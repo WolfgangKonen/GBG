@@ -1,0 +1,8 @@
+alpha=0.7 		// blabla
+alfin=0.02
+epsilon=0.66
+epsifin=0.2
+lambda=0.35
+featmode=2
+netHasSigmoid=false
+trainNum=5

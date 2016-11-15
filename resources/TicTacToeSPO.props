@@ -1,0 +1,11 @@
+#User Properties from TicTacToeSPO
+#Sun Sep 11 10:46:17 CEST 2011
+alfin=0.02
+alpha=0.7 \t\t// blabla
+trainNum=5
+featmode=2
+lambda=0.35
+netHasSigmoid=false
+epsifin=0.2
+netIsLinear=true
+epsilon=0.66
