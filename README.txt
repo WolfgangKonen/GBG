@@ -1,3 +1,4 @@
+test
 Starting the framework:
 -----------------------
 (e.g. in Eclipse)  Make a new Eclipse project with name SourceGBG and with build path SourceGBG/GBG (the directory containing src/ and lib/)
