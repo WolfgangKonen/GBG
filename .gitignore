@@ -4,6 +4,7 @@ doc/*
 .classpath
 .project
 Arena.comp.csv
+count_states.csv
 notes_MCTS.docx.lnk
 notes-reinforce.docx.lnk
 TR_GBG.lnk

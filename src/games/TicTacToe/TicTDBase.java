@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Random;
 
 import controllers.PlayAgent;
 import tools.Types;
+import tools.Types.ACTIONS;
 import controllers.AgentBase;
 import controllers.MinimaxAgent;
 
@@ -102,6 +104,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 * <p><b>Only for diagnostics.</b> 
 	 */
 	protected transient HashMap<String, HashMap<String,ScoreC>> hmX;
+	protected static transient HashMap<String, Integer> hm2;
 
 	protected int POSVALUES = 3; // Possible Values for each Field of the Board
 	protected boolean USESYMMETRY = true; // Use Rotation in NTuple-System
@@ -359,135 +362,57 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	}
 	
 	/**
-	 * 
-	 * @param Table
-	 * @return 0, if it is an intermediate game state,<br>
-	 * 			1, if it is a valid win state for either player, <br>
-	 * 			2, if it is a tie, <br>
-	 * 			3, if it is a state which cannot legally occur in a game (e.g. two horizontal triplets) 
-	 */
-	protected static int winState(int[][] Table)
-	{
-		int WIN=1, TIE=2, NOT_VALID=3;
-		int horTriplet=0, verTriplet=0, diagTriplet=0;
-		int[] S=new int[3];
-		int i;
-		int j;
-		for (i=0;i<3;i++)
-		{
-			for (j=0;j<3;j++) S[j]=Table[i][j];
-			if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0))
-			{
-				horTriplet++;
-			}
-		}
-		for (i=0;i<3;i++)
-		{
-			for (j=0;j<3;j++) S[j]=Table[j][i];
-			if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0))
-			{
-				verTriplet++;
-			}
-		}
-		
-		for (i=0;i<3;i++) S[i]=Table[i][i];						
-		if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0))
-		{
-			diagTriplet++;
-		}
-		for (i=0;i<3;i++) S[i]=Table[i][2-i];	
-		if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0))
-		{
-			diagTriplet++;
-		}
-		
-		if (horTriplet>1 || verTriplet>1) return NOT_VALID;
-		if (horTriplet+verTriplet+diagTriplet>0) return WIN;
-		if (tie(Table)) return TIE;
-		return 0;
-	}
-	
-	/**
 	 * How many legal states (total / final / in-game) has the game TicTacToe? Prints out on console.
-	 * (total = in-game + final) <br>
-	 * Side Effect: write all 3^9=19683 states (all board position) on count_states.csv which contains:<ul>
-	 * <li> the state representation as string
-	 * <li> res 0: intermediate, 1: win, 2: tie, 3: not legal
-	 * <li> diffpiece: sum of pieces (+1 for X, -1 for O), so only diffpiece=0 or 1 is legal
-	 * <li> nStates: cumulative sum of legal states
-	 * <li> nFinal: cumulative sum of legal final states
-	 * </ul>
-	 * @param verbose if greater-equal 2, print a line for each state (more than 5000!) on console
-	 * @see games.TicTacToe.TDPlayerTTT#getAlpha()
+	 * (total = in-game + final) <p>
+	 * 
+	 * The calculation is verified by the formula in the nice blog post
+	 * <a href="http://imagine.kicbak.com/blog/?p=249">http://imagine.kicbak.com/blog/?p=249</a>.
+	 *  
+	 * @param gameTreeStates {@code =false}: count the possible different legal boards;   
+	 * 			{@code =true}: count the number of nodes in the game tree
+	 * @see games.LaunchTrainTTT
 	 */
-	public static void countStates(int verbose) {
-		String filename = "count_states.csv";
-		PrintWriter f;
-		// header for summary file:
-		try {
-		f = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
-		f.println("state; res; diffpiece; nStates; nFinal;" ); 
-		int[][] Table = new int[3][3];
-		int diffpiece=0;
-		int nStates=0, nFinal=0;
-		int res=0;
-		for (int i11=0; i11<3; i11++) {
-		 Table[0][0]=(i11==2?-1:i11); 
-		 for (int i12=0; i12<3; i12++) {
-		  Table[0][1]=(i12==2?-1:i12); 
-  		  for (int i13=0; i13<3; i13++) {
-  			  Table[0][2]=(i13==2?-1:i13); 
-  			  for (int i21=0; i21<3; i21++) {
-				Table[1][0]=(i21==2?-1:i21); 
-				for (int i22=0; i22<3; i22++) {
-				 Table[1][1]=(i22==2?-1:i22); 
-		  		 for (int i23=0; i23<3; i23++) {
-		  			 Table[1][2]=(i23==2?-1:i23); 
-		  			 for (int i31=0; i31<3; i31++) {
-		  			  Table[2][0]=(i31==2?-1:i31); 
-					  for (int i32=0; i32<3; i32++) {
-					    Table[2][1]=(i32==2?-1:i32); 
-					    for (int i33=0; i33<3; i33++) {
-					    	Table[2][2]=(i33==2?-1:i33); 
-							
-							diffpiece=0;
-							for (int i=0;i<3;i++) for (int j=0;j<3;j++) diffpiece+=Table[i][j];
-							if (diffpiece==0 || diffpiece==1) {
-								res = winState(Table);
-								if (res<3) {
-									nStates++; 
-									if (res>0) nFinal++;
-								}
-							} else {
-								res=3;
-							}
-							if (verbose>=2 ) //|| (verbose>=1 && i22==0)) 
-								System.out.println(tableToString(1,Table) + " res="+res+", diffpiece="+diffpiece+", nStates="+nStates);
-							f.println("'"+tableToString(1,Table)+"'; "+res+"; "+ diffpiece+"; "+ nStates +"; " +nFinal); 
-
-				  		 }
-					   }
-		  			 } // i31
-		  	      }
-			    }
-  			  } // i21
-		  }
-		 }
-		} // i11
-
-		int approxCount = (int) Math.pow(3, 9);
-		System.out.println("Rough approximation for nStates = "+approxCount+ " = (3^9)");
-		System.out.println("[TicTDBase.countStates] nStates="+nStates+", nFinal="+nFinal
-							+", nInGame="+(nStates-nFinal));		
-		f.println();
-		f.println("[TicTDBase.countStates] nStates="+nStates+", nFinal="+nFinal
-					+", nInGame="+(nStates-nFinal));
-		f.close();
-		} catch (IOException e) {
-			System.out.println("IO-Fehler in TicTDBase.countStates()");
+	public static void countStates2(boolean gameTreeStates) {
+		hm2 = new HashMap<String, Integer>();
+		StateObserverTTT so = new StateObserverTTT();  // empty board
+		int[] nVec = new int[3];   // [nStates, nFinal, nInGame]   
+		nVec[0]=1;
+		nVec[2]=1;
+		countStates2_intern(0,gameTreeStates,so,nVec);
+		System.out.print("[TicTDBase.countStates2] nStates="+nVec[0]+
+				", nFinal="+nVec[1]+
+				", nInGame="+nVec[2]);	
+		if (gameTreeStates) {
+			System.out.println(" (game tree complexity)");
+		} else {
+			System.out.println(" (different boards)");
 		}
 	}
-	
+	private static void countStates2_intern(int depth, boolean gts,
+			StateObserverTTT so, int[] nVec) 
+	{
+		StateObserverTTT NewSO;
+		String stringRep;
+		ArrayList<ACTIONS> act = so.getAvailableActions();
+		assert (depth<9) : "Oops, too many recursions";
+		for (int i=0; i<act.size(); i++) {
+			NewSO = so.copy();
+			NewSO.advance(act.get(i));
+			stringRep = NewSO.toString();
+			Integer in = hm2.get(stringRep); // was this state there before?
+			if (in==null) {		// no, then count it
+				if (gts==false) hm2.put(stringRep, 9);
+				nVec[0] = nVec[0] + 1;
+				if (NewSO.isGameOver()) {
+					nVec[1] = nVec[1] + 1;
+				} else {
+					nVec[2] = nVec[2] + 1;
+					countStates2_intern(depth+1,gts,NewSO,nVec);
+				}			
+			}
+		}
+		return;
+	}
 	/**
 	 * 
 	 * @param Table
@@ -517,11 +442,11 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 		}
 	}
 	
-	public static int[][] cloneTable(int Table[][]) {
-		int[][] NewTable = new int[3][3];
-		copyTable(Table,NewTable);
-		return NewTable;
-	}
+//	public static int[][] cloneTable(int Table[][]) {
+//		int[][] NewTable = new int[3][3];
+//		copyTable(Table,NewTable);
+//		return NewTable;
+//	}
 	
 	
 	/**

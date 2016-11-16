@@ -34,12 +34,13 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 * @param stopEval	the number of successful evaluations needed to reach the 
 	 * 					evaluator goal (may be used during training to stop it 
 	 * 					prematurely)
-	 * @param mode		which evaluator mode: 0,1,2,9
+	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
+	 * 					if {@code mode} is not in the set {@link #getAvailableModes}.
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		if (mode==9) return new Evaluator9(pa,stopEval);
+		//if (mode==9) return new Evaluator9(pa,stopEval);
 		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
 	}
 

@@ -42,12 +42,14 @@ public class StateObserverTTT implements StateObservation {
 				pieceCount += Table[i][j];
 			}
 		m_Player = (pieceCount%2==0 ? +1 : -1);
-		m_Table = TicTDBase.cloneTable(Table); 
+		m_Table = new int[3][3];
+		TicTDBase.copyTable(Table,m_Table); 
 		setAvailableActions();
 	}
 	
 	public StateObserverTTT(int[][] Table, int Player) {
-		m_Table = TicTDBase.cloneTable(Table); 
+		m_Table = new int[3][3];
+		TicTDBase.copyTable(Table,m_Table); 
 		m_Player = Player;
 		setAvailableActions();
 	}

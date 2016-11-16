@@ -33,6 +33,10 @@ public class LaunchTrainTTT extends JFrame {
 	{
 		LaunchTrainTTT t_Frame = new LaunchTrainTTT("General Board Game Playing");
 
+		System.out.println("Rough approximation for nStates = "+(int) Math.pow(3, 9)+ " = (3^9)");
+		TicTDBase.countStates2(false);
+		TicTDBase.countStates2(true);
+		
 		if (args.length==0) {
 			t_Frame.init();
 		} else {

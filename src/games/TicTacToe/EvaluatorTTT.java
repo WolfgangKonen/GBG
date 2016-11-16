@@ -22,10 +22,12 @@ import tools.Types;
  * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
  */
 public class EvaluatorTTT extends Evaluator {
-	String sRandom = Types.GUI_AGENT_LIST[2];
-	String sMinimax = Types.GUI_AGENT_LIST[1];
+ 	private static final int[] AVAILABLE_MODES = {0,1,2,9};
+	private String sRandom = Types.GUI_AGENT_LIST[2];
+	private String sMinimax = Types.GUI_AGENT_LIST[1];
 	private RandomAgent random_agent = new RandomAgent(sRandom);
 	private MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
+	private Evaluator9 m_evaluator9 = null; 
 	private int m_mode;
 	private double m_om=-1;			// avg. success against RandomPlayer, best is 0.9 (m_mode=0)
 									// or against MinimaxPlayer, best is 0.0 (m_mode=1,2)
@@ -35,22 +37,28 @@ public class EvaluatorTTT extends Evaluator {
 	
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, stopEval);
-		m_mode = 1;
-		m_gb = gb;
+		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
+		initEvaluator(gb,1);
 	}
 
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
 		super(e_PlayAgent, stopEval);
-		m_mode = mode;
-		m_gb = gb;
+		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
+		initEvaluator(gb,mode);
 	}
 
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, stopEval, verbose);
-		m_mode = mode;
-		m_gb = gb;
+		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
+		initEvaluator(gb,mode);
 	}
 	
+	private void initEvaluator(GameBoard gb, int mode) {
+		if (!isAvailableMode(mode)) 
+			throw new RuntimeException("Value mode = "+mode+" is not allowed for EvaluatorTTT!");
+		m_mode = mode;
+		m_gb = gb;		
+	}
 //	/**	
 //	 * Known callers of eval (outside this class): 
 //	 * 		{@link ArenaTrain#run()}, case TRAIN_X, TRAIN_O, 
@@ -72,6 +80,7 @@ public class EvaluatorTTT extends Evaluator {
 		case 0: return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
 		case 1: return evaluateAgent1(m_PlayAgent,m_gb)>m_thresh[1];
 		case 2: return evaluateAgent2(m_PlayAgent,m_gb)>m_thresh[2];
+		case 9: return m_evaluator9.eval_Agent();
 		default: return false;
 		}
 	}
@@ -150,7 +159,21 @@ public class EvaluatorTTT extends Evaluator {
  	public double getOm() { return m_om; }
  	
  	@Override
- 	public double getLastResult() { return m_om; }
+ 	public double getLastResult() { 
+ 		return (m_mode==9) ? m_evaluator9.getLastResult() : m_om; 
+ 	}
  	@Override
- 	public String getMsg() { return m_msg; } 
+ 	public String getMsg() { 
+ 		return (m_mode==9) ? m_evaluator9.getMsg() : m_msg; } 
+ 	
+ 	public static int[] getAvailableModes() {
+ 		return AVAILABLE_MODES;
+ 	}
+ 	
+ 	public static boolean isAvailableMode(int mode) {
+ 		for (int i : AVAILABLE_MODES) {
+ 			if (mode==i) return true;
+ 		}
+ 		return false;
+ 	}
 }
