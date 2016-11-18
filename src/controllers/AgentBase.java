@@ -39,12 +39,15 @@ abstract public class AgentBase implements Serializable {
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement
 	 * getScore(), as required by the interface {@link PlayAgent} as well.
-	 * The definition of getScore() is needed in 
-	 * {@link #rewardEstimate(StateObservation)}.
+	 * The definition of getScore() is needed here, because  
+	 * {@link #rewardEstimate(StateObservation)} needs it.
 	 */
 	abstract public double getScore(StateObservation sob);
+	
 	/**
-	 * Default behaviour: return {@link #getScore(StateObservation)}
+	 * Default behaviour: 
+	 * @return {@link #getScore(StateObservation)}, that is whatever the derived
+	 * 			class implements for {@link #getScore(StateObservation)}.
 	 */
 	public double rewardEstimate(StateObservation sob) {
 		return getScore(sob);

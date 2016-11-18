@@ -55,7 +55,8 @@ public class FeatureTTT extends TicTDBase implements Feature, Serializable {
 
 	@Override
 	public double getScore(StateObservation sob) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub (just needed because AgentBase,
+		// the superclass of TicTDBase, requires it)
 		return 0;
 	}
 

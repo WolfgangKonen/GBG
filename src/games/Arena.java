@@ -394,6 +394,8 @@ abstract public class Arena extends JPanel implements Runnable {
 
 	public void enableButtons(boolean state) { m_xab.enableButtons(state); }
 
+	abstract public String getGameName();
+	
 	/**
 	 * Factory pattern method: make a new GameBoard 
 	 * @return	the game board

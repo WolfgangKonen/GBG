@@ -25,6 +25,12 @@ import games.TicTacToe.TicTDBase;
 
 
 /**
+ * @deprecated
+ * This class is deprecated since it mixes TicTacToe-specific functionality with
+ * general TD(lambda) functionality. For better abstraction it is recommended to
+ * use class {@link TDAgent} together with the (small) TTT-specific classes
+ * {@link TDPlayerTTT} and {@link FeatureTTT}. <p> 
+ * 
  * The TD-Learning {@link PlayAgent} for TicTacToe. It has either a linear net
  * {@link TD_Lin} or a BP neural net {@link TD_NNet} to model the value
  * function. The net follows closely the (pseudo-)code by [SuttonBonde93]. It

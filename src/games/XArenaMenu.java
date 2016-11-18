@@ -75,7 +75,7 @@ public class XArenaMenu extends JMenuBar {
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 
 		generateFileMenu();
-		generateTDAgentMenu();
+		generateAgentMenu();
 		generateCompetitionMenu();
 		//generateOptionsMenu();
 		generateHelpMenu();
@@ -97,6 +97,8 @@ public class XArenaMenu extends JMenuBar {
 			}
 		});
 		menuItem.setToolTipText(TIPEVALUATE);
+		if (!(m_arena instanceof ArenaTrain))
+			menuItem.setEnabled(false);			// no param tabs for Arena
 		menu.add(menuItem);
 		// ==============================================================
 		// Quit Program
@@ -117,7 +119,7 @@ public class XArenaMenu extends JMenuBar {
 		add(menu);
 	}
 
-	private void generateTDAgentMenu() {
+	private void generateAgentMenu() {
 		JMenu menu, submenu;
 		JMenuItem menuItem;
 
@@ -166,6 +168,8 @@ public class XArenaMenu extends JMenuBar {
 				}
 			});
 			menuItem.setToolTipText(TIPSAVE);
+			if (!(m_arena instanceof ArenaTrain))
+				menuItem.setEnabled(false);			// no agent save for Arena
 			submenu.add(menuItem);
 			submenu.addSeparator();
 
@@ -179,6 +183,7 @@ public class XArenaMenu extends JMenuBar {
 				}
 			});
 			menuItem.setToolTipText(TIPSHOWNTUPLE);
+			menuItem.setEnabled(false);
 			submenu.add(menuItem);
 
 			// ==============================================================
@@ -191,6 +196,7 @@ public class XArenaMenu extends JMenuBar {
 				}
 			});
 			menuItem.setToolTipText(TIPSETNTUPLES);
+			menuItem.setEnabled(false);
 			submenu.add(menuItem);
 
 			// ==============================================================
@@ -203,6 +209,7 @@ public class XArenaMenu extends JMenuBar {
 				}
 			});
 			menuItem.setToolTipText(TIPINSPECTLUT);
+			menuItem.setEnabled(false);
 			submenu.add(menuItem);
 
 			// ==============================================================
@@ -314,7 +321,11 @@ public class XArenaMenu extends JMenuBar {
 		});
 		menuItem.setToolTipText("Set Options for the multi-training. The agent that shall "
 				+ "be trained (TD) and the opponent must be selected here.");
+		if (!(m_arena instanceof ArenaTrain))
+			menuItem.setEnabled(false);			// no multi-training for Arena
 		submenu.add(menuItem);
+		if (!(m_arena instanceof ArenaTrain))
+			submenu.setEnabled(false);			// no multi-training for Arena
 
 		// ==============================================================
 		// Start Multi-Training
@@ -329,6 +340,8 @@ public class XArenaMenu extends JMenuBar {
 		});
 		menuItem.setToolTipText("Start the multi-training of the TD-Agent. Be sure thtat the options "
 				+ "where choosen correctly and that both agents (TD and opponent) are initialized");
+		if (!(m_arena instanceof ArenaTrain))
+			menuItem.setEnabled(false);			// no multi-training for Arena
 		submenu.add(menuItem);
 
 		menu.add(submenu);

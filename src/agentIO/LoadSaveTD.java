@@ -57,36 +57,36 @@ import games.TicTacToe.TDPlayerTTT;
 import params.TDParams;
 
 public class LoadSaveTD {
-	private static final String DEFAULT_DIR_AGENT = "agents";
 	private final JFileChooserApprove fc;
 	private final FileFilter tdAgentExt = new ExtensionFilter("agt.zip",
 			"TD-Agents");
 	private final FileFilter txtExt = new ExtensionFilter(".txt.zip",
 			"Compressed Text-Files (.txt.zip)");
-	private final Arena c4Game;
-	private final XArenaButtons c4Buttons;
-	private final JFrame c4Frame;
+	private final Arena arenaGame;
+	private final XArenaButtons arenaButtons;
+	private final JFrame arenaFrame;
 
-	public LoadSaveTD(Arena c4Game, XArenaButtons c4Buttons, JFrame c4Frame) {
-		this.c4Game = c4Game;
-		this.c4Buttons = c4Buttons;
-		this.c4Frame = c4Frame;
+	public LoadSaveTD(Arena areGame, XArenaButtons areButtons, JFrame areFrame) {
+		this.arenaGame = areGame;
+		this.arenaButtons = areButtons;
+		this.arenaFrame = areFrame;
 
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
 		fc = new JFileChooserApprove();
-		fc.setCurrentDirectory(new File(DEFAULT_DIR_AGENT));
+		fc.setCurrentDirectory(new File(strDir));
 	}
 
 	public JDialog createProgressDialog(final IGetProgress streamProgress,
 			final String msg) {
 		// ------------------------------------------------------------
 		// Setup Progressbar Dialog
-		final JDialog dlg = new JDialog(c4Frame, msg, true);
+		final JDialog dlg = new JDialog(arenaFrame, msg, true);
 		final JProgressBar dpb = new JProgressBar(0, 100);
 		dlg.add(BorderLayout.CENTER, dpb);
 		dlg.add(BorderLayout.NORTH, new JLabel("Progress..."));
 		dlg.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		dlg.setSize(300, 75);
-		dlg.setLocationRelativeTo(c4Frame);
+		dlg.setLocationRelativeTo(arenaFrame);
 
 		Thread t = new Thread(new Runnable() {
 			public void run() {
@@ -95,7 +95,7 @@ public class LoadSaveTD {
 		});
 		t.start();
 
-		c4Game.setProgress(new tools.Progress() {
+		arenaGame.setProgress(new tools.Progress() {
 			@Override
 			public String getStatusMessage() {
 				String str = new String(msg + getProgress() + "%");
@@ -119,12 +119,13 @@ public class LoadSaveTD {
 	// Menu: Save Agent
 	// ==============================================================
 	public void saveTDAgent(PlayAgent pa) throws IOException {
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
 		fc.removeChoosableFileFilter(txtExt);
 		fc.setFileFilter(tdAgentExt);
-		fc.setCurrentDirectory(new File(Types.GUI_DEFAULT_DIR_AGENT));
+		fc.setCurrentDirectory(new File(strDir));
 		fc.setAcceptAllFileFilterUsed(false);
 
-		int returnVal = fc.showSaveDialog(c4Game);
+		int returnVal = fc.showSaveDialog(arenaGame);
 		String filePath = "";
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -141,9 +142,9 @@ public class LoadSaveTD {
 			try {
 				fos = new FileOutputStream(filePath);
 			} catch (FileNotFoundException e2) {
-				MessageBox.show(c4Frame,"ERROR: Could not save TDPlayerTTT to " + filePath,
+				MessageBox.show(arenaFrame,"ERROR: Could not save TDPlayerTTT to " + filePath,
 						"C4Game.saveTDAgent", JOptionPane.ERROR_MESSAGE);
-				c4Game.setStatusMessage("[ERROR: Could not save to file "
+				arenaGame.setStatusMessage("[ERROR: Could not save to file "
 						+ filePath + " !]");
 			}
 
@@ -156,7 +157,7 @@ public class LoadSaveTD {
 				};
 
 			} catch (IOException e1) {
-				c4Game.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for"
+				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for"
 								+ filePath + " !]");
 				throw e1;
 			}
@@ -173,7 +174,7 @@ public class LoadSaveTD {
 			try {
 				oos = new ObjectOutputStream(ptos);
 			} catch (IOException e) {
-				c4Game.setStatusMessage("[ERROR: Could not create Object-OutputStream for"
+				arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for"
 								+ filePath + " !]");
 			}
 
@@ -184,11 +185,11 @@ public class LoadSaveTD {
 			} catch (IOException e) {
 				dlg.setVisible(false);
 				if (e instanceof NotSerializableException) {
-					MessageBox.show(c4Frame,"ERROR: Object pa of class "+pa.getClass().getName()
+					MessageBox.show(arenaFrame,"ERROR: Object pa of class "+pa.getClass().getName()
 							+" is not serializable",
 							"C4Game.saveTDAgent", JOptionPane.ERROR_MESSAGE);
 				}
-				c4Game.setStatusMessage("[ERROR: Could not write to file "
+				arenaGame.setStatusMessage("[ERROR: Could not write to file "
 						+ filePath + " !]");
 				throw new IOException("ERROR: Could not write object to file! ["+e.getClass().getName()+"]");
 			}
@@ -198,16 +199,16 @@ public class LoadSaveTD {
 				oos.close();
 				fos.close();
 			} catch (IOException e) {
-				c4Game.setStatusMessage("[ERROR: Could not complete Save-Process]");
+				arenaGame.setStatusMessage("[ERROR: Could not complete Save-Process]");
 				throw new IOException("ERROR: Could not complete Save-Process ["+e.getClass().getName()+"]");
 			}
 
 			dlg.setVisible(false);
-			c4Game.setProgress(null);
-			c4Game.setStatusMessage("Done.");
+			arenaGame.setProgress(null);
+			arenaGame.setStatusMessage("Done.");
 
 		} else
-			c4Game.setStatusMessage("[Save Agent: Aborted by User]");
+			arenaGame.setStatusMessage("[Save Agent: Aborted by User]");
 
 		// Rescan current directory, hope it helps
 		fc.rescanCurrentDirectory();
@@ -234,13 +235,14 @@ public class LoadSaveTD {
 	}
 
 	public PlayAgent loadTDAgent() throws IOException, ClassNotFoundException {
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
 		PlayAgent pa = null;
 		fc.removeChoosableFileFilter(txtExt);
 		fc.setFileFilter(tdAgentExt);
-		fc.setCurrentDirectory(new File(Types.GUI_DEFAULT_DIR_AGENT));
+		fc.setCurrentDirectory(new File(strDir));
 		fc.setAcceptAllFileFilterUsed(false);
 
-		int returnVal = fc.showOpenDialog(c4Game);
+		int returnVal = fc.showOpenDialog(arenaGame);
 		String filePath = "";
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -253,7 +255,7 @@ public class LoadSaveTD {
 				filePath = file.getPath();
 				fis = new FileInputStream(filePath);
 			} catch (IOException e) {
-				c4Game.setStatusMessage("[ERROR: Could not open file " + filePath
+				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
 						+ " !]");
 				e.printStackTrace();
 			}
@@ -262,7 +264,7 @@ public class LoadSaveTD {
 			try {
 				gs = new GZIPInputStream(fis);
 			} catch (IOException e1) {
-				c4Game.setStatusMessage("[ERROR: Could not create ZIP-InputStream for"
+				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for"
 								+ filePath + " !]");
 				throw e1;
 			}
@@ -274,7 +276,7 @@ public class LoadSaveTD {
 				ois = new ObjectInputStream(ptis);
 			} catch (IOException e1) {
 				ptis.close();
-				c4Game.setStatusMessage("[ERROR: Could not create ObjectInputStream for"
+				arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for"
 								+ filePath + " !]");
 				throw e1;
 			}
@@ -294,26 +296,26 @@ public class LoadSaveTD {
 					pa = (RandomAgent) obj;
 				} else {
 					dlg.setVisible(false);
-					MessageBox.show(c4Frame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
+					MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
 							+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
-					c4Game.setStatusMessage("[ERROR: Could not load agent from "
+					arenaGame.setStatusMessage("[ERROR: Could not load agent from "
 									+ filePath + "!]");
 					throw new ClassNotFoundException("ERROR: Unknown agent class");
 				}
 				dlg.setVisible(false);
-				c4Game.setProgress(null);
-				c4Game.setStatusMessage("Done.");
+				arenaGame.setProgress(null);
+				arenaGame.setStatusMessage("Done.");
 			} catch (IOException e) {
 				dlg.setVisible(false);
-				MessageBox.show(c4Frame,"ERROR: Could not open file " + filePath,
+				MessageBox.show(arenaFrame,"ERROR: Could not open file " + filePath,
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
-				c4Game.setStatusMessage("[ERROR: Could not open file " + filePath
+				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
 						+ " !]");
 				e.printStackTrace();
 				throw e;
 			} catch (ClassNotFoundException e) {
 				dlg.setVisible(false);
-				MessageBox.show(c4Frame,"ERROR: Class not found: " + e.getMessage(),
+				MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 				//e.printStackTrace();
 				throw e;
@@ -330,7 +332,7 @@ public class LoadSaveTD {
 					}
 			}
 		} else
-			c4Game.setStatusMessage("[ERROR: Something went wrong while loading file "
+			arenaGame.setStatusMessage("[ERROR: Something went wrong while loading file "
 							+ filePath + " !]");
 		return pa;
 	}

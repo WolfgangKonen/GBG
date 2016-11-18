@@ -368,8 +368,9 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 * The calculation is verified by the formula in the nice blog post
 	 * <a href="http://imagine.kicbak.com/blog/?p=249">http://imagine.kicbak.com/blog/?p=249</a>.
 	 *  
-	 * @param gameTreeStates {@code =false}: count the possible different legal boards;   
-	 * 			{@code =true}: count the number of nodes in the game tree
+	 * @param gameTreeStates <br>
+	 *        {@code =false}: count the possible legal boards (without symmetry considerations);<br>   
+	 * 		  {@code =true}: count the number of nodes in the game tree
 	 * @see games.LaunchTrainTTT
 	 */
 	public static void countStates2(boolean gameTreeStates) {

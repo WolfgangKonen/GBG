@@ -20,6 +20,14 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	}
 
 	/**
+	 * @return a name of the game, suitable as subdirectory name in the 
+	 *         {@code agents} directory
+	 */
+	public String getGameName() {
+		return "TicTacToe";
+	}
+	
+	/**
 	 * Factory pattern method: make a new GameBoard 
 	 * @return	the game board
 	 */
@@ -41,6 +49,8 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
 		//if (mode==9) return new Evaluator9(pa,stopEval);
+		// --- this is now inside EvaluatorTTT ---
+		
 		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
 	}
 
