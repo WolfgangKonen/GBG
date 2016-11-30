@@ -10,9 +10,6 @@ import games.ArenaTrain;
 import games.XArenaFuncs;
 import tools.Types;
 
-/**
- * Created by Johannes on 29.11.2016.
- */
 public class LaunchTrainZTVA extends JFrame {
     private static final long serialVersionUID = 1L;
     public ArenaTrainZTVA m_Arena;

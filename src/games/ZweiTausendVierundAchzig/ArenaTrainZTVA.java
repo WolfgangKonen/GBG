@@ -7,8 +7,6 @@ import games.GameBoard;
 
 import javax.swing.*;
 
-/**
- */
 public class ArenaTrainZTVA  extends ArenaTrain {
     public ArenaTrainZTVA() {
         super();
@@ -23,7 +21,7 @@ public class ArenaTrainZTVA  extends ArenaTrain {
      *         {@code agents} directory
      */
     public String getGameName() {
-        return "TicTacToe";
+        return "2048";
     }
 
     /**

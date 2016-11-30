@@ -7,9 +7,6 @@ import games.Arena;
 
 import javax.swing.*;
 
-/**
- * Created by Johannes on 18.11.2016.
- */
 public class ArenaZTVA extends Arena {
     public ArenaZTVA() {
         super();

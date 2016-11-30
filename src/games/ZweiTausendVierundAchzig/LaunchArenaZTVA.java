@@ -8,9 +8,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 
-/**
- * Created by Johannes on 18.11.2016
- */
 public class LaunchArenaZTVA extends JFrame{
     private static final long serialVersionUID = 1L;
     public ArenaZTVA m_Arena;
