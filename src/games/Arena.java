@@ -34,7 +34,7 @@ import tools.Types;
  * Run this class from the {@code main} in {@link LaunchArenaTTT}) for the 
  * TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  */
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
@@ -277,9 +277,24 @@ abstract public class Arena extends JPanel implements Runnable {
 			setStatusMessage("Done.");
 			return;			
 		}
-		
-		String AgentX = m_xab.getSelectedAgent(0);
-		String AgentO = m_xab.getSelectedAgent(1);
+
+
+		String AgentX ="";
+		String AgentO ="";
+
+
+		switch (numPlayers) {
+			case (1):
+				AgentX = m_xab.getSelectedAgent(0);
+				break;
+			case (2):
+				AgentX = m_xab.getSelectedAgent(0);
+				AgentO = m_xab.getSelectedAgent(1);
+				break;
+			default:
+				// TODO: implement s.th. for n-player games (n>2)
+				break;
+		}
 
 		String sMsg;
 		switch (numPlayers) {
@@ -357,7 +372,7 @@ abstract public class Arena extends JPanel implements Runnable {
 								"Game Over", JOptionPane.INFORMATION_MESSAGE );
 						break;  // out of inner switch
 					case (-1):
-						MessageBox.show(m_TicFrame, "O ("+AgentO+") wins", 
+						MessageBox.show(m_TicFrame, "O ("+AgentO+") wins",
 								"Game Over", JOptionPane.INFORMATION_MESSAGE );
 						break;  // out of inner switch
 					case ( 0):
