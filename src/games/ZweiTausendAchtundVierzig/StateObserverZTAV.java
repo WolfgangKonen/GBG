@@ -92,7 +92,12 @@ public class StateObserverZTAV implements StateObservation{
 
     @Override
     public double getGameScore() {
-        return score;
+        switch (winState) {
+            case -1:
+                return -1;
+            default:
+                return 0;
+        }
     }
 
     @Override
@@ -188,10 +193,6 @@ public class StateObserverZTAV implements StateObservation{
     public int getScore() {
         return score;
     }
-
-
-
-
 
     public Tile getTile(int row, int column) {
         return gameBoard[row][column].getTile();
