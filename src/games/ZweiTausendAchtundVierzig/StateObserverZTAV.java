@@ -96,7 +96,11 @@ public class StateObserverZTAV implements StateObservation{
             case -1:
                 return -1;
             default:
-                return 0;
+                if(score == 0) {
+                    return 0;
+                } else {
+                    return score / MAXSCORE;
+                }
         }
     }
 
