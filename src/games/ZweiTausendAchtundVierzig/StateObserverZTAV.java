@@ -1,6 +1,5 @@
-package games.ZweiTausendVierundAchzig;
+package games.ZweiTausendAchtundVierzig;
 
-import controllers.PlayAgent;
 import games.StateObservation;
 import tools.Types;
 
@@ -11,7 +10,7 @@ import java.util.Random;
 /**
  * Created by Johannes on 18.11.2016.
  */
-public class StateObserverZTVA implements StateObservation{
+public class StateObserverZTAV implements StateObservation{
     private Random random = new Random();
     private List<Position> emptyTiles = new ArrayList();
     protected List<Integer> viableMoves;
@@ -30,11 +29,12 @@ public class StateObserverZTVA implements StateObservation{
     private final static double MAXSCORE = 3932156;
     private final static double MINSCORE = 0;
 
-    public StateObserverZTVA() {
+    public StateObserverZTAV() {
         newBoard();
+        setAvailableActions();
     }
 
-    public StateObserverZTVA(int[][] values, int score, int winState) {
+    public StateObserverZTAV(int[][] values, int score, int winState) {
         gameBoard = new Position[Config.ROWS][Config.COLUMNS];
         for(int row = 0; row < Config.ROWS; row++) {
             for(int column = 0; column < Config.COLUMNS; column++) {
@@ -55,11 +55,12 @@ public class StateObserverZTVA implements StateObservation{
         if(!movesAvailable()) {
             setWinState(-1);
         }
+        setAvailableActions();
     }
 
     @Override
-    public StateObserverZTVA copy() {
-        return new StateObserverZTVA(toArray(), score, winState);
+    public StateObserverZTAV copy() {
+        return new StateObserverZTAV(toArray(), score, winState);
     }
 
     @Override
@@ -97,7 +98,7 @@ public class StateObserverZTVA implements StateObservation{
     @Override
     public double getGameScore(StateObservation referingState) {
         //ToDo: nicht sicher ob richtig
-        assert (referingState instanceof StateObserverZTVA) : "referingState is not of class StateObserverZTVA";
+        assert (referingState instanceof StateObserverZTAV) : "referingState is not of class StateObserverZTAV";
         return referingState.getGameScore();
     }
 
@@ -178,6 +179,14 @@ public class StateObserverZTVA implements StateObservation{
     @Override
     public int getNumPlayers() {
         return 1;
+    }
+
+    public boolean isLegalAction(Types.ACTIONS action) {
+        return viableMoves.contains(action.toInt());
+    }
+
+    public int getScore() {
+        return score;
     }
 
 

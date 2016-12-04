@@ -1,4 +1,4 @@
-package games.ZweiTausendVierundAchzig;
+package games.ZweiTausendAchtundVierzig;
 
 /**
  * Created by Johannes on 03.11.2016.

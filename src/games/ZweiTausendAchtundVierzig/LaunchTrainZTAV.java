@@ -1,4 +1,4 @@
-package games.ZweiTausendVierundAchzig;
+package games.ZweiTausendAchtundVierzig;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,30 +6,22 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 
-import games.ArenaTrain;
-import games.XArenaFuncs;
 import tools.Types;
 
-public class LaunchTrainZTVA extends JFrame {
+public class LaunchTrainZTAV extends JFrame {
     private static final long serialVersionUID = 1L;
-    public ArenaTrainZTVA m_Arena;
+    public ArenaTrainZTAV m_Arena;
 
     /**
      * @param args
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        LaunchTrainZTVA t_Frame = new LaunchTrainZTVA("General buttons Game Playing");
-
-// ---  just for analysis: compute the state space & game tree complexity ---
-//		System.out.println("Rough approximation for nStates = "+(int) Math.pow(3, 9)+ " = (3^9)");
-//		TicTDBase.countStates2(false);
-//		TicTDBase.countStates2(true);
-
+        LaunchTrainZTAV t_Frame = new LaunchTrainZTAV("General buttons Game Playing");
         if (args.length == 0) {
             t_Frame.init();
         } else {
-            throw new RuntimeException("[LaunchTrainZTVA.main] args=" + args + " not allowed. Use TicTacToeBatch.");
+            throw new RuntimeException("[LaunchTrainZTAV.main] args=" + args + " not allowed. Use TicTacToeBatch.");
         }
     }
 
@@ -45,9 +37,9 @@ public class LaunchTrainZTVA extends JFrame {
         setVisible(true);
     }
 
-    public LaunchTrainZTVA(String title) {
+    public LaunchTrainZTAV(String title) {
         super(title);
-        m_Arena = new ArenaTrainZTVA(this);
+        m_Arena = new ArenaTrainZTAV(this);
         setLayout(new BorderLayout(10, 10));
         setJMenuBar(m_Arena.m_menu);
         add(m_Arena, BorderLayout.CENTER);
