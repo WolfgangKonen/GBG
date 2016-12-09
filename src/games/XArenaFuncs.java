@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import controllers.MC.MCAgent;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
@@ -53,7 +54,7 @@ import tools.Types;
  * Known classes having {@link XArenaFuncs} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  * 
  */
 public class XArenaFuncs 
@@ -129,6 +130,8 @@ public class XArenaFuncs
 			pa= new MCTSAgentT(sAgent,null,m_xab.mcPar);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
+		} else if (sAgent.equals("MC")) {
+			pa = new MCAgent(sAgent);
 		}
 		return pa;
 	}
@@ -164,7 +167,9 @@ public class XArenaFuncs
 				pa= new MCTSAgentT(sAgent,null,m_xab.mcPar);
 			} else if (sAgent.equals("Human")) {
 				pa= new HumanPlayer(sAgent);
-			} else { // all the trainable agents:
+			} else if (sAgent.equals("MC")) {
+				pa= new MCAgent(sAgent);
+			}else { // all the trainable agents:
 				if (m_PlayAgents[n]==null) {
 					if (sAgent.equals("TDS")) {
 						pa = new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);

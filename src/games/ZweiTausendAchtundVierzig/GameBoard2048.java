@@ -14,7 +14,7 @@ import java.awt.*;
 /**
  * Created by Johannes on 18.11.2016.
  */
-public class GameBoardZTAV extends JFrame implements GameBoard {
+public class GameBoard2048 extends JFrame implements GameBoard {
     private JPanel boardPanel;
     private JPanel buttonPanel;
     private JPanel vButtonPanel;
@@ -22,7 +22,7 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
     private JLabel leftInfo = new JLabel("");
     private JLabel rightInfo = new JLabel("");
     private Arena m_Arena;
-    private StateObserverZTAV m_so;
+    private StateObserver2048 m_so;
     private boolean arenaActReq=false;
 
     /**
@@ -58,7 +58,7 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
         buttonPanel     = initButton();
         vButtonPanel    = initvBoard();
         vTable          = new double[4];
-        m_so		    = new StateObserverZTAV();	// empty table
+        m_so		    = new StateObserver2048();	// empty table
 
 
         JPanel titlePanel = new JPanel();
@@ -167,7 +167,7 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
 
     private JPanel initvBoard() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3,3,10,10));
+        panel.setLayout(new GridLayout(4,3,10,10));
         for(int i = 0; i < 4; i++) {
             vBoard[i]= new JLabel();
             vBoard[i].setText(" ");
@@ -185,6 +185,9 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
         panel.add(vBoard[2]);
         panel.add(new Label());
         panel.add(vBoard[3]);
+        panel.add(new Label());
+        panel.add(new Label());
+        panel.add(new Label());
         panel.add(new Label());
         return panel;
     }
@@ -274,7 +277,7 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
     @Override
     public void clearBoard(boolean boardClear, boolean vClear) {
         if(boardClear) {
-            m_so = new StateObserverZTAV();
+            m_so = new StateObserver2048();
             for(int row=0;row<Config.ROWS;row++){
                 for(int column=0;column<Config.COLUMNS;column++){
                     updateBoardLabel(row, column);
@@ -298,8 +301,8 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
     @Override
     public void updateBoard(StateObservation so, boolean showStoredV, boolean enableOccupiedCells) {
         if(so != null) {
-            assert (so instanceof StateObserverZTAV): "StateObservation 'so' is not an instance of StateObserverZTAV";
-            StateObserverZTAV soZTAV = (StateObserverZTAV) so;
+            assert (so instanceof StateObserver2048): "StateObservation 'so' is not an instance of StateObserver2048";
+            StateObserver2048 soZTAV = (StateObserver2048) so;
             m_so = soZTAV.copy();
 
             if(so.isGameOver()) {
@@ -332,7 +335,7 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
     private void guiUpdateBoard(boolean enable) {
         //ToDO: da Zellen keine Buttons sind bin ich mir nicht sicher wofür ich die Variable enable benutzen soll/kann
         for(int i = 0; i < 4; i++) {
-            if(m_so.viableMoves.contains(i)) {
+            if(m_so.availableMoves.contains(i)) {
                 buttons[i].setEnabled(true);
             }
             else {
@@ -359,18 +362,12 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
             }
             if(Double.isNaN(score)) {
                 vBoard[i].setText("   ");
-                vBoard[i].setBackground(Color.green);
+                vBoard[i].setBackground(Color.red);
             } else {
                 String txt = ""+(String.format("%.6f",score));
                 if (score<0) txt = ""+(String.format("%.5f",score));
                 vBoard[i].setText(txt);
-                if (m_so.viableMoves.contains(i)) {
-                    vBoard[i].setBackground(Color.orange);
-                    buttons[i].setEnabled(true);
-                } else {
-                    vBoard[i].setBackground(Color.green);
-                    buttons[i].setEnabled(false);
-                }
+                vBoard[i].setBackground(Color.orange);
                 if (score>maxscore) {
                     maxscore=score;
                     imax=i;
@@ -381,7 +378,7 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
 
         scoreLabel.setText("" + m_so.getScore());
 
-        paint(this.getGraphics());
+        super.paintComponents(this.getGraphics());
     }
 
     @Override
@@ -429,7 +426,7 @@ public class GameBoardZTAV extends JFrame implements GameBoard {
         return null;
     }
 
-    public GameBoardZTAV(Arena ztavGame) {
+    public GameBoard2048(Arena ztavGame) {
         initGameBoard(ztavGame);
     }
 

@@ -8,9 +8,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 
-public class LaunchArenaZTAV extends JFrame{
+public class LaunchArena2048 extends JFrame{
     private static final long serialVersionUID = 1L;
-    public ArenaZTAV m_Arena;
+    public Arena2048 m_Arena;
 
     /**
      * @param args
@@ -18,12 +18,12 @@ public class LaunchArenaZTAV extends JFrame{
      */
     public static void main(String[] args) throws IOException
     {
-        LaunchArenaZTAV t_Frame = new LaunchArenaZTAV("General buttons Game Playing");
+        LaunchArena2048 t_Frame = new LaunchArena2048("General buttons Game Playing");
 
         if (args.length==0) {
             t_Frame.init();
         } else {
-            throw new RuntimeException("[LaunchArenaZTAV.main] args="+args+" not allowed. Use TicTacToeBatch.");
+            throw new RuntimeException("[LaunchArena2048.main] args="+args+" not allowed. Use TicTacToeBatch.");
         }
 
     }
@@ -33,7 +33,7 @@ public class LaunchArenaZTAV extends JFrame{
      */
     public void init()
     {
-        addWindowListener(new LaunchArenaZTAV.WindowClosingAdapter());
+        addWindowListener(new LaunchArena2048.WindowClosingAdapter());
         m_Arena.init();
         setSize(Types.GUI_ARENATRAIN_WIDTH,Types.GUI_ARENATRAIN_HEIGHT);
         setBounds(0,0,Types.GUI_ARENATRAIN_WIDTH,Types.GUI_ARENATRAIN_HEIGHT);
@@ -41,9 +41,9 @@ public class LaunchArenaZTAV extends JFrame{
         setVisible(true);
     }
 
-    public LaunchArenaZTAV(String title) {
+    public LaunchArena2048(String title) {
         super(title);
-        m_Arena = new ArenaZTAV(this);
+        m_Arena = new Arena2048(this);
         setLayout(new BorderLayout(10,10));
         setJMenuBar(m_Arena.m_menu);
         add(m_Arena,BorderLayout.CENTER);

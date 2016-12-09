@@ -10,17 +10,17 @@ import java.util.Random;
 /**
  * Created by Johannes on 18.11.2016.
  */
-public class StateObserverZTAV implements StateObservation{
+public class StateObserver2048 implements StateObservation{
     private Random random = new Random();
     private List<Position> emptyTiles = new ArrayList();
-    protected List<Integer> viableMoves;
+    protected List<Integer> availableMoves;
     private Position[][] gameBoard;
     protected Types.ACTIONS[] actions;
-    private int highestTileValue = 0;
 
     // 0 = running, 1 = won, -1 = lost
     private int winState;
     private int score;
+    private List<Tile> highestTiles = new ArrayList();
 
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
@@ -32,11 +32,11 @@ public class StateObserverZTAV implements StateObservation{
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 
-    public StateObserverZTAV() {
+    public StateObserver2048() {
         newBoard();
     }
 
-    public StateObserverZTAV(int[][] values, int score, int winState) {
+    public StateObserver2048(int[][] values, int score, int winState) {
         gameBoard = new Position[Config.ROWS][Config.COLUMNS];
         for(int row = 0; row < Config.ROWS; row++) {
             for(int column = 0; column < Config.COLUMNS; column++) {
@@ -58,13 +58,13 @@ public class StateObserverZTAV implements StateObservation{
     }
 
     @Override
-    public StateObserverZTAV copy() {
-        return new StateObserverZTAV(toArray(), score, winState);
+    public StateObserver2048 copy() {
+        return new StateObserver2048(toArray(), score, winState);
     }
 
     @Override
     public boolean isGameOver() {
-        if(viableMoves.size() == 0) {
+        if(availableMoves.size() == 0) {
             return true;
         }
         else {
@@ -75,7 +75,6 @@ public class StateObserverZTAV implements StateObservation{
     @Override
     public boolean isLegalState() {
         //ToDo: überprüfen ob wirklich legal state ist!
-        System.out.println("was");
         return true;
     }
 
@@ -94,20 +93,36 @@ public class StateObserverZTAV implements StateObservation{
     public double getGameScore() {
         switch (winState) {
             case -1:
-                return -1;
+                return -1+(score/MAXSCORE);
             default:
                 switch (score) {
                     case 0:
                         return 0;
                     default:
-                        return score/MAXSCORE;
+                        double newScore = score/MAXSCORE;
+                    /*    boolean multiply = false;
+                        for (int i = 0; i < highestTiles.size(); i++) {
+                            int row = highestTiles.get(i).getPosition().row;
+                            int column = highestTiles.get(i).getPosition().column;
+                            if(row == 0 && column == 0 ||
+                                    row == 0 && column == 3 ||
+                                    row == 3 && column == 0 ||
+                                    row == 3 && column == 3
+                                    ) {
+                                //multiply = true;
+                            }
+                        }
+                        if(multiply) {
+                            newScore *= 2;
+                        }*/
+                        return newScore;
                 }
         }
     }
 
     @Override
     public double getGameScore(StateObservation referingState) {
-        assert (referingState instanceof StateObserverZTAV) : "referingState is not of class StateObserverZTAV";
+        assert (referingState instanceof StateObserver2048) : "referingState is not of class StateObserver2048";
         return referingState.getGameScore();
     }
 
@@ -124,7 +139,7 @@ public class StateObserverZTAV implements StateObservation{
     @Override
     public void advance(Types.ACTIONS action) {
         int iAction = action.toInt();
-        assert (viableMoves.contains(iAction)) : "iAction is not viable.";
+        assert (availableMoves.contains(iAction)) : "iAction is not viable.";
 
         move(iAction);
     }
@@ -132,7 +147,7 @@ public class StateObserverZTAV implements StateObservation{
     @Override
     public ArrayList<Types.ACTIONS> getAvailableActions() {
         ArrayList<Types.ACTIONS> availAct = new ArrayList<>();
-        for(int viableMove : viableMoves) {
+        for(int viableMove : availableMoves) {
             availAct.add(Types.ACTIONS.fromInt(viableMove));
         }
         return availAct;
@@ -140,8 +155,7 @@ public class StateObserverZTAV implements StateObservation{
 
     @Override
     public int getNumAvailableActions() {
-        //ToDo: wird teilweise aufgerufen wenn keine viable Moves mehr vorhanden sind?!?
-        return viableMoves.size();
+        return availableMoves.size();
     }
 
     @Override
@@ -189,7 +203,7 @@ public class StateObserverZTAV implements StateObservation{
     }
 
     public boolean isLegalAction(Types.ACTIONS action) {
-        return viableMoves.contains(action.toInt());
+        return availableMoves.contains(action.toInt());
     }
 
     public int getScore() {
@@ -202,7 +216,9 @@ public class StateObserverZTAV implements StateObservation{
 
     public void addTile(Position position, int value) {
         emptyTiles.remove(position);
-        gameBoard[position.row][position.column].setTile(new Tile(value, position));
+        Tile newTile = new Tile(value, position);
+        updateHighestTile(newTile);
+        gameBoard[position.row][position.column].setTile(newTile);
     }
 
     public void mergeTiles(Tile tileOne, Tile tileTwo) {
@@ -211,11 +227,22 @@ public class StateObserverZTAV implements StateObservation{
         if(tileOne.getValue() >= Config.WINNINGVALUE) {
             setWinState(1);
         }
-        if(tileOne.getValue() > highestTileValue) {
-            highestTileValue = tileOne.getValue();
-        }
+        updateHighestTile(tileOne);
         tileTwo.getPosition().setTile(null);
         emptyTiles.add(tileTwo.getPosition());
+    }
+
+    public void updateHighestTile(Tile newTile) {
+        if(highestTiles.size() == 0) {
+            highestTiles.add(newTile);
+        }
+        else if(highestTiles.get(0).getValue() == newTile.getValue()) {
+            highestTiles.add(newTile);
+        }
+        else if(highestTiles.get(0).getValue() < newTile.getValue()) {
+            highestTiles.removeAll(highestTiles);
+            highestTiles.add(newTile);
+        }
     }
 
     public void moveTile(Tile tile, Position position) {
@@ -256,7 +283,7 @@ public class StateObserverZTAV implements StateObservation{
     }
 
     public void updateAvailableMoves() {
-        viableMoves = new ArrayList<>();
+        availableMoves = new ArrayList<>();
 
         loop:
         for(int row = 0; row < Config.ROWS; row++) {
@@ -265,7 +292,7 @@ public class StateObserverZTAV implements StateObservation{
 
                 }
                 else if (getTile(row, column - 1) == null || getTile(row, column).getValue() == getTile(row, column - 1).getValue()) {
-                    viableMoves.add(0);
+                    availableMoves.add(0);
                     break loop;
                 }
             }
@@ -278,7 +305,7 @@ public class StateObserverZTAV implements StateObservation{
 
                 }
                 else if (getTile(row - 1, column) == null || getTile(row, column).getValue() == getTile(row - 1, column).getValue()) {
-                    viableMoves.add(1);
+                    availableMoves.add(1);
                     break loop;
                 }
             }
@@ -291,7 +318,7 @@ public class StateObserverZTAV implements StateObservation{
 
                 }
                 else if (getTile(row, column + 1) == null || getTile(row, column).getValue() == getTile(row, column + 1).getValue()) {
-                    viableMoves.add(2);
+                    availableMoves.add(2);
                     break loop;
                 }
             }
@@ -304,13 +331,13 @@ public class StateObserverZTAV implements StateObservation{
 
                 }
                 else if (getTile(row + 1, column) == null || getTile(row, column).getValue() == getTile(row + 1, column).getValue()) {
-                    viableMoves.add(3);
+                    availableMoves.add(3);
                     break loop;
                 }
             }
         }
 
-        if(viableMoves.size() <= 0) {
+        if(availableMoves.size() <= 0) {
             setWinState(-1);
         }
 
@@ -386,7 +413,7 @@ public class StateObserverZTAV implements StateObservation{
     }
 
     private void left() {
-        if(viableMoves.contains(0)) {
+        if(availableMoves.contains(0)) {
             for (int row = 0; row < Config.ROWS; row++) {
                 Tile lastTile = getTile(row, 0);
                 int position = 0;
@@ -414,12 +441,12 @@ public class StateObserverZTAV implements StateObservation{
         }
         else {
             System.out.println("Invalid Move 0");
-            System.out.println("viableMoves = " + viableMoves);
+            System.out.println("availableMoves = " + availableMoves);
         }
     }
 
     private void up() {
-        if(viableMoves.contains(1)) {
+        if(availableMoves.contains(1)) {
             for (int column = 0; column < Config.COLUMNS; column++) {
                 Tile lastTile = getTile(0, column);
                 int position = 0;
@@ -447,12 +474,12 @@ public class StateObserverZTAV implements StateObservation{
         }
         else {
             System.out.println("Invalid Move 1");
-            System.out.println("viableMoves = " + viableMoves);
+            System.out.println("availableMoves = " + availableMoves);
         }
     }
 
     private void right() {
-        if(viableMoves.contains(2)) {
+        if(availableMoves.contains(2)) {
             for (int row = 0; row < Config.ROWS; row++) {
                 Tile lastTile = getTile(row, Config.COLUMNS - 1);
                 int position = Config.COLUMNS - 1;
@@ -480,12 +507,12 @@ public class StateObserverZTAV implements StateObservation{
         }
         else {
             System.out.println("Invalid Move 2");
-            System.out.println("viableMoves = " + viableMoves);
+            System.out.println("availableMoves = " + availableMoves);
         }
     }
 
     private void down() {
-        if(viableMoves.contains(3)) {
+        if(availableMoves.contains(3)) {
             for (int column = 0; column < Config.COLUMNS; column++) {
                 Tile lastTile = getTile(Config.ROWS - 1, column);
                 int position = Config.ROWS - 1;
@@ -513,7 +540,7 @@ public class StateObserverZTAV implements StateObservation{
         }
         else {
             System.out.println("Invalid Move 3");
-            System.out.println("viableMoves = " + viableMoves);
+            System.out.println("availableMoves = " + availableMoves);
         }
     }
 

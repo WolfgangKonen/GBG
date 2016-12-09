@@ -136,7 +136,7 @@ public class Types {
     
     // Default (startup) settings for Arena and ArenaTrain
     public static final String[] GUI_AGENT_LIST 	// list of available agents = list of choices in Agent Selectors
-    	= {"TDS", "Minimax", "Random", "MCTS", "Human"};
+    	= {"TDS", "Minimax", "Random", "MCTS", "Human", "MC"};
     public static final String[] GUI_AGENT_INITIAL  // initial agent choice (for up to 5 players)
     	= {"MCTS", "Human", "Human", "Human", "Human"};
     public static final String[] GUI_PLAYER_NAME  // player names (for up to 5 players)

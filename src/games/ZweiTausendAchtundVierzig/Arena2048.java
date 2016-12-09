@@ -1,18 +1,18 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.PlayAgent;
-import games.ArenaTrain;
 import games.Evaluator;
 import games.GameBoard;
+import games.Arena;
 
 import javax.swing.*;
 
-public class ArenaTrainZTAV extends ArenaTrain {
-    public ArenaTrainZTAV() {
+public class Arena2048 extends Arena {
+    public Arena2048() {
         super();
     }
 
-    public ArenaTrainZTAV(JFrame frame) {
+    public Arena2048(JFrame frame) {
         super(frame);
     }
 
@@ -29,7 +29,7 @@ public class ArenaTrainZTAV extends ArenaTrain {
      * @return	the game board
      */
     public GameBoard makeGameBoard() {
-        gb = new GameBoardZTAV(this);
+        gb = new GameBoard2048(this);
         return gb;
     }
     /**
@@ -46,8 +46,10 @@ public class ArenaTrainZTAV extends ArenaTrain {
      */
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
         //if (mode==9) return new Evaluator9(pa,stopEval);
-        // --- this is now inside EvaluatorZTAV ---
+        // --- this is now inside Evaluator2048 ---
 
-        return new EvaluatorZTAV(pa,gb,stopEval,mode,verbose);
+        return new Evaluator2048(pa,gb,stopEval,mode,verbose);
     }
+
+    public void performArenaDerivedTasks() {  }
 }
