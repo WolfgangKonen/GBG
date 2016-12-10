@@ -10,4 +10,6 @@ public class Config {
     public static final int WINNINGVALUE = 2048;
 
     public static final int STARTINGVALUES[] = {2,2,2,2,2,2,2,2,2,4};
+
+    public static final int NUMBEREVALUATIONS = 100;
 }

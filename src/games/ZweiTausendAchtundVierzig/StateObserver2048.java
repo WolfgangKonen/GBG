@@ -19,7 +19,7 @@ public class StateObserver2048 implements StateObservation{
 
     // 0 = running, 1 = won, -1 = lost
     private int winState;
-    private int score;
+    public int score;
     private List<Tile> highestTiles = new ArrayList();
 
     public Types.ACTIONS[] storedActions = null;
@@ -100,7 +100,7 @@ public class StateObserver2048 implements StateObservation{
                         return 0;
                     default:
                         double newScore = score/MAXSCORE;
-                    /*    boolean multiply = false;
+                        /*boolean multiply = false;
                         for (int i = 0; i < highestTiles.size(); i++) {
                             int row = highestTiles.get(i).getPosition().row;
                             int column = highestTiles.get(i).getPosition().column;
@@ -109,11 +109,11 @@ public class StateObserver2048 implements StateObservation{
                                     row == 3 && column == 0 ||
                                     row == 3 && column == 3
                                     ) {
-                                //multiply = true;
+                                multiply = true;
                             }
                         }
                         if(multiply) {
-                            newScore *= 2;
+                            newScore += 1;
                         }*/
                         return newScore;
                 }
