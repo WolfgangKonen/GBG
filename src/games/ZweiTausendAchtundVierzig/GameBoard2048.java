@@ -364,8 +364,39 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                 vBoard[i].setText("   ");
                 vBoard[i].setBackground(Color.red);
             } else {
-                String txt = ""+(String.format("%.6f",score));
-                if (score<0) txt = ""+(String.format("%.5f",score));
+                double exactScore = score*m_so.MAXSCORE;
+                String txt = null;
+                if(exactScore >= 1000000) {
+                    txt = ""+(String.format("%.1f",exactScore));
+                } else if(exactScore >= 100000) {
+                    txt = ""+(String.format("%.2f",exactScore));
+                } else if(exactScore >= 10000) {
+                    txt = ""+(String.format("%.3f",exactScore));
+                } else if(exactScore >= 1000) {
+                    txt = ""+(String.format("%.4f",exactScore));
+                } else if(exactScore >= 100) {
+                    txt = ""+(String.format("%.5f",exactScore));
+                } else if(exactScore >= 10) {
+                    txt = ""+(String.format("%.6f",exactScore));
+                } else if(exactScore >= 0) {
+                    txt = ""+(String.format("%.7f",exactScore));
+                } else if(exactScore <= -1000000) {
+                    txt = ""+(String.format("%.0f",exactScore));
+                } else if(exactScore <= -100000) {
+                    txt = ""+(String.format("%.1f",exactScore));
+                } else if(exactScore <= -10000) {
+                    txt = ""+(String.format("%.2f",exactScore));
+                } else if(exactScore <= -1000) {
+                    txt = ""+(String.format("%.3f",exactScore));
+                } else if(exactScore <= -100) {
+                    txt = ""+(String.format("%.4f",exactScore));
+                } else if(exactScore <= -10) {
+                    txt = ""+(String.format("%.5f",exactScore));
+                } else if(exactScore == 0) {
+                    txt = ""+exactScore;
+                }
+
+
                 vBoard[i].setText(txt);
                 vBoard[i].setBackground(Color.orange);
                 if (score>maxscore) {

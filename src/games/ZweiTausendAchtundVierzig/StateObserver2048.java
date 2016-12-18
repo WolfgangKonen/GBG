@@ -27,8 +27,8 @@ public class StateObserver2048 implements StateObservation{
     public double[] storedValues = null;
     public double storedMaxScore;
 
-    private final static double MAXSCORE = 3932156;
-    private final static double MINSCORE = 0;
+    public final static double MAXSCORE = 3932156;
+    public final static double MINSCORE = 0;
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 
@@ -74,7 +74,8 @@ public class StateObserver2048 implements StateObservation{
 
     @Override
     public boolean isLegalState() {
-        //ToDo: überprüfen ob wirklich legal state ist!
+        //Sollte eigentlich nicht benötigt werden, solange das Spielfeld nur über advance() verändert wird.
+        //Ich überprüfe den State vorerst nicht, da die Überprüfung nicht Notwendig sein sollte und das Programm nur verlangsamen würde.
         return true;
     }
 
@@ -91,31 +92,31 @@ public class StateObserver2048 implements StateObservation{
 
     @Override
     public double getGameScore() {
-        switch (winState) {
-            case -1:
-                return -1+(score/MAXSCORE);
-            default:
-                switch (score) {
-                    case 0:
-                        return 0;
-                    default:
-                        double newScore = score/MAXSCORE;
-                        /*boolean multiply = false;
-                        for (int i = 0; i < highestTiles.size(); i++) {
-                            int row = highestTiles.get(i).getPosition().row;
-                            int column = highestTiles.get(i).getPosition().column;
-                            if(row == 0 && column == 0 ||
-                                    row == 0 && column == 3 ||
-                                    row == 3 && column == 0 ||
-                                    row == 3 && column == 3
-                                    ) {
-                                multiply = true;
-                            }
+        if (isGameOver()) {
+            return -1 + (score / MAXSCORE);
+        }
+        else {
+            switch (score) {
+                case 0:
+                    return 0;
+                default:
+                    double newScore = score/MAXSCORE;
+                    /*boolean multiply = false;
+                    for (int i = 0; i < highestTiles.size(); i++) {
+                        int row = highestTiles.get(i).getPosition().row;
+                        int column = highestTiles.get(i).getPosition().column;
+                        if(row == 0 && column == 0 ||
+                                row == 0 && column == 3 ||
+                                row == 3 && column == 0 ||
+                                row == 3 && column == 3
+                                ) {
+                            multiply = true;
                         }
-                        if(multiply) {
-                            newScore += 1;
-                        }*/
-                        return newScore;
+                    }
+                    if(multiply) {
+                        newScore += 1;
+                    }*/
+                    return newScore;
                 }
         }
     }
@@ -123,7 +124,7 @@ public class StateObserver2048 implements StateObservation{
     @Override
     public double getGameScore(StateObservation referingState) {
         assert (referingState instanceof StateObserver2048) : "referingState is not of class StateObserver2048";
-        return referingState.getGameScore();
+        return this.getGameScore();
     }
 
     @Override
