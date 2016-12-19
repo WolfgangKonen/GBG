@@ -32,6 +32,8 @@ public class StateObserver2048 implements StateObservation{
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 
+    public boolean highestTileInCorner = false;
+
     public StateObserver2048() {
         newBoard();
     }
@@ -101,7 +103,7 @@ public class StateObserver2048 implements StateObservation{
                     return 0;
                 default:
                     double newScore = score/MAXSCORE;
-                    /*boolean multiply = false;
+                  /*  highestTileInCorner = false;
                     for (int i = 0; i < highestTiles.size(); i++) {
                         int row = highestTiles.get(i).getPosition().row;
                         int column = highestTiles.get(i).getPosition().column;
@@ -110,10 +112,10 @@ public class StateObserver2048 implements StateObservation{
                                 row == 3 && column == 0 ||
                                 row == 3 && column == 3
                                 ) {
-                            multiply = true;
+                            highestTileInCorner = true;
                         }
                     }
-                    if(multiply) {
+                    if(highestTileInCorner) {
                         newScore += 1;
                     }*/
                     return newScore;

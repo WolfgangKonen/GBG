@@ -320,27 +320,25 @@ abstract public class Arena extends JPanel implements Runnable {
 				so = gb.getStateObs();
 				player = so.getPlayer();
 				pa = paVector[player];
-				switch(player) {
-				default: 
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
 						gb.updateBoard(so,false,false);		// enable board buttons
-						break;  // out of switch
 					}
-					vtable = new double[so.getNumAvailableActions()+1];
-					actBest = pa.getNextAction(so, false, vtable, true);
-					so.storeBestActionInfo(actBest, vtable);
-					so.advance(actBest);
-					try
-					{
-						Thread.sleep(200); 
-						// waiting time between agent-agent actions
-					} 
-					catch (Exception e){System.out.println("Thread 1");}
-					break; // out of switch
-				}	
-				
-				gb.updateBoard(so,true,false);
+					else {
+                        vtable = new double[so.getNumAvailableActions() + 1];
+                        actBest = pa.getNextAction(so, false, vtable, true);
+                        so.storeBestActionInfo(actBest, vtable);
+                        so.advance(actBest);
+                        try {
+                            Thread.sleep(200);
+                            // waiting time between agent-agent actions
+                        } catch (Exception e) {
+                            System.out.println("Thread 1");
+                        }
+                        gb.updateBoard(so,true,false);
+				}
+
+
 				
 			} // if(gb.isActionReq())
 			else

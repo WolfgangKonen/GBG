@@ -25,11 +25,12 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private StateObserver2048 m_so;
     private boolean arenaActReq=false;
 
+
     /**
      * The clickable buttons in the GUI, used to controll the Gameboard (Left, Up, Right, Down). The buttons will be enabled only
      * when "Play" or "Inspect V" are clicked.
      */
-    protected Button[] buttons;
+    protected JButton[] buttons;
 
     /**
      * The representation of the value function corresponding to the current board
@@ -50,7 +51,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     private void initGameBoard(Arena ztavGame) {
         m_Arena         = ztavGame;
-        buttons         = new Button[4];
+        buttons         = new JButton[4];
         vBoard          = new JLabel[4];
         board           = new JLabel[Config.ROWS][Config.COLUMNS];
         scoreLabel      = new JLabel();
@@ -115,10 +116,10 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private JPanel initButton() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(4,3,10,10));
-        buttons[0] = new Button("left");
-        buttons[1] = new Button("up");
-        buttons[2] = new Button("right");
-        buttons[3] = new Button("down");
+        buttons[0] = new JButton("left");
+        buttons[1] = new JButton("up");
+        buttons[2] = new JButton("right");
+        buttons[3] = new JButton("down");
 
         Font font = new Font("Arial",1,22);
 
@@ -300,6 +301,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     @Override
     public void updateBoard(StateObservation so, boolean showStoredV, boolean enableOccupiedCells) {
+                
         if(so != null) {
             assert (so instanceof StateObserver2048): "StateObservation 'so' is not an instance of StateObserver2048";
             StateObserver2048 soZTAV = (StateObserver2048) so;
@@ -329,10 +331,10 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                 }
             }
         }
-        guiUpdateBoard(enableOccupiedCells);
+        guiUpdateBoard();
     }
 
-    private void guiUpdateBoard(boolean enable) {
+    private void guiUpdateBoard() {
         //ToDO: da Zellen keine Buttons sind bin ich mir nicht sicher wofür ich die Variable enable benutzen soll/kann
         for(int i = 0; i < 4; i++) {
             if(m_so.availableMoves.contains(i)) {
@@ -364,36 +366,36 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                 vBoard[i].setText("   ");
                 vBoard[i].setBackground(Color.red);
             } else {
-                double exactScore = score*m_so.MAXSCORE;
+                double realScore = score*m_so.MAXSCORE;
                 String txt = null;
-                if(exactScore >= 1000000) {
-                    txt = ""+(String.format("%.1f",exactScore));
-                } else if(exactScore >= 100000) {
-                    txt = ""+(String.format("%.2f",exactScore));
-                } else if(exactScore >= 10000) {
-                    txt = ""+(String.format("%.3f",exactScore));
-                } else if(exactScore >= 1000) {
-                    txt = ""+(String.format("%.4f",exactScore));
-                } else if(exactScore >= 100) {
-                    txt = ""+(String.format("%.5f",exactScore));
-                } else if(exactScore >= 10) {
-                    txt = ""+(String.format("%.6f",exactScore));
-                } else if(exactScore >= 0) {
-                    txt = ""+(String.format("%.7f",exactScore));
-                } else if(exactScore <= -1000000) {
-                    txt = ""+(String.format("%.0f",exactScore));
-                } else if(exactScore <= -100000) {
-                    txt = ""+(String.format("%.1f",exactScore));
-                } else if(exactScore <= -10000) {
-                    txt = ""+(String.format("%.2f",exactScore));
-                } else if(exactScore <= -1000) {
-                    txt = ""+(String.format("%.3f",exactScore));
-                } else if(exactScore <= -100) {
-                    txt = ""+(String.format("%.4f",exactScore));
-                } else if(exactScore <= -10) {
-                    txt = ""+(String.format("%.5f",exactScore));
-                } else if(exactScore == 0) {
-                    txt = ""+exactScore;
+                if(realScore >= 1000000) {
+                    txt = ""+(String.format("%.1f",realScore));
+                } else if(realScore >= 100000) {
+                    txt = ""+(String.format("%.2f",realScore));
+                } else if(realScore >= 10000) {
+                    txt = ""+(String.format("%.3f",realScore));
+                } else if(realScore >= 1000) {
+                    txt = ""+(String.format("%.4f",realScore));
+                } else if(realScore >= 100) {
+                    txt = ""+(String.format("%.5f",realScore));
+                } else if(realScore >= 10) {
+                    txt = ""+(String.format("%.6f",realScore));
+                } else if(realScore >= 0) {
+                    txt = ""+(String.format("%.7f",realScore));
+                } else if(realScore <= -1000000) {
+                    txt = ""+(String.format("%.0f",realScore));
+                } else if(realScore <= -100000) {
+                    txt = ""+(String.format("%.1f",realScore));
+                } else if(realScore <= -10000) {
+                    txt = ""+(String.format("%.2f",realScore));
+                } else if(realScore <= -1000) {
+                    txt = ""+(String.format("%.3f",realScore));
+                } else if(realScore <= -100) {
+                    txt = ""+(String.format("%.4f",realScore));
+                } else if(realScore <= -10) {
+                    txt = ""+(String.format("%.5f",realScore));
+                } else if(realScore == 0) {
+                    txt = ""+realScore;
                 }
 
 
@@ -408,8 +410,11 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         vBoard[imax].setBackground(Color.yellow);
 
         scoreLabel.setText("" + m_so.getScore());
+        leftInfo.setText("m_so.highestTileInCorner = " + m_so.highestTileInCorner);
 
-        super.paintComponents(this.getGraphics());
+
+
+        super.repaint(0,0,0,850,550);
     }
 
     @Override
@@ -421,7 +426,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         if (ztavGame.m_TicFrame!=null) {
             x = ztavGame.m_TicFrame.getX();
             y = ztavGame.m_TicFrame.getY() + ztavGame.m_TicFrame.getHeight() +1;
-            this.setSize(800,550);
+            this.setSize(850,550);
         }
         this.setLocation(x,y);
     }
@@ -478,7 +483,6 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         Types.ACTIONS act = Types.ACTIONS.fromInt(move);
         assert m_so.isLegalAction(act) : "Desired action is not legal";
         m_so.advance(act);
-        updateBoard(null,false,false);
         arenaActReq = true;			// ask Arena for next action
     }
 
