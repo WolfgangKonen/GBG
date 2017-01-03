@@ -4,27 +4,23 @@ import games.StateObservation;
 import tools.Types;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.*;
 
 /**
  * Created by Johannes on 18.11.2016.
  */
 public class StateObserver2048 implements StateObservation{
     private Random random = new Random();
-    protected List<Tile> emptyTiles = new ArrayList();
+    private List<Position> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves;
-    private Tile[][] gameBoard;
+    private Position[][] gameBoard;
     protected Types.ACTIONS[] actions;
 
     // 0 = running, 1 = won, -1 = lost
     private int winState;
     public int score;
-    public int highestTileValue = Integer.MIN_VALUE;
-    public boolean highestTileInCorner = false;
-    public int moves = 0;
+    private List<Tile> highestTiles = new ArrayList();
 
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
@@ -36,19 +32,24 @@ public class StateObserver2048 implements StateObservation{
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 
+    public boolean highestTileInCorner = false;
+
     public StateObserver2048() {
         newBoard();
     }
 
     public StateObserver2048(int[][] values, int score, int winState) {
-        gameBoard = new Tile[Config.ROWS][Config.COLUMNS];
+        gameBoard = new Position[Config.ROWS][Config.COLUMNS];
         for(int row = 0; row < Config.ROWS; row++) {
             for(int column = 0; column < Config.COLUMNS; column++) {
-                Tile newTile = new Tile(values[row][column], new Position(row,column));
-                gameBoard[row][column] = newTile;
-                updateHighestTile(newTile);
-                if(values[row][column] == 0) {
-                    emptyTiles.add(newTile);
+                Position newPosition = new Position(row,column,null);
+                gameBoard[row][column] = newPosition;
+                if(values[row][column] != 0) {
+                    Tile newTile = new Tile(values[row][column], newPosition);
+                    newPosition.setTile(newTile);
+                }
+                else {
+                    emptyTiles.add(newPosition);
                 }
             }
         }
@@ -94,34 +95,31 @@ public class StateObserver2048 implements StateObservation{
     @Override
     public double getGameScore() {
         if (isGameOver()) {
-            double penalisation = Config.PENALISATION;
-
-            if(Config.ADDSCORE) {
-                penalisation += (score / MAXSCORE);
-            }
-            return penalisation;
+            return -1 + (score / MAXSCORE);
         }
         else {
-
-            highestTileInCorner = false;
-            if(gameBoard[0][0].getValue() == highestTileValue || gameBoard[Config.ROWS-1][0].getValue() == highestTileValue || gameBoard[0][Config.COLUMNS-1].getValue() == highestTileValue || gameBoard[Config.ROWS-1][Config.COLUMNS-1].getValue() == highestTileValue) {
-                highestTileInCorner = true;
-            }
-
             switch (score) {
                 case 0:
                     return 0;
                 default:
                     double newScore = score/MAXSCORE;
-
-
-                    if(highestTileInCorner) {
-                        newScore *= Config.HIGHESTTILEINCORENERVALUE;
+                  /*  highestTileInCorner = false;
+                    for (int i = 0; i < highestTiles.size(); i++) {
+                        int row = highestTiles.get(i).getPosition().row;
+                        int column = highestTiles.get(i).getPosition().column;
+                        if(row == 0 && column == 0 ||
+                                row == 0 && column == 3 ||
+                                row == 3 && column == 0 ||
+                                row == 3 && column == 3
+                                ) {
+                            highestTileInCorner = true;
+                        }
                     }
-
-                    newScore *= Math.pow(Config.EMPTYTILEVALUE, emptyTiles.size());
+                    if(highestTileInCorner) {
+                        newScore += 1;
+                    }*/
                     return newScore;
-            }
+                }
         }
     }
 
@@ -216,13 +214,14 @@ public class StateObserver2048 implements StateObservation{
     }
 
     public Tile getTile(int row, int column) {
-        return gameBoard[row][column];
+        return gameBoard[row][column].getTile();
     }
 
-    public void addTile(Tile tile, int value) {
-        emptyTiles.remove(tile);
-        tile.setValue(value);
-        updateHighestTile(tile);
+    public void addTile(Position position, int value) {
+        emptyTiles.remove(position);
+        Tile newTile = new Tile(value, position);
+        updateHighestTile(newTile);
+        gameBoard[position.row][position.column].setTile(newTile);
     }
 
     public void mergeTiles(Tile tileOne, Tile tileTwo) {
@@ -232,22 +231,33 @@ public class StateObserver2048 implements StateObservation{
             setWinState(1);
         }
         updateHighestTile(tileOne);
-        tileTwo.setValue(0);
-        emptyTiles.add(tileTwo);
+        tileTwo.getPosition().setTile(null);
+        emptyTiles.add(tileTwo.getPosition());
     }
 
     public void updateHighestTile(Tile newTile) {
-        if(newTile.getValue() > highestTileValue) {
-            highestTileValue = newTile.getValue();
+        if(highestTiles.size() == 0) {
+            highestTiles.add(newTile);
+        }
+        else if(highestTiles.get(0).getValue() == newTile.getValue()) {
+            highestTiles.add(newTile);
+        }
+        else if(highestTiles.get(0).getValue() < newTile.getValue()) {
+            highestTiles.removeAll(highestTiles);
+            highestTiles.add(newTile);
         }
     }
 
-    public void moveTile(Tile oldTile, Tile newTile) {
-        emptyTiles.remove(newTile);
-        newTile.setValue(oldTile.getValue());
+    public void moveTile(Tile tile, Position position) {
+        tile.getPosition().setTile(null);
+        emptyTiles.add(tile.getPosition());
+        emptyTiles.remove(position);
+        tile.setPosition(position);
+        position.setTile(tile);
+    }
 
-        emptyTiles.add(oldTile);
-        oldTile.setValue(0);
+    public Position getPosition(int row, int column) {
+        return gameBoard[row][column];
     }
 
     /**
@@ -264,7 +274,12 @@ public class StateObserver2048 implements StateObservation{
         int[][] newBoard = new int[Config.ROWS][Config.COLUMNS];
         for(int row = 0; row < Config.ROWS; row++) {
             for(int column = 0; column < Config.COLUMNS; column++) {
-                newBoard[row][column] = gameBoard[row][column].getValue();
+                if(gameBoard[row][column].getTile() == null) {
+                    newBoard[row][column] = 0;
+                }
+                else {
+                    newBoard[row][column] = gameBoard[row][column].getTile().getValue();
+                }
             }
         }
         return newBoard;
@@ -276,25 +291,25 @@ public class StateObserver2048 implements StateObservation{
         loop:
         for(int row = 0; row < Config.ROWS; row++) {
             for (int column = 1; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row][column - 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column - 1].getValue()) {
-                        availableMoves.add(0);
-                        break loop;
-                    }
+                if(getTile(row, column) == null){
+
+                }
+                else if (getTile(row, column - 1) == null || getTile(row, column).getValue() == getTile(row, column - 1).getValue()) {
+                    availableMoves.add(0);
+                    break loop;
                 }
             }
         }
 
-
-
         loop:
         for(int row = 1; row < Config.ROWS; row++) {
             for (int column = 0; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row - 1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row - 1][column].getValue()) {
-                        availableMoves.add(1);
-                        break loop;
-                    }
+                if(getTile(row, column) == null){
+
+                }
+                else if (getTile(row - 1, column) == null || getTile(row, column).getValue() == getTile(row - 1, column).getValue()) {
+                    availableMoves.add(1);
+                    break loop;
                 }
             }
         }
@@ -302,11 +317,12 @@ public class StateObserver2048 implements StateObservation{
         loop:
         for(int row = 0; row < Config.ROWS; row++) {
             for (int column = 0; column < Config.COLUMNS-1; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row][column + 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column + 1].getValue()) {
-                        availableMoves.add(2);
-                        break loop;
-                    }
+                if(getTile(row, column) == null){
+
+                }
+                else if (getTile(row, column + 1) == null || getTile(row, column).getValue() == getTile(row, column + 1).getValue()) {
+                    availableMoves.add(2);
+                    break loop;
                 }
             }
         }
@@ -314,11 +330,12 @@ public class StateObserver2048 implements StateObservation{
         loop:
         for(int row = 0; row < Config.ROWS-1; row++) {
             for (int column = 0; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row+1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row+1][column].getValue()) {
-                        availableMoves.add(3);
-                        break loop;
-                    }
+                if(getTile(row, column) == null){
+
+                }
+                else if (getTile(row + 1, column) == null || getTile(row, column).getValue() == getTile(row + 1, column).getValue()) {
+                    availableMoves.add(3);
+                    break loop;
                 }
             }
         }
@@ -332,11 +349,12 @@ public class StateObserver2048 implements StateObservation{
 
     public void printBoard() {
         System.out.println("---------------------------------");
-        for(Tile[] row: gameBoard)
+        for(Position[] row: gameBoard)
         {
             System.out.print("|");
-            for(Tile tile: row) {
-                if(tile.getValue() != 0) {
+            for(Position position: row) {
+                Tile tile = position.getTile();
+                if(tile != null) {
                     if(tile.getValue() < 10) {
                         System.out.print("   " + tile.getValue() + "   |");
                     }
@@ -366,8 +384,8 @@ public class StateObserver2048 implements StateObservation{
 
     public void addRandomTile () {
         if(emptyTiles.size() > 0) {
-            Tile tile = emptyTiles.get(random.nextInt(emptyTiles.size()));
-            addTile(tile, Config.STARTINGVALUES[random.nextInt(Config.STARTINGVALUES.length)]);
+            Position position = emptyTiles.get(random.nextInt(emptyTiles.size()));
+            addTile(position, Config.STARTINGVALUES[random.nextInt(Config.STARTINGVALUES.length)]);
         }
     }
 
@@ -394,37 +412,31 @@ public class StateObserver2048 implements StateObservation{
                 break;
         }
 
-        moves++;
-
         updateAvailableMoves();
     }
 
     private void left() {
         if(availableMoves.contains(0)) {
             for (int row = 0; row < Config.ROWS; row++) {
-                //Feld mit dem gemerged wird oder auf das geschoben wird
                 Tile lastTile = getTile(row, 0);
+                int position = 0;
 
                 for (int column = 1; column < Config.COLUMNS; column++) {
                     Tile currentTile = getTile(row, column);
 
-                    if(currentTile.getValue() != 0) {
+                    if (currentTile != null && lastTile != null) {
                         if (currentTile.getValue() == lastTile.getValue()) {
-                            //Es stehen zweimal die selben Zahlen hintereinander
                             mergeTiles(lastTile, currentTile);
-                            lastTile = getTile(row, lastTile.getPosition().getColumn()+1);
-
-                        } else if (currentTile.getValue() != 0 && lastTile.getValue() != 0) {
-                            //Es stehen zwei verschiedene Zahlen hintereinander
-                            lastTile = getTile(row, lastTile.getPosition().getColumn()+1);
-                            if(currentTile != lastTile) {
-                                moveTile(currentTile, lastTile);
-                            }
-
-                        } else if (currentTile.getValue() != 0) {
-                            // Eine Zahl steht hinter einem leerem Feld
-                            moveTile(currentTile, lastTile);
+                            position++;
+                            lastTile = null;
+                        } else {
+                            position++;
+                            lastTile = currentTile;
+                            moveTile(currentTile, getPosition(row, position));
                         }
+                    } else if (currentTile != null) {
+                        moveTile(currentTile, getPosition(row, position));
+                        lastTile = currentTile;
                     }
                 }
             }
@@ -440,27 +452,24 @@ public class StateObserver2048 implements StateObservation{
         if(availableMoves.contains(1)) {
             for (int column = 0; column < Config.COLUMNS; column++) {
                 Tile lastTile = getTile(0, column);
+                int position = 0;
 
                 for (int row = 1; row < Config.ROWS; row++) {
                     Tile currentTile = getTile(row, column);
 
-                    if(currentTile.getValue() != 0) {
+                    if (currentTile != null && lastTile != null) {
                         if (currentTile.getValue() == lastTile.getValue()) {
-                            //Es stehen zweimal die selben Zahlen hintereinander
                             mergeTiles(lastTile, currentTile);
-                            lastTile = getTile(lastTile.getPosition().getRow()+1, column);
-
-                        } else if (currentTile.getValue() != 0 && lastTile.getValue() != 0) {
-                            //Es stehen zwei verschiedene Zahlen hintereinander
-                            lastTile = getTile(lastTile.getPosition().getRow()+1, column);
-                            if(currentTile != lastTile) {
-                                moveTile(currentTile, lastTile);
-                            }
-
-                        } else if (currentTile.getValue() != 0) {
-                            // Eine Zahl steht hinter einem leerem Feld
-                            moveTile(currentTile, lastTile);
+                            position++;
+                            lastTile = null;
+                        } else {
+                            position++;
+                            lastTile = currentTile;
+                            moveTile(currentTile, getPosition(position, column));
                         }
+                    } else if (currentTile != null) {
+                        moveTile(currentTile, getPosition(position, column));
+                        lastTile = currentTile;
                     }
                 }
             }
@@ -476,27 +485,24 @@ public class StateObserver2048 implements StateObservation{
         if(availableMoves.contains(2)) {
             for (int row = 0; row < Config.ROWS; row++) {
                 Tile lastTile = getTile(row, Config.COLUMNS - 1);
+                int position = Config.COLUMNS - 1;
 
                 for (int column = Config.COLUMNS - 2; column >= 0; column--) {
                     Tile currentTile = getTile(row, column);
 
-                    if(currentTile.getValue() != 0) {
+                    if (currentTile != null && lastTile != null) {
                         if (currentTile.getValue() == lastTile.getValue()) {
-                            //Es stehen zweimal die selben Zahlen hintereinander
                             mergeTiles(lastTile, currentTile);
-                            lastTile = getTile(row, lastTile.getPosition().getColumn()-1);
-
-                        } else if (currentTile.getValue() != 0 && lastTile.getValue() != 0) {
-                            //Es stehen zwei verschiedene Zahlen hintereinander
-                            lastTile = getTile(row, lastTile.getPosition().getColumn()-1);
-                            if(currentTile != lastTile) {
-                                moveTile(currentTile, lastTile);
-                            }
-
-                        } else if (currentTile.getValue() != 0) {
-                            // Eine Zahl steht hinter einem leerem Feld
-                            moveTile(currentTile, lastTile);
+                            position--;
+                            lastTile = null;
+                        } else {
+                            position--;
+                            lastTile = currentTile;
+                            moveTile(currentTile, getPosition(row, position));
                         }
+                    } else if (currentTile != null) {
+                        moveTile(currentTile, getPosition(row, position));
+                        lastTile = currentTile;
                     }
                 }
             }
@@ -512,27 +518,24 @@ public class StateObserver2048 implements StateObservation{
         if(availableMoves.contains(3)) {
             for (int column = 0; column < Config.COLUMNS; column++) {
                 Tile lastTile = getTile(Config.ROWS - 1, column);
+                int position = Config.ROWS - 1;
 
                 for (int row = Config.ROWS - 2; row >= 0; row--) {
                     Tile currentTile = getTile(row, column);
 
-                    if(currentTile.getValue() != 0) {
+                    if (currentTile != null && lastTile != null) {
                         if (currentTile.getValue() == lastTile.getValue()) {
-                            //Es stehen zweimal die selben Zahlen hintereinander
                             mergeTiles(lastTile, currentTile);
-                            lastTile = getTile(lastTile.getPosition().getRow()-1, column);
-
-                        } else if (currentTile.getValue() != 0 && lastTile.getValue() != 0) {
-                            //Es stehen zwei verschiedene Zahlen hintereinander
-                            lastTile = getTile(lastTile.getPosition().getRow()-1, column);
-                            if(currentTile != lastTile) {
-                                moveTile(currentTile, lastTile);
-                            }
-
-                        } else if (currentTile.getValue() != 0) {
-                            // Eine Zahl steht hinter einem leerem Feld
-                            moveTile(currentTile, lastTile);
+                            position--;
+                            lastTile = null;
+                        } else {
+                            position--;
+                            lastTile = currentTile;
+                            moveTile(currentTile, getPosition(position, column));
                         }
+                    } else if (currentTile != null) {
+                        moveTile(currentTile, getPosition(position, column));
+                        lastTile = currentTile;
                     }
                 }
             }
@@ -545,12 +548,12 @@ public class StateObserver2048 implements StateObservation{
     }
 
     private void newBoard() {
-        gameBoard = new Tile[Config.ROWS][Config.COLUMNS];
+        gameBoard = new Position[Config.ROWS][Config.COLUMNS];
         for(int row = 0; row < Config.ROWS; row++) {
             for(int column = 0; column < Config.COLUMNS; column++) {
-                Tile newTile = new Tile(0, new Position(row,column));
-                gameBoard[row][column] = newTile;
-                emptyTiles.add(newTile);
+                Position newPosition = new Position(row,column,null);
+                gameBoard[row][column] = newPosition;
+                emptyTiles.add(newPosition);
             }
         }
         score = 0;
