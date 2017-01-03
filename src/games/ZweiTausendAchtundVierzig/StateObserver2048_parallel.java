@@ -12,19 +12,19 @@ import java.util.concurrent.*;
 /**
  * Created by Johannes on 18.11.2016.
  */
-public class StateObserver2048 implements StateObservation{
+public class StateObserver2048_parallel implements StateObservation{
     private Random random = new Random();
     protected List<Tile> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves;
     private Tile[][] gameBoard;
     protected Types.ACTIONS[] actions;
+    ExecutorService executorService;
 
     // 0 = running, 1 = won, -1 = lost
     private int winState;
     public int score;
     public int highestTileValue = Integer.MIN_VALUE;
     public boolean highestTileInCorner = false;
-    public int moves = 0;
 
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
@@ -36,11 +36,13 @@ public class StateObserver2048 implements StateObservation{
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 
-    public StateObserver2048() {
+    public StateObserver2048_parallel() {
+        executorService = Executors.newWorkStealingPool();
         newBoard();
     }
 
-    public StateObserver2048(int[][] values, int score, int winState) {
+    public StateObserver2048_parallel(int[][] values, int score, int winState, ExecutorService executorService) {
+        this.executorService = executorService;
         gameBoard = new Tile[Config.ROWS][Config.COLUMNS];
         for(int row = 0; row < Config.ROWS; row++) {
             for(int column = 0; column < Config.COLUMNS; column++) {
@@ -59,8 +61,8 @@ public class StateObserver2048 implements StateObservation{
     }
 
     @Override
-    public StateObserver2048 copy() {
-        return new StateObserver2048(toArray(), score, winState);
+    public StateObserver2048_parallel copy() {
+        return new StateObserver2048_parallel(toArray(), score, winState, executorService);
     }
 
     @Override
@@ -273,55 +275,74 @@ public class StateObserver2048 implements StateObservation{
     public void updateAvailableMoves() {
         availableMoves = new ArrayList<>();
 
-        loop:
-        for(int row = 0; row < Config.ROWS; row++) {
-            for (int column = 1; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row][column - 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column - 1].getValue()) {
-                        availableMoves.add(0);
-                        break loop;
+        List<Callable<Integer>> callables = Arrays.asList(
+                () -> {
+                    for(int row = 0; row < Config.ROWS; row++) {
+                        for (int column = 1; column < Config.COLUMNS; column++) {
+                            if(gameBoard[row][column].getValue() != 0) {
+                                if (gameBoard[row][column - 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column - 1].getValue()) {
+                                    //availableMoves.add(0);
+                                    return 0;
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        }
-
-
-
-        loop:
-        for(int row = 1; row < Config.ROWS; row++) {
-            for (int column = 0; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row - 1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row - 1][column].getValue()) {
-                        availableMoves.add(1);
-                        break loop;
+                    return null;
+                },
+                () -> {
+                    for(int row = 1; row < Config.ROWS; row++) {
+                        for (int column = 0; column < Config.COLUMNS; column++) {
+                            if(gameBoard[row][column].getValue() != 0) {
+                                if (gameBoard[row - 1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row - 1][column].getValue()) {
+                                    //availableMoves.add(1);
+                                    return 1;
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        }
-
-        loop:
-        for(int row = 0; row < Config.ROWS; row++) {
-            for (int column = 0; column < Config.COLUMNS-1; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row][column + 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column + 1].getValue()) {
-                        availableMoves.add(2);
-                        break loop;
+                    return null;
+                },
+                () -> {
+                    for(int row = 0; row < Config.ROWS; row++) {
+                        for (int column = 0; column < Config.COLUMNS-1; column++) {
+                            if(gameBoard[row][column].getValue() != 0) {
+                                if (gameBoard[row][column + 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column + 1].getValue()) {
+                                    //availableMoves.add(2);
+                                    return 2;
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        }
-
-        loop:
-        for(int row = 0; row < Config.ROWS-1; row++) {
-            for (int column = 0; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row+1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row+1][column].getValue()) {
-                        availableMoves.add(3);
-                        break loop;
+                    return null;
+                },
+                () -> {
+                    for(int row = 0; row < Config.ROWS-1; row++) {
+                        for (int column = 0; column < Config.COLUMNS; column++) {
+                            if(gameBoard[row][column].getValue() != 0) {
+                                if (gameBoard[row+1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row+1][column].getValue()) {
+                                    //availableMoves.add(3);
+                                    return 3;
+                                }
+                            }
+                        }
                     }
+                    return null;
                 }
-            }
-        }
+        );
+
+        try {
+            executorService.invokeAll(callables).stream()
+                    .map(future -> {
+                        try {
+                            return future.get();
+                        }
+                        catch (Exception e) {
+                            throw new IllegalStateException(e);
+                        }
+                    }).filter(move -> move != null)
+                    .forEach(move -> availableMoves.add(move));
+        } catch (InterruptedException ignore) { }
+
 
         if(availableMoves.size() <= 0) {
             setWinState(-1);
@@ -393,8 +414,6 @@ public class StateObserver2048 implements StateObservation{
                 down();
                 break;
         }
-
-        moves++;
 
         updateAvailableMoves();
     }

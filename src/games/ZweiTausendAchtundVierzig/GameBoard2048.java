@@ -18,6 +18,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private JPanel boardPanel;
     private JPanel buttonPanel;
     private JPanel vButtonPanel;
+    private JPanel gameInfo;
     private double[] vTable;
     private JLabel leftInfo = new JLabel("");
     private JLabel rightInfo = new JLabel("");
@@ -36,7 +37,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
      * The representation of the value function corresponding to the current board
      * {@link #buttons} position.
      */
-    protected JLabel[] vBoard;
+    private JLabel[] vBoard;
 
     /**
      * The representation of the gameBoard
@@ -46,7 +47,16 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     /**
      * The gamescore
      */
-    protected JLabel scoreLabel;
+    private JLabel scoreLabel;
+
+    /**
+     * Informations about Scoremodifiers and the hidden gamescore
+     */
+    protected JLabel realScore;
+    protected JLabel highestTileInCorner;
+    protected JLabel highestTileValue;
+    protected JLabel emptyTiles;
+
 
 
     private void initGameBoard(Arena ztavGame) {
@@ -58,6 +68,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         boardPanel      = initBoard();
         buttonPanel     = initButton();
         vButtonPanel    = initvBoard();
+        gameInfo        = initGameInfo();
+
         vTable          = new double[4];
         m_so		    = new StateObserver2048();	// empty table
 
@@ -75,8 +87,9 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         boardPanel.add(this.boardPanel);
         boardPanel.add(new Label("    "));		// some space
         JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new GridLayout(2,1,20,20));
+        rightPanel.setLayout(new GridLayout(2,2,30,30));
         rightPanel.add(buttonPanel);
+        rightPanel.add(gameInfo);
         rightPanel.add(vButtonPanel);
         boardPanel.add(rightPanel);
 
@@ -146,11 +159,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                     }
             );
         }
-
-        Label ScoreDescription = new Label("Score:");
-        ScoreDescription.setFont(new Font("Arial",1,20));
-        panel.add(ScoreDescription);
-        panel.add(initScore());
+        panel.add(new Label());
+        panel.add(new Label());
         panel.add(new Label());
         panel.add(new Label());
         panel.add(buttons[1]);
@@ -193,22 +203,58 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         return panel;
     }
 
-    private JPanel initScore() {
+    private JPanel initGameInfo() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(1,1,20,20));
+        panel.setLayout(new GridLayout(5,2,10,0));
+        Font font = new Font("Arial",1,16);
+
+        Label ScoreDescription = new Label("Score:");
+        ScoreDescription.setFont(font);
+        panel.add(ScoreDescription);
         scoreLabel = new JLabel("");
-        Font font = new Font("Arial",1,22);
         scoreLabel.setFont(font);
         panel.add(scoreLabel);
+
+        Label realScoreDescription = new Label("modified Score:");
+        realScoreDescription.setFont(font);
+        panel.add(realScoreDescription);
+
+        realScore = new JLabel("");
+        realScore.setFont(font);
+        panel.add(realScore);
+
+        Label highestTileInCornerDescription = new Label("highest Tile in Corner:");
+        highestTileInCornerDescription.setFont(font);
+        panel.add(highestTileInCornerDescription);
+
+        highestTileInCorner = new JLabel("");
+        highestTileInCorner.setFont(font);
+        panel.add(highestTileInCorner);
+
+        Label highestTileValueDescription = new Label("highest Tile Value:");
+        highestTileValueDescription.setFont(font);
+        panel.add(highestTileValueDescription);
+
+        highestTileValue = new JLabel("");
+        highestTileValue.setFont(font);
+        panel.add(highestTileValue);
+
+        Label emptyTilesDescription = new Label("empty Tiles:");
+        emptyTilesDescription.setFont(font);
+        panel.add(emptyTilesDescription);
+
+        emptyTiles = new JLabel("");
+        emptyTiles.setFont(font);
+        panel.add(emptyTiles);
         return panel;
     }
+
+
 
     private void updateBoardLabel(int row, int column) {
         int value = 0;
         if(m_so != null) {
-            if (m_so.getPosition(row, column).getTile() != null) {
-                value = m_so.getPosition(row, column).getTile().getValue();
-            }
+            value = m_so.getTile(row, column).getValue();
         }
 
         switch (value) {
@@ -261,15 +307,15 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                 board[row][column].setBackground(Color.decode("#edc22e"));
                 break;
             case 4096:
-                board[row][column].setText("<html><br><font color='#3c3a32'>.</font>" + value + "<font color='#3c3a32'>..</font><br><br></html>");
+                board[row][column].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>..</font><br><br></html>");
                 board[row][column].setBackground(Color.decode("#3c3a32"));
                 break;
             case 8192:
-                board[row][column].setText("<html><br><font color='#3c3a32'>.</font>" + value + "<font color='#3c3a32'>..</font><br><br></html>");
+                board[row][column].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>..</font><br><br></html>");
                 board[row][column].setBackground(Color.decode("#3c3a32"));
                 break;
             default:
-                board[row][column].setText("<html><br><font color='#3c3a32'>.</font>" + value + "<font color='#3c3a32'>.</font><br><br></html>");
+                board[row][column].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>.</font><br><br></html>");
                 board[row][column].setBackground(Color.decode("#3c3a32"));
                 break;
         }
@@ -287,6 +333,10 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             scoreLabel.setText("");
             leftInfo.setText("");
             rightInfo.setText("");
+            realScore.setText("");
+            highestTileInCorner.setText("");
+            highestTileValue.setText("");
+            emptyTiles.setText("");
         }
         if(vClear) {
             vTable = new double[4];
@@ -335,7 +385,6 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     }
 
     private void guiUpdateBoard() {
-        //ToDO: da Zellen keine Buttons sind bin ich mir nicht sicher wofür ich die Variable enable benutzen soll/kann
         for(int i = 0; i < 4; i++) {
             if(m_so.availableMoves.contains(i)) {
                 buttons[i].setEnabled(true);
@@ -410,7 +459,11 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         vBoard[imax].setBackground(Color.yellow);
 
         scoreLabel.setText("" + m_so.getScore());
-        leftInfo.setText("m_so.highestTileInCorner = " + m_so.highestTileInCorner);
+
+        realScore.setText("" + Math.round(m_so.getGameScore()*m_so.MAXSCORE));
+        highestTileInCorner.setText("" + m_so.highestTileInCorner);
+        emptyTiles.setText("" + m_so.emptyTiles.size());
+        highestTileValue.setText("" + m_so.highestTileValue);
 
 
 
@@ -426,7 +479,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         if (ztavGame.m_TicFrame!=null) {
             x = ztavGame.m_TicFrame.getX();
             y = ztavGame.m_TicFrame.getY() + ztavGame.m_TicFrame.getHeight() +1;
-            this.setSize(850,550);
+            this.setSize(1300,550);
         }
         this.setLocation(x,y);
     }
@@ -488,7 +541,6 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     private void InspectMove(int move)
     {
-        //ToDO: not sure
         Types.ACTIONS act = Types.ACTIONS.fromInt(move);
         assert m_so.isLegalAction(act) : "Desired action is not legal";
         m_so.advance(act);
