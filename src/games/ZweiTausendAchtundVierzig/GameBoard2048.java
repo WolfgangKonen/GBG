@@ -52,10 +52,13 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     /**
      * Informations about Scoremodifiers and the hidden gamescore
      */
-    protected JLabel realScore;
-    protected JLabel highestTileInCorner;
-    protected JLabel highestTileValue;
-    protected JLabel emptyTiles;
+    private JLabel realScore;
+    private JLabel highestTileInCorner;
+    private JLabel highestTileValue;
+    private JLabel emptyTiles;
+    private JLabel rowLength;
+    private JLabel rowValue;
+    private JLabel mergeValue;
 
 
 
@@ -86,11 +89,16 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         JPanel boardPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         boardPanel.add(this.boardPanel);
         boardPanel.add(new Label("    "));		// some space
+
+
+        JPanel rightPanelLeft = new JPanel();
+        rightPanelLeft.setLayout(new GridLayout(2,1,30,30));
+        rightPanelLeft.add(buttonPanel);
+        rightPanelLeft.add(vButtonPanel);
         JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new GridLayout(2,2,30,30));
-        rightPanel.add(buttonPanel);
+        rightPanel.setLayout(new GridLayout(1,2,30,30));
+        rightPanel.add(rightPanelLeft);
         rightPanel.add(gameInfo);
-        rightPanel.add(vButtonPanel);
         boardPanel.add(rightPanel);
 
         JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -205,7 +213,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     private JPanel initGameInfo() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(5,2,10,0));
+        panel.setLayout(new GridLayout(8,2,10,0));
         Font font = new Font("Arial",1,16);
 
         Label ScoreDescription = new Label("Score:");
@@ -246,6 +254,31 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         emptyTiles = new JLabel("");
         emptyTiles.setFont(font);
         panel.add(emptyTiles);
+
+        Label rowLengthDescription = new Label("row Length:");
+        rowLengthDescription.setFont(font);
+        panel.add(rowLengthDescription);
+
+        rowLength = new JLabel("");
+        rowLength.setFont(font);
+        panel.add(rowLength);
+
+        Label rowValueDescription = new Label("row Value:");
+        rowValueDescription.setFont(font);
+        panel.add(rowValueDescription);
+
+        rowValue = new JLabel("");
+        rowValue.setFont(font);
+        panel.add(rowValue);
+
+        Label mergeValueDescription = new Label("merge Value:");
+        mergeValueDescription.setFont(font);
+        panel.add(mergeValueDescription);
+
+        mergeValue = new JLabel("");
+        mergeValue.setFont(font);
+        panel.add(mergeValue);
+
         return panel;
     }
 
@@ -461,9 +494,13 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         scoreLabel.setText("" + m_so.getScore());
 
         realScore.setText("" + Math.round(m_so.getGameScore()*m_so.MAXSCORE));
+        rowValue.setText("" + (m_so.rowValue));
+        mergeValue.setText("" + (m_so.mergeValue));
         highestTileInCorner.setText("" + m_so.highestTileInCorner);
         emptyTiles.setText("" + m_so.emptyTiles.size());
         highestTileValue.setText("" + m_so.highestTileValue);
+        rowLength.setText("" + (m_so.rowLength));
+
 
 
 

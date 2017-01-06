@@ -118,10 +118,10 @@ public class StateObserver2048_parallel implements StateObservation{
 
 
                     if(highestTileInCorner) {
-                        newScore *= Config.HIGHESTTILEINCORENERVALUE;
+                        newScore *= Config.HIGHESTTILEINCORENERMULTIPLIER;
                     }
 
-                    newScore *= Math.pow(Config.EMPTYTILEVALUE, emptyTiles.size());
+                    newScore *= Math.pow(Config.EMPTYTILEMULTIPLIER, emptyTiles.size());
                     return newScore;
             }
         }

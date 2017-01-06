@@ -1,11 +1,9 @@
 package controllers.MC;
 
 
-import java.util.List;
 import java.util.Random;
 
 import games.StateObservation;
-import tools.Types;
 
 /**
  * Created by Johannes on 07.11.2016.

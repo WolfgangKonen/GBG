@@ -4,10 +4,8 @@ import games.StateObservation;
 import tools.Types;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.*;
 
 /**
  * Created by Johannes on 18.11.2016.
@@ -24,6 +22,9 @@ public class StateObserver2048 implements StateObservation{
     public int score;
     public int highestTileValue = Integer.MIN_VALUE;
     public boolean highestTileInCorner = false;
+    public int rowLength = 0;
+    public int rowValue = 0;
+    public int mergeValue = 0;
     public int moves = 0;
 
     public Types.ACTIONS[] storedActions = null;
@@ -102,27 +103,202 @@ public class StateObserver2048 implements StateObservation{
             return penalisation;
         }
         else {
+            double realScore = score;
 
-            highestTileInCorner = false;
-            if(gameBoard[0][0].getValue() == highestTileValue || gameBoard[Config.ROWS-1][0].getValue() == highestTileValue || gameBoard[0][Config.COLUMNS-1].getValue() == highestTileValue || gameBoard[Config.ROWS-1][Config.COLUMNS-1].getValue() == highestTileValue) {
-                highestTileInCorner = true;
+
+            //Row Heuristik
+            evaluateBoard();
+            realScore += rowValue * Config.ROWMULTIPLIER;
+
+            //Highest Tile In Corner Heuristik
+            if(highestTileInCorner) {
+                //realScore *= Config.HIGHESTTILEINCORENERMULTIPLIER+1;
+                realScore += highestTileValue * Config.HIGHESTTILEINCORENERMULTIPLIER;
             }
 
-            switch (score) {
-                case 0:
-                    return 0;
-                default:
-                    double newScore = score/MAXSCORE;
+            //Empty Tiles Heuristik
+            //realScore *= Math.pow(Config.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
+            //realScore += highestTileValue*emptyTiles.size()*(Config.EMPTYTILEMULTIPLIER);
+            realScore += score*emptyTiles.size()*Config.EMPTYTILEMULTIPLIER;
+
+            //Merge Heuristik
+            realScore += mergeValue*Config.MERGEMULTIPLIER;
 
 
-                    if(highestTileInCorner) {
-                        newScore *= Config.HIGHESTTILEINCORENERVALUE;
-                    }
 
-                    newScore *= Math.pow(Config.EMPTYTILEVALUE, emptyTiles.size());
-                    return newScore;
+            if(realScore == 0) {
+                return 0;
+            } else {
+                realScore /= MAXSCORE;
+                return realScore;
             }
         }
+    }
+
+    private void evaluateBoard() {
+        RowInformationContainer rowInformationContainer;
+        highestTileInCorner = false;
+        rowValue = 0;
+        rowLength = 0;
+        mergeValue = 0;
+
+        if (gameBoard[0][0].getValue() == highestTileValue) {
+            highestTileInCorner = true;
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+        }
+
+        if (gameBoard[Config.ROWS - 1][0].getValue() == highestTileValue) {
+            highestTileInCorner = true;
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+        }
+
+        if (gameBoard[0][Config.COLUMNS - 1].getValue() == highestTileValue) {
+            highestTileInCorner = true;
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+        }
+
+        if (gameBoard[Config.ROWS - 1][Config.COLUMNS - 1].getValue() == highestTileValue) {
+            highestTileInCorner = true;
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+        }
+
+        for(int row = 0; row < Config.ROWS-1; row++) {
+            for (int column = 0; column < Config.COLUMNS; column++) {
+                int currentValue = gameBoard[row][column].getValue();
+                if(currentValue != 0) {
+                    for (int position = row+1; position < Config.ROWS; position++) {
+                        int newValue = gameBoard[position][column].getValue();
+                        if(newValue != 0) {
+                            if (currentValue == newValue) {
+                                mergeValue += currentValue;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int row = 0; row < Config.ROWS; row++) {
+            for (int column = 0; column < Config.COLUMNS-1; column++) {
+                int currentValue = gameBoard[row][column].getValue();
+                if(currentValue != 0) {
+                    for (int position = column+1; position < Config.COLUMNS; position++) {
+                        int newValue = gameBoard[row][position].getValue();
+                        if(newValue != 0) {
+                            if (currentValue == newValue) {
+                                mergeValue += currentValue;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private RowInformationContainer evaluateRow(int currentTileValue, int currentRowLength, int currentRowValue, int position, int offset, int direction) {
+        switch (direction) {
+            case 0:
+                //left
+                for (int i = Config.COLUMNS-1-offset; i >= 0; i--) {
+                    if (gameBoard[position][i].getValue() != 0 && gameBoard[position][i].getValue() < currentTileValue /*gameBoard[position][i].getValue() == currentTileValue/2*/) {
+                        currentRowLength++;
+                        currentTileValue = gameBoard[position][i].getValue();
+                        currentRowValue += currentTileValue;
+                    } else {
+                        return new RowInformationContainer(currentRowLength, currentRowValue);
+                    }
+                }
+
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position+1, 0, 2);
+
+            case 1:
+                //up
+                for (int i = Config.ROWS-1-offset; i >= 0; i--) {
+                    if (gameBoard[i][position].getValue() != 0 && gameBoard[i][position].getValue() < currentTileValue /*gameBoard[i][position].getValue() == currentTileValue/2*/) {
+                        currentRowLength++;
+                        currentTileValue = gameBoard[i][position].getValue();
+                        currentRowValue += currentTileValue;
+                    } else {
+                        return new RowInformationContainer(currentRowLength, currentRowValue);
+                    }
+                }
+
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position+1, 0, 3);
+
+            case 2:
+                //right
+                for (int i = 0+offset; i < Config.COLUMNS; i++) {
+                    if (gameBoard[position][i].getValue() != 0 && gameBoard[position][i].getValue() < currentTileValue /*gameBoard[position][i].getValue() == currentTileValue/2*/) {
+                        currentRowLength++;
+                        currentTileValue = gameBoard[position][i].getValue();
+                        currentRowValue += currentTileValue;
+                    } else {
+                        return new RowInformationContainer(currentRowLength, currentRowValue);
+                    }
+                }
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position+1, 0, 0);
+
+            case 3:
+                //down
+                for (int i = 0+offset; i < Config.ROWS; i++) {
+                    if (gameBoard[i][position].getValue() != 0 && gameBoard[i][position].getValue() < currentTileValue /*gameBoard[i][position].getValue() == currentTileValue/2*/) {
+                        currentRowLength++;
+                        currentTileValue = gameBoard[i][position].getValue();
+                        currentRowValue += currentTileValue;
+                    } else {
+                        return new RowInformationContainer(currentRowLength, currentRowValue);
+                    }
+                }
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position+1, 0, 1);
+        }
+
+        return null;
     }
 
     @Override
@@ -561,5 +737,15 @@ public class StateObserver2048 implements StateObservation{
         }
 
         updateAvailableMoves();
+    }
+}
+
+class RowInformationContainer {
+    int rowLength;
+    int rowValue;
+
+    public RowInformationContainer(int rowLength, int rowValue) {
+        this.rowLength = rowLength;
+        this.rowValue = rowValue;
     }
 }

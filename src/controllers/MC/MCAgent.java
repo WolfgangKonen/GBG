@@ -3,6 +3,7 @@ package controllers.MC;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
+
 import tools.Types;
 import java.util.List;
 import java.util.Random;
@@ -28,6 +29,10 @@ public class MCAgent extends AgentBase implements PlayAgent {
         nextMoveScore = Double.NEGATIVE_INFINITY;
 
         actions = sob.getAvailableActions();
+
+        if(sob.getNumAvailableActions() == 1) {
+            return actions.get(0);
+        }
 
         for(int i = 0; i < sob.getNumAvailableActions(); i++) {
             double averageScore = 0;

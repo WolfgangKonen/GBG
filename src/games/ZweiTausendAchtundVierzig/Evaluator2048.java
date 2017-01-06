@@ -4,8 +4,7 @@ import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Johannes on 02.12.2016.
@@ -14,7 +13,7 @@ public class Evaluator2048 extends Evaluator {
     private double averageScore;
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = 0;
-    private Map<Integer, Integer> tiles = new HashMap<Integer, Integer>();
+    private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
     private long startTime;
     private long stopTime;
@@ -74,6 +73,7 @@ public class Evaluator2048 extends Evaluator {
     @Override
     public String getMsg() {
         String tilesString = "";
+
         for (Map.Entry tile : tiles.entrySet()) {
             tilesString += "\n" + tile.getKey() + ", " + tile.getValue();
         }
@@ -84,8 +84,9 @@ public class Evaluator2048 extends Evaluator {
         return "\n\nSettings:" +
                 "\nPenalisation: " + Config.PENALISATION +
                 "\nAddscore: " + Config.ADDSCORE +
-                "\nEmptitiles multiplier: " + Config.EMPTYTILEVALUE +
-                "\nHighesttileincorner multiplier: " + Config.HIGHESTTILEINCORENERVALUE +
+                "\nEmptitiles multiplier: " + Config.EMPTYTILEMULTIPLIER +
+                "\nHighesttileincorner multiplier: " + Config.HIGHESTTILEINCORENERMULTIPLIER +
+                "\nRow multiplier: " + Config.ROWMULTIPLIER +
                 "\nNumber of games: " + Config.NUMBEREVALUATIONS +
                 "\n" +
                 "\nResults:" +
@@ -95,6 +96,7 @@ public class Evaluator2048 extends Evaluator {
                 "\nAverage game duration: " +  Math.round((stopTime - startTime)/Config.NUMBEREVALUATIONS) + "ms" +
                 "\nDuration of evaluation: " + duration + "s" +
                 "\nMoves per second: " + Math.round(moves/duration) +
+                "\n" +
                 "\nHighest tiles: " +
                 tilesString +
                 "\n\n";
