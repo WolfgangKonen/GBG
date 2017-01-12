@@ -95,6 +95,22 @@ public class StateObserver2048 implements StateObservation{
 
     @Override
     public double getGameScore() {
+        if(Config.ENABLEHEURISTICS) {
+            return getGameScore2();
+        } else {
+            return getGameScore1();
+        }
+    }
+
+    public double getGameScore1() {
+        if(score == 0) {
+            return 0;
+        } else {
+            return score / MAXSCORE;
+        }
+    }
+
+    public double getGameScore2() {
         if (isGameOver()) {
             double penalisation = Config.PENALISATION;
 
@@ -106,30 +122,26 @@ public class StateObserver2048 implements StateObservation{
         else {
             double realScore = score;
 
-            if(Config.ENABLEHEURISTICS) {
+            //Row Heuristik
+            evaluateBoard();
+            realScore += rowValue * Config.ROWMULTIPLIER;
 
-                //Row Heuristik
-                evaluateBoard();
-                realScore += rowValue * Config.ROWMULTIPLIER;
-
-                //Highest Tile In Corner Heuristik
-                if (highestTileInCorner) {
-                    //realScore *= Config.HIGHESTTILEINCORENERMULTIPLIER+1;
-                    realScore += highestTileValue * Config.HIGHESTTILEINCORENERMULTIPLIER;
-                }
-
-                //Empty Tiles Heuristik
-                //realScore *= Math.pow(Config.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
-                //realScore += highestTileValue*emptyTiles.size()*(Config.EMPTYTILEMULTIPLIER);
-                realScore += score * emptyTiles.size() * Config.EMPTYTILEMULTIPLIER;
-
-                //Merge Heuristik
-                realScore += mergeValue * Config.MERGEMULTIPLIER;
+            //Highest Tile In Corner Heuristik
+            if (highestTileInCorner) {
+                //realScore *= Config.HIGHESTTILEINCORENERMULTIPLIER+1;
+                realScore += highestTileValue * Config.HIGHESTTILEINCORENERMULTIPLIER;
             }
 
+            //Empty Tiles Heuristik
+            //realScore *= Math.pow(Config.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
+            //realScore += highestTileValue*emptyTiles.size()*(Config.EMPTYTILEMULTIPLIER);
+            realScore += score * emptyTiles.size() * Config.EMPTYTILEMULTIPLIER;
+
+            //Merge Heuristik
+            realScore += mergeValue * Config.MERGEMULTIPLIER;
 
 
-            if(realScore == 0) {
+            if (realScore == 0) {
                 return 0;
             } else {
                 realScore /= MAXSCORE;
