@@ -25,6 +25,10 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
+        return getNextActionAverage(sob, vtable);
+    }
+
+    public Types.ACTIONS getNextActionAverage (StateObservation sob, double[] vtable) {
         nextAction = null;
         nextMoveScore = Double.NEGATIVE_INFINITY;
 
@@ -44,6 +48,8 @@ public class MCAgent extends AgentBase implements PlayAgent {
                 agent.startAgent(newSob);
 
                 averageScore += newSob.getGameScore();
+
+
             }
             averageScore /= Config.ITERATIONS;
             vtable[i] = averageScore;
@@ -51,6 +57,33 @@ public class MCAgent extends AgentBase implements PlayAgent {
             if (nextMoveScore <= averageScore) {
                 nextAction = actions.get(i);
                 nextMoveScore = averageScore;
+            }
+        }
+
+        return nextAction;
+    }
+
+    public Types.ACTIONS getNextActionMax (StateObservation sob, double[] vtable) {
+        nextAction = null;
+        nextMoveScore = Double.NEGATIVE_INFINITY;
+        actions = sob.getAvailableActions();
+
+        if(sob.getNumAvailableActions() == 1) {
+            return actions.get(0);
+        }
+
+        for(int i = 0; i < sob.getNumAvailableActions(); i++) {
+            for (int j = 0; j < Config.ITERATIONS; j++) {
+                StateObservation newSob = sob.copy();
+
+                newSob.advance(actions.get(i));
+                RandomSearch agent = new RandomSearch();
+                agent.startAgent(newSob);
+
+                if(newSob.getGameScore() > vtable[i]) {
+                    nextAction = actions.get(i);
+                    vtable[i] = newSob.getGameScore();
+                }
             }
         }
 

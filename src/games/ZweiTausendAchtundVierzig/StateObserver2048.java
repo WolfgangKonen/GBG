@@ -4,6 +4,7 @@ import games.StateObservation;
 import tools.Types;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -105,24 +106,26 @@ public class StateObserver2048 implements StateObservation{
         else {
             double realScore = score;
 
+            if(Config.ENABLEHEURISTICS) {
 
-            //Row Heuristik
-            evaluateBoard();
-            realScore += rowValue * Config.ROWMULTIPLIER;
+                //Row Heuristik
+                evaluateBoard();
+                realScore += rowValue * Config.ROWMULTIPLIER;
 
-            //Highest Tile In Corner Heuristik
-            if(highestTileInCorner) {
-                //realScore *= Config.HIGHESTTILEINCORENERMULTIPLIER+1;
-                realScore += highestTileValue * Config.HIGHESTTILEINCORENERMULTIPLIER;
+                //Highest Tile In Corner Heuristik
+                if (highestTileInCorner) {
+                    //realScore *= Config.HIGHESTTILEINCORENERMULTIPLIER+1;
+                    realScore += highestTileValue * Config.HIGHESTTILEINCORENERMULTIPLIER;
+                }
+
+                //Empty Tiles Heuristik
+                //realScore *= Math.pow(Config.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
+                //realScore += highestTileValue*emptyTiles.size()*(Config.EMPTYTILEMULTIPLIER);
+                realScore += score * emptyTiles.size() * Config.EMPTYTILEMULTIPLIER;
+
+                //Merge Heuristik
+                realScore += mergeValue * Config.MERGEMULTIPLIER;
             }
-
-            //Empty Tiles Heuristik
-            //realScore *= Math.pow(Config.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
-            //realScore += highestTileValue*emptyTiles.size()*(Config.EMPTYTILEMULTIPLIER);
-            realScore += score*emptyTiles.size()*Config.EMPTYTILEMULTIPLIER;
-
-            //Merge Heuristik
-            realScore += mergeValue*Config.MERGEMULTIPLIER;
 
 
 
