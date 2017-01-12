@@ -4,6 +4,7 @@ import games.StateObservation;
 import tools.Types;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -94,12 +95,21 @@ public class StateObserver2048 implements StateObservation{
 
     @Override
     public double getGameScore() {
-    	return getGameScore1();
-    	//return getGameScore2();
+        if(Config.ENABLEHEURISTICS) {
+            return getGameScore2();
+        } else {
+            return getGameScore1();
+        }
     }
+
     public double getGameScore1() {
-    	return score / MAXSCORE;
+        if(score == 0) {
+            return 0;
+        } else {
+            return score / MAXSCORE;
+        }
     }
+
     public double getGameScore2() {
         if (isGameOver()) {
             double penalisation = Config.PENALISATION;
@@ -112,13 +122,12 @@ public class StateObserver2048 implements StateObservation{
         else {
             double realScore = score;
 
-
             //Row Heuristik
             evaluateBoard();
             realScore += rowValue * Config.ROWMULTIPLIER;
 
             //Highest Tile In Corner Heuristik
-            if(highestTileInCorner) {
+            if (highestTileInCorner) {
                 //realScore *= Config.HIGHESTTILEINCORENERMULTIPLIER+1;
                 realScore += highestTileValue * Config.HIGHESTTILEINCORENERMULTIPLIER;
             }
@@ -126,14 +135,13 @@ public class StateObserver2048 implements StateObservation{
             //Empty Tiles Heuristik
             //realScore *= Math.pow(Config.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
             //realScore += highestTileValue*emptyTiles.size()*(Config.EMPTYTILEMULTIPLIER);
-            realScore += score*emptyTiles.size()*Config.EMPTYTILEMULTIPLIER;
+            realScore += score * emptyTiles.size() * Config.EMPTYTILEMULTIPLIER;
 
             //Merge Heuristik
-            realScore += mergeValue*Config.MERGEMULTIPLIER;
+            realScore += mergeValue * Config.MERGEMULTIPLIER;
 
 
-
-            if(realScore == 0) {
+            if (realScore == 0) {
                 return 0;
             } else {
                 realScore /= MAXSCORE;

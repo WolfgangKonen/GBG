@@ -10,6 +10,7 @@ notes-reinforce.docx.lnk
 TR_GBG.lnk
 *.idea
 *.iml
+*.settings
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

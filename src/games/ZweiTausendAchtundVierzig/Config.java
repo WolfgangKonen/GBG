@@ -11,18 +11,19 @@ public class Config {
 
     public static final int STARTINGVALUES[] = {2,2,2,2,2,2,2,2,2,4};
 
-    public static final int NUMBEREVALUATIONS = 100;
+    public static final int NUMBEREVALUATIONS = 20;
 
     //Heuristik Values
-    public static final double EMPTYTILEMULTIPLIER = 0.005;
-    public static final double HIGHESTTILEINCORENERMULTIPLIER = 1;
-    public static final double ROWMULTIPLIER = 1;
+    public static final boolean ENABLEHEURISTICS = false;
+    public static final double EMPTYTILEMULTIPLIER = 0.1;
+    public static final double HIGHESTTILEINCORENERMULTIPLIER = 0.7;
+    public static final double ROWMULTIPLIER = 0.7;
     public static final double MERGEMULTIPLIER = 0.2;
 
     //Bestrafung
     //Value from -1 to 0
-    public static final double PENALISATION = 0;
+    public static final double PENALISATION = -1;
     //Gibt an ob die unveränderte Gamescore zu der Bestrafung hinzuaddiert werden soll. Heuristiken werden bei dieser Socre nich berücksichtigt!
-    public static final boolean ADDSCORE = false;
+    public static final boolean ADDSCORE = true;
 
 }

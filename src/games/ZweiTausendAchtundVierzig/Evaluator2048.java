@@ -12,11 +12,14 @@ import java.util.*;
 public class Evaluator2048 extends Evaluator {
     private double averageScore;
     private int minScore = Integer.MAX_VALUE;
-    private int maxScore = 0;
+    private int maxScore = Integer.MIN_VALUE;
+    private int[] score = new int[Config.NUMBEREVALUATIONS];
+    private int medianScore;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
     private long startTime;
     private long stopTime;
+
 
     public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
@@ -44,6 +47,8 @@ public class Evaluator2048 extends Evaluator {
                 tiles.put(so.highestTileValue, value + 1);
             }
 
+            score[i] = so.score;
+
             averageScore += so.score;
             if(so.score < minScore) {
                 minScore = so.score;
@@ -57,6 +62,16 @@ public class Evaluator2048 extends Evaluator {
             System.out.print("Finished game " + (i+1) + " with score " + so.score + " after " + (System.currentTimeMillis()-gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
         }
         averageScore/=Config.NUMBEREVALUATIONS;
+
+        Arrays.sort(score);
+
+        if(Config.NUMBEREVALUATIONS %2 == 0) {
+            medianScore+=score[Config.NUMBEREVALUATIONS/2];
+            medianScore+=score[(Config.NUMBEREVALUATIONS/2)-1];
+            medianScore/=2;
+        } else {
+            medianScore=score[(Config.NUMBEREVALUATIONS-1)/2];
+        }
 
         stopTime = System.currentTimeMillis();
 
@@ -82,6 +97,8 @@ public class Evaluator2048 extends Evaluator {
 
 
         return "\n\nSettings:" +
+                "\n MC-Agent Depth:" + controllers.MC.Config.DEPTH +
+                "\n MC-Agent Iterationen:" + controllers.MC.Config.ITERATIONS +
                 "\nPenalisation: " + Config.PENALISATION +
                 "\nAddscore: " + Config.ADDSCORE +
                 "\nEmptitiles multiplier: " + Config.EMPTYTILEMULTIPLIER +
@@ -90,8 +107,9 @@ public class Evaluator2048 extends Evaluator {
                 "\nNumber of games: " + Config.NUMBEREVALUATIONS +
                 "\n" +
                 "\nResults:" +
-                "\nAverage score is: " + Math.round(averageScore) +
                 "\nLowest score is: " + minScore +
+                "\nAverage score is: " + Math.round(averageScore) +
+                "\nMedian score is: " + Math.round(medianScore) +
                 "\nHighest score is: " + maxScore +
                 "\nAverage game duration: " +  Math.round((stopTime - startTime)/Config.NUMBEREVALUATIONS) + "ms" +
                 "\nDuration of evaluation: " + duration + "s" +
