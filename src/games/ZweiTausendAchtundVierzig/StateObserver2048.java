@@ -94,6 +94,13 @@ public class StateObserver2048 implements StateObservation{
 
     @Override
     public double getGameScore() {
+    	return getGameScore1();
+    	//return getGameScore2();
+    }
+    public double getGameScore1() {
+    	return score / MAXSCORE;
+    }
+    public double getGameScore2() {
         if (isGameOver()) {
             double penalisation = Config.PENALISATION;
 
