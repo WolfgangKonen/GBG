@@ -415,6 +415,10 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             }
         }
         guiUpdateBoard();
+        if (showStoredV) {
+        	// just a statement to optionally stop in debugger after guiUpdateBoard:
+        	int dummy=1;
+        }
     }
 
     private void guiUpdateBoard() {

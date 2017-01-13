@@ -249,13 +249,14 @@ abstract public class Arena extends JPanel implements Runnable {
 	}
 	
 	/**
-	 * Play a game (the agents selected in the combo boxes). One or  
-	 * multiple of them may be "Human".
+	 * Play a game (using the agents selected in the combo boxes).  
+	 * One or multiple of them may be "Human".
 	 * For 2-player games it is a game "X vs. O".
  	 */
 	public void PlayGame()
 	{
 		int Player,player;
+		boolean showStoredV=true; 
 		StateObservation so;
 		Types.ACTIONS actBest;
 		PlayAgent pa;
@@ -328,6 +329,11 @@ abstract public class Arena extends JPanel implements Runnable {
                         vtable = new double[so.getNumAvailableActions() + 1];
                         actBest = pa.getNextAction(so, false, vtable, true);
                         so.storeBestActionInfo(actBest, vtable);
+                        if (so.getNumPlayers()==1) {
+                        	// show state and stored vtable *before* advance
+                            gb.updateBoard(so,true,false);
+                            showStoredV=false; // this is for 2nd updateBoard below
+                        }
                         so.advance(actBest);
                         try {
                             Thread.sleep(200);
@@ -335,7 +341,7 @@ abstract public class Arena extends JPanel implements Runnable {
                         } catch (Exception e) {
                             System.out.println("Thread 1");
                         }
-                        gb.updateBoard(so,true,false);
+                        gb.updateBoard(so,showStoredV,false);
 				}
 
 
@@ -384,7 +390,7 @@ abstract public class Arena extends JPanel implements Runnable {
 					break;  // out of switch
 				}
 				
-				break;			// this is the final bread out of while loop 	
+				break;			// this is the final break out of while loop 	
 			} // if isGameOver
 			
 		}	// while(true) [will be left only by the last break above]
