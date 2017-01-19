@@ -32,6 +32,15 @@ import controllers.MinimaxAgent;
  * {@link #check_state(String, String)}, {@link #diversityCheck(String)}, 
  * {@link #diversityCheck(String, int[])},
  * <li> the HashMaps {@link #hmC} and {@link #hmX} to perform these diagnostics.
+ * </ul> 
+ * <p>
+ * Class {@link TicTDBase} can be trained with different feature sets:
+ * <ul>
+ * <li>0: Levkovich's features
+ * <li>1,2: thin, thick feature set (6 or 10 features)
+ * <li>3: thick feature set + board position (19 features)
+ * <li>4: extended = thick + extra features (13 features)
+ * <li>9: raw = only board position (9 features)
  * </ul> <p>
  * Class {@link TicTDBase} is an abstract class because it does not implement 
  * {@link AgentBase#getScore(games.StateObservation)}. This is left for the derived 
