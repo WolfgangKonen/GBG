@@ -19,6 +19,7 @@ import tools.Progress;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
+import controllers.MCTS.MCTSAgentT;
 import games.Arena.Task;
 import games.TicTacToe.LaunchTrainTTT;
 import tools.MessageBox;
@@ -258,8 +259,9 @@ abstract public class Arena extends JPanel implements Runnable {
 		int Player,player;
 		boolean showStoredV=true; 
 		StateObservation so;
-		Types.ACTIONS actBest;
+		Types.ACTIONS actBest=null;
 		PlayAgent pa;
+		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mcPar);
 		double[] vtable = null;
 		PlayAgent[] paVector;
 
@@ -327,7 +329,41 @@ abstract public class Arena extends JPanel implements Runnable {
 					}
 					else {
                         vtable = new double[so.getNumAvailableActions() + 1];
-                        actBest = pa.getNextAction(so, false, vtable, true);
+                        boolean DEBG=true;
+                        double MAXSCORE = 3932156;
+                        if (DEBG) {
+                        	for (int k=0; k<2; k++) {
+                                actBest = p2.getNextAction(so, false, vtable, true);
+                                System.out.print("p2 ["+p2.getName()+"]: ");
+                                double vbest = -Double.MAX_VALUE;
+                                int ibest = -1;
+                                for (int i=0;i<so.getNumAvailableActions();i++) {
+                                	System.out.print(String.format("%.3f",vtable[i]*MAXSCORE)+" ");
+                                	if (vtable[i]>vbest) {
+                                		vbest=vtable[i];
+                                		ibest=i;
+                                	}
+                                }
+                                System.out.println(";  Best = "+ibest);                        		
+                        	}
+                        	for (int k=0; k<2; k++) {
+                                actBest = pa.getNextAction(so, false, vtable, true);
+                                System.out.print("pa ["+pa.getName()+"]: "); 
+                                double vbest = -Double.MAX_VALUE;
+                                int ibest = -1;
+                                for (int i=0;i<so.getNumAvailableActions();i++) {
+                                	System.out.print(String.format("%.3f",vtable[i]*MAXSCORE)+" ");
+                                	if (vtable[i]>vbest) {
+                                		vbest=vtable[i];
+                                		ibest=i;
+                                	}
+                                }
+                                System.out.println(";  Best = "+ibest);                        		
+                        	}
+                        } else {
+                            actBest = pa.getNextAction(so, false, vtable, true);
+                        }
+                        
                         so.storeBestActionInfo(actBest, vtable);
                         if (so.getNumPlayers()==1) {
                         	// show state and stored vtable *before* advance
