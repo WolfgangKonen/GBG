@@ -42,6 +42,7 @@ public class SingleMCTSPlayer implements Serializable
     public int NUM_ITERS = DEFAULT_NUM_ITERS;
 	public double K = DEFAULT_K;
 	public int verbose = DEFAULT_VERBOSITY; 
+    int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 	
 	/**
 	 * Member {@link #m_mcPar} is only needed for saving and loading the agent
@@ -117,6 +118,8 @@ public class SingleMCTSPlayer implements Serializable
      */
     public int run(ElapsedCpuTimer elapsedTimer, double[] vtable)
     {
+    	this.nRolloutFinished=0;
+    	
         //Do the search within the available time.
         m_root.mctsSearch(elapsedTimer, vtable);
 
@@ -167,4 +170,8 @@ public class SingleMCTSPlayer implements Serializable
 	public MCTSParams getMCTSParams() {
 		return m_mcPar;
 	}
+
+    public int getNRolloutFinished() {
+        return nRolloutFinished;
+    }
 }

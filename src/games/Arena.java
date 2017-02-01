@@ -19,8 +19,11 @@ import tools.Progress;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
+import controllers.MC.MCAgent;
+import controllers.MCTS.MCTSAgentT;
 import games.Arena.Task;
 import games.TicTacToe.LaunchTrainTTT;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.MessageBox;
 import tools.StatusBar;
 import tools.Types;
@@ -258,8 +261,9 @@ abstract public class Arena extends JPanel implements Runnable {
 		int Player,player;
 		boolean showStoredV=true; 
 		StateObservation so;
-		Types.ACTIONS actBest;
+		Types.ACTIONS actBest=null;
 		PlayAgent pa;
+		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mcPar);
 		double[] vtable = null;
 		PlayAgent[] paVector;
 
@@ -327,7 +331,14 @@ abstract public class Arena extends JPanel implements Runnable {
 					}
 					else {
                         vtable = new double[so.getNumAvailableActions() + 1];
-                        actBest = pa.getNextAction(so, false, vtable, true);
+                        boolean DEBG=false; //false;true;
+                        int nEmpty = ((StateObserver2048) so).getNumEmptyTiles();
+                        if (DEBG && (nEmpty<4)) {
+                        	actBest = getNextAction_DEBG(so,pa,p2,vtable);
+                        } else {	
+                            actBest = pa.getNextAction(so, false, vtable, true);
+                        }
+                        
                         so.storeBestActionInfo(actBest, vtable);
                         if (so.getNumPlayers()==1) {
                         	// show state and stored vtable *before* advance
@@ -336,7 +347,7 @@ abstract public class Arena extends JPanel implements Runnable {
                         }
                         so.advance(actBest);
                         try {
-                            Thread.sleep(200);
+                            Thread.sleep(0); //(200);
                             // waiting time between agent-agent actions
                         } catch (Exception e) {
                             System.out.println("Thread 1");
@@ -397,6 +408,62 @@ abstract public class Arena extends JPanel implements Runnable {
 		taskState = Task.IDLE;		
 		setStatusMessage("Done.");
 	}
+
+	/**
+	 * For debugging during {@link #PlayGame()}: This function is only called if switch
+	 * DEBG in source code of {@link #PlayGame()} is set to true and if the number of empty 
+	 * tiles is below a threshold. - It calls MCTSAgentT p2.getNextAction() repeatedly and prints the vtable
+	 * results on console. It calls PlayAgent pa (usually MCAgent) repeatedly as well. 
+	 * In addition, it prints the best i and the number of rollouts (iterations) in which the 
+	 * game terminates.
+	 * 
+	 * @param so
+	 * @param pa
+	 * @param p2
+	 * @param vtable
+	 * @return the chosen action from the last call of pa.getNextAction()
+	 */
+	Types.ACTIONS  getNextAction_DEBG(StateObservation so, PlayAgent pa, MCTSAgentT p2, double[] vtable) {
+		Types.ACTIONS actBest=null;
+        double MAXSCORE = 3932156;
+    	for (int k=0; k<3; k++) {
+            actBest = p2.getNextAction(so, false, vtable, true);
+            System.out.print("p2 ["+p2.getName()+"]: ");
+            double vbest = -Double.MAX_VALUE;
+            int ibest = -1;
+            for (int i=0;i<so.getNumAvailableActions();i++) {
+            	System.out.print(String.format("%.3f",vtable[i]*MAXSCORE)+" ");
+            	if (vtable[i]>vbest) {
+            		vbest=vtable[i];
+            		ibest=i;
+            	}
+            }
+        	int nRolloutFinished = p2.getNRolloutFinished();
+        	int nIterations = p2.getNIterations();
+            System.out.println(";  Best = "+ibest+", Finished="+nRolloutFinished+"/"+nIterations);                        		
+    	}
+    	for (int k=0; k<2; k++) {
+            actBest = pa.getNextAction(so, false, vtable, true);
+            System.out.print("pa ["+pa.getName()+"]: "); 
+            double vbest = -Double.MAX_VALUE;
+            int ibest = -1;
+            for (int i=0;i<so.getNumAvailableActions();i++) {
+            	System.out.print(String.format("%.3f",vtable[i]*MAXSCORE)+" ");
+            	if (vtable[i]>vbest) {
+            		vbest=vtable[i];
+            		ibest=i;
+            	}
+            }
+            if (pa instanceof MCAgent) {
+            	int nRolloutFinished = ((MCAgent) pa).getNRolloutFinished();
+            	int nIterations = ((MCAgent) pa).getNIterations();
+                System.out.println(";  Best = "+ibest+", Finished="+nRolloutFinished+"/"+nIterations);                        		
+            } else {
+                System.out.println(";  Best = "+ibest);              	
+            }
+    	}
+    	return actBest;
+    }
 
 	public GameBoard getGameBoard() {
 		return gb;

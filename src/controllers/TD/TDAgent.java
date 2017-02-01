@@ -22,30 +22,22 @@ import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Feature;
 import games.StateObservation;
-import games.TicTacToe.StateObserverTTT;
-import games.TicTacToe.TDPlayerTTT;
+//import games.TicTacToe.StateObserverTTT;
 
 /**
- * The TD-Learning {@link PlayAgent} for TicTacToe. It has either a linear net
- * {@link TD_Lin} or a BP neural net {@link TD_NNet} to model the value
- * function. The net follows closely the (pseudo-)code by [SuttonBonde93]. It
- * can be trained with different feature sets:
- * <ul>
- * <li>0: Levkovich's features
- * <li>1,2: thin, thick feature set (6 or 10 features)
- * <li>3: thick feature set + board position (19 features)
- * <li>4: extended = thick + extra features (13 features)
- * <li>9: raw = only board position (9 features)
- * </ul>
+ * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning). 
+ * It has either a linear net {@link TD_Lin} or a BP neural net {@link TD_NNet}
+ * to model the value function. 
+ * The net follows closely the (pseudo-)code by [SuttonBonde93]. 
+ * <p>
  * The internal learning rate ALPHA for the net input layer weights is alpha/n,
  * where n=(size of feature vector) and alpha is the constructors' first
  * parameter.
- * 
- * Some functionality is packed in the superclass {@link TicTDBase} and *its*
- * superclass {@link AgentBase} (gameNum, maxGameNum, AgentState)
+ * <p>
+ * Some functionality is packed in the superclass 
+ * {@link AgentBase} (gameNum, maxGameNum, AgentState)
  * 
  * @see PlayAgent
- * @see TicTDBase
  * @see AgentBase
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
@@ -78,7 +70,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	//public int epiCount=0;
 
 	/**
-	 * Default constructor for TDPlayerTTT, needed for loading a serialized version
+	 * Default constructor for TDAgent, needed for loading a serialized version
 	 */
 	public TDAgent() {
 		super();
@@ -87,7 +79,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	}
 
 	/**
-	 * Construct new {@link TDPlayerTTT}, setting everything from tdPar and set default
+	 * Construct new {@link TDAgent}, setting everything from tdPar and set default
 	 * maxGameNum=1000
 	 * 
 	 * @param tdPar
@@ -98,7 +90,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	}
 
 	/**
-	 * Construct new {@link TDPlayerTTT}, setting everything from tdPar and from maxGameNum
+	 * Construct new {@link TDAgent}, setting everything from tdPar and from maxGameNum
 	 * 
 	 * @param tdPar
 	 * @param maxGameNum
@@ -207,8 +199,8 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 					// And a reward 0 for a tie.
 					break;
 				default: 
-					throw new RuntimeException("TDPlayer.trainAgent not yet "+
-							"implementing case so.getNumPlayers()>2");
+					throw new RuntimeException("TDPlayer.trainAgent does not yet "+
+							"implement case so.getNumPlayers()>2");
 				}
 				// Normalize to +1 (X-win), 0.5 (tie), 0.0 (O-win) for 2-player game:
 				CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
@@ -316,7 +308,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 		int player;
 		Types.ACTIONS actBest;
 		boolean isNtuplePlayer = (m_feature.getFeatmode() == 8
-				|| this.getClass().getName().equals("TicTacToe.TD_NTPlayer"));
+				|| this.getClass().getName().equals("TD_NTPlayer"));
 
 //		assert (sob instanceof StateObserverTTT) : "Input 'sob' is not of class StateObserverTTT";
 //		StateObserverTTT so = (StateObserverTTT) sob;

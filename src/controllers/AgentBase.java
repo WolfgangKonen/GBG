@@ -17,7 +17,6 @@ import tools.Types;
  * common to all agents (things related to gameNum, maxGameNum, AgentState).
  * 
  * @see PlayAgent
- * @see games.TicTacToe.TicTDBase
  * @see controllers.MCTS.MCTSAgentT
  */
 abstract public class AgentBase implements Serializable {
