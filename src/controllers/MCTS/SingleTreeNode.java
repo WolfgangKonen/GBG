@@ -273,6 +273,8 @@ public class SingleTreeNode
             rollerState.advance(rollerState.getAction(action));
             thisDepth++;
         }
+        if (rollerState.isGameOver()) 
+        	m_player.nRolloutFinished++;
 
         double delta = value(rollerState,this.m_state);
 
@@ -416,4 +418,5 @@ public class SingleTreeNode
 				N += 1+c.numDescendants();
     	return N;
     }
+    
 }

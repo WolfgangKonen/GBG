@@ -16,6 +16,8 @@ public class MCAgent extends AgentBase implements PlayAgent {
     private Types.ACTIONS nextAction = Types.ACTIONS.fromInt(5);
     private double nextMoveScore = 0;
     private Random rnd = new Random();
+    private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true
+    private int nIterations = 0; 		// counts the total number of iterations
 
     public MCAgent(String name)
     {
@@ -31,6 +33,8 @@ public class MCAgent extends AgentBase implements PlayAgent {
     public Types.ACTIONS getNextActionAverage (StateObservation sob, double[] vtable) {
         nextAction = null;
         nextMoveScore = Double.NEGATIVE_INFINITY;
+        nRolloutFinished = 0; 
+        nIterations = 0;
 
         actions = sob.getAvailableActions();
 
@@ -46,7 +50,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
                 newSob.advance(actions.get(i));
                 RandomSearch agent = new RandomSearch();
                 agent.startAgent(newSob);
-
+                
                 averageScore += newSob.getGameScore();
 
 
@@ -93,6 +97,14 @@ public class MCAgent extends AgentBase implements PlayAgent {
     @Override
     public double getScore(StateObservation sob) {
         return nextMoveScore;
+    }
+
+    public int getNRolloutFinished() {
+        return nRolloutFinished;
+    }
+
+    public int getNIterations() {
+        return nIterations;
     }
 
     @Override

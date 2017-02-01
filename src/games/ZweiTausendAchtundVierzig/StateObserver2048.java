@@ -405,6 +405,10 @@ public class StateObserver2048 implements StateObservation{
     public int getScore() {
         return score;
     }
+    
+    public int getNumEmptyTiles() {
+    	return emptyTiles.size();
+    }
 
     public Tile getTile(int row, int column) {
         return gameBoard[row][column];
