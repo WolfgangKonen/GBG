@@ -151,4 +151,14 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	public MCTSParams getMCTSParams() {
 		return mctsPlayer.getMCTSParams();
 	}
+	
+    public int getNRolloutFinished() {
+        return mctsPlayer.getNRolloutFinished();
+    }
+
+    public int getNIterations() {
+        return mctsPlayer.getNUM_ITERS();
+    }
+
+
 }

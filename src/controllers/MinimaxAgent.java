@@ -66,6 +66,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
         // DON'T! The caller has to define VTable with the right length
 
 		Types.ACTIONS actBest = getBestAction(so,  random,  VTable,  silent, 0);
+        //System.out.println("hm size: "+hm.size());
 		return actBest;
 	}
 	
@@ -209,6 +210,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		
 		int n=sob.getNumAvailableActions();
 		double[] vtable	= new double[n+1];
+		// here is the recursion: getBestAction calls getScore(...,depth+1):
 		getBestAction(sob,  false,  vtable,  true, depth);  // sets vtable[n]=iMaxScore
 		return vtable[n];		// return iMaxScore
 	}
@@ -217,14 +219,14 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score. This function may be overridden in a game-
 	 * specific way by classes derived from {@link MinimaxAgent}. <p>
-	 * This  stub method just returns {@link #getScore(StateObservation)}, which might 
-	 * be too simplistic for not-yet finished games, because the score will be  
-	 * mostly 0.
+	 * This  stub method just returns {@link StateObservation#getGameScore()}, which might 
+	 * be too simplistic for not-yet finished games, because the score does not reflect  
+	 * future returns.
 	 * @param sob	the state observation
 	 * @return		the score.
 	 */
 	private double estimateScore(StateObservation sob) {
-		return getScore(sob);
+		return sob.getGameScore();
 	}
 
 	@Override

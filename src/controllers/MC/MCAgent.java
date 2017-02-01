@@ -50,9 +50,11 @@ public class MCAgent extends AgentBase implements PlayAgent {
                 newSob.advance(actions.get(i));
                 RandomSearch agent = new RandomSearch();
                 agent.startAgent(newSob);
-                
-                averageScore += newSob.getGameScore();
 
+                averageScore += newSob.getGameScore();
+                
+                nIterations++;
+                if (newSob.isGameOver()) nRolloutFinished++;
 
             }
             averageScore /= Config.ITERATIONS;
