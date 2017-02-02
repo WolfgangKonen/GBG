@@ -153,7 +153,7 @@ abstract public class Arena extends JPanel implements Runnable {
 				taskState = Task.IDLE; 
 				break;				
 			case PLAY: 
-				enableButtons(false);
+				//enableButtons(false);		// see Play.addActionListener in XArenaButtons
 				gb.clearBoard(false,true);
 				PlayGame();
 				enableButtons(true);
@@ -319,7 +319,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		assert paVector.length == so.getNumPlayers() : 
 			  "Number of agents does not match so.getNumPlayers()!";
 		
-		while(true)
+		while(taskState == Task.PLAY)	// game play interruptible by hitting 'Play' again 
 		{			
 			if(gb.isActionReq()){
 				so = gb.getStateObs();

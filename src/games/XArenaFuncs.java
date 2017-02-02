@@ -487,18 +487,26 @@ public class XArenaFuncs
 	} // compete
 	
 	/**
-	 * Does the main work for buttons 'Compete' and 'Swap Compete'. These buttons set 
-	 * enum {@link ArenaTrain#taskState} to either COMPETE or SWAPCMP. Then the appropriate cases  
-	 * of {@code switch} in TicGame.run() will call competeBase. 'Compete' performs competeNum 
-	 * competitions AgentX as X vs. AgentO as O. 'Swap Compete' performs competeNum 
-	 * competitions AgentX as O vs. AgentO as X. The agents are assumed to be trained (!)
+	 * Does the main work for menu items 'Single Compete' and 'Swap Compete'. 
+	 * These items set enum {@link Arena#taskState} to either COMPETE or SWAPCMP. 
+	 * Then the appropriate cases of {@code switch} in Arena.run() will call competeBase. 
+	 * 'Compete' performs competeNum competitions AgentX as X vs. AgentO as O. 
+	 * 'Swap Compete' performs competeNum competitions AgentX as O vs. AgentO as X. 
+	 * The agents are assumed to be trained (!)
 	 *  
 	 * @param swap {@code false} for 'Compete' and {@code true} for 'Swap Compete'
 	 * @param xab	used only for reading parameter values from GUI members 
 	 */
 	protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb) {
 		int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
-		
+		int numPlayers = gb.getStateObs().getNumPlayers();
+		if (numPlayers!=2) {
+			MessageBox.show(xab, 
+					"Single/Swap Compete only available for 2-player games!", 
+					"Error", JOptionPane.ERROR_MESSAGE);	
+			return;
+		}
+
 		try {
 			String AgentX = xab.getSelectedAgent(0);
 			String AgentO = xab.getSelectedAgent(1);
@@ -509,7 +517,6 @@ public class XArenaFuncs
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
 
-				int numPlayers = gb.getStateObs().getNumPlayers();
 				PlayAgent[] paVector = fetchAgents(xab);
 
 				AgentBase.validTrainedAgents(paVector,numPlayers);  
@@ -546,7 +553,17 @@ public class XArenaFuncs
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		int verbose=1;
 		int stopEval = 0;
+		double[] winrate = new double[3];
 		
+		int numPlayers = gb.getStateObs().getNumPlayers();
+		if (numPlayers!=2) {
+			MessageBox.show(xab, 
+					"Multi-Competition only available for 2-player games!", 
+					"Error", JOptionPane.ERROR_MESSAGE);	
+			return winrate;
+		}
+		
+		try {
 		// take settings from GUI xab
 		String AgentX = xab.getSelectedAgent(0);
 		String AgentO = xab.getSelectedAgent(1);
@@ -563,7 +580,6 @@ public class XArenaFuncs
 		double optimCountX=0.0,optimCountO=0.0;
 		double[][] winrateC = new double[competitionNum][3];
 		double[][] evalC = new double[competitionNum][2];
-		double[] winrate = new double[3];
 		PlayAgent paX=null, paO=null;
 
 		if (AgentX.equals("Human") | AgentO.equals("Human")) {
@@ -679,6 +695,12 @@ public class XArenaFuncs
 			System.out.print("win rates: ");
 			for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
 			System.out.println(" (X/Tie/O)");
+		}
+		
+		} catch(RuntimeException ex) {
+			MessageBox.show(xab, 
+					ex.getMessage(), 
+					"Error", JOptionPane.ERROR_MESSAGE);
 		}
 		
 		return winrate;

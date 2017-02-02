@@ -27,6 +27,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	private double[] m_VTable;
 	private int m_depth=10;
 	private HashMap<String,Double> hm;
+	private boolean m_useHashMap=true;
 	private static final long serialVersionUID = 123L;
 		
 	public MinimaxAgent(String name)
@@ -43,6 +44,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	{
 		this(name);
 		m_depth = opar.getMinimaxDepth();
+		m_useHashMap = opar.usesHashmap();
 	}
 	
 	
@@ -81,12 +83,13 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		int count = 1; // counts the moves with same iMaxScore
         Types.ACTIONS actBest = null;
         String stringRep;
+        Double sc;
         int iBest;
 		//VTable = new double[so.getNumAvailableActions()];
         // DON'T! The caller has to define VTable with the right length
 		
         stringRep = so.toString();
-        if (stringRep.equals("XoXoXo-X-")) {
+        if (stringRep.equals("XoXoXo-X-")) {		// only debug for TTT
         	int dummy=1;
         }
 		assert so.isLegalState() 
@@ -95,18 +98,22 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		iMaxScore = -Double.MAX_VALUE;
         ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
         Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
-        //VTable = new double[acts.size()];
+        
         for(i = 0; i < acts.size(); ++i)
         {
         	actions[i] = acts.get(i);
         	NewSO = so.copy();
         	NewSO.advance(actions[i]);
         	
-			// speed up MinimaxPlayer for repeated calls by storing the 
-			// scores of visited states in a HashMap
-			stringRep = NewSO.toString();
-			//System.out.println(stringRep);
-			Double sc = hm.get(stringRep); 
+        	if (m_useHashMap) {
+    			// speed up MinimaxPlayer for repeated calls by storing/retrieving the 
+    			// scores of visited states in HashMap hm:
+    			stringRep = NewSO.toString();
+    			//System.out.println(stringRep);
+    			sc = hm.get(stringRep); 		// returns null if not in hm
+        	} else {
+        		sc = null;
+        	}
 			if (depth<this.m_depth) {
 				if (sc==null) {
 					// here is the recursion: getScore calls getBestTable:
@@ -119,7 +126,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		            default:		// i.e. n-player, n>2
 		            	throw new RuntimeException("Minimax is not yet implemented for n-player games (n>2).");
 		            }
-					hm.put(stringRep, CurrentScore);
+					if (m_useHashMap) hm.put(stringRep, CurrentScore);
 				} else {
 					CurrentScore = sc;
 				}
@@ -173,7 +180,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * 
 	 * @return	returns true/false, whether the action suggested by last call 
 	 * 			to getNextAction() was a random action. 
-	 * 			Always true in the case of MinimaxAgent
+	 * 			Always false in the case of MinimaxAgent
 	 */
 	public boolean wasRandomAction() {
 		return false;
@@ -196,7 +203,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	}
 	private double getScore(StateObservation sob, int depth) {
 		String stringRep = sob.toString();
-		if (stringRep.equals("XXoXXooo-")) {
+		if (stringRep.equals("XXoXXooo-")) {		// only debug for TTT
 			int dummy=1;
 		}
 		if (sob.isGameOver())
@@ -223,7 +230,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * be too simplistic for not-yet finished games, because the score does not reflect  
 	 * future returns.
 	 * @param sob	the state observation
-	 * @return		the score.
+	 * @return		the estimated score
 	 */
 	private double estimateScore(StateObservation sob) {
 		return sob.getGameScore();

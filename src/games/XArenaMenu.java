@@ -255,6 +255,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem = new JMenuItem("Competition-Options");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				m_arena.m_xab.winCompOptions.setVisible(true);
 				//ticGame.c4Buttons.setWindowPos(ticGame.winCompOptions);
 			}
 		});
@@ -267,7 +268,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem = new JMenuItem("Single Compete");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_arena.taskState = ArenaTrain.Task.COMPETE;
+				m_arena.taskState = Arena.Task.COMPETE;
 				String str = "[Start Single Competition]";
 				printStatus(str);
 			}
@@ -279,7 +280,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem = new JMenuItem("Swap Compete");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_arena.taskState = ArenaTrain.Task.SWAPCMP;
+				m_arena.taskState = Arena.Task.SWAPCMP;
 				String str = "[Start Swap Competition]";
 				printStatus(str);
 			}
@@ -295,7 +296,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem = new JMenuItem("Multi-Competition");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_arena.taskState = ArenaTrain.Task.MULTCMP;
+				m_arena.taskState = Arena.Task.MULTCMP;
 				//ticGame.changeState(State.MULTICOMPETE);
 				String str = "[Start multi-Competition]";
 				printStatus(str);

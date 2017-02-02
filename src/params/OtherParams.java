@@ -3,6 +3,8 @@ package params;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Canvas;
+import java.awt.Checkbox;
+import java.awt.CheckboxGroup;
 import java.awt.Choice;
 import java.awt.Frame;
 import java.awt.GridLayout;
@@ -20,9 +22,10 @@ import javax.swing.JTextField;
  * <li> <b>numEval</b>: 	[100] During training: Call the evaluators every NumEval episodes  
  * <li> <b>stopTest</b>: 	[  0] whether to perform the stop test during training. If
  * 		>0, then m_evaluator2 is checked during training whether its goal is reached
- * <li> <b>stopEval</b>: 	[100] During training: How many successfull evaluator 
+ * <li> <b>stopEval</b>: 	[100] During training: How many successful evaluator 
  * 							calls are needed to stop training prematurely?
- * <li> <b>MinimaxDepth</b>	[ 10] Tree Depth for Minimax agent
+ * <li> <b>MinimaxDepth</b>	[ 10] Minimax Tree Depth
+ * <li> <b>use Hashmap</b>	[true] Minimax: whether to use hashmap or not
  * </ul> 
  * 
  * @see games.TicTacToe.TDPlayerTTT
@@ -42,6 +45,10 @@ public class OtherParams extends Frame
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
 	public JTextField miniDepth_T;
+	JLabel miniUseHmL;
+	CheckboxGroup cbgUseHashmap;
+	public Checkbox miniUseHmTrue;
+	public Checkbox miniUseHmFalse;
 	Choice choiceBatch;
 	Button ok;
 	JPanel oPanel;
@@ -60,6 +67,10 @@ public class OtherParams extends Frame
 		stopEval_L = new JLabel("stopEval");
 		batchL = new JLabel("BatchNum");
 		miniDepth_L = new JLabel("Minimax Depth");
+		miniUseHmL = new JLabel("use Hashmap: ");
+		cbgUseHashmap = new CheckboxGroup();
+		miniUseHmTrue = new Checkbox("true",cbgUseHashmap,true);
+		miniUseHmFalse = new Checkbox("false",cbgUseHashmap,false);
 		ok = new Button("OK");
 		m_par = this;
 		oPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
@@ -70,7 +81,8 @@ public class OtherParams extends Frame
 		epiLeng_L.setToolTipText("During training: Maximum number of moves in an episode. If reached, game terminates prematurely. -1: never terminate.");
 		stopTest_L.setToolTipText("During training: If >0 then perform stop test");
 		stopEval_L.setToolTipText("During training: How many successfull evaluator calls are needed to stop training prematurely?");
-		miniDepth_L.setToolTipText("Tree Depth for Minimax agent");
+		miniDepth_L.setToolTipText("Minimax tree Depth");
+		miniUseHmL.setToolTipText("Minimax: use hashmap to save values of visited states");
 		
 		ok.addActionListener(
 				new ActionListener()
@@ -96,19 +108,24 @@ public class OtherParams extends Frame
 
 		oPanel.add(stopTest_L);
 		oPanel.add(stopTest_T);
-		oPanel.add(miniDepth_L);
-		oPanel.add(miniDepth_T);
-		
 		oPanel.add(stopEval_L);
 		oPanel.add(stopEval_T);
+
+		oPanel.add(new Canvas());			// add two empty rows to balance height of fields
+		oPanel.add(new Canvas());
+		oPanel.add(new Canvas());
+		oPanel.add(new Canvas());
+
+		oPanel.add(miniDepth_L);
+		oPanel.add(miniDepth_T);
 		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
 //		oPanel.add(batchL);
 //		oPanel.add(choiceBatch);
-		
-		oPanel.add(new Canvas());			// add two empty rows to balance height of fields
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
+
+		oPanel.add(miniUseHmL);
+		oPanel.add(miniUseHmTrue);
+		oPanel.add(miniUseHmFalse);
 		oPanel.add(new Canvas());
 
 		oPanel.add(new Canvas());
@@ -145,6 +162,9 @@ public class OtherParams extends Frame
 		int elen = Integer.valueOf(epiLeng_T.getText()).intValue();
 		if (elen==-1) elen=Integer.MAX_VALUE;
 		return elen;
+	}
+	public boolean usesHashmap() {
+		return miniUseHmTrue.getState();
 	}
 	public void setStopTest(double value) {
 		stopTest_T.setText(value+"");
