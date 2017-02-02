@@ -9,6 +9,7 @@ import params.MCTSParams;
 //import params.RpropParams;
 //import params.TCParams;
 import params.TDParams;
+import params.OptionsComp;
 import tools.HtmlDisplay;
 import tools.Types;
 import params.OtherParams;
@@ -16,7 +17,7 @@ import params.OtherParams;
 
 
 /**
- * Helper class for {@link ArenaTrain}: <ul> 
+ * Helper class for {@link Arena} and {@link ArenaTrain}: <ul> 
  * <li> sets the buttons, selectors and text fields (everything below the TicTacToe board),
  * <li> sets initial values for all relevant fields,
  * <li> has the action code for Param-, Train-, MultiTrain-, Play-, and Compete- button events.
@@ -30,6 +31,7 @@ public class XArenaButtons extends JPanel
 	XArenaFuncs 		m_xfun;	
 	public Arena	 	m_game;	// a reference to the ArenaTTT object passed in with the constructor
 	XArenaButtons		m_xab;
+	OptionsComp 		winCompOptions = new OptionsComp();
 	//private Random rand;
 	int numPlayers;
 	int m_numParamBtn;			// number of the last param button pressed
@@ -246,8 +248,17 @@ public class XArenaButtons extends JPanel
 				{
 					public void actionPerformed(ActionEvent e)
 					{	
-						m_game.setStatusMessage("Playing a game ...");
-						m_game.taskState = ArenaTrain.Task.PLAY;
+						// toggle m_game.state between PLAY and IDLE
+						if (m_game.taskState!=ArenaTrain.Task.PLAY) {
+							m_game.taskState = ArenaTrain.Task.PLAY;
+							m_game.setStatusMessage("Playing a game ...");
+							enableButtons(false);		// disable all buttons ...
+							Play.setEnabled(true);		// ... but the Play button
+						} else {
+							m_game.taskState = ArenaTrain.Task.IDLE;
+							m_game.setStatusMessage("Done.");
+							enableButtons(true);
+						}
 						
 					}
 				}	
