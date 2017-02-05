@@ -40,15 +40,15 @@ public class OtherParams extends Frame
 	JLabel stopEval_L;
 	JLabel batchL;
 	JLabel miniDepth_L;
+	JLabel miniUseHm_L;
 	public JTextField numEval_T;
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
 	public JTextField miniDepth_T;
-	JLabel miniUseHmL;
-	CheckboxGroup cbgUseHashmap;
+	//CheckboxGroup cbgUseHashmap;
 	public Checkbox miniUseHmTrue;
-	public Checkbox miniUseHmFalse;
+	//public Checkbox miniUseHmFalse;
 	Choice choiceBatch;
 	Button ok;
 	JPanel oPanel;
@@ -67,10 +67,10 @@ public class OtherParams extends Frame
 		stopEval_L = new JLabel("stopEval");
 		batchL = new JLabel("BatchNum");
 		miniDepth_L = new JLabel("Minimax Depth");
-		miniUseHmL = new JLabel("use Hashmap: ");
-		cbgUseHashmap = new CheckboxGroup();
-		miniUseHmTrue = new Checkbox("true",cbgUseHashmap,true);
-		miniUseHmFalse = new Checkbox("false",cbgUseHashmap,false);
+		miniUseHm_L = new JLabel("Minimax Hash ");
+		//cbgUseHashmap = new CheckboxGroup();
+		miniUseHmTrue = new Checkbox("use hashmap",true);
+		//miniUseHmFalse = new Checkbox("false",cbgUseHashmap,false);
 		ok = new Button("OK");
 		m_par = this;
 		oPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
@@ -82,7 +82,7 @@ public class OtherParams extends Frame
 		stopTest_L.setToolTipText("During training: If >0 then perform stop test");
 		stopEval_L.setToolTipText("During training: How many successfull evaluator calls are needed to stop training prematurely?");
 		miniDepth_L.setToolTipText("Minimax tree Depth");
-		miniUseHmL.setToolTipText("Minimax: use hashmap to save values of visited states");
+		miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
 		
 		ok.addActionListener(
 				new ActionListener()
@@ -123,9 +123,9 @@ public class OtherParams extends Frame
 //		oPanel.add(batchL);
 //		oPanel.add(choiceBatch);
 
-		oPanel.add(miniUseHmL);
+		oPanel.add(miniUseHm_L);
 		oPanel.add(miniUseHmTrue);
-		oPanel.add(miniUseHmFalse);
+		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
 
 		oPanel.add(new Canvas());

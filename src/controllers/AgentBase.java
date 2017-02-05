@@ -39,16 +39,24 @@ abstract public class AgentBase implements Serializable {
 	 * This is just to signal that derived classes will be either abstract or implement
 	 * getScore(), as required by the interface {@link PlayAgent} as well.
 	 * The definition of getScore() is needed here, because  
-	 * {@link #rewardEstimate(StateObservation)} needs it.
+	 * {@link #estimateGameValue(StateObservation)} needs it.
 	 */
 	abstract public double getScore(StateObservation sob);
 	
 	/**
-	 * Default behaviour: 
+	 * Return the estimated game value for {@link StateObservation} sob. The default behaviour is to return
+	 * {@link #getScore(StateObservation)}.<p>
+	 * 
+	 * <b>Important note</b>: Derived classes that use {@link #estimateGameValue} inside 
+	 * {@link #getScore(StateObservation)} (e.g. Minimax, MC or MCTS when reaching 
+	 * the predefined rollout depth) have to <b>override</b> this function 
+	 * with a function <b>not</b> using  {@link #getScore(StateObservation)},
+	 * otherwise an infinite loop would result. 
+	 *  
 	 * @return {@link #getScore(StateObservation)}, that is whatever the derived
 	 * 			class implements for {@link #getScore(StateObservation)}.
 	 */
-	public double rewardEstimate(StateObservation sob) {
+	public double estimateGameValue(StateObservation sob) {
 		return getScore(sob);
 	};
 	public void setAgentState(AgentState aState) {

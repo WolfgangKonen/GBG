@@ -276,7 +276,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 //		int Player = -so.getPlayerPM(); 	// Player is the player who made the move 
 //									 	// while so has the player who moves next 
 //		int[][] Table = so.getTable();
-		double score = m_Net.getScore(m_feature.prepareInputVector(so));
+		double score = m_Net.getScore(m_feature.prepareFeatVector(so));
 		return score;
 	}
 
@@ -317,7 +317,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 
 		m_Net.resetElig(); // reset the elig traces before starting a new game
 							// /WK/ NEW/02/2015
-		oldInput = m_feature.prepareInputVector(so);
+		oldInput = m_feature.prepareFeatVector(so);
 		S_old = so.toString();   
 		//S_old = tableToString(-Player, table);
 		if (!isNtuplePlayer)
@@ -363,11 +363,11 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 			}
 			counter++;
 			if (counter==epiLength) {
-				reward=rewardEstimate(so);
+				reward=estimateGameValue(so);
 				//epiCount++;
 				finished = true; 
 			}
-			Input = m_feature.prepareInputVector(so);
+			Input = m_feature.prepareFeatVector(so);
 			if (randomMove && !finished) {
 				// no training, go to next move
 				m_Net.calcScoresAndElig(Input); // calculate score, write it to

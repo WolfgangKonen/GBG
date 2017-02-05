@@ -131,7 +131,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 					CurrentScore = sc;
 				}
 			} else {
-				CurrentScore = estimateScore(NewSO);
+				CurrentScore = estimateGameValue(NewSO);
 				if (so.getNumPlayers()==2) 
 					CurrentScore = - CurrentScore; 		
 			}
@@ -232,7 +232,8 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * @param sob	the state observation
 	 * @return		the estimated score
 	 */
-	private double estimateScore(StateObservation sob) {
+	@Override
+	public double estimateGameValue(StateObservation sob) {
 		return sob.getGameScore();
 	}
 

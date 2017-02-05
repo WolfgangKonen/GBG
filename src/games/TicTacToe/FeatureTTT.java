@@ -10,7 +10,7 @@ import games.TicTacToe.StateObserverTTT;
 /**
  * Implementation of {@link Feature} for game TicTacToe.<p>
  * 
- * Method {@link #prepareInputVector(StateObservation)} returns the feature vector. 
+ * Method {@link #prepareFeatVector(StateObservation)} returns the feature vector. 
  * The constructor accepts argument {@code featmode} to construct different types 
  * of feature vectors. The acceptable values for {@code featmode} are
  * retrieved with {@link #getAvailFeatmode()}.
@@ -26,7 +26,7 @@ public class FeatureTTT extends TicTDBase implements Feature, Serializable {
 	}
 	
 	@Override
-	public double[] prepareInputVector(StateObservation sob) {
+	public double[] prepareFeatVector(StateObservation sob) {
 		assert (sob instanceof StateObserverTTT) : "Input 'sob' is not of class StateObserverTTT";
 		StateObserverTTT so = (StateObserverTTT) sob;
 		int[][] table = so.getTable();

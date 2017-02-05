@@ -54,14 +54,14 @@ public interface PlayAgent {
 	public double getScore(StateObservation sob);
 	
 	/**
-	 * Return the agent's estimate of the final reward 
+	 * Return the agent's estimate of the final game value (final reward) 
 	 * @param sob			the current game state;
 	 * @return				the agent's estimate of the final reward. This may be 
 	 * 						the same as {@link #getScore(StateObservation)} (as 
 	 * 						implemented in {@link AgentBase}). But it may as well be 
 	 * 						overridden by derived classes.
 	 */
-	public double rewardEstimate(StateObservation sob);
+	public double estimateGameValue(StateObservation sob);
 	
 	/**
 	 * 

@@ -361,7 +361,7 @@ public class TDPlayerTT2 extends TicTDBase implements PlayAgent,Serializable {
 			}
 			counter++;
 			if (counter==epiLength) {
-				reward=rewardEstimate(so);
+				reward=estimateGameValue(so);
 				//epiCount++;
 				finished = true; 
 			}
