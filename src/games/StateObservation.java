@@ -48,6 +48,15 @@ public interface StateObservation {
 	public double getGameScore();
 	
 	/**
+	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
+	 * 			will be reached from this state (assuming perfect play).  
+	 * 			This member function can be {@link StateObservation}'s heuristic  
+	 * 			for the <em>potential</em> of that state. If such a heuristic is not known, 
+	 * 			{@link #getGameValue()} might simply return {@link #getGameScore()}.
+	 */
+	public double getGameValue();
+	
+	/**
 	 * Same as getGameScore(), but relative to referingState. This relativeness
 	 * is usually only relevant for 2-player games.
 	 * @param referingState

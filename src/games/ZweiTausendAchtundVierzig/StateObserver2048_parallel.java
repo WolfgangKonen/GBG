@@ -144,6 +144,9 @@ public class StateObserver2048_parallel implements StateObservation{
     }
 
     @Override
+	public double getGameValue() { return getGameScore(); }
+	
+    @Override
     public void advance(Types.ACTIONS action) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";

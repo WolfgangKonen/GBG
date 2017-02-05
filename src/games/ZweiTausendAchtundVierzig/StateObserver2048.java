@@ -150,7 +150,10 @@ public class StateObserver2048 implements StateObservation{
         }
     }
 
-    private void evaluateBoard() {
+    @Override
+	public double getGameValue() { return getGameScore(); }
+	
+   private void evaluateBoard() {
         RowInformationContainer rowInformationContainer;
         highestTileInCorner = false;
         rowValue = 0;

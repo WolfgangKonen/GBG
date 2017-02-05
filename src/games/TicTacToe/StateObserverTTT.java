@@ -141,6 +141,9 @@ public class StateObserverTTT implements StateObservation {
 	public double getMinGameScore() { return REWARD_NEGATIVE; }
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
+    @Override
+	public double getGameValue() { return getGameScore(); }
+
 	/**
 	 * Same as getGameScore(), but relative to referingState. This relativeness
 	 * is usually only relevant for 2-player games
