@@ -211,10 +211,10 @@ public class Evaluator9 extends Evaluator {
 				System.out.print(state[k] + ": " + frM.format(VM_s) + " " + frm.format(V_s) + " " + 
 						frM.format(VM_n) + " " + frm.format(V_n) + 
 						" >>  " + newState + "  (ref: " + refState +  " )  " + res + " " + frk.format(k));
-				if (pa instanceof TDPlayerTT2) {
-					int[] cnt = ((TDPlayerTT2) pa).getCounters(player,stable); // counters for initial state
-					sfinal = " C:" + cnt[0] +", " + cnt[1] + ((TDPlayerTT2) pa).diversityCheck(state[k]); 
-				}
+//				if (pa instanceof TDPlayerTT2) {
+//					int[] cnt = ((TDPlayerTT2) pa).getCounters(player,stable); // counters for initial state
+//					sfinal = " C:" + cnt[0] +", " + cnt[1] + ((TDPlayerTT2) pa).diversityCheck(state[k]); 
+//				}
 				System.out.println(sfinal);				
 			}
 		} // for (k)

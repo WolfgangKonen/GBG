@@ -137,15 +137,17 @@ public class Types {
     // Default (startup) settings for Arena and ArenaTrain
     public static final String[] GUI_AGENT_LIST 	// list of available agents = list of choices in Agent Selectors
     	= {"TDS", "Minimax", "Random", "MCTS", "Human", "MC"};
-    public static final String[] GUI_AGENT_INITIAL  // initial agent choice (for up to 5 players)
-    	= {"MCTS", "Human", "Human", "Human", "Human"};
-    public static final String[] GUI_PLAYER_NAME  // player names (for up to 5 players)
+    public static final String[] GUI_AGENT_INITIAL  // initial agent choice for P0, P1, ... (for up to 5 players)
+    	= {"TDS", "MCTS", "Human", "Human", "Human"};
+    public static final String[] GUI_PLAYER_NAME  // player names for P0, P1, ... (for up to 5 players)
     	//= {"P0", "P1", "P2", "P3", "P4"};
     	= {"0", "1", "2", "3", "4"};
     public static final String[] GUI_2PLAYER_NAME  // player names for 2-player game
 		= {"X", "O"};
-    public static final String GUI_X_PLAYER = "MCTS";  // "MCTS" "TDS" "CMA-ES" "Minimax" 
-    public static final String GUI_O_PLAYER = "Human";	  // "Human";"ValIt";
+    
+    // probably GUI_X_PLAYER and GUI_O_PLAYER is not necessary anymore:
+    public static final String GUI_X_PLAYER = "TDS";  // "MCTS" "TDS" "CMA-ES" "Minimax" 
+    public static final String GUI_O_PLAYER = "MCTS";	  // "Human";"MCTS";
 
 	public static final int GUI_ARENATRAIN_WIDTH = 465;
 	public static final int GUI_ARENATRAIN_HEIGHT = 430;

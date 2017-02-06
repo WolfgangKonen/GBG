@@ -81,7 +81,7 @@ public class OtherParams extends Frame
 		epiLeng_L.setToolTipText("During training: Maximum number of moves in an episode. If reached, game terminates prematurely. -1: never terminate.");
 		stopTest_L.setToolTipText("During training: If >0 then perform stop test");
 		stopEval_L.setToolTipText("During training: How many successfull evaluator calls are needed to stop training prematurely?");
-		miniDepth_L.setToolTipText("Minimax tree Depth");
+		miniDepth_L.setToolTipText("Minimax tree depth");
 		miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
 		
 		ok.addActionListener(

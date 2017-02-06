@@ -82,7 +82,7 @@ public class XArenaFuncs
 	{
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		m_PlayAgents = new PlayAgent[numPlayers];
-		m_PlayAgents[0] = new MinimaxAgent(sMinimax);
+		//m_PlayAgents[0] = new MinimaxAgent(sMinimax);
         rand = new Random(System.currentTimeMillis());	
 	}
 	
@@ -111,6 +111,8 @@ public class XArenaFuncs
 		
 		if (sAgent.equals("TDS")) {
 			pa = new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);
+//		} else if (sAgent.equals("TDS2")) {
+//			pa = new TDPlayerTT2(sAgent,m_xab.tdPar,maxGameNum);
 //		} else if (sAgent.equals("TDS-NTuple-2")) {
 //			// deprecated, only as debug check. Use class TD_NTPlayer instead
 //			pa = new TDPlayerTTT(m_xab.tdPar,maxGameNum);
@@ -174,6 +176,9 @@ public class XArenaFuncs
 					if (sAgent.equals("TDS")) {
 						pa = new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);
 					}					
+//					if (sAgent.equals("TDS2")) {
+//						pa = new TDPlayerTT2(sAgent,m_xab.tdPar,maxGameNum);
+//					}					
 				} else {
 					if (!sAgent.equals(m_PlayAgents[n].getName()))
 						throw new RuntimeException("Current agent for player "+n+" is "+m_PlayAgents[n].getName()

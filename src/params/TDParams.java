@@ -78,12 +78,12 @@ public class TDParams extends Frame implements Serializable
 	public TDParams() {
 		super("TD Parameter");
 		alphaT = new JTextField("0.1");				// the defaults
-		alfinT = new JTextField("0.001");				//
-		epsilT = new JTextField("0.3");					// 
-		epfinT = new JTextField("0.0");					//
-		lambdaT = new JTextField("0.5");				//
-		gammaT = new JTextField("1.0");					//
-		epochT = new JTextField("1");					//
+		alfinT = new JTextField("0.001");			//
+		epsilT = new JTextField("0.3");				// 
+		epfinT = new JTextField("0.0");				//
+		lambdaT = new JTextField("0.9");			//
+		gammaT = new JTextField("1.0");				//
+		epochT = new JTextField("1");				//
 		alphaL = new JLabel("Alpha init");
 		alfinL = new JLabel("Alpha final");
 		epsilL = new JLabel("Epsilon init");

@@ -25,7 +25,7 @@ import games.TicTacToe.TicTDBase;
 
 
 /**
- * @deprecated
+ * deprecated
  * This class is deprecated since it mixes TicTacToe-specific functionality with
  * general TD(lambda) functionality. For better abstraction it is recommended to
  * use class {@link TDAgent} together with the (small) TTT-specific classes
