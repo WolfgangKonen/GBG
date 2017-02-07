@@ -6,9 +6,26 @@ import javax.swing.JFrame;
 import controllers.PlayAgent;
 import games.Arena;
 import games.Evaluator;
+import games.Feature;
 import games.GameBoard;
+import params.TDParams;
 import games.ArenaTrain;
 
+/**
+ * {@link ArenaTrain} for TicTacToe. It borrows all functionality
+ * from the general class {@link ArenaTrain} derived from {@link Arena}. It only overrides 
+ * the abstract methods {@link Arena#makeGameBoard()}, {@link Arena#makeEvaluator()},
+ * and {@link Arena#makeFeatureClass()}, such that 
+ * these factory methods return objects of class {@link GameBoardTTT}, 
+ * {@link EvaluatorTTT}, and {@link Feature}, respectively.
+ * 
+ * @see PlayAgent
+ * @see TDAgent
+ * @see GameBoardTTT
+ * @see EvaluatorTTT
+ * 
+ * @author Wolfgang Konen, TH Köln, Nov'16
+ */
 public class ArenaTrainTTT extends ArenaTrain   {
 	
 	public ArenaTrainTTT() {
@@ -48,12 +65,17 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		//if (mode==9) return new Evaluator9(pa,stopEval);
-		// --- this is now inside EvaluatorTTT ---
-		
 		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
 	}
 
+//	@Override
+//	public PlayAgent makeTDSAgent(String sAgent, TDParams tdPar, int maxGameNum){
+//		return new TDPlayerTTT(sAgent,tdPar,maxGameNum);
+//	}
+
+	public Feature makeFeatureClass(int featmode) {
+		return new FeatureTTT(featmode);
+	}
 
 
 }

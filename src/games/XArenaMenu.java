@@ -20,8 +20,8 @@ import controllers.HumanPlayer;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.MCTS.MCTSAgentT;
+import controllers.TD.TDAgent;
 import games.TicTacToe.LaunchTrainTTT;
-import games.TicTacToe.TDPlayerTTT;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
@@ -462,10 +462,10 @@ public class XArenaMenu extends JMenuBar {
 		if (td == null) {
 			str = "No Agent loaded!";
 		} else {
-			if (td instanceof TDPlayerTTT) {
+			if (td instanceof TDAgent) {
 				//td.setName("TDS");
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar.setFrom(((TDPlayerTTT) td).getTDParams());
+				m_arena.m_xab.tdPar.setFrom(((TDAgent) td).getTDParams());
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:

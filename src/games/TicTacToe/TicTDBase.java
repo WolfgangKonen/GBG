@@ -45,7 +45,7 @@ import controllers.MinimaxAgent;
  * Class {@link TicTDBase} is an abstract class because it does not implement 
  * {@link AgentBase#getScore(games.StateObservation)}. This is left for the derived 
  * classes. <p>
- * Known classes having {@link TicTDBase} as super class: {@link games.TicTacToe.TDPlayerTTT}
+ * Known classes having {@link TicTDBase} as super class: {@link controllers.TD.TDAgent}
  * 
  * @author Wolfgang Konen, TH Köln, Dec'08 - Nov'16
  */
@@ -570,12 +570,12 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	/**
 	 * Given the current game position {Player,Table} and given the feature
 	 * mode coded in member variable {@link #featmode}, construct the feature 
-	 * vector (input vector for neural network in {@link games.TicTacToe.TDPlayerTTT} and similar play agents) 
+	 * vector (input vector for neural network in {@link controllers.TD.TDAgent} and similar play agents) 
 	 * @param Player	+1 or -1, player who **made** the last move
 	 * @param Table
 	 * @return	double[], the feature vector
 	 * <p>
-	 * Known classes using prepareInputvector: {@link games.TicTacToe.TDPlayerTTT}
+	 * Known classes using prepareInputvector: {@link controllers.TD.TDAgent}
 	 */
 	protected double[] prepareInputVector(int Player, int Table[][])
 	{
@@ -911,7 +911,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	}
 
 	/** 
-	 * Helper function for diagnostics in {@link games.TicTacToe.TDPlayerTTT#trainAgent(StateObservation)}, ValItPlayer.
+	 * Helper function for diagnostics in {@link controllers.TD.TDAgent#trainAgent(StateObservation)}, ValItPlayer.
 	 * @param hsc the {@link HashMap} for which we update or add S_old
 	 * @param S_old string rep of old state 
 	 * @return the modified {@link HashMap}
@@ -1050,7 +1050,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 * corresponding feature vector FV and then the diversity of this feature vector FV, i.e. how 
 	 * many states belonging to FV are mapped by MinimaxAgent to -1 (O-win), 0 (tie), +1 (X-win).
 	 * <p>
-	 * Known callers: {@link games.TicTacToe.TDPlayerTTT#diversityCheck(String)} 
+	 * Known callers: {@link controllers.TD.TDAgent#diversityCheck(String)} 
 	 * <p><b>Only for diagnostics.</b>
 	 * @param state	(e.g. "XoX---Xo-")
 	 * @param counters int[3] which contains on output: [0]: O-win, [1]: tie, [2]: X-win counts (Minimax)

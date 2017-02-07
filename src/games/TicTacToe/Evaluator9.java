@@ -3,6 +3,7 @@ package games.TicTacToe;
 import java.text.DecimalFormat;
 
 import controllers.PlayAgent;
+import controllers.TD.TDAgent;
 import controllers.MinimaxAgent;
 import games.Evaluator;
 import tools.Types;
@@ -134,7 +135,7 @@ public class Evaluator9 extends Evaluator {
 		//long nStart = System.currentTimeMillis();
 		
 		boolean is01player = false;		// signals a player with score V in 0..1 (else: -1..1)
-		if (pa.getClass().getName().equals("controllers.TD.TDPlayerTTT")) is01player=true;
+		if (pa.getClass().getName().equals("controllers.TD.TDAgent")) is01player=true;
 		if (pa.getClass().getName().equals("TicTacToe.ValItPlayer")) is01player=true;
 		if (pa.getClass().getName().equals("TicTacToe.CMAPlayer")) is01player=true;
 		if (m_ss.first_eval) {
@@ -233,11 +234,11 @@ public class Evaluator9 extends Evaluator {
 				"  (" + count +" of " + state.length + " states)" +
 				", delta = " + frm.format(delta) + ", mixDelta = " + m_MixDelta;
 		if (!silent) {
-			if (pa instanceof TDPlayerTTT) {
+			if (pa instanceof TDAgent) {
 				// side effect: getAlpha prints some  
 				// debug info, if verbose1,2>0 in source code getAlpha:
 				System.out.println("alpha final: "+	
-									frm.format(((TDPlayerTTT) pa).getAlpha()));
+									frm.format(((TDAgent) pa).getAlpha()));
 				System.out.println(m_msg);
 			}
 		}

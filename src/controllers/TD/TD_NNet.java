@@ -4,7 +4,6 @@ import java.io.*;
 
 import org.jfree.data.xy.XYSeries;
 
-import games.TicTacToe.TDPlayerTTT;
 import tools.LineChartSuccess;
 
 /**
@@ -268,7 +267,7 @@ public class TD_NNet implements TD_func, Serializable {
 	/**
 	 *  Adjust learn parameters ALPHA and BETA. <p>
 	 *  
-	 *  Known caller: {@link TDPlayerTTT#trainAgent}
+	 *  Known caller: {@link TDAgent#trainAgent}
 	 */
     public void finishUpdateWeights() {
         ALPHA = ALPHA * m_AlphaChangeRatio;

@@ -29,8 +29,10 @@ import controllers.AgentBase;
 import controllers.HumanPlayer;
 import controllers.MinimaxAgent;
 import controllers.MCTS.MCTSAgentT;
+import controllers.TD.TDAgent;
 import games.Arena.Task;
-import games.TicTacToe.TDPlayerTTT;
+import games.TicTacToe.FeatureTTT;
+import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import params.TDParams;
 import tools.LineChartSuccess;
 import tools.Measure;
@@ -110,7 +112,10 @@ public class XArenaFuncs
 //		this.m_NetHasSigmoid = m_xab.tdPar.withSigType.getState();
 		
 		if (sAgent.equals("TDS")) {
-			pa = new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);
+			Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar.getFeatmode());
+			pa = new TDAgent(sAgent, m_xab.tdPar, feat, maxGameNum);
+			//pa = m_xab.m_game.makeTDSAgent(sAgent,m_xab.tdPar,maxGameNum); 
+				// new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);
 //		} else if (sAgent.equals("TDS2")) {
 //			pa = new TDPlayerTT2(sAgent,m_xab.tdPar,maxGameNum);
 //		} else if (sAgent.equals("TDS-NTuple-2")) {
@@ -174,11 +179,10 @@ public class XArenaFuncs
 			}else { // all the trainable agents:
 				if (m_PlayAgents[n]==null) {
 					if (sAgent.equals("TDS")) {
-						pa = new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);
+						//pa = m_xab.m_game.makeTDSAgent(sAgent, m_xab.tdPar, maxGameNum);
+						Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar.getFeatmode());
+						pa = new TDAgent(sAgent, m_xab.tdPar, feat, maxGameNum);
 					}					
-//					if (sAgent.equals("TDS2")) {
-//						pa = new TDPlayerTT2(sAgent,m_xab.tdPar,maxGameNum);
-//					}					
 				} else {
 					if (!sAgent.equals(m_PlayAgents[n].getName()))
 						throw new RuntimeException("Current agent for player "+n+" is "+m_PlayAgents[n].getName()
@@ -215,8 +219,17 @@ public class XArenaFuncs
 		int maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		int gameNum=0;
 
-		pa = this.constructAgent(sAgent, xab);
-		if (pa==null) throw new RuntimeException("No suitable class for sAgent = " + sAgent);
+		try {
+			pa = this.constructAgent(sAgent, xab);
+			if (pa==null) throw new RuntimeException("No suitable class for sAgent = " + sAgent);
+			
+		}  catch(RuntimeException e) 
+		{
+			MessageBox.show(xab, 
+					e.getMessage(), 
+					"Warning", JOptionPane.WARNING_MESSAGE);
+			return pa;			
+		} 
 		
 		if (lChart==null) lChart=new LineChartSuccess("Training Progress L","gameNum","success against Minimax",
 													  true,false);
@@ -326,8 +339,17 @@ public class XArenaFuncs
 		//ValItPlayer valit_agent = trainedValItPlayer(maxGameNumV);
 		
 		for (int i=0; i<trainNum; i++) {
-			m_PlayAgents[0] = constructAgent(sAgent, xab);
-			if (m_PlayAgents[0]==null) throw new RuntimeException("No suitable class for sAgent = " + sAgent);
+			try {
+				m_PlayAgents[0] = constructAgent(sAgent, xab);
+				if (m_PlayAgents[0]==null) throw new RuntimeException("No suitable class for sAgent = " + sAgent);				
+			}  catch(RuntimeException e) 
+			{
+				MessageBox.show(xab, 
+						e.getMessage(), 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+				return;			
+			} 
+
 
 			m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,9,1);
 	        m_evaluator2 = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,2,1);
@@ -426,7 +448,7 @@ public class XArenaFuncs
 		StateObservation so;
 		Types.ACTIONS actBest;
 		double[] VTable = null;
-		String[] playersWithFeatures = {"TicTacToe.ValItPlayer","TicTacToe.TDPlayerTTT","TicTacToe.CMAPlayer"}; 
+		String[] playersWithFeatures = {"TicTacToe.ValItPlayer","controllers.TD.TDAgent","TicTacToe.CMAPlayer"}; 
 		
 		String paX_string = paX.stringDescr();
 		String paO_string = paO.stringDescr();
@@ -596,13 +618,29 @@ public class XArenaFuncs
 		for (int c=0; c<competitionNum; c++) {
 			int player;
 			
-			paX = this.constructAgent(AgentX, xab);
-			if (paX==null) throw new RuntimeException("No suitable class for AgentX = " + AgentX);
+			try {
+				paX = this.constructAgent(AgentX, xab);
+				if (paX==null) throw new RuntimeException("No suitable class for AgentX = " + AgentX);
+			}  catch(RuntimeException e) 
+			{
+				MessageBox.show(xab, 
+						e.getMessage(), 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+				return winrate;			
+			} 
 			paX.setMaxGameNum(maxGameNum);
 			paX.setGameNum(0);
 			
-			paO = this.constructAgent(AgentO, xab);
-			if (paO==null) throw new RuntimeException("No suitable class for AgentO = " + AgentO);
+			try {
+				paO = this.constructAgent(AgentO, xab);
+				if (paO==null) throw new RuntimeException("No suitable class for AgentO = " + AgentO);
+			}  catch(RuntimeException e) 
+			{
+				MessageBox.show(xab, 
+						e.getMessage(), 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+				return winrate;			
+			} 
 			paO.setMaxGameNum(maxGameNum);
 			paO.setGameNum(0);
 			
@@ -676,12 +714,12 @@ public class XArenaFuncs
 			f.println("alpha=" + alpha + ";  lambda=" + lambda + "; trained agents=" + competitionNum 
 					  + ",  maxGameNum=" +maxGameNum);
 			f.print(AgentX);
-			if (paX instanceof TDPlayerTTT) 
-				f.print("("+((TDPlayerTTT)paX).getFeatmode()+")");
+			if (paX instanceof TDAgent) 
+				f.print("("+((TDAgent)paX).getFeatmode()+")");
 			f.print(" vs. ");  
 			f.print(AgentO);
-			if (paO instanceof TDPlayerTTT) 
-				f.print("("+((TDPlayerTTT)paO).getFeatmode()+")");
+			if (paO instanceof TDAgent) 
+				f.print("("+((TDAgent)paO).getFeatmode()+")");
 			f.println(); f.println();
 			f.println("C; X-win; tie; O-win; X success rate; O success rate");
 			for (int c=0; c<competitionNum; c++) {

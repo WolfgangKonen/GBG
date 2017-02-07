@@ -22,8 +22,10 @@ import controllers.PlayAgent.AgentState;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
 import games.Arena.Task;
+import games.TicTacToe.FeatureTTT;
 import games.TicTacToe.LaunchTrainTTT;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import params.TDParams;
 import tools.MessageBox;
 import tools.StatusBar;
 import tools.Types;
@@ -37,7 +39,7 @@ import tools.Types;
  * Run this class from the {@code main} in {@link LaunchArenaTTT}) for the 
  * TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  */
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
@@ -107,9 +109,19 @@ abstract public class Arena extends JPanel implements Runnable {
 		int n;
 		gb.showGameBoard(this);
 		
-		m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
-		// ensure that m_PlayAgents has the agents selected, even if the first 
-		// thing is to issue a save agent command
+		try {
+			m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
+			// ensure that m_PlayAgents has the agents selected, even if the first 
+			// thing is to issue a save agent command
+		} catch(RuntimeException e) 
+		{
+			MessageBox.show(m_xab, 
+					e.getMessage(), 
+					"Warning", JOptionPane.WARNING_MESSAGE);
+			taskState = Task.IDLE;		
+			setStatusMessage("Done.");
+			return;			
+		}
 
 		while(true)
 		{
@@ -332,9 +344,9 @@ abstract public class Arena extends JPanel implements Runnable {
 					else {
                         vtable = new double[so.getNumAvailableActions() + 1];
                         boolean DEBG=false; //false;true;
-                        int nEmpty = ((StateObserver2048) so).getNumEmptyTiles();
-                        if (DEBG && (nEmpty<4)) {
-                        	actBest = getNextAction_DEBG(so,pa,p2,vtable);
+                        int N_EMPTY = 4;
+                        if (DEBG) {
+                        	actBest = getNextAction_DEBG(so,pa,p2,vtable,N_EMPTY);
                         } else {	
                             actBest = pa.getNextAction(so, false, vtable, true);
                         }
@@ -417,15 +429,30 @@ abstract public class Arena extends JPanel implements Runnable {
 	 * In addition, it prints the best i and the number of rollouts (iterations) in which the 
 	 * game terminates.
 	 * 
+	 * Currently this function is only for StateObserver2048 so. Otherwise it returns the
+	 * 'normal' pa.getNextAction().
+	 * 
 	 * @param so
 	 * @param pa
 	 * @param p2
 	 * @param vtable
+	 * @param N_EMPTY return the 'normal' pa.getNextAction(), if number of empty cells is 
+	 * 		greater or equal to N_EMPTY
 	 * @return the chosen action from the last call of pa.getNextAction()
 	 */
-	Types.ACTIONS  getNextAction_DEBG(StateObservation so, PlayAgent pa, MCTSAgentT p2, double[] vtable) {
+	Types.ACTIONS  getNextAction_DEBG(StateObservation so, PlayAgent pa, MCTSAgentT p2, 
+			double[] vtable, int N_EMPTY) {
 		Types.ACTIONS actBest=null;
         double MAXSCORE = 3932156;
+        int nEmpty;
+        if (so instanceof StateObserver2048) {
+        	nEmpty = ((StateObserver2048) so).getNumEmptyTiles();        	
+        } else {
+        	return pa.getNextAction(so, false, vtable, true);
+        }
+        if (nEmpty>=N_EMPTY) 
+        	return pa.getNextAction(so, false, vtable, true);
+
     	for (int k=0; k<3; k++) {
             actBest = p2.getNextAction(so, false, vtable, true);
             System.out.print("p2 ["+p2.getName()+"]: ");
@@ -500,6 +527,25 @@ abstract public class Arena extends JPanel implements Runnable {
 	 * @return
 	 */
 	abstract public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose);
+
+//	public PlayAgent makeTDSAgent(String name, TDParams tdPar, int maxGameNum){
+//		throw new RuntimeException("No TDAgent available for game "+this.getGameName());
+//	}
+
+	/**
+	 * Factory pattern method: make a new {@link Feature} tailored to a specific game. <br>
+	 * (We delegate this task to derived classes ArenaXYZ, since they usually 
+	 * require a game-tailored FeatureXYZ.) <p>
+	 * 
+	 * If the derived class does not override {@link #makeFeatureClass(int)}, 
+	 * the default behavior is to throw a {@link RuntimeException}.
+	 * 
+	 * @param featmode
+	 * @return
+	 */
+	public Feature makeFeatureClass(int featmode) {
+		throw new RuntimeException("No Feature class available for game "+this.getGameName()+" (needed for TDS)");
+	}
 
 	/**
 	 * This method is called from {@link #run()} and it has to be overridden by 

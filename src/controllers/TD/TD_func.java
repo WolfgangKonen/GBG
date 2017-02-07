@@ -1,6 +1,4 @@
 package controllers.TD;
-//import Nimm3.N3TDPlayer;
-//import controllers.TD.TDPlayerTTT;
 
 /**
  * The abstract interface for the value function approximators.

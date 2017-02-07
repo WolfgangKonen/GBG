@@ -38,7 +38,7 @@ public class TDPlayerTTT extends TDAgent implements PlayAgent,Serializable {
 	 * @param tdPar
 	 */
 	public TDPlayerTTT(String name, TDParams tdPar) {
-		super(name, tdPar);
+		super(name, tdPar, new FeatureTTT(tdPar.getFeatmode()));
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class TDPlayerTTT extends TDAgent implements PlayAgent,Serializable {
 	 * @param maxGameNum
 	 */
 	public TDPlayerTTT(String name, TDParams tdPar, int maxGameNum) {
-		super(name, tdPar, maxGameNum);
+		super(name, tdPar, new FeatureTTT(tdPar.getFeatmode()), maxGameNum);
 	}
 
 	public Feature makeFeatureClass(int featmode) {

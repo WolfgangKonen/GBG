@@ -25,11 +25,11 @@ import javax.swing.JTextField;
  * <li> <b>epsilon</b>: 	[0.1] initial probability of random move 
  * <li> <b>epsilonFinal</b>:[0.0] final probability of random move  
  * <li> <b>lambda</b>: 		[0.0] eligibility trace parameter 
- * 	(only relevant for {@link games.TicTacToe.TDPlayerTTT})
+ * 	(only relevant for {@link controllers.TD.TDAgent})
  * <li> <b>gamma</b>: 		[1.0] discount parameter 
  * </ul> 
  * 
- * @see games.TicTacToe.TDPlayerTTT
+ * @see controllers.TD.TDAgent
  * @see games.XArenaButtons
  */
 public class TDParams extends Frame implements Serializable

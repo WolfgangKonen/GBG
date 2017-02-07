@@ -9,7 +9,7 @@ import tools.Types;
  * <p>
  * Known implementations: <ul>
  * <li> for TicTacToe:  {@link controllers.MinimaxAgent}, 
- * 						{@link games.TicTacToe.TDPlayerTTT}, ValItPlayer, 
+ * 						{@link controllers.TD.TDAgent}, ValItPlayer, 
  * 						{@link controllers.RandomAgent}, 
  * 						{@link controllers.HumanPlayer},
  * 						{@link controllers.MCTS.MCTSAgentT}		

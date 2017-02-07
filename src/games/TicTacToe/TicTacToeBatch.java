@@ -19,8 +19,10 @@ import org.jfree.data.xy.XYSeries;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
+import controllers.TD.TDAgent;
 import games.ArenaTrain;
 import games.Evaluator;
+import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaButtons;
@@ -137,7 +139,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 
 	/**
 	 * Perform measurements in 'batch' mode (different nets (LIN/BP), with and w/o sigmoid,  
-	 * always TDPlayerTTT, always feature set T3). Write results to file TicTacToe.batch.csv.
+	 * always TDAgent, always feature set T3). Write results to file TicTacToe.batch.csv.
 	 * @param trainNum	how many agents to train
 	 * @param alpha		learn parameter (its start value, decreasing) 
 	 * @param alphaFinal	its final value
@@ -173,7 +175,9 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 				//double alphaChangeRatio = Math.pow(alphaFinal/alpha, 1.0/maxGameNum);
 				// loop over the agent realizations:
 				for (int i=0; i<trainNum; i++) {
-					m_PlayAgentX = new TDPlayerTTT("TDS",tdPar, maxGameNum);
+					Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
+					m_PlayAgentX = new TDAgent("TDS", tdPar, feat, maxGameNum);
+					//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar, maxGameNum);
 			        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 
 					if (i==0) {
@@ -218,7 +222,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 	} // batch1
 
 	/**
-	 * Perform measurements in 'batch' mode for {@link TDPlayerTTT} (different feature vectors, 
+	 * Perform measurements in 'batch' mode for {@link TDAgent} (different feature vectors, 
 	 * always backprop).
 	 * Write results to file TicTacToe.feat.csv and TicTacToe.feat.detail.csv. 
 	 * These files can be loaded into Excel for subsequent analysis (CAUTION: the  
@@ -241,7 +245,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 						// false: output = output activation; true: output = sigmoid(output activation)
 		int featArr[] = {2}; //{1,2,3,4,9};
 		//double EPS = 0.0;	 	// @deprecated, use epsilon
-		double epsilon = 0.3;   // controls explorative moves, see TDPlayerTTT
+		double epsilon = 0.3;   // controls explorative moves, see TDAgent
 		TDParams tdPar = new TDParams();
 		tdPar.setAlpha(alpha);
 		tdPar.setAlphaFinal(alphaFinal);
@@ -294,8 +298,9 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 					// i-loop over the agent realizations:
 					for (int i=0; i<trainNum; i++) {
 						long istarttime = System.currentTimeMillis();
-						//m_PlayAgentX = new TDPlayerTTT(tdPar, EPS, m_NetHasSigmoid, m_NetIsLinear, featmode,maxGameNum);
-						m_PlayAgentX = new TDPlayerTTT("TDS",tdPar,maxGameNum);
+						//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar,maxGameNum);
+						Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
+						m_PlayAgentX = new TDAgent("TDS", tdPar, feat, maxGameNum);
 				        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 						if (i==0) {
 							System.out.println(m_PlayAgentX.stringDescr());
@@ -530,7 +535,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 //	} // batch3
 	
 	/**
-	 * Perform measurements in 'batch' mode for {@link TDPlayerTTT} (different lambda, epochs 
+	 * Perform measurements in 'batch' mode for {@link TDAgent} (different lambda, epochs 
 	 * always lin).
 	 * Write results to file TicTacToe.elig.csv and TicTacToe.elig.detail.csv. 
 	 * These files can be loaded into Excel for subsequent analysis (CAUTION: the  
@@ -566,7 +571,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 		int epochArr[] = {0,1,10}; 
 		int featArr[] = {4}; //{1,2,3,4,9};
 		//double EPS = 0.1;	// @deprecated, use epsilon 
-		double epsilon = 0.3;   // controls explorative moves, see TDPlayerTTT (0.3 for linear, 0.1 for NN)
+		double epsilon = 0.3;   // controls explorative moves, see TDAgent (0.3 for linear, 0.1 for NN)
 		int verbose=0;		// verbosity of m_evaluator2
 		TDParams tdPar = new TDParams();
 		tdPar.setAlpha(alpha);
@@ -642,8 +647,9 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 						long istarttime = System.currentTimeMillis();
 						tdPar.setLambda(lambda);
 						tdPar.setEpochs(epochMax);
-						//m_PlayAgentX = new TDPlayerTTT(tdPar, EPS, m_NetHasSigmoid, m_NetIsLinear, featmode,maxGameNum);
-						m_PlayAgentX = new TDPlayerTTT("TDS",tdPar,maxGameNum);
+						//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar,maxGameNum);
+						Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
+						m_PlayAgentX = new TDAgent("TDS", tdPar, feat, maxGameNum);
 				        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 				        		
 				        m_evaluator2 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,2,1);

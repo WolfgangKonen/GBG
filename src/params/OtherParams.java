@@ -28,7 +28,7 @@ import javax.swing.JTextField;
  * <li> <b>use Hashmap</b>	[true] Minimax: whether to use hashmap or not
  * </ul> 
  * 
- * @see games.TicTacToe.TDPlayerTTT
+ * @see controllers.TD.TDAgent
  * @see XArenaButtons
  */
 public class OtherParams extends Frame 

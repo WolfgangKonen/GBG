@@ -49,11 +49,11 @@ import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
+import controllers.TD.TDAgent;
 import tools.MessageBox;
 import tools.Types;
 import games.Arena;
 import games.XArenaButtons;
-import games.TicTacToe.TDPlayerTTT;
 import params.TDParams;
 
 public class LoadSaveTD {
@@ -142,7 +142,7 @@ public class LoadSaveTD {
 			try {
 				fos = new FileOutputStream(filePath);
 			} catch (FileNotFoundException e2) {
-				MessageBox.show(arenaFrame,"ERROR: Could not save TDPlayerTTT to " + filePath,
+				MessageBox.show(arenaFrame,"ERROR: Could not save TDAgent to " + filePath,
 						"C4Game.saveTDAgent", JOptionPane.ERROR_MESSAGE);
 				arenaGame.setStatusMessage("[ERROR: Could not save to file "
 						+ filePath + " !]");
@@ -286,8 +286,8 @@ public class LoadSaveTD {
 			try {
 				// ois = new ObjectInputStream(gs);
 				Object obj = ois.readObject();
-				if (obj instanceof TDPlayerTTT) {
-					pa = (TDPlayerTTT) obj;
+				if (obj instanceof TDAgent) {
+					pa = (TDAgent) obj;
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;
 				} else if (obj instanceof MinimaxAgent) {

@@ -100,10 +100,14 @@ abstract public class ArenaTrain extends Arena
 					e2.printStackTrace();
 				}
 
-				Evaluator m_evaluator2 = makeEvaluator(m_xfun.m_PlayAgents[n],gb,0,2,1);
-				m_evaluator2.eval();
-				m_xfun.m_PlayAgents[n].setAgentState(AgentState.TRAINED);
-				setStatusMessage(m_evaluator2.getMsg());
+				if (m_xfun.m_PlayAgents[n] != null) {
+					Evaluator m_evaluator2 = makeEvaluator(m_xfun.m_PlayAgents[n],gb,0,2,1);
+					m_evaluator2.eval();
+					m_xfun.m_PlayAgents[n].setAgentState(AgentState.TRAINED);
+					setStatusMessage(m_evaluator2.getMsg());
+				} else {
+					setStatusMessage("Done.");
+				}
 
 				enableButtons(true);
 			}
@@ -122,8 +126,12 @@ abstract public class ArenaTrain extends Arena
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
-	        setStatusMessage("MultiTrain finished: "+ m_xfun.getLastMsg());
+			if (m_xfun.m_PlayAgents[0]==null) {
+		        setStatusMessage("Done.");
+			} else {
+				m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
+		        setStatusMessage("MultiTrain finished: "+ m_xfun.getLastMsg());
+			}
 
 			enableButtons(true);
 			taskState = Task.IDLE; 

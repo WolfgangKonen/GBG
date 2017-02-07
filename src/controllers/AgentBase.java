@@ -7,8 +7,8 @@ import javax.swing.JOptionPane;
 
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
+import controllers.TD.TDAgent;
 import games.StateObservation;
-import games.TicTacToe.TDPlayerTTT;
 import tools.MessageBox;
 import tools.Types;
 
@@ -174,7 +174,7 @@ abstract public class AgentBase implements Serializable {
 	
 		String s_p = (Player==+1 ? "X" : "O");
 		String pa_string = pa.getClass().getName();
-		if (agentName.equals("TDS") & !(pa instanceof TDPlayerTTT)) {
+		if (agentName.equals("TDS") & !(pa instanceof TDAgent)) {
 			MessageBox.show(parent, 
 					"Cannot execute command. "+"Current "+s_p+" agent is not a TDSPlayer: "+ pa_string+".", 
 					"Warning", JOptionPane.WARNING_MESSAGE);

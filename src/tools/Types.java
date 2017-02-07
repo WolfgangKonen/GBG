@@ -138,7 +138,7 @@ public class Types {
     public static final String[] GUI_AGENT_LIST 	// list of available agents = list of choices in Agent Selectors
     	= {"TDS", "Minimax", "Random", "MCTS", "Human", "MC"};
     public static final String[] GUI_AGENT_INITIAL  // initial agent choice for P0, P1, ... (for up to 5 players)
-    	= {"TDS", "MCTS", "Human", "Human", "Human"};
+    	= {"MCTS", "MC", "Human", "Human", "Human"};
     public static final String[] GUI_PLAYER_NAME  // player names for P0, P1, ... (for up to 5 players)
     	//= {"P0", "P1", "P2", "P3", "P4"};
     	= {"0", "1", "2", "3", "4"};

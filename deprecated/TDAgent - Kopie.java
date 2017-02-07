@@ -42,8 +42,7 @@ import games.StateObservation;
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  */
-//abstract 
-public class TDAgent extends AgentBase implements PlayAgent,Serializable {
+abstract public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	protected TD_func m_Net;
 	private double m_epsilon = 0.1;
 	private double m_EpsilonChangeDelta = 0.001;
@@ -76,7 +75,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	public TDAgent() {
 		super();
 		TDParams tdPar = new TDParams();
-		initNet(tdPar, null, 1000);
+		initNet(tdPar, 1000);
 	}
 
 	/**
@@ -85,9 +84,9 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * 
 	 * @param tdPar
 	 */
-	public TDAgent(String name, TDParams tdPar, Feature feature) {
+	public TDAgent(String name, TDParams tdPar) {
 		super(name);
-		initNet(tdPar, feature, 1000);
+		initNet(tdPar, 1000);
 	}
 
 	/**
@@ -96,9 +95,9 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @param tdPar
 	 * @param maxGameNum
 	 */
-	public TDAgent(String name, TDParams tdPar, Feature feature, int maxGameNum) {
+	public TDAgent(String name, TDParams tdPar, int maxGameNum) {
 		super(name);
-		initNet(tdPar, feature, maxGameNum);
+		initNet(tdPar, maxGameNum);
 	}
 
 	/**
@@ -106,10 +105,10 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @param tdPar
 	 * @param maxGameNum
 	 */
-	private void initNet(TDParams tdPar, Feature feature, int maxGameNum) {
+	private void initNet(TDParams tdPar, int maxGameNum) {
 		m_tdPar = new TDParams();
 		m_tdPar.setFrom(tdPar);
-		m_feature = feature; //makeFeatureClass(tdPar.getFeatmode());
+		m_feature = makeFeatureClass(tdPar.getFeatmode());
 		//super.setFeatmode(tdPar.getFeatmode());
 		//super.setEpochMax(tdPar.getEpochs());
 		if (m_feature.getFeatmode() > 9) {
@@ -506,5 +505,5 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @param 	featmode	different modi of features to generate
 	 * @return	the Feature object
 	 */
-	//abstract public Feature makeFeatureClass(int featmode);
+	abstract public Feature makeFeatureClass(int featmode);
 }
