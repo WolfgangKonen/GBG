@@ -525,7 +525,8 @@ public class XArenaFuncs
 	 * @param xab	used only for reading parameter values from GUI members 
 	 */
 	protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb) {
-		int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
+		//int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
+		int competeNum=xab.winCompOptions.getNumGames();
 		int numPlayers = gb.getStateObs().getNumPlayers();
 		if (numPlayers!=2) {
 			MessageBox.show(xab, 
@@ -594,13 +595,15 @@ public class XArenaFuncs
 		// take settings from GUI xab
 		String AgentX = xab.getSelectedAgent(0);
 		String AgentO = xab.getSelectedAgent(1);
-		int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
-		int competitionNum=Integer.valueOf(xab.CompetitionsT.getText()).intValue();
+		//int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
+		//int competitionNum=Integer.valueOf(xab.CompetitionsT.getText()).intValue();
+		int competeNum=xab.winCompOptions.getNumGames();
+		int competitionNum=xab.winCompOptions.getNumCompetitions();
 		int maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		int epiLength = xab.oPar.getEpiLength();
 		Evaluator m_evaluatorO=null;
-		double alpha = Double.valueOf(xab.tdPar.alphaT.getText()).doubleValue();
-		double lambda = Double.valueOf(xab.tdPar.lambdaT.getText()).doubleValue();
+		double alpha = xab.tdPar.getAlpha();
+		double lambda = xab.tdPar.getLambda();
 //		this.m_NetIsLinear = xab.tdPar.LinNetType.getState();
 //		this.m_NetHasSigmoid = xab.tdPar.withSigType.getState();
 		
@@ -608,6 +611,8 @@ public class XArenaFuncs
 		double[][] winrateC = new double[competitionNum][3];
 		double[][] evalC = new double[competitionNum][2];
 		PlayAgent paX=null, paO=null;
+		if (verbose>0) System.out.println("Multi-Competition: "+competitionNum+" competitions with "
+										 +competeNum+" games each, "+AgentX+" vs "+AgentO);
 
 		if (AgentX.equals("Human") | AgentO.equals("Human")) {
 			MessageBox.show(xab, 

@@ -14,12 +14,14 @@ import games.TicTacToe.StateObserverTTT;
  * The constructor accepts argument {@code featmode} to construct different types 
  * of feature vectors. The acceptable values for {@code featmode} are
  * retrieved with {@link #getAvailFeatmode()}.
+ * 
+ * Class {@link FeatureTTT} is derived from {@link TicTDBase} in order to access 
+ * the protected method {@link TicTDBase#prepareInputVector(int, int[][]) to do 
+ * the main work.
  *
  * @author Wolfgang Konen, TH Köln, Nov'16
  */
 public class FeatureTTT extends TicTDBase implements Feature, Serializable {
-	// class FeatureTTT is derived from TicTDBase in order to access the protected
-	// method TicTDBase.prepareInputVector.	
 	
 	public FeatureTTT(int featmode) {
 		super("", featmode);

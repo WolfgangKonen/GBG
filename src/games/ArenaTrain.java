@@ -84,7 +84,7 @@ abstract public class ArenaTrain extends Arena
 			n = m_xab.getNumParamBtn();
 			agentN = m_xab.getSelectedAgent(n);
 			setStatusMessage("Params for "+agentN+ " ...");
-			m_tabs.showParamTabs(this,agentN);
+			m_tabs.showParamTabs(this,!m_tabs.isVisible(),agentN);
 			taskState = Task.IDLE; 
 			break;
 		case TRAIN: 

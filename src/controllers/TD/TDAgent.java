@@ -109,7 +109,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	private void initNet(TDParams tdPar, Feature feature, int maxGameNum) {
 		m_tdPar = new TDParams();
 		m_tdPar.setFrom(tdPar);
-		m_feature = feature; //makeFeatureClass(tdPar.getFeatmode());
+		m_feature = feature; 
 		//super.setFeatmode(tdPar.getFeatmode());
 		//super.setEpochMax(tdPar.getEpochs());
 		if (m_feature.getFeatmode() > 9) {

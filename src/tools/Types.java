@@ -150,7 +150,11 @@ public class Types {
     public static final String GUI_O_PLAYER = "MCTS";	  // "Human";"MCTS";
 
 	public static final int GUI_ARENATRAIN_WIDTH = 465;
-	public static final int GUI_ARENATRAIN_HEIGHT = 430;
+	public static final int GUI_ARENATRAIN_HEIGHT = 390;
+	public static final int GUI_WINCOMP_WIDTH = 350;
+	public static final int GUI_WINCOMP_HEIGHT = 300;
+	public static final int GUI_PARAMTABS_WIDTH = 464;	// wide enough to hold 6 tabs
+	public static final int GUI_PARAMTABS_HEIGHT = 300;
 	
 	public static final int GUI_HELPFONTSIZE = 14;
 

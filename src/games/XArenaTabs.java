@@ -4,12 +4,14 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import tools.Types;
+
 public class XArenaTabs extends JFrame 
 {
 	JTabbedPane tp;
 	
 	public XArenaTabs(Arena arena) {
-		super("TicTacToe Parameters");
+		super(arena.getGameName()+" Parameters");
 		//addWindowListener(new WindowClosingAdapter(true));
 		tp = new JTabbedPane();
 //		for (int i = 0; i < 2; ++i) {
@@ -50,8 +52,8 @@ public class XArenaTabs extends JFrame
 	public void setEnabledAt(int k) {
 		tp.setEnabledAt(k, true);
 	}
-	public void showParamTabs(Arena ticGame,String selectedAgent) {
-		ticGame.m_tabs.setVisible(true);
+	public void showParamTabs(Arena ticGame,boolean isVisible,String selectedAgent) {
+		ticGame.m_tabs.setVisible(isVisible);
 		// place window TD params on the right side of the main window
 		int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
 		int y = ticGame.m_xab.getLocation().y;
@@ -60,8 +62,7 @@ public class XArenaTabs extends JFrame
 			y = ticGame.m_TicFrame.getY();
 		}
 		ticGame.m_tabs.setLocation(x,y);
-		ticGame.m_tabs.setSize(464,300);		// wide enough to hold 6 tabs
-//		{"TDS","MCTS","Other"};
+		ticGame.m_tabs.setSize(Types.GUI_PARAMTABS_WIDTH,Types.GUI_PARAMTABS_HEIGHT);		
 		tp.setSelectedIndex(0);
 		if (selectedAgent.equals("MCTS")) tp.setSelectedIndex(1);
 		if (selectedAgent.equals("Minimax")) tp.setSelectedIndex(2);

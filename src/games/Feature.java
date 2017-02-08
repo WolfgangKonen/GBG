@@ -12,7 +12,7 @@ package games;
  * The acceptable values for {@code featmode} in a 
  * certain child class are retrieved with {@link #getAvailFeatmode()}.
  *
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Feb'16
  */
 public interface Feature {
 	public double[] prepareFeatVector(StateObservation so);

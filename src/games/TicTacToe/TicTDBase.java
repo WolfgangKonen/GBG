@@ -45,7 +45,7 @@ import controllers.MinimaxAgent;
  * Class {@link TicTDBase} is an abstract class because it does not implement 
  * {@link AgentBase#getScore(games.StateObservation)}. This is left for the derived 
  * classes. <p>
- * Known classes having {@link TicTDBase} as super class: {@link controllers.TD.TDAgent}
+ * Known classes having {@link TicTDBase} as super class: {@link FeatureTTT}
  * 
  * @author Wolfgang Konen, TH Köln, Dec'08 - Nov'16
  */

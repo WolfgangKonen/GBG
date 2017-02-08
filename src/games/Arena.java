@@ -166,11 +166,13 @@ abstract public class Arena extends JPanel implements Runnable {
 				break;				
 			case PLAY: 
 				//enableButtons(false);		// see Play.addActionListener in XArenaButtons
+				gb.showGameBoard(this);
 				gb.clearBoard(false,true);
 				PlayGame();
 				enableButtons(true);
 				break;
 			case INSPECTV:
+				gb.showGameBoard(this);
 				gb.clearBoard(false,true);
 				gb.setActionReq(true);
 				InspectGame();

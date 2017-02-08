@@ -31,7 +31,7 @@ public class XArenaButtons extends JPanel
 	XArenaFuncs 		m_xfun;	
 	public Arena	 	m_game;	// a reference to the ArenaTTT object passed in with the constructor
 	XArenaButtons		m_xab;
-	OptionsComp 		winCompOptions = new OptionsComp();
+	public OptionsComp 		winCompOptions = new OptionsComp();
 	//private Random rand;
 	int numPlayers;
 	int m_numParamBtn;			// number of the last param button pressed
@@ -42,20 +42,20 @@ public class XArenaButtons extends JPanel
 	JButton MultiTrain;
 	JButton Play;
 	JButton InspectV;
-	//JButton TDparB;		// now in TicTacToeTabs
+	//JButton TDparB;			// now in TicTacToeTabs
 	//JButton CMAparB;
 	//JButton TCparB;
 	//JButton OparB;
 	JButton NTupShowB;
 	TextField GameNumT;
 	TextField TrainNumT;
-	TextField CompeteNumT;
-	TextField CompetitionsT;
+	//TextField CompeteNumT;	// now in OptionsComp winCompOptions
+	//TextField CompetitionsT;	//
+	//Label Competitions_L;		//
+	//Label CompeteG_L;			//
 	Label GameNumL;
 	Label TrainNumL;
 	Label AgentX_L;
-	Label Competitions_L;
-	Label CompeteG_L;
 	Choice[] choiceAgent; 
 	TDParams tdPar = new TDParams();
 //	RpropParams rpPar = new RpropParams();
@@ -108,8 +108,8 @@ public class XArenaButtons extends JPanel
 		AgentO = Types.GUI_O_PLAYER;  // "Human";"ValIt";
 		GameNumT=new TextField("1000", 5); //("10000", 5);
 		TrainNumT=new TextField("25", 5);
-		CompeteNumT=new TextField("3", 5);
-		CompetitionsT=new TextField("1", 5);
+		//CompeteNumT=new TextField("3", 5);
+		//CompetitionsT=new TextField("1", 5);
 
 		MultiTrain=new JButton("MultiTrain");
 		Play=new JButton("Play");
@@ -118,8 +118,8 @@ public class XArenaButtons extends JPanel
 		GameNumL = new Label("Train Games");
 		TrainNumL = new Label("Agents trained");
 		AgentX_L = new Label("Agent Type: ");
-		CompeteG_L = new Label("Games/Comp:");
-		Competitions_L = new Label("Competitions:");
+		//CompeteG_L = new Label("Games/Comp:");
+		//Competitions_L = new Label("Competitions:");
 		
 		for (int n=0; n<numPlayers; n++) {
 			choiceAgent[n] = new Choice();
@@ -319,36 +319,43 @@ public class XArenaButtons extends JPanel
 		}
 		if (numPlayers<3) q.add(new JPanel());
 		
-		JPanel tp = new JPanel();
-		tp.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
+		JPanel p1 = new JPanel();
+		p1.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
 		
-		tp.add(GameNumL);
-		tp.add(GameNumT);
-		tp.add(new Canvas());
-		tp.add(new Canvas());
+		p1.add(GameNumL);
+		p1.add(GameNumT);
+		p1.add(new Canvas());
+		p1.add(new Canvas());
 
-		tp.add(TrainNumL);
-		tp.add(TrainNumT);
-		tp.add(MultiTrain);
-		tp.add(new Canvas());
+		JPanel p2 = new JPanel();
+		p2.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
 
-		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
+		p2.add(TrainNumL);
+		p2.add(TrainNumT);
+		p2.add(new Canvas());
+		p2.add(new Canvas());
+
+		JPanel p3 = new JPanel();
+		p3.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
 	
-		p.add(CompeteG_L);
-		p.add(CompeteNumT);
-		p.add(Competitions_L);	
-		p.add(CompetitionsT); 
+		/*  --- These button functions are now in the OptionsComp winCompOptions ---
+		p3.add(CompeteG_L);
+		p3.add(CompeteNumT);
+		p3.add(Competitions_L);	
+		p3.add(CompetitionsT); 
+		*/
 
-		p.add(Play);
-		p.add(new Canvas());
-		p.add(NTupShowB);		
-		p.add(InspectV);
+		p3.add(Play);
+		p3.add(MultiTrain);
+		p3.add(NTupShowB);		
+		p3.add(InspectV);
 
 		JPanel ptp = new JPanel();
 		ptp.setLayout(new GridLayout(0,1,10,10));	// rows,columns,hgap,vgap
-		ptp.add(tp);
-		ptp.add(p);
+		ptp.add(p1);
+		ptp.add(p2);
+		ptp.add(p3);
+		// adding to ptp three objects of equal height helps the layout manager to balance the height distribution
 		
 		/*  --- These button functions are now in the menu ---
 		p.add(Compete);
@@ -366,7 +373,9 @@ public class XArenaButtons extends JPanel
 		add(ptp,java.awt.BorderLayout.CENTER);
 		//add(s,java.awt.BorderLayout.SOUTH);
 		
-		// size of window: see LaunchArenaTTT::init() or LaunchAppletTTT::init()
+		// infoPanel (StatusMessage) is in Arena.java
+		
+		// size of window: see Types.GUI_ARENATRAIN_WIDTH,Types.GUI_ARENATRAIN_HEIGHT
 
 	} // constructor XArenaButtons
 

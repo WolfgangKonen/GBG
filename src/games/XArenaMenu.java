@@ -65,6 +65,7 @@ public class XArenaMenu extends JMenuBar {
 	private JFrame m_frame;
 	private int selectedAgent = 0;
 	private int numPlayers;
+	private boolean winCompVisible=false;
 
 	// private final String agentList[] = { "Human", "Minimax", "TDS", "Random"
 	// };
@@ -93,7 +94,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem = new JMenuItem("Param Tabs");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_arena.m_tabs.showParamTabs(m_arena,m_arena.m_xab.getSelectedAgent(0));
+				m_arena.m_tabs.showParamTabs(m_arena,!m_arena.m_tabs.isVisible(),m_arena.m_xab.getSelectedAgent(0));
 			}
 		});
 		menuItem.setToolTipText(TIPEVALUATE);
@@ -252,11 +253,11 @@ public class XArenaMenu extends JMenuBar {
 		// ==============================================================
 		// Competition-Options
 		// ==============================================================
-		menuItem = new JMenuItem("Competition-Options");
+		menuItem = new JMenuItem("Competition Options");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_arena.m_xab.winCompOptions.setVisible(true);
-				//ticGame.c4Buttons.setWindowPos(ticGame.winCompOptions);
+				winCompVisible = !m_arena.m_xab.winCompOptions.isVisible();
+				m_arena.m_xab.winCompOptions.showOptionsComp(m_arena,winCompVisible);
 			}
 		});
 		menuItem.setToolTipText("Choose the options for single- and multi-Competitions");
@@ -276,6 +277,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.setToolTipText("<html><body>Start a single competition between the selected Agents "
 				+ " The results are printed to <br>"
 				+ "the console</body></html>");
+		menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);
 		menuItem = new JMenuItem("Swap Compete");
 		menuItem.addActionListener(new ActionListener() {
@@ -288,6 +290,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.setToolTipText("<html><body>Start a single competition between the selected Agents "
 				+ "in swapped order. The results <br>"
 				+ "are printed to the console</body></html>");
+		menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);
 
 		// ==============================================================
@@ -305,6 +308,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.setToolTipText("<html><body>Start a multi-competition between the selected "
 				+ "Agents (do 'Competions' times a single competition). The results are printed to <br>"
 				+ "the console and saved to bin/TicTacToe.comp.csv.</body></html>");
+		menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);
 
 		
