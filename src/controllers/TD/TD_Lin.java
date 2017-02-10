@@ -213,7 +213,7 @@ public class TD_Lin implements TD_func, Serializable {
 				int index=0;
 				for (k=0;k<m;k++)
 				{
-					for (i=0;i<=n;i++) {
+					for (i=0;i<=n;i++,index++) {
 						// gradSum contains the sum over all epoch iterations of 
 						// - gradient of loss function 0.5 error^2 
 						v[i][k]+=ALPHA*gradSum[i][k];
@@ -222,7 +222,6 @@ public class TD_Lin implements TD_func, Serializable {
 						//if (i==1) System.out.println("v[1]="+v[i][k]+", wghtChng="+ ALPHA*gradSum[i][k]);
 						gradients[index] = - gradSum[i][k];		// note the "-" sign !!
 						flatWeights[index] = v[i][k];			
-						index++;
 
 						gradSum[i][k]=0;				// reset gradient sum (for next epoch)
 					}

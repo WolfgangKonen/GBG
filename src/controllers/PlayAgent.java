@@ -8,11 +8,12 @@ import tools.Types;
  * The abstract interface for the game playing agents.
  * <p>
  * Known implementations: <ul>
- * <li> for TicTacToe:  {@link controllers.MinimaxAgent}, 
- * 						{@link controllers.TD.TDAgent}, ValItPlayer, 
- * 						{@link controllers.RandomAgent}, 
- * 						{@link controllers.HumanPlayer},
- * 						{@link controllers.MCTS.MCTSAgentT}		
+ * <li> {@link controllers.MinimaxAgent}, 
+ * 		{@link controllers.RandomAgent}, 
+ * 		{@link controllers.HumanPlayer},
+ * 		{@link controllers.MC.MCAgent}		
+ * 		{@link controllers.MCTS.MCTSAgentT}		
+ * 		{@link controllers.TD.TDAgent}, 
  * </ul> 
  *
  * @author Wolfgang Konen, TH Köln, Nov'16

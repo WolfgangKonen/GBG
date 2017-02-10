@@ -401,7 +401,73 @@ public class StateObserver2048 implements StateObservation{
         return 1;
     }
 
-    public boolean isLegalAction(Types.ACTIONS action) {
+	//
+	// The following four functions are only needed for the n-tuple interface:
+	//
+	/**
+	 * @return the number of board cells
+	 */
+	public int getNumCells() {
+		return 16;
+	}
+	
+	/**
+	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
+	 * can have (0: empty tile, 1: tile 2^1, ..., 14: tile 2^14, assuming that 2^14 is 
+	 * the highest tile we encounter. Theoretically, 2^17 is the highest tile.) 
+	 */
+	public int getNumPositionValues() {
+		return 15; 
+	}
+	
+	/**
+	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
+	 * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
+	 */
+	public int[] getBoardVector() {
+		int[] bvec = new int[getNumCells()]; 
+		int b2,k;
+        for(int row = 0, n=0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,n++) {
+            	b2 = gameBoard[row][column].getValue();
+            	for (k=0; k<getNumPositionValues(); k++) {
+            		// find the exponent k in 2^k by down-shifting:
+                    b2 = b2>>1;
+            		if (b2==0) break;
+            	}
+            	bvec[n]=k;                	
+            }
+        }
+		return bvec;   
+	}
+	
+	/**
+	 * Given a board vector from {@link #getBoardVector()} and given that the game has 
+	 * s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * <li> the first row {@code boardArray[0]} is the board vector itself
+	 * <li> the other rows are the board vectors when transforming {@code boardVector}
+	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
+	 * </ul>
+	 * @param boardVector
+	 * @return boardArray
+	 */
+	public int[][] symmetryVectors(int[] boardVector) {
+		return null;	// TODO
+	}
+
+    public String toString() {
+        String s="";
+        int[] bvec = getBoardVector();
+        for(int row = 0,n=0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,n++) {
+                s = s+bvec[n];
+            }
+            if (row<(Config.ROWS-1)) s=s+",";
+        }
+        return s;
+    }
+
+	public boolean isLegalAction(Types.ACTIONS action) {
         return availableMoves.contains(action.toInt());
     }
 
