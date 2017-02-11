@@ -19,6 +19,10 @@ public class MCAgent extends AgentBase implements PlayAgent {
     private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true
     private int nIterations = 0; 		// counts the total number of iterations
 
+    public MCAgent() {
+        this("MC");
+    }
+
     public MCAgent(String name)
     {
         super(name);

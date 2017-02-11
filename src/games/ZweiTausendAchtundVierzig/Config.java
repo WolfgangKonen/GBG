@@ -11,9 +11,9 @@ public class Config {
 
     public static final int STARTINGVALUES[] = {2,2,2,2,2,2,2,2,2,4};
 
-    public static final int NUMBEREVALUATIONS = 20;
+    public static final int NUMBEREVALUATIONS = 15;
 
-    //Heuristik Values
+    //Heuristic Values
     public static final boolean ENABLEHEURISTICS = false;
     public static final double EMPTYTILEMULTIPLIER = 0.1;
     public static final double HIGHESTTILEINCORENERMULTIPLIER = 0.7;

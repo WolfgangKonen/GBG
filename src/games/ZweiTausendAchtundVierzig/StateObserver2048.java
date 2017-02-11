@@ -11,7 +11,7 @@ import java.util.Random;
 /**
  * Created by Johannes on 18.11.2016.
  */
-public class StateObserver2048 implements StateObservation{
+public class StateObserver2048 implements StateObservation {
     private Random random = new Random();
     protected List<Tile> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves;
@@ -407,6 +407,10 @@ public class StateObserver2048 implements StateObservation{
 
     public int getScore() {
         return score;
+    }
+
+    public int getWinState() {
+        return winState;
     }
     
     public int getNumEmptyTiles() {

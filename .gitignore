@@ -12,6 +12,9 @@ TR_GBG.lnk
 *.iml
 *.settings
 
+#Ordner mit veralteten versuchen zur Parallelität
+src/games/ZweiTausendAchtundVierzig/Parallel/*
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
