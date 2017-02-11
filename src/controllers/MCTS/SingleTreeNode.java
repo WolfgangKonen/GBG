@@ -115,7 +115,8 @@ public class SingleTreeNode
         	if (c!=null) {
         		cVisits += c.nVisits;
         		if (m_player.getVerbosity()>1)
-        			System.out.println(c.m_state.toString() + ": " + c.nVisits + ", " + c.totValue/c.nVisits);
+        			System.out.println(c.m_state.toString() + ": " + c.nVisits + ", " + c.totValue*3932156/c.nVisits);
+    				//System.out.println(c.m_state.toString() + ": " + c.nVisits + ", " + c.totValue/c.nVisits);
         	}
         }
         assert cVisits==numIters : "children visits do not match numIters!";

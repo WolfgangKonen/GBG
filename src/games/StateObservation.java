@@ -9,11 +9,17 @@ import tools.Types.ACTIONS;
 /**
  * Class StateObservation observes the current state of the game, it has utility functions for
  * <ul>
- * <li> returning the available actions (getAvailableActions()), 
- * <li> advancing the state of the game with a specific action (advance()),
+ * <li> returning the available actions ({@link #getAvailableActions()}), 
+ * <li> advancing the state of the game with a specific action ({@link #advance(ACTIONS)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
- * </ul>
+ * <li> and others.
+ * </ul><p>
+ * 
+ * Note: The four methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
+ * {@link #getBoardVector()} and {@link #symmetryVectors(int[])} are only required for 
+ * the n-tuple interface. If an implementing class does not need that part, it may just 
+ * code stubs returning 0 or {@code null};
  *
  * @author Wolfgang Konen, TH Köln, Nov'16
  */
@@ -93,9 +99,9 @@ public interface StateObservation {
 	 * {@link PlayAgent#getNextAction(StateObservation, boolean, double[], boolean)}
 	 *  
 	 * @param actBest	the best action
-	 * @param vtable	one double for each action in this.getAvailableActions():
+	 * @param vtable	one double for each action in {@link #getAvailableActions()}:
 	 * 					it stores the value of that action (as given by the double[] 
-	 * 					in getNextAction) 
+	 * 					in {@code PlayAgent#getNextAction}) 
 	 */
 	public void storeBestActionInfo(ACTIONS actBest, double[] vtable); 
 	
@@ -106,7 +112,6 @@ public interface StateObservation {
 	public int getPlayer();
 
 	/**
-	 * 
 	 * @return  1 for a 1-player game (e.g. 2048),  
 	 * 			{+1,-1} for a 2-player game (e.g. TicTacToe): who moves next
 	 * 			{0,1,...,n-1} for an n-player game: who moves next
@@ -115,10 +120,43 @@ public interface StateObservation {
 	public int getPlayerPM();
 
 	/**
-	 * 
 	 * @return  1 for a 1-player game (e.g. 2048), 2 for a 2-player game
 	 * 			(e.g. TicTacToe) and so on
 	 */
 	public int getNumPlayers();
 	
+	//
+	// The following four functions are only required for the n-tuple interface.
+	// If an implementing class does not need that part, it may just code stubs 
+	// returning 0 or {@code null};
+	//
+	/**
+	 * @return the number of board cells
+	 */
+	public int getNumCells();
+	
+	/**
+	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
+	 * can have (e. g. P=3 for TicTacToe with 0:"O", 1=empty, 2="X") 
+	 */
+	public int getNumPositionValues();
+	
+	/**
+	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
+	 * position value 0, 1, 2,..., P-1.
+	 */
+	public int[] getBoardVector();
+
+	/**
+	 * Given a board vector from {@link #getBoardVector()} and given that the game has 
+	 * s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * <li> the first row {@code boardArray[0]} is the board vector itself
+	 * <li> the other rows are the board vectors when transforming {@code boardVector}
+	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
+	 * </ul>
+	 * @param boardVector
+	 * @return boardArray
+	 */
+	public int[][] symmetryVectors(int[] boardVector);
+
 }

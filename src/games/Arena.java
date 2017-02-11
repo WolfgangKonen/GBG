@@ -330,6 +330,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		gb.clearBoard(true,true);
 		gb.setActionReq(true);
 		so = gb.getStateObs();
+		
 		assert paVector.length == so.getNumPlayers() : 
 			  "Number of agents does not match so.getNumPlayers()!";
 		
@@ -337,6 +338,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		{			
 			if(gb.isActionReq()){
 				so = gb.getStateObs();
+				//int[] test= so.getBoardVector();
 				player = so.getPlayer();
 				pa = paVector[player];
 					if (pa instanceof controllers.HumanPlayer) {
