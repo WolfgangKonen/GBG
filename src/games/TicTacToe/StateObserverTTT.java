@@ -298,11 +298,12 @@ public class StateObserverTTT implements StateObservation {
 	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
 	 * position value with 0:"O", 1=empty, 2="X".
 	 */
+	@Override
 	public int[] getBoardVector() {
 		int[] bvec = new int[getNumCells()]; 
 		for (int i=0, n=0;i<3;i++)
 			for (int j=0;j<3;j++, n++) 
-            	bvec[n]=this.m_Table[i][j]+1;                					
+            	bvec[n]=this.m_Table[i][j];                					
 
 		return bvec;   
 	}

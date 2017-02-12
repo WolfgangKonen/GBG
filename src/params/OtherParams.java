@@ -56,7 +56,7 @@ public class OtherParams extends Frame
 	
 	public OtherParams(int batchMax) {
 		super("Other Parameter");
-		numEval_T = new JTextField("100");				// 
+		numEval_T = new JTextField("500");				// 
 		epiLeng_T = new JTextField("-1");				// 
 		stopTest_T = new JTextField("0");				// the defaults
 		stopEval_T = new JTextField("100");				// 

@@ -59,6 +59,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	private boolean randomSelect = false;
 	private boolean m_hasLinearNet;
 	private boolean m_hasSigmoid;
+	private boolean NORMALIZE = false; 
 	protected Feature m_feature;
 	
 	/**
@@ -131,6 +132,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal())
 				/ maxGameNum;
 		m_hasSigmoid = tdPar.hasSigmoid();
+		NORMALIZE=tdPar.getUseNormalize();
 		m_hasLinearNet = tdPar.hasLinearNet();
 		rand = new Random(System.currentTimeMillis());
 		setAgentState(AgentState.INIT);
@@ -184,15 +186,19 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
             NewSO.advance(actions[i]);
 			
 			if (NewSO.isGameOver()) {
-				// Fetch game score and normalize it to the range [0,1], since 
-				// TD_NNet may build a value function with a sigmoid function
-				// mapping to [0,1]. Then it can use only rewards in [0,1].
 				switch (so.getNumPlayers()) {
 				case 1: 
 					CurrentScore = NewSO.getGameScore();
 					break;
 				case 2: 
-					CurrentScore = (-player)*NewSO.getGameScore();
+					CurrentScore = (-1)*NewSO.getGameScore();		// CORRECT
+					// NewSO.getGameScore() returns -1, if 'player', that is the
+					// one who *made* the move to 'so', has won. If we multiply
+					// this by (-1), we get a reward +1 for a X(player=+1)- 
+					// win and *also* a reward +1 for an O(player=-1)-win.
+					// And a reward 0 for a tie.
+					//
+					//CurrentScore = (-player)*NewSO.getGameScore(); // WRONG!!
 					// so.getGameScore() returns -1, if 'player', that is the
 					// one who *made* the move to 'so', has won. If we multiply
 					// this by (-player), we get a reward +1 for a X(player=+1)- 
@@ -200,14 +206,24 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 					// And a reward 0 for a tie.
 					break;
 				default: 
-					throw new RuntimeException("TDPlayer.trainAgent does not yet "+
+					throw new RuntimeException("TDAgent.trainAgent does not yet "+
 							"implement case so.getNumPlayers()>2");
 				}
-				// Normalize to +1 (X-win), 0.5 (tie), 0.0 (O-win) for 2-player game:
-				CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
-								   		 so.getMaxGameScore(),0.0,1.0);
+				if (NORMALIZE) {
+					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid):
+					CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
+									   		 so.getMaxGameScore(),0.0,1.0);					
+				}
 			}  else {
 				CurrentScore = player * getScore(NewSO);
+										// here we ask this agent for its score estimate on NewSO
+				if (NORMALIZE) {
+					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid):
+					CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
+									   		 so.getMaxGameScore(),0.0,1.0);					
+				}
+// unclear why, but for TTT the agent has better results if there is no normalization here
+// but the normalize call 4 lines above
 			}
 			// ???? questionable: a) what happens in case of a tie and 
 			//      b) shouldn't this be in range [-1,+1]? 
@@ -229,20 +245,23 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				iBest  = i; 
 				count = 1;
 			} else if (MaxScore == CurrentScore) {
-				count++;	        
+				// If there are 'count' possibilities with the same score MaxScore, 
+				// each one has the probability 1/count of being selected.
+				// 
+				// (To understand formula, think recursively from the end: the last one is
+				// obviously selected with prob. 1/count. The others have the probability 
+				//      1 - 1/count = (count-1)/count 
+				// left. The previous one is selected with probability 
+				//      ((count-1)/count)*(1/(count-1)) = 1/count
+				// and so on.) 
+				count++;
+				if (rand.nextDouble() < 1.0/count) {
+					actBest = actions[i];
+					iBest  = i; 
+				}
 			}
         } // for
-        if (count>1) {  // more than one action with MaxScore: 
-        	// break ties by selecting one of them randomly
-        	int selectJ = (int)(rand.nextDouble()*count);
-        	for (i=0, j=0; i < actions.length; ++i) 
-        	{
-        		if (VTable[i]==MaxScore) {
-        			if (j==selectJ) actBest = actions[i];
-        			j++;
-        		}
-        	}
-        }
+ 
         assert actBest != null : "Oops, no best action actBest";
 		if (!silent) {
 			System.out.print("---Best Move: ");
@@ -399,9 +418,11 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				m_Net.updateWeights(reward, Input, finished, wghtChange);
 				// contains afterwards a m_Net.calcScoresAndElig(Input);
 
-				oldInput = Input;
+				oldInput = Input; 		// ?? should be outside else, see below
 			}
 
+			oldInput = Input; 
+			
 			if (finished) {
 				if (DEBG)
 					if (randomMove)
@@ -468,6 +489,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		String cs = getClass().getName();
 		String str = cs + ", " + (m_hasLinearNet?"LIN":"BP")
 						+ ", " + (m_hasSigmoid?"with sigmoid":"w/o sigmoid")
+						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", features:" + m_feature.getFeatmode();
 		return str;

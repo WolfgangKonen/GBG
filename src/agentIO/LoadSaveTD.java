@@ -50,6 +50,7 @@ import controllers.PlayAgent;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple.TDNTupleAgt;
 import tools.MessageBox;
 import tools.Types;
 import games.Arena;
@@ -288,6 +289,8 @@ public class LoadSaveTD {
 				Object obj = ois.readObject();
 				if (obj instanceof TDAgent) {
 					pa = (TDAgent) obj;
+				} else if (obj instanceof TDNTupleAgt) {
+					pa = (TDNTupleAgt) obj;
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;
 				} else if (obj instanceof MinimaxAgent) {
@@ -307,18 +310,18 @@ public class LoadSaveTD {
 				arenaGame.setStatusMessage("Done.");
 			} catch (IOException e) {
 				dlg.setVisible(false);
-				MessageBox.show(arenaFrame,"ERROR: Could not open file " + filePath,
+				MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
 						+ " !]");
 				e.printStackTrace();
-				throw e;
+				//throw e;
 			} catch (ClassNotFoundException e) {
 				dlg.setVisible(false);
 				MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
-				//e.printStackTrace();
-				throw e;
+				e.printStackTrace();
+				//throw e;
 			} finally {
 				if (ois != null)
 					try {

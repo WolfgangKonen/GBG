@@ -2,8 +2,11 @@ package games;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.*; 		// DecimalFormat, NumberFormat
 import java.util.Arrays;
@@ -30,9 +33,11 @@ import controllers.HumanPlayer;
 import controllers.MinimaxAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple.TDNTupleAgt;
 import games.Arena.Task;
 import games.TicTacToe.FeatureTTT;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
+import params.NTParams;
 import params.TDParams;
 import tools.LineChartSuccess;
 import tools.Measure;
@@ -129,6 +134,13 @@ public class XArenaFuncs
 //			pa = new ValItPlayer(m_xab.tdPar,this.m_NetHasSigmoid,this.m_NetIsLinear,featmode,maxGameNum);
 //		} else if (sAgent.equals("CMA-ES")) {
 //			pa = new CMAPlayer(alpha,alphaChangeRatio,m_xab.cmaPar,this.m_NetHasSigmoid,this.m_NetIsLinear,featmode);
+		} else if (sAgent.equals("TD-Ntuple")) {
+			try {
+				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, maxGameNum);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else if (sAgent.equals("Minimax")) {
 			pa = new MinimaxAgent(sAgent,m_xab.oPar);
 		} else if (sAgent.equals("Random")) {
@@ -182,6 +194,13 @@ public class XArenaFuncs
 						//pa = m_xab.m_game.makeTDSAgent(sAgent, m_xab.tdPar, maxGameNum);
 						Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar.getFeatmode());
 						pa = new TDAgent(sAgent, m_xab.tdPar, feat, maxGameNum);
+					} else if (sAgent.equals("TD-Ntuple")) {
+						try {
+							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, maxGameNum);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}					
 				} else {
 					if (!sAgent.equals(m_PlayAgents[n].getName()))
@@ -212,26 +231,29 @@ public class XArenaFuncs
 								// >0: call Evaluator after every stopTest training games
 		int stopEval;			// 0: do not stop on Evaluator; 
 								// >0: stop, if Evaluator stays true for stopEval games
+		int maxGameNum;			// maximum number of training games
 		int numEval;			// evaluate the trained agent every numEval games
 		int epiLength;			// maximum length of an episode
+		int gameNum=0;
+		int verbose=2;
+		maxGameNum = Integer.parseInt(xab.GameNumT.getText());
+		numEval = xab.oPar.getNumEval();
+
 		DecimalFormat frm = new DecimalFormat("#0.0000");
 		PlayAgent pa = null;
-		int maxGameNum = Integer.parseInt(xab.GameNumT.getText());
-		int gameNum=0;
 
 		try {
 			pa = this.constructAgent(sAgent, xab);
 			if (pa==null) throw new RuntimeException("No suitable class for sAgent = " + sAgent);
 			
-		}  catch(RuntimeException e) 
-		{
+		}  catch(RuntimeException e) {
 			MessageBox.show(xab, 
 					e.getMessage(), 
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			return pa;			
 		} 
 		
-		if (lChart==null) lChart=new LineChartSuccess("Training Progress L","gameNum","success against Minimax",
+		if (lChart==null) lChart=new LineChartSuccess("Training Progress","gameNum","success against Minimax",
 													  true,false);
 		lChart.clearAndSetXY(xab);
 		series = new XYSeries("Train X");		// "Train X" is the key of the XYSeries object
@@ -243,20 +265,22 @@ public class XArenaFuncs
 //			pa_string = pa_string + " with fitness " + ((CMAPlayer) pa).getFitfunString() +
 //			" and with " + ((CMAPlayer) pa).getNbRuns() + " restarts";
 		System.out.println(pa.stringDescr());
-		int player = 1;		// neu
 		pa.setMaxGameNum(maxGameNum);
+		pa.setNumEval(numEval);
 		pa.setGameNum(0);
-		int verbose=2;
 		System.out.println(pa.printTrainStatus());
 		
 		stopTest = xab.oPar.getStopTest();
 		stopEval = xab.oPar.getStopEval();
-		numEval = xab.oPar.getNumEval();
 		epiLength = xab.oPar.getEpiLength();
         m_evaluator1 = xab.m_game.makeEvaluator(pa,gb,stopEval,9,1);
         //m_evaluator2 = new EvaluatorTTT(pa,gb,stopEval,2);
         m_evaluator2 = xab.m_game.makeEvaluator(pa,gb,stopEval,2,1);
 
+		// Debug only: direct debug output to file debug.txt
+		//TDNTupleAgt.pstream = System.out;
+		//TDNTupleAgt.pstream = new PrintStream(new FileOutputStream("debug-TDNT.txt"));
+		
 // TODO: implement CMAPlayer correctly
 //		if (sAgent.equals("CMA-ES")) {
 //			((CMAPlayer) pa).trainLoop(maxGameNum,this,xab,verbose);
@@ -265,11 +289,12 @@ public class XArenaFuncs
 			while (pa.getGameNum()<pa.getMaxGameNum())
 			{							
 				StateObservation so = gb.chooseStartState01();
+				//StateObservation so = gb.getDefaultStartState();  // Debug only
 
 				pa.trainAgent(so,epiLength);
 				
 				gameNum = pa.getGameNum();
-				if (gameNum%numEval==0 || gameNum==1) {
+				if (gameNum%numEval==0 ) { //|| gameNum==1) {
 					System.out.println(pa.printTrainStatus());
 					xab.GameNumT.setText(Integer.toString(gameNum ) );
 					
@@ -289,6 +314,9 @@ public class XArenaFuncs
 					
 				}
 			}
+			
+			// Debug only
+			//TDNTupleAgt.pstream.close();
 			
 		} // if(sAgent)..else
 		xab.GameNumT.setText(Integer.toString(maxGameNum) );		// restore initial value (maxGameNum)

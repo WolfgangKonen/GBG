@@ -22,6 +22,7 @@ import tools.Types;
 abstract public class AgentBase implements Serializable {
 	private int m_GameNum;
 	private int	m_MaxGameNum;
+	private int m_NumEval;
 	private String m_name;
 	private AgentState m_agentState = AgentState.RAW;
 	private int epochMax=0;
@@ -119,6 +120,16 @@ abstract public class AgentBase implements Serializable {
 	public void incrementGameNum()
 	{
 		m_GameNum++;
+	}
+
+	public int getNumEval()
+	{	
+		return m_NumEval;
+	}	
+
+	public void setNumEval(int num)
+	{
+		m_NumEval=num;
 	}
 
 	/**

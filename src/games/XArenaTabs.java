@@ -23,9 +23,10 @@ public class XArenaTabs extends JFrame
 //	        tp.addTab("Tab" + i, panel);
 //		}
 
-		tp.addTab("TD pars", arena.m_xab.tdPar.getPanel());		// 0
-		tp.addTab("MCTS pars", arena.m_xab.mcPar.getPanel());		// 1
-		tp.addTab("Other pars", arena.m_xab.oPar.getPanel());		// 2
+		tp.addTab("TD pars", arena.m_xab.tdPar.getPanel());			// 0
+		tp.addTab("NT pars", arena.m_xab.tcPar.getPanel());			// 1	
+		tp.addTab("MCTS pars", arena.m_xab.mcPar.getPanel());		// 2
+		tp.addTab("Other pars", arena.m_xab.oPar.getPanel());		// 3
 //		tp.addTab("RP pars", arena.m_xab.rpPar.getPanel());		// --1
 //		tp.addTab("TC pars", arena.m_xab.tcPar.getPanel());		// --2
 //		tp.addTab("CMA pars", arena.m_xab.cmaPar.getPanel());		// --4
@@ -64,8 +65,9 @@ public class XArenaTabs extends JFrame
 		ticGame.m_tabs.setLocation(x,y);
 		ticGame.m_tabs.setSize(Types.GUI_PARAMTABS_WIDTH,Types.GUI_PARAMTABS_HEIGHT);		
 		tp.setSelectedIndex(0);
-		if (selectedAgent.equals("MCTS")) tp.setSelectedIndex(1);
-		if (selectedAgent.equals("Minimax")) tp.setSelectedIndex(2);
+		if (selectedAgent.equals("TD-Ntuple")) tp.setSelectedIndex(1);
+		if (selectedAgent.equals("MCTS")) tp.setSelectedIndex(2);
+		if (selectedAgent.equals("Minimax")) tp.setSelectedIndex(3);
 		//if (selectedAgent.equals("CMA-ES")) tp.setSelectedIndex(4);
 	}
 

@@ -21,6 +21,7 @@ import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple.TDNTupleAgt;
 import games.TicTacToe.LaunchTrainTTT;
 import tools.MessageBox;
 import tools.ShowBrowser;
@@ -153,7 +154,10 @@ public class XArenaMenu extends JMenuBar {
 			menuItem = new JMenuItem(strLoad);
 			menuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					loadAgent(j);
+					try {
+						loadAgent(j);						
+					} catch (Exception exc) {						
+					}
 				}
 			});
 			menuItem.setToolTipText(TIPLOAD);
@@ -466,19 +470,35 @@ public class XArenaMenu extends JMenuBar {
 		if (td == null) {
 			str = "No Agent loaded!";
 		} else {
+			// enable / disable certain parameter settings according to 
+			// the loaded agent and the active game:
+			m_arena.m_xab.setParamDefaults(td.getName(), m_arena.getGameName());
+			
 			if (td instanceof TDAgent) {
-				//td.setName("TDS");
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar.setFrom(((TDAgent) td).getTDParams());
+				m_arena.m_xab.tdPar.setFrom( ((TDAgent) td).getTDParams() );
+			}
+			else if (td instanceof TDNTupleAgt) {
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.tdPar.setFrom( ((TDNTupleAgt) td).getTDParams() );
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mcPar.setFrom(((MCTSAgentT) td).getMCTSParams());
+				m_arena.m_xab.mcPar.setFrom( ((MCTSAgentT) td).getMCTSParams() );
 			}
 			else if (td instanceof MinimaxAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.oPar.setMinimaxDepth(((MinimaxAgent) td).getDepth());
+				m_arena.m_xab.oPar.setMinimaxDepth( ((MinimaxAgent) td).getDepth() );
 			}
+			
+			if (td instanceof TDAgent || td instanceof TDNTupleAgt) {
+				// If it is one of the trainable agents: set maxGameNum and 
+				// numEval according to the settings in the loaded agent
+				// (at least maxGameNum is relevant for training): 
+				m_arena.m_xab.GameNumT.setText(""+td.getMaxGameNum());
+				m_arena.m_xab.oPar.numEval_T.setText(""+td.getNumEval());
+			}
+			
 			// set selector according to class loaded:
 			m_arena.m_xab.setSelectedAgent(index, td.getName());
 			m_arena.m_xfun.m_PlayAgents[index] = td;

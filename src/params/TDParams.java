@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.io.Serializable;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -56,15 +57,17 @@ public class TDParams extends Frame implements Serializable
 	public JTextField gammaT;
 	public JTextField epochT;
 	
-	JLabel NetTypeL;
 	JLabel SigTypeL;
+	JLabel NormalizeL;
+	JLabel NetTypeL;
 	JLabel LrnTypeL;
 	CheckboxGroup cbgNetType;
-	public Checkbox LinNetType;
-	public Checkbox BprNetType;
-	CheckboxGroup cbgSigType;
-	public Checkbox withSigType;
-	public Checkbox wo_SigType;
+	Checkbox LinNetType;
+	Checkbox BprNetType;
+	//CheckboxGroup cbgSigType;
+	public JCheckBox withSigType;
+	public JCheckBox normalize;
+	//public Checkbox wo_SigType;
 	CheckboxGroup cbgLrnType;
 	public Checkbox bpropType;
 	public Checkbox rpropType;
@@ -74,14 +77,22 @@ public class TDParams extends Frame implements Serializable
 	
 	//JButton ok;
 	//TDParams m_par;
+
+// -- obsolete, they are stored in AgentBase
+//
+//	// These two members are here only to save these settings (from other param tabs) 
+//	// together with the agent, so that we can restore them later on load (at least 
+//	// maxGameNum is relevant for training): 
+//	private int maxGameNum;
+//	private int numEval;
 	
 	public TDParams() {
 		super("TD Parameter");
-		alphaT = new JTextField("0.1");				// the defaults
+		alphaT = new JTextField("0.001");  //("0.1");				// the defaults
 		alfinT = new JTextField("0.001");			//
 		epsilT = new JTextField("0.3");				// 
 		epfinT = new JTextField("0.0");				//
-		lambdaT = new JTextField("0.9");			//
+		lambdaT = new JTextField("0.0"); //("0.9");			//
 		gammaT = new JTextField("1.0");				//
 		epochT = new JTextField("1");				//
 		alphaL = new JLabel("Alpha init");
@@ -94,17 +105,20 @@ public class TDParams extends Frame implements Serializable
 		epochL = new JLabel("Epochs");
 		epochL.setToolTipText(TIPEPOCHL);
 		
+		withSigType = new JCheckBox();
+		normalize = new JCheckBox();
+//		cbgSigType = new CheckboxGroup();
+//		wo_SigType = new Checkbox("without",cbgSigType,true);
+//		withSigType = new Checkbox("with",cbgSigType,false);
+
 		NetTypeL = new JLabel("Network Type: ");
 		SigTypeL = new JLabel("Output Sigmoid: ");
+		NormalizeL = new JLabel("Normalize: ");
 		LrnTypeL = new JLabel("Learning rule: ");
 
 		cbgNetType = new CheckboxGroup();
 		LinNetType = new Checkbox("linear",cbgNetType,true);
 		BprNetType = new Checkbox("neural net",cbgNetType,false);
-
-		cbgSigType = new CheckboxGroup();
-		wo_SigType = new Checkbox("without",cbgSigType,true);
-		withSigType = new Checkbox("with",cbgSigType,false);
 
 		cbgLrnType = new CheckboxGroup();
 		bpropType = new Checkbox("backprop",cbgLrnType,true);
@@ -152,16 +166,16 @@ public class TDParams extends Frame implements Serializable
 		tdPanel.add(gammaL);
 		tdPanel.add(gammaT);
 		
+		tdPanel.add(SigTypeL);
+		tdPanel.add(withSigType);
+		tdPanel.add(NormalizeL);
+		tdPanel.add(normalize);
+
 		tdPanel.add(NetTypeL);
 		tdPanel.add(LinNetType);
 		tdPanel.add(BprNetType);
 		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
 		
-		tdPanel.add(SigTypeL);
-		tdPanel.add(wo_SigType);
-		tdPanel.add(withSigType);
-		tdPanel.add(new Canvas());				
-
 		tdPanel.add(LrnTypeL);
 		tdPanel.add(bpropType);
 		tdPanel.add(rpropType);
@@ -178,6 +192,58 @@ public class TDParams extends Frame implements Serializable
 		pack();
 		setVisible(false);
 	} // constructor TDParams()	
+	
+	public void setParamDefaults(String agentName, String gameName) {
+		if(agentName.equals("TD-Ntuple")) {
+		}
+		else {
+		}
+		switch (agentName) {
+		case "TD-Ntuple": 
+			alphaT.setText("0.001");  			// the defaults
+			alfinT.setText("0.001");			//
+			epsilT.setText("0.3");				// 
+			epfinT.setText("0.0");				//
+			lambdaT.setText("0.0"); 			//
+			gammaT.setText("1.0");				//
+			epochT.setText("1");				//
+			withSigType.setSelected(true);		// tanh
+			normalize.setSelected(false);		// 
+			NetTypeL.setEnabled(false);
+			LinNetType.setEnabled(false);
+			BprNetType.setEnabled(false);
+			LrnTypeL.setEnabled(false);
+			bpropType.setEnabled(false);
+			rpropType.setEnabled(false);
+			FeatTDS_L.setEnabled(false);
+			choiceFeatTDS.setEnabled(false);
+			epochL.setEnabled(false);
+			epochT.setEnabled(false);
+			break;
+		case "TDS":
+			alphaT.setText("0.1");				// the defaults
+			alfinT.setText("0.001");			//
+			epsilT.setText("0.3");				// 
+			epfinT.setText("0.0");				//
+			lambdaT.setText("0.9");				//
+			gammaT.setText("1.0");				//
+			epochT.setText("1");				//
+			withSigType.setSelected(false);		//
+			normalize.setSelected(false);		// 
+			NetTypeL.setEnabled(true);
+			LinNetType.setEnabled(true);
+			BprNetType.setEnabled(true);
+			LrnTypeL.setEnabled(true);
+			bpropType.setEnabled(true);
+			rpropType.setEnabled(true);
+			FeatTDS_L.setEnabled(true);
+			choiceFeatTDS.setEnabled(true);
+			epochL.setEnabled(true);
+			epochT.setEnabled(true);
+			break;
+		}
+		
+	}
 	
 	public JPanel getPanel() {
 		return tdPanel;
@@ -209,7 +275,10 @@ public class TDParams extends Frame implements Serializable
 		return Integer.valueOf(s).intValue();
 	}
 	public boolean hasSigmoid() {
-		return withSigType.getState();
+		return withSigType.isSelected();
+	}
+	public boolean getUseNormalize() {
+		return normalize.isSelected();
 	}
 	public boolean hasLinearNet() {
 		return LinNetType.getState();
@@ -217,6 +286,12 @@ public class TDParams extends Frame implements Serializable
 	public boolean hasRpropLrn() {
 		return rpropType.getState();
 	}
+//	public int getMaxGameNum() {
+//		return maxGameNum;
+//	}
+//	public int getNumEval() {
+//		return numEval;
+//	}
 	
 	public void setAlpha(double value) {
 		alphaT.setText(value+"");
@@ -243,8 +318,10 @@ public class TDParams extends Frame implements Serializable
 		choiceFeatTDS.select(featmode+"");
 	}
 	public void setSigmoid(boolean state) {
-		withSigType.setState(state);
-		wo_SigType.setState(!state);
+		withSigType.setSelected(state);
+	}
+	public void setNormalize(boolean state) {
+		normalize.setSelected(state);
 	}
 	public void setLinearNet(boolean state) {
 		LinNetType.setState(state);
@@ -254,6 +331,12 @@ public class TDParams extends Frame implements Serializable
 		rpropType.setState(state);
 		bpropType.setState(!state);
 	}
+//	public void setMaxGameNum(int maxGameNum) {
+//		this.maxGameNum = maxGameNum;
+//	}
+//	public void setNumEval(int numEval) {
+//		this.numEval = numEval;
+//	}
 	
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
@@ -271,6 +354,9 @@ public class TDParams extends Frame implements Serializable
 		setLinearNet(tp.hasLinearNet());
 		setRpropLrn(tp.hasRpropLrn());
 		setSigmoid(tp.hasSigmoid());
+		setNormalize(tp.getUseNormalize());
+//		setMaxGameNum(tp.getMaxGameNum());
+//		setNumEval(tp.getNumEval());
 	}
 	
 } // class TDParams

@@ -93,6 +93,8 @@ public interface PlayAgent {
 	public void setMaxGameNum(int num);
 	public int getGameNum();
 	public void setGameNum(int num);
+	public int getNumEval();
+	public void setNumEval(int num);
 	
 	public AgentState getAgentState(); 
 	public void setAgentState(AgentState aState);

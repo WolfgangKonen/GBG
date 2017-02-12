@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Calendar;
+
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -117,6 +119,7 @@ abstract public class ArenaTrain extends Arena
 			enableButtons(false);
 			
 	        setStatusMessage("MultiTrain started ...");
+	        long start_time = Calendar.getInstance().getTime().getTime();
 			try {
 				
 				m_xfun.multiTrain(m_xab.getSelectedAgent(0), m_xab, gb);
@@ -132,6 +135,8 @@ abstract public class ArenaTrain extends Arena
 				m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
 		        setStatusMessage("MultiTrain finished: "+ m_xfun.getLastMsg());
 			}
+	        long elapsed_time = Calendar.getInstance().getTime().getTime() - start_time;
+	        System.out.println("MultiTrain finished, time : "+ elapsed_time + " msec");
 
 			enableButtons(true);
 			taskState = Task.IDLE; 

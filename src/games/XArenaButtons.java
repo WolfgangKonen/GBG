@@ -13,6 +13,7 @@ import params.OptionsComp;
 import tools.HtmlDisplay;
 import tools.Types;
 import params.OtherParams;
+import params.NTParams;
 
 
 
@@ -58,6 +59,7 @@ public class XArenaButtons extends JPanel
 	Label AgentX_L;
 	Choice[] choiceAgent; 
 	TDParams tdPar = new TDParams();
+	NTParams tcPar = new NTParams();
 //	RpropParams rpPar = new RpropParams();
 //	TCParams tcPar= new TCParams();
 //	CMAParams cmaPar = new CMAParams();
@@ -106,7 +108,7 @@ public class XArenaButtons extends JPanel
 		//
 		AgentX = Types.GUI_X_PLAYER;  // "MCTS"; "TDS"; "CMA-ES"; "Minimax" 
 		AgentO = Types.GUI_O_PLAYER;  // "Human";"ValIt";
-		GameNumT=new TextField("1000", 5); //("10000", 5);
+		GameNumT=new TextField("10000", 5); //("10000", 5);
 		TrainNumT=new TextField("25", 5);
 		//CompeteNumT=new TextField("3", 5);
 		//CompetitionsT=new TextField("1", 5);
@@ -125,6 +127,7 @@ public class XArenaButtons extends JPanel
 			choiceAgent[n] = new Choice();
 			for (String s : Types.GUI_AGENT_LIST) choiceAgent[n].add(s);
 			choiceAgent[n].select(Types.GUI_AGENT_INITIAL[n]);	
+			this.setParamDefaults(Types.GUI_AGENT_INITIAL[n], m_game.getGameName());
 			if (numPlayers==2) {
 				mParam[n]=new JButton("Param "+Types.GUI_2PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_2PLAYER_NAME[n]);
@@ -173,27 +176,8 @@ public class XArenaButtons extends JPanel
 		choiceAgent[0].addItemListener(
 				new ItemListener() {
 					public void itemStateChanged(ItemEvent arg0) {
-						if(choiceAgent[0].getSelectedItem().equals("TDS-NTuple")) {
-							tdPar.LinNetType.setEnabled(false);
-							tdPar.BprNetType.setEnabled(false);
-							tdPar.wo_SigType.setEnabled(false);
-							tdPar.withSigType.setEnabled(false);
-						}
-						else {
-							tdPar.LinNetType.setEnabled(true);
-							tdPar.BprNetType.setEnabled(true);
-							tdPar.wo_SigType.setEnabled(true);
-							tdPar.withSigType.setEnabled(true);
-						}
-						if(choiceAgent[0].getSelectedItem().equals("TDS-NTuple")
-						  |choiceAgent[0].getSelectedItem().equals("TDS-NTuple-2")
-						  |choiceAgent[0].getSelectedItem().equals("TD_NT")) {
-							NTupShowB.setEnabled(true);	// enable this button only if AgentX is an N-Tuple Player							
-						}
-						else {
-							NTupShowB.setEnabled(false);
-							
-						}
+						setParamDefaults(choiceAgent[0].getSelectedItem(),
+								m_game.getGameName());
 					}
 				}
 		);
@@ -379,6 +363,28 @@ public class XArenaButtons extends JPanel
 
 	} // constructor XArenaButtons
 
+	public void setParamDefaults(String agentName, String gameName) {
+		tdPar.setParamDefaults(agentName, gameName);
+		
+		if(agentName.equals("TDS")) {
+			switch(gameName) {
+			case "TicTacToe":
+				GameNumT.setText("10000");				
+			}
+		}
+		if(agentName.equals("TD-Ntuple")) {
+			NTupShowB.setEnabled(true);	// enable this button only if agentName is an n-tuple agent
+			switch(gameName) {
+			case "TicTacToe":
+			default: 
+				GameNumT.setText("10000");				
+			}
+		}
+		else {
+			NTupShowB.setEnabled(false);			
+		}
+	}
+	
 	public void helpFunction() {
 		if (htmlDisplay==null) {
 			//htmlDisplay =new HtmlDisplay("HelpGUI-test.htm");
