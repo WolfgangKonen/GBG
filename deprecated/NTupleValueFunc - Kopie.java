@@ -52,7 +52,7 @@ public class NTupleValueFunc implements Serializable {
 	// The generated n-Tuples
 	private NTuple nTuples[][];
 	
-	private transient StateObservation so=null; 
+	private StateObservation so=null; 
 
 	// Turns usage of symmetry on or off
 	private boolean useSymmetry = false;
@@ -77,12 +77,176 @@ public class NTupleValueFunc implements Serializable {
 	public NTupleValueFunc(int nTuples[][], int posVals, boolean useSymmetry,
 			boolean randInitWeights, NTParams tcPar, int numCells) 
 					throws RuntimeException {
+		numTuples = nTuples.length;
 		this.useSymmetry = useSymmetry;
-		
-		if (nTuples!=null) {
-			this.numTuples = nTuples.length;
-			initNTuples(nTuples, posVals, randInitWeights, tcPar, numCells);
+
+		initNTuples(nTuples, posVals, randInitWeights, tcPar, numCells);
+	}
+
+	/**
+	 * Generate a set of random n-tuples (random POINTS).
+	 * 
+	 * @param maxTupleLen
+	 *            length of each n-tuple 
+	 * @param tupleNum
+	 *            number of tuples that shall be generated
+	 * @param posVals
+	 *            possible values/field of the board (TicTacToe: 3)
+	 * @param useSymmetry
+	 *            true, if symmetries shall be used
+	 * @param randInitWeights
+	 *            true, if all weights of all n-Tuples shall be initialized
+	 *            randomly
+	 * @throws IOException may only happen if PRINTNTUPLES=true
+	 */
+// -- OLD comment was: --	
+//	 * @param maxTupleLen
+//	 *            max. length of a n-tuple (every generated tuple has a length
+//	 *            in the range 2 .. maxTupleLen)	
+	public NTupleValueFunc(int maxTupleLen, int tupleNum, int posVals, boolean useSymmetry, 
+			boolean randInitWeights, NTParams tcPar, int numCells) 
+					throws IOException {
+		numTuples = tupleNum;
+		this.useSymmetry = useSymmetry;
+		int nTuples[][] = new int[numTuples][];
+		for (int i = 0; i < numTuples; i++) {
+			//int tupleLen = rand.nextInt(maxTupleLen - 1) + 2; // min. length is 2
+			//samine// just commented the last line to change tupleLen to the given length
+			//to get rid of that 
+			int tupleLen=maxTupleLen;													
+			int[] tuple = new int[tupleLen];
+			boolean isUnique;
+			for (int j = 0; j < tupleLen; j++) {
+				int sp;
+				do {
+					isUnique = true;
+					sp = rand.nextInt(numCells); 
+					for (int k = 0; k < j; k++)
+						if (tuple[k] == sp) {
+							isUnique = false;
+							break;
+						}
+				} while (!isUnique);
+
+				tuple[j] = sp;
+			}
+			nTuples[i] = tuple;
 		}
+		
+		if (PRINTNTUPLES) {
+			//samine//printing the generated n-tuples
+			for(int h=0;h<numTuples;h++)
+				print(nTuples[h]);		// may throw IOException
+		}
+
+		initNTuples(nTuples, posVals, randInitWeights, tcPar, numCells);
+	}
+
+	/**
+	 * Generate a set of random n-tuples (random WALK).
+	 * 
+	 * @param maxTupleLen
+	 *            length of each n-tuple 
+	 * @param tupleNum
+	 *            Number of tuples that shall be generated
+	 * @param posVals
+	 *            Possible values/field of the board (TicTacToe: 3)
+	 * @param WALK
+	 * 			  dummy parameter to distinguish this constructor from the random POINTS constructor            
+	 * @param useSymmetry
+	 *            true, if symmetries shall be used
+	 * @param randInitWeights
+	 *            true, if all weights of all n-Tuples shall be initialized
+	 *            randomly
+	 * @throws IOException may only happen if PRINTNTUPLES=true
+	 */
+	// -- OLD comment was: --	
+//	 * @param maxTupleLen
+//	 *            max. length of a n-tuple (every generated tuple has a length
+//	 *            in the range 2 .. maxTupleLen)
+	public NTupleValueFunc(int maxTupleLen, int tupleNum, int posVals, int WALK, 
+			boolean useSymmetry, boolean randInitWeights, NTParams ntPar, int numCells) 
+					throws IOException {
+		numTuples = tupleNum;
+		this.useSymmetry = useSymmetry;
+		int nTuples[][] = new int[numTuples][];
+
+		for (int i = 0; i < numTuples; i++) {
+			int numWalkSteps = maxTupleLen;
+			int[] nTuple;
+			int[] tmpTuple = new int[numWalkSteps];
+			int tupleLen = 1;
+			int lastMove = rand.nextInt(numCells); // start position
+			tmpTuple[0] = lastMove;
+
+			for (int j = 0; j < numWalkSteps - 1; j++) {
+				boolean madeMove = false;
+				do {
+					int sp = rand.nextInt(6); 	// For TicTacToe only
+											  	// /WK/ why 6 and not 9 ??
+					switch (sp) {
+					case 0:
+						if (lastMove / 3 != 2) {
+							madeMove = true;
+							lastMove = lastMove + 3;
+						}
+						break;
+					case 1:
+						if (lastMove / 3 != 0) {
+							madeMove = true;
+							lastMove = lastMove - 3;
+						}
+						break;
+					case 2:
+						if (lastMove % 3 != 2) {
+							madeMove = true;
+							lastMove = lastMove + 1;
+						}
+						break;
+					case 3:
+						if (lastMove % 3 != 0) {
+							madeMove = true;
+							lastMove = lastMove - 1;
+						}
+						break;
+					case 4:
+						if (lastMove / 3 != 2 && lastMove % 3 != 2) {
+							madeMove = true;
+							lastMove = lastMove + 4;
+						}
+						break;
+					case 5:
+						if (lastMove / 3 != 0 && lastMove % 3 != 0) {
+							madeMove = true;
+							lastMove = lastMove - 4;
+						}
+						break;
+					}
+				} while (!madeMove);
+				int k;
+				for (k = 0; k < tupleLen && tmpTuple[k] != lastMove; k++)
+					;
+				if (k == tupleLen) {
+					tmpTuple[tupleLen] = lastMove;
+					tupleLen++;
+				}
+			}
+			// TODO: remove??
+			if (tupleLen == numWalkSteps) {
+				nTuple = new int[tupleLen];
+				for (int j = 0; j < tupleLen; j++)
+					nTuple[j] = tmpTuple[j];
+				nTuples[i] = nTuple;
+			} else
+				i--;			
+		}
+		
+		if (PRINTNTUPLES) {
+			for(int h=0;h<tupleNum;h++)
+				   print(nTuples[h]);		// may throw IOException
+		}
+		
+		initNTuples(nTuples, posVals, randInitWeights, ntPar, numCells);
 	}
 
 	void initNTuples(int[][] nTuples, int posVals, boolean randInitWeights,
@@ -130,6 +294,38 @@ public class NTupleValueFunc implements Serializable {
 		ALPHA = ALPHA * m_AlphaChangeRatio;
 	}
 
+// -- obsolete, these two functions are now in StateObserverTTT (called via 
+// -- so.symmetryVectors(int[] board) )	
+//
+//	/**
+//	 * rotate the given board once
+//	 * 
+//	 * @param board
+//	 * @return the rotated board
+//	 */
+//	private int[] rotate(int[] board) {
+//		// Currently only for TicTacToe
+//		int[] newBoard = new int[9];
+//		int[] ri = {6,3,0,7,4,1,8,5,2};
+//		for (int k=0; k<9; k++) newBoard[k] =board[ri[k]];
+//		return newBoard;
+//	}
+//
+//	/**
+//	 * Mirror the board at the center column
+//	 * 
+//	 * @param board
+//	 * @return the mirrored board
+//	 */
+//	private int[] mirror(int[] board) {
+//		// Mirror Board,. Currently only for Tic-Tac-Toe
+//		int[] newBoard = new int[9];
+//		for (int i = 2, k = 0; i >= 0; i--)
+//			for (int j = 0; j < 3; j++)
+//				newBoard[k++] = board[i * 3 + j];
+//		return newBoard;
+//	}
+
 	public int countPieces(int board[]) {
 		int count = 0;
 		for (int i = 0; i < board.length; i++)
@@ -160,7 +356,20 @@ public class NTupleValueFunc implements Serializable {
 		// Get player
 		int player = countPieces(board) % 2;
 
-		// Get equivalent boards (including self)
+// -- deprecated --
+//		// Get equivalent Boards
+//		if (useSymmetry) {
+//			equiv = getSymBoards(board);
+//		}
+//
+//		for (i = 0; i < numTuples; i++) {
+//			score += nTuples[player][i].getScore(board);
+//			if (useSymmetry)
+//				for (j = 0; j < equiv.length; j++)
+//					score += nTuples[player][i].getScore(equiv[j]);
+//		}
+		
+		// Get equivalent boards
 		equiv = getSymBoards2(board, useSymmetry);
 		//equiv = getSymBoards2(board, false);    // DON'T, at least for TTT clearly inferior
 
@@ -173,16 +382,37 @@ public class NTupleValueFunc implements Serializable {
 		return Math.tanh(score);
 	}
 
+// -- obsolete, use getSymBoards2 --
+//
+//	/**
+//	 * Get the seven equivalent Positions to one board. These can be generated
+//	 * with mirroring and rotation.
+//	 * 
+//	 * @param board
+//	 * @return The seven equivalent Positions
+//	 */
+//	@Deprecated
+//	private int[][] getSymBoards(int[] board) {
+//		int i;
+//		int[][] equiv = new int[7][];
+//		equiv[0] = rotate(board);
+//		for (i = 1; i < 3; i++)
+//			equiv[i] = rotate(equiv[i - 1]);
+//		equiv[i] = mirror(board);
+//		for (++i; i < 7; i++)
+//			equiv[i] = rotate(equiv[i - 1]);
+//		return equiv;
+//	}
+
 	/**
-	 * Get the equivalent positions to one board. The first one 
+	 * Get the eight equivalent positions to one board. The first one 
 	 * is the board itself. The other can be generated
-	 * with mirroring and rotation (depending on the game, see 
-	 * {@code so.symmetryVectors(board)}).
+	 * with mirroring and rotation.
 	 * 
 	 * @param board
 	 * @param useSymmetry if false, return a 2D array with only one row 
 	 * 			(the board itself in int[0][])
-	 * @return the equivalent positions
+	 * @return The eight equivalent positions
 	 */
 	private int[][] getSymBoards2(int[] board, boolean useSymmetry) {
 		int i;
@@ -257,7 +487,20 @@ public class NTupleValueFunc implements Serializable {
 		// Get player
 		int player = countPieces(board) % 2;
 
-		// Get equivalent boards (including self)
+// -- deprecated --
+//		// Get equivalent Boards
+//		if (useSymmetry) {
+//			equiv = getSymBoards(board);
+//		}
+//
+//		for (i = 0; i < numTuples; i++) {
+//			nTuples[player][i].update(board, ALPHA, delta, e, LAMBDA);
+//			if (useSymmetry)
+//				for (j = 0; j < equiv.length; j++)
+//					nTuples[player][i].update(equiv[j], ALPHA, delta, e, LAMBDA);
+//		}
+		
+		// Get equivalent Boards
 		equiv = getSymBoards2(board,useSymmetry);
 
 		for (i = 0; i < numTuples; i++) {
@@ -282,7 +525,19 @@ public class NTupleValueFunc implements Serializable {
 		// Get player
 		int player = countPieces(board) % 2;
 
-		// Get equivalent boards (including self)
+//		// Get equivalent Boards
+//		if (useSymmetry) {
+//			equiv = getSymBoards(board);
+//		}
+//
+//		for (i = 0; i < numTuples; i++) {
+//			nTuples[player][i].updateElig(board, LAMBDA, GAMMA, e);
+//			if (useSymmetry)
+//				for (j = 0; j < equiv.length; j++)
+//					nTuples[player][i].updateElig(equiv[j], LAMBDA, GAMMA, e);
+//		}
+
+		// Get all 8 equivalent Boards (including board)
 		equiv = getSymBoards2(board,useSymmetry);
 
 		for (i = 0; i < numTuples; i++) {

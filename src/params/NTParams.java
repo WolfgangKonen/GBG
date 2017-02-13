@@ -7,6 +7,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serializable;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -16,7 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 //samine//
-public class NTParams extends Frame {
+public class NTParams extends Frame implements Serializable {
 	private static final String TIPRANDL = "If checked, generate random n-tuples. If not, take a hard-coded n-tuple set (int[][] nTuple in TDSNPlayer)";
 	private static final String TIPNTUPLETYPE = "n-tuple generation method: random walk or random point";
 	private static final String TIPNTUPLENUML = "How many n-tuples to generate in case of 'randomness'";

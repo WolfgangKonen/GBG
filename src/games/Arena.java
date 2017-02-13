@@ -120,7 +120,7 @@ abstract public class Arena extends JPanel implements Runnable {
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;		
 			setStatusMessage("Done.");
-			return;			
+			//return;			
 		}
 
 		while(true)

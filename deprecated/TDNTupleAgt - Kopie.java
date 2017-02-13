@@ -45,7 +45,7 @@ import games.StateObservation;
 //
 public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private Random rand; // generate random Numbers 
-	static transient public PrintStream pstream = System.out;
+	static public PrintStream pstream = System.out;
 
 	/**
 	 * Controls the amount of explorative moves in
@@ -71,6 +71,27 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	// Here: NTupleValueFunc
 	private NTupleValueFunc m_Net;
 
+	// Examples for some NTuples
+	//best chosen 40, 4-tuples
+	private int nTuple[][]={{6, 7, 4, 0},{4, 5, 8, 7},{4, 3, 0, 1},{4, 5, 2, 1},{6, 3, 0, 1},
+			{6, 3, 0, 4},{0, 1, 5, 2},{2, 1, 4, 7},{7, 3, 4, 5},{0, 4, 1, 2},{8, 4, 0, 1},{7, 4, 1, 0},
+			{7, 4, 0, 1},{8, 7, 4, 1},{7, 4, 8, 5},{8, 7, 4, 1},{7, 8, 5, 4},{4, 8, 7, 6},{2, 1, 5, 4},
+			{3, 0, 1, 4},{8, 7, 3, 4},{8, 4, 3, 0},{4, 1, 2, 5},{6, 3, 0, 4},{1, 2, 5, 8},{1, 4, 3, 7},
+			{6, 3, 0, 1},{8, 5, 4, 3},{3, 4, 7, 6},{5, 8, 7, 6},{5, 4, 0, 1},{6, 3, 4, 7},{0, 3, 4, 8},
+			{6, 3, 7, 8},{2, 1, 4, 0},{3, 7, 4, 1},{1, 2, 5, 4},{8, 5, 1, 4},{6, 7, 8, 4},{6, 3, 0, 1}
+	};
+	// private int nTuple[][] = {{0,1,2,3,4,5,6,7,8}};
+	// private int nTuple[][] = { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 0, 4, 8 } };
+	// private int nTuple[][] = {{0,1,2,3,4,5,6,7}, {8,7,6,5,4,3,2,1},
+	// 		{8,7,6,5,4,3,2,0}, {0,1,2,3,4,5,6,8}};
+	// private int nTuple[][] = {{0,1,2,5,8,7}, {0,3,6,7,8,5}, {0,3,6,1,4,7},
+	// 		{2,5,8,7,4,1}, {0,1,2,3,4,5}, {6,7,8,3,4,5}, {0,4,8,7,6,3}};
+	// private int nTuple[][] =
+	// 		{{0,1,2,3},{4,5,6,7},{8,0,3,6},{1,4,7,2},{5,8,0,4},{6,4,2,0}};
+	// private int nTuple[][] = {{0,1,2},{3,4,5},{6,7,8},{0,4,8},{0,1,2,5,8,7},
+	//	 	{0,3,6,7,8,5}, {0,3,6,1,4,7}, {2,5,8,7,4,1}, {0,1,2,3,4,5},
+	//	 	{6,7,8,3,4,5}, {0,4,8,7,6,3}};
+	
 	protected boolean USESYMMETRY = true; 	// Use symmetries (rotation, mirror) in NTuple-System
 	private boolean NORMALIZE = false; 
 	private boolean RANDINITWEIGHTS = false;// Init Weights of Value-Function
@@ -87,13 +108,15 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private boolean randomSelect = false;
 	
 	/**
-	 * Members {@link #m_tdPar} {@link #m_ntPar} are only needed for saving and loading
-	 * the agent (to restore the agent with all its parameter settings)
+	 * Member {@link #m_tdPar} is only needed for saving and loading the agent
+	 * (to restore the agent with all its parameter settings)
 	 */
 	private TDParams m_tdPar;
 	private NTParams m_ntPar;
+	private static final long serialVersionUID = 1234L;
 	
 	//public int epiCount=0;
+
 
 	/**
 	 * Default constructor for {@link TDNTupleAgt}, needed for loading a serialized version
@@ -105,20 +128,20 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		initNet(ntPar, tdPar, null, 1000);
 	}
 
-//	/**
-//	 * Create a new {@link TDNTupleAgt}
-//	 * 
-//	 * @param tdPar
-//	 *            All needed Parameters
-//	 * @param ntPar 
-//	 * @param maxGameNum
-//	 *            Number of Training-Games
-//	 * @throws IOException 
-//	 */
-//	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, int maxGameNum) throws IOException {
-//		super(name);
-//		initNet(ntPar,tdPar, null, maxGameNum);			
-//	}
+	/**
+	 * Create a new {@link TDNTupleAgt}
+	 * 
+	 * @param tdPar
+	 *            All needed Parameters
+	 * @param ntPar 
+	 * @param maxGameNum
+	 *            Number of Training-Games
+	 * @throws IOException 
+	 */
+	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, int maxGameNum) throws IOException {
+		super(name);
+		initNet(ntPar,tdPar, null, maxGameNum);			
+	}
 
 	/**
 	 * Create a new {@link TDNTupleAgt}
@@ -162,9 +185,28 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		randWalk=ntPar.getRandWalk();
 		int numTuple=ntPar.getNtupleNumber();
 		int maxTupleLen=ntPar.getNtupleMax();
+		//samine//
+//		if(randomness==true){
+//			
+//			if(randWalk==true){
+//				//random walk
+//				int WALK=1;
+//				m_Net = new NTupleValueFunc(maxTupleLen,numTuple ,POSVALUES, WALK,
+//						 USESYMMETRY,RANDINITWEIGHTS,ntPar,numCells);
+//			}else{
+//				//random point
+//				m_Net = new NTupleValueFunc( maxTupleLen,numTuple ,POSVALUES,
+//						 USESYMMETRY,RANDINITWEIGHTS,ntPar,numCells);
+//			}
+//			
+//		}else{
+//			//given ntuples
+//			m_Net = new NTupleValueFunc(nTuple, POSVALUES, USESYMMETRY,
+//					RANDINITWEIGHTS,ntPar,numCells);
+//		}
 		
 		m_Net = new NTupleValueFunc(nTuples, POSVALUES, USESYMMETRY,
-				RANDINITWEIGHTS,ntPar,numCells);
+		RANDINITWEIGHTS,ntPar,numCells);
 		
 		setTDParams(tdPar, maxGameNum);
 		//samine//
@@ -566,11 +608,6 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 	public void setAlpha(double alpha) {
 		m_Net.setAlpha(alpha);
-	}
-
-	// needed in LoadSaveTD.loadAgent()
-	public void setSO(StateObservation so) {
-		m_Net.setSO(so);
 	}
 
 	public double getAlpha() {

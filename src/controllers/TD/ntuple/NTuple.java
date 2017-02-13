@@ -336,6 +336,7 @@ public class NTuple implements Serializable {
 		}
 	}
 
+	// currently not used
 	public void weightDecay(double factor) {
 		for (int k=0; k<lut.length; k++)
 			lut[k] *= factor;

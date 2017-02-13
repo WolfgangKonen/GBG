@@ -33,6 +33,7 @@ import controllers.HumanPlayer;
 import controllers.MinimaxAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple.NTupleFactory;
 import controllers.TD.ntuple.TDNTupleAgt;
 import games.Arena.Task;
 import games.TicTacToe.FeatureTTT;
@@ -136,11 +137,22 @@ public class XArenaFuncs
 //			pa = new CMAPlayer(alpha,alphaChangeRatio,m_xab.cmaPar,this.m_NetHasSigmoid,this.m_NetIsLinear,featmode);
 		} else if (sAgent.equals("TD-Ntuple")) {
 			try {
-				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, maxGameNum);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				NTupleFactory ntf = new NTupleFactory(); 
+				int[][] nTuples = ntf.makeNTupleSet(m_xab.tcPar, m_xab.m_game.gb.getStateObs());
+				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, nTuples, maxGameNum);
+			} catch (Exception e) {
+				MessageBox.show(m_xab, 
+						e.getMessage(), 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+				//e.printStackTrace();
+				pa=null;			
 			}
+//			try {
+//				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, maxGameNum);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		} else if (sAgent.equals("Minimax")) {
 			pa = new MinimaxAgent(sAgent,m_xab.oPar);
 		} else if (sAgent.equals("Random")) {
@@ -196,11 +208,23 @@ public class XArenaFuncs
 						pa = new TDAgent(sAgent, m_xab.tdPar, feat, maxGameNum);
 					} else if (sAgent.equals("TD-Ntuple")) {
 						try {
-							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, maxGameNum);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							TDNTupleAgt test = new TDNTupleAgt();
+							NTupleFactory ntf = new NTupleFactory(); 
+							int[][] nTuples = ntf.makeNTupleSet(m_xab.tcPar, m_xab.m_game.gb.getStateObs());
+							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, nTuples, maxGameNum);
+						} catch (Exception e) {
+							MessageBox.show(m_xab, 
+									e.getMessage(), 
+									"Warning", JOptionPane.WARNING_MESSAGE);
+							//e.printStackTrace();
+							pa=null;			
 						}
+//						try {
+//							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, maxGameNum);
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
 					}					
 				} else {
 					if (!sAgent.equals(m_PlayAgents[n].getName()))

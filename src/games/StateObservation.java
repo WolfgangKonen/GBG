@@ -16,12 +16,13 @@ import tools.Types.ACTIONS;
  * <li> and others.
  * </ul><p>
  * 
- * Note: The four methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
- * {@link #getBoardVector()} and {@link #symmetryVectors(int[])} are only required for 
- * the n-tuple interface. If an implementing class does not need that part, it may just 
- * code stubs returning 0 or {@code null};
+ * Note: The five methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
+ * {@link #getBoardVector()}, {@link #symmetryVectors(int[])} and {@link #fixedNTuples()} are 
+ * only required for the n-tuple interface. If an implementing class does not need that part 
+ * (i. e. if it does not plan to use {@link TDNTupleAgt}), it may just code stubs
+ * returning 0, {@code null}, or throwing a RuntimeException.
  *
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Feb'17
  */
 public interface StateObservation {
     //Types.ACTIONS[] actions=null;
@@ -36,7 +37,17 @@ public interface StateObservation {
 	 * 
 	 * @return a string representation of the current state
 	 */
+	@Deprecated
+	// Why? - Because java.Object has already a default for toString() and thus it can
+	// go unnoticed if a class implementing StateObservation does not implement toString().
+	// Better use stringDescr()
 	public String toString();
+
+	/**
+	 * 
+	 * @return a string representation of the current state
+	 */
+	public String stringDescr();
 
 	/**
 	 * This method should be only called if game is over. The player is 
@@ -128,7 +139,7 @@ public interface StateObservation {
 	//
 	// The following four functions are only required for the n-tuple interface.
 	// If an implementing class does not need that part, it may just code stubs 
-	// returning 0 or {@code null};
+	// returning 0, {@code null}, or throwing a RuntimeException.
 	//
 	/**
 	 * @return the number of board cells
@@ -158,5 +169,14 @@ public interface StateObservation {
 	 * @return boardArray
 	 */
 	public int[][] symmetryVectors(int[] boardVector);
+	
+	/** 
+	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
+	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
+	 * containing the cells 0, 1, and 4.
+	 * 
+	 * @return nTuples[numTuples][]
+	 */
+	public int[][] fixedNTuples();
 
 }
