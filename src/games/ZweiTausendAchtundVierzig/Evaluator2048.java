@@ -1,19 +1,27 @@
 package games.ZweiTausendAchtundVierzig;
 
+import controllers.MC.MCAgent;
+import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
+import params.MCTSParams;
 
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Johannes on 02.12.2016.
  */
 public class Evaluator2048 extends Evaluator {
+    private ExecutorService executorService = Executors.newWorkStealingPool();
+
     private double averageScore;
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = Integer.MIN_VALUE;
-    private int[] score = new int[Config.NUMBEREVALUATIONS];
+    List<Integer> score = new ArrayList<>();
     private int medianScore;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
@@ -27,50 +35,97 @@ public class Evaluator2048 extends Evaluator {
 
     @Override
     protected boolean eval_Agent() {
-
         startTime = System.currentTimeMillis();
-
         System.out.print("Starting evaluation of " + Config.NUMBEREVALUATIONS + " games, this may take a while...\n");
+        List<StateObserver2048> stateObservers = new ArrayList<>();
 
-        for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
-            long gameSartTime = System.currentTimeMillis();
-            StateObserver2048 so = new StateObserver2048();
-            while (!so.isGameOver()) {
-                so.advance(m_PlayAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
+
+        if(m_PlayAgent.getName() == "MC" | m_PlayAgent.getName() == "MCTS") {
+            //async for MC and MCTS Agents
+            List<Callable<StateObserver2048>> callables = new ArrayList<>();
+
+            //play Games
+            for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
+                int gameNumber = i+1;
+                callables.add(() -> {
+                    StateObserver2048 so = new StateObserver2048();
+                    long gameSartTime = System.currentTimeMillis();
+
+                    PlayAgent playAgent = new MCAgent();
+                    if(m_PlayAgent.getName() == "MCTS") {
+                        playAgent = new MCTSAgentT("MCTS",null,new MCTSParams());
+                    }
+
+                    while (!so.isGameOver()) {
+                        so.advance(playAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
+                    }
+                    System.out.print("Finished game " + gameNumber + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+
+                    return so;
+                });
             }
 
+            //save final gameState
+            try {
+                executorService.invokeAll(callables).stream().map(future -> {
+                    try {
+                        return future.get();
+                    }
+                    catch (Exception e) {
+                        throw new IllegalStateException(e);
+                    }
+                }).forEach(stateObservers::add);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            //sync for other Agents
+            for (int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
+                long gameSartTime = System.currentTimeMillis();
+                StateObserver2048 so = new StateObserver2048();
+
+                while (!so.isGameOver()) {
+                    so.advance(m_PlayAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
+                }
+                System.out.print("Finished game " + (i + 1) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+
+                stateObservers.add(so);
+            }
+        }
+
+        //evaluate games
+        for(StateObserver2048 so : stateObservers) {
             Integer value = tiles.get(so.highestTileValue);
             if (value == null) {
                 tiles.put(so.highestTileValue, 1);
-            }
-            else {
+            } else {
                 tiles.put(so.highestTileValue, value + 1);
             }
 
-            score[i] = so.score;
+            score.add(so.score);
 
             averageScore += so.score;
-            if(so.score < minScore) {
+            if (so.score < minScore) {
                 minScore = so.score;
             }
-            if(so.score > maxScore) {
+            if (so.score > maxScore) {
                 maxScore = so.score;
             }
 
             moves += so.moves;
-
-            System.out.print("Finished game " + (i+1) + " with score " + so.score + " after " + (System.currentTimeMillis()-gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
         }
+
         averageScore/=Config.NUMBEREVALUATIONS;
 
-        Arrays.sort(score);
+        Collections.sort(score);
 
         if(Config.NUMBEREVALUATIONS %2 == 0) {
-            medianScore+=score[Config.NUMBEREVALUATIONS/2];
-            medianScore+=score[(Config.NUMBEREVALUATIONS/2)-1];
+            medianScore+=score.get(Config.NUMBEREVALUATIONS/2);
+            medianScore+=score.get((Config.NUMBEREVALUATIONS/2)-1);
             medianScore/=2;
         } else {
-            medianScore=score[(Config.NUMBEREVALUATIONS-1)/2];
+            medianScore=score.get((Config.NUMBEREVALUATIONS-1)/2);
         }
 
         stopTime = System.currentTimeMillis();
