@@ -11,7 +11,7 @@ public class Config {
 
     public static final int STARTINGVALUES[] = {2,2,2,2,2,2,2,2,2,4};
 
-    public static final int NUMBEREVALUATIONS = 15;
+    public static final int NUMBEREVALUATIONS = 25;
 
     //Heuristic Values
     public static final boolean ENABLEHEURISTICS = false;

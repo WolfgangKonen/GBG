@@ -11,6 +11,7 @@ TR_GBG.lnk
 *.idea
 *.iml
 *.settings
+out/*
 
 #Ordner mit veralteten versuchen zur Parallelität
 src/games/ZweiTausendAchtundVierzig/Parallel/*
