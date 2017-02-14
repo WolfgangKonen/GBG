@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import games.StateObservation;
+import games.XNTupleFuncs;
 import params.NTParams;
 
 public class NTupleFactory {
@@ -17,15 +18,15 @@ public class NTupleFactory {
 	// Needed for generating random n-Tuples
 	private Random rand = new Random(42);
 
-	public int[][] makeNTupleSet(NTParams ntPar, StateObservation so) throws Exception {
+	public int[][] makeNTupleSet(NTParams ntPar, XNTupleFuncs xnf, StateObservation so) throws Exception {
 		int nTuples[][]; 
 		boolean randomness=ntPar.getRandomness();
 		boolean randWalk=ntPar.getRandWalk();
 		int numTuple=ntPar.getNtupleNumber();
 		int maxTupleLen=ntPar.getNtupleMax();
-		int numCells = so.getNumCells();
-		POSVALUES = so.getNumPositionValues();
-		numCells = so.getNumCells();
+		int numCells = xnf.getNumCells();
+		POSVALUES = xnf.getNumPositionValues();
+		numCells = xnf.getNumCells();
 		//samine//
 		if(randomness==true){
 			
@@ -43,7 +44,7 @@ public class NTupleFactory {
 			
 		}else{
 			//given ntuples
-			nTuples = so.fixedNTuples();
+			nTuples = xnf.fixedNTuples();
 			
 			checkNtuples(nTuples,numCells);
 		}

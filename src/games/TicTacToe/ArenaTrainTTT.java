@@ -8,6 +8,7 @@ import games.Arena;
 import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
+import games.XNTupleFuncs;
 import params.TDParams;
 import games.ArenaTrain;
 
@@ -77,5 +78,8 @@ public class ArenaTrainTTT extends ArenaTrain   {
 		return new FeatureTTT(featmode);
 	}
 
+	public XNTupleFuncs makeXNTupleFuncs() {
+		return new XNTupleFuncsTTT();
+	}
 
 }

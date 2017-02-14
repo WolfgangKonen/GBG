@@ -21,6 +21,7 @@ import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Feature;
 import games.StateObservation;
+import games.XNTupleFuncs;
 
 /**
  * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning). 
@@ -102,7 +103,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		super();
 		TDParams tdPar = new TDParams();
 		NTParams ntPar = new NTParams();
-		initNet(ntPar, tdPar, null, 1000);
+		initNet(ntPar, tdPar, null, null, 1000);
 	}
 
 //	/**
@@ -130,9 +131,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 *            Number of Training-Games
 	 * @throws IOException 
 	 */
-	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, int[][] nTuples, int maxGameNum) throws IOException {
+	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, int[][] nTuples, 
+			XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		super(name);
-		initNet(ntPar,tdPar, nTuples, maxGameNum);			
+		initNet(ntPar,tdPar, nTuples, xnf, maxGameNum);			
 	}
 
 	/**
@@ -145,7 +147,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @param maxGameNum
 	 *            Number of Training-Games
 	 */
-	private void initNet(NTParams ntPar, TDParams tdPar, int[][] nTuples, int maxGameNum) throws IOException {
+	private void initNet(NTParams ntPar, TDParams tdPar, int[][] nTuples, 
+			XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		m_tdPar = new TDParams();
 		m_tdPar.setFrom(tdPar);
 		m_ntPar = new NTParams();
@@ -163,7 +166,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		int numTuple=ntPar.getNtupleNumber();
 		int maxTupleLen=ntPar.getNtupleMax();
 		
-		m_Net = new NTupleValueFunc(nTuples, POSVALUES, USESYMMETRY,
+		m_Net = new NTupleValueFunc(nTuples, xnf, POSVALUES, USESYMMETRY,
 				RANDINITWEIGHTS,ntPar,numCells);
 		
 		setTDParams(tdPar, maxGameNum);
@@ -333,7 +336,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 *         Player*V() is the quantity to be maximized by getNextAction.
 	 */
 	public double getScore(StateObservation so) {
-		int[] bvec = so.getBoardVector();
+		int[] bvec = m_Net.xnf.getBoardVector(so);
 		double score = m_Net.getScoreI(bvec);
 		return score;
 	}
@@ -366,7 +369,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		String S_old, I_old = null;   // only as debug info
 		int player;
 		Types.ACTIONS actBest;
-		int[] curBoard = so.getBoardVector();
+		int[] curBoard = m_Net.xnf.getBoardVector(so);
 		int[] nextBoard = null;
 
 		//System.out.println("Random test: "+ rand.nextDouble());
@@ -382,7 +385,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			m_Net.calcScoresAndElig(curBoard);
 		}
 
-		m_Net.setSO(so);   // needed for getSymBoards2
+		//m_Net.setSO(so);   // needed for getSymBoards2
 		
 		//oldInput = m_feature.prepareFeatVector(so);
 		//S_old = so.toString();   
@@ -394,7 +397,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			//actBest = this.getNextAction(so, false, VTable, true);  // Debug only
 			randomMove = this.wasRandomAction();
 			so.advance(actBest);
-			nextBoard = so.getBoardVector();
+			nextBoard = m_Net.xnf.getBoardVector(so);
 			//if (DEBG) printVTable(pstream,VTable);
 			if (DEBG) printTable(pstream,nextBoard);
 			if (so.isGameOver()) {
@@ -568,10 +571,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		m_Net.setAlpha(alpha);
 	}
 
-	// needed in LoadSaveTD.loadAgent()
-	public void setSO(StateObservation so) {
-		m_Net.setSO(so);
-	}
+//	// needed in LoadSaveTD.loadAgent()
+//	public void setSO(StateObservation so) {
+//		m_Net.setSO(so);
+//	}
 
 	public double getAlpha() {
 		// only for debug & testing

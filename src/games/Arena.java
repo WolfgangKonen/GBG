@@ -551,6 +551,8 @@ abstract public class Arena extends JPanel implements Runnable {
 		throw new RuntimeException("No Feature class available for game "+this.getGameName()+" (needed for TDS)");
 	}
 
+	abstract public XNTupleFuncs makeXNTupleFuncs();
+
 	/**
 	 * This method is called from {@link #run()} and it has to be overridden by 
 	 * classes derived from {@link Arena} (e.g. {@link ArenaTrain}). <p>

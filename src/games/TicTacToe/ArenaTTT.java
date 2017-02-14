@@ -7,6 +7,7 @@ import games.Arena;
 import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
+import games.XNTupleFuncs;
 import params.TDParams;
 import games.ArenaTrain;
 
@@ -71,6 +72,10 @@ public class ArenaTTT extends Arena   {
 		return new FeatureTTT(featmode);
 	}
 	
+	public XNTupleFuncs makeXNTupleFuncs() {
+		return new XNTupleFuncsTTT();
+	}
+
 //	public PlayAgent makeTDSAgent(String sAgent, TDParams tdPar, int maxGameNum){
 //		return new TDPlayerTTT(sAgent,tdPar,maxGameNum);
 //	}

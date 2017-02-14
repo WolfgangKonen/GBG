@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import games.StateObservation;
+import games.XNTupleFuncs;
 import params.NTParams;
 import params.TDParams;
 
@@ -52,7 +53,7 @@ public class NTupleValueFunc implements Serializable {
 	// The generated n-Tuples
 	private NTuple nTuples[][];
 	
-	private transient StateObservation so=null; 
+	public XNTupleFuncs xnf=null; 
 
 	// Turns usage of symmetry on or off
 	private boolean useSymmetry = false;
@@ -74,10 +75,11 @@ public class NTupleValueFunc implements Serializable {
 	 *            true, if all weights of all n-Tuples shall be initialized
 	 *            randomly
 	 */
-	public NTupleValueFunc(int nTuples[][], int posVals, boolean useSymmetry,
+	public NTupleValueFunc(int nTuples[][], XNTupleFuncs xnf, int posVals, boolean useSymmetry,
 			boolean randInitWeights, NTParams tcPar, int numCells) 
 					throws RuntimeException {
 		this.useSymmetry = useSymmetry;
+		this.xnf = xnf;
 		
 		if (nTuples!=null) {
 			this.numTuples = nTuples.length;
@@ -177,7 +179,7 @@ public class NTupleValueFunc implements Serializable {
 	 * Get the equivalent positions to one board. The first one 
 	 * is the board itself. The other can be generated
 	 * with mirroring and rotation (depending on the game, see 
-	 * {@code so.symmetryVectors(board)}).
+	 * {@code xnf.symmetryVectors(board)}).
 	 * 
 	 * @param board
 	 * @param useSymmetry if false, return a 2D array with only one row 
@@ -188,9 +190,7 @@ public class NTupleValueFunc implements Serializable {
 		int i;
 		int[][] equiv = null;
 		if (useSymmetry) {
-			if (so==null) 
-				throw new RuntimeException("StateObservation 'so' is not set!");
-			equiv = so.symmetryVectors(board);
+			equiv = xnf.symmetryVectors(board);
 
 		} else {
 			equiv = new int[1][];
@@ -326,9 +326,9 @@ public class NTupleValueFunc implements Serializable {
 	public void setRpropInitDelta(double initDelta) {
 		// dummy
 	}
-	public void setSO(StateObservation sob) {
-		this.so = sob; 
-	}
+//	public void setSO(StateObservation sob) {
+//		this.so = sob; 
+//	}
 
 	public double getAlpha() {
 		return ALPHA;

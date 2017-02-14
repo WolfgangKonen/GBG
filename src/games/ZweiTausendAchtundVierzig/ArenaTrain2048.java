@@ -4,6 +4,7 @@ import controllers.PlayAgent;
 import games.ArenaTrain;
 import games.Evaluator;
 import games.GameBoard;
+import games.XNTupleFuncs;
 
 import javax.swing.*;
 
@@ -48,4 +49,10 @@ public class ArenaTrain2048 extends ArenaTrain {
 
         return new Evaluator2048_BoardPositions(pa,gb,stopEval,mode,verbose);
     }
+    
+	public XNTupleFuncs makeXNTupleFuncs() {
+		return new XNTupleFuncs2048();
+	}
+
+
 }
