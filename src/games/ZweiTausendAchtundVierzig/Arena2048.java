@@ -3,6 +3,7 @@ package games.ZweiTausendAchtundVierzig;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
+import games.XNTupleFuncs;
 import games.Arena;
 
 import javax.swing.*;
@@ -50,6 +51,10 @@ public class Arena2048 extends Arena {
 
         return new Evaluator2048(pa,gb,stopEval,mode,verbose);
     }
+
+	public XNTupleFuncs makeXNTupleFuncs() {
+		return new XNTupleFuncs2048();
+	}
 
     public void performArenaDerivedTasks() {  }
 }
