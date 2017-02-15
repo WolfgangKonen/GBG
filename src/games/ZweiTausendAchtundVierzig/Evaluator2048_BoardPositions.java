@@ -6,12 +6,16 @@ import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
 import params.MCTSParams;
+import tools.Types;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static java.util.Arrays.deepEquals;
+import static java.util.Arrays.toString;
 
 /**
  * Created by Johannes on 09.02.2016.
@@ -28,38 +32,29 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     @Override
     protected boolean eval_Agent() {
-        //find new realisitic boardPositions
-        //newBoardPositions();
+        //find new realisitic gameStates
+        //newGameStates();
 
-        //load saved boardPositions
-        List<StateObserver2048> boardPositions = loadBoardPositions();
-        System.out.println("Found " + boardPositions.size() + " boardPositions\n");
+        //load saved gameStates
+        List<StateObserver2048> gameStates = loadGameStates();
+        System.out.println("Found " + gameStates.size() + " gameStates\n");
 
-        /*ToDo: remove/mark controversial boardPositions like
-        0 | 0 | 0 | 0
-        0 | 2 | 4 | 0
-        0 | 2 | 0 | 0
-        0 | 0 | 0 | 0
-        because up or down are equally good*/
+        //group gameStates by numEmptyTiles
+        TreeMap<String, List<StateObserver2048>> gameStateGroups = groupGameStates(gameStates);
 
-        /*ToDo: group by availableActions*/
-
-        //sort boardPositions by numEmptyTiles
-        TreeMap<Integer, List<StateObserver2048>> groupedBoardPositions = groupBoardPositionsByNumEmptyTiles(boardPositions);
-
-        //remove gameBoards until numGameBoards are left for each group
-        for(List<StateObserver2048> groupedBoardPosition : groupedBoardPositions.values()) {
-            while (groupedBoardPosition.size() > 10) {
-                groupedBoardPosition.remove(random.nextInt(groupedBoardPosition.size()-1));
+        //remove gameStates until numGameStates are left for each group
+        for(List<StateObserver2048> gameStateGroup : gameStateGroups.values()) {
+            while (gameStateGroup.size() > 20) {
+                gameStateGroup.remove(random.nextInt(gameStateGroup.size()-1));
             }
         }
 
-        //Analyse the groupedBoardPositions
-        System.out.println("Analysing gameBoards, this may take a while...");
+        //Analyse the gameStateGroups
+        System.out.println("Analysing gameStates, this may take a while...");
         List<Callable<Integer>> callables = new ArrayList<>();
-        for(List<StateObserver2048>groupedBoardPosition : groupedBoardPositions.values()) {
+        for(List<StateObserver2048> gameStateGroup : gameStateGroups.values()) {
             callables.add(() -> {
-                analyseBoardPositions(groupedBoardPosition);
+                analyseGameStateGroup(gameStateGroup);
                 return null;
             });
         }
@@ -73,7 +68,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         return true;
     }
 
-    private void analyseBoardPositions(List<StateObserver2048> boardPositions) {
+    private void analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
+        //create Agents
         MCTSParams mctsParams = new MCTSParams();
         mctsParams.setNumIter(10000);
         mctsParams.setK_UCT(1);
@@ -82,12 +78,12 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         PlayAgent mctsAgent = new MCTSAgentT("MCTS",null,mctsParams);
         PlayAgent mcAgent = new MCAgent();
 
-        int maxCertainty = Config.NUMBEREVALUATIONS*boardPositions.size();
+        int maxCertainty = Config.NUMBEREVALUATIONS*gameStateGroup.size();
         double mcCertainty = 0;
         double mctsCertainty = 0;
         double sameActionCounter = 0;
 
-        for(StateObserver2048 so : boardPositions) {
+        for(StateObserver2048 gameState : gameStateGroup) {
             int[] mcActions = {0,0,0,0};
             int[] mctsActions = {0,0,0,0};
             int highestMCValue = 0;
@@ -95,16 +91,19 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             int highestMCTSValue = 0;
             int bestMCTSAction = 0;
 
+            //analyse for MC Agent
             for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
-                int MCAction = mcAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true).toInt();
+                int MCAction = mcAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
                 mcActions[MCAction] +=1;
             }
 
+            //analyse for MCTS Agent
             for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
-                int MCTSAction = mctsAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true).toInt();
+                int MCTSAction = mctsAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
                 mctsActions[MCTSAction] +=1;
             }
 
+            //find bestAction and the number of moves for this Action
             for(int i = 0; i < 4; i++) {
                 if(highestMCValue < mcActions[i]) {
                     highestMCValue = mcActions[i];
@@ -115,6 +114,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                     bestMCTSAction = i;
                 }
             }
+
+            //add the number of moves for the best Action to Counter
             mcCertainty += highestMCValue;
             mctsCertainty += highestMCTSValue;
             if(bestMCAction == bestMCTSAction) {
@@ -122,54 +123,57 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             }
         }
 
+        //calculate Certainty in %
         mcCertainty=(mcCertainty/maxCertainty)*100;
         mctsCertainty=(mctsCertainty/maxCertainty)*100;
-        sameActionCounter=(sameActionCounter/boardPositions.size())*100;
+        sameActionCounter=(sameActionCounter/gameStateGroup.size())*100;
 
-        System.out.println("Analysed " + boardPositions.size() + " gameBoards with " + boardPositions.get(0).getNumEmptyTiles() + " emptyTile(s)");
+        System.out.println("Analysed " + gameStateGroup.size() + " gameStates with " + gameStateGroup.get(0).getNumEmptyTiles() + " emptyTile(s) and " + gameStateGroup.get(0).getNumAvailableActions() + " availableAction(s)");
         System.out.println("mcCertainty = " + mcCertainty);
         System.out.println("mctsCertainty = " + mctsCertainty);
         System.out.println("sameActionCounter = " + sameActionCounter);
         System.out.println();
     }
 
-    private TreeMap<Integer, List<StateObserver2048>> groupBoardPositionsByNumEmptyTiles(List<StateObserver2048> boardPositions) {
-        TreeMap<Integer, List<StateObserver2048>> sortedBoardPositions = new TreeMap<>();
+    private TreeMap<String, List<StateObserver2048>> groupGameStates(List<StateObserver2048> gameStates) {
+        TreeMap<String, List<StateObserver2048>> gameStateGroups = new TreeMap<>();
 
-        for(StateObserver2048 so : boardPositions) {
-            Integer numEmptyTiles = so.getNumEmptyTiles();
-            List<StateObserver2048> matchingSO = sortedBoardPositions.get(numEmptyTiles);
-            if(matchingSO == null) {
-                matchingSO = new ArrayList<>();
+        for(StateObserver2048 gameState : gameStates) {
+            String key = ""+gameState.getNumEmptyTiles()+", "+gameState.getNumAvailableActions();
+            List<StateObserver2048> gameStateGroup = gameStateGroups.get(key);
+            if(gameStateGroup == null) {
+                gameStateGroup = new ArrayList<>();
             }
-            matchingSO.add(so);
-            sortedBoardPositions.put(numEmptyTiles, matchingSO);
+            gameStateGroup.add(gameState);
+            gameStateGroups.put(key, gameStateGroup);
         }
 
-        return sortedBoardPositions;
+        return gameStateGroups;
     }
 
-    private void newBoardPositions() {
-        System.out.println("Looking for boardPositions, this may take a while...");
+    private void newGameStates() {
+        System.out.println("Looking for gameStatess, this may take a while...");
 
-        List<BoardPositionContainer> boardPositionContainers = new ArrayList<>();
+        List<StateObserver2048> gameStates = new ArrayList<>();
 
         //play i games
-        List<Callable<List<BoardPositionContainer>>> callables = new ArrayList<>();
-        for(int i = 8; i > 0; i--) {
+        List<Callable<List<StateObserver2048>>> callables = new ArrayList<>();
+        for(int i = 20; i > 0; i--) {
+            int gameNumber = i;
             callables.add(() -> {
-                StateObserver2048 so = new StateObserver2048();
+                StateObserver2048 gameState = new StateObserver2048();
                 PlayAgent playAgent = new MCAgent();
-                List<BoardPositionContainer> boardPositionContainer = new ArrayList<>();
-                while (!so.isGameOver()) {
-                    boardPositionContainer.add(new BoardPositionContainer(so));
-                    so.advance(playAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
+                List<StateObserver2048> tempGameStates = new ArrayList<>();
+                while (!gameState.isGameOver()) {
+                    tempGameStates.add(gameState.copy());
+                    gameState.advance(playAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true));
                 }
-                return boardPositionContainer;
+                System.out.println("Finished with Game " + gameNumber);
+                return tempGameStates;
             });
         }
 
-        //merge all boardPositions
+        //merge all gameStates
         try {
             executorService.invokeAll(callables).stream().map(future -> {
                 try {
@@ -178,16 +182,84 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                 catch (Exception e) {
                     throw new IllegalStateException(e);
                 }
-            }).forEach(boardPositionContainers::addAll);
+            }).forEach(gameStates::addAll);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        //save all boardPositions
+        /*remove inconclusive gameStates like
+        0 | 0 | 0 | 0
+        0 | 2 | 4 | 0
+        0 | 2 | 0 | 0
+        0 | 0 | 0 | 0
+        because up and down are equally good*/
+        System.out.println("Found " + gameStates.size() + " gameStates, removing inconclusiveGameStates");
+        List<StateObserver2048> inconclusiveGameStates = new ArrayList<>();
+
+        for(StateObserver2048 gameState : gameStates) {
+            if(gameState.getNumAvailableActions() > 1) {
+                //remove gameStates with mirrored Actions
+                boolean conclusive = true;
+
+                List<int[][]> gameStateArrays = new ArrayList<>();
+                for(Types.ACTIONS action : gameState.getAvailableActions()) {
+                    //copy and advance the gameState for each availableAction without spawning a new random Tile
+                    StateObserver2048 newGameState = gameState.copy();
+                    newGameState.move(action.toInt());
+                    gameStateArrays.add(newGameState.toArray());
+                }
+
+                while(gameStateArrays.size() > 1 && conclusive) {
+                    //get one gameState while there are at least 2 cameStates left
+                    int[][] currentGameStateArray = gameStateArrays.get(0);
+                    gameStateArrays.remove(currentGameStateArray);
+
+                    //mirror and rotate the gameState to get 8 equal gameStates
+                    List<int[][]> modifiedGameStateArrays = new ArrayList<>();
+                    modifiedGameStateArrays.add(currentGameStateArray);
+                    modifiedGameStateArrays.add(mirrorArray(currentGameStateArray));
+                    for(int i = 0; i < 3; i++) {
+                        modifiedGameStateArrays.add(rotateArray(modifiedGameStateArrays.get(i*2)));
+                        modifiedGameStateArrays.add(rotateArray(modifiedGameStateArrays.get((i*2)+1)));
+                    }
+
+                    //compare the modifiedGameStates to gameStates for other Actions
+                    for(int [][] gameStateArray : gameStateArrays) {
+                        for (int[][] modifiedGameStateArray : modifiedGameStateArrays) {
+                            if(deepEquals(gameStateArray, modifiedGameStateArray)) {
+                                conclusive = false;
+                            }
+                        }
+                    }
+
+                    if(!conclusive) {
+                        //we found a inconclusive gameState
+                        inconclusiveGameStates.add(gameState);
+
+                        gameState.printBoard();
+                    }
+                }
+
+            }
+            else {
+                //remove gameStates with only 1 available Action
+                inconclusiveGameStates.add((gameState));
+            }
+        }
+
+        gameStates.removeAll(inconclusiveGameStates);
+        System.out.println("Removed " + inconclusiveGameStates.size() + " inconclusiveGameStates");
+
+        List<GameStateContainer> gameStateContainers = new ArrayList<>();
+        for(StateObserver2048 gameState : gameStates) {
+            gameStateContainers.add(new GameStateContainer(gameState));
+        }
+
+        //save all gameStates
         try {
-            FileOutputStream fos = new FileOutputStream("src\\games\\ZweiTausendAchtundVierzig\\boardpositions.ser");
+            FileOutputStream fos = new FileOutputStream("src\\games\\ZweiTausendAchtundVierzig\\gameStates.ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(boardPositionContainers);
+            oos.writeObject(gameStateContainers);
             fos.close();
             oos.close();
         } catch (IOException e) {
@@ -195,27 +267,47 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         }
     }
 
-    private List<StateObserver2048> loadBoardPositions() {
-        System.out.println("Loading boardPositions");
+    private List<StateObserver2048> loadGameStates() {
+        System.out.println("Loading gameStates");
 
-        List<StateObserver2048> boardPositions = new ArrayList<>();
+        List<StateObserver2048> gameStates = new ArrayList<>();
 
-        //load boardPositions
+        //load gameStates
         try {
-            FileInputStream fis = new FileInputStream("src\\games\\ZweiTausendAchtundVierzig\\boardpositions.ser");
+            FileInputStream fis = new FileInputStream("src\\games\\ZweiTausendAchtundVierzig\\gameStates.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
-            List<BoardPositionContainer> boardPositionContainers = (List<BoardPositionContainer>)ois.readObject();
+            List<GameStateContainer> gameStateContainers = (List<GameStateContainer>)ois.readObject();
             fis.close();
             ois.close();
 
-            for(BoardPositionContainer boardpositionContainer : boardPositionContainers) {
-                boardPositions.add(new StateObserver2048(boardpositionContainer.values, boardpositionContainer.score, boardpositionContainer.winState));
+            for(GameStateContainer gameStateContainer : gameStateContainers) {
+                gameStates.add(new StateObserver2048(gameStateContainer.values, gameStateContainer.score, gameStateContainer.winState));
             }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
-        return boardPositions;
+        return gameStates;
+    }
+
+    private int[][] rotateArray(int[][] array) {
+        int[][] rotatedArray = new int[Config.ROWS][Config.COLUMNS];
+        for(int i = 0; i < Config.ROWS; i++) {
+            for(int j = 0; j < Config.COLUMNS; j++) {
+                rotatedArray[j][3-i] = array[i][j];
+            }
+        }
+        return rotatedArray;
+    }
+
+    private int[][] mirrorArray(int[][] array) {
+        int[][] mirroredArray = new int[Config.ROWS][Config.COLUMNS];
+        for(int i = 0; i < Config.ROWS; i++) {
+            for(int j = 0; j < Config.COLUMNS; j++) {
+                mirroredArray[3-i][j] = array[i][j];
+            }
+        }
+        return mirroredArray;
     }
 
     @Override
@@ -229,14 +321,14 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     }
 }
 
-class BoardPositionContainer implements Serializable {
+class GameStateContainer implements Serializable {
     public int[][] values;
     public int score;
     public int winState;
 
-    public BoardPositionContainer(StateObserver2048 so) {
-        this.values = so.toArray();
-        this.score = so.getScore();
-        this.winState = so.getWinState();
+    public GameStateContainer(StateObserver2048 gameState) {
+        this.values = gameState.toArray();
+        this.score = gameState.getScore();
+        this.winState = gameState.getWinState();
     }
 }

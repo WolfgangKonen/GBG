@@ -5,5 +5,5 @@ package controllers.MC;
  */
 public class Config {
     public static final int ITERATIONS = 3500; //Number of Games played for every available Action
-    public static final int DEPTH = 200; //Number of times advance() is called for every Iteration
+    public static final int DEPTH = 2; //Number of times advance() is called for every Iteration
 }
