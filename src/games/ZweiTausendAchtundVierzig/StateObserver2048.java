@@ -339,8 +339,9 @@ public class StateObserver2048 implements StateObservation {
     public void advance(Types.ACTIONS action) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
-
         move(iAction);
+        addRandomTile();
+        updateAvailableMoves();
     }
 
     @Override
@@ -618,10 +619,7 @@ public class StateObserver2048 implements StateObservation {
                 down();
                 break;
         }
-
         moves++;
-
-        updateAvailableMoves();
     }
 
     private void left() {
@@ -653,7 +651,6 @@ public class StateObserver2048 implements StateObservation {
                     }
                 }
             }
-            addRandomTile();
         }
         else {
             System.out.println("Invalid Move 0");
@@ -689,7 +686,6 @@ public class StateObserver2048 implements StateObservation {
                     }
                 }
             }
-            addRandomTile();
         }
         else {
             System.out.println("Invalid Move 1");
@@ -725,7 +721,6 @@ public class StateObserver2048 implements StateObservation {
                     }
                 }
             }
-            addRandomTile();
         }
         else {
             System.out.println("Invalid Move 2");
@@ -761,7 +756,6 @@ public class StateObserver2048 implements StateObservation {
                     }
                 }
             }
-            addRandomTile();
         }
         else {
             System.out.println("Invalid Move 3");

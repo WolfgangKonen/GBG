@@ -40,7 +40,7 @@ public class Evaluator2048 extends Evaluator {
         List<StateObserver2048> stateObservers = new ArrayList<>();
 
 
-        if(m_PlayAgent.getName() == "MC" | m_PlayAgent.getName() == "MCTS") {
+        if(m_PlayAgent.getName().equals("MC") | m_PlayAgent.getName().equals("MCTS")) {
             //async for MC and MCTS Agents
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class Evaluator2048 extends Evaluator {
                     long gameSartTime = System.currentTimeMillis();
 
                     PlayAgent playAgent = new MCAgent();
-                    if(m_PlayAgent.getName() == "MCTS") {
+                    if(m_PlayAgent.getName().equals("MCTS")) {
                         playAgent = new MCTSAgentT("MCTS",null,new MCTSParams());
                     }
 
