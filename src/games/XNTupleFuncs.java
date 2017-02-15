@@ -1,5 +1,12 @@
 package games;
 
+/**
+ * Interface for the n-tuple implementation in {@link TDNTupleAgt} and 
+ * {@link NTupleValueFunction}. Game-specific functions for producing a 
+ * board vector, symmetric board vectors (if any) and a fixed n-tuple set. 
+ * 
+ * @author Wolfgang Konen, TH Köln, Feb'17
+ */
 public interface XNTupleFuncs {
 
 	//
