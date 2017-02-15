@@ -72,10 +72,10 @@ public class XArenaFuncs
 	//public	PlayAgent m_PlayAgentX;
 	//public	PlayAgent m_PlayAgentO;
 	public  PlayAgent[] m_PlayAgents;
-	String sRandom = Types.GUI_AGENT_LIST[2];
-	String sMinimax = Types.GUI_AGENT_LIST[1];
-	RandomAgent random_agent = new RandomAgent(sRandom);
-	MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
+	//String sRandom = Types.GUI_AGENT_LIST[2];
+	//String sMinimax = Types.GUI_AGENT_LIST[1];
+	//RandomAgent random_agent = new RandomAgent(sRandom);
+	//MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
 	protected Evaluator m_evaluator1=null;
 	protected Evaluator m_evaluator2=null;
 	protected Evaluator m_evaluator3=null;
@@ -139,8 +139,8 @@ public class XArenaFuncs
 			try {
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.tcPar, xnf, m_xab.m_game.gb.getStateObs());
-				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, nTuples, xnf, maxGameNum);
+				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf, m_xab.m_game.gb.getStateObs());
+				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
 						e.getMessage(), 
@@ -209,11 +209,11 @@ public class XArenaFuncs
 						pa = new TDAgent(sAgent, m_xab.tdPar, feat, maxGameNum);
 					} else if (sAgent.equals("TD-Ntuple")) {
 						try {
-							TDNTupleAgt test = new TDNTupleAgt();
+							//TDNTupleAgt test = new TDNTupleAgt();
 							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 							NTupleFactory ntupfac = new NTupleFactory(); 
-							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.tcPar,xnf, m_xab.m_game.gb.getStateObs());
-							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, nTuples, xnf, maxGameNum);
+							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf, m_xab.m_game.gb.getStateObs());
+							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
 						} catch (Exception e) {
 							MessageBox.show(m_xab, 
 									e.getMessage(), 
@@ -221,12 +221,6 @@ public class XArenaFuncs
 							//e.printStackTrace();
 							pa=null;			
 						}
-//						try {
-//							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, maxGameNum);
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
 					}					
 				} else {
 					if (!sAgent.equals(m_PlayAgents[n].getName()))
@@ -237,7 +231,7 @@ public class XArenaFuncs
 				}
 			} 
 			if (pa==null) 
-				throw new RuntimeException("Choice "+sAgent+" is not in Types.GUI_AGENT_LIST");
+				throw new RuntimeException("Could not construct/fetch agent = "+sAgent);
 			
 			m_PlayAgents[n] = pa;
 		} // for (n)
@@ -270,7 +264,7 @@ public class XArenaFuncs
 
 		try {
 			pa = this.constructAgent(sAgent, xab);
-			if (pa==null) throw new RuntimeException("No suitable class for sAgent = " + sAgent);
+			if (pa==null) throw new RuntimeException("Could not construct agent = " + sAgent);
 			
 		}  catch(RuntimeException e) {
 			MessageBox.show(xab, 
@@ -395,7 +389,7 @@ public class XArenaFuncs
 		for (int i=0; i<trainNum; i++) {
 			try {
 				m_PlayAgents[0] = constructAgent(sAgent, xab);
-				if (m_PlayAgents[0]==null) throw new RuntimeException("No suitable class for sAgent = " + sAgent);				
+				if (m_PlayAgents[0]==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
 				MessageBox.show(xab, 
@@ -679,7 +673,7 @@ public class XArenaFuncs
 			
 			try {
 				paX = this.constructAgent(AgentX, xab);
-				if (paX==null) throw new RuntimeException("No suitable class for AgentX = " + AgentX);
+				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);
 			}  catch(RuntimeException e) 
 			{
 				MessageBox.show(xab, 
@@ -692,7 +686,7 @@ public class XArenaFuncs
 			
 			try {
 				paO = this.constructAgent(AgentO, xab);
-				if (paO==null) throw new RuntimeException("No suitable class for AgentO = " + AgentO);
+				if (paO==null) throw new RuntimeException("Could not construct AgentO = " + AgentO);
 			}  catch(RuntimeException e) 
 			{
 				MessageBox.show(xab, 

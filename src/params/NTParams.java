@@ -35,7 +35,7 @@ public class NTParams extends Frame implements Serializable {
 	JLabel RandL;
 	JLabel InitL;
 	JLabel tcIntervalL;
-	JLabel EvalL;
+	//JLabel EvalL;
 	JLabel NTupleType;
 	JLabel UseSymL;
 	JPanel tcPanel;
@@ -45,7 +45,7 @@ public class NTParams extends Frame implements Serializable {
 	public JTextField tcIntervalT;
 	public JTextField NTupleNumT;
 	public JTextField nTupleMaxT;
-	public JTextField EvalT;
+	//public JTextField EvalT;
 
 	public JCheckBox TempCoC;
 	public JCheckBox RandomnessC;
@@ -73,24 +73,27 @@ public class NTParams extends Frame implements Serializable {
 		NTupleSizeL.setToolTipText(TIPNTUPLESIZEL);
 		RandL = new JLabel("randomness");
 		RandL.setToolTipText(TIPRANDL);
-		EvalL = new JLabel("Evaluting Interval");
+		//EvalL = new JLabel("Evaluting Interval");
 		NTupleType=new JLabel("nTuple generation");
 		NTupleType.setToolTipText(TIPNTUPLETYPE);
 
 		UseSymL = new JLabel("USESYMMETRY");
 		UseSymL.setToolTipText(TIPUSESYMMETRY);
 		
-		// default values
+		// These are the initial defaults 
+		// (Other game- and agent-specific defaults are in setParamDefaults, which is called
+		// whenever one of the agent choice boxes changes to an agent requiring NTParams)
+		//
 		InitT = new JTextField("0.0001");
 		InitT.setEnabled(false);
 		tcIntervalT = new JTextField("2");
 		tcIntervalT.setEnabled(false);
-		NTupleNumT = new JTextField("6");
+		NTupleNumT = new JTextField("10");
 		NTupleNumT.setEnabled(false);
-		nTupleMaxT = new JTextField("8");
+		nTupleMaxT = new JTextField("6");
 		nTupleMaxT.setEnabled(false);
-		EvalT = new JTextField("100");
-		EvalT.setEnabled(false);
+		//EvalT = new JTextField("100");
+		//EvalT.setEnabled(false);
 
 		TempCoC = new JCheckBox();
 		TempCoC.setSelected(false);
@@ -295,7 +298,7 @@ public class NTParams extends Frame implements Serializable {
 		setTcInterval(""+nt.getTcInterval());
 		setTcImm(nt.getTcImm());
 		InitT.setText(""+nt.getINIT());
-		EvalT = nt.EvalT;
+		//EvalT = nt.EvalT;
 		RandomnessC.setSelected(nt.getRandomness());
 		TupleType.setSelectedIndex(nt.getRandWalk()?0:1);
 		NTupleNumT.setText(nt.getNtupleNumber()+"");
@@ -303,4 +306,32 @@ public class NTParams extends Frame implements Serializable {
 		UseSymmetryC.setSelected(nt.getUseSymmetry());
 	}
 
+	/**
+	 * Set sensible parameters for a specific agent and specific game. By "sensible
+	 * parameters" we mean parameter producing good results.
+	 * 
+	 * @param agentName currently only "TD-Ntuple" (for {@link TDNTupleAgt}), 
+	 * 				all other strings are without any effect
+	 * @param gameName
+	 */
+	public void setParamDefaults(String agentName, String gameName) {
+		// currently we have here only the sensible defaults for one game (TTT)
+		// but for two agents:
+		switch (agentName) {
+		case "TD-Ntuple": 
+			InitT = new JTextField("0.0001");
+			InitT.setEnabled(false);
+			tcIntervalT = new JTextField("2");
+			tcIntervalT.setEnabled(false);
+			NTupleNumT = new JTextField("10");
+			NTupleNumT.setEnabled(false);
+			nTupleMaxT = new JTextField("6");
+			nTupleMaxT.setEnabled(false);
+			TempCoC.setSelected(false);
+			RandomnessC.setSelected(false);
+			break;
+		}
+		
+	}
+	
 }

@@ -290,8 +290,6 @@ public class LoadSaveTD {
 				if (obj instanceof TDAgent) {
 					pa = (TDAgent) obj;
 				} else if (obj instanceof TDNTupleAgt) {
-//					// restore the transient field m_Net.so:
-//					((TDNTupleAgt)obj).setSO(arenaGame.getGameBoard().getDefaultStartState());
 					pa = (TDNTupleAgt) obj;
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;

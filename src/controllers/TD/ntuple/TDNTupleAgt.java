@@ -375,18 +375,13 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		//System.out.println("Random test: "+ rand.nextDouble());
 		//System.out.println("Random test: "+ rand.nextDouble());
 		
-//		assert (sob instanceof StateObserverTTT) : "Input 'sob' is not of class StateObserverTTT";
-//		StateObserverTTT so = (StateObserverTTT) sob;
 		player = so.getPlayerPM();
-		// ??? where is the setting of table (in the old version) ??? 
 
 		if (m_Net.LAMBDA!=0.0) {
 			m_Net.resetElig(); // reset the eligibility traces before starting a new game
 			m_Net.calcScoresAndElig(curBoard);
 		}
 
-		//m_Net.setSO(so);   // needed for getSymBoards2
-		
 		//oldInput = m_feature.prepareFeatVector(so);
 		//S_old = so.toString();   
 		//S_old = tableToString(-Player, table);
@@ -570,11 +565,6 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	public void setAlpha(double alpha) {
 		m_Net.setAlpha(alpha);
 	}
-
-//	// needed in LoadSaveTD.loadAgent()
-//	public void setSO(StateObservation so) {
-//		m_Net.setSO(so);
-//	}
 
 	public double getAlpha() {
 		// only for debug & testing

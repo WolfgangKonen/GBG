@@ -326,9 +326,6 @@ public class NTupleValueFunc implements Serializable {
 	public void setRpropInitDelta(double initDelta) {
 		// dummy
 	}
-//	public void setSO(StateObservation sob) {
-//		this.so = sob; 
-//	}
 
 	public double getAlpha() {
 		return ALPHA;

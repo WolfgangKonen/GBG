@@ -471,7 +471,8 @@ public class XArenaMenu extends JMenuBar {
 			str = "No Agent loaded!";
 		} else {
 			// enable / disable certain parameter settings according to 
-			// the loaded agent and the active game:
+			// the agent name and the active game (before setting the specific
+			// parameters in certain tabs with 'setFrom' from the agent loaded):
 			m_arena.m_xab.setParamDefaults(td.getName(), m_arena.getGameName());
 			
 			if (td instanceof TDAgent) {
@@ -501,6 +502,7 @@ public class XArenaMenu extends JMenuBar {
 			
 			// set selector according to class loaded:
 			m_arena.m_xab.setSelectedAgent(index, td.getName());
+			
 			m_arena.m_xfun.m_PlayAgents[index] = td;
 			String strAgent = (numPlayers==2) ? "Agent-"+Types.GUI_2PLAYER_NAME[index] :
 												"Agent-"+Types.GUI_PLAYER_NAME[index];

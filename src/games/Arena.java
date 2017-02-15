@@ -532,10 +532,6 @@ abstract public class Arena extends JPanel implements Runnable {
 	 */
 	abstract public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose);
 
-//	public PlayAgent makeTDSAgent(String name, TDParams tdPar, int maxGameNum){
-//		throw new RuntimeException("No TDAgent available for game "+this.getGameName());
-//	}
-
 	/**
 	 * Factory pattern method: make a new {@link Feature} tailored to a specific game. <br>
 	 * (We delegate this task to derived classes ArenaXYZ, since they usually 

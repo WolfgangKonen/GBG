@@ -59,7 +59,7 @@ public class XArenaButtons extends JPanel
 	Label AgentX_L;
 	Choice[] choiceAgent; 
 	TDParams tdPar = new TDParams();
-	NTParams tcPar = new NTParams();
+	NTParams ntPar = new NTParams();
 //	RpropParams rpPar = new RpropParams();
 //	TCParams tcPar= new TCParams();
 //	CMAParams cmaPar = new CMAParams();
@@ -84,6 +84,17 @@ public class XArenaButtons extends JPanel
 			x=num1;
 		}
 		public void actionPerformed(ActionEvent e){}			
+	}
+	
+	class ItemListenerHandler implements ItemListener
+	{
+		int n;
+		
+		ItemListenerHandler(int num1)			
+		{		
+			n=num1;
+		}
+		public void itemStateChanged(ItemEvent arg0){}			
 	}
 	
 	public XArenaButtons(XArenaFuncs game, Arena arena)
@@ -142,6 +153,18 @@ public class XArenaButtons extends JPanel
 			
 			choiceAgent[n].setEnabled(false);		
 			// Arena does not allow user to modify choice boxes (see ArenaTrain)
+			
+			// whenever one of the agent choice boxes changes, call setParamDefaults
+			// to set the param tabs to sensible defaults for that agent and that game
+			choiceAgent[n].addItemListener(
+					new ItemListenerHandler(n) { // this constructor will copy n to ItemListenerHandler.n
+						public void itemStateChanged(ItemEvent arg0) {
+							setParamDefaults(choiceAgent[n].getSelectedItem(),
+									m_game.getGameName());
+						}
+					}
+			);
+
 		}
 		this.enableButtons(false);
 		GameNumT.setEnabled(false);		// Arena allows no training / multi-training 
@@ -172,15 +195,6 @@ public class XArenaButtons extends JPanel
 		//GameNumL.setBackground(Color.white);
 		
 		
-		//added for NTuple-Systems
-		choiceAgent[0].addItemListener(
-				new ItemListener() {
-					public void itemStateChanged(ItemEvent arg0) {
-						setParamDefaults(choiceAgent[0].getSelectedItem(),
-								m_game.getGameName());
-					}
-				}
-		);
 		NTupShowB.setEnabled(false);	// enable this button only if AgentX is an N-Tuple Player
 		
 		// Why do we set only m_game.state in the following ActionListeners and delegate
@@ -190,7 +204,7 @@ public class XArenaButtons extends JPanel
 		
 		for (int n=0; n<numPlayers; n++) {
 			mParam[n].addActionListener(
-					new ActionHandler(n)		// constructor copies n to member x
+					new ActionHandler(n)		// this constructor will copy n to member x
 					{
 						public void actionPerformed(ActionEvent e)
 						{	
@@ -365,6 +379,7 @@ public class XArenaButtons extends JPanel
 
 	public void setParamDefaults(String agentName, String gameName) {
 		tdPar.setParamDefaults(agentName, gameName);
+		ntPar.setParamDefaults(agentName, gameName);
 		
 		if(agentName.equals("TDS")) {
 			switch(gameName) {

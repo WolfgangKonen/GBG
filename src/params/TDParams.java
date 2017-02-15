@@ -78,7 +78,7 @@ public class TDParams extends Frame implements Serializable
 	//JButton ok;
 	//TDParams m_par;
 
-// -- obsolete, they are stored in AgentBase
+// -- obsolete, they are now stored in AgentBase
 //
 //	// These two members are here only to save these settings (from other param tabs) 
 //	// together with the agent, so that we can restore them later on load (at least 
@@ -88,6 +88,11 @@ public class TDParams extends Frame implements Serializable
 	
 	public TDParams() {
 		super("TD Parameter");
+		
+		// These are the initial defaults 
+		// (Other game- and agent-specific defaults are in setParamDefaults, which is called
+		// whenever one of the agent choice boxes changes to an agent requiring TDParams)
+		//
 		alphaT = new JTextField("0.001");  //("0.1");				// the defaults
 		alfinT = new JTextField("0.001");			//
 		epsilT = new JTextField("0.3");				// 
@@ -193,11 +198,17 @@ public class TDParams extends Frame implements Serializable
 		setVisible(false);
 	} // constructor TDParams()	
 	
+	/**
+	 * Set sensible parameters for a specific agent and specific game. By "sensible
+	 * parameters" we mean parameter producing good results.
+	 * 
+	 * @param agentName either "TD-Ntuple" (for {@link TDNTupleAgt}) or "TDS" (for {@link TDAgent}),
+	 * 				all other strings are without any effect
+	 * @param gameName
+	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		if(agentName.equals("TD-Ntuple")) {
-		}
-		else {
-		}
+		// currently we have here only the sensible defaults for one game (TTT)
+		// but for two agents:
 		switch (agentName) {
 		case "TD-Ntuple": 
 			alphaT.setText("0.001");  			// the defaults
