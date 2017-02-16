@@ -57,7 +57,7 @@ public class EvaluatorTTT extends Evaluator {
 	
 	private void initEvaluator(GameBoard gb, int mode) {
 		if (!isAvailableMode(mode)) 
-			throw new RuntimeException("Value mode = "+mode+" is not allowed for EvaluatorTTT!");
+			throw new RuntimeException("EvaluatorTTT: Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
 		m_gb = gb;		
 	}
@@ -168,14 +168,16 @@ public class EvaluatorTTT extends Evaluator {
  	public String getMsg() { 
  		return (m_mode==9) ? m_evaluator9.getMsg() : m_msg; } 
  	
- 	public static int[] getAvailableModes() {
- 		return AVAILABLE_MODES;
+	@Override
+ 	public boolean isAvailableMode(int mode) {
+		for (int i : AVAILABLE_MODES) {
+			if (mode==i) return true;
+		}
+		return false;
  	}
  	
- 	public static boolean isAvailableMode(int mode) {
- 		for (int i : AVAILABLE_MODES) {
- 			if (mode==i) return true;
- 		}
- 		return false;
+ 	@Override
+ 	public int[] getAvailableModes() {
+ 		return AVAILABLE_MODES;
  	}
 }

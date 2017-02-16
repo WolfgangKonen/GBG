@@ -100,5 +100,20 @@ abstract public class Evaluator {
 		}
 		return msg;
 	}
+	
+	/**
+	 * 
+	 * @param mode
+	 * @return true, if {@code mode} is in {@link #getAvailableModes} or 
+	 * 		if Evaluator does not use {@code mode}.
+	 */
+	abstract public boolean isAvailableMode(int mode);
+	
+	/**
+	 * @return the allowed values for parameter {@code mode} in a call 
+	 *     to {@code Arena.makeEvaluator}.     
+	 *     If an Evaluator does not use {@code mode}, it returns null.
+	 */
+	abstract public int[] getAvailableModes();
 }
 

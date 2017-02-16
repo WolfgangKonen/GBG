@@ -317,5 +317,19 @@ public class Evaluator9 extends Evaluator {
  	
  	@Override
  	public String getMsg() { return m_msg; } 
+ 	
+ 	/**
+ 	 * Since Evaluator2048 does not use mode, this function returns always true
+ 	 */
+	@Override
+ 	public boolean isAvailableMode(int mode) {
+		return true;
+ 	}
+
+ 	@Override
+ 	public int[] getAvailableModes() {
+ 		return null;
+ 	}
+ 	
 }
 

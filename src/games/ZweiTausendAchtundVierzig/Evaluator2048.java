@@ -31,6 +31,8 @@ public class Evaluator2048 extends Evaluator {
 
     public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
+        if (isAvailableMode(mode)==false) 
+        	throw new RuntimeException("Evaluator2048: Value mode = "+mode+" for parameter mode not allowed." );
     }
 
     @Override
@@ -174,4 +176,18 @@ public class Evaluator2048 extends Evaluator {
                 tilesString +
                 "\n\n";
     }
+ 
+ 	/**
+ 	 * Since Evaluator2048 does not use mode, this function returns always true
+ 	 */
+	@Override
+ 	public boolean isAvailableMode(int mode) {
+		return true;
+ 	}
+
+ 	@Override
+ 	public int[] getAvailableModes() {
+ 		return null;
+ 	}
+ 	
 }
