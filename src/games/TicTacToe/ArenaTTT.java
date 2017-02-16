@@ -14,13 +14,12 @@ import games.ArenaTrain;
 /**
  * {@link Arena} for TicTacToe. It borrows all functionality
  * from the general class {@link Arena}. It only overrides the abstract
- * methods {@link Arena#makeGameBoard()}, {@link Arena#makeEvaluator()},
- * and {@link Arena#makeFeatureClass()}, such that 
+ * methods {@link Arena#makeGameBoard()}, 
+ * {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)},
+ * and {@link Arena#makeFeatureClass(int)}, such that 
  * these factory methods return objects of class {@link GameBoardTTT}, 
- * {@link EvaluatorTTT}, and {@link Feature}, respectively.
+ * {@link EvaluatorTTT}, and {@link FeatureTTT}, respectively.
  * 
- * @see PlayAgent
- * @see TDAgent
  * @see GameBoardTTT
  * @see EvaluatorTTT
  * 
@@ -60,7 +59,7 @@ public class ArenaTTT extends Arena   {
 	 * 					evaluator goal (may be used during training to stop it 
 	 * 					prematurely)
 	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
-	 * 					if {@code mode} is not in the set {@link #getAvailableModes}.
+	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */

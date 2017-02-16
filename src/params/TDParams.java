@@ -18,6 +18,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import controllers.TD.TDAgent;
+import controllers.TD.ntuple.TDNTupleAgt;
+
 /**
  * This class realizes the parameter settings for TD players.
  * These parameters and their [defaults] are: <ul>

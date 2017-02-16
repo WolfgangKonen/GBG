@@ -16,12 +16,6 @@ import tools.Types.ACTIONS;
  * <li> and others.
  * </ul><p>
  * 
- * Note: The five methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
- * {@link #getBoardVector()}, {@link #symmetryVectors(int[])} and {@link #fixedNTuples()} are 
- * only required for the n-tuple interface. If an implementing class does not need that part 
- * (i. e. if it does not plan to use {@link TDNTupleAgt}), it may just code stubs
- * returning 0, {@code null}, or throwing a RuntimeException.
- *
  * @author Wolfgang Konen, TH Köln, Feb'17
  */
 public interface StateObservation {

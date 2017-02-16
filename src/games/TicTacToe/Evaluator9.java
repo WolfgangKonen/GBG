@@ -66,7 +66,7 @@ public class Evaluator9 extends Evaluator {
 	 *  <li> if pa is a ValItPlayer or TDSPlayer, then 'C: c0,c1' shows the counters for that state
 	 *       (c0: how often visited during training, c1: how often trained (updated))     
 	 *  <li> if pa is a TDSPlayer, then 'Div: (0/0/8) OK' shows the result from 
-	 *  	 {@link games.TicTDBase#diversityCheck(String)}: Does the feature vector corresponding to 
+	 *  	 {@link games.TicTacToe.TicTDBase#diversityCheck(String)}: Does the feature vector corresponding to 
 	 *  	 state s have a non-diverging set of scores?    
 	 *  </ul> 
 	 * Note that with this definition of result we can handle in a consistent way cases 

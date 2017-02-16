@@ -6,8 +6,7 @@ package controllers.TD;
  * Known implementations: {@link TD_Lin}, {@link TD_NNet}
  * <p>
  * Known classes using TD_func: <ul>
- * <li> {@link TDSPlayer}, {@link XArenaFuncs.CMAPlayer} (for game TicTacToe)
- * <li> {@link N3TDPlayer} (for game Nimm3)
+ * <li> {@link TDAgent}
  * </ul>
  * 
  * @author Wolfgang Konen, TH Köln, Apr'08-Nov'16

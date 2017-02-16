@@ -1,19 +1,23 @@
 package games;
 
+import controllers.TD.ntuple.TDNTupleAgt;
+import controllers.TD.ntuple.NTupleValueFunc;
+
 /**
  * Interface for the n-tuple implementation in {@link TDNTupleAgt} and 
- * {@link NTupleValueFunction}. Game-specific functions for producing a 
- * board vector, symmetric board vectors (if any) and a fixed n-tuple set. 
+ * {@link NTupleValueFunc}. Game-specific functions for producing a 
+ * board vector, symmetric board vectors (if any) and a fixed n-tuple set. <p>
  * 
+ * Note: The five methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
+ * {@link #getBoardVector(StateObservation)}, {@link #symmetryVectors(int[])} and 
+ * {@link #fixedNTuples()} are only required for the n-tuple interface. 
+ * If an implementing class does not need that part 
+ * (i. e. if it does not plan to use {@link TDNTupleAgt}), it may just code stubs
+ * returning 0, {@code null}, or throwing a {@link RuntimeException}.
+ *
  * @author Wolfgang Konen, TH Köln, Feb'17
  */
 public interface XNTupleFuncs {
-
-	//
-	// The following four functions are only required for the n-tuple interface.
-	// If an implementing class does not need that part, it may just code stubs 
-	// returning 0, {@code null}, or throwing a RuntimeException.
-	//
 	/**
 	 * @return the number of board cells
 	 */
@@ -32,8 +36,9 @@ public interface XNTupleFuncs {
 	public int[] getBoardVector(StateObservation so);
 
 	/**
-	 * Given a board vector from {@link #getBoardVector()} and given that the game has 
-	 * s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
+	 * game has s symmetries, return an array which holds s symmetric board vectors: 
+	 * <ul>
 	 * <li> the first row {@code boardArray[0]} is the board vector itself
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).

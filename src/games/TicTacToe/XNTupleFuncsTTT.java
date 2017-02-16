@@ -51,8 +51,8 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 	}
 	
 	/**
-	 * Given a board vector from {@link #getBoardVector()} and given that the game has 
-	 * s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
+	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
 	 * <li> the first row {@code boardArray[0]} is the board vector itself
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).

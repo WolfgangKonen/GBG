@@ -12,7 +12,7 @@ import tools.Types;
 /**
  * Launch class used to run {@link ArenaTrain} as <b>applet</b>. <br> 
  * 
- * @see Arena
+ * @see games.Arena
  * @see ArenaTrain
  *  
  * @author Wolfgang Konen, TH Köln, Nov'16

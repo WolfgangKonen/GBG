@@ -351,14 +351,14 @@ public class TD_NNet implements TD_func, Serializable {
     } /* end initWeights */
     
    /**
-     *  Set the weights & bias from one long double vector wv. Given H=(n+1)*num_hidden:<ul>
+     *  Set the weights and bias from one long double vector wv. Given H=(n+1)*num_hidden:<ul>
      *  <li> wv[0..n] = weights from inputs (incl. bias neuron) to 1st hidden
      *  <li> ...
      *  <li> wv[H-(n+1)..H-1] = weights from inputs (incl. bias neuron) to (num_hidden)th hidden
      *  <li> wv[H..H+num_hidden] = weights from hidden (incl. bias) to 1st output
      *  <li> ...
      *  <li> wv[wv.length-1] = activity of bias neurons
-     *  <ul>
+     *  </ul>
      */ 
     public void setWeights(double[] wv) {
     	int i,j,k,kv;
@@ -398,7 +398,7 @@ public class TD_NNet implements TD_func, Serializable {
      *  <li> wv[H..H+num_hidden] = weights from hidden (incl. bias) to 1st output
      *  <li> ...
      *  <li> wv[wv.length-1] = activity of bias neuron
-     *  <ul>
+     *  </ul>
      */ 
     public double[] getWeights() {
     	int i,j,k,kv;

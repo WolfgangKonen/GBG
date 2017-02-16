@@ -11,10 +11,10 @@ import params.NTParams;
 import params.TDParams;
 
 /**
- * Realization of a single N-tuple for the game {@link TicTacToe}.<br>
+ * Realization of a single N-tuple for games.<br>
  * Each NTuple consists of {@link NTuple#getLength()} positions on the game
  * board.<br>
- * Each position can carry one out of {@code posVals} values. For TTT the 
+ * Each position can carry one out of {@code posVals} position values. For TTT the 
  * values are 0 ("O"), 1 (empty), 2 ("X").<br>
  * Each NTuple has a lookup table (LUT) containing for each combination of
  * values a corresponding weight. The length of the LUT is {@code posVals} ^
@@ -164,27 +164,27 @@ public class NTuple implements Serializable {
 		return board;
 	}
 
-	/**
-	 * Given a long weight vector (all N-tuples), set from this weight vector
-	 * the weights of this NTuple.
-	 * 
-	 * @param wv
-	 *            long weight vector (usually the weights from
-	 *            {@link RLGame.TD_Lin})
-	 * @param off
-	 *            offset, i.e. the weights for this NTuple start at
-	 *            {@code wv[off]}
-	 * 
-	 * @see NTupleSet#copyWeights(double[])
-	 */
-	public void setWeights(double[] wv, int off) {
-		if ((wv.length - off) < lut.length)
-			throw new RuntimeException("Length mismatch: wv.length="
-					+ wv.length + ", offset=" + off + ", lut.length="
-					+ lut.length);
-		for (int i = 0; i < lut.length; i++)
-			lut[i] = wv[i + off];
-	}
+//	/**
+//	 * Given a long weight vector (all N-tuples), set from this weight vector
+//	 * the weights of this NTuple.
+//	 * 
+//	 * @param wv
+//	 *            long weight vector (usually the weights from
+//	 *            {@link RLGame.TD_Lin})
+//	 * @param off
+//	 *            offset, i.e. the weights for this NTuple start at
+//	 *            {@code wv[off]}
+//	 * 
+//	 * @see NTupleSet#copyWeights(double[])
+//	 */
+//	public void setWeights(double[] wv, int off) {
+//		if ((wv.length - off) < lut.length)
+//			throw new RuntimeException("Length mismatch: wv.length="
+//					+ wv.length + ", offset=" + off + ", lut.length="
+//					+ lut.length);
+//		for (int i = 0; i < lut.length; i++)
+//			lut[i] = wv[i + off];
+//	}
 
 	/**
 	 * Initialize the weights
@@ -227,10 +227,12 @@ public class NTuple implements Serializable {
 	 * @param board
 	 *            the representation of a game board (vector of length 9,
 	 *            carrying -1 ("O"), 0 (empty) or +1 ("X"))
-	 * @param dW
-	 *            weight increment
+	 * @param ALPHA
+	 * @param delta
+	 * @param e
+	 * @param LAMBDA
 	 * 
-	 * @see NTupleValueFunc#updateWeights(double[], double[], boolean, double)
+	 * @see NTupleValueFunc#updateWeights(int[], int[], boolean, double, boolean) 
 	 */
 	public void update(int[] board, double ALPHA, double delta, double e, double LAMBDA) {
 		// lut[getIndex(board)] += dW;
@@ -313,28 +315,28 @@ public class NTuple implements Serializable {
 		}
     }/* end updateElig(int[][],...) */
 
-    /**
-	 * Update the train counters for this NTuple. Each LUT weight has a train
-	 * counter which is incremented by 1 whenever this weight is updated (i. e.
-	 * a TDLearn-step occurs with the Input for this weight being 1).
-	 * 
-	 * @param Input
-	 *            long vector for all N-tuples containing a "1.0" if the
-	 *            corresponding LUT weight gets trained in the TDLearn-step.
-	 * @param k
-	 *            offset within the Input vector for this NTuple (i.e. the
-	 *            inputs for this NTuple start at {@code Input[k]}.
-	 * 
-	 * @see NTupleSet#updateTrainCounter(double[])
-	 */
-	public void updateTrainCounter(double[] Input, int k) {
-		if (Input.length - k < lut.length)
-			throw new RuntimeException("Vector Input too short for current LUT");
-		for (int i = 0; i < lut.length; i++) {
-			if (Input[k + i] == 1.0)
-				trainCounter[i]++;
-		}
-	}
+//    /**
+//	 * Update the train counters for this NTuple. Each LUT weight has a train
+//	 * counter which is incremented by 1 whenever this weight is updated (i. e.
+//	 * a TDLearn-step occurs with the Input for this weight being 1).
+//	 * 
+//	 * @param Input
+//	 *            long vector for all N-tuples containing a "1.0" if the
+//	 *            corresponding LUT weight gets trained in the TDLearn-step.
+//	 * @param k
+//	 *            offset within the Input vector for this NTuple (i.e. the
+//	 *            inputs for this NTuple start at {@code Input[k]}.
+//	 * 
+//	 * @see NTupleSet#updateTrainCounter(double[])
+//	 */
+//	public void updateTrainCounter(double[] Input, int k) {
+//		if (Input.length - k < lut.length)
+//			throw new RuntimeException("Vector Input too short for current LUT");
+//		for (int i = 0; i < lut.length; i++) {
+//			if (Input[k + i] == 1.0)
+//				trainCounter[i]++;
+//		}
+//	}
 
 	// currently not used
 	public void weightDecay(double factor) {

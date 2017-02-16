@@ -67,7 +67,8 @@ public interface PlayAgent {
 	/**
 	 * 
 	 * @return	returns true/false, whether the action suggested by last call 
-	 * 			to {@link #getNextAction()} was a random action 
+	 * 			to {@link #getNextAction(StateObservation, boolean, double[], boolean)} 
+	 *          was a random action 
 	 */
 	public boolean wasRandomAction(); 
 	
@@ -82,8 +83,11 @@ public interface PlayAgent {
 	 * 					prematurely.  
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
-	public boolean trainAgent(StateObservation so);
 	public boolean trainAgent(StateObservation so, int epiLength);
+	/**
+	 * @see #trainAgent(StateObservation, int)
+	 */
+	public boolean trainAgent(StateObservation so);
 	
 	public String printTrainStatus();
 	public String stringDescr();

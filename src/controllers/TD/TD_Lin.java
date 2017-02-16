@@ -260,8 +260,8 @@ public class TD_Lin implements TD_func, Serializable {
     }
 
     /**
-     * update weights based on current {reward & input} and based on the output old_y of the 
-     * previous step
+     * update weights based on current reward, current input and on the output old_y 
+     * of the previous step
      * @param reward	reward of the current board position
      * @param Input		feature vector derived from Table, the current board position
      * @param finished	is the current board position an end state?
@@ -404,7 +404,7 @@ public class TD_Lin implements TD_func, Serializable {
     } /* end initWeights */
     
     /**
-     *  Set the weights & bias from one long double vector wv of size (n+1)*m+1. <ul>
+     *  Set the weights and bias from one long double vector wv of size (n+1)*m+1. <ul>
      *  <li> wv[0..n] = weights from inputs (incl. bias neuron) to 1st output
      *  <li> wv[n+1..2n+1] = weights from inputs (incl. bias neuron) to 2nd output
      *  <li> ...

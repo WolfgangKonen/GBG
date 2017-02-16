@@ -10,15 +10,17 @@ import controllers.PlayAgent;
 import controllers.RandomAgent;
 import games.ArenaTrain;
 import games.Evaluator;
+import games.TicTacToe.Evaluator9;
 import games.GameBoard;
 import games.XArenaFuncs;
 import tools.Types;
 
 /**
- * Same as {@link Evaluator9}, but instead of {@link Evaluator9#evalAgent1(PlayAgent)} use <p>
- * if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition with MinimaxPlayer and RandomPlayer) or <p>
- * if mode=2: {@link EvaluatorTTT#evaluateAgent2(PlayAgent,GameBoard)} (competition with MinimaxPlayer from different start positions). 
- * <p>  
+ * Same as {@link Evaluator9}, but instead of {@link Evaluator9#evalAgent1(PlayAgent, boolean)} use
+ * <ul>
+ * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition with MinimaxPlayer and RandomPlayer) or 
+ * <li> if mode=2: {@link EvaluatorTTT#evaluateAgent2(PlayAgent,GameBoard)} (competition with MinimaxPlayer from different start positions). 
+ * </ul>  
  * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
  */
 public class EvaluatorTTT extends Evaluator {

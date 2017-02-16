@@ -16,7 +16,7 @@ import games.TicTacToe.StateObserverTTT;
  * retrieved with {@link #getAvailFeatmode()}.
  * 
  * Class {@link FeatureTTT} is derived from {@link TicTDBase} in order to access 
- * the protected method {@link TicTDBase#prepareInputVector(int, int[][]) to do 
+ * the protected method {@link TicTDBase#prepareInputVector(int, int[][])} to do 
  * the main work.
  *
  * @author Wolfgang Konen, TH Köln, Nov'16

@@ -16,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import controllers.TD.ntuple.TDNTupleAgt;
+
 //samine//
 public class NTParams extends Frame implements Serializable {
 	private static final String TIPRANDL = "If checked, generate random n-tuples. If not, take a hard-coded n-tuple set (int[][] nTuple in TDSNPlayer)";

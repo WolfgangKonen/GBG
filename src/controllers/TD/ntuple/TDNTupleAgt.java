@@ -20,21 +20,19 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Feature;
+import games.GameBoard;
 import games.StateObservation;
 import games.XNTupleFuncs;
 
 /**
- * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning). 
- * It has either a linear net {@link TD_Lin} or a BP neural net {@link TD_NNet}
+ * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning)
+ * <b>with n-tuples</b>. 
+ * It has a one-layer (perceptron-like) network with output-nonlinearty tanh 
  * to model the value function. 
  * The net follows closely the (pseudo-)code by [SuttonBonde93]. 
  * <p>
- * The internal learning rate ALPHA for the net input layer weights is alpha/n,
- * where n=(size of feature vector) and alpha is the constructors' first
- * parameter.
- * <p>
  * Some functionality is packed in the superclass 
- * {@link AgentBase} (gameNum, maxGameNum, AgentState)
+ * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...)
  * 
  * @see PlayAgent
  * @see AgentBase
@@ -50,7 +48,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 	/**
 	 * Controls the amount of explorative moves in
-	 * {@link #getBestTable(int[][], int[][], int, boolean, boolean, double[][])}
+	 * {@link #getNextAction(StateObservation, boolean, double[], boolean)}
 	 * during training. Let p=getGameNum()/getMaxGameNum(). As long as
 	 * p < m_epsilon/(1+m_epsilon) we have progress < 0 and we get with certainty a random
 	 * (explorative) move. For p \in [EPS/(1+EPS), 1.0] the random move
@@ -124,12 +122,13 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	/**
 	 * Create a new {@link TDNTupleAgt}
 	 * 
-	 * @param tdPar
-	 *            All needed Parameters
-	 * @param ntPar 
-	 * @param maxGameNum
-	 *            Number of Training-Games
-	 * @throws IOException 
+	 * @param name			agent name
+	 * @param tdPar			temporal difference parameters
+	 * @param ntPar			n-tuples and temporal coherence parameter
+	 * @param nTuples		the set of n-tuples
+	 * @param xnf			contains game-specific n-tuple functions
+	 * @param maxGameNum	maximum number of training games
+	 * @throws IOException
 	 */
 	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, int[][] nTuples, 
 			XNTupleFuncs xnf, int maxGameNum) throws IOException {
@@ -138,14 +137,13 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	/**
-	 * Init the N-Tuple-System and set the TD-Params
-	 * @param ntPar 
-	 * @param init 
 	 * 
-	 * @param tdPar
-	 *            All needed Parameters
-	 * @param maxGameNum
-	 *            Number of Training-Games
+	 * @param tdPar			temporal difference parameters
+	 * @param ntPar			n-tuples and temporal coherence parameter
+	 * @param nTuples		the set of n-tuples
+	 * @param xnf			contains game-specific n-tuple functions
+	 * @param maxGameNum	maximum number of training games
+	 * @throws IOException
 	 */
 	private void initNet(NTParams ntPar, TDParams tdPar, int[][] nTuples, 
 			XNTupleFuncs xnf, int maxGameNum) throws IOException {
@@ -181,7 +179,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	/**
 	 * Get the next best action and return it
 	 * 
-	 * @param sob			current game state (is returned unchanged)
+	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow epsilon-greedy random action selection	
 	 * @param VTable		the score for each available action (corresponding
 	 * 						to sob.getAvailableActions())
@@ -341,21 +339,23 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		return score;
 	}
 
-
 	/**
-	 * Train the agent (the net) for one complete game episode. Side effect:
-	 * AgentBase.incrementGameNum().
-	 * 
-	 * @param Player
-	 *            +1 or -1, player who makes the next move. If Player=+1, the
-	 *            initial board position is empty, if Player=-1, the initial
-	 *            board position has an 'X' set at a random location (so X is
-	 *            always the one who starts the game)
-	 * @return true, if agent raised a stop condition (currently only CMAPlayer)
+	 * @see #trainAgent(StateObservation, int)
 	 */
 	public boolean trainAgent(StateObservation sob) {
 		return trainAgent(sob, Integer.MAX_VALUE);
 	}
+	/**
+	 * Train the Agent for one complete game episode. <p>
+	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
+	 * parameters (weights and so on).
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState01()} to get
+	 * 					some exploration of different game paths)
+	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
+	 * 					prematurely.  
+	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
+	 */
 	public boolean trainAgent(StateObservation so, int epiLength) {
 		//int[][] table = new int[3][3];
 		double[] VTable = null;

@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Random;
 
 import controllers.PlayAgent;
+import controllers.TD.TDAgent;
+import controllers.TD.ntuple.TDNTupleAgt;
 import tools.Types;
 import tools.Types.ACTIONS;
 import controllers.AgentBase;
@@ -58,7 +60,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	//private boolean MakeMove;		// true, if an agent move is requested 
 	protected transient MinimaxAgent referee;
 	/**
-	 * @deprecated (use {@link TD_NTPlayer} instead)
+	 * @deprecated (use {@link TDNTupleAgt} instead)
 	 */
 	private int nTuple[][] = {{0,1,2},{3,4,5},{0,4,8}
 							 ,{0,3,6,7,8},{0,4,8,2,6} 
@@ -380,7 +382,8 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 * @param gameTreeStates <br>
 	 *        {@code =false}: count the possible legal boards (without symmetry considerations);<br>   
 	 * 		  {@code =true}: count the number of nodes in the game tree
-	 * @see games.LaunchTrainTTT
+	 * 
+	 * @see games.TicTacToe.LaunchTrainTTT
 	 */
 	public static void countStates2(boolean gameTreeStates) {
 		hm2 = new HashMap<String, Integer>();
@@ -1050,7 +1053,6 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 * corresponding feature vector FV and then the diversity of this feature vector FV, i.e. how 
 	 * many states belonging to FV are mapped by MinimaxAgent to -1 (O-win), 0 (tie), +1 (X-win).
 	 * <p>
-	 * Known callers: {@link controllers.TD.TDAgent#diversityCheck(String)} 
 	 * <p><b>Only for diagnostics.</b>
 	 * @param state	(e.g. "XoX---Xo-")
 	 * @param counters int[3] which contains on output: [0]: O-win, [1]: tie, [2]: X-win counts (Minimax)

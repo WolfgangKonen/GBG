@@ -29,7 +29,7 @@ import javax.swing.JTextField;
  * </ul> 
  * 
  * @see controllers.TD.TDAgent
- * @see XArenaButtons
+ * @see games.XArenaButtons
  */
 public class OtherParams extends Frame 
 {

@@ -34,7 +34,7 @@ public class RandomAgent extends AgentBase implements PlayAgent
 		
 	/**
 	 * Get the best next action and return it
-	 * @param sob			current game state (not changed on return)
+	 * @param so			current game state (not changed on return)
 	 * @param random		allow epsilon-greedy random action selection	
 	 * @param VTable		the score for each available action (corresponding
 	 * 						to sob.getAvailableActions())

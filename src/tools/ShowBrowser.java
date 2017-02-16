@@ -32,7 +32,7 @@ public class ShowBrowser {
     * connects it automatically with the right program (e.g. PDF viewer) to view 
     * the file.
     * 
-    * @param url A web address (URL) of a web page (ex: "http://www.google.com/")
+    * @param URL A web address (URL) of a web page (ex: "http://www.google.com/")
     */
    public static void openURL(java.net.URL URL) {
 	   

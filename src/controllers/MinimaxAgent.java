@@ -50,7 +50,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	
 	/**
 	 * Get the best next action and return it
-	 * @param sob			current game state (not changed on return)
+	 * @param so			current game state (not changed on return)
 	 * @param random		allow epsilon-greedy random action selection	
 	 * @param VTable		must be an array of size n+1 on input, where 
 	 * 						n=sob.getNumAvailableActions(). On output,

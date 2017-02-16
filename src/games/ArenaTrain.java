@@ -34,12 +34,12 @@ import tools.Types;
  * The GUI for buttons and choice boxes is in {@link XArenaButtons}. <p>
  *
  * Run this class either as applet (from {@link LaunchAppletTTT}) or as main (from 
- * {@link LaunchTrainTTT}) for the TicTacToe game.
+ * {@link games.TicTacToe.LaunchTrainTTT LaunchTrainTTT} or from
+ * {@link games.TicTacToe.LaunchArenaTTT LaunchArenaTTT}) for the TicTacToe game.
  * 
  * @see XArenaButtons 
  * @see XArenaFuncs
  * @see LaunchAppletTTT 
- * @see LaunchTrainTTT 
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  *

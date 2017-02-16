@@ -479,9 +479,9 @@ public class XArenaFuncs
 	
 	/**
 	 * Perform a competition paX vs. paO consisting of competeNum games, starting from StateObservation startSO.
-	 * @param paX	PlayAgent	a trained agent
-	 * @param paO	PlayAgent	a trained agent
-	 * @param startObservation	the start board position for the game
+	 * @param paX	PlayAgent,	a trained agent
+	 * @param paO	PlayAgent,	a trained agent
+	 * @param startSO	the start board position for the game
 	 * @param competeNum		the number of games to play
 	 * @param verbose			0: silent, 1,2: more print-out
 	 * @return		double[3], the percentage of games with X-win, tie, O-win

@@ -21,6 +21,7 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Feature;
+import games.GameBoard;
 import games.StateObservation;
 //import games.TicTacToe.StateObserverTTT;
 
@@ -141,7 +142,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	/**
 	 * Get the next best action and return it
 	 * 
-	 * @param sob			current game state (is returned unchanged)
+	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow epsilon-greedy random action selection	
 	 * @param VTable		the score for each available action (corresponding
 	 * 						to sob.getAvailableActions())
@@ -302,19 +303,22 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 
 	/**
-	 * Train the agent (the net) for one complete game episode. Side effect:
-	 * AgentBase.incrementGameNum().
-	 * 
-	 * @param Player
-	 *            +1 or -1, player who makes the next move. If Player=+1, the
-	 *            initial board position is empty, if Player=-1, the initial
-	 *            board position has an 'X' set at a random location (so X is
-	 *            always the one who starts the game)
-	 * @return true, if agent raised a stop condition (currently only CMAPlayer)
+	 * @see #trainAgent(StateObservation, int)
 	 */
 	public boolean trainAgent(StateObservation sob) {
 		return trainAgent(sob, Integer.MAX_VALUE);
 	}
+	/**
+	 * Train the Agent for one complete game episode. <p>
+	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
+	 * parameters (weights and so on).
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState01()} to get
+	 * 					some exploration of different game paths)
+	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
+	 * 					prematurely.  
+	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
+	 */
 	public boolean trainAgent(StateObservation so, int epiLength) {
 		//int[][] table = new int[3][3];
 		double[] VTable = null;

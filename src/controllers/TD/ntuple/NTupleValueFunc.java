@@ -15,12 +15,12 @@ import params.NTParams;
 import params.TDParams;
 
 /**
- *         Implementation of an learning value-function using a n-Tuple-System.
- *         A set of n-Tuples is generated randomly or by user precept. Random
+ *         Implementation of a learning value-function using n-Tuple systems.
+ *         A set of n-tuples is generated randomly or by user precept. Random
  *         n-Tuples can be just a set of random points or a random walk on the
  *         board. The value-function uses symmetries of the board to allow a
  *         faster training. The output of the value-function is always put
- *         through a sigmoid-function (tanh) to get the value in the range -1 ..
+ *         through a sigmoid function (tanh) to get the value in the range -1 ..
  *         +1. The learning rate alpha decreases exponentially from a start
  *         value at the beginning of the training to an end value after a certain
  *         amount of games.
