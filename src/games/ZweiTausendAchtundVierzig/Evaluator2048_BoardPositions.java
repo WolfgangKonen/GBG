@@ -53,24 +53,57 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
         //Analyse the gameStateGroups
         System.out.println("Analysing gameStates, this may take a while...");
-        List<Callable<Integer>> callables = new ArrayList<>();
+        List<Callable<ResultContainer>> callables = new ArrayList<>();
         for(List<StateObserver2048> gameStateGroup : gameStateGroups.values()) {
             callables.add(() -> {
-                analyseGameStateGroup(gameStateGroup);
-                return null;
+                return analyseGameStateGroup(gameStateGroup);
             });
         }
 
+        List<ResultContainer> resultContainers = new ArrayList<>();
         try {
-            executorService.invokeAll(callables).stream();
+            executorService.invokeAll(callables).stream().map(future -> {
+                try {
+                    return future.get();
+                }
+                catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }).forEach(resultContainers::add);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        
+        String[][] results = new String[3][16];
+        for(ResultContainer resultContainer : resultContainers) {
+            results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] = "mcCertainty: " + resultContainer.mcCertainty + "\nmctsCertainty: " + resultContainer.mctsCertainty + "\nsameActionCounter: " + resultContainer.sameActionCounter;
+        }
+
+        /*for(ResultContainer resultContainer : resultContainers) {
+            results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] = resultContainer.mcCertainty + "\n" + resultContainer.mctsCertainty + "\n" + resultContainer.sameActionCounter;
+        }*/
+
+        System.out.println("\n\n\n\n\nResults:");
+        for(int i = 0; i < 3; i++) {
+            System.out.println("\nnumberAvailableActions: " + (i+2));
+            for(int j = 0; j < 16; j++) {
+                System.out.println("\nnumberEmptyTiles: " + j);
+                System.out.println(results[i][j]);
+            }
+        }
+
+        /*for(int i = 0; i < 3; i++) {
+            System.out.println("\n " + (i+2));
+            for(int j = 0; j < 16; j++) {
+                System.out.println("\n" + j);
+                System.out.println(results[i][j]);
+            }
+        }*/
 
         return true;
     }
 
-    private void analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
+    private ResultContainer analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
         //create Agents
         MCTSParams mctsParams = new MCTSParams();
         mctsParams.setNumIter(10000);
@@ -131,10 +164,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         sameActionCounter=(sameActionCounter/gameStateGroup.size())*100;
 
         System.out.println("Analysed " + gameStateGroup.size() + " gameStates with " + gameStateGroup.get(0).getNumEmptyTiles() + " emptyTile(s) and " + gameStateGroup.get(0).getNumAvailableActions() + " availableAction(s)");
-        System.out.println("mcCertainty = " + mcCertainty);
-        System.out.println("mctsCertainty = " + mctsCertainty);
-        System.out.println("sameActionCounter = " + sameActionCounter);
-        System.out.println();
+
+        return new ResultContainer(gameStateGroup.get(0).getNumAvailableActions(), gameStateGroup.get(0).getNumEmptyTiles(), mcCertainty, mctsCertainty, sameActionCounter);
     }
 
     private TreeMap<String, List<StateObserver2048>> groupGameStates(List<StateObserver2048> gameStates) {
@@ -154,7 +185,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     }
 
     private void newGameStates() {
-        System.out.println("Looking for gameStatess, this may take a while...");
+        System.out.println("Looking for gameStates, this may take a while...");
 
         List<StateObserver2048> gameStates = new ArrayList<>();
 
@@ -346,5 +377,21 @@ class GameStateContainer implements Serializable {
         this.values = gameState.toArray();
         this.score = gameState.getScore();
         this.winState = gameState.getWinState();
+    }
+}
+
+class ResultContainer {
+    public int numberEmptyTiles;
+    public int numberAvailableActions;
+    public double mcCertainty;
+    public double mctsCertainty;
+    public double sameActionCounter;
+
+    public ResultContainer(int numberAvailableActions, int numberEmptyTiles, double mcCertainty, double mctsCertainty, double sameActionCounter) {
+        this.numberEmptyTiles = numberEmptyTiles;
+        this.numberAvailableActions = numberAvailableActions;
+        this.mcCertainty = mcCertainty;
+        this.mctsCertainty = mctsCertainty;
+        this.sameActionCounter = sameActionCounter;
     }
 }
