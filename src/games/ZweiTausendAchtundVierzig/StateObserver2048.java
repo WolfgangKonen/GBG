@@ -392,10 +392,10 @@ public class StateObserver2048 implements StateObservation {
         return 0;
     }
 
-    @Override
-    public int getPlayerPM() {
-        return 1;
-    }
+//    @Override
+//    public int getPlayerPM() {
+//        return 1;
+//    }
 
     @Override
     public int getNumPlayers() {
@@ -478,7 +478,7 @@ public class StateObserver2048 implements StateObservation {
 
     /**
      *
-     * @param winState -1 > lost, 0 > running, 1 > won
+     * @param winState {@literal-1  > lost, 0 > running, 1 > won} 
      */
     public void setWinState(int winState) {
         if(this.winState == 0) {
@@ -599,7 +599,7 @@ public class StateObserver2048 implements StateObservation {
 
     /**
      *
-     * @param move 0 > left, 1 > up, 2 > right, 3 > down
+     * @param move {@literal 0 > left, 1 > up, 2 > right, 3 > down}
      */
     public void move(int move) {
         switch (move) {

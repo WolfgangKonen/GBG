@@ -397,7 +397,7 @@ abstract public class Arena extends JPanel implements Runnable {
 					break;  // out of switch
 				case 2: 
 					int win=so.getGameWinner().toInt();
-					Player=so.getPlayerPM();
+					Player=Types.PLAYER_PM[so.getPlayer()];
 					switch(Player*win) {
 					case (+1): 
 						MessageBox.show(m_TicFrame, "X ("+AgentX+") wins", 

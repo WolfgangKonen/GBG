@@ -47,8 +47,8 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	/**
 	 * The clickable representation of the board in the GUI. The buttons of Board will be enabled only
 	 * when "Play" or "Inspect V" are clicked. During "Play" only unoccupied fields are enabled,
-	 * during "Inspect V" all fields are enabled and they change with each click in a ring
-	 * <pre>    " " -> "X" -> "O" -> " "</pre> 
+	 * during "Inspect V" all fields are enabled and they change with each click in a ring:
+	 * {@literal   " " -> "X" -> "O" -> " "}.
 	 */
 	protected Button[][] Board;
 	/**
@@ -232,7 +232,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			StateObserverTTT soT = (StateObserverTTT) so;
 			m_so = soT.copy();
 			//Table = soT.getTable();
-			int Player=soT.getPlayerPM();
+			int Player=Types.PLAYER_PM[soT.getPlayer()];
 			switch(Player) {
 			case(+1): 
 				leftInfo.setText("X to move   "); break;

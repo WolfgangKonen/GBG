@@ -132,6 +132,8 @@ public class Types {
         }
     }
 
+    public static final int[] PLAYER_PM = {+1,-1};
+    
     public static final int SCORE_DISQ = -1000;
     
     // Default (startup) settings for Arena and ArenaTrain

@@ -148,10 +148,10 @@ public class NTuple implements Serializable {
 	 *         ("O"), 1 (empty) or 2 ("X")). As a specialty of this function,
 	 *         each board cell which is NOT a NTuple position, gets a "-9"
 	 *         (those cells are displayed in light gray by class
-	 *         {@link NTupleShow}).
+	 *         {@code NTupleShow}).
 	 * 
-	 * @see NTupleShow#updatePanel()
 	 */
+//	  {@see NTupleShow#updatePanel()    // for later, when we integrate NTupleShow
 	public int[] getBoard(int index) {
 		int i;
 		int[] board = new int[9];

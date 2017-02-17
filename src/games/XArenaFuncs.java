@@ -502,7 +502,7 @@ public class XArenaFuncs
 		String paO_string = paO.stringDescr();
 		if (verbose>0) System.out.println("Competition: "+competeNum+" games "+paX_string+" vs "+paO_string);
 		for (int k=0; k<competeNum; k++) {
-			int Player=startSO.getPlayerPM();			
+			int Player=Types.PLAYER_PM[startSO.getPlayer()];			
 			so = startSO.copy();
 			 
 			while(true)
@@ -526,7 +526,7 @@ public class XArenaFuncs
 				if (so.isGameOver()) {
 					int res = so.getGameWinner().toInt();
 					//  res is +1/0/-1  for X/tie/O win	
-					int player = so.getPlayerPM();
+					int player = Types.PLAYER_PM[so.getPlayer()];
 					switch (res*player) {
 					case -1: 
 						if (!silent) System.out.println(k+": O wins");

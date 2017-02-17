@@ -116,13 +116,13 @@ public interface StateObservation {
 	 */
 	public int getPlayer();
 
-	/**
-	 * @return  1 for a 1-player game (e.g. 2048),  
-	 * 			{+1,-1} for a 2-player game (e.g. TicTacToe): who moves next
-	 * 			{0,1,...,n-1} for an n-player game: who moves next
-	 */
-	@Deprecated
-	public int getPlayerPM();
+//	/**
+//	 * @return  1 for a 1-player game (e.g. 2048),  
+//	 * 			{+1,-1} for a 2-player game (e.g. TicTacToe): who moves next
+//	 * 			{0,1,...,n-1} for an n-player game: who moves next
+//	 */
+//	@Deprecated
+//	public int getPlayerPM();
 
 	/**
 	 * @return  1 for a 1-player game (e.g. 2048), 2 for a 2-player game

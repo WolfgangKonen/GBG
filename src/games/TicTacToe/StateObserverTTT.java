@@ -163,7 +163,8 @@ public class StateObserverTTT implements StateObservation {
 			: "referingState is not of class StateObserverTTT";
 		if (getNumPlayers()==2) {
 			// if refering state has another player than this, then multiply by -1: 
-			rawScore *=  this.getPlayerPM()*((StateObserverTTT)referingState).getPlayerPM();
+			if (this.getPlayer() != ((StateObserverTTT)referingState).getPlayer())
+				rawScore *=  (-1);
 		}
 		return rawScore;
 	}
@@ -269,13 +270,13 @@ public class StateObserverTTT implements StateObservation {
 	public int getPlayer() {
 		return (-m_Player+1)/2;
 	}
-	/**
-	 * @return 	{+1,-1} for the player to move next
-	 * 			Player +1 is X, the player who starts the game. Player -1 is O.
-	 */
-	public int getPlayerPM() {
-		return m_Player;
-	}
+//	/**
+//	 * @return 	{+1,-1} for the player to move next
+//	 * 			Player +1 is X, the player who starts the game. Player -1 is O.
+//	 */
+//	public int getPlayerPM() {
+//		return m_Player;
+//	}
 	
 	public int getNumPlayers() {
 		return 2;				// TicTacToe is a 2-player game

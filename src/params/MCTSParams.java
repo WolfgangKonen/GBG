@@ -17,11 +17,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
 
 /**
- * This class realizes parameter settings for simple board games.
- *  --- TODO ---: describe this for MCTS 
+ * MCTS (Monte Carlo Tree Search) parameters for board games.<p>
+ *  
  * These parameters and their [defaults] are: <ul>
  * <li> <b>Iterations</b>: 	[1000] number of iterations during MCTS search 
  * <li> <b>K (UCT)</b>: 	[1.414] parameter K in UCT rule  
@@ -30,8 +31,8 @@ import controllers.MCTS.SingleMCTSPlayer;
  * </ul>
  * The defaults are defined in {@link SingleMCTSPlayer}. 
  * 
- * @see controllers.MCTS.MCTSAgentT
- * @see controllers.MCTS.SingleMCTSPlayer
+ * @see MCTSAgentT
+ * @see SingleMCTSPlayer
  */
 public class MCTSParams extends Frame implements Serializable
 {

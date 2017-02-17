@@ -167,7 +167,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 //        assert (sob instanceof StateObserverTTT)
 //		: "StateObservation 'sob' is not an instance of StateObserverTTT";
 //		StateObserverTTT so = (StateObserverTTT) sob;
-		int player = so.getPlayerPM(); 	 
+		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
 		//int[][] Table = so.getTable();
         randomSelect = false;
 		if (random) {
@@ -223,9 +223,10 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 					CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
 									   		 so.getMaxGameScore(),0.0,1.0);					
 				}
-// unclear why, but for TTT the agent has better results if there is no normalization here
-// but the normalize call 4 lines above
+				// unclear why, but for TTT the agent has better results if there is no 
+				// normalization here but the normalize call 4 lines above
 			}
+			
 			// ???? questionable: a) what happens in case of a tie and 
 			//      b) shouldn't this be in range [-1,+1]? 
 //				if (NewSO.win()) {
@@ -294,8 +295,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 //		assert (sob instanceof StateObserverTTT)
 //		: "StateObservation 'sob' is not an instance of StateObserverTTT";
 //		StateObserverTTT so = (StateObserverTTT) sob;
-//		int Player = -so.getPlayerPM(); 	// Player is the player who made the move 
-//									 	// while so has the player who moves next 
+//		int Player = -Types.PLAYER_PM[so.getPlayer()];	// Player is the player who made the  
+//									 	   // move while 'so' has the player who moves next 
 //		int[][] Table = so.getTable();
 		double score = m_Net.getScore(m_feature.prepareFeatVector(so));
 		return score;
@@ -336,7 +337,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 //		assert (sob instanceof StateObserverTTT) : "Input 'sob' is not of class StateObserverTTT";
 //		StateObserverTTT so = (StateObserverTTT) sob;
-		player = so.getPlayerPM();
+		player = Types.PLAYER_PM[so.getPlayer()];
 		// ??? where is the setting of table (in the old version ??? 
 
 		m_Net.resetElig(); // reset the elig traces before starting a new game
@@ -439,7 +440,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				System.out.println();
 			}
 
-			player = so.getPlayerPM();   // advance to the next player
+			player = Types.PLAYER_PM[so.getPlayer()];   // advance to the next player
 		}
 		m_Net.finishUpdateWeights(); // adjust learn params ALPHA & BETA
 		m_epsilon = m_epsilon - m_EpsilonChangeDelta;

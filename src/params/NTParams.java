@@ -18,7 +18,11 @@ import javax.swing.JTextField;
 
 import controllers.TD.ntuple.TDNTupleAgt;
 
-//samine//
+/**
+ *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTupleAgt}
+ *  
+ *  @see TDNTupleAgt
+ */
 public class NTParams extends Frame implements Serializable {
 	private static final String TIPRANDL = "If checked, generate random n-tuples. If not, take a hard-coded n-tuple set (int[][] nTuple in TDSNPlayer)";
 	private static final String TIPNTUPLETYPE = "n-tuple generation method: random walk or random point";

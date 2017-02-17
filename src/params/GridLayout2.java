@@ -10,6 +10,7 @@ import java.awt.Insets;
  * Almost the same as GridLayout. But not all rows and columns need to
  *         have the same size. <br> from http://www.javaworld.com
  * 
+ * @see OptionsComp
  * @author
  *    
  */

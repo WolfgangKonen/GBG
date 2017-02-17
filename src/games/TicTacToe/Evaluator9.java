@@ -60,7 +60,8 @@ public class Evaluator9 extends Evaluator {
 	 *  <li> Is the next move suggested for state[k] a <b>success</b>, i.e. has the next state the   
 	 *       same minimax score as the minimax score V_m(state[k])? If so, then result = OK.
 	 *       success = percentage of states with result = OK.
-	 *  <li> <b>delta</b>: avg. absolute difference between V_pa(s) and V_ref(s). If m_MixDelta \> 0 
+	 *  <li> <b>delta</b>: avg. absolute difference between V_pa(s) and V_ref(s). If 
+	 *  	 {@literal m_MixDelta > 0 }
 	 *   	 then 1-delta is mixed with success by this proportion in the return value   
 	 *  <li> no.: the number of the state
 	 *  <li> if pa is a ValItPlayer or TDSPlayer, then 'C: c0,c1' shows the counters for that state

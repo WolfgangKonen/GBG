@@ -5,6 +5,7 @@ import java.io.Serializable;
 import games.Feature;
 import games.StateObservation;
 import games.TicTacToe.StateObserverTTT;
+import tools.Types;
 
 
 /**
@@ -32,7 +33,7 @@ public class FeatureTTT extends TicTDBase implements Feature, Serializable {
 		assert (sob instanceof StateObserverTTT) : "Input 'sob' is not of class StateObserverTTT";
 		StateObserverTTT so = (StateObserverTTT) sob;
 		int[][] table = so.getTable();
-		int player = so.getPlayerPM();
+		int player = Types.PLAYER_PM[so.getPlayer()];
 		// note that TicTDBase.prepareInputVector requires the player who
 		// **made** the last move, therefore '-player':
 		double[] input = super.prepareInputVector(-player, table);

@@ -17,11 +17,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 /**
- * This class realizes other parameter settings for board games.
+ * This class realizes other parameter settings for board games.<p>
+ * 
  * These parameters and their [defaults] are: <ul>
  * <li> <b>numEval</b>: 	[100] During training: Call the evaluators every NumEval episodes  
  * <li> <b>stopTest</b>: 	[  0] whether to perform the stop test during training. If
- * 		>0, then m_evaluator2 is checked during training whether its goal is reached
+ * 		{@literal> 0}, then m_evaluator2 is checked during training whether its goal is reached
  * <li> <b>stopEval</b>: 	[100] During training: How many successful evaluator 
  * 							calls are needed to stop training prematurely?
  * <li> <b>MinimaxDepth</b>	[ 10] Minimax Tree Depth

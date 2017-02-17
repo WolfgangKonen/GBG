@@ -50,8 +50,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * Controls the amount of explorative moves in
 	 * {@link #getNextAction(StateObservation, boolean, double[], boolean)}
 	 * during training. Let p=getGameNum()/getMaxGameNum(). As long as
-	 * p < m_epsilon/(1+m_epsilon) we have progress < 0 and we get with certainty a random
-	 * (explorative) move. For p \in [EPS/(1+EPS), 1.0] the random move
+	 * {@literal p < m_epsilon/(1+m_epsilon) we have progress < 0 and} we get with 
+	 * certainty a random (explorative) move. For p \in [EPS/(1+EPS), 1.0] the random move
 	 * probability drops linearly from 1 to 0. <br>
 	 * m_epsilon = 0.0: too few exploration, = 0.1 (def.): better exploration.
 	 */
@@ -201,7 +201,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
         int iBest;
 		MaxScore = -Double.MAX_VALUE;
        
-		int player = so.getPlayerPM(); 	 
+		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
 		//int[][] Table = so.getTable();
 		
 		randomSelect = false;
@@ -375,7 +375,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		//System.out.println("Random test: "+ rand.nextDouble());
 		//System.out.println("Random test: "+ rand.nextDouble());
 		
-		player = so.getPlayerPM();
+		player = Types.PLAYER_PM[so.getPlayer()];
 
 		if (m_Net.LAMBDA!=0.0) {
 			m_Net.resetElig(); // reset the eligibility traces before starting a new game
@@ -396,9 +396,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			//if (DEBG) printVTable(pstream,VTable);
 			if (DEBG) printTable(pstream,nextBoard);
 			if (so.isGameOver()) {
-				// Fetch a reward and normalize it to the range [0,1], since 
-				// TD_NNet may build a value function with a sigmoid function
-				// mapping to [0,1]. Then it can use only rewards in [0,1].
+				// Fetch the reward from StateObservation:
 				switch (so.getNumPlayers()) {
 				case 1: 
 					reward = so.getGameScore();
@@ -477,7 +475,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 				break;
 			}
 
-			player = so.getPlayerPM();   // advance to the next player
+			player = Types.PLAYER_PM[so.getPlayer()];   // advance to the next player
 		} // while
 
 		try {

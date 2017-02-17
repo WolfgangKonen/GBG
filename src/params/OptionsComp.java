@@ -20,6 +20,11 @@ import games.Arena;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+/**
+ * 
+ * Competition Options
+ *
+ */
 public class OptionsComp extends JFrame {
 	private static final long serialVersionUID = 1L;
 	//private JLabel lsingleComp;
