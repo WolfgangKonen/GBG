@@ -10,6 +10,7 @@ import games.StateObservation;
  */
 public class RandomSearch{
     private Random random = new Random();
+    private int rolloutDepth = Config.DEPTH;
 
     public void startAgent(StateObservation sob) {
 
@@ -18,8 +19,13 @@ public class RandomSearch{
                 sob.advance(sob.getAvailableActions().get(random.nextInt(sob.getNumAvailableActions())));
             }
             else {
+                rolloutDepth = i+1;
                 break;
             }
         }
+    }
+
+    public int getRolloutDepth() {
+        return  rolloutDepth;
     }
 }

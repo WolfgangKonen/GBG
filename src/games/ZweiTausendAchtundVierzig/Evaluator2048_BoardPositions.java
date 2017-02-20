@@ -9,13 +9,14 @@ import params.MCTSParams;
 import tools.Types;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static java.util.Arrays.deepEquals;
-import static java.util.Arrays.toString;
 
 /**
  * Created by Johannes on 09.02.2016.
@@ -76,29 +77,31 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         
         String[][] results = new String[3][16];
         for(ResultContainer resultContainer : resultContainers) {
-            results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] = "mcCertainty: " + resultContainer.mcCertainty + "\nmctsCertainty: " + resultContainer.mctsCertainty + "\nsameActionCounter: " + resultContainer.sameActionCounter;
+            results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] =
+                    "mcCertainty: " + new BigDecimal(resultContainer.mcCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
+                    "\nmctsCertainty: " + new BigDecimal(resultContainer.mctsCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
+                    "\nsameActionCounter: " + new BigDecimal(resultContainer.sameActionCounter).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
+                    "\nmcRolloutDepth: " + new BigDecimal(resultContainer.mcRolloutDepth).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
+                    "\nmctsRolloutDepth: " + new BigDecimal(resultContainer.mctsRolloutDepth).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",");
         }
 
-        /*for(ResultContainer resultContainer : resultContainers) {
-            results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] = resultContainer.mcCertainty + "\n" + resultContainer.mctsCertainty + "\n" + resultContainer.sameActionCounter;
-        }*/
+       /* for(ResultContainer resultContainer : resultContainers) {
+            results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] =
+                    new BigDecimal(resultContainer.mcCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
+                    "\n" + new BigDecimal(resultContainer.mctsCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
+                    "\n" + new BigDecimal(resultContainer.sameActionCounter).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
+                    "\n" + new BigDecimal(resultContainer.mcRolloutDepth).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
+                    "\n" + new BigDecimal(resultContainer.mctsRolloutDepth).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",");
+        } */
 
         System.out.println("\n\n\n\n\nResults:");
         for(int i = 0; i < 3; i++) {
             System.out.println("\nnumberAvailableActions: " + (i+2));
-            for(int j = 0; j < 16; j++) {
+            for(int j = 0; j < 13; j++) {
                 System.out.println("\nnumberEmptyTiles: " + j);
                 System.out.println(results[i][j]);
             }
         }
-
-        /*for(int i = 0; i < 3; i++) {
-            System.out.println("\n " + (i+2));
-            for(int j = 0; j < 16; j++) {
-                System.out.println("\n" + j);
-                System.out.println(results[i][j]);
-            }
-        }*/
 
         return true;
     }
@@ -110,13 +113,15 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         mctsParams.setK_UCT(1);
         mctsParams.setTreeDepth(1);
         mctsParams.setRolloutDepth(201);
-        PlayAgent mctsAgent = new MCTSAgentT("MCTS",null,mctsParams);
-        PlayAgent mcAgent = new MCAgent();
+        MCTSAgentT mctsAgent = new MCTSAgentT("MCTS",null,mctsParams);
+        MCAgent mcAgent = new MCAgent();
 
         int maxCertainty = Config.NUMBEREVALUATIONS*gameStateGroup.size();
         double mcCertainty = 0;
         double mctsCertainty = 0;
         double sameActionCounter = 0;
+        double mcRolloutDepth = 0;
+        double mctsRolloutDepth = 0;
 
         for(StateObserver2048 gameState : gameStateGroup) {
             int[] mcActions = {0,0,0,0};
@@ -130,6 +135,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
                 int MCAction = mcAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
                 mcActions[MCAction] +=1;
+                mcRolloutDepth += mcAgent.getAverageRolloutDepth();
             }
 
             //analyse for MCTS Agent
@@ -162,10 +168,12 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         mcCertainty=(mcCertainty/maxCertainty)*100;
         mctsCertainty=(mctsCertainty/maxCertainty)*100;
         sameActionCounter=(sameActionCounter/gameStateGroup.size())*100;
+        mcRolloutDepth = mcRolloutDepth/gameStateGroup.size()/Config.NUMBEREVALUATIONS;
 
         System.out.println("Analysed " + gameStateGroup.size() + " gameStates with " + gameStateGroup.get(0).getNumEmptyTiles() + " emptyTile(s) and " + gameStateGroup.get(0).getNumAvailableActions() + " availableAction(s)");
-
-        return new ResultContainer(gameStateGroup.get(0).getNumAvailableActions(), gameStateGroup.get(0).getNumEmptyTiles(), mcCertainty, mctsCertainty, sameActionCounter);
+        
+        
+        return new ResultContainer(gameStateGroup.get(0).getNumAvailableActions(), gameStateGroup.get(0).getNumEmptyTiles(), mcCertainty, mctsCertainty, sameActionCounter, mcRolloutDepth, mctsRolloutDepth);
     }
 
     private TreeMap<String, List<StateObserver2048>> groupGameStates(List<StateObserver2048> gameStates) {
@@ -386,12 +394,16 @@ class ResultContainer {
     public double mcCertainty;
     public double mctsCertainty;
     public double sameActionCounter;
+    public double mcRolloutDepth;
+    public double mctsRolloutDepth;
 
-    public ResultContainer(int numberAvailableActions, int numberEmptyTiles, double mcCertainty, double mctsCertainty, double sameActionCounter) {
+    public ResultContainer(int numberAvailableActions, int numberEmptyTiles, double mcCertainty, double mctsCertainty, double sameActionCounter, double mcRolloutDepth, double mctsRolloutDepth) {
         this.numberEmptyTiles = numberEmptyTiles;
         this.numberAvailableActions = numberAvailableActions;
         this.mcCertainty = mcCertainty;
         this.mctsCertainty = mctsCertainty;
         this.sameActionCounter = sameActionCounter;
+        this.mcRolloutDepth = mcRolloutDepth;
+        this.mctsRolloutDepth = mctsRolloutDepth;
     }
 }
