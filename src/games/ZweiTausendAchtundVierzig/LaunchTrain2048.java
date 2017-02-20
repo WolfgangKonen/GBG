@@ -17,6 +17,7 @@ public class LaunchTrain2048 extends JFrame {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+    	
         LaunchTrain2048 t_Frame = new LaunchTrain2048("General buttons Game Playing");
         if (args.length == 0) {
             t_Frame.init();

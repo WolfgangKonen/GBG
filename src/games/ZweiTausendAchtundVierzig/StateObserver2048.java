@@ -402,22 +402,32 @@ public class StateObserver2048 implements StateObservation {
         return 1;
     }
 
-	@Deprecated
-    public String toString() {
-    	return stringDescr();
-    }
 	@Override
     public String stringDescr() {
         String s="";
+        int codeA = +'A';		// normally 65
         XNTupleFuncs2048 xnf = new XNTupleFuncs2048();
         int[] bvec = xnf.getBoardVector(this);
         for(int row = 0,n=0; row < Config.ROWS; row++) {
             for(int column = 0; column < Config.COLUMNS; column++,n++) {
-                s = s+bvec[n];
+            	if (bvec[n]>=10) {
+            		s = s+((char)(65-10+bvec[n]));
+            	} else {
+                    s = s+bvec[n];
+            	}
             }
             if (row<(Config.ROWS-1)) s=s+",";
         }
         return s;
+    }
+	// -- possible code to test stringDescr --
+	//		int[][] state = {{0,2048,0,0}, {0,0,0,0}, {0,2,4,0}, {0,0,0,0}};
+	//		StateObserver2048 so = new StateObserver2048(state,0,0);
+	//		System.out.println(so.stringDescr());
+
+	@Deprecated
+    public String toString() {
+    	return stringDescr();
     }
 
 	public boolean isLegalAction(Types.ACTIONS action) {
