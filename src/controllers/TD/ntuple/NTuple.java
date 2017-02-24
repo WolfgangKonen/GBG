@@ -7,18 +7,25 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
 
+import games.StateObservation;
+import games.XNTupleFuncs;
 import params.NTParams;
 import params.TDParams;
 
 /**
- * Realization of a single N-tuple for games.<br>
- * Each NTuple consists of {@link NTuple#getLength()} positions on the game
+ * Realization of a single N-tuple for games.
+ * Each {@link NTuple} consists of {@link NTuple#getLength()} positions on the game
  * board.<br>
- * Each position can carry one out of {@code posVals} position values. For TTT the 
- * values are 0 ("O"), 1 (empty), 2 ("X").<br>
- * Each NTuple has a lookup table (LUT) containing for each combination of
+ * Each position can carry one out of {@code posVals} position values. For TicTacToe the 
+ * values are 0 ("O"), 1 (empty), 2 ("X").<p>
+ * 
+ * Each {@link NTuple} has a lookup table (LUT) containing for each combination of
  * values a corresponding weight. The length of the LUT is {@code posVals} ^
- * {@link NTuple#getLength()}.
+ * {@link NTuple#getLength()}.<p>
+ * 
+ * Game states are transformed to {@code int[]} board vectors with 
+ * {@link XNTupleFuncs#getBoardVector(StateObservation)} before they are passed to 
+ * {@link NTuple} methods. 
  * 
  * @author Markus Thill, Samineh Bagheri, Wolfgang Konen, FH Köln, Sep'11
  * 
@@ -129,11 +136,11 @@ public class NTuple implements Serializable {
 		int index = 0;
 		int P=1; 		// P = (posVals)^i in i-loop below
 		for (int i = 0; i < nTuple.length; i++) {
-			// board+1 ->
+			// board ->
 			// black: 0
 			// empty: 1
 			// white: 2
-			index += P * ( board[nTuple[i]] +1);
+			index += P * ( board[nTuple[i]]);
 			P = P*posVals;
 		}
 		return index;
@@ -213,7 +220,7 @@ public class NTuple implements Serializable {
 	 *            carrying 0 ("O"), 1 (empty) or 2 ("X"))
 	 * @return the LUT weight for this game board
 	 * 
-	 * @see NTupleValueFunc#getScoreI(int[])
+	 * @see NTupleValueFunc#getScoreI(int[],int)
 	 */
 	public double getScore(int[] board) {
 		double score = lut[getIndex(board)];
@@ -232,7 +239,8 @@ public class NTuple implements Serializable {
 	 * @param e
 	 * @param LAMBDA
 	 * 
-	 * @see NTupleValueFunc#updateWeights(int[], int[], boolean, double, boolean) 
+	 * @see NTupleValueFunc#update(int[], int, double, double) 
+	 * @see NTupleValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 
 	 */
 	public void update(int[] board, double ALPHA, double delta, double e, double LAMBDA) {
 		// lut[getIndex(board)] += dW;
@@ -444,7 +452,7 @@ public class NTuple implements Serializable {
 	}
 	
 	//
-	// Debug only: 
+	// The following functions are needed for debug only: 
 	//
 	
 	//samine// print "tableN" and "tableA", called by {@link NTupleValueFunc#printTables()}

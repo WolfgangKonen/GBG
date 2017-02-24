@@ -60,13 +60,13 @@ abstract public class AgentBase implements Serializable {
 	public double estimateGameValue(StateObservation sob) {
 		return getScore(sob);
 	};
-	public void setAgentState(AgentState aState) {
-		m_agentState = aState;	
-	}
 
 	public AgentState getAgentState() {
 		return m_agentState;
 	}	
+	public void setAgentState(AgentState aState) {
+		m_agentState = aState;	
+	}
 
 	public String getName() { return m_name; }
 	public void setName(String name) { m_name=name; }
@@ -95,7 +95,7 @@ abstract public class AgentBase implements Serializable {
 		return "";
 	}
 
-	public byte getSize() {return 1;}	// dummy stub
+	public byte getSize() {return 1;}	// dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
 	
 	public int getGameNum()
 	{			

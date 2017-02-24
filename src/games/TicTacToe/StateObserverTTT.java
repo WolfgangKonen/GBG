@@ -11,7 +11,7 @@ import tools.Types.ACTIONS;
  * Class StateObservation observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>

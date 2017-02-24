@@ -19,7 +19,7 @@ import params.NTParams;
 
 /**
  * Helper class for {@link Arena} and {@link ArenaTrain}: <ul> 
- * <li> sets the buttons, selectors and text fields (everything below the TicTacToe board),
+ * <li> sets the buttons, selectors and text fields,
  * <li> sets initial values for all relevant fields,
  * <li> has the action code for Param-, Train-, MultiTrain-, Play-, and Compete- button events.
  * </ul>

@@ -1,6 +1,7 @@
 package games.TicTacToe;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
 import games.StateObservation;
 import games.XNTupleFuncs;
@@ -28,6 +29,14 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 	}
 	
 	/**
+	 * @return the number of players in this game 
+	 */
+	@Override
+	public int getNumPlayers() {
+		return 2;
+	}
+	
+	/**
 	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
 	 * cell of the board. In the case of TicTacToe the mapping is
 	 * <pre>
@@ -45,7 +54,7 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 		int[] bvec = new int[getNumCells()]; 
 		for (int i=0, n=0;i<3;i++)
 			for (int j=0;j<3;j++, n++) 
-            	bvec[n]=table[i][j];                					
+            	bvec[n]=table[i][j]+1;                					
 
 		return bvec;   
 	}
@@ -57,6 +66,8 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
+	 * In the case of TicTacToe we have s=8 symmetries (4 board rotations * 2 board flips)
+	 * 
 	 * @param boardVector
 	 * @return boardArray
 	 */
@@ -108,6 +119,43 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 		return nTuple;		
 	}
 	
+	/**
+	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
+	 * for board coding.
+	 * 
+	 * @param iCell
+	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
+	 * 		a board vector) 
+	 */
+	public HashSet adjacencySet(int iCell) {
+		int[] aList = new int[4];			// 4-point neighborhood
+		int count=0;
+		
+		if (iCell>2) {						// there is an upper neighbor
+			aList[count++]=iCell-3;  
+		}
+		if ((iCell+1)%3 != 0) {				// there is a right neighbor
+			aList[count++]=iCell+1;
+		}
+		if (iCell<6) {						// there is a lower neighbor
+			aList[count++]=iCell+3;  
+		}
+		if (iCell%3 != 0) {					// there is a left neighbor
+			aList[count++]=iCell-1;
+		}
+		
+		if (count==0) throw new RuntimeException("No neighbors for cell "+iCell+"!?!?");
+		
+//		// bList: the real neighbors of iCell (may be 2,3, or 4
+//		int[] bList = new int[count];
+//		for (int i=0; i<count; i++) bList[i]=aList[i];
+		
+		HashSet adjSet = new HashSet();
+		for (int i=0; i<count; i++) adjSet.add(aList[i]);
+		
+		return adjSet;
+	}
+
 	/**
 	 * Helper for {@link #symmetryVectors(int[])}: 
 	 * Rotate the given board clockwise by 90 degree. <p>

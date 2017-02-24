@@ -22,15 +22,17 @@ import controllers.PlayAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple.TDNTupleAgt;
+import games.Arena;
+import games.ArenaTrain;
 import games.TicTacToe.LaunchTrainTTT;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
 
 /**
- * Main Menu
+ * Main menu for {@link Arena} and {@link ArenaTrain}.
  * 
- * @author Wolfgang Konen
+ * @author Wolfgang Konen, TH Köln, Nov'16
  * 
  */
 

@@ -49,7 +49,7 @@ public class NTParams extends Frame implements Serializable {
 
 	public JTextField InitT;
 	public JTextField tcIntervalT;
-	public JTextField NTupleNumT;
+	public JTextField nTupleNumT;
 	public JTextField nTupleMaxT;
 	//public JTextField EvalT;
 
@@ -94,8 +94,8 @@ public class NTParams extends Frame implements Serializable {
 		InitT.setEnabled(false);
 		tcIntervalT = new JTextField("2");
 		tcIntervalT.setEnabled(false);
-		NTupleNumT = new JTextField("10");
-		NTupleNumT.setEnabled(false);
+		nTupleNumT = new JTextField("10");
+		nTupleNumT.setEnabled(false);
 		nTupleMaxT = new JTextField("6");
 		nTupleMaxT.setEnabled(false);
 		//EvalT = new JTextField("100");
@@ -114,15 +114,7 @@ public class NTParams extends Frame implements Serializable {
 		RandomnessC.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(getRandomness()==true){
-					NTupleNumT.setEnabled(true);
-					nTupleMaxT.setEnabled(true);
-					TupleType.setEnabled(true);
-				} else {
-					NTupleNumT.setEnabled(false);
-					nTupleMaxT.setEnabled(false);
-					TupleType.setEnabled(false);
-				}
+				enableRandomPart();
 			}
 		});
 
@@ -178,7 +170,7 @@ public class NTParams extends Frame implements Serializable {
 		tcPanel.add(new Canvas());
 		// fifth row
 		tcPanel.add(NTupleNumL);
-		tcPanel.add(NTupleNumT);
+		tcPanel.add(nTupleNumT);
 		tcPanel.add(NTupleSizeL);
 		tcPanel.add(nTupleMaxT);
 
@@ -228,6 +220,18 @@ public class NTParams extends Frame implements Serializable {
 		}					
 	}
 	
+	private void enableRandomPart() {
+		if(getRandomness()==true){
+			nTupleNumT.setEnabled(true);
+			nTupleMaxT.setEnabled(true);
+			TupleType.setEnabled(true);
+		} else {
+			nTupleNumT.setEnabled(false);
+			nTupleMaxT.setEnabled(false);
+			TupleType.setEnabled(false);
+		}
+	}
+	
 	public JPanel getPanel() {
 		return tcPanel;
 	}
@@ -240,11 +244,12 @@ public class NTParams extends Frame implements Serializable {
 	}
 
 	public int getNtupleNumber() {
-		return Integer.parseInt(NTupleNumT.getText());
+		return Integer.parseInt(nTupleNumT.getText());
 	}
 
 	public int getNtupleMax() {
-		return Integer.parseInt(nTupleMaxT.getText());
+		int dummy = Integer.parseInt(nTupleMaxT.getText());
+		return dummy;
 	}
 
 // /WK/02/2015: never used:
@@ -307,7 +312,7 @@ public class NTParams extends Frame implements Serializable {
 		//EvalT = nt.EvalT;
 		RandomnessC.setSelected(nt.getRandomness());
 		TupleType.setSelectedIndex(nt.getRandWalk()?0:1);
-		NTupleNumT.setText(nt.getNtupleNumber()+"");
+		nTupleNumT.setText(nt.getNtupleNumber()+"");
 		nTupleMaxT.setText(nt.getNtupleMax()+"");
 		UseSymmetryC.setSelected(nt.getUseSymmetry());
 	}
@@ -322,19 +327,18 @@ public class NTParams extends Frame implements Serializable {
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
 		// currently we have here only the sensible defaults for one game (TTT)
-		// but for two agents:
+		// and one agent ("TD-Ntuple" = class TDNTupleAgt):
 		switch (agentName) {
 		case "TD-Ntuple": 
-			InitT = new JTextField("0.0001");
+			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
+			InitT.setText("0.0001");
 			InitT.setEnabled(false);
-			tcIntervalT = new JTextField("2");
+			tcIntervalT.setText("2");
 			tcIntervalT.setEnabled(false);
-			NTupleNumT = new JTextField("10");
-			NTupleNumT.setEnabled(false);
-			nTupleMaxT = new JTextField("6");
-			nTupleMaxT.setEnabled(false);
-			TempCoC.setSelected(false);
-			RandomnessC.setSelected(false);
+			RandomnessC.setSelected(false);		// consequence: disable TupleType, nTupleNumT, nTupleMaxT
+			nTupleNumT.setText("10");
+			nTupleMaxT.setText("6"); 
+			enableRandomPart();
 			break;
 		}
 		

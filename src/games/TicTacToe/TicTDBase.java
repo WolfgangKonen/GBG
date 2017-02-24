@@ -1052,7 +1052,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 * Given a board position <code>state</code> (e.g. "XoX---Xo-") as input, calculate its 
 	 * corresponding feature vector FV and then the diversity of this feature vector FV, i.e. how 
 	 * many states belonging to FV are mapped by MinimaxAgent to -1 (O-win), 0 (tie), +1 (X-win).
-	 * <p>
+	 * 
 	 * <p><b>Only for diagnostics.</b>
 	 * @param state	(e.g. "XoX---Xo-")
 	 * @param counters int[3] which contains on output: [0]: O-win, [1]: tie, [2]: X-win counts (Minimax)

@@ -1,6 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
 import games.StateObservation;
 import games.XNTupleFuncs;
@@ -26,6 +27,14 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	@Override
 	public int getNumPositionValues() {
 		return 15; 
+	}
+	
+	/**
+	 * @return the number of players in this game 
+	 */
+	@Override
+	public int getNumPlayers() {
+		return 1;
 	}
 	
 	/**
@@ -67,6 +76,7 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
+	 * In the case of 2048 we have s=8 symmetries (4 board rotations * 2 board flips)
 	 * @param boardVector
 	 * @return boardArray
 	 */
@@ -92,5 +102,43 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	// End n-tuple functions
 	//
 	
+	/**
+	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
+	 * for board coding.
+	 * 
+	 * @param iCell
+	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
+	 * 		a board vector) 
+	 */
+	public HashSet adjacencySet(int iCell) {
+		int[] aList = new int[4];			// 4-point neighborhood
+		int count=0;
+		
+		if (iCell>3) {						// there is an upper neighbor
+			aList[count++]=iCell-4;  
+		}
+		if ((iCell+1)%4 != 0) {				// there is a right neighbor
+			aList[count++]=iCell+1;
+		}
+		if (iCell<12) {						// there is a lower neighbor
+			aList[count++]=iCell+4;  
+		}
+		if (iCell%4 != 0) {					// there is a left neighbor
+			aList[count++]=iCell-1;
+		}
+		
+		if (count==0) throw new RuntimeException("No neighbors for cell "+iCell+"!?!?");
+		
+//		// bList: the real neighbors of iCell (may be 2,3, or 4
+//		int[] bList = new int[count];
+//		for (int i=0; i<count; i++) bList[i]=aList[i];
+		
+		HashSet adjSet = new HashSet();
+		for (int i=0; i<count; i++) adjSet.add(aList[i]);
+		
+		
+		return adjSet;
+	}
+
 
 }

@@ -36,6 +36,7 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple.NTupleFactory;
 import controllers.TD.ntuple.TDNTupleAgt;
 import games.Arena.Task;
+import games.Evaluator;
 import games.TicTacToe.FeatureTTT;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import params.NTParams;
@@ -55,14 +56,14 @@ import tools.Types;
  * <li> compete:	one competition 'X vs. O', several games, measure win/tie/loose rate
  * <li> competeBoth call compete for pair (pa,opponent) in both roles, X and O  
  * <li> multiCompete: many competitions, measure win/tie/loose rate and avg. correct moves
- * <li> evalAgent: 	(in class Evaluator) percentage of correct moves on certain states
+ * <li> eval: 	(as part of the protected {@link Evaluator} elements) measure agent success
  * </ul> 
  * --- Batch methods are now in TicTacToeBatch ---
  * <p>
  * Known classes having {@link XArenaFuncs} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
- * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  * 
  */
 public class XArenaFuncs 
@@ -139,7 +140,7 @@ public class XArenaFuncs
 			try {
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf, m_xab.m_game.gb.getStateObs());
+				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf);
 				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
@@ -212,7 +213,7 @@ public class XArenaFuncs
 							//TDNTupleAgt test = new TDNTupleAgt();
 							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 							NTupleFactory ntupfac = new NTupleFactory(); 
-							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf, m_xab.m_game.gb.getStateObs());
+							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf);
 							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
 						} catch (Exception e) {
 							MessageBox.show(m_xab, 

@@ -1,17 +1,20 @@
 package games;
 
 import controllers.TD.ntuple.TDNTupleAgt;
+
+import java.util.HashSet;
+
 import controllers.TD.ntuple.NTupleValueFunc;
 
 /**
  * Interface for the n-tuple implementation in {@link TDNTupleAgt} and 
- * {@link NTupleValueFunc}. Game-specific functions for producing a 
+ * {@link NTupleValueFunc}. Contains game-specific functions for producing a 
  * board vector, symmetric board vectors (if any) and a fixed n-tuple set. <p>
  * 
  * Note: The five methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
  * {@link #getBoardVector(StateObservation)}, {@link #symmetryVectors(int[])} and 
  * {@link #fixedNTuples()} are only required for the n-tuple interface. 
- * If an implementing class does not need that part 
+ * If an implementing game does not need that part 
  * (i. e. if it does not plan to use {@link TDNTupleAgt}), it may just code stubs
  * returning 0, {@code null}, or throwing a {@link RuntimeException}.
  *
@@ -28,6 +31,11 @@ public interface XNTupleFuncs {
 	 * can have (e. g. P=3 for TicTacToe with 0:"O", 1=empty, 2="X") 
 	 */
 	public int getNumPositionValues();
+	
+	/**
+	 * @return the number of players in this game 
+	 */
+	public int getNumPlayers();
 	
 	/**
 	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
@@ -57,4 +65,12 @@ public interface XNTupleFuncs {
 	 */
 	public int[][] fixedNTuples();
 
+	/**
+	 * Return all neighbors of {@code iCell}
+	 * 
+	 * @param iCell
+	 * @return a list of all cells adjacent to {@code iCell} (referring to the coding in 
+	 * 		a board vector) 
+	 */
+	public HashSet adjacencySet(int iCell);
 }

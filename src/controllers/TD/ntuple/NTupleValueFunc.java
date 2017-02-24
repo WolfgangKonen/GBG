@@ -15,9 +15,9 @@ import params.NTParams;
 import params.TDParams;
 
 /**
- *         Implementation of a learning value-function using n-Tuple systems.
+ *         Implementation of a learning value-function using n-tuple systems.
  *         A set of n-tuples is generated randomly or by user precept. Random
- *         n-Tuples can be just a set of random points or a random walk on the
+ *         n-tuples can be just a set of random points or a random walk on the
  *         board. The value-function uses symmetries of the board to allow a
  *         faster training. The output of the value-function is always put
  *         through a sigmoid function (tanh) to get the value in the range -1 ..
@@ -44,13 +44,12 @@ public class NTupleValueFunc implements Serializable {
 	protected int epochMax=1;
     protected boolean  rpropLrn=false;
 
-	// Needed for generating random n-Tuples
-	private Random rand = new Random(42);
-
-	// Number of generated n-Tuples
+	// Number of n-tuples
 	private int numTuples = 0;
 
-	// The generated n-Tuples
+	private int numPlayers; 
+	
+	// The generated n-tuples
 	private NTuple nTuples[][];
 	
 	public XNTupleFuncs xnf=null; 
@@ -64,9 +63,12 @@ public class NTupleValueFunc implements Serializable {
 	/**
 	 * Constructor using a set of n-tuples that are predefined.
 	 * 
-	 * @param nTuples
-	 *            The set of n-tuples as an {@code int} array. TicTacToe: Allowed values 
-	 *            for the sampling points: 0-8
+	 * @param nTuplesI
+	 *            The set of n-tuples as an {@code int} array. For each {@code nTuplesI[i]}
+	 *            the constructor will construct k {@link NTuple} objects of the same form,
+	 *            one for each player ({@code k=xnf.getNumPlayers()}). Allowed values 
+	 *            for the sampling points of an n-tuple: 0,..,numCells.
+	 * @param xnf
 	 * @param posVals
 	 *            Possible values/field of the board (TicTacToe: 3)
 	 * @param useSymmetry
@@ -74,42 +76,48 @@ public class NTupleValueFunc implements Serializable {
 	 * @param randInitWeights
 	 *            true, if all weights of all n-Tuples shall be initialized
 	 *            randomly
+	 * @param tcPar
+	 * @param numCells
+	 * @throws RuntimeException
 	 */
-	public NTupleValueFunc(int nTuples[][], XNTupleFuncs xnf, int posVals, boolean useSymmetry,
+	public NTupleValueFunc(int nTuplesI[][], XNTupleFuncs xnf, int posVals, boolean useSymmetry,
 			boolean randInitWeights, NTParams tcPar, int numCells) 
 					throws RuntimeException {
 		this.useSymmetry = useSymmetry;
 		this.xnf = xnf;
+		this.numPlayers = xnf.getNumPlayers();
 		
-		if (nTuples!=null) {
-			this.numTuples = nTuples.length;
-			initNTuples(nTuples, posVals, randInitWeights, tcPar, numCells);
+		if (nTuplesI!=null) {
+			this.numTuples = nTuplesI.length;
+			initNTuples(nTuplesI, posVals, randInitWeights, tcPar, numCells);
+		} else {
+			throw new RuntimeException("Error: nTuplesI not initialized");
 		}
 	}
 
-	void initNTuples(int[][] nTuples, int posVals, boolean randInitWeights,
+	void initNTuples(int[][] nTuplesI, int posVals, boolean randInitWeights,
 			NTParams ntPar, int numCells) {
-		this.nTuples = new NTuple[2][numTuples];
+		this.nTuples = new NTuple[numPlayers][numTuples];
 		for (int i = 0; i < numTuples; i++) {
-			for (int j=0; j<nTuples[i].length; j++) {
-				int v = nTuples[i][j];
+			for (int j=0; j<nTuplesI[i].length; j++) {
+				int v = nTuplesI[i][j];
 				if (v<0 || v>=numCells) 
 					throw new RuntimeException("Invalid cell number "+v+" in n-tuple no. "+i);
 			}
-			this.nTuples[0][i] = new NTuple(nTuples[i], posVals, ntPar);
-			this.nTuples[1][i] = new NTuple(nTuples[i], posVals, ntPar);
-			if (randInitWeights) {
-				this.nTuples[0][i].initWeights(true);
-				this.nTuples[1][i].initWeights(true);
+			for (int k=0; k<numPlayers; k++) {
+				this.nTuples[k][i] = new NTuple(nTuplesI[i], posVals, ntPar);
+				if (randInitWeights) {
+					this.nTuples[k][i].initWeights(true);
+				}				
 			}
 		}
 	}
 
 	/**
-	 * @return The List of N-Tuples
+	 * @return The list of n-Tuples
 	 */
 	public NTuple[] getNTuples() {
-		NTuple list[] = new NTuple[numTuples * 2];
+		NTuple list[] = new NTuple[numTuples * numPlayers];
 		for (int j = 0, k = 0; j < nTuples[0].length; j++)
 			for (int i = 0; i < nTuples.length; i++)
 				list[k++] = nTuples[i][j];
@@ -122,20 +130,21 @@ public class NTupleValueFunc implements Serializable {
 				nTuples[i][j].resetElig();
 	}
 
-	public void calcScoresAndElig(int[] curTable) {
-    	double v_old = getScoreI(curTable);	
+	public void calcScoresAndElig(int[] curTable, int curPlayer) {
+    	double v_old = getScoreI(curTable,curPlayer);	
     	double e = (1.0 - v_old * v_old);   // derivative of tanh
-        updateElig(curTable,e);	
+        updateElig(curTable,curPlayer,e);	
 	}
 
 	public void finishUpdateWeights() {
 		ALPHA = ALPHA * m_AlphaChangeRatio;
 	}
 
+	// this is only needed for TTT
 	public int countPieces(int board[]) {
 		int count = 0;
 		for (int i = 0; i < board.length; i++)
-			if (board[i] != 0)		// remember: board[i]==1 for empty cells (!)
+			if (board[i] != 1)		// remember: board[i]==1 for empty cells (!)
 				count++;
 		return count;
 	}
@@ -151,16 +160,19 @@ public class NTupleValueFunc implements Serializable {
 	/**
 	 * Get the value for this state
 	 * 
-	 * @param board the state as 1D-integer vector (position value for each board cell) 
+	 * @param board 
+	 * 			  the state as 1D-integer vector (position value for each board cell) 
+	 * @param player
+	 *            the player who has to move on {@code board}
 	 * @return
 	 */
-	public double getScoreI(int[] board) {
+	public double getScoreI(int[] board, int player) {
 		int i, j;
 		double score = 0.0;
 		int[][] equiv = null;
 
-		// Get player
-		int player = countPieces(board) % 2;
+		// assertion *only* for TTT:
+		assert(player == countPieces(board) % 2);
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board, useSymmetry);
@@ -182,6 +194,7 @@ public class NTupleValueFunc implements Serializable {
 	 * {@code xnf.symmetryVectors(board)}).
 	 * 
 	 * @param board
+	 *            board as 1D-integer vector (position value for each board cell) 
 	 * @param useSymmetry if false, return a 2D array with only one row 
 	 * 			(the board itself in int[0][])
 	 * @return the equivalent positions
@@ -209,20 +222,24 @@ public class NTupleValueFunc implements Serializable {
 	 * Update the weights of the n-Tuple-System.
 	 * 
 	 * @param curBoard
-	 *            the current Board
+	 *            the current board
+	 * @param curPlayer
+	 *            the player who has to move on current board
 	 * @param nextBoard
 	 *            the following board
+	 * @param nextPlayer
+	 *            the player who has to move on next board
 	 * @param finished
 	 *            true, if game is over
 	 * @param reward
 	 *            reward given for a terminated game (-1,0,+1)
 	 */
-	public void updateWeights(int[] curBoard, int[] nextBoard,
+	public void updateWeights(int[] curBoard, int curPlayer, int[] nextBoard, int nextPlayer,
 			boolean finished, double reward, boolean upTC) {
-		double v_old = getScoreI(curBoard); // Old Value
+		double v_old = getScoreI(curBoard,curPlayer); // Old Value
 		double tg; // Target-Signal
 		// tg contains reward OR GAMMA * value of the after-state
-		tg = (finished ? reward : GAMMA * getScoreI(nextBoard));
+		tg = (finished ? reward : GAMMA * getScoreI(nextBoard,nextPlayer));
 		// delta is the error signal
 		double delta = (tg - v_old);
 		// derivative of tanh
@@ -234,10 +251,10 @@ public class NTupleValueFunc implements Serializable {
 		// temporal coherence// update N and A matrices
 		// samine//
 
-		update(curBoard, delta, e);
+		update(curBoard, curPlayer, delta, e);
 		//update(curBoard, dW, dW);   // /WK/
 		
-		if (LAMBDA!=0.0) updateElig(nextBoard, e);
+		if (LAMBDA!=0.0) updateElig(nextBoard, nextPlayer, e);
 
 	}
 
@@ -246,16 +263,19 @@ public class NTupleValueFunc implements Serializable {
 	 * update the symmetric boards, if wanted.
 	 * 
 	 * @param board
-	 *            board, for which the weights shall be updated
+	 *            board, for which the weights shall be updated,
+	 *            as 1D-integer vector (position value for each board cell) 
+	 * @param player
+	 *            the player who has to move on {@code board}
 	 * @param delta
 	 *            ALPHA*delta*e is the value added to all weights (LAMBDA==0)
 	 */
-	private void update(int[] board, double delta, double e) {
+	private void update(int[] board, int player, double delta, double e) {
 		int i, j;
 		int[][] equiv = null;
 
-		// Get player
-		int player = countPieces(board) % 2;
+		// assertion *only* for TTT:
+		assert(player == countPieces(board) % 2);
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board,useSymmetry);
@@ -271,16 +291,19 @@ public class NTupleValueFunc implements Serializable {
 	 * (Only the traces for the active player are updated/decayed.)
 	 * 
 	 * @param board
-	 *            board, for which the eligibility traces shall be updated
+	 *            board, for which the eligibility traces shall be updated, 
+	 *            as 1D-integer vector (position value for each board cell) 
+	 * @param player
+	 *            the player who has to move on {@code board}
 	 * @param e
 	 *            the derivative of the sigmoid function
 	 */
-	private void updateElig(int[] board, double e) {
+	private void updateElig(int[] board, int player, double e) {
 		int i, j;
 		int[][] equiv = null;
 
-		// Get player
-		int player = countPieces(board) % 2;
+		// assertion *only* for TTT:
+		assert(player == countPieces(board) % 2);
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board,useSymmetry);
@@ -295,7 +318,7 @@ public class NTupleValueFunc implements Serializable {
 	public void updateTC() {
 		int i, k;
 			for (i = 0; i < numTuples; i++) {
-				for (k = 0; k < 2; k++)
+				for (k = 0; k < numPlayers; k++)
 					nTuples[k][i].updateTC();
 			}
 

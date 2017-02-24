@@ -201,64 +201,6 @@ public class TDParams extends Frame implements Serializable
 		setVisible(false);
 	} // constructor TDParams()	
 	
-	/**
-	 * Set sensible parameters for a specific agent and specific game. By "sensible
-	 * parameters" we mean parameter producing good results.
-	 * 
-	 * @param agentName either "TD-Ntuple" (for {@link TDNTupleAgt}) or "TDS" (for {@link TDAgent}),
-	 * 				all other strings are without any effect
-	 * @param gameName
-	 */
-	public void setParamDefaults(String agentName, String gameName) {
-		// currently we have here only the sensible defaults for one game (TTT)
-		// but for two agents:
-		switch (agentName) {
-		case "TD-Ntuple": 
-			alphaT.setText("0.001");  			// the defaults
-			alfinT.setText("0.001");			//
-			epsilT.setText("0.3");				// 
-			epfinT.setText("0.0");				//
-			lambdaT.setText("0.0"); 			//
-			gammaT.setText("1.0");				//
-			epochT.setText("1");				//
-			withSigType.setSelected(true);		// tanh
-			normalize.setSelected(false);		// 
-			NetTypeL.setEnabled(false);
-			LinNetType.setEnabled(false);
-			BprNetType.setEnabled(false);
-			LrnTypeL.setEnabled(false);
-			bpropType.setEnabled(false);
-			rpropType.setEnabled(false);
-			FeatTDS_L.setEnabled(false);
-			choiceFeatTDS.setEnabled(false);
-			epochL.setEnabled(false);
-			epochT.setEnabled(false);
-			break;
-		case "TDS":
-			alphaT.setText("0.1");				// the defaults
-			alfinT.setText("0.001");			//
-			epsilT.setText("0.3");				// 
-			epfinT.setText("0.0");				//
-			lambdaT.setText("0.9");				//
-			gammaT.setText("1.0");				//
-			epochT.setText("1");				//
-			withSigType.setSelected(false);		//
-			normalize.setSelected(false);		// 
-			NetTypeL.setEnabled(true);
-			LinNetType.setEnabled(true);
-			BprNetType.setEnabled(true);
-			LrnTypeL.setEnabled(true);
-			bpropType.setEnabled(true);
-			rpropType.setEnabled(true);
-			FeatTDS_L.setEnabled(true);
-			choiceFeatTDS.setEnabled(true);
-			epochL.setEnabled(true);
-			epochT.setEnabled(true);
-			break;
-		}
-		
-	}
-	
 	public JPanel getPanel() {
 		return tdPanel;
 	}
@@ -371,6 +313,65 @@ public class TDParams extends Frame implements Serializable
 		setNormalize(tp.getUseNormalize());
 //		setMaxGameNum(tp.getMaxGameNum());
 //		setNumEval(tp.getNumEval());
+	}
+	
+	/**
+	 * Set sensible parameters for a specific agent and specific game. By "sensible
+	 * parameters" we mean parameter producing good results. Likewise, some parameter
+	 * choices may be enabled or disabled.
+	 * 
+	 * @param agentName either "TD-Ntuple" (for {@link TDNTupleAgt}) or "TDS" (for {@link TDAgent}),
+	 * 				all other strings are without any effect
+	 * @param gameName
+	 */
+	public void setParamDefaults(String agentName, String gameName) {
+		// currently we have here only the sensible defaults for one game (TTT)
+		// but for two agents ("TD-Ntuple" = class TDNTupleAgt and "TDS" = class TDAgent):
+		switch (agentName) {
+		case "TD-Ntuple": 
+			alphaT.setText("0.001");  			// the defaults
+			alfinT.setText("0.001");			//
+			epsilT.setText("0.3");				// 
+			epfinT.setText("0.0");				//
+			lambdaT.setText("0.0"); 			//
+			gammaT.setText("1.0");				//
+			epochT.setText("1");				//
+			withSigType.setSelected(true);		// tanh
+			normalize.setSelected(false);		// 
+			NetTypeL.setEnabled(false);
+			LinNetType.setEnabled(false);
+			BprNetType.setEnabled(false);
+			LrnTypeL.setEnabled(false);
+			bpropType.setEnabled(false);
+			rpropType.setEnabled(false);
+			FeatTDS_L.setEnabled(false);
+			choiceFeatTDS.setEnabled(false);
+			epochL.setEnabled(false);
+			epochT.setEnabled(false);
+			break;
+		case "TDS":
+			alphaT.setText("0.1");				// the defaults
+			alfinT.setText("0.001");			//
+			epsilT.setText("0.3");				// 
+			epfinT.setText("0.0");				//
+			lambdaT.setText("0.9");				//
+			gammaT.setText("1.0");				//
+			epochT.setText("1");				//
+			withSigType.setSelected(false);		// Fermi fct
+			normalize.setSelected(false);		// 
+			NetTypeL.setEnabled(true);
+			LinNetType.setEnabled(true);
+			BprNetType.setEnabled(true);
+			LrnTypeL.setEnabled(true);
+			bpropType.setEnabled(true);
+			rpropType.setEnabled(true);
+			FeatTDS_L.setEnabled(true);
+			choiceFeatTDS.setEnabled(true);
+			epochL.setEnabled(true);
+			epochT.setEnabled(true);
+			break;
+		}
+		
 	}
 	
 } // class TDParams

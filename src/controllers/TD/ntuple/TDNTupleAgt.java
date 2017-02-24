@@ -27,8 +27,8 @@ import games.XNTupleFuncs;
 /**
  * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning)
  * <b>with n-tuples</b>. 
- * It has a one-layer (perceptron-like) network with output-nonlinearty tanh 
- * to model the value function. 
+ * It has a one-layer (perceptron-like) neural network with output-nonlinearity  
+ * {@code tanh} to model the value function. 
  * The net follows closely the (pseudo-)code by [SuttonBonde93]. 
  * <p>
  * Some functionality is packed in the superclass 
@@ -37,7 +37,7 @@ import games.XNTupleFuncs;
  * @see PlayAgent
  * @see AgentBase
  * 
- * @author Wolfgang Konen, TH Köln, Feb'17
+ * @author Wolfgang Konen, Samineh Bagheri, Markus Thill, TH Köln, Feb'17
  */
 //
 // This agent is adapted from project SourceTTT, class TicTacToe.TDSNPlayer
@@ -75,9 +75,6 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private boolean RANDINITWEIGHTS = false;// Init Weights of Value-Function
 											// randomly
 	private boolean PRINTTABLES = false;	// /WK/ control the printout of tableA, tableN, epsilon
-	
-	private int numCells=9; 			// specific for TicTacToe
-	private int POSVALUES = 3; 			// Possible values for each board field
 	
 	//
 	// from TDAgent
@@ -163,8 +160,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		randWalk=ntPar.getRandWalk();
 		int numTuple=ntPar.getNtupleNumber();
 		int maxTupleLen=ntPar.getNtupleMax();
+		int posVals = xnf.getNumPositionValues();
+		int numCells = xnf.getNumCells();
 		
-		m_Net = new NTupleValueFunc(nTuples, xnf, POSVALUES, USESYMMETRY,
+		m_Net = new NTupleValueFunc(nTuples, xnf, posVals, USESYMMETRY,
 				RANDINITWEIGHTS,ntPar,numCells);
 		
 		setTDParams(tdPar, maxGameNum);
@@ -335,7 +334,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 */
 	public double getScore(StateObservation so) {
 		int[] bvec = m_Net.xnf.getBoardVector(so);
-		double score = m_Net.getScoreI(bvec);
+		double score = m_Net.getScoreI(bvec,so.getPlayer());
 		return score;
 	}
 
@@ -370,7 +369,9 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		int player;
 		Types.ACTIONS actBest;
 		int[] curBoard = m_Net.xnf.getBoardVector(so);
+		int   curPlayer=so.getPlayer();
 		int[] nextBoard = null;
+		int   nextPlayer;
 
 		//System.out.println("Random test: "+ rand.nextDouble());
 		//System.out.println("Random test: "+ rand.nextDouble());
@@ -379,7 +380,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 		if (m_Net.LAMBDA!=0.0) {
 			m_Net.resetElig(); // reset the eligibility traces before starting a new game
-			m_Net.calcScoresAndElig(curBoard);
+			m_Net.calcScoresAndElig(curBoard,curPlayer);
 		}
 
 		//oldInput = m_feature.prepareFeatVector(so);
@@ -393,6 +394,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			randomMove = this.wasRandomAction();
 			so.advance(actBest);
 			nextBoard = m_Net.xnf.getBoardVector(so);
+			nextPlayer= so.getPlayer();
 			//if (DEBG) printVTable(pstream,VTable);
 			if (DEBG) printTable(pstream,nextBoard);
 			if (so.isGameOver()) {
@@ -410,7 +412,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 					// And a reward 0 for a tie.
 					break;
 				default: 
-					throw new RuntimeException("TDPlayer.trainAgent not yet "+
+					throw new RuntimeException("TDNTupleAgt.trainAgent not yet "+
 							"implementing case so.getNumPlayers()>2");
 				}
 				// Normalize to +1 (X-win), 0.5 (tie), 0.0 (O-win) for 2-player game:
@@ -428,8 +430,9 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			}
 			//Input = m_feature.prepareFeatVector(so);
 			if (randomMove && !finished) {
-				// no training, go to next move
-				m_Net.calcScoresAndElig(nextBoard); // but update eligibilities for next pass
+				// no training, go to next move,
+				// but update eligibility traces for next pass
+				m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
 				// only for diagnostics
 				if (DEBG)
 					pstream.println("random move");
@@ -437,7 +440,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			} else {
 				// do one training step
 				
-				m_Net.updateWeights(curBoard, nextBoard,
+				m_Net.updateWeights(curBoard, curPlayer, nextBoard, nextPlayer,
 						finished, reward,upTC);
 				// contains an updateElig(nextBoard,...) in the end, if LAMBDA>0
 
@@ -463,6 +466,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			}
 
 			curBoard = nextBoard; 
+			curPlayer= nextPlayer;
 			
 			if (finished) {
 				if (DEBG)
