@@ -452,7 +452,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                 vBoard[i].setText("   ");
                 vBoard[i].setBackground(Color.red);
             } else {
-                double realScore = score*m_so.MAXSCORE;
+                double realScore = score/*m_so.MAXSCORE*/;
                 String txt = null;
                 if(realScore >= 1000000) {
                     txt = ""+(String.format("%.1f",realScore));

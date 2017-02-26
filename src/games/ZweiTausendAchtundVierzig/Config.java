@@ -23,7 +23,7 @@ public class Config {
     //Bestrafung
     //Value from -1 to 0
     public static final double PENALISATION = -1;
-    //Gibt an ob die unveränderte Gamescore zu der Bestrafung hinzuaddiert werden soll. Heuristiken werden bei dieser Socre nich berücksichtigt!
+    //Gibt an ob die unveränderte Gamescore zu der Bestrafung hinzuaddiert werden soll. Heuristiken werden bei dieser Score nich berücksichtigt!
     public static final boolean ADDSCORE = true;
 
 }

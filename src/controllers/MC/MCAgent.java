@@ -5,6 +5,8 @@ import controllers.PlayAgent;
 import games.StateObservation;
 
 import tools.Types;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -12,9 +14,8 @@ import java.util.Random;
  * Created by Johannes on 08.12.2016.
  */
 public class MCAgent extends AgentBase implements PlayAgent {
-    private List<Types.ACTIONS> actions;
-    private Types.ACTIONS nextAction = Types.ACTIONS.fromInt(5);
-    private double nextMoveScore = 0;
+    private Random random = new Random();
+
     private int totalRolloutDepth = 0; // saves the average rollout depth for the mc Agent
     private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true
     private int nIterations = 0; 		// counts the total number of iterations
@@ -31,17 +32,17 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
-        return getNextActionAverage(sob, vtable);
+        return getNextActionMultipleAgents(sob, vtable);
     }
 
-    public Types.ACTIONS getNextActionAverage (StateObservation sob, double[] vtable) {
-        nextAction = null;
-        nextMoveScore = Double.NEGATIVE_INFINITY;
-        nRolloutFinished = 0; 
-        nIterations = 0;
-        totalRolloutDepth = 0;
+    public Types.ACTIONS getNextAction (StateObservation sob, double[] vtable) {
+        Types.ACTIONS nextAction = Types.ACTIONS.fromInt(5);
+        double nextActionScore = Double.NEGATIVE_INFINITY;
+        List<Types.ACTIONS> actions = sob.getAvailableActions();
 
-        actions = sob.getAvailableActions();
+        nRolloutFinished = 0; 
+        nIterations = sob.getNumAvailableActions()*Config.ITERATIONS;
+        totalRolloutDepth = 0;
 
         if(sob.getNumAvailableActions() == 1) {
             return actions.get(0);
@@ -57,52 +58,91 @@ public class MCAgent extends AgentBase implements PlayAgent {
                 agent.startAgent(newSob);
 
                 averageScore += newSob.getGameScore();
+
                 if (newSob.isGameOver()) nRolloutFinished++;
                 totalRolloutDepth += agent.getRolloutDepth();
-
             }
             averageScore /= Config.ITERATIONS;
             vtable[i] = averageScore;
-            nIterations += Config.ITERATIONS;
 
-            if (nextMoveScore <= averageScore) {
+            if (nextActionScore <= averageScore) {
                 nextAction = actions.get(i);
-                nextMoveScore = averageScore;
+                nextActionScore = averageScore;
             }
         }
         return nextAction;
     }
 
-    public Types.ACTIONS getNextActionMax (StateObservation sob, double[] vtable) {
-        nextAction = null;
-        nextMoveScore = Double.NEGATIVE_INFINITY;
-        actions = sob.getAvailableActions();
+    public Types.ACTIONS getNextActionMultipleAgents (StateObservation sob, double[] vtable) {
+        List<Types.ACTIONS> actions = sob.getAvailableActions();
+
+        nRolloutFinished = 0;
+        nIterations = sob.getNumAvailableActions()*Config.ITERATIONS*Config.NUMBERAGENTS;
+        totalRolloutDepth = 0;
 
         if(sob.getNumAvailableActions() == 1) {
             return actions.get(0);
         }
 
-        for(int i = 0; i < sob.getNumAvailableActions(); i++) {
-            for (int j = 0; j < Config.ITERATIONS; j++) {
-                StateObservation newSob = sob.copy();
+        for (int i = 0; i < Config.NUMBERAGENTS; i++) {
+            int nextAction = 0;
+            double nextActionScore = Double.NEGATIVE_INFINITY;
 
-                newSob.advance(actions.get(i));
-                RandomSearch agent = new RandomSearch();
-                agent.startAgent(newSob);
+            for (int j = 0; j < sob.getNumAvailableActions(); j++) {
+                double averageScore = 0;
 
-                if(newSob.getGameScore() > vtable[i]) {
-                    nextAction = actions.get(i);
-                    vtable[i] = newSob.getGameScore();
+                for (int k = 0; k < Config.ITERATIONS; k++) {
+                    StateObservation newSob = sob.copy();
+
+                    newSob.advance(actions.get(j));
+                    RandomSearch agent = new RandomSearch();
+                    agent.startAgent(newSob);
+
+                    averageScore += newSob.getGameScore();
+                    if (newSob.isGameOver()) nRolloutFinished++;
+                    totalRolloutDepth += agent.getRolloutDepth();
+
                 }
+
+                averageScore /= Config.ITERATIONS;
+                if (nextActionScore <= averageScore) {
+                    nextAction = j;
+                    nextActionScore = averageScore;
+                }
+            }
+            vtable[nextAction]++;
+        }
+
+        List<Types.ACTIONS> nextActions = new ArrayList<>();
+        double nextActionScore = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+            if (nextActionScore < vtable[i]) {
+                nextActions.clear();
+                nextActions.add(actions.get(i));
+                nextActionScore = vtable[i];
+            } else if(nextActionScore == vtable[i]) {
+                nextActions.add(actions.get(i));
             }
         }
 
-        return nextAction;
+        return nextActions.get(random.nextInt(nextActions.size()));
     }
 
     @Override
     public double getScore(StateObservation sob) {
-        return nextMoveScore;
+        double[] vtable = new double[sob.getNumAvailableActions()+1];
+        double nextActionScore = Double.NEGATIVE_INFINITY;
+
+        getNextAction(sob, true, vtable, true);
+
+        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+            if (nextActionScore <= vtable[i]) {
+                nextActionScore = vtable[i];
+            }
+        }
+
+        return nextActionScore;
     }
 
     public double getAverageRolloutDepth() {

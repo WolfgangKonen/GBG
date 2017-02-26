@@ -76,23 +76,23 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         }
         
         String[][] results = new String[3][16];
-        for(ResultContainer resultContainer : resultContainers) {
+        /*for(ResultContainer resultContainer : resultContainers) {
             results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] =
                     "mcCertainty: " + new BigDecimal(resultContainer.mcCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\nmctsCertainty: " + new BigDecimal(resultContainer.mctsCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\nsameActionCounter: " + new BigDecimal(resultContainer.sameActionCounter).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\nmcRolloutDepth: " + new BigDecimal(resultContainer.mcRolloutDepth).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\nmctsRolloutDepth: " + new BigDecimal(resultContainer.mctsRolloutDepth).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",");
-        }
+        }*/
 
-       /* for(ResultContainer resultContainer : resultContainers) {
+        for(ResultContainer resultContainer : resultContainers) {
             results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] =
                     new BigDecimal(resultContainer.mcCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\n" + new BigDecimal(resultContainer.mctsCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\n" + new BigDecimal(resultContainer.sameActionCounter).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\n" + new BigDecimal(resultContainer.mcRolloutDepth).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\n" + new BigDecimal(resultContainer.mctsRolloutDepth).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",");
-        } */
+        }
 
         System.out.println("\n\n\n\n\nResults:");
         for(int i = 0; i < 3; i++) {
@@ -109,7 +109,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     private ResultContainer analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
         //create Agents
         MCTSParams mctsParams = new MCTSParams();
-        mctsParams.setNumIter(10000);
+        mctsParams.setNumIter(controllers.MC.Config.ITERATIONS*controllers.MC.Config.NUMBERAGENTS*gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
         mctsParams.setK_UCT(1);
         mctsParams.setTreeDepth(1);
         mctsParams.setRolloutDepth(201);
