@@ -42,26 +42,32 @@ public class Evaluator2048 extends Evaluator {
         List<StateObserver2048> stateObservers = new ArrayList<>();
 
 
-        if(m_PlayAgent.getName().equals("MC") | m_PlayAgent.getName().equals("MCTS")) {
-            //async for MC and MCTS Agents
+        if(m_PlayAgent.getName().equals("MCTS")) {
+            //async for MCTS Agents
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
 
             //play Games
             for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
                 int gameNumber = i+1;
                 callables.add(() -> {
+                    int depth = 0;
+                    double numberActions = 0;
+                    int currentNumberActions = 0;
                     StateObserver2048 so = new StateObserver2048();
                     long gameSartTime = System.currentTimeMillis();
 
-                    PlayAgent playAgent = new MCAgent();
-                    if(m_PlayAgent.getName().equals("MCTS")) {
-                        playAgent = new MCTSAgentT("MCTS",null,new MCTSParams());
-                    }
+                    PlayAgent playAgent = new MCTSAgentT("MCTS",null,new MCTSParams());
 
                     while (!so.isGameOver()) {
+                        currentNumberActions = so.getNumAvailableActions();
                         so.advance(playAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
+                        currentNumberActions = currentNumberActions * so.getNumEmptyTiles() * 2;
+                        numberActions += currentNumberActions;
+                        depth++;
                     }
-                    System.out.print("Finished game " + gameNumber + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+
+                    numberActions/=depth;
+                    System.out.print("Finished game " + gameNumber + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ". Depth is: " + depth + " and numberActions is: " + numberActions + "\n");
 
                     return so;
                 });
@@ -154,10 +160,11 @@ public class Evaluator2048 extends Evaluator {
 
 
         return "\n\nSettings:" +
-                "\n MC-Agent Depth:" + controllers.MC.Config.DEPTH +
-                "\n MC-Agent Iterationen:" + controllers.MC.Config.ITERATIONS +
-                "\nPenalisation: " + Config.PENALISATION +
-                "\nAddscore: " + Config.ADDSCORE +
+                "\nMC-Agent DEPTH:" + controllers.MC.Config.DEPTH +
+                "\nMC-Agent ITERATIONS:" + controllers.MC.Config.ITERATIONS +
+                "\nMC-Agent NUMBERAGENTS:" + controllers.MC.Config.NUMBERAGENTS +
+                "\nPENALISATION: " + Config.PENALISATION +
+                "\nADDSCORE: " + Config.ADDSCORE +
                 "\nEmptitiles multiplier: " + Config.EMPTYTILEMULTIPLIER +
                 "\nHighesttileincorner multiplier: " + Config.HIGHESTTILEINCORENERMULTIPLIER +
                 "\nRow multiplier: " + Config.ROWMULTIPLIER +
