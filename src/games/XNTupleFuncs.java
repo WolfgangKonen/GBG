@@ -11,12 +11,13 @@ import controllers.TD.ntuple.NTupleValueFunc;
  * {@link NTupleValueFunc}. Contains game-specific functions for producing a 
  * board vector, symmetric board vectors (if any) and a fixed n-tuple set. <p>
  * 
- * Note: The five methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
- * {@link #getBoardVector(StateObservation)}, {@link #symmetryVectors(int[])} and 
- * {@link #fixedNTuples()} are only required for the n-tuple interface. 
- * If an implementing game does not need that part 
- * (i. e. if it does not plan to use {@link TDNTupleAgt}), it may just code stubs
- * returning 0, {@code null}, or throwing a {@link RuntimeException}.
+ * Note: The six methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
+ * {@link #getBoardVector(StateObservation)}, {@link #symmetryVectors(int[])}, 
+ * {@link #fixedNTuples()} and {@link #adjacencySet()} are only required for the 
+ * n-tuple interface. 
+ * If an implementing game does not need that part (i. e. if it does not plan to 
+ * use {@link TDNTupleAgt}), it may just code stubs returning 0, {@code null}, 
+ * or throwing a {@link RuntimeException}.
  *
  * @author Wolfgang Konen, TH Köln, Feb'17
  */

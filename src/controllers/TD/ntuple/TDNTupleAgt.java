@@ -546,7 +546,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private void print(double m_epsilon2) throws IOException {
 		PrintWriter epsilon = new PrintWriter(new FileWriter("epsilon",true));
 		epsilon.println("" +m_epsilon2);
-		epsilon.close();// TODO Auto-generated method stub
+		epsilon.close();
 	}
 
 	public void setTDParams(TDParams tdPar, int maxGameNum) {

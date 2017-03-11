@@ -542,13 +542,25 @@ abstract public class Arena extends JPanel implements Runnable {
 	 * the default behavior is to throw a {@link RuntimeException}.
 	 * 
 	 * @param featmode
-	 * @return
+	 * @return an object implementing {@link Feature}
 	 */
 	public Feature makeFeatureClass(int featmode) {
 		throw new RuntimeException("No Feature class available for game "+this.getGameName()+" (needed for TDS)");
 	}
 
-	abstract public XNTupleFuncs makeXNTupleFuncs();
+	/**
+	 * Factory pattern method: make a new {@link XNTupleFuncs} tailored to a specific game. <br>
+	 * (We delegate this task to derived classes ArenaXYZ, since they usually 
+	 * require a game-tailored XNTupleFuncsXYZ.) <p>
+	 * 
+	 * If the derived class does not override {@link #makeXNTupleFuncs()}, 
+	 * the default behavior is to throw a {@link RuntimeException}.
+	 * 
+	 * @return an object implementing {@link XNTupleFuncs}
+	 */
+	public XNTupleFuncs makeXNTupleFuncs() {
+		throw new RuntimeException("No XNTupleFuncs class available for game "+this.getGameName()+" (needed for TD-Ntuple)");
+	}
 
 	/**
 	 * This method is called from {@link #run()} and it has to be overridden by 
