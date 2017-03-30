@@ -5,7 +5,6 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
-import params.MCTSParams;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -21,8 +20,10 @@ public class Evaluator2048 extends Evaluator {
     private double averageScore;
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = Integer.MIN_VALUE;
-    List<Integer> score = new ArrayList<>();
+    List<Integer> scores = new ArrayList<>();
     private int medianScore;
+    private long standartdeviation;
+    private double averageRolloutDepth;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
     private long startTime;
@@ -45,7 +46,9 @@ public class Evaluator2048 extends Evaluator {
         if(m_PlayAgent.getName().equals("MCTS")) {
             //async for MCTS Agents
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
+            MCTSAgentT mctsAgentT = (MCTSAgentT)m_PlayAgent;
 
+            System.out.println("Detected MCTS Agent, Iterations: " + mctsAgentT.params.getNumIter() + ", Rolloutdepth: " + mctsAgentT.params.getRolloutDepth());
             //play Games
             for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
                 int gameNumber = i+1;
@@ -56,7 +59,7 @@ public class Evaluator2048 extends Evaluator {
                     StateObserver2048 so = new StateObserver2048();
                     long gameSartTime = System.currentTimeMillis();
 
-                    PlayAgent playAgent = new MCTSAgentT("MCTS",null,new MCTSParams());
+                    PlayAgent playAgent = new MCTSAgentT("MCTS",null,mctsAgentT.params);
 
                     while (!so.isGameOver()) {
                         currentNumberActions = so.getNumAvailableActions();
@@ -67,7 +70,7 @@ public class Evaluator2048 extends Evaluator {
                     }
 
                     numberActions/=depth;
-                    System.out.print("Finished game " + gameNumber + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ". Depth is: " + depth + " and numberActions is: " + numberActions + "\n");
+                    System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ". Depth is: " + depth + " and numberActions is: " + numberActions + "\n");
 
                     return so;
                 });
@@ -88,13 +91,15 @@ public class Evaluator2048 extends Evaluator {
             }
 
         } else {
-            //sync for other Agents
+            //sync for other Agents (MC Agent uses multiple Cores naturally)
             for (int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
                 long gameSartTime = System.currentTimeMillis();
                 StateObserver2048 so = new StateObserver2048();
 
                 while (!so.isGameOver()) {
                     so.advance(m_PlayAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
+                    MCAgent agent = (MCAgent)m_PlayAgent;
+                    averageRolloutDepth += agent.getAverageRolloutDepth();
                 }
                 System.out.print("Finished game " + (i + 1) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
 
@@ -103,6 +108,7 @@ public class Evaluator2048 extends Evaluator {
         }
 
         //evaluate games
+        //Min/Max/Average Score
         for(StateObserver2048 so : stateObservers) {
             Integer value = tiles.get(so.highestTileValue);
             if (value == null) {
@@ -111,7 +117,7 @@ public class Evaluator2048 extends Evaluator {
                 tiles.put(so.highestTileValue, value + 1);
             }
 
-            score.add(so.score);
+            scores.add(so.score);
 
             averageScore += so.score;
             if (so.score < minScore) {
@@ -126,15 +132,26 @@ public class Evaluator2048 extends Evaluator {
 
         averageScore/=Config.NUMBEREVALUATIONS;
 
-        Collections.sort(score);
+
+        //Median Score
+        Collections.sort(scores);
 
         if(Config.NUMBEREVALUATIONS %2 == 0) {
-            medianScore+=score.get(Config.NUMBEREVALUATIONS/2);
-            medianScore+=score.get((Config.NUMBEREVALUATIONS/2)-1);
+            medianScore+= scores.get(Config.NUMBEREVALUATIONS/2);
+            medianScore+= scores.get((Config.NUMBEREVALUATIONS/2)-1);
             medianScore/=2;
         } else {
-            medianScore=score.get((Config.NUMBEREVALUATIONS-1)/2);
+            medianScore= scores.get((Config.NUMBEREVALUATIONS-1)/2);
         }
+
+        //Standartdeviation
+        for(int score : scores) {
+            standartdeviation += (score-averageScore)*(score-averageScore);
+        }
+        standartdeviation/=Config.NUMBEREVALUATIONS;
+        standartdeviation = Double.valueOf(Math.sqrt(standartdeviation)).longValue();
+
+        averageRolloutDepth/=moves;
 
         stopTime = System.currentTimeMillis();
 
@@ -163,6 +180,7 @@ public class Evaluator2048 extends Evaluator {
                 "\nMC-Agent DEPTH:" + controllers.MC.Config.DEPTH +
                 "\nMC-Agent ITERATIONS:" + controllers.MC.Config.ITERATIONS +
                 "\nMC-Agent NUMBERAGENTS:" + controllers.MC.Config.NUMBERAGENTS +
+                "\n" +
                 "\nPENALISATION: " + Config.PENALISATION +
                 "\nADDSCORE: " + Config.ADDSCORE +
                 "\nEmptitiles multiplier: " + Config.EMPTYTILEMULTIPLIER +
@@ -171,10 +189,11 @@ public class Evaluator2048 extends Evaluator {
                 "\nNumber of games: " + Config.NUMBEREVALUATIONS +
                 "\n" +
                 "\nResults:" +
-                "\nLowest score is: " + minScore +
-                "\nAverage score is: " + Math.round(averageScore) +
-                "\nMedian score is: " + Math.round(medianScore) +
-                "\nHighest score is: " + maxScore +
+                "\nLowest scores is: " + minScore +
+                "\nAverage scores is: " + Math.round(averageScore) +
+                "\nHighest scores is: " + maxScore +
+                "\nStandartdeviation is: " + standartdeviation +
+                "\nAverage Rolloutdepth is: " + averageRolloutDepth +
                 "\nAverage game duration: " +  Math.round((stopTime - startTime)/Config.NUMBEREVALUATIONS) + "ms" +
                 "\nDuration of evaluation: " + duration + "s" +
                 "\nMoves per second: " + Math.round(moves/duration) +

@@ -3,7 +3,6 @@ package controllers.MCTS;
 import games.StateObservation;
 import tools.ElapsedCpuTimer;
 import tools.Types;
-import tools.Utils;
 
 import java.util.Random;
 
@@ -61,6 +60,18 @@ public class SingleTreeNode
     }
 
 
+    /**
+     * Wird bei evaluieren aufgerufen
+     *
+     * Solange wie Iterationen ausgeführt werden
+     * einen TreeNode mit treePolicy() auswählen
+     *      wenn nocht nicht die TreeDepth erreicht wurde und es Aktionen ohne neuen Knoten gibt hänge baue für eine zufällige Aktion einen Knoten und speichere die GameState nach der Aktion in dem Knoten
+     *      falls die Treedepth erreicht wurde mach rnd Spiele
+     *
+     * auf dieser Node rollOut ausführen (ein rnd Game und dann die Score zurückgeben)
+     * mit backUp() die Anzahl an Visits und die Score des Ausgewählten Knotens aktualisieren
+     *
+     */
     public void mctsSearch(ElapsedCpuTimer elapsedTimer, double[] VTable) {
 
         lastBounds[0] = curBounds[0];

@@ -112,7 +112,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         mctsParams.setNumIter(controllers.MC.Config.ITERATIONS*controllers.MC.Config.NUMBERAGENTS*gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
         mctsParams.setK_UCT(1);
         mctsParams.setTreeDepth(1);
-        mctsParams.setRolloutDepth(201);
+        mctsParams.setRolloutDepth(controllers.MC.Config.DEPTH+1);
         MCTSAgentT mctsAgent = new MCTSAgentT("MCTS",null,mctsParams);
         MCAgent mcAgent = new MCAgent();
 

@@ -2,16 +2,13 @@ package controllers.MCTS;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
+import games.StateObservation;
 import params.MCTSParams;
-import params.TDParams;
 import tools.ElapsedCpuTimer;
 import tools.ElapsedCpuTimer.TimerType;
 import tools.Types;
-import games.StateObservation;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Random;
 
 
@@ -21,12 +18,13 @@ import java.util.Random;
  * 
  * This is the MCTS agent for 1- and 2-player games 
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  */
 public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable 
 { 
 	private static final long serialVersionUID = 123L;
     private transient ElapsedCpuTimer m_Timer;
+	public MCTSParams params;
 
     /**
      * The MCTS-UCT implementation
@@ -53,6 +51,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     public MCTSAgentT(String name,StateObservation so, MCTSParams mcPar) //, ElapsedCpuTimer elapsedTimer)
     {
     	super(name);
+		params = mcPar;
         
         //Create the player.
         mctsPlayer = new SingleMCTSPlayer(new Random(),mcPar);		
