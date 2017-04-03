@@ -35,7 +35,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
-        return getNextActionMultipleAgents(sob, vtable);
+        return getNextAction(sob, vtable);
     }
 
 /**
@@ -53,117 +53,117 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
 
 
-public Types.ACTIONS getNextAction (StateObservation sob, double[] vtable) {
-    //die Funktionen, welche auf die verschiedenen Kerne verteilt
-    //werden sollen
-    List<Callable<ResultContainer>> callables = new ArrayList<>();
-    //das Ergebnis dieser Funktionen
-    List<ResultContainer> resultContainers = new ArrayList<>();
-    //alle fuer den Spielzustand verfuegbaren Aktionen
-    List<Types.ACTIONS> actions = sob.getAvailableActions();
+    public Types.ACTIONS getNextAction (StateObservation sob, double[] vtable) {
+        //die Funktionen, welche auf die verschiedenen Kerne verteilt
+        //werden sollen
+        List<Callable<ResultContainer>> callables = new ArrayList<>();
+        //das Ergebnis dieser Funktionen
+        List<ResultContainer> resultContainers = new ArrayList<>();
+        //alle fuer den Spielzustand verfuegbaren Aktionen
+        List<Types.ACTIONS> actions = sob.getAvailableActions();
 
-    nRolloutFinished = 0;
-    nIterations = sob.getNumAvailableActions()*Config.ITERATIONS;
-    totalRolloutDepth = 0;
+        nRolloutFinished = 0;
+        nIterations = sob.getNumAvailableActions()*Config.ITERATIONS;
+        totalRolloutDepth = 0;
 
-    //es ist nur eine Aktion verfuegbar, diese kann sofort
-    //zurueckgegeben werden
-    if(sob.getNumAvailableActions() == 1) {
-        return actions.get(0);
-    }
+        //es ist nur eine Aktion verfuegbar, diese kann sofort
+        //zurueckgegeben werden
+        if(sob.getNumAvailableActions() == 1) {
+            return actions.get(0);
+        }
 
-    //die Funktionen, welche anschliessend auf die verschiedenen
-    //Kerne verteilt werden sollen, werden erstellt
-    //fuer jede Iteration wird eine Funktion mit jeder verfuegbaren
-    //Aktion erstellt
-    for (int j = 0; j < Config.ITERATIONS; j++) {
+        //die Funktionen, welche anschliessend auf die verschiedenen
+        //Kerne verteilt werden sollen, werden erstellt
+        //fuer jede Iteration wird eine Funktion mit jeder verfuegbaren
+        //Aktion erstellt
+        for (int j = 0; j < Config.ITERATIONS; j++) {
+            for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+
+                //eine Kopie des Spielzustandes wird erstellt
+                StateObservation newSob = sob.copy();
+
+                //die Kennzeichnung der ersten Aktion muss
+                //Zwischengespeichert werden, da auf den aktuellen
+                //Wert der for-Schleife zum Zeitpunkt der Ausfuehrung
+                //des callables nicht mehr zugegriffen werden kann
+                int firstActionIdentifier = i;
+
+                //Die callables, also die Funktionen die spaeter auf
+                //mehreren Kernen parallel ausgefuehrt werden, werden
+                //erstellt. Die callables werden hier nur erstellt und
+                //erst mit dem Ausfuehren der Funktion
+                //invokeAll(callables) auf executorService in Zeile 79
+                //durchlaufen
+                callables.add(() -> {
+
+                    //die erste Aktion wird ermittelt und auf dem
+                    //Spielzustand ausgefuehrt
+                    Types.ACTIONS firstAction = actions.get(firstActionIdentifier);
+                    newSob.advance(firstAction);
+
+                    //der Random Agent wird erstellt und simuliert
+                    //ein Spiel
+                    RandomSearch agent = new RandomSearch();
+                    agent.startAgent(newSob);
+
+                    //das Ergebnis der Simulation wird in einem
+                    //ResultContainer zurueckgegeben
+                    return new ResultContainer(firstActionIdentifier, newSob, agent.getRolloutDepth());
+                });
+            }
+        }
+
+        try {
+            //Der executorService wird aufgerufen und verteilt die
+            //zuvor erstellen Simulationen auf alle Kerne der CPU.
+            //Die Ergebnisse der Simulationen werden in einen stream
+            //geschrieben.
+            executorService.invokeAll(callables).stream().map(future -> {
+                try {
+                    return future.get();
+                }
+                catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+
+            //jedes Ergebnis das in den stream geschrieben wurde wird
+            //in der Liste resultContainers gespeichert
+            }).forEach(resultContainers::add);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //jeder resultContainer in der Liste resultContainers wird
+        //der zugehoerigen Aktion im vtable hinzuadiert
+        for(ResultContainer resultContainer : resultContainers) {
+            vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore();
+            totalRolloutDepth += resultContainer.rolloutDepth;
+            if(resultContainer.sob.isGameOver()) {
+                nRolloutFinished++;
+            }
+        }
+
+        //hier wird die naechste Aktion sowie ihre Bewertung
+        //gespeichert
+        Types.ACTIONS nextAction = null;
+        double nextActionScore = Double.NEGATIVE_INFINITY;
+
+        //es wird jede im vtable gespeicherte Aktion durchlaufen
         for (int i = 0; i < sob.getNumAvailableActions(); i++) {
 
-            //eine Kopie des Spielzustandes wird erstellt
-            StateObservation newSob = sob.copy();
+            //es wird die durchschnittliche Score jeder Aktion gebildet
+            vtable[i] /= Config.ITERATIONS;
 
-            //die Kennzeichnung der ersten Aktion muss
-            //Zwischengespeichert werden, da auf den aktuellen
-            //Wert der for-Schleife zum Zeitpunkt der Ausfuehrung
-            //des callables nicht mehr zugegriffen werden kann
-            int firstActionIdentifier = i;
-
-            //Die callables, also die Funktionen die spaeter auf
-            //mehreren Kernen parallel ausgefuehrt werden, werden
-            //erstellt. Die callables werden hier nur erstellt und
-            //erst mit dem Ausfuehren der Funktion
-            //invokeAll(callables) auf executorService in Zeile 79
-            //durchlaufen
-            callables.add(() -> {
-
-                //die erste Aktion wird ermittelt und auf dem
-                //Spielzustand ausgefuehrt
-                Types.ACTIONS firstAction = actions.get(firstActionIdentifier);
-                newSob.advance(firstAction);
-
-                //der Random Agent wird erstellt und simuliert
-                //ein Spiel
-                RandomSearch agent = new RandomSearch();
-                agent.startAgent(newSob);
-
-                //das Ergebnis der Simulation wird in einem
-                //ResultContainer zurueckgegeben
-                return new ResultContainer(firstActionIdentifier, newSob, agent.getRolloutDepth());
-            });
-        }
-    }
-
-    try {
-        //Der executorService wird aufgerufen und verteilt die
-        //zuvor erstellen Simulationen auf alle Kerne der CPU.
-        //Die Ergebnisse der Simulationen werden in einen stream
-        //geschrieben.
-        executorService.invokeAll(callables).stream().map(future -> {
-            try {
-                return future.get();
+            //es wurde eine Aktion mit einer hoeheren Score gefunden
+            if (nextActionScore < vtable[i]) {
+                nextAction = actions.get(i);
+                nextActionScore = vtable[i];
             }
-            catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-
-        //jedes Ergebnis das in den stream geschrieben wurde wird
-        //in der Liste resultContainers gespeichert
-        }).forEach(resultContainers::add);
-    } catch (InterruptedException e) {
-        e.printStackTrace();
-    }
-
-    //jeder resultContainer in der Liste resultContainers wird
-    //der zugehoerigen Aktion im vtable hinzuadiert
-    for(ResultContainer resultContainer : resultContainers) {
-        vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore();
-        totalRolloutDepth += resultContainer.rolloutDepth;
-        if(resultContainer.sob.isGameOver()) {
-            nRolloutFinished++;
         }
+
+        //die beste Aktion wird zurueckgegeben
+        return nextAction;
     }
-
-    //hier wird die naechste Aktion sowie ihre Bewertung
-    //gespeichert
-    Types.ACTIONS nextAction = null;
-    double nextActionScore = Double.NEGATIVE_INFINITY;
-
-    //es wird jede im vtable gespeicherte Aktion durchlaufen
-    for (int i = 0; i < sob.getNumAvailableActions(); i++) {
-
-        //es wird die durchschnittliche Score jeder Aktion gebildet
-        vtable[i] /= Config.ITERATIONS;
-
-        //es wurde eine Aktion mit einer hoeheren Score gefunden
-        if (nextActionScore < vtable[i]) {
-            nextAction = actions.get(i);
-            nextActionScore = vtable[i];
-        }
-    }
-
-    //die beste Aktion wird zurueckgegeben
-    return nextAction;
-}
 
     public Types.ACTIONS getNextActionMultipleAgents (StateObservation sob, double[] vtable) {
         List<Types.ACTIONS> actions = sob.getAvailableActions();
