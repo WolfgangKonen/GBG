@@ -23,6 +23,9 @@ public class MCAgent extends AgentBase implements PlayAgent {
     private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true
     private int nIterations = 0; 		// counts the total number of iterations
 
+    private boolean DOCALCCERTAINTY = false; // if true, calculate several certainty measures at the 
+    									// beginning of getNextAction (only debug)
+    
     public MCAgent() {
         this("MC");
     }
@@ -35,24 +38,48 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
+    	if (DOCALCCERTAINTY) {
+    		// this is only some test output for checking bit shift operations
+//            long k = 6;
+//            System.out.println(Long.toBinaryString(k << 1));
+//            System.out.println(Long.toBinaryString(k << 14));
+//            System.out.println(Long.toBinaryString((k <<  1) & 0xFFFF));
+//            System.out.println(Long.toBinaryString((k << 14) & 0xFFFF));
+//            System.out.println((k << 1));
+//            System.out.println((k << 14));
+//            System.out.println(((k <<  1) & 0xFFFF));
+//            System.out.println(((k << 14) & 0xFFFF));
+
+        	double cert0, cert1,cert2=0,cert4=0,cert6=0;
+        	Config.NC = 100;
+        	cert0 = calcCertainty(sob, vtable,1,false);
+        	Config.NC = 20;
+        	cert1 = calcCertainty(sob, vtable,1,false);
+        	cert2 = calcCertainty(sob, vtable,2,false);
+        	//cert4 = calcCertainty(sob, vtable,4,false);
+        	cert6 = calcCertainty(sob, vtable,6,false);
+            System.out.println("n="+sob.getNumAvailableActions()+": certainty ="
+            		+ cert0+","+cert1
+            		+" / "+ cert2 
+            		//+" / " + cert4 
+            		+" / "+ cert6);
+    	}
+
         return getNextAction(sob, vtable);
     }
 
-/**
- * Get the best next action and return it
- * @param sob			current game state (not changed on return)
- * @param vtable		must be an array of size n+1 on input, where
- * 						n=sob.getNumAvailableActions(). On output,
- * 						elements 0,...,n-1 hold the score for each available
- * 						action (corresponding to sob.getAvailableActions())
- * 						In addition, vtable[n] has the score for the
- * 						best action.
- * @return nextAction	the next action
- */
-
-
-
-
+    /**
+     * Get the best next action and return it (multi-core version)
+     * 
+     * @param sob			current game state (not changed on return)
+     * @param vtable		must be an array of size n+1 on input, where
+     * 						n=sob.getNumAvailableActions(). On output,
+     * 						elements 0,...,n-1 hold the score for each available
+     * 						action (corresponding to sob.getAvailableActions())
+     * 						In addition, vtable[n] has the score for the
+     * 						best action.
+     * @return nextAction	the next action
+     */
     public Types.ACTIONS getNextAction (StateObservation sob, double[] vtable) {
         //die Funktionen, welche auf die verschiedenen Kerne verteilt
         //werden sollen
@@ -175,6 +202,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
         if(sob.getNumAvailableActions() == 1) {
             return actions.get(0);
         }
+        for (int i=0; i < vtable.length; i++) vtable[i]=0; // /WK/ bug fix, was missing before
 
         for (int i = 0; i < Config.NUMBERAGENTS; i++) {
             int nextAction = 0;
@@ -216,6 +244,9 @@ public class MCAgent extends AgentBase implements PlayAgent {
                 nextActions.add(actions.get(i));
             }
         }
+        
+        //for (int i = 0; i < vtable.length-1; i++) System.out.print((int)vtable[i]+",");
+        //System.out.println(""+sob.stringDescr());
 
         return nextActions.get(random.nextInt(nextActions.size()));
     }
@@ -234,6 +265,50 @@ public class MCAgent extends AgentBase implements PlayAgent {
         }
 
         return nextActionScore;
+    }
+    
+    /**
+     * Calculate the certainty by repeating the next-action calculation 
+     * Config.NC times and calculating the relative frequency of the most frequent
+     * next action
+     * 
+     * @param sob
+     * @param vtable
+     * @param mode	=1: use getNextAction (parallel version) <br>
+     *              >1: use getNextActionMultipleAgents with Config.NUMBERAGENTS=mode
+     * @return the certainty (highest bin in the relative-frequency histogram of possible actions)
+     */
+    public double calcCertainty(StateObservation sob, double[] vtable,int mode, boolean silent) {
+        double[] wtable = new double[4];
+        double highestBin;
+        int nextAction;
+        
+        if(sob.getNumAvailableActions() == 1) {
+            return 1.0;
+        }
+
+        for (int i = 0; i < Config.NC; i++) {
+        	if (mode==1) {
+        		nextAction = getNextAction(sob,vtable).toInt();
+        	} else {
+        		Config.NUMBERAGENTS = mode;
+        		nextAction = getNextActionMultipleAgents(sob,vtable).toInt();   
+        		if (!silent) System.out.print(".");
+        	}
+            wtable[nextAction]++;
+        }
+        if (mode!=1 & !silent) System.out.println("");
+
+        highestBin = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < wtable.length; i++) {
+            if (highestBin < wtable[i]) {
+                highestBin = wtable[i];
+            } 
+        }
+        double cert = highestBin/Config.NC;
+     
+    	return cert;
     }
 
     public double getAverageRolloutDepth() {
