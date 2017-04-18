@@ -35,7 +35,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     @Override
     protected boolean eval_Agent() {
-        //find new realisitic gameStates
+        //find new realistic gameStates
         //newGameStates();
 
         //load saved gameStates
