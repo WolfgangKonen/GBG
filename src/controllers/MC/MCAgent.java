@@ -39,17 +39,6 @@ public class MCAgent extends AgentBase implements PlayAgent {
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
     	if (DOCALCCERTAINTY) {
-    		// this is only some test output for checking bit shift operations
-//            long k = 6;
-//            System.out.println(Long.toBinaryString(k << 1));
-//            System.out.println(Long.toBinaryString(k << 14));
-//            System.out.println(Long.toBinaryString((k <<  1) & 0xFFFF));
-//            System.out.println(Long.toBinaryString((k << 14) & 0xFFFF));
-//            System.out.println((k << 1));
-//            System.out.println((k << 14));
-//            System.out.println(((k <<  1) & 0xFFFF));
-//            System.out.println(((k << 14) & 0xFFFF));
-
         	double cert0, cert1,cert2=0,cert4=0,cert6=0;
         	Config.NC = 100;
         	cert0 = calcCertainty(sob, vtable,1,false);

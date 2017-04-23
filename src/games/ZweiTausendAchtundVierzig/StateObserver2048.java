@@ -425,7 +425,19 @@ public class StateObserver2048 implements StateObservation {
 	//		StateObserver2048 so = new StateObserver2048(state,0,0);
 	//		System.out.println(so.stringDescr());
 
-	@Deprecated
+    public String toHexString() {
+        String s="";
+        XNTupleFuncs2048 xnf = new XNTupleFuncs2048();
+        int[] bvec = xnf.getBoardVector(this);
+        for(int row = 0,n=0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,n++) {
+            	s = s+Integer.toHexString(bvec[n]);
+            }
+        }
+        return s;
+    }
+
+    @Deprecated
     public String toString() {
     	return stringDescr();
     }
