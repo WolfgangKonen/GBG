@@ -25,9 +25,9 @@ import java.util.Random;
  * that is, the 4 lowest hex digits represent the lowest row of the 2048-board, with the 
  * digit 3 representing the leftmost cell in this row and so on.
  * 
- * TODO: The score part is not yet ready. 
+ * TODO: getGameScore2, evaluateBoard & evaluateRow via StateObserver2048
  * 
- * @author Wolfgang Konen
+ * @author Wolfgang Konen, THK
  */
 public class StateObs2048BitShift implements StateObservation {
     private Random random = new Random();
@@ -431,7 +431,9 @@ public class StateObs2048BitShift implements StateObservation {
 
 	@Override
     public String stringDescr() {
-		return Long.toHexString(boardB);
+		return String.format("%016x", boardB);	// format as 16-hex-digit number with  
+												// leading 0's (if necessary) 
+		//return Long.toHexString(boardB);		// no leading zeros
     }
 
 	@Deprecated
@@ -527,6 +529,7 @@ public class StateObs2048BitShift implements StateObservation {
 
     public void updateAvailableMoves() {
         availableMoves.clear(); 
+        int oldScore = score;
         long oldBoardB = boardB;
         if (leftAction().boardB!=oldBoardB)
             availableMoves.add(0);
@@ -540,6 +543,7 @@ public class StateObs2048BitShift implements StateObservation {
         if (downAction().boardB!=oldBoardB)
             availableMoves.add(3);
         boardB=oldBoardB;
+        score=oldScore;
 
         if(availableMoves.size() <= 0) {
             setWinState(-1);
@@ -635,14 +639,18 @@ public class StateObs2048BitShift implements StateObservation {
     	for (int k=0; k<4; k++) {
     		RowBitShift row = this.getRow(k).rAction();
     		this.putRow(row,k);
+    		this.score += row.score;
     	}
     	return this;
     }
     
     public StateObs2048BitShift leftAction() {
     	for (int k=0; k<4; k++) {
+    		//System.out.println(String.format("%04x", this.getRow(k).getRow()));
     		RowBitShift row = this.getRow(k).lAction();
+    		//System.out.println(String.format("%04x", row.getRow()));
     		this.putRow(row,k);
+    		this.score += row.score;
     	}
     	return this;
     }
@@ -651,6 +659,7 @@ public class StateObs2048BitShift implements StateObservation {
     	for (int k=0; k<4; k++) {
     		RowBitShift row = this.getCol(k).rAction();
     		this.putCol(row,k);
+    		this.score += row.score;
     	}
     	return this;
     }
@@ -659,6 +668,7 @@ public class StateObs2048BitShift implements StateObservation {
     	for (int k=0; k<4; k++) {
     		RowBitShift row = this.getCol(k).lAction();
     		this.putCol(row,k);
+    		this.score += row.score;
     	}
     	return this;
     }
@@ -741,6 +751,9 @@ public class StateObs2048BitShift implements StateObservation {
 //        System.out.println((k << 14));
 //        System.out.println(((k <<  1) & 0xFFFF));
 //        System.out.println(((k << 14) & 0xFFFF));
+//        long longpid = 24;
+//        String s = String.format("%016x", longpid);  // 16 hex digits with leading zeros
+//        System.out.println(s);
 		
 
         // testing RowByteShift.rShift:
@@ -787,8 +800,8 @@ public class StateObs2048BitShift implements StateObservation {
         for (int c=3; c>=0; c--) {
         	RowBitShift col = new RowBitShift(colArr[c]);
         	sob.putCol(col, c);
-        	System.out.println("col="+c+": "+Integer.toHexString(colArr[c])
-        						+", "+Long.toHexString(sob.getBoardNum()));
+        	System.out.println("col="+c+": "+String.format("%04x",colArr[c])
+        						+", "+String.format("%016x",sob.getBoardNum()));
         }
         
         // time measurement for StateObs2048BitShift.advance vs. StateObserver2048.advance:
@@ -804,8 +817,8 @@ public class StateObs2048BitShift implements StateObservation {
 		startTime=System.nanoTime();
 		sbs.advance(act);
 		System.out.println("StateObs2048BitShift time:  "+(System.nanoTime()-startTime));
-		System.out.println(so.toHexString());
-		System.out.println(sbs.stringDescr());
+		System.out.println(so.toHexString()+",  score="+so.getScore());
+		System.out.println(sbs.stringDescr()+",  score="+sbs.getScore());
     }
 
 
@@ -831,8 +844,11 @@ public class StateObs2048BitShift implements StateObservation {
  */
 class RowBitShift {
 	int rowB;	// the four lowest hex digits (16 bit) of this 32-bit int are used 
+	int score=0;
 	static int[] tabRight = null;
 	static int[] tabLeft = null; 
+	static int[] scoreRight = null;
+	static int[] scoreLeft = null; 
 	
 	public RowBitShift(int row) {
 		this.rowB = row;
@@ -897,15 +913,19 @@ class RowBitShift {
 	 */
 	public RowBitShift rMerge(int r) {
 		if (r>2 || r<0) throw new RuntimeException("r="+r+" is not in allowed range {0,1,2}");
-		if (this.d(r)!=this.d(r+1)) throw new RuntimeException("Digits "+(r+1)+" and "+r+" are not the same"); 
-		if (this.d(r)==0) throw new RuntimeException("Digit "+r+" must be greater than zero"); 
+		int exp = this.d(r);
+		if (exp!=this.d(r+1)) throw new RuntimeException("Digits "+(r+1)+" and "+r+" are not the same"); 
+		if (exp==0) throw new RuntimeException("Digit "+r+" must be greater than zero"); 
 
 		// andR is a bit mask which lets all digits pass except the two to-be-merged digits:
 		int[] andR = {0xff00, 0xf00f, 0x00ff};   
 									
-		// since each digit holds the exponent e of tile 2^e, merging two tiles (doubling) is the 
-		// same as adding 1 to the exponent:
-		int newd = this.d(r)+1;			
+		// since each digit holds the exponent exp of tile 2^exp, merging two tiles (doubling) 
+		// is the same as adding 1 to the exponent:
+		int newd = exp+1;	
+		
+		// the score delta is 2^newd:
+		this.score += (1 << newd);
  
 		// shift the merged result back to digit r and add the 'passed' digits:
 		rowB = (newd << (4*r)) + (rowB & andR[r]); 
@@ -925,15 +945,19 @@ class RowBitShift {
 	 */
 	public RowBitShift lMerge(int r) {
 		if (r>3 || r<1) throw new RuntimeException("r="+r+" is not in allowed range {1,2,3}");
-		if (this.d(r)!=this.d(r-1)) throw new RuntimeException("Digits "+r+" and "+(r-1)+" are not the same"); 
-		if (this.d(r)==0) throw new RuntimeException("Digit "+r+" must be greater than zero"); 
+		int exp = this.d(r);
+		if (exp!=this.d(r-1)) throw new RuntimeException("Digits "+r+" and "+(r-1)+" are not the same"); 
+		if (exp==0) throw new RuntimeException("Digit "+r+" must be greater than zero"); 
 
 		// andR is a bit mask which lets all digits pass except the two to-be-merged digits:
 		int[] andR = {0x0000, 0xff00, 0xf00f, 0x00ff};   
 									
-		// since each digit holds the exponent e of tile 2^e, merging two tiles (doubling) is the 
-		// same as adding 1 to the exponent:
-		int newd = this.d(r)+1;			
+		// since each digit holds the exponent exp of tile 2^exp, merging two tiles (doubling) 
+		// is the same as adding 1 to the exponent:
+		int newd = exp+1;		
+		
+		// the score delta is 2^newd:
+		this.score += (1 << newd);
  
 		// shift the merged result back to digit r and add the 'passed' digits:
 		rowB = (newd << (4*r)) + (rowB & andR[r]); 
@@ -950,19 +974,23 @@ class RowBitShift {
 	 */
 	public RowBitShift rAction( ) {
 		if (tabRight==null) calcTabRight();
+		this.score = scoreRight[rowB];
 		this.rowB = tabRight[rowB];
 		return this;
 	}
 	private void calcTabRight() {
 		int sz = (1 << 16);
 		tabRight = new int[sz];
+		scoreRight = new int[sz];
 		RowBitShift rbs = new RowBitShift(0);
 		for (int i=0; i<sz; i++) {
 			rbs.rowB=i;
+			rbs.score=0;
 			tabRight[i]=rbs.rActionSlow().getRow();
+			scoreRight[i]=rbs.score;
 		}
 	}
-	private RowBitShift rActionSlow( ) {
+	RowBitShift rActionSlow( ) {
 		// remove the 'holes' (0-tiles) from left to right:
 		for (int k=2; k>=0; k--) 
 			if (this.d(k)==0) this.rShift(k);
@@ -982,19 +1010,23 @@ class RowBitShift {
 	 */
 	public RowBitShift lAction( ) {
 		if (tabLeft==null) calcTabLeft();
+		this.score = scoreLeft[rowB];
 		this.rowB = tabLeft[rowB];
 		return this;
 	}
 	private void calcTabLeft() {
 		int sz = (1 << 16);
 		tabLeft = new int[sz];
+		scoreLeft = new int[sz];
 		RowBitShift rbs = new RowBitShift(0);
 		for (int i=0; i<sz; i++) {
 			rbs.rowB=i;
+			rbs.score=0;
 			tabLeft[i]=rbs.lActionSlow().getRow();
+			scoreLeft[i]=rbs.score;
 		}
 	}
-	private RowBitShift lActionSlow( ) {
+	RowBitShift lActionSlow( ) {
 		// remove the 'holes' (0-tiles) from right to left:
 		for (int k=1; k<4; k++) 
 			if (this.d(k)==0) this.lShift(k);
