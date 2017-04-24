@@ -27,6 +27,7 @@ public class StateObserver2048 implements StateObservation {
     public int rowValue = 0;
     public int mergeValue = 0;
     public int moves = 0;
+    private boolean ASSERTSAME = false; // if true, run through assertSameAdvance
 
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
@@ -65,6 +66,59 @@ public class StateObserver2048 implements StateObservation {
         return new StateObserver2048(toArray(), score, winState);
     }
 
+    /**
+     * Only debug check (if ASSERTSAME==true): 
+     * Assert that StateObserver2048 and StateObs2048BitShift result in
+     * <ul>
+     * <li> the same state when doing a move with iAction on {@code this} (no random tile added)
+     * <li> the same score 
+     * <li> the same list of available moves
+     * <li> the same empty tile positions (note that the lists {@code emptyTiles} contain different 
+     * 		things in both classes)
+     * </ul>
+     * @param iAction
+     * @return {@code true} if all assertions are passed, {@code false} else
+     */
+    private boolean assertSameAdvance(int iAction) {
+    	StateObserver2048 sot = this.copy();
+    	int[][] iArray = toArray();
+    	StateObs2048BitShift sbs = new StateObs2048BitShift(iArray, score, winState);
+    	//System.out.println("sot: "+sot.toHexString()+",  score="+sot.getScore());
+    	//System.out.println("sbs: "+sbs.stringDescr()+",  score="+sbs.getScore());
+    	sot.move(iAction);
+    	sot.updateAvailableMoves();
+    	sbs.move(iAction);
+    	sbs.updateEmptyTiles();
+    	sbs.updateAvailableMoves();
+    	String s_sot = sot.toHexString();
+    	String s_sbs = sbs.stringDescr();
+    	System.out.println("sot: "+s_sot+",  score="+sot.getScore());
+    	System.out.println("sbs: "+s_sbs+",  score="+sbs.getScore());
+    	if (!s_sot.equals(s_sbs)) {
+    		return false;
+    	}
+    	if (sot.getScore()!=sbs.getScore()) {
+    		return false;
+    	}
+    	for (Integer iVal : sot.availableMoves) {
+    		if (!sbs.availableMoves.contains(iVal)) {
+    			return false;
+    		}
+    	}
+    	for (Tile tile : sot.emptyTiles) {
+    		// note that the numbering of tile positions is different:
+    		// in StateObserver2048 row 0 is the highest row and column 0 is the leftmost column;
+    		// in StateObs2048BitShift row 0 is the lowest row and column 0 is the rightmost column. 
+    		// Therefore we add two times a "(3-...)" for comparison. 
+    		Position pos = tile.getPosition();
+    		Integer iVal = (3-pos.getColumn()) + 4*(3-pos.getRow());
+    		if (!sbs.emptyTiles.contains(iVal)) {
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
     @Override
     public boolean isGameOver() {
         if(availableMoves.size() == 0) {
@@ -339,6 +393,10 @@ public class StateObserver2048 implements StateObservation {
     public void advance(Types.ACTIONS action) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
+        if (ASSERTSAME) {
+        	boolean succ = assertSameAdvance(iAction);
+        	if (succ==false) throw new RuntimeException("assertSameAdvance failed!");
+        }
         move(iAction);
         addRandomTile();
         updateAvailableMoves();

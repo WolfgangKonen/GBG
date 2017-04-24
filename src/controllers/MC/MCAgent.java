@@ -55,6 +55,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
     	}
 
         return getNextAction(sob, vtable);
+//        return getNextActionMultipleAgents(sob, vtable);
     }
 
     /**
