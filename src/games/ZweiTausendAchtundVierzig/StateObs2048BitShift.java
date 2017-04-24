@@ -23,9 +23,12 @@ import java.util.Random;
  *                      
  *                 col= 3 2 1 0            </pre>
  * that is, the 4 lowest hex digits represent the lowest row of the 2048-board, with the 
- * digit 3 representing the leftmost cell in this row and so on. <p>
+ * digit 3 representing the leftmost cell in this row and so on. <br>
+ * Each hex digit represents the exponent {@code exp} of a tile value {@code 2^exp}. 
+ * Example: Hex digit {@code a} codes tile value {@code 2^a} = 1024.  <p>
  * 
- * Method getGameScore2 is implemented via StateObserver2048.getGameScore2 (may be slow).
+ * Method getGameScore2 is currently implemented via StateObserver2048.getGameScore2 
+ * (may be slow).
  * 
  * @author Wolfgang Konen, THK
  */
@@ -152,15 +155,15 @@ public class StateObs2048BitShift implements StateObservation {
     }
 
     public double getGameScore2() {
-    	int[][] values = new int[Config.ROWS][Config.COLUMNS];
-        for(int row = 0, position=0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++,position++) {
-                long b2 = boardB;
-                values[row][column] = (1 << (b2 & 0x0fL));
-                b2 = (b2 >> 4);
-            }
-        }      
-        StateObserver2048 so = new StateObserver2048(values,score,winState);
+//    	int[][] values = new int[Config.ROWS][Config.COLUMNS];
+//        for(int row = Config.ROWS-1, position=0; row >=0 ; row--) {
+//            for(int column = Config.COLUMNS-1; column >=0 ; column--,position++) {
+//                long b2 = boardB;
+//                values[row][column] = (1 << (b2 & 0x0fL));
+//                b2 = (b2 >> 4);
+//            }
+//        }      
+        StateObserver2048 so = new StateObserver2048(this.toArray(),score,winState);
         
         double score2 = so.getGameScore2();
         this.highestTileInCorner = false;
