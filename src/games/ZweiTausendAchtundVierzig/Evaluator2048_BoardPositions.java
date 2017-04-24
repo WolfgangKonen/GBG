@@ -75,7 +75,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             e.printStackTrace();
         }
         
-        String[][] results = new String[3][16];
+        String[][] results = new String[3][10];
         /*for(ResultContainer resultContainer : resultContainers) {
             results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] =
                     "mcCertainty: " + new BigDecimal(resultContainer.mcCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
@@ -86,7 +86,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         }*/
 
         for(ResultContainer resultContainer : resultContainers) {
-            results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles] =
+            results[resultContainer.numberAvailableActions-2][resultContainer.numberEmptyTiles-1] =
                     new BigDecimal(resultContainer.mcCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\n" + new BigDecimal(resultContainer.mctsCertainty).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
                     "\n" + new BigDecimal(resultContainer.sameActionCounter).setScale(2, RoundingMode.HALF_UP).toString().replace(".", ",") +
@@ -97,8 +97,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         System.out.println("\n\n\n\n\nResults:");
         for(int i = 0; i < 3; i++) {
             System.out.println("\nnumberAvailableActions: " + (i+2));
-            for(int j = 0; j < 13; j++) {
-                System.out.println("\nnumberEmptyTiles: " + j);
+            for(int j = 0; j < 10; j++) {
+                System.out.println("\nnumberEmptyTiles: " + (j+1));
                 System.out.println(results[i][j]);
             }
         }
@@ -139,10 +139,11 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             }
 
             //analyse for MCTS Agent
-            for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
+            //MCTS currently disabled to save CPU Time when Evaluating MC Agent
+            /*for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
                 int MCTSAction = mctsAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
                 mctsActions[MCTSAction] +=1;
-            }
+            } */
 
             //find bestAction and the number of moves for this Action
             for(int i = 0; i < 4; i++) {
@@ -238,8 +239,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         List<StateObserver2048> inconclusiveGameStates = new ArrayList<>();
 
         for(StateObserver2048 gameState : gameStates) {
-            if(gameState.getNumAvailableActions() > 1) {
-                //remove gameStates with mirrored Actions
+            if(gameState.getNumAvailableActions() > 1 && gameState.getNumEmptyTiles() >= 1 && gameState.getNumEmptyTiles() <= 10) {
+                //remove gameStates with mirrored Actions and uncommon gameStates (0 empty Tiles or > 10 empty Tiles)
                 boolean conclusive = true;
 
                 List<int[][]> gameStateArrays = new ArrayList<>();
@@ -298,7 +299,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
         //save all gameStates
         try {
-            FileOutputStream fos = new FileOutputStream("src\\games\\ZweiTausendAchtundVierzig\\gameStates.ser");
+            FileOutputStream fos = new FileOutputStream("games\\ZweiTausendAchtundVierzig\\gameStates.ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(gameStateContainers);
             fos.close();
@@ -315,7 +316,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
         //load gameStates
         try {
-            FileInputStream fis = new FileInputStream("src\\games\\ZweiTausendAchtundVierzig\\gameStates.ser");
+            FileInputStream fis = new FileInputStream("games\\ZweiTausendAchtundVierzig\\gameStates.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
             List<GameStateContainer> gameStateContainers = (List<GameStateContainer>)ois.readObject();
             fis.close();

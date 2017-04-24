@@ -35,7 +35,13 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
-        return getNextAction(sob, vtable);
+        if(Config.NUMBERAGENTS > 1) {
+            //more than one Agent (Majoity Vote)
+            return getNextActionMultipleAgents(sob, vtable);
+        } else {
+            //only one Agent
+            return getNextAction(sob, vtable);
+        }
     }
 
 /**
