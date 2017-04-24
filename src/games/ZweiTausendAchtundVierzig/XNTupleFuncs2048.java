@@ -53,19 +53,28 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	public int[] getBoardVector(StateObservation so) {
 		int[] bvec = new int[getNumCells()]; 
 		int b2,k;
-		assert (so instanceof StateObserver2048);
-		Tile[][] gameBoard = ((StateObserver2048) so).getGameBoard();
-		for(int row = 0, n=0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++,n++) {
-            	b2 = gameBoard[row][column].getValue();
-            	for (k=0; k<getNumPositionValues(); k++) {
-            		// find the exponent k in 2^k by down-shifting:
-                    b2 = b2>>1;
-            		if (b2==0) break;
-            	}
-            	bvec[n]=k;                	
-            }
-        }
+		if (so instanceof StateObserver2048) {
+			Tile[][] gameBoard = ((StateObserver2048) so).getGameBoard();
+			for(int row = 0, n=0; row < Config.ROWS; row++) {
+	            for(int column = 0; column < Config.COLUMNS; column++,n++) {
+	            	b2 = gameBoard[row][column].getValue();
+	            	for (k=0; k<getNumPositionValues(); k++) {
+	            		// find the exponent k in 2^k by down-shifting:
+	                    b2 = b2>>1;
+	            		if (b2==0) break;
+	            	}
+	            	bvec[n]=k;                	
+	            }
+	        }			
+		} else if (so instanceof StateObs2048BitShift) {
+			long boardB = ((StateObs2048BitShift) so).getBoardNum();
+			for (int n=15; n>=0; n--) {
+				bvec[n] = (int)(boardB & 0x000000000000000fL);
+				boardB = boardB >> 4;
+			}
+		} else {
+			throw new RuntimeException("Class of so is not allowed.");
+		}
 		return bvec;   
 	}
 	
