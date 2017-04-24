@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import params.MCTSParams;
 //import params.RpropParams;
@@ -24,7 +26,7 @@ import params.NTParams;
  * <li> has the action code for Param-, Train-, MultiTrain-, Play-, and Compete- button events.
  * </ul>
  * 
- * @author Wolfgang Konen, TH Köln, Apr'08-Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Apr'08-Nov'16
  */
 public class XArenaButtons extends JPanel		
 {
@@ -48,6 +50,7 @@ public class XArenaButtons extends JPanel
 	//JButton TCparB;
 	//JButton OparB;
 	JButton NTupShowB;
+	JSlider Delay;				// The Sleep Slider
 	TextField GameNumT;
 	TextField TrainNumT;
 	//TextField CompeteNumT;	// now in OptionsComp winCompOptions
@@ -57,6 +60,7 @@ public class XArenaButtons extends JPanel
 	Label GameNumL;
 	Label TrainNumL;
 	Label AgentX_L;
+	Label SleepDurationL;
 	Choice[] choiceAgent; 
 	TDParams tdPar = new TDParams();
 	NTParams ntPar = new NTParams();
@@ -113,7 +117,6 @@ public class XArenaButtons extends JPanel
 		assert (numPlayers<=Types.GUI_PLAYER_NAME.length) 
 			: "GUI not configured for "+numPlayers+" players. Increase Types.GUI_PLAYER_NAME and GUI_AGENT_INITIAL";
 		
-		
 		// 
 		// initial settings for the GUI
 		//
@@ -128,11 +131,13 @@ public class XArenaButtons extends JPanel
 		Play=new JButton("Play");
 		InspectV=new JButton("Inspect V");
 		NTupShowB = new JButton("Insp Ntuples");
+		Delay = new JSlider(JSlider.HORIZONTAL, m_game.minSleepDuration,m_game.maxSleepDuration, m_game.currentSleepDuration);
 		GameNumL = new Label("Train Games");
 		TrainNumL = new Label("Agents trained");
 		AgentX_L = new Label("Agent Type: ");
 		//CompeteG_L = new Label("Games/Comp:");
 		//Competitions_L = new Label("Competitions:");
+        SleepDurationL = new Label("Sleep duration");
 		
 		for (int n=0; n<numPlayers; n++) {
 			choiceAgent[n] = new Choice();
@@ -182,6 +187,7 @@ public class XArenaButtons extends JPanel
 		NTupShowB.setForeground(Color.white);
 		GameNumT.setForeground(Color.black);
 		GameNumL.setForeground(Color.black);
+        SleepDurationL.setForeground(Color.black);
 
 //		MultiTrain.setBackground(Color.lightGray);
 		Play.setBackground(Color.blue);
@@ -193,6 +199,11 @@ public class XArenaButtons extends JPanel
 		NTupShowB.setBackground(Color.blue);
 		GameNumT.setBackground(Color.white);
 		//GameNumL.setBackground(Color.white);
+
+		Delay.setMajorTickSpacing(250);
+		Delay.setMinorTickSpacing(50);
+		Delay.setPaintTicks(true);
+		Delay.setPaintLabels(true);
 		
 		
 		NTupShowB.setEnabled(false);	// enable this button only if AgentX is an N-Tuple Player
@@ -282,6 +293,18 @@ public class XArenaButtons extends JPanel
 				}	
 		);
 
+		Delay.addChangeListener(
+				new ChangeListener() {
+					public void stateChanged(ChangeEvent e) {
+						JSlider source = (JSlider)e.getSource();
+						//if (!source.getValueIsAdjusting()) { //only Update when slider is released
+						//	System.out.println("Changed Delay to: " + source.getValue());
+							m_game.currentSleepDuration = source.getValue();
+						//}
+					}
+				}
+		);
+
 //		NTupShowB.addActionListener(
 //				new ActionListener()
 //				{
@@ -361,6 +384,12 @@ public class XArenaButtons extends JPanel
 		p.add(MultiCompete);
 		p.add(new Canvas());
 		 */
+
+
+		JPanel delayPanel = new JPanel();
+        delayPanel.setLayout(new BorderLayout(10,10));
+		delayPanel.add(SleepDurationL, java.awt.BorderLayout.WEST);
+		delayPanel.add(Delay,java.awt.BorderLayout.CENTER);
 		
 		//JPanel s = new JPanel();
 		//s.setLayout(new GridLayout(0,1,10,10));		// rows,columns,hgap,vgap (1 column = allow long messages)
@@ -369,6 +398,7 @@ public class XArenaButtons extends JPanel
 		setLayout(new BorderLayout(10,10));
 		add(q,java.awt.BorderLayout.NORTH);
 		add(ptp,java.awt.BorderLayout.CENTER);
+		add(delayPanel,java.awt.BorderLayout.SOUTH);
 		//add(s,java.awt.BorderLayout.SOUTH);
 		
 		// infoPanel (StatusMessage) is in Arena.java

@@ -23,7 +23,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
     private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true
     private int nIterations = 0; 		// counts the total number of iterations
 
-    private boolean DOCALCCERTAINTY = false; // if true, calculate several certainty measures at the 
+    private boolean DOCALCCERTAINTY = true; // if true, calculate several certainty measures at the
     									// beginning of getNextAction (only debug)
     
     public MCAgent() {
@@ -38,24 +38,29 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
-    	if (DOCALCCERTAINTY) {
-        	double cert0, cert1,cert2=0,cert4=0,cert6=0;
-        	Config.NC = 100;
-        	cert0 = calcCertainty(sob, vtable,1,false);
-        	Config.NC = 20;
-        	cert1 = calcCertainty(sob, vtable,1,false);
-        	cert2 = calcCertainty(sob, vtable,2,false);
-        	//cert4 = calcCertainty(sob, vtable,4,false);
-        	cert6 = calcCertainty(sob, vtable,6,false);
+        if (DOCALCCERTAINTY) {
+            double cert0, cert1,cert2=0,cert4=0,cert6=0;
+            Config.NC = 100;
+            cert0 = calcCertainty(sob, vtable,1,false);
+            Config.NC = 20;
+            cert1 = calcCertainty(sob, vtable,1,false);
+            cert2 = calcCertainty(sob, vtable,2,false);
+            //cert4 = calcCertainty(sob, vtable,4,false);
+            cert6 = calcCertainty(sob, vtable,6,false);
             System.out.println("n="+sob.getNumAvailableActions()+": certainty ="
-            		+ cert0+","+cert1
-            		+" / "+ cert2 
-            		//+" / " + cert4 
-            		+" / "+ cert6);
-    	}
+                    + cert0+","+cert1
+                    +" / "+ cert2
+                    //+" / " + cert4
+                    +" / "+ cert6);
+        }
 
-        return getNextAction(sob, vtable);
-//        return getNextActionMultipleAgents(sob, vtable);
+        if(Config.NUMBERAGENTS > 1) {
+            //more than one Agent (Majoity Vote)
+            return getNextActionMultipleAgents(sob, vtable);
+        } else {
+            //only one Agent
+            return getNextAction(sob, vtable);
+        }
     }
 
     /**

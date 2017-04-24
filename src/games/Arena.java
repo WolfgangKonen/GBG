@@ -40,7 +40,7 @@ import tools.Types;
  * {@link games.TicTacToe.LaunchArenaTTT LaunchArenaTTT} or 
  * {@link games.TicTacToe.LaunchTrainTTT LaunchTrainTTT} for the TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  */
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
@@ -58,6 +58,10 @@ abstract public class Arena extends JPanel implements Runnable {
 	protected GameBoard gb;		
 	protected StatusBar statusBar = new StatusBar();
 	public Task taskState = Task.IDLE;
+
+	public int minSleepDuration = 0;
+	public int maxSleepDuration = 2000;
+	public int currentSleepDuration = 250;
 
 	public Arena() {
 		initGame();
@@ -364,7 +368,7 @@ abstract public class Arena extends JPanel implements Runnable {
                         }
                         so.advance(actBest);
                         try {
-                            Thread.sleep(0); //(200);
+                            Thread.sleep(currentSleepDuration); //(200);
                             // waiting time between agent-agent actions
                         } catch (Exception e) {
                             System.out.println("Thread 1");
