@@ -69,8 +69,8 @@ public class StateObserver2048 implements StateObservation {
     }
 
     /**
-     * Only debug check (if ASSERTSAME==true): 
-     * Assert that StateObserver2048 and StateObs2048BitShift result in
+     * Only debug check (if ASSERTSAME==true): <br>
+     * Assert that StateObserver2048 (which should be a copy of StateObserver2048Slow) and StateObs2048BitShift result in
      * <ul>
      * <li> the same state when doing a move with iAction on {@code this} (no random tile added)
      * <li> the same score 

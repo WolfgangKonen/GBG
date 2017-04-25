@@ -3,6 +3,7 @@ package controllers.MC;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -39,19 +40,24 @@ public class MCAgent extends AgentBase implements PlayAgent {
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
         if (DOCALCCERTAINTY) {
-            double cert0, cert1,cert2=0,cert4=0,cert6=0;
-            Config.NC = 100;
-            cert0 = calcCertainty(sob, vtable,1,false);
-            Config.NC = 20;
-            cert1 = calcCertainty(sob, vtable,1,false);
-            cert2 = calcCertainty(sob, vtable,2,false);
-            //cert4 = calcCertainty(sob, vtable,4,false);
-            cert6 = calcCertainty(sob, vtable,6,false);
-            System.out.println("n="+sob.getNumAvailableActions()+": certainty ="
-                    + cert0+","+cert1
-                    +" / "+ cert2
-                    //+" / " + cert4
-                    +" / "+ cert6);
+        	StateObserver2048 sobZTAV = (StateObserver2048) sob;
+        	if (sobZTAV.getNumEmptyTiles()==10) {
+            	int oldNC = Config.NC;
+                double cert0, cert1,cert2=0,cert4=0,cert6=0;
+                Config.NC = 100;
+                cert0 = calcCertainty(sob, vtable,1,false);
+                Config.NC = 20;
+                cert1 = calcCertainty(sob, vtable,1,false);
+                cert2 = calcCertainty(sob, vtable,2,false);
+                //cert4 = calcCertainty(sob, vtable,4,false);
+                cert6 = calcCertainty(sob, vtable,6,false);
+                System.out.println("n="+sob.getNumAvailableActions()+": certainty ="
+                        + cert0+","+cert1
+                        +" / "+ cert2
+                        //+" / " + cert4
+                        +" / "+ cert6);
+                Config.NC = oldNC;			// bug fix: restore!
+        	}
         }
 
         if(Config.NUMBERAGENTS > 1) {
@@ -277,6 +283,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
         double[] wtable = new double[4];
         double highestBin;
         int nextAction;
+        int oldNUMBERAGENTS=Config.NUMBERAGENTS;
         
         if(sob.getNumAvailableActions() == 1) {
             return 1.0;
@@ -301,8 +308,9 @@ public class MCAgent extends AgentBase implements PlayAgent {
                 highestBin = wtable[i];
             } 
         }
+        Config.NUMBERAGENTS=oldNUMBERAGENTS;	// bug fix: restore!
         double cert = highestBin/Config.NC;
-     
+        
     	return cert;
     }
 
