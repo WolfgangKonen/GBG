@@ -11,7 +11,7 @@ import java.util.Random;
 /**
  * Created by Johannes on 18.11.2016.
  */
-public class StateObserver2048 implements StateObservation {
+public class StateObserver2048Slow implements StateObservation {
     private Random random = new Random();
     protected List<Tile> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves;
@@ -39,11 +39,11 @@ public class StateObserver2048 implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 
-    public StateObserver2048() {
+    public StateObserver2048Slow() {
         newBoard();
     }
 
-    public StateObserver2048(int[][] values, int score, int winState) {
+    public StateObserver2048Slow(int[][] values, int score, int winState) {
         gameBoard = new Tile[Config.ROWS][Config.COLUMNS];
         for(int row = 0; row < Config.ROWS; row++) {
             for(int column = 0; column < Config.COLUMNS; column++) {
@@ -61,16 +61,16 @@ public class StateObserver2048 implements StateObservation {
         updateAvailableMoves();
     }
 
-    // Note: StateObserver2048 copy() copies the board state, score, winState,
+    // Note: StateObserver2048Slow copy() copies the board state, score, winState,
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
     @Override
-    public StateObserver2048 copy() {
-        return new StateObserver2048(toArray(), score, winState);
+    public StateObserver2048Slow copy() {
+        return new StateObserver2048Slow(toArray(), score, winState);
     }
 
     /**
      * Only debug check (if ASSERTSAME==true): 
-     * Assert that StateObserver2048 and StateObs2048BitShift result in
+     * Assert that StateObserver2048Slow and StateObs2048BitShift result in
      * <ul>
      * <li> the same state when doing a move with iAction on {@code this} (no random tile added)
      * <li> the same score 
@@ -82,7 +82,7 @@ public class StateObserver2048 implements StateObservation {
      * @return {@code true} if all assertions are passed, {@code false} else
      */
     private boolean assertSameAdvance(int iAction) {
-    	StateObserver2048 sot = this.copy();
+    	StateObserver2048Slow sot = this.copy();
     	int[][] iArray = toArray();
     	StateObs2048BitShift sbs = new StateObs2048BitShift(iArray, score, winState);
     	//System.out.println("sot: "+sot.toHexString()+",  score="+sot.getScore());
@@ -109,7 +109,7 @@ public class StateObserver2048 implements StateObservation {
     	}
     	for (Tile tile : sot.emptyTiles) {
     		// note that the numbering of tile positions is different:
-    		// in StateObserver2048 row 0 is the highest row and column 0 is the leftmost column;
+    		// in StateObserver2048Slow row 0 is the highest row and column 0 is the leftmost column;
     		// in StateObs2048BitShift row 0 is the lowest row and column 0 is the rightmost column. 
     		// Therefore we add two times a "(3-...)" for comparison. 
     		Position pos = tile.getPosition();
@@ -377,7 +377,7 @@ public class StateObserver2048 implements StateObservation {
 
     @Override
     public double getGameScore(StateObservation referingState) {
-        assert (referingState instanceof StateObserver2048) : "referingState is not of class StateObserver2048";
+        assert (referingState instanceof StateObserver2048Slow) : "referingState is not of class StateObserver2048Slow";
         return this.getGameScore();
     }
 
@@ -482,7 +482,7 @@ public class StateObserver2048 implements StateObservation {
     }
 	// -- possible code to test stringDescr --
 	//		int[][] state = {{0,2048,0,0}, {0,0,0,0}, {0,2,4,0}, {0,0,0,0}};
-	//		StateObserver2048 so = new StateObserver2048(state,0,0);
+	//		StateObserver2048Slow so = new StateObserver2048Slow(state,0,0);
 	//		System.out.println(so.stringDescr());
 
     public String toHexString() {
@@ -865,14 +865,12 @@ public class StateObserver2048 implements StateObservation {
     }
 }
 
-// *** this is now def'd in StateObservation2048Slow.java: ***
-//
-//class RowInformationContainer {
-//    int rowLength;
-//    int rowValue;
-//
-//    public RowInformationContainer(int rowLength, int rowValue) {
-//        this.rowLength = rowLength;
-//        this.rowValue = rowValue;
-//    }
-//}
+class RowInformationContainer {
+    int rowLength;
+    int rowValue;
+
+    public RowInformationContainer(int rowLength, int rowValue) {
+        this.rowLength = rowLength;
+        this.rowValue = rowValue;
+    }
+}

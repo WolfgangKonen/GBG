@@ -27,7 +27,7 @@ import java.util.Random;
  * Each hex digit represents the exponent {@code exp} of a tile value {@code 2^exp}. 
  * Example: Hex digit {@code a} codes tile value {@code 2^a} = 1024.  <p>
  * 
- * Method getGameScore2 is currently implemented via StateObserver2048.getGameScore2 
+ * Method getGameScore2 is currently implemented via StateObserver2048Slow.getGameScore2 
  * (may be slow).
  * 
  * @author Wolfgang Konen, THK
@@ -106,6 +106,8 @@ public class StateObs2048BitShift implements StateObservation {
         updateAvailableMoves();
     }
 
+    // Note: StateObs2048BitShift copy() copies the board state, score, winState,
+    // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
     @Override
     public StateObs2048BitShift copy() {
     	return new StateObs2048BitShift(boardB, score, winState);
@@ -163,7 +165,7 @@ public class StateObs2048BitShift implements StateObservation {
 //                b2 = (b2 >> 4);
 //            }
 //        }      
-        StateObserver2048 so = new StateObserver2048(this.toArray(),score,winState);
+        StateObserver2048Slow so = new StateObserver2048Slow(this.toArray(),score,winState);
         
         double score2 = so.getGameScore2();
         this.highestTileInCorner = false;
@@ -568,6 +570,9 @@ public class StateObs2048BitShift implements StateObservation {
     }
     
     /**
+     * Several test on the correctness of class {@link StateObs2048BitShift} and 
+     * class {@link RowBitShift}
+     * 
      * @param args
      * @throws IOException
      */
@@ -647,19 +652,19 @@ public class StateObs2048BitShift implements StateObservation {
         						+", "+String.format("%016x",sob.getBoardNum()));
         }
         
-        // time measurement for StateObs2048BitShift.advance vs. StateObserver2048.advance:
+        // time measurement for StateObs2048BitShift.advance vs. StateObserver2048Slow.advance:
 		int[][] state = {{0,2048,0,0}, {2,2,2,2}, {0,2,4,0}, {4,4,4,4}};
-		StateObserver2048 so = new StateObserver2048(state,0,0);
+		StateObserver2048Slow so = new StateObserver2048Slow(state,0,0);
 		System.out.println(so.stringDescr());
 		long startTime=System.nanoTime();
 		Types.ACTIONS act = Types.ACTIONS.fromInt(0);
 		so.advance(act);
-		System.out.println("StateObserver2048    time: "+(System.nanoTime()-startTime));
+		System.out.println("StateObserver2048Slow time: "+(System.nanoTime()-startTime));
 		long lstate = 0x0b00111101202222L;
 		StateObs2048BitShift sbs = new StateObs2048BitShift(lstate);
 		startTime=System.nanoTime();
 		sbs.advance(act);
-		System.out.println("StateObs2048BitShift time:  "+(System.nanoTime()-startTime));
+		System.out.println("StateObs2048BitShift  time:  "+(System.nanoTime()-startTime));
 		System.out.println(so.toHexString()+",  score="+so.getScore());
 		System.out.println(sbs.stringDescr()+",  score="+sbs.getScore());
     }
@@ -669,19 +674,22 @@ public class StateObs2048BitShift implements StateObservation {
 
 /**
  * RowBitShift represents an row of the 2048 board in the four lowest hex digits of 
- * an int. Digit 3 is the leftmost tile, digit 0 the rightmost tile.  <br>
- * (It represents as well columns of the 2048 board, then digit 3 is the highest tile, 
- * digit 0 is the lowest tile.) <p>
+ * {@code int rowB}. Digit 3 is the leftmost tile, digit 0 the rightmost tile.  <br>
+ * (RowBitShift represents as well columns of the 2048 board, then digit 3 is the highest tile, 
+ * digit 0 is the lowest tile of a column.) <p>
  * 
  * The hex value for each digit is {@code exp} in tile {@code 2^exp}. <p>
  * 
  * RowBitShift has methods {@link RowBitShift#lAction()} and {@link RowBitShift#rAction()} 
  * for left and right move action according to the rules of 2048. On first pass through 
- * this methods, static transposition tables {@code tabLeft} and {@code tabRight} are filled 
- * which contain for each possible row value the resulting row. <p>
+ * these methods, static transposition tables {@code tabLeft} and {@code tabRight} are filled 
+ * which contain for each possible row value the resulting row. <br>
+ * Likewise, static transposition tables {@code scoreLeft} and {@code scoreRight} are filled 
+ * which contain for each possible row value the resulting score. <p>
  * 
  * This speeds up the calculation in {@link StateObs2048BitShift#advance(Action)} by a 
- * factor of 10 as compared to {@link StateObserver2048#advance(Action)}
+ * factor of 10 as compared to {@link StateObserver2048Slow#advance(Action)}
+ * (see {@link StateObs2048BitShift#main(String[])}).
  *
  * @author Wolfgang Konen, THK
  */

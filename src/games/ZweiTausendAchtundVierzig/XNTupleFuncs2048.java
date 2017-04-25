@@ -53,8 +53,13 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	public int[] getBoardVector(StateObservation so) {
 		int[] bvec = new int[getNumCells()]; 
 		int b2,k;
-		if (so instanceof StateObserver2048) {
-			Tile[][] gameBoard = ((StateObserver2048) so).getGameBoard();
+		if (so instanceof StateObserver2048 || so instanceof StateObserver2048Slow) {
+			Tile[][] gameBoard=null;
+			if (so instanceof StateObserver2048) {
+				gameBoard = ((StateObserver2048) so).getGameBoard();
+			} else if (so instanceof StateObserver2048Slow) {
+				gameBoard = ((StateObserver2048Slow) so).getGameBoard();				
+			}
 			for(int row = 0, n=0; row < Config.ROWS; row++) {
 	            for(int column = 0; column < Config.COLUMNS; column++,n++) {
 	            	b2 = gameBoard[row][column].getValue();
@@ -73,7 +78,7 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 				boardB = boardB >> 4;
 			}
 		} else {
-			throw new RuntimeException("Class of so is not allowed.");
+			throw new RuntimeException("StateObservation 'so' is not an instance of StateObserver2048 or StateObs2048BitShift");
 		}
 		return bvec;   
 	}
