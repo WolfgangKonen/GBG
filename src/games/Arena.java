@@ -40,7 +40,7 @@ import tools.Types;
  * {@link games.TicTacToe.LaunchArenaTTT LaunchArenaTTT} or 
  * {@link games.TicTacToe.LaunchTrainTTT LaunchTrainTTT} for the TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  */
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV

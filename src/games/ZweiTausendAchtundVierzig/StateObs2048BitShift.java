@@ -194,6 +194,28 @@ public class StateObs2048BitShift implements StateObservation {
         return REWARD_POSITIVE;
     }
 
+	/**
+	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
+	 * cell of the board. In the case of 2048 the mapping is
+	 * <pre>
+	 *    00 01 02 03
+	 *    04 05 06 07
+	 *    08 09 10 11
+	 *    12 13 14 15
+	 * </pre>
+	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
+	 * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
+	 */
+	public int[] getBoardVector() {
+		int[] bvec = new int[16]; 
+		long b2 = boardB;
+		for (int n=15; n>=0; n--) {
+			bvec[n] = (int)(b2 & 0x000000000000000fL);
+			b2 = b2 >> 4;
+		}
+		return bvec;   
+	}
+	
     @Override
     public void advance(Types.ACTIONS action) {
         int iAction = action.toInt();
@@ -667,6 +689,14 @@ public class StateObs2048BitShift implements StateObservation {
 		System.out.println("StateObs2048BitShift  time:  "+(System.nanoTime()-startTime));
 		System.out.println(so.toHexString()+",  score="+so.getScore());
 		System.out.println(sbs.stringDescr()+",  score="+sbs.getScore());
+
+		// testing getBoardVector():
+		so = new StateObserver2048Slow(state,0,0);
+		sbs = new StateObs2048BitShift(lstate);
+		int[] so_bv = so.getBoardVector();
+		int[] sbs_bv = sbs.getBoardVector();
+		for (int i=0; i<so_bv.length; i++) assert so_bv[i]==sbs_bv[i] : "Error in getBoardVector";
+
     }
 
 

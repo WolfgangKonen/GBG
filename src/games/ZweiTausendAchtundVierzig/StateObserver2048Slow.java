@@ -391,6 +391,35 @@ public class StateObserver2048Slow implements StateObservation {
         return REWARD_POSITIVE;
     }
 
+	/**
+	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
+	 * cell of the board. In the case of 2048 the mapping is
+	 * <pre>
+	 *    00 01 02 03
+	 *    04 05 06 07
+	 *    08 09 10 11
+	 *    12 13 14 15
+	 * </pre>
+	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
+	 * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
+	 */
+	public int[] getBoardVector() {
+		int[] bvec = new int[Config.ROWS*Config.COLUMNS]; 
+		int b2,k;
+		for(int row = 0, n=0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,n++) {
+            	b2 = gameBoard[row][column].getValue();
+            	for (k=0; k<16; k++) {
+            		// find the exponent k in 2^k by down-shifting:
+                    b2 = b2>>1;
+            		if (b2==0) break;
+            	}
+            	bvec[n]=k;                	
+            }
+        }			
+		return bvec;   
+	}
+
     @Override
     public void advance(Types.ACTIONS action) {
         int iAction = action.toInt();

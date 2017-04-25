@@ -401,23 +401,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                         vTable[iAction] = soZTAV.storedValues[i];
                     }
                 }
-    		} else if (so instanceof StateObs2048BitShift) {
-                StateObs2048BitShift soZTAV = (StateObs2048BitShift) so;
-                // ** activate next line only if m_so is of class StateObs2048BitShift: **
-                //m_so = soZTAV.copy();
-                
-                if (showStoredV && soZTAV.storedValues!=null) {
-                    for(int i=0;i<4;i++) {
-                        vTable[i] = Double.NaN;
-                    }
-                    for(int i = 0; i < soZTAV.storedValues.length; i++) {
-                        Types.ACTIONS action = soZTAV.storedActions[i];
-                        int iAction = action.toInt();
-                        vTable[iAction] = soZTAV.storedValues[i];
-                    }
-                }
     		} else {
-    			throw new RuntimeException("StateObservation 'so' is not an instance of StateObserver2048 or StateObs2048BitShift");
+    			throw new RuntimeException("StateObservation 'so' is not an instance of StateObserver2048");
     		}
 
             if(so.isGameOver()) {
