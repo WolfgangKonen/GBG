@@ -36,12 +36,6 @@ public class SingleMCTSPlayer implements Serializable
     public static int DEFAULT_NUM_ITERS = 1000;
     public static double DEFAULT_K = Math.sqrt(2);
     public static int DEFAULT_VERBOSITY = 0;
-    public int NUM_ACTIONS;
-	public int ROLLOUT_DEPTH = DEFAULT_ROLLOUT_DEPTH;
-	public int TREE_DEPTH = DEFAULT_TREE_DEPTH;
-    public int NUM_ITERS = DEFAULT_NUM_ITERS;
-	public double K = DEFAULT_K;
-	public int verbose = DEFAULT_VERBOSITY; 
     int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 	
 	/**
@@ -61,12 +55,14 @@ public class SingleMCTSPlayer implements Serializable
 	}
 
 	/**
-     * Creates the MCTS player with a sampleRandom generator object.
-     * @param a_rnd 	sampleRandom generator object.
+     * Creates the MCTS player. 
+     * @param a_rnd 	random number generator object.
      * @param mcPar		parameters for MCTS
      */
     public SingleMCTSPlayer(Random a_rnd, MCTSParams mcPar)
     {
+    	// Why do we have m_mcpar and the several single parameters?? 
+    	
     	if (mcPar!=null) {
             this.setK(mcPar.getK_UCT());
             this.setNUM_ITERS(mcPar.getNumIter());
@@ -81,6 +77,11 @@ public class SingleMCTSPlayer implements Serializable
         m_root = new SingleTreeNode(a_rnd,this);
     }
 
+    /**
+     * Set the available actions for state {@code so}.
+     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer, double[])}.
+     * @param so
+     */
     public void initActions(StateObservation so) {
         //Get the actions into an array.
         ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
@@ -89,11 +90,12 @@ public class SingleMCTSPlayer implements Serializable
         {
             actions[i] = acts.get(i);
         }
-        this.setNUM_ACTIONS(actions.length);    	
+        NUM_ACTIONS = actions.length;    	
     }
 
     /**
-     * Inits the tree with the new observation state in the root.
+     * Initializes the tree with the new observation state in the root.
+     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer, double[])}.
      * @param so current state of the game.
      */
     public void init(StateObservation so)
@@ -167,11 +169,11 @@ public class SingleMCTSPlayer implements Serializable
 	public void setVerbosity(int verbosity) {
 		verbose = verbosity;
 	}
-	public MCTSParams getMCTSParams() {
-		return m_mcPar;
-	}
-
     public int getNRolloutFinished() {
         return nRolloutFinished;
     }
+
+    public MCTSParams getMCTSParams() {
+		return m_mcPar;
+	}
 }

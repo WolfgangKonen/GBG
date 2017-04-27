@@ -18,7 +18,7 @@ import java.util.Random;
  * 
  * This is the MCTS agent for 1- and 2-player games 
  * 
- * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  */
 public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable 
 { 
@@ -123,6 +123,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	 * 			to getNextAction() was a random action. 
 	 * 			Always false in the case of MCTS based on SingleTreeNode.uct().
 	 */
+	@Override
 	public boolean wasRandomAction() {
 		return false;
 	}

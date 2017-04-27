@@ -33,14 +33,29 @@ public class SingleTreeNode
      */
     public static double egreedyEpsilon = 0.05; 
 
-    public SingleTreeNode() {
-  	
-    }
+// --- probably never needed ---
+//    public SingleTreeNode() {
+//  	
+//    }
     
+    /**
+     * (does it make sense to pass {@code null} for the state of the node??)
+     * @param rnd
+     * @param mplay
+     */
     public SingleTreeNode(Random rnd, SingleMCTSPlayer mplay) {
         this(null, null, null, rnd, mplay);
     }
 
+    /**
+     * 
+     * @param state the state of the node 
+     * @param act	the action which leads from parent's state to this state ({@code null} for root node)
+     * @param parent the parent node ({@code null} for root node)
+     * @param rnd   a random number generator
+     * @param mplay a reference to the one MCTS agent where {@code this} is part of (needed
+     * 				to access several parameters of the MCTS agent)
+     */
     public SingleTreeNode(StateObservation state, Types.ACTIONS act, SingleTreeNode parent, Random rnd, SingleMCTSPlayer mplay) {
         this.m_state = state;
         this.m_act = act;
@@ -48,7 +63,7 @@ public class SingleTreeNode
         this.m_player = mplay;
         this.m_rnd = rnd;
         if (state==null) {
-        	children = new SingleTreeNode[m_player.NUM_ACTIONS];
+        	children = new SingleTreeNode[m_player.getNUM_ACTIONS()];
         } else {
             children = new SingleTreeNode[state.getNumAvailableActions()];			// /WK/ NEW!        	
         }
@@ -61,16 +76,29 @@ public class SingleTreeNode
 
 
     /**
-     * Wird bei evaluieren aufgerufen
+     * Perform an MCTS search, i.e. a selection of the best next action given the state 
+     * in the root node of the tree. <br>
+     * Called by {@link SingleMCTSPlayer#run(ElapsedCpuTimer, double[])}.<p>
      *
-     * Solange wie Iterationen ausgeführt werden
-     * einen TreeNode mit treePolicy() auswählen
-     *      wenn nocht nicht die TreeDepth erreicht wurde und es Aktionen ohne neuen Knoten gibt hänge baue für eine zufällige Aktion einen Knoten und speichere die GameState nach der Aktion in dem Knoten
-     *      falls die Treedepth erreicht wurde mach rnd Spiele
-     *
-     * auf dieser Node rollOut ausführen (ein rnd Game und dann die Score zurückgeben)
-     * mit backUp() die Anzahl an Visits und die Score des Ausgewählten Knotens aktualisieren
-     *
+     * Do for {@code m_player.NUM_ITERS} iterations:
+     * <ul>
+     * <li> select a leaf node via {@link #treePolicy()} (this includes {@link #expand()} of 
+     * 		not fully expanded nodes, as long as the maximum tree depth is not yet reached),
+     * <li> make a {@link #rollOut()} starting from this leaf node (a game with random actions 
+     * 		until game is over or until the maximum rollout depth is reached)
+     * <li> {@link #backUp(SingleTreeNode, double)} the resulting score {@code delta} and 
+     * 		the number of visits for all nodes on {@code totValue} and {@code nVisits}.
+     * 		Do this for all nodes on the path from the leaf up to the root.
+     * </ul>
+     * 
+     * Once this method is completed, the method {@link #bestAction()} will return the index
+     * {@code i} of the root's children which maximizes 
+     * <pre> U(i) = children[i].totValue/children[i].nVisits </pre>
+     * 
+     * @param elapsedTimer currently not used
+     * @param VTable on input an array of length K+1, where K is the number of available 
+     * 		  moves for the root state. Contains on output {@code U(i)} in the first 
+     * 		  K entries and the maximum of all {@code U(i)} in {@code VTable[K]}
      */
     public void mctsSearch(ElapsedCpuTimer elapsedTimer, double[] VTable) {
 
@@ -83,7 +111,7 @@ public class SingleTreeNode
         int numIters = 0;
 
         int remainingLimit = 5;
-        while(numIters<m_player.NUM_ITERS){ 				// /WK/ fixed number of iterations while debugging
+        while(numIters<m_player.getNUM_ITERS()){ 		// /WK/ fixed number of iterations while debugging
         //while(remaining > 2*avgTimeTaken && remaining > remainingLimit){
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
             SingleTreeNode selected = treePolicy();
@@ -157,7 +185,7 @@ public class SingleTreeNode
 
         SingleTreeNode cur = this;
 
-        while (!cur.m_state.isGameOver() && cur.m_depth < m_player.TREE_DEPTH)
+        while (!cur.m_state.isGameOver() && cur.m_depth < m_player.getTREE_DEPTH())
         {
             if (cur.notFullyExpanded()) {
                 return cur.expand();
@@ -173,6 +201,13 @@ public class SingleTreeNode
     }
 
 
+    /**
+     * Expand the current node {@code this}, i. e. select randomly one of those children {@code children[i]} 
+     * being yet {@code null}. Then advance the state of {@code this} with the {@code i}th  
+     * available action and construct child node {@code children[i]} from this advanced state.
+     * 
+     * @return {@code children[i]}
+     */
     public SingleTreeNode expand() {
 
         int bestAction = 0;
@@ -212,7 +247,7 @@ public class SingleTreeNode
             double childValue =  hvVal / (child.nVisits + this.epsilon);
 
             double uctValue = childValue +
-                    m_player.K * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon)) +
+                    m_player.getK() * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon)) +
                     this.m_rnd.nextDouble() * this.epsilon;
             		// small sampleRandom numbers: break ties in unexpanded nodes
             
@@ -315,7 +350,7 @@ public class SingleTreeNode
 
     public boolean finishRollout(StateObservation rollerState, int depth)
     {
-        if(depth >= m_player.ROLLOUT_DEPTH)      //rollout end condition.
+        if(depth >= m_player.getROLLOUT_DEPTH())      //rollout end condition.
             return true;
 
         if(rollerState.isGameOver())               //end of game
@@ -384,6 +419,11 @@ public class SingleTreeNode
         return selected;
     }
 
+    /**
+     * 
+     * @return the index {@code i} of the child maximizing 
+     * <pre> U(i) = children[i].totValue/children[i].nVisits </pre>
+     */
     public int bestAction()
     {
         int selected = -1;
