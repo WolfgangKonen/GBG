@@ -36,6 +36,12 @@ public class SingleMCTSPlayer implements Serializable
     public static int DEFAULT_NUM_ITERS = 1000;
     public static double DEFAULT_K = Math.sqrt(2);
     public static int DEFAULT_VERBOSITY = 0;
+    private int NUM_ACTIONS;
+    private int ROLLOUT_DEPTH = DEFAULT_ROLLOUT_DEPTH;
+    private int TREE_DEPTH = DEFAULT_TREE_DEPTH;
+    private int NUM_ITERS = DEFAULT_NUM_ITERS;
+    private double K = DEFAULT_K;
+    private int verbose = DEFAULT_VERBOSITY; 
     int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 	
 	/**
