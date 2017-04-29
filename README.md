@@ -1,8 +1,8 @@
 # GBG 
 
 ## Introduction
-GBG is a framework for **General Board Game** playing. GBG is written in Java. GBG is suitable for arbitrary 1-
-player, 2-player and n-player board games. It provides a set of agents (**AI**’s) which can be applied to any such game. 
+GBG is a framework for **General Board Game** playing. GBG is written in Java. GBG is suitable for arbitrary 
+1-player, 2-player and n-player board games. It provides a set of agents (**AI**’s) which can be applied to any such game. 
 New games can be coded following certain interfaces and then all agents of the GBG framework are available for that game. 
 New AI agents can be coded following certain other interfaces. Then, the new agent can be tested on all 
 games implemented in the GBG framework. It can be compared with all other AI agents in the GBG framework. 
