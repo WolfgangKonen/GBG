@@ -3,7 +3,9 @@ package controllers.MC;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
+import games.ZweiTausendAchtundVierzig.Config;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import params.MCParams;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -24,48 +26,50 @@ public class MCAgent extends AgentBase implements PlayAgent {
     private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true
     private int nIterations = 0; 		// counts the total number of iterations
 
-    private boolean DOCALCCERTAINTY = true; // if true, calculate several certainty measures at the
-    									// beginning of getNextAction (only debug)
+    public MCParams mcParams;
+
+
     
-    public MCAgent() {
-        this("MC");
+    public MCAgent(MCParams mcParams) {
+        this("MC", mcParams);
     }
 
-    public MCAgent(String name)
+    public MCAgent(String name, MCParams mcParams)
     {
         super(name);
+        this.mcParams = mcParams;
         setAgentState(AgentState.TRAINED);
     }
 
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
-        if (DOCALCCERTAINTY) {
+        int iterations = mcParams.getIterations();
+        int numberAgents = mcParams.getNumberAgents();
+        int depth = mcParams.getDepth();
+
+        if (mcParams.getCalcCertainty()) {
         	StateObserver2048 sobZTAV = (StateObserver2048) sob;
         	if (sobZTAV.getNumEmptyTiles()==10) {
-            	int oldNC = Config.NC;
+            	int NC = Config.NUMBEREVALUATIONS;
                 double cert0, cert1,cert2=0,cert4=0,cert6=0;
-                Config.NC = 100;
-                cert0 = calcCertainty(sob, vtable,1,false);
-                Config.NC = 20;
-                cert1 = calcCertainty(sob, vtable,1,false);
-                cert2 = calcCertainty(sob, vtable,2,false);
-                //cert4 = calcCertainty(sob, vtable,4,false);
-                cert6 = calcCertainty(sob, vtable,6,false);
+                cert0 = calcCertainty(sob, vtable,1,false, NC, iterations, depth);
+                NC = 20;
+                cert1 = calcCertainty(sob, vtable,1,false, NC, iterations, depth);
+                cert2 = calcCertainty(sob, vtable,2,false, NC, iterations, depth);
+                cert6 = calcCertainty(sob, vtable,6,false, NC, iterations, depth);
                 System.out.println("n="+sob.getNumAvailableActions()+": certainty ="
                         + cert0+","+cert1
                         +" / "+ cert2
-                        //+" / " + cert4
                         +" / "+ cert6);
-                Config.NC = oldNC;			// bug fix: restore!
         	}
         }
 
-        if(Config.NUMBERAGENTS > 1) {
+        if(mcParams.getNumberAgents() > 1) {
             //more than one Agent (Majoity Vote)
-            return getNextActionMultipleAgents(sob, vtable);
+            return getNextActionMultipleAgents(sob, vtable, iterations, numberAgents, depth);
         } else {
             //only one Agent
-            return getNextAction(sob, vtable);
+            return getNextAction(sob, vtable, iterations, depth);
         }
     }
 
@@ -81,7 +85,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
      * 						best action.
      * @return nextAction	the next action
      */
-    public Types.ACTIONS getNextAction (StateObservation sob, double[] vtable) {
+    private Types.ACTIONS getNextAction (StateObservation sob, double[] vtable, int iterations, int depth) {
         //die Funktionen, welche auf die verschiedenen Kerne verteilt
         //werden sollen
         List<Callable<ResultContainer>> callables = new ArrayList<>();
@@ -91,7 +95,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
         List<Types.ACTIONS> actions = sob.getAvailableActions();
 
         nRolloutFinished = 0;
-        nIterations = sob.getNumAvailableActions()*Config.ITERATIONS;
+        nIterations = sob.getNumAvailableActions()* iterations;
         totalRolloutDepth = 0;
 
         //es ist nur eine Aktion verfuegbar, diese kann sofort
@@ -104,7 +108,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
         //Kerne verteilt werden sollen, werden erstellt
         //fuer jede Iteration wird eine Funktion mit jeder verfuegbaren
         //Aktion erstellt
-        for (int j = 0; j < Config.ITERATIONS; j++) {
+        for (int j = 0; j < iterations; j++) {
             for (int i = 0; i < sob.getNumAvailableActions(); i++) {
 
                 //eine Kopie des Spielzustandes wird erstellt
@@ -132,7 +136,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
                     //der Random Agent wird erstellt und simuliert
                     //ein Spiel
                     RandomSearch agent = new RandomSearch();
-                    agent.startAgent(newSob);
+                    agent.startAgent(newSob, depth);
 
                     //das Ergebnis der Simulation wird in einem
                     //ResultContainer zurueckgegeben
@@ -180,7 +184,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
         for (int i = 0; i < sob.getNumAvailableActions(); i++) {
 
             //es wird die durchschnittliche Score jeder Aktion gebildet
-            vtable[i] /= Config.ITERATIONS;
+            vtable[i] /= iterations;
 
             //es wurde eine Aktion mit einer hoeheren Score gefunden
             if (nextActionScore < vtable[i]) {
@@ -193,11 +197,11 @@ public class MCAgent extends AgentBase implements PlayAgent {
         return nextAction;
     }
 
-    public Types.ACTIONS getNextActionMultipleAgents (StateObservation sob, double[] vtable) {
+    private Types.ACTIONS getNextActionMultipleAgents (StateObservation sob, double[] vtable, int iterations, int numberAgents, int depth) {
         List<Types.ACTIONS> actions = sob.getAvailableActions();
 
         nRolloutFinished = 0;
-        nIterations = sob.getNumAvailableActions()*Config.ITERATIONS*Config.NUMBERAGENTS;
+        nIterations = sob.getNumAvailableActions()* iterations * numberAgents;
         totalRolloutDepth = 0;
 
         if(sob.getNumAvailableActions() == 1) {
@@ -205,26 +209,26 @@ public class MCAgent extends AgentBase implements PlayAgent {
         }
         for (int i=0; i < vtable.length; i++) vtable[i]=0; // /WK/ bug fix, was missing before
 
-        for (int i = 0; i < Config.NUMBERAGENTS; i++) {
+        for (int i = 0; i < numberAgents; i++) {
             int nextAction = 0;
             double nextActionScore = Double.NEGATIVE_INFINITY;
 
             for (int j = 0; j < sob.getNumAvailableActions(); j++) {
                 double averageScore = 0;
 
-                for (int k = 0; k < Config.ITERATIONS; k++) {
+                for (int k = 0; k < iterations; k++) {
                     StateObservation newSob = sob.copy();
 
                     newSob.advance(actions.get(j));
                     RandomSearch agent = new RandomSearch();
-                    agent.startAgent(newSob);
+                    agent.startAgent(newSob, depth);
 
                     averageScore += newSob.getGameScore();
                     if (newSob.isGameOver()) nRolloutFinished++;
                     totalRolloutDepth += agent.getRolloutDepth();
                 }
 
-                averageScore /= Config.ITERATIONS;
+                averageScore /= iterations;
                 if (nextActionScore <= averageScore) {
                     nextAction = j;
                     nextActionScore = averageScore;
@@ -270,36 +274,34 @@ public class MCAgent extends AgentBase implements PlayAgent {
     
     /**
      * Calculate the certainty by repeating the next-action calculation 
-     * Config.NC times and calculating the relative frequency of the most frequent
+     * NC times and calculating the relative frequency of the most frequent
      * next action
      * 
      * @param sob
      * @param vtable
-     * @param mode	=1: use getNextAction (parallel version) <br>
-     *              >1: use getNextActionMultipleAgents with Config.NUMBERAGENTS=mode
+     * @param numberAgents	=1: use getNextAction (parallel version) <br>
+     *                      >1: use getNextActionMultipleAgents with NUMBERAGENTS=numberAgents
      * @return the certainty (highest bin in the relative-frequency histogram of possible actions)
      */
-    public double calcCertainty(StateObservation sob, double[] vtable,int mode, boolean silent) {
+    public double calcCertainty(StateObservation sob, double[] vtable, int numberAgents, boolean silent, int NC, int iterations, int depth) {
         double[] wtable = new double[4];
         double highestBin;
         int nextAction;
-        int oldNUMBERAGENTS=Config.NUMBERAGENTS;
         
         if(sob.getNumAvailableActions() == 1) {
             return 1.0;
         }
 
-        for (int i = 0; i < Config.NC; i++) {
-        	if (mode==1) {
-        		nextAction = getNextAction(sob,vtable).toInt();
+        for (int i = 0; i < NC; i++) {
+        	if (numberAgents==1) {
+        		nextAction = getNextAction(sob,vtable,iterations, depth).toInt();
         	} else {
-        		Config.NUMBERAGENTS = mode;
-        		nextAction = getNextActionMultipleAgents(sob,vtable).toInt();   
+        		nextAction = getNextActionMultipleAgents(sob,vtable,iterations,numberAgents, depth).toInt();
         		if (!silent) System.out.print(".");
         	}
             wtable[nextAction]++;
         }
-        if (mode!=1 & !silent) System.out.println("");
+        if (numberAgents!=1 & !silent) System.out.println("");
 
         highestBin = Double.NEGATIVE_INFINITY;
 
@@ -308,8 +310,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
                 highestBin = wtable[i];
             } 
         }
-        Config.NUMBERAGENTS=oldNUMBERAGENTS;	// bug fix: restore!
-        double cert = highestBin/Config.NC;
+        double cert = highestBin/NC;
         
     	return cert;
     }

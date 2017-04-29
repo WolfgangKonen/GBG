@@ -1,10 +1,12 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
+import controllers.MC.MCAgentConfig;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
+import params.MCParams;
 import params.MCTSParams;
 import tools.Types;
 
@@ -109,12 +111,12 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     private ResultContainer analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
         //create Agents
         MCTSParams mctsParams = new MCTSParams();
-        mctsParams.setNumIter(controllers.MC.Config.ITERATIONS*controllers.MC.Config.NUMBERAGENTS*gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
+        mctsParams.setNumIter(MCAgentConfig.ITERATIONS* MCAgentConfig.NUMBERAGENTS*gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
         mctsParams.setK_UCT(1);
         mctsParams.setTreeDepth(1);
-        mctsParams.setRolloutDepth(controllers.MC.Config.DEPTH+1);
+        mctsParams.setRolloutDepth(MCAgentConfig.DEPTH+1);
         MCTSAgentT mctsAgent = new MCTSAgentT("MCTS",null,mctsParams);
-        MCAgent mcAgent = new MCAgent();
+        MCAgent mcAgent = new MCAgent(new MCParams());
 
         int maxCertainty = Config.NUMBEREVALUATIONS*gameStateGroup.size();
         double mcCertainty = 0;
@@ -140,7 +142,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
             //analyse for MCTS Agent
             //MCTS currently disabled to save CPU Time when Evaluating MC Agent
-            /*for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
+            /*for(int i = 0; i < MCAgentConfig.NUMBEREVALUATIONS; i++) {
                 int MCTSAction = mctsAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
                 mctsActions[MCTSAction] +=1;
             } */
@@ -204,7 +206,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             int gameNumber = i;
             callables.add(() -> {
                 StateObserver2048 gameState = new StateObserver2048();
-                PlayAgent playAgent = new MCAgent();
+                PlayAgent playAgent = new MCAgent(new MCParams());
                 List<StateObserver2048> tempGameStates = new ArrayList<>();
                 while (!gameState.isGameOver()) {
                     tempGameStates.add(gameState.copy());

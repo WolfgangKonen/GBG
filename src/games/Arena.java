@@ -2,12 +2,9 @@ package games;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -18,14 +15,9 @@ import agentIO.LoadSaveTD;
 import tools.Progress;
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
-import games.Arena.Task;
-import games.TicTacToe.FeatureTTT;
-import games.TicTacToe.LaunchTrainTTT;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
-import params.TDParams;
 import tools.MessageBox;
 import tools.StatusBar;
 import tools.Types;
@@ -40,7 +32,7 @@ import tools.Types;
  * {@link games.TicTacToe.LaunchArenaTTT LaunchArenaTTT} or 
  * {@link games.TicTacToe.LaunchTrainTTT LaunchTrainTTT} for the TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  */
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
@@ -61,7 +53,7 @@ abstract public class Arena extends JPanel implements Runnable {
 
 	public int minSleepDuration = 0;
 	public int maxSleepDuration = 2000;
-	public int currentSleepDuration = 250;
+	public int currentSleepDuration = 0;
 
 	public Arena() {
 		initGame();
@@ -282,7 +274,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		StateObservation so;
 		Types.ACTIONS actBest=null;
 		PlayAgent pa;
-		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mcPar);
+		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mctsParams);
 		double[] vtable = null;
 		PlayAgent[] paVector;
 

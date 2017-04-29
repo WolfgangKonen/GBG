@@ -7,9 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -22,9 +20,6 @@ import controllers.PlayAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple.TDNTupleAgt;
-import games.Arena;
-import games.ArenaTrain;
-import games.TicTacToe.LaunchTrainTTT;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
@@ -32,7 +27,7 @@ import tools.Types;
 /**
  * Main menu for {@link Arena} and {@link ArenaTrain}.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  * 
  */
 
@@ -487,7 +482,7 @@ public class XArenaMenu extends JMenuBar {
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mcPar.setFrom( ((MCTSAgentT) td).getMCTSParams() );
+				m_arena.m_xab.mctsParams.setFrom( ((MCTSAgentT) td).getMCTSParams() );
 			}
 			else if (td instanceof MinimaxAgent) {
 				// set the agent parameters in XArenaTabs:

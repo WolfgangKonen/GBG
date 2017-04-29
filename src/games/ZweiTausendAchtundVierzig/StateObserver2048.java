@@ -3,31 +3,52 @@ package games.ZweiTausendAchtundVierzig;
 import games.StateObservation;
 import tools.Types;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Created by Johannes on 18.11.2016.
+ * Class {@link StateObs2048BitShift} holds a 2048 game state.
+ * The game state is coded in a compact way in *one* long number
+ * <pre>
+ * 		private boardB = 0xfedcba9876543210L
+ *
+ *                                 row
+ *                      f e d c    3
+ *                      b a 9 8    2
+ *                      7 6 5 4    1
+ *                      3 2 1 0    0
+ *
+ *                 col= 3 2 1 0            </pre>
+ * that is, the 4 lowest hex digits represent the lowest row of the 2048-board, with the
+ * digit 3 representing the leftmost cell in this row and so on. <br>
+ * Each hex digit represents the exponent {@code exp} of a tile value {@code 2^exp}.
+ * Example: Hex digit {@code a} codes tile value {@code 2^a} = 1024.  <p>
+ *
+ * Method getGameScore2 is currently implemented via StateObserver2048Slow.getGameScore2
+ * (may be slow).
+ *
+ * @author Wolfgang Konen, THK
  */
 public class StateObserver2048 implements StateObservation {
     private Random random = new Random();
-    protected List<Tile> emptyTiles = new ArrayList();
-    protected List<Integer> availableMoves;
+    protected List<Integer> emptyTiles = new ArrayList();
+    protected List<Integer> availableMoves = new ArrayList();  // 0: left, 1: up, 2: right, 3: down
     private Tile[][] gameBoard;
-	protected Types.ACTIONS[] actions;
+    protected Types.ACTIONS[] actions;
 
-    // 0 = running, 1 = won, -1 = lost
-    private int winState;
-    public int score;
+    private long boardB;
+
+    private int winState = 0;		// 0 = running, 1 = won, -1 = lost
+    public int score = 0;
     public int highestTileValue = Integer.MIN_VALUE;
     public boolean highestTileInCorner = false;
     public int rowLength = 0;
     public int rowValue = 0;
     public int mergeValue = 0;
     public int moves = 0;
-    private boolean ASSERTSAME = false; // if true, run through assertSameAdvance
 
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
@@ -43,84 +64,55 @@ public class StateObserver2048 implements StateObservation {
         newBoard();
     }
 
+    public StateObserver2048(long b) {
+        boardB=b;
+        updateEmptyTiles();
+        updateAvailableMoves();
+    }
+    public StateObserver2048(long b, int score, int winState) {
+        boardB=b;
+        updateEmptyTiles();
+        this.score = score;
+        this.winState = winState;
+        updateAvailableMoves();
+    }
+
+    /**
+     * Construct an 2048 game state from {@code int[r][c]} array, where row r=0 is the
+     * highest row and column c=0 is the left column
+     * @param values the tile values {@code 2^exp}
+     * @param score
+     * @param winState
+     */
     public StateObserver2048(int[][] values, int score, int winState) {
-        gameBoard = new Tile[Config.ROWS][Config.COLUMNS];
-        for(int row = 0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++) {
-                Tile newTile = new Tile(values[row][column], new Position(row,column));
-                gameBoard[row][column] = newTile;
-                updateHighestTile(newTile);
-                if(values[row][column] == 0) {
-                    emptyTiles.add(newTile);
+        boardB=0;
+        updateEmptyTiles();		// add all cells to emptyTiles
+        for(int row = 0, position=15; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,position--) {
+                int k,b2 = values[row][column];
+                for (k=0; k<16; k++) {
+                    // find the exponent k in 2^k by down-shifting:
+                    b2 = b2>>1;
+                    if (b2==0) break;
                 }
+                if (k>0)
+                    addTile(position,k);	// deletes also 'position' from emptyTiles
             }
         }
+        updateEmptyTiles();
         this.score = score;
         this.winState = winState;
 
         updateAvailableMoves();
     }
 
-    // Note: StateObserver2048 copy() copies the board state, score, winState,
+    // Note: StateObs2048BitShift copy() copies the board state, score, winState,
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
     @Override
     public StateObserver2048 copy() {
-        return new StateObserver2048(toArray(), score, winState);
+        return new StateObserver2048(boardB, score, winState);
     }
 
-    /**
-     * Only debug check (if ASSERTSAME==true): <br>
-     * Assert that StateObserver2048 (which should be a copy of StateObserver2048Slow) and StateObs2048BitShift result in
-     * <ul>
-     * <li> the same state when doing a move with iAction on {@code this} (no random tile added)
-     * <li> the same score 
-     * <li> the same list of available moves
-     * <li> the same empty tile positions (note that the lists {@code emptyTiles} contain different 
-     * 		things in both classes)
-     * </ul>
-     * @param iAction
-     * @return {@code true} if all assertions are passed, {@code false} else
-     */
-    private boolean assertSameAdvance(int iAction) {
-    	StateObserver2048 sot = this.copy();
-    	int[][] iArray = toArray();
-    	StateObs2048BitShift sbs = new StateObs2048BitShift(iArray, score, winState);
-    	//System.out.println("sot: "+sot.toHexString()+",  score="+sot.getScore());
-    	//System.out.println("sbs: "+sbs.stringDescr()+",  score="+sbs.getScore());
-    	sot.move(iAction);
-    	sot.updateAvailableMoves();
-    	sbs.move(iAction);
-    	sbs.updateEmptyTiles();
-    	sbs.updateAvailableMoves();
-    	String s_sot = sot.toHexString();
-    	String s_sbs = sbs.stringDescr();
-    	System.out.println("sot: "+s_sot+",  score="+sot.getScore());
-    	System.out.println("sbs: "+s_sbs+",  score="+sbs.getScore());
-    	if (!s_sot.equals(s_sbs)) {
-    		return false;
-    	}
-    	if (sot.getScore()!=sbs.getScore()) {
-    		return false;
-    	}
-    	for (Integer iVal : sot.availableMoves) {
-    		if (!sbs.availableMoves.contains(iVal)) {
-    			return false;
-    		}
-    	}
-    	for (Tile tile : sot.emptyTiles) {
-    		// note that the numbering of tile positions is different:
-    		// in StateObserver2048 row 0 is the highest row and column 0 is the leftmost column;
-    		// in StateObs2048BitShift row 0 is the lowest row and column 0 is the rightmost column. 
-    		// Therefore we add two times a "(3-...)" for comparison. 
-    		Position pos = tile.getPosition();
-    		Integer iVal = (3-pos.getColumn()) + 4*(3-pos.getRow());
-    		if (!sbs.emptyTiles.contains(iVal)) {
-    			return false;
-    		}
-    	}
-    	return true;
-    }
-    
     @Override
     public boolean isGameOver() {
         if(availableMoves.size() == 0) {
@@ -133,8 +125,6 @@ public class StateObserver2048 implements StateObservation {
 
     @Override
     public boolean isLegalState() {
-        //Sollte eigentlich nicht benötigt werden, solange das Spielfeld nur über advance() verändert wird.
-        //Ich überprüfe den State vorerst nicht, da die Überprüfung nicht Notwendig sein sollte und das Programm nur verlangsamen würde.
         return true;
     }
 
@@ -167,213 +157,26 @@ public class StateObserver2048 implements StateObservation {
     }
 
     public double getGameScore2() {
-        if (isGameOver()) {
-            double penalisation = Config.PENALISATION;
+//    	int[][] values = new int[MCAgentConfig.ROWS][MCAgentConfig.COLUMNS];
+//        for(int row = MCAgentConfig.ROWS-1, position=0; row >=0 ; row--) {
+//            for(int column = MCAgentConfig.COLUMNS-1; column >=0 ; column--,position++) {
+//                long b2 = boardB;
+//                values[row][column] = (1 << (b2 & 0x0fL));
+//                b2 = (b2 >> 4);
+//            }
+//        }
+        StateObserver2048Slow so = new StateObserver2048Slow(this.toArray(),score,winState);
 
-            if(Config.ADDSCORE) {
-                penalisation += (score / MAXSCORE);
-            }
-            return penalisation;
-        }
-        else {
-            double realScore = score;
-
-            //Row Heuristik
-            evaluateBoard();
-            realScore += rowValue * Config.ROWMULTIPLIER;
-
-            //Highest Tile In Corner Heuristik
-            if (highestTileInCorner) {
-                //realScore *= Config.HIGHESTTILEINCORENERMULTIPLIER+1;
-                realScore += highestTileValue * Config.HIGHESTTILEINCORENERMULTIPLIER;
-            }
-
-            //Empty Tiles Heuristik
-            //realScore *= Math.pow(Config.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
-            //realScore += highestTileValue*emptyTiles.size()*(Config.EMPTYTILEMULTIPLIER);
-            realScore += score * emptyTiles.size() * Config.EMPTYTILEMULTIPLIER;
-
-            //Merge Heuristik
-            realScore += mergeValue * Config.MERGEMULTIPLIER;
-
-
-            if (realScore == 0) {
-                return 0;
-            } else {
-                realScore /= MAXSCORE;
-                return realScore;
-            }
-        }
+        double score2 = so.getGameScore2();
+        this.highestTileInCorner = false;
+        this.rowLength = so.rowLength;
+        this.rowValue = so.rowValue;
+        this.mergeValue = so.mergeValue;
+        return score2;
     }
 
     @Override
-	public double getGameValue() { return getGameScore(); }
-	
-   private void evaluateBoard() {
-        RowInformationContainer rowInformationContainer;
-        highestTileInCorner = false;
-        rowValue = 0;
-        rowLength = 0;
-        mergeValue = 0;
-
-        if (gameBoard[0][0].getValue() == highestTileValue) {
-            highestTileInCorner = true;
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-        }
-
-        if (gameBoard[Config.ROWS - 1][0].getValue() == highestTileValue) {
-            highestTileInCorner = true;
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-        }
-
-        if (gameBoard[0][Config.COLUMNS - 1].getValue() == highestTileValue) {
-            highestTileInCorner = true;
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-        }
-
-        if (gameBoard[Config.ROWS - 1][Config.COLUMNS - 1].getValue() == highestTileValue) {
-            highestTileInCorner = true;
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-        }
-
-        for(int row = 0; row < Config.ROWS-1; row++) {
-            for (int column = 0; column < Config.COLUMNS; column++) {
-                int currentValue = gameBoard[row][column].getValue();
-                if(currentValue != 0) {
-                    for (int position = row+1; position < Config.ROWS; position++) {
-                        int newValue = gameBoard[position][column].getValue();
-                        if(newValue != 0) {
-                            if (currentValue == newValue) {
-                                mergeValue += currentValue;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        for(int row = 0; row < Config.ROWS; row++) {
-            for (int column = 0; column < Config.COLUMNS-1; column++) {
-                int currentValue = gameBoard[row][column].getValue();
-                if(currentValue != 0) {
-                    for (int position = column+1; position < Config.COLUMNS; position++) {
-                        int newValue = gameBoard[row][position].getValue();
-                        if(newValue != 0) {
-                            if (currentValue == newValue) {
-                                mergeValue += currentValue;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private RowInformationContainer evaluateRow(int currentTileValue, int currentRowLength, int currentRowValue, int position, int offset, int direction) {
-        switch (direction) {
-            case 0:
-                //left
-                for (int i = Config.COLUMNS-1-offset; i >= 0; i--) {
-                    if (gameBoard[position][i].getValue() != 0 && gameBoard[position][i].getValue() < currentTileValue /*gameBoard[position][i].getValue() == currentTileValue/2*/) {
-                        currentRowLength++;
-                        currentTileValue = gameBoard[position][i].getValue();
-                        currentRowValue += currentTileValue;
-                    } else {
-                        return new RowInformationContainer(currentRowLength, currentRowValue);
-                    }
-                }
-
-                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position+1, 0, 2);
-
-            case 1:
-                //up
-                for (int i = Config.ROWS-1-offset; i >= 0; i--) {
-                    if (gameBoard[i][position].getValue() != 0 && gameBoard[i][position].getValue() < currentTileValue /*gameBoard[i][position].getValue() == currentTileValue/2*/) {
-                        currentRowLength++;
-                        currentTileValue = gameBoard[i][position].getValue();
-                        currentRowValue += currentTileValue;
-                    } else {
-                        return new RowInformationContainer(currentRowLength, currentRowValue);
-                    }
-                }
-
-                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position+1, 0, 3);
-
-            case 2:
-                //right
-                for (int i = 0+offset; i < Config.COLUMNS; i++) {
-                    if (gameBoard[position][i].getValue() != 0 && gameBoard[position][i].getValue() < currentTileValue /*gameBoard[position][i].getValue() == currentTileValue/2*/) {
-                        currentRowLength++;
-                        currentTileValue = gameBoard[position][i].getValue();
-                        currentRowValue += currentTileValue;
-                    } else {
-                        return new RowInformationContainer(currentRowLength, currentRowValue);
-                    }
-                }
-                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position+1, 0, 0);
-
-            case 3:
-                //down
-                for (int i = 0+offset; i < Config.ROWS; i++) {
-                    if (gameBoard[i][position].getValue() != 0 && gameBoard[i][position].getValue() < currentTileValue /*gameBoard[i][position].getValue() == currentTileValue/2*/) {
-                        currentRowLength++;
-                        currentTileValue = gameBoard[i][position].getValue();
-                        currentRowValue += currentTileValue;
-                    } else {
-                        return new RowInformationContainer(currentRowLength, currentRowValue);
-                    }
-                }
-                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position+1, 0, 1);
-        }
-
-        return null;
-    }
+    public double getGameValue() { return getGameScore(); }
 
     @Override
     public double getGameScore(StateObservation referingState) {
@@ -391,44 +194,34 @@ public class StateObserver2048 implements StateObservation {
         return REWARD_POSITIVE;
     }
 
-	/**
-	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
-	 * cell of the board. In the case of 2048 the mapping is
-	 * <pre>
-	 *    00 01 02 03
-	 *    04 05 06 07
-	 *    08 09 10 11
-	 *    12 13 14 15
-	 * </pre>
-	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
-	 * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
-	 */
-	public int[] getBoardVector() {
-		int[] bvec = new int[Config.ROWS*Config.COLUMNS]; 
-		int b2,k;
-		for(int row = 0, n=0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++,n++) {
-            	b2 = gameBoard[row][column].getValue();
-            	for (k=0; k<16; k++) {
-            		// find the exponent k in 2^k by down-shifting:
-                    b2 = b2>>1;
-            		if (b2==0) break;
-            	}
-            	bvec[n]=k;                	
-            }
-        }			
-		return bvec;   
-	}
+    /**
+     * The board vector is an {@code int[]} vector where each entry corresponds to one
+     * cell of the board. In the case of 2048 the mapping is
+     * <pre>
+     *    00 01 02 03
+     *    04 05 06 07
+     *    08 09 10 11
+     *    12 13 14 15
+     * </pre>
+     * @return a vector of length {@link #getNumCells()}, holding for each board cell its
+     * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
+     */
+    public int[] getBoardVector() {
+        int[] bvec = new int[16];
+        long b2 = boardB;
+        for (int n=15; n>=0; n--) {
+            bvec[n] = (int)(b2 & 0x000000000000000fL);
+            b2 = b2 >> 4;
+        }
+        return bvec;
+    }
 
-	@Override
+    @Override
     public void advance(Types.ACTIONS action) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
-        if (ASSERTSAME) {
-        	boolean succ = assertSameAdvance(iAction);
-        	if (succ==false) throw new RuntimeException("assertSameAdvance failed!");
-        }
         move(iAction);
+        updateEmptyTiles();
         addRandomTile();
         updateAvailableMoves();
     }
@@ -491,47 +284,19 @@ public class StateObserver2048 implements StateObservation {
         return 1;
     }
 
-	@Override
+    @Override
     public String stringDescr() {
-        String s="";
-        int codeA = +'A';		// normally 65
-        XNTupleFuncs2048 xnf = new XNTupleFuncs2048();
-        int[] bvec = xnf.getBoardVector(this);
-        for(int row = 0,n=0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++,n++) {
-            	if (bvec[n]>=10) {
-            		s = s+((char)(65-10+bvec[n]));
-            	} else {
-                    s = s+bvec[n];
-            	}
-            }
-            if (row<(Config.ROWS-1)) s=s+",";
-        }
-        return s;
-    }
-	// -- possible code to test stringDescr --
-	//		int[][] state = {{0,2048,0,0}, {0,0,0,0}, {0,2,4,0}, {0,0,0,0}};
-	//		StateObserver2048 so = new StateObserver2048(state,0,0);
-	//		System.out.println(so.stringDescr());
-
-    public String toHexString() {
-        String s="";
-        XNTupleFuncs2048 xnf = new XNTupleFuncs2048();
-        int[] bvec = xnf.getBoardVector(this);
-        for(int row = 0,n=0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++,n++) {
-            	s = s+Integer.toHexString(bvec[n]);
-            }
-        }
-        return s;
+        return String.format("%016x", boardB);	// format as 16-hex-digit number with
+        // leading 0's (if necessary)
+        //return Long.toHexString(boardB);		// no leading zeros
     }
 
     @Deprecated
     public String toString() {
-    	return stringDescr();
+        return stringDescr();
     }
 
-	public boolean isLegalAction(Types.ACTIONS action) {
+    public boolean isLegalAction(Types.ACTIONS action) {
         return availableMoves.contains(action.toInt());
     }
 
@@ -542,54 +307,65 @@ public class StateObserver2048 implements StateObservation {
     public int getWinState() {
         return winState;
     }
-    
+
     public int getNumEmptyTiles() {
-    	return emptyTiles.size();
+        return emptyTiles.size();
     }
 
     public Tile getTile(int row, int column) {
-        return gameBoard[row][column];
-    }
-    
-    public Tile[][] getGameBoard() {
-		return gameBoard;
-	}
-
-
-    public void addTile(Tile tile, int value) {
-        emptyTiles.remove(tile);
-        tile.setValue(value);
-        updateHighestTile(tile);
+        int pos = column + 4*row;
+        long val = (boardB >> 4*pos) & 0x0fL;
+        Tile tile = new Tile((int)val, new Position(row,column));
+        return tile;
     }
 
-    public void mergeTiles(Tile tileOne, Tile tileTwo) {
-        tileOne.addValue(tileTwo.getValue());
-        score += tileOne.getValue();
-        if(tileOne.getValue() >= Config.WINNINGVALUE) {
-            setWinState(1);
+    public long getBoardNum() {
+        return boardB;
+    }
+
+
+    /**
+     * Add tile 2^value to the 2048 board, i.e. change {@code boardB} accordingly.<br>
+     * Assumes (and asserts) that board is empty at {@code position}.
+     *
+     * @param position one out of {0,...,15}, where to add the tile
+     * @param value	the exponent (2^value is the tile value)
+     */
+    public void addTile(int position, int value) {
+        boolean succ = emptyTiles.remove(new Integer(position));
+        assert (succ==true) : "Something wrong in emptyTiles removal";
+        //System.out.println(Long.toHexString(boardB));
+        long b = (boardB >> (4*position)) & 0x0fL;
+        assert (b==0) : "boardB is not empty at 'position'";
+        long v = (long)value << (4*position);
+        boardB = boardB + v;
+        //System.out.println(Long.toHexString(v));
+        updateHighestTile(value);
+    }
+
+    public void updateHighestTile(int exp) {
+        int tileVal = (1 << exp);
+        if(tileVal > highestTileValue) {
+            highestTileValue = tileVal;
         }
-        updateHighestTile(tileOne);
-        tileTwo.setValue(0);
-        emptyTiles.add(tileTwo);
     }
 
-    public void updateHighestTile(Tile newTile) {
-        if(newTile.getValue() > highestTileValue) {
-            highestTileValue = newTile.getValue();
+    /**
+     * Given a new board state {@code boardB}, recompute the list {@code emptyTiles}
+     * (Integer list with positions {0,...,15} which have a 0-tile)
+     */
+    public void updateEmptyTiles() {
+        emptyTiles.clear();
+        long b = boardB;
+        for (int j=0; j<16; j++) {
+            if ((b & 0x0fL)==0) emptyTiles.add(new Integer(j));
+            b = b >> 4;		// shift down by one hex digit
         }
-    }
-
-    public void moveTile(Tile oldTile, Tile newTile) {
-        emptyTiles.remove(newTile);
-        newTile.setValue(oldTile.getValue());
-
-        emptyTiles.add(oldTile);
-        oldTile.setValue(0);
     }
 
     /**
      *
-     * @param winState {@literal-1  > lost, 0 > running, 1 > won} 
+     * @param winState {@literal-1  > lost, 0 > running, 1 > won}
      */
     public void setWinState(int winState) {
         if(this.winState == 0) {
@@ -597,68 +373,39 @@ public class StateObserver2048 implements StateObservation {
         }
     }
 
+    /**
+     * transform the board state to an {@code int[][]} array in the same way as
+     * StateObservation.toArray() does: row 0 is highest row, column 0 is left column
+     * @return each value in the {@code int[][]} array carries the tile value {@code 2^exp}
+     */
     public int[][] toArray() {
         int[][] newBoard = new int[Config.ROWS][Config.COLUMNS];
-        for(int row = 0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++) {
-                newBoard[row][column] = gameBoard[row][column].getValue();
+        for(int row = 0, position=15; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,position--) {
+                int exp = (int) ((boardB >> 4*position) & 0x0fL);
+                newBoard[row][column] = (1 << exp);
             }
         }
         return newBoard;
     }
 
     public void updateAvailableMoves() {
-        availableMoves = new ArrayList<>();
-
-        loop:
-        for(int row = 0; row < Config.ROWS; row++) {
-            for (int column = 1; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row][column - 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column - 1].getValue()) {
-                        availableMoves.add(0);
-                        break loop;
-                    }
-                }
-            }
-        }
-
-
-
-        loop:
-        for(int row = 1; row < Config.ROWS; row++) {
-            for (int column = 0; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row - 1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row - 1][column].getValue()) {
-                        availableMoves.add(1);
-                        break loop;
-                    }
-                }
-            }
-        }
-
-        loop:
-        for(int row = 0; row < Config.ROWS; row++) {
-            for (int column = 0; column < Config.COLUMNS-1; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row][column + 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column + 1].getValue()) {
-                        availableMoves.add(2);
-                        break loop;
-                    }
-                }
-            }
-        }
-
-        loop:
-        for(int row = 0; row < Config.ROWS-1; row++) {
-            for (int column = 0; column < Config.COLUMNS; column++) {
-                if(gameBoard[row][column].getValue() != 0) {
-                    if (gameBoard[row+1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row+1][column].getValue()) {
-                        availableMoves.add(3);
-                        break loop;
-                    }
-                }
-            }
-        }
+        availableMoves.clear();
+        int oldScore = score;
+        long oldBoardB = boardB;
+        if (leftAction().boardB!=oldBoardB)
+            availableMoves.add(0);
+        boardB=oldBoardB;
+        if (upAction().boardB!=oldBoardB)
+            availableMoves.add(1);
+        boardB=oldBoardB;
+        if (rightAction().boardB!=oldBoardB)
+            availableMoves.add(2);
+        boardB=oldBoardB;
+        if (downAction().boardB!=oldBoardB)
+            availableMoves.add(3);
+        boardB=oldBoardB;
+        score=oldScore;
 
         if(availableMoves.size() <= 0) {
             setWinState(-1);
@@ -669,25 +416,28 @@ public class StateObserver2048 implements StateObservation {
 
     public void printBoard() {
         System.out.println("---------------------------------");
-        for(Tile[] row: gameBoard)
+        for(int r=3; r>=0; r--)
         {
             System.out.print("|");
-            for(Tile tile: row) {
-                if(tile.getValue() != 0) {
-                    if(tile.getValue() < 10) {
-                        System.out.print("   " + tile.getValue() + "   |");
+            RowBitShift row = this.getRow(r);
+            for(int c=3; c>=0; c--) {
+                int exp=row.d(c);
+                if(exp != 0) {
+                    int val = (1 << exp);
+                    if(val < 10) {
+                        System.out.print("   " + val + "   |");
                     }
-                    else if(tile.getValue() < 100) {
-                        System.out.print("  " + tile.getValue() + "   |");
+                    else if(val < 100) {
+                        System.out.print("  " + val + "   |");
                     }
-                    else if(tile.getValue() < 1000) {
-                        System.out.print("  " + tile.getValue() + "  |");
+                    else if(val < 1000) {
+                        System.out.print("  " + val + "  |");
                     }
-                    else if(tile.getValue() < 10000) {
-                        System.out.print(" " + tile.getValue() + "  |");
+                    else if(val < 10000) {
+                        System.out.print(" " + val + "  |");
                     }
-                    else if(tile.getValue() < 100000) {
-                        System.out.print(" " + tile.getValue() + " |");
+                    else if(val < 100000) {
+                        System.out.print("" + val + " |");
                     }
                 }
                 else {
@@ -703,8 +453,9 @@ public class StateObserver2048 implements StateObservation {
 
     public void addRandomTile () {
         if(emptyTiles.size() > 0) {
-            Tile tile = emptyTiles.get(random.nextInt(emptyTiles.size()));
-            addTile(tile, Config.STARTINGVALUES[random.nextInt(Config.STARTINGVALUES.length)]);
+            int position = emptyTiles.get(random.nextInt(emptyTiles.size())).intValue();
+            int value = Config.STARTINGVALUES[random.nextInt(Config.STARTINGVALUES.length)] >> 1;
+            addTile(position, value);
         }
     }
 
@@ -715,193 +466,130 @@ public class StateObserver2048 implements StateObservation {
     public void move(int move) {
         switch (move) {
             case 0:
-                left();
+                leftAction();
                 break;
 
             case 1:
-                up();
+                upAction();
                 break;
 
             case 2:
-                right();
+                rightAction();
                 break;
 
             case 3:
-                down();
+                downAction();
                 break;
         }
         moves++;
     }
 
-    private void left() {
-        if(availableMoves.contains(0)) {
-            for (int row = 0; row < Config.ROWS; row++) {
-                //Feld mit dem gemerged wird oder auf das geschoben wird
-                Tile lastTile = getTile(row, 0);
-
-                for (int column = 1; column < Config.COLUMNS; column++) {
-                    Tile currentTile = getTile(row, column);
-
-                    if(currentTile.getValue() != 0) {
-                        if (currentTile.getValue() == lastTile.getValue()) {
-                            //Es stehen zweimal die selben Zahlen hintereinander
-                            mergeTiles(lastTile, currentTile);
-                            lastTile = getTile(row, lastTile.getPosition().getColumn()+1);
-
-                        } else if (currentTile.getValue() != 0 && lastTile.getValue() != 0) {
-                            //Es stehen zwei verschiedene Zahlen hintereinander
-                            lastTile = getTile(row, lastTile.getPosition().getColumn()+1);
-                            if(currentTile != lastTile) {
-                                moveTile(currentTile, lastTile);
-                            }
-
-                        } else if (currentTile.getValue() != 0) {
-                            // Eine Zahl steht hinter einem leerem Feld
-                            moveTile(currentTile, lastTile);
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            System.out.println("Invalid Move 0");
-            System.out.println("availableMoves = " + availableMoves);
-        }
-    }
-
-    private void up() {
-        if(availableMoves.contains(1)) {
-            for (int column = 0; column < Config.COLUMNS; column++) {
-                Tile lastTile = getTile(0, column);
-
-                for (int row = 1; row < Config.ROWS; row++) {
-                    Tile currentTile = getTile(row, column);
-
-                    if(currentTile.getValue() != 0) {
-                        if (currentTile.getValue() == lastTile.getValue()) {
-                            //Es stehen zweimal die selben Zahlen hintereinander
-                            mergeTiles(lastTile, currentTile);
-                            lastTile = getTile(lastTile.getPosition().getRow()+1, column);
-
-                        } else if (currentTile.getValue() != 0 && lastTile.getValue() != 0) {
-                            //Es stehen zwei verschiedene Zahlen hintereinander
-                            lastTile = getTile(lastTile.getPosition().getRow()+1, column);
-                            if(currentTile != lastTile) {
-                                moveTile(currentTile, lastTile);
-                            }
-
-                        } else if (currentTile.getValue() != 0) {
-                            // Eine Zahl steht hinter einem leerem Feld
-                            moveTile(currentTile, lastTile);
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            System.out.println("Invalid Move 1");
-            System.out.println("availableMoves = " + availableMoves);
-        }
-    }
-
-    private void right() {
-        if(availableMoves.contains(2)) {
-            for (int row = 0; row < Config.ROWS; row++) {
-                Tile lastTile = getTile(row, Config.COLUMNS - 1);
-
-                for (int column = Config.COLUMNS - 2; column >= 0; column--) {
-                    Tile currentTile = getTile(row, column);
-
-                    if(currentTile.getValue() != 0) {
-                        if (currentTile.getValue() == lastTile.getValue()) {
-                            //Es stehen zweimal die selben Zahlen hintereinander
-                            mergeTiles(lastTile, currentTile);
-                            lastTile = getTile(row, lastTile.getPosition().getColumn()-1);
-
-                        } else if (currentTile.getValue() != 0 && lastTile.getValue() != 0) {
-                            //Es stehen zwei verschiedene Zahlen hintereinander
-                            lastTile = getTile(row, lastTile.getPosition().getColumn()-1);
-                            if(currentTile != lastTile) {
-                                moveTile(currentTile, lastTile);
-                            }
-
-                        } else if (currentTile.getValue() != 0) {
-                            // Eine Zahl steht hinter einem leerem Feld
-                            moveTile(currentTile, lastTile);
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            System.out.println("Invalid Move 2");
-            System.out.println("availableMoves = " + availableMoves);
-        }
-    }
-
-    private void down() {
-        if(availableMoves.contains(3)) {
-            for (int column = 0; column < Config.COLUMNS; column++) {
-                Tile lastTile = getTile(Config.ROWS - 1, column);
-
-                for (int row = Config.ROWS - 2; row >= 0; row--) {
-                    Tile currentTile = getTile(row, column);
-
-                    if(currentTile.getValue() != 0) {
-                        if (currentTile.getValue() == lastTile.getValue()) {
-                            //Es stehen zweimal die selben Zahlen hintereinander
-                            mergeTiles(lastTile, currentTile);
-                            lastTile = getTile(lastTile.getPosition().getRow()-1, column);
-
-                        } else if (currentTile.getValue() != 0 && lastTile.getValue() != 0) {
-                            //Es stehen zwei verschiedene Zahlen hintereinander
-                            lastTile = getTile(lastTile.getPosition().getRow()-1, column);
-                            if(currentTile != lastTile) {
-                                moveTile(currentTile, lastTile);
-                            }
-
-                        } else if (currentTile.getValue() != 0) {
-                            // Eine Zahl steht hinter einem leerem Feld
-                            moveTile(currentTile, lastTile);
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            System.out.println("Invalid Move 3");
-            System.out.println("availableMoves = " + availableMoves);
-        }
-    }
-
     private void newBoard() {
-        gameBoard = new Tile[Config.ROWS][Config.COLUMNS];
-        for(int row = 0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++) {
-                Tile newTile = new Tile(0, new Position(row,column));
-                gameBoard[row][column] = newTile;
-                emptyTiles.add(newTile);
-            }
-        }
+        boardB = 0x0L;
         score = 0;
         winState = 0;
+
+        updateEmptyTiles(); // fixed Empty Tiles JK
 
         for(int i = Config.STARTINGFIELDS; i > 0; i--) {
             addRandomTile();
         }
 
+        updateEmptyTiles();
         updateAvailableMoves();
     }
-}
 
-// *** this is now def'd in StateObservation2048Slow.java: ***
-//
-//class RowInformationContainer {
-//    int rowLength;
-//    int rowValue;
-//
-//    public RowInformationContainer(int rowLength, int rowValue) {
-//        this.rowLength = rowLength;
-//        this.rowValue = rowValue;
-//    }
-//}
+    public StateObserver2048 rightAction() {
+        for (int k=0; k<4; k++) {
+            RowBitShift row = this.getRow(k).rAction();
+            this.putRow(row,k);
+            this.score += row.score;
+        }
+        return this;
+    }
+
+    public StateObserver2048 leftAction() {
+        for (int k=0; k<4; k++) {
+            //System.out.println(String.format("%04x", this.getRow(k).getRow()));
+            RowBitShift row = this.getRow(k).lAction();
+            //System.out.println(String.format("%04x", row.getRow()));
+            this.putRow(row,k);
+            this.score += row.score;
+        }
+        return this;
+    }
+
+    public StateObserver2048 downAction() {
+        for (int k=0; k<4; k++) {
+            RowBitShift row = this.getCol(k).rAction();
+            this.putCol(row,k);
+            this.score += row.score;
+        }
+        return this;
+    }
+
+    public StateObserver2048 upAction() {
+        for (int k=0; k<4; k++) {
+            RowBitShift row = this.getCol(k).lAction();
+            this.putCol(row,k);
+            this.score += row.score;
+        }
+        return this;
+    }
+
+    /**
+     * Returns the {@code k}th row of the board state
+     * @param k one out of {3,2,1,0} where 0 is the lowest row
+     * @return
+     */
+    public RowBitShift getRow(int k) {
+        long r = (boardB >> (16*k)) & 0x000000000000ffffL;
+        RowBitShift row = new RowBitShift((int) r);
+        return row;
+    }
+
+    public StateObserver2048 putRow(RowBitShift row, int k) {
+        long[] andB = {0xffffffffffff0000L,
+                0xffffffff0000ffffL,
+                0xffff0000ffffffffL,
+                0x0000ffffffffffffL};
+        long r = ((long)row.getRow() << (16*k)) ;
+        boardB = (boardB & andB[k]) + r;
+        return this;
+    }
+
+    /**
+     * Returns the {@code k}th column of the board state. The column returned is a
+     * 4-hex-digit number with the highest digit being the tile in the highest row.
+     * @param k one out of {3,2,1,0} where 0 is the rightmost column
+     * @return
+     */
+    public RowBitShift getCol(int k) {
+        long btemp = (boardB >> (4*k));  // shift the column to get in row 0 to digit 0
+        long r = 0L;
+        for (int j=3; j>=0; j--) {
+            r = r << 4;
+            r = r + ((btemp >> 16*j) & 0x000000000000000fL);
+        }
+        RowBitShift row = new RowBitShift((int) r);
+        return row;
+    }
+
+    public StateObserver2048 putCol(RowBitShift row, int k) {
+        long[] andB = {0xfff0fff0fff0fff0L,
+                0xff0fff0fff0fff0fL,
+                0xf0fff0fff0fff0ffL,
+                0x0fff0fff0fff0fffL};
+        long col = 0L;
+        for (int j=3; j>=0; j--) {
+            // shift one word (4 hex-digits) up and add the jth digit from row as lowest digit:
+            col = (col << 16) + row.d(j);
+        }
+        // shift the digits from row to the locations (the '0's in the relevant andB[k]):
+        col = col << 4*k;
+
+        // add the boardB digits on all other places:
+        boardB = (boardB & andB[k]) + col;
+        return this;
+    }
+}

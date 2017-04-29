@@ -287,11 +287,15 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private void updateBoardLabel(int row, int column) {
         int value = 0;
         if(m_so != null) {
-            value = m_so.getTile(row, column).getValue();
+            value = (int)Math.pow(2 , m_so.getTile(row, column).getValue());
         }
 
         switch (value) {
             case 0:
+                board[row][column].setText("<html><br><font color='#eee4da'>......</font><br><br></html>");
+                board[row][column].setBackground(Color.decode("#eee4da"));
+                break;
+            case 1:
                 board[row][column].setText("<html><br><font color='#eee4da'>......</font><br><br></html>");
                 board[row][column].setBackground(Color.decode("#eee4da"));
                 break;
@@ -387,7 +391,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                 
         if(so != null) {
     		if (so instanceof StateObserver2048) {
-    			StateObserver2048 soZTAV = (StateObserver2048) so;
+                StateObserver2048 soZTAV = (StateObserver2048) so;
                 // ** activate next line only if m_so is of class StateObserver2048: **
                 m_so = soZTAV.copy();
                 

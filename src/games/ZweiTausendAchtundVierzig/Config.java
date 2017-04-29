@@ -11,7 +11,7 @@ public class Config {
 
     public static final int STARTINGVALUES[] = {2,2,2,2,2,2,2,2,2,4};
 
-    public static final int NUMBEREVALUATIONS = 100;
+    public static final int NUMBEREVALUATIONS = 100; // NC for Certainty Calculation
 
     //Heuristic Values
     public static final boolean ENABLEHEURISTICS = false;
@@ -25,5 +25,4 @@ public class Config {
     public static final double PENALISATION = -1;
     //Gibt an ob die unveränderte Gamescore zu der Bestrafung hinzuaddiert werden soll. Heuristiken werden bei dieser Score nich berücksichtigt!
     public static final boolean ADDSCORE = true;
-
 }

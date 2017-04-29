@@ -1,10 +1,12 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
+import controllers.MC.MCAgentConfig;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
+import params.MCParams;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -28,6 +30,10 @@ public class Evaluator2048 extends Evaluator {
     private int moves = 0;
     private long startTime;
     private long stopTime;
+
+    int depth = -1;
+    int iterations = -1;
+    int numberAgents = -1;
 
 
     public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
@@ -177,9 +183,9 @@ public class Evaluator2048 extends Evaluator {
 
 
         return "\n\nSettings:" +
-                "\nMC-Agent DEPTH:" + controllers.MC.Config.DEPTH +
-                "\nMC-Agent ITERATIONS:" + controllers.MC.Config.ITERATIONS +
-                "\nMC-Agent NUMBERAGENTS:" + controllers.MC.Config.NUMBERAGENTS +
+                "\nMC-Agent DEPTH: " + depth +
+                "\nMC-Agent ITERATIONS: " + iterations +
+                "\nMC-Agent NUMBERAGENTS: " + numberAgents +
                 "\n" +
                 "\nPENALISATION: " + Config.PENALISATION +
                 "\nADDSCORE: " + Config.ADDSCORE +

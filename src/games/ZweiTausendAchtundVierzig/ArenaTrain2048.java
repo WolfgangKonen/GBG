@@ -47,7 +47,7 @@ public class ArenaTrain2048 extends ArenaTrain {
      */
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
 
-        return new Evaluator2048_BoardPositions(pa,gb,stopEval,mode,verbose);
+        return new Evaluator2048(pa,gb,stopEval,mode,verbose);
     }
     
 	public XNTupleFuncs makeXNTupleFuncs() {

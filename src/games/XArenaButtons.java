@@ -7,16 +7,11 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import params.MCTSParams;
+import params.*;
 //import params.RpropParams;
 //import params.TCParams;
-import params.TDParams;
-import params.OptionsComp;
 import tools.HtmlDisplay;
 import tools.Types;
-import params.OtherParams;
-import params.NTParams;
-
 
 
 /**
@@ -68,7 +63,8 @@ public class XArenaButtons extends JPanel
 //	TCParams tcPar= new TCParams();
 //	CMAParams cmaPar = new CMAParams();
 //	NTupleShow ntupleShow = null;
-	MCTSParams mcPar= new MCTSParams();
+	MCTSParams mctsParams = new MCTSParams();
+	MCParams mcParams = new MCParams();
 	OtherParams oPar = new OtherParams(5);
 	HtmlDisplay htmlDisplay = null;
 	boolean htmlDisplayActive = false;

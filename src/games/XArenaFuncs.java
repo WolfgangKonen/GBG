@@ -1,30 +1,16 @@
 package games;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.*; 		// DecimalFormat, NumberFormat
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.Random;
-import java.util.HashMap;
-import java.util.Set;
 
 import javax.swing.JOptionPane;
 
 import controllers.MC.MCAgent;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartFrame;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import controllers.PlayAgent;
 import controllers.RandomAgent;
@@ -35,12 +21,6 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple.NTupleFactory;
 import controllers.TD.ntuple.TDNTupleAgt;
-import games.Arena.Task;
-import games.Evaluator;
-import games.TicTacToe.FeatureTTT;
-import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
-import params.NTParams;
-import params.TDParams;
 import tools.LineChartSuccess;
 import tools.Measure;
 import tools.MessageBox;
@@ -63,7 +43,7 @@ import tools.Types;
  * Known classes having {@link XArenaFuncs} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  * 
  */
 public class XArenaFuncs 
@@ -160,11 +140,11 @@ public class XArenaFuncs
 		} else if (sAgent.equals("Random")) {
 			pa = new RandomAgent(sAgent);
 		} else if (sAgent.equals("MCTS")) {
-			pa= new MCTSAgentT(sAgent,null,m_xab.mcPar);
+			pa= new MCTSAgentT(sAgent,null,m_xab.mctsParams);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
-			pa = new MCAgent(sAgent);
+			pa = new MCAgent(sAgent, m_xab.mcParams);
 		}
 		return pa;
 	}
@@ -197,11 +177,11 @@ public class XArenaFuncs
 			} else if (sAgent.equals("Random")) {
 				pa= new RandomAgent(sAgent);
 			} else if (sAgent.equals("MCTS")) {
-				pa= new MCTSAgentT(sAgent,null,m_xab.mcPar);
+				pa= new MCTSAgentT(sAgent,null,m_xab.mctsParams);
 			} else if (sAgent.equals("Human")) {
 				pa= new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {
-				pa= new MCAgent(sAgent);
+				pa= new MCAgent(sAgent, m_xab.mcParams);
 			}else { // all the trainable agents:
 				if (m_PlayAgents[n]==null) {
 					if (sAgent.equals("TDS")) {

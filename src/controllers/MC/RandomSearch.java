@@ -10,11 +10,11 @@ import games.StateObservation;
  */
 public class RandomSearch{
     private Random random = new Random();
-    private int rolloutDepth = Config.DEPTH;
+    private int rolloutDepth = MCAgentConfig.DEPTH;
 
-    public void startAgent(StateObservation sob) {
+    public void startAgent(StateObservation sob, int depth) {
 
-        for(int i = 0; i < Config.DEPTH; i++) {
+        for(int i = 0; i < depth; i++) {
             if (sob.getNumAvailableActions() > 0) {
                 sob.advance(sob.getAvailableActions().get(random.nextInt(sob.getNumAvailableActions())));
             }
