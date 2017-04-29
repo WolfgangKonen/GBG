@@ -8,11 +8,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.MC.MCAgentConfig;
-import controllers.MCTS.MCTSAgentT;
-import controllers.MCTS.SingleMCTSPlayer;
 
 /**
- * MCTS (Monte Carlo Tree Search) parameters for board games.<p>
+ * MC (Monte Carlo) parameters for board games.<p>
  *
  * These parameters and their [defaults] are: <ul>
  * <li> <b>Iterations</b>: 	    [1000]  number of iterations during MC search
@@ -20,10 +18,9 @@ import controllers.MCTS.SingleMCTSPlayer;
  * <li> <b>NumberAgents</b>:    [1]     Number Agents for Majority Vote
  * <li> <b>DOCALCCERTAINTY</b>  [false] Calculate Certainty while playing
  * </ul>
- * The defaults are defined in {@link SingleMCTSPlayer}.
+ * The defaults are defined in {@link MCAgentConfig}.
  *
- * @see MCTSAgentT
- * @see SingleMCTSPlayer
+ * @see controllers.MC.MCAgent
  */
 public class MCParams extends Frame implements Serializable
 {
@@ -37,9 +34,6 @@ public class MCParams extends Frame implements Serializable
     public Checkbox CBCalcCertainty;
     JPanel mPanel;
 
-//	Button ok;
-//	MCTSParams m_par;
-
     public MCParams() {
         super("MC Parameter");
         LIterations = new JLabel("Iterations");
@@ -51,11 +45,11 @@ public class MCParams extends Frame implements Serializable
         CBCalcCertainty = new Checkbox("Calc Certainty", MCAgentConfig.DOCALCCERTAINTY);
         mPanel = new JPanel();
 
-        LIterations.setToolTipText("Number of iterations during MCTS search");
-        LDepth.setToolTipText("Parameter K in UCT rule ");
-        LNumberAgents.setToolTipText("MCTS tree depth");
+        LIterations.setToolTipText("Number of iterations during MC search");
+        LDepth.setToolTipText("MC tree depth");
+        LNumberAgents.setToolTipText("Number of agents for majority vote");
 
-        setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
+        setLayout(new BorderLayout(10,0));
         mPanel.setLayout(new GridLayout(0,4,10,10));
 
         mPanel.add(LIterations);
@@ -88,7 +82,7 @@ public class MCParams extends Frame implements Serializable
 
         pack();
         setVisible(false);
-    } // constructor MCTSParams()
+    }
 
     public JPanel getPanel() {
         return mPanel;
