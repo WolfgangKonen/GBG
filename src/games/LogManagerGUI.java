@@ -33,7 +33,7 @@ public class LogManagerGUI {
     private JPanel jPMain = new JPanel();
     private JTextField jTFNextAction = new JTextField("0");
     private JLabel jLNumberActions = new JLabel("/ 0");
-    private JButton jBJump = new JButton("Jump to Action");
+    private JButton jBJump = new JButton("Jump to Boardstate");
     private JButton jBNextAction = new JButton("no next action");
     private JButton jBPreviousAction = new JButton("no previous action");
 

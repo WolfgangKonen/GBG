@@ -31,7 +31,8 @@ public class LogManager {
      * and "src\games\Logs\temp" as default tempPath
      */
     public LogManager() {
-        //ToDo: temp ordner suchen und konfertieren
+        checkForFolder(filePath);
+        checkForFolder(tempPath);
     }
 
     /**
@@ -44,6 +45,9 @@ public class LogManager {
     public LogManager(String filePath, String tempPath) {
         this.filePath = filePath;
         this.tempPath = tempPath;
+
+        checkForFolder(filePath);
+        checkForFolder(tempPath);
     }
 
 
@@ -222,6 +226,18 @@ public class LogManager {
         Date now = new Date();
         String strDate = sdfDate.format(now);
         return strDate;
+    }
+
+    /**
+     * checks if a folder exists and creates a new one if it doesn't
+     * 
+     * @param filePath the folder Path
+     */
+    private void checkForFolder(String filePath) {
+        File file = new File(filePath);
+        if(!file.exists()) {
+            file.mkdirs();
+        }
     }
 }
 
