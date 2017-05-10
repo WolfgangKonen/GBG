@@ -1,9 +1,11 @@
 package games.ZweiTausendAchtundVierzig;
 
+import java.io.Serializable;
+
 /**
  * Created by Johannes on 02.01.2017.
  */
-public class Tile {
+public class Tile implements Serializable{
     private int value;
     private Position position;
 
@@ -33,7 +35,7 @@ public class Tile {
     }
 }
 
-class Position {
+class Position implements Serializable{
     private int row;
     private int column;
 

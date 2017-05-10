@@ -29,7 +29,8 @@ public class XArenaButtons extends JPanel
 	XArenaFuncs 		m_xfun;	
 	public Arena	 	m_game;	// a reference to the ArenaTTT object passed in with the constructor
 	XArenaButtons		m_xab;
-	public OptionsComp 		winCompOptions = new OptionsComp();
+	public OptionsComp 	winCompOptions = new OptionsComp();
+	private LogManagerGUI logManagerGUI = null;
 	//private Random rand;
 	int numPlayers;
 	int m_numParamBtn;			// number of the last param button pressed
@@ -45,6 +46,7 @@ public class XArenaButtons extends JPanel
 	//JButton TCparB;
 	//JButton OparB;
 	JButton NTupShowB;
+	JButton Logs;
 	JSlider Delay;				// The Sleep Slider
 	TextField GameNumT;
 	TextField TrainNumT;
@@ -127,6 +129,7 @@ public class XArenaButtons extends JPanel
 		Play=new JButton("Play");
 		InspectV=new JButton("Inspect V");
 		NTupShowB = new JButton("Insp Ntuples");
+		Logs=new JButton("Logs");
 		Delay = new JSlider(JSlider.HORIZONTAL, m_game.minSleepDuration,m_game.maxSleepDuration, m_game.currentSleepDuration);
 		GameNumL = new Label("Train Games");
 		TrainNumL = new Label("Agents trained");
@@ -172,11 +175,13 @@ public class XArenaButtons extends JPanel
 		TrainNumT.setEnabled(false);	// (see ArenaTrain for enabling this)	
 		Play.setEnabled(true);
 		InspectV.setEnabled(true);
+		Logs.setEnabled(true);
 		// Arena enables only button Play & Inspect V
 
 		MultiTrain.setForeground(Color.black);
 		Play.setForeground(Color.white);
 		InspectV.setForeground(Color.white);
+		Logs.setForeground(Color.white);
 //		TDparB.setForeground(Color.white);
 //		CMAparB.setForeground(Color.white);
 //		OparB.setForeground(Color.white);
@@ -188,6 +193,7 @@ public class XArenaButtons extends JPanel
 //		MultiTrain.setBackground(Color.lightGray);
 		Play.setBackground(Color.blue);
 		InspectV.setBackground(Color.blue);
+		Logs.setBackground(Color.blue);
 //		TDparB.setBackground(Color.blue);
 //		CMAparB.setBackground(Color.blue);
 //		TCparB.setBackground(Color.GREEN);//samine//
@@ -289,6 +295,22 @@ public class XArenaButtons extends JPanel
 				}	
 		);
 
+		Logs.addActionListener(
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						if(logManagerGUI == null) {
+							logManagerGUI = new LogManagerGUI(m_game.logManager, m_game.getGameBoard());
+						} else {
+							logManagerGUI.close();
+							logManagerGUI = null;
+						}
+
+					}
+				}
+		);
+
 		Delay.addChangeListener(
 				new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
@@ -342,7 +364,7 @@ public class XArenaButtons extends JPanel
 		p1.add(GameNumL);
 		p1.add(GameNumT);
 		p1.add(new Canvas());
-		p1.add(new Canvas());
+		p1.add(Logs);
 
 		JPanel p2 = new JPanel();
 		p2.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
