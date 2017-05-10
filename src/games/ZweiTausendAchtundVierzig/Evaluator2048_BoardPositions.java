@@ -1,7 +1,6 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
-import controllers.MC.MCAgentConfig;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.Evaluator;
@@ -38,7 +37,9 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     @Override
     protected boolean eval_Agent() {
         //find new realistic gameStates
-        //newGameStates();
+        if(ConfigEvaluator.GENERATENEWGAMESTATES) {
+            newGameStates();
+        }
 
         //load saved gameStates
         List<StateObserver2048> gameStates = loadGameStates();
@@ -49,7 +50,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
         //remove gameStates until numGameStates are left for each group
         for(List<StateObserver2048> gameStateGroup : gameStateGroups.values()) {
-            while (gameStateGroup.size() > 20) {
+            while (gameStateGroup.size() > ConfigEvaluator.BOARDPOSITIONS) {
                 gameStateGroup.remove(random.nextInt(gameStateGroup.size()-1));
             }
         }
@@ -111,14 +112,19 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     private ResultContainer analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
         //create Agents
         MCTSParams mctsParams = new MCTSParams();
-        mctsParams.setNumIter(MCAgentConfig.ITERATIONS* MCAgentConfig.NUMBERAGENTS*gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
-        mctsParams.setK_UCT(1);
-        mctsParams.setTreeDepth(1);
-        mctsParams.setRolloutDepth(MCAgentConfig.DEPTH+1);
-        MCTSAgentT mctsAgent = new MCTSAgentT("MCTS",null,mctsParams);
-        MCAgent mcAgent = new MCAgent(new MCParams());
+        mctsParams.setNumIter(ConfigEvaluator.ITERATIONS * ConfigEvaluator.NUMBERAGENTS * gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
+        mctsParams.setK_UCT(ConfigEvaluator.KUCT);
+        mctsParams.setTreeDepth(ConfigEvaluator.TREEDEPTH);
+        mctsParams.setRolloutDepth(ConfigEvaluator.ROLLOUTDEPTH);
+        MCTSAgentT mctsAgent = new MCTSAgentT("MCTS", null, mctsParams);
 
-        int maxCertainty = Config.NUMBEREVALUATIONS*gameStateGroup.size();
+        MCParams mcParams = new MCParams();
+        mcParams.setRolloutdepth(ConfigEvaluator.ROLLOUTDEPTH - 1);
+        mcParams.setIterations(ConfigEvaluator.ITERATIONS);
+        mcParams.setNumberAgents(ConfigEvaluator.NUMBERAGENTS);
+        MCAgent mcAgent = new MCAgent(mcParams);
+
+        int maxCertainty = ConfigEvaluator.NC*gameStateGroup.size();
         double mcCertainty = 0;
         double mctsCertainty = 0;
         double sameActionCounter = 0;
@@ -133,19 +139,22 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             int highestMCTSValue = 0;
             int bestMCTSAction = 0;
 
-            //analyse for MC Agent
-            for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
-                int MCAction = mcAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
-                mcActions[MCAction] +=1;
-                mcRolloutDepth += mcAgent.getAverageRolloutDepth();
+            //analyse for MCTS Agent
+            if(ConfigEvaluator.EVALUATEMCTS) {
+                for (int i = 0; i < ConfigEvaluator.NC; i++) {
+                    int MCTSAction = mctsAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
+                    mctsActions[MCTSAction] += 1;
+                }
             }
 
-            //analyse for MCTS Agent
-            //MCTS currently disabled to save CPU Time when Evaluating MC Agent
-            /*for(int i = 0; i < MCAgentConfig.NUMBEREVALUATIONS; i++) {
-                int MCTSAction = mctsAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
-                mctsActions[MCTSAction] +=1;
-            } */
+            //analyse for MC Agent
+            if(ConfigEvaluator.EVALUATEMC) {
+                for (int i = 0; i < ConfigEvaluator.NC; i++) {
+                    int MCAction = mcAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
+                    mcActions[MCAction] += 1;
+                    mcRolloutDepth += mcAgent.getAverageRolloutDepth();
+                }
+            }
 
             //find bestAction and the number of moves for this Action
             for(int i = 0; i < 4; i++) {
@@ -171,11 +180,10 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         mcCertainty=(mcCertainty/maxCertainty)*100;
         mctsCertainty=(mctsCertainty/maxCertainty)*100;
         sameActionCounter=(sameActionCounter/gameStateGroup.size())*100;
-        mcRolloutDepth = mcRolloutDepth/gameStateGroup.size()/Config.NUMBEREVALUATIONS;
+        mcRolloutDepth = mcRolloutDepth/gameStateGroup.size()/ ConfigEvaluator.NC;
 
         System.out.println("Analysed " + gameStateGroup.size() + " gameStates with " + gameStateGroup.get(0).getNumEmptyTiles() + " emptyTile(s) and " + gameStateGroup.get(0).getNumAvailableActions() + " availableAction(s)");
-        
-        
+
         return new ResultContainer(gameStateGroup.get(0).getNumAvailableActions(), gameStateGroup.get(0).getNumEmptyTiles(), mcCertainty, mctsCertainty, sameActionCounter, mcRolloutDepth, mctsRolloutDepth);
     }
 
@@ -202,7 +210,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
         //play i games
         List<Callable<List<StateObserver2048>>> callables = new ArrayList<>();
-        for(int i = 20; i > 0; i--) {
+        for(int i = ConfigEvaluator.GAMESFORNEWGAMESTATES; i > 0; i--) {
             int gameNumber = i;
             callables.add(() -> {
                 StateObserver2048 gameState = new StateObserver2048();
@@ -335,9 +343,9 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     }
 
     private int[][] rotateArray(int[][] array) {
-        int[][] rotatedArray = new int[Config.ROWS][Config.COLUMNS];
-        for(int i = 0; i < Config.ROWS; i++) {
-            for(int j = 0; j < Config.COLUMNS; j++) {
+        int[][] rotatedArray = new int[ConfigGame.ROWS][ConfigGame.COLUMNS];
+        for(int i = 0; i < ConfigGame.ROWS; i++) {
+            for(int j = 0; j < ConfigGame.COLUMNS; j++) {
                 rotatedArray[j][3-i] = array[i][j];
             }
         }
@@ -345,9 +353,9 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     }
 
     private int[][] mirrorArray(int[][] array) {
-        int[][] mirroredArray = new int[Config.ROWS][Config.COLUMNS];
-        for(int i = 0; i < Config.ROWS; i++) {
-            for(int j = 0; j < Config.COLUMNS; j++) {
+        int[][] mirroredArray = new int[ConfigGame.ROWS][ConfigGame.COLUMNS];
+        for(int i = 0; i < ConfigGame.ROWS; i++) {
+            for(int j = 0; j < ConfigGame.COLUMNS; j++) {
                 mirroredArray[3-i][j] = array[i][j];
             }
         }
@@ -361,7 +369,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     @Override
     public String getMsg() {
-        return "";
+        return "use this Spreedsheat to analyse output: https://docs.google.com/spreadsheets/d/1fAX-gwf4keZut4vuAZ2GQro5ubiLOeVvwhzn74zPTKs/edit?usp=sharing";
     }
     
  	/**

@@ -146,6 +146,8 @@ public class StateObserverTTT implements StateObservation {
 	public double getMinGameScore() { return REWARD_NEGATIVE; }
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
+	public String getName() { return "TicTacToe";	}
+
     @Override
 	public double getGameValue() { return getGameScore(); }
 

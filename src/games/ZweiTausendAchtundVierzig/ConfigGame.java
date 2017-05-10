@@ -3,15 +3,14 @@ package games.ZweiTausendAchtundVierzig;
 /**
  * Created by Johannes on 03.11.2016.
  */
-public class Config {
+public class ConfigGame {
+    //General Game Settings
     public static final int ROWS = 4;
     public static final int COLUMNS = 4;
     public static final int STARTINGFIELDS = 2;
     public static final int WINNINGVALUE = 2048;
 
     public static final int STARTINGVALUES[] = {2,2,2,2,2,2,2,2,2,4};
-
-    public static final int NUMBEREVALUATIONS = 100; // NC for Certainty Calculation
 
     //Heuristic Values
     public static final boolean ENABLEHEURISTICS = false;

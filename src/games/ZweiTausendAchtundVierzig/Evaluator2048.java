@@ -1,12 +1,12 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
-import controllers.MC.MCAgentConfig;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
-import params.MCParams;
+import games.LogManager;
+import tools.Types;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -45,18 +45,19 @@ public class Evaluator2048 extends Evaluator {
     @Override
     protected boolean eval_Agent() {
         startTime = System.currentTimeMillis();
-        System.out.print("Starting evaluation of " + Config.NUMBEREVALUATIONS + " games, this may take a while...\n");
+        System.out.print("Starting evaluation of " + ConfigEvaluator.NUMBEREVALUATIONS + " games, this may take a while...\n");
         List<StateObserver2048> stateObservers = new ArrayList<>();
 
 
         if(m_PlayAgent.getName().equals("MCTS")) {
             //async for MCTS Agents
+            LogManager logManager = new LogManager();
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
             MCTSAgentT mctsAgentT = (MCTSAgentT)m_PlayAgent;
 
             System.out.println("Detected MCTS Agent, Iterations: " + mctsAgentT.params.getNumIter() + ", Rolloutdepth: " + mctsAgentT.params.getRolloutDepth());
             //play Games
-            for(int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
+            for(int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
                 int gameNumber = i+1;
                 callables.add(() -> {
                     int depth = 0;
@@ -67,16 +68,23 @@ public class Evaluator2048 extends Evaluator {
 
                     PlayAgent playAgent = new MCTSAgentT("MCTS",null,mctsAgentT.params);
 
+                    int sesionid = logManager.newLoggingSession(so);
+
                     while (!so.isGameOver()) {
                         currentNumberActions = so.getNumAvailableActions();
-                        so.advance(playAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
+                        Types.ACTIONS action = playAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true);
+                        so.advance(action);
                         currentNumberActions = currentNumberActions * so.getNumEmptyTiles() * 2;
                         numberActions += currentNumberActions;
                         depth++;
+
+                        logManager.addLogEntry(action, so, sesionid);
                     }
 
                     numberActions/=depth;
                     System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ". Depth is: " + depth + " and numberActions is: " + numberActions + "\n");
+
+                    logManager.endLoggingSession(sesionid);
 
                     return so;
                 });
@@ -98,7 +106,7 @@ public class Evaluator2048 extends Evaluator {
 
         } else {
             //sync for other Agents (MC Agent uses multiple Cores naturally)
-            for (int i = 0; i < Config.NUMBEREVALUATIONS; i++) {
+            for (int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
                 long gameSartTime = System.currentTimeMillis();
                 StateObserver2048 so = new StateObserver2048();
 
@@ -136,25 +144,25 @@ public class Evaluator2048 extends Evaluator {
             moves += so.moves;
         }
 
-        averageScore/=Config.NUMBEREVALUATIONS;
+        averageScore/= ConfigEvaluator.NUMBEREVALUATIONS;
 
 
         //Median Score
         Collections.sort(scores);
 
-        if(Config.NUMBEREVALUATIONS %2 == 0) {
-            medianScore+= scores.get(Config.NUMBEREVALUATIONS/2);
-            medianScore+= scores.get((Config.NUMBEREVALUATIONS/2)-1);
+        if(ConfigEvaluator.NUMBEREVALUATIONS %2 == 0) {
+            medianScore+= scores.get(ConfigEvaluator.NUMBEREVALUATIONS/2);
+            medianScore+= scores.get((ConfigEvaluator.NUMBEREVALUATIONS/2)-1);
             medianScore/=2;
         } else {
-            medianScore= scores.get((Config.NUMBEREVALUATIONS-1)/2);
+            medianScore= scores.get((ConfigEvaluator.NUMBEREVALUATIONS-1)/2);
         }
 
         //Standartdeviation
         for(int score : scores) {
             standartdeviation += (score-averageScore)*(score-averageScore);
         }
-        standartdeviation/=Config.NUMBEREVALUATIONS;
+        standartdeviation/= ConfigEvaluator.NUMBEREVALUATIONS;
         standartdeviation = Double.valueOf(Math.sqrt(standartdeviation)).longValue();
 
         averageRolloutDepth/=moves;
@@ -183,16 +191,10 @@ public class Evaluator2048 extends Evaluator {
 
 
         return "\n\nSettings:" +
-                "\nMC-Agent DEPTH: " + depth +
+                "\nMC-Agent ROLLOUTDEPTH: " + depth +
                 "\nMC-Agent ITERATIONS: " + iterations +
                 "\nMC-Agent NUMBERAGENTS: " + numberAgents +
-                "\n" +
-                "\nPENALISATION: " + Config.PENALISATION +
-                "\nADDSCORE: " + Config.ADDSCORE +
-                "\nEmptitiles multiplier: " + Config.EMPTYTILEMULTIPLIER +
-                "\nHighesttileincorner multiplier: " + Config.HIGHESTTILEINCORENERMULTIPLIER +
-                "\nRow multiplier: " + Config.ROWMULTIPLIER +
-                "\nNumber of games: " + Config.NUMBEREVALUATIONS +
+                "\nNumber of games: " + ConfigEvaluator.NUMBEREVALUATIONS +
                 "\n" +
                 "\nResults:" +
                 "\nLowest scores is: " + minScore +
@@ -200,7 +202,7 @@ public class Evaluator2048 extends Evaluator {
                 "\nHighest scores is: " + maxScore +
                 "\nStandartdeviation is: " + standartdeviation +
                 "\nAverage Rolloutdepth is: " + averageRolloutDepth +
-                "\nAverage game duration: " +  Math.round((stopTime - startTime)/Config.NUMBEREVALUATIONS) + "ms" +
+                "\nAverage game duration: " +  Math.round((stopTime - startTime)/ ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
                 "\nDuration of evaluation: " + duration + "s" +
                 "\nMoves per second: " + Math.round(moves/duration) +
                 "\n" +

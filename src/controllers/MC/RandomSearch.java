@@ -10,7 +10,7 @@ import games.StateObservation;
  */
 public class RandomSearch{
     private Random random = new Random();
-    private int rolloutDepth = MCAgentConfig.DEPTH;
+    private int rolloutDepth = MCAgentConfig.ROLLOUTDEPTH;
 
     public void startAgent(StateObservation sob, int depth) {
 

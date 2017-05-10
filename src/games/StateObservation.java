@@ -1,5 +1,6 @@
 package games;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import controllers.PlayAgent;
@@ -16,9 +17,9 @@ import tools.Types.ACTIONS;
  * <li> and others.
  * </ul><p>
  * 
- * @author Wolfgang Konen, TH Köln, Feb'17
+ * @author Wolfgang Konen, TH Kï¿½ln, Feb'17
  */
-public interface StateObservation {
+public interface StateObservation extends Serializable{
     //Types.ACTIONS[] actions=null;
 	
 	public StateObservation copy();
@@ -45,7 +46,7 @@ public interface StateObservation {
 
 	/**
 	 * This method should be only called if game is over. The player is 
-	 * the player who would be next in turn (if the game were not over) 
+	 * the player who would be next in turn (if the game were not over)
 	 * @return PLAYER_LOSES(-1), TIE(0), PLAYER_WINS(1)
 	 */
 	public Types.WINNER getGameWinner();
@@ -79,6 +80,12 @@ public interface StateObservation {
 	
 	public double getMinGameScore();
 	public double getMaxGameScore();
+
+	/**
+	 *
+	 * @return the Name of the Game
+	 */
+	public String getName();
 
 	/**
 	 * Advance the current state with 'action' to a new state

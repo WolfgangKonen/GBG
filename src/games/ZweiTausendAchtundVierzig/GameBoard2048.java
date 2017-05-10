@@ -66,7 +66,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         m_Arena         = ztavGame;
         buttons         = new JButton[4];
         vBoard          = new JLabel[4];
-        board           = new JLabel[Config.ROWS][Config.COLUMNS];
+        board           = new JLabel[ConfigGame.ROWS][ConfigGame.COLUMNS];
         scoreLabel      = new JLabel();
         boardPanel      = initBoard();
         buttonPanel     = initButton();
@@ -74,7 +74,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         gameInfo        = initGameInfo();
 
         vTable          = new double[4];
-        m_so		    = new StateObserver2048();	// empty table
+        m_so		    = new StateObserver2048();
 
 
         JPanel titlePanel = new JPanel();
@@ -118,9 +118,9 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     private JPanel initBoard() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(Config.ROWS,Config.COLUMNS,20,20));
-        for(int row = 0; row < Config.ROWS; row++) {
-            for(int column = 0; column < Config.COLUMNS; column++) {
+        panel.setLayout(new GridLayout(ConfigGame.ROWS, ConfigGame.COLUMNS,20,20));
+        for(int row = 0; row < ConfigGame.ROWS; row++) {
+            for(int column = 0; column < ConfigGame.COLUMNS; column++) {
                 board[row][column] = new JLabel();
                 board[row][column].setOpaque(true);
                 updateBoardLabel(row, column);
@@ -362,8 +362,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     public void clearBoard(boolean boardClear, boolean vClear) {
         if(boardClear) {
             m_so = new StateObserver2048();
-            for(int row=0;row<Config.ROWS;row++){
-                for(int column=0;column<Config.COLUMNS;column++){
+            for(int row = 0; row< ConfigGame.ROWS; row++){
+                for(int column = 0; column< ConfigGame.COLUMNS; column++){
                     updateBoardLabel(row, column);
                 }
             }
@@ -443,8 +443,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         double score, maxscore=Double.NEGATIVE_INFINITY;
         int imax = 0;
 
-        for(int row = 0; row < Config.ROWS; row++) {
-            for (int column = 0; column < Config.COLUMNS; column++) {
+        for(int row = 0; row < ConfigGame.ROWS; row++) {
+            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
                 updateBoardLabel(row,column);
             }
         }
@@ -460,7 +460,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                 vBoard[i].setText("   ");
                 vBoard[i].setBackground(Color.red);
             } else {
-                double realScore = score/*m_so.MAXSCORE*/;
+                double realScore = score*m_so.MAXSCORE;
                 String txt = null;
                 if(realScore >= 1000000) {
                     txt = ""+(String.format("%.1f",realScore));
