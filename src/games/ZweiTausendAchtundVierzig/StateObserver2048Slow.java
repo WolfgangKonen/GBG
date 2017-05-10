@@ -3,8 +3,8 @@ package games.ZweiTausendAchtundVierzig;
 import games.StateObservation;
 import tools.Types;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -44,9 +44,9 @@ public class StateObserver2048Slow implements StateObservation {
     }
 
     public StateObserver2048Slow(int[][] values, int score, int winState) {
-        gameBoard = new Tile[ConfigGame.ROWS][ConfigGame.COLUMNS];
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++) {
+        gameBoard = new Tile[Config.ROWS][Config.COLUMNS];
+        for(int row = 0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++) {
                 Tile newTile = new Tile(values[row][column], new Position(row,column));
                 gameBoard[row][column] = newTile;
                 updateHighestTile(newTile);
@@ -69,13 +69,13 @@ public class StateObserver2048Slow implements StateObservation {
     }
 
     /**
-     * Only debug check (if ASSERTSAME==true):
+     * Only debug check (if ASSERTSAME==true): 
      * Assert that StateObserver2048Slow and StateObs2048BitShift result in
      * <ul>
      * <li> the same state when doing a move with iAction on {@code this} (no random tile added)
-     * <li> the same score
+     * <li> the same score 
      * <li> the same list of available moves
-     * <li> the same empty tile positions (note that the lists {@code emptyTiles} contain different
+     * <li> the same empty tile positions (note that the lists {@code emptyTiles} contain different 
      * 		things in both classes)
      * </ul>
      * @param iAction
@@ -110,8 +110,8 @@ public class StateObserver2048Slow implements StateObservation {
     	for (Tile tile : sot.emptyTiles) {
     		// note that the numbering of tile positions is different:
     		// in StateObserver2048Slow row 0 is the highest row and column 0 is the leftmost column;
-    		// in StateObs2048BitShift row 0 is the lowest row and column 0 is the rightmost column.
-    		// Therefore we add two times a "(3-...)" for comparison.
+    		// in StateObs2048BitShift row 0 is the lowest row and column 0 is the rightmost column. 
+    		// Therefore we add two times a "(3-...)" for comparison. 
     		Position pos = tile.getPosition();
     		Integer iVal = (3-pos.getColumn()) + 4*(3-pos.getRow());
     		if (!sbs.emptyTiles.contains(iVal)) {
@@ -120,7 +120,7 @@ public class StateObserver2048Slow implements StateObservation {
     	}
     	return true;
     }
-
+    
     @Override
     public boolean isGameOver() {
         if(availableMoves.size() == 0) {
@@ -151,7 +151,7 @@ public class StateObserver2048Slow implements StateObservation {
 
     @Override
     public double getGameScore() {
-        if(ConfigGame.ENABLEHEURISTICS) {
+        if(Config.ENABLEHEURISTICS) {
             return getGameScore2();
         } else {
             return getGameScore1();
@@ -168,9 +168,9 @@ public class StateObserver2048Slow implements StateObservation {
 
     public double getGameScore2() {
         if (isGameOver()) {
-            double penalisation = ConfigGame.PENALISATION;
+            double penalisation = Config.PENALISATION;
 
-            if(ConfigGame.ADDSCORE) {
+            if(Config.ADDSCORE) {
                 penalisation += (score / MAXSCORE);
             }
             return penalisation;
@@ -180,21 +180,21 @@ public class StateObserver2048Slow implements StateObservation {
 
             //Row Heuristik
             evaluateBoard();
-            realScore += rowValue * ConfigGame.ROWMULTIPLIER;
+            realScore += rowValue * Config.ROWMULTIPLIER;
 
             //Highest Tile In Corner Heuristik
             if (highestTileInCorner) {
-                //realScore *= ConfigGame.HIGHESTTILEINCORENERMULTIPLIER+1;
-                realScore += highestTileValue * ConfigGame.HIGHESTTILEINCORENERMULTIPLIER;
+                //realScore *= Config.HIGHESTTILEINCORENERMULTIPLIER+1;
+                realScore += highestTileValue * Config.HIGHESTTILEINCORENERMULTIPLIER;
             }
 
             //Empty Tiles Heuristik
-            //realScore *= Math.pow(ConfigGame.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
-            //realScore += highestTileValue*emptyTiles.size()*(ConfigGame.EMPTYTILEMULTIPLIER);
-            realScore += score * emptyTiles.size() * ConfigGame.EMPTYTILEMULTIPLIER;
+            //realScore *= Math.pow(Config.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
+            //realScore += highestTileValue*emptyTiles.size()*(Config.EMPTYTILEMULTIPLIER);
+            realScore += score * emptyTiles.size() * Config.EMPTYTILEMULTIPLIER;
 
             //Merge Heuristik
-            realScore += mergeValue * ConfigGame.MERGEMULTIPLIER;
+            realScore += mergeValue * Config.MERGEMULTIPLIER;
 
 
             if (realScore == 0) {
@@ -208,7 +208,7 @@ public class StateObserver2048Slow implements StateObservation {
 
     @Override
 	public double getGameValue() { return getGameScore(); }
-
+	
    private void evaluateBoard() {
         RowInformationContainer rowInformationContainer;
         highestTileInCorner = false;
@@ -232,7 +232,7 @@ public class StateObserver2048Slow implements StateObservation {
             }
         }
 
-        if (gameBoard[ConfigGame.ROWS - 1][0].getValue() == highestTileValue) {
+        if (gameBoard[Config.ROWS - 1][0].getValue() == highestTileValue) {
             highestTileInCorner = true;
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
@@ -248,7 +248,7 @@ public class StateObserver2048Slow implements StateObservation {
             }
         }
 
-        if (gameBoard[0][ConfigGame.COLUMNS - 1].getValue() == highestTileValue) {
+        if (gameBoard[0][Config.COLUMNS - 1].getValue() == highestTileValue) {
             highestTileInCorner = true;
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
@@ -264,7 +264,7 @@ public class StateObserver2048Slow implements StateObservation {
             }
         }
 
-        if (gameBoard[ConfigGame.ROWS - 1][ConfigGame.COLUMNS - 1].getValue() == highestTileValue) {
+        if (gameBoard[Config.ROWS - 1][Config.COLUMNS - 1].getValue() == highestTileValue) {
             highestTileInCorner = true;
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
@@ -280,11 +280,11 @@ public class StateObserver2048Slow implements StateObservation {
             }
         }
 
-        for(int row = 0; row < ConfigGame.ROWS-1; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
+        for(int row = 0; row < Config.ROWS-1; row++) {
+            for (int column = 0; column < Config.COLUMNS; column++) {
                 int currentValue = gameBoard[row][column].getValue();
                 if(currentValue != 0) {
-                    for (int position = row+1; position < ConfigGame.ROWS; position++) {
+                    for (int position = row+1; position < Config.ROWS; position++) {
                         int newValue = gameBoard[position][column].getValue();
                         if(newValue != 0) {
                             if (currentValue == newValue) {
@@ -297,11 +297,11 @@ public class StateObserver2048Slow implements StateObservation {
             }
         }
 
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS-1; column++) {
+        for(int row = 0; row < Config.ROWS; row++) {
+            for (int column = 0; column < Config.COLUMNS-1; column++) {
                 int currentValue = gameBoard[row][column].getValue();
                 if(currentValue != 0) {
-                    for (int position = column+1; position < ConfigGame.COLUMNS; position++) {
+                    for (int position = column+1; position < Config.COLUMNS; position++) {
                         int newValue = gameBoard[row][position].getValue();
                         if(newValue != 0) {
                             if (currentValue == newValue) {
@@ -319,7 +319,7 @@ public class StateObserver2048Slow implements StateObservation {
         switch (direction) {
             case 0:
                 //left
-                for (int i = ConfigGame.COLUMNS-1-offset; i >= 0; i--) {
+                for (int i = Config.COLUMNS-1-offset; i >= 0; i--) {
                     if (gameBoard[position][i].getValue() != 0 && gameBoard[position][i].getValue() < currentTileValue /*gameBoard[position][i].getValue() == currentTileValue/2*/) {
                         currentRowLength++;
                         currentTileValue = gameBoard[position][i].getValue();
@@ -333,7 +333,7 @@ public class StateObserver2048Slow implements StateObservation {
 
             case 1:
                 //up
-                for (int i = ConfigGame.ROWS-1-offset; i >= 0; i--) {
+                for (int i = Config.ROWS-1-offset; i >= 0; i--) {
                     if (gameBoard[i][position].getValue() != 0 && gameBoard[i][position].getValue() < currentTileValue /*gameBoard[i][position].getValue() == currentTileValue/2*/) {
                         currentRowLength++;
                         currentTileValue = gameBoard[i][position].getValue();
@@ -347,7 +347,7 @@ public class StateObserver2048Slow implements StateObservation {
 
             case 2:
                 //right
-                for (int i = 0+offset; i < ConfigGame.COLUMNS; i++) {
+                for (int i = 0+offset; i < Config.COLUMNS; i++) {
                     if (gameBoard[position][i].getValue() != 0 && gameBoard[position][i].getValue() < currentTileValue /*gameBoard[position][i].getValue() == currentTileValue/2*/) {
                         currentRowLength++;
                         currentTileValue = gameBoard[position][i].getValue();
@@ -360,7 +360,7 @@ public class StateObserver2048Slow implements StateObservation {
 
             case 3:
                 //down
-                for (int i = 0+offset; i < ConfigGame.ROWS; i++) {
+                for (int i = 0+offset; i < Config.ROWS; i++) {
                     if (gameBoard[i][position].getValue() != 0 && gameBoard[i][position].getValue() < currentTileValue /*gameBoard[i][position].getValue() == currentTileValue/2*/) {
                         currentRowLength++;
                         currentTileValue = gameBoard[i][position].getValue();
@@ -391,11 +391,8 @@ public class StateObserver2048Slow implements StateObservation {
         return REWARD_POSITIVE;
     }
 
-    @Override
-    public String getName() { return "ZweiTausendAchtundVierzig"; }
-
 	/**
-	 * The board vector is an {@code int[]} vector where each entry corresponds to one
+	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
 	 * cell of the board. In the case of 2048 the mapping is
 	 * <pre>
 	 *    00 01 02 03
@@ -403,24 +400,24 @@ public class StateObserver2048Slow implements StateObservation {
 	 *    08 09 10 11
 	 *    12 13 14 15
 	 * </pre>
-	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its
+	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
 	 * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
 	 */
 	public int[] getBoardVector() {
-		int[] bvec = new int[ConfigGame.ROWS* ConfigGame.COLUMNS];
+		int[] bvec = new int[Config.ROWS*Config.COLUMNS]; 
 		int b2,k;
-		for(int row = 0, n = 0; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++,n++) {
+		for(int row = 0, n=0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,n++) {
             	b2 = gameBoard[row][column].getValue();
             	for (k=0; k<16; k++) {
             		// find the exponent k in 2^k by down-shifting:
                     b2 = b2>>1;
             		if (b2==0) break;
             	}
-            	bvec[n]=k;
+            	bvec[n]=k;                	
             }
-        }
-		return bvec;
+        }			
+		return bvec;   
 	}
 
     @Override
@@ -500,15 +497,15 @@ public class StateObserver2048Slow implements StateObservation {
         int codeA = +'A';		// normally 65
         XNTupleFuncs2048 xnf = new XNTupleFuncs2048();
         int[] bvec = xnf.getBoardVector(this);
-        for(int row = 0, n = 0; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++,n++) {
+        for(int row = 0,n=0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,n++) {
             	if (bvec[n]>=10) {
             		s = s+((char)(65-10+bvec[n]));
             	} else {
                     s = s+bvec[n];
             	}
             }
-            if (row<(ConfigGame.ROWS-1)) s=s+",";
+            if (row<(Config.ROWS-1)) s=s+",";
         }
         return s;
     }
@@ -521,8 +518,8 @@ public class StateObserver2048Slow implements StateObservation {
         String s="";
         XNTupleFuncs2048 xnf = new XNTupleFuncs2048();
         int[] bvec = xnf.getBoardVector(this);
-        for(int row = 0, n = 0; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++,n++) {
+        for(int row = 0,n=0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,n++) {
             	s = s+Integer.toHexString(bvec[n]);
             }
         }
@@ -545,7 +542,7 @@ public class StateObserver2048Slow implements StateObservation {
     public int getWinState() {
         return winState;
     }
-
+    
     public int getNumEmptyTiles() {
     	return emptyTiles.size();
     }
@@ -553,7 +550,7 @@ public class StateObserver2048Slow implements StateObservation {
     public Tile getTile(int row, int column) {
         return gameBoard[row][column];
     }
-
+    
     public Tile[][] getGameBoard() {
 		return gameBoard;
 	}
@@ -568,7 +565,7 @@ public class StateObserver2048Slow implements StateObservation {
     public void mergeTiles(Tile tileOne, Tile tileTwo) {
         tileOne.addValue(tileTwo.getValue());
         score += tileOne.getValue();
-        if(tileOne.getValue() >= ConfigGame.WINNINGVALUE) {
+        if(tileOne.getValue() >= Config.WINNINGVALUE) {
             setWinState(1);
         }
         updateHighestTile(tileOne);
@@ -592,7 +589,7 @@ public class StateObserver2048Slow implements StateObservation {
 
     /**
      *
-     * @param winState {@literal-1  > lost, 0 > running, 1 > won}
+     * @param winState {@literal-1  > lost, 0 > running, 1 > won} 
      */
     public void setWinState(int winState) {
         if(this.winState == 0) {
@@ -601,9 +598,9 @@ public class StateObserver2048Slow implements StateObservation {
     }
 
     public int[][] toArray() {
-        int[][] newBoard = new int[ConfigGame.ROWS][ConfigGame.COLUMNS];
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++) {
+        int[][] newBoard = new int[Config.ROWS][Config.COLUMNS];
+        for(int row = 0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++) {
                 newBoard[row][column] = gameBoard[row][column].getValue();
             }
         }
@@ -614,8 +611,8 @@ public class StateObserver2048Slow implements StateObservation {
         availableMoves = new ArrayList<>();
 
         loop:
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for (int column = 1; column < ConfigGame.COLUMNS; column++) {
+        for(int row = 0; row < Config.ROWS; row++) {
+            for (int column = 1; column < Config.COLUMNS; column++) {
                 if(gameBoard[row][column].getValue() != 0) {
                     if (gameBoard[row][column - 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column - 1].getValue()) {
                         availableMoves.add(0);
@@ -628,8 +625,8 @@ public class StateObserver2048Slow implements StateObservation {
 
 
         loop:
-        for(int row = 1; row < ConfigGame.ROWS; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
+        for(int row = 1; row < Config.ROWS; row++) {
+            for (int column = 0; column < Config.COLUMNS; column++) {
                 if(gameBoard[row][column].getValue() != 0) {
                     if (gameBoard[row - 1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row - 1][column].getValue()) {
                         availableMoves.add(1);
@@ -640,8 +637,8 @@ public class StateObserver2048Slow implements StateObservation {
         }
 
         loop:
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS-1; column++) {
+        for(int row = 0; row < Config.ROWS; row++) {
+            for (int column = 0; column < Config.COLUMNS-1; column++) {
                 if(gameBoard[row][column].getValue() != 0) {
                     if (gameBoard[row][column + 1].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row][column + 1].getValue()) {
                         availableMoves.add(2);
@@ -652,8 +649,8 @@ public class StateObserver2048Slow implements StateObservation {
         }
 
         loop:
-        for(int row = 0; row < ConfigGame.ROWS-1; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
+        for(int row = 0; row < Config.ROWS-1; row++) {
+            for (int column = 0; column < Config.COLUMNS; column++) {
                 if(gameBoard[row][column].getValue() != 0) {
                     if (gameBoard[row+1][column].getValue() == 0 || gameBoard[row][column].getValue() == gameBoard[row+1][column].getValue()) {
                         availableMoves.add(3);
@@ -707,7 +704,7 @@ public class StateObserver2048Slow implements StateObservation {
     public void addRandomTile () {
         if(emptyTiles.size() > 0) {
             Tile tile = emptyTiles.get(random.nextInt(emptyTiles.size()));
-            addTile(tile, ConfigGame.STARTINGVALUES[random.nextInt(ConfigGame.STARTINGVALUES.length)]);
+            addTile(tile, Config.STARTINGVALUES[random.nextInt(Config.STARTINGVALUES.length)]);
         }
     }
 
@@ -738,11 +735,11 @@ public class StateObserver2048Slow implements StateObservation {
 
     private void left() {
         if(availableMoves.contains(0)) {
-            for (int row = 0; row < ConfigGame.ROWS; row++) {
+            for (int row = 0; row < Config.ROWS; row++) {
                 //Feld mit dem gemerged wird oder auf das geschoben wird
                 Tile lastTile = getTile(row, 0);
 
-                for (int column = 1; column < ConfigGame.COLUMNS; column++) {
+                for (int column = 1; column < Config.COLUMNS; column++) {
                     Tile currentTile = getTile(row, column);
 
                     if(currentTile.getValue() != 0) {
@@ -774,10 +771,10 @@ public class StateObserver2048Slow implements StateObservation {
 
     private void up() {
         if(availableMoves.contains(1)) {
-            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
+            for (int column = 0; column < Config.COLUMNS; column++) {
                 Tile lastTile = getTile(0, column);
 
-                for (int row = 1; row < ConfigGame.ROWS; row++) {
+                for (int row = 1; row < Config.ROWS; row++) {
                     Tile currentTile = getTile(row, column);
 
                     if(currentTile.getValue() != 0) {
@@ -809,10 +806,10 @@ public class StateObserver2048Slow implements StateObservation {
 
     private void right() {
         if(availableMoves.contains(2)) {
-            for (int row = 0; row < ConfigGame.ROWS; row++) {
-                Tile lastTile = getTile(row, ConfigGame.COLUMNS - 1);
+            for (int row = 0; row < Config.ROWS; row++) {
+                Tile lastTile = getTile(row, Config.COLUMNS - 1);
 
-                for (int column = ConfigGame.COLUMNS - 2; column >= 0; column--) {
+                for (int column = Config.COLUMNS - 2; column >= 0; column--) {
                     Tile currentTile = getTile(row, column);
 
                     if(currentTile.getValue() != 0) {
@@ -844,10 +841,10 @@ public class StateObserver2048Slow implements StateObservation {
 
     private void down() {
         if(availableMoves.contains(3)) {
-            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
-                Tile lastTile = getTile(ConfigGame.ROWS - 1, column);
+            for (int column = 0; column < Config.COLUMNS; column++) {
+                Tile lastTile = getTile(Config.ROWS - 1, column);
 
-                for (int row = ConfigGame.ROWS - 2; row >= 0; row--) {
+                for (int row = Config.ROWS - 2; row >= 0; row--) {
                     Tile currentTile = getTile(row, column);
 
                     if(currentTile.getValue() != 0) {
@@ -878,9 +875,9 @@ public class StateObserver2048Slow implements StateObservation {
     }
 
     private void newBoard() {
-        gameBoard = new Tile[ConfigGame.ROWS][ConfigGame.COLUMNS];
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++) {
+        gameBoard = new Tile[Config.ROWS][Config.COLUMNS];
+        for(int row = 0; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++) {
                 Tile newTile = new Tile(0, new Position(row,column));
                 gameBoard[row][column] = newTile;
                 emptyTiles.add(newTile);
@@ -889,7 +886,7 @@ public class StateObserver2048Slow implements StateObservation {
         score = 0;
         winState = 0;
 
-        for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
+        for(int i = Config.STARTINGFIELDS; i > 0; i--) {
             addRandomTile();
         }
 
@@ -897,7 +894,7 @@ public class StateObserver2048Slow implements StateObservation {
     }
 }
 
-class RowInformationContainer implements Serializable {
+class RowInformationContainer {
     int rowLength;
     int rowValue;
 

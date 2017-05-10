@@ -26,10 +26,10 @@ public class MCParams extends Frame implements Serializable
 {
     private static final long serialVersionUID = 1L;
     JLabel LIterations;
-    JLabel LRolloutdepth;
+    JLabel LDepth;
     JLabel LNumberAgents;
     public JTextField TIterations;
-    public JTextField TRolloutdepth;
+    public JTextField TDepth;
     public JTextField TNumberAgents;
     public Checkbox CBCalcCertainty;
     JPanel mPanel;
@@ -37,16 +37,16 @@ public class MCParams extends Frame implements Serializable
     public MCParams() {
         super("MC Parameter");
         LIterations = new JLabel("Iterations");
-        LRolloutdepth = new JLabel("Rolloutdepth");
+        LDepth = new JLabel("Depth");
         LNumberAgents = new JLabel("Number Agents (Majority Vote)");
         TIterations = new JTextField(""+MCAgentConfig.ITERATIONS);
-        TRolloutdepth = new JTextField(""+MCAgentConfig.ROLLOUTDEPTH);
+        TDepth = new JTextField(""+MCAgentConfig.DEPTH);
         TNumberAgents = new JTextField(""+MCAgentConfig.NUMBERAGENTS);
         CBCalcCertainty = new Checkbox("Calc Certainty", MCAgentConfig.DOCALCCERTAINTY);
         mPanel = new JPanel();
 
         LIterations.setToolTipText("Number of iterations during MC search");
-        LRolloutdepth.setToolTipText("MC Rolloutdepth");
+        LDepth.setToolTipText("MC tree depth");
         LNumberAgents.setToolTipText("Number of agents for majority vote");
 
         setLayout(new BorderLayout(10,0));
@@ -54,8 +54,8 @@ public class MCParams extends Frame implements Serializable
 
         mPanel.add(LIterations);
         mPanel.add(TIterations);
-        mPanel.add(LRolloutdepth);
-        mPanel.add(TRolloutdepth);
+        mPanel.add(LDepth);
+        mPanel.add(TDepth);
 
         mPanel.add(LNumberAgents);
         mPanel.add(TNumberAgents);
@@ -90,8 +90,8 @@ public class MCParams extends Frame implements Serializable
     public int getIterations() {
         return Integer.valueOf(TIterations.getText()).intValue();
     }
-    public int getRolloutdepth() {
-        return Double.valueOf(TRolloutdepth.getText()).intValue();
+    public int getDepth() {
+        return Double.valueOf(TDepth.getText()).intValue();
     }
     public int getNumberAgents() {
         return Integer.valueOf(TNumberAgents.getText()).intValue();
@@ -102,8 +102,8 @@ public class MCParams extends Frame implements Serializable
     public void setIterations(int value) {
         TIterations.setText(value+"");
     }
-    public void setRolloutdepth(double value) {
-        TRolloutdepth.setText(value+"");
+    public void setDepth(double value) {
+        TDepth.setText(value+"");
     }
     public void setNumberAgents(int value) {
         TNumberAgents.setText(value+"");
@@ -118,7 +118,7 @@ public class MCParams extends Frame implements Serializable
      */
     public void setFrom(MCParams tp) {
         setIterations(tp.getIterations());
-        setRolloutdepth(tp.getRolloutdepth());
+        setDepth(tp.getDepth());
         setNumberAgents(tp.getNumberAgents());
         setCalcCertainty(tp.getCalcCertainty());
     }

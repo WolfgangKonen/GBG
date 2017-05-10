@@ -26,7 +26,7 @@ public class XArenaTabs extends JFrame
 		tp.addTab("TD pars", arena.m_xab.tdPar.getPanel());			// 0
 		tp.addTab("NT pars", arena.m_xab.ntPar.getPanel());			// 1	
 		tp.addTab("MCTS pars", arena.m_xab.mctsParams.getPanel());		// 2
-		tp.addTab("MC pars", arena.m_xab.mcParams.getPanel());    		// 3
+		tp.addTab("MC pars", arena.m_xab.mcParams.getPanel());    	// 3
 		tp.addTab("Other pars", arena.m_xab.oPar.getPanel());			// 4
 //		tp.addTab("RP pars", arena.m_xab.rpPar.getPanel());		// --1
 //		tp.addTab("TC pars", arena.m_xab.tcPar.getPanel());		// --2

@@ -5,6 +5,7 @@ import tools.Types;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -86,8 +87,8 @@ public class StateObs2048BitShift implements StateObservation {
     public StateObs2048BitShift(int[][] values, int score, int winState) {
         boardB=0;
         updateEmptyTiles();		// add all cells to emptyTiles
-        for(int row = 0, position = 15; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++,position--) {
+        for(int row = 0, position=15; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,position--) {
                 int k,b2 = values[row][column];
             	for (k=0; k<16; k++) {
             		// find the exponent k in 2^k by down-shifting:
@@ -140,7 +141,7 @@ public class StateObs2048BitShift implements StateObservation {
 
     @Override
     public double getGameScore() {
-        if(ConfigGame.ENABLEHEURISTICS) {
+        if(Config.ENABLEHEURISTICS) {
             return getGameScore2();
         } else {
             return getGameScore1();
@@ -156,9 +157,9 @@ public class StateObs2048BitShift implements StateObservation {
     }
 
     public double getGameScore2() {
-//    	int[][] values = new int[ConfigGame.ROWS][ConfigGame.COLUMNS];
-//        for(int row = ConfigGame.ROWS-1, position=0; row >=0 ; row--) {
-//            for(int column = ConfigGame.COLUMNS-1; column >=0 ; column--,position++) {
+//    	int[][] values = new int[Config.ROWS][Config.COLUMNS];
+//        for(int row = Config.ROWS-1, position=0; row >=0 ; row--) {
+//            for(int column = Config.COLUMNS-1; column >=0 ; column--,position++) {
 //                long b2 = boardB;
 //                values[row][column] = (1 << (b2 & 0x0fL));
 //                b2 = (b2 >> 4);
@@ -191,11 +192,6 @@ public class StateObs2048BitShift implements StateObservation {
     @Override
     public double getMaxGameScore() {
         return REWARD_POSITIVE;
-    }
-
-    @Override
-    public String getName() {
-        return "ZweiTausendAchtundVierzig";
     }
 
 	/**
@@ -383,9 +379,9 @@ public class StateObs2048BitShift implements StateObservation {
      * @return each value in the {@code int[][]} array carries the tile value {@code 2^exp}
      */
     public int[][] toArray() {
-        int[][] newBoard = new int[ConfigGame.ROWS][ConfigGame.COLUMNS];
-        for(int row = 0, position = 15; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++,position--) {
+        int[][] newBoard = new int[Config.ROWS][Config.COLUMNS];
+        for(int row = 0, position=15; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,position--) {
             	int exp = (int) ((boardB >> 4*position) & 0x0fL);
                 newBoard[row][column] = (1 << exp);
             }
@@ -458,7 +454,7 @@ public class StateObs2048BitShift implements StateObservation {
     public void addRandomTile () {
         if(emptyTiles.size() > 0) {
             int position = emptyTiles.get(random.nextInt(emptyTiles.size())).intValue();
-            int value = ConfigGame.STARTINGVALUES[random.nextInt(ConfigGame.STARTINGVALUES.length)] >> 1;
+            int value = Config.STARTINGVALUES[random.nextInt(Config.STARTINGVALUES.length)] >> 1;
             addTile(position, value);
         }
     }
@@ -493,7 +489,7 @@ public class StateObs2048BitShift implements StateObservation {
         score = 0;
         winState = 0;
 
-        for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
+        for(int i = Config.STARTINGFIELDS; i > 0; i--) {
             addRandomTile();
         }
 

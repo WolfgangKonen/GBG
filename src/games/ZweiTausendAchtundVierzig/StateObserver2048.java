@@ -3,7 +3,9 @@ package games.ZweiTausendAchtundVierzig;
 import games.StateObservation;
 import tools.Types;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -11,7 +13,7 @@ import java.util.Random;
  * Class {@link StateObs2048BitShift} holds a 2048 game state.
  * The game state is coded in a compact way in *one* long number
  * <pre>
- *                 private boardB = 0xfedcba9876543210L
+ * 		private boardB = 0xfedcba9876543210L
  *
  *                                 row
  *                      f e d c    3
@@ -39,7 +41,7 @@ public class StateObserver2048 implements StateObservation {
 
     private long boardB;
 
-    private int winState = 0;                // 0 = running, 1 = won, -1 = lost
+    private int winState = 0;		// 0 = running, 1 = won, -1 = lost
     public int score = 0;
     public int highestTileValue = Integer.MIN_VALUE;
     public boolean highestTileInCorner = false;
@@ -84,9 +86,9 @@ public class StateObserver2048 implements StateObservation {
      */
     public StateObserver2048(int[][] values, int score, int winState) {
         boardB=0;
-        updateEmptyTiles();                // add all cells to emptyTiles
-        for(int row = 0, position = 15; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++,position--) {
+        updateEmptyTiles();		// add all cells to emptyTiles
+        for(int row = 0, position=15; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,position--) {
                 int k,b2 = values[row][column];
                 for (k=0; k<16; k++) {
                     // find the exponent k in 2^k by down-shifting:
@@ -94,7 +96,7 @@ public class StateObserver2048 implements StateObservation {
                     if (b2==0) break;
                 }
                 if (k>0)
-                    addTile(position,k);        // deletes also 'position' from emptyTiles
+                    addTile(position,k);	// deletes also 'position' from emptyTiles
             }
         }
         updateEmptyTiles();
@@ -139,7 +141,7 @@ public class StateObserver2048 implements StateObservation {
 
     @Override
     public double getGameScore() {
-        if(ConfigGame.ENABLEHEURISTICS) {
+        if(Config.ENABLEHEURISTICS) {
             return getGameScore2();
         } else {
             return getGameScore1();
@@ -155,7 +157,7 @@ public class StateObserver2048 implements StateObservation {
     }
 
     public double getGameScore2() {
-//            int[][] values = new int[MCAgentConfig.ROWS][MCAgentConfig.COLUMNS];
+//    	int[][] values = new int[MCAgentConfig.ROWS][MCAgentConfig.COLUMNS];
 //        for(int row = MCAgentConfig.ROWS-1, position=0; row >=0 ; row--) {
 //            for(int column = MCAgentConfig.COLUMNS-1; column >=0 ; column--,position++) {
 //                long b2 = boardB;
@@ -190,11 +192,6 @@ public class StateObserver2048 implements StateObservation {
     @Override
     public double getMaxGameScore() {
         return REWARD_POSITIVE;
-    }
-
-    @Override
-    public String getName() {
-        return "2048";
     }
 
     /**
@@ -289,9 +286,9 @@ public class StateObserver2048 implements StateObservation {
 
     @Override
     public String stringDescr() {
-        return String.format("%016x", boardB);        // format as 16-hex-digit number with
+        return String.format("%016x", boardB);	// format as 16-hex-digit number with
         // leading 0's (if necessary)
-        //return Long.toHexString(boardB);                // no leading zeros
+        //return Long.toHexString(boardB);		// no leading zeros
     }
 
     @Deprecated
@@ -332,7 +329,7 @@ public class StateObserver2048 implements StateObservation {
      * Assumes (and asserts) that board is empty at {@code position}.
      *
      * @param position one out of {0,...,15}, where to add the tile
-     * @param value        the exponent (2^value is the tile value)
+     * @param value	the exponent (2^value is the tile value)
      */
     public void addTile(int position, int value) {
         boolean succ = emptyTiles.remove(new Integer(position));
@@ -362,7 +359,7 @@ public class StateObserver2048 implements StateObservation {
         long b = boardB;
         for (int j=0; j<16; j++) {
             if ((b & 0x0fL)==0) emptyTiles.add(new Integer(j));
-            b = b >> 4;                // shift down by one hex digit
+            b = b >> 4;		// shift down by one hex digit
         }
     }
 
@@ -382,9 +379,9 @@ public class StateObserver2048 implements StateObservation {
      * @return each value in the {@code int[][]} array carries the tile value {@code 2^exp}
      */
     public int[][] toArray() {
-        int[][] newBoard = new int[ConfigGame.ROWS][ConfigGame.COLUMNS];
-        for(int row = 0, position = 15; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++,position--) {
+        int[][] newBoard = new int[Config.ROWS][Config.COLUMNS];
+        for(int row = 0, position=15; row < Config.ROWS; row++) {
+            for(int column = 0; column < Config.COLUMNS; column++,position--) {
                 int exp = (int) ((boardB >> 4*position) & 0x0fL);
                 newBoard[row][column] = (1 << exp);
             }
@@ -457,7 +454,7 @@ public class StateObserver2048 implements StateObservation {
     public void addRandomTile () {
         if(emptyTiles.size() > 0) {
             int position = emptyTiles.get(random.nextInt(emptyTiles.size())).intValue();
-            int value = ConfigGame.STARTINGVALUES[random.nextInt(ConfigGame.STARTINGVALUES.length)] >> 1;
+            int value = Config.STARTINGVALUES[random.nextInt(Config.STARTINGVALUES.length)] >> 1;
             addTile(position, value);
         }
     }
@@ -494,15 +491,9 @@ public class StateObserver2048 implements StateObservation {
 
         updateEmptyTiles(); // fixed Empty Tiles JK
 
-      /*  for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
+        for(int i = Config.STARTINGFIELDS; i > 0; i--) {
             addRandomTile();
-        }*/
-
-        addTile(0,2);
-        addTile(1,1);
-        addTile(2,2);
-        addTile(4,1);
-        addTile(5,2);
+        }
 
         updateEmptyTiles();
         updateAvailableMoves();

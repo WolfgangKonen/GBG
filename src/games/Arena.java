@@ -54,7 +54,6 @@ abstract public class Arena extends JPanel implements Runnable {
 	public int minSleepDuration = 0;
 	public int maxSleepDuration = 2000;
 	public int currentSleepDuration = 0;
-	public LogManager logManager;
 
 	public Arena() {
 		initGame();
@@ -92,9 +91,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		m_tabs = new XArenaTabs(this);
 		add(titlePanel,BorderLayout.NORTH);				
 		add(m_xab,BorderLayout.CENTER);	
-		add(infoPanel,BorderLayout.SOUTH);
-
-		logManager = new LogManager();
+		add(infoPanel,BorderLayout.SOUTH);	
 	}
 	
 	public void init()
@@ -333,9 +330,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		
 		assert paVector.length == so.getNumPlayers() : 
 			  "Number of agents does not match so.getNumPlayers()!";
-
-		int sessionid = logManager.newLoggingSession(so);
-
+		
 		while(taskState == Task.PLAY)	// game play interruptible by hitting 'Play' again 
 		{			
 			if(gb.isActionReq()){
@@ -365,14 +360,12 @@ abstract public class Arena extends JPanel implements Runnable {
                         }
                         so.advance(actBest);
                         try {
-                            Thread.sleep(currentSleepDuration);
+                            Thread.sleep(currentSleepDuration); //(200);
                             // waiting time between agent-agent actions
                         } catch (Exception e) {
                             System.out.println("Thread 1");
                         }
                         gb.updateBoard(so,showStoredV,false);
-
-                        logManager.addLogEntry(actBest, so, sessionid);
 				}
 
 
@@ -425,7 +418,6 @@ abstract public class Arena extends JPanel implements Runnable {
 			} // if isGameOver
 			
 		}	// while(true) [will be left only by the last break above]
-		logManager.endLoggingSession(sessionid);
 		taskState = Task.IDLE;		
 		setStatusMessage("Done.");
 	}

@@ -3,7 +3,7 @@ package controllers.MC;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
-import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
+import games.ZweiTausendAchtundVierzig.Config;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.MCParams;
 import tools.Types;
@@ -45,12 +45,12 @@ public class MCAgent extends AgentBase implements PlayAgent {
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
         int iterations = mcParams.getIterations();
         int numberAgents = mcParams.getNumberAgents();
-        int depth = mcParams.getRolloutdepth();
+        int depth = mcParams.getDepth();
 
         if (mcParams.getCalcCertainty()) {
         	StateObserver2048 sobZTAV = (StateObserver2048) sob;
         	if (sobZTAV.getNumEmptyTiles()==10) {
-            	int NC = ConfigEvaluator.NC;
+            	int NC = Config.NUMBEREVALUATIONS;
                 double cert0, cert1,cert2=0,cert4=0,cert6=0;
                 cert0 = calcCertainty(sob, vtable,1,false, NC, iterations, depth);
                 NC = 20;
