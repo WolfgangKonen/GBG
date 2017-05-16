@@ -300,13 +300,11 @@ public class XArenaButtons extends JPanel
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						if(logManagerGUI == null) {
-							logManagerGUI = new LogManagerGUI(m_game.logManager, m_game.getGameBoard());
-						} else {
-							logManagerGUI.close();
-							logManagerGUI = null;
-						}
-
+					    if(logManagerGUI == null) {
+                            logManagerGUI = new LogManagerGUI(m_game.logManager, m_game.getGameBoard());
+                        } else {
+                            logManagerGUI.show();
+                        }
 					}
 				}
 		);

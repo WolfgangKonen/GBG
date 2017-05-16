@@ -875,7 +875,7 @@ class RowBitShift {
 			scoreRight[i]=rbs.score;
 		}
 	}
-	RowBitShift rActionSlow( ) {
+	private RowBitShift rActionSlow( ) {
 		// remove the 'holes' (0-tiles) from left to right:
 		for (int k=2; k>=0; k--) 
 			if (this.d(k)==0) this.rShift(k);
@@ -911,9 +911,9 @@ class RowBitShift {
 			scoreLeft[i]=rbs.score;
 		}
 	}
-	RowBitShift lActionSlow( ) {
+	private RowBitShift lActionSlow( ) {
 		// remove the 'holes' (0-tiles) from right to left:
-		for (int k=1; k<4; k++) 
+		for (int k=1; k<4; k++)
 			if (this.d(k)==0) this.lShift(k);
 		
 		// merge adjacent same-value tiles from left to right:

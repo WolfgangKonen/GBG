@@ -26,6 +26,7 @@ public class LogManagerGUI {
     private JMenu jMOptions = new JMenu("Options");
     private JCheckBoxMenuItem jCBMILoggingEnabled;
     private JCheckBoxMenuItem jCBMIAdvancedLogging;
+    private JCheckBoxMenuItem jCBMIVerbose;
     private JMenuItem jMICompile = new JMenuItem("Compile temporary Gamelog");
     private JMenu jMLoad = new JMenu("Load");
     private JMenuItem jMILoad = new JMenuItem("Load Gamelog");
@@ -37,13 +38,13 @@ public class LogManagerGUI {
     private JButton jBNextAction = new JButton("no next action");
     private JButton jBPreviousAction = new JButton("no previous action");
 
-    LogSessionContainer currentLog;
-    int counter;
+    private LogSessionContainer currentLog;
+    private int counter;
 
     /**
      * The GUI for the logManager
      *
-     * @param logManager a logManager, mostly used for settings and filepaths
+     * @param logManager a logManager, mostly used for settings and file paths
      * @param gameBoard a gameBoard, used to display a log
      */
     public LogManagerGUI(LogManager logManager, GameBoard gameBoard) {
@@ -63,18 +64,32 @@ public class LogManagerGUI {
         jMBMain.add(jMOptions);
 
         jCBMILoggingEnabled = new JCheckBoxMenuItem("Logging enabled", logManager.loggingEnabled);
-        jCBMILoggingEnabled.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
+        jCBMILoggingEnabled.addActionListener((e) ->
             {
-                logManager.loggingEnabled = jCBMILoggingEnabled.isSelected();
+                if(!logManager.running()) {
+                    logManager.loggingEnabled = jCBMILoggingEnabled.isSelected();
+                } else {
+                    jCBMILoggingEnabled.setState(logManager.loggingEnabled);
+                    JOptionPane.showMessageDialog(null, "Cant disable logging while logging is in progress.");
+                }
             }
-        });
+        );
 
         jCBMIAdvancedLogging = new JCheckBoxMenuItem("Advanced logging", logManager.advancedLogging);
         jCBMIAdvancedLogging.addActionListener((e) ->
             {
-                logManager.advancedLogging = jCBMIAdvancedLogging.isSelected();
+                if(!logManager.running()) {
+                    logManager.advancedLogging = jCBMIAdvancedLogging.isSelected();
+                } else {
+                    jCBMIAdvancedLogging.setState(logManager.advancedLogging);
+                    JOptionPane.showMessageDialog(null, "Cant change logging method while logging is in progress.");
+                }
+        });
+
+        jCBMIVerbose= new JCheckBoxMenuItem("Verbose", logManager.verbose);
+        jCBMIVerbose.addActionListener((e) ->
+        {
+            logManager.verbose = jCBMIVerbose.isSelected();
         });
 
         jMICompile.addActionListener((e) ->
@@ -103,6 +118,7 @@ public class LogManagerGUI {
 
         jMOptions.add(jCBMILoggingEnabled);
         jMOptions.add(jCBMIAdvancedLogging);
+        jMOptions.add(jCBMIVerbose);
         jMOptions.add(jMICompile);
 
         //load
@@ -111,7 +127,6 @@ public class LogManagerGUI {
         jMILoad.addActionListener((e) ->
         {
             //load a new .gamelog File
-
             JFileChooser fileChooser = new JFileChooser(logManager.filePath);
             String gameName = gameBoard.getStateObs().getName();
             fileChooser.setFileFilter(new FileNameExtensionFilter(gameName + " Gamelog", gameName + "_gamelog"));
@@ -125,11 +140,21 @@ public class LogManagerGUI {
                 try {
                     FileInputStream fis = new FileInputStream(selectedFile);
                     ObjectInputStream ois = new ObjectInputStream(fis);
-                    currentLog = (LogSessionContainer) ois.readObject();
+                    LogSessionContainer tempLog = (LogSessionContainer) ois.readObject();
                     fis.close();
                     ois.close();
 
+                    //check if gameboard and log have the same StateObserver Type
+                    StateObservation so = gameBoard.getStateObs();
+                    if(!tempLog.stateObservations.get(0).getClass().equals(gameBoard.getStateObs().getClass())) {
+                        JOptionPane.showMessageDialog(null, "Please only select logs for the current gameboard.");
+                        return;
+                    } else {
+                        currentLog = tempLog;
+                    }
+
                     loadBoard(0);
+
                     counter = 0;
                     jTFNextAction.setEnabled(true);
                     jLNumberActions.setText("/ " + (currentLog.stateObservations.size()));
@@ -193,8 +218,8 @@ public class LogManagerGUI {
         JPAction.add(jTFNextAction);
         JPAction.add(jLNumberActions);
 
-        jPMain.add(JPAction);
         jPMain.add(jBJump);
+        jPMain.add(JPAction);
 
         jPMain.add(jBPreviousAction);
         jPMain.add(jBNextAction);
@@ -210,6 +235,15 @@ public class LogManagerGUI {
      */
     public void close() {
         jFMain.dispatchEvent(new WindowEvent(jFMain, WindowEvent.WINDOW_CLOSING));
+    }
+
+    /**
+     * move the LogManagerGUI to the front
+     */
+    public void show() {
+        jFMain.setVisible(true);
+        jFMain.setState(Frame.NORMAL);
+        jFMain.toFront();
     }
 
     /**

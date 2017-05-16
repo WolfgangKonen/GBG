@@ -1,6 +1,5 @@
 package games;
 
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.Types;
 
 import java.io.*;
@@ -17,7 +16,7 @@ public class LogManager {
     public boolean advancedLogging = true; //if advancedLogging is enabled every new logEntry is saved to a temporary file
                                            //the log is not lost when a crash occurs
                                            //call generateLogSessionContainerFromFile(path of temp folder) to combine all temporary files and generate the log
-    private boolean verbose = true;
+    public boolean verbose = true;
 
     public String filePath = "games\\Logs";
     public String tempPath = "games\\Logs\\temp";
@@ -31,8 +30,8 @@ public class LogManager {
      * and "src\games\Logs\temp" as default tempPath
      */
     public LogManager() {
-        checkForFolder(filePath);
-        checkForFolder(tempPath);
+        checkAndCreateFolder(filePath);
+        checkAndCreateFolder(tempPath);
     }
 
     /**
@@ -46,8 +45,8 @@ public class LogManager {
         this.filePath = filePath;
         this.tempPath = tempPath;
 
-        checkForFolder(filePath);
-        checkForFolder(tempPath);
+        checkAndCreateFolder(filePath);
+        checkAndCreateFolder(tempPath);
     }
 
 
@@ -59,10 +58,15 @@ public class LogManager {
      * @param sessionid the id of the current logsession
      */
     public void addLogEntry(Types.ACTIONS action, StateObservation stateObservation, int sessionid) {
-        if(loggingEnabled) {
+        //sessionid = -1 => session is invalid, started while logging was disabled
+        if(loggingEnabled && sessionid != -1) {
             LogContainer logContainer = new LogContainer(action, stateObservation);
 
             if(advancedLogging) {
+                if(!counter.containsKey(sessionid)) {
+                    throw new RuntimeException("Invalid sessionid, start a new  logging session to get a valid sessionid");
+                }
+
                 try {
                     FileOutputStream fos = new FileOutputStream(tempPath + "\\temp_" + sessionid + "\\" + counter.get(sessionid) + ".temp");
                     ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -74,6 +78,10 @@ public class LogManager {
                     ignore.printStackTrace();
                 }
             } else {
+                if(!simpleLoggingContainers.containsKey(sessionid)) {
+                    throw new RuntimeException("Invalid Session ID");
+                }
+
                 simpleLoggingContainers.get(sessionid).add(logContainer);
             }
         }
@@ -86,26 +94,29 @@ public class LogManager {
      */
     public int newLoggingSession(StateObservation stateObservation) {
         //find first empty sessionid
-        int sessionid = 0;
-        if(advancedLogging) {
-            while (counter.containsKey(sessionid)) {
-                sessionid++;
-            }
-        } else {
-            while (simpleLoggingContainers.containsKey(sessionid)) {
-                sessionid++;
-            }
-        }
+        int sessionid = -1;
 
         if(loggingEnabled) {
-            if(verbose) {
-                System.out.println("LogManager: Starting new logging session with id: " + sessionid);
+            sessionid = 0;
+            if(advancedLogging) {
+                while (counter.containsKey(sessionid)) {
+                    sessionid++;
+                }
+            } else {
+                while (simpleLoggingContainers.containsKey(sessionid)) {
+                    sessionid++;
+                }
             }
 
             LogContainer logContainer = new LogContainer(null, stateObservation.copy());
 
             if(advancedLogging) {
+                while(checkFolder(tempPath + "\\temp_" + sessionid)) {
+                    sessionid++;
+                }
+
                 counter.put(sessionid, 0);
+
                 new File(tempPath + "\\temp_" + sessionid).mkdirs();
 
                 try {
@@ -121,6 +132,10 @@ public class LogManager {
             } else {
                 simpleLoggingContainers.put(sessionid, new ArrayList<>());
                 simpleLoggingContainers.get(sessionid).add(logContainer);
+            }
+
+            if(verbose) {
+                System.out.println("LogManager: Starting new logging session with id: " + sessionid);
             }
         }
 
@@ -140,9 +155,17 @@ public class LogManager {
                 System.out.println("LogManager: Ending logging session with id: " + sessionid);
             }
             if(advancedLogging) {
+                if(!counter.containsKey(sessionid)) {
+                    throw new RuntimeException("Invalid Session ID");
+                }
+
                 logSessionContainer = generateLogSessionContainerFromFile(tempPath + "\\temp_" + sessionid);
                 counter.remove(sessionid);
             } else {
+                if(!simpleLoggingContainers.containsKey(sessionid)) {
+                    throw new RuntimeException("Invalid Session ID");
+                }
+
                 logSessionContainer = new LogSessionContainer();
                 List<LogContainer> logContainers = simpleLoggingContainers.get(sessionid);
                 logContainers.forEach(logSessionContainer::addLogEntry);
@@ -192,27 +215,31 @@ public class LogManager {
      * @param logSessionContainer the LogSessionContainer
      */
     public void safeLogSessionContainer(LogSessionContainer logSessionContainer) {
-        try {
-            String sessionFolderName = filePath + "\\" + getCurrentTimeStamp() + "_" + logSessionContainer.stateObservations.size() + "_" + logSessionContainer.stateObservations.get(logSessionContainer.stateObservations.size() - 1).getGameScore();
+        if (logSessionContainer.stateObservations.size() > 0) {
+            try {
+                String sessionFolderName = filePath + "\\" + getCurrentTimeStamp() + "_" + logSessionContainer.stateObservations.size() + "_" + logSessionContainer.stateObservations.get(logSessionContainer.stateObservations.size() - 1).getGameScore();
 
 
-            //test if File allready exists
-            String sessionFolderNameSuffix = "";
-            int i = 0;
-            File sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + "." + logSessionContainer.stateObservations.get(0).getName() + "_gamelog");
-            while(sessionFolder.exists()) {
-                sessionFolderNameSuffix = " (" + i + ")";
-                sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + "." + logSessionContainer.stateObservations.get(0).getName() + "_gamelog");
-                i++;
+                //test if File allready exists
+                String sessionFolderNameSuffix = "";
+                int i = 0;
+                File sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + "." + logSessionContainer.stateObservations.get(0).getName() + "_gamelog");
+                while (sessionFolder.exists()) {
+                    sessionFolderNameSuffix = " (" + i + ")";
+                    sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + "." + logSessionContainer.stateObservations.get(0).getName() + "_gamelog");
+                    i++;
+                }
+
+                FileOutputStream fos = new FileOutputStream(sessionFolder);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(logSessionContainer);
+                fos.close();
+                oos.close();
+            } catch (IOException ignore) {
+                ignore.printStackTrace();
             }
-
-            FileOutputStream fos = new FileOutputStream(sessionFolder);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(logSessionContainer);
-            fos.close();
-            oos.close();
-        } catch (IOException ignore) {
-            ignore.printStackTrace();
+        } else {
+            System.out.println("LogManager: Log not saved because it is empty");
         }
     }
 
@@ -230,15 +257,34 @@ public class LogManager {
 
     /**
      * checks if a folder exists and creates a new one if it doesn't
-     * 
+     *
      * @param filePath the folder Path
      */
-    private void checkForFolder(String filePath) {
+    private void checkAndCreateFolder(String filePath) {
         File file = new File(filePath);
         if(!file.exists()) {
             file.mkdirs();
         }
     }
+
+    /**
+     * checks if a folder exists
+     *
+     * @param filePath the folder Path
+     */
+    private boolean checkFolder(String filePath) {
+        return new File(filePath).exists();
+    }
+
+    public boolean running() {
+        if(counter.size() > 0 || simpleLoggingContainers.size() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 }
 
 /**

@@ -34,7 +34,6 @@ public class StateObserver2048 implements StateObservation {
     private Random random = new Random();
     protected List<Integer> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves = new ArrayList();  // 0: left, 1: up, 2: right, 3: down
-    private Tile[][] gameBoard;
     protected Types.ACTIONS[] actions;
 
     private long boardB;
@@ -82,6 +81,7 @@ public class StateObserver2048 implements StateObservation {
      * @param score
      * @param winState
      */
+    @Deprecated
     public StateObserver2048(int[][] values, int score, int winState) {
         boardB=0;
         updateEmptyTiles();                // add all cells to emptyTiles
@@ -315,11 +315,9 @@ public class StateObserver2048 implements StateObservation {
         return emptyTiles.size();
     }
 
-    public Tile getTile(int row, int column) {
-        int pos = column + 4*row;
-        long val = (boardB >> 4*pos) & 0x0fL;
-        Tile tile = new Tile((int)val, new Position(row,column));
-        return tile;
+    public long getTileValue(int pos) {
+        long val = (boardB >> (15-pos)*4 & 0x0fL);
+        return val;
     }
 
     public long getBoardNum() {
@@ -494,15 +492,9 @@ public class StateObserver2048 implements StateObservation {
 
         updateEmptyTiles(); // fixed Empty Tiles JK
 
-      /*  for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
+        for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
             addRandomTile();
-        }*/
-
-        addTile(0,2);
-        addTile(1,1);
-        addTile(2,2);
-        addTile(4,1);
-        addTile(5,2);
+        }
 
         updateEmptyTiles();
         updateAvailableMoves();
@@ -519,9 +511,9 @@ public class StateObserver2048 implements StateObservation {
 
     public StateObserver2048 leftAction() {
         for (int k=0; k<4; k++) {
-            //System.out.println(String.format("%04x", this.getRow(k).getRow()));
+            //System.out.println(String.format("Old: %04x", this.getRow(k).getRow()));
             RowBitShift row = this.getRow(k).lAction();
-            //System.out.println(String.format("%04x", row.getRow()));
+            //System.out.println(String.format("New: %04x", row.getRow()));
             this.putRow(row,k);
             this.score += row.score;
         }

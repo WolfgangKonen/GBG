@@ -42,7 +42,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     /**
      * The representation of the gameBoard
      */
-    protected JLabel[][] board;
+    protected JLabel[] board;
 
     /**
      * The gamescore
@@ -66,7 +66,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         m_Arena         = ztavGame;
         buttons         = new JButton[4];
         vBoard          = new JLabel[4];
-        board           = new JLabel[ConfigGame.ROWS][ConfigGame.COLUMNS];
+        board           = new JLabel[ConfigGame.ROWS * ConfigGame.COLUMNS];
         scoreLabel      = new JLabel();
         boardPanel      = initBoard();
         buttonPanel     = initButton();
@@ -119,17 +119,15 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private JPanel initBoard() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(ConfigGame.ROWS, ConfigGame.COLUMNS,20,20));
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for(int column = 0; column < ConfigGame.COLUMNS; column++) {
-                board[row][column] = new JLabel();
-                board[row][column].setOpaque(true);
-                updateBoardLabel(row, column);
-                board[row][column].setForeground(Color.black);
-                board[row][column].setBorder(BorderFactory.createLineBorder(Color.black, 2));
-                Font font=new Font("Consolas",1,22);
-                board[row][column].setFont(font);
-                panel.add(board[row][column]);
-            }
+        for(int pos = 0; pos < ConfigGame.ROWS * ConfigGame.COLUMNS; pos++) {
+            board[pos] = new JLabel();
+            board[pos].setOpaque(true);
+            updateBoardLabel(pos);
+            board[pos].setForeground(Color.black);
+            board[pos].setBorder(BorderFactory.createLineBorder(Color.black, 2));
+            Font font = new Font("Consolas", 1, 22);
+            board[pos].setFont(font);
+            panel.add(board[pos]);
         }
         return panel;
     }
@@ -284,76 +282,76 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
 
 
-    private void updateBoardLabel(int row, int column) {
+    private void updateBoardLabel(int pos) {
         int value = 0;
         if(m_so != null) {
-            value = (int)Math.pow(2 , m_so.getTile(row, column).getValue());
+            value = (int)Math.pow(2 , m_so.getTileValue(pos));
         }
 
         switch (value) {
             case 0:
-                board[row][column].setText("<html><br><font color='#eee4da'>......</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#eee4da"));
+                board[pos].setText("<html><br><font color='#eee4da'>......</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#eee4da"));
                 break;
             case 1:
-                board[row][column].setText("<html><br><font color='#eee4da'>......</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#eee4da"));
+                board[pos].setText("<html><br><font color='#eee4da'>......</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#eee4da"));
                 break;
             case 2:
-                board[row][column].setText("<html><br><font color='#eee4da'>...</font>" + value + "<font color='#eee4da'>...</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#eee4da"));
+                board[pos].setText("<html><br><font color='#eee4da'>...</font>" + value + "<font color='#eee4da'>...</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#eee4da"));
                 break;
             case 4:
-                board[row][column].setText("<html><br><font color='#ede0c8'>...</font>" + value + "<font color='#ede0c8'>...</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#ede0c8"));
+                board[pos].setText("<html><br><font color='#ede0c8'>...</font>" + value + "<font color='#ede0c8'>...</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#ede0c8"));
                 break;
             case 8:
-                board[row][column].setText("<html><br><font color='#f2b179'>...</font>" + value + "<font color='#f2b179'>...</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#f2b179"));
+                board[pos].setText("<html><br><font color='#f2b179'>...</font>" + value + "<font color='#f2b179'>...</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#f2b179"));
                 break;
             case 16:
-                board[row][column].setText("<html><br><font color='#f59563'>..</font>" + value + "<font color='#f59563'>...</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#f59563"));
+                board[pos].setText("<html><br><font color='#f59563'>..</font>" + value + "<font color='#f59563'>...</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#f59563"));
                 break;
             case 32:
-                board[row][column].setText("<html><br><font color='#f67c5f'>..</font>" + value + "<font color='#f67c5f'>...</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#f67c5f"));
+                board[pos].setText("<html><br><font color='#f67c5f'>..</font>" + value + "<font color='#f67c5f'>...</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#f67c5f"));
                 break;
             case 64:
-                board[row][column].setText("<html><br><font color='#f65e3b'>..</font>" + value + "<font color='#f65e3b'>...</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#f65e3b"));
+                board[pos].setText("<html><br><font color='#f65e3b'>..</font>" + value + "<font color='#f65e3b'>...</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#f65e3b"));
                 break;
             case 128:
-                board[row][column].setText("<html><br><font color='#edcf72'>..</font>" + value + "<font color='#edcf72'>..</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#edcf72"));
+                board[pos].setText("<html><br><font color='#edcf72'>..</font>" + value + "<font color='#edcf72'>..</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#edcf72"));
                 break;
             case 256:
-                board[row][column].setText("<html><br><font color='#edcc61'>..</font>" + value + "<font color='#edcc61'>..</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#edcc61"));
+                board[pos].setText("<html><br><font color='#edcc61'>..</font>" + value + "<font color='#edcc61'>..</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#edcc61"));
                 break;
             case 512:
-                board[row][column].setText("<html><br><font color='#edc850'>..</font>" + value + "<font color='#edc850'>..</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#edc850"));
+                board[pos].setText("<html><br><font color='#edc850'>..</font>" + value + "<font color='#edc850'>..</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#edc850"));
                 break;
             case 1024:
-                board[row][column].setText("<html><br><font color='#edc53f'>.</font>" + value + "<font color='#edc53f'>..</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#edc53f"));
+                board[pos].setText("<html><br><font color='#edc53f'>.</font>" + value + "<font color='#edc53f'>..</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#edc53f"));
                 break;
             case 2048:
-                board[row][column].setText("<html><br><font color='#edc22e'>.</font>" + value + "<font color='#edc22e'>..</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#edc22e"));
+                board[pos].setText("<html><br><font color='#edc22e'>.</font>" + value + "<font color='#edc22e'>..</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#edc22e"));
                 break;
             case 4096:
-                board[row][column].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>..</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#3c3a32"));
+                board[pos].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>..</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#3c3a32"));
                 break;
             case 8192:
-                board[row][column].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>..</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#3c3a32"));
+                board[pos].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>..</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#3c3a32"));
                 break;
             default:
-                board[row][column].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>.</font><br><br></html>");
-                board[row][column].setBackground(Color.decode("#3c3a32"));
+                board[pos].setText("<html><br><font color='#3c3a32'>.</font><font color='#ffffff'>" + value + "</font><font color='#3c3a32'>.</font><br><br></html>");
+                board[pos].setBackground(Color.decode("#3c3a32"));
                 break;
         }
     }
@@ -362,10 +360,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     public void clearBoard(boolean boardClear, boolean vClear) {
         if(boardClear) {
             m_so = new StateObserver2048();
-            for(int row = 0; row< ConfigGame.ROWS; row++){
-                for(int column = 0; column< ConfigGame.COLUMNS; column++){
-                    updateBoardLabel(row, column);
-                }
+            for(int pos = 0; pos< ConfigGame.ROWS * ConfigGame.COLUMNS; pos++) {
+                updateBoardLabel(pos);
             }
             scoreLabel.setText("");
             leftInfo.setText("");
@@ -423,10 +419,6 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
         }
         guiUpdateBoard();
-        if (showStoredV) {
-        	// just a statement to optionally stop in debugger after guiUpdateBoard:
-        	int dummy=1;
-        }
     }
 
     private void guiUpdateBoard() {
@@ -440,13 +432,12 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         }
 
 
+
         double score, maxscore=Double.NEGATIVE_INFINITY;
         int imax = 0;
 
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
-                updateBoardLabel(row,column);
-            }
+        for(int pos = 0; pos< ConfigGame.ROWS * ConfigGame.COLUMNS; pos++) {
+            updateBoardLabel(pos);
         }
 
         for(int i = 0; i < 4; i++) {

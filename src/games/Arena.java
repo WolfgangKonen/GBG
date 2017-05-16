@@ -47,7 +47,7 @@ abstract public class Arena extends JPanel implements Runnable {
 	private Progress progress = null; // progress for some functions
 	public LoadSaveTD tdAgentIO;	// saving/loading of agents
 	protected JLabel m_title;
-	protected GameBoard gb;		
+	protected GameBoard gb;
 	protected StatusBar statusBar = new StatusBar();
 	public Task taskState = Task.IDLE;
 
@@ -364,6 +364,7 @@ abstract public class Arena extends JPanel implements Runnable {
                             showStoredV=false; // this is for 2nd updateBoard below
                         }
                         so.advance(actBest);
+						logManager.addLogEntry(actBest, so, sessionid);
                         try {
                             Thread.sleep(currentSleepDuration);
                             // waiting time between agent-agent actions
@@ -372,7 +373,7 @@ abstract public class Arena extends JPanel implements Runnable {
                         }
                         gb.updateBoard(so,showStoredV,false);
 
-                        logManager.addLogEntry(actBest, so, sessionid);
+
 				}
 
 
