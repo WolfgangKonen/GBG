@@ -27,6 +27,6 @@ public class ConfigEvaluator {
         public static final int KUCT = 1;
         public static final int TREEDEPTH = 5;
 
-        public static final boolean GENERATENEWGAMESTATES = false; //create a new gameStates.ser
+        public static final boolean GENERATENEWGAMESTATES = true; //create a new gameStates.ser
         public static final int GAMESFORNEWGAMESTATES = 20; //number of games when creating a new gameStates.ser
 }

@@ -47,6 +47,30 @@ public class Types {
         ,ACTION_06(16)
         ,ACTION_07(17)
         ,ACTION_08(18)
+        ,ACTION_09(19)
+        ,ACTION_10(20)
+        ,ACTION_11(21)
+        ,ACTION_12(22)
+        ,ACTION_13(23)
+        ,ACTION_14(24)
+        ,ACTION_15(25)
+        ,ACTION_16(26)
+        ,ACTION_17(27)
+        ,ACTION_18(28)
+        ,ACTION_19(29)
+        ,ACTION_20(30)
+        ,ACTION_21(31)
+        ,ACTION_22(32)
+        ,ACTION_23(33)
+        ,ACTION_24(34)
+        ,ACTION_25(35)
+        ,ACTION_26(36)
+        ,ACTION_27(37)
+        ,ACTION_28(38)
+        ,ACTION_29(39)
+        ,ACTION_30(40)
+        ,ACTION_31(41)
+        ,ACTION_32(42)
 //        ,ACTION_UP(new int[]{KeyEvent.VK_UP})
 //        ,ACTION_LEFT(new int[]{KeyEvent.VK_LEFT})
 //        ,ACTION_DOWN(new int[]{KeyEvent.VK_DOWN})
@@ -62,32 +86,148 @@ public class Types {
 
         public int toInt() {
         	switch(this) {
-        	case ACTION_00: return 0;
-        	case ACTION_01: return 1;
-        	case ACTION_02: return 2;
-        	case ACTION_03: return 3;
-        	case ACTION_04: return 4;
-        	case ACTION_05: return 5;
-        	case ACTION_06: return 6;
-        	case ACTION_07: return 7;
-        	case ACTION_08: return 8;
-        	default: return -1;
-        	}
+                case ACTION_00:
+                    return 0;
+                case ACTION_01:
+                    return 1;
+                case ACTION_02:
+                    return 2;
+                case ACTION_03:
+                    return 3;
+                case ACTION_04:
+                    return 4;
+                case ACTION_05:
+                    return 5;
+                case ACTION_06:
+                    return 6;
+                case ACTION_07:
+                    return 7;
+                case ACTION_08:
+                    return 8;
+                case ACTION_09:
+                    return 9;
+                case ACTION_10:
+                    return 10;
+                case ACTION_11:
+                    return 11;
+                case ACTION_12:
+                    return 12;
+                case ACTION_13:
+                    return 13;
+                case ACTION_14:
+                    return 14;
+                case ACTION_15:
+                    return 15;
+                case ACTION_16:
+                    return 16;
+                case ACTION_17:
+                    return 17;
+                case ACTION_18:
+                    return 18;
+                case ACTION_19:
+                    return 19;
+                case ACTION_20:
+                    return 20;
+                case ACTION_21:
+                    return 21;
+                case ACTION_22:
+                    return 22;
+                case ACTION_23:
+                    return 23;
+                case ACTION_24:
+                    return 24;
+                case ACTION_25:
+                    return 25;
+                case ACTION_26:
+                    return 26;
+                case ACTION_27:
+                    return 27;
+                case ACTION_28:
+                    return 28;
+                case ACTION_29:
+                    return 29;
+                case ACTION_30:
+                    return 30;
+                case ACTION_31:
+                    return 31;
+                case ACTION_32:
+                    return 32;
+                default:
+                    return -1;
+            }
         }
         
         public static ACTIONS fromInt(int iAct) {
         	switch (iAct) {
-        	case 0: return ACTION_00;
-        	case 1: return ACTION_01;
-        	case 2: return ACTION_02;
-        	case 3: return ACTION_03;
-        	case 4: return ACTION_04;
-        	case 5: return ACTION_05;
-        	case 6: return ACTION_06;
-        	case 7: return ACTION_07;
-        	case 8: return ACTION_08;
-        	default: return ACTION_NIL;
-        	}
+                case 0:
+                    return ACTION_00;
+                case 1:
+                    return ACTION_01;
+                case 2:
+                    return ACTION_02;
+                case 3:
+                    return ACTION_03;
+                case 4:
+                    return ACTION_04;
+                case 5:
+                    return ACTION_05;
+                case 6:
+                    return ACTION_06;
+                case 7:
+                    return ACTION_07;
+                case 8:
+                    return ACTION_08;
+                case 9:
+                    return ACTION_09;
+                case 10:
+                    return ACTION_10;
+                case 11:
+                    return ACTION_11;
+                case 12:
+                    return ACTION_12;
+                case 13:
+                    return ACTION_13;
+                case 14:
+                    return ACTION_14;
+                case 15:
+                    return ACTION_15;
+                case 16:
+                    return ACTION_16;
+                case 17:
+                    return ACTION_17;
+                case 18:
+                    return ACTION_18;
+                case 19:
+                    return ACTION_19;
+                case 20:
+                    return ACTION_20;
+                case 21:
+                    return ACTION_21;
+                case 22:
+                    return ACTION_22;
+                case 23:
+                    return ACTION_23;
+                case 24:
+                    return ACTION_24;
+                case 25:
+                    return ACTION_25;
+                case 26:
+                    return ACTION_26;
+                case 27:
+                    return ACTION_27;
+                case 28:
+                    return ACTION_28;
+                case 29:
+                    return ACTION_29;
+                case 30:
+                    return ACTION_30;
+                case 31:
+                    return ACTION_31;
+                case 32:
+                    return ACTION_32;
+                default:
+                    return ACTION_NIL;
+            }
         }
 
         public static ACTIONS fromString(String strKey)
@@ -101,6 +241,7 @@ public class Types {
             else if(strKey.equalsIgnoreCase("ACTION_06")) return ACTION_06;
             else if(strKey.equalsIgnoreCase("ACTION_07")) return ACTION_07;
             else if(strKey.equalsIgnoreCase("ACTION_08")) return ACTION_08;
+            //ToDo: add Actions 09-32
 //            if(strKey.equalsIgnoreCase("ACTION_UP")) return ACTION_UP;
 //            else if(strKey.equalsIgnoreCase("ACTION_LEFT")) return ACTION_LEFT;
 //            else if(strKey.equalsIgnoreCase("ACTION_DOWN")) return ACTION_DOWN;

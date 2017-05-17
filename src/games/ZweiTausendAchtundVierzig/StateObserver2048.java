@@ -1,6 +1,9 @@
 package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
+import games.StateObservationNondeterministic;
+import javafx.util.Pair;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -30,15 +33,15 @@ import java.util.Random;
  *
  * @author Wolfgang Konen, THK
  */
-public class StateObserver2048 implements StateObservation {
+public class StateObserver2048 implements StateObservationNondeterministic {
     private Random random = new Random();
     protected List<Integer> emptyTiles = new ArrayList();
-    protected List<Integer> availableMoves = new ArrayList();  // 0: left, 1: up, 2: right, 3: down
+    protected List<Integer> availableMoves = new ArrayList();   // 0: left, 1: up, 2: right, 3: down
     protected Types.ACTIONS[] actions;
 
     private long boardB;
 
-    private int winState = 0;                // 0 = running, 1 = won, -1 = lost
+    private int winState = 0;                                   // 0 = running, 1 = won, -1 = lost
     public int score = 0;
     public int highestTileValue = Integer.MIN_VALUE;
     public boolean highestTileInCorner = false;
@@ -46,11 +49,12 @@ public class StateObserver2048 implements StateObservation {
     public int rowValue = 0;
     public int mergeValue = 0;
     public int moves = 0;
+    private boolean isNextActionDeterministic;
 
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
     public double[] storedValues = null;
-    public double storedMaxScore;
+    private double storedMaxScore;
 
     public final static double MAXSCORE = 3932156;
     public final static double MINSCORE = 0;
@@ -61,13 +65,15 @@ public class StateObserver2048 implements StateObservation {
         newBoard();
     }
 
-    public StateObserver2048(long b) {
-        boardB=b;
+    public StateObserver2048(long board) {
+        boardB=board;
         updateEmptyTiles();
         updateAvailableMoves();
     }
-    public StateObserver2048(long b, int score, int winState) {
-        boardB=b;
+
+    public StateObserver2048(long board, int score, int winState, boolean isNextActionDeterministic) {
+        this.isNextActionDeterministic = isNextActionDeterministic;
+        boardB=board;
         updateEmptyTiles();
         this.score = score;
         this.winState = winState;
@@ -82,7 +88,8 @@ public class StateObserver2048 implements StateObservation {
      * @param winState
      */
     @Deprecated
-    public StateObserver2048(int[][] values, int score, int winState) {
+    public StateObserver2048(int[][] values, int score, int winState, boolean isNextActionDeterministic) {
+        this.isNextActionDeterministic = isNextActionDeterministic;
         boardB=0;
         updateEmptyTiles();                // add all cells to emptyTiles
         for(int row = 0, position = 15; row < ConfigGame.ROWS; row++) {
@@ -106,12 +113,10 @@ public class StateObserver2048 implements StateObservation {
 
     // Note: StateObs2048BitShift copy() copies the board state, score, winState,
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
-    @Override
     public StateObserver2048 copy() {
-        return new StateObserver2048(boardB, score, winState);
+        return new StateObserver2048(boardB, score, winState, isNextActionDeterministic);
     }
 
-    @Override
     public boolean isGameOver() {
         if(availableMoves.size() == 0) {
             return true;
@@ -121,12 +126,10 @@ public class StateObserver2048 implements StateObservation {
         }
     }
 
-    @Override
     public boolean isLegalState() {
         return true;
     }
 
-    @Override
     public Types.WINNER getGameWinner() {
         assert isGameOver() : "Game is not yet over!";
         switch (winState) {
@@ -137,7 +140,6 @@ public class StateObserver2048 implements StateObservation {
         }
     }
 
-    @Override
     public double getGameScore() {
         if(ConfigGame.ENABLEHEURISTICS) {
             return getGameScore2();
@@ -146,7 +148,7 @@ public class StateObserver2048 implements StateObservation {
         }
     }
 
-    public double getGameScore1() {
+    private double getGameScore1() {
         if(score == 0) {
             return 0;
         } else {
@@ -154,7 +156,7 @@ public class StateObserver2048 implements StateObservation {
         }
     }
 
-    public double getGameScore2() {
+    private double getGameScore2() {
 //            int[][] values = new int[MCAgentConfig.ROWS][MCAgentConfig.COLUMNS];
 //        for(int row = MCAgentConfig.ROWS-1, position=0; row >=0 ; row--) {
 //            for(int column = MCAgentConfig.COLUMNS-1; column >=0 ; column--,position++) {
@@ -173,26 +175,21 @@ public class StateObserver2048 implements StateObservation {
         return score2;
     }
 
-    @Override
     public double getGameValue() { return getGameScore(); }
 
-    @Override
     public double getGameScore(StateObservation referingState) {
         assert (referingState instanceof StateObserver2048) : "referingState is not of class StateObserver2048";
         return this.getGameScore();
     }
 
-    @Override
     public double getMinGameScore() {
         return REWARD_NEGATIVE;
     }
 
-    @Override
     public double getMaxGameScore() {
         return REWARD_POSITIVE;
     }
 
-    @Override
     public String getName() {
         return "2048";
     }
@@ -219,7 +216,6 @@ public class StateObserver2048 implements StateObservation {
         return bvec;
     }
 
-    @Override
     public void advance(Types.ACTIONS action) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
@@ -227,9 +223,34 @@ public class StateObserver2048 implements StateObservation {
         updateEmptyTiles();
         addRandomTile();
         updateAvailableMoves();
+        isNextActionDeterministic = true;
+
+
+
+        //some Tests for MCTS-Expectimax
+        /*advanceDeterministic(action);
+
+        ArrayList<Pair<Types.ACTIONS, Double>> actions = getAvailableActionsNondeterministic();
+
+        double totalWeight = 0.0d;
+        for (Pair<Types.ACTIONS, Double> actionPair : actions) {
+            totalWeight += actionPair.getValue();
+        }
+
+        double value = Math.random() * totalWeight;
+
+        action = null;
+        for (Pair<Types.ACTIONS, Double> actionPair : actions) {
+            value -= actionPair.getValue();
+            if(value <= 0.0d) {
+                action = actionPair.getKey();
+                break;
+            }
+        }
+
+        advanceNondeterministic(action);*/
     }
 
-    @Override
     public ArrayList<Types.ACTIONS> getAvailableActions() {
         ArrayList<Types.ACTIONS> availAct = new ArrayList<>();
         for(int viableMove : availableMoves) {
@@ -238,12 +259,10 @@ public class StateObserver2048 implements StateObservation {
         return availAct;
     }
 
-    @Override
     public int getNumAvailableActions() {
         return availableMoves.size();
     }
 
-    @Override
     public void setAvailableActions() {
         ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
         actions = new Types.ACTIONS[acts.size()];
@@ -253,12 +272,78 @@ public class StateObserver2048 implements StateObservation {
         }
     }
 
-    @Override
     public Types.ACTIONS getAction(int i) {
         return actions[i];
     }
 
-    @Override
+    public void advanceDeterministic(Types.ACTIONS action) {
+        if(!isNextActionDeterministic) {
+            throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");
+        }
+
+        int iAction = action.toInt();
+        assert (availableMoves.contains(iAction)) : "iAction is not viable.";
+        move(iAction);
+        updateEmptyTiles();
+
+        isNextActionDeterministic = false;
+    }
+
+    public ArrayList<Types.ACTIONS> getAvailableActionsDeterministic() {
+        return getAvailableActions();
+    }
+
+    public void setAvailableActionsDeterministic() {
+        setAvailableActions();
+    }
+
+    public int getNumAvailableActionsDeterministic() {
+        return getNumAvailableActions();
+    }
+
+    public void advanceNondeterministic(Types.ACTIONS action) {
+        if(isNextActionDeterministic) {
+            throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
+        }
+
+        int iAction = action.toInt();
+        assert (emptyTiles.size() * 2 > iAction) : "iAction is not viable.";
+
+        //System.out.println("Action: " + iAction + " Value: " + ((iAction%2)+1) + " Position: " + (iAction/2));
+
+        addTile(emptyTiles.get(iAction/2), (iAction%2)+1);
+
+        updateAvailableMoves();
+        isNextActionDeterministic = true;
+    }
+
+    public ArrayList<Pair<Types.ACTIONS, Double>> getAvailableActionsNondeterministic() {
+        ArrayList<Pair<Types.ACTIONS, Double>> actions = new ArrayList<>();
+        for (int i = 0; i < emptyTiles.size()*2; i++) {
+            double weight;
+            if(i%2 == 0) {
+                weight = 9;
+            } else {
+                weight = 1;
+            }
+            actions.add(new Pair<>(Types.ACTIONS.fromInt(i), weight));
+        }
+        return actions;
+    }
+
+    public void setAvailableActionsNondeterministic() {
+        //not used for 2048 because nondeterministic actions depend on empty tiles
+        //and empty tiles are updated automatically
+    }
+
+    public int getNumAvailableActionsNondeterministic() {
+        return emptyTiles.size() * 2;
+    }
+
+    public boolean isNextActionDeterminisitc() {
+        return isNextActionDeterministic;
+    }
+
     public void storeBestActionInfo(Types.ACTIONS actBest, double[] vtable) {
         ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
         storedActions = new Types.ACTIONS[acts.size()];
@@ -272,29 +357,20 @@ public class StateObserver2048 implements StateObservation {
         storedMaxScore = vtable[acts.size()];
     }
 
-    @Override
     public int getPlayer() {
         return 0;
     }
 
-//    @Override
-//    public int getPlayerPM() {
-//        return 1;
-//    }
-
-    @Override
     public int getNumPlayers() {
         return 1;
     }
 
-    @Override
     public String stringDescr() {
         return String.format("%016x", boardB);        // format as 16-hex-digit number with
         // leading 0's (if necessary)
         //return Long.toHexString(boardB);                // no leading zeros
     }
 
-    @Deprecated
     public String toString() {
         return stringDescr();
     }
@@ -324,7 +400,6 @@ public class StateObserver2048 implements StateObservation {
         return boardB;
     }
 
-
     /**
      * Add tile 2^value to the 2048 board, i.e. change {@code boardB} accordingly.<br>
      * Assumes (and asserts) that board is empty at {@code position}.
@@ -332,7 +407,7 @@ public class StateObserver2048 implements StateObservation {
      * @param position one out of {0,...,15}, where to add the tile
      * @param value        the exponent (2^value is the tile value)
      */
-    public void addTile(int position, int value) {
+    private void addTile(int position, int value) {
         boolean succ = emptyTiles.remove(new Integer(position));
         assert (succ==true) : "Something wrong in emptyTiles removal";
         //System.out.println(Long.toHexString(boardB));
@@ -344,7 +419,7 @@ public class StateObserver2048 implements StateObservation {
         updateHighestTile(value);
     }
 
-    public void updateHighestTile(int exp) {
+    private void updateHighestTile(int exp) {
         int tileVal = (1 << exp);
         if(tileVal > highestTileValue) {
             highestTileValue = tileVal;
@@ -355,7 +430,7 @@ public class StateObserver2048 implements StateObservation {
      * Given a new board state {@code boardB}, recompute the list {@code emptyTiles}
      * (Integer list with positions {0,...,15} which have a 0-tile)
      */
-    public void updateEmptyTiles() {
+    private void updateEmptyTiles() {
         emptyTiles.clear();
         long b = boardB;
         for (int j=0; j<16; j++) {
@@ -368,7 +443,7 @@ public class StateObserver2048 implements StateObservation {
      *
      * @param winState {@literal-1  > lost, 0 > running, 1 > won}
      */
-    public void setWinState(int winState) {
+    private void setWinState(int winState) {
         if(this.winState == 0) {
             this.winState = winState;
         }
@@ -390,7 +465,7 @@ public class StateObserver2048 implements StateObservation {
         return newBoard;
     }
 
-    public void updateAvailableMoves() {
+    private void updateAvailableMoves() {
         availableMoves.clear();
         int oldScore = score;
         long oldBoardB = boardB;
@@ -452,7 +527,7 @@ public class StateObserver2048 implements StateObservation {
         System.out.println();
     }
 
-    public void addRandomTile () {
+    private void addRandomTile () {
         if(emptyTiles.size() > 0) {
             int position = emptyTiles.get(random.nextInt(emptyTiles.size())).intValue();
             int value = ConfigGame.STARTINGVALUES[random.nextInt(ConfigGame.STARTINGVALUES.length)] >> 1;
@@ -489,6 +564,7 @@ public class StateObserver2048 implements StateObservation {
         boardB = 0x0L;
         score = 0;
         winState = 0;
+        isNextActionDeterministic = true;
 
         updateEmptyTiles(); // fixed Empty Tiles JK
 
@@ -500,7 +576,7 @@ public class StateObserver2048 implements StateObservation {
         updateAvailableMoves();
     }
 
-    public StateObserver2048 rightAction() {
+    private StateObserver2048 rightAction() {
         for (int k=0; k<4; k++) {
             RowBitShift row = this.getRow(k).rAction();
             this.putRow(row,k);
@@ -509,7 +585,7 @@ public class StateObserver2048 implements StateObservation {
         return this;
     }
 
-    public StateObserver2048 leftAction() {
+    private StateObserver2048 leftAction() {
         for (int k=0; k<4; k++) {
             //System.out.println(String.format("Old: %04x", this.getRow(k).getRow()));
             RowBitShift row = this.getRow(k).lAction();
@@ -520,7 +596,7 @@ public class StateObserver2048 implements StateObservation {
         return this;
     }
 
-    public StateObserver2048 downAction() {
+    private StateObserver2048 downAction() {
         for (int k=0; k<4; k++) {
             RowBitShift row = this.getCol(k).rAction();
             this.putCol(row,k);
@@ -529,7 +605,7 @@ public class StateObserver2048 implements StateObservation {
         return this;
     }
 
-    public StateObserver2048 upAction() {
+    private StateObserver2048 upAction() {
         for (int k=0; k<4; k++) {
             RowBitShift row = this.getCol(k).lAction();
             this.putCol(row,k);
@@ -543,13 +619,13 @@ public class StateObserver2048 implements StateObservation {
      * @param k one out of {3,2,1,0} where 0 is the lowest row
      * @return
      */
-    public RowBitShift getRow(int k) {
+    private RowBitShift getRow(int k) {
         long r = (boardB >> (16*k)) & 0x000000000000ffffL;
         RowBitShift row = new RowBitShift((int) r);
         return row;
     }
 
-    public StateObserver2048 putRow(RowBitShift row, int k) {
+    private StateObserver2048 putRow(RowBitShift row, int k) {
         long[] andB = {0xffffffffffff0000L,
                 0xffffffff0000ffffL,
                 0xffff0000ffffffffL,
@@ -565,7 +641,7 @@ public class StateObserver2048 implements StateObservation {
      * @param k one out of {3,2,1,0} where 0 is the rightmost column
      * @return
      */
-    public RowBitShift getCol(int k) {
+    private RowBitShift getCol(int k) {
         long btemp = (boardB >> (4*k));  // shift the column to get in row 0 to digit 0
         long r = 0L;
         for (int j=3; j>=0; j--) {
@@ -576,7 +652,7 @@ public class StateObserver2048 implements StateObservation {
         return row;
     }
 
-    public StateObserver2048 putCol(RowBitShift row, int k) {
+    private StateObserver2048 putCol(RowBitShift row, int k) {
         long[] andB = {0xfff0fff0fff0fff0L,
                 0xff0fff0fff0fff0fL,
                 0xf0fff0fff0fff0ffL,

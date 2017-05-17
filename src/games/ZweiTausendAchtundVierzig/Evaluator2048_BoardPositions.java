@@ -333,7 +333,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             ois.close();
 
             for(GameStateContainer gameStateContainer : gameStateContainers) {
-                gameStates.add(new StateObserver2048(gameStateContainer.values, gameStateContainer.score, gameStateContainer.winState));
+                gameStates.add(new StateObserver2048(gameStateContainer.values, gameStateContainer.score, gameStateContainer.winState, gameStateContainer.isNextActionDeterministic));
             }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -391,11 +391,13 @@ class GameStateContainer implements Serializable {
     public int[][] values;
     public int score;
     public int winState;
+    public boolean isNextActionDeterministic;
 
     public GameStateContainer(StateObserver2048 gameState) {
         this.values = gameState.toArray();
         this.score = gameState.getScore();
         this.winState = gameState.getWinState();
+        this.isNextActionDeterministic = gameState.isNextActionDeterminisitc();
     }
 }
 
