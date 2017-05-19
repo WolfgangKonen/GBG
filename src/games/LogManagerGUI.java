@@ -127,9 +127,9 @@ public class LogManagerGUI {
         jMILoad.addActionListener((e) ->
         {
             //load a new .gamelog File
-            JFileChooser fileChooser = new JFileChooser(logManager.filePath);
             String gameName = gameBoard.getStateObs().getName();
-            fileChooser.setFileFilter(new FileNameExtensionFilter(gameName + " Gamelog", gameName + "_gamelog"));
+            JFileChooser fileChooser = new JFileChooser(logManager.filePath + "\\" + gameName);
+            fileChooser.setFileFilter(new FileNameExtensionFilter(gameName + " Gamelog", "gamelog"));
             Action details = fileChooser.getActionMap().get("viewTypeDetails");
             details.actionPerformed(null);
 
@@ -145,7 +145,6 @@ public class LogManagerGUI {
                     ois.close();
 
                     //check if gameboard and log have the same StateObserver Type
-                    StateObservation so = gameBoard.getStateObs();
                     if(!tempLog.stateObservations.get(0).getClass().equals(gameBoard.getStateObs().getClass())) {
                         JOptionPane.showMessageDialog(null, "Please only select logs for the current gameboard.");
                         return;

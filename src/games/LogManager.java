@@ -18,8 +18,8 @@ public class LogManager {
                                            //call generateLogSessionContainerFromFile(path of temp folder) to combine all temporary files and generate the log
     public boolean verbose = true;
 
-    public String filePath = "games\\Logs";
-    public String tempPath = "games\\Logs\\temp";
+    public String filePath = "logs";
+    public String tempPath = "logs\\temp";
 
     private HashMap<Integer, Integer> counter = new HashMap<>(); //saves a counter for each sessionid
     private HashMap<Integer, List<LogContainer>> simpleLoggingContainers = new HashMap<>();
@@ -111,13 +111,11 @@ public class LogManager {
             LogContainer logContainer = new LogContainer(null, stateObservation.copy());
 
             if(advancedLogging) {
-                while(checkFolder(tempPath + "\\temp_" + sessionid)) {
+                while(checkAndCreateFolder(tempPath + "\\temp_" + sessionid)) {
                     sessionid++;
                 }
 
                 counter.put(sessionid, 0);
-
-                new File(tempPath + "\\temp_" + sessionid).mkdirs();
 
                 try {
                     FileOutputStream fos = new FileOutputStream(tempPath + "\\temp_" + sessionid + "\\" + counter.get(sessionid) + ".temp");
@@ -217,16 +215,18 @@ public class LogManager {
     public void safeLogSessionContainer(LogSessionContainer logSessionContainer) {
         if (logSessionContainer.stateObservations.size() > 0) {
             try {
-                String sessionFolderName = filePath + "\\" + getCurrentTimeStamp() + "_" + logSessionContainer.stateObservations.size() + "_" + logSessionContainer.stateObservations.get(logSessionContainer.stateObservations.size() - 1).getGameScore();
+                checkAndCreateFolder(filePath + "\\" + logSessionContainer.stateObservations.get(0).getName());
+
+                String sessionFolderName = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName() + "\\" + logSessionContainer.stateObservations.get(0).getName() + "_" + getCurrentTimeStamp();
 
 
                 //test if File allready exists
                 String sessionFolderNameSuffix = "";
-                int i = 0;
-                File sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + "." + logSessionContainer.stateObservations.get(0).getName() + "_gamelog");
+                int i = 1;
+                File sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + ".gamelog");
                 while (sessionFolder.exists()) {
                     sessionFolderNameSuffix = " (" + i + ")";
-                    sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + "." + logSessionContainer.stateObservations.get(0).getName() + "_gamelog");
+                    sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + ".gamelog");
                     i++;
                 }
 
@@ -249,7 +249,7 @@ public class LogManager {
      * @return the timestamp
      */
     private static String getCurrentTimeStamp() {
-        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS");//dd/MM/yyyy
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");//-SSS
         Date now = new Date();
         String strDate = sdfDate.format(now);
         return strDate;
@@ -259,18 +259,22 @@ public class LogManager {
      * checks if a folder exists and creates a new one if it doesn't
      *
      * @param filePath the folder Path
+     * @return true if a folder allready existed
      */
-    private void checkAndCreateFolder(String filePath) {
+    private boolean checkAndCreateFolder(String filePath) {
         File file = new File(filePath);
+        boolean exists = file.exists();
         if(!file.exists()) {
             file.mkdirs();
         }
+        return exists;
     }
 
     /**
      * checks if a folder exists
      *
      * @param filePath the folder Path
+     * @return true if the folder exists
      */
     private boolean checkFolder(String filePath) {
         return new File(filePath).exists();
