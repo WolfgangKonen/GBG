@@ -17,6 +17,8 @@ out/*
 src/games/Logs/*
 src/logs/*
 *.gamelog
+games/Logs/*
+logs/*
 
 #Ordner mit veralteten versuchen zur Parallelität
 src/games/ZweiTausendAchtundVierzig/Parallel/*
