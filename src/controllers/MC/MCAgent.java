@@ -65,10 +65,10 @@ public class MCAgent extends AgentBase implements PlayAgent {
         }
 
         if(mcParams.getNumberAgents() > 1) {
-            //more than one Agent (Majoity Vote)
+            //more than one agent (majority vote)
             return getNextActionMultipleAgents(sob, vtable, iterations, numberAgents, depth);
         } else {
-            //only one Agent
+            //only one agent
             return getNextAction(sob, vtable, iterations, depth);
         }
     }
@@ -281,6 +281,10 @@ public class MCAgent extends AgentBase implements PlayAgent {
      * @param vtable
      * @param numberAgents	=1: use getNextAction (parallel version) <br>
      *                      >1: use getNextActionMultipleAgents with NUMBERAGENTS=numberAgents
+     * @param silent
+     * @param NC			number of repeats for next-action calculation
+     * @param iterations    rollout repeats (for each available action)
+     * @param depth			rollout depth
      * @return the certainty (highest bin in the relative-frequency histogram of possible actions)
      */
     public double calcCertainty(StateObservation sob, double[] vtable, int numberAgents, boolean silent, int NC, int iterations, int depth) {

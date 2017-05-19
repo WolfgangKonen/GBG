@@ -15,6 +15,7 @@ src/out/production/GBG/*
 out/*
 
 src/games/Logs/*
+games/Logs/*
 
 #Ordner mit veralteten versuchen zur Parallelität
 src/games/ZweiTausendAchtundVierzig/Parallel/*
