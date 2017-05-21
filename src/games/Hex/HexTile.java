@@ -1,8 +1,9 @@
 package games.Hex;
 
 import java.awt.*;
+import java.io.Serializable;
 
-public class HexTile {
+public class HexTile implements Serializable {
     private Point coords;
     private int player;
     private Polygon poly;
