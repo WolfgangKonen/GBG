@@ -160,9 +160,9 @@ public class LogManagerGUI {
                     jBJump.setEnabled(true);
                 } catch (IOException | ClassNotFoundException ignore) {
                     if(verbose) {
-                        System.out.println("LogManager: please only load Logs for your current game!");
+                        System.out.println("LogManager: something went wrong, cant load the log.");
+                        ignore.printStackTrace();
                     }
-                    //ignore.printStackTrace();
                 }
             }
         });
