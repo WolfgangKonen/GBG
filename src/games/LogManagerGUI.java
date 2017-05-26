@@ -108,7 +108,7 @@ public class LogManagerGUI {
                 File selectedFile = fileChooser.getSelectedFile();
 
                 LogSessionContainer logSessionContainer = logManager.generateLogSessionContainerFromFile(selectedFile.getPath());
-                logManager.safeLogSessionContainer(logSessionContainer);
+                logManager.safeLogSessionContainer(logSessionContainer, null);
 
                 if (verbose) {
                     System.out.println("LogManager: compiled temp log successfully");
@@ -160,9 +160,9 @@ public class LogManagerGUI {
                     jBJump.setEnabled(true);
                 } catch (IOException | ClassNotFoundException ignore) {
                     if(verbose) {
-                        System.out.println("LogManager: please only load Logs for your current game!");
+                        System.out.println("LogManager: something went wrong, cant load the log.");
+                        ignore.printStackTrace();
                     }
-                    //ignore.printStackTrace();
                 }
             }
         });

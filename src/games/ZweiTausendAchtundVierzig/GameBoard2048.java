@@ -285,7 +285,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private void updateBoardLabel(int pos) {
         int value = 0;
         if(m_so != null) {
-            value = (int)Math.pow(2 , m_so.getTileValue(pos));
+            value = m_so.getTileValue(pos);
         }
 
         switch (value) {

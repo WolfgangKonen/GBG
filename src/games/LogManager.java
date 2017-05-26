@@ -146,9 +146,19 @@ public class LogManager {
      * @param sessionid the id of the current logsession
      */
     public void endLoggingSession(int sessionid) {
-        LogSessionContainer logSessionContainer;
+        endLoggingSession(sessionid, null);
+    }
 
+    /**
+     * ends a logging session, for example when a game is finished
+     *
+     * @param sessionid the id of the current logsession
+     * @param subdir the name of a subdirectory in which the log should be saved, for example to sort logs with differtent gameboardsettings
+     */
+    public void endLoggingSession(int sessionid, String subdir) {
         if (loggingEnabled) {
+            LogSessionContainer logSessionContainer;
+
             if(verbose) {
                 System.out.println("LogManager: Ending logging session with id: " + sessionid);
             }
@@ -171,7 +181,7 @@ public class LogManager {
                 simpleLoggingContainers.remove(sessionid);
             }
 
-            safeLogSessionContainer(logSessionContainer);
+            safeLogSessionContainer(logSessionContainer, subdir);
         }
     }
 
@@ -212,24 +222,29 @@ public class LogManager {
      *
      * @param logSessionContainer the LogSessionContainer
      */
-    public void safeLogSessionContainer(LogSessionContainer logSessionContainer) {
+    public void safeLogSessionContainer(LogSessionContainer logSessionContainer, String subdir) {
         if (logSessionContainer.stateObservations.size() > 0) {
+            String saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName();
+            if(subdir != null && !subdir.equals("")) {
+                saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName() + "\\" + subdir;
+                System.out.println(saveDirectory);
+            }
+
+            checkAndCreateFolder(saveDirectory);
+
+            String sessionFolderName = saveDirectory + "\\" + logSessionContainer.stateObservations.get(0).getName() + "_" + getCurrentTimeStamp();
+            String sessionFolderNameSuffix = "";
+
+            //test if File allready exists
+            int i = 1;
+            File sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + ".gamelog");
+            while (sessionFolder.exists()) {
+                sessionFolderNameSuffix = " (" + i + ")";
+                sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + ".gamelog");
+                i++;
+            }
+
             try {
-                checkAndCreateFolder(filePath + "\\" + logSessionContainer.stateObservations.get(0).getName());
-
-                String sessionFolderName = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName() + "\\" + logSessionContainer.stateObservations.get(0).getName() + "_" + getCurrentTimeStamp();
-
-
-                //test if File allready exists
-                String sessionFolderNameSuffix = "";
-                int i = 1;
-                File sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + ".gamelog");
-                while (sessionFolder.exists()) {
-                    sessionFolderNameSuffix = " (" + i + ")";
-                    sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + ".gamelog");
-                    i++;
-                }
-
                 FileOutputStream fos = new FileOutputStream(sessionFolder);
                 ObjectOutputStream oos = new ObjectOutputStream(fos);
                 oos.writeObject(logSessionContainer);

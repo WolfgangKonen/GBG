@@ -55,6 +55,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
     public Types.ACTIONS storedActBest = null;
     public double[] storedValues = null;
     private double storedMaxScore;
+    private Types.ACTIONS nextNondeterminisitcAction;
 
     public final static double MAXSCORE = 3932156;
     public final static double MINSCORE = 0;
@@ -69,6 +70,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         boardB=board;
         updateEmptyTiles();
         updateAvailableMoves();
+        isNextActionDeterministic = true;
     }
 
     public StateObserver2048(long board, int score, int winState, boolean isNextActionDeterministic) {
@@ -224,31 +226,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         addRandomTile();
         updateAvailableMoves();
         isNextActionDeterministic = true;
-
-
-
-        //some Tests for MCTS-Expectimax
-        /*advanceDeterministic(action);
-
-        ArrayList<Pair<Types.ACTIONS, Double>> actions = getAvailableActionsNondeterministic();
-
-        double totalWeight = 0.0d;
-        for (Pair<Types.ACTIONS, Double> actionPair : actions) {
-            totalWeight += actionPair.getValue();
-        }
-
-        double value = Math.random() * totalWeight;
-
-        action = null;
-        for (Pair<Types.ACTIONS, Double> actionPair : actions) {
-            value -= actionPair.getValue();
-            if(value <= 0.0d) {
-                action = actionPair.getKey();
-                break;
-            }
-        }
-
-        advanceNondeterministic(action);*/
+        nextNondeterminisitcAction = null;
     }
 
     public ArrayList<Types.ACTIONS> getAvailableActions() {
@@ -287,26 +265,15 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         updateEmptyTiles();
 
         isNextActionDeterministic = false;
+        setNextNondeterminisitcAction();
     }
 
-    public ArrayList<Types.ACTIONS> getAvailableActionsDeterministic() {
-        return getAvailableActions();
-    }
-
-    public void setAvailableActionsDeterministic() {
-        setAvailableActions();
-    }
-
-    public int getNumAvailableActionsDeterministic() {
-        return getNumAvailableActions();
-    }
-
-    public void advanceNondeterministic(Types.ACTIONS action) {
+    public void advanceNondeterministic() {
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
 
-        int iAction = action.toInt();
+        int iAction = nextNondeterminisitcAction.toInt();
         assert (emptyTiles.size() * 2 > iAction) : "iAction is not viable.";
 
         //System.out.println("Action: " + iAction + " Value: " + ((iAction%2)+1) + " Position: " + (iAction/2));
@@ -315,10 +282,21 @@ public class StateObserver2048 implements StateObservationNondeterministic {
 
         updateAvailableMoves();
         isNextActionDeterministic = true;
+        nextNondeterminisitcAction = null;
     }
 
-    public ArrayList<Pair<Types.ACTIONS, Double>> getAvailableActionsNondeterministic() {
+    private void setNextNondeterminisitcAction() {
+        if(nextNondeterminisitcAction != null) {
+            throw new RuntimeException("nextNondeterministicAction is allready set to" + nextNondeterminisitcAction);
+        } else if(isNextActionDeterministic) {
+            throw new RuntimeException("next Action is Deterministic");
+        }
+
+        //ToDo: This is just a quick implementation to test some things, there are most likely faster ways to choose the next nondeterminisitc Action
         ArrayList<Pair<Types.ACTIONS, Double>> actions = new ArrayList<>();
+
+        double totalWeight = 0.0d;
+
         for (int i = 0; i < emptyTiles.size()*2; i++) {
             double weight;
             if(i%2 == 0) {
@@ -326,22 +304,27 @@ public class StateObserver2048 implements StateObservationNondeterministic {
             } else {
                 weight = 1;
             }
+            totalWeight += weight;
             actions.add(new Pair<>(Types.ACTIONS.fromInt(i), weight));
         }
-        return actions;
-    }
 
-    public void setAvailableActionsNondeterministic() {
-        //not used for 2048 because nondeterministic actions depend on empty tiles
-        //and empty tiles are updated automatically
-    }
+        double value = Math.random() * totalWeight;
 
-    public int getNumAvailableActionsNondeterministic() {
-        return emptyTiles.size() * 2;
+        for (Pair<Types.ACTIONS, Double> actionPair : actions) {
+            value -= actionPair.getValue();
+            if(value <= 0.0d) {
+                nextNondeterminisitcAction = actionPair.getKey();
+                break;
+            }
+        }
     }
 
     public boolean isNextActionDeterminisitc() {
         return isNextActionDeterministic;
+    }
+
+    public Types.ACTIONS getNextNondeterministicAction() {
+        return nextNondeterminisitcAction;
     }
 
     public void storeBestActionInfo(Types.ACTIONS actBest, double[] vtable) {
@@ -391,9 +374,9 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         return emptyTiles.size();
     }
 
-    public long getTileValue(int pos) {
+    public int getTileValue(int pos) {
         long val = (boardB >> (15-pos)*4 & 0x0fL);
-        return val;
+        return (int)Math.pow(2, val);
     }
 
     public long getBoardNum() {
