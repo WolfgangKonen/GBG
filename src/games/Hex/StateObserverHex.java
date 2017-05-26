@@ -10,18 +10,10 @@ import static games.Hex.HexConfig.*;
 
 public class StateObserverHex implements StateObservation {
     private int currentPlayer;
-    private int winnerInt = HexConfig.PLAYER_NONE;
 
     private HexTile[][] board;
     private HexTile lastUpdatedTile;
     private ArrayList<Types.ACTIONS> actions;
-
-
-
-    Types.ACTIONS[] storedActions = null;
-    private Types.ACTIONS bestAction = null;
-    double[] storedValues = null;
-    private double storedMaxScore;
 
     public StateObserverHex(int hexSize){
         board = defaultGameBoard(hexSize);
@@ -78,24 +70,21 @@ public class StateObserverHex implements StateObservation {
 
     @Override
     public boolean isGameOver() {
-
-        return determineWinner() || getNumAvailableActions() == 0;
+        return determineWinner() != PLAYER_NONE || getNumAvailableActions() == 0;
     }
 
     @Override
     public Types.WINNER getGameWinner() {
-        return (winnerInt == currentPlayer ? Types.WINNER.PLAYER_WINS : Types.WINNER.PLAYER_LOSES);
+        return (determineWinner() == currentPlayer ? Types.WINNER.PLAYER_LOSES : Types.WINNER.PLAYER_WINS);
     }
 
-    private boolean determineWinner(){
+    private int determineWinner(){
         Types.WINNER winner = HexUtils.getWinner(getBoard(), getLastUpdatedTile());
         if (winner == Types.WINNER.PLAYER_WINS){
             //Reverse winners, since current player changes after the winning tile was placed
-            int winningPlayer = (getCurrentPlayer() == PLAYER_ONE ? PLAYER_TWO : PLAYER_ONE);
-            setWinnerInt(winningPlayer);
-            return true;
+            return (getCurrentPlayer() == PLAYER_ONE ? PLAYER_ONE : PLAYER_TWO);
         }
-        return false;
+        return PLAYER_NONE;
     }
 
     @Override
@@ -151,7 +140,12 @@ public class StateObserverHex implements StateObservation {
 
     @Override
     public double getGameScore() {
-        return (winnerInt == currentPlayer ? REWARD_POSITIVE : REWARD_NEGATIVE);
+        int winner = determineWinner();
+        if (winner == PLAYER_NONE){
+            return 0;
+        }
+
+        return (winner == currentPlayer ? REWARD_NEGATIVE : REWARD_POSITIVE);
     }
 
     @Override
@@ -229,15 +223,19 @@ public class StateObserverHex implements StateObservation {
 
     @Override
     public void storeBestActionInfo(Types.ACTIONS bestAction, double[] valueTable) {
-        storedActions = new Types.ACTIONS[getNumAvailableActions()];
-        storedValues = new double[storedActions.length];
-        for(int i = 0; i < storedActions.length; ++i)
-        {
-            storedActions[i] = getAction(i);
-            storedValues[i] = valueTable[i];
+        for(int i=0;i<HexConfig.BOARD_SIZE;i++){
+            for(int j=0;j<HexConfig.BOARD_SIZE;j++) {
+                board[i][j].setValue(Double.NaN);
+            }
         }
-        this.bestAction = bestAction;
-        storedMaxScore = valueTable[storedActions.length];
+
+        for(int k = 0; k < getNumAvailableActions(); ++k) {
+            double val = valueTable[k];
+            int actionInt = getAction(k).toInt();
+            int j = actionInt % HexConfig.BOARD_SIZE;
+            int i = (actionInt - j) / HexConfig.BOARD_SIZE;
+            board[i][j].setValue(val);
+        }
     }
 
     @Override
@@ -260,10 +258,5 @@ public class StateObserverHex implements StateObservation {
 
     int getCurrentPlayer(){
         return currentPlayer;
-    }
-
-    void setWinnerInt(int winnerInt){
-        this.winnerInt = winnerInt;
-        //System.out.println("Player "+currentPlayer+" wins!");
     }
 }

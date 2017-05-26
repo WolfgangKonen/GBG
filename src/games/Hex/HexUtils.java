@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 
 import static java.lang.Math.cos;
+import static java.lang.Math.min;
 
 //Hexagon math based on hexmech.java: https://gist.github.com/salamander2/4329783#file-hexmech-java
 public class HexUtils {
@@ -31,7 +32,30 @@ public class HexUtils {
         return new Polygon(xPoints, yPoints, 6);
     }
 
-    public static void drawHex(HexTile tile, Graphics2D g2, int boardSize) {
+    public static void drawHex(HexTile tile, Graphics2D g2, boolean highlight) {
+        Polygon poly = tile.getPoly();
+
+        Color cellColor = GameBoardHex.COLOR_CELL;
+        if (tile.getPlayer() == HexConfig.PLAYER_ONE){
+            cellColor = GameBoardHex.COLOR_PLAYER_ONE;
+        } else if (tile.getPlayer() == HexConfig.PLAYER_TWO){
+            cellColor = GameBoardHex.COLOR_PLAYER_TWO;
+        }
+
+        g2.setColor(cellColor);
+        g2.fillPolygon(poly);
+
+        if (highlight) {
+            g2.setStroke(new BasicStroke(3));
+            g2.setColor(Color.RED);
+        } else {
+            g2.setColor(GameBoardHex.COLOR_GRID);
+        }
+
+        g2.drawPolygon(poly);
+    }
+
+    public static void drawTileValues(HexTile tile, Graphics2D g2, int boardSize, Color cellColor) {
         int i = tile.getCoords().x;
         int j = tile.getCoords().y;
 
@@ -41,32 +65,46 @@ public class HexUtils {
         int x = getHexX(i, j, polyHeight);
         int y = getHexY(i, j, polyHeight, boardSize);
 
-        Color cellColor = GameBoardHex.COLOR_CELL;
-        Color textColor = Color.BLACK;
-        if (tile.getPlayer() == HexConfig.PLAYER_ONE){
-            cellColor = GameBoardHex.COLOR_PLAYER_ONE;
-        } else if (tile.getPlayer() == HexConfig.PLAYER_TWO){
-            cellColor = GameBoardHex.COLOR_PLAYER_TWO;
-            textColor = Color.WHITE;
+        Color textColor = tile.getPlayer() == HexConfig.PLAYER_TWO ? Color.WHITE : Color.BLACK;
+
+        if (cellColor != null) {
+            g2.setColor(cellColor);
+            g2.fillPolygon(poly);
         }
 
-        g2.setColor(cellColor);
-        g2.fillPolygon(poly);
-
-        g2.setColor(GameBoardHex.COLOR_GRID);
-        g2.drawPolygon(poly);
-
         g2.setColor(textColor);
-        String s = i+", "+j;
+        double tileValue = tile.getValue();
+        String tileText = "";
 
-        int width = g2.getFontMetrics().stringWidth(s);
+
+        tileText = String.format("%.2f", tileValue);
+
+        int width = g2.getFontMetrics().stringWidth(tileText);
         int height = g2.getFontMetrics().getHeight();
 
-        int textX = (int) (x+(getSideLengthFromHeight(polyHeight)*1.5)-(width/2));
-        int textY = y+height*2;
+        int textX = (int) (x + (getSideLengthFromHeight(polyHeight) * 1.5) - (width / 2));
+        int textY = y + (polyHeight / 2) + (height);
 
-        //g2.drawString(""+s, textX, textY);
+        g2.drawString("" + tileText, textX, textY);
     }
+
+    public static Color calculateTileColor(double tileValue){
+        double minVal = -1;
+        double maxVal = 1;
+        double difference = maxVal-minVal;
+        float percentage = (float) ((tileValue-minVal)/difference);
+        float inverse_percentage = 1-percentage;
+
+        Color colorBad = Color.RED;
+        Color colorGood = Color.GREEN;
+
+        int red =   Math.round(colorBad.getRed()   * inverse_percentage + colorGood.getRed()   * percentage);
+        int blue =  Math.round(colorBad.getBlue()  * inverse_percentage + colorGood.getBlue()  * percentage);
+        int green = Math.round(colorBad.getGreen() * inverse_percentage + colorGood.getGreen() * percentage);
+
+        return new Color(red, green, blue, 255);
+    }
+
 
     public static int getHexX(int i, int j, int polyHeight){
         return (int) ((i+j) * (polyHeight - (polyHeight * cos(30))));
@@ -248,9 +286,6 @@ public class HexUtils {
             }
 
             //Check if the tile is next to an edge belonging to the player
-            int x = currentTile.getCoords().x;
-            int y = currentTile.getCoords().y;
-
             switch (isNextToEdge(currentTile)){
                 case 1:
                     firstEdgeReached = true;

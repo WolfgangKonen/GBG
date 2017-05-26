@@ -12,6 +12,7 @@ public class HexTile implements Serializable {
     public HexTile(int i, int j){
         coords = new Point(i, j);
         player = HexConfig.PLAYER_NONE;
+        value = Double.NaN;
     }
 
     public HexTile(int i, int j, int player, Polygon poly, double value){

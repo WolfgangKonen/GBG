@@ -69,23 +69,8 @@ public class GameBoardHex implements GameBoard {
 
         stateObs = soHex.copy();
 
-        if (showStoredV && stateObs.storedValues!=null) {
-            for(int i=0;i<HexConfig.BOARD_SIZE;i++){
-                for(int j=0;j<HexConfig.BOARD_SIZE;j++) {
-                    stateObs.getBoard()[i][j].setValue(Double.NaN);
-                }
-            }
-
-            for (int k=0; k<stateObs.storedValues.length; k++) {
-                Types.ACTIONS action = stateObs.storedActions[k];
-                int actionInt = action.toInt();
-                int j = actionInt % HexConfig.BOARD_SIZE;
-                int i = (actionInt - j) / HexConfig.BOARD_SIZE;
-                stateObs.getBoard()[i][j].setValue(stateObs.storedValues[k]);
-            }
-        }
-
-        gamePanel.repaint();
+        gamePanel.showValues = showStoredV;
+        drawBoardToPanel((Graphics2D) gamePanel.getGraphics(), showStoredV);
     }
 
     @Override
@@ -132,10 +117,46 @@ public class GameBoardHex implements GameBoard {
         return stateObs;
     }
 
+    private void drawBoardToPanel(Graphics2D g2, boolean showValues){
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+
+        //draw borders of the game board
+        HexUtils.drawOutlines(HexConfig.BOARD_SIZE, COLOR_PLAYER_ONE, COLOR_PLAYER_TWO, g2, stateObs.getBoard());
+
+        HexTile lastPlaced = stateObs.getLastUpdatedTile();
+
+        //draw hexes
+        for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
+            for (int j=0;j<HexConfig.BOARD_SIZE;j++) {
+                HexTile tile = stateObs.getBoard()[i][j];
+                double tileValue = tile.getValue();
+
+                HexUtils.drawHex(tile, g2, false);
+
+                if (showValues && !Double.isNaN(tileValue)){
+                    Color cellColor = null;
+                    if (!tile.equals(lastPlaced)) {
+                        cellColor = HexUtils.calculateTileColor(tileValue);
+                    }
+                    HexUtils.drawTileValues(tile, g2, HexConfig.BOARD_SIZE, cellColor);
+                }
+            }
+        }
+
+        //Draw last placed hex again to highlight it
+        if (lastPlaced != null) {
+            HexUtils.drawHex(lastPlaced, g2, true);
+            if (showValues && !Double.isNaN(lastPlaced.getValue())) {
+                HexUtils.drawTileValues(lastPlaced, g2, HexConfig.BOARD_SIZE, null);
+            }
+        }
+    }
+
     private void createAndShowGUI()
     {
         gamePanel = new HexPanel();
-        JFrame frame = new JFrame("HexGame - GBG");
+        JFrame frame = new JFrame("Hex - GBG");
         frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
         frame.getContentPane().setBackground(Color.black);
         Container content = frame.getContentPane();
@@ -148,6 +169,7 @@ public class GameBoardHex implements GameBoard {
 
     public class HexPanel extends JPanel
     {
+        boolean showValues = false;
         HexPanel(){
             setBackground(GameBoardHex.BACKGROUND_COLOR);
 
@@ -157,18 +179,8 @@ public class GameBoardHex implements GameBoard {
 
         public void paintComponent(Graphics g){
             Graphics2D g2 = (Graphics2D)g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setFont(new Font("TimesRoman", Font.PLAIN, 20));
             super.paintComponent(g2);
-            //draw borders of the game board
-            HexUtils.drawOutlines(HexConfig.BOARD_SIZE, COLOR_PLAYER_ONE, COLOR_PLAYER_TWO, g2, stateObs.getBoard());
-
-            //draw hexes
-            for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
-                for (int j=0;j<HexConfig.BOARD_SIZE;j++) {
-                    HexUtils.drawHex(stateObs.getBoard()[i][j],g2 , HexConfig.BOARD_SIZE);
-                }
-            }
+            drawBoardToPanel(g2, showValues);
         }
 
         class MyMouseListener extends MouseAdapter {
