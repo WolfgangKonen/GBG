@@ -98,9 +98,9 @@ public class HexUtils {
         Color colorBad = Color.RED;
         Color colorGood = Color.GREEN;
 
-        int red =   Math.round(colorBad.getRed()   * inverse_percentage + colorGood.getRed()   * percentage);
-        int blue =  Math.round(colorBad.getBlue()  * inverse_percentage + colorGood.getBlue()  * percentage);
-        int green = Math.round(colorBad.getGreen() * inverse_percentage + colorGood.getGreen() * percentage);
+        int red =   Math.min(Math.max(Math.round(colorBad.getRed()   * inverse_percentage + colorGood.getRed()   * percentage), 0), 255);
+        int blue =  Math.min(Math.max(Math.round(colorBad.getBlue()  * inverse_percentage + colorGood.getBlue()  * percentage), 0), 255);
+        int green = Math.min(Math.max(Math.round(colorBad.getGreen() * inverse_percentage + colorGood.getGreen() * percentage), 0), 255);
 
         return new Color(red, green, blue, 255);
     }
@@ -156,7 +156,7 @@ public class HexUtils {
             g2.drawPolygon(newPoly);*/
 
             g2.setStroke(strokeFill);
-            g2.setColor(colorOne);
+            g2.setColor(colorTwo);
             g2.fillPolygon(newPoly);
 
 
@@ -183,7 +183,7 @@ public class HexUtils {
             g2.drawPolygon(newPoly);*/
 
             g2.setStroke(strokeFill);
-            g2.setColor(colorOne);
+            g2.setColor(colorTwo);
             g2.fillPolygon(newPoly);
 
 
@@ -211,7 +211,7 @@ public class HexUtils {
             g2.drawPolygon(newPoly);*/
 
             g2.setStroke(strokeFill);
-            g2.setColor(colorTwo);
+            g2.setColor(colorOne);
             g2.fillPolygon(newPoly);
 
             //Bottom right corner
@@ -237,7 +237,7 @@ public class HexUtils {
             g2.drawPolygon(newPoly);*/
 
             g2.setStroke(strokeFill);
-            g2.setColor(colorTwo);
+            g2.setColor(colorOne);
             g2.fillPolygon(newPoly);
         }
     }
@@ -305,18 +305,67 @@ public class HexUtils {
         return null;
     }
 
+    public static int getLongestChain(HexTile[][] board, int player){
+        LinkedList<HexTile> tilesToVisit = new LinkedList<>();
+        ArrayList<HexTile> visitedTiles = new ArrayList<>();
+
+        int longestChain = 0;
+
+        for (int i=0; i<HexConfig.BOARD_SIZE; i++){
+            for (int j=0; j<HexConfig.BOARD_SIZE; j++){
+                if (!visitedTiles.contains(board[i][j]) && board[i][j].getPlayer() == player){
+                    tilesToVisit.add(board[i][j]);
+                }
+
+                int currentChainLength = 0;
+                int currentChainMin = Integer.MAX_VALUE;
+                int currentChainMax = Integer.MIN_VALUE;
+                while(tilesToVisit.size() > 0){
+                    HexTile currentTile = tilesToVisit.pop();
+                    //Add all neighbors that belong to the player and have not been visited
+                    ArrayList<HexTile> adjacentTiles = getAdjacentTiles(board, currentTile);
+                    for (HexTile currentNeighbor: adjacentTiles){
+                        if (currentNeighbor.getPlayer() == player &&
+                                !tilesToVisit.contains(currentNeighbor) &&
+                                !visitedTiles.contains(currentNeighbor)){
+                            tilesToVisit.add(currentNeighbor);
+                        }
+                    }
+
+                    if (player == HexConfig.PLAYER_TWO){
+                        //For player one, x direction matters
+                        currentChainMin = Math.min(currentTile.getCoords().x, currentChainMin);
+                        currentChainMax = Math.max(currentTile.getCoords().x, currentChainMax);
+                    } else if (player == HexConfig.PLAYER_ONE){
+                        //For player two, y direction matters
+                        currentChainMin = Math.min(currentTile.getCoords().y, currentChainMin);
+                        currentChainMax = Math.max(currentTile.getCoords().y, currentChainMax);
+                    }
+
+                    currentChainLength = Math.max(currentChainLength, (currentChainMax-currentChainMin)+1);
+
+                    visitedTiles.add(currentTile);
+                }
+                longestChain = Math.max(longestChain, currentChainLength);
+            }
+        }
+
+
+        return longestChain;
+    }
+
     private static int isNextToEdge(HexTile tile){
         int player = tile.getPlayer();
         int x = tile.getCoords().x;
         int y = tile.getCoords().y;
 
-        if (player == HexConfig.PLAYER_ONE){
+        if (player == HexConfig.PLAYER_TWO){
             if (x == 0){
                 return 1;
             } else if (x == HexConfig.BOARD_SIZE-1){
                 return 2;
             }
-        } else {
+        } else if (player == HexConfig.PLAYER_ONE){
             if (y == 0){
                 return 1;
             } else if (y == HexConfig.BOARD_SIZE-1){
@@ -345,7 +394,7 @@ public class HexUtils {
         return adjacentTiles;
     }
 
-    private static boolean isValidTile(int x, int y) {
+    public static boolean isValidTile(int x, int y) {
         return (x >= 0 && x < HexConfig.BOARD_SIZE) && (y >= 0 && y < HexConfig.BOARD_SIZE);
     }
 
@@ -359,5 +408,17 @@ public class HexUtils {
 
     static double getSideLengthFromHeight(int height){
         return (height / 2) / (Math.sqrt(3)/2);
+    }
+
+    static HexTile[] boardToVector(HexTile[][] board){
+        HexTile[] boardVector = new HexTile[board.length*board.length];
+
+        for (int i=0, k=0; i<HexConfig.BOARD_SIZE; i++){
+            for (int j=0; j<HexConfig.BOARD_SIZE; j++, k++){
+                //No player: 0, player one: 1, player two: 2
+                boardVector[k] = board[i][j];
+            }
+        }
+        return boardVector;
     }
 }

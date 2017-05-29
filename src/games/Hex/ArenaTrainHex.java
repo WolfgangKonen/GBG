@@ -1,9 +1,7 @@
 package games.Hex;
 
 import controllers.PlayAgent;
-import games.ArenaTrain;
-import games.Evaluator;
-import games.GameBoard;
+import games.*;
 
 import javax.swing.*;
 
@@ -28,5 +26,13 @@ public class ArenaTrainHex extends ArenaTrain {
     @Override
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
         return new EvaluatorHex(pa,gb,stopEval,mode,verbose);
+    }
+
+    public Feature makeFeatureClass(int featmode) {
+        return new FeatureHex(featmode);
+    }
+
+    public XNTupleFuncs makeXNTupleFuncs() {
+        return new XNTupleFuncsHex();
     }
 }

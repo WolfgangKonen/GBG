@@ -10,6 +10,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
 
 
@@ -21,8 +23,8 @@ public class GameBoardHex implements GameBoard {
 
     private final int HEX_SIZE = 60; //size of hexagons in px (from one side to the opposite one)
     final static int OFFSET = 15; //offset in px from top and left borders of the window
-    final static Color COLOR_PLAYER_ONE = Color.WHITE;
-    final static Color COLOR_PLAYER_TWO = Color.BLACK;
+    final static Color COLOR_PLAYER_ONE = Color.BLACK;
+    final static Color COLOR_PLAYER_TWO = Color.WHITE;
     private final int WINDOW_HEIGHT;
     private final int WINDOW_WIDTH;
 
