@@ -153,7 +153,7 @@ public class LogManager {
      * ends a logging session, for example when a game is finished
      *
      * @param sessionid the id of the current logsession
-     * @param subdir the name of a subdirectory in which the log should be saved, for example to sort logs with differtent gameboardsettings
+     * @param subdir the name of a subdirectory in which the log should be saved, for example to sort logs with different gameboard settings
      */
     public void endLoggingSession(int sessionid, String subdir) {
         if (loggingEnabled) {
@@ -218,7 +218,7 @@ public class LogManager {
 
 
     /**
-     * safes a LogSessionContainer to a .gamelog file
+     * saves a LogSessionContainer to a .gamelog file
      *
      * @param logSessionContainer the LogSessionContainer
      */
@@ -235,7 +235,7 @@ public class LogManager {
             String sessionFolderName = saveDirectory + "\\" + logSessionContainer.stateObservations.get(0).getName() + "_" + getCurrentTimeStamp();
             String sessionFolderNameSuffix = "";
 
-            //test if File allready exists
+            //test if File already exists
             int i = 1;
             File sessionFolder = new File(sessionFolderName + sessionFolderNameSuffix + ".gamelog");
             while (sessionFolder.exists()) {

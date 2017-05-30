@@ -52,6 +52,19 @@ public class FeatureHex implements Feature {
         return new int[]{0, 1};
     }
 
+    @Override
+	public int getInputSize(int featmode) {
+        switch (featmode){
+        case 0:
+            return 2;
+        case 1:
+            return HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE;
+        default:
+            throw new RuntimeException("Unknown featmode: "+featmode);
+        }
+    	
+    }
+    
     public double[] createFeatureVector0(int player, HexTile[][] board){
         double[] inputVector = new double[2];
         switch (player){

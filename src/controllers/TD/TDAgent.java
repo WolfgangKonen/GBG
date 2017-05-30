@@ -48,10 +48,11 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	protected TD_func m_Net;
 	private double m_epsilon = 0.1;
 	private double m_EpsilonChangeDelta = 0.001;
+	// --- inpSize now obsolete (replaced by m_feature.getInputSize(int featmode)) --- :
 	// size of feature input vector for each featmode
 	// (featmode def'd in TicTDBase. If featmode==8, use
 	// TicTDBase.getInputSize8())
-	private int inpSize[] = { 6, 6, 10, 19, 13, 19, 0, 0, 0, 9 };
+	// private int inpSize[] = { 6, 6, 10, 19, 13, 19, 0, 0, 0, 9 };
 	protected int hiddenSize = 15; // size of hidden layer (only for TD_NNet)
 	private Random rand;
 //	private int[][] m_trainTable = null;
@@ -118,10 +119,12 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			m_Net = null;
 		} else {
 			if (tdPar.hasLinearNet()) {
-				m_Net = new TD_Lin(getInputSize(m_feature.getFeatmode()),
+				m_Net = new TD_Lin(m_feature.getInputSize(m_feature.getFeatmode()),
+						//OLD (and wrong): getInputSize(m_feature.getFeatmode()),
 						tdPar.hasSigmoid());
 			} else {
-				m_Net = new TD_NNet(getInputSize(m_feature.getFeatmode()),
+				m_Net = new TD_NNet(m_feature.getInputSize(m_feature.getFeatmode()),
+						//OLD (and wrong): getInputSize(m_feature.getFeatmode()),
 						hiddenSize, tdPar.hasSigmoid());
 			}
 			// set alpha,beta,gamma,lambda & epochMax,rpropLrn from the TDpars
@@ -458,7 +461,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			// the fan-in,
 			// i.e. divide by the number of neurons on the input side of the
 			// weights:
-			m_Net.setAlpha( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
+			m_Net.setAlpha( tdPar.getAlpha() / m_feature.getInputSize(m_feature.getFeatmode()) );
+					//OLD (and wrong): inpSize[m_feature.getFeatmode()] );
 		}
 		m_Net.setBeta(tdPar.getAlpha() / hiddenSize); 	// only relevant for
 														// TD_NNet
@@ -466,7 +470,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				tdPar.getAlphaFinal() / tdPar.getAlpha(), 1.0 / maxGameNum));
 		//m_Net.setEpochs(tdPar.getEpochs());  // now we use epochs over whole games
 		m_Net.setRpropLrn(tdPar.hasRpropLrn());
-		m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
+		m_Net.setRpropInitDelta( tdPar.getAlpha() / m_feature.getInputSize(m_feature.getFeatmode()));
+					//OLD (and wrong): inpSize[m_feature.getFeatmode()] );
 	}
 
 	public void setAlpha(double alpha) {
@@ -510,9 +515,10 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		return str;
 	}
 
-	private int getInputSize(int featmode) {
-			return inpSize[featmode];
-	}
+// --- obsolete (replaced by m_feature.getInputSize(int featmode) ):
+//	private int getInputSize(int featmode) {
+//			return inpSize[featmode];
+//	}
 
 	public int getHiddenSize() {
 		return hiddenSize;

@@ -1,10 +1,10 @@
 package games;
 
 import controllers.TD.ntuple.TDNTupleAgt;
-
+import controllers.TD.ntuple.NTupleValueFunc;
+import controllers.TD.ntuple.NTupleFactory;
 import java.util.HashSet;
 
-import controllers.TD.ntuple.NTupleValueFunc;
 
 /**
  * Interface for the n-tuple implementation in {@link TDNTupleAgt} and 
@@ -45,24 +45,29 @@ public interface XNTupleFuncs {
 	public int[] getBoardVector(StateObservation so);
 
 	/**
-	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
-	 * game has s symmetries, return an array which holds s symmetric board vectors: 
+	 * Given a board vector and given that the game has s symmetries,  
+	 * return an array which holds s symmetric board vectors: 
 	 * <ul>
 	 * <li> the first row {@code boardArray[0]} is the board vector itself
-	 * <li> the other rows are the board vectors when transforming {@code boardVector}
+	 * <li> the other s-1 rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
-	 * @param boardVector
-	 * @return boardArray
+	 * @param boardVector e.g. from {@link #getBoardVector(StateObservation)}
+	 * @return a (s x length(boardVector))-matrix 
 	 */
 	public int[][] symmetryVectors(int[] boardVector);
 	
 	/** 
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
-	 * containing the cells 0, 1, and 4.
+	 * containing the cells 0, 1, and 4.<p>
+	 * 
+	 * Other options than fixed n-tuples (that is, the generation of random n-tuples) are 
+	 * provided by {@link NTupleFactory#makeNTupleSet(params.NTParams, XNTupleFuncs)}
 	 * 
 	 * @return nTuples[numTuples][]
+	 * 
+	 * @see NTupleFactory#makeNTupleSet(params.NTParams, XNTupleFuncs)
 	 */
 	public int[][] fixedNTuples();
 

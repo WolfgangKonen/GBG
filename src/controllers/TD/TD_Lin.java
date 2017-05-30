@@ -367,7 +367,7 @@ public class TD_Lin implements TD_func, Serializable {
     	int j,k;
     	
         // initialize input layer & bias neurons:	
-    	if (Input.length != n) throw new RuntimeException("Wrong length");
+    	if (Input.length != n) throw new RuntimeException("Wrong length (Input.length != n)");
     	System.arraycopy(Input, 0, x, 0, Input.length);
     	x[n] = BIAS;
 

@@ -19,4 +19,5 @@ public interface Feature {
 	public String stringRepr(double[] featVec);
 	public int getFeatmode();
 	public int[] getAvailFeatmode();
+	public int getInputSize(int featmode);
 }

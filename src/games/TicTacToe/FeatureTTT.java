@@ -56,6 +56,16 @@ public class FeatureTTT extends TicTDBase implements Feature, Serializable {
 		return super.getFeatmode();
 	}
 
+    @Override
+	public int getInputSize(int featmode) {
+    	// inpSize[i] has to match the length of the vector which
+    	// TicTDBase.prepareInputVector() returns for featmode==i:
+    	int inpSize[] = { 6, 6, 10, 19, 13, 19, 0, 0, 0, 9 };
+    	if (featmode>(inpSize.length-1) || featmode<0)
+    		throw new RuntimeException("featmode outside allowed range 0,...,"+(inpSize.length-1));
+    	return inpSize[featmode];
+    }
+    
 	@Override
 	public double getScore(StateObservation sob) {
 		// Auto-generated method stub (just needed because AgentBase,
