@@ -369,6 +369,14 @@ public class TDParams extends Frame implements Serializable
 			choiceFeatTDS.setEnabled(true);
 			epochL.setEnabled(true);
 			epochT.setEnabled(true);
+			switch (gameName) {
+			case "TicTacToe": 
+				setFeatmode(3);
+				break;
+			default:	// Hex and all other
+				setFeatmode(0);
+				break;
+			}
 			break;
 		}
 		
