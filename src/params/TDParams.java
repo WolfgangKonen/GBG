@@ -41,8 +41,6 @@ public class TDParams extends Frame implements Serializable
 	private static final long serialVersionUID = 1L;
 	private static final String TIPGAMMAL = "Discount factor in range [0,1] ";
 	private static final String TIPEPOCHL = "Accumulate gradient for Epochs iterations, then update weights";
-	//private final String featList[] = {"0","1","2","3","4","5","6","7","8","9"};
-	private final String featList[] = {"0","1","2","3","4","5","9"};	// only the allowed feature sets 
 
 	JLabel alphaL;
 	JLabel alfinL;
@@ -132,13 +130,8 @@ public class TDParams extends Frame implements Serializable
 		bpropType = new Checkbox("backprop",cbgLrnType,true);
 		rpropType = new Checkbox("RPROP",cbgLrnType,false);
 
-		FeatTDS = "3";
 		FeatTDS_L = new JLabel("Feature set");
 		this.choiceFeatTDS = new Choice();
-		for (String s : featList) choiceFeatTDS.add(s); 
-		choiceFeatTDS.select(FeatTDS);
-		
-
 
 //		ok = new JButton("OK");
 //		m_par = this;
@@ -271,7 +264,14 @@ public class TDParams extends Frame implements Serializable
 		epochT.setText(value+"");
 	}
 	public void setFeatmode(int featmode) {
+		//If the feature list has not been initialized, add the selected featmode to the list
+		if (choiceFeatTDS.getItemCount() == 0){
+			choiceFeatTDS.add(Integer.toString(featmode));
+		}
 		choiceFeatTDS.select(featmode+"");
+	}
+	public void setFeatList(int[] featList){
+		for (int i : featList) choiceFeatTDS.add(Integer.toString(i));
 	}
 	public void setSigmoid(boolean state) {
 		withSigType.setSelected(state);
