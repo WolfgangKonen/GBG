@@ -65,7 +65,7 @@ public class HexUtils {
         int x = getHexX(i, j, polyHeight);
         int y = getHexY(i, j, polyHeight, boardSize);
 
-        Color textColor = tile.getPlayer() == HexConfig.PLAYER_TWO ? Color.WHITE : Color.BLACK;
+        Color textColor = tile.getPlayer() == HexConfig.PLAYER_ONE ? Color.WHITE : Color.BLACK;
 
         if (cellColor != null) {
             g2.setColor(cellColor);
@@ -74,10 +74,7 @@ public class HexUtils {
 
         g2.setColor(textColor);
         double tileValue = tile.getValue();
-        String tileText = "";
-
-
-        tileText = String.format("%.2f", tileValue);
+        String tileText = String.format("%.2f", tileValue);
 
         int width = g2.getFontMetrics().stringWidth(tileText);
         int height = g2.getFontMetrics().getHeight();
