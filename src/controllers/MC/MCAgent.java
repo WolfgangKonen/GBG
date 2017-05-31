@@ -136,7 +136,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
                     //der Random Agent wird erstellt und simuliert
                     //ein Spiel
                     RandomSearch agent = new RandomSearch();
-                    agent.startAgent(newSob, depth);
+                    agent.startAgent(newSob, depth);			// contains BUG1 fix
 
                     //das Ergebnis der Simulation wird in einem
                     //ResultContainer zurueckgegeben
@@ -168,7 +168,9 @@ public class MCAgent extends AgentBase implements PlayAgent {
         //jeder resultContainer in der Liste resultContainers wird
         //der zugehoerigen Aktion im vtable hinzuadiert
         for(ResultContainer resultContainer : resultContainers) {
-            vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore();
+            //vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore();	
+        	// /WK/ **BUG2** in line above: referingState was missing. Use instead next line:
+        	vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore(sob);
             totalRolloutDepth += resultContainer.rolloutDepth;
             if(resultContainer.sob.isGameOver()) {
                 nRolloutFinished++;
@@ -220,10 +222,14 @@ public class MCAgent extends AgentBase implements PlayAgent {
                     StateObservation newSob = sob.copy();
 
                     newSob.advance(actions.get(j));
-                    RandomSearch agent = new RandomSearch();
-                    agent.startAgent(newSob, depth);
 
-                    averageScore += newSob.getGameScore();
+                    RandomSearch agent = new RandomSearch();
+                    agent.startAgent(newSob, depth);			// contains BUG1 fix
+
+                    //averageScore += newSob.getGameScore();	
+                	// /WK/ **BUG2** in line above: referingState was missing. 
+                    // Use instead next line:
+                    averageScore += newSob.getGameScore(sob);
                     if (newSob.isGameOver()) nRolloutFinished++;
                     totalRolloutDepth += agent.getRolloutDepth();
                 }

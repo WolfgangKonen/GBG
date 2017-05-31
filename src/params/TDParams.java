@@ -296,7 +296,7 @@ public class TDParams extends Frame implements Serializable
 	
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
-	 * @param tp  of the re-loaded agent
+	 * @param tp  TDParams of the re-loaded agent
 	 */
 	public void setFrom(TDParams tp) {
 		setAlpha(tp.getAlpha());
@@ -322,11 +322,16 @@ public class TDParams extends Frame implements Serializable
 	 * 
 	 * @param agentName either "TD-Ntuple" (for {@link TDNTupleAgt}) or "TDS" (for {@link TDAgent}),
 	 * 				all other strings are without any effect
-	 * @param gameName
+	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// currently we have here only the sensible defaults for one game (TTT)
-		// but for two agents ("TD-Ntuple" = class TDNTupleAgt and "TDS" = class TDAgent):
+		// Currently we have here only the sensible defaults for one game ("TicTacToe")
+		// but for two agents ("TD-Ntuple" = class TDNTupleAgt and "TDS" = class TDAgent).
+		//
+		// If later good parameters for other games (e.g. "Hex") are found, they should be
+		// added with suitable nested switch(gameName). 
+		// Currently we have only one switch(gameName) on the initial featmode (=3 for 
+		// TicTacToe, =0 for all others)
 		switch (agentName) {
 		case "TD-Ntuple": 
 			alphaT.setText("0.001");  			// the defaults
@@ -373,7 +378,7 @@ public class TDParams extends Frame implements Serializable
 			case "TicTacToe": 
 				setFeatmode(3);
 				break;
-			default:	// Hex and all other
+			default:	// "Hex" and all other
 				setFeatmode(0);
 				break;
 			}

@@ -103,8 +103,8 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] vtable, boolean silent) {
 		
-		//VTable = new double[so.getNumAvailableActions()];
-        // DON'T! The caller has to define VTable with the right length
+		//vtable = new double[so.getNumAvailableActions()];
+        // DON'T! The caller has to define vtable with the right length
 		
 		assert so.isLegalState() 
 			: "Not a legal state"; // e.g. player to move does not fit to Table

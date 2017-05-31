@@ -45,8 +45,8 @@ abstract public class AgentBase implements Serializable {
 	abstract public double getScore(StateObservation sob);
 	
 	/**
-	 * Return the estimated game value for {@link StateObservation} sob. The default behaviour is to return
-	 * {@link #getScore(StateObservation)}.<p>
+	 * Return the estimated game value for {@link StateObservation} sob. The default 
+	 * behavior is to return {@link #getScore(StateObservation)}.<p>
 	 * 
 	 * <b>Important note</b>: Derived classes that use {@link #estimateGameValue} inside 
 	 * {@link #getScore(StateObservation)} (e.g. Minimax, MC or MCTS when reaching 
