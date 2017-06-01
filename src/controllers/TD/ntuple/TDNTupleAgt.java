@@ -326,7 +326,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	/**
-	 * Return the agent's score for that after state.
+	 * Return the agent's estimate of the score for that after state.
 	 * 
 	 * @param so			the current game state;
 	 * @return V(), the prob. that X (Player +1) wins from that after state.
