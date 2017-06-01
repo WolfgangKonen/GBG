@@ -466,6 +466,9 @@ public class XArenaMenu extends JMenuBar {
 		
 		if (td == null) {
 			str = "No Agent loaded!";
+			MessageBox.show(m_arena,"ERROR: " + str,
+					"Load Error", JOptionPane.ERROR_MESSAGE);
+
 		} else {
 			// enable / disable certain parameter settings according to 
 			// the agent name and the active game (before setting the specific

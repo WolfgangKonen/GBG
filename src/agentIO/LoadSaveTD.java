@@ -314,7 +314,7 @@ public class LoadSaveTD {
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
 						+ " !]");
-				e.printStackTrace();
+				//e.printStackTrace();
 				//throw e;
 			} catch (ClassNotFoundException e) {
 				dlg.setVisible(false);

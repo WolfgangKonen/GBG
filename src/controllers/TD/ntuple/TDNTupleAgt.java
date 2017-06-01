@@ -232,29 +232,36 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
             NewSO.advance(actions[i]);
 			
 			if (NewSO.isGameOver()) {
-				switch (so.getNumPlayers()) {
-				case 1: 
-					CurrentScore = NewSO.getGameScore();
-					break;
-				case 2: 
-					CurrentScore = (-1)*NewSO.getGameScore();		// CORRECT
-					// NewSO.getGameScore() returns -1, if 'player', that is the
-					// one who *made* the move to 'so', has won. If we multiply
-					// this by (-1), we get a reward +1 for a X(player=+1)- 
-					// win and *also* a reward +1 for an O(player=-1)-win.
-					// And a reward 0 for a tie.
-					//
-					//CurrentScore = (-player)*NewSO.getGameScore(); // WRONG!!
-					// NewSO.getGameScore() returns -1, if 'player', that is the
-					// one who *made* the move to 'so', has won. If we multiply
-					// this by (-player), we get a reward +1 for a X(player=+1)- 
-					// win and a reward -1 for an O(player=-1)-win.
-					// And a reward 0 for a tie.
-					break;
-				default: 
-					throw new RuntimeException("TDNTupleAgt.trainAgent does not yet "+
-							"implement case so.getNumPlayers()>2");
-				}
+//				switch (so.getNumPlayers()) {
+//				case 1: 
+//					CurrentScore = NewSO.getGameScore();
+//					break;
+//				case 2: 
+//					CurrentScore = (-1)*NewSO.getGameScore();		// CORRECT
+//					// NewSO.getGameScore() returns -1, if 'player', that is the
+//					// one who *made* the move to 'so', has won. If we multiply
+//					// this by (-1), we get a reward +1 for a X(player=+1)- 
+//					// win and *also* a reward +1 for an O(player=-1)-win.
+//					// And a reward 0 for a tie.
+//					//
+//					//CurrentScore = (-player)*NewSO.getGameScore(); // WRONG!!
+//					// NewSO.getGameScore() returns -1, if 'player', that is the
+//					// one who *made* the move to 'so', has won. If we multiply
+//					// this by (-player), we get a reward +1 for a X(player=+1)- 
+//					// win and a reward -1 for an O(player=-1)-win.
+//					// And a reward 0 for a tie.
+//					break;
+//				default: 
+//					throw new RuntimeException("TDNTupleAgt.trainAgent does not yet "+
+//							"implement case so.getNumPlayers()>2");
+//				}
+				
+				// the whole switch-statement above can be replaced with the simpler  
+				// logic of NewSO.getGameScore(StateObservation referingState), where  
+				// referingState is 'so', the state before NewSO. [This should be  
+				// extensible to 3- or 4-player games (!) as well, if we put the 
+				// proper logic into method getGameScore(referingState).]  
+				CurrentScore = NewSO.getGameScore(so);
 			}  else {
 				// 
 				// TODO: clarify whether this should be normalized to [0,1] as well (!!!)

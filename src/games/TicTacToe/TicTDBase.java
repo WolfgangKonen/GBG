@@ -25,7 +25,7 @@ import controllers.MinimaxAgent;
  * Class {@link TicTDBase} contains basic things which are similar for all 
  * {@link PlayAgent}s  playing TicTacToe. Among these things are: <ul>
  * <li> functions like {@link #tie(int[][])} or {@link #win(int[][])} to decide whether the game is finished,
- * <li> setter and getter for featmode (0,1,2,3,8,9 for 'Levkovich', thin, thick, rich, N-tuple, raw feature vector),
+ * <li> setter and getter for featmode (0,1,2,3,4,5,9 for 'Levkovich', thin, thick, rich, .., raw feature vector),
  * <li> {@link #prepareInputVector(int, int[][])} to generate the feature vector for a board position 
  * (based on <code>featmode</code>, the first parameter),
  * <li> functions like {@link #inputToString(double[])}, {@link #tableToString(int, int[][])} or
@@ -54,7 +54,7 @@ import controllers.MinimaxAgent;
 abstract public class TicTDBase  extends AgentBase implements Serializable {
 	private int[][] crosspoint_w;
 	private int[][] crosspoint_b;
-	private int featmode=2;		// 0,1,2,3,8,9 for 'Levkovich',thin,thick,rich,N-tuple,raw feature vector
+	private int featmode=2;		// 0,1,2,3,4,5,9 for 'Levkovich',thin,thick,rich,...,raw feature vector
 
 	protected Random rand;			// needed by derived class TDSNPlayer
 	//private boolean MakeMove;		// true, if an agent move is requested 
@@ -140,10 +140,6 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
     	String sMinimax = Types.GUI_AGENT_LIST[1];
 		referee = new MinimaxAgent(sMinimax);
 		
-		if (featmode==8) {
-			//ntupleSet = new NTupleSet(nTuple, POSVALUES, USESYMMETRY,RANDINITWEIGHTS, tcPar);
-			//ntupleSet = new NTupleSet(3, 12, POSVALUES, USESYMMETRY,RANDINITWEIGHTS);			
-		}
 	}
 	
 	/**
@@ -592,9 +588,6 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 			return prepareInputVector4(Player,Table);
 		} else if (featmode==9) {
 			return prepareInputVector9(Player,Table);
-		} else if (featmode==8) {
-			//return prepareInputNtuple(Player,Table);
-			throw new RuntimeException("[TicTDBase] featmode = 8 currently not supported!");
 		} else {  
 			throw new RuntimeException("[TicTDBase] featmode = " + featmode + " not allowed!");
 		}
@@ -832,7 +825,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	}
 
 //	/**
-//	 * @deprecated (use {@link TD_NTPlayer} instead)
+//	 * @deprecated (use {@link TDNTupleAgt} instead)
 //	 * <p>
 //	 * The Ntuple feature vector for featmode==8. <ul>
 //	 * <li> length = sum of LUT lengths for all Ntuples

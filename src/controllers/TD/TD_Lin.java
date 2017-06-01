@@ -379,8 +379,11 @@ public class TD_Lin implements TD_func, Serializable {
     			y[k]+=x[j]*v[j][k];
     		}
     		if (withSigmoid)
-    			y[k]=1.0/(1.0+Math.exp(-y[k])); /* asymmetric sigmoid (OPTIONAL) */
-//    			y[k]=2.0*y[k]-1.0;				/* symmetric sigmoid, needs a factor 2 in updateElig() */ 
+    			y[k]=1.0/(1.0+Math.exp(-y[k])); /* asymmetric sigmoid (Fermi fct) \in [0,1] */
+//    			y[k]=2.0*y[k]-1.0;				
+    			/* uncomment the line above to map to symmetric sigmoid \in [-1,1]. This
+    			 * needs a factor 2 in the withSigmoid-branch of updateElig() */ 
+
     	}
     	return(y[0]);
     }/* end getScore */

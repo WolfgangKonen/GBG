@@ -596,6 +596,14 @@ public class XArenaFuncs
 		}
 	} // competeBase
 
+	public void singleCompete(XArenaButtons xab, GameBoard gb) {
+		this.competeBase(false, xab, gb);
+	}
+	
+	public void swapCompete(XArenaButtons xab, GameBoard gb) {
+		this.competeBase(true, xab, gb);
+	}
+
 	/**
 	 * Perform many (competitionNum) competitions between agents of type AgentX and agents 
 	 * of type AgentO. The agents (if trainable) are trained anew before each competition. 

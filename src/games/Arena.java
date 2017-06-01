@@ -128,9 +128,9 @@ abstract public class Arena extends JPanel implements Runnable {
 			switch(taskState) {
 			case COMPETE:
 				enableButtons(false);
-				setStatusMessage("Running Compete ...");
+				setStatusMessage("Running Single Compete ...");
 				
-				m_xfun.competeBase(false, m_xab, gb);
+				m_xfun.singleCompete(m_xab, gb);
 				
 				enableButtons(true);
 				setStatusMessage("Compete finished.");
@@ -141,7 +141,7 @@ abstract public class Arena extends JPanel implements Runnable {
 				enableButtons(false);
 				setStatusMessage("Running Swap Compete ...");
 				
-				m_xfun.competeBase(true, m_xab, gb);
+				m_xfun.swapCompete(m_xab, gb);
 				
 				enableButtons(true);
 				setStatusMessage("Swap Compete finished.");
