@@ -125,8 +125,12 @@ public class XArenaButtons extends JPanel
 		//CompeteNumT=new TextField("3", 5);
 		//CompetitionsT=new TextField("1", 5);
 
-		Feature dummyFeature = m_game.makeFeatureClass(0); //to get list of available feature modes
-		tdPar.setFeatList(dummyFeature.getAvailFeatmode());
+		try {
+			Feature dummyFeature = m_game.makeFeatureClass(0); //to get list of available feature modes
+			tdPar.setFeatList(dummyFeature.getAvailFeatmode());
+		} catch (RuntimeException ignored){
+
+		}
 
 		MultiTrain=new JButton("MultiTrain");
 		Play=new JButton("Play");
