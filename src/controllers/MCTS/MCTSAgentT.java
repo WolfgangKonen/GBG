@@ -132,14 +132,29 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	@Override
 	public double getScore(StateObservation so) {
 		double[] vtable = new double[so.getNumAvailableActions()+1];
+        double nextActionScore = Double.NEGATIVE_INFINITY;
 		
 		assert so.isLegalState() 
 		: "Not a legal state"; // e.g. player to move does not fit to Table
 	
-		// Ask MCTS for the best action ...
-		Types.ACTIONS actBest = act(so,m_Timer,vtable);
-		
-		return vtable[vtable.length];
+		// This if branch is vital: It was missing before, and if 'so' was a game-over state
+		// this resulted in a NullpointerException later, because no child was added to root.
+		// Now we fix this by returning so.getGameScore(so):
+        if (so.isGameOver()) {
+        	return so.getGameScore(so);
+        } else {
+        	
+    		// Ask MCTS for the best action ...
+    		Types.ACTIONS actBest = act(so,m_Timer,vtable);
+
+            for (int i = 0; i < so.getNumAvailableActions(); i++) {
+                if (nextActionScore <= vtable[i]) {
+                    nextActionScore = vtable[i];
+                }
+            }
+
+            return nextActionScore;
+        }
 	}
 
 	@Override

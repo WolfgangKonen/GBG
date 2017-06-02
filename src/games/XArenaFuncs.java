@@ -686,8 +686,9 @@ public class XArenaFuncs
 			paO.setMaxGameNum(maxGameNum);
 			paO.setGameNum(0);
 			
-			if (!AgentX.equals("MCTS")) 
-				m_evaluator1 = xab.m_game.makeEvaluator(paX,gb,stopEval,9,1);
+			m_evaluator1 = xab.m_game.makeEvaluator(paX,gb,stopEval,-1,1);
+			// mode==-1: take Evaluator.getDefaultMode() from the game-specific 
+			// class derived from Evaluator
 			
 //TODO: implement CMAPlayer correctly
 //			if (AgentX.equals("CMA-ES")) {
@@ -701,14 +702,14 @@ public class XArenaFuncs
 				}
 				
 			} 
-			if (!AgentX.equals("MCTS")) {
-				m_evaluator1.eval();
-				evalC[c][0] = m_evaluator1.getLastResult();
-			}
+
+			m_evaluator1.eval();
+			evalC[c][0] = m_evaluator1.getLastResult();
 			optimCountX += evalC[c][0];
 			
-			if (!AgentO.equals("MCTS")) 
-				m_evaluatorO = xab.m_game.makeEvaluator(paO,gb,stopEval,9,1);
+			m_evaluatorO = xab.m_game.makeEvaluator(paO,gb,stopEval,-1,1);
+			// mode==-1: take Evaluator.getDefaultMode() from the game-specific 
+			// class derived from Evaluator
 			
 //TODO: implement CMAPlayer correctly
 //			if (AgentO.equals("CMA-ES")) {
@@ -722,10 +723,9 @@ public class XArenaFuncs
 				}
 				
 			} 
-			if (!AgentO.equals("MCTS")) {
-				m_evaluatorO.eval();
-				evalC[c][1] = m_evaluatorO.getLastResult();
-			}
+
+			m_evaluatorO.eval();
+			evalC[c][1] = m_evaluatorO.getLastResult();
 			optimCountO += evalC[c][1];
 
 			StateObservation startSO = gb.getDefaultStartState();  // empty board
@@ -743,16 +743,19 @@ public class XArenaFuncs
 		for (int i=0; i<3; i++) winrate[i] = winrate[i]/competitionNum;
 		if (!silent) {
 			System.out.println("*** Competition results: ***");
-			System.out.println("Avg. success rate (evalAgent paX): "+frm.format((double)optimCountX/competitionNum));
-			System.out.println("Avg. success rate (evalAgent paO): "+frm.format((double)optimCountO/competitionNum));
-			System.out.print("Avg. win rate: ");
-			for (int i=0; i<3; i++) System.out.print(" "+frm.format(winrate[i]));
-			System.out.println(" (X/Tie/O)");
+			System.out.println("Avg. success rate (Evaluator X): "+frm.format((double)optimCountX/competitionNum));
+			System.out.println("Avg. success rate (Evaluator O): "+frm.format((double)optimCountO/competitionNum));
+			//--- this is done below ---
+			//System.out.print("Avg. win rate: ");
+			//for (int i=0; i<3; i++) System.out.print(" "+frm.format(winrate[i]));
+			//System.out.println(" (X/Tie/O)");
 		}
+
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+xab.m_game.getGameName()+"/";
+		String filename = "Arena.comp.csv";
 		try {
-			String filename = "Arena.comp.csv";
 			PrintWriter f; 
-			f = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
+			f = new PrintWriter(new BufferedWriter(new FileWriter(strDir+filename)));
 			f.println("alpha=" + alpha + ";  lambda=" + lambda + "; trained agents=" + competitionNum 
 					  + ",  maxGameNum=" +maxGameNum);
 			f.print(AgentX);
@@ -770,17 +773,24 @@ public class XArenaFuncs
 				for (int p=0; p<2; p++) f.print(evalC[c][p] + "; ");
 				f.println();
 			}
+			f.println();
+			f.println("Averages:");
+			f.print(";");
+			for (int p=0; p<3; p++) f.print(winrate[p] + "; ");
+			f.print((double)optimCountX/competitionNum+"; ");
+			f.print((double)optimCountO/competitionNum+"; ");
+			f.println();
 			f.close();
-			System.out.println("multiCompete: Output written to bin/" + filename);
+			System.out.println("multiCompete: Output written to " + strDir + filename);
 		} catch (IOException e) {
-			System.out.println("IO-exception in TicTacToe::multiCompete()");
+			System.out.println("Could not write to "+strDir+filename+" in XArenaFuncs::multiCompete()");
 		}
 		
-		if (!silent) {
-			System.out.print("win rates: ");
+//		if (!silent) {
+			System.out.print("Avg. win rates: ");
 			for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
 			System.out.println(" (X/Tie/O)");
-		}
+//		}
 		
 		} catch(RuntimeException ex) {
 			MessageBox.show(xab, 

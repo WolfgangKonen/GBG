@@ -31,7 +31,7 @@ public class EvaluatorTTT extends Evaluator {
 	private MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
 	private Evaluator9 m_evaluator9 = null; 
 	private int m_mode;
-	private double m_om=-1;			// avg. success against RandomPlayer, best is 0.9 (m_mode=0)
+	private double m_res=-1;		// avg. success against RandomPlayer, best is 0.9 (m_mode=0)
 									// or against MinimaxPlayer, best is 0.0 (m_mode=1,2)
 	private String m_msg;
 	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
@@ -72,9 +72,12 @@ public class EvaluatorTTT extends Evaluator {
 	
 	/**
 	 * 
-	 * @return true if evaluateAgentX is above m_thresh=-0.15 (best: 0.0, worst: -1.0).
+	 * @return true if evaluateAgentX is above m_thresh.<br>
 	 * The choice for X=1 or 2 is made with 3rd parameter mode in 
-	 * {@link #EvaluatorTTT(PlayAgent, GameBoard, int, int)} [default mode=1].
+	 * {@link #EvaluatorTTT(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
+	 * 
+	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
+	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
 	 */
 	@Override
 	public boolean eval_Agent() {
@@ -94,10 +97,10 @@ public class EvaluatorTTT extends Evaluator {
 	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
 	 */
  	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
-		m_om = XArenaFuncs.competeBoth(pa, random_agent, 100, gb);
-		m_msg = "Success against random = " + m_om;
+		m_res = XArenaFuncs.competeBoth(pa, random_agent, 100, gb);
+		m_msg = "Success against random = " + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
-		return m_om;
+		return m_res;
 	}
 
  	/**	
@@ -107,10 +110,10 @@ public class EvaluatorTTT extends Evaluator {
 	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
 	 */
  	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
-		m_om = XArenaFuncs.competeBoth(pa, minimax_agent, 1, gb);
-		m_msg = "Success against minimax = " + m_om;
+		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, 1, gb);
+		m_msg = "Success against minimax = " + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
-		return m_om;
+		return m_res;
 	}
  	
  	/**
@@ -131,7 +134,7 @@ public class EvaluatorTTT extends Evaluator {
 						, "------X--","-----X---","----X----"
 						, "---X-----","--X------","-X-------"
 						, "X--------"};
-		m_om=0;
+		m_res=0;
 		for (int k=0; k<state.length; ++k) {
 			startPlayer = Evaluator9.string2table(state[k],startTable);
 			StateObserverTTT startSO = new StateObserverTTT(startTable,startPlayer);
@@ -143,14 +146,14 @@ public class EvaluatorTTT extends Evaluator {
 			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
 											// resp. \in [-1,0], if opponent never looses.
 											// +1 is best for pa, -1 worst for pa.
-			m_om += (resX+resO)/2.0;
+			m_res += (resX+resO)/2.0;
 		}
-		m_om=m_om/state.length;
+		m_res=m_res/state.length;
 		
-		m_msg = "Success against minimax (different starts, best is 0.0) = " + m_om;
+		m_msg = "Success against minimax (different starts, best is 0.0) = " + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		
-		return m_om;
+		return m_res;
 	}
  	
  	/**
@@ -158,11 +161,11 @@ public class EvaluatorTTT extends Evaluator {
  	 * empty board ({@code mode==1}) or from different start positions ({@code mode==2}), 
  	 * depending on {@code mode} as set in constructor.
  	 */
- 	public double getOm() { return m_om; }
+ 	public double getOm() { return m_res; }
  	
  	@Override
  	public double getLastResult() { 
- 		return (m_mode==9) ? m_evaluator9.getLastResult() : m_om; 
+ 		return (m_mode==9) ? m_evaluator9.getLastResult() : m_res; 
  	}
  	@Override
  	public String getMsg() { 
@@ -180,4 +183,10 @@ public class EvaluatorTTT extends Evaluator {
  	public int[] getAvailableModes() {
  		return AVAILABLE_MODES;
  	}
+ 	
+ 	//@Override
+ 	public static int getDefaultEvalMode() {
+		return AVAILABLE_MODES[AVAILABLE_MODES.length-1];		// mode 9
+	}
+
 }

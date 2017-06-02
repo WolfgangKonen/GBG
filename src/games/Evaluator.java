@@ -52,6 +52,13 @@ abstract public class Evaluator {
 		gnumTrue=-2;
 	}
 	
+	/**
+	 * Calls {@link #eval_Agent} which returns a boolean predicate (fail/success). It counts
+	 * the number of consecutive successes. If this number reaches m_stopEval, the 
+	 * method {@link #goalReached(int)} will return true.
+	 * @return
+	 * 		boolean predicate from {@link #eval_Agent}
+	 */
 	public boolean eval() {
 		thisEval = eval_Agent();
 		if (thisEval) {
@@ -62,8 +69,22 @@ abstract public class Evaluator {
 		return thisEval;
 	}
 
+	/**
+	 * This function needs to be implemented in derived classes.
+	 * 
+	 * @return
+	 *  	a boolean predicate (fail/success) for the result of the evaluation. 
+	 *  	Might be for example (avg.success > -0.15) when playing TTT against Minimax.
+	 */
 	abstract protected boolean eval_Agent();
 
+	/**
+	 * This function needs to be implemented in derived classes.
+	 * 
+	 * @return
+	 *  	the result from the last call to {@link #eval_Agent()}, which might be for example
+	 *  	the average success rate of games played against a Minimax player.
+	 */
  	abstract public double getLastResult();
 
 	/**
@@ -115,5 +136,10 @@ abstract public class Evaluator {
 	 *     If an Evaluator does not use {@code mode}, it returns null.
 	 */
 	abstract public int[] getAvailableModes();
+	
+	public static int getDefaultEvalMode() 
+	{
+		return 0;
+	}
 }
 

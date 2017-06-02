@@ -532,7 +532,8 @@ abstract public class Arena extends JPanel implements Runnable {
 	 * @param stopEval	the number of successful evaluations needed to reach the 
 	 * 					evaluator goal (may be used during training to stop it 
 	 * 					prematurely)
-	 * @param mode		which evaluator mode
+	 * @param mode		which evaluator mode. If -1, take the default evalMode
+	 * 					{@link Evaluator#getDefaultEvalMode()}
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */

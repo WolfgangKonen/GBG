@@ -266,16 +266,25 @@ public class MCAgent extends AgentBase implements PlayAgent {
     public double getScore(StateObservation sob) {
         double[] vtable = new double[sob.getNumAvailableActions()+1];
         double nextActionScore = Double.NEGATIVE_INFINITY;
+        
+		// This if branch is vital: It was missing before, and if 'so' was a game-over state
+		// this could result in wrong scores.
+		// Now we fix this by returning so.getGameScore(so) on a game-over situation:
+        if (sob.isGameOver()) {
+        	return sob.getGameScore(sob);
+        } else {
+        	
+            getNextAction(sob, true, vtable, true);
 
-        getNextAction(sob, true, vtable, true);
-
-        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
-            if (nextActionScore <= vtable[i]) {
-                nextActionScore = vtable[i];
+            for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+                if (nextActionScore <= vtable[i]) {
+                    nextActionScore = vtable[i];
+                }
             }
+
+            return nextActionScore;
         }
 
-        return nextActionScore;
     }
     
     /**
