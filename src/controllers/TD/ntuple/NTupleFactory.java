@@ -113,9 +113,10 @@ public class NTupleFactory {
 					while(!foundStep) {
 						//
 						// look from a randomly picked cell of the so-far tupleSet
-						// whether it has a not-yet visited neighbor: If so, pick one 
-						// of these neighbors. If not, foundStep remains false 
-						// and another loop through while picks another cell from tupleSet
+						// whether it has neighbors which do not belong yet to tupleSet: 
+						// If so, pick one of these neighbors. 
+						// If not, foundStep remains false and another loop 
+						// through while picks another cell from tupleSet
 						//
 						int iCell=pickElement(tupleSet);
 						HashSet adjSet = xnf.adjacencySet(iCell);
