@@ -10,6 +10,7 @@ import java.util.Random;
 import javax.swing.JOptionPane;
 
 import controllers.MC.MCAgent;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgent;
 import org.jfree.data.xy.XYSeries;
 
 import controllers.PlayAgent;
@@ -140,7 +141,9 @@ public class XArenaFuncs
 		} else if (sAgent.equals("Random")) {
 			pa = new RandomAgent(sAgent);
 		} else if (sAgent.equals("MCTS")) {
-			pa= new MCTSAgentT(sAgent,null,m_xab.mctsParams);
+			pa = new MCTSAgentT(sAgent, null, m_xab.mctsParams);
+		} else if (sAgent.equals("MCTS Expectimax")) {
+			pa= new MCTSExpectimaxAgent(sAgent,null,m_xab.mctsParams);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
@@ -178,6 +181,8 @@ public class XArenaFuncs
 				pa= new RandomAgent(sAgent);
 			} else if (sAgent.equals("MCTS")) {
 				pa= new MCTSAgentT(sAgent,null,m_xab.mctsParams);
+			} else if (sAgent.equals("MCTS Expectimax")) {
+				pa= new MCTSExpectimaxAgent(sAgent,null, m_xab.mctsParams);
 			} else if (sAgent.equals("Human")) {
 				pa= new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {

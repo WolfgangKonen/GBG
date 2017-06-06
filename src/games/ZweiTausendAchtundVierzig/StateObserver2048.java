@@ -2,8 +2,6 @@ package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
 import games.StateObservationNondeterministic;
-import javafx.util.Pair;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -11,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Class {@link StateObs2048BitShift} holds a 2048 game state.
+ * Class {@link StateObserver2048} holds a 2048 game state.
  * The game state is coded in a compact way in *one* long number
  * <pre>
  *                 private boardB = 0xfedcba9876543210L
@@ -32,6 +30,7 @@ import java.util.Random;
  * (may be slow).
  *
  * @author Wolfgang Konen, THK
+ * @author Johannes Kutsch
  */
 public class StateObserver2048 implements StateObservationNondeterministic {
     private Random random = new Random();
@@ -196,6 +195,10 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         return "2048";
     }
 
+    public double getBoard() {
+        return boardB;
+    }
+
     /**
      * The board vector is an {@code int[]} vector where each entry corresponds to one
      * cell of the board. In the case of 2048 the mapping is
@@ -285,6 +288,14 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         nextNondeterminisitcAction = null;
     }
 
+    /**
+     * Selects a Tile and the new value of the tile and saves it in an action
+     * 0 = first Tile, value 2
+     * 1 = first Tile, value 4
+     * 2 = second Tile, value 2
+     * 3 = second Tile, value 4
+     * ....
+     */
     private void setNextNondeterminisitcAction() {
         if(nextNondeterminisitcAction != null) {
             throw new RuntimeException("nextNondeterministicAction is allready set to" + nextNondeterminisitcAction);
@@ -292,31 +303,15 @@ public class StateObserver2048 implements StateObservationNondeterministic {
             throw new RuntimeException("next Action is Deterministic");
         }
 
-        //ToDo: This is just a quick implementation to test some things, there are most likely faster ways to choose the next nondeterminisitc Action
-        ArrayList<Pair<Types.ACTIONS, Double>> actions = new ArrayList<>();
+        //select a Tile
+        int action = random.nextInt(emptyTiles.size()) * 2;
 
-        double totalWeight = 0.0d;
-
-        for (int i = 0; i < emptyTiles.size()*2; i++) {
-            double weight;
-            if(i%2 == 0) {
-                weight = 9;
-            } else {
-                weight = 1;
-            }
-            totalWeight += weight;
-            actions.add(new Pair<>(Types.ACTIONS.fromInt(i), weight));
+        //select the new Tile Value
+        if(random.nextInt(10) == 9) {
+            action += 1;
         }
 
-        double value = Math.random() * totalWeight;
-
-        for (Pair<Types.ACTIONS, Double> actionPair : actions) {
-            value -= actionPair.getValue();
-            if(value <= 0.0d) {
-                nextNondeterminisitcAction = actionPair.getKey();
-                break;
-            }
-        }
+        nextNondeterminisitcAction = Types.ACTIONS.fromInt(action);
     }
 
     public boolean isNextActionDeterminisitc() {
@@ -402,6 +397,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         updateHighestTile(value);
     }
 
+    //ToDo: this seems to be buggy when using Evaluator 2048
     private void updateHighestTile(int exp) {
         int tileVal = (1 << exp);
         if(tileVal > highestTileValue) {
