@@ -16,30 +16,16 @@ import java.util.Random;
  *
  * @author Johannes Kutsch
  */
-public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent, Serializable
+public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent
 {
 	public MCTSParams params;
-
-    /**
-     * The MCTS-UCT implementation
-     */
     private MCTSExpectimaxPlayer player;
 
 	/**
-     * @param name	agent name, should be "MCTSExpectimax"
-     * @param so 	state observation of the current game (may be null)
-     */
-    public MCTSExpectimaxAgent(String name,StateObservation so)
-    {
-    	this(name, so, null);
-    }
-
-	/**
-	 * @param name	agent name, should be "MCTSExpectimax"
-	 * @param so 	state observation of the current game (may be null)
+	 * @param name	agent name, should be "MCTS Expectimax"
 	 * @param mcPar Settings for the Agent
 	 */
-    public MCTSExpectimaxAgent(String name, StateObservation so, MCTSParams mcPar)
+    public MCTSExpectimaxAgent(String name, MCTSParams mcPar)
     {
     	super(name);
 		params = mcPar;
@@ -52,6 +38,7 @@ public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent, Seriali
     /**
      * Picks an action. This function is called every game step to request an
      * action from the player.
+	 *
      * @param stateObs Observation of the current state.
 	 * @param vtable		the score for each available action (corresponding
 	 * 						to sob.getAvailableActions())
@@ -68,11 +55,12 @@ public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent, Seriali
 
 	/**
 	 * Get the best next action and return it
+	 *
 	 * @param so			current game state (not changed on return)
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param vtable		the score for each available action (corresponding
-	 * 						to sob.getAvailableActions())
+	 * @param random		allow epsilon-greedy random action selection, currently not implemented
+	 * @param vtable		the score for each available action (corresponding to sob.getAvailableActions())
 	 * @param silent		verbosity control
+	 *
 	 * @return actBest		the best action 
 	 */	
 	@Override
@@ -85,7 +73,7 @@ public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent, Seriali
 	/**
 	 * @return	returns true/false, whether the action suggested by last call 
 	 * 			to getNextAction() was a random action. 
-	 * 			Always false in the case of MCTS based on MCTSExpectimaxChanceNode.uct().
+	 * 			Always false in the case of MCTS Expectimax
 	 */
 	public boolean wasRandomAction() {
 		return false;
@@ -94,19 +82,18 @@ public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent, Seriali
 
 	/**
 	 * Get the best next action and return its score
+	 *
 	 * @param so 			current game state (not changed on return)
+	 *
 	 * @return				the score of the best action
 	 */
 	public double getScore(StateObservation so) {
 		double[] vtable = new double[so.getNumAvailableActions()+1];
         double nextActionScore = Double.NEGATIVE_INFINITY;
-		
-		assert so.isLegalState() : "Not a legal state"; // e.g. player to move does not fit to Table
 
         if (so.isGameOver()) {
         	return so.getGameScore(so);
         } else {
-        	
     		act(so,vtable);
 
             for (int i = 0; i < so.getNumAvailableActions(); i++) {

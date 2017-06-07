@@ -4,7 +4,6 @@ import games.StateObservation;
 import params.MCTSParams;
 import tools.Types;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,13 +17,13 @@ import java.util.Random;
  *
  * @author Johannes Kutsch
  */
-public class MCTSExpectimaxPlayer implements Serializable
+public class MCTSExpectimaxPlayer
 {
-    private transient MCTSExpectimaxChanceNode m_root;
-    private Random m_rnd;
+    private transient MCTSExpectimaxChanceNode rootNode;
+    private Random random;
     public transient List<Types.ACTIONS> actions = new ArrayList<>();
 
-    private int ROLLOUT_DEPTH = 200;
+    private int ROLLOUT_DEPTH = 200; //default values
     private int TREE_DEPTH = 10;
     private int NUM_ITERS = 1000;
     private double K = Math.sqrt(2);
@@ -33,18 +32,18 @@ public class MCTSExpectimaxPlayer implements Serializable
     int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 
 	/**
-	 * Member {@link #m_mcPar} is only needed for saving and loading the agent
+	 * Member {@link #mctsParams} is only needed for saving and loading the agent
 	 * (to restore the agent with all its parameter settings)
 	 */
-	private MCTSParams m_mcPar;
-	private static final long serialVersionUID = 123L;
+	private MCTSParams mctsParams;
 
 	/**
      * Creates the MCTSExpectimax player.
-     * @param a_rnd 	random number generator object.
-     * @param mcPar		parameters for MCTS
+	 *
+     * @param random 	random number generator object.
+     * @param mcPar		parameters for MCTS, can be null
      */
-    public MCTSExpectimaxPlayer(Random a_rnd, MCTSParams mcPar)
+    public MCTSExpectimaxPlayer(Random random, MCTSParams mcPar)
     {
     	if (mcPar!=null) {
             this.setK(mcPar.getK_UCT());
@@ -52,31 +51,34 @@ public class MCTSExpectimaxPlayer implements Serializable
             this.setROLLOUT_DEPTH(mcPar.getRolloutDepth());
             this.setTREE_DEPTH(mcPar.getTreeDepth());
             this.verbose = mcPar.getVerbosity();
-    	}
+    	} else {
+			mctsParams = new MCTSParams();
+			mctsParams.setFrom(mcPar);
+		}
 
-		m_mcPar = new MCTSParams();
-		m_mcPar.setFrom(mcPar);
-
-        m_rnd = a_rnd;
+        this.random = random;
     }
 
     /**
      * Initializes the tree with the new observation state in the root.
      * Called from {@link MCTSExpectimaxAgent#act(StateObservation, double[])}.
+	 *
      * @param so current state of the game.
      */
     public void init(StateObservation so)
     {
-        //Get the actions into an array.
         actions = so.getAvailableActions();
 
-    	m_root = new MCTSExpectimaxChanceNode(so,null,null,m_rnd,this);
+        //at first it seems confusing that the root node is a Chance Node, but because the first generation of children are are nodes the root node has to be a Chance Node
+    	rootNode = new MCTSExpectimaxChanceNode(so,null,null, random,this);
     }
 
     /**
      * Runs MCTS to decide the action to take. It does not reset the tree.
+	 *
 	 * @param vtable		the score for each available action (corresponding
 	 * 						to sob.getAvailableActions())
+	 *
      * @return the action to execute in the game.
      */
     public Types.ACTIONS run(double[] vtable)
@@ -84,12 +86,12 @@ public class MCTSExpectimaxPlayer implements Serializable
     	this.nRolloutFinished=0;
     	
         //Do the search
-        m_root.mctsSearch(vtable);
+        rootNode.mctsSearch(vtable);
 
         //Determine the best action to take and return it
         //(Choose one of the following two lines)
-        //int action = m_root.mostVisitedAction();
-		Types.ACTIONS action = m_root.bestAction();
+        //int action = rootNode.mostVisitedAction();
+		Types.ACTIONS action = rootNode.bestAction();
         
         return action;
     }
@@ -128,6 +130,6 @@ public class MCTSExpectimaxPlayer implements Serializable
         return nRolloutFinished;
     }
     public MCTSParams getMCTSParams() {
-		return m_mcPar;
+		return mctsParams;
 	}
 }
