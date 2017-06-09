@@ -1,4 +1,4 @@
-package games;
+﻿package games;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
