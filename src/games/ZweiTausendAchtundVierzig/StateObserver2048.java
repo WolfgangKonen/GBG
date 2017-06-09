@@ -112,7 +112,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         updateAvailableMoves();
     }
 
-    // Note: StateObs2048BitShift copy() copies the board state, score, winState,
+    // Note: StateObs2048 copy() copies the board state, score, winState,
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
     public StateObserver2048 copy() {
         return new StateObserver2048(boardB, score, winState, isNextActionDeterministic);
@@ -268,10 +268,11 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         updateEmptyTiles();
 
         isNextActionDeterministic = false;
-        setNextNondeterminisitcAction();
     }
 
     public void advanceNondeterministic() {
+        setNextNondeterminisitcAction();
+
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
@@ -297,11 +298,12 @@ public class StateObserver2048 implements StateObservationNondeterministic {
      * ....
      */
     private void setNextNondeterminisitcAction() {
-        if(nextNondeterminisitcAction != null) {
-            throw new RuntimeException("nextNondeterministicAction is allready set to" + nextNondeterminisitcAction);
-        } else if(isNextActionDeterministic) {
+        if(isNextActionDeterministic) {
             throw new RuntimeException("next Action is Deterministic");
+        } else if(nextNondeterminisitcAction != null) {
+            return;
         }
+
 
         //select a Tile
         int action = random.nextInt(emptyTiles.size()) * 2;
@@ -319,6 +321,8 @@ public class StateObserver2048 implements StateObservationNondeterministic {
     }
 
     public Types.ACTIONS getNextNondeterministicAction() {
+        setNextNondeterminisitcAction();
+
         return nextNondeterminisitcAction;
     }
 

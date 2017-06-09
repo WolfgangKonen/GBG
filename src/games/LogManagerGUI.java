@@ -1,10 +1,10 @@
 package games;
 
+import org.jfree.io.FileUtilities;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +28,7 @@ public class LogManagerGUI {
     private JCheckBoxMenuItem jCBMIAdvancedLogging;
     private JCheckBoxMenuItem jCBMIVerbose;
     private JMenuItem jMICompile = new JMenuItem("Compile temporary Gamelog");
+    private JMenuItem jMIClear = new JMenuItem("Delete all temporary Gamelogs");
     private JMenu jMLoad = new JMenu("Load");
     private JMenuItem jMILoad = new JMenuItem("Load Gamelog");
 
@@ -116,10 +117,21 @@ public class LogManagerGUI {
             }
         });
 
+        jMIClear.addActionListener((e) ->
+        {
+            //delete all temporary log files
+            purgeDirectory(new File(logManager.tempPath));
+
+            if (verbose) {
+                System.out.println("LogManager: cleared temp log successfully");
+            }
+        });
+
         jMOptions.add(jCBMILoggingEnabled);
         jMOptions.add(jCBMIAdvancedLogging);
         jMOptions.add(jCBMIVerbose);
         jMOptions.add(jMICompile);
+        jMOptions.add(jMIClear);
 
         //load
         jMBMain.add(jMLoad);
@@ -272,6 +284,13 @@ public class LogManagerGUI {
                 jBPreviousAction.setEnabled(false);
                 jBPreviousAction.setText("no previous action");
             }
+        }
+    }
+
+    void purgeDirectory(File dir) {
+        for (File file: dir.listFiles()) {
+            if (file.isDirectory()) purgeDirectory(file);
+            file.delete();
         }
     }
 }

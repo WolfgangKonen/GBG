@@ -30,4 +30,6 @@ public interface StateObservationNondeterministic extends StateObservation {
      * @return the action, null if the next action is deterministic
      */
     Types.ACTIONS getNextNondeterministicAction();
+
+    StateObservationNondeterministic copy();
 }

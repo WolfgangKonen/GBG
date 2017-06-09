@@ -6,7 +6,6 @@ import games.StateObservation;
 import params.MCTSParams;
 import tools.Types;
 
-import java.io.Serializable;
 import java.util.Random;
 
 
@@ -19,7 +18,7 @@ import java.util.Random;
 public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent
 {
 	public MCTSParams params;
-    private MCTSExpectimaxPlayer player;
+    private MCTSExpectimaxPlayer1 player;
 
 	/**
 	 * @param name	agent name, should be "MCTS Expectimax"
@@ -30,7 +29,7 @@ public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent
     	super(name);
 		params = mcPar;
 
-        player = new MCTSExpectimaxPlayer(new Random(),mcPar);
+        player = new MCTSExpectimaxPlayer1(new Random(),mcPar);
 
         setAgentState(AgentState.TRAINED);
     }

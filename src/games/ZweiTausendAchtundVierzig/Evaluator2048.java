@@ -2,6 +2,7 @@ package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgent;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
@@ -23,17 +24,12 @@ public class Evaluator2048 extends Evaluator {
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = Integer.MIN_VALUE;
     List<Integer> scores = new ArrayList<>();
-    private int medianScore;
     private long standartdeviation;
     private double averageRolloutDepth;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
     private long startTime;
     private long stopTime;
-
-    int depth = -1;
-    int iterations = -1;
-    int numberAgents = -1;
 
 
     public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
@@ -49,42 +45,27 @@ public class Evaluator2048 extends Evaluator {
         List<StateObserver2048> stateObservers = new ArrayList<>();
 
 
-        if(m_PlayAgent.getName().equals("MCTS")) {
+        if(m_PlayAgent.getName().equals("MCTS Expectimax")) {
             //async for MCTS Agents
-            LogManager logManager = new LogManager();
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
-            MCTSAgentT mctsAgentT = (MCTSAgentT)m_PlayAgent;
+            MCTSExpectimaxAgent mctsExpectimaxAgent = (MCTSExpectimaxAgent)m_PlayAgent;
 
-            System.out.println("Detected MCTS Agent, Iterations: " + mctsAgentT.params.getNumIter() + ", Rolloutdepth: " + mctsAgentT.params.getRolloutDepth());
+            System.out.println("Detected MCTS Expectimax Agent, Iterations: " + mctsExpectimaxAgent.params.getNumIter() + ", Rolloutdepth: " + mctsExpectimaxAgent.params.getRolloutDepth());
             //play Games
             for(int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
                 int gameNumber = i+1;
                 callables.add(() -> {
-                    int depth = 0;
-                    double numberActions = 0;
-                    int currentNumberActions = 0;
                     StateObserver2048 so = new StateObserver2048();
                     long gameSartTime = System.currentTimeMillis();
 
-                    PlayAgent playAgent = new MCTSAgentT("MCTS",null,mctsAgentT.params);
-
-                    int sesionid = logManager.newLoggingSession(so);
+                    PlayAgent playAgent = new MCTSAgentT("MCTS",null,mctsExpectimaxAgent.params);
 
                     while (!so.isGameOver()) {
-                        currentNumberActions = so.getNumAvailableActions();
                         Types.ACTIONS action = playAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true);
                         so.advance(action);
-                        currentNumberActions = currentNumberActions * so.getNumEmptyTiles() * 2;
-                        numberActions += currentNumberActions;
-                        depth++;
-
-                        logManager.addLogEntry(action, so, sesionid);
                     }
 
-                    numberActions/=depth;
-                    System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ". Depth is: " + depth + " and numberActions is: " + numberActions + "\n");
-
-                    logManager.endLoggingSession(sesionid);
+                    System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
 
                     return so;
                 });
@@ -112,8 +93,6 @@ public class Evaluator2048 extends Evaluator {
 
                 while (!so.isGameOver()) {
                     so.advance(m_PlayAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
-                    MCAgent agent = (MCAgent)m_PlayAgent;
-                    averageRolloutDepth += agent.getAverageRolloutDepth();
                 }
                 System.out.print("Finished game " + (i + 1) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
 
@@ -150,14 +129,6 @@ public class Evaluator2048 extends Evaluator {
         //Median Score
         Collections.sort(scores);
 
-        if(ConfigEvaluator.NUMBEREVALUATIONS %2 == 0) {
-            medianScore+= scores.get(ConfigEvaluator.NUMBEREVALUATIONS/2);
-            medianScore+= scores.get((ConfigEvaluator.NUMBEREVALUATIONS/2)-1);
-            medianScore/=2;
-        } else {
-            medianScore= scores.get((ConfigEvaluator.NUMBEREVALUATIONS-1)/2);
-        }
-
         //Standartdeviation
         for(int score : scores) {
             standartdeviation += (score-averageScore)*(score-averageScore);
@@ -189,11 +160,23 @@ public class Evaluator2048 extends Evaluator {
 
         long duration = (stopTime - startTime)/1000;
 
+        String agentSettings = "";
+
+        if(m_PlayAgent.getName() == "MC") {
+            MCAgent mcAgent = (MCAgent)m_PlayAgent;
+            agentSettings = "\nROLLOUTDEPTH: " + mcAgent.mcParams.getRolloutdepth() +
+                    "\nITERATIONS: " + mcAgent.mcParams.getIterations() +
+                    "\nNUMBERAGENTS: " + mcAgent.mcParams.getNumberAgents();
+        } else if(m_PlayAgent.getName() == "MCTS Expectimax") {
+            MCTSExpectimaxAgent mctsExpectimaxAgent = (MCTSExpectimaxAgent) m_PlayAgent;
+            agentSettings = "\nROLLOUTDEPTH: " + mctsExpectimaxAgent.params.getRolloutDepth() +
+                    "\nITERATIONS: " + mctsExpectimaxAgent.params.getNumIter();
+        }
+
 
         return "\n\nSettings:" +
-                "\nMC-Agent ROLLOUTDEPTH: " + depth +
-                "\nMC-Agent ITERATIONS: " + iterations +
-                "\nMC-Agent NUMBERAGENTS: " + numberAgents +
+                "\nAgent Name: " + m_PlayAgent.getName() +
+                agentSettings +
                 "\nNumber of games: " + ConfigEvaluator.NUMBEREVALUATIONS +
                 "\n" +
                 "\nResults:" +
