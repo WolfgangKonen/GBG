@@ -1,0 +1,60 @@
+package controllers.MCTSExpectimax.MCTSExpectimax1;
+
+import controllers.MCTSExpectimax.MCTSEChanceNode;
+import controllers.MCTSExpectimax.MCTSEPlayer;
+import controllers.MCTSExpectimax.MCTSETreeNode;
+import games.StateObservationNondeterministic;
+import tools.Types;
+
+import java.util.Random;
+import java.util.TreeMap;
+
+/**
+ * Created by Johannes on 03.06.2017.
+ */
+public class MCTSE1TreeNode extends MCTSETreeNode {
+    private StateObservationNondeterministic so = null;
+    private TreeMap<Types.ACTIONS, MCTSE1ChanceNode> childrenNodes = new TreeMap<>();
+
+
+    /**
+     * This Class represents a MCTS Expectmiax Tree Node. (Min/Max Node)
+     * Each Tree Node has multiple {@link MCTSE1ChanceNode} children and one {@link MCTSE1ChanceNode} parent.
+     *
+     *
+     * This MCTSExpectimax Version implements the {@link StateObservationNondeterministic} interface, using this interface we can increase the {@link controllers.MCTSExpectimax.MCTSExpectimaxAgt} speed by about 3-4%.
+     * @param so         the unadvanced state of the parentNode
+     * @param action	 the action which leads from parentNode's state to this state ({@code null} for root node)
+     * @param parentNode the parentNode node
+     * @param random     a random number generator
+     * @param player     a reference to the one MCTS agent where {@code this} is part of (needed to access several parameters of the MCTS agent)
+     */
+    public MCTSE1TreeNode(StateObservationNondeterministic so, Types.ACTIONS action, MCTSE1ChanceNode parentNode, Random random, MCTSEPlayer player) {
+        super(so, action, parentNode, random, player);
+        this.so = so;
+    }
+
+    /**
+     * Expand the current node, by randomly selecting one child node
+     *
+     * @return the selected child node
+     */
+    public MCTSE1ChanceNode expand() {
+        StateObservationNondeterministic childSo = so.copy();
+
+        MCTSE1ChanceNode child;
+        Types.ACTIONS nondeterministicAction = childSo.getNextNondeterministicAction();
+
+        if(!childrenNodes.containsKey(nondeterministicAction)) {
+            //create a new child node
+            childSo.advanceNondeterministic();
+            child = new MCTSE1ChanceNode(childSo, nondeterministicAction, this, random, player);
+            childrenNodes.put(nondeterministicAction, child);
+        } else {
+            //a child node representing this boardstate already exists
+            child = childrenNodes.get(nondeterministicAction);
+        }
+
+        return child;
+    }
+}

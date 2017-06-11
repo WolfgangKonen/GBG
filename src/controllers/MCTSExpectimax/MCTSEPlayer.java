@@ -1,6 +1,9 @@
 package controllers.MCTSExpectimax;
 
+import controllers.MCTSExpectimax.MCTSExpectimax1.MCTSE1ChanceNode;
 import games.StateObservation;
+import games.StateObservationNondeterministic;
+import params.MCTSExpectimaxParams;
 import params.MCTSParams;
 import tools.Types;
 
@@ -17,43 +20,44 @@ import java.util.Random;
  *
  * @author Johannes Kutsch
  */
-public class MCTSExpectimaxPlayer
+public class MCTSEPlayer
 {
-    private transient MCTSExpectimaxChanceNode rootNode;
+    private transient MCTSEChanceNode rootNode;
     private Random random;
     public transient List<Types.ACTIONS> actions = new ArrayList<>();
 
-    private int ROLLOUT_DEPTH = 200; //default values
-    private int TREE_DEPTH = 10;
-    private int NUM_ITERS = 1000;
-    private double K = Math.sqrt(2);
-    private int verbose = 0;
+    private int ROLLOUT_DEPTH = MCTSExpectimaxConfig.DEFAULT_ROLLOUTDEPTH; //default values
+    private int TREE_DEPTH = MCTSExpectimaxConfig.DEFAULT_TREEDEPTH;
+    private int NUM_ITERS = MCTSExpectimaxConfig.DEFAULT_ITERATIONS;
+    private double K = MCTSExpectimaxConfig.DEFAULT_K;
+    private int MAX_NODES = MCTSExpectimaxConfig.DEFAULT_MAXNODES;
 
-    int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
+    public int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 
 	/**
-	 * Member {@link #mctsParams} is only needed for saving and loading the agent
+	 * Member {@link #mctsExpectimaxParams} is only needed for saving and loading the agent
 	 * (to restore the agent with all its parameter settings)
 	 */
-	private MCTSParams mctsParams;
+	private MCTSExpectimaxParams mctsExpectimaxParams;
 
 	/**
      * Creates the MCTSExpectimax player.
 	 *
-     * @param random 	random number generator object.
-     * @param mcPar		parameters for MCTS, can be null
+     * @param random 					random number generator object.
+     * @param mctsExpectimaxParams		parameters for MCTSExpectimax, can be null
      */
-    public MCTSExpectimaxPlayer(Random random, MCTSParams mcPar)
+    public MCTSEPlayer(Random random, MCTSExpectimaxParams mctsExpectimaxParams)
     {
-    	if (mcPar!=null) {
-            this.setK(mcPar.getK_UCT());
-            this.setNUM_ITERS(mcPar.getNumIter());
-            this.setROLLOUT_DEPTH(mcPar.getRolloutDepth());
-            this.setTREE_DEPTH(mcPar.getTreeDepth());
-            this.verbose = mcPar.getVerbosity();
+    	if (mctsExpectimaxParams!=null) {
+            this.setK(mctsExpectimaxParams.getK_UCT());
+            this.setNUM_ITERS(mctsExpectimaxParams.getNumIter());
+            this.setROLLOUT_DEPTH(mctsExpectimaxParams.getRolloutDepth());
+            this.setTREE_DEPTH(mctsExpectimaxParams.getTreeDepth());
+            this.setMaxNodes(mctsExpectimaxParams.getMaxNodes());
+			this.mctsExpectimaxParams = mctsExpectimaxParams;
     	} else {
-			mctsParams = new MCTSParams();
-			mctsParams.setFrom(mcPar);
+			mctsExpectimaxParams = new MCTSExpectimaxParams();
+			mctsExpectimaxParams.setFrom(mctsExpectimaxParams);
 		}
 
         this.random = random;
@@ -61,7 +65,7 @@ public class MCTSExpectimaxPlayer
 
     /**
      * Initializes the tree with the new observation state in the root.
-     * Called from {@link MCTSExpectimaxAgent#act(StateObservation, double[])}.
+     * Called from {@link MCTSExpectimaxAgt#act(StateObservation, double[])}.
 	 *
      * @param so current state of the game.
      */
@@ -70,7 +74,16 @@ public class MCTSExpectimaxPlayer
         actions = so.getAvailableActions();
 
         //at first it seems confusing that the root node is a Chance Node, but because the first generation of children are are nodes the root node has to be a Chance Node
-    	rootNode = new MCTSExpectimaxChanceNode(so,null,null, random,this);
+		if(!mctsExpectimaxParams.getAlternativeVersion()) {
+			rootNode = new MCTSEChanceNode(so, null, null, random, this);
+		} else {
+			if(so instanceof StateObservationNondeterministic) {
+				StateObservationNondeterministic son = (StateObservationNondeterministic) so;
+				rootNode = new MCTSE1ChanceNode(son, null, null, random, this);
+			} else {
+				throw new RuntimeException("You need to implement the \"StateObservationNondeterministic\" interface to use the alternative version");
+			}
+		}
     }
 
     /**
@@ -84,8 +97,7 @@ public class MCTSExpectimaxPlayer
     public Types.ACTIONS run(double[] vtable)
     {
     	this.nRolloutFinished=0;
-    	
-        //Do the search
+		//Do the search
         rootNode.mctsSearch(vtable);
 
         //Determine the best action to take and return it
@@ -120,16 +132,19 @@ public class MCTSExpectimaxPlayer
 	public void setK(double k) {
 		K = k;
 	}
-    public int getVerbosity() {
-		return verbose;
+    public int getMaxNodes() {
+		return MAX_NODES;
 	}
-	public void setVerbosity(int verbosity) {
-		verbose = verbosity;
+	public void setMaxNodes(int value) {
+		MAX_NODES = value;
 	}
     public int getNRolloutFinished() {
         return nRolloutFinished;
     }
-    public MCTSParams getMCTSParams() {
-		return mctsParams;
+    public MCTSExpectimaxParams getMCTSParams() {
+		return mctsExpectimaxParams;
+	}
+	public MCTSEChanceNode getRootNode() {
+    	return rootNode;
 	}
 }

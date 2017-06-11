@@ -18,24 +18,27 @@ import java.util.Random;
  *  @author Johannes Kutsch
  */
 
-public class MCTSExpectimaxChanceNode
+public class MCTSEChanceNode
 {
     public static double epsilon = 1e-6;		                                // tiebreaker
-    private StateObservation so = null;
+    public StateObservation so = null;
     private Types.ACTIONS action = null;		                                // the action which leads from parent's state to this state
-    private MCTSExpectimaxTreeNode parentNode = null;
-    private List<MCTSExpectimaxTreeNode> childrenNodes = new ArrayList<>();
-    private MCTSExpectimaxPlayer player = null;
+    private MCTSETreeNode parentNode = null;
+    public List<MCTSETreeNode> childrenNodes = new ArrayList<>();
+    public MCTSEPlayer player = null;
 
-    private List<Types.ACTIONS> notExpandedActions = new ArrayList<>();         // Actions that are not represented by a Note
+    public List<Types.ACTIONS> notExpandedActions = new ArrayList<>();         // Actions that are not represented by a Note
     public double value = 0;                                                    // total value
     public int visits = 0;                                                      // total number of visits
-    private Random random;
+    public Random random;
     public int depth;
+
+    public int iterations = 0;
+    public int numberTreeNodes = 0;
 
     /**
      * This Class represents a MCTS Expectmiax Chance Node.
-     * Each Chance Node has multiple {@link MCTSExpectimaxTreeNode} children and one {@link MCTSExpectimaxTreeNode} parent.
+     * Each Chance Node has multiple {@link MCTSETreeNode} children and one {@link MCTSETreeNode} parent.
      *
      * @param so            the state of the node
      * @param action	    the action which leads from parentNode's state to this state ({@code null} for root node)
@@ -43,7 +46,7 @@ public class MCTSExpectimaxChanceNode
      * @param random        a random number generator
      * @param player        a reference to the one MCTS agent where {@code this} is part of (needed to access several parameters of the MCTS agent)
      */
-    public MCTSExpectimaxChanceNode(StateObservation so, Types.ACTIONS action, MCTSExpectimaxTreeNode parentNode, Random random, MCTSExpectimaxPlayer player) {
+    public MCTSEChanceNode(StateObservation so, Types.ACTIONS action, MCTSETreeNode parentNode, Random random, MCTSEPlayer player) {
         this.so = so;
         this.action = action;
         this.parentNode = parentNode;
@@ -52,7 +55,7 @@ public class MCTSExpectimaxChanceNode
 
         notExpandedActions = so.getAvailableActions();
 
-        if(parentNode != null) {
+        if (parentNode != null) {
             depth = parentNode.depth + 1;
         } else {
             depth = 0;
@@ -61,18 +64,18 @@ public class MCTSExpectimaxChanceNode
 
     /**
      * Perform an MCTS Expectimax search, i.e. a selection of the best next action given the state
-     * in the root node of the tree. The tree consists of alternating layers of {@link MCTSExpectimaxTreeNode}
-     * and {@link MCTSExpectimaxChanceNode}.
+     * in the root node of the tree. The tree consists of alternating layers of {@link MCTSETreeNode}
+     * and {@link MCTSEChanceNode}.
      *
-     * Called by {@link MCTSExpectimaxPlayer#run(double[])}.
+     * Called by {@link MCTSEPlayer#run(double[])}.
      *
      * Do for {@code player.NUM_ITERS} iterations
-     * --- select a {@link MCTSExpectimaxTreeNode} leaf node via {@link #treePolicy()} (this
+     * --- select a {@link MCTSETreeNode} leaf node via {@link #treePolicy()} (this
      *     includes {@link #expand()} of not fully expanded nodes, as long as the maximum tree
      *     depth is not yet reached)
-     * --- make a {@link MCTSExpectimaxTreeNode#rollOut()} starting from this leaf node (a game
+     * --- make a {@link MCTSETreeNode#rollOut()} starting from this leaf node (a game
      *     with random actions until game is over or until the maximum rollout depth is reached)
-     * --- {@link #backUp(double)} the resulting score {@code delta} and
+     * --- {@link #backUp(double)} the resulting score {@code score} and
      *     the number of visits for all nodes on {@code value} and {@code visits}.
      * --- Do this for all nodes on the path from the leaf up to the root.
      *
@@ -86,11 +89,9 @@ public class MCTSExpectimaxChanceNode
      * 		  K entries and the maximum of all {@code U(i)} in {@code vTable[K]}
      */
     public void mctsSearch(double[] vTable) {
-        int iterations = 0;
-
         while (iterations < player.getNUM_ITERS()) {
             //select an childNode
-            MCTSExpectimaxTreeNode selected = treePolicy();
+            MCTSETreeNode selected = treePolicy();
 
             //rollout the childNode
             double score = selected.rollOut();
@@ -103,7 +104,7 @@ public class MCTSExpectimaxChanceNode
 
         // fill vTable
         for (int k = 0; k < so.getNumAvailableActions(); k++) {
-            for (MCTSExpectimaxTreeNode child : childrenNodes) {
+            for (MCTSETreeNode child : childrenNodes) {
                 if (child.action == so.getAction(k)) {
                     vTable[k] = child.value / child.visits;
                 }
@@ -112,24 +113,26 @@ public class MCTSExpectimaxChanceNode
     }
 
     /**
-     * Select the next {@link MCTSExpectimaxTreeNode} that should be evaluated
+     * Select the next {@link MCTSETreeNode} that should be evaluated
      *
-     * If the current Node is not fully expanded a random unexpanded {@link MCTSExpectimaxTreeNode} will be chosen
-     * If the current Node is fully expanded the {@link MCTSExpectimaxTreeNode} will be select with uct()
+     * If the current Node is not fully expanded a random unexpanded {@link MCTSETreeNode} will be chosen
+     * If the current Node is fully expanded the {@link MCTSETreeNode} will be select with uct()
      *
-     * @return the {@link MCTSExpectimaxTreeNode} that should be evaluated
+     * @return the {@link MCTSETreeNode} that should be evaluated
      */
-    private MCTSExpectimaxTreeNode treePolicy() {
-        if(so.isGameOver()) {
-            return parentNode;                             //equivalent to this in mcts
-        }
-        if (notExpandedActions.size() != 0 && depth < player.getTREE_DEPTH()) {
-            return expand();
+    private MCTSETreeNode treePolicy() {
+        if(so.isGameOver() || depth >= player.getTREE_DEPTH()) {
+            return parentNode; //equivalent to this in mcts
+        } else if(notExpandedActions.size() != 0) {
+            if(player.getRootNode().numberTreeNodes < player.getMaxNodes()) {
+                return expand();
+            } else {
+                return parentNode; //equivalent to this in mcts
+            }
         } else {
             //recursively go down the three
             //select a child with uct(), select/create a chance node with treePolicy() and call this method in the new chance node
             return uct().treePolicy().treePolicy();
-
             //ToDo: test egreedy and other selectionstrategys
         }
     }
@@ -139,12 +142,12 @@ public class MCTSExpectimaxChanceNode
      *
      * @return the selected child node
      */
-    private MCTSExpectimaxTreeNode uct() {
+    private MCTSETreeNode uct() {
         //ToDo: Problem: if gamescore is normalised uct always chooses the least visited node, if the gamescore is not normalised uct chooses the same node most of the time (99.9% +)
-        MCTSExpectimaxTreeNode selected = null;
+        MCTSETreeNode selected = null;
         double selectedValue = -Double.MAX_VALUE;
 
-        for (MCTSExpectimaxTreeNode child : childrenNodes)
+        for (MCTSETreeNode child : childrenNodes)
         {
             double uctValue = child.value / child.visits + player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits)) + random.nextDouble() * epsilon; // small sampleRandom numbers: break ties in unexpanded node
 
@@ -162,13 +165,13 @@ public class MCTSExpectimaxChanceNode
      * 
      * @return the selected child node
      */
-    private MCTSExpectimaxTreeNode expand() {
+    public MCTSETreeNode expand() {
         Types.ACTIONS action = notExpandedActions.get(random.nextInt(notExpandedActions.size()));
         notExpandedActions.remove(action);
 
         StateObserver2048 childSo = (StateObserver2048) so.copy();
 
-        MCTSExpectimaxTreeNode child = new MCTSExpectimaxTreeNode(childSo, action, this, random,player);
+        MCTSETreeNode child = new MCTSETreeNode(childSo, action, this, random,player);
         childrenNodes.add(child);
         return child;
     }
@@ -200,7 +203,7 @@ public class MCTSExpectimaxChanceNode
         double bestValue = -Double.MAX_VALUE;
         double currentValue;
 
-        for (MCTSExpectimaxTreeNode child: childrenNodes) {
+        for (MCTSETreeNode child: childrenNodes) {
             currentValue = child.value / child.visits + random.nextDouble() * epsilon;
             if (currentValue > bestValue) {
                 bestValue = currentValue;

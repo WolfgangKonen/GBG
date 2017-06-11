@@ -1,30 +1,34 @@
 package controllers.MCTSExpectimax;
 
-import games.StateObservationNondeterministic;
+import games.StateObservation;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import tools.TestCompare;
 import tools.Types;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeMap;
 
 /**
  * Created by Johannes on 03.06.2017.
  */
-public class MCTSExpectimaxTreeNode1 {
+public class MCTSETreeNode {
     public static double epsilon = 1e-6;		            // tiebreaker
-    private StateObservationNondeterministic so = null;
+    private StateObservation so = null;
     public Types.ACTIONS action = null;		                // the action which leads from parent's state to this state
-    private MCTSExpectimaxChanceNode1 parentNode = null;
-    private TreeMap<Types.ACTIONS, MCTSExpectimaxChanceNode1> childrenNodes = new TreeMap<>();
-    private MCTSExpectimaxPlayer1 player = null;
+    private MCTSEChanceNode parentNode = null;
+    private HashSet<MCTSEChanceNode> childrenNodes = new HashSet<>();
+    public MCTSEPlayer player = null;
     public double value = 0;                                   // total value
     public int visits = 0;                                     // total number of visits
-    private Random random;
+    public Random random;
     public int depth;
 
 
     /**
      * This Class represents a MCTS Expectmiax Tree Node. (Min/Max Node)
-     * Each Chance Node has multiple {@link MCTSExpectimaxChanceNode1} children and one {@link MCTSExpectimaxChanceNode1} parent.
+     * Each Tree Node has multiple {@link MCTSEChanceNode} children and one {@link MCTSEChanceNode} parent.
      *
      * @param so         the unadvanced state of the parentNode
      * @param action	 the action which leads from parentNode's state to this state ({@code null} for root node)
@@ -32,23 +36,25 @@ public class MCTSExpectimaxTreeNode1 {
      * @param random     a random number generator
      * @param player     a reference to the one MCTS agent where {@code this} is part of (needed to access several parameters of the MCTS agent)
      */
-    public MCTSExpectimaxTreeNode1(StateObservationNondeterministic so, Types.ACTIONS action, MCTSExpectimaxChanceNode1 parentNode, Random random, MCTSExpectimaxPlayer1 player) {
+    public MCTSETreeNode(StateObservation so, Types.ACTIONS action, MCTSEChanceNode parentNode, Random random, MCTSEPlayer player) {
         this.so = so;
         this.action = action;
         this.parentNode = parentNode;
         this.player = player;
         this.random = random;
         this.depth = parentNode.depth;
+
+        player.getRootNode().numberTreeNodes++;
     }
 
     /**
-     * Select the next {@link MCTSExpectimaxChanceNode1} that should be evaluated
+     * Select the next {@link MCTSEChanceNode} that should be evaluated
      *
-     * Because the next boardstate is always random the child node will be chosen randomly using the action that this {@link MCTSExpectimaxTreeNode1} represents.
+     * Because the next boardstate is always random the child node will be chosen randomly using the action that this {@link MCTSETreeNode} represents.
      *
-     * @return the {@link MCTSExpectimaxTreeNode1} that should be evaluated
+     * @return the {@link MCTSETreeNode} that should be evaluated
      */
-    public MCTSExpectimaxChanceNode1 treePolicy() {
+    public MCTSEChanceNode treePolicy() {
         return expand();
     }
 
@@ -57,21 +63,20 @@ public class MCTSExpectimaxTreeNode1 {
      *
      * @return the selected child node
      */
-    private MCTSExpectimaxChanceNode1 expand() {
-        StateObservationNondeterministic childSo = so.copy();
+    public MCTSEChanceNode expand() {
+        StateObserver2048 childSo = (StateObserver2048) so.copy();
+        childSo.advance(action);
 
-        MCTSExpectimaxChanceNode1 child;
-        Types.ACTIONS nondeterministicAction = childSo.getNextNondeterministicAction();
-
-        if(!childrenNodes.containsKey(nondeterministicAction)) {
-            //create a new child node
-            childSo.advanceNondeterministic();
-            child = new MCTSExpectimaxChanceNode1(childSo, nondeterministicAction, this, random, player);
-            childrenNodes.put(nondeterministicAction, child);
-        } else {
-            //a child node representing this boardstate already exists
-            child = childrenNodes.get(nondeterministicAction);
+        for (MCTSEChanceNode childrenNode : childrenNodes) {
+            if (childrenNode.so.equals(childSo)) {
+                //a child node representing this boardstate already exists
+                return childrenNode;
+            }
         }
+
+        //create a new child node
+        MCTSEChanceNode child = new MCTSEChanceNode(childSo, null, this, random, player);
+        childrenNodes.add(child);
 
         return child;
     }
@@ -79,10 +84,10 @@ public class MCTSExpectimaxTreeNode1 {
     /**
      * starting from this leaf node a game with random actions will be played until the game is over or the maximum rollout depth is reached
      *
-     * @return the {@link StateObservationNondeterministic#getGameScore()} after the rollout is finished
+     * @return the {@link StateObservation#getGameScore()} after the rollout is finished
      */
     public double rollOut() {
-        StateObservationNondeterministic rollerState = so.copy();
+        StateObservation rollerState = so.copy();
         int thisDepth = this.depth;
 
         while (!finishRollout(rollerState, thisDepth)) {
@@ -96,7 +101,7 @@ public class MCTSExpectimaxTreeNode1 {
             player.nRolloutFinished++;
         }
 
-        return rollerState.getGameScore(so);
+        return rollerState.getGameScore();
     }
 
     /**
@@ -106,7 +111,7 @@ public class MCTSExpectimaxTreeNode1 {
      * @param depth the current rolloutdepth
      * @return true if the rollout is finished, false if not
      */
-    public boolean finishRollout(StateObservationNondeterministic rollerState, int depth) {
+    public boolean finishRollout(StateObservation rollerState, int depth) {
         if (depth >= player.getROLLOUT_DEPTH()) {
             return true;
         }

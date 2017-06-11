@@ -3,6 +3,7 @@ package controllers.MCTSExpectimax;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
+import params.MCTSExpectimaxParams;
 import params.MCTSParams;
 import tools.Types;
 
@@ -15,24 +16,23 @@ import java.util.Random;
  *
  * @author Johannes Kutsch
  */
-public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent
+public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 {
-	public MCTSParams params;
-    private MCTSExpectimaxPlayer1 player;
+	public MCTSExpectimaxParams params;
+    private MCTSEPlayer player;
 
 	/**
 	 * @param name	agent name, should be "MCTS Expectimax"
 	 * @param mcPar Settings for the Agent
 	 */
-    public MCTSExpectimaxAgent(String name, MCTSParams mcPar)
-    {
-    	super(name);
+    public MCTSExpectimaxAgt(String name, MCTSExpectimaxParams mcPar) {
+		super(name);
 		params = mcPar;
 
-        player = new MCTSExpectimaxPlayer1(new Random(),mcPar);
+		player = new MCTSEPlayer(new Random(), mcPar);
 
-        setAgentState(AgentState.TRAINED);
-    }
+		setAgentState(AgentState.TRAINED);
+	}
 
     /**
      * Picks an action. This function is called every game step to request an
@@ -110,7 +110,7 @@ public class MCTSExpectimaxAgent extends AgentBase implements PlayAgent
 		return cs;
 	}
 
-	public MCTSParams getMCTSParams() {
+	public MCTSExpectimaxParams getMCTSParams() {
 		return player.getMCTSParams();
 	}
 	

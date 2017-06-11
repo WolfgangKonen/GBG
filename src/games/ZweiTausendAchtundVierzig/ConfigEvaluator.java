@@ -11,7 +11,7 @@ public class ConfigEvaluator {
 
 
     //Evaluator2048 Settings
-        public static final int NUMBEREVALUATIONS = 100;
+        public static final int NUMBEREVALUATIONS = 50;
 
 
     //Evaluator2048_BoardPositions Settings

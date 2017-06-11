@@ -2,11 +2,10 @@ package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgent;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
-import games.LogManager;
 import tools.Types;
 
 import java.util.*;
@@ -48,9 +47,9 @@ public class Evaluator2048 extends Evaluator {
         if(m_PlayAgent.getName().equals("MCTS Expectimax")) {
             //async for MCTS Agents
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
-            MCTSExpectimaxAgent mctsExpectimaxAgent = (MCTSExpectimaxAgent)m_PlayAgent;
+            MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
 
-            System.out.println("Detected MCTS Expectimax Agent, Iterations: " + mctsExpectimaxAgent.params.getNumIter() + ", Rolloutdepth: " + mctsExpectimaxAgent.params.getRolloutDepth());
+            System.out.println("Detected MCTS Expectimax Agent, iterations: " + mctsExpectimaxAgt.params.getNumIter() + ", rolloutdepth: " + mctsExpectimaxAgt.params.getRolloutDepth() + ", Treedepth: " + mctsExpectimaxAgt.params.getTreeDepth() + ", k: " + mctsExpectimaxAgt.params.getK_UCT() + ", maxnodes: " + mctsExpectimaxAgt.params.getMaxNodes() + ", alternative version: " + mctsExpectimaxAgt.params.getAlternativeVersion());
             //play Games
             for(int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
                 int gameNumber = i+1;
@@ -58,7 +57,7 @@ public class Evaluator2048 extends Evaluator {
                     StateObserver2048 so = new StateObserver2048();
                     long gameSartTime = System.currentTimeMillis();
 
-                    PlayAgent playAgent = new MCTSAgentT("MCTS",null,mctsExpectimaxAgent.params);
+                    PlayAgent playAgent = new MCTSExpectimaxAgt("MCTS Expectimax", mctsExpectimaxAgt.params);
 
                     while (!so.isGameOver()) {
                         Types.ACTIONS action = playAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true);
@@ -168,9 +167,9 @@ public class Evaluator2048 extends Evaluator {
                     "\nITERATIONS: " + mcAgent.mcParams.getIterations() +
                     "\nNUMBERAGENTS: " + mcAgent.mcParams.getNumberAgents();
         } else if(m_PlayAgent.getName() == "MCTS Expectimax") {
-            MCTSExpectimaxAgent mctsExpectimaxAgent = (MCTSExpectimaxAgent) m_PlayAgent;
-            agentSettings = "\nROLLOUTDEPTH: " + mctsExpectimaxAgent.params.getRolloutDepth() +
-                    "\nITERATIONS: " + mctsExpectimaxAgent.params.getNumIter();
+            MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
+            agentSettings = "\nROLLOUTDEPTH: " + mctsExpectimaxAgt.params.getRolloutDepth() +
+                    "\nITERATIONS: " + mctsExpectimaxAgt.params.getNumIter();
         }
 
 
@@ -185,7 +184,7 @@ public class Evaluator2048 extends Evaluator {
                 "\nHighest scores is: " + maxScore +
                 "\nStandartdeviation is: " + standartdeviation +
                 "\nAverage Rolloutdepth is: " + averageRolloutDepth +
-                "\nAverage game duration: " +  Math.round((stopTime - startTime)/ ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
+                "\nAverage game duration: " +  Math.round((stopTime - startTime) / ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
                 "\nDuration of evaluation: " + duration + "s" +
                 "\nMoves per second: " + Math.round(moves/duration) +
                 "\n" +

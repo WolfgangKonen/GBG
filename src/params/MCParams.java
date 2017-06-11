@@ -3,9 +3,7 @@ package params;
 import java.awt.*;
 import java.io.Serializable;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import controllers.MC.MCAgentConfig;
 
@@ -31,7 +29,7 @@ public class MCParams extends Frame implements Serializable
     public JTextField TIterations;
     public JTextField TRolloutdepth;
     public JTextField TNumberAgents;
-    public Checkbox CBCalcCertainty;
+    public JCheckBox CBCalcCertainty;
     JPanel mPanel;
 
     public MCParams() {
@@ -39,10 +37,10 @@ public class MCParams extends Frame implements Serializable
         LIterations = new JLabel("Iterations");
         LRolloutdepth = new JLabel("Rolloutdepth");
         LNumberAgents = new JLabel("Number Agents (Majority Vote)");
-        TIterations = new JTextField(""+MCAgentConfig.ITERATIONS);
-        TRolloutdepth = new JTextField(""+MCAgentConfig.ROLLOUTDEPTH);
-        TNumberAgents = new JTextField(""+MCAgentConfig.NUMBERAGENTS);
-        CBCalcCertainty = new Checkbox("Calc Certainty", MCAgentConfig.DOCALCCERTAINTY);
+        TIterations = new JTextField(""+MCAgentConfig.DEFAULT_ITERATIONS);
+        TRolloutdepth = new JTextField(""+MCAgentConfig.DEFAULT_ROLLOUTDEPTH);
+        TNumberAgents = new JTextField(""+MCAgentConfig.DEFAULT_NUMBERAGENTS);
+        CBCalcCertainty = new JCheckBox("Calc Certainty", MCAgentConfig.DOCALCCERTAINTY);
         mPanel = new JPanel();
 
         LIterations.setToolTipText("Number of iterations during MC search");
@@ -63,7 +61,7 @@ public class MCParams extends Frame implements Serializable
         mPanel.add(new Canvas());
 
         mPanel.add(new Canvas());
-        mPanel.add(CBCalcCertainty);
+       // mPanel.add(CBCalcCertainty);
         mPanel.add(new Canvas());
         mPanel.add(new Canvas());
 
@@ -97,7 +95,7 @@ public class MCParams extends Frame implements Serializable
         return Integer.valueOf(TNumberAgents.getText()).intValue();
     }
     public boolean getCalcCertainty() {
-        return CBCalcCertainty.getState();
+        return CBCalcCertainty.isSelected();
     }
     public void setIterations(int value) {
         TIterations.setText(value+"");
@@ -109,7 +107,7 @@ public class MCParams extends Frame implements Serializable
         TNumberAgents.setText(value+"");
     }
     public void setCalcCertainty(boolean value) {
-        CBCalcCertainty.setState(value);
+        CBCalcCertainty.setSelected(value);
     }
 
     /**

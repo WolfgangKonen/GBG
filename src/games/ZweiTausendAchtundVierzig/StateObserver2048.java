@@ -208,7 +208,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
      *    08 09 10 11
      *    12 13 14 15
      * </pre>
-     * @return a vector of length {@link #getNumCells()}, holding for each board cell its
+     * @return a vector of length 16, holding for each board cell its
      * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
      */
     public int[] getBoardVector() {
@@ -651,5 +651,13 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         // add the boardB digits on all other places:
         boardB = (boardB & andB[k]) + col;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object arg0) {
+        StateObserver2048 aItem = null;
+        if (arg0 instanceof StateObserver2048)
+            aItem = (StateObserver2048) arg0;
+        return (this.boardB == aItem.boardB);
     }
 }

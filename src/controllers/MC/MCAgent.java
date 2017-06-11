@@ -47,7 +47,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
         int numberAgents = mcParams.getNumberAgents();
         int depth = mcParams.getRolloutdepth();
 
-        if (mcParams.getCalcCertainty()) {
+      /*  if (mcParams.getCalcCertainty()) {
         	StateObserver2048 sobZTAV = (StateObserver2048) sob;
         	if (sobZTAV.getNumEmptyTiles()==10) {
             	int NC = ConfigEvaluator.NC;
@@ -62,7 +62,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
                         +" / "+ cert2
                         +" / "+ cert6);
         	}
-        }
+        } */
 
         if(mcParams.getNumberAgents() > 1) {
             //more than one agent (majority vote)

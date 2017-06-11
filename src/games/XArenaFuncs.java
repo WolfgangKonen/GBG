@@ -1,4 +1,4 @@
-﻿package games;
+package games;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -10,7 +10,7 @@ import java.util.Random;
 import javax.swing.JOptionPane;
 
 import controllers.MC.MCAgent;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgent;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import org.jfree.data.xy.XYSeries;
 
 import controllers.PlayAgent;
@@ -44,7 +44,7 @@ import tools.Types;
  * Known classes having {@link XArenaFuncs} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
- * @author Wolfgang Konen, TH K�ln, Nov'16
+ * @author Wolfgang Konen, TH K?ln, Nov'16
  * 
  */
 public class XArenaFuncs 
@@ -143,7 +143,7 @@ public class XArenaFuncs
 		} else if (sAgent.equals("MCTS")) {
 			pa = new MCTSAgentT(sAgent, null, m_xab.mctsParams);
 		} else if (sAgent.equals("MCTS Expectimax")) {
-			pa= new MCTSExpectimaxAgent(sAgent, m_xab.mctsParams);
+			pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
@@ -182,7 +182,7 @@ public class XArenaFuncs
 			} else if (sAgent.equals("MCTS")) {
 				pa= new MCTSAgentT(sAgent,null,m_xab.mctsParams);
 			} else if (sAgent.equals("MCTS Expectimax")) {
-				pa= new MCTSExpectimaxAgent(sAgent, m_xab.mctsParams);
+				pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams);
 			} else if (sAgent.equals("Human")) {
 				pa= new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {

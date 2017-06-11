@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import params.*;
 //import params.RpropParams;
 //import params.TCParams;
@@ -67,6 +68,7 @@ public class XArenaButtons extends JPanel
 //	NTupleShow ntupleShow = null;
 	MCTSParams mctsParams = new MCTSParams();
 	MCParams mcParams = new MCParams();
+	MCTSExpectimaxParams mctsExpectimaxParams = new MCTSExpectimaxParams();
 	OtherParams oPar = new OtherParams(5);
 	HtmlDisplay htmlDisplay = null;
 	boolean htmlDisplayActive = false;
