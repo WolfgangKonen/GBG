@@ -656,8 +656,12 @@ public class StateObserver2048 implements StateObservationNondeterministic {
     @Override
     public boolean equals(Object arg0) {
         StateObserver2048 aItem = null;
-        if (arg0 instanceof StateObserver2048)
+        if (arg0 instanceof StateObserver2048) {
             aItem = (StateObserver2048) arg0;
+        } else {
+        	throw new RuntimeException("so is not a StateObserver2048 object!");
+        }
+        boolean res = (this.boardB == aItem.boardB);
         return (this.boardB == aItem.boardB);
     }
 }
