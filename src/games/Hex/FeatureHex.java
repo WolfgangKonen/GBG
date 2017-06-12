@@ -56,7 +56,7 @@ public class FeatureHex implements Feature {
 	public int getInputSize(int featmode) {
         switch (featmode){
         case 0:
-            return 2;
+            return 4;
         case 1:
             return HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE;
         default:
@@ -66,23 +66,26 @@ public class FeatureHex implements Feature {
     }
     
     public double[] createFeatureVector0(int player, HexTile[][] board){
-        double[] inputVector = new double[2];
-        switch (player){
-            case HexConfig.PLAYER_ONE:
-                inputVector[0] = HexUtils.getLongestChain(board, HexConfig.PLAYER_ONE);
-                inputVector[1] = HexUtils.getLongestChain(board, HexConfig.PLAYER_TWO);
-                break;
-            case HexConfig.PLAYER_TWO:
-                inputVector[0] = HexUtils.getLongestChain(board, HexConfig.PLAYER_TWO);
-                inputVector[1] = HexUtils.getLongestChain(board, HexConfig.PLAYER_ONE);
-                break;
-        }
+        double[] inputVector = new double[4];
+        int[] featureCurrentPlayer = HexUtils.getLongestChain(board, player);
+        int[] featureOpponentPlayer = HexUtils.getLongestChain(board, HexUtils.getOpponent(player));
+
+        inputVector[0] = featureCurrentPlayer[0];
+        inputVector[1] = featureOpponentPlayer[0];
+        inputVector[2] = featureCurrentPlayer[1];
+        inputVector[3] = featureOpponentPlayer[1];
 
         //Normalize to range of 0-1
         inputVector[0] /= HexConfig.BOARD_SIZE;
         inputVector[1] /= HexConfig.BOARD_SIZE;
 
-        System.out.println(stringRepr(inputVector));
+        inputVector[2] /= ((HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE)+1);
+        inputVector[3] /= ((HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE)+1);
+
+        if (inputVector[2] > 1 || inputVector[3] > 1){
+            System.out.println("Hex Feature0 warning: number of adjacent free tiles was greater than 1 after normalization ("+inputVector[2]+"; "+inputVector[3]+")");
+        }
+
         return inputVector;
     }
 
@@ -95,7 +98,6 @@ public class FeatureHex implements Feature {
             }
         }
 
-        System.out.println(stringRepr(inputVector));
         return inputVector;
     }
 }

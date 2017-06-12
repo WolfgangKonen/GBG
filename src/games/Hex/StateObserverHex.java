@@ -175,6 +175,10 @@ public class StateObserverHex implements StateObservation {
 
     @Override
     public void advance(Types.ACTIONS action) {
+        if (action == null){
+            System.out.println("HEX ERROR: null given as action in advance()");
+            return;
+        }
         int actionInt = action.toInt();
         assert (0<=actionInt && actionInt<=(HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE)) : "Invalid action: "+actionInt;
         int j = actionInt       % HexConfig.BOARD_SIZE;

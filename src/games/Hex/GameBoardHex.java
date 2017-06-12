@@ -14,6 +14,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 
+import static games.Hex.HexConfig.PLAYER_ONE;
+import static games.Hex.HexConfig.PLAYER_TWO;
+
 
 public class GameBoardHex implements GameBoard {
     private HexPanel gamePanel;
@@ -73,6 +76,16 @@ public class GameBoardHex implements GameBoard {
 
         gamePanel.showValues = showStoredV;
         drawBoardToPanel((Graphics2D) gamePanel.getGraphics(), showStoredV);
+
+        /*int longestChain = HexUtils.getLongestChain(soHex.getBoard(), HexUtils.getOpponent(so.getPlayer()))[0];
+        int featureVectorP1[] = HexUtils.getLongestChain(soHex.getBoard(), PLAYER_ONE);
+        int featureVectorP2[] = HexUtils.getLongestChain(soHex.getBoard(), PLAYER_TWO);
+        //System.out.println("Longest chain for player "+so.getPlayer()+": "+longestChain);
+        System.out.println("---------------------------------");
+        System.out.println("Longest chain for player BLACK: "+featureVectorP1[0]);
+        System.out.println("Longest chain for player WHITE: "+featureVectorP2[0]);
+        System.out.println("Free adjacent tiles for player BLACK: "+featureVectorP1[1]);
+        System.out.println("Free adjacent tiles for player WHITE: "+featureVectorP2[1]);*/
     }
 
     @Override
