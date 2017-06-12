@@ -169,7 +169,8 @@ public class MCTSEChanceNode
         Types.ACTIONS action = notExpandedActions.get(random.nextInt(notExpandedActions.size()));
         notExpandedActions.remove(action);
 
-        StateObserver2048 childSo = (StateObserver2048) so.copy();
+//      StateObserver2048 childSo = (StateObserver2048) so.copy();		// /WK/ can be done w/o using StateObserver2048:
+        StateObservation childSo = so.copy();
 
         MCTSETreeNode child = new MCTSETreeNode(childSo, action, this, random,player);
         childrenNodes.add(child);

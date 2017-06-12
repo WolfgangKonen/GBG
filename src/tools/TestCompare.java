@@ -46,9 +46,18 @@ public class TestCompare {
 	           if (((Items)it.next()).isEqualTo(arg0))
 	        	   return true;
 	    }
-	    return false;
-		
+	    return false;		
 	}
+	
+	public boolean containsState2(HashSet itemSet, Items arg0) {
+	    Iterator it = itemSet.iterator();
+	    while (it.hasNext()) {
+	           if (((Items)it.next()).equals(arg0))
+	        	   return true;
+	    }
+	    return false;		
+	}
+	
 	public void operate() {
 	    Items it1 = new Items(1,10);
 	    Items it2 = new Items(2,20);
@@ -71,6 +80,8 @@ public class TestCompare {
 		// will return false, although the key 4 of it6 is in tupleSet. 
 		//
 		// For unclear reason it does not help to override equals() from class Object (see above).
+		// It works however (see containsState2 below), if we call equals() directly. So it 
+		// must be that contains() does not call the same equals(), for some unclear reason.
 		//
 		if (itemSet.contains(it1)) 
 			System.out.println("contains element with key 1");
@@ -91,6 +102,19 @@ public class TestCompare {
 			System.out.println("containsState: has element with key 4");
 		if (!containsState(itemSet,it5))
 			System.out.println("containsState: does not have element with key 5");
+		
+		// 
+		// this instead works: we call our own method containsState to check for containment
+		// and in this method we call our own method isEqualTo which exclusively looks 
+		// to the key.
+		//
+		System.out.println();
+		if (containsState2(itemSet,it1)) 
+			System.out.println("containsState2: has element with key 1");
+		if (containsState2(itemSet,it6)) 
+			System.out.println("containsState2: has element with key 4");
+		if (!containsState2(itemSet,it5))
+			System.out.println("containsState2: does not have element with key 5");
 		
 	}
     

@@ -17,7 +17,7 @@ import tools.Types.ACTIONS;
  * <li> and others.
  * </ul><p>
  * 
- * @author Wolfgang Konen, TH K�ln, Feb'17
+ * @author Wolfgang Konen, TH Koeln, Feb'17
  */
 public interface StateObservation extends Serializable{
     //Types.ACTIONS[] actions=null;

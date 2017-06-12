@@ -64,9 +64,10 @@ public class MCTSETreeNode {
      * @return the selected child node
      */
     public MCTSEChanceNode expand() {
-        StateObserver2048 childSo = (StateObserver2048) so.copy();
+//        StateObserver2048 childSo = (StateObserver2048) so.copy();		// /WK/ can be done w/o using StateObserver2048:
+        StateObservation childSo = so.copy();
         childSo.advance(action);
-
+    	
         for (MCTSEChanceNode childrenNode : childrenNodes) {
             if (childrenNode.so.equals(childSo)) {
                 //a child node representing this boardstate already exists
