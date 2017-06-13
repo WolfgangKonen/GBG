@@ -20,6 +20,7 @@ public class LogManager {
 
     public String filePath = "logs";
     public String tempPath = "logs\\temp";
+    private String subDir = null;
 
     private HashMap<Integer, Integer> counter = new HashMap<>(); //saves a counter for each sessionid
     private HashMap<Integer, List<LogContainer>> simpleLoggingContainers = new HashMap<>();
@@ -146,16 +147,6 @@ public class LogManager {
      * @param sessionid the id of the current logsession
      */
     public void endLoggingSession(int sessionid) {
-        endLoggingSession(sessionid, null);
-    }
-
-    /**
-     * ends a logging session, for example when a game is finished
-     *
-     * @param sessionid the id of the current logsession
-     * @param subdir the name of a subdirectory in which the log should be saved, for example to sort logs with different gameboard settings
-     */
-    public void endLoggingSession(int sessionid, String subdir) {
         if (loggingEnabled) {
             LogSessionContainer logSessionContainer;
 
@@ -181,7 +172,7 @@ public class LogManager {
                 simpleLoggingContainers.remove(sessionid);
             }
 
-            safeLogSessionContainer(logSessionContainer, subdir);
+            safeLogSessionContainer(logSessionContainer);
         }
     }
 
@@ -222,11 +213,11 @@ public class LogManager {
      *
      * @param logSessionContainer the LogSessionContainer
      */
-    public void safeLogSessionContainer(LogSessionContainer logSessionContainer, String subdir) {
+    public void safeLogSessionContainer(LogSessionContainer logSessionContainer) {
         if (logSessionContainer.stateObservations.size() > 0) {
             String saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName();
-            if(subdir != null && !subdir.equals("")) {
-                saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName() + "\\" + subdir;
+            if(subDir != null && !subDir.equals("")) {
+                saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName() + "\\" + subDir;
                 //System.out.println(saveDirectory);
             }
 
@@ -303,6 +294,13 @@ public class LogManager {
         }
     }
 
+    public void setSubDir(String subDir){
+        this.subDir = subDir;
+    }
+
+    public String getSubDir(){
+        return subDir;
+    }
 
 }
 
