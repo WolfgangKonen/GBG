@@ -35,6 +35,7 @@ public class MCTSEChanceNode
 
     public int iterations = 0;
     public int numberTreeNodes = 0;
+    public int numberChanceNodes = 1;
 
     /**
      * This Class represents a MCTS Expectmiax Chance Node.
@@ -54,6 +55,10 @@ public class MCTSEChanceNode
         this.random = random;
 
         notExpandedActions = so.getAvailableActions();
+
+        if(player.getRootNode() != null) {
+            player.getRootNode().numberChanceNodes++;
+        }
 
         if (parentNode != null) {
             depth = parentNode.depth + 1;
@@ -184,8 +189,41 @@ public class MCTSEChanceNode
      * @param score the score that we want to backup
      */
     public void backUp(double score) {
+        backUpSum(score);
+    }
+
+    /**
+     * The value of a node is the sum of all it childnodes
+     *
+     * @param score the value of the new childnode
+     */
+    private void backUpSum(double score) {
+        if (so.getNumPlayers()==2) {
+            score =- score;
+        }
+
         visits++;
         value += score;
+
+        if (parentNode != null) {
+            parentNode.backUp(score);
+        }
+    }
+
+    /**
+     * The value of a node is the value of the lowest childnode
+     *
+     * @param score the value of the new childnode
+     */
+    private void backUpMin(double score) {
+        if (so.getNumPlayers()==2) {
+            score =- score;
+        }
+
+        visits++;
+        if(score < value || value == 0) {
+            value = score;
+        }
 
         if (parentNode != null) {
             parentNode.backUp(score);

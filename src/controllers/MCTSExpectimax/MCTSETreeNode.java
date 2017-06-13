@@ -102,7 +102,7 @@ public class MCTSETreeNode {
             player.nRolloutFinished++;
         }
 
-        return rollerState.getGameScore();
+        return rollerState.getGameScore(so);
     }
 
     /**
@@ -131,12 +131,41 @@ public class MCTSETreeNode {
      * @param score the score that we want to backup
      */
     public void backUp(double score) {
+        backUpSum(score);
+    }
+
+    /**
+     * The value of a node is the sum of all it childnodes
+     *
+     * @param score the value of the new childnode
+     */
+    private void backUpSum(double score) {
         if (so.getNumPlayers()==2) {
             score =- score;
         }
 
         visits++;
         value += score;
+
+        if (parentNode != null) {
+            parentNode.backUp(score);
+        }
+    }
+
+    /**
+     * The value of a node is the value of the lowest childnode
+     *
+     * @param score the value of the new childnode
+     */
+    private void backUpMin(double score) {
+        if (so.getNumPlayers()==2) {
+            score =- score;
+        }
+
+        visits++;
+        if(score < value || value == 0) {
+            value = score;
+        }
 
         if (parentNode != null) {
             parentNode.backUp(score);
