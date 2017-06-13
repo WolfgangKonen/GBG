@@ -10,12 +10,9 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
 
 import static games.Hex.HexConfig.PLAYER_ONE;
-import static games.Hex.HexConfig.PLAYER_TWO;
 
 
 public class GameBoardHex implements GameBoard {
@@ -35,8 +32,6 @@ public class GameBoardHex implements GameBoard {
     final static Color COLOR_GRID =  Color.GRAY;
 
     private boolean actionRequired = false;
-
-    private boolean inputEnabled = true;
 
     final static Color BACKGROUND_COLOR = Color.lightGray;
 
@@ -74,8 +69,7 @@ public class GameBoardHex implements GameBoard {
 
         stateObs = soHex.copy();
 
-        gamePanel.showValues = showStoredV;
-        drawBoardToPanel((Graphics2D) gamePanel.getGraphics(), showStoredV);
+        drawBoardToPanel((Graphics2D) gamePanel.getGraphics(), true);
 
         /*int longestChain = HexUtils.getLongestChain(soHex.getBoard(), HexUtils.getOpponent(so.getPlayer()))[0];
         int featureVectorP1[] = HexUtils.getLongestChain(soHex.getBoard(), PLAYER_ONE);
@@ -105,7 +99,7 @@ public class GameBoardHex implements GameBoard {
 
     @Override
     public void enableInteraction(boolean enable) {
-
+        //Not called anywhere
     }
 
     @Override
@@ -145,27 +139,32 @@ public class GameBoardHex implements GameBoard {
         for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
             for (int j=0;j<HexConfig.BOARD_SIZE;j++) {
                 HexTile tile = stateObs.getBoard()[i][j];
-                double tileValue = tile.getValue();
-
-                HexUtils.drawHex(tile, g2, false);
-
-                if (showValues && !Double.isNaN(tileValue)){
-                    Color cellColor = null;
-                    if (!tile.equals(lastPlaced)) {
-                        cellColor = HexUtils.calculateTileColor(tileValue);
-                    }
-                    HexUtils.drawTileValues(tile, g2, HexConfig.BOARD_SIZE, cellColor);
-                }
+                Color cellColor = getTileColor(tile, showValues);
+                HexUtils.drawHex(tile, g2, cellColor, false);
+                HexUtils.drawTileValueText(tile, g2, HexConfig.BOARD_SIZE);
             }
         }
 
-        //Draw last placed hex again to highlight it
+        //draw last placed tile again so it's highlighting overlaps all other tiles
         if (lastPlaced != null) {
-            HexUtils.drawHex(lastPlaced, g2, true);
-            if (showValues && !Double.isNaN(lastPlaced.getValue())) {
-                HexUtils.drawTileValues(lastPlaced, g2, HexConfig.BOARD_SIZE, null);
-            }
+            Color cellColor = getTileColor(lastPlaced, showValues);
+            HexUtils.drawHex(lastPlaced, g2, cellColor, true);
+            HexUtils.drawTileValueText(lastPlaced, g2, HexConfig.BOARD_SIZE);
         }
+    }
+
+    private Color getTileColor(HexTile tile, boolean showValues){
+        double tileValue = tile.getValue();
+        Color cellColor = COLOR_CELL;
+        if (tile.getPlayer() == PLAYER_ONE){
+            cellColor = GameBoardHex.COLOR_PLAYER_ONE;
+        } else if (tile.getPlayer() == HexConfig.PLAYER_TWO){
+            cellColor = GameBoardHex.COLOR_PLAYER_TWO;
+        } else if (showValues && !Double.isNaN(tileValue)){
+            cellColor = HexUtils.calculateTileColor(tileValue);
+        }
+
+        return cellColor;
     }
 
     private void createAndShowGUI()
@@ -184,7 +183,7 @@ public class GameBoardHex implements GameBoard {
 
     public class HexPanel extends JPanel
     {
-        boolean showValues = false;
+        boolean showValues = true;
         HexPanel(){
             setBackground(GameBoardHex.BACKGROUND_COLOR);
 
@@ -195,12 +194,13 @@ public class GameBoardHex implements GameBoard {
         public void paintComponent(Graphics g){
             Graphics2D g2 = (Graphics2D)g;
             super.paintComponent(g2);
+
             drawBoardToPanel(g2, showValues);
         }
 
         class MyMouseListener extends MouseAdapter {
             public void mouseReleased(MouseEvent e) {
-                if (!inputEnabled || arena.taskState != Arena.Task.PLAY){
+                if (actionRequired || arena.taskState != Arena.Task.PLAY){
                     return;
                 }
                 Point p = new Point( HexUtils.pxtoHex(e.getX(),e.getY(), stateObs.getBoard(), HexConfig.BOARD_SIZE) );

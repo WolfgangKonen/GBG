@@ -35,15 +35,8 @@ public class HexUtils {
         return new Polygon(xPoints, yPoints, 6);
     }
 
-    public static void drawHex(HexTile tile, Graphics2D g2, boolean highlight) {
+    public static void drawHex(HexTile tile, Graphics2D g2, Color cellColor, boolean highlight) {
         Polygon poly = tile.getPoly();
-
-        Color cellColor = GameBoardHex.COLOR_CELL;
-        if (tile.getPlayer() == PLAYER_ONE){
-            cellColor = GameBoardHex.COLOR_PLAYER_ONE;
-        } else if (tile.getPlayer() == HexConfig.PLAYER_TWO){
-            cellColor = GameBoardHex.COLOR_PLAYER_TWO;
-        }
 
         g2.setColor(cellColor);
         g2.fillPolygon(poly);
@@ -58,7 +51,12 @@ public class HexUtils {
         g2.drawPolygon(poly);
     }
 
-    public static void drawTileValues(HexTile tile, Graphics2D g2, int boardSize, Color cellColor) {
+    public static void drawTileValueText(HexTile tile, Graphics2D g2, int boardSize) {
+        double tileValue = tile.getValue();
+        if (Double.isNaN(tileValue)){
+            return;
+        }
+
         int i = tile.getCoords().x;
         int j = tile.getCoords().y;
 
@@ -70,13 +68,8 @@ public class HexUtils {
 
         Color textColor = tile.getPlayer() == PLAYER_ONE ? Color.WHITE : Color.BLACK;
 
-        if (cellColor != null) {
-            g2.setColor(cellColor);
-            g2.fillPolygon(poly);
-        }
-
         g2.setColor(textColor);
-        double tileValue = tile.getValue();
+
         String tileText = String.format("%.2f", tileValue);
 
         int width = g2.getFontMetrics().stringWidth(tileText);
