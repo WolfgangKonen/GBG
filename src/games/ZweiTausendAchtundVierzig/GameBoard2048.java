@@ -586,4 +586,9 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         m_so.advance(act);
         arenaActReq = true;
     }
+
+	@Override
+	public String getSubDir() {
+		return null;
+	}
 }

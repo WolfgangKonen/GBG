@@ -426,7 +426,7 @@ abstract public class Arena extends JPanel implements Runnable {
 			} // if isGameOver
 			
 		}	// while(true) [will be left only by the last break above]
-		logManager.endLoggingSession(sessionid);
+		logManager.endLoggingSession(sessionid, gb.getSubDir());
 		taskState = Task.IDLE;		
 		setStatusMessage("Done.");
 	}

@@ -454,4 +454,9 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		return m_so;
 	}
 
+	@Override
+	public String getSubDir() {
+		return null;
+	}
+
 }

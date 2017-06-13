@@ -33,6 +33,14 @@ public interface GameBoard {
 	public StateObservation getStateObs();
 	
 	/**
+	 * If logs and agents should be placed in a subdirectory (e.g. Hex: BoardSize), then
+	 * this method returns a suitable string. If it returns {@code null}, then logs and 
+	 * agents are placed in the {@code gameName} directory directly. 
+	 * @return subdir string
+	 */
+	public String getSubDir();
+	
+	/**
 	 * @return the 'empty-board' start state
 	 */
 	public StateObservation getDefaultStartState();

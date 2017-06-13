@@ -1,6 +1,7 @@
 package tools;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -28,7 +29,8 @@ public class TestCompare {
 			return (this.key == aItem.key);
 		}
 		
-		// override dos not work, for unclear reasons
+		// override dos not work for Set.contains(), for unclear reasons.
+		// But it works for our method containsState2().
 		@Override
 		public boolean equals(Object arg0) {
 			Items aItem = null;
@@ -36,9 +38,8 @@ public class TestCompare {
 				aItem = (Items) arg0; 
 			return (this.key == aItem.key);
 			
-		}
-		
-	}
+		}		
+	} //class Items
 
 	public boolean containsState(HashSet itemSet, Items arg0) {
 	    Iterator it = itemSet.iterator();
@@ -104,9 +105,9 @@ public class TestCompare {
 			System.out.println("containsState: does not have element with key 5");
 		
 		// 
-		// this instead works: we call our own method containsState to check for containment
-		// and in this method we call our own method isEqualTo which exclusively looks 
-		// to the key.
+		// this instead works as well: we call our own method containsState2 to check for containment
+		// and in this method we call equals(Object arg0) explicitly, which is our overriding  
+		// method which exclusively looks to the key.
 		//
 		System.out.println();
 		if (containsState2(itemSet,it1)) 
@@ -122,6 +123,12 @@ public class TestCompare {
     {
     	TestCompare tc = new TestCompare();
     	tc.operate();
+    	
+//    	int k=5;
+//    	DecimalFormat form = new DecimalFormat("00");
+//    	String s = "k = "+ form.format(k);
+//    	System.out.println(s);		// liefert "k = 05“
+    	
     }
 
 }

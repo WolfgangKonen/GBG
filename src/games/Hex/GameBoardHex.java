@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -212,4 +213,11 @@ public class GameBoardHex implements GameBoard {
             }
         }
     }
+
+	@Override
+	public String getSubDir() {
+    	DecimalFormat form = new DecimalFormat("00");
+    	String s = form.format(HexConfig.BOARD_SIZE);
+		return s;
+	}
 }

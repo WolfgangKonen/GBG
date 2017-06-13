@@ -227,7 +227,7 @@ public class LogManager {
             String saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName();
             if(subdir != null && !subdir.equals("")) {
                 saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName() + "\\" + subdir;
-                System.out.println(saveDirectory);
+                //System.out.println(saveDirectory);
             }
 
             checkAndCreateFolder(saveDirectory);

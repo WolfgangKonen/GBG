@@ -202,15 +202,15 @@ public class StateObserverTTT implements StateObservation {
 
 	public ArrayList<ACTIONS> getAvailableActions() {
 		ArrayList<ACTIONS> availAct = new ArrayList<ACTIONS>();
-		if (m_Table[0][0]==0)  availAct.add(Types.ACTIONS.ACTION_00);
-		if (m_Table[0][1]==0)  availAct.add(Types.ACTIONS.ACTION_01);
-		if (m_Table[0][2]==0)  availAct.add(Types.ACTIONS.ACTION_02);
-		if (m_Table[1][0]==0)  availAct.add(Types.ACTIONS.ACTION_03);
-		if (m_Table[1][1]==0)  availAct.add(Types.ACTIONS.ACTION_04);
-		if (m_Table[1][2]==0)  availAct.add(Types.ACTIONS.ACTION_05);
-		if (m_Table[2][0]==0)  availAct.add(Types.ACTIONS.ACTION_06);
-		if (m_Table[2][1]==0)  availAct.add(Types.ACTIONS.ACTION_07);
-		if (m_Table[2][2]==0)  availAct.add(Types.ACTIONS.ACTION_08);
+		if (m_Table[0][0]==0)  availAct.add(Types.ACTIONS.fromInt(0));
+		if (m_Table[0][1]==0)  availAct.add(Types.ACTIONS.fromInt(1));
+		if (m_Table[0][2]==0)  availAct.add(Types.ACTIONS.fromInt(2));
+		if (m_Table[1][0]==0)  availAct.add(Types.ACTIONS.fromInt(3));
+		if (m_Table[1][1]==0)  availAct.add(Types.ACTIONS.fromInt(4));
+		if (m_Table[1][2]==0)  availAct.add(Types.ACTIONS.fromInt(5));
+		if (m_Table[2][0]==0)  availAct.add(Types.ACTIONS.fromInt(6));
+		if (m_Table[2][1]==0)  availAct.add(Types.ACTIONS.fromInt(7));
+		if (m_Table[2][2]==0)  availAct.add(Types.ACTIONS.fromInt(8));
 		return availAct;
 	}
 	
