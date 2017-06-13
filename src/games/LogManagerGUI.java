@@ -109,7 +109,7 @@ public class LogManagerGUI {
                 File selectedFile = fileChooser.getSelectedFile();
 
                 LogSessionContainer logSessionContainer = logManager.generateLogSessionContainerFromFile(selectedFile.getPath());
-                logManager.safeLogSessionContainer(logSessionContainer, null);
+                logManager.safeLogSessionContainer(logSessionContainer);
 
                 if (verbose) {
                     System.out.println("LogManager: compiled temp log successfully");
@@ -140,7 +140,16 @@ public class LogManagerGUI {
         {
             //load a new .gamelog File
             String gameName = gameBoard.getStateObs().getName();
-            JFileChooser fileChooser = new JFileChooser(logManager.filePath + "\\" + gameName);
+            String logPath = logManager.filePath + "\\" + gameName;
+            String subDir = logManager.getSubDir();
+            if (subDir != null){
+                File file = new File(logPath+"\\"+subDir);
+                if (file.exists()) {
+                    logPath += "\\" + subDir;
+                }
+            }
+            JFileChooser fileChooser = new JFileChooser(logPath);
+
             fileChooser.setFileFilter(new FileNameExtensionFilter(gameName + " Gamelog", "gamelog"));
             Action details = fileChooser.getActionMap().get("viewTypeDetails");
             details.actionPerformed(null);

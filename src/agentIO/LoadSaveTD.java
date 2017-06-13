@@ -121,6 +121,12 @@ public class LoadSaveTD {
 	// ==============================================================
 	public void saveTDAgent(PlayAgent pa) throws IOException {
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
+		String subDir = arenaGame.getGameBoard().getSubDir();
+		if (subDir != null){
+			strDir += "/"+subDir;
+		}
+		checkAndCreateFolder(strDir);
+
 		fc.removeChoosableFileFilter(txtExt);
 		fc.setFileFilter(tdAgentExt);
 		fc.setCurrentDirectory(new File(strDir));
@@ -237,6 +243,12 @@ public class LoadSaveTD {
 
 	public PlayAgent loadTDAgent() throws IOException, ClassNotFoundException {
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
+		String subDir = arenaGame.getGameBoard().getSubDir();
+		if (subDir != null){
+			strDir += "/"+subDir;
+		}
+		checkAndCreateFolder(strDir);
+
 		PlayAgent pa = null;
 		fc.removeChoosableFileFilter(txtExt);
 		fc.setFileFilter(tdAgentExt);
@@ -400,6 +412,21 @@ public class LoadSaveTD {
 			e.printStackTrace();
 		}
 		return txtFileContent;
+	}
+
+	/**
+	 * checks if a folder exists and creates a new one if it doesn't
+	 *
+	 * @param filePath the folder Path
+	 * @return true if a folder allready existed
+	 */
+	private boolean checkAndCreateFolder(String filePath) {
+		File file = new File(filePath);
+		boolean exists = file.exists();
+		if(!file.exists()) {
+			file.mkdirs();
+		}
+		return exists;
 	}
 
 }

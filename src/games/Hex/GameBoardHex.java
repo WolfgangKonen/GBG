@@ -215,9 +215,8 @@ public class GameBoardHex implements GameBoard {
     }
 
 	@Override
-	public String getSubDir() {
-    	DecimalFormat form = new DecimalFormat("00");
-    	String s = form.format(HexConfig.BOARD_SIZE);
-		return s;
-	}
+    public String getSubDir() {
+        DecimalFormat form = new DecimalFormat("00");
+        return form.format(HexConfig.BOARD_SIZE);
+    }
 }
