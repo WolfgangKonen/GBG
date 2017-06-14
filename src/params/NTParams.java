@@ -33,6 +33,13 @@ public class NTParams extends Frame implements Serializable {
 	private static String[] tcFactorString = { "Immediate", "Accumulating" };
 	private static String[] ntTupleTypeString={"RandomWalk","RandomPoint"};
 
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 1L;
+
 	JLabel TempCoL;
 	JLabel tcFactorL;
 	JLabel NTupleL;
@@ -315,6 +322,8 @@ public class NTParams extends Frame implements Serializable {
 		nTupleNumT.setText(nt.getNtupleNumber()+"");
 		nTupleMaxT.setText(nt.getNtupleMax()+"");
 		UseSymmetryC.setSelected(nt.getUseSymmetry());
+		enableTcPart();
+		enableRandomPart();
 	}
 
 	/**
@@ -338,6 +347,7 @@ public class NTParams extends Frame implements Serializable {
 			RandomnessC.setSelected(false);		// consequence: disable TupleType, nTupleNumT, nTupleMaxT
 			nTupleNumT.setText("10");
 			nTupleMaxT.setText("6"); 
+			enableTcPart();
 			enableRandomPart();
 			break;
 		}

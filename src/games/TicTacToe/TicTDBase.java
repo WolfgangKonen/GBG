@@ -66,6 +66,13 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 							 ,{0,3,6,7,8},{0,4,8,2,6} 
 	 						 };
 	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
+
+	/**
 	 * Counter class, usually mapped to a state (board position): <ul>
 	 * <li> <code>counter0</code> counts how often this state was visited during training
 	 * <li> <code>counter1</code> counts how often this state was updated during training

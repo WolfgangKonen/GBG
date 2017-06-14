@@ -94,6 +94,14 @@ public class TD_Lin implements TD_func, Serializable {
 	// weights wOpt are near-optimal settings for feature set 3, used only for debugging in
 	// this.setRpropLrn()
 
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
+
+	
 
     private void initNet() {
         rand = new Random(System.currentTimeMillis());

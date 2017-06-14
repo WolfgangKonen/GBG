@@ -482,6 +482,7 @@ public class XArenaMenu extends JMenuBar {
 			else if (td instanceof TDNTupleAgt) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar.setFrom( ((TDNTupleAgt) td).getTDParams() );
+				m_arena.m_xab.ntPar.setFrom( ((TDNTupleAgt) td).getNTParams() );
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:

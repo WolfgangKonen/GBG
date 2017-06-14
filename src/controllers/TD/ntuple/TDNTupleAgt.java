@@ -45,6 +45,13 @@ import games.XNTupleFuncs;
 public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private Random rand; // generate random Numbers 
 	static transient public PrintStream pstream = System.out;
+	
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
 
 	/**
 	 * Controls the amount of explorative moves in
@@ -571,6 +578,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 	}
 
+	public void setNTParams(NTParams ntPar) {
+		// *TODO* 
+	}
+
 	public void setAlpha(double alpha) {
 		m_Net.setAlpha(alpha);
 	}
@@ -613,6 +624,9 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 	public TDParams getTDParams() {
 		return m_tdPar;
+	}
+	public NTParams getNTParams() {
+		return m_ntPar;
 	}
 
 	// Debug only: 

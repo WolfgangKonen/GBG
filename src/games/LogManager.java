@@ -313,6 +313,13 @@ class LogContainer implements Serializable {
     public Types.ACTIONS action;
     public StateObservation stateObservation;
 
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .gamelog containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 1L;
+
     public LogContainer(Types.ACTIONS action, StateObservation stateObservation) {
         this.action = action;
         this.stateObservation = stateObservation;
@@ -327,6 +334,13 @@ class LogContainer implements Serializable {
 class LogSessionContainer implements Serializable {
     public List<Types.ACTIONS> actions = new ArrayList<>();
     public List<StateObservation> stateObservations = new ArrayList<>();
+
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .gamelog containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 1L;
 
     public void addLogEntry(LogContainer logContainer) {
         actions.add(logContainer.action);

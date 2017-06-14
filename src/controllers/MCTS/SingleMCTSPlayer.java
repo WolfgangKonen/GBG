@@ -49,7 +49,14 @@ public class SingleMCTSPlayer implements Serializable
 	 * (to restore the agent with all its parameter settings)
 	 */
 	private MCTSParams m_mcPar;
-	private static final long serialVersionUID = 123L;
+
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
+
 
 	/**
 	 * Default constructor for SingleMCTSPlayer, needed for loading a serialized version
@@ -76,8 +83,9 @@ public class SingleMCTSPlayer implements Serializable
             this.setTREE_DEPTH(mcPar.getTreeDepth());
             this.verbose = mcPar.getVerbosity();
     	}
-		m_mcPar = new MCTSParams();
-		m_mcPar.setFrom(mcPar);
+//		m_mcPar = new MCTSParams();
+//		m_mcPar.setFrom(mcPar);
+    	m_mcPar = mcPar;
 
         m_rnd = a_rnd;
         m_root = new SingleTreeNode(a_rnd,this);

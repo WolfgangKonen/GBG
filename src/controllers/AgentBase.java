@@ -28,6 +28,13 @@ abstract public class AgentBase implements Serializable {
 	private int epochMax=0;
 
 	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
+
+	/**
 	 * Default constructor for AgentBase, needed for loading a serialized version
 	 */
 	protected AgentBase() {

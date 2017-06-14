@@ -188,6 +188,11 @@ public class LoadSaveTD {
 			final JDialog dlg = createProgressDialog(ptos, "Saving...");
 
 			try {
+				if (pa instanceof MCTSAgentT) {
+					MCTSAgentT mcts = (MCTSAgentT) pa;
+//					System.out.println("saveIter1 "+mcts.getMCTSParams().getNumIter());
+//					System.out.println("saveIter2 "+mcts.params.getNumIter());
+				}
 				oos.writeObject(pa);
 			} catch (IOException e) {
 				dlg.setVisible(false);

@@ -36,7 +36,6 @@ import controllers.MCTS.SingleMCTSPlayer;
  */
 public class MCTSParams extends Frame implements Serializable
 {
-	private static final long serialVersionUID = 1L;
 	JLabel numIter_L;
 	JLabel kUCT_L;
 	JLabel treedep_L;
@@ -48,6 +47,13 @@ public class MCTSParams extends Frame implements Serializable
 	public JTextField rollout_T;
 	public JTextField verbose_T;
 	JPanel mPanel;
+
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 1L;
 
 //	Button ok;
 //	MCTSParams m_par;
@@ -169,5 +175,7 @@ public class MCTSParams extends Frame implements Serializable
 		setRolloutDepth(tp.getRolloutDepth());
 		setTreeDepth(tp.getTreeDepth());
 		setVerbosity(tp.getVerbosity());
+//		System.out.println("numIter= "+tp.getNumIter());
+//		System.out.println("k_UCT= "+tp.getK_UCT());
 	}
 } // class MCTSParams

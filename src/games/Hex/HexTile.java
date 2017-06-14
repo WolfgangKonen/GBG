@@ -9,6 +9,13 @@ public class HexTile implements Serializable {
     private Polygon poly;
     private double value;
 
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .gamelog containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 12L;
+
     public HexTile(int i, int j){
         coords = new Point(i, j);
         player = HexConfig.PLAYER_NONE;

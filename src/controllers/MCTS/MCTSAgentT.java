@@ -22,14 +22,23 @@ import java.util.Random;
  */
 public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable 
 { 
-	private static final long serialVersionUID = 123L;
     private transient ElapsedCpuTimer m_Timer;
-	public MCTSParams params;
+    
+    @Deprecated 
+    // should use this.getMCTSParams() instead 
+	private MCTSParams params;
 
     /**
      * The MCTS-UCT implementation
      */
     private SingleMCTSPlayer mctsPlayer;
+
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
 
 	/**
 	 * Default constructor, needed for loading a serialized version

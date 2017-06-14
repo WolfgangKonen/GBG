@@ -4,6 +4,7 @@ import games.StateObservation;
 import tools.ElapsedCpuTimer;
 import tools.Types;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Random;
  * (with a bug fix concerning the number of available actions and an 
  *  extension for 1- and 2-player games. And the return of VTable information.)
  */
-public class SingleTreeNode
+public class SingleTreeNode implements Serializable
 {
     public static double epsilon = 1e-6;		// tiebreaker
     public StateObservation m_state=null;
@@ -32,6 +33,13 @@ public class SingleTreeNode
      *  used as variant to uct() (which is currently *not* the case).
      */
     public static double egreedyEpsilon = 0.05; 
+
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
 
 // --- probably never needed ---
 //    public SingleTreeNode() {

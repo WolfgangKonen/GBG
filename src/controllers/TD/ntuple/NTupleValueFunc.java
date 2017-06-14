@@ -61,6 +61,13 @@ public class NTupleValueFunc implements Serializable {
 	private DecimalFormat frmS = new DecimalFormat("+0.00000;-0.00000");
 
 	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
+
+	/**
 	 * Constructor using a set of n-tuples that are predefined.
 	 * 
 	 * @param nTuplesI

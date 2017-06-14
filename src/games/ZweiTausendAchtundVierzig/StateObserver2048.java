@@ -61,6 +61,13 @@ public class StateObserver2048 implements StateObservationNondeterministic {
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .gamelog containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 12L;
+
     public StateObserver2048() {
         newBoard();
     }

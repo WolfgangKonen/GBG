@@ -29,6 +29,13 @@ public class StateObserverTTT implements StateObservation {
     public double[] storedValues = null;
     public double storedMaxScore; 
 	
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .gamelog containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 12L;
+
 	public StateObserverTTT() {
 		m_Table = new int[3][3]; 
 		m_Player = 1;

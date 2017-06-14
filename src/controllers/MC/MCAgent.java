@@ -28,6 +28,12 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     public MCParams mcParams;
 
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
 
     
     public MCAgent(MCParams mcParams) {

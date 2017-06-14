@@ -22,7 +22,6 @@ import controllers.MC.MCAgentConfig;
  */
 public class MCParams extends Frame implements Serializable
 {
-    private static final long serialVersionUID = 1L;
     JLabel LIterations;
     JLabel LRolloutdepth;
     JLabel LNumberAgents;
@@ -32,7 +31,14 @@ public class MCParams extends Frame implements Serializable
     public JCheckBox CBCalcCertainty;
     JPanel mPanel;
 
-    public MCParams() {
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 1L;
+
+   public MCParams() {
         super("MC Parameter");
         LIterations = new JLabel("Iterations");
         LRolloutdepth = new JLabel("Rolloutdepth");

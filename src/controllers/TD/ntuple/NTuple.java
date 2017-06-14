@@ -80,6 +80,13 @@ public class NTuple implements Serializable {
 	private double BETA=0.9; //0.8;		// dampening factor for NEW_WK
 
 	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
+
+	/**
 	 * Each NTuple consists of {@link NTuple#getLength()} positions on the game
 	 * board.<br>
 	 * Each position can carry one out of {@code posVals} values. Here the
