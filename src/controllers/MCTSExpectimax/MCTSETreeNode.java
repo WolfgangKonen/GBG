@@ -70,9 +70,6 @@ public class MCTSETreeNode {
     	
         for (MCTSEChanceNode childrenNode : childrenNodes) {
             if (childrenNode.so.equals(childSo)) {
-                System.out.println(childrenNode.so.hashCode());
-                System.out.println(childSo.hashCode());
-                System.out.println();
                 //a child node representing this boardstate already exists
                 return childrenNode;
             }
