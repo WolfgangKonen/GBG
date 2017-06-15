@@ -108,10 +108,10 @@ public class MCTSEChanceNode
         }
 
         // fill vTable
-        for (int k = 0; k < so.getNumAvailableActions(); k++) {
+        for (int i = 0; i < so.getNumAvailableActions(); i++) {
             for (MCTSETreeNode child : childrenNodes) {
-                if (child.action == so.getAction(k)) {
-                    vTable[k] = child.value / child.visits;
+                if (child.action.equals(so.getAction(i))) {
+                    vTable[i] = child.value / child.visits;
                 }
             }
         }
@@ -138,7 +138,6 @@ public class MCTSEChanceNode
             //recursively go down the three
             //select a child with uct(), select/create a chance node with treePolicy() and call this method in the new chance node
             return uct().treePolicy().treePolicy();
-            //ToDo: test egreedy and other selectionstrategys
         }
     }
 
@@ -163,6 +162,30 @@ public class MCTSEChanceNode
         }
 
         return selected;
+    }
+
+    /**
+     * Epsilon-Greedy, a variant to UCT
+     *
+     * @return the best child node
+     */
+    public MCTSETreeNode egreedy() {
+        if (random.nextDouble() < MCTSExpectimaxConfig.EGREEDYEPSILON) {
+            return childrenNodes.get(random.nextInt(childrenNodes.size()));
+        } else {
+            MCTSETreeNode selected = null;
+            double selectedValue = -Double.MAX_VALUE;
+
+            for (MCTSETreeNode childrenNode : childrenNodes)
+            {
+                if (childrenNode.value > selectedValue) {
+                    selected = childrenNode;
+                    selectedValue = childrenNode.value;
+                }
+            }
+
+            return selected;
+        }
     }
 
     /**

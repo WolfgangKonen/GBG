@@ -660,6 +660,9 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         return this;
     }
 
+    /**
+     * equals currently only tests if the gameboards are equal
+     */
     @Override
     public boolean equals(Object arg0) {
         StateObserver2048 aItem = null;
@@ -668,7 +671,11 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         } else {
         	throw new RuntimeException("so is not a StateObserver2048 object!");
         }
-        boolean res = (this.boardB == aItem.boardB);
         return (this.boardB == aItem.boardB);
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(boardB);
     }
 }

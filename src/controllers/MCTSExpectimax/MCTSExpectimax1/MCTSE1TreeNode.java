@@ -6,6 +6,7 @@ import controllers.MCTSExpectimax.MCTSETreeNode;
 import games.StateObservationNondeterministic;
 import tools.Types;
 
+import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -14,7 +15,7 @@ import java.util.TreeMap;
  */
 public class MCTSE1TreeNode extends MCTSETreeNode {
     private StateObservationNondeterministic so = null;
-    private TreeMap<Types.ACTIONS, MCTSE1ChanceNode> childrenNodes = new TreeMap<>();
+    private HashMap<Types.ACTIONS, MCTSE1ChanceNode> childrenNodes = new HashMap<>();
 
 
     /**
@@ -43,16 +44,16 @@ public class MCTSE1TreeNode extends MCTSETreeNode {
         StateObservationNondeterministic childSo = so.copy();
 
         MCTSE1ChanceNode child;
-        Types.ACTIONS nondeterministicAction = childSo.getNextNondeterministicAction();
+        Types.ACTIONS action = childSo.getNextNondeterministicAction();
 
-        if(!childrenNodes.containsKey(nondeterministicAction)) {
+        if(!childrenNodes.containsKey(action)) {
             //create a new child node
             childSo.advanceNondeterministic();
-            child = new MCTSE1ChanceNode(childSo, nondeterministicAction, this, random, player);
-            childrenNodes.put(nondeterministicAction, child);
+            child = new MCTSE1ChanceNode(childSo, action, this, random, player);
+            childrenNodes.put(action, child);
         } else {
             //a child node representing this boardstate already exists
-            child = childrenNodes.get(nondeterministicAction);
+            child = childrenNodes.get(action);
         }
 
         return child;

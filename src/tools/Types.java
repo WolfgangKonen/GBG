@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public class Types {
 
-    public static class ACTIONS implements Serializable {
+    public static class ACTIONS implements Serializable, Comparable<ACTIONS> {
         private int key;
         
     	/**
@@ -30,6 +30,33 @@ public class Types {
         	return new ACTIONS(iAct);
         }
 
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof ACTIONS)) {
+                return false;
+            }
+
+            ACTIONS action = (ACTIONS) object;
+            return key == action.key;
+        }
+
+        @Override
+        public int hashCode() {
+            return key;
+        }
+
+        @Override
+        public int compareTo(ACTIONS action) {
+            if(key < action.key) {
+                return -1;
+            }
+
+            if(key > action.key) {
+                return 1;
+            }
+
+            return 0;
+        }
     } // class ACTIONS
 
 
