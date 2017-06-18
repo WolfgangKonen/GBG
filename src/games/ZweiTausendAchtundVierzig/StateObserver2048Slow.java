@@ -561,6 +561,13 @@ public class StateObserver2048Slow implements StateObservation {
         return gameBoard[row][column];
     }
 
+    public int getTileValue(int pos) {
+        int row = pos/4;
+        int column = pos%4;
+
+        return getTile(row, column).getValue();
+    }
+
     public Tile[][] getGameBoard() {
 		return gameBoard;
 	}

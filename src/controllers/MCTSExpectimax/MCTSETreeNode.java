@@ -83,48 +83,6 @@ public class MCTSETreeNode {
     }
 
     /**
-     * starting from this leaf node a game with random actions will be played until the game is over or the maximum rollout depth is reached
-     *
-     * @return the {@link StateObservation#getGameScore()} after the rollout is finished
-     */
-    public double rollOut() {
-        StateObservation rollerState = so.copy();
-        int thisDepth = this.depth;
-
-        while (!finishRollout(rollerState, thisDepth)) {
-            rollerState.setAvailableActions();
-            int action = random.nextInt(rollerState.getNumAvailableActions());
-            rollerState.advance(rollerState.getAction(action));
-            thisDepth++;
-        }
-
-        if (rollerState.isGameOver()) {
-            player.nRolloutFinished++;
-        }
-
-        return rollerState.getGameScore(so);
-    }
-
-    /**
-     * checks if a rollout is finished
-     *
-     * @param rollerState the current gamestate
-     * @param depth the current rolloutdepth
-     * @return true if the rollout is finished, false if not
-     */
-    public boolean finishRollout(StateObservation rollerState, int depth) {
-        if (depth >= player.getROLLOUT_DEPTH()) {
-            return true;
-        }
-
-        if (rollerState.isGameOver()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Backup the score through all parent nodes, until the root node is reached
      * calls itself recursively in each parent node
      *

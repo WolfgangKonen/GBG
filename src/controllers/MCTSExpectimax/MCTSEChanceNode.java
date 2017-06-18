@@ -1,7 +1,6 @@
 package controllers.MCTSExpectimax;
 
 import games.StateObservation;
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -36,6 +35,8 @@ public class MCTSEChanceNode
     public int iterations = 0;
     public int numberTreeNodes = 0;
     public int numberChanceNodes = 1;
+
+    public double maxRolloutScore = 0;                                                 //The max score that was reached during a rollout
 
     /**
      * This Class represents a MCTS Expectmiax Chance Node.
@@ -75,10 +76,10 @@ public class MCTSEChanceNode
      * Called by {@link MCTSEPlayer#run(double[])}.
      *
      * Do for {@code player.NUM_ITERS} iterations
-     * --- select a {@link MCTSETreeNode} leaf node via {@link #treePolicy()} (this
+     * --- select a {@link MCTSEChanceNode} leaf node via {@link #treePolicy()} (this
      *     includes {@link #expand()} of not fully expanded nodes, as long as the maximum tree
      *     depth is not yet reached)
-     * --- make a {@link MCTSETreeNode#rollOut()} starting from this leaf node (a game
+     * --- make a {@link #rollOut()} starting from this leaf node (a game
      *     with random actions until game is over or until the maximum rollout depth is reached)
      * --- {@link #backUp(double)} the resulting score {@code score} and
      *     the number of visits for all nodes on {@code value} and {@code visits}.
@@ -96,10 +97,15 @@ public class MCTSEChanceNode
     public void mctsSearch(double[] vTable) {
         while (iterations < player.getNUM_ITERS()) {
             //select an childNode
-            MCTSETreeNode selected = treePolicy();
+            MCTSEChanceNode selected = treePolicy();
 
             //rollout the childNode
             double score = selected.rollOut();
+
+            //set max Score in root Node
+            if(player.getRootNode().maxRolloutScore < score) {
+                player.getRootNode().maxRolloutScore = score;
+            }
 
             //backup the score
             selected.backUp(score);
@@ -125,14 +131,18 @@ public class MCTSEChanceNode
      *
      * @return the {@link MCTSETreeNode} that should be evaluated
      */
-    private MCTSETreeNode treePolicy() {
+    private MCTSEChanceNode treePolicy() {
         if(so.isGameOver() || depth >= player.getTREE_DEPTH()) {
-            return parentNode; //equivalent to this in mcts
+            return this;
+
         } else if(notExpandedActions.size() != 0) {
             if(player.getRootNode().numberTreeNodes < player.getMaxNodes()) {
-                return expand();
+                return expand().treePolicy();
             } else {
-                return parentNode; //equivalent to this in mcts
+                //ToDo: We need to decide what we want to do when maxNumberTreeNodes is reached.
+                //Do we want to select one random child and ignore notExpandedActions, do we want to fully expand the Node but stop creating new layers of Chance & Treenodes or do we want to ignore not fully expanded layers.
+                //In the current implementation we do the third option.
+                return this;
             }
         } else {
             //recursively go down the three
@@ -162,6 +172,29 @@ public class MCTSEChanceNode
         }
 
         return selected;
+    }
+
+    private MCTSETreeNode uctNormalised() {
+        if(player.getRootNode().iterations < 100) {
+            return uct();
+        } else {
+            double multiplier = 1/player.getRootNode().maxRolloutScore;
+
+            MCTSETreeNode selected = null;
+            double selectedValue = -Double.MAX_VALUE;
+
+            for (MCTSETreeNode child : childrenNodes)
+            {
+                double uctValue = child.value * multiplier / child.visits + player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits)) + random.nextDouble() * epsilon; // small sampleRandom numbers: break ties in unexpanded node
+
+                if (uctValue > selectedValue) {
+                    selected = child;
+                    selectedValue = uctValue;
+                }
+            }
+
+            return selected;
+        }
     }
 
     /**
@@ -203,6 +236,48 @@ public class MCTSEChanceNode
         MCTSETreeNode child = new MCTSETreeNode(childSo, action, this, random,player);
         childrenNodes.add(child);
         return child;
+    }
+
+    /**
+     * starting from this leaf node a game with random actions will be played until the game is over or the maximum rollout depth is reached
+     *
+     * @return the {@link StateObservation#getGameScore()} after the rollout is finished
+     */
+    public double rollOut() {
+        StateObservation rollerState = so.copy();
+        int thisDepth = this.depth;
+
+        while (!finishRollout(rollerState, thisDepth)) {
+            rollerState.setAvailableActions();
+            int action = random.nextInt(rollerState.getNumAvailableActions());
+            rollerState.advance(rollerState.getAction(action));
+            thisDepth++;
+        }
+
+        if (rollerState.isGameOver()) {
+            player.nRolloutFinished++;
+        }
+
+        return rollerState.getGameScore(so);
+    }
+
+    /**
+     * checks if a rollout is finished
+     *
+     * @param rollerState the current gamestate
+     * @param depth the current rolloutdepth
+     * @return true if the rollout is finished, false if not
+     */
+    public boolean finishRollout(StateObservation rollerState, int depth) {
+        if (depth >= player.getROLLOUT_DEPTH()) {
+            return true;
+        }
+
+        if (rollerState.isGameOver()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
