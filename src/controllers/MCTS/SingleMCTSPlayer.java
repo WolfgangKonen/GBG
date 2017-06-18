@@ -74,18 +74,23 @@ public class SingleMCTSPlayer implements Serializable
      */
     public SingleMCTSPlayer(Random a_rnd, MCTSParams mcPar)
     {
-    	// Why do we have m_mcpar and the several single parameters?? 
+    	// Why do we have m_mcpar and the several single parameters?
+    	// We need both, m_mcPar for saving to disk and re-loading (use setFrom() to set
+    	// the values in the params tab). And the single parameters for computational
+    	// efficient access from the nodes of the tree.
+    	//
+    	// The setters are responsible for updating the parameters in both locations (!)
     	
+//		m_mcPar = new MCTSParams();
+//		m_mcPar.setFrom(mcPar);
+    	m_mcPar = new MCTSParams();
     	if (mcPar!=null) {
             this.setK(mcPar.getK_UCT());
             this.setNUM_ITERS(mcPar.getNumIter());
             this.setROLLOUT_DEPTH(mcPar.getRolloutDepth());
             this.setTREE_DEPTH(mcPar.getTreeDepth());
-            this.verbose = mcPar.getVerbosity();
+            this.setVerbosity(mcPar.getVerbosity());
     	}
-//		m_mcPar = new MCTSParams();
-//		m_mcPar.setFrom(mcPar);
-    	m_mcPar = mcPar;
 
         m_rnd = a_rnd;
         m_root = new SingleTreeNode(a_rnd,this);
@@ -158,30 +163,35 @@ public class SingleMCTSPlayer implements Serializable
 	}
 	public void setROLLOUT_DEPTH(int rOLLOUT_DEPTH) {
 		ROLLOUT_DEPTH = rOLLOUT_DEPTH;
+		m_mcPar.setRolloutDepth(rOLLOUT_DEPTH);
 	}
 	public int getTREE_DEPTH() {
 		return TREE_DEPTH;
 	}
 	public void setTREE_DEPTH(int tREE_DEPTH) {
 		TREE_DEPTH = tREE_DEPTH;
+		m_mcPar.setTreeDepth(tREE_DEPTH);
 	}
     public int getNUM_ITERS() {
 		return NUM_ITERS;
 	}
 	public void setNUM_ITERS(int nUM_ITERS) {
 		NUM_ITERS = nUM_ITERS;
+		m_mcPar.setNumIter(nUM_ITERS);
 	}
 	public double getK() {
 		return K;
 	}
 	public void setK(double k) {
 		K = k;
+		m_mcPar.setK_UCT(k);
 	}
     public int getVerbosity() {
 		return verbose;
 	}
 	public void setVerbosity(int verbosity) {
 		verbose = verbosity;
+		m_mcPar.setVerbosity(verbosity);;
 	}
     public int getNRolloutFinished() {
         return nRolloutFinished;

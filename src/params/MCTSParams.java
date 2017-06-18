@@ -138,7 +138,8 @@ public class MCTSParams extends Frame implements Serializable
 		return Integer.valueOf(numIter_T.getText()).intValue();
 	}
 	public double getK_UCT() {
-		return Double.valueOf(kUCT_T.getText()).intValue();
+		//return Double.valueOf(kUCT_T.getText()).intValue();			// BUG: always 1.0 (when real k is 1.3, 1.4, ... )!!!
+		return Double.valueOf(kUCT_T.getText()).doubleValue();	
 	}
 	public int getTreeDepth() {
 		return Integer.valueOf(treedep_T.getText()).intValue();

@@ -190,8 +190,10 @@ public class LoadSaveTD {
 			try {
 				if (pa instanceof MCTSAgentT) {
 					MCTSAgentT mcts = (MCTSAgentT) pa;
+					// only for debug:
 //					System.out.println("saveIter1 "+mcts.getMCTSParams().getNumIter());
-//					System.out.println("saveIter2 "+mcts.params.getNumIter());
+//					System.out.println("saveK_U1 "+mcts.getMCTSParams().getK_UCT());
+//					System.out.println("saveK_U2 "+mcts.getK());
 				}
 				oos.writeObject(pa);
 			} catch (IOException e) {

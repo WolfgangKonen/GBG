@@ -183,6 +183,9 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     public int getNIterations() {
         return mctsPlayer.getNUM_ITERS();
     }
+	public double getK() {
+		return mctsPlayer.getK();
+	}
 
 
 }

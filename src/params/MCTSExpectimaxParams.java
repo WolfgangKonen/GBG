@@ -161,5 +161,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		setNumIter(tp.getNumIter());
 		setRolloutDepth(tp.getRolloutDepth());
 		setTreeDepth(tp.getTreeDepth());
+		setMaxNodes(tp.getMaxNodes());						// /WK/ this was missing
+		setAlternativeVersion(tp.getAlternativeVersion());	// /WK/ this was missing
 	}
 }

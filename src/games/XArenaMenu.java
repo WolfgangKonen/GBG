@@ -514,6 +514,16 @@ public class XArenaMenu extends JMenuBar {
 	}
 
 	void saveAgent(int index) {
+		try {
+			m_arena.m_xfun.m_PlayAgents = m_arena.m_xfun.fetchAgents(m_arena.m_xab);
+			AgentBase.validTrainedAgents(m_arena.m_xfun.m_PlayAgents,numPlayers);
+		} catch (RuntimeException e) {
+			MessageBox.show(m_arena, e.getMessage(), 
+					"Error", JOptionPane.ERROR_MESSAGE);
+			printStatus("Done");
+			return;
+		}
+
 		PlayAgent td = m_arena.m_xfun.m_PlayAgents[index];
 		String str = TIPEVALUATE;
 		try {
