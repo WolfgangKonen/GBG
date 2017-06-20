@@ -30,12 +30,15 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
 
     @Override
     public int[] getBoardVector(StateObservation so) {
+    	int[] bmap = {0,1,2};  // bmap is just for debug check (no effect if bmap={0,1,2}
+    						// and any other permutation should lead after re-training to 
+    						// identical results as well.
         StateObserverHex stateObs = (StateObserverHex) so;
         HexTile[] boardVectorTiles = HexUtils.boardToVector(stateObs.getBoard());
         int[] boardVectorInt = new int[boardVectorTiles.length];
 
         for (int i=0; i<boardVectorInt.length; i++){
-            boardVectorInt[i] = boardVectorTiles[i].getPlayer()+1;
+            boardVectorInt[i] = bmap[boardVectorTiles[i].getPlayer()+1];
         }
 
         return boardVectorInt;
@@ -43,11 +46,13 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
 
     @Override
     public int[][] symmetryVectors(int[] boardVector) {
-        int[][] symmetries = new int[4][];
+        int[][] symmetries = new int[2][];
         symmetries[0] = boardVector;
-        symmetries[1] = mirrorBoard(boardVector, Axis.HORIZONTAL);
-        symmetries[2] = mirrorBoard(boardVector, Axis.VERTICAL);
-        symmetries[3] = rotateBoard(boardVector);
+        // /WK/ Bug fix: mirrorBoard is *not* a symmetry of Hex due to the 
+        // hexagonal neighborhood of each tile. Only rotateBoard is a symmetry!
+//        symmetries[1] = mirrorBoard(boardVector, Axis.HORIZONTAL);
+//        symmetries[2] = mirrorBoard(boardVector, Axis.VERTICAL);
+        symmetries[1] = rotateBoard(boardVector);
         return symmetries;
     }
 
@@ -122,7 +127,8 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
         //Rotating by 180 degrees is the same as mirroring by both axes
         //Rotating by 90 or 270 degrees would not be an equivalent board in Hex
         rotatedBoard = mirrorBoard(rotatedBoard, Axis.HORIZONTAL);
-        rotatedBoard = mirrorBoard(rotatedBoard, Axis.HORIZONTAL);
+        //rotatedBoard = mirrorBoard(rotatedBoard, Axis.HORIZONTAL); // /WK/ Bug!!
+        rotatedBoard = mirrorBoard(rotatedBoard, Axis.VERTICAL);
 
         return rotatedBoard;
     }
