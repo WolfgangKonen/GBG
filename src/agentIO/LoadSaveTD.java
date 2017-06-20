@@ -55,6 +55,7 @@ import tools.MessageBox;
 import tools.Types;
 import games.Arena;
 import games.XArenaButtons;
+import params.NTParams;
 import params.TDParams;
 
 public class LoadSaveTD {
@@ -194,6 +195,13 @@ public class LoadSaveTD {
 //					System.out.println("saveIter1 "+mcts.getMCTSParams().getNumIter());
 //					System.out.println("saveK_U1 "+mcts.getMCTSParams().getK_UCT());
 //					System.out.println("saveK_U2 "+mcts.getK());
+				}
+				if (pa instanceof TDNTupleAgt) {
+					TDNTupleAgt tdnt = (TDNTupleAgt) pa;
+					NTParams ntpar = tdnt.getNTParams();
+					// only for debug:
+//					System.out.println("randWalk:  "+tdnt.getNTParams().getRandWalk());
+//					System.out.println("randNumTup: "+ntpar.getNtupleNumber());
 				}
 				oos.writeObject(pa);
 			} catch (IOException e) {

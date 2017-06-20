@@ -63,13 +63,12 @@ public class EvaluatorHex extends Evaluator {
     private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard){
         //mctsAgent.params.setNumIter(5000);
     	// /WK/ Bug fix: it is not safe to change this parameter of mctsAgent. I made it private now.
-    	// Instead, the safe way is, to go always through the MCTSAgentT constructor
-// However, I commented this out for the moment, since 5000 makes it very slow and the usage 
-// of constructor seems to trigger a slightly different eval behaviour.
-//        MCTSParams params = new MCTSParams();
-//        params.setNumIter(5000);
-//        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], gameBoard.getStateObs(), params);
-        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(60), 5, verbose);
+    	// Instead, the safe way is, to go always through the MCTSAgentT constructor:
+        MCTSParams params = new MCTSParams();
+        params.setNumIter(1000);
+        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(60), params);
+
+        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(60), 5, 0);//verbose);
         double success = res[0];
         if (this.verbose>0) System.out.println("Success against MCTS = " + success);
         lastResult = success;

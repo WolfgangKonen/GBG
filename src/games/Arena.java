@@ -256,7 +256,8 @@ abstract public class Arena extends JPanel implements Runnable {
 					Thread.sleep(100);
 					//
 					// wait until an action in GameBoard gb occurs (see
-					// ActionListener in InitBoard()), which will set 
+					// ActionListener in GameBoardTTT::InitBoard() or MyMouseListener
+					// in GameBoardHex), which will set 
 					// gb.isActionReq() to true again. 
 				}	
 				catch (Exception e){}

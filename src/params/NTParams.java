@@ -295,8 +295,10 @@ public class NTParams extends Frame implements Serializable {
 		return RandomnessC.isSelected();
 	}
 	public boolean getRandWalk() {
-		Object Type=TupleType.getSelectedItem();
-		if(Type==ntTupleTypeString[0]) // "RandomWalk"
+		//Object Type=TupleType.getSelectedItem();			// /WK/ Bug fix: this did not work, need to test on String equalness
+		//if(Type==ntTupleTypeString[0]) // "RandomWalk"
+		String Type2 = (String) TupleType.getSelectedItem();
+		if(Type2.equals(ntTupleTypeString[0])) // "RandomWalk"
 			return true;
 		return false;
 	}
@@ -318,7 +320,8 @@ public class NTParams extends Frame implements Serializable {
 		InitT.setText(""+nt.getINIT());
 		//EvalT = nt.EvalT;
 		RandomnessC.setSelected(nt.getRandomness());
-		TupleType.setSelectedIndex(nt.getRandWalk()?0:1);
+		int ntindex= nt.getRandWalk()?0:1;
+		TupleType.setSelectedIndex(ntindex);
 		nTupleNumT.setText(nt.getNtupleNumber()+"");
 		nTupleMaxT.setText(nt.getNtupleMax()+"");
 		UseSymmetryC.setSelected(nt.getUseSymmetry());

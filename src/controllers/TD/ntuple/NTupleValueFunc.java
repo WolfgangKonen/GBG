@@ -179,7 +179,7 @@ public class NTupleValueFunc implements Serializable {
 		int[][] equiv = null;
 
 		// assertion *only* for TTT:
-		assert(player == countPieces(board) % 2);
+		//assert(player == countPieces(board) % 2);
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board, useSymmetry);
@@ -282,7 +282,7 @@ public class NTupleValueFunc implements Serializable {
 		int[][] equiv = null;
 
 		// assertion *only* for TTT:
-		assert(player == countPieces(board) % 2);
+		//assert(player == countPieces(board) % 2);
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board,useSymmetry);
@@ -310,7 +310,7 @@ public class NTupleValueFunc implements Serializable {
 		int[][] equiv = null;
 
 		// assertion *only* for TTT:
-		assert(player == countPieces(board) % 2);
+		//assert(player == countPieces(board) % 2);
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board,useSymmetry);

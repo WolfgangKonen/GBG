@@ -201,7 +201,7 @@ public class GameBoardHex implements GameBoard {
 
         class MyMouseListener extends MouseAdapter {
             public void mouseReleased(MouseEvent e) {
-                if (actionRequired || arena.taskState != Arena.Task.PLAY){
+                if (actionRequired || (arena.taskState != Arena.Task.PLAY && arena.taskState != Arena.Task.INSPECTV)){
                     return;
                 }
                 Point p = new Point( HexUtils.pxtoHex(e.getX(),e.getY(), stateObs.getBoard(), HexConfig.BOARD_SIZE) );

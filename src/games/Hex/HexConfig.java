@@ -8,5 +8,5 @@ class HexConfig {
     final static int PLAYER_ONE = 0;
     final static int PLAYER_TWO = 1;
 
-    final static int BOARD_SIZE = 8;
+    final static int BOARD_SIZE = 4;
 }
