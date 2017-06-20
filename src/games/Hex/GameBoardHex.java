@@ -22,8 +22,6 @@ public class GameBoardHex implements GameBoard {
     private StateObserverHex stateObs;
     protected Random rand;
 
-    private final int HEX_SIZE = 60; //size of hexagons in px (from one side to the opposite one)
-    final static int OFFSET = 15; //offset in px from top and left borders of the window
     final static Color COLOR_PLAYER_ONE = Color.BLACK;
     final static Color COLOR_PLAYER_TWO = Color.WHITE;
     private final int WINDOW_HEIGHT;
@@ -40,20 +38,24 @@ public class GameBoardHex implements GameBoard {
         this.arena = arena;
 
         //Board size +2 to account for offset on top and bottom of the window
-        WINDOW_HEIGHT = HEX_SIZE*(HexConfig.BOARD_SIZE+2);
+        WINDOW_HEIGHT = HexConfig.HEX_SIZE*(HexConfig.BOARD_SIZE+1)+HexConfig.OFFSET*2;
 
         //Increasing the board size by one increases total width of board by 3 times side length
-        WINDOW_WIDTH = (int)(HexConfig.BOARD_SIZE*3*(HexUtils.getSideLengthFromHeight(HEX_SIZE)));
+        WINDOW_WIDTH = (int)(HexConfig.BOARD_SIZE*3*(HexUtils.getSideLengthFromHeight(HexConfig.HEX_SIZE)));
 
         rand = new Random(System.currentTimeMillis());
-        stateObs = new StateObserverHex(HEX_SIZE);
+        stateObs = new StateObserverHex();
 
         createAndShowGUI();
     }
 
     @Override
     public void clearBoard(boolean boardClear, boolean vClear) {
-        stateObs = new StateObserverHex(HEX_SIZE);
+        if (boardClear) {
+            stateObs = new StateObserverHex();
+        } else if (vClear){
+            stateObs.clearTileValues();
+        }
         gamePanel.repaint();
     }
 
@@ -129,7 +131,7 @@ public class GameBoardHex implements GameBoard {
 
     private void drawBoardToPanel(Graphics2D g2, boolean showValues){
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setFont(new Font("TimesRoman", Font.PLAIN, 16));
+        g2.setFont(new Font("TimesRoman", Font.PLAIN, HexConfig.HEX_SIZE/4));
 
         //draw borders of the game board
         HexUtils.drawOutlines(HexConfig.BOARD_SIZE, COLOR_PLAYER_ONE, COLOR_PLAYER_TWO, g2, stateObs.getBoard());
@@ -176,7 +178,9 @@ public class GameBoardHex implements GameBoard {
         frame.getContentPane().setBackground(Color.black);
         Container content = frame.getContentPane();
         content.add(gamePanel);
-        frame.setSize( WINDOW_WIDTH, WINDOW_HEIGHT);
+        //frame.setSize( WINDOW_WIDTH, WINDOW_HEIGHT);
+        frame.getContentPane().setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+        frame.pack();
         frame.setResizable(false);
         frame.setLocationRelativeTo( null );
         frame.setVisible(true);
@@ -196,7 +200,9 @@ public class GameBoardHex implements GameBoard {
             Graphics2D g2 = (Graphics2D)g;
             super.paintComponent(g2);
 
-            drawBoardToPanel(g2, showValues);
+            if (arena.taskState != Arena.Task.TRAIN) {
+                drawBoardToPanel(g2, showValues);
+            }
         }
 
         class MyMouseListener extends MouseAdapter {

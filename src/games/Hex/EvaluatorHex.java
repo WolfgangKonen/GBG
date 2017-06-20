@@ -53,7 +53,7 @@ public class EvaluatorHex extends Evaluator {
     }
 
     private double competeAgainstMinimax(PlayAgent playAgent, GameBoard gameBoard){
-        double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(60), 2, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(), 2, verbose);
         double success = res[0];
         if (this.verbose>0) System.out.println("Success against minimax = " + success);
         lastResult = success;
@@ -66,9 +66,9 @@ public class EvaluatorHex extends Evaluator {
     	// Instead, the safe way is, to go always through the MCTSAgentT constructor:
         MCTSParams params = new MCTSParams();
         params.setNumIter(1000);
-        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(60), params);
+        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
-        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(60), 5, 0);//verbose);
+        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 5, 0);//verbose);
         double success = res[0];
         if (this.verbose>0) System.out.println("Success against MCTS = " + success);
         lastResult = success;
@@ -77,7 +77,7 @@ public class EvaluatorHex extends Evaluator {
 
     private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard){
         //double success = XArenaFuncs.competeBoth(playAgent, randomAgent, 10, gameBoard);
-        double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(60), 100, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose);
         double success = res[0];
         if (this.verbose>0) System.out.println("Success against Random = " + success);
         lastResult = success;

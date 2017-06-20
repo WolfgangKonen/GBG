@@ -22,8 +22,8 @@ public class StateObserverHex implements StateObservation {
 	 */
 	private static final long serialVersionUID = 12L;
 
-    public StateObserverHex(int hexSize){
-        board = defaultGameBoard(hexSize);
+    public StateObserverHex(){
+        board = defaultGameBoard();
         currentPlayer = HexConfig.PLAYER_ONE;
         setAvailableActions();
     }
@@ -57,13 +57,13 @@ public class StateObserverHex implements StateObservation {
         }
     }
 
-    private HexTile[][] defaultGameBoard(int hexSize){
+    private HexTile[][] defaultGameBoard(){
         HexTile[][] newBoard = new HexTile[HexConfig.BOARD_SIZE][HexConfig.BOARD_SIZE];
 
         for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
             for (int j=0;j<HexConfig.BOARD_SIZE;j++) {
                 newBoard[i][j] = new HexTile(i, j);
-                newBoard[i][j].setPoly(HexUtils.createHexPoly(i, j, GameBoardHex.OFFSET, HexConfig.BOARD_SIZE, hexSize));
+                newBoard[i][j].setPoly(HexUtils.createHexPoly(i, j, HexConfig.OFFSET, HexConfig.BOARD_SIZE, HexConfig.HEX_SIZE));
             }
         }
 
@@ -246,6 +246,14 @@ public class StateObserverHex implements StateObservation {
             int j = actionInt % HexConfig.BOARD_SIZE;
             int i = (actionInt - j) / HexConfig.BOARD_SIZE;
             board[i][j].setValue(val);
+        }
+    }
+
+    protected void clearTileValues(){
+        for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+                board[i][j].setValue(Double.NaN);
+            }
         }
     }
 

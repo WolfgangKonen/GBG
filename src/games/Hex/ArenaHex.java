@@ -17,13 +17,13 @@ import games.ArenaTrain;
  * methods {@link Arena#makeGameBoard()}, 
  * {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)},
  * and {@link Arena#makeFeatureClass(int)}, such that 
- * these factory methods return objects of class {@link GameBoardTTT}, 
- * {@link EvaluatorTTT}, and {@link FeatureTTT}, respectively.
+ * these factory methods return objects of class {@link GameBoardHex},
+ * {@link EvaluatorHex}, and {@link FeatureHex}, respectively.
  * 
- * @see GameBoardTTT
- * @see EvaluatorTTT
+ * @see GameBoardHex
+ * @see EvaluatorHex
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  */
 public class ArenaHex extends Arena   {
 	
@@ -40,7 +40,7 @@ public class ArenaHex extends Arena   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "TicTacToe";
+		return "Hex";
 	}
 	
 	/**
@@ -76,11 +76,6 @@ public class ArenaHex extends Arena   {
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncsHex();
 	}
-
-//	public PlayAgent makeTDSAgent(String sAgent, TDParams tdPar, int maxGameNum){
-//		return new TDPlayerTTT(sAgent,tdPar,maxGameNum);
-//	}
-	
 
 	public void performArenaDerivedTasks() {  }
 

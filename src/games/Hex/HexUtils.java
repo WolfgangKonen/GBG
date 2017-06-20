@@ -15,7 +15,7 @@ import static java.lang.Math.min;
 
 //Hexagon math based on hexmech.java: https://gist.github.com/salamander2/4329783#file-hexmech-java
 public class HexUtils {
-    private static int OUTLINEWIDTH = 8; //width of the outer border of the game board in px
+    private static int OUTLINEWIDTH = HexConfig.HEX_SIZE/6; //width of the outer border of the game board in px
 
     public static Polygon createHexPoly(int i, int j, int borders, int boardSize, int polyHeight) {
         if (polyHeight == 0) {
@@ -24,14 +24,20 @@ public class HexUtils {
         }
 
         int y = getHexY(i, j, polyHeight, boardSize) + borders;
-        int x = getHexX(i, j, polyHeight) + borders;
+        int x = getHexX(i, j, polyHeight) + borders*2;
 
-        int r = polyHeight/2;	// radius of inscribed circle
-        int t = (int) (r / (Math.sqrt(3)));	// short side of 30 degree triangle outside of each hex
-        int s = (int) getSideLengthFromHeight(polyHeight);	// length of one side
+        double r = polyHeight/2f;	// radius of inscribed circle
+        double t = (r / (Math.sqrt(3)));	// short side of 30 degree triangle outside of each hex
+        double s = getSideLengthFromHeight(polyHeight);	// length of one side
 
-        int[] xPoints = new int[] {x+t, x+s+t, x+s+t+t, x+s+t, x+t,   x};
-        int[] yPoints = new int[] {y,   y,     y+r,     y+r+r, y+r+r, y+r};
+        int[] xPoints = new int[] {(int) Math.round(x+t),     (int) Math.round(x+s+t),
+                                   (int) Math.round(x+s+t+t), (int) Math.round(x+s+t),
+                                   (int) Math.round(x+t),     x};
+
+        int[] yPoints = new int[] {y,                         y,
+                                   (int) Math.round(y+r),     (int) Math.round(y+r+r),
+                                   (int) Math.round(y+r+r),   (int) Math.round(y+r)};
+
         return new Polygon(xPoints, yPoints, 6);
     }
 
@@ -63,7 +69,7 @@ public class HexUtils {
         Polygon poly = tile.getPoly();
         int polyHeight = getPolyHeight(poly);
 
-        int x = getHexX(i, j, polyHeight);
+        int x = getHexX(i, j, polyHeight)+HexConfig.OFFSET;
         int y = getHexY(i, j, polyHeight, boardSize);
 
         Color textColor = tile.getPlayer() == PLAYER_ONE ? Color.WHITE : Color.BLACK;
@@ -75,8 +81,8 @@ public class HexUtils {
         int width = g2.getFontMetrics().stringWidth(tileText);
         int height = g2.getFontMetrics().getHeight();
 
-        int textX = (int) (x + (getSideLengthFromHeight(polyHeight) * 1.5) - (width / 2));
-        int textY = y + (polyHeight / 2) + (height);
+        int textX = (int) (x + (getSideLengthFromHeight(polyHeight) * 1.5) - (width / 2f));
+        int textY = (int) (y + (polyHeight / 2f) + (height));
 
         g2.drawString("" + tileText, textX, textY);
     }
@@ -107,7 +113,7 @@ public class HexUtils {
     }
 
     public static int getHexY(int i, int j, int polyHeight, int boardSize){
-        return (int) ((j-i) * (polyHeight/2)) + (boardSize * (polyHeight/2));
+        return (int) (((j-i) * (polyHeight/2f)) + (boardSize * (polyHeight/2f)));
     }
 
     public static void drawOutlines(int boardSize, Color colorOne, Color colorTwo, Graphics2D g2, HexTile[][] board){
@@ -120,7 +126,7 @@ public class HexUtils {
             polyHeight = getPolyHeight(board[0][0].getPoly());
         }
 
-        int sHalf = Math.round((int)getSideLengthFromHeight(polyHeight) / 2);
+        int sHalf = Math.round((int)getSideLengthFromHeight(polyHeight) / 2f);
         int offset = (int) Math.round(OUTLINEWIDTH *0.6);
 
         for (int n=0; n<boardSize; n++){
@@ -469,7 +475,7 @@ public class HexUtils {
     }
 
     static double getSideLengthFromHeight(int height){
-        return (height / 2) / (Math.sqrt(3)/2);
+        return ((float)height / 2f) / (Math.sqrt(3)/2f);
     }
 
     static HexTile[] boardToVector(HexTile[][] board){

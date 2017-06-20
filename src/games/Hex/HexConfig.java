@@ -8,5 +8,7 @@ class HexConfig {
     final static int PLAYER_ONE = 0;
     final static int PLAYER_TWO = 1;
 
-    final static int BOARD_SIZE = 4;
+    final static int BOARD_SIZE = 6;
+    final static int HEX_SIZE = 60; //size of hexagons in px (from one side to the opposite one)
+    final static int OFFSET = HEX_SIZE/4; //offset in px from top and left borders of the window
 }
