@@ -2,10 +2,12 @@ package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
 import params.MCParams;
+import params.MCTSExpectimaxParams;
 import params.MCTSParams;
 import tools.Types;
 
@@ -111,12 +113,12 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     private ResultContainer analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
         //create Agents
-        MCTSParams mctsParams = new MCTSParams();
+        MCTSExpectimaxParams mctsParams = new MCTSExpectimaxParams();
         mctsParams.setNumIter(ConfigEvaluator.ITERATIONS * ConfigEvaluator.NUMBERAGENTS * gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
         mctsParams.setK_UCT(ConfigEvaluator.KUCT);
         mctsParams.setTreeDepth(ConfigEvaluator.TREEDEPTH);
         mctsParams.setRolloutDepth(ConfigEvaluator.ROLLOUTDEPTH);
-        MCTSAgentT mctsAgent = new MCTSAgentT("MCTS", null, mctsParams);
+        MCTSExpectimaxAgt mctsAgent = new MCTSExpectimaxAgt("MCTSE", mctsParams);
 
         MCParams mcParams = new MCParams();
         mcParams.setRolloutdepth(ConfigEvaluator.ROLLOUTDEPTH - 1);

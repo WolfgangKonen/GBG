@@ -1,10 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.PlayAgent;
-import games.Evaluator;
-import games.GameBoard;
-import games.XNTupleFuncs;
-import games.Arena;
+import games.*;
 
 import javax.swing.*;
 
@@ -59,6 +56,10 @@ public class Arena2048 extends Arena {
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncs2048();
 	}
+
+    public Feature makeFeatureClass(int featmode) {
+        return new Feature2048(featmode);
+    }
 
     public void performArenaDerivedTasks() {  }
 }

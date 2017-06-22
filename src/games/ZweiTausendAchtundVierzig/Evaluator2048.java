@@ -141,7 +141,7 @@ public class Evaluator2048 extends Evaluator {
 
         System.out.print("\n");
 
-        return true;
+        return averageScore > ConfigEvaluator.MINPOINTS;
     }
 
     @Override
@@ -173,7 +173,7 @@ public class Evaluator2048 extends Evaluator {
         }
 
 
-        return "\n\nSettings:" +
+        return "\n\nSettings:";/* +
                 "\nAgent Name: " + m_PlayAgent.getName() +
                 agentSettings +
                 "\nNumber of games: " + ConfigEvaluator.NUMBEREVALUATIONS +
@@ -190,7 +190,9 @@ public class Evaluator2048 extends Evaluator {
                 "\n" +
                 "\nHighest tiles: " +
                 tilesString +
-                "\n\n";
+                "\n\n";*/
+
+        //Temporary Workaround für division by zero because Evaluationtime is so fast when using NTuple Agents
     }
  
  	/**

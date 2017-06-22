@@ -1,10 +1,8 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.PlayAgent;
-import games.ArenaTrain;
-import games.Evaluator;
-import games.GameBoard;
-import games.XNTupleFuncs;
+import games.*;
+import games.Hex.FeatureHex;
 
 import javax.swing.*;
 
@@ -59,6 +57,10 @@ public class ArenaTrain2048 extends ArenaTrain {
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncs2048();
 	}
+
+    public Feature makeFeatureClass(int featmode) {
+        return new Feature2048(featmode);
+    }
 
 
 }
