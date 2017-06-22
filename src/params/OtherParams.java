@@ -16,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import games.Feature;
+
 /**
  * This class realizes other parameter settings for board games.<p>
  * 
@@ -35,6 +37,12 @@ import javax.swing.JTextField;
 public class OtherParams extends Frame 
 {
 	private static final long serialVersionUID = 1L;
+	
+	JLabel evalQ_L;
+	public Choice choiceEvalQ;
+	JLabel evalT_L;
+	public Choice choiceEvalT;
+
 	JLabel numEval_L;
 	JLabel epiLeng_L;
 	JLabel stopTest_L;
@@ -57,6 +65,12 @@ public class OtherParams extends Frame
 	
 	public OtherParams(int batchMax) {
 		super("Other Parameter");
+		
+		evalQ_L = new JLabel("Quick Eval Mode");
+		this.choiceEvalQ = new Choice();
+		evalT_L = new JLabel("Train Eval Mode");
+		this.choiceEvalT = new Choice();
+
 		numEval_T = new JTextField("500");				// 
 		epiLeng_T = new JTextField("-1");				// 
 		stopTest_T = new JTextField("0");				// the defaults
@@ -102,6 +116,11 @@ public class OtherParams extends Frame
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
 		oPanel.setLayout(new GridLayout(0,4,10,10));		
 		
+		oPanel.add(evalQ_L);
+		oPanel.add(choiceEvalQ);
+		oPanel.add(evalT_L);
+		oPanel.add(choiceEvalT);
+
 		oPanel.add(numEval_L);			
 		oPanel.add(numEval_T);
 		oPanel.add(epiLeng_L);			
@@ -144,6 +163,14 @@ public class OtherParams extends Frame
 	public JPanel getPanel() {
 		return oPanel;
 	}
+	public int getQuickEvalMode() {
+		String s = choiceEvalQ.getSelectedItem();
+		return Integer.valueOf(s).intValue();
+	}
+	public int getTrainEvalMode() {
+		String s = choiceEvalT.getSelectedItem();
+		return Integer.valueOf(s).intValue();
+	}
 	public int getStopTest() {
 		return Integer.valueOf(stopTest_T.getText()).intValue();
 	}
@@ -167,6 +194,28 @@ public class OtherParams extends Frame
 	public boolean usesHashmap() {
 		return miniUseHmTrue.getState();
 	}
+	
+	public void setQuickEvalMode(int qEvalmode) {
+		//If the mode list has not been initialized, add the selected mode to the list
+		if (choiceEvalQ.getItemCount() == 0){
+			choiceEvalQ.add(Integer.toString(qEvalmode));
+		}
+		choiceEvalQ.select(qEvalmode+"");
+	}
+	public void setQuickEvalList(int[] modeList){
+		for (int i : modeList) choiceEvalQ.add(Integer.toString(i));
+	}
+	public void setTrainEvalMode(int tEvalmode) {
+		//If the mode list has not been initialized, add the selected mode to the list
+		if (choiceEvalT.getItemCount() == 0){
+			choiceEvalT.add(Integer.toString(tEvalmode));
+		}
+		choiceEvalT.select(tEvalmode+"");
+	}
+	public void setTrainEvalList(int[] modeList){
+		for (int i : modeList) choiceEvalT.add(Integer.toString(i));
+	}
+	
 	public void setStopTest(double value) {
 		stopTest_T.setText(value+"");
 	}

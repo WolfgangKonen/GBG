@@ -58,9 +58,9 @@ public class XArenaFuncs
 	//String sMinimax = Types.GUI_AGENT_LIST[1];
 	//RandomAgent random_agent = new RandomAgent(sRandom);
 	//MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
-	protected Evaluator m_evaluator1=null;
-	protected Evaluator m_evaluator2=null;
-	protected Evaluator m_evaluator3=null;
+	protected Evaluator m_evaluatorT=null;
+	protected Evaluator m_evaluatorQ=null;
+	protected Evaluator m_evaluatorM=null;
 	protected String lastMsg="";
 	protected int numPlayers;
 	
@@ -259,7 +259,8 @@ public class XArenaFuncs
 			return pa;			
 		} 
 		
-		if (lChart==null) lChart=new LineChartSuccess("Training Progress","gameNum","success against Minimax",
+		if (lChart==null) 
+			lChart=new LineChartSuccess("Training Progress","gameNum","",
 													  true,false);
 		lChart.clearAndSetXY(xab);
 		series = new XYSeries("Train X");		// "Train X" is the key of the XYSeries object
@@ -279,9 +280,21 @@ public class XArenaFuncs
 		stopTest = xab.oPar.getStopTest();
 		stopEval = xab.oPar.getStopEval();
 		epiLength = xab.oPar.getEpiLength();
-        m_evaluator1 = xab.m_game.makeEvaluator(pa,gb,stopEval,9,1);
-        //m_evaluator2 = new EvaluatorTTT(pa,gb,stopEval,2);
-        m_evaluator2 = xab.m_game.makeEvaluator(pa,gb,stopEval,2,1);
+		int qem = xab.oPar.getQuickEvalMode();
+        m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
+        //
+        // set Y-axis of lChart according to the current Quick Eval Mode:
+        lChart.setYAxisLabel(m_evaluatorQ.getPlotTitle());
+        
+		int tem = xab.oPar.getTrainEvalMode();
+		//
+		// doTrainEvaluation flags whether Train Evaluator is executed:
+		// Evaluator m_evaluatorT is only constructed and evaluated, if the choice
+		// boxes 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' have
+		// different values. 
+		boolean doTrainEvaluation = (tem!=qem);
+		if (doTrainEvaluation)
+	        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
 
 		// Debug only: direct debug output to file debug.txt
 		//TDNTupleAgt.pstream = System.out;
@@ -304,19 +317,21 @@ public class XArenaFuncs
 					System.out.println(pa.printTrainStatus());
 					xab.GameNumT.setText(Integer.toString(gameNum ) );
 					
-					m_evaluator1.eval();
-					m_evaluator2.eval();
+					m_evaluatorQ.eval();
+					if (doTrainEvaluation) m_evaluatorT.eval();
 					
-					series.add((double)gameNum, m_evaluator2.getLastResult());
+					series.add((double)gameNum, m_evaluatorQ.getLastResult());
 					lChart.plot();
 				}
 				
 				if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {
-					m_evaluator1.eval();
-					m_evaluator2.eval(); 
-					m_evaluator1.goalReached(gameNum);
+					if (doTrainEvaluation) {
+						m_evaluatorT.eval();
+						m_evaluatorT.goalReached(gameNum);
+					}
 					
-					if(m_evaluator2.goalReached(gameNum)) break;  // out of while
+					m_evaluatorQ.eval(); 
+					if(m_evaluatorQ.goalReached(gameNum)) break;  // out of while
 					
 				}
 			}
@@ -336,9 +351,12 @@ public class XArenaFuncs
 //        Evaluator2 m_evaluator2New = new Evaluator2(pa,0,2);
 //        m_evaluator2New.eval();
 		if (stopTest>0 && stopEval>0) {
-			System.out.println(m_evaluator1.getMsg(gameNum));
-			System.out.println(m_evaluator2.getMsg(gameNum));
+			System.out.println(m_evaluatorQ.getGoalMsg(gameNum));
+			if (doTrainEvaluation) System.out.println(m_evaluatorT.getGoalMsg(gameNum));
 		}
+		
+		System.out.println("final "+m_evaluatorQ.getMsg());
+		if (doTrainEvaluation) System.out.println("final "+m_evaluatorT.getMsg());
 
 		return pa;
 	}
@@ -361,12 +379,15 @@ public class XArenaFuncs
 		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
 		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
 		int epiLength = xab.oPar.getEpiLength();
+		
+		boolean doTrainEvaluation=false;
+		boolean doMultiEvaluation=false;
 
 		System.out.println("*** Starting TicTacToe.multiTrain with trainNum = "+trainNum+" ***");
 
-		Measure oe = new Measure();			// evalAgent-success rates of all trained agents
-		Measure om = new Measure();			// competeBoth-success rates against MinimaxPlayer
-		Measure or = new Measure();			// competeBoth-success rates against RandomPlayer
+		Measure oT = new Measure();			// evalAgent-success rates of all trained agents
+		Measure oQ = new Measure();			// competeBoth-success rates against MinimaxPlayer
+		Measure oM = new Measure();			// competeBoth-success rates against RandomPlayer
 		//Measure ov = new Measure();			// competeBoth-success rates against ValItPlayer
 		Measure oC = new Measure();			// overall success measure S_C as def'd in GECCO'2009 paper
 		int maxGameNumV=10000;
@@ -385,9 +406,27 @@ public class XArenaFuncs
 			} 
 
 
-			m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,9,1);
-	        m_evaluator2 = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,2,1);
-	        m_evaluator3 = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,0,1);
+			int qem = xab.oPar.getQuickEvalMode();
+	        m_evaluatorQ = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,qem,1);
+			int tem = xab.oPar.getTrainEvalMode();
+			//
+			// doTrainEvaluation flags whether Train Evaluator is executed:
+			// Evaluator m_evaluatorT is only constructed and evaluated, if the choice
+			// boxes 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' have
+			// different values. 
+			doTrainEvaluation = (tem!=qem);
+			if (doTrainEvaluation)
+		        m_evaluatorT = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,tem,1);
+			int mem = m_evaluatorQ.getMultiTrainEvalMode();
+			//
+			// doMultiEvaluation flags whether Multi Train Evaluator is executed:
+			// Evaluator m_evaluatorM is only constructed and evaluated, if the value of
+			// getMultiTrainEvalMode() differs from the values in choice boxes
+			// 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' . 
+			doMultiEvaluation = ((mem!=qem) && (mem!=tem));
+			if (doMultiEvaluation)
+		        m_evaluatorM = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,mem,1);
+
 			if (i==0) {
 				String pa_string = m_PlayAgents[0].getClass().getName();
 //				if (pa_string.equals("TicTacToe.CMAPlayer")) 
@@ -413,23 +452,29 @@ public class XArenaFuncs
 				}
 				
 			} // if(sAgent)..else
-			m_evaluator1.eval();
-			m_evaluator2.eval();
-			m_evaluator3.eval();
-			//or.add(m_evaluator2.getOr());
-			oe.add(m_evaluator1.getLastResult());								
-			om.add(m_evaluator2.getLastResult());
-			or.add(m_evaluator3.getLastResult());
+			m_evaluatorQ.eval();
+			oQ.add(m_evaluatorQ.getLastResult());
+			if (doTrainEvaluation) {
+				m_evaluatorT.eval();
+				oT.add(m_evaluatorT.getLastResult());								
+			}
+			if (doMultiEvaluation) {
+				m_evaluatorM.eval();
+				oM.add(m_evaluatorM.getLastResult());
+			}
+
 			//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100));
 			//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);
-			oC.add(1+(or.getVal()-0.9+om.getVal())/2.0);
+			oC.add(1+(oM.getVal()-0.9+oQ.getVal())/2.0);
 		} // for (i)
-		System.out.println("Avg. success rate (evalAgent, best is 1.0): "+frm3.format(oe.getMean()) + " +- " + frm.format(oe.getStd()));
-		System.out.println("Avg. success rate (randAgent, best is 0.9): "+frm3.format(or.getMean()) + " +- " + frm.format(or.getStd()));
-		System.out.println("Avg. success rate (miniAgent, best is 0.0): "+frm3.format(om.getMean()) + " +- " + frm.format(om.getStd()));
+		System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
+		if (doTrainEvaluation) 
+		  System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
+		if (doMultiEvaluation)
+		  System.out.println("Avg. "+ m_evaluatorM.getPrintString()+frm3.format(oM.getMean()) + " +- " + frm.format(oM.getStd()));
 		//System.out.println("Avg. success rate (valiAgent, best is 0.0): "+frm3.format(ov.getMean()) + " +- " + frm.format(ov.getStd()));
 		//System.out.println("Avg. success rate (ALL_Agent, best is 1.0): "+frm3.format(oC.getMean()) + " +- " + frm.format(oC.getStd()));
-		this.lastMsg = ("Success against Minimax (best is 0.0): "+frm2.format(om.getMean()) + " +- " + frm1.format(om.getStd()) + "");
+		this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");
 	} // multiTrain
 
 	/**
@@ -643,6 +688,7 @@ public class XArenaFuncs
 		int competitionNum=xab.winCompOptions.getNumCompetitions();
 		int maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		int epiLength = xab.oPar.getEpiLength();
+		Evaluator m_evaluatorX=null;
 		Evaluator m_evaluatorO=null;
 		double alpha = xab.tdPar.getAlpha();
 		double lambda = xab.tdPar.getLambda();
@@ -691,9 +737,10 @@ public class XArenaFuncs
 			paO.setMaxGameNum(maxGameNum);
 			paO.setGameNum(0);
 			
-			m_evaluator1 = xab.m_game.makeEvaluator(paX,gb,stopEval,-1,1);
-			// mode==-1: take Evaluator.getDefaultMode() from the game-specific 
-			// class derived from Evaluator
+			// take the evaluator mode qem from the choice box 'Quick Eval Mode'
+			// in tab 'Other pars':
+			int qem = xab.oPar.getQuickEvalMode();
+			m_evaluatorX = xab.m_game.makeEvaluator(paX,gb,stopEval,qem,1);
 			
 //TODO: implement CMAPlayer correctly
 //			if (AgentX.equals("CMA-ES")) {
@@ -708,13 +755,11 @@ public class XArenaFuncs
 				
 			} 
 
-			m_evaluator1.eval();
-			evalC[c][0] = m_evaluator1.getLastResult();
+			m_evaluatorX.eval();
+			evalC[c][0] = m_evaluatorX.getLastResult();
 			optimCountX += evalC[c][0];
 			
-			m_evaluatorO = xab.m_game.makeEvaluator(paO,gb,stopEval,-1,1);
-			// mode==-1: take Evaluator.getDefaultMode() from the game-specific 
-			// class derived from Evaluator
+			m_evaluatorO = xab.m_game.makeEvaluator(paO,gb,stopEval,qem,1);
 			
 //TODO: implement CMAPlayer correctly
 //			if (AgentO.equals("CMA-ES")) {
@@ -748,8 +793,8 @@ public class XArenaFuncs
 		for (int i=0; i<3; i++) winrate[i] = winrate[i]/competitionNum;
 		if (!silent) {
 			System.out.println("*** Competition results: ***");
-			System.out.println("Avg. success rate (Evaluator X): "+frm.format((double)optimCountX/competitionNum));
-			System.out.println("Avg. success rate (Evaluator O): "+frm.format((double)optimCountO/competitionNum));
+			System.out.println("Agent X: Avg. "+m_evaluatorX.getPrintString()+": "+frm.format((double)optimCountX/competitionNum));
+			System.out.println("Agent O: Avg. "+m_evaluatorO.getPrintString()+": "+frm.format((double)optimCountO/competitionNum));
 			//--- this is done below ---
 			//System.out.print("Avg. win rate: ");
 			//for (int i=0; i<3; i++) System.out.print(" "+frm.format(winrate[i]));

@@ -231,7 +231,7 @@ public class Evaluator9 extends Evaluator {
 		
 		double suc=(double)count/state.length;
 		delta /= (2*state.length);				// now delta is between 0 (best) and 1 (worst)
-		m_msg = "Evaluator1: success rate = " + frm.format(suc) + 
+		m_msg = "Evaluator(9) success rate = " + frm.format(suc) + 
 				"  (" + count +" of " + state.length + " states)" +
 				", delta = " + frm.format(delta) + ", mixDelta = " + m_MixDelta;
 		if (!silent) {
@@ -331,6 +331,36 @@ public class Evaluator9 extends Evaluator {
  	public int[] getAvailableModes() {
  		return null;
  	}
+
+	@Override
+	public int getQuickEvalMode() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getTrainEvalMode() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getMultiTrainEvalMode() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String getPrintString() {
+		String str = "success rate (Evaluator9, best is ?): ";
+		return str;
+	}
+
+	@Override
+	public String getPlotTitle() {
+		String str = "success Evaluator9";
+		return str;
+	}
  	
 }
 

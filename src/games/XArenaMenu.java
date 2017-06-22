@@ -515,6 +515,8 @@ public class XArenaMenu extends JMenuBar {
 
 	void saveAgent(int index) {
 		try {
+			// fetching the agents ensures that the actual parameters from the tabs
+			// are all taken (!)
 			m_arena.m_xfun.m_PlayAgents = m_arena.m_xfun.fetchAgents(m_arena.m_xab);
 			AgentBase.validTrainedAgents(m_arena.m_xfun.m_PlayAgents,numPlayers);
 		} catch (RuntimeException e) {
@@ -578,6 +580,8 @@ public class XArenaMenu extends JMenuBar {
 		String str = "[Start Evaluation of PlayAgent "+index+"]";
 		printStatus(str);
 		try {
+			// ensure with fetchAgents that for agents like MCTS a new agent with the 
+			// latest settings in the MCTS pars tab is constructed:
 			m_arena.m_xfun.m_PlayAgents = m_arena.m_xfun.fetchAgents(m_arena.m_xab);
 			AgentBase.validTrainedAgents(m_arena.m_xfun.m_PlayAgents,numPlayers);
 		} catch (RuntimeException e) {
@@ -592,9 +596,10 @@ public class XArenaMenu extends JMenuBar {
 					"Error", JOptionPane.ERROR_MESSAGE);			
 			printStatus("Done");
 		} else {
-	        Evaluator evaluator2 = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,2,0);
-			evaluator2.eval();
-			str = pa.getName()+": "+evaluator2.getMsg();
+			int qem = m_arena.m_xab.oPar.getQuickEvalMode();
+			Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,0);
+	        qEvaluator.eval();
+			str = pa.getName()+": "+qEvaluator.getMsg();
 			System.out.println(str);
 			printStatus(str);
 		}

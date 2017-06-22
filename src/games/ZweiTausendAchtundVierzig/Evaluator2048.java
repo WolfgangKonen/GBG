@@ -203,7 +203,35 @@ public class Evaluator2048 extends Evaluator {
 
  	@Override
  	public int[] getAvailableModes() {
- 		return null;
+        //Only one mode currently
+        return new int[0];
  	}
+
+	@Override
+	public int getQuickEvalMode() {
+		return 0;
+	}
+
+	@Override
+	public int getTrainEvalMode() {
+		return 0;
+	}
+
+	@Override
+	public int getMultiTrainEvalMode() {
+		return 0;
+	}
+
+	@Override
+	public String getPrintString() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getPlotTitle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
  	
 }

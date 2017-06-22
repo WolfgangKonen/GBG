@@ -384,6 +384,36 @@ public class Evaluator2048_BoardPositions extends Evaluator{
  	public int[] getAvailableModes() {
  		return null;
  	}
+
+	@Override
+	public int getQuickEvalMode() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getTrainEvalMode() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getMultiTrainEvalMode() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String getPrintString() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getPlotTitle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
  	
 }
 

@@ -93,11 +93,20 @@ public interface PlayAgent {
 	public String stringDescr();
 	public byte getSize();		// estimated size of agent object
 
+	/**
+	 * @return maximum number of training games
+	 */
 	public int getMaxGameNum();
-	public void setMaxGameNum(int num);
+	/**
+	 * @return number of training games that this agent actually has performed
+	 */
 	public int getGameNum();
-	public void setGameNum(int num);
+	/**
+	 * @return During training: Call the Evaluator after this number of training games
+	 */
 	public int getNumEval();
+	public void setMaxGameNum(int num);
+	public void setGameNum(int num);
 	public void setNumEval(int num);
 	
 	public AgentState getAgentState(); 

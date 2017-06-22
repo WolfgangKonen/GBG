@@ -107,11 +107,13 @@ abstract public class Evaluator {
 	public boolean setState(boolean stateE) { thisEval = stateE; return stateE; }
 	public boolean getState() { return thisEval; }
 	
-	public String getMsg() {
-		// dummy, to fulfill the interface (should be overridden by derived classes)
-		return getMsg(0);
-	}
-	public String getMsg(int gameNum) {
+	abstract public String getMsg(); 
+//	{
+//		// dummy, to fulfill the interface (should be overridden by derived classes)
+//		return getGoalMsg(0);
+//	}
+	
+	public String getGoalMsg(int gameNum) {
 		String msg;
 		if (gnumTrue==-2) {
 			msg = getClass().getName()+": Goal not yet reached";
@@ -141,5 +143,25 @@ abstract public class Evaluator {
 	{
 		return 0;
 	}
+	
+	/**
+	 * @return the initial mode selected in OtherPars choice box 'Quick Eval Mode'
+	 */
+	abstract public int getQuickEvalMode();
+	/**
+	 * @return the initial mode selected in OtherPars choice box 'Train Eval Mode'
+	 */
+	abstract public int getTrainEvalMode();
+	
+	/**
+	 * @return the optional third evaluator mode which may be used in multiTrain.
+	 * 		If the mode returned here equals to the mode of one of the other two 
+	 * 		Evaluator objects, the third Evaluator will be skipped.
+	 */
+	abstract public int getMultiTrainEvalMode();
+	
+	abstract public String getPrintString();
+	abstract public String getPlotTitle();
+	
 }
 

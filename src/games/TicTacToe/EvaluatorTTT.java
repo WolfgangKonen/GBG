@@ -98,7 +98,7 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
 		m_res = XArenaFuncs.competeBoth(pa, random_agent, 100, gb);
-		m_msg = "Success against random = " + m_res;
+		m_msg = getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;
 	}
@@ -111,7 +111,7 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
 		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, 1, gb);
-		m_msg = "Success against minimax = " + m_res;
+		m_msg = getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;
 	}
@@ -150,7 +150,7 @@ public class EvaluatorTTT extends Evaluator {
 		}
 		m_res=m_res/state.length;
 		
-		m_msg = "Success against minimax (different starts, best is 0.0) = " + m_res;
+		m_msg = getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		
 		return m_res;
@@ -187,6 +187,41 @@ public class EvaluatorTTT extends Evaluator {
  	//@Override
  	public static int getDefaultEvalMode() {
 		return AVAILABLE_MODES[AVAILABLE_MODES.length-1];		// mode 9
+	}
+ 	
+	public int getQuickEvalMode() 
+	{
+		return 2;
+	}
+	public int getTrainEvalMode() 
+	{
+		return 9;
+	}
+	public int getMultiTrainEvalMode() 
+	{
+		return 0;
+	}
+
+	@Override
+	public String getPrintString() {
+		switch (m_mode) {
+		case 0:  return "success rate (randomAgent, best is 0.9): ";
+		case 1:  return "success rate (minimax, best is 0.0): ";
+		case 2:  return "success rate (minimax, different starts, best is 0.0): ";
+		case 9:  return "success rate (Evaluator9, best is ?): ";		
+		default: return null;
+		}
+	}
+
+	@Override
+	public String getPlotTitle() {
+		switch (m_mode) {
+		case 0:  return "success against Random";
+		case 1:  return "success against Minimax";
+		case 2:  return "success against Minimax, dStart";
+		case 9:  return "success Evaluator9";		
+		default: return null;
+		}
 	}
 
 }

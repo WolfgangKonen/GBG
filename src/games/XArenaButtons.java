@@ -28,8 +28,8 @@ public class XArenaButtons extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	XArenaFuncs 		m_xfun;	
-	public Arena	 	m_game;	// a reference to the ArenaTTT object passed in with the constructor
-	XArenaButtons		m_xab;
+	public Arena	 	m_game;	// a reference to the Arena object passed in with the constructor
+	//XArenaButtons		m_xab;
 	public OptionsComp 	winCompOptions = new OptionsComp();
 	private LogManagerGUI logManagerGUI = null;
 	//private Random rand;
@@ -108,7 +108,7 @@ public class XArenaButtons extends JPanel
 		
 		m_xfun = game;
 		m_game = arena;
-		m_xab = this; 
+		//m_xab = this; 
 
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		mParam = new JButton[numPlayers];
@@ -128,11 +128,25 @@ public class XArenaButtons extends JPanel
 		//CompetitionsT=new TextField("1", 5);
 
 		try {
-			Feature dummyFeature = m_game.makeFeatureClass(0); //to get list of available feature modes
+			Feature dummyFeature = m_game.makeFeatureClass(0); 
+			// Why object dummyFeature? - By constructing it via the factory pattern method
+			// makeFeatureClass we ensure to get a FeatureXX object (with XX being the specific game)
+			// and only this object knows the available feature modes. It would not help to have
+			// a static method getAvailFeatmode() since we cannot call it here.
+			// 
+			// Why try-catch? - If the default implementation of makeFeatureClass() is not
+			// overridden, it will throw a RuntimeException
+			//
 			tdPar.setFeatList(dummyFeature.getAvailFeatmode());
-		} catch (RuntimeException ignored){
-
-		}
+		} catch (RuntimeException ignored){ }
+		
+		try {
+			Evaluator dummyEvaluator = m_game.makeEvaluator(null, null, 0, 0, 0); 
+			oPar.setQuickEvalList(dummyEvaluator.getAvailableModes());
+			oPar.setTrainEvalList(dummyEvaluator.getAvailableModes());
+			oPar.setQuickEvalMode(dummyEvaluator.getQuickEvalMode());
+			oPar.setTrainEvalMode(dummyEvaluator.getTrainEvalMode());
+		} catch (RuntimeException ignored){ }
 
 		MultiTrain=new JButton("MultiTrain");
 		Play=new JButton("Play");
@@ -220,7 +234,7 @@ public class XArenaButtons extends JPanel
 		NTupShowB.setEnabled(false);	// enable this button only if AgentX is an N-Tuple Player
 		
 		// Why do we set only m_game.state in the following ActionListeners and delegate
-		// the call of the relevant functions to the big state-switch in TicGame.run()?
+		// the call of the relevant functions to the big state-switch in m_game.run()?
 		// (a) Because the new JButtons do only react on disabling them, when the 
 		// ActionListener is actually left (!) (b) Because of clearer separation GUI - Control
 		

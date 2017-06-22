@@ -226,7 +226,7 @@ public class TDParams extends Frame implements Serializable
 	}
 	public int getFeatmode() {
 		String s = choiceFeatTDS.getSelectedItem();
-		int i = Integer.valueOf(s).intValue();
+		//int i = Integer.valueOf(s).intValue();
 		return Integer.valueOf(s).intValue();
 	}
 	public boolean hasSigmoid() {

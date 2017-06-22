@@ -13,12 +13,14 @@ import tools.Types;
 
 public class EvaluatorHex extends Evaluator {
     private MinimaxAgent minimaxAgent = new MinimaxAgent(Types.GUI_AGENT_LIST[1]);
-    private MCTSAgentT mctsAgent;
+    private MCTSAgentT mctsAgent = null;
     private RandomAgent randomAgent = new RandomAgent(Types.GUI_AGENT_LIST[2]);
     private double trainingThreshold = 0.8;
     private GameBoard gameBoard;
     private PlayAgent playAgent;
     private double lastResult = 0;
+    private int m_mode = 0;
+    private String m_msg = null;
 
     public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
         super(e_PlayAgent, stopEval);
@@ -28,23 +30,30 @@ public class EvaluatorHex extends Evaluator {
     public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
         super(e_PlayAgent, stopEval);
         initEvaluator(e_PlayAgent, gb,mode);
+        m_mode=mode;
     }
 
     public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
         initEvaluator(e_PlayAgent, gb,mode);
+        m_mode=mode;
     }
 
+    // WK : questionable: last parameter is stopEval, but you call it with mode !?
     private void initEvaluator(PlayAgent playAgent, GameBoard gameBoard, int stopEval) {
         if (verbose == 1) {
             System.out.println("InitEval stopEval: " + stopEval);
         }
         MCTSParams params = new MCTSParams();
-        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], gameBoard.getStateObs(), params);
+        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], gameBoard.getStateObs(), params);
+        //-- WK: not needed anymore and would not work, if initEvaluator is called with arguments
+        //-- (null,null,0) which might happen for a dummy Evaluator
         this.gameBoard = gameBoard;
         this.playAgent = playAgent;
     }
 
+    // WK: here you might select between different opponents based on m_mode
+    // (should then also modify getAvailableModes, getPrintTitle and getPlotTitle appropriately)
     @Override
     protected boolean eval_Agent() {
         //return competeAgainstMinimax(playAgent, gameBoard) >= trainingThreshold;
@@ -55,7 +64,8 @@ public class EvaluatorHex extends Evaluator {
     private double competeAgainstMinimax(PlayAgent playAgent, GameBoard gameBoard){
         double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(), 2, verbose);
         double success = res[0];
-        if (this.verbose>0) System.out.println("Success against minimax = " + success);
+        m_msg = this.getPrintString() + success;
+        if (this.verbose>0) System.out.println(m_msg);
         lastResult = success;
         return success;
     }
@@ -70,7 +80,8 @@ public class EvaluatorHex extends Evaluator {
 
         double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 5, 0);//verbose);
         double success = res[0];
-        if (this.verbose>0) System.out.println("Success against MCTS = " + success);
+        m_msg = playAgent.getName()+": "+this.getPrintString() + success;
+        if (this.verbose>0) System.out.println(m_msg);
         lastResult = success;
         return success;
     }
@@ -100,4 +111,44 @@ public class EvaluatorHex extends Evaluator {
         //Only one mode currently
         return new int[0];
     }
+
+	@Override
+	public int getQuickEvalMode() {
+		return 0;
+	}
+
+	@Override
+	public int getTrainEvalMode() {
+		return 0;
+	}
+
+	@Override
+	public int getMultiTrainEvalMode() {
+		return 0;
+	}
+
+	@Override
+	public String getPrintString() {
+		switch (m_mode) {
+		case 0:  return "success against MCTS (best is 1.0): ";
+		case 1:  return "success against Random (best is 1.0): ";
+		case 2:  return "success against Minimax (best is 1.0): ";
+		default: return null;
+		}
+	}
+
+	@Override
+	public String getPlotTitle() {
+		switch (m_mode) {
+		case 0:  return "success against MCTS";
+		case 1:  return "success against Random";
+		case 2:  return "success against Minimax";
+		default: return null;
+		}
+	}
+
+	@Override
+	public String getMsg() {
+		return m_msg;
+	}
 }
