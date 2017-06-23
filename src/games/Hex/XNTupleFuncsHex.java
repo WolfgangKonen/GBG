@@ -15,7 +15,7 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
 
     @Override
     public int getNumCells() {
-        return HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE;
+        return HexConfig.TILE_COUNT;
     }
 
     @Override

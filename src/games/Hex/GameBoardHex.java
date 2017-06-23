@@ -11,9 +11,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import static games.Hex.HexConfig.PLAYER_ONE;
+import static games.Hex.HexConfig.PLAYER_TWO;
 
 
 public class GameBoardHex implements GameBoard {
@@ -72,13 +74,17 @@ public class GameBoardHex implements GameBoard {
 
         stateObs = soHex.copy();
 
-        drawBoardToPanel((Graphics2D) gamePanel.getGraphics(), true);
+        gamePanel.repaint();
 
-        /*int longestChain = HexUtils.getLongestChain(soHex.getBoard(), HexUtils.getOpponent(so.getPlayer()))[0];
-        int featureVectorP1[] = HexUtils.getLongestChain(soHex.getBoard(), PLAYER_ONE);
-        int featureVectorP2[] = HexUtils.getLongestChain(soHex.getBoard(), PLAYER_TWO);
+        /*FeatureHex featureHex = new FeatureHex(1);
+        double[] v1 = featureHex.createFeatureVector1(PLAYER_ONE, soHex.getBoard());
+        double[] v2 = featureHex.createFeatureVector1(PLAYER_TWO, soHex.getBoard());*/
+
+        //int[] longestChain = HexUtils.getFeature0ForPlayer(soHex.getBoard(), HexUtils.getOpponent(so.getPlayer()));
+        //double featureVectorP1[] = HexUtils.getFeature0ForPlayer(soHex.getBoard(), PLAYER_ONE);
+        //double featureVectorP2[] = HexUtils.getFeature0ForPlayer(soHex.getBoard(), PLAYER_TWO);
         //System.out.println("Longest chain for player "+so.getPlayer()+": "+longestChain);
-        System.out.println("---------------------------------");
+        /*System.out.println("---------------------------------");
         System.out.println("Longest chain for player BLACK: "+featureVectorP1[0]);
         System.out.println("Longest chain for player WHITE: "+featureVectorP2[0]);
         System.out.println("Free adjacent tiles for player BLACK: "+featureVectorP1[1]);
@@ -178,7 +184,6 @@ public class GameBoardHex implements GameBoard {
         frame.getContentPane().setBackground(Color.black);
         Container content = frame.getContentPane();
         content.add(gamePanel);
-        //frame.setSize( WINDOW_WIDTH, WINDOW_HEIGHT);
         frame.getContentPane().setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         frame.pack();
         frame.setResizable(false);

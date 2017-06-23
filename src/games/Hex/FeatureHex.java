@@ -3,7 +3,7 @@ package games.Hex;
 import games.Feature;
 import games.StateObservation;
 
-import javax.swing.plaf.nimbus.State;
+import java.util.Arrays;
 
 
 public class FeatureHex implements Feature {
@@ -56,9 +56,9 @@ public class FeatureHex implements Feature {
 	public int getInputSize(int featmode) {
         switch (featmode){
         case 0:
-            return 4;
+            return 7;
         case 1:
-            return HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE;
+            return HexConfig.TILE_COUNT;
         default:
             throw new RuntimeException("Unknown featmode: "+featmode);
         }
@@ -66,35 +66,46 @@ public class FeatureHex implements Feature {
     }
     
     public double[] createFeatureVector0(int player, HexTile[][] board){
-        double[] inputVector = new double[4];
-        int[] featureCurrentPlayer = HexUtils.getLongestChain(board, player);
-        int[] featureOpponentPlayer = HexUtils.getLongestChain(board, HexUtils.getOpponent(player));
+        double[] featureCurrentPlayer = HexUtils.getFeature0ForPlayer(board, player);
+        double[] featureOpponentPlayer = HexUtils.getFeature0ForPlayer(board, HexUtils.getOpponent(player));
 
-        inputVector[0] = featureCurrentPlayer[0];
-        inputVector[1] = featureOpponentPlayer[0];
-        inputVector[2] = featureCurrentPlayer[1];
-        inputVector[3] = featureOpponentPlayer[1];
+        //+1 because of tile count
+        double[] inputVector = new double[featureCurrentPlayer.length+featureOpponentPlayer.length+1];
 
-        //Normalize to range of 0-1
-        inputVector[0] /= HexConfig.BOARD_SIZE;
-        inputVector[1] /= HexConfig.BOARD_SIZE;
+        int i = 0;
 
-        inputVector[2] /= ((HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE)+1);
-        inputVector[3] /= ((HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE)+1);
-
-        if (inputVector[2] > 1 || inputVector[3] > 1){
-            System.out.println("Hex Feature0 warning: number of adjacent free tiles was greater than 1 after normalization ("+inputVector[2]+"; "+inputVector[3]+")");
+        for (double feature: featureCurrentPlayer) {
+            inputVector[i] = feature;
+            if (feature > 1){
+                System.out.println("Hex FeatureVector0 warning: feature "+i+" was greater than 1 ("+feature+")");
+            }
+            i++;
         }
 
+        for (double feature: featureOpponentPlayer) {
+            inputVector[i] = feature;
+            if (feature > 1){
+                System.out.println("Hex FeatureVector0 warning: feature "+i+" was greater than 1 ("+feature+")");
+            }
+            i++;
+        }
+
+        //Max tiles per player: Half of tile count (round up in case of odd tile count)
+        inputVector[i] = (double) HexUtils.getTileCountForPlayer(board, player)/(double) (Math.ceil(HexConfig.TILE_COUNT/2));
+
+        //System.out.println(Arrays.toString(inputVector));
+        //double[] boardVector = createFeatureVector1(player, board);
+
+        //ArrayUtils.addAll();
         return inputVector;
     }
 
     public double[] createFeatureVector1(int player, HexTile[][] board){
-        double[] inputVector = new double[HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE];
+        double[] inputVector = new double[HexConfig.TILE_COUNT];
 
         for (int i = 0; i<HexConfig.BOARD_SIZE; i++ ){
             for (int j = 0; j<HexConfig.BOARD_SIZE; j++ ){
-                inputVector[j*HexConfig.BOARD_SIZE+i] = board[i][j].getPlayer();
+                inputVector[j*HexConfig.BOARD_SIZE+i] = (double) (board[i][j].getPlayer()+1)/2f;
             }
         }
 

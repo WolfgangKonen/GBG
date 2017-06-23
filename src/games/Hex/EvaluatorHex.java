@@ -10,10 +10,13 @@ import games.XArenaFuncs;
 import params.MCTSParams;
 import tools.Types;
 
+import java.util.Arrays;
+
 
 public class EvaluatorHex extends Evaluator {
     private MinimaxAgent minimaxAgent = new MinimaxAgent(Types.GUI_AGENT_LIST[1]);
     private MCTSAgentT mctsAgent = null;
+    private MCTSParams mctsParams;
     private RandomAgent randomAgent = new RandomAgent(Types.GUI_AGENT_LIST[2]);
     private double trainingThreshold = 0.8;
     private GameBoard gameBoard;
@@ -44,7 +47,9 @@ public class EvaluatorHex extends Evaluator {
         if (verbose == 1) {
             System.out.println("InitEval stopEval: " + stopEval);
         }
-        MCTSParams params = new MCTSParams();
+        //mctsParams = new MCTSParams();
+        //mctsParams.setNumIter(2500);
+        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), mctsParams);
         //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], gameBoard.getStateObs(), params);
         //-- WK: not needed anymore and would not work, if initEvaluator is called with arguments
         //-- (null,null,0) which might happen for a dummy Evaluator
@@ -56,9 +61,12 @@ public class EvaluatorHex extends Evaluator {
     // (should then also modify getAvailableModes, getPrintTitle and getPlotTitle appropriately)
     @Override
     protected boolean eval_Agent() {
-        //return competeAgainstMinimax(playAgent, gameBoard) >= trainingThreshold;
-        return competeAgainstMCTS(playAgent, gameBoard) >= trainingThreshold;
-        //return competeAgainstRandom(playAgent, gameBoard) >= trainingThreshold;
+        switch (m_mode) {
+            case 0:  return competeAgainstMCTS(playAgent, gameBoard) >= trainingThreshold;
+            case 1:  return competeAgainstRandom(playAgent, gameBoard) >= trainingThreshold;
+            case 2:  return competeAgainstMinimax(playAgent, gameBoard) >= trainingThreshold;
+            default: return false;
+        }
     }
 
     private double competeAgainstMinimax(PlayAgent playAgent, GameBoard gameBoard){
@@ -74,11 +82,16 @@ public class EvaluatorHex extends Evaluator {
         //mctsAgent.params.setNumIter(5000);
     	// /WK/ Bug fix: it is not safe to change this parameter of mctsAgent. I made it private now.
     	// Instead, the safe way is, to go always through the MCTSAgentT constructor:
-        MCTSParams params = new MCTSParams();
-        params.setNumIter(1000);
-        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
-        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 5, 0);//verbose);
+        //MCTSParams params = new MCTSParams();
+        //params.setNumIter(1000);
+        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), mctsParams);
+
+        // /KG/ Creating a new MCTSParams and MCTSAgentT object for every evaluation causes a GDI object leak which
+        // eventually crashes the program after the GDI object limit is reached.
+
+        //double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 5, 0);//verbose);
+        double[] res = {0};
         double success = res[0];
         m_msg = playAgent.getName()+": "+this.getPrintString() + success;
         if (this.verbose>0) System.out.println(m_msg);
@@ -102,29 +115,35 @@ public class EvaluatorHex extends Evaluator {
 
     @Override
     public boolean isAvailableMode(int mode) {
-        //Only one mode currently
-        return true;
+        int[] availableModes = getAvailableModes();
+        for (int availableMode: availableModes) {
+            if (mode == availableMode){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
     public int[] getAvailableModes() {
-        //Only one mode currently
-        return new int[0];
+        //MCTS not available
+        return new int[]{1, 2};
     }
 
 	@Override
 	public int getQuickEvalMode() {
-		return 0;
+		return getAvailableModes()[0];
 	}
 
 	@Override
 	public int getTrainEvalMode() {
-		return 0;
+		return getAvailableModes()[0];
 	}
 
 	@Override
 	public int getMultiTrainEvalMode() {
-		return 0;
+		return getAvailableModes()[0];
 	}
 
 	@Override
