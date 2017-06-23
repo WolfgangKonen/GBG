@@ -7,11 +7,11 @@ public class ConfigEvaluator {
     //The Evaluator that is used when clicking on Quick Evaluation
     //0 > Evaluator2048, evaluates whole games
     //1 > Evaluator2048_BoardPositions, evaluates single GameStates, used for calculating Certainty
-    public static final int Evaluator = 0;
+    public static final int DEFAULTEVALUATOR = 0;
 
 
     //Evaluator2048 Settings
-        public static final int NUMBEREVALUATIONS = 50;
+        public static final int NUMBEREVALUATIONS = 500;
         public static final int MINPOINTS = 10000;
 
 

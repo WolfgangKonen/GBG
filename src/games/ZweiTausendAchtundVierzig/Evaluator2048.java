@@ -29,18 +29,20 @@ public class Evaluator2048 extends Evaluator {
     private int moves = 0;
     private long startTime;
     private long stopTime;
+    private int verbose;
 
 
     public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
-        if (isAvailableMode(mode)==false) 
-        	throw new RuntimeException("Evaluator2048: Value mode = "+mode+" for parameter mode not allowed." );
+        this.verbose = verbose;
     }
 
     @Override
     protected boolean eval_Agent() {
         startTime = System.currentTimeMillis();
-        System.out.print("Starting evaluation of " + ConfigEvaluator.NUMBEREVALUATIONS + " games, this may take a while...\n");
+        if(verbose == 0) {
+            System.out.print("Starting evaluation of " + ConfigEvaluator.NUMBEREVALUATIONS + " games, this may take a while...\n");
+        }
         List<StateObserver2048> stateObservers = new ArrayList<>();
 
 
@@ -49,7 +51,10 @@ public class Evaluator2048 extends Evaluator {
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
             MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
 
-            System.out.println("Detected MCTS Expectimax Agent, iterations: " + mctsExpectimaxAgt.params.getNumIter() + ", rolloutdepth: " + mctsExpectimaxAgt.params.getRolloutDepth() + ", Treedepth: " + mctsExpectimaxAgt.params.getTreeDepth() + ", k: " + mctsExpectimaxAgt.params.getK_UCT() + ", maxnodes: " + mctsExpectimaxAgt.params.getMaxNodes() + ", alternative version: " + mctsExpectimaxAgt.params.getAlternativeVersion());
+            if(verbose == 0) {
+                System.out.println("Detected MCTS Expectimax Agent, iterations: " + mctsExpectimaxAgt.params.getNumIter() + ", rolloutdepth: " + mctsExpectimaxAgt.params.getRolloutDepth() + ", Treedepth: " + mctsExpectimaxAgt.params.getTreeDepth() + ", k: " + mctsExpectimaxAgt.params.getK_UCT() + ", maxnodes: " + mctsExpectimaxAgt.params.getMaxNodes() + ", alternative version: " + mctsExpectimaxAgt.params.getAlternativeVersion());
+            }
+
             //play Games
             for(int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
                 int gameNumber = i+1;
@@ -64,8 +69,9 @@ public class Evaluator2048 extends Evaluator {
                         so.advance(action);
                     }
 
-                    System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
-
+                    if(verbose == 0) {
+                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+                    }
                     return so;
                 });
             }
@@ -93,7 +99,10 @@ public class Evaluator2048 extends Evaluator {
                 while (!so.isGameOver()) {
                     so.advance(m_PlayAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
                 }
-                System.out.print("Finished game " + (i + 1) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+
+                if(verbose == 0) {
+                    System.out.print("Finished game " + (i + 1) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+                }
 
                 stateObservers.add(so);
             }
@@ -157,7 +166,10 @@ public class Evaluator2048 extends Evaluator {
             tilesString += "\n" + tile.getKey() + ", " + tile.getValue();
         }
 
-        long duration = (stopTime - startTime)/1000;
+        long duration = (stopTime - startTime);
+        if(duration == 0) {
+            duration = 1;
+        }
 
         String agentSettings = "";
 
@@ -172,8 +184,7 @@ public class Evaluator2048 extends Evaluator {
                     "\nITERATIONS: " + mctsExpectimaxAgt.params.getNumIter();
         }
 
-
-        return "\n\nSettings:";/* +
+        return "\n\nSettings:" +
                 "\nAgent Name: " + m_PlayAgent.getName() +
                 agentSettings +
                 "\nNumber of games: " + ConfigEvaluator.NUMBEREVALUATIONS +
@@ -184,56 +195,54 @@ public class Evaluator2048 extends Evaluator {
                 "\nHighest scores is: " + maxScore +
                 "\nStandartdeviation is: " + standartdeviation +
                 "\nAverage Rolloutdepth is: " + averageRolloutDepth +
-                "\nAverage game duration: " +  Math.round((stopTime - startTime) / ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
-                "\nDuration of evaluation: " + duration + "s" +
-                "\nMoves per second: " + Math.round(moves/duration) +
+                "\nAverage game duration: " +  Math.round((double)duration / (double)ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
+                "\nDuration of evaluation: " + Math.round((double)duration/(double)1000) + "s" +
+                "\nMoves per second: " + Math.round(moves/((double)duration/(double)1000)) +
                 "\n" +
                 "\nHighest tiles: " +
                 tilesString +
-                "\n\n";*/
-
-        //Temporary Workaround für division by zero because Evaluationtime is so fast when using NTuple Agents
+                "\n\n";
     }
- 
- 	/**
- 	 * Since Evaluator2048 does not use mode, this function returns always true
- 	 */
-	@Override
- 	public boolean isAvailableMode(int mode) {
-		return true;
- 	}
 
- 	@Override
- 	public int[] getAvailableModes() {
-        //Only one mode currently
-        return new int[0];
- 	}
+    @Override
+    public boolean isAvailableMode(int mode) {
+        switch (mode) {
+            case 1:
+                return true;
+            case 2:
+                return true;
+            default:
+                return false;
+        }
+    }
 
-	@Override
-	public int getQuickEvalMode() {
-		return 0;
-	}
+    @Override
+    public int[] getAvailableModes() {
+        return new int[]{0, 1};
+    }
 
-	@Override
-	public int getTrainEvalMode() {
-		return 0;
-	}
+    @Override
+    public int getQuickEvalMode() {
+        return 0;
+    }
 
-	@Override
-	public int getMultiTrainEvalMode() {
-		return 0;
-	}
+    @Override
+    public int getTrainEvalMode() {
+        return 0;
+    }
 
-	@Override
-	public String getPrintString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public int getMultiTrainEvalMode() {
+        return 0;
+    }
 
-	@Override
-	public String getPlotTitle() {
-		// TODO Auto-generated method stub
-		return null;
-	}
- 	
+    @Override
+    public String getPrintString() {
+        return"success rate";
+    }
+
+    @Override
+    public String getPlotTitle() {
+        return "success";
+    }
 }

@@ -9,6 +9,7 @@ import games.GameBoard;
 import params.MCParams;
 import params.MCTSExpectimaxParams;
 import params.MCTSParams;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import tools.Types;
 
 import java.io.*;
@@ -32,8 +33,6 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
-        if (isAvailableMode(mode)==false) 
-        	throw new RuntimeException("Evaluator2048: Value mode = "+mode+" for parameter mode not allowed." );
     }
 
     @Override
@@ -366,57 +365,55 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     @Override
     public double getLastResult() {
-        return 0;
+        throw new RuntimeException("getLastResult is not yet implemented for Evaluator2048_BoardPositions");
     }
 
     @Override
     public String getMsg() {
         return "use this Spreedsheat to analyse output: https://docs.google.com/spreadsheets/d/1fAX-gwf4keZut4vuAZ2GQro5ubiLOeVvwhzn74zPTKs/edit?usp=sharing";
     }
-    
- 	/**
- 	 * Since Evaluator2048 does not use mode, this function returns always true
- 	 */
-	@Override
- 	public boolean isAvailableMode(int mode) {
-		return true;
- 	}
 
- 	@Override
- 	public int[] getAvailableModes() {
- 		return null;
- 	}
+    @Override
+    public boolean isAvailableMode(int mode) {
+        switch (mode) {
+            case 1:
+                return true;
+            case 2:
+                return true;
+            default:
+                return false;
+        }
+    }
 
-	@Override
-	public int getQuickEvalMode() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public int[] getAvailableModes() {
+        return new int[]{0, 1};
+    }
 
-	@Override
-	public int getTrainEvalMode() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public int getQuickEvalMode() {
+        return 0;
+    }
 
-	@Override
-	public int getMultiTrainEvalMode() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public int getTrainEvalMode() {
+        return 0;
+    }
 
-	@Override
-	public String getPrintString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public int getMultiTrainEvalMode() {
+        return 0;
+    }
 
-	@Override
-	public String getPlotTitle() {
-		// TODO Auto-generated method stub
-		return null;
-	}
- 	
+    @Override
+    public String getPrintString() {
+        return"success rate";
+    }
+
+    @Override
+    public String getPlotTitle() {
+        return "success";
+    }
 }
 
 class GameStateContainer implements Serializable {
