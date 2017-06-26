@@ -552,14 +552,12 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     @Override
     public StateObservation chooseStartState01() {
-        return null;
+        return getDefaultStartState();
     }
 
     public GameBoard2048(Arena ztavGame) {
         initGameBoard(ztavGame);
     }
-
-
 
     class ActionHandler implements ActionListener {
         int move;

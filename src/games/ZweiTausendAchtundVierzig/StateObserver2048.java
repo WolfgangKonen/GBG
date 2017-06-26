@@ -398,7 +398,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
      */
     private void addTile(int position, int value) {
         boolean succ = emptyTiles.remove(new Integer(position));
-        assert (succ==true) : "Something wrong in emptyTiles removal";
+        assert succ : "Something wrong in emptyTiles removal";
         //System.out.println(Long.toHexString(boardB));
         long b = (boardB >> (4*position)) & 0x0fL;
         assert (b==0) : "boardB is not empty at 'position'";

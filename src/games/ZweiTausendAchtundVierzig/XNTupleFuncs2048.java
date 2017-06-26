@@ -71,8 +71,17 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	 */
 	@Override
 	public int[][] symmetryVectors(int[] boardVector) {
-		// TODO
-		throw new RuntimeException("XNTupleFuncs2048.symmetryVectors() not yet implemented");
+		int[][] symmetries = new int[8][];
+		int[] mirroredBoardVector = mirrorBoardVector(boardVector);
+
+		for(int i = 0; i < 8; i+=2) {
+			symmetries[i] = boardVector;
+			symmetries[i+1] = mirroredBoardVector;
+
+			mirroredBoardVector = rotateBoardVector(mirroredBoardVector);
+			boardVector = rotateBoardVector(boardVector);
+		}
+		return symmetries;
 	}
 
 	/** 
@@ -86,6 +95,7 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	public int[][] fixedNTuples() {
 		// TODO
 		throw new RuntimeException("XNTupleFuncs2048.fixedNTuples() not yet implemented");
+		//return new int[0][];
 	}
 	//
 	// End n-tuple functions
@@ -129,5 +139,45 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 		return adjSet;
 	}
 
+	private int[] rotateBoardVector(int[] array) {
+		int[] rotatedArray = new int[16];
+		rotatedArray[0] = array[12];
+		rotatedArray[1] = array[8];
+		rotatedArray[2] = array[4];
+		rotatedArray[3] = array[0];
+		rotatedArray[4] = array[13];
+		rotatedArray[5] = array[9];
+		rotatedArray[6] = array[5];
+		rotatedArray[7] = array[1];
+		rotatedArray[8] = array[14];
+		rotatedArray[9] = array[10];
+		rotatedArray[10] = array[6];
+		rotatedArray[11] = array[2];
+		rotatedArray[12] = array[15];
+		rotatedArray[13] = array[11];
+		rotatedArray[14] = array[7];
+		rotatedArray[15] = array[3];
+		return rotatedArray;
+	}
 
+	private int[] mirrorBoardVector(int[] array) {
+		int[] mirroredArray = new int[16];
+		mirroredArray[0] = array[12];
+		mirroredArray[1] = array[13];
+		mirroredArray[2] = array[14];
+		mirroredArray[3] = array[15];
+		mirroredArray[4] = array[8];
+		mirroredArray[5] = array[9];
+		mirroredArray[6] = array[10];
+		mirroredArray[7] = array[11];
+		mirroredArray[8] = array[4];
+		mirroredArray[9] = array[5];
+		mirroredArray[10] = array[6];
+		mirroredArray[11] = array[7];
+		mirroredArray[12] = array[0];
+		mirroredArray[13] = array[1];
+		mirroredArray[14] = array[2];
+		mirroredArray[15] = array[3];
+		return mirroredArray;
+	}
 }

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.File;
 import java.text.*; 		// DecimalFormat, NumberFormat
 import java.util.Random;
 
@@ -812,6 +813,7 @@ public class XArenaFuncs
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+xab.m_game.getGameName()+"/";
 		String filename = "Arena.comp.csv";
+		checkAndCreateFolder(strDir);
 		try {
 			PrintWriter f; 
 			f = new PrintWriter(new BufferedWriter(new FileWriter(strDir+filename)));
@@ -864,6 +866,21 @@ public class XArenaFuncs
 	
 	public String getLastMsg() {
 		return lastMsg;
+	}
+
+	/**
+	 * checks if a folder exists and creates a new one if it doesn't
+	 *
+	 * @param filePath the folder Path
+	 * @return true if a folder allready existed
+	 */
+	private boolean checkAndCreateFolder(String filePath) {
+		File file = new File(filePath);
+		boolean exists = file.exists();
+		if(!file.exists()) {
+			file.mkdirs();
+		}
+		return exists;
 	}
 	
 }

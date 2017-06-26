@@ -1,10 +1,8 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.PlayAgent;
-import games.ArenaTrain;
-import games.Evaluator;
-import games.GameBoard;
-import games.XNTupleFuncs;
+import games.*;
+import games.Hex.FeatureHex;
 
 import javax.swing.*;
 
@@ -46,19 +44,23 @@ public class ArenaTrain2048 extends ArenaTrain {
      * @return
      */
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-        if(ConfigEvaluator.Evaluator == 0) {
-            return new Evaluator2048(pa, gb, stopEval, mode, verbose);
-        } else if(ConfigEvaluator.Evaluator == 1) {
-            return new Evaluator2048_BoardPositions(pa, gb, stopEval, mode, verbose);
-        } else {
-            System.out.println("No valid Evaluator in ArenaTrain2048.java");
-            return null;
+        switch (mode) {
+            case 0:
+                return new Evaluator2048(pa, gb, stopEval, mode, verbose);
+            case 1:
+                return new Evaluator2048_BoardPositions(pa, gb, stopEval, mode, verbose);
+            default:
+                throw new RuntimeException("Mode " + mode + " is not allowed for 2048");
         }
     }
     
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncs2048();
 	}
+
+    public Feature makeFeatureClass(int featmode) {
+        return new Feature2048(featmode);
+    }
 
 
 }
