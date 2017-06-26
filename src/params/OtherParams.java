@@ -92,6 +92,8 @@ public class OtherParams extends Frame
 									// can be handed over to a tab of a JTabbedPane 
 									// (see class TicTacToeTabs)
 		
+		evalQ_L.setToolTipText("'Quick Evaluation' evaluator has this mode");
+		evalT_L.setToolTipText("additional evaluator with this mode during training (none if mode is the same as Quick Eval Mode)");
 		numEval_L.setToolTipText("During training: Call the evaluators every NumEval episodes");
 		epiLeng_L.setToolTipText("During training: Maximum number of moves in an episode. If reached, game terminates prematurely. -1: never terminate.");
 		stopTest_L.setToolTipText("During training: If >0 then perform stop test");

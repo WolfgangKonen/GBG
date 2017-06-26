@@ -8,6 +8,7 @@ import games.Evaluator;
 import games.GameBoard;
 import games.XArenaFuncs;
 import params.MCTSParams;
+import params.ParMCTS;
 import tools.Types;
 
 
@@ -44,7 +45,7 @@ public class EvaluatorHex extends Evaluator {
         if (verbose == 1) {
             System.out.println("InitEval stopEval: " + stopEval);
         }
-        MCTSParams params = new MCTSParams();
+        //MCTSParams params = new MCTSParams();
         //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], gameBoard.getStateObs(), params);
         //-- WK: not needed anymore and would not work, if initEvaluator is called with arguments
         //-- (null,null,0) which might happen for a dummy Evaluator
@@ -74,7 +75,7 @@ public class EvaluatorHex extends Evaluator {
         //mctsAgent.params.setNumIter(5000);
     	// /WK/ Bug fix: it is not safe to change this parameter of mctsAgent. I made it private now.
     	// Instead, the safe way is, to go always through the MCTSAgentT constructor:
-        MCTSParams params = new MCTSParams();
+        ParMCTS params = new ParMCTS();
         params.setNumIter(1000);
         mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 

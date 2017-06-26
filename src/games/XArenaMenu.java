@@ -486,7 +486,7 @@ public class XArenaMenu extends JMenuBar {
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mctsParams.setFrom( ((MCTSAgentT) td).getMCTSParams() );
+				m_arena.m_xab.mctsParams.setFrom( ((MCTSAgentT) td).getParMCTS() );
 			}
 			else if (td instanceof MinimaxAgent) {
 				// set the agent parameters in XArenaTabs:

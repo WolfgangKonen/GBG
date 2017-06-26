@@ -2,6 +2,7 @@ package controllers.MCTS;
 
 import games.StateObservation;
 import params.MCTSParams;
+import params.ParMCTS;
 import params.TDParams;
 import tools.ElapsedCpuTimer;
 import tools.Types;
@@ -31,38 +32,36 @@ public class SingleMCTSPlayer implements Serializable
 
     public transient Types.ACTIONS[] actions; 			
 
-    public static int DEFAULT_ROLLOUT_DEPTH =200;
-    public static int DEFAULT_TREE_DEPTH = 10;
-    public static int DEFAULT_NUM_ITERS = 1000;
-    public static double DEFAULT_K = Math.sqrt(2);
-    public static int DEFAULT_VERBOSITY = 0;
     private int NUM_ACTIONS;
-    private int ROLLOUT_DEPTH = DEFAULT_ROLLOUT_DEPTH;
-    private int TREE_DEPTH = DEFAULT_TREE_DEPTH;
-    private int NUM_ITERS = DEFAULT_NUM_ITERS;
-    private double K = DEFAULT_K;
-    private int verbose = DEFAULT_VERBOSITY; 
+// --- this is now in ParMCTS: ---
+//    private int ROLLOUT_DEPTH = DEFAULT_ROLLOUT_DEPTH;
+//    private int TREE_DEPTH = DEFAULT_TREE_DEPTH;
+//    private int NUM_ITERS = DEFAULT_NUM_ITERS;
+//    private double K = DEFAULT_K;
+//    private int verbose = DEFAULT_VERBOSITY; 
     int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 	
 	/**
 	 * Member {@link #m_mcPar} is only needed for saving and loading the agent
 	 * (to restore the agent with all its parameter settings)
 	 */
-	private MCTSParams m_mcPar;
+	//private MCTSParams m_mcPar;
+	private ParMCTS m_parMCTS;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip will become unreadable or you have
 	 * to provide a special version transformation)
 	 */
-	private static final long  serialVersionUID = 12L;
+	private static final long  serialVersionUID = 13L;
 
 
 	/**
 	 * Default constructor for SingleMCTSPlayer, needed for loading a serialized version
 	 */
 	public SingleMCTSPlayer() {
-		m_mcPar = new MCTSParams();
+		m_parMCTS = new ParMCTS();
+		//m_mcPar = new MCTSParams();
         m_rnd = new Random();
         m_root = new SingleTreeNode(m_rnd,this);
 	}
@@ -70,27 +69,42 @@ public class SingleMCTSPlayer implements Serializable
 	/**
      * Creates the MCTS player. 
      * @param a_rnd 	random number generator object.
+     * @param parMC		parameters for MCTS
+     */
+    public SingleMCTSPlayer(Random a_rnd, ParMCTS parMC)
+    {
+		m_parMCTS = parMC;
+        m_rnd = a_rnd;
+        m_root = new SingleTreeNode(a_rnd,this);
+    }
+   	
+	/**
+     * Creates the MCTS player. 
+     * @param a_rnd 	random number generator object.
      * @param mcPar		parameters for MCTS
      */
     public SingleMCTSPlayer(Random a_rnd, MCTSParams mcPar)
     {
+    	// --- OLD, can be deleted, when the new version is tested and works:  ---
+    	//
     	// Why do we have m_mcpar and the several single parameters?
     	// We need both, m_mcPar for saving to disk and re-loading (use setFrom() to set
     	// the values in the params tab). And the single parameters for computational
     	// efficient access from the nodes of the tree.
     	//
-    	// The setters are responsible for updating the parameters in both locations (!)
-    	
+    	// The setters are responsible for updating the parameters in both locations (!)    	
 //		m_mcPar = new MCTSParams();
 //		m_mcPar.setFrom(mcPar);
-    	m_mcPar = new MCTSParams();
-    	if (mcPar!=null) {
-            this.setK(mcPar.getK_UCT());
-            this.setNUM_ITERS(mcPar.getNumIter());
-            this.setROLLOUT_DEPTH(mcPar.getRolloutDepth());
-            this.setTREE_DEPTH(mcPar.getTreeDepth());
-            this.setVerbosity(mcPar.getVerbosity());
-    	}
+//    	m_mcPar = new MCTSParams();
+//    	if (mcPar!=null) {
+//            this.setK(mcPar.getK_UCT());
+//            this.setNUM_ITERS(mcPar.getNumIter());
+//            this.setROLLOUT_DEPTH(mcPar.getRolloutDepth());
+//            this.setTREE_DEPTH(mcPar.getTreeDepth());
+//            this.setVerbosity(mcPar.getVerbosity());
+//    	}
+    	
+		m_parMCTS = new ParMCTS(mcPar);
 
         m_rnd = a_rnd;
         m_root = new SingleTreeNode(a_rnd,this);
@@ -155,49 +169,50 @@ public class SingleMCTSPlayer implements Serializable
     public int getNUM_ACTIONS() {
 		return NUM_ACTIONS;
 	}
-	public void setNUM_ACTIONS(int nUM_ACTIONS) {
-		NUM_ACTIONS = nUM_ACTIONS;
-	}
+//	public void setNUM_ACTIONS(int nUM_ACTIONS) {
+//		NUM_ACTIONS = nUM_ACTIONS;
+//	}
 	public int getROLLOUT_DEPTH() {
-		return ROLLOUT_DEPTH;
+		return m_parMCTS.getRolloutDepth();
 	}
-	public void setROLLOUT_DEPTH(int rOLLOUT_DEPTH) {
-		ROLLOUT_DEPTH = rOLLOUT_DEPTH;
-		m_mcPar.setRolloutDepth(rOLLOUT_DEPTH);
-	}
+//	public void setROLLOUT_DEPTH(int rOLLOUT_DEPTH) {
+//		ROLLOUT_DEPTH = rOLLOUT_DEPTH;
+//		m_mcPar.setRolloutDepth(rOLLOUT_DEPTH);
+//	}
 	public int getTREE_DEPTH() {
-		return TREE_DEPTH;
+		return m_parMCTS.getTreeDepth();
 	}
-	public void setTREE_DEPTH(int tREE_DEPTH) {
-		TREE_DEPTH = tREE_DEPTH;
-		m_mcPar.setTreeDepth(tREE_DEPTH);
-	}
+//	public void setTREE_DEPTH(int tREE_DEPTH) {
+//		TREE_DEPTH = tREE_DEPTH;
+//		m_mcPar.setTreeDepth(tREE_DEPTH);
+//	}
     public int getNUM_ITERS() {
-		return NUM_ITERS;
+		return m_parMCTS.getNumIter();
 	}
-	public void setNUM_ITERS(int nUM_ITERS) {
-		NUM_ITERS = nUM_ITERS;
-		m_mcPar.setNumIter(nUM_ITERS);
-	}
+//	public void setNUM_ITERS(int nUM_ITERS) {
+//		NUM_ITERS = nUM_ITERS;
+//		m_mcPar.setNumIter(nUM_ITERS);
+//	}
 	public double getK() {
-		return K;
+		return m_parMCTS.getK_UCT();
 	}
-	public void setK(double k) {
-		K = k;
-		m_mcPar.setK_UCT(k);
-	}
+//	public void setK(double k) {
+//		K = k;
+//		m_mcPar.setK_UCT(k);
+//	}
     public int getVerbosity() {
-		return verbose;
+		return m_parMCTS.getVerbosity();
 	}
-	public void setVerbosity(int verbosity) {
-		verbose = verbosity;
-		m_mcPar.setVerbosity(verbosity);;
-	}
+//	public void setVerbosity(int verbosity) {
+//		verbose = verbosity;
+//		m_mcPar.setVerbosity(verbosity);;
+//	}
+    
     public int getNRolloutFinished() {
         return nRolloutFinished;
     }
 
-    public MCTSParams getMCTSParams() {
-		return m_mcPar;
+    public ParMCTS getParMCTS() {
+		return m_parMCTS;
 	}
 }

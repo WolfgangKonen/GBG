@@ -4,6 +4,7 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
 import params.MCTSParams;
+import params.ParMCTS;
 import tools.ElapsedCpuTimer;
 import tools.ElapsedCpuTimer.TimerType;
 import tools.Types;
@@ -26,7 +27,8 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     
     @Deprecated 
     // should use this.getMCTSParams() instead 
-	private MCTSParams params;
+	//private MCTSParams params;
+    private ParMCTS pmcts; 
 
     /**
      * The MCTS-UCT implementation
@@ -38,13 +40,13 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	 * compatible with an older one (older .agt.zip will become unreadable or you have
 	 * to provide a special version transformation)
 	 */
-	private static final long  serialVersionUID = 12L;
+	private static final long  serialVersionUID = 13L;
 
 	/**
 	 * Default constructor, needed for loading a serialized version
 	 */
 	public MCTSAgentT() {
-    	this("MCTS", null, null);
+    	this("MCTS", null);
 	}
 
 	/**
@@ -54,16 +56,24 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
      */
     public MCTSAgentT(String name,StateObservation so) //, ElapsedCpuTimer elapsedTimer)
     {
-    	this(name, so, null);
+    	super(name);
+    	initMCTSAgent(so, null);
     }
 
     public MCTSAgentT(String name,StateObservation so, MCTSParams mcPar) //, ElapsedCpuTimer elapsedTimer)
     {
     	super(name);
-		params = mcPar;
-        
+    	initMCTSAgent(so, new ParMCTS(mcPar));
+    }
+    public MCTSAgentT(String name,StateObservation so, ParMCTS parMCTS) //, ElapsedCpuTimer elapsedTimer)
+    {
+    	super(name);
+    	initMCTSAgent(so, parMCTS);
+    }
+    
+    private void initMCTSAgent(StateObservation so, ParMCTS parMCTS) {    	
         //Create the player.
-        mctsPlayer = new SingleMCTSPlayer(new Random(),mcPar);		
+        mctsPlayer = new SingleMCTSPlayer(new Random(),parMCTS);		
         //mctsPlayer = new SingleMCTSPlayer(new Random(1),mcPar);	// /WK/ reproducible debugging: seed 1
 
         //Set the available actions for stateObs.
@@ -172,8 +182,8 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		return cs;
 	}
 
-	public MCTSParams getMCTSParams() {
-		return mctsPlayer.getMCTSParams();
+	public ParMCTS getParMCTS() {
+		return mctsPlayer.getParMCTS();
 	}
 	
     public int getNRolloutFinished() {
@@ -189,3 +199,4 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 
 
 }
+
