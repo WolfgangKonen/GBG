@@ -24,6 +24,7 @@ public class EvaluatorHex extends Evaluator {
     private double lastResult = 0;
     private int m_mode = 0;
     private String m_msg = null;
+    protected int verbose=0;
 
     public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
         super(e_PlayAgent, stopEval);

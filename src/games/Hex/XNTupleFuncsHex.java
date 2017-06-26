@@ -5,6 +5,7 @@ import games.XNTupleFuncs;
 
 import javax.swing.plaf.nimbus.State;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
@@ -58,8 +59,28 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
 
     @Override
     public int[][] fixedNTuples() {
-        //TODO
-        return new int[0][];
+        int[][] tuples = new int[(HexConfig.BOARD_SIZE*2)+1][HexConfig.BOARD_SIZE];
+
+        //All diagonal lines
+        for (int i=0; i<HexConfig.BOARD_SIZE; i++){
+            for (int j=0; j<HexConfig.BOARD_SIZE; j++){
+                int actionInt = i*HexConfig.BOARD_SIZE + j;
+                tuples[i][j] = actionInt;
+
+                actionInt = j*HexConfig.BOARD_SIZE + i;
+                tuples[i+HexConfig.BOARD_SIZE][j] = actionInt;
+            }
+        }
+
+        //The straight line in the center of the board
+        //(0, n); (1, n-1); ... (n-1, 1); (n, 0);
+        for (int i=0; i<HexConfig.BOARD_SIZE; i++){
+            int j = HexConfig.BOARD_SIZE-i;
+            int actionInt = i*HexConfig.BOARD_SIZE + j;
+            tuples[HexConfig.BOARD_SIZE*2][i] = actionInt-1;
+        }
+
+        return tuples;
     }
 
     @Override
