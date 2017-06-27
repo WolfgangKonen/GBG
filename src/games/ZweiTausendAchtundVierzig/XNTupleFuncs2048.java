@@ -93,13 +93,13 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	 */
 	@Override
 	public int[][] fixedNTuples() {
-		// TODO
-		throw new RuntimeException("XNTupleFuncs2048.fixedNTuples() not yet implemented");
-		//return new int[0][];
+		return new int[][]{{0, 1, 2, 3},{4, 5, 6, 7},{8, 9, 10, 11},{12, 13, 14, 15}
+				,{0, 4, 8, 12},{1, 5, 9, 13},{2, 6, 10, 14},{3, 7, 11, 15}
+				,{0, 1, 5, 4},{3, 7, 6, 2},{15, 14, 10, 11},{ 12, 8, 9, 13}
+				,{1, 2, 5, 6},{7, 11, 10, 6},{14, 13, 9, 10},{8, 4, 5, 9}
+				,{5, 6, 9, 10}};
+
 	}
-	//
-	// End n-tuple functions
-	//
 	
 	/**
 	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
