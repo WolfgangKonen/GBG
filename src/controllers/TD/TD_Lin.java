@@ -285,11 +285,11 @@ public class TD_Lin implements TD_func, Serializable {
            error[k] = target - old_y[k];
         this.TDlearn();			// backward pass - learning: accumulate weight changes
         if (wghtChange) this.TDchangeWeights();		// apply weight changes
-        if (DEBG) {
+        if (DEBG && finished) {
             getScore(old_Input);	
         	double new_error = target - y[0];
-//        	System.out.println("error:"+error[0]);
-//        	System.out.println("new_e:"+new_error);
+        	System.out.println("error:"+error[0]);
+        	System.out.println("new_e:"+new_error);
         	for (int i=0;i<old_Input.length;++i) System.out.print((int)old_Input[i]);
         	System.out.print(" ");
         	System.out.println("err quotient: "+100*(new_error/error[0])+"% "+error[0]+"  "

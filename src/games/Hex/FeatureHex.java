@@ -22,6 +22,8 @@ public class FeatureHex implements Feature {
                 return createFeatureVector0(stateObs.getPlayer(), stateObs.getBoard());
             case 1:
                 return createFeatureVector1(stateObs.getPlayer(), stateObs.getBoard());
+            case 2:
+                return createFeatureVector2(stateObs.getPlayer(), stateObs.getBoard());
             default:
                 System.out.println("Unknown feature mode, defaulting to feature mode 0");
                 return createFeatureVector0(stateObs.getPlayer(), stateObs.getBoard());
@@ -49,7 +51,7 @@ public class FeatureHex implements Feature {
 
     @Override
     public int[] getAvailFeatmode() {
-        return new int[]{0, 1};
+        return new int[]{0, 1, 2};
     }
 
     @Override
@@ -58,7 +60,9 @@ public class FeatureHex implements Feature {
         case 0:
             return 7;
         case 1:
-            return HexConfig.TILE_COUNT;
+        	return HexConfig.TILE_COUNT;
+        case 2:
+            return HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE + 2;
         default:
             throw new RuntimeException("Unknown featmode: "+featmode);
         }
@@ -108,6 +112,25 @@ public class FeatureHex implements Feature {
                 inputVector[j*HexConfig.BOARD_SIZE+i] = (double) (board[i][j].getPlayer()+1)/2f;
             }
         }
+
+        return inputVector;
+    }
+
+    public double[] createFeatureVector2(int player, HexTile[][] board){
+        double[] inputVector = new double[HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE + 2];
+
+        int nEmpty=0; 
+        for (int i = 0; i<HexConfig.BOARD_SIZE; i++ ){
+            for (int j = 0; j<HexConfig.BOARD_SIZE; j++ ){
+                inputVector[j*HexConfig.BOARD_SIZE+i] = board[i][j].getPlayer();
+                if (board[i][j].getPlayer()==HexConfig.PLAYER_NONE) {
+                	inputVector[j*HexConfig.BOARD_SIZE+i] = 0.5;
+                	nEmpty++;
+                }
+            }
+        }
+        inputVector[HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE] = (nEmpty>2)?1:0;
+        inputVector[HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE+1] = (nEmpty>2)?1:0;
 
         return inputVector;
     }

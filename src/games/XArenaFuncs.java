@@ -314,8 +314,8 @@ public class XArenaFuncs
 		{
 			while (pa.getGameNum()<pa.getMaxGameNum())
 			{							
-				StateObservation so = gb.chooseStartState01();
-				//StateObservation so = gb.getDefaultStartState();  // Debug only
+				//StateObservation so = gb.chooseStartState01();
+				StateObservation so = gb.getDefaultStartState();  // Debug only
 
 				pa.trainAgent(so,epiLength);
 				
