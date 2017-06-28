@@ -187,7 +187,7 @@ public class StateObserverHex implements StateObservation {
             return;
         }
         int actionInt = action.toInt();
-        assert (0<=actionInt && actionInt<=(HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE)) : "Invalid action: "+actionInt;
+        assert (0<=actionInt && actionInt<=(HexConfig.TILE_COUNT)) : "Invalid action: "+actionInt;
         int j = actionInt       % HexConfig.BOARD_SIZE;
         int i = (actionInt - j) / HexConfig.BOARD_SIZE;
 

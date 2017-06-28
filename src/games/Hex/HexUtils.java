@@ -4,6 +4,7 @@ import tools.Types;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -76,7 +77,7 @@ public class HexUtils {
 
         g2.setColor(textColor);
 
-        String tileText = String.format("%.2f", tileValue);
+        String tileText = String.format("%4d", Math.round(tileValue*1000));
 
         int width = g2.getFontMetrics().stringWidth(tileText);
         int height = g2.getFontMetrics().getHeight();
@@ -84,7 +85,7 @@ public class HexUtils {
         int textX = (int) (x + (getSideLengthFromHeight(polyHeight) * 1.5) - (width / 2f));
         int textY = (int) (y + (polyHeight / 2f) + (height));
 
-        g2.drawString("" + tileText, textX, textY);
+        g2.drawString(tileText, textX, textY);
     }
 
     public static Color calculateTileColor(double tileValue){
@@ -118,7 +119,6 @@ public class HexUtils {
 
     public static void drawOutlines(int boardSize, Color colorOne, Color colorTwo, Graphics2D g2, HexTile[][] board){
         Stroke strokeFill = new BasicStroke(1);
-        Stroke strokeDraw = new BasicStroke(2);
 
         //Get polygon height from one of the polygons
         int polyHeight = 0;
@@ -153,9 +153,6 @@ public class HexUtils {
                         currentHex.ypoints[5]+ OUTLINEWIDTH};
                 newPoly = new Polygon(cx, cy, cx.length);
             }
-            /*g2.setStroke(strokeDraw);
-            g2.setColor(Color.BLACK);
-            g2.drawPolygon(newPoly);*/
 
             g2.setStroke(strokeFill);
             g2.setColor(colorTwo);
@@ -180,9 +177,6 @@ public class HexUtils {
                         currentHex.ypoints[2], currentHex.ypoints[1], currentHex.ypoints[0]};
                 newPoly = new Polygon(cx, cy, cx.length);
             }
-            /*g2.setStroke(strokeDraw);
-            g2.setColor(Color.BLACK);
-            g2.drawPolygon(newPoly);*/
 
             g2.setStroke(strokeFill);
             g2.setColor(colorTwo);
@@ -208,9 +202,6 @@ public class HexUtils {
                         currentHex.ypoints[5]};
                 newPoly = new Polygon(cx, cy, cx.length);
             }
-            /*g2.setStroke(strokeDraw);
-            g2.setColor(Color.BLACK);
-            g2.drawPolygon(newPoly);*/
 
             g2.setStroke(strokeFill);
             g2.setColor(colorOne);
@@ -234,9 +225,6 @@ public class HexUtils {
                         currentHex.ypoints[3]+ OUTLINEWIDTH, currentHex.ypoints[3]+ OUTLINEWIDTH};
                 newPoly = new Polygon(cx, cy, cx.length);
             }
-            /*g2.setStroke(strokeDraw);
-            g2.setColor(Color.BLACK);
-            g2.drawPolygon(newPoly);*/
 
             g2.setStroke(strokeFill);
             g2.setColor(colorOne);
@@ -307,12 +295,13 @@ public class HexUtils {
         return null;
     }
 
-    public static int[] getLongestChain(HexTile[][] board, int player){
+    public static double[] getFeature0ForPlayer(HexTile[][] board, int player){
         LinkedList<HexTile> tilesToVisit = new LinkedList<>();
         ArrayList<HexTile> visitedTiles = new ArrayList<>();
 
         int longestChain = 0;
         int neighborCount = 0;
+        int virtualConnections = 0;
 
         for (int i=0; i<HexConfig.BOARD_SIZE; i++){
             for (int j=0; j<HexConfig.BOARD_SIZE; j++){
@@ -362,6 +351,7 @@ public class HexUtils {
                                                 && isNextToEdge(currentNeighborsNeighbor, player) > 0){
                                             tilesToVisit.add(currentNeighbor);
                                             tilesToVisit.add(currentNeighborsNeighbor);
+                                            virtualConnections++;
                                         } else {
                                             //Find a tile that is adjacent to both neighbors and also belongs
                                             //to the player, if such a tile exists
@@ -376,6 +366,7 @@ public class HexUtils {
                                                     //This treats the two chains as a single chain
                                                     tilesToVisit.add(currentNeighbor);
                                                     tilesToVisit.add(currentNeighborsNeighbor);
+                                                    virtualConnections++;
                                                 }
                                             }
                                         }
@@ -404,11 +395,27 @@ public class HexUtils {
             }
         }
 
-        int [] rVal = new int[2];
-        rVal[0] = longestChain;
-        rVal[1] = neighborCount;
+        double [] rVal = new double[3];
+        rVal[0] = (double) longestChain / (double) HexConfig.BOARD_SIZE;
+        //rVal[0] = longestChain;
+        rVal[1] = (double) neighborCount /(double) (HexConfig.TILE_COUNT+1);
+        //rVal[1] = neighborCount;
+        rVal[2] = (double) virtualConnections /(double) HexConfig.TILE_COUNT;
 
         return rVal;
+    }
+
+    public static int getTileCountForPlayer(HexTile[][] board, int player){
+        int tileCount = 0;
+        for (int i=0; i<HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+                if (board[i][j].getPlayer() == player) {
+                    tileCount++;
+                }
+            }
+        }
+
+        return tileCount;
     }
 
     private static int isNextToEdge(HexTile tile){
