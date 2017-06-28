@@ -40,6 +40,13 @@ public class TDParams extends Frame implements Serializable
 {
 	private static final String TIPGAMMAL = "Discount factor in range [0,1] ";
 	private static final String TIPEPOCHL = "Accumulate gradient for Epochs iterations, then update weights";
+	private static final String TIPNORMALIZEL = "Normalize StateObservation's game score to the range of the agent's sigmoid function";
+	private static final String TIPALPHA1L = "Initial learn step size";
+	private static final String TIPALPHA2L = "Final learn step size";
+	private static final String TIPEPSIL1L = "Initial random move rate in [0,1]";
+	private static final String TIPEPSIL2L = "Final random move rate in [0,1]";
+	private static final String TIPLAMBDAL = "Eligibility trace parameter in [0,1]";
+	
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -113,9 +120,14 @@ public class TDParams extends Frame implements Serializable
 		epfinL = new JLabel("Epsilon final");
 		lambdaL = new JLabel("Lambda");
 		gammaL = new JLabel("Gamma");
-		gammaL.setToolTipText(TIPGAMMAL);
 		epochL = new JLabel("Epochs");
 		epochL.setToolTipText(TIPEPOCHL);
+		alphaL.setToolTipText(TIPALPHA1L);
+		alfinL.setToolTipText(TIPALPHA2L);
+		lambdaL.setToolTipText(TIPLAMBDAL);
+		epsilL.setToolTipText(TIPEPSIL1L);
+		epfinL.setToolTipText(TIPEPSIL2L);
+		gammaL.setToolTipText(TIPGAMMAL);
 		
 		withSigType = new JCheckBox();
 		normalize = new JCheckBox();
@@ -127,6 +139,7 @@ public class TDParams extends Frame implements Serializable
 		SigTypeL = new JLabel("Output Sigmoid: ");
 		NormalizeL = new JLabel("Normalize: ");
 		LrnTypeL = new JLabel("Learning rule: ");
+		NormalizeL.setToolTipText(TIPNORMALIZEL);
 
 		cbgNetType = new CheckboxGroup();
 		LinNetType = new Checkbox("linear",cbgNetType,true);
@@ -349,6 +362,8 @@ public class TDParams extends Frame implements Serializable
 			epochT.setText("1");				//
 			withSigType.setSelected(true);		// tanh
 			normalize.setSelected(false);		// 
+			withSigType.setEnabled(false);		
+			SigTypeL.setEnabled(false);
 			NetTypeL.setEnabled(false);
 			LinNetType.setEnabled(false);
 			BprNetType.setEnabled(false);

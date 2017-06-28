@@ -66,7 +66,8 @@ public class XArenaFuncs
 	protected int numPlayers;
 	
 	protected Random rand;
-	protected XYSeries series; 
+	protected XYSeries seriesQ; 
+	protected XYSeries seriesT; 
 	protected LineChartSuccess lChart;
 	
 	public XArenaFuncs(Arena arena)
@@ -243,6 +244,7 @@ public class XArenaFuncs
 		int epiLength;			// maximum length of an episode
 		int gameNum=0;
 		int verbose=2;
+		boolean PLOTTRAINEVAL=false;
 		maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		numEval = xab.oPar.getNumEval();
 
@@ -264,9 +266,8 @@ public class XArenaFuncs
 			lChart=new LineChartSuccess("Training Progress","gameNum","",
 													  true,false);
 		lChart.clearAndSetXY(xab);
-		series = new XYSeries("Train X");		// "Train X" is the key of the XYSeries object
-		lChart.addSeries(series);
-
+		seriesQ = new XYSeries("Q Eval");		// "Q Eval" is the key of the XYSeries object
+		lChart.addSeries(seriesQ);
 		
 		String pa_string = pa.getClass().getName();
 //		if (pa_string.equals("TicTacToe.CMAPlayer")) 
@@ -284,7 +285,7 @@ public class XArenaFuncs
 		int qem = xab.oPar.getQuickEvalMode();
         m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
         //
-        // set Y-axis of lChart according to the current Quick Eval Mode:
+        // set Y-axis of existing lChart according to the current Quick Eval Mode
         lChart.setYAxisLabel(m_evaluatorQ.getPlotTitle());
         
 		int tem = xab.oPar.getTrainEvalMode();
@@ -294,8 +295,13 @@ public class XArenaFuncs
 		// boxes 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' have
 		// different values. 
 		boolean doTrainEvaluation = (tem!=qem);
-		if (doTrainEvaluation)
+		if (doTrainEvaluation) {
 	        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
+	        if (PLOTTRAINEVAL) {
+				seriesT = new XYSeries("T Eval");		// "T Eval" is the key of the XYSeries object
+				lChart.addSeries(seriesT);	        	
+	        }
+		}
 
 		// Debug only: direct debug output to file debug.txt
 		//TDNTupleAgt.pstream = System.out;
@@ -319,9 +325,12 @@ public class XArenaFuncs
 					xab.GameNumT.setText(Integer.toString(gameNum ) );
 					
 					m_evaluatorQ.eval();
-					if (doTrainEvaluation) m_evaluatorT.eval();
-					
-					series.add((double)gameNum, m_evaluatorQ.getLastResult());
+					seriesQ.add((double)gameNum, m_evaluatorQ.getLastResult());
+					if (doTrainEvaluation) {
+						m_evaluatorT.eval();
+						if (PLOTTRAINEVAL) 
+							seriesT.add((double)gameNum, m_evaluatorT.getLastResult());
+					}
 					lChart.plot();
 				}
 				

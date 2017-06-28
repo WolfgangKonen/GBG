@@ -8,6 +8,7 @@ import games.Evaluator;
 import games.GameBoard;
 import games.XArenaFuncs;
 import params.MCTSParams;
+import params.ParMCTS;
 import tools.Types;
 
 import java.util.Arrays;
@@ -83,6 +84,9 @@ public class EvaluatorHex extends Evaluator {
         //mctsAgent.params.setNumIter(5000);
     	// /WK/ Bug fix: it is not safe to change this parameter of mctsAgent. I made it private now.
     	// Instead, the safe way is, to go always through the MCTSAgentT constructor:
+        ParMCTS params = new ParMCTS();
+        params.setNumIter(1000);
+        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
         //MCTSParams params = new MCTSParams();
         //params.setNumIter(1000);

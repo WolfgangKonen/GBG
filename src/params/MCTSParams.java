@@ -65,11 +65,11 @@ public class MCTSParams extends Frame implements Serializable
 		treedep_L = new JLabel("Tree Depth");
 		rollout_L = new JLabel("Rollout Depth");
 		verbose_L = new JLabel("Verbosity");
-		numIter_T = new JTextField(SingleMCTSPlayer.DEFAULT_NUM_ITERS+"");			
-		kUCT_T = new JTextField(SingleMCTSPlayer.DEFAULT_K+"");					// 
-		treedep_T = new JTextField(SingleMCTSPlayer.DEFAULT_TREE_DEPTH+"");		 
-		rollout_T = new JTextField(SingleMCTSPlayer.DEFAULT_ROLLOUT_DEPTH+"");		 
-		verbose_T = new JTextField(SingleMCTSPlayer.DEFAULT_VERBOSITY+"");		 
+		numIter_T = new JTextField(ParMCTS.DEFAULT_NUM_ITERS+"");			
+		kUCT_T = new JTextField(ParMCTS.DEFAULT_K+"");					// 
+		treedep_T = new JTextField(ParMCTS.DEFAULT_TREE_DEPTH+"");		 
+		rollout_T = new JTextField(ParMCTS.DEFAULT_ROLLOUT_DEPTH+"");		 
+		verbose_T = new JTextField(ParMCTS.DEFAULT_VERBOSITY+"");		 
 //		ok = new Button("OK");
 //		m_par = this;
 		mPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
@@ -78,8 +78,8 @@ public class MCTSParams extends Frame implements Serializable
 		
 		numIter_L.setToolTipText("Number of iterations during MCTS search");
 		kUCT_L.setToolTipText("Parameter K in UCT rule ");
-		treedep_L.setToolTipText("MCTS tree depth");
-		rollout_L.setToolTipText("MCTS rollout depth");
+		treedep_L.setToolTipText("maximum tree depth");
+		rollout_L.setToolTipText("maximum rollout depth (random moves from a leaf)");
 		verbose_L.setToolTipText("0: print nothing, 1: one line per MCTS call, 2: for each action one line");
 		
 //		ok.addActionListener(
@@ -178,5 +178,17 @@ public class MCTSParams extends Frame implements Serializable
 		setVerbosity(tp.getVerbosity());
 //		System.out.println("numIter= "+tp.getNumIter());
 //		System.out.println("k_UCT= "+tp.getK_UCT());
+	}
+
+	/**
+	 * Needed to restore the param tab with the parameters from a re-loaded agent
+	 * @param tp  of the re-loaded agent
+	 */
+	public void setFrom(ParMCTS tp) {
+		setK_UCT(tp.getK_UCT());
+		setNumIter(tp.getNumIter());
+		setRolloutDepth(tp.getRolloutDepth());
+		setTreeDepth(tp.getTreeDepth());
+		setVerbosity(tp.getVerbosity());
 	}
 } // class MCTSParams

@@ -113,7 +113,9 @@ abstract public class Arena extends JPanel implements Runnable {
 		try {
 			m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
 			// ensure that m_PlayAgents has the agents selected, even if the first 
-			// thing is to issue a save agent command
+			// thing is to issue a save agent command.
+			// ensure that the most recent parameters for this agent are fetched from 
+			// the params tab.
 		} catch(RuntimeException e) 
 		{
 			MessageBox.show(m_xab, 
@@ -245,7 +247,8 @@ abstract public class Arena extends JPanel implements Runnable {
 					gb.updateBoard(so,true,true);
 				} else {
 					gb.updateBoard(null,false,true);
-					// not a valid play position >> show the initial VBoard (orange)
+					// not a valid play position >> show the board settings, i.e. 
+					// the game-over position, but clear the values: 
 					gb.clearBoard(false,true);
 				}
 			}
