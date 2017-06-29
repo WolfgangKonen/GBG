@@ -142,7 +142,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal())
 				/ maxGameNum;
 		m_hasSigmoid = tdPar.hasSigmoid();
-		NORMALIZE=tdPar.getUseNormalize();
+		NORMALIZE=tdPar.getNormalize();
 		m_hasLinearNet = tdPar.hasLinearNet();
 		rand = new Random(System.currentTimeMillis());
 		setAgentState(AgentState.INIT);

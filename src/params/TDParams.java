@@ -245,7 +245,7 @@ public class TDParams extends Frame implements Serializable
 	public boolean hasSigmoid() {
 		return withSigType.isSelected();
 	}
-	public boolean getUseNormalize() {
+	public boolean getNormalize() {
 		return normalize.isSelected();
 	}
 	public boolean hasLinearNet() {
@@ -320,18 +320,37 @@ public class TDParams extends Frame implements Serializable
 	public void setFrom(TDParams tp) {
 		setAlpha(tp.getAlpha());
 		setAlphaFinal(tp.getAlphaFinal());
-		setEpochs(tp.getEpochs());
 		setEpsilon(tp.getEpsilon());
 		setEpsilonFinal(tp.getEpsilonFinal());
-		setFeatmode(tp.getFeatmode());
 		setGamma(tp.getGamma());
 		setLambda(tp.getLambda());
 		setLinearNet(tp.hasLinearNet());
 		setRpropLrn(tp.hasRpropLrn());
 		setSigmoid(tp.hasSigmoid());
-		setNormalize(tp.getUseNormalize());
-//		setMaxGameNum(tp.getMaxGameNum());
+		setNormalize(tp.getNormalize());
+		setEpochs(tp.getEpochs());
+		setFeatmode(tp.getFeatmode());
+//		setMaxGameNum(tp.getMaxGameNum());	// this is now in AgentBase
 //		setNumEval(tp.getNumEval());
+	}
+	
+	/**
+	 * Needed to restore the param tab with the parameters from a re-loaded agent
+	 * @param tp  TDParams of the re-loaded agent
+	 */
+	public void setFrom(ParTD tp) {
+		setAlpha(tp.getAlpha());
+		setAlphaFinal(tp.getAlphaFinal());
+		setEpsilon(tp.getEpsilon());
+		setEpsilonFinal(tp.getEpsilonFinal());
+		setGamma(tp.getGamma());
+		setLambda(tp.getLambda());
+		setLinearNet(tp.hasLinearNet());
+		setRpropLrn(tp.hasRpropLrn());
+		setSigmoid(tp.hasSigmoid());
+		setNormalize(tp.getNormalize());
+		setEpochs(tp.getEpochs());
+		setFeatmode(tp.getFeatmode());
 	}
 	
 	/**
@@ -344,10 +363,10 @@ public class TDParams extends Frame implements Serializable
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// Currently we have here only the sensible defaults for one game ("TicTacToe")
-		// but for two agents ("TD-Ntuple" = class TDNTupleAgt and "TDS" = class TDAgent).
+		// Currently we have here only the sensible defaults for two games ("TicTacToe", "Hex")
+		// and for two agents ("TD-Ntuple" = class TDNTupleAgt and "TDS" = class TDAgent).
 		//
-		// If later good parameters for other games (e.g. "Hex") are found, they should be
+		// If later good parameters for other games are found, they should be
 		// added with suitable nested switch(gameName). 
 		// Currently we have only one switch(gameName) on the initial featmode (=3 for 
 		// TicTacToe, =0 for all others)

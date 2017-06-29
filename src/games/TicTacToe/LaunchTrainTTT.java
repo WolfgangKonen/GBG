@@ -6,6 +6,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import javax.swing.JFrame;
 
+import agentIO.TransformTdAgents;
 import games.Arena;
 import games.ArenaTrain;
 import games.XArenaFuncs;
@@ -67,6 +68,13 @@ public class LaunchTrainTTT extends JFrame {
 		add(m_Arena,BorderLayout.CENTER);
 		add(new Label(" "),BorderLayout.SOUTH);	// just a little space at the bottom
 		
+		/*
+		// invoke the following lines only during the one-time transformation of saved 
+		// TDNTupleAgt agents:
+		TransformTdAgents m_transformTD 
+			= new TransformTdAgents(TransformTdAgents.TRANSFORMDIRECTION.V12ToTemp,this);
+		//	= new TransformTdAgents(TransformTdAgents.TRANSFORMDIRECTION.TempToV13,this);
+		*/
 	}
 	
 	protected static class WindowClosingAdapter

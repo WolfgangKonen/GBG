@@ -199,7 +199,7 @@ public class NTParams extends Frame implements Serializable {
 	}
 
 	private void enableTcPart() {
-		if (getTC()==false){
+		if (getTc()==false){
 			InitL.setEnabled(false);
 			InitT.setEnabled(false);
 			tcFactorL.setEnabled(false);
@@ -218,7 +218,7 @@ public class NTParams extends Frame implements Serializable {
 	}
 
 	private void enableTcImmPart() {
-		if(getTCFType()==false){
+		if(getTcImm()==false){
 			tcIntervalL.setEnabled(true);
 			tcIntervalT.setEnabled(true);
 		} else {
@@ -264,19 +264,19 @@ public class NTParams extends Frame implements Serializable {
 //		return Double.valueOf(EvalT.getText()).doubleValue();
 //	}
 
-	public boolean getTC() {
+	public boolean getTc() {
 		return TempCoC.isSelected();
 	}
 
-	public void setTC(boolean state) {
+	public void setTc(boolean state) {
 		TempCoC.setSelected(state);
 	}
 
-	public void setTcImm(String strg) {
+	public void setTcImmediate(String strg) {
 		tcFactorType.setSelectedItem(strg);
 	}
 
-	public String getTcImm() {
+	public String getTcImmediate() {
 		return (String) tcFactorType.getSelectedItem();
 	}
 
@@ -284,11 +284,15 @@ public class NTParams extends Frame implements Serializable {
 		tcIntervalT.setText(strg);
 	}
 	
-	public boolean getTCFType() {
+	public boolean getTcImm() {
 		Object Type = tcFactorType.getSelectedItem();
 		if (Type == "Immediate")
 			return true;
 		return false;
+	}
+
+	public void setTcImm(boolean tcImm) {
+		tcFactorType.setSelectedItem(tcImm ? 0 : 1);
 	}
 
 	public boolean getRandomness() {
@@ -314,13 +318,32 @@ public class NTParams extends Frame implements Serializable {
 	 * @param nt  of the re-loaded agent
 	 */
 	public void setFrom(NTParams nt) {
-		setTC(nt.getTC());
+		setTc(nt.getTc());
 		setTcInterval(""+nt.getTcInterval());
-		setTcImm(nt.getTcImm());
+		setTcImmediate(nt.getTcImmediate());
 		InitT.setText(""+nt.getINIT());
 		//EvalT = nt.EvalT;
 		RandomnessC.setSelected(nt.getRandomness());
 		int ntindex= nt.getRandWalk()?0:1;
+		TupleType.setSelectedIndex(ntindex);
+		nTupleNumT.setText(nt.getNtupleNumber()+"");
+		nTupleMaxT.setText(nt.getNtupleMax()+"");
+		UseSymmetryC.setSelected(nt.getUseSymmetry());
+		enableTcPart();
+		enableRandomPart();
+	}
+
+	/**
+	 * Needed to restore the param tab with the parameters from a re-loaded agent
+	 * @param nt  of the re-loaded agent
+	 */
+	public void setFrom(ParNT nt) {
+		setTc(nt.getTc());
+		setTcInterval(""+nt.getTcInterval());
+		setTcImmediate(nt.getTcImm()==true ? tcFactorString[0] : tcFactorString[1]);
+		InitT.setText(""+nt.getTcInit());
+		RandomnessC.setSelected(nt.getRandomness());
+		int ntindex= (nt.getRandomWalk() ? 0 : 1);
 		TupleType.setSelectedIndex(ntindex);
 		nTupleNumT.setText(nt.getNtupleNumber()+"");
 		nTupleMaxT.setText(nt.getNtupleMax()+"");

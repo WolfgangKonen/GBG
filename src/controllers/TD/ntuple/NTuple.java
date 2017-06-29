@@ -102,8 +102,8 @@ public class NTuple implements Serializable {
 
 		// samine//
 		INIT = ntPar.getINIT();// samine//
-		TC = ntPar.getTC();
-		TcImm = ntPar.getTCFType();
+		TC = ntPar.getTc();
+		TcImm = ntPar.getTcImm();
 		rand = new Random();
 		this.nTuple = nTuple;
 		lut = new double[(int) Math.pow(posVals, nTuple.length)];

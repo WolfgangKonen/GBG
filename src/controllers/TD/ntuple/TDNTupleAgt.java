@@ -13,7 +13,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 
+import agentIO.TDNTupleAgt_v12;
 import params.NTParams;
+import params.ParNT;
+import params.ParTD;
 import params.TDParams;
 import tools.Types;
 import controllers.AgentBase;
@@ -141,6 +144,40 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	/**
+	 * This constructor is only needed during the one-time transformation of a 
+	 * v12-agent-file to a v13-agent file. <p>
+	 * 
+	 * Create a new {@link TDNTupleAgt} just by copying all members from 
+	 * {@link TDNTupleAgt_v12} which is assumed to be in the old v12 version. (We need 
+	 * just a class with a new name for proper serialization.) 
+	 * 
+	 * @param tdagt			agent of the old v12 version 
+	 */
+	public TDNTupleAgt(TDNTupleAgt_v12 tdagt) {
+		super(tdagt.getName());
+		m_tdPar = new TDParams();
+		m_tdPar.setFrom(tdagt.getTDParams());
+		m_ntPar = new NTParams();
+		m_ntPar.setFrom(tdagt.getNTParams());
+		rand = new Random(42); //(System.currentTimeMillis());		
+
+		setNTParams(m_ntPar);
+
+//		int numTuple=tdagt.getNTParams().getNtupleNumber();
+//		int maxTupleLen=tdagt.getNTParams().getNtupleMax();
+		int posVals = tdagt.getNTupleValueFunc().getXnf().getNumPositionValues();
+		int numCells = tdagt.getNTupleValueFunc().getXnf().getNumCells();
+		
+		m_Net = tdagt.getNTupleValueFunc();
+		
+		setTDParams(tdagt.getTDParams(), tdagt.getMaxGameNum());
+//		NORMALIZE=tdagt.getTDParams().getNormalize(); // now in setTDParams
+		
+		setAgentState(AgentState.INIT);
+	}
+
+
+	/**
 	 * 
 	 * @param tdPar			temporal difference parameters
 	 * @param ntPar			n-tuples and temporal coherence parameter
@@ -157,16 +194,9 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		m_ntPar.setFrom(ntPar);
 		rand = new Random(42); //(System.currentTimeMillis());		
 		//samine//
-		tcIn=ntPar.getTcInterval();
-		TC=ntPar.getTC();
-		USESYMMETRY=ntPar.getUseSymmetry();
-		NORMALIZE=tdPar.getUseNormalize();
-		tcImm=ntPar.getTCFType();
 		
-		randomness=ntPar.getRandomness();
-		randWalk=ntPar.getRandWalk();
-		int numTuple=ntPar.getNtupleNumber();
-		int maxTupleLen=ntPar.getNtupleMax();
+		setNTParams(ntPar);
+
 		int posVals = xnf.getNumPositionValues();
 		int numCells = xnf.getNumCells();
 		
@@ -174,10 +204,6 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 				RANDINITWEIGHTS,ntPar,numCells);
 		
 		setTDParams(tdPar, maxGameNum);
-		//samine//
-		// m_EPS = eps;
-		m_epsilon = tdPar.getEpsilon();
-		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
 		
 		setAgentState(AgentState.INIT);
 	}
@@ -576,10 +602,49 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 		m_Net.setRpropLrn(tdPar.hasRpropLrn());
 		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
+		NORMALIZE=tdPar.getNormalize();
+		m_epsilon = tdPar.getEpsilon();
+		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
+	}
+
+	public void setTDParams(ParTD tdPar, int maxGameNum) {
+		m_Net.setLambda(tdPar.getLambda());
+		m_Net.setGamma(tdPar.getGamma());
+
+		double alpha = tdPar.getAlpha();
+		double alphaFinal = tdPar.getAlphaFinal();
+		double alphaChangeRatio = Math
+				.pow(alphaFinal / alpha, 1.0 / maxGameNum);
+		m_Net.setAlpha(tdPar.getAlpha());
+		m_Net.setAlphaChangeRatio(alphaChangeRatio);
+
+		m_Net.setRpropLrn(tdPar.hasRpropLrn());
+		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
+		NORMALIZE=tdPar.getNormalize();
+		m_epsilon = tdPar.getEpsilon();
+		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
 	}
 
 	public void setNTParams(NTParams ntPar) {
-		// *TODO* 
+		tcIn=ntPar.getTcInterval();
+		TC=ntPar.getTc();
+		USESYMMETRY=ntPar.getUseSymmetry();
+		tcImm=ntPar.getTcImm();		
+		randomness=ntPar.getRandomness();
+		randWalk=ntPar.getRandWalk();
+//		int numTuple=ntPar.getNtupleNumber();
+//		int maxTupleLen=ntPar.getNtupleMax();
+	}
+
+	public void setNTParams(ParNT ntPar) {
+		tcIn=ntPar.getTcInterval();
+		TC=ntPar.getTc();
+		USESYMMETRY=ntPar.getUseSymmetry();
+		tcImm=ntPar.getTcImm();		
+		randomness=ntPar.getRandomness();
+		randWalk=ntPar.getRandomWalk();
+//		int numTuple=ntPar.getNtupleNumber();
+//		int maxTupleLen=ntPar.getNtupleMax();
 	}
 
 	public void setAlpha(double alpha) {
@@ -601,6 +666,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 	public double getEpsilon() {
 		return m_epsilon;
+	}
+	
+	public NTupleValueFunc getNTupleValueFunc() {
+		return m_Net;
 	}
 	
 	public String stringDescr() {

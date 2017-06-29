@@ -368,6 +368,10 @@ public class NTupleValueFunc implements Serializable {
 	public double getAlphaChangeRatio() {
 		return m_AlphaChangeRatio;
 	}
+	
+	public XNTupleFuncs getXnf() {
+		return xnf;
+	}
 
 	//
 	// Debug only: 
