@@ -10,6 +10,7 @@ import controllers.TD.ntuple.NTupleValueFunc;
 import controllers.TD.ntuple.TDNTupleAgt;
 import games.StateObservation;
 import params.NTParams;
+import params.ParTD;
 import params.TDParams;
 
 /**
@@ -86,7 +87,7 @@ public class TDNTupleAgt_v12 extends AgentBase implements Serializable {
 		tcImm=tdagt.getNTParams().getTcImm();
 		
 		randomness=tdagt.getNTParams().getRandomness();
-		randWalk=tdagt.getNTParams().getRandWalk();
+		randWalk=tdagt.getNTParams().getRandomWalk();
 		int numTuple=tdagt.getNTParams().getNtupleNumber();
 		int maxTupleLen=tdagt.getNTParams().getNtupleMax();
 		int posVals = tdagt.getNTupleValueFunc().getXnf().getNumPositionValues();
@@ -98,10 +99,25 @@ public class TDNTupleAgt_v12 extends AgentBase implements Serializable {
 		m_epsilon = tdagt.getTDParams().getEpsilon();
 		m_EpsilonChangeDelta = (m_epsilon - tdagt.getTDParams().getEpsilonFinal()) / maxGameNum;
 		
-		setAgentState(AgentState.INIT);
+		setAgentState(tdagt.getAgentState());
 	}
 
 	public void setTDParams(TDParams tdPar, int maxGameNum) {
+		m_Net.setLambda(tdPar.getLambda());
+		m_Net.setGamma(tdPar.getGamma());
+
+		double alpha = tdPar.getAlpha();
+		double alphaFinal = tdPar.getAlphaFinal();
+		double alphaChangeRatio = Math
+				.pow(alphaFinal / alpha, 1.0 / maxGameNum);
+		m_Net.setAlpha(tdPar.getAlpha());
+		m_Net.setAlphaChangeRatio(alphaChangeRatio);
+
+		m_Net.setRpropLrn(tdPar.hasRpropLrn());
+		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
+	}
+
+	public void setTDParams(ParTD tdPar, int maxGameNum) {
 		m_Net.setLambda(tdPar.getLambda());
 		m_Net.setGamma(tdPar.getGamma());
 

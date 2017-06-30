@@ -39,7 +39,7 @@ public class ParNT implements Serializable {
 		this.tcImm = tp.getTcImm();
 		this.tcInterval = tp.getTcInterval();
 		this.randomness = tp.getRandomness();
-		this.randomWalk = tp.getRandWalk();
+		this.randomWalk = tp.getRandomWalk();
 		this.numTuple = tp.getNtupleNumber();
 		this.maxTupleLen = tp.getNtupleMax();
 		this.useSymmetry = tp.getUseSymmetry();

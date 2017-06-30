@@ -196,6 +196,11 @@ public class NTParams extends Frame implements Serializable {
 		
 		pack();
 		setVisible(false);
+	} // constructor NTParams()
+	
+	public NTParams(NTParams ntPar) {
+		this();
+		this.setFrom(ntPar);
 	}
 
 	private void enableTcPart() {
@@ -298,7 +303,7 @@ public class NTParams extends Frame implements Serializable {
 	public boolean getRandomness() {
 		return RandomnessC.isSelected();
 	}
-	public boolean getRandWalk() {
+	public boolean getRandomWalk() {
 		//Object Type=TupleType.getSelectedItem();			// /WK/ Bug fix: this did not work, need to test on String equalness
 		//if(Type==ntTupleTypeString[0]) // "RandomWalk"
 		String Type2 = (String) TupleType.getSelectedItem();
@@ -324,7 +329,7 @@ public class NTParams extends Frame implements Serializable {
 		InitT.setText(""+nt.getINIT());
 		//EvalT = nt.EvalT;
 		RandomnessC.setSelected(nt.getRandomness());
-		int ntindex= nt.getRandWalk()?0:1;
+		int ntindex= nt.getRandomWalk()?0:1;
 		TupleType.setSelectedIndex(ntindex);
 		nTupleNumT.setText(nt.getNtupleNumber()+"");
 		nTupleMaxT.setText(nt.getNtupleMax()+"");

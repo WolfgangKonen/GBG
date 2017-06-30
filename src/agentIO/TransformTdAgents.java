@@ -107,13 +107,10 @@ import params.TDParams;
 public class TransformTdAgents {
 	public static enum TRANSFORMDIRECTION {V12ToTemp,TempToV13};
 	private final String TMP_DIR = "agents/temp";
-//	private final JFileChooserApprove fc;
 	private final FileFilter tdAgentExt = new ExtensionFilter("agt.zip",
 			"TD-Agents");
 	private final FileFilter txtExt = new ExtensionFilter(".txt.zip",
 			"Compressed Text-Files (.txt.zip)");
-//	private final Arena arenaGame;
-//	private final XArenaButtons arenaButtons;
 	private final JFrame arenaFrame;
 
 	private List<String> fileList = new ArrayList<String>();
@@ -121,18 +118,19 @@ public class TransformTdAgents {
 	private String tdFileExt="agt.zip";
 
 	public TransformTdAgents(TRANSFORMDIRECTION tdirect, JFrame areFrame) {
-//		this.arenaGame = areGame;
-//		this.arenaButtons = areButtons;
 		this.arenaFrame = areFrame;
 
-//		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
-//		fc = new JFileChooserApprove();
-//		fc.setCurrentDirectory(new File(strDir));
-		
 		// Specify here the pairs (directory,file) you want to process.
-		// Note that files are *without* extension ".agt.zip", this is added from tdFileExt (!)
+		// Note that files are without extension ".agt.zip", this is added from tdFileExt (!)
 		dirList.add("agents/TicTacToe"); fileList.add("tdntuple"); 
-
+		dirList.add("agents/Hex/04"); fileList.add("firstTDNT"); 
+		dirList.add("agents/Hex/05"); fileList.add("firstTDNT"); 
+		dirList.add("agents/Hex/05"); fileList.add("secondTDNT"); 
+		dirList.add("agents/Hex/06"); fileList.add("firstTDNT"); 
+		dirList.add("agents/2048"); fileList.add("3 Tupel 1m Traininggames"); 
+		dirList.add("agents/2048"); fileList.add("3 Tupel 100k Trainingames"); 
+		dirList.add("agents/2048"); fileList.add("fixed Tupels 100k Traininggames"); 
+		
 		String filePath = "";
 		
 		try {
@@ -140,11 +138,18 @@ public class TransformTdAgents {
 		case V12ToTemp:
 			for (int i=0; i<fileList.size(); i++) {
 				filePath = dirList.get(i)+"/"+fileList.get(i);
+				System.out.println(filePath);
 				TDNTupleAgt pa = (TDNTupleAgt) this.loadTDAgent(dirList.get(i), fileList.get(i));
-				saveTempAgtFile(pa, dirList.get(i), fileList.get(i));
+				this.saveTempAgtFile(pa, dirList.get(i), fileList.get(i));
 			}
 			break;
 		case TempToV13: 
+			for (int i=0; i<fileList.size(); i++) {
+				filePath = dirList.get(i)+"/"+fileList.get(i);
+				System.out.println(filePath);
+				PlayAgent pa = this.loadTempAgtFile(dirList.get(i), fileList.get(i));
+				this.saveTDAgent(pa, dirList.get(i), fileList.get(i));
+			}
 			break;
 		default:
 			throw new RuntimeException("Case not handled in switch(tdirect): "+tdirect);
@@ -371,6 +376,99 @@ public class TransformTdAgents {
 
 		// Rescan current directory, hope it helps
 //		fc.rescanCurrentDirectory();
+	}
+
+	public PlayAgent loadTempAgtFile(String strDir, String fileName) throws IOException, ClassNotFoundException {
+		checkAndCreateFolder(TMP_DIR+"/"+strDir);
+
+		TDNTupleAgt pa = null;
+		String filePath = TMP_DIR+"/"+strDir+"/"+fileName+"."+tdFileExt;
+
+			ObjectInputStream ois = null;
+			FileInputStream fis = null;
+			try {
+
+				fis = new FileInputStream(filePath);
+			} catch (IOException e) {
+				System.out.println("[ERROR: Could not open file " + filePath
+						+ " !]");
+				e.printStackTrace();
+			}
+			
+			GZIPInputStream gs = null;
+			try {
+				gs = new GZIPInputStream(fis);
+			} catch (IOException e1) {
+				System.out.println("[ERROR: Could not create ZIP-InputStream for"
+								+ filePath + " !]");
+				throw e1;
+			}
+
+			long fileLength = (long) 1L; //(estimateGZIPLength(file));
+			final ProgressTrackingObjectInputStream ptis = new ProgressTrackingObjectInputStream(
+					gs, new agentIO.IOProgress(fileLength));
+			try {
+				ois = new ObjectInputStream(ptis);
+			} catch (IOException e1) {
+				ptis.close();
+				System.out.println("[ERROR: Could not create ObjectInputStream for"
+								+ filePath + " !]");
+				throw e1;
+			}
+
+			//final JDialog dlg = createProgressDialog(ptis, "Loading...");
+
+			try {
+				// ois = new ObjectInputStream(gs);
+				Object obj = ois.readObject();
+				if (obj instanceof TDNTupleAgt_v12) {
+					pa = new TDNTupleAgt((TDNTupleAgt_v12) obj);
+//				} else if (obj instanceof TDAgent) {
+//					pa = (TDAgent) obj;
+//				} else if (obj instanceof MCTSAgentT) {
+//					pa = (MCTSAgentT) obj;
+//				} else if (obj instanceof MinimaxAgent) {
+//					pa = (MinimaxAgent) obj;
+//				} else if (obj instanceof RandomAgent) {
+//					pa = (RandomAgent) obj;
+				} else {
+					//dlg.setVisible(false);
+					MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
+							+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
+					System.out.println("[ERROR: Could not load agent from "
+									+ filePath + "!]");
+					throw new ClassNotFoundException("ERROR: Unknown agent class");
+				}
+				//dlg.setVisible(false);
+				//arenaGame.setProgress(null);
+				System.out.println("Done.");
+			} catch (IOException e) {
+				//dlg.setVisible(false);
+				MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
+						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+				System.out.println("[ERROR: Could not open file " + filePath
+						+ " !]");
+				//e.printStackTrace();
+				//throw e;
+			} catch (ClassNotFoundException e) {
+				//dlg.setVisible(false);
+				MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
+						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+				//throw e;
+			} finally {
+				if (ois != null)
+					try {
+						ois.close();
+					} catch (IOException e) {
+					}
+				if (fis != null)
+					try {
+						fis.close();
+					} catch (IOException e) {
+					}
+			}
+		return pa;
 	}
 
 	public void saveTempAgtFile(PlayAgent pa, String strDir, String fileName) throws IOException {

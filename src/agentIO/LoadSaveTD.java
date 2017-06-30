@@ -210,7 +210,7 @@ public class LoadSaveTD {
 				}
 				if (pa instanceof TDNTupleAgt) {
 					TDNTupleAgt tdnt = (TDNTupleAgt) pa;
-					NTParams ntpar = tdnt.getNTParams();
+					//NTParams ntpar = tdnt.getNTParams();
 					// only for debug:
 //					System.out.println("randWalk:  "+tdnt.getNTParams().getRandWalk());
 //					System.out.println("randNumTup: "+ntpar.getNtupleNumber());

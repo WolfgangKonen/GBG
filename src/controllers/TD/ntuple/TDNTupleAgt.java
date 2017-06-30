@@ -54,7 +54,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * compatible with an older one (older .agt.zip will become unreadable or you have
 	 * to provide a special version transformation)
 	 */
-	private static final long  serialVersionUID = 12L;
+	private static final long  serialVersionUID = 13L;
 
 	/**
 	 * Controls the amount of explorative moves in
@@ -96,8 +96,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * Members {@link #m_tdPar} {@link #m_ntPar} are only needed for saving and loading
 	 * the agent (to restore the agent with all its parameter settings)
 	 */
-	private TDParams m_tdPar;
-	private NTParams m_ntPar;
+//	private TDParams m_tdPar;
+//	private NTParams m_ntPar;
+	private ParTD m_tdPar;
+	private ParNT m_ntPar;
 	
 	//public int epiCount=0;
 
@@ -155,10 +157,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 */
 	public TDNTupleAgt(TDNTupleAgt_v12 tdagt) {
 		super(tdagt.getName());
-		m_tdPar = new TDParams();
-		m_tdPar.setFrom(tdagt.getTDParams());
-		m_ntPar = new NTParams();
-		m_ntPar.setFrom(tdagt.getNTParams());
+		m_tdPar = new ParTD(tdagt.getTDParams());
+		m_ntPar = new ParNT(tdagt.getNTParams());
 		rand = new Random(42); //(System.currentTimeMillis());		
 
 		setNTParams(m_ntPar);
@@ -173,7 +173,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		setTDParams(tdagt.getTDParams(), tdagt.getMaxGameNum());
 //		NORMALIZE=tdagt.getTDParams().getNormalize(); // now in setTDParams
 		
-		setAgentState(AgentState.INIT);
+		//setAgentState(tdagt.getAgentState());
+		setAgentState(AgentState.TRAINED);
 	}
 
 
@@ -188,12 +189,9 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 */
 	private void initNet(NTParams ntPar, TDParams tdPar, int[][] nTuples, 
 			XNTupleFuncs xnf, int maxGameNum) throws IOException {
-		m_tdPar = new TDParams();
-		m_tdPar.setFrom(tdPar);
-		m_ntPar = new NTParams();
-		m_ntPar.setFrom(ntPar);
+		m_tdPar = new ParTD(tdPar);
+		m_ntPar = new ParNT(ntPar);
 		rand = new Random(42); //(System.currentTimeMillis());		
-		//samine//
 		
 		setNTParams(ntPar);
 
@@ -631,7 +629,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		USESYMMETRY=ntPar.getUseSymmetry();
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
-		randWalk=ntPar.getRandWalk();
+		randWalk=ntPar.getRandomWalk();
 //		int numTuple=ntPar.getNtupleNumber();
 //		int maxTupleLen=ntPar.getNtupleMax();
 	}
@@ -691,10 +689,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		return str;
 	}
 
-	public TDParams getTDParams() {
+	public ParTD getTDParams() {
 		return m_tdPar;
 	}
-	public NTParams getNTParams() {
+	public ParNT getNTParams() {
 		return m_ntPar;
 	}
 

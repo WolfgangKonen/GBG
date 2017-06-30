@@ -213,6 +213,11 @@ public class TDParams extends Frame implements Serializable
 		setVisible(false);
 	} // constructor TDParams()	
 	
+	public TDParams(TDParams tdPar) {
+		this();
+		this.setFrom(tdPar);
+	}
+	
 	public JPanel getPanel() {
 		return tdPanel;
 	}
@@ -404,6 +409,8 @@ public class TDParams extends Frame implements Serializable
 			epochT.setText("1");				//
 			withSigType.setSelected(false);		// Fermi fct
 			normalize.setSelected(false);		// 
+			withSigType.setEnabled(true);		
+			SigTypeL.setEnabled(true);
 			NetTypeL.setEnabled(true);
 			LinNetType.setEnabled(true);
 			BprNetType.setEnabled(true);
