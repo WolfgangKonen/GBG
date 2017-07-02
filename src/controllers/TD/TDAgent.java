@@ -121,7 +121,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_feature = feature; 
 		//super.setFeatmode(tdPar.getFeatmode());
 		//super.setEpochMax(tdPar.getEpochs());
-		if (m_feature.getFeatmode() > 9) {
+		if (m_feature.getFeatmode() > 99) {
 			m_Net = null;
 		} else {
 			if (tdPar.hasLinearNet()) {
@@ -228,17 +228,26 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				CurrentScore = NewSO.getGameScore(so);
 
 				if (NORMALIZE) {
-					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid):
+					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+					// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+					double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+					double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+					
 					CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
-									   		 so.getMaxGameScore(),0.0,1.0);					
+									   so.getMaxGameScore(),lower,upper);
 				}
-			}  else {
+			}  
+			else {
 				CurrentScore = player * getScore(NewSO);
 										// here we ask this agent for its score estimate on NewSO
 				if (NORMALIZE) {
-					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid):
+					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+					// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+					double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+					double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+					
 					CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
-									   		 so.getMaxGameScore(),0.0,1.0);					
+									   so.getMaxGameScore(),lower,upper);
 				}
 				// unclear why, but for TTT the agent has better results if there is no 
 				// normalization here but the normalize call 4 lines above
@@ -349,6 +358,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		String S_old, I_old = null;   // only as debug info
 		int player;
 		Types.ACTIONS actBest;
+		StateObservation oldSO;
 		boolean isNtuplePlayer = (m_feature.getFeatmode() == 8
 				|| this.getClass().getName().equals("TD_NTPlayer"));
 
@@ -375,32 +385,53 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			VTable = new double[so.getNumAvailableActions()+1];
 			actBest = this.getNextAction(so, true, VTable, true);
 			randomMove = this.wasRandomAction();
+			oldSO = so.copy();
 			so.advance(actBest);
+
 			if (so.isGameOver()) {
 				// Fetch a reward and normalize it to the range [0,1], since 
 				// TD_NNet may build a value function with a sigmoid function
 				// mapping to [0,1]. Then it can use only rewards in [0,1].
-				switch (so.getNumPlayers()) {
-				case 1: 
-					reward = so.getGameScore();
-					break;
-				case 2: 
-					reward = (-player)*so.getGameScore();
-					// so.getGameScore() returns -1, if 'player', that is the
-					// one who *made* the move to 'so', has won. If we multiply
-					// this by (-player), we get a reward +1 for a X(player=+1)- 
-					// win and a reward -1 for an O(player=-1)-win.
-					// And a reward 0 for a tie.
-					break;
-				default: 
-					throw new RuntimeException("TDPlayer.trainAgent not yet "+
-							"implementing case so.getNumPlayers()>2");
+				
+//				switch (so.getNumPlayers()) {
+//				case 1: 
+//					reward = so.getGameScore();
+//					break;
+//				case 2: 
+//					reward = (-player)*so.getGameScore();
+//					// so.getGameScore() returns -1, if 'player', that is the
+//					// one who *made* the move to 'so', has won. If we multiply
+//					// this by (-player), we get a reward +1 for a X(player=+1)- 
+//					// win and a reward -1 for an O(player=-1)-win.
+//					// And a reward 0 for a tie.
+//					break;
+//				default: 
+//					throw new RuntimeException("TDPlayer.trainAgent not yet "+
+//							"implementing case so.getNumPlayers()>2");
+//				}
+				
+				// the whole switch-statement above can be replaced with the simpler  
+				// logic of so.getGameScore(StateObservation referingState), where  
+				// referingState is 'oldSO', the state before so. [This should be  
+				// extensible to 3- or 4-player games (!) as well, if we put the 
+				// proper logic into method getGameScore(referingState).]  
+				reward = player*so.getGameScore(oldSO);
+				
+				if (NORMALIZE) {
+					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+					// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+					double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+					double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+					
+					reward = normalize(reward,so.getMinGameScore(),
+									   so.getMaxGameScore(),lower,upper);
 				}
-				// Normalize to +1 (X-win), 0.5 (tie), 0.0 (O-win) for 2-player game:
-				reward = normalize(reward,so.getMinGameScore(),
-								   so.getMaxGameScore(),0.0,1.0);
 				finished = true;
 			} else {
+				//it is irrelevant what we put into reward here, because it will 
+				//not be used in m_Net.updateWeights when finished is not true.
+				//
+				// ??? has to be re-thought for the case of 2048 and other 1-player games!!!
 				reward = 0.0;
 			}
 			counter++;
@@ -426,7 +457,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				
 				// this is the accumulation logic: if eMax>0, then form 
 				// mini batches and apply the weight changes only at the end
-				// of such mini batches
+				// of such mini batches (after eMax complete games)
 				int eMax = super.getEpochMax();
 				if (eMax==0) {
 					wghtChange=true;
@@ -440,7 +471,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				m_Net.updateWeights(reward, Input, finished, wghtChange);
 				// contains afterwards a m_Net.calcScoresAndElig(Input);
 
-				oldInput = Input; 		// ?? should be outside else, see below
 			}
 
 			oldInput = Input; 

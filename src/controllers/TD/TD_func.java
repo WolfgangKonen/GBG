@@ -13,6 +13,9 @@ package controllers.TD;
  *
  */
 public interface TD_func {
+	
+	public boolean FERMI_FCT = false; // if false, take tanh instead
+	
 	abstract public void resetElig();
 	abstract public void calcScoresAndElig(double[] Input);
 	public double[] updateWeights(double reward, double[] Input, boolean finished, boolean wghtChange);

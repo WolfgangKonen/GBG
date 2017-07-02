@@ -24,6 +24,8 @@ public class FeatureHex implements Feature {
                 return createFeatureVector1(stateObs.getPlayer(), stateObs.getBoard());
             case 2:
                 return createFeatureVector2(stateObs.getPlayer(), stateObs.getBoard());
+            case 99:
+                return createFeatureVector99(stateObs.getPlayer(), stateObs.getBoard());
             default:
                 System.out.println("Unknown feature mode, defaulting to feature mode 0");
                 return createFeatureVector0(stateObs.getPlayer(), stateObs.getBoard());
@@ -51,7 +53,7 @@ public class FeatureHex implements Feature {
 
     @Override
     public int[] getAvailFeatmode() {
-        return new int[]{0, 1, 2};
+        return new int[]{0, 1, 2, 99};
     }
 
     @Override
@@ -63,6 +65,8 @@ public class FeatureHex implements Feature {
         	return HexConfig.TILE_COUNT;
         case 2:
             return HexConfig.BOARD_SIZE*HexConfig.BOARD_SIZE + 2;
+        case 99:
+        	return 81; // only for BOARD_SIZE=2
         default:
             throw new RuntimeException("Unknown featmode: "+featmode);
         }
@@ -134,4 +138,23 @@ public class FeatureHex implements Feature {
 
         return inputVector;
     }
+
+    public double[] createFeatureVector99(int player, HexTile[][] board){
+    	if (board[0].length>2)
+    		throw new RuntimeException("Feature mode 99 only available for 2x2 board");
+    	
+        double[] inputVector = new double[81];  // = 3^4
+
+        int index=0; // index into LUT = inputVector 
+        for (int i = 0, k=0; i<HexConfig.BOARD_SIZE; i++ ){
+            for (int j = 0; j<HexConfig.BOARD_SIZE; j++, k++ ){
+                int posValue = board[i][j].getPlayer()+1;
+                index += k*posValue;
+            }
+        }
+        inputVector[index] = 1;
+
+        return inputVector;
+    }
+
 }

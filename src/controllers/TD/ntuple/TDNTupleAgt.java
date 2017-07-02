@@ -163,18 +163,14 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 		setNTParams(m_ntPar);
 
-//		int numTuple=tdagt.getNTParams().getNtupleNumber();
-//		int maxTupleLen=tdagt.getNTParams().getNtupleMax();
-		int posVals = tdagt.getNTupleValueFunc().getXnf().getNumPositionValues();
-		int numCells = tdagt.getNTupleValueFunc().getXnf().getNumCells();
-		
 		m_Net = tdagt.getNTupleValueFunc();
 		
 		setTDParams(tdagt.getTDParams(), tdagt.getMaxGameNum());
-//		NORMALIZE=tdagt.getTDParams().getNormalize(); // now in setTDParams
 		
-		//setAgentState(tdagt.getAgentState());
-		setAgentState(AgentState.TRAINED);
+		this.setAgentState(tdagt.getAgentState());		
+		this.setMaxGameNum(tdagt.getMaxGameNum());
+		this.setEpochMax(tdagt.getEpochMax());
+		this.setNumEval(tdagt.getNumEval());
 	}
 
 
@@ -406,6 +402,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		String S_old, I_old = null;   // only as debug info
 		int player;
 		Types.ACTIONS actBest;
+		StateObservation oldSO;
 		int[] curBoard = m_Net.xnf.getBoardVector(so);
 		int   curPlayer=so.getPlayer();
 		int[] nextBoard = null;
@@ -430,6 +427,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			actBest = this.getNextAction(so, true, VTable, true);
 			//actBest = this.getNextAction(so, false, VTable, true);  // Debug only
 			randomMove = this.wasRandomAction();
+			oldSO = so.copy();
 			so.advance(actBest);
 			nextBoard = m_Net.xnf.getBoardVector(so);
 			nextPlayer= so.getPlayer();
@@ -437,27 +435,50 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			if (DEBG) printTable(pstream,nextBoard);
 			if (so.isGameOver()) {
 				// Fetch the reward from StateObservation:
-				switch (so.getNumPlayers()) {
-				case 1: 
-					reward = so.getGameScore();
-					break;
-				case 2: 
-					reward = (-player)*so.getGameScore();
-					// so.getGameScore() returns -1, if 'player', that is the
-					// one who *made* the move to 'so', has won. If we multiply
-					// this by (-player), we get a reward +1 for a X(player=+1)- 
-					// win and a reward -1 for an O(player=-1)-win.
-					// And a reward 0 for a tie.
-					break;
-				default: 
-					throw new RuntimeException("TDNTupleAgt.trainAgent not yet "+
-							"implementing case so.getNumPlayers()>2");
+//				switch (so.getNumPlayers()) {
+//				case 1: 
+//					reward = so.getGameScore();
+//					break;
+//				case 2: 
+//					reward = (-player)*so.getGameScore();
+//					// so.getGameScore() returns -1, if 'player', that is the
+//					// one who *made* the move to 'so', has won. If we multiply
+//					// this by (-player), we get a reward +1 for a X(player=+1)- 
+//					// win and a reward -1 for an O(player=-1)-win.
+//					// And a reward 0 for a tie.
+//					break;
+//				default: 
+//					throw new RuntimeException("TDNTupleAgt.trainAgent not yet "+
+//							"implementing case so.getNumPlayers()>2");
+//				}
+				
+				// the whole switch-statement above can be replaced with the simpler  
+				// logic of so.getGameScore(StateObservation referingState), where  
+				// referingState is 'oldSO', the state before so. [This should be  
+				// extensible to 3- or 4-player games (!) as well, if we put the 
+				// proper logic into method getGameScore(referingState).]  
+				reward = player*so.getGameScore(oldSO);
+
+				if (NORMALIZE) {
+//					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+//					// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+//					double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+//					double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+					
+					// since we have - in contrast to TDAgent - here only one sigmoid
+					// choice, namely tanh, we can take fixed [min,max] = [-1,+1]. 
+					// If we would later extend to several sigmoids, we would have to 
+					// adapt here:
+					
+					reward = normalize(reward,so.getMinGameScore(),
+									   so.getMaxGameScore(),-1,+1);
 				}
-				// Normalize to +1 (X-win), 0.5 (tie), 0.0 (O-win) for 2-player game:
-				//reward = normalize(reward,so.getMinGameScore(),
-				//				   so.getMaxGameScore(),0.0,1.0);
 				finished = true;
 			} else {
+				//it is irrelevant what we put into reward here, because it will 
+				//not be used in m_Net.updateWeights when finished is not true.
+				//
+				// ??? has to be re-thought for the case of 2048 and other 1-player games!!!
 				reward = 0.0;
 			}
 			counter++;
@@ -630,8 +651,6 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
-//		int numTuple=ntPar.getNtupleNumber();
-//		int maxTupleLen=ntPar.getNtupleMax();
 	}
 
 	public void setNTParams(ParNT ntPar) {
@@ -641,8 +660,6 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
-//		int numTuple=ntPar.getNtupleNumber();
-//		int maxTupleLen=ntPar.getNtupleMax();
 	}
 
 	public void setAlpha(double alpha) {

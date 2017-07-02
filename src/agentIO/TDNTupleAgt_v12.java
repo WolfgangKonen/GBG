@@ -99,7 +99,11 @@ public class TDNTupleAgt_v12 extends AgentBase implements Serializable {
 		m_epsilon = tdagt.getTDParams().getEpsilon();
 		m_EpsilonChangeDelta = (m_epsilon - tdagt.getTDParams().getEpsilonFinal()) / maxGameNum;
 		
-		setAgentState(tdagt.getAgentState());
+		this.setAgentState(tdagt.getAgentState());		
+		this.setMaxGameNum(tdagt.getMaxGameNum());
+		this.setEpochMax(tdagt.getEpochMax());
+		this.setNumEval(tdagt.getNumEval());
+
 	}
 
 	public void setTDParams(TDParams tdPar, int maxGameNum) {

@@ -26,7 +26,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     private transient ElapsedCpuTimer m_Timer;
     
     @Deprecated 
-    // should use this.getMCTSParams() instead 
+    // should use this.getParMCTS() instead 
 	//private MCTSParams params;
     private ParMCTS pmcts; 
 

@@ -247,6 +247,7 @@ public class XArenaFuncs
 		boolean PLOTTRAINEVAL=false;
 		maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		numEval = xab.oPar.getNumEval();
+		if (numEval==0) numEval=500; // just for safety, to avoid ArithmeticException in 'gameNum%numEval' below
 
 		DecimalFormat frm = new DecimalFormat("#0.0000");
 		PlayAgent pa = null;

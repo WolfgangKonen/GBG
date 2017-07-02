@@ -425,8 +425,13 @@ public class TDParams extends Frame implements Serializable
 			case "TicTacToe": 
 				setFeatmode(3);
 				break;
-			default:	// "Hex" and all other
+			case "Hex": 
+				setFeatmode(2);
+				lambdaT.setText("0.0");				
+				break;
+			default:	//  all other
 				setFeatmode(0);
+				lambdaT.setText("0.0");				
 				break;
 			}
 			break;

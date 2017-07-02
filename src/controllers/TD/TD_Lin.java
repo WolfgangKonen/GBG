@@ -39,6 +39,9 @@ are held at a constant value (BIAS).
 
 public class TD_Lin implements TD_func, Serializable {
     protected Random rand;
+	
+    //--- this is now in TD_func ---
+    //public boolean FERMI_FCT=true; // if false, take tanh instead
 
     /* Experimental Parameters: */
 
@@ -283,7 +286,7 @@ public class TD_Lin implements TD_func, Serializable {
     	double target = (finished ? reward : GAMMA*y[0]);
     	for (int k=0;k<m;k++) 
            error[k] = target - old_y[k];
-        this.TDlearn();			// backward pass - learning: accumulate weight changes
+		this.TDlearn();			// backward pass - learning: accumulate weight changes
         if (wghtChange) this.TDchangeWeights();		// apply weight changes
         if (DEBG && finished) {
             getScore(old_Input);	
@@ -327,7 +330,12 @@ public class TD_Lin implements TD_func, Serializable {
     		old_y[k] = y[k];
 
     	if (withSigmoid) {
-    		for (k=0;k<m;k++)	temp[k]=y[k]*(1-y[k]);
+    		if (FERMI_FCT) {
+        		for (k=0;k<m;k++)	temp[k]=y[k]*(1-y[k]);    			
+    		} else {
+    			// this is the derivative for tanh sigmoid
+    			for (k=0;k<m;k++)	temp[k]=(1-y[k]*y[k]);
+    		}
     	} else {
     		for (k=0;k<m;k++)	temp[k]=1.0;
     	}
@@ -387,10 +395,14 @@ public class TD_Lin implements TD_func, Serializable {
     			y[k]+=x[j]*v[j][k];
     		}
     		if (withSigmoid)
-    			y[k]=1.0/(1.0+Math.exp(-y[k])); /* asymmetric sigmoid (Fermi fct) \in [0,1] */
-//    			y[k]=2.0*y[k]-1.0;				
-    			/* uncomment the line above to map to symmetric sigmoid \in [-1,1]. This
-    			 * needs a factor 2 in the withSigmoid-branch of updateElig() */ 
+    			if (FERMI_FCT) {
+        			y[k]=1.0/(1.0+Math.exp(-y[k])); /* asymmetric sigmoid (Fermi fct) \in [0,1] */
+//        			y[k]=2.0*y[k]-1.0;				
+        			/* uncomment the line above to map to symmetric sigmoid \in [-1,1]. This
+        			 * needs a factor 2 in the withSigmoid-branch of updateElig() */     				
+    			} else {
+    				y[k] = Math.tanh(y[k]);
+    			}
 
     	}
     	return(y[0]);
@@ -479,58 +491,58 @@ public class TD_Lin implements TD_func, Serializable {
     	return (n+1)*m+1;
     }
     
-    public static TD_Lin loadNet(String FileName) {
-        TD_Lin Net = null;
-
-        if (FileName != null) {
-            try {
-                ObjectInputStream in = new ObjectInputStream(new FileInputStream(FileName));
-                Net = new TD_Lin(1,false);
-/*
-                Net.m_OutputLayer = in.readDouble();
-                Net.m_InputLayer = (double[]) in.readObject();
-                Net.m_HiddenLayerOutputs = (double[]) in.readObject();
-                Net.m_HiddenLayerWeights = (double[]) in.readObject();
-                Net.m_OutputLayerWeights = (double[]) in.readObject();
-                Net.m_InputNum = in.readInt();
-                Net.m_NeuronsNum = in.readInt();
-                Net.m_TimePeriod = in.readInt();
-                Net.ALPHA = in.readDouble();
-                Net.LAMBDA = in.readDouble();
-                Net.m_AlphaChangeRatio = in.readDouble();
- */                
-                in.close();
-            } catch (Exception E) {
-				Net = null;
-            }
-        }
-        return Net;
-    }
-
-    public void saveNet(String FileName) {
-        if (FileName != null) {
-            try {
-                ObjectOutputStream out =
-                    new ObjectOutputStream(new FileOutputStream(FileName, false));
-/*                
-                out.writeDouble(m_OutputLayer);
-                out.writeObject(m_InputLayer);
-                out.writeObject(m_HiddenLayerOutputs);
-                out.writeObject(m_HiddenLayerWeights);
-                out.writeObject(m_OutputLayerWeights);
-                out.writeInt(m_InputNum);
-                out.writeInt(m_NeuronsNum);
-                out.writeInt(m_TimePeriod);
-                out.writeDouble(ALPHA);
-                out.writeDouble(LAMBDA);
-                out.writeDouble(m_AlphaChangeRatio);
- */                
-                out.close();
-            } catch (Exception E) {
-
-            }
-        }
-    }
+//    public static TD_Lin loadNet(String FileName) {
+//        TD_Lin Net = null;
+//
+//        if (FileName != null) {
+//            try {
+//                ObjectInputStream in = new ObjectInputStream(new FileInputStream(FileName));
+//                Net = new TD_Lin(1,false);
+///*
+//                Net.m_OutputLayer = in.readDouble();
+//                Net.m_InputLayer = (double[]) in.readObject();
+//                Net.m_HiddenLayerOutputs = (double[]) in.readObject();
+//                Net.m_HiddenLayerWeights = (double[]) in.readObject();
+//                Net.m_OutputLayerWeights = (double[]) in.readObject();
+//                Net.m_InputNum = in.readInt();
+//                Net.m_NeuronsNum = in.readInt();
+//                Net.m_TimePeriod = in.readInt();
+//                Net.ALPHA = in.readDouble();
+//                Net.LAMBDA = in.readDouble();
+//                Net.m_AlphaChangeRatio = in.readDouble();
+// */                
+//                in.close();
+//            } catch (Exception E) {
+//				Net = null;
+//            }
+//        }
+//        return Net;
+//    }
+//
+//    public void saveNet(String FileName) {
+//        if (FileName != null) {
+//            try {
+//                ObjectOutputStream out =
+//                    new ObjectOutputStream(new FileOutputStream(FileName, false));
+///*                
+//                out.writeDouble(m_OutputLayer);
+//                out.writeObject(m_InputLayer);
+//                out.writeObject(m_HiddenLayerOutputs);
+//                out.writeObject(m_HiddenLayerWeights);
+//                out.writeObject(m_OutputLayerWeights);
+//                out.writeInt(m_InputNum);
+//                out.writeInt(m_NeuronsNum);
+//                out.writeInt(m_TimePeriod);
+//                out.writeDouble(ALPHA);
+//                out.writeDouble(LAMBDA);
+//                out.writeDouble(m_AlphaChangeRatio);
+// */                
+//                out.close();
+//            } catch (Exception E) {
+//
+//            }
+//        }
+//    }
 
     public void setAlphaChangeRatio(double newAlphaChangeRatio) {
         m_AlphaChangeRatio = newAlphaChangeRatio;
