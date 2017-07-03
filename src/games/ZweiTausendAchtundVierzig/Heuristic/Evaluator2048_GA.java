@@ -3,12 +3,6 @@ package games.ZweiTausendAchtundVierzig.Heuristic;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
-import games.ZweiTausendAchtundVierzig.Evaluator2048;
-import params.MCTSExpectimaxParams;
-
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
-import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Created by Johannes on 29.06.2017.
@@ -16,7 +10,6 @@ import java.util.Random;
 public class Evaluator2048_GA extends Evaluator {
     private int verbose;
     private HeuristicSettings2048[] population = new HeuristicSettings2048[ConfigEvaluator.TOTALPOPULATION];
-    private Random random = new Random();
     private int totalfitness = 0;
     private int bestFitness = 0;
     private int bestHeuristicSettings2048 = 0;
@@ -42,6 +35,9 @@ public class Evaluator2048_GA extends Evaluator {
         //return true;
     }
 
+    /**
+     * create a new generation of "childs"
+     */
     private void newGeneration() {
         totalfitness = 0;
         bestFitness = 0;
@@ -59,12 +55,13 @@ public class Evaluator2048_GA extends Evaluator {
 
             if(population[i].fitness >= bestFitness) {
                 bestHeuristicSettings2048 = i;
+                bestFitness = population[i].fitness;
             }
         }
 
         if(verbose == 0) {
             System.out.println("\nFinished evaluation of the new generation. Average fitness is: " + getLastResult() + ", total fitness is " + totalfitness + ".");
-            System.out.println("Best new member is " + bestHeuristicSettings2048 + " with fitness " + population[bestHeuristicSettings2048].fitness + " and this settings:");
+            System.out.println("Best new member is " + (bestHeuristicSettings2048+1) + " with fitness " + population[bestHeuristicSettings2048].fitness + " and this settings:");
             System.out.println(population[bestHeuristicSettings2048].toString());
         }
 
@@ -83,6 +80,11 @@ public class Evaluator2048_GA extends Evaluator {
         }
     }
 
+    /**
+     * returns a random member of the population, chance is weighted with the fitness fo each member
+     *
+     * @return the selected member
+     */
     private HeuristicSettings2048 getWeightedRandomPop() {
         double value = Math.random() * totalfitness;
 

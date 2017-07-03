@@ -22,7 +22,7 @@ public class Evaluator2048 extends Evaluator {
     private double averageScore;
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = Integer.MIN_VALUE;
-    List<Integer> scores = new ArrayList<>();
+    private List<Integer> scores = new ArrayList<>();
     private long standartdeviation;
     private double averageRolloutDepth;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
