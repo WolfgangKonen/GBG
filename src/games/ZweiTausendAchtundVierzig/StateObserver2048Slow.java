@@ -157,15 +157,8 @@ public class StateObserver2048Slow implements StateObservation {
     }
 
     @Override
-    public double getGameScore() {
-        if(ConfigGame.ENABLEHEURISTICS) {
-            return getGameScore2();
-        } else {
-            return getGameScore1();
-        }
-    }
 
-    public double getGameScore1() {
+    public double getGameScore() {
         if(score == 0) {
             return 0;
         } else {
@@ -173,7 +166,7 @@ public class StateObserver2048Slow implements StateObservation {
         }
     }
 
-    public double getGameScore2() {
+    public double getGameScore1() {
         if (isGameOver()) {
             double penalisation = ConfigGame.PENALISATION;
 

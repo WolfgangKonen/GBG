@@ -2,6 +2,7 @@ package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
 import games.StateObservationNondeterministic;
+import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -149,14 +150,6 @@ public class StateObserver2048 implements StateObservationNondeterministic {
     }
 
     public double getGameScore() {
-        if(ConfigGame.ENABLEHEURISTICS) {
-            return getGameScore2();
-        } else {
-            return getGameScore1();
-        }
-    }
-
-    private double getGameScore1() {
         if(score == 0) {
             return 0;
         } else {
@@ -164,23 +157,327 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         }
     }
 
-    private double getGameScore2() {
-//            int[][] values = new int[MCAgentConfig.ROWS][MCAgentConfig.COLUMNS];
-//        for(int row = MCAgentConfig.ROWS-1, position=0; row >=0 ; row--) {
-//            for(int column = MCAgentConfig.COLUMNS-1; column >=0 ; column--,position++) {
-//                long b2 = boardB;
-//                values[row][column] = (1 << (b2 & 0x0fL));
-//                b2 = (b2 >> 4);
-//            }
-//        }
-        StateObserver2048Slow so = new StateObserver2048Slow(this.toArray(),score,winState);
 
-        double score2 = so.getGameScore2();
-        this.highestTileInCorner = false;
-        this.rowLength = so.rowLength;
-        this.rowValue = so.rowValue;
-        this.mergeValue = so.mergeValue;
-        return score2;
+    public double getHeuristicBonus(HeuristicSettings2048 settings) {
+        double bonus = 0;
+
+        //TODO: evtl so strukturieren, das jede HeuristikMethode für sich ein und ausgestellt werden kann und mehrere Methoden pro Heuristik aktiv sein können
+
+        //find new Values
+        evaluateBoard(settings.rowMethod);
+
+        //Empty Tile Heuristik
+        if(settings.enableEmptyTiles) {
+            switch (settings.emptyTilesMethod) {
+                case 0:
+                    bonus += Math.pow(settings.emptyTilesWeighting0, emptyTiles.size());
+                    break;
+                case 1:
+                    bonus += highestTileValue * emptyTiles.size() * settings.emptyTilesWeighting1;
+                    break;
+                case 2:
+                    bonus += score * emptyTiles.size() * settings.emptyTilesWeighting2;
+                    break;
+                default:
+                    throw new RuntimeException(settings.emptyTilesMethod + " is not a valid Empty Tiles Method");
+            }
+        }
+
+        //Row Heuristik
+        if(settings.enableRow) {
+            switch (settings.rowMethod) {
+                case 0:
+                    bonus += rowValue * settings.rowWeighting0;
+                    break;
+                case 1:
+                    bonus += rowValue * settings.rowWeighting1;
+                    break;
+                default:
+                    throw new RuntimeException(settings.emptyTilesMethod + " is not a valid Row Method");
+            }
+        }
+
+        //Merge Heuristik
+        if(settings.enableMerge) {
+            bonus += mergeValue * settings.mergeWeighting;
+        }
+
+        //Highest Tile In Corner Heuristik
+        if (highestTileInCorner && settings.enableHighestTileInCorner) {
+            bonus += highestTileValue * settings.highestTileIncornerWeighting;
+        }
+
+     /*   System.out.println("rowValue = " + rowValue);
+        System.out.println("rowLength = " + rowLength);
+        System.out.println("mergeValue = " + mergeValue);
+        System.out.println("highestTileInCorner = " + highestTileInCorner);*/
+
+        return bonus;
+    }
+
+    private void evaluateBoard(int rowEvaluationMethod) {
+        //reset old Values
+        highestTileInCorner = false;
+        rowValue = 0;
+        rowLength = 0;
+        mergeValue = 0;
+
+        RowInformationContainer rowInformationContainer;
+
+        boolean foundHighestTileInCorner = false;           //this is to prevent Situations where multiple Tiles with the same highest Value in different Corners trigger the Heuristic
+
+        //evaluate topleft corner
+        if(getTileValue(0) == highestTileValue) {
+            //check if highest tile is in this corner
+            highestTileInCorner = true;
+            foundHighestTileInCorner = true;
+
+            //evaluate right row
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2, rowEvaluationMethod);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+
+            //evaluate bottom row
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3, rowEvaluationMethod);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+        }
+
+        if(getTileValue(3) == highestTileValue) {
+            if(!foundHighestTileInCorner) {
+                highestTileInCorner = true;
+                foundHighestTileInCorner = true;
+            } else {
+                //there are multiple tiles with the same value in differen Corners
+                highestTileInCorner = false;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2, rowEvaluationMethod);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1, rowEvaluationMethod);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+        }
+
+        if(getTileValue(12) == highestTileValue) {
+            if(!foundHighestTileInCorner) {
+                highestTileInCorner = true;
+                foundHighestTileInCorner = true;
+            } else {
+                highestTileInCorner = false;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0, rowEvaluationMethod);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3, rowEvaluationMethod);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+        }
+
+        if(getTileValue(15) == highestTileValue) {
+            if(!foundHighestTileInCorner) {
+                highestTileInCorner = true;
+            } else {
+                highestTileInCorner = false;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0, rowEvaluationMethod);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1, rowEvaluationMethod);
+            if (rowInformationContainer.rowValue > rowValue) {
+                rowLength = rowInformationContainer.rowLength;
+                rowValue = rowInformationContainer.rowValue;
+            }
+        }
+
+        //check for merges
+        for(int row = 0; row < ConfigGame.ROWS-1; row++) {
+            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
+                int currentValue = getTileValue(row * 4 + column);
+                if (currentValue != 0) {
+                    for (int position = row + 1; position < ConfigGame.ROWS; position++) {
+                        int newValue = getTileValue(position * 4 + column);
+                        if (newValue != 0) {
+                            if (currentValue == newValue) {
+                                mergeValue += currentValue;
+                                row = position + 1; //else a row with e.g. 4 | 4 | 4 | 0 would count 2 merges
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int row = 0; row < ConfigGame.ROWS; row++) {
+            for (int column = 0; column < ConfigGame.COLUMNS-1; column++) {
+                int currentValue = getTileValue(row * 4 + column);
+                if(currentValue != 0) {
+                    for (int position = column+1; position < ConfigGame.COLUMNS; position++) {
+                        int newValue = getTileValue(row * 4 + position);
+                        if(newValue != 0) {
+                            if (currentValue == newValue) {
+                                mergeValue += currentValue;
+                                column = position + 1;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Evaluates a row of tiles and checks if the next tile in this row is valid for the row heuristic.
+     * If the end of one row is reached, this method calls itself and continues with the next tile e.g.:
+     * 0 => 1 => 2 => 3 =>
+     * 7 => 6 => 5 => 4 =>
+     * 8 => 9...
+     *
+     * There are two Methods to check if the next tile is a valid part of the row or not.
+     * Method 0: The next tile is lower then the current tile
+     * Method 1: The next tile has exactly half the value of the current tile
+     *
+     * @param currentTileValue the Value of the Tile that was last evaluated in the row or the value of the first Tile in a row if it is a new row
+     * @param currentRowLength the currentRowLength
+     * @param currentRowValue the currentRowValue
+     * @param position the position of the row
+     * @param offset a offset if we want to skip tiles in the row, set 1 when calling the method initially because the first tile is always part of a row
+     * @param direction the direction, 0 => left, 1 => up, 2 => right, 3 => down
+     * @param method the Method used to determine if the next tile is part of the row
+     * @return a RowInformationContainer containing the currentRowLength and the currentRowValue
+     */
+    private RowInformationContainer evaluateRow(int currentTileValue, int currentRowLength, int currentRowValue, int position, int offset, int direction, int method) {
+        switch (direction) {
+            case 0:
+                //left
+                for (int i = 3 - offset; i >= 0; i--) {
+                    switch (method) {
+                        case 0:
+                            if (getTileValue(position * 4 + i) != 0 && getTileValue(position * 4 + i) < currentTileValue) {
+                                currentRowLength++;
+                                currentTileValue = getTileValue(position * 4 + i);
+                                currentRowValue += currentTileValue;
+                            } else {
+                                return new RowInformationContainer(currentRowLength, currentRowValue);
+                            }
+                            break;
+                        case 1:
+                            if (getTileValue(position * 4 + i) != 0 && getTileValue(position * 4 + i) == currentTileValue / 2) {
+                                currentRowLength++;
+                                currentTileValue = getTileValue(position * 4 + i);
+                                currentRowValue += currentTileValue;
+                            } else {
+                                return new RowInformationContainer(currentRowLength, currentRowValue);
+                            }
+                            break;
+                    }
+                }
+
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + 1, 0, 2, method);
+
+            case 1:
+                //up
+                for (int i = 3 - offset; i >= 0; i--) {
+                    switch (method) {
+                        case 0:
+                            if (getTileValue(i * 4 + position) != 0 && getTileValue(i * 4 + position) < currentTileValue) {
+                                currentRowLength++;
+                                currentTileValue = getTileValue(i * 4 + position);
+                                currentRowValue += currentTileValue;
+                            } else {
+                                return new RowInformationContainer(currentRowLength, currentRowValue);
+                            }
+                            break;
+                        case 1:
+                            if (getTileValue(i * 4 + position) != 0 && getTileValue(i * 4 + position) == currentTileValue / 2) {
+                                currentRowLength++;
+                                currentTileValue = getTileValue(i * 4 + position);
+                                currentRowValue += currentTileValue;
+                            } else {
+                                return new RowInformationContainer(currentRowLength, currentRowValue);
+                            }
+                            break;
+                    }
+                }
+
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + 1, 0, 3, method);
+
+            case 2:
+                //right
+                for (int i = offset; i < ConfigGame.COLUMNS; i++) {
+                    switch (method) {
+                        case 0:
+                            if (getTileValue(position * 4 + i) != 0 && getTileValue(position * 4 + i) < currentTileValue) {
+                                currentRowLength++;
+                                currentTileValue = getTileValue(position * 4 + i);
+                                currentRowValue += currentTileValue;
+                            } else {
+                                return new RowInformationContainer(currentRowLength, currentRowValue);
+                            }
+                            break;
+                        case 1:
+                            if (getTileValue(position * 4 + i) != 0 && getTileValue(position * 4 + i) == currentTileValue / 2) {
+                                currentRowLength++;
+                                currentTileValue = getTileValue(position * 4 + i);
+                                currentRowValue += currentTileValue;
+                            } else {
+                                return new RowInformationContainer(currentRowLength, currentRowValue);
+                            }
+                            break;
+                    }
+                }
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + 1, 0, 0, method);
+
+            case 3:
+                //down
+                for (int i = offset; i < ConfigGame.ROWS; i++) {
+                    switch (method) {
+                        case 0:
+                            if (getTileValue(i * 4 + position) != 0 && getTileValue(i * 4 + position) < currentTileValue) {
+                                currentRowLength++;
+                                currentTileValue = getTileValue(i * 4 + position);
+                                currentRowValue += currentTileValue;
+                            } else {
+                                return new RowInformationContainer(currentRowLength, currentRowValue);
+                            }
+                            break;
+                        case 1:
+                            if (getTileValue(i * 4 + position) != 0 && getTileValue(i * 4 + position) == currentTileValue / 2) {
+                                currentRowLength++;
+                                currentTileValue = getTileValue(i * 4 + position);
+                                currentRowValue += currentTileValue;
+                            } else {
+                                return new RowInformationContainer(currentRowLength, currentRowValue);
+                            }
+                            break;
+                    }
+                }
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + 1, 0, 1, method);
+        }
+
+        return null;
     }
 
     public double getGameValue() { return getGameScore(); }
@@ -548,6 +845,10 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                 break;
         }
         moves++;
+
+        for(int i = 0; i < 16; i++) {
+            updateHighestTile((int)(boardB >> (15-i)*4 & 0x0fL));
+        }
     }
 
     private void newBoard() {

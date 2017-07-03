@@ -1,15 +1,11 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
-import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
-import games.GameBoard;
 import params.MCParams;
 import params.MCTSExpectimaxParams;
-import params.MCTSParams;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import tools.Types;
 
 import java.io.*;
@@ -31,7 +27,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
 
 
-    public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
+    public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, int stopEval, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
     }
 
@@ -117,7 +113,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         mctsParams.setK_UCT(ConfigEvaluator.KUCT);
         mctsParams.setTreeDepth(ConfigEvaluator.TREEDEPTH);
         mctsParams.setRolloutDepth(ConfigEvaluator.ROLLOUTDEPTH);
-        MCTSExpectimaxAgt mctsAgent = new MCTSExpectimaxAgt("MCTSE", mctsParams);
+        MCTSExpectimaxAgt mctseAgent = new MCTSExpectimaxAgt("MCTSE", mctsParams);
 
         MCParams mcParams = new MCParams();
         mcParams.setRolloutdepth(ConfigEvaluator.ROLLOUTDEPTH - 1);
@@ -140,10 +136,10 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             int highestMCTSValue = 0;
             int bestMCTSAction = 0;
 
-            //analyse for MCTS Agent
-            if(ConfigEvaluator.EVALUATEMCTS) {
+            //analyse for MCTSE Agent
+            if(ConfigEvaluator.EVALUATEMCTSE) {
                 for (int i = 0; i < ConfigEvaluator.NC; i++) {
-                    int MCTSAction = mctsAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
+                    int MCTSAction = mctseAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
                     mctsActions[MCTSAction] += 1;
                 }
             }
@@ -380,6 +376,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                 return true;
             case 2:
                 return true;
+            case 3:
+                return true;
             default:
                 return false;
         }
@@ -387,12 +385,12 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{0, 1};
+        return new int[]{0, 1, 2};
     }
 
     @Override
     public int getQuickEvalMode() {
-        return 0;
+        return ConfigEvaluator.DEFAULTEVALUATOR;
     }
 
     @Override

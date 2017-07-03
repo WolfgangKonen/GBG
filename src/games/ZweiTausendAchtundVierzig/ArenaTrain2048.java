@@ -3,6 +3,7 @@ package games.ZweiTausendAchtundVierzig;
 import controllers.PlayAgent;
 import games.*;
 import games.Hex.FeatureHex;
+import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_GA;
 
 import javax.swing.*;
 
@@ -46,9 +47,11 @@ public class ArenaTrain2048 extends ArenaTrain {
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
         switch (mode) {
             case 0:
-                return new Evaluator2048(pa, gb, stopEval, mode, verbose);
+                return new Evaluator2048(pa, stopEval, verbose);
             case 1:
-                return new Evaluator2048_BoardPositions(pa, gb, stopEval, mode, verbose);
+                return new Evaluator2048_BoardPositions(pa, stopEval, verbose);
+            case 2:
+                return new Evaluator2048_GA(pa, stopEval, verbose);
             default:
                 throw new RuntimeException("Mode " + mode + " is not allowed for 2048");
         }

@@ -3,6 +3,7 @@ package controllers.MCTSExpectimax;
 import controllers.MCTSExpectimax.MCTSExpectimax1.MCTSE1ChanceNode;
 import games.StateObservation;
 import games.StateObservationNondeterministic;
+import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import params.MCTSExpectimaxParams;
 import params.MCTSParams;
 import tools.Types;
@@ -31,6 +32,7 @@ public class MCTSEPlayer
     private int NUM_ITERS = MCTSExpectimaxConfig.DEFAULT_ITERATIONS;
     private double K = MCTSExpectimaxConfig.DEFAULT_K;
     private int MAX_NODES = MCTSExpectimaxConfig.DEFAULT_MAXNODES;
+    private HeuristicSettings2048 heuristicSettings2048;
 
     public int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 
@@ -54,6 +56,7 @@ public class MCTSEPlayer
             this.setROLLOUT_DEPTH(mctsExpectimaxParams.getRolloutDepth());
             this.setTREE_DEPTH(mctsExpectimaxParams.getTreeDepth());
             this.setMaxNodes(mctsExpectimaxParams.getMaxNodes());
+			this.heuristicSettings2048 = mctsExpectimaxParams.getHeuristicSettings2048();
 			this.mctsExpectimaxParams = mctsExpectimaxParams;
     	} else {
 			mctsExpectimaxParams = new MCTSExpectimaxParams();
@@ -73,7 +76,7 @@ public class MCTSEPlayer
     {
         actions = so.getAvailableActions();
 
-        //at first it seems confusing that the root node is a Chance Node, but because the first generation of children are are nodes the root node has to be a Chance Node
+        //at first it seems confusing that the root node is a chance node, but because the first generation of children are tree nodes the root node has to be a chance node
 		if(!mctsExpectimaxParams.getAlternativeVersion()) {
 			rootNode = new MCTSEChanceNode(so, null, null, random, this);
 		} else {
@@ -87,7 +90,7 @@ public class MCTSEPlayer
     }
 
     /**
-     * Runs MCTS to decide the action to take. It does not reset the tree.
+     * Runs MCTSE to decide the action to take. It does not reset the tree.
 	 *
 	 * @param vtable		the score for each available action (corresponding
 	 * 						to sob.getAvailableActions())
@@ -141,6 +144,9 @@ public class MCTSEPlayer
     public int getNRolloutFinished() {
         return nRolloutFinished;
     }
+	public HeuristicSettings2048 getHeuristicSettings2048() {
+		return heuristicSettings2048;
+	}
     public MCTSExpectimaxParams getMCTSParams() {
 		return mctsExpectimaxParams;
 	}

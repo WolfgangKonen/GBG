@@ -32,7 +32,7 @@ public class Evaluator2048 extends Evaluator {
     private int verbose;
 
 
-    public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
+    public Evaluator2048(PlayAgent e_PlayAgent, int stopEval, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
         this.verbose = verbose;
     }
@@ -211,6 +211,8 @@ public class Evaluator2048 extends Evaluator {
                 return true;
             case 2:
                 return true;
+            case 3:
+                return true;
             default:
                 return false;
         }
@@ -218,12 +220,12 @@ public class Evaluator2048 extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{0, 1};
+        return new int[]{0, 1, 2};
     }
 
     @Override
     public int getQuickEvalMode() {
-        return 0;
+        return ConfigEvaluator.DEFAULTEVALUATOR;
     }
 
     @Override

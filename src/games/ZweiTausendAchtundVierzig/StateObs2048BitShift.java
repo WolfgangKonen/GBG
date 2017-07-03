@@ -147,38 +147,11 @@ public class StateObs2048BitShift implements StateObservation {
 
     @Override
     public double getGameScore() {
-        if(ConfigGame.ENABLEHEURISTICS) {
-            return getGameScore2();
-        } else {
-            return getGameScore1();
-        }
-    }
-
-    public double getGameScore1() {
         if(score == 0) {
             return 0;
         } else {
             return score / MAXSCORE;
         }
-    }
-
-    public double getGameScore2() {
-//    	int[][] values = new int[ConfigGame.ROWS][ConfigGame.COLUMNS];
-//        for(int row = ConfigGame.ROWS-1, position=0; row >=0 ; row--) {
-//            for(int column = ConfigGame.COLUMNS-1; column >=0 ; column--,position++) {
-//                long b2 = boardB;
-//                values[row][column] = (1 << (b2 & 0x0fL));
-//                b2 = (b2 >> 4);
-//            }
-//        }      
-        StateObserver2048Slow so = new StateObserver2048Slow(this.toArray(),score,winState);
-        
-        double score2 = so.getGameScore2();
-        this.highestTileInCorner = false;
-        this.rowLength = so.rowLength;
-        this.rowValue = so.rowValue;
-        this.mergeValue = so.mergeValue;
-        return score2;
     }
 
     @Override

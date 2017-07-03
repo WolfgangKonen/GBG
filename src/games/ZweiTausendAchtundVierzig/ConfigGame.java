@@ -13,7 +13,6 @@ public class ConfigGame {
     public static final int STARTINGVALUES[] = {2,2,2,2,2,2,2,2,2,4};
 
     //Heuristic Values
-    public static final boolean ENABLEHEURISTICS = false;
     public static final double EMPTYTILEMULTIPLIER = 0.1;
     public static final double HIGHESTTILEINCORENERMULTIPLIER = 0.7;
     public static final double ROWMULTIPLIER = 0.7;

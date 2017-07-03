@@ -3,6 +3,7 @@ package params;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
 import controllers.MCTSExpectimax.MCTSExpectimaxConfig;
+import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,18 +25,21 @@ import java.io.Serializable;
  */
 public class MCTSExpectimaxParams extends Frame implements Serializable
 {
-	JLabel numIter_L;
-	JLabel kUCT_L;
-	JLabel treedep_L;
-	JLabel rollout_L;
-	JLabel maxNodes_L;
+	private JLabel numIter_L;
+	private JLabel kUCT_L;
+	private JLabel treedep_L;
+	private JLabel rollout_L;
+	private JLabel maxNodes_L;
 	private JTextField numIter_T;
 	private JTextField kUCT_T;
 	private JTextField treedep_T;
 	private JTextField rollout_T;
 	private JTextField maxNodes_T;
 	private JCheckBox alternativeVersion_CB;
-	JPanel mPanel;
+	private JCheckBox enableHeuristics_CB;
+	private JPanel mPanel;
+
+	private HeuristicSettings2048 heuristicSettings2048;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -46,13 +50,17 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 
 
 	public MCTSExpectimaxParams() {
-		super("MCTS Parameter");
+		super("MCTS Expectimax Parameter");
+
+		heuristicSettings2048 = new HeuristicSettings2048();
+
 		numIter_L = new JLabel("Iterations");
 		kUCT_L = new JLabel("K (UCT)");
 		treedep_L = new JLabel("Tree Depth");
 		rollout_L = new JLabel("Rollout Depth");
 		maxNodes_L = new JLabel("Max Nodes");
 		alternativeVersion_CB = new JCheckBox("alternative Version (~4% faster)", MCTSExpectimaxConfig.DEFAULT_ALTERNATIVEVERSION);
+		enableHeuristics_CB = new JCheckBox("enable Heuristics", MCTSExpectimaxConfig.DEFAULT_ENABLEHEURISTICS);
 		numIter_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_ITERATIONS+"");
 		kUCT_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_K+"");					//
 		treedep_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_TREEDEPTH+"");
@@ -99,7 +107,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 
 		mPanel.add(alternativeVersion_CB);
 
-		mPanel.add(new Canvas());	// add two empty rows to balance height of fields
+		mPanel.add(enableHeuristics_CB);	// add two empty rows to balance height of fields
 		mPanel.add(new Canvas());
 
 		mPanel.add(new Canvas());
@@ -133,6 +141,12 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	public boolean getAlternativeVersion() {
 		return alternativeVersion_CB.isSelected();
 	}
+	public boolean getEnableHeuristics() {
+		return enableHeuristics_CB.isSelected();
+	}
+	public HeuristicSettings2048 getHeuristicSettings2048() {
+		return heuristicSettings2048;
+	}
 	public void setNumIter(int value) {
 		numIter_T.setText(value+"");
 	}
@@ -150,6 +164,12 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	}
 	public void setAlternativeVersion(boolean value) {
 		alternativeVersion_CB.setSelected(value);
+	}
+	public void setEnableHeuristics(boolean value) {
+		enableHeuristics_CB.setSelected(value);
+	}
+	public void setHeuristicSettings2048(HeuristicSettings2048 heuristicSettings2048) {
+		this.heuristicSettings2048 = heuristicSettings2048;
 	}
 	
 	/**

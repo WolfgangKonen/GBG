@@ -1,6 +1,9 @@
 package controllers.MCTSExpectimax;
 
 import games.StateObservation;
+import games.ZweiTausendAchtundVierzig.ConfigGame;
+import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -99,8 +102,19 @@ public class MCTSEChanceNode
             //select an childNode
             MCTSEChanceNode selected = treePolicy();
 
-            //rollout the childNode
-            double score = selected.rollOut();
+            double score;
+
+            if(selected.so instanceof StateObserver2048 && player.getMCTSParams().getEnableHeuristics()) {
+                //get Heuristic bonus
+                score = ((StateObserver2048)selected.so).getHeuristicBonus(player.getHeuristicSettings2048());
+                if(player.getHeuristicSettings2048().enableRollout) {
+                    //add rollout bonus
+                    score += selected.rollOut1() * player.getHeuristicSettings2048().rolloutWeighting;
+                }
+            } else {
+                //get "normal" mctse score
+                score = selected.rollOut();
+            }
 
             //set max Score in root Node
             if(player.getRootNode().maxRolloutScore < score) {
@@ -139,15 +153,12 @@ public class MCTSEChanceNode
             if(player.getRootNode().numberTreeNodes < player.getMaxNodes()) {
                 return expand().treePolicy();
             } else {
-                //ToDo: We need to decide what we want to do when maxNumberTreeNodes is reached.
-                //Do we want to select one random child and ignore notExpandedActions, do we want to fully expand the Node but stop creating new layers of Chance & Treenodes or do we want to ignore not fully expanded layers.
-                //In the current implementation we do the third option.
                 return this;
             }
         } else {
             //recursively go down the three
             //select a child with uct(), select/create a chance node with treePolicy() and call this method in the new chance node
-            return uct().treePolicy().treePolicy();
+            return uctNormalised().treePolicy().treePolicy();
         }
     }
 
@@ -259,6 +270,31 @@ public class MCTSEChanceNode
         }
 
         return rollerState.getGameScore(so);
+    }
+
+    /**
+     * starting from this leaf node a game with random actions will be played until the game is over or the maximum rollout depth is reached
+     * this rollout variant only works for 2048 and returns the not normalised gamescore
+     *
+     * @return the {@link StateObservation#getGameScore()} after the rollout is finished
+     */
+    public double rollOut1() {
+        assert so instanceof StateObserver2048: "so is not instanceof StateObserver2048, use rollOut() instead off rollOut1()";
+        StateObserver2048 rollerState = (StateObserver2048)so.copy();
+        int thisDepth = this.depth;
+
+        while (!finishRollout(rollerState, thisDepth)) {
+            rollerState.setAvailableActions();
+            int action = random.nextInt(rollerState.getNumAvailableActions());
+            rollerState.advance(rollerState.getAction(action));
+            thisDepth++;
+        }
+
+        if (rollerState.isGameOver()) {
+            player.nRolloutFinished++;
+        }
+
+        return rollerState.score;
     }
 
     /**
