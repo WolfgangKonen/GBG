@@ -45,7 +45,7 @@ import games.StateObservation;
  */
 //abstract 
 public class TDAgent extends AgentBase implements PlayAgent,Serializable {
-	protected TD_func m_Net;
+	protected transient TD_func m_Net;
 	private double m_epsilon = 0.1;
 	private double m_EpsilonChangeDelta = 0.001;
 	// --- inpSize now obsolete (replaced by m_feature.getInputSize(int featmode)) --- :
@@ -62,7 +62,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	private boolean m_hasLinearNet;
 	private boolean m_hasSigmoid;
 	private boolean NORMALIZE = false; 
-	protected Feature m_feature;
+	protected transient Feature m_feature;
 	
 	/**
 	 * Member {@link #m_tdPar} is only needed for saving and loading the agent

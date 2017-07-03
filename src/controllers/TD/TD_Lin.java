@@ -222,6 +222,7 @@ public class TD_Lin implements TD_func, Serializable {
 //			} else 
 			{
 				int index=0;
+				boolean DBG_HEX2=false;
 				for (k=0;k<m;k++)
 				{
 					for (i=0;i<=n;i++,index++) {
@@ -230,7 +231,15 @@ public class TD_Lin implements TD_func, Serializable {
 						v[i][k]+=ALPHA*gradSum[i][k];
 
 						// only debugging
-						//if (i==1) System.out.println("v[1]="+v[i][k]+", wghtChng="+ ALPHA*gradSum[i][k]);
+						if (DBG_HEX2) {
+							int i_p=1;	// the weight index to be printed
+							if (i==i_p && gradSum[i][k]!=0.0) {
+								System.out.println("v["+i_p+"]="+v[i][k]+", wghtChng="+ ALPHA*gradSum[i][k]+", ALPHA="+ALPHA);
+								int dummy=1;
+							}
+						}
+						
+						// only for RPROP
 						gradients[index] = - gradSum[i][k];		// note the "-" sign !!
 						flatWeights[index] = v[i][k];			
 

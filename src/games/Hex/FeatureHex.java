@@ -146,10 +146,11 @@ public class FeatureHex implements Feature {
         double[] inputVector = new double[81];  // = 3^4
 
         int index=0; // index into LUT = inputVector 
-        for (int i = 0, k=0; i<HexConfig.BOARD_SIZE; i++ ){
-            for (int j = 0; j<HexConfig.BOARD_SIZE; j++, k++ ){
+        for (int i = 0, k=1; i<HexConfig.BOARD_SIZE; i++ ){
+            for (int j = 0; j<HexConfig.BOARD_SIZE; j++){
                 int posValue = board[i][j].getPlayer()+1;
                 index += k*posValue;
+                k *= 3;
             }
         }
         inputVector[index] = 1;

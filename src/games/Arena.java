@@ -17,6 +17,9 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
+import games.Hex.GameBoardHex;
+import games.Hex.HexTile;
+import games.Hex.StateObserverHex;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.MessageBox;
 import tools.StatusBar;
@@ -212,6 +215,8 @@ abstract public class Arena extends JPanel implements Runnable {
 		double[] vtable = null;
 		PlayAgent paX;
 		
+		boolean DBG_HEX=false;
+		
 		int numPlayers = gb.getStateObs().getNumPlayers();
 		try 
 		{
@@ -238,6 +243,13 @@ abstract public class Arena extends JPanel implements Runnable {
 			if(gb.isActionReq()){
 				gb.setActionReq(false);
 				so = gb.getStateObs();
+				
+				if (DBG_HEX && (so instanceof StateObserverHex)) {
+					StateObserverHex soh = (StateObserverHex) so;
+					int Index = this.getHexIndex(soh.getBoard());
+					System.out.println("Index: "+Index);
+				}
+				
 				if (so.isLegalState() && !so.isGameOver()) {
 					boolean silent=false;
 					vtable = new double[so.getNumAvailableActions()+1];
@@ -269,7 +281,24 @@ abstract public class Arena extends JPanel implements Runnable {
 		gb.clearBoard(true,true);
 
 	}
-	
+
+	// only needed in case DBG_HEX for debugging the TDAgent in case 2x2 Hex
+    private int getHexIndex(HexTile[][] board){
+    	if (board[0].length!=2)
+    		throw new RuntimeException("getHexIndex only available for 2x2 board");
+    	
+        int index=0; // index into LUT = inputVector 
+        for (int i = 0, k=1; i<2; i++ ){
+            for (int j = 0; j<2; j++){
+                int posValue = board[i][j].getPlayer()+1;
+                index += k*posValue;
+                k *= 3;
+            }
+        }
+
+        return index;
+    }
+
 	/**
 	 * Play a game (using the agents selected in the combo boxes).  
 	 * One or multiple of them may be "Human".
