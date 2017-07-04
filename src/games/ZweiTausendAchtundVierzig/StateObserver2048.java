@@ -207,10 +207,9 @@ public class StateObserver2048 implements StateObservationNondeterministic {
             bonus += highestTileValue * settings.highestTileIncornerWeighting;
         }
 
-     /*   System.out.println("rowValue = " + rowValue);
+        System.out.println("rowValue = " + rowValue);
         System.out.println("rowLength = " + rowLength);
-        System.out.println("mergeValue = " + mergeValue);
-        System.out.println("highestTileInCorner = " + highestTileInCorner);*/
+        System.out.println();
 
         return bonus;
     }
@@ -311,15 +310,17 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         }
 
         //check for merges
-        for(int row = 0; row < ConfigGame.ROWS-1; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
+        //vertical
+        int mergeValue0 = 0;
+        for(int row = 0; row < 4; row++) {
+            for (int column = 0; column < 4; column++) {
                 int currentValue = getTileValue(row * 4 + column);
                 if (currentValue != 0) {
                     for (int position = row + 1; position < ConfigGame.ROWS; position++) {
                         int newValue = getTileValue(position * 4 + column);
                         if (newValue != 0) {
                             if (currentValue == newValue) {
-                                mergeValue += currentValue;
+                                mergeValue0 += currentValue;
                                 row = position + 1; //else a row with e.g. 4 | 4 | 4 | 0 would count 2 merges
                             }
                             break;
@@ -329,15 +330,17 @@ public class StateObserver2048 implements StateObservationNondeterministic {
             }
         }
 
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS-1; column++) {
+        //horizontal
+        int mergeValue1 = 0;
+        for(int row = 0; row < 4; row++) {
+            for (int column = 0; column < 4; column++) {
                 int currentValue = getTileValue(row * 4 + column);
                 if(currentValue != 0) {
                     for (int position = column+1; position < ConfigGame.COLUMNS; position++) {
                         int newValue = getTileValue(row * 4 + position);
                         if(newValue != 0) {
                             if (currentValue == newValue) {
-                                mergeValue += currentValue;
+                                mergeValue1 += currentValue;
                                 column = position + 1;
                             }
                             break;
@@ -345,6 +348,12 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                     }
                 }
             }
+        }
+
+        if(mergeValue0 > mergeValue1) {
+            mergeValue = mergeValue0;
+        } else {
+            mergeValue = mergeValue1;
         }
     }
 
@@ -534,6 +543,8 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterminisitcAction = null;
+
+        getHeuristicBonus(new HeuristicSettings2048());
     }
 
     public ArrayList<Types.ACTIONS> getAvailableActions() {
@@ -679,7 +690,12 @@ public class StateObserver2048 implements StateObservationNondeterministic {
 
     public int getTileValue(int pos) {
         long val = (boardB >> (15-pos)*4 & 0x0fL);
-        return (int)Math.pow(2, val);
+        int value = (int)Math.pow(2, val);
+        if(value == 1) {
+            return 0;
+        } else {
+            return value;
+        }
     }
 
     public long getBoardNum() {

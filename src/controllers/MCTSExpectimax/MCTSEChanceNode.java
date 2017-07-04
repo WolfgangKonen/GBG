@@ -158,6 +158,7 @@ public class MCTSEChanceNode
         } else {
             //recursively go down the three
             //select a child with uct(), select/create a chance node with treePolicy() and call this method in the new chance node
+
             return uctNormalised().treePolicy().treePolicy();
         }
     }
@@ -189,19 +190,28 @@ public class MCTSEChanceNode
         if(player.getRootNode().iterations < 100) {
             return uct();
         } else {
-            double multiplier = 1/player.getRootNode().maxRolloutScore;
+            double multiplier;
+
+            if(player.getRootNode().maxRolloutScore == 0.0d) {
+                multiplier = 1;
+            } else {
+                multiplier = 1/player.getRootNode().maxRolloutScore;
+            }
 
             MCTSETreeNode selected = null;
             double selectedValue = -Double.MAX_VALUE;
 
-            for (MCTSETreeNode child : childrenNodes)
-            {
+            for (MCTSETreeNode child : childrenNodes) {
                 double uctValue = child.value * multiplier / child.visits + player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits)) + random.nextDouble() * epsilon; // small sampleRandom numbers: break ties in unexpanded node
 
                 if (uctValue > selectedValue) {
                     selected = child;
                     selectedValue = uctValue;
                 }
+            }
+
+            if(selected == null) {
+                System.out.println("2: " + childrenNodes.size());
             }
 
             return selected;
