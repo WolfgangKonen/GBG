@@ -207,10 +207,6 @@ public class StateObserver2048 implements StateObservationNondeterministic {
             bonus += highestTileValue * settings.highestTileIncornerWeighting;
         }
 
-        System.out.println("rowValue = " + rowValue);
-        System.out.println("rowLength = " + rowLength);
-        System.out.println();
-
         return bonus;
     }
 
@@ -543,8 +539,6 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterminisitcAction = null;
-
-        getHeuristicBonus(new HeuristicSettings2048());
     }
 
     public ArrayList<Types.ACTIONS> getAvailableActions() {

@@ -58,7 +58,7 @@ public class HeuristicSettings2048 implements Serializable{
             genes[i] = random.nextDouble();
         }
 
-        //applyGenes();
+        applyGenes();
     }
 
     /**
