@@ -3,10 +3,11 @@ package games.Hex;
 import games.Feature;
 import games.StateObservation;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 
-public class FeatureHex implements Feature {
+public class FeatureHex implements Feature, Serializable {
     int featMode = 0;
 
     FeatureHex(int featMode){
