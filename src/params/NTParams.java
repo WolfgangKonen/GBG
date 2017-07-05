@@ -21,7 +21,6 @@ import controllers.TD.ntuple.TDNTupleAgt;
 /**
  *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTupleAgt}
  *  
- *  @see ParNT
  *  @see TDNTupleAgt
  */
 public class NTParams extends Frame implements Serializable {

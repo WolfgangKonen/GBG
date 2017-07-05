@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 public class HeuristicSettings2048 implements Serializable{
     private int geneLength = 15;
     private double[] genes;
-    public int fitness;
+    public double fitness;
     private Random random = new Random();
     private ExecutorService executorService = Executors.newFixedThreadPool(6);
 
@@ -32,7 +32,7 @@ public class HeuristicSettings2048 implements Serializable{
     public double emptyTilesWeighting0 = 1;
     public double emptyTilesWeighting1 = 1;
     public double emptyTilesWeighting2 = 1;
-    public int emptyTilesMethod = 2;            //valid methods are 0 => numeEmptyTiles^weighting, 1 => highestTileValue * numEmptyTile * weighting, 2 => score * numEmptyTile * Weighting
+    public int emptyTilesMethod = 0;            //valid methods are 0 => numeEmptyTiles^weighting, 1 => highestTileValue * numEmptyTile * weighting, 2 => score * numEmptyTile * Weighting
 
     //highest tile in corner
     public boolean enableHighestTileInCorner = true;
@@ -42,7 +42,7 @@ public class HeuristicSettings2048 implements Serializable{
     public boolean enableRow = true;
     public double rowWeighting0 = 1;
     public double rowWeighting1 = 1;
-    public int rowMethod = 1;                   //valid methods are 0 => tile in a row has to be lower then the previous tile, 1 => tile in a row is exactly half of the previous tile
+    public int rowMethod = 0;                   //valid methods are 0 => tile in a row has to be lower then the previous tile, 1 => tile in a row is exactly half of the previous tile
 
     //merge
     public boolean enableMerge = true;
@@ -65,16 +65,23 @@ public class HeuristicSettings2048 implements Serializable{
      * calculate the fitness
      */
     public void calcFitness () {
+        if(!enableEmptyTiles && !enableHighestTileInCorner && !enableRow && !enableMerge && !enableRollout) {
+            fitness = 0;
+            return;
+        }
+
         List<Callable<StateObserver2048>> callables = new ArrayList<>();
         MCTSExpectimaxParams mctseParams = new MCTSExpectimaxParams();
         mctseParams.setHeuristicSettings2048(this);
         mctseParams.setNumIter(4000);
+        mctseParams.setMaxNodes(4000);
+        mctseParams.setTreeDepth(10);
         mctseParams.setEnableHeuristics(true);
 
-        int totScore = 0;
+        double totScore = 0;
 
 
-        for(int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
+        for(int i = 0; i < 25; i++) {
             callables.add(() -> {
                 MCTSExpectimaxAgt mctseAgt = new MCTSExpectimaxAgt("MCTSE", mctseParams);
 
@@ -108,7 +115,7 @@ public class HeuristicSettings2048 implements Serializable{
             totScore += so.score;
         }
 
-        fitness = totScore;
+        fitness = totScore/25;
     }
 
     /**

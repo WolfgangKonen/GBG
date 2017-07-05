@@ -14,7 +14,6 @@ import java.io.Serializable;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -23,7 +22,7 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple.TDNTupleAgt;
 
 /**
- * This class realizes the parameter settings (GUI tab) for TD players.
+ * This class realizes the parameter settings for TD players.
  * These parameters and their [defaults] are: <ul>
  * <li> <b>alpha</b>: 		[0.001] initial strength of learning parameter 
  * <li> <b>alphaFinal</b>: 	[0.001] final strength of learning parameter  
@@ -34,8 +33,8 @@ import controllers.TD.ntuple.TDNTupleAgt;
  * <li> <b>gamma</b>: 		[1.0] discount parameter 
  * </ul> 
  * 
- * @see ParTD
- * @see TDAgent
+ * @see controllers.TD.TDAgent
+ * @see games.XArenaButtons
  */
 public class TDParams extends Frame implements Serializable
 {
@@ -48,7 +47,6 @@ public class TDParams extends Frame implements Serializable
 	private static final String TIPEPSIL2L = "Final random move rate in [0,1]";
 	private static final String TIPLAMBDAL = "Eligibility trace parameter in [0,1]";
 	
-	private static String[] lrnTypeString = { "backprop","RPROP" };
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -80,16 +78,20 @@ public class TDParams extends Frame implements Serializable
 	CheckboxGroup cbgNetType;
 	Checkbox LinNetType;
 	Checkbox BprNetType;
+	//CheckboxGroup cbgSigType;
 	public JCheckBox withSigType;
 	public JCheckBox normalize;
-//	CheckboxGroup cbgLrnType;
-//	public Checkbox bpropType;
-//	public Checkbox rpropType;
-	public Choice choiceLrnType;
+	//public Checkbox wo_SigType;
+	CheckboxGroup cbgLrnType;
+	public Checkbox bpropType;
+	public Checkbox rpropType;
 	JLabel FeatTDS_L;
 	public Choice choiceFeatTDS;
-		String FeatTDS;
+	String FeatTDS;
 	
+	//JButton ok;
+	//TDParams m_par;
+
 // -- obsolete, they are now stored in AgentBase
 //
 //	// These two members are here only to save these settings (from other param tabs) 
@@ -143,12 +145,10 @@ public class TDParams extends Frame implements Serializable
 		LinNetType = new Checkbox("linear",cbgNetType,true);
 		BprNetType = new Checkbox("neural net",cbgNetType,false);
 
-//		cbgLrnType = new CheckboxGroup();
-//		bpropType = new Checkbox("backprop",cbgLrnType,true);
-//		rpropType = new Checkbox("RPROP",cbgLrnType,false);
-		choiceLrnType = new Choice();
-		for (String s : lrnTypeString) choiceLrnType.addItem(s);
-		
+		cbgLrnType = new CheckboxGroup();
+		bpropType = new Checkbox("backprop",cbgLrnType,true);
+		rpropType = new Checkbox("RPROP",cbgLrnType,false);
+
 		FeatTDS_L = new JLabel("Feature set");
 		this.choiceFeatTDS = new Choice();
 
@@ -197,10 +197,8 @@ public class TDParams extends Frame implements Serializable
 		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
 		
 		tdPanel.add(LrnTypeL);
-		tdPanel.add(choiceLrnType);
-//		tdPanel.add(bpropType);
-//		tdPanel.add(rpropType);
-		tdPanel.add(new Canvas());				
+		tdPanel.add(bpropType);
+		tdPanel.add(rpropType);
 		tdPanel.add(new Canvas());				
 
 		tdPanel.add(FeatTDS_L);
@@ -245,7 +243,7 @@ public class TDParams extends Frame implements Serializable
 		return Integer.valueOf(epochT.getText()).intValue();
 	}
 	public int getFeatmode() {
-		String s = (String) choiceFeatTDS.getSelectedItem();
+		String s = choiceFeatTDS.getSelectedItem();
 		//int i = Integer.valueOf(s).intValue();
 		return Integer.valueOf(s).intValue();
 	}
@@ -259,10 +257,7 @@ public class TDParams extends Frame implements Serializable
 		return LinNetType.getState();
 	}
 	public boolean hasRpropLrn() {
-		Object Type = choiceLrnType.getSelectedItem();
-		if (Type == "RPROP")
-			return true;
-		return false;
+		return rpropType.getState();
 	}
 //	public int getMaxGameNum() {
 //		return maxGameNum;
@@ -300,7 +295,7 @@ public class TDParams extends Frame implements Serializable
 		choiceFeatTDS.select(featmode+"");
 	}
 	public void setFeatList(int[] featList){
-		for (int i : featList) choiceFeatTDS.addItem(Integer.toString(i));
+		for (int i : featList) choiceFeatTDS.add(Integer.toString(i));
 	}
 	public void setSigmoid(boolean state) {
 		withSigType.setSelected(state);
@@ -313,11 +308,9 @@ public class TDParams extends Frame implements Serializable
 		BprNetType.setState(!state);
 	}
 	public void setRpropLrn(boolean state) {
-		choiceLrnType.select(state ? 1 : 0);
-//		rpropType.setState(state);
-//		bpropType.setState(!state);
+		rpropType.setState(state);
+		bpropType.setState(!state);
 	}
-	
 //	public void setMaxGameNum(int maxGameNum) {
 //		this.maxGameNum = maxGameNum;
 //	}
@@ -399,9 +392,8 @@ public class TDParams extends Frame implements Serializable
 			LinNetType.setEnabled(false);
 			BprNetType.setEnabled(false);
 			LrnTypeL.setEnabled(false);
-			choiceLrnType.setEnabled(false);
-//			bpropType.setEnabled(false);
-//			rpropType.setEnabled(false);
+			bpropType.setEnabled(false);
+			rpropType.setEnabled(false);
 			FeatTDS_L.setEnabled(false);
 			choiceFeatTDS.setEnabled(false);
 			epochL.setEnabled(false);
@@ -423,9 +415,8 @@ public class TDParams extends Frame implements Serializable
 			LinNetType.setEnabled(true);
 			BprNetType.setEnabled(true);
 			LrnTypeL.setEnabled(true);
-			choiceLrnType.setEnabled(true);
-//			bpropType.setEnabled(true);
-//			rpropType.setEnabled(true);
+			bpropType.setEnabled(true);
+			rpropType.setEnabled(true);
 			FeatTDS_L.setEnabled(true);
 			choiceFeatTDS.setEnabled(true);
 			epochL.setEnabled(true);

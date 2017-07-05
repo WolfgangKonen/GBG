@@ -266,61 +266,6 @@ public class NTupleValueFunc implements Serializable {
 	}
 
 	/**
-	 * Update the weights of the n-Tuple-System. The only difference to {@code updateWeights}
-	 * is that the target is different: reward + GAMMA*valueFunction(next), irrespective of 
-	 * {@code finished}.
-	 * The value function estimated by {@code this} has a different meaning: it 
-	 * estimates the sum of future rewards.
-	 * 
-	 * @param curBoard
-	 *            the current board
-	 * @param curPlayer
-	 *            the player who has to move on current board
-	 * @param nextBoard
-	 *            the following board
-	 * @param nextPlayer
-	 *            the player who has to move on next board
-	 * @param reward
-	 *            reward given for a terminated game (-1,0,+1)
-	 */
-	public void updateWeightsNew(int[] curBoard, int curPlayer, int[] nextBoard, int nextPlayer,
-			double reward, boolean upTC) {
-		double v_old = getScoreI(curBoard,curPlayer); // Old Value
-		double tg; // Target-Signal
-		// tg is 0 for a final state OR (reward + GAMMA * value of the after-state)
-		tg = reward + GAMMA * getScoreI(nextBoard,nextPlayer);
-		// delta is the error signal
-		double delta = (tg - v_old);
-		// derivative of tanh
-		double e = (1.0 - v_old * v_old);
-
-		double dW = ALPHA * delta * e;
-
-		// update every single N-Tuple LUT
-		// temporal coherence// update N and A matrices
-		// samine//
-
-		update(curBoard, curPlayer, delta, e);
-		//update(curBoard, dW, dW);   // /WK/
-		
-		if (LAMBDA!=0.0) updateElig(nextBoard, nextPlayer, e);
-
-	}
-
-	public void updateWeightsNewTerminal(int[] curBoard, int curPlayer, boolean upTC) {
-		double v_old = getScoreI(curBoard,curPlayer); // Old Value
-		double tg = 0.0; // Target signal is 0 (!)
-		// delta is the error signal
-		double delta = (tg - v_old);
-		// derivative of tanh
-		double e = (1.0 - v_old * v_old);
-
-		double dW = ALPHA * delta * e;
-
-		update(curBoard, curPlayer, delta, e);
-	}
-
-	/**
 	 * Update all n-Tuple LUTs. Simply add dW to all relevant weights. Also
 	 * update the symmetric boards, if wanted.
 	 * 

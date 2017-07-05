@@ -3,11 +3,10 @@ package games.Hex;
 import games.Feature;
 import games.StateObservation;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 
-public class FeatureHex implements Feature, Serializable {
+public class FeatureHex implements Feature {
     int featMode = 0;
 
     FeatureHex(int featMode){
@@ -114,7 +113,18 @@ public class FeatureHex implements Feature, Serializable {
 
         for (int i = 0; i<HexConfig.BOARD_SIZE; i++ ){
             for (int j = 0; j<HexConfig.BOARD_SIZE; j++ ){
-                inputVector[j*HexConfig.BOARD_SIZE+i] = (double) (board[i][j].getPlayer()+1)/2f;
+                double v = 0f; //Default value for unused tiles
+                if (board[i][j].getPlayer() == player){
+                    v = 1f;
+                } else if (board[i][j].getPlayer() == HexUtils.getOpponent(player)){
+                    v = -1f;
+                }
+
+                //Tile values:
+                //Opponent: -1
+                //Free tile: 0
+                //Own tile: 1
+                inputVector[i*HexConfig.BOARD_SIZE+j] = v;
             }
         }
 

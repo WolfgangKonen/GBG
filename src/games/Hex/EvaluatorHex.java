@@ -72,7 +72,7 @@ public class EvaluatorHex extends Evaluator {
     }
 
     private double competeAgainstMinimax(PlayAgent playAgent, GameBoard gameBoard){
-        double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(), 2, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(), 1, verbose);
         double success = res[0];
         m_msg = this.getPrintString() + success;
         if (this.verbose>0) System.out.println(m_msg);
@@ -85,7 +85,7 @@ public class EvaluatorHex extends Evaluator {
     	// /WK/ Bug fix: it is not safe to change this parameter of mctsAgent. I made it private now.
     	// Instead, the safe way is, to go always through the MCTSAgentT constructor:
         ParMCTS params = new ParMCTS();
-        params.setNumIter(1000);
+        params.setNumIter(10000);
         mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
         //MCTSParams params = new MCTSParams();
@@ -95,8 +95,8 @@ public class EvaluatorHex extends Evaluator {
         // /KG/ Creating a new MCTSParams and MCTSAgentT object for every evaluation causes a GDI object leak which
         // eventually crashes the program after the GDI object limit is reached.
 
-        //double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 5, 0);//verbose);
-        double[] res = {0};
+        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 1, 0);//verbose);
+        //double[] res = {0};
         double success = res[0];
         m_msg = playAgent.getName()+": "+this.getPrintString() + success;
         if (this.verbose>0) System.out.println(m_msg);
@@ -132,8 +132,7 @@ public class EvaluatorHex extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        //MCTS not available
-        return new int[]{1, 2};
+        return new int[]{0, 1, 2};
     }
 
 	@Override

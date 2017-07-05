@@ -10,8 +10,8 @@ import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 public class Evaluator2048_GA extends Evaluator {
     private int verbose;
     private HeuristicSettings2048[] population = new HeuristicSettings2048[ConfigEvaluator.TOTALPOPULATION];
-    private int totalfitness = 0;
-    private int bestFitness = 0;
+    private double totalfitness = 0;
+    private double bestFitness = 0;
     private int bestHeuristicSettings2048 = 0;
 
     public Evaluator2048_GA(PlayAgent e_PlayAgent, int stopEval, int verbose) {
