@@ -85,6 +85,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private boolean RANDINITWEIGHTS = false;// Init Weights of Value-Function
 											// randomly
 	private boolean PRINTTABLES = false;	// /WK/ control the printout of tableA, tableN, epsilon
+	private boolean NEWTARGET=false;
 	
 	//
 	// from TDAgent
@@ -101,7 +102,14 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private ParTD m_tdPar;
 	private ParNT m_ntPar;
 	
-	//public int epiCount=0;
+	//
+	// variables needed in various train methods
+	//
+	private int m_counter = 0;				// count moves in trainAgent
+	private boolean m_finished = false;		// whether a training game is finished
+	private boolean m_randomMove = false;		// whether the last action was random
+	private boolean m_DEBG = false;
+
 
 	/**
 	 * Default constructor for {@link TDNTupleAgt}, needed for loading a serialized version
@@ -290,12 +298,22 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 				// proper logic into method getGameScore(referingState).]  
 				CurrentScore = NewSO.getGameScore(so);
 			}  else {
-				// 
-				// TODO: clarify whether this should be normalized to [0,1] as well (!!!)
-				//       If so, correct this for TDAgent as well (!!)
-				//
-				CurrentScore = player * getScore(NewSO);
-										// here we ask this agent for its score estimate on NewSO
+				if (NEWTARGET) {
+					// new target logic:
+					// the score is the sum of rewards received so far (getGameScore)
+					// plus the estimated future rewards until game over (getScore(NewSO), 
+					// the agent's value function for NewSO)
+					CurrentScore = player * (NewSO.getGameScore() + getScore(NewSO));
+					
+				} else {
+					// old target logic:
+					// the score is just the agent's value function for NewSO. In this case
+					// the agent has to learn in the value function the sum of rewards 
+					// received plus future rewards himself. 
+					CurrentScore = player * getScore(NewSO);
+											// here we ask this agent for its score estimate on NewSO
+					
+				}
 			}
 			
 			if (NORMALIZE) {
@@ -390,16 +408,12 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
 	public boolean trainAgent(StateObservation so, int epiLength) {
-		//int[][] table = new int[3][3];
 		double[] VTable = null;
-		double reward = 0.0;
-		boolean randomMove;
-		boolean finished = false;
+		double reward = 0.0, oldReward = 0.0;
 		boolean wghtChange = false;
 		boolean upTC=false;
-		boolean DEBG = false;
 		double Input[], oldInput[];
-		String S_old, I_old = null;   // only as debug info
+		String S_old = null;   // only as debug info
 		int player;
 		Types.ACTIONS actBest;
 		StateObservation oldSO;
@@ -421,115 +435,34 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		//oldInput = m_feature.prepareFeatVector(so);
 		//S_old = so.toString();   
 		//S_old = tableToString(-Player, table);
-		int counter=0;		// count the number of moves
+		m_counter=0;		// count the number of moves
+		m_finished=false;
 		while (true) {
 			VTable = new double[so.getNumAvailableActions()+1];
 			actBest = this.getNextAction(so, true, VTable, true);
 			//actBest = this.getNextAction(so, false, VTable, true);  // Debug only
-			randomMove = this.wasRandomAction();
+			m_randomMove = this.wasRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
 			nextBoard = m_Net.xnf.getBoardVector(so);
 			nextPlayer= so.getPlayer();
 			//if (DEBG) printVTable(pstream,VTable);
-			if (DEBG) printTable(pstream,nextBoard);
-			if (so.isGameOver()) {
-				// Fetch the reward from StateObservation:
-//				switch (so.getNumPlayers()) {
-//				case 1: 
-//					reward = so.getGameScore();
-//					break;
-//				case 2: 
-//					reward = (-player)*so.getGameScore();
-//					// so.getGameScore() returns -1, if 'player', that is the
-//					// one who *made* the move to 'so', has won. If we multiply
-//					// this by (-player), we get a reward +1 for a X(player=+1)- 
-//					// win and a reward -1 for an O(player=-1)-win.
-//					// And a reward 0 for a tie.
-//					break;
-//				default: 
-//					throw new RuntimeException("TDNTupleAgt.trainAgent not yet "+
-//							"implementing case so.getNumPlayers()>2");
-//				}
-				
-				// the whole switch-statement above can be replaced with the simpler  
-				// logic of so.getGameScore(StateObservation referingState), where  
-				// referingState is 'oldSO', the state before so. [This should be  
-				// extensible to 3- or 4-player games (!) as well, if we put the 
-				// proper logic into method getGameScore(referingState).]  
-				reward = player*so.getGameScore(oldSO);
-
-				if (NORMALIZE) {
-//					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
-//					// or to [-1,+1] (the appropriate range for tanh-sigmoid):
-//					double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
-//					double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
-					
-					// since we have - in contrast to TDAgent - here only one sigmoid
-					// choice, namely tanh, we can take fixed [min,max] = [-1,+1]. 
-					// If we would later extend to several sigmoids, we would have to 
-					// adapt here:
-					
-					reward = normalize(reward,so.getMinGameScore(),
-									   so.getMaxGameScore(),-1,+1);
-				}
-				finished = true;
+			if (m_DEBG) printTable(pstream,nextBoard);
+			if (NEWTARGET) {
+				reward=trainNewTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
+						epiLength,player,upTC,oldReward);				
 			} else {
-				//it is irrelevant what we put into reward here, because it will 
-				//not be used in m_Net.updateWeights when finished is not true.
-				//
-				// ??? has to be re-thought for the case of 2048 and other 1-player games!!!
-				reward = 0.0;
-			}
-			counter++;
-			if (counter==epiLength) {
-				reward=estimateGameValue(so);
-				//epiCount++;
-				finished = true; 
-			}
-			//Input = m_feature.prepareFeatVector(so);
-			if (randomMove && !finished) {
-				// no training, go to next move,
-				// but update eligibility traces for next pass
-				m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
-				// only for diagnostics
-				if (DEBG)
-					pstream.println("random move");
-
-			} else {
-				// do one training step
-				
-				m_Net.updateWeights(curBoard, curPlayer, nextBoard, nextPlayer,
-						finished, reward,upTC);
-				// contains an updateElig(nextBoard,...) in the end, if LAMBDA>0
-
-// -- accumulation logic not yet implemented for TDNTupleAgt --
-//
-//				// this is the accumulation logic: if eMax>0, then form 
-//				// mini batches and apply the weight changes only at the end
-//				// of such mini batches
-//				int eMax = super.getEpochMax();
-//				if (eMax==0) {
-//					wghtChange=true;
-//				} else {
-//					if (finished) numFinishedGames++;
-//					wghtChange = (finished && (numFinishedGames % eMax) == 0);
-//				}
-//				
-//				// either no random move or game is finished >> target signal is
-//				// meaningful!
-//				m_Net.updateWeights(reward, Input, finished, wghtChange);
-//				// contains afterwards a m_Net.calcScoresAndElig(Input);
-//
-//				oldInput = Input;
+				reward=trainOldTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
+						epiLength,player,upTC);
 			}
 
 			curBoard = nextBoard; 
 			curPlayer= nextPlayer;
+			oldReward= reward;
 			
-			if (finished) {
-				if (DEBG)
-					if (randomMove) {
+			if (m_finished) {
+				if (m_DEBG)
+					if (m_randomMove) {
 						pstream.println("Terminated game "+(getGameNum()) + " by random move. Reward = "+reward);						
 					} else {
 						pstream.println("Terminated game "+(getGameNum()) + ". Reward = "+reward);
@@ -541,6 +474,12 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			player = Types.PLAYER_PM[so.getPlayer()];   // advance to the next player
 		} // while
 
+		if (NEWTARGET) {
+			// learn for each final state that the value function (estimated further reward)
+			// should be zero:
+			m_Net.updateWeightsNewTerminal(curBoard, curPlayer,upTC);
+		}
+		
 		try {
 			this.finishMarkMoves(null);		// adjust learn params ALPHA & m_epsilon
 		} catch (Throwable e) {
@@ -555,13 +494,175 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			 m_Net.updateTC();
 		
 		//if (DEBG) m_Net.printLutSum(pstream);
-		if (DEBG) m_Net.printLutHashSum(pstream);
+		if (m_DEBG) m_Net.printLutHashSum(pstream);
 		if (PRINTTABLES) {
 			if(getGameNum()%10==0 && TC)
 				m_Net.printTables();
 		}
 		
 		return false;
+		
+	} // trainAgent
+
+	/**
+	 * 
+	 * @return reward
+	 */
+	private double trainNewTargetLogic(
+			StateObservation so, StateObservation oldSO, 
+			int[] curBoard, int curPlayer,
+			int[] nextBoard, int nextPlayer, 
+			int epiLength, int player, boolean upTC, double oldReward) 
+	{
+		double reward;
+		
+		// Fetch the reward for StateObservation so (relative to oldSO):
+		reward = player*so.getGameScore(oldSO);
+
+		if (NORMALIZE) {
+//			// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+//			// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+//			double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+//			double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+			
+			// since we have - in contrast to TDAgent - here only one sigmoid
+			// choice, namely tanh, we can take fixed [min,max] = [-1,+1]. 
+			// If we would later extend to several sigmoids, we would have to 
+			// adapt here:
+			
+			reward = normalize(reward,so.getMinGameScore(),
+							   so.getMaxGameScore(),-1,+1);
+		}
+		if (so.isGameOver()) {
+			m_finished = true;
+		}
+
+		m_counter++;
+		if (m_counter==epiLength) {
+			reward=estimateGameValue(so);
+			//epiCount++;
+			m_finished = true; 
+		}
+		
+		if (m_randomMove) {
+			// no training, go to next move,
+			// but update eligibility traces for next pass
+			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
+			// only for diagnostics
+			if (m_DEBG)
+				pstream.println("random move");
+
+		} else {
+			// do one training step (NEW target)
+			m_Net.updateWeightsNew(curBoard, curPlayer, nextBoard, nextPlayer,
+					reward-oldReward,upTC);
+			// contains an updateElig(nextBoard,...) in the end, if LAMBDA>0
+		}
+		
+		return reward;
+		
+	} 
+	
+	private double trainOldTargetLogic(
+			StateObservation so, StateObservation oldSO, 
+			int[] curBoard, int curPlayer,
+			int[] nextBoard, int nextPlayer, 
+			int epiLength, int player, boolean upTC) 
+	{
+		double reward;
+		
+		if (so.isGameOver()) {
+			// Fetch the reward from StateObservation:
+//			switch (so.getNumPlayers()) {
+//			case 1: 
+//				reward = so.getGameScore();
+//				break;
+//			case 2: 
+//				reward = (-player)*so.getGameScore();
+//				// so.getGameScore() returns -1, if 'player', that is the
+//				// one who *made* the move to 'so', has won. If we multiply
+//				// this by (-player), we get a reward +1 for a X(player=+1)- 
+//				// win and a reward -1 for an O(player=-1)-win.
+//				// And a reward 0 for a tie.
+//				break;
+//			default: 
+//				throw new RuntimeException("TDNTupleAgt.trainAgent not yet "+
+//						"implementing case so.getNumPlayers()>2");
+//			}
+			
+			// the whole switch-statement above can be replaced with the simpler  
+			// logic of so.getGameScore(StateObservation referingState), where  
+			// referingState is 'oldSO', the state before so. [This should be  
+			// extensible to 3- or 4-player games (!) as well, if we put the 
+			// proper logic into method getGameScore(referingState).]  
+			reward = player*so.getGameScore(oldSO);
+
+			if (NORMALIZE) {
+//				// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+//				// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+//				double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+//				double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+				
+				// since we have - in contrast to TDAgent - here only one sigmoid
+				// choice, namely tanh, we can take fixed [min,max] = [-1,+1]. 
+				// If we would later extend to several sigmoids, we would have to 
+				// adapt here:
+				
+				reward = normalize(reward,so.getMinGameScore(),
+								   so.getMaxGameScore(),-1,+1);
+			}
+			m_finished = true;
+		} else {
+			//it is irrelevant what we put into reward here, because it will 
+			//not be used in m_Net.updateWeights when m_finished is not true.
+			//
+			// ??? has to be re-thought for the case of 2048 and other 1-player games!!!
+			reward = 0.0;
+		}
+		m_counter++;
+		if (m_counter==epiLength) {
+			reward=estimateGameValue(so);
+			//epiCount++;
+			m_finished = true; 
+		}
+		//Input = m_feature.prepareFeatVector(so);
+		if (m_randomMove && !m_finished) {
+			// no training, go to next move,
+			// but update eligibility traces for next pass
+			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
+			// only for diagnostics
+			if (m_DEBG)
+				pstream.println("random move");
+
+		} else {
+			// do one training step
+			
+			m_Net.updateWeights(curBoard, curPlayer, nextBoard, nextPlayer,
+					m_finished, reward,upTC);
+			// contains an updateElig(nextBoard,...) in the end, if LAMBDA>0
+
+//-- accumulation logic not yet implemented for TDNTupleAgt --
+//
+//			// this is the accumulation logic: if eMax>0, then form 
+//			// mini batches and apply the weight changes only at the end
+//			// of such mini batches
+//			int eMax = super.getEpochMax();
+//			if (eMax==0) {
+//				wghtChange=true;
+//			} else {
+//				if (m_finished) numFinishedGames++;
+//				wghtChange = (m_finished && (numFinishedGames % eMax) == 0);
+//			}
+//			
+//			// either no random move or game is finished >> target signal is
+//			// meaningful!
+//			m_Net.updateWeights(reward, Input, m_finished, wghtChange);
+//			// contains afterwards a m_Net.calcScoresAndElig(Input);
+//
+//			oldInput = Input;
+		}
+		
+		return reward;
 	}
 	
 	/**

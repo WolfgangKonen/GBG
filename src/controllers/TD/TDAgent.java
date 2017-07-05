@@ -45,7 +45,7 @@ import games.StateObservation;
  */
 //abstract 
 public class TDAgent extends AgentBase implements PlayAgent,Serializable {
-	protected transient TD_func m_Net;
+	protected TD_func m_Net;
 	private double m_epsilon = 0.1;
 	private double m_EpsilonChangeDelta = 0.001;
 	// --- inpSize now obsolete (replaced by m_feature.getInputSize(int featmode)) --- :
@@ -59,10 +59,10 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 //	private double[][] m_deltaTable = null;
 	private int numFinishedGames = 0;
 	private boolean randomSelect = false;
-	private boolean m_hasLinearNet;
-	private boolean m_hasSigmoid;
+//	private boolean m_hasLinearNet;
+//	private boolean m_hasSigmoid;
 	private boolean NORMALIZE = false; 
-	protected transient Feature m_feature;
+	protected Feature m_feature;
 	
 	/**
 	 * Member {@link #m_tdPar} is only needed for saving and loading the agent
@@ -141,9 +141,9 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_epsilon = tdPar.getEpsilon();
 		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal())
 				/ maxGameNum;
-		m_hasSigmoid = tdPar.hasSigmoid();
 		NORMALIZE=tdPar.getNormalize();
-		m_hasLinearNet = tdPar.hasLinearNet();
+//		m_hasSigmoid = tdPar.hasSigmoid();
+//		m_hasLinearNet = tdPar.hasLinearNet();
 		rand = new Random(System.currentTimeMillis());
 		setAgentState(AgentState.INIT);
 	}
@@ -541,8 +541,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	
 	public String stringDescr() {
 		String cs = getClass().getName();
-		String str = cs + ", " + (m_hasLinearNet?"LIN":"BP")
-						+ ", " + (m_hasSigmoid?"with sigmoid":"w/o sigmoid")
+		String str = cs + ", " + (m_tdPar.hasLinearNet()?"LIN":"BP")
+						+ ", " + (m_tdPar.hasSigmoid()?"with sigmoid":"w/o sigmoid")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", features:" + m_feature.getFeatmode();
