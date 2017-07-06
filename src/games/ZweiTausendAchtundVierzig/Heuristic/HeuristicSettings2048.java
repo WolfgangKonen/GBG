@@ -116,7 +116,7 @@ public class HeuristicSettings2048 implements IObjectiveFunction {
 
         fitness = totScore/25;
         System.out.println("\nFitness is: " + fitness);
-        System.out.println(toString() + "\n");
+        System.out.println(toString());
     }
 
     private void applyGenes() {

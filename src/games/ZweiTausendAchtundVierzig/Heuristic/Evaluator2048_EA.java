@@ -9,9 +9,8 @@ import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.CMAEvolutionStrategy;
  * Created by Johannes on 29.06.2017.
  */
 public class Evaluator2048_EA extends Evaluator {
-    private int verbose;
     private HeuristicSettings2048 fitfun = new HeuristicSettings2048();
-    CMAEvolutionStrategy cma = new CMAEvolutionStrategy();
+    private CMAEvolutionStrategy cma = new CMAEvolutionStrategy();
     private double bestFitness = 0;
 
     public Evaluator2048_EA(PlayAgent e_PlayAgent, int stopEval, int verbose) {
@@ -44,7 +43,7 @@ public class Evaluator2048_EA extends Evaluator {
             // core iteration step
             double[][] pop = cma.samplePopulation(); // get a new population of solutions
             for (int i = 0; i < pop.length; ++i) {    // for each candidate solution i
-                System.out.println("Starting Evaluation: " + (cma.getCountEval() + i));
+                System.out.println("\nStarting Evaluation: " + (cma.getCountEval() + i));
                 while (!fitfun.isFeasible(pop[i]))   //    test whether solution is feasible,
                     pop[i] = cma.resampleSingle(i);  //       re-sample solution until it is feasible
                 fitness[i] = fitfun.valueOf(pop[i]); //    compute fitness value, where fitfun
@@ -60,12 +59,14 @@ public class Evaluator2048_EA extends Evaluator {
                 cma.println();
         }
 
+        bestFitness = (1-cma.getBestFunctionValue())*100000;
+
         cma.writeToDefaultFiles(1);
         cma.println();
-        cma.println("Terminated due to");
+        cma.println("\nTerminated due to");
         for (String s : cma.stopConditions.getMessages())
             cma.println("  " + s);
-        cma.println("best function value " + (1-cma.getBestFunctionValue())*100000
+        cma.println("best fitness " + bestFitness
                 + " at evaluation " + cma.getBestEvaluationNumber());
 
         System.out.println("best settings are: ");
