@@ -169,7 +169,6 @@ public class MCTSEChanceNode
      * @return the selected child node
      */
     private MCTSETreeNode uct() {
-        //ToDo: Problem: if gamescore is normalised uct always chooses the least visited node, if the gamescore is not normalised uct chooses the same node most of the time (99.9% +)
         MCTSETreeNode selected = null;
         double selectedValue = -Double.MAX_VALUE;
 
@@ -380,8 +379,6 @@ public class MCTSEChanceNode
      * @return the {@link Types.ACTIONS} of the root's childrenNodes which maximizes U(i) = childrenNodes[i].value/childrenNodes[i].visits
      */
     public Types.ACTIONS bestAction() {
-        //ToDo: test other strategys to choose the best action
-
         Types.ACTIONS selected = null;
         double bestValue = -Double.MAX_VALUE;
         double currentValue;

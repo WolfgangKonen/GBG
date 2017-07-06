@@ -2,7 +2,7 @@ package games.ZweiTausendAchtundVierzig;
 
 import controllers.PlayAgent;
 import games.*;
-import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_GA;
+import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
 
 import javax.swing.*;
 
@@ -50,7 +50,7 @@ public class Arena2048 extends Arena {
             case 1:
                 return new Evaluator2048_BoardPositions(pa, stopEval, verbose);
             case 2:
-                return new Evaluator2048_GA(pa, stopEval, verbose);
+                return new Evaluator2048_EA(pa, stopEval, verbose);
             default:
                 throw new RuntimeException("Mode " + mode + " is not allowed for 2048");
         }

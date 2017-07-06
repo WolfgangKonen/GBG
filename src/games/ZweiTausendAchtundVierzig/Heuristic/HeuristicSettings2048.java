@@ -1,13 +1,11 @@
 package games.ZweiTausendAchtundVierzig.Heuristic;
 
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
-import games.Evaluator;
-import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
+import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.fitness.IObjectiveFunction;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.MCTSExpectimaxParams;
 import tools.Types;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,14 +16,12 @@ import java.util.concurrent.Executors;
 /**
  * Created by Johannes on 27.06.2017.
  */
-public class HeuristicSettings2048 implements Serializable{
+public class HeuristicSettings2048 implements IObjectiveFunction {
     private int geneLength = 15;
     private double[] genes;
     public double fitness;
     private Random random = new Random();
     private ExecutorService executorService = Executors.newFixedThreadPool(6);
-
-    private static final long serialVersionUID = 1;
 
     //empty tiles
     public boolean enableEmptyTiles = true;
@@ -65,6 +61,7 @@ public class HeuristicSettings2048 implements Serializable{
      * calculate the fitness
      */
     public void calcFitness () {
+        System.out.print("Calculating Fitness");
         if(!enableEmptyTiles && !enableHighestTileInCorner && !enableRow && !enableMerge && !enableRollout) {
             fitness = 0;
             return;
@@ -92,6 +89,8 @@ public class HeuristicSettings2048 implements Serializable{
                     so.advance(action);
                 }
 
+                System.out.print(".");
+
                 return so;
             });
         }
@@ -116,92 +115,10 @@ public class HeuristicSettings2048 implements Serializable{
         }
 
         fitness = totScore/25;
+        System.out.println("\nFitness is: " + fitness);
+        System.out.println(toString() + "\n");
     }
 
-    /**
-     * crossover this genes with the genes of a partner and create a new genecombination
-     * all genes for one Heuristic are chosen from the same genepool
-     *
-     * @param partner the partner
-     * @return the new genecombination
-     */
-    public HeuristicSettings2048 crossover(HeuristicSettings2048 partner) {
-        HeuristicSettings2048 child = new HeuristicSettings2048();
-
-        //empty tiles
-        if(random.nextDouble() < 0.5) {
-            child.genes[0] = genes[0];
-            child.genes[1] = genes[1];
-            child.genes[2] = genes[2];
-            child.genes[3] = genes[3];
-            child.genes[4] = genes[4];
-        } else {
-            child.genes[0] = partner.genes[0];
-            child.genes[1] = partner.genes[1];
-            child.genes[2] = partner.genes[2];
-            child.genes[3] = partner.genes[3];
-            child.genes[4] = partner.genes[4];
-        }
-
-        //highest tile in corner
-        if(random.nextDouble() < 0.5) {
-            child.genes[5] = genes[5];
-            child.genes[6] = genes[6];
-        } else {
-            child.genes[5] = partner.genes[5];
-            child.genes[6] = partner.genes[6];
-        }
-
-        //row
-        if(random.nextDouble() < 0.5) {
-            child.genes[7] = genes[7];
-            child.genes[8] = genes[8];
-            child.genes[9] = genes[9];
-            child.genes[10] = genes[10];
-        } else {
-            child.genes[7] = partner.genes[7];
-            child.genes[8] = partner.genes[8];
-            child.genes[9] = partner.genes[9];
-            child.genes[10] = partner.genes[10];
-        }
-
-        //merge
-        if(random.nextDouble() < 0.5) {
-            child.genes[11] = genes[11];
-            child.genes[12] = genes[12];
-        } else {
-            child.genes[11] = partner.genes[11];
-            child.genes[12] = partner.genes[12];
-        }
-
-        //rollout
-        if(random.nextDouble() < 0.5) {
-            child.genes[13] = genes[13];
-            child.genes[14] = genes[14];
-        } else {
-            child.genes[13] = partner.genes[13];
-            child.genes[14] = partner.genes[14];
-        }
-
-        return child;
-    }
-
-    /**
-     * mutate some randomly selected genes
-     *
-     * @param mutationRate the mutation rate
-     */
-    public void mutate(double mutationRate) {
-        for (int i = 0; i < genes.length; i++) {
-            if (random.nextDouble() < mutationRate) {
-                genes[i] = random.nextDouble();
-            }
-        }
-    }
-
-    /**
-     * set the settings accordingly to the current genes
-     */
     private void applyGenes() {
         enableEmptyTiles = genes[0] < 0.5;
         emptyTilesWeighting0 = genes[1];
@@ -266,5 +183,30 @@ public class HeuristicSettings2048 implements Serializable{
                 "\nrolloutWeighting: " + rolloutWeighting;
 
         return string;
+    }
+
+    @Override
+    public double valueOf(double[] x) {
+        genes = x;
+        applyGenes();
+        calcFitness();
+        return 1-(fitness/100000);
+    }
+
+    @Override
+    public boolean isFeasible(double[] x) {
+        for(int i = 0; i < x.length; i++) {
+            if(x[i] < 0 || x[i] > 1) {
+                return false;
+            }
+        }
+
+        genes = x;
+        applyGenes();
+        if(!enableRollout && !enableMerge && !enableHighestTileInCorner && !enableEmptyTiles && !enableRow) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

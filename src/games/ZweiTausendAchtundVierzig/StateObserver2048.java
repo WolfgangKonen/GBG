@@ -161,8 +161,6 @@ public class StateObserver2048 implements StateObservationNondeterministic {
     public double getHeuristicBonus(HeuristicSettings2048 settings) {
         double bonus = 0;
 
-        //TODO: evtl so strukturieren, das jede HeuristikMethode für sich ein und ausgestellt werden kann und mehrere Methoden pro Heuristik aktiv sein können
-
         //find new Values
         evaluateBoard(settings.rowMethod);
 
@@ -228,20 +226,21 @@ public class StateObserver2048 implements StateObservationNondeterministic {
             foundHighestTileInCorner = true;
 
             //evaluate right row
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2, rowEvaluationMethod);
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2, rowEvaluationMethod, 1);
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
             //evaluate bottom row
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3, rowEvaluationMethod);
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3, rowEvaluationMethod, 1);
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
         }
 
+        //evaluate topright corner
         if(getTileValue(3) == highestTileValue) {
             if(!foundHighestTileInCorner) {
                 highestTileInCorner = true;
@@ -251,19 +250,20 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                 highestTileInCorner = false;
             }
 
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2, rowEvaluationMethod);
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0, rowEvaluationMethod, 1);
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1, rowEvaluationMethod);
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 3, 3, 1, 3, rowEvaluationMethod, -1);
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
         }
 
+        //evaluate bottomleft corner
         if(getTileValue(12) == highestTileValue) {
             if(!foundHighestTileInCorner) {
                 highestTileInCorner = true;
@@ -272,19 +272,20 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                 highestTileInCorner = false;
             }
 
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0, rowEvaluationMethod);
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1, rowEvaluationMethod, 1);
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3, rowEvaluationMethod);
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 2, rowEvaluationMethod, -1);
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
         }
 
+        //evaluate bottomright corner
         if(getTileValue(15) == highestTileValue) {
             if(!foundHighestTileInCorner) {
                 highestTileInCorner = true;
@@ -292,13 +293,13 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                 highestTileInCorner = false;
             }
 
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0, rowEvaluationMethod);
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 0, rowEvaluationMethod, -1);
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1, rowEvaluationMethod);
+            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 1, rowEvaluationMethod, -1);
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
@@ -373,7 +374,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
      * @param method the Method used to determine if the next tile is part of the row
      * @return a RowInformationContainer containing the currentRowLength and the currentRowValue
      */
-    private RowInformationContainer evaluateRow(int currentTileValue, int currentRowLength, int currentRowValue, int position, int offset, int direction, int method) {
+    private RowInformationContainer evaluateRow(int currentTileValue, int currentRowLength, int currentRowValue, int position, int offset, int direction, int method, int newRowDirection) {
         switch (direction) {
             case 0:
                 //left
@@ -400,7 +401,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                     }
                 }
 
-                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + 1, 0, 2, method);
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + newRowDirection, 0, 2, method, newRowDirection);
 
             case 1:
                 //up
@@ -427,7 +428,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                     }
                 }
 
-                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + 1, 0, 3, method);
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + newRowDirection, 0, 3, method, newRowDirection);
 
             case 2:
                 //right
@@ -453,7 +454,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                             break;
                     }
                 }
-                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + 1, 0, 0, method);
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + newRowDirection, 0, 0, method, newRowDirection);
 
             case 3:
                 //down
@@ -479,7 +480,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
                             break;
                     }
                 }
-                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + 1, 0, 1, method);
+                return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + newRowDirection, 0, 1, method, newRowDirection);
         }
 
         return null;
@@ -715,7 +716,6 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         updateHighestTile(value);
     }
 
-    //ToDo: this seems to be buggy when using Evaluator 2048
     private void updateHighestTile(int exp) {
         int tileVal = (1 << exp);
         if(tileVal > highestTileValue) {

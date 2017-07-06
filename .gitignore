@@ -12,6 +12,7 @@ GBG-design.pdf
 *.idea
 *.iml
 *.settings
+*.dat
 src/out/production/GBG/*
 out/*
 
