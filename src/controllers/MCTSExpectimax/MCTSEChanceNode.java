@@ -156,7 +156,7 @@ public class MCTSEChanceNode
                 return this;
             }
         } else {
-            //recursively go down the three
+            //recursively go down the tree
             //select a child with uct(), select/create a chance node with treePolicy() and call this method in the new chance node
 
             return uctNormalised().treePolicy().treePolicy();

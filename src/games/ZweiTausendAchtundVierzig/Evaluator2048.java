@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
  * Created by Johannes on 02.12.2016.
  */
 public class Evaluator2048 extends Evaluator {
-    private ExecutorService executorService = Executors.newWorkStealingPool();
+    private ExecutorService executorService = Executors.newFixedThreadPool(6);
 
     private double averageScore;
     private int minScore = Integer.MAX_VALUE;
@@ -181,7 +181,8 @@ public class Evaluator2048 extends Evaluator {
         } else if(m_PlayAgent.getName() == "MCTS Expectimax") {
             MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
             agentSettings = "\nROLLOUTDEPTH: " + mctsExpectimaxAgt.params.getRolloutDepth() +
-                    "\nITERATIONS: " + mctsExpectimaxAgt.params.getNumIter();
+                    "\nITERATIONS: " + mctsExpectimaxAgt.params.getNumIter() +
+                    "\nMAXNODES:" + mctsExpectimaxAgt.params.getMaxNodes();
         }
 
         return "\n\nSettings:" +

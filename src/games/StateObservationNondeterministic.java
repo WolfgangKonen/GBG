@@ -1,9 +1,6 @@
 package games;
 
-import javafx.util.Pair;
 import tools.Types;
-
-import java.util.ArrayList;
 
 /**
  * This interface is used to implement nondeterministic games like 2048.

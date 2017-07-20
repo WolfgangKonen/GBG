@@ -70,8 +70,9 @@ public class HeuristicSettings2048 implements IObjectiveFunction {
         List<Callable<StateObserver2048>> callables = new ArrayList<>();
         MCTSExpectimaxParams mctseParams = new MCTSExpectimaxParams();
         mctseParams.setHeuristicSettings2048(this);
-        mctseParams.setNumIter(4000);
-        mctseParams.setMaxNodes(4000);
+        mctseParams.setNumIter(3500);
+        mctseParams.setMaxNodes(500);
+        mctseParams.setRolloutDepth(150);
         mctseParams.setTreeDepth(10);
         mctseParams.setEnableHeuristics(true);
 
@@ -119,6 +120,9 @@ public class HeuristicSettings2048 implements IObjectiveFunction {
         System.out.println(toString());
     }
 
+    /**
+     * apply the current genes
+     */
     private void applyGenes() {
         enableEmptyTiles = genes[0] < 0.5;
         emptyTilesWeighting0 = genes[1];

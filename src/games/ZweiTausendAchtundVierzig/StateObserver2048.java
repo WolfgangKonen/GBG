@@ -168,7 +168,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         if(settings.enableEmptyTiles) {
             switch (settings.emptyTilesMethod) {
                 case 0:
-                    bonus += Math.pow(settings.emptyTilesWeighting0, emptyTiles.size());
+                    bonus += Math.pow(settings.emptyTilesWeighting0 + 1, emptyTiles.size());
                     break;
                 case 1:
                     bonus += highestTileValue * emptyTiles.size() * settings.emptyTilesWeighting1;

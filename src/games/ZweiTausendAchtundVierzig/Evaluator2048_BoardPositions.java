@@ -110,7 +110,6 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         //create Agents
         MCTSExpectimaxParams mctsParams = new MCTSExpectimaxParams();
         mctsParams.setNumIter(ConfigEvaluator.ITERATIONS * ConfigEvaluator.NUMBERAGENTS * gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
-        mctsParams.setK_UCT(ConfigEvaluator.KUCT);
         mctsParams.setTreeDepth(ConfigEvaluator.TREEDEPTH);
         mctsParams.setRolloutDepth(ConfigEvaluator.ROLLOUTDEPTH);
         MCTSExpectimaxAgt mctseAgent = new MCTSExpectimaxAgt("MCTSE", mctsParams);

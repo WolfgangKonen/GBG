@@ -15,7 +15,6 @@ public class Evaluator2048_EA extends Evaluator {
 
     public Evaluator2048_EA(PlayAgent e_PlayAgent, int stopEval, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
-        this.verbose = verbose;
     }
 
     @Override
