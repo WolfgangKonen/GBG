@@ -21,7 +21,7 @@ public class HeuristicSettings2048 implements IObjectiveFunction {
     private double[] genes;
     public double fitness;
     private Random random = new Random();
-    private ExecutorService executorService = Executors.newFixedThreadPool(6);
+    private ExecutorService executorService = Executors.newWorkStealingPool();
 
     //empty tiles
     public boolean enableEmptyTiles = true;

@@ -23,7 +23,7 @@ public class Evaluator2048_EA extends Evaluator {
         cma.setInitialX(0.5);
         cma.setInitialStandardDeviation(0.2);
 
-        cma.options.stopMaxFunEvals = 250;
+        cma.options.stopMaxFunEvals = 240;
 
         double[] fitness = cma.init();
 
@@ -56,6 +56,17 @@ public class Evaluator2048_EA extends Evaluator {
                 cma.printlnAnnotation(); // might write file as well
             if (cma.getCountIter() % outmod == 1)
                 cma.println();
+
+
+            bestFitness = (1-cma.getBestFunctionValue())*100000;
+            cma.println("\nbest fitness " + bestFitness
+                    + " at evaluation " + cma.getBestEvaluationNumber());
+
+            System.out.println("best settings are: ");
+            double[] best = cma.getBestX();
+            for (int i = 0; i < best.length; i++) {
+                System.out.println(i + ": " + best[i]);
+            }
         }
 
         bestFitness = (1-cma.getBestFunctionValue())*100000;
