@@ -313,16 +313,18 @@ public class XArenaFuncs
 //			((CMAPlayer) pa).trainLoop(maxGameNum,this,xab,verbose);
 //		} else 
 		{
+			long startTime = System.currentTimeMillis();
 			while (pa.getGameNum()<pa.getMaxGameNum())
 			{							
-				//StateObservation so = gb.chooseStartState01();
-				StateObservation so = gb.getDefaultStartState();  // Debug only
+				StateObservation so = gb.chooseStartState01();
+				//StateObservation so = gb.getDefaultStartState();  // Debug only
 
 				pa.trainAgent(so,epiLength);
 				
 				gameNum = pa.getGameNum();
 				if (gameNum%numEval==0 ) { //|| gameNum==1) {
-					System.out.println(pa.printTrainStatus());
+					double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+					System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
 					xab.GameNumT.setText(Integer.toString(gameNum ) );
 					
 					m_evaluatorQ.eval();
@@ -333,6 +335,7 @@ public class XArenaFuncs
 							seriesT.add((double)gameNum, m_evaluatorT.getLastResult());
 					}
 					lChart.plot();
+					startTime = System.currentTimeMillis();
 				}
 				
 				if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {

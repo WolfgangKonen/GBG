@@ -86,6 +86,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 											// randomly
 	private boolean PRINTTABLES = false;	// /WK/ control the printout of tableA, tableN, epsilon
 	private boolean NEWTARGET=false;
+	private boolean DBG2_TARGET=false;
 	
 	//
 	// from TDAgent
@@ -300,16 +301,23 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			}  else {
 				if (NEWTARGET) {
 					// new target logic:
-					// the score is the sum of rewards received so far (getGameScore)
+					// the score is the sum of rewards received so far (NewSO.getGameScore)
 					// plus the estimated future rewards until game over (getScore(NewSO), 
 					// the agent's value function for NewSO)
 					CurrentScore = player * (NewSO.getGameScore() + getScore(NewSO));
 					
+					// just a debug check:
+					if (Double.isInfinite(getScore(NewSO))) {
+						double s = getScore(NewSO);
+						System.out.println("getScore(NewSO) is infinite!");
+					}
+					
 				} else {
 					// old target logic:
 					// the score is just the agent's value function for NewSO. In this case
-					// the agent has to learn in the value function the sum of rewards 
-					// received plus future rewards himself. 
+					// the agent has to learn in the value function the sum 
+					// 		"rewards received plus future rewards"
+					// himself. 
 					CurrentScore = player * getScore(NewSO);
 											// here we ask this agent for its score estimate on NewSO
 					
@@ -455,6 +463,9 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 				reward=trainOldTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
 						epiLength,player,upTC);
 			}
+			final double MAXSCORE = 3932156;
+			if (DBG2_TARGET) System.out.println("r_t, r_t+1: "+oldReward*MAXSCORE
+												+", "+reward*MAXSCORE );
 
 			curBoard = nextBoard; 
 			curPlayer= nextPlayer;
@@ -712,6 +723,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	public void setTDParams(TDParams tdPar, int maxGameNum) {
 		m_Net.setLambda(tdPar.getLambda());
 		m_Net.setGamma(tdPar.getGamma());
+		m_Net.setSigmoid(tdPar.hasSigmoid());
 
 		double alpha = tdPar.getAlpha();
 		double alphaFinal = tdPar.getAlphaFinal();
@@ -730,6 +742,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	public void setTDParams(ParTD tdPar, int maxGameNum) {
 		m_Net.setLambda(tdPar.getLambda());
 		m_Net.setGamma(tdPar.getGamma());
+		m_Net.setSigmoid(tdPar.hasSigmoid());
 
 		double alpha = tdPar.getAlpha();
 		double alphaFinal = tdPar.getAlphaFinal();
@@ -792,7 +805,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		String cs = getClass().getName();
 		String str = cs + ", USESYMMETRY:" + (USESYMMETRY?"true":"false")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
-						+ ", " + "sigmoid: tanh"
+						+ ", " + "sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda();
 		return str;
 	}

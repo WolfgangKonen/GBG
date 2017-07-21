@@ -153,7 +153,8 @@ public class XArenaMenu extends JMenuBar {
 				public void actionPerformed(ActionEvent e) {
 					try {
 						loadAgent(j);						
-					} catch (Exception exc) {						
+					} catch (Exception exc) {	
+						System.out.println(exc.getMessage());
 					}
 				}
 			});
@@ -511,6 +512,7 @@ public class XArenaMenu extends JMenuBar {
 				+ strAgent + "!";
 		}
 		printStatus(str);
+		System.out.println("[LoadAgent] "+str);
 	}
 
 	void saveAgent(int index) {
@@ -535,6 +537,7 @@ public class XArenaMenu extends JMenuBar {
 			str = e.getMessage();
 		}
 		printStatus(str);
+		System.out.println("[SaveAgent] "+str);
 	}
 
 	

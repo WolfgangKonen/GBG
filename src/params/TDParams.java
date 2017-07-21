@@ -393,8 +393,10 @@ public class TDParams extends Frame implements Serializable
 			epochT.setText("1");				//
 			withSigType.setSelected(true);		// tanh
 			normalize.setSelected(false);		// 
-			withSigType.setEnabled(false);		
-			SigTypeL.setEnabled(false);
+			withSigType.setEnabled(false);
+			SigTypeL.setEnabled(false);   
+//			withSigType.setEnabled(true); // NEW		
+//			SigTypeL.setEnabled(true);    // NEW
 			NetTypeL.setEnabled(false);
 			LinNetType.setEnabled(false);
 			BprNetType.setEnabled(false);

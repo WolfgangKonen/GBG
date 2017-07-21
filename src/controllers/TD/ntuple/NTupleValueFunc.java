@@ -43,6 +43,7 @@ public class NTupleValueFunc implements Serializable {
 	protected double m_AlphaChangeRatio = 0.9998; // 0.998
 	protected int epochMax=1;
     protected boolean  rpropLrn=false;
+    protected boolean withSigmoid=true;
 
 	// Number of n-tuples
 	private int numTuples = 0;
@@ -139,7 +140,8 @@ public class NTupleValueFunc implements Serializable {
 
 	public void calcScoresAndElig(int[] curTable, int curPlayer) {
     	double v_old = getScoreI(curTable,curPlayer);	
-    	double e = (1.0 - v_old * v_old);   // derivative of tanh
+		// derivative of tanh ( if withSigmoid==true)
+		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
         updateElig(curTable,curPlayer,e);	
 	}
 
@@ -191,7 +193,7 @@ public class NTupleValueFunc implements Serializable {
 		}
 		//if (useSymmetry) score /= equiv.length; // DON'T, at least for TTT clearly inferior
 
-		return Math.tanh(score);
+		return (withSigmoid ? Math.tanh(score) : score);
 	}
 
 	/**
@@ -249,8 +251,8 @@ public class NTupleValueFunc implements Serializable {
 		tg = (finished ? reward : GAMMA * getScoreI(nextBoard,nextPlayer));
 		// delta is the error signal
 		double delta = (tg - v_old);
-		// derivative of tanh
-		double e = (1.0 - v_old * v_old);
+		// derivative of tanh ( if withSigmoid==true)
+		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
 
 		double dW = ALPHA * delta * e;
 
@@ -291,8 +293,8 @@ public class NTupleValueFunc implements Serializable {
 		tg = reward + GAMMA * getScoreI(nextBoard,nextPlayer);
 		// delta is the error signal
 		double delta = (tg - v_old);
-		// derivative of tanh
-		double e = (1.0 - v_old * v_old);
+		// derivative of tanh ( if withSigmoid==true)
+		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
 
 		double dW = ALPHA * delta * e;
 
@@ -312,8 +314,8 @@ public class NTupleValueFunc implements Serializable {
 		double tg = 0.0; // Target signal is 0 (!)
 		// delta is the error signal
 		double delta = (tg - v_old);
-		// derivative of tanh
-		double e = (1.0 - v_old * v_old);
+		// derivative of tanh ( if withSigmoid==true)
+		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
 
 		double dW = ALPHA * delta * e;
 
@@ -410,6 +412,14 @@ public class NTupleValueFunc implements Serializable {
 	}
 	public void setRpropInitDelta(double initDelta) {
 		// dummy
+	}
+
+	public boolean hasSigmoid() {
+		return withSigmoid;
+	}
+
+	public void setSigmoid(boolean withSigmoid) {
+		this.withSigmoid = withSigmoid;
 	}
 
 	public double getAlpha() {
