@@ -3,10 +3,7 @@ import com.sun.istack.internal.Nullable;
 import tools.Types;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.*;
 
 import static games.Hex.HexConfig.PLAYER_NONE;
 import static games.Hex.HexConfig.PLAYER_ONE;
@@ -32,12 +29,12 @@ public class HexUtils {
         double s = getSideLengthFromHeight(polyHeight);	// length of one side
 
         int[] xPoints = new int[] {(int) Math.round(x+t),     (int) Math.round(x+s+t),
-                                   (int) Math.round(x+s+t+t), (int) Math.round(x+s+t),
-                                   (int) Math.round(x+t),     x};
+                (int) Math.round(x+s+t+t), (int) Math.round(x+s+t),
+                (int) Math.round(x+t),     x};
 
         int[] yPoints = new int[] {y,                         y,
-                                   (int) Math.round(y+r),     (int) Math.round(y+r+r),
-                                   (int) Math.round(y+r+r),   (int) Math.round(y+r)};
+                (int) Math.round(y+r),     (int) Math.round(y+r+r),
+                (int) Math.round(y+r+r),   (int) Math.round(y+r)};
 
         return new Polygon(xPoints, yPoints, 6);
     }
@@ -58,7 +55,7 @@ public class HexUtils {
         g2.drawPolygon(poly);
     }
 
-    public static void drawTileValueText(HexTile tile, Graphics2D g2, int boardSize) {
+    public static void drawTileValueText(HexTile tile, Graphics2D g2, Color cellColor, int boardSize) {
         double tileValue = tile.getValue();
         if (Double.isNaN(tileValue)){
             return;
@@ -73,11 +70,15 @@ public class HexUtils {
         int x = getHexX(i, j, polyHeight)+HexConfig.OFFSET;
         int y = getHexY(i, j, polyHeight, boardSize);
 
-        Color textColor = tile.getPlayer() == PLAYER_ONE ? Color.WHITE : Color.BLACK;
+        //Using luminosity function from: https://en.wikipedia.org/wiki/Relative_luminance
+        //Adjusted factor of red for better readability
+        int luminance = (int) (0.8*cellColor.getRed() + 0.7152*cellColor.getGreen() + 0.0722*cellColor.getBlue());
+        int luminance_inverse = Math.max(255-luminance, 0);
+        Color textColor = new Color(luminance_inverse, luminance_inverse, luminance_inverse, 255);
 
         g2.setColor(textColor);
 
-        String tileText = String.format("%4d", Math.round(tileValue*1000));
+        String tileText = Long.toString(Math.round(tileValue*1000));
 
         int width = g2.getFontMetrics().stringWidth(tileText);
         int height = g2.getFontMetrics().getHeight();
@@ -89,21 +90,28 @@ public class HexUtils {
     }
 
     public static Color calculateTileColor(double tileValue){
-        double minVal = -1;
-        double maxVal = 1;
-        double difference = maxVal-minVal;
-        float percentage = (float) ((tileValue-minVal)/difference);
+        float percentage = (float) Math.abs(tileValue);
         float inverse_percentage = 1-percentage;
 
-        Color colorBad = Color.RED;
-        Color colorGood = Color.GREEN;
+        Color colorLow;
+        Color colorHigh;
+        Color colorNeutral = Color.YELLOW;
+        int red, blue, green;
+        
+        if (tileValue < 0) {
+            colorLow = colorNeutral;
+            colorHigh = Color.RED;
+        } else {
+            colorLow = colorNeutral;
+            colorHigh = Color.GREEN;
+        }
 
-        int red =   Math.min(Math.max(Math.round(colorBad.getRed()   * inverse_percentage
-                + colorGood.getRed()   * percentage), 0), 255);
-        int blue =  Math.min(Math.max(Math.round(colorBad.getBlue()  * inverse_percentage
-                + colorGood.getBlue()  * percentage), 0), 255);
-        int green = Math.min(Math.max(Math.round(colorBad.getGreen() * inverse_percentage
-                + colorGood.getGreen() * percentage), 0), 255);
+        red = Math.min(Math.max(Math.round(colorLow.getRed() * inverse_percentage
+                + colorHigh.getRed() * percentage), 0), 255);
+        blue = Math.min(Math.max(Math.round(colorLow.getBlue() * inverse_percentage
+                + colorHigh.getBlue() * percentage), 0), 255);
+        green = Math.min(Math.max(Math.round(colorLow.getGreen() * inverse_percentage
+                + colorHigh.getGreen() * percentage), 0), 255);
 
         return new Color(red, green, blue, 255);
     }
@@ -298,111 +306,359 @@ public class HexUtils {
     public static double[] getFeature0ForPlayer(HexTile[][] board, int player){
         LinkedList<HexTile> tilesToVisit = new LinkedList<>();
         ArrayList<HexTile> visitedTiles = new ArrayList<>();
+        ArrayList<HexTile> freeNeighborTiles = new ArrayList<>();
 
         int longestChain = 0;
-        int neighborCount = 0;
         int virtualConnections = 0;
 
-        for (int i=0; i<HexConfig.BOARD_SIZE; i++){
-            for (int j=0; j<HexConfig.BOARD_SIZE; j++){
-                if (!visitedTiles.contains(board[i][j]) && board[i][j].getPlayer() == player){
+        for (int i=0; i<HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+                if (!visitedTiles.contains(board[i][j]) && board[i][j].getPlayer() == player) {
                     tilesToVisit.add(board[i][j]);
                 }
+            }
+        }
 
-                int currentChainLength = 0;
-                int currentChainMin = Integer.MAX_VALUE;
-                int currentChainMax = Integer.MIN_VALUE;
-                while(tilesToVisit.size() > 0){
-                    HexTile currentTile = tilesToVisit.pop();
-                    ArrayList<HexTile> adjacentTiles = getAdjacentTiles(board, currentTile);
-                    for (HexTile currentNeighbor: adjacentTiles){
-                        if (currentTile.getPlayer() == player && currentNeighbor.getPlayer() == PLAYER_NONE){
-                            //Add currentNeighbor to count of neighboring free tiles
-                            neighborCount += 1;
+        int currentChainLength = 0;
+        int currentVirtualConnections = 0;
+        int currentChainMin = Integer.MAX_VALUE;
+        int currentChainMax = Integer.MIN_VALUE;
+        while(tilesToVisit.size() > 0){
+            HexTile currentTile = tilesToVisit.pop();
+            ArrayList<HexTile> adjacentTiles = getAdjacentTiles(board, currentTile);
+            for (HexTile currentNeighbor: adjacentTiles){
+                //Check if the tile has not been visited and is not yet marked to be visited...
+                if (!tilesToVisit.contains(currentNeighbor) &&
+                        !visitedTiles.contains(currentNeighbor)) {
+                    //If the tile belongs to the player, add it directly
+                    if (currentNeighbor.getPlayer() == player) {
+                        tilesToVisit.add(currentNeighbor);
+                    } else if (currentNeighbor.getPlayer() == PLAYER_NONE) {
+                        //Add currentNeighbor to count of neighboring free tiles
+                        if (!freeNeighborTiles.contains(currentNeighbor)){
+                            freeNeighborTiles.add(currentNeighbor);
                         }
-                        //Check if the tile has not been visited and is not yet marked to be visited...
-                        if (!tilesToVisit.contains(currentNeighbor) &&
-                                !visitedTiles.contains(currentNeighbor)) {
-                            //If the tile belongs to the player, add it directly
-                            if (currentNeighbor.getPlayer() == player) {
-                                tilesToVisit.add(currentNeighbor);
-                            } else if (currentNeighbor.getPlayer() == PLAYER_NONE) {
-                                //If the tile does not belong to a player, check if there is an additional free tile
-                                //where both free tiles connect the same two tiles that belong to the player
-                                /*Example (X: tile of player; ?: free tile):
+                        //If the tile does not belong to a player, check if there is an additional free tile
+                        //where both free tiles connect the same two tiles that belong to the player
+/*                                Example (X: tile of player; ?: free tile):
                                      ?
                                    /   \
                                   X     X
                                    \   /
                                      ?
 
-                                 Also applies if one X is replaced by an edge with the same color as the player
-                                 */
-                                ArrayList<HexTile> neighborsNeighbors = getAdjacentTiles(board, currentNeighbor);
-                                for (HexTile currentNeighborsNeighbor : neighborsNeighbors) {
-                                    if (!currentNeighborsNeighbor.equals(currentTile)
-                                            && adjacentTiles.contains(currentNeighborsNeighbor)
-                                            &&currentNeighborsNeighbor.getPlayer() == PLAYER_NONE) {
-                                        //If this evaluates to true, the tile is adjacent to currentTile AND
-                                        //currentNeighbor AND does not belong to a player yet
+                                 Also applies if one X is replaced by an edge with the same color as the player*/
 
-                                        //Check if both free tiles are connected to an edge that belongs to the player
-                                        if (isNextToEdge(currentNeighbor, player) > 0
-                                                && isNextToEdge(currentNeighborsNeighbor, player) > 0){
+                        ArrayList<HexTile> neighborsNeighbors = getAdjacentTiles(board, currentNeighbor);
+                        for (HexTile currentNeighborsNeighbor : neighborsNeighbors) {
+                            if (!currentNeighborsNeighbor.equals(currentTile)
+                                    && adjacentTiles.contains(currentNeighborsNeighbor)
+                                    && currentNeighborsNeighbor.getPlayer() == PLAYER_NONE) {
+                                //If this evaluates to true, the tile is adjacent to currentTile
+
+                                //Check if both tiles are connected to an edge that belongs to the player
+                                if (isNextToEdge(currentNeighbor, player) > 0
+                                        && isNextToEdge(currentNeighborsNeighbor, player) > 0) {
+                                    tilesToVisit.add(currentNeighbor);
+                                    tilesToVisit.add(currentNeighborsNeighbor);
+                                    virtualConnections++;
+                                    currentVirtualConnections++;
+                                } else {
+                                    //Find a tile that is adjacent to both neighbors and also belongs
+                                    //to the player, if such a tile exists
+                                    ArrayList<HexTile> secondNeighborsAdjacentTiles =
+                                            getAdjacentTiles(board, currentNeighborsNeighbor);
+                                    for (HexTile secondNeighborsNeighbor : secondNeighborsAdjacentTiles) {
+                                        if (neighborsNeighbors.contains(secondNeighborsNeighbor)
+                                                && !secondNeighborsNeighbor.equals(currentTile)
+                                                && secondNeighborsNeighbor.getPlayer() == player) {
+                                            //If such a tile was found, add the two free adjacent tiles that
+                                            //connect the two separate chains.
+                                            //This treats the two chains as a single chain
                                             tilesToVisit.add(currentNeighbor);
                                             tilesToVisit.add(currentNeighborsNeighbor);
                                             virtualConnections++;
-                                        } else {
-                                            //Find a tile that is adjacent to both neighbors and also belongs
-                                            //to the player, if such a tile exists
-                                            ArrayList<HexTile> secondNeighborsAdjacentTiles =
-                                                    getAdjacentTiles(board, currentNeighborsNeighbor);
-                                            for (HexTile secondNeighborsNeighbor : secondNeighborsAdjacentTiles) {
-                                                if (neighborsNeighbors.contains(secondNeighborsNeighbor)
-                                                        && !secondNeighborsNeighbor.equals(currentTile)
-                                                        && secondNeighborsNeighbor.getPlayer() == player) {
-                                                    //If such a tile was found, add the two free adjacent tiles that
-                                                    //connect the two separate chains.
-                                                    //This treats the two chains as a single chain
-                                                    tilesToVisit.add(currentNeighbor);
-                                                    tilesToVisit.add(currentNeighborsNeighbor);
-                                                    virtualConnections++;
-                                                }
-                                            }
+                                            currentVirtualConnections++;
                                         }
                                     }
                                 }
                             }
                         }
-
                     }
-
-                    if (player == HexConfig.PLAYER_TWO){
-                        //For player two, x direction matters
-                        currentChainMin = Math.min(currentTile.getCoords().x, currentChainMin);
-                        currentChainMax = Math.max(currentTile.getCoords().x, currentChainMax);
-                    } else if (player == PLAYER_ONE){
-                        //For player one, y direction matters
-                        currentChainMin = Math.min(currentTile.getCoords().y, currentChainMin);
-                        currentChainMax = Math.max(currentTile.getCoords().y, currentChainMax);
-                    }
-
-                    currentChainLength = Math.max(currentChainLength, (currentChainMax-currentChainMin)+1);
-
-                    visitedTiles.add(currentTile);
                 }
-                longestChain = Math.max(longestChain, currentChainLength);
+
             }
+
+            if (player == HexConfig.PLAYER_TWO){
+                //For player two, x direction matters
+                currentChainMin = Math.min(currentTile.getCoords().x, currentChainMin);
+                currentChainMax = Math.max(currentTile.getCoords().x, currentChainMax);
+            } else if (player == PLAYER_ONE){
+                //For player one, y direction matters
+                currentChainMin = Math.min(currentTile.getCoords().y, currentChainMin);
+                currentChainMax = Math.max(currentTile.getCoords().y, currentChainMax);
+            }
+
+            currentChainLength = Math.max(currentChainLength, (currentChainMax-currentChainMin)+1-currentVirtualConnections);
+
+            visitedTiles.add(currentTile);
         }
+        longestChain = Math.max(longestChain, currentChainLength);
 
         double [] rVal = new double[3];
         rVal[0] = (double) longestChain / (double) HexConfig.BOARD_SIZE;
         //rVal[0] = longestChain;
-        rVal[1] = (double) neighborCount /(double) (HexConfig.TILE_COUNT+1);
+        rVal[1] = (double) freeNeighborTiles.size() /(double) (HexConfig.TILE_COUNT+1);
         //rVal[1] = neighborCount;
         rVal[2] = (double) virtualConnections /(double) HexConfig.TILE_COUNT;
 
+        //rVal[3] = (double) weakLinks.size();
+
+        double[] ownTilesInSlice = new double[board.length];
+        double[] enemyTilesInSlice = new double[board.length];
+
+
+
         return rVal;
+    }
+
+    public static double[] getFeature3ForPlayer(HexTile[][] board, int player){
+        LinkedList<HexTile> tilesToVisit = new LinkedList<>();
+        ArrayList<HexTile> freeNeighborTiles = new ArrayList<>();
+        ArrayList<ArrayList<HexTile>> connections = new ArrayList<>();
+
+        //Two dummy tiles to use as edges
+        HexTile edge1 = new HexTile(-1,-1);
+        HexTile edge2 = new HexTile(-2,-2);
+
+        //Get a list of all tiles the player owns
+        for (int i=0; i<HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+                if (board[i][j].getPlayer() == player) {
+                    tilesToVisit.add(board[i][j]);
+                }
+            }
+        }
+
+        //Visit every tile the player owns
+        while(tilesToVisit.size() > 0){
+            HexTile currentTile = tilesToVisit.pop();
+            int edge = isNextToEdge(currentTile, player);
+            if (edge > 0){
+                HexTile correctEdge = edge == 1 ? edge1 : edge2;
+                connections = addConnection(connections, currentTile, correctEdge, null);
+                continue;
+            }
+            ArrayList<HexTile> adjacentTiles = getAdjacentTiles(board, currentTile);
+            for (HexTile neighbor: adjacentTiles){
+                if (neighbor.getPlayer() == getOpponent(player)){
+                    continue;
+                }
+
+                if (neighbor.getPlayer() == player){
+                    connections = addConnection(connections, currentTile, neighbor, null);
+                    continue;
+                }
+
+                if (neighbor.getPlayer() == PLAYER_NONE && !freeNeighborTiles.contains(neighbor)){
+                    freeNeighborTiles.add(neighbor);
+                }
+
+                int neighborEdge = isNextToEdge(neighbor, player);
+                HexTile connectingTile = null;
+                if (neighborEdge == 1){
+                    connectingTile = edge1;
+                } else if (neighborEdge == 2){
+                    connectingTile = edge2;
+                }
+
+                if (connectingTile != null) {
+                    connections = addConnection(connections, currentTile, neighbor, connectingTile);
+                } else {
+                    ArrayList<HexTile> neighborsNeighbors = getAdjacentTiles(board, neighbor);
+                    for (HexTile neighborsNeighbor : neighborsNeighbors) {
+                        if (neighborsNeighbor == currentTile){
+                            continue;
+                        }
+                        connectingTile = null;
+                        if (neighborsNeighbor.getPlayer() == player) {
+                            connectingTile = neighborsNeighbor;
+                        }
+
+                        if (connectingTile != null) {
+                            connections = addConnection(connections, currentTile, neighbor, connectingTile);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        int longestChain = 0;
+
+        ArrayList<ArrayList<HexTile>> chains = generateChains(connections);
+        //System.out.println("Chains for p. "+player+": "+chains.size());
+        for (ArrayList<HexTile> chain: chains){
+            int currentChainMin = Integer.MAX_VALUE;
+            int currentChainMax = Integer.MIN_VALUE;
+
+            for (HexTile currentTile: chain){
+                if (player == HexConfig.PLAYER_TWO){
+                    //For player two, x direction matters
+                    currentChainMin = Math.min(currentTile.getCoords().x, currentChainMin);
+                    currentChainMax = Math.max(currentTile.getCoords().x, currentChainMax);
+                } else if (player == PLAYER_ONE){
+                    //For player one, y direction matters
+                    currentChainMin = Math.min(currentTile.getCoords().y, currentChainMin);
+                    currentChainMax = Math.max(currentTile.getCoords().y, currentChainMax);
+                }
+            }
+            longestChain = Math.max(longestChain, (currentChainMax-currentChainMin)+1);
+            //System.out.println(chain);
+        }
+
+        int virtualConnections = 0;
+        int weakLinks = 0;
+        int directConnections = 0;
+
+        //Check all conections again and remove virtual and weak connections that are not needed due to both tiles that
+        //are connected being in a longer, direct chain
+        Iterator<ArrayList<HexTile>> iter = connections.iterator();
+        while (iter.hasNext()) {
+            ArrayList<HexTile> connection = iter.next();
+            int connectionSize = connection.size();
+            //System.out.println("Connection: "+connection);
+            if (connectionSize > 2 && areConnected(chains, connection.get(0), connection.get(2))){
+                //System.out.println("Removing connection");
+                iter.remove();
+                continue;
+            }
+            if (connectionSize == 3){
+                weakLinks++;
+            } else if (connectionSize == 4){
+                virtualConnections++;
+            } else if (connectionSize == 2){
+                directConnections++;
+            }  else {
+                System.out.println("Unexpected connection length: "+connectionSize);
+            }
+        }
+
+        double [] rVal = new double[5];
+        rVal[0] = (double) longestChain;
+        rVal[1] = (double) freeNeighborTiles.size();
+        rVal[2] = (double) virtualConnections;
+        rVal[3] = (double) weakLinks;
+        rVal[4] = (double) directConnections;
+
+        double[] ownTilesInSlice = new double[board.length];
+        double[] enemyTilesInSlice = new double[board.length];
+
+
+
+        return rVal;
+    }
+
+    private static ArrayList<ArrayList<HexTile>> addConnection(ArrayList<ArrayList<HexTile>> connections, HexTile currentTile, HexTile neighbor, HexTile connectingTile){
+        boolean matchFound = false;
+        for (ArrayList<HexTile> connection : connections) {
+            if (connectingTile != null) {
+                if (connection.contains(currentTile) && connection.contains(connectingTile)) {
+                    //Add this tile to the list of connecting tiles, but only if connection is not direct
+                    matchFound = true;
+                    if (!connection.contains(neighbor) && connection.size() > 2) {
+                        connection.add(neighbor);
+                    }
+                }
+            } else {
+                //Only the case, if its a direct connection
+                if (connection.contains(currentTile) && connection.contains(neighbor)) {
+                    matchFound = true;
+                    //Delete indirect connecting tiles if they exist
+                    connection.removeIf(tile -> !tile.equals(currentTile) && !tile.equals(neighbor));
+                }
+            }
+        }
+
+        if (!matchFound) {
+            ArrayList<HexTile> newConnection = new ArrayList<>();
+            newConnection.add(currentTile);
+            newConnection.add(neighbor);
+            if (connectingTile != null) {
+                newConnection.add(connectingTile);
+            }
+            connections.add(newConnection);
+        }
+
+        return connections;
+    }
+
+    private static boolean areConnected(ArrayList<ArrayList<HexTile>> chains, HexTile tile1, HexTile tile2){
+        for (ArrayList<HexTile> chain: chains){
+            if (chain.contains(tile1) && chain.contains(tile2)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static ArrayList<ArrayList<HexTile>> generateChains(ArrayList<ArrayList<HexTile>> connections){
+        ArrayList<ArrayList<HexTile>> chains = new ArrayList<>();
+
+        for (ArrayList<HexTile> connection : connections) {
+            if (connection.size() != 2) {
+                continue;
+            }
+
+            boolean matchFound = false;
+            for (ArrayList<HexTile> chain : chains) {
+                boolean tile1Contained = chain.contains(connection.get(0));
+                boolean tile2Contained = chain.contains(connection.get(1));
+
+                if (tile1Contained || tile2Contained) {
+                    matchFound = true;
+                    boolean merged = false;
+                    if (!tile1Contained) {
+                        for (ArrayList<HexTile> chain2 : chains) {
+                            if (chain2.contains(connection.get(0))) {
+                                chain.removeAll(chain2);
+                                chain.addAll(chain2);
+                                chain2.removeAll(chain);
+                                merged = true;
+                            }
+                        }
+                        if (!merged) {
+                            chain.add(connection.get(0));
+                        }
+                    } else if (!tile2Contained) {
+                        for (ArrayList<HexTile> chain2 : chains) {
+                            if (chain2.contains(connection.get(1))) {
+                                chain.removeAll(chain2);
+                                chain.addAll(chain2);
+                                chain2.removeAll(chain);
+                                merged = true;
+                            }
+                        }
+                        if (!merged) {
+                            chain.add(connection.get(1));
+                        }
+                    }
+                }
+            }
+
+            if (!matchFound) {
+                ArrayList<HexTile> newChain = new ArrayList<>();
+                newChain.add(connection.get(0));
+                newChain.add(connection.get(1));
+                chains.add(newChain);
+            }
+        }
+
+        //The above code can leave empty chains in the array list, remove them
+        chains.removeIf(chain -> chain.size() == 0);
+
+        return chains;
     }
 
     public static int getTileCountForPlayer(HexTile[][] board, int player){

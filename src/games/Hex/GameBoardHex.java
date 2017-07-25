@@ -24,17 +24,22 @@ public class GameBoardHex implements GameBoard {
     private StateObserverHex stateObs;
     protected Random rand;
 
+    final static boolean GRAYSCALE = false; //Used to take screenshots of board states without using color
+
     final static Color COLOR_PLAYER_ONE = Color.BLACK;
     final static Color COLOR_PLAYER_TWO = Color.WHITE;
     private final int WINDOW_HEIGHT;
     private final int WINDOW_WIDTH;
 
-    final static Color COLOR_CELL =  Color.ORANGE;
+    final static Color COLOR_CELL =  GRAYSCALE ? Color.LIGHT_GRAY : Color.ORANGE;
     final static Color COLOR_GRID =  Color.GRAY;
 
     private boolean actionRequired = false;
 
-    final static Color BACKGROUND_COLOR = Color.lightGray;
+    final static Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
+
+    final boolean verbose = false;
+
 
     public GameBoardHex(Arena arena){
         this.arena = arena;
@@ -76,19 +81,31 @@ public class GameBoardHex implements GameBoard {
 
         gamePanel.repaint();
 
-        /*FeatureHex featureHex = new FeatureHex(1);
-        double[] v1 = featureHex.createFeatureVector1(PLAYER_ONE, soHex.getBoard());
-        double[] v2 = featureHex.createFeatureVector1(PLAYER_TWO, soHex.getBoard());*/
 
-        //int[] longestChain = HexUtils.getFeature0ForPlayer(soHex.getBoard(), HexUtils.getOpponent(so.getPlayer()));
-        //double featureVectorP1[] = HexUtils.getFeature0ForPlayer(soHex.getBoard(), PLAYER_ONE);
-        //double featureVectorP2[] = HexUtils.getFeature0ForPlayer(soHex.getBoard(), PLAYER_TWO);
-        //System.out.println("Longest chain for player "+so.getPlayer()+": "+longestChain);
-        /*System.out.println("---------------------------------");
-        System.out.println("Longest chain for player BLACK: "+featureVectorP1[0]);
-        System.out.println("Longest chain for player WHITE: "+featureVectorP2[0]);
-        System.out.println("Free adjacent tiles for player BLACK: "+featureVectorP1[1]);
-        System.out.println("Free adjacent tiles for player WHITE: "+featureVectorP2[1]);*/
+        if (verbose) {
+            /*FeatureHex featureHex = new FeatureHex(1);
+            double[] v1 = featureHex.createFeatureVector1(PLAYER_ONE, soHex.getBoard());
+            double[] v2 = featureHex.createFeatureVector1(PLAYER_TWO, soHex.getBoard());
+
+            System.out.println("Player 1: "+Arrays.toString(v1));
+            System.out.println("Player 2: "+Arrays.toString(v2));*/
+
+            //int[] longestChain = HexUtils.getFeature0ForPlayer(soHex.getBoard(), HexUtils.getOpponent(so.getPlayer()));
+            double featureVectorP1[] = HexUtils.getFeature3ForPlayer(soHex.getBoard(), PLAYER_ONE);
+            double featureVectorP2[] = HexUtils.getFeature3ForPlayer(soHex.getBoard(), PLAYER_TWO);
+            //System.out.println("Longest chain for player "+so.getPlayer()+": "+longestChain);
+            System.out.println("---------------------------------");
+            System.out.println("Longest chain for player BLACK: " + featureVectorP1[0]);
+            System.out.println("Longest chain for player WHITE: " + featureVectorP2[0]);
+            System.out.println("Free adjacent tiles for player BLACK: " + featureVectorP1[1]);
+            System.out.println("Free adjacent tiles for player WHITE: " + featureVectorP2[1]);
+            System.out.println("Virt. Con. for player BLACK: " + featureVectorP1[2]);
+            System.out.println("Virt. Con. for player WHITE: " + featureVectorP2[2]);
+            System.out.println("Weak Con. for player BLACK: " + featureVectorP1[3]);
+            System.out.println("Weak Con. for player WHITE: " + featureVectorP2[3]);
+            System.out.println("Dir. Con. for player BLACK: " + featureVectorP1[4]);
+            System.out.println("Dir. Con. for player WHITE: " + featureVectorP2[4]);
+        }
     }
 
     @Override
@@ -145,20 +162,25 @@ public class GameBoardHex implements GameBoard {
         HexTile lastPlaced = stateObs.getLastUpdatedTile();
 
         //draw hexes
+        if (GRAYSCALE){
+            showValues = false;
+        }
         for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
             for (int j=0;j<HexConfig.BOARD_SIZE;j++) {
                 HexTile tile = stateObs.getBoard()[i][j];
                 Color cellColor = getTileColor(tile, showValues);
                 HexUtils.drawHex(tile, g2, cellColor, false);
-                HexUtils.drawTileValueText(tile, g2, HexConfig.BOARD_SIZE);
+                if (!GRAYSCALE) {
+                    HexUtils.drawTileValueText(tile, g2, cellColor, HexConfig.BOARD_SIZE);
+                }
             }
         }
 
         //draw last placed tile again so it's highlighting overlaps all other tiles
-        if (lastPlaced != null) {
+        if (lastPlaced != null && !GRAYSCALE) {
             Color cellColor = getTileColor(lastPlaced, showValues);
             HexUtils.drawHex(lastPlaced, g2, cellColor, true);
-            HexUtils.drawTileValueText(lastPlaced, g2, HexConfig.BOARD_SIZE);
+            HexUtils.drawTileValueText(lastPlaced, g2, cellColor, HexConfig.BOARD_SIZE);
         }
     }
 

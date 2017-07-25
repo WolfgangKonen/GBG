@@ -67,4 +67,9 @@ public class HexTile implements Serializable {
     public HexTile copy(){
         return new HexTile(coords.x, coords.y, player, poly, value);
     }
+
+    @Override
+    public String toString(){
+        return "HexTile ["+coords.x+", "+coords.y+"]";
+    }
 }

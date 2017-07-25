@@ -11,13 +11,19 @@ import params.MCTSParams;
 import params.ParMCTS;
 import tools.Types;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class EvaluatorHex extends Evaluator {
-    private MinimaxAgent minimaxAgent = new MinimaxAgent(Types.GUI_AGENT_LIST[1]);
+    //minimaxAgent is static so the search tree does not have to be rebuilt every time a new evaluator is created.
+    //However, this prevents minimax parameters from being adjusted while the program is running. Set needed tree depth
+    //during compile time.
+    private static MinimaxAgent minimaxAgent = new MinimaxAgent(Types.GUI_AGENT_LIST[1]);
     private MCTSAgentT mctsAgent = null;
-    private MCTSParams mctsParams;
     private RandomAgent randomAgent = new RandomAgent(Types.GUI_AGENT_LIST[2]);
     private double trainingThreshold = 0.8;
     private GameBoard gameBoard;
@@ -27,34 +33,26 @@ public class EvaluatorHex extends Evaluator {
     private String m_msg = null;
     protected int verbose=0;
 
-    public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-        super(e_PlayAgent, stopEval);
-        initEvaluator(e_PlayAgent, gb,1);
-    }
-
-    public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-        super(e_PlayAgent, stopEval);
-        initEvaluator(e_PlayAgent, gb,mode);
-        m_mode=mode;
-    }
+    private boolean logResults = false;
+    private boolean fileCreated = false;
+    private final String logDir = "logs/Hex/train";
+    private PrintWriter logFile;
+    private StringBuilder logSB;
 
     public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
         super(e_PlayAgent, stopEval, verbose);
-        initEvaluator(e_PlayAgent, gb,mode);
         m_mode=mode;
+        if (verbose == 1) {
+            System.out.println("Using evaluation mode " + mode);
+        }
+        initEvaluator(e_PlayAgent, gb);
+        if (m_mode == 2 && minimaxAgent.getDepth() < HexConfig.TILE_COUNT){
+            System.out.println("Using minimax with limited tree depth: "+
+                    minimaxAgent.getDepth()+" used, "+HexConfig.TILE_COUNT+" needed");
+        }
     }
 
-    // WK : questionable: last parameter is stopEval, but you call it with mode !?
-    private void initEvaluator(PlayAgent playAgent, GameBoard gameBoard, int stopEval) {
-        if (verbose == 1) {
-            System.out.println("InitEval stopEval: " + stopEval);
-        }
-        //mctsParams = new MCTSParams();
-        //mctsParams.setNumIter(2500);
-        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), mctsParams);
-        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], gameBoard.getStateObs(), params);
-        //-- WK: not needed anymore and would not work, if initEvaluator is called with arguments
-        //-- (null,null,0) which might happen for a dummy Evaluator
+    private void initEvaluator(PlayAgent playAgent, GameBoard gameBoard) {
         this.gameBoard = gameBoard;
         this.playAgent = playAgent;
     }
@@ -63,16 +61,62 @@ public class EvaluatorHex extends Evaluator {
     // (should then also modify getAvailableModes, getPrintTitle and getPlotTitle appropriately)
     @Override
     protected boolean eval_Agent() {
+        if (m_mode == -1){
+            return true;
+        }
+
+        if (!fileCreated && playAgent.getGameNum() == playAgent.getMaxGameNum()){
+            logResults = false;
+        }
+
+        if (logResults && !fileCreated){
+            checkAndCreateFolder(logDir);
+            logSB = new StringBuilder();
+            logSB.append("training_matches");
+            logSB.append(",");
+            logSB.append("result");
+            logSB.append("\n");
+            try {
+                logFile = new PrintWriter(new File(logDir+"/"+getCurrentTimeStamp()+".csv"));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            fileCreated = true;
+        }
+
+        double result;
         switch (m_mode) {
-            case 0:  return competeAgainstMCTS(playAgent, gameBoard) >= trainingThreshold;
-            case 1:  return competeAgainstRandom(playAgent, gameBoard) >= trainingThreshold;
-            case 2:  return competeAgainstMinimax(playAgent, gameBoard) >= trainingThreshold;
+            case 0:
+                result = competeAgainstMCTS(playAgent, gameBoard);
+                break;
+            case 1:
+                result = competeAgainstRandom(playAgent, gameBoard);
+                break;
+            case 2:
+                result = competeAgainstMinimax(playAgent, gameBoard);
+                break;
             default: return false;
         }
+
+
+        if (logResults){
+            logSB.append(playAgent.getGameNum());
+            logSB.append(",");
+            logSB.append(result);
+            logSB.append("\n");
+            logFile.write(logSB.toString());
+            logSB.delete(0, logSB.length());
+            logFile.flush();
+            if (playAgent.getMaxGameNum() == playAgent.getGameNum()){
+                logFile.close();
+            }
+        }
+
+        return result >= trainingThreshold;
     }
 
     private double competeAgainstMinimax(PlayAgent playAgent, GameBoard gameBoard){
-        double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(), 1, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(), 100, verbose);
         double success = res[0];
         m_msg = this.getPrintString() + success;
         if (this.verbose>0) System.out.println(m_msg);
@@ -81,21 +125,11 @@ public class EvaluatorHex extends Evaluator {
     }
 
     private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard){
-        //mctsAgent.params.setNumIter(5000);
-    	// /WK/ Bug fix: it is not safe to change this parameter of mctsAgent. I made it private now.
-    	// Instead, the safe way is, to go always through the MCTSAgentT constructor:
         ParMCTS params = new ParMCTS();
-        params.setNumIter(10000);
+        params.setNumIter((int) Math.pow(10, HexConfig.BOARD_SIZE-1));
         mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
-        //MCTSParams params = new MCTSParams();
-        //params.setNumIter(1000);
-        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), mctsParams);
-
-        // /KG/ Creating a new MCTSParams and MCTSAgentT object for every evaluation causes a GDI object leak which
-        // eventually crashes the program after the GDI object limit is reached.
-
-        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 1, 0);//verbose);
+        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 1, 0);
         //double[] res = {0};
         double success = res[0];
         m_msg = playAgent.getName()+": "+this.getPrintString() + success;
@@ -108,7 +142,8 @@ public class EvaluatorHex extends Evaluator {
         //double success = XArenaFuncs.competeBoth(playAgent, randomAgent, 10, gameBoard);
         double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose);
         double success = res[0];
-        if (this.verbose>0) System.out.println("Success against Random = " + success);
+        m_msg = playAgent.getName()+": "+this.getPrintString() + success;
+        if (this.verbose>0) System.out.println(m_msg);
         lastResult = success;
         return success;
     }
@@ -132,17 +167,17 @@ public class EvaluatorHex extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{0, 1, 2};
+        return new int[]{-1, 0, 1, 2};
     }
 
 	@Override
 	public int getQuickEvalMode() {
-		return getAvailableModes()[0];
+		return 2;
 	}
 
 	@Override
 	public int getTrainEvalMode() {
-		return getAvailableModes()[0];
+		return -1;
 	}
 
 	@Override
@@ -174,4 +209,31 @@ public class EvaluatorHex extends Evaluator {
 	public String getMsg() {
 		return m_msg;
 	}
+
+    /**
+     * checks if a folder exists and creates a new one if it doesn't
+     *
+     * @param filePath the folder Path
+     * @return true if a folder already existed
+     */
+    private boolean checkAndCreateFolder(String filePath) {
+        File file = new File(filePath);
+        boolean exists = file.exists();
+        if(!file.exists()) {
+            file.mkdirs();
+        }
+        return exists;
+    }
+
+    /**
+     * generates String containing the current timestamp
+     *
+     * @return the timestamp
+     */
+    private static String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");//-SSS
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
+    }
 }
