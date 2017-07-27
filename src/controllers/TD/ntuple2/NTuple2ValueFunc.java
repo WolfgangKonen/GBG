@@ -1,4 +1,4 @@
-package controllers.TD.ntuple;
+package controllers.TD.ntuple2;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,7 +9,6 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Random;
 
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import params.NTParams;
@@ -28,7 +27,7 @@ import params.TDParams;
  * 
  * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Köln, Feb'17  
  */
-public class NTupleValueFunc implements Serializable {
+public class NTuple2ValueFunc implements Serializable {
 	/* Experimental Parameters: */
 	// protected double EPS = 0.5; /* random weights init scale */
 	// protected double BIAS = 1.0; /* strength of the bias (constant input) */
@@ -52,7 +51,7 @@ public class NTupleValueFunc implements Serializable {
 	private int numPlayers; 
 	
 	// The generated n-tuples
-	private NTuple nTuples[][];
+	private NTuple2 nTuples[][];
 	
 	public XNTupleFuncs xnf=null; 
 
@@ -74,7 +73,7 @@ public class NTupleValueFunc implements Serializable {
 	 * 
 	 * @param nTuplesI
 	 *            The set of n-tuples as an {@code int} array. For each {@code nTuplesI[i]}
-	 *            the constructor will construct k {@link NTuple} objects of the same form,
+	 *            the constructor will construct k {@link NTuple2} objects of the same form,
 	 *            one for each player ({@code k=xnf.getNumPlayers()}). Allowed values 
 	 *            for the sampling points of an n-tuple: 0,..,numCells.
 	 * @param xnf
@@ -89,7 +88,7 @@ public class NTupleValueFunc implements Serializable {
 	 * @param numCells
 	 * @throws RuntimeException
 	 */
-	public NTupleValueFunc(int nTuplesI[][], XNTupleFuncs xnf, int posVals, boolean useSymmetry,
+	public NTuple2ValueFunc(int nTuplesI[][], XNTupleFuncs xnf, int posVals, boolean useSymmetry,
 			boolean randInitWeights, NTParams tcPar, int numCells) 
 					throws RuntimeException {
 		this.useSymmetry = useSymmetry;
@@ -106,7 +105,7 @@ public class NTupleValueFunc implements Serializable {
 
 	void initNTuples(int[][] nTuplesI, int posVals, boolean randInitWeights,
 			NTParams ntPar, int numCells) {
-		this.nTuples = new NTuple[numPlayers][numTuples];
+		this.nTuples = new NTuple2[numPlayers][numTuples];
 		for (int i = 0; i < numTuples; i++) {
 			for (int j=0; j<nTuplesI[i].length; j++) {
 				int v = nTuplesI[i][j];
@@ -114,7 +113,7 @@ public class NTupleValueFunc implements Serializable {
 					throw new RuntimeException("Invalid cell number "+v+" in n-tuple no. "+i);
 			}
 			for (int k=0; k<numPlayers; k++) {
-				this.nTuples[k][i] = new NTuple(nTuplesI[i], posVals, ntPar);
+				this.nTuples[k][i] = new NTuple2(nTuplesI[i], posVals, ntPar);
 				if (randInitWeights) {
 					this.nTuples[k][i].initWeights(true);
 				}				
@@ -125,8 +124,8 @@ public class NTupleValueFunc implements Serializable {
 	/**
 	 * @return The list of n-Tuples
 	 */
-	public NTuple[] getNTuples() {
-		NTuple list[] = new NTuple[numTuples * numPlayers];
+	public NTuple2[] getNTuples() {
+		NTuple2 list[] = new NTuple2[numTuples * numPlayers];
 		for (int j = 0, k = 0; j < nTuples[0].length; j++)
 			for (int i = 0; i < nTuples.length; i++)
 				list[k++] = nTuples[i][j];
@@ -193,7 +192,7 @@ public class NTupleValueFunc implements Serializable {
 				score += nTuples[player][i].getScore(equiv[j]);
 		}
 		//if (useSymmetry) score /= equiv.length; // DON'T, at least for TTT clearly inferior
-		if (TDNTupleAgt.NEWTARGET) score /= equiv.length; 
+		if (TDNTuple2Agt.NEWTARGET) score /= equiv.length; 
 
 		return (withSigmoid ? Math.tanh(score) : score);
 	}

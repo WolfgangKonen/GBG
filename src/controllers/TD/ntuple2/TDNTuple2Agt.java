@@ -1,4 +1,4 @@
-package controllers.TD.ntuple;
+package controllers.TD.ntuple2;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -22,7 +22,6 @@ import tools.Types;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
@@ -47,7 +46,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
 //
 // This agent is adapted from project SourceTTT, class TicTacToe.TDSNPlayer
 //
-public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
+public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private Random rand; // generate random Numbers 
 	static transient public PrintStream pstream = System.out;
 	
@@ -80,14 +79,16 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 	// Value function of the agent.
 	// Here: NTupleValueFunc
-	private NTupleValueFunc m_Net;
+	private NTuple2ValueFunc m_Net;
 
 	protected boolean USESYMMETRY = true; 	// Use symmetries (rotation, mirror) in NTuple-System
 	private boolean NORMALIZE = false; 
 	private boolean RANDINITWEIGHTS = false;// Init Weights of Value-Function
 											// randomly
 	private boolean PRINTTABLES = false;	// /WK/ control the printout of tableA, tableN, epsilon
-	public static boolean NEWTARGET=false;
+	public static boolean NEWTARGET=true;
+	public static boolean DBG2_TARGET=true;
+	public static boolean DBG2_FIXEDSEQUENCE=true;
 	
 	//
 	// from TDAgent
@@ -114,32 +115,17 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 
 	/**
-	 * Default constructor for {@link TDNTupleAgt}, needed for loading a serialized version
+	 * Default constructor for {@link TDNTuple2Agt}, needed for loading a serialized version
 	 */
-	public TDNTupleAgt() throws IOException {
+	public TDNTuple2Agt() throws IOException {
 		super();
 		TDParams tdPar = new TDParams();
 		NTParams ntPar = new NTParams();
 		initNet(ntPar, tdPar, null, null, 1000);
 	}
 
-//	/**
-//	 * Create a new {@link TDNTupleAgt}
-//	 * 
-//	 * @param tdPar
-//	 *            All needed Parameters
-//	 * @param ntPar 
-//	 * @param maxGameNum
-//	 *            Number of Training-Games
-//	 * @throws IOException 
-//	 */
-//	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, int maxGameNum) throws IOException {
-//		super(name);
-//		initNet(ntPar,tdPar, null, maxGameNum);			
-//	}
-
 	/**
-	 * Create a new {@link TDNTupleAgt}
+	 * Create a new {@link TDNTuple2Agt}
 	 * 
 	 * @param name			agent name
 	 * @param tdPar			temporal difference parameters
@@ -149,40 +135,11 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
-	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, int[][] nTuples, 
+	public TDNTuple2Agt(String name, TDParams tdPar, NTParams ntPar, int[][] nTuples, 
 			XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		super(name);
 		initNet(ntPar,tdPar, nTuples, xnf, maxGameNum);			
 	}
-
-	/**
-	 * This constructor is only needed during the one-time transformation of a 
-	 * v12-agent-file to a v13-agent file. <p>
-	 * 
-	 * Create a new {@link TDNTupleAgt} just by copying all members from 
-	 * {@link TDNTupleAgt_v12} which is assumed to be in the old v12 version. (We need 
-	 * just a class with a new name for proper serialization.) 
-	 * 
-	 * @param tdagt			agent of the old v12 version 
-	 */
-	public TDNTupleAgt(TDNTupleAgt_v12 tdagt) {
-		super(tdagt.getName());
-		m_tdPar = new ParTD(tdagt.getTDParams());
-		m_ntPar = new ParNT(tdagt.getNTParams());
-		rand = new Random(42); //(System.currentTimeMillis());		
-
-		setNTParams(m_ntPar);
-
-		m_Net = tdagt.getNTupleValueFunc();
-		
-		setTDParams(tdagt.getTDParams(), tdagt.getMaxGameNum());
-		
-		this.setAgentState(tdagt.getAgentState());		
-		this.setMaxGameNum(tdagt.getMaxGameNum());
-		this.setEpochMax(tdagt.getEpochMax());
-		this.setNumEval(tdagt.getNumEval());
-	}
-
 
 	/**
 	 * 
@@ -204,7 +161,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		int posVals = xnf.getNumPositionValues();
 		int numCells = xnf.getNumCells();
 		
-		m_Net = new NTupleValueFunc(nTuples, xnf, posVals, USESYMMETRY,
+		m_Net = new NTuple2ValueFunc(nTuples, xnf, posVals, USESYMMETRY,
 				RANDINITWEIGHTS,ntPar,numCells);
 		
 		setTDParams(tdPar, maxGameNum);
@@ -284,12 +241,6 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 //						// win and *also* a reward +1 for an O(player=-1)-win.
 //						// And a reward 0 for a tie.
 //						//
-//						//CurrentScore = (-player)*NewSO.getGameScore(); // WRONG!!
-//						// NewSO.getGameScore() returns -1, if 'player', that is the
-//						// one who *made* the move to 'so', has won. If we multiply
-//						// this by (-player), we get a reward +1 for a X(player=+1)- 
-//						// win and a reward -1 for an O(player=-1)-win.
-//						// And a reward 0 for a tie.
 //						break;
 //					default: 
 //						throw new RuntimeException("TDNTupleAgt.trainAgent does not yet "+
@@ -314,16 +265,12 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 				}
 			} else {
 				// new target logic:
-//				if (NewSO.isGameOver()) {
-//					CurrentScore = NewSO.getGameScore(so) - soReward;					
-//				}  else {
 					// new target logic:
 					// the score is the reward received for the transition from so to NewSO 
 					// 		(NewSO.getGameScore(so)-soReward)
 					// plus the estimated future rewards until game over (getScore(NewSO), 
 					// the agent's value function for NewSO)
 					CurrentScore = ((NewSO.getGameScore(so) - soReward) + player * getScore(NewSO));				
-//				}
 			}
 			
 			// just a debug check:
@@ -380,7 +327,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
             NewSO.advance(actBest);
 			System.out.println(NewSO.stringDescr()+", "+(2*MaxScore*player-1));
 		}			
-		if (TDNTuple2Agt.DBG2_TARGET) {
+		if (DBG2_TARGET) {
             NewSO = so.copy();
             NewSO.advance(actBest);
             double deltaReward = NewSO.getGameScore(so) - so.getGameScore(NewSO);
@@ -402,7 +349,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
         Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
         actBest = acts.get(0);
         
-		if (TDNTuple2Agt.DBG2_TARGET) {
+		if (DBG2_TARGET) {
             NewSO = so.copy();
             NewSO.advance(actBest);
             double deltaReward = NewSO.getGameScore(so) - so.getGameScore(NewSO);
@@ -504,7 +451,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 				reward=trainOldTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
 						epiLength,player,upTC);
 			}
-			if (TDNTuple2Agt.DBG2_TARGET) {
+			if (DBG2_TARGET) {
 				final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
 				System.out.print("R_t+1, r_t+1: "+reward*MAXSCORE
 						+", "+(int)((reward-oldReward)*MAXSCORE+0.5) );
@@ -848,7 +795,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		return m_epsilon;
 	}
 	
-	public NTupleValueFunc getNTupleValueFunc() {
+	public NTuple2ValueFunc getNTupleValueFunc() {
 		return m_Net;
 	}
 	
@@ -881,7 +828,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	// Debug only: 
 	//
 	private void printTable(PrintStream pstream, int[] board) {
-		String s = NTuple.stringRep(board);
+		String s = NTuple2.stringRep(board);
 		pstream.println(s + " : MaxScore= "+MaxScore);
 	}
 

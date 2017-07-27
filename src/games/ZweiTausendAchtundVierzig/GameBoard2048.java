@@ -6,6 +6,10 @@ import games.StateObservation;
 import tools.Types;
 
 import javax.swing.*;
+
+import controllers.TD.ntuple.TDNTupleAgt;
+import controllers.TD.ntuple2.TDNTuple2Agt;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -534,6 +538,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     @Override
     public StateObservation getDefaultStartState() {
         clearBoard(true, true);
+        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) 
+        	return new StateObserver2048();
         return m_so;
     }
 

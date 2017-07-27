@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import controllers.TD.ntuple2.TDNTuple2Agt;
+
 /**
  * Class {@link StateObserver2048} holds a 2048 game state.
  * The game state is coded in a compact way in *one* long number
@@ -70,6 +72,10 @@ public class StateObserver2048 implements StateObservationNondeterministic {
 	private static final long serialVersionUID = 12L;
 
     public StateObserver2048() {
+        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) {
+            long seed=42L;					// DEBUG only
+            random = new Random(seed);		//
+        }
         newBoard();
     }
 

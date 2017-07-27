@@ -57,6 +57,7 @@ import controllers.MCTS.SingleTreeNode;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple.TDNTupleAgt;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import tools.ElapsedCpuTimer;
 import tools.MessageBox;
 import tools.Types;
@@ -330,6 +331,8 @@ public class LoadSaveTD {
 					pa = (TDAgent) obj;
 				} else if (obj instanceof TDNTupleAgt) {
 					pa = (TDNTupleAgt) obj;
+				} else if (obj instanceof TDNTuple2Agt) {
+					pa = (TDNTuple2Agt) obj;
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;
 				} else if (obj instanceof MinimaxAgent) {

@@ -20,6 +20,7 @@ import controllers.PlayAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple.TDNTupleAgt;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
@@ -484,6 +485,11 @@ public class XArenaMenu extends JMenuBar {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar.setFrom( ((TDNTupleAgt) td).getTDParams() );
 				m_arena.m_xab.ntPar.setFrom( ((TDNTupleAgt) td).getNTParams() );
+			}
+			else if (td instanceof TDNTuple2Agt) {
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.tdPar.setFrom( ((TDNTuple2Agt) td).getTDParams() );
+				m_arena.m_xab.ntPar.setFrom( ((TDNTuple2Agt) td).getNTParams() );
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:

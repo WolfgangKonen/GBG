@@ -370,20 +370,20 @@ public class TDParams extends Frame implements Serializable
 	 * parameters" we mean parameter producing good results. Likewise, some parameter
 	 * choices may be enabled or disabled.
 	 * 
-	 * @param agentName either "TD-Ntuple" (for {@link TDNTupleAgt}) or "TDS" (for {@link TDAgent}),
-	 * 				all other strings are without any effect
+	 * @param agentName either "TD-Ntuple" (for {@link TDNTupleAgt}) or "TDS" (for {@link TDAgent})
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
 		// Currently we have here only the sensible defaults for two games ("TicTacToe", "Hex")
-		// and for two agents ("TD-Ntuple" = class TDNTupleAgt and "TDS" = class TDAgent).
+		// and for three agents ("TD-Ntuple[-2]" = class TDNTuple[2]Agt and "TDS" = class TDAgent).
 		//
 		// If later good parameters for other games are found, they should be
 		// added with suitable nested switch(gameName). 
 		// Currently we have only one switch(gameName) on the initial featmode (=3 for 
-		// TicTacToe, =0 for all others)
+		// TicTacToe, =2 for Hex, and =0 for all others)
 		switch (agentName) {
 		case "TD-Ntuple": 
+		case "TD-Ntuple-2": 
 			alphaT.setText("0.001");  			// the defaults
 			alfinT.setText("0.001");			//
 			epsilT.setText("0.3");				// 
@@ -393,10 +393,10 @@ public class TDParams extends Frame implements Serializable
 			epochT.setText("1");				//
 			withSigType.setSelected(true);		// tanh
 			normalize.setSelected(false);		// 
-			withSigType.setEnabled(false);
-			SigTypeL.setEnabled(false);   
-//			withSigType.setEnabled(true); // NEW		
-//			SigTypeL.setEnabled(true);    // NEW
+//			withSigType.setEnabled(false);
+//			SigTypeL.setEnabled(false);   
+			withSigType.setEnabled(true); // NEW		
+			SigTypeL.setEnabled(true);    // NEW
 			NetTypeL.setEnabled(false);
 			LinNetType.setEnabled(false);
 			BprNetType.setEnabled(false);

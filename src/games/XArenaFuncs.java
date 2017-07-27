@@ -23,6 +23,7 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple.NTupleFactory;
 import controllers.TD.ntuple.TDNTupleAgt;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import tools.LineChartSuccess;
 import tools.Measure;
 import tools.MessageBox;
@@ -132,12 +133,19 @@ public class XArenaFuncs
 				//e.printStackTrace();
 				pa=null;			
 			}
-//			try {
-//				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.tcPar, maxGameNum);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+		} else if (sAgent.equals("TD-Ntuple-2")) {
+			try {
+				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+				NTupleFactory ntupfac = new NTupleFactory(); 
+				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf);
+				pa = new TDNTuple2Agt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
+			} catch (Exception e) {
+				MessageBox.show(m_xab, 
+						e.getMessage(), 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+				//e.printStackTrace();
+				pa=null;			
+			}
 		} else if (sAgent.equals("Minimax")) {
 			pa = new MinimaxAgent(sAgent,m_xab.oPar);
 		} else if (sAgent.equals("Random")) {
@@ -197,11 +205,23 @@ public class XArenaFuncs
 						pa = new TDAgent(sAgent, m_xab.tdPar, feat, maxGameNum);
 					} else if (sAgent.equals("TD-Ntuple")) {
 						try {
-							//TDNTupleAgt test = new TDNTupleAgt();
 							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 							NTupleFactory ntupfac = new NTupleFactory(); 
 							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf);
 							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
+						} catch (Exception e) {
+							MessageBox.show(m_xab, 
+									e.getMessage(), 
+									"Warning", JOptionPane.WARNING_MESSAGE);
+							//e.printStackTrace();
+							pa=null;			
+						}
+					} else if (sAgent.equals("TD-Ntuple-2")) {
+						try {
+							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+							NTupleFactory ntupfac = new NTupleFactory(); 
+							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf);
+							pa = new TDNTuple2Agt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
 						} catch (Exception e) {
 							MessageBox.show(m_xab, 
 									e.getMessage(), 
