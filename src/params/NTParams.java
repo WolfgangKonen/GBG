@@ -382,6 +382,26 @@ public class NTParams extends Frame implements Serializable {
 			enableTcPart();
 			enableRandomPart();
 			break;
+		case "TD-Ntuple-2": 
+			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
+			InitT.setText("0.0001");
+			InitT.setEnabled(false);
+			tcIntervalT.setText("2");
+			tcIntervalT.setEnabled(false);
+			RandomnessC.setSelected(true);		// consequence: disable TupleType, nTupleNumT, nTupleMaxT
+			nTupleNumT.setText("10");
+			nTupleMaxT.setText("6"); 
+			enableTcPart();
+			enableRandomPart();
+			switch (gameName) {
+			case "2048": 
+				nTupleMaxT.setText("3");
+				break;
+			default:	//  all other
+				nTupleMaxT.setText("6");			
+				break;
+			}
+			break;
 		}
 		
 	}

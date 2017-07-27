@@ -386,7 +386,6 @@ public class TDParams extends Frame implements Serializable
 		case "TD-Ntuple-2": 
 			alphaT.setText("0.001");  			// the defaults
 			alfinT.setText("0.001");			//
-			epsilT.setText("0.3");				// 
 			epfinT.setText("0.0");				//
 			lambdaT.setText("0.0"); 			//
 			gammaT.setText("1.0");				//
@@ -408,11 +407,18 @@ public class TDParams extends Frame implements Serializable
 			choiceFeatTDS.setEnabled(false);
 			epochL.setEnabled(false);
 			epochT.setEnabled(false);
+			switch (gameName) {
+			case "2048": 
+				epsilT.setText("0.0");				
+				break;
+			default:	//  all other
+				epsilT.setText("0.3");				
+				break;
+			}
 			break;
 		case "TDS":
 			alphaT.setText("0.1");				// the defaults
 			alfinT.setText("0.001");			//
-			epsilT.setText("0.3");				// 
 			epfinT.setText("0.0");				//
 			lambdaT.setText("0.9");				//
 			gammaT.setText("1.0");				//
@@ -443,6 +449,14 @@ public class TDParams extends Frame implements Serializable
 			default:	//  all other
 				setFeatmode(0);
 				lambdaT.setText("0.0");				
+				break;
+			}
+			switch (gameName) {
+			case "2048": 
+				epsilT.setText("0.0");				
+				break;
+			default:	//  all other
+				epsilT.setText("0.3");				
 				break;
 			}
 			break;

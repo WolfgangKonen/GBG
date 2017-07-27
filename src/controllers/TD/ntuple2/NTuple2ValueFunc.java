@@ -220,11 +220,6 @@ public class NTuple2ValueFunc implements Serializable {
 			equiv[0] = board;			
 		}
 		
-//		if (DEBG) {
-//			NTuple.print(equiv);
-//			int dummy=1;
-//		}
-		
 		return equiv;
 	}
 

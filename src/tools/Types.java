@@ -83,8 +83,8 @@ public class Types {
     	= {"TDS", "Minimax", "Random", "MCTS", "Human", "MC", "TD-Ntuple", "TD-Ntuple-2", "MCTS Expectimax"};
     public static final String[] GUI_AGENT_INITIAL  // initial agent choice for P0, P1, ... (for up to 5 players)
     	//= {"TD-Ntuple", "MC", "Human", "Human", "Human"};
-    	//= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
-		= {"TD-Ntuple-2", "Human", "MCTS Expectimax", "Human", "Human", "Human"};
+    	= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
+		//= {"TD-Ntuple-2", "Human", "MCTS Expectimax", "Human", "Human", "Human"};
     public static final String[] GUI_PLAYER_NAME  	// player names for P0, P1, ... (for up to 5 players)
     	//= {"P0", "P1", "P2", "P3", "P4"};
     	= {"0", "1", "2", "3", "4"};

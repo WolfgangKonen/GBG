@@ -242,8 +242,8 @@ public class NTuple2 implements Serializable {
 	 *            the representation of a game board (vector of length 9,
 	 *            carrying -1 ("O"), 0 (empty) or +1 ("X"))
 	 * @param ALPHA
-	 * @param delta
-	 * @param e
+	 * @param delta  target minus V(s_t)
+	 * @param e		 derivative of sigmoid (1 if no sigmoid)
 	 * @param LAMBDA
 	 * 
 	 * @see NTuple2ValueFunc#update(int[], int, double, double) 
