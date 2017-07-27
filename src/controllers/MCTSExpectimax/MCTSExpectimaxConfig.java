@@ -11,6 +11,7 @@ public class MCTSExpectimaxConfig {
     public static final int DEFAULT_MAXNODES = 500;                     //Max number of nodes expand() can create
     public static final boolean DEFAULT_ALTERNATIVEVERSION = true;      //Use MCTSExpectimax1 instead of MCTSExpectimax
     public static final boolean DEFAULT_ENABLEHEURISTICS = false;
+    public static final int DEFAULT_NUMAGENTS = 10;                      //number Agents for majority vote
     /**
      *  egreedyEpsilon = probability that a random action is taken (instead
      *  greedy action). This is *only* relevant, if function egreedy() is

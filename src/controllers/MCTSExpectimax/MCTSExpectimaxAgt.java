@@ -7,6 +7,8 @@ import params.MCTSExpectimaxParams;
 import params.MCTSParams;
 import tools.Types;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
@@ -51,13 +53,61 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
      * @return An action for the current state
      */
     public Types.ACTIONS act(StateObservation stateObs, double[] vtable) {
-    	
-        //Set the state observation object as the new root of the tree.
-        player.init(stateObs);
+		if (params.getNumAgents() > 1) {
+			return actMultipleAgents(stateObs, vtable, params.getNumAgents());
+		} else {
+			return actOneAgent(stateObs, vtable);
+		}
+	}
 
-        //Determine the action using MCTS Expectimax and return it.
-        return player.run(vtable);
-    }
+	/**
+	 * only one Agent, no majority Vote
+	 */
+    private Types.ACTIONS actOneAgent(StateObservation stateObs, double[] vtable) {
+		//Set the state observation object as the new root of the tree.
+		player.init(stateObs);
+
+		//Determine the action using MCTS Expectimax and return it.
+		return player.run(vtable);
+	}
+
+	/**
+	 * majority Vote
+	 */
+    private Types.ACTIONS actMultipleAgents(StateObservation stateObs, double[] vtable, int numAgents) {
+		double[] vtableIgnore = new double[vtable.length];
+		double[] actions = new double[4];
+
+		for (int i = 0; i < actions.length; i++) {
+			actions[i] = 0;
+		}
+
+		//determine numAgents Actions and save them in the vtable
+		for(int i = 0; i < numAgents; i++) {
+			//Set the state observation object as the new root of the tree.
+			player.init(stateObs);
+
+			int act = player.run(vtableIgnore).toInt();
+
+			actions[act]++;
+		}
+
+		List<Types.ACTIONS> nextActions = new ArrayList<>();
+		double nextActionScore = Double.NEGATIVE_INFINITY;
+
+		for (int i = 0; i < actions.length; i++) {
+			if (nextActionScore < actions[i]) {
+				nextActions.clear();
+				nextActions.add(Types.ACTIONS.fromInt(i));
+				nextActionScore = actions[i];
+			} else if(nextActionScore == actions[i]) {
+				nextActions.add(Types.ACTIONS.fromInt(i));
+			}
+		}
+
+		Random random = new Random();
+		return nextActions.get(random.nextInt(nextActions.size()));
+	}
 
 	/**
 	 * Get the best next action and return it

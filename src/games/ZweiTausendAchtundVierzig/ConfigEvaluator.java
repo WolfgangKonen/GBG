@@ -16,16 +16,15 @@ public class ConfigEvaluator {
 
 
     //Evaluator2048_BoardPositions Settings
-        public static final int NC = 100; //Number of Evaluations for a single BoardPositions
+        public static final int NC = 20; //Number of Evaluations for a single BoardPositions
         public static final int BOARDPOSITIONS = 20; //Number of Boardpositions per availableActions/emptyTiles pair
-        public static final boolean EVALUATEMC = true;
+        public static final boolean EVALUATEMC = false;
         public static final boolean EVALUATEMCTSE = true;
 
     //Agent Settings for MC and MCTS while using Evaluator2048_BoardPositions
-        public static final int ROLLOUTDEPTH = 20;
-        public static final int ITERATIONS = 4000;  //Iterations for each availableAction
+        public static final int ROLLOUTDEPTH = 150;
+        public static final int ITERATIONS = 1000;  //Iterations for each availableAction
         public static final int NUMBERAGENTS = 1;   //only MC Agent uses Majority Vote, MCTS Agent gets more Iterations when using multiple Agents
-        public static final int KUCT = 1;
         public static final int TREEDEPTH = 10;
 
         public static final boolean GENERATENEWGAMESTATES = false; //create a new gameStates.ser

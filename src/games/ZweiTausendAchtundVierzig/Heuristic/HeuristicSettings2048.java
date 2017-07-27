@@ -25,28 +25,28 @@ public class HeuristicSettings2048 implements IObjectiveFunction {
 
     //empty tiles
     public boolean enableEmptyTiles = true;
-    public double emptyTilesWeighting0 = 1;
-    public double emptyTilesWeighting1 = 1;
-    public double emptyTilesWeighting2 = 1;
-    public int emptyTilesMethod = 0;            //valid methods are 0 => numeEmptyTiles^weighting, 1 => highestTileValue * numEmptyTile * weighting, 2 => score * numEmptyTile * Weighting
+    public double emptyTilesWeighting0 = 0;
+    public double emptyTilesWeighting1 = 0.7214131449043863;
+    public double emptyTilesWeighting2 = 0;
+    public int emptyTilesMethod = 1;            //valid methods are 0 => numeEmptyTiles^weighting, 1 => highestTileValue * numEmptyTile * weighting, 2 => score * numEmptyTile * Weighting
 
     //highest tile in corner
     public boolean enableHighestTileInCorner = true;
-    public double highestTileIncornerWeighting = 1;
+    public double highestTileIncornerWeighting = 0.48066258192020583;
 
     //row
     public boolean enableRow = true;
-    public double rowWeighting0 = 1;
-    public double rowWeighting1 = 1;
+    public double rowWeighting0 = 0.4778659656963287;
+    public double rowWeighting1 = 0;
     public int rowMethod = 0;                   //valid methods are 0 => tile in a row has to be lower then the previous tile, 1 => tile in a row is exactly half of the previous tile
 
     //merge
     public boolean enableMerge = true;
-    public double mergeWeighting = 1;
+    public double mergeWeighting = 0.8079838161879548;
 
     //rollout
     public boolean enableRollout = true;
-    public double rolloutWeighting = 1;
+    public double rolloutWeighting = 0.8435028456190605;
 
     public HeuristicSettings2048() {
         genes = new double[geneLength];

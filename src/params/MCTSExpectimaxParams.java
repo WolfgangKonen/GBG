@@ -2,6 +2,7 @@ package params;
 
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
+import controllers.MCTSExpectimax.MCTSEChanceNode;
 import controllers.MCTSExpectimax.MCTSExpectimaxConfig;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 
@@ -30,11 +31,13 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	private JLabel treedep_L;
 	private JLabel rollout_L;
 	private JLabel maxNodes_L;
+	private JLabel numAgents_L;
 	private JTextField numIter_T;
 	private JTextField kUCT_T;
 	private JTextField treedep_T;
 	private JTextField rollout_T;
 	private JTextField maxNodes_T;
+	private JTextField numAgents_T;
 	private JCheckBox alternativeVersion_CB;
 	private JCheckBox enableHeuristics_CB;
 	private JPanel mPanel;
@@ -59,6 +62,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		treedep_L = new JLabel("Tree Depth");
 		rollout_L = new JLabel("Rollout Depth");
 		maxNodes_L = new JLabel("Max Nodes");
+		numAgents_L = new JLabel("Number Agents");
 		alternativeVersion_CB = new JCheckBox("alternative Version (~4% faster)", MCTSExpectimaxConfig.DEFAULT_ALTERNATIVEVERSION);
 		enableHeuristics_CB = new JCheckBox("enable Heuristics", MCTSExpectimaxConfig.DEFAULT_ENABLEHEURISTICS);
 		numIter_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_ITERATIONS+"");
@@ -66,6 +70,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		treedep_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_TREEDEPTH+"");
 		rollout_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_ROLLOUTDEPTH+"");
 		maxNodes_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_MAXNODES+"");
+		numAgents_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_NUMAGENTS+ "");
 		mPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
 									// can be handed over to a tab of a JTabbedPane 
 									// (see class TicTacToeTabs)
@@ -75,6 +80,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		treedep_L.setToolTipText("MCTS tree depth");
 		rollout_L.setToolTipText("MCTS rollout depth");
 		maxNodes_L.setToolTipText("Max number of tree nodes");
+		numAgents_L.setToolTipText("Number of agents for majority Vote");
 
 
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
@@ -105,10 +111,15 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		mnPanel.add(maxNodes_T);
 		mPanel.add(mnPanel);
 
+		JPanel naPanel = new JPanel(new GridLayout(0,2,10,10));
+		naPanel.add(numAgents_L);
+		naPanel.add(numAgents_T);
+		mPanel.add(naPanel);
+
 		mPanel.add(alternativeVersion_CB);
 
 		mPanel.add(enableHeuristics_CB);	// add two empty rows to balance height of fields
-		mPanel.add(new Canvas());
+
 
 		mPanel.add(new Canvas());
 		mPanel.add(new Canvas());
@@ -138,6 +149,9 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	public int getMaxNodes() {
 		return Integer.valueOf(maxNodes_T.getText());
 	}
+	public int getNumAgents()  {
+		return Integer.valueOf(numAgents_T.getText());
+	}
 	public boolean getAlternativeVersion() {
 		return alternativeVersion_CB.isSelected();
 	}
@@ -162,6 +176,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	public void setMaxNodes(int value) {
 		maxNodes_T.setText(value+"");
 	}
+	public void setNumAgents(int value) { numAgents_T.setText(value+""); }
 	public void setAlternativeVersion(boolean value) {
 		alternativeVersion_CB.setSelected(value);
 	}
