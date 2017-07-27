@@ -68,6 +68,7 @@ public class XArenaTabs extends JFrame
 		ticGame.m_tabs.setSize(Types.GUI_PARAMTABS_WIDTH,Types.GUI_PARAMTABS_HEIGHT);		
 		tp.setSelectedIndex(0);
 		if (selectedAgent.equals("TD-Ntuple")) tp.setSelectedIndex(1);
+		if (selectedAgent.equals("TD-Ntuple-2")) tp.setSelectedIndex(1);
 		if (selectedAgent.equals("MCTS")) tp.setSelectedIndex(2);
 		if (selectedAgent.equals("MC")) tp.setSelectedIndex(3);
 		if (selectedAgent.equals("MCTS Expectimax")) tp.setSelectedIndex(4);

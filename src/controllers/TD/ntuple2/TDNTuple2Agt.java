@@ -87,8 +87,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 											// randomly
 	private boolean PRINTTABLES = false;	// /WK/ control the printout of tableA, tableN, epsilon
 	public static boolean NEWTARGET=true;
-	public static boolean DBG2_TARGET=true;
-	public static boolean DBG2_FIXEDSEQUENCE=true;
+	public static boolean DBG2_TARGET=false;
+	public static boolean DBG2_FIXEDSEQUENCE=false;
 	
 	//
 	// from TDAgent
@@ -434,10 +434,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		m_finished=false;
 		while (true) {
 			VTable = new double[so.getNumAvailableActions()+1];
-			//actBest = this.getNextAction(so, true, VTable, true);
-			actBest = this.getFirstAction(so, true, VTable, true);
-			//actBest = this.getNextAction(so, false, VTable, true);  // Debug only
-			m_randomMove = this.wasRandomAction();
+	        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) {
+	        	actBest = this.getFirstAction(so, true, VTable, true);	// DEBUG only
+	        } else {
+				actBest = this.getNextAction(so, true, VTable, true);	// the normal case        	
+	        }
+
+	        m_randomMove = this.wasRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
 			nextBoard = m_Net.xnf.getBoardVector(so);

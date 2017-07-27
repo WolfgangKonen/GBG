@@ -371,17 +371,6 @@ public class NTParams extends Frame implements Serializable {
 		// and one agent ("TD-Ntuple" = class TDNTupleAgt):
 		switch (agentName) {
 		case "TD-Ntuple": 
-			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
-			InitT.setText("0.0001");
-			InitT.setEnabled(false);
-			tcIntervalT.setText("2");
-			tcIntervalT.setEnabled(false);
-			RandomnessC.setSelected(false);		// consequence: disable TupleType, nTupleNumT, nTupleMaxT
-			nTupleNumT.setText("10");
-			nTupleMaxT.setText("6"); 
-			enableTcPart();
-			enableRandomPart();
-			break;
 		case "TD-Ntuple-2": 
 			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
 			InitT.setText("0.0001");
@@ -390,7 +379,7 @@ public class NTParams extends Frame implements Serializable {
 			tcIntervalT.setEnabled(false);
 			RandomnessC.setSelected(true);		// consequence: disable TupleType, nTupleNumT, nTupleMaxT
 			nTupleNumT.setText("10");
-			nTupleMaxT.setText("6"); 
+			UseSymmetryC.setSelected(true);
 			enableTcPart();
 			enableRandomPart();
 			switch (gameName) {

@@ -241,7 +241,7 @@ public class NTuple2 implements Serializable {
 	 * @param board
 	 *            the representation of a game board (vector of length 9,
 	 *            carrying -1 ("O"), 0 (empty) or +1 ("X"))
-	 * @param ALPHA
+	 * @param alphaM the step size ALPHA (divided by m=numTuples, if NEWTARGET)
 	 * @param delta  target minus V(s_t)
 	 * @param e		 derivative of sigmoid (1 if no sigmoid)
 	 * @param LAMBDA
@@ -249,7 +249,7 @@ public class NTuple2 implements Serializable {
 	 * @see NTuple2ValueFunc#update(int[], int, double, double) 
 	 * @see NTuple2ValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 
 	 */
-	public void update(int[] board, double ALPHA, double delta, double e, double LAMBDA) {
+	public void update(int[] board, double alphaM, double delta, double e, double LAMBDA) {
 		// lut[getIndex(board)] += dW;
 		// samine//
 		int Index = getIndex(board);
@@ -263,7 +263,7 @@ public class NTuple2 implements Serializable {
 				tcFactor = tcFactorArray[Index];
 			}
 		}
-		double dW = ALPHA*delta* e * tcFactor;
+		double dW = alphaM*delta* e * tcFactor;
 
 		tcN[Index] += delta;
 		tcA[Index] += Math.abs(delta);
@@ -274,7 +274,7 @@ public class NTuple2 implements Serializable {
 			} else {
 				// elig traces active, we have to do it the long way (as long as we do not 
 				// keep track of all elig traces > 0, *TODO*)
-				double alphaDelta=ALPHA*delta * tcFactor;		// the e-part is now in ev[i]
+				double alphaDelta=alphaM*delta * tcFactor;		// the e-part is now in ev[i]
 				for (int i=0; i<lut.length; i++)
 					//if (ev[i]!=0.0) 				// DON'T, this extra 'if' slows down!
 						lut[i] += alphaDelta*ev[i];
@@ -320,38 +320,6 @@ public class NTuple2 implements Serializable {
 		ev[Index] += e;
 		
     }/* end updateElig(int[],...) */
-
-    // update w/o decay (!)
-    @Deprecated
-    public void updateElig(int[][] equiv, double LAMBDA, double GAMMA, double e) {
- 		for (int j = 0; j < equiv.length; j++) {
-			int Index = getIndex(equiv[j]);
-			ev[Index] += e;
-		}
-    }/* end updateElig(int[][],...) */
-
-//    /**
-//	 * Update the train counters for this NTuple. Each LUT weight has a train
-//	 * counter which is incremented by 1 whenever this weight is updated (i. e.
-//	 * a TDLearn-step occurs with the Input for this weight being 1).
-//	 * 
-//	 * @param Input
-//	 *            long vector for all N-tuples containing a "1.0" if the
-//	 *            corresponding LUT weight gets trained in the TDLearn-step.
-//	 * @param k
-//	 *            offset within the Input vector for this NTuple (i.e. the
-//	 *            inputs for this NTuple start at {@code Input[k]}.
-//	 * 
-//	 * @see NTupleSet#updateTrainCounter(double[])
-//	 */
-//	public void updateTrainCounter(double[] Input, int k) {
-//		if (Input.length - k < lut.length)
-//			throw new RuntimeException("Vector Input too short for current LUT");
-//		for (int i = 0; i < lut.length; i++) {
-//			if (Input[k + i] == 1.0)
-//				trainCounter[i]++;
-//		}
-//	}
 
 	// currently not used
 	public void weightDecay(double factor) {

@@ -346,9 +346,11 @@ public class NTuple2ValueFunc implements Serializable {
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board,useSymmetry);
 
+		double alphaM = ALPHA;
+		if (TDNTuple2Agt.NEWTARGET) alphaM /= numTuples; 
 		for (i = 0; i < numTuples; i++) {
 			for (j = 0; j < equiv.length; j++)
-				nTuples[player][i].update(equiv[j], ALPHA, delta, e, LAMBDA);
+				nTuples[player][i].update(equiv[j], alphaM, delta, e, LAMBDA);
 		}
 	}
 

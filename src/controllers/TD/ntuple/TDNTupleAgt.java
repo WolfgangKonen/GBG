@@ -487,8 +487,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		m_finished=false;
 		while (true) {
 			VTable = new double[so.getNumAvailableActions()+1];
-			//actBest = this.getNextAction(so, true, VTable, true);
-			actBest = this.getFirstAction(so, true, VTable, true);
+			actBest = this.getNextAction(so, true, VTable, true);
 			//actBest = this.getNextAction(so, false, VTable, true);  // Debug only
 			m_randomMove = this.wasRandomAction();
 			oldSO = so.copy();
