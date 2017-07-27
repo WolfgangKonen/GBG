@@ -1,44 +1,55 @@
 package games.Hex;
-import com.sun.istack.internal.Nullable;
+
 import tools.Types;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
-import static games.Hex.HexConfig.PLAYER_NONE;
-import static games.Hex.HexConfig.PLAYER_ONE;
-import static games.Hex.HexConfig.PLAYER_TWO;
+import static games.Hex.HexConfig.*;
 import static java.lang.Math.cos;
-import static java.lang.Math.min;
 
 //Hexagon math based on hexmech.java: https://gist.github.com/salamander2/4329783#file-hexmech-java
 public class HexUtils {
-    private static int OUTLINEWIDTH = HexConfig.HEX_SIZE/6; //width of the outer border of the game board in px
 
+    /**
+     * Creates a polygon object for the specified tile
+     *
+     * @param i          first index
+     * @param j          second index
+     * @param borders    top and left margin/offset
+     * @param boardSize  length of one side of the game board in tiles
+     * @param polyHeight size in px of each hex side to side
+     * @return Polygon for specified tile
+     */
     public static Polygon createHexPoly(int i, int j, int borders, int boardSize, int polyHeight) {
-        if (polyHeight == 0) {
-            System.out.println("ERROR: size of hex has not been set");
-            return new Polygon();
-        }
-
         int y = getHexY(i, j, polyHeight, boardSize) + borders;
-        int x = getHexX(i, j, polyHeight) + borders*2;
+        int x = getHexX(i, j, polyHeight) + borders * 2;
 
-        double r = polyHeight/2f;	// radius of inscribed circle
-        double t = (r / (Math.sqrt(3)));	// short side of 30 degree triangle outside of each hex
-        double s = getSideLengthFromHeight(polyHeight);	// length of one side
+        double r = polyHeight / 2f;    // radius of inscribed circle
+        double t = (r / (Math.sqrt(3)));    // short side of 30 degree triangle outside of each hex
+        double s = getSideLengthFromHeight(polyHeight);    // length of one side
 
-        int[] xPoints = new int[] {(int) Math.round(x+t),     (int) Math.round(x+s+t),
-                (int) Math.round(x+s+t+t), (int) Math.round(x+s+t),
-                (int) Math.round(x+t),     x};
+        int[] xPoints = new int[]{(int) Math.round(x + t), (int) Math.round(x + s + t),
+                (int) Math.round(x + s + t + t), (int) Math.round(x + s + t),
+                (int) Math.round(x + t), x};
 
-        int[] yPoints = new int[] {y,                         y,
-                (int) Math.round(y+r),     (int) Math.round(y+r+r),
-                (int) Math.round(y+r+r),   (int) Math.round(y+r)};
+        int[] yPoints = new int[]{y, y,
+                (int) Math.round(y + r), (int) Math.round(y + r + r),
+                (int) Math.round(y + r + r), (int) Math.round(y + r)};
 
         return new Polygon(xPoints, yPoints, 6);
     }
 
+    /**
+     * Draws a single hex tile
+     *
+     * @param tile      Tile to be drawn
+     * @param g2        Graphics context
+     * @param cellColor Color to draw the tile in
+     * @param highlight If a red border surrounding the tile should be drawn
+     */
     public static void drawHex(HexTile tile, Graphics2D g2, Color cellColor, boolean highlight) {
         Polygon poly = tile.getPoly();
 
@@ -55,9 +66,21 @@ public class HexUtils {
         g2.drawPolygon(poly);
     }
 
+    /**
+     * Draws the tile value on top of the tile.
+     * Tile value is transformed from [-1, +1] to [-1000, +1000].
+     * Text color is calculated using luminosity function from: https://en.wikipedia.org/wiki/Relative_luminance
+     * Text color function has been adjusted for better readability on deep red tiles.
+     * Text is always exactly centered in the tile.
+     *
+     * @param tile      Tile for which value is to be drawn
+     * @param g2        Graphics context
+     * @param cellColor Color of cell, needed for text color calculation
+     * @param boardSize Size of the board in tiles (one side)
+     */
     public static void drawTileValueText(HexTile tile, Graphics2D g2, Color cellColor, int boardSize) {
         double tileValue = tile.getValue();
-        if (Double.isNaN(tileValue)){
+        if (Double.isNaN(tileValue)) {
             return;
         }
 
@@ -67,18 +90,16 @@ public class HexUtils {
         Polygon poly = tile.getPoly();
         int polyHeight = getPolyHeight(poly);
 
-        int x = getHexX(i, j, polyHeight)+HexConfig.OFFSET;
+        int x = getHexX(i, j, polyHeight) + HexConfig.OFFSET;
         int y = getHexY(i, j, polyHeight, boardSize);
 
-        //Using luminosity function from: https://en.wikipedia.org/wiki/Relative_luminance
-        //Adjusted factor of red for better readability
-        int luminance = (int) (0.8*cellColor.getRed() + 0.7152*cellColor.getGreen() + 0.0722*cellColor.getBlue());
-        int luminance_inverse = Math.max(255-luminance, 0);
+        int luminance = (int) (0.8 * cellColor.getRed() + 0.7152 * cellColor.getGreen() + 0.0722 * cellColor.getBlue());
+        int luminance_inverse = Math.max(255 - luminance, 0);
         Color textColor = new Color(luminance_inverse, luminance_inverse, luminance_inverse, 255);
 
         g2.setColor(textColor);
 
-        String tileText = Long.toString(Math.round(tileValue*1000));
+        String tileText = Long.toString(Math.round(tileValue * 1000));
 
         int width = g2.getFontMetrics().stringWidth(tileText);
         int height = g2.getFontMetrics().getHeight();
@@ -89,15 +110,24 @@ public class HexUtils {
         g2.drawString(tileText, textX, textY);
     }
 
-    public static Color calculateTileColor(double tileValue){
+    /**
+     * Calculate the color for a specific tile value.
+     * Uses three color stops: Red for value -1, Yellow for value 0, Green for value +1.
+     * Colors for values between -1 and 0 are interpolated between red and yellow.
+     * Colors for values between 0 and +1 are interpolated between yellow and green.
+     *
+     * @param tileValue Value of the tile
+     * @return Color the tile is supposed to be drawn in
+     */
+    public static Color calculateTileColor(double tileValue) {
         float percentage = (float) Math.abs(tileValue);
-        float inverse_percentage = 1-percentage;
+        float inverse_percentage = 1 - percentage;
 
         Color colorLow;
         Color colorHigh;
         Color colorNeutral = Color.YELLOW;
         int red, blue, green;
-        
+
         if (tileValue < 0) {
             colorLow = colorNeutral;
             colorHigh = Color.RED;
@@ -116,49 +146,77 @@ public class HexUtils {
         return new Color(red, green, blue, 255);
     }
 
-
-    public static int getHexX(int i, int j, int polyHeight){
-        return (int) ((i+j) * (polyHeight - (polyHeight * cos(30))));
+    /**
+     * Calculate X offset in px of the tile inside the window
+     *
+     * @param i          first index of tile
+     * @param j          second index of tile
+     * @param polyHeight Height of each tile in px
+     * @return X offset of tile
+     */
+    public static int getHexX(int i, int j, int polyHeight) {
+        return (int) ((i + j) * (polyHeight - (polyHeight * cos(30))));
     }
 
-    public static int getHexY(int i, int j, int polyHeight, int boardSize){
-        return (int) (((j-i) * (polyHeight/2f)) + (boardSize * (polyHeight/2f)));
+    /**
+     * Calculate Y offset in px of the tile inside the window
+     *
+     * @param i          first index of tile
+     * @param j          second index of tile
+     * @param polyHeight Height of each tile in px
+     * @param boardSize  Size of board in tiles (one side)
+     * @return Y offset of tile
+     */
+    public static int getHexY(int i, int j, int polyHeight, int boardSize) {
+        return (int) (((j - i) * (polyHeight / 2f)) + (boardSize * (polyHeight / 2f)));
     }
 
-    public static void drawOutlines(int boardSize, Color colorOne, Color colorTwo, Graphics2D g2, HexTile[][] board){
+    /**
+     * Draw outlines at the edges of the outer tiles.
+     * There is most likely a better way to implement this, but since it works...
+     *
+     * @param boardSize Size of board in tiles (one side)
+     * @param colorOne  Color of first player
+     * @param colorTwo  Color of second player
+     * @param g2        Graphics context
+     * @param board     Game board array
+     */
+    public static void drawOutlines(int boardSize, Color colorOne, Color colorTwo, Graphics2D g2, HexTile[][] board) {
         Stroke strokeFill = new BasicStroke(1);
+
+        int outline = HexConfig.OUTLINE_WIDTH;
 
         //Get polygon height from one of the polygons
         int polyHeight = 0;
-        if (board.length > 0 && board[0].length > 0){
+        if (board.length > 0 && board[0].length > 0) {
             polyHeight = getPolyHeight(board[0][0].getPoly());
         }
 
-        int sHalf = Math.round((int)getSideLengthFromHeight(polyHeight) / 2f);
-        int offset = (int) Math.round(OUTLINEWIDTH *0.6);
+        int sHalf = Math.round((int) getSideLengthFromHeight(polyHeight) / 2f);
+        int offset = (int) Math.round(outline * 0.6);
 
-        for (int n=0; n<boardSize; n++){
+        for (int n = 0; n < boardSize; n++) {
             Polygon newPoly;
             Polygon currentHex;
 
             //Bottom left corner
             currentHex = board[0][n].getPoly();
-            if (n==0) {
-                int[] cx = new int[]{currentHex.xpoints[5] - OUTLINEWIDTH, currentHex.xpoints[5],
+            if (n == 0) {
+                int[] cx = new int[]{currentHex.xpoints[5] - outline, currentHex.xpoints[5],
                         currentHex.xpoints[4], currentHex.xpoints[4] + sHalf,
                         currentHex.xpoints[4] + sHalf, currentHex.xpoints[4] - offset};
                 int[] cy = new int[]{currentHex.ypoints[5], currentHex.ypoints[5],
-                        currentHex.ypoints[4], currentHex.ypoints[4], currentHex.ypoints[4] + OUTLINEWIDTH,
-                        currentHex.ypoints[4] + OUTLINEWIDTH, currentHex.ypoints[4]};
+                        currentHex.ypoints[4], currentHex.ypoints[4], currentHex.ypoints[4] + outline,
+                        currentHex.ypoints[4] + outline, currentHex.ypoints[4]};
                 newPoly = new Polygon(cx, cy, cx.length);
             } else {
-                int[] cx = new int[]{currentHex.xpoints[5]-sHalf, currentHex.xpoints[5],
+                int[] cx = new int[]{currentHex.xpoints[5] - sHalf, currentHex.xpoints[5],
                         currentHex.xpoints[4], currentHex.xpoints[4] + sHalf, currentHex.xpoints[4] + sHalf,
-                        currentHex.xpoints[4] - offset, currentHex.xpoints[5] - offset, currentHex.xpoints[5]-sHalf};
+                        currentHex.xpoints[4] - offset, currentHex.xpoints[5] - offset, currentHex.xpoints[5] - sHalf};
                 int[] cy = new int[]{currentHex.ypoints[5], currentHex.ypoints[5], currentHex.ypoints[4],
-                        currentHex.ypoints[4], currentHex.ypoints[4] + OUTLINEWIDTH,
-                        currentHex.ypoints[4] + OUTLINEWIDTH, currentHex.ypoints[5]+ OUTLINEWIDTH,
-                        currentHex.ypoints[5]+ OUTLINEWIDTH};
+                        currentHex.ypoints[4], currentHex.ypoints[4] + outline,
+                        currentHex.ypoints[4] + outline, currentHex.ypoints[5] + outline,
+                        currentHex.ypoints[5] + outline};
                 newPoly = new Polygon(cx, cy, cx.length);
             }
 
@@ -168,20 +226,20 @@ public class HexUtils {
 
 
             //Top right corner
-            currentHex = board[boardSize-1][n].getPoly();
-            if (n==boardSize-1) {
-                int[] cx = new int[]{currentHex.xpoints[0]+sHalf, currentHex.xpoints[1]+offset,
-                        currentHex.xpoints[2]+ OUTLINEWIDTH, currentHex.xpoints[2], currentHex.xpoints[1],
-                        currentHex.xpoints[0]+sHalf};
-                int[] cy = new int[]{currentHex.ypoints[0]- OUTLINEWIDTH, currentHex.ypoints[1]- OUTLINEWIDTH,
+            currentHex = board[boardSize - 1][n].getPoly();
+            if (n == boardSize - 1) {
+                int[] cx = new int[]{currentHex.xpoints[0] + sHalf, currentHex.xpoints[1] + offset,
+                        currentHex.xpoints[2] + outline, currentHex.xpoints[2], currentHex.xpoints[1],
+                        currentHex.xpoints[0] + sHalf};
+                int[] cy = new int[]{currentHex.ypoints[0] - outline, currentHex.ypoints[1] - outline,
                         currentHex.ypoints[2], currentHex.ypoints[2], currentHex.ypoints[1], currentHex.ypoints[0]};
                 newPoly = new Polygon(cx, cy, cx.length);
             } else {
-                int[] cx = new int[]{currentHex.xpoints[0]+sHalf, currentHex.xpoints[1]+offset,
-                        currentHex.xpoints[2]+offset, currentHex.xpoints[2]+sHalf, currentHex.xpoints[2]+sHalf,
-                        currentHex.xpoints[2], currentHex.xpoints[1], currentHex.xpoints[0]+sHalf};
-                int[] cy = new int[]{currentHex.ypoints[0]- OUTLINEWIDTH, currentHex.ypoints[1]- OUTLINEWIDTH,
-                        currentHex.ypoints[2]- OUTLINEWIDTH, currentHex.ypoints[2]- OUTLINEWIDTH, currentHex.ypoints[2],
+                int[] cx = new int[]{currentHex.xpoints[0] + sHalf, currentHex.xpoints[1] + offset,
+                        currentHex.xpoints[2] + offset, currentHex.xpoints[2] + sHalf, currentHex.xpoints[2] + sHalf,
+                        currentHex.xpoints[2], currentHex.xpoints[1], currentHex.xpoints[0] + sHalf};
+                int[] cy = new int[]{currentHex.ypoints[0] - outline, currentHex.ypoints[1] - outline,
+                        currentHex.ypoints[2] - outline, currentHex.ypoints[2] - outline, currentHex.ypoints[2],
                         currentHex.ypoints[2], currentHex.ypoints[1], currentHex.ypoints[0]};
                 newPoly = new Polygon(cx, cy, cx.length);
             }
@@ -193,20 +251,20 @@ public class HexUtils {
 
             //Top left corner
             currentHex = board[n][0].getPoly();
-            if (n==0) {
-                int[] cx = new int[]{currentHex.xpoints[5], currentHex.xpoints[0], currentHex.xpoints[0]+sHalf,
-                        currentHex.xpoints[0]+sHalf, currentHex.xpoints[0]-offset, currentHex.xpoints[5]- OUTLINEWIDTH};
+            if (n == 0) {
+                int[] cx = new int[]{currentHex.xpoints[5], currentHex.xpoints[0], currentHex.xpoints[0] + sHalf,
+                        currentHex.xpoints[0] + sHalf, currentHex.xpoints[0] - offset, currentHex.xpoints[5] - outline};
                 int[] cy = new int[]{currentHex.ypoints[5], currentHex.ypoints[0], currentHex.ypoints[0],
-                        currentHex.ypoints[0]- OUTLINEWIDTH, currentHex.ypoints[0]- OUTLINEWIDTH,
+                        currentHex.ypoints[0] - outline, currentHex.ypoints[0] - outline,
                         currentHex.ypoints[5]};
                 newPoly = new Polygon(cx, cy, cx.length);
             } else {
-                int[] cx = new int[]{currentHex.xpoints[5], currentHex.xpoints[0], currentHex.xpoints[0]+sHalf,
-                        currentHex.xpoints[0]+sHalf, currentHex.xpoints[0]-offset, currentHex.xpoints[5]-offset,
-                        currentHex.xpoints[5]-sHalf, currentHex.xpoints[5]-sHalf};
+                int[] cx = new int[]{currentHex.xpoints[5], currentHex.xpoints[0], currentHex.xpoints[0] + sHalf,
+                        currentHex.xpoints[0] + sHalf, currentHex.xpoints[0] - offset, currentHex.xpoints[5] - offset,
+                        currentHex.xpoints[5] - sHalf, currentHex.xpoints[5] - sHalf};
                 int[] cy = new int[]{currentHex.ypoints[5], currentHex.ypoints[0], currentHex.ypoints[0],
-                        currentHex.ypoints[0]- OUTLINEWIDTH, currentHex.ypoints[0]- OUTLINEWIDTH,
-                        currentHex.ypoints[5]- OUTLINEWIDTH, currentHex.ypoints[5]- OUTLINEWIDTH,
+                        currentHex.ypoints[0] - outline, currentHex.ypoints[0] - outline,
+                        currentHex.ypoints[5] - outline, currentHex.ypoints[5] - outline,
                         currentHex.ypoints[5]};
                 newPoly = new Polygon(cx, cy, cx.length);
             }
@@ -216,21 +274,21 @@ public class HexUtils {
             g2.fillPolygon(newPoly);
 
             //Bottom right corner
-            currentHex = board[n][boardSize-1].getPoly();
-            if (n==(boardSize-1)) {
-                int[] cx = new int[]{currentHex.xpoints[3]-sHalf, currentHex.xpoints[3], currentHex.xpoints[2],
-                        currentHex.xpoints[2]+ OUTLINEWIDTH, currentHex.xpoints[3]+offset, currentHex.xpoints[3]-sHalf};
+            currentHex = board[n][boardSize - 1].getPoly();
+            if (n == (boardSize - 1)) {
+                int[] cx = new int[]{currentHex.xpoints[3] - sHalf, currentHex.xpoints[3], currentHex.xpoints[2],
+                        currentHex.xpoints[2] + outline, currentHex.xpoints[3] + offset, currentHex.xpoints[3] - sHalf};
                 int[] cy = new int[]{currentHex.ypoints[3], currentHex.ypoints[3], currentHex.ypoints[2],
-                        currentHex.ypoints[2], currentHex.ypoints[3]+ OUTLINEWIDTH,
-                        currentHex.ypoints[3]+ OUTLINEWIDTH};
+                        currentHex.ypoints[2], currentHex.ypoints[3] + outline,
+                        currentHex.ypoints[3] + outline};
                 newPoly = new Polygon(cx, cy, cx.length);
             } else {
-                int[] cx = new int[]{currentHex.xpoints[3]-sHalf, currentHex.xpoints[3], currentHex.xpoints[2],
-                        currentHex.xpoints[2]+sHalf, currentHex.xpoints[2]+sHalf, currentHex.xpoints[2]+offset,
-                        currentHex.xpoints[3]+offset, currentHex.xpoints[3]-sHalf};
+                int[] cx = new int[]{currentHex.xpoints[3] - sHalf, currentHex.xpoints[3], currentHex.xpoints[2],
+                        currentHex.xpoints[2] + sHalf, currentHex.xpoints[2] + sHalf, currentHex.xpoints[2] + offset,
+                        currentHex.xpoints[3] + offset, currentHex.xpoints[3] - sHalf};
                 int[] cy = new int[]{currentHex.ypoints[3], currentHex.ypoints[3], currentHex.ypoints[2],
-                        currentHex.ypoints[2], currentHex.ypoints[2]+ OUTLINEWIDTH, currentHex.ypoints[2]+ OUTLINEWIDTH,
-                        currentHex.ypoints[3]+ OUTLINEWIDTH, currentHex.ypoints[3]+ OUTLINEWIDTH};
+                        currentHex.ypoints[2], currentHex.ypoints[2] + outline, currentHex.ypoints[2] + outline,
+                        currentHex.ypoints[3] + outline, currentHex.ypoints[3] + outline};
                 newPoly = new Polygon(cx, cy, cx.length);
             }
 
@@ -240,13 +298,20 @@ public class HexUtils {
         }
     }
 
+    /**
+     * @param mx        X coordinate in pixels inside window
+     * @param my        Y coordinate in pixels inside window
+     * @param board     Game board array
+     * @param boardSize Size of board in tiles (one side)
+     * @return The coordinates of the Hex tile that was clicked
+     */
     public static Point pxtoHex(int mx, int my, HexTile[][] board, int boardSize) {
-        Point p = new Point(-1,-1);
+        Point p = new Point(-1, -1);
         Point coords = new Point(mx, my);
 
-        for (int i=0; i<boardSize; i++){
-            for (int j=0; j<boardSize; j++){
-                if (board[i][j].getPoly().contains(coords)){
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                if (board[i][j].getPoly().contains(coords)) {
                     p.x = i;
                     p.y = j;
                 }
@@ -256,9 +321,16 @@ public class HexUtils {
         return p;
     }
 
-    @Nullable
-    public static Types.WINNER getWinner(HexTile[][] board, HexTile lastPlacedTile){
-        if (lastPlacedTile == null){
+    /**
+     * Checks if the chain that contains the last placed stone touches both edges.
+     * Other chains, especially those by the opponent, don't have to be checked each time.
+     *
+     * @param board          Game board array
+     * @param lastPlacedTile Tile that the last stone was placed on
+     * @return Either null or 1 as int - null if game is not over, 1 if player that placed the last stone has won
+     */
+    public static Types.WINNER getWinner(HexTile[][] board, HexTile lastPlacedTile) {
+        if (lastPlacedTile == null) {
             //System.out.println("lastPlacedTile was null");
             return null;
         }
@@ -271,20 +343,20 @@ public class HexUtils {
 
         tilesToVisit.add(lastPlacedTile);
 
-        while(tilesToVisit.size() > 0){
+        while (tilesToVisit.size() > 0) {
             HexTile currentTile = tilesToVisit.pop();
             //Add all neighbors that belong to the player and have not been visited
             ArrayList<HexTile> adjacentTiles = getAdjacentTiles(board, currentTile);
-            for (HexTile currentNeighbor: adjacentTiles){
+            for (HexTile currentNeighbor : adjacentTiles) {
                 if (currentNeighbor.getPlayer() == player &&
                         !tilesToVisit.contains(currentNeighbor) &&
-                        !visitedTiles.contains(currentNeighbor)){
+                        !visitedTiles.contains(currentNeighbor)) {
                     tilesToVisit.add(currentNeighbor);
                 }
             }
 
             //Check if the tile is next to an edge belonging to the player
-            switch (isNextToEdge(currentTile)){
+            switch (isNextToEdge(currentTile)) {
                 case 1:
                     firstEdgeReached = true;
                     break;
@@ -293,7 +365,7 @@ public class HexUtils {
                     break;
             }
 
-            if (firstEdgeReached && secondEdgeReached){
+            if (firstEdgeReached && secondEdgeReached) {
                 return Types.WINNER.PLAYER_WINS;
             }
 
@@ -303,7 +375,16 @@ public class HexUtils {
         return null;
     }
 
-    public static double[] getFeature0ForPlayer(HexTile[][] board, int player){
+    /**
+     * Generates feature vector 0.
+     * Quite slow and training does not work.
+     * Use not recommended.
+     *
+     * @param board  Game board array
+     * @param player Player for which the features are to be generated
+     * @return Feature vector 0
+     */
+    public static double[] getFeature0ForPlayer(HexTile[][] board, int player) {
         LinkedList<HexTile> tilesToVisit = new LinkedList<>();
         ArrayList<HexTile> visitedTiles = new ArrayList<>();
         ArrayList<HexTile> freeNeighborTiles = new ArrayList<>();
@@ -311,7 +392,7 @@ public class HexUtils {
         int longestChain = 0;
         int virtualConnections = 0;
 
-        for (int i=0; i<HexConfig.BOARD_SIZE; i++) {
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 if (!visitedTiles.contains(board[i][j]) && board[i][j].getPlayer() == player) {
                     tilesToVisit.add(board[i][j]);
@@ -323,10 +404,10 @@ public class HexUtils {
         int currentVirtualConnections = 0;
         int currentChainMin = Integer.MAX_VALUE;
         int currentChainMax = Integer.MIN_VALUE;
-        while(tilesToVisit.size() > 0){
+        while (tilesToVisit.size() > 0) {
             HexTile currentTile = tilesToVisit.pop();
             ArrayList<HexTile> adjacentTiles = getAdjacentTiles(board, currentTile);
-            for (HexTile currentNeighbor: adjacentTiles){
+            for (HexTile currentNeighbor : adjacentTiles) {
                 //Check if the tile has not been visited and is not yet marked to be visited...
                 if (!tilesToVisit.contains(currentNeighbor) &&
                         !visitedTiles.contains(currentNeighbor)) {
@@ -335,7 +416,7 @@ public class HexUtils {
                         tilesToVisit.add(currentNeighbor);
                     } else if (currentNeighbor.getPlayer() == PLAYER_NONE) {
                         //Add currentNeighbor to count of neighboring free tiles
-                        if (!freeNeighborTiles.contains(currentNeighbor)){
+                        if (!freeNeighborTiles.contains(currentNeighbor)) {
                             freeNeighborTiles.add(currentNeighbor);
                         }
                         //If the tile does not belong to a player, check if there is an additional free tile
@@ -389,50 +470,50 @@ public class HexUtils {
 
             }
 
-            if (player == HexConfig.PLAYER_TWO){
+            if (player == HexConfig.PLAYER_TWO) {
                 //For player two, x direction matters
                 currentChainMin = Math.min(currentTile.getCoords().x, currentChainMin);
                 currentChainMax = Math.max(currentTile.getCoords().x, currentChainMax);
-            } else if (player == PLAYER_ONE){
+            } else if (player == PLAYER_ONE) {
                 //For player one, y direction matters
                 currentChainMin = Math.min(currentTile.getCoords().y, currentChainMin);
                 currentChainMax = Math.max(currentTile.getCoords().y, currentChainMax);
             }
 
-            currentChainLength = Math.max(currentChainLength, (currentChainMax-currentChainMin)+1-currentVirtualConnections);
+            currentChainLength = Math.max(currentChainLength, (currentChainMax - currentChainMin) + 1 - currentVirtualConnections);
 
             visitedTiles.add(currentTile);
         }
         longestChain = Math.max(longestChain, currentChainLength);
 
-        double [] rVal = new double[3];
+        double[] rVal = new double[3];
         rVal[0] = (double) longestChain / (double) HexConfig.BOARD_SIZE;
-        //rVal[0] = longestChain;
-        rVal[1] = (double) freeNeighborTiles.size() /(double) (HexConfig.TILE_COUNT+1);
-        //rVal[1] = neighborCount;
-        rVal[2] = (double) virtualConnections /(double) HexConfig.TILE_COUNT;
-
-        //rVal[3] = (double) weakLinks.size();
-
-        double[] ownTilesInSlice = new double[board.length];
-        double[] enemyTilesInSlice = new double[board.length];
-
-
+        rVal[1] = (double) freeNeighborTiles.size() / (double) (HexConfig.TILE_COUNT + 1);
+        rVal[2] = (double) virtualConnections / (double) HexConfig.TILE_COUNT;
 
         return rVal;
     }
 
-    public static double[] getFeature3ForPlayer(HexTile[][] board, int player){
+    /**
+     * Similar to feature mode 0, but a bit faster and could potentially be improved.
+     * Generates a list of tile connections for the player's tiles.
+     * Recognizes direct, weak and virtual connections.
+     *
+     * @param board  Game board array
+     * @param player Player for whom to generate the features
+     * @return Feature vector 3
+     */
+    public static double[] getFeature3ForPlayer(HexTile[][] board, int player) {
         LinkedList<HexTile> tilesToVisit = new LinkedList<>();
         ArrayList<HexTile> freeNeighborTiles = new ArrayList<>();
         ArrayList<ArrayList<HexTile>> connections = new ArrayList<>();
 
         //Two dummy tiles to use as edges
-        HexTile edge1 = new HexTile(-1,-1);
-        HexTile edge2 = new HexTile(-2,-2);
+        HexTile edge1 = new HexTile(-1, -1);
+        HexTile edge2 = new HexTile(-2, -2);
 
         //Get a list of all tiles the player owns
-        for (int i=0; i<HexConfig.BOARD_SIZE; i++) {
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 if (board[i][j].getPlayer() == player) {
                     tilesToVisit.add(board[i][j]);
@@ -441,34 +522,34 @@ public class HexUtils {
         }
 
         //Visit every tile the player owns
-        while(tilesToVisit.size() > 0){
+        while (tilesToVisit.size() > 0) {
             HexTile currentTile = tilesToVisit.pop();
             int edge = isNextToEdge(currentTile, player);
-            if (edge > 0){
-                HexTile correctEdge = edge == 1 ? edge1 : edge2;
-                connections = addConnection(connections, currentTile, correctEdge, null);
+            if (edge > 0) {
+                HexTile neighboringEdge = edge == 1 ? edge1 : edge2;
+                connections = addConnection(connections, currentTile, neighboringEdge, null);
                 continue;
             }
             ArrayList<HexTile> adjacentTiles = getAdjacentTiles(board, currentTile);
-            for (HexTile neighbor: adjacentTiles){
-                if (neighbor.getPlayer() == getOpponent(player)){
+            for (HexTile neighbor : adjacentTiles) {
+                if (neighbor.getPlayer() == getOpponent(player)) {
                     continue;
                 }
 
-                if (neighbor.getPlayer() == player){
+                if (neighbor.getPlayer() == player) {
                     connections = addConnection(connections, currentTile, neighbor, null);
                     continue;
                 }
 
-                if (neighbor.getPlayer() == PLAYER_NONE && !freeNeighborTiles.contains(neighbor)){
+                if (neighbor.getPlayer() == PLAYER_NONE && !freeNeighborTiles.contains(neighbor)) {
                     freeNeighborTiles.add(neighbor);
                 }
 
                 int neighborEdge = isNextToEdge(neighbor, player);
                 HexTile connectingTile = null;
-                if (neighborEdge == 1){
+                if (neighborEdge == 1) {
                     connectingTile = edge1;
-                } else if (neighborEdge == 2){
+                } else if (neighborEdge == 2) {
                     connectingTile = edge2;
                 }
 
@@ -477,7 +558,7 @@ public class HexUtils {
                 } else {
                     ArrayList<HexTile> neighborsNeighbors = getAdjacentTiles(board, neighbor);
                     for (HexTile neighborsNeighbor : neighborsNeighbors) {
-                        if (neighborsNeighbor == currentTile){
+                        if (neighborsNeighbor == currentTile) {
                             continue;
                         }
                         connectingTile = null;
@@ -493,27 +574,25 @@ public class HexUtils {
             }
         }
 
-
         int longestChain = 0;
 
         ArrayList<ArrayList<HexTile>> chains = generateChains(connections);
-        //System.out.println("Chains for p. "+player+": "+chains.size());
-        for (ArrayList<HexTile> chain: chains){
+        for (ArrayList<HexTile> chain : chains) {
             int currentChainMin = Integer.MAX_VALUE;
             int currentChainMax = Integer.MIN_VALUE;
 
-            for (HexTile currentTile: chain){
-                if (player == HexConfig.PLAYER_TWO){
+            for (HexTile currentTile : chain) {
+                if (player == HexConfig.PLAYER_TWO) {
                     //For player two, x direction matters
                     currentChainMin = Math.min(currentTile.getCoords().x, currentChainMin);
                     currentChainMax = Math.max(currentTile.getCoords().x, currentChainMax);
-                } else if (player == PLAYER_ONE){
+                } else if (player == PLAYER_ONE) {
                     //For player one, y direction matters
                     currentChainMin = Math.min(currentTile.getCoords().y, currentChainMin);
                     currentChainMax = Math.max(currentTile.getCoords().y, currentChainMax);
                 }
             }
-            longestChain = Math.max(longestChain, (currentChainMax-currentChainMin)+1);
+            longestChain = Math.max(longestChain, (currentChainMax - currentChainMin) + 1);
             //System.out.println(chain);
         }
 
@@ -527,24 +606,22 @@ public class HexUtils {
         while (iter.hasNext()) {
             ArrayList<HexTile> connection = iter.next();
             int connectionSize = connection.size();
-            //System.out.println("Connection: "+connection);
-            if (connectionSize > 2 && areConnected(chains, connection.get(0), connection.get(2))){
-                //System.out.println("Removing connection");
+            if (connectionSize > 2 && areConnected(chains, connection.get(0), connection.get(2))) {
                 iter.remove();
                 continue;
             }
-            if (connectionSize == 3){
+            if (connectionSize == 3) {
                 weakLinks++;
-            } else if (connectionSize == 4){
+            } else if (connectionSize == 4) {
                 virtualConnections++;
-            } else if (connectionSize == 2){
+            } else if (connectionSize == 2) {
                 directConnections++;
-            }  else {
-                System.out.println("Unexpected connection length: "+connectionSize);
+            } else {
+                System.out.println("Unexpected connection length: " + connectionSize);
             }
         }
 
-        double [] rVal = new double[5];
+        double[] rVal = new double[5];
         rVal[0] = (double) longestChain;
         rVal[1] = (double) freeNeighborTiles.size();
         rVal[2] = (double) virtualConnections;
@@ -554,12 +631,23 @@ public class HexUtils {
         double[] ownTilesInSlice = new double[board.length];
         double[] enemyTilesInSlice = new double[board.length];
 
-
-
         return rVal;
     }
 
-    private static ArrayList<ArrayList<HexTile>> addConnection(ArrayList<ArrayList<HexTile>> connections, HexTile currentTile, HexTile neighbor, HexTile connectingTile){
+    /**
+     * Used for feature mode 3.
+     * Adds a new connection to the ArrayList and also checks for duplicates.
+     * Upgrades connections from weak to direct or weak to virtual if necessary.
+     * Direct connections only contain two tiles, weak connections always contain three tiles, virtual connections
+     * contain four tiles.
+     *
+     * @param connections    Current list of connections
+     * @param currentTile    Subject tile that is being looked at
+     * @param neighbor       Tile that is in some way connected to the subject tile
+     * @param connectingTile Intermediary tile that connects the subject and the neighbor. Always an unused tile.
+     * @return
+     */
+    private static ArrayList<ArrayList<HexTile>> addConnection(ArrayList<ArrayList<HexTile>> connections, HexTile currentTile, HexTile neighbor, HexTile connectingTile) {
         boolean matchFound = false;
         for (ArrayList<HexTile> connection : connections) {
             if (connectingTile != null) {
@@ -593,9 +681,17 @@ public class HexUtils {
         return connections;
     }
 
-    private static boolean areConnected(ArrayList<ArrayList<HexTile>> chains, HexTile tile1, HexTile tile2){
-        for (ArrayList<HexTile> chain: chains){
-            if (chain.contains(tile1) && chain.contains(tile2)){
+    /**
+     * Checks if there exists a chain that contains both tiles
+     *
+     * @param chains List of chains
+     * @param tile1  First tile
+     * @param tile2  Second tile
+     * @return True or False, depending on if the tiles are in the same chain or not
+     */
+    private static boolean areConnected(ArrayList<ArrayList<HexTile>> chains, HexTile tile1, HexTile tile2) {
+        for (ArrayList<HexTile> chain : chains) {
+            if (chain.contains(tile1) && chain.contains(tile2)) {
                 return true;
             }
         }
@@ -603,7 +699,14 @@ public class HexUtils {
         return false;
     }
 
-    private static ArrayList<ArrayList<HexTile>> generateChains(ArrayList<ArrayList<HexTile>> connections){
+    /**
+     * Generates a list of chains from the list of connections.
+     * Does so by stitching together all direct connections.
+     *
+     * @param connections List of connections
+     * @return List of chains
+     */
+    private static ArrayList<ArrayList<HexTile>> generateChains(ArrayList<ArrayList<HexTile>> connections) {
         ArrayList<ArrayList<HexTile>> chains = new ArrayList<>();
 
         for (ArrayList<HexTile> connection : connections) {
@@ -661,9 +764,16 @@ public class HexUtils {
         return chains;
     }
 
-    public static int getTileCountForPlayer(HexTile[][] board, int player){
+    /**
+     * Counts all the tiles that belong to the player given as parameter
+     *
+     * @param board  Game board array
+     * @param player Player to check tile count for
+     * @return Tile count for player
+     */
+    public static int getTileCountForPlayer(HexTile[][] board, int player) {
         int tileCount = 0;
-        for (int i=0; i<HexConfig.BOARD_SIZE; i++) {
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 if (board[i][j].getPlayer() == player) {
                     tileCount++;
@@ -674,32 +784,38 @@ public class HexUtils {
         return tileCount;
     }
 
-    private static int isNextToEdge(HexTile tile){
-        int player = tile.getPlayer();
-        return isNextToEdge(tile, player);
+    /**
+     * Checks if the tile is next to an edge the player owning the tile has to reach
+     *
+     * @param tile The tile to check
+     * @return 0, 1 or 2 -- 0 means no edge, 1 is the first edge, 2 is the second.
+     */
+    private static int isNextToEdge(HexTile tile) {
+        return isNextToEdge(tile, tile.getPlayer());
     }
 
     /**
+     * Checks if the tile is next to an edge of the player that is given as parameter
      *
-     * @param tile The tile to check
+     * @param tile   The tile to check
      * @param player The player whose edge is to be checked. Optional parameter, if missing,
      *               the player who the tile belongs to will be subject of the comparison.
      * @return 0, 1 or 2 -- 0 means no edge, 1 is the first edge, 2 is the second.
      */
-    private static int isNextToEdge(HexTile tile, int player){
+    private static int isNextToEdge(HexTile tile, int player) {
         int x = tile.getCoords().x;
         int y = tile.getCoords().y;
 
-        if (player == HexConfig.PLAYER_TWO){
-            if (x == 0){
+        if (player == HexConfig.PLAYER_TWO) {
+            if (x == 0) {
                 return 1;
-            } else if (x == HexConfig.BOARD_SIZE-1){
+            } else if (x == HexConfig.BOARD_SIZE - 1) {
                 return 2;
             }
-        } else if (player == PLAYER_ONE){
-            if (y == 0){
+        } else if (player == PLAYER_ONE) {
+            if (y == 0) {
                 return 1;
-            } else if (y == HexConfig.BOARD_SIZE-1){
+            } else if (y == HexConfig.BOARD_SIZE - 1) {
                 return 2;
             }
         }
@@ -707,16 +823,23 @@ public class HexUtils {
         return 0;
     }
 
-    private static ArrayList<HexTile> getAdjacentTiles(HexTile[][] board, HexTile tile){
+    /**
+     * Generates a list of all neighboring tiles for the given tile
+     *
+     * @param board Game board array
+     * @param tile  Subject tile
+     * @return List of neighbors
+     */
+    private static ArrayList<HexTile> getAdjacentTiles(HexTile[][] board, HexTile tile) {
         ArrayList<HexTile> adjacentTiles = new ArrayList<>();
         int x = tile.getCoords().x;
         int y = tile.getCoords().y;
 
-        for (int i = -1; i<=1; i++){
-            for (int j = -1; j<=1; j++){
-                int neighborX = x+i;
-                int neighborY = y+j;
-                if (i != j && isValidTile(neighborX, neighborY)){
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                int neighborX = x + i;
+                int neighborY = y + j;
+                if (i != j && isValidTile(neighborX, neighborY)) {
                     adjacentTiles.add(board[neighborX][neighborY]);
                 }
             }
@@ -725,11 +848,24 @@ public class HexUtils {
         return adjacentTiles;
     }
 
+    /**
+     * Checks if the tile exists by checking if it is inside the bounds of the game board
+     *
+     * @param x index 1
+     * @param y index 2
+     * @return True or False, depending on if the tile exists
+     */
     public static boolean isValidTile(int x, int y) {
         return (x >= 0 && x < HexConfig.BOARD_SIZE) && (y >= 0 && y < HexConfig.BOARD_SIZE);
     }
 
-    static int getPolyHeight(Polygon poly){
+    /**
+     * Calculates height of the polygon by subtracting window coordinates of two opposite vertices
+     *
+     * @param poly Subject polygon
+     * @return Height of polygon
+     */
+    static int getPolyHeight(Polygon poly) {
         if (poly.xpoints.length == 6) {
             return poly.ypoints[4] - poly.ypoints[0];
         } else {
@@ -737,24 +873,43 @@ public class HexUtils {
         }
     }
 
-    static double getSideLengthFromHeight(int height){
-        return ((float)height / 2f) / (Math.sqrt(3)/2f);
+    /**
+     * Calculates the length of a single side of the polygon
+     *
+     * @param height Height of the polygon
+     * @return Side length of polygon
+     */
+    static double getSideLengthFromHeight(int height) {
+        return ((float) height / 2f) / (Math.sqrt(3) / 2f);
     }
 
-    static HexTile[] boardToVector(HexTile[][] board){
-        HexTile[] boardVector = new HexTile[board.length*board.length];
+    /**
+     * Converts the two-dimensional board array to a one-dimensional vector.
+     * Leftmost tile on board (coordinates: 0, 0) is the first element.
+     * Bottom tile on board (coordinates: 0, n) is the n-th element.
+     * Top tile on board (coordinates: n, 0) is the (n^2 - n + 1)-th element.
+     * Rightmost tile on board (coordinates: n, n) is the (n^2)-th element.
+     *
+     * @param board
+     * @return
+     */
+    static HexTile[] boardToVector(HexTile[][] board) {
+        HexTile[] boardVector = new HexTile[board.length * board.length];
 
-        for (int i=0, k=0; i<HexConfig.BOARD_SIZE; i++){
-            for (int j=0; j<HexConfig.BOARD_SIZE; j++, k++){
-                //No player: 0, player one: 1, player two: 2
+        for (int i = 0, k = 0; i < HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++, k++) {
                 boardVector[k] = board[i][j];
             }
         }
         return boardVector;
     }
 
-    static int getOpponent(int player){
-        if (player == PLAYER_ONE){
+    /**
+     * @param player Subject player
+     * @return Opponent player of subject
+     */
+    static int getOpponent(int player) {
+        if (player == PLAYER_ONE) {
             return PLAYER_TWO;
         } else {
             return PLAYER_ONE;

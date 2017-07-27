@@ -9,33 +9,31 @@ import static games.Hex.HexConfig.*;
 
 
 public class StateObserverHex implements StateObservation {
+    /**
+     * change the version ID for serialization only if a newer version is no longer
+     * compatible with an older one (older .gamelog containing this object will become
+     * unreadable or you have to provide a special version transformation)
+     */
+    private static final long serialVersionUID = 12L;
     private int currentPlayer;
-
     private HexTile[][] board;
     private HexTile lastUpdatedTile;
     private ArrayList<Types.ACTIONS> actions;
 
-	/**
-	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .gamelog containing this object will become 
-	 * unreadable or you have to provide a special version transformation)
-	 */
-	private static final long serialVersionUID = 12L;
-
-    public StateObserverHex(){
+    public StateObserverHex() {
         board = defaultGameBoard();
         currentPlayer = HexConfig.PLAYER_ONE;
         setAvailableActions();
     }
 
     public StateObserverHex(HexTile[][] table) {
-        int pieceCount=0;
-        for (int i=0; i<HexConfig.BOARD_SIZE; i++) {
+        int pieceCount = 0;
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 pieceCount += (table[i][j].getPlayer() == HexConfig.PLAYER_ONE ? 1 : -1);
             }
         }
-        currentPlayer = (pieceCount%2==0 ? HexConfig.PLAYER_ONE : PLAYER_TWO);
+        currentPlayer = (pieceCount % 2 == 0 ? HexConfig.PLAYER_ONE : PLAYER_TWO);
         board = new HexTile[HexConfig.BOARD_SIZE][HexConfig.BOARD_SIZE];
         copyTable(table);
         setAvailableActions();
@@ -49,7 +47,12 @@ public class StateObserverHex implements StateObservation {
         setAvailableActions();
     }
 
-    private void copyTable(HexTile[][] table){
+    /**
+     * Replaces the current game board array by a copy of the array that is passed as the parameter.
+     *
+     * @param table The game board array that is to be copied
+     */
+    private void copyTable(HexTile[][] table) {
         for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 board[i][j] = table[i][j].copy();
@@ -57,11 +60,14 @@ public class StateObserverHex implements StateObservation {
         }
     }
 
-    private HexTile[][] defaultGameBoard(){
+    /**
+     * @return An empty board array
+     */
+    private HexTile[][] defaultGameBoard() {
         HexTile[][] newBoard = new HexTile[HexConfig.BOARD_SIZE][HexConfig.BOARD_SIZE];
 
-        for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
-            for (int j=0;j<HexConfig.BOARD_SIZE;j++) {
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 newBoard[i][j] = new HexTile(i, j);
                 newBoard[i][j].setPoly(HexUtils.createHexPoly(i, j, HexConfig.OFFSET, HexConfig.BOARD_SIZE, HexConfig.HEX_SIZE));
             }
@@ -85,9 +91,15 @@ public class StateObserverHex implements StateObservation {
         return (determineWinner() == currentPlayer ? Types.WINNER.PLAYER_LOSES : Types.WINNER.PLAYER_WINS);
     }
 
-    private int determineWinner(){
+    /**
+     * Uses information about the tile on which the last stone has been placed to determine if the chain containing
+     * that stone touches both game board edges that have to be connected. Actual calculation is done in HexUtils.
+     *
+     * @return ID of the player who won the game. ID of HexConfig.PLAYER_NONE if game is not over.
+     */
+    private int determineWinner() {
         Types.WINNER winner = HexUtils.getWinner(getBoard(), getLastUpdatedTile());
-        if (winner == Types.WINNER.PLAYER_WINS){
+        if (winner == Types.WINNER.PLAYER_WINS) {
             //Reverse winners, since current player changes after the winning tile was placed
             return (getCurrentPlayer() == PLAYER_ONE ? PLAYER_ONE : PLAYER_TWO);
         }
@@ -99,32 +111,32 @@ public class StateObserverHex implements StateObservation {
         int playerOneTiles = 0;
         int playerTwoTiles = 0;
 
-        for (int i=0; i<HexConfig.BOARD_SIZE; i++){
-            for (int j=0; j<HexConfig.BOARD_SIZE; j++){
-                if (board[i][j].getPlayer() == PLAYER_ONE){
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+                if (board[i][j].getPlayer() == PLAYER_ONE) {
                     playerOneTiles++;
-                } else if (board[i][j].getPlayer() == PLAYER_TWO){
+                } else if (board[i][j].getPlayer() == PLAYER_TWO) {
                     playerTwoTiles++;
                 }
             }
         }
 
-        if (currentPlayer == PLAYER_ONE){
+        if (currentPlayer == PLAYER_ONE) {
             return (playerOneTiles == playerTwoTiles);
         } else {
-            return (playerOneTiles-1 == playerTwoTiles);
+            return (playerOneTiles - 1 == playerTwoTiles);
         }
     }
 
     @Override
     public String stringDescr() {
         StringBuilder sb = new StringBuilder();
-        for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
-            for (int k = 0; k<i; k++){
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+            for (int k = 0; k < i; k++) {
                 sb.append(' ');
             }
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
-                switch (board[i][j].getPlayer()){
+                switch (board[i][j].getPlayer()) {
                     case HexConfig.PLAYER_ONE:
                         sb.append('W');
                         break;
@@ -148,7 +160,7 @@ public class StateObserverHex implements StateObservation {
     @Override
     public double getGameScore() {
         int winner = determineWinner();
-        if (winner == PLAYER_NONE){
+        if (winner == PLAYER_NONE) {
             return 0;
         }
 
@@ -162,7 +174,7 @@ public class StateObserverHex implements StateObservation {
 
     @Override
     public double getGameScore(StateObservation referingState) {
-        return (this.getPlayer() == referingState.getPlayer() ? getGameScore() : getGameScore()*(-1));
+        return (this.getPlayer() == referingState.getPlayer() ? getGameScore() : getGameScore() * (-1));
     }
 
     @Override
@@ -182,23 +194,23 @@ public class StateObserverHex implements StateObservation {
 
     @Override
     public void advance(Types.ACTIONS action) {
-        if (action == null){
+        if (action == null) {
             System.out.println("HEX ERROR: null given as action in advance()");
             return;
         }
         int actionInt = action.toInt();
-        assert (0<=actionInt && actionInt<=(HexConfig.TILE_COUNT)) : "Invalid action: "+actionInt;
-        int j = actionInt       % HexConfig.BOARD_SIZE;
+        assert (0 <= actionInt && actionInt <= (HexConfig.TILE_COUNT)) : "Invalid action: " + actionInt;
+        int j = actionInt % HexConfig.BOARD_SIZE;
         int i = (actionInt - j) / HexConfig.BOARD_SIZE;
 
-        if (board[i][j].getPlayer() != HexConfig.PLAYER_NONE){
-            System.out.println("Tile ("+i+", "+j+") has already been claimed by a player.");
+        if (board[i][j].getPlayer() != HexConfig.PLAYER_NONE) {
+            System.out.println("Tile (" + i + ", " + j + ") has already been claimed by a player.");
             return;
         }
         board[i][j].setPlayer(currentPlayer);
 
         lastUpdatedTile = board[i][j];
-        setAvailableActions(); 			// IMPORTANT: adjust the available actions (have reduced by one)
+        setAvailableActions();            // IMPORTANT: adjust the available actions (have reduced by one)
 
         // set up player for next advance()
         currentPlayer = (currentPlayer == HexConfig.PLAYER_ONE ? PLAYER_TWO : HexConfig.PLAYER_ONE);
@@ -217,10 +229,10 @@ public class StateObserverHex implements StateObservation {
     @Override
     public void setAvailableActions() {
         actions = new ArrayList<>();
-        for (int i=0; i<HexConfig.BOARD_SIZE; i++){
-            for (int j=0; j<HexConfig.BOARD_SIZE; j++){
-                if (board[i][j].getPlayer() == HexConfig.PLAYER_NONE){
-                    int actionInt = i*HexConfig.BOARD_SIZE + j;
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+                if (board[i][j].getPlayer() == HexConfig.PLAYER_NONE) {
+                    int actionInt = i * HexConfig.BOARD_SIZE + j;
                     actions.add(Types.ACTIONS.fromInt(actionInt));
                 }
             }
@@ -234,13 +246,13 @@ public class StateObserverHex implements StateObservation {
 
     @Override
     public void storeBestActionInfo(Types.ACTIONS bestAction, double[] valueTable) {
-        for(int i=0;i<HexConfig.BOARD_SIZE;i++){
-            for(int j=0;j<HexConfig.BOARD_SIZE;j++) {
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 board[i][j].setValue(Double.NaN);
             }
         }
 
-        for(int k = 0; k < getNumAvailableActions(); ++k) {
+        for (int k = 0; k < getNumAvailableActions(); ++k) {
             double val = valueTable[k];
             int actionInt = getAction(k).toInt();
             int j = actionInt % HexConfig.BOARD_SIZE;
@@ -249,8 +261,11 @@ public class StateObserverHex implements StateObservation {
         }
     }
 
-    protected void clearTileValues(){
-        for (int i=0;i<HexConfig.BOARD_SIZE;i++) {
+    /**
+     * Set all tile values to the default (Double.NaN)
+     */
+    protected void clearTileValues() {
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 board[i][j].setValue(Double.NaN);
             }
@@ -262,7 +277,7 @@ public class StateObserverHex implements StateObservation {
         return currentPlayer;
     }
 
-    public HexTile[][] getBoard(){
+    public HexTile[][] getBoard() {
         return board;
     }
 
@@ -271,11 +286,14 @@ public class StateObserverHex implements StateObservation {
         return 2;
     }
 
+    /**
+     * @return The tile on which the last stone was placed
+     */
     HexTile getLastUpdatedTile() {
         return lastUpdatedTile;
     }
 
-    int getCurrentPlayer(){
+    int getCurrentPlayer() {
         return currentPlayer;
     }
 }
