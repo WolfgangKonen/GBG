@@ -143,7 +143,10 @@ public class NTupleValueFunc implements Serializable {
     	double v_old = getScoreI(curTable,curPlayer);	
 		// derivative of tanh ( if withSigmoid==true)
 		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
-        updateElig(curTable,curPlayer,e);	
+        //updateElig(curTable,curPlayer,e);	 // terribly SLOW for games like 2048 if LAMBDA==0
+		if (LAMBDA!=0.0) 
+			updateElig(curTable,curPlayer,e);	
+
 	}
 
 	public void finishUpdateWeights() {

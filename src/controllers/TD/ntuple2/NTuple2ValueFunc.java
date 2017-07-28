@@ -142,7 +142,8 @@ public class NTuple2ValueFunc implements Serializable {
     	double v_old = getScoreI(curTable,curPlayer);	
 		// derivative of tanh ( if withSigmoid==true)
 		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
-        updateElig(curTable,curPlayer,e);	
+		if (LAMBDA!=0.0) 
+			updateElig(curTable,curPlayer,e);	
 	}
 
 	public void finishUpdateWeights() {
