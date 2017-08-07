@@ -55,13 +55,13 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     /**
      * Informations about Scoremodifiers and the hidden gamescore
      */
-    private JLabel realScore;
+   /* private JLabel realScore;
     private JLabel highestTileInCorner;
     private JLabel highestTileValue;
     private JLabel emptyTiles;
     private JLabel rowLength;
     private JLabel rowValue;
-    private JLabel mergeValue;
+    private JLabel mergeValue; */
 
 
     private void initGameBoard(Arena ztavGame) {
@@ -100,7 +100,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new GridLayout(1, 2, 30, 30));
         rightPanel.add(rightPanelLeft);
-        rightPanel.add(gameInfo);
+        //rightPanel.add(gameInfo);
         boardPanel.add(rightPanel);
 
         JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -164,9 +164,14 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                     }
             );
         }
+        Label ScoreDescription = new Label("Score:");
+        ScoreDescription.setFont(font);
+        panel.add(ScoreDescription);
+        scoreLabel = new JLabel("");
+        scoreLabel.setFont(font);
+        panel.add(scoreLabel);
         panel.add(new Label());
-        panel.add(new Label());
-        panel.add(new Label());
+
         panel.add(new Label());
         panel.add(buttons[1]);
         panel.add(new Label());
@@ -210,17 +215,17 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     private JPanel initGameInfo() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(8, 2, 10, 0));
+        panel.setLayout(new GridLayout(1, 2, 10, 0));
         Font font = new Font("Arial", 1, 16);
 
-        Label ScoreDescription = new Label("Score:");
+     /*   Label ScoreDescription = new Label("Score:");
         ScoreDescription.setFont(font);
         panel.add(ScoreDescription);
         scoreLabel = new JLabel("");
         scoreLabel.setFont(font);
-        panel.add(scoreLabel);
+        panel.add(scoreLabel);*/
 
-        Label realScoreDescription = new Label("modified Score:");
+   /*     Label realScoreDescription = new Label("modified Score:");
         realScoreDescription.setFont(font);
         panel.add(realScoreDescription);
 
@@ -274,7 +279,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
         mergeValue = new JLabel("");
         mergeValue.setFont(font);
-        panel.add(mergeValue);
+        panel.add(mergeValue); */
 
         return panel;
     }
@@ -364,10 +369,10 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             scoreLabel.setText("");
             leftInfo.setText("");
             rightInfo.setText("");
-            realScore.setText("");
+          /*  realScore.setText("");
             highestTileInCorner.setText("");
             highestTileValue.setText("");
-            emptyTiles.setText("");
+            emptyTiles.setText("");*/
         }
         if (vClear) {
             vTable = new double[4];
@@ -489,13 +494,13 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
         scoreLabel.setText("" + m_so.getScore());
 
-        realScore.setText("" + Math.round(m_so.getGameScore() * m_so.MAXSCORE));
+      /*  realScore.setText("" + Math.round(m_so.getGameScore() * m_so.MAXSCORE));
         rowValue.setText("" + (m_so.rowValue));
         mergeValue.setText("" + (m_so.mergeValue));
         highestTileInCorner.setText("" + m_so.highestTileInCorner);
         emptyTiles.setText("" + m_so.emptyTiles.size());
         highestTileValue.setText("" + m_so.highestTileValue);
-        rowLength.setText("" + (m_so.rowLength));
+        rowLength.setText("" + (m_so.rowLength));*/
 
 
         super.repaint(0, 0, 0, 850, 550);
@@ -510,7 +515,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         if (ztavGame.m_TicFrame != null) {
             x = ztavGame.m_TicFrame.getX();
             y = ztavGame.m_TicFrame.getY() + ztavGame.m_TicFrame.getHeight() + 1;
-            this.setSize(1300, 550);
+            this.setSize(850, 550);
         }
         this.setLocation(x, y);
     }
