@@ -602,9 +602,9 @@ public class StateObserver2048Slow implements StateObservation {
      * @param winState {@literal-1  > lost, 0 > running, 1 > won}
      */
     public void setWinState(int winState) {
-        if(this.winState == 0) {
+        //if(this.winState == 0) {
             this.winState = winState;
-        }
+        //}
     }
 
     public int[][] toArray() {
@@ -672,6 +672,7 @@ public class StateObserver2048Slow implements StateObservation {
 
         if(availableMoves.size() <= 0) {
             setWinState(-1);
+            if (highestTileValue >= ConfigGame.WINNINGVALUE) setWinState(+1);
         }
 
         setAvailableActions();

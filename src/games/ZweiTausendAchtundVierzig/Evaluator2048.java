@@ -191,11 +191,11 @@ public class Evaluator2048 extends Evaluator {
                 "\nNumber of games: " + ConfigEvaluator.NUMBEREVALUATIONS +
                 "\n" +
                 "\nResults:" +
-                "\nLowest scores is: " + minScore +
-                "\nAverage scores is: " + Math.round(averageScore) +
-                "\nHighest scores is: " + maxScore +
-                "\nStandartdeviation is: " + standartdeviation +
-                "\nAverage Rolloutdepth is: " + averageRolloutDepth +
+                "\nLowest score is: " + minScore +
+                "\nAverage score is: " + Math.round(averageScore) +
+                "\nHighest score is: " + maxScore +
+                "\nStandard deviation is: " + standartdeviation +
+                "\nAverage rollout depth is: " + averageRolloutDepth +
                 "\nAverage game duration: " +  Math.round((double)duration / (double)ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
                 "\nDuration of evaluation: " + Math.round((double)duration/(double)1000) + "s" +
                 "\nMoves per second: " + Math.round(moves/((double)duration/(double)1000)) +

@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Random;
 
 import games.StateObservation;
@@ -54,6 +56,11 @@ public class NTuple2ValueFunc implements Serializable {
 	private NTuple2 nTuples[][];
 	
 	public XNTupleFuncs xnf=null; 
+	
+	// elements needed for TD(lambda)-update with finite horizon, 
+	// see update(int[],int,double,double):
+	private int horizon=0;
+	private transient LinkedList eList = new LinkedList();		
 
 	// Turns usage of symmetry on or off
 	private boolean useSymmetry = false;
@@ -132,31 +139,22 @@ public class NTuple2ValueFunc implements Serializable {
 		return list;
 	}
 
-	public void resetElig() {
-		for (int j = 0, k = 0; j < nTuples[0].length; j++)
-			for (int i = 0; i < nTuples.length; i++)
-				nTuples[i][j].resetElig();
-	}
+//	public void resetElig() {
+//		for (int j = 0, k = 0; j < nTuples[0].length; j++)
+//			for (int i = 0; i < nTuples.length; i++)
+//				nTuples[i][j].resetElig();
+//	}
 
-	public void calcScoresAndElig(int[] curTable, int curPlayer) {
-    	double v_old = getScoreI(curTable,curPlayer);	
-		// derivative of tanh ( if withSigmoid==true)
-		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
-		if (LAMBDA!=0.0) 
-			updateElig(curTable,curPlayer,e);	
-	}
+//	public void calcScoresAndElig(int[] curTable, int curPlayer) {
+//    	double v_old = getScoreI(curTable,curPlayer);	
+//		// derivative of tanh ( if withSigmoid==true)
+//		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
+//		if (LAMBDA!=0.0) 
+//			updateElig(curTable,curPlayer,e);	
+//	}
 
 	public void finishUpdateWeights() {
 		ALPHA = ALPHA * m_AlphaChangeRatio;
-	}
-
-	// this is only needed for TTT
-	public int countPieces(int board[]) {
-		int count = 0;
-		for (int i = 0; i < board.length; i++)
-			if (board[i] != 1)		// remember: board[i]==1 for empty cells (!)
-				count++;
-		return count;
 	}
 
 	/* OLD interface: get the value for this state */
@@ -181,19 +179,18 @@ public class NTuple2ValueFunc implements Serializable {
 		double score = 0.0;
 		int[][] equiv = null;
 
-		// assertion *only* for TTT:
-		//assert(player == countPieces(board) % 2);
-
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board, useSymmetry);
 		//equiv = getSymBoards2(board, false);    // DON'T, at least for TTT clearly inferior
 
 		for (i = 0; i < numTuples; i++) {
-			for (j = 0; j < equiv.length; j++)
+			for (j = 0; j < equiv.length; j++) {
+//				System.out.print("g(i,j)=("+i+","+j+"):  ");		//debug
 				score += nTuples[player][i].getScore(equiv[j]);
+			}
 		}
 		//if (useSymmetry) score /= equiv.length; // DON'T, at least for TTT clearly inferior
-		if (TDNTuple2Agt.NEWTARGET) score /= equiv.length; 
+		//if (TDNTuple2Agt.NEWTARGET) score /= equiv.length; 
 
 		return (withSigmoid ? Math.tanh(score) : score);
 	}
@@ -251,17 +248,8 @@ public class NTuple2ValueFunc implements Serializable {
 		// derivative of tanh ( if withSigmoid==true)
 		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
 
-		double dW = ALPHA * delta * e;
-
-		// update every single N-Tuple LUT
-		// temporal coherence// update N and A matrices
-		// samine//
-
 		update(curBoard, curPlayer, delta, e);
-		//update(curBoard, dW, dW);   // /WK/
 		
-		if (LAMBDA!=0.0) updateElig(nextBoard, nextPlayer, e);
-
 	}
 
 	/**
@@ -293,17 +281,14 @@ public class NTuple2ValueFunc implements Serializable {
 		// derivative of tanh ( if withSigmoid==true)
 		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
 
-		double dW = ALPHA * delta * e;
-
-		// update every single N-Tuple LUT
-		// temporal coherence// update N and A matrices
-		// samine//
-
 		update(curBoard, curPlayer, delta, e);
-		//update(curBoard, dW, dW);   // /WK/
 		
-		if (LAMBDA!=0.0) updateElig(nextBoard, nextPlayer, e);
-
+		if (TDNTuple2Agt.DBG2_TARGET) {
+			final double MAXSCORE = 3932156; // 1; 3932156;
+			double v_new = getScoreI(curBoard,curPlayer);
+			System.out.println("getScore(intermed):"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+tg*MAXSCORE);
+			int dummy=1;
+		}
 	}
 
 	public void updateWeightsNewTerminal(int[] curBoard, int curPlayer, boolean upTC) {
@@ -314,14 +299,13 @@ public class NTuple2ValueFunc implements Serializable {
 		// derivative of tanh ( if withSigmoid==true)
 		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
 
-		double dW = ALPHA * delta * e;
-
 		update(curBoard, curPlayer, delta, e);
 
-		if (TDNTuple2Agt.DBG2_TARGET) {
-			final double MAXSCORE = 1; //3932156;
+		if (TDNTuple2Agt.DBGF_TARGET) {
+			final double MAXSCORE = 3932156; // 1; 3932156;
 			double v_new = getScoreI(curBoard,curPlayer);
 			System.out.println("getScore(***finalSO):"+v_old*MAXSCORE+", "+v_new*MAXSCORE);
+			int dummy=1;
 		}
 	}
 
@@ -335,53 +319,69 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param player
 	 *            the player who has to move on {@code board}
 	 * @param delta
-	 *            ALPHA*delta*e is the value added to all weights (LAMBDA==0)
+	 * @param e   derivative of tanh ( if withSigmoid==true)
+	 * 
+	 * The value added to all active weights is alphaM*delta*e   (in case LAMBDA==0)
 	 */
 	private void update(int[] board, int player, double delta, double e) {
 		int i, j;
 		int[][] equiv = null;
-
-		// assertion *only* for TTT:
-		//assert(player == countPieces(board) % 2);
+		double alphaM, sigDeriv, lamFactor;
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board,useSymmetry);
 
-		double alphaM = ALPHA;
-		if (TDNTuple2Agt.NEWTARGET) alphaM /= numTuples; 
-		for (i = 0; i < numTuples; i++) {
-			for (j = 0; j < equiv.length; j++)
-				nTuples[player][i].update(equiv[j], alphaM, delta, e, LAMBDA);
+		alphaM = ALPHA;
+		if (TDNTuple2Agt.NEWTARGET) alphaM /= (numTuples*equiv.length); 
+
+		// construct new EquivStates object, add it at head of LinkedList eList and remove 
+		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):
+		EquivStates elem = new EquivStates(equiv,e);
+		eList.addFirst(elem);
+		if (eList.size()>(horizon+1)) eList.pollLast();
+		
+		// iterate over all list elements in horizon  (h+1 elements from t down to t_0):
+		ListIterator<EquivStates> iter = eList.listIterator();		
+		lamFactor=1;  // holds 1, LAMBDA, LAMBDA^2,... in successive passes through while-loop
+		while(iter.hasNext()) {
+			elem=iter.next();
+			equiv=elem.equiv;
+			e = lamFactor*elem.sigDeriv;
+			for (i = 0; i < numTuples; i++) {
+				nTuples[player][i].clearIndices();
+				for (j = 0; j < equiv.length; j++) {
+//					System.out.print("(i,j)=("+i+","+j+"):  ");		//debug
+					nTuples[player][i].updateNew(equiv[j], alphaM, delta, e, LAMBDA);
+				}
+			}
+			lamFactor *= LAMBDA; 
 		}
 	}
 
-	/**
-	 * Update all n-Tuple eligibility traces. 
-	 * (Only the traces for the active player are updated/decayed.)
-	 * 
-	 * @param board
-	 *            board, for which the eligibility traces shall be updated, 
-	 *            as 1D-integer vector (position value for each board cell) 
-	 * @param player
-	 *            the player who has to move on {@code board}
-	 * @param e
-	 *            the derivative of the sigmoid function
-	 */
-	private void updateElig(int[] board, int player, double e) {
-		int i, j;
-		int[][] equiv = null;
-
-		// assertion *only* for TTT:
-		//assert(player == countPieces(board) % 2);
-
-		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board,useSymmetry);
-
-		for (i = 0; i < numTuples; i++) {
-			for (j = 0; j < equiv.length; j++)
-				nTuples[player][i].updateElig(equiv[j], LAMBDA, GAMMA, e);
-		}
-	}
+//	/**
+//	 * Update all n-Tuple eligibility traces. 
+//	 * (Only the traces for the active player are updated/decayed.)
+//	 * 
+//	 * @param board
+//	 *            board, for which the eligibility traces shall be updated, 
+//	 *            as 1D-integer vector (position value for each board cell) 
+//	 * @param player
+//	 *            the player who has to move on {@code board}
+//	 * @param e
+//	 *            the derivative of the sigmoid function
+//	 */
+//	private void updateElig(int[] board, int player, double e) {
+//		int i, j;
+//		int[][] equiv = null;
+//
+//		// Get equivalent boards (including self)
+//		equiv = getSymBoards2(board,useSymmetry);
+//
+//		for (i = 0; i < numTuples; i++) {
+//			for (j = 0; j < equiv.length; j++)
+//				nTuples[player][i].updateElig(equiv[j], LAMBDA, GAMMA, e);
+//		}
+//	}
 
 	// samine// updating TCfactor for all ntuples after every tcIn games
 	public void updateTC() {
@@ -443,6 +443,29 @@ public class NTuple2ValueFunc implements Serializable {
 		return xnf;
 	}
 
+	public void clearEquivList() {
+		eList.clear();
+	}
+	
+	public void setHorizon() {
+		if (LAMBDA==0.0) {
+			horizon=0;
+		} else {
+			horizon = (int) (Math.log(0.1)/Math.log(LAMBDA));
+		}		
+	}
+	
+	// class EquivStates is needed in update(int[],int,double,double)
+	private class EquivStates implements Serializable {
+		int[][] equiv;
+		double sigDeriv;
+		
+		EquivStates(int[][] equiv, double sigDeriv) {
+			this.equiv=equiv.clone();
+			this.sigDeriv=sigDeriv;
+		}
+	}
+
 	//
 	// Debug only: 
 	//
@@ -483,3 +506,4 @@ public class NTuple2ValueFunc implements Serializable {
 		
 	}
 }
+

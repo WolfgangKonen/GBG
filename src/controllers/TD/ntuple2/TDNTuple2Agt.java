@@ -87,7 +87,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 											// randomly
 	private boolean PRINTTABLES = false;	// /WK/ control the printout of tableA, tableN, epsilon
 	public static boolean NEWTARGET=true;
+	
+	// debug printout in updateWeightsNew, getNextAction, trainAgent:
 	public static boolean DBG2_TARGET=false;
+	// debug printout in updateWeightsNewTerminal:
+	public static boolean DBGF_TARGET=false;
+	// debug: repeat always the same sequence in one episode (to check a trivial convergence)
 	public static boolean DBG2_FIXEDSEQUENCE=false;
 	
 	//
@@ -195,23 +200,24 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		MaxScore = -Double.MAX_VALUE;
        
 		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
-		//int[][] Table = so.getTable();
-		
-		randomSelect = false;
-		double progress = (double) getGameNum() / (double) getMaxGameNum();
-		progress = (1 + m_epsilon) * progress - m_epsilon; 	// = progress +
-															// m_EPS*(progress - 1)
-		if (random) {
-			double rd = rand.nextDouble();
-			//System.out.println("rd="+rd);
-			if (rd > progress) {
-				randomSelect = true;
-			}
-		}
-//        randomSelect = false;
+	
+// --- this code is not understandable and wrong ---		
+//		randomSelect = false;
+//		double progress = (double) getGameNum() / (double) getMaxGameNum();
+//		progress = (1 + m_epsilon) * progress - m_epsilon; 	// = progress +
+//															// m_EPS*(progress - 1)
 //		if (random) {
-//			randomSelect = (rand.nextDouble() < m_epsilon);
+//			double rd = rand.nextDouble();
+//			//System.out.println("rd="+rd);
+//			if (rd > progress) {
+//				randomSelect = true;
+//			}
 //		}
+		
+        randomSelect = false;
+		if (random) {
+			randomSelect = (rand.nextDouble() < m_epsilon);
+		}
 		
 		// get the best (or eps-greedy random) action
         ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
@@ -422,14 +428,14 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		
 		player = Types.PLAYER_PM[so.getPlayer()];
 
-		if (m_Net.LAMBDA!=0.0) {
-			m_Net.resetElig(); // reset the eligibility traces before starting a new game
-			m_Net.calcScoresAndElig(curBoard,curPlayer);
-		}
+		m_Net.clearEquivList();
+		m_Net.setHorizon();
+//		if (m_Net.LAMBDA!=0.0) {
+//			m_Net.resetElig(); // reset the eligibility traces before starting a new game
+//			m_Net.calcScoresAndElig(curBoard,curPlayer);
+//		}
 
-		//oldInput = m_feature.prepareFeatVector(so);
-		//S_old = so.toString();   
-		//S_old = tableToString(-Player, table);
+		
 		m_counter=0;		// count the number of moves
 		m_finished=false;
 		while (true) {
@@ -494,7 +500,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//m_epsilon = m_epsilon - m_EpsilonChangeDelta;
 		
 		incrementGameNum();
 		if (this.getGameNum() % 100 == 0) {
@@ -558,8 +563,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		
 		if (m_randomMove) {
 			// no training, go to next move,
-			// but update eligibility traces for next pass
-			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
+//			// but update eligibility traces for next pass
+//			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
 			// only for diagnostics
 			if (m_DEBG)
 				pstream.println("random move");
@@ -568,7 +573,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// do one training step (NEW target)
 			m_Net.updateWeightsNew(curBoard, curPlayer, nextBoard, nextPlayer,
 					reward-oldReward,upTC);
-			// contains an updateElig(nextBoard,...) in the end, if LAMBDA>0
 		}
 		
 		return reward;
@@ -584,29 +588,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		double reward;
 		
 		if (so.isGameOver()) {
-			// Fetch the reward from StateObservation:
-//			switch (so.getNumPlayers()) {
-//			case 1: 
-//				reward = so.getGameScore();
-//				break;
-//			case 2: 
-//				reward = (-player)*so.getGameScore();
-//				// so.getGameScore() returns -1, if 'player', that is the
-//				// one who *made* the move to 'so', has won. If we multiply
-//				// this by (-player), we get a reward +1 for a X(player=+1)- 
-//				// win and a reward -1 for an O(player=-1)-win.
-//				// And a reward 0 for a tie.
-//				break;
-//			default: 
-//				throw new RuntimeException("TDNTupleAgt.trainAgent not yet "+
-//						"implementing case so.getNumPlayers()>2");
-//			}
-			
-			// the whole switch-statement above can be replaced with the simpler  
-			// logic of so.getGameScore(StateObservation referingState), where  
-			// referingState is 'oldSO', the state before so. [This should be  
-			// extensible to 3- or 4-player games (!) as well, if we put the 
-			// proper logic into method getGameScore(referingState).]  
+			// Fetch the reward for StateObservation so (relative to oldSO):
 			reward = player*so.getGameScore(oldSO);
 
 			if (NORMALIZE) {
@@ -637,21 +619,18 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			//epiCount++;
 			m_finished = true; 
 		}
-		//Input = m_feature.prepareFeatVector(so);
 		if (m_randomMove && !m_finished) {
 			// no training, go to next move,
-			// but update eligibility traces for next pass
-			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
+//			// but update eligibility traces for next pass
+//			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
 			// only for diagnostics
 			if (m_DEBG)
 				pstream.println("random move");
 
 		} else {
-			// do one training step
-			
+			// do one training step			
 			m_Net.updateWeights(curBoard, curPlayer, nextBoard, nextPlayer,
 					m_finished, reward,upTC);
-			// contains an updateElig(nextBoard,...) in the end, if LAMBDA>0
 
 //-- accumulation logic not yet implemented for TDNTupleAgt --
 //

@@ -170,7 +170,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         //find new Values
         evaluateBoard(settings.rowMethod);
 
-        //Empty Tile Heuristik
+        //Empty Tile Heuristic
         if(settings.enableEmptyTiles) {
             switch (settings.emptyTilesMethod) {
                 case 0:
@@ -187,7 +187,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
             }
         }
 
-        //Row Heuristik
+        //Row Heuristic
         if(settings.enableRow) {
             switch (settings.rowMethod) {
                 case 0:
@@ -201,12 +201,12 @@ public class StateObserver2048 implements StateObservationNondeterministic {
             }
         }
 
-        //Merge Heuristik
+        //Merge Heuristic
         if(settings.enableMerge) {
             bonus += mergeValue * settings.mergeWeighting;
         }
 
-        //Highest Tile In Corner Heuristik
+        //Highest Tile In Corner Heuristic
         if (highestTileInCorner && settings.enableHighestTileInCorner) {
             bonus += highestTileValue * settings.highestTileIncornerWeighting;
         }
@@ -747,9 +747,9 @@ public class StateObserver2048 implements StateObservationNondeterministic {
      * @param winState {@literal-1  > lost, 0 > running, 1 > won}
      */
     private void setWinState(int winState) {
-        if(this.winState == 0) {
+        //if(this.winState == 0) {
             this.winState = winState;
-        }
+        //}
     }
 
     /**
@@ -788,6 +788,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
 
         if(availableMoves.size() <= 0) {
             setWinState(-1);
+            if (highestTileValue >= ConfigGame.WINNINGVALUE) setWinState(+1);
         }
 
         setAvailableActions();

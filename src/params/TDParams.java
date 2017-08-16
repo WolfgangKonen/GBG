@@ -384,8 +384,15 @@ public class TDParams extends Frame implements Serializable
 		switch (agentName) {
 		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
-			alphaT.setText("0.001");  			// the defaults
-			alfinT.setText("0.001");			//
+			switch (agentName) {
+			case "TD-Ntuple": 
+				alphaT.setText("0.001");  		// the defaults
+				alfinT.setText("0.001");		//
+				break;
+			case "TD-Ntuple-2": 
+				alphaT.setText("0.2");  		// the defaults
+				alfinT.setText("0.2");			//
+			}
 			epfinT.setText("0.0");				//
 			lambdaT.setText("0.0"); 			//
 			gammaT.setText("1.0");				//

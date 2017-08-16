@@ -240,21 +240,23 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
 		//int[][] Table = so.getTable();
 		
-		randomSelect = false;
-		double progress = (double) getGameNum() / (double) getMaxGameNum();
-		progress = (1 + m_epsilon) * progress - m_epsilon; 	// = progress +
-															// m_EPS*(progress - 1)
-		if (random) {
-			double rd = rand.nextDouble();
-			//System.out.println("rd="+rd);
-			if (rd > progress) {
-				randomSelect = true;
-			}
-		}
-//        randomSelect = false;
+		// --- this code is not understandable and wrong ---		
+//		randomSelect = false;
+//		double progress = (double) getGameNum() / (double) getMaxGameNum();
+//		progress = (1 + m_epsilon) * progress - m_epsilon; 	// = progress +
+//															// m_EPS*(progress - 1)
 //		if (random) {
-//			randomSelect = (rand.nextDouble() < m_epsilon);
+//			double rd = rand.nextDouble();
+//			//System.out.println("rd="+rd);
+//			if (rd > progress) {
+//				randomSelect = true;
+//			}
 //		}
+		
+        randomSelect = false;
+		if (random) {
+			randomSelect = (rand.nextDouble() < m_epsilon);
+		}
 		
 		// get the best (or eps-greedy random) action
         ArrayList<Types.ACTIONS> acts = so.getAvailableActions();

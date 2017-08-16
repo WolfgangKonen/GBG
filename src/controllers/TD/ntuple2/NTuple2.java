@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Random;
 
 import games.StateObservation;
@@ -54,23 +55,27 @@ public class NTuple2 implements Serializable {
 	private int[] nTuple;
 	private int posVals; // # of possible values for a field of the board
 	private double lut[];
-	private int trainCounter[];
-//	private  double ev[];
-//	private  double tcN[];
-//	private  double tcA[];
-//	private  double tcFactorArray[];
-//	private  double tcDampArray[];
-	private transient double ev[];
-	private transient double tcN[];
-	private transient double tcA[];
-	private transient double tcFactorArray[];
-	private transient double tcDampArray[];
+	private transient double tcN[] = null;
+	private transient double tcA[] = null;
+	private transient double tcFactorArray[] = null;
+	private transient double tcDampArray[] = null;
+	
+	// the following elements are needed in update(): if a certain index of the LUT is 
+	// invoked more than once during a weight update for state s_k (multiple calls to update(), 
+	// if there are equivalent states (symmetric to s_k)), then it is updated only *once*. This 
+	// is realized by remembering the already visited indices in indexList.
+	// This ensures that an update with ALPHA=1.0 changes the LUT in such a way that a subsequent
+	// call getScoreI() returns a value identical to the target of that update.
+	private transient LinkedList indexList = new LinkedList();
+	private transient int trainCounter[] = null;
+	private boolean useIndexList = true;	// true: use indexList in update()
+											// false: use trainCounter in update()
+											// (true is recommended, since it is faster by a 
+											// factor of 7)
+
+//	private transient double ev[];
 
 	// /WK/
-//	private  double dWArray[];			// recommended weight changes	
-//	private  double dWOld[]=null;		// previous recommended weight changes
-//	private  int countP[]=null;			// # of weight changes with same direction as previous
-//	private  int countM[]=null;			// # of weight changes with opposite direction
 	private transient double dWArray[];			// recommended weight changes	
 	private transient double dWOld[]=null;		// previous recommended weight changes
 	private transient int countP[]=null;			// # of weight changes with same direction as previous
@@ -105,48 +110,50 @@ public class NTuple2 implements Serializable {
 		TC = ntPar.getTc();
 		TcImm = ntPar.getTcImm();
 		rand = new Random();
-		this.nTuple = nTuple;
+		this.nTuple = nTuple.clone();
+		this.posVals = posVals;
 		lut = new double[(int) Math.pow(posVals, nTuple.length)];
-		ev  = new double[lut.length];
-		// samine//
-		tcN = new double[lut.length]; // matrix N in TC
-		tcA = new double[lut.length]; // matrix A in TC
-		tcFactorArray = new double[lut.length]; // tcFactor=|N|/A
-		tcDampArray = new double[lut.length]; // /WK/ for NEW_WK
+//		ev  = new double[lut.length];
 		dWArray = new double[lut.length];	// for accumulating TC (tcImm==false)
-		// initializing N and A matrices and tcFactor=|N|/A
-		for (int i = 0; i < lut.length; i++) {
-			tcN[i] = INIT;
-			tcA[i] = INIT;
-			tcFactorArray[i] = 1.0;
-			tcDampArray[i] = 1.0;			
+		
+		if (TC) {
+			// samine//
+			tcN = new double[lut.length]; // matrix N in TC
+			tcA = new double[lut.length]; // matrix A in TC
+			tcFactorArray = new double[lut.length]; // tcFactor=|N|/A
+			tcDampArray = new double[lut.length]; // /WK/ for NEW_WK
+			
+			// initializing N and A matrices and tcFactor=|N|/A
+			for (int i = 0; i < lut.length; i++) {
+				tcN[i] = INIT;
+				tcA[i] = INIT;
+				tcFactorArray[i] = 1.0;
+				tcDampArray[i] = 1.0;			
+			}
 		}
+		
 		if (DW_DBG) {
 			dWOld = new double[lut.length];
 			countP = new int[lut.length];
 			countM = new int[lut.length];
 		}
 
-		trainCounter = new int[lut.length];
-		this.posVals = posVals;
+		if (useIndexList==false)
+			trainCounter = new int[lut.length];
 	}
 
 	/**
 	 * Get the LUT index for a certain game board.
 	 * 
 	 * @param board
-	 *            the representation of a game board (vector of length 9,
-	 *            carrying 0 ("O"), 1 (empty) or 2 ("X"))
+	 *            the representation of a game board (in case of TTT: vector of length 9,
+	 *            carrying 0 ("O"), 1 (empty) or 2 ("X") in each element)
 	 * @return the corresponding index into the LUT
 	 */
 	public int getIndex(int[] board) {
 		int index = 0;
 		int P=1; 		// P = (posVals)^i in i-loop below
 		for (int i = 0; i < nTuple.length; i++) {
-			// board ->
-			// black: 0
-			// empty: 1
-			// white: 2
 			index += P * ( board[nTuple[i]]);
 			P = P*posVals;
 		}
@@ -213,10 +220,10 @@ public class NTuple2 implements Serializable {
 			lut[i] = (random ? EPS * (rand.nextDouble() * 2 - 1) : 0.0);
 	}
 
-    public void resetElig() {
-		for (int i=0;i<ev.length;i++)
-			ev[i] = 0.0;
-	}
+//    public void resetElig() {
+//		for (int i=0;i<ev.length;i++)
+//			ev[i] = 0.0;
+//	}
 
     /**
 	 * Get the score of this NTuple for one specific board (not using
@@ -230,96 +237,152 @@ public class NTuple2 implements Serializable {
 	 * @see NTuple2ValueFunc#getScoreI(int[],int)
 	 */
 	public double getScore(int[] board) {
-		double score = lut[getIndex(board)];
+		int Index = getIndex(board);
+		double score = lut[Index];
+		
+//		final double MAXSCORE = 3932156; 
+//		System.out.println(Index + " ["+score*MAXSCORE+"]");  //debug
+		
 		return score;
 	}
 
+//	/**
+//	 * Update the weights of this NTuple for one specific board (not using
+//	 * symmetries)
+//	 * 
+//	 * @param board
+//	 *            the representation of a game board (vector of length 9,
+//	 *            carrying -1 ("O"), 0 (empty) or +1 ("X"))
+//	 * @param alphaM the step size ALPHA (divided by m=numTuples, if NEWTARGET)
+//	 * @param delta  target minus V(s_t)
+//	 * @param e		 derivative of sigmoid (1 if no sigmoid)
+//	 * @param LAMBDA
+//	 * 
+//	 * @see NTuple2ValueFunc#update(int[], int, double, double) 
+//	 * @see NTuple2ValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 
+//	 */
+//	public void update(int[] board, double alphaM, double delta, double e, double LAMBDA) {
+//		// lut[getIndex(board)] += dW;
+//		// samine//
+//		int Index = getIndex(board);
+//
+//		double tcFactor = setTcFactor(Index,delta);
+//
+//		double dW = alphaM*delta* e * tcFactor;
+//
+//		if (!TC || TcImm) {
+//			if (LAMBDA==0.0) {
+//				// the old and fast version, but without eligibility traces
+//				lut[Index] += dW;				
+//			} else {
+//				// elig traces active, we have to do it the long way (as long as we do not 
+//				// keep track of all elig traces > 0, *TODO*)
+//				double alphaDelta=alphaM*delta * tcFactor;		// the e-part is now in ev[i]
+//				for (int i=0; i<lut.length; i++)
+//					//if (ev[i]!=0.0) 				// DON'T, this extra 'if' slows down!
+//						lut[i] += alphaDelta*ev[i];
+//				
+//				// only debug
+////				double a1=dW*tcFactor;
+////				double a2=alphaDelta*ev[Index];
+////				double evIndex=ev[Index];
+//			}			
+//		}
+//		dWArray[Index] += dW;		// /WK/
+//
+//		trainCounter[Index]++;   	// /WK/
+//		
+//		if (DW_DBG) {
+//			if (NEW_WK) tcDampArray[Index] *= BETA;
+//			if (dWOld[Index]*dW<0)  {countM[Index]++; }
+//			if (dWOld[Index]*dW>0)  {countP[Index]++; }
+//			dWOld[Index] = dW;
+//		}
+//
+//	}
+
 	/**
-	 * Update the weights of this NTuple for one specific board (not using
-	 * symmetries)
+	 * Update the weights of this NTuple for one specific board (not using symmetries). 
+	 * **New** function according to [Jaskowski16].
 	 * 
 	 * @param board
 	 *            the representation of a game board (vector of length 9,
 	 *            carrying -1 ("O"), 0 (empty) or +1 ("X"))
-	 * @param alphaM the step size ALPHA (divided by m=numTuples, if NEWTARGET)
+	 * @param alphaM the step size ALPHA (divided by numTuples*numEquiv, if NEWTARGET)
 	 * @param delta  target minus V(s_t)
-	 * @param e		 derivative of sigmoid (1 if no sigmoid)
+	 * @param e		 derivative of sigmoid (1 if no sigmoid) * LAMBDA^(t-k)
 	 * @param LAMBDA
 	 * 
 	 * @see NTuple2ValueFunc#update(int[], int, double, double) 
 	 * @see NTuple2ValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 
 	 */
-	public void update(int[] board, double alphaM, double delta, double e, double LAMBDA) {
-		// lut[getIndex(board)] += dW;
-		// samine//
+	public void updateNew(int[] board, double alphaM, double delta, double e, double LAMBDA) {
 		int Index = getIndex(board);
+		Integer IndexI = new Integer(Index);
 
-		double tcFactor = 1;
+		double tcFactor = setTcFactor(Index,delta);	// returns 1 if TC==false
+				
+		double dW = alphaM*delta* e * tcFactor;
+
+//		final double MAXSCORE = 3932156; 					//debug
+//		System.out.println(Index + " ["+dW*MAXSCORE+"]");   //
+		
+		if (useIndexList) {
+			if (!TC || TcImm) {
+//				if (trainCounter[Index]==0) lut[Index] += dW;				
+				if (!indexList.contains(IndexI)) lut[Index] += dW;				
+			}		
+			indexList.add(new Integer(IndexI));
+		} 
+		else {
+			if (!TC || TcImm) {
+				if (trainCounter[Index]==0) lut[Index] += dW;				
+			}
+			trainCounter[Index]++;   				
+		}
+
+		// this is only needed if TC==true:
+		dWArray[Index] += dW;		// /WK/
+	}
+
+	private double setTcFactor(int Index, double delta) {
+		double tcFactor = 		1;
 
 		if (TC == true) {
+			tcN[Index] += delta;
+			tcA[Index] += Math.abs(delta);
+
 			if (TcImm == true) {
 				tcFactor = (double) Math.abs(tcN[Index]) / tcA[Index];
 			} else {
 				tcFactor = tcFactorArray[Index];
 			}
 		}
-		double dW = alphaM*delta* e * tcFactor;
-
-		tcN[Index] += delta;
-		tcA[Index] += Math.abs(delta);
-		if (!TC || TcImm) {
-			if (LAMBDA==0.0) {
-				// the old and fast version, but without eligibility traces
-				lut[Index] += dW;				
-			} else {
-				// elig traces active, we have to do it the long way (as long as we do not 
-				// keep track of all elig traces > 0, *TODO*)
-				double alphaDelta=alphaM*delta * tcFactor;		// the e-part is now in ev[i]
-				for (int i=0; i<lut.length; i++)
-					//if (ev[i]!=0.0) 				// DON'T, this extra 'if' slows down!
-						lut[i] += alphaDelta*ev[i];
-				
-				// only debug
-//				double a1=dW*tcFactor;
-//				double a2=alphaDelta*ev[Index];
-//				double evIndex=ev[Index];
-			}			
-		}
-		dWArray[Index] += dW;		// /WK/
-
-		trainCounter[Index]++;   	// /WK/
-		
-		if (DW_DBG) {
-			if (NEW_WK) tcDampArray[Index] *= BETA;
-			if (dWOld[Index]*dW<0)  {countM[Index]++; }
-			if (dWOld[Index]*dW>0)  {countP[Index]++; }
-			dWOld[Index] = dW;
-		}
-
+		return tcFactor;
 	}
-
-	/**
-     * Update eligibility traces {@code ev} 
-     * for next pass through loop. Called only in case {@code LAMBDA!=0}.     
-	 * 
-	 * @param board	board, for which the eligibility traces shall be updated
-	 * @param LAMBDA
-	 * @param GAMMA
-	 * @param e		the derivative of the sigmoid function 
-	 */
-    public void updateElig(int[] board, double LAMBDA, double GAMMA, double e) {
-    	int i,k;
-		int Index = getIndex(board);
-
-		for (i=0;i<ev.length;i++) {
-			//if (ev[i]!=0.0) 			// DON'T, this extra 'if' slows down!	
-				ev[i]=LAMBDA*GAMMA*ev[i];
-				// decay all elig traces (could be done more efficiently if an   
-		}		// index of all ev[i]>0 were kept)
-		
-		ev[Index] += e;
-		
-    }/* end updateElig(int[],...) */
+	
+//	/**
+//     * Update eligibility traces {@code } 
+//     * for next pass through loop. Called only in case {@code LAMBDA!=0}.     
+//	 * 
+//	 * @param board	board, for which the eligibility traces shall be updated
+//	 * @param LAMBDA
+//	 * @param GAMMA
+//	 * @param e		the derivative of the sigmoid function 
+//	 */
+//    public void updateElig(int[] board, double LAMBDA, double GAMMA, double e) {
+//    	int i,k;
+//		int Index = getIndex(board);
+//
+//		for (i=0;i<ev.length;i++) {
+//			//if (ev[i]!=0.0) 			// DON'T, this extra 'if' slows down!	
+//				ev[i]=LAMBDA*GAMMA*ev[i];
+//				// decay all elig traces (could be done more efficiently if an   
+//		}		// index of all ev[i]>0 were kept)
+//		
+//		ev[Index] += e;
+//		
+//    }/* end updateElig(int[],...) */
 
 	// currently not used
 	public void weightDecay(double factor) {
@@ -377,6 +440,16 @@ public class NTuple2 implements Serializable {
 
 	public int[] getTrainCounters() {
 		return trainCounter;
+	}
+
+	
+	public void clearIndices() {
+		if (useIndexList) {
+			indexList.clear();			
+		} else {
+			for (int k=0; k<trainCounter.length; k++)
+				trainCounter[k] = 0;			
+		}
 	}
 
 	public int getCountP(int k) {

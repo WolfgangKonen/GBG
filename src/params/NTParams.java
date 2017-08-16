@@ -362,13 +362,14 @@ public class NTParams extends Frame implements Serializable {
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
 	 * parameters" we mean parameter producing good results.
 	 * 
-	 * @param agentName currently only "TD-Ntuple" (for {@link TDNTupleAgt}), 
+	 * @param agentName currently only "TD-Ntuple" or "TD-Ntuple-2"
+	 * 				(for {@link TDNTupleAgt} or {@link TDNTuple2Agt}), 
 	 * 				all other strings are without any effect
 	 * @param gameName
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// currently we have here only the sensible defaults for one game (TTT)
-		// and one agent ("TD-Ntuple" = class TDNTupleAgt):
+		// currently we have here only the sensible defaults for two games (2048 vs. other games)
+		// and two agent2 ("TD-Ntuple[-2]" = class TDNTuple[2]Agt):
 		switch (agentName) {
 		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 

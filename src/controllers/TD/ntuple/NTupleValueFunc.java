@@ -330,6 +330,7 @@ public class NTupleValueFunc implements Serializable {
 			final double MAXSCORE = 1; //3932156;
 			double v_new = getScoreI(curBoard,curPlayer);
 			System.out.println("getScore(***finalSO):"+v_old*MAXSCORE+", "+v_new*MAXSCORE);
+			int dummy=1;
 		}
 	}
 
