@@ -485,11 +485,23 @@ public class XArenaMenu extends JMenuBar {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar.setFrom( ((TDNTupleAgt) td).getTDParams() );
 				m_arena.m_xab.ntPar.setFrom( ((TDNTupleAgt) td).getNTParams() );
+				//
+				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
+				// get the loaded values)
+				((TDNTupleAgt) td).setTDParams(((TDNTupleAgt) td).getTDParams(), td.getMaxGameNum());
+				((TDNTupleAgt) td).setNTParams(((TDNTupleAgt) td).getNTParams());
 			}
 			else if (td instanceof TDNTuple2Agt) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar.setFrom( ((TDNTuple2Agt) td).getTDParams() );
 				m_arena.m_xab.ntPar.setFrom( ((TDNTuple2Agt) td).getNTParams() );
+				//
+				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
+				// get the loaded values)
+				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getTDParams(), td.getMaxGameNum());
+				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getNTParams());
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
@@ -500,7 +512,7 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.oPar.setMinimaxDepth( ((MinimaxAgent) td).getDepth() );
 			}
 			
-			if (td instanceof TDAgent || td instanceof TDNTupleAgt) {
+			if (td instanceof TDAgent || td instanceof TDNTupleAgt || td instanceof TDNTuple2Agt) {
 				// If it is one of the trainable agents: set maxGameNum and 
 				// numEval according to the settings in the loaded agent
 				// (at least maxGameNum is relevant for training): 

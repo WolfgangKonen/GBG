@@ -32,7 +32,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
 /**
  * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning)
  * <b>with n-tuples</b>. 
- * It has a one-layer (perceptron-like) neural network with output-nonlinearity  
+ * It has a one-layer (perceptron-like) neural network with or without output-nonlinearity  
  * {@code tanh} to model the value function. 
  * The net follows closely the (pseudo-)code by [SuttonBonde93]. 
  * <p>
@@ -41,6 +41,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * 
  * @see PlayAgent
  * @see AgentBase
+ * @see TDNTuple2Agt
  * 
  * @author Wolfgang Konen, Samineh Bagheri, Markus Thill, TH Köln, Feb'17
  */
@@ -58,17 +59,31 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 */
 	private static final long  serialVersionUID = 13L;
 
+	// --- OLD AND WRONG: ---
+//	 * Let p=getGameNum()/getMaxGameNum(). As long as
+//	 * {@literal p < m_epsilon/(1+m_epsilon) we have progress < 0 and} we get with 
+//	 * certainty a random (explorative) move. For p \in [EPS/(1+EPS), 1.0] the random move
+//	 * probability drops linearly from 1 to 0. <br>
 	/**
 	 * Controls the amount of explorative moves in
 	 * {@link #getNextAction(StateObservation, boolean, double[], boolean)}
-	 * during training. Let p=getGameNum()/getMaxGameNum(). As long as
-	 * {@literal p < m_epsilon/(1+m_epsilon) we have progress < 0 and} we get with 
-	 * certainty a random (explorative) move. For p \in [EPS/(1+EPS), 1.0] the random move
-	 * probability drops linearly from 1 to 0. <br>
-	 * m_epsilon = 0.0: too few exploration, = 0.1 (def.): better exploration.
+	 * during training. <br>
+	 * m_epsilon = 0.0: no random moves, <br>
+	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth. <br>
+	 * m_epsilon undergoes a sigmoidal change from {@code tdPar.getEpsilon()} 
+	 * to {@code tdPar.getEpsilonFinal()}. 
+	 * This is realized in {@link #finishUpdateWeights()}.
 	 */
 	private double m_epsilon = 0.1;
+	
+	/**
+	 * m_EpsilonChangeDelta is not used anymore. We use a sigmoidal change from 
+	 * {@code tdPar.getEpsilon()} to {@code tdPar.getEpsilonFinal()}. 
+	 * This is realized in {@link #finishUpdateWeights()}.
+	 */
+	@Deprecated
 	private double m_EpsilonChangeDelta = 0.001;
+
 	private double MaxScore;
 	//samine//
 	private boolean TC; //true: using Temporal Coherence algorithm
@@ -171,12 +186,12 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		m_ntPar = new ParNT(tdagt.getNTParams());
 		rand = new Random(42); //(System.currentTimeMillis());		
 
-		setNTParams(m_ntPar);
-
 		m_Net = tdagt.getNTupleValueFunc();
 		
 		setTDParams(tdagt.getTDParams(), tdagt.getMaxGameNum());
 		
+		setNTParams(m_ntPar);
+
 		this.setAgentState(tdagt.getAgentState());		
 		this.setMaxGameNum(tdagt.getMaxGameNum());
 		this.setEpochMax(tdagt.getEpochMax());
@@ -199,14 +214,14 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		m_ntPar = new ParNT(ntPar);
 		rand = new Random(42); //(System.currentTimeMillis());		
 		
-		setNTParams(ntPar);
-
 		int posVals = xnf.getNumPositionValues();
 		int numCells = xnf.getNumCells();
 		
 		m_Net = new NTupleValueFunc(nTuples, xnf, posVals, USESYMMETRY,
 				RANDINITWEIGHTS,ntPar,numCells);
 		
+		setNTParams(ntPar);
+
 		setTDParams(tdPar, maxGameNum);
 		
 		setAgentState(AgentState.INIT);
@@ -540,12 +555,11 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		}
 		
 		try {
-			this.finishMarkMoves(null);		// adjust learn params ALPHA & m_epsilon
+			this.finishUpdateWeights();		// adjust learn params ALPHA & m_epsilon
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//m_epsilon = m_epsilon - m_EpsilonChangeDelta;
 		
 		incrementGameNum();
 		if (this.getGameNum() % 100 == 0) {
@@ -729,9 +743,9 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	}
 	
 	/**
-	 * call m_Net.finishUpdateWeights (adjust ALPHA) and adjust m_epsilon
+	 * Adjust {@code ALPHA} and adjust {@code m_epsilon}.
 	 */
-	public void finishMarkMoves(int[][] table) {
+	public void finishUpdateWeights() {
 		// m_Net.setAlpha(0.0009*Math.exp(-0.03*(getGameNum()+1))+0.0001);
 		// m_Net.setAlpha(-(1.0/Math.pow(4000.0,4))*(0.1e-2-0.1e-3)*Math.pow(getGameNum(),4)+0.1e-2);
 
@@ -814,6 +828,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
 		USESYMMETRY=ntPar.getUseSymmetry();
+		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
@@ -823,6 +838,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
 		USESYMMETRY=ntPar.getUseSymmetry();
+		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();

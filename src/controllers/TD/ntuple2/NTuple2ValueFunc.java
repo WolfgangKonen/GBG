@@ -418,6 +418,9 @@ public class NTuple2ValueFunc implements Serializable {
 	public void setRpropInitDelta(double initDelta) {
 		// dummy
 	}
+	public void setUseSymmetry(boolean useSymmetry) {
+		this.useSymmetry = useSymmetry;
+	}
 
 	public boolean hasSigmoid() {
 		return withSigmoid;

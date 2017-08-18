@@ -31,17 +31,32 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
 /**
  * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning)
  * <b>with n-tuples</b>. 
- * It has a one-layer (perceptron-like) neural network with output-nonlinearity  
+ * It has a one-layer (perceptron-like) neural network with or without output-nonlinearity  
  * {@code tanh} to model the value function. 
  * The net follows closely the (pseudo-)code by [SuttonBonde93]. 
  * <p>
  * Some functionality is packed in the superclass 
  * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...)
+ * <p>
+ * The differences of {@link TDNTuple2Agt} to {@link TDNTupleAgt}:
+ * <ul>
+ * <li> no eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
+ * 		memory consumptive)
+ * <li> fix of the random move rate bug (now EPSILON=0.0 means really 'no ramdom moves')
+ * <li> learning rate ALPHA differently scaled: if ALPHA=1.0, the new value for a
+ * 		state just trained will be exactly the target. Therefore, recommended ALPHA values are 
+ * 		m*N_s bigger than in {@link TDNTupleAgt}, where m=number of n-tuples, N_s=number of 
+ * 		symmetric (equivalent) states. 
+ * <li> a change in the update formula: when looping over different equivalent
+ * 		states, not more than one update per index is allowed (see comment in {@link NTuple2} for 
+ * 		member {@code indexList}).
+ * </ul>
  * 
+ * @see TDNTupleAgt
  * @see PlayAgent
  * @see AgentBase
  * 
- * @author Wolfgang Konen, Samineh Bagheri, Markus Thill, TH Köln, Feb'17
+ * @author Wolfgang Konen, TH Köln, Aug'17
  */
 //
 // This agent is adapted from project SourceTTT, class TicTacToe.TDSNPlayer
@@ -57,16 +72,26 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 */
 	private static final long  serialVersionUID = 13L;
 
+// --- OLD AND WRONG: ---
+//	 * Let p=getGameNum()/getMaxGameNum(). As long as
+//	 * {@literal p < m_epsilon/(1+m_epsilon) we have progress < 0 and} we get with 
+//	 * certainty a random (explorative) move. For p \in [EPS/(1+EPS), 1.0] the random move
+//	 * probability drops linearly from 1 to 0. <br>
 	/**
 	 * Controls the amount of explorative moves in
 	 * {@link #getNextAction(StateObservation, boolean, double[], boolean)}
-	 * during training. Let p=getGameNum()/getMaxGameNum(). As long as
-	 * {@literal p < m_epsilon/(1+m_epsilon) we have progress < 0 and} we get with 
-	 * certainty a random (explorative) move. For p \in [EPS/(1+EPS), 1.0] the random move
-	 * probability drops linearly from 1 to 0. <br>
-	 * m_epsilon = 0.0: too few exploration, = 0.1 (def.): better exploration.
+	 * during training. <br>
+	 * m_epsilon = 0.0: no random moves, <br>
+	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
 	 */
 	private double m_epsilon = 0.1;
+	
+	/**
+	 * m_EpsilonChangeDelta is not used anymore. We use a sigmoidal change from 
+	 * {@code tdPar.getEpsilonFinal()} to {@code tdPar.getEpsilonFinal()}, 
+	 * see {@link #finishUpdateWeights()}.
+	 */
+	@Deprecated
 	private double m_EpsilonChangeDelta = 0.001;
 	private double MaxScore;
 	//samine//
@@ -161,13 +186,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		m_ntPar = new ParNT(ntPar);
 		rand = new Random(42); //(System.currentTimeMillis());		
 		
-		setNTParams(ntPar);
-
 		int posVals = xnf.getNumPositionValues();
 		int numCells = xnf.getNumCells();
 		
 		m_Net = new NTuple2ValueFunc(nTuples, xnf, posVals, USESYMMETRY,
 				RANDINITWEIGHTS,ntPar,numCells);
+
+		setNTParams(ntPar);
 		
 		setTDParams(tdPar, maxGameNum);
 		
@@ -199,6 +224,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         int iBest;
 		MaxScore = -Double.MAX_VALUE;
        
+		if (so.getNumPlayers()>2)
+			throw new RuntimeException("TDNTuple2Agt.getNextAction does not yet "+
+									   "implement case so.getNumPlayers()>2");
+
 		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
 	
 // --- this code is not understandable and wrong ---		
@@ -235,29 +264,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			if (!NEWTARGET) {
 				// old target logic:
 				if (NewSO.isGameOver()) {
-//					switch (so.getNumPlayers()) {
-//					case 1: 
-//						CurrentScore = NewSO.getGameScore();
-//						break;
-//					case 2: 
-//						CurrentScore = (-1)*NewSO.getGameScore();		// CORRECT
-//						// NewSO.getGameScore() returns -1, if 'player', that is the
-//						// one who *made* the move to 'so', has won. If we multiply
-//						// this by (-1), we get a reward +1 for a X(player=+1)- 
-//						// win and *also* a reward +1 for an O(player=-1)-win.
-//						// And a reward 0 for a tie.
-//						//
-//						break;
-//					default: 
-//						throw new RuntimeException("TDNTupleAgt.trainAgent does not yet "+
-//								"implement case so.getNumPlayers()>2");
-//					}
-					
-					// the whole switch-statement above can be replaced with the simpler  
-					// logic of NewSO.getGameScore(StateObservation referingState), where  
-					// referingState is 'so', the state before NewSO. [This should be  
-					// extensible to 3- or 4-player games (!) as well, if we put the 
-					// proper logic into method getGameScore(referingState).]  
 					CurrentScore = NewSO.getGameScore(so);
 				}  else {
 					// old target logic:
@@ -280,15 +286,15 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			}
 			
 			// just a debug check:
-			if (Double.isInfinite(getScore(NewSO))) {
-				double s = getScore(NewSO);
+			double s = getScore(NewSO);
+			if (Double.isInfinite(s)) {
 				System.out.println("getScore(NewSO) is infinite!");
 			}
 			
 			if (NORMALIZE) {
 				// Normalize to [-1,+1] (the appropriate range for tanh-sigmoid):
 				//
-				// (this will have no effect for TicTacToe or other games where the 
+				// (this will have no effect for TicTacToe or similar games where the 
 				// min./max. game score are -1/+1 anyway)
 				CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
 								   		 so.getMaxGameScore(),-1.0,1.0);					
@@ -495,7 +501,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		}
 		
 		try {
-			this.finishMarkMoves(null);		// adjust learn params ALPHA & m_epsilon
+			this.finishUpdateWeights();		// adjust learn params ALPHA & m_epsilon
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -657,9 +663,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 	
 	/**
-	 * call m_Net.finishUpdateWeights (adjust ALPHA) and adjust m_epsilon
+	 * Adjust {@code ALPHA} and adjust {@code m_epsilon}.
 	 */
-	public void finishMarkMoves(int[][] table) {
+	public void finishUpdateWeights() {
 		// m_Net.setAlpha(0.0009*Math.exp(-0.03*(getGameNum()+1))+0.0001);
 		// m_Net.setAlpha(-(1.0/Math.pow(4000.0,4))*(0.1e-2-0.1e-3)*Math.pow(getGameNum(),4)+0.1e-2);
 
@@ -671,9 +677,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
 		m_Net.finishUpdateWeights(); // adjust learn param ALPHA
 
-		// TODO: wieder in alten Wert ändern
+		// OLD method: linear change
 		// m_epsilon = m_epsilon - m_EpsilonChangeDelta;
-		// m_epsilon = m_epsilon*m_EpsilonChangeDelta;
 
 		// 
 		double a0 = m_tdPar.getEpsilon();
@@ -742,6 +747,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
 		USESYMMETRY=ntPar.getUseSymmetry();
+		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
@@ -751,6 +757,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
 		USESYMMETRY=ntPar.getUseSymmetry();
+		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
