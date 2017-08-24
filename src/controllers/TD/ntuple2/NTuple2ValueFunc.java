@@ -38,15 +38,18 @@ public class NTuple2ValueFunc implements Serializable {
 	/* initial learning rate (typically 1/n) */
 	protected double ALPHA = 0.1;
 
-	/* discount-rate parameter (typically 0.9) */
-	protected double GAMMA = 0.9;
+//	/* discount-rate parameter (typically 0.9) */
+//	protected double GAMMA = 0.9;			// use now getGamma() - don't store/maintain value twice
 
-	/* eligibility trace decay parameter (should be <= GAMMA) */
-	protected double LAMBDA = 0.0;
+//	/* eligibility trace decay parameter (should be <= GAMMA) */
+//	protected double LAMBDA = 0.0;			// use now getLambda() - don't store/maintain value twice
 	protected double m_AlphaChangeRatio = 0.9998; // 0.998
 	protected int epochMax=1;
     protected boolean  rpropLrn=false;
 //  protected boolean withSigmoid=true; 	// use now hasSigmoid() - don't store/maintain value twice
+
+    // Turns usage of symmetry on or off
+//	private boolean useSymmetry = false;	// use now getUSESYMMETRY() - don't store/maintain value twice
 
 	// Number of n-tuples
 	private int numTuples = 0;
@@ -64,9 +67,6 @@ public class NTuple2ValueFunc implements Serializable {
 	// see update(int[],int,double,double):
 	private int horizon=0;
 	private transient LinkedList eList = new LinkedList();		
-
-    // Turns usage of symmetry on or off
-//	private boolean useSymmetry = false;	// use now getUSESYMMETRY() - don't store/maintain value twice
 
 	private boolean PRINTNTUPLES = false;	// /WK/ control the file printout of n-tuples
 	private DecimalFormat frmS = new DecimalFormat("+0.00000;-0.00000");
@@ -247,7 +247,7 @@ public class NTuple2ValueFunc implements Serializable {
 		double v_old = getScoreI(curBoard,curPlayer); // Old Value
 		double tg; // Target-Signal
 		// tg contains reward OR GAMMA * value of the after-state
-		tg = (finished ? reward : GAMMA * getScoreI(nextBoard,nextPlayer));
+		tg = (finished ? reward : getGamma() * getScoreI(nextBoard,nextPlayer));
 		// delta is the error signal
 		double delta = (tg - v_old);
 		// derivative of tanh ( if hasSigmoid()==true)
@@ -280,7 +280,7 @@ public class NTuple2ValueFunc implements Serializable {
 		double v_old = getScoreI(curBoard,curPlayer); // Old Value
 		double tg; // Target-Signal
 		// tg is 0 for a final state OR (reward + GAMMA * value of the after-state)
-		tg = reward + GAMMA * getScoreI(nextBoard,nextPlayer);
+		tg = reward + getGamma() * getScoreI(nextBoard,nextPlayer);
 		// delta is the error signal
 		double delta = (tg - v_old);
 		// derivative of tanh ( if hasSigmoid()==true)
@@ -356,10 +356,10 @@ public class NTuple2ValueFunc implements Serializable {
 				nTuples[player][i].clearIndices();
 				for (j = 0; j < equiv.length; j++) {
 //					System.out.print("(i,j)=("+i+","+j+"):  ");		//debug
-					nTuples[player][i].updateNew(equiv[j], alphaM, delta, e, LAMBDA);
+					nTuples[player][i].updateNew(equiv[j], alphaM, delta, e, getLambda());
 				}
 			}
-			lamFactor *= LAMBDA; 
+			lamFactor *= getLambda(); 
 		}
 	}
 
@@ -437,7 +437,11 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 	public double getLambda() {
-		return LAMBDA;
+		return tdAgt.getTDParams().getLambda();
+	}
+
+	public double getGamma() {
+		return tdAgt.getTDParams().getGamma();
 	}
 
 	public double getAlphaChangeRatio() {
@@ -465,10 +469,10 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 	
 	public void setHorizon() {
-		if (LAMBDA==0.0) {
+		if (getLambda()==0.0) {
 			horizon=0;
 		} else {
-			horizon = (int) (Math.log(0.1)/Math.log(LAMBDA));
+			horizon = (int) (Math.log(0.1)/Math.log(getLambda()));
 		}		
 	}
 	

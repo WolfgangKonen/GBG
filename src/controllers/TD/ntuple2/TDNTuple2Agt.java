@@ -107,7 +107,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	// Here: NTupleValueFunc
 	private NTuple2ValueFunc m_Net;
 
-	protected boolean USESYMMETRY = true; 	// Use symmetries (rotation, mirror) in NTuple-System
+	// Use symmetries (rotation, mirror) in NTuple-System
+//	protected boolean USESYMMETRY = true; 	// use now m_ntPar.getUseSymmetry() - don't store/maintain value twice
 	private boolean NORMALIZE = false; 
 	private boolean RANDINITWEIGHTS = false;// Init Weights of Value-Function
 											// randomly
@@ -405,9 +406,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * @return	returns true/false, whether the action suggested by last call 
 	 * 			to getNextAction() was a random action 
 	 */
+	@Deprecated
 	public boolean wasRandomAction() {
 		return randomSelect;
 	}
+	// TODO: change PlayAgent's interface and other locations to use ACTIONS::isRandomAction()
+	// instead of wasRandomAction()
 
 	/**
 	 * Return the agent's estimate of the score for that after state.
@@ -481,7 +485,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				actBest = this.getNextAction(so, true, VTable, true);	// the normal case        	
 	        }
 
-	        m_randomMove = actBest.isRandomAction();
+//	        m_randomMove = actBest.isRandomAction();
+			m_randomMove = this.wasRandomAction();
 	               
 	        // this part will become obsolete if we switch to the NextState-logic:
 	        // (we keep it only for a while as cross-check)
