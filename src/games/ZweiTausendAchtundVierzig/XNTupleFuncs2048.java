@@ -97,13 +97,13 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 		switch (ConfigGame.FIXEDNTUPLEMODE) {
 		case 1: 
 			// -- new setting by WK, along the lines of [Jaskowski16], Fig 3b
-			// -- Medium results, but much smaller (5*50e3 weights, 2 MB)
+			// -- Medium resulting score ~30.000, but small in memory (5*50e3 weights, 2 MB)
 			return new int[][]{
 				{0,4,1,5},{1,5,2,6},{5,9,6,10},
 				{2,6,10,14},{3,7,11,15}};
 		case 2: 
 			// -- former setting by JK, along the lines of [Jaskowski16], Fig 3c.
-			// -- Very good results, but also very big LUTs (4*11e6 weights, 44 MB agt.zip!!)
+			// -- Very good resulting score ~50.000, but also very big LUTs (4*11e6 weights, 44 MB agt.zip!!)
 			return new int[][]{
 					{0,4,8,1,5,9},{1,5,9,2,6,10},
 					{2,6,9,10,13,14},{3,7,10,11,14,15}};

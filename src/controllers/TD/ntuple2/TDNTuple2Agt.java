@@ -275,7 +275,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
                 agentScore = getScore(NewSO);
             }
             
-            // this alternative implementation has less code, but is much (40%-70%!!) slower 
+            // this alternative implementation has less code, but is much (40%-70%!!) slower: 
 //          double agentScore2;
 //    		StateObservation NewSO2;
 //	        ns = new NextState(so,actions[i]);
@@ -296,7 +296,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //					// itself. 
 //					CurrentScore = player * agentScore;
 //											// here we ask this agent for its score estimate on NewSO
-//					
 //				}
 			} else {
 				// new target logic:
@@ -362,16 +361,19 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		}			
 		if (DBG2_TARGET) {
 			final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
+			// the old version, which is only correct for AFTERSTATE==false:
 //          NewSO = so.copy();
 //          NewSO.advance(actBest);
 //          double deltaReward = NewSO.getGameScore(so) - so.getGameScore(so);
 //			double sc = (deltaReward + player * getScore(NewSO))*MAXSCORE;
 												// this is problematic when AFTERSTATE==true (!)
 			// here we use the NextState version, because computation time does not matter
-			// inside DBG2_TARGET and this version is correct for both values of getAFTERSTATE():
+			// inside DBG2_TARGET and becaus this version is correct for both values of 
+			// getAFTERSTATE():
 	        ns = new NextState(so,actBest);
 			double deltaReward = ns.getNextSO().getGameScore(so) - so.getGameScore(so);
 			double sc = (deltaReward + player * getScore(ns.getAfterState()))*MAXSCORE;
+			
 			System.out.println("getScore((so,actbest)-afterstate): "+sc+"   ["+so.stringDescr()+"]");
 			int dummy=1;
 		}
@@ -525,8 +527,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		        /* Note that we cannot perform a check that so and ns.getNextSO are the same states, since they both 
 		         * contain a nondeterministic advance which usually differs in the random tile. */
 	        }	        
-	        
 			nextPlayer= so.getPlayer();
+
 			//if (DEBG) printVTable(pstream,VTable);
 			if (m_DEBG) printTable(pstream,nextBoard);
 			if (NEWTARGET) {
@@ -730,85 +732,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		}
 		return reward;
 	}
-
-//	private double trainOldTargetLogic(
-//			StateObservation so, StateObservation oldSO, 
-//			int[] curBoard, int curPlayer,
-//			int[] nextBoard, int nextPlayer, boolean learnFromRM, 
-//			int epiLength, int player, boolean upTC) 
-//	{
-//		double reward;
-//		
-//		if (so.isGameOver()) {
-//			// Fetch the reward for StateObservation so (relative to oldSO):
-//			reward = player*so.getGameScore(oldSO);
-//
-//			if (NORMALIZE) {
-////				// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
-////				// or to [-1,+1] (the appropriate range for tanh-sigmoid):
-////				double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
-////				double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
-//				
-//				// since we have - in contrast to TDAgent - here only one sigmoid
-//				// choice, namely tanh, we can take fixed [min,max] = [-1,+1]. 
-//				// If we would later extend to several sigmoids, we would have to 
-//				// adapt here:
-//				
-//				reward = normalize(reward,so.getMinGameScore(),
-//								   so.getMaxGameScore(),-1,+1);
-//			}
-//			m_finished = true;
-//		} else {
-//			//it is irrelevant what we put into reward here, because it will 
-//			//not be used in m_Net.updateWeights when m_finished is not true.
-//			//
-//			// ??? has to be re-thought for the case of 2048 and other 1-player games!!!
-//			reward = 0.0;
-//		}
-//		m_counter++;
-//		if (m_counter==epiLength) {
-//			reward=estimateGameValue(so);
-//			//epiCount++;
-//			m_finished = true; 
-//		}
-//		if (m_randomMove && !m_finished && !learnFromRM) {
-//			// no training, go to next move,
-////			// but update eligibility traces for next pass
-////			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
-//			// only for diagnostics
-//			if (m_DEBG)
-//				pstream.println("random move");
-//
-//		} else {
-//			// do one training step			
-//			if (curBoard!=null) {
-//				m_Net.updateWeights(curBoard, curPlayer, nextBoard, nextPlayer,
-//						m_finished, reward,upTC);
-//			}
-//
-////-- accumulation logic not yet implemented for TDNTupleAgt --
-////
-////			// this is the accumulation logic: if eMax>0, then form 
-////			// mini batches and apply the weight changes only at the end
-////			// of such mini batches
-////			int eMax = super.getEpochMax();
-////			if (eMax==0) {
-////				wghtChange=true;
-////			} else {
-////				if (m_finished) numFinishedGames++;
-////				wghtChange = (m_finished && (numFinishedGames % eMax) == 0);
-////			}
-////			
-////			// either no random move or game is finished >> target signal is
-////			// meaningful!
-////			m_Net.updateWeights(reward, Input, m_finished, wghtChange);
-////			// contains afterwards a m_Net.calcScoresAndElig(Input);
-////
-////			oldInput = Input;
-//		}
-//		
-//		return reward;
-//	}
 	
 	/**
 	 * Class NextState bundles the different states in state advancing and two different modes of 
@@ -819,13 +742,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * state so.advance(actBest). 
 	 * <p>
 	 * If {@link TDNTuple2Agt#getAFTERSTATE()}==true, then {@code ns=new NextState(so,actBest)}  
-	 * advances so in two steps: ns.getAfterState() returns the <b>afterstate</b> (after the 
-	 * deterministic advance (e.g. the merge in case of 2048)) and ns.getNextSO() returns the 
-	 * next state (after adding the nondeterministic part (e.g. adding the random tile in case 
-	 * of 2048)).
+	 * advances {@code so} in two steps: ns.getAfterState() returns the <b>afterstate s'</b> (after  
+	 * the deterministic advance (e.g. the merge in case of 2048)) and ns.getNextSO() returns  
+	 * the next state <b>s''</b> (after adding the nondeterministic part (e.g. adding the random 
+	 * tile in case of 2048)).
 	 * <p> 
-	 * Note that the part with {@code getAFTERSTATE()==true} is only available for nondeterministic games 
-	 * where {@link StateObservation} {@code so} is actually an instance of 
+	 * Note that the part with {@code getAFTERSTATE()==true} is only available for nondeterministic 
+	 * games where {@link StateObservation} {@code so} is actually an instance of 
 	 * {@link StateObservationNondeterministic}. Otherwise, an assertion will fire.
 	 * 
 	 * @see TDNTuple2Agt#getNextAction(StateObservation, boolean, double[], boolean)
