@@ -32,7 +32,7 @@ import params.TDParams;
  */
 public class NTuple implements Serializable {
 
-	private double INIT; // samine// N and A have to be initiliazed with the
+	private double INIT; 	// N and A have to be initialized with the
 							// same number(INIT)
 
 	protected static boolean TC = false; // samine//TC constant is implemented
@@ -43,11 +43,11 @@ public class NTuple implements Serializable {
 											// samine// TcImm=false: tcFactor is
 											// stored in array and will be
 											// updated after tcIn game
-	 protected static int tcIn = 1; //
+	 protected static int tcIn = 1; 	//
 	 									// samine// tcIn is the number of
-											// games that
-	// // tcFactor will be updated after that
-	// // samine//(it is used only if TcImm is false)
+										// games that
+	 									// tcFactor will be updated after that
+	 									// (it is used only if TcImm is false)
 	private double EPS = 0.5; /* random weights init scale */
 	Random rand;
 
@@ -239,7 +239,7 @@ public class NTuple implements Serializable {
 	 * symmetries)
 	 * 
 	 * @param board
-	 *            the representation of a game board (vector of length 9,
+	 *            the representation of a game board (in case of TTT: vector of length 9,
 	 *            carrying -1 ("O"), 0 (empty) or +1 ("X"))
 	 * @param ALPHA
 	 * @param delta

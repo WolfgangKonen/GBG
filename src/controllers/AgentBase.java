@@ -80,9 +80,9 @@ abstract public class AgentBase implements Serializable {
 
 	public boolean trainAgent(StateObservation so) 
 	{
-		return trainAgent(so,Integer.MAX_VALUE);
+		return trainAgent(so,Integer.MAX_VALUE,false);
 	}
-	public boolean trainAgent(StateObservation so, int epiLength)								 
+	public boolean trainAgent(StateObservation so, int epiLength, boolean learnFromRM)								 
 	{	
 		m_GameNum++;
 		return false;

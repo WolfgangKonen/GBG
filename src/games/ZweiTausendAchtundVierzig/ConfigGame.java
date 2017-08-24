@@ -18,9 +18,18 @@ public class ConfigGame {
     public static final double ROWMULTIPLIER = 0.7;
     public static final double MERGEMULTIPLIER = 0.2;
 
-    //Bestrafung
+    //Penalization
     //Value from -1 to 0
     public static final double PENALISATION = -1;
-    //Gibt an ob die unveränderte Gamescore zu der Bestrafung hinzuaddiert werden soll. Heuristiken werden bei dieser Score nich berücksichtigt!
+    //Gibt an ob die unveraenderte Gamescore zu der Bestrafung hinzuaddiert werden soll. 
+    //Heuristiken werden bei dieser Score nicht beruecksichtigt!
     public static final boolean ADDSCORE = true;
+    
+    // N-tuples:
+    /**
+     * =1: along the lines of [Jaskowski16] Fig 3b, 5 4-tuples, smaller LUTs (5*50e3, 2 MB agt.zip file), medium results <br>
+     * =2: along the lines of [Jaskowski16] Fig 3c, 4 6-tuples, very big LUTs (4*11e6 weights, 44 MB agt.zip!!), very good results
+     * @see XNTupleFuncs2048#fixedNTuples()
+     */
+    public static final int FIXEDNTUPLEMODE = 2;
 }

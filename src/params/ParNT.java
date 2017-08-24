@@ -19,7 +19,8 @@ public class ParNT implements Serializable {
     private int numTuple = DEFAULT_NTUPLE_NUM;
     private int maxTupleLen = DEFAULT_NTUPLE_LEN;
     private boolean useSymmetry = true;
-
+    private boolean afterState = false;
+    
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 
@@ -43,6 +44,7 @@ public class ParNT implements Serializable {
 		this.numTuple = tp.getNtupleNumber();
 		this.maxTupleLen = tp.getNtupleMax();
 		this.useSymmetry = tp.getUseSymmetry();
+		this.afterState = tp.getUseAfterState();
 	}
 
 	public double getTcInit() {
@@ -77,8 +79,11 @@ public class ParNT implements Serializable {
 		return maxTupleLen;
 	}
 
-	public boolean getUseSymmetry() {
+	public boolean getUSESYMMETRY() {
 		return useSymmetry;
+	}
+	public boolean getAFTERSTATE() {
+		return afterState;
 	}
 
 	public void setTcInit(double tcInit) {
@@ -113,8 +118,12 @@ public class ParNT implements Serializable {
 		this.maxTupleLen = maxTupleLen;
 	}
 
-	public void setUseSymmetry(boolean useSymmetry) {
+	public void setUSESYMMETRY(boolean useSymmetry) {
 		this.useSymmetry = useSymmetry;
+	}
+
+	public void setAFTERSTATE(boolean afterState) {
+		this.afterState = afterState;
 	}
 
 

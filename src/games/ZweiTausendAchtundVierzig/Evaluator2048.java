@@ -20,10 +20,11 @@ public class Evaluator2048 extends Evaluator {
     private ExecutorService executorService = Executors.newFixedThreadPool(6);
 
     private double averageScore;
+    private double medianScore;
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = Integer.MIN_VALUE;
     private List<Integer> scores = new ArrayList<>();
-    private long standartdeviation;
+    private double standarddeviation;
     private double averageRolloutDepth;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
@@ -133,16 +134,21 @@ public class Evaluator2048 extends Evaluator {
 
         averageScore/= ConfigEvaluator.NUMBEREVALUATIONS;
 
+        //Standard deviation
+        for(int score : scores) {
+            standarddeviation += (score-averageScore)*(score-averageScore);
+        }
+        standarddeviation/= ConfigEvaluator.NUMBEREVALUATIONS;
+        standarddeviation = Math.sqrt(standarddeviation);
 
         //Median Score
         Collections.sort(scores);
-
-        //Standartdeviation
-        for(int score : scores) {
-            standartdeviation += (score-averageScore)*(score-averageScore);
+        int mid = (int) (scores.size()/2);
+        if (scores.size()%2==0) {
+        	medianScore = (scores.get(mid-1)+scores.get(mid))/2;        	
+        } else {
+        	medianScore = scores.get(mid);
         }
-        standartdeviation/= ConfigEvaluator.NUMBEREVALUATIONS;
-        standartdeviation = Double.valueOf(Math.sqrt(standartdeviation)).longValue();
 
         averageRolloutDepth/=moves;
 
@@ -192,12 +198,13 @@ public class Evaluator2048 extends Evaluator {
                 "\n" +
                 "\nResults:" +
                 "\nLowest score is: " + minScore +
-                "\nAverage score is: " + Math.round(averageScore) +
+                "\nAverage score is: " + Math.round(averageScore) + " +- " + Math.round(standarddeviation) +
+                "\nMedian score is: " + Math.round(medianScore) +
                 "\nHighest score is: " + maxScore +
-                "\nStandard deviation is: " + standartdeviation +
-                "\nAverage rollout depth is: " + averageRolloutDepth +
+//              "\nStandard deviation is: " + standarddeviation +
+//              "\nAverage rollout depth is: " + averageRolloutDepth +
                 "\nAverage game duration: " +  Math.round((double)duration / (double)ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
-                "\nDuration of evaluation: " + Math.round((double)duration/(double)1000) + "s" +
+//              "\nDuration of evaluation: " + Math.round((double)duration/(double)1000) + "s" +
                 "\nMoves per second: " + Math.round(moves/((double)duration/(double)1000)) +
                 "\n" +
                 "\nHighest tiles: " +

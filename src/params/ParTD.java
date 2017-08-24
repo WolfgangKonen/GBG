@@ -12,12 +12,12 @@ public class ParTD implements Serializable {
     public static double DEFAULT_GAMMA=1.0;  
     public static double DEFAULT_LAMBDA=0.0;  
     
-    private double alpha = DEFAULT_ALPHA;
-    private double alfin = DEFAULT_ALFIN;
-    private double epsil = DEFAULT_EPSIL;
-    private double epfin = DEFAULT_EPFIN;
-    private double gamma = DEFAULT_GAMMA;
-    private double lambda= DEFAULT_LAMBDA;
+    private double alpha = DEFAULT_ALPHA;		// initial learn step size
+    private double alfin = DEFAULT_ALFIN;		// final learn step size
+    private double epsil = DEFAULT_EPSIL;		// initial random move rate 
+    private double epfin = DEFAULT_EPFIN;		// final random move rate
+    private double gamma = DEFAULT_GAMMA;		// discount-rate parameter (typically 1.0 or 0.9) 
+    private double lambda= DEFAULT_LAMBDA; 		// eligibility trace decay parameter (should be <= GAMMA) 
     private int epochs = DEFAULT_EPOCHS; 
     private int featmode = 0;
     private boolean useNormalize = false;
@@ -25,8 +25,6 @@ public class ParTD implements Serializable {
     private boolean hasRprop = false;
     private boolean hasSigmoid = false;
     
-    
-
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 

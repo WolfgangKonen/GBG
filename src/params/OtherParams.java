@@ -27,6 +27,11 @@ import games.Feature;
  * 		{@literal> 0}, then m_evaluator2 is checked during training whether its goal is reached
  * <li> <b>stopEval</b>: 	[100] During training: How many successful evaluator 
  * 							calls are needed to stop training prematurely?
+ * <li> <b> chooseStartState01</b>: [false] whether to start always from default start state 
+ * 							({@code false}, or to start 50% from default, 50% from a random 
+ * 							1-ply state ({@code true}
+ * <li> <b> learn from RM</b>: [false] whether to learn from random moves or not
+ * 
  * <li> <b>MinimaxDepth</b>	[ 10] Minimax Tree Depth
  * <li> <b>use Hashmap</b>	[true] Minimax: whether to use hashmap or not
  * </ul> 
@@ -47,18 +52,22 @@ public class OtherParams extends Frame
 	JLabel epiLeng_L;
 	JLabel stopTest_L;
 	JLabel stopEval_L;
-	JLabel batchL;
+//	JLabel batchL;
+	JLabel chooseS01L;
+	JLabel learnRM_L;
 	JLabel miniDepth_L;
 	JLabel miniUseHm_L;
 	public JTextField numEval_T;
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
+	public Checkbox chooseS01;
+	public Checkbox learnRM;
 	public JTextField miniDepth_T;
 	//CheckboxGroup cbgUseHashmap;
 	public Checkbox miniUseHmTrue;
 	//public Checkbox miniUseHmFalse;
-	Choice choiceBatch;
+//	Choice choiceBatch;
 	Button ok;
 	JPanel oPanel;
 	OtherParams m_par;
@@ -80,10 +89,14 @@ public class OtherParams extends Frame
 		epiLeng_L = new JLabel("Episode Length");
 		stopTest_L = new JLabel("stopTest");
 		stopEval_L = new JLabel("stopEval");
-		batchL = new JLabel("BatchNum");
+		chooseS01L = new JLabel("Choose Start 01");
+		learnRM_L = new JLabel("Learn from RM");
+//		batchL = new JLabel("BatchNum");
 		miniDepth_L = new JLabel("Minimax Depth");
 		miniUseHm_L = new JLabel("Minimax Hash ");
 		//cbgUseHashmap = new CheckboxGroup();
+		chooseS01 = new Checkbox("",false);
+		learnRM = new Checkbox("",false);
 		miniUseHmTrue = new Checkbox("use hashmap",true);
 		//miniUseHmFalse = new Checkbox("false",cbgUseHashmap,false);
 		ok = new Button("OK");
@@ -98,6 +111,8 @@ public class OtherParams extends Frame
 		epiLeng_L.setToolTipText("During training: Maximum number of moves in an episode. If reached, game terminates prematurely. -1: never terminate.");
 		stopTest_L.setToolTipText("During training: If >0 then perform stop test");
 		stopEval_L.setToolTipText("During training: How many successfull evaluator calls are needed to stop training prematurely?");
+		chooseS01L.setToolTipText("Choose start state in training: 50% default, 50% random 1-ply");
+		learnRM_L.setToolTipText("Learn from random moves during training");
 		miniDepth_L.setToolTipText("Minimax tree depth");
 		miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
 		
@@ -111,9 +126,9 @@ public class OtherParams extends Frame
 				}					
 		);
 
-		this.choiceBatch = new Choice();
-		for (int i=1; i<=batchMax; i++) choiceBatch.add(i+""); 
-		choiceBatch.select(batchMax+"");
+//		this.choiceBatch = new Choice();
+//		for (int i=1; i<=batchMax; i++) choiceBatch.add(i+""); 
+//		choiceBatch.select(batchMax+"");
 
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
 		oPanel.setLayout(new GridLayout(0,4,10,10));		
@@ -133,6 +148,11 @@ public class OtherParams extends Frame
 		oPanel.add(stopEval_L);
 		oPanel.add(stopEval_T);
 
+		oPanel.add(chooseS01L);
+		oPanel.add(chooseS01);
+		oPanel.add(learnRM_L);
+		oPanel.add(learnRM);
+
 		oPanel.add(new Canvas());			// add two empty rows to balance height of fields
 		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
@@ -147,11 +167,6 @@ public class OtherParams extends Frame
 
 		oPanel.add(miniUseHm_L);
 		oPanel.add(miniUseHmTrue);
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
-
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
 
@@ -182,9 +197,9 @@ public class OtherParams extends Frame
 	public int getMinimaxDepth() {
 		return Integer.valueOf(miniDepth_T.getText()).intValue();
 	}
-	public int getBatchMode() {
-		return Integer.parseInt(choiceBatch.getSelectedItem());
-	}
+//	public int getBatchMode() {
+//		return Integer.parseInt(choiceBatch.getSelectedItem());
+//	}
 	public int getNumEval() {
 		return Integer.valueOf(numEval_T.getText()).intValue();
 	}
@@ -193,6 +208,14 @@ public class OtherParams extends Frame
 		if (elen==-1) elen=Integer.MAX_VALUE;
 		return elen;
 	}
+	public boolean useChooseStart01() {
+		return chooseS01.getState();
+	}
+	
+	public boolean useLearnFromRM() {
+		return learnRM.getState();
+	}
+	
 	public boolean usesHashmap() {
 		return miniUseHmTrue.getState();
 	}

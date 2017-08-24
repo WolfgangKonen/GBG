@@ -29,7 +29,8 @@ public class NTParams extends Frame implements Serializable {
 	private static final String TIPNTUPLETYPE = "n-tuple generation method: random walk or random point";
 	private static final String TIPNTUPLENUML = "How many n-tuples to generate in case of 'randomness'";
 	private static final String TIPNTUPLESIZEL = "maxTupleLen: Every generated n-tuple has a size 2,...,maxTupleLen";
-	private static final String TIPUSESYMMETRY = "If checked, use symmetries when training nTuple agent in TDSNPlayer)";
+	private static final String TIPUSESYMMETRY = "If checked, use symmetries when training n-tuple agent";
+	private static final String TIPAFTERSTATE = "If checked, use afterstate logic [Jaskowski16] when training n-tuple agent";
 
 	private static String[] tcFactorString = { "Immediate", "Accumulating" };
 	private static String[] ntTupleTypeString={"RandomWalk","RandomPoint"};
@@ -52,6 +53,7 @@ public class NTParams extends Frame implements Serializable {
 	//JLabel EvalL;
 	JLabel NTupleType;
 	JLabel UseSymL;
+	JLabel AfterStateL;
 	JPanel tcPanel;
 	// JLabel NTupleMaxL;
 
@@ -64,6 +66,7 @@ public class NTParams extends Frame implements Serializable {
 	public JCheckBox TempCoC;
 	public JCheckBox RandomnessC;
 	public JCheckBox UseSymmetryC;
+	public JCheckBox AfterStateC;
 
 	public JComboBox tcFactorType;
 	public JComboBox TupleType;
@@ -93,6 +96,8 @@ public class NTParams extends Frame implements Serializable {
 
 		UseSymL = new JLabel("USESYMMETRY");
 		UseSymL.setToolTipText(TIPUSESYMMETRY);
+		AfterStateL = new JLabel("AFTERSTATE");
+		AfterStateL.setToolTipText(TIPAFTERSTATE);
 		
 		// These are the initial defaults 
 		// (Other game- and agent-specific defaults are in setParamDefaults, which is called
@@ -127,6 +132,7 @@ public class NTParams extends Frame implements Serializable {
 		});
 
 		UseSymmetryC = new JCheckBox();
+		AfterStateC = new JCheckBox();
 		
 		tcFactorType = new JComboBox(tcFactorString);
 		tcFactorType.addActionListener(new ActionListener(){
@@ -187,8 +193,8 @@ public class NTParams extends Frame implements Serializable {
 //		tcPanel.add(EvalT);
 		tcPanel.add(UseSymL);
 		tcPanel.add(UseSymmetryC);
-		tcPanel.add(new Canvas());
-		tcPanel.add(new Canvas());
+		tcPanel.add(AfterStateL);
+		tcPanel.add(AfterStateC);
 		
 		add(tcPanel,BorderLayout.CENTER);
 		add(ok,BorderLayout.SOUTH);
@@ -244,7 +250,18 @@ public class NTParams extends Frame implements Serializable {
 			TupleType.setEnabled(false);
 		}
 	}
-	
+
+	private void enableAfterState(boolean enable) {
+		if (enable) {
+			AfterStateL.setEnabled(true);
+			AfterStateC.setEnabled(true);
+		} else {
+			AfterStateL.setEnabled(false);
+			AfterStateC.setEnabled(false);			
+		}
+		
+	}
+
 	public JPanel getPanel() {
 		return tcPanel;
 	}
@@ -315,6 +332,9 @@ public class NTParams extends Frame implements Serializable {
 	public boolean getUseSymmetry() {
 		return UseSymmetryC.isSelected();
 	}
+	public boolean getUseAfterState() {
+		return AfterStateC.isSelected();
+	}
 	// public void setINIT(double value) {
 	// InitT.setText(value+"");
 	// }
@@ -335,6 +355,7 @@ public class NTParams extends Frame implements Serializable {
 		nTupleNumT.setText(nt.getNtupleNumber()+"");
 		nTupleMaxT.setText(nt.getNtupleMax()+"");
 		UseSymmetryC.setSelected(nt.getUseSymmetry());
+		AfterStateC.setSelected(nt.getUseAfterState());
 		enableTcPart();
 		enableRandomPart();
 	}
@@ -353,7 +374,8 @@ public class NTParams extends Frame implements Serializable {
 		TupleType.setSelectedIndex(ntindex);
 		nTupleNumT.setText(nt.getNtupleNumber()+"");
 		nTupleMaxT.setText(nt.getNtupleMax()+"");
-		UseSymmetryC.setSelected(nt.getUseSymmetry());
+		UseSymmetryC.setSelected(nt.getUSESYMMETRY());
+		AfterStateC.setSelected(nt.getAFTERSTATE());
 		enableTcPart();
 		enableRandomPart();
 	}
@@ -381,14 +403,18 @@ public class NTParams extends Frame implements Serializable {
 			RandomnessC.setSelected(true);		// consequence: disable TupleType, nTupleNumT, nTupleMaxT
 			nTupleNumT.setText("10");
 			UseSymmetryC.setSelected(true);
+			AfterStateC.setSelected(false);
 			enableTcPart();
 			enableRandomPart();
 			switch (gameName) {
 			case "2048": 
 				nTupleMaxT.setText("3");
+				AfterStateC.setSelected(true);
+				enableAfterState(true);
 				break;
 			default:	//  all other
-				nTupleMaxT.setText("6");			
+				nTupleMaxT.setText("6");	
+				enableAfterState(false);		// disable AFTERSTATE for all deterministic games
 				break;
 			}
 			break;

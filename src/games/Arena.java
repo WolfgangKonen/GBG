@@ -245,7 +245,7 @@ abstract public class Arena extends JPanel implements Runnable {
 				so = gb.getStateObs();
 				
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
-					StateObserverHex soh = (StateObserverHex) so;
+					StateObserverHex soh = (StateObserverHex) so; 
 					int Index = this.getHexIndex(soh.getBoard());
 					System.out.println("Index: "+Index);
 				}

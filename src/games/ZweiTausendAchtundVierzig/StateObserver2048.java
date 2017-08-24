@@ -156,11 +156,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
     }
 
     public double getGameScore() {
-        if(score == 0) {
-            return 0;
-        } else {
             return score / MAXSCORE;
-        }
     }
 
 

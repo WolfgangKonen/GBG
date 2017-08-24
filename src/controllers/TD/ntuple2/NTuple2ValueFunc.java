@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
 
+import controllers.TD.ntuple.TDNTupleAgt;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import params.NTParams;
@@ -45,12 +46,14 @@ public class NTuple2ValueFunc implements Serializable {
 	protected double m_AlphaChangeRatio = 0.9998; // 0.998
 	protected int epochMax=1;
     protected boolean  rpropLrn=false;
-    protected boolean withSigmoid=true;
+//  protected boolean withSigmoid=true; 	// use now hasSigmoid() - don't store/maintain value twice
 
 	// Number of n-tuples
 	private int numTuples = 0;
 
 	private int numPlayers; 
+	
+	TDNTuple2Agt tdAgt;		// the 'parent' - used to access the parameters in m_tdPar, m_ntPar
 	
 	// The generated n-tuples
 	private NTuple2 nTuples[][];
@@ -62,8 +65,8 @@ public class NTuple2ValueFunc implements Serializable {
 	private int horizon=0;
 	private transient LinkedList eList = new LinkedList();		
 
-	// Turns usage of symmetry on or off
-	private boolean useSymmetry = false;
+    // Turns usage of symmetry on or off
+//	private boolean useSymmetry = false;	// use now getUSESYMMETRY() - don't store/maintain value twice
 
 	private boolean PRINTNTUPLES = false;	// /WK/ control the file printout of n-tuples
 	private DecimalFormat frmS = new DecimalFormat("+0.00000;-0.00000");
@@ -78,6 +81,9 @@ public class NTuple2ValueFunc implements Serializable {
 	/**
 	 * Constructor using a set of n-tuples that are predefined.
 	 * 
+	 * @param parent
+	 * 			The TDNTuple2Agt object where {@code this} is part of. Used to access
+	 * 			parameters like withSigmoid, USESYMMETRY and so on.
 	 * @param nTuplesI
 	 *            The set of n-tuples as an {@code int} array. For each {@code nTuplesI[i]}
 	 *            the constructor will construct k {@link NTuple2} objects of the same form,
@@ -86,8 +92,6 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param xnf
 	 * @param posVals
 	 *            Possible values/field of the board (TicTacToe: 3)
-	 * @param useSymmetry
-	 *            true, if symmetries shall be used
 	 * @param randInitWeights
 	 *            true, if all weights of all n-Tuples shall be initialized
 	 *            randomly
@@ -95,12 +99,13 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param numCells
 	 * @throws RuntimeException
 	 */
-	public NTuple2ValueFunc(int nTuplesI[][], XNTupleFuncs xnf, int posVals, boolean useSymmetry,
+	public NTuple2ValueFunc(TDNTuple2Agt parent, int nTuplesI[][], XNTupleFuncs xnf, int posVals,
 			boolean randInitWeights, NTParams tcPar, int numCells) 
 					throws RuntimeException {
-		this.useSymmetry = useSymmetry;
+//		this.useSymmetry = useSymmetry;
 		this.xnf = xnf;
 		this.numPlayers = xnf.getNumPlayers();
+		this.tdAgt = parent;
 		
 		if (nTuplesI!=null) {
 			this.numTuples = nTuplesI.length;
@@ -147,8 +152,8 @@ public class NTuple2ValueFunc implements Serializable {
 
 //	public void calcScoresAndElig(int[] curTable, int curPlayer) {
 //    	double v_old = getScoreI(curTable,curPlayer);	
-//		// derivative of tanh ( if withSigmoid==true)
-//		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
+//		// derivative of tanh ( if hasSigmoid()==true)
+//		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 //		if (LAMBDA!=0.0) 
 //			updateElig(curTable,curPlayer,e);	
 //	}
@@ -180,7 +185,7 @@ public class NTuple2ValueFunc implements Serializable {
 		int[][] equiv = null;
 
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board, useSymmetry);
+		equiv = getSymBoards2(board, getUSESYMMETRY());
 		//equiv = getSymBoards2(board, false);    // DON'T, at least for TTT clearly inferior
 
 		for (i = 0; i < numTuples; i++) {
@@ -189,10 +194,10 @@ public class NTuple2ValueFunc implements Serializable {
 				score += nTuples[player][i].getScore(equiv[j]);
 			}
 		}
-		//if (useSymmetry) score /= equiv.length; // DON'T, at least for TTT clearly inferior
+		//if (getUSESYMMETRY()) score /= equiv.length; // DON'T, at least for TTT clearly inferior
 		//if (TDNTuple2Agt.NEWTARGET) score /= equiv.length; 
 
-		return (withSigmoid ? Math.tanh(score) : score);
+		return (hasSigmoid() ? Math.tanh(score) : score);
 	}
 
 	/**
@@ -205,7 +210,7 @@ public class NTuple2ValueFunc implements Serializable {
 	 *            board as 1D-integer vector (position value for each board cell) 
 	 * @param useSymmetry if false, return a 2D array with only one row 
 	 * 			(the board itself in int[0][])
-	 * @return the equivalent positions
+	 * @return the equivalent board vectors
 	 */
 	private int[][] getSymBoards2(int[] board, boolean useSymmetry) {
 		int i;
@@ -245,8 +250,8 @@ public class NTuple2ValueFunc implements Serializable {
 		tg = (finished ? reward : GAMMA * getScoreI(nextBoard,nextPlayer));
 		// delta is the error signal
 		double delta = (tg - v_old);
-		// derivative of tanh ( if withSigmoid==true)
-		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
+		// derivative of tanh ( if hasSigmoid()==true)
+		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
 		update(curBoard, curPlayer, delta, e);
 		
@@ -278,8 +283,8 @@ public class NTuple2ValueFunc implements Serializable {
 		tg = reward + GAMMA * getScoreI(nextBoard,nextPlayer);
 		// delta is the error signal
 		double delta = (tg - v_old);
-		// derivative of tanh ( if withSigmoid==true)
-		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
+		// derivative of tanh ( if hasSigmoid()==true)
+		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
 		update(curBoard, curPlayer, delta, e);
 		
@@ -291,13 +296,13 @@ public class NTuple2ValueFunc implements Serializable {
 		}
 	}
 
-	public void updateWeightsNewTerminal(int[] curBoard, int curPlayer, boolean upTC) {
+	public void updateWeightsNewTerminal(int[] curBoard, int curPlayer) {
 		double v_old = getScoreI(curBoard,curPlayer); // Old Value
 		double tg = 0.0; // Target signal is 0 (!)
 		// delta is the error signal
 		double delta = (tg - v_old);
-		// derivative of tanh ( if withSigmoid==true)
-		double e = (withSigmoid ? (1.0 - v_old * v_old) : 1.0);
+		// derivative of tanh ( if hasSigmoid()==true)
+		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
 		update(curBoard, curPlayer, delta, e);
 
@@ -319,7 +324,7 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param player
 	 *            the player who has to move on {@code board}
 	 * @param delta
-	 * @param e   derivative of tanh ( if withSigmoid==true)
+	 * @param e   derivative of tanh ( if hasSigmoid()==true)
 	 * 
 	 * The value added to all active weights is alphaM*delta*e   (in case LAMBDA==0)
 	 */
@@ -329,7 +334,7 @@ public class NTuple2ValueFunc implements Serializable {
 		double alphaM, sigDeriv, lamFactor;
 
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board,useSymmetry);
+		equiv = getSymBoards2(board,getUSESYMMETRY());
 
 		alphaM = ALPHA;
 		if (TDNTuple2Agt.NEWTARGET) alphaM /= (numTuples*equiv.length); 
@@ -375,7 +380,7 @@ public class NTuple2ValueFunc implements Serializable {
 //		int[][] equiv = null;
 //
 //		// Get equivalent boards (including self)
-//		equiv = getSymBoards2(board,useSymmetry);
+//		equiv = getSymBoards2(board,getUSESYMMETRY());
 //
 //		for (i = 0; i < numTuples; i++) {
 //			for (j = 0; j < equiv.length; j++)
@@ -397,14 +402,6 @@ public class NTuple2ValueFunc implements Serializable {
 		ALPHA = newStartAlpha;
 	}
 
-	public void setGamma(double newGamma) {
-		GAMMA = newGamma;
-	}
-
-	public void setLambda(double newLambda) {
-		LAMBDA = newLambda;
-	}
-
 	public void setAlphaChangeRatio(double newAlphaChangeRatio) {
 		m_AlphaChangeRatio = newAlphaChangeRatio;
 	}
@@ -412,23 +409,28 @@ public class NTuple2ValueFunc implements Serializable {
 	public void setEpochs(int epochs) {
 		epochMax = epochs;
 	}
-	public void setRpropLrn(boolean hasRpropLrn) {
-		rpropLrn = hasRpropLrn;
+	public void setTdAgt(TDNTuple2Agt tdAgt) {
+		this.tdAgt = tdAgt;
 	}
-	public void setRpropInitDelta(double initDelta) {
-		// dummy
-	}
-	public void setUseSymmetry(boolean useSymmetry) {
-		this.useSymmetry = useSymmetry;
-	}
-
-	public boolean hasSigmoid() {
-		return withSigmoid;
-	}
-
-	public void setSigmoid(boolean withSigmoid) {
-		this.withSigmoid = withSigmoid;
-	}
+	
+//	public void setGamma(double newGamma) {
+//		GAMMA = newGamma;
+//	}
+//	public void setLambda(double newLambda) {
+//		LAMBDA = newLambda;
+//	}
+//	public void setRpropLrn(boolean hasRpropLrn) {
+//		rpropLrn = hasRpropLrn;
+//	}
+//	public void setRpropInitDelta(double initDelta) {
+//		// dummy
+//	}
+//	public void setUseSymmetry(boolean useSymmetry) {
+//		this.useSymmetry = useSymmetry;
+//	}
+//	public void setSigmoid(boolean withSigmoid) {
+//		this.withSigmoid = withSigmoid;
+//	}
 
 	public double getAlpha() {
 		return ALPHA;
@@ -444,6 +446,18 @@ public class NTuple2ValueFunc implements Serializable {
 	
 	public XNTupleFuncs getXnf() {
 		return xnf;
+	}
+
+	public boolean hasSigmoid() {
+		return tdAgt.getTDParams().hasSigmoid();
+	}
+	
+	public boolean hasRpropLrn() {
+		return tdAgt.getTDParams().hasRpropLrn();
+	}
+
+	public boolean getUSESYMMETRY() {
+		return tdAgt.getNTParams().getUSESYMMETRY();
 	}
 
 	public void clearEquivList() {

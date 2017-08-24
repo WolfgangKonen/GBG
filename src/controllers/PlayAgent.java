@@ -81,11 +81,12 @@ public interface PlayAgent {
 	 * 					some exploration of different game paths)
 	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
 	 * 					prematurely.  
+	 * @param learnFromRM if true, learn from random moves during training
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
-	public boolean trainAgent(StateObservation so, int epiLength);
+	public boolean trainAgent(StateObservation so, int epiLength, boolean learnFromRM);
 	/**
-	 * @see #trainAgent(StateObservation, int)
+	 * @see #trainAgent(StateObservation, int, boolean)
 	 */
 	public boolean trainAgent(StateObservation so);
 	

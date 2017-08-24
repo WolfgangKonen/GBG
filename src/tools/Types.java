@@ -10,8 +10,9 @@ public class Types {
 
     public static class ACTIONS implements Serializable, Comparable<ACTIONS> {
         private int key;
-        
-    	/**
+        private boolean randomSelect;
+
+		/**
     	 * change the version ID for serialization only if a newer version is no longer 
     	 * compatible with an older one (older .agt.zip will become unreadable or you have
     	 * to provide a special version transformation)
@@ -57,6 +58,14 @@ public class Types {
 
             return 0;
         }
+        
+    	public boolean isRandomAction() {
+			return randomSelect;
+		}
+
+		public void setRandomSelect(boolean randomSelect) {
+			this.randomSelect = randomSelect;
+		}
     } // class ACTIONS
 
 

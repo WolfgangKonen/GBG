@@ -262,6 +262,7 @@ public class XArenaFuncs
 		int maxGameNum;			// maximum number of training games
 		int numEval;			// evaluate the trained agent every numEval games
 		int epiLength;			// maximum length of an episode
+		boolean learnFromRM;	// if true, learn from random moves during training
 		int gameNum=0;
 		int verbose=2;
 		boolean PLOTTRAINEVAL=false;
@@ -303,6 +304,7 @@ public class XArenaFuncs
 		stopTest = xab.oPar.getStopTest();
 		stopEval = xab.oPar.getStopEval();
 		epiLength = xab.oPar.getEpiLength();
+		learnFromRM = xab.oPar.useLearnFromRM();
 		int qem = xab.oPar.getQuickEvalMode();
         m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
         //
@@ -335,11 +337,10 @@ public class XArenaFuncs
 		{
 			long startTime = System.currentTimeMillis();
 			while (pa.getGameNum()<pa.getMaxGameNum())
-			{							
-				StateObservation so = gb.chooseStartState01();
-				//StateObservation so = gb.getDefaultStartState();  // Debug only
+			{		
+				StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
 
-				pa.trainAgent(so,epiLength);
+				pa.trainAgent(so,epiLength,learnFromRM);
 				
 				gameNum = pa.getGameNum();
 				if (gameNum%numEval==0 ) { //|| gameNum==1) {
@@ -395,6 +396,16 @@ public class XArenaFuncs
 		return pa;
 	}
 	
+	private StateObservation soSelectStartState(GameBoard gb, boolean chooseStart01) {
+		StateObservation so; 
+		if (chooseStart01) {
+			so = gb.chooseStartState01();
+		} else {
+			so = gb.getDefaultStartState();  // recommended
+		}					
+		return so;
+	}
+
 	/**
 	 * Perform trainNum cycles of training and evaluation for PlayAgent, each 
 	 * training with maxGameNum games. 
@@ -413,6 +424,7 @@ public class XArenaFuncs
 		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
 		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
 		int epiLength = xab.oPar.getEpiLength();
+		boolean learnFromRM = xab.oPar.useLearnFromRM();
 		
 		boolean doTrainEvaluation=false;
 		boolean doMultiEvaluation=false;
@@ -478,10 +490,10 @@ public class XArenaFuncs
 //			} else 
 			{
 				while (m_PlayAgents[0].getGameNum()<m_PlayAgents[0].getMaxGameNum())
-				{							
-					StateObservation so = gb.chooseStartState01();
+				{		
+					StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
 
-					m_PlayAgents[0].trainAgent(so,epiLength);
+					m_PlayAgents[0].trainAgent(so,epiLength,learnFromRM);
 					
 				}
 				
@@ -722,6 +734,7 @@ public class XArenaFuncs
 		int competitionNum=xab.winCompOptions.getNumCompetitions();
 		int maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		int epiLength = xab.oPar.getEpiLength();
+		boolean learnFromRM = xab.oPar.useLearnFromRM();
 		Evaluator m_evaluatorX=null;
 		Evaluator m_evaluatorO=null;
 		double alpha = xab.tdPar.getAlpha();
@@ -783,8 +796,9 @@ public class XArenaFuncs
 			{
 				while (paX.getGameNum()<paX.getMaxGameNum())
 				{							
-					StateObservation so = gb.chooseStartState01();
-					paX.trainAgent(so,epiLength);
+					StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
+
+					paX.trainAgent(so,epiLength,learnFromRM);
 				}
 				
 			} 
@@ -802,8 +816,9 @@ public class XArenaFuncs
 			{
 				while (paO.getGameNum()<paO.getMaxGameNum())
 				{							
-					StateObservation so = gb.chooseStartState01();
-					paO.trainAgent(so);
+					StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
+
+					paX.trainAgent(so,epiLength,learnFromRM);
 				}
 				
 			} 

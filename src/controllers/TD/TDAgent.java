@@ -333,7 +333,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @see #trainAgent(StateObservation, int)
 	 */
 	public boolean trainAgent(StateObservation sob) {
-		return trainAgent(sob, Integer.MAX_VALUE);
+		return trainAgent(sob, Integer.MAX_VALUE, false);
 	}
 	/**
 	 * Train the Agent for one complete game episode. <p>
@@ -344,9 +344,10 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * 					some exploration of different game paths)
 	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
 	 * 					prematurely.  
+	 * @param learnFromRM if true, learn from random moves during training
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
-	public boolean trainAgent(StateObservation so, int epiLength) {
+	public boolean trainAgent(StateObservation so, int epiLength, boolean learnFromRM) {
 		//int[][] table = new int[3][3];
 		double[] VTable = null;
 		double reward = 0.0;
@@ -441,7 +442,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				finished = true; 
 			}
 			Input = m_feature.prepareFeatVector(so);
-			if (randomMove && !finished) {
+			if (randomMove && !finished && !learnFromRM) {
 				// no training, go to next move
 				m_Net.calcScoresAndElig(Input); // calculate score, write it to
 												// old_y[k] for

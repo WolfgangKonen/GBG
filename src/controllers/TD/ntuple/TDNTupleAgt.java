@@ -97,7 +97,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	// Here: NTupleValueFunc
 	private NTupleValueFunc m_Net;
 
-	protected boolean USESYMMETRY = true; 	// Use symmetries (rotation, mirror) in NTuple-System
+	// Use symmetries (rotation, mirror) in NTuple-System
+//	protected boolean USESYMMETRY = true; 	// use now m_ntPar.getUseSymmetry() - don't store/maintain value twice
 	private boolean NORMALIZE = false; 
 	private boolean RANDINITWEIGHTS = false;// Init Weights of Value-Function
 											// randomly
@@ -217,7 +218,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		int posVals = xnf.getNumPositionValues();
 		int numCells = xnf.getNumCells();
 		
-		m_Net = new NTupleValueFunc(nTuples, xnf, posVals, USESYMMETRY,
+		m_Net = new NTupleValueFunc(this, nTuples, xnf, posVals, 
 				RANDINITWEIGHTS,ntPar,numCells);
 		
 		setNTParams(ntPar);
@@ -459,7 +460,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @see #trainAgent(StateObservation, int)
 	 */
 	public boolean trainAgent(StateObservation sob) {
-		return trainAgent(sob, Integer.MAX_VALUE);
+		return trainAgent(sob, Integer.MAX_VALUE, false);
 	}
 	/**
 	 * Train the Agent for one complete game episode. <p>
@@ -470,9 +471,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * 					some exploration of different game paths)
 	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
 	 * 					prematurely.  
+	 * @param learnFromRM if true, learn from random moves during training
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
-	public boolean trainAgent(StateObservation so, int epiLength) {
+	public boolean trainAgent(StateObservation so, int epiLength, boolean learnFromRM) {
 		double[] VTable = null;
 		double reward = 0.0, oldReward = 0.0;
 		boolean wghtChange = false;
@@ -492,7 +494,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		
 		player = Types.PLAYER_PM[so.getPlayer()];
 
-		if (m_Net.LAMBDA!=0.0) {
+		if (m_Net.getLambda()!=0.0) {
 			m_Net.resetElig(); // reset the eligibility traces before starting a new game
 			m_Net.calcScoresAndElig(curBoard,curPlayer);
 		}
@@ -515,10 +517,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			if (m_DEBG) printTable(pstream,nextBoard);
 			if (NEWTARGET) {
 				reward=trainNewTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
-						epiLength,player,upTC,oldReward);				
+						learnFromRM,epiLength,player,upTC,oldReward);				
 			} else {
 				reward=trainOldTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
-						epiLength,player,upTC);
+						learnFromRM,epiLength,player,upTC);
 			}
 			if (TDNTuple2Agt.DBG2_TARGET) {
 				final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
@@ -562,7 +564,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		}
 		
 		incrementGameNum();
-		if (this.getGameNum() % 100 == 0) {
+		if (this.getGameNum() % 500 == 0) {
 			System.out.println("gameNum: "+this.getGameNum());
 			int dummy=1;
 		}
@@ -588,7 +590,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private double trainNewTargetLogic(
 			StateObservation so, StateObservation oldSO, 
 			int[] curBoard, int curPlayer,
-			int[] nextBoard, int nextPlayer, 
+			int[] nextBoard, int nextPlayer, boolean learnFromRM,
 			int epiLength, int player, boolean upTC, double oldReward) 
 	{
 		double reward;
@@ -621,7 +623,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			m_finished = true; 
 		}
 		
-		if (m_randomMove) {
+		if (m_randomMove && !learnFromRM) {
 			// no training, go to next move,
 			// but update eligibility traces for next pass
 			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
@@ -643,7 +645,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private double trainOldTargetLogic(
 			StateObservation so, StateObservation oldSO, 
 			int[] curBoard, int curPlayer,
-			int[] nextBoard, int nextPlayer, 
+			int[] nextBoard, int nextPlayer, boolean learnFromRM, 
 			int epiLength, int player, boolean upTC) 
 	{
 		double reward;
@@ -703,7 +705,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			m_finished = true; 
 		}
 		//Input = m_feature.prepareFeatVector(so);
-		if (m_randomMove && !m_finished) {
+		if (m_randomMove && !m_finished && !learnFromRM) {
 			// no training, go to next move,
 			// but update eligibility traces for next pass
 			m_Net.calcScoresAndElig(nextBoard,nextPlayer); 
@@ -787,9 +789,11 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	public void setTDParams(TDParams tdPar, int maxGameNum) {
-		m_Net.setLambda(tdPar.getLambda());
-		m_Net.setGamma(tdPar.getGamma());
-		m_Net.setSigmoid(tdPar.hasSigmoid());
+//		m_Net.setLambda(tdPar.getLambda());
+//		m_Net.setGamma(tdPar.getGamma());
+//		m_Net.setSigmoid(tdPar.hasSigmoid());
+//		m_Net.setRpropLrn(tdPar.hasRpropLrn());
+		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 
 		double alpha = tdPar.getAlpha();
 		double alphaFinal = tdPar.getAlphaFinal();
@@ -798,17 +802,17 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		m_Net.setAlpha(tdPar.getAlpha());
 		m_Net.setAlphaChangeRatio(alphaChangeRatio);
 
-		m_Net.setRpropLrn(tdPar.hasRpropLrn());
-		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 		NORMALIZE=tdPar.getNormalize();
 		m_epsilon = tdPar.getEpsilon();
 		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
 	}
 
 	public void setTDParams(ParTD tdPar, int maxGameNum) {
-		m_Net.setLambda(tdPar.getLambda());
-		m_Net.setGamma(tdPar.getGamma());
-		m_Net.setSigmoid(tdPar.hasSigmoid());
+//		m_Net.setLambda(tdPar.getLambda());
+//		m_Net.setGamma(tdPar.getGamma());
+//		m_Net.setSigmoid(tdPar.hasSigmoid());
+//		m_Net.setRpropLrn(tdPar.hasRpropLrn());
+		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 
 		double alpha = tdPar.getAlpha();
 		double alphaFinal = tdPar.getAlphaFinal();
@@ -817,8 +821,6 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		m_Net.setAlpha(tdPar.getAlpha());
 		m_Net.setAlphaChangeRatio(alphaChangeRatio);
 
-		m_Net.setRpropLrn(tdPar.hasRpropLrn());
-		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 		NORMALIZE=tdPar.getNormalize();
 		m_epsilon = tdPar.getEpsilon();
 		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
@@ -827,8 +829,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	public void setNTParams(NTParams ntPar) {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
-		USESYMMETRY=ntPar.getUseSymmetry();
-		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
+//		USESYMMETRY=ntPar.getUseSymmetry();
+//		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
@@ -837,11 +839,12 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	public void setNTParams(ParNT ntPar) {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
-		USESYMMETRY=ntPar.getUseSymmetry();
-		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
+//		USESYMMETRY=ntPar.getUseSymmetry();
+//		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
+		m_Net.setTdAgt(this);						 // WK: needed when loading an older agent
 	}
 
 	public void setAlpha(double alpha) {
@@ -871,7 +874,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	
 	public String stringDescr() {
 		String cs = getClass().getName();
-		String str = cs + ", USESYMMETRY:" + (USESYMMETRY?"true":"false")
+		String str = cs + ", USESYMMETRY:" + (this.m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", " + "sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda();

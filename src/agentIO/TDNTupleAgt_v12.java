@@ -82,7 +82,7 @@ public class TDNTupleAgt_v12 extends AgentBase implements Serializable {
 		rand = new Random(42); //(System.currentTimeMillis());		
 		tcIn=tdagt.getNTParams().getTcInterval();
 		TC=tdagt.getNTParams().getTc();
-		USESYMMETRY=tdagt.getNTParams().getUseSymmetry();
+		USESYMMETRY=tdagt.getNTParams().getUSESYMMETRY();
 		NORMALIZE=tdagt.getTDParams().getNormalize();
 		tcImm=tdagt.getNTParams().getTcImm();
 		
@@ -107,8 +107,10 @@ public class TDNTupleAgt_v12 extends AgentBase implements Serializable {
 	}
 
 	public void setTDParams(TDParams tdPar, int maxGameNum) {
-		m_Net.setLambda(tdPar.getLambda());
-		m_Net.setGamma(tdPar.getGamma());
+//		m_Net.setLambda(tdPar.getLambda());
+//		m_Net.setGamma(tdPar.getGamma());
+//		m_Net.setRpropLrn(tdPar.hasRpropLrn());
+		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 
 		double alpha = tdPar.getAlpha();
 		double alphaFinal = tdPar.getAlphaFinal();
@@ -117,13 +119,13 @@ public class TDNTupleAgt_v12 extends AgentBase implements Serializable {
 		m_Net.setAlpha(tdPar.getAlpha());
 		m_Net.setAlphaChangeRatio(alphaChangeRatio);
 
-		m_Net.setRpropLrn(tdPar.hasRpropLrn());
-		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 	}
 
 	public void setTDParams(ParTD tdPar, int maxGameNum) {
-		m_Net.setLambda(tdPar.getLambda());
-		m_Net.setGamma(tdPar.getGamma());
+//		m_Net.setLambda(tdPar.getLambda());
+//		m_Net.setGamma(tdPar.getGamma());
+//		m_Net.setRpropLrn(tdPar.hasRpropLrn());
+		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 
 		double alpha = tdPar.getAlpha();
 		double alphaFinal = tdPar.getAlphaFinal();
@@ -132,8 +134,6 @@ public class TDNTupleAgt_v12 extends AgentBase implements Serializable {
 		m_Net.setAlpha(tdPar.getAlpha());
 		m_Net.setAlphaChangeRatio(alphaChangeRatio);
 
-		m_Net.setRpropLrn(tdPar.hasRpropLrn());
-		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
 	}
 
 	public TDParams getTDParams() {
