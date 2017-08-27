@@ -72,7 +72,7 @@ public class OtherParams extends Frame
 	JPanel oPanel;
 	OtherParams m_par;
 	
-	public OtherParams(int batchMax) {
+	public OtherParams(/* int batchMax */) {
 		super("Other Parameter");
 		
 		evalQ_L = new JLabel("Quick Eval Mode");
@@ -216,7 +216,7 @@ public class OtherParams extends Frame
 		return learnRM.getState();
 	}
 	
-	public boolean usesHashmap() {
+	public boolean useMinimaxHashmap() {
 		return miniUseHmTrue.getState();
 	}
 	
@@ -241,19 +241,37 @@ public class OtherParams extends Frame
 		for (int i : modeList) choiceEvalT.add(Integer.toString(i));
 	}
 	
-	public void setStopTest(double value) {
+	public void setStopTest(int value) {
 		stopTest_T.setText(value+"");
 	}
-	public void setStopEval(double value) {
+	public void setStopEval(int value) {
 		stopEval_T.setText(value+"");
 	}
-	public void setNumEval(double value) {
+	public void setNumEval(int value) {
 		numEval_T.setText(value+"");
 	}
-	public void setEpiLength(double value) {
+	public void setEpiLength(int value) {
 		numEval_T.setText(value+"");
 	}
 	public void setMinimaxDepth(int value) {
 		miniDepth_T.setText(value+"");
 	}
+	
+	/**
+	 * Needed to restore the param tab with the parameters from a re-loaded agent
+	 * @param nt  of the re-loaded agent
+	 */
+	public void setFrom(ParOther op) {
+		this.setQuickEvalMode(op.getQuickEvalMode());
+		this.setTrainEvalMode(op.getTrainEvalMode());
+		this.setNumEval(op.getNumEval());
+		this.setEpiLength(op.getEpisodeLength());
+		this.setStopTest(op.getStopTest());
+		this.setStopEval(op.getStopEval());
+		this.chooseS01.setState(op.useChooseStart01());
+		this.learnRM.setState(op.useLearnFromRM());
+		this.setMinimaxDepth(op.getMinimaxDepth());
+		this.miniUseHmTrue.setState(op.useMinimaxHashmap());
+	}
+
 } // class OtherParams

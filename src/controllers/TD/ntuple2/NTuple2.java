@@ -158,7 +158,8 @@ public class NTuple2 implements Serializable {
 	}
 
 	/**
-	 * Get the game board corresponding to this LUT index for this NTuple.
+	 * Get the game board corresponding to this LUT index for this NTuple.<br>
+	 * (--- currently not used inside GBG [still specific to TTT] ---)
 	 * 
 	 * @param index
 	 *            the index into LUT
@@ -170,6 +171,7 @@ public class NTuple2 implements Serializable {
 	 * 
 	 */
 //	  {@see NTupleShow#updatePanel()    // for later, when we integrate NTupleShow
+	@Deprecated
 	public int[] getBoard(int index) {
 		int i;
 		int[] board = new int[9];
@@ -463,14 +465,12 @@ public class NTuple2 implements Serializable {
 		try {
 			tableN = new PrintWriter(new FileWriter("tableN",true));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		PrintWriter tableA = null;
 		try {
 			tableA = new PrintWriter(new FileWriter("tableA",true));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		tableN.println("" +Arrays.toString(tcN));

@@ -86,7 +86,8 @@ abstract public class ArenaTrain extends Arena
 			n = m_xab.getNumParamBtn();
 			agentN = m_xab.getSelectedAgent(n);
 			setStatusMessage("Params for "+agentN+ " ...");
-			m_tabs.showParamTabs(this,!m_tabs.isVisible(),agentN);
+//			m_tabs.showParamTabs(this,!m_tabs.isVisible(),agentN);
+			m_tabs.showParamTabs(this,true,agentN);
 			taskState = Task.IDLE; 
 			break;
 		case TRAIN: 
@@ -123,7 +124,7 @@ abstract public class ArenaTrain extends Arena
 	        long start_time = Calendar.getInstance().getTime().getTime();
 			try {
 				
-				m_xfun.multiTrain(m_xab.getSelectedAgent(0), m_xab, gb);
+				m_xfun.m_PlayAgents[0] = m_xfun.multiTrain(m_xab.getSelectedAgent(0), m_xab, gb);
 			
 			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();

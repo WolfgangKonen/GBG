@@ -69,7 +69,7 @@ public class XArenaButtons extends JPanel
 	MCTSParams mctsParams = new MCTSParams();
 	MCParams mcParams = new MCParams();
 	MCTSExpectimaxParams mctsExpectimaxParams = new MCTSExpectimaxParams();
-	OtherParams oPar = new OtherParams(5);
+	OtherParams oPar = new OtherParams();
 	HtmlDisplay htmlDisplay = null;
 	boolean htmlDisplayActive = false;
 	boolean isNTupShowEnabled = false;

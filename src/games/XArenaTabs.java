@@ -57,6 +57,8 @@ public class XArenaTabs extends JFrame
 	}
 	public void showParamTabs(Arena ticGame,boolean isVisible,String selectedAgent) {
 		ticGame.m_tabs.setVisible(isVisible);
+		ticGame.m_tabs.setState(Frame.NORMAL);	// if window is iconified, display it normally
+		ticGame.m_tabs.toFront();
 		// place window TD params on the right side of the main window
 		int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
 		int y = ticGame.m_xab.getLocation().y;

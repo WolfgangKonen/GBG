@@ -50,7 +50,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	{
 		this(name);
 		m_depth = opar.getMinimaxDepth();
-		m_useHashMap = opar.usesHashmap();
+		m_useHashMap = opar.useMinimaxHashmap();
 	}
 	
 	

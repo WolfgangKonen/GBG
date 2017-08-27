@@ -15,7 +15,9 @@ import java.util.Random;
 
 import agentIO.TDNTupleAgt_v12;
 import params.NTParams;
+import params.OtherParams;
 import params.ParNT;
+import params.ParOther;
 import params.ParTD;
 import params.TDParams;
 import tools.Types;
@@ -70,21 +72,18 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * during training. <br>
 	 * m_epsilon = 0.0: no random moves, <br>
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth. <br>
-	 * m_epsilon undergoes a sigmoidal change from {@code tdPar.getEpsilon()} 
+	 * m_epsilon undergoes a linear change from {@code tdPar.getEpsilon()} 
 	 * to {@code tdPar.getEpsilonFinal()}. 
 	 * This is realized in {@link #finishUpdateWeights()}.
 	 */
 	private double m_epsilon = 0.1;
 	
 	/**
-	 * m_EpsilonChangeDelta is not used anymore. We use a sigmoidal change from 
-	 * {@code tdPar.getEpsilon()} to {@code tdPar.getEpsilonFinal()}. 
-	 * This is realized in {@link #finishUpdateWeights()}.
+	 * m_EpsilonChangeDelta is the epsilon change per episode.
 	 */
-	@Deprecated
 	private double m_EpsilonChangeDelta = 0.001;
 
-	private double MaxScore;
+	private double BestScore;
 	//samine//
 	private boolean TC; //true: using Temporal Coherence algorithm
 	private int tcIn; 	//temporal coherence interval: after tcIn games tcFactor will be updates
@@ -99,6 +98,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 	// Use symmetries (rotation, mirror) in NTuple-System
 //	protected boolean USESYMMETRY = true; 	// use now m_ntPar.getUseSymmetry() - don't store/maintain value twice
+//	private boolean learnFromRM = false;    // use now m_oPar.useLearnFromRM() - don't store/maintain value twice
 	private boolean NORMALIZE = false; 
 	private boolean RANDINITWEIGHTS = false;// Init Weights of Value-Function
 											// randomly
@@ -112,13 +112,14 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private boolean randomSelect = false;
 	
 	/**
-	 * Members {@link #m_tdPar} {@link #m_ntPar} are only needed for saving and loading
-	 * the agent (to restore the agent with all its parameter settings)
+	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link #m_oPar} are only needed for 
+	 * saving and loading the agent (to restore the agent with all its parameter settings)
 	 */
 //	private TDParams m_tdPar;
 //	private NTParams m_ntPar;
 	private ParTD m_tdPar;
 	private ParNT m_ntPar;
+	private ParOther m_oPar = new ParOther();
 	
 	//
 	// variables needed in various train methods
@@ -136,7 +137,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		super();
 		TDParams tdPar = new TDParams();
 		NTParams ntPar = new NTParams();
-		initNet(ntPar, tdPar, null, null, 1000);
+		OtherParams oPar = new OtherParams();
+		initNet(ntPar, tdPar, oPar, null, null, 1000);
 	}
 
 //	/**
@@ -165,10 +167,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
-	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, int[][] nTuples, 
-			XNTupleFuncs xnf, int maxGameNum) throws IOException {
+	public TDNTupleAgt(String name, TDParams tdPar, NTParams ntPar, OtherParams oPar, 
+			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		super(name);
-		initNet(ntPar,tdPar, nTuples, xnf, maxGameNum);			
+		initNet(ntPar,tdPar, oPar, nTuples, xnf, maxGameNum);			
 	}
 
 	/**
@@ -185,6 +187,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		super(tdagt.getName());
 		m_tdPar = new ParTD(tdagt.getTDParams());
 		m_ntPar = new ParNT(tdagt.getNTParams());
+		m_oPar = new ParOther();
 		rand = new Random(42); //(System.currentTimeMillis());		
 
 		m_Net = tdagt.getNTupleValueFunc();
@@ -209,10 +212,11 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
-	private void initNet(NTParams ntPar, TDParams tdPar, int[][] nTuples, 
-			XNTupleFuncs xnf, int maxGameNum) throws IOException {
+	private void initNet(NTParams ntPar, TDParams tdPar, OtherParams oPar, 
+			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		m_tdPar = new ParTD(tdPar);
 		m_ntPar = new ParNT(ntPar);
+		m_oPar = new ParOther(oPar);
 		rand = new Random(42); //(System.currentTimeMillis());		
 		
 		int posVals = xnf.getNumPositionValues();
@@ -248,10 +252,10 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
 									// maximized
 		StateObservation NewSO;
-		int count = 1; // counts the moves with same MaxScore
+		int count = 1; // counts the moves with same BestScore
         Types.ACTIONS actBest = null;
         int iBest;
-		MaxScore = -Double.MAX_VALUE;
+		BestScore = -Double.MAX_VALUE;
        
 		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
 		//int[][] Table = so.getTable();
@@ -368,13 +372,13 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 				CurrentScore = rd2;
 			}
 			VTable[i] = CurrentScore;
-			if (MaxScore < CurrentScore) {
-				MaxScore = CurrentScore;
+			if (BestScore < CurrentScore) {
+				BestScore = CurrentScore;
 				actBest = actions[i];
 				iBest  = i; 
 				count = 1;
-			} else if (MaxScore == CurrentScore) {
-				// If there are 'count' possibilities with the same score MaxScore, 
+			} else if (BestScore == CurrentScore) {
+				// If there are 'count' possibilities with the same score BestScore, 
 				// each one has the probability 1/count of being selected.
 				// 
 				// (To understand formula, think recursively from the end: the last one is
@@ -396,7 +400,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
             NewSO.advance(actBest);
-			System.out.println(NewSO.stringDescr()+", "+(2*MaxScore*player-1));
+			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
 		}			
 		if (TDNTuple2Agt.DBG2_TARGET) {
             NewSO = so.copy();
@@ -457,24 +461,19 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	/**
-	 * @see #trainAgent(StateObservation, int)
-	 */
-	public boolean trainAgent(StateObservation sob) {
-		return trainAgent(sob, Integer.MAX_VALUE, false);
-	}
-	/**
 	 * Train the Agent for one complete game episode. <p>
 	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
 	 * parameters (weights and so on).
-	 * @param so		the state from which the episode is played (usually the
-	 * 					return value of {@link GameBoard#chooseStartState01()} to get
+	 * @param so		the state from which the episode is played (see function
+	 * 					soSelectStartState in {@link games.XArenaFuncs} to get
 	 * 					some exploration of different game paths)
-	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
-	 * 					prematurely.  
-	 * @param learnFromRM if true, learn from random moves during training
+// --- epiLength, learnFromRM are now available via the agent's member ParOther m_oPar: ---
+//	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
+//	 * 					prematurely.  
+//	 * @param learnFromRM if true, learn from random moves during training
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
-	public boolean trainAgent(StateObservation so, int epiLength, boolean learnFromRM) {
+	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/) {
 		double[] VTable = null;
 		double reward = 0.0, oldReward = 0.0;
 		boolean wghtChange = false;
@@ -488,6 +487,9 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		int   curPlayer=so.getPlayer();
 		int[] nextBoard = null;
 		int   nextPlayer;
+
+		boolean learnFromRM = m_oPar.useLearnFromRM();
+		int epiLength = m_oPar.getEpisodeLength();
 
 		//System.out.println("Random test: "+ rand.nextDouble());
 		//System.out.println("Random test: "+ rand.nextDouble());
@@ -759,18 +761,17 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 
 		m_Net.finishUpdateWeights(); // adjust learn param ALPHA
 
-		// TODO: wieder in alten Wert ändern
-		// m_epsilon = m_epsilon - m_EpsilonChangeDelta;
-		// m_epsilon = m_epsilon*m_EpsilonChangeDelta;
+		// linear decrease of m_epsilon (re-activated 08/2017)
+		m_epsilon = m_epsilon - m_EpsilonChangeDelta;
 
-		// 
-		double a0 = m_tdPar.getEpsilon();
-		double a1 = m_tdPar.getEpsilonFinal();
-		// double x = (double) getGameNum() / (getMaxGameNum()) * 10.0;
-		double x = (double) ((getGameNum() - 1000.0) / getMaxGameNum())*5;
-		double fx = (((a0 - a1) / 2.0 )* (1.0 - Math.tanh(x)) )+ a1;
-		
-		m_epsilon = fx;
+		// the suspicious version before 08/2017
+//		double a0 = m_tdPar.getEpsilon();
+//		double a1 = m_tdPar.getEpsilonFinal();
+//		// double x = (double) getGameNum() / (getMaxGameNum()) * 10.0;
+//		double x = (double) ((getGameNum() - 1000.0) / getMaxGameNum())*5;
+//		double fx = (((a0 - a1) / 2.0 )* (1.0 - Math.tanh(x)) )+ a1;
+//		m_epsilon = fx;
+
 		if (PRINTTABLES) {
 			try {
 				print(m_epsilon);
@@ -877,7 +878,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		String str = cs + ", USESYMMETRY:" + (this.m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", " + "sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
-						+ ", lambda:" + m_Net.getLambda();
+						+ ", lambda:" + m_Net.getLambda()
+						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");
 		return str;
 	}
 		
@@ -897,12 +899,15 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	public ParNT getNTParams() {
 		return m_ntPar;
 	}
+	public ParOther getOtherPar() {
+		return m_oPar;
+	}
 
 	// Debug only: 
 	//
 	private void printTable(PrintStream pstream, int[] board) {
 		String s = NTuple.stringRep(board);
-		pstream.println(s + " : MaxScore= "+MaxScore);
+		pstream.println(s + " : BestScore= "+BestScore);
 	}
 
 	private void printVTable(PrintStream pstream, double[] VTable) {

@@ -78,11 +78,8 @@ abstract public class AgentBase implements Serializable {
 	public String getName() { return m_name; }
 	public void setName(String name) { m_name=name; }
 
-	public boolean trainAgent(StateObservation so) 
-	{
-		return trainAgent(so,Integer.MAX_VALUE,false);
-	}
-	public boolean trainAgent(StateObservation so, int epiLength, boolean learnFromRM)								 
+	// --- epiLength, learnFromRM are now available via the agent's member ParOther m_oPar: ---
+	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/)								 
 	{	
 		m_GameNum++;
 		return false;

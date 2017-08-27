@@ -154,7 +154,8 @@ public class NTuple implements Serializable {
 	}
 
 	/**
-	 * Get the game board corresponding to this LUT index for this NTuple.
+	 * Get the game board corresponding to this LUT index for this NTuple.<br>
+	 * (--- currently not used inside GBG [still specific to TTT] ---)
 	 * 
 	 * @param index
 	 *            the index into LUT
@@ -166,6 +167,7 @@ public class NTuple implements Serializable {
 	 * 
 	 */
 //	  {@see NTupleShow#updatePanel()    // for later, when we integrate NTupleShow
+	@Deprecated
 	public int[] getBoard(int index) {
 		int i;
 		int[] board = new int[9];

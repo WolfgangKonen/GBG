@@ -28,8 +28,8 @@ public class ConfigGame {
     // N-tuples:
     /**
      * =1: along the lines of [Jaskowski16] Fig 3b, 5 4-tuples, smaller LUTs (5*50e3, 2 MB agt.zip file), medium results <br>
-     * =2: along the lines of [Jaskowski16] Fig 3c, 4 6-tuples, very big LUTs (4*11e6 weights, 44 MB agt.zip!!), very good results
+     * =2: along the lines of [Jaskowski16] Fig 3c, 4 6-tuples, very big LUTs (4*11e6 weights, 69 MB agt.zip!!), very good results
      * @see XNTupleFuncs2048#fixedNTuples()
      */
-    public static final int FIXEDNTUPLEMODE = 2;
+    public static final int FIXEDNTUPLEMODE = 1;
 }

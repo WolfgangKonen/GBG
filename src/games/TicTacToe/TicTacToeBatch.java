@@ -27,6 +27,8 @@ import games.GameBoard;
 import games.StateObservation;
 import games.XArenaButtons;
 import games.XArenaFuncs;
+import params.OtherParams;
+import params.ParOther;
 import params.TDParams;
 import tools.LineChartSuccess;
 import tools.Measure;
@@ -161,6 +163,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 		tdPar.setAlphaFinal(alphaFinal);
 		tdPar.setLambda(lambda);
 		tdPar.setFeatmode(featmode);
+		OtherParams oPar = new OtherParams();
 
 		System.out.println("*** Starting TicTacToe.batch1 with trainNum = "+trainNum+" ***");
 
@@ -176,7 +179,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 				// loop over the agent realizations:
 				for (int i=0; i<trainNum; i++) {
 					Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
-					m_PlayAgentX = new TDAgent("TDS", tdPar, feat, maxGameNum);
+					m_PlayAgentX = new TDAgent("TDS", tdPar, oPar, feat, maxGameNum);
 					//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar, maxGameNum);
 			        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 
@@ -252,6 +255,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 		tdPar.setLambda(lambda);
 		tdPar.setEpsilon(epsilon);
 		tdPar.setEpsilonFinal(0.0);
+		OtherParams oPar = new OtherParams();
 		
 		System.out.println("*** Starting TicTacToe.batch2 with trainNum = "+trainNum+" ***");
 
@@ -300,7 +304,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 						long istarttime = System.currentTimeMillis();
 						//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar,maxGameNum);
 						Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
-						m_PlayAgentX = new TDAgent("TDS", tdPar, feat, maxGameNum);
+						m_PlayAgentX = new TDAgent("TDS", tdPar, oPar, feat, maxGameNum);
 				        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 						if (i==0) {
 							System.out.println(m_PlayAgentX.stringDescr());
@@ -578,6 +582,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 		tdPar.setAlphaFinal(alphaFinal);
 		tdPar.setEpsilon(epsilon);
 		tdPar.setEpsilonFinal(0.0);
+		OtherParams oPar = new OtherParams();
 		
 		System.out.println("*** Starting TicTacToe.batch4 with trainNum = "+trainNum+
 						   ", alpha="+alpha+", alphaFinal="+alphaFinal+ " ***");
@@ -649,7 +654,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 						tdPar.setEpochs(epochMax);
 						//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar,maxGameNum);
 						Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
-						m_PlayAgentX = new TDAgent("TDS", tdPar, feat, maxGameNum);
+						m_PlayAgentX = new TDAgent("TDS", tdPar, oPar, feat, maxGameNum);
 				        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 				        		
 				        m_evaluator2 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,2,1);

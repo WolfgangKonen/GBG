@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.File;
 import java.text.*; 		// DecimalFormat, NumberFormat
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.ListIterator;
 import java.util.Random;
 
 import javax.swing.JOptionPane;
@@ -46,7 +49,7 @@ import tools.Types;
  * Known classes having {@link XArenaFuncs} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
- * @author Wolfgang Konen, TH K?ln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  * 
  */
 public class XArenaFuncs 
@@ -56,6 +59,7 @@ public class XArenaFuncs
 	//public	PlayAgent m_PlayAgentX;
 	//public	PlayAgent m_PlayAgentO;
 	public  PlayAgent[] m_PlayAgents;
+	private Arena m_Arena;
 	//String sRandom = Types.GUI_AGENT_LIST[2];
 	//String sMinimax = Types.GUI_AGENT_LIST[1];
 	//RandomAgent random_agent = new RandomAgent(sRandom);
@@ -73,6 +77,7 @@ public class XArenaFuncs
 	
 	public XArenaFuncs(Arena arena)
 	{
+		m_Arena = arena;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		m_PlayAgents = new PlayAgent[numPlayers];
 		//m_PlayAgents[0] = new MinimaxAgent(sMinimax);
@@ -104,7 +109,7 @@ public class XArenaFuncs
 		
 		if (sAgent.equals("TDS")) {
 			Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar.getFeatmode());
-			pa = new TDAgent(sAgent, m_xab.tdPar, feat, maxGameNum);
+			pa = new TDAgent(sAgent, m_xab.tdPar, m_xab.oPar, feat, maxGameNum);
 			//pa = m_xab.m_game.makeTDSAgent(sAgent,m_xab.tdPar,maxGameNum); 
 				// new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);
 //		} else if (sAgent.equals("TDS2")) {
@@ -125,7 +130,7 @@ public class XArenaFuncs
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf);
-				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
+				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
 						e.getMessage(), 
@@ -138,7 +143,7 @@ public class XArenaFuncs
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf);
-				pa = new TDNTuple2Agt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
+				pa = new TDNTuple2Agt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
 						e.getMessage(), 
@@ -202,13 +207,13 @@ public class XArenaFuncs
 					if (sAgent.equals("TDS")) {
 						//pa = m_xab.m_game.makeTDSAgent(sAgent, m_xab.tdPar, maxGameNum);
 						Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar.getFeatmode());
-						pa = new TDAgent(sAgent, m_xab.tdPar, feat, maxGameNum);
+						pa = new TDAgent(sAgent, m_xab.tdPar, m_xab.oPar, feat, maxGameNum);
 					} else if (sAgent.equals("TD-Ntuple")) {
 						try {
 							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 							NTupleFactory ntupfac = new NTupleFactory(); 
 							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf);
-							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
+							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
 						} catch (Exception e) {
 							MessageBox.show(m_xab, 
 									e.getMessage(), 
@@ -221,7 +226,7 @@ public class XArenaFuncs
 							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 							NTupleFactory ntupfac = new NTupleFactory(); 
 							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf);
-							pa = new TDNTuple2Agt(sAgent, m_xab.tdPar, m_xab.ntPar, nTuples, xnf, maxGameNum);
+							pa = new TDNTuple2Agt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
 						} catch (Exception e) {
 							MessageBox.show(m_xab, 
 									e.getMessage(), 
@@ -340,7 +345,7 @@ public class XArenaFuncs
 			{		
 				StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
 
-				pa.trainAgent(so,epiLength,learnFromRM);
+				pa.trainAgent(so /*,epiLength,learnFromRM*/);
 				
 				gameNum = pa.getGameNum();
 				if (gameNum%numEval==0 ) { //|| gameNum==1) {
@@ -413,7 +418,7 @@ public class XArenaFuncs
 	 * @param xab		used only for reading parameter values from members td_par, cma_par
 	 * @throws IOException 
 	 */
-	public void multiTrain(String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
+	public PlayAgent multiTrain(String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
 		DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		DecimalFormat frm2 = new DecimalFormat("+0.00;-0.00");
@@ -425,35 +430,39 @@ public class XArenaFuncs
 		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
 		int epiLength = xab.oPar.getEpiLength();
 		boolean learnFromRM = xab.oPar.useLearnFromRM();
+		PlayAgent pa = null;
 		
 		boolean doTrainEvaluation=false;
 		boolean doMultiEvaluation=false;
 
-		System.out.println("*** Starting TicTacToe.multiTrain with trainNum = "+trainNum+" ***");
+		System.out.println("*** Starting multiTrain with trainNum = "+trainNum+" ***");
 
 		Measure oT = new Measure();			// evalAgent-success rates of all trained agents
 		Measure oQ = new Measure();			// competeBoth-success rates against MinimaxPlayer
 		Measure oM = new Measure();			// competeBoth-success rates against RandomPlayer
 		//Measure ov = new Measure();			// competeBoth-success rates against ValItPlayer
 		Measure oC = new Measure();			// overall success measure S_C as def'd in GECCO'2009 paper
+		MTrain mTrain;
+		double evalT=0.0, evalM=0.0;
+		ArrayList<MTrain> mtList = new ArrayList<MTrain>();
 		int maxGameNumV=10000;
 		//ValItPlayer valit_agent = trainedValItPlayer(maxGameNumV);
 		
 		for (int i=0; i<trainNum; i++) {
 			try {
-				m_PlayAgents[0] = constructAgent(sAgent, xab);
-				if (m_PlayAgents[0]==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
+				pa = constructAgent(sAgent, xab);
+				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
 				MessageBox.show(xab, 
 						e.getMessage(), 
 						"Warning", JOptionPane.WARNING_MESSAGE);
-				return;			
+				return pa;			
 			} 
 
 
 			int qem = xab.oPar.getQuickEvalMode();
-	        m_evaluatorQ = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,qem,1);
+	        m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
 			int tem = xab.oPar.getTrainEvalMode();
 			//
 			// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -462,7 +471,7 @@ public class XArenaFuncs
 			// different values. 
 			doTrainEvaluation = (tem!=qem);
 			if (doTrainEvaluation)
-		        m_evaluatorT = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,tem,1);
+		        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
 			int mem = m_evaluatorQ.getMultiTrainEvalMode();
 			//
 			// doMultiEvaluation flags whether Multi Train Evaluator is executed:
@@ -471,30 +480,53 @@ public class XArenaFuncs
 			// 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' . 
 			doMultiEvaluation = ((mem!=qem) && (mem!=tem));
 			if (doMultiEvaluation)
-		        m_evaluatorM = xab.m_game.makeEvaluator(m_PlayAgents[0],gb,stopEval,mem,1);
+		        m_evaluatorM = xab.m_game.makeEvaluator(pa,gb,stopEval,mem,1);
 
 			if (i==0) {
-				String pa_string = m_PlayAgents[0].getClass().getName();
+				String pa_string = pa.getClass().getName();
 //				if (pa_string.equals("TicTacToe.CMAPlayer")) 
 //					pa_string = pa_string + " with fitness " + ((CMAPlayer) m_PlayAgentX).getFitfunString() +
 //					" and with " + ((CMAPlayer) m_PlayAgentX).getNbRuns() + " restarts";
-				System.out.println(m_PlayAgents[0].stringDescr());
+				System.out.println(pa.stringDescr());
 			}
-			m_PlayAgents[0].setMaxGameNum(maxGameNum);
-			m_PlayAgents[0].setGameNum(0);
+			pa.setMaxGameNum(maxGameNum);
+			pa.setGameNum(0);
 			int player; 
+			int numEval = xab.oPar.getNumEval();
+			int gameNum;
 			
 // TODO: implement CMAPlayer correctly
 //			if (sAgent.equals("CMA-ES")) {
 //				((CMAPlayer) m_PlayAgentX).trainLoop(maxGameNum,this,xab,verbose);
 //			} else 
 			{
-				while (m_PlayAgents[0].getGameNum()<m_PlayAgents[0].getMaxGameNum())
+				long startTime = System.currentTimeMillis();
+				while (pa.getGameNum()<pa.getMaxGameNum())
 				{		
 					StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
 
-					m_PlayAgents[0].trainAgent(so,epiLength,learnFromRM);
+					pa.trainAgent(so /*,epiLength,learnFromRM*/);
 					
+					gameNum = pa.getGameNum();
+					if (gameNum%numEval==0 ) { //|| gameNum==1) {
+						double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+						System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
+						xab.GameNumT.setText(Integer.toString(gameNum ) );
+						
+						m_evaluatorQ.eval();
+						if (doTrainEvaluation) {
+							m_evaluatorT.eval();
+							evalT = m_evaluatorT.getLastResult();
+						}
+						if (doMultiEvaluation) {
+							m_evaluatorM.eval();
+							evalM = m_evaluatorM.getLastResult();
+						}
+						mTrain = new MTrain(i,gameNum,m_evaluatorQ.getLastResult(),evalT,evalM);
+						mtList.add(mTrain);
+
+						startTime = System.currentTimeMillis();
+					}
 				}
 				
 			} // if(sAgent)..else
@@ -521,7 +553,72 @@ public class XArenaFuncs
 		//System.out.println("Avg. success rate (valiAgent, best is 0.0): "+frm3.format(ov.getMean()) + " +- " + frm.format(ov.getStd()));
 		//System.out.println("Avg. success rate (ALL_Agent, best is 1.0): "+frm3.format(oC.getMean()) + " +- " + frm.format(oC.getStd()));
 		this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");
+		
+		printMultiTrainList(mtList, pa);
+		
+		return pa;
+		
 	} // multiTrain
+
+	class MTrain {
+		public int i;
+		public int gameNum;
+		public double evalQ;
+		public double evalT;
+		public double evalM;
+		
+		MTrain(int i, int gameNum, double evalQ, double evalT, double evalM) {
+			this.i=i;
+			this.gameNum=gameNum;
+			this.evalQ=evalQ;
+			this.evalT=evalT;
+			this.evalM=evalM;
+		}
+		
+		public void print(PrintWriter mtWriter)  {
+			String sep = ", ";
+			mtWriter.print(i + sep + gameNum + sep);
+			mtWriter.println(evalQ + sep + evalT + sep + evalM);
+		}
+	}
+	
+	/**
+	 * Print the results from {@link XArenaFuncs#multiTrain(String, XArenaButtons, GameBoard)} to
+	 * file <br>
+	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/multiTrain.csv}. <br>
+	 * where the optional {@code subdir} is for games with different flavors (like Hex: board size). 
+	 * The directory is created, if it does not exist.   
+	 * 
+	 * @param mtList	the results from {@code multiTrain}
+	 * @param pa		the agent used in {@code multiTrain} 
+	 */
+	public void printMultiTrainList(ArrayList<MTrain> mtList, PlayAgent pa){
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+m_Arena.getGameName();
+		String subDir = m_Arena.getGameBoard().getSubDir();
+		if (subDir != null){
+			strDir += "/"+subDir;
+		}
+		strDir += "/csv";
+		checkAndCreateFolder(strDir);
+
+		PrintWriter mtWriter = null;
+		try {
+			mtWriter = new PrintWriter(new FileWriter(strDir+"/"+"multiTrain.csv",false));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		mtWriter.println(pa.stringDescr());
+		
+		mtWriter.println();
+		mtWriter.println("run, gameNum, evalQ, evalT, evalM");
+		ListIterator<MTrain> iter = mtList.listIterator();		
+		while(iter.hasNext()) {
+			(iter.next()).print(mtWriter);
+		}
+
+	    mtWriter.close();
+	}
 
 	/**
 	 * Test player pa by playing competeNum games against opponent, both as X and as O.
@@ -798,7 +895,7 @@ public class XArenaFuncs
 				{							
 					StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
 
-					paX.trainAgent(so,epiLength,learnFromRM);
+					paX.trainAgent(so /*,epiLength,learnFromRM*/);
 				}
 				
 			} 
@@ -818,7 +915,7 @@ public class XArenaFuncs
 				{							
 					StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
 
-					paX.trainAgent(so,epiLength,learnFromRM);
+					paX.trainAgent(so /*,epiLength,learnFromRM*/);
 				}
 				
 			} 
