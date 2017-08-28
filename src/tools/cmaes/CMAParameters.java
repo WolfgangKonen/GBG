@@ -1,4 +1,4 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes;
+package tools.cmaes;
 
 /*
     Copyright 2003, 2005, 2007 Nikolaus Hansen 

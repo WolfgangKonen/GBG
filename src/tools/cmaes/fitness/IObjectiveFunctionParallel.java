@@ -1,4 +1,4 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes.fitness;
+package tools.cmaes.fitness;
 
 /** Interface to a single-objective function to be minimized, 
  * that accepts an array

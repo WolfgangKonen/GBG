@@ -58,7 +58,7 @@ public class ArenaHex extends Arena {
      *                 if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
      *                 If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
      * @param verbose  how verbose or silent the evaluator is
-     * @return
+     * @return		   the evaluator
      */
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
         if (mode == -1) mode = EvaluatorHex.getDefaultEvalMode();

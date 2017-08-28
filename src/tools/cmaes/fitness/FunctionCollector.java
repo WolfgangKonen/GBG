@@ -1,4 +1,4 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes.fitness;
+package tools.cmaes.fitness;
 
 import java.util.Random;
 

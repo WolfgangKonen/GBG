@@ -39,8 +39,9 @@ public interface XNTupleFuncs {
 	public int getNumPlayers();
 	
 	/**
+	 * @param so the state
 	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
-	 * position value 0, 1, 2,..., P-1.
+	 * position value 0, 1, 2,..., P-1 in state {@code so}.
 	 */
 	public int[] getBoardVector(StateObservation so);
 

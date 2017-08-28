@@ -3,7 +3,7 @@ package games.ZweiTausendAchtundVierzig.Heuristic;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.CMAEvolutionStrategy;
+import tools.cmaes.CMAEvolutionStrategy;
 
 /**
  * Created by Johannes on 29.06.2017.

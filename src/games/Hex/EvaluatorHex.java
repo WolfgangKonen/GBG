@@ -9,6 +9,7 @@ import games.GameBoard;
 import games.XArenaFuncs;
 import params.ParMCTS;
 import tools.Types;
+import tools.Types.ACTIONS;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -86,15 +87,19 @@ public class EvaluatorHex extends Evaluator {
         }
 
         double result;
+        int numEpisodes=3;
         switch (m_mode) {
             case 0:
-                result = competeAgainstMCTS(playAgent, gameBoard);
+                result = competeAgainstMCTS(playAgent, gameBoard, numEpisodes);
                 break;
             case 1:
                 result = competeAgainstRandom(playAgent, gameBoard);
                 break;
             case 2:
                 result = competeAgainstMinimax(playAgent, gameBoard);
+                break;
+            case 10:
+                result = competeAgainstMCTS_diffStates(playAgent, gameBoard, numEpisodes);
                 break;
             default:
                 return false;
@@ -145,18 +150,56 @@ public class EvaluatorHex extends Evaluator {
      * up to and including 5x5. No guarantees for 6x6 board or higher. Tends to require a lot of
      * memory for 7x7 and up. Only one game per evaluation because of the high runtime of the MCTS agent.
      *
-     * @param playAgent Agent to be evaluated
+     * @param playAgent agent to be evaluated
      * @param gameBoard Game board the evaluation game is played on
-     * @return 0 or 1 as double, depending on if the evaluation game was lost or won, respectively
+     * @param numEpisodes number of episodes played during evaluation
+     * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
      */
-    private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard) {
+    private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
         ParMCTS params = new ParMCTS();
         params.setNumIter((int) Math.pow(10, HexConfig.BOARD_SIZE - 1));
         mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
-        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), 1, 0);
-        //double[] res = {0};
-        double success = res[0];
+        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0);
+        double success = res[0];        	
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+        if (this.verbose > 0) System.out.println(m_msg);
+        lastResult = success;
+        return success;
+    }
+
+    /**
+     * Similar to {@link EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)}: 
+     * It does not only play evaluation games from the default start state (empty board) but 
+     * also games where the first player (Black) has made a losing moves and the agent as second
+     * player (White) will win, if it plays perfect. 
+     *
+     * @param playAgent agent to be evaluated
+     * @param gameBoard Game board the evaluation game is played on
+     * @param numEpisodes number of episodes played during evaluation
+     * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
+     * 
+     * @see EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)
+     */
+    private double competeAgainstMCTS_diffStates(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+        ParMCTS params = new ParMCTS();
+        params.setNumIter((int) Math.pow(10, HexConfig.BOARD_SIZE - 1));
+        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
+
+        double success = 0;
+        // the int's in startAction code the start board. -1: empty board (Black can win), 
+        // 0/1/...: tile 00/01/... was Black's 1st move (losing move, White can win)
+        int [] startAction = {-1,0}; 
+        // indResWin: 0: res[0] contains the agent's success rate, he plays Black 
+        // 			  2: res[2] contains the agent's success rate, he plays White 
+        int [] indResWin = {0,2,2,2};
+        for (int i=0; i<startAction.length; i++) {
+        	StateObserverHex so = new StateObserverHex();
+        	if (startAction[i] > -1) so.advance(new ACTIONS(startAction[i]));
+            double[] res = XArenaFuncs.compete(playAgent, mctsAgent, so, numEpisodes, 0);
+            success += res[indResWin[i]];        	
+        }
+        success /= startAction.length;
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         if (this.verbose > 0) System.out.println(m_msg);
         lastResult = success;
@@ -200,7 +243,7 @@ public class EvaluatorHex extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{-1, 0, 1, 2};
+        return new int[]{-1, 0, 1, 2, 10};
     }
 
     @Override
@@ -215,7 +258,8 @@ public class EvaluatorHex extends Evaluator {
 
     @Override
     public int getMultiTrainEvalMode() {
-        return getAvailableModes()[0];
+        return 0; //getAvailableModes()[0];
+//        return getQuickEvalMode();
     }
 
     @Override
@@ -223,6 +267,8 @@ public class EvaluatorHex extends Evaluator {
         switch (m_mode) {
             case 0:
                 return "success against MCTS (best is 1.0): ";
+            case 10:
+                return "success against MCTS (diff. start states, best is 1.0): ";
             case 1:
                 return "success against Random (best is 1.0): ";
             case 2:

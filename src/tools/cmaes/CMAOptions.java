@@ -1,4 +1,4 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes;
+package tools.cmaes;
 
 import java.util.Properties;
 
@@ -43,7 +43,7 @@ public class CMAOptions implements java.io.Serializable {
     /** number of initial iterations with diagonal covariance matrix, where
      * 1 means always. Default is
      * diagonalCovarianceMatrix=0, but this will presumably change in future.
-     * As long as iterations<=diagonalCovarianceMatrix
+     * As long as iterations &le; diagonalCovarianceMatrix
      * the internal time complexity is linear in the search space dimensionality
      * (memory requirements remain quadratic).
      */
@@ -80,7 +80,7 @@ public class CMAOptions implements java.io.Serializable {
          * solutions of the last 10 +
          * 30*N/lambda iterations
          * and all solutions of the recent iteration
-         * become <= stopTolFun. Default = 1e-12.
+         * become &le; stopTolFun. Default = 1e-12.
          * */
         public double stopTolFun = 1e-12;
         /** stop if the maximum function value difference of all iteration-best
@@ -120,11 +120,11 @@ public class CMAOptions implements java.io.Serializable {
         public int verbosity = 1;
         /** Output files written will have the names outputFileNamesPrefix*.dat */
         public String outputFileNamesPrefix = "outcmaes"; 
-        /** if chosen > 0 the console output from functions <code>print...</code> is saved 
+        /** if chosen &gt; 0 the console output from functions <code>print...</code> is saved 
          * additionally into a file, by default <tt>outcmaesdisp.dat</tt> */
         public int writeDisplayToFile = 1;
         
-        /** only for >= 1 results are always exactly reproducible, as otherwise the update of the 
+        /** only for &ge; 1 results are always exactly reproducible, as otherwise the update of the 
          * eigensystem is conducted depending on time measurements, defaut is 0.2 */
         public double maxTimeFractionForEigendecomposition = 0.2;
         /** default is 0.1 

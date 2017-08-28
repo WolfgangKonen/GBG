@@ -1,4 +1,4 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes;
+package tools.cmaes;
 //
 // (c) 2000 Sun Microsystems, Inc.
 // ALL RIGHTS RESERVED
@@ -49,13 +49,13 @@ import java.util.Vector;
  *<li>precedes a sequence of characters that parses as
  * a valid control specification.
  *</ol>
- *</p><p>
+ *<p>
  * A control specification usually takes the form:
  *<pre> % ['-+ #0]* [0..9]* { . [0..9]* }+
  *                { [hlL] }+ [idfgGoxXeEcs]
  *</pre>
  * There are variants of this basic form that are
- * discussed below.</p>
+ * discussed below.
  *<p>
  * The format is composed of zero or more directives
  * defined as follows:
@@ -66,7 +66,7 @@ import java.util.Vector;
  * characters; and
  *<li>conversion specifications,  each of which
  * results in the fetching of zero or more arguments.
- *</ul></p>
+ *</ul>
  *<p>
  * The results are undefined if there are insufficient
  * arguments for the format.  Usually an unchecked
@@ -131,7 +131,7 @@ import java.util.Vector;
  *          next implementation-defined vertical
  *          tab position.
  *</td></tr>
- *</table></p>
+ *</table>
  *<h4>Conversion Specifications</h4>
  *<p>
  * Each conversion specification is introduced by

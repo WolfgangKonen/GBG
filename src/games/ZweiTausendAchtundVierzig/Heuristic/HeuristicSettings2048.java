@@ -1,10 +1,10 @@
 package games.ZweiTausendAchtundVierzig.Heuristic;
 
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.fitness.IObjectiveFunction;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.MCTSExpectimaxParams;
 import tools.Types;
+import tools.cmaes.fitness.IObjectiveFunction;
 
 import java.util.ArrayList;
 import java.util.List;

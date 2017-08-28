@@ -449,6 +449,8 @@ public class XArenaFuncs
 		//ValItPlayer valit_agent = trainedValItPlayer(maxGameNumV);
 		
 		for (int i=0; i<trainNum; i++) {
+			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
+
 			try {
 				pa = constructAgent(sAgent, xab);
 				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
@@ -544,6 +546,7 @@ public class XArenaFuncs
 			//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100));
 			//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);
 			oC.add(1+(oM.getVal()-0.9+oQ.getVal())/2.0);
+
 		} // for (i)
 		System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
 		if (doTrainEvaluation) 
@@ -556,6 +559,7 @@ public class XArenaFuncs
 		
 		printMultiTrainList(mtList, pa);
 		
+		xab.TrainNumT.setText(Integer.toString(trainNum) );
 		return pa;
 		
 	} // multiTrain

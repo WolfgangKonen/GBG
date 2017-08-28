@@ -1,4 +1,4 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes;
+package tools.cmaes;
 
 import java.util.*;
 
@@ -82,14 +82,14 @@ import java.util.*;
  *
  * <p>In general, on smooth objective functions the CMA-ES is roughly ten times
  * slower than BFGS (counting objective function evaluations, no gradients provided). 
- * For up to <math>N=10</math> variables also the derivative-free simplex
- * direct search method (Nelder & Mead) can be faster, but it is
+ * For up to <code>N=10</code> variables also the derivative-free simplex
+ * direct search method (Nelder &amp; Mead) can be faster, but it is
  * far less reliable than CMA-ES. 
  *
  * <p>The CMA-ES is particularly well suited for non-separable 
  * and/or badly conditioned problems. 
  * To observe the advantage of CMA compared to a conventional
- * evolution strategy, it will usually take about 30&#215;<math>N</math> function
+ * evolution strategy, it will usually take about 30&#215;<code>N</code> function
  * evaluations. On difficult problems the complete
  * optimization (a single run) is expected to take <em>roughly</em>  between
  * <math>30&#215;N</math> and <math>300&#215;N<sup>2</sup></math>
@@ -142,17 +142,17 @@ import java.util.*;
      *   plotted in Matlab or Scilab using <tt>plotcmaesdat.m</tt> or
      *   <tt>plotcmaesdat.sci</tt> respectively, see {@link #writeToDefaultFiles()}. 
      *     
-</P>     
-<P> The implementation follows very closely <a name=HK2004>[3]</a>. It supports small and large 
+     
+<p> The implementation follows very closely <a name=HK2004>[3]</a>. It supports small and large 
 population sizes, the latter by using the rank-&micro;-update [2],
 together with weighted recombination for the covariance matrix, an
 improved parameter setting for large populations [3] and an (initially) diagonal covariance matrix [5]. 
 The latter is particularly useful for large dimension, e.g. larger 100. 
 The default population size is small [1]. An
 independent restart procedure with increasing population size [4]
-is implemented in class <code>{@link cmaes.examples.CMAExample2}</code>.</P>
+is implemented in class <code>{@link tools.cmaes.examples.CMAExample2}</code>.
 
- * <P><B>Practical hint</B>: In order to solve an optimization problem in reasonable time it needs to be 
+ * <p><B>Practical hint</B>: In order to solve an optimization problem in reasonable time it needs to be 
  * reasonably encoded. In particular the domain width of variables should be 
  * similar for all objective variables (decision variables), 
  * such that the initial standard deviation can be chosen the same
@@ -161,7 +161,7 @@ is implemented in class <code>{@link cmaes.examples.CMAExample2}</code>.</P>
  * For positive variables a log-encoding or a square-encoding 
  * should be considered, to avoid the need to set a hard boundary at zero, 
  * see <A href="http://www.lri.fr/~hansen/cmaes_inmatlab.html#practical">here for a few more details</A>.
- * </P>
+ * 
 
 <P><B>References</B>
 <UL>
@@ -181,7 +181,7 @@ Proceedings</I>, pp. 282-291, Berlin: Springer.
 </LI>
 <LI>[4]
 Auger, A, and Hansen, N. (2005). A Restart CMA Evolution Strategy
-With Increasing Population Size.</A> In <I>Proceedings of the IEEE
+With Increasing Population Size. In <I>Proceedings of the IEEE
 Congress on Evolutionary Computation, CEC 2005</I>, pp.1769-1776.
 </LI>
 <LI>[5]
@@ -191,7 +191,7 @@ In Rudolph et al. (eds.) <I>Parallel Problem Solving from Nature, PPSN X,
 Proceedings</I>, pp. 296-305, Springer.
 </LI>
 </UL>
-</P>
+
 
  * @see #samplePopulation()
  * @see #updateDistribution(double[])
@@ -1593,7 +1593,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
     }
 
 	/** update of the search distribution from a population and its 
-	 * function values, see {@link #updateDistribution(double[][], double[], 0)}. 
+	 * function values, see {@link #updateDistribution(double[][], double[], int)}. 
 	 * This might become updateDistribution(double[][], double[], popsize)
      * in future. 
      * 
@@ -2255,6 +2255,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
          *   164( 8),   1638: 5.5061568003892640e-08 (-4e-08,3e-08) |  0: 3.3e-05  8: 1.5e-05 | 1.4e-05 5.6e-05   2.34   |  0.1  0.0
          *</pre>
          * shows the value of getPrintAnnotation() in the first line and in the second line
+         * <ul>
          * <li>164 iteration number
          * <li>( 8) recently sampled search point in this iteration,
          * <li>1638: number of function evaluations
@@ -2274,6 +2275,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
          * and smallest eigenvalue of covariance matrix C
          * <li> 0.1 time, overall elapsed time in seconds
          * <li> 0.0 in eig, overall time spent within eigendecompostion
+         * </ul>
          * @see #getPrintAnnotation()
          * */
     public String getPrintLine() {
@@ -2387,7 +2389,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
 
     }
     /** calls System.out.println(s) and writes s to the file outcmaesdisp.dat
-     * by default, if writeDisplayToFile option is > 0
+     * by default, if writeDisplayToFile option is &gt; 0
      * @see #getPrintLine()
      */
     public void println(String s) {
@@ -2503,7 +2505,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
      * <p>Example: cma.writeToFile("cmaescorr.dat", cma.writeC()); 
      * @param filename is a String giving the name of the file to be written
      * @param data is a String of text/data to be written
-     * @param flgAppend for flgAppend>0 old data are not overwritten
+     * @param flgAppend for flgAppend &gt; 0 old data are not overwritten
      */
     public void writeToFile(String filename, String data, int flgAppend) {
         boolean appendflag = flgAppend > 0;
@@ -2556,7 +2558,7 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
           getf('plotcmaesdat.sci');
           plotcmaesdat;
      * </pre>
-     * </p>
+     * 
      * @see #writeToDefaultFiles(String fileNamePrefix)
      * @see #writeToDefaultFiles(int)
      *  */
@@ -2628,8 +2630,8 @@ public class CMAEvolutionStrategy implements java.io.Serializable {
         writeToDefaultFilesHeaders(options.outputFileNamesPrefix, flgAppend);
     }
     /** 
-     * Writes headers (column annotations) to files <prefix>fit.dat, ...xmean.dat
-     * ...xbest.dat, ...std.dat, ...axlen.dat, and in case the first data
+     * Writes headers (column annotations) to files <pre>fit.dat, ...xmean.dat
+     * ...xbest.dat, ...std.dat, ...axlen.dat </pre>, and in case the first data
      * line, usually with the initial values. 
      * @param fileNamePrefix String for filenames created to write data */
     public void writeToDefaultFilesHeaders(String fileNamePrefix, int flgAppend) {

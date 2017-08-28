@@ -24,6 +24,7 @@ import tools.Types;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
+import controllers.TD.ntuple.TDNTupleAgt;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;

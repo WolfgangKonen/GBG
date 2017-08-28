@@ -19,7 +19,7 @@ public class Types {
     	 */
     	private static final long  serialVersionUID = 12L;
 
-        ACTIONS(int numVal) {			// constructor
+        public ACTIONS(int numVal) {			// constructor
             this.key = numVal;
         }
 

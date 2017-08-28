@@ -1,9 +1,9 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes.examples;
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.CMAEvolutionStrategy;
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.CMAOptions;
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.CMASolution;
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.fitness.FunctionCollector;
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.fitness.IObjectiveFunction;
+package tools.cmaes.examples;
+import tools.cmaes.CMAEvolutionStrategy;
+import tools.cmaes.CMAOptions;
+import tools.cmaes.CMASolution;
+import tools.cmaes.fitness.FunctionCollector;
+import tools.cmaes.fitness.IObjectiveFunction;
 
 import java.io.BufferedReader;
 import java.io.IOException;

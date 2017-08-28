@@ -7,7 +7,23 @@ import java.util.ArrayList;
 
 import static games.Hex.HexConfig.*;
 
-
+/**
+ * Class StateObserverHex represents states in Hex.
+ * <p>
+ * The board celled are numbered starting from the west corner going down to the south corner, which constitutes
+ * the first row. The next row is the row above. I. e. an 4x4 Hex board has its tiles numbered 
+ * as follows:
+ * <pre>
+ *                   12
+ *                08    13
+ *             04    09    14
+ *          00    05    10    15
+ *             01    06    11
+ *                02    07
+ *                   03
+ * </pre>
+ * 
+ */
 public class StateObserverHex implements StateObservation {
     /**
      * change the version ID for serialization only if a newer version is no longer

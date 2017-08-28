@@ -1,4 +1,4 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes.fitness;
+package tools.cmaes.fitness;
 
 
 /** extending from this abstract class implements a generic isFeasible method and adds the

@@ -1,4 +1,4 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes;
+package tools.cmaes;
 
 /** solution point in search space. Rather plain implementation of the interface ISolutionPoint. 
  * 

@@ -1,7 +1,7 @@
-package games.ZweiTausendAchtundVierzig.Heuristic.cmaes.examples;
+package tools.cmaes.examples;
 
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.CMAEvolutionStrategy;
-import games.ZweiTausendAchtundVierzig.Heuristic.cmaes.fitness.IObjectiveFunction;
+import tools.cmaes.CMAEvolutionStrategy;
+import tools.cmaes.fitness.IObjectiveFunction;
 
 /** The very well-known Rosenbrock objective function to be minimized. 
  */

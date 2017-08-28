@@ -246,8 +246,11 @@ abstract public class Arena extends JPanel implements Runnable {
 				
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so; 
-					int Index = this.getHexIndex(soh.getBoard());
-					System.out.println("Index: "+Index);
+					XNTupleFuncs xnf = this.makeXNTupleFuncs();
+					int[] bvec = xnf.getBoardVector(soh);		// look at bvec in debugger to see the board representation
+					//int Index = this.getHexIndex(soh.getBoard());
+					//System.out.println("Index: "+Index);
+					int dummy=1;
 				}
 				
 				if (so.isLegalState() && !so.isGameOver()) {
@@ -569,7 +572,7 @@ abstract public class Arena extends JPanel implements Runnable {
 	 * @param mode		which evaluator mode. If -1, take the default evalMode
 	 * 					{@link Evaluator#getDefaultEvalMode()}
 	 * @param verbose	how verbose or silent the evaluator is
-	 * @return
+	 * @return			the evaluator
 	 */
 	abstract public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose);
 

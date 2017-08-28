@@ -141,8 +141,8 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
     }
 
     /**
-     * Rotates the board by 180Â° degrees by mirroring along both axes.
-     * Hex has rotational symmetry if rotated by 180Â°.
+     * Rotates the board by 180° degrees by mirroring along both axes.
+     * Hex has rotational symmetry if rotated by 180°.
      *
      * @param boardVector Game board vector
      * @return Rotated board
