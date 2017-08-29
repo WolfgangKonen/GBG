@@ -13,7 +13,7 @@ import java.util.HashSet;
  * 
  * Note: The six methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
  * {@link #getBoardVector(StateObservation)}, {@link #symmetryVectors(int[])}, 
- * {@link #fixedNTuples()} and {@link #adjacencySet()} are only required for the 
+ * {@link #fixedNTuples()} and {@link #adjacencySet(int)} are only required for the 
  * n-tuple interface. 
  * If an implementing game does not need that part (i. e. if it does not plan to 
  * use {@link TDNTupleAgt}), it may just code stubs returning 0, {@code null}, 
@@ -53,6 +53,10 @@ public interface XNTupleFuncs {
 	 * <li> the other s-1 rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
+	 * Symmetric board vectors are board vectors with the same value and with equivalent best
+	 * next actions. For example, TicTacToe has 8 symmetries: 4 rotations (0°, 90°, 180°, 270°)
+	 * times 2 mirror reflections.
+	 * 
 	 * @param boardVector e.g. from {@link #getBoardVector(StateObservation)}
 	 * @return a (s x length(boardVector))-matrix 
 	 */

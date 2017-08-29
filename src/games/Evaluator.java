@@ -74,7 +74,7 @@ abstract public class Evaluator {
 	 * 
 	 * @return
 	 *  	a boolean predicate (fail/success) for the result of the evaluation. 
-	 *  	Might be for example (avg.success > -0.15) when playing TTT against Minimax.
+	 *  	Might be for example (avg.success &gt; -0.15) when playing TTT against Minimax.
 	 */
 	abstract protected boolean eval_Agent();
 

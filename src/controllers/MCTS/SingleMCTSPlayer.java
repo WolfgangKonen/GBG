@@ -42,7 +42,7 @@ public class SingleMCTSPlayer implements Serializable
     int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 	
 	/**
-	 * Member {@link #m_mcPar} is only needed for saving and loading the agent
+	 * Member {@link #m_parMCTS} is only needed for saving and loading the agent
 	 * (to restore the agent with all its parameter settings)
 	 */
 	//private MCTSParams m_mcPar;

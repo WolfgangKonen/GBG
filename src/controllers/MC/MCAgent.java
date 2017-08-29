@@ -300,8 +300,8 @@ public class MCAgent extends AgentBase implements PlayAgent {
      * 
      * @param sob
      * @param vtable
-     * @param numberAgents	=1: use getNextAction (parallel version) <br>
-     *                      >1: use getNextActionMultipleAgents with NUMBERAGENTS=numberAgents
+     * @param numberAgents	= 1: use getNextAction (parallel version) <br>
+     *                      &gt; 1: use getNextActionMultipleAgents with NUMBERAGENTS=numberAgents
      * @param silent
      * @param NC			number of repeats for next-action calculation
      * @param iterations    rollout repeats (for each available action)

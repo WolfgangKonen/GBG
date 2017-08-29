@@ -7,7 +7,17 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
-
+	
+    /**
+     * change the version ID for serialization only if a newer version is no longer
+     * compatible with an older one (older .gamelog or .agt.zip containing this object will
+     * become unreadable or you have to provide a special version transformation)
+     * <p>
+     * [We need this strange number here, because serialVersionUID was not present before, 
+     * and the so far stored agents had this automatically created serialVersionUID.]
+     */
+    private static final long serialVersionUID = -2631312361401190002L;
+    
     @Override
     public int getNumCells() {
         return HexConfig.TILE_COUNT;
@@ -43,7 +53,10 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
     public int[][] symmetryVectors(int[] boardVector) {
         int[][] symmetries = new int[2][];
         symmetries[0] = boardVector;
-        symmetries[1] = rotateBoard(boardVector);
+        symmetries[1] = rotateBoard2(boardVector); // a bit faster than rotateBoard()
+//        int[] check = rotateBoard(boardVector);
+//        for (int i=0; i<boardVector.length; i++)
+//        	assert symmetries[1][i]==check[i] : "Oops, rotateBoard() and rotateBoard2() differ!";
         return symmetries;
     }
 
@@ -106,6 +119,7 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
      * @param axis        Axis along which to mirror
      * @return Mirrored board
      */
+    @Deprecated
     private int[] mirrorBoard(int[] boardVector, Axis axis) {
         int[] mirroredVector = boardVector.clone();
 
@@ -142,11 +156,12 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
 
     /**
      * Rotates the board by 180° degrees by mirroring along both axes.
-     * Hex has rotational symmetry if rotated by 180°.
+     * Hex has rotational symmetry if rotated by 180°. Slower than {@link #rotateBoard2(int[])}.
      *
      * @param boardVector Game board vector
      * @return Rotated board
      */
+    @Deprecated
     private int[] rotateBoard(int[] boardVector) {
         int[] rotatedBoard = boardVector.clone();
 
@@ -154,6 +169,26 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
         //Rotating by 90 or 270 degrees would not be an equivalent board in Hex
         rotatedBoard = mirrorBoard(rotatedBoard, Axis.HORIZONTAL);
         rotatedBoard = mirrorBoard(rotatedBoard, Axis.VERTICAL);
+
+        return rotatedBoard;
+    }
+
+    /**
+     * Rotates the board by 180° degrees by mirroring along both axes.
+     * Hex has rotational symmetry if rotated by 180°.
+     *
+     * @param boardVector game board vector
+     * @return rotated board vector
+     */
+    private int[] rotateBoard2(int[] boardVector) {
+        int[] rotatedBoard = boardVector.clone();
+        int L = boardVector.length;
+
+        //Rotating by 180 degrees is the same as mirroring by both axes
+        //Rotating by 90 or 270 degrees would not be an equivalent board in Hex
+        for (int i=0,j=L-1; i<L; i++,j--) {
+        	rotatedBoard[i]=boardVector[j];
+        }
 
         return rotatedBoard;
     }

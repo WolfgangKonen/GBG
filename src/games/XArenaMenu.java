@@ -480,15 +480,17 @@ public class XArenaMenu extends JMenuBar {
 			if (td instanceof TDAgent) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar.setFrom( ((TDAgent) td).getTDParams() );
-				if (((TDAgent) td).getOtherPar() != null )
-					m_arena.m_xab.oPar.setFrom( ((TDNTuple2Agt) td).getOtherPar() );
+				if (((TDAgent) td).getOtherPar() == null ) 
+					((TDAgent) td).setDefaultOtherPar();
+				m_arena.m_xab.oPar.setFrom( ((TDAgent) td).getOtherPar() );
 			}
 			else if (td instanceof TDNTupleAgt) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar.setFrom( ((TDNTupleAgt) td).getTDParams() );
 				m_arena.m_xab.ntPar.setFrom( ((TDNTupleAgt) td).getNTParams() );
-				if (((TDNTupleAgt) td).getOtherPar() != null )
-					m_arena.m_xab.oPar.setFrom( ((TDNTuple2Agt) td).getOtherPar() );
+				if (((TDNTupleAgt) td).getOtherPar() == null ) 
+					((TDNTupleAgt) td).setDefaultOtherPar();
+				m_arena.m_xab.oPar.setFrom( ((TDNTupleAgt) td).getOtherPar() );
 				//
 				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
@@ -500,8 +502,9 @@ public class XArenaMenu extends JMenuBar {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar.setFrom( ((TDNTuple2Agt) td).getTDParams() );
 				m_arena.m_xab.ntPar.setFrom( ((TDNTuple2Agt) td).getNTParams() );
-				if (((TDNTuple2Agt) td).getOtherPar() != null )
-					m_arena.m_xab.oPar.setFrom( ((TDNTuple2Agt) td).getOtherPar() );
+				if (((TDNTuple2Agt) td).getOtherPar() == null ) 
+					((TDNTuple2Agt) td).setDefaultOtherPar();
+				m_arena.m_xab.oPar.setFrom( ((TDNTuple2Agt) td).getOtherPar() );
 				//
 				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 

@@ -112,7 +112,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private boolean randomSelect = false;
 	
 	/**
-	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link #m_oPar} are only needed for 
+	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link #m_oPar} are needed for 
 	 * saving and loading the agent (to restore the agent with all its parameter settings)
 	 */
 //	private TDParams m_tdPar;
@@ -846,6 +846,15 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
 		m_Net.setTdAgt(this);						 // WK: needed when loading an older agent
+	}
+	
+	/**
+	 * Set defaults for m_oPar 
+	 * (needed in {@link XArenaMenu.loadAgent} when loading older agents, where 
+	 * m_oPar=null in the saved version).
+	 */
+	public void setDefaultOtherPar() {
+		m_oPar = new ParOther();
 	}
 
 	public void setAlpha(double alpha) {

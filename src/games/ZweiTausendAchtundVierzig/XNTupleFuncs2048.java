@@ -8,6 +8,16 @@ import games.XNTupleFuncs;
 
 public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 
+    /**
+     * change the version ID for serialization only if a newer version is no longer
+     * compatible with an older one (older .gamelog or .agt.zip containing this object will
+     * become unreadable or you have to provide a special version transformation)
+     * <p>
+     * [We need this strange number here, because serialVersionUID was not present before, 
+     * and the so far stored agents had this automatically created serialVersionUID.]
+     */
+    private static final long serialVersionUID = -4486168568704181430L;
+
 	//
 	// The following five functions are only needed for the n-tuple interface:
 	//

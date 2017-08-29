@@ -572,6 +572,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         Types.ACTIONS act = Types.ACTIONS.fromInt(move);
         assert m_so.isLegalAction(act) : "Desired action is not legal";
         m_so.advance(act);
+		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
         arenaActReq = true;            // ask Arena for next action
     }
 

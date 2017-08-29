@@ -31,6 +31,7 @@ public class EvaluatorHex extends Evaluator {
     private GameBoard gameBoard;
     private PlayAgent playAgent;
     private double lastResult = 0;
+    private int numStartStates = 1;
     private int m_mode = 0;
     private String m_msg = null;
     /**
@@ -174,30 +175,49 @@ public class EvaluatorHex extends Evaluator {
      * also games where the first player (Black) has made a losing moves and the agent as second
      * player (White) will win, if it plays perfect. 
      *
-     * @param playAgent agent to be evaluated
+     * @param playAgent agent to be evaluated (it plays both 1st and 2nd)
      * @param gameBoard Game board the evaluation game is played on
      * @param numEpisodes number of episodes played during evaluation
      * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
      * 
      * @see EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)
+     * @see HexConfig#EVAL_START_ACTIONS
      */
     private double competeAgainstMCTS_diffStates(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
         ParMCTS params = new ParMCTS();
         params.setNumIter((int) Math.pow(10, HexConfig.BOARD_SIZE - 1));
         mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
+        // find the start states to evaluate:
+        int [] startAction = {-1};
+        int N = HexConfig.BOARD_SIZE;
+        if (N>HexConfig.EVAL_START_ACTIONS.length-1) {
+            System.out.println("*** WARNING ***: 1-ply winning boards for board size N="+N+
+            		"are not coded in " +"HexConfig.EVAL_START_ACTIONS." );
+            System.out.println("*** WARNING ***: Evaluator(mode 10) will use only " +
+            		"empty board for evaluation.");
+        } else {
+            // the int's in startAction code the start board. -1: empty board (a winning 
+            // board for 1st player Black), 
+            // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, a winning
+            // board for 2nd player White)
+            startAction = HexConfig.EVAL_START_ACTIONS[N];
+        }
+        numStartStates = startAction.length;
+        
+        // evaluate each start state in turn and return average success rate: 
+        double[] res;
         double success = 0;
-        // the int's in startAction code the start board. -1: empty board (Black can win), 
-        // 0/1/...: tile 00/01/... was Black's 1st move (losing move, White can win)
-        int [] startAction = {-1,0}; 
-        // indResWin: 0: res[0] contains the agent's success rate, he plays Black 
-        // 			  2: res[2] contains the agent's success rate, he plays White 
-        int [] indResWin = {0,2,2,2};
         for (int i=0; i<startAction.length; i++) {
         	StateObserverHex so = new StateObserverHex();
-        	if (startAction[i] > -1) so.advance(new ACTIONS(startAction[i]));
-            double[] res = XArenaFuncs.compete(playAgent, mctsAgent, so, numEpisodes, 0);
-            success += res[indResWin[i]];        	
+        	if (startAction[i] == -1) {
+        		res = XArenaFuncs.compete(playAgent, mctsAgent, so, numEpisodes, 0);
+                success += res[0];        	
+        	} else {
+        		so.advance(new ACTIONS(startAction[i]));
+        		res = XArenaFuncs.compete(mctsAgent, playAgent, so, numEpisodes, 0);
+                success += res[2];        	
+        	}
         }
         success /= startAction.length;
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
@@ -268,7 +288,7 @@ public class EvaluatorHex extends Evaluator {
             case 0:
                 return "success against MCTS (best is 1.0): ";
             case 10:
-                return "success against MCTS (diff. start states, best is 1.0): ";
+                return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
             case 1:
                 return "success against Random (best is 1.0): ";
             case 2:

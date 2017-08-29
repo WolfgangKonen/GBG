@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.ntuple.TDNTupleAgt;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
  *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTupleAgt}

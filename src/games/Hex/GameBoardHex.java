@@ -268,7 +268,9 @@ public class GameBoardHex implements GameBoard {
                 Point p = new Point(HexUtils.pxtoHex(e.getX(), e.getY(), stateObs.getBoard(), HexConfig.BOARD_SIZE));
                 if (p.x < 0 || p.y < 0 || p.x >= HexConfig.BOARD_SIZE || p.y >= HexConfig.BOARD_SIZE) return;
 
-                stateObs.advance(Types.ACTIONS.fromInt(p.x * HexConfig.BOARD_SIZE + p.y));
+        		Types.ACTIONS act = Types.ACTIONS.fromInt(p.x * HexConfig.BOARD_SIZE + p.y);
+                stateObs.advance(act);
+        		(arena.getLogManager()).addLogEntry(act, stateObs, arena.getLogSessionID());
                 updateBoard(null, false, false);
                 setActionReq(true);
             }

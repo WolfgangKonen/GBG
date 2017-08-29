@@ -187,7 +187,7 @@ public class StateObs2048BitShift implements StateObservation {
 	 *    08 09 10 11
 	 *    12 13 14 15
 	 * </pre>
-	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
+	 * @return a vector of length {@link games.XNTupleFuncs#getNumCells()}, holding for each board cell its 
 	 * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
 	 */
 	public int[] getBoardVector() {

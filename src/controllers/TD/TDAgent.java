@@ -25,6 +25,7 @@ import controllers.PlayAgent.AgentState;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
+import games.XArenaMenu;
 
 /**
  * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning). 
@@ -55,7 +56,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
 	 * m_epsilon undergoes a linear change from {@code tdPar.getEpsilon()} 
 	 * to {@code tdPar.getEpsilonFinal()}. 
-	 * This is realized in {@link #finishUpdateWeights()}.
+	 * This is realized in {@link TD_Lin#finishUpdateWeights()}.
 	 */
 	private double m_epsilon = 0.1;
 	
@@ -82,10 +83,10 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	protected Feature m_feature;
 	
 	/**
-	 * Member {@link #m_tdPar} is only needed for saving and loading the agent
-	 * (to restore the agent with all its parameter settings)
+	 * Members {@link #m_tdPar} and {@link #m_oPar} are needed for saving and loading
+	 * the agent (to restore the agent with all its parameter settings)
 	 */
-	private TDParams m_tdPar;
+	private TDParams m_tdPar;		// TODO transform to ParTD
 	private ParOther m_oPar = new ParOther();
 	
 	/**
@@ -525,6 +526,15 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_Net.setRpropLrn(tdPar.hasRpropLrn());
 		m_Net.setRpropInitDelta( tdPar.getAlpha() / m_feature.getInputSize(m_feature.getFeatmode()));
 					//OLD (and wrong): inpSize[m_feature.getFeatmode()] );
+	}
+
+	/**
+	 * Set defaults for m_oPar 
+	 * (needed in {@link XArenaMenu.loadAgent} when loading older agents, where 
+	 * m_oPar=null in the saved version).
+	 */
+	public void setDefaultOtherPar() {
+		m_oPar = new ParOther();
 	}
 
 	public void setAlpha(double alpha) {

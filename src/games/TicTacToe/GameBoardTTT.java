@@ -396,6 +396,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		m_so.advance(act);			// this allows m_so to add random elements from game 
 									// environment (not necessary in TicTacToe)
+		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 		updateBoard(null,false,false);
 		arenaActReq = true;			// ask Arena for next action
 	}

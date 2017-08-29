@@ -30,6 +30,7 @@ import games.GameBoard;
 import games.StateObservation;
 import games.StateObservationNondeterministic;
 import games.XNTupleFuncs;
+import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 
 /**
@@ -240,7 +241,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
 		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
 	
-// --- this code is not understandable and wrong ---		
+// --- this code is suspicious and not intuitive (random moves even in case m_epsilon==0) ---		
 //		randomSelect = false;
 //		double progress = (double) getGameNum() / (double) getMaxGameNum();
 //		progress = (1 + m_epsilon) * progress - m_epsilon; 	// = progress +
@@ -502,54 +503,57 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //	        m_randomMove = actBest.isRandomAction();
 			m_randomMove = this.wasRandomAction();
 	               
-	        // this part will become obsolete if we switch to the NextState-logic:
-	        // (we keep it only for a while as cross-check)
-			oldSO = so.copy();
-	        if (getAFTERSTATE()) {
-            	assert (so instanceof StateObservationNondeterministic);
-                ((StateObservationNondeterministic) so).advanceDeterministic(actBest); 
-				nextBoard = m_Net.xnf.getBoardVector(so);
-                ((StateObservationNondeterministic) so).advanceNondeterministic(); 
-	        	
-	        } else {
-				so.advance(actBest);
-				nextBoard = m_Net.xnf.getBoardVector(so);
-	        }
-	        if (getAFTERSTATE()) {
-	        	/* a debug assertion which we can only do in the (AFTERSTATE==true)-case, otherwise the random tile 
-	        	 * differs */
-	        	if (ns!=null && curBoard!=null) {
-		        	// the after state before the current state as board vector
-			        curBoard2 = m_Net.xnf.getBoardVector(ns.getAfterState()); 
-			        for (int i=0; i<nextBoard.length; i++)
-			        	assert curBoard[i]==curBoard2[i] : "Ooops, curBoard2 differs from curBoard";	        	
-	        	}
-	        }
+//	        // this part will become obsolete if we switch to the NextState-logic:
+//	        // (we keep it only for a while as cross-check)
+//			oldSO = so.copy();
+//	        if (getAFTERSTATE()) {
+//            	assert (so instanceof StateObservationNondeterministic);
+//                ((StateObservationNondeterministic) so).advanceDeterministic(actBest); 
+//				nextBoard = m_Net.xnf.getBoardVector(so);
+//                ((StateObservationNondeterministic) so).advanceNondeterministic(); 
+//	        	
+//	        } else {
+//				so.advance(actBest);
+//				nextBoard = m_Net.xnf.getBoardVector(so);
+//	        }
+//	        if (getAFTERSTATE()) {
+//	        	/* a debug assertion which we can only do in the (AFTERSTATE==true)-case, otherwise the random tile 
+//	        	 * differs */
+//	        	if (ns!=null && curBoard!=null) {
+//		        	// the after state before the current state as board vector
+//			        curBoard2 = m_Net.xnf.getBoardVector(ns.getAfterState()); 
+//			        for (int i=0; i<nextBoard.length; i++)
+//			        	assert curBoard[i]==curBoard2[i] : "Ooops, curBoard2 differs from curBoard";	        	
+//	        	}
+//	        }
 	        
-	        ns = new NextState(oldSO,actBest);
+//	        ns = new NextState(oldSO,actBest); // activate this line only, if the obsolete part above is NOT commented out
+	        ns = new NextState(so,actBest);	        
+	        nextPlayer = ns.getNextSO().getPlayer();
 	        
-	        // this part will become obsolete if we switch to the NextState-logic:
-	        // (we keep it only for a while as cross-check)
-	        if (getAFTERSTATE()) {
-	        	/* a debug assertion which we can only do in the (AFTERSTATE==true)-case, otherwise the random tile 
-	        	 * differs */
-		        nextBoard2 = m_Net.xnf.getBoardVector(ns.getAfterState()); // the afterstate as board vector
-		        for (int i=0; i<nextBoard.length; i++)
-		        	assert nextBoard[i]==nextBoard2[i] : "Ooops, nextBoard2 differs from nextBoard";
-		        /* Note that we cannot perform a check that so and ns.getNextSO are the same states, since they both 
-		         * contain a nondeterministic advance which usually differs in the random tile. */
-	        }	        
-			nextPlayer= so.getPlayer();
+//	        // this part will become obsolete if we switch to the NextState-logic:
+//	        // (we keep it only for a while as cross-check)
+//	        if (getAFTERSTATE()) {
+//	        	/* a debug assertion which we can only do in the (AFTERSTATE==true)-case, otherwise the random tile 
+//	        	 * differs */
+//		        nextBoard2 = m_Net.xnf.getBoardVector(ns.getAfterState()); // the afterstate as board vector
+//		        for (int i=0; i<nextBoard.length; i++)
+//		        	assert nextBoard[i]==nextBoard2[i] : "Ooops, nextBoard2 differs from nextBoard";
+//		        /* Note that we cannot perform a check that so and ns.getNextSO are the same states, since they both 
+//		         * contain a nondeterministic advance which usually differs in the random tile. */
+//	        }	        
+//			int nextPlayer2 = so.getPlayer();
+//			assert nextPlayer2==nextPlayer : "Oops, nextPlayer differs";
+//			//if (DEBG) printVTable(pstream,VTable);
+//			if (m_DEBG) printTable(pstream,nextBoard);
 
-			//if (DEBG) printVTable(pstream,VTable);
-			if (m_DEBG) printTable(pstream,nextBoard);
 			if (NEWTARGET) {
-				if (WITH_NS) {
+//				if (WITH_NS) {
 					reward=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward);
-				} else {
-					reward=trainNewTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
-							learnFromRM,epiLength,player,upTC,oldReward);	
-				}
+//				} else {
+//					reward=trainNewTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
+//							learnFromRM,epiLength,player,upTC,oldReward);	
+//				}
 			} else {
 				throw new RuntimeException("NEWTARGET==false no longer supported in TDNTuple2Agt!");
 //				reward=trainOldTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
@@ -566,16 +570,16 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			}
 
 			/* prepare for next pass through while-loop or for terminal update */ 
-			if (WITH_NS) {
+//			if (WITH_NS) {
 				so = ns.getNextSO();	// Only together with trainNewTargetLogic2			
 				curBoard = m_Net.xnf.getBoardVector(ns.getAfterState());  
-			} else {
-				//curBoard = nextBoard; 	// BUG!! A later change to nextBoard will change curBoard as well!!
-											// But probably w/o effect, since the next use of nextBoard is
-											//  	nextBoard = ...getBoardVector(), 
-											// and this sets nextBoard to new int[] ... 
-				curBoard = nextBoard.clone();
-			}
+//			} else {
+//				//curBoard = nextBoard; 	// BUG!! A later change to nextBoard will change curBoard as well!!
+//											// But probably w/o effect, since the next use of nextBoard is
+//											//  	nextBoard = ...getBoardVector(), 
+//											// and this sets nextBoard to new int[] ... 
+//				curBoard = nextBoard.clone();
+//			}
 			curPlayer= nextPlayer;
 			oldReward= reward;
 			player = Types.PLAYER_PM[so.getPlayer()];   // advance to the next player
@@ -673,47 +677,47 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		
 	} 
 	
-	/**
-	 * 
-	 * @return reward
-	 */
-	private double trainNewTargetLogic(
-			StateObservation so, StateObservation oldSO, 
-			int[] curBoard, int curPlayer,
-			int[] nextBoard, int nextPlayer, boolean learnFromRM, 
-			int epiLength, int player, boolean upTC, double oldReward) 
-	{
-		double reward;
-		
-		reward = fetchReward(so,oldSO,player);
-		
-		if (so.isGameOver()) {
-			m_finished = true;
-		}
-
-		m_counter++;
-		if (m_counter==epiLength) {
-			reward=estimateGameValue(so);
-			//epiCount++;
-			m_finished = true; 
-		}
-		
-		if (m_randomMove && !learnFromRM) {
-			// no training, go to next move.
-			// only for diagnostics
-			if (m_DEBG)
-				pstream.println("random move");
-		} else {
-			// do one training step (NEW target)
-			if (curBoard!=null) {
-				m_Net.updateWeightsNew(curBoard, curPlayer, nextBoard, nextPlayer,
-						reward-oldReward,upTC);
-			}
-		}
-		
-		return reward;
-		
-	} 
+//	/**
+//	 * 
+//	 * @return reward
+//	 */
+//	private double trainNewTargetLogic(
+//			StateObservation so, StateObservation oldSO, 
+//			int[] curBoard, int curPlayer,
+//			int[] nextBoard, int nextPlayer, boolean learnFromRM, 
+//			int epiLength, int player, boolean upTC, double oldReward) 
+//	{
+//		double reward;
+//		
+//		reward = fetchReward(so,oldSO,player);
+//		
+//		if (so.isGameOver()) {
+//			m_finished = true;
+//		}
+//
+//		m_counter++;
+//		if (m_counter==epiLength) {
+//			reward=estimateGameValue(so);
+//			//epiCount++;
+//			m_finished = true; 
+//		}
+//		
+//		if (m_randomMove && !learnFromRM) {
+//			// no training, go to next move.
+//			// only for diagnostics
+//			if (m_DEBG)
+//				pstream.println("random move");
+//		} else {
+//			// do one training step (NEW target)
+//			if (curBoard!=null) {
+//				m_Net.updateWeightsNew(curBoard, curPlayer, nextBoard, nextPlayer,
+//						reward-oldReward,upTC);
+//			}
+//		}
+//		
+//		return reward;
+//		
+//	} 
 	
 	/**
 	 * Fetch the reward for StateObservation so (relative to oldSO)
@@ -769,7 +773,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		StateObservation sobs;
 		StateObservation afterState;
 		StateObservation nextSO;
-		double thisReward;
+		double thisReward;			// TODO
 		double nextReward;
 		
 		/**
@@ -795,8 +799,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
 			nextReward = fetchReward(nextSO,sobs,Types.PLAYER_PM[sobs.getPlayer()]);
 
-	        //**TODO**
-//	        oldReward = sobs.getGameScore();
 		}
 
 		/**
@@ -930,6 +932,15 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
 		m_Net.setTdAgt(this);						 // WK: needed when loading an older agent
+	}
+
+	/**
+	 * Set defaults for m_oPar 
+	 * (needed in {@link XArenaMenu.loadAgent} when loading older agents, where 
+	 * m_oPar=null in the saved version).
+	 */
+	public void setDefaultOtherPar() {
+		m_oPar = new ParOther();
 	}
 
 	public void setAlpha(double alpha) {

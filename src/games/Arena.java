@@ -58,7 +58,8 @@ abstract public class Arena extends JPanel implements Runnable {
 	public int maxSleepDuration = 2000;
 	public int currentSleepDuration = 0;
 	public LogManager logManager;
-
+	private int logSessionid;
+	
 	public Arena() {
 		initGame();
 	}
@@ -371,7 +372,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		assert paVector.length == so.getNumPlayers() : 
 			  "Number of agents does not match so.getNumPlayers()!";
 
-		int sessionid = logManager.newLoggingSession(so);
+		logSessionid = logManager.newLoggingSession(so);
 
 		while(taskState == Task.PLAY)	// game play interruptible by hitting 'Play' again 
 		{			
@@ -401,7 +402,7 @@ abstract public class Arena extends JPanel implements Runnable {
                             showStoredV=false; // this is for 2nd updateBoard below
                         }
                         so.advance(actBest);
-						logManager.addLogEntry(actBest, so, sessionid);
+						logManager.addLogEntry(actBest, so, logSessionid);
                         try {
                             Thread.sleep(currentSleepDuration);
                             // waiting time between agent-agent actions
@@ -423,8 +424,8 @@ abstract public class Arena extends JPanel implements Runnable {
 					Thread.sleep(100);
 					//
 					// wait until an action in GameBoard gb occurs (see
-					// ActionListener in InitBoard()), which will set 
-					// gb.isActionReq() to true again. 
+					// ActionListener in InitBoard(), usually calling a function HGameMove),  
+					// which will set gb.isActionReq() to true again. 
 				}	
 				catch (Exception e){System.out.println("Thread 3");}
 			}
@@ -463,7 +464,7 @@ abstract public class Arena extends JPanel implements Runnable {
 			} // if isGameOver
 			
 		}	// while(true) [will be left only by the last break above]
-		logManager.endLoggingSession(sessionid);
+		logManager.endLoggingSession(logSessionid);
 		taskState = Task.IDLE;		
 		setStatusMessage("Done.");
 	}
@@ -541,6 +542,12 @@ abstract public class Arena extends JPanel implements Runnable {
 
 	public GameBoard getGameBoard() {
 		return gb;
+	}
+	public LogManager getLogManager() {
+		return logManager;
+	}
+	public int getLogSessionID() {
+		return logSessionid;
 	}
 	
 	public void setStatusMessage(String msg) { statusBar.setMessage(msg); }

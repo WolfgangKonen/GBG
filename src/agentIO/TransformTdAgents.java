@@ -166,7 +166,7 @@ public class TransformTdAgents {
 
 	/** 
 	 * Loading an agent (.agt.zip) directly, without file chooser dialog. <br>
-	 * Currently, only agents of class {@link controller.TD.ntuple.TDNTupleAgt} are 
+	 * Currently, only agents of class {@link controllers.TD.ntuple.TDNTupleAgt} are 
 	 * handled, others lead to a ClassNotFoundException.
 	 * 
 	 * @param strDir

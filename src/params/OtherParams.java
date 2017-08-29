@@ -259,7 +259,7 @@ public class OtherParams extends Frame
 	
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
-	 * @param nt  of the re-loaded agent
+	 * @param op  ParOther of the re-loaded agent
 	 */
 	public void setFrom(ParOther op) {
 		this.setQuickEvalMode(op.getQuickEvalMode());
