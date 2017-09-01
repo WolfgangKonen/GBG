@@ -100,8 +100,11 @@ public interface PlayAgent {
 	 */
 	public int getGameNum();
 	/**
+	 * (probably obsolete now since we have ParOther m_oPar as part of every agent)
+	 * 
 	 * @return During training: Call the Evaluator after this number of training games
 	 */
+	@Deprecated
 	public int getNumEval();
 	public void setMaxGameNum(int num);
 	public void setGameNum(int num);

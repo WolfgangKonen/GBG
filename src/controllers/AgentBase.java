@@ -126,6 +126,12 @@ abstract public class AgentBase implements Serializable {
 		m_GameNum++;
 	}
 
+	/**
+	 * (probably obsolete now since we have ParOther m_oPar as part of every agent)
+	 * 
+	 * @return During training: Call the Evaluator after this number of training games
+	 */
+	@Deprecated
 	public int getNumEval()
 	{	
 		return m_NumEval;

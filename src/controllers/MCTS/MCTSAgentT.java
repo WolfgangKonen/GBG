@@ -3,8 +3,11 @@ package controllers.MCTS;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
+import games.XArenaMenu;
 import params.MCTSParams;
+import params.OtherParams;
 import params.ParMCTS;
+import params.ParOther;
 import tools.ElapsedCpuTimer;
 import tools.ElapsedCpuTimer.TimerType;
 import tools.Types;
@@ -29,6 +32,8 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     // should use this.getParMCTS() instead 
 	//private MCTSParams params;
     private ParMCTS pmcts; 
+    
+	private ParOther m_oPar = new ParOther();
 
     /**
      * The MCTS-UCT implementation
@@ -46,7 +51,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	 * Default constructor, needed for loading a serialized version
 	 */
 	public MCTSAgentT() {
-    	this("MCTS", null);
+    	this("MCTS", null, new ParMCTS());
 	}
 
 	/**
@@ -57,24 +62,25 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     public MCTSAgentT(String name,StateObservation so) //, ElapsedCpuTimer elapsedTimer)
     {
     	super(name);
-    	initMCTSAgent(so, null);
+    	initMCTSAgent(so, new ParMCTS(), new ParOther());
     }
 
-    public MCTSAgentT(String name,StateObservation so, MCTSParams mcPar) //, ElapsedCpuTimer elapsedTimer)
+    public MCTSAgentT(String name,StateObservation so, MCTSParams mcPar, OtherParams oPar) //, ElapsedCpuTimer elapsedTimer)
     {
     	super(name);
-    	initMCTSAgent(so, new ParMCTS(mcPar));
+    	initMCTSAgent(so, new ParMCTS(mcPar), new ParOther(oPar));
     }
     public MCTSAgentT(String name,StateObservation so, ParMCTS parMCTS) //, ElapsedCpuTimer elapsedTimer)
     {
     	super(name);
-    	initMCTSAgent(so, parMCTS);
+    	initMCTSAgent(so, parMCTS, new ParOther());
     }
     
-    private void initMCTSAgent(StateObservation so, ParMCTS parMCTS) {    	
+    private void initMCTSAgent(StateObservation so, ParMCTS parMCTS, ParOther oPar) {    	
         //Create the player.
         mctsPlayer = new SingleMCTSPlayer(new Random(),parMCTS);		
         //mctsPlayer = new SingleMCTSPlayer(new Random(1),mcPar);	// /WK/ reproducible debugging: seed 1
+		m_oPar = oPar;
 
         //Set the available actions for stateObs.
         if (so!=null) mctsPlayer.initActions(so);
@@ -197,6 +203,17 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		return mctsPlayer.getK();
 	}
 
+	/**
+	 * Set defaults for m_oPar 
+	 * (needed in {@link XArenaMenu.loadAgent} when loading older agents, where 
+	 * m_oPar=null in the saved version).
+	 */
+	public void setDefaultOtherPar() {
+		m_oPar = new ParOther();
+	}
+	public ParOther getOtherPar() {
+		return m_oPar;
+	}
 
 }
 

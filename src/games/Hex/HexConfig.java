@@ -32,7 +32,9 @@ class HexConfig {
      * Number of tiles on the game board
      */
     final static int TILE_COUNT = BOARD_SIZE * BOARD_SIZE;
-    
+ 
+    final static int EVAL_NUMEPISODES = 3;
+
     /**
      * the int's in EVAL_START_ACTIONS[N][] code the start boards for evaluation mode 10
      * and for the case of an NxN Hex board:

@@ -16,12 +16,20 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import controllers.TD.TDAgent;
+import controllers.TD.ntuple.TDNTupleAgt;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Feature;
 
 /**
- * This class realizes other parameter settings for board games.<p>
+ * This class realizes other parameter settings for board games. Most parameter are only
+ * relevant for trainable agents ({@link TDAgent}, {@link TDNTupleAgt}, {@link TDNTuple2Agt}), 
+ * but 'Quick Eval Mode' is relevant for all agents 
+ * <p>
  * 
  * These parameters and their [defaults] are: <ul>
+ * <li> <b>Quick Eval Mode</b>: 	evaluation mode used during 'Quick Evaluation'  
+ * <li> <b>Train Eval Mode</b>: 	additional evaluation mode used during training  
  * <li> <b>numEval</b>: 	[100] During training: Call the evaluators every NumEval episodes  
  * <li> <b>stopTest</b>: 	[  0] whether to perform the stop test during training. If
  * 		{@literal> 0}, then m_evaluator2 is checked during training whether its goal is reached
@@ -36,12 +44,17 @@ import games.Feature;
  * <li> <b>use Hashmap</b>	[true] Minimax: whether to use hashmap or not
  * </ul> 
  * 
- * @see controllers.TD.TDAgent
+ * @see TDAgent
+ * @see TDNTuple2Agt
  * @see games.XArenaButtons
  */
 public class OtherParams extends Frame 
 {
 	private static final long serialVersionUID = 1L;
+	TDAgent T;
+	TDNTupleAgt t2;
+	TDNTuple2Agt t3;
+	
 	
 	JLabel evalQ_L;
 	public Choice choiceEvalQ;

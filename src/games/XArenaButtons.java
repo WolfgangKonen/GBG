@@ -30,7 +30,7 @@ public class XArenaButtons extends JPanel
 	XArenaFuncs 		m_xfun;	
 	public Arena	 	m_game;	// a reference to the Arena object passed in with the constructor
 	//XArenaButtons		m_xab;
-	public OptionsComp 	winCompOptions = new OptionsComp();
+	public OptionsComp 	winCompOptions = new OptionsComp(); // window with Competition Options
 	private LogManagerGUI logManagerGUI = null;
 	//private Random rand;
 	int numPlayers;

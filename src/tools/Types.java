@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.awt.event.KeyEvent;
 import java.io.Serializable;
 
+/**
+ * Class <b>Types</b> holds various constants and the class {@link Types.ACTIONS}
+ *
+ */
 public class Types {
 
     public static class ACTIONS implements Serializable, Comparable<ACTIONS> {
         private int key;
-        private boolean randomSelect;
+        private boolean randomSelect = false; // true, if this action was selected at random
 
 		/**
     	 * change the version ID for serialization only if a newer version is no longer 
@@ -37,8 +41,7 @@ public class Types {
                 return false;
             }
 
-            ACTIONS action = (ACTIONS) object;
-            return key == action.key;
+            return key == ((ACTIONS) object).key;
         }
 
         @Override
@@ -85,12 +88,18 @@ public class Types {
 
     public static final int[] PLAYER_PM = {+1,-1};
 
-    //public static final int SCORE_DISQ = -1000;
-
+    //
     // Default (startup) settings for Arena and ArenaTrain
-    public static final String[] GUI_AGENT_LIST 	// list of available agents = list of choices in Agent Selectors
-    	= {"TDS", "Minimax", "Random", "MCTS", "Human", "MC", "TD-Ntuple", "TD-Ntuple-2", "MCTS Expectimax"};
-    public static final String[] GUI_AGENT_INITIAL  // initial agent choice for P0, P1, ... (for up to 5 players)
+    //
+    /**
+     * list of available agents = list of choices in Agent Selectors
+     */
+    public static final String[] GUI_AGENT_LIST 	 
+    	= {"Random", "Minimax", "MC", "MCTS", "MCTS Expectimax", "Human", "TD-Ntuple", "TD-Ntuple-2", "TDS"};
+    /**
+     * initial agent choice for P0, P1, ... (for up to 5 players) 
+     */
+    public static final String[] GUI_AGENT_INITIAL  
     	//= {"TD-Ntuple", "MC", "Human", "Human", "Human"};
     	= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
 		//= {"TD-Ntuple-2", "Human", "MCTS Expectimax", "Human", "Human", "Human"};
@@ -104,41 +113,18 @@ public class Types {
     public static final String GUI_X_PLAYER = "TDS";  	// "MCTS" "TDS" "CMA-ES" "Minimax" 
     public static final String GUI_O_PLAYER = "MCTS";	// "Human";"MCTS";
 
-	public static final int GUI_ARENATRAIN_WIDTH = 465;
+	public static final int GUI_ARENATRAIN_WIDTH = 465;	// width ArenaTrain window
 	public static final int GUI_ARENATRAIN_HEIGHT = 420;
-	public static final int GUI_WINCOMP_WIDTH = 350;
+	public static final int GUI_WINCOMP_WIDTH = 350;	// width 'Competition Options' window
 	public static final int GUI_WINCOMP_HEIGHT = 300;
 	public static final int GUI_PARAMTABS_WIDTH = 464;	// wide enough to hold 6 tabs
 	public static final int GUI_PARAMTABS_HEIGHT = 300;
 
 	public static final int GUI_HELPFONTSIZE = 14;
 
-	// Default directory for loading and saving PlayAgents
+	/**
+	 * Default directory for loading and saving PlayAgents
+	 */
 	public static final String GUI_DEFAULT_DIR_AGENT = "agents";
 	
-	/*
-    public static final int PHYSICS_NONE = -1;
-    public static final int PHYSICS_GRID = 0;
-    public static final int PHYSICS_CONT = 1;
-    public static final int PHYSICS_NON_FRICTION = 2;
-    public static final int PHYSICS_GRAVITY = 3;
-
-    public static final int VGDL_GAME_DEF = 0;
-    public static final int VGDL_SPRITE_SET = 1;
-    public static final int VGDL_INTERACTION_SET = 2;
-    public static final int VGDL_LEVEL_MAPPING = 3;
-    public static final int VGDL_TERMINATION_SET = 4;
-    public static final Vector2d NIL = new Vector2d(-1, -1);
-
-    public static final Vector2d NONE = new Vector2d(0, 0);
-    public static final Vector2d RIGHT = new Vector2d(1, 0);
-    public static final Vector2d LEFT = new Vector2d(-1, 0);
-    public static final Vector2d UP = new Vector2d(0, -1);
-    public static final Vector2d DOWN = new Vector2d(0, 1);
-
-    public static final Vector2d[] BASEDIRS = new Vector2d[]{UP, LEFT, DOWN, RIGHT};
-    public static int[] ALL_ACTIONS = new int[]{KeyEvent.VK_UP, KeyEvent.VK_LEFT, KeyEvent.VK_DOWN,
-                                                KeyEvent.VK_RIGHT, KeyEvent.VK_SPACE, KeyEvent.VK_ESCAPE};
-    */
-
  }

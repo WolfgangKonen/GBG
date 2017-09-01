@@ -91,13 +91,13 @@ public class MCParams extends Frame implements Serializable
     public JPanel getPanel() {
         return mPanel;
     }
-    public int getIterations() {
+    public int getNumIter() {
         return Integer.valueOf(TIterations.getText()).intValue();
     }
-    public int getRolloutdepth() {
+    public int getRolloutDepth() {
         return Double.valueOf(TRolloutdepth.getText()).intValue();
     }
-    public int getNumberAgents() {
+    public int getNumAgents() {
         return Integer.valueOf(TNumberAgents.getText()).intValue();
     }
     public boolean getCalcCertainty() {
@@ -121,9 +121,19 @@ public class MCParams extends Frame implements Serializable
      * @param tp  of the re-loaded agent
      */
     public void setFrom(MCParams tp) {
-        setIterations(tp.getIterations());
-        setRolloutdepth(tp.getRolloutdepth());
-        setNumberAgents(tp.getNumberAgents());
+        setIterations(tp.getNumIter());
+        setRolloutdepth(tp.getRolloutDepth());
+        setNumberAgents(tp.getNumAgents());
+        setCalcCertainty(tp.getCalcCertainty());
+    }
+    /**
+     * Needed to restore the param tab with the parameters from a re-loaded agent
+     * @param tp  of the re-loaded agent
+     */
+    public void setFrom(ParMC tp) {
+        setIterations(tp.getNumIter());
+        setRolloutdepth(tp.getRolloutDepth());
+        setNumberAgents(tp.getNumAgents());
         setCalcCertainty(tp.getCalcCertainty());
     }
 }

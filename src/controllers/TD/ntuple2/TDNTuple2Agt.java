@@ -47,6 +47,9 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * <ul>
  * <li> no eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
  * 		memory consumptive)
+ * <li> option AFTERSTATE (only for nondeterministic games like 2048), which builds the value 
+ * 		function on the argument afterstate <b>s'</b> (before adding random element) instead 
+ * 		of next state <b>s''</b> (faster learning and better generalization).
  * <li> fix of the random move rate bug (now EPSILON=0.0 means really 'no ramdom moves')
  * <li> learning rate ALPHA differently scaled: if ALPHA=1.0, the new value for a
  * 		state just trained will be exactly the target. Therefore, recommended ALPHA values are 
@@ -64,7 +67,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * @author Wolfgang Konen, TH Köln, Aug'17
  */
 //
-// This agent is adapted from project SourceTTT, class TicTacToe.TDSNPlayer
+// This agent is adapted from TDNTupleAgt
 //
 public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private Random rand; // generate random Numbers 
@@ -136,7 +139,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private boolean randomSelect = false;
 	
 	/**
-	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link #m_oPar} are only needed for 
+	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link #m_oPar} are needed for 
 	 * saving and loading the agent (to restore the agent with all its parameter settings)
 	 */
 //	private TDParams m_tdPar;

@@ -57,6 +57,9 @@ public class ParOther implements Serializable {
 		return trainEvalMode;
 	}
 
+	/**
+	 * @return During training: Call evaluator after this number of training games
+	 */
 	public int getNumEval() {
 		return numEval;
 	}

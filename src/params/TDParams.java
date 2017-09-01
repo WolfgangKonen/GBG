@@ -343,7 +343,7 @@ public class TDParams extends Frame implements Serializable
 		setEpochs(tp.getEpochs());
 		setFeatmode(tp.getFeatmode());
 //		setMaxGameNum(tp.getMaxGameNum());	// this is now in AgentBase
-//		setNumEval(tp.getNumEval());
+//		setNumEval(tp.getNumEval());		// this is obsolete now (we have ParOther)
 	}
 	
 	/**

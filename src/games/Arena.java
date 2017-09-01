@@ -315,7 +315,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		StateObservation so;
 		Types.ACTIONS actBest=null;
 		PlayAgent pa;
-		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mctsParams);
+		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mctsParams,m_xab.oPar);
 		double[] vtable = null;
 		PlayAgent[] paVector;
 

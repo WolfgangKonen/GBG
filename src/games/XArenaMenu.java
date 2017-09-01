@@ -17,6 +17,7 @@ import controllers.AgentBase;
 import controllers.HumanPlayer;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
+import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple.TDNTupleAgt;
@@ -495,6 +496,8 @@ public class XArenaMenu extends JMenuBar {
 				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
 				// get the loaded values)
+				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
+				// it doesn't hurt
 				((TDNTupleAgt) td).setTDParams(((TDNTupleAgt) td).getTDParams(), td.getMaxGameNum());
 				((TDNTupleAgt) td).setNTParams(((TDNTupleAgt) td).getNTParams());
 			}
@@ -509,12 +512,24 @@ public class XArenaMenu extends JMenuBar {
 				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
 				// get the loaded values)
+				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
+				// it doesn't hurt
 				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getTDParams(), td.getMaxGameNum());
 				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getNTParams());
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctsParams.setFrom( ((MCTSAgentT) td).getParMCTS() );
+				if (((MCTSAgentT) td).getOtherPar() == null ) 
+					((MCTSAgentT) td).setDefaultOtherPar();
+				m_arena.m_xab.oPar.setFrom( ((MCTSAgentT) td).getOtherPar() );
+			}
+			else if (td instanceof MCAgent) {
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.mcParams.setFrom( ((MCAgent) td).getMCPar() );
+				if (((MCAgent) td).getOtherPar() == null ) 
+					((MCAgent) td).setDefaultOtherPar();
+				m_arena.m_xab.oPar.setFrom( ((MCAgent) td).getOtherPar() );
 			}
 			else if (td instanceof MinimaxAgent) {
 				// set the agent parameters in XArenaTabs:

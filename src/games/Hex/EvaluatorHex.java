@@ -88,7 +88,7 @@ public class EvaluatorHex extends Evaluator {
         }
 
         double result;
-        int numEpisodes=3;
+        int numEpisodes=HexConfig.EVAL_NUMEPISODES;
         switch (m_mode) {
             case 0:
                 result = competeAgainstMCTS(playAgent, gameBoard, numEpisodes);

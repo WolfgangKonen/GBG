@@ -3,9 +3,13 @@ package controllers.MC;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
+import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.MCParams;
+import params.OtherParams;
+import params.ParMC;
+import params.ParOther;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -26,7 +30,8 @@ public class MCAgent extends AgentBase implements PlayAgent {
     private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true
     private int nIterations = 0; 		// counts the total number of iterations
 
-    public MCParams mcParams;
+    public ParMC m_mcPar = new ParMC();
+	private ParOther m_oPar = new ParOther();
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -37,23 +42,24 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     
     public MCAgent(MCParams mcParams) {
-        this("MC", mcParams);
+        this("MC", mcParams, new OtherParams());
     }
 
-    public MCAgent(String name, MCParams mcParams)
+    public MCAgent(String name, MCParams mcParams, OtherParams oPar)
     {
         super(name);
-        this.mcParams = mcParams;
+        this.m_mcPar.setFrom(mcParams);
+		this.m_oPar = new ParOther(oPar);
         setAgentState(AgentState.TRAINED);
     }
 
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
-        int iterations = mcParams.getIterations();
-        int numberAgents = mcParams.getNumberAgents();
-        int depth = mcParams.getRolloutdepth();
+        int iterations = m_mcPar.getNumIter();
+        int numberAgents = m_mcPar.getNumAgents();
+        int depth = m_mcPar.getRolloutDepth();
 
-      /*  if (mcParams.getCalcCertainty()) {
+      /*  if (m_mcPar.getCalcCertainty()) {
         	StateObserver2048 sobZTAV = (StateObserver2048) sob;
         	if (sobZTAV.getNumEmptyTiles()==10) {
             	int NC = ConfigEvaluator.NC;
@@ -70,7 +76,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
         	}
         } */
 
-        if(mcParams.getNumberAgents() > 1) {
+        if(m_mcPar.getNumAgents() > 1) {
             //more than one agent (majority vote)
             return getNextActionMultipleAgents(sob, vtable, iterations, numberAgents, depth);
         } else {
@@ -80,7 +86,8 @@ public class MCAgent extends AgentBase implements PlayAgent {
     }
 
     /**
-     * Get the best next action and return it (multi-core version)
+     * Get the best next action and return it (multi-core version).
+     * Called by calcCertainty and getNextAction.
      * 
      * @param sob			current game state (not changed on return)
      * @param vtable		must be an array of size n+1 on input, where
@@ -89,6 +96,8 @@ public class MCAgent extends AgentBase implements PlayAgent {
      * 						action (corresponding to sob.getAvailableActions())
      * 						In addition, vtable[n] has the score for the
      * 						best action.
+     * @param iterations    rollout repeats (for each available action)
+     * @param depth			rollout depth
      * @return nextAction	the next action
      */
     private Types.ACTIONS getNextAction (StateObservation sob, double[] vtable, int iterations, int depth) {
@@ -205,6 +214,16 @@ public class MCAgent extends AgentBase implements PlayAgent {
         return nextAction;
     }
 
+    /**
+     * Called by calcCertainty and getNextAction.
+     * 
+     * @param sob
+     * @param vtable
+     * @param iterations
+     * @param numberAgents
+     * @param depth
+     * @return
+     */
     private Types.ACTIONS getNextActionMultipleAgents (StateObservation sob, double[] vtable, int iterations, int numberAgents, int depth) {
         List<Types.ACTIONS> actions = sob.getAvailableActions();
 
@@ -351,6 +370,20 @@ public class MCAgent extends AgentBase implements PlayAgent {
     public int getNIterations() {
         return nIterations;
     }
+	public ParMC getMCPar() {
+		return m_mcPar;
+	}
+	public ParOther getOtherPar() {
+		return m_oPar;
+	}
+	/**
+	 * Set defaults for m_oPar 
+	 * (needed in {@link XArenaMenu.loadAgent} when loading older agents, where 
+	 * m_oPar=null in the saved version).
+	 */
+	public void setDefaultOtherPar() {
+		m_oPar = new ParOther();
+	}
 
     @Override
     public boolean wasRandomAction() {

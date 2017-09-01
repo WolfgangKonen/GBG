@@ -156,13 +156,13 @@ public class XArenaFuncs
 		} else if (sAgent.equals("Random")) {
 			pa = new RandomAgent(sAgent);
 		} else if (sAgent.equals("MCTS")) {
-			pa = new MCTSAgentT(sAgent, null, m_xab.mctsParams);
+			pa = new MCTSAgentT(sAgent, null, m_xab.mctsParams, m_xab.oPar);
 		} else if (sAgent.equals("MCTS Expectimax")) {
 			pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
-			pa = new MCAgent(sAgent, m_xab.mcParams);
+			pa = new MCAgent(sAgent, m_xab.mcParams, m_xab.oPar);
 		}
 		return pa;
 	}
@@ -195,13 +195,13 @@ public class XArenaFuncs
 			} else if (sAgent.equals("Random")) {
 				pa= new RandomAgent(sAgent);
 			} else if (sAgent.equals("MCTS")) {
-				pa= new MCTSAgentT(sAgent,null,m_xab.mctsParams);
+				pa= new MCTSAgentT(sAgent,null,m_xab.mctsParams, m_xab.oPar);
 			} else if (sAgent.equals("MCTS Expectimax")) {
 				pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams);
 			} else if (sAgent.equals("Human")) {
 				pa= new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {
-				pa= new MCAgent(sAgent, m_xab.mcParams);
+				pa= new MCAgent(sAgent, m_xab.mcParams, m_xab.oPar);
 			}else { // all the trainable agents:
 				if (m_PlayAgents[n]==null) {
 					if (sAgent.equals("TDS")) {

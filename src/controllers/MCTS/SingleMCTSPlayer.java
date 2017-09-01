@@ -3,7 +3,6 @@ package controllers.MCTS;
 import games.StateObservation;
 import params.MCTSParams;
 import params.ParMCTS;
-import params.TDParams;
 import tools.ElapsedCpuTimer;
 import tools.Types;
 
@@ -16,7 +15,7 @@ import java.util.Random;
  * 		http://gvgai.net/cont.php
  * (with a bug fix concerning the number of available actions and an 
  *  extensions for 1- and 2-player games)
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 public class SingleMCTSPlayer implements Serializable
 {
@@ -69,11 +68,11 @@ public class SingleMCTSPlayer implements Serializable
 	/**
      * Creates the MCTS player. 
      * @param a_rnd 	random number generator object.
-     * @param parMC		parameters for MCTS
+     * @param parMCTS		parameters for MCTS
      */
-    public SingleMCTSPlayer(Random a_rnd, ParMCTS parMC)
+    public SingleMCTSPlayer(Random a_rnd, ParMCTS parMCTS)
     {
-		m_parMCTS = parMC;
+		m_parMCTS = parMCTS;
         m_rnd = a_rnd;
         m_root = new SingleTreeNode(a_rnd,this);
     }

@@ -181,9 +181,9 @@ public class Evaluator2048 extends Evaluator {
 
         if(m_PlayAgent.getName() == "MC") {
             MCAgent mcAgent = (MCAgent)m_PlayAgent;
-            agentSettings = "\nROLLOUTDEPTH: " + mcAgent.mcParams.getRolloutdepth() +
-                    "\nITERATIONS: " + mcAgent.mcParams.getIterations() +
-                    "\nNUMBERAGENTS: " + mcAgent.mcParams.getNumberAgents();
+            agentSettings = "\nROLLOUTDEPTH: " + mcAgent.getMCPar().getRolloutDepth() +
+                    "\nITERATIONS: " + mcAgent.getMCPar().getNumIter() +
+                    "\nNUMBERAGENTS: " + mcAgent.getMCPar().getNumAgents();
         } else if(m_PlayAgent.getName() == "MCTS Expectimax") {
             MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
             agentSettings = "\nROLLOUTDEPTH: " + mctsExpectimaxAgt.params.getRolloutDepth() +

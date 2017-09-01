@@ -14,7 +14,6 @@ import java.util.Random;
 
 import params.OtherParams;
 import params.ParOther;
-import params.ParTD;
 import params.TDParams;
 import tools.Types;
 import controllers.TD.TD_Lin;
@@ -87,7 +86,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * Members {@link #m_tdPar} and {@link #m_oPar} are needed for saving and loading
 	 * the agent (to restore the agent with all its parameter settings)
 	 */
-	private ParTD m_tdPar;		// TODO transform to ParTD
+	private TDParams m_tdPar;		// TODO transform to ParTD
 	private ParOther m_oPar = new ParOther();
 	
 	/**
@@ -137,7 +136,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @param maxGameNum
 	 */
 	private void initNet(TDParams tdPar, OtherParams oPar, Feature feature, int maxGameNum) {
-		m_tdPar = new ParTD();
+		m_tdPar = new TDParams();
 		m_oPar = new ParOther(oPar);
 		m_tdPar.setFrom(tdPar);
 		m_feature = feature; 
@@ -589,7 +588,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		return hiddenSize;
 	}
 
-	public ParTD getTDParams() {
+	public TDParams getTDParams() {
 		return m_tdPar;
 	}
 	public ParOther getOtherPar() {

@@ -126,7 +126,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	//
 	private int m_counter = 0;				// count moves in trainAgent
 	private boolean m_finished = false;		// whether a training game is finished
-	private boolean m_randomMove = false;		// whether the last action was random
+	private boolean m_randomMove = false;	// whether the last action was random
 	private boolean m_DEBG = false;
 
 
