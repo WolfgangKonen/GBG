@@ -496,6 +496,7 @@ public class XArenaFuncs
 			int player; 
 			int numEval = xab.oPar.getNumEval();
 			int gameNum;
+			long actionNum;
 			
 // TODO: implement CMAPlayer correctly
 //			if (sAgent.equals("CMA-ES")) {
@@ -510,6 +511,7 @@ public class XArenaFuncs
 					pa.trainAgent(so /*,epiLength,learnFromRM*/);
 					
 					gameNum = pa.getGameNum();
+					actionNum = pa.getNumLrnActions();
 					if (gameNum%numEval==0 ) { //|| gameNum==1) {
 						double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
 						System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
@@ -524,7 +526,7 @@ public class XArenaFuncs
 							m_evaluatorM.eval();
 							evalM = m_evaluatorM.getLastResult();
 						}
-						mTrain = new MTrain(i,gameNum,m_evaluatorQ.getLastResult(),evalT,evalM);
+						mTrain = new MTrain(i,gameNum,m_evaluatorQ.getLastResult(),evalT,evalM,actionNum);
 						mtList.add(mTrain);
 
 						startTime = System.currentTimeMillis();
@@ -570,19 +572,21 @@ public class XArenaFuncs
 		public double evalQ;
 		public double evalT;
 		public double evalM;
+		public long actionNum;		// number of learning actions
 		
-		MTrain(int i, int gameNum, double evalQ, double evalT, double evalM) {
+		MTrain(int i, int gameNum, double evalQ, double evalT, double evalM, long actionNum) {
 			this.i=i;
 			this.gameNum=gameNum;
 			this.evalQ=evalQ;
 			this.evalT=evalT;
 			this.evalM=evalM;
+			this.actionNum=actionNum;
 		}
 		
 		public void print(PrintWriter mtWriter)  {
 			String sep = ", ";
 			mtWriter.print(i + sep + gameNum + sep);
-			mtWriter.println(evalQ + sep + evalT + sep + evalM);
+			mtWriter.println(evalQ + sep + evalT + sep + evalM + sep + actionNum);
 		}
 	}
 	
@@ -615,7 +619,7 @@ public class XArenaFuncs
 		mtWriter.println(pa.stringDescr());
 		
 		mtWriter.println();
-		mtWriter.println("run, gameNum, evalQ, evalT, evalM");
+		mtWriter.println("run, gameNum, evalQ, evalT, evalM, actionNum");
 		ListIterator<MTrain> iter = mtList.listIterator();		
 		while(iter.hasNext()) {
 			(iter.next()).print(mtWriter);

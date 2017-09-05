@@ -516,6 +516,7 @@ public class XArenaMenu extends JMenuBar {
 				// it doesn't hurt
 				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getTDParams(), td.getMaxGameNum());
 				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getNTParams());
+				//m_arena.m_xab.oPar.numEval_T.setText(""+((TDNTuple2Agt) td).getOtherPar().getNumEval());
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:

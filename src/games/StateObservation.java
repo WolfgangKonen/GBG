@@ -69,14 +69,14 @@ public interface StateObservation extends Serializable{
 	public double getGameValue();
 	
 	/**
-	 * Same as getGameScore(), but relative to referingState. This relativeness
+	 * Same as getGameScore(), but relative to referringState. This relativeness
 	 * is usually only relevant for 2-player games.
-	 * @param referingState
-	 * @return  If the referingState was created by White (and Black is to move), 
-	 * 			then it is getGameScore(). If referingState was created by Black,
+	 * @param referringState
+	 * @return  If the referringState was created by White (and Black is to move), 
+	 * 			then it is getGameScore(). If referringState was created by Black,
 	 * 			then it is getGameScore()*(-1). 
 	 */
-	public double getGameScore(StateObservation referingState);
+	public double getGameScore(StateObservation referringState);
 	
 	public double getMinGameScore();
 	public double getMaxGameScore();

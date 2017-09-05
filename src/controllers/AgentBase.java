@@ -126,17 +126,22 @@ abstract public class AgentBase implements Serializable {
 		m_GameNum++;
 	}
 
+	public long getNumLrnActions()
+	{			
+		return 0L;		// dummy stub for agents which are not trainable
+	}
+
 	/**
-	 * (probably obsolete now since we have ParOther m_oPar as part of every agent)
+	 * (trainable agents with member ParOther m_oPar should override this function)
 	 * 
 	 * @return During training: Call the Evaluator after this number of training games
 	 */
-	@Deprecated
 	public int getNumEval()
 	{	
-		return m_NumEval;
+		return 1000;	// dummy stub for agents which are not trainable
 	}	
 
+	@Deprecated
 	public void setNumEval(int num)
 	{
 		m_NumEval=num;

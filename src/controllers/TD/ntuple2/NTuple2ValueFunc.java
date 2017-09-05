@@ -22,13 +22,13 @@ import params.TDParams;
  *         A set of n-tuples is generated randomly or by user precept. Random
  *         n-tuples can be just a set of random points or a random walk on the
  *         board. The value-function uses symmetries of the board to allow a
- *         faster training. The output of the value-function is always put
- *         through a sigmoid function (tanh) to get the value in the range -1 ..
- *         +1. The learning rate alpha decreases exponentially from a start
- *         value at the beginning of the training to an end value after a certain
- *         amount of games.
+ *         faster training. The output of the value-function is put
+ *         through a sigmoid function (tanh) or not depending on the value returned
+ *         from {@link #hasSigmoid()}. The learning rate alpha decreases exponentially 
+ *         from a start value at the beginning of the training to an end value after a 
+ *         certain amount of games.
  * 
- * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Köln, Feb'17  
+ * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Koeln, Feb'17  
  */
 public class NTuple2ValueFunc implements Serializable {
 	/* Experimental Parameters: */
@@ -46,6 +46,8 @@ public class NTuple2ValueFunc implements Serializable {
 	protected double m_AlphaChangeRatio = 0.9998; // 0.998
 	protected int epochMax=1;
     protected boolean  rpropLrn=false;
+    private transient long numLearnActions = 0L; 		// count the number of calls to update() (learn actions in [Jaskowski16])
+
 //  protected boolean withSigmoid=true; 	// use now hasSigmoid() - don't store/maintain value twice
 
     // Turns usage of symmetry on or off
@@ -361,6 +363,7 @@ public class NTuple2ValueFunc implements Serializable {
 			}
 			lamFactor *= getLambda(); 
 		}
+		numLearnActions++;
 	}
 
 //	/**
@@ -475,7 +478,16 @@ public class NTuple2ValueFunc implements Serializable {
 			horizon = (int) (Math.log(0.1)/Math.log(getLambda()));
 		}		
 	}
-	
+
+	public long getNumLearnActions() {
+		return numLearnActions;
+	}
+
+	public void resetNumLearnActions() {
+		this.numLearnActions = 0L;
+	}
+
+
 	// class EquivStates is needed in update(int[],int,double,double)
 	private class EquivStates implements Serializable {
 		int[][] equiv;

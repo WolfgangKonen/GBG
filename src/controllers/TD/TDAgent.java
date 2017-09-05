@@ -572,11 +572,16 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	
 	public String printTrainStatus() {
 		DecimalFormat frm = new DecimalFormat("#0.0000");
+		DecimalFormat frme= new DecimalFormat();
+		frme = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+		frme.applyPattern("0.0E00");  
+
 		String cs = ""; //getClass().getName() + ": ";   // optional class name
 		String str = cs + "alpha="+frm.format(m_Net.getAlpha()) 
 				   + ", epsilon="+frm.format(getEpsilon())
 				   //+ ", lambda:" + m_Net.getLambda()
-				   + ", "+getGameNum() + " games";
+				   + ", "+getGameNum() + " games"
+				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
 		return str;
 	}
 
@@ -594,6 +599,19 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	}
 	public ParOther getOtherPar() {
 		return m_oPar;
+	}
+	
+	public int getNumEval()
+	{	
+		return m_oPar.getNumEval();
+	}
+	
+	public long getNumLrnActions() {
+		return m_Net.getNumLearnActions();
+	}
+
+	public void resetNumLearnActions() {
+		m_Net.resetNumLearnActions();
 	}
 	
 	public int getFeatmode() {

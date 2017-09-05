@@ -100,14 +100,19 @@ public interface PlayAgent {
 	 */
 	public int getGameNum();
 	/**
-	 * (probably obsolete now since we have ParOther m_oPar as part of every agent)
 	 * 
+	 * @return number of learn actions (calls to update()) for trainable agents.
+	 * (For non-trainable agents, {@link AgentBase} will return 0L.)
+	 */
+	public long getNumLrnActions();
+
+	/**
 	 * @return During training: Call the Evaluator after this number of training games
 	 */
-	@Deprecated
 	public int getNumEval();
 	public void setMaxGameNum(int num);
 	public void setGameNum(int num);
+	@Deprecated
 	public void setNumEval(int num);
 	
 	public AgentState getAgentState(); 

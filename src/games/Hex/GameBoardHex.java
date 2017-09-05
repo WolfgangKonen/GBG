@@ -270,7 +270,11 @@ public class GameBoardHex implements GameBoard {
 
         		Types.ACTIONS act = Types.ACTIONS.fromInt(p.x * HexConfig.BOARD_SIZE + p.y);
                 stateObs.advance(act);
-        		(arena.getLogManager()).addLogEntry(act, stateObs, arena.getLogSessionID());
+                if (arena.taskState == Arena.Task.PLAY) {
+                	// only do this when passing here during 'PLAY': add a log entry in case of Human move
+                	// Do NOT do this during 'INSPECT', because then we have (currently) no valid log session ID
+            		(arena.getLogManager()).addLogEntry(act, stateObs, arena.getLogSessionID());                	
+                }
                 updateBoard(null, false, false);
                 setActionReq(true);
             }

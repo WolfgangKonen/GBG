@@ -26,6 +26,8 @@ public interface TD_func {
 	public double getAlpha();
 	public double getBeta();
 	public double getLambda();
+	public long getNumLearnActions();
+	public void resetNumLearnActions(); 
 	public double getScore(double[] Input);
 	public void updateElig(double[] Input);
 	public void setAlphaChangeRatio(double newAlphaChangeRatio);

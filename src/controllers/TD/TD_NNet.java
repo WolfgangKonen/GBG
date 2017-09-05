@@ -95,7 +95,7 @@ public class TD_NNet implements TD_func, Serializable {
 	/* only visual debugging */
     protected transient LineChartSuccess lChart=null;
     protected transient XYSeries series;
-    protected int 	   iterates=0;
+    protected long 	   numLearnActions=0L;
 	protected double[] flatWeights;
 
 	/**
@@ -228,6 +228,9 @@ public class TD_NNet implements TD_func, Serializable {
     	// forward pass must be done twice to form TD errors: calculate scores with new weights,
     	// copy current scores to old_y[k] & update eligibilities
     	// (for use in next cycle's TD errors) 
+        
+        numLearnActions++;
+
         return error;
     }
 
@@ -301,6 +304,15 @@ public class TD_NNet implements TD_func, Serializable {
     public double getBeta() {
         return BETA;
     }
+    
+	public long getNumLearnActions() {
+		return numLearnActions;
+	}
+
+	public void resetNumLearnActions() {
+		this.numLearnActions = 0L;
+	}
+    
     /**calculate net output for given Input (fct Response in [SuttonBonde93])
      * <p> net output = V(s_t): the higher, the more likely is s_t a win position for player +1 (white)
      * @param Input		feature vector derived from Table, the current board position

@@ -109,7 +109,7 @@ public class LogManagerGUI {
                 File selectedFile = fileChooser.getSelectedFile();
 
                 LogSessionContainer logSessionContainer = logManager.generateLogSessionContainerFromFile(selectedFile.getPath());
-                logManager.safeLogSessionContainer(logSessionContainer);
+                logManager.saveLogSessionContainer(logSessionContainer);
 
                 if (verbose) {
                     System.out.println("LogManager: compiled temp log successfully");

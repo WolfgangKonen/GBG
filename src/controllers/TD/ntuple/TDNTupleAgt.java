@@ -467,7 +467,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @param so		the state from which the episode is played (see function
 	 * 					soSelectStartState in {@link games.XArenaFuncs} to get
 	 * 					some exploration of different game paths)
-// --- epiLength, learnFromRM are now available via the agent's member ParOther m_oPar: ---
+// --- epiLength, learnFromRM are now available via the agent's member ParOther m_oPar ---
 //	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
 //	 * 					prematurely.  
 //	 * @param learnFromRM if true, learn from random moves during training
@@ -878,6 +878,19 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		return m_epsilon;
 	}
 	
+	public long getNumLrnActions() {
+		return m_Net.getNumLearnActions();
+	}
+
+	public void resetNumLearnActions() {
+		m_Net.resetNumLearnActions();
+	}
+	
+	public int getNumEval()
+	{	
+		return m_oPar.getNumEval();
+	}
+	
 	public NTupleValueFunc getNTupleValueFunc() {
 		return m_Net;
 	}
@@ -894,11 +907,16 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		
 	public String printTrainStatus() {
 		DecimalFormat frm = new DecimalFormat("#0.0000");
+		DecimalFormat frme= new DecimalFormat();
+		frme = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+		frme.applyPattern("0.0E00");  
+
 		String cs = ""; //getClass().getName() + ": ";   // optional class name
 		String str = cs + "alpha="+frm.format(m_Net.getAlpha()) 
 				   + ", epsilon="+frm.format(getEpsilon())
 				   //+ ", lambda:" + m_Net.getLambda()
-				   + ", "+getGameNum() + " games";
+				   + ", "+getGameNum() + " games"
+				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
 		return str;
 	}
 

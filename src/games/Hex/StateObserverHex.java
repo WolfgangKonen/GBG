@@ -200,8 +200,8 @@ public class StateObserverHex implements StateObservation {
     }
 
     @Override
-    public double getGameScore(StateObservation referingState) {
-        return (this.getPlayer() == referingState.getPlayer() ? getGameScore() : getGameScore() * (-1));
+    public double getGameScore(StateObservation referringState) {
+        return (this.getPlayer() == referringState.getPlayer() ? getGameScore() : getGameScore() * (-1));
     }
 
     @Override

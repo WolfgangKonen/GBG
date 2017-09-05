@@ -11,7 +11,7 @@ class HexConfig {
     /**
      * Length of one side of the game board in tiles
      */
-    final static int BOARD_SIZE = 4;
+    final static int BOARD_SIZE = 5;
 
     /**
      * Size of hexagons in px (from one side to the opposite one)
@@ -46,12 +46,12 @@ class HexConfig {
      * See {@link StateObserverHex} for the numbering of the tiles. <br>
      * {@link EvaluatorHex}, mode=10, will use all start boards for evaluation and return the average success.
      * <p>
-     * How to find out which boards are winning board? - It is proven that the empty board is 
+     * How to find out which boards are winning boards? - It is proven that the empty board is 
      * a winning board for all board sizes. But the situation is more tricky for the 1-ply moves.
      * For small board sizes N<5, the exact value of each move can be calculated with Minimax. 
      * For larger board sizes, it is possible to use Hexy (a strong Hex playing program): Make
      * a starting move and see whether Hexy can win as 2nd player. However, this has to be done
-     * manually for each new board size.
+     * manually for each starting move and each new board size.
      * 
      * @see EvaluatorHex
      */
@@ -60,7 +60,8 @@ class HexConfig {
     		{-1},		// dummy for N=1	
     		{-1,0},		// N=2
     		{-1,0,3},	// N=3
-    		{-1,0,1,2}	// N=4 (the complete set is {-1,0,1,2,4,5,8})
+    		{-1,0,1,2},	// N=4 (the complete set is {-1,0,1,2,4,5,8})
+    		{-1,0,2,5}	// N=5 (the complete set is {-1,0,2,5,10,15})
     };
 
 }

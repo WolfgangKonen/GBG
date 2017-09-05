@@ -88,7 +88,7 @@ public class TD_Lin implements TD_func, Serializable {
     protected transient XYSeries wSeries0;
     protected transient XYSeries wSeries1;
     protected transient XYSeries wSeriesN;
-    protected int 	   iterates=0;
+    protected long 	   numLearnActions=0L;
 	protected double[] flatWeights;
 	protected double[] wOpt = {-0.127757,0.254308, 0.095779,-0.107197,-0.015401, 0.144247
 							  ,-0.108901,0.003043,-0.063511, 0.004583,-0.004598,-0.00304
@@ -127,7 +127,7 @@ public class TD_Lin implements TD_func, Serializable {
 		
 		/* only visual debugging */
 		if (VISU_DBG) {
-			if (lChart==null) lChart=new LineChartSuccess("Step Sizes","iterates","step size",
+			if (lChart==null) lChart=new LineChartSuccess("Step Sizes","numLearnActions","step size",
 					  true,false);
 			lChart.clear();
 			series0 = new XYSeries("step size 0");		
@@ -137,7 +137,7 @@ public class TD_Lin implements TD_func, Serializable {
 			seriesN = new XYSeries("step size N");		
 			lChart.addSeries(seriesN);
 
-			if (wChart==null) wChart=new LineChartSuccess("Weights","iterates","weight",
+			if (wChart==null) wChart=new LineChartSuccess("Weights","numLearnActions","weight",
 					  true,false);
 			wChart.clear();
 			wChart.setLocation(400, 0);
@@ -209,13 +209,13 @@ public class TD_Lin implements TD_func, Serializable {
 //
 //				/* only visual debugging */
 //				if (VISU_DBG) {
-//					series0.add((double)iterates, rp.getLastDelta()[0]);
-//					series1.add((double)iterates, rp.getLastDelta()[1]);
-//					seriesN.add((double)iterates, rp.getLastDelta()[rp.getLastDelta().length-1]);
+//					series0.add((double)numLearnActions, rp.getLastDelta()[0]);
+//					series1.add((double)numLearnActions, rp.getLastDelta()[1]);
+//					seriesN.add((double)numLearnActions, rp.getLastDelta()[rp.getLastDelta().length-1]);
 //					lChart.plot();
-//					wSeries0.add((double)iterates, this.getWeights()[0]);
-//					wSeries1.add((double)iterates, this.getWeights()[1]);
-//					wSeriesN.add((double)iterates, this.getWeights()[this.getWeights().length-2]);
+//					wSeries0.add((double)numLearnActions, this.getWeights()[0]);
+//					wSeries1.add((double)numLearnActions, this.getWeights()[1]);
+//					wSeriesN.add((double)numLearnActions, this.getWeights()[this.getWeights().length-2]);
 //					wChart.plot();
 //				}
 //
@@ -249,11 +249,11 @@ public class TD_Lin implements TD_func, Serializable {
 				}
 				/* only visual debugging */
 				if (VISU_DBG) {
-					series0.add((double)iterates, this.getAlpha());
+					series0.add((double)numLearnActions, this.getAlpha());
 					lChart.plot();
-					wSeries0.add((double)iterates, this.getWeights()[0]);
-					wSeries1.add((double)iterates, this.getWeights()[1]);
-					wSeriesN.add((double)iterates, this.getWeights()[this.getWeights().length-2]);
+					wSeries0.add((double)numLearnActions, this.getWeights()[0]);
+					wSeries1.add((double)numLearnActions, this.getWeights()[1]);
+					wSeriesN.add((double)numLearnActions, this.getWeights()[this.getWeights().length-2]);
 					wChart.plot();
 				}
 			}
@@ -261,7 +261,7 @@ public class TD_Lin implements TD_func, Serializable {
 		//} // trainCounter
 			
 		// only for debugger stop
-		if (iterates % 100 == 0) {
+		if (numLearnActions % 100 == 0) {
 			int dummy=0;
 		}
 
@@ -313,7 +313,7 @@ public class TD_Lin implements TD_func, Serializable {
     	// copy it to old_y[k] for next pass & update eligibilities
     	// (for use in next cycle's TD errors) 
         
-        iterates++;
+        numLearnActions++;
         
         return error;
     }
@@ -381,7 +381,15 @@ public class TD_Lin implements TD_func, Serializable {
     public double getBeta() {
         return 0;
     }
-    /**
+	public long getNumLearnActions() {
+		return numLearnActions;
+	}
+
+	public void resetNumLearnActions() {
+		this.numLearnActions = 0L;
+	}
+	
+   /**
      * Calculate net output for given Input (fct Response in [SuttonBonde93])
      * <p> net output = V(s_t): the higher, the more likely is s_t a win position for player +1 (white)
      * @param Input		feature vector derived from Table, the current board position

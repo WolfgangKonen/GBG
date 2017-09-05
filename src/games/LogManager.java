@@ -65,7 +65,12 @@ public class LogManager {
 
             if(advancedLogging) {
                 if(!counter.containsKey(sessionid)) {
-                    throw new RuntimeException("Invalid sessionid, start a new  logging session to get a valid sessionid");
+                	// this should normally not happen. It happens only if addLogEntry is
+                	// called without a prior newLoggingSession. We print out a warning and 
+                	// return. (This is less disruptive than throwing an exception.)
+                	System.out.println("*** Logging: Invalid sessionid - cannot add log entry!! ***");
+                	return;
+                    //throw new RuntimeException("Invalid sessionid, start a new  logging session to get a valid sessionid");
                 }
 
                 try {
@@ -80,7 +85,12 @@ public class LogManager {
                 }
             } else {
                 if(!simpleLoggingContainers.containsKey(sessionid)) {
-                    throw new RuntimeException("Invalid Session ID");
+                	// this should normally not happen. It happens only if addLogEntry is
+                	// called without a prior newLoggingSession. We print out a warning and 
+                	// return. (This is less disruptive than throwing an exception.)
+                	System.out.println("*** Logging: Invalid sessionid - cannot add log entry!! ***");
+                	return;
+                    //throw new RuntimeException("Invalid Session ID");
                 }
 
                 simpleLoggingContainers.get(sessionid).add(logContainer);
@@ -172,7 +182,7 @@ public class LogManager {
                 simpleLoggingContainers.remove(sessionid);
             }
 
-            safeLogSessionContainer(logSessionContainer);
+            saveLogSessionContainer(logSessionContainer);
         }
     }
 
@@ -213,7 +223,7 @@ public class LogManager {
      *
      * @param logSessionContainer the LogSessionContainer
      */
-    public void safeLogSessionContainer(LogSessionContainer logSessionContainer) {
+    public void saveLogSessionContainer(LogSessionContainer logSessionContainer) {
         if (logSessionContainer.stateObservations.size() > 0) {
             String saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName();
             if(subDir != null && !subDir.equals("")) {
