@@ -534,6 +534,11 @@ public class StateObserver2048Slow implements StateObservation {
     	return stringDescr();
     }
 
+    @Override
+	public boolean isDeterministicGame() {
+		return false;
+	}
+	
 	public boolean isLegalAction(Types.ACTIONS action) {
         return availableMoves.contains(action.toInt());
     }

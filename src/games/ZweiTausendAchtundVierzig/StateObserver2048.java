@@ -669,6 +669,10 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         return stringDescr();
     }
 
+	public boolean isDeterministicGame() {
+		return false;
+	}
+	
     public boolean isLegalAction(Types.ACTIONS action) {
         return availableMoves.contains(action.toInt());
     }

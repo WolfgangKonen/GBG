@@ -339,7 +339,8 @@ public class NTuple2ValueFunc implements Serializable {
 		equiv = getSymBoards2(board,getUSESYMMETRY());
 
 		alphaM = ALPHA;
-		if (TDNTuple2Agt.NEWTARGET) alphaM /= (numTuples*equiv.length); 
+//		if (TDNTuple2Agt.NEWTARGET) 
+			alphaM /= (numTuples*equiv.length); 
 
 		// construct new EquivStates object, add it at head of LinkedList eList and remove 
 		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):

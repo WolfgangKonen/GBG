@@ -69,6 +69,10 @@ public class StateObserverTTT implements StateObservation {
 		return TicTDBase.isGameOver(m_Table);
 	}
 
+	public boolean isDeterministicGame() {
+		return true;
+	}
+	
 	public boolean isLegalState() {
 		return TicTDBase.legalState(m_Table,m_Player);
 	}
@@ -197,7 +201,8 @@ public class StateObserverTTT implements StateObservation {
     	int n=this.getNumPlayers();
     	switch (n) {
     	case (1): 
-    		m_Player = m_Player; break;
+    		m_Player = m_Player; 
+    		break;
     	case (2): 
     		m_Player = m_Player*(-1);    // 2-player games: 1,-1,1,-1,...
     		break;

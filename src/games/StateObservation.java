@@ -26,6 +26,8 @@ public interface StateObservation extends Serializable{
 
 	public boolean isGameOver();
 
+	public boolean isDeterministicGame();
+
 	public boolean isLegalState();
 	
 	/**

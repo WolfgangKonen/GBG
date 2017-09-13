@@ -130,6 +130,11 @@ public class StateObs2048BitShift implements StateObservation {
     }
 
     @Override
+	public boolean isDeterministicGame() {
+		return false;
+	}
+	
+    @Override
     public boolean isLegalState() {
         return true;
     }

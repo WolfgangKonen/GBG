@@ -134,6 +134,11 @@ public class StateObserverHex implements StateObservation {
     }
 
     @Override
+	public boolean isDeterministicGame() {
+		return true;
+	}
+	
+    @Override
     public boolean isLegalState() {
         int playerOneTiles = 0;
         int playerTwoTiles = 0;

@@ -122,12 +122,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private boolean RANDINITWEIGHTS = false;// Init Weights of Value-Function
 											// randomly
 	private boolean PRINTTABLES = false;	// /WK/ control the printout of tableA, tableN, epsilon
-//	public static boolean NEWTARGET=true;	// this is now always true
-//	public static boolean WITH_NS=true;		// this is now always true
-
-	// if NEW_GNA==true: use the new function getNextAction2,3 in getNextAction;
-	// if NEW_GNA==false: use the old function getNextAction1 in getNextAction;
-	private static boolean NEW_GNA=true;	
+	public static boolean NEWTARGET=true;
+	public static boolean WITH_NS=true;
+	
 	// debug printout in updateWeightsNew, getNextAction, trainAgent:
 	public static boolean DBG2_TARGET=false;
 	// debug printout in updateWeightsNewTerminal:
@@ -218,7 +215,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	/**
-	 * Get the best next action and return it
+	 * Get the next best action and return it
 	 * 
 	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow epsilon-greedy random action selection	
@@ -231,24 +228,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * actBest has member isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).
 	 */
-	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
-		// this function selector is just intermediate, as long as we want to test getNextAction2 
-		// against getNextAction1 (the former getNextAction). Once everything works fine with
-		// getNextAction2, we should use only this function and make getNextAction deprecated 
-		// (requires appropriate changes in all other agents implementing interface PlayAgent).
-		if (!NEW_GNA) {
-			return getNextAction1(so, random, VTable, silent);
-		} else {
-			Types.ACTIONS_VT actBestVT = getNextAction2(so, random, silent);
-			double[] vtable = actBestVT.getVTable();
-			for (int i=0; i<vtable.length; i++) VTable[i] = normalize2(vtable[i],so);
-			VTable[vtable.length] = normalize2(actBestVT.getVBest(),so);
-			return actBestVT;
-		}
-	}
-	// this is the old getNextAction function (prior to 09/2017):
-	private Types.ACTIONS getNextAction1(StateObservation so, boolean random, double[] VTable, boolean silent) {
 		int i, j;
 		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
 									// maximized
@@ -287,6 +267,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
         double soReward = so.getGameScore(so); // 0; 
         double agentScore;
+        NextState ns;
         //VTable = new double[acts.size()];  
         // DON'T! The caller has to define VTable with the right length
         
@@ -314,35 +295,42 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //	        NewSO2 = ns.getNextSO();
 //	        assert agentScore==agentScore2 : "Oops, agentScore and agentScore2 differ!";
 
-//			if (!NEWTARGET) {
-//				throw new RuntimeException("NEWTARGET==false no longer supported in TDNTuple2Agt!");
-////				// old target logic:
-////				if (NewSO.isGameOver()) {
-////					CurrentScore = NewSO.getGameScore(so);
-////				}  else {
-////					// old target logic:
-////					// the score is just the agent's value function for NewSO. In this case
-////					// the agent has to learn in the value function the sum 
-////					// 		"rewards received plus future rewards"
-////					// itself. 
-////					CurrentScore = player * agentScore;
-////											// here we ask this agent for its score estimate on NewSO
-////				}
-//			} else {
+			if (!NEWTARGET) {
+				throw new RuntimeException("NEWTARGET==false no longer supported in TDNTuple2Agt!");
+//				// old target logic:
+//				if (NewSO.isGameOver()) {
+//					CurrentScore = NewSO.getGameScore(so);
+//				}  else {
+//					// old target logic:
+//					// the score is just the agent's value function for NewSO. In this case
+//					// the agent has to learn in the value function the sum 
+//					// 		"rewards received plus future rewards"
+//					// itself. 
+//					CurrentScore = player * agentScore;
+//											// here we ask this agent for its score estimate on NewSO
+//				}
+			} else {
 				// new target logic:
 				// the score is the reward received for the transition from so to NewSO 
 				// 		(NewSO.getGameScore(so)-soReward)
 				// plus the estimated future rewards until game over (getScore(NewSO), 
 				// the agent's value function for NewSO)
 				CurrentScore = (NewSO.getGameScore(so) - soReward) + player * agentScore;				
-//			}
+			}
 			
 			// just a debug check:
 			if (Double.isInfinite(agentScore)) {
 				System.out.println("getScore(NewSO) is infinite!");
 			}
 			
-			CurrentScore = normalize2(CurrentScore,so);					
+			if (NORMALIZE) {
+				// Normalize to [-1,+1] (the appropriate range for tanh-sigmoid):
+				//
+				// (this will have no effect for TicTacToe or similar games where the 
+				// min./max. game score are -1/+1 anyway)
+				CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
+								   		 so.getMaxGameScore(),-1.0,1.0);					
+			}
 			
 			if (!silent)
 				System.out.println(NewSO.toString()+", "+(2*CurrentScore*player-1));
@@ -352,10 +340,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				//System.out.println("rd CS="+rd2);
 				CurrentScore = rd2;
 			}
-
-			//
-			// fill VTable, calculate BestScore and actBest:
-			//
 			VTable[i] = CurrentScore;
 			if (BestScore < CurrentScore) {
 				BestScore = CurrentScore;
@@ -398,191 +382,15 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// here we use the NextState version, because computation time does not matter
 			// inside DBG2_TARGET and because this version is correct for both values of 
 			// getAFTERSTATE():
-	        NextState ns = new NextState(so,actBest);
+	        ns = new NextState(so,actBest);
 			double deltaReward = ns.getNextSO().getGameScore(so) - so.getGameScore(so);
 			double sc = (deltaReward + player * getScore(ns.getAfterState()))*MAXSCORE;
 			
 			System.out.println("getScore((so,actbest)-afterstate): "+sc+"   ["+so.stringDescr()+"]");
 			int dummy=1;
 		}
-		
-		actBest.setRandomSelect(randomSelect);
 		return actBest;
 	}
-
-	/**
-	 * Get the best next action and return it 
-	 * (NEW version: ACTIONS_VT and recursive part for multi-moves)
-	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent
-	 * @return actBest		the best action. If several actions have the same
-	 * 						score, break ties by selecting one of them at random. 
-	 * <p>						
-	 * actBest has predicate isRandomAction()  (true: if action was selected 
-	 * at random, false: if action was selected by agent).<br>
-	 * actBest has also the members vTable and vBest to store the value for each available
-	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
-	 */
-	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
-		return getNextAction3(so, so, random, silent);
-	}
-	// 
-	// this private function is needed so that the recursive call inside getNextAction3 can 
-	// transfer the referring state refer
-	private Types.ACTIONS_VT getNextAction3(StateObservation so, StateObservation refer, 
-			boolean random, boolean silent) {
-		int i, j;
-		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
-									// maximized
-		StateObservation NewSO;
-		int count = 1; // counts the moves with same BestScore
-        Types.ACTIONS actBest = null;
-        Types.ACTIONS_VT actBestVT = null;
-        int iBest;
-		BestScore = -Double.MAX_VALUE;
-		double[] VTable;
-       
-		if (so.getNumPlayers()>2)
-			throw new RuntimeException("TDNTuple2Agt.getNextAction does not yet "+
-									   "implement case so.getNumPlayers()>2");
-
-		int player = Types.PLAYER_PM[refer.getPlayer()]; 	 
-	
-        randomSelect = false;
-		if (random) {
-			randomSelect = (rand.nextDouble() < m_epsilon);
-		}
-		
-		// get the best (or eps-greedy random) action
-        ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
-        Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
-        double agentScore;
-        VTable = new double[acts.size()];  
-        
-        assert actions.length>0 : "Oops, no available action";
-        for(i = 0; i < actions.length; ++i)
-        {
-            actions[i] = acts.get(i);		
-	        
-            CurrentScore = g3_Evaluate(so,actions[i],refer,silent);
-				
-			// just a debug check:
-			if (Double.isInfinite(CurrentScore)) {
-				System.out.println("getScore(NewSO) is infinite!");
-			}
-			
-			CurrentScore = normalize2(CurrentScore,so);					
-			
-			//
-			// fill VTable, calculate BestScore and actBest:
-			//
-			VTable[i] = CurrentScore;
-			if (BestScore < CurrentScore) {
-				BestScore = CurrentScore;
-				actBest = actions[i];
-				iBest  = i; 
-				count = 1;
-			} else if (BestScore == CurrentScore) {
-				// If there are 'count' possibilities with the same score BestScore, 
-				// each one has the probability 1/count of being selected.
-				// 
-				// (To understand formula, think recursively from the end: the last one is
-				// obviously selected with prob. 1/count. The others have the probability 
-				//      1 - 1/count = (count-1)/count 
-				// left. The previous one is selected with probability 
-				//      ((count-1)/count)*(1/(count-1)) = 1/count
-				// and so on.) 
-				count++;
-				if (rand.nextDouble() < 1.0/count) {
-					actBest = actions[i];
-					iBest  = i; 
-				}
-			}
-        } // for
-
-        assert actBest != null : "Oops, no best action actBest";
-		if (!silent) {
-			System.out.print("---Best Move: ");
-            NewSO = so.copy();
-            NewSO.advance(actBest);
-			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
-		}			
-		if (DBG2_TARGET) {
-			final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
-			// here we use the NextState version, because computation time does not matter
-			// inside DBG2_TARGET and because this version is correct for both values of 
-			// getAFTERSTATE():
-	        NextState ns = new NextState(so,actBest);
-			double deltaReward = ns.getNextSO().getGameScore(so) - so.getGameScore(so);
-			double sc = (deltaReward + player * getScore(ns.getAfterState()))*MAXSCORE;
-			
-			System.out.println("getScore((so,actbest)-afterstate): "+sc+"   ["+so.stringDescr()+"]");
-			int dummy=1;
-		}
-		
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, BestScore);
-		return actBestVT;
-	}
-
-    // calculate CurrentScore: 
-	// (g3_Evaluate is helper function for getNextAction3)
-    private double g3_Evaluate(	StateObservation so, Types.ACTIONS act, 
-    							StateObservation refer, boolean silent) {
-    	double CurrentScore,agentScore;
-		int player = Types.PLAYER_PM[refer.getPlayer()]; 	 
-        double referReward = refer.getGameScore(refer); // 0; 
-    	StateObservation NewSO;
-    	Types.ACTIONS_VT actBestVT;
-
-		if (randomSelect) {
-			CurrentScore = rand.nextDouble();
-			return CurrentScore;
-		} 
-        NewSO = so.copy();
-        
-        if (getAFTERSTATE() && !so.isDeterministicGame()) {
-        	assert (NewSO instanceof StateObservationNondeterministic);
-            ((StateObservationNondeterministic) NewSO).advanceDeterministic(act); 
-            agentScore = getScore(NewSO);
-            ((StateObservationNondeterministic) NewSO).advanceNondeterministic(); 
-			CurrentScore = (NewSO.getGameScore(refer) - referReward) + getGamma()*player*agentScore;
-			return CurrentScore;
-        } 
-        
-    	// the normal part for the case of single moves:
-        NewSO.advance(act);
-        agentScore = getScore(NewSO);
-        //
-        // the recursive part (only for deterministic games) is for the case of 
-        // multi-moves: the player who just moved gets from StateObservation 
-        // the signal for one (or more) additional move(s)
-        if (so.isDeterministicGame() && so.getNumPlayers()>1 && !NewSO.isGameOver()) {
-            int newPlayer =  Types.PLAYER_PM[NewSO.getPlayer()];
-            if (newPlayer==player) {
-            	actBestVT = getNextAction3(NewSO, refer, false, silent);
-            	NewSO.advance(actBestVT);
-            	CurrentScore = actBestVT.getVBest();
-            	return CurrentScore;
-            }
-        }
-	            
-		// new target logic:
-		// the score is the reward received for the transition from refer to NewSO 
-		// 		(NewSO.getGameScore(refer)-referReward)
-		// plus the estimated future rewards until game over (getScore(NewSO), 
-		// the agent's value function for NewSO)
-		CurrentScore = (NewSO.getGameScore(refer) - referReward) + getGamma()*player*agentScore;				
-
-		if (!silent) {
-			System.out.println(NewSO.toString()+", "+(2*CurrentScore*player-1));
-			//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
-		}
-
-		return CurrentScore;
-    }
 
 	// DEBUG only: return always the 1st available action (for deterministic training games)
 	public Types.ACTIONS getFirstAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
@@ -692,29 +500,68 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) {
 	        	actBest = this.getFirstAction(so, true, VTable, true);	// DEBUG only
 	        } else {
-				actBest = this.getNextAction(so, true, VTable, true);	// the normal case 
+				actBest = this.getNextAction(so, true, VTable, true);	// the normal case        	
 	        }
 
 //	        m_randomMove = actBest.isRandomAction();
 			m_randomMove = this.wasRandomAction();
 	               
+//	        // this part will become obsolete if we switch to the NextState-logic:
+//	        // (we keep it only for a while as cross-check)
+//			oldSO = so.copy();
+//	        if (getAFTERSTATE()) {
+//            	assert (so instanceof StateObservationNondeterministic);
+//                ((StateObservationNondeterministic) so).advanceDeterministic(actBest); 
+//				nextBoard = m_Net.xnf.getBoardVector(so);
+//                ((StateObservationNondeterministic) so).advanceNondeterministic(); 
+//	        	
+//	        } else {
+//				so.advance(actBest);
+//				nextBoard = m_Net.xnf.getBoardVector(so);
+//	        }
+//	        if (getAFTERSTATE()) {
+//	        	/* a debug assertion which we can only do in the (AFTERSTATE==true)-case, otherwise the random tile 
+//	        	 * differs */
+//	        	if (ns!=null && curBoard!=null) {
+//		        	// the after state before the current state as board vector
+//			        curBoard2 = m_Net.xnf.getBoardVector(ns.getAfterState()); 
+//			        for (int i=0; i<nextBoard.length; i++)
+//			        	assert curBoard[i]==curBoard2[i] : "Ooops, curBoard2 differs from curBoard";	        	
+//	        	}
+//	        }
 	        
+//	        ns = new NextState(oldSO,actBest); // activate this line only, if the obsolete part above is NOT commented out
 	        ns = new NextState(so,actBest);	        
 	        nextPlayer = ns.getNextSO().getPlayer();
 	        
+//	        // this part will become obsolete if we switch to the NextState-logic:
+//	        // (we keep it only for a while as cross-check)
+//	        if (getAFTERSTATE()) {
+//	        	/* a debug assertion which we can only do in the (AFTERSTATE==true)-case, otherwise the random tile 
+//	        	 * differs */
+//		        nextBoard2 = m_Net.xnf.getBoardVector(ns.getAfterState()); // the afterstate as board vector
+//		        for (int i=0; i<nextBoard.length; i++)
+//		        	assert nextBoard[i]==nextBoard2[i] : "Ooops, nextBoard2 differs from nextBoard";
+//		        /* Note that we cannot perform a check that so and ns.getNextSO are the same states, since they both 
+//		         * contain a nondeterministic advance which usually differs in the random tile. */
+//	        }	        
+//			int nextPlayer2 = so.getPlayer();
+//			assert nextPlayer2==nextPlayer : "Oops, nextPlayer differs";
+//			//if (DEBG) printVTable(pstream,VTable);
+//			if (m_DEBG) printTable(pstream,nextBoard);
 
-//			if (NEWTARGET) {
+			if (NEWTARGET) {
 //				if (WITH_NS) {
 					reward=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward);
 //				} else {
 //					reward=trainNewTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
 //							learnFromRM,epiLength,player,upTC,oldReward);	
 //				}
-//			} else {
-//				throw new RuntimeException("NEWTARGET==false no longer supported in TDNTuple2Agt!");
-////				reward=trainOldTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
-////						learnFromRM,epiLength,player,upTC);
-//			}
+			} else {
+				throw new RuntimeException("NEWTARGET==false no longer supported in TDNTuple2Agt!");
+//				reward=trainOldTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
+//						learnFromRM,epiLength,player,upTC);
+			}
 			if (DBG2_TARGET) {
 				final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
 				System.out.print("R_t+1, r_t+1: "+reward*MAXSCORE
@@ -753,11 +600,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
 		} // while
 
-//		if (NEWTARGET) {
+		if (NEWTARGET) {
 			// learn for each final state that the value function (estimated further reward)
 			// should be zero:
 			m_Net.updateWeightsNewTerminal(curBoard, curPlayer);
-//		}
+		}
 		
 		try {
 			this.finishUpdateWeights();		// adjust learn params ALPHA & m_epsilon
@@ -876,31 +723,32 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //	} 
 	
 	/**
-	 * Fetch the reward for StateObservation so (relative to refer)
+	 * Fetch the reward for StateObservation so (relative to oldSO)
 	 * 
 	 * @param so		actual state
-	 * @param refer		referring state
-	 * @param player	the player to move in state refer. 
+	 * @param oldSO		referring state
+	 * @param player	the player to move in state oldSO. 
 	 * 					1-player games: always +1; 2-player games: +1 or -1
 	 * @return reward (total gameScore) for actual state {@code so} 
 	 */
-	private double fetchReward(StateObservation so, StateObservation refer, int player) {
-		double reward = player*so.getGameScore(refer);
-		return normalize2(reward,so);
-	}
-	
-	private double normalize2(double score, StateObservation so) {
+	private double fetchReward(StateObservation so, StateObservation oldSO, int player) {
+		double reward = player*so.getGameScore(oldSO);
+
 		if (NORMALIZE) {
-			// Normalize to [-1,+1] (the appropriate range for tanh-sigmoid):
-			//			
+//			// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+//			// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+//			double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+//			double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+			
 			// since we have - in contrast to TDAgent - here only one sigmoid
 			// choice, namely tanh, we can take fixed [min,max] = [-1,+1]. 
 			// If we would later extend to several sigmoids, we would have to 
-			// adapt here:		
-			score = normalize(score,so.getMinGameScore(),
-							   		so.getMaxGameScore(),-1.0,+1.0);
+			// adapt here:
+			
+			reward = normalize(reward,so.getMinGameScore(),
+							   so.getMaxGameScore(),-1,+1);
 		}
-		return score;
+		return reward;
 	}
 	
 	/**
@@ -916,20 +764,16 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * the deterministic advance (e.g. the merge in case of 2048)) and ns.getNextSO() returns  
 	 * the next state <b>s''</b> (after adding the nondeterministic part (e.g. adding the random 
 	 * tile in case of 2048)).
-	 * <p>
-	 * The nondeterministic part is done once at the time of constructing an object of class
-	 * {@code NextState}, so multiple calls to {@code ns.getNextSO()} are guaranteed to return
-	 * the  same state.
 	 * <p> 
 	 * Note that the part with {@code getAFTERSTATE()==true} is only available for nondeterministic 
 	 * games where {@link StateObservation} {@code so} is actually an instance of 
 	 * {@link StateObservationNondeterministic}. Otherwise, an assertion will fire.
 	 * 
-	 * @see TDNTuple2Agt#getAFTERSTATE()
+	 * @see TDNTuple2Agt#getNextAction(StateObservation, boolean, double[], boolean)
 	 * @see TDNTuple2Agt#trainAgent(StateObservation)
 	 */
 	class NextState {
-		StateObservation refer;
+		StateObservation sobs;
 		StateObservation afterState;
 		StateObservation nextSO;
 		double thisReward;			// TODO
@@ -940,7 +784,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		 * <b>s'</b> and the next state <b>s''</b>. 
 		 */
 		NextState(StateObservation so, Types.ACTIONS actBest) {
-			refer = so.copy();
+			sobs = so.copy();
 	        if (getAFTERSTATE()) {
             	assert (so instanceof StateObservationNondeterministic);
             	// implement it in such a way that StateObservation so is *not* changed -> that is why 
@@ -956,7 +800,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				afterState = nextSO.copy();
 	        }
 
-			nextReward = fetchReward(nextSO,refer,Types.PLAYER_PM[refer.getPlayer()]);
+			nextReward = fetchReward(nextSO,sobs,Types.PLAYER_PM[sobs.getPlayer()]);
 
 		}
 
@@ -964,7 +808,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		 * @return the original state <b>s</b> = {@code so}
 		 */
 		public StateObservation getSO() {
-			return refer;
+			return sobs;
 		}
 
 		/**
@@ -1123,10 +967,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		return m_epsilon;
 	}
 	
-	public double getGamma() {
-		return m_tdPar.getGamma();
-	}
-	
 	public long getNumLrnActions() {
 		return m_Net.getNumLearnActions();
 	}
@@ -1148,7 +988,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		String cs = getClass().getName();
 		String str = cs + ", USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
-						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
+						+ ", " + "sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
 						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");

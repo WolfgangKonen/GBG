@@ -3,6 +3,9 @@ package tools;
 
 import java.awt.Color;
 import java.util.ArrayList;
+
+import controllers.PlayAgent;
+
 import java.awt.event.KeyEvent;
 import java.io.Serializable;
 
@@ -12,6 +15,11 @@ import java.io.Serializable;
  */
 public class Types {
 
+	/**
+	 *  Class ACTIONS holds an action + information whether it was selected at random. 
+	 *  
+	 *  @see Types.ACTIONS_VT
+	 */
     public static class ACTIONS implements Serializable, Comparable<ACTIONS> {
         private int key;
         private boolean randomSelect = false; // true, if this action was selected at random
@@ -23,8 +31,13 @@ public class Types {
     	 */
     	private static final long  serialVersionUID = 12L;
 
-        public ACTIONS(int numVal) {			// constructor
+        public ACTIONS(int numVal) {			
             this.key = numVal;
+        }
+
+        public ACTIONS(int numVal, boolean random) {			
+            this.key = numVal;
+            this.randomSelect = random;
         }
 
         public int toInt() {
@@ -70,6 +83,73 @@ public class Types {
 			this.randomSelect = randomSelect;
 		}
     } // class ACTIONS
+
+	/**
+	 *  Class ACTIONS_VT (action with VTable) is derived from ACTIONS. It has the additional members 
+	 *  <ul>
+	 *  <li> double[] vTable: the game values for all other available actions when this action
+	 *  	 is created via PlayAgent.getNextAction(so,...) 
+	 *  <li> double   vBest: the game value for the best action returned from 
+	 *  	 PlayAgent.getNextAction(so,...)
+	 *  </ul>
+	 *  
+	 *  @see Types.ACTIONS
+	 */
+    public static class ACTIONS_VT extends ACTIONS implements Serializable, Comparable<ACTIONS> {
+        private double[] vTable;
+        private double   vBest;
+
+		/**
+    	 * change the version ID for serialization only if a newer version is no longer 
+    	 * compatible with an older one (older .agt.zip will become unreadable or you have
+    	 * to provide a special version transformation)
+    	 */
+    	private static final long  serialVersionUID = 12L;
+
+        public ACTIONS_VT(int numVal) {			
+            super(numVal);
+        }
+
+        public ACTIONS_VT(int numVal, boolean random) {			
+            super(numVal,random);
+        }
+
+        /**
+         * 
+         * @param numVal	action code
+         * @param random	flag for random move	
+         * @param vtable	game values for all K available actions (+1)
+         * <p>
+         * It is assumed that {@code vtable} has K+1 elements and vtable[K] is the game value
+         * for {@code this} action. 
+         */
+        public ACTIONS_VT(int numVal, boolean random, double [] vtable) {			
+            super(numVal,random);
+            this.vTable = vtable.clone();
+            this.vBest = vtable[vtable.length-1];
+        }
+
+        /**
+         * 
+         * @param numVal	action code
+         * @param random	flag for random move	
+         * @param vtable	game values for all K available actions 
+         * @param vbest		game value for {@code this} action. 
+         */
+        public ACTIONS_VT(int numVal, boolean random, double [] vtable, double vbest) {			
+            super(numVal,random);
+            this.vTable = vtable.clone();
+            this.vBest = vbest;
+        }
+
+        public double[] getVTable() {
+        	return vTable;
+        }
+        
+        public double getVBest() {
+        	return vBest;
+        }
+    } // class ACTIONS_VT
 
 
     public static enum WINNER {

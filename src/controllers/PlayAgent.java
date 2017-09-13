@@ -41,6 +41,8 @@ public interface PlayAgent {
 	public Types.ACTIONS getNextAction(StateObservation sob, boolean random, 
 			double[] vtable, boolean silent);
 	
+	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
+	
 	/**
 	 * Return the agent's score for that game state.
 	 * @param sob			the current game state;

@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 
+import params.OtherParams;
+import params.ParOther;
+import params.ParTD;
 import params.TDParams;
 import tools.Types;
 import controllers.TD.TD_Lin;
@@ -21,8 +24,9 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Feature;
+import games.GameBoard;
 import games.StateObservation;
-//import games.TicTacToe.StateObserverTTT;
+import games.XArenaMenu;
 
 /**
  * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning). 
@@ -42,30 +46,56 @@ import games.StateObservation;
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  */
-abstract public class TDAgent extends AgentBase implements PlayAgent,Serializable {
+//abstract 
+public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	protected TD_func m_Net;
+	/**
+	 * Controls the amount of explorative moves in
+	 * {@link #getNextAction(StateObservation, boolean, double[], boolean)}
+	 * during training. <br>
+	 * m_epsilon = 0.0: no random moves, <br>
+	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
+	 * m_epsilon undergoes a linear change from {@code tdPar.getEpsilon()} 
+	 * to {@code tdPar.getEpsilonFinal()}. 
+	 * This is realized in {@link TD_Lin#finishUpdateWeights()}.
+	 */
 	private double m_epsilon = 0.1;
+	
+	/**
+	 * m_EpsilonChangeDelta is the epsilon change per episode.
+	 */
 	private double m_EpsilonChangeDelta = 0.001;
+	
+	// --- inpSize now obsolete (replaced by m_feature.getInputSize(int featmode)) --- :
 	// size of feature input vector for each featmode
 	// (featmode def'd in TicTDBase. If featmode==8, use
 	// TicTDBase.getInputSize8())
-	private int inpSize[] = { 6, 6, 10, 19, 13, 19, 0, 0, 0, 9 };
+	// private int inpSize[] = { 6, 6, 10, 19, 13, 19, 0, 0, 0, 9 };
 	protected int hiddenSize = 15; // size of hidden layer (only for TD_NNet)
 	private Random rand;
 //	private int[][] m_trainTable = null;
 //	private double[][] m_deltaTable = null;
 	private int numFinishedGames = 0;
 	private boolean randomSelect = false;
-	private boolean m_hasLinearNet;
-	private boolean m_hasSigmoid;
+//	private boolean m_hasLinearNet;
+//	private boolean m_hasSigmoid;
+//	private boolean learnFromRM = false;    // use now m_oPar.useLearnFromRM() - don't store/maintain value twice
+	private boolean NORMALIZE = false; 
 	protected Feature m_feature;
 	
 	/**
-	 * Member {@link #m_tdPar} is only needed for saving and loading the agent
-	 * (to restore the agent with all its parameter settings)
+	 * Members {@link #m_tdPar} and {@link #m_oPar} are needed for saving and loading
+	 * the agent (to restore the agent with all its parameter settings)
 	 */
-	private TDParams m_tdPar;
-	private static final long serialVersionUID = 1234L;
+	private ParTD m_tdPar;		// TODO transform to ParTD
+	private ParOther m_oPar = new ParOther();
+	
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
 	
 	//public int epiCount=0;
 
@@ -75,7 +105,8 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	public TDAgent() {
 		super();
 		TDParams tdPar = new TDParams();
-		initNet(tdPar, 1000);
+		OtherParams oPar = new OtherParams();		
+		initNet(tdPar, oPar, null, 1000);
 	}
 
 	/**
@@ -84,9 +115,9 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	 * 
 	 * @param tdPar
 	 */
-	public TDAgent(String name, TDParams tdPar) {
+	public TDAgent(String name, TDParams tdPar, OtherParams oPar, Feature feature) {
 		super(name);
-		initNet(tdPar, 1000);
+		initNet(tdPar, oPar, feature, 1000);
 	}
 
 	/**
@@ -95,9 +126,9 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	 * @param tdPar
 	 * @param maxGameNum
 	 */
-	public TDAgent(String name, TDParams tdPar, int maxGameNum) {
+	public TDAgent(String name, TDParams tdPar, OtherParams oPar, Feature feature, int maxGameNum) {
 		super(name);
-		initNet(tdPar, maxGameNum);
+		initNet(tdPar, oPar, feature, maxGameNum);
 	}
 
 	/**
@@ -105,20 +136,23 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	 * @param tdPar
 	 * @param maxGameNum
 	 */
-	private void initNet(TDParams tdPar, int maxGameNum) {
-		m_tdPar = new TDParams();
+	private void initNet(TDParams tdPar, OtherParams oPar, Feature feature, int maxGameNum) {
+		m_tdPar = new ParTD();
+		m_oPar = new ParOther(oPar);
 		m_tdPar.setFrom(tdPar);
-		m_feature = makeFeatureClass(tdPar.getFeatmode());
+		m_feature = feature; 
 		//super.setFeatmode(tdPar.getFeatmode());
 		//super.setEpochMax(tdPar.getEpochs());
-		if (m_feature.getFeatmode() > 9) {
+		if (m_feature.getFeatmode() > 99) {
 			m_Net = null;
 		} else {
 			if (tdPar.hasLinearNet()) {
-				m_Net = new TD_Lin(getInputSize(m_feature.getFeatmode()),
+				m_Net = new TD_Lin(m_feature.getInputSize(m_feature.getFeatmode()),
+						//OLD (and wrong): getInputSize(m_feature.getFeatmode()),
 						tdPar.hasSigmoid());
 			} else {
-				m_Net = new TD_NNet(getInputSize(m_feature.getFeatmode()),
+				m_Net = new TD_NNet(m_feature.getInputSize(m_feature.getFeatmode()),
+						//OLD (and wrong): getInputSize(m_feature.getFeatmode()),
 						hiddenSize, tdPar.hasSigmoid());
 			}
 			// set alpha,beta,gamma,lambda & epochMax,rpropLrn from the TDpars
@@ -127,10 +161,10 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 		}
 		// m_EPS=eps;
 		m_epsilon = tdPar.getEpsilon();
-		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal())
-				/ maxGameNum;
-		m_hasSigmoid = tdPar.hasSigmoid();
-		m_hasLinearNet = tdPar.hasLinearNet();
+		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
+		NORMALIZE=tdPar.getNormalize();
+//		m_hasSigmoid = tdPar.hasSigmoid();
+//		m_hasLinearNet = tdPar.hasLinearNet();
 		rand = new Random(System.currentTimeMillis());
 		setAgentState(AgentState.INIT);
 	}
@@ -138,7 +172,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	/**
 	 * Get the next best action and return it
 	 * 
-	 * @param sob			current game state (is returned unchanged)
+	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow epsilon-greedy random action selection	
 	 * @param VTable		the score for each available action (corresponding
 	 * 						to sob.getAvailableActions())
@@ -152,18 +186,18 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	 */
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
 		int i, j;
-		double MaxScore = -Double.MAX_VALUE;
+		double BestScore = -Double.MAX_VALUE;
 		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
 									// maximized
 		StateObservation NewSO;
-		int count = 1; // counts the moves with same MaxScore
+		int count = 1; // counts the moves with same BestScore
         Types.ACTIONS actBest = null;
         int iBest;
         
 //        assert (sob instanceof StateObserverTTT)
 //		: "StateObservation 'sob' is not an instance of StateObserverTTT";
 //		StateObserverTTT so = (StateObserverTTT) sob;
-		int player = so.getPlayerPM(); 	 
+		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
 		//int[][] Table = so.getTable();
         randomSelect = false;
 		if (random) {
@@ -183,31 +217,63 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
             NewSO.advance(actions[i]);
 			
 			if (NewSO.isGameOver()) {
-				// Fetch game score and normalize it to the range [0,1], since 
-				// TD_NNet may build a value function with a sigmoid function
-				// mapping to [0,1]. Then it can use only rewards in [0,1].
-				switch (so.getNumPlayers()) {
-				case 1: 
-					CurrentScore = NewSO.getGameScore();
-					break;
-				case 2: 
-					CurrentScore = (-player)*NewSO.getGameScore();
-					// so.getGameScore() returns -1, if 'player', that is the
-					// one who *made* the move to 'so', has won. If we multiply
-					// this by (-player), we get a reward +1 for a X(player=+1)- 
-					// win and a reward -1 for an O(player=-1)-win.
-					// And a reward 0 for a tie.
-					break;
-				default: 
-					throw new RuntimeException("TDPlayer.trainAgent does not yet "+
-							"implement case so.getNumPlayers()>2");
+//				switch (so.getNumPlayers()) {
+//				case 1: 
+//					CurrentScore = NewSO.getGameScore();
+//					break;
+//				case 2: 
+//					CurrentScore = (-1)*NewSO.getGameScore();		// CORRECT
+//					// NewSO.getGameScore() returns -1, if 'player', that is the
+//					// one who *made* the move to 'so', has won. If we multiply
+//					// this by (-1), we get a reward +1 for a X(player=+1)- 
+//					// win and *also* a reward +1 for an O(player=-1)-win.
+//					// And a reward 0 for a tie.
+//					//
+//					//CurrentScore = (-player)*NewSO.getGameScore(); // WRONG!!
+//					// so.getGameScore() returns -1, if 'player', that is the
+//					// one who *made* the move to 'so', has won. If we multiply
+//					// this by (-player), we get a reward +1 for a X(player=+1)- 
+//					// win and a reward -1 for an O(player=-1)-win.
+//					// And a reward 0 for a tie.
+//					break;
+//				default: 
+//					throw new RuntimeException("TDAgent.trainAgent does not yet "+
+//							"implement case so.getNumPlayers()>2");
+//				}				
+				
+				// the whole switch-statement above can be replaced with the simpler  
+				// logic of NewSO.getGameScore(StateObservation referingState), where  
+				// referingState is 'so', the state before NewSO. [This should be  
+				// extensible to 3- or 4-player games (!) as well, if we put the 
+				// proper logic into method getGameScore(referingState).]  
+				CurrentScore = NewSO.getGameScore(so);
+
+				if (NORMALIZE) {
+					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+					// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+					double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+					double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+					
+					CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
+									   so.getMaxGameScore(),lower,upper);
 				}
-				// Normalize to +1 (X-win), 0.5 (tie), 0.0 (O-win) for 2-player game:
-				CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
-								   		 so.getMaxGameScore(),0.0,1.0);
-			}  else {
+			}  
+			else {
 				CurrentScore = player * getScore(NewSO);
+										// here we ask this agent for its score estimate on NewSO
+				if (NORMALIZE) {
+					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+					// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+					double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+					double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+					
+					CurrentScore = normalize(CurrentScore,so.getMinGameScore(),
+									   so.getMaxGameScore(),lower,upper);
+				}
+				// unclear why, but for TTT the agent has better results if there is no 
+				// normalization here but the normalize call 4 lines above
 			}
+			
 			// ???? questionable: a) what happens in case of a tie and 
 			//      b) shouldn't this be in range [-1,+1]? 
 //				if (NewSO.win()) {
@@ -222,33 +288,36 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 				CurrentScore = rand.nextDouble();
 			}
 			VTable[i] = CurrentScore;
-			if (MaxScore < CurrentScore) {
-				MaxScore = CurrentScore;
+			if (BestScore < CurrentScore) {
+				BestScore = CurrentScore;
 				actBest = actions[i];
 				iBest  = i; 
 				count = 1;
-			} else if (MaxScore == CurrentScore) {
-				count++;	        
+			} else if (BestScore == CurrentScore) {
+				// If there are 'count' possibilities with the same score BestScore, 
+				// each one has the probability 1/count of being selected.
+				// 
+				// (To understand formula, think recursively from the end: the last one is
+				// obviously selected with prob. 1/count. The others have the probability 
+				//      1 - 1/count = (count-1)/count 
+				// left. The previous one is selected with probability 
+				//      ((count-1)/count)*(1/(count-1)) = 1/count
+				// and so on.) 
+				count++;
+				if (rand.nextDouble() < 1.0/count) {
+					actBest = actions[i];
+					iBest  = i; 
+				}
 			}
         } // for
-        if (count>1) {  // more than one action with MaxScore: 
-        	// break ties by selecting one of them randomly
-        	int selectJ = (int)(rand.nextDouble()*count);
-        	for (i=0, j=0; i < actions.length; ++i) 
-        	{
-        		if (VTable[i]==MaxScore) {
-        			if (j==selectJ) actBest = actions[i];
-        			j++;
-        		}
-        	}
-        }
+ 
         assert actBest != null : "Oops, no best action actBest";
 		if (!silent) {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
             NewSO.advance(actBest);
-			System.out.println(NewSO.toString()+", "+(2*MaxScore*player-1));
-			//print_V(Player, NewSO.getTable(), 2 * MaxScore * Player - 1);
+			System.out.println(NewSO.toString()+", "+(2*BestScore*player-1));
+			//print_V(Player, NewSO.getTable(), 2 * BestScore * Player - 1);
 		}			
 		return actBest;
 	}
@@ -263,40 +332,32 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	}
 
 	/**
-	 * Return the agent's score for that after state.
+	 * Return the agent's estimate of the score for that after state.
 	 * 
 	 * @param so			the current game state;
 	 * @return V(), the prob. that X (Player +1) wins from that after state.
 	 *         Player*V() is the quantity to be maximized by getNextAction.
 	 */
 	public double getScore(StateObservation so) {
-//		assert (sob instanceof StateObserverTTT)
-//		: "StateObservation 'sob' is not an instance of StateObserverTTT";
-//		StateObserverTTT so = (StateObserverTTT) sob;
-//		int Player = -so.getPlayerPM(); 	// Player is the player who made the move 
-//									 	// while so has the player who moves next 
-//		int[][] Table = so.getTable();
 		double score = m_Net.getScore(m_feature.prepareFeatVector(so));
 		return score;
 	}
 
 
 	/**
-	 * Train the agent (the net) for one complete game episode. Side effect:
-	 * AgentBase.incrementGameNum().
-	 * 
-	 * @param Player
-	 *            +1 or -1, player who makes the next move. If Player=+1, the
-	 *            initial board position is empty, if Player=-1, the initial
-	 *            board position has an 'X' set at a random location (so X is
-	 *            always the one who starts the game)
-	 * @return true, if agent raised a stop condition (currently only CMAPlayer)
+	 * Train the Agent for one complete game episode. <p>
+	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
+	 * parameters (weights and so on).
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState01()} to get
+	 * 					some exploration of different game paths)
+// --- epiLength, learnFromRM are now available via the agent's member ParOther m_oPar: ---
+//	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
+//	 * 					prematurely.  
+//	 * @param learnFromRM if true, learn from random moves during training
+	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
-	public boolean trainAgent(StateObservation sob) {
-		return trainAgent(sob, Integer.MAX_VALUE);
-	}
-	public boolean trainAgent(StateObservation so, int epiLength) {
-		//int[][] table = new int[3][3];
+	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/) {
 		double[] VTable = null;
 		double reward = 0.0;
 		boolean randomMove;
@@ -307,13 +368,14 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 		String S_old, I_old = null;   // only as debug info
 		int player;
 		Types.ACTIONS actBest;
+		StateObservation oldSO;
 		boolean isNtuplePlayer = (m_feature.getFeatmode() == 8
 				|| this.getClass().getName().equals("TD_NTPlayer"));
 
-//		assert (sob instanceof StateObserverTTT) : "Input 'sob' is not of class StateObserverTTT";
-//		StateObserverTTT so = (StateObserverTTT) sob;
-		player = so.getPlayerPM();
-		// ??? where is the setting of table (in the old version ??? 
+		boolean learnFromRM = m_oPar.useLearnFromRM();
+		int epiLength = m_oPar.getEpisodeLength();
+
+		player = Types.PLAYER_PM[so.getPlayer()];
 
 		m_Net.resetElig(); // reset the elig traces before starting a new game
 							// /WK/ NEW/02/2015
@@ -333,32 +395,53 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 			VTable = new double[so.getNumAvailableActions()+1];
 			actBest = this.getNextAction(so, true, VTable, true);
 			randomMove = this.wasRandomAction();
+			oldSO = so.copy();
 			so.advance(actBest);
+
 			if (so.isGameOver()) {
 				// Fetch a reward and normalize it to the range [0,1], since 
 				// TD_NNet may build a value function with a sigmoid function
 				// mapping to [0,1]. Then it can use only rewards in [0,1].
-				switch (so.getNumPlayers()) {
-				case 1: 
-					reward = so.getGameScore();
-					break;
-				case 2: 
-					reward = (-player)*so.getGameScore();
-					// so.getGameScore() returns -1, if 'player', that is the
-					// one who *made* the move to 'so', has won. If we multiply
-					// this by (-player), we get a reward +1 for a X(player=+1)- 
-					// win and a reward -1 for an O(player=-1)-win.
-					// And a reward 0 for a tie.
-					break;
-				default: 
-					throw new RuntimeException("TDPlayer.trainAgent not yet "+
-							"implementing case so.getNumPlayers()>2");
+				
+//				switch (so.getNumPlayers()) {
+//				case 1: 
+//					reward = so.getGameScore();
+//					break;
+//				case 2: 
+//					reward = (-player)*so.getGameScore();
+//					// so.getGameScore() returns -1, if 'player', that is the
+//					// one who *made* the move to 'so', has won. If we multiply
+//					// this by (-player), we get a reward +1 for a X(player=+1)- 
+//					// win and a reward -1 for an O(player=-1)-win.
+//					// And a reward 0 for a tie.
+//					break;
+//				default: 
+//					throw new RuntimeException("TDPlayer.trainAgent not yet "+
+//							"implementing case so.getNumPlayers()>2");
+//				}
+				
+				// the whole switch-statement above can be replaced with the simpler  
+				// logic of so.getGameScore(StateObservation referingState), where  
+				// referingState is 'oldSO', the state before so. [This should be  
+				// extensible to 3- or 4-player games (!) as well, if we put the 
+				// proper logic into method getGameScore(referingState).]  
+				reward = player*so.getGameScore(oldSO);
+				
+				if (NORMALIZE) {
+					// Normalize to [0,+1] (the appropriate range for Fermi-fct-sigmoid)
+					// or to [-1,+1] (the appropriate range for tanh-sigmoid):
+					double lower = (m_Net.FERMI_FCT ? 0.0 : -1.0);
+					double upper = (m_Net.FERMI_FCT ? 1.0 :  1.0);
+					
+					reward = normalize(reward,so.getMinGameScore(),
+									   so.getMaxGameScore(),lower,upper);
 				}
-				// Normalize to +1 (X-win), 0.5 (tie), 0.0 (O-win) for 2-player game:
-				reward = normalize(reward,so.getMinGameScore(),
-								   so.getMaxGameScore(),0.0,1.0);
 				finished = true;
 			} else {
+				//it is irrelevant what we put into reward here, because it will 
+				//not be used in m_Net.updateWeights when finished is not true.
+				//
+				// ??? has to be re-thought for the case of 2048 and other 1-player games!!!
 				reward = 0.0;
 			}
 			counter++;
@@ -368,7 +451,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 				finished = true; 
 			}
 			Input = m_feature.prepareFeatVector(so);
-			if (randomMove && !finished) {
+			if (randomMove && !finished && !learnFromRM) {
 				// no training, go to next move
 				m_Net.calcScoresAndElig(Input); // calculate score, write it to
 												// old_y[k] for
@@ -384,7 +467,7 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 				
 				// this is the accumulation logic: if eMax>0, then form 
 				// mini batches and apply the weight changes only at the end
-				// of such mini batches
+				// of such mini batches (after eMax complete games)
 				int eMax = super.getEpochMax();
 				if (eMax==0) {
 					wghtChange=true;
@@ -398,9 +481,10 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 				m_Net.updateWeights(reward, Input, finished, wghtChange);
 				// contains afterwards a m_Net.calcScoresAndElig(Input);
 
-				oldInput = Input;
 			}
 
+			oldInput = Input; 
+			
 			if (finished) {
 				if (DEBG)
 					if (randomMove)
@@ -413,10 +497,11 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 				System.out.println();
 			}
 
-			player = so.getPlayerPM();   // advance to the next player
+			player = Types.PLAYER_PM[so.getPlayer()];   // advance to the next player
 		}
 		m_Net.finishUpdateWeights(); // adjust learn params ALPHA & BETA
-		m_epsilon = m_epsilon - m_EpsilonChangeDelta;
+		m_epsilon = m_epsilon - m_EpsilonChangeDelta; 		// linear decrease of m_epsilon 
+
 		incrementGameNum();
 		return false;
 	}
@@ -431,7 +516,8 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 			// the fan-in,
 			// i.e. divide by the number of neurons on the input side of the
 			// weights:
-			m_Net.setAlpha( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
+			m_Net.setAlpha( tdPar.getAlpha() / m_feature.getInputSize(m_feature.getFeatmode()) );
+					//OLD (and wrong): inpSize[m_feature.getFeatmode()] );
 		}
 		m_Net.setBeta(tdPar.getAlpha() / hiddenSize); 	// only relevant for
 														// TD_NNet
@@ -439,7 +525,17 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 				tdPar.getAlphaFinal() / tdPar.getAlpha(), 1.0 / maxGameNum));
 		//m_Net.setEpochs(tdPar.getEpochs());  // now we use epochs over whole games
 		m_Net.setRpropLrn(tdPar.hasRpropLrn());
-		m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
+		m_Net.setRpropInitDelta( tdPar.getAlpha() / m_feature.getInputSize(m_feature.getFeatmode()));
+					//OLD (and wrong): inpSize[m_feature.getFeatmode()] );
+	}
+
+	/**
+	 * Set defaults for m_oPar 
+	 * (needed in {@link XArenaMenu.loadAgent} when loading older agents, where 
+	 * m_oPar=null in the saved version).
+	 */
+	public void setDefaultOtherPar() {
+		m_oPar = new ParOther();
 	}
 
 	public void setAlpha(double alpha) {
@@ -465,33 +561,57 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	
 	public String stringDescr() {
 		String cs = getClass().getName();
-		String str = cs + ", " + (m_hasLinearNet?"LIN":"BP")
-						+ ", " + (m_hasSigmoid?"with sigmoid":"w/o sigmoid")
+		String str = cs + ", " + (m_tdPar.hasLinearNet()?"LIN":"BP")
+						+ ", " + (m_tdPar.hasSigmoid()?"with sigmoid":"w/o sigmoid")
+						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", lambda:" + m_Net.getLambda()
-						+ ", features:" + m_feature.getFeatmode();
+						+ ", features:" + m_feature.getFeatmode()
+						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");
 		return str;
 	}
 	
 	public String printTrainStatus() {
 		DecimalFormat frm = new DecimalFormat("#0.0000");
+		DecimalFormat frme= new DecimalFormat();
+		frme = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+		frme.applyPattern("0.0E00");  
+
 		String cs = ""; //getClass().getName() + ": ";   // optional class name
 		String str = cs + "alpha="+frm.format(m_Net.getAlpha()) 
 				   + ", epsilon="+frm.format(getEpsilon())
 				   //+ ", lambda:" + m_Net.getLambda()
-				   + ", "+getGameNum() + " games";
+				   + ", "+getGameNum() + " games"
+				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
 		return str;
 	}
 
-	private int getInputSize(int featmode) {
-			return inpSize[featmode];
-	}
+// --- obsolete (replaced by m_feature.getInputSize(int featmode) ):
+//	private int getInputSize(int featmode) {
+//			return inpSize[featmode];
+//	}
 
 	public int getHiddenSize() {
 		return hiddenSize;
 	}
 
-	public TDParams getTDParams() {
+	public ParTD getTDParams() {
 		return m_tdPar;
+	}
+	public ParOther getOtherPar() {
+		return m_oPar;
+	}
+	
+	public int getNumEval()
+	{	
+		return m_oPar.getNumEval();
+	}
+	
+	public long getNumLrnActions() {
+		return m_Net.getNumLearnActions();
+	}
+
+	public void resetNumLearnActions() {
+		m_Net.resetNumLearnActions();
 	}
 	
 	public int getFeatmode() {
@@ -505,5 +625,5 @@ abstract public class TDAgent extends AgentBase implements PlayAgent,Serializabl
 	 * @param 	featmode	different modi of features to generate
 	 * @return	the Feature object
 	 */
-	abstract public Feature makeFeatureClass(int featmode);
+	//abstract public Feature makeFeatureClass(int featmode);
 }
