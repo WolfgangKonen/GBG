@@ -223,9 +223,10 @@ abstract public class AgentBase implements Serializable {
 		this.epochMax = epochMax;
 	}
 	
-	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
-		throw new RuntimeException("Not yet ready!!");
-	}
+//  --- this is now implemented by every agent --- 
+//	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+//		throw new RuntimeException("Not yet ready!!");
+//	}
 	
 
 }

@@ -36,7 +36,7 @@ public interface PlayAgent {
 	 * 
 	 * Side effect: sets member randomSelect (true: if action was selected 
 	 * at random, false: if action was selected by agent).
-	 * See {@link #wasRandomAction()}.
+	 * 
 	 */	
 	public Types.ACTIONS getNextAction(StateObservation sob, boolean random, 
 			double[] vtable, boolean silent);
@@ -72,6 +72,7 @@ public interface PlayAgent {
 	 * 			to {@link #getNextAction(StateObservation, boolean, double[], boolean)} 
 	 *          was a random action 
 	 */
+	@Deprecated
 	public boolean wasRandomAction(); 
 	
 	/**

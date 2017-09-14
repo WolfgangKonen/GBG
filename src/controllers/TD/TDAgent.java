@@ -487,6 +487,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @return	returns true/false, whether the action suggested by last call 
 	 * 			to getNextAction() was a random action 
 	 */
+    @Deprecated
 	public boolean wasRandomAction() {
 		return randomSelect;
 	}
@@ -554,7 +555,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		while (true) {
 			VTable = new double[so.getNumAvailableActions()+1];
 			actBest = this.getNextAction(so, true, VTable, true);
-			randomMove = this.wasRandomAction();
+			randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
 

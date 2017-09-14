@@ -381,6 +381,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         } // for
 
         assert actBest != null : "Oops, no best action actBest";
+        actBest.setRandomSelect(randomSelect);
+        
 		if (!silent) {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
@@ -406,7 +408,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			int dummy=1;
 		}
 		
-		actBest.setRandomSelect(randomSelect);
 		return actBest;
 	}
 
@@ -695,8 +696,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				actBest = this.getNextAction(so, true, VTable, true);	// the normal case 
 	        }
 
-//	        m_randomMove = actBest.isRandomAction();
-			m_randomMove = this.wasRandomAction();
+	        m_randomMove = actBest.isRandomAction();
+//			m_randomMove = this.wasRandomAction();
 	               
 	        
 	        ns = new NextState(so,actBest);	        

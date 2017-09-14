@@ -13,6 +13,7 @@ import tools.ElapsedCpuTimer.TimerType;
 import tools.Types;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Random;
 
 
@@ -34,6 +35,10 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     private ParMCTS pmcts; 
     
 	private ParOther m_oPar = new ParOther();
+
+	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
+	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
+	private static boolean NEW_GNA=false;	
 
     /**
      * The MCTS-UCT implementation
@@ -127,6 +132,36 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	 */	
 	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] vtable, boolean silent) {
+
+		// this function selector is just intermediate, as long as we want to test getNextAction2 
+		// against getNextAction1 (the former getNextAction). Once everything works fine with
+		// getNextAction2, we should use only this function and make getNextAction deprecated 
+		// (requires appropriate changes in all other agents implementing interface PlayAgent).
+		if (!NEW_GNA) {
+	        return getNextAction1(so, vtable, silent);
+		} else {
+			Types.ACTIONS_VT actBestVT = getNextAction2(so, random, silent);
+			double[] VTable = actBestVT.getVTable();
+			for (int i=0; i<VTable.length; i++) vtable[i] = VTable[i];
+			vtable[VTable.length] = actBestVT.getVBest();
+			return actBestVT;			
+		}
+    }
+
+    /**
+     * Get the best next action and return it (old version, NEW_GNA==false).
+     * Called by calcCertainty and getNextAction.
+     * 
+     * @param sob			current game state (not changed on return)
+     * @param vtable		must be an array of size n+1 on input, where
+     * 						n=sob.getNumAvailableActions(). On output,
+     * 						elements 0,...,n-1 hold the score for each available
+     * 						action (corresponding to sob.getAvailableActions())
+     * 						In addition, vtable[n] has the score for the
+     * 						best action.
+     * @return nextAction	the next action
+     */
+    private Types.ACTIONS getNextAction1(StateObservation so, double[] vtable, boolean silent) {
 		
 		//vtable = new double[so.getNumAvailableActions()];
         // DON'T! The caller has to define vtable with the right length
@@ -138,7 +173,43 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		// Ask MCTS for the best action ...
 		Types.ACTIONS actBest = act(so,m_Timer,vtable);
 		
-    	return actBest;         // the action was not a random move
+		actBest.setRandomSelect(false);		// the action was not a random move
+		
+    	return actBest;         
+	}
+
+    /**
+     * Get the best next action and return it (new version, NEW_GNA==true).
+     * Called by calcCertainty and getNextAction.
+     * 
+     * @param sob			current game state (not changed on return)
+     * @return actBest		the next action
+	 * <p>						
+	 * actBest has predicate isRandomAction()  (true: if action was selected 
+	 * at random, false: if action was selected by agent).<br>
+	 * actBest has also the members vTable and vBest to store the value for each available
+	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
+     */
+    public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+		
+        Types.ACTIONS actBest = null;
+        Types.ACTIONS_VT actBestVT = null;
+        List<Types.ACTIONS> actions = so.getAvailableActions();
+		double[] VTable, vtable;
+        vtable = new double[actions.size()];  
+        VTable = new double[actions.size()+1];  
+		
+		assert so.isLegalState() 
+			: "Not a legal state"; // e.g. player to move does not fit to Table
+		m_Timer.reset();
+		
+		// Ask MCTS for the best action ...
+		actBest = act(so,m_Timer,VTable);
+		
+		double bestScore = VTable[actions.size()];
+		for (int i=0; i<vtable.length; i++) vtable[i]=VTable[i];
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), false, vtable, bestScore);
+        return actBestVT;
 	}
 
 
@@ -147,8 +218,10 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	 * @return	returns true/false, whether the action suggested by last call 
 	 * 			to getNextAction() was a random action. 
 	 * 			Always false in the case of MCTS based on SingleTreeNode.uct().
+	 * <p>
+	 * Use now {@link Types.ACTIONS#isRandomAction()}
 	 */
-	@Override
+	@Deprecated
 	public boolean wasRandomAction() {
 		return false;
 	}

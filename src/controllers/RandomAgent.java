@@ -1,5 +1,6 @@
 package controllers;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import controllers.PlayAgent;
@@ -97,8 +98,26 @@ public class RandomAgent extends AgentBase implements PlayAgent
         	NewSO.advance(actBest);
         	System.out.print("---Best Move: "+NewSO.toString()+"   "+MaxScore);
         }			
+		actBest.setRandomSelect(true);		// the action was a random move
 
-        return actBest;         // the action was not a random move
+        return actBest;         
+	}
+
+	@Override
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+        Types.ACTIONS actBest = null;
+        Types.ACTIONS_VT actBestVT = null;
+        List<Types.ACTIONS> actions = so.getAvailableActions();
+		double[] VTable, vtable;
+        vtable = new double[actions.size()];  
+        VTable = new double[actions.size()+1];  
+		
+        actBest = getNextAction(so,random,VTable,silent);
+		
+		double bestScore = VTable[actions.size()];
+		for (int i=0; i<vtable.length; i++) vtable[i]=VTable[i];
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, bestScore);
+        return actBestVT;
 	}
 
 
@@ -107,7 +126,10 @@ public class RandomAgent extends AgentBase implements PlayAgent
 	 * @return	returns true/false, whether the action suggested by last call 
 	 * 			to getNextAction() was a random action. 
 	 * 			Always true in the case of RandomAgent.
+	 * <p>
+	 * Use now {@link Types.ACTIONS#isRandomAction()}
 	 */
+	@Deprecated
 	public boolean wasRandomAction() {
 		return true;
 	}

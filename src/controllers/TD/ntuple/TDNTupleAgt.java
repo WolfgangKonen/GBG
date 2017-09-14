@@ -409,6 +409,8 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
         } // for
 
         assert actBest != null : "Oops, no best action actBest";
+        actBest.setRandomSelect(randomSelect);
+        
 		if (!silent) {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
@@ -607,6 +609,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @return	returns true/false, whether the action suggested by last call 
 	 * 			to getNextAction() was a random action 
 	 */
+	@Deprecated
 	public boolean wasRandomAction() {
 		return randomSelect;
 	}
@@ -676,7 +679,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			VTable = new double[so.getNumAvailableActions()+1];
 			actBest = this.getNextAction(so, true, VTable, true);
 			//actBest = this.getNextAction(so, false, VTable, true);  // Debug only
-			m_randomMove = this.wasRandomAction();
+			m_randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
 			nextBoard = m_Net.xnf.getBoardVector(so);

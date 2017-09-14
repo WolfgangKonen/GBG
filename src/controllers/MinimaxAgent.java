@@ -9,6 +9,7 @@ import tools.Types;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -78,6 +79,20 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		return actBest;
 	}
 	
+	@Override
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+        List<Types.ACTIONS> actions = so.getAvailableActions();
+		double[] VTable, vtable;
+        vtable = new double[actions.size()];  
+        VTable = new double[actions.size()+1];  
+		
+		Types.ACTIONS actBest = getBestAction(so,  random,  VTable,  silent, 0);
+		
+		double bestScore = VTable[actions.size()];
+		for (int i=0; i<vtable.length; i++) vtable[i]=VTable[i];
+        return new Types.ACTIONS_VT(actBest.toInt(), true, vtable, bestScore);
+	}
+
 	private Types.ACTIONS getBestAction(StateObservation so, boolean random, 
 			double[] VTable, boolean silent, int depth) 
 	{
@@ -122,7 +137,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
         	}
 			if (depth<this.m_depth) {
 				if (sc==null) {
-					// here is the recursion: getScore calls getBestTable:
+					// here is the recursion: getScore calls getBestAction:
 					CurrentScore = getScore(NewSO,depth+1);	
 					switch(so.getNumPlayers()) {
 					case (1): break;
@@ -178,7 +193,8 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
         }			
 
         VTable[actions.length] = iMaxScore;
-       return actBest;         
+        actBest.setRandomSelect(false);
+        return actBest;         
 	}
 
 
@@ -187,7 +203,10 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * @return	returns true/false, whether the action suggested by last call 
 	 * 			to getNextAction() was a random action. 
 	 * 			Always false in the case of MinimaxAgent
+	 * <p>
+	 * Use now {@link Types.ACTIONS#isRandomAction()}
 	 */
+	@Deprecated
 	public boolean wasRandomAction() {
 		return false;
 	}
@@ -202,7 +221,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * 				    	
 	 */
 	 // OLD return: V(), the prob. that X (Player +1) wins from that after state. 
-	 // Player*V() is the quantity to be maximized by getBestTable.  
+	 // Player*V() is the quantity to be maximized by getBestAction.  
 	@Override
 	public double getScore(StateObservation sob) {
 		return getScore(sob,0);
