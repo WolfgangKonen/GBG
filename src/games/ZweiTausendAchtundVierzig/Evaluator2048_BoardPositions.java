@@ -138,7 +138,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             //analyse for MCTSE Agent
             if(ConfigEvaluator.EVALUATEMCTSE) {
                 for (int i = 0; i < ConfigEvaluator.NC; i++) {
-                    int MCTSAction = mctseAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
+                    int MCTSAction = mctseAgent.getNextAction2(gameState, false, true).toInt();
                     mctsActions[MCTSAction] += 1;
                 }
             }
@@ -146,7 +146,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             //analyse for MC Agent
             if(ConfigEvaluator.EVALUATEMC) {
                 for (int i = 0; i < ConfigEvaluator.NC; i++) {
-                    int MCAction = mcAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true).toInt();
+                    int MCAction = mcAgent.getNextAction2(gameState, false, true).toInt();
                     mcActions[MCAction] += 1;
                     mcRolloutDepth += mcAgent.getAverageRolloutDepth();
                 }
@@ -214,7 +214,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                 List<StateObserver2048> tempGameStates = new ArrayList<>();
                 while (!gameState.isGameOver()) {
                     tempGameStates.add(gameState.copy());
-                    gameState.advance(playAgent.getNextAction(gameState, false, new double[gameState.getNumAvailableActions() + 1], true));
+                    gameState.advance(playAgent.getNextAction2(gameState, false, true));
                 }
                 System.out.println("Finished with Game " + gameNumber);
                 return tempGameStates;

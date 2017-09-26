@@ -66,7 +66,7 @@ public class Evaluator2048 extends Evaluator {
                     PlayAgent playAgent = new MCTSExpectimaxAgt("MCTS Expectimax", mctsExpectimaxAgt.params);
 
                     while (!so.isGameOver()) {
-                        Types.ACTIONS action = playAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true);
+                        Types.ACTIONS action = playAgent.getNextAction2(so, false, true);
                         so.advance(action);
                     }
 
@@ -98,7 +98,7 @@ public class Evaluator2048 extends Evaluator {
                 StateObserver2048 so = new StateObserver2048();
 
                 while (!so.isGameOver()) {
-                    so.advance(m_PlayAgent.getNextAction(so, false, new double[so.getNumAvailableActions() + 1], true));
+                    so.advance(m_PlayAgent.getNextAction2(so, false, true));
                 }
 
                 if(verbose == 0) {

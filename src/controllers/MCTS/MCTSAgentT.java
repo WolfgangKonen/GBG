@@ -258,7 +258,11 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	@Override
 	public String stringDescr() {
 		String cs = getClass().getName();
-		return cs;
+		String str = cs + ": iterations:" + getParMCTS().getNumIter() 
+				+ ", rollout depth:" + getParMCTS().getRolloutDepth()
+				+ ", K_UCT:"+ getParMCTS().getK_UCT()
+				+ ", tree depth:" + getParMCTS().getTreeDepth();
+		return str;
 	}
 
 	public ParMCTS getParMCTS() {

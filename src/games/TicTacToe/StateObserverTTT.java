@@ -252,8 +252,8 @@ public class StateObserverTTT implements StateObservation {
 
 	/**
 	 * Given the current state, store some info useful for inspecting the  
-	 * action actBest and double[] vtable returned by a call to 
-	 * {@link PlayAgent#getNextAction(StateObservation, boolean, double[], boolean)}
+	 * action actBest and double[] vtable returned by a call to <br>
+	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
 	 *  
 	 * @param actBest	the best action
 	 * @param vtable	one double for each action in this.getAvailableActions():
@@ -270,7 +270,11 @@ public class StateObserverTTT implements StateObservation {
         	storedValues[i] = vtable[i];
         }
         storedActBest = actBest;
-        storedMaxScore = vtable[acts.size()];
+        if (actBest instanceof Types.ACTIONS_VT) {
+        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
+        } else {
+            storedMaxScore = vtable[acts.size()];        	
+        }
 	}
 
 	public int[][] getTable() {

@@ -26,6 +26,7 @@ abstract public class AgentBase implements Serializable {
 	private String m_name;
 	private AgentState m_agentState = AgentState.RAW;
 	private int epochMax=0;
+	protected long m_numTrnMoves =0L;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -131,6 +132,11 @@ abstract public class AgentBase implements Serializable {
 		return 0L;		// dummy stub for agents which are not trainable
 	}
 
+	public long getNumTrnMoves()
+	{			
+		return m_numTrnMoves;		
+	}
+
 	/**
 	 * (trainable agents with member ParOther m_oPar should override this function)
 	 * 
@@ -223,6 +229,10 @@ abstract public class AgentBase implements Serializable {
 		this.epochMax = epochMax;
 	}
 	
+	public String stringDescr2() {
+		return getClass().getName() + ":";
+	}
+
 //  --- this is now implemented by every agent --- 
 //	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
 //		throw new RuntimeException("Not yet ready!!");

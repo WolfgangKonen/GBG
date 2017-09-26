@@ -124,7 +124,7 @@ public class Evaluator9 extends Evaluator {
 		DecimalFormat frk = new DecimalFormat("00");
 		String sMinimax = Types.GUI_AGENT_LIST[1];
 		MinimaxAgent referee = new MinimaxAgent(sMinimax);
-		double[] VTable = null;
+//		double[] VTable = null;
 		Types.ACTIONS actBest;
 		int[][] rtable = new int[3][3];	// referee (Minimax) table for next move
 		int[][] stable = new int[3][3];	// save copy of table, needed for getCounters
@@ -161,8 +161,8 @@ public class Evaluator9 extends Evaluator {
 				VM_s = referee.getScore(SO);
 				m_ss.m_VM_s[k] = VM_s;
 				int n=rSO.getNumAvailableActions();
-				VTable	= new double[n+1];
-				actBest = referee.getNextAction(rSO, false, VTable, true);
+//				VTable	= new double[n+1];
+				actBest = referee.getNextAction2(rSO, false, true);
 				rSO.advance(actBest);
 				rtable = rSO.getTable();
 				m_ss.m_refState[k] = table2string(rtable);
@@ -185,8 +185,8 @@ public class Evaluator9 extends Evaluator {
 			if (TicTDBase.Win(table,-1)) V_s=-1.0;
 			if (TicTDBase.Win(table,+1)) V_s=+1.0;
 			int n=SO.getNumAvailableActions();
-			VTable	= new double[n+1];
-			actBest = pa.getNextAction(SO, false, VTable, true);	 
+//			VTable	= new double[n+1];
+			actBest = pa.getNextAction2(SO, false, true);	 
 			SO.advance(actBest);			// SO contains now the after state,
 											// after pa made its move
 			

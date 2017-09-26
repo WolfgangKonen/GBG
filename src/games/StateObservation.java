@@ -109,8 +109,8 @@ public interface StateObservation extends Serializable{
 	
 	/**
 	 * Given the current state, store some info useful for inspecting the  
-	 * action actBest and double[] vtable returned by a call to 
-	 * {@link PlayAgent#getNextAction(StateObservation, boolean, double[], boolean)}
+	 * action actBest and double[] vtable returned by a call to <br>
+	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
 	 *  
 	 * @param actBest	the best action
 	 * @param vtable	one double for each action in {@link #getAvailableActions()}:

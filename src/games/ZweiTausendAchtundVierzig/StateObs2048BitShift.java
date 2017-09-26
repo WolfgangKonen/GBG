@@ -255,7 +255,11 @@ public class StateObs2048BitShift implements StateObservation {
             storedValues[i] = vtable[i];
         }
         storedActBest = actBest;
-        storedMaxScore = vtable[acts.size()];
+        if (actBest instanceof Types.ACTIONS_VT) {
+        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
+        } else {
+            storedMaxScore = vtable[acts.size()];        	
+        }
     }
 
     @Override

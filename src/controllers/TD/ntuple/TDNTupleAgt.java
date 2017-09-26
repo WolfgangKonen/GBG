@@ -377,7 +377,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 			CurrentScore = normalize2(CurrentScore,so);					
 			
 			if (!silent)
-				System.out.println(NewSO.toString()+", "+(2*CurrentScore*player-1));
+				System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
 				//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 			if (randomSelect) {
 				double rd2 = rand.nextDouble();
@@ -575,7 +575,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		CurrentScore = (NewSO.getGameScore(refer) - referReward) + getGamma()*player*agentScore;				
 
 		if (!silent) {
-			System.out.println(NewSO.toString()+", "+(2*CurrentScore*player-1));
+			System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
 			//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 		}
 
@@ -643,14 +643,14 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
 	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/) {
-		double[] VTable = null;
+//		double[] VTable = null;
 		double reward = 0.0, oldReward = 0.0;
 		boolean wghtChange = false;
 		boolean upTC=false;
 		double Input[], oldInput[];
 		String S_old = null;   // only as debug info
 		int player;
-		Types.ACTIONS actBest;
+		Types.ACTIONS_VT actBest;
 		StateObservation oldSO;
 		int[] curBoard = m_Net.xnf.getBoardVector(so);
 		int   curPlayer=so.getPlayer();
@@ -671,20 +671,21 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		}
 
 		//oldInput = m_feature.prepareFeatVector(so);
-		//S_old = so.toString();   
+		//S_old = so.stringDescr();   
 		//S_old = tableToString(-Player, table);
 		m_counter=0;		// count the number of moves
 		m_finished=false;
 		while (true) {
-			VTable = new double[so.getNumAvailableActions()+1];
-			actBest = this.getNextAction(so, true, VTable, true);
+//			VTable = new double[so.getNumAvailableActions()+1];
+//			actBest = this.getNextAction(so, true, VTable, true);
+			actBest = this.getNextAction2(so, true, true);
 			//actBest = this.getNextAction(so, false, VTable, true);  // Debug only
 			m_randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
 			nextBoard = m_Net.xnf.getBoardVector(so);
 			nextPlayer= so.getPlayer();
-			//if (DEBG) printVTable(pstream,VTable);
+//			if (m_DEBG) printVTable(pstream,actBest.getVTable());
 			if (m_DEBG) printTable(pstream,nextBoard);
 			if (NEWTARGET) {
 				reward=trainNewTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
@@ -1060,11 +1061,18 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	
 	public String stringDescr() {
 		String cs = getClass().getName();
-		String str = cs + ", USESYMMETRY:" + (this.m_ntPar.getUSESYMMETRY()?"true":"false")
+		String str = cs + ": USESYMMETRY:" + (this.m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", " + "sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");
+		return str;
+	}
+		
+	public String stringDescr2() {
+		String cs = getClass().getName();
+		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
+						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal();
 		return str;
 	}
 		

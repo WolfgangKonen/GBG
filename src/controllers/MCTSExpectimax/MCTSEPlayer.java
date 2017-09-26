@@ -6,6 +6,7 @@ import games.StateObservationNondeterministic;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import params.MCTSExpectimaxParams;
 import params.MCTSParams;
+import params.ParMCTSE;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class MCTSEPlayer
 	 * Member {@link #mctsExpectimaxParams} is only needed for saving and loading the agent
 	 * (to restore the agent with all its parameter settings)
 	 */
-	private MCTSExpectimaxParams mctsExpectimaxParams;
+	private ParMCTSE mctsExpectimaxParams;
 
 	/**
      * Creates the MCTSExpectimax player.
@@ -48,7 +49,7 @@ public class MCTSEPlayer
      * @param random 					random number generator object.
      * @param mctsExpectimaxParams		parameters for MCTSExpectimax, can be null
      */
-    public MCTSEPlayer(Random random, MCTSExpectimaxParams mctsExpectimaxParams)
+    public MCTSEPlayer(Random random, ParMCTSE mctsExpectimaxParams)
     {
     	if (mctsExpectimaxParams!=null) {
             this.setK(mctsExpectimaxParams.getK_UCT());
@@ -59,8 +60,9 @@ public class MCTSEPlayer
 			this.heuristicSettings2048 = mctsExpectimaxParams.getHeuristicSettings2048();
 			this.mctsExpectimaxParams = mctsExpectimaxParams;
     	} else {
-			mctsExpectimaxParams = new MCTSExpectimaxParams();
-			mctsExpectimaxParams.setFrom(mctsExpectimaxParams);
+    		// /WK/ ?? unclear who sets K, NUM_ITERS and others in this case
+			this.mctsExpectimaxParams = new ParMCTSE();
+			//mctsExpectimaxParams.setFrom(mctsExpectimaxParams);
 		}
 
         this.random = random;
@@ -147,7 +149,7 @@ public class MCTSEPlayer
 	public HeuristicSettings2048 getHeuristicSettings2048() {
 		return heuristicSettings2048;
 	}
-    public MCTSExpectimaxParams getMCTSParams() {
+    public ParMCTSE getMCTSParams() {
 		return mctsExpectimaxParams;
 	}
 	public MCTSEChanceNode getRootNode() {

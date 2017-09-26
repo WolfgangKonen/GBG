@@ -212,8 +212,8 @@ abstract public class Arena extends JPanel implements Runnable {
 	protected void InspectGame() {
 		String AgentX = m_xab.getSelectedAgent(0);
 		StateObservation so;
-		Types.ACTIONS actBest;
-		double[] vtable = null;
+		Types.ACTIONS_VT actBest;
+//		double[] vtable = null;
 		PlayAgent paX;
 		
 		boolean DBG_HEX=false;
@@ -256,9 +256,9 @@ abstract public class Arena extends JPanel implements Runnable {
 				
 				if (so.isLegalState() && !so.isGameOver()) {
 					boolean silent=false;
-					vtable = new double[so.getNumAvailableActions()+1];
-					actBest = paX.getNextAction(so, false, vtable, true);
-					so.storeBestActionInfo(actBest, vtable);
+//					vtable = new double[so.getNumAvailableActions()+1];
+					actBest = paX.getNextAction2(so, false, true);
+					so.storeBestActionInfo(actBest, actBest.getVTable());
 					
 					gb.updateBoard(so,true,true);
 				} else {
@@ -313,10 +313,10 @@ abstract public class Arena extends JPanel implements Runnable {
 		int Player,player;
 		boolean showStoredV=true; 
 		StateObservation so;
-		Types.ACTIONS actBest=null;
+		Types.ACTIONS_VT actBest=null;
 		PlayAgent pa;
 		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mctsParams,m_xab.oPar);
-		double[] vtable = null;
+//		double[] vtable = null;
 		PlayAgent[] paVector;
 
 		// fetch the agents in a way general for 1-, 2- and n-player games
@@ -386,16 +386,16 @@ abstract public class Arena extends JPanel implements Runnable {
 						gb.updateBoard(so,false,false);		// enable board buttons
 					}
 					else {
-                        vtable = new double[so.getNumAvailableActions() + 1];
+//                        vtable = new double[so.getNumAvailableActions() + 1];
                         boolean DEBG=false; //false;true;
                         int N_EMPTY = 4;
                         if (DEBG) {
-                        	actBest = getNextAction_DEBG(so,pa,p2,vtable,N_EMPTY);
+                        	actBest = getNextAction_DEBG(so,pa,p2,N_EMPTY);
                         } else {	
-                            actBest = pa.getNextAction(so, false, vtable, true);
+                            actBest = pa.getNextAction2(so, false, true);
                         }
                         
-                        so.storeBestActionInfo(actBest, vtable);
+                        so.storeBestActionInfo(actBest, actBest.getVTable());
                         if (so.getNumPlayers()==1) {
                         	// show state and stored vtable *before* advance
                             gb.updateBoard(so,true,false);
@@ -483,26 +483,27 @@ abstract public class Arena extends JPanel implements Runnable {
 	 * @param so
 	 * @param pa
 	 * @param p2
-	 * @param vtable
 	 * @param N_EMPTY return the 'normal' pa.getNextAction(), if number of empty cells is 
 	 * 		greater or equal to N_EMPTY
 	 * @return the chosen action from the last call of pa.getNextAction()
 	 */
-	Types.ACTIONS  getNextAction_DEBG(StateObservation so, PlayAgent pa, MCTSAgentT p2, 
-			double[] vtable, int N_EMPTY) {
-		Types.ACTIONS actBest=null;
+	Types.ACTIONS_VT  getNextAction_DEBG(StateObservation so, PlayAgent pa, MCTSAgentT p2, 
+			int N_EMPTY) {
+		Types.ACTIONS_VT actBest=null;
         double MAXSCORE = 3932156;
+        double[] vtable;
         int nEmpty;
         if (so instanceof StateObserver2048) {
         	nEmpty = ((StateObserver2048) so).getNumEmptyTiles();        	
         } else {
-        	return pa.getNextAction(so, false, vtable, true);
+        	return pa.getNextAction2(so, false, true);
         }
         if (nEmpty>=N_EMPTY) 
-        	return pa.getNextAction(so, false, vtable, true);
+        	return pa.getNextAction2(so, false, true);
 
     	for (int k=0; k<3; k++) {
-            actBest = p2.getNextAction(so, false, vtable, true);
+            actBest = p2.getNextAction2(so, false, true);
+            vtable = actBest.getVTable();
             System.out.print("p2 ["+p2.getName()+"]: ");
             double vbest = -Double.MAX_VALUE;
             int ibest = -1;
@@ -518,7 +519,8 @@ abstract public class Arena extends JPanel implements Runnable {
             System.out.println(";  Best = "+ibest+", Finished="+nRolloutFinished+"/"+nIterations);                        		
     	}
     	for (int k=0; k<2; k++) {
-            actBest = pa.getNextAction(so, false, vtable, true);
+            actBest = pa.getNextAction2(so, false, true);
+            vtable = actBest.getVTable();
             System.out.print("pa ["+pa.getName()+"]: "); 
             double vbest = -Double.MAX_VALUE;
             int ibest = -1;

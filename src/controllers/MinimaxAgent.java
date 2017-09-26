@@ -109,7 +109,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		//VTable = new double[so.getNumAvailableActions()];
         // DON'T! The caller has to define VTable with the right length
 		
-        stringRep = so.toString();
+        stringRep = so.stringDescr();
         if (stringRep.equals("XoXoXo-X-")) {		// only debug for TTT
         	int dummy=1;
         }
@@ -129,7 +129,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
         	if (m_useHashMap) {
     			// speed up MinimaxPlayer for repeated calls by storing/retrieving the 
     			// scores of visited states in HashMap hm:
-    			stringRep = NewSO.toString();
+    			stringRep = NewSO.stringDescr();
     			//System.out.println(stringRep);
     			sc = hm.get(stringRep); 		// returns null if not in hm
         	} else {
@@ -189,7 +189,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
         if (!silent) {
         	NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.print("---Best Move: "+NewSO.toString()+"   "+iMaxScore);
+        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+iMaxScore);
         }			
 
         VTable[actions.length] = iMaxScore;
@@ -227,7 +227,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		return getScore(sob,0);
 	}
 	private double getScore(StateObservation sob, int depth) {
-		String stringRep = sob.toString();
+		String stringRep = sob.stringDescr();
 		if (stringRep.equals("XXoXXooo-")) {		// only debug for TTT
 			int dummy=1;
 		}

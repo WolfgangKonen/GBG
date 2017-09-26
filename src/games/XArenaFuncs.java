@@ -496,7 +496,7 @@ public class XArenaFuncs
 			int player; 
 			int numEval = xab.oPar.getNumEval();
 			int gameNum;
-			long actionNum;
+			long actionNum, trnMoveNum;
 			
 // TODO: implement CMAPlayer correctly
 //			if (sAgent.equals("CMA-ES")) {
@@ -512,6 +512,7 @@ public class XArenaFuncs
 					
 					gameNum = pa.getGameNum();
 					actionNum = pa.getNumLrnActions();
+					trnMoveNum = pa.getNumTrnMoves();
 					if (gameNum%numEval==0 ) { //|| gameNum==1) {
 						double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
 						System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
@@ -526,7 +527,8 @@ public class XArenaFuncs
 							m_evaluatorM.eval();
 							evalM = m_evaluatorM.getLastResult();
 						}
-						mTrain = new MTrain(i,gameNum,m_evaluatorQ.getLastResult(),evalT,evalM,actionNum);
+						mTrain = new MTrain(i,gameNum,m_evaluatorQ.getLastResult(),evalT,evalM,
+											actionNum,trnMoveNum);
 						mtList.add(mTrain);
 
 						startTime = System.currentTimeMillis();
@@ -573,20 +575,24 @@ public class XArenaFuncs
 		public double evalT;
 		public double evalM;
 		public long actionNum;		// number of learning actions
+		public long trnMoveNum;		// number of train moves (including random moves)
 		
-		MTrain(int i, int gameNum, double evalQ, double evalT, double evalM, long actionNum) {
+		MTrain(int i, int gameNum, double evalQ, double evalT, double evalM, 
+				long actionNum, long trnMoveNum) {
 			this.i=i;
 			this.gameNum=gameNum;
 			this.evalQ=evalQ;
 			this.evalT=evalT;
 			this.evalM=evalM;
 			this.actionNum=actionNum;
+			this.trnMoveNum=trnMoveNum;
 		}
 		
 		public void print(PrintWriter mtWriter)  {
 			String sep = ", ";
 			mtWriter.print(i + sep + gameNum + sep);
-			mtWriter.println(evalQ + sep + evalT + sep + evalM + sep + actionNum);
+			mtWriter.println(evalQ + sep + evalT + sep + evalM 
+					+ sep + actionNum + sep + trnMoveNum);
 		}
 	}
 	
@@ -616,10 +622,10 @@ public class XArenaFuncs
 			e.printStackTrace();
 		}
 		
-		mtWriter.println(pa.stringDescr());
+		mtWriter.println(pa.stringDescr());		
+		mtWriter.println(pa.stringDescr2());
 		
-		mtWriter.println();
-		mtWriter.println("run, gameNum, evalQ, evalT, evalM, actionNum");
+		mtWriter.println("run, gameNum, evalQ, evalT, evalM, actionNum, trnMoves");
 		ListIterator<MTrain> iter = mtList.listIterator();		
 		while(iter.hasNext()) {
 			(iter.next()).print(mtWriter);
@@ -677,7 +683,7 @@ public class XArenaFuncs
 		boolean nextMoveSilent = (verbose<2 ? true : false);
 		StateObservation so;
 		Types.ACTIONS actBest;
-		double[] VTable = null;
+//		double[] VTable = null;
 		String[] playersWithFeatures = {"TicTacToe.ValItPlayer","controllers.TD.TDAgent","TicTacToe.CMAPlayer"}; 
 		
 		String paX_string = paX.stringDescr();
@@ -692,16 +698,16 @@ public class XArenaFuncs
 				
 				if(Player==1){		// make a X-move
 					int n=so.getNumAvailableActions();
-					VTable	= new double[n+1];
-					actBest = paX.getNextAction(so, false, VTable, nextMoveSilent);
+//					VTable	= new double[n+1];
+					actBest = paX.getNextAction2(so, false, nextMoveSilent);
 					so.advance(actBest);
 					Player=-1;
 				}
 				else				// i.e. O-Move
 				{
 					int n=so.getNumAvailableActions();
-					VTable	= new double[n+1];
-					actBest = paO.getNextAction(so, false, VTable, nextMoveSilent);
+//					VTable	= new double[n+1];
+					actBest = paO.getNextAction2(so, false, nextMoveSilent);
 					so.advance(actBest);
 					Player=+1;
 				}

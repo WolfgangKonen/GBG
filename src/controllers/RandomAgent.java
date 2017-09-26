@@ -42,6 +42,7 @@ public class RandomAgent extends AgentBase implements PlayAgent
 	 * @param silent
 	 * @return actBest		the best action 
 	 */	
+	@Deprecated
 	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
 		int i,j;
@@ -96,27 +97,88 @@ public class RandomAgent extends AgentBase implements PlayAgent
         if (!silent) {
         	NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.print("---Best Move: "+NewSO.toString()+"   "+MaxScore);
+        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+MaxScore);
         }			
 		actBest.setRandomSelect(true);		// the action was a random move
 
         return actBest;         
 	}
 
+	/**
+	 * Get the best next action and return it 
+	 * (NEW version: returns ACTIONS_VT and has a recursive part for multi-moves)
+	 * 
+	 * @param so			current game state (is returned unchanged)
+	 * @param random		allow random action selection with probability m_epsilon
+	 * @param silent
+	 * @return actBest		the best action. If several actions have the same
+	 * 						score, break ties by selecting one of them at random. 
+	 * <p>						
+	 * actBest has predicate isRandomAction()  (true: if action was selected 
+	 * at random, false: if action was selected by agent).<br>
+	 * actBest has also the members vTable to store the value for each available
+	 * action (as returned by so.getAvailableActions()) and vBest to store the value for the best action actBest.
+	 */
 	@Override
 	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
-        List<Types.ACTIONS> actions = so.getAvailableActions();
-		double[] VTable, vtable;
-        vtable = new double[actions.size()];  
-        VTable = new double[actions.size()+1];  
+        ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
+        Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
+		double[] vtable = new double[acts.size()];  
+        //double[] VTable = new double[acts.size()+1];  
 		
-        actBest = getNextAction(so,random,VTable,silent);
-		
-		double bestScore = VTable[actions.size()];
-		for (int i=0; i<vtable.length; i++) vtable[i]=VTable[i];
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, bestScore);
+        // --- a copy of the code inside getNextAction:
+		int i,j;
+		double MaxScore = -Double.MAX_VALUE;
+		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
+									// maximized
+		StateObservation NewSO;
+		int count = 1; // counts the moves with same MaxScore
+        int iBest;
+
+		assert so.isLegalState() : "Not a legal state";
+
+        for(i = 0; i < actions.length; ++i)
+        {
+        	actions[i] = acts.get(i);
+        	NewSO = so.copy();
+        	NewSO.advance(actions[i]);
+        	CurrentScore = rand.nextDouble();
+        	vtable[i] = CurrentScore;
+        	if (MaxScore < CurrentScore) {
+        		MaxScore = CurrentScore;
+        		actBest = actions[i];
+        		iBest  = i; 
+        		count = 1;
+        	} else if (MaxScore == CurrentScore) {
+        		count++;	        
+        	}
+        } // for
+        if (count>1) {  // more than one action with MaxScore: 
+        	// break ties by selecting one of them randomly
+        	int selectJ = (int)(rand.nextDouble()*count);
+        	for (i=0, j=0; i < actions.length; ++i) 
+        	{
+        		if (vtable[i]==MaxScore) {
+        			if (j==selectJ) actBest = actions[i];
+        			j++;
+        		}
+        	}
+        }
+
+        // optional: show the best action
+        assert actBest != null : "Oops, no best action actBest";
+        if (!silent) {
+        	NewSO = so.copy();
+        	NewSO.advance(actBest);
+        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+MaxScore);
+        }			
+		actBest.setRandomSelect(true);		// the action was a random move
+        // --- end of copy of the code inside getNextAction
+	
+		//for (i=0; i<vtable.length; i++) vtable[i]=VTable[i];
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, MaxScore);
         return actBestVT;
 	}
 

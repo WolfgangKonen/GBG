@@ -532,8 +532,8 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
 	@Override
     public double getScore(StateObservation sob) {
-        double[] vtable = new double[sob.getNumAvailableActions()+1];
-        double nextActionScore = Double.NEGATIVE_INFINITY;
+//        double[] vtable = new double[sob.getNumAvailableActions()+1];
+//        double nextActionScore = Double.NEGATIVE_INFINITY;
         
 		// This if branch is vital: It was missing before, and if 'so' was a game-over state
 		// this could result in wrong scores.
@@ -542,15 +542,15 @@ public class MCAgent extends AgentBase implements PlayAgent {
         	return sob.getGameScore(sob);
         } else {
         	
-            getNextAction(sob, true, vtable, true);
+            Types.ACTIONS_VT actBestVT = getNextAction2(sob, false, true);
 
-            for (int i = 0; i < sob.getNumAvailableActions(); i++) {
-                if (nextActionScore <= vtable[i]) {
-                    nextActionScore = vtable[i];
-                }
-            }
+//            for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+//                if (nextActionScore <= vtable[i]) {
+//                    nextActionScore = vtable[i];
+//                }
+//            }
 
-            return nextActionScore;
+            return actBestVT.getVBest();
         }
 
     }
@@ -642,7 +642,10 @@ public class MCAgent extends AgentBase implements PlayAgent {
     @Override
     public String stringDescr() {
         String cs = getClass().getName();
-        return cs;
+		String str = cs + ": iterations:" + m_mcPar.getNumIter() 
+				+ ", rollout depth:" + m_mcPar.getRolloutDepth()
+				+ ", # agents:"+ m_mcPar.getNumAgents();
+		return str;
     }
 }
 

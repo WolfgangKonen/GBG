@@ -5,6 +5,7 @@ import controllers.PlayAgent;
 import games.StateObservation;
 import params.MCTSExpectimaxParams;
 import params.MCTSParams;
+import params.ParMCTSE;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.Random;
  */
 public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 {
-	public MCTSExpectimaxParams params;
+	public ParMCTSE params;
     private MCTSEPlayer player;
 
 	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
@@ -40,7 +41,21 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 */
     public MCTSExpectimaxAgt(String name, MCTSExpectimaxParams mcPar) {
 		super(name);
-		params = mcPar;
+		params = new ParMCTSE(mcPar);
+
+		player = new MCTSEPlayer(new Random(), new	ParMCTSE(mcPar));
+
+		setAgentState(AgentState.TRAINED);
+	}
+
+	/**
+	 * @param name	agent name, should be "MCTS Expectimax"
+	 * @param mcPar Settings for the Agent
+	 */
+    public MCTSExpectimaxAgt(String name, ParMCTSE mcPar) {
+		super(name);
+		params = new ParMCTSE();
+		params.setFrom(mcPar);
 
 		player = new MCTSEPlayer(new Random(), mcPar);
 
@@ -243,10 +258,14 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 
 	public String stringDescr() {
 		String cs = getClass().getName();
-		return cs;
+		String str = cs + ": iterations:" + getMCTSParams().getNumIter() 
+				+ ", rollout depth:" + getMCTSParams().getRolloutDepth()
+				+ ", K_UCT:"+ getMCTSParams().getK_UCT()
+				+ ", tree depth:" + getMCTSParams().getTreeDepth();
+		return str;
 	}
 
-	public MCTSExpectimaxParams getMCTSParams() {
+	public ParMCTSE getMCTSParams() {
 		return player.getMCTSParams();
 	}
 	

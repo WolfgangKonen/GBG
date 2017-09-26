@@ -290,7 +290,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 //				}
 			
 			if (!silent)
-				System.out.println(NewSO.toString()+", "+(2*CurrentScore*player-1));
+				System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
 				//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 			if (randomSelect) {
 				CurrentScore = rand.nextDouble();
@@ -324,7 +324,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
             NewSO.advance(actBest);
-			System.out.println(NewSO.toString()+", "+(2*BestScore*player-1));
+			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
 			//print_V(Player, NewSO.getTable(), 2 * BestScore * Player - 1);
 		}			
 		return actBest;
@@ -475,7 +475,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		}
 
 		if (!silent) {
-			System.out.println(NewSO.toString()+", "+(2*CurrentScore*player-1));
+			System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
 			//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 		}
 
@@ -519,7 +519,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
 	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/) {
-		double[] VTable = null;
+//		double[] VTable = null;
 		double reward = 0.0;
 		boolean randomMove;
 		boolean finished = false;
@@ -528,7 +528,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		double Input[], oldInput[];
 		String S_old, I_old = null;   // only as debug info
 		int player;
-		Types.ACTIONS actBest;
+		Types.ACTIONS_VT actBest;
 		StateObservation oldSO;
 		boolean isNtuplePlayer = (m_feature.getFeatmode() == 8
 				|| this.getClass().getName().equals("TD_NTPlayer"));
@@ -541,7 +541,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_Net.resetElig(); // reset the elig traces before starting a new game
 							// /WK/ NEW/02/2015
 		oldInput = m_feature.prepareFeatVector(so);
-		S_old = so.toString();   
+		S_old = so.stringDescr();   
 		//S_old = tableToString(-Player, table);
 		if (!isNtuplePlayer)
 			I_old = m_feature.stringRepr(oldInput);
@@ -553,8 +553,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		}
 		int counter=0;		// count the number of moves
 		while (true) {
-			VTable = new double[so.getNumAvailableActions()+1];
-			actBest = this.getNextAction(so, true, VTable, true);
+//			VTable = new double[so.getNumAvailableActions()+1];
+			actBest = this.getNextAction2(so, true, true);
 			randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
@@ -732,7 +732,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	
 	public String stringDescr() {
 		String cs = getClass().getName();
-		String str = cs + ", " + (m_tdPar.hasLinearNet()?"LIN":"BP")
+		String str = cs + ": " + (m_tdPar.hasLinearNet()?"LIN":"BP")
 						+ ", " + (m_tdPar.hasSigmoid()?"with sigmoid":"w/o sigmoid")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", lambda:" + m_Net.getLambda()
@@ -741,6 +741,13 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		return str;
 	}
 	
+	public String stringDescr2() {
+		String cs = getClass().getName();
+		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
+						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal();
+		return str;
+	}
+		
 	public String printTrainStatus() {
 		DecimalFormat frm = new DecimalFormat("#0.0000");
 		DecimalFormat frme= new DecimalFormat();

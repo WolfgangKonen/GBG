@@ -22,6 +22,9 @@ public interface PlayAgent {
 	public enum AgentState {RAW, INIT, TRAINED};
 	
 	/**
+	 * <em> This function is now deprecated. Use instead: </em>
+	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
+	 * <p>
 	 * Get the best next action and return it
 	 * @param sob			current game state (not changed on return)
 	 * @param random		allow epsilon-greedy random action selection	
@@ -38,9 +41,25 @@ public interface PlayAgent {
 	 * at random, false: if action was selected by agent).
 	 * 
 	 */	
+	@Deprecated
 	public Types.ACTIONS getNextAction(StateObservation sob, boolean random, 
 			double[] vtable, boolean silent);
 	
+	/**
+	 * Get the best next action and return it 
+	 * (NEW version: returns ACTIONS_VT and has a recursive part for multi-moves)
+	 * 
+	 * @param so			current game state (is returned unchanged)
+	 * @param random		allow random action selection with probability m_epsilon
+	 * @param silent
+	 * @return actBest		the best action. If several actions have the same
+	 * 						score, break ties by selecting one of them at random. 
+	 * <p>						
+	 * actBest has predicate isRandomAction()  (true: if action was selected 
+	 * at random, false: if action was selected by agent).<br>
+	 * actBest has also the members vTable to store the value for each available
+	 * action (as returned by so.getAvailableActions()) and vBest to store the value for the best action actBest.
+	 */
 	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
 	
 	/**
@@ -69,8 +88,9 @@ public interface PlayAgent {
 	/**
 	 * 
 	 * @return	returns true/false, whether the action suggested by last call 
-	 * 			to {@link #getNextAction(StateObservation, boolean, double[], boolean)} 
-	 *          was a random action 
+	 * 			to getNextAction() was a random action 
+	 * <p>
+	 * Use now {@link Types.ACTIONS#isRandomAction()}
 	 */
 	@Deprecated
 	public boolean wasRandomAction(); 
@@ -92,6 +112,7 @@ public interface PlayAgent {
 	
 	public String printTrainStatus();
 	public String stringDescr();
+	public String stringDescr2();
 	public byte getSize();		// estimated size of agent object
 
 	/**
@@ -108,6 +129,13 @@ public interface PlayAgent {
 	 * (For non-trainable agents, {@link AgentBase} will return 0L.)
 	 */
 	public long getNumLrnActions();
+	/**
+	 * 
+	 * @return number of training moves for trainable agents. Difference to 
+	 * {@link #getNumLrnActions()}: it is incremented on random actions as well.
+	 * (For non-trainable agents, {@link AgentBase} will return 0L.)
+	 */
+	public long getNumTrnMoves();
 
 	/**
 	 * @return During training: Call the Evaluator after this number of training games

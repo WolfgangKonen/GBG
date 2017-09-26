@@ -31,5 +31,5 @@ public class ConfigGame {
      * =2: along the lines of [Jaskowski16] Fig 3c, 4 6-tuples, very big LUTs (4*11e6 weights, 69 MB agt.zip!!), very good results
      * @see XNTupleFuncs2048#fixedNTuples()
      */
-    public static final int FIXEDNTUPLEMODE = 1;
+    public static final int FIXEDNTUPLEMODE = 2;
 }

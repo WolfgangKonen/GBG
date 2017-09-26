@@ -345,7 +345,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			CurrentScore = normalize2(CurrentScore,so);					
 			
 			if (!silent)
-				System.out.println(NewSO.toString()+", "+(2*CurrentScore*player-1));
+				System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
 				//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 			if (randomSelect) {
 				double rd2 = rand.nextDouble();
@@ -578,7 +578,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		CurrentScore = (NewSO.getGameScore(refer) - referReward) + getGamma()*player*agentScore;				
 
 		if (!silent) {
-			System.out.println(NewSO.toString()+", "+(2*CurrentScore*player-1));
+			System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
 			//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 		}
 
@@ -693,11 +693,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) {
 	        	actBest = this.getFirstAction(so, true, VTable, true);	// DEBUG only
 	        } else {
-				actBest = this.getNextAction(so, true, VTable, true);	// the normal case 
+				actBest = this.getNextAction2(so, true, true);	// the normal case 
 	        }
 
 	        m_randomMove = actBest.isRandomAction();
 //			m_randomMove = this.wasRandomAction();
+	        
+	        m_numTrnMoves++;		// number of train moves (including random moves)
 	               
 	        
 	        ns = new NextState(so,actBest);	        
@@ -1147,12 +1149,19 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	
 	public String stringDescr() {
 		String cs = getClass().getName();
-		String str = cs + ", USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
+		String str = cs + ": USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
 						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");
+		return str;
+	}
+		
+	public String stringDescr2() {
+		String cs = getClass().getName();
+		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
+						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal();
 		return str;
 	}
 		
