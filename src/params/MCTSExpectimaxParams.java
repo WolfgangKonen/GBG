@@ -199,4 +199,16 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		setMaxNodes(tp.getMaxNodes());						// /WK/ this was missing
 		setAlternativeVersion(tp.getAlternativeVersion());	// /WK/ this was missing
 	}
+	/**
+	 * Needed to restore the param tab with the parameters from a re-loaded agent
+	 * @param tp  of the re-loaded agent
+	 */
+	public void setFrom(ParMCTSE tp) {
+		setK_UCT(tp.getK_UCT());
+		setNumIter(tp.getNumIter());
+		setRolloutDepth(tp.getRolloutDepth());
+		setTreeDepth(tp.getTreeDepth());
+		setMaxNodes(tp.getMaxNodes());						// /WK/ this was missing
+		setAlternativeVersion(tp.getAlternativeVersion());	// /WK/ this was missing
+	}
 }

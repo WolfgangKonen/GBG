@@ -472,20 +472,20 @@ abstract public class Arena extends JPanel implements Runnable {
 	/**
 	 * For debugging during {@link #PlayGame()}: This function is only called if switch
 	 * DEBG in source code of {@link #PlayGame()} is set to true and if the number of empty 
-	 * tiles is below a threshold. - It calls MCTSAgentT p2.getNextAction() repeatedly and prints the vtable
+	 * tiles is below a threshold. - It calls MCTSAgentT p2.getNextAction2() repeatedly and prints the vtable
 	 * results on console. It calls PlayAgent pa (usually MCAgent) repeatedly as well. 
 	 * In addition, it prints the best i and the number of rollouts (iterations) in which the 
 	 * game terminates.
 	 * 
 	 * Currently this function is only for StateObserver2048 so. Otherwise it returns the
-	 * 'normal' pa.getNextAction().
+	 * 'normal' pa.getNextAction2().
 	 * 
 	 * @param so
 	 * @param pa
 	 * @param p2
-	 * @param N_EMPTY return the 'normal' pa.getNextAction(), if number of empty cells is 
+	 * @param N_EMPTY return the 'normal' pa.getNextAction2(), if number of empty cells is 
 	 * 		greater or equal to N_EMPTY
-	 * @return the chosen action from the last call of pa.getNextAction()
+	 * @return the chosen action from the last call of pa.getNextAction2()
 	 */
 	Types.ACTIONS_VT  getNextAction_DEBG(StateObservation so, PlayAgent pa, MCTSAgentT p2, 
 			int N_EMPTY) {

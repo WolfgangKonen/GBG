@@ -19,6 +19,7 @@ import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple.TDNTupleAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
@@ -524,6 +525,13 @@ public class XArenaMenu extends JMenuBar {
 				if (((MCTSAgentT) td).getOtherPar() == null ) 
 					((MCTSAgentT) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar.setFrom( ((MCTSAgentT) td).getOtherPar() );
+			}
+			else if (td instanceof MCTSExpectimaxAgt) {
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.mctsExpectimaxParams.setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
+				if (((MCTSExpectimaxAgt) td).getOtherPar() == null ) 
+					((MCTSExpectimaxAgt) td).setDefaultOtherPar();
+				m_arena.m_xab.oPar.setFrom( ((MCTSExpectimaxAgt) td).getOtherPar() );
 			}
 			else if (td instanceof MCAgent) {
 				// set the agent parameters in XArenaTabs:

@@ -258,7 +258,7 @@ public class StateObserverTTT implements StateObservation {
 	 * @param actBest	the best action
 	 * @param vtable	one double for each action in this.getAvailableActions():
 	 * 					it stores the value of that action (as given by the double[] 
-	 * 					in getNextAction) 
+	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
 	 */
 	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
         ArrayList<Types.ACTIONS> acts = this.getAvailableActions();

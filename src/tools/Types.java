@@ -88,9 +88,9 @@ public class Types {
 	 *  Class ACTIONS_VT (action with VTable) is derived from ACTIONS. It has the additional members 
 	 *  <ul>
 	 *  <li> double[] vTable: the game values for all other available actions when this action
-	 *  	 is created via PlayAgent.getNextAction(so,...) 
+	 *  	 is created via PlayAgent.getNextAction2(so,...) 
 	 *  <li> double   vBest: the game value for the best action returned from 
-	 *  	 PlayAgent.getNextAction(so,...)
+	 *  	 PlayAgent.getNextAction2(so,...)
 	 *  </ul>
 	 *  
 	 *  @see Types.ACTIONS
@@ -206,5 +206,7 @@ public class Types {
 	 * Default directory for loading and saving PlayAgents
 	 */
 	public static final String GUI_DEFAULT_DIR_AGENT = "agents";
+	
+	public static final double TD_HORIZONCUT = 0.1;		// see NTuple2ValueFunc.setHorizon()
 	
  }

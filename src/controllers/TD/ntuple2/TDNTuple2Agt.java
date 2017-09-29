@@ -87,7 +87,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //	 * probability drops linearly from 1 to 0. <br>
 	/**
 	 * Controls the amount of explorative moves in
-	 * {@link #getNextAction(StateObservation, boolean, double[], boolean)}
+	 * {@link #getNextAction2(StateObservation, boolean, boolean)}
 	 * during training. <br>
 	 * m_epsilon = 0.0: no random moves, <br>
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
@@ -231,6 +231,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * actBest has member isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).
 	 */
+	@Deprecated
 	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
 		// this function selector is just intermediate, as long as we want to test getNextAction2 
@@ -259,7 +260,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		BestScore = -Double.MAX_VALUE;
        
 		if (so.getNumPlayers()>2)
-			throw new RuntimeException("TDNTuple2Agt.getNextAction does not yet "+
+			throw new RuntimeException("TDNTuple2Agt.getNextAction1 does not yet "+
 									   "implement case so.getNumPlayers()>2");
 
 		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
@@ -447,7 +448,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		double[] VTable;
        
 		if (so.getNumPlayers()>2)
-			throw new RuntimeException("TDNTuple2Agt.getNextAction does not yet "+
+			throw new RuntimeException("TDNTuple2Agt.getNextAction2 does not yet "+
 									   "implement case so.getNumPlayers()>2");
 
 		int player = Types.PLAYER_PM[refer.getPlayer()]; 	 
@@ -623,7 +624,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	/**
 	 * Return the agent's estimate of the score for that after state.
 	 * For 2-player games like TTT the score is V(), the prob. that X (Player +1) wins 
-	 * from that after state. Player*V() is the quantity to be maximized by getNextAction.
+	 * from that after state. Player*V() is the quantity to be maximized by getNextAction2.
 	 * For 1-player games like 2048 it is the estimated (total or future) reward.
 	 * 
 	 * @param so			the current game state;
@@ -1148,11 +1149,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 	
 	public String stringDescr() {
+		m_Net.setHorizon();
 		String cs = getClass().getName();
 		String str = cs + ": USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda()
+						+ ", horizon:" + m_Net.getHorizon()
 						+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
 						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");
 		return str;

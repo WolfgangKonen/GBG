@@ -69,7 +69,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 //	 * probability drops linearly from 1 to 0. <br>
 	/**
 	 * Controls the amount of explorative moves in
-	 * {@link #getNextAction(StateObservation, boolean, double[], boolean)}
+	 * {@link #getNextAction2(StateObservation, boolean, boolean)}
 	 * during training. <br>
 	 * m_epsilon = 0.0: no random moves, <br>
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth. <br>
@@ -250,6 +250,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	 * actBest has member isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).
 	 */
+	@Deprecated
 	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
 		// this function selector is just intermediate, as long as we want to test getNextAction2 
@@ -465,7 +466,7 @@ public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 		double[] VTable;
        
 		if (so.getNumPlayers()>2)
-			throw new RuntimeException("TDNTupleAgt.getNextAction does not yet "+
+			throw new RuntimeException("TDNTupleAgt.getNextAction2 does not yet "+
 									   "implement case so.getNumPlayers()>2");
 
 		int player = Types.PLAYER_PM[refer.getPlayer()]; 	 

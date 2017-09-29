@@ -69,6 +69,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * @return actBest		the best action 
 	 * 
 	 */	
+	@Deprecated
 	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
 		//VTable = new double[so.getNumAvailableActions()];
@@ -79,6 +80,19 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		return actBest;
 	}
 	
+	/**
+	 * Get the best next action and return it
+	 * @param so			current game state (not changed on return)
+	 * @param random		allow epsilon-greedy random action selection	
+	 * @param silent
+	 * @return actBest		the best action 
+	 * <p>						
+	 * actBest has predicate isRandomAction()  (true: if action was selected 
+	 * at random, false: if action was selected by agent).<br>
+	 * actBest has also the members vTable and vBest to store the value for each available
+	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
+	 * 
+	 */	
 	@Override
 	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
         List<Types.ACTIONS> actions = so.getAvailableActions();

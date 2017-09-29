@@ -153,32 +153,32 @@ public class NTuple implements Serializable {
 		return index;
 	}
 
-	/**
-	 * Get the game board corresponding to this LUT index for this NTuple.<br>
-	 * (--- currently not used inside GBG [still specific to TTT] ---)
-	 * 
-	 * @param index
-	 *            the index into LUT
-	 * @return the corresponding game board (vector of length 9, carrying 0
-	 *         ("O"), 1 (empty) or 2 ("X")). As a specialty of this function,
-	 *         each board cell which is NOT a NTuple position, gets a "-9"
-	 *         (those cells are displayed in light gray by class
-	 *         {@code NTupleShow}).
-	 * 
-	 */
-//	  {@see NTupleShow#updatePanel()    // for later, when we integrate NTupleShow
-	@Deprecated
-	public int[] getBoard(int index) {
-		int i;
-		int[] board = new int[9];
-		for (i = 0; i < 9; i++)
-			board[i] = -9; // -9: is not part of the N-tuple
-		for (i = 0; i < nTuple.length; i++) {
-			board[nTuple[i]] = index % posVals;
-			index = (index - (int) board[nTuple[i]]) / posVals;
-		}
-		return board;
-	}
+//	/**
+//	 * Get the game board corresponding to this LUT index for this NTuple.<br>
+//	 * (--- currently not used inside GBG [still specific to TTT] ---)
+//	 * 
+//	 * @param index
+//	 *            the index into LUT
+//	 * @return the corresponding game board (vector of length 9, carrying 0
+//	 *         ("O"), 1 (empty) or 2 ("X")). As a specialty of this function,
+//	 *         each board cell which is NOT a NTuple position, gets a "-9"
+//	 *         (those cells are displayed in light gray by class
+//	 *         {@code NTupleShow}).
+//	 * 
+//	 */
+////	  {@see NTupleShow#updatePanel()    // for later, when we integrate NTupleShow
+//	@Deprecated
+//	public int[] getBoard(int index) {
+//		int i;
+//		int[] board = new int[9];
+//		for (i = 0; i < 9; i++)
+//			board[i] = -9; // -9: is not part of the N-tuple
+//		for (i = 0; i < nTuple.length; i++) {
+//			board[nTuple[i]] = index % posVals;
+//			index = (index - (int) board[nTuple[i]]) / posVals;
+//		}
+//		return board;
+//	}
 
 //	/**
 //	 * Given a long weight vector (all N-tuples), set from this weight vector

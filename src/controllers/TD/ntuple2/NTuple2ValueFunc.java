@@ -16,6 +16,7 @@ import games.StateObservation;
 import games.XNTupleFuncs;
 import params.NTParams;
 import params.TDParams;
+import tools.Types;
 
 /**
  *         Implementation of a learning value-function using n-tuple systems.
@@ -472,11 +473,15 @@ public class NTuple2ValueFunc implements Serializable {
 		eList.clear();
 	}
 	
+	public int getHorizon() {
+		return horizon;
+	}
+
 	public void setHorizon() {
 		if (getLambda()==0.0) {
 			horizon=0;
 		} else {
-			horizon = (int) (Math.log(0.1)/Math.log(getLambda()));
+			horizon = (int) (Math.log(Types.TD_HORIZONCUT)/Math.log(getLambda()));
 		}		
 	}
 

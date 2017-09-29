@@ -149,7 +149,7 @@ public class MCTSEPlayer
 	public HeuristicSettings2048 getHeuristicSettings2048() {
 		return heuristicSettings2048;
 	}
-    public ParMCTSE getMCTSParams() {
+    public ParMCTSE getParMCTSE() {
 		return mctsExpectimaxParams;
 	}
 	public MCTSEChanceNode getRootNode() {

@@ -104,7 +104,7 @@ public class MCTSEChanceNode
 
             double score;
 
-            if(selected.so instanceof StateObserver2048 && player.getMCTSParams().getEnableHeuristics()) {
+            if(selected.so instanceof StateObserver2048 && player.getParMCTSE().getEnableHeuristics()) {
                 //get Heuristic bonus
                 score = ((StateObserver2048)selected.so).getHeuristicBonus(player.getHeuristicSettings2048());
                 if(player.getHeuristicSettings2048().enableRollout) {

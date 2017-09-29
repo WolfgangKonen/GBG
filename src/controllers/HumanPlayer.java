@@ -16,6 +16,7 @@ public class HumanPlayer extends AgentBase implements PlayAgent
 	}
 
 
+	@Deprecated
 	@Override
 	public ACTIONS getNextAction(StateObservation sob, boolean random, double[] VTable, boolean silent) {
 		// TODO Auto-generated method stub

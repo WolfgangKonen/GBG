@@ -35,7 +35,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
 	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
 	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
-	private static boolean NEW_GNA=false;	
+	private static boolean NEW_GNA=true;	
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -71,6 +71,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
      * @param depth			rollout depth
      * @return nextAction	the next action
      */
+	@Deprecated
     @Override
     public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
         int iterations = m_mcPar.getNumIter();
@@ -450,7 +451,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
     /**
      * Get the best next action and return it (single-core version, multiple agents).
-     * Called by calcCertainty and getNextAction.
+     * Called by calcCertainty and getNextAction2.
      * 
      * @param sob			current game state (not changed on return)
      * @param iterations    rollout repeats (for each available action)
@@ -561,7 +562,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
      * next action
      * 
      * @param sob			the game state
-     * @param numberAgents	= 1: use getNextAction (parallel version) <br>
+     * @param numberAgents	= 1: use getNextAction2 (parallel version) <br>
      *                      &gt; 1: use getNextActionMultipleAgents with NUMBERAGENTS=numberAgents
      * @param silent
      * @param NC			number of repeats for next-action calculation

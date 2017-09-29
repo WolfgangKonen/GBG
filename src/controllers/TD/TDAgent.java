@@ -51,7 +51,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	protected TD_func m_Net;
 	/**
 	 * Controls the amount of explorative moves in
-	 * {@link #getNextAction(StateObservation, boolean, double[], boolean)}
+	 * {@link #getNextAction2(StateObservation, boolean, boolean)}
 	 * during training. <br>
 	 * m_epsilon = 0.0: no random moves, <br>
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
@@ -85,7 +85,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	private boolean NORMALIZE = false; 
 	// if NEW_GNA==true: use the new function getNextAction2,3 in getNextAction;
 	// if NEW_GNA==false: use the old function getNextAction1 in getNextAction;
-	private static boolean NEW_GNA=false;	
+	private static boolean NEW_GNA=true;	
 	
 	protected Feature m_feature;
 	
@@ -189,6 +189,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * actBest has member isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).
 	 */
+	@Deprecated
 	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
 		// this function selector is just intermediate, as long as we want to test getNextAction2 
@@ -366,7 +367,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		double[] VTable;
        
 		if (so.getNumPlayers()>2)
-			throw new RuntimeException("TDAgent.getNextAction does not yet "+
+			throw new RuntimeException("TDAgent.getNextAction2 does not yet "+
 									   "implement case so.getNumPlayers()>2");
 
 		int player = Types.PLAYER_PM[refer.getPlayer()]; 	 
@@ -497,7 +498,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * 
 	 * @param so			the current game state;
 	 * @return V(), the prob. that X (Player +1) wins from that after state.
-	 *         Player*V() is the quantity to be maximized by getNextAction.
+	 *         Player*V() is the quantity to be maximized by getNextAction2.
 	 */
 	public double getScore(StateObservation so) {
 		double score = m_Net.getScore(m_feature.prepareFeatVector(so));

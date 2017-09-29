@@ -115,7 +115,7 @@ public interface StateObservation extends Serializable{
 	 * @param actBest	the best action
 	 * @param vtable	one double for each action in {@link #getAvailableActions()}:
 	 * 					it stores the value of that action (as given by the double[] 
-	 * 					in {@code PlayAgent#getNextAction}) 
+	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
 	 */
 	public void storeBestActionInfo(ACTIONS actBest, double[] vtable); 
 	

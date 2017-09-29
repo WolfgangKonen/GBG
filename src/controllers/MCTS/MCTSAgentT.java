@@ -38,7 +38,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 
 	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
 	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
-	private static boolean NEW_GNA=false;	
+	private static boolean NEW_GNA=true;	
 
     /**
      * The MCTS-UCT implementation
@@ -130,6 +130,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	 * @param silent		verbosity control
 	 * @return actBest		the best action 
 	 */	
+	@Deprecated
 	@Override
 	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] vtable, boolean silent) {
 

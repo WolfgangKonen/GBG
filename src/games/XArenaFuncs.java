@@ -158,7 +158,7 @@ public class XArenaFuncs
 		} else if (sAgent.equals("MCTS")) {
 			pa = new MCTSAgentT(sAgent, null, m_xab.mctsParams, m_xab.oPar);
 		} else if (sAgent.equals("MCTS Expectimax")) {
-			pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams);
+			pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams, m_xab.oPar);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
@@ -197,7 +197,7 @@ public class XArenaFuncs
 			} else if (sAgent.equals("MCTS")) {
 				pa= new MCTSAgentT(sAgent,null,m_xab.mctsParams, m_xab.oPar);
 			} else if (sAgent.equals("MCTS Expectimax")) {
-				pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams);
+				pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams, m_xab.oPar);
 			} else if (sAgent.equals("Human")) {
 				pa= new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {
