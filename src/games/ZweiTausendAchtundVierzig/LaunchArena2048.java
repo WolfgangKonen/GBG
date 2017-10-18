@@ -18,7 +18,7 @@ public class LaunchArena2048 extends JFrame{
      */
     public static void main(String[] args) throws IOException
     {
-        LaunchArena2048 t_Frame = new LaunchArena2048("General buttons Game Playing");
+        LaunchArena2048 t_Frame = new LaunchArena2048("General Board Game Playing");
 
         if (args.length==0) {
             t_Frame.init();

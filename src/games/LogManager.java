@@ -275,7 +275,7 @@ public class LogManager {
      * checks if a folder exists and creates a new one if it doesn't
      *
      * @param filePath the folder Path
-     * @return true if a folder allready existed
+	 * @return true if folder already exists
      */
     private boolean checkAndCreateFolder(String filePath) {
         File file = new File(filePath);

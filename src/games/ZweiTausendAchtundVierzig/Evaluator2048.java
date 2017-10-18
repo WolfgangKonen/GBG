@@ -6,6 +6,8 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
+import games.Arena;
+import games.PStats;
 import tools.Types;
 
 import java.util.*;
@@ -31,15 +33,22 @@ public class Evaluator2048 extends Evaluator {
     private long startTime;
     private long stopTime;
     private int verbose;
+    private Arena ar;		// needed in eval_agent, if PStats.printPlayStats(psList, m_PlayAgent,ar) is called
 
 
-    public Evaluator2048(PlayAgent e_PlayAgent, int stopEval, int verbose) {
+    public Evaluator2048(PlayAgent e_PlayAgent, int stopEval, int verbose, Arena ar) {
         super(e_PlayAgent, stopEval, verbose);
         this.verbose = verbose;
+        this.ar = ar;
     }
 
     @Override
     protected boolean eval_Agent() {
+		int nEmpty = 0,cumEmpty=0;
+		int moveNum=0;
+		double gameScore=0.0;
+		PStats pstats;
+		ArrayList<PStats> psList = new ArrayList<PStats>();
         startTime = System.currentTimeMillis();
         if(verbose == 0) {
             System.out.print("Starting evaluation of " + ConfigEvaluator.NUMBEREVALUATIONS + " games, this may take a while...\n");
@@ -68,6 +77,8 @@ public class Evaluator2048 extends Evaluator {
                     while (!so.isGameOver()) {
                         Types.ACTIONS action = playAgent.getNextAction2(so, false, true);
                         so.advance(action);
+                        
+                        // TODO: integrate a branch for ConfigEvaluator.PLAYSTATS_CSV, if needed
                     }
 
                     if(verbose == 0) {
@@ -97,8 +108,21 @@ public class Evaluator2048 extends Evaluator {
                 long gameSartTime = System.currentTimeMillis();
                 StateObserver2048 so = new StateObserver2048();
 
+                moveNum=cumEmpty=0;
                 while (!so.isGameOver()) {
                     so.advance(m_PlayAgent.getNextAction2(so, false, true));
+                    
+                    // gather information for later printout to agents/gameName/csv/playStats.csv:
+                    if (ConfigEvaluator.PLAYSTATS_CSV) {
+                        moveNum++;
+                        assert (so instanceof StateObserver2048) : "Oops, so is not a StateObserver2048 object!";
+                    	StateObserver2048 so2048 = (StateObserver2048) so;
+                    	nEmpty = so2048.getNumEmptyTiles();  
+                    	gameScore = so2048.getGameScore()*so2048.MAXSCORE;
+                    	cumEmpty += nEmpty;
+                        pstats = new PStats(i,moveNum,gameScore,(double)nEmpty,(double)cumEmpty);
+            			psList.add(pstats);
+                    }
                 }
 
                 if(verbose == 0) {
@@ -106,7 +130,12 @@ public class Evaluator2048 extends Evaluator {
                 }
 
                 stateObservers.add(so);
+                
             }
+            if (ConfigEvaluator.PLAYSTATS_CSV) {
+        		PStats.printPlayStats(psList, m_PlayAgent,this.ar);
+            }
+            
         }
 
         //evaluate games

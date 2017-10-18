@@ -217,200 +217,199 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		setAgentState(AgentState.INIT);
 	}
 
-	/**
-	 * Get the best next action and return it
-	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param VTable		the score for each available action (corresponding
-	 * 						to sob.getAvailableActions())
-	 * @param silent
-	 * @return actBest		the best action. If several actions have the same
-	 * 						score, break ties by selecting one of them at random 
-	 * 						
-	 * actBest has member isRandomAction()  (true: if action was selected 
-	 * at random, false: if action was selected by agent).
-	 */
-	@Deprecated
-	@Override
-	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
-		// this function selector is just intermediate, as long as we want to test getNextAction2 
-		// against getNextAction1 (the former getNextAction). Once everything works fine with
-		// getNextAction2, we should use only this function and make getNextAction deprecated 
-		// (requires appropriate changes in all other agents implementing interface PlayAgent).
-		if (!NEW_GNA) {
-			return getNextAction1(so, random, VTable, silent);
-		} else {
-			Types.ACTIONS_VT actBestVT = getNextAction2(so, random, silent);
-			double[] vtable = actBestVT.getVTable();
-			for (int i=0; i<vtable.length; i++) VTable[i] = normalize2(vtable[i],so);
-			VTable[vtable.length] = normalize2(actBestVT.getVBest(),so);
-			return actBestVT;
-		}
-	}
-	// this is the old getNextAction function (prior to 09/2017):
-	private Types.ACTIONS getNextAction1(StateObservation so, boolean random, double[] VTable, boolean silent) {
-		int i, j;
-		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
-									// maximized
-		StateObservation NewSO;
-		int count = 1; // counts the moves with same BestScore
-        Types.ACTIONS actBest = null;
-        int iBest;
-		BestScore = -Double.MAX_VALUE;
-       
-		if (so.getNumPlayers()>2)
-			throw new RuntimeException("TDNTuple2Agt.getNextAction1 does not yet "+
-									   "implement case so.getNumPlayers()>2");
-
-		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
-	
-// --- this code is suspicious and not intuitive (random moves even in case m_epsilon==0) ---		
-//		randomSelect = false;
-//		double progress = (double) getGameNum() / (double) getMaxGameNum();
-//		progress = (1 + m_epsilon) * progress - m_epsilon; 	// = progress +
-//															// m_EPS*(progress - 1)
-//		if (random) {
-//			double rd = rand.nextDouble();
-//			//System.out.println("rd="+rd);
-//			if (rd > progress) {
-//				randomSelect = true;
-//			}
+//	/**
+//	 * Get the best next action and return it
+//	 * 
+//	 * @param so			current game state (is returned unchanged)
+//	 * @param random		allow epsilon-greedy random action selection	
+//	 * @param VTable		the score for each available action (corresponding
+//	 * 						to sob.getAvailableActions())
+//	 * @param silent
+//	 * @return actBest		the best action. If several actions have the same
+//	 * 						score, break ties by selecting one of them at random 
+//	 * 						
+//	 * actBest has member isRandomAction()  (true: if action was selected 
+//	 * at random, false: if action was selected by agent).
+//	 */
+//	@Deprecated
+//	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
+//		// this function selector is just intermediate, as long as we want to test getNextAction2 
+//		// against getNextAction1 (the former getNextAction). Once everything works fine with
+//		// getNextAction2, we should use only this function and make getNextAction deprecated 
+//		// (requires appropriate changes in all other agents implementing interface PlayAgent).
+//		if (!NEW_GNA) {
+//			return getNextAction1(so, random, VTable, silent);
+//		} else {
+//			Types.ACTIONS_VT actBestVT = getNextAction2(so, random, silent);
+//			double[] vtable = actBestVT.getVTable();
+//			for (int i=0; i<vtable.length; i++) VTable[i] = normalize2(vtable[i],so);
+//			VTable[vtable.length] = normalize2(actBestVT.getVBest(),so);
+//			return actBestVT;
 //		}
-		
-        randomSelect = false;
-		if (random) {
-			randomSelect = (rand.nextDouble() < m_epsilon);
-		}
-		
-		// get the best (or eps-greedy random) action
-        ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
-        Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
-        double soReward = so.getGameScore(so); // 0; 
-        double agentScore;
-        //VTable = new double[acts.size()];  
-        // DON'T! The caller has to define VTable with the right length
-        
-        assert actions.length>0 : "Oops, no available action";
-        for(i = 0; i < actions.length; ++i)
-        {
-            actions[i] = acts.get(i);		
-	        
-            NewSO = so.copy();
-            if (getAFTERSTATE()) {
-            	assert (NewSO instanceof StateObservationNondeterministic);
-                ((StateObservationNondeterministic) NewSO).advanceDeterministic(actions[i]); 
-                agentScore = getScore(NewSO);
-                ((StateObservationNondeterministic) NewSO).advanceNondeterministic(); 
-            } else {
-                NewSO.advance(actions[i]);
-                agentScore = getScore(NewSO);
-            }
-            
-            // this alternative implementation has less code, but is much (40%-70%!!) slower: 
-//          double agentScore2;
-//    		StateObservation NewSO2;
-//	        ns = new NextState(so,actions[i]);
-//	        agentScore2 = getScore(ns.getAfterState());
-//	        NewSO2 = ns.getNextSO();
-//	        assert agentScore==agentScore2 : "Oops, agentScore and agentScore2 differ!";
-
-//			if (!NEWTARGET) {
-//				throw new RuntimeException("NEWTARGET==false no longer supported in TDNTuple2Agt!");
-////				// old target logic:
-////				if (NewSO.isGameOver()) {
-////					CurrentScore = NewSO.getGameScore(so);
-////				}  else {
-////					// old target logic:
-////					// the score is just the agent's value function for NewSO. In this case
-////					// the agent has to learn in the value function the sum 
-////					// 		"rewards received plus future rewards"
-////					// itself. 
-////					CurrentScore = player * agentScore;
-////											// here we ask this agent for its score estimate on NewSO
-////				}
-//			} else {
-				// new target logic:
-				// the score is the reward received for the transition from so to NewSO 
-				// 		(NewSO.getGameScore(so)-soReward)
-				// plus the estimated future rewards until game over (getScore(NewSO), 
-				// the agent's value function for NewSO)
-				CurrentScore = (NewSO.getGameScore(so) - soReward) + player * agentScore;				
+//	}
+//	// this is the old getNextAction function (prior to 09/2017):
+//	private Types.ACTIONS getNextAction1(StateObservation so, boolean random, double[] VTable, boolean silent) {
+//		int i, j;
+//		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
+//									// maximized
+//		StateObservation NewSO;
+//		int count = 1; // counts the moves with same BestScore
+//        Types.ACTIONS actBest = null;
+//        int iBest;
+//		BestScore = -Double.MAX_VALUE;
+//       
+//		if (so.getNumPlayers()>2)
+//			throw new RuntimeException("TDNTuple2Agt.getNextAction1 does not yet "+
+//									   "implement case so.getNumPlayers()>2");
+//
+//		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
+//	
+//// --- this code is suspicious and not intuitive (random moves even in case m_epsilon==0) ---		
+////		randomSelect = false;
+////		double progress = (double) getGameNum() / (double) getMaxGameNum();
+////		progress = (1 + m_epsilon) * progress - m_epsilon; 	// = progress +
+////															// m_EPS*(progress - 1)
+////		if (random) {
+////			double rd = rand.nextDouble();
+////			//System.out.println("rd="+rd);
+////			if (rd > progress) {
+////				randomSelect = true;
+////			}
+////		}
+//		
+//        randomSelect = false;
+//		if (random) {
+//			randomSelect = (rand.nextDouble() < m_epsilon);
+//		}
+//		
+//		// get the best (or eps-greedy random) action
+//        ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
+//        Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
+//        double soReward = so.getGameScore(so); // 0; 
+//        double agentScore;
+//        //VTable = new double[acts.size()];  
+//        // DON'T! The caller has to define VTable with the right length
+//        
+//        assert actions.length>0 : "Oops, no available action";
+//        for(i = 0; i < actions.length; ++i)
+//        {
+//            actions[i] = acts.get(i);		
+//	        
+//            NewSO = so.copy();
+//            if (getAFTERSTATE()) {
+//            	assert (NewSO instanceof StateObservationNondeterministic);
+//                ((StateObservationNondeterministic) NewSO).advanceDeterministic(actions[i]); 
+//                agentScore = getScore(NewSO);
+//                ((StateObservationNondeterministic) NewSO).advanceNondeterministic(); 
+//            } else {
+//                NewSO.advance(actions[i]);
+//                agentScore = getScore(NewSO);
+//            }
+//            
+//            // this alternative implementation has less code, but is much (40%-70%!!) slower: 
+////          double agentScore2;
+////    		StateObservation NewSO2;
+////	        ns = new NextState(so,actions[i]);
+////	        agentScore2 = getScore(ns.getAfterState());
+////	        NewSO2 = ns.getNextSO();
+////	        assert agentScore==agentScore2 : "Oops, agentScore and agentScore2 differ!";
+//
+////			if (!NEWTARGET) {
+////				throw new RuntimeException("NEWTARGET==false no longer supported in TDNTuple2Agt!");
+//////				// old target logic:
+//////				if (NewSO.isGameOver()) {
+//////					CurrentScore = NewSO.getGameScore(so);
+//////				}  else {
+//////					// old target logic:
+//////					// the score is just the agent's value function for NewSO. In this case
+//////					// the agent has to learn in the value function the sum 
+//////					// 		"rewards received plus future rewards"
+//////					// itself. 
+//////					CurrentScore = player * agentScore;
+//////											// here we ask this agent for its score estimate on NewSO
+//////				}
+////			} else {
+//				// new target logic:
+//				// the score is the reward received for the transition from so to NewSO 
+//				// 		(NewSO.getGameScore(so)-soReward)
+//				// plus the estimated future rewards until game over (getScore(NewSO), 
+//				// the agent's value function for NewSO)
+//				CurrentScore = (NewSO.getGameScore(so) - soReward) + player * agentScore;				
+////			}
+//			
+//			// just a debug check:
+//			if (Double.isInfinite(agentScore)) {
+//				System.out.println("getScore(NewSO) is infinite!");
 //			}
-			
-			// just a debug check:
-			if (Double.isInfinite(agentScore)) {
-				System.out.println("getScore(NewSO) is infinite!");
-			}
-			
-			CurrentScore = normalize2(CurrentScore,so);					
-			
-			if (!silent)
-				System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
-				//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
-			if (randomSelect) {
-				double rd2 = rand.nextDouble();
-				//System.out.println("rd CS="+rd2);
-				CurrentScore = rd2;
-			}
-
-			//
-			// fill VTable, calculate BestScore and actBest:
-			//
-			VTable[i] = CurrentScore;
-			if (BestScore < CurrentScore) {
-				BestScore = CurrentScore;
-				actBest = actions[i];
-				iBest  = i; 
-				count = 1;
-			} else if (BestScore == CurrentScore) {
-				// If there are 'count' possibilities with the same score BestScore, 
-				// each one has the probability 1/count of being selected.
-				// 
-				// (To understand formula, think recursively from the end: the last one is
-				// obviously selected with prob. 1/count. The others have the probability 
-				//      1 - 1/count = (count-1)/count 
-				// left. The previous one is selected with probability 
-				//      ((count-1)/count)*(1/(count-1)) = 1/count
-				// and so on.) 
-				count++;
-				if (rand.nextDouble() < 1.0/count) {
-					actBest = actions[i];
-					iBest  = i; 
-				}
-			}
-        } // for
-
-        assert actBest != null : "Oops, no best action actBest";
-        actBest.setRandomSelect(randomSelect);
-        
-		if (!silent) {
-			System.out.print("---Best Move: ");
-            NewSO = so.copy();
-            NewSO.advance(actBest);
-			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
-		}			
-		if (DBG2_TARGET) {
-			final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
-			// the old version, which is only correct for AFTERSTATE==false:
-//          NewSO = so.copy();
-//          NewSO.advance(actBest);
-//          double deltaReward = NewSO.getGameScore(so) - so.getGameScore(so);
-//			double sc = (deltaReward + player * getScore(NewSO))*MAXSCORE;
-												// this is problematic when AFTERSTATE==true (!)
-			// here we use the NextState version, because computation time does not matter
-			// inside DBG2_TARGET and because this version is correct for both values of 
-			// getAFTERSTATE():
-	        NextState ns = new NextState(so,actBest);
-			double deltaReward = ns.getNextSO().getGameScore(so) - so.getGameScore(so);
-			double sc = (deltaReward + player * getScore(ns.getAfterState()))*MAXSCORE;
-			
-			System.out.println("getScore((so,actbest)-afterstate): "+sc+"   ["+so.stringDescr()+"]");
-			int dummy=1;
-		}
-		
-		return actBest;
-	}
+//			
+//			CurrentScore = normalize2(CurrentScore,so);					
+//			
+//			if (!silent)
+//				System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
+//				//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
+//			if (randomSelect) {
+//				double rd2 = rand.nextDouble();
+//				//System.out.println("rd CS="+rd2);
+//				CurrentScore = rd2;
+//			}
+//
+//			//
+//			// fill VTable, calculate BestScore and actBest:
+//			//
+//			VTable[i] = CurrentScore;
+//			if (BestScore < CurrentScore) {
+//				BestScore = CurrentScore;
+//				actBest = actions[i];
+//				iBest  = i; 
+//				count = 1;
+//			} else if (BestScore == CurrentScore) {
+//				// If there are 'count' possibilities with the same score BestScore, 
+//				// each one has the probability 1/count of being selected.
+//				// 
+//				// (To understand formula, think recursively from the end: the last one is
+//				// obviously selected with prob. 1/count. The others have the probability 
+//				//      1 - 1/count = (count-1)/count 
+//				// left. The previous one is selected with probability 
+//				//      ((count-1)/count)*(1/(count-1)) = 1/count
+//				// and so on.) 
+//				count++;
+//				if (rand.nextDouble() < 1.0/count) {
+//					actBest = actions[i];
+//					iBest  = i; 
+//				}
+//			}
+//        } // for
+//
+//        assert actBest != null : "Oops, no best action actBest";
+//        actBest.setRandomSelect(randomSelect);
+//        
+//		if (!silent) {
+//			System.out.print("---Best Move: ");
+//            NewSO = so.copy();
+//            NewSO.advance(actBest);
+//			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
+//		}			
+//		if (DBG2_TARGET) {
+//			final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
+//			// the old version, which is only correct for AFTERSTATE==false:
+////          NewSO = so.copy();
+////          NewSO.advance(actBest);
+////          double deltaReward = NewSO.getGameScore(so) - so.getGameScore(so);
+////			double sc = (deltaReward + player * getScore(NewSO))*MAXSCORE;
+//												// this is problematic when AFTERSTATE==true (!)
+//			// here we use the NextState version, because computation time does not matter
+//			// inside DBG2_TARGET and because this version is correct for both values of 
+//			// getAFTERSTATE():
+//	        NextState ns = new NextState(so,actBest);
+//			double deltaReward = ns.getNextSO().getGameScore(so) - so.getGameScore(so);
+//			double sc = (deltaReward + player * getScore(ns.getAfterState()))*MAXSCORE;
+//			
+//			System.out.println("getScore((so,actbest)-afterstate): "+sc+"   ["+so.stringDescr()+"]");
+//			int dummy=1;
+//		}
+//		
+//		return actBest;
+//	}
 
 	/**
 	 * Get the best next action and return it 

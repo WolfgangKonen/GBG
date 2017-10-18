@@ -9,7 +9,15 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by Johannes on 18.11.2016.
+ * Class {@link StateObs2048Slow} holds a 2048 game state.
+ * The game state is coded in a matrix of tiles {@code Tile[][] gameBoard}. The code for 
+ * merging tiles is better understandable, but also slower than in {@link StateObs2048BitShift}.<p>
+ * 
+ * This is just a copy-class, meaning that either {@link StateObs2048BitShift} or 
+ * {@link StateObserver2048Slow} is copied to {@link StateObserver2048}. Then 
+ * {@link StateObserver2048} is the class used in all other locations.
+ * 
+ * @author Johannes Kutsch, THK
  */
 public class StateObserver2048Slow implements StateObservation {
     private Random random = new Random();
@@ -68,7 +76,7 @@ public class StateObserver2048Slow implements StateObservation {
         updateAvailableMoves();
     }
 
-    // Note: StateObserver2048Slow copy() copies the board state, score, winState,
+    // Note: StateObserver2048Slow.copy() copies the board state, score, winState,
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
     @Override
     public StateObserver2048Slow copy() {

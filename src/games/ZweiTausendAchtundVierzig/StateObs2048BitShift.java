@@ -27,7 +27,11 @@ import java.util.Random;
  * Example: Hex digit {@code a} codes tile value {@code 2^a} = 1024.  <p>
  * 
  * Method getGameScore2 is currently implemented via StateObserver2048Slow.getGameScore2 
- * (may be slow).
+ * (may be slow).<p>
+ * 
+ * This is just a copy-class, meaning that either {@link StateObs2048BitShift} or 
+ * {@link StateObserver2048Slow} is copied to {@link StateObserver2048}. Then 
+ * {@link StateObserver2048} is the class used in all other locations.
  * 
  * @author Wolfgang Konen, THK
  */

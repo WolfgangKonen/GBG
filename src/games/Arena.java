@@ -3,7 +3,12 @@ package games;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.ListIterator;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,6 +25,7 @@ import controllers.MCTS.MCTSAgentT;
 import games.Hex.GameBoardHex;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
+import games.MTrain;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.MessageBox;
 import tools.StatusBar;
@@ -35,7 +41,7 @@ import tools.Types;
  * {@link games.TicTacToe.LaunchArenaTTT LaunchArenaTTT} or 
  * {@link games.TicTacToe.LaunchTrainTTT LaunchTrainTTT} for the TicTacToe game.
  * 
- * @author Wolfgang Konen, TH K�ln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
@@ -318,6 +324,11 @@ abstract public class Arena extends JPanel implements Runnable {
 		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mctsParams,m_xab.oPar);
 //		double[] vtable = null;
 		PlayAgent[] paVector;
+		int nEmpty = 0,cumEmpty=0;
+		int moveNum=0;
+		double gameScore=0.0;
+		PStats pstats;
+		ArrayList<PStats> psList = new ArrayList<PStats>();
 
 		// fetch the agents in a way general for 1-, 2- and n-player games
 		int numPlayers = gb.getStateObs().getNumPlayers();
@@ -377,6 +388,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		while(taskState == Task.PLAY)	// game play interruptible by hitting 'Play' again 
 		{			
 			if(gb.isActionReq()){
+				moveNum++;
 				so = gb.getStateObs();
 				//int[] test= so.getBoardVector();
 				player = so.getPlayer();
@@ -411,6 +423,19 @@ abstract public class Arena extends JPanel implements Runnable {
                         }
                         gb.updateBoard(so,showStoredV,false);
 
+                        // gather information for later printout to agents/gameName/csv/playStats.csv.
+                        // This is mostly for diagnostics in game 2048, but not completely useless for other
+                        // games as well.
+                        if (so instanceof StateObserver2048) {
+                        	StateObserver2048 so2048 = (StateObserver2048) so;
+                        	nEmpty = so2048.getNumEmptyTiles();  
+                        	cumEmpty += nEmpty;
+                        	gameScore = so2048.getGameScore()*so2048.MAXSCORE;
+                        } else {
+                        	gameScore = so.getGameScore();
+                        }
+                        pstats = new PStats(1,moveNum,gameScore,(double)nEmpty,(double)cumEmpty);
+            			psList.add(pstats);
 
 				}
 
@@ -463,7 +488,9 @@ abstract public class Arena extends JPanel implements Runnable {
 				break;			// this is the final break out of while loop 	
 			} // if isGameOver
 			
-		}	// while(true) [will be left only by the last break above]
+		}	// while(taskState == Task.PLAY) [will be left only by the last break above or when taskState changes]
+
+		PStats.printPlayStats(psList, paVector[0],this);
 		logManager.endLoggingSession(logSessionid);
 		taskState = Task.IDLE;		
 		setStatusMessage("Done.");
@@ -541,6 +568,7 @@ abstract public class Arena extends JPanel implements Runnable {
     	}
     	return actBest;
     }
+
 
 	public GameBoard getGameBoard() {
 		return gb;

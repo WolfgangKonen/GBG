@@ -527,6 +527,8 @@ public class XArenaFuncs
 							m_evaluatorM.eval();
 							evalM = m_evaluatorM.getLastResult();
 						}
+						
+                        // gather information for later printout to agents/gameName/csv/multiTrain.csv.
 						mTrain = new MTrain(i,gameNum,m_evaluatorQ.getLastResult(),evalT,evalM,
 											actionNum,trnMoveNum);
 						mtList.add(mTrain);
@@ -561,78 +563,12 @@ public class XArenaFuncs
 		//System.out.println("Avg. success rate (ALL_Agent, best is 1.0): "+frm3.format(oC.getMean()) + " +- " + frm.format(oC.getStd()));
 		this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");
 		
-		printMultiTrainList(mtList, pa);
+		MTrain.printMultiTrainList(mtList, pa, m_Arena);
 		
 		xab.TrainNumT.setText(Integer.toString(trainNum) );
 		return pa;
 		
 	} // multiTrain
-
-	class MTrain {
-		public int i;
-		public int gameNum;
-		public double evalQ;
-		public double evalT;
-		public double evalM;
-		public long actionNum;		// number of learning actions
-		public long trnMoveNum;		// number of train moves (including random moves)
-		
-		MTrain(int i, int gameNum, double evalQ, double evalT, double evalM, 
-				long actionNum, long trnMoveNum) {
-			this.i=i;
-			this.gameNum=gameNum;
-			this.evalQ=evalQ;
-			this.evalT=evalT;
-			this.evalM=evalM;
-			this.actionNum=actionNum;
-			this.trnMoveNum=trnMoveNum;
-		}
-		
-		public void print(PrintWriter mtWriter)  {
-			String sep = ", ";
-			mtWriter.print(i + sep + gameNum + sep);
-			mtWriter.println(evalQ + sep + evalT + sep + evalM 
-					+ sep + actionNum + sep + trnMoveNum);
-		}
-	}
-	
-	/**
-	 * Print the results from {@link XArenaFuncs#multiTrain(String, XArenaButtons, GameBoard)} to
-	 * file <br>
-	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/multiTrain.csv}. <br>
-	 * where the optional {@code subdir} is for games with different flavors (like Hex: board size). 
-	 * The directory is created, if it does not exist.   
-	 * 
-	 * @param mtList	the results from {@code multiTrain}
-	 * @param pa		the agent used in {@code multiTrain} 
-	 */
-	public void printMultiTrainList(ArrayList<MTrain> mtList, PlayAgent pa){
-		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+m_Arena.getGameName();
-		String subDir = m_Arena.getGameBoard().getSubDir();
-		if (subDir != null){
-			strDir += "/"+subDir;
-		}
-		strDir += "/csv";
-		checkAndCreateFolder(strDir);
-
-		PrintWriter mtWriter = null;
-		try {
-			mtWriter = new PrintWriter(new FileWriter(strDir+"/"+"multiTrain.csv",false));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		mtWriter.println(pa.stringDescr());		
-		mtWriter.println(pa.stringDescr2());
-		
-		mtWriter.println("run, gameNum, evalQ, evalT, evalM, actionNum, trnMoves");
-		ListIterator<MTrain> iter = mtList.listIterator();		
-		while(iter.hasNext()) {
-			(iter.next()).print(mtWriter);
-		}
-
-	    mtWriter.close();
-	}
 
 	/**
 	 * Test player pa by playing competeNum games against opponent, both as X and as O.
@@ -1022,9 +958,9 @@ public class XArenaFuncs
 	 * checks if a folder exists and creates a new one if it doesn't
 	 *
 	 * @param filePath the folder Path
-	 * @return true if a folder allready existed
+	 * @return true if folder already exists
 	 */
-	private boolean checkAndCreateFolder(String filePath) {
+	private static boolean checkAndCreateFolder(String filePath) {
 		File file = new File(filePath);
 		boolean exists = file.exists();
 		if(!file.exists()) {

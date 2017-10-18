@@ -22,7 +22,7 @@ public class LaunchTrain2048 extends JFrame {
     	
 //    	testLinkedList();
     	
-        LaunchTrain2048 t_Frame = new LaunchTrain2048("General buttons Game Playing");
+        LaunchTrain2048 t_Frame = new LaunchTrain2048("General Board Game Playing");
         if (args.length == 0) {
             t_Frame.init();
         } else {

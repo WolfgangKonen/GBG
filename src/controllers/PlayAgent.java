@@ -21,29 +21,29 @@ import tools.Types;
 public interface PlayAgent {
 	public enum AgentState {RAW, INIT, TRAINED};
 	
-	/**
-	 * <em> This function is now deprecated. Use instead: </em>
-	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
-	 * <p>
-	 * Get the best next action and return it
-	 * @param sob			current game state (not changed on return)
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param vtable		must be an array of size n+1 on input, where 
-	 * 						n=sob.getNumAvailableActions(). On output,
-	 * 						elements 0,...,n-1 hold the score for each available 
-	 * 						action (corresponding to sob.getAvailableActions())
-	 * 						In addition, vtable[n] has the score for the 
-	 * 						best action.
-	 * @param silent
-	 * @return actBest		the best action 
-	 * 
-	 * Side effect: sets member randomSelect (true: if action was selected 
-	 * at random, false: if action was selected by agent).
-	 * 
-	 */	
-	@Deprecated
-	public Types.ACTIONS getNextAction(StateObservation sob, boolean random, 
-			double[] vtable, boolean silent);
+//	/**
+//	 * <em> This function is now deprecated. Use instead: </em>
+//	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
+//	 * <p>
+//	 * Get the best next action and return it
+//	 * @param sob			current game state (not changed on return)
+//	 * @param random		allow epsilon-greedy random action selection	
+//	 * @param vtable		must be an array of size n+1 on input, where 
+//	 * 						n=sob.getNumAvailableActions(). On output,
+//	 * 						elements 0,...,n-1 hold the score for each available 
+//	 * 						action (corresponding to sob.getAvailableActions())
+//	 * 						In addition, vtable[n] has the score for the 
+//	 * 						best action.
+//	 * @param silent
+//	 * @return actBest		the best action 
+//	 * 
+//	 * Side effect: sets member randomSelect (true: if action was selected 
+//	 * at random, false: if action was selected by agent).
+//	 * 
+//	 */	
+//	@Deprecated
+//	public Types.ACTIONS getNextAction(StateObservation sob, boolean random, 
+//			double[] vtable, boolean silent);
 	
 	/**
 	 * Get the best next action and return it 

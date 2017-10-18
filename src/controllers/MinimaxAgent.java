@@ -55,30 +55,30 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	}
 	
 	
-	/**
-	 * Get the best next action and return it
-	 * @param so			current game state (not changed on return)
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param VTable		must be an array of size n+1 on input, where 
-	 * 						n=sob.getNumAvailableActions(). On output,
-	 * 						elements 0,...,n-1 hold the score for each available 
-	 * 						action (corresponding to sob.getAvailableActions())
-	 * 						In addition, VTable[n] has the score for the 
-	 * 						best action.
-	 * @param silent
-	 * @return actBest		the best action 
-	 * 
-	 */	
-	@Deprecated
-	@Override
-	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
-		//VTable = new double[so.getNumAvailableActions()];
-        // DON'T! The caller has to define VTable with the right length
-
-		Types.ACTIONS actBest = getBestAction(so,  random,  VTable,  silent, 0);
-        //System.out.println("hm size: "+hm.size());
-		return actBest;
-	}
+//	/**
+//	 * Get the best next action and return it
+//	 * @param so			current game state (not changed on return)
+//	 * @param random		allow epsilon-greedy random action selection	
+//	 * @param VTable		must be an array of size n+1 on input, where 
+//	 * 						n=sob.getNumAvailableActions(). On output,
+//	 * 						elements 0,...,n-1 hold the score for each available 
+//	 * 						action (corresponding to sob.getAvailableActions())
+//	 * 						In addition, VTable[n] has the score for the 
+//	 * 						best action.
+//	 * @param silent
+//	 * @return actBest		the best action 
+//	 * 
+//	 */	
+//	@Deprecated
+//	@Override
+//	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
+//		//VTable = new double[so.getNumAvailableActions()];
+//        // DON'T! The caller has to define VTable with the right length
+//
+//		Types.ACTIONS actBest = getBestAction(so,  random,  VTable,  silent, 0);
+//        //System.out.println("hm size: "+hm.size());
+//		return actBest;
+//	}
 	
 	/**
 	 * Get the best next action and return it

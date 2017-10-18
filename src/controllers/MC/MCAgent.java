@@ -57,248 +57,248 @@ public class MCAgent extends AgentBase implements PlayAgent {
         setAgentState(AgentState.TRAINED);
     }
 
-    /**
-     * Get the best next action and return it.
-     * 
-     * @param sob			current game state (not changed on return)
-     * @param vtable		must be an array of size n+1 on input, where
-     * 						n=sob.getNumAvailableActions(). On output,
-     * 						elements 0,...,n-1 hold the score for each available
-     * 						action (corresponding to sob.getAvailableActions())
-     * 						In addition, vtable[n] has the score for the
-     * 						best action.
-     * @param iterations    rollout repeats (for each available action)
-     * @param depth			rollout depth
-     * @return nextAction	the next action
-     */
-	@Deprecated
-    @Override
-    public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
-        int iterations = m_mcPar.getNumIter();
-        int numberAgents = m_mcPar.getNumAgents();
-        int depth = m_mcPar.getRolloutDepth();
-
-		// this function selector is just intermediate, as long as we want to test getNextAction2 
-		// against getNextAction1 (the former getNextAction). Once everything works fine with
-		// getNextAction2, we should use only this function and make getNextAction deprecated 
-		// (requires appropriate changes in all other agents implementing interface PlayAgent).
-		if (!NEW_GNA) {
-	        if(numberAgents > 1) {
-	            //more than one agent (majority vote)
-	            return getNextAction1MultipleAgents(sob, vtable, iterations, numberAgents, depth);
-	        } else {
-	            //only one agent
-	            return getNextAction1(sob, vtable, iterations, depth);
-	        }
-		} else {
-			Types.ACTIONS_VT actBestVT = getNextAction2(sob, random, silent);
-			double[] VTable = actBestVT.getVTable();
-			for (int i=0; i<VTable.length; i++) vtable[i] = VTable[i];
-			vtable[VTable.length] = actBestVT.getVBest();
-			return actBestVT;
-			
-		}
-    }
-
-    /**
-     * Get the best next action and return it (multi-core version).
-     * Called by calcCertainty and getNextAction.
-     * 
-     * @param sob			current game state (not changed on return)
-     * @param vtable		must be an array of size n+1 on input, where
-     * 						n=sob.getNumAvailableActions(). On output,
-     * 						elements 0,...,n-1 hold the score for each available
-     * 						action (corresponding to sob.getAvailableActions())
-     * 						In addition, vtable[n] has the score for the
-     * 						best action.
-     * @param iterations    rollout repeats (for each available action)
-     * @param depth			rollout depth
-     * @return nextAction	the next action
-     */
-    private Types.ACTIONS getNextAction1(StateObservation sob, double[] vtable, int iterations, int depth) {
-    	//the functions which are to be distributed on the cores: 
-        List<Callable<ResultContainer>> callables = new ArrayList<>();
-        //the results of these functions:
-        List<ResultContainer> resultContainers = new ArrayList<>();
-        // all available actions for state sob:
-        List<Types.ACTIONS> actions = sob.getAvailableActions();
-
-        nRolloutFinished = 0;
-        nIterations = sob.getNumAvailableActions()* iterations;
-        totalRolloutDepth = 0;
-
-        //if only one action is available, return it immediately:
-        if(sob.getNumAvailableActions() == 1) {
-            return actions.get(0);
-        }
-
-        //build the functions to be distributed on the scores.
-        //For each iteration a function is built for each available action:
-        for (int j = 0; j < iterations; j++) {
-            for (int i = 0; i < sob.getNumAvailableActions(); i++) {
-
-                //make a copy of the game state:
-                StateObservation newSob = sob.copy();
-
-                //the actual action i has to be saved on a new variable, since
-                //the  for-loop value i is not accessible at the time of
-                //execution of an callables-element:
-                int firstActionIdentifier = i;
-
-                //The callables, that is, the functions which are later executed on
-                //multiple cores in parallel, are built. The callables are only
-                //built here, they will be executed only later with 
-                //invokeAll(callables) on executorService :
-                callables.add(() -> {
-
-                	//fetch the first action and execute it on the game state:
-                    Types.ACTIONS firstAction = actions.get(firstActionIdentifier);
-                    newSob.advance(firstAction);
-
-                    //construct Random Agent and let it simulate a (random) rollout:
-                    RandomSearch agent = new RandomSearch();
-                    agent.startAgent(newSob, depth);			// contains BUG1 fix
-
-                    //return result of simulation in an object of class ResultContainer:
-                    return new ResultContainer(firstActionIdentifier, newSob, agent.getRolloutDepth());
-                });
-            }
-        }
-
-        try {
-        	//executerService is called and it distributes all callables on all cores
-        	//of the CPU. The callables perform the simulations and the results of these
-        	//simulations are written to a stream:
-            executorService.invokeAll(callables).stream().map(future -> {
-                try {
-                    return future.get();
-                }
-                catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
-
-            //each result written to the stream is added to list resultContainers:    
-            }).forEach(resultContainers::add);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        //for each resultContainer in list resultContainers: add its game score
-        //to the appropriate action in vtable:
-        for(ResultContainer resultContainer : resultContainers) {
-            //vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore();	
-        	// /WK/ **BUG2** in line above: referingState was missing. Use instead next line:
-        	vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore(sob);
-            totalRolloutDepth += resultContainer.rolloutDepth;
-            if(resultContainer.sob.isGameOver()) {
-                nRolloutFinished++;
-            }
-        }
-
-        //find the best next action:
-        Types.ACTIONS bestAction = null;
-        double nextActionScore = Double.NEGATIVE_INFINITY;
-
-        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
-
-            //calculate average score:
-            vtable[i] /= iterations;
-
-            if (nextActionScore < vtable[i]) {
-                bestAction = actions.get(i);
-                nextActionScore = vtable[i];
-            }
-        }
-        vtable[sob.getNumAvailableActions()] = nextActionScore;
-        bestAction.setRandomSelect(false);
-
-        return bestAction;
-    }
-
-    /**
-     * Get the best next action and return it (single-core version, multiple agents).
-     * Called by calcCertainty and getNextAction.
-     * 
-     * @param sob			current game state (not changed on return)
-     * @param vtable		must be an array of size n+1 on input, where
-     * 						n=sob.getNumAvailableActions(). On output,
-     * 						elements 0,...,n-1 hold the score for each available
-     * 						action (corresponding to sob.getAvailableActions())
-     * 						In addition, vtable[n] has the score for the
-     * 						best action.
-     * @param iterations    rollout repeats (for each available action)
-     * @param numberAgents
-     * @param depth			rollout depth
-     * @return nextAction	the next action
-     */
-    private Types.ACTIONS getNextAction1MultipleAgents (StateObservation sob, double[] vtable,
-    		int iterations, int numberAgents, int depth) {
-        List<Types.ACTIONS> actions = sob.getAvailableActions();
-
-        nRolloutFinished = 0;
-        nIterations = sob.getNumAvailableActions()* iterations * numberAgents;
-        totalRolloutDepth = 0;
-
-        if(sob.getNumAvailableActions() == 1) {
-            return actions.get(0);
-        }
-        for (int i=0; i < vtable.length; i++) vtable[i]=0; // /WK/ bug fix, was missing before
-
-        for (int i = 0; i < numberAgents; i++) {
-            int nextAction = 0;
-            double nextActionScore = Double.NEGATIVE_INFINITY;
-
-            for (int j = 0; j < sob.getNumAvailableActions(); j++) {
-                double averageScore = 0;
-
-                for (int k = 0; k < iterations; k++) {
-                    StateObservation newSob = sob.copy();
-
-                    newSob.advance(actions.get(j));
-
-                    RandomSearch agent = new RandomSearch();
-                    agent.startAgent(newSob, depth);			// contains BUG1 fix
-
-                    //averageScore += newSob.getGameScore();	
-                	// /WK/ **BUG2** in line above: referringState sob was missing. Corrected:
-                    averageScore += newSob.getGameScore(sob);
-                    if (newSob.isGameOver()) nRolloutFinished++;
-                    totalRolloutDepth += agent.getRolloutDepth();
-                }
-
-                averageScore /= iterations;
-                if (nextActionScore <= averageScore) {
-                    nextAction = j;
-                    nextActionScore = averageScore;
-                }
-            }
-            //store in vtable[k] how many of the multiple agents did select action k 
-            //as the best next action
-            vtable[nextAction]++;
-        }
-
-        List<Types.ACTIONS> nextActions = new ArrayList<>();
-        double nextActionScore = Double.NEGATIVE_INFINITY;
-
-        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
-            if (nextActionScore < vtable[i]) {
-                nextActions.clear();
-                nextActions.add(actions.get(i));
-                nextActionScore = vtable[i];
-            } else if(nextActionScore == vtable[i]) {
-                nextActions.add(actions.get(i));
-            }
-        }
-        vtable[sob.getNumAvailableActions()] = nextActionScore;
-        
-        //for (int i = 0; i < vtable.length-1; i++) System.out.print((int)vtable[i]+",");
-        //System.out.println(""+sob.stringDescr());
-
-        Types.ACTIONS bestAction = nextActions.get(random.nextInt(nextActions.size()));
-        bestAction.setRandomSelect(false);
-
-        return bestAction;
-    }
+//    /**
+//     * Get the best next action and return it.
+//     * 
+//     * @param sob			current game state (not changed on return)
+//     * @param vtable		must be an array of size n+1 on input, where
+//     * 						n=sob.getNumAvailableActions(). On output,
+//     * 						elements 0,...,n-1 hold the score for each available
+//     * 						action (corresponding to sob.getAvailableActions())
+//     * 						In addition, vtable[n] has the score for the
+//     * 						best action.
+//     * @param iterations    rollout repeats (for each available action)
+//     * @param depth			rollout depth
+//     * @return nextAction	the next action
+//     */
+//	@Deprecated
+//    @Override
+//    public Types.ACTIONS getNextAction(StateObservation sob, boolean random, double[] vtable, boolean silent) {
+//        int iterations = m_mcPar.getNumIter();
+//        int numberAgents = m_mcPar.getNumAgents();
+//        int depth = m_mcPar.getRolloutDepth();
+//
+//		// this function selector is just intermediate, as long as we want to test getNextAction2 
+//		// against getNextAction1 (the former getNextAction). Once everything works fine with
+//		// getNextAction2, we should use only this function and make getNextAction deprecated 
+//		// (requires appropriate changes in all other agents implementing interface PlayAgent).
+//		if (!NEW_GNA) {
+//	        if(numberAgents > 1) {
+//	            //more than one agent (majority vote)
+//	            return getNextAction1MultipleAgents(sob, vtable, iterations, numberAgents, depth);
+//	        } else {
+//	            //only one agent
+//	            return getNextAction1(sob, vtable, iterations, depth);
+//	        }
+//		} else {
+//			Types.ACTIONS_VT actBestVT = getNextAction2(sob, random, silent);
+//			double[] VTable = actBestVT.getVTable();
+//			for (int i=0; i<VTable.length; i++) vtable[i] = VTable[i];
+//			vtable[VTable.length] = actBestVT.getVBest();
+//			return actBestVT;
+//			
+//		}
+//    }
+//
+//    /**
+//     * Get the best next action and return it (multi-core version).
+//     * Called by calcCertainty and getNextAction.
+//     * 
+//     * @param sob			current game state (not changed on return)
+//     * @param vtable		must be an array of size n+1 on input, where
+//     * 						n=sob.getNumAvailableActions(). On output,
+//     * 						elements 0,...,n-1 hold the score for each available
+//     * 						action (corresponding to sob.getAvailableActions())
+//     * 						In addition, vtable[n] has the score for the
+//     * 						best action.
+//     * @param iterations    rollout repeats (for each available action)
+//     * @param depth			rollout depth
+//     * @return nextAction	the next action
+//     */
+//    private Types.ACTIONS getNextAction1(StateObservation sob, double[] vtable, int iterations, int depth) {
+//    	//the functions which are to be distributed on the cores: 
+//        List<Callable<ResultContainer>> callables = new ArrayList<>();
+//        //the results of these functions:
+//        List<ResultContainer> resultContainers = new ArrayList<>();
+//        // all available actions for state sob:
+//        List<Types.ACTIONS> actions = sob.getAvailableActions();
+//
+//        nRolloutFinished = 0;
+//        nIterations = sob.getNumAvailableActions()* iterations;
+//        totalRolloutDepth = 0;
+//
+//        //if only one action is available, return it immediately:
+//        if(sob.getNumAvailableActions() == 1) {
+//            return actions.get(0);
+//        }
+//
+//        //build the functions to be distributed on the scores.
+//        //For each iteration a function is built for each available action:
+//        for (int j = 0; j < iterations; j++) {
+//            for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+//
+//                //make a copy of the game state:
+//                StateObservation newSob = sob.copy();
+//
+//                //the actual action i has to be saved on a new variable, since
+//                //the  for-loop value i is not accessible at the time of
+//                //execution of an callables-element:
+//                int firstActionIdentifier = i;
+//
+//                //The callables, that is, the functions which are later executed on
+//                //multiple cores in parallel, are built. The callables are only
+//                //built here, they will be executed only later with 
+//                //invokeAll(callables) on executorService :
+//                callables.add(() -> {
+//
+//                	//fetch the first action and execute it on the game state:
+//                    Types.ACTIONS firstAction = actions.get(firstActionIdentifier);
+//                    newSob.advance(firstAction);
+//
+//                    //construct Random Agent and let it simulate a (random) rollout:
+//                    RandomSearch agent = new RandomSearch();
+//                    agent.startAgent(newSob, depth);			// contains BUG1 fix
+//
+//                    //return result of simulation in an object of class ResultContainer:
+//                    return new ResultContainer(firstActionIdentifier, newSob, agent.getRolloutDepth());
+//                });
+//            }
+//        }
+//
+//        try {
+//        	//executerService is called and it distributes all callables on all cores
+//        	//of the CPU. The callables perform the simulations and the results of these
+//        	//simulations are written to a stream:
+//            executorService.invokeAll(callables).stream().map(future -> {
+//                try {
+//                    return future.get();
+//                }
+//                catch (Exception e) {
+//                    throw new IllegalStateException(e);
+//                }
+//
+//            //each result written to the stream is added to list resultContainers:    
+//            }).forEach(resultContainers::add);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        //for each resultContainer in list resultContainers: add its game score
+//        //to the appropriate action in vtable:
+//        for(ResultContainer resultContainer : resultContainers) {
+//            //vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore();	
+//        	// /WK/ **BUG2** in line above: referingState was missing. Use instead next line:
+//        	vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore(sob);
+//            totalRolloutDepth += resultContainer.rolloutDepth;
+//            if(resultContainer.sob.isGameOver()) {
+//                nRolloutFinished++;
+//            }
+//        }
+//
+//        //find the best next action:
+//        Types.ACTIONS bestAction = null;
+//        double nextActionScore = Double.NEGATIVE_INFINITY;
+//
+//        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+//
+//            //calculate average score:
+//            vtable[i] /= iterations;
+//
+//            if (nextActionScore < vtable[i]) {
+//                bestAction = actions.get(i);
+//                nextActionScore = vtable[i];
+//            }
+//        }
+//        vtable[sob.getNumAvailableActions()] = nextActionScore;
+//        bestAction.setRandomSelect(false);
+//
+//        return bestAction;
+//    }
+//
+//    /**
+//     * Get the best next action and return it (single-core version, multiple agents).
+//     * Called by calcCertainty and getNextAction.
+//     * 
+//     * @param sob			current game state (not changed on return)
+//     * @param vtable		must be an array of size n+1 on input, where
+//     * 						n=sob.getNumAvailableActions(). On output,
+//     * 						elements 0,...,n-1 hold the score for each available
+//     * 						action (corresponding to sob.getAvailableActions())
+//     * 						In addition, vtable[n] has the score for the
+//     * 						best action.
+//     * @param iterations    rollout repeats (for each available action)
+//     * @param numberAgents
+//     * @param depth			rollout depth
+//     * @return nextAction	the next action
+//     */
+//    private Types.ACTIONS getNextAction1MultipleAgents (StateObservation sob, double[] vtable,
+//    		int iterations, int numberAgents, int depth) {
+//        List<Types.ACTIONS> actions = sob.getAvailableActions();
+//
+//        nRolloutFinished = 0;
+//        nIterations = sob.getNumAvailableActions()* iterations * numberAgents;
+//        totalRolloutDepth = 0;
+//
+//        if(sob.getNumAvailableActions() == 1) {
+//            return actions.get(0);
+//        }
+//        for (int i=0; i < vtable.length; i++) vtable[i]=0; // /WK/ bug fix, was missing before
+//
+//        for (int i = 0; i < numberAgents; i++) {
+//            int nextAction = 0;
+//            double nextActionScore = Double.NEGATIVE_INFINITY;
+//
+//            for (int j = 0; j < sob.getNumAvailableActions(); j++) {
+//                double averageScore = 0;
+//
+//                for (int k = 0; k < iterations; k++) {
+//                    StateObservation newSob = sob.copy();
+//
+//                    newSob.advance(actions.get(j));
+//
+//                    RandomSearch agent = new RandomSearch();
+//                    agent.startAgent(newSob, depth);			// contains BUG1 fix
+//
+//                    //averageScore += newSob.getGameScore();	
+//                	// /WK/ **BUG2** in line above: referringState sob was missing. Corrected:
+//                    averageScore += newSob.getGameScore(sob);
+//                    if (newSob.isGameOver()) nRolloutFinished++;
+//                    totalRolloutDepth += agent.getRolloutDepth();
+//                }
+//
+//                averageScore /= iterations;
+//                if (nextActionScore <= averageScore) {
+//                    nextAction = j;
+//                    nextActionScore = averageScore;
+//                }
+//            }
+//            //store in vtable[k] how many of the multiple agents did select action k 
+//            //as the best next action
+//            vtable[nextAction]++;
+//        }
+//
+//        List<Types.ACTIONS> nextActions = new ArrayList<>();
+//        double nextActionScore = Double.NEGATIVE_INFINITY;
+//
+//        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+//            if (nextActionScore < vtable[i]) {
+//                nextActions.clear();
+//                nextActions.add(actions.get(i));
+//                nextActionScore = vtable[i];
+//            } else if(nextActionScore == vtable[i]) {
+//                nextActions.add(actions.get(i));
+//            }
+//        }
+//        vtable[sob.getNumAvailableActions()] = nextActionScore;
+//        
+//        //for (int i = 0; i < vtable.length-1; i++) System.out.print((int)vtable[i]+",");
+//        //System.out.println(""+sob.stringDescr());
+//
+//        Types.ACTIONS bestAction = nextActions.get(random.nextInt(nextActions.size()));
+//        bestAction.setRandomSelect(false);
+//
+//        return bestAction;
+//    }
 
 	/**
 	 * Get the best next action and return it 
