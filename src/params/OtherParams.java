@@ -68,6 +68,7 @@ public class OtherParams extends Frame
 //	JLabel batchL;
 	JLabel chooseS01L;
 	JLabel learnRM_L;
+	JLabel rgs_L;
 	JLabel miniDepth_L;
 	JLabel miniUseHm_L;
 	public JTextField numEval_T;
@@ -76,6 +77,7 @@ public class OtherParams extends Frame
 	public JTextField stopEval_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
+	public Checkbox rewardIsGameScore;
 	public JTextField miniDepth_T;
 	//CheckboxGroup cbgUseHashmap;
 	public Checkbox miniUseHmTrue;
@@ -104,12 +106,14 @@ public class OtherParams extends Frame
 		stopEval_L = new JLabel("stopEval");
 		chooseS01L = new JLabel("Choose Start 01");
 		learnRM_L = new JLabel("Learn from RM");
+		rgs_L = new JLabel("Reward = Score");
 //		batchL = new JLabel("BatchNum");
 		miniDepth_L = new JLabel("Minimax Depth");
 		miniUseHm_L = new JLabel("Minimax Hash ");
 		//cbgUseHashmap = new CheckboxGroup();
 		chooseS01 = new Checkbox("",false);
 		learnRM = new Checkbox("",false);
+		rewardIsGameScore = new Checkbox("",true);
 		miniUseHmTrue = new Checkbox("use hashmap",true);
 		//miniUseHmFalse = new Checkbox("false",cbgUseHashmap,false);
 		ok = new Button("OK");
@@ -126,6 +130,7 @@ public class OtherParams extends Frame
 		stopEval_L.setToolTipText("During training: How many successfull evaluator calls are needed to stop training prematurely?");
 		chooseS01L.setToolTipText("Choose start state in training: 50% default, 50% random 1-ply");
 		learnRM_L.setToolTipText("Learn from random moves during training");
+		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		miniDepth_L.setToolTipText("Minimax tree depth");
 		miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
 		
@@ -166,10 +171,10 @@ public class OtherParams extends Frame
 		oPanel.add(learnRM_L);
 		oPanel.add(learnRM);
 
-		oPanel.add(new Canvas());			// add two empty rows to balance height of fields
+		oPanel.add(new Canvas());			// add an empty row to balance height of fields
 		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
+		oPanel.add(rgs_L);
+		oPanel.add(rewardIsGameScore);
 
 		oPanel.add(miniDepth_L);
 		oPanel.add(miniDepth_T);
@@ -229,6 +234,10 @@ public class OtherParams extends Frame
 		return learnRM.getState();
 	}
 	
+	public boolean getRewardIsGameScore() {
+		return rewardIsGameScore.getState();
+	}
+
 	public boolean useMinimaxHashmap() {
 		return miniUseHmTrue.getState();
 	}
@@ -283,6 +292,7 @@ public class OtherParams extends Frame
 		this.setStopEval(op.getStopEval());
 		this.chooseS01.setState(op.useChooseStart01());
 		this.learnRM.setState(op.useLearnFromRM());
+		this.rewardIsGameScore.setState(op.getRewardIsGameScore());
 		this.setMinimaxDepth(op.getMinimaxDepth());
 		this.miniUseHmTrue.setState(op.useMinimaxHashmap());
 	}

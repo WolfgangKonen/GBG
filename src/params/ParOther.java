@@ -19,6 +19,7 @@ public class ParOther implements Serializable {
     private int stopEval = DEFAULT_STOP_EVAL; 
     private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
+    private boolean rewardIsGameScore = true;
     
     private int minimaxDepth = DEFAULT_MINIMAX_DEPTH;
     private boolean minimaxHashmap = true;
@@ -45,6 +46,7 @@ public class ParOther implements Serializable {
 		this.stopEval = op.getStopEval();
 		this.chooseStart01 = op.useChooseStart01();
 		this.learnFromRM = op.useLearnFromRM();
+		this.rewardIsGameScore = op.getRewardIsGameScore();
 		this.minimaxDepth = op.getMinimaxDepth();
 		this.minimaxHashmap = op.useMinimaxHashmap();	
 	}
@@ -82,6 +84,10 @@ public class ParOther implements Serializable {
 
 	public boolean useLearnFromRM() {
 		return learnFromRM;
+	}
+
+	public boolean getRewardIsGameScore() {
+		return rewardIsGameScore;
 	}
 
 	public int getMinimaxDepth() {

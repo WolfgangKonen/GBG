@@ -31,8 +31,8 @@ public class LogManager {
      * and "src\games\Logs\temp" as default tempPath
      */
     public LogManager() {
-        checkAndCreateFolder(filePath);
-        checkAndCreateFolder(tempPath);
+		tools.Utils.checkAndCreateFolder(filePath);
+		tools.Utils.checkAndCreateFolder(tempPath);
     }
 
     /**
@@ -46,8 +46,8 @@ public class LogManager {
         this.filePath = filePath;
         this.tempPath = tempPath;
 
-        checkAndCreateFolder(filePath);
-        checkAndCreateFolder(tempPath);
+		tools.Utils.checkAndCreateFolder(filePath);
+		tools.Utils.checkAndCreateFolder(tempPath);
     }
 
 
@@ -122,7 +122,7 @@ public class LogManager {
             LogContainer logContainer = new LogContainer(null, stateObservation.copy());
 
             if(advancedLogging) {
-                while(checkAndCreateFolder(tempPath + "\\temp_" + sessionid)) {
+                while(tools.Utils.checkAndCreateFolder(tempPath + "\\temp_" + sessionid)) {
                     sessionid++;
                 }
 
@@ -231,7 +231,7 @@ public class LogManager {
                 //System.out.println(saveDirectory);
             }
 
-            checkAndCreateFolder(saveDirectory);
+    		tools.Utils.checkAndCreateFolder(saveDirectory);
 
             String sessionFolderName = saveDirectory + "\\" + logSessionContainer.stateObservations.get(0).getName() + "_" + getCurrentTimeStamp();
             String sessionFolderNameSuffix = "";
@@ -271,30 +271,15 @@ public class LogManager {
         return strDate;
     }
 
-    /**
-     * checks if a folder exists and creates a new one if it doesn't
-     *
-     * @param filePath the folder Path
-	 * @return true if folder already exists
-     */
-    private boolean checkAndCreateFolder(String filePath) {
-        File file = new File(filePath);
-        boolean exists = file.exists();
-        if(!file.exists()) {
-            file.mkdirs();
-        }
-        return exists;
-    }
-
-    /**
-     * checks if a folder exists
-     *
-     * @param filePath the folder Path
-     * @return true if the folder exists
-     */
-    private boolean checkFolder(String filePath) {
-        return new File(filePath).exists();
-    }
+//    /**
+//     * checks if a folder exists
+//     *
+//     * @param filePath the folder Path
+//     * @return true if the folder exists
+//     */
+//    private boolean checkFolder(String filePath) {
+//        return new File(filePath).exists();
+//    }
 
     public boolean running() {
         if(counter.size() > 0 || simpleLoggingContainers.size() > 0) {

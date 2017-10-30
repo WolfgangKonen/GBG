@@ -423,7 +423,7 @@ class GameStateContainer implements Serializable {
         this.values = gameState.toArray();
         this.score = gameState.getScore();
         this.winState = gameState.getWinState();
-        this.isNextActionDeterministic = gameState.isNextActionDeterminisitc();
+        this.isNextActionDeterministic = gameState.isNextActionDeterministic();
     }
 }
 

@@ -120,7 +120,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     private JPanel initBoard() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(ConfigGame.ROWS, ConfigGame.COLUMNS, 20, 20));
+        panel.setLayout(new GridLayout(ConfigGame.ROWS, ConfigGame.COLUMNS, 2, 2));
         for (int pos = 0; pos < ConfigGame.ROWS * ConfigGame.COLUMNS; pos++) {
             board[pos] = new JLabel();
             board[pos].setOpaque(true);
@@ -507,17 +507,19 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     }
 
     @Override
-    public void showGameBoard(Arena ztavGame) {
+    public void showGameBoard(Arena ztavGame, boolean alignToMain) {
         this.setVisible(true);
-        // place window with game board below the main window
-        int x = ztavGame.m_xab.getX() + ztavGame.m_xab.getWidth() + 8;
-        int y = ztavGame.m_xab.getLocation().y;
-        if (ztavGame.m_TicFrame != null) {
-            x = ztavGame.m_TicFrame.getX();
-            y = ztavGame.m_TicFrame.getY() + ztavGame.m_TicFrame.getHeight() + 1;
-            this.setSize(850, 550);
+        if (alignToMain) {
+            // place window with game board below the main window
+            int x = ztavGame.m_xab.getX() + ztavGame.m_xab.getWidth() + 8;
+            int y = ztavGame.m_xab.getLocation().y;
+            if (ztavGame.m_TicFrame != null) {
+                x = ztavGame.m_TicFrame.getX();
+                y = ztavGame.m_TicFrame.getY() + ztavGame.m_TicFrame.getHeight() + 1;
+                this.setSize(850, 550);
+            }
+            this.setLocation(x, y);        	
         }
-        this.setLocation(x, y);
     }
 
     @Override

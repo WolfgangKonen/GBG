@@ -118,7 +118,7 @@ abstract public class Arena extends JPanel implements Runnable {
 	public void run() {
 		String agentN;
 		int n;
-		gb.showGameBoard(this);
+		gb.showGameBoard(this,true);
 		
 		try {
 			m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
@@ -179,13 +179,13 @@ abstract public class Arena extends JPanel implements Runnable {
 				break;				
 			case PLAY: 
 				//enableButtons(false);		// see Play.addActionListener in XArenaButtons
-				gb.showGameBoard(this);
+				gb.showGameBoard(this,false);
 				gb.clearBoard(false,true);
 				PlayGame();
 				enableButtons(true);
 				break;
 			case INSPECTV:
-				gb.showGameBoard(this);
+				gb.showGameBoard(this,false);
 				gb.clearBoard(false,true);
 				gb.setActionReq(true);
 				InspectGame();
@@ -621,7 +621,7 @@ abstract public class Arena extends JPanel implements Runnable {
 	 * If the derived class does not override {@link #makeFeatureClass(int)}, 
 	 * the default behavior is to throw a {@link RuntimeException}.
 	 * 
-	 * @param featmode
+	 * @param featmode feature mode
 	 * @return an object implementing {@link Feature}
 	 */
 	public Feature makeFeatureClass(int featmode) {

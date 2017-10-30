@@ -126,7 +126,7 @@ abstract public class Evaluator {
 	
 	/**
 	 * 
-	 * @param mode
+	 * @param mode the evaluator mode
 	 * @return true, if {@code mode} is in {@link #getAvailableModes} or 
 	 * 		if Evaluator does not use {@code mode}.
 	 */

@@ -1,6 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
+import games.StateObservationNondeterministic;
 import tools.Types;
 
 import java.io.Serializable;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Class {@link StateObs2048Slow} holds a 2048 game state.
+ * Class <strong> StateObs2048Slow </strong> holds a 2048 game state.
  * The game state is coded in a matrix of tiles {@code Tile[][] gameBoard}. The code for 
  * merging tiles is better understandable, but also slower than in {@link StateObs2048BitShift}.<p>
  * 
@@ -19,7 +20,7 @@ import java.util.Random;
  * 
  * @author Johannes Kutsch, THK
  */
-public class StateObserver2048Slow implements StateObservation {
+public class StateObserver2048Slow implements StateObservationNondeterministic {
     private Random random = new Random();
     protected List<Tile> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves;
@@ -36,11 +37,13 @@ public class StateObserver2048Slow implements StateObservation {
     public int mergeValue = 0;
     public int moves = 0;
     private boolean ASSERTSAME = false; // if true, run through assertSameAdvance
+    private boolean isNextActionDeterministic;
 
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
     public double[] storedValues = null;
     public double storedMaxScore;
+    private Types.ACTIONS nextNondeterminisitcAction;
 
     public final static double MAXSCORE = 3932156;
     public final static double MINSCORE = 0;
@@ -389,6 +392,40 @@ public class StateObserver2048Slow implements StateObservation {
         return this.getGameScore();
     }
 
+	/**
+	 * The cumulative reward, here: the same as getGameScore()
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return the cumulative reward
+	 */
+    @Override
+	public double getReward(boolean rewardIsGameScore) {
+		return getGameScore();
+	}
+	
+	/**
+	 * Same as getReward(), but relative to referringState. 
+	 * @param referringState
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return  the cumulative reward 
+	 */
+    @Override
+	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+		return getGameScore(referringState);
+	}
+
+	/**
+	 * Same as getReward(referringState), but with the player of referringState. 
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return  the cumulative reward 
+	 */
+	public double getReward(int player, boolean rewardIsGameScore) {
+        return this.getGameScore();
+	}
+
     @Override
     public double getMinGameScore() {
         return REWARD_NEGATIVE;
@@ -411,7 +448,7 @@ public class StateObserver2048Slow implements StateObservation {
 	 *    08 09 10 11
 	 *    12 13 14 15
 	 * </pre>
-	 * @return a vector of length {@link games.XNTupleFuncs.getNumCells()}, holding for each board cell its
+	 * @return a vector of length {@link games.XNTupleFuncs#getNumCells()}, holding for each board cell its
 	 * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
 	 */
 	public int[] getBoardVector() {
@@ -471,6 +508,81 @@ public class StateObserver2048Slow implements StateObservation {
     @Override
     public Types.ACTIONS getAction(int i) {
         return actions[i];
+    }
+
+    public void advanceDeterministic(Types.ACTIONS action) {
+        if(!isNextActionDeterministic) {
+            throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");
+        }
+
+        int iAction = action.toInt();
+        assert (availableMoves.contains(iAction)) : "iAction is not viable.";
+        move(iAction);
+        //updateEmptyTiles();
+
+        isNextActionDeterministic = false;
+    }
+
+    public void advanceNondeterministic() {
+        setNextNondeterministicAction();
+
+        if(isNextActionDeterministic) {
+            throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
+        }
+
+        int iAction = nextNondeterminisitcAction.toInt();
+        assert (emptyTiles.size() * 2 > iAction) : "iAction is not viable.";
+
+        //System.out.println("Action: " + iAction + " Value: " + ((iAction%2)+1) + " Position: " + (iAction/2));
+
+        addTile(emptyTiles.get(iAction/2), (iAction%2)+1);
+
+        updateAvailableMoves();
+        isNextActionDeterministic = true;
+        nextNondeterminisitcAction = null;
+    }
+
+    /**
+     * Selects a Tile and the new value of the tile and saves it in an action
+     * 0 = first Tile, value 2
+     * 1 = first Tile, value 4
+     * 2 = second Tile, value 2
+     * 3 = second Tile, value 4
+     * ....
+     */
+    private void setNextNondeterministicAction() {
+        if(isNextActionDeterministic) {
+            throw new RuntimeException("next Action is Deterministic");
+        } else if(nextNondeterminisitcAction != null) {
+            return;
+        }
+
+
+        //select a Tile
+        int action = random.nextInt(emptyTiles.size()) * 2;
+
+        //select the new Tile Value
+        if(random.nextInt(10) == 9) {
+            action += 1;
+        }
+
+        nextNondeterminisitcAction = Types.ACTIONS.fromInt(action);
+    }
+
+    public boolean isNextActionDeterministic() {
+        return isNextActionDeterministic;
+    }
+
+    public Types.ACTIONS getNextNondeterministicAction() {
+        setNextNondeterministicAction();
+
+        return nextNondeterminisitcAction;
+    }
+
+    @Override
+    public StateObservation getPrecedingAfterstate() {
+    	// for 2048, the preceding afterstate is not known
+    	return null;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import controllers.PlayAgent;
+import controllers.TD.ntuple2.*;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -16,6 +17,10 @@ import tools.Types.ACTIONS;
  * <li> signaling end, score and winner of the game
  * <li> and others.
  * </ul><p>
+ * 
+ * StateObservation is for deterministic games.
+ * 
+ * @see StateObservationNondeterministic
  * 
  * @author Wolfgang Konen, TH Koeln, Feb'17
  */
@@ -54,14 +59,6 @@ public interface StateObservation extends Serializable{
 	public Types.WINNER getGameWinner();
 
 	/**
-	 * @return 	the game score, i.e. the sum of rewards for the current state. 
-	 * 			For a 2-player game the score is often only non-zero for a 
-	 * 			game-over state.  
-	 * 			For a 1-player game it may be the cumulative reward.
-	 */
-	public double getGameScore();
-	
-	/**
 	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
 	 * 			will be reached from this state (assuming perfect play).  
 	 * 			This member function can be {@link StateObservation}'s heuristic  
@@ -69,6 +66,14 @@ public interface StateObservation extends Serializable{
 	 * 			{@link #getGameValue()} might simply return {@link #getGameScore()}.
 	 */
 	public double getGameValue();
+	
+	/**
+	 * @return 	the game score, i.e. the sum of rewards for the current state. 
+	 * 			For a 2-player game the score is often only non-zero for a 
+	 * 			game-over state.  
+	 * 			For a 1-player game it may be the cumulative reward.
+	 */
+	public double getGameScore();
 	
 	/**
 	 * Same as getGameScore(), but relative to referringState. This relativeness
@@ -80,6 +85,32 @@ public interface StateObservation extends Serializable{
 	 */
 	public double getGameScore(StateObservation referringState);
 	
+	/**
+	 * The cumulative reward, can be the same as getGameScore()
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return the cumulative reward
+	 */
+	public double getReward(boolean rewardIsGameScore);
+	
+	/**
+	 * Same as getReward(), but relative to referringState. 
+	 * @param referringState
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return  the cumulative reward 
+	 */
+	public double getReward(StateObservation referringState, boolean rewardIsGameScore);
+
+	/**
+	 * Same as getReward(referringState), but with the player of referringState. 
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return  the cumulative reward 
+	 */
+	public double getReward(int player, boolean rewardIsGameScore);
+
 	public double getMinGameScore();
 	public double getMaxGameScore();
 
@@ -90,10 +121,45 @@ public interface StateObservation extends Serializable{
 	public String getName();
 
 	/**
-	 * Advance the current state with 'action' to a new state
-	 * @param action
+	 * Advance the current state with {@code action} to a new state
+	 * 
+	 * @param action the action
 	 */
 	public void advance(ACTIONS action);
+
+    /**
+     * Advance the current state to a new afterstate (do the deterministic part of advance).<p>
+     *
+     * (This method is not really necessary for deterministic games - it does the same as 
+     * {@link #advance(ACTIONS)} - but we have it in the interface to allow the same syntax in 
+     * {@link TDNTuple2Agt} when making an action for any StateObservation, deterministic 
+     * or nondeterministic.)
+     * 
+     * @param action the action
+     */
+    public void advanceDeterministic(Types.ACTIONS action);
+
+    /**
+     * Advance the current afterstate to a new state (do the nondeterministic part of advance).<p>
+     * 
+     * (This method is not really necessary for deterministic games - it does just nothing - but we
+     * have it here to allow the same syntax in {@link TDNTuple2Agt} when making an action for
+     * any StateObservation, deterministic or nondeterministic.)
+     */
+    public void advanceNondeterministic();
+    
+    /**
+     * Return the afterstate preceding {@code this}. The afterstate is the state resulting 
+     * after the deterministic part of the preceding action. Return {@code null}, if this
+     * afterstate is not known.
+     *  
+     * @return the afterstate or {@code null}. <p>
+     * 
+     * For deterministic games, the afterstate is identical to {@code this}. For 
+     * nondeterministic games, it depends on the game: E.g. for 2048 it is not known, for 
+     * Backgammon it is the preceding board position without the nondeterministic dice part. 
+     */
+    public StateObservation getPrecedingAfterstate();
 
 	public ArrayList<ACTIONS> getAvailableActions();
 

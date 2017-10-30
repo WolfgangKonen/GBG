@@ -26,6 +26,11 @@ agents/temp/*
 #Ordner mit veralteten versuchen zur Parallelität
 src/games/ZweiTausendAchtundVierzig/Parallel/*
 
+# too big (92 MB) for a regular save to GitHub
+agents/2048/fixed 4 6-Tupels 200k TDNT2 afterState.agt.zip
+agents/2048/fixed TEST eTiles 4 6-Tupels 200k TDNT2.agt.zip
+agents/2048/TEST*.agt.zip
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

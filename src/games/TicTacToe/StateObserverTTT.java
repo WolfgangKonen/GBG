@@ -164,24 +164,49 @@ public class StateObserverTTT implements StateObservation {
 
 	/**
 	 * Same as getGameScore(), but relative to referingState. This relativeness
-	 * is usually only relevant for 2-player games
-	 * @param referingState
-	 * @return  If the referingState was created by White (and Black is to move), 
-	 * 			then it is getGameScore(). If referingState was created by Black,
-	 * 			then it is getGameScore()*(-1). 
+	 * is usually only relevant for games with more than one player.
+	 * @param referringState
+	 * @return  If referringState has the same player as this, then it is getGameScore(). 
+	 * 			If referringState has opposite player, then it is getGameScore()*(-1). 
 	 */
-	public double getGameScore(StateObservation referingState) {
-		double rawScore = this.getGameScore();
-		assert (referingState instanceof StateObserverTTT) 
-			: "referingState is not of class StateObserverTTT";
-		if (getNumPlayers()==2) {
-			// if refering state has another player than this, then multiply by -1: 
-			if (this.getPlayer() != ((StateObserverTTT)referingState).getPlayer())
-				rawScore *=  (-1);
-		}
-		return rawScore;
+	public double getGameScore(StateObservation referringState) {
+        return (this.getPlayer() == referringState.getPlayer() ? getGameScore() : getGameScore() * (-1));
 	}
 	
+	/**
+	 * The cumulative reward, here: the same as getGameScore()
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return the cumulative reward
+	 */
+    @Override
+	public double getReward(boolean rewardIsGameScore) {
+		return getGameScore();
+	}
+	
+	/**
+	 * Same as getReward(), but relative to referringState. 
+	 * @param referringState
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return  the cumulative reward 
+	 */
+    @Override
+	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+		return getGameScore(referringState);
+	}
+
+	/**
+	 * Same as getReward(referringState), but with the player of referringState. 
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return  the cumulative reward 
+	 */
+	public double getReward(int player, boolean rewardIsGameScore) {
+        return (this.getPlayer() == player ? getGameScore() : getGameScore() * (-1));
+	}
+
 	/**
 	 * Advance the current state with 'action' to a new state
 	 * @param action
@@ -211,6 +236,32 @@ public class StateObserverTTT implements StateObservation {
     		break;
     	}   		
 	}
+
+    /**
+     * Advance the current state to a new afterstate (do the deterministic part of advance)
+     *
+     * @param action the action
+     */
+    @Override
+    public void advanceDeterministic(Types.ACTIONS action) {
+    	// since StateObserverTTT is for a deterministic game, advanceDeterministic()
+    	// is the same as advance():
+    	advance(action);
+    }
+
+    /**
+     * Advance the current afterstate to a new state (do the nondeterministic part of advance)
+     */
+    @Override
+    public void advanceNondeterministic() {
+    	// nothing to do here, since StateObserverTTT is for a deterministic game    	
+    }
+
+    @Override
+    public StateObservation getPrecedingAfterstate() {
+    	// for deterministic games next state and afterstate are the same
+    	return this;
+    }
 
 	public ArrayList<ACTIONS> getAvailableActions() {
 		ArrayList<ACTIONS> availAct = new ArrayList<ACTIONS>();

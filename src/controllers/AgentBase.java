@@ -49,6 +49,8 @@ abstract public class AgentBase implements Serializable {
 	 * getScore(), as required by the interface {@link PlayAgent} as well.
 	 * The definition of getScore() is needed here, because  
 	 * {@link #estimateGameValue(StateObservation)} needs it.
+	 * @param 	sob the state observation object 
+	 * @return  the agent's estimate of the game value function
 	 */
 	abstract public double getScore(StateObservation sob);
 	
@@ -62,6 +64,7 @@ abstract public class AgentBase implements Serializable {
 	 * with a function <b>not</b> using  {@link #getScore(StateObservation)},
 	 * otherwise an infinite loop would result. 
 	 *  
+	 * @param 	sob the state observation object 
 	 * @return {@link #getScore(StateObservation)}, that is whatever the derived
 	 * 			class implements for {@link #getScore(StateObservation)}.
 	 */

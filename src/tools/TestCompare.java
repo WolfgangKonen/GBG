@@ -7,8 +7,8 @@ import java.util.Iterator;
 
 /**
  *  A test class: Given class Items with a key and a value, we want to check in 
- *  a set of Items whether it contains an item which is equal to a certain Items.
- *  The equalness shall be user-defined (in this case: equality of keys)
+ *  a set of Items whether it contains an item which is the same as a certain Item.
+ *  The sameness shall be user-defined (in this case: equality of keys)
  *
  */
 public class TestCompare {

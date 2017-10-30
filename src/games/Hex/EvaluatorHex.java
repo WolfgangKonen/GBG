@@ -73,7 +73,7 @@ public class EvaluatorHex extends Evaluator {
         }
 
         if (logResults && !fileCreated) {
-            checkAndCreateFolder(logDir);
+    		tools.Utils.checkAndCreateFolder(logDir);
             logSB = new StringBuilder();
             logSB.append("training_matches");
             logSB.append(",");
@@ -315,21 +315,6 @@ public class EvaluatorHex extends Evaluator {
     @Override
     public String getMsg() {
         return m_msg;
-    }
-
-    /**
-     * checks if a folder exists and creates a new one if it doesn't
-     *
-     * @param filePath the folder Path
-     * @return true if a folder already existed
-     */
-    private boolean checkAndCreateFolder(String filePath) {
-        File file = new File(filePath);
-        boolean exists = file.exists();
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        return exists;
     }
 
     /**

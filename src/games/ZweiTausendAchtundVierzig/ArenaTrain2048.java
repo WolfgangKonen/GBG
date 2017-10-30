@@ -29,6 +29,7 @@ public class ArenaTrain2048 extends ArenaTrain {
      */
     public GameBoard makeGameBoard() {
         gb = new GameBoard2048(this);
+        //gb = new GBInvisible2048(this);
         return gb;
     }
     /**

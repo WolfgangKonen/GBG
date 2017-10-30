@@ -699,7 +699,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 	/**
 	 * Set defaults for m_oPar 
-	 * (needed in {@link XArenaMenu.loadAgent} when loading older agents, where 
+	 * (needed in {@link XArenaMenu#loadAgent} when loading older agents, where 
 	 * m_oPar=null in the saved version).
 	 */
 	public void setDefaultOtherPar() {

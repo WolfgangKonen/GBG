@@ -139,7 +139,7 @@ public class LoadSaveTD {
 		if (subDir != null){
 			strDir += "/"+subDir;
 		}
-		checkAndCreateFolder(strDir);
+		tools.Utils.checkAndCreateFolder(strDir);
 
 		fc.removeChoosableFileFilter(txtExt);
 		fc.setFileFilter(tdAgentExt);
@@ -275,7 +275,7 @@ public class LoadSaveTD {
 		if (subDir != null){
 			strDir += "/"+subDir;
 		}
-		checkAndCreateFolder(strDir);
+		tools.Utils.checkAndCreateFolder(strDir);
 
 		PlayAgent pa = null;
 		fc.removeChoosableFileFilter(txtExt);
@@ -442,21 +442,6 @@ public class LoadSaveTD {
 			e.printStackTrace();
 		}
 		return txtFileContent;
-	}
-
-	/**
-	 * checks if a folder exists and creates a new one if it doesn't
-	 *
-	 * @param filePath the folder Path
-	 * @return true if folder already exists
-	 */
-	private boolean checkAndCreateFolder(String filePath) {
-		File file = new File(filePath);
-		boolean exists = file.exists();
-		if(!file.exists()) {
-			file.mkdirs();
-		}
-		return exists;
 	}
 
 }

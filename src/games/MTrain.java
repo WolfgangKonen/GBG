@@ -64,7 +64,7 @@ class MTrain {
 			strDir += "/"+subDir;
 		}
 		strDir += "/csv";
-		checkAndCreateFolder(strDir);
+		tools.Utils.checkAndCreateFolder(strDir);
 
 		PrintWriter mtWriter = null;
 		try {
@@ -85,20 +85,5 @@ class MTrain {
 	    mtWriter.close();
 	}
 
-	/**
-	 * checks if a folder exists and creates a new one if it doesn't
-	 *
-	 * @param filePath the folder Path
-	 * @return true if folder already exists
-	 */
-	private static boolean checkAndCreateFolder(String filePath) {
-		File file = new File(filePath);
-		boolean exists = file.exists();
-		if(!file.exists()) {
-			file.mkdirs();
-		}
-		return exists;
-	}
-	
 }
 

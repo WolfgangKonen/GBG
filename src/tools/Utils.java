@@ -6,6 +6,7 @@ import tools.Types;
 //import ontology.physics.Physics;
 
 import java.awt.*;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Random;
@@ -125,4 +126,19 @@ public class Utils
         return maxIndex;
     }
 
+	/**
+	 * checks if a folder exists and creates a new one if it doesn't
+	 *
+	 * @param filePath the folder Path
+	 * @return true if folder already exists
+	 */
+	public static boolean checkAndCreateFolder(String filePath) {
+		File file = new File(filePath);
+		boolean exists = file.exists();
+		if(!file.exists()) {
+			file.mkdirs();
+		}
+		return exists;
+	}
+	
 }

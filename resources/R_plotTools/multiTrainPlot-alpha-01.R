@@ -2,11 +2,11 @@ library(ggplot2)
 library(grid)
 source("summarySE.R")
 
-path <- "../agents/2048/csv/"; limits=c(0.0,1.0); errWidth=3000;
+path <- "../../agents/Hex/04/csv/"; limits=c(0.0,1.0); errWidth=3000;
 
-filenames=c("playStats-TDNTuple2.csv")
-#filenames=c("playStats-MC.csv")
-PLOTALLLINES=T    # if =T: make a plot for each filename, with one line for each run
+filenames=c("multiTrain-noLearnFromRM-01-al099.csv","multiTrain-noLearnFromRM-01.csv",
+            "multiTrain-noLearnFromRM-01-al020.csv") 
+PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
   
 dfBoth = data.frame()
 for (k in 1:length(filenames)) {
@@ -15,14 +15,12 @@ for (k in 1:length(filenames)) {
   df$run <- as.factor(df$run)
   
   if (PLOTALLLINES) {
-    q <- ggplot(df,aes(x=moveNum,y=cumEmptyTl,colour=run))
-    q <- q+geom_line(aes(colour=run))
-    plot(q)
-    q <- ggplot(df,aes(x=moveNum,y=gameScore,colour=run))
-    q <- q+geom_line(aes(colour=run))
+    q <- ggplot(df,aes(x=gameNum,y=evalQ))
+    q <- q+geom_line(aes(colour=run),size=1.0) + 
+      scale_y_continuous(limits=c(-1,0)) #+
+    #facet_grid(.~THETA, labeller = label_both)
     plot(q)
   }
-  browser()
   
   alphaCol = switch(k
                     ,rep(0.99,nrow(df))

@@ -209,7 +209,7 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
      * Get the best next action and return it (new version, NEW_GNA==true).
      * Called by calcCertainty and getNextAction.
      * 
-     * @param sob			current game state (not changed on return)
+     * @param so 			current game state (not changed on return)
      * @return actBest		the next action
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
@@ -301,7 +301,7 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	
 	/**
 	 * Set defaults for m_oPar 
-	 * (needed in {@link XArenaMenu.loadAgent} when loading older agents, where 
+	 * (needed in {@link XArenaMenu#loadAgent} when loading older agents, where 
 	 * m_oPar=null in the saved version).
 	 */
 	public void setDefaultOtherPar() {

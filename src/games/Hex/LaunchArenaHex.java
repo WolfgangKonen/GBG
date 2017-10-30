@@ -35,7 +35,7 @@ public class LaunchArenaHex extends JFrame {
     }
 
     /**
-     * @param args
+     * @param args ...
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {

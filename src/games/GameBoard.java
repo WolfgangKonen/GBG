@@ -22,7 +22,7 @@ public interface GameBoard {
 	//public void updateBoard();
 	//public void updateBoard(StateObservation so);
 	public void updateBoard(StateObservation so, boolean showStoredV, boolean enableOccupiedCells);
-	public void showGameBoard(Arena arena);
+	public void showGameBoard(Arena arena,boolean alignToMain);
 	/**
 	 * Is an action requested from Arena (i.e. was human interaction done)?
 	 * @return true if action from Arena is requested 

@@ -1,6 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
+import games.StateObservationNondeterministic;
 import tools.Types;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ import java.util.Random;
  * 
  * @author Wolfgang Konen, THK
  */
-public class StateObs2048BitShift implements StateObservation {
+public class StateObs2048BitShift implements StateObservationNondeterministic {
     private Random random = new Random();
     protected List<Integer> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves = new ArrayList();  // 0: left, 1: up, 2: right, 3: down
@@ -52,11 +53,14 @@ public class StateObs2048BitShift implements StateObservation {
     public int rowValue = 0;
     public int mergeValue = 0;
     public int moves = 0;
+    private long cumulEmptyTiles = 0;
+    private boolean isNextActionDeterministic;
 
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
     public double[] storedValues = null;
     public double storedMaxScore;
+    private Types.ACTIONS nextNondeterminisitcAction;
 
     public final static double MAXSCORE = 3932156;
     public final static double MINSCORE = 0;
@@ -87,6 +91,16 @@ public class StateObs2048BitShift implements StateObservation {
         updateAvailableMoves();
     }
     
+    public StateObs2048BitShift(long board, int score, int winState, long cumulEmptyTiles, boolean isNextActionDeterministic) {
+        this.isNextActionDeterministic = isNextActionDeterministic;
+        boardB=board;
+        updateEmptyTiles();
+        this.score = score;
+        this.cumulEmptyTiles = cumulEmptyTiles; 
+        this.winState = winState;
+        updateAvailableMoves();
+    }
+
     /**
      * Construct an 2048 game state from {@code int[r][c]} array, where row r=0 is the 
      * highest row and column c=0 is the left column
@@ -94,6 +108,7 @@ public class StateObs2048BitShift implements StateObservation {
      * @param score
      * @param winState
      */
+    @Deprecated
     public StateObs2048BitShift(int[][] values, int score, int winState) {
         boardB=0;
         updateEmptyTiles();		// add all cells to emptyTiles
@@ -116,12 +131,12 @@ public class StateObs2048BitShift implements StateObservation {
         updateAvailableMoves();
     }
 
-    // Note: StateObs2048BitShift copy() copies the board state, score, winState,
+    // Note: StateObs2048 copy() copies the board state, score, winState, cumulEmptyTiles, 
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
-    @Override
-    public StateObs2048BitShift copy() {
-    	return new StateObs2048BitShift(boardB, score, winState);
+    public StateObserver2048 copy() {
+        return new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
     }
+
 
     @Override
     public boolean isGameOver() {
@@ -171,6 +186,48 @@ public class StateObs2048BitShift implements StateObservation {
         assert (referingState instanceof StateObs2048BitShift) : "referingState is not of class StateObs2048BitShift";
         return this.getGameScore();
     }
+
+	/**
+	 * The cumulative reward, here: the same as getGameScore()
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return the cumulative reward
+	 */
+    @Override
+	public double getReward(boolean rewardIsGameScore) {
+    	if (rewardIsGameScore) {
+    		return this.getGameScore();    		
+    	} else {
+    		return this.getCumulEmptyTiles();
+    	}
+	}
+	
+	/**
+	 * Same as getReward(), but relative to referringState. 
+	 * @param referringState
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return  the cumulative reward 
+	 */
+    @Override
+	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+    	if (rewardIsGameScore) {
+    		return getGameScore(referringState);    		
+    	} else {
+    		return this.getCumulEmptyTiles();
+    	}
+	}
+
+	/**
+	 * Same as getReward(referringState), but with the player of referringState. 
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return  the cumulative reward 
+	 */
+	public double getReward(int player, boolean rewardIsGameScore) {
+        return this.getGameScore();
+	}
 
     @Override
     public double getMinGameScore() {
@@ -248,6 +305,81 @@ public class StateObs2048BitShift implements StateObservation {
         return actions[i];
     }
 
+    public void advanceDeterministic(Types.ACTIONS action) {
+        if(!isNextActionDeterministic) {
+            throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");
+        }
+
+        int iAction = action.toInt();
+        assert (availableMoves.contains(iAction)) : "iAction is not viable.";
+        move(iAction);
+        updateEmptyTiles();
+
+        isNextActionDeterministic = false;
+    }
+
+    public void advanceNondeterministic() {
+        setNextNondeterministicAction();
+
+        if(isNextActionDeterministic) {
+            throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
+        }
+
+        int iAction = nextNondeterminisitcAction.toInt();
+        assert (emptyTiles.size() * 2 > iAction) : "iAction is not viable.";
+
+        //System.out.println("Action: " + iAction + " Value: " + ((iAction%2)+1) + " Position: " + (iAction/2));
+
+        addTile(emptyTiles.get(iAction/2), (iAction%2)+1);
+
+        updateAvailableMoves();
+        isNextActionDeterministic = true;
+        nextNondeterminisitcAction = null;
+    }
+
+    /**
+     * Selects a Tile and the new value of the tile and saves it in an action
+     * 0 = first Tile, value 2
+     * 1 = first Tile, value 4
+     * 2 = second Tile, value 2
+     * 3 = second Tile, value 4
+     * ....
+     */
+    private void setNextNondeterministicAction() {
+        if(isNextActionDeterministic) {
+            throw new RuntimeException("next Action is Deterministic");
+        } else if(nextNondeterminisitcAction != null) {
+            return;
+        }
+
+
+        //select a Tile
+        int action = random.nextInt(emptyTiles.size()) * 2;
+
+        //select the new Tile Value
+        if(random.nextInt(10) == 9) {
+            action += 1;
+        }
+
+        nextNondeterminisitcAction = Types.ACTIONS.fromInt(action);
+    }
+
+    public boolean isNextActionDeterministic() {
+        return isNextActionDeterministic;
+    }
+
+    public Types.ACTIONS getNextNondeterministicAction() {
+        setNextNondeterministicAction();
+
+        return nextNondeterminisitcAction;
+    }
+
+    @Override
+    public StateObservation getPrecedingAfterstate() {
+    	// for 2048, the preceding afterstate is not known
+    	return null;
+    }
+
     @Override
     public void storeBestActionInfo(Types.ACTIONS actBest, double[] vtable) {
         ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
@@ -309,13 +441,20 @@ public class StateObs2048BitShift implements StateObservation {
     	return emptyTiles.size();
     }
 
-    public Tile getTile(int row, int column) {
-    	int pos = column + 4*row;
-    	long val = (boardB >> 4*pos) & 0x0fL;
-    	Tile tile = new Tile((int)val, new Position(row,column));
-        return tile;
+    public long getCumulEmptyTiles() {
+        return cumulEmptyTiles;
     }
-    
+
+    public int getTileValue(int pos) {
+        long val = (boardB >> (15-pos)*4 & 0x0fL);
+        int value = (int)Math.pow(2, val);
+        if(value == 1) {
+            return 0;
+        } else {
+            return value;
+        }
+    }
+
     public long getBoardNum() {
     	return boardB;
     }
@@ -358,6 +497,8 @@ public class StateObs2048BitShift implements StateObservation {
     		if ((b & 0x0fL)==0) emptyTiles.add(new Integer(j)); 
     		b = b >> 4;		// shift down by one hex digit
     	}
+        cumulEmptyTiles += emptyTiles.size() - 1;  
+        // "-1" because a random tile will be added from the environment
     }
 
     /**
@@ -389,6 +530,7 @@ public class StateObs2048BitShift implements StateObservation {
     public void updateAvailableMoves() {
         availableMoves.clear(); 
         int oldScore = score;
+        long oldCumulEmptyTiles = cumulEmptyTiles;
         long oldBoardB = boardB;
         if (leftAction().boardB!=oldBoardB)
             availableMoves.add(0);
@@ -402,6 +544,7 @@ public class StateObs2048BitShift implements StateObservation {
         if (downAction().boardB!=oldBoardB)
             availableMoves.add(3);
         boardB=oldBoardB;
+        cumulEmptyTiles = oldCumulEmptyTiles;
         score=oldScore;
 
         if(availableMoves.size() <= 0) {
@@ -486,11 +629,12 @@ public class StateObs2048BitShift implements StateObservation {
         score = 0;
         winState = 0;
 
+        updateEmptyTiles();
+        cumulEmptyTiles = 0L;
+
         for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
             addRandomTile();
         }
-
-        updateEmptyTiles();
         updateAvailableMoves();
     }
     

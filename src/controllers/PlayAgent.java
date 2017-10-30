@@ -49,7 +49,7 @@ public interface PlayAgent {
 	 * Get the best next action and return it 
 	 * (NEW version: returns ACTIONS_VT and has a recursive part for multi-moves)
 	 * 
-	 * @param so			current game state (is returned unchanged)
+	 * @param sob			current game state (is returned unchanged)
 	 * @param random		allow random action selection with probability m_epsilon
 	 * @param silent
 	 * @return actBest		the best action. If several actions have the same

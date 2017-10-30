@@ -410,18 +410,19 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		arenaActReq = true;		
 	}
 	
-	public void showGameBoard(Arena ticGame) {
+	public void showGameBoard(Arena ticGame, boolean alignToMain) {
 		this.setVisible(true);
-		// place window with game board below the main window
-		int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
-		int y = ticGame.m_xab.getLocation().y;
-		if (ticGame.m_TicFrame!=null) {
-			x = ticGame.m_TicFrame.getX();
-			y = ticGame.m_TicFrame.getY() + ticGame.m_TicFrame.getHeight() +1;
-			this.setSize(ticGame.m_TicFrame.getWidth(),250);	
-		}
-		this.setLocation(x,y);
-		
+		if (alignToMain) {
+			// place window with game board below the main window
+			int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
+			int y = ticGame.m_xab.getLocation().y;
+			if (ticGame.m_TicFrame!=null) {
+				x = ticGame.m_TicFrame.getX();
+				y = ticGame.m_TicFrame.getY() + ticGame.m_TicFrame.getHeight() +1;
+				this.setSize(ticGame.m_TicFrame.getWidth(),250);	
+			}
+			this.setLocation(x,y);	
+		}		
 	}
 
 	public StateObservation getStateObs() {

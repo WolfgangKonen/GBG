@@ -2,7 +2,7 @@ library(ggplot2)
 library(grid)
 source("summarySE.R")
 
-path <- "../agents/Hex/05/csv/"; limits=c(0.0,1.0); errWidth=3000;
+path <- "../../agents/Hex/05/csv/"; limits=c(0.0,1.0); errWidth=3000;
 
 filenames=c("multiTrain-25-6-al050.csv","multiTrain-25-6-al099.csv",
             "multiTrain-25-6-al020.csv","multiTrain-25-6-al010.csv") 

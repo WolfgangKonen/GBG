@@ -181,7 +181,7 @@ public class TransformTdAgents {
 //		if (subDir != null){
 //			strDir += "/"+subDir;
 //		}
-		checkAndCreateFolder(strDir);
+		tools.Utils.checkAndCreateFolder(strDir);
 
 		
 //		fc.removeChoosableFileFilter(txtExt);
@@ -286,7 +286,7 @@ public class TransformTdAgents {
 //		if (subDir != null){
 //			strDir += "/"+subDir;
 //		}
-		checkAndCreateFolder(strDir);
+		tools.Utils.checkAndCreateFolder(strDir);
 
 //		fc.removeChoosableFileFilter(txtExt);
 //		fc.setFileFilter(tdAgentExt);
@@ -379,7 +379,7 @@ public class TransformTdAgents {
 	}
 
 	public PlayAgent loadTempAgtFile(String strDir, String fileName) throws IOException, ClassNotFoundException {
-		checkAndCreateFolder(TMP_DIR+"/"+strDir);
+		tools.Utils.checkAndCreateFolder(TMP_DIR+"/"+strDir);
 
 		TDNTupleAgt pa = null;
 		String filePath = TMP_DIR+"/"+strDir+"/"+fileName+"."+tdFileExt;
@@ -476,7 +476,7 @@ public class TransformTdAgents {
 		if (pa instanceof TDNTupleAgt) {
 			TDNTupleAgt_v12 tdv12 = new TDNTupleAgt_v12( (TDNTupleAgt)pa );
 			
-			checkAndCreateFolder(TMP_DIR+"/"+strDir);
+			tools.Utils.checkAndCreateFolder(TMP_DIR+"/"+strDir);
 			File file = null;
 			String path = TMP_DIR+"/"+strDir+"/"+fileName+"."+tdFileExt;
 
@@ -638,21 +638,6 @@ public class TransformTdAgents {
 			e.printStackTrace();
 		}
 		return txtFileContent;
-	}
-
-	/**
-	 * checks if a folder exists and creates a new one if it doesn't
-	 *
-	 * @param filePath the folder Path
-	 * @return true if a folder already existed
-	 */
-	private boolean checkAndCreateFolder(String filePath) {
-		File file = new File(filePath);
-		boolean exists = file.exists();
-		if(!file.exists()) {
-			file.mkdirs();
-		}
-		return exists;
 	}
 
 //	public JDialog createProgressDialog(final IGetProgress streamProgress,
