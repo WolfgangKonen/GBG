@@ -8,8 +8,9 @@ filenames=c("multiTrain-1run-100k.csv"
             #,"multiTrain-1run-200k.csv"
             #,"multiTrain-1run-200k-eTile.csv"
             , "multiTrain-1run-100k-al02.csv"
-            , "multiTrain-1run-100k-eTile-3P.csv"
-            , "multiTrain-1run-100k-score-3P.csv"
+            , "multiTrain.csv"
+            #, "multiTrain-1run-100k-eTile-3P.csv"
+            #, "multiTrain-1run-100k-score-3P.csv"
 ) 
 titnames=c("100k","200k","eTile")
 PLOTALLLINES=T    # if =T: make a plot for each filename, with one line for each run
@@ -34,8 +35,9 @@ for (k in 1:length(filenames)) {
                     #,rep("200k",nrow(df))
                     #,rep("eTile",nrow(df))
                     ,rep("al=0.2",nrow(df))
-                    ,rep("eTile 3P",nrow(df))
-                    ,rep("score 3P",nrow(df))
+                    ,rep("al=0.8",nrow(df))
+                    #,rep("eTile 3P",nrow(df))
+                    #,rep("score 3P",nrow(df))
   )
   dfBoth = rbind(dfBoth,cbind(df,NGAMES=afterCol))
 }

@@ -10,7 +10,7 @@ import static games.Hex.HexConfig.*;
 /**
  * Class StateObserverHex represents states in Hex.
  * <p>
- * The board celled are numbered starting from the west corner going down to the south corner, which constitutes
+ * The board cells are numbered starting from the west corner going down to the south corner, which constitutes
  * the first row. The next row is the row above. I. e. an 4x4 Hex board has its tiles numbered 
  * as follows:
  * <pre>
@@ -32,7 +32,8 @@ import static games.Hex.HexConfig.*;
  *               [0,2] [1,3]
  *                  [0,3]
  * </pre>
- * 
+ * Player 0 (Black) has the first move. The white borders are below the first and above the 
+ * last row. The black borders are along the columns.
  * 
  */
 public class StateObserverHex implements StateObservation {
@@ -164,22 +165,23 @@ public class StateObserverHex implements StateObservation {
     public String stringDescr() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
-            for (int k = 0; k < i; k++) {
-                sb.append(' ');
-            }
+//            for (int k = 0; k < i; k++) {
+//                sb.append(' ');
+//            }
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 switch (board[i][j].getPlayer()) {
                     case HexConfig.PLAYER_ONE:
-                        sb.append('W');
+                        sb.append('B');
                         break;
                     case PLAYER_TWO:
-                        sb.append('B');
+                        sb.append('W');
                         break;
                     default:
                         sb.append('-');
                 }
             }
-            sb.append("\n");
+//            sb.append("\n");
+            sb.append("/");
 
         }
         return sb.toString();

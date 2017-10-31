@@ -257,6 +257,7 @@ abstract public class Arena extends JPanel implements Runnable {
 					int[] bvec = xnf.getBoardVector(soh);		// look at bvec in debugger to see the board representation
 					//int Index = this.getHexIndex(soh.getBoard());
 					//System.out.println("Index: "+Index);
+					System.out.println("["+soh.stringDescr()+"]");
 					int dummy=1;
 				}
 				

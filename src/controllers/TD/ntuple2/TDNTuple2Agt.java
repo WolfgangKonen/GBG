@@ -125,28 +125,30 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //	public static boolean NEWTARGET=true;	// this is now always true
 //	public static boolean WITH_NS=true;		// this is now always true
 	/**
-	 * If NEW_3P==true, use the new logic for 3-,...,n-player games: Each player has its own
-	 * reward function and value function and in each update step n value function updates 
-	 * occur.
+	 * If NEW_3P==true, use the new logic for 1,2,3-,...,n-player games: Each player has its 
+	 * own reward function and its own value function. In each update step n value function  
+	 * updates occur.
 	 * If NEW_3P==false, use the old logic (prior to 10/2017), which is valid only for 1- and
 	 * 2-player games. The target to learn is the value/reward for the 1st player and only one 
 	 * value function update is needed (exploits the 1- and 2-player symmetry). But this is not 
 	 * generalizable to arbitrary games.
 	 */
-	public static boolean NEW_3P=true; 	
+	public static boolean NEW_3P=false; 	
 
 //	// if NEW_GNA==true: use the new function getNextAction2,3 in getNextAction;
-//	//    (the new version returning Types.ACTIONS_VT and allowing deterministic multi-moves)
+//	//    (the new version which returns Types.ACTIONS_VT and allows deterministic multi-moves)
 //	// if NEW_GNA==false: use the old function getNextAction1 in getNextAction;
-//	//    (the old version returning Types.ACTIONS and not allowing multi-moves)
+//	//    (the old version which returns Types.ACTIONS and does not allow multi-moves)
 //	private static boolean NEW_GNA=true;	// this is now always true
 	
-	// debug printout in updateWeightsNew, getNextAction, trainAgent:
+	// debug printout in getNextAction, trainAgent:
 	public static boolean DBG2_TARGET=false;
 	// debug printout in updateWeightsNewTerminal:
 	public static boolean DBGF_TARGET=false;
 	// debug: repeat always the same sequence in one episode (to check a trivial convergence)
 	public static boolean DBG2_FIXEDSEQUENCE=false;
+	// debug printout in updateWeightsNew, g3_Evaluate, NextState:
+	public static boolean DBG_REWARD=false;
 	
 	//
 	// from TDAgent
@@ -519,6 +521,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         } // for
 
         assert actBest != null : "Oops, no best action actBest";
+        if (NEW_3P) player=1;
 		if (!silent) {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
@@ -547,7 +550,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
     private double g3_Evaluate(	StateObservation so, Types.ACTIONS act, 
     							StateObservation refer, boolean silent) {
     	double CurrentScore,agentScore;
-		int player = Types.PLAYER_PM[refer.getPlayer()]; 	 
+		int player = Types.PLAYER_PM[refer.getPlayer()]; 	
+		int rplyer = refer.getPlayer();
 		boolean rgs = m_oPar.getRewardIsGameScore();
 
         double referReward = refer.getReward(refer,rgs); // 0; 
@@ -575,12 +579,20 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
         if (getAFTERSTATE()) {
         	NewSO.advanceDeterministic(act); 	// the afterstate
-            agentScore = getScore(NewSO);		// this is V(s')
+        	if (NEW_3P) {
+                agentScore = getScore(NewSO,rplyer);	// this is V(s')        		        		
+        	} else {
+                agentScore = getScore(NewSO);			// this is V(s')        		
+        	}
             NewSO.advanceNondeterministic(); 
         } else { 
         	// the non-afterstate logic for the case of single moves:
             NewSO.advance(act);
-            agentScore = getScore(NewSO);      	// this is V(s'')  	
+        	if (NEW_3P) {
+                agentScore = getScore(NewSO,rplyer);	// this is V(s'')        		        		
+        	} else {
+                agentScore = getScore(NewSO);			// this is V(s'')        		
+        	}
         }
         // both ways of calculating the agent score are the same for deterministic games (s'=s''),
         // but they usually differ for nondeterministic games.
@@ -606,8 +618,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         if (NEW_3P) player=1;
 		CurrentScore = (NewSO.getReward(refer,rgs) - referReward) + getGamma()*player*agentScore;				
 
-		if (!silent) {
-			System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
+		if (!silent || DBG_REWARD) {
+			//System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
+			double deltaReward = (NewSO.getReward(refer,rgs) - referReward);
+			System.out.println(NewSO.stringDescr()+", "+CurrentScore+", "+deltaReward);
 			//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 		}
 
@@ -665,6 +679,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		return score;
 	}
 
+	public double getScore(StateObservation so, int player) {
+		int[] bvec = m_Net.xnf.getBoardVector(so);
+		double score = m_Net.getScoreI(bvec,player);
+		return score;
+	}
+
 	/**
 	 * Train the agent for one complete game episode. <p>
 	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
@@ -681,12 +701,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public boolean trainAgent(StateObservation so) {
 		double[] VTable = null;
 		double reward = 0.0, oldReward = 0.0;
+		double reward2=0.0;
 		double[] rewardArr, oldRewardArr;
 		boolean wghtChange = false;
 		boolean upTC=false;
 		double Input[], oldInput[];
 		String S_old = null;   // only as debug info
-		int player;
+//		int player;
 		Types.ACTIONS actBest;
 		StateObservation oldSO;
 		StateObservation aftSO;
@@ -709,7 +730,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		//System.out.println("Random test: "+ rand.nextDouble());
 		//System.out.println("Random test: "+ rand.nextDouble());
 		
-		player = Types.PLAYER_PM[so.getPlayer()];
+//		player = Types.PLAYER_PM[so.getPlayer()];
 
 		m_Net.clearEquivList();
 		m_Net.setHorizon();
@@ -733,25 +754,32 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        ns = new NextState(so,actBest);	        
 	        nextPlayer = ns.getNextSO().getPlayer();
 	        
+	        if (DBG_REWARD) {
+	        	System.out.println("nextSO: ["+ns.getNextSO().stringDescr()+"] for player "+nextPlayer);
+	        }
 
 	        if (NEW_3P) {
 	        	int refPlayer=ns.getSO().getPlayer();
 	        	rewardArr=trainNewTargetNEW_3P(ns,curBoard,learnFromRM,epiLength,oldRewardArr);
 	        	reward=rewardArr[refPlayer];
+//	        	if (DBG_REWARD) {
+//					reward2=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward);	 
+//					System.out.println("reward,reward2: "+reward+","+reward2);
+//	        	}
 	        	oldReward=oldRewardArr[refPlayer];
 	        } else {
-//			if (NEWTARGET) {
+//			  if (NEWTARGET) {
 //				if (WITH_NS) {
 					reward=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward);
 //				} else {
 //					reward=trainNewTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
 //							learnFromRM,epiLength,player,upTC,oldReward);	
 //				}
-//			} else {
+//			  } else {
 //				throw new RuntimeException("NEWTARGET==false no longer supported in TDNTuple2Agt!");
 ////				reward=trainOldTargetLogic(so,oldSO,curBoard,curPlayer,nextBoard,nextPlayer,
 ////						learnFromRM,epiLength,player,upTC);
-//			}
+//			  }
 	        }
 			if (DBG2_TARGET) {
 				final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
@@ -780,7 +808,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			} else {
 				oldReward= reward;				
 			}
-			player = Types.PLAYER_PM[so.getPlayer()];   // advance to the next player
+//			player = Types.PLAYER_PM[so.getPlayer()];   // advance to the next player
 			
 			if (m_finished) {
 				if (m_DEBG)
@@ -876,7 +904,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			for (int i=0; i<thisSO.getNumPlayers(); i++) {
 				if (curBoard!=null) {
 					m_Net.updateWeightsNew(curBoard, i /*thisPlayer*/, nextBoard, i /*nextPlayer*/,
-							rewardArr[i]-oldRewardArr[i],false);
+							rewardArr[i]-oldRewardArr[i],false,thisSO);
 				}
 			}
 		}
@@ -925,7 +953,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// do one training step (NEW target)
 			if (curBoard!=null) {
 				m_Net.updateWeightsNew(curBoard, thisPlayer, nextBoard, nextPlayer,
-						reward-oldReward,false);
+						reward-oldReward,false,thisSO);
 			}
 		}
 		
@@ -1054,6 +1082,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		 */
 		NextState(StateObservation so, Types.ACTIONS actBest) {
 			refer = so.copy();
+			int nPlayers= refer.getNumPlayers();
 	        if (getAFTERSTATE()) {
 	        	/* assertion not needed anymore, advanceDeterministic is also part of StateObservation */ 
             	// assert (so instanceof StateObservationNondeterministic);
@@ -1075,15 +1104,26 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			
 			if (NEW_3P) {
 				boolean rgs = m_oPar.getRewardIsGameScore();
-				int nPlayers= refer.getNumPlayers();
-				int player=refer.getPlayer();
+//				int player=refer.getPlayer();
 				nextRewardArr = new double[nPlayers];
 				for (int i=0; i<nPlayers; i++) {
-					nextRewardArr[player] = normalize2(nextSO.getReward(player,rgs),nextSO);
-					player=(player+1) % nPlayers;
+					nextRewardArr[i] = normalize2(nextSO.getReward(i,rgs),nextSO);
+//					nextRewardArr[player] = normalize2(nextSO.getReward(player,rgs),nextSO);
+//					player=(player+1) % nPlayers;
 				}
 			}
 
+			if (DBG_REWARD && nextSO.isGameOver()) {
+				if (NEW_3P) {
+					System.out.print("Rewards: ");
+					for (int i=0; i<nPlayers; i++) {
+						System.out.print(nextRewardArr[i]+",");
+					}
+				} else {
+					System.out.print("Reward: "+nextReward);
+				}
+				System.out.println("   ["+nextSO.stringDescr()+"]  " + nextSO.getGameScore() + " for player " + nextSO.getPlayer());
+			}
 		}
 
 		/**

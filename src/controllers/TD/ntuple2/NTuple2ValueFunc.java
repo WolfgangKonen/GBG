@@ -14,6 +14,7 @@ import java.util.Random;
 import controllers.TD.ntuple.TDNTupleAgt;
 import games.StateObservation;
 import games.XNTupleFuncs;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.NTParams;
 import params.TDParams;
 import tools.Types;
@@ -270,16 +271,16 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param curBoard
 	 *            the current board
 	 * @param curPlayer
-	 *            the player who has to move on current board
+	 *            the player whose value function is updated (the p in V(s_t|p) )
 	 * @param nextBoard
 	 *            the following board
 	 * @param nextPlayer
-	 *            the player who has to move on next board
+	 *            the player to use in the target value function (the p in \gamma*V(s_{t+1}|p) )
 	 * @param reward
 	 *            reward given for a terminated game (-1,0,+1)
 	 */
 	public void updateWeightsNew(int[] curBoard, int curPlayer, int[] nextBoard, int nextPlayer,
-			double reward, boolean upTC) {
+			double reward, boolean upTC,StateObservation thisSO) {
 		double v_old = getScoreI(curBoard,curPlayer); // Old Value
 		double tg; // Target-Signal
 		// tg is 0 for a final state OR (reward + GAMMA * value of the after-state)
@@ -291,10 +292,11 @@ public class NTuple2ValueFunc implements Serializable {
 
 		update(curBoard, curPlayer, delta, e);
 		
-		if (TDNTuple2Agt.DBG2_TARGET) {
-			final double MAXSCORE = 3932156; // 1; 3932156;
+		if (TDNTuple2Agt.DBG_REWARD) {
+			final double MAXSCORE = 1; // 1; 3932156;
 			double v_new = getScoreI(curBoard,curPlayer);
-			System.out.println("getScore(intermed):"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+tg*MAXSCORE);
+			System.out.println("updateWeightsNew[p="+curPlayer+", "+thisSO.stringDescr()
+				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+tg*MAXSCORE+", R="+reward);
 			int dummy=1;
 		}
 	}
