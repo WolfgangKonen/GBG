@@ -54,7 +54,8 @@ tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c("gameNum","lambda"))
 tgc2 <- cbind(tgc2,evalMode=rep(10,nrow(tgc2)))
 names(tgc2)[4] <- "eval"  # rename "evalT"
 tgc <- rbind(tgc1,tgc2)
-#tgc <- tgc1
+tgc <- tgc1
+#tgc <- tgc2
 tgc$lambda <- as.factor(tgc$lambda)
 tgc$evalMode <- as.factor(tgc$evalMode)
 

@@ -36,6 +36,13 @@ public interface StateObservation extends Serializable{
 	public boolean isLegalState();
 	
 	/**
+	 * @return this predicate is true only for 2-player games where the reward of player 0
+	 * is always the negative of the reward of player 1. E.g. TTT, Hex, where a reward of +1
+	 * for one player means -1 for the other. 
+	 */
+	public boolean has2OppositeRewards();
+	
+	/**
 	 * 
 	 * @return a string representation of the current state
 	 */

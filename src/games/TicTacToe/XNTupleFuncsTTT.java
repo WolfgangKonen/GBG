@@ -101,10 +101,11 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.
 	 * 
+	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
 	 * @return nTuples[numTuples][]
 	 */
 	@Override
-	public int[][] fixedNTuples() {
+	public int[][] fixedNTuples(int mode) {
 		// Examples for some NTuples for TicTacToe:
 		//best chosen 40, 4-tuples
 		int nTuple[][]={{6, 7, 4, 0},{4, 5, 8, 7},{4, 3, 0, 1},{4, 5, 2, 1},{6, 3, 0, 1},
@@ -128,7 +129,14 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 		
 		return nTuple;		
 	}
-	
+
+    private static int[] fixedModes = {1};
+    
+	public int[] getAvailFixedNTupleModes() {
+		return fixedModes;
+	}
+
+
 	/**
 	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
 	 * for board coding.

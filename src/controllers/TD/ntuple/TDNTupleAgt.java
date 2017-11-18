@@ -40,7 +40,9 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * The net follows closely the (pseudo-)code by [SuttonBonde93]. 
  * <p>
  * Some functionality is packed in the superclass 
- * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...)
+ * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...) <p>
+ * 
+ * TDNTupleAgt should not be used anymore, use instead {@link TDNTuple2Agt}
  * 
  * @see PlayAgent
  * @see AgentBase
@@ -49,8 +51,10 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * @author Wolfgang Konen, Samineh Bagheri, Markus Thill, TH Köln, Feb'17
  */
 //
-// This agent is adapted from project SourceTTT, class TicTacToe.TDSNPlayer
+// This agent is adapted from project SourceTTT, class TicTacToe.TDSNPlayer.
+// 
 //
+@Deprecated
 public class TDNTupleAgt extends AgentBase implements PlayAgent,Serializable {
 	private Random rand; // generate random Numbers 
 	static transient public PrintStream pstream = System.out;

@@ -60,8 +60,16 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
         return symmetries;
     }
 
+	/** 
+	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
+	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
+	 * containing the cells 0, 1, and 4.
+	 * 
+	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
+	 * @return nTuples[numTuples][]
+	 */
     @Override
-    public int[][] fixedNTuples() {
+    public int[][] fixedNTuples(int mode) {
         int[][] tuples = new int[(HexConfig.BOARD_SIZE * 2) + 1][HexConfig.BOARD_SIZE];
 
         //All diagonal lines
@@ -85,6 +93,13 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
 
         return tuples;
     }
+    
+    private static int[] fixedModes = {1};
+    
+	public int[] getAvailFixedNTupleModes() {
+		return fixedModes;
+	}
+
 
     @Override
     public HashSet adjacencySet(int iCell) {

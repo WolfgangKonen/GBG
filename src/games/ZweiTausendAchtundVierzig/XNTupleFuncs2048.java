@@ -99,12 +99,17 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.
+	 * <p>
+	 * See {@link #getBoardVector(StateObservation)} for the numbering of cells in boardVector.
 	 * 
+	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
 	 * @return nTuples[numTuples][]
 	 */
 	@Override
-	public int[][] fixedNTuples() {
-		switch (ConfigGame.FIXEDNTUPLEMODE) {
+	public int[][] fixedNTuples(int mode) {
+		// TODO: (when mode is stored in the saved agents)
+		switch (mode) {
+		//switch (ConfigGame.FIXEDNTUPLEMODE) {
 		case 1: 
 			// -- new setting by WK, along the lines of [Jaskowski16], Fig 3b
 			// -- Medium resulting score ~30.000, but small in memory (5*50e3 weights, 2 MB)
@@ -113,7 +118,7 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 				{2,6,10,14},{3,7,11,15}};
 		case 2: 
 			// -- former setting by JK, along the lines of [Jaskowski16], Fig 3c.
-			// -- Very good resulting score ~50.000, but also very big LUTs (4*11e6 weights, 44 MB agt.zip!!)
+			// -- Very good resulting score ~80.000, but also very big LUTs (4*11e6 weights, 44 MB agt.zip!!)
 			return new int[][]{
 					{0,4,8,1,5,9},{1,5,9,2,6,10},
 					{2,6,9,10,13,14},{3,7,10,11,14,15}};
@@ -121,9 +126,25 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 		throw new RuntimeException("Unsupported value for ConfigGame.FIXEDNTUPLEMODE");
 	}
 	
+    private static int[] fixedModes = {1,2};
+    
+    /**
+     * This function returns {1,2} as the available fixed-n-tuple modes, with meaning: 
+     * <ul>
+     * <li> =1: along the lines of [Jaskowski16] Fig 3b, 5 4-tuples, smaller LUTs (5*50e3, 2 MB agt.zip file), medium results <br>
+     * <li> =2: along the lines of [Jaskowski16] Fig 3c, 4 6-tuples, very big LUTs (4*11e6 weights, 69 MB or 93 MB agt.zip!!), 
+     *     very good results
+     * </ul>
+     * @see XNTupleFuncs2048#fixedNTuples(int)
+     */
+    public int[] getAvailFixedNTupleModes() {
+		return fixedModes;
+	}
+
 	/**
-	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
-	 * for board coding.
+	 * Return all neighbors of {@code iCell}. 
+	 * <p>
+	 * See {@link #getBoardVector(StateObservation)} for the numbering of cells in boardVector.
 	 * 
 	 * @param iCell
 	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
@@ -159,6 +180,14 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 		return adjSet;
 	}
 
+	/**
+	 * Rotate 90 degree clockwise.
+	 * <p>
+	 * See {@link #getBoardVector(StateObservation)} for the numbering of cells in boardVector.
+	 * 
+	 * @param array
+	 * @return
+	 */
 	private int[] rotateBoardVector(int[] array) {
 		int[] rotatedArray = new int[16];
 		rotatedArray[0] = array[12];
@@ -180,6 +209,14 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 		return rotatedArray;
 	}
 
+	/**
+	 * Make a mirror copy along the horizontal mid line.
+	 * <p>
+	 * See {@link #getBoardVector(StateObservation)} for the numbering of cells in boardVector.
+	 * 
+	 * @param array
+	 * @return
+	 */
 	private int[] mirrorBoardVector(int[] array) {
 		int[] mirroredArray = new int[16];
 		mirroredArray[0] = array[12];

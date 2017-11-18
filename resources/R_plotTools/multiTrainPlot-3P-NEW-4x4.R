@@ -4,8 +4,14 @@ source("summarySE.R")
 
 path <- "../../agents/Hex/04/csv/"; limits=c(0.0,1.0); errWidth=3000;
 
-filenames=c("multiTrain-noLearnFromRM-01-al099.csv","multiTrain-noLearnFromRM-01.csv",
-            "multiTrain-noLearnFromRM-01-al020.csv") 
+# 25 runs, epsilon 1.3 --> 0, lambda=0, 20 5-tuples. "-01" means 'Choose Start 01' checked.
+# 'Learn from RM' not checked. Eval_Q=0, Eval_T=10.
+# Files w/o "_3P" are with VER_3P=false
+filenames=c( "multiTrain-noLearnFromRM-01-al050.csv"
+            ,"multiTrain-noLearnFromRM-01-al050_3P-1ply.csv"
+            ,"multiTrain-noLearnFromRM-01-al050_3P-2ply.csv"
+            ,"multiTrain-noLearnFromRM-01-al050_3P-OLD.csv"
+            ) 
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
   
 dfBoth = data.frame()
@@ -13,6 +19,8 @@ for (k in 1:length(filenames)) {
   filename <- paste0(path,filenames[k])
   df <- read.csv(file=filename, na.string="-1", dec=".",skip=2)
   df$run <- as.factor(df$run)
+  # we remove here two columns since the older multiTrain files do not have it:
+  df <- df[,setdiff(names(df),c("actionNum","trnMoves"))]
   
   if (PLOTALLLINES) {
     q <- ggplot(df,aes(x=gameNum,y=evalQ))
@@ -23,9 +31,10 @@ for (k in 1:length(filenames)) {
   }
   
   alphaCol = switch(k
-                    ,rep(0.99,nrow(df))
-                    ,rep(0.5,nrow(df))
-                    ,rep(0.2,nrow(df))
+                    ,rep("0.5 2P",nrow(df))
+                    ,rep("0.5 3P-1ply",nrow(df))
+                    ,rep("0.5 3P-2ply",nrow(df))
+                    ,rep("0.5 3P-OLD",nrow(df))
                     )
   dfBoth <- rbind(dfBoth,cbind(df,alpha=alphaCol))
                   
@@ -41,8 +50,8 @@ names(tgc1)[4] <- "eval"  # rename "evalQ"
 tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c("gameNum","alpha"))
 tgc2 <- cbind(tgc2,evalMode=rep(10,nrow(tgc1)))
 names(tgc2)[4] <- "eval"  # rename "evalT"
-tgc <- rbind(tgc1,tgc2)
-#tgc <- tgc1
+#tgc <- rbind(tgc1,tgc2)
+tgc <- tgc2
 tgc$alpha <- as.factor(tgc$alpha)
 tgc$evalMode <- as.factor(tgc$evalMode)
 

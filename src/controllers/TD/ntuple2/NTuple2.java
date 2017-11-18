@@ -33,8 +33,7 @@ import params.TDParams;
  */
 public class NTuple2 implements Serializable {
 
-	private double INIT; // samine// N and A have to be initiliazed with the
-							// same number(INIT)
+	private double INIT; // samine// N and A will be initialized with the same number(INIT)
 
 	protected static boolean TC = false; // samine//TC constant is implemented
 											// to turn on and off temporal
@@ -67,11 +66,11 @@ public class NTuple2 implements Serializable {
 	// This ensures that an update with ALPHA=1.0 changes the LUT in such a way that a subsequent
 	// call getScoreI() returns a value identical to the target of that update.
 	private transient LinkedList indexList = new LinkedList();
-	private transient int trainCounter[] = null;
-	private boolean useIndexList = true;	// true: use indexList in updateNew()
-											// false: use trainCounter in updateNew()
-											// (true is recommended, since it is faster by a 
-											// factor of 7 and it avoids the memory for trainCounter)
+//	private transient int trainCounter[] = null;
+//	private boolean useIndexList = true;	// true: use indexList in updateNew()
+//											// false: use trainCounter in updateNew()
+//											// (useIndexList is now always true, since it is faster by a 
+//											// factor of 7 and it avoids the memory for trainCounter)
 
 	// /WK/
 	private transient double dWArray[]=null;		// recommended weight changes	
@@ -135,8 +134,8 @@ public class NTuple2 implements Serializable {
 			countM = new int[lut.length];
 		}
 
-		if (useIndexList==false)
-			trainCounter = new int[lut.length];
+//		if (useIndexList==false)
+//			trainCounter = new int[lut.length];
 	}
 
 	/**
@@ -308,12 +307,12 @@ public class NTuple2 implements Serializable {
 	 * @param alphaM the step size ALPHA (divided by numTuples*numEquiv, if NEWTARGET)
 	 * @param delta  target minus V(s_t)
 	 * @param e		 derivative of sigmoid (1 if no sigmoid) * LAMBDA^(t-k)
-	 * @param LAMBDA -- obsolete now --
 	 * 
 	 * @see NTuple2ValueFunc#update(int[], int, double, double) 
-	 * @see NTuple2ValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 
 	 */
-	public void updateNew(int[] board, double alphaM, double delta, double e, double LAMBDA) {
+//	 * @param LAMBDA -- obsolete now --
+//	 * @see NTuple2ValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 
+	public void updateNew(int[] board, double alphaM, double delta, double e /*, double LAMBDA*/) {
 		int Index = getIndex(board);
 		Integer IndexI = new Integer(Index);
 
@@ -321,21 +320,18 @@ public class NTuple2 implements Serializable {
 				
 		double dW = alphaM*delta* e * tcFactor;
 
-//		final double MAXSCORE = 3932156; 					//debug
-//		System.out.println(Index + " ["+dW*MAXSCORE+"]");   //
-		
-		if (useIndexList) {		// useIndexList==true is the recommended choice
+//		if (useIndexList) {		// useIndexList==true is the recommended choice
 			if (!TC || TcImm) {
 				if (!indexList.contains(IndexI)) lut[Index] += dW;				
 			}		
 			indexList.add(new Integer(IndexI));
-		} 
-		else {
-			if (!TC || TcImm) {
-				if (trainCounter[Index]==0) lut[Index] += dW;				
-			}
-			trainCounter[Index]++;   				
-		}
+//		} 
+//		else {
+//			if (!TC || TcImm) {
+//				if (trainCounter[Index]==0) lut[Index] += dW;				
+//			}
+//			trainCounter[Index]++;   				
+//		}
 
 		if (TC)
 			dWArray[Index] += dW;		// /WK/
@@ -399,13 +395,13 @@ public class NTuple2 implements Serializable {
 	}
 
 	public void clearIndices() {
-		if (useIndexList) {
+//		if (useIndexList) {
 			indexList.clear();			
-		} else {
-			// very slow!!!
-			for (int k=0; k<trainCounter.length; k++)
-				trainCounter[k] = 0;			
-		}
+//		} else {
+//			// very slow!!!
+//			for (int k=0; k<trainCounter.length; k++)
+//				trainCounter[k] = 0;			
+//		}
 	}
 
 	public int getCountP(int k) {

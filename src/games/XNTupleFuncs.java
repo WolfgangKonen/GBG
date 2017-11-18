@@ -13,7 +13,7 @@ import java.util.HashSet;
  * 
  * Note: The six methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 
  * {@link #getBoardVector(StateObservation)}, {@link #symmetryVectors(int[])}, 
- * {@link #fixedNTuples()} and {@link #adjacencySet(int)} are only required for the 
+ * {@link #fixedNTuples(int)} and {@link #adjacencySet(int)} are only required for the 
  * n-tuple interface. 
  * If an implementing game does not need that part (i. e. if it does not plan to 
  * use {@link TDNTupleAgt}), it may just code stubs returning 0, {@code null}, 
@@ -64,17 +64,20 @@ public interface XNTupleFuncs {
 	
 	/** 
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
-	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
+	 * Different n-tuples may have different lengths. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.<p>
 	 * 
 	 * Other options than fixed n-tuples (that is, the generation of random n-tuples) are 
 	 * provided by {@link NTupleFactory#makeNTupleSet(params.NTParams, XNTupleFuncs)}
 	 * 
+	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
 	 * @return nTuples[numTuples][]
 	 * 
 	 * @see NTupleFactory#makeNTupleSet(params.NTParams, XNTupleFuncs)
 	 */
-	public int[][] fixedNTuples();
+	public int[][] fixedNTuples(int mode);
+	
+	public int[] getAvailFixedNTupleModes();
 
 	/**
 	 * Return all neighbors of {@code iCell}

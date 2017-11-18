@@ -3,7 +3,9 @@ library(grid)
 source("summarySE.R")
 
 path <- "../../agents/2048/csv/"
-filenames=c("multiTrain-2048-withAFTERSTATE.csv","multiTrain-2048-noAFTERSTATE.csv") 
+filenames=c( "multiTrain-2048-withAFTERSTATE.csv"
+            ,"multiTrain-2048-noAFTERSTATE.csv"
+            ) 
 titnames=c("with AFTERSTATE","no AFTERSTATE")
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
   

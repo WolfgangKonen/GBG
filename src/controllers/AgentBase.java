@@ -69,6 +69,7 @@ abstract public class AgentBase implements Serializable {
 	 * 			class implements for {@link #getScore(StateObservation)}.
 	 */
 	public double estimateGameValue(StateObservation sob) {
+		// TODO: generalize this to the VER_3P case:
 		return getScore(sob);
 	};
 

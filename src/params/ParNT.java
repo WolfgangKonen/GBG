@@ -9,6 +9,7 @@ public class ParNT implements Serializable {
     public static int DEFAULT_TC_INTERVAL=2;  
     public static int DEFAULT_NTUPLE_NUM=10;  
     public static int DEFAULT_NTUPLE_LEN=6;  
+    public static int DEFAULT_FIXED_NTUPLE=1;  
     
     private double tcInit = DEFAULT_TC_INIT;
     private boolean tc = false;
@@ -18,6 +19,7 @@ public class ParNT implements Serializable {
     private boolean randomWalk = true;
     private int numTuple = DEFAULT_NTUPLE_NUM;
     private int maxTupleLen = DEFAULT_NTUPLE_LEN;
+    private int fixedNtupleMode= DEFAULT_FIXED_NTUPLE;
     private boolean useSymmetry = true;
     private boolean afterState = false;
     
@@ -34,17 +36,18 @@ public class ParNT implements Serializable {
     	this.setFrom(tp);
     }
     
-	public void setFrom(NTParams tp) {
-		this.tcInit = tp.getINIT();
-		this.tc = tp.getTc();
-		this.tcImm = tp.getTcImm();
-		this.tcInterval = tp.getTcInterval();
-		this.randomness = tp.getRandomness();
-		this.randomWalk = tp.getRandomWalk();
-		this.numTuple = tp.getNtupleNumber();
-		this.maxTupleLen = tp.getNtupleMax();
-		this.useSymmetry = tp.getUseSymmetry();
-		this.afterState = tp.getUseAfterState();
+	public void setFrom(NTParams nt) {
+		this.tcInit = nt.getINIT();
+		this.tc = nt.getTc();
+		this.tcImm = nt.getTcImm();
+		this.tcInterval = nt.getTcInterval();
+		this.randomness = nt.getRandomness();
+		this.randomWalk = nt.getRandomWalk();
+		this.numTuple = nt.getNtupleNumber();
+		this.maxTupleLen = nt.getNtupleMax();
+		this.fixedNtupleMode = nt.getFixedNtupleMode();
+		this.useSymmetry = nt.getUseSymmetry();
+		this.afterState = nt.getUseAfterState();
 	}
 
 	public double getTcInit() {
@@ -77,6 +80,10 @@ public class ParNT implements Serializable {
 
 	public int getNtupleMax() {
 		return maxTupleLen;
+	}
+
+	public int getFixedNtupleMode() {
+		return fixedNtupleMode;
 	}
 
 	public boolean getUSESYMMETRY() {
@@ -116,6 +123,10 @@ public class ParNT implements Serializable {
 
 	public void setMaxTupleLen(int maxTupleLen) {
 		this.maxTupleLen = maxTupleLen;
+	}
+
+	public void setFixedNtupleMode(int fixedNtupleMode) {
+		this.fixedNtupleMode = fixedNtupleMode;
 	}
 
 	public void setUSESYMMETRY(boolean useSymmetry) {

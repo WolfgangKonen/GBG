@@ -43,6 +43,7 @@ public class NTupleFactory {
 		boolean randWalk=ntPar.getRandomWalk();
 		int numTuple=ntPar.getNtupleNumber();
 		int maxTupleLen=ntPar.getNtupleMax();
+		int fixedNtupleMode=ntPar.getFixedNtupleMode();
 		int numCells = xnf.getNumCells();
 		int POSVALUES = xnf.getNumPositionValues();
 		
@@ -62,7 +63,7 @@ public class NTupleFactory {
 			
 		}else{
 			//given ntuples
-			nTuplesI = xnf.fixedNTuples();
+			nTuplesI = xnf.fixedNTuples(fixedNtupleMode);
 			
 			checkNtuples(nTuplesI,numCells);
 		}

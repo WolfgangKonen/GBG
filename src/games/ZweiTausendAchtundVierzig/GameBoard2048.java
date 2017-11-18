@@ -509,6 +509,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     @Override
     public void showGameBoard(Arena ztavGame, boolean alignToMain) {
         this.setVisible(true);
+        this.toFront();
         if (alignToMain) {
             // place window with game board below the main window
             int x = ztavGame.m_xab.getX() + ztavGame.m_xab.getWidth() + 8;

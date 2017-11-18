@@ -100,7 +100,8 @@ public class GameBoardHex implements GameBoard {
 
     @Override
     public void showGameBoard(Arena arena, boolean alignToMain) {
-        //Since the game board is visible at all times, this is not implemented.
+        gamePanel.setVisible(true);
+        //gamePanel.repaint();
     }
 
     @Override

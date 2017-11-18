@@ -11,7 +11,7 @@ class HexConfig {
     /**
      * Length of one side of the game board in tiles
      */
-    final static int BOARD_SIZE = 4;
+    final static int BOARD_SIZE = 5;
 
     /**
      * Size of hexagons in px (from one side to the opposite one)
@@ -41,10 +41,11 @@ class HexConfig {
      * <ul>
      * <li> -1: empty board (a winning board for 1st player Black), 
      * <li> 0/1/...: Black's 1st move was tile 00/01/... (1-ply move, it should be a losing 
-     * move, so that this is a winning board for 2nd player White)
+     * move. Then such a board is a winning board for 2nd player White)
      * </ul>
      * See {@link StateObserverHex} for the numbering of the tiles. <br>
-     * {@link EvaluatorHex}, mode=10, will use all start boards for evaluation and return the average success.
+     * {@link EvaluatorHex}, mode=10, will use all start boards for evaluation and 
+     * return the average success.
      * <p>
      * How to find out which boards are winning boards? - It is proven that the empty board is 
      * a winning board for all board sizes. But the situation is more tricky for the 1-ply moves.

@@ -670,7 +670,7 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         if(random.nextInt(10) == 9) {
             action += 1;
         }
-
+        
         nextNondeterminisitcAction = Types.ACTIONS.fromInt(action);
     }
 
@@ -729,6 +729,11 @@ public class StateObserver2048 implements StateObservationNondeterministic {
 		return false;
 	}
 	
+    @Override
+	public boolean has2OppositeRewards() {
+		return true;
+	}
+
     public boolean isLegalAction(Types.ACTIONS action) {
         return availableMoves.contains(action.toInt());
     }

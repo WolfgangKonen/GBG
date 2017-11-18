@@ -65,14 +65,22 @@ public class StateObserverTTT implements StateObservation {
 		return new StateObserverTTT(m_Table,m_Player);
 	}
 
+    @Override
 	public boolean isGameOver() {
 		return TicTDBase.isGameOver(m_Table);
 	}
 
+    @Override
 	public boolean isDeterministicGame() {
 		return true;
 	}
 	
+    @Override
+	public boolean has2OppositeRewards() {
+		return true;
+	}
+
+    @Override
 	public boolean isLegalState() {
 		return TicTDBase.legalState(m_Table,m_Player);
 	}
