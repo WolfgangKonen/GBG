@@ -1,3 +1,11 @@
+# 
+# This plot shows for 4x4 Hex different TD-update scheme forms. The first result is, that the NEW_2P 
+# form is shown to be fully equivalent to (NEW_3P, 1-ply)-form, as it should. The 2nd result is 
+# that the (NEW_3P, 2-ply)-form is significantly better, especially if we look at evalMode=10 (diff. 
+# start states, tgc2). The 3rd result is that the OLD_3P-form is significantly worse.
+#
+# More details are found in TR-TDNTuple.tex.
+# 
 library(ggplot2)
 library(grid)
 source("summarySE.R")
@@ -7,7 +15,7 @@ path <- "../../agents/Hex/04/csv/"; limits=c(0.0,1.0); errWidth=3000;
 # 25 runs, epsilon 1.3 --> 0, lambda=0, 20 5-tuples. "-01" means 'Choose Start 01' checked.
 # 'Learn from RM' not checked. Eval_Q=0, Eval_T=10.
 # Files w/o "_3P" are with VER_3P=false
-filenames=c( "multiTrain-noLearnFromRM-01-al050.csv"
+filenames=c( "multiTrain-noLearnFromRM-01-al050.csv"     # NEW_2P form
             ,"multiTrain-noLearnFromRM-01-al050_3P-1ply.csv"
             ,"multiTrain-noLearnFromRM-01-al050_3P-2ply.csv"
             ,"multiTrain-noLearnFromRM-01-al050_3P-OLD.csv"

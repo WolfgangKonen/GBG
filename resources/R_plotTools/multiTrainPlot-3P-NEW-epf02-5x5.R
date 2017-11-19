@@ -12,7 +12,8 @@ source("summarySE.R")
 path <- "../../agents/Hex/05/csv/"; limits=c(0.0,1.0); errWidth=3000;
 
 filenames=c ( "multiTrain-25-6-lam050-epf02.csv"
-             ,"multiTrain-25-6-lam050-epf02-3P-2ply.csv"    # 10 runs = 2.8h
+              ,"multiTrain-25-6-lam050-epf02-3P-1ply.csv"    # 10 runs = 2.8h
+              ,"multiTrain-25-6-lam050-epf02-3P-2ply.csv"    # 10 runs = 2.8h
              #,"multiTrain-25-6-lam075-epf02.csv"
             )
 # other pars: alpha=0.2, epsilon = 1.0 ... 0.2, ChooseStart01=T, LearnFromRM=F, 
@@ -38,6 +39,7 @@ for (k in 1:length(filenames)) {
   
   lambdaCol = switch(k
                     ,rep("0.50 2P",nrow(df))
+                    ,rep("0.50 3P-1ply",nrow(df))
                     ,rep("0.50 3P-2ply",nrow(df))
                     )
   #browser()
@@ -56,7 +58,7 @@ tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c("gameNum","lambda"))
 tgc2 <- cbind(tgc2,evalMode=rep(10,nrow(tgc2)))
 names(tgc2)[4] <- "eval"  # rename "evalT"
 tgc <- rbind(tgc1,tgc2)
-#tgc <- tgc1
+tgc <- tgc1
 #tgc <- tgc2
 tgc$lambda <- as.factor(tgc$lambda)
 tgc$evalMode <- as.factor(tgc$evalMode)
