@@ -286,6 +286,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //	 * at random, false: if action was selected by agent).
 //	 */
 //	@Deprecated
+//	// this is the old getNextAction function (prior to 09/2017): 
+//	// 		returning ACTIONS (not ACTIONS_VT) and no multi-move recursion
 //	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
 //		// this function selector is just intermediate, as long as we want to test getNextAction2 
 //		// against getNextAction1 (the former getNextAction). Once everything works fine with
@@ -301,7 +303,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //			return actBestVT;
 //		}
 //	}
-//	// this is the old getNextAction function (prior to 09/2017):
+//	// this is the old getNextAction1 function (prior to 09/2017): 
+//	// 		returning ACTIONS (not ACTIONS_VT) and no multi-move recursion
 //	private Types.ACTIONS getNextAction1(StateObservation so, boolean random, double[] VTable, boolean silent) {
 //		int i, j;
 //		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
@@ -490,15 +493,16 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private Types.ACTIONS_VT getNextAction3(StateObservation so, StateObservation refer, 
 			boolean random, boolean silent) {
 		int i, j;
+		double BestScore3;
 		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
 									// maximized
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		StateObservation NewSO;
 	    int iBest;
-		int count = 1; // counts the moves with same BestScore
+		int count = 1; // counts the moves with same BestScore3
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
-    	BestScore = -Double.MAX_VALUE;
+    	BestScore3 = -Double.MAX_VALUE;
 		double[] VTable;
        
 //		if (so.getNumPlayers()>2)
@@ -523,11 +527,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         {
             actions[i] = acts.get(i);		
 	        
-            if (OLD_3P) {
-                CurrentScore = g3_Evaluate(so,actions[i],refer,silent);
-            } else {
-                //CurrentScore = g3_Eval_NPly(so,actions[i],refer,so.getNumPlayers(),silent);   
-                CurrentScore = g3_Eval_NPly(so,actions[i],refer,1,silent);   
+            if (VER_3P && OLD_3P==false) {
+            	// this has n-ply recursion, but does not reflect multi-moves:
+            	int nply = so.getNumPlayers();
+            	//int nply = 1;
+                CurrentScore = g3_Eval_NPly(so,actions[i],refer,nply,silent);   
                 
 //                if (DBG_NEW_3P && so.getNumPlayers()==1) {
 //                	// This is just a sanity check for  the special case of 1-player games (N_P=nply=1), 
@@ -548,6 +552,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //                        CurrentScoreOLD = g3_Evaluate(so,actions[i],refer,silent);
 //                    }
 //                }
+            } else {	// i.e. VER_3P=false OR (VER_3P==OLD_3P==true)
+            	// this has recursive multi-move recursion:
+                CurrentScore = g3_Evaluate(so,actions[i],refer,silent);
             }
             
 			// just a debug check:
@@ -558,16 +565,16 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			CurrentScore = normalize2(CurrentScore,so);					
 			
 			//
-			// fill VTable, calculate BestScore and actBest:
+			// fill VTable, calculate BestScore3 and actBest:
 			//
 			VTable[i] = CurrentScore;
-			if (BestScore < CurrentScore) {
-				BestScore = CurrentScore;
+			if (BestScore3 < CurrentScore) {
+				BestScore3 = CurrentScore;
 				actBest = actions[i];
 				iBest  = i; 
 				count = 1;
-			} else if (BestScore == CurrentScore) {
-				// If there are 'count' possibilities with the same score BestScore, 
+			} else if (BestScore3 == CurrentScore) {
+				// If there are 'count' possibilities with the same score BestScore3, 
 				// each one has the probability 1/count of being selected.
 				// 
 				// (To understand formula, think recursively from the end: the last one is
@@ -593,7 +600,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
             NewSO.advance(actBest);
-			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
+			System.out.println(NewSO.stringDescr()+", "+(2*BestScore3*player-1));
 		}			
 		if (DBG2_TARGET) {
 			final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
@@ -608,12 +615,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			int dummy=1;
 		}
 		
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, BestScore);
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, BestScore3);
 		return actBestVT;
 	} // getNextAction3
 
     // calculate CurrentScore: 
-	// (g3_Evaluate is helper function for getNextAction3)
+	// (g3_Evaluate is helper function for getNextAction3, if OLD_3P=true)
     private double g3_Evaluate(	StateObservation so, Types.ACTIONS act, 
     							StateObservation refer, boolean silent) {
     	double CurrentScore,agentScore;
@@ -693,10 +700,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
     }  // g3_Evaluate
 
     // calculate CurrentScore: 
-	// (g3_Eval_NPly is helper function for getNextAction3)
+	// (g3_Eval_NPly is helper function for getNextAction3, if OLD_3P=false)
     private double g3_Eval_NPly(StateObservation so, Types.ACTIONS act, 
     							StateObservation refer, int nply, boolean silent) {
     	double CurrentScore,agentScore;
+    	double g3BestScore = -Double.MAX_VALUE;
 		int player = Types.PLAYER_PM[refer.getPlayer()]; 	
 		int rplyer = refer.getPlayer();
 		boolean rgs = m_oPar.getRewardIsGameScore();
@@ -705,7 +713,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         double rtilde = 0;
         double kappa;
 	    int iBest;
-		int count = 1; // counts the moves with same BestScore
+		int count = 1; // counts the moves with same g3BestScore
         Types.ACTIONS actBest = null;
     	StateObservation NewSO;
     	StateObservation oldSO = so.copy();
@@ -746,7 +754,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        // maximizing the return from evalNPly
 	        ArrayList<Types.ACTIONS> acts = NewSO.getAvailableActions();
 	        Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
-	    	double g3BestScore = -Double.MAX_VALUE;
 
 	        assert actions.length>0 : "Oops, no available action";
 	        for(int i = 0; i < actions.length; ++i)
@@ -862,7 +869,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * Return the agent's estimate of the score for that after state 
 	 * (both versions, {@link VER_3P}==true/false).
 	 * Return V(s_t|p_refer), that is the value function from the perspective of the player
-	 * who has to move in state {@code refer}. 
+	 * who moves in state {@code refer}. 
 	 * For 1-player games like 2048 it is the estimated (total or future) reward.
 	 * 
 	 * @param so	the state s_t for which the value is desired

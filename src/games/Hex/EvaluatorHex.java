@@ -1,12 +1,16 @@
 package games.Hex;
 
 import controllers.MCTS.MCTSAgentT;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import games.Evaluator;
 import games.GameBoard;
 import games.XArenaFuncs;
+import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -15,7 +19,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class EvaluatorHex extends Evaluator {
@@ -100,7 +109,13 @@ public class EvaluatorHex extends Evaluator {
                 result = competeAgainstMinimax(playAgent, gameBoard);
                 break;
             case 10:
-                result = competeAgainstMCTS_diffStates(playAgent, gameBoard, numEpisodes);
+            	if (playAgent instanceof TDNTuple2Agt) {
+            		// we can only call the parallel version, if playAgent's getNextAction2 is 
+            		// thread-safe:
+                    result = competeAgainstMCTS_diffStates_PAR(playAgent, gameBoard, numEpisodes);
+            	} else {
+            		result = competeAgainstMCTS_diffStates(playAgent, gameBoard, numEpisodes);
+            	}
                 break;
             default:
                 return false;
@@ -158,7 +173,8 @@ public class EvaluatorHex extends Evaluator {
      */
     private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
         ParMCTS params = new ParMCTS();
-        params.setNumIter((int) Math.pow(10, HexConfig.BOARD_SIZE - 1));
+        int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
+        params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
         double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0);
@@ -185,7 +201,8 @@ public class EvaluatorHex extends Evaluator {
      */
     private double competeAgainstMCTS_diffStates(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
         ParMCTS params = new ParMCTS();
-        params.setNumIter((int) Math.pow(10, HexConfig.BOARD_SIZE - 1));
+        int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
+        params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
 
         // find the start states to evaluate:
@@ -224,6 +241,111 @@ public class EvaluatorHex extends Evaluator {
         if (this.verbose > 0) System.out.println(m_msg);
         lastResult = success;
         return success;
+    }
+
+    /**
+     * Does the same as {@code competeAgainstMCTS_diffStates}, but with 6 parallel cores, 
+     * so it is 6 times faster. 
+     * <p>
+     * NOTES: <ul>
+     * <li> The memory consumption grows when this function is repeatedly called (by about 60 kB
+     * for each call, but there seems to be an effective limit for the Java process at 4.3 GB -- 
+     * beyond the garbage collector seems to do its work effectively)
+     * <li> The call to compete may not alter anything in {@code playAgent}. So the function 
+     * getNextAction2 invoked by compete should be thread-safe. This is valid, if getNextAction2 
+     * does not modify members in playAgent. Possible for TD-n-Tuple-agents, if we do not write 
+     * on class-global members (e.g. do not use BestScore, but use local variable BestScore2). 
+     * Parallel threads are not possible when playAgent is MCTSAgentT or MinimaxAgent.
+     * </ul>
+     * 
+     * @param playAgent
+     * @param gameBoard
+     * @param numEpisodes
+     * @return
+     */
+    private double competeAgainstMCTS_diffStates_PAR(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+        ExecutorService executorService = Executors.newFixedThreadPool(6);
+        ParMCTS params = new ParMCTS();
+        int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
+        params.setNumIter((int) Math.pow(10, numIterExp));
+        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
+
+        // find the start states to evaluate:
+        int [] startAction = {-1};
+        int N = HexConfig.BOARD_SIZE;
+        if (N>HexConfig.EVAL_START_ACTIONS.length-1) {
+            System.out.println("*** WARNING ***: 1-ply winning boards for board size N="+N+
+            		"are not coded in " +"HexConfig.EVAL_START_ACTIONS." );
+            System.out.println("*** WARNING ***: Evaluator(mode 10) will use only " +
+            		"the empty board for evaluation.");
+        } else {
+            // the int's in startAction code the start board. -1: empty board (a winning 
+            // board for 1st player Black), 
+            // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, a winning
+            // board for 2nd player White)
+            startAction = HexConfig.EVAL_START_ACTIONS[N];
+        }
+        numStartStates = startAction.length;
+        
+        List<Double> successObservers = new ArrayList<>();
+        List<Callable<Double>> callables = new ArrayList<>();
+        final int[] startAction2 = startAction;
+
+        // evaluate each start state in turn and return average success rate: 
+        for (int i=0; i<startAction.length; i++) {
+            int gameNumber = i+1;
+            final int i2 = i;
+            callables.add(() -> {
+                double[] res;
+                double success = 0;
+                long gameStartTime = System.currentTimeMillis();
+                StateObserverHex so = new StateObserverHex();
+                
+                // important: mctsAgent2 has to be constructed inside the 'callables' function, 
+                // otherwise all parallel calls would operate on the same agent and would produce
+                // garbage.
+                MCTSAgentT mctsAgent2 = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
+
+            	if (startAction2[i2] == -1) {
+            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0);
+                    success = res[0];        	
+            	} else {
+            		so.advance(new ACTIONS(startAction2[i2]));
+            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0);
+                    success = res[2];        	
+            	}
+                if(verbose == 0) {
+                    System.out.println("Finished evaluation " + gameNumber + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. ");
+                }
+            	return Double.valueOf(success);
+            });
+        }
+   
+        // invoke all callables and store results on List successObservers
+        try {
+            executorService.invokeAll(callables).stream().map(future -> {
+                try {
+                    return future.get();
+                }
+                catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }).forEach(successObservers::add);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // reduce results (here: calculate average success)
+        double averageSuccess = 0; 
+        for(Double suc : successObservers) {
+            averageSuccess += suc.doubleValue();
+        }
+        averageSuccess/= startAction.length;
+
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + averageSuccess;
+        if (this.verbose > 0) System.out.println(m_msg);
+        lastResult = averageSuccess;
+        return averageSuccess;
     }
 
     /**

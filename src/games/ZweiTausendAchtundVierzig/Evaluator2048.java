@@ -70,7 +70,7 @@ public class Evaluator2048 extends Evaluator {
                 int gameNumber = i+1;
                 callables.add(() -> {
                     StateObserver2048 so = new StateObserver2048();
-                    long gameSartTime = System.currentTimeMillis();
+                    long gameStartTime = System.currentTimeMillis();
 
                     PlayAgent playAgent = new MCTSExpectimaxAgt("MCTS Expectimax", mctsExpectimaxAgt.params);
 
@@ -82,7 +82,7 @@ public class Evaluator2048 extends Evaluator {
                     }
 
                     if(verbose == 0) {
-                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
                     }
                     return so;
                 });
@@ -105,7 +105,7 @@ public class Evaluator2048 extends Evaluator {
         } else {
             //sync for other Agents (MC Agent uses multiple Cores naturally)
             for (int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
-                long gameSartTime = System.currentTimeMillis();
+                long gameStartTime = System.currentTimeMillis();
                 StateObserver2048 so = new StateObserver2048();
 
                 moveNum=cumEmpty=0;
@@ -126,7 +126,7 @@ public class Evaluator2048 extends Evaluator {
                 }
 
                 if(verbose == 0) {
-                    System.out.print("Finished game " + (i + 1) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameSartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+                    System.out.print("Finished game " + (i + 1) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
                 }
 
                 stateObservers.add(so);
