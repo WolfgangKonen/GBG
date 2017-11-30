@@ -214,18 +214,18 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	}
 
 
-	/**
-	 * 
-	 * @return	returns true/false, whether the action suggested by last call 
-	 * 			to getNextAction() was a random action. 
-	 * 			Always false in the case of MCTS based on SingleTreeNode.uct().
-	 * <p>
-	 * Use now {@link Types.ACTIONS#isRandomAction()}
-	 */
-	@Deprecated
-	public boolean wasRandomAction() {
-		return false;
-	}
+//	/**
+//	 * 
+//	 * @return	returns true/false, whether the action suggested by last call 
+//	 * 			to getNextAction() was a random action. 
+//	 * 			Always false in the case of MCTS based on SingleTreeNode.uct().
+//	 * <p>
+//	 * Use now {@link Types.ACTIONS#isRandomAction()}
+//	 */
+//	@Deprecated
+//	public boolean wasRandomAction() {
+//		return false;
+//	}
 
 
 	@Override

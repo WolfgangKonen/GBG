@@ -483,15 +483,15 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		return CurrentScore;
     }
 
-	/**
-	 * 
-	 * @return	returns true/false, whether the action suggested by last call 
-	 * 			to getNextAction() was a random action 
-	 */
-    @Deprecated
-	public boolean wasRandomAction() {
-		return randomSelect;
-	}
+//	/**
+//	 * 
+//	 * @return	returns true/false, whether the action suggested by last call 
+//	 * 			to getNextAction() was a random action 
+//	 */
+//    @Deprecated
+//	public boolean wasRandomAction() {
+//		return randomSelect;
+//	}
 
 	/**
 	 * Return the agent's estimate of the score for that after state.

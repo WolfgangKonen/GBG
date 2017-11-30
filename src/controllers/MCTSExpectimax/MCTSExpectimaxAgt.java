@@ -239,17 +239,17 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	}
 
 
-	/**
-	 * @return	returns true/false, whether the action suggested by last call 
-	 * 			to getNextAction() was a random action. 
-	 * 			Always false in the case of MCTS Expectimax
-	 * <p>
-	 * Use now {@link Types.ACTIONS#isRandomAction()}
-	 */
-	@Deprecated
-	public boolean wasRandomAction() {
-		return false;
-	}
+//	/**
+//	 * @return	returns true/false, whether the action suggested by last call 
+//	 * 			to getNextAction() was a random action. 
+//	 * 			Always false in the case of MCTS Expectimax
+//	 * <p>
+//	 * Use now {@link Types.ACTIONS#isRandomAction()}
+//	 */
+//	@Deprecated
+//	public boolean wasRandomAction() {
+//		return false;
+//	}
 
 
 	/**

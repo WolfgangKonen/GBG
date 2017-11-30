@@ -155,7 +155,7 @@ public class EvaluatorHex extends Evaluator {
     private double competeAgainstMinimax(PlayAgent playAgent, GameBoard gameBoard) {
         double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(), 100, verbose);
         double success = res[0];
-        m_msg = this.getPrintString() + success;
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         if (this.verbose > 0) System.out.println(m_msg);
         lastResult = success;
         return success;

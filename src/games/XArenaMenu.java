@@ -552,6 +552,17 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.GameNumT.setText(""+td.getMaxGameNum());
 				m_arena.m_xab.oPar.numEval_T.setText(""+td.getNumEval());
 			}
+			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P && !TDNTuple2Agt.OLD_3P) {
+				m_arena.m_xab.oPar.enableNPly(true);
+				// if it is one of the older agents (before nply was added to oPar), it will
+				// have nply=0. Then set nply=1: 
+				if (m_arena.m_xab.oPar.getNPly()==0) {
+					m_arena.m_xab.oPar.setNPly(1);
+					((TDNTuple2Agt) td).getOtherPar().setNPly(1);
+				}
+			} else {
+				m_arena.m_xab.oPar.enableNPly(false);
+			}
 			
 			// set selector according to class loaded:
 			m_arena.m_xab.setSelectedAgent(index, td.getName());
@@ -653,7 +664,7 @@ public class XArenaMenu extends JMenuBar {
 			int qem = m_arena.m_xab.oPar.getQuickEvalMode();
 			Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,0);
 	        qEvaluator.eval();
-			str = pa.getName()+": "+qEvaluator.getMsg();
+			str = qEvaluator.getMsg();
 			System.out.println(str);
 			printStatus(str);
 		}

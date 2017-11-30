@@ -262,14 +262,8 @@ public class NTParams extends Frame implements Serializable {
 	}
 
 	private void enableAfterState(boolean enable) {
-		if (enable) {
-			AfterStateL.setEnabled(true);
-			AfterStateC.setEnabled(true);
-		} else {
-			AfterStateL.setEnabled(false);
-			AfterStateC.setEnabled(false);			
-		}
-		
+		AfterStateL.setEnabled(enable);
+		AfterStateC.setEnabled(enable);
 	}
 
 	public JPanel getPanel() {

@@ -153,10 +153,10 @@ public class StateObs2048BitShift implements StateObservationNondeterministic {
 		return false;
 	}
 	
-    @Override
-	public boolean has2OppositeRewards() {
-		return true;
-	}
+//    @Override
+//	public boolean has2OppositeRewards() {
+//		return true;
+//	}
 
     @Override
     public boolean isLegalState() {

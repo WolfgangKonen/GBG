@@ -25,12 +25,10 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
  *
  *                 col= 3 2 1 0            </pre>
  * that is, the 4 lowest hex digits represent the lowest row of the 2048-board, with the
- * digit 3 representing the leftmost cell in this row and so on. <br>
- * Each hex digit represents the exponent {@code exp} of a tile value {@code 2^exp}.
+ * digit 3 representing the leftmost tile in this row and so on. <br>
+ * Each hex digit represents the exponent {@code exp} of a tile value {@code 2^exp}. The 
+ * value {@code exp = 0} codes an empty tile. <br>
  * Example: Hex digit {@code a} codes tile value {@code 2^a} = 1024.  <p>
- *
- * Method getGameScore2 is currently implemented via StateObserver2048Slow.getGameScore2
- * (may be slow).
  *
  * @author Wolfgang Konen, THK
  * @author Johannes Kutsch
@@ -539,8 +537,6 @@ public class StateObserver2048 implements StateObservationNondeterministic {
         return this.getGameScore();
 	}
 
-
-
     public double getMinGameScore() {
         return REWARD_NEGATIVE;
     }
@@ -729,10 +725,10 @@ public class StateObserver2048 implements StateObservationNondeterministic {
 		return false;
 	}
 	
-    @Override
-	public boolean has2OppositeRewards() {
-		return true;
-	}
+//    @Override
+//	public boolean has2OppositeRewards() {
+//		return true;
+//	}
 
     public boolean isLegalAction(Types.ACTIONS action) {
         return availableMoves.contains(action.toInt());

@@ -69,12 +69,14 @@ public class OtherParams extends Frame
 	JLabel chooseS01L;
 	JLabel learnRM_L;
 	JLabel rgs_L;
+	JLabel nPly_L;
 	JLabel miniDepth_L;
 	JLabel miniUseHm_L;
 	public JTextField numEval_T;
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
+	public JTextField nPly_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
 	public Checkbox rewardIsGameScore;
@@ -100,6 +102,7 @@ public class OtherParams extends Frame
 		stopTest_T = new JTextField("0");				// the defaults
 		stopEval_T = new JTextField("100");				// 
 		miniDepth_T = new JTextField("10");				// 
+		nPly_T = new JTextField("1");
 		numEval_L = new JLabel("numEval");
 		epiLeng_L = new JLabel("Episode Length");
 		stopTest_L = new JLabel("stopTest");
@@ -107,6 +110,7 @@ public class OtherParams extends Frame
 		chooseS01L = new JLabel("Choose Start 01");
 		learnRM_L = new JLabel("Learn from RM");
 		rgs_L = new JLabel("Reward = Score");
+		nPly_L = new JLabel("nPly");
 //		batchL = new JLabel("BatchNum");
 		miniDepth_L = new JLabel("Minimax Depth");
 		miniUseHm_L = new JLabel("Minimax Hash ");
@@ -131,8 +135,12 @@ public class OtherParams extends Frame
 		chooseS01L.setToolTipText("Choose start state in training: 50% default, 50% random 1-ply");
 		learnRM_L.setToolTipText("Learn from random moves during training");
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
+		nPly_L.setToolTipText("n-ply look ahead (currently only TD-NTuple-2)");
 		miniDepth_L.setToolTipText("Minimax tree depth");
 		miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
+		
+//		this.setQuickEvalMode(0);
+//		this.setTrainEvalMode(0);
 		
 		ok.addActionListener(
 				new ActionListener()
@@ -171,10 +179,10 @@ public class OtherParams extends Frame
 		oPanel.add(learnRM_L);
 		oPanel.add(learnRM);
 
-		oPanel.add(new Canvas());			// add an empty row to balance height of fields
-		oPanel.add(new Canvas());
 		oPanel.add(rgs_L);
 		oPanel.add(rewardIsGameScore);
+		oPanel.add(nPly_L);
+		oPanel.add(nPly_T);
 
 		oPanel.add(miniDepth_L);
 		oPanel.add(miniDepth_T);
@@ -193,6 +201,10 @@ public class OtherParams extends Frame
 				
 		pack();
 		setVisible(false);
+		
+		boolean enabNPly =  (TDNTuple2Agt.VER_3P && !TDNTuple2Agt.OLD_3P); 
+		this.enableNPly(enabNPly);
+		
 	} // constructor OtherParams()	
 	
 	public JPanel getPanel() {
@@ -200,10 +212,12 @@ public class OtherParams extends Frame
 	}
 	public int getQuickEvalMode() {
 		String s = choiceEvalQ.getSelectedItem();
+		if (s==null) return 0;  // return a dummy, if choiceEvalQ is empty (happens in case of 'new OtherParams()')
 		return Integer.valueOf(s).intValue();
 	}
 	public int getTrainEvalMode() {
 		String s = choiceEvalT.getSelectedItem();
+		if (s==null) return 0;  // return a dummy, if choiceEvalQ is empty (happens in case of 'new OtherParams()')
 		return Integer.valueOf(s).intValue();
 	}
 	public int getStopTest() {
@@ -220,6 +234,9 @@ public class OtherParams extends Frame
 //	}
 	public int getNumEval() {
 		return Integer.valueOf(numEval_T.getText()).intValue();
+	}
+	public int getNPly() {
+		return Integer.valueOf(nPly_T.getText()).intValue();
 	}
 	public int getEpiLength() {
 		int elen = Integer.valueOf(epiLeng_T.getText()).intValue();
@@ -272,11 +289,18 @@ public class OtherParams extends Frame
 	public void setNumEval(int value) {
 		numEval_T.setText(value+"");
 	}
+	public void setNPly(int value) {
+		nPly_T.setText(value+"");
+	}
 	public void setEpiLength(int value) {
 		numEval_T.setText(value+"");
 	}
 	public void setMinimaxDepth(int value) {
 		miniDepth_T.setText(value+"");
+	}
+	public void enableNPly(boolean enable) {
+		nPly_L.setEnabled(enable);
+		nPly_T.setEnabled(enable);
 	}
 	
 	/**
@@ -290,6 +314,7 @@ public class OtherParams extends Frame
 		this.setEpiLength(op.getEpisodeLength());
 		this.setStopTest(op.getStopTest());
 		this.setStopEval(op.getStopEval());
+		this.setNPly(op.getNPly());
 		this.chooseS01.setState(op.useChooseStart01());
 		this.learnRM.setState(op.useLearnFromRM());
 		this.rewardIsGameScore.setState(op.getRewardIsGameScore());

@@ -34,14 +34,14 @@ public class HumanPlayer extends AgentBase implements PlayAgent
 		return 0;
 	}
 
-	/**
-	 * <p>
-	 * Use now {@link Types.ACTIONS#isRandomAction()}
-	 */
-	@Deprecated
-	public boolean wasRandomAction() {
-		return false;
-	}
+//	/**
+//	 * <p>
+//	 * Use now {@link Types.ACTIONS#isRandomAction()}
+//	 */
+//	@Deprecated
+//	public boolean wasRandomAction() {
+//		return false;
+//	}
 
 	@Override
 	public String stringDescr() {

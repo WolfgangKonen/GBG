@@ -85,15 +85,15 @@ public interface PlayAgent {
 	 */
 	public double estimateGameValue(StateObservation sob);
 	
-	/**
-	 * 
-	 * @return	returns true/false, whether the action suggested by last call 
-	 * 			to getNextAction() was a random action 
-	 * <p>
-	 * Use now {@link Types.ACTIONS#isRandomAction()}
-	 */
-	@Deprecated
-	public boolean wasRandomAction(); 
+//	/**
+//	 * 
+//	 * @return	returns true/false, whether the action suggested by last call 
+//	 * 			to getNextAction() was a random action 
+//	 * <p>
+//	 * Use now {@link Types.ACTIONS#isRandomAction()}
+//	 */
+//	@Deprecated
+//	public boolean wasRandomAction(); 
 	
 	/**
 	 * Train the Agent for one complete game episode. <p>

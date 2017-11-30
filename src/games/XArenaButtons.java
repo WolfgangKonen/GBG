@@ -282,6 +282,11 @@ public class XArenaButtons extends JPanel
 				{
 					public void actionPerformed(ActionEvent e)
 					{	
+						if (m_game.taskState==ArenaTrain.Task.INSPECTV) {
+							// if Play button is pressed while being in InspectV-mode, 
+							// store this in taskBefore:
+							m_game.taskBefore=ArenaTrain.Task.INSPECTV;
+						}
 						// toggle m_game.state between PLAY and IDLE
 						if (m_game.taskState!=ArenaTrain.Task.PLAY) {
 							m_game.taskState = ArenaTrain.Task.PLAY;
@@ -307,8 +312,9 @@ public class XArenaButtons extends JPanel
 						if (m_game.taskState!=ArenaTrain.Task.INSPECTV) {
 							m_game.taskState = ArenaTrain.Task.INSPECTV;
 							m_game.setStatusMessage("Inspecting the value function ...");
-							enableButtons(false);
-							InspectV.setEnabled(true);	
+							enableButtons(false);			// disable all buttons ...
+							InspectV.setEnabled(true);		// ... but the InspectV button
+							Play.setEnabled(true);			// ... and the Play button
 						} else {
 							m_game.taskState = ArenaTrain.Task.IDLE;
 							m_game.setStatusMessage("Done.");
@@ -485,6 +491,7 @@ public class XArenaButtons extends JPanel
 	void enableButtons(boolean state) {
 		Play.setEnabled(state);
 		InspectV.setEnabled(state);
+		Logs.setEnabled(state);
 //		TDparB.setEnabled(state);
 //		TCparB.setEnabled(state);//samine//
 //		CMAparB.setEnabled(state);

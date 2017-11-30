@@ -183,18 +183,18 @@ public class RandomAgent extends AgentBase implements PlayAgent
 	}
 
 
-	/**
-	 * 
-	 * @return	returns true/false, whether the action suggested by last call 
-	 * 			to getNextAction() was a random action. 
-	 * 			Always true in the case of RandomAgent.
-	 * <p>
-	 * Use now {@link Types.ACTIONS#isRandomAction()}
-	 */
-	@Deprecated
-	public boolean wasRandomAction() {
-		return true;
-	}
+//	/**
+//	 * 
+//	 * @return	returns true/false, whether the action suggested by last call 
+//	 * 			to getNextAction() was a random action. 
+//	 * 			Always true in the case of RandomAgent.
+//	 * <p>
+//	 * Use now {@link Types.ACTIONS#isRandomAction()}
+//	 */
+//	@Deprecated
+//	public boolean wasRandomAction() {
+//		return true;
+//	}
 
 
 	@Override

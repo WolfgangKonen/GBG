@@ -139,10 +139,10 @@ public class StateObserverHex implements StateObservation {
 		return true;
 	}
 
-    @Override
-	public boolean has2OppositeRewards() {
-		return true;
-	}
+//    @Override
+//	public boolean has2OppositeRewards() {
+//		return true;
+//	}
 
     @Override
     public boolean isLegalState() {

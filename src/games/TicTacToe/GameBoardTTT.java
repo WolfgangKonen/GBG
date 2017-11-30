@@ -403,10 +403,22 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	
 	private void InspectMove(int x, int y)
 	{
-		int[][] table = m_so.getTable();
-		int hvalue = ((table[x][y] + 2) % 3) -1;	// i.e. state change 0->1, 1->-1, -1->0 
-		table[x][y]=hvalue;
-		m_so = new StateObserverTTT(table);
+//		int[][] table = m_so.getTable();
+//		int hvalue = ((table[x][y] + 2) % 3) -1;	// i.e. state change 0->1, 1->-1, -1->0 
+//		table[x][y]=hvalue;
+//		m_so = new StateObserverTTT(table);
+		int iAction = 3*x+y;
+		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
+		if (!m_so.isLegalAction(act)) {
+			System.out.println("Desired action is not legal!");
+			m_Arena.setStatusMessage("Desired action is not legal");
+			return;
+		} else {
+			m_Arena.setStatusMessage("Inspecting the value function ...");
+		}
+		m_so.advance(act);			// this allows m_so to add random elements from game 
+									// environment (not necessary in TicTacToe)
+		updateBoard(null,false,false);
 		arenaActReq = true;		
 	}
 	

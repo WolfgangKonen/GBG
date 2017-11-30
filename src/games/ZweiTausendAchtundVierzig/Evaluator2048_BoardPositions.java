@@ -204,35 +204,55 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
         List<StateObserver2048> gameStates = new ArrayList<>();
 
-        //play i games
-        List<Callable<List<StateObserver2048>>> callables = new ArrayList<>();
-        for(int i = ConfigEvaluator.GAMESFORNEWGAMESTATES; i > 0; i--) {
-            int gameNumber = i;
-            callables.add(() -> {
+        boolean PAR = true;
+        
+        if (PAR) {
+            //play i games --- parallel execution on all available cores ---
+            List<Callable<List<StateObserver2048>>> callables = new ArrayList<>();
+            for(int i = ConfigEvaluator.GAMESFORNEWGAMESTATES; i > 0; i--) {
+                int gameNumber = i;
+                callables.add(() -> {
+                    StateObserver2048 gameState = new StateObserver2048();
+                    PlayAgent playAgent = new MCAgent(new MCParams());
+                    List<StateObserver2048> tempGameStates = new ArrayList<>();
+                    while (!gameState.isGameOver()) {
+                        tempGameStates.add(gameState.copy());
+                        gameState.advance(playAgent.getNextAction2(gameState, false, true));
+                    }
+                    System.out.println("Finished with Game " + gameNumber);
+                    return tempGameStates;
+                });
+            }
+
+            //merge all gameStates
+            try {
+                executorService.invokeAll(callables).stream().map(future -> {
+                    try {
+                        return future.get();
+                    }
+                    catch (Exception e) {
+                        throw new IllegalStateException(e);
+                    }
+                }).forEach(gameStates::addAll);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }        	
+        } else {
+            //play i games --- serial execution on one core (better for debugging) ---
+            List<StateObserver2048> tempGameStates=null;
+            for(int i = ConfigEvaluator.GAMESFORNEWGAMESTATES; i > 0; i--) {
+                int gameNumber = i;
                 StateObserver2048 gameState = new StateObserver2048();
                 PlayAgent playAgent = new MCAgent(new MCParams());
-                List<StateObserver2048> tempGameStates = new ArrayList<>();
+                tempGameStates = new ArrayList<>();
                 while (!gameState.isGameOver()) {
                     tempGameStates.add(gameState.copy());
                     gameState.advance(playAgent.getNextAction2(gameState, false, true));
                 }
                 System.out.println("Finished with Game " + gameNumber);
-                return tempGameStates;
-            });
-        }
+                gameStates.addAll(tempGameStates);
+            }
 
-        //merge all gameStates
-        try {
-            executorService.invokeAll(callables).stream().map(future -> {
-                try {
-                    return future.get();
-                }
-                catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
-            }).forEach(gameStates::addAll);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
         /*remove inconclusive gameStates like
@@ -305,7 +325,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
         //save all gameStates
         try {
-            FileOutputStream fos = new FileOutputStream("games\\ZweiTausendAchtundVierzig\\gameStates.ser");
+    		String gsFile = Types.GUI_DEFAULT_DIR_AGENT+"\\2048\\gameStates\\gameStates.ser";
+            FileOutputStream fos = new FileOutputStream(gsFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(gameStateContainers);
             fos.close();
@@ -322,7 +343,9 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
         //load gameStates
         try {
-            FileInputStream fis = new FileInputStream("games\\ZweiTausendAchtundVierzig\\gameStates.ser");
+    		String gsFile = Types.GUI_DEFAULT_DIR_AGENT+"\\2048\\gameStates\\gsFile";
+            FileInputStream fis = new FileInputStream(gsFile);
+//            FileInputStream fis = new FileInputStream("bin\\games\\ZweiTausendAchtundVierzig\\gameStates.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
             List<GameStateContainer> gameStateContainers = (List<GameStateContainer>)ois.readObject();
             fis.close();
@@ -365,7 +388,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     @Override
     public String getMsg() {
-        return "use this Spreedsheat to analyse output: https://docs.google.com/spreadsheets/d/1fAX-gwf4keZut4vuAZ2GQro5ubiLOeVvwhzn74zPTKs/edit?usp=sharing";
+        return "use this spreadsheet to analyse output: https://docs.google.com/spreadsheets/d/1fAX-gwf4keZut4vuAZ2GQro5ubiLOeVvwhzn74zPTKs/edit?usp=sharing";
     }
 
     @Override

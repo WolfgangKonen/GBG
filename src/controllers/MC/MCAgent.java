@@ -631,14 +631,14 @@ public class MCAgent extends AgentBase implements PlayAgent {
 		m_oPar = new ParOther();
 	}
 
-	/**
-	 * 
-	 * Use now {@link Types.ACTIONS#isRandomAction()}
-	 */
-    @Deprecated
-    public boolean wasRandomAction() {
-        return false;
-    }
+//	/**
+//	 * 
+//	 * Use now {@link Types.ACTIONS#isRandomAction()}
+//	 */
+//    @Deprecated
+//    public boolean wasRandomAction() {
+//        return false;
+//    }
 
     @Override
     public String stringDescr() {

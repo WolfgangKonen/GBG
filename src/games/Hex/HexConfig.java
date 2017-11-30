@@ -11,7 +11,7 @@ class HexConfig {
     /**
      * Length of one side of the game board in tiles
      */
-    final static int BOARD_SIZE = 6;
+    final static int BOARD_SIZE = 5;
 
     /**
      * Size of hexagons in px (from one side to the opposite one)

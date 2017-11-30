@@ -117,16 +117,16 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		StateObservation NewSO;
 		int count = 1; // counts the moves with same iMaxScore
         Types.ACTIONS actBest = null;
-        String stringRep;
+        String stringRep ="";
         Double sc;
         int iBest;
 		//VTable = new double[so.getNumAvailableActions()];
         // DON'T! The caller has to define VTable with the right length
 		
-        stringRep = so.stringDescr();
-        if (stringRep.equals("XoXoXo-X-")) {		// only debug for TTT
-        	int dummy=1;
-        }
+//        stringRep = so.stringDescr();
+//        if (stringRep.equals("XoXoXo-X-")) {		// only debug for TTT
+//        	int dummy=1;
+//        }
 		assert so.isLegalState() 
 			: "Not a legal state"; // e.g. player to move does not fit to Table
 
@@ -151,7 +151,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
         	}
 			if (depth<this.m_depth) {
 				if (sc==null) {
-					// here is the recursion: getScore calls getBestAction:
+					// here is the recursion: getScore may call getBestAction back:
 					CurrentScore = getScore(NewSO,depth+1);	
 					switch(so.getNumPlayers()) {
 					case (1): break;
@@ -212,18 +212,18 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	}
 
 
-	/**
-	 * 
-	 * @return	returns true/false, whether the action suggested by last call 
-	 * 			to getNextAction() was a random action. 
-	 * 			Always false in the case of MinimaxAgent
-	 * <p>
-	 * Use now {@link Types.ACTIONS#isRandomAction()}
-	 */
-	@Deprecated
-	public boolean wasRandomAction() {
-		return false;
-	}
+//	/**
+//	 * 
+//	 * @return	returns true/false, whether the action suggested by last call 
+//	 * 			to getNextAction() was a random action. 
+//	 * 			Always false in the case of MinimaxAgent
+//	 * <p>
+//	 * Use now {@link Types.ACTIONS#isRandomAction()}
+//	 */
+//	@Deprecated
+//	public boolean wasRandomAction() {
+//		return false;
+//	}
 
 	/**
 	 * Return the agent's score for that after state.
@@ -241,10 +241,10 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		return getScore(sob,0);
 	}
 	private double getScore(StateObservation sob, int depth) {
-		String stringRep = sob.stringDescr();
-		if (stringRep.equals("XXoXXooo-")) {		// only debug for TTT
-			int dummy=1;
-		}
+//		String stringRep = sob.stringDescr();
+//		if (stringRep.equals("XXoXXooo-")) {		// only debug for TTT
+//			int dummy=1;
+//		}
 		if (sob.isGameOver())
 		{
 			int res = sob.getGameWinner().toInt(); 

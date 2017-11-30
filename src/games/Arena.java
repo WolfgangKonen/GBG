@@ -59,6 +59,7 @@ abstract public class Arena extends JPanel implements Runnable {
 	protected GameBoard gb;
 	protected StatusBar statusBar = new StatusBar();
 	public Task taskState = Task.IDLE;
+	public Task taskBefore = Task.IDLE;
 
 	public int minSleepDuration = 0;
 	public int maxSleepDuration = 2000;
@@ -289,7 +290,7 @@ abstract public class Arena extends JPanel implements Runnable {
 				catch (Exception e){}
 			}
 		}
-		gb.clearBoard(true,true);
+		//gb.clearBoard(true,true);
 
 	}
 
@@ -377,7 +378,11 @@ abstract public class Arena extends JPanel implements Runnable {
 		setStatusMessage(sMsg);
 		System.out.println(sMsg);
 		
-		gb.clearBoard(true,true);
+		if (taskBefore!=Task.INSPECTV) {
+			gb.clearBoard(true,true);
+		}
+		taskBefore=Task.IDLE;
+		
 		gb.setActionReq(true);
 		so = gb.getStateObs();
 		
@@ -460,6 +465,7 @@ abstract public class Arena extends JPanel implements Runnable {
 				switch (so.getNumPlayers()) {
 				case 1: 
 					double gScore = so.getGameScore();
+					if (so instanceof StateObserver2048) gScore *= StateObserver2048.MAXSCORE;
 					MessageBox.show(m_TicFrame, "Game finished with score " +gScore, 
 							"Game Over", JOptionPane.INFORMATION_MESSAGE );
 					break;  // out of switch

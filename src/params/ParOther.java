@@ -9,6 +9,7 @@ public class ParOther implements Serializable {
     public static int DEFAULT_EPISODE_LENGTH = -1;
     public static int DEFAULT_STOP_TEST = 0;
     public static int DEFAULT_STOP_EVAL = 100;
+    public static int DEFAULT_NPLY = 1;
     public static int DEFAULT_MINIMAX_DEPTH = 10;
 
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
@@ -17,6 +18,7 @@ public class ParOther implements Serializable {
     private int episodeLength = DEFAULT_EPISODE_LENGTH;
     private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 
+    private int nply = DEFAULT_NPLY; 
     private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
     private boolean rewardIsGameScore = true;
@@ -44,12 +46,18 @@ public class ParOther implements Serializable {
 		this.episodeLength = op.getEpiLength();
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
+		this.nply = op.getNPly();
 		this.chooseStart01 = op.useChooseStart01();
 		this.learnFromRM = op.useLearnFromRM();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
 		this.minimaxDepth = op.getMinimaxDepth();
 		this.minimaxHashmap = op.useMinimaxHashmap();	
 	}
+	
+	public void setNPly(int nply) {
+		this.nply=nply;
+	}
+	
 
 	public int getQuickEvalMode() {
 		return quickEvalMode;
@@ -76,6 +84,10 @@ public class ParOther implements Serializable {
 
 	public int getStopEval() {
 		return stopEval;
+	}
+
+	public int getNPly() {
+		return nply;
 	}
 
 	public boolean useChooseStart01() {

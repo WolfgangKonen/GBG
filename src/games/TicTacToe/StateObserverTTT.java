@@ -75,10 +75,10 @@ public class StateObserverTTT implements StateObservation {
 		return true;
 	}
 	
-    @Override
-	public boolean has2OppositeRewards() {
-		return true;
-	}
+//    @Override
+//	public boolean has2OppositeRewards() {
+//		return true;
+//	}
 
     @Override
 	public boolean isLegalState() {

@@ -1,13 +1,12 @@
 package games;
 
-import controllers.TD.ntuple.TDNTupleAgt;
-import controllers.TD.ntuple.NTupleValueFunc;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple.NTupleFactory;
 import java.util.HashSet;
 
 
 /**
- * Interface for the n-tuple implementation in {@link TDNTupleAgt} and 
+ * Interface for the n-tuple implementation in {@link TDNTuple2Agt} and 
  * {@link NTupleValueFunc}. Contains game-specific functions for producing a 
  * board vector, symmetric board vectors (if any) and a fixed n-tuple set. <p>
  * 
