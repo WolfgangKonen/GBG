@@ -16,19 +16,20 @@ import java.util.Random;
  * The Minimax {@link PlayAgent}. It traverses the game tree up to a prescribed 
  * depth (default: 10, see {@link OtherParams}). To speed up calculations, already 
  * visited states are stored in a HashMap.  
+ * <p>
+ * {@link MinimaxAgent} is only viable for 1- and 2-player games. See {@link MaxNAgent}
+ * for the arbitrary n-player variant.
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  * 
+ * @see MaxNAgent
  */
 public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 {
 	private Random rand;
-	private int m_GameNum;
-	private int	m_MaxGameNum;
-	private double[] m_VTable;
 	private int m_depth=10;
-	private HashMap<String,Double> hm;
 	private boolean m_useHashMap=true;
+	private HashMap<String,Double> hm;
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -97,17 +98,17 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
         List<Types.ACTIONS> actions = so.getAvailableActions();
 		double[] VTable, vtable;
-        vtable = new double[actions.size()];  
+//        vtable = new double[actions.size()];  
         VTable = new double[actions.size()+1];  
 		
-		Types.ACTIONS actBest = getBestAction(so,  random,  VTable,  silent, 0);
+		Types.ACTIONS act_best = getBestAction(so, so,  random,  VTable,  silent, 0);
 		
-		double bestScore = VTable[actions.size()];
-		for (int i=0; i<vtable.length; i++) vtable[i]=VTable[i];
-        return new Types.ACTIONS_VT(actBest.toInt(), true, vtable, bestScore);
+//		double bestScore = VTable[actions.size()];
+//		for (int i=0; i<vtable.length; i++) vtable[i]=VTable[i];
+        return new Types.ACTIONS_VT(act_best.toInt(), act_best.isRandomAction(), VTable);
 	}
 
-	private Types.ACTIONS getBestAction(StateObservation so, boolean random, 
+	private Types.ACTIONS getBestAction(StateObservation so, StateObservation refer, boolean random, 
 			double[] VTable, boolean silent, int depth) 
 	{
 		int i,j;
@@ -127,8 +128,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 //        if (stringRep.equals("XoXoXo-X-")) {		// only debug for TTT
 //        	int dummy=1;
 //        }
-		assert so.isLegalState() 
-			: "Not a legal state"; // e.g. player to move does not fit to Table
+		assert so.isLegalState() : "Not a legal state"; 
 
 		iMaxScore = -Double.MAX_VALUE;
         ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
@@ -152,14 +152,14 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 			if (depth<this.m_depth) {
 				if (sc==null) {
 					// here is the recursion: getScore may call getBestAction back:
-					CurrentScore = getScore(NewSO,depth+1);	
+					CurrentScore = getScore(NewSO,refer,depth+1);	
 					switch(so.getNumPlayers()) {
 					case (1): break;
 		            case (2): 
 		            	CurrentScore = - CurrentScore; 		// negamax variant for 2-player tree
 		            	break;
 		            default:		// i.e. n-player, n>2
-		            	throw new RuntimeException("Minimax is not yet implemented for n-player games (n>2).");
+		            	throw new RuntimeException("Minimax is not implemented for n-player games (n>2). Consider MaxNAgent.");
 		            }
 					if (m_useHashMap) hm.put(stringRep, CurrentScore);
 				} else {
@@ -232,15 +232,14 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * 						state. If game is over: the score for the player who 
 	 * 						*would* move (if the game were not over).
 	 * Each player wants to maximize its score	 
-	 * 				    	
 	 */
 	 // OLD return: V(), the prob. that X (Player +1) wins from that after state. 
 	 // Player*V() is the quantity to be maximized by getBestAction.  
 	@Override
 	public double getScore(StateObservation sob) {
-		return getScore(sob,0);
+		return getScore(sob,sob,0);
 	}
-	private double getScore(StateObservation sob, int depth) {
+	private double getScore(StateObservation sob, StateObservation refer, int depth) {
 //		String stringRep = sob.stringDescr();
 //		if (stringRep.equals("XXoXXooo-")) {		// only debug for TTT
 //			int dummy=1;
@@ -257,7 +256,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		int n=sob.getNumAvailableActions();
 		double[] vtable	= new double[n+1];
 		// here is the recursion: getBestAction calls getScore(...,depth+1):
-		getBestAction(sob,  false,  vtable,  true, depth);  // sets vtable[n]=iMaxScore
+		getBestAction(sob, refer, false,  vtable,  true, depth);  // sets vtable[n]=iMaxScore
 		return vtable[n];		// return iMaxScore
 	}
 

@@ -11,6 +11,7 @@ import controllers.TD.TDAgent;
 import games.StateObservation;
 import tools.MessageBox;
 import tools.Types;
+import tools.Types.ScoreTuple;
 
 /**
  * Class AgentBase implements functionality of the interface {@link PlayAgent} 
@@ -54,6 +55,10 @@ abstract public class AgentBase implements Serializable {
 	 */
 	abstract public double getScore(StateObservation sob);
 	
+	public ScoreTuple getScoreTuple(StateObservation sob) {
+		throw new RuntimeException("The derived class has to implement getScoreTuple!");
+	}
+	
 	/**
 	 * Return the estimated game value for {@link StateObservation} sob. The default 
 	 * behavior is to return {@link #getScore(StateObservation)}.<p>
@@ -73,6 +78,20 @@ abstract public class AgentBase implements Serializable {
 		return getScore(sob);
 	};
 
+	/**
+	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
+	 * Is called when maximum episode length (TD) or maximum tree depth for certain agents (Max-N) 
+	 * is reached.
+	 * 
+	 * @param sob			the current game state
+	 * @return				the agent's estimate of the final reward <b>for all players</b>. 
+	 * 						The return value is a tuple containing  
+	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
+	 */
+	public Types.ScoreTuple estimateGameValueTuple(StateObservation sob) {
+		throw new RuntimeException("Agents derived from AgentBase have to implement this method estimateGameValueTuple");
+	}
+	
 	public AgentState getAgentState() {
 		return m_agentState;
 	}	

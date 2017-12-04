@@ -1,7 +1,8 @@
 package games;
 
+import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.TDNTuple2Agt;
-import controllers.TD.ntuple.NTupleFactory;
+
 import java.util.HashSet;
 
 
@@ -15,7 +16,7 @@ import java.util.HashSet;
  * {@link #fixedNTuples(int)} and {@link #adjacencySet(int)} are only required for the 
  * n-tuple interface. 
  * If an implementing game does not need that part (i. e. if it does not plan to 
- * use {@link TDNTupleAgt}), it may just code stubs returning 0, {@code null}, 
+ * use {@link TDNTuple2Agt}), it may just code stubs returning 0, {@code null}, 
  * or throwing a {@link RuntimeException}.
  *
  * @author Wolfgang Konen, TH Köln, Feb'17

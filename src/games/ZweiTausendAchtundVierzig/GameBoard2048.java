@@ -7,7 +7,6 @@ import tools.Types;
 
 import javax.swing.*;
 
-import controllers.TD.ntuple.TDNTupleAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 
 import java.awt.*;

@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 
-import agentIO.TDNTupleAgt_v12;
 import params.NTParams;
 import params.OtherParams;
 import params.ParNT;
@@ -24,11 +23,10 @@ import tools.Types;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
-import controllers.TD.ntuple.TDNTupleAgt;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
-import games.StateObservationNondeterministic;
+import games.StateObservationNondet;
 import games.XNTupleFuncs;
 import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -43,8 +41,8 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * Some functionality is packed in the superclass 
  * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...)
  * <p>
- * {@link TDNTuple2Agt} replaces the older {@link TDNTupleAgt}. 
- * The differences of {@link TDNTuple2Agt} to {@link TDNTupleAgt} are:
+ * {@link TDNTuple2Agt} replaces the older {@code TDNTupleAgt}. 
+ * The differences of {@link TDNTuple2Agt} to {@code TDNTupleAgt} are:
  * <ul>
  * <li> no eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
  * 		memory consumptive)
@@ -54,14 +52,13 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * <li> has the random move rate bug fixed: Now EPSILON=0.0 means really 'no ramdom moves'.
  * <li> learning rate ALPHA differently scaled: if ALPHA=1.0, the new value for a
  * 		state just trained will be exactly the target. Therefore, recommended ALPHA values are 
- * 		m*N_s bigger than in {@link TDNTupleAgt}, where m=number of n-tuples, N_s=number of 
+ * 		m*N_s bigger than in {@code TDNTupleAgt}, where m=number of n-tuples, N_s=number of 
  * 		symmetric (equivalent) states. 
  * <li> a change in the update formula: when looping over different equivalent
  * 		states, at most one update per index is allowed (see comment in {@link NTuple2} for 
  * 		member {@code indexList}).
  * </ul>
  * 
- * @see TDNTupleAgt
  * @see PlayAgent
  * @see AgentBase
  * 

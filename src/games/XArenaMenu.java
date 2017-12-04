@@ -14,14 +14,15 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import controllers.AgentBase;
+import controllers.ExpectimaxNAgent;
 import controllers.HumanPlayer;
+import controllers.MaxNAgent;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
-import controllers.TD.ntuple.TDNTupleAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import tools.MessageBox;
 import tools.ShowBrowser;
@@ -486,22 +487,22 @@ public class XArenaMenu extends JMenuBar {
 					((TDAgent) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar.setFrom( ((TDAgent) td).getOtherPar() );
 			}
-			else if (td instanceof TDNTupleAgt) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar.setFrom( ((TDNTupleAgt) td).getTDParams() );
-				m_arena.m_xab.ntPar.setFrom( ((TDNTupleAgt) td).getNTParams() );
-				if (((TDNTupleAgt) td).getOtherPar() == null ) 
-					((TDNTupleAgt) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar.setFrom( ((TDNTupleAgt) td).getOtherPar() );
-				//
-				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
-				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
-				// get the loaded values)
-				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
-				// it doesn't hurt
-				((TDNTupleAgt) td).setTDParams(((TDNTupleAgt) td).getTDParams(), td.getMaxGameNum());
-				((TDNTupleAgt) td).setNTParams(((TDNTupleAgt) td).getNTParams());
-			}
+//			else if (td instanceof TDNTupleAgt) {
+//				// set the agent parameters in XArenaTabs:
+//				m_arena.m_xab.tdPar.setFrom( ((TDNTupleAgt) td).getTDParams() );
+//				m_arena.m_xab.ntPar.setFrom( ((TDNTupleAgt) td).getNTParams() );
+//				if (((TDNTupleAgt) td).getOtherPar() == null ) 
+//					((TDNTupleAgt) td).setDefaultOtherPar();
+//				m_arena.m_xab.oPar.setFrom( ((TDNTupleAgt) td).getOtherPar() );
+//				//
+//				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+//				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
+//				// get the loaded values)
+//				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
+//				// it doesn't hurt
+//				((TDNTupleAgt) td).setTDParams(((TDNTupleAgt) td).getTDParams(), td.getMaxGameNum());
+//				((TDNTupleAgt) td).setNTParams(((TDNTupleAgt) td).getNTParams());
+//			}
 			else if (td instanceof TDNTuple2Agt) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar.setFrom( ((TDNTuple2Agt) td).getTDParams() );
@@ -544,8 +545,16 @@ public class XArenaMenu extends JMenuBar {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.oPar.setMinimaxDepth( ((MinimaxAgent) td).getDepth() );
 			}
+			else if (td instanceof MaxNAgent) {
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.oPar.setMinimaxDepth( ((MaxNAgent) td).getDepth() );
+			}
+			else if (td instanceof ExpectimaxNAgent) {
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.oPar.setMinimaxDepth( ((ExpectimaxNAgent) td).getDepth() );
+			}
 			
-			if (td instanceof TDAgent || td instanceof TDNTupleAgt || td instanceof TDNTuple2Agt) {
+			if (td instanceof TDAgent || td instanceof TDNTuple2Agt /* || td instanceof TDNTupleAgt */) {
 				// If it is one of the trainable agents: set maxGameNum and 
 				// numEval according to the settings in the loaded agent
 				// (at least maxGameNum is relevant for training): 

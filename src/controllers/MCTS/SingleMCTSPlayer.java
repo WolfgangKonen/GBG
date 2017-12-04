@@ -11,10 +11,11 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * This is adapted from Diego Perez MCTS reference implementation
- * 		http://gvgai.net/cont.php
- * (with a bug fix concerning the number of available actions and an 
+ * This is adapted from Diego Perez MCTS reference implementation<br>
+ * 		<a href="http://gvgai.net/cont.php">http://gvgai.net/cont.php</a><br>
+ * (with a bug fix concerning the number of available actions and  
  *  extensions for 1- and 2-player games)
+ *  
  * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 public class SingleMCTSPlayer implements Serializable

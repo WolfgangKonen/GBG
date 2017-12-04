@@ -16,14 +16,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import controllers.TD.ntuple.TDNTupleAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
- *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTupleAgt}
+ *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTuple2Agt}
  *  
  *  @see ParNT
- *  @see TDNTupleAgt
+ *  @see TDNTuple2Agt
  */
 public class NTParams extends Frame implements Serializable {
 	private static final String TIPRANDL = "n-tuple randomness: If checked, generate random n-tuples. If not, take fixed n-tuple set acc. to 'n-tuple fixed mode'";
@@ -389,8 +388,8 @@ public class NTParams extends Frame implements Serializable {
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
 	 * parameters" we mean parameter producing good results.
 	 * 
-	 * @param agentName currently only "TD-Ntuple" or "TD-Ntuple-2"
-	 * 				(for {@link TDNTupleAgt} or {@link TDNTuple2Agt}), 
+	 * @param agentName currently only "TD-Ntuple-2"
+	 * 				(for {@link TDNTuple2Agt}), 
 	 * 				all other strings are without any effect
 	 * @param gameName
 	 */

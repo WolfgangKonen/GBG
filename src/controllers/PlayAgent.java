@@ -3,6 +3,7 @@ package controllers;
 import games.StateObservation;
 import games.GameBoard;
 import tools.Types;
+import tools.Types.ScoreTuple;
 
 /**
  * The abstract interface for the game playing agents.
@@ -71,12 +72,16 @@ public interface PlayAgent {
 	 * 						If game is over: the score for the player who *would*
 	 * 						move (if the game were not over).<p>
 	 * Each player wants to maximize *its* score.	 
-	 * 				    	
 	 */
 	public double getScore(StateObservation sob);
 	
+	public ScoreTuple getScoreTuple(StateObservation sob);
+	
 	/**
-	 * Return the agent's estimate of the final game value (final reward) 
+	 * Return the agent's estimate of the final game value (final reward). Is called when
+	 * maximum episode length (TD) or maximum tree depth for certain agents (Minimax) 
+	 * is reached.
+	 * 
 	 * @param sob			the current game state;
 	 * @return				the agent's estimate of the final reward. This may be 
 	 * 						the same as {@link #getScore(StateObservation)} (as 
@@ -84,6 +89,18 @@ public interface PlayAgent {
 	 * 						overridden by derived classes.
 	 */
 	public double estimateGameValue(StateObservation sob);
+	
+	/**
+	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
+	 * Is called when maximum episode length (TD) or maximum tree depth for certain agents (Max-N) 
+	 * is reached.
+	 * 
+	 * @param sob			the current game state
+	 * @return				the agent's estimate of the final reward <b>for all players</b>. 
+	 * 						The return value is a tuple containing  
+	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
+	 */
+	public Types.ScoreTuple estimateGameValueTuple(StateObservation sob);
 	
 //	/**
 //	 * 

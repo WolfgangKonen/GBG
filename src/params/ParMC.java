@@ -19,6 +19,13 @@ public class ParMC implements Serializable {
 
 	public ParMC() {	}
     
+    public ParMC(ParMC tp) {
+		this.numIters = tp.getNumIter();
+		this.numAgents = tp.getNumAgents();
+		this.rolloutDepth = tp.getRolloutDepth();
+		this.calcCertainty = tp.getCalcCertainty();
+    }
+    
     public ParMC(MCParams tp) { 
     	this.setFrom(tp);
     }
@@ -43,7 +50,7 @@ public class ParMC implements Serializable {
 		return calcCertainty;
 	}
 
-	public void setNumIter(int numIters) {
+	public void setIterations(int numIters) {
 		this.numIters = numIters;
 	}
 	public void setNumAgents(int numAgents) {

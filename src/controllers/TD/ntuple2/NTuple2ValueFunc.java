@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
 
-import controllers.TD.ntuple.TDNTupleAgt;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;

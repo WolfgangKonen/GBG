@@ -4,7 +4,9 @@ package tools;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import controllers.MaxNAgent;
 import controllers.PlayAgent;
+import games.StateObservation;
 
 import java.awt.event.KeyEvent;
 import java.io.Serializable;
@@ -38,6 +40,11 @@ public class Types {
         public ACTIONS(int numVal, boolean random) {			
             this.key = numVal;
             this.randomSelect = random;
+        }
+        
+        public ACTIONS(ACTIONS oa) {
+            this.key = oa.key;
+            this.randomSelect = oa.randomSelect;        	
         }
 
         public int toInt() {
@@ -152,6 +159,73 @@ public class Types {
     } // class ACTIONS_VT
 
 
+    /**
+     *	ScoreTuple: a tuple with scores (game values) for all players.
+     * 
+     *	@see MaxNAgent
+     */
+    public static class ScoreTuple {
+    	public enum CombineOP {AVG,MIN};
+    	public double[] scTup;
+    	private double minValue = Double.MIN_VALUE;
+    	
+    	public ScoreTuple(StateObservation sob) {
+    		this.scTup = new double[sob.getNumPlayers()];
+    	}
+    	public ScoreTuple(double [] res) {
+    		this.scTup = res.clone();
+    	}
+    	public ScoreTuple(ScoreTuple ost) {
+    		this.scTup = ost.scTup.clone();
+    	}
+    	public String toString() {
+    		String cs = "(";
+    		for (int i=0; i<scTup.length-1; i++) cs = cs + scTup[i] + ", ";
+    		cs = cs + scTup[scTup.length-1] + ")";
+    		return(cs);
+    	}
+    	
+    	/**
+    	 * Combine {@code this} {@link ScoreTuple} with the information in the new {@link ScoreTuple}  
+    	 * {@code currScoreTuple}. Combine according to operator {@code cOP}:
+    	 * <ul>
+    	 * <li> <b>AVG</b>: weighted average or expectation value with probability weight 
+    	 * 		{@code currProbab}
+    	 * <li> <b>MIN</b>: combine by retaining the {@code currScoreTuple}, which has the
+    	 * 		minimal value in {@code scTup[playNum]}, the score for player {@code playNum}
+    	 * </ul>
+    	 * 
+    	 * @param currScoreTuple the new {@link ScoreTuple} 
+    	 * @param cOP			 combine operator 	
+    	 * @param playNum		 player number (needed for {@code cOP}==MIN)
+    	 * @param currProbab	 probability (needed for {@code cOP}==AVG)
+    	 */
+    	public void combine(ScoreTuple currScoreTuple, CombineOP cOP, int playNum, double currProbab)
+    	{
+    		switch(cOP) {
+    		case AVG: 
+        		for (int i=0; i<scTup.length; i++) scTup[i] += currProbab*currScoreTuple.scTup[i];
+    		case MIN:
+    			if (currScoreTuple.scTup[playNum]<minValue) {
+    				this.scTup = currScoreTuple.scTup.clone();
+    			}  			
+    		}
+    	}
+    }
+
+    /**
+     *  ACTIONS_ST = ACTIONS + ScoreTuple (for best action)
+     *  
+     *  @see MaxNAgent
+     */
+    public static class ACTIONS_ST extends Types.ACTIONS {
+    	public ScoreTuple m_st;
+    	public ACTIONS_ST(Types.ACTIONS oa, ScoreTuple st) {
+    		super(oa);
+    		m_st = new ScoreTuple(st); 
+    	}
+    }
+    
     public static enum WINNER {
         PLAYER_DISQ(-100),
         TIE(0),
@@ -175,7 +249,8 @@ public class Types {
      * list of available agents = list of choices in Agent Selectors
      */
     public static final String[] GUI_AGENT_LIST 	 
-    	= {"Random", "Minimax", "MC", "MCTS", "MCTS Expectimax", "Human", "TD-Ntuple", "TD-Ntuple-2", "TDS"};
+    	= {"Random", "Minimax", "Max-N", "Expectimax-N", 
+    	   "MC", "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TDS"};
     /**
      * initial agent choice for P0, P1, ... (for up to 5 players) 
      */
@@ -210,3 +285,4 @@ public class Types {
 	public static final double TD_HORIZONCUT = 0.1;		// see NTuple2ValueFunc.setHorizon()
 	
  }
+

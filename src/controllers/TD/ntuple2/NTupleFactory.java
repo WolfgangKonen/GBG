@@ -1,4 +1,4 @@
-package controllers.TD.ntuple;
+package controllers.TD.ntuple2;
 
 import java.io.FileWriter;
 import java.io.IOException;

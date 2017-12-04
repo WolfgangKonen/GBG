@@ -2,6 +2,7 @@ package controllers.MCTSExpectimax;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
+import controllers.MCTS.MCTSAgentT;
 import games.StateObservation;
 import games.XArenaMenu;
 import params.MCTSExpectimaxParams;
@@ -18,10 +19,11 @@ import java.util.Random;
 
 
 /**
- * This is a Java port from Tom Schaul's VGDL - https://github.com/schaul/py-vgdl
- * and adapted from Diego Perez MCTS implementation http://gvgai.net/cont.php
+ * MCTSExpectimaxAgt is the extension of {@link MCTSAgentT} for <b>non-deterministic</b> games.
  *
  * @author Johannes Kutsch
+ * 
+ * @see MCTSAgentT MCTSAgentT for deterministic games
  */
 public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 {

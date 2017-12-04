@@ -35,6 +35,21 @@ public class ParOther implements Serializable {
 	
 	public ParOther() {	}
     
+	public ParOther(ParOther op) {
+		this.quickEvalMode = op.getQuickEvalMode();
+		this.trainEvalMode = op.getTrainEvalMode();
+		this.numEval = op.getNumEval();
+		this.episodeLength = op.getEpisodeLength();
+		this.stopTest = op.getStopTest();
+		this.stopEval = op.getStopEval();
+		this.nply = op.getNPly();
+		this.chooseStart01 = op.useChooseStart01();
+		this.learnFromRM = op.useLearnFromRM();
+		this.rewardIsGameScore = op.getRewardIsGameScore();
+		this.minimaxDepth = op.getMinimaxDepth();
+		this.minimaxHashmap = op.useMinimaxHashmap();	
+	}
+	
     public ParOther(OtherParams op) { 
     	this.setFrom(op);
     }

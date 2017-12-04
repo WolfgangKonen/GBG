@@ -7,7 +7,6 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,7 +14,7 @@ import java.util.Random;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
- * Class {@link StateObserver2048} holds a 2048 game state.
+ * Class {@link StateObserver2048BitShift} holds a 2048 game state.
  * The game state is coded in a compact way in *one* long number
  * <pre>
  *                 private boardB = 0xfedcba9876543210L
@@ -36,10 +35,11 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
  * @author Wolfgang Konen, THK
  * @author Johannes Kutsch
  */
-public class StateObserver2048 implements StateObservationNondet {
+public class StateObserver2048BitShift implements StateObservationNondet {
     private Random random = new Random();
     protected List<Integer> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves = new ArrayList();   // 0: left, 1: up, 2: right, 3: down
+    protected List<Integer> availableRandoms = new ArrayList();
     protected ACTIONS[] actions;
 
     private long boardB;
@@ -73,7 +73,7 @@ public class StateObserver2048 implements StateObservationNondet {
 	 */
 	private static final long serialVersionUID = 12L;
 
-    public StateObserver2048() {
+    public StateObserver2048BitShift() {
         if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) {
             long seed=42L;					// DEBUG only
             random = new Random(seed);		//
@@ -81,14 +81,14 @@ public class StateObserver2048 implements StateObservationNondet {
         newBoard();
     }
 
-    public StateObserver2048(long board) {
+    public StateObserver2048BitShift(long board) {
         boardB=board;
         updateEmptyTiles();
         updateAvailableMoves();
         isNextActionDeterministic = true;
     }
 
-    public StateObserver2048(long board, int score, int winState, long cumulEmptyTiles, boolean isNextActionDeterministic) {
+    public StateObserver2048BitShift(long board, int score, int winState, long cumulEmptyTiles, boolean isNextActionDeterministic) {
         this.isNextActionDeterministic = isNextActionDeterministic;
         boardB=board;
         updateEmptyTiles();
@@ -106,7 +106,7 @@ public class StateObserver2048 implements StateObservationNondet {
      * @param winState
      */
     @Deprecated
-    public StateObserver2048(int[][] values, int score, int winState, boolean isNextActionDeterministic) {
+    public StateObserver2048BitShift(int[][] values, int score, int winState, boolean isNextActionDeterministic) {
         this.isNextActionDeterministic = isNextActionDeterministic;
         boardB=0;
         updateEmptyTiles();                // add all cells to emptyTiles
@@ -131,8 +131,8 @@ public class StateObserver2048 implements StateObservationNondet {
 
     // Note: StateObs2048 copy() copies the board state, score, winState, cumulEmptyTiles, 
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
-    public StateObserver2048 copy() {
-        return new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
+    public StateObserver2048BitShift copy() {
+        return new StateObserver2048BitShift(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
     }
 
     public boolean isGameOver() {
@@ -603,14 +603,15 @@ public class StateObserver2048 implements StateObservationNondet {
     
 	public ArrayList<ACTIONS> getAvailableRandoms() {
         ArrayList<ACTIONS> availRan = new ArrayList<>();
-        for (int i=0; i<emptyTiles.size()*2; i++) 
-            availRan.add(ACTIONS.fromInt(i));
+        for(int viableMove : availableRandoms) {
+            availRan.add(ACTIONS.fromInt(viableMove));
+        }
         return availRan;
 		
 	}
 
 	public int getNumAvailableRandoms() {
-		return emptyTiles.size()*2;
+		return availableRandoms.size();
 	}
 
 
@@ -653,7 +654,6 @@ public class StateObserver2048 implements StateObservationNondet {
 
         addTile(emptyTiles.get(iAction/2), (iAction%2)+1);
 
-        updateEmptyTiles();
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
@@ -693,8 +693,9 @@ public class StateObserver2048 implements StateObservationNondet {
 
     public double getProbability(ACTIONS action) {
         int iAction = action.toInt();
+        int numEmptyTiles = iAction/2;
         double prob = (iAction%2==0) ? 0.9 : 0.1;
-        return prob/emptyTiles.size();
+        return prob/numEmptyTiles;
     }
     
     public boolean isNextActionDeterministic() {
@@ -821,8 +822,7 @@ public class StateObserver2048 implements StateObservationNondet {
      * Given a new board state {@code boardB}, recompute the list {@code emptyTiles}
      * (Integer list with positions {0,...,15} which have a 0-tile)
      */
-    // updateEmptyTiles is package-visible (for StateObserver2048Slow::assertSameAdvance)
-    void updateEmptyTiles() {
+    public void updateEmptyTiles() {
         emptyTiles.clear();
         long b = boardB;
         for (int j=0; j<16; j++) {
@@ -859,8 +859,7 @@ public class StateObserver2048 implements StateObservationNondet {
         return newBoard;
     }
 
-    // updateAvaliableMoves is package-visible (for StateObserver2048Slow::assertSameAdvance)
-    void updateAvailableMoves() {
+    public void updateAvailableMoves() {
         availableMoves.clear();
         int oldScore = score;
         long oldCumulEmptyTiles = cumulEmptyTiles;
@@ -888,6 +887,11 @@ public class StateObserver2048 implements StateObservationNondet {
         setAvailableActions();
     }
 
+    private void updateAvailableRandoms() {
+        availableRandoms.clear();
+        for (int i=0; i<emptyTiles.size()*2; i++) availableRandoms.add(i);
+    }
+    
     public void printBoard() {
         System.out.println("---------------------------------");
         for(int r=3; r>=0; r--)
@@ -979,7 +983,7 @@ public class StateObserver2048 implements StateObservationNondet {
         updateAvailableMoves();
     }
 
-    private StateObserver2048 rightAction() {
+    private StateObserver2048BitShift rightAction() {
         for (int k=0; k<4; k++) {
             RowBitShift row = this.getRow(k).rAction();
             this.putRow(row,k);
@@ -988,7 +992,7 @@ public class StateObserver2048 implements StateObservationNondet {
         return this;
     }
 
-    private StateObserver2048 leftAction() {
+    private StateObserver2048BitShift leftAction() {
         for (int k=0; k<4; k++) {
             //System.out.println(String.format("Old: %04x", this.getRow(k).getRow()));
             RowBitShift row = this.getRow(k).lAction();
@@ -999,7 +1003,7 @@ public class StateObserver2048 implements StateObservationNondet {
         return this;
     }
 
-    private StateObserver2048 downAction() {
+    private StateObserver2048BitShift downAction() {
         for (int k=0; k<4; k++) {
             RowBitShift row = this.getCol(k).rAction();
             this.putCol(row,k);
@@ -1008,7 +1012,7 @@ public class StateObserver2048 implements StateObservationNondet {
         return this;
     }
 
-    private StateObserver2048 upAction() {
+    private StateObserver2048BitShift upAction() {
         for (int k=0; k<4; k++) {
             RowBitShift row = this.getCol(k).lAction();
             this.putCol(row,k);
@@ -1028,7 +1032,7 @@ public class StateObserver2048 implements StateObservationNondet {
         return row;
     }
 
-    private StateObserver2048 putRow(RowBitShift row, int k) {
+    private StateObserver2048BitShift putRow(RowBitShift row, int k) {
         long[] andB = {0xffffffffffff0000L,
                 0xffffffff0000ffffL,
                 0xffff0000ffffffffL,
@@ -1055,7 +1059,7 @@ public class StateObserver2048 implements StateObservationNondet {
         return row;
     }
 
-    private StateObserver2048 putCol(RowBitShift row, int k) {
+    private StateObserver2048BitShift putCol(RowBitShift row, int k) {
         long[] andB = {0xfff0fff0fff0fff0L,
                 0xff0fff0fff0fff0fL,
                 0xf0fff0fff0fff0ffL,
@@ -1078,9 +1082,9 @@ public class StateObserver2048 implements StateObservationNondet {
      */
     @Override
     public boolean equals(Object arg0) {
-        StateObserver2048 aItem = null;
-        if (arg0 instanceof StateObserver2048) {
-            aItem = (StateObserver2048) arg0;
+        StateObserver2048BitShift aItem = null;
+        if (arg0 instanceof StateObserver2048BitShift) {
+            aItem = (StateObserver2048BitShift) arg0;
         } else {
         	throw new RuntimeException("so is not a StateObserver2048 object!");
         }
@@ -1092,238 +1096,3 @@ public class StateObserver2048 implements StateObservationNondet {
         return Long.hashCode(boardB);
     }
 }
-
-/**
- * RowBitShift represents an row of the 2048 board in the four lowest hex digits of 
- * {@code int rowB}. Digit 3 is the leftmost tile, digit 0 the rightmost tile.  <br>
- * (RowBitShift represents as well columns of the 2048 board, then digit 3 is the highest tile, 
- * digit 0 is the lowest tile of a column.) <p>
- * 
- * The hex value for each digit is {@code exp} in tile {@code 2^exp}. <p>
- * 
- * RowBitShift has methods {@link RowBitShift#lAction()} and {@link RowBitShift#rAction()} 
- * for left and right move action according to the rules of 2048. On first pass through 
- * these methods, static transposition tables {@code tabLeft} and {@code tabRight} are filled 
- * which contain for each possible row value the resulting row. <br>
- * Likewise, static transposition tables {@code scoreLeft} and {@code scoreRight} are filled 
- * which contain for each possible row value the resulting score. <p>
- * 
- * This speeds up the calculation in {@link StateObs2048BitShift#advance(Action)} by a 
- * factor of 10 as compared to {@link StateObserver2048Slow#advance(Action)}
- * (see {@link StateObs2048BitShift#main(String[])}).
- *
- * @author Wolfgang Konen, THK
- */
-class RowBitShift {
-	int rowB;	// the four lowest hex digits (16 bit) of this 32-bit int are used 
-	int score=0;
-	static int[] tabRight = null;
-	static int[] tabLeft = null; 
-	static int[] scoreRight = null;
-	static int[] scoreLeft = null; 
-	
-	public RowBitShift(int row) {
-		this.rowB = row;
-	}
-	
-	public RowBitShift(RowBitShift rbs) {
-		this.rowB = rbs.rowB;
-	}
-	
-	/**
-	 * Extract the k-th hexadecimal digit
-	 * @param k	one out of {3,2,1,0}, where 3 is the highest digit
-	 * @return an int holding the k-th hexadecimal digit
-	 */
-	public int d(int k) {
-		if (k>3 || k<0) throw new RuntimeException("k"+k+" is not in allowed range {0,1,2,3}");
-		return (rowB >> (k*4)) & 0x0F;
-	}
-	
-	/**
-	 * Shift digits from 3 to {@code lower} by one hex digit (4 bit) to the right, 
-	 * but leave the digits below {@code lower} untouched.
-	 * 
-	 * @param lower one out of {3,2,1,0}, where 3 is the highest digit
-	 * @return the shifted row
-	 */
-	public RowBitShift rShift(int lower) {
-		if (lower>3 || lower<0) throw new RuntimeException("lower"+lower+" is not in allowed range {0,1,2,3}");
-		int[] andS = {0xffff, 0xfff0, 0xff00, 0xf000};
-		int[] andR = {0x0000, 0x000f, 0x00ff, 0x0fff};
-		int shift = (rowB >> 4)  & andS[lower];
-		rowB = shift + (rowB & andR[lower]);
-		
-		return this;
-	}
-	
-	/**
-	 * Shift digits from 0 to {@code higher} by one hex digit (4 bit) to the left, 
-	 * but leave the digits above {@code higher} untouched.
-	 * 
-	 * @param higher one out of {3,2,1,0}, where 3 is the highest digit
-	 * @return the shifted row
-	 */
-	public RowBitShift lShift(int higher) {
-		if (higher>3 || higher<0) throw new RuntimeException("higher"+higher+" is not in allowed range {0,1,2,3}");
-		int[] andS = {0x000f, 0x00ff, 0x0fff, 0xffff};
-		int[] andR = {0xfff0, 0xff00, 0xf000, 0x0000};
-		int shift = (rowB << 4)  & andS[higher];
-		rowB = shift + (rowB & andR[higher]);
-		
-		return this;
-	}
-	
-	/**
-	 * Merge hex digits {@code r+1} and {@code r} on digit {@code r} (right merge),  
-	 * assuming that they both contain the same, non-zero value. 
-	 * Shift digits above {@code r} accordingly.
-	 * Leave digits below {@code r} untouched.
-	 * 
-	 * @param r one out of {2,1,0}
-	 * @return the merged row
-	 */
-	public RowBitShift rMerge(int r) {
-		if (r>2 || r<0) throw new RuntimeException("r="+r+" is not in allowed range {0,1,2}");
-		int exp = this.d(r);
-		if (exp!=this.d(r+1)) throw new RuntimeException("Digits "+(r+1)+" and "+r+" are not the same"); 
-		if (exp==0) throw new RuntimeException("Digit "+r+" must be greater than zero"); 
-
-		// andR is a bit mask which lets all digits pass except the two to-be-merged digits:
-		int[] andR = {0xff00, 0xf00f, 0x00ff};   
-									
-		// since each digit holds the exponent exp of tile 2^exp, merging two tiles (doubling) 
-		// is the same as adding 1 to the exponent:
-		int newd = exp+1;	
-		
-		// the score delta is 2^newd:
-		this.score += (1 << newd);
- 
-		// shift the merged result back to digit r and add the 'passed' digits:
-		rowB = (newd << (4*r)) + (rowB & andR[r]); 
-
-		this.rShift(r+1);
-		return this;
-	}
-	
-	/**
-	 * Merge hex digits {@code r} and {@code r-1} on digit {@code r} (left merge),  
-	 * assuming that they both contain the same, non-zero value. 
-	 * Shift digits below {@code r} accordingly.
-	 * Leave digits above {@code r} untouched.
-	 * 
-	 * @param r one out of {3,2,1}
-	 * @return the merged row
-	 */
-	public RowBitShift lMerge(int r) {
-		if (r>3 || r<1) throw new RuntimeException("r="+r+" is not in allowed range {1,2,3}");
-		int exp = this.d(r);
-		if (exp!=this.d(r-1)) throw new RuntimeException("Digits "+r+" and "+(r-1)+" are not the same"); 
-		if (exp==0) throw new RuntimeException("Digit "+r+" must be greater than zero"); 
-
-		// andR is a bit mask which lets all digits pass except the two to-be-merged digits:
-		int[] andR = {0x0000, 0xff00, 0xf00f, 0x00ff};   
-									
-		// since each digit holds the exponent exp of tile 2^exp, merging two tiles (doubling) 
-		// is the same as adding 1 to the exponent:
-		int newd = exp+1;		
-		
-		// the score delta is 2^newd:
-		this.score += (1 << newd);
- 
-		// shift the merged result back to digit r and add the 'passed' digits:
-		rowB = (newd << (4*r)) + (rowB & andR[r]); 
-
-		this.lShift(r-1);
-		return this;
-	}
-	
-	/**
-	 * Perform a "right" action. <br>
-	 * Use the static transposition table {@code tabRight} to do the job fast. An equivalent
-	 * but slow version (w/o {@code tabRight}) is in {@link RowBitShift#rActionSlow()}. 
-	 * @return the resulting row object
-	 */
-	public RowBitShift rAction( ) {
-		if (tabRight==null) calcTabRight();
-		this.score = scoreRight[rowB];
-		this.rowB = tabRight[rowB];
-		return this;
-	}
-	private void calcTabRight() {
-		int sz = (1 << 16);
-		tabRight = new int[sz];
-		scoreRight = new int[sz];
-		RowBitShift rbs = new RowBitShift(0);
-		for (int i=0; i<sz; i++) {
-			rbs.rowB=i;
-			rbs.score=0;
-			tabRight[i]=rbs.rActionSlow().getRow();
-			scoreRight[i]=rbs.score;
-		}
-	}
-	private RowBitShift rActionSlow( ) {
-		// remove the 'holes' (0-tiles) from left to right:
-		for (int k=2; k>=0; k--) 
-			if (this.d(k)==0) this.rShift(k);
-		
-		// merge adjacent same-value tiles from right to left:
-		for (int r=0; r<3; r++)
-			if (this.d(r+1)==this.d(r) && this.d(r)>0) this.rMerge(r);
-		
-		return this;
-	}
-	
-	/**
-	 * Perform a "left" action. <br>
-	 * Use the static transposition table {@code tabLeft} to do the job fast. An equivalent
-	 * but slow version (w/o {@code tabLeft}) is in {@link RowBitShift#lActionSlow()}. 
-	 * @return the resulting row object
-	 */
-	public RowBitShift lAction( ) {
-		if (tabLeft==null) calcTabLeft();
-		this.score = scoreLeft[rowB];
-		this.rowB = tabLeft[rowB];
-		return this;
-	}
-	private void calcTabLeft() {
-		int sz = (1 << 16);
-		tabLeft = new int[sz];
-		scoreLeft = new int[sz];
-		RowBitShift rbs = new RowBitShift(0);
-		for (int i=0; i<sz; i++) {
-			rbs.rowB=i;
-			rbs.score=0;
-			tabLeft[i]=rbs.lActionSlow().getRow();
-			scoreLeft[i]=rbs.score;
-		}
-	}
-	private RowBitShift lActionSlow( ) {
-		// remove the 'holes' (0-tiles) from right to left:
-		for (int k=1; k<4; k++)
-			if (this.d(k)==0) this.lShift(k);
-		
-		// merge adjacent same-value tiles from left to right:
-		for (int r=3; r>0; r--)
-			if (this.d(r-1)==this.d(r) && this.d(r)>0) this.lMerge(r);
-		
-		return this;
-	}
-	
-	
-	public int getRow() {
-		return rowB;
-	}
-}
-
-class RowInformationContainer implements Serializable {
-    int rowLength;
-    int rowValue;
-
-    public RowInformationContainer(int rowLength, int rowValue) {
-        this.rowLength = rowLength;
-        this.rowValue = rowValue;
-    }
-}
-
-

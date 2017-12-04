@@ -120,8 +120,8 @@ public class XArenaButtons extends JPanel
 		// 
 		// initial settings for the GUI
 		//
-		AgentX = Types.GUI_X_PLAYER;  // "MCTS"; "TDS"; "CMA-ES"; "Minimax" 
-		AgentO = Types.GUI_O_PLAYER;  // "Human";"ValIt";
+		AgentX = null; //Types.GUI_X_PLAYER;  // "MCTS"; "TDS"; "CMA-ES"; "Minimax" 
+		AgentO = null; //Types.GUI_O_PLAYER;  // "Human";"ValIt";
 		GameNumT=new TextField("10000", 5); //("10000", 5);
 		TrainNumT=new TextField("25", 5);
 		//CompeteNumT=new TextField("3", 5);

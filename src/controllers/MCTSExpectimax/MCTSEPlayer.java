@@ -2,7 +2,7 @@ package controllers.MCTSExpectimax;
 
 import controllers.MCTSExpectimax.MCTSExpectimax1.MCTSE1ChanceNode;
 import games.StateObservation;
-import games.StateObservationNondeterministic;
+import games.StateObservationNondet;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import params.MCTSExpectimaxParams;
 import params.MCTSParams;
@@ -82,8 +82,8 @@ public class MCTSEPlayer
 		if(!mctsExpectimaxParams.getAlternativeVersion()) {
 			rootNode = new MCTSEChanceNode(so, null, null, random, this);
 		} else {
-			if(so instanceof StateObservationNondeterministic) {
-				StateObservationNondeterministic son = (StateObservationNondeterministic) so;
+			if(so instanceof StateObservationNondet) {
+				StateObservationNondet son = (StateObservationNondet) so;
 				rootNode = new MCTSE1ChanceNode(son, null, null, random, this);
 			} else {
 				throw new RuntimeException("You need to implement the \"StateObservationNondeterministic\" interface to use the alternative version");

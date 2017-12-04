@@ -2,6 +2,7 @@ package controllers.MCTS;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.StateObservation;
 import games.XArenaMenu;
 import params.MCTSParams;
@@ -18,12 +19,17 @@ import java.util.Random;
 
 
 /**
+ * MCTSAgentT is the MCTS agent for <b>deterministic</b> 1- and 2-player games. 
+ * <p>
  * This is a Java port from Tom Schaul's VGDL - https://github.com/schaul/py-vgdl
- * and adapted from Diego Perez MCTS implementation http://gvgai.net/cont.php
- * 
- * This is the MCTS agent for 1- and 2-player games 
+ * and adapted from Diego Perez MCTS implementation <br>
+ * 		<a href="http://gvgai.net/cont.php">http://gvgai.net/cont.php</a><br>
+ * (with a bug fix concerning the number of available actions and  
+ *  extensions for 1- and 2-player games)
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
+ * 
+ * @see MCTSExpectimaxAgt MCTSExpectimaxAgt for non-deterministic games
  */
 public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable 
 { 

@@ -1,8 +1,10 @@
 package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
-import games.StateObservationNondeterministic;
+import games.StateObservationNondet;
 import tools.Types;
+import tools.Types.ACTIONS;
+import tools.Types.ACTIONS_VT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,12 +22,13 @@ import java.util.Random;
  * 
  * @author Johannes Kutsch, THK
  */
-public class StateObserver2048Slow implements StateObservationNondeterministic {
+public class StateObserver2048Slow implements StateObservationNondet {
     private Random random = new Random();
     protected List<Tile> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves;
+    protected List<Integer> availableRandoms = new ArrayList();
     private Tile[][] gameBoard;
-	protected Types.ACTIONS[] actions;
+	protected ACTIONS[] actions;
 
     // 0 = running, 1 = won, -1 = lost
     private int winState;
@@ -39,11 +42,11 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
     private boolean ASSERTSAME = false; // if true, run through assertSameAdvance
     private boolean isNextActionDeterministic;
 
-    public Types.ACTIONS[] storedActions = null;
-    public Types.ACTIONS storedActBest = null;
+    public ACTIONS[] storedActions = null;
+    public ACTIONS storedActBest = null;
     public double[] storedValues = null;
     public double storedMaxScore;
-    private Types.ACTIONS nextNondeterminisitcAction;
+    private ACTIONS nextNondeterministicAction;
 
     public final static double MAXSCORE = 3932156;
     public final static double MINSCORE = 0;
@@ -102,7 +105,7 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
     private boolean assertSameAdvance(int iAction) {
     	StateObserver2048Slow sot = this.copy();
     	int[][] iArray = toArray();
-    	StateObs2048BitShift sbs = new StateObs2048BitShift(iArray, score, winState);
+    	StateObserver2048 sbs = new StateObserver2048(iArray, score, winState,true);
     	//System.out.println("sot: "+sot.toHexString()+",  score="+sot.getScore());
     	//System.out.println("sbs: "+sbs.stringDescr()+",  score="+sbs.getScore());
     	sot.move(iAction);
@@ -469,7 +472,7 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
 	}
 
     @Override
-    public void advance(Types.ACTIONS action) {
+    public void advance(ACTIONS action) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
         if (ASSERTSAME) {
@@ -482,10 +485,10 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
     }
 
     @Override
-    public ArrayList<Types.ACTIONS> getAvailableActions() {
-        ArrayList<Types.ACTIONS> availAct = new ArrayList<>();
+    public ArrayList<ACTIONS> getAvailableActions() {
+        ArrayList<ACTIONS> availAct = new ArrayList<>();
         for(int viableMove : availableMoves) {
-            availAct.add(Types.ACTIONS.fromInt(viableMove));
+            availAct.add(ACTIONS.fromInt(viableMove));
         }
         return availAct;
     }
@@ -495,10 +498,23 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
         return availableMoves.size();
     }
 
+	public ArrayList<ACTIONS> getAvailableRandoms() {
+        ArrayList<ACTIONS> availRan = new ArrayList<>();
+        for(int viableMove : availableRandoms) {
+            availRan.add(ACTIONS.fromInt(viableMove));
+        }
+        return availRan;
+		
+	}
+
+	public int getNumAvailableRandoms() {
+		return availableRandoms.size();
+	}
+
     @Override
     public void setAvailableActions() {
-        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
-        actions = new Types.ACTIONS[acts.size()];
+        ArrayList<ACTIONS> acts = this.getAvailableActions();
+        actions = new ACTIONS[acts.size()];
         for(int i = 0; i < actions.length; ++i)
         {
             actions[i] = acts.get(i);
@@ -506,11 +522,11 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
     }
 
     @Override
-    public Types.ACTIONS getAction(int i) {
+    public ACTIONS getAction(int i) {
         return actions[i];
     }
 
-    public void advanceDeterministic(Types.ACTIONS action) {
+    public void advanceDeterministic(ACTIONS action) {
         if(!isNextActionDeterministic) {
             throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");
         }
@@ -523,14 +539,12 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
         isNextActionDeterministic = false;
     }
 
-    public void advanceNondeterministic() {
-        setNextNondeterministicAction();
-
+    public void advanceNondeterministic(ACTIONS action) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
 
-        int iAction = nextNondeterminisitcAction.toInt();
+        int iAction = action.toInt();
         assert (emptyTiles.size() * 2 > iAction) : "iAction is not viable.";
 
         //System.out.println("Action: " + iAction + " Value: " + ((iAction%2)+1) + " Position: " + (iAction/2));
@@ -539,7 +553,13 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
 
         updateAvailableMoves();
         isNextActionDeterministic = true;
-        nextNondeterminisitcAction = null;
+        nextNondeterministicAction = null;
+    	
+    }
+    
+    public void advanceNondeterministic() {
+        setNextNondeterministicAction();
+        advanceNondeterministic(nextNondeterministicAction);
     }
 
     /**
@@ -553,7 +573,7 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
     private void setNextNondeterministicAction() {
         if(isNextActionDeterministic) {
             throw new RuntimeException("next Action is Deterministic");
-        } else if(nextNondeterminisitcAction != null) {
+        } else if(nextNondeterministicAction != null) {
             return;
         }
 
@@ -566,17 +586,24 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
             action += 1;
         }
 
-        nextNondeterminisitcAction = Types.ACTIONS.fromInt(action);
+        nextNondeterministicAction = ACTIONS.fromInt(action);
     }
 
+    public double getProbability(ACTIONS action) {
+        int iAction = action.toInt();
+        int numEmptyTiles = iAction/2;
+        double prob = (iAction%2==0) ? 0.9 : 0.1;
+        return prob/numEmptyTiles;
+    }
+    
     public boolean isNextActionDeterministic() {
         return isNextActionDeterministic;
     }
 
-    public Types.ACTIONS getNextNondeterministicAction() {
+    public ACTIONS getNextNondeterministicAction() {
         setNextNondeterministicAction();
 
-        return nextNondeterminisitcAction;
+        return nextNondeterministicAction;
     }
 
     @Override
@@ -586,9 +613,9 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
     }
 
     @Override
-    public void storeBestActionInfo(Types.ACTIONS actBest, double[] vtable) {
-        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
-        storedActions = new Types.ACTIONS[acts.size()];
+    public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
+        ArrayList<ACTIONS> acts = this.getAvailableActions();
+        storedActions = new ACTIONS[acts.size()];
         storedValues = new double[acts.size()];
         for(int i = 0; i < storedActions.length; ++i)
         {
@@ -596,8 +623,8 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
             storedValues[i] = vtable[i];
         }
         storedActBest = actBest;
-        if (actBest instanceof Types.ACTIONS_VT) {
-        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
+        if (actBest instanceof ACTIONS_VT) {
+        	storedMaxScore = ((ACTIONS_VT) actBest).getVBest();
         } else {
             storedMaxScore = vtable[acts.size()];        	
         }
@@ -668,7 +695,7 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
 //		return true;
 //	}
 
-	public boolean isLegalAction(Types.ACTIONS action) {
+	public boolean isLegalAction(ACTIONS action) {
         return availableMoves.contains(action.toInt());
     }
 
@@ -812,6 +839,11 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
         setAvailableActions();
     }
 
+    private void updateAvailableRandoms() {
+        availableRandoms.clear();
+        for (int i=0; i<emptyTiles.size()*2; i++) availableRandoms.add(i);
+    }
+    
     public void printBoard() {
         System.out.println("---------------------------------");
         for(Tile[] row: gameBoard)
@@ -1039,12 +1071,3 @@ public class StateObserver2048Slow implements StateObservationNondeterministic {
     }
 }
 
-class RowInformationContainer implements Serializable {
-    int rowLength;
-    int rowValue;
-
-    public RowInformationContainer(int rowLength, int rowValue) {
-        this.rowLength = rowLength;
-        this.rowValue = rowValue;
-    }
-}

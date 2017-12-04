@@ -1,9 +1,6 @@
 package tools;
 
-//import core.VGDLSprite;
-//import core.game.Game;
 import tools.Types;
-//import ontology.physics.Physics;
 
 import java.awt.*;
 import java.io.File;
@@ -22,10 +19,10 @@ public class Utils
         return elements[rnd.nextInt(elements.length)];
     }
 
-    public static Vector2d choice(ArrayList<Vector2d> elements, Random rnd)
-    {
-        return elements.get(rnd.nextInt(elements.size()));
-    }
+//    public static Vector2d choice(ArrayList<Vector2d> elements, Random rnd)
+//    {
+//        return elements.get(rnd.nextInt(elements.size()));
+//    }
 
     public static String formatString(String str)
     {
@@ -34,83 +31,12 @@ public class Utils
         return str.replaceAll("[\\s&&[^\\n]]+", " ").replaceAll("(?m)^\\s|\\s$", "");
     }
 
-//    /**
-//     *  Returns the Polygon for a triangle in the middle of the provided
-//     *  rect, pointing in the orientation
-//     *  (given as angle from upwards, or orientation vector)
-//     * @param rect rectangle with the location
-//     * @param orientation orientation of the sprite.
-//     * @return a polygon (triangle) with the specified orientation.
-//     */
-//    public static Polygon triPoints(Rectangle rect, Vector2d orientation)
-//    {
-//        Vector2d p1 = new Vector2d(rect.getCenterX()+orientation.x*rect.getWidth()/3.0,
-//                                   rect.getCenterY()+orientation.y*rect.getHeight()/3.0);
-//        Vector2d p2 = new Vector2d(rect.getCenterX()+orientation.x*rect.getWidth()/4.0,
-//                                   rect.getCenterY()+orientation.y*rect.getHeight()/4.0);
-//        Vector2d orthdir = new Vector2d(orientation.y, -orientation.x);
-//
-//        Vector2d p2a = new Vector2d(p2.x-orthdir.x*rect.getWidth()/6.0,
-//                                    p2.y-orthdir.y*rect.getHeight()/6.0);
-//        Vector2d p2b = new Vector2d(p2.x+orthdir.x*rect.getWidth()/6.0,
-//                                    p2.y+orthdir.y*rect.getHeight()/6.0);
-//
-//        return new Polygon(new int[]{(int)p1.x, (int)p2a.x, (int)p2b.x},
-//                           new int[]{(int)p1.y, (int)p2a.y, (int)p2b.y}, 3);
-//    }
-
-
-//    public static Polygon roundedPoints(Rectangle rect)
-//    {
-//        System.out.println("Utils.roundedPoints not implemented yet");
-//        return null;
-//    }
-
-//    public static Vector2d processMovementActionKeys(boolean[] key_pressed) {
-//
-//        int vertical = 0;
-//        int horizontal = 0;
-//
-//
-//        if (key_pressed[Types.ACTIONS.ACTION_UP.getKey()[0]]) {
-//            vertical = -1;
-//        }
-//        if (key_pressed[Types.ACTIONS.ACTION_DOWN.getKey()[0]]) {
-//            vertical = 1;
-//        }
-//
-//
-//        if (key_pressed[Types.ACTIONS.ACTION_LEFT.getKey()[0]]) {
-//            horizontal = -1;
-//        }
-//        if (key_pressed[Types.ACTIONS.ACTION_RIGHT.getKey()[0]]) {
-//            horizontal = 1;
-//        }
-//
-//        if (horizontal == 0) {
-//            if (vertical == 1)
-//                return Types.DOWN;
-//            else if (vertical == -1)
-//                return Types.UP;
-//        } else if (vertical == 0) {
-//            if (horizontal == 1)
-//                return Types.RIGHT;
-//            else if (horizontal == -1)
-//                return Types.LEFT;
-//        }
-//        return Types.NONE;
-//    }
 
     //Normalizes a value between its MIN and MAX.
     public static double normalise(double a_value, double a_min, double a_max)
     {
         return (a_value - a_min)/(a_max - a_min);
     }
-
-//    public static boolean processUseKey(boolean[] key_pressed)
-//    {
-//        return key_pressed[Types.ACTIONS.ACTION_USE.getKey()[0]];
-//    }
 
     public static int argmax (double[] values)
     {

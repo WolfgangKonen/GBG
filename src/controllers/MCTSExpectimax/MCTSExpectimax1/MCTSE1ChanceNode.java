@@ -3,7 +3,7 @@ package controllers.MCTSExpectimax.MCTSExpectimax1;
 import controllers.MCTSExpectimax.MCTSEChanceNode;
 import controllers.MCTSExpectimax.MCTSEPlayer;
 import controllers.MCTSExpectimax.MCTSETreeNode;
-import games.StateObservationNondeterministic;
+import games.StateObservationNondet;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -17,14 +17,14 @@ import java.util.Random;
  *  extension for 1- and 2-player games, adjusted for nondeterministic
  *  games and the return of VTable information.)
  *
- *  This MCTSExpectimax Version implements the {@link StateObservationNondeterministic} interface, using this interface we can increase the {@link controllers.MCTSExpectimax.MCTSExpectimaxAgt} speed by about 3-4%.
+ *  This MCTSExpectimax Version implements the {@link StateObservationNondet} interface, using this interface we can increase the {@link controllers.MCTSExpectimax.MCTSExpectimaxAgt} speed by about 3-4%.
  *
  *  @author Johannes Kutsch
  */
 
 public class MCTSE1ChanceNode extends MCTSEChanceNode
 {
-    private StateObservationNondeterministic so = null;
+    private StateObservationNondet so = null;
 
     /**
      * This Class represents a MCTS Expectmiax Chance Node.
@@ -36,7 +36,7 @@ public class MCTSE1ChanceNode extends MCTSEChanceNode
      * @param random        a random number generator
      * @param player        a reference to the one MCTS agent where {@code this} is part of (needed to access several parameters of the MCTS agent)
      */
-    public MCTSE1ChanceNode(StateObservationNondeterministic so, Types.ACTIONS action, MCTSETreeNode parentNode, Random random, MCTSEPlayer player) {
+    public MCTSE1ChanceNode(StateObservationNondet so, Types.ACTIONS action, MCTSETreeNode parentNode, Random random, MCTSEPlayer player) {
         super(so, action, parentNode, random, player);
         this.so = so;
     }
@@ -50,7 +50,7 @@ public class MCTSE1ChanceNode extends MCTSEChanceNode
         Types.ACTIONS action = notExpandedActions.get(random.nextInt(notExpandedActions.size()));
         notExpandedActions.remove(action);
 
-        StateObservationNondeterministic childSo = so.copy();
+        StateObservationNondet childSo = so.copy();
         childSo.advanceDeterministic(action);
 
         MCTSE1TreeNode child = new MCTSE1TreeNode(childSo, action, this, random, player);

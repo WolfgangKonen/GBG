@@ -17,13 +17,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.TDAgent;
-import controllers.TD.ntuple.TDNTupleAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Feature;
 
 /**
  * This class realizes other parameter settings for board games. Most parameter are only
- * relevant for trainable agents ({@link TDAgent}, {@link TDNTupleAgt}, {@link TDNTuple2Agt}), 
+ * relevant for trainable agents ({@link TDAgent}, {@link TDNTuple2Agt}), 
  * but 'Quick Eval Mode' is relevant for all agents 
  * <p>
  * 
@@ -51,9 +50,9 @@ import games.Feature;
 public class OtherParams extends Frame 
 {
 	private static final long serialVersionUID = 1L;
-	TDAgent T;
-	TDNTupleAgt t2;
-	TDNTuple2Agt t3;
+//	TDAgent T;
+//	TDNTupleAgt t2;
+//	TDNTuple2Agt t3;
 	
 	
 	JLabel evalQ_L;

@@ -18,14 +18,16 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import org.jfree.data.xy.XYSeries;
 
 import controllers.PlayAgent;
+import controllers.PlayAgent.AgentState;
 import controllers.RandomAgent;
 import controllers.AgentBase;
+import controllers.ExpectimaxNAgent;
 import controllers.HumanPlayer;
+import controllers.MaxNAgent;
 import controllers.MinimaxAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
-import controllers.TD.ntuple.NTupleFactory;
-import controllers.TD.ntuple.TDNTupleAgt;
+import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import tools.LineChartSuccess;
 import tools.Measure;
@@ -125,19 +127,6 @@ public class XArenaFuncs
 //			pa = new ValItPlayer(m_xab.tdPar,this.m_NetHasSigmoid,this.m_NetIsLinear,featmode,maxGameNum);
 //		} else if (sAgent.equals("CMA-ES")) {
 //			pa = new CMAPlayer(alpha,alphaChangeRatio,m_xab.cmaPar,this.m_NetHasSigmoid,this.m_NetIsLinear,featmode);
-		} else if (sAgent.equals("TD-Ntuple")) {
-			try {
-				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
-				NTupleFactory ntupfac = new NTupleFactory(); 
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf);
-				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
-			} catch (Exception e) {
-				MessageBox.show(m_xab, 
-						e.getMessage(), 
-						"Warning", JOptionPane.WARNING_MESSAGE);
-				//e.printStackTrace();
-				pa=null;			
-			}
 		} else if (sAgent.equals("TD-Ntuple-2")) {
 			try {
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
@@ -151,8 +140,25 @@ public class XArenaFuncs
 				//e.printStackTrace();
 				pa=null;			
 			}
+//		} else if (sAgent.equals("TD-Ntuple")) {
+//			try {
+//				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+//				NTupleFactory ntupfac = new NTupleFactory(); 
+//				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf);
+//				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
+//			} catch (Exception e) {
+//				MessageBox.show(m_xab, 
+//						e.getMessage(), 
+//						"Warning", JOptionPane.WARNING_MESSAGE);
+//				//e.printStackTrace();
+//				pa=null;			
+//			}
 		} else if (sAgent.equals("Minimax")) {
 			pa = new MinimaxAgent(sAgent,m_xab.oPar);
+		} else if (sAgent.equals("Max-N")) {
+			pa = new MaxNAgent(sAgent,m_xab.oPar);
+		} else if (sAgent.equals("Expectimax-N")) {
+			pa = new ExpectimaxNAgent(sAgent,m_xab.oPar);
 		} else if (sAgent.equals("Random")) {
 			pa = new RandomAgent(sAgent);
 		} else if (sAgent.equals("MCTS")) {
@@ -192,6 +198,10 @@ public class XArenaFuncs
 			String sAgent = m_xab.getSelectedAgent(n);
 			if (sAgent.equals("Minimax")) {
 				pa= new MinimaxAgent(sAgent,m_xab.oPar);
+			} else if (sAgent.equals("Max-N")) {
+				pa= new MaxNAgent(sAgent,m_xab.oPar);
+			} else if (sAgent.equals("Expectimax-N")) {
+				pa = new ExpectimaxNAgent(sAgent,m_xab.oPar);
 			} else if (sAgent.equals("Random")) {
 				pa= new RandomAgent(sAgent);
 			} else if (sAgent.equals("MCTS")) {
@@ -208,19 +218,19 @@ public class XArenaFuncs
 						//pa = m_xab.m_game.makeTDSAgent(sAgent, m_xab.tdPar, maxGameNum);
 						Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar.getFeatmode());
 						pa = new TDAgent(sAgent, m_xab.tdPar, m_xab.oPar, feat, maxGameNum);
-					} else if (sAgent.equals("TD-Ntuple")) {
-						try {
-							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
-							NTupleFactory ntupfac = new NTupleFactory(); 
-							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf);
-							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
-						} catch (Exception e) {
-							MessageBox.show(m_xab, 
-									e.getMessage(), 
-									"Warning", JOptionPane.WARNING_MESSAGE);
-							//e.printStackTrace();
-							pa=null;			
-						}
+//					} else if (sAgent.equals("TD-Ntuple")) {
+//						try {
+//							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+//							NTupleFactory ntupfac = new NTupleFactory(); 
+//							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf);
+//							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
+//						} catch (Exception e) {
+//							MessageBox.show(m_xab, 
+//									e.getMessage(), 
+//									"Warning", JOptionPane.WARNING_MESSAGE);
+//							//e.printStackTrace();
+//							pa=null;			
+//						}
 					} else if (sAgent.equals("TD-Ntuple-2")) {
 						try {
 							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
@@ -836,18 +846,14 @@ public class XArenaFuncs
 			int qem = xab.oPar.getQuickEvalMode();
 			m_evaluatorX = xab.m_game.makeEvaluator(paX,gb,stopEval,qem,1);
 			
-//TODO: implement CMAPlayer correctly
-//			if (AgentX.equals("CMA-ES")) {
-//				((CMAPlayer) paX).trainLoop(maxGameNum,this,xab,verbose);
-//			} else 
-			{
+			if (paX.getAgentState()!=AgentState.TRAINED) {
 				while (paX.getGameNum()<paX.getMaxGameNum())
 				{							
 					StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
 
 					paX.trainAgent(so /*,epiLength,learnFromRM*/);
 				}
-				
+				paX.setAgentState(AgentState.TRAINED);
 			} 
 
 			m_evaluatorX.eval();
@@ -856,18 +862,14 @@ public class XArenaFuncs
 			
 			m_evaluatorO = xab.m_game.makeEvaluator(paO,gb,stopEval,qem,1);
 			
-//TODO: implement CMAPlayer correctly
-//			if (AgentO.equals("CMA-ES")) {
-//				((CMAPlayer) paO).trainLoop(maxGameNum,this,xab,verbose);
-//			} else 
-			{
+			if (paO.getAgentState()!=AgentState.TRAINED) {
 				while (paO.getGameNum()<paO.getMaxGameNum())
 				{							
 					StateObservation so = soSelectStartState(gb,xab.oPar.useChooseStart01()); 
 
-					paX.trainAgent(so /*,epiLength,learnFromRM*/);
+					paO.trainAgent(so /*,epiLength,learnFromRM*/);
 				}
-				
+				paO.setAgentState(AgentState.TRAINED);				
 			} 
 
 			m_evaluatorO.eval();

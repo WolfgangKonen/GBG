@@ -48,6 +48,8 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.IOUtils;
 
 import controllers.AgentBase;
+import controllers.ExpectimaxNAgent;
+import controllers.MaxNAgent;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
@@ -56,7 +58,6 @@ import controllers.MCTS.SingleMCTSPlayer;
 import controllers.MCTS.SingleTreeNode;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
-import controllers.TD.ntuple.TDNTupleAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import tools.ElapsedCpuTimer;
 import tools.MessageBox;
@@ -209,13 +210,13 @@ public class LoadSaveTD {
 //					System.out.println("saveK_U1 "+mcts.getMCTSParams().getK_UCT());
 //					System.out.println("saveK_U2 "+mcts.getK());
 				}
-				if (pa instanceof TDNTupleAgt) {
-					TDNTupleAgt tdnt = (TDNTupleAgt) pa;
-					//NTParams ntpar = tdnt.getNTParams();
-					// only for debug:
-//					System.out.println("randWalk:  "+tdnt.getNTParams().getRandWalk());
-//					System.out.println("randNumTup: "+ntpar.getNtupleNumber());
-				}
+//				if (pa instanceof TDNTupleAgt) {
+//					TDNTupleAgt tdnt = (TDNTupleAgt) pa;
+//					//NTParams ntpar = tdnt.getNTParams();
+//					// only for debug:
+////					System.out.println("randWalk:  "+tdnt.getNTParams().getRandWalk());
+////					System.out.println("randNumTup: "+ntpar.getNtupleNumber());
+//				}
 				oos.writeObject(pa);
 			} catch (IOException e) {
 				dlg.setVisible(false);
@@ -329,14 +330,18 @@ public class LoadSaveTD {
 				Object obj = ois.readObject();
 				if (obj instanceof TDAgent) {
 					pa = (TDAgent) obj;
-				} else if (obj instanceof TDNTupleAgt) {
-					pa = (TDNTupleAgt) obj;
+//				} else if (obj instanceof TDNTupleAgt) {
+//					pa = (TDNTupleAgt) obj;
 				} else if (obj instanceof TDNTuple2Agt) {
 					pa = (TDNTuple2Agt) obj;
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;
 				} else if (obj instanceof MinimaxAgent) {
 					pa = (MinimaxAgent) obj;
+				} else if (obj instanceof MaxNAgent) {
+					pa = (MaxNAgent) obj;
+				} else if (obj instanceof ExpectimaxNAgent) {
+					pa = (ExpectimaxNAgent) obj;
 				} else if (obj instanceof RandomAgent) {
 					pa = (RandomAgent) obj;
 				} else {

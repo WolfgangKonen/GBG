@@ -3,7 +3,7 @@ package controllers.MCTSExpectimax.MCTSExpectimax1;
 import controllers.MCTSExpectimax.MCTSEChanceNode;
 import controllers.MCTSExpectimax.MCTSEPlayer;
 import controllers.MCTSExpectimax.MCTSETreeNode;
-import games.StateObservationNondeterministic;
+import games.StateObservationNondet;
 import tools.Types;
 
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.TreeMap;
  * Created by Johannes on 03.06.2017.
  */
 public class MCTSE1TreeNode extends MCTSETreeNode {
-    private StateObservationNondeterministic so = null;
+    private StateObservationNondet so = null;
     private HashMap<Types.ACTIONS, MCTSE1ChanceNode> childrenNodes = new HashMap<>();
 
 
@@ -23,14 +23,14 @@ public class MCTSE1TreeNode extends MCTSETreeNode {
      * Each Tree Node has multiple {@link MCTSE1ChanceNode} children and one {@link MCTSE1ChanceNode} parent.
      *
      *
-     * This MCTSExpectimax Version implements the {@link StateObservationNondeterministic} interface, using this interface we can increase the {@link controllers.MCTSExpectimax.MCTSExpectimaxAgt} speed by about 3-4%.
+     * This MCTSExpectimax Version implements the {@link StateObservationNondet} interface, using this interface we can increase the {@link controllers.MCTSExpectimax.MCTSExpectimaxAgt} speed by about 3-4%.
      * @param so         the unadvanced state of the parentNode
      * @param action	 the action which leads from parentNode's state to this state ({@code null} for root node)
      * @param parentNode the parentNode node
      * @param random     a random number generator
      * @param player     a reference to the one MCTS agent where {@code this} is part of (needed to access several parameters of the MCTS agent)
      */
-    public MCTSE1TreeNode(StateObservationNondeterministic so, Types.ACTIONS action, MCTSE1ChanceNode parentNode, Random random, MCTSEPlayer player) {
+    public MCTSE1TreeNode(StateObservationNondet so, Types.ACTIONS action, MCTSE1ChanceNode parentNode, Random random, MCTSEPlayer player) {
         super(so, action, parentNode, random, player);
         this.so = so;
     }
@@ -41,7 +41,7 @@ public class MCTSE1TreeNode extends MCTSETreeNode {
      * @return the selected child node
      */
     public MCTSE1ChanceNode expand() {
-        StateObservationNondeterministic childSo = so.copy();
+        StateObservationNondet childSo = so.copy();
 
         MCTSE1ChanceNode child;
         Types.ACTIONS action = childSo.getNextNondeterministicAction();

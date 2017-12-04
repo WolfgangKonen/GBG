@@ -6,7 +6,6 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import javax.swing.JFrame;
 
-import agentIO.TransformTdAgents;
 import games.Arena;
 import games.ArenaTrain;
 import games.XArenaFuncs;

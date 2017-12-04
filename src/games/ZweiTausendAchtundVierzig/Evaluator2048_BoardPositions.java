@@ -6,6 +6,7 @@ import controllers.PlayAgent;
 import games.Evaluator;
 import params.MCParams;
 import params.MCTSExpectimaxParams;
+import params.ParMC;
 import tools.Types;
 
 import java.io.*;
@@ -114,10 +115,10 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         mctsParams.setRolloutDepth(ConfigEvaluator.ROLLOUTDEPTH);
         MCTSExpectimaxAgt mctseAgent = new MCTSExpectimaxAgt("MCTSE", mctsParams);
 
-        MCParams mcParams = new MCParams();
-        mcParams.setRolloutdepth(ConfigEvaluator.ROLLOUTDEPTH - 1);
+        ParMC mcParams = new ParMC();
+        mcParams.setRolloutDepth(ConfigEvaluator.ROLLOUTDEPTH - 1);
         mcParams.setIterations(ConfigEvaluator.ITERATIONS);
-        mcParams.setNumberAgents(ConfigEvaluator.NUMBERAGENTS);
+        mcParams.setNumAgents(ConfigEvaluator.NUMBERAGENTS);
         MCAgent mcAgent = new MCAgent(mcParams);
 
         int maxCertainty = ConfigEvaluator.NC*gameStateGroup.size();

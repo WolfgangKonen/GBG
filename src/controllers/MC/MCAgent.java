@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by Johannes on 08.12.2016.
+ * Created by Johannes Kutsch on 08.12.2016.
  */
 public class MCAgent extends AgentBase implements PlayAgent {
     private Random random = new Random();
@@ -35,7 +35,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
 
 	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
 	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
-	private static boolean NEW_GNA=true;	
+//	private static boolean NEW_GNA=true;	// NEW_GNA is now always true
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -45,18 +45,31 @@ public class MCAgent extends AgentBase implements PlayAgent {
 	private static final long  serialVersionUID = 12L;
 
     
+    @Deprecated
     public MCAgent(MCParams mcParams) {
         this("MC", mcParams, new OtherParams());
     }
 
+    @Deprecated 
     public MCAgent(String name, MCParams mcParams, OtherParams oPar)
     {
         super(name);
-        this.m_mcPar.setFrom(mcParams);
+        this.m_mcPar = new ParMC(mcParams);
 		this.m_oPar = new ParOther(oPar);
         setAgentState(AgentState.TRAINED);
     }
 
+    public MCAgent(ParMC mcParams){
+        this("MC", mcParams, new ParOther());    	
+    }
+    
+    public MCAgent(String name, ParMC mcParams, ParOther oPar)
+    {
+        super(name);
+        this.m_mcPar = new ParMC(mcParams);
+		this.m_oPar = new ParOther(oPar);
+        setAgentState(AgentState.TRAINED);
+    }
 //    /**
 //     * Get the best next action and return it.
 //     * 

@@ -20,7 +20,7 @@ import tools.Types.ACTIONS;
  * 
  * StateObservation is for deterministic games.
  * 
- * @see StateObservationNondeterministic
+ * @see StateObservationNondet
  * 
  * @author Wolfgang Konen, TH Koeln, Feb'17
  */
