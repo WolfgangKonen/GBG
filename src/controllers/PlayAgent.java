@@ -6,15 +6,21 @@ import tools.Types;
 import tools.Types.ScoreTuple;
 
 /**
- * The abstract interface for the game playing agents.
+ * The abstract interface for game playing agents.
  * <p>
  * Known implementations: <ul>
- * <li> {@link controllers.MinimaxAgent}, 
- * 		{@link controllers.RandomAgent}, 
+ * <li> {@link controllers.RandomAgent}, 
  * 		{@link controllers.HumanPlayer},
+ * 		{@link controllers.MinimaxAgent}, 
+ * 		{@link controllers.MaxNAgent}, 
+ * 		{@link controllers.MaxNWrapper}, 
+ * 		{@link controllers.ExpectimaxNAgent}, 
+ * 		{@link controllers.ExpectimaxNWrapper}, 
  * 		{@link controllers.MC.MCAgent}		
  * 		{@link controllers.MCTS.MCTSAgentT}		
+ * 		{@link controllers.MCTS.MCTSExpectimax.MCTSExpectimaxAgt}		
  * 		{@link controllers.TD.TDAgent}, 
+ * 		{@link controllers.TD.ntuple2.TDNTuple2Agt}, 
  * </ul> 
  *
  * @author Wolfgang Konen, TH Köln, Nov'16
@@ -128,8 +134,18 @@ public interface PlayAgent {
 	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/);
 	
 	public String printTrainStatus();
+	
+	/**
+	 * @return a string with information about this agent
+	 * @see #stringDescr2()
+	 */
 	public String stringDescr();
+	/**
+	 * @return a string with additional information about this agent
+	 * @see #stringDescr()
+	 */
 	public String stringDescr2();
+	
 	public byte getSize();		// estimated size of agent object
 
 	/**
@@ -154,14 +170,14 @@ public interface PlayAgent {
 	 */
 	public long getNumTrnMoves();
 
+	public void setMaxGameNum(int num);
+	public void setGameNum(int num);
 	/**
 	 * @return During training: Call the Evaluator after this number of training games
 	 */
 	public int getNumEval();
-	public void setMaxGameNum(int num);
-	public void setGameNum(int num);
 	@Deprecated
-	public void setNumEval(int num);
+	public void setNumEval(int num);	// should be obsolete: each trainable agent has a ParOther member with element numEval
 	
 	public AgentState getAgentState(); 
 	public void setAgentState(AgentState aState);

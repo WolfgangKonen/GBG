@@ -268,7 +268,7 @@ public class XArenaFuncs
 	}
 
 	/**
-	 * Given the selected agent in {@code paVector}, wrap them (if {@code nply>0} by an n-ply
+	 * Given the selected agents in {@code paVector}, wrap them (if {@code nply>0} by an n-ply
 	 * look-ahead tree search. The tree is of type Max-N for deterministic games and of type
 	 * Expectimax-N for nondeterministic games. No wrapping occurs for agent {@link HumanPlayer}.
 	 * <p>
