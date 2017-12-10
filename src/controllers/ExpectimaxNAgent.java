@@ -4,8 +4,8 @@ import controllers.PlayAgent;
 import controllers.MinimaxAgent;
 import games.StateObservation;
 import games.StateObservationNondet;
-import params.OtherParams;
-import params.TDParams;
+import params.ParMaxN;
+import params.ParOther;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_ST;
@@ -20,9 +20,9 @@ import java.util.Random;
 
 /**
  * The Expectimax-N agent implements the Max-N algorithm [Korf91] via interface {@link PlayAgent}. 
- * Expectimax-N  is the generalization of Expectiminimax to N players. It works on {@link ScoreTuple}, 
- * an N-tuple of game scores. It traverses the game tree up to a prescribed 
- * depth (default: 10, see {@link OtherParams}).   
+ * Expectimax-N  is the generalization {@link MaxNAgent} to nondeterministic games. It works on  
+ * {@link ScoreTuple}, an N-tuple of game scores. It traverses the game tree up to a prescribed 
+ * depth (default: 10, see {@link MaxNParams}).   
  * <p>
  * {@link ExpectimaxNAgent} is for <b>nondeterministic</b> games. For deterministic games see 
  * {@link MaxNAgent}.
@@ -30,7 +30,7 @@ import java.util.Random;
  * See [Korf91] 
  * R. E. Korf: <em>Multi-Player Alpha-Beta Pruning</em>, Artificial Intelligence 48, 1991, 99-111.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'17
+ * @author Wolfgang Konen, TH Köln, Dec'17
  * 
  * @see ScoreTuple
  * @see MaxNAgent
@@ -38,7 +38,9 @@ import java.util.Random;
 public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
 	private Random rand;
-	private int m_depth=10;
+	protected int m_depth=10;
+//	protected boolean m_rgs=true;  // use now m_oPar.getRewardIsGameScore()
+	protected ParOther m_oPar = new ParOther();
 	//private boolean m_useHashMap=true;
 	//private HashMap<String,ScoreTuple> hm;
 	
@@ -59,14 +61,21 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		setAgentState(AgentState.TRAINED);
 	}
 	
-	public ExpectimaxNAgent(String name, OtherParams opar)
+	public ExpectimaxNAgent(String name, ParMaxN mpar, ParOther opar)
 	{
 		this(name);
-		m_depth = opar.getMinimaxDepth();
+		m_depth = mpar.getMaxnDepth();
+//		m_rgs = opar.getRewardIsGameScore();
+		m_oPar = opar;
 		//m_useHashMap = opar.useMinimaxHashmap();
 	}
 	
-	
+	public ExpectimaxNAgent(String name, int nply)
+	{
+		this(name);
+		m_depth = nply;
+	}
+		
 	/**
 	 * Get the best next action and return it
 	 * @param so			current game state (not changed on return), has to be an 
@@ -86,12 +95,13 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
         List<ACTIONS> actions = so.getAvailableActions();
 		double[] VTable = new double[actions.size()+1];  
+//		silent=false;
 		
 		if (!(so instanceof StateObservationNondet)) 
-			throw new RuntimeException("Error, so must be of class StateObservationNondet");
+			throw new RuntimeException("Error, Expectimax-N only usable for nondeterministic games");
 		StateObservationNondet soND = (StateObservationNondet) so;
 		
-		ACTIONS_ST act_best = getBestAction(soND, so,  random,  VTable,  silent, 0);
+		ACTIONS_ST act_best = getBestAction(soND, so,  random,  VTable,  silent, 1);
 		
         return new ACTIONS_VT(act_best.toInt(), act_best.isRandomAction(), VTable);
 	}
@@ -115,7 +125,6 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		ScoreTuple currScoreTuple=null;
         ScoreTuple sc, scBest=null;
 		StateObservationNondet NewSO;
-		int count = 1; // counts the moves with same iMaxScore
         ACTIONS actBest = null;
         ACTIONS_ST act_st = null;
 
@@ -127,9 +136,10 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
         	//
         	// find the best next deterministic action for current player in state soND
         	//
-            double iMaxScore = -Double.MAX_VALUE;
+            double pMaxScore = -Double.MAX_VALUE;
             ArrayList<ACTIONS> acts = soND.getAvailableActions();
             ACTIONS[] actions = new ACTIONS[acts.size()];
+        	scBest=new ScoreTuple(soND);		// make a new ScoreTuple with lowest possible maxValue
             for(i = 0; i < acts.size(); ++i)
             {
             	actions[i] = acts.get(i);
@@ -138,36 +148,33 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
             	
             	if (depth<this.m_depth) {
     				// here is the recursion: getAllScores may call getBestAction back:
-    				currScoreTuple = getAllScores(NewSO,refer,depth+1);						
+    				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);						
     			} else {
     				// this terminates the recursion:
+    				// (after finishing the for-loop for every element of acts)
     				currScoreTuple = estimateGameValueTuple(NewSO);
     			}
-    			
-    			// always *maximize* csVal, that is P's element in the tuple CurrScoreTuple, 
+            	if (!silent && depth<3) printAfterstate(soND,actions[i],currScoreTuple,depth);
+            	VTable[i] = currScoreTuple.scTup[player];
+            	
+    			// always *maximize* P's element in the tuple currScoreTuple, 
     			// where P is the player to move in state soND:
-    			double csVal = currScoreTuple.scTup[player];
-            	VTable[i] = csVal;
-            	if (iMaxScore < csVal) {
-            		iMaxScore = csVal;
-            		scBest = new ScoreTuple(currScoreTuple);
-            		count = 1;
-            	} else  {
-            		if (iMaxScore == csVal) count++;	        
-            	}
+    			ScoreTuple.CombineOP cOP = ScoreTuple.CombineOP.MAX;
+    			scBest.combine(currScoreTuple, cOP, player, 0.0);            	
             } // for
             
-            // There might be one or more than one action with iMaxScore. 
+            // There might be one or more than one action with pMaxScore. 
             // Break ties by selecting one of them randomly:
-        	int selectJ = (int)(rand.nextDouble()*count);
+        	int selectJ = (int)(rand.nextDouble()*scBest.count);
+        	pMaxScore = scBest.scTup[player];
         	for (i=0, j=0; i < actions.length; ++i) {
-        		if (VTable[i]==iMaxScore) {
+        		if (VTable[i]==pMaxScore) {
         			if ((j++)==selectJ) actBest = new ACTIONS(actions[i]);
         		}
         	}
             
-            VTable[actions.length] = iMaxScore;
-            if (!silent) printBestAfterstate(soND,actBest,iMaxScore);
+            VTable[actions.length] = pMaxScore;
+            if (!silent && depth<3) printBestAfterstate(soND,actBest,pMaxScore,depth);
 
         } // if (isNextActionDeterministic)
         else 
@@ -175,32 +182,34 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
         	//
         	// average (or min) over all next nondeterministic actions 
         	//
-            ArrayList<ACTIONS> acts = soND.getAvailableRandoms();
-            assert (acts.size()>0) : "Error: getAvailableRandoms returns no actions";
-            ACTIONS[] actions = new ACTIONS[acts.size()];
+            ArrayList<ACTIONS> rans = soND.getAvailableRandoms();
+            assert (rans.size()>0) : "Error: getAvailableRandoms returns no actions";
+            ACTIONS[] actions = new ACTIONS[rans.size()];
     		ScoreTuple expecScoreTuple=new ScoreTuple(soND);
 			ScoreTuple.CombineOP cOP = ScoreTuple.CombineOP.AVG;
 			double currProbab;
 			double sumProbab=0.0;
-            for(i = 0; i < acts.size(); ++i)
+            for(i = 0; i < rans.size(); ++i)
             {
-            	actions[i] = acts.get(i);
+            	actions[i] = rans.get(i);
             	NewSO = soND.copy();
             	NewSO.advanceNondeterministic(actions[i]);
             	
 				// here is the recursion: getAllScores may call getBestAction back:
-				currScoreTuple = getAllScores(NewSO,refer,depth+1);		
+				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);		
 				
 				currProbab = soND.getProbability(actions[i]);
+            	if (!silent) printRandom(NewSO,currScoreTuple,currProbab,depth);
 				sumProbab += currProbab;
 				// if cOP==AVG, expecScoreTuple will contain the average ScoreTuple
 				// if cOP==MIN, expecScoreTuple will contain the worst ScoreTuple for 
-				// player (consider environment as adversarial player)
+				// player (this considers environment as adversarial player)
 				expecScoreTuple.combine(currScoreTuple, cOP, player, currProbab);
             }
             assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
+        	if (!silent) printRandom(soND,expecScoreTuple,sumProbab,depth);
             scBest = expecScoreTuple;	
-            actBest = acts.get(0); 		// this is just a dummy 
+            actBest = rans.get(0); 		// this is just a dummy 
         } // else (isNextActionDeterministic)
 
         assert actBest != null : "Oops, no best action actBest";
@@ -210,22 +219,21 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
         return act_st;         
 	}
 
-	private ScoreTuple getAllScores(StateObservationNondet sob, StateObservation refer, int depth) {
+	private ScoreTuple getAllScores(StateObservationNondet sob, StateObservation refer, boolean silent, int depth) {
         ACTIONS_ST act_st = null;
+		boolean rgs = m_oPar.getRewardIsGameScore();
 		if (sob.isGameOver())
 		{
-			boolean rewardIsGameScore=true; // TODO!!
 			double[] res = new double[sob.getNumPlayers()];
-			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rewardIsGameScore);
+			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rgs);
 			return new ScoreTuple(res); 	
 		}
-		
-		
+				
 		int n=sob.getNumAvailableActions();
 		double[] vtable	= new double[n+1];
 		
 		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
-		act_st = getBestAction(sob, refer, false,  vtable,  true, depth);  // sets vtable[n]=iMaxScore
+		act_st = getBestAction(sob, refer, false,  vtable,  silent, depth);  // sets vtable[n]=iMaxScore
 		
 		return act_st.m_st;		// return ScoreTuple for best action
 	}
@@ -243,14 +251,14 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		assert sob instanceof StateObservationNondet : "Error, sob must be of class StateObservationNondet";
 		StateObservationNondet soND = (StateObservationNondet) sob;
 		
-		return getAllScores(soND,sob,0).scTup[sob.getPlayer()];
+		return getAllScores(soND,sob,true,0).scTup[sob.getPlayer()];
 	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob) {
 		assert sob instanceof StateObservationNondet : "Error, sob must be of class StateObservationNondet";
 		StateObservationNondet soND = (StateObservationNondet) sob;
 		
-		return getAllScores(soND,sob,0);
+		return getAllScores(soND,sob,true,0);
 	}
 	
 	/**
@@ -265,7 +273,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 */
 	@Override
 	public double estimateGameValue(StateObservation sob) {
-		return sob.getReward(true);
+		boolean rgs = m_oPar.getRewardIsGameScore();
+		return sob.getReward(rgs);
 	}
 
 	/**
@@ -280,10 +289,10 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
-		boolean rewardIsGameScore=true; // TODO!!
+		boolean rgs = m_oPar.getRewardIsGameScore();
 		ScoreTuple sc = new ScoreTuple(sob);
 		for (int i=0; i<sob.getNumPlayers(); i++) 
-			sc.scTup[i] = sob.getReward(i, rewardIsGameScore);
+			sc.scTup[i] = sob.getReward(i, rgs);
 		return sc;
 	}
 
@@ -298,12 +307,28 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		return m_depth;
 	}
 
-	
-    private void printBestAfterstate(StateObservationNondet soND,ACTIONS actBest,double iMaxScore)
+    private void printAfterstate(StateObservationNondet soND,ACTIONS actBest,
+    		ScoreTuple scTuple, int depth)
     {
 		StateObservationNondet NewSO = soND.copy();
     	NewSO.advanceDeterministic(actBest);
-    	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+iMaxScore);
+    	System.out.println("---     Move: "+NewSO.stringDescr()+"   "+scTuple.toString()+", depth="+depth);
+    }	 
+
+    private void printRandom(StateObservationNondet NewSO,
+    		ScoreTuple scTuple, double currProbab, int depth)
+    {
+    	System.out.println("---   Random: "+NewSO.stringDescr()+"   "+scTuple.toString()+
+    			", p="+currProbab+", depth="+depth);
+    }	 
+
+	
+    private void printBestAfterstate(StateObservationNondet soND,ACTIONS actBest,
+    		double iMaxScore, int depth)
+    {
+		StateObservationNondet NewSO = soND.copy();
+    	NewSO.advanceDeterministic(actBest);
+    	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+iMaxScore+", depth="+depth);
     }	
 
 	// currently not used:

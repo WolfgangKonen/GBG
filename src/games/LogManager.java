@@ -12,7 +12,7 @@ import java.util.*;
  * @author Johannes Kutsch, 30.04.2017
  */
 public class LogManager {
-    public boolean loggingEnabled = true;  //enables or disables logging
+    public boolean loggingEnabled = false;  //enables or disables logging
     public boolean advancedLogging = true; //if advancedLogging is enabled every new logEntry is saved to a temporary file
                                            //the log is not lost when a crash occurs
                                            //call generateLogSessionContainerFromFile(path of temp folder) to combine all temporary files and generate the log

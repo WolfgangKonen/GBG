@@ -107,11 +107,19 @@ abstract public class Evaluator {
 	public boolean setState(boolean stateE) { thisEval = stateE; return stateE; }
 	public boolean getState() { return thisEval; }
 	
+	/**
+	 * @return long message of evaluator result (multi-line) for {@code System.out}
+	 */
 	abstract public String getMsg(); 
-//	{
-//		// dummy, to fulfill the interface (should be overridden by derived classes)
-//		return getGoalMsg(0);
-//	}
+	
+	/**
+	 * If not implemented by implementing class, {@link #getShortMsg()} returns {@link #getMsg()}
+	 * 
+	 * @return short message of evaluator result (one line) for status window 
+	 */
+	public String getShortMsg() {
+		return getMsg();
+	}
 	
 	public String getGoalMsg(int gameNum) {
 		String msg;

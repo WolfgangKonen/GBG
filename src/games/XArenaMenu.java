@@ -543,15 +543,15 @@ public class XArenaMenu extends JMenuBar {
 			}
 			else if (td instanceof MinimaxAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.oPar.setMinimaxDepth( ((MinimaxAgent) td).getDepth() );
+				m_arena.m_xab.maxnParams.setMaxnDepth( ((MinimaxAgent) td).getDepth() );
 			}
 			else if (td instanceof MaxNAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.oPar.setMinimaxDepth( ((MaxNAgent) td).getDepth() );
+				m_arena.m_xab.maxnParams.setMaxnDepth( ((MinimaxAgent) td).getDepth() );
 			}
 			else if (td instanceof ExpectimaxNAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.oPar.setMinimaxDepth( ((ExpectimaxNAgent) td).getDepth() );
+				m_arena.m_xab.maxnParams.setMaxnDepth( ((MinimaxAgent) td).getDepth() );
 			}
 			
 			if (td instanceof TDAgent || td instanceof TDNTuple2Agt /* || td instanceof TDNTupleAgt */) {
@@ -561,7 +561,7 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.GameNumT.setText(""+td.getMaxGameNum());
 				m_arena.m_xab.oPar.numEval_T.setText(""+td.getNumEval());
 			}
-			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P && !TDNTuple2Agt.OLD_3P) {
+			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P && !(TDNTuple2Agt.MODE_3P==0)) {
 				m_arena.m_xab.oPar.enableNPly(true);
 				// if it is one of the older agents (before nply was added to oPar), it will
 				// have nply=0. Then set nply=1: 
@@ -653,29 +653,34 @@ public class XArenaMenu extends JMenuBar {
 		// ensure that m_PlayAgents has the agents selected
 		String str = "[Start Evaluation of PlayAgent "+index+"]";
 		printStatus(str);
+		PlayAgent[] paVector;
+		int wrappedNPly=m_arena.m_xab.oPar.getWrapperNPly();
+
 		try {
 			// ensure with fetchAgents that for agents like MCTS a new agent with the 
 			// latest settings in the MCTS pars tab is constructed:
 			m_arena.m_xfun.m_PlayAgents = m_arena.m_xfun.fetchAgents(m_arena.m_xab);
 			AgentBase.validTrainedAgents(m_arena.m_xfun.m_PlayAgents,numPlayers);
+			paVector = m_arena.m_xfun.wrapAgents(m_arena.m_xfun.m_PlayAgents,wrappedNPly,m_arena.gb.getStateObs());
 		} catch (RuntimeException e) {
 			MessageBox.show(m_arena, e.getMessage(), 
 					"Error", JOptionPane.ERROR_MESSAGE);
 			printStatus("Done");
 			return;
 		}
-		PlayAgent pa = m_arena.m_xfun.m_PlayAgents[index];
+		PlayAgent pa = paVector[index];
 		if (pa instanceof HumanPlayer) {
 			MessageBox.show(m_arena, "No evaluation for HumanPlayer", 
 					"Error", JOptionPane.ERROR_MESSAGE);			
 			printStatus("Done");
 		} else {
+			printStatus("Running Quick Evaluation ...");
 			int qem = m_arena.m_xab.oPar.getQuickEvalMode();
 			Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,0);
 	        qEvaluator.eval();
 			str = qEvaluator.getMsg();
 			System.out.println(str);
-			printStatus(str);
+			printStatus(qEvaluator.getShortMsg());
 		}
 	}
 

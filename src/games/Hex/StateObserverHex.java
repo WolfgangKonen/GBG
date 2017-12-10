@@ -1,5 +1,6 @@
 package games.Hex;
 
+import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
 
@@ -36,7 +37,7 @@ import static games.Hex.HexConfig.*;
  * last row. The black borders are along the columns.
  * 
  */
-public class StateObserverHex implements StateObservation {
+public class StateObserverHex extends ObserverBase implements StateObservation {
     /**
      * change the version ID for serialization only if a newer version is no longer
      * compatible with an older one (older .gamelog or .agt.zip containing this object will
@@ -129,7 +130,7 @@ public class StateObserverHex implements StateObservation {
         Types.WINNER winner = HexUtils.getWinner(getBoard(), getLastUpdatedTile());
         if (winner == Types.WINNER.PLAYER_WINS) {
             //Reverse winners, since current player changes after the winning tile was placed
-            return (getCurrentPlayer() == PLAYER_ONE ? PLAYER_ONE : PLAYER_TWO);
+            return (this.getPlayer() == PLAYER_ONE ? PLAYER_ONE : PLAYER_TWO);
         }
         return PLAYER_NONE;
     }
@@ -192,10 +193,6 @@ public class StateObserverHex implements StateObservation {
         return sb.toString();
     }
 
-    public String toString() {
-        return stringDescr();
-    }
-
     @Override
     public double getGameScore() {
         int winner = determineWinner();
@@ -207,59 +204,8 @@ public class StateObserverHex implements StateObservation {
     }
 
     @Override
-    public double getGameValue() {
-        return getGameScore();
-    }
-
-	/**
-	 * Same as getGameScore(), but relative to referingState. This relativeness
-	 * is usually only relevant for games with more than one player.
-	 * @param referringState see below
-	 * @return  If referringState has the same player as this, then it is getGameScore().<br> 
-	 * 			If referringState has opposite player, then it is getGameScore()*(-1). 
-	 */
-    @Override
-    public double getGameScore(StateObservation referringState) {
-        return (this.getPlayer() == referringState.getPlayer() ? getGameScore() : getGameScore() * (-1));
-    }
-
-	/**
-	 * The cumulative reward, usually the same as getGameScore()
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return the cumulative reward
-	 */
-    @Override
-	public double getReward(boolean rewardIsGameScore) {
-		return getGameScore();
-	}
-	
-	/**
-	 * Same as getReward(), but relative to referringState. 
-	 * @param referringState
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return the cumulative reward 
-	 */
-    @Override
-	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
-		return getGameScore(referringState);
-	}
-
-	/**
-	 * Same as getReward(referringState), but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return  the cumulative reward 
-	 */
-	public double getReward(int player, boolean rewardIsGameScore) {
-        return (this.getPlayer() == player ? getGameScore() : getGameScore() * (-1));
-	}
-
-    @Override
     public double getMinGameScore() {
-        return REWARD_NEGATIVE;
+        return HexConfig.REWARD_NEGATIVE;
     }
 
     @Override
@@ -296,34 +242,17 @@ public class StateObserverHex implements StateObservation {
         currentPlayer = (currentPlayer == HexConfig.PLAYER_ONE ? PLAYER_TWO : HexConfig.PLAYER_ONE);
     }
 
-    /**
-     * Advance the current state to a new afterstate (do the deterministic part of advance)
-     *
-     * @param action the action
-     */
-    @Override
-    public void advanceDeterministic(Types.ACTIONS action) {
-    	// since StateObserverHex is for a deterministic game, advanceDeterministic()
-    	// is the same as advance():
-    	advance(action);
-    }
-
-    /**
-     * Advance the current afterstate to a new state (do the nondeterministic part of advance)
-     */
-    @Override
-    public void advanceNondeterministic() {
-    	// nothing to do here, since StateObserverHex is for a deterministic game    	
-    }
-
     @Override
     public ArrayList<Types.ACTIONS> getAvailableActions() {
         return actions;
     }
     
+    /**
+     * Return the afterstate preceding {@code this}. 
+     */
     @Override
     public StateObservation getPrecedingAfterstate() {
-    	// for deterministic games next state and afterstate are the same
+    	// for deterministic games this state and the preceding afterstate are the same
     	return this;
     }
 
@@ -379,19 +308,23 @@ public class StateObserverHex implements StateObservation {
     }
 
     @Override
+    public int getNumPlayers() {
+        return 2;
+    }
+
+    @Override
     public int getPlayer() {
         return currentPlayer;
     }
+
+//  int getCurrentPlayer() {
+//  return currentPlayer;
+//}
 
     public HexTile[][] getBoard() {
         return board;
     }
 
-
-    @Override
-    public int getNumPlayers() {
-        return 2;
-    }
 
     /**
      * @return The tile on which the last stone was placed
@@ -400,7 +333,4 @@ public class StateObserverHex implements StateObservation {
         return lastUpdatedTile;
     }
 
-    int getCurrentPlayer() {
-        return currentPlayer;
-    }
 }

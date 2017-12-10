@@ -3,8 +3,8 @@ package controllers;
 import controllers.PlayAgent;
 import controllers.MinimaxAgent;
 import games.StateObservation;
-import params.OtherParams;
-import params.TDParams;
+import params.ParMaxN;
+import params.ParOther;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_ST;
@@ -21,7 +21,7 @@ import java.util.Random;
  * The Max-N agent implements the Max-N algorithm [Korf91] via interface {@link PlayAgent}. 
  * Max-N is the generalization of {@link MinimaxAgent} to N players. It works on {@link ScoreTuple}, 
  * an N-tuple of game scores. It traverses the game tree up to a prescribed 
- * depth (default: 10, see {@link OtherParams}). To speed up calculations, already 
+ * depth (default: 10, see {@link MaxNParams}). To speed up calculations, already 
  * visited states are stored in a HashMap.  
  * <p>
  * {@link MaxNAgent} is for <b>deterministic</b> games. For non-deterministic games see 
@@ -30,15 +30,17 @@ import java.util.Random;
  * See [Korf91] 
  * R. E. Korf: <em>Multi-Player Alpha-Beta Pruning</em>, Artificial Intelligence 48, 1991, 99-111.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'17
+ * @author Wolfgang Konen, TH Köln, Dec'17
  * 
  * @see ScoreTuple
  * @see ExpectimaxNAgent
+ * @see MaxNParams
  */
 public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
 	private Random rand;
 	private int m_depth=10;
+	protected ParOther m_oPar = new ParOther();
 	private boolean m_useHashMap=true;
 	private HashMap<String,ScoreTuple> hm;
 	
@@ -59,14 +61,19 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		setAgentState(AgentState.TRAINED);
 	}
 	
-	public MaxNAgent(String name, OtherParams opar)
+	public MaxNAgent(String name, ParMaxN mpar, ParOther opar)
 	{
 		this(name);
-		m_depth = opar.getMinimaxDepth();
-		m_useHashMap = opar.useMinimaxHashmap();
+		m_depth = mpar.getMaxnDepth();
+		m_useHashMap = mpar.useMinimaxHashmap();
 	}
-	
-	
+		
+	public MaxNAgent(String name, int nply)
+	{
+		this(name);
+		m_depth = nply;
+	}
+		
 	/**
 	 * Get the best next action and return it
 	 * @param so			current game state (not changed on return)
@@ -106,20 +113,19 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 			double[] VTable, boolean silent, int depth) 
 	{
 		int i,j;
-		ScoreTuple CurrScoreTuple=null;
+		ScoreTuple currScoreTuple=null;
         ScoreTuple sc, scBest=null;
 		StateObservation NewSO;
-		int count = 1; // counts the moves with same iMaxScore
         ACTIONS actBest = null;
         ACTIONS_ST act_st = null;
         String stringRep ="";
-        int iBest;
 
         assert so.isLegalState() : "Not a legal state"; 
 
-        double iMaxScore = -Double.MAX_VALUE;
+        double pMaxScore = -Double.MAX_VALUE;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
         ACTIONS[] actions = new ACTIONS[acts.size()];
+    	scBest=new ScoreTuple(so);		// make a new ScoreTuple with lowest possible maxValue
         int player = so.getPlayer();
         
         for(i = 0; i < acts.size(); ++i)
@@ -140,57 +146,42 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 			if (depth<this.m_depth) {
 				if (sc==null) {
 					// here is the recursion: getAllScores may call getBestAction back:
-					CurrScoreTuple = getAllScores(NewSO,refer,depth+1);	
+					currScoreTuple = getAllScores(NewSO,refer,depth+1);	
 					
-					if (m_useHashMap) hm.put(stringRep, CurrScoreTuple);
+					if (m_useHashMap) hm.put(stringRep, currScoreTuple);
 				} else {
-					CurrScoreTuple = sc;
+					currScoreTuple = sc;
 				}
 			} else {
-				CurrScoreTuple = estimateGameValueTuple(NewSO);
+				currScoreTuple = estimateGameValueTuple(NewSO);
 			}
-			if (depth==0) {
-				//System.out.println(stringRep + ", " + CurrScoreTuple.toString());
-			}
+        	VTable[i] = currScoreTuple.scTup[player];
 			
-			// always *maximize* csVal, that is P's element in the tuple CurrScoreTuple, 
-			// where P is the player to move in state so:
-			double csVal = CurrScoreTuple.scTup[player];
-        	VTable[i] = csVal;
-        	if (iMaxScore < csVal) {
-        		iMaxScore = csVal;
-        		actBest = actions[i];
-        		scBest = new ScoreTuple(CurrScoreTuple);
-        		iBest  = i; 
-        		count = 1;
-        	} else  {
-        		if (iMaxScore == csVal) count++;	        
-        	}
+			// always *maximize* P's element in the tuple currScoreTuple, 
+			// where P is the player to move in state soND:
+			ScoreTuple.CombineOP cOP = ScoreTuple.CombineOP.MAX;
+			scBest.combine(currScoreTuple, cOP, player, 0.0);            	
         } // for
-        if (count>actions.length) {
-        	int dummy=1;
-        }
-        if (count>1) {  // more than one action with iMaxScore: 
-        	// break ties by selecting one of them randomly
-        	int selectJ = (int)(rand.nextDouble()*count);
-        	for (i=0, j=0; i < actions.length; ++i) 
-        	{
-        		if (VTable[i]==iMaxScore) {
-        			if (j==selectJ) actBest = actions[i];
-        			j++;
-        		}
-        	}
-        }
+        
+        // There might be one or more than one action with pMaxScore. 
+        // Break ties by selecting one of them randomly:
+    	int selectJ = (int)(rand.nextDouble()*scBest.count);
+    	pMaxScore = scBest.scTup[player];
+    	for (i=0, j=0; i < actions.length; ++i) {
+    		if (VTable[i]==pMaxScore) {
+    			if ((j++)==selectJ) actBest = new ACTIONS(actions[i]);
+    		}
+    	}
 
         assert actBest != null : "Oops, no best action actBest";
         // optional: print the best action
         if (!silent) {
         	NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+iMaxScore);
+        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore);
         }			
 
-        VTable[actions.length] = iMaxScore;
+        VTable[actions.length] = pMaxScore;
         actBest.setRandomSelect(false);
         act_st = new ACTIONS_ST(actBest, scBest);
         return act_st;         

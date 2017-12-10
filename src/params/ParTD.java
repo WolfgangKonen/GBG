@@ -34,7 +34,22 @@ public class ParTD implements Serializable {
 
 	public ParTD() {	}
     
-    public ParTD(TDParams tp) { 
+	public ParTD(ParTD tp) {
+		this.alpha = tp.getAlpha();
+		this.alfin = tp.getAlphaFinal();
+		this.epsil = tp.getEpsilon();
+		this.epfin = tp.getEpsilonFinal();
+		this.lambda = tp.getLambda();
+		this.gamma = tp.getGamma();
+		this.epochs = tp.getEpochs();
+		this.featmode = tp.getFeatmode();
+		this.useNormalize = tp.getNormalize();
+		this.hasLinNet = tp.hasLinearNet();
+		this.hasRprop = tp.hasRpropLrn();
+		this.hasSigmoid = tp.hasSigmoid();
+	}
+
+	public ParTD(TDParams tp) { 
     	this.setFrom(tp);
     }
     

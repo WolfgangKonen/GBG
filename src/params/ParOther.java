@@ -10,7 +10,7 @@ public class ParOther implements Serializable {
     public static int DEFAULT_STOP_TEST = 0;
     public static int DEFAULT_STOP_EVAL = 100;
     public static int DEFAULT_NPLY = 1;
-    public static int DEFAULT_MINIMAX_DEPTH = 10;
+    public static int DEFAULT_WRAPPER_NPLY = 0;
 
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
     private int trainEvalMode = DEFAULT_TRAIN_EVAL_MODE;
@@ -19,12 +19,14 @@ public class ParOther implements Serializable {
     private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 
     private int nply = DEFAULT_NPLY; 
+    private int wrapperNply = DEFAULT_WRAPPER_NPLY; 
     private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
     private boolean rewardIsGameScore = true;
     
-    private int minimaxDepth = DEFAULT_MINIMAX_DEPTH;
-    private boolean minimaxHashmap = true;
+    // --- this is now in ParMaxN: ---
+//    private int minimaxDepth = DEFAULT_MINIMAX_DEPTH;
+//    private boolean minimaxHashmap = true;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -43,11 +45,12 @@ public class ParOther implements Serializable {
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
 		this.nply = op.getNPly();
+		this.wrapperNply = op.getWrapperNPly();
 		this.chooseStart01 = op.useChooseStart01();
 		this.learnFromRM = op.useLearnFromRM();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
-		this.minimaxDepth = op.getMinimaxDepth();
-		this.minimaxHashmap = op.useMinimaxHashmap();	
+//		this.minimaxDepth = op.getMinimaxDepth();
+//		this.minimaxHashmap = op.useMinimaxHashmap();	
 	}
 	
     public ParOther(OtherParams op) { 
@@ -62,15 +65,20 @@ public class ParOther implements Serializable {
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
 		this.nply = op.getNPly();
+		this.wrapperNply = op.getWrapperNPly();
 		this.chooseStart01 = op.useChooseStart01();
 		this.learnFromRM = op.useLearnFromRM();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
-		this.minimaxDepth = op.getMinimaxDepth();
-		this.minimaxHashmap = op.useMinimaxHashmap();	
+//		this.minimaxDepth = op.getMinimaxDepth();
+//		this.minimaxHashmap = op.useMinimaxHashmap();	
 	}
 	
 	public void setNPly(int nply) {
 		this.nply=nply;
+	}
+	
+	public void setWrapperNPly(int nply) {
+		this.wrapperNply=nply;
 	}
 	
 
@@ -105,6 +113,10 @@ public class ParOther implements Serializable {
 		return nply;
 	}
 
+	public int getWrapperNPly() {
+		return wrapperNply;
+	}
+
 	public boolean useChooseStart01() {
 		return chooseStart01;
 	}
@@ -117,12 +129,12 @@ public class ParOther implements Serializable {
 		return rewardIsGameScore;
 	}
 
-	public int getMinimaxDepth() {
-		return minimaxDepth;
-	}
-
-	public boolean useMinimaxHashmap() {
-		return minimaxHashmap;
-	}
+//	public int getMinimaxDepth() {
+//		return minimaxDepth;
+//	}
+//
+//	public boolean useMinimaxHashmap() {
+//		return minimaxHashmap;
+//	}
 
 }

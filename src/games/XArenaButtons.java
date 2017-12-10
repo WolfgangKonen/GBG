@@ -66,6 +66,7 @@ public class XArenaButtons extends JPanel
 //	TCParams tcPar= new TCParams();
 //	CMAParams cmaPar = new CMAParams();
 //	NTupleShow ntupleShow = null;
+	MaxNParams maxnParams = new MaxNParams();
 	MCTSParams mctsParams = new MCTSParams();
 	MCParams mcParams = new MCParams();
 	MCTSExpectimaxParams mctsExpectimaxParams = new MCTSExpectimaxParams();

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import games.StateObservation;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
 
 import java.awt.event.KeyEvent;
 import java.io.Serializable;
@@ -165,9 +166,17 @@ public class Types {
      *	@see MaxNAgent
      */
     public static class ScoreTuple {
-    	public enum CombineOP {AVG,MIN};
+    	public enum CombineOP {AVG,MIN,MAX};
+    	/**
+    	 * the tuple values
+    	 */
     	public double[] scTup;
-    	private double minValue = Double.MIN_VALUE;
+    	/**
+    	 * for CombineOP=MIN (MAX): how many of the tuple combined have minValue (maxValue)
+    	 */
+    	public int count;
+    	private double minValue = Double.MAX_VALUE;
+    	private double maxValue = -Double.MAX_VALUE;
     	
     	public ScoreTuple(StateObservation sob) {
     		this.scTup = new double[sob.getNumPlayers()];
@@ -180,8 +189,10 @@ public class Types {
     	}
     	public String toString() {
     		String cs = "(";
-    		for (int i=0; i<scTup.length-1; i++) cs = cs + scTup[i] + ", ";
-    		cs = cs + scTup[scTup.length-1] + ")";
+    		//double f = StateObserver2048.MAXSCORE;		// only temporarily
+    		double f = 1.0;
+    		for (int i=0; i<scTup.length-1; i++) cs = cs + scTup[i]*f + ", ";
+    		cs = cs + scTup[scTup.length-1]*f + ")";
     		return(cs);
     	}
     	
@@ -193,22 +204,39 @@ public class Types {
     	 * 		{@code currProbab}
     	 * <li> <b>MIN</b>: combine by retaining the {@code currScoreTuple}, which has the
     	 * 		minimal value in {@code scTup[playNum]}, the score for player {@code playNum}
+    	 * <li> <b>MAX</b>: combine by retaining the {@code currScoreTuple}, which has the
+    	 * 		maximal value in {@code scTup[playNum]}, the score for player {@code playNum}
     	 * </ul>
     	 * 
-    	 * @param currScoreTuple the new {@link ScoreTuple} 
+    	 * @param tuple the new {@link ScoreTuple} 
     	 * @param cOP			 combine operator 	
-    	 * @param playNum		 player number (needed for {@code cOP}==MIN)
+    	 * @param playNum		 player number (needed for {@code cOP}==MIN,MAX)
     	 * @param currProbab	 probability (needed for {@code cOP}==AVG)
     	 */
-    	public void combine(ScoreTuple currScoreTuple, CombineOP cOP, int playNum, double currProbab)
+    	public void combine(ScoreTuple tuple, CombineOP cOP, int playNum, double currProbab)
     	{
     		switch(cOP) {
     		case AVG: 
-        		for (int i=0; i<scTup.length; i++) scTup[i] += currProbab*currScoreTuple.scTup[i];
+        		for (int i=0; i<scTup.length; i++) scTup[i] += currProbab*tuple.scTup[i];
+        		break;
     		case MIN:
-    			if (currScoreTuple.scTup[playNum]<minValue) {
-    				this.scTup = currScoreTuple.scTup.clone();
-    			}  			
+    			if (tuple.scTup[playNum]<minValue) {
+    				minValue = tuple.scTup[playNum];
+    				this.scTup = tuple.scTup.clone();
+    				count=1;
+    			}  else if (tuple.scTup[playNum]==minValue) {
+    				count++;
+    			}  	
+    			break;
+    		case MAX:
+    			if (tuple.scTup[playNum]>maxValue) {
+    				maxValue = tuple.scTup[playNum];
+    				this.scTup = tuple.scTup.clone();
+    				count=1;
+    			}  else if (tuple.scTup[playNum]==maxValue) {
+    				count++;
+    			}
+    			break;
     		}
     	}
     }

@@ -56,14 +56,57 @@ public class Evaluator2048 extends Evaluator {
         List<StateObserver2048> stateObservers = new ArrayList<>();
 
 
-        if(m_PlayAgent.getName().equals("MCTS Expectimax")) {
-            //async for MCTS Agents
+        if(	m_PlayAgent.getName().equals("MCTS Expectimax")  ) {
+            //async for MCTS Expectimax agents 
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
             MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
 
-            if(verbose == 0) {
-                System.out.println("Detected MCTS Expectimax Agent, iterations: " + mctsExpectimaxAgt.params.getNumIter() + ", rolloutdepth: " + mctsExpectimaxAgt.params.getRolloutDepth() + ", Treedepth: " + mctsExpectimaxAgt.params.getTreeDepth() + ", k: " + mctsExpectimaxAgt.params.getK_UCT() + ", maxnodes: " + mctsExpectimaxAgt.params.getMaxNodes() + ", alternative version: " + mctsExpectimaxAgt.params.getAlternativeVersion());
+        	if (verbose == 0) 
+        		System.out.println("Detected MCTS Expectimax Agent, iterations: " + mctsExpectimaxAgt.params.getNumIter() + ", rolloutdepth: " + mctsExpectimaxAgt.params.getRolloutDepth() + ", Treedepth: " + mctsExpectimaxAgt.params.getTreeDepth() + ", k: " + mctsExpectimaxAgt.params.getK_UCT() + ", maxnodes: " + mctsExpectimaxAgt.params.getMaxNodes() + ", alternative version: " + mctsExpectimaxAgt.params.getAlternativeVersion());
+
+            //play Games
+            for(int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
+                int gameNumber = i+1;
+                callables.add(() -> {
+                    StateObserver2048 so = new StateObserver2048();
+                    PlayAgent playAgent;
+                    long gameStartTime = System.currentTimeMillis();
+
+                    // we need a new agent for every eval thread, since MCTSExpectimaxAgt is
+                    // not thread-safe in its method getNextAction2:
+                    playAgent = new MCTSExpectimaxAgt("MCTS Expectimax", mctsExpectimaxAgt.params);
+ 
+                    while (!so.isGameOver()) {
+                        Types.ACTIONS action = playAgent.getNextAction2(so, false, true);
+                        so.advance(action);
+                        
+                        // TODO: integrate a branch for ConfigEvaluator.PLAYSTATS_CSV, if needed
+                    }
+
+                    if(verbose == 0) {
+                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+                    }
+                    return so;
+                });
             }
+
+            //save final gameState
+            try {
+                executorService.invokeAll(callables).stream().map(future -> {
+                    try {
+                        return future.get();
+                    }
+                    catch (Exception e) {
+                        throw new IllegalStateException(e);
+                    }
+                }).forEach(stateObservers::add);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        } else if (	m_PlayAgent.getName().equals("ExpectimaxWrapper") ) {
+            //async for wrapper agents (ExpectiMaxN or MaxN tree nply)
+            List<Callable<StateObserver2048>> callables = new ArrayList<>();
 
             //play Games
             for(int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
@@ -72,7 +115,10 @@ public class Evaluator2048 extends Evaluator {
                     StateObserver2048 so = new StateObserver2048();
                     long gameStartTime = System.currentTimeMillis();
 
-                    PlayAgent playAgent = new MCTSExpectimaxAgt("MCTS Expectimax", mctsExpectimaxAgt.params);
+                    // we can use the same m_PlayAgent in every parallel eval thread, since 
+                    // ExpectiMaxN's method getNextAction2 and the wrapped agent's method getScore* are 
+                    // thread-safe:
+                    PlayAgent playAgent = m_PlayAgent;
 
                     while (!so.isGameOver()) {
                         Types.ACTIONS action = playAgent.getNextAction2(so, false, true);
@@ -110,7 +156,9 @@ public class Evaluator2048 extends Evaluator {
 
                 moveNum=cumEmpty=0;
                 while (!so.isGameOver()) {
+                    long gameMoveTime = System.currentTimeMillis();
                     so.advance(m_PlayAgent.getNextAction2(so, false, true));
+//                    System.out.print("Finished move " + (so.moves) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameMoveTime) + "ms.\n");
                     
                     // gather information for later printout to agents/gameName/csv/playStats.csv:
                     if (ConfigEvaluator.PLAYSTATS_CSV) {
@@ -239,6 +287,11 @@ public class Evaluator2048 extends Evaluator {
                 "\nHighest tiles: " +
                 tilesString +
                 "\n\n";
+    }
+    
+    @Override
+    public String getShortMsg() {
+        return "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(averageScore);    	
     }
 
     @Override

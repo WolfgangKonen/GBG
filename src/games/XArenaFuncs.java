@@ -22,13 +22,17 @@ import controllers.PlayAgent.AgentState;
 import controllers.RandomAgent;
 import controllers.AgentBase;
 import controllers.ExpectimaxNAgent;
+import controllers.ExpectimaxWrapper;
 import controllers.HumanPlayer;
 import controllers.MaxNAgent;
+import controllers.MaxNWrapper;
 import controllers.MinimaxAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import params.ParMaxN;
+import params.ParOther;
 import tools.LineChartSuccess;
 import tools.Measure;
 import tools.MessageBox;
@@ -51,7 +55,7 @@ import tools.Types;
  * Known classes having {@link XArenaFuncs} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
- * @author Wolfgang Konen, TH Koeln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  * 
  */
 public class XArenaFuncs 
@@ -154,11 +158,11 @@ public class XArenaFuncs
 //				pa=null;			
 //			}
 		} else if (sAgent.equals("Minimax")) {
-			pa = new MinimaxAgent(sAgent,m_xab.oPar);
+			pa = new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams), new ParOther(m_xab.oPar));
 		} else if (sAgent.equals("Max-N")) {
-			pa = new MaxNAgent(sAgent,m_xab.oPar);
+			pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams), new ParOther(m_xab.oPar));
 		} else if (sAgent.equals("Expectimax-N")) {
-			pa = new ExpectimaxNAgent(sAgent,m_xab.oPar);
+			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams), new ParOther(m_xab.oPar));
 		} else if (sAgent.equals("Random")) {
 			pa = new RandomAgent(sAgent);
 		} else if (sAgent.equals("MCTS")) {
@@ -197,11 +201,11 @@ public class XArenaFuncs
 		for (int n=0; n<numPlayers; n++) {
 			String sAgent = m_xab.getSelectedAgent(n);
 			if (sAgent.equals("Minimax")) {
-				pa= new MinimaxAgent(sAgent,m_xab.oPar);
+				pa= new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams), new ParOther(m_xab.oPar));
 			} else if (sAgent.equals("Max-N")) {
-				pa= new MaxNAgent(sAgent,m_xab.oPar);
+				pa= new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams), new ParOther(m_xab.oPar));
 			} else if (sAgent.equals("Expectimax-N")) {
-				pa = new ExpectimaxNAgent(sAgent,m_xab.oPar);
+				pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams), new ParOther(m_xab.oPar));
 			} else if (sAgent.equals("Random")) {
 				pa= new RandomAgent(sAgent);
 			} else if (sAgent.equals("MCTS")) {
@@ -215,7 +219,6 @@ public class XArenaFuncs
 			}else { // all the trainable agents:
 				if (m_PlayAgents[n]==null) {
 					if (sAgent.equals("TDS")) {
-						//pa = m_xab.m_game.makeTDSAgent(sAgent, m_xab.tdPar, maxGameNum);
 						Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar.getFeatmode());
 						pa = new TDAgent(sAgent, m_xab.tdPar, m_xab.oPar, feat, maxGameNum);
 //					} else if (sAgent.equals("TD-Ntuple")) {
@@ -246,7 +249,10 @@ public class XArenaFuncs
 						}
 					}					
 				} else {
-					if (!sAgent.equals(m_PlayAgents[n].getName()))
+					PlayAgent inner_pa = m_PlayAgents[n];
+					if (m_PlayAgents[n].getName()=="ExpectimaxWrapper") 
+						inner_pa = ((ExpectimaxWrapper) inner_pa).getWrappedPlayAgent();
+					if (!sAgent.equals(inner_pa.getName()))
 						throw new RuntimeException("Current agent for player "+n+" is "+m_PlayAgents[n].getName()
 								+" but selector for player "+n+" requires "+sAgent+".");
 					pa = m_PlayAgents[n];		// take the n'th current agent, which 
@@ -259,6 +265,37 @@ public class XArenaFuncs
 			m_PlayAgents[n] = pa;
 		} // for (n)
 		return m_PlayAgents;
+	}
+
+	/**
+	 * Given the selected agent in {@code paVector}, wrap them (if {@code nply>0} by an n-ply
+	 * look-ahead tree search. The tree is of type Max-N for deterministic games and of type
+	 * Expectimax-N for nondeterministic games. No wrapping occurs for agent {@link HumanPlayer}.
+	 * <p>
+	 * Caution: Larger values for {@code nply}, e.g. > 5, may lead to long execution times!
+	 * 
+	 * @param paVector	the (unwrapped) agents for each player 
+	 * @param nply		the number of look-ahead plies (depth of the tree)
+	 * @param so		needed only to detect whether game is deterministic or not.
+	 * @return {@code paVector} itself if {@code nply==0}. Wrapped agents if {@code nply>0}
+	 * 
+	 * @see MaxNWrapper
+	 * @see ExpectimaxWrapper
+	 */
+	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, int nply, StateObservation so) 
+	{
+		PlayAgent[] qaVector = new PlayAgent[numPlayers];
+		for (int n=0; n<numPlayers; n++) {
+			qaVector[n]=paVector[n];
+			if (nply>0 && !(paVector[n] instanceof HumanPlayer)) {
+				if (so.isDeterministicGame()) {
+					qaVector[n] = new MaxNWrapper(paVector[0],nply);
+				} else {
+					qaVector[n] = new ExpectimaxWrapper(paVector[0],nply);
+				}
+			}
+		} // for (n)
+		return qaVector;
 	}
 
 
@@ -726,18 +763,21 @@ public class XArenaFuncs
 						"Error", JOptionPane.ERROR_MESSAGE);
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
+				int wrappedNPly=xab.oPar.getWrapperNPly();
 
 				PlayAgent[] paVector = fetchAgents(xab);
 
 				AgentBase.validTrainedAgents(paVector,numPlayers);  
 				// may throw RuntimeException
+				
+				PlayAgent[] qaVector = wrapAgents(paVector,wrappedNPly,startSO);
 
 				int verbose=1;
 
 				if (swap) {
-					compete(paVector[1],paVector[0],startSO,competeNum,verbose);
+					compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
 				} else {
-					compete(paVector[0],paVector[1],startSO,competeNum,verbose);	
+					compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);	
 				}
 			}
 					
@@ -796,8 +836,6 @@ public class XArenaFuncs
 		Evaluator m_evaluatorO=null;
 		double alpha = xab.tdPar.getAlpha();
 		double lambda = xab.tdPar.getLambda();
-//		this.m_NetIsLinear = xab.tdPar.LinNetType.getState();
-//		this.m_NetHasSigmoid = xab.tdPar.withSigType.getState();
 		
 		double optimCountX=0.0,optimCountO=0.0;
 		double[][] winrateC = new double[competitionNum][3];
@@ -818,6 +856,7 @@ public class XArenaFuncs
 			try {
 				paX = this.constructAgent(AgentX, xab);
 				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);
+				// TODO: add suitable wrapAgents-call (MaxNWrapper or ExpectimaxWrapper)
 			}  catch(RuntimeException e) 
 			{
 				MessageBox.show(xab, 
@@ -831,6 +870,7 @@ public class XArenaFuncs
 			try {
 				paO = this.constructAgent(AgentO, xab);
 				if (paO==null) throw new RuntimeException("Could not construct AgentO = " + AgentO);
+				// TODO: add suitable wrapAgents-call (MaxNWrapper or ExpectimaxWrapper)
 			}  catch(RuntimeException e) 
 			{
 				MessageBox.show(xab, 

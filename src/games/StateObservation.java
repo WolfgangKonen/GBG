@@ -22,7 +22,7 @@ import tools.Types.ACTIONS;
  * 
  * @see StateObservationNondet
  * 
- * @author Wolfgang Konen, TH Koeln, Feb'17
+ * @author Wolfgang Konen, TH Köln, Feb'17
  */
 public interface StateObservation extends Serializable{
     //Types.ACTIONS[] actions=null;

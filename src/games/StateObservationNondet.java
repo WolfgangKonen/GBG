@@ -11,7 +11,7 @@ import tools.Types.ACTIONS;
  * 
  * @see StateObservation
  * 
- * @author Johannes Kutsch, Wolfgang Konen, TH Koeln, Feb'17
+ * @author Johannes Kutsch, Wolfgang Konen, TH Köln, Feb'17
  */
 public interface StateObservationNondet extends StateObservation {
     /**

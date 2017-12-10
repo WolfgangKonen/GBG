@@ -6,6 +6,9 @@ import javax.swing.*;
 
 import tools.Types;
 
+/**
+ *  The GUI element (JTabbedPane) holding the parameter tabs 
+ */
 public class XArenaTabs extends JFrame 
 {
 	JTabbedPane tp;
@@ -23,12 +26,13 @@ public class XArenaTabs extends JFrame
 //	        tp.addTab("Tab" + i, panel);
 //		}
 
-		tp.addTab("TD pars", arena.m_xab.tdPar.getPanel());			// 0
-		tp.addTab("NT pars", arena.m_xab.ntPar.getPanel());			// 1	
-		tp.addTab("MCTS pars", arena.m_xab.mctsParams.getPanel());		// 2
+		tp.addTab("TD pars", arena.m_xab.tdPar.getPanel());				// 0
+		tp.addTab("NT pars", arena.m_xab.ntPar.getPanel());				// 1
+		tp.addTab("MaxN pars", arena.m_xab.maxnParams.getPanel());		// 2		
 		tp.addTab("MC pars", arena.m_xab.mcParams.getPanel());    		// 3
-		tp.addTab("MCTSE pars", arena.m_xab.mctsExpectimaxParams.getPanel());    		// 4
-		tp.addTab("Other pars", arena.m_xab.oPar.getPanel());			// 5
+		tp.addTab("MCTS pars", arena.m_xab.mctsParams.getPanel());		// 4
+		tp.addTab("MCTSE pars", arena.m_xab.mctsExpectimaxParams.getPanel());    		// 5
+		tp.addTab("Other pars", arena.m_xab.oPar.getPanel());			// 6
 //		tp.addTab("RP pars", arena.m_xab.rpPar.getPanel());		// --1
 //		tp.addTab("TC pars", arena.m_xab.tcPar.getPanel());		// --2
 //		tp.addTab("CMA pars", arena.m_xab.cmaPar.getPanel());		// --4
@@ -69,14 +73,15 @@ public class XArenaTabs extends JFrame
 		ticGame.m_tabs.setLocation(x,y);
 		ticGame.m_tabs.setSize(Types.GUI_PARAMTABS_WIDTH,Types.GUI_PARAMTABS_HEIGHT);		
 		tp.setSelectedIndex(0);
+		if (selectedAgent.equals("TDS")) tp.setSelectedIndex(0);
 		if (selectedAgent.equals("TD-Ntuple")) tp.setSelectedIndex(1);
 		if (selectedAgent.equals("TD-Ntuple-2")) tp.setSelectedIndex(1);
-		if (selectedAgent.equals("MCTS")) tp.setSelectedIndex(2);
+		if (selectedAgent.equals("Minimax")) tp.setSelectedIndex(2);
+		if (selectedAgent.equals("Max-N")) tp.setSelectedIndex(2);
+		if (selectedAgent.equals("Expectimax-N")) tp.setSelectedIndex(2);
 		if (selectedAgent.equals("MC")) tp.setSelectedIndex(3);
-		if (selectedAgent.equals("MCTS Expectimax")) tp.setSelectedIndex(4);
-		if (selectedAgent.equals("Minimax")) tp.setSelectedIndex(5);
-		if (selectedAgent.equals("Max-N")) tp.setSelectedIndex(5);
-		if (selectedAgent.equals("Expectimax-N")) tp.setSelectedIndex(5);
+		if (selectedAgent.equals("MCTS")) tp.setSelectedIndex(4);
+		if (selectedAgent.equals("MCTS Expectimax")) tp.setSelectedIndex(5);
 		//if (selectedAgent.equals("CMA-ES")) tp.setSelectedIndex(4);
 	}
 

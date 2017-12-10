@@ -19,6 +19,7 @@ import javax.swing.SwingConstants;
 import agentIO.LoadSaveTD;
 import tools.Progress;
 import controllers.AgentBase;
+import controllers.ExpectimaxWrapper;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
@@ -26,22 +27,21 @@ import games.Hex.GameBoardHex;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.MTrain;
+import games.TicTacToe.LaunchArenaTTT;
+import games.TicTacToe.LaunchTrainTTT;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.MessageBox;
 import tools.StatusBar;
 import tools.Types;
 
-//import agentIO.Progress;
-
 /**
  * This class contains the GUI and the task dispatcher for the game. The GUI for 
  * buttons and choice boxes is in {@link XArenaButtons}.
+ * <p>
+ * Run this class for example from {@code main} in 
+ * {@link LaunchArenaTTT} or {@link LaunchTrainTTT} for the TicTacToe game.
  * 
- * Run this class for example from the {@code main} in 
- * {@link games.TicTacToe.LaunchArenaTTT LaunchArenaTTT} or 
- * {@link games.TicTacToe.LaunchTrainTTT LaunchTrainTTT} for the TicTacToe game.
- * 
- * @author Wolfgang Konen, TH Koeln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  */
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
@@ -325,7 +325,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		PlayAgent pa;
 		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mctsParams,m_xab.oPar);
 //		double[] vtable = null;
-		PlayAgent[] paVector;
+		PlayAgent[] paVector,qaVector;
 		int nEmpty = 0,cumEmpty=0;
 		int moveNum=0;
 		double gameScore=0.0;
@@ -334,10 +334,12 @@ abstract public class Arena extends JPanel implements Runnable {
 
 		// fetch the agents in a way general for 1-, 2- and n-player games
 		int numPlayers = gb.getStateObs().getNumPlayers();
+		int wrappedNPly=m_xab.oPar.getWrapperNPly();
 		try 
 		{
 			paVector = m_xfun.fetchAgents(m_xab);
 			AgentBase.validTrainedAgents(paVector,numPlayers);
+			qaVector = m_xfun.wrapAgents(paVector,wrappedNPly,gb.getStateObs());
 		} catch(RuntimeException e) 
 		{
 			MessageBox.show(m_xab, 
@@ -378,6 +380,8 @@ abstract public class Arena extends JPanel implements Runnable {
 		setStatusMessage(sMsg);
 		System.out.println(sMsg);
 		
+		// if taskBefore==INSPECTV, start from the board left by InspectV,
+		// if taskBefore!=INSPECTV, start from empty board:
 		if (taskBefore!=Task.INSPECTV) {
 			gb.clearBoard(true,true);
 		}
@@ -386,19 +390,21 @@ abstract public class Arena extends JPanel implements Runnable {
 		gb.setActionReq(true);
 		so = gb.getStateObs();
 		
-		assert paVector.length == so.getNumPlayers() : 
+		assert qaVector.length == so.getNumPlayers() : 
 			  "Number of agents does not match so.getNumPlayers()!";
 
 		logSessionid = logManager.newLoggingSession(so);
 
-		while(taskState == Task.PLAY)	// game play interruptible by hitting 'Play' again 
-		{			
+		try 
+		{
+		  while(taskState == Task.PLAY)	// game play interruptible by hitting 'Play' again 
+		  {			
 			if(gb.isActionReq()){
 				moveNum++;
 				so = gb.getStateObs();
 				//int[] test= so.getBoardVector();
 				player = so.getPlayer();
-				pa = paVector[player];
+				pa = qaVector[player];
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
 						gb.updateBoard(so,false,false);		// enable board buttons
@@ -495,7 +501,19 @@ abstract public class Arena extends JPanel implements Runnable {
 				break;			// this is the final break out of while loop 	
 			} // if isGameOver
 			
-		}	// while(taskState == Task.PLAY) [will be left only by the last break above or when taskState changes]
+		  }	// while(taskState == Task.PLAY) [will be left only by the last break above or when taskState changes]
+		} catch(RuntimeException e) 
+		{
+			// a possible RuntimeException is raised when an agent for nondeterministic games
+			// (ExpectimaxNAgent, MCTSExpectimax) is called with a (deterministic) 
+			// StateObservation object 
+			MessageBox.show(m_xab, 
+					e.getMessage(), 
+					"Error", JOptionPane.WARNING_MESSAGE);
+			taskState = Task.IDLE;		
+			setStatusMessage("Done.");
+			return;			
+		}
 
 		PStats.printPlayStats(psList, paVector[0],this);
 		logManager.endLoggingSession(logSessionid);

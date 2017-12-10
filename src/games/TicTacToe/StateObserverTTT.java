@@ -3,6 +3,7 @@ package games.TicTacToe;
 import java.util.ArrayList;
 
 import controllers.PlayAgent;
+import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -17,7 +18,7 @@ import tools.Types.ACTIONS;
  * </ul>
  *
  */
-public class StateObserverTTT implements StateObservation {
+public class StateObserverTTT extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 	private int[][] m_Table;		// current board position
@@ -167,54 +168,6 @@ public class StateObserverTTT implements StateObservation {
 
 	public String getName() { return "TicTacToe";	}
 
-    @Override
-	public double getGameValue() { return getGameScore(); }
-
-	/**
-	 * Same as getGameScore(), but relative to referingState. This relativeness
-	 * is usually only relevant for games with more than one player.
-	 * @param referringState
-	 * @return  If referringState has the same player as this, then it is getGameScore(). 
-	 * 			If referringState has opposite player, then it is getGameScore()*(-1). 
-	 */
-	public double getGameScore(StateObservation referringState) {
-        return (this.getPlayer() == referringState.getPlayer() ? getGameScore() : getGameScore() * (-1));
-	}
-	
-	/**
-	 * The cumulative reward, here: the same as getGameScore()
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return the cumulative reward
-	 */
-    @Override
-	public double getReward(boolean rewardIsGameScore) {
-		return getGameScore();
-	}
-	
-	/**
-	 * Same as getReward(), but relative to referringState. 
-	 * @param referringState
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return  the cumulative reward 
-	 */
-    @Override
-	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
-		return getGameScore(referringState);
-	}
-
-	/**
-	 * Same as getReward(referringState), but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return  the cumulative reward 
-	 */
-	public double getReward(int player, boolean rewardIsGameScore) {
-        return (this.getPlayer() == player ? getGameScore() : getGameScore() * (-1));
-	}
-
 	/**
 	 * Advance the current state with 'action' to a new state
 	 * @param action
@@ -246,28 +199,11 @@ public class StateObserverTTT implements StateObservation {
 	}
 
     /**
-     * Advance the current state to a new afterstate (do the deterministic part of advance)
-     *
-     * @param action the action
+     * Return the afterstate preceding {@code this}. 
      */
-    @Override
-    public void advanceDeterministic(Types.ACTIONS action) {
-    	// since StateObserverTTT is for a deterministic game, advanceDeterministic()
-    	// is the same as advance():
-    	advance(action);
-    }
-
-    /**
-     * Advance the current afterstate to a new state (do the nondeterministic part of advance)
-     */
-    @Override
-    public void advanceNondeterministic() {
-    	// nothing to do here, since StateObserverTTT is for a deterministic game    	
-    }
-
     @Override
     public StateObservation getPrecedingAfterstate() {
-    	// for deterministic games next state and afterstate are the same
+    	// for deterministic games, this state and its preceding afterstate are the same
     	return this;
     }
 

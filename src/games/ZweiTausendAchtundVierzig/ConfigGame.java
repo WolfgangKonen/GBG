@@ -34,6 +34,7 @@ public class ConfigGame {
     //     */
     //    public static final int FIXEDNTUPLEMODE = 2;
     // --- obsolete, FIXEDNTUPLEMODE is now coded via ParNT.fixedNtupleMode ---
+    // --- see also XNTupleFuncs2048::fixedNTuples(int mode) ---
     
     // this is now parameter rewardIsGameScore in OtherParams and ParOther,
     // so REWARD_IS_EMPTYTILES is not needed anymore:

@@ -3,6 +3,8 @@ package controllers;
 import controllers.PlayAgent;
 import games.StateObservation;
 import params.OtherParams;
+import params.ParMaxN;
+import params.ParOther;
 import params.TDParams;
 import tools.Types;
 
@@ -30,6 +32,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	private int m_depth=10;
 	private boolean m_useHashMap=true;
 	private HashMap<String,Double> hm;
+	private ParOther m_oPar = new ParOther();
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -48,38 +51,13 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		setAgentState(AgentState.TRAINED);
 	}
 	
-	public MinimaxAgent(String name, OtherParams opar)
+	public MinimaxAgent(String name, ParMaxN mpar, ParOther opar)
 	{
 		this(name);
-		m_depth = opar.getMinimaxDepth();
-		m_useHashMap = opar.useMinimaxHashmap();
+		m_depth = mpar.getMaxnDepth();
+		m_useHashMap = mpar.useMinimaxHashmap();
+		m_oPar = opar;
 	}
-	
-	
-//	/**
-//	 * Get the best next action and return it
-//	 * @param so			current game state (not changed on return)
-//	 * @param random		allow epsilon-greedy random action selection	
-//	 * @param VTable		must be an array of size n+1 on input, where 
-//	 * 						n=sob.getNumAvailableActions(). On output,
-//	 * 						elements 0,...,n-1 hold the score for each available 
-//	 * 						action (corresponding to sob.getAvailableActions())
-//	 * 						In addition, VTable[n] has the score for the 
-//	 * 						best action.
-//	 * @param silent
-//	 * @return actBest		the best action 
-//	 * 
-//	 */	
-//	@Deprecated
-//	@Override
-//	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
-//		//VTable = new double[so.getNumAvailableActions()];
-//        // DON'T! The caller has to define VTable with the right length
-//
-//		Types.ACTIONS actBest = getBestAction(so,  random,  VTable,  silent, 0);
-//        //System.out.println("hm size: "+hm.size());
-//		return actBest;
-//	}
 	
 	/**
 	 * Get the best next action and return it
@@ -211,19 +189,6 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
         return actBest;         
 	}
 
-
-//	/**
-//	 * 
-//	 * @return	returns true/false, whether the action suggested by last call 
-//	 * 			to getNextAction() was a random action. 
-//	 * 			Always false in the case of MinimaxAgent
-//	 * <p>
-//	 * Use now {@link Types.ACTIONS#isRandomAction()}
-//	 */
-//	@Deprecated
-//	public boolean wasRandomAction() {
-//		return false;
-//	}
 
 	/**
 	 * Return the agent's score for that after state.

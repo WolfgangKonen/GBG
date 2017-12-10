@@ -537,7 +537,11 @@ public class StateObserver2048 implements StateObservationNondet {
 	 * @return  the cumulative reward 
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
-        return this.getGameScore();
+    	if (rewardIsGameScore) {
+    		return getGameScore();    		
+    	} else {
+    		return this.getCumulEmptyTiles();
+    	}
 	}
 
     public double getMinGameScore() {
