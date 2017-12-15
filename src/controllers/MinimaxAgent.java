@@ -32,7 +32,6 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	private int m_depth=10;
 	private boolean m_useHashMap=true;
 	private HashMap<String,Double> hm;
-	private ParOther m_oPar = new ParOther();
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -56,7 +55,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 		this(name);
 		m_depth = mpar.getMaxnDepth();
 		m_useHashMap = mpar.useMinimaxHashmap();
-		m_oPar = opar;
+		m_oPar = opar;	// AgentBase::m_oPar
 	}
 	
 	/**

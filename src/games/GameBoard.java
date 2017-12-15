@@ -21,7 +21,8 @@ public interface GameBoard {
 	public void clearBoard(boolean boardClear, boolean vClear);
 	//public void updateBoard();
 	//public void updateBoard(StateObservation so);
-	public void updateBoard(StateObservation so, boolean showStoredV, boolean enableOccupiedCells);
+	public void updateBoard(StateObservation so, boolean showStoredV, boolean enableOccupiedCells
+			, boolean showValueOnGameboard);
 	public void showGameBoard(Arena arena,boolean alignToMain);
 	/**
 	 * Is an action requested from Arena (i.e. was human interaction done)?

@@ -8,8 +8,10 @@ import java.util.*;
 
 /**
  * This class is responsible for logging games
- *
- * @author Johannes Kutsch, 30.04.2017
+ * 
+ * @author Johannes Kutsch, TH Köln, Nov'16
+ * 
+ * @see LogManagerGUI
  */
 public class LogManager {
     public boolean loggingEnabled = false;  //enables or disables logging

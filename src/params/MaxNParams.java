@@ -25,7 +25,7 @@ import games.Feature;
 
 /**
  * This class realizes the parameter settings (GUI tab) for for {@link MinimaxAgent}, 
- * {@link MaxNAgent}, {@link ExpectiimaxNAgent}.
+ * {@link MaxNAgent}, {@link ExpectimaxNAgent}.
  * These parameters and their [defaults] are: <ul>
  * <li> <b>tree depth</b>: 	[10] initial strength of learning parameter 
  * <li> <b>useHashMap</b>: 	[true] (only Minimax) whether to store calculated values in a hash map or not 

@@ -12,7 +12,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 /**
- * Created by Johannes on 06.05.2017.
+ * The GUI for {@link LogManager}
+ * 
+ * @author Johannes Kutsch, TH Köln, Nov'16
+ * 
+ * @see LogManager
  */
 public class LogManagerGUI {
     private LogManager logManager;
@@ -50,7 +54,7 @@ public class LogManagerGUI {
      */
     public LogManagerGUI(LogManager logManager, GameBoard gameBoard) {
         this.logManager = logManager;
-        this.gameBoard = gameBoard;
+        this.gameBoard = gameBoard; 
         initialize();
     }
 
@@ -275,7 +279,7 @@ public class LogManagerGUI {
     private void loadBoard(int position) {
         if(currentLog.stateObservations.size() > position && position >= 0) {
             counter = position;
-            gameBoard.updateBoard(currentLog.stateObservations.get(position), true, true);
+            gameBoard.updateBoard(currentLog.stateObservations.get(position), true, true, true);
             jTFNextAction.setText("" + (position + 1));
 
             if(currentLog.stateObservations.size() > position + 1) {

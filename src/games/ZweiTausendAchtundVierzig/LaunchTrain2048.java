@@ -1,6 +1,11 @@
 package games.ZweiTausendAchtundVierzig;
 
 import javax.swing.*;
+
+import games.Arena;
+import games.ArenaTrain;
+import games.XArenaFuncs;
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -10,6 +15,16 @@ import java.util.ListIterator;
 
 import tools.Types;
 
+/**
+ * Launch class used to start game 2048 in class {@link ArenaTrain} via 
+ * a <b>main method</b>. <br> 
+ *  
+ * @author Wolfgang Konen, TH Cologne, Nov'16
+ * 
+ * @see Arena
+ * @see ArenaTrain
+ * @see XArenaFuncs
+ */
 public class LaunchTrain2048 extends JFrame {
     private static final long serialVersionUID = 1L;
     public ArenaTrain2048 m_Arena;

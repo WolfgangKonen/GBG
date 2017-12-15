@@ -142,6 +142,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * <li> If {@link #MODE_3P}==1: Use the new n-ply logic as 
 	 * described in TR-TDNTuple.tex: one value function V(s_t|p_t) and each player maximizes
 	 * its own game value or minimizes the next opponent's game value. 
+	 * <li> If {@link #MODE_3P}==2: Space for yet another version 
 	 * </ul>
 	 * If {@link #VER_3P}==false, proceed with a 2-player logic (see comment for 
 	 * {@link #NEW_2P}).
@@ -195,12 +196,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private boolean randomSelect = false;
 	
 	/**
-	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link #m_oPar} are needed for 
+	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link AgentBase#m_oPar} are needed for 
 	 * saving and loading the agent (to restore the agent with all its parameter settings)
 	 */
 	private ParTD m_tdPar;
 	private ParNT m_ntPar;
-	private ParOther m_oPar = new ParOther();
 	
 	//
 	// variables needed in various train methods
@@ -309,7 +309,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
     	BestScore3 = -Double.MAX_VALUE;
 		double[] VTable;
    
-		assert m_oPar.getNPly()>0 : "Oops, nPly=0 (or negative) in m_oPar!";
+		assert m_tdPar.getNPly()>0 : "Oops, nPly=0 (or negative) in m_oPar!";
 		
 //		if (so.getNumPlayers()>2)
 //			throw new RuntimeException("TDNTuple2Agt.getNextAction2 does not yet "+
@@ -335,7 +335,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        
             if (VER_3P && MODE_3P==1) {
             	// this has n-ply recursion, but does not reflect multi-moves:
-            	int nply = m_oPar.getNPly();
+            	int nply = m_tdPar.getNPly();
             	//int nply = so.getNumPlayers();
             	//int nply = 1;
             	//System.out.println("so: "+so.stringDescr()+", act: "+actions[i].toInt()); // DEBUG
@@ -1429,15 +1429,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		m_Net.setTdAgt(this);						 // WK: needed when loading an older agent
 	}
 
-	/**
-	 * Set defaults for m_oPar 
-	 * (needed in {@link XArenaMenu#loadAgent} when loading older agents, where 
-	 * m_oPar=null in the saved version).
-	 */
-	public void setDefaultOtherPar() {
-		m_oPar = new ParOther();
-	}
-
 	public void setAlpha(double alpha) {
 		m_Net.setAlpha(alpha);
 	}
@@ -1469,11 +1460,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
 	public void resetNumLearnActions() {
 		m_Net.resetNumLearnActions();
-	}
-	
-	public int getNumEval()
-	{	
-		return m_oPar.getNumEval();
 	}
 	
 	public NTuple2ValueFunc getNTupleValueFunc() {
@@ -1520,9 +1506,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 	public ParNT getNTParams() {
 		return m_ntPar;
-	}
-	public ParOther getOtherPar() {
-		return m_oPar;
 	}
 	public boolean getAFTERSTATE() {
 		return m_ntPar.getAFTERSTATE();

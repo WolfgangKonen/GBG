@@ -609,15 +609,12 @@ public class StateObserver2048 implements StateObservationNondet {
         ArrayList<ACTIONS> availRan = new ArrayList<>();
         for (int i=0; i<emptyTiles.size()*2; i++) 
             availRan.add(ACTIONS.fromInt(i));
-        return availRan;
-		
+        return availRan;	
 	}
 
 	public int getNumAvailableRandoms() {
 		return emptyTiles.size()*2;
 	}
-
-
 
     public void setAvailableActions() {
         ArrayList<ACTIONS> acts = this.getAvailableActions();

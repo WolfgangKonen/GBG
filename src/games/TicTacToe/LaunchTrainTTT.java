@@ -5,6 +5,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import games.Arena;
 import games.ArenaTrain;
@@ -13,7 +15,7 @@ import tools.Types;
 
 /**
  * Launch class used to start game TicTacToe in class {@link ArenaTrain} via 
- * a <b>main method</b>: <br> 
+ * a <b>main method</b>. <br> 
  *  
  * @author Wolfgang Konen, TH Cologne, Nov'16
  * 
@@ -62,10 +64,14 @@ public class LaunchTrainTTT extends JFrame {
 	public LaunchTrainTTT(String title) {
 		super(title);
 		m_Arena = new ArenaTrainTTT(this);
+		JPanel jPanel = new JPanel();
+		jPanel.setBackground(Types.GUI_BGCOLOR);
+		JLabel jlabel = new JLabel(" ");
+		jPanel.add(jlabel);
 		setLayout(new BorderLayout(10,10));
 		setJMenuBar(m_Arena.m_menu);
-		add(m_Arena,BorderLayout.CENTER);
-		add(new Label(" "),BorderLayout.SOUTH);	// just a little space at the bottom
+		add(m_Arena,BorderLayout.CENTER);		
+		add(jPanel,BorderLayout.SOUTH);	// just a little space at the bottom
 		
 		/*
 		// invoke the following lines only during the one-time transformation v12 -> v13 

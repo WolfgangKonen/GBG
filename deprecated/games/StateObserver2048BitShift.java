@@ -39,7 +39,6 @@ public class StateObserver2048BitShift implements StateObservationNondet {
     private Random random = new Random();
     protected List<Integer> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves = new ArrayList();   // 0: left, 1: up, 2: right, 3: down
-    protected List<Integer> availableRandoms = new ArrayList();
     protected ACTIONS[] actions;
 
     private long boardB;
@@ -603,15 +602,14 @@ public class StateObserver2048BitShift implements StateObservationNondet {
     
 	public ArrayList<ACTIONS> getAvailableRandoms() {
         ArrayList<ACTIONS> availRan = new ArrayList<>();
-        for(int viableMove : availableRandoms) {
-            availRan.add(ACTIONS.fromInt(viableMove));
-        }
+        for (int i=0; i<emptyTiles.size()*2; i++) 
+            availRan.add(ACTIONS.fromInt(i));
         return availRan;
 		
 	}
 
 	public int getNumAvailableRandoms() {
-		return availableRandoms.size();
+		return emptyTiles.size()*2;
 	}
 
 
@@ -887,11 +885,6 @@ public class StateObserver2048BitShift implements StateObservationNondet {
         setAvailableActions();
     }
 
-    private void updateAvailableRandoms() {
-        availableRandoms.clear();
-        for (int i=0; i<emptyTiles.size()*2; i++) availableRandoms.add(i);
-    }
-    
     public void printBoard() {
         System.out.println("---------------------------------");
         for(int r=3; r>=0; r--)

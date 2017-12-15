@@ -11,6 +11,7 @@ public class StatusBar extends JLabel {
     public StatusBar() {
         super();
         super.setPreferredSize(new Dimension(200, 16));
+        super.setBackground(Types.GUI_BGCOLOR);
         setMessage("Ready");
     }
     

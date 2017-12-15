@@ -9,7 +9,6 @@ public class ParOther implements Serializable {
     public static int DEFAULT_EPISODE_LENGTH = -1;
     public static int DEFAULT_STOP_TEST = 0;
     public static int DEFAULT_STOP_EVAL = 100;
-    public static int DEFAULT_NPLY = 1;
     public static int DEFAULT_WRAPPER_NPLY = 0;
 
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
@@ -18,7 +17,6 @@ public class ParOther implements Serializable {
     private int episodeLength = DEFAULT_EPISODE_LENGTH;
     private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 
-    private int nply = DEFAULT_NPLY; 
     private int wrapperNply = DEFAULT_WRAPPER_NPLY; 
     private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
@@ -44,7 +42,6 @@ public class ParOther implements Serializable {
 		this.episodeLength = op.getEpisodeLength();
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
-		this.nply = op.getNPly();
 		this.wrapperNply = op.getWrapperNPly();
 		this.chooseStart01 = op.useChooseStart01();
 		this.learnFromRM = op.useLearnFromRM();
@@ -64,7 +61,6 @@ public class ParOther implements Serializable {
 		this.episodeLength = op.getEpiLength();
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
-		this.nply = op.getNPly();
 		this.wrapperNply = op.getWrapperNPly();
 		this.chooseStart01 = op.useChooseStart01();
 		this.learnFromRM = op.useLearnFromRM();
@@ -73,10 +69,11 @@ public class ParOther implements Serializable {
 //		this.minimaxHashmap = op.useMinimaxHashmap();	
 	}
 	
-	public void setNPly(int nply) {
-		this.nply=nply;
+	public void setNumEval(int num)
+	{
+		this.numEval=num;
 	}
-	
+
 	public void setWrapperNPly(int nply) {
 		this.wrapperNply=nply;
 	}
@@ -107,10 +104,6 @@ public class ParOther implements Serializable {
 
 	public int getStopEval() {
 		return stopEval;
-	}
-
-	public int getNPly() {
-		return nply;
 	}
 
 	public int getWrapperNPly() {

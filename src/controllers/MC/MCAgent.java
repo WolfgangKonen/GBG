@@ -31,7 +31,6 @@ public class MCAgent extends AgentBase implements PlayAgent {
     private int nIterations = 0; 		// counts the total number of iterations
 
     public ParMC m_mcPar = new ParMC();
-	private ParOther m_oPar = new ParOther();
 
 	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
 	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
@@ -55,7 +54,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
     {
         super(name);
         this.m_mcPar = new ParMC(mcParams);
-		this.m_oPar = new ParOther(oPar);
+		this.m_oPar = new ParOther(oPar);		// AgentBase::m_oPar
         setAgentState(AgentState.TRAINED);
     }
 
@@ -632,18 +631,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
 	public ParMC getMCPar() {
 		return m_mcPar;
 	}
-	public ParOther getOtherPar() {
-		return m_oPar;
-	}
-	/**
-	 * Set defaults for m_oPar 
-	 * (needed in {@link XArenaMenu#loadAgent} when loading older agents, where 
-	 * m_oPar=null in the saved version).
-	 */
-	public void setDefaultOtherPar() {
-		m_oPar = new ParOther();
-	}
-
+	
 //	/**
 //	 * 
 //	 * Use now {@link Types.ACTIONS#isRandomAction()}

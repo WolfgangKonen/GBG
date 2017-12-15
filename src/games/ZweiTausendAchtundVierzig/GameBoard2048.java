@@ -385,14 +385,15 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     }
 
     @Override
-    public void updateBoard(StateObservation so, boolean showStoredV, boolean enableOccupiedCells) {
+    public void updateBoard(StateObservation so, boolean showStoredV, 
+    						boolean enableOccupiedCells, boolean showValueOnGameboard) {
         if (so != null) {
             if (so instanceof StateObserver2048) {
                 StateObserver2048 soZTAV = (StateObserver2048) so;
                 // ** activate next line only if m_so is of class StateObserver2048: **
                 m_so = soZTAV.copy();
 
-                if (showStoredV && soZTAV.storedValues != null) {
+                if (showValueOnGameboard && soZTAV.storedValues != null) {
                     for (int i = 0; i < 4; i++) {
                         vTable[i] = Double.NaN;
                     }
@@ -545,8 +546,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     @Override
     public StateObservation getDefaultStartState() {
         clearBoard(true, true);
-        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) 
-        	return new StateObserver2048();
+//        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) 
+//        	return new StateObserver2048();
         return m_so;
     }
 

@@ -31,10 +31,9 @@ import tools.Types;
 /**
  * Main menu for {@link Arena} and {@link ArenaTrain}.
  * 
- * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  * 
  */
-
 public class XArenaMenu extends JMenuBar {
 
 	private static final String TIPEVALUATE = "";
@@ -562,15 +561,15 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.oPar.numEval_T.setText(""+td.getNumEval());
 			}
 			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P && !(TDNTuple2Agt.MODE_3P==0)) {
-				m_arena.m_xab.oPar.enableNPly(true);
+				m_arena.m_xab.tdPar.enableNPly(true);
 				// if it is one of the older agents (before nply was added to oPar), it will
 				// have nply=0. Then set nply=1: 
-				if (m_arena.m_xab.oPar.getNPly()==0) {
-					m_arena.m_xab.oPar.setNPly(1);
-					((TDNTuple2Agt) td).getOtherPar().setNPly(1);
+				if (m_arena.m_xab.tdPar.getNPly()==0) {
+					m_arena.m_xab.tdPar.setNPly(1);
+					((TDNTuple2Agt) td).getTDParams().setNPly(1);
 				}
 			} else {
-				m_arena.m_xab.oPar.enableNPly(false);
+				m_arena.m_xab.tdPar.enableNPly(false);
 			}
 			
 			// set selector according to class loaded:

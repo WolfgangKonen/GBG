@@ -10,6 +10,7 @@ count_states.csv
 *.iml
 *.settings
 *.dat
+.Rhistory
 src/out/production/GBG/*
 out/*
 

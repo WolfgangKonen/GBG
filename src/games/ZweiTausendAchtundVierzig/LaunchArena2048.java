@@ -3,11 +3,26 @@ package games.ZweiTausendAchtundVierzig;
 import tools.Types;
 
 import javax.swing.*;
+
+import games.Arena;
+import games.ArenaTrain;
+import games.XArenaFuncs;
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 
+/**
+ * Launch class used to start game 2048 in class {@link Arena} via 
+ * a <b>main method</b>: <br> 
+ *  
+ * @author Wolfgang Konen, TH Cologne, Nov'16
+ * 
+ * @see Arena
+ * @see ArenaTrain
+ * @see XArenaFuncs
+ */
 public class LaunchArena2048 extends JFrame{
     private static final long serialVersionUID = 1L;
     public Arena2048 m_Arena;
