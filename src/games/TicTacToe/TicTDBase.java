@@ -14,6 +14,7 @@ import java.util.Random;
 
 import controllers.PlayAgent;
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import tools.Types;
 import tools.Types.ACTIONS;
 import controllers.AgentBase;

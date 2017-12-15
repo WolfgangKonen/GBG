@@ -201,7 +201,8 @@ public class Types {
     	 * {@code currScoreTuple}. Combine according to operator {@code cOP}:
     	 * <ul>
     	 * <li> <b>AVG</b>: weighted average or expectation value with probability weight 
-    	 * 		{@code currProbab}
+    	 * 		{@code currProbab}. The probability weights of all combined tuples should sum
+    	 *   	up to 1.
     	 * <li> <b>MIN</b>: combine by retaining the {@code currScoreTuple}, which has the
     	 * 		minimal value in {@code scTup[playNum]}, the score for player {@code playNum}
     	 * <li> <b>MAX</b>: combine by retaining the {@code currScoreTuple}, which has the
@@ -304,6 +305,12 @@ public class Types {
 	public static final int GUI_PARAMTABS_HEIGHT = 300;
 
 	public static final int GUI_HELPFONTSIZE = 14;
+	
+	static final int gray = 215;
+	/**
+	 * The background color for various GUI elements
+	 */
+	public static final Color GUI_BGCOLOR = new Color(gray,gray,gray);
 
 	/**
 	 * Default directory for loading and saving PlayAgents

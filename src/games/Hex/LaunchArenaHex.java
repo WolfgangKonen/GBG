@@ -12,8 +12,8 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 /**
- * Launch class used to start game TicTacToe in class {@link Arena} via
- * a <b>main method</b>: <br>
+ * Launch class used to start game Hex in class {@link Arena} via
+ * a <b>main method</b>. <br>
  *
  * @author Wolfgang Konen, TH Cologne, Nov'16
  * @see Arena

@@ -40,8 +40,6 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	//private MCTSParams params;
     private ParMCTS pmcts; 
     
-	private ParOther m_oPar = new ParOther();
-
 	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
 	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
 	private static boolean NEW_GNA=true;	
@@ -91,7 +89,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
         //Create the player.
         mctsPlayer = new SingleMCTSPlayer(new Random(),parMCTS);		
         //mctsPlayer = new SingleMCTSPlayer(new Random(1),mcPar);	// /WK/ reproducible debugging: seed 1
-		m_oPar = oPar;
+		m_oPar = oPar;		// AgentBase::m_oPar
 
         //Set the available actions for stateObs.
         if (so!=null) mctsPlayer.initActions(so);
@@ -285,18 +283,6 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     }
 	public double getK() {
 		return mctsPlayer.getK();
-	}
-
-	/**
-	 * Set defaults for m_oPar 
-	 * (needed in {@link XArenaMenu#loadAgent} when loading older agents, where 
-	 * m_oPar=null in the saved version).
-	 */
-	public void setDefaultOtherPar() {
-		m_oPar = new ParOther();
-	}
-	public ParOther getOtherPar() {
-		return m_oPar;
 	}
 
 }

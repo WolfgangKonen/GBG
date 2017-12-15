@@ -5,7 +5,7 @@ import tools.Types;
 
 /**
  * Class {@link ObserverBase} implements functionality of the interface {@link StateObservation} 
- * common to all agents (things related to advance, game value, reward, ...).
+ * common to all games (things related to advance, game value, reward, ...).
  * <p>
  * The default behavior in {@link ObserverBase} - which may be overridden in derived classes -
  * is for deterministic, 2-player games.

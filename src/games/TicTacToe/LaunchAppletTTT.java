@@ -6,20 +6,20 @@ import java.awt.Label;
 
 import javax.swing.JApplet;
 
+import games.Arena;
 import games.ArenaTrain;
 import tools.Types;
 
 /**
  * Launch class used to run {@link ArenaTrain} as <b>applet</b>. <br> 
  * 
- * @see games.Arena
+ * @see Arena
  * @see ArenaTrain
  *  
  * @author Wolfgang Konen, TH Köln, Nov'16
  *
  */
 public class LaunchAppletTTT extends JApplet {
-
 	private static final long serialVersionUID = 1L;
 	public ArenaTrainTTT t_Game;
 

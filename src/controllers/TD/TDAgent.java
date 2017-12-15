@@ -90,11 +90,10 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	protected Feature m_feature;
 	
 	/**
-	 * Members {@link #m_tdPar} and {@link #m_oPar} are needed for saving and loading
+	 * Members {@link #m_tdPar} and {@link AgentBase#m_oPar} are needed for saving and loading
 	 * the agent (to restore the agent with all its parameter settings)
 	 */
 	private ParTD m_tdPar;		// TODO transform to ParTD
-	private ParOther m_oPar = new ParOther();
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -144,8 +143,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 */
 	private void initNet(TDParams tdPar, OtherParams oPar, Feature feature, int maxGameNum) {
 		m_tdPar = new ParTD();
-		m_oPar = new ParOther(oPar);
 		m_tdPar.setFrom(tdPar);
+		m_oPar.setFrom(oPar);  		// AgentBase::m_oPar
 		m_feature = feature; 
 		//super.setFeatmode(tdPar.getFeatmode());
 		//super.setEpochMax(tdPar.getEpochs());
@@ -513,7 +512,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState01()} to get
 	 * 					some exploration of different game paths)
-// --- epiLength, learnFromRM are now available via the agent's member ParOther m_oPar: ---
+// --- epiLength, learnFromRM are now available via the AgentBase's member ParOther m_oPar: ---
 //	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
 //	 * 					prematurely.  
 //	 * @param learnFromRM if true, learn from random moves during training
@@ -697,15 +696,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 					//OLD (and wrong): inpSize[m_feature.getFeatmode()] );
 	}
 
-	/**
-	 * Set defaults for m_oPar 
-	 * (needed in {@link XArenaMenu#loadAgent} when loading older agents, where 
-	 * m_oPar=null in the saved version).
-	 */
-	public void setDefaultOtherPar() {
-		m_oPar = new ParOther();
-	}
-
 	public void setAlpha(double alpha) {
 		m_Net.setAlpha(alpha);
 	}
@@ -775,14 +765,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 	public ParTD getTDParams() {
 		return m_tdPar;
-	}
-	public ParOther getOtherPar() {
-		return m_oPar;
-	}
-	
-	public int getNumEval()
-	{	
-		return m_oPar.getNumEval();
 	}
 	
 	public long getNumLrnActions() {

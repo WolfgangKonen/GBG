@@ -36,8 +36,8 @@ public class GameBoardHex implements GameBoard {
     protected Random rand;
     private HexPanel gamePanel;
     private Arena arena;
-    private StateObserverHex stateObs;
-    private boolean actionRequired = false;
+    private StateObserverHex m_so;
+    private boolean arenaActReq = false;
 
 
     public GameBoardHex(Arena arena) {
@@ -50,7 +50,7 @@ public class GameBoardHex implements GameBoard {
         WINDOW_WIDTH = (int) (HexConfig.BOARD_SIZE * 3 * (HexUtils.getSideLengthFromHeight(HexConfig.HEX_SIZE)));
 
         rand = new Random(System.currentTimeMillis());
-        stateObs = new StateObserverHex();
+        m_so = new StateObserverHex();
 
         createAndShowGUI();
     }
@@ -58,15 +58,16 @@ public class GameBoardHex implements GameBoard {
     @Override
     public void clearBoard(boolean boardClear, boolean vClear) {
         if (boardClear) {
-            stateObs = new StateObserverHex();
+            m_so = new StateObserverHex();
         } else if (vClear) {
-            stateObs.clearTileValues();
+            m_so.clearTileValues();
         }
         gamePanel.repaint();
     }
 
     @Override
-    public void updateBoard(StateObservation so, boolean showStoredV, boolean enableOccupiedCells) {
+    public void updateBoard(StateObservation so, boolean showStoredV, 
+							boolean enableOccupiedCells, boolean showValueOnGameboard) {
         if (so == null) {
             gamePanel.repaint();
             return;
@@ -76,7 +77,7 @@ public class GameBoardHex implements GameBoard {
                 : "StateObservation 'so' is not an instance of StateObserverHex";
         StateObserverHex soHex = (StateObserverHex) so;
 
-        stateObs = soHex.copy();
+        m_so = soHex.copy();
 
         gamePanel.repaint();
 
@@ -104,14 +105,23 @@ public class GameBoardHex implements GameBoard {
         //gamePanel.repaint();
     }
 
+	/**
+	 * @return  true: if an action is requested from Arena or ArenaTrain
+	 * 			false: no action requested from Arena, next action has to come 
+	 * 			from GameBoard (e.g. user input / human move) 
+	 */
     @Override
     public boolean isActionReq() {
-        return actionRequired;
+        return arenaActReq;
     }
 
+	/**
+	 * @param	actionReq true : GameBoard requests an action from Arena 
+	 * 			(see {@link #isActionReq()})
+	 */
     @Override
     public void setActionReq(boolean actionReq) {
-        actionRequired = actionReq;
+        arenaActReq = actionReq;
     }
 
     @Override
@@ -121,26 +131,31 @@ public class GameBoardHex implements GameBoard {
 
     @Override
     public StateObservation getStateObs() {
-        return stateObs;
+        return m_so;
     }
 
     @Override
     public StateObservation getDefaultStartState() {
         clearBoard(true, true);
-        return stateObs;
+        return m_so;
     }
 
+	/**
+	 * @return a start state which is with probability 0.5 the empty board 
+	 * 		start state and with probability 0.5 one of the possible one-ply 
+	 * 		successors
+	 */
     @Override
     public StateObservation chooseStartState01() {
         clearBoard(true, true);
         if (rand.nextDouble() > 0.5) {
             // choose randomly one of the possible actions in default
             // start state and advance m_so by one ply
-            ArrayList<Types.ACTIONS> acts = stateObs.getAvailableActions();
+            ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
             int i = rand.nextInt(acts.size());
-            stateObs.advance(acts.get(i));
+            m_so.advance(acts.get(i));
         }
-        return stateObs;
+        return m_so;
     }
 
     private void createAndShowGUI() {
@@ -207,9 +222,9 @@ public class GameBoardHex implements GameBoard {
             g2.setFont(new Font("TimesRoman", Font.PLAIN, HexConfig.HEX_SIZE / 4));
 
             //draw borders of the game board
-            HexUtils.drawOutlines(HexConfig.BOARD_SIZE, COLOR_PLAYER_ONE, COLOR_PLAYER_TWO, g2, stateObs.getBoard());
+            HexUtils.drawOutlines(HexConfig.BOARD_SIZE, COLOR_PLAYER_ONE, COLOR_PLAYER_TWO, g2, m_so.getBoard());
 
-            HexTile lastPlaced = stateObs.getLastUpdatedTile();
+            HexTile lastPlaced = m_so.getLastUpdatedTile();
 
             //draw hexes
             if (GRAYSCALE) {
@@ -217,7 +232,7 @@ public class GameBoardHex implements GameBoard {
             }
             for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
                 for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
-                    HexTile tile = stateObs.getBoard()[i][j];
+                    HexTile tile = m_so.getBoard()[i][j];
                     Color cellColor = getTileColor(tile, showValues);
                     HexUtils.drawHex(tile, g2, cellColor, false);
                     if (!GRAYSCALE) {
@@ -263,20 +278,20 @@ public class GameBoardHex implements GameBoard {
          */
         class HexMouseListener extends MouseAdapter {
             public void mouseReleased(MouseEvent e) {
-                if (actionRequired || (arena.taskState != Arena.Task.PLAY && arena.taskState != Arena.Task.INSPECTV)) {
+                if (arenaActReq || (arena.taskState != Arena.Task.PLAY && arena.taskState != Arena.Task.INSPECTV)) {
                     return;
                 }
-                Point p = new Point(HexUtils.pxtoHex(e.getX(), e.getY(), stateObs.getBoard(), HexConfig.BOARD_SIZE));
+                Point p = new Point(HexUtils.pxtoHex(e.getX(), e.getY(), m_so.getBoard(), HexConfig.BOARD_SIZE));
                 if (p.x < 0 || p.y < 0 || p.x >= HexConfig.BOARD_SIZE || p.y >= HexConfig.BOARD_SIZE) return;
 
         		Types.ACTIONS act = Types.ACTIONS.fromInt(p.x * HexConfig.BOARD_SIZE + p.y);
-                stateObs.advance(act);
+                m_so.advance(act);
                 if (arena.taskState == Arena.Task.PLAY) {
                 	// only do this when passing here during 'PLAY': add a log entry in case of Human move
                 	// Do NOT do this during 'INSPECT', because then we have (currently) no valid log session ID
-            		(arena.getLogManager()).addLogEntry(act, stateObs, arena.getLogSessionID());                	
+            		(arena.getLogManager()).addLogEntry(act, m_so, arena.getLogSessionID());                	
                 }
-                updateBoard(null, false, false);
+                updateBoard(null, false, false, false);
                 setActionReq(true);
             }
         }

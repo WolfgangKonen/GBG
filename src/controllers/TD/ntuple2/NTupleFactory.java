@@ -33,7 +33,7 @@ public class NTupleFactory {
 	 * @param ntPar n-tuple parameter (+ TC parameter)
 	 * @param xnf	holds game-specific functions for n-tuples
 	 * @return {@code int[m][n]} array for the cell positions of m n-tuples with length n. 
-	 * 		(The real n-tuples in {@link NTupleValueFunc} are later an array 
+	 * 		(The real n-tuples in {@link NTuple2ValueFunc} are later an array 
 	 * 		{@code NTuple[p][m]}, one n-tuple set for each player.) 
 	 * @throws Exception
 	 */

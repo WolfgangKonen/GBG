@@ -1,6 +1,7 @@
 package controllers;
 
 import games.StateObservation;
+import games.Evaluator;
 import games.GameBoard;
 import tools.Types;
 import tools.Types.ScoreTuple;
@@ -15,10 +16,10 @@ import tools.Types.ScoreTuple;
  * 		{@link controllers.MaxNAgent}, 
  * 		{@link controllers.MaxNWrapper}, 
  * 		{@link controllers.ExpectimaxNAgent}, 
- * 		{@link controllers.ExpectimaxNWrapper}, 
+ * 		{@link controllers.ExpectimaxWrapper}, 
  * 		{@link controllers.MC.MCAgent}		
  * 		{@link controllers.MCTS.MCTSAgentT}		
- * 		{@link controllers.MCTS.MCTSExpectimax.MCTSExpectimaxAgt}		
+ * 		{@link controllers.MCTSExpectimax.MCTSExpectimaxAgt}		
  * 		{@link controllers.TD.TDAgent}, 
  * 		{@link controllers.TD.ntuple2.TDNTuple2Agt}, 
  * </ul> 
@@ -172,12 +173,12 @@ public interface PlayAgent {
 
 	public void setMaxGameNum(int num);
 	public void setGameNum(int num);
+	
 	/**
-	 * @return During training: Call the Evaluator after this number of training games
+	 * @return During training: Call {@link Evaluator} after this number of training games
 	 */
 	public int getNumEval();
-	@Deprecated
-	public void setNumEval(int num);	// should be obsolete: each trainable agent has a ParOther member with element numEval
+	public void setNumEval(int num);	
 	
 	public AgentState getAgentState(); 
 	public void setAgentState(AgentState aState);

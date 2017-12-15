@@ -14,7 +14,7 @@ import params.NTParams;
 import params.TDParams;
 
 /**
- * Realization of a single N-tuple for games.
+ * Realization of a single n-tuple for games.
  * Each {@link NTuple2} consists of {@link NTuple2#getLength()} positions on the game
  * board.<br>
  * Each position can carry one out of {@code posVals} position values. For TicTacToe the 

@@ -14,11 +14,10 @@ import java.util.Random;
 /**
  * Class <strong> StateObs2048Slow </strong> holds a 2048 game state.
  * The game state is coded in a matrix of tiles {@code Tile[][] gameBoard}. The code for 
- * merging tiles is better understandable, but also slower than in {@link StateObs2048BitShift}.<p>
+ * merging tiles is better understandable, but also slower than in {@link StateObserver2048}.<p>
  * 
- * This is just a copy-class, meaning that either {@link StateObs2048BitShift} or 
- * {@link StateObserver2048Slow} is copied to {@link StateObserver2048}. Then 
- * {@link StateObserver2048} is the class used in all other locations.
+ * This is just an alternate class for {@link StateObserver2048}. It is only used if 
+ * {@link StateObserver2048Slow} is copied to {@link StateObserver2048}. 
  * 
  * @author Johannes Kutsch, THK
  */
@@ -91,7 +90,7 @@ public class StateObserver2048Slow implements StateObservationNondet {
 
     /**
      * Only debug check (if ASSERTSAME==true):
-     * Assert that StateObserver2048Slow and StateObs2048BitShift result in
+     * Assert that StateObserver2048Slow and StateObs2048 (fast, with bit shift) result in
      * <ul>
      * <li> the same state when doing a move with iAction on {@code this} (no random tile added)
      * <li> the same score

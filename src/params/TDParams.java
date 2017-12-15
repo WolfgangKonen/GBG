@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
  * This class realizes the parameter settings (GUI tab) for TD players.
@@ -63,6 +64,7 @@ public class TDParams extends Frame implements Serializable
 	JLabel lambdaL;
 	JLabel gammaL;
 	JLabel epochL;
+	JLabel tNply_L;
 	JPanel tdPanel;
 	public JTextField alphaT;
 	public JTextField alfinT;
@@ -71,6 +73,7 @@ public class TDParams extends Frame implements Serializable
 	public JTextField lambdaT;
 	public JTextField gammaT;
 	public JTextField epochT;
+	public JTextField tNply_T;
 	
 	JLabel SigTypeL;
 	JLabel NormalizeL;
@@ -111,6 +114,7 @@ public class TDParams extends Frame implements Serializable
 		lambdaT = new JTextField("0.0"); //("0.9");			//
 		gammaT = new JTextField("1.0");				//
 		epochT = new JTextField("1");				//
+		tNply_T = new JTextField("1");					//
 		alphaL = new JLabel("Alpha init");
 		alfinL = new JLabel("Alpha final");
 		epsilL = new JLabel("Epsilon init");
@@ -118,6 +122,7 @@ public class TDParams extends Frame implements Serializable
 		lambdaL = new JLabel("Lambda");
 		gammaL = new JLabel("Gamma");
 		epochL = new JLabel("Epochs");
+		tNply_L = new JLabel("Train nPly");
 		epochL.setToolTipText(TIPEPOCHL);
 		alphaL.setToolTipText(TIPALPHA1L);
 		alfinL.setToolTipText(TIPALPHA2L);
@@ -125,6 +130,7 @@ public class TDParams extends Frame implements Serializable
 		epsilL.setToolTipText(TIPEPSIL1L);
 		epfinL.setToolTipText(TIPEPSIL2L);
 		gammaL.setToolTipText(TIPGAMMAL);
+		tNply_L.setToolTipText("Train n-ply look ahead (currently only TD-NTuple-2)");
 		
 		withSigType = new JCheckBox();
 		normalize = new JCheckBox();
@@ -199,8 +205,8 @@ public class TDParams extends Frame implements Serializable
 		tdPanel.add(choiceLrnType);
 //		tdPanel.add(bpropType);
 //		tdPanel.add(rpropType);
-		tdPanel.add(new Canvas());				
-		tdPanel.add(new Canvas());				
+		tdPanel.add(tNply_L);
+		tdPanel.add(tNply_T);
 
 		tdPanel.add(FeatTDS_L);
 		tdPanel.add(choiceFeatTDS);
@@ -212,6 +218,10 @@ public class TDParams extends Frame implements Serializable
 		
 		pack();
 		setVisible(false);
+		
+		boolean enabNPly =  (TDNTuple2Agt.VER_3P && !(TDNTuple2Agt.MODE_3P==0)); 
+		this.enableNPly(enabNPly);
+		
 	} // constructor TDParams()	
 	
 	public TDParams(TDParams tdPar) {
@@ -262,6 +272,9 @@ public class TDParams extends Frame implements Serializable
 		if (Type == "RPROP")
 			return true;
 		return false;
+	}
+	public int getNPly() {
+		return Integer.valueOf(tNply_T.getText()).intValue();
 	}
 //	public int getMaxGameNum() {
 //		return maxGameNum;
@@ -316,7 +329,14 @@ public class TDParams extends Frame implements Serializable
 //		rpropType.setState(state);
 //		bpropType.setState(!state);
 	}
+	public void setNPly(int value) {
+		tNply_T.setText(value+"");
+	}
 	
+	public void enableNPly(boolean enable) {
+		tNply_L.setEnabled(enable);
+		tNply_T.setEnabled(enable);
+	}
 //	public void setMaxGameNum(int maxGameNum) {
 //		this.maxGameNum = maxGameNum;
 //	}
@@ -341,6 +361,7 @@ public class TDParams extends Frame implements Serializable
 		setNormalize(tp.getNormalize());
 		setEpochs(tp.getEpochs());
 		setFeatmode(tp.getFeatmode());
+		this.setNPly(tp.getNPly());
 //		setMaxGameNum(tp.getMaxGameNum());	// this is now in AgentBase
 //		setNumEval(tp.getNumEval());		// this is obsolete now (we have ParOther)
 	}
@@ -362,6 +383,7 @@ public class TDParams extends Frame implements Serializable
 		setNormalize(tp.getNormalize());
 		setEpochs(tp.getEpochs());
 		setFeatmode(tp.getFeatmode());
+		setNPly(tp.getNPly());
 	}
 	
 	/**

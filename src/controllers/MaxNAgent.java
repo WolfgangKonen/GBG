@@ -3,6 +3,7 @@ package controllers;
 import controllers.PlayAgent;
 import controllers.MinimaxAgent;
 import games.StateObservation;
+import params.MaxNParams;
 import params.ParMaxN;
 import params.ParOther;
 import tools.Types;
@@ -40,7 +41,6 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
 	private Random rand;
 	private int m_depth=10;
-	protected ParOther m_oPar = new ParOther();
 	private boolean m_useHashMap=true;
 	private HashMap<String,ScoreTuple> hm;
 	
@@ -61,11 +61,12 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		setAgentState(AgentState.TRAINED);
 	}
 	
-	public MaxNAgent(String name, ParMaxN mpar, ParOther opar)
+	public MaxNAgent(String name, ParMaxN mPar, ParOther oPar)
 	{
 		this(name);
-		m_depth = mpar.getMaxnDepth();
-		m_useHashMap = mpar.useMinimaxHashmap();
+		m_depth = mPar.getMaxnDepth();
+		m_useHashMap = mPar.useMinimaxHashmap();
+		m_oPar = new ParOther(oPar);		// AgentBase::m_oPar
 	}
 		
 	public MaxNAgent(String name, int nply)
@@ -207,9 +208,9 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         ACTIONS_ST act_st = null;
 		if (sob.isGameOver())
 		{
-			boolean rewardIsGameScore=true; // TODO!!
+			boolean rgs = m_oPar.getRewardIsGameScore();
 			double[] res = new double[sob.getNumPlayers()];
-			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rewardIsGameScore);
+			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rgs);
 			return new ScoreTuple(res); 	
 		}
 		
@@ -249,10 +250,10 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
-		boolean rewardIsGameScore=true; // TODO!!
+		boolean rgs = m_oPar.getRewardIsGameScore();
 		ScoreTuple sc = new ScoreTuple(sob);
 		for (int i=0; i<sob.getNumPlayers(); i++) 
-			sc.scTup[i] = sob.getReward(i, rewardIsGameScore);
+			sc.scTup[i] = sob.getReward(i, rgs);
 		return sc;
 	}
 

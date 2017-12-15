@@ -272,7 +272,7 @@ public class XArenaFuncs
 	 * look-ahead tree search. The tree is of type Max-N for deterministic games and of type
 	 * Expectimax-N for nondeterministic games. No wrapping occurs for agent {@link HumanPlayer}.
 	 * <p>
-	 * Caution: Larger values for {@code nply}, e.g. > 5, may lead to long execution times!
+	 * Caution: Larger values for {@code nply}, e.g. greater 5, may lead to long execution times!
 	 * 
 	 * @param paVector	the (unwrapped) agents for each player 
 	 * @param nply		the number of look-ahead plies (depth of the tree)

@@ -46,23 +46,22 @@ public class NTParams extends Frame implements Serializable {
 
 	JLabel TempCoL;
 	JLabel tcFactorL;
+	JLabel tcInitL;
+	JLabel tcIntervalL;
+	JLabel RandomnessL;
 	JLabel NTupleFixL;
 	JLabel NTupleNumL;
 	JLabel NTupleSizeL;
-	JLabel RandL;
-	JLabel InitL;
-	JLabel tcIntervalL;
-	//JLabel EvalL;
-	JLabel NTupleType;
-	JLabel UseSymL;
+	JLabel NTupleTypeL;
+	JLabel UseSymmetryL;
 	JLabel AfterStateL;
-	JPanel tcPanel;
-	// JLabel NTupleMaxL;
+	//JLabel NTupleMaxL;
+	//JLabel EvalL;
 
-	public JTextField InitT;
+	public JTextField tcInitT;
 	public JTextField tcIntervalT;
-	public JTextField nTupleNumT;
-	public JTextField nTupleMaxT;
+	public JTextField NTupleNumT;
+	public JTextField NTupleSizeT;
 	//public JTextField EvalT;
 
 	public JCheckBox TempCoC;
@@ -71,9 +70,10 @@ public class NTParams extends Frame implements Serializable {
 	public JCheckBox AfterStateC;
 
 	public JComboBox tcFactorType;
-	public JComboBox TupleType;
-	public JComboBox FixedTupleMode;
+	public JComboBox NTupleTypeCo;
+	public JComboBox NTupleFixCo;
 
+	JPanel ntPanel;
 	JButton ok;
 
 	NTParams c_par;
@@ -83,23 +83,23 @@ public class NTParams extends Frame implements Serializable {
 		super("Temporal Coherence Parameters");
 		TempCoL = new JLabel("TC");
 		tcFactorL = new JLabel("TC factor type");
-		InitL = new JLabel("INIT");
+		tcInitL = new JLabel("INIT");
 		tcIntervalL = new JLabel("Episodes");
 		NTupleNumL = new JLabel("# of nTuples");
 		NTupleNumL.setToolTipText(TIPNTUPLENUML);
 
 		NTupleSizeL = new JLabel("nTuple size");
 		NTupleSizeL.setToolTipText(TIPNTUPLESIZEL);
-		RandL = new JLabel("nTuple randomness");
-		RandL.setToolTipText(TIPRANDL);
+		RandomnessL = new JLabel("nTuple randomness");
+		RandomnessL.setToolTipText(TIPRANDL);
 		NTupleFixL = new JLabel("nTuple fixed mode:");
 		NTupleFixL.setToolTipText(TIPFIXEDL);
 		NTupleFixL.setEnabled(true);
-		NTupleType=new JLabel("nTuple generation");
-		NTupleType.setToolTipText(TIPNTUPLETYPE);
+		NTupleTypeL=new JLabel("nTuple generation");
+		NTupleTypeL.setToolTipText(TIPNTUPLETYPE);
 
-		UseSymL = new JLabel("USESYMMETRY");
-		UseSymL.setToolTipText(TIPUSESYMMETRY);
+		UseSymmetryL = new JLabel("USESYMMETRY");
+		UseSymmetryL.setToolTipText(TIPUSESYMMETRY);
 		AfterStateL = new JLabel("AFTERSTATE");
 		AfterStateL.setToolTipText(TIPAFTERSTATE);
 		
@@ -107,14 +107,14 @@ public class NTParams extends Frame implements Serializable {
 		// (Other game- and agent-specific defaults are in setParamDefaults, which is called
 		// whenever one of the agent choice boxes changes to an agent requiring NTParams)
 		//
-		InitT = new JTextField("0.0001");
-		InitT.setEnabled(false);
+		tcInitT = new JTextField("0.0001");
+		tcInitT.setEnabled(false);
 		tcIntervalT = new JTextField("2");
 		tcIntervalT.setEnabled(false);
-		nTupleNumT = new JTextField("10");
-		nTupleNumT.setEnabled(false);
-		nTupleMaxT = new JTextField("6");
-		nTupleMaxT.setEnabled(false);
+		NTupleNumT = new JTextField("10");
+		NTupleNumT.setEnabled(false);
+		NTupleSizeT = new JTextField("6");
+		NTupleSizeT.setEnabled(false);
 		//EvalT = new JTextField("100");
 		//EvalT.setEnabled(false);
 
@@ -146,14 +146,14 @@ public class NTParams extends Frame implements Serializable {
 			}
 		});
 		
-		TupleType= new JComboBox(ntTupleTypeString);
-		TupleType.setEnabled(false);
-		FixedTupleMode = new JComboBox(fixedTupleModeString);
-		FixedTupleMode.setEnabled(true); 
+		NTupleTypeCo= new JComboBox(ntTupleTypeString);
+		NTupleTypeCo.setEnabled(false);
+		NTupleFixCo = new JComboBox(fixedTupleModeString);
+		NTupleFixCo.setEnabled(true); 
 		
 		ok = new JButton("ok");
 		c_par = this;
-		tcPanel = new JPanel();		// put the inner buttons into panel tcPanel. This panel
+		ntPanel = new JPanel();		// put the inner buttons into panel tcPanel. This panel
 									// can be handed over to a tab of a JTabbedPane 
 									// (see class TicTacToeTabs)
 
@@ -164,47 +164,48 @@ public class NTParams extends Frame implements Serializable {
 		});
 
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
-		tcPanel.setLayout(new GridLayout(0, 4, 10, 10)); // rows,columns,hgap,vgap
+		ntPanel.setLayout(new GridLayout(0, 4, 10, 10)); // rows,columns,hgap,vgap
 
 		// first row
-		tcPanel.add(TempCoL);
-		tcPanel.add(TempCoC);
-		tcPanel.add(InitL);
-		tcPanel.add(InitT);
+		ntPanel.add(TempCoL);
+		ntPanel.add(TempCoC);
+		ntPanel.add(tcInitL);
+		ntPanel.add(tcInitT);
 
 		// second row
-		tcPanel.add(tcFactorL);
-		tcPanel.add(tcFactorType);
-		tcPanel.add(tcIntervalL);
-		tcPanel.add(tcIntervalT);
+		ntPanel.add(tcFactorL);
+		ntPanel.add(tcFactorType);
+		ntPanel.add(tcIntervalL);
+		ntPanel.add(tcIntervalT);
 
 		// third row
-		tcPanel.add(RandL);
-		tcPanel.add(RandomnessC);
-		tcPanel.add(NTupleFixL);
-		tcPanel.add(FixedTupleMode);
+		ntPanel.add(RandomnessL);
+		ntPanel.add(RandomnessC);
+		ntPanel.add(NTupleFixL);
+		ntPanel.add(NTupleFixCo);
 		
 		//forth row
-		tcPanel.add(NTupleType);
-		tcPanel.add(TupleType);
-		tcPanel.add(new Canvas());
-		tcPanel.add(new Canvas());
+		ntPanel.add(NTupleTypeL);
+		ntPanel.add(NTupleTypeCo);
+		ntPanel.add(new Canvas());
+		ntPanel.add(new Canvas());
 		// fifth row
-		tcPanel.add(NTupleNumL);
-		tcPanel.add(nTupleNumT);
-		tcPanel.add(UseSymL);
-		tcPanel.add(UseSymmetryC);
+		ntPanel.add(NTupleNumL);
+		ntPanel.add(NTupleNumT);
+		ntPanel.add(UseSymmetryL);
+		ntPanel.add(UseSymmetryC);
 
 		// sixth row
-		tcPanel.add(NTupleSizeL);
-		tcPanel.add(nTupleMaxT);
-		tcPanel.add(AfterStateL);
-		tcPanel.add(AfterStateC);
+		ntPanel.add(NTupleSizeL);
+		ntPanel.add(NTupleSizeT);
+		ntPanel.add(AfterStateL);
+		ntPanel.add(AfterStateC);
 		
-		add(tcPanel,BorderLayout.CENTER);
+		add(ntPanel,BorderLayout.CENTER);
 		add(ok,BorderLayout.SOUTH);
 	
 		enableTcPart();
+		enableRandomPart();
 		
 		pack();
 		setVisible(false);
@@ -217,15 +218,15 @@ public class NTParams extends Frame implements Serializable {
 
 	private void enableTcPart() {
 		if (getTc()==false){
-			InitL.setEnabled(false);
-			InitT.setEnabled(false);
+			tcInitL.setEnabled(false);
+			tcInitT.setEnabled(false);
 			tcFactorL.setEnabled(false);
 			tcFactorType.setEnabled(false);
 			tcIntervalL.setEnabled(false);
 			tcIntervalT.setEnabled(false);
 		}else{
-			InitL.setEnabled(true);
-			InitT.setEnabled(true);
+			tcInitL.setEnabled(true);
+			tcInitT.setEnabled(true);
 			tcFactorL.setEnabled(true);
 			tcFactorType.setEnabled(true);
 			tcIntervalL.setEnabled(true);
@@ -246,17 +247,23 @@ public class NTParams extends Frame implements Serializable {
 	
 	private void enableRandomPart() {
 		if(getRandomness()==true){
-			nTupleNumT.setEnabled(true);
-			nTupleMaxT.setEnabled(true);
-			TupleType.setEnabled(true);
+			NTupleNumL.setEnabled(true);
+			NTupleSizeL.setEnabled(true);
+			NTupleTypeL.setEnabled(true);
+			NTupleNumT.setEnabled(true);
+			NTupleSizeT.setEnabled(true);
+			NTupleTypeCo.setEnabled(true);
 			NTupleFixL.setEnabled(false);
-			FixedTupleMode.setEnabled(false);
+			NTupleFixCo.setEnabled(false);
 		} else {
-			nTupleNumT.setEnabled(false);
-			nTupleMaxT.setEnabled(false);
-			TupleType.setEnabled(false);
+			NTupleNumL.setEnabled(false);
+			NTupleSizeL.setEnabled(false);
+			NTupleTypeL.setEnabled(false);
+			NTupleNumT.setEnabled(false);
+			NTupleSizeT.setEnabled(false);
+			NTupleTypeCo.setEnabled(false);
 			NTupleFixL.setEnabled(true);
-			FixedTupleMode.setEnabled(true);
+			NTupleFixCo.setEnabled(true);
 		}
 	}
 
@@ -266,10 +273,10 @@ public class NTParams extends Frame implements Serializable {
 	}
 
 	public JPanel getPanel() {
-		return tcPanel;
+		return ntPanel;
 	}
 	public double getINIT() {
-		return Double.valueOf(InitT.getText()).doubleValue();
+		return Double.valueOf(tcInitT.getText()).doubleValue();
 	}
 
 	public int getTcInterval() {
@@ -277,16 +284,16 @@ public class NTParams extends Frame implements Serializable {
 	}
 
 	public int getNtupleNumber() {
-		return Integer.parseInt(nTupleNumT.getText());
+		return Integer.parseInt(NTupleNumT.getText());
 	}
 
 	public int getNtupleMax() {
-		int dummy = Integer.parseInt(nTupleMaxT.getText());
+		int dummy = Integer.parseInt(NTupleSizeT.getText());
 		return dummy;
 	}
 
 	public int getFixedNtupleMode() {
-		return Integer.parseInt((String) FixedTupleMode.getSelectedItem());
+		return Integer.parseInt((String) NTupleFixCo.getSelectedItem());
 	}
 
 	public boolean getTc() {
@@ -326,7 +333,7 @@ public class NTParams extends Frame implements Serializable {
 	public boolean getRandomWalk() {
 		//Object Type=TupleType.getSelectedItem();			// /WK/ Bug fix: this did not work, need to test on String equalness
 		//if(Type==ntTupleTypeString[0]) // "RandomWalk"
-		String Type2 = (String) TupleType.getSelectedItem();
+		String Type2 = (String) NTupleTypeCo.getSelectedItem();
 		if(Type2.equals(ntTupleTypeString[0])) // "RandomWalk"
 			return true;
 		return false;
@@ -349,14 +356,14 @@ public class NTParams extends Frame implements Serializable {
 		setTc(nt.getTc());
 		setTcInterval(""+nt.getTcInterval());
 		setTcImmediate(nt.getTcImmediate());
-		InitT.setText(""+nt.getINIT());
+		tcInitT.setText(""+nt.getINIT());
 		//EvalT = nt.EvalT;
 		RandomnessC.setSelected(nt.getRandomness());
 		int ntindex= nt.getRandomWalk()?0:1;
-		TupleType.setSelectedIndex(ntindex);
-		nTupleNumT.setText(nt.getNtupleNumber()+"");
-		nTupleMaxT.setText(nt.getNtupleMax()+"");
-		FixedTupleMode.setSelectedItem(""+nt.getFixedNtupleMode());
+		NTupleTypeCo.setSelectedIndex(ntindex);
+		NTupleNumT.setText(nt.getNtupleNumber()+"");
+		NTupleSizeT.setText(nt.getNtupleMax()+"");
+		NTupleFixCo.setSelectedItem(""+nt.getFixedNtupleMode());
 		UseSymmetryC.setSelected(nt.getUseSymmetry());
 		AfterStateC.setSelected(nt.getUseAfterState());
 		enableTcPart();
@@ -371,13 +378,13 @@ public class NTParams extends Frame implements Serializable {
 		setTc(nt.getTc());
 		setTcInterval(""+nt.getTcInterval());
 		setTcImmediate(nt.getTcImm()==true ? tcFactorString[0] : tcFactorString[1]);
-		InitT.setText(""+nt.getTcInit());
+		tcInitT.setText(""+nt.getTcInit());
 		RandomnessC.setSelected(nt.getRandomness());
 		int ntindex= (nt.getRandomWalk() ? 0 : 1);
-		TupleType.setSelectedIndex(ntindex);
-		nTupleNumT.setText(nt.getNtupleNumber()+"");
-		nTupleMaxT.setText(nt.getNtupleMax()+"");
-		FixedTupleMode.setSelectedItem(""+nt.getFixedNtupleMode());
+		NTupleTypeCo.setSelectedIndex(ntindex);
+		NTupleNumT.setText(nt.getNtupleNumber()+"");
+		NTupleSizeT.setText(nt.getNtupleMax()+"");
+		NTupleFixCo.setSelectedItem(""+nt.getFixedNtupleMode());
 		UseSymmetryC.setSelected(nt.getUSESYMMETRY());
 		AfterStateC.setSelected(nt.getAFTERSTATE());
 		enableTcPart();
@@ -400,26 +407,26 @@ public class NTParams extends Frame implements Serializable {
 		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
 			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
-			InitT.setText("0.0001");
-			InitT.setEnabled(false);
+			tcInitT.setText("0.0001");
+			tcInitT.setEnabled(false);
 			tcIntervalT.setText("2");
 			tcIntervalT.setEnabled(false);
 			RandomnessC.setSelected(true);		// consequence: disable TupleType, nTupleNumT, nTupleMaxT
-			TupleType.setSelectedIndex(0);
-			nTupleNumT.setText("10");
-			FixedTupleMode.setSelectedItem(""+1);
+			NTupleTypeCo.setSelectedIndex(0);
+			NTupleNumT.setText("10");
+			NTupleFixCo.setSelectedItem(""+1);
 			UseSymmetryC.setSelected(true);
 			AfterStateC.setSelected(false);
 			enableTcPart();
 			enableRandomPart();
 			switch (gameName) {
 			case "2048": 
-				nTupleMaxT.setText("3");
+				NTupleSizeT.setText("3");
 				AfterStateC.setSelected(true);
 				enableAfterState(true);
 				break;
 			default:	//  all other
-				nTupleMaxT.setText("6");	
+				NTupleSizeT.setText("6");	
 				enableAfterState(false);		// disable AFTERSTATE for all deterministic games
 				break;
 			}

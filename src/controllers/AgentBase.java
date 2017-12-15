@@ -9,6 +9,8 @@ import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import games.StateObservation;
+import games.XArenaMenu;
+import params.ParOther;
 import tools.MessageBox;
 import tools.Types;
 import tools.Types.ScoreTuple;
@@ -28,6 +30,7 @@ abstract public class AgentBase implements Serializable {
 	private AgentState m_agentState = AgentState.RAW;
 	private int epochMax=0;
 	protected long m_numTrnMoves =0L;
+	protected ParOther m_oPar = new ParOther();
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -102,7 +105,7 @@ abstract public class AgentBase implements Serializable {
 	public String getName() { return m_name; }
 	public void setName(String name) { m_name=name; }
 
-	// --- epiLength, learnFromRM are now available via the agent's member ParOther m_oPar: ---
+	// --- epiLength, learnFromRM are now available via member ParOther m_oPar: ---
 	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/)								 
 	{	
 		m_GameNum++;
@@ -161,21 +164,32 @@ abstract public class AgentBase implements Serializable {
 	}
 
 	/**
-	 * (trainable agents with member ParOther m_oPar should override this function)
-	 * 
 	 * @return During training: Call the Evaluator after this number of training games
 	 */
 	public int getNumEval()
 	{	
-		return 1000;	// dummy stub for agents which are not trainable
-	}	
-
-	@Deprecated
+		return m_oPar.getNumEval();
+	}
+	
 	public void setNumEval(int num)
 	{
-		m_NumEval=num;
+		m_oPar.setNumEval(num);
 	}
 
+	public ParOther getOtherPar() {
+		return m_oPar;
+	}
+	
+	/**
+	 * Set defaults for m_oPar 
+	 * (needed in {@link XArenaMenu#loadAgent} when loading older agents, where 
+	 * m_oPar=null in the saved version).
+	 */
+	public void setDefaultOtherPar() {
+		m_oPar = new ParOther();
+	}
+
+	
 	/**
 	 * Check whether pa is a valid (non-null) and trained agent, of the same type as 
 	 * requested by agentName
@@ -255,12 +269,6 @@ abstract public class AgentBase implements Serializable {
 	public String stringDescr2() {
 		return getClass().getName() + ":";
 	}
-
-//  --- this is now implemented by every agent --- 
-//	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
-//		throw new RuntimeException("Not yet ready!!");
-//	}
-	
 
 }
 

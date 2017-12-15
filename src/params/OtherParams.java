@@ -68,7 +68,6 @@ public class OtherParams extends Frame
 	JLabel chooseS01L;
 	JLabel learnRM_L;
 	JLabel rgs_L;
-	JLabel nPly_L;
 	JLabel wNply_L;
 //	JLabel miniDepth_L;
 //	JLabel miniUseHm_L;
@@ -76,7 +75,6 @@ public class OtherParams extends Frame
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
-	public JTextField nPly_T;
 	public JTextField wNply_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
@@ -106,7 +104,6 @@ public class OtherParams extends Frame
 		stopTest_T = new JTextField("0");				// 
 		stopEval_T = new JTextField("100");				// the defaults
 //		miniDepth_T = new JTextField("10");				// 
-		nPly_T = new JTextField("1");					//
 		wNply_T = new JTextField("0");					//
 		numEval_L = new JLabel("numEval");
 		epiLeng_L = new JLabel("Episode Length");
@@ -115,7 +112,6 @@ public class OtherParams extends Frame
 		chooseS01L = new JLabel("Choose Start 01");
 		learnRM_L = new JLabel("Learn from RM");
 		rgs_L = new JLabel("Reward = Score");
-		nPly_L = new JLabel("nPly");
 		wNply_L = new JLabel("Wrapper nPly");
 //		miniDepth_L = new JLabel("Minimax Depth");
 //		miniUseHm_L = new JLabel("Minimax Hash ");
@@ -141,7 +137,6 @@ public class OtherParams extends Frame
 		chooseS01L.setToolTipText("Choose start state in training: 50% default, 50% random 1-ply");
 		learnRM_L.setToolTipText("Learn from random moves during training");
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
-		nPly_L.setToolTipText("train n-ply look ahead (currently only TD-NTuple-2)");
 		wNply_L.setToolTipText("Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
 //		miniDepth_L.setToolTipText("Minimax tree depth");
 //		miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
@@ -188,8 +183,8 @@ public class OtherParams extends Frame
 
 		oPanel.add(rgs_L);
 		oPanel.add(rewardIsGameScore);
-		oPanel.add(nPly_L);
-		oPanel.add(nPly_T);
+		oPanel.add(new Canvas());				
+		oPanel.add(new Canvas());				
 
 		oPanel.add(wNply_L);
 		oPanel.add(wNply_T);
@@ -206,9 +201,6 @@ public class OtherParams extends Frame
 				
 		pack();
 		setVisible(false);
-		
-		boolean enabNPly =  (TDNTuple2Agt.VER_3P && !(TDNTuple2Agt.MODE_3P==0)); 
-		this.enableNPly(enabNPly);
 		
 	} // constructor OtherParams()	
 	
@@ -239,9 +231,6 @@ public class OtherParams extends Frame
 //	}
 	public int getNumEval() {
 		return Integer.valueOf(numEval_T.getText()).intValue();
-	}
-	public int getNPly() {
-		return Integer.valueOf(nPly_T.getText()).intValue();
 	}
 	public int getWrapperNPly() {
 		return Integer.valueOf(wNply_T.getText()).intValue();
@@ -297,9 +286,6 @@ public class OtherParams extends Frame
 	public void setNumEval(int value) {
 		numEval_T.setText(value+"");
 	}
-	public void setNPly(int value) {
-		nPly_T.setText(value+"");
-	}
 	public void setWrapperNPly(int value) {
 		wNply_T.setText(value+"");
 	}
@@ -309,10 +295,6 @@ public class OtherParams extends Frame
 //	public void setMinimaxDepth(int value) {
 //		miniDepth_T.setText(value+"");
 //	}
-	public void enableNPly(boolean enable) {
-		nPly_L.setEnabled(enable);
-		nPly_T.setEnabled(enable);
-	}
 	
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
@@ -325,7 +307,6 @@ public class OtherParams extends Frame
 		this.setEpiLength(op.getEpisodeLength());
 		this.setStopTest(op.getStopTest());
 		this.setStopEval(op.getStopEval());
-		this.setNPly(op.getNPly());
 		this.setWrapperNPly(op.getWrapperNPly());
 		this.chooseS01.setState(op.useChooseStart01());
 		this.learnRM.setState(op.useLearnFromRM());
