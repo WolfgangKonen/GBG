@@ -1,3 +1,17 @@
+# 
+# This plot shows for 2048 different TD-n-tuple results for 100k, 200k, ... training episodes.
+# 'actionNum' is the number of n-tuple weight updates (#episodes * avg. episode length).
+#
+# The first result is, that after 200k training games there is only little further
+# increase. 
+# The second result is that V2 and V3 are nearly identical: Doubling the learning rate
+# from 0.2-->0.1 to 0.4-->0.2 does not have any effect. 
+# The third result (not known if statistically significant) is that in 3 cases (200k V3, 
+# 300k and 400k) there is a clear drop in performance in the last 3 measuruments (last 
+# 30.000 games). Why?
+#
+# More details are found in TR-TDNTuple.tex.
+# 
 library(ggplot2)
 library(grid)
 source("summarySE.R")
@@ -5,9 +19,21 @@ source("summarySE.R")
 path <- "../../agents/2048/csv/"
 filenames=c("multiTrain-1run-100k_V2.csv"
            ,"multiTrain-1run-200k_V2.csv"
+           ,"multiTrain-1run-200k_V3.csv"
+           ,"multiTrain-1run-200k_V5.csv"
+           #,"multiTrain-1run-300k_V2.csv"
+           #,"multiTrain-1run-400k_V2.csv"
            #,"multiTrain-RewardGameScore.csv"#,"multiTrain-RewardGameScore-OLD.csv"
            #,"multiTrain-RewardGameSc-3P.csv"
            ) 
+# Param settings: epsilon = 0.0, ChooseStart01=F, LearnFromRM=F, 
+#     1 run, lambda=0.0, gamma=1.0, VER_3P=true, MODE_3P=1.
+# V2: alpha=0.2-->0.1
+# V3: alpha=0.4-->0.2 --> same result as V2
+# V4: alpha=0.2-->0.2 --> slightly worse than V2,V3
+# V5: V2+lambda=0.5
+
+
 titnames=c("Reward CumTiles","Reward GameScore")
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
   
@@ -27,7 +53,10 @@ for (k in 1:length(filenames)) {
   afterCol = switch(k
                     ,rep("100k",nrow(df))
                     ,rep("200k",nrow(df))
-                    ,rep("game score",nrow(df))
+                    ,rep("200k V3",nrow(df))
+                    ,rep("200k V5",nrow(df))
+                    ,rep("300k",nrow(df))
+                    ,rep("400k",nrow(df))
                     #,rep("game score OLD",nrow(df))
                     ,rep("game sc 3P",nrow(df))
                     )
@@ -47,7 +76,8 @@ q <- ggplot(tgc,aes(x=actionNum,y=evalQ,colour=REWARD))
 #q <- q+geom_errorbar(aes(ymin=evalQ-se, ymax=evalQ+se), width=300, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 #q <- q+geom_line()
-q <- q+scale_y_continuous(limits=c(0,120000)) 
+q <- q+scale_y_continuous(limits=c(0,140000)) 
+q <- q+scale_x_continuous(limits=c(0,9e8)) 
 #q <- q+guides(colour = guide_legend(reverse = TRUE))
 plot(q)
 

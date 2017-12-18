@@ -14,7 +14,7 @@ import javax.swing.*;
  * these factory methods return objects of class {@link GameBoardHex},
  * {@link EvaluatorHex}, and {@link FeatureHex}, respectively.
  *
- * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  * @see GameBoardHex
  * @see EvaluatorHex
  */

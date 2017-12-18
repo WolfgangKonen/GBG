@@ -9,8 +9,6 @@ import javax.swing.event.ChangeListener;
 
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import params.*;
-//import params.RpropParams;
-//import params.TCParams;
 import tools.HtmlDisplay;
 import tools.Types;
 import tools.SolidBorder;
@@ -171,7 +169,7 @@ public class XArenaButtons extends JPanel
 			choiceAgent[n] = new Choice();
 			for (String s : Types.GUI_AGENT_LIST) choiceAgent[n].add(s);
 			choiceAgent[n].select(Types.GUI_AGENT_INITIAL[n]);	
-			this.setParamDefaults(Types.GUI_AGENT_INITIAL[n], m_game.getGameName());
+			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_game.getGameName());
 			if (numPlayers==2) {
 				mParam[n]=new JButton("Param "+Types.GUI_2PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_2PLAYER_NAME[n]);
@@ -194,7 +192,7 @@ public class XArenaButtons extends JPanel
 			choiceAgent[n].addItemListener(
 					new ItemListenerHandler(n) { // this constructor will copy n to ItemListenerHandler.n
 						public void itemStateChanged(ItemEvent arg0) {
-							setParamDefaults(choiceAgent[n].getSelectedItem(),
+							setParamDefaults(n, choiceAgent[n].getSelectedItem(),
 									m_game.getGameName());
 						}
 					}
@@ -284,6 +282,7 @@ public class XArenaButtons extends JPanel
 					public void actionPerformed(ActionEvent e)
 					{	
 						if (m_game.taskState==ArenaTrain.Task.INSPECTV) {
+							m_game.taskState = ArenaTrain.Task.IDLE;
 							// if Play button is pressed while being in InspectV-mode, 
 							// store this in taskBefore:
 							m_game.taskBefore=ArenaTrain.Task.INSPECTV;
@@ -457,7 +456,12 @@ public class XArenaButtons extends JPanel
 
 	} // constructor XArenaButtons
 
-	public void setParamDefaults(String agentName, String gameName) {
+	/**
+	 * @param n				number of agent
+	 * @param agentName		name of agent
+	 * @param gameName		name of game 
+	 */
+	public void setParamDefaults(int n, String agentName, String gameName) {
 		tdPar.setParamDefaults(agentName, gameName);
 		ntPar.setParamDefaults(agentName, gameName);
 		

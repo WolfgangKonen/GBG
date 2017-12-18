@@ -290,7 +290,7 @@ public class OtherParams extends Frame
 		wNply_T.setText(value+"");
 	}
 	public void setEpiLength(int value) {
-		numEval_T.setText(value+"");
+		epiLeng_T.setText(value+"");
 	}
 //	public void setMinimaxDepth(int value) {
 //		miniDepth_T.setText(value+"");

@@ -31,6 +31,7 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import params.ParMC;
 import params.ParMaxN;
 import params.ParOther;
 import tools.LineChartSuccess;
@@ -101,7 +102,7 @@ public class XArenaFuncs
 	 * @throws IOException 
 	 */
 	// OLD:  Side effect: the class members {@link XArenaFuncs#m_NetIsLinear}, {@link XArenaFuncs#m_NetHasSigmoid} are set.
-	protected PlayAgent constructAgent(String sAgent, XArenaButtons m_xab) throws IOException {
+	protected PlayAgent constructAgent(int n, String sAgent, XArenaButtons m_xab) throws IOException {
 		PlayAgent pa = null;
 		int maxGameNum=Integer.parseInt(m_xab.GameNumT.getText());
 		int featmode = m_xab.tdPar.getFeatmode();
@@ -172,7 +173,7 @@ public class XArenaFuncs
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
-			pa = new MCAgent(sAgent, m_xab.mcParams, m_xab.oPar);
+			pa = new MCAgent(sAgent, new ParMC(m_xab.mcParams), new ParOther(m_xab.oPar));
 		}
 		return pa;
 	}
@@ -215,7 +216,7 @@ public class XArenaFuncs
 			} else if (sAgent.equals("Human")) {
 				pa= new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {
-				pa= new MCAgent(sAgent, m_xab.mcParams, m_xab.oPar);
+				pa= new MCAgent(sAgent, new ParMC(m_xab.mcParams), new ParOther(m_xab.oPar));
 			}else { // all the trainable agents:
 				if (m_PlayAgents[n]==null) {
 					if (sAgent.equals("TDS")) {
@@ -306,7 +307,7 @@ public class XArenaFuncs
 	 * @return	the trained PlayAgent
 	 * @throws IOException 
 	 */
-	public PlayAgent train(String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
+	public PlayAgent train(int n, String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
 		int stopTest;			// 0: do not call Evaluator during training; 
 								// >0: call Evaluator after every stopTest training games
 		int stopEval;			// 0: do not stop on Evaluator; 
@@ -326,7 +327,7 @@ public class XArenaFuncs
 		PlayAgent pa = null;
 
 		try {
-			pa = this.constructAgent(sAgent, xab);
+			pa = this.constructAgent(n,sAgent, xab);
 			if (pa==null) throw new RuntimeException("Could not construct agent = " + sAgent);
 			
 		}  catch(RuntimeException e) {
@@ -499,7 +500,7 @@ public class XArenaFuncs
 			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
 
 			try {
-				pa = constructAgent(sAgent, xab);
+				pa = constructAgent(0,sAgent, xab);
 				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
@@ -834,8 +835,6 @@ public class XArenaFuncs
 		boolean learnFromRM = xab.oPar.useLearnFromRM();
 		Evaluator m_evaluatorX=null;
 		Evaluator m_evaluatorO=null;
-		double alpha = xab.tdPar.getAlpha();
-		double lambda = xab.tdPar.getLambda();
 		
 		double optimCountX=0.0,optimCountO=0.0;
 		double[][] winrateC = new double[competitionNum][3];
@@ -854,7 +853,7 @@ public class XArenaFuncs
 			int player;
 			
 			try {
-				paX = this.constructAgent(AgentX, xab);
+				paX = this.constructAgent(0,AgentX, xab);
 				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);
 				// TODO: add suitable wrapAgents-call (MaxNWrapper or ExpectimaxWrapper)
 			}  catch(RuntimeException e) 
@@ -868,7 +867,7 @@ public class XArenaFuncs
 			paX.setGameNum(0);
 			
 			try {
-				paO = this.constructAgent(AgentO, xab);
+				paO = this.constructAgent(1,AgentO, xab);
 				if (paO==null) throw new RuntimeException("Could not construct AgentO = " + AgentO);
 				// TODO: add suitable wrapAgents-call (MaxNWrapper or ExpectimaxWrapper)
 			}  catch(RuntimeException e) 
@@ -943,6 +942,11 @@ public class XArenaFuncs
 		String filename = "Arena.comp.csv";
 		tools.Utils.checkAndCreateFolder(strDir);
 		try {
+			// TODO: needs to be generalized to other agents but TDAgent and to 
+			// differences in X- and O-agent:
+			
+			double alpha = xab.tdPar.getAlpha();
+			double lambda = xab.tdPar.getLambda();
 			PrintWriter f; 
 			f = new PrintWriter(new BufferedWriter(new FileWriter(strDir+filename)));
 			f.println("alpha=" + alpha + ";  lambda=" + lambda + "; trained agents=" + competitionNum 

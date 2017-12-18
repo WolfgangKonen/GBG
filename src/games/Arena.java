@@ -215,11 +215,11 @@ abstract public class Arena extends JPanel implements Runnable {
 	}
 	
 	protected void UpdateBoard() {
-		gb.updateBoard(null, false, false,false);
+		gb.updateBoard(null, false, false);
 	}
 
 	/**
-	 * Inspect the value function in m_PlayAgent of {@link #m_xfun}. This agent will 
+	 * Inspect the value function in m_PlayAgent[0] of {@link #m_xfun}. This agent will 
 	 * be initially the one set in {@link XArenaFuncs}'s constructor (usually {@link controllers.MinimaxAgent})
 	 * or the agent last trained via button "Train X"
 	 */
@@ -254,7 +254,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		System.out.println("[InspectGame] "+pa_string);
 		
 		gb.clearBoard(true, true);
-		gb.updateBoard(null,false,true,true);				// enable Board buttons
+		gb.updateBoard(null,false,true);				// enable Board buttons
 		while(taskState == Task.INSPECTV)
 		{			
 			if(gb.isActionReq()){
@@ -277,9 +277,9 @@ abstract public class Arena extends JPanel implements Runnable {
 					if (actBest!=null)  // a HumanAgent will return actBest=null
 						so.storeBestActionInfo(actBest, actBest.getVTable());
 					
-					gb.updateBoard(so,true,false,true);
+					gb.updateBoard(so,false,true);
 				} else {
-					gb.updateBoard(so,true,false,true);
+					gb.updateBoard(so,false,true);
 					// not a valid play position >> show the board settings, i.e. 
 					// the game-over position, but clear the values: 
 					gb.clearBoard(false,true);
@@ -303,9 +303,18 @@ abstract public class Arena extends JPanel implements Runnable {
 
 		} // while(taskState == Task.INSPECTV) [will be left only by the break above or when taskState changes]
 		
-		// game over - leave the INSPECTV task
-		taskState = Task.IDLE;		
-		setStatusMessage("Done.");
+		// We arrive here under three conditions:
+		//		1) InspectV pressed again --> taskState changed to Task.IDLE
+		//  	2) game over --> break in while above
+		// 		3) Play button pressed --> taskState changed to Task.PLAY
+		// In case 1)+2) we want to be in IDLE mode, but in case 3) we want to stay in PLAY mode.
+		// That is the reason for the if-clause in the next line:
+		
+		if (taskState!=Task.PLAY) {
+			// game over or InspectV pressed again --> leave the INSPECTV task
+			taskState = Task.IDLE;		
+			setStatusMessage("Done.");			
+		}
 	}
 
 	// only needed in case DBG_HEX for debugging the TDAgent in case 2x2 Hex
@@ -333,7 +342,6 @@ abstract public class Arena extends JPanel implements Runnable {
 	public void PlayGame()
 	{
 		int Player,player;
-		boolean showStoredV=true; 
 		StateObservation so;
 		Types.ACTIONS_VT actBest=null;
 		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mctsParams,m_xab.oPar); // only DEBG
@@ -349,6 +357,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		int numPlayers = gb.getStateObs().getNumPlayers();
 		int wrappedNPly=m_xab.oPar.getWrapperNPly();
 		boolean showValue = (taskState==Task.PLAY) ? m_xab.getShowValueOnGameBoard() : true;
+		boolean showStoredV=true; 
 		
 		try 
 		{
@@ -366,32 +375,36 @@ abstract public class Arena extends JPanel implements Runnable {
 		}
 
 
-		String AgentX ="";
-		String AgentO ="";
+		String agentX ="";
+		String agentO ="";
+		String[] agentVec = new String[numPlayers];
+		String sMsg ="";
 
+		gb.toFront();
 
 		switch (numPlayers) {
 			case (1):
-				AgentX = m_xab.getSelectedAgent(0);
+				agentX = m_xab.getSelectedAgent(0);
+				sMsg = "Playing a game ... [ "+agentX+" ]"; 
+				if (wrappedNPly>0)
+					sMsg = "Playing a game ... [ "+agentX+", nPly="+wrappedNPly+" ]"; 
 				break;
 			case (2):
-				AgentX = m_xab.getSelectedAgent(0);
-				AgentO = m_xab.getSelectedAgent(1);
+				agentX = m_xab.getSelectedAgent(0);
+				agentO = m_xab.getSelectedAgent(1);
+				sMsg = "Playing a game ... ["+agentX+" (X) vs. "+agentO+" (O)]";
 				break;
 			default:
-				// TODO: implement s.th. for N-player games (n>2)
+				sMsg = "Playing a game ... [";
+				for (int n=0; n<numPlayers; n++) {
+					agentVec[n] = m_xab.getSelectedAgent(0);
+					sMsg = sMsg+agentVec[n]+"("+n+")";
+					if (n<numPlayers-1) sMsg = sMsg + ", ";
+				}
+				sMsg = sMsg+"]";
 				break;
 		}
 
-		String sMsg;
-		switch (numPlayers) {
-		case (1): 
-			sMsg = "Playing a game ... [ "+AgentX+" ]"; break;
-		case (2):
-			sMsg = "Playing a game ... ["+AgentX+" (X) vs. "+AgentO+" (O)]"; break;
-		default: 
-			sMsg = "Playing an N-player game ..."; break;
-		}
 		setStatusMessage(sMsg);
 		System.out.println(sMsg);
 		
@@ -422,7 +435,8 @@ abstract public class Arena extends JPanel implements Runnable {
 				pa = qaVector[player];
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
-						gb.updateBoard(so,false,false,showValue);		
+						gb.updateBoard(so,false,showValue);	
+						// leave the previously shown values if it is HumanPlayer
 					}
 					else {
                         boolean DEBG=false; //false;true;
@@ -434,11 +448,11 @@ abstract public class Arena extends JPanel implements Runnable {
                         }
                         
                         so.storeBestActionInfo(actBest, actBest.getVTable());
-                        if (so.getNumPlayers()==1) {
-                        	// show state and stored vtable *before* advance
-                            gb.updateBoard(so,true,false,showValue);
-                            showStoredV=false; // this is for 2nd updateBoard below
-                        }
+//                        if (so.getNumPlayers()==1) {
+//                        	// show state and stored vtable *before* advance
+//                            gb.updateBoard(so,false,showValue);
+//                            showStoredV=false; // this is for 2nd updateBoard below
+//                        }
                         so.advance(actBest);
 						logManager.addLogEntry(actBest, so, logSessionid);
                         try {
@@ -447,7 +461,7 @@ abstract public class Arena extends JPanel implements Runnable {
                         } catch (Exception e) {
                             System.out.println("Thread 1");
                         }
-                        gb.updateBoard(so,showStoredV,false,showValue);
+                        gb.updateBoard(so,false,showValue);
 
                         // gather information for later printout to agents/gameName/csv/playStats.csv.
                         // This is mostly for diagnostics in game 2048, but not completely useless for other
@@ -492,11 +506,11 @@ abstract public class Arena extends JPanel implements Runnable {
 					Player=Types.PLAYER_PM[so.getPlayer()];
 					switch(Player*win) {
 					case (+1): 
-						MessageBox.show(m_TicFrame, "X ("+AgentX+") wins", 
+						MessageBox.show(m_TicFrame, "X ("+agentX+") wins", 
 								"Game Over", JOptionPane.INFORMATION_MESSAGE );
 						break;  // out of inner switch
 					case (-1):
-						MessageBox.show(m_TicFrame, "O ("+AgentO+") wins",
+						MessageBox.show(m_TicFrame, "O ("+agentO+") wins",
 								"Game Over", JOptionPane.INFORMATION_MESSAGE );
 						break;  // out of inner switch
 					case ( 0):

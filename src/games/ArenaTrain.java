@@ -86,8 +86,9 @@ abstract public class ArenaTrain extends Arena
 			n = m_xab.getNumParamBtn();
 			agentN = m_xab.getSelectedAgent(n);
 			setStatusMessage("Params for "+agentN+ " ...");
-//			m_tabs.showParamTabs(this,!m_tabs.isVisible(),agentN);
-			m_tabs.showParamTabs(this,true,agentN);
+			m_tabs.showParamTabs(this,true,0,agentN);
+			// this is for later, when we have extended to N tabs:
+			m_tabs.showParamTabs(this,true,n,agentN);
 			taskState = Task.IDLE; 
 			break;
 		case TRAIN: 
@@ -98,7 +99,7 @@ abstract public class ArenaTrain extends Arena
 				setStatusMessage("Training "+agentN+"-Player X ...");
 
 				try {
-					m_xfun.m_PlayAgents[n] = m_xfun.train(agentN, m_xab, gb);
+					m_xfun.m_PlayAgents[n] = m_xfun.train(n,agentN, m_xab, gb);
 				} catch (IOException e2) {
 					e2.printStackTrace();
 				}

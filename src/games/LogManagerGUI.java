@@ -279,7 +279,7 @@ public class LogManagerGUI {
     private void loadBoard(int position) {
         if(currentLog.stateObservations.size() > position && position >= 0) {
             counter = position;
-            gameBoard.updateBoard(currentLog.stateObservations.get(position), true, true, true);
+            gameBoard.updateBoard(currentLog.stateObservations.get(position), true, true);
             jTFNextAction.setText("" + (position + 1));
 
             if(currentLog.stateObservations.size() > position + 1) {

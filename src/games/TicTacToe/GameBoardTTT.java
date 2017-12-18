@@ -205,13 +205,13 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	 * Update the play board and the associated VBoard.
 	 * 
 	 * @param so	the game state
-	 * @param showStoredV	if true, show the values (scores) for the available actions
-	 * 						(only if they are stored in 'so')
-	 * @param enableOccupiedCells  if true, then allow user interaction on occupied 
-	 * 						cells (needed for inspecting the value function)
+	 * @param showValueOnGameboard	if true, show the game values for the available actions
+	 * 				(only if they are stored in 'so')
+	 * @param enableOccupiedCells  if true, allow user interaction on occupied 
+	 * 				cells (may be needed for inspecting the value function)
 	 */
 	@Override
-	public void updateBoard(StateObservation so, boolean showStoredV,
+	public void updateBoard(StateObservation so, 
 							boolean enableOccupiedCells, boolean showValueOnGameboard) {
 		int i,j;
 		if (so!=null) {
@@ -391,7 +391,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		m_so.advance(act);			// perform action (optionally add random elements from game 
 									// environment - not necessary in TicTacToe)
 		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-		updateBoard(null,false,false,false);
+		updateBoard(null,false,false);
 		arenaActReq = true;			// ask Arena for next action
 	}
 	
@@ -408,7 +408,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		}
 		m_so.advance(act);			// perform action (optionally add random elements from game 
 									// environment - not necessary in TicTacToe)
-		updateBoard(null,false,false,false);
+		updateBoard(null,false,false);
 		arenaActReq = true;		
 	}
 	
@@ -461,6 +461,11 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	@Override
 	public String getSubDir() {
 		return null;
+	}
+	
+    @Override
+	public void toFront() {
+		super.toFront();
 	}
 
 }

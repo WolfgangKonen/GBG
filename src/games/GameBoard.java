@@ -9,10 +9,11 @@ import games.Arena;
  * and allows user interactions with the board to enter legal moves during 
  * game play or to enter board positions for which the agent reaction is 
  * inspected. 
- * It has an internal object derived from StateObservateion which represents the 
- * current game state. It can be retrieved {@link #getStateObs()}, reset and retrieved
- * {@link #getDefaultStartState()} or a random start state can be retrieved 
- * {@link #chooseStartState01()}.  
+ * <p>
+ * {@link GameBoard} has an internal object derived from {@link StateObservation} which represents the 
+ * current game state. It can be retrieved with {@link #getStateObs()}, it can be reset and 
+ * retrieved with {@link #getDefaultStartState()}, or a random start state can be retrieved 
+ * with {@link #chooseStartState01()}.  
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  *
@@ -21,9 +22,10 @@ public interface GameBoard {
 	public void clearBoard(boolean boardClear, boolean vClear);
 	//public void updateBoard();
 	//public void updateBoard(StateObservation so);
-	public void updateBoard(StateObservation so, boolean showStoredV, boolean enableOccupiedCells
+	public void updateBoard(StateObservation so, boolean enableOccupiedCells
 			, boolean showValueOnGameboard);
 	public void showGameBoard(Arena arena,boolean alignToMain);
+	public void toFront();
 	/**
 	 * Is an action requested from Arena (i.e. was human interaction done)?
 	 * @return true if action from Arena is requested 

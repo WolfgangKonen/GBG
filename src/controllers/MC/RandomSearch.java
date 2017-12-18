@@ -6,7 +6,7 @@ import java.util.Random;
 import games.StateObservation;
 
 /**
- * Created by Johannes on 07.11.2016.
+ * Perform a random rollout for {@link MCAgent}
  */
 public class RandomSearch{
     private Random random = new Random();

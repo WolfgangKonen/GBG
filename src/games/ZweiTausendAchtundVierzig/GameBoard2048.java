@@ -385,7 +385,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     }
 
     @Override
-    public void updateBoard(StateObservation so, boolean showStoredV, 
+    public void updateBoard(StateObservation so,  
     						boolean enableOccupiedCells, boolean showValueOnGameboard) {
         if (so != null) {
             if (so instanceof StateObserver2048) {
@@ -420,10 +420,10 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             }
 
         }
-        guiUpdateBoard();
+        guiUpdateBoard(showValueOnGameboard);
     }
 
-    private void guiUpdateBoard() {
+    private void guiUpdateBoard(boolean showValueOnGameboard) {
         for (int i = 0; i < 4; i++) {
             if (m_so.availableMoves.contains(i)) {
                 buttons[i].setEnabled(true);
@@ -439,58 +439,64 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             updateBoardLabel(pos);
         }
 
-        for (int i = 0; i < 4; i++) {
-            if (vTable == null) {
-                score = Double.NaN;
-            } else {
-                score = vTable[i];
+        if (showValueOnGameboard) {
+            for (int i = 0; i < 4; i++) {
+            	score = (vTable == null) ? Double.NaN : vTable[i];
+                
+                if (Double.isNaN(score)) {
+                    vBoard[i].setText("   ");
+                    vBoard[i].setBackground(Color.red);
+                } else {
+                    double realScore = score * m_so.MAXSCORE;
+                    String txt = null;
+                    if (realScore >= 1000000) {
+                        txt = "" + (String.format("%.1f", realScore));
+                    } else if (realScore >= 100000) {
+                        txt = "" + (String.format("%.2f", realScore));
+                    } else if (realScore >= 10000) {
+                        txt = "" + (String.format("%.3f", realScore));
+                    } else if (realScore >= 1000) {
+                        txt = "" + (String.format("%.4f", realScore));
+                    } else if (realScore >= 100) {
+                        txt = "" + (String.format("%.5f", realScore));
+                    } else if (realScore >= 10) {
+                        txt = "" + (String.format("%.6f", realScore));
+                    } else if (realScore >= 0) {
+                        txt = "" + (String.format("%.7f", realScore));
+                    } else if (realScore <= -1000000) {
+                        txt = "" + (String.format("%.0f", realScore));
+                    } else if (realScore <= -100000) {
+                        txt = "" + (String.format("%.1f", realScore));
+                    } else if (realScore <= -10000) {
+                        txt = "" + (String.format("%.2f", realScore));
+                    } else if (realScore <= -1000) {
+                        txt = "" + (String.format("%.3f", realScore));
+                    } else if (realScore <= -100) {
+                        txt = "" + (String.format("%.4f", realScore));
+                    } else if (realScore <= -10) {
+                        txt = "" + (String.format("%.5f", realScore));
+                    } else if (realScore == 0) {
+                        txt = "" + realScore;
+                    }
+
+
+                    vBoard[i].setText(txt);
+                    vBoard[i].setBackground(Color.orange);
+                    if (score > maxscore) {
+                        maxscore = score;
+                        imax = i;
+                    }
+                }
             }
-            if (Double.isNaN(score)) {
+            vBoard[imax].setBackground(Color.yellow);
+        } 
+        else {  // i.e. if (!showValueOnGameboard)
+        	Color colTHK2 = new Color(255,137,0);
+            for (int i = 0; i < 4; i++) {
                 vBoard[i].setText("   ");
-                vBoard[i].setBackground(Color.red);
-            } else {
-                double realScore = score * m_so.MAXSCORE;
-                String txt = null;
-                if (realScore >= 1000000) {
-                    txt = "" + (String.format("%.1f", realScore));
-                } else if (realScore >= 100000) {
-                    txt = "" + (String.format("%.2f", realScore));
-                } else if (realScore >= 10000) {
-                    txt = "" + (String.format("%.3f", realScore));
-                } else if (realScore >= 1000) {
-                    txt = "" + (String.format("%.4f", realScore));
-                } else if (realScore >= 100) {
-                    txt = "" + (String.format("%.5f", realScore));
-                } else if (realScore >= 10) {
-                    txt = "" + (String.format("%.6f", realScore));
-                } else if (realScore >= 0) {
-                    txt = "" + (String.format("%.7f", realScore));
-                } else if (realScore <= -1000000) {
-                    txt = "" + (String.format("%.0f", realScore));
-                } else if (realScore <= -100000) {
-                    txt = "" + (String.format("%.1f", realScore));
-                } else if (realScore <= -10000) {
-                    txt = "" + (String.format("%.2f", realScore));
-                } else if (realScore <= -1000) {
-                    txt = "" + (String.format("%.3f", realScore));
-                } else if (realScore <= -100) {
-                    txt = "" + (String.format("%.4f", realScore));
-                } else if (realScore <= -10) {
-                    txt = "" + (String.format("%.5f", realScore));
-                } else if (realScore == 0) {
-                    txt = "" + realScore;
-                }
-
-
-                vBoard[i].setText(txt);
-                vBoard[i].setBackground(Color.orange);
-                if (score > maxscore) {
-                    maxscore = score;
-                    imax = i;
-                }
-            }
+                vBoard[i].setBackground(colTHK2);
+            }        	
         }
-        vBoard[imax].setBackground(Color.yellow);
 
         scoreLabel.setText("" + m_so.getScore());
 
@@ -590,4 +596,11 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     public String getSubDir() {
         return null;
     }
+    
+    @Override
+	public void toFront() {
+		super.toFront();
+	}
+
+
 }

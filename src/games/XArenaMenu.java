@@ -95,7 +95,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem = new JMenuItem("Param Tabs");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_arena.m_tabs.showParamTabs(m_arena,!m_arena.m_tabs.isVisible(),m_arena.m_xab.getSelectedAgent(0));
+				m_arena.m_tabs.showParamTabs(m_arena,true,0,m_arena.m_xab.getSelectedAgent(0));
 			}
 		});
 		menuItem.setToolTipText(TIPEVALUATE);
@@ -457,6 +457,9 @@ public class XArenaMenu extends JMenuBar {
 		add(menu);
 	}
 	
+	/**
+	 * @param index   number of the agent
+	 */
 	void loadAgent(int index) {
 		String str=TIPEVALUATE;
 		PlayAgent td=null;
@@ -477,7 +480,7 @@ public class XArenaMenu extends JMenuBar {
 			// enable / disable certain parameter settings according to 
 			// the agent name and the active game (before setting the specific
 			// parameters in certain tabs with 'setFrom' from the agent loaded):
-			m_arena.m_xab.setParamDefaults(td.getName(), m_arena.getGameName());
+			m_arena.m_xab.setParamDefaults(index, td.getName(), m_arena.getGameName());
 			
 			if (td instanceof TDAgent) {
 				// set the agent parameters in XArenaTabs:

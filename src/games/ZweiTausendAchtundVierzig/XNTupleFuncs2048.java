@@ -99,6 +99,11 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.
+	 * <ul>
+	 * <li> <b>mode=1</b>: 5 4-tuples as in [Jaskowski16, Fig. 3b]: two straight lines, 3 squares.
+	 * <li> <b>mode=2</b>: 4 6-tuples, similar to [Jaskowski16, Fig. 3c]: two 32-rectangles and
+	 * 		only <b>two</b> d-shaped 42-tuples (note that [Jaskowski16] has 3 d-shaped tuples). 
+	 * </ul>
 	 * <p>
 	 * See {@link #getBoardVector(StateObservation)} for the numbering of cells in boardVector.
 	 * 
@@ -123,7 +128,7 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 					{0,4,8,1,5,9},{1,5,9,2,6,10},
 					{2,6,9,10,13,14},{3,7,10,11,14,15}};
 		}
-		throw new RuntimeException("Unsupported value for ConfigGame.FIXEDNTUPLEMODE");
+		throw new RuntimeException("Unsupported value mode="+mode+" in XNTupleFuncs::fixedNTuples(int)");
 	}
 	
     private static int[] fixedModes = {1,2};

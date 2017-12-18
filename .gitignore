@@ -21,11 +21,11 @@ games/Logs/*
 logs/*
 agents/temp/*
 
-#Ordner mit veralteten versuchen zur Parallelit√§t
+#Ordner mit veralteten Versuchen zur Parallelit‰t
 src/games/ZweiTausendAchtundVierzig/Parallel/*
 
 # too big (92 MB) for a regular save to GitHub
-agents/2048/fixed 4 6-Tupels 200k TDNT2 afterState.agt.zip
+agents/2048/fixed 4 6-Tupels*.agt.zip
 agents/2048/fixed TEST eTiles 4 6-Tupels 200k TDNT2.agt.zip
 agents/2048/TEST*.agt.zip
 

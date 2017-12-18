@@ -214,7 +214,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                 int gameNumber = i;
                 callables.add(() -> {
                     StateObserver2048 gameState = new StateObserver2048();
-                    PlayAgent playAgent = new MCAgent(new MCParams());
+                    PlayAgent playAgent = new MCAgent(new ParMC());
                     List<StateObserver2048> tempGameStates = new ArrayList<>();
                     while (!gameState.isGameOver()) {
                         tempGameStates.add(gameState.copy());
@@ -244,7 +244,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             for(int i = ConfigEvaluator.GAMESFORNEWGAMESTATES; i > 0; i--) {
                 int gameNumber = i;
                 StateObserver2048 gameState = new StateObserver2048();
-                PlayAgent playAgent = new MCAgent(new MCParams());
+                PlayAgent playAgent = new MCAgent(new ParMC());
                 tempGameStates = new ArrayList<>();
                 while (!gameState.isGameOver()) {
                     tempGameStates.add(gameState.copy());

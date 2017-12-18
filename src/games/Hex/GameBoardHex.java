@@ -66,8 +66,10 @@ public class GameBoardHex implements GameBoard {
     }
 
     @Override
-    public void updateBoard(StateObservation so, boolean showStoredV, 
+    public void updateBoard(StateObservation so,  
 							boolean enableOccupiedCells, boolean showValueOnGameboard) {
+    	gamePanel.setShowValues(showValueOnGameboard);
+    	
         if (so == null) {
             gamePanel.repaint();
             return;
@@ -184,6 +186,11 @@ public class GameBoardHex implements GameBoard {
      * Includes a child class HexMouseListener to process user input.
      */
 
+    @Override
+	public void toFront() {
+		gamePanel.toFront();
+	}
+
     public class HexPanel extends JPanel {
         boolean showValues = true;
 
@@ -192,6 +199,14 @@ public class GameBoardHex implements GameBoard {
 
             HexMouseListener ml = new HexMouseListener();
             addMouseListener(ml);
+        }
+        
+    	public void toFront() {
+    		super.setVisible(true);
+    	}
+
+    	public void setShowValues(boolean showValueOnGameboard) {
+        	showValues = showValueOnGameboard;
         }
 
         /**
@@ -235,7 +250,7 @@ public class GameBoardHex implements GameBoard {
                     HexTile tile = m_so.getBoard()[i][j];
                     Color cellColor = getTileColor(tile, showValues);
                     HexUtils.drawHex(tile, g2, cellColor, false);
-                    if (!GRAYSCALE) {
+                    if (showValues && !GRAYSCALE) {
                         HexUtils.drawTileValueText(tile, g2, cellColor, HexConfig.BOARD_SIZE);
                     }
                 }
@@ -245,7 +260,8 @@ public class GameBoardHex implements GameBoard {
             if (lastPlaced != null && !GRAYSCALE) {
                 Color cellColor = getTileColor(lastPlaced, showValues);
                 HexUtils.drawHex(lastPlaced, g2, cellColor, true);
-                HexUtils.drawTileValueText(lastPlaced, g2, cellColor, HexConfig.BOARD_SIZE);
+                if (showValues)
+                	HexUtils.drawTileValueText(lastPlaced, g2, cellColor, HexConfig.BOARD_SIZE);
             }
         }
 
@@ -291,7 +307,7 @@ public class GameBoardHex implements GameBoard {
                 	// Do NOT do this during 'INSPECT', because then we have (currently) no valid log session ID
             		(arena.getLogManager()).addLogEntry(act, m_so, arena.getLogSessionID());                	
                 }
-                updateBoard(null, false, false, false);
+                updateBoard(null, false, false);
                 setActionReq(true);
             }
         }
