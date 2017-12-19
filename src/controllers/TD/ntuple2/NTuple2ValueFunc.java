@@ -152,39 +152,17 @@ public class NTuple2ValueFunc implements Serializable {
 		return list;
 	}
 
-//	public void resetElig() {
-//		for (int j = 0, k = 0; j < nTuples[0].length; j++)
-//			for (int i = 0; i < nTuples.length; i++)
-//				nTuples[i][j].resetElig();
-//	}
-
-//	public void calcScoresAndElig(int[] curTable, int curPlayer) {
-//    	double v_old = getScoreI(curTable,curPlayer);	
-//		// derivative of tanh ( if hasSigmoid()==true)
-//		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
-//		if (LAMBDA!=0.0) 
-//			updateElig(curTable,curPlayer,e);	
-//	}
-
 	public void finishUpdateWeights() {
 		ALPHA = ALPHA * m_AlphaChangeRatio;
 	}
 
-	/* OLD interface: get the value for this state */
-//	public double getScore(double[] board) {
-//		int[] boardI = new int[board.length];
-//		for (int i=0; i<board.length; i++)
-//			boardI[i] = (int) board[i];
-//		return getScoreI(boardI);
-//	}
-	
 	/**
 	 * Get the value for this state in int[]-representation
 	 * 
 	 * @param board 
 	 * 			  the state as 1D-integer vector (position value for each board cell) 
 	 * @param player
-	 *            the player who has to move on {@code board}
+	 *            the player who has to move on {@code board} (0,...,N-1)
 	 * @return
 	 */
 	public double getScoreI(int[] board, int player) {
@@ -421,31 +399,6 @@ public class NTuple2ValueFunc implements Serializable {
 		numLearnActions++;
 	}
 
-//	/**
-//	 * Update all n-Tuple eligibility traces. 
-//	 * (Only the traces for the active player are updated/decayed.)
-//	 * 
-//	 * @param board
-//	 *            board, for which the eligibility traces shall be updated, 
-//	 *            as 1D-integer vector (position value for each board cell) 
-//	 * @param player
-//	 *            the player who has to move on {@code board}
-//	 * @param e
-//	 *            the derivative of the sigmoid function
-//	 */
-//	private void updateElig(int[] board, int player, double e) {
-//		int i, j;
-//		int[][] equiv = null;
-//
-//		// Get equivalent boards (including self)
-//		equiv = getSymBoards2(board,getUSESYMMETRY());
-//
-//		for (i = 0; i < numTuples; i++) {
-//			for (j = 0; j < equiv.length; j++)
-//				nTuples[player][i].updateElig(equiv[j], LAMBDA, GAMMA, e);
-//		}
-//	}
-
 	// samine// updating TCfactor for all ntuples after every tcIn games
 	public void updateTC() {
 		int i, k;
@@ -471,25 +424,6 @@ public class NTuple2ValueFunc implements Serializable {
 		this.tdAgt = tdAgt;
 	}
 	
-//	public void setGamma(double newGamma) {
-//		GAMMA = newGamma;
-//	}
-//	public void setLambda(double newLambda) {
-//		LAMBDA = newLambda;
-//	}
-//	public void setRpropLrn(boolean hasRpropLrn) {
-//		rpropLrn = hasRpropLrn;
-//	}
-//	public void setRpropInitDelta(double initDelta) {
-//		// dummy
-//	}
-//	public void setUseSymmetry(boolean useSymmetry) {
-//		this.useSymmetry = useSymmetry;
-//	}
-//	public void setSigmoid(boolean withSigmoid) {
-//		this.withSigmoid = withSigmoid;
-//	}
-
 	public double getAlpha() {
 		return ALPHA;
 	}

@@ -23,6 +23,8 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ScoreTuple;
 import controllers.AgentBase;
+import controllers.ExpectimaxWrapper;
+import controllers.MaxNWrapper;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Feature;
@@ -1466,6 +1468,26 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		return m_Net;
 	}
 	
+	/**
+	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
+	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
+	 * 
+	 * @param sob			the current game state
+	 * @return				the agent's estimate of the final game value <b>for all players</b>. 
+	 * 						The return value is a tuple containing  
+	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
+	 */
+	@Override
+	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
+		boolean rgs = m_oPar.getRewardIsGameScore();
+		ScoreTuple sc = new ScoreTuple(sob);
+		sc = this.getScoreTuple(sob);
+		for (int i=0; i<sob.getNumPlayers(); i++) 
+			sc.scTup[i] += sob.getReward(i, rgs);
+		return sc;
+	}
+
+
 	public String stringDescr() {
 		m_Net.setHorizon();
 		String cs = getClass().getName();
