@@ -40,8 +40,8 @@ import java.util.Random;
 public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
 	private Random rand;
-	private int m_depth=10;
-	private boolean m_useHashMap=true;
+	protected int m_depth=10;
+	protected boolean m_useHashMap=true;
 	private HashMap<String,ScoreTuple> hm;
 	
 	/**

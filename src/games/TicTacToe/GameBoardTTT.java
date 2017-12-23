@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.TextField;
@@ -42,8 +43,8 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	private int TICGAMEHEIGHT=280;
 	private JPanel BoardPanel;
 //	private JPanel VBoardPanel; 	// simplified: VBoardPanel no integrated in BoardPanel
-	private JLabel leftInfo=new JLabel(" left ");
-	private JLabel rightInfo=new JLabel(" right "); 
+	private JLabel leftInfo=new JLabel("");
+	private JLabel rightInfo=new JLabel(""); 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
 									// infer the current taskState
 	protected Random rand;
@@ -418,10 +419,10 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			// place window with game board below the main window
 			int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
 			int y = ticGame.m_xab.getLocation().y;
-			if (ticGame.m_TicFrame!=null) {
-				x = ticGame.m_TicFrame.getX();
-				y = ticGame.m_TicFrame.getY() + ticGame.m_TicFrame.getHeight() +1;
-				this.setSize(ticGame.m_TicFrame.getWidth(),TICGAMEHEIGHT);	
+			if (ticGame.m_LaunchFrame!=null) {
+				x = ticGame.m_LaunchFrame.getX();
+				y = ticGame.m_LaunchFrame.getY() + ticGame.m_LaunchFrame.getHeight() +1;
+				this.setSize(ticGame.m_LaunchFrame.getWidth(),TICGAMEHEIGHT);	
 			}
 			this.setLocation(x,y);	
 		}		
@@ -465,6 +466,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	
     @Override
 	public void toFront() {
+    	super.setState(Frame.NORMAL);	// if window is iconified, display it normally
 		super.toFront();
 	}
 

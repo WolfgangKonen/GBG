@@ -59,7 +59,7 @@ abstract public class AgentBase implements Serializable {
 	abstract public double getScore(StateObservation sob);
 	
 	public ScoreTuple getScoreTuple(StateObservation sob) {
-		throw new RuntimeException("The derived class has to implement getScoreTuple!");
+		throw new RuntimeException("Agents derived from AgentBase have to implement this method: getScoreTuple");
 	}
 	
 	/**
@@ -92,7 +92,7 @@ abstract public class AgentBase implements Serializable {
 	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
 	 */
 	public Types.ScoreTuple estimateGameValueTuple(StateObservation sob) {
-		throw new RuntimeException("Agents derived from AgentBase have to implement this method estimateGameValueTuple");
+		throw new RuntimeException("Agents derived from AgentBase have to implement this method: estimateGameValueTuple");
 	}
 	
 	public AgentState getAgentState() {

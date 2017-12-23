@@ -2,13 +2,14 @@ package games;
 
 import controllers.PlayAgent;
 import tools.Types;
+import tools.Types.ScoreTuple;
 
 /**
  * Class {@link ObserverBase} implements functionality of the interface {@link StateObservation} 
  * common to all games (things related to advance, game value, reward, ...).
  * <p>
- * The default behavior in {@link ObserverBase} - which may be overridden in derived classes -
- * is for deterministic, 2-player games.
+ * This default behavior in {@link ObserverBase} - which may be overridden in derived classes -
+ * is for deterministic, 2-player games, where reward and game score are the same.
  * 
  * @see StateObservation
  */
@@ -44,6 +45,7 @@ abstract public class ObserverBase {
 	 */
 	abstract public double getGameScore();
 	abstract public int getPlayer();
+	abstract public int getNumPlayers();
 
 	/**
 	 * Same as getGameScore(), but relative to referingState. This relativeness
@@ -60,6 +62,32 @@ abstract public class ObserverBase {
     }
 	
 
+	/**
+	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @return  the game score
+	 */
+	public double getGameScore(int player) {
+		return (this.getPlayer() == player ? getGameScore() : getGameScore() * (-1));
+	}
+	
+	/**
+	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
+	 */
+	public ScoreTuple getGameScoreTuple() {
+		ScoreTuple sc = new ScoreTuple(this.getNumPlayers());
+		for (int i=0; i<this.getNumPlayers(); i++)
+			sc.scTup[i] = this.getGameScore(i);
+		return sc;
+	}
+
+	/**
+	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
+	 * 			can be reached from this state (assuming perfect play).  
+	 * 			This member function can be {@link StateObservation}'s heuristic  
+	 * 			for the <em>potential</em> of that state. <br> 
+	 * 			Here, {@link ObserverBase} will simply return {@link #getGameScore()}.
+	 */
     public double getGameValue() {
         return getGameScore();
     }
@@ -86,7 +114,7 @@ abstract public class ObserverBase {
 	}
 
 	/**
-	 * Same as getReward(referringState), but with the player of referringState. 
+	 * Same as {@link #getReward(StateObservation referringState)}, but with the player of referringState. 
 	 * @param player the player of referringState, a number in 0,1,...,N.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward

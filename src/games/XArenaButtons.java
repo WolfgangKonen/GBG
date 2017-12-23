@@ -59,14 +59,13 @@ public class XArenaButtons extends JPanel
 	Choice[] choiceAgent; 
 	JLabel showValOnGB_L;
 	Checkbox showValOnGB;		// show game values on gameboard
-	TDParams tdPar = new TDParams();
-	NTParams ntPar = new NTParams();
-//	NTupleShow ntupleShow = null;
-	MaxNParams maxnParams = new MaxNParams();
-	MCTSParams mctsParams = new MCTSParams();
-	MCParams mcParams = new MCParams();
-	MCTSExpectimaxParams mctsExpectimaxParams = new MCTSExpectimaxParams();
-	OtherParams oPar = new OtherParams();
+	TDParams[] tdPar;
+	NTParams[] ntPar;
+	MaxNParams[] maxnParams;
+	MCTSParams[] mctsParams;
+	MCParams[] mcParams;
+	MCTSExpectimaxParams[] mctsExpectimaxParams;
+	OtherParams[] oPar;
 	HtmlDisplay htmlDisplay = null;
 	boolean htmlDisplayActive = false;
 	boolean isNTupShowEnabled = false;
@@ -117,7 +116,14 @@ public class XArenaButtons extends JPanel
 		choiceAgent = new Choice[numPlayers];
 		assert (numPlayers<=Types.GUI_PLAYER_NAME.length) 
 			: "GUI not configured for "+numPlayers+" players. Increase Types.GUI_PLAYER_NAME and GUI_AGENT_INITIAL";
-		
+		tdPar = new TDParams[numPlayers];
+		ntPar = new NTParams[numPlayers];
+		maxnParams = new MaxNParams[numPlayers];
+		mctsParams = new MCTSParams[numPlayers];
+		mcParams = new MCParams[numPlayers];
+		mctsExpectimaxParams = new MCTSExpectimaxParams[numPlayers];
+		oPar = new OtherParams[numPlayers];
+
 		// 
 		// initial settings for the GUI
 		//
@@ -125,27 +131,6 @@ public class XArenaButtons extends JPanel
 		AgentO = null; //Types.GUI_O_PLAYER;  // "Human";"ValIt";
 		GameNumT=new TextField("10000", 5); //("10000", 5);
 		TrainNumT=new TextField("25", 5);
-
-		try {
-			Feature dummyFeature = m_game.makeFeatureClass(0); 
-			// Why object dummyFeature? - By constructing it via the factory pattern method
-			// makeFeatureClass we ensure to get a FeatureXX object (with XX being the specific game)
-			// and only this object knows the available feature modes. It would not help to have
-			// a static method getAvailFeatmode() since we cannot call it here.
-			// 
-			// Why try-catch? - If the default implementation of makeFeatureClass() is not
-			// overridden, it will throw a RuntimeException
-			//
-			tdPar.setFeatList(dummyFeature.getAvailFeatmode());
-		} catch (RuntimeException ignored){ }
-		
-		try {
-			Evaluator dummyEvaluator = m_game.makeEvaluator(null, null, 0, 0, 0); 
-			oPar.setQuickEvalList(dummyEvaluator.getAvailableModes());
-			oPar.setTrainEvalList(dummyEvaluator.getAvailableModes());
-			oPar.setQuickEvalMode(dummyEvaluator.getQuickEvalMode());
-			oPar.setTrainEvalMode(dummyEvaluator.getTrainEvalMode());
-		} catch (RuntimeException ignored){ }
 
 		MultiTrain=new JButton("MultiTrain");
 		MultiTrain.setBorder(bord);
@@ -169,7 +154,6 @@ public class XArenaButtons extends JPanel
 			choiceAgent[n] = new Choice();
 			for (String s : Types.GUI_AGENT_LIST) choiceAgent[n].add(s);
 			choiceAgent[n].select(Types.GUI_AGENT_INITIAL[n]);	
-			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_game.getGameName());
 			if (numPlayers==2) {
 				mParam[n]=new JButton("Param "+Types.GUI_2PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_2PLAYER_NAME[n]);
@@ -197,8 +181,39 @@ public class XArenaButtons extends JPanel
 						}
 					}
 			);
+			
+			tdPar[n] = new TDParams();
+			ntPar[n] = new NTParams();
+			maxnParams[n] = new MaxNParams();
+			mctsParams[n] = new MCTSParams();
+			mcParams[n] = new MCParams();
+			mctsExpectimaxParams[n] = new MCTSExpectimaxParams();
+			oPar[n] = new OtherParams();
+			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_game.getGameName());
+			
+			try {
+				Feature dummyFeature = m_game.makeFeatureClass(0); 
+				// Why object dummyFeature? - By constructing it via the factory pattern method
+				// makeFeatureClass we ensure to get a FeatureXX object (with XX being the specific game)
+				// and only this object knows the available feature modes. It would not help to have
+				// a static method getAvailFeatmode() since we cannot call it here.
+				// 
+				// Why try-catch? - If the default implementation of makeFeatureClass() is not
+				// overridden, it will throw a RuntimeException
+				//
+				tdPar[n].setFeatList(dummyFeature.getAvailFeatmode());
+			} catch (RuntimeException ignored){ }
+			
+			try {
+				Evaluator dummyEvaluator = m_game.makeEvaluator(null, null, 0, 0, 0); 
+				oPar[n].setQuickEvalList(dummyEvaluator.getAvailableModes());
+				oPar[n].setTrainEvalList(dummyEvaluator.getAvailableModes());
+				oPar[n].setQuickEvalMode(dummyEvaluator.getQuickEvalMode());
+				oPar[n].setTrainEvalMode(dummyEvaluator.getTrainEvalMode());
+			} catch (RuntimeException ignored){ }
 
-		}
+		} // for
+
 		this.enableButtons(false);
 		GameNumT.setEnabled(false);		// Arena allows no training / multi-training 
 		TrainNumT.setEnabled(false);	// (see ArenaTrain for enabling this)	
@@ -375,16 +390,36 @@ public class XArenaButtons extends JPanel
 		q1.add(new Canvas());
 		q.add(q1);
 		
+		//
+		// here comes the agent columns: Choice / Param- / Train-btn
+		//
 		JPanel jPanel = new JPanel();
 		jPanel.setBackground(Types.GUI_BGCOLOR);
 		if (numPlayers==1) q.add(jPanel);
+		JPanel[][] qcol = new JPanel[4][numPlayers];	// four color stripes: 2 for Param btn, 2 for Train btn
 		for (int n=0; n<numPlayers; n++) {
+			for (int c=0; c<4; c++) {
+				qcol[c][n] = new JPanel();
+				qcol[c][n].setBackground(Types.GUI_PLAYER_COLOR[n]);
+				qcol[c][n].setPreferredSize(new Dimension(10,9));
+				qcol[c][n].setBorder(bord);
+			}
+			JPanel qparam = new JPanel();
+			qparam.setLayout(new BorderLayout());		// BorderLayout reacts on the preferred size for qcol
+			qparam.add(qcol[0][n],BorderLayout.WEST);
+			qparam.add(mParam[n],BorderLayout.CENTER);
+			qparam.add(qcol[2][n],BorderLayout.EAST);
+			JPanel qtrain = new JPanel();
+			qtrain.setLayout(new BorderLayout());
+			qtrain.add(qcol[1][n],BorderLayout.WEST);
+			qtrain.add(mTrain[n],BorderLayout.CENTER);
+			qtrain.add(qcol[3][n],BorderLayout.EAST);
 			JPanel qplay = new JPanel();
 			qplay.setLayout(new GridLayout(0,1,10,10));
 			qplay.setBackground(Types.GUI_BGCOLOR);
 			qplay.add(choiceAgent[n]);
-			qplay.add(mParam[n]);
-			qplay.add(mTrain[n]);
+			qplay.add(qparam);
+			qplay.add(qtrain);
 			q.add(qplay);	
 			mParam[n].setVisible(false);		// see ArenaTrain for making them
 			mTrain[n].setVisible(false);		// visible
@@ -462,8 +497,8 @@ public class XArenaButtons extends JPanel
 	 * @param gameName		name of game 
 	 */
 	public void setParamDefaults(int n, String agentName, String gameName) {
-		tdPar.setParamDefaults(agentName, gameName);
-		ntPar.setParamDefaults(agentName, gameName);
+		tdPar[n].setParamDefaults(agentName, gameName);
+		ntPar[n].setParamDefaults(agentName, gameName);
 		
 		if(agentName.equals("TDS")) {
 			switch(gameName) {

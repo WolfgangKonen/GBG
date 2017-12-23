@@ -85,7 +85,7 @@ public class LineChartSuccess extends XYSeriesCollection
 	public void clearAndSetXY(XArenaButtons xab) {
 		this.removeAllSeries();
 		
-		int x = xab.m_game.m_TicFrame.getX() + xab.m_game.m_TicFrame.getWidth() + 1;
+		int x = xab.m_game.m_LaunchFrame.getX() + xab.m_game.m_LaunchFrame.getWidth() + 1;
 		int y = xab.m_game.m_tabs.getY() + xab.m_game.m_tabs.getHeight() +1;
 		this.setLocation(x, y);  
 	}

@@ -12,7 +12,7 @@ source("summarySE.R")
 
 path <- "../../agents/Hex/06/csv/"; limits=c(0.0,1.0); errWidth=3000;
 
-filenames=c ( # "multiTrain-25-6-lam025-epf02-2P.csv"
+filenames=c ( # "multiTrain-25-6-lam025-epf02-3P-2ply.csv"
                "multiTrain-25-6-lam050-epf02-3P-1ply.csv"    # 5 runs = 1.8h
               ,"multiTrain-25-6-lam050-epf02-3P-2ply.csv"    # 5 runs = 5.8h (!)
               ,"multiTrain-250-4-lam050-epf02-3P-1ply.csv"   # 5 runs = 1.5h (with _PAR evaluation)
@@ -21,7 +21,9 @@ filenames=c ( # "multiTrain-25-6-lam025-epf02-2P.csv"
             )
 # other pars: alpha=0.2, epsilon = 1.0 ... 0.2, ChooseStart01=T, LearnFromRM=F, 
 # 5 runs, 150.000 training episodes. 
- 
+# evalMode= 0 (evalQ) is from default start state against MCTS, 
+# evalMode=10 (evalT) is from different start states against MCTS. 
+
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
   
 dfBoth = data.frame()

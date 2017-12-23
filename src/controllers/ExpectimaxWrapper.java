@@ -31,13 +31,14 @@ public class ExpectimaxWrapper extends ExpectimaxNAgent implements Serializable 
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
-		return wrapped_pa.estimateGameValueTuple(sob);
+		return wrapped_pa.getScoreTuple(sob);
 		//
-		// the following would be too specific to TDNTuple2Agt, we delegate it to *its* 
-		// estimateGameValueTuple:
+		// the following would be too specific to TDNTuple2Agt, we delegate it to  
+		// getScoreTuple of the wrapped agent:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
 //		ScoreTuple sc = new ScoreTuple(sob);
-//		sc = wrapped_pa.getScoreTuple(sob);
+//		//sc = wrapped_pa.getScoreTuple(sob);
+//		sc.scTup[0] = wrapped_pa.getScore(sob);
 //		for (int i=0; i<sob.getNumPlayers(); i++) 
 //			sc.scTup[i] += sob.getReward(i, rgs);
 //		return sc;
@@ -45,6 +46,13 @@ public class ExpectimaxWrapper extends ExpectimaxNAgent implements Serializable 
 	
 	public PlayAgent getWrappedPlayAgent() {
 		return wrapped_pa;
+	}
+
+	@Override
+	public String stringDescr() {
+		String cs = wrapped_pa.getClass().getSimpleName();
+		cs = cs + "[nPly="+m_depth+"]";
+		return cs;
 	}
 
 }

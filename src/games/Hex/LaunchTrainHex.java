@@ -17,7 +17,7 @@ import java.io.IOException;
  * Launch class used to start game Hex in class {@link ArenaTrain} via 
  * a <b>main method</b>. <br> 
  *  
- * @author Wolfgang Konen, TH Cologne, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  * 
  * @see Arena
  * @see ArenaTrain
@@ -35,25 +35,19 @@ public class LaunchTrainHex extends JFrame {
     {
         LaunchTrainHex t_Frame = new LaunchTrainHex("General Board Game Playing");
 
-// ---  just for analysis: compute the state space & game tree complexity ---
-//		System.out.println("Rough approximation for nStates = "+(int) Math.pow(3, 9)+ " = (3^9)");
-//		TicTDBase.countStates2(false);
-//		TicTDBase.countStates2(true);
-
         if (args.length==0) {
             t_Frame.init();
         } else {
-            throw new RuntimeException("[LaunchTrainTTT.main] args="+args+" not allowed. Use TicTacToeBatch.");
+            throw new RuntimeException("[LaunchTrainTTT.main] args="+args+" not allowed. Use batch facility.");
         }
     }
 
     public LaunchTrainHex(String title) {
         super(title);
         m_Arena = new ArenaTrainHex(this);
-        setLayout(new BorderLayout(10,10));
+        setLayout(new BorderLayout(0,0));
         setJMenuBar(m_Arena.m_menu);
         add(m_Arena,BorderLayout.CENTER);
-        add(new Label(" "),BorderLayout.SOUTH);	// just a little space at the bottom
     }
 
     /**

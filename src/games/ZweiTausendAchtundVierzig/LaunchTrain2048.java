@@ -19,7 +19,7 @@ import tools.Types;
  * Launch class used to start game 2048 in class {@link ArenaTrain} via 
  * a <b>main method</b>. <br> 
  *  
- * @author Wolfgang Konen, TH Cologne, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16
  * 
  * @see Arena
  * @see ArenaTrain
@@ -41,7 +41,7 @@ public class LaunchTrain2048 extends JFrame {
         if (args.length == 0) {
             t_Frame.init();
         } else {
-            throw new RuntimeException("[LaunchTrain2048.main] args=" + args + " not allowed. Use TicTacToeBatch.");
+            throw new RuntimeException("[LaunchTrain2048.main] args=" + args + " not allowed. Use batch facility.");
         }
     }
 
@@ -60,11 +60,9 @@ public class LaunchTrain2048 extends JFrame {
     public LaunchTrain2048(String title) {
         super(title);
         m_Arena = new ArenaTrain2048(this);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(0, 0));
         setJMenuBar(m_Arena.m_menu);
         add(m_Arena, BorderLayout.CENTER);
-        add(new Label(" "), BorderLayout.SOUTH);    // just a little space at the bottom
-
     }
 
     protected static class WindowClosingAdapter

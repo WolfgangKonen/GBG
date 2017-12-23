@@ -112,9 +112,16 @@ public class EvaluatorHex extends Evaluator {
             	if (playAgent instanceof TDNTuple2Agt) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
             		// thread-safe:
+            		// Also we have to construct MCTS opponent inside the callables, otherwise
+            		// we are not thread-safe as well:
                     result = competeAgainstMCTS_diffStates_PAR(playAgent, gameBoard, numEpisodes);
             	} else {
-            		result = competeAgainstMCTS_diffStates(playAgent, gameBoard, numEpisodes);
+                    ParMCTS params = new ParMCTS();
+                    int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
+                    params.setNumIter((int) Math.pow(10, numIterExp));
+                    mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
+
+            		result = competeAgainstOpponent_diffStates(playAgent, mctsAgent, gameBoard, numEpisodes);
             	}
                 break;
             default:
@@ -199,12 +206,7 @@ public class EvaluatorHex extends Evaluator {
      * @see EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)
      * @see HexConfig#EVAL_START_ACTIONS
      */
-    private double competeAgainstMCTS_diffStates(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
-        ParMCTS params = new ParMCTS();
-        int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
-        params.setNumIter((int) Math.pow(10, numIterExp));
-        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
-
+    private double competeAgainstOpponent_diffStates(PlayAgent playAgent, PlayAgent opponent, GameBoard gameBoard, int numEpisodes) {
         // find the start states to evaluate:
         int [] startAction = {-1};
         int N = HexConfig.BOARD_SIZE;
@@ -228,17 +230,18 @@ public class EvaluatorHex extends Evaluator {
         for (int i=0; i<startAction.length; i++) {
         	StateObserverHex so = new StateObserverHex();
         	if (startAction[i] == -1) {
-        		res = XArenaFuncs.compete(playAgent, mctsAgent, so, numEpisodes, 0);
+        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0);
                 success += res[0];        	
         	} else {
         		so.advance(new ACTIONS(startAction[i]));
-        		res = XArenaFuncs.compete(mctsAgent, playAgent, so, numEpisodes, 0);
+        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0);
                 success += res[2];        	
         	}
         }
         success /= startAction.length;
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
-        if (this.verbose > 0) System.out.println(m_msg);
+//        if (this.verbose > 0) 
+        	System.out.println(m_msg);
         lastResult = success;
         return success;
     }
@@ -411,6 +414,8 @@ public class EvaluatorHex extends Evaluator {
                 return "success against MCTS (best is 1.0): ";
             case 10:
                 return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
+            case 11:
+                return "success against TD-Ntuple-2 (" + numStartStates + " diff. start states, best is 1.0): ";
             case 1:
                 return "success against Random (best is 1.0): ";
             case 2:

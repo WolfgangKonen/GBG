@@ -31,10 +31,10 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
-		return wrapped_pa.estimateGameValueTuple(sob);
+		return wrapped_pa.getScoreTuple(sob);
 		//
 		// the following would be too specific to TDNTuple2Agt, we delegate it to *its* 
-		// estimateGameValueTuple:
+		// getScoreTuple:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
 //		ScoreTuple sc = new ScoreTuple(sob);
 //		sc = wrapped_pa.getScoreTuple(sob);
@@ -45,6 +45,20 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	
 	public PlayAgent getWrappedPlayAgent() {
 		return wrapped_pa;
+	}
+
+	@Override
+	public String stringDescr() {
+		String cs = wrapped_pa.getClass().getSimpleName();
+		cs = cs + "[nPly="+m_depth+"]";
+		return cs;
+	}
+
+	@Override
+	public String getName() {
+		String cs = wrapped_pa.getClass().getSimpleName();
+		cs = cs + "[nPly="+m_depth+"]";
+		return cs;
 	}
 
 }

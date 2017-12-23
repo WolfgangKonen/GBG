@@ -48,7 +48,7 @@ class MTrain {
 	}
 	
 	/**
-	 * Print the results from {@link XArenaFuncs#multiTrain(String, XArenaButtons, GameBoard)} to
+	 * Print the results from {@link XArenaFuncs#multiTrain(int n, String, XArenaButtons, GameBoard)} to
 	 * file <br>
 	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/multiTrain.csv}. <br>
 	 * where the optional {@code subdir} is for games with different flavors (like Hex: board size). 

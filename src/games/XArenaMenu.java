@@ -219,7 +219,7 @@ public class XArenaMenu extends JMenuBar {
 			submenu.add(menuItem);
 
 			// ==============================================================
-			// Evaluate TD-Agent Agent i
+			// Evaluate TD-Agent Agent i (Quick Eval)
 			// ==============================================================
 			menuItem = new JMenuItem("Quick Evaluation");
 			menuItem.addActionListener(new ActionListener() {
@@ -458,9 +458,9 @@ public class XArenaMenu extends JMenuBar {
 	}
 	
 	/**
-	 * @param index   number of the agent
+	 * @param n   number of the player (agent)
 	 */
-	void loadAgent(int index) {
+	void loadAgent(int n) {
 		String str=TIPEVALUATE;
 		PlayAgent td=null;
 		try {
@@ -480,14 +480,14 @@ public class XArenaMenu extends JMenuBar {
 			// enable / disable certain parameter settings according to 
 			// the agent name and the active game (before setting the specific
 			// parameters in certain tabs with 'setFrom' from the agent loaded):
-			m_arena.m_xab.setParamDefaults(index, td.getName(), m_arena.getGameName());
+			m_arena.m_xab.setParamDefaults(n, td.getName(), m_arena.getGameName());
 			
 			if (td instanceof TDAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar.setFrom( ((TDAgent) td).getTDParams() );
+				m_arena.m_xab.tdPar[n].setFrom( ((TDAgent) td).getTDParams() );
 				if (((TDAgent) td).getOtherPar() == null ) 
 					((TDAgent) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar.setFrom( ((TDAgent) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((TDAgent) td).getOtherPar() );
 			}
 //			else if (td instanceof TDNTupleAgt) {
 //				// set the agent parameters in XArenaTabs:
@@ -507,11 +507,11 @@ public class XArenaMenu extends JMenuBar {
 //			}
 			else if (td instanceof TDNTuple2Agt) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar.setFrom( ((TDNTuple2Agt) td).getTDParams() );
-				m_arena.m_xab.ntPar.setFrom( ((TDNTuple2Agt) td).getNTParams() );
+				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple2Agt) td).getTDParams() );
+				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple2Agt) td).getNTParams() );
 				if (((TDNTuple2Agt) td).getOtherPar() == null ) 
 					((TDNTuple2Agt) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar.setFrom( ((TDNTuple2Agt) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple2Agt) td).getOtherPar() );
 				//
 				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
@@ -524,36 +524,36 @@ public class XArenaMenu extends JMenuBar {
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mctsParams.setFrom( ((MCTSAgentT) td).getParMCTS() );
+				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT) td).getParMCTS() );
 				if (((MCTSAgentT) td).getOtherPar() == null ) 
 					((MCTSAgentT) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar.setFrom( ((MCTSAgentT) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT) td).getOtherPar() );
 			}
 			else if (td instanceof MCTSExpectimaxAgt) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mctsExpectimaxParams.setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
+				m_arena.m_xab.mctsExpectimaxParams[n].setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
 				if (((MCTSExpectimaxAgt) td).getOtherPar() == null ) 
 					((MCTSExpectimaxAgt) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar.setFrom( ((MCTSExpectimaxAgt) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((MCTSExpectimaxAgt) td).getOtherPar() );
 			}
 			else if (td instanceof MCAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mcParams.setFrom( ((MCAgent) td).getMCPar() );
+				m_arena.m_xab.mcParams[n].setFrom( ((MCAgent) td).getMCPar() );
 				if (((MCAgent) td).getOtherPar() == null ) 
 					((MCAgent) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar.setFrom( ((MCAgent) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((MCAgent) td).getOtherPar() );
 			}
 			else if (td instanceof MinimaxAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.maxnParams.setMaxnDepth( ((MinimaxAgent) td).getDepth() );
+				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MinimaxAgent) td).getDepth() );
 			}
 			else if (td instanceof MaxNAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.maxnParams.setMaxnDepth( ((MinimaxAgent) td).getDepth() );
+				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MinimaxAgent) td).getDepth() );
 			}
 			else if (td instanceof ExpectimaxNAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.maxnParams.setMaxnDepth( ((MinimaxAgent) td).getDepth() );
+				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MinimaxAgent) td).getDepth() );
 			}
 			
 			if (td instanceof TDAgent || td instanceof TDNTuple2Agt /* || td instanceof TDNTupleAgt */) {
@@ -561,26 +561,26 @@ public class XArenaMenu extends JMenuBar {
 				// numEval according to the settings in the loaded agent
 				// (at least maxGameNum is relevant for training): 
 				m_arena.m_xab.GameNumT.setText(""+td.getMaxGameNum());
-				m_arena.m_xab.oPar.numEval_T.setText(""+td.getNumEval());
+				m_arena.m_xab.oPar[n].numEval_T.setText(""+td.getNumEval());
 			}
 			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P && !(TDNTuple2Agt.MODE_3P==0)) {
-				m_arena.m_xab.tdPar.enableNPly(true);
+				m_arena.m_xab.tdPar[n].enableNPly(true);
 				// if it is one of the older agents (before nply was added to oPar), it will
 				// have nply=0. Then set nply=1: 
-				if (m_arena.m_xab.tdPar.getNPly()==0) {
-					m_arena.m_xab.tdPar.setNPly(1);
+				if (m_arena.m_xab.tdPar[n].getNPly()==0) {
+					m_arena.m_xab.tdPar[n].setNPly(1);
 					((TDNTuple2Agt) td).getTDParams().setNPly(1);
 				}
 			} else {
-				m_arena.m_xab.tdPar.enableNPly(false);
+				m_arena.m_xab.tdPar[n].enableNPly(false);
 			}
 			
 			// set selector according to class loaded:
-			m_arena.m_xab.setSelectedAgent(index, td.getName());
+			m_arena.m_xab.setSelectedAgent(n, td.getName());
 			
-			m_arena.m_xfun.m_PlayAgents[index] = td;
-			String strAgent = (numPlayers==2) ? "Agent-"+Types.GUI_2PLAYER_NAME[index] :
-												"Agent-"+Types.GUI_PLAYER_NAME[index];
+			m_arena.m_xfun.m_PlayAgents[n] = td;
+			String strAgent = (numPlayers==2) ? "Agent-"+Types.GUI_2PLAYER_NAME[n] :
+												"Agent-"+Types.GUI_PLAYER_NAME[n];
 			str = "Agent "+td.getName()+" succesfully loaded to "
 				+ strAgent + "!";
 		}
@@ -588,6 +588,9 @@ public class XArenaMenu extends JMenuBar {
 		System.out.println("[LoadAgent] "+str);
 	}
 
+	/**
+	 * @param index   number of the player (agent)
+	 */
 	void saveAgent(int index) {
 		try {
 			// fetching the agents ensures that the actual parameters from the tabs
@@ -651,19 +654,22 @@ public class XArenaMenu extends JMenuBar {
 	}
 */
 
+	/**
+	 * @param index		number of the player (agent)
+	 */
 	private void evaluate(int index) {
 		// ensure that m_PlayAgents has the agents selected
 		String str = "[Start Evaluation of PlayAgent "+index+"]";
 		printStatus(str);
 		PlayAgent[] paVector;
-		int wrappedNPly=m_arena.m_xab.oPar.getWrapperNPly();
 
 		try {
 			// ensure with fetchAgents that for agents like MCTS a new agent with the 
 			// latest settings in the MCTS pars tab is constructed:
 			m_arena.m_xfun.m_PlayAgents = m_arena.m_xfun.fetchAgents(m_arena.m_xab);
 			AgentBase.validTrainedAgents(m_arena.m_xfun.m_PlayAgents,numPlayers);
-			paVector = m_arena.m_xfun.wrapAgents(m_arena.m_xfun.m_PlayAgents,wrappedNPly,m_arena.gb.getStateObs());
+			paVector = m_arena.m_xfun.wrapAgents(m_arena.m_xfun.m_PlayAgents, 
+					m_arena.m_xab.oPar, m_arena.gb.getStateObs());
 		} catch (RuntimeException e) {
 			MessageBox.show(m_arena, e.getMessage(), 
 					"Error", JOptionPane.ERROR_MESSAGE);
@@ -677,12 +683,19 @@ public class XArenaMenu extends JMenuBar {
 			printStatus("Done");
 		} else {
 			printStatus("Running Quick Evaluation ...");
-			int qem = m_arena.m_xab.oPar.getQuickEvalMode();
-			Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,0);
-	        qEvaluator.eval();
-			str = qEvaluator.getMsg();
-			System.out.println(str);
-			printStatus(qEvaluator.getShortMsg());
+			try {
+				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
+				Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,0);
+		        qEvaluator.eval();
+				str = qEvaluator.getMsg();
+				System.out.println(str);
+				printStatus(qEvaluator.getShortMsg());				
+			} catch (RuntimeException e) {
+				MessageBox.show(m_arena, e.getMessage(), 
+						"Error", JOptionPane.ERROR_MESSAGE);
+				printStatus("Done");
+				return;
+			}
 		}
 	}
 

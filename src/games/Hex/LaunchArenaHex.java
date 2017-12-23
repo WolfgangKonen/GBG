@@ -31,7 +31,6 @@ public class LaunchArenaHex extends JFrame {
         setLayout(new BorderLayout(10, 10));
         setJMenuBar(m_Arena.m_menu);
         add(m_Arena, BorderLayout.CENTER);
-        add(new Label(" "), BorderLayout.SOUTH);    // just a little space at the bottom
     }
 
     /**
@@ -44,7 +43,7 @@ public class LaunchArenaHex extends JFrame {
         if (args.length == 0) {
             t_Frame.init();
         } else {
-            throw new RuntimeException("[LaunchArenaHex.main] args=" + args + " not allowed. Use TicTacToeBatch.");
+            throw new RuntimeException("[LaunchArenaHex.main] args=" + args + " not allowed. Use batch facility.");
         }
 
     }
