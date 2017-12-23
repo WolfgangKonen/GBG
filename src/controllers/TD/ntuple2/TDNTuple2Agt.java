@@ -149,7 +149,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * If {@link #VER_3P}==false, proceed with a 2-player logic (see comment for 
 	 * {@link #NEW_2P}).
 	 */
-	public static boolean VER_3P=true; 
+	public static boolean VER_3P=false; 
 	public static int MODE_3P=1; 		// 0/1/2
 //	public static boolean OLD_3P=false; // OLD_3P=true  <--> MODE_3P=0
 										// OLD_3P=false	<--> MODE_3P=1		
@@ -311,7 +311,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
     	BestScore3 = -Double.MAX_VALUE;
 		double[] VTable;
    
-		assert m_tdPar.getNPly()>0 : "Oops, nPly=0 (or negative) in m_oPar!";
 		
 //		if (so.getNumPlayers()>2)
 //			throw new RuntimeException("TDNTuple2Agt.getNextAction2 does not yet "+
@@ -338,6 +337,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
             if (VER_3P && MODE_3P==1) {
             	// this has n-ply recursion, but does not reflect multi-moves:
             	int nply = m_tdPar.getNPly();
+        		assert nply>0 : "Oops, nPly=0 (or negative) in m_tdPar!";
             	//int nply = so.getNumPlayers();
             	//int nply = 1;
             	//System.out.println("so: "+so.stringDescr()+", act: "+actions[i].toInt()); // DEBUG
@@ -684,8 +684,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	/**
-	 * Return the agent's estimate of the score for that after state 
-	 * (only for version {@link VER_3P}==true).
+	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
+	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
 	 * 
 	 * @param so	the state s_t for which the value is desired
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
@@ -694,13 +694,35 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so) {
 		ScoreTuple sc = new ScoreTuple(so);
-    	if (VER_3P) {
-    		int[] bvec = m_Net.xnf.getBoardVector(so);
-    		for (int i=0; i<so.getNumPlayers(); i++) 
-    			sc.scTup[i] = m_Net.getScoreI(bvec,i);
-    	} else {
-    		throw new RuntimeException("Cannot create ScoreTuple if VER_3P==false");			        		
-    	}
+		int[] bvec = m_Net.xnf.getBoardVector(so);
+		switch (so.getNumPlayers()) {
+		case 1: 
+			sc.scTup[0] = m_Net.getScoreI(bvec,so.getPlayer());
+			break;
+		case 2:
+			int player = so.getPlayer();
+			int opponent = (player==0) ? 1 : 0;
+			sc.scTup[player] = m_Net.getScoreI(bvec,player);
+			sc.scTup[opponent] = -sc.scTup[player];
+			break;
+		default: 
+	    	if (VER_3P) {
+	    		for (int i=0; i<so.getNumPlayers(); i++) 
+	    			sc.scTup[i] = m_Net.getScoreI(bvec,i);
+	    			// CAUTION: This might not work for all i, if n-tuples were not trained
+	    			// for all i in this state 'so'. 
+	    			// It should work however in the case MODE_3P==0.
+	    	} else {
+	    		throw new RuntimeException("Cannot create ScoreTuple if VER_3P==false");			        		
+	    	}
+	    	break;
+		}
+		
+		// In any case: add the reward obtained so far, since the net predicts
+		// with getScoreI only the expected future reward.
+		boolean rgs = m_oPar.getRewardIsGameScore();
+		for (int i=0; i<so.getNumPlayers(); i++) 
+			sc.scTup[i] += so.getReward(i, rgs);
     	return sc;
 	}
 
@@ -1481,9 +1503,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		ScoreTuple sc = new ScoreTuple(sob);
-		sc = this.getScoreTuple(sob);
+//		sc = this.getScoreTuple(sob);		// NO recursion!!
 		for (int i=0; i<sob.getNumPlayers(); i++) 
-			sc.scTup[i] += sob.getReward(i, rgs);
+			sc.scTup[i] = sob.getReward(i, rgs);
 		return sc;
 	}
 

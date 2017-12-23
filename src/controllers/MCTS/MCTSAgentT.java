@@ -74,6 +74,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     	initMCTSAgent(so, new ParMCTS(), new ParOther());
     }
 
+    @Deprecated
     public MCTSAgentT(String name,StateObservation so, MCTSParams mcPar, OtherParams oPar) //, ElapsedCpuTimer elapsedTimer)
     {
     	super(name);
@@ -83,6 +84,12 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     {
     	super(name);
     	initMCTSAgent(so, parMCTS, new ParOther());
+    }
+    
+    public MCTSAgentT(String name,StateObservation so, ParMCTS parMCTS, ParOther oPar) //, ElapsedCpuTimer elapsedTimer)
+    {
+    	super(name);
+    	initMCTSAgent(so, parMCTS, oPar);
     }
     
     private void initMCTSAgent(StateObservation so, ParMCTS parMCTS, ParOther oPar) {    	

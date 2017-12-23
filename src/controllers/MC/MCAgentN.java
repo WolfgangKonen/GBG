@@ -23,12 +23,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Monte Carlo (MC) agent
+ * Monte Carlo (MC) agent N-player.
+ * <p>
+ * Similar to {@link MCAgent}, but it operates on {@link ScoreTuple} and is thus general for 
+ * N-player games with arbitrary N. It might be a bit slower than {@link MCAgent}.
+ * <p>
+ * (Note: {@link MCAgent} can operate for N-player games, but it cannot return {@link ScoreTuple}
+ * for N>2. Returning {@link ScoreTuple} is however needed for wrapping {@link MCAgent} in 
+ * {@link MaxNWrapper} or {@link ExpectimaxWrapper}.)
  * 
+ * @see MCAgent
  * @see MCAgentConfig
  * @see RandomSearch
  */
-public class MCAgent extends AgentBase implements PlayAgent {
+public class MCAgentN extends AgentBase implements PlayAgent {
+	ScoreTuple sc;
     private Random random = new Random();
     private ExecutorService executorService = Executors.newWorkStealingPool();
 
@@ -64,11 +73,11 @@ public class MCAgent extends AgentBase implements PlayAgent {
 //        setAgentState(AgentState.TRAINED);
 //    }
 
-    public MCAgent(ParMC mcParams){
+    public MCAgentN(ParMC mcParams){
         this("MC", mcParams, new ParOther());    	
     }
     
-    public MCAgent(String name, ParMC mcParams, ParOther oPar)
+    public MCAgentN(String name, ParMC mcParams, ParOther oPar)
     {
         super(name);
         this.m_mcPar = new ParMC(mcParams);
@@ -454,36 +463,5 @@ public class MCAgent extends AgentBase implements PlayAgent {
 }
 
 
-//
-// this code snippet was just for debug purposes [formerly part of getNextAction()]:
-//
-/*  if (m_mcPar.getCalcCertainty()) {
-StateObserver2048 sobZTAV = (StateObserver2048) sob;
-if (sobZTAV.getNumEmptyTiles()==10) {
-	int NC = ConfigEvaluator.NC;
-    double cert0, cert1,cert2=0,cert4=0,cert6=0;
-    cert0 = calcCertainty(sob, vtable,1,false, NC, iterations, depth);
-    NC = 20;
-    cert1 = calcCertainty(sob, vtable,1,false, NC, iterations, depth);
-    cert2 = calcCertainty(sob, vtable,2,false, NC, iterations, depth);
-    cert6 = calcCertainty(sob, vtable,6,false, NC, iterations, depth);
-    System.out.println("n="+sob.getNumAvailableActions()+": certainty ="
-            + cert0+","+cert1
-            +" / "+ cert2
-            +" / "+ cert6);
-}
-} */
 
 
-
-class ResultContainer {
-    public int firstAction;
-    public StateObservation sob;
-    public double rolloutDepth;
-
-    public ResultContainer(int firstAction, StateObservation sob, double rolloutDepth) {
-        this.firstAction = firstAction;
-        this.sob = sob;
-        this.rolloutDepth = rolloutDepth;
-    }
-}

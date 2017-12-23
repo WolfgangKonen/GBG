@@ -7,6 +7,7 @@ import controllers.PlayAgent;
 import controllers.TD.ntuple2.*;
 import tools.Types;
 import tools.Types.ACTIONS;
+import tools.Types.ScoreTuple;
 
 /**
  * Class StateObservation observes the current state of the game, it has utility functions for
@@ -67,7 +68,7 @@ public interface StateObservation extends Serializable{
 
 	/**
 	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
-	 * 			will be reached from this state (assuming perfect play).  
+	 * 			can be reached from this state (assuming perfect play).  
 	 * 			This member function can be {@link StateObservation}'s heuristic  
 	 * 			for the <em>potential</em> of that state. If such a heuristic is not known, 
 	 * 			{@link #getGameValue()} might simply return {@link #getGameScore()}.
@@ -78,20 +79,33 @@ public interface StateObservation extends Serializable{
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 			For a 2-player game the score is often only non-zero for a 
 	 * 			game-over state.  
-	 * 			For a 1-player game it may be the cumulative reward.
+	 * 			For a 1-player game it is the cumulative reward.
 	 */
 	public double getGameScore();
 	
 	/**
-	 * Same as getGameScore(), but relative to referringState. This relativeness
-	 * is usually only relevant for 2-player games.
-	 * @param referringState
-	 * @return  If the referringState was created by White (and Black is to move), 
-	 * 			then it is getGameScore(). If referringState was created by Black,
-	 * 			then it is getGameScore()*(-1). 
+	 * Same as {@link #getGameScore()}, but relative to referringState. This relativeness
+	 * is only relevant for >=2-player games.
+	 * @param referringState	see below
+	 * @return  If referringState has the same player as this, then it is getGameScore().<br> 
+	 * 			If referringState has opposite player, then it is getGameScore()*(-1). <br>
+	 * 			This is for 2-player games. For N-player games, it has to return the game 
+	 * 			score for the player of referringState.
 	 */
 	public double getGameScore(StateObservation referringState);
 	
+	/**
+	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @return  the game score
+	 */
+	public double getGameScore(int player);
+	
+	/**
+	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
+	 */
+	public ScoreTuple getGameScoreTuple();
+
 	/**
 	 * The cumulative reward, can be the same as getGameScore()
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
@@ -102,7 +116,7 @@ public interface StateObservation extends Serializable{
 	
 	/**
 	 * Same as getReward(), but relative to referringState. 
-	 * @param referringState
+	 * @param referringState	see {@link #getGameScore(StateObservation)}
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return  the cumulative reward 
@@ -110,7 +124,7 @@ public interface StateObservation extends Serializable{
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore);
 
 	/**
-	 * Same as getReward(referringState), but with the player of referringState. 
+	 * Same as {@link #getReward(StateObservation referringState)}, but with the player of referringState. 
 	 * @param player the player of referringState, a number in 0,1,...,N.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward

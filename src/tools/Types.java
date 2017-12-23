@@ -13,7 +13,8 @@ import java.awt.event.KeyEvent;
 import java.io.Serializable;
 
 /**
- * Class <b>Types</b> holds various constants and the class {@link Types.ACTIONS}
+ * Class <b>Types</b> holds various constants, the class {@link Types.ScoreTuple} and the  
+ * class {@link Types.ACTIONS} and its derived classes
  *
  */
 public class Types {
@@ -172,12 +173,16 @@ public class Types {
     	 */
     	public double[] scTup;
     	/**
-    	 * for CombineOP=MIN (MAX): how many of the tuple combined have minValue (maxValue)
+    	 * for CombineOP=MIN (MAX): how many of the tuple combined have minValue (maxValue). 
+    	 * This is needed in {@link MaxNAgent} and {@link ExpectimaxNAgent} to break ties.
     	 */
     	public int count;
     	private double minValue = Double.MAX_VALUE;
     	private double maxValue = -Double.MAX_VALUE;
     	
+    	public ScoreTuple(int N) {
+    		this.scTup = new double[N];
+    	}
     	public ScoreTuple(StateObservation sob) {
     		this.scTup = new double[sob.getNumPlayers()];
     	}
@@ -198,7 +203,7 @@ public class Types {
     	
     	/**
     	 * Combine {@code this} {@link ScoreTuple} with the information in the new {@link ScoreTuple}  
-    	 * {@code currScoreTuple}. Combine according to operator {@code cOP}:
+    	 * {@code tuple}. Combine according to operator {@code cOP}:
     	 * <ul>
     	 * <li> <b>AVG</b>: weighted average or expectation value with probability weight 
     	 * 		{@code currProbab}. The probability weights of all combined tuples should sum
@@ -209,10 +214,10 @@ public class Types {
     	 * 		maximal value in {@code scTup[playNum]}, the score for player {@code playNum}
     	 * </ul>
     	 * 
-    	 * @param tuple the new {@link ScoreTuple} 
-    	 * @param cOP			 combine operator 	
-    	 * @param playNum		 player number (needed for {@code cOP}==MIN,MAX)
-    	 * @param currProbab	 probability (needed for {@code cOP}==AVG)
+    	 * @param tuple 		the new {@link ScoreTuple} 
+    	 * @param cOP			combine operator 	
+    	 * @param playNum		player number (needed for {@code cOP}==MIN,MAX)
+    	 * @param currProbab	probability (needed for {@code cOP}==AVG)
     	 */
     	public void combine(ScoreTuple tuple, CombineOP cOP, int playNum, double currProbab)
     	{
@@ -240,7 +245,7 @@ public class Types {
     			break;
     		}
     	}
-    }
+    } // ScoreTuple
 
     /**
      *  ACTIONS_ST = ACTIONS + ScoreTuple (for best action)
@@ -292,17 +297,19 @@ public class Types {
     	= {"0", "1", "2", "3", "4"};
     public static final String[] GUI_2PLAYER_NAME  	// player names for 2-player game
 		= {"X", "O"};
+    public static final Color[] GUI_PLAYER_COLOR  	// player colors for P0, P1, ... (for up to 5 players)
+		= {Color.BLACK, Color.WHITE, Color.RED, Color.BLUE, Color.ORANGE};
 
     // probably GUI_X_PLAYER and GUI_O_PLAYER is not necessary anymore:
     public static final String GUI_X_PLAYER = "TDS";  	// "MCTS" "TDS" "CMA-ES" "Minimax" 
     public static final String GUI_O_PLAYER = "MCTS";	// "Human";"MCTS";
 
 	public static final int GUI_ARENATRAIN_WIDTH = 465;	// width ArenaTrain window
-	public static final int GUI_ARENATRAIN_HEIGHT = 420;
+	public static final int GUI_ARENATRAIN_HEIGHT = 380;
 	public static final int GUI_WINCOMP_WIDTH = 350;	// width 'Competition Options' window
 	public static final int GUI_WINCOMP_HEIGHT = 300;
 	public static final int GUI_PARAMTABS_WIDTH = 464;	// wide enough to hold 6 tabs
-	public static final int GUI_PARAMTABS_HEIGHT = 300;
+	public static final int GUI_PARAMTABS_HEIGHT = 330;
 
 	public static final int GUI_HELPFONTSIZE = 14;
 	

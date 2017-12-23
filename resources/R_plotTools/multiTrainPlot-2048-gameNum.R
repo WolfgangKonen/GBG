@@ -17,12 +17,11 @@ library(grid)
 source("summarySE.R")
 
 path <- "../../agents/2048/csv/"
-filenames=c("multiTrain-1run-100k_V2.csv"
-           ,"multiTrain-1run-200k_V2.csv"
-           ,"multiTrain-1run-200k_V3.csv"
-           ,"multiTrain-1run-200k_V5.csv"
-           ,"multiTrain-1run-300k_V2.csv"
-           ,"multiTrain-1run-400k_V2.csv"
+filenames=c("multiTrain-5run-200k_V2.csv"
+           #,"multiTrain-1run-200k_V3.csv"
+           ,"multiTrain-5run-200k_V5.csv"
+           #,"multiTrain-1run-300k_V2.csv"
+           #,"multiTrain-1run-400k_V2.csv"
            #,"multiTrain-RewardGameScore.csv"#,"multiTrain-RewardGameScore-OLD.csv"
            #,"multiTrain-RewardGameSc-3P.csv"
            ) 
@@ -51,12 +50,11 @@ for (k in 1:length(filenames)) {
   }
   
   afterCol = switch(k
-                    ,rep("100k",nrow(df))
                     ,rep("200k",nrow(df))
-                    ,rep("200k V3",nrow(df))
+                    #,rep("200k V3",nrow(df))
                     ,rep("200k V5",nrow(df))
-                    ,rep("300k",nrow(df))
-                    ,rep("400k",nrow(df))
+                    #,rep("300k",nrow(df))
+                    #,rep("400k",nrow(df))
                     #,rep("game score OLD",nrow(df))
                     ,rep("game sc 3P",nrow(df))
                     )
@@ -66,18 +64,18 @@ for (k in 1:length(filenames)) {
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
 # its mean, sd, se (standard dev of the mean), ci (conf.interval) and count N.
-tgc <- summarySE(dfBoth, measurevar="evalQ", groupvars=c("gameNum","REWARD","actionNum"))
+tgc <- summarySE(dfBoth, measurevar="evalQ", groupvars=c("gameNum","REWARD"))
 tgc$REWARD <- as.factor(tgc$REWARD)
 
 # The errorbars may overlap, so use position_dodge to move them horizontally
-pd <- position_dodge(100) # move them 100 to the left and right
+pd <- position_dodge(1000) # move them 100 to the left and right
 
-q <- ggplot(tgc,aes(x=actionNum,y=evalQ,colour=REWARD))
-#q <- q+geom_errorbar(aes(ymin=evalQ-se, ymax=evalQ+se), width=300, position=pd)
+q <- ggplot(tgc,aes(x=gameNum,y=evalQ,colour=REWARD))
+q <- q+geom_errorbar(aes(ymin=evalQ-se, ymax=evalQ+se), width=3000, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 #q <- q+geom_line()
-q <- q+scale_y_continuous(limits=c(0,140000))    
-q <- q+scale_x_continuous(limits=c(0,17e8))    # for x=actionNum
-#q <- q+guides(colour = guide_legend(reverse = TRUE))
+q <- q+scale_y_continuous(limits=c(0,120000))    
+q <- q+scale_x_continuous(limits=c(0,201000))     # for x=gameNum
+q <- q+guides(colour = guide_legend(reverse = TRUE))
 plot(q)
 

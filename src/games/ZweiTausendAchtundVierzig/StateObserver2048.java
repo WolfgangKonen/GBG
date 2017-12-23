@@ -6,6 +6,7 @@ import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
+import tools.Types.ScoreTuple;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -1092,7 +1093,26 @@ public class StateObserver2048 implements StateObservationNondet {
     public int hashCode() {
         return Long.hashCode(boardB);
     }
-}
+    
+	/**
+	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @return  the game score
+	 */
+	public double getGameScore(int player) {
+		return getGameScore();
+	}
+	
+	/**
+	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
+	 */
+	public ScoreTuple getGameScoreTuple() {
+		ScoreTuple sc = new ScoreTuple(1);
+		sc.scTup[0] = this.getGameScore();
+		return sc;
+	}
+	
+} // class StateObserver2048
 
 /**
  * RowBitShift represents an row of the 2048 board in the four lowest hex digits of 

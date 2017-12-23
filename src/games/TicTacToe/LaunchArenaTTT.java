@@ -5,6 +5,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import games.Arena;
 import games.ArenaTrain;
@@ -61,7 +62,6 @@ public class LaunchArenaTTT extends JFrame {
 		setLayout(new BorderLayout(10,10));
 		setJMenuBar(m_Arena.m_menu);
 		add(m_Arena,BorderLayout.CENTER);
-		add(new Label(" "),BorderLayout.SOUTH);	// just a little space at the bottom	
 	}
 	
 	protected static class WindowClosingAdapter

@@ -86,7 +86,7 @@ abstract public class ArenaTrain extends Arena
 			n = m_xab.getNumParamBtn();
 			agentN = m_xab.getSelectedAgent(n);
 			setStatusMessage("Params for "+agentN+ " ...");
-			m_tabs.showParamTabs(this,true,0,agentN);
+			//m_tabs.showParamTabs(this,true,0,agentN);
 			// this is for later, when we have extended to N tabs:
 			m_tabs.showParamTabs(this,true,n,agentN);
 			taskState = Task.IDLE; 
@@ -105,7 +105,7 @@ abstract public class ArenaTrain extends Arena
 				}
 
 				if (m_xfun.m_PlayAgents[n] != null) {
-					Evaluator m_evaluator2 = makeEvaluator(m_xfun.m_PlayAgents[n],gb,0,m_xab.oPar.getQuickEvalMode(),1);
+					Evaluator m_evaluator2 = makeEvaluator(m_xfun.m_PlayAgents[n],gb,0,m_xab.oPar[n].getQuickEvalMode(),1);
 					m_evaluator2.eval();
 					System.out.println("final "+m_evaluator2.getMsg());
 					m_xfun.m_PlayAgents[n].setAgentState(AgentState.TRAINED);
@@ -125,7 +125,7 @@ abstract public class ArenaTrain extends Arena
 	        long start_time = Calendar.getInstance().getTime().getTime();
 			try {
 				
-				m_xfun.m_PlayAgents[0] = m_xfun.multiTrain(m_xab.getSelectedAgent(0), m_xab, gb);
+				m_xfun.m_PlayAgents[0] = m_xfun.multiTrain(0, m_xab.getSelectedAgent(0), m_xab, gb);
 			
 			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();

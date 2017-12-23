@@ -9,7 +9,9 @@ filenames=c("multiTrain-25-6-lam000.csv","multiTrain-25-6-lam020.csv"
            ,"multiTrain-25-6-lam080.csv")#,"multiTrain-25-6-lam090.csv"
            #)
 # other pars: alpha=0.2, eps = 1.0 ... 0.1, ChooseStart01=T
- 
+# evalMode= 0 (evalQ) is from default start state against MCTS, 
+# evalMode=10 (evalT) is from different start states against MCTS. 
+
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
   
 dfBoth = data.frame()
@@ -54,8 +56,8 @@ tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c("gameNum","lambda"))
 tgc2 <- cbind(tgc2,evalMode=rep(10,nrow(tgc2)))
 names(tgc2)[4] <- "eval"  # rename "evalT"
 tgc <- rbind(tgc1,tgc2)
-tgc <- tgc1
-#tgc <- tgc2
+#tgc <- tgc1
+tgc <- tgc2
 tgc$lambda <- as.factor(tgc$lambda)
 tgc$evalMode <- as.factor(tgc$evalMode)
 

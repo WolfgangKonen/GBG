@@ -35,13 +35,14 @@ public class GameBoardHex implements GameBoard {
     private final int WINDOW_WIDTH;
     protected Random rand;
     private HexPanel gamePanel;
-    private Arena arena;
+    private JFrame m_frame = new JFrame("Hex - GBG");
+    private Arena m_Arena;
     private StateObserverHex m_so;
     private boolean arenaActReq = false;
 
 
     public GameBoardHex(Arena arena) {
-        this.arena = arena;
+        this.m_Arena = arena;
 
         //Board size +2 to account for offset on top and bottom of the window
         WINDOW_HEIGHT = HexConfig.HEX_SIZE * (HexConfig.BOARD_SIZE + 1) + HexConfig.OFFSET * 2;
@@ -162,16 +163,15 @@ public class GameBoardHex implements GameBoard {
 
     private void createAndShowGUI() {
         gamePanel = new HexPanel();
-        JFrame frame = new JFrame("Hex - GBG");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.getContentPane().setBackground(Color.black);
-        Container content = frame.getContentPane();
+        m_frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        m_frame.getContentPane().setBackground(Color.black);
+        Container content = m_frame.getContentPane();
         content.add(gamePanel);
-        frame.getContentPane().setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
-        frame.pack();
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        m_frame.getContentPane().setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+        m_frame.pack();
+        m_frame.setResizable(false);
+        m_frame.setLocationRelativeTo(null);
+        m_frame.setVisible(true);
     }
 
     @Override
@@ -202,6 +202,7 @@ public class GameBoardHex implements GameBoard {
         }
         
     	public void toFront() {
+        	m_frame.setState(Frame.NORMAL);	// if window is iconified, display it normally
     		super.setVisible(true);
     	}
 
@@ -219,7 +220,7 @@ public class GameBoardHex implements GameBoard {
             super.paintComponent(g2);
 
             //Don't draw the game board while training to save CPU cycles
-            if (arena.taskState != Arena.Task.TRAIN) {
+            if (m_Arena.taskState != Arena.Task.TRAIN) {
                 drawBoardToPanel(g2, showValues);
             }
         }
@@ -294,7 +295,7 @@ public class GameBoardHex implements GameBoard {
          */
         class HexMouseListener extends MouseAdapter {
             public void mouseReleased(MouseEvent e) {
-                if (arenaActReq || (arena.taskState != Arena.Task.PLAY && arena.taskState != Arena.Task.INSPECTV)) {
+                if (arenaActReq || (m_Arena.taskState != Arena.Task.PLAY && m_Arena.taskState != Arena.Task.INSPECTV)) {
                     return;
                 }
                 Point p = new Point(HexUtils.pxtoHex(e.getX(), e.getY(), m_so.getBoard(), HexConfig.BOARD_SIZE));
@@ -302,10 +303,10 @@ public class GameBoardHex implements GameBoard {
 
         		Types.ACTIONS act = Types.ACTIONS.fromInt(p.x * HexConfig.BOARD_SIZE + p.y);
                 m_so.advance(act);
-                if (arena.taskState == Arena.Task.PLAY) {
+                if (m_Arena.taskState == Arena.Task.PLAY) {
                 	// only do this when passing here during 'PLAY': add a log entry in case of Human move
                 	// Do NOT do this during 'INSPECT', because then we have (currently) no valid log session ID
-            		(arena.getLogManager()).addLogEntry(act, m_so, arena.getLogSessionID());                	
+            		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());                	
                 }
                 updateBoard(null, false, false);
                 setActionReq(true);

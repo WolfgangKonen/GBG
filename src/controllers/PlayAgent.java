@@ -109,16 +109,6 @@ public interface PlayAgent {
 	 */
 	public Types.ScoreTuple estimateGameValueTuple(StateObservation sob);
 	
-//	/**
-//	 * 
-//	 * @return	returns true/false, whether the action suggested by last call 
-//	 * 			to getNextAction() was a random action 
-//	 * <p>
-//	 * Use now {@link Types.ACTIONS#isRandomAction()}
-//	 */
-//	@Deprecated
-//	public boolean wasRandomAction(); 
-	
 	/**
 	 * Train the Agent for one complete game episode. <p>
 	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  

@@ -31,6 +31,8 @@ import games.Arena.Task;
 import games.TicTacToe.LaunchArenaTTT;
 import games.TicTacToe.LaunchTrainTTT;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import params.ParMCTS;
+import params.ParOther;
 import tools.MessageBox;
 import tools.StatusBar;
 import tools.Types;
@@ -49,7 +51,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		 //, INSPECTNTUP, BAT_TC, BATCH
 		 , COMPETE, SWAPCMP, MULTCMP, IDLE  };
 	public XArenaFuncs m_xfun;
-	public JFrame m_TicFrame = null;  
+	public JFrame m_LaunchFrame = null;  
 	public XArenaMenu m_menu = null;
 	public XArenaTabs m_tabs = null;
 	public XArenaButtons m_xab;	// the game buttons and text fields
@@ -72,7 +74,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		initGame();
 	}
 	public Arena(JFrame frame) {
-		m_TicFrame = frame; 
+		m_LaunchFrame = frame; 
 		initGame();
 	}
 	
@@ -82,7 +84,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		
 		m_xfun 		= new XArenaFuncs(this);
 		m_xab    	= new XArenaButtons(m_xfun,this);		// needs a constructed 'gb'		
-		tdAgentIO = new LoadSaveTD(this, m_xab, m_TicFrame);
+		tdAgentIO = new LoadSaveTD(this, m_xab, m_LaunchFrame);
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
@@ -103,10 +105,12 @@ abstract public class Arena extends JPanel implements Runnable {
 		jPanel.setBackground(Types.GUI_BGCOLOR);
 		//new JLabel(" ")
 		infoPanel.add(jPanel,BorderLayout.NORTH); // a little gap
-		//infoPanel.add(boardPanel,BorderLayout.CENTER);
-		infoPanel.add(statusBar,BorderLayout.SOUTH);	
+		infoPanel.add(statusBar,BorderLayout.CENTER);	
+//		JLabel jlabel = new JLabel(" ");
+//		jPanel.add(jlabel);
+		infoPanel.add(jPanel,BorderLayout.SOUTH);			// just a little space at the bottom
 
-		m_menu = new XArenaMenu(this, m_TicFrame);
+		m_menu = new XArenaMenu(this, m_LaunchFrame);
 		m_tabs = new XArenaTabs(this);
 		add(titlePanel,BorderLayout.NORTH);				
 		add(m_xab,BorderLayout.CENTER);	
@@ -233,12 +237,11 @@ abstract public class Arena extends JPanel implements Runnable {
 		boolean DBG_HEX=false;
 		
 		int numPlayers = gb.getStateObs().getNumPlayers();
-		int wrappedNPly=m_xab.oPar.getWrapperNPly();
 		try 
 		{
 			paVector = m_xfun.fetchAgents(m_xab);
 			AgentBase.validTrainedAgents(paVector,numPlayers);
-			qaVector = m_xfun.wrapAgents(paVector,wrappedNPly,gb.getStateObs());
+			qaVector = m_xfun.wrapAgents(paVector,m_xab.oPar,gb.getStateObs());
 			paX = qaVector[0];
 		} catch(RuntimeException e) 
 		{
@@ -344,7 +347,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		int Player,player;
 		StateObservation so;
 		Types.ACTIONS_VT actBest=null;
-		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,m_xab.mctsParams,m_xab.oPar); // only DEBG
+		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,new ParMCTS(m_xab.mctsParams[0]), new ParOther(m_xab.oPar[0])); // only DEBG
 		PlayAgent pa;
 		PlayAgent[] paVector,qaVector;
 		int nEmpty = 0,cumEmpty=0;
@@ -355,7 +358,6 @@ abstract public class Arena extends JPanel implements Runnable {
 
 		// fetch the agents in a way general for 1-, 2- and N-player games
 		int numPlayers = gb.getStateObs().getNumPlayers();
-		int wrappedNPly=m_xab.oPar.getWrapperNPly();
 		boolean showValue = (taskState==Task.PLAY) ? m_xab.getShowValueOnGameBoard() : true;
 		boolean showStoredV=true; 
 		
@@ -363,7 +365,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		{
 			paVector = m_xfun.fetchAgents(m_xab);
 			AgentBase.validTrainedAgents(paVector,numPlayers);
-			qaVector = m_xfun.wrapAgents(paVector,wrappedNPly,gb.getStateObs());
+			qaVector = m_xfun.wrapAgents(paVector,m_xab.oPar,gb.getStateObs());
 		} catch(RuntimeException e) 
 		{
 			MessageBox.show(m_xab, 
@@ -386,6 +388,7 @@ abstract public class Arena extends JPanel implements Runnable {
 			case (1):
 				agentX = m_xab.getSelectedAgent(0);
 				sMsg = "Playing a game ... [ "+agentX+" ]"; 
+				int wrappedNPly=m_xab.oPar[0].getWrapperNPly();
 				if (wrappedNPly>0)
 					sMsg = "Playing a game ... [ "+agentX+", nPly="+wrappedNPly+" ]"; 
 				break;
@@ -498,7 +501,7 @@ abstract public class Arena extends JPanel implements Runnable {
 				case 1: 
 					double gScore = so.getGameScore();
 					if (so instanceof StateObserver2048) gScore *= StateObserver2048.MAXSCORE;
-					MessageBox.show(m_TicFrame, "Game finished with score " +gScore, 
+					MessageBox.show(m_LaunchFrame, "Game finished with score " +gScore, 
 							"Game Over", JOptionPane.INFORMATION_MESSAGE );
 					break;  // out of switch
 				case 2: 
@@ -506,15 +509,15 @@ abstract public class Arena extends JPanel implements Runnable {
 					Player=Types.PLAYER_PM[so.getPlayer()];
 					switch(Player*win) {
 					case (+1): 
-						MessageBox.show(m_TicFrame, "X ("+agentX+") wins", 
+						MessageBox.show(m_LaunchFrame, "X ("+agentX+") wins", 
 								"Game Over", JOptionPane.INFORMATION_MESSAGE );
 						break;  // out of inner switch
 					case (-1):
-						MessageBox.show(m_TicFrame, "O ("+agentO+") wins",
+						MessageBox.show(m_LaunchFrame, "O ("+agentO+") wins",
 								"Game Over", JOptionPane.INFORMATION_MESSAGE );
 						break;  // out of inner switch
 					case ( 0):
-						MessageBox.show(m_TicFrame, "Tie", 
+						MessageBox.show(m_LaunchFrame, "Tie", 
 								"Game Over", JOptionPane.INFORMATION_MESSAGE );
 						break;  // out of inner switch
 					} // switch(Player*win)
