@@ -14,6 +14,7 @@ import java.util.Random;
 import javax.swing.JOptionPane;
 
 import controllers.MC.MCAgent;
+import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import org.jfree.data.xy.XYSeries;
 
@@ -176,6 +177,8 @@ public class XArenaFuncs
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
 			pa = new MCAgent(sAgent, new ParMC(m_xab.mcParams[n]), new ParOther(m_xab.oPar[n]));
+		} else if (sAgent.equals("MC-N")) {
+			pa = new MCAgentN(sAgent, new ParMC(m_xab.mcParams[n]), new ParOther(m_xab.oPar[n]));
 		}
 		return pa;
 	}
@@ -219,6 +222,8 @@ public class XArenaFuncs
 				pa= new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {
 				pa= new MCAgent(sAgent, new ParMC(m_xab.mcParams[n]), new ParOther(m_xab.oPar[n]));
+			} else if (sAgent.equals("MC-N")) {
+				pa= new MCAgentN(sAgent, new ParMC(m_xab.mcParams[n]), new ParOther(m_xab.oPar[n]));
 			}else { // all the trainable agents:
 				if (m_PlayAgents[n]==null) {
 					if (sAgent.equals("TDS")) {
@@ -323,8 +328,10 @@ public class XArenaFuncs
 
 	/**
 	 * Perform one training of a {@link PlayAgent} sAgent with maxGameNum episodes. 
+	 * @param n			index of agent to train
 	 * @param sAgent	a string containing the class name of the agent
 	 * @param xab		used only for reading parameter values from members td_par, cma_par
+	 * @param gb		the game board
 	 * @return	the trained PlayAgent
 	 * @throws IOException 
 	 */
@@ -346,6 +353,7 @@ public class XArenaFuncs
 
 		DecimalFormat frm = new DecimalFormat("#0.0000");
 		PlayAgent pa = null;
+		PlayAgent qa = null;
 
 		try {
 			pa = this.constructAgent(n,sAgent, xab);
@@ -404,10 +412,6 @@ public class XArenaFuncs
 		//TDNTupleAgt.pstream = System.out;
 		//TDNTupleAgt.pstream = new PrintStream(new FileOutputStream("debug-TDNT.txt"));
 		
-// TODO: implement CMAPlayer correctly
-//		if (sAgent.equals("CMA-ES")) {
-//			((CMAPlayer) pa).trainLoop(maxGameNum,this,xab,verbose);
-//		} else 
 		{
 			long startTime = System.currentTimeMillis();
 			while (pa.getGameNum()<pa.getMaxGameNum())
@@ -422,10 +426,15 @@ public class XArenaFuncs
 					System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
 					xab.GameNumT.setText(Integer.toString(gameNum ) );
 					
-					m_evaluatorQ.eval();
+					// construct 'qa' anew (possibly wrapped agent for eval)
+					qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
+			        //m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
+
+			        m_evaluatorQ.eval(qa);
 					seriesQ.add((double)gameNum, m_evaluatorQ.getLastResult());
 					if (doTrainEvaluation) {
-						m_evaluatorT.eval();
+				        //m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
+						m_evaluatorT.eval(qa);
 						if (PLOTTRAINEVAL) 
 							seriesT.add((double)gameNum, m_evaluatorT.getLastResult());
 					}
@@ -434,12 +443,17 @@ public class XArenaFuncs
 				}
 				
 				if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {
+					// construct 'qa' anew (possibly wrapped agent for eval)
+					qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
+			        //m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
+			        
 					if (doTrainEvaluation) {
-						m_evaluatorT.eval();
+				        //m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
+						m_evaluatorT.eval(qa);
 						m_evaluatorT.goalReached(gameNum);
 					}
 					
-					m_evaluatorQ.eval(); 
+					m_evaluatorQ.eval(qa); 
 					if(m_evaluatorQ.goalReached(gameNum)) break;  // out of while
 					
 				}
@@ -569,10 +583,6 @@ public class XArenaFuncs
 			long actionNum, trnMoveNum;
 			PlayAgent[] paVector;
 			
-// TODO: implement CMAPlayer correctly
-//			if (sAgent.equals("CMA-ES")) {
-//				((CMAPlayer) m_PlayAgentX).trainLoop(maxGameNum,this,xab,verbose);
-//			} else 
 			{
 				long startTime = System.currentTimeMillis();
 				while (pa.getGameNum()<pa.getMaxGameNum())
@@ -589,20 +599,20 @@ public class XArenaFuncs
 						System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
 						xab.GameNumT.setText(Integer.toString(gameNum ) );
 						
-						// construct qa anew (possibly wrapped agent for eval)
+						// construct 'qa' anew (possibly wrapped agent for eval)
 						qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
-				        m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
+				        //m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
 				        
-						m_evaluatorQ.eval();
+						m_evaluatorQ.eval(qa);
 						evalQ = m_evaluatorQ.getLastResult();
 						if (doTrainEvaluation) {
-					        m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
-							m_evaluatorT.eval();
+					        //m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
+							m_evaluatorT.eval(qa);
 							evalT = m_evaluatorT.getLastResult();
 						}
 						if (doMultiEvaluation) {
-					        m_evaluatorM = xab.m_game.makeEvaluator(qa,gb,stopEval,mem,1);
-							m_evaluatorM.eval();
+					        //m_evaluatorM = xab.m_game.makeEvaluator(qa,gb,stopEval,mem,1);
+							m_evaluatorM.eval(qa);
 							evalM = m_evaluatorM.getLastResult();
 						}
 						
@@ -617,21 +627,21 @@ public class XArenaFuncs
 				
 			} // if(sAgent)..else
 			
-			// construct qa anew (possibly wrapped agent for eval)
+			// construct 'qa' anew (possibly wrapped agent for eval)
 			qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
-	        m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
+	        //m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
 
 	        // evaluate again at the end of a training run:
-			m_evaluatorQ.eval();
+			m_evaluatorQ.eval(qa);
 			oQ.add(m_evaluatorQ.getLastResult());
 			if (doTrainEvaluation) {
-		        m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
-				m_evaluatorT.eval();
+		        //m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
+				m_evaluatorT.eval(qa);
 				oT.add(m_evaluatorT.getLastResult());								
 			}
 			if (doMultiEvaluation) {
-		        m_evaluatorM = xab.m_game.makeEvaluator(qa,gb,stopEval,mem,1);
-				m_evaluatorM.eval();
+		        //m_evaluatorM = xab.m_game.makeEvaluator(qa,gb,stopEval,mem,1);
+				m_evaluatorM.eval(qa);
 				oM.add(m_evaluatorM.getLastResult());
 			}
 
@@ -705,7 +715,6 @@ public class XArenaFuncs
 		boolean nextMoveSilent = (verbose<2 ? true : false);
 		StateObservation so;
 		Types.ACTIONS actBest;
-//		double[] VTable = null;
 		String[] playersWithFeatures = {"TicTacToe.ValItPlayer","controllers.TD.TDAgent","TicTacToe.CMAPlayer"}; 
 		
 		String paX_string = paX.stringDescr();
@@ -720,7 +729,6 @@ public class XArenaFuncs
 				
 				if(Player==1){		// make a X-move
 					int n=so.getNumAvailableActions();
-//					VTable	= new double[n+1];
 					actBest = paX.getNextAction2(so, false, nextMoveSilent);
 					so.advance(actBest);
 					Player=-1;
@@ -728,7 +736,6 @@ public class XArenaFuncs
 				else				// i.e. O-Move
 				{
 					int n=so.getNumAvailableActions();
-//					VTable	= new double[n+1];
 					actBest = paO.getNextAction2(so, false, nextMoveSilent);
 					so.advance(actBest);
 					Player=+1;
@@ -878,7 +885,7 @@ public class XArenaFuncs
 		double optimCountX=0.0,optimCountO=0.0;
 		double[][] winrateC = new double[competitionNum][3];
 		double[][] evalC = new double[competitionNum][2];
-		PlayAgent paX=null, paO=null;
+		PlayAgent paX=null, paO=null, qa=null;
 		if (verbose>0) System.out.println("Multi-Competition: "+competitionNum+" competitions with "
 										 +competeNum+" games each, "+AgentX+" vs "+AgentO);
 
@@ -894,7 +901,6 @@ public class XArenaFuncs
 			try {
 				paX = this.constructAgent(0,AgentX, xab);
 				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);
-				// TODO: add suitable wrapAgents-call (MaxNWrapper or ExpectimaxWrapper)
 			}  catch(RuntimeException e) 
 			{
 				MessageBox.show(xab, 
@@ -908,7 +914,6 @@ public class XArenaFuncs
 			try {
 				paO = this.constructAgent(1,AgentO, xab);
 				if (paO==null) throw new RuntimeException("Could not construct AgentO = " + AgentO);
-				// TODO: add suitable wrapAgents-call (MaxNWrapper or ExpectimaxWrapper)
 			}  catch(RuntimeException e) 
 			{
 				MessageBox.show(xab, 
@@ -934,7 +939,9 @@ public class XArenaFuncs
 				paX.setAgentState(AgentState.TRAINED);
 			} 
 
-			m_evaluatorX.eval();
+			// construct 'qa' anew (possibly wrapped agent for eval)
+			qa = wrapAgent(0, paX, xab.oPar, gb.getStateObs());
+			m_evaluatorX.eval(qa);
 			evalC[c][0] = m_evaluatorX.getLastResult();
 			optimCountX += evalC[c][0];
 			
@@ -951,7 +958,9 @@ public class XArenaFuncs
 				paO.setAgentState(AgentState.TRAINED);				
 			} 
 
-			m_evaluatorO.eval();
+			// construct 'qa' anew (possibly wrapped agent for eval)
+			qa = wrapAgent(1, paO, xab.oPar, gb.getStateObs());
+			m_evaluatorO.eval(qa);
 			evalC[c][1] = m_evaluatorO.getLastResult();
 			optimCountO += evalC[c][1];
 
@@ -978,19 +987,23 @@ public class XArenaFuncs
 			//System.out.println(" (X/Tie/O)");
 		}
 
+		//
+		// write multiCompete statistics to "Arena.comp.csv"
+		//
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+xab.m_game.getGameName()+"/";
 		String filename = "Arena.comp.csv";
 		tools.Utils.checkAndCreateFolder(strDir);
 		try {
-			// TODO: needs to be generalized to other agents but TDAgent and to 
-			// differences in X- and O-agent:
-			
-			double alpha = xab.tdPar[0].getAlpha();
-			double lambda = xab.tdPar[0].getLambda();
 			PrintWriter f; 
 			f = new PrintWriter(new BufferedWriter(new FileWriter(strDir+filename)));
-			f.println("alpha=" + alpha + ";  lambda=" + lambda + "; trained agents=" + competitionNum 
-					  + ",  maxGameNum=" +maxGameNum);
+			
+			// TODO: needs to be generalized to other agents but TDAgent: 
+			for (int i=0; i<2; i++) {
+				double alpha = xab.tdPar[i].getAlpha();
+				double lambda = xab.tdPar[i].getLambda();
+				f.println("alpha["+i+"]=" + alpha + ";  lambda["+i+"]=" + lambda + "; trained agents=" + competitionNum 
+						  + ",  maxGameNum=" +maxGameNum);
+			}
 			f.print(AgentX);
 			if (paX instanceof TDAgent) 
 				f.print("("+((TDAgent)paX).getFeatmode()+")");

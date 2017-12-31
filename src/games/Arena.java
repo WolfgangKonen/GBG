@@ -16,7 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import agentIO.LoadSaveTD;
+import agentIO.LoadSaveGBG;
 import tools.Progress;
 import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
@@ -57,7 +57,7 @@ abstract public class Arena extends JPanel implements Runnable {
 	public XArenaButtons m_xab;	// the game buttons and text fields
 	private Thread playThread = null;	
 	private Progress progress = null; // progress for some functions
-	public LoadSaveTD tdAgentIO;	// saving/loading of agents
+	public LoadSaveGBG tdAgentIO;	// saving/loading of agents
 	protected JLabel m_title;
 	protected GameBoard gb;
 	protected StatusBar statusBar = new StatusBar();
@@ -84,7 +84,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		
 		m_xfun 		= new XArenaFuncs(this);
 		m_xab    	= new XArenaButtons(m_xfun,this);		// needs a constructed 'gb'		
-		tdAgentIO = new LoadSaveTD(this, m_xab, m_LaunchFrame);
+		tdAgentIO = new LoadSaveGBG(this, m_xab, m_LaunchFrame);
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
@@ -536,8 +536,9 @@ abstract public class Arena extends JPanel implements Runnable {
 			// a possible RuntimeException is raised when an agent for nondeterministic games
 			// (ExpectimaxNAgent, MCTSExpectimax) is called with a (deterministic) 
 			// StateObservation object 
+			e.printStackTrace();
 			MessageBox.show(m_xab, 
-					e.getMessage(), 
+					e.getClass().getName()+":"+e.getMessage(), 
 					"Error", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;		
 			setStatusMessage("Done.");

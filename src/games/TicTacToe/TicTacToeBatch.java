@@ -197,7 +197,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 						m_PlayAgentX.trainAgent(so);
 
 					}	
-					m_evaluator1.eval();
+					m_evaluator1.eval(m_PlayAgentX);
 					double e = m_evaluator1.getLastResult();
 					System.out.println(e);
 					optimCount += e;								
@@ -318,7 +318,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 							m_PlayAgentX.trainAgent(so);
 	
 						}			
-						m_evaluator1.eval();
+						m_evaluator1.eval(m_PlayAgentX);
 						oe.add(m_evaluator1.getLastResult());								
 						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, 100, gb));
 						om.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, minimax_agent, 1, gb));
@@ -671,8 +671,8 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 							m_PlayAgentX.trainAgent(so);
 	
 						}		
-						m_evaluator1.eval();
-						m_evaluator2.eval();
+						m_evaluator1.eval(m_PlayAgentX);
+						m_evaluator2.eval(m_PlayAgentX);
 						oe.add(m_evaluator1.getLastResult());								
 						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, 100, gb));
 						//om.add(competeBoth(m_PlayAgentX, minimax_agent, 1, gb));

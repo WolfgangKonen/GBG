@@ -107,6 +107,7 @@ public class Types {
     public static class ACTIONS_VT extends ACTIONS implements Serializable, Comparable<ACTIONS> {
         private double[] vTable;
         private double   vBest;
+        private ScoreTuple scBest;
 
 		/**
     	 * change the version ID for serialization only if a newer version is no longer 
@@ -139,16 +140,27 @@ public class Types {
         }
 
         /**
-         * 
          * @param numVal	action code
          * @param random	flag for random move	
          * @param vtable	game values for all K available actions 
          * @param vbest		game value for {@code this} action. 
          */
         public ACTIONS_VT(int numVal, boolean random, double [] vtable, double vbest) {			
+            this(numVal,random,vtable,vbest,null);
+        }
+
+        /**
+         * @param numVal	action code
+         * @param random	flag for random move	
+         * @param vtable	game values for all K available actions 
+         * @param vbest		game value for {@code this} action. 
+         * @param scBest	score tuple for {@code this} action. 
+         */
+        public ACTIONS_VT(int numVal, boolean random, double [] vtable, double vbest, ScoreTuple scBest) {			
             super(numVal,random);
             this.vTable = vtable.clone();
             this.vBest = vbest;
+            this.scBest = scBest;
         }
 
         public double[] getVTable() {
@@ -157,6 +169,10 @@ public class Types {
         
         public double getVBest() {
         	return vBest;
+        }
+        
+        public ScoreTuple getScoreTuple() {
+        	return scBest;
         }
     } // class ACTIONS_VT
 
@@ -284,7 +300,7 @@ public class Types {
      */
     public static final String[] GUI_AGENT_LIST 	 
     	= {"Random", "Minimax", "Max-N", "Expectimax-N", 
-    	   "MC", "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TDS"};
+    	   "MC", "MC-N", "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TDS"};
     /**
      * initial agent choice for P0, P1, ... (for up to 5 players) 
      */

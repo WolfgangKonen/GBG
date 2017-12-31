@@ -65,6 +65,7 @@ public class TDParams extends Frame implements Serializable
 	JLabel gammaL;
 	JLabel epochL;
 	JLabel tNply_L;
+	JLabel mode3P_L;
 	JPanel tdPanel;
 	public JTextField alphaT;
 	public JTextField alfinT;
@@ -74,6 +75,7 @@ public class TDParams extends Frame implements Serializable
 	public JTextField gammaT;
 	public JTextField epochT;
 	public JTextField tNply_T;
+	public JTextField mode3P_T;
 	
 	JLabel SigTypeL;
 	JLabel NormalizeL;
@@ -115,6 +117,7 @@ public class TDParams extends Frame implements Serializable
 		gammaT = new JTextField("1.0");				//
 		epochT = new JTextField("1");				//
 		tNply_T = new JTextField("1");					//
+		mode3P_T = new JTextField("2");					//
 		alphaL = new JLabel("Alpha init");
 		alfinL = new JLabel("Alpha final");
 		epsilL = new JLabel("Epsilon init");
@@ -123,6 +126,7 @@ public class TDParams extends Frame implements Serializable
 		gammaL = new JLabel("Gamma");
 		epochL = new JLabel("Epochs");
 		tNply_L = new JLabel("Train nPly");
+		mode3P_L = new JLabel("MODE_3P");
 		epochL.setToolTipText(TIPEPOCHL);
 		alphaL.setToolTipText(TIPALPHA1L);
 		alfinL.setToolTipText(TIPALPHA2L);
@@ -131,6 +135,7 @@ public class TDParams extends Frame implements Serializable
 		epfinL.setToolTipText(TIPEPSIL2L);
 		gammaL.setToolTipText(TIPGAMMAL);
 		tNply_L.setToolTipText("Train n-ply look ahead (currently only TD-NTuple-2)");
+		mode3P_L.setToolTipText("Mode for TD-NTuple-2: 0: multi, 1: single, 2: mixed");
 		
 		withSigType = new JCheckBox();
 		normalize = new JCheckBox();
@@ -205,8 +210,10 @@ public class TDParams extends Frame implements Serializable
 		tdPanel.add(choiceLrnType);
 //		tdPanel.add(bpropType);
 //		tdPanel.add(rpropType);
-		tdPanel.add(tNply_L);
-		tdPanel.add(tNply_T);
+//		tdPanel.add(tNply_L);
+//		tdPanel.add(tNply_T);
+		tdPanel.add(mode3P_L);
+		tdPanel.add(mode3P_T);
 
 		tdPanel.add(FeatTDS_L);
 		tdPanel.add(choiceFeatTDS);
@@ -219,8 +226,9 @@ public class TDParams extends Frame implements Serializable
 		pack();
 		setVisible(false);
 		
-		boolean enabNPly =  (TDNTuple2Agt.VER_3P && !(TDNTuple2Agt.MODE_3P==0)); 
-		this.enableNPly(enabNPly);
+		boolean enabMode3P =  (TDNTuple2Agt.VER_3P); 
+		this.enableNPly(enabMode3P);
+		this.enableMode3P(enabMode3P);
 		
 	} // constructor TDParams()	
 	
@@ -275,6 +283,9 @@ public class TDParams extends Frame implements Serializable
 	}
 	public int getNPly() {
 		return Integer.valueOf(tNply_T.getText()).intValue();
+	}
+	public int getMode3P() {
+		return Integer.valueOf(mode3P_T.getText()).intValue();
 	}
 //	public int getMaxGameNum() {
 //		return maxGameNum;
@@ -332,10 +343,17 @@ public class TDParams extends Frame implements Serializable
 	public void setNPly(int value) {
 		tNply_T.setText(value+"");
 	}
+	public void setMode3P(int value) {
+		mode3P_T.setText(value+"");
+	}
 	
 	public void enableNPly(boolean enable) {
 		tNply_L.setEnabled(enable);
 		tNply_T.setEnabled(enable);
+	}
+	public void enableMode3P(boolean enable) {
+		mode3P_L.setEnabled(enable);
+		mode3P_T.setEnabled(enable);
 	}
 //	public void setMaxGameNum(int maxGameNum) {
 //		this.maxGameNum = maxGameNum;
@@ -362,6 +380,7 @@ public class TDParams extends Frame implements Serializable
 		setEpochs(tp.getEpochs());
 		setFeatmode(tp.getFeatmode());
 		this.setNPly(tp.getNPly());
+		this.setMode3P(tp.getMode3P());
 //		setMaxGameNum(tp.getMaxGameNum());	// this is now in AgentBase
 //		setNumEval(tp.getNumEval());		// this is obsolete now (we have ParOther)
 	}
@@ -384,6 +403,7 @@ public class TDParams extends Frame implements Serializable
 		setEpochs(tp.getEpochs());
 		setFeatmode(tp.getFeatmode());
 		setNPly(tp.getNPly());
+		setMode3P(tp.getMode3P());
 	}
 	
 	/**

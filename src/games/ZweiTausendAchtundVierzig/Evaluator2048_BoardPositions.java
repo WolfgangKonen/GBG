@@ -33,7 +33,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     }
 
     @Override
-    protected boolean eval_Agent() {
+    protected boolean eval_Agent(PlayAgent pa) {
+    	m_PlayAgent = pa;
         //find new realistic gameStates
         if(ConfigEvaluator.GENERATENEWGAMESTATES) {
             newGameStates();

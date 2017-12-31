@@ -316,7 +316,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
 		// this could result in wrong scores.
 		// Now we fix this by returning so.getGameScore(so) on a game-over situation:
         if (sob.isGameOver()) {
-        	return sob.getGameScore(sob);
+        	return sob.getGameScore(sob); 
         } else {
         	
             Types.ACTIONS_VT actBestVT = getNextAction2(sob, false, true);
@@ -354,7 +354,10 @@ public class MCAgent extends AgentBase implements PlayAgent {
 			sc.scTup[opponent] = -sc.scTup[player];
 			break;
 		default: 
-    		throw new RuntimeException("Cannot create ScoreTuple for MCAgent and numPlayer>=3");			        		
+			// this might be too simplistic (it is only the score tuple of the state, no 
+			// agent estimate of the future game value), but for MC it might be o.k. if MC
+			// makes a rollout until the game ends.
+			return so.getGameScoreTuple();
 		}
     	return sc;
 	}

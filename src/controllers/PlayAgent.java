@@ -71,7 +71,7 @@ public interface PlayAgent {
 	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
 	
 	/**
-	 * Return the agent's score for that game state.
+	 * Return the agent's estimate of the final score for that game state.
 	 * @param sob			the current game state;
 	 * @return				the agent's estimate of the final score for that state. 
 	 * 						For 2-player games this is usually the probability 

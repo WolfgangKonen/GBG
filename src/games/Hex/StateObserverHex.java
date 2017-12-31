@@ -140,11 +140,6 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 		return true;
 	}
 
-//    @Override
-//	public boolean has2OppositeRewards() {
-//		return true;
-//	}
-
     @Override
     public boolean isLegalState() {
         int playerOneTiles = 0;

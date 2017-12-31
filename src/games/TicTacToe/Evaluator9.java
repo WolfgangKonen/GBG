@@ -47,7 +47,8 @@ public class Evaluator9 extends Evaluator {
 //	}
 	
 	@Override
-	public boolean eval_Agent() {
+	public boolean eval_Agent(PlayAgent playAgent) {
+		m_PlayAgent=playAgent;
 		return evalAgent1(m_PlayAgent,true)>m_thresh;
 	}
 

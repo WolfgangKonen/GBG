@@ -12,6 +12,7 @@ public class ParTD implements Serializable {
     public static double DEFAULT_GAMMA=1.0;  
     public static double DEFAULT_LAMBDA=0.0;  
     public static int DEFAULT_NPLY = 1;
+    public static int DEFAULT_MODE_3P = 2;
     
     private double alpha = DEFAULT_ALPHA;		// initial learn step size
     private double alfin = DEFAULT_ALFIN;		// final learn step size
@@ -20,6 +21,7 @@ public class ParTD implements Serializable {
     private double gamma = DEFAULT_GAMMA;		// discount-rate parameter (typically 1.0 or 0.9) 
     private double lambda= DEFAULT_LAMBDA; 		// eligibility trace decay parameter (should be <= GAMMA) 
     private int nply = DEFAULT_NPLY; 
+    private int mode3P = DEFAULT_MODE_3P; 
     private int epochs = DEFAULT_EPOCHS; 
     private int featmode = 0;
     private boolean useNormalize = false;
@@ -45,6 +47,7 @@ public class ParTD implements Serializable {
 		this.gamma = tp.getGamma();
 		this.epochs = tp.getEpochs();
 		this.nply = tp.getNPly();
+		this.mode3P = tp.getMode3P();
 		this.featmode = tp.getFeatmode();
 		this.useNormalize = tp.getNormalize();
 		this.hasLinNet = tp.hasLinearNet();
@@ -65,6 +68,7 @@ public class ParTD implements Serializable {
 		this.gamma = tp.getGamma();
 		this.epochs = tp.getEpochs();
 		this.nply = tp.getNPly();
+		this.mode3P = tp.getMode3P();
 		this.featmode = tp.getFeatmode();
 		this.useNormalize = tp.getNormalize();
 		this.hasLinNet = tp.hasLinearNet();
@@ -112,6 +116,10 @@ public class ParTD implements Serializable {
 		return nply;
 	}
 
+	public int getMode3P() {
+		return mode3P;
+	}
+
 	public boolean hasLinearNet() {
 		return hasLinNet;
 	}
@@ -150,6 +158,10 @@ public class ParTD implements Serializable {
 
 	public void setNPly(int nply) {
 		this.nply=nply;
+	}
+	
+	public void setMode3P(int mode3P) {
+		this.mode3P=mode3P;
 	}
 	
 	public void setEpochs(int epochs) {

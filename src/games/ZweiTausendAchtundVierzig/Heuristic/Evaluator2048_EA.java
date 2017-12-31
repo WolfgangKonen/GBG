@@ -18,7 +18,8 @@ public class Evaluator2048_EA extends Evaluator {
     }
 
     @Override
-    protected boolean eval_Agent() {
+    protected boolean eval_Agent(PlayAgent pa) {
+    	m_PlayAgent = pa;
         cma.setDimension(15);
         cma.setInitialX(0.5);
         cma.setInitialStandardDeviation(0.2);

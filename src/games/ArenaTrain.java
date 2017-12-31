@@ -106,7 +106,7 @@ abstract public class ArenaTrain extends Arena
 
 				if (m_xfun.m_PlayAgents[n] != null) {
 					Evaluator m_evaluator2 = makeEvaluator(m_xfun.m_PlayAgents[n],gb,0,m_xab.oPar[n].getQuickEvalMode(),1);
-					m_evaluator2.eval();
+					m_evaluator2.eval(m_xfun.m_PlayAgents[n]);
 					System.out.println("final "+m_evaluator2.getMsg());
 					m_xfun.m_PlayAgents[n].setAgentState(AgentState.TRAINED);
 					setStatusMessage("final "+m_evaluator2.getMsg());

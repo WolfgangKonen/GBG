@@ -58,7 +58,7 @@ abstract public class ObserverBase {
 	 * 			If referringState has opposite player, then it is getGameScore()*(-1). 
 	 */
     public double getGameScore(StateObservation referringState) {
-        return (this.getPlayer() == referringState.getPlayer() ? getGameScore() : getGameScore() * (-1));
+        return (this.getPlayer() == referringState.getPlayer() ? getGameScore() : (-1)*getGameScore()  );
     }
 	
 
@@ -68,7 +68,7 @@ abstract public class ObserverBase {
 	 * @return  the game score
 	 */
 	public double getGameScore(int player) {
-		return (this.getPlayer() == player ? getGameScore() : getGameScore() * (-1));
+		return (this.getPlayer() == player ? getGameScore() : (-1)*getGameScore() );
 	}
 	
 	/**
@@ -81,16 +81,16 @@ abstract public class ObserverBase {
 		return sc;
 	}
 
-	/**
-	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
-	 * 			can be reached from this state (assuming perfect play).  
-	 * 			This member function can be {@link StateObservation}'s heuristic  
-	 * 			for the <em>potential</em> of that state. <br> 
-	 * 			Here, {@link ObserverBase} will simply return {@link #getGameScore()}.
-	 */
-    public double getGameValue() {
-        return getGameScore();
-    }
+//	/**
+//	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
+//	 * 			can be reached from this state (assuming perfect play).  
+//	 * 			This member function can be {@link StateObservation}'s heuristic  
+//	 * 			for the <em>potential</em> of that state. <br> 
+//	 * 			Here, {@link ObserverBase} will simply return {@link #getGameScore()}.
+//	 */
+//    public double getGameValue() {
+//        return getGameScore();
+//    }
 
 	/**
 	 * The cumulative reward, usually the same as getGameScore()

@@ -43,6 +43,8 @@ public interface GameBoard {
 	 */
 	public String getSubDir();
 	
+	public Arena getArena();
+	
 	/**
 	 * @return the 'empty-board' start state
 	 */

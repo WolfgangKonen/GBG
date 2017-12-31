@@ -43,7 +43,8 @@ public class Evaluator2048 extends Evaluator {
     }
 
     @Override
-    protected boolean eval_Agent() {
+    protected boolean eval_Agent(PlayAgent pa) {
+    	m_PlayAgent = pa;
 		int nEmpty = 0,cumEmpty=0;
 		int moveNum=0;
 		double gameScore=0.0;

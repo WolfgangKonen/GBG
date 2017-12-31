@@ -20,6 +20,7 @@ import controllers.MaxNAgent;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
+import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
@@ -464,7 +465,7 @@ public class XArenaMenu extends JMenuBar {
 		String str=TIPEVALUATE;
 		PlayAgent td=null;
 		try {
-			td = m_arena.tdAgentIO.loadTDAgent();			
+			td = m_arena.tdAgentIO.loadGBGAgent(null);			
 		} catch(IOException e) {
 			str = e.getMessage();			
 		} catch(ClassNotFoundException e) {
@@ -472,7 +473,7 @@ public class XArenaMenu extends JMenuBar {
 		} 
 		
 		if (td == null) {
-			str = "No Agent loaded!";
+			str = str + "\nNo Agent loaded!";
 			MessageBox.show(m_arena,"ERROR: " + str,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
 
@@ -543,6 +544,13 @@ public class XArenaMenu extends JMenuBar {
 					((MCAgent) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((MCAgent) td).getOtherPar() );
 			}
+			else if (td instanceof MCAgentN) {
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.mcParams[n].setFrom( ((MCAgentN) td).getMCPar() );
+				if (((MCAgentN) td).getOtherPar() == null ) 
+					((MCAgentN) td).setDefaultOtherPar();
+				m_arena.m_xab.oPar[n].setFrom( ((MCAgentN) td).getOtherPar() );
+			}
 			else if (td instanceof MinimaxAgent) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MinimaxAgent) td).getDepth() );
@@ -563,8 +571,9 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.GameNumT.setText(""+td.getMaxGameNum());
 				m_arena.m_xab.oPar[n].numEval_T.setText(""+td.getNumEval());
 			}
-			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P && !(TDNTuple2Agt.MODE_3P==0)) {
-				m_arena.m_xab.tdPar[n].enableNPly(true);
+			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
+				m_arena.m_xab.tdPar[n].enableMode3P(true);
+				m_arena.m_xab.tdPar[n].enableNPly(false);
 				// if it is one of the older agents (before nply was added to oPar), it will
 				// have nply=0. Then set nply=1: 
 				if (m_arena.m_xab.tdPar[n].getNPly()==0) {
@@ -607,7 +616,7 @@ public class XArenaMenu extends JMenuBar {
 		PlayAgent td = m_arena.m_xfun.m_PlayAgents[index];
 		String str = TIPEVALUATE;
 		try {
-			m_arena.tdAgentIO.saveTDAgent(td);
+			m_arena.tdAgentIO.saveGBGAgent(td);
 			str = "Saved Agent!";
 		} catch(IOException e) {
 			str = e.getMessage();
@@ -686,7 +695,7 @@ public class XArenaMenu extends JMenuBar {
 			try {
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
 				Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,0);
-		        qEvaluator.eval();
+		        qEvaluator.eval(pa);
 				str = qEvaluator.getMsg();
 				System.out.println(str);
 				printStatus(qEvaluator.getShortMsg());				

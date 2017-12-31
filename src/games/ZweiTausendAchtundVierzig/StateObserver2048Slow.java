@@ -220,9 +220,6 @@ public class StateObserver2048Slow implements StateObservationNondet {
         }
     }
 
-    @Override
-	public double getGameValue() { return getGameScore(); }
-
    private void evaluateBoard() {
         RowInformationContainer rowInformationContainer;
         highestTileInCorner = false;

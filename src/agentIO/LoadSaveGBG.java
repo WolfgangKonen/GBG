@@ -53,6 +53,8 @@ import controllers.MaxNAgent;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
+import controllers.MC.MCAgent;
+import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
 import controllers.MCTS.SingleTreeNode;
@@ -72,7 +74,7 @@ import params.NTParams;
 import params.ParMCTS;
 import params.TDParams;
 
-public class LoadSaveTD {
+public class LoadSaveGBG {
 	private final JFileChooserApprove fc;
 	private final FileFilter tdAgentExt = new ExtensionFilter("agt.zip",
 			"TD-Agents");
@@ -81,8 +83,9 @@ public class LoadSaveTD {
 	private final Arena arenaGame;
 	private final XArenaButtons arenaButtons;
 	private final JFrame arenaFrame;
+	private String tdstr="";
 
-	public LoadSaveTD(Arena areGame, XArenaButtons areButtons, JFrame areFrame) {
+	public LoadSaveGBG(Arena areGame, XArenaButtons areButtons, JFrame areFrame) {
 		this.arenaGame = areGame;
 		this.arenaButtons = areButtons;
 		this.arenaFrame = areFrame;
@@ -134,7 +137,7 @@ public class LoadSaveTD {
 	// ==============================================================
 	// Menu: Save Agent
 	// ==============================================================
-	public void saveTDAgent(PlayAgent pa) throws IOException {
+	public void saveGBGAgent(PlayAgent pa) throws IOException {
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
 		String subDir = arenaGame.getGameBoard().getSubDir();
 		if (subDir != null){
@@ -210,13 +213,6 @@ public class LoadSaveTD {
 //					System.out.println("saveK_U1 "+mcts.getMCTSParams().getK_UCT());
 //					System.out.println("saveK_U2 "+mcts.getK());
 				}
-//				if (pa instanceof TDNTupleAgt) {
-//					TDNTupleAgt tdnt = (TDNTupleAgt) pa;
-//					//NTParams ntpar = tdnt.getNTParams();
-//					// only for debug:
-////					System.out.println("randWalk:  "+tdnt.getNTParams().getRandWalk());
-////					System.out.println("randNumTup: "+ntpar.getNtupleNumber());
-//				}
 				oos.writeObject(pa);
 			} catch (IOException e) {
 				dlg.setVisible(false);
@@ -270,38 +266,63 @@ public class LoadSaveTD {
 		return fileSize;
 	}
 
-	public PlayAgent loadTDAgent() throws IOException, ClassNotFoundException {
-		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
-		String subDir = arenaGame.getGameBoard().getSubDir();
-		if (subDir != null){
-			strDir += "/"+subDir;
-		}
-		tools.Utils.checkAndCreateFolder(strDir);
-
+	/**
+	 * 
+	 * @param filePath		if null, open a file choose dialog. If not null, open this fully 
+	 * 						qualified file with suffix .agt.zip.
+	 * @return				the agent loaded
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	public PlayAgent loadGBGAgent(String filePath) throws IOException, ClassNotFoundException {
+		ObjectInputStream ois = null;
+		FileInputStream fis = null;
+		File file = null;
 		PlayAgent pa = null;
-		fc.removeChoosableFileFilter(txtExt);
-		fc.setFileFilter(tdAgentExt);
-		fc.setCurrentDirectory(new File(strDir));
-		fc.setAcceptAllFileFilterUsed(false);
 
-		int returnVal = fc.showOpenDialog(arenaGame);
-		String filePath = "";
+		if (filePath==null) {
+			String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
+			String subDir = arenaGame.getGameBoard().getSubDir();
+			if (subDir != null){
+				strDir += "/"+subDir;
+			}
+			tools.Utils.checkAndCreateFolder(strDir);
 
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			ObjectInputStream ois = null;
-			FileInputStream fis = null;
-			File file = null;
+			fc.removeChoosableFileFilter(txtExt);
+			fc.setFileFilter(tdAgentExt);
+			fc.setCurrentDirectory(new File(strDir));
+			fc.setAcceptAllFileFilterUsed(false);
+
+			int returnVal = fc.showOpenDialog(arenaGame);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				try {
+
+					file = fc.getSelectedFile();
+					filePath = file.getPath();
+					fis = new FileInputStream(filePath);
+				} catch (IOException e) {
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
+							+ " !]");
+					//e.printStackTrace();
+					throw e;
+				}
+			} else {
+				arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
+			}
+		} else {	// i.e. if filePath is not null
 			try {
-
-				file = fc.getSelectedFile();
-				filePath = file.getPath();
+				file = new File(filePath);
 				fis = new FileInputStream(filePath);
 			} catch (IOException e) {
 				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
 						+ " !]");
-				e.printStackTrace();
+				//e.printStackTrace();
+				throw e;
 			}
-			
+		}
+		
+		if (fis != null) {
 			GZIPInputStream gs = null;
 			try {
 				gs = new GZIPInputStream(fis);
@@ -330,12 +351,14 @@ public class LoadSaveTD {
 				Object obj = ois.readObject();
 				if (obj instanceof TDAgent) {
 					pa = (TDAgent) obj;
-//				} else if (obj instanceof TDNTupleAgt) {
-//					pa = (TDNTupleAgt) obj;
 				} else if (obj instanceof TDNTuple2Agt) {
 					pa = (TDNTuple2Agt) obj;
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;
+				} else if (obj instanceof MCAgent) {
+					pa = (MCAgent) obj;
+				} else if (obj instanceof MCAgentN) {
+					pa = (MCAgentN) obj;
 				} else if (obj instanceof MinimaxAgent) {
 					pa = (MinimaxAgent) obj;
 				} else if (obj instanceof MaxNAgent) {
@@ -381,9 +404,8 @@ public class LoadSaveTD {
 					} catch (IOException e) {
 					}
 			}
-		} else
-			arenaGame.setStatusMessage("[ERROR: Something went wrong while loading file "
-							+ filePath + " !]");
+		} 
+		
 		return pa;
 	}
 

@@ -14,14 +14,14 @@ path <- "../../agents/Hex/05/csv/";
 limits=c(0.0,1.0); errWidth=3000;
 
 filenames=c ( "TDNT2_NEW_2P-0ply.csv"    # 5 runs: 20 min (_PAR version)
-             ,"TDNT2_NEW_2P-1ply.csv"    # 5 runs: 27 min (no _PAR version)
-             ,"TDNT2_NEW_2P-3ply.csv"    # 5 runs: 31 min, elapsed 63 min (no _PAR version)
+             #,"TDNT2_NEW_2P-1ply.csv"   # 5 runs: 27 min (no _PAR version)
+             ,"TDNT2_NEW_2P-3ply.csv"    # 5 runs: 42 min, elapsed 63 min (no _PAR version)
              ,"TDNT2_NEW_2P-5ply.csv"    # 5 runs: 155 min (no _PAR version)
             )
 # other pars: alpha=0.2, eps = 1.0 ... 0.2, ChooseStart01=T, LearnFromRM=F, VER_3P=F, NEW_2P=T
-# 5 runs, 150.000 training episodes. 
+# 20 runs, 150.000 training episodes. 
 # evalMode= 0 (evalQ) is from default start state against MCTS, 
-# evalMode=10 (evalT) is from different start states against MCTS. 
+# evalMode=10 (evalT) is from 6 different start states against MCTS. 
 
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
   
@@ -43,7 +43,7 @@ for (k in 1:length(filenames)) {
   
   lambdaCol = switch(k
                     ,rep(0,nrow(df))
-                    ,rep(1,nrow(df))
+                    #,rep(1,nrow(df))
                     ,rep(3,nrow(df))
                     ,rep(5,nrow(df))
   )

@@ -180,6 +180,11 @@ public class GameBoardHex implements GameBoard {
         return form.format(HexConfig.BOARD_SIZE);
     }
 
+    @Override
+    public Arena getArena() {
+        return m_Arena;
+    }
+    
     /**
      * Class HexPanel is used as the GUI for the game Hex. It extends the class JPanel.
      * It is responsible for drawing the game state to the screen.

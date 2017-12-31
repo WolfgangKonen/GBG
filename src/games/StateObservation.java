@@ -62,18 +62,21 @@ public interface StateObservation extends Serializable{
 	/**
 	 * This method should be only called if game is over. The player is 
 	 * the player who would be next in turn (if the game were not over)
+	 * <p>
+	 * WINNER::key() returns the number of the player who has won.
+	 * 
 	 * @return PLAYER_LOSES(-1), TIE(0), PLAYER_WINS(1)
 	 */
 	public Types.WINNER getGameWinner();
 
-	/**
-	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
-	 * 			can be reached from this state (assuming perfect play).  
-	 * 			This member function can be {@link StateObservation}'s heuristic  
-	 * 			for the <em>potential</em> of that state. If such a heuristic is not known, 
-	 * 			{@link #getGameValue()} might simply return {@link #getGameScore()}.
-	 */
-	public double getGameValue();
+//	/**
+//	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
+//	 * 			can be reached from this state (assuming perfect play).  
+//	 * 			This member function can be {@link StateObservation}'s heuristic  
+//	 * 			for the <em>potential</em> of that state. If such a heuristic is not known, 
+//	 * 			{@link #getGameValue()} might simply return {@link #getGameScore()}.
+//	 */
+//	public double getGameValue();
 	
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
@@ -158,7 +161,7 @@ public interface StateObservation extends Serializable{
      * 
      * @param action the action
      */
-    public void advanceDeterministic(Types.ACTIONS action);
+    public void advanceDeterministic(ACTIONS action);
 
     /**
      * Advance the current afterstate to a new state (do the nondeterministic part of advance).<p>

@@ -1,6 +1,8 @@
 package controllers.MCTS;
 
 import controllers.AgentBase;
+import controllers.ExpectimaxWrapper;
+import controllers.MaxNWrapper;
 import controllers.PlayAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.StateObservation;
@@ -11,6 +13,7 @@ import params.ParMCTS;
 import params.ParOther;
 import tools.ElapsedCpuTimer;
 import tools.ElapsedCpuTimer.TimerType;
+import tools.Types.ScoreTuple;
 import tools.Types;
 
 import java.io.Serializable;
@@ -265,6 +268,33 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 
             return nextActionScore;
         }
+	}
+
+	/**
+	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
+	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
+	 * 
+	 * @param so	the state s_t for which the value is desired
+	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
+	 * 				the future score for s_t from the perspective of player i
+	 */
+	@Override
+	public ScoreTuple getScoreTuple(StateObservation so) {
+		ScoreTuple sc = new ScoreTuple(so);
+		switch (so.getNumPlayers()) {
+		case 1: 
+			sc.scTup[0] = this.getScore(so);
+			break;
+		case 2:
+			int player = so.getPlayer();
+			int opponent = (player==0) ? 1 : 0;
+			sc.scTup[player] = this.getScore(so);
+			sc.scTup[opponent] = -sc.scTup[player];
+			break;
+		default: 
+    		throw new RuntimeException("Cannot create ScoreTuple for MCTSAgentT and numPlayer>=3");			        		
+		}
+    	return sc;
 	}
 
 	@Override

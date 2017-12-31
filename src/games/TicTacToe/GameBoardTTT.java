@@ -465,6 +465,11 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	}
 	
     @Override
+    public Arena getArena() {
+        return m_Arena;
+    }
+    
+   @Override
 	public void toFront() {
     	super.setState(Frame.NORMAL);	// if window is iconified, display it normally
 		super.toFront();
