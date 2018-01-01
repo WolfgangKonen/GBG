@@ -23,4 +23,4 @@ the set of interfaces, abstract and non-abstract classes which help to standardi
 those parts of board game playing and learning that otherwise would be tedious and repetitive parts in coding. 
 Alternatively, you can reach the technical report after starting the GBG framework via  `Help - Show TR-GBG.pdf`
 
-[test](resources/figArenaTrain.png)
+![ArenaTrain](https://github.com/WolfgangKonen/GBG/blob/master/resources/figArenaTrain.png)
