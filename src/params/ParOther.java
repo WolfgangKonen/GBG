@@ -46,8 +46,6 @@ public class ParOther implements Serializable {
 		this.chooseStart01 = op.useChooseStart01();
 		this.learnFromRM = op.useLearnFromRM();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
-//		this.minimaxDepth = op.getMinimaxDepth();
-//		this.minimaxHashmap = op.useMinimaxHashmap();	
 	}
 	
     public ParOther(OtherParams op) { 
@@ -58,15 +56,13 @@ public class ParOther implements Serializable {
 		this.quickEvalMode = op.getQuickEvalMode();
 		this.trainEvalMode = op.getTrainEvalMode();
 		this.numEval = op.getNumEval();
-		this.episodeLength = op.getEpiLength();
+		this.episodeLength = op.getEpisodeLength();
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
 		this.chooseStart01 = op.useChooseStart01();
 		this.learnFromRM = op.useLearnFromRM();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
-//		this.minimaxDepth = op.getMinimaxDepth();
-//		this.minimaxHashmap = op.useMinimaxHashmap();	
 	}
 	
 	public void setNumEval(int num)
@@ -121,13 +117,5 @@ public class ParOther implements Serializable {
 	public boolean getRewardIsGameScore() {
 		return rewardIsGameScore;
 	}
-
-//	public int getMinimaxDepth() {
-//		return minimaxDepth;
-//	}
-//
-//	public boolean useMinimaxHashmap() {
-//		return minimaxHashmap;
-//	}
 
 }

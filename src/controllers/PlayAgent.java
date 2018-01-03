@@ -99,8 +99,8 @@ public interface PlayAgent {
 	
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called when maximum episode length (TD) or maximum tree depth for certain agents (Max-N) 
-	 * is reached.
+	 * Is called when maximum episode length (TD) or maximum tree depth for certain agents 
+	 * (Max-N, Expectimax-N) is reached.
 	 * 
 	 * @param sob			the current game state
 	 * @return				the agent's estimate of the final reward <b>for all players</b>. 
@@ -116,12 +116,12 @@ public interface PlayAgent {
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState01()} to get
 	 * 					some exploration of different game paths)
+	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
+	 */
 // --- epiLength, learnFromRM are now available via the agent's member ParOther m_oPar: ---
 //	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
 //	 * 					prematurely.  
 //	 * @param learnFromRM if true, learn from random moves during training
-	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
-	 */
 	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/);
 	
 	public String printTrainStatus();

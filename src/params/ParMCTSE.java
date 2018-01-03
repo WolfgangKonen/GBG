@@ -3,6 +3,7 @@ package params;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
 import controllers.MCTSExpectimax.MCTSEChanceNode;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.MCTSExpectimax.MCTSExpectimaxConfig;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 
@@ -11,36 +12,23 @@ import java.awt.*;
 import java.io.Serializable;
 
 /**
- * MCTS (Monte Carlo Tree Search) parameters for board games.<p>
+ * MCTSE (Monte Carlo Tree Search Expectimax) parameters for board games.<p>
  *  
  * These parameters and their [defaults] are: <ul>
- * <li> <b>Iterations</b>: 	[1000] number of iterations during MCTS search 
+ * <li> <b>Iterations</b>: 	[3500] number of iterations during MCTSE search 
  * <li> <b>K (UCT)</b>: 	[1.414] parameter K in UCT rule  
- * <li> <b>Tree Depth</b>: 	[ 10] MCTS tree depth 
- * <li> <b>Rollout Depth</b>[200] MCTS rollout depth  
+ * <li> <b>Tree Depth</b>: 	[ 10] MCTSE tree depth 
+ * <li> <b>Rollout Depth</b>[150] MCTSE rollout depth  
+ * <li> <b>Max Nodes</b>	[500] max number of nodes that expand() can create  
+ * <li> <b>Number Agents</b>[  1] number of agents for majority vote  
  * </ul>
- * The defaults are defined in {@link SingleMCTSPlayer}. 
+ * The defaults are defined in {@link MCTSExpectimaxConfig}. 
  * 
- * @see MCTSAgentT
- * @see SingleMCTSPlayer
+ * @see MCTSExpectimaxAgt
+ * @see MCTSExpectimaxConfig
  */
 public class ParMCTSE implements Serializable
 {
-//	private JLabel numIter_L;
-//	private JLabel kUCT_L;
-//	private JLabel treedep_L;
-//	private JLabel rollout_L;
-//	private JLabel maxNodes_L;
-//	private JLabel numAgents_L;
-//	private JTextField numIter_T;
-//	private JTextField kUCT_T;
-//	private JTextField treedep_T;
-//	private JTextField rollout_T;
-//	private JTextField maxNodes_T;
-//	private JTextField numAgents_T;
-//	private JCheckBox alternativeVersion_CB;
-//	private JCheckBox enableHeuristics_CB;
-//	private JPanel mPanel;
     private int numIters = MCTSExpectimaxConfig.DEFAULT_ITERATIONS;
 	private int rolloutDepth = MCTSExpectimaxConfig.DEFAULT_ROLLOUTDEPTH;
     private int treeDepth = MCTSExpectimaxConfig.DEFAULT_TREEDEPTH;
@@ -61,34 +49,11 @@ public class ParMCTSE implements Serializable
 
 
 	public ParMCTSE() {
-
 		heuristicSettings2048 = new HeuristicSettings2048();
-
-//		numIter_L = new JLabel("Iterations");
-//		kUCT_L = new JLabel("K (UCT)");
-//		treedep_L = new JLabel("Tree Depth");
-//		rollout_L = new JLabel("Rollout Depth");
-//		maxNodes_L = new JLabel("Max Nodes");
-//		numAgents_L = new JLabel("Number Agents");
-//		alternativeVersion_CB = new JCheckBox("alternative Version (~4% faster)", MCTSExpectimaxConfig.DEFAULT_ALTERNATIVEVERSION);
-//		enableHeuristics_CB = new JCheckBox("enable Heuristics", MCTSExpectimaxConfig.DEFAULT_ENABLEHEURISTICS);
-//		numIter_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_ITERATIONS+"");
-//		kUCT_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_K+"");					//
-//		treedep_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_TREEDEPTH+"");
-//		rollout_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_ROLLOUTDEPTH+"");
-//		maxNodes_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_MAXNODES+"");
-//		numAgents_T = new JTextField(MCTSExpectimaxConfig.DEFAULT_NUMAGENTS+ "");
-		
-//		numIter_L.setToolTipText("Number of iterations during MCTS search");
-//		kUCT_L.setToolTipText("Parameter K in UCT rule ");
-//		treedep_L.setToolTipText("MCTS tree depth");
-//		rollout_L.setToolTipText("MCTS rollout depth");
-//		maxNodes_L.setToolTipText("Max number of tree nodes");
-//		numAgents_L.setToolTipText("Number of agents for majority Vote");
-
 	}
 	
     public ParMCTSE(MCTSExpectimaxParams tp) { 
+		heuristicSettings2048 = new HeuristicSettings2048();
     	this.setFrom(tp);
     }
     

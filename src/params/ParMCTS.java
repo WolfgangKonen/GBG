@@ -2,6 +2,10 @@ package params;
 
 import java.io.Serializable;
 
+/**
+ * 
+ * @see MCTSParams
+ */
 public class ParMCTS implements Serializable {
     public static int DEFAULT_ROLLOUT_DEPTH =200;
     public static int DEFAULT_TREE_DEPTH = 10;

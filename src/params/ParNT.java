@@ -2,9 +2,16 @@ package params;
 
 import java.io.Serializable;
 
+import controllers.TD.ntuple2.TDNTuple2Agt;
+
+/**
+ *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTuple2Agt}
+ *  
+ *  @see NTParams
+ *  @see TDNTuple2Agt
+ */
 public class ParNT implements Serializable {
 	
-    public static int DEFAULT_EPOCHS = 1;
     public static double DEFAULT_TC_INIT=0.001;  
     public static int DEFAULT_TC_INTERVAL=2;  
     public static int DEFAULT_NTUPLE_NUM=10;  

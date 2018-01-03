@@ -23,19 +23,22 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
- * This class realizes the parameter settings (GUI tab) for TD players.
+ * This class realizes the parameter settings (GUI tab) for TD players 
+ * (agents {@link TDAgent} and {@link TDNTuple2Agt}).
  * These parameters and their [defaults] are: <ul>
  * <li> <b>alpha</b>: 		[0.001] initial strength of learning parameter 
  * <li> <b>alphaFinal</b>: 	[0.001] final strength of learning parameter  
  * <li> <b>epsilon</b>: 	[0.1] initial probability of random move 
  * <li> <b>epsilonFinal</b>:[0.0] final probability of random move  
  * <li> <b>lambda</b>: 		[0.0] eligibility trace parameter 
- * 	(only relevant for {@link controllers.TD.TDAgent})
  * <li> <b>gamma</b>: 		[1.0] discount parameter 
  * </ul> 
+ * The defaults are defined in {@link ParTD}. <br>
+ * Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String)}.
  * 
  * @see ParTD
  * @see TDAgent
+ * @see TDNTuple2Agt
  */
 public class TDParams extends Frame implements Serializable
 {
@@ -109,15 +112,15 @@ public class TDParams extends Frame implements Serializable
 		// (Other game- and agent-specific defaults are in setParamDefaults, which is called
 		// whenever one of the agent choice boxes changes to an agent requiring TDParams)
 		//
-		alphaT = new JTextField("0.001");  //("0.1");				// the defaults
-		alfinT = new JTextField("0.001");			//
-		epsilT = new JTextField("0.3");				// 
-		epfinT = new JTextField("0.0");				//
-		lambdaT = new JTextField("0.0"); //("0.9");			//
-		gammaT = new JTextField("1.0");				//
-		epochT = new JTextField("1");				//
-		tNply_T = new JTextField("1");					//
-		mode3P_T = new JTextField("2");					//
+		alphaT = new JTextField(ParTD.DEFAULT_ALPHA+"");//("0.1")	// 
+		alfinT = new JTextField(ParTD.DEFAULT_ALFIN+"");			//
+		epsilT = new JTextField(ParTD.DEFAULT_EPSIL+"");			// 
+		epfinT = new JTextField(ParTD.DEFAULT_EPFIN+"");			//
+		lambdaT = new JTextField(ParTD.DEFAULT_LAMBDA+"");//("0.9")	//  the defaults
+		gammaT = new JTextField(ParTD.DEFAULT_GAMMA+"");			//
+		epochT = new JTextField(ParTD.DEFAULT_EPOCHS+"");			//
+		tNply_T = new JTextField(ParTD.DEFAULT_NPLY+"");			//
+		mode3P_T = new JTextField(ParTD.DEFAULT_MODE_3P+"");		//
 		alphaL = new JLabel("Alpha init");
 		alfinL = new JLabel("Alpha final");
 		epsilL = new JLabel("Epsilon init");

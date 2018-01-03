@@ -535,6 +535,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 		boolean learnFromRM = m_oPar.useLearnFromRM();
 		int epiLength = m_oPar.getEpisodeLength();
+		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 
 		player = Types.PLAYER_PM[so.getPlayer()];
 

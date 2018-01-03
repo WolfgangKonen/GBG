@@ -2,8 +2,17 @@ package params;
 
 import java.io.Serializable;
 
+import controllers.TD.TDAgent;
+import controllers.TD.ntuple2.TDNTuple2Agt;
+
+/**
+ *  TD (temporal difference) parameters for agents {@link TDAgent} and {@link TDNTuple2Agt}
+ *  
+ *  @see TDParams
+ *  @see TDAgent
+ *  @see TDNTuple2Agt
+ */
 public class ParTD implements Serializable {
-	
     public static int DEFAULT_EPOCHS = 1;
     public static double DEFAULT_ALPHA=0.001;  // 0.1
     public static double DEFAULT_ALFIN=0.001;  

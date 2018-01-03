@@ -19,7 +19,9 @@ import javax.swing.JTextField;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
- *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTuple2Agt}
+ *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTuple2Agt}.
+ *  <p>
+ *  Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String)}.
  *  
  *  @see ParNT
  *  @see TDNTuple2Agt
@@ -74,9 +76,9 @@ public class NTParams extends Frame implements Serializable {
 	public JComboBox NTupleFixCo;
 
 	JPanel ntPanel;
-	JButton ok;
 
-	NTParams c_par;
+//	JButton ok;
+//	NTParams c_par;
 
 	public NTParams() {
 		// label names
@@ -107,13 +109,13 @@ public class NTParams extends Frame implements Serializable {
 		// (Other game- and agent-specific defaults are in setParamDefaults, which is called
 		// whenever one of the agent choice boxes changes to an agent requiring NTParams)
 		//
-		tcInitT = new JTextField("0.0001");
+		tcInitT = new JTextField(ParNT.DEFAULT_TC_INIT+"");
 		tcInitT.setEnabled(false);
-		tcIntervalT = new JTextField("2");
+		tcIntervalT = new JTextField(ParNT.DEFAULT_TC_INTERVAL+"");
 		tcIntervalT.setEnabled(false);
-		NTupleNumT = new JTextField("10");
+		NTupleNumT = new JTextField(ParNT.DEFAULT_NTUPLE_NUM+"");
 		NTupleNumT.setEnabled(false);
-		NTupleSizeT = new JTextField("6");
+		NTupleSizeT = new JTextField(ParNT.DEFAULT_NTUPLE_LEN+"");
 		NTupleSizeT.setEnabled(false);
 		//EvalT = new JTextField("100");
 		//EvalT.setEnabled(false);
@@ -151,19 +153,20 @@ public class NTParams extends Frame implements Serializable {
 		NTupleFixCo = new JComboBox(fixedTupleModeString);
 		NTupleFixCo.setEnabled(true); 
 		
-		ok = new JButton("ok");
-		c_par = this;
-		ntPanel = new JPanel();		// put the inner buttons into panel tcPanel. This panel
-									// can be handed over to a tab of a JTabbedPane 
-									// (see class TicTacToeTabs)
+		ntPanel = new JPanel();		// put the inner buttons into panel ntPanel. This panel
+									// can be handed over to a tab of a JTabbedPane object
+									// (see class XArenaTabs)
 
-		ok.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				c_par.setVisible(false);
-			}
-		});
+//		ok = new JButton("ok");
+//		c_par = this;
+		
+//		ok.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				c_par.setVisible(false);
+//			}
+//		});
 
-		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
+		setLayout(new BorderLayout(10,0));				 // hgap,vgap
 		ntPanel.setLayout(new GridLayout(0, 4, 10, 10)); // rows,columns,hgap,vgap
 
 		// first row
@@ -202,7 +205,7 @@ public class NTParams extends Frame implements Serializable {
 		ntPanel.add(AfterStateC);
 		
 		add(ntPanel,BorderLayout.CENTER);
-		add(ok,BorderLayout.SOUTH);
+//		add(ok,BorderLayout.SOUTH);
 	
 		enableTcPart();
 		enableRandomPart();
@@ -344,9 +347,6 @@ public class NTParams extends Frame implements Serializable {
 	public boolean getUseAfterState() {
 		return AfterStateC.isSelected();
 	}
-	// public void setINIT(double value) {
-	// InitT.setText(value+"");
-	// }
 	
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
@@ -398,7 +398,7 @@ public class NTParams extends Frame implements Serializable {
 	 * @param agentName currently only "TD-Ntuple-2"
 	 * 				(for {@link TDNTuple2Agt}), 
 	 * 				all other strings are without any effect
-	 * @param gameName
+	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
 		// currently we have here only the sensible defaults for two games (2048 vs. other games)

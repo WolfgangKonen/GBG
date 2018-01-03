@@ -235,12 +235,6 @@ public class OtherParams extends Frame {
 		return Integer.valueOf(stopEval_T.getText()).intValue();
 	}
 
-	// public int getMinimaxDepth() {
-	// return Integer.valueOf(miniDepth_T.getText()).intValue();
-	// }
-	// public int getBatchMode() {
-	// return Integer.parseInt(choiceBatch.getSelectedItem());
-	// }
 	public int getNumEval() {
 		return Integer.valueOf(numEval_T.getText()).intValue();
 	}
@@ -249,10 +243,9 @@ public class OtherParams extends Frame {
 		return Integer.valueOf(wNply_T.getText()).intValue();
 	}
 
-	public int getEpiLength() {
+	public int getEpisodeLength() {
 		int elen = Integer.valueOf(epiLeng_T.getText()).intValue();
-		if (elen == -1)
-			elen = Integer.MAX_VALUE;
+		//if (elen == -1)	elen = Integer.MAX_VALUE;
 		return elen;
 	}
 
@@ -316,7 +309,8 @@ public class OtherParams extends Frame {
 		wNply_T.setText(value + "");
 	}
 
-	public void setEpiLength(int value) {
+	public void setEpisodeLength(int value) {
+		if (value == Integer.MAX_VALUE) value=-1;
 		epiLeng_T.setText(value + "");
 	}
 	// public void setMinimaxDepth(int value) {
@@ -334,7 +328,7 @@ public class OtherParams extends Frame {
 		this.setQuickEvalMode(op.getQuickEvalMode());
 		this.setTrainEvalMode(op.getTrainEvalMode());
 		this.setNumEval(op.getNumEval());
-		this.setEpiLength(op.getEpisodeLength());
+		this.setEpisodeLength(op.getEpisodeLength());
 		this.setStopTest(op.getStopTest());
 		this.setStopEval(op.getStopEval());
 		this.setWrapperNPly(op.getWrapperNPly());

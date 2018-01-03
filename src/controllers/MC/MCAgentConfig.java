@@ -1,7 +1,7 @@
 package controllers.MC;
 
 /**
- * Configuration constants for {@link MCAgent}
+ * Configuration constants for {@link MCAgentN} and {@link MCAgent}
  */
 public class MCAgentConfig {
     public static final int DEFAULT_ITERATIONS = 1000; //Number of Games played for every available Action

@@ -6,20 +6,24 @@ import java.io.Serializable;
 import javax.swing.*;
 
 import controllers.MC.MCAgentConfig;
+import controllers.MC.MCAgentN;
 
 /**
  * MC (Monte Carlo) parameters for board games.<p>
  *
  * These parameters and their [defaults] are: <ul>
  * <li> <b>Iterations</b>: 	    [1000]  number of iterations during MC search
- * <li> <b>Depth</b>: 	        [20]    MC tree depth
- * <li> <b>NumberAgents</b>:    [1]     Number Agents for Majority Vote
- * <li> <b>DOCALCCERTAINTY</b>  [false] Calculate Certainty while playing
+ * <li> <b>Rollout Depth</b>: 	[20]    MC rollout depth
+ * <li> <b>NumberAgents</b>:    [1]     number agents for Majority Vote
  * </ul>
  * The defaults are defined in {@link MCAgentConfig}.
  *
- * @see controllers.MC.MCAgent
+ * @see MCAgentN
+ * @see MCAgentConfig
+ * @see ParMC
  */
+//--- this is commented out: ---
+//* <li> <b>DOCALCCERTAINTY</b>  [false] Calculate Certainty while playing
 public class MCParams extends Frame implements Serializable
 {
     JLabel LIterations;
@@ -41,8 +45,8 @@ public class MCParams extends Frame implements Serializable
    public MCParams() {
         super("MC Parameter");
         LIterations = new JLabel("Iterations");
-        LRolloutdepth = new JLabel("Rolloutdepth");
-        LNumberAgents = new JLabel("Number Agents (Majority Vote)");
+        LRolloutdepth = new JLabel("Rollout Depth");
+        LNumberAgents = new JLabel("Number Agents");
         TIterations = new JTextField(""+MCAgentConfig.DEFAULT_ITERATIONS);
         TRolloutdepth = new JTextField(""+MCAgentConfig.DEFAULT_ROLLOUTDEPTH);
         TNumberAgents = new JTextField(""+MCAgentConfig.DEFAULT_NUMBERAGENTS);
@@ -50,7 +54,7 @@ public class MCParams extends Frame implements Serializable
         mPanel = new JPanel();
 
         LIterations.setToolTipText("Number of iterations during MC search");
-        LRolloutdepth.setToolTipText("MC Rolloutdepth");
+        LRolloutdepth.setToolTipText("MC rollout depth");
         LNumberAgents.setToolTipText("Number of agents for majority vote");
 
         setLayout(new BorderLayout(10,0));
@@ -82,7 +86,6 @@ public class MCParams extends Frame implements Serializable
         mPanel.add(new Canvas());
 
         add(mPanel,BorderLayout.CENTER);
-        //add(ok,BorderLayout.SOUTH);
 
         pack();
         setVisible(false);

@@ -342,7 +342,7 @@ public class XArenaFuncs
 								// >0: stop, if Evaluator stays true for stopEval games
 		int maxGameNum;			// maximum number of training games
 		int numEval;			// evaluate the trained agent every numEval games
-		int epiLength;			// maximum length of an episode
+//		int epiLength;			// maximum length of an episode
 		boolean learnFromRM;	// if true, learn from random moves during training
 		int gameNum=0;
 		int verbose=2;
@@ -385,7 +385,7 @@ public class XArenaFuncs
 		
 		stopTest = xab.oPar[n].getStopTest();
 		stopEval = xab.oPar[n].getStopEval();
-		epiLength = xab.oPar[n].getEpiLength();
+//		epiLength = xab.oPar[n].getEpiLength();
 		learnFromRM = xab.oPar[n].useLearnFromRM();
 		int qem = xab.oPar[n].getQuickEvalMode();
         m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
@@ -512,7 +512,7 @@ public class XArenaFuncs
 
 		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
 		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
-		int epiLength = xab.oPar[n].getEpiLength();
+//		int epiLength = xab.oPar[n].getEpiLength();
 		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
@@ -875,10 +875,10 @@ public class XArenaFuncs
 		int competeNum=xab.winCompOptions.getNumGames();
 		int competitionNum=xab.winCompOptions.getNumCompetitions();
 		int maxGameNum = Integer.parseInt(xab.GameNumT.getText());
-		int epiLength0 = xab.oPar[0].getEpiLength();
-		int epiLength1 = xab.oPar[1].getEpiLength();
-		boolean learnFromRM0 = xab.oPar[0].useLearnFromRM();
-		boolean learnFromRM1 = xab.oPar[1].useLearnFromRM();
+		//int epiLength0 = xab.oPar[0].getEpiLength();
+		//int epiLength1 = xab.oPar[1].getEpiLength();
+		//boolean learnFromRM0 = xab.oPar[0].useLearnFromRM();
+		//boolean learnFromRM1 = xab.oPar[1].useLearnFromRM();
 		Evaluator m_evaluatorX=null;
 		Evaluator m_evaluatorO=null;
 		

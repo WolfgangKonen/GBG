@@ -30,10 +30,10 @@ import games.Feature;
  * <li> <b>tree depth</b>: 	[10] initial strength of learning parameter 
  * <li> <b>useHashMap</b>: 	[true] (only Minimax) whether to store calculated values in a hash map or not 
  * </ul> 
+ * The defaults are defined in {@link ParMaxN}. 
  * 
  * @see ParMaxN
  * @see MaxNAgent
- * @see games.XArenaButtons
  */
 public class MaxNParams extends Frame 
 {
@@ -44,74 +44,74 @@ public class MaxNParams extends Frame
 	public JTextField maxnDepth_T;
 	public Checkbox miniUseHmTrue;
 
-	Button ok;
-	JPanel oPanel;
-	MaxNParams m_par;
+	JPanel mPanel;
+//	Button ok;
+//	MaxNParams m_par;
 	
 	public MaxNParams() {
 		super("MaxN Parameter");
 		
-		maxnDepth_T = new JTextField("10");				// 
 		maxnDepth_L = new JLabel("Tree Depth");
+		maxnDepth_T = new JTextField(ParMaxN.DEFAULT_MAXN_TREE_DEPTH+"");				// 
 		miniUseHm_L = new JLabel("Minimax Hash ");
 		miniUseHmTrue = new Checkbox("use hashmap",true);
-		ok = new Button("OK");
-		m_par = this;
-		oPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
-									// can be handed over to a tab of a JTabbedPane 
-									// (see class TicTacToeTabs)
+//		ok = new Button("OK");
+//		m_par = this;
+		mPanel = new JPanel();		// put the inner buttons into panel mPanel. This panel
+									// can be handed over to a tab of a JTabbedPane object
+									// (see class XArenaTabs)
 		
 		maxnDepth_L.setToolTipText("Tree depth (for MaxN, Minimax or ExpectimaxN)");
 		miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
 		
-		ok.addActionListener(
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						m_par.setVisible(false);
-					}
-				}					
-		);
+//		ok.addActionListener(
+//				new ActionListener()
+//				{
+//					public void actionPerformed(ActionEvent e)
+//					{
+//						m_par.setVisible(false);
+//					}
+//				}					
+//		);
 
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
-		oPanel.setLayout(new GridLayout(0,4,10,10));		
+		mPanel.setLayout(new GridLayout(0,4,10,10));		
 		
-		oPanel.add(maxnDepth_L);
-		oPanel.add(maxnDepth_T);
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
+		mPanel.add(maxnDepth_L);
+		mPanel.add(maxnDepth_T);
+		mPanel.add(new Canvas());
+		mPanel.add(new Canvas());
 
-		oPanel.add(miniUseHm_L);
-		oPanel.add(miniUseHmTrue);
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
+		mPanel.add(miniUseHm_L);
+		mPanel.add(miniUseHmTrue);
+		mPanel.add(new Canvas());
+		mPanel.add(new Canvas());
 
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
+		mPanel.add(new Canvas());
+		mPanel.add(new Canvas());
+		mPanel.add(new Canvas());
+		mPanel.add(new Canvas());
 
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
+		mPanel.add(new Canvas());
+		mPanel.add(new Canvas());
+		mPanel.add(new Canvas());
+		mPanel.add(new Canvas());
 
 //		oPanel.add(new Canvas());
 //		oPanel.add(new Canvas());
 //		oPanel.add(new Canvas());
 //		oPanel.add(new Canvas());
 
-		add(oPanel,BorderLayout.CENTER);
-		add(ok,BorderLayout.SOUTH);
+		add(mPanel,BorderLayout.CENTER);
+//		add(ok,BorderLayout.SOUTH);
 				
 		pack();
 		setVisible(false);
 		
-	} // constructor OtherParams()	
+	} // constructor MaxNParams()	
 	
 	public JPanel getPanel() {
-		return oPanel;
+		return mPanel;
 	}
 
 	public void setMaxnDepth(int value) {

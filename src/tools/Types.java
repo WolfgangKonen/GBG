@@ -299,8 +299,8 @@ public class Types {
      * list of available agents = list of choices in Agent Selectors
      */
     public static final String[] GUI_AGENT_LIST 	 
-    	= {"Random", "Minimax", "Max-N", "Expectimax-N", 
-    	   "MC", "MC-N", "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TDS"};
+    	= {"Random", "Minimax", "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", 
+    	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TDS"};
     /**
      * initial agent choice for P0, P1, ... (for up to 5 players) 
      */

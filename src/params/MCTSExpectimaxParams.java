@@ -3,6 +3,7 @@ package params;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
 import controllers.MCTSExpectimax.MCTSEChanceNode;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.MCTSExpectimax.MCTSExpectimaxConfig;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 
@@ -11,18 +12,20 @@ import java.awt.*;
 import java.io.Serializable;
 
 /**
- * MCTS (Monte Carlo Tree Search) parameters for board games.<p>
+ * MCTSE (Monte Carlo Tree Search Expectimax) parameters for board games.<p>
  *  
  * These parameters and their [defaults] are: <ul>
- * <li> <b>Iterations</b>: 	[1000] number of iterations during MCTS search 
+ * <li> <b>Iterations</b>: 	[3500] number of iterations during MCTSE search 
  * <li> <b>K (UCT)</b>: 	[1.414] parameter K in UCT rule  
- * <li> <b>Tree Depth</b>: 	[ 10] MCTS tree depth 
- * <li> <b>Rollout Depth</b>[200] MCTS rollout depth  
+ * <li> <b>Tree Depth</b>: 	[ 10] MCTSE tree depth 
+ * <li> <b>Rollout Depth</b>[150] MCTSE rollout depth  
+ * <li> <b>Max Nodes</b>	[500] max number of nodes that expand() can create  
+ * <li> <b>Number Agents</b>[  1] number of agents for majority vote  
  * </ul>
- * The defaults are defined in {@link SingleMCTSPlayer}. 
+ * The defaults are defined in {@link MCTSExpectimaxConfig}. 
  * 
- * @see MCTSAgentT
- * @see SingleMCTSPlayer
+ * @see MCTSExpectimaxAgt
+ * @see MCTSExpectimaxConfig
  */
 public class MCTSExpectimaxParams extends Frame implements Serializable
 {
@@ -75,10 +78,10 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 									// can be handed over to a tab of a JTabbedPane 
 									// (see class TicTacToeTabs)
 		
-		numIter_L.setToolTipText("Number of iterations during MCTS search");
+		numIter_L.setToolTipText("Number of iterations during MCTSE search");
 		kUCT_L.setToolTipText("Parameter K in UCT rule ");
-		treedep_L.setToolTipText("MCTS tree depth");
-		rollout_L.setToolTipText("MCTS rollout depth");
+		treedep_L.setToolTipText("MCTSE tree depth");
+		rollout_L.setToolTipText("MCTSE rollout depth");
 		maxNodes_L.setToolTipText("Max number of tree nodes");
 		numAgents_L.setToolTipText("Number of agents for majority Vote");
 
@@ -125,7 +128,6 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		mPanel.add(new Canvas());
 
 		add(mPanel,BorderLayout.CENTER);
-		//add(ok,BorderLayout.SOUTH);
 				
 		pack();
 		setVisible(false);

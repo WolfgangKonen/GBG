@@ -9,6 +9,7 @@ import controllers.MinimaxAgent;
 /**
  * Parameter for {@link MinimaxAgent}, {@link MaxNAgent}, {@link ExpectimaxNAgent}
  *
+ * @see MaxNParams
  */
 public class ParMaxN implements Serializable {
 

@@ -3,7 +3,24 @@ package params;
 import java.io.Serializable;
 
 import controllers.MC.MCAgentConfig;
+import controllers.MC.MCAgentN;
 
+/**
+ * MC (Monte Carlo) parameters for board games.<p>
+ *
+ * These parameters and their [defaults] are: <ul>
+ * <li> <b>Iterations</b>: 	    [1000]  number of iterations during MC search
+ * <li> <b>Rollout Depth</b>: 	[20]    MC rollout depth
+ * <li> <b>NumberAgents</b>:    [1]     number agents for Majority Vote
+ * </ul>
+ * The defaults are defined in {@link MCAgentConfig}.
+ *
+ * @see MCAgentN
+ * @see MCAgentConfig
+ * @see MCParams
+ */
+//--- this is commented out: ---
+//* <li> <b>DOCALCCERTAINTY</b>  [false] Calculate certainty while playing
 public class ParMC implements Serializable {
     private int numIters = MCAgentConfig.DEFAULT_ITERATIONS;
 	private int numAgents = MCAgentConfig.DEFAULT_NUMBERAGENTS;

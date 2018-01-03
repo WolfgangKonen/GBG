@@ -37,7 +37,6 @@ import java.util.concurrent.Executors;
  * @see RandomSearch
  */
 public class MCAgentN extends AgentBase implements PlayAgent {
-	ScoreTuple sc;
     private Random random = new Random();
     private ExecutorService executorService = Executors.newWorkStealingPool();
 
@@ -95,8 +94,9 @@ public class MCAgentN extends AgentBase implements PlayAgent {
             //more than one agent (majority vote)
         	return getNextAction2MultipleAgents(so, iterations, numberAgents, depth);
         } else {
-            //only one agent
+            //only one agent: select one of the following lines:
         	return getNextAction_PAR(so, iterations, depth);
+        	//return getNextAction_MassivePAR(so, iterations, depth);
         }
 	}
 
@@ -116,8 +116,159 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * <p>
 	 * {@code actBest.getScoreTuple()} returns the {@link ScoreTuple} connected with this
      * selected action.
+     * <p>
+     * The parallelization is done over the available actions. It is NOT done over the rollout
+     * iterations (as well), this would be too fine-grained (at least for games like Hex). 
      */
     private Types.ACTIONS_VT getNextAction_PAR(StateObservation sob, int iterations, int depth) {
+    	//the functions which are to be distributed on the cores: 
+        List<Callable<ResultContainerN>> callables = new ArrayList<>();
+        //the results of these functions:
+        List<ResultContainerN> resultContainers = new ArrayList<>();
+        // all available actions for state sob:
+        List<Types.ACTIONS> actions = sob.getAvailableActions();
+
+        Types.ACTIONS actBest = null;
+        Types.ACTIONS_VT actBestVT = null;
+		double[] vtable;
+        vtable = new double[actions.size()];  
+		double currProbab = 1.0/iterations;
+		int sobPlayer = sob.getPlayer();
+		ScoreTuple.CombineOP cOP1 = ScoreTuple.CombineOP.AVG;
+		ScoreTuple bestActionScoreTuple = null;
+		ScoreTuple[] nextActionScoreTuple = new ScoreTuple[actions.size()];
+    	RandomSearch agent= new RandomSearch();
+
+		for (int i=0; i<actions.size(); i++) {
+			nextActionScoreTuple[i] = new ScoreTuple(sob);
+		}
+		
+        nRolloutFinished = 0;
+        nIterations = sob.getNumAvailableActions()* iterations;
+        totalRolloutDepth = 0;
+
+//        //if only one action is available, return it immediately:
+//        if(sob.getNumAvailableActions() == 1) {
+//        	actBest = actions.get(0);
+//            return new Types.ACTIONS_VT(actBest.toInt(), false, vtable, 0.0);       		
+//        }
+        // we do  not return early but run the code below even in case sob.getNumAvailableActions()==1  
+        // in order to get a meaningful nextAction.getScoreTuple() (score tuple for the action taken)
+
+        //build the functions to be distributed on the cores.
+        //For each available action a function is built:
+        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+
+            //the actual action i has to be saved on a new variable, since
+            //the  for-loop value i is not accessible at the time of
+            //execution of an callables-element:
+            int firstActionIdentifier = i;
+
+            //The callables, that is, the functions which are later executed on
+            //multiple cores in parallel, are built. The callables are only
+            //built here, they will be executed only later with 
+            //invokeAll(callables) on executorService :
+            callables.add(() -> {
+            	long rolloutDepth=0;
+            	int nRolloutFinished=0;
+            	ScoreTuple avgScoreTuple = new ScoreTuple(sob);
+            	
+                for (int j = 0; j < iterations; j++) {
+
+                    //make a copy of the game state:
+                    StateObservation newSob = sob.copy();
+                    
+                	//fetch the first action (of rollout) and execute it on the game state:
+                    newSob.advance(actions.get(firstActionIdentifier));
+
+                    //construct Random Agent and let it simulate a (random) rollout:
+                    agent.startAgent(newSob, depth);			// contains BUG1 fix
+                    
+                    avgScoreTuple.combine(newSob.getGameScoreTuple(), cOP1, sobPlayer, currProbab);
+                    rolloutDepth += agent.getRolloutDepth();
+                    if(newSob.isGameOver()) nRolloutFinished++;
+                    
+                } // for (j)
+
+                //average score is:  
+                //     avgScoreTuple.scTup[sobPlayer];              
+
+                //return result of simulation in an object of class ResultContainer:
+                return new ResultContainerN(firstActionIdentifier, avgScoreTuple, 
+                		rolloutDepth, nRolloutFinished);
+            });
+        } // for (i)
+
+        try {
+        	//executerService is called and it distributes all callables on all cores
+        	//of the CPU. The callables perform the simulations and the results of these
+        	//simulations are written to a stream:
+            executorService.invokeAll(callables).stream().map(future -> {
+                try {
+                    return future.get();
+                }
+                catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+
+            //each result written to the stream is added to list resultContainers:    
+            }).forEach(resultContainers::add);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //for each resultContainer in list resultContainers: add its game score
+        //to the appropriate action in vtable:
+        int r_i;
+        for(ResultContainerN resultContainer : resultContainers) {
+        	r_i = resultContainer.firstAction;
+        	vtable[r_i] = resultContainer.avgScoreTuple.scTup[sobPlayer];
+        	nextActionScoreTuple[r_i] = resultContainer.avgScoreTuple;
+            totalRolloutDepth += resultContainer.rolloutDepth;
+            nRolloutFinished += resultContainer.nRolloutFinished;
+        }
+
+        //find the best next action:
+        Types.ACTIONS bestAction = null;
+        double bestActionScore = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+
+            if (bestActionScore < vtable[i]) {
+            	actBest = actions.get(i);
+                bestActionScore = vtable[i];
+                bestActionScoreTuple = nextActionScoreTuple[i];
+            }
+        }
+
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), false, vtable, 
+				 						 bestActionScore, bestActionScoreTuple);
+        return actBestVT;
+    }
+
+    /**
+     * Get the best next action and return it (multi-core [massive parallel] version).
+     * Called by calcCertainty and getNextAction2.
+     * 
+     * @param sob			current game state (not changed on return)
+     * @param iterations    rollout repeats (for each available action)
+     * @param depth			rollout depth
+     * @return actBest		the best next action
+ 	 * <p>						
+	 * actBest has predicate isRandomAction()  (true: if action was selected 
+	 * at random, false: if action was selected by agent).<br>
+	 * actBest has also the members vTable and vBest to store the value for each available
+	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
+	 * <p>
+	 * {@code actBest.getScoreTuple()} returns the {@link ScoreTuple} connected with this
+     * selected action.
+     * <p>
+     * The parallelization is done over the available actions AND over the rollout
+     * iterations as well. This might be an alternative for games like 2048, where there are only 
+     * up to 4 actions. If you want to activate this function, you have to change the source
+     * code in {@link #getNextAction2(StateObservation, boolean, boolean).} 
+     */
+    private Types.ACTIONS_VT getNextAction_MassivePAR(StateObservation sob, int iterations, int depth) {
     	//the functions which are to be distributed on the cores: 
         List<Callable<ResultContainer>> callables = new ArrayList<>();
         //the results of these functions:
@@ -256,7 +407,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
      * {@code actBest.getScoreTuple()} returns the {@link ScoreTuple} connected with this
      * selected action.
      */
-    private Types.ACTIONS_VT getNextAction2MultipleAgents (StateObservation sob, 
+    private Types.ACTIONS_VT getNextAction2MultipleAgents(StateObservation sob, 
     		int iterations, int numberAgents, int depth) {
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
@@ -481,6 +632,21 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 				+ ", rollout depth:" + m_mcPar.getRolloutDepth()
 				+ ", # agents:"+ m_mcPar.getNumAgents();
 		return str;
+    }
+}
+
+class ResultContainerN {
+    public int firstAction;
+    public long rolloutDepth;
+    public ScoreTuple avgScoreTuple;
+    public int nRolloutFinished;
+
+    public ResultContainerN(int firstAction, ScoreTuple avgScoreTuple, 
+    		long rolloutDepth, int nRolloutFinished) {
+        this.firstAction = firstAction;
+        this.avgScoreTuple = avgScoreTuple;
+        this.rolloutDepth = rolloutDepth;
+        this.nRolloutFinished = nRolloutFinished;	
     }
 }
 

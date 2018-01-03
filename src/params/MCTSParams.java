@@ -29,10 +29,11 @@ import controllers.MCTS.SingleMCTSPlayer;
  * <li> <b>Tree Depth</b>: 	[ 10] MCTS tree depth 
  * <li> <b>Rollout Depth</b>[200] MCTS rollout depth  
  * </ul>
- * The defaults are defined in {@link SingleMCTSPlayer}. 
+ * The defaults are defined in {@link ParMCTS}. 
  * 
  * @see MCTSAgentT
  * @see SingleMCTSPlayer
+ * @see ParMCTS
  */
 public class MCTSParams extends Frame implements Serializable
 {
@@ -55,9 +56,6 @@ public class MCTSParams extends Frame implements Serializable
 	 */
 	private static final long serialVersionUID = 1L;
 
-//	Button ok;
-//	MCTSParams m_par;
-	
 	public MCTSParams() {
 		super("MCTS Parameter");
 		numIter_L = new JLabel("Iterations");
@@ -70,11 +68,10 @@ public class MCTSParams extends Frame implements Serializable
 		treedep_T = new JTextField(ParMCTS.DEFAULT_TREE_DEPTH+"");		 
 		rollout_T = new JTextField(ParMCTS.DEFAULT_ROLLOUT_DEPTH+"");		 
 		verbose_T = new JTextField(ParMCTS.DEFAULT_VERBOSITY+"");		 
-//		ok = new Button("OK");
-//		m_par = this;
-		mPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
-									// can be handed over to a tab of a JTabbedPane 
-									// (see class TicTacToeTabs)
+
+		mPanel = new JPanel();		// put the inner buttons into panel mPanel. This panel
+									// can be handed over to a tab of a JTabbedPane object
+									// (see class XArenaTabs)
 		
 		numIter_L.setToolTipText("Number of iterations during MCTS search");
 		kUCT_L.setToolTipText("Parameter K in UCT rule ");
@@ -82,20 +79,6 @@ public class MCTSParams extends Frame implements Serializable
 		rollout_L.setToolTipText("maximum rollout depth (random moves from a leaf)");
 		verbose_L.setToolTipText("0: print nothing, 1: one line per MCTS call, 2: for each action one line");
 		
-//		ok.addActionListener(
-//				new ActionListener()
-//				{
-//					public void actionPerformed(ActionEvent e)
-//					{
-//						m_par.setVisible(false);
-//					}
-//				}					
-//		);
-
-//		this.choiceBatch = new Choice();
-//		for (int i=1; i<=batchMax; i++) choiceBatch.add(i+""); 
-//		choiceBatch.select(batchMax+"");
-
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
 		mPanel.setLayout(new GridLayout(0,4,10,10));		
 		
@@ -125,7 +108,6 @@ public class MCTSParams extends Frame implements Serializable
 		mPanel.add(new Canvas());
 
 		add(mPanel,BorderLayout.CENTER);
-		//add(ok,BorderLayout.SOUTH);
 				
 		pack();
 		setVisible(false);

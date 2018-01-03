@@ -670,6 +670,7 @@ public class XArenaMenu extends JMenuBar {
 		// ensure that m_PlayAgents has the agents selected
 		String str = "[Start Evaluation of PlayAgent "+index+"]";
 		printStatus(str);
+		System.out.println(str);
 		PlayAgent[] paVector;
 
 		try {

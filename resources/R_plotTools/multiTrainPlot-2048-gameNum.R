@@ -17,7 +17,7 @@ library(grid)
 source("summarySE.R")
 
 path <- "../../agents/2048/csv/"
-filenames=c("multiTrain-5run-200k_V2.csv"
+filenames=c("multiTrain-5run-200k_V2.csv"        
            #,"multiTrain-1run-200k_V3.csv"
            ,"multiTrain-5run-200k_V5.csv"
            #,"multiTrain-1run-300k_V2.csv"
@@ -25,8 +25,8 @@ filenames=c("multiTrain-5run-200k_V2.csv"
            #,"multiTrain-RewardGameScore.csv"#,"multiTrain-RewardGameScore-OLD.csv"
            #,"multiTrain-RewardGameSc-3P.csv"
            ) 
-# Param settings: epsilon = 0.0, ChooseStart01=F, LearnFromRM=F, 
-#     1 run, lambda=0.0, gamma=1.0, VER_3P=true, MODE_3P=1.
+# Param settings: epsilon = 0.0, ChooseStart01=F, LearnFromRM=F, Reward=Score,
+#     5 runs, lambda=0.0, gamma=1.0, VER_3P=true, MODE_3P=1 (all modes are equivalent for 1-player game 2048).
 # V2: alpha=0.2-->0.1
 # V3: alpha=0.4-->0.2 --> same result as V2
 # V4: alpha=0.2-->0.2 --> slightly  worse than V2,V3
