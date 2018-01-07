@@ -6,14 +6,14 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * Class {@link StateObservationNondet} is used to implement <b>nondeterministic</b> games 
+ * Class {@link StateObsNondeterministic} is used to implement <b>nondeterministic</b> games 
  * (like 2048). It extends the normal {@link StateObservation} interface.<p>
  * 
  * @see StateObservation
  * 
  * @author Johannes Kutsch, Wolfgang Konen, TH Köln, Feb'17
  */
-public interface StateObservationNondet extends StateObservation {
+public interface StateObsNondeterministic extends StateObservation {
     /**
      * Advance the current state to a new afterstate (do the deterministic part of advance)
      *
@@ -47,5 +47,5 @@ public interface StateObservationNondet extends StateObservation {
 	
 	public double getProbability(ACTIONS action);
 
-	public StateObservationNondet copy();
+	public StateObsNondeterministic copy();
 }

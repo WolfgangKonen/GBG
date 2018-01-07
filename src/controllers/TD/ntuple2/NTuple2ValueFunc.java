@@ -370,9 +370,7 @@ public class NTuple2ValueFunc implements Serializable {
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board,getUSESYMMETRY());
 
-		alphaM = ALPHA;
-//		if (TDNTuple2Agt.NEWTARGET) 
-			alphaM /= (numTuples*equiv.length); 
+		alphaM = ALPHA / (numTuples*equiv.length); 
 
 		// construct new EquivStates object, add it at head of LinkedList eList and remove 
 		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):
@@ -429,11 +427,11 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 	public double getLambda() {
-		return tdAgt.getTDParams().getLambda();
+		return tdAgt.getParTD().getLambda();
 	}
 
 	public double getGamma() {
-		return tdAgt.getTDParams().getGamma();
+		return tdAgt.getParTD().getGamma();
 	}
 
 	public double getAlphaChangeRatio() {
@@ -445,15 +443,15 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 	public boolean hasSigmoid() {
-		return tdAgt.getTDParams().hasSigmoid();
+		return tdAgt.getParTD().hasSigmoid();
 	}
 	
 	public boolean hasRpropLrn() {
-		return tdAgt.getTDParams().hasRpropLrn();
+		return tdAgt.getParTD().hasRpropLrn();
 	}
 
 	public boolean getUSESYMMETRY() {
-		return tdAgt.getNTParams().getUSESYMMETRY();
+		return tdAgt.getParNT().getUSESYMMETRY();
 	}
 
 	public void clearEquivList() {

@@ -21,6 +21,12 @@ games/Logs/*
 logs/*
 agents/temp/*
 
+#Files not for the public GitHub version
+TDNTupleAgt.docx
+FutureWork.docx
+~$*.*
+~*.tmp
+
 #Ordner mit veralteten Versuchen zur Parallelität
 src/games/ZweiTausendAchtundVierzig/Parallel/*
 
@@ -28,6 +34,7 @@ src/games/ZweiTausendAchtundVierzig/Parallel/*
 agents/2048/fixed 4 6-Tupels*.agt.zip
 agents/2048/fixed TEST eTiles 4 6-Tupels 200k TDNT2.agt.zip
 agents/2048/TEST*.agt.zip
+agents/2048/TC*.agt.zip
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

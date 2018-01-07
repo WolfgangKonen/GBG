@@ -419,7 +419,7 @@ public class EvaluatorHex extends Evaluator {
 
     @Override
     public int getQuickEvalMode() {
-        return 2;
+        return 0;
     }
 
     @Override

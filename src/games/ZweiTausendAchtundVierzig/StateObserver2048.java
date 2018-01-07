@@ -1,7 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
-import games.StateObservationNondet;
+import games.StateObsNondeterministic;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -37,7 +37,7 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
  * @author Wolfgang Konen, THK
  * @author Johannes Kutsch
  */
-public class StateObserver2048 implements StateObservationNondet {
+public class StateObserver2048 implements StateObsNondeterministic {
     private Random random = new Random();
     protected List<Integer> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves = new ArrayList();   // 0: left, 1: up, 2: right, 3: down

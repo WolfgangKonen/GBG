@@ -57,7 +57,7 @@ public class NTuple2 implements Serializable {
 	private transient double tcN[] = null;
 	private transient double tcA[] = null;
 	private transient double tcFactorArray[] = null;
-	private transient double tcDampArray[] = null;
+	//private transient double tcDampArray[] = null;   // currently not used
 	
 	// the following elements are needed in update(): if a certain index of the LUT is 
 	// invoked more than once during a weight update for state s_k (multiple calls to updateNew(), 
@@ -116,7 +116,7 @@ public class NTuple2 implements Serializable {
 			tcN = new double[lut.length]; // matrix N in TC
 			tcA = new double[lut.length]; // matrix A in TC
 			tcFactorArray = new double[lut.length]; // tcFactor=|N|/A
-			tcDampArray = new double[lut.length]; // /WK/ for NEW_WK
+			//tcDampArray = new double[lut.length]; // /WK/ for NEW_WK
 			dWArray = new double[lut.length];	// for accumulating TC (tcImm==false)
 			
 			// initializing N and A matrices and tcFactor=|N|/A
@@ -124,7 +124,7 @@ public class NTuple2 implements Serializable {
 				tcN[i] = INIT;
 				tcA[i] = INIT;
 				tcFactorArray[i] = 1.0;
-				tcDampArray[i] = 1.0;			
+				//tcDampArray[i] = 1.0;			
 			}
 		}
 		
@@ -246,7 +246,7 @@ public class NTuple2 implements Serializable {
 //	 * @param board
 //	 *            the representation of a game board (vector of length 9,
 //	 *            carrying -1 ("O"), 0 (empty) or +1 ("X"))
-//	 * @param alphaM the step size ALPHA (divided by m=numTuples, if NEWTARGET)
+//	 * @param alphaM the step size ALPHA (divided by m=numTuples)
 //	 * @param delta  target minus V(s_t)
 //	 * @param e		 derivative of sigmoid (1 if no sigmoid)
 //	 * @param LAMBDA
@@ -304,7 +304,7 @@ public class NTuple2 implements Serializable {
 	 * @param board
 	 *            the representation of a game board (in case of TTT: vector of length 9,
 	 *            carrying -1 ("O"), 0 (empty) or +1 ("X"))
-	 * @param alphaM the step size ALPHA (divided by numTuples*numEquiv, if NEWTARGET)
+	 * @param alphaM the step size ALPHA (divided by numTuples*numEquiv)
 	 * @param delta  target minus V(s_t)
 	 * @param e		 derivative of sigmoid (1 if no sigmoid) * LAMBDA^(t-k)
 	 * 
@@ -369,26 +369,26 @@ public class NTuple2 implements Serializable {
 		return lut[k];
 	}
 
-	/**
-	 * (only called by NTupleShow.updatePanel())
-	 * 
-	 * @param k
-	 *            index into LUT
-	 * @return the kth tcFactor (TC) for this NTuple
-	 */
-	public double getTCFactor(int k) {
-		if (!TC) return -1.0;		// no TC learning
-		assert (k >= 0 && k < tcFactorArray.length) : " k is not a valid tcFactorArray index";
-		return tcFactorArray[k];
-		//return (double) Math.abs(tcN[k]) / tcA[k];
-		//return tcN[k];
-	}
+//	/**
+//	 * (only called by NTupleShow.updatePanel())
+//	 * 
+//	 * @param k
+//	 *            index into LUT
+//	 * @return the kth tcFactor (TC) for this NTuple
+//	 */
+//	public double getTCFactor(int k) {
+//		if (!TC) return -1.0;		// no TC learning
+//		assert (k >= 0 && k < tcFactorArray.length) : " k is not a valid tcFactorArray index";
+//		return tcFactorArray[k];
+//		//return (double) Math.abs(tcN[k]) / tcA[k];
+//		//return tcN[k];
+//	}
 
-	public double getTC_A(int k) {
-		if (!TC) return -1.0;		// no TC learning
-		assert (k >= 0 && k < tcFactorArray.length) : " k is not a valid tcFactorArray index";
-		return tcA[k];
-	}
+//	public double getTC_A(int k) {
+//		if (!TC) return -1.0;		// no TC learning
+//		assert (k >= 0 && k < tcFactorArray.length) : " k is not a valid tcFactorArray index";
+//		return tcA[k];
+//	}
 
 	public double[] getWeights() {
 		return lut;
@@ -444,7 +444,7 @@ public class NTuple2 implements Serializable {
 // /WK/
 			for (int i = 0; i < lut.length; i++) {
 				tcFactorArray[i] = (double) Math.abs(tcN[i]) / tcA[i];
-				if (NEW_WK) tcFactorArray[i] *= tcDampArray[i]; 
+				//if (NEW_WK) tcFactorArray[i] *= tcDampArray[i]; 
 				lut[i] += tcFactorArray[i]* dWArray[i];
 				dWArray[i]=0.0;
 			}

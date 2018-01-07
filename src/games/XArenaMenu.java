@@ -508,8 +508,8 @@ public class XArenaMenu extends JMenuBar {
 //			}
 			else if (td instanceof TDNTuple2Agt) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple2Agt) td).getTDParams() );
-				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple2Agt) td).getNTParams() );
+				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple2Agt) td).getParTD() );
+				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple2Agt) td).getParNT() );
 				if (((TDNTuple2Agt) td).getOtherPar() == null ) 
 					((TDNTuple2Agt) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple2Agt) td).getOtherPar() );
@@ -519,8 +519,8 @@ public class XArenaMenu extends JMenuBar {
 				// get the loaded values)
 				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
 				// it doesn't hurt
-				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getTDParams(), td.getMaxGameNum());
-				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getNTParams());
+				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getParTD(), td.getMaxGameNum());
+				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getParNT());
 				//m_arena.m_xab.oPar.numEval_T.setText(""+((TDNTuple2Agt) td).getOtherPar().getNumEval());
 			}
 			else if (td instanceof MCTSAgentT) {
@@ -578,7 +578,7 @@ public class XArenaMenu extends JMenuBar {
 				// have nply=0. Then set nply=1: 
 				if (m_arena.m_xab.tdPar[n].getNPly()==0) {
 					m_arena.m_xab.tdPar[n].setNPly(1);
-					((TDNTuple2Agt) td).getTDParams().setNPly(1);
+					((TDNTuple2Agt) td).getParTD().setNPly(1);
 				}
 			} else {
 				m_arena.m_xab.tdPar[n].enableNPly(false);

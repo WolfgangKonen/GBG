@@ -31,7 +31,7 @@ import controllers.PlayAgent.AgentState;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
-import games.StateObservationNondet;
+import games.StateObsNondeterministic;
 import games.XNTupleFuncs;
 import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -69,9 +69,6 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * 
  * @author Wolfgang Konen, TH Köln, Aug'17
  */
-//
-// This agent is adapted from TDNTupleAgt
-//
 public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private enum UpdateType {SINGLE_UPDATE, MULTI_UPDATE};
 	private Random rand; // generate random Numbers 
@@ -84,11 +81,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 */
 	private static final long  serialVersionUID = 13L;
 
-// --- OLD AND WRONG: ---
-//	 * Let p=getGameNum()/getMaxGameNum(). As long as
-//	 * {@literal p < m_epsilon/(1+m_epsilon) we have progress < 0 and} we get with 
-//	 * certainty a random (explorative) move. For p \in [EPS/(1+EPS), 1.0] the random move
-//	 * probability drops linearly from 1 to 0. <br>
 	/**
 	 * Controls the amount of explorative moves in
 	 * {@link #getNextAction2(StateObservation, boolean, boolean)}
@@ -116,7 +108,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 									//false: random points is used to generate nTuples//samine//
 
 	// Value function of the agent.
-	// Here: NTuple2ValueFunc
 	private NTuple2ValueFunc m_Net;
 	
 	// m_Net3 is only needed for DEBG_NEW_3P: it is a parallel structure learning the value 
@@ -156,8 +147,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 */
 	public static boolean VER_3P=true; 
 	/**
-	 * The actual value is set from {@link #m_tdPar}{@code .getMode3P()}.
-	 * @see #VER_3P
+	 * The actual value is set from {@link #m_tdPar}{@code .getMode3P()}. <br>
+	 * See {@link #VER_3P} for more details.
 	 */
 	public int MODE_3P=1; 		// 0/1/2, the actual value is set in initNet from m_tdPar.getMode3P()
 //	public static boolean OLD_3P=false; // OLD_3P=true  <--> MODE_3P=0
@@ -341,33 +332,23 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         
         VTable = new double[acts.size()];  
         
+		UpdateType UPDATE = setUpdateType(so);
+    	int nply = (MODE_3P==1) ? so.getNumPlayers() : 1;
+		
         assert actions.length>0 : "Oops, no available action";
         for(i = 0; i < actions.length; ++i)
         {
             actions[i] = acts.get(i);		
 	        
-            if (VER_3P && MODE_3P==1) {
+            if (VER_3P && UPDATE==UpdateType.SINGLE_UPDATE) {
             	// this has n-ply recursion, but does not reflect multi-moves:
             	//
-            	// ** we currently set nply==N always **
-            	//
-            	//int nply = m_tdPar.getNPly();
-        		//assert nply>0 : "Oops, nPly=0 (or negative) in m_tdPar!";
-//            	if (nply==0) {
-//            		// this should normally not happen, but some saved agents have currently nply=0:
-//            		System.out.println("** Warning **: nply=0 in saved agent, will be set to 1.");
-//            		m_tdPar.setNPly(1);
-//            		nply=1;
-//            	}
-            	int nply = so.getNumPlayers();
-            	//int nply = 1;
-
                 CurrentScore = g3_Eval_NPly(so,actions[i],refer,nply,silent);   
-                
+
 //              if (DBG_NEW_3P && so.getNumPlayers()==1) 
 //                sanityCheck1P(so,actions,i,refer,silent,CurrentScore);
                 
-            } else {	// i.e. VER_3P=false OR (VER_3P==true && MODE_3P!=1)
+            } else {	// i.e. !VER_3P OR (UPDATE==UpdateType.MULTI_UPDATE)
             	// this has recursive multi-move recursion:
                 CurrentScore = g3_Evaluate(so,actions[i],refer,silent);
             }
@@ -812,7 +793,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		double[] VTable = null;
 		double reward = 0.0, oldReward = 0.0;
 		double reward2=0.0;
-		double[] rewardArr, oldRewardArr;
+		//double[] rewardArr, oldRewardArr;
+		ScoreTuple rewardTuple, oldRewardTuple;
 		boolean wghtChange = false;
 		boolean upTC=false;
 		double Input[], oldInput[];
@@ -832,12 +814,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		int epiLength = m_oPar.getEpisodeLength();
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 		
-		UpdateType UPDATE = UpdateType.MULTI_UPDATE;
-		if (MODE_3P==1 || (MODE_3P==2 && so.getNumPlayers()==2))
-			UPDATE = UpdateType.SINGLE_UPDATE;
+		UpdateType UPDATE = setUpdateType(so);
 		
-		rewardArr = new double[so.getNumPlayers()];
-		oldRewardArr = new double[so.getNumPlayers()];
+//		rewardArr = new double[so.getNumPlayers()];
+//		oldRewardArr = new double[so.getNumPlayers()];
+		rewardTuple = new ScoreTuple(so);
+		oldRewardTuple = new ScoreTuple(so);
 
 
 		aftSO = so.getPrecedingAfterstate();
@@ -889,8 +871,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        	case MULTI_UPDATE:
 	    			// do one training step (NEW target) for all players' value functions (VER_3P)
 		        	int refPlayer=ns.getSO().getPlayer();
-		        	rewardArr=trainMultiUpdate_3P(ns,curBoard,learnFromRM,epiLength,oldRewardArr);
-		        	reward=rewardArr[refPlayer];
+//		        	rewardArr=trainMultiUpdate_3P(ns,curBoard,learnFromRM,epiLength,oldRewardArr);
+//		        	reward=rewardArr[refPlayer];
+		        	rewardTuple=trainMultiUpdate_3P(ns,curBoard,learnFromRM,epiLength,oldRewardTuple);
+		        	reward=rewardTuple.scTup[refPlayer];
 //		        	if (DBG_OLD_3P) {
 //		        		double reward3=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward,m_Net3);
 //		        	}
@@ -898,7 +882,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //						reward2=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward);	 
 //						System.out.println("reward,reward2: "+reward+","+reward2);
 //		        	}
-		        	oldReward=oldRewardArr[refPlayer];	        		
+		        	oldReward=oldRewardTuple.scTup[refPlayer];	        		
 	        		break;
 	        	case SINGLE_UPDATE:
 	    			// do one training step (NEW target) only for current player
@@ -939,19 +923,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			}
 
 			/* prepare for next pass through while-loop or for terminal update */ 
-//			if (WITH_NS) {
-				so = ns.getNextSO();	// Only together with trainNewTargetLogic2	or trainNewTargetNEW_3P		
-				curBoard = m_Net.xnf.getBoardVector(ns.getAfterState());  
-//			} else {
-//				//curBoard = nextBoard; 	// BUG!! A later change to nextBoard will change curBoard as well!!
-//											// But probably w/o effect, since the next use of nextBoard is
-//											//  	nextBoard = ...getBoardVector(), 
-//											// and this sets nextBoard to new int[] ... 
-//				curBoard = nextBoard.clone();
-//			}
+			so = ns.getNextSO();	// Only together with trainNewTargetLogic2	or trainNewTargetNEW_3P		
+			curBoard = m_Net.xnf.getBoardVector(ns.getAfterState());  
 			curPlayer= nextPlayer;
 			if (VER_3P && UPDATE==UpdateType.MULTI_UPDATE) {
-				for (int i=0; i<so.getNumPlayers(); i++) oldRewardArr[i] = rewardArr[i];
+				//for (int i=0; i<so.getNumPlayers(); i++) oldRewardArr[i] = rewardArr[i];
+				oldRewardTuple.scTup = rewardTuple.scTup.clone();
 			} else {
 				oldReward= reward;				
 			}
@@ -1027,23 +1004,25 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * This is for the 3P target logic, i.e. {@link #VER_3P}==true and {@code MODE_3P}==0
 	 * or [{@code MODE_3P}==2 AND N!=2 ] (since it is sub-optimal for 2-player games).
 	 * <p>
-	 * Each player has its own value function and the target for player p_i is
-	 * 		r(s_t+1, p_i) + \gamma*V(s_t+1,p_i)
+	 * Each player has its own value function and the target for player p_i is <br>
+	 * 		r(s_t+1, p_i) + \gamma*V(s_t+1,p_i) <br>
 	 * which is the target for the actual value function V(s_t,p_i)
 	 * 
-	 * @return rewardArr
+	 * @return rewardTuple the tuple of rewards r(s_t+1, p_i) of {@code ns} for each player p_i
 	 */
-	private double[] trainMultiUpdate_3P(NextState ns,
+	private ScoreTuple trainMultiUpdate_3P(NextState ns,
 			int[] curBoard, 
 			boolean learnFromRM, int epiLength,  
-			double[] oldRewardArr) 
+			//double[] oldRewardArr
+			ScoreTuple oldRewardTuple) 
 	{
 		StateObservation thisSO=ns.getSO();
 		StateObservation nextSO=ns.getNextSO();
 		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState());
 		int thisPlayer= thisSO.getPlayer();
 		int nextPlayer= nextSO.getPlayer();
-		double[] rewardArr = ns.getNextRewardArr();
+		//double[] rewardArr = ns.getNextRewardArr();
+		ScoreTuple rewardTuple = ns.getNextRewardTuple();
 		
 		assert (VER_3P==true);
 		
@@ -1053,7 +1032,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
 		m_counter++;
 		if (m_counter==epiLength) {
-			rewardArr=(estimateGameValueTuple(nextSO)).scTup;
+			//rewardArr=(estimateGameValueTuple(nextSO)).scTup;
+			rewardTuple=estimateGameValueTuple(nextSO);
 			//epiCount++;
 			m_finished = true; 
 		}
@@ -1066,7 +1046,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// do one training step (NEW target) for all players' value functions (VER_3P)
 			for (int i=0; i<thisSO.getNumPlayers(); i++) {
 				if (curBoard!=null) {
-					double rw = rewardArr[i]-oldRewardArr[i];
+					double rw = rewardTuple.scTup[i]-oldRewardTuple.scTup[i];
 					// target is (reward + GAMMA * value of the after-state) for non-final states
 					double target = rw + getGamma() * m_Net.getScoreI(nextBoard,i);
 					m_Net.updateWeightsNew(curBoard, i /*thisPlayer*/, nextBoard, i /*nextPlayer*/,
@@ -1075,7 +1055,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			}
 		}
 		
-		return rewardArr;
+		return rewardTuple;
 		
 	} // trainMultiUpdate_3P
 	
@@ -1160,7 +1140,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		int thisPlayer= thisSO.getPlayer();
 		int nextPlayer= nextSO.getPlayer();
 		
-		//reward = fetchReward(nextSO,thisSO,Types.PLAYER_PM[thisSO.getPlayer()]);
 		reward = ns.getNextReward();
 		
 		if (nextSO.isGameOver()) {
@@ -1280,17 +1259,22 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		StateObservation refer;
 		StateObservation afterState;
 		StateObservation nextSO;
-//		double thisReward;			
 		/**
 		 * the reward of next state <b>s''</b> from the perspective of state <b>s</b> = {@code so} 
 		 */
 		double nextReward;
 		
+//		/**
+//		 * an array of size {@code N = nextSO.getNumPlayers()} holding  the reward of 
+//		 * {@code nextSO} from the perspective of player 0,1,...N-1
+//		 */
+//		private double nextRewardArr[] = null;	
+		
 		/**
-		 * an array of size {@code N = nextSO.getNumPlayers()} holding  the reward of 
+		 * a ScoreTuple holding  the rewards of 
 		 * {@code nextSO} from the perspective of player 0,1,...N-1
 		 */
-		private double nextRewardArr[] = null;	
+		private ScoreTuple nextRewardTuple = null;
 		
 		/**
 		 * Advance state <b>s</b> = {@code so} by action {@code actBest}. Store the afterstate 
@@ -1300,8 +1284,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			refer = so.copy();
 			int nPlayers= refer.getNumPlayers();
 	        if (getAFTERSTATE()) {
-	        	/* assertion not needed anymore, advanceDeterministic is also part of StateObservation */ 
-            	// assert (so instanceof StateObservationNondeterministic);
+	        	/* assertion not needed anymore, advanceNondeterministic is also part of StateObservation */ 
+            	// assert (so instanceof StateObsNondeterministic);
 	        	
             	// implement it in such a way that StateObservation so is *not* changed -> that is why 
             	// we copy *first* to afterState, then advance:
@@ -1316,23 +1300,23 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				afterState = nextSO.copy();
 	        }
 	        
-			UpdateType UPDATE = UpdateType.MULTI_UPDATE;
-			if (MODE_3P==1 || (MODE_3P==2 && so.getNumPlayers()==2))
-				UPDATE = UpdateType.SINGLE_UPDATE;
-			
+			UpdateType UPDATE = setUpdateType(so);
 
 			if (VER_3P) {
 	        	switch (UPDATE) {
 	        	case MULTI_UPDATE:
 					boolean rgs = m_oPar.getRewardIsGameScore();
-					nextRewardArr = new double[nPlayers];
+					//nextRewardArr = new double[nPlayers];
+					nextRewardTuple = new ScoreTuple(so);
 					for (int i=0; i<nPlayers; i++) {
-						nextRewardArr[i] = normalize2(nextSO.getReward(i,rgs),nextSO);
+						//nextRewardArr[i] = 
+						nextRewardTuple.scTup[i] = normalize2(nextSO.getReward(i,rgs),nextSO);
 					}
 					break;
 	        	case SINGLE_UPDATE:
 					nextReward = fetchReward2P(nextSO,refer);
-		        	// this is r(s_{t+1}|p_t). It is equivalent to (-1)*r(s_{t+1}|p_{t+1}).
+		        	// this is r(s_{t+1}|p_t). It is equivalent to (-1)*r(s_{t+1}|p_{t+1}) for 
+					// 2-player games.
 					break;
 				}
 			} else {	// i.e. VER_3P==false
@@ -1347,9 +1331,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			if (DBG_REWARD && nextSO.isGameOver()) {
 				if (VER_3P && MODE_3P==0) {
 					System.out.print("Rewards: ");
-					for (int i=0; i<nPlayers; i++) {
-						System.out.print(nextRewardArr[i]+",");
-					}
+//					for (int i=0; i<nPlayers; i++) {
+//						System.out.print(nextRewardArr[i]+",");
+//					}
+					System.out.print(nextRewardTuple.toString());
 				} else {
 					System.out.print("Reward: "+nextReward);
 				}
@@ -1372,28 +1357,31 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		}
 
 		/**
-		 * @return the next state <b>s''</b> (random part from environment added).
+		 * @return the next state <b>s''</b> (with random part from environment added).
 		 */
 		public StateObservation getNextSO() {
 			return nextSO;
 		}
 
-//		@Deprecated
-//		public double getThisReward() {
-//			return thisReward;
-//		}
-
 		public double getNextReward() {
 			return nextReward;
 		}
 
+//		/**
+//		 * Returns an array of size {@code N = nextSO.getNumPlayers()}
+//		 * 
+//		 * @return the reward of {@code nextSO} from the perspective of player 0,1,...N-1
+//		 */
+//		@Deprecated
+//		public double[] getNextRewardArr() {
+//			return nextRewardArr;
+//		}
+		
 		/**
-		 * Returns an array of size {@code N = nextSO.getNumPlayers()}
-		 * 
-		 * @return the reward of {@code nextSO} from the perspective of player 0,1,...N-1
+		 * @return the tuple of rewards of {@code nextSO} from the perspective of player 0,1,...N-1
 		 */
-		public double[] getNextRewardArr() {
-			return nextRewardArr;
+		public ScoreTuple getNextRewardTuple() {
+			return nextRewardTuple;
 		}
 
 	} // class NextState
@@ -1427,12 +1415,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	public void setTDParams(TDParams tdPar, int maxGameNum) {
-//		m_Net.setLambda(tdPar.getLambda());
-//		m_Net.setGamma(tdPar.getGamma());
-//		m_Net.setSigmoid(tdPar.hasSigmoid());
-//		m_Net.setRpropLrn(tdPar.hasRpropLrn());
-		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
-
 		double alpha = tdPar.getAlpha();
 		double alphaFinal = tdPar.getAlphaFinal();
 		double alphaChangeRatio = Math
@@ -1450,12 +1432,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	public void setTDParams(ParTD tdPar, int maxGameNum) {
-//		m_Net.setLambda(tdPar.getLambda());
-//		m_Net.setGamma(tdPar.getGamma());
-//		m_Net.setSigmoid(tdPar.hasSigmoid());
-//		m_Net.setRpropLrn(tdPar.hasRpropLrn());
-		//m_Net.setRpropInitDelta( tdPar.getAlpha() / inpSize[m_feature.getFeatmode()] );
-
 		double alpha = tdPar.getAlpha();
 		double alphaFinal = tdPar.getAlphaFinal();
 		double alphaChangeRatio = Math
@@ -1471,8 +1447,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public void setNTParams(NTParams ntPar) {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
-//		USESYMMETRY=ntPar.getUseSymmetry();
-//		m_Net.setUseSymmetry(ntPar.getUseSymmetry());   // WK: needed when loading agent
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
@@ -1481,8 +1455,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public void setNTParams(ParNT ntPar) {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
-//		USESYMMETRY=ntPar.getUSESYMMETRY();
-//		m_Net.setUseSymmetry(ntPar.getUSESYMMETRY());   // WK: needed when loading agent
 		tcImm=ntPar.getTcImm();		
 		randomness=ntPar.getRandomness();
 		randWalk=ntPar.getRandomWalk();
@@ -1562,10 +1534,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		return str;
 	}
 
-	public ParTD getTDParams() {
+	public ParTD getParTD() {
 		return m_tdPar;
 	}
-	public ParNT getNTParams() {
+	public ParNT getParNT() {
 		return m_ntPar;
 	}
 	public boolean getAFTERSTATE() {
@@ -1575,6 +1547,25 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		return m_oPar.useLearnFromRM();
 	}
 
+	/**
+	 * Set the weight update mode: <ul>
+	 * <li> If {@link #MODE_3P}==0, do weight update for each player's V (MULTI)
+	 * <li> If {@link #MODE_3P}==1, do weight update only for p_t in V(s_t) (SINGLE, nply=N)
+	 * <li> If {@link #MODE_3P}==2: <ul>
+	 * 		<li> If N==2, do weight update only for p_t in V(s_t) (SINGLE, nply=1)
+	 * 		<li> else do weight update for each player's V (MULTI)
+	 * 		</ul>
+	 * </ul>
+	 * See {@link #VER_3P} for more details.
+	 * @param so	to get N=={@code so.getNumPlayers()}
+	 * @return the update type
+	 */
+	private UpdateType setUpdateType(StateObservation so) {
+		if (MODE_3P==1 || (MODE_3P==2 && so.getNumPlayers()==2))
+			return UpdateType.SINGLE_UPDATE;	
+		return UpdateType.MULTI_UPDATE;
+	}
+	
 
 	// Debug only: 
 	//

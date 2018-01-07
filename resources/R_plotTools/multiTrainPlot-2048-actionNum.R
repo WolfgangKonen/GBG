@@ -24,6 +24,7 @@ filenames=c("multiTrain-1run-100k_V2.csv"
            ,"multiTrain-1run-300k_V2.csv"
            ,"multiTrain-1run-300k_V5.csv"         # 5.0h elapsed
            ,"multiTrain-1run-400k_V2.csv"
+           ,"multiTrain-1run-400k_V5.csv"         # 6.9h elapsed
            #,"multiTrain-RewardGameScore.csv"#,"multiTrain-RewardGameScore-OLD.csv"
            #,"multiTrain-RewardGameSc-3P.csv"
            ) 
@@ -59,6 +60,7 @@ for (k in 1:length(filenames)) {
                     ,rep("300k",nrow(df))
                     ,rep("300k V5",nrow(df))
                     ,rep("400k",nrow(df))
+                    ,rep("400k V5",nrow(df))
                     #,rep("game score OLD",nrow(df))
                     ,rep("game sc 3P",nrow(df))
                     )

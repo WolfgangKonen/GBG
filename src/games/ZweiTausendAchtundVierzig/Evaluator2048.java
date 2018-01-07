@@ -232,7 +232,9 @@ public class Evaluator2048 extends Evaluator {
 
         stopTime = System.currentTimeMillis();
 
-        System.out.print("\n");
+        //System.out.print("\n");
+        if (verbose==1) System.out.println("Finished evaluation of "+ConfigEvaluator.NUMBEREVALUATIONS+" games with average score "
+        		+ Math.round(averageScore) + " +- " + Math.round(standarddeviation/Math.sqrt(ConfigEvaluator.NUMBEREVALUATIONS)));
 
         return averageScore > ConfigEvaluator.MINPOINTS;
     }

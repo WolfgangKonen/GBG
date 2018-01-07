@@ -3,7 +3,7 @@ package controllers;
 import controllers.PlayAgent;
 import controllers.MinimaxAgent;
 import games.StateObservation;
-import games.StateObservationNondet;
+import games.StateObsNondeterministic;
 import params.MaxNParams;
 import params.ParMaxN;
 import params.ParOther;
@@ -95,9 +95,9 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		double[] VTable = new double[actions.size()+1];  
 //		silent=false;
 		
-		if (!(so instanceof StateObservationNondet)) 
+		if (!(so instanceof StateObsNondeterministic)) 
 			throw new RuntimeException("Error, Expectimax-N only usable for nondeterministic games");
-		StateObservationNondet soND = (StateObservationNondet) so;
+		StateObsNondeterministic soND = (StateObsNondeterministic) so;
 		
 		ACTIONS_ST act_best = getBestAction(soND, so,  random,  VTable,  silent, 1);
 		
@@ -116,13 +116,13 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @param depth		tree depth
 	 * @return		best action + score tuple
 	 */
-	private ACTIONS_ST getBestAction(StateObservationNondet soND, StateObservation refer, boolean random, 
+	private ACTIONS_ST getBestAction(StateObsNondeterministic soND, StateObservation refer, boolean random, 
 			double[] VTable, boolean silent, int depth) 
 	{
 		int i,j;
 		ScoreTuple currScoreTuple=null;
         ScoreTuple sc, scBest=null;
-		StateObservationNondet NewSO;
+		StateObsNondeterministic NewSO;
         ACTIONS actBest = null;
         ACTIONS_ST act_st = null;
 
@@ -218,7 +218,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
         return act_st;         
 	}
 
-	private ScoreTuple getAllScores(StateObservationNondet sob, StateObservation refer, boolean silent, int depth) {
+	private ScoreTuple getAllScores(StateObsNondeterministic sob, StateObservation refer, boolean silent, int depth) {
         ACTIONS_ST act_st = null;
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		if (sob.isGameOver())
@@ -247,15 +247,15 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 */
 	@Override
 	public double getScore(StateObservation sob) {
-		assert sob instanceof StateObservationNondet : "Error, sob must be of class StateObservationNondet";
-		StateObservationNondet soND = (StateObservationNondet) sob;
+		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
+		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
 		
 		return getAllScores(soND,sob,true,0).scTup[sob.getPlayer()];
 	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob) {
-		assert sob instanceof StateObservationNondet : "Error, sob must be of class StateObservationNondet";
-		StateObservationNondet soND = (StateObservationNondet) sob;
+		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
+		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
 		
 		return getAllScores(soND,sob,true,0);
 	}
@@ -306,23 +306,23 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		return m_depth;
 	}
 
-    private void printAfterstate(StateObservationNondet soND,ACTIONS actBest,
+    private void printAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
     		ScoreTuple scTuple, int depth)
     {
-		StateObservationNondet NewSO = soND.copy();
+		StateObsNondeterministic NewSO = soND.copy();
     	NewSO.advanceDeterministic(actBest);
     	System.out.println("---     Move: "+NewSO.stringDescr()+"   "+scTuple.toString()+", depth="+depth);
     }	 
 
-    private void printBestAfterstate(StateObservationNondet soND,ACTIONS actBest,
+    private void printBestAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
     		double pMaxScore, int depth)
     {
-		StateObservationNondet NewSO = soND.copy();
+		StateObsNondeterministic NewSO = soND.copy();
     	NewSO.advanceDeterministic(actBest);
     	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore+", depth="+depth);
     }	
 
-    private void printNondet(StateObservationNondet NewSO,
+    private void printNondet(StateObsNondeterministic NewSO,
     		ScoreTuple scTuple, double currProbab, int depth)
     {
     	System.out.println("---   Random: "+NewSO.stringDescr()+"   "+scTuple.toString()+

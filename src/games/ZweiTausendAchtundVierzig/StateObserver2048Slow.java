@@ -1,7 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
-import games.StateObservationNondet;
+import games.StateObsNondeterministic;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
@@ -22,7 +22,7 @@ import java.util.Random;
  * 
  * @author Johannes Kutsch, THK
  */
-public class StateObserver2048Slow implements StateObservationNondet {
+public class StateObserver2048Slow implements StateObsNondeterministic {
     private Random random = new Random();
     protected List<Tile> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves;

@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 /**
  * Interface for the n-tuple implementation in {@link TDNTuple2Agt} and 
- * {@link NTuple2ValueFunc}. Contains game-specific functions for producing a 
+ * {@link NTuple2ValueFunc}. Specifies game-specific functions for producing a 
  * board vector, symmetric board vectors (if any) and a fixed n-tuple set. <p>
  * 
  * Note: The six methods {@link #getNumCells()}, {@link #getNumPositionValues()}, 

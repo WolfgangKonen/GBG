@@ -98,7 +98,6 @@ public class XArenaFuncs
 	 * Construct and return a new {@link PlayAgent}, based on the settings in 
 	 * {@code sAgent} and {@code m_xab}. 
 	 * <p>
-	 *  
 	 * @param sAgent	the string from the agent-select box
 	 * @param m_xab		used only for reading parameter values from GUI members 
 	 * @return			a new {@link PlayAgent} (initialized, but not yet trained)
@@ -148,19 +147,6 @@ public class XArenaFuncs
 				//e.printStackTrace();
 				pa=null;			
 			}
-//		} else if (sAgent.equals("TD-Ntuple")) {
-//			try {
-//				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
-//				NTupleFactory ntupfac = new NTupleFactory(); 
-//				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar, xnf);
-//				pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
-//			} catch (Exception e) {
-//				MessageBox.show(m_xab, 
-//						e.getMessage(), 
-//						"Warning", JOptionPane.WARNING_MESSAGE);
-//				//e.printStackTrace();
-//				pa=null;			
-//			}
 		} else if (sAgent.equals("Minimax")) {
 			pa = new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Max-N")) {
@@ -168,7 +154,7 @@ public class XArenaFuncs
 		} else if (sAgent.equals("Expectimax-N")) {
 			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Random")) {
-			pa = new RandomAgent(sAgent);
+			pa = new RandomAgent(sAgent, new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS")) {
 			pa = new MCTSAgentT(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS Expectimax")) {
@@ -213,7 +199,7 @@ public class XArenaFuncs
 			} else if (sAgent.equals("Expectimax-N")) {
 				pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("Random")) {
-				pa= new RandomAgent(sAgent);
+				pa= new RandomAgent(sAgent, new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("MCTS")) {
 				pa= new MCTSAgentT(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("MCTS Expectimax")) {
@@ -229,19 +215,6 @@ public class XArenaFuncs
 					if (sAgent.equals("TDS")) {
 						Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
 						pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
-//					} else if (sAgent.equals("TD-Ntuple")) {
-//						try {
-//							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
-//							NTupleFactory ntupfac = new NTupleFactory(); 
-//							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar,xnf);
-//							pa = new TDNTupleAgt(sAgent, m_xab.tdPar, m_xab.ntPar, m_xab.oPar, nTuples, xnf, maxGameNum);
-//						} catch (Exception e) {
-//							MessageBox.show(m_xab, 
-//									e.getMessage(), 
-//									"Warning", JOptionPane.WARNING_MESSAGE);
-//							//e.printStackTrace();
-//							pa=null;			
-//						}
 					} else if (sAgent.equals("TD-Ntuple-2")) {
 						try {
 							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
@@ -276,8 +249,9 @@ public class XArenaFuncs
 	}
 
 	/**
-	 * Given the selected agents in {@code paVector}, wrap them (if {@code nply>0} by an n-ply
-	 * look-ahead tree search. The tree is of type Max-N for deterministic games and of type
+	 * Given the selected agents in {@code paVector}, do nothing if their {@code nply==0}. 
+	 * But if their {@code nply>0}, wrap them by an n-ply look-ahead tree search. 
+	 * The tree is of type Max-N for deterministic games and of type
 	 * Expectimax-N for nondeterministic games. No wrapping occurs for agent {@link HumanPlayer}.
 	 * <p>
 	 * Caution: Larger values for {@code nply}, e.g. greater 5, may lead to long execution times!
@@ -297,15 +271,6 @@ public class XArenaFuncs
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n=0; n<numPlayers; n++) {
 			qaVector[n] = wrapAgent(n, paVector[n], oPar, so);
-//			qaVector[n]=paVector[n];
-//			int nply = oPar[n].getWrapperNPly();
-//			if (nply>0 && !(paVector[n] instanceof HumanPlayer)) {
-//				if (so.isDeterministicGame()) {
-//					qaVector[n] = new MaxNWrapper(paVector[n],nply);
-//				} else {
-//					qaVector[n] = new ExpectimaxWrapper(paVector[n],nply);
-//				}
-//			}
 		} // for (n)
 		return qaVector;
 	}
@@ -374,9 +339,6 @@ public class XArenaFuncs
 		lChart.addSeries(seriesQ);
 		
 		String pa_string = pa.getClass().getName();
-//		if (pa_string.equals("TicTacToe.CMAPlayer")) 
-//			pa_string = pa_string + " with fitness " + ((CMAPlayer) pa).getFitfunString() +
-//			" and with " + ((CMAPlayer) pa).getNbRuns() + " restarts";
 		System.out.println(pa.stringDescr());
 		pa.setMaxGameNum(maxGameNum);
 		pa.setNumEval(numEval);
@@ -428,12 +390,10 @@ public class XArenaFuncs
 					
 					// construct 'qa' anew (possibly wrapped agent for eval)
 					qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
-			        //m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
 
 			        m_evaluatorQ.eval(qa);
 					seriesQ.add((double)gameNum, m_evaluatorQ.getLastResult());
 					if (doTrainEvaluation) {
-				        //m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
 						m_evaluatorT.eval(qa);
 						if (PLOTTRAINEVAL) 
 							seriesT.add((double)gameNum, m_evaluatorT.getLastResult());
@@ -445,10 +405,8 @@ public class XArenaFuncs
 				if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {
 					// construct 'qa' anew (possibly wrapped agent for eval)
 					qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
-			        //m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
 			        
 					if (doTrainEvaluation) {
-				        //m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
 						m_evaluatorT.eval(qa);
 						m_evaluatorT.goalReached(gameNum);
 					}
@@ -570,9 +528,6 @@ public class XArenaFuncs
 
 			if (i==0) {
 				String pa_string = pa.getClass().getName();
-//				if (pa_string.equals("TicTacToe.CMAPlayer")) 
-//					pa_string = pa_string + " with fitness " + ((CMAPlayer) m_PlayAgentX).getFitfunString() +
-//					" and with " + ((CMAPlayer) m_PlayAgentX).getNbRuns() + " restarts";
 				System.out.println(pa.stringDescr());
 			}
 			pa.setMaxGameNum(maxGameNum);
@@ -601,17 +556,14 @@ public class XArenaFuncs
 						
 						// construct 'qa' anew (possibly wrapped agent for eval)
 						qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
-				        //m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
 				        
 						m_evaluatorQ.eval(qa);
 						evalQ = m_evaluatorQ.getLastResult();
 						if (doTrainEvaluation) {
-					        //m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
 							m_evaluatorT.eval(qa);
 							evalT = m_evaluatorT.getLastResult();
 						}
 						if (doMultiEvaluation) {
-					        //m_evaluatorM = xab.m_game.makeEvaluator(qa,gb,stopEval,mem,1);
 							m_evaluatorM.eval(qa);
 							evalM = m_evaluatorM.getLastResult();
 						}
@@ -629,18 +581,15 @@ public class XArenaFuncs
 			
 			// construct 'qa' anew (possibly wrapped agent for eval)
 			qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
-	        //m_evaluatorQ = xab.m_game.makeEvaluator(qa,gb,stopEval,qem,1);
 
 	        // evaluate again at the end of a training run:
 			m_evaluatorQ.eval(qa);
 			oQ.add(m_evaluatorQ.getLastResult());
 			if (doTrainEvaluation) {
-		        //m_evaluatorT = xab.m_game.makeEvaluator(qa,gb,stopEval,tem,1);
 				m_evaluatorT.eval(qa);
 				oT.add(m_evaluatorT.getLastResult());								
 			}
 			if (doMultiEvaluation) {
-		        //m_evaluatorM = xab.m_game.makeEvaluator(qa,gb,stopEval,mem,1);
 				m_evaluatorM.eval(qa);
 				oM.add(m_evaluatorM.getLastResult());
 			}

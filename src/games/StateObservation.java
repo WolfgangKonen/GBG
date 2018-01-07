@@ -21,7 +21,7 @@ import tools.Types.ScoreTuple;
  * 
  * StateObservation is for deterministic games.
  * 
- * @see StateObservationNondet
+ * @see StateObsNondeterministic
  * 
  * @author Wolfgang Konen, TH Köln, Feb'17
  */
