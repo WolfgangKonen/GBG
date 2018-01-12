@@ -432,8 +432,8 @@ abstract public class Arena extends JPanel implements Runnable {
 		  {			
 			if(gb.isActionReq()){
 				moveNum++;
+				//System.out.println(moveNum);
 				so = gb.getStateObs();
-				//int[] test= so.getBoardVector();
 				player = so.getPlayer();
 				pa = qaVector[player];
 					if (pa instanceof controllers.HumanPlayer) {

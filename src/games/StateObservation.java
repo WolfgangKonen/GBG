@@ -68,6 +68,7 @@ public interface StateObservation extends Serializable{
 	 * @return PLAYER_LOSES(-1), TIE(0), PLAYER_WINS(1)
 	 */
 	public Types.WINNER getGameWinner();
+	// Do we need this method really?
 
 //	/**
 //	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
@@ -105,7 +106,8 @@ public interface StateObservation extends Serializable{
 	public double getGameScore(int player);
 	
 	/**
-	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
+	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int)} 
+	 * 			with {@code i} as argument
 	 */
 	public ScoreTuple getGameScoreTuple();
 
@@ -135,6 +137,14 @@ public interface StateObservation extends Serializable{
 	 */
 	public double getReward(int player, boolean rewardIsGameScore);
 
+	/**
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return	a score tuple which has as {@code i}th value  
+	 * 			{@link #getReward(int, boolean)} with {@code i} as first argument
+	 */
+	public ScoreTuple getRewardTuple(boolean rewardIsGameScore);
+	
 	public double getMinGameScore();
 	public double getMaxGameScore();
 

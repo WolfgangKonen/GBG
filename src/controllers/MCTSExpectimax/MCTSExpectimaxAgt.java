@@ -5,9 +5,9 @@ import controllers.PlayAgent;
 import controllers.MCTS.MCTSAgentT;
 import games.StateObservation;
 import games.XArenaMenu;
-import params.MCTSExpectimaxParams;
-import params.MCTSParams;
-import params.OtherParams;
+//import params.MCTSExpectimaxParams;
+//import params.MCTSParams;
+//import params.OtherParams;
 import params.ParMCTS;
 import params.ParMCTSE;
 import params.ParOther;
@@ -43,16 +43,17 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 */
 	private static final long  serialVersionUID = 12L;
 
-	/**
-	 * @param name	agent name, should be "MCTS Expectimax"
-	 * @param mcPar Settings for the Agent
-	 */
-    public MCTSExpectimaxAgt(String name, MCTSExpectimaxParams mcPar) {
-		super(name);
-		params = new ParMCTSE(mcPar);
-
-		initMCTSEAgent(params, new ParOther());
-	}
+//	/**
+//	 * @param name	agent name, should be "MCTS Expectimax"
+//	 * @param mcPar Settings for the Agent
+//	 */
+//	@Deprecated
+//    public MCTSExpectimaxAgt(String name, MCTSExpectimaxParams mcPar) {
+//		super(name);
+//		params = new ParMCTSE(mcPar);
+//
+//		initMCTSEAgent(params, new ParOther());
+//	}
 
 	/**
 	 * @param name	agent name, should be "MCTS Expectimax"
@@ -70,13 +71,23 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 * @param name	agent name, should be "MCTS Expectimax"
 	 * @param mcPar Settings for the Agent
 	 */
-    public MCTSExpectimaxAgt(String name, MCTSExpectimaxParams mcPar, OtherParams oPar) {
+    public MCTSExpectimaxAgt(String name, ParMCTSE mcPar, ParOther oPar) {
 		super(name);
-		params = new ParMCTSE();
-		params.setFrom(mcPar);
-
-		initMCTSEAgent(params, new ParOther(oPar));
+		initMCTSEAgent(mcPar, oPar);
 	}
+
+//	/**
+//	 * @param name	agent name, should be "MCTS Expectimax"
+//	 * @param mcPar Settings for the Agent
+//	 */
+//    @Deprecated
+//    public MCTSExpectimaxAgt(String name, MCTSExpectimaxParams mcPar, OtherParams oPar) {
+//		super(name);
+//		params = new ParMCTSE();
+//		params.setFrom(mcPar);
+//
+//		initMCTSEAgent(params, new ParOther(oPar));
+//	}
 
     private void initMCTSEAgent(ParMCTSE mcPar, ParOther oPar) {   
 		player = new MCTSEPlayer(new Random(), mcPar);

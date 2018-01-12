@@ -69,10 +69,9 @@ import tools.Types.ACTIONS;
 import games.Arena;
 import games.StateObservation;
 import games.XArenaButtons;
-import params.MCTSParams;
-import params.NTParams;
 import params.ParMCTS;
-import params.TDParams;
+//import params.NTParams;
+//import params.TDParams;
 
 public class LoadSaveGBG {
 	private final JFileChooserApprove fc;

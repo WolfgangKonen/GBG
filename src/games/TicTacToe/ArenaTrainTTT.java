@@ -9,8 +9,8 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import params.TDParams;
 import games.ArenaTrain;
+//import params.TDParams;
 
 /**
  * {@link ArenaTrain} for TicTacToe. It borrows all functionality

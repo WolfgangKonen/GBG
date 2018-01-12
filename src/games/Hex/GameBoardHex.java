@@ -63,7 +63,8 @@ public class GameBoardHex implements GameBoard {
         } else if (vClear) {
             m_so.clearTileValues();
         }
-        gamePanel.repaint();
+        //gamePanel.repaint();
+        m_frame.paint(m_frame.getGraphics());
     }
 
     @Override
@@ -72,7 +73,8 @@ public class GameBoardHex implements GameBoard {
     	gamePanel.setShowValues(showValueOnGameboard);
     	
         if (so == null) {
-            gamePanel.repaint();
+            //gamePanel.repaint();
+            m_frame.paint(m_frame.getGraphics());
             return;
         }
 
@@ -81,8 +83,20 @@ public class GameBoardHex implements GameBoard {
         StateObserverHex soHex = (StateObserverHex) so;
 
         m_so = soHex.copy();
-
-        gamePanel.repaint();
+        
+        if (m_Arena.taskState != Arena.Task.PLAY) {
+            gamePanel.repaint();
+            //--- the above line results in a buggy behavior in connection with delay slider: not 
+            //--- every call to repaint will issue an update, so that after two delays all of a 
+            //--- sudden two moves would be displayed. The right thing is to call the paint() 
+            //--- method of the enclosing JFrame:         	
+        } else {
+    		m_frame.paint(m_frame.getGraphics());
+    		// this works well with the slider, with the little down-side of paint(): GameBoard 
+    		// tends to flicker when moves are displayed.
+    		// But it has problems when training: The Gameboard flickers AND part of the 
+    		// JFreeChart are 'hidden' --> so we do not use this in training.
+        }
 
 
         if (verbose) {
@@ -164,10 +178,15 @@ public class GameBoardHex implements GameBoard {
     private void createAndShowGUI() {
         gamePanel = new HexPanel();
         m_frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        
         m_frame.getContentPane().setBackground(Color.black);
         Container content = m_frame.getContentPane();
         content.add(gamePanel);
         m_frame.getContentPane().setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+        // this is just a try instead of the 4 lines above: does it stop the "GUI hangs" bug? - not really
+//        m_frame.add(gamePanel);
+//        m_frame.setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+        
         m_frame.pack();
         m_frame.setResizable(false);
         m_frame.setLocationRelativeTo(null);
@@ -185,17 +204,17 @@ public class GameBoardHex implements GameBoard {
         return m_Arena;
     }
     
-    /**
-     * Class HexPanel is used as the GUI for the game Hex. It extends the class JPanel.
-     * It is responsible for drawing the game state to the screen.
-     * Includes a child class HexMouseListener to process user input.
-     */
 
     @Override
 	public void toFront() {
 		gamePanel.toFront();
 	}
 
+    /**
+     * Class HexPanel is used as the GUI for the game Hex. It extends the class JPanel.
+     * It is responsible for drawing the game state to the screen.
+     * Includes a child class HexMouseListener to process user input.
+     */
     public class HexPanel extends JPanel {
         boolean showValues = true;
 
@@ -225,7 +244,9 @@ public class GameBoardHex implements GameBoard {
             super.paintComponent(g2);
 
             //Don't draw the game board while training to save CPU cycles
-            if (m_Arena.taskState != Arena.Task.TRAIN) {
+            if (   m_Arena.taskState != Arena.Task.TRAIN 
+           		&& m_Arena.taskState != Arena.Task.MULTTRN
+            		) {
                 drawBoardToPanel(g2, showValues);
             }
         }

@@ -27,9 +27,9 @@ import games.GameBoard;
 import games.StateObservation;
 import games.XArenaButtons;
 import games.XArenaFuncs;
-import params.OtherParams;
+//import params.OtherParams;
 import params.ParOther;
-import params.TDParams;
+import params.ParTD;
 import tools.LineChartSuccess;
 import tools.Measure;
 import tools.Types;
@@ -158,12 +158,12 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 		boolean sigArr[] = {false,true,false,true};	// false: output = output activation; true: output = sigmoid(output activation)
 		
 		double result[][] = new double[linArr.length][maxGameArr.length];
-		TDParams tdPar = new TDParams();
+		ParTD tdPar = new ParTD();
 		tdPar.setAlpha(alpha);
 		tdPar.setAlphaFinal(alphaFinal);
 		tdPar.setLambda(lambda);
 		tdPar.setFeatmode(featmode);
-		OtherParams oPar = new OtherParams();
+		ParOther oPar = new ParOther();
 
 		System.out.println("*** Starting TicTacToe.batch1 with trainNum = "+trainNum+" ***");
 
@@ -249,13 +249,13 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 		int featArr[] = {2}; //{1,2,3,4,9};
 		//double EPS = 0.0;	 	// @deprecated, use epsilon
 		double epsilon = 0.3;   // controls explorative moves, see TDAgent
-		TDParams tdPar = new TDParams();
+		ParTD tdPar = new ParTD();
 		tdPar.setAlpha(alpha);
 		tdPar.setAlphaFinal(alphaFinal);
 		tdPar.setLambda(lambda);
 		tdPar.setEpsilon(epsilon);
 		tdPar.setEpsilonFinal(0.0);
-		OtherParams oPar = new OtherParams();
+		ParOther oPar = new ParOther();
 		
 		System.out.println("*** Starting TicTacToe.batch2 with trainNum = "+trainNum+" ***");
 
@@ -577,12 +577,12 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 		//double EPS = 0.1;	// @deprecated, use epsilon 
 		double epsilon = 0.3;   // controls explorative moves, see TDAgent (0.3 for linear, 0.1 for NN)
 		int verbose=0;		// verbosity of m_evaluator2
-		TDParams tdPar = new TDParams();
+		ParTD tdPar = new ParTD();
 		tdPar.setAlpha(alpha);
 		tdPar.setAlphaFinal(alphaFinal);
 		tdPar.setEpsilon(epsilon);
 		tdPar.setEpsilonFinal(0.0);
-		OtherParams oPar = new OtherParams();
+		ParOther oPar = new ParOther();
 		
 		System.out.println("*** Starting TicTacToe.batch4 with trainNum = "+trainNum+
 						   ", alpha="+alpha+", alphaFinal="+alphaFinal+ " ***");
@@ -718,69 +718,6 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 			System.out.println("IO-exception in TicTacToe::batch4()");
 		}
 	} // batch4
-	
-//	/**
-//	 * Construct and return a trained ValItPlayer.
-//	 * Known callers: {@link #batch2(int, double, double, double)}, 
-//	 *  {@link #batch3(int, double, double, CMAParams)}, {@link #multiTrain(String, TicGameButtons)}
-//	 * @param maxGameNum
-//	 * @return the trained ValItPlayer
-//	 */
-//	public ValItPlayer trainedValItPlayer(int maxGameNum) {
-//		DecimalFormat frm = new DecimalFormat("#0.000");		
-//		int player,  gameNum=0;
-//		TDParams tdPar = new TDParams();
-//		tdPar.setAlpha(1.0);
-//		tdPar.setAlphaFinal(1.0);
-//		ValItPlayer valit_agent = new ValItPlayer(tdPar,true,true,4,maxGameNum);
-//		
-//		valit_agent.setMaxGameNum(maxGameNum);
-//		valit_agent.setGameNum(gameNum);
-//		System.out.println("Training ValItPlayer "+maxGameNum+" games...");		
-//		while (gameNum<maxGameNum)
-//		{							
-//			player = ( rand.nextDouble()>0.5 ? 1 : -1);
-//			
-//			valit_agent.trainNet(player);
-//			gameNum = valit_agent.getGameNum();
-//			if (gameNum%10000==0) {
-//				System.out.println("alpha="+frm.format(valit_agent.getAlpha()) 
-//						+ ", "+gameNum + " games");
-//			}
-//		}
-//		return valit_agent;
-//	}
-//	
-//	/**
-//	 * Add the stop condition of the current CMAPlayer to the stopMap. 
-//	 * The stop map contains e.g. ("MapIter", 6), ("TolFun", 4) 
-//	 * @param cma_agent
-//	 * @param stopMap
-//	 * @see #batch3(int, double, double,int)
-//	 */
-//	private void addToStopMap(CMAPlayer cma_agent, HashMap<String,Integer> stopMap) {
-//		for (String s : cma_agent.stopConditionMessages()) {
-//			String[] ssp = s.split(":");		
-//			s = ssp[0].trim(); 						// select the first word, like "MaxIter"
-//			Integer count = stopMap.get(s);
-//			if (count==null) count = new Integer(0);
-//			stopMap.put(s, new Integer(count+1));
-//		}
-//	}
-//	
-//	/**
-//	 * Helper for batch3
-//	 * @param stopMap
-//	 * @return
-//	 */
-//	private String stopMap2String(HashMap<String,Integer> stopMap) {
-//		String s = "";
-//		Set<String> set = stopMap.keySet();
-//		for (String t : set) {
-//			s = s + t + ":" + stopMap.get(t) + ". ";
-//		}
-//		return s;
-//	}
 	
 	// dummy stub only (as long as the old batchTC is not implemented for SourceGBG)
 	public double[] batchTC(boolean silent, XArenaButtons xab) throws IOException {

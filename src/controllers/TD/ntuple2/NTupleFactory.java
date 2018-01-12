@@ -12,7 +12,8 @@ import java.util.Set;
 
 import games.StateObservation;
 import games.XNTupleFuncs;
-import params.NTParams;
+import params.ParNT;
+//import params.NTParams;
 
 /**
  * This class generates n-tuple sets (fixed for a specific game, by random walk or by 
@@ -37,7 +38,7 @@ public class NTupleFactory {
 	 * 		{@code NTuple[p][m]}, one n-tuple set for each player.) 
 	 * @throws Exception
 	 */
-	public int[][] makeNTupleSet(NTParams ntPar, XNTupleFuncs xnf) throws Exception {
+	public int[][] makeNTupleSet(ParNT ntPar, XNTupleFuncs xnf) throws Exception {
 		int nTuplesI[][]; 
 		boolean randomness=ntPar.getRandomness();
 		boolean randWalk=ntPar.getRandomWalk();

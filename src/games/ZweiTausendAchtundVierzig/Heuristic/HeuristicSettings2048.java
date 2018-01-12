@@ -2,7 +2,8 @@ package games.ZweiTausendAchtundVierzig.Heuristic;
 
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
-import params.MCTSExpectimaxParams;
+//import params.MCTSExpectimaxParams;
+import params.ParMCTSE;
 import tools.Types;
 import tools.cmaes.fitness.IObjectiveFunction;
 
@@ -68,7 +69,8 @@ public class HeuristicSettings2048 implements IObjectiveFunction {
         }
 
         List<Callable<StateObserver2048>> callables = new ArrayList<>();
-        MCTSExpectimaxParams mctseParams = new MCTSExpectimaxParams();
+//        MCTSExpectimaxParams mctseParams = new MCTSExpectimaxParams();
+        ParMCTSE mctseParams = new ParMCTSE();
         mctseParams.setHeuristicSettings2048(this);
         mctseParams.setNumIter(3500);
         mctseParams.setMaxNodes(500);

@@ -12,10 +12,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 
-import params.OtherParams;
 import params.ParOther;
 import params.ParTD;
-import params.TDParams;
+//import params.TDParams;
+//import params.OtherParams;
 import tools.Types;
 import controllers.TD.TD_Lin;
 import controllers.TD.TD_NNet;
@@ -109,21 +109,22 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 */
 	public TDAgent() {
 		super();
-		TDParams tdPar = new TDParams();
-		OtherParams oPar = new OtherParams();		
+		ParTD tdPar = new ParTD();
+		ParOther oPar = new ParOther();		
 		initNet(tdPar, oPar, null, 1000);
 	}
 
-	/**
-	 * Construct new {@link TDAgent}, setting everything from tdPar and set default
-	 * maxGameNum=1000
-	 * 
-	 * @param tdPar
-	 */
-	public TDAgent(String name, TDParams tdPar, OtherParams oPar, Feature feature) {
-		super(name);
-		initNet(tdPar, oPar, feature, 1000);
-	}
+	// --- never used ---
+//	/**
+//	 * Construct new {@link TDAgent}, setting everything from tdPar and set default
+//	 * maxGameNum=1000
+//	 * 
+//	 * @param tdPar
+//	 */
+//	public TDAgent(String name, ParTD tdPar, ParOther oPar, Feature feature) {
+//		super(name);
+//		initNet(tdPar, oPar, feature, 1000);
+//	}
 
 	/**
 	 * Construct new {@link TDAgent}, setting everything from tdPar and from maxGameNum
@@ -131,7 +132,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @param tdPar
 	 * @param maxGameNum
 	 */
-	public TDAgent(String name, TDParams tdPar, OtherParams oPar, Feature feature, int maxGameNum) {
+	public TDAgent(String name, ParTD tdPar, ParOther oPar, Feature feature, int maxGameNum) {
 		super(name);
 		initNet(tdPar, oPar, feature, maxGameNum);
 	}
@@ -141,10 +142,9 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @param tdPar
 	 * @param maxGameNum
 	 */
-	private void initNet(TDParams tdPar, OtherParams oPar, Feature feature, int maxGameNum) {
-		m_tdPar = new ParTD();
-		m_tdPar.setFrom(tdPar);
-		m_oPar.setFrom(oPar);  		// AgentBase::m_oPar
+	private void initNet(ParTD tdPar, ParOther oPar, Feature feature, int maxGameNum) {
+		m_tdPar = new ParTD(tdPar);
+		m_oPar = new ParOther(oPar);  		// AgentBase::m_oPar
 		m_feature = feature; 
 		//super.setFeatmode(tdPar.getFeatmode());
 		//super.setEpochMax(tdPar.getEpochs());
@@ -173,162 +173,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		rand = new Random(System.currentTimeMillis());
 		setAgentState(AgentState.INIT);
 	}
-
-//	/**
-//	 * Get the best next action and return it
-//	 * 
-//	 * @param so			current game state (is returned unchanged)
-//	 * @param random		allow epsilon-greedy random action selection	
-//	 * @param VTable		the score for each available action (corresponding
-//	 * 						to sob.getAvailableActions())
-//	 * @param silent
-//	 * @return actBest		the best action. If several actions have the same
-//	 * 						score, break ties by selecting one of them at random 
-//	 * 						
-//	 * actBest has member isRandomAction()  (true: if action was selected 
-//	 * at random, false: if action was selected by agent).
-//	 */
-//	@Deprecated
-//	@Override
-//	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] VTable, boolean silent) {
-//		// this function selector is just intermediate, as long as we want to test getNextAction2 
-//		// against getNextAction1 (the former getNextAction). Once everything works fine with
-//		// getNextAction2, we should use only this function and make getNextAction deprecated 
-//		// (requires appropriate changes in all other agents implementing interface PlayAgent).
-//		if (!NEW_GNA) {
-//			return getNextAction1(so, random, VTable, silent);
-//		} else {
-//			Types.ACTIONS_VT actBestVT = getNextAction2(so, random, silent);
-//			double[] vtable = actBestVT.getVTable();
-//			for (int i=0; i<vtable.length; i++) VTable[i] = normalize2(vtable[i],so);
-//			VTable[vtable.length] = normalize2(actBestVT.getVBest(),so);
-//			return actBestVT;
-//		}
-//	}
-//	// this is the old getNextAction function (prior to 09/2017):
-//	private Types.ACTIONS getNextAction1(StateObservation so, boolean random, double[] VTable, boolean silent) {
-//		int i, j;
-//		double BestScore = -Double.MAX_VALUE;
-//		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
-//									// maximized
-//		StateObservation NewSO;
-//		int count = 1; // counts the moves with same BestScore
-//        Types.ACTIONS actBest = null;
-//        int iBest;
-//        
-////        assert (sob instanceof StateObserverTTT)
-////		: "StateObservation 'sob' is not an instance of StateObserverTTT";
-////		StateObserverTTT so = (StateObserverTTT) sob;
-//		int player = Types.PLAYER_PM[so.getPlayer()]; 	 
-//		//int[][] Table = so.getTable();
-//        randomSelect = false;
-//		if (random) {
-//			randomSelect = (rand.nextDouble() < m_epsilon);
-//		}
-//		
-//		// get the best (or eps-greedy random) action
-//        ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
-//        Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
-//        //VTable = new double[acts.size()];  
-//        // DON'T! The caller has to define VTable with the right length
-//        
-//        for(i = 0; i < actions.length; ++i)
-//        {
-//            actions[i] = acts.get(i);
-//            NewSO = so.copy();
-//            NewSO.advance(actions[i]);
-//			
-//			if (NewSO.isGameOver()) {
-////				switch (so.getNumPlayers()) {
-////				case 1: 
-////					CurrentScore = NewSO.getGameScore();
-////					break;
-////				case 2: 
-////					CurrentScore = (-1)*NewSO.getGameScore();		// CORRECT
-////					// NewSO.getGameScore() returns -1, if 'player', that is the
-////					// one who *made* the move to 'so', has won. If we multiply
-////					// this by (-1), we get a reward +1 for a X(player=+1)- 
-////					// win and *also* a reward +1 for an O(player=-1)-win.
-////					// And a reward 0 for a tie.
-////					//
-////					//CurrentScore = (-player)*NewSO.getGameScore(); // WRONG!!
-////					// so.getGameScore() returns -1, if 'player', that is the
-////					// one who *made* the move to 'so', has won. If we multiply
-////					// this by (-player), we get a reward +1 for a X(player=+1)- 
-////					// win and a reward -1 for an O(player=-1)-win.
-////					// And a reward 0 for a tie.
-////					break;
-////				default: 
-////					throw new RuntimeException("TDAgent.trainAgent does not yet "+
-////							"implement case so.getNumPlayers()>2");
-////				}				
-//				
-//				// the whole switch-statement above can be replaced with the simpler  
-//				// logic of NewSO.getGameScore(StateObservation referingState), where  
-//				// referingState is 'so', the state before NewSO. [This should be  
-//				// extensible to 3- or 4-player games (!) as well, if we put the 
-//				// proper logic into method getGameScore(referingState).]  
-//				CurrentScore = NewSO.getGameScore(so);
-//
-//				CurrentScore = normalize2(CurrentScore,so);
-//
-//			}  
-//			else {
-//				CurrentScore = player * getScore(NewSO);
-//										// here we ask this agent for its score estimate on NewSO
-//
-//				CurrentScore = normalize2(CurrentScore,so);
-//				// unclear why, but for TTT the agent has better results if there is no 
-//				// normalization here but the normalize call 4 lines above
-//			}
-//			
-//			// ???? questionable: a) what happens in case of a tie and 
-//			//      b) shouldn't this be in range [-1,+1]? 
-////				if (NewSO.win()) {
-////					CurrentScore = player * (player + 1.0) / 2.0;   
-////					// 0 / 1  version for O / X - win
-////				}
-//			
-//			if (!silent)
-//				System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*player-1));
-//				//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
-//			if (randomSelect) {
-//				CurrentScore = rand.nextDouble();
-//			}
-//			VTable[i] = CurrentScore;
-//			if (BestScore < CurrentScore) {
-//				BestScore = CurrentScore;
-//				actBest = actions[i];
-//				iBest  = i; 
-//				count = 1;
-//			} else if (BestScore == CurrentScore) {
-//				// If there are 'count' possibilities with the same score BestScore, 
-//				// each one has the probability 1/count of being selected.
-//				// 
-//				// (To understand formula, think recursively from the end: the last one is
-//				// obviously selected with prob. 1/count. The others have the probability 
-//				//      1 - 1/count = (count-1)/count 
-//				// left. The previous one is selected with probability 
-//				//      ((count-1)/count)*(1/(count-1)) = 1/count
-//				// and so on.) 
-//				count++;
-//				if (rand.nextDouble() < 1.0/count) {
-//					actBest = actions[i];
-//					iBest  = i; 
-//				}
-//			}
-//        } // for
-// 
-//        assert actBest != null : "Oops, no best action actBest";
-//		if (!silent) {
-//			System.out.print("---Best Move: ");
-//            NewSO = so.copy();
-//            NewSO.advance(actBest);
-//			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
-//			//print_V(Player, NewSO.getTable(), 2 * BestScore * Player - 1);
-//		}			
-//		return actBest;
-//	}
 
 	/**
 	 * Get the best next action and return it 
@@ -481,16 +325,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 		return CurrentScore;
     }
-
-//	/**
-//	 * 
-//	 * @return	returns true/false, whether the action suggested by last call 
-//	 * 			to getNextAction() was a random action 
-//	 */
-//    @Deprecated
-//	public boolean wasRandomAction() {
-//		return randomSelect;
-//	}
 
 	/**
 	 * Return the agent's estimate of the score for that after state.
@@ -674,7 +508,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		return score;
 	}
 	
-	public void setTDParams(TDParams tdPar, int maxGameNum) {
+	public void setTDParams(ParTD tdPar, int maxGameNum) {
 		m_Net.setLambda(tdPar.getLambda());
 		m_Net.setGamma(tdPar.getGamma());
 		if (m_feature.getFeatmode() == 8) {

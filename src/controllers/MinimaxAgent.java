@@ -2,10 +2,9 @@ package controllers;
 
 import controllers.PlayAgent;
 import games.StateObservation;
-import params.OtherParams;
+//import params.OtherParams;
 import params.ParMaxN;
 import params.ParOther;
-import params.TDParams;
 import tools.Types;
 
 import java.io.Serializable;
@@ -16,16 +15,17 @@ import java.util.Random;
 
 /**
  * The Minimax {@link PlayAgent}. It traverses the game tree up to a prescribed 
- * depth (default: 10, see {@link OtherParams}). To speed up calculations, already 
+ * depth (default: 10, see {@link ParOther}). To speed up calculations, already 
  * visited states are stored in a HashMap.  
  * <p>
- * {@link MinimaxAgent} is only viable for 1- and 2-player games. See {@link MaxNAgent}
- * for the arbitrary n-player variant.
+ * {@link MinimaxAgent} is only viable for 1- and 2-player games. Therefore it is <b>deprecated</b>
+ * and one should use instead {@link MaxNAgent} for the arbitrary n-player variant.
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  * 
  * @see MaxNAgent
  */
+@Deprecated
 public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 {
 	private Random rand;

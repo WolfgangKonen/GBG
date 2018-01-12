@@ -14,8 +14,9 @@ import java.util.Random;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
-import params.NTParams;
-import params.TDParams;
+import params.ParNT;
+//import params.NTParams;
+//import params.TDParams;
 import tools.Types;
 
 /**
@@ -108,7 +109,7 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @throws RuntimeException
 	 */
 	public NTuple2ValueFunc(TDNTuple2Agt parent, int nTuplesI[][], XNTupleFuncs xnf, int posVals,
-			boolean randInitWeights, NTParams tcPar, int numCells) 
+			boolean randInitWeights, ParNT tcPar, int numCells) 
 					throws RuntimeException {
 //		this.useSymmetry = useSymmetry;
 		this.xnf = xnf;
@@ -124,7 +125,7 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 	void initNTuples(int[][] nTuplesI, int posVals, boolean randInitWeights,
-			NTParams ntPar, int numCells) {
+			ParNT ntPar, int numCells) {
 		this.nTuples = new NTuple2[numPlayers][numTuples];
 		for (int i = 0; i < numTuples; i++) {
 			for (int j=0; j<nTuplesI[i].length; j++) {

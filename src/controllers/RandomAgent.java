@@ -9,7 +9,6 @@ import games.StateObservation;
 import games.TicTacToe.StateObserverTTT;
 import params.ParMC;
 import params.ParOther;
-import params.TDParams;
 import tools.Types;
 
 

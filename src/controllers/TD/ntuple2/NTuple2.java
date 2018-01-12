@@ -10,8 +10,9 @@ import java.util.Random;
 
 import games.StateObservation;
 import games.XNTupleFuncs;
-import params.NTParams;
-import params.TDParams;
+import params.ParNT;
+//import params.NTParams;
+//import params.TDParams;
 
 /**
  * Realization of a single n-tuple for games.
@@ -100,10 +101,10 @@ public class NTuple2 implements Serializable {
 	 * @param posVals
 	 *            number of possible values at each position
 	 */
-	NTuple2(int[] nTuple, int posVals, NTParams ntPar) {
+	NTuple2(int[] nTuple, int posVals, ParNT ntPar) {
 
 		// samine//
-		INIT = ntPar.getINIT();// samine//
+		INIT = ntPar.getTcInit();// samine//
 		TC = ntPar.getTc();
 		TcImm = ntPar.getTcImm();
 		rand = new Random();

@@ -1,7 +1,7 @@
 package controllers.MCTS;
 
 import games.StateObservation;
-import params.MCTSParams;
+//import params.MCTSParams;
 import params.ParMCTS;
 import tools.ElapsedCpuTimer;
 import tools.Types;
@@ -78,13 +78,14 @@ public class SingleMCTSPlayer implements Serializable
         m_root = new SingleTreeNode(a_rnd,this);
     }
    	
-	/**
-     * Creates the MCTS player. 
-     * @param a_rnd 	random number generator object.
-     * @param mcPar		parameters for MCTS
-     */
-    public SingleMCTSPlayer(Random a_rnd, MCTSParams mcPar)
-    {
+//	/**
+//     * Creates the MCTS player. 
+//     * @param a_rnd 	random number generator object.
+//     * @param mcPar		parameters for MCTS
+//     */
+//    @Deprecated
+//    public SingleMCTSPlayer(Random a_rnd, MCTSParams mcPar)
+//    {
     	// --- OLD, can be deleted, when the new version is tested and works:  ---
     	//
     	// Why do we have m_mcpar and the several single parameters?
@@ -104,11 +105,10 @@ public class SingleMCTSPlayer implements Serializable
 //            this.setVerbosity(mcPar.getVerbosity());
 //    	}
     	
-		m_parMCTS = new ParMCTS(mcPar);
-
-        m_rnd = a_rnd;
-        m_root = new SingleTreeNode(a_rnd,this);
-    }
+//		m_parMCTS = new ParMCTS(mcPar);
+//        m_rnd = a_rnd;
+//        m_root = new SingleTreeNode(a_rnd,this);
+//    }
 
     /**
      * Set the available actions for state {@code so}.

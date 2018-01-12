@@ -35,8 +35,11 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 import params.OtherParams;
 import params.ParMC;
 import params.ParMCTS;
+import params.ParMCTSE;
 import params.ParMaxN;
+import params.ParNT;
 import params.ParOther;
+import params.ParTD;
 import tools.LineChartSuccess;
 import tools.Measure;
 import tools.MessageBox;
@@ -76,7 +79,7 @@ public class XArenaFuncs
 	//MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
 	protected Evaluator m_evaluatorT=null;
 	protected Evaluator m_evaluatorQ=null;
-	protected Evaluator m_evaluatorM=null;
+//	protected Evaluator m_evaluatorM=null;
 	protected String lastMsg="";
 	protected int numPlayers;
 	
@@ -118,7 +121,7 @@ public class XArenaFuncs
 		
 		if (sAgent.equals("TDS")) {
 			Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
-			pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
+			pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
 			//pa = m_xab.m_game.makeTDSAgent(sAgent,m_xab.tdPar,maxGameNum); 
 				// new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);
 //		} else if (sAgent.equals("TDS2")) {
@@ -138,8 +141,9 @@ public class XArenaFuncs
 			try {
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n], m_xab.oPar[n], nTuples, xnf, maxGameNum);
+				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
+				pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
+									  new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
 						e.getMessage(), 
@@ -158,7 +162,7 @@ public class XArenaFuncs
 		} else if (sAgent.equals("MCTS")) {
 			pa = new MCTSAgentT(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS Expectimax")) {
-			pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams[n], m_xab.oPar[n]);
+			pa= new MCTSExpectimaxAgt(sAgent, new ParMCTSE(m_xab.mctsExpectimaxParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
@@ -203,7 +207,7 @@ public class XArenaFuncs
 			} else if (sAgent.equals("MCTS")) {
 				pa= new MCTSAgentT(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("MCTS Expectimax")) {
-				pa= new MCTSExpectimaxAgt(sAgent, m_xab.mctsExpectimaxParams[n], m_xab.oPar[n]);
+				pa= new MCTSExpectimaxAgt(sAgent, new ParMCTSE(m_xab.mctsExpectimaxParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("Human")) {
 				pa= new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {
@@ -214,13 +218,14 @@ public class XArenaFuncs
 				if (m_PlayAgents[n]==null) {
 					if (sAgent.equals("TDS")) {
 						Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
-						pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
+						pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
 					} else if (sAgent.equals("TD-Ntuple-2")) {
 						try {
 							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 							NTupleFactory ntupfac = new NTupleFactory(); 
-							int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n],xnf);
-							pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n], m_xab.oPar[n], nTuples, xnf, maxGameNum);
+							int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
+							pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
+									              new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 						} catch (Exception e) {
 							MessageBox.show(m_xab, 
 									e.getMessage(), 
@@ -437,7 +442,8 @@ public class XArenaFuncs
 		}
 		
 		System.out.println("final "+m_evaluatorQ.getMsg());
-		if (doTrainEvaluation) System.out.println("final "+m_evaluatorT.getMsg());
+		if (doTrainEvaluation && m_evaluatorT.getMsg()!=null) System.out.println("final "+m_evaluatorT.getMsg());
+								// getMsg() might be null if evaluator mode = -1 (no evaluation)
 
 		return pa;
 	}
@@ -479,16 +485,13 @@ public class XArenaFuncs
 
 		System.out.println("*** Starting multiTrain with trainNum = "+trainNum+" ***");
 
-		Measure oT = new Measure();			// evalAgent-success rates of all trained agents
-		Measure oQ = new Measure();			// competeBoth-success rates against MinimaxPlayer
-		Measure oM = new Measure();			// competeBoth-success rates against RandomPlayer
-		//Measure ov = new Measure();			// competeBoth-success rates against ValItPlayer
-		Measure oC = new Measure();			// overall success measure S_C as def'd in GECCO'2009 paper
+		Measure oQ = new Measure();			// quick eval measure
+		Measure oT = new Measure();			// train eval measure
+//		Measure oM = new Measure();			// multiTrain eval measure
 		MTrain mTrain;
 		double evalQ=0.0, evalT=0.0, evalM=0.0;
 		ArrayList<MTrain> mtList = new ArrayList<MTrain>();
 		int maxGameNumV=10000;
-		//ValItPlayer valit_agent = trainedValItPlayer(maxGameNumV);
 		
 		for (int i=0; i<trainNum; i++) {
 			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
@@ -516,15 +519,16 @@ public class XArenaFuncs
 			doTrainEvaluation = (tem!=qem);
 			if (doTrainEvaluation)
 		        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
-			int mem = m_evaluatorQ.getMultiTrainEvalMode();
-			//
-			// doMultiEvaluation flags whether Multi Train Evaluator is executed:
-			// Evaluator m_evaluatorM is only constructed and evaluated, if the value of
-			// getMultiTrainEvalMode() differs from the values in choice boxes
-			// 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' . 
-			doMultiEvaluation = ((mem!=qem) && (mem!=tem));
-			if (doMultiEvaluation)
-		        m_evaluatorM = xab.m_game.makeEvaluator(pa,gb,stopEval,mem,1);
+			
+//			int mem = m_evaluatorQ.getMultiTrainEvalMode();
+//			//
+//			// doMultiEvaluation flags whether Multi Train Evaluator is executed:
+//			// Evaluator m_evaluatorM is only constructed and evaluated, if the value of
+//			// getMultiTrainEvalMode() differs from the values in choice boxes
+//			// 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' . 
+//			doMultiEvaluation = ((mem!=qem) && (mem!=tem));
+//			if (doMultiEvaluation)
+//		        m_evaluatorM = xab.m_game.makeEvaluator(pa,gb,stopEval,mem,1);
 
 			if (i==0) {
 				String pa_string = pa.getClass().getName();
@@ -563,13 +567,13 @@ public class XArenaFuncs
 							m_evaluatorT.eval(qa);
 							evalT = m_evaluatorT.getLastResult();
 						}
-						if (doMultiEvaluation) {
-							m_evaluatorM.eval(qa);
-							evalM = m_evaluatorM.getLastResult();
-						}
+//						if (doMultiEvaluation) {
+//							m_evaluatorM.eval(qa);
+//							evalM = m_evaluatorM.getLastResult();
+//						}
 						
                         // gather information for later printout to agents/gameName/csv/multiTrain.csv.
-						mTrain = new MTrain(i,gameNum,evalQ,evalT,evalM,
+						mTrain = new MTrain(i,gameNum,evalQ,evalT,/*evalM,*/
 											actionNum,trnMoveNum);
 						mtList.add(mTrain);
 
@@ -589,23 +593,20 @@ public class XArenaFuncs
 				m_evaluatorT.eval(qa);
 				oT.add(m_evaluatorT.getLastResult());								
 			}
-			if (doMultiEvaluation) {
-				m_evaluatorM.eval(qa);
-				oM.add(m_evaluatorM.getLastResult());
-			}
-
-			//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100));
-			//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);
-			oC.add(1+(oM.getVal()-0.9+oQ.getVal())/2.0);
-
+//			if (doMultiEvaluation) {
+//				m_evaluatorM.eval(qa);
+//				oM.add(m_evaluatorM.getLastResult());
+//			}
+			
 		} // for (i)
 		System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
-		if (doTrainEvaluation) 
+		if (doTrainEvaluation && m_evaluatorT.getPrintString()!=null) 
+								 // getPrintString() may be null, if evalMode=-1
+		{
 		  System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
-		if (doMultiEvaluation)
-		  System.out.println("Avg. "+ m_evaluatorM.getPrintString()+frm3.format(oM.getMean()) + " +- " + frm.format(oM.getStd()));
-		//System.out.println("Avg. success rate (valiAgent, best is 0.0): "+frm3.format(ov.getMean()) + " +- " + frm.format(ov.getStd()));
-		//System.out.println("Avg. success rate (ALL_Agent, best is 1.0): "+frm3.format(oC.getMean()) + " +- " + frm.format(oC.getStd()));
+		}
+//		if (doMultiEvaluation)
+//		  System.out.println("Avg. "+ m_evaluatorM.getPrintString()+frm3.format(oM.getMean()) + " +- " + frm.format(oM.getStd()));
 		this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");
 		
 		MTrain.printMultiTrainList(mtList, pa, m_Arena);

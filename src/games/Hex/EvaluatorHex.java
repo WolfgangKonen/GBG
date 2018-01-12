@@ -119,7 +119,7 @@ public class EvaluatorHex extends Evaluator {
             case 10:
             	if (playAgent instanceof TDNTuple2Agt) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
-            		// thread-safe:
+            		// thread-safe, which is the case for TDNTuple2Agt
             		// Also we have to construct MCTS opponent inside the callables, otherwise
             		// we are not thread-safe as well:
                     result = competeAgainstMCTS_diffStates_PAR(playAgent, m_gb, numEpisodes);

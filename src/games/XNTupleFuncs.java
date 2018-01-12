@@ -69,12 +69,12 @@ public interface XNTupleFuncs {
 	 * containing the cells 0, 1, and 4.<p>
 	 * 
 	 * Other options than fixed n-tuples (that is, the generation of random n-tuples) are 
-	 * provided by {@link NTupleFactory#makeNTupleSet(params.NTParams, XNTupleFuncs)}
+	 * provided by {@link NTupleFactory#makeNTupleSet(params.ParNT, XNTupleFuncs)}
 	 * 
 	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
 	 * @return nTuples[numTuples][]
 	 * 
-	 * @see NTupleFactory#makeNTupleSet(params.NTParams, XNTupleFuncs)
+	 * @see NTupleFactory#makeNTupleSet(params.ParNT, XNTupleFuncs)
 	 */
 	public int[][] fixedNTuples(int mode);
 	

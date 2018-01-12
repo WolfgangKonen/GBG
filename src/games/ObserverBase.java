@@ -39,61 +39,65 @@ abstract public class ObserverBase {
     	// nothing to do here, since ObserverBase is for a deterministic game    	
     }
 
-	/**
-	 * This is just to signal that derived classes will be either abstract or implement
-	 * getGameScore(), getPlayer(), as required by the interface {@link StateObservation} as well.
-	 */
-	abstract public double getGameScore();
 	abstract public int getPlayer();
 	abstract public int getNumPlayers();
+
+	/**
+	 * This is just to signal that derived classes will be either abstract or implement
+	 * getGameScore(), as required by the interface {@link StateObservation} as well.
+	 */
+	abstract public double getGameScore();
 
 	/**
 	 * Same as getGameScore(), but relative to referingState. This relativeness
 	 * is usually only relevant for games with more than one player.
 	 * <p>
-	 * This implementation in ObserverBase is valid for 2-player games.
+	 * This implementation is valid for all classes implementing {@link StateObservation}, once
+	 * they have a valid implementation for {@link #getGameScore(int)}.
 	 * 
 	 * @param referringState see below
 	 * @return  If referringState has the same player as this, then it is getGameScore().<br> 
 	 * 			If referringState has opposite player, then it is getGameScore()*(-1). 
 	 */
     public double getGameScore(StateObservation referringState) {
-        return (this.getPlayer() == referringState.getPlayer() ? getGameScore() : (-1)*getGameScore()  );
+    	return getGameScore(referringState.getPlayer());
     }
 	
 
 	/**
-	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
-	 * @return  the game score
+	 * Same as {@link #getGameScore()}, but from the perspective of player {@code player}. The 
+	 * perspective shift is usually only relevant for games with more than one player.
+	 * <p>
+	 * This implementation in {@link ObserverBase} is only valid for 1- or 2-player games.
+	 * 
+	 * @param player the player whose perspective is taken, a number in 0,1,...,N.
+	 * @return  If {@code player} and {@code this.player} are the same, then it is getGameScore().<br> 
+	 * 			If they are different, then it is getGameScore()*(-1). 
 	 */
 	public double getGameScore(int player) {
+    	assert (this.getNumPlayers()<=2) : "ObserverBase's implementation of getGameScore(ref) is not valid for current class";
 		return (this.getPlayer() == player ? getGameScore() : (-1)*getGameScore() );
 	}
 	
 	/**
-	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
+	 * This implementation is valid for all classes implementing {@link StateObservation}, once
+	 * they have a valid implementation for {@link #getGameScore(int)}.
+	 * 
+	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int)}
+	 * 			with {@code i} as argument
 	 */
 	public ScoreTuple getGameScoreTuple() {
-		ScoreTuple sc = new ScoreTuple(this.getNumPlayers());
-		for (int i=0; i<this.getNumPlayers(); i++)
+		int N = this.getNumPlayers();
+		ScoreTuple sc = new ScoreTuple(N);
+		for (int i=0; i<N; i++)
 			sc.scTup[i] = this.getGameScore(i);
 		return sc;
 	}
 
-//	/**
-//	 * @return 	the game value, i.e. an <em>estimate of the final score</em> which 
-//	 * 			can be reached from this state (assuming perfect play).  
-//	 * 			This member function can be {@link StateObservation}'s heuristic  
-//	 * 			for the <em>potential</em> of that state. <br> 
-//	 * 			Here, {@link ObserverBase} will simply return {@link #getGameScore()}.
-//	 */
-//    public double getGameValue() {
-//        return getGameScore();
-//    }
-
 	/**
-	 * The cumulative reward, usually the same as getGameScore()
+	 * The cumulative reward. 
+	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
+	 * 
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return the cumulative reward
@@ -104,6 +108,8 @@ abstract public class ObserverBase {
 	
 	/**
 	 * Same as getReward(), but relative to referringState. 
+	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
+	 * 
 	 * @param referringState
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
@@ -114,15 +120,35 @@ abstract public class ObserverBase {
 	}
 
 	/**
-	 * Same as {@link #getReward(StateObservation referringState)}, but with the player of referringState. 
+	 * Same as {@link #getReward(StateObservation referringState)}, but with the player of referringState.
+	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
+	 *  
 	 * @param player the player of referringState, a number in 0,1,...,N.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return  the cumulative reward 
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
-        return (this.getPlayer() == player ? getGameScore() : getGameScore() * (-1));
+        return getGameScore(player);
 	}
+	
+	/**
+	 * This implementation is valid for all classes implementing {@link StateObservation}, once
+	 * they have a valid implementation for {@link #getReward(int,boolean)}.
+	 * 
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 * 		  game-specific reward
+	 * @return	a score tuple which has as {@code i}th value  
+	 * 			{@link #getReward(int, boolean)} with {@code i} as first argument
+	 */
+	public ScoreTuple getRewardTuple(boolean rewardIsGameScore) {
+		int N = this.getNumPlayers();
+		ScoreTuple sc = new ScoreTuple(N);
+		for (int i=0; i<N; i++)
+			sc.scTup[i] = this.getReward(i,rewardIsGameScore);
+		return sc;		
+	}
+
 
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement

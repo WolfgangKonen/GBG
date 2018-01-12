@@ -5,8 +5,9 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
 import params.MCParams;
-import params.MCTSExpectimaxParams;
+//import params.MCTSExpectimaxParams;
 import params.ParMC;
+import params.ParMCTSE;
 import tools.Types;
 
 import java.io.*;
@@ -110,7 +111,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 
     private ResultContainer analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
         //create Agents
-        MCTSExpectimaxParams mctsParams = new MCTSExpectimaxParams();
+//        MCTSExpectimaxParams mctsParams = new MCTSExpectimaxParams();
+        ParMCTSE mctsParams = new ParMCTSE();
         mctsParams.setNumIter(ConfigEvaluator.ITERATIONS * ConfigEvaluator.NUMBERAGENTS * gameStateGroup.get(0).getNumAvailableActions()); //MC and MCTS now have the same Number of Iterations per Action
         mctsParams.setTreeDepth(ConfigEvaluator.TREEDEPTH);
         mctsParams.setRolloutDepth(ConfigEvaluator.ROLLOUTDEPTH);

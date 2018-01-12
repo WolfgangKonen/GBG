@@ -220,12 +220,13 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 	private ScoreTuple getAllScores(StateObsNondeterministic sob, StateObservation refer, boolean silent, int depth) {
         ACTIONS_ST act_st = null;
-		boolean rgs = m_oPar.getRewardIsGameScore();
 		if (sob.isGameOver())
 		{
-			double[] res = new double[sob.getNumPlayers()];
-			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rgs);
-			return new ScoreTuple(res); 	
+			boolean rgs = m_oPar.getRewardIsGameScore();
+			return sob.getRewardTuple(rgs);
+//			double[] res = new double[sob.getNumPlayers()];
+//			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rgs);
+//			return new ScoreTuple(res); 	
 		}
 				
 		int n=sob.getNumAvailableActions();

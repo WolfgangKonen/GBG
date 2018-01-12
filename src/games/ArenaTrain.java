@@ -19,7 +19,7 @@ import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Arena.Task;
 import games.TicTacToe.LaunchAppletTTT;
-import params.TDParams;
+//import params.TDParams;
 import tools.MessageBox;
 import tools.StatusBar;
 import tools.Types;

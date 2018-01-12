@@ -1,8 +1,12 @@
 # 
-# This plot shows for 5x5 Hex different TD-update scheme forms. The first result is, that the NEW_2P 
-# form is shown to be fully equivalent to (NEW_3P, 1-ply)-form, as it should. The 2nd result is 
-# that the (NEW_3P, 2-ply)-form is significantly better, especially if we look at evalMode=10 (diff. 
-# start states, tgc2). 
+# This plot shows for 5x5 Hex different TD-update scheme forms. Results:
+# 1) MODE_3P=0 largely inferior to MODE_3P=1 or 2 (cross-talk from multi-update)
+# 2) MODE_3P=1 (nPly=2) slightly better than MODE_3P=2 (nPly=1 in train evaluation)
+# 3) Oppnent TDReferee (MODE_3P=1) is harder to beat than opponent MCTS
+#
+# Open: 
+#   - Would a longer training bring MODE_3P=0 finally up to the other two?
+#   - Would TC help?
 #
 # More details are found in TR-TDNTuple.tex.
 # 
@@ -16,8 +20,8 @@ filenames=c ( "TDNT2_NEW_MODE_3P=0.csv"    # 5 runs = 0.5h
              ,"TDNT2_NEW_MODE_3P=1.csv"    # 5 runs = 1.2h
              ,"TDNT2_NEW_MODE_3P=2.csv"    # 5 runs = 0.5h
             )
-# other pars: alpha=0.2, epsilon = 1.0 ... 0.2, ChooseStart01=T, LearnFromRM=F, 
-# 10 runs, 150.000 training episodes. 
+# other pars: alpha=0.2, epsilon = 1.0 ... 0.2, lambda=0.5, ChooseStart01=T, LearnFromRM=F, 
+# 5 runs, 150.000 training episodes. 
 # evalMode=10 (evalT) is from different start states against MCTS, 
 # evalMode=11 (evalQ) is from different start states against TDReferee, 
 # where TDReferee is TDNT2_NEW_MODE_3P=1.agt.zip.

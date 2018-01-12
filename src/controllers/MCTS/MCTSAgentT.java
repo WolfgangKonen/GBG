@@ -7,8 +7,8 @@ import controllers.PlayAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.StateObservation;
 import games.XArenaMenu;
-import params.MCTSParams;
-import params.OtherParams;
+//import params.MCTSParams;
+//import params.OtherParams;
 import params.ParMCTS;
 import params.ParOther;
 import tools.ElapsedCpuTimer;
@@ -77,12 +77,12 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     	initMCTSAgent(so, new ParMCTS(), new ParOther());
     }
 
-    @Deprecated
-    public MCTSAgentT(String name,StateObservation so, MCTSParams mcPar, OtherParams oPar) //, ElapsedCpuTimer elapsedTimer)
-    {
-    	super(name);
-    	initMCTSAgent(so, new ParMCTS(mcPar), new ParOther(oPar));
-    }
+//    @Deprecated
+//    public MCTSAgentT(String name,StateObservation so, MCTSParams mcPar, OtherParams oPar) //, ElapsedCpuTimer elapsedTimer)
+//    {
+//    	super(name);
+//    	initMCTSAgent(so, new ParMCTS(mcPar), new ParOther(oPar));
+//    }
     public MCTSAgentT(String name,StateObservation so, ParMCTS parMCTS) //, ElapsedCpuTimer elapsedTimer)
     {
     	super(name);

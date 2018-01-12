@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-import params.NTParams;
-import params.OtherParams;
+//import params.NTParams;
+//import params.OtherParams;
+//import params.TDParams;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
-import params.TDParams;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ScoreTuple;
@@ -218,9 +218,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 */
 	public TDNTuple2Agt() throws IOException {
 		super();
-		TDParams tdPar = new TDParams();
-		NTParams ntPar = new NTParams();
-		OtherParams oPar = new OtherParams();
+		ParTD tdPar = new ParTD();
+		ParNT ntPar = new ParNT();
+		ParOther oPar = new ParOther();
 		initNet(ntPar, tdPar, oPar, null, null, 1000);
 	}
 
@@ -235,7 +235,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
-	public TDNTuple2Agt(String name, TDParams tdPar, NTParams ntPar, OtherParams oPar, 
+	public TDNTuple2Agt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar, 
 			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		super(name);
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);			
@@ -250,10 +250,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
-	private void initNet(NTParams ntPar, TDParams tdPar, OtherParams oPar,  
+	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,  
 			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		m_tdPar = new ParTD(tdPar);
-		m_ntPar = new ParNT(ntPar);
+		m_ntPar = ntPar;
 		m_oPar = new ParOther(oPar);
 		MODE_3P = m_tdPar.getMode3P();
 		rand = new Random(42); //(System.currentTimeMillis());		
@@ -1414,22 +1414,24 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		epsilon.close();
 	}
 
-	public void setTDParams(TDParams tdPar, int maxGameNum) {
-		double alpha = tdPar.getAlpha();
-		double alphaFinal = tdPar.getAlphaFinal();
-		double alphaChangeRatio = Math
-				.pow(alphaFinal / alpha, 1.0 / maxGameNum);
-		m_Net.setAlpha(tdPar.getAlpha());
-		m_Net.setAlphaChangeRatio(alphaChangeRatio);
-		if (DBG_OLD_3P || DBG_NEW_3P) {
-			m_Net3.setAlpha(tdPar.getAlpha());
-			m_Net3.setAlphaChangeRatio(alphaChangeRatio);
-		}
-
-		NORMALIZE=tdPar.getNormalize();
-		m_epsilon = tdPar.getEpsilon();
-		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
-	}
+	// -- no longer used --
+//	@Deprecated
+//	public void setTDParams(TDParams tdPar, int maxGameNum) {
+//		double alpha = tdPar.getAlpha();
+//		double alphaFinal = tdPar.getAlphaFinal();
+//		double alphaChangeRatio = Math
+//				.pow(alphaFinal / alpha, 1.0 / maxGameNum);
+//		m_Net.setAlpha(tdPar.getAlpha());
+//		m_Net.setAlphaChangeRatio(alphaChangeRatio);
+//		if (DBG_OLD_3P || DBG_NEW_3P) {
+//			m_Net3.setAlpha(tdPar.getAlpha());
+//			m_Net3.setAlphaChangeRatio(alphaChangeRatio);
+//		}
+//
+//		NORMALIZE=tdPar.getNormalize();
+//		m_epsilon = tdPar.getEpsilon();
+//		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
+//	}
 
 	public void setTDParams(ParTD tdPar, int maxGameNum) {
 		double alpha = tdPar.getAlpha();
@@ -1444,13 +1446,14 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
 	}
 
-	public void setNTParams(NTParams ntPar) {
-		tcIn=ntPar.getTcInterval();
-		TC=ntPar.getTc();
-		tcImm=ntPar.getTcImm();		
-		randomness=ntPar.getRandomness();
-		randWalk=ntPar.getRandomWalk();
-	}
+	// -- no longer used --
+//	public void setNTParams(NTParams ntPar) {
+//		tcIn=ntPar.getTcInterval();
+//		TC=ntPar.getTc();
+//		tcImm=ntPar.getTcImm();		
+//		randomness=ntPar.getRandomness();
+//		randWalk=ntPar.getRandomWalk();
+//	}
 
 	public void setNTParams(ParNT ntPar) {
 		tcIn=ntPar.getTcInterval();

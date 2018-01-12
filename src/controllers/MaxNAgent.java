@@ -209,9 +209,10 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		if (sob.isGameOver())
 		{
 			boolean rgs = m_oPar.getRewardIsGameScore();
-			double[] res = new double[sob.getNumPlayers()];
-			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rgs);
-			return new ScoreTuple(res); 	
+			return sob.getRewardTuple(rgs);
+//			double[] res = new double[sob.getNumPlayers()];
+//			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rgs);
+//			return new ScoreTuple(res); 	
 		}
 		
 		int n=sob.getNumAvailableActions();
@@ -226,10 +227,11 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score. This function may be overridden in a game-
-	 * specific way by classes derived from {@link MaxNAgent}. <p>
+	 * specific way by classes derived from {@link MaxNAgent}. 
+	 * <p>
 	 * This  stub method just returns {@link StateObservation#getReward(boolean)}, which might 
 	 * be too simplistic for not-yet finished games, because the current reward does not reflect  
-	 * future returns.
+	 * future rewards.
 	 * @param sob	the state observation
 	 * @return		the estimated score
 	 */
@@ -241,8 +243,9 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score (tuple for all players). This function may be overridden 
-	 * in a game-specific way by classes derived from {@link MaxNAgent}. <p>
-	 * This  stub method just returns {@link StateObservation#getReward(boolean)} for all 
+	 * in a game-specific way by classes derived from {@link MaxNAgent}. 
+	 * <p>
+	 * This  stub method just returns {@link StateObservation#getReward(boolean)} for every 
 	 * players, which might be too simplistic for not-yet finished games, because the current 
 	 * reward may not reflect future rewards.
 	 * @param sob	the state observation
