@@ -41,9 +41,6 @@ import games.Feature;
  * start state ({@code false}, or to start 50% from default, 50% from a random
  * 1-ply state ({@code true}
  * <li><b> learn from RM</b>: [false] whether to learn from random moves or not
- * 
- * <li><b>MinimaxDepth</b> [ 10] Minimax Tree Depth
- * <li><b>use Hashmap</b> [true] Minimax: whether to use hashmap or not
  * </ul>
  * 
  * @see TDAgent
@@ -52,9 +49,6 @@ import games.Feature;
  */
 public class OtherParams extends Frame {
 	private static final long serialVersionUID = 1L;
-	// TDAgent T;
-	// TDNTupleAgt t2;
-	// TDNTuple2Agt t3;
 
 	JLabel evalQ_L;
 	public Choice choiceEvalQ;
@@ -144,9 +138,8 @@ public class OtherParams extends Frame {
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		wNply_L.setToolTipText(
 				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
-				// miniDepth_L.setToolTipText("Minimax tree depth");
-				// miniUseHm_L.setToolTipText("Minimax: use hashmap to save
-				// values of visited states");
+		// miniDepth_L.setToolTipText("Minimax tree depth");
+		// miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
 
 		// this.setQuickEvalMode(0);
 		// this.setTrainEvalMode(0);

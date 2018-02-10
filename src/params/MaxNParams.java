@@ -134,5 +134,12 @@ public class MaxNParams extends Frame
 		this.setMaxnDepth(mp.getMaxnDepth());
 		this.miniUseHmTrue.setState(mp.useMinimaxHashmap());
 	}
+	
+	/**
+	 * @return	the {@link ParMaxN} representation of {@code this}
+	 */
+	public ParMaxN getParMaxN() {
+		return new ParMaxN(this);
+	}
 
 } // class MaxNParams

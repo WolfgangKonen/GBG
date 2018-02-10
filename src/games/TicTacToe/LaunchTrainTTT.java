@@ -47,7 +47,7 @@ public class LaunchTrainTTT extends JFrame {
 			throw new RuntimeException("[LaunchTrainTTT.main] args="+args+" not allowed. Use TicTacToeBatch.");
 		}
 	}
-
+	
 	/**
 	 * Initialize the frame and {@link #m_Arena}.
 	 */

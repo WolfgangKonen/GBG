@@ -262,11 +262,11 @@ public class XArenaFuncs
 	 * Caution: Larger values for {@code nply}, e.g. greater 5, may lead to long execution times!
 	 * 
 	 * @param paVector	the (unwrapped) agents for each player 
-	 * @param oPar		the vector of OtherParams, needed to access 
-	 * 					{@code nply = oPar[n]getWrapperNPly()} for  each agent separately
+	 * @param oPar		the vector of {@link OtherParams}, needed to access 
+	 * 					{@code nply = oPar[n].getWrapperNPly()} for  each agent separately
 	 * @param so		needed only to detect whether game is deterministic or not.
-	 * @return a vector of agents ({@code paVector} itself if {@code nply==0}; wrapped agent 
-	 * 					if {@code nply>0}
+	 * @return a vector of agents ({@code paVector} itself if {@code nply==0}; wrapped agents 
+	 * 					if {@code nply>0})
 	 * 
 	 * @see MaxNWrapper
 	 * @see ExpectimaxWrapper
