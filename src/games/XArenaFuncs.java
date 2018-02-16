@@ -383,7 +383,7 @@ public class XArenaFuncs
 			long startTime = System.currentTimeMillis();
 			while (pa.getGameNum()<pa.getMaxGameNum())
 			{		
-				StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01()); 
+				StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
 				pa.trainAgent(so /*,epiLength,learnFromRM*/);
 				
@@ -448,10 +448,10 @@ public class XArenaFuncs
 		return pa;
 	}
 	
-	private StateObservation soSelectStartState(GameBoard gb, boolean chooseStart01) {
+	private StateObservation soSelectStartState(GameBoard gb, boolean chooseStart01, PlayAgent pa) {
 		StateObservation so; 
 		if (chooseStart01) {
-			so = gb.chooseStartState01();
+			so = gb.chooseStartState(pa);
 		} else {
 			so = gb.getDefaultStartState();  // recommended
 		}					
@@ -546,7 +546,7 @@ public class XArenaFuncs
 				long startTime = System.currentTimeMillis();
 				while (pa.getGameNum()<pa.getMaxGameNum())
 				{		
-					StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01()); 
+					StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
 					pa.trainAgent(so /*,epiLength,learnFromRM*/);
 					
@@ -882,7 +882,7 @@ public class XArenaFuncs
 			if (paX.getAgentState()!=AgentState.TRAINED) {
 				while (paX.getGameNum()<paX.getMaxGameNum())
 				{							
-					StateObservation so = soSelectStartState(gb,xab.oPar[0].useChooseStart01()); 
+					StateObservation so = soSelectStartState(gb,xab.oPar[0].useChooseStart01(), paX); 
 
 					paX.trainAgent(so /*,epiLength,learnFromRM*/);
 				}
@@ -901,7 +901,7 @@ public class XArenaFuncs
 			if (paO.getAgentState()!=AgentState.TRAINED) {
 				while (paO.getGameNum()<paO.getMaxGameNum())
 				{							
-					StateObservation so = soSelectStartState(gb,xab.oPar[1].useChooseStart01()); 
+					StateObservation so = soSelectStartState(gb,xab.oPar[1].useChooseStart01(), paO); 
 
 					paO.trainAgent(so /*,epiLength,learnFromRM*/);
 				}

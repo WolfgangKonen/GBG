@@ -1,13 +1,16 @@
 package games.RubiksCube;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import games.RubiksCube.CubieTriple.Orientation;
+import games.RubiksCube.ColorTrafoMap.ColMapType;
+import games.RubiksCube.CubeState.Twist;
 
 public class CubeStateMap extends Hashtable<Integer,CubeState> {
 	public enum CsMapType {AllWholeCubeRotTrafos};
@@ -33,31 +36,32 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 			case 0: 
 				break;
 			case 1: 
-				rot.lTr();
+				rot.lTr(1);
 				break;
 			case 2:
-				rot.lTr().lTr().lTr();
+				rot.lTr(3);
 				break;
 			case 3: 
-				rot.fTr();
+				rot.fTr(1);
 				break;
 			case 4: 
-				rot.fTr().fTr();
+				rot.fTr(2);
 				break;
 			case 5: 
-				rot.fTr().fTr().fTr();
+				rot.fTr(3);
 				break;
 			}
 			for (int j=0; j<4; j++) {
 				//rot.print();
-//				for (int k=0; k<3; k++) loc[k] = rot.fcol[ygrCubie.loc[k]];
-//				CubieTriple ct = new CubieTriple(loc,ygrCubie.col,Orientation.CLOCK);
+				
+				// each whole-cube rotation is uniquely defined by the location of the 
+				// y-face of the ygr-cubie:
 				Integer key = rot.fcol[ygrCubie.loc[0]];
 				CubeState tS = new CubeState(rot);	// IMPORTANT: We have to make a copy of rot, so that
 							// each this.put(key,tS) below really stores a different value!! (Otherwise 
 							// just a reference to the (mutable) object rot is stored in the HashMap.)
 				this.put(key, tS);	// put (key,value) = (Integer, CubeState) into HashMap
-				rot.uTr();
+				rot.uTr(1); // prepare for next for-loop pass
 			}
 		}
 	}
@@ -97,6 +101,19 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 		return set.size();
 	}
 	
+	public static int countDifferentStates(ArrayList D) {
+	    Iterator it1 = D.iterator(); 
+	    HashSet set = new HashSet();
+	    while (it1.hasNext()) {
+		    set.add((CubeState)it1.next());	
+		    		// if set.add(value) is called for a CubeState value which is already
+		    		// present in the set (i.e. value.equals(other) is true for at least  
+		    		// one CubeState other in set), then it will not be added to the set. Thus 
+		    		// set.size() will return the # of truly different values in HashMap this.
+        } 		    
+		return set.size();
+	}
+	
 	public int countYgrHomeStates() {
 		int counter = 0;
 	    Iterator it1 = this.entrySet().iterator(); 
@@ -108,5 +125,6 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 		return counter;
 		
 	}
+	
 } // class CubeStateMap
 

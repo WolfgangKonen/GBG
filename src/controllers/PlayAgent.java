@@ -114,7 +114,7 @@ public interface PlayAgent {
 	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
 	 * parameters (weights and so on).
 	 * @param so		the state from which the episode is played (usually the
-	 * 					return value of {@link GameBoard#chooseStartState01()} to get
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
@@ -125,6 +125,8 @@ public interface PlayAgent {
 	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/);
 	
 	public String printTrainStatus();
+	
+	public boolean isTrainable();
 	
 	/**
 	 * @return a string with information about this agent

@@ -1,4 +1,4 @@
-package games.TicTacToe;
+package games.RubiksCube;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -25,25 +25,25 @@ import games.GameBoard;
 import games.StateObservation;
 import games.Arena;
 import games.Arena.Task;
+import games.RubiksCube.CSArrayList.CSAListType;
+import games.RubiksCube.CSArrayList.TupleInt;
 import games.ArenaTrain;
 import tools.Types;
 
 /**
- * Class GameBoardTTT implements interface GameBoard for TicTacToe.
+ * Class GameBoardCube implements interface GameBoard for RubiksCube.
  * It has the board game GUI. 
  * It shows board game states, optionally the values of possible next actions,
  * and allows user interactions with the board to enter legal moves during 
  * game play or to enter board positions for which the agent reaction is 
  * inspected. 
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
- *
+ * @author Wolfgang Konen, TH Kï¿½ln, Feb'18
  */
-public class GameBoardTTT extends JFrame implements GameBoard {
+public class GameBoardCube extends JFrame implements GameBoard {
 
 	private int TICGAMEHEIGHT=280;
 	private JPanel BoardPanel;
-//	private JPanel VBoardPanel; 	// simplified: VBoardPanel no integrated in BoardPanel
 	private JLabel leftInfo=new JLabel("");
 	private JLabel rightInfo=new JLabel(""); 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
@@ -56,41 +56,39 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	 */
 	protected Button[][] Board;
 	/**
-	 * The representation of the value function corresponding to the current 
+	 * The representation of the state corresponding to the current 
 	 * {@link #Board} position.
 	 */
-//	protected Label[][] VBoard;		// simplified: VBoard no integrated in Board
-	private StateObserverTTT m_so;
+	private StateObserverCube m_so;
 	private int[][] Table;			// =1: position occupied by "X" player
 									//=-1: position occupied by "O" player
 	private double[][] VTable;
+	private CSArrayList[] D;		// the distance sets
 	private boolean arenaActReq=false;
 	
-	// the colors of the TH Köln logo (used for button coloring):
+	// the colors of the TH Kï¿½ln logo (used for button coloring):
 	private Color colTHK1 = new Color(183,29,13);
 	private Color colTHK2 = new Color(255,137,0);
 	private Color colTHK3 = new Color(162,0,162);
 	
-	public GameBoardTTT(Arena ticGame) {
+	public GameBoardCube(Arena ticGame) {
 		initGameBoard(ticGame);
+		generateDistanceSets();
 	}
 	
 	private void initGameBoard(Arena ticGame) 
 	{
 		m_Arena		= ticGame;
 		Board       = new Button[3][3];
-//		VBoard		= new Label[3][3];
 		BoardPanel	= InitBoard();
-//		VBoardPanel = InitVBoard();
 		Table       = new int[3][3];
 		VTable		= new double[3][3];
-		m_so		= new StateObserverTTT();	// empty table
+		m_so		= new StateObserverCube();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
 		JLabel Blank=new JLabel(" ");		// a little bit of space
-		//JLabel Title=new JLabel("Tic Tac Toe",SwingConstants.CENTER);
 		JLabel Title=new JLabel("   ",SwingConstants.CENTER);  // no title, it appears sometimes in the wrong place
 		Title.setForeground(Color.black);	
 		Font font=new Font("Arial",1,20);			
@@ -101,8 +99,6 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		JPanel boardPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		boardPanel.add(BoardPanel);
 		boardPanel.setBackground(Types.GUI_BGCOLOR);
-		//boardPanel.add(new Label("    "));		// some space
-		//boardPanel.add(VBoardPanel);
 		
 		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		infoPanel.setBackground(Types.GUI_BGCOLOR);
@@ -160,46 +156,46 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		return panel;
 	}
 	
-//	private JPanel InitVBoard()
-//	{
-//		JPanel panel=new JPanel();
-//		panel.setLayout(new GridLayout(3,3,10,10));
-//		for(int i=0;i<3;i++){
-//			for(int j=0;j<3;j++){
-//				VBoard[i][j] = new Label("    ");
-//				VBoard[i][j].setBackground(Color.orange);
-//				VBoard[i][j].setForeground(Color.black);
-//				Font font=new Font("Arial",1,12);
-//				VBoard[i][j].setFont(font);
-//				panel.add(VBoard[i][j]);
-//			}
-//		}
-//		return panel;
-//	}
+	private void generateDistanceSets() {
+		
+		System.out.println("\nGenerating distance sets ..");
+		//            0          4                   8
+		int[] Narr = {0,0,9,54, 321,1847,9992,50136, 50,50,50,50};	// for GenerateNext
+//		int[] Narr = {0,0,9,50, 150,600,3000,15000,  50,50,50,50};  // for GenerateNextColSymm
+		int[] theoCov = {1,9,54,321,  	// the known maximum sizes for D[0],D[1],D[2],D[3] ...
+				1847,9992,50136,227536	// ... and D[4],D[5],D[6],D[7],
+		};
+		boolean silent=false;
+		boolean doAssert=true;
+		ArrayList<TupleInt>[] tintList = new ArrayList[12];
+    	D 	= new CSArrayList[12];
+		D[0] = new CSArrayList(CSAListType.GenerateD0);
+		D[1] = new CSArrayList(CSAListType.GenerateD1);
+		//D[1].assertTwistSeqInArrayList();
+		for (int p=2; p<6; p++) {			// a preliminary small set - later we need up to p=11
+			if (p>1) silent=true;
+			if (p>3) doAssert=false;
+			tintList[p] = new ArrayList();
+			//System.out.print("Generating distance set for p="+p+" ..");
+			long startTime = System.currentTimeMillis();
+//			D[p] = new CSArrayList(CSAListType.GenerateNextColSymm, D[p-1], D[p-2], Narr[p], tintList[p], silent);
+			D[p] = new CSArrayList(CSAListType.GenerateNext, D[p-1], D[p-2], Narr[p]
+					, tintList[p], silent, doAssert);
+			double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+			//assert(CubeStateMap.countDifferentStates(D[p])==D[p].size()) : "D["+p+"]: size and # diff. states differ!";
+			//D[p].assertTwistSeqInArrayList();
+			System.out.println("\nCoverage D["+p+"] = "+D[p].size()+" of "+ theoCov[p]
+					+"    Time="+elapsedTime+" sec");
+			//CSArrayList.printTupleIntList(tintList[p]);
+			//CSArrayList.printLastTupleInt(tintList[p]);
+			int dummy=1;
+		}
+	}
 
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
-			m_so = new StateObserverTTT();			// empty Table
-			for(int i=0;i<3;i++){
-				for(int j=0;j<3;j++){
-					Board[i][j].setLabel("  ");
-					Board[i][j].setBackground(colTHK2);
-					Board[i][j].setForeground(Color.white);
-					Board[i][j].setEnabled(false);
-				}
-			}
-		}
-		if (vClear) {
-			VTable		= new double[3][3];
-			for(int i=0;i<3;i++){
-				for(int j=0;j<3;j++){
-					VTable[i][j] = Double.NaN;
-//					VBoard[i][j].setText("   ");
-//					VBoard[i][j].setBackground(Color.orange);
-//					VBoard[i][j].setForeground(Color.black);
-				}
-			}
+			m_so = new StateObserverCube();			// solved cube
 		}
 	}
 
@@ -217,30 +213,13 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 							boolean enableOccupiedCells, boolean showValueOnGameboard) {
 		int i,j;
 		if (so!=null) {
-	        assert (so instanceof StateObserverTTT)
-			: "StateObservation 'so' is not an instance of StateObserverTTT";
-			StateObserverTTT soT = (StateObserverTTT) so;
+	        assert (so instanceof StateObserverCube)
+			: "StateObservation 'so' is not an instance of StateObserverCube";
+			StateObserverCube soT = (StateObserverCube) so;
 			m_so = soT.copy();
-			//Table = soT.getTable();
-			int Player=Types.PLAYER_PM[soT.getPlayer()];
-			switch(Player) {
-			case(+1): 
-				leftInfo.setText("X to move   "); break;
-			case(-1):
-				leftInfo.setText("O to move   "); break;
-			}
 			if (so.isGameOver()) {
 				int win = so.getGameWinner().toInt();
-				int check = Player*win;
-				switch(check) {
-				case(+1): 
-					leftInfo.setText("X has won   "); break;
-				case(-1):
-					leftInfo.setText("O has won   "); break;
-				case(0):
-					leftInfo.setText("Tie         "); break;
-				}
-				
+				leftInfo.setText("You solved it!   "); 				
 			}
 			
 			if (showValueOnGameboard && soT.storedValues!=null) {
@@ -255,18 +234,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 					i=(iAction-j)/3;
 					VTable[i][j] = soT.storedValues[k];					
 				}	
-				if (showValueOnGameboard) {
-					String splus = (m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
-					String sminus= (m_Arena.taskState == Arena.Task.INSPECTV) ? "O" : "X";
-					switch(Player) {
-					case(+1): 
-						rightInfo.setText("    Score for " + splus); break;
-					case(-1):
-						rightInfo.setText("    Score for " + sminus); break;
-					}					
-				} else {
-					rightInfo.setText("");					
-				}
+				rightInfo.setText("");					
 			} 
 		} // if(so!=null)
 		
@@ -285,62 +253,6 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	 */ 
 	private void guiUpdateBoard(boolean enable, boolean showValueOnGameboard)
 	{		
-		double value, maxvalue=Double.NEGATIVE_INFINITY;
-		String valueTxt;
-		int imax=0,jmax=0;
-		int[][] table = m_so.getTable();
-		for(int i=0;i<3;i++){
-			for(int j=0;j<3;j++){
-				if (VTable==null) { 
-					// HumanPlayer and MCTSAgentT do not have a VTable (!)
-					value = Double.NaN;
-				} else {
-					value = VTable[i][j];					
-				}
-				
-				if (Double.isNaN(value)) {
-					valueTxt = "   ";
-//					VBoard[i][j].setBackground(Color.green);						
-				} else {
-					valueTxt = " "+(int)(value*100);
-					if (value<0) valueTxt = ""+(int)(value*100);
-//					if (table[i][j]==0) {
-//						VBoard[i][j].setBackground(Color.orange);
-//					} else {
-//						VBoard[i][j].setBackground(Color.green);						
-//					}
-					if (value>maxvalue) {
-						maxvalue=value;
-						imax=i;
-						jmax=j;
-					}
-				}
-//				VBoard[i][j].setText(scoreTxt);
-//				VBoard[imax][jmax].setBackground(Color.yellow);
-				if(table[i][j]==1)
-				{
-					Board[i][j].setLabel("X");				
-					Board[i][j].setEnabled(enable);
-					Board[i][j].setBackground(Color.black);
-					Board[i][j].setForeground(Color.white);
-				}					
-				else if(table[i][j]==-1)
-				{
-					Board[i][j].setLabel("O");				
-					Board[i][j].setEnabled(enable);
-					Board[i][j].setBackground(Color.white);
-					Board[i][j].setForeground(Color.black);
-				}
-				else
-				{
-					Board[i][j].setLabel("  ");
-					Board[i][j].setEnabled(true);
-					Board[i][j].setForeground(Color.black);
-					Board[i][j].setBackground(colTHK2);
-				}
-				if (showValueOnGameboard) Board[i][j].setLabel(valueTxt);
-			}
-		}
 		paint(this.getGraphics());
 	}		
 
@@ -409,11 +321,12 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			m_Arena.setStatusMessage("Inspecting the value function ...");
 		}
 		m_so.advance(act);			// perform action (optionally add random elements from game 
-									// environment - not necessary in TicTacToe)
+									// environment - not necessary in RubiksCube)
 		updateBoard(null,false,false);
 		arenaActReq = true;		
 	}
 	
+	@Override
 	public void showGameBoard(Arena ticGame, boolean alignToMain) {
 		this.setVisible(true);
 		if (alignToMain) {
@@ -443,9 +356,17 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	}
 
 	/**
-	 * @return a start state which is with probability 0.5 the empty board 
-	 * 		start state and with probability 0.5 one of the possible one-ply 
-	 * 		successors
+	 * Return a start state depending on {@code pa}'s {@link PlayAgent#getGameNum()} and
+	 * {@link PlayAgent#getMaxGameNum()} by randomly selecting from the distance sets in 
+	 * {@code this.D}: <br>
+	 * If the proportion of training games is in the first X[1] percent, select 
+	 * from D[1], if it is in the first X[2] percent, select from D[2], and so on. In this 
+	 * way we realize <b>time-reverse learning</b> (from the cube's end-game to the more complex
+	 * cube states) during the training process. The cumulative percentage X is currently 
+	 * hardcoded in GameBoardCube.
+	 * 
+	 * @param the agent to be trained, we need it here only for its getGameNum() and getMaxGameNum()
+	 * @return the start state for the next training episode
 	 */
 	@Override
 	public StateObservation chooseStartState(PlayAgent pa) {

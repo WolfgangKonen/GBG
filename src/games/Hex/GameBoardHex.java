@@ -6,6 +6,9 @@ import games.StateObservation;
 import tools.Types;
 
 import javax.swing.*;
+
+import controllers.PlayAgent;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -163,7 +166,7 @@ public class GameBoardHex implements GameBoard {
 	 * 		successors
 	 */
     @Override
-    public StateObservation chooseStartState01() {
+    public StateObservation chooseStartState(PlayAgent pa) {
         clearBoard(true, true);
         if (rand.nextDouble() > 0.5) {
             // choose randomly one of the possible actions in default

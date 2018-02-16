@@ -7,6 +7,7 @@ import tools.Types;
 
 import javax.swing.*;
 
+import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 
 import java.awt.*;
@@ -558,7 +559,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     }
 
     @Override
-    public StateObservation chooseStartState01() {
+    public StateObservation chooseStartState(PlayAgent pa) {
         return getDefaultStartState();
     }
 

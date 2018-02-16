@@ -123,7 +123,11 @@ abstract public class AgentBase implements Serializable {
 	}
 
 	public String printTrainStatus() {
-		return "";
+		return "AgentBase::printTrain";	// dummy stub
+	}
+	
+	public boolean isTrainable() { 
+		return false; 					// dummy stub
 	}
 
 	public byte getSize() {return 1;}	// dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)

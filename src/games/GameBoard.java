@@ -1,6 +1,7 @@
 package games;
 
 import games.StateObservation;
+import controllers.PlayAgent;
 import games.Arena;
 
 /**
@@ -13,7 +14,7 @@ import games.Arena;
  * {@link GameBoard} has an internal object derived from {@link StateObservation} which represents the 
  * current game state. It can be retrieved with {@link #getStateObs()}, it can be reset and 
  * retrieved with {@link #getDefaultStartState()}, or a random start state can be retrieved 
- * with {@link #chooseStartState01()}.  
+ * with {@link #chooseStartState(PlayAgent)}.  
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  *
@@ -49,10 +50,12 @@ public interface GameBoard {
 	 * @return the 'empty-board' start state
 	 */
 	public StateObservation getDefaultStartState();
+	
 	/**
+	 * @param pa TODO
 	 * @return a start state which is with probability 0.5 the empty board 
 	 * 		start state and with probability 0.5 one of the possible one-ply 
 	 * 		successors
 	 */
-	public StateObservation chooseStartState01();
+	public StateObservation chooseStartState(PlayAgent pa);
 }

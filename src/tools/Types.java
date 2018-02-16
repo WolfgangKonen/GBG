@@ -22,7 +22,8 @@ public class Types {
 	/**
 	 *  Class ACTIONS holds an action + information whether it was selected at random. 
 	 *  
-	 *  @see Types.ACTIONS_VT
+	 *  @see ACTIONS_VT
+	 *  @see ACTIONS_ST
 	 */
     public static class ACTIONS implements Serializable, Comparable<ACTIONS> {
         private int key;
@@ -100,9 +101,11 @@ public class Types {
 	 *  	 is created via PlayAgent.getNextAction2(so,...) 
 	 *  <li> double   vBest: the game value for the best action returned from 
 	 *  	 PlayAgent.getNextAction2(so,...)
+	 *  <li> ScoreTuple scBest
 	 *  </ul>
 	 *  
-	 *  @see Types.ACTIONS
+	 *  @see ACTIONS
+	 *  @see ACTIONS_ST
 	 */
     public static class ACTIONS_VT extends ACTIONS implements Serializable, Comparable<ACTIONS> {
         private double[] vTable;
@@ -265,7 +268,9 @@ public class Types {
 
     /**
      *  ACTIONS_ST = ACTIONS + ScoreTuple (for best action)
-     *  
+     *
+     *  @see ACTIONS
+     *  @see ACTIONS_VT
      *  @see MaxNAgent
      */
     public static class ACTIONS_ST extends Types.ACTIONS {

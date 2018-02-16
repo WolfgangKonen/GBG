@@ -344,7 +344,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
 	 * parameters (weights and so on).
 	 * @param so		the state from which the episode is played (usually the
-	 * 					return value of {@link GameBoard#chooseStartState01()} to get
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)
 // --- epiLength, learnFromRM are now available via the AgentBase's member ParOther m_oPar: ---
 //	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
@@ -588,6 +588,9 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
 		return str;
 	}
+	
+	@Override
+	public boolean isTrainable() { return true; }
 
 // --- obsolete (replaced by m_feature.getInputSize(int featmode) ):
 //	private int getInputSize(int featmode) {

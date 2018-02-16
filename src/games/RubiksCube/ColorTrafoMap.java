@@ -4,12 +4,19 @@ package games.RubiksCube;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-
+import games.RubiksCube.CubeState.Twist;
 import games.RubiksCube.CubeState.Type;
 
-public class ColorTrafoMap extends HashMap {
+/**
+ * A map of {@link ColorTrafo} objects. The key is just an integer counter to 
+ * distinguish every ColorTrafo when marching through them (e.g. in allColorTrafos()).
+ * 
+ * @see ColorTrafo
+ */
+public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> {
 	public enum ColMapType {AllColorTrafos};
 	public ColorTrafoMap() {
 		super();
@@ -31,29 +38,30 @@ public class ColorTrafoMap extends HashMap {
 			case 0: 
 				break;
 			case 1: 
-				rot.lTr();
+				rot.lTr(1);
 				break;
 			case 2:
-				rot.lTr().lTr().lTr();
+				rot.lTr(3);
 				break;
 			case 3: 
-				rot.fTr();
+				rot.fTr(1);
 				break;
 			case 4: 
-				rot.fTr().fTr();
+				rot.fTr(2);
 				break;
 			case 5: 
-				rot.fTr().fTr().fTr();
+				rot.fTr(3);
 				break;
 			}
 			for (int j=0; j<4; j++) {
 				//rot.print();
-				Integer ct = new Integer(count);
-				ColorTrafo tS = new ColorTrafo(rot);	// IMPORTANT: We have to make a copy of rot, so that
-							// each this.put(ct,tS) below really stores a different value!! (Otherwise 
-							// just a reference to the (mutable) object rot is stored in the HashMap.)
-				this.put(ct, tS);	// put (key,value) = (Integer, ColorTrafo) into HashMap
-				rot.uTr();
+				Integer iCnt = new Integer(count);
+				ColorTrafo tS = new ColorTrafo(rot);	// IMPORTANT: We have to make a copy of rot, 
+					// so that each this.put(iCnt,tS) below really stores a different value!! (Otherwise 
+					// just a reference to the (mutable) object rot is stored in the Hashtable.)
+				tS.setT();
+				this.put(iCnt, tS);	// put (key,value) = (Integer, ColorTrafo) into HashMap
+				rot.uTr(1);
 				count++;
 			}
 		}
@@ -86,11 +94,11 @@ public class ColorTrafoMap extends HashMap {
 	}
 
 	/**
-	 * Given a cube state in cS, apply all color transformation of this to it 
+	 * Given a cube state in cS, apply all color transformation of {@code this} to it 
 	 * 
 	 * @param cS		a cube state of type POCKET or RUBIKS	
 	 * @param hmRots	helper, all whole-cube rotations, to bring ygr-cubie 'home'
-	 * @return	a map with all states which are color-symmetry equivalent to cS
+	 * @return	a map with all states which are color-symmetric equivalent to cS
 	 */
 	public CubeStateMap applyColSymm(CubeState cS, CubeStateMap hmRots) {
 		assert(cS.type==Type.POCKET || cS.type==Type.RUBIKS) : "Wrong cS.type in applyColSymm(cS) !";
@@ -107,11 +115,16 @@ public class ColorTrafoMap extends HashMap {
 	    	ColorTrafo cT = (ColorTrafo)entry.getValue();
 	    	CubeState dS = new CubeState(cS);
 	    	dS.applyCT(cT);							// apply color trafo to dS
+	    	//
+	    	// it is (currently) difficult to give the right values for 
+	    	// dS.lastTwist and dS.twistSequence, so we set them to empty values ('not known'):
+	    	dS.lastTwist = Twist.ID;
+	    	dS.twistSeq = "";
 	    	CubieTriple where = dS.locate(ygr);		// find new location of ygr-cubie
 	    	CubeState trafo = (CubeState)hmRots.get(where.loc[0]);
 	    	if (trafo==null) throw new RuntimeException("Key 'where' not found!");
 	    	dS.apply(trafo);		// apply the right whole-cube rotation to bring ygr-cubie 'home'
-	    	newMap.put(key, dS);
+	    	newMap.put(key, dS);	// add dS to newMap	
 	    	//dS.print();
 	    }
 		return newMap;

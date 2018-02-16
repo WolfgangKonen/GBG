@@ -193,7 +193,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 
 					while (m_PlayAgentX.getGameNum()<m_PlayAgentX.getMaxGameNum())
 					{							
-						StateObservation so = gb.chooseStartState01();
+						StateObservation so = gb.chooseStartState(null);
 						m_PlayAgentX.trainAgent(so);
 
 					}	
@@ -314,7 +314,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 	
 						while (m_PlayAgentX.getGameNum()<m_PlayAgentX.getMaxGameNum())
 						{							
-							StateObservation so = gb.chooseStartState01();
+							StateObservation so = gb.chooseStartState(null);
 							m_PlayAgentX.trainAgent(so);
 	
 						}			
@@ -667,7 +667,7 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 	
 						while (m_PlayAgentX.getGameNum()<m_PlayAgentX.getMaxGameNum())
 						{							
-							StateObservation so = gb.chooseStartState01();
+							StateObservation so = gb.chooseStartState(null);
 							m_PlayAgentX.trainAgent(so);
 	
 						}		

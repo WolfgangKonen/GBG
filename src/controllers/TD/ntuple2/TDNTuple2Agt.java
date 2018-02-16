@@ -781,7 +781,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
 	 * parameters (weights and so on).
 	 * @param so		the state from which the episode is played (usually the
-	 * 					return value of {@link GameBoard#chooseStartState01()} to get
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
@@ -1536,6 +1536,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
 		return str;
 	}
+
+	@Override
+	public boolean isTrainable() { return true; }
 
 	public ParTD getParTD() {
 		return m_tdPar;
