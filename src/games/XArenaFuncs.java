@@ -453,7 +453,7 @@ public class XArenaFuncs
 		if (chooseStart01) {
 			so = gb.chooseStartState(pa);
 		} else {
-			so = gb.getDefaultStartState();  // recommended
+			so = gb.getDefaultStartState();  
 		}					
 		return so;
 	}

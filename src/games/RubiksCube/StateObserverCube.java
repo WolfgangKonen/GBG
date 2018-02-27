@@ -47,6 +47,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		setAvailableActions();
 	}
 	
+	public StateObserverCube(CubeState other) {
+		m_state = new CubeState(other);
+		setAvailableActions();
+	}
+	
 	public StateObserverCube(StateObserverCube other) {
 		m_state = new CubeState(other.m_state);
 		m_state.lastTwist = Twist.ID;		// we assume that we do not know the last twist
@@ -59,7 +64,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
     @Override
 	public boolean isGameOver() {
-		return (this.m_state.equals(def));
+    	boolean pred = (this.m_state.equals(def));
+    	if (pred==true) {
+    		int dummy=1;
+    	}
+		return pred;
 	}
 
     @Override
@@ -108,7 +117,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public double getMinGameScore() { return 0; }
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
-	public String getName() { return "Rubik's Cube";	}
+	public String getName() { return "RubiksCube";	}
 
 	/**
 	 * Advance the current state with 'action' to a new state
@@ -121,9 +130,9 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		int i=(iAction-j)/3;		// reverse: iAction = 3*i + j
 		
 		switch(i) {
-		case 0: m_state.UTw(j); break;
-		case 1: m_state.LTw(j); break;
-		case 2: m_state.FTw(j); break;
+		case 0: m_state.UTw(j+1); break;
+		case 1: m_state.LTw(j+1); break;
+		case 2: m_state.FTw(j+1); break;
 		}
 	}
 
@@ -157,6 +166,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 	
 	public int getNumAvailableActions() {
+		if (actions==null) setAvailableActions();
 		return actions.length;
 	}
 

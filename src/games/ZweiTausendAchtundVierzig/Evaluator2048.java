@@ -185,7 +185,7 @@ public class Evaluator2048 extends Evaluator {
         		PStats.printPlayStats(psList, m_PlayAgent,this.ar);
             }
             
-        }
+        } // else
 
         //evaluate games
         //Min/Max/Average Score

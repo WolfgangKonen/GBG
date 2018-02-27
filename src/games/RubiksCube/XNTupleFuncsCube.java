@@ -98,10 +98,10 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 	    // once we have the truly different CubeStates in 'set', 
 	    // create and fill 'equiv' accordingly:
 		equiv = new int[set.size()][];
-		it1 = mapColSymm.entrySet().iterator();
+		it1 = set.iterator();
 	    while (it1.hasNext()) {
-		    Map.Entry entry = (Map.Entry)it1.next();
-		    equiv[i++] = ((CubeState)entry.getValue()).fcol.clone();	
+		    CubeState cs  = (CubeState)it1.next();
+		    equiv[i++] = cs.fcol.clone();	
         } 
 
 		return equiv;
@@ -117,28 +117,14 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		// Examples for some NTuples for TicTacToe:
-		//best chosen 40, 4-tuples
-		int nTuple[][]={{6, 7, 4, 0},{4, 5, 8, 7},{4, 3, 0, 1},{4, 5, 2, 1},{6, 3, 0, 1},
-				{6, 3, 0, 4},{0, 1, 5, 2},{2, 1, 4, 7},{7, 3, 4, 5},{0, 4, 1, 2},{8, 4, 0, 1},{7, 4, 1, 0},
-				{7, 4, 0, 1},{8, 7, 4, 1},{7, 4, 8, 5},{8, 7, 4, 1},{7, 8, 5, 4},{4, 8, 7, 6},{2, 1, 5, 4},
-				{3, 0, 1, 4},{8, 7, 3, 4},{8, 4, 3, 0},{4, 1, 2, 5},{6, 3, 0, 4},{1, 2, 5, 8},{1, 4, 3, 7},
-				{6, 3, 0, 1},{8, 5, 4, 3},{3, 4, 7, 6},{5, 8, 7, 6},{5, 4, 0, 1},{6, 3, 4, 7},{0, 3, 4, 8},
-				{6, 3, 7, 8},{2, 1, 4, 0},{3, 7, 4, 1},{1, 2, 5, 4},{8, 5, 1, 4},{6, 7, 8, 4},{6, 3, 0, 1}
-		};
-		// int nTuple[][] = {{0,1,2,3,4,5,6,7,8}};
-		// int nTuple[][] = { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 0, 4, 8 } };
-		// int nTuple[][] = {{0,1,2,3,4,5,6,7}, {8,7,6,5,4,3,2,1},
-		// 		{8,7,6,5,4,3,2,0}, {0,1,2,3,4,5,6,8}};
-		// int nTuple[][] = {{0,1,2,5,8,7}, {0,3,6,7,8,5}, {0,3,6,1,4,7},
-		// 		{2,5,8,7,4,1}, {0,1,2,3,4,5}, {6,7,8,3,4,5}, {0,4,8,7,6,3}};
-		// int nTuple[][] =
-		// 		{{0,1,2,3},{4,5,6,7},{8,0,3,6},{1,4,7,2},{5,8,0,4},{6,4,2,0}};
-		// int nTuple[][] = {{0,1,2},{3,4,5},{6,7,8},{0,4,8},{0,1,2,5,8,7},
-		//	 	{0,3,6,7,8,5}, {0,3,6,1,4,7}, {2,5,8,7,4,1}, {0,1,2,3,4,5},
-		//	 	{6,7,8,3,4,5}, {0,4,8,7,6,3}};
-		
-		return nTuple;		
+		// Examples for some n-tuples for Rubik's Cube:
+		switch (mode) {
+		case 1: 
+			// the 4 "ring" 8-tuples:
+			return new int[][]{ {15,14,9,8,0,3,22,21} ,{12,13,10,11,1,2,23,20},
+								{5,4,8,11,18,17,23,22},{ 6,7,9,10,19,16,20,21} };
+		}
+		throw new RuntimeException("Unsupported value mode="+mode+" in XNTupleFuncs::fixedNTuples(int)");
 	}
 
     private static int[] fixedModes = {1};

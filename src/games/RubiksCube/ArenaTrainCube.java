@@ -1,4 +1,4 @@
-package games.TicTacToe;
+package games.RubiksCube;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -10,31 +10,30 @@ import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
 import games.ArenaTrain;
-//import params.TDParams;
 
 /**
- * {@link ArenaTrain} for TicTacToe. It borrows all functionality
+ * {@link ArenaTrain} for Rubik's Cube. It borrows all functionality
  * from the general class {@link ArenaTrain} derived from {@link Arena}. It only overrides 
  * the abstract methods <ul>
  * <li> {@link Arena#makeGameBoard()}, 
  * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)}, and 
  * <li> {@link Arena#makeFeatureClass(int)}, 
  * </ul> such that 
- * these factory methods return objects of class {@link GameBoardTTT}, 
- * {@link EvaluatorTTT}, and {@link FeatureTTT}, respectively.
+ * these factory methods return objects of class {@link GameBoardCube}, 
+ * {@link EvaluatorCube}, and {@link FeatureCube}, respectively.
  * 
- * @see GameBoardTTT
- * @see EvaluatorTTT
+ * @see GameBoardCube
+ * @see EvaluatorCube
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Feb'18
  */
-public class ArenaTrainTTT extends ArenaTrain   {
+public class ArenaTrainCube extends ArenaTrain   {
 	
-	public ArenaTrainTTT() {
+	public ArenaTrainCube() {
 		super();
 	}
 
-	public ArenaTrainTTT(JFrame frame) {
+	public ArenaTrainCube(JFrame frame) {
 		super(frame);
 	}
 
@@ -43,15 +42,14 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "TicTacToe";
+		return "RubiksCube";
 	}
 	
 	/**
-	 * Factory pattern method: make a new GameBoard 
-	 * @return	the game board
+	 * Factory pattern method
 	 */
 	public GameBoard makeGameBoard() {
-		gb = new GameBoardTTT(this);	
+		gb = new GameBoardCube(this);	
 		return gb;
 	}
 	/**
@@ -59,8 +57,7 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 * @param pa		the agent to evaluate
 	 * @param gb		the game board
 	 * @param stopEval	the number of successful evaluations needed to reach the 
-	 * 					evaluator goal (may be used during training to stop it 
-	 * 					prematurely)
+	 * 					evaluator goal (may be used to stop training prematurely)
 	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
 	 * 					If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
@@ -68,21 +65,16 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		if (mode==-1) mode=EvaluatorTTT.getDefaultEvalMode();
-		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
+		if (mode==-1) mode=EvaluatorCube.getDefaultEvalMode();
+		return new EvaluatorCube(pa,gb,stopEval,mode,verbose);
 	}
 
-//	@Override
-//	public PlayAgent makeTDSAgent(String sAgent, TDParams tdPar, int maxGameNum){
-//		return new TDPlayerTTT(sAgent,tdPar,maxGameNum);
-//	}
-
 	public Feature makeFeatureClass(int featmode) {
-		return new FeatureTTT(featmode);
+		return new FeatureCube(featmode);
 	}
 
 	public XNTupleFuncs makeXNTupleFuncs() {
-		return new XNTupleFuncsTTT();
+		return new XNTupleFuncsCube();
 	}
 
 }

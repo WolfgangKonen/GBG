@@ -1,5 +1,6 @@
 package games.RubiksCube;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import games.RubiksCube.CubeState.Type;
 
@@ -18,9 +19,16 @@ import games.RubiksCube.CubeState.Type;
  * 
  * @see ColorTrafoMap
  */
-public class ColorTrafo {
+public class ColorTrafo implements Serializable {
 	public int[] fcol; // fcol[i] holds the new color for current color no. i
 	public int[] T = null; // the forward trafo
+
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
 
 	public ColorTrafo() {
 		this.fcol = new int[] { 0, 1, 2, 3, 4, 5 };

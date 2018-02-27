@@ -33,6 +33,12 @@ public class TestPocketCube {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
+		if (args.length==0) {
+			;
+		} else {
+			throw new RuntimeException("[TestPocketCube.main] args="+args+" not allowed.");
+		}
+
 		TestPocketCube tpock = new TestPocketCube();
 		
 		XNTupleFuncsCube xnf = new XNTupleFuncsCube();
@@ -41,12 +47,9 @@ public class TestPocketCube {
 		tpock.simpleTests01();
 		tpock.simpleTests02();
 		tpock.generatorTests();
+		
+		System.out.println("*** All done ***");
 
-		if (args.length==0) {
-			;
-		} else {
-			throw new RuntimeException("[TestPocketCube.main] args="+args+" not allowed.");
-		}
 	}
 	
 	private void simpleTests01() {
@@ -199,13 +202,19 @@ public class TestPocketCube {
 	}
 	
 	private void generatorTests() {
+		// Generate the distance sets D[p] and calculate the number of prevs, currents and twins
+		// while generating them. If all works out correctly, the relation
+		//		D[p+1].size() = 6*D[p].size() - N_p - N_c - N_t 
+		// should hold
 		
 		System.out.println("\nTesting CSArrayList [GenerateNext]");
 		//            0          4                   8
-		int[] Narr = {0,0,9,54, 321,1847,9992,50136, 50,50,50,50};	// for GenerateNext
+		int[] Narr = {0,0,9,54, 321,1847,9992,50136, 227536,870072,1887748,623800};	// for GenerateNext
 //		int[] Narr = {0,0,9,50, 150,600,3000,15000,  50,50,50,50};  // for GenerateNextColSymm
 		int[] theoCov = {1,9,54,321,  	// the known maximum sizes for D[0],D[1],D[2],D[3] ...
-				1847,9992,50136,227536	// ... and D[4],D[5],D[6],D[7],
+				1847,9992,50136,227536,	// ... and D[4],D[5],D[6],D[7],
+				870072,1887748,623800,	// ... and D[8],D[9],D[10],D[7],
+				2644					// ... and D[11]
 		};
 		boolean silent=false;
 		boolean doAssert=true;
@@ -214,7 +223,7 @@ public class TestPocketCube {
 		D[0] = new CSArrayList(CSAListType.GenerateD0);
 		D[1] = new CSArrayList(CSAListType.GenerateD1);
 		D[1].assertTwistSeqInArrayList();
-		for (int p=2; p<6; p++) {
+		for (int p=2; p<12; p++) {
 			if (p>3) silent=true;
 			if (p>5) doAssert=false;
 			tintList[p] = new ArrayList();

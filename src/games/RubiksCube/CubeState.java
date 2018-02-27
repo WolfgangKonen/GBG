@@ -1,6 +1,7 @@
 package games.RubiksCube;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,7 +62,7 @@ import games.RubiksCube.CubieTriple.Orientation;
  * 
  * @author Wolfgang Konen, TH Köln, Feb'18
  */
-public class CubeState {
+public class CubeState implements Serializable {
 	
 	public static enum Type {POCKET,RUBIKS,TRAFO_P,TRAFO_R};
 	public static enum Twist {ID,U,L,F};
@@ -74,6 +75,13 @@ public class CubeState {
 							//		(new CubeState()).LTw(2).UTw(1) 
 							// produces this.
 	
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
+
 	public CubeState() {
 		this(Type.POCKET);
 	}
@@ -350,7 +358,8 @@ public class CubeState {
 	/**
 	 * 
 	 * @return true, if applying {@code this.twistSeq} to the solved cube yields the  
-	 * cube state of {@code this} (as stored in {@code this.fco}l).
+	 * same cube state as stored in {@code this.fcol}.<br>
+	 * If {@code this.twistSeq=""} (not known), then return always true. 
 	 */
 	public boolean assertTwistSequence() {
 		CubeState tst = new CubeState();

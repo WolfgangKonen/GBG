@@ -1,6 +1,7 @@
 package games.RubiksCube;
 
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,8 +17,16 @@ import games.RubiksCube.CubeState.Type;
  * 
  * @see ColorTrafo
  */
-public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> {
+public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> implements Serializable {
 	public enum ColMapType {AllColorTrafos};
+	
+	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
+
 	public ColorTrafoMap() {
 		super();
 	}
