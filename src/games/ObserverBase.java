@@ -42,6 +42,11 @@ abstract public class ObserverBase {
 	abstract public int getPlayer();
 	abstract public int getNumPlayers();
 
+	public int getMinEpisodeLength() {
+		return 1;
+	}
+
+
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement
 	 * getGameScore(), as required by the interface {@link StateObservation} as well.

@@ -63,10 +63,11 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	private StateObserverCube m_so;
 	private double[][] VTable;
 	private CSArrayList[] D;		// the array of distance sets
-	private int pMax = 4;			// up to which p this array of distance sets is filled
+	private int pMax = 5;			// up to which p this array of distance sets is filled
 	private double[][] Xper = 								// 1st index:
-			new double[][]{{0.0}, {0.0,1.0}, {0,0.1,1.0}	// [0],[1],[2]
-				,{0,0.1,0.2,1.0},{0,0.1,0.2,0.3,1.0}		//,[3],[4]
+			new double[][]{{0.0}, {0.0,1.0}, {0,0.2,1.0}	// [0],[1],[2]
+				,{0,0.1,0.2,1.0},{0,0.1,0.2,0.5,1.0}		//,[3],[4]
+				,{0,0.05,0.10,0.25,0.5,1.0}					//,[5]
 			};
 	private boolean arenaActReq=false;
 	
@@ -389,6 +390,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		}
 		int index = rand.nextInt(D[p].size());
 		CubeState cS = (CubeState)D[p].get(index);
+		cS.minTwists = p; 
 		cS.lastTwist = Twist.ID;
 //		// Each call shall pick a random, but different element from D[p]. 
 //		// Therefore we remove from D[p] every element which has already been picked:

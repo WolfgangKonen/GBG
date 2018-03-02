@@ -8,6 +8,8 @@ import java.io.File;
 import java.text.*; 		// DecimalFormat, NumberFormat
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Random;
 
@@ -32,6 +34,7 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import games.TStats.TAggreg;
 import params.OtherParams;
 import params.ParMC;
 import params.ParMCTS;
@@ -317,9 +320,14 @@ public class XArenaFuncs
 		int gameNum=0;
 		int verbose=2;
 		boolean PLOTTRAINEVAL=false;
+
 		maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		numEval = xab.oPar[n].getNumEval();
 		if (numEval==0) numEval=500; // just for safety, to avoid ArithmeticException in 'gameNum%numEval' below
+
+		boolean doTrainStatistics=true;
+		ArrayList tsList = new ArrayList<TStats>();
+		ArrayList taggList = new ArrayList<TAggreg>();
 
 		DecimalFormat frm = new DecimalFormat("#0.0000");
 		PlayAgent pa = null;
@@ -379,53 +387,63 @@ public class XArenaFuncs
 		//TDNTupleAgt.pstream = System.out;
 		//TDNTupleAgt.pstream = new PrintStream(new FileOutputStream("debug-TDNT.txt"));
 		
-		{
-			long startTime = System.currentTimeMillis();
-			while (pa.getGameNum()<pa.getMaxGameNum())
-			{		
-				StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
+		//{
+		
+		long startTime = System.currentTimeMillis();
+		while (pa.getGameNum()<pa.getMaxGameNum())
+		{		
+			StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
-				pa.trainAgent(so /*,epiLength,learnFromRM*/);
+			pa.trainAgent(so /*,epiLength,learnFromRM*/);
+			
+			if (doTrainStatistics) collectTrainStats(tsList,pa,so);
 				
-				gameNum = pa.getGameNum();
-				if (gameNum%numEval==0 ) { //|| gameNum==1) {
-					double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
-					System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
-					xab.GameNumT.setText(Integer.toString(gameNum ) );
-					
-					// construct 'qa' anew (possibly wrapped agent for eval)
-					qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
+			gameNum = pa.getGameNum();
+			if (gameNum%numEval==0 ) { //|| gameNum==1) {
+				double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+				System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
+				xab.GameNumT.setText(Integer.toString(gameNum ) );
+				
+				// construct 'qa' anew (possibly wrapped agent for eval)
+				qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
 
-			        m_evaluatorQ.eval(qa);
-					seriesQ.add((double)gameNum, m_evaluatorQ.getLastResult());
-					if (doTrainEvaluation) {
-						m_evaluatorT.eval(qa);
-						if (PLOTTRAINEVAL) 
-							seriesT.add((double)gameNum, m_evaluatorT.getLastResult());
-					}
-					lChart.plot();
-					startTime = System.currentTimeMillis();
+		        m_evaluatorQ.eval(qa);
+				seriesQ.add((double)gameNum, m_evaluatorQ.getLastResult());
+				if (doTrainEvaluation) {
+					m_evaluatorT.eval(qa);
+					if (PLOTTRAINEVAL) 
+						seriesT.add((double)gameNum, m_evaluatorT.getLastResult());
 				}
-				
-				if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {
-					// construct 'qa' anew (possibly wrapped agent for eval)
-					qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
-			        
-					if (doTrainEvaluation) {
-						m_evaluatorT.eval(qa);
-						m_evaluatorT.goalReached(gameNum);
-					}
-					
-					m_evaluatorQ.eval(qa); 
-					if(m_evaluatorQ.goalReached(gameNum)) break;  // out of while
-					
-				}
+				lChart.plot();
+				startTime = System.currentTimeMillis();
 			}
 			
-			// Debug only
-			//TDNTupleAgt.pstream.close();
+			if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {
+				// construct 'qa' anew (possibly wrapped agent for eval)
+				qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
+		        
+				if (doTrainEvaluation) {
+					m_evaluatorT.eval(qa);
+					m_evaluatorT.goalReached(gameNum);
+				}
+				
+				m_evaluatorQ.eval(qa); 
+				if(m_evaluatorQ.goalReached(gameNum)) break;  // out of while
+				
+			}
+		} // while
+		
+		// Debug only
+		//TDNTupleAgt.pstream.close();
 			
-		} // if(sAgent)..else
+		//} // if(sAgent)..else
+		
+		if (doTrainStatistics) {
+			taggList = aggregateTrainStats(tsList);
+			System.out.println("--- Train Statistics ---");
+			TStats.printTAggregList(taggList);
+		}
+		
 		xab.GameNumT.setText(Integer.toString(maxGameNum) );		// restore initial value (maxGameNum)
 		//samine
 		int test=2000;
@@ -456,6 +474,34 @@ public class XArenaFuncs
 			so = gb.getDefaultStartState();  
 		}					
 		return so;
+	}
+	
+	private void collectTrainStats(ArrayList<TStats> tsList, PlayAgent pa, StateObservation so) {
+		int n=pa.getGameNum();
+		int p=so.getMinEpisodeLength();
+		int moveNum=pa.getMoveCounter();
+		int epiLength = pa.getParOther().getEpisodeLength();
+        TStats tstats = new TStats(n,p,moveNum,epiLength);
+        tsList.add(tstats);
+	}
+	
+	private ArrayList<TAggreg> aggregateTrainStats(ArrayList<TStats> tsList) {
+		ArrayList taggList = new ArrayList<TAggreg>();
+		TStats tstats;
+		TAggreg tagg;
+		HashSet pvalues = new HashSet();
+		Iterator it = tsList.iterator();
+	    while (it.hasNext()) {
+		    tstats = (TStats)it.next();
+	    	pvalues.add(tstats.p);
+	    }
+		Iterator itp = pvalues.iterator();
+	    while (itp.hasNext()) {
+	    	int p=(int)itp.next();
+ 			tagg = new TAggreg(tsList,p);
+ 			taggList.add(tagg);
+	    }
+		return taggList;
 	}
 
 	/**

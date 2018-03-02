@@ -147,6 +147,8 @@ public interface StateObservation extends Serializable{
 	
 	public double getMinGameScore();
 	public double getMaxGameScore();
+	
+	public int getMinEpisodeLength();
 
 	/**
 	 *

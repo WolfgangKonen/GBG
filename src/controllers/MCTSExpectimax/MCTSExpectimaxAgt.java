@@ -320,7 +320,7 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	public void setDefaultOtherPar() {
 		m_oPar = new ParOther();
 	}
-	public ParOther getOtherPar() {
+	public ParOther getParOther() {
 		return m_oPar;
 	}
 }

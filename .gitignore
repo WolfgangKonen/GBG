@@ -42,7 +42,6 @@ agents/Hex/05/TEST*.agt.zip
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.ear
 

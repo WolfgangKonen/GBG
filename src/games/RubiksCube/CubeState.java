@@ -73,7 +73,8 @@ public class CubeState implements Serializable {
 	Twist lastTwist = Twist.ID;
 	String twistSeq = "";   // e.g. "L2U1" means that 
 							//		(new CubeState()).LTw(2).UTw(1) 
-							// produces this.
+							// produces this. ("": not known).
+	int minTwists = -1;		// minimum number of twists needed to solve this state (-1: not known)
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -129,6 +130,7 @@ public class CubeState implements Serializable {
 		this.type = cs.type;
 		this.lastTwist = cs.lastTwist;
 		this.twistSeq = cs.twistSeq;
+		this.minTwists = cs.minTwists;
 		this.fcol = cs.fcol.clone();
 	}
 	

@@ -1,6 +1,7 @@
 package controllers;
 
 import games.StateObservation;
+import params.ParOther;
 import games.Evaluator;
 import games.GameBoard;
 import tools.Types;
@@ -162,9 +163,17 @@ public interface PlayAgent {
 	 * (For non-trainable agents, {@link AgentBase} will return 0L.)
 	 */
 	public long getNumTrnMoves();
+	
+	/**
+	 * @return number of moves in the last train episode for trainable agents.
+	 * (For non-trainable agents, {@link AgentBase} will return 0.)
+	 */
+	public int getMoveCounter();
 
 	public void setMaxGameNum(int num);
 	public void setGameNum(int num);
+	
+	public ParOther getParOther();
 	
 	/**
 	 * @return During training: Call {@link Evaluator} after this number of training games

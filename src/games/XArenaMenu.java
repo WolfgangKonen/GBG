@@ -486,9 +486,9 @@ public class XArenaMenu extends JMenuBar {
 			if (td instanceof TDAgent) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar[n].setFrom( ((TDAgent) td).getTDParams() );
-				if (((TDAgent) td).getOtherPar() == null ) 
+				if (((TDAgent) td).getParOther() == null ) 
 					((TDAgent) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar[n].setFrom( ((TDAgent) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((TDAgent) td).getParOther() );
 			}
 //			else if (td instanceof TDNTupleAgt) {
 //				// set the agent parameters in XArenaTabs:
@@ -510,9 +510,9 @@ public class XArenaMenu extends JMenuBar {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple2Agt) td).getParTD() );
 				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple2Agt) td).getParNT() );
-				if (((TDNTuple2Agt) td).getOtherPar() == null ) 
+				if (((TDNTuple2Agt) td).getParOther() == null ) 
 					((TDNTuple2Agt) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple2Agt) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple2Agt) td).getParOther() );
 				//
 				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
@@ -526,30 +526,30 @@ public class XArenaMenu extends JMenuBar {
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT) td).getParMCTS() );
-				if (((MCTSAgentT) td).getOtherPar() == null ) 
+				if (((MCTSAgentT) td).getParOther() == null ) 
 					((MCTSAgentT) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT) td).getParOther() );
 			}
 			else if (td instanceof MCTSExpectimaxAgt) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctsExpectimaxParams[n].setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
-				if (((MCTSExpectimaxAgt) td).getOtherPar() == null ) 
+				if (((MCTSExpectimaxAgt) td).getParOther() == null ) 
 					((MCTSExpectimaxAgt) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar[n].setFrom( ((MCTSExpectimaxAgt) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((MCTSExpectimaxAgt) td).getParOther() );
 			}
 			else if (td instanceof MCAgent) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mcParams[n].setFrom( ((MCAgent) td).getMCPar() );
-				if (((MCAgent) td).getOtherPar() == null ) 
+				if (((MCAgent) td).getParOther() == null ) 
 					((MCAgent) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar[n].setFrom( ((MCAgent) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((MCAgent) td).getParOther() );
 			}
 			else if (td instanceof MCAgentN) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mcParams[n].setFrom( ((MCAgentN) td).getMCPar() );
-				if (((MCAgentN) td).getOtherPar() == null ) 
+				if (((MCAgentN) td).getParOther() == null ) 
 					((MCAgentN) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar[n].setFrom( ((MCAgentN) td).getOtherPar() );
+				m_arena.m_xab.oPar[n].setFrom( ((MCAgentN) td).getParOther() );
 			}
 			else if (td instanceof MinimaxAgent) {
 				// set the agent parameters in XArenaTabs:

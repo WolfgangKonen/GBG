@@ -63,6 +63,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 
     @Override
+	public int getMinEpisodeLength() {
+		return m_state.minTwists;
+	}
+
+    @Override
 	public boolean isGameOver() {
     	boolean pred = (this.m_state.equals(def));
     	if (pred==true) {
