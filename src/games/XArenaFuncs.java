@@ -597,7 +597,7 @@ public class XArenaFuncs
 					pa.trainAgent(so /*,epiLength,learnFromRM*/);
 					
 					gameNum = pa.getGameNum();
-					actionNum = pa.getNumLrnActions();
+					actionNum = pa.getNumLrnActions();	
 					trnMoveNum = pa.getNumTrnMoves();
 					if (gameNum%numEval==0 ) { //|| gameNum==1) {
 						double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;

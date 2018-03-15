@@ -25,6 +25,7 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import games.RubiksCube.ArenaTrainCube;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
@@ -695,7 +696,8 @@ public class XArenaMenu extends JMenuBar {
 			printStatus("Running Quick Evaluation ...");
 			try {
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
-				Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,0);
+				int verb = 0;
+				Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,verb);
 		        qEvaluator.eval(pa);
 				str = qEvaluator.getMsg();
 				System.out.println(str);

@@ -11,6 +11,7 @@ import java.util.Random;
 import agentIO.AgentLoader;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.ArenaTrain;
 import games.Evaluator;
 import games.TicTacToe.Evaluator9;
@@ -20,6 +21,7 @@ import games.TStats;
 import games.TStats.TAggreg;
 import games.XArenaFuncs;
 import games.RubiksCube.CSArrayList.TupleInt;
+import games.RubiksCube.CubeConfig.StateType;
 import tools.MessageBox;
 import tools.Types;
 
@@ -32,21 +34,22 @@ import tools.Types;
  * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
  */
 public class EvaluatorCube extends Evaluator {
- 	private static final int[] AVAILABLE_MODES = {0};
+ 	private static final int[] AVAILABLE_MODES = new int[]{0,1};
 	private String sRandom = Types.GUI_AGENT_LIST[2];
 	private String sMinimax = Types.GUI_AGENT_LIST[1];
 	private long seed = 999;
 	private Random rand = new Random(seed);
 //	private AgentLoader agtLoader = null;
 	private int m_mode;
-	private double m_res=-1;		// avg. success against RandomPlayer, best is 0.9 (m_mode=0)
-									// or against MinimaxPlayer, best is 0.0 (m_mode=1,2)
+	private double m_res=-1;		// avg. success on array D of distance sets
 	private String m_msg;
-	protected double[] m_thresh={0.8}; // threshold for each value of m_mode
-	private GameBoardCube m_gb;
-	private CSArrayList[] D;		// the array of distance sets
-		// Nmax: how many states to pick randomly from each distance set D[p]
+	private CSArrayList[] T;		// the array of distance sets
+	// Nmax: how many states to pick randomly from each distance set D[p]:
 	private int[] Nmax = {0,10,50,300,2000,2000,2000,2000,2000,2000,2000,2000};
+	/**
+	 * threshold for each value of m_mode
+	 */
+	protected double[] m_thresh={0.85,0.9}; // 
 	
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, stopEval);
@@ -67,24 +70,27 @@ public class EvaluatorCube extends Evaluator {
 		if (!isAvailableMode(mode)) 
 			throw new RuntimeException("EvaluatorTTT: Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
-		m_gb = (GameBoardCube)gb;	
-		D = m_gb.getD();
+		if (gb != null) {
+			assert (gb instanceof GameBoardCube);	
+			T = ((GameBoardCube)gb).getT();			
+			//T = ((GameBoardCube)gb).generateDistanceSets(rand);		
+			//--- this takes too much time (each time an Evaluator is constructed), so we do it 
+			//--- once in GameBoardCube
+		}
 	}
 	
 	/**
-	 * 
-	 * @return true if evaluateAgentX is above m_thresh.<br>
-	 * The choice for X=0 is made with 4th parameter mode in 
-	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int)} [default mode=0].<p>
-	 * 
-	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
-	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
+	 * @return true if evaluateAgentX is above {@link #m_thresh}.
+	 * The choice for {@link #m_thresh} is made with 4th parameter mode in 
+	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int)} [default: mode=0].<p>
 	 */
 	@Override
 	public boolean eval_Agent(PlayAgent playAgent) {
+		assert (m_thresh.length >= AVAILABLE_MODES.length);
 		m_PlayAgent = playAgent;
 		switch(m_mode) {
 		case 0:  return evaluateAgent0(m_PlayAgent)>m_thresh[0];
+		case 1:  return evaluateAgent0(m_PlayAgent)>m_thresh[1];
 		default: return false;
 		}
 	}
@@ -99,23 +105,28 @@ public class EvaluatorCube extends Evaluator {
 		ArrayList taggList = new ArrayList<TAggreg>();
 		TStats tstats;
 		TAggreg tagg;
-		for (int p=1; p<=m_gb.getPMax(); p++) {
+		for (int p=1; p<=CubeConfig.pMax; p++) {
 			int epiLength = 2*p; //(2*p>10) ? 2*p : 10;
-			if (D[p]!=null) {
+			if (T[p]!=null) {
 	 			for (int n=0; n<Nmax[p]; n++) {
- 	 				int index = rand.nextInt(D[p].size());
- 	 				CubeState cS = (CubeState)D[p].get(index);
+ 	 				int index = rand.nextInt(T[p].size());
+ 	 				CubeState cS = (CubeState)T[p].get(index);
+ 	 				cS.clearLast();
  	 				StateObserverCube so = new StateObserverCube(cS);
  	 				
  	                moveNum=0;
  	                while (!so.isGameOver() && moveNum<epiLength) {
- 	                    so.advance(m_PlayAgent.getNextAction2(so, false, true));
+ 	                	if (pa instanceof TDNTuple2Agt) {
+ 	 	                    so.advance(((TDNTuple2Agt) pa).getNextAction2SYM(so, false, true, false)); 	                		
+ 	                	} else {
+ 	 	                    so.advance(pa.getNextAction2(so, false, true));
+ 	                	}
  	                    moveNum++;
  	                }
  	                tstats = new TStats(n,p,moveNum,epiLength);
  	    			tsList.add(tstats);
 
- 	                if(verbose == 0) {
+ 	                if(verbose > 1) {
  	                    System.out.print("Finished game " + n + " with moveNum " + moveNum + " twists.\n");
  	                }
  				} // for (n)
@@ -123,9 +134,12 @@ public class EvaluatorCube extends Evaluator {
  			tagg = new TAggreg(tsList,p);
  			taggList.add(tagg);
  		} // for (p)
-		m_res = TStats.avgResTAggregList(taggList);
+		m_res = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
 		m_msg = pa.getName()+": "+getPrintString() + m_res;
-		if (this.verbose>0) TStats.printTAggregList(taggList);
+		if (this.verbose>=0) {
+			TStats.printTAggregList(taggList);
+			//System.out.println((CubeConfig.stateCube==StateType.CUBESTATE) ? "CUBESTATE" : "CUBEPLUSACTION");
+		}
 		return m_res;
 	}
 
@@ -153,7 +167,7 @@ public class EvaluatorCube extends Evaluator {
  	
  	//@Override
  	public static int getDefaultEvalMode() {
-		return AVAILABLE_MODES[0];		
+		return 0;		
 	}
  	
 	public int getQuickEvalMode() 
@@ -172,7 +186,8 @@ public class EvaluatorCube extends Evaluator {
 	@Override
 	public String getPrintString() {
 		switch (m_mode) {
-		case 0:  return "success rate (randomAgent, best is 0.9): ";
+		case 0:  return "% solved with minimal twists (best is 1.0): ";
+		case 1:  return "% solved below epiLength=2*p (best is 1.0): ";
 		default: return null;
 		}
 	}
@@ -180,7 +195,8 @@ public class EvaluatorCube extends Evaluator {
 	@Override
 	public String getPlotTitle() {
 		switch (m_mode) {
-		case 0:  return "success against Random";
+		case 0:  return "% solved with minimal twists";
+		case 1:  return "% solved below epiLength";
 		default: return null;
 		}
 	}

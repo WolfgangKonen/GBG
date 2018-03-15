@@ -166,7 +166,7 @@ public class GameBoardHex implements GameBoard {
 	 * 		successors
 	 */
     @Override
-    public StateObservation chooseStartState(PlayAgent pa) {
+    public StateObservation chooseStartState() {
         clearBoard(true, true);
         if (rand.nextDouble() > 0.5) {
             // choose randomly one of the possible actions in default
@@ -178,6 +178,11 @@ public class GameBoardHex implements GameBoard {
         return m_so;
     }
 
+	@Override
+    public StateObservation chooseStartState(PlayAgent pa) {
+    	return chooseStartState();
+    }
+	
     private void createAndShowGUI() {
         gamePanel = new HexPanel();
         m_frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

@@ -3,6 +3,7 @@ package games;
 import games.StateObservation;
 import controllers.PlayAgent;
 import games.Arena;
+import games.RubiksCube.CubeConfig;
 
 /**
  * Each class implementing interface GameBoard has the board game GUI. 
@@ -52,10 +53,27 @@ public interface GameBoard {
 	public StateObservation getDefaultStartState();
 	
 	/**
-	 * @param pa TODO
-	 * @return a start state which is with probability 0.5 the empty board 
-	 * 		start state and with probability 0.5 one of the possible one-ply 
-	 * 		successors
+	 * Choose a random start state. Used when training an agent via self-play.
+	 * 
+	 * @param pa needed to get the number of training games
+	 * @return a) for 2-player games: a start state which is with probability 0.5 the empty board 
+	 * 		and with probability 0.5 one of the possible one-ply successors. <br>
+	 *   b) for RubiksCube: a random start state which is p twists away from the solved cube. 
+	 *      Which p from {1,...,{@link CubeConfig#pMax}} depends on the proportion of training games conducted.
+	 *      
+	 * @see PlayAgent#trainAgent(StateObservation)    
 	 */
 	public StateObservation chooseStartState(PlayAgent pa);
+
+	/**
+	 * Choose a random start state when playing a game.
+	 * 
+	 * @return a) for 2-player games: a start state which is with probability 0.5 the empty board 
+	 * 		and with probability 0.5 one of the possible one-ply successors. <br>
+	 *   b) for RubiksCube: a random start state which is p twists away from the solved cube. 
+	 *      p from {1,...,{@link CubeConfig#pMax}} is picked randomly.
+	 *      
+	 * @see Arena#PlayGame()
+	 */
+	public StateObservation chooseStartState();
 }

@@ -9,6 +9,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import games.StateObservation;
 import games.RubiksCube.CubieTriple.Orientation;
 
 /**
@@ -71,6 +72,7 @@ public class CubeState implements Serializable {
 
 	Type type = Type.POCKET;
 	Twist lastTwist = Twist.ID;
+	int lastTimes = 0;
 	String twistSeq = "";   // e.g. "L2U1" means that 
 							//		(new CubeState()).LTw(2).UTw(1) 
 							// produces this. ("": not known).
@@ -129,6 +131,7 @@ public class CubeState implements Serializable {
 	public CubeState(CubeState cs) {
 		this.type = cs.type;
 		this.lastTwist = cs.lastTwist;
+		this.lastTimes = cs.lastTimes;
 		this.twistSeq = cs.twistSeq;
 		this.minTwists = cs.minTwists;
 		this.fcol = cs.fcol.clone();
@@ -247,6 +250,7 @@ public class CubeState implements Serializable {
 	public CubeState UTw(int times) {
 		for (int i=0; i<times; i++) this.UTw();
 		this.twistSeq = this.twistSeq + "U"+times;
+		this.lastTimes = times;
 		return this;
 	}
 	
@@ -256,6 +260,7 @@ public class CubeState implements Serializable {
 	public CubeState LTw(int times) {
 		for (int i=0; i<times; i++) this.LTw();
 		this.twistSeq = this.twistSeq + "L"+times;
+		this.lastTimes = times;
 		return this;
 	}
 	
@@ -265,6 +270,7 @@ public class CubeState implements Serializable {
 	public CubeState FTw(int times) {
 		for (int i=0; i<times; i++) this.FTw();
 		this.twistSeq = this.twistSeq + "F"+times;
+		this.lastTimes = times;
 		return this;
 	}
 	
@@ -331,6 +337,30 @@ public class CubeState implements Serializable {
 		throw new RuntimeException("Invalid cube, we should not arrive here!");
 	}
 
+	public int[] getBoardVector() {
+		int[] bvec;
+		switch (CubeConfig.stateCube) {
+		case CUBESTATE: 
+			bvec = fcol.clone();
+			break;
+		case CUBEPLUSACTION:
+			bvec = new int[fcol.length+2];
+			for (int i=0; i<fcol.length; i++) bvec[i] = this.fcol[i];
+			bvec[fcol.length] = this.lastTwist.ordinal();
+			bvec[fcol.length+1] = this.lastTimes;
+			break;
+		default: 
+			throw new RuntimeException("Unallowed value in switch stateCube");
+		}
+		return bvec;   
+	}
+	
+	public CubeState clearLast() {
+		this.lastTwist = Twist.ID;
+		this.lastTimes = 0;
+		return this;
+	}
+	
 	public CubeState print() {
 		System.out.println(this.toString());
 		return this;

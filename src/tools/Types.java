@@ -345,7 +345,7 @@ public class Types {
 	 */
 	public static final String GUI_DEFAULT_DIR_AGENT = "agents";
 	
-	public static final double TD_HORIZONCUT = 0.1;		// see NTuple2ValueFunc.setHorizon()
+	public static final double TD_HORIZONCUT = 0.01;		// see NTuple2ValueFunc.setHorizon()
 	
  }
 

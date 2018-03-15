@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * A simple main program to calculate the number of states in the game of NIM.
@@ -218,6 +219,8 @@ public class TestPocketCube {
 		};
 		boolean silent=false;
 		boolean doAssert=true;
+		long seed = 99;
+		Random rand = new Random(seed);
 		ArrayList<TupleInt>[] tintList = new ArrayList[12];
 		CSArrayList[] D = new CSArrayList[12];
 		D[0] = new CSArrayList(CSAListType.GenerateD0);
@@ -231,7 +234,7 @@ public class TestPocketCube {
 			long startTime = System.currentTimeMillis();
 //			D[p] = new CSArrayList(CSAListType.GenerateNextColSymm, D[p-1], D[p-2], Narr[p], tintList[p], silent);
 			D[p] = new CSArrayList(CSAListType.GenerateNext, D[p-1], D[p-2], Narr[p]
-					, tintList[p], silent, doAssert);
+					, tintList[p], silent, doAssert, rand);
 			double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
 			assert(CubeStateMap.countDifferentStates(D[p])==D[p].size()) : "D["+p+"]: size and # diff. states differ!";
 			D[p].assertTwistSeqInArrayList();

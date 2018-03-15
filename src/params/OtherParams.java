@@ -6,6 +6,7 @@ import java.awt.Canvas;
 import java.awt.Checkbox;
 import java.awt.CheckboxGroup;
 import java.awt.Choice;
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Label;
@@ -238,7 +239,7 @@ public class OtherParams extends Frame {
 
 	public int getEpisodeLength() {
 		int elen = Integer.valueOf(epiLeng_T.getText()).intValue();
-		//if (elen == -1)	elen = Integer.MAX_VALUE;
+		if (elen == -1)	elen = Integer.MAX_VALUE;
 		return elen;
 	}
 
@@ -332,4 +333,26 @@ public class OtherParams extends Frame {
 		// this.miniUseHmTrue.setState(op.useMinimaxHashmap());
 	}
 
+	/**
+	 * Set sensible parameters for a specific agent and specific game. By "sensible
+	 * parameters" we mean parameter producing good results. Likewise, some parameter
+	 * choices may be enabled or disabled.
+	 * 
+	 * @param agentName either "TD-Ntuple-2" (for {@link TDNTuple2Agt}) or "TDS" (for {@link TDAgent})
+	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 */
+	public void setParamDefaults(String agentName, String gameName) {
+		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
+		switch (gameName) {
+		case "RubiksCube": 
+			chooseS01.setState(true);		// always select a non-solved cube as start state
+			chooseS01.setEnabled(false);
+			chooseS01L.setEnabled(false);
+			epiLeng_T.setText("50"); 		// the maximum episode length (when playing a game)
+			break;
+		default:	//  all other
+			break;
+		}
+	}
+	
 } // class OtherParams

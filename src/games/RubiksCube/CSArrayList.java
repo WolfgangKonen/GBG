@@ -74,7 +74,7 @@ public class CSArrayList extends ArrayList<CubeState> {
 	 * @see TupleInt 
 	 */
 	public CSArrayList(CSAListType csaType, CSArrayList D, CSArrayList Dprev, int N,
-			ArrayList tintList, boolean silent, boolean doAssert) {
+			ArrayList tintList, boolean silent, boolean doAssert, Random rand) {
 		super();
 		// Dcopy is just a copy of D from which we can safely remove the elements 
 		// we already picked (in the for-n-loop below) without altering D:
@@ -85,8 +85,6 @@ public class CSArrayList extends ArrayList<CubeState> {
 		int twinCounter=0;
 		int prevCounter=0;
 		int currCounter=0;
-		long seed = 999;
-		Random rand = new Random(seed);
 		assert(N<=D.size()) : "Oops, N too big!";
 		TupleInt tint;
 		for (int n=0; n<N; n++) {

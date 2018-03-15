@@ -43,30 +43,21 @@ public class TStats {
 	    		+ ", epiLength="+tint.epiLength);
 	}
 
+	/**
+	 * Class for aggregating the results in a list of {@link TStats} objects: All objects with a 
+	 * given {@code p} are aggregated to obtain: <ul>
+	 *  <li> <b>size</b> 		the count
+	 *  <li> <b>percSolved</b> 	the percentage of episodes solved in minimum episode length  
+	 *  <li> <b>percLonger</b>	the percentage of longer episodes, but below max. episode length
+	 *  <li> <b>epiLength</b>	the percentage of episodes with maximum episode length
+	 *  </ul>
+	 */
 	public static class TAggreg {
 		int size;
 		int p;
 		double percSolved;
 		double percLonger;
 		double percNotSol;
-		
-//		public TAggreg(ArrayList<TStats> csList) {
-//			Iterator it = csList.iterator();
-//			int nSolved=0;
-//			int nLonger=0;
-//			int nNot=0;
-//		    while (it.hasNext()) {
-//			    TStats cs = (TStats)it.next();
-//			    this.p = cs.p;
-//			    if (cs.moveNum==cs.p) nSolved++;
-//			    if (cs.p<cs.moveNum && cs.moveNum<cs.epiLength) nLonger++;
-//			    if (cs.moveNum==cs.epiLength) nNot++;
-//	        } 
-//		    this.size = csList.size();
-//			this.percSolved = ((double)nSolved)/size;
-//			this.percLonger = ((double)nLonger)/size;
-//			this.percNotSol = ((double)nNot)/size;
-//		}	
 		
 		public TAggreg(ArrayList<TStats> tsList, int p) {
 			Iterator it = tsList.iterator();
@@ -106,7 +97,6 @@ public class TStats {
 	}
 	
 	/**
-	 * 
 	 * @param taList
 	 * @return the average 'solved' percentage of taList
 	 */
@@ -114,11 +104,32 @@ public class TStats {
 		Iterator it = taList.iterator();
 		double res=0;
 	    while (it.hasNext()) {
-			TAggreg tint = (TAggreg)it.next();
-			res += tint.percSolved;
+			TAggreg tagg = (TAggreg)it.next();
+			res += tagg.percSolved;
         } 		
 		return res/taList.size();
 	}
 
+	/**
+	 * @param taList
+	 * @param weight the weights w, each entry in taList gets the relative weight w[p]/sum(w[p])
+	 * @param mode =0: percent solved within minimal twists, =1: percent solved below epiLength
+	 * @return the weighted average of 'solved' percentages in taList
+	 */
+	public static double weightedAvgResTAggregList(ArrayList<TAggreg> taList, int[] weight, int mode) {
+		assert (weight.length >= taList.size());
+		Iterator it = taList.iterator();
+		double res=0;
+		double wghtSum = 0.0;
+		double val;
+		int count=0;
+	    while (it.hasNext()) {
+			TAggreg tagg = (TAggreg)it.next();
+			val = (mode==0) ? tagg.percSolved : (1-tagg.percNotSol);
+			wghtSum += weight[count];
+			res += val * weight[count++];
+        } 		
+		return res/wghtSum;
+	}
 
 }

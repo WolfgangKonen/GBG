@@ -10,20 +10,21 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * Class StateObservation observes the current state of the game, it has utility functions for
+ * Class StateObserverCube observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
  * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
- *
  */
 public class StateObserverCube extends ObserverBase implements StateObservation {
 	private CubeState m_state;
+	private ACTIONS m_action; 		// the action which led to m_state (9 if not known)
 	private static CubeState def = new CubeState(); // a solved cube as reference
     private static final double REWARD_POSITIVE =  1.0;
-	protected Types.ACTIONS[] actions;
+	//protected Types.ACTIONS[] actions;
+	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
     
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
@@ -39,23 +40,28 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
 	public StateObserverCube() {
 		m_state = new CubeState(); 
+		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
 
 	public StateObserverCube(int[] fcol) {
 		m_state = new CubeState(fcol);
+		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
 	
 	public StateObserverCube(CubeState other) {
 		m_state = new CubeState(other);
+		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
 	
 	public StateObserverCube(StateObserverCube other) {
 		m_state = new CubeState(other.m_state);
-		m_state.lastTwist = Twist.ID;		// we assume that we do not know the last twist
-											// when we get a new initial state
+//		m_state.lastTwist = Twist.ID;		// we assume that we do not know the last twist
+//											// when we get a new initial state
+		m_action = new ACTIONS(other.m_action);
+		setAvailableActions();
 	}
 	
 	public StateObserverCube copy() {
@@ -70,9 +76,9 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     @Override
 	public boolean isGameOver() {
     	boolean pred = (this.m_state.equals(def));
-    	if (pred==true) {
-    		int dummy=1;
-    	}
+//    	if (pred) {
+//    		int dummy=1;	// this is only for a conditional breakpoint
+//    	}
 		return pred;
 	}
 
@@ -90,7 +96,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 	
 	public boolean isLegalAction(ACTIONS act) {
-		return (act.toInt()<9); 
+		return (0<=act.toInt() && act.toInt()<9); 
 		
 	}
 
@@ -109,23 +115,21 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
-	 * 			For TTT only game-over states have a non-zero game score. 
-	 * 			It is the reward for the player who *would* move next (if 
-	 * 			the game were not over). 
+	 * 			For Rubik's Cube only game-over states have a non-zero game score. 
 	 */
 	public double getGameScore() {
-        boolean gameOver = this.isGameOver();
-        if(gameOver) return REWARD_POSITIVE;
+        if(isGameOver()) return REWARD_POSITIVE;
         return 0; 
 	}
 
 	public double getMinGameScore() { return 0; }
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
-	public String getName() { return "RubiksCube";	}
+	public String getName() { return "RubiksCube";	}	// should be a valid directory name
 
 	/**
-	 * Advance the current state with 'action' to a new state
+	 * Advance the current state with 'action' to a new state. 
+	 * Set the available actions for the new state.
 	 * @param action
 	 */
 	public void advance(ACTIONS action) {
@@ -139,6 +143,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		case 1: m_state.LTw(j+1); break;
 		case 2: m_state.FTw(j+1); break;
 		}
+		this.setAvailableActions();
 	}
 
     /**
@@ -151,28 +156,13 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     }
 
 	public ArrayList<ACTIONS> getAvailableActions() {
-		ArrayList<ACTIONS> availAct = new ArrayList<ACTIONS>();
-		if (m_state.lastTwist!=Twist.U) {
-			availAct.add(Types.ACTIONS.fromInt(0));  // U1
-			availAct.add(Types.ACTIONS.fromInt(1));  // U2
-			availAct.add(Types.ACTIONS.fromInt(2));  // U3
-		}
-		if (m_state.lastTwist!=Twist.L) {
-			availAct.add(Types.ACTIONS.fromInt(3));  // L1
-			availAct.add(Types.ACTIONS.fromInt(4));  // L2
-			availAct.add(Types.ACTIONS.fromInt(5));  // L3
-		}		
-		if (m_state.lastTwist!=Twist.F) {
-			availAct.add(Types.ACTIONS.fromInt(6));  // F1
-			availAct.add(Types.ACTIONS.fromInt(7));  // F2
-			availAct.add(Types.ACTIONS.fromInt(8));  // F3
-		}		
-		return availAct;
+		return acts;
 	}
 	
 	public int getNumAvailableActions() {
-		if (actions==null) setAvailableActions();
-		return actions.length;
+		return acts.size();
+//		if (actions==null) setAvailableActions();
+//		return actions.length;
 	}
 
 	/**
@@ -180,19 +170,36 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * Set them in member ACTIONS[] actions.
 	 */
 	public void setAvailableActions() {
-        // /WK/ Get the available actions in an array.
-		// *TODO* Does this work if acts.size()==0 ?
-        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
-        actions = new Types.ACTIONS[acts.size()];
-        for(int i = 0; i < actions.length; ++i)
-        {
-            actions[i] = acts.get(i);
-        }
+		acts.clear();
+		if (m_state.lastTwist!=Twist.U) {
+			acts.add(Types.ACTIONS.fromInt(0));  // U1
+			acts.add(Types.ACTIONS.fromInt(1));  // U2
+			acts.add(Types.ACTIONS.fromInt(2));  // U3
+		}
+		if (m_state.lastTwist!=Twist.L) {
+			acts.add(Types.ACTIONS.fromInt(3));  // L1
+			acts.add(Types.ACTIONS.fromInt(4));  // L2
+			acts.add(Types.ACTIONS.fromInt(5));  // L3
+		}		
+		if (m_state.lastTwist!=Twist.F) {
+			acts.add(Types.ACTIONS.fromInt(6));  // F1
+			acts.add(Types.ACTIONS.fromInt(7));  // F2
+			acts.add(Types.ACTIONS.fromInt(8));  // F3
+		}		
+        //acts = this.getAvailableActions();
+		
+// --- OLD ---- /WK/ Get the available actions in an array.
+// *TODO* Does this work if acts.size()==0 ?
+//        actions = new Types.ACTIONS[acts.size()];
+//        for(int i = 0; i < actions.length; ++i)
+//        {
+//            actions[i] = acts.get(i);
+//        }
 		
 	}
 	
 	public Types.ACTIONS getAction(int i) {
-		return actions[i];
+		return acts.get(i);
 	}
 
 	/**

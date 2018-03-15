@@ -559,10 +559,15 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     }
 
     @Override
-    public StateObservation chooseStartState(PlayAgent pa) {
+    public StateObservation chooseStartState() {
         return getDefaultStartState();
     }
 
+	@Override
+    public StateObservation chooseStartState(PlayAgent pa) {
+    	return chooseStartState();
+    }
+	
     public GameBoard2048(Arena ztavGame) {
         initGameBoard(ztavGame);
     }

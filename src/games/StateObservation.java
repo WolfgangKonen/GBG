@@ -152,7 +152,7 @@ public interface StateObservation extends Serializable{
 
 	/**
 	 *
-	 * @return the Name of the Game
+	 * @return the name of the Game (should be a valid directory name)
 	 */
 	public String getName();
 

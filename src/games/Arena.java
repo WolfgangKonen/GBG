@@ -26,6 +26,7 @@ import controllers.MCTS.MCTSAgentT;
 import games.Hex.GameBoardHex;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
+import games.RubiksCube.GameBoardCube;
 import games.MTrain;
 import games.Arena.Task;
 import games.TicTacToe.LaunchArenaTTT;
@@ -258,6 +259,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		
 		gb.clearBoard(true, true);
 		gb.updateBoard(null,false,true);				// enable Board buttons
+
 		while(taskState == Task.INSPECTV)
 		{			
 			if(gb.isActionReq()){
@@ -412,14 +414,22 @@ abstract public class Arena extends JPanel implements Runnable {
 		System.out.println(sMsg);
 		
 		// if taskBefore==INSPECTV, start from the board left by InspectV,
-		// if taskBefore!=INSPECTV, start from empty board:
+		// if taskBefore!=INSPECTV, select here the start state:
 		if (taskBefore!=Task.INSPECTV) {
-			gb.clearBoard(true,true);
+			gb.clearBoard(true,true);				// reset game board to default start state
+			if (m_xab.oPar[0].useChooseStart01()) {
+				// this is mandatory for games like RubiksCube (but possible also for other games): 
+				// do not start from the default start state (solved cube), but choose randomly a 
+				// different one: 
+				so = gb.chooseStartState();
+				gb.updateBoard(so,false,true);
+			}
 		}
 		taskBefore=Task.IDLE;
-		
+
 		gb.setActionReq(true);
 		so = gb.getStateObs();
+		System.out.println(so.stringDescr());
 		
 		assert qaVector.length == so.getNumPlayers() : 
 			  "Number of agents does not match so.getNumPlayers()!";
@@ -496,6 +506,7 @@ abstract public class Arena extends JPanel implements Runnable {
 				catch (Exception e){System.out.println("Thread 3");}
 			}
 			so = gb.getStateObs();
+			System.out.println(so.stringDescr());
 			if (so.isGameOver()) {
 				switch (so.getNumPlayers()) {
 				case 1: 
@@ -530,7 +541,16 @@ abstract public class Arena extends JPanel implements Runnable {
 				break;			// this is the final break out of while loop 	
 			} // if isGameOver
 			
-		  }	// while(taskState == Task.PLAY) [will be left only by the last break above or when taskState changes]
+			if (moveNum > m_xab.oPar[0].getEpisodeLength()) {
+				double gScore = so.getGameScore();
+				int epiLength = m_xab.oPar[0].getEpisodeLength();
+				if (so instanceof StateObserver2048) gScore *= StateObserver2048.MAXSCORE;
+				MessageBox.show(m_LaunchFrame, "Game stopped (epiLength) with score " +gScore, 
+						"Game Over", JOptionPane.INFORMATION_MESSAGE );
+				break;			// this is the final break out of while loop 					
+			} // if (moveNum...)
+			
+		  }	// while(taskState == Task.PLAY) [will be left only by the last break(s) above OR when taskState changes]
 		} catch(RuntimeException e) 
 		{
 			// a possible RuntimeException is raised when an agent for nondeterministic games
@@ -553,7 +573,7 @@ abstract public class Arena extends JPanel implements Runnable {
 	}
 
 	/**
-	 * For debugging during {@link #PlayGame()}: This function is only called if switch
+	 * For debugging 2048 during {@link #PlayGame()}: This function is only called if switch
 	 * DEBG in source code of {@link #PlayGame()} is set to true and if the number of empty 
 	 * tiles is below a threshold. - It calls MCTSAgentT p2.getNextAction2() repeatedly and prints the vtable
 	 * results on console. It calls PlayAgent pa (usually MCAgent) repeatedly as well. 

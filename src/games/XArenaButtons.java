@@ -210,7 +210,9 @@ public class XArenaButtons extends JPanel
 				oPar[n].setTrainEvalList(dummyEvaluator.getAvailableModes());
 				oPar[n].setQuickEvalMode(dummyEvaluator.getQuickEvalMode());
 				oPar[n].setTrainEvalMode(dummyEvaluator.getTrainEvalMode());
-			} catch (RuntimeException ignored){ }
+			} catch (RuntimeException ignored){ 
+				System.out.println(ignored.getMessage());				
+			}
 
 		} // for
 
@@ -499,6 +501,7 @@ public class XArenaButtons extends JPanel
 	public void setParamDefaults(int n, String agentName, String gameName) {
 		tdPar[n].setParamDefaults(agentName, gameName);
 		ntPar[n].setParamDefaults(agentName, gameName);
+		oPar[n].setParamDefaults(agentName, gameName);
 		
 		if(agentName.equals("TDS")) {
 			switch(gameName) {

@@ -8,6 +8,7 @@ import java.util.Map;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import games.RubiksCube.ColorTrafoMap.ColMapType;
+import games.RubiksCube.CubeConfig.StateType;
 import games.RubiksCube.CubeStateMap.CsMapType;
 
 public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
@@ -30,7 +31,14 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 	 */
 	@Override
 	public int getNumCells() {
-		return 24;
+		switch(CubeConfig.stateCube) {
+		case CUBESTATE: 
+			return 24;
+		case CUBEPLUSACTION:
+			return 26;
+		default: 
+			throw new RuntimeException("Unallowed value in switch stateCube");
+		}
 	}
 	
 	/**
@@ -60,8 +68,7 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 	@Override
 	public int[] getBoardVector(StateObservation so) {
 		assert (so instanceof StateObserverCube);
-		int[] bvec = ((StateObserverCube) so).getCubeState().fcol.clone();
-		return bvec;   
+		return ((StateObserverCube) so).getCubeState().getBoardVector();
 	}
 	
 	/**
@@ -101,7 +108,7 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 		it1 = set.iterator();
 	    while (it1.hasNext()) {
 		    CubeState cs  = (CubeState)it1.next();
-		    equiv[i++] = cs.fcol.clone();	
+		    equiv[i++] = cs.getBoardVector();	
         } 
 
 		return equiv;
@@ -117,12 +124,19 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		// Examples for some n-tuples for Rubik's Cube:
+		// Examples for some n-tuples for Rubik's PocketCube:
 		switch (mode) {
 		case 1: 
-			// the 4 "ring" 8-tuples:
-			return new int[][]{ {15,14,9,8,0,3,22,21} ,{12,13,10,11,1,2,23,20},
-								{5,4,8,11,18,17,23,22},{ 6,7,9,10,19,16,20,21} };
+			switch(CubeConfig.stateCube) {
+			case CUBESTATE: 
+				// the 4 "ring" 8-tuples:
+				return new int[][]{ {15,14,9,8,0,3,22,21} ,{12,13,10,11,1,2,23,20},
+									{5,4,8,11,18,17,23,22},{ 6,7,9,10,19,16,20,21} };
+			case CUBEPLUSACTION:
+				// the 4 "ring" 8-tuples + the 2 lastAction-cells:
+				return new int[][]{ {15,14,9,8,0,3,22,21,24,25} ,{12,13,10,11,1,2,23,20,24,25},
+									{5,4,8,11,18,17,23,22,24,25},{ 6,7,9,10,19,16,20,21,24,25} };
+			}
 		}
 		throw new RuntimeException("Unsupported value mode="+mode+" in XNTupleFuncs::fixedNTuples(int)");
 	}
@@ -143,7 +157,7 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 	 * 		a board vector) 
 	 */
 	public HashSet adjacencySet(int iCell) {
-		int[][] aList = {						// 4-point neighborhoods
+		final int[][] aList = {						// 4-point neighborhoods
 				{1,3,4,8},		//0
 				{0,2,18,11},		
 				{1,3,23,17},
@@ -168,6 +182,10 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 				{6,15,20,22},
 				{3,5,21,23},
 				{2,17,20,22},
+//				{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23},	// OLD, is inferior
+//				{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23}		//
+				{0,1,2,3,4,5},
+				{0,1,2,3,4,5}
 				};
 		
 		// just a one-time debug test, if we wrote up aList correctly:
@@ -179,6 +197,14 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 		
 		HashSet adjSet = new HashSet();
 		for (int i=0; i<4; i++) adjSet.add(aList[iCell][i]);
+		
+		// If the board vector includes lastAction, we follow the model that the first 6 fcol-cells have
+		// cell 24 + 25 (coding lastAction) as neighbors:
+//		if (CubeConfig.stateCube==StateType.CUBEPLUSACTION) {	// OLD: all cells, is inferior
+		if (CubeConfig.stateCube==StateType.CUBEPLUSACTION && iCell<6) {
+			adjSet.add(24);
+			adjSet.add(25);
+		}
 		
 		return adjSet;
 	}

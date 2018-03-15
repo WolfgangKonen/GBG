@@ -27,7 +27,9 @@ public class NTupleFactory {
 	private boolean PRINTNTUPLES = false;	// /WK/ control the file printout of n-tuples
 
 	// Needed for generating random n-Tuples
-	private Random rand = new Random(); //new Random(42);
+	//private Random rand = new Random(); //new Random(42);
+	private Random rand = new Random(System.currentTimeMillis());	
+
 
 	/**
 	 * 

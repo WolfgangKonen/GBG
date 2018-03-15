@@ -62,13 +62,8 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	 */
 	private StateObserverCube m_so;
 	private double[][] VTable;
-	private CSArrayList[] D;		// the array of distance sets
-	private int pMax = 5;			// up to which p this array of distance sets is filled
-	private double[][] Xper = 								// 1st index:
-			new double[][]{{0.0}, {0.0,1.0}, {0,0.2,1.0}	// [0],[1],[2]
-				,{0,0.1,0.2,1.0},{0,0.1,0.2,0.5,1.0}		//,[3],[4]
-				,{0,0.05,0.10,0.25,0.5,1.0}					//,[5]
-			};
+	private CSArrayList[] D;		// the array of distance sets (training)
+	private CSArrayList[] T;		// the array of distance sets (testing = evaluation)
 	private boolean arenaActReq=false;
 	
 	// the colors of the TH Köln logo (used for button coloring):
@@ -78,7 +73,8 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	
 	public GameBoardCube(Arena ticGame) {
 		initGameBoard(ticGame);
-		generateDistanceSets();
+		this.D = generateDistanceSets(rand);
+		this.T = generateDistanceSets(rand);
 	}
 	
 	private void initGameBoard(Arena ticGame) 
@@ -89,8 +85,8 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		VTable		= new double[3][3];
 		m_so		= new StateObserverCube();	// empty table
 		long seed = 999;
-		rand 		= new Random(seed);
-//        rand 		= new Random(System.currentTimeMillis());	
+//		rand 		= new Random(seed);
+        rand 		= new Random(System.currentTimeMillis());	
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
@@ -162,44 +158,38 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		return panel;
 	}
 	
-	private void generateDistanceSets() {
+	public CSArrayList[] generateDistanceSets(Random rand) {
 		
 		System.out.println("\nGenerating distance sets ..");
-		//            0          4                   8
-		int[] Narr = {0,0,9,54, 321,1847,9992,50136, 50,50,50,50};	// for GenerateNext
-//		int[] Narr = {0,0,9,50, 150,600,3000,15000,  50,50,50,50};  // for GenerateNextColSymm
-		int[] theoCov = {1,9,54,321,  	// the known maximum sizes for D[0],D[1],D[2],D[3] ...
-				1847,9992,50136,227536,	// ... and D[4],D[5],D[6],D[7],
-				870072,1887748,623800,	// ... and D[8],D[9],D[10],D[7],
-				2644					// ... and D[11]
-		};
 		boolean silent=false;
 		boolean doAssert=true;
 //		CSAListType csaType = CSAListType.GenerateNextColSymm;
 		CSAListType csaType = CSAListType.GenerateNext;
 		ArrayList<TupleInt>[] tintList = new ArrayList[12];
-    	D 	= new CSArrayList[12];
-		D[0] = new CSArrayList(CSAListType.GenerateD0);
-		D[1] = new CSArrayList(CSAListType.GenerateD1);
+    	CSArrayList[] gD 	= new CSArrayList[12];
+		gD[0] = new CSArrayList(CSAListType.GenerateD0);
+		gD[1] = new CSArrayList(CSAListType.GenerateD1);
 		//D[1].assertTwistSeqInArrayList();
-		for (int p=2; p<=pMax; p++) {			// a preliminary set up to pMax - later we need it up to p=11
+		for (int p=2; p<=CubeConfig.pMax; p++) {			// a preliminary set up to pMax - later we need it up to p=11
 			if (p>1) silent=true;
 			if (p>3) doAssert=false;
 			tintList[p] = new ArrayList();
 			//System.out.print("Generating distance set for p="+p+" ..");
 			long startTime = System.currentTimeMillis();
 			
-			D[p] = new CSArrayList(csaType, D[p-1], D[p-2], Narr[p],tintList[p], silent, doAssert);
+			gD[p] = new CSArrayList(csaType, gD[p-1], gD[p-2], CubeConfig.Narr[p],
+									tintList[p], silent, doAssert, rand);
 			
 			double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
 			//assert(CubeStateMap.countDifferentStates(D[p])==D[p].size()) : "D["+p+"]: size and # diff. states differ!";
 			//D[p].assertTwistSeqInArrayList();
-			System.out.println("\nCoverage D["+p+"] = "+D[p].size()+" of "+ theoCov[p]
+			System.out.println("\nCoverage D["+p+"] = "+gD[p].size()+" of "+ CubeConfig.theoCov[p]
 					+"    Time="+elapsedTime+" sec");
 			//CSArrayList.printTupleIntList(tintList[p]);
 			//CSArrayList.printLastTupleInt(tintList[p]);
 			int dummy=1;
 		}
+		return gD;
 	}
 
 	@Override
@@ -368,30 +358,35 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	/**
 	 * Return a start state depending on {@code pa}'s {@link PlayAgent#getGameNum()} and
 	 * {@link PlayAgent#getMaxGameNum()} by randomly selecting from the distance sets in 
-	 * {@code this.D}: <br>
-	 * Set X=Xper[pMax]. If the proportion of training games is in the first X[1] percent, select 
-	 * from D[1], if it is in the first X[2] percent, select from D[2], and so on. In this 
+	 * {@code this.D}: <p>
+	 * In detail: Set X={@link CubeConfig#Xper}[{@link CubeConfig#pMax}]. 
+	 * If the proportion of training games is in the first X[1] percent, select from D[1], 
+	 * if it is between X[1] and X[2] percent, select from D[2], and so on.  In this 
 	 * way we realize <b>time-reverse learning</b> (from the cube's end-game to the more complex
 	 * cube states) during the training process. The cumulative percentage X is currently 
-	 * hard-coded in GameBoardCube.
+	 * hard-coded in {@link CubeConfig#Xper}.
 	 * 
 	 * @param 	pa the agent to be trained, we need it here only for its {@link PlayAgent#getGameNum()} 
 	 * 			and {@link PlayAgent#getMaxGameNum()}
 	 * @return 	the start state for the next training episode
+	 *      
+	 * @see PlayAgent#trainAgent(StateObservation)    
 	 */
 	@Override
 	public StateObservation chooseStartState(PlayAgent pa) {
 		int p;
 		clearBoard(true, true);			// m_so is in default start state 
-		double[] X = Xper[pMax];
+		double[] X = CubeConfig.Xper[CubeConfig.pMax];
 		double x = ((double)pa.getGameNum())/pa.getMaxGameNum() + 1e-10;
-		for (p=1; p<=pMax; p++) {
+		for (p=1; p<=CubeConfig.pMax; p++) {
 			if (X[p-1]<x && x<X[p]) break;
 		}
 		int index = rand.nextInt(D[p].size());
 		CubeState cS = (CubeState)D[p].get(index);
 		cS.minTwists = p; 
-		cS.lastTwist = Twist.ID;
+		cS.clearLast();		// clear lastTwist and lastTimes (which we do not know for the initial
+							// state in an episode)
+		
 //		// Each call shall pick a random, but different element from D[p]. 
 //		// Therefore we remove from D[p] every element which has already been picked:
 //		D[p].remove(cS);
@@ -400,6 +395,29 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		
 		return m_so;
 	}
+
+	/**
+	 * Choose a random start state when playing a game.
+	 * 
+	 * @return a random start state which is p twists away from the solved cube. 
+	 *         p from {1,...,{@link CubeConfig#pMax}} is picked randomly.
+	 *      
+	 * @see Arena#PlayGame()
+	 */
+	@Override
+	public StateObservation chooseStartState() {
+		clearBoard(true, true);			// m_so is in default start state 
+		int p = 1+rand.nextInt(CubeConfig.pMax);
+		System.out.println("p = "+p);
+		int index = rand.nextInt(D[p].size());
+		CubeState cS = (CubeState)D[p].get(index);
+		cS.minTwists = p; 
+		cS.clearLast();		// clear lastTwist and lastTimes (which we do not know for the initial
+							// state in an episode)
+		m_so = new StateObserverCube(cS);
+		return m_so;
+	}
+
 
 	@Override
 	public String getSubDir() {
@@ -417,13 +435,18 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		super.toFront();
 	}
 
-   public int getPMax() {
-	   return pMax;
-   }
    public CSArrayList[] getD() {
 	   return D;
    }
-   public double[][] getXper() {
-	   return Xper;
+   
+   public CSArrayList[] getT() {
+	   return T;
    }
+   
+//   public int getPMax() {
+//	   return CubeConfig.pMax;
+//   }
+//   public double[][] getXper() {
+//	   return CubeConfig.Xper;
+//   }
 }
