@@ -55,12 +55,16 @@ public class CSArrayList extends ArrayList<CubeState> {
 	
 	/**
 	 * Given the CSArrayList objects D and Dprev, which are the distance sets
-	 * from stage p-1 and p-2, create the distance set for stage p.
+	 * from stage p-1 and p-2, create in {@code this} the distance set for stage p.
 	 * <p>
 	 * In more detail: We pick N random elements from D, for each of it we perform a random twist.
 	 * If the resulting new state is not in D or Dprev, we add it to the distance set of stage p.
 	 * If csaType==GenerateNext, we add only it; if csaType==GenerateNextColSymm, we add it and 
 	 * all its color-symmetric states.
+	 * <p>
+	 * NOTE: If D or Dprev are not the complete distance sets from stage p-1 and p-2, the operation
+	 * may not detect every twin, so that some of the states in the constructed object CSArrayList
+	 * may be actually not in stage p, but in stage p-1 or p-2. 
 	 * 
 	 * @param csaType see 'Detail' above
 	 * @param D		the distance set we use as base
@@ -69,7 +73,7 @@ public class CSArrayList extends ArrayList<CubeState> {
 	 * @param tintList	additional output information, see {@link TupleInt} 
 	 * @param silent
 	 * @param doAssert	do assertions (time consuming), if true 
-	 * @return		an CSArrayList covering (part of) the next distance set (above D)
+	 * @return		an CSArrayList covering (part of) the next distance set for p ("Dnext")
 	 * 
 	 * @see TupleInt 
 	 */
@@ -159,7 +163,11 @@ public class CSArrayList extends ArrayList<CubeState> {
 							if (doAssert) this.assertSetInD(set,"Dnext");
 							continue; // next for-loop
 						}
-						if (Dprev.contains(cS1)) {
+						if (Dprev.contains(cS1)) { // add cS1-family only to Dnext, if it is NOT in Dprev
+							// cS1 can happen to be in Dprev, if the base cS0 from D was a twin, and the 
+							// lastTwist in the other twin was, say U1, and we have selected the action
+							// U3, which yields in summary the twist U4 = Id, and thus the last twist 
+							// vanishes and we have a state with only p-2 twists, i.e. from Dprev.
 							prevCounter++;
 							if (!silent) {
 								System.out.print("This is an element of previous distance set: "+cS1.toString()+" ! ");

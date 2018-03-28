@@ -27,6 +27,7 @@ import games.Hex.GameBoardHex;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.RubiksCube.GameBoardCube;
+import games.RubiksCube.StateObserverCube;
 import games.MTrain;
 import games.Arena.Task;
 import games.TicTacToe.LaunchArenaTTT;
@@ -258,7 +259,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		System.out.println("[InspectGame] "+pa_string);
 		
 		gb.clearBoard(true, true);
-		gb.updateBoard(null,false,true);				// enable Board buttons
+		gb.updateBoard(null,false,true);		// enable action buttons		
 
 		while(taskState == Task.INSPECTV)
 		{			
@@ -277,19 +278,26 @@ abstract public class Arena extends JPanel implements Runnable {
 				}
 				
 				if (so.isLegalState() && !so.isGameOver()) {
-					boolean silent=false;
 					actBest = paX.getNextAction2(so, false, true);
 					if (actBest!=null)  // a HumanAgent will return actBest=null
 						so.storeBestActionInfo(actBest, actBest.getVTable());
 					
 					gb.updateBoard(so,false,true);
 				} else {
-					gb.updateBoard(so,false,true);
-					// not a valid play position >> show the board settings, i.e. 
-					// the game-over position, but clear the values: 
-					gb.clearBoard(false,true);
+					if (so.stopInspectOnGameOver()) {
+						gb.updateBoard(so,false,true);
+						// not a valid play position >> show the board settings, i.e. 
+						// the game-over position, but clear the values: 
+						gb.clearBoard(false,true);	
+						
+						break; // out of while
+					} else {
+						// we get here e.g. in the RubiksCube case where the initial state
+						// in INSPECTV is usually the default (game-over, solved-cube) state:
+						// In this case we only clear the action values, but stay in INSPECTV
+						gb.clearBoard(false,true);						
+					}
 					
-					break; // out of while
 				}
 			}
 			else
@@ -297,11 +305,9 @@ abstract public class Arena extends JPanel implements Runnable {
 				try
 				{
 					Thread.sleep(100);
-					//
 					// wait until an action in GameBoard gb occurs (see
 					// ActionListener in GameBoardTTT::InitBoard() or MyMouseListener
-					// in GameBoardHex), which will set 
-					// gb.isActionReq() to true again. 
+					// in GameBoardHex), which will set gb.isActionReq() to true again.
 				}	
 				catch (Exception e){}
 			}
@@ -310,7 +316,7 @@ abstract public class Arena extends JPanel implements Runnable {
 		
 		// We arrive here under three conditions:
 		//		1) InspectV pressed again --> taskState changed to Task.IDLE
-		//  	2) game over --> break in while above
+		//  	2) game over && so.stopInspectOnGameOver()==true --> break in while above
 		// 		3) Play button pressed --> taskState changed to Task.PLAY
 		// In case 1)+2) we want to be in IDLE mode, but in case 3) we want to stay in PLAY mode.
 		// That is the reason for the if-clause in the next line:
@@ -319,6 +325,7 @@ abstract public class Arena extends JPanel implements Runnable {
 			// game over or InspectV pressed again --> leave the INSPECTV task
 			taskState = Task.IDLE;		
 			setStatusMessage("Done.");			
+//			gb.enableInteraction(false);
 		}
 	}
 
@@ -346,14 +353,13 @@ abstract public class Arena extends JPanel implements Runnable {
  	 */
 	public void PlayGame()
 	{
-		int Player,player;
+		int Player;
 		StateObservation so;
 		Types.ACTIONS_VT actBest=null;
 		MCTSAgentT p2 = new MCTSAgentT("MCTS",null,new ParMCTS(m_xab.mctsParams[0]), new ParOther(m_xab.oPar[0])); // only DEBG
 		PlayAgent pa;
 		PlayAgent[] paVector,qaVector;
 		int nEmpty = 0,cumEmpty=0;
-		int moveNum=0;
 		double gameScore=0.0;
 		PStats pstats;
 		ArrayList<PStats> psList = new ArrayList<PStats>();
@@ -422,13 +428,14 @@ abstract public class Arena extends JPanel implements Runnable {
 				// do not start from the default start state (solved cube), but choose randomly a 
 				// different one: 
 				so = gb.chooseStartState();
-				gb.updateBoard(so,false,true);
+				gb.updateBoard(so,false,showValue);
 			}
 		}
 		taskBefore=Task.IDLE;
 
 		gb.setActionReq(true);
 		so = gb.getStateObs();
+		so.resetMoveCounter();
 		System.out.println(so.stringDescr());
 		
 		assert qaVector.length == so.getNumPlayers() : 
@@ -440,58 +447,55 @@ abstract public class Arena extends JPanel implements Runnable {
 		{
 		  while(taskState == Task.PLAY)	// game play interruptible by hitting 'Play' again 
 		  {			
-			if(gb.isActionReq()){
-				moveNum++;
-				//System.out.println(moveNum);
-				so = gb.getStateObs();
-				player = so.getPlayer();
-				pa = qaVector[player];
+				if(gb.isActionReq()){
+					so = gb.getStateObs();
+					pa = qaVector[so.getPlayer()];
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
 						gb.updateBoard(so,false,showValue);	
 						// leave the previously shown values if it is HumanPlayer
 					}
 					else {
-                        boolean DEBG=false; //false;true;
-                        int N_EMPTY = 4;
-                        if (DEBG) {
-                        	actBest = getNextAction_DEBG(so,pa,p2,N_EMPTY);
-                        } else {	
-                            actBest = pa.getNextAction2(so, false, true);
-                        }
-                        
-                        so.storeBestActionInfo(actBest, actBest.getVTable());
-//                        if (so.getNumPlayers()==1) {
-//                        	// show state and stored vtable *before* advance
-//                            gb.updateBoard(so,false,showValue);
-//                            showStoredV=false; // this is for 2nd updateBoard below
-//                        }
-                        so.advance(actBest);
+	                    boolean DEBG=false; //false;true;
+	                    int N_EMPTY = 4;
+	                    if (DEBG) {
+	                    	actBest = getNextAction_DEBG(so,pa,p2,N_EMPTY);
+	                    } else {	
+	                        actBest = pa.getNextAction2(so, false, true);
+	                    }
+	                    
+	                    so.storeBestActionInfo(actBest, actBest.getVTable());
+//	                    if (so.getNumPlayers()==1) {
+//	                    	// show state and stored vtable *before* advance
+//	                        gb.updateBoard(so,false,showValue);
+//	                        showStoredV=false; // this is for 2nd updateBoard below
+//	                    }
+	                    so.advance(actBest);
 						logManager.addLogEntry(actBest, so, logSessionid);
-                        try {
-                            Thread.sleep(currentSleepDuration);
-                            // waiting time between agent-agent actions
-                        } catch (Exception e) {
-                            System.out.println("Thread 1");
-                        }
-                        gb.updateBoard(so,false,showValue);
+	                    try {
+	                        Thread.sleep(currentSleepDuration);
+	                        // waiting time between agent-agent actions
+	                    } catch (Exception e) {
+	                        System.out.println("Thread 1");
+	                    }
+	                    gb.updateBoard(so,false,showValue);
 
-                        // gather information for later printout to agents/gameName/csv/playStats.csv.
-                        // This is mostly for diagnostics in game 2048, but not completely useless for other
-                        // games as well.
-                        if (so instanceof StateObserver2048) {
-                        	StateObserver2048 so2048 = (StateObserver2048) so;
-                        	nEmpty = so2048.getNumEmptyTiles();  
-                        	cumEmpty += nEmpty;
-                        	gameScore = so2048.getGameScore()*so2048.MAXSCORE;
-                        } else {
-                        	gameScore = so.getGameScore();
-                        }
-                        pstats = new PStats(1,moveNum,gameScore,(double)nEmpty,(double)cumEmpty);
-            			psList.add(pstats);
+	                    // gather information for later printout to agents/gameName/csv/playStats.csv.
+	                    // This is mostly for diagnostics in game 2048, but not completely useless for other
+	                    // games as well.
+	                    if (so instanceof StateObserver2048) {
+	                    	StateObserver2048 so2048 = (StateObserver2048) so;
+	                    	nEmpty = so2048.getNumEmptyTiles();  
+	                    	cumEmpty += nEmpty;
+	                    	gameScore = so2048.getGameScore()*so2048.MAXSCORE;
+	                    } else {
+	                    	gameScore = so.getGameScore();
+	                    }
+	                    pstats = new PStats(1,so.getMoveCounter(),gameScore,(double)nEmpty,(double)cumEmpty);
+	        			psList.add(pstats);
 
-				}
-				
+				}	// else (pa)
+					
 			} // if(gb.isActionReq())
 			else
 			{
@@ -506,8 +510,11 @@ abstract public class Arena extends JPanel implements Runnable {
 				catch (Exception e){System.out.println("Thread 3");}
 			}
 			so = gb.getStateObs();
-			System.out.println(so.stringDescr());
+			if (!agentX.equals("Human")) System.out.println(so.stringDescr());
 			if (so.isGameOver()) {
+				// for (agentX=="Human")-case: ensure to show the "Solved in..." text in leftInfo:
+				gb.updateBoard(so,false,showValue);	
+				
 				switch (so.getNumPlayers()) {
 				case 1: 
 					double gScore = so.getGameScore();
@@ -541,16 +548,17 @@ abstract public class Arena extends JPanel implements Runnable {
 				break;			// this is the final break out of while loop 	
 			} // if isGameOver
 			
-			if (moveNum > m_xab.oPar[0].getEpisodeLength()) {
+			if (so.getMoveCounter() > m_xab.oPar[0].getEpisodeLength()) {
 				double gScore = so.getGameScore();
 				int epiLength = m_xab.oPar[0].getEpisodeLength();
 				if (so instanceof StateObserver2048) gScore *= StateObserver2048.MAXSCORE;
 				MessageBox.show(m_LaunchFrame, "Game stopped (epiLength) with score " +gScore, 
 						"Game Over", JOptionPane.INFORMATION_MESSAGE );
 				break;			// this is the final break out of while loop 					
-			} // if (moveNum...)
+			} // if (so.getMoveCounter()...)
 			
-		  }	// while(taskState == Task.PLAY) [will be left only by the last break(s) above OR when taskState changes]
+		  }	// while(taskState == Task.PLAY) [will be left only by 
+		  	// the last break(s) above OR when taskState changes]
 		} catch(RuntimeException e) 
 		{
 			// a possible RuntimeException is raised when an agent for nondeterministic games
@@ -645,6 +653,16 @@ abstract public class Arena extends JPanel implements Runnable {
     	return actBest;
     }
 
+	/** 
+	 * @return true, if there is at least one human agent in the game
+	 */
+	public boolean hasHumanAgent() {
+		PlayAgent[] paVector = m_xfun.fetchAgents(m_xab);
+		for (int i=0; i<paVector.length; i++) {
+			if (paVector[i].getName().equals("Human")) return true;
+		}
+		return false;
+	}
 
 	public GameBoard getGameBoard() {
 		return gb;

@@ -14,6 +14,7 @@ import tools.Types.ScoreTuple;
  * @see StateObservation
  */
 abstract public class ObserverBase {
+	protected int m_counter = 0;
 	
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement
@@ -45,8 +46,22 @@ abstract public class ObserverBase {
 	public int getMinEpisodeLength() {
 		return 1;
 	}
+	
+	/**
+	 * @return number of moves in the episode where {@code this} is part of.
+	 */
+	public int getMoveCounter() {
+		return m_counter;
+	}
 
-
+	public void resetMoveCounter() {
+		m_counter = 0;
+	}
+	
+	protected void incrementMoveCounter() {
+		m_counter++;
+	}
+	
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement
 	 * getGameScore(), as required by the interface {@link StateObservation} as well.
@@ -166,4 +181,7 @@ abstract public class ObserverBase {
         return stringDescr();
     }
     
+    public boolean stopInspectOnGameOver() {
+    	return true;
+    }
 }

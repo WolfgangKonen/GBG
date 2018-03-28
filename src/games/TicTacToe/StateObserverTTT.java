@@ -23,7 +23,8 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     private static final double REWARD_POSITIVE =  1.0;
 	private int[][] m_Table;		// current board position
 	private int m_Player;			// Player who makes the next move 
-    protected Types.ACTIONS[] actions;
+	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
+//	protected Types.ACTIONS[] actions;
     
     public Types.ACTIONS[] storedActions = null;
     public Types.ACTIONS storedActBest = null;
@@ -63,7 +64,9 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	}
 	
 	public StateObserverTTT copy() {
-		return new StateObserverTTT(m_Table,m_Player);
+		StateObserverTTT sot = new StateObserverTTT(m_Table,m_Player);
+		sot.m_counter = this.m_counter;
+		return sot;
 	}
 
     @Override
@@ -196,6 +199,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     		m_Player = (m_Player+1) % n;  // many-player games: 0,1,...,n-1,0,1,...
     		break;
     	}   		
+		super.incrementMoveCounter();
 	}
 
     /**
@@ -208,21 +212,11 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     }
 
 	public ArrayList<ACTIONS> getAvailableActions() {
-		ArrayList<ACTIONS> availAct = new ArrayList<ACTIONS>();
-		if (m_Table[0][0]==0)  availAct.add(Types.ACTIONS.fromInt(0));
-		if (m_Table[0][1]==0)  availAct.add(Types.ACTIONS.fromInt(1));
-		if (m_Table[0][2]==0)  availAct.add(Types.ACTIONS.fromInt(2));
-		if (m_Table[1][0]==0)  availAct.add(Types.ACTIONS.fromInt(3));
-		if (m_Table[1][1]==0)  availAct.add(Types.ACTIONS.fromInt(4));
-		if (m_Table[1][2]==0)  availAct.add(Types.ACTIONS.fromInt(5));
-		if (m_Table[2][0]==0)  availAct.add(Types.ACTIONS.fromInt(6));
-		if (m_Table[2][1]==0)  availAct.add(Types.ACTIONS.fromInt(7));
-		if (m_Table[2][2]==0)  availAct.add(Types.ACTIONS.fromInt(8));
-		return availAct;
+		return acts;
 	}
 	
 	public int getNumAvailableActions() {
-		return actions.length;
+		return acts.size();
 	}
 
 	/**
@@ -230,19 +224,29 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	 * Set them in member ACTIONS[] actions.
 	 */
 	public void setAvailableActions() {
-        // /WK/ Get the available actions in an array.
-		// *TODO* Does this work if acts.size()==0 ?
-        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
-        actions = new Types.ACTIONS[acts.size()];
-        for(int i = 0; i < actions.length; ++i)
-        {
-            actions[i] = acts.get(i);
-        }
+		acts.clear();
+		if (m_Table[0][0]==0)  acts.add(Types.ACTIONS.fromInt(0));
+		if (m_Table[0][1]==0)  acts.add(Types.ACTIONS.fromInt(1));
+		if (m_Table[0][2]==0)  acts.add(Types.ACTIONS.fromInt(2));
+		if (m_Table[1][0]==0)  acts.add(Types.ACTIONS.fromInt(3));
+		if (m_Table[1][1]==0)  acts.add(Types.ACTIONS.fromInt(4));
+		if (m_Table[1][2]==0)  acts.add(Types.ACTIONS.fromInt(5));
+		if (m_Table[2][0]==0)  acts.add(Types.ACTIONS.fromInt(6));
+		if (m_Table[2][1]==0)  acts.add(Types.ACTIONS.fromInt(7));
+		if (m_Table[2][2]==0)  acts.add(Types.ACTIONS.fromInt(8));
+//        // /WK/ Get the available actions in an array.
+//		// *TODO* Does this work if acts.size()==0 ?
+//        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
+//        actions = new Types.ACTIONS[acts.size()];
+//        for(int i = 0; i < actions.length; ++i)
+//        {
+//            actions[i] = acts.get(i);
+//        }
 		
 	}
 	
 	public Types.ACTIONS getAction(int i) {
-		return actions[i];
+		return acts.get(i);
 	}
 
 	/**

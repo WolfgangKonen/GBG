@@ -87,7 +87,9 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
     @Override
     public StateObserver2048Slow copy() {
-        return new StateObserver2048Slow(toArray(), score, winState);
+    	StateObserver2048Slow so2 = new StateObserver2048Slow(toArray(), score, winState);
+    	so2.m_counter = this.m_counter;
+    	return so2;
     }
 
     /**
@@ -535,7 +537,8 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
         //updateEmptyTiles();
 
         isNextActionDeterministic = false;
-    }
+		super.incrementMoveCounter();
+   }
 
     public void advanceNondeterministic(ACTIONS action) {
         if(isNextActionDeterministic) {
@@ -552,7 +555,8 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
-    	
+		super.incrementMoveCounter();
+   	
     }
     
     public void advanceNondeterministic() {

@@ -17,13 +17,14 @@ import tools.Types.ACTIONS;
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
+ * The private member {@link CubeState} {@code m_state} has most part of the state logic for 
+ * Rubik's Cube.
  */
 public class StateObserverCube extends ObserverBase implements StateObservation {
 	private CubeState m_state;
 	private ACTIONS m_action; 		// the action which led to m_state (9 if not known)
 	private static CubeState def = new CubeState(); // a solved cube as reference
     private static final double REWARD_POSITIVE =  1.0;
-	//protected Types.ACTIONS[] actions;
 	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
     
     public Types.ACTIONS[] storedActions = null;
@@ -39,7 +40,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverCube() {
-		m_state = new CubeState(); 
+		m_state = new CubeState(); 		// default (solved) cube of type POCKET
 		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
@@ -61,6 +62,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 //		m_state.lastTwist = Twist.ID;		// we assume that we do not know the last twist
 //											// when we get a new initial state
 		m_action = new ACTIONS(other.m_action);
+		super.m_counter = other.m_counter;
 		setAvailableActions();
 	}
 	
@@ -144,6 +146,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		case 2: m_state.FTw(j+1); break;
 		}
 		this.setAvailableActions();
+		super.incrementMoveCounter();
 	}
 
     /**
@@ -161,13 +164,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	
 	public int getNumAvailableActions() {
 		return acts.size();
-//		if (actions==null) setAvailableActions();
-//		return actions.length;
 	}
 
 	/**
 	 * Given the current state in m_Table, what are the available actions? 
-	 * Set them in member ACTIONS[] actions.
+	 * Set them in member ArrayList<ACTIONS> acts.
 	 */
 	public void setAvailableActions() {
 		acts.clear();
@@ -186,16 +187,6 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 			acts.add(Types.ACTIONS.fromInt(7));  // F2
 			acts.add(Types.ACTIONS.fromInt(8));  // F3
 		}		
-        //acts = this.getAvailableActions();
-		
-// --- OLD ---- /WK/ Get the available actions in an array.
-// *TODO* Does this work if acts.size()==0 ?
-//        actions = new Types.ACTIONS[acts.size()];
-//        for(int i = 0; i < actions.length; ++i)
-//        {
-//            actions[i] = acts.get(i);
-//        }
-		
 	}
 	
 	public Types.ACTIONS getAction(int i) {
@@ -213,7 +204,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
 	 */
 	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
-        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
+        //ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
         storedActions = new Types.ACTIONS[acts.size()];
         storedValues = new double[acts.size()];
         for(int i = 0; i < storedActions.length; ++i)
@@ -237,5 +228,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		return 1;				// the Cube is a one-player puzzle
 	}
 
+    public boolean stopInspectOnGameOver() {
+    	return false;
+    }
 
 }

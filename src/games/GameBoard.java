@@ -71,7 +71,7 @@ public interface GameBoard {
 	 * @return a) for 2-player games: a start state which is with probability 0.5 the empty board 
 	 * 		and with probability 0.5 one of the possible one-ply successors. <br>
 	 *   b) for RubiksCube: a random start state which is p twists away from the solved cube. 
-	 *      p from {1,...,{@link CubeConfig#pMax}} is picked randomly.
+	 *      p is picked randomly from {1,...,{@link CubeConfig#pMax}}.
 	 *      
 	 * @see Arena#PlayGame()
 	 */

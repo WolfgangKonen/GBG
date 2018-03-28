@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
+import controllers.TD.ntuple2.NTuple2ValueFunc;
 import games.StateObservation;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 
@@ -95,7 +96,8 @@ public class Types {
     } // class ACTIONS
 
 	/**
-	 *  Class ACTIONS_VT (action with VTable) is derived from ACTIONS. It has the additional members 
+	 *  Class ACTIONS_VT (= ACTIONS + VTable) is derived from ACTIONS. 
+	 *  It has the additional members 
 	 *  <ul>
 	 *  <li> double[] vTable: the game values for all other available actions when this action
 	 *  	 is created via PlayAgent.getNextAction2(so,...) 
@@ -345,7 +347,14 @@ public class Types {
 	 */
 	public static final String GUI_DEFAULT_DIR_AGENT = "agents";
 	
-	public static final double TD_HORIZONCUT = 0.01;		// see NTuple2ValueFunc.setHorizon()
+	/**
+	 * The parameter {@code C = } {@link #TD_HORIZONCUT} controls the horizon in eligibility traces: 
+	 * Retain only those elements in the TD-update equation where {@code lambda^(t-k)} &ge; {@code C}.  
+	 * <br>(The horizon {@code h = t-k} runs from 0,1,..., to the appropriate {@code h = ceil(log_lambda(C))}.
+	 * 
+	 * @see NTuple2ValueFunc#setHorizon()
+	 */
+	public static double TD_HORIZONCUT = 0.1;		// 0.01 (perhaps in RubiksCube)
 	
  }
 

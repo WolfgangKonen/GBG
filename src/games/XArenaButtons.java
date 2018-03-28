@@ -574,6 +574,11 @@ public class XArenaButtons extends JPanel
 	public int getNumParamBtn() {
 		return m_numParamBtn;
 	}
+	
+	// needed currently only in GameBoardCube
+	public int getEpisodeLength(int i) {
+		return oPar[i].getEpisodeLength();
+	}
 
 	public boolean getShowValueOnGameBoard() {
 		return showValOnGB.getState();

@@ -3,6 +3,7 @@ package games;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.*;
 import tools.Types;
@@ -35,6 +36,8 @@ public interface StateObservation extends Serializable{
 	public boolean isDeterministicGame();
 
 	public boolean isLegalState();
+	
+	public boolean stopInspectOnGameOver();
 	
 //	/**
 //	 * @return this predicate is true only for 2-player games where the reward of player 0
@@ -150,6 +153,13 @@ public interface StateObservation extends Serializable{
 	
 	public int getMinEpisodeLength();
 
+	/**
+	 * @return number of moves in the episode where {@code this} is part of.
+	 */
+	public int getMoveCounter();
+
+	public void resetMoveCounter();
+	
 	/**
 	 *
 	 * @return the name of the Game (should be a valid directory name)

@@ -17,12 +17,18 @@ public class CubeConfig {
 	 */
 	final static int[] Narr = {0,0,9,54, 321,1847,5000,1800, 9900,50,50,50}; // for GenerateNext
 //	final static int[] Narr = {0,0,9,50, 150,600,3000,15000, 50,50,50,50};  // for GenerateNextColSymm
-// 	           				   0         4                   8
+//		                       0         4                   8
 
 	/**
-	 * Up to which p the distance set array D[p] in {@link GameBoardCube} is filled.
+	 * EvalNmax: how many states to pick randomly from each distance set T[p]
 	 */
-	public final static int pMax = 4;			// 3,5,6
+	final static int[] EvalNmax = {0,10,50,300, 2000,2000,2000,2000, 2000,2000,2000,2000};
+//		                           0            4                    8
+
+	/**
+	 * Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} is filled.
+	 */
+	public final static int pMax = 4;			// 3,4,5,6
 	
 	/**
 	 * Selector array for {@link GameBoardCube#chooseStartState(controllers.PlayAgent)}.
@@ -38,6 +44,12 @@ public class CubeConfig {
 				,{0,0.025,0.05,0.10,0.25,0.5,1.0}			//,[6]
 			};
 
+	/**
+	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br> 
+	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e. g. during training).  	
+	 */
+	final static int EVAL_EPILENGTH = 12;		// 12,50 (should be > pMax)
+	
 	/**
 	 * What does a state in {@link StateObserverCube} represent? <ul>
 	 * <li> <b>CUBESTATE</b>: only the cube state (what {@link CubeState#fcol} holds)

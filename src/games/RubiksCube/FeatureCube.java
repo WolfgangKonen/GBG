@@ -9,18 +9,10 @@ import tools.Types;
 
 
 /**
- * Implementation of {@link Feature} for game TicTacToe.<p>
+ * Implementation of {@link Feature} for game RubiksCube.<p>
  * 
- * Method {@link #prepareFeatVector(StateObservation)} returns the feature vector. 
- * The constructor accepts argument {@code featmode} to construct different types 
- * of feature vectors. The acceptable values for {@code featmode} are
- * retrieved with {@link #getAvailFeatmode()}.
+ * --- This is at present just a dummy class ---
  * 
- * Class {@link FeatureCube} is derived from {@link TicTDBase} in order to access 
- * the protected method {@link TicTDBase#prepareInputVector(int, int[][])} to do 
- * the main work.
- *
- * @author Wolfgang Konen, TH Köln, Nov'16
  */
 public class FeatureCube implements Feature, Serializable {
     int featMode = 0;
@@ -57,7 +49,7 @@ public class FeatureCube implements Feature, Serializable {
 
 	@Override
 	public int[] getAvailFeatmode() {
-		int[] featlist = {0,1,2,3,4,5,9};
+		int[] featlist = {0};
 		return featlist;
 	}
 

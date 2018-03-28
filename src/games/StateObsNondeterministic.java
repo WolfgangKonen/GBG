@@ -45,6 +45,12 @@ public interface StateObsNondeterministic extends StateObservation {
 
 	public int getNumAvailableRandoms();
 	
+	/**
+	 * 
+	 * @param action  the nondeterministic action
+	 * @return the probability that the random {@code action} is selected by a 
+	 *         nondeterministic advance.
+	 */
 	public double getProbability(ACTIONS action);
 
 	public StateObsNondeterministic copy();

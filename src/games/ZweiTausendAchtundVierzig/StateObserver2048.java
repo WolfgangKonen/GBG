@@ -134,7 +134,9 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     // Note: StateObs2048 copy() copies the board state, score, winState, cumulEmptyTiles, 
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
     public StateObserver2048 copy() {
-        return new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
+    	StateObserver2048 so2 =  new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
+    	so2.m_counter = this.m_counter;
+    	return so2;
     }
 
     public boolean isGameOver() {
@@ -642,6 +644,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         updateEmptyTiles();
 
         isNextActionDeterministic = false;
+		super.incrementMoveCounter();
     }
 
     public void advanceNondeterministic(ACTIONS action) {
@@ -660,7 +663,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
-    	
+		super.incrementMoveCounter();
+   	
     }
     
     public void advanceNondeterministic() {

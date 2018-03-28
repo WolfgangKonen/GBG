@@ -2,7 +2,10 @@ package games.Hex;
 
 import games.ObserverBase;
 import games.StateObservation;
+import games.RubiksCube.CubeState;
+import games.RubiksCube.StateObserverCube;
 import tools.Types;
+import tools.Types.ACTIONS;
 
 import java.util.ArrayList;
 
@@ -107,7 +110,9 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 
     @Override
     public StateObserverHex copy() {
-        return new StateObserverHex(board, currentPlayer, lastUpdatedTile);
+    	StateObserverHex soh = new StateObserverHex(board, currentPlayer, lastUpdatedTile);
+    	soh.m_counter = this.m_counter;
+        return soh;
     }
 
     @Override
@@ -232,6 +237,7 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 
         lastUpdatedTile = board[i][j];
         setAvailableActions();            // IMPORTANT: adjust the available actions (have reduced by one)
+		super.incrementMoveCounter();
 
         // set up player for next advance()
         currentPlayer = (currentPlayer == HexConfig.PLAYER_ONE ? PLAYER_TWO : HexConfig.PLAYER_ONE);

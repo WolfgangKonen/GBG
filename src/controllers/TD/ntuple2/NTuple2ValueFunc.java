@@ -377,7 +377,7 @@ public class NTuple2ValueFunc implements Serializable {
 		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):
 		EquivStates elem = new EquivStates(equiv,e);
 		eList.addFirst(elem);
-		if (eList.size()>(horizon+1)) eList.pollLast();
+		if (eList.size()>horizon) eList.pollLast();
 		
 		// iterate over all list elements in horizon  (h+1 elements from t down to t_0):
 		ListIterator<EquivStates> iter = eList.listIterator();		
@@ -385,6 +385,7 @@ public class NTuple2ValueFunc implements Serializable {
 		while(iter.hasNext()) {
 			elem=iter.next();
 			equiv=elem.equiv;
+			assert (lamFactor >= Types.TD_HORIZONCUT) : "Error: lamFactor < TD_HORIZONCUT";
 			e = lamFactor*elem.sigDeriv;
 			for (i = 0; i < numTuples; i++) {
 				nTuples[player][i].clearIndices();
@@ -465,9 +466,9 @@ public class NTuple2ValueFunc implements Serializable {
 
 	public void setHorizon() {
 		if (getLambda()==0.0) {
-			horizon=0;
+			horizon=1;
 		} else {
-			horizon = (int) (Math.log(Types.TD_HORIZONCUT)/Math.log(getLambda()));
+			horizon = 1+(int) (Math.log(Types.TD_HORIZONCUT)/Math.log(getLambda()));
 		}		
 	}
 

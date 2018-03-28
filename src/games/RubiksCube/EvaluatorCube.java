@@ -26,26 +26,23 @@ import tools.MessageBox;
 import tools.Types;
 
 /**
- * Same as {@link Evaluator9}, but instead of {@link Evaluator9#evalAgent1(PlayAgent, boolean)} use
+ * Evaluator for RubiksCube. For p in {1, ..., {@link CubeConfig#pMax}}: Test with Nmax[p] cube states 
+ * randomly picked from test distance set {@link GameBoardCube#getT()}:
  * <ul>
- * <li> if mode=1: {@link EvaluatorCube#evaluateAgent1(PlayAgent,GameBoard)} (competition with MinimaxPlayer and RandomPlayer) or 
- * <li> if mode=2: {@link EvaluatorCube#evaluateAgent2(PlayAgent,GameBoard)} (competition with MinimaxPlayer from different start positions). 
+ * <li> If mode=0: how many percent of the states are solved with the minimal amount of twists? 
+ * <li> If mode=1: how many percent of the states are solved in an episode not longer than 2*p? 
  * </ul>  
- * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
+ * The value of mode is set in the constructor. 
  */
 public class EvaluatorCube extends Evaluator {
  	private static final int[] AVAILABLE_MODES = new int[]{0,1};
-	private String sRandom = Types.GUI_AGENT_LIST[2];
-	private String sMinimax = Types.GUI_AGENT_LIST[1];
-	private long seed = 999;
-	private Random rand = new Random(seed);
-//	private AgentLoader agtLoader = null;
+	private Random rand;
 	private int m_mode;
 	private double m_res=-1;		// avg. success on array D of distance sets
 	private String m_msg;
 	private CSArrayList[] T;		// the array of distance sets
-	// Nmax: how many states to pick randomly from each distance set D[p]:
-	private int[] Nmax = {0,10,50,300,2000,2000,2000,2000,2000,2000,2000,2000};
+	private	int countStates=0;
+
 	/**
 	 * threshold for each value of m_mode
 	 */
@@ -53,7 +50,7 @@ public class EvaluatorCube extends Evaluator {
 	
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, stopEval);
-		initEvaluator(gb,1);
+		initEvaluator(gb,0);
 	}
 
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
@@ -67,8 +64,11 @@ public class EvaluatorCube extends Evaluator {
 	}
 	
 	private void initEvaluator(GameBoard gb, int mode) {
+//		long seed = 999;
+//		rand 		= new Random(seed);
+	    rand 		= new Random(System.currentTimeMillis());	
 		if (!isAvailableMode(mode)) 
-			throw new RuntimeException("EvaluatorTTT: Value mode = "+mode+" is not allowed!");
+			throw new RuntimeException("EvaluatorCube: Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
 		if (gb != null) {
 			assert (gb instanceof GameBoardCube);	
@@ -100,29 +100,29 @@ public class EvaluatorCube extends Evaluator {
  	 * @return
 	 */
  	private double evaluateAgent0(PlayAgent pa) {
- 		int moveNum;
 		ArrayList tsList = new ArrayList<TStats>();
 		ArrayList taggList = new ArrayList<TAggreg>();
 		TStats tstats;
 		TAggreg tagg;
+ 		countStates=0;
 		for (int p=1; p<=CubeConfig.pMax; p++) {
-			int epiLength = 2*p; //(2*p>10) ? 2*p : 10;
+			int epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
 			if (T[p]!=null) {
-	 			for (int n=0; n<Nmax[p]; n++) {
+	 			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
  	 				int index = rand.nextInt(T[p].size());
  	 				CubeState cS = (CubeState)T[p].get(index);
  	 				cS.clearLast();
  	 				StateObserverCube so = new StateObserverCube(cS);
+ 	 				so.resetMoveCounter();
  	 				
- 	                moveNum=0;
- 	                while (!so.isGameOver() && moveNum<epiLength) {
+ 	                while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
  	                	if (pa instanceof TDNTuple2Agt) {
  	 	                    so.advance(((TDNTuple2Agt) pa).getNextAction2SYM(so, false, true, false)); 	                		
  	                	} else {
  	 	                    so.advance(pa.getNextAction2(so, false, true));
  	                	}
- 	                    moveNum++;
  	                }
+ 	                int moveNum = so.getMoveCounter();
  	                tstats = new TStats(n,p,moveNum,epiLength);
  	    			tsList.add(tstats);
 
@@ -130,6 +130,7 @@ public class EvaluatorCube extends Evaluator {
  	                    System.out.print("Finished game " + n + " with moveNum " + moveNum + " twists.\n");
  	                }
  				} // for (n)
+				countStates += CubeConfig.EvalNmax[p];
  			} // if
  			tagg = new TAggreg(tsList,p);
  			taggList.add(tagg);
@@ -186,8 +187,8 @@ public class EvaluatorCube extends Evaluator {
 	@Override
 	public String getPrintString() {
 		switch (m_mode) {
-		case 0:  return "% solved with minimal twists (best is 1.0): ";
-		case 1:  return "% solved below epiLength=2*p (best is 1.0): ";
+		case 0:  return countStates+" cubes: % solved with minimal twists (best is 1.0): ";
+		case 1:  return countStates+" cubes: % solved below epiLength="+ CubeConfig.EVAL_EPILENGTH +" (best is 1.0): ";
 		default: return null;
 		}
 	}
