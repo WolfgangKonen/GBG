@@ -151,7 +151,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * <li> If {@link #MODE_3P}==1: Use the new n-ply logic with n=N as 
 	 * described in TR-TDNTuple.tex: one value function V(s_t|p_t) and each player maximizes
 	 * its own game value or minimizes the next opponent's game value. 
-	 * <li> If {@link #MODE_3P}==2 [<b>recommended</b>]: Use {@link #MODE_3P}==0 for N=1 and N>2.  
+	 * <li> If {@link #MODE_3P}==2 [<b>recommended</b>]: Use {@link #MODE_3P}==0 for N=1 and N &gt; 2.  
 	 * For N==2, use a logic equivalent to 1-ply {@link #MODE_3P}==1 where the symmetry 
 	 * 		V(s_t+1|p_t) = - V(s_t+1|p_t+1)
 	 * allows to make only one weight update for V(s_t|p_t) but to have all V(s_t|p^(i)).
@@ -1268,7 +1268,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 	
 	/**
-	 * the number of calls to {@link #update}
+	 * the number of calls to {@link NTuple2ValueFunc#update(int[], int, double, double)}
 	 */
 	@Override
 	public long getNumLrnActions() {

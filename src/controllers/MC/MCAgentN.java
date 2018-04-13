@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
  * N-player games with arbitrary N. It might be a bit slower than {@link MCAgent}.
  * <p>
  * (Note: {@link MCAgent} can operate for N-player games, but it cannot return a {@link ScoreTuple}
- * for N>2. Returning a {@link ScoreTuple} is however needed for wrapping {@link MCAgent} in 
+ * for N &gt; 2. Returning a {@link ScoreTuple} is however needed for wrapping {@link MCAgent} in 
  * {@link MaxNWrapper} or {@link ExpectimaxWrapper}.)
  * 
  * @see MCAgent

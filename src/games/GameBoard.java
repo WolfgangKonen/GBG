@@ -21,6 +21,10 @@ import games.RubiksCube.CubeConfig;
  *
  */
 public interface GameBoard {
+	/**
+	 * things to be initialized prior to starting a training 
+	 */
+	public void initialize();
 	public void clearBoard(boolean boardClear, boolean vClear);
 	//public void updateBoard();
 	//public void updateBoard(StateObservation so);

@@ -15,7 +15,8 @@ public class CubeConfig {
 	 * Narr[p] is the number of elements to pick from D[p] when generating D[p+1]. So the size
 	 * of D[p+1] will be roughly 6*Narr[p].
 	 */
-	final static int[] Narr = {0,0,9,54, 321,1847,5000,1800, 9900,50,50,50}; // for GenerateNext
+//	final static int[] Narr = {0,0,9,20, 100, 300, 900,1800, 9900,50,50,50}; // for GenerateNext
+	final static int[] Narr = {0,0,9,54, 321,1847,5000,5000, 9900,50,50,50}; // for GenerateNext
 //	final static int[] Narr = {0,0,9,50, 150,600,3000,15000, 50,50,50,50};  // for GenerateNextColSymm
 //		                       0         4                   8
 
@@ -26,9 +27,15 @@ public class CubeConfig {
 //		                           0            4                    8
 
 	/**
+	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br> 
+	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e. g. during training).  	
+	 */
+	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
+	
+	/**
 	 * Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} is filled.
 	 */
-	public final static int pMax = 4;			// 3,4,5,6
+	public final static int pMax = 6;			// 3,4,5,6,7
 	
 	/**
 	 * Selector array for {@link GameBoardCube#chooseStartState(controllers.PlayAgent)}.
@@ -42,14 +49,9 @@ public class CubeConfig {
 				,{0,0.1,0.2,1.0},{0,0.1,0.2,0.5,1.0}		//,[3],[4]
 				,{0,0.05,0.10,0.25,0.5,1.0}					//,[5]
 				,{0,0.025,0.05,0.10,0.25,0.5,1.0}			//,[6]
+				,{0,0.0125,0.025,0.05,0.125,0.25,0.5,1.0}	//,[7]
 			};
 
-	/**
-	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br> 
-	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e. g. during training).  	
-	 */
-	final static int EVAL_EPILENGTH = 12;		// 12,50 (should be > pMax)
-	
 	/**
 	 * What does a state in {@link StateObserverCube} represent? <ul>
 	 * <li> <b>CUBESTATE</b>: only the cube state (what {@link CubeState#fcol} holds)
@@ -58,6 +60,6 @@ public class CubeConfig {
 	 */
 	public enum StateType {CUBESTATE, CUBEPLUSACTION};
 	
-	//final static StateType stateCube = StateType.CUBESTATE;
-	final static StateType stateCube = StateType.CUBEPLUSACTION;
+	final static StateType stateCube = StateType.CUBESTATE;
+//	final static StateType stateCube = StateType.CUBEPLUSACTION;
 }

@@ -63,6 +63,8 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private JLabel rowValue;
     private JLabel mergeValue; */
 
+    @Override
+    public void initialize() {}
 
     private void initGameBoard(Arena ztavGame) {
         m_Arena = ztavGame;

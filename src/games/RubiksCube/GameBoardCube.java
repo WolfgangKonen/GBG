@@ -12,6 +12,7 @@ import java.awt.Label;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
@@ -84,7 +85,25 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	 * the array of distance sets for testing (= evaluation)
 	 */
 	private CSArrayList[] T;		
+	private CSArrayList[] D2=null;
 	private boolean arenaActReq=false;
+	private int[][] realPMat;
+	
+	/**
+	 * If true, select in {@link #chooseStartState(PlayAgent)} from distance set {@link #D}.
+	 * If false, use {@link #selectByTwists2(int)}. 
+	 */
+	private boolean SELECT_FROM_D = false;  
+	/**
+	 * If true, increment the matrix realPMat, which measures the real p of each start state.  
+	 * Make a debug printout of realPMat every 10000 training games.
+	 * 
+	 * @see #chooseStartState(PlayAgent) chooseStartState(PlayAgent) and its helpers selectByTwists1 or selectByTwists2
+	 * @see #incrRealPMat(StateObserverCube, int)
+	 * @see #printRealPMat()
+	 */
+	private boolean DBG_REALPMAT=false;
+
 	
 	// the colors of the TH Köln logo (used for button coloring):
 	private Color colTHK1 = new Color(183,29,13);
@@ -93,9 +112,23 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	
 	public GameBoardCube(Arena ticGame) {
 		initGameBoard(ticGame);
-		this.D = generateDistanceSets(rand);
+		this.initialize();
 		this.T = generateDistanceSets(rand2);
-		this.checkUnions();
+		if (this.SELECT_FROM_D) {
+			this.D = generateDistanceSets(rand);
+			//this.checkIntersects();   // print out the intersection sizes of D and T 
+		} 
+	}
+	
+	public void initialize() {
+//		long seed = 999;
+//		rand 		= new Random(seed);
+        rand 		= new Random(System.currentTimeMillis());	
+        rand2 		= new Random(2*System.currentTimeMillis());	
+		realPMat 	= new int[CubeConfig.pMax+1][CubeConfig.pMax+2];			
+    	D2 		= new CSArrayList[12];
+		D2[0] 	= new CSArrayList(CSAListType.GenerateD0);
+		D2[1] 	= new CSArrayList(CSAListType.GenerateD1);	
 	}
 	
 	private void initGameBoard(Arena ticGame) 
@@ -107,10 +140,6 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		ButtonPanel = InitButton();
 		VTable		= new double[3][3];
 		m_so		= new StateObserverCube();	// empty table
-//		long seed = 999;
-//		rand 		= new Random(seed);
-        rand 		= new Random(System.currentTimeMillis());	
-        rand2 		= new Random(2*System.currentTimeMillis());	
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
@@ -262,6 +291,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 			//CSArrayList.printLastTupleInt(tintList[p]);
 			int dummy=1;
 		}
+			
 		return gD;
 	}
 
@@ -511,12 +541,11 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		clearBoard(true, true);			// m_so is in default start state 
 		int p = 1+rand.nextInt(CubeConfig.pMax);
 		System.out.println("p = "+p);
-		int index = rand.nextInt(D[p].size());
-		CubeState cS = (CubeState)D[p].get(index);
-		cS.minTwists = p; 
-		cS.clearLast();		// clear lastTwist and lastTimes (which we do not know for the initial
-							// state in an episode)
+		int index = rand.nextInt(T[p].size());
+		CubeState cS = (CubeState)T[p].get(index);
 		m_so = new StateObserverCube(cS);
+//		m_so = clearCube(m_so,p);
+		m_so = new StateObserverCubeCleared(m_so,p);
 		return m_so;
 	}
 
@@ -524,7 +553,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	/**
 	 * Choose a random start state when training for an episode. Return a start state depending 
 	 * on {@code pa}'s {@link PlayAgent#getGameNum()} and {@link PlayAgent#getMaxGameNum()} 
-	 * by randomly selecting from the distance sets in {@code this.D}. 
+	 * by randomly selecting from the distance sets D[p]. 
 	 * <p>
 	 * In more detail: Set X={@link CubeConfig#Xper}[{@link CubeConfig#pMax}]. 
 	 * If the proportion of training games is in the first X[1] percent, select from D[1], 
@@ -532,6 +561,9 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	 * way we realize <b>time-reverse learning</b> (from the cube's end-game to the more complex
 	 * cube states) during the training process. The cumulative percentage X is currently 
 	 * hard-coded in {@link CubeConfig#Xper}.
+	 * <p>
+	 * If {@link #SELECT_FROM_D}==true, then select from {@code this.D} (distance sets created at program startup).<br>
+	 * If {@link #SELECT_FROM_D}==false, then use {@link #selectByTwists2(int)}.
 	 * 
 	 * @param 	pa the agent to be trained, we need it here only for its {@link PlayAgent#getGameNum()} 
 	 * 			and {@link PlayAgent#getMaxGameNum()}
@@ -549,38 +581,127 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		for (p=1; p<=CubeConfig.pMax; p++) {
 			if (X[p-1]<x && x<X[p]) break;
 		}
-		boolean SELECT_FROM_D = false; // true is the default. If false, use selectByTwists() [experimental]
 		if (SELECT_FROM_D) {
 			int index = rand.nextInt(D[p].size());
-			CubeState cS = (CubeState)D[p].get(index);
-			cS.minTwists = p; 
-			cS.clearLast();		// clear lastTwist and lastTimes (which we do not know for the initial
-								// state in an episode)		
 //			D[p].remove(cS);	// remove elements already picked -- currently NOT used
-			m_so = new StateObserverCube(cS);
+			m_so = new StateObserverCube(D[p].get(index));
 		} else {
-			m_so = selectByTwists(p);
+//			m_so = selectByTwists1(p);
+			m_so = selectByTwists2(p);
+			
+			// only debug:
+			if (DBG_REALPMAT) {
+				if (pa.getGameNum() % 10000 == 0 ) {
+					this.printRealPMat(); 
+					int dummy=1;
+				}
+				if (pa.getGameNum()==(pa.getMaxGameNum()-1)) {
+					this.printRealPMat();				
+					int dummy=1;
+				}
+			}
 		}
 		
+		// StateObserverCubeCleared is VERY important, so that no actions are 'forgotten' when 
+		// trying to solve m_so (!!)
+		m_so = new StateObserverCubeCleared(m_so,p);
 		return m_so;
 	}
 	
 	/** 
-	 * experimental method to select a start state by doing p random twist on the default cube. 
+	 * --- NOT the recommended choice! --> better use selectByTwists2 ---
+	 * 
+	 * Experimental method to select a start state by doing 1.2*p random twist on the default cube. 
 	 * This may be the only way to select a start state being p=8,9,... twists away from the 
 	 * solved cube (where the distance D[p] becomes to big). 
 	 * But it has the caveat that p random twists do not guarantee to produce a state in D[p]. 
-	 * Due to twins etc. the resulting state may be actually in D[p-1],D[p-2],...
+	 * Due to twins etc. the resulting state may be actually in D[p-1], D[p-2], ...
 	 */
-	private StateObserverCube selectByTwists(int p) {
-		StateObserverCube d_so = new StateObserverCube(); // default cube
-		for (int k=0; k<p; k++)  {
-			int index = rand.nextInt(d_so.getAvailableActions().size());
-			d_so.advance(d_so.getAction(index));  
-			
+	private StateObserverCubeCleared selectByTwists1(int p) {
+		StateObserverCubeCleared d_so;
+		CubeState cS;
+		int index;
+		d_so = new StateObserverCubeCleared(); // default cube
+		// the not-recommended choice: make 1.2*p twists and hope that we land in 
+		// distance set D[p] (which is very often not true for p>5)
+		int twists = (int)(1.2*p);
+		for (int k=0; k<twists; k++)  {
+			index = rand.nextInt(d_so.getAvailableActions().size());
+			d_so.advance(d_so.getAction(index));  				
 		}
+		d_so = new StateObserverCubeCleared(d_so,p);
+		
+		if (DBG_REALPMAT) incrRealPMat(d_so, p);	// increment realPMat		
+		
 		return d_so; 
 	}
+	
+	/** 
+	 * Method to select a start state in distance set D[p] by random twists and maintaining 
+	 * a list D2[k], k=0,...,p, of all already visited states. 
+	 * A new state in D[p] is created by randomly selecting a state from D2[p-1], advancing it 
+	 * and - if it happens to be in D2[p-1] or D2[p-2] - advancing again (and again) .
+	 * <p>
+	 * <b>Details</b>:
+	 * This method is guaranteed to return a state in the true D[p] if and only if
+	 * D2[p-1], D2[p-2], ... are complete. If they are not, <ul>
+	 * <li> certain elements from D[p] may be missed
+	 *      (since its predecessor in D2[p-1] is not there)    -- or -- 
+	 * <li> an element may claim to be in D[p], but truly it belongs to D[p-1] or D[p-2]
+	 *      (not detected, since this element is not present in D2[p-1] or D2[p-2]).
+	 * </ul><p>
+	 * But nevertheless, in the limit of a large number of calls for every p-1, p-2, ..., this
+	 * method will produce with high probability every element from D[p] and only from D[p].
+	 */
+	private StateObserverCubeCleared selectByTwists2(int p) {
+		StateObserverCube d_so;
+		StateObserverCubeCleared d_soC;
+		CubeState cS;
+		int index;
+//			d_so = new StateObserverCube(); // default cube
+//			for (int k=1; k<=p; k++)  {
+			index = rand.nextInt(D2[p-1].size());
+			d_so =new StateObserverCube(D2[p-1].get(index)); // pick randomly cube from D2[p-1]
+			for (int k=p; k<=p; k++)  {
+				index = rand.nextInt(d_so.getAvailableActions().size());
+				d_so.advance(d_so.getAction(index));  	
+				if (k>=3) {
+					if (D2[k-1].contains(d_so.getCubeState())) {
+						k = k-1;
+					} else if (D2[k-2].contains(d_so.getCubeState())) {
+						k = k-2;
+					}
+				}
+			}	
+			// StateObserverCubeCleared is VERY important, so that no actions are 'forgotten' when 
+			// trying to solve m_so (!!)
+			d_soC = new StateObserverCubeCleared(d_so,p);
+			if (D2[p]==null) D2[p]=new CSArrayList(); 
+			if (!D2[p].contains(d_soC.getCubeState())) D2[p].add(d_soC.getCubeState());
+		
+			if (DBG_REALPMAT) incrRealPMat(d_soC, p);	// increment realPMat		
+		
+		return d_soC; 
+	}
+
+	// --- obsolete now, we have StateObserverCubeCleared ---
+//	private StateObserverCube clearCube(StateObserverCube d_so, int p) {
+////		CubeState cS;
+////		cS = d_so.getCubeState();
+////		cS.minTwists = p;
+////		cS.clearLast();
+////		d_so = new StateObserverCube(cS);
+//		d_so.getCubeState().minTwists = p; 
+//		d_so.getCubeState().clearLast(); 	// clear lastTwist and lastTimes (which we do not know 
+//											// for the initial state in an episode)	
+//		d_so.setAvailableActions();	// then set the available actions which causes all
+//									// 9 actions to be added to m_so.acts. We need this
+//									// to test all 9 actions when looking for the best
+//									// next action.
+//		// (If lastTwist were set, 3 actions would be excluded
+//		// which we do not want for a start state.) 
+//		return d_so;
+//	}
 	
     /**
      * @return the array of distance sets for training
@@ -606,28 +727,57 @@ public class GameBoardCube extends JFrame implements GameBoard {
         return m_Arena;
     }
     
-   @Override
+    @Override
 	public void toFront() {
-    	super.setState(Frame.NORMAL);	// if window is iconified, display it normally
+   	super.setState(Frame.NORMAL);	// if window is iconified, display it normally
 		super.toFront();
 	}
+   
+    /* ---- METHODS BELOW ARE ONLY FOR DEBUG --- */
 
-    private void checkUnions() {
+    private void checkIntersects() {
     	for (int p=1; p<=CubeConfig.pMax; p++) {
     	    Iterator itD = D[p].iterator();
-    	    int unionCount = 0;
+    	    int intersectCount = 0;
     	    while (itD.hasNext()) {
     		    CubeState twin = (CubeState)itD.next();
-    		    if (T[p].contains(twin)) unionCount++;
+    		    if (T[p].contains(twin)) intersectCount++;
             } 
-    		System.out.println("checkUnions: p="+p+", union(D[p],T[p])="+unionCount+", D[p].size="+D[p].size());;
-    	}
-    	
+    		System.out.println("checkIntersects: p="+p+", intersect(D[p],T[p])="+intersectCount+", D[p].size="+D[p].size());
+    	}   	
     }
-//   public int getPMax() {
-//	   return CubeConfig.pMax;
-//   }
-//   public double[][] getXper() {
-//	   return CubeConfig.Xper;
-//   }
+    
+    /**
+     * Find the real pR for state d_so which claims to be in T[p] and increment realPMat 
+     * accordingly.
+     * The real pR is only guaranteed to be found, if T[p] is complete.
+     */
+    void incrRealPMat(StateObserverCube d_so, int p) {
+		boolean found=false;
+		for (int pR=0; pR<=CubeConfig.pMax; pR++) {
+			if (T[pR].contains(d_so.getCubeState())) {
+				// the real p is pR
+				realPMat[p][pR]++;
+				found = true;
+				break;
+			}
+		}
+		
+		if (!found) realPMat[p][CubeConfig.pMax+1]++;
+		// A count in realPMat[X][pMax+1] means: the real p is not known for p=X.
+		// This can happen if T[pR] is not the complete set: Then d_so might be truly in 
+		// the distance set of pR, but it is not found in T[pR].
+	}
+
+	public void printRealPMat() {
+		DecimalFormat df = new DecimalFormat("  00000");
+		for (int i=0; i<realPMat.length; i++) {
+			for (int j=0; j<realPMat[i].length; j++) {
+				System.out.print(df.format(realPMat[i][j]));
+			}
+			System.out.println("");
+		}
+		
+	}
+   
 }

@@ -19,6 +19,8 @@ import tools.Types.ACTIONS;
  * </ul>
  * The private member {@link CubeState} {@code m_state} has most part of the state logic for 
  * Rubik's Cube.
+ * 
+ * @see StateObserverCubeCleared
  */
 public class StateObserverCube extends ObserverBase implements StateObservation {
 	private CubeState m_state;
@@ -168,7 +170,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
 	/**
 	 * Given the current state in m_Table, what are the available actions? 
-	 * Set them in member ArrayList<ACTIONS> acts.
+	 * Set them in member {@code ArrayList<ACTIONS> acts}.
 	 */
 	public void setAvailableActions() {
 		acts.clear();

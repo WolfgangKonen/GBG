@@ -75,7 +75,10 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		initGameBoard(ticGame);
 	}
 	
-	private void initGameBoard(Arena ticGame) 
+    @Override
+    public void initialize() {}
+
+    private void initGameBoard(Arena ticGame) 
 	{
 		m_Arena		= ticGame;
 		Board       = new Button[3][3];

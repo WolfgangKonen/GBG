@@ -92,7 +92,7 @@ public interface StateObservation extends Serializable{
 	
 	/**
 	 * Same as {@link #getGameScore()}, but relative to referringState. This relativeness
-	 * is only relevant for >=2-player games.
+	 * is only relevant for &ge; 2-player games.
 	 * @param referringState	see below
 	 * @return  If referringState has the same player as this, then it is getGameScore().<br> 
 	 * 			If referringState has opposite player, then it is getGameScore()*(-1). <br>
@@ -132,7 +132,7 @@ public interface StateObservation extends Serializable{
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore);
 
 	/**
-	 * Same as {@link #getReward(StateObservation referringState)}, but with the player of referringState. 
+	 * Same as {@link #getReward(StateObservation,boolean)}, but with the player of referringState. 
 	 * @param player the player of referringState, a number in 0,1,...,N.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward

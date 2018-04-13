@@ -290,9 +290,9 @@ abstract public class Arena extends JPanel implements Runnable {
 						// the game-over position, but clear the values: 
 						gb.clearBoard(false,true);	
 						
-						break; // out of while
+						break; // out of while, i.e. finish INSPECTV
 					} else {
-						// we get here e.g. in the RubiksCube case where the initial state
+						// we get here e.g. in case RubiksCube where the initial state
 						// in INSPECTV is usually the default (game-over, solved-cube) state:
 						// In this case we only clear the action values, but stay in INSPECTV
 						gb.clearBoard(false,true);						

@@ -390,6 +390,7 @@ public class XArenaFuncs
 		//{
 		
 		long startTime = System.currentTimeMillis();
+		gb.initialize();
 		while (pa.getGameNum()<pa.getMaxGameNum())
 		{		
 			StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
@@ -590,6 +591,7 @@ public class XArenaFuncs
 			
 			{
 				long startTime = System.currentTimeMillis();
+				gb.initialize();
 				while (pa.getGameNum()<pa.getMaxGameNum())
 				{		
 					StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 

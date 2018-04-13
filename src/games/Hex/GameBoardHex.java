@@ -60,6 +60,8 @@ public class GameBoardHex implements GameBoard {
     }
 
     @Override
+    public void initialize() {}
+    @Override
     public void clearBoard(boolean boardClear, boolean vClear) {
         if (boardClear) {
             m_so = new StateObserverHex();

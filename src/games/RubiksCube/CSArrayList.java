@@ -21,6 +21,10 @@ import games.RubiksCube.CubeStateMap.CsMapType;
 public class CSArrayList extends ArrayList<CubeState> {
 	public enum CSAListType {GenerateD0, GenerateD1, GenerateNext, GenerateNextColSymm};
 	
+	public CSArrayList() {
+		super();
+	}
+	
 	/**
 	 * Generate either distance set D0 or D1
 	 * 
@@ -55,7 +59,9 @@ public class CSArrayList extends ArrayList<CubeState> {
 	
 	/**
 	 * Given the CSArrayList objects D and Dprev, which are the distance sets
-	 * from stage p-1 and p-2, create in {@code this} the distance set for stage p.
+	 * from stage p-1 and p-2, create in {@code this} the distance set for stage p.<br>
+	 * The object constructed is an CSArrayList covering (part of) the next distance set for p 
+	 * ("Dnext").
 	 * <p>
 	 * In more detail: We pick N random elements from D, for each of it we perform a random twist.
 	 * If the resulting new state is not in D or Dprev, we add it to the distance set of stage p.
@@ -73,7 +79,6 @@ public class CSArrayList extends ArrayList<CubeState> {
 	 * @param tintList	additional output information, see {@link TupleInt} 
 	 * @param silent
 	 * @param doAssert	do assertions (time consuming), if true 
-	 * @return		an CSArrayList covering (part of) the next distance set for p ("Dnext")
 	 * 
 	 * @see TupleInt 
 	 */

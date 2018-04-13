@@ -4,6 +4,7 @@ package tools;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import controllers.ExpectimaxNAgent;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.NTuple2ValueFunc;

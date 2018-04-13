@@ -140,7 +140,7 @@ abstract public class ObserverBase {
 	}
 
 	/**
-	 * Same as {@link #getReward(StateObservation referringState)}, but with the player of referringState.
+	 * Same as {@link #getReward(StateObservation,boolean)}, but with the player of referringState.
 	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
 	 *  
 	 * @param player the player of referringState, a number in 0,1,...,N.
