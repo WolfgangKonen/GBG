@@ -22,6 +22,7 @@ import tools.Types;
  * @see ArenaTrain
  * @see XArenaFuncs
  */
+@Deprecated // use LaunchTrainTTT
 public class LaunchArenaTTT extends JFrame {
 
 	private static final long serialVersionUID = 1L;
