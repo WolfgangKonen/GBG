@@ -81,6 +81,7 @@ public class XArenaMenu extends JMenuBar {
 		generateFileMenu();
 		generateAgentMenu();
 		generateCompetitionMenu();
+		generateTournamentMenu();
 		//generateOptionsMenu();
 		generateHelpMenu();
 	}
@@ -357,6 +358,37 @@ public class XArenaMenu extends JMenuBar {
 		submenu.add(menuItem);
 
 		menu.add(submenu);
+
+		add(menu);
+	}
+
+	private void generateTournamentMenu() {
+		JMenu menu;
+		JMenuItem menuItem;
+
+		menu = new JMenu("Tournament");
+		menu.setMnemonic(KeyEvent.VK_A);
+		menu.getAccessibleContext().setAccessibleDescription("GBG Tournament System");
+
+		menuItem = new JMenuItem("menuitem#1");
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//m_arena.m_xab.helpFunction();
+				JOptionPane.showMessageDialog(null, "menu item #1 clicked");
+			}
+		});
+		menuItem.setToolTipText("<html><body>Start menu item #1</body></html>");
+		menu.add(menuItem);
+
+		menuItem = new JMenuItem("menuitem#2");
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//m_arena.m_xab.helpFunction();
+				JOptionPane.showMessageDialog(null, "menu item #2 clicked");
+			}
+		});
+		menuItem.setToolTipText("<html><body>Start menu item #2</body></html>");
+		menu.add(menuItem);
 
 		add(menu);
 	}
