@@ -52,6 +52,7 @@ public class TDParams extends Frame implements Serializable
 	private static final String TIPLAMBDAL = "Eligibility trace parameter in [0,1]";
 	
 	private static String[] lrnTypeString = { "backprop","RPROP" };
+	private static String[] neuralNetString = { "linear","neural net" };
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -84,17 +85,18 @@ public class TDParams extends Frame implements Serializable
 	JLabel NormalizeL;
 	JLabel NetTypeL;
 	JLabel LrnTypeL;
-	CheckboxGroup cbgNetType;
-	Checkbox LinNetType;
-	Checkbox BprNetType;
+//	CheckboxGroup cbgNetType;
+//	Checkbox LinNetType;
+//	Checkbox BprNetType;
 	public JCheckBox withSigType;
 	public JCheckBox normalize;
 //	CheckboxGroup cbgLrnType;
 //	public Checkbox bpropType;
 //	public Checkbox rpropType;
-	public Choice choiceLrnType;
+	public JComboBox choiceLrnType;
+	public JComboBox choiceNetType;
 	JLabel FeatTDS_L;
-	public Choice choiceFeatTDS;
+	public JComboBox choiceFeatTDS;
 		String FeatTDS;
 	
 // -- obsolete, they are now stored in AgentBase
@@ -152,18 +154,19 @@ public class TDParams extends Frame implements Serializable
 		LrnTypeL = new JLabel("Learning rule: ");
 		NormalizeL.setToolTipText(TIPNORMALIZEL);
 
-		cbgNetType = new CheckboxGroup();
-		LinNetType = new Checkbox("linear",cbgNetType,true);
-		BprNetType = new Checkbox("neural net",cbgNetType,false);
+//		cbgNetType = new CheckboxGroup();
+//		LinNetType = new Checkbox("linear",cbgNetType,true);
+//		BprNetType = new Checkbox("neural net",cbgNetType,false);
+		choiceNetType = new JComboBox(neuralNetString);
 
 //		cbgLrnType = new CheckboxGroup();
 //		bpropType = new Checkbox("backprop",cbgLrnType,true);
 //		rpropType = new Checkbox("RPROP",cbgLrnType,false);
-		choiceLrnType = new Choice();
-		for (String s : lrnTypeString) choiceLrnType.addItem(s);
+		choiceLrnType = new JComboBox(lrnTypeString);
+		//for (String s : lrnTypeString) choiceLrnType.addItem(s);
 		
 		FeatTDS_L = new JLabel("Feature set");
-		this.choiceFeatTDS = new Choice();
+		this.choiceFeatTDS = new JComboBox();
 
 //		ok = new JButton("OK");
 //		m_par = this;
@@ -205,8 +208,10 @@ public class TDParams extends Frame implements Serializable
 		tdPanel.add(normalize);
 
 		tdPanel.add(NetTypeL);
-		tdPanel.add(LinNetType);
-		tdPanel.add(BprNetType);
+//		tdPanel.add(LinNetType);
+//		tdPanel.add(BprNetType);
+		tdPanel.add(choiceNetType);
+		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
 		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
 		
 		tdPanel.add(LrnTypeL);
@@ -276,10 +281,13 @@ public class TDParams extends Frame implements Serializable
 		return normalize.isSelected();
 	}
 	public boolean hasLinearNet() {
-		return LinNetType.getState();
+		String Type = (String) choiceNetType.getSelectedItem();
+		if (Type == "linear")
+			return true;
+		return false;		
 	}
 	public boolean hasRpropLrn() {
-		Object Type = choiceLrnType.getSelectedItem();
+		String Type = (String) choiceLrnType.getSelectedItem();
 		if (Type == "RPROP")
 			return true;
 		return false;
@@ -321,9 +329,9 @@ public class TDParams extends Frame implements Serializable
 	public void setFeatmode(int featmode) {
 		//If the feature list has not been initialized, add the selected featmode to the list
 		if (choiceFeatTDS.getItemCount() == 0){
-			choiceFeatTDS.add(Integer.toString(featmode));
+			choiceFeatTDS.addItem(Integer.toString(featmode));
 		}
-		choiceFeatTDS.select(featmode+"");
+		choiceFeatTDS.setSelectedItem(featmode+"");
 	}
 	public void setFeatList(int[] featList){
 		for (int i : featList) choiceFeatTDS.addItem(Integer.toString(i));
@@ -335,11 +343,12 @@ public class TDParams extends Frame implements Serializable
 		normalize.setSelected(state);
 	}
 	public void setLinearNet(boolean state) {
-		LinNetType.setState(state);
-		BprNetType.setState(!state);
+		choiceNetType.setSelectedItem(state ? 0 : 1);
+//		LinNetType.setState(state);
+//		BprNetType.setState(!state);
 	}
 	public void setRpropLrn(boolean state) {
-		choiceLrnType.select(state ? 1 : 0);
+		choiceLrnType.setSelectedItem(state ? 1 : 0);
 //		rpropType.setState(state);
 //		bpropType.setState(!state);
 	}
@@ -448,8 +457,9 @@ public class TDParams extends Frame implements Serializable
 			withSigType.setEnabled(true); // NEW		
 			SigTypeL.setEnabled(true);    // NEW
 			NetTypeL.setEnabled(false);
-			LinNetType.setEnabled(false);
-			BprNetType.setEnabled(false);
+//			LinNetType.setEnabled(false);
+//			BprNetType.setEnabled(false);
+			choiceNetType.setEnabled(false);
 			LrnTypeL.setEnabled(false);
 			choiceLrnType.setEnabled(false);
 //			bpropType.setEnabled(false);
@@ -479,8 +489,9 @@ public class TDParams extends Frame implements Serializable
 			withSigType.setEnabled(true);		
 			SigTypeL.setEnabled(true);
 			NetTypeL.setEnabled(true);
-			LinNetType.setEnabled(true);
-			BprNetType.setEnabled(true);
+//			LinNetType.setEnabled(true);
+//			BprNetType.setEnabled(true);
+			choiceNetType.setEnabled(true);
 			LrnTypeL.setEnabled(true);
 			choiceLrnType.setEnabled(true);
 //			bpropType.setEnabled(true);

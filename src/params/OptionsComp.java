@@ -14,10 +14,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 import games.Arena;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 
 /**
@@ -38,13 +40,13 @@ public class OptionsComp extends JFrame {
 	//private JButton ok;
 	private OptionsComp m_par;
 
-	private Checkbox cbUseCurBoard;
-	private Checkbox cbLogValues;
-	private Checkbox cbswapPlayers;
+	private JCheckBox cbUseCurBoard;
+	private JCheckBox cbLogValues;
+	private JCheckBox cbswapPlayers;
 
 	//private TextField tNumPieces;
-	private TextField tNumGames;
-	private TextField tNumCompetitions;
+	private JTextField tNumGames;
+	private JTextField tNumCompetitions;
 	
 	private Choice cFirstPlayer;
 	private Choice cSecondPlayer;
@@ -63,20 +65,20 @@ public class OptionsComp extends JFrame {
 		lNumCompetitions = new JLabel("# competitions (only MULTI)");
 
 		lPlayUntil = new JLabel("Stop Game after x Moves: ");
-		tNumGames = new TextField("3", 3);
-		tNumCompetitions = new TextField("10", 3);
+		tNumGames = new JTextField("3", 3);
+		tNumCompetitions = new JTextField("10", 3);
 
 		//ok = new JButton("OK");
 		m_par = this;
 
-		cbUseCurBoard = new Checkbox("Use current board");
-		cbUseCurBoard.setState(true);
+		cbUseCurBoard = new JCheckBox("Use current board");
+		cbUseCurBoard.setSelected(true);
 
-		cbLogValues = new Checkbox("Log value tables of opponents");
-		cbLogValues.setState(true);
+		cbLogValues = new JCheckBox("Log value tables of opponents");
+		cbLogValues.setSelected(true);
 		
-		cbswapPlayers = new Checkbox("Swap players (only MULTI)");
-		cbswapPlayers.setState(false);
+		cbswapPlayers = new JCheckBox("Swap players (only MULTI)");
+		cbswapPlayers.setSelected(false);
 		
 		//tNumPieces = new TextField("42", 3);
 		
@@ -154,19 +156,19 @@ public class OptionsComp extends JFrame {
 		}
 		x += ticGame.m_tabs.getX() + 1;
 		ticGame.m_xab.winCompOptions.setLocation(x,y);
-		ticGame.m_xab.winCompOptions.setSize(Types.GUI_WINCOMP_WIDTH,Types.GUI_WINCOMP_HEIGHT);		
+		ticGame.m_xab.winCompOptions.setSize(Types.GUI_WINCOMP_WIDTH,Types.GUI_WINCOMP_HEIGHT);	
 	}
 
 	public boolean swapPlayers() {
-		return cbswapPlayers.getState();
+		return cbswapPlayers.isSelected();
 	}
 
 	public boolean useCurBoard() {
-		return cbUseCurBoard.getState();
+		return cbUseCurBoard.isSelected();
 	}
 
 	public boolean logValues() {
-		return cbLogValues.getState();
+		return cbLogValues.isSelected();
 	}
 
 //	public int getNumPieces() {

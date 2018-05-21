@@ -18,5 +18,9 @@ public class StatusBar extends JLabel {
     public void setMessage(String message) {
         setText(" "+message);    
         super.repaint();
-    }        
+    }   
+    
+    public void setFont(Font font) {
+        super.setFont(font);
+    }
 }

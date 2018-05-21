@@ -48,8 +48,8 @@ public class HtmlDisplay extends JFrame implements HyperlinkListener
     		 // this magic work-around from http://stackoverflow.com/questions/12542733/setting-default-font-in-jeditorpane
     		 // is needed so that the font change becomes effective (!!)
     		 html.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-    		 font=new Font("Arial",1,Types.GUI_HELPFONTSIZE);			
-    		 html.setFont(font);	// does not work yet
+    		 font=new Font("Arial",Font.BOLD,Types.GUI_HELPFONTSIZE);			
+    		 html.setFont(font);	
     		 if (url!=null) {
     			 html.setPage(url);
     		 } else {

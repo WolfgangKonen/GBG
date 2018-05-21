@@ -40,6 +40,8 @@ public class XArenaMenu extends JMenuBar {
 
 	private static final String TIPEVALUATE = "";
 
+	private static final String TIPPARAMTABS = "Show the tabbed window with parameter settings";
+
 	private static final String TIPINSPECTLUT = "Inspect the lookup-tables (LUT) for the selected "
 			+ "N-Tuple-Agent. The selected agent also must be trained for this to work";
 
@@ -78,6 +80,7 @@ public class XArenaMenu extends JMenuBar {
 		m_frame = m_TicFrame;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 
+
 		generateFileMenu();
 		generateAgentMenu();
 		generateCompetitionMenu();
@@ -100,7 +103,7 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_tabs.showParamTabs(m_arena,true,0,m_arena.m_xab.getSelectedAgent(0));
 			}
 		});
-		menuItem.setToolTipText(TIPEVALUATE);
+		menuItem.setToolTipText(TIPPARAMTABS);
 		if (!(m_arena instanceof ArenaTrain))
 			menuItem.setEnabled(false);			// no param tabs for Arena
 		menu.add(menuItem);

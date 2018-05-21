@@ -46,19 +46,19 @@ public class XArenaButtons extends JPanel
 	JButton NTupShowB;
 	JButton Logs; 
 	JSlider Delay;				// the sleep slider
-	TextField GameNumT;
-	TextField TrainNumT;
+	JTextField GameNumT;
+	JTextField TrainNumT;
 	//TextField CompeteNumT;	// now in OptionsComp winCompOptions
 	//TextField CompetitionsT;	//
 	//Label Competitions_L;		//
 	//Label CompeteG_L;			//
-	Label GameNumL;
-	Label TrainNumL;
-	Label AgentX_L;
-	Label SleepDurationL;
-	Choice[] choiceAgent; 
+	JLabel GameNumL;
+	JLabel TrainNumL;
+	JLabel AgentX_L;
+	JLabel SleepDurationL;
+	JComboBox[] choiceAgent; 
 	JLabel showValOnGB_L;
-	Checkbox showValOnGB;		// show game values on gameboard
+	JCheckBox showValOnGB;		// show game values on gameboard
 	TDParams[] tdPar;
 	NTParams[] ntPar;
 	MaxNParams[] maxnParams;
@@ -113,7 +113,7 @@ public class XArenaButtons extends JPanel
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		mParam = new JButton[numPlayers];
 		mTrain = new JButton[numPlayers];
-		choiceAgent = new Choice[numPlayers];
+		choiceAgent = new JComboBox[numPlayers];
 		assert (numPlayers<=Types.GUI_PLAYER_NAME.length) 
 			: "GUI not configured for "+numPlayers+" players. Increase Types.GUI_PLAYER_NAME and GUI_AGENT_INITIAL";
 		tdPar = new TDParams[numPlayers];
@@ -129,8 +129,8 @@ public class XArenaButtons extends JPanel
 		//
 		AgentX = null; //Types.GUI_X_PLAYER;  // "MCTS"; "TDS"; "CMA-ES"; "Minimax" 
 		AgentO = null; //Types.GUI_O_PLAYER;  // "Human";"ValIt";
-		GameNumT=new TextField("10000", 5); //("10000", 5);
-		TrainNumT=new TextField("25", 5);
+		GameNumT=new JTextField("10000", 5); //("10000", 5);
+		TrainNumT=new JTextField("25", 5);
 
 		MultiTrain=new JButton("MultiTrain");
 		MultiTrain.setBorder(bord);
@@ -143,17 +143,20 @@ public class XArenaButtons extends JPanel
 		Logs=new JButton("Logs");
 		Logs.setBorder(bord);
 		Delay = new JSlider(JSlider.HORIZONTAL, m_game.minSleepDuration,m_game.maxSleepDuration, m_game.currentSleepDuration);
-		GameNumL = new Label("Train Games");
-		TrainNumL = new Label("Agents trained");
-		AgentX_L = new Label("Agent Type: ");
-        SleepDurationL = new Label("Sleep duration");
+		GameNumL = new JLabel("Train Games");
+		TrainNumL = new JLabel("Agents trained");
+		AgentX_L = new JLabel("Agent Type: ");
+        SleepDurationL = new JLabel("Sleep duration");
 		showValOnGB_L = new JLabel("Show V  ");
-		showValOnGB = new Checkbox("",true);
+		showValOnGB = new JCheckBox("",true);
+		showValOnGB.setBackground(Types.GUI_BGCOLOR);
 
 		for (int n=0; n<numPlayers; n++) {
-			choiceAgent[n] = new Choice();
-			for (String s : Types.GUI_AGENT_LIST) choiceAgent[n].add(s);
-			choiceAgent[n].select(Types.GUI_AGENT_INITIAL[n]);	
+			choiceAgent[n] = new JComboBox(Types.GUI_AGENT_LIST);
+			// --- the old code when choiceAgent was Choice[] (AWT) and not JComboBox[] (Swing) ---
+			//for (String s : Types.GUI_AGENT_LIST) choiceAgent[n].add(s);
+			//choiceAgent[n].select(Types.GUI_AGENT_INITIAL[n]);	
+			choiceAgent[n].setSelectedItem(Types.GUI_AGENT_INITIAL[n]);
 			if (numPlayers==2) {
 				mParam[n]=new JButton("Param "+Types.GUI_2PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_2PLAYER_NAME[n]);
@@ -176,7 +179,7 @@ public class XArenaButtons extends JPanel
 			choiceAgent[n].addItemListener(
 					new ItemListenerHandler(n) { // this constructor will copy n to ItemListenerHandler.n
 						public void itemStateChanged(ItemEvent arg0) {
-							setParamDefaults(n, choiceAgent[n].getSelectedItem(),
+							setParamDefaults(n, (String) choiceAgent[n].getSelectedItem(),
 									m_game.getGameName());
 						}
 					}
@@ -448,10 +451,11 @@ public class XArenaButtons extends JPanel
 
 		JPanel psv = new JPanel();
 		psv.setBackground(Types.GUI_BGCOLOR);
+		psv.setAlignmentX(CENTER_ALIGNMENT); // does not work
 		psv.add(showValOnGB_L);
 		psv.add(showValOnGB);
-		psv.add(new JLabel("   "));		// add some space to the right
-		psv.add(new JLabel("   "));		//
+		//psv.add(new JLabel("   "));		// add some space to the right
+		//psv.add(new JLabel("   "));		//
 		
 		JPanel p3 = new JPanel();
 		p3.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
@@ -581,13 +585,13 @@ public class XArenaButtons extends JPanel
 	}
 
 	public boolean getShowValueOnGameBoard() {
-		return showValOnGB.getState();
+		return showValOnGB.isSelected();
 	}
 	public String getSelectedAgent(int i){
-		return choiceAgent[i].getSelectedItem();
+		return (String) choiceAgent[i].getSelectedItem();
 	}
 	public void setSelectedAgent(int i, String str){
-		choiceAgent[i].select(str);
+		choiceAgent[i].setSelectedItem(str);
 	}
 	
 } // class XArenaButtons	

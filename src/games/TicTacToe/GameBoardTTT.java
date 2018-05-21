@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -72,6 +73,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	private Color colTHK3 = new Color(162,0,162);
 	
 	public GameBoardTTT(Arena ticGame) {
+		super("Tic Tac Toe");
 		initGameBoard(ticGame);
 	}
 	
@@ -82,9 +84,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	{
 		m_Arena		= ticGame;
 		Board       = new Button[3][3];
-//		VBoard		= new Label[3][3];
 		BoardPanel	= InitBoard();
-//		VBoardPanel = InitVBoard();
 		Table       = new int[3][3];
 		VTable		= new double[3][3];
 		m_so		= new StateObserverTTT();	// empty table
@@ -94,24 +94,23 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
 		JLabel Blank=new JLabel(" ");		// a little bit of space
 		//JLabel Title=new JLabel("Tic Tac Toe",SwingConstants.CENTER);
-		JLabel Title=new JLabel("   ",SwingConstants.CENTER);  // no title, it appears sometimes in the wrong place
-		Title.setForeground(Color.black);	
-		Font font=new Font("Arial",1,20);			
-		Title.setFont(font);	
+//		JLabel Title=new JLabel("   ",SwingConstants.CENTER);  // no title, it appears sometimes in the wrong place
+//		Title.setForeground(Color.black);	
+//		Title.setFont(font);	
 		titlePanel.add(Blank);
-		titlePanel.add(Title);
+//		titlePanel.add(Title);
 		
 		JPanel boardPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		boardPanel.add(BoardPanel);
 		boardPanel.setBackground(Types.GUI_BGCOLOR);
-		//boardPanel.add(new Label("    "));		// some space
-		//boardPanel.add(VBoardPanel);
 		
 		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		infoPanel.setBackground(Types.GUI_BGCOLOR);
-		Font font2=new Font("Arial",1,10);			
+//		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
+		Font font=new Font("Arial",0,Types.GUI_HELPFONTSIZE);			
 		leftInfo.setFont(font);	
 		rightInfo.setFont(font);	
+//		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
 		infoPanel.add(leftInfo);
 		infoPanel.add(rightInfo);
 		infoPanel.setSize(100,10);
@@ -136,7 +135,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 				Board[i][j].setBackground(colTHK2);
 				Board[i][j].setForeground(Color.white);
 				Font font=new Font("Arial",Font.BOLD,14);
-		        Board[i][j].setFont(font);
+//		        Board[i][j].setFont(font);
 				Board[i][j].setEnabled(false);
 				Board[i][j].setPreferredSize(minimumSize); 
 				Board[i][j].addActionListener(					
@@ -163,23 +162,6 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		return panel;
 	}
 	
-//	private JPanel InitVBoard()
-//	{
-//		JPanel panel=new JPanel();
-//		panel.setLayout(new GridLayout(3,3,10,10));
-//		for(int i=0;i<3;i++){
-//			for(int j=0;j<3;j++){
-//				VBoard[i][j] = new Label("    ");
-//				VBoard[i][j].setBackground(Color.orange);
-//				VBoard[i][j].setForeground(Color.black);
-//				Font font=new Font("Arial",1,12);
-//				VBoard[i][j].setFont(font);
-//				panel.add(VBoard[i][j]);
-//			}
-//		}
-//		return panel;
-//	}
-
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
@@ -198,9 +180,6 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			for(int i=0;i<3;i++){
 				for(int j=0;j<3;j++){
 					VTable[i][j] = Double.NaN;
-//					VBoard[i][j].setText("   ");
-//					VBoard[i][j].setBackground(Color.orange);
-//					VBoard[i][j].setForeground(Color.black);
 				}
 			}
 		}
@@ -303,23 +282,15 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 				
 				if (Double.isNaN(value)) {
 					valueTxt = "   ";
-//					VBoard[i][j].setBackground(Color.green);						
 				} else {
 					valueTxt = " "+(int)(value*100);
 					if (value<0) valueTxt = ""+(int)(value*100);
-//					if (table[i][j]==0) {
-//						VBoard[i][j].setBackground(Color.orange);
-//					} else {
-//						VBoard[i][j].setBackground(Color.green);						
-//					}
 					if (value>maxvalue) {
 						maxvalue=value;
 						imax=i;
 						jmax=j;
 					}
 				}
-//				VBoard[i][j].setText(scoreTxt);
-//				VBoard[imax][jmax].setBackground(Color.yellow);
 				if(table[i][j]==1)
 				{
 					Board[i][j].setLabel("X");				
