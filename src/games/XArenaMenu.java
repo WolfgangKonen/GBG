@@ -13,6 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import TournamentSystem.TournamentSystemGUI;
 import controllers.AgentBase;
 import controllers.ExpectimaxNAgent;
 import controllers.HumanPlayer;
@@ -68,7 +69,8 @@ public class XArenaMenu extends JMenuBar {
 	private JFrame m_frame;
 	private int selectedAgent = 0;
 	private int numPlayers;
-	private boolean winCompVisible=false;
+	private boolean winCompVisible = false;
+	private TournamentSystemGUI tournamentSystemGUI = null;
 
 	// private final String agentList[] = { "Human", "Minimax", "TDS", "Random"
 	// };
@@ -370,11 +372,16 @@ public class XArenaMenu extends JMenuBar {
 		menu.setMnemonic(KeyEvent.VK_A);
 		menu.getAccessibleContext().setAccessibleDescription("GBG Tournament System");
 
-		menuItem = new JMenuItem("menuitem#1");
+		menuItem = new JMenuItem("Start TS GUI");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//m_arena.m_xab.helpFunction();
-				JOptionPane.showMessageDialog(null, "menu item #1 clicked");
+				//JOptionPane.showMessageDialog(null, "menu item #1 clicked");
+				if(tournamentSystemGUI == null) {
+					tournamentSystemGUI = new TournamentSystemGUI(/*m_arena.logManager,*/ m_arena.getGameBoard());
+				} else {
+					tournamentSystemGUI.show();
+				}
 			}
 		});
 		menuItem.setToolTipText("<html><body>Start menu item #1</body></html>");
