@@ -1,4 +1,4 @@
-package tmp;
+package TournamentSystem;
 
 import controllers.AgentBase;
 import games.Arena;
