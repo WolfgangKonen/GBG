@@ -46,7 +46,7 @@ import tools.Types;
  *  
  *
  */
-public class TicTacToeBatch extends LaunchTrainTTT {
+public class TicTacToeBatch extends ArenaTrainTTT {
 
 	private static final long serialVersionUID = 1L;
 	public ArenaTrainTTT t_Game;
@@ -118,11 +118,11 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 	public TicTacToeBatch(String title) {
 		super(title);
 		t_Batch = this;
-		t_Game = new ArenaTrainTTT(this);
-		setLayout(new BorderLayout(10,10));
-		setJMenuBar(t_Game.m_menu);
-		add(t_Game,BorderLayout.CENTER);
-		add(new Label(" "),BorderLayout.SOUTH);	// just a little space at the bottom
+//		t_Game = new ArenaTrainTTT(this);
+//		setLayout(new BorderLayout(10,10));
+//		setJMenuBar(t_Game.m_menu);
+//		add(t_Game,BorderLayout.CENTER);
+//		add(new Label(" "),BorderLayout.SOUTH);	// just a little space at the bottom
 		
 	}
 	

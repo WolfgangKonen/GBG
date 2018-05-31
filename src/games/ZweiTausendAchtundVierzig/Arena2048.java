@@ -1,8 +1,14 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.PlayAgent;
-import games.*;
+import games.Arena;
+import games.Evaluator;
+import games.Feature;
+import games.GameBoard;
+import games.XNTupleFuncs;
 import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
+
+import java.io.IOException;
 
 import javax.swing.*;
 
@@ -11,10 +17,14 @@ public class Arena2048 extends Arena {
         super();
     }
 
-    public Arena2048(JFrame frame) {
-        super(frame);
-    }
+//    public Arena2048(JFrame frame) {
+//        super(frame);
+//    }
 
+	public Arena2048(String title) {
+		super(title);		
+	}
+	
     /**
      * @return a name of the game, suitable as subdirectory name in the
      *         {@code agents} directory
@@ -68,4 +78,23 @@ public class Arena2048 extends Arena {
     }
 
     public void performArenaDerivedTasks() {  }
+    
+	/**
+	 * Start GBG for 2048 (non-trainable version)
+	 * 
+	 * @param args
+	 * @throws IOException 
+	 */
+	public static void main(String[] args) throws IOException 
+	{
+		Arena2048 t_Frame = new Arena2048("General Board Game Playing");
+
+		if (args.length==0) {
+			t_Frame.init();
+		} else {
+			throw new RuntimeException("[Arena2048.main] args="+args+" not allowed. ");
+		}
+	}
+	
+
 }

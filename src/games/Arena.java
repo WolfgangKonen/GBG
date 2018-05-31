@@ -3,6 +3,8 @@ package games;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,8 +32,6 @@ import games.RubiksCube.GameBoardCube;
 import games.RubiksCube.StateObserverCube;
 import games.MTrain;
 import games.Arena.Task;
-import games.TicTacToe.LaunchArenaTTT;
-import games.TicTacToe.LaunchTrainTTT;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
 import params.ParOther;
@@ -48,7 +48,7 @@ import tools.Types;
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  */
-abstract public class Arena extends JPanel implements Runnable {
+abstract public class Arena extends JFrame implements Runnable {
 	public enum Task {
 		PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
 		// , INSPECTNTUP, BAT_TC, BATCH
@@ -84,6 +84,15 @@ abstract public class Arena extends JPanel implements Runnable {
 		initGame();
 	}
 
+	public Arena(String title) {
+		super(title);
+		m_LaunchFrame = this;
+		initGame();
+	}
+
+	/**
+	 * called by constructors
+	 */
 	protected void initGame() {
 		// scale the GUI (window sizes and fonts of all GUI elements)
 		Types.globalGUIScaling(true);
@@ -127,15 +136,22 @@ abstract public class Arena extends JPanel implements Runnable {
 
 		logManager = new LogManager();
 		logManager.setSubDir(gb.getSubDir());
-
+		
+		// initialize GUI elements (NEW version: 'Arena extends JFrame')
+		addWindowListener(new WindowClosingAdapter());
+		setJMenuBar(m_menu);
+		setSize(Types.GUI_ARENATRAIN_WIDTH,Types.GUI_ARENATRAIN_HEIGHT);		
+		setBounds(0,0,Types.GUI_ARENATRAIN_WIDTH,Types.GUI_ARENATRAIN_HEIGHT);
+		//pack();
+		setVisible(true);
 	}
 
 	public void init() {
 		// this causes Arena.run() to be executed as a separate thread
 		playThread = new Thread(this);
-		playThread.start();
+		playThread.start();	
 	}
-
+	
 	public void run() {
 		String agentN;
 		int n;
@@ -789,5 +805,23 @@ abstract public class Arena extends JPanel implements Runnable {
 	 * @see ArenaTrain
 	 */
 	abstract public void performArenaDerivedTasks();
+
+	/**
+	 * helper class for the NEW 'Arena extends JFrame'-version
+	 * 
+	 * @see Arena#initGame()
+	 */
+	protected static class WindowClosingAdapter
+	extends WindowAdapter
+	{
+		public WindowClosingAdapter()  {  }
+
+		public void windowClosing(WindowEvent event)
+		{
+			event.getWindow().setVisible(false);
+			event.getWindow().dispose();
+			System.exit(0);
+		}
+	}
 
 }

@@ -90,6 +90,14 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         isNextActionDeterministic = true;
     }
 
+    /**
+     * 
+     * @param board
+     * @param score
+     * @param winState
+     * @param cumulEmptyTiles
+     * @param isNextActionDeterministic
+     */
     public StateObserver2048(long board, int score, int winState, long cumulEmptyTiles, boolean isNextActionDeterministic) {
         this.isNextActionDeterministic = isNextActionDeterministic;
         boardB=board;
@@ -102,10 +110,11 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
     /**
      * Construct an 2048 game state from {@code int[r][c]} array, where row r=0 is the
-     * highest row and column c=0 is the left column
+     * highest row and column c=0 is the left column.
      * @param values the tile values {@code 2^exp}
      * @param score
      * @param winState
+     * @param isNextActionDeterministic
      */
     @Deprecated
     public StateObserver2048(int[][] values, int score, int winState, boolean isNextActionDeterministic) {
@@ -131,7 +140,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         updateAvailableMoves();
     }
 
-    // Note: StateObs2048 copy() copies the board state, score, winState, cumulEmptyTiles, 
+    // Note: StateObserver2048::copy() copies the board state, score, winState, cumulEmptyTiles, 
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
     public StateObserver2048 copy() {
     	StateObserver2048 so2 =  new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);

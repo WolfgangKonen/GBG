@@ -1,4 +1,4 @@
-package games.TicTacToe;
+package games.CFour;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -27,7 +27,7 @@ import games.ArenaTrain;
 import tools.Types;
 
 /**
- * Class GameBoardTTT implements interface GameBoard for TicTacToe.
+ * Class GameBoardC4 implements interface GameBoard for TicTacToe.
  * It has the board game GUI. 
  * It shows board game states, optionally the values of possible next actions,
  * and allows user interactions with the board to enter legal moves during 
@@ -37,7 +37,7 @@ import tools.Types;
  * @author Wolfgang Konen, TH Köln, Nov'16
  *
  */
-public class GameBoardTTT extends JFrame implements GameBoard {
+public class GameBoardC4 extends JFrame implements GameBoard {
 
 	private int TICGAMEHEIGHT=280;
 	private JPanel BoardPanel;
@@ -53,7 +53,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	 * is displayed as its label.
 	 */
 	protected JButton[][] Board;
-	private StateObserverTTT m_so;
+	private StateObserverC4 m_so;
 	private int[][] Table;			// =1: position occupied by "X" player
 									//=-1: position occupied by "O" player
 	private double[][] VTable;
@@ -64,7 +64,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	private Color colTHK2 = new Color(255,137,0);
 	private Color colTHK3 = new Color(162,0,162);
 	
-	public GameBoardTTT(Arena ticGame) {
+	public GameBoardC4(Arena ticGame) {
 		super("Tic Tac Toe");
 		initGameBoard(ticGame);
 	}
@@ -79,7 +79,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		BoardPanel	= InitBoard();
 		Table       = new int[3][3];
 		VTable		= new double[3][3];
-		m_so		= new StateObserverTTT();	// empty table
+		m_so		= new StateObserverC4();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
 
 		JPanel titlePanel = new JPanel();
@@ -163,7 +163,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
-			m_so = new StateObserverTTT();			// empty Table
+			m_so = new StateObserverC4();			// empty Table
 			for(int i=0;i<3;i++){
 				for(int j=0;j<3;j++){
 					Board[i][j].setText("  ");
@@ -197,9 +197,9 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 							boolean enableOccupiedCells, boolean showValueOnGameboard) {
 		int i,j;
 		if (so!=null) {
-	        assert (so instanceof StateObserverTTT)
-			: "StateObservation 'so' is not an instance of StateObserverTTT";
-			StateObserverTTT soT = (StateObserverTTT) so;
+	        assert (so instanceof StateObserverC4)
+			: "StateObservation 'so' is not an instance of StateObserverC4";
+			StateObserverC4 soT = (StateObserverC4) so;
 			m_so = soT.copy();
 			//Table = soT.getTable();
 			int Player=Types.PLAYER_PM[soT.getPlayer()];
@@ -267,7 +267,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		double value, maxvalue=Double.NEGATIVE_INFINITY;
 		String valueTxt;
 		int imax=0,jmax=0;
-		int[][] table = m_so.getTable();
+		int[][] table = null; // = m_so.getTable();
 		for(int i=0;i<3;i++){
 			for(int j=0;j<3;j++){
 				if (VTable==null) { 
@@ -400,7 +400,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			}
 			this.setLocation(x,y);	
 		}		
-//		System.out.println("GameBoardTTT size = " +super.getWidth() + " * " + super.getHeight());
+//		System.out.println("GameBoardC4 size = " +super.getWidth() + " * " + super.getHeight());
 //		System.out.println("Arena size = " +ticGame.m_LaunchFrame.getWidth() + " * " + ticGame.m_LaunchFrame.getHeight());
 
 	}

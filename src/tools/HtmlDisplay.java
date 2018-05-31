@@ -38,7 +38,7 @@ public class HtmlDisplay extends JFrame implements HyperlinkListener
     		 //--- Alternative 1: load resource from in working dir ---
     		 //String curDir = System.getProperty("user.dir"); // fetch the working dir 
     		 //curDir = curDir.replace('\\', '/');
-    		 //url=new URL("file:///"+curDir+"/"+filename);
+			// url=new URL("file:///"+curDir+"/"+filename);
     		 //--- Alternative 2: absolute path to resource, not portable at all ---    		 
     		 //url=new URL("file:///C:/Dokumente%20und%20Einstellungen/wolfgang/Eigene%20Dateien/ProjectsWK/ReinforceLearn/TicTacToe/resources/"+filename);
     		 html=new JEditorPane();

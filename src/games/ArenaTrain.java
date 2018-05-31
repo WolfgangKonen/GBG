@@ -18,7 +18,6 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Arena.Task;
-import games.TicTacToe.LaunchAppletTTT;
 //import params.TDParams;
 import tools.MessageBox;
 import tools.StatusBar;
@@ -55,6 +54,11 @@ abstract public class ArenaTrain extends Arena
 	}
 	public ArenaTrain(JFrame frame) {
 		super(frame);
+		initArenaTrain();
+	}
+	
+	public ArenaTrain(String title) {
+		super(title);
 		initArenaTrain();
 	}
 	

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- *  {@link TStats} is just a class to store a tuple of int's with diagnostic information
- *  about the last training episode <ul>
+ *  {@link TStats} is a class to store a tuple of int's with diagnostic information
+ *  about the last training episode: <ul>
  *  <li> <b>n</b> 			the episode counter (gameNum)
  *  <li> <b>p</b> 			the minimum episode length 
  *  <li> <b>moveNum</b>		the actual number of moves in this episode

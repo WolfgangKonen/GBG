@@ -1,4 +1,4 @@
-package games.RubiksCube;
+package games.CFour;
 
 import java.io.IOException;
 
@@ -12,34 +12,32 @@ import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
 import games.ArenaTrain;
+//import params.TDParams;
 
 /**
- * {@link ArenaTrain} for Rubik's Cube. It borrows all functionality
+ * {@link ArenaTrain} for Connect Four. It borrows all functionality
  * from the general class {@link ArenaTrain} derived from {@link Arena}. It only overrides 
  * the abstract methods <ul>
  * <li> {@link Arena#makeGameBoard()}, 
  * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)}, and 
  * <li> {@link Arena#makeFeatureClass(int)}, 
- * </ul> such that 
- * these factory methods return objects of class {@link GameBoardCube}, 
- * {@link EvaluatorCube}, and {@link FeatureCube}, respectively.
+ * <li> {@link Arena#makeXNTupleFuncs()}, 
+ * </ul> 
+ * such that these factory methods return objects of class {@link GameBoardC4}, 
+ * {@link EvaluatorC4}, {@link FeatureC4}, and {@link XNTupleFuncsC4}, respectively.
  * 
- * @see GameBoardCube
- * @see EvaluatorCube
+ * @see GameBoardC4
+ * @see EvaluatorC4
  * 
- * @author Wolfgang Konen, TH Köln, Feb'18
+ * @author Wolfgang Konen, TH Köln, Nov'16
  */
-public class ArenaTrainCube extends ArenaTrain   {
+public class ArenaTrainC4 extends ArenaTrain   {
 	
-	public ArenaTrainCube() {
+	public ArenaTrainC4() {
 		super();
 	}
 
-//	public ArenaTrainCube(JFrame frame) {
-//		super(frame);
-//	}
-
-	public ArenaTrainCube(String title) {
+	public ArenaTrainC4(String title) {
 		super(title);		
 	}
 	
@@ -48,14 +46,15 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "RubiksCube";
+		return "ConnectFour";
 	}
 	
 	/**
-	 * Factory pattern method
+	 * Factory pattern method: make a new GameBoard 
+	 * @return	the game board
 	 */
 	public GameBoard makeGameBoard() {
-		gb = new GameBoardCube(this);	
+		gb = new GameBoardC4(this);	
 		return gb;
 	}
 	/**
@@ -63,7 +62,8 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 * @param pa		the agent to evaluate
 	 * @param gb		the game board
 	 * @param stopEval	the number of successful evaluations needed to reach the 
-	 * 					evaluator goal (may be used to stop training prematurely)
+	 * 					evaluator goal (may be used during training to stop it 
+	 * 					prematurely)
 	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
 	 * 					If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
@@ -71,32 +71,37 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		if (mode==-1) mode=EvaluatorCube.getDefaultEvalMode();
-		return new EvaluatorCube(pa,gb,stopEval,mode,verbose);
+		if (mode==-1) mode=EvaluatorC4.getDefaultEvalMode();
+		return new EvaluatorC4(pa,gb,stopEval,mode,verbose);
 	}
 
+//	@Override
+//	public PlayAgent makeTDSAgent(String sAgent, TDParams tdPar, int maxGameNum){
+//		return new TDPlayerC4(sAgent,tdPar,maxGameNum);
+//	}
+
 	public Feature makeFeatureClass(int featmode) {
-		return new FeatureCube(featmode);
+		return new FeatureC4(featmode);
 	}
 
 	public XNTupleFuncs makeXNTupleFuncs() {
-		return new XNTupleFuncsCube();
+		return new XNTupleFuncsC4();
 	}
 
 	/**
-	 * Start GBG for Rubik's Cube (trainable version)
+	 * Start GBG for Connect Four (trainable version)
 	 * 
 	 * @param args
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrainCube t_Frame = new ArenaTrainCube("General Board Game Playing");
+		ArenaTrainC4 t_Frame = new ArenaTrainC4("General Board Game Playing");
 
 		if (args.length==0) {
 			t_Frame.init();
 		} else {
-			throw new RuntimeException("[ArenaTrainCube.main] args="+args+" not allowed. Use batch facility.");
+			throw new RuntimeException("[ArenaTrainC4.main] args="+args+" not allowed. Use batch facility.");
 		}
 	}
 	
