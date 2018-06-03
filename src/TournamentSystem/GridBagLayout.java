@@ -51,23 +51,29 @@ public class GridBagLayout {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //JOptionPane.showMessageDialog(null, "Hello World");
-                System.out.println("Startbutton clicked | checkbox states:");
-                for (TSAgent agent : checkBoxen)
-                {
-                    //System.out.println(agent.getAgentType() +" == "+ agent.getName());
-                    if(agent.guiCheckBox.isSelected())
-                        System.out.println(agent.guiCheckBox.getText()+": selected");
-                    else
-                        System.out.println(agent.guiCheckBox.getText()+": deselected");
-                }
-                System.out.println("\n");
+                playPressed();
             }
         });
 
     }
 
+    private void playPressed(){
+        System.out.println("Startbutton clicked | checkbox states:");
+        // durch alle checkboxen der agenten iterieren
+        for (TSAgent agent : checkBoxen)
+        {
+            //System.out.println(agent.getAgentType() +" == "+ agent.getName());
+            // pruefen fuer jede checkbox, ob sie selected ist oder nicht
+            if(agent.guiCheckBox.isSelected())
+                System.out.println(agent.guiCheckBox.getText()+": selected");
+            else
+                System.out.println(agent.guiCheckBox.getText()+": deselected");
+        }
+        System.out.println("\n");
+    }
+
     /**
-     * move the LogManagerGUI to the front
+     * move the GUI to the front
      */
     public void show() {
         mFrame.setVisible(true);
@@ -75,7 +81,9 @@ public class GridBagLayout {
         mFrame.toFront();
     }
 
-    /** For Testing Only */
+    /**
+     * For Testing Only
+     */
     public static void main(String[] args) {
         new GridBagLayout(null);
     }
