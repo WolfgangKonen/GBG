@@ -13,6 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import TournamentSystem.GridBagLayout;
 import TournamentSystem.TournamentSystemGUI;
 import controllers.AgentBase;
 import controllers.ExpectimaxNAgent;
@@ -71,6 +72,7 @@ public class XArenaMenu extends JMenuBar {
 	private int numPlayers;
 	private boolean winCompVisible = false;
 	private TournamentSystemGUI tournamentSystemGUI = null;
+	private GridBagLayout gridBagLayout = null;
 
 	// private final String agentList[] = { "Human", "Minimax", "TDS", "Random"
 	// };
@@ -387,14 +389,29 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.setToolTipText("<html><body>Start menu item #1</body></html>");
 		menu.add(menuItem);
 
-		menuItem = new JMenuItem("menuitem#2");
+		menuItem = new JMenuItem("Start TS GUI v2");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//m_arena.m_xab.helpFunction();
-				JOptionPane.showMessageDialog(null, "menu item #2 clicked");
+				//JOptionPane.showMessageDialog(null, "menu item #2 clicked");
+				if(gridBagLayout == null) {
+					gridBagLayout = new GridBagLayout(/*m_arena.logManager,*/ m_arena.getGameBoard());
+				} else {
+					gridBagLayout.show();
+				}
 			}
 		});
 		menuItem.setToolTipText("<html><body>Start menu item #2</body></html>");
+		menu.add(menuItem);
+
+		menuItem = new JMenuItem("menuitem#3");
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//m_arena.m_xab.helpFunction();
+				JOptionPane.showMessageDialog(null, "menu item #3 clicked");
+			}
+		});
+		menuItem.setToolTipText("<html><body>Start menu item #3</body></html>");
 		menu.add(menuItem);
 
 		add(menu);

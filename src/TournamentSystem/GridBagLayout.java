@@ -1,8 +1,10 @@
 package TournamentSystem;
 
+import games.GameBoard;
 import tools.Types;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -21,14 +23,17 @@ public class GridBagLayout {
     private JPanel mJPanel;
 
     private JFrame mFrame;
+    private GameBoard gameBoard;
     private ArrayList<TSAgent> checkBoxen;
 
-    public GridBagLayout() {
+    public GridBagLayout(GameBoard gameBoard) {
         mFrame = new JFrame("GridBagLayout");
         mFrame.setContentPane(mJPanel);
-        mFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        //mFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mFrame.pack();
         mFrame.setVisible(true);
+
+        this.gameBoard = gameBoard;
 
         checkBoxen = new ArrayList<>();
         checkBoxen.add(new TSAgent("randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox));
@@ -61,8 +66,17 @@ public class GridBagLayout {
 
     }
 
+    /**
+     * move the LogManagerGUI to the front
+     */
+    public void show() {
+        mFrame.setVisible(true);
+        mFrame.setState(Frame.NORMAL);
+        mFrame.toFront();
+    }
+
     /** For Testing Only */
     public static void main(String[] args) {
-        new GridBagLayout();
+        new GridBagLayout(null);
     }
 }
