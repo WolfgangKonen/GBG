@@ -27,6 +27,8 @@ public class notes
          *
          * @see games.LogManagerGUI // bsp gui im eigenen Fenster - vorlage TS GUI?
          *
+         * @see tools.Types.GUI_AGENT_LIST // Liste der verfügbaren Agenten
+         *
          */
     }
 }
