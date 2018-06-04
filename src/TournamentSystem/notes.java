@@ -1,9 +1,9 @@
 package TournamentSystem;
 
 import controllers.AgentBase;
-import games.Arena;
+import controllers.PlayAgent;
+import games.*;
 import games.TicTacToe.LaunchTrainTTT;
-import games.XArenaMenu;
 
 public class notes
 {
@@ -28,6 +28,14 @@ public class notes
          * @see games.LogManagerGUI // bsp gui im eigenen Fenster - vorlage TS GUI?
          *
          * @see tools.Types.GUI_AGENT_LIST // Liste der verfügbaren Agenten
+         *
+         * Kette Aufrufe Wettkampf
+         * @see Arena#run() -> while() taskState==COMPETE
+         * @see games.XArenaFuncs#singleCompete(XArenaButtons, GameBoard)
+         * @see games.XArenaFuncs#competeBase(boolean, XArenaButtons, GameBoard)
+         * @see games.XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int)  -> while()
+         *
+         * @see PlayAgent#getNextAction2(StateObservation, boolean, boolean) // berechnung des nächsten zuges des agenten
          *
          */
     }
