@@ -5,6 +5,8 @@ import controllers.PlayAgent;
 import games.*;
 import games.TicTacToe.LaunchTrainTTT;
 
+import javax.swing.*;
+
 public class notes
 {
     public static void main(String[] args)
@@ -38,14 +40,38 @@ public class notes
          * @see PlayAgent#getNextAction2(StateObservation, boolean, boolean) // berechnung des nächsten zuges des agenten
          *
          * ++++++++++++++++++
+         * Fragen:
          *
-         * Einsatzpunkt
+         * welcher Einsatzpunkt?
          *      {@link Arena#PlayGame()} oder
          *      {@link XArenaFuncs#singleCompete(XArenaButtons, GameBoard)} oder
          *      {@link XArenaFuncs#multiCompete(boolean, XArenaButtons, GameBoard)} ?
          *      + neuen Taskstate in {@link Arena}
          *
          * Unterschied numGames und numCompetitions in {@link XArenaFuncs#multiCompete(boolean, XArenaButtons, GameBoard)} ?
+         *
+         * Wie komme ich in XArenaFuncs an meine GUI Eingaben?
+         *
+         * Exakte System in dem die Agenten gegeneinander antreten
+         *      alle gegen alle
+         *          nur a vs b oder auch b vs a (http://www.turnier-editor.de/ nur obere hälfte der diagonale oder beide)
+         *      oder paarweise turniersystem wo nur gewinner gegeneinander spielen?
+         *          was passiert mit ungeradem letzten spieler
+         *              disqualifikation
+         *              automatisch auftsieg in nächste runde ohne sieg wertung
+         *              automatisch auftsieg in nächste runde mit sieg wertung
+         *
+         * ++++++++++++++++++
+         *
+         * Code Edited to implement TS
+         * {@link XArenaMenu#XArenaMenu(Arena, JFrame)}
+         *
+         *
+         * Code Added to implement TS
+         * {@link XArenaMenu#generateTournamentMenu()}
+         * @see TournamentSystem.TournamentSystemGUI
+         * @see TournamentSystem.TSAgent
+         * @see TournamentSystem.GridBagLayout
          *
          */
     }

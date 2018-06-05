@@ -866,7 +866,7 @@ public class XArenaFuncs
 		
 		try {
 		// take settings from GUI xab
-		String AgentX = xab.getSelectedAgent(0);
+		String AgentX = xab.getSelectedAgent(0);  // enthalten AgentNamen als String (tools.Types.GUI_AGENT_LIST)
 		String AgentO = xab.getSelectedAgent(1);
 		//int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
 		//int competitionNum=Integer.valueOf(xab.CompetitionsT.getText()).intValue();
@@ -893,9 +893,10 @@ public class XArenaFuncs
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return winrate;
 		} 
-		for (int c=0; c<competitionNum; c++) {
+		for (int c=0; c<competitionNum; c++) { // durchlauf der einzelnen competitions
 			int player;
-			
+
+			// beide agenten werden für die games jeder competition neu initialisiert
 			try {
 				paX = this.constructAgent(0,AgentX, xab);
 				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);

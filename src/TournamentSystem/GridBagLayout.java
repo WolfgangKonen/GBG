@@ -58,6 +58,7 @@ public class GridBagLayout {
     }
 
     private void playPressed(){
+        int selected = 0;
         System.out.println("Startbutton clicked | checkbox states:");
         // durch alle checkboxen der agenten iterieren
         for (TSAgent agent : checkBoxen)
@@ -65,11 +66,25 @@ public class GridBagLayout {
             //System.out.println(agent.getAgentType() +" == "+ agent.getName());
             // pruefen fuer jede checkbox, ob sie selected ist oder nicht
             if(agent.guiCheckBox.isSelected())
+            {
                 System.out.println(agent.guiCheckBox.getText()+": selected");
+                selected++;
+            }
             else
-                System.out.println(agent.guiCheckBox.getText()+": deselected");
+            {
+                System.out.println(agent.guiCheckBox.getText() + ": deselected");
+            }
         }
         System.out.println("\n");
+        if (selected < 2)
+        {
+            System.out.println("Error :: At least 2 Agents need to be selected for a tournament!");
+        }
+        else
+        {
+            // start tournament
+            // ...
+        }
     }
 
     /**
