@@ -37,6 +37,16 @@ public class notes
          *
          * @see PlayAgent#getNextAction2(StateObservation, boolean, boolean) // berechnung des nächsten zuges des agenten
          *
+         * ++++++++++++++++++
+         *
+         * Einsatzpunkt
+         *      {@link Arena#PlayGame()} oder
+         *      {@link XArenaFuncs#singleCompete(XArenaButtons, GameBoard)} oder
+         *      {@link XArenaFuncs#multiCompete(boolean, XArenaButtons, GameBoard)} ?
+         *      + neuen Taskstate in {@link Arena}
+         *
+         * Unterschied numGames und numCompetitions in {@link XArenaFuncs#multiCompete(boolean, XArenaButtons, GameBoard)} ?
+         *
          */
     }
 }
