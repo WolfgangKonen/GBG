@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GridBagLayout {
     private JCheckBox randomCheckBox;
@@ -58,7 +59,7 @@ public class GridBagLayout {
     }
 
     private void playPressed(){
-        int selected = 0;
+        int countSelectedAgents = 0;
         System.out.println("Startbutton clicked | checkbox states:");
         // durch alle checkboxen der agenten iterieren
         for (TSAgent agent : checkBoxen)
@@ -68,7 +69,7 @@ public class GridBagLayout {
             if(agent.guiCheckBox.isSelected())
             {
                 System.out.println(agent.guiCheckBox.getText()+": selected");
-                selected++;
+                countSelectedAgents++;
             }
             else
             {
@@ -76,14 +77,39 @@ public class GridBagLayout {
             }
         }
         System.out.println("\n");
-        if (selected < 2)
+        if (countSelectedAgents < 2)
         {
             System.out.println("Error :: At least 2 Agents need to be selected for a tournament!");
         }
         else
         {
-            // start tournament
-            // ...
+            // determin 1v1 gameplan with selected agents
+            String selectedAGents[] = new String[countSelectedAgents]; // just selected agents
+            int tmp = 0;
+            for (TSAgent agent : checkBoxen) {
+                if (agent.guiCheckBox.isSelected()) {
+                    selectedAGents[tmp++] = agent.getAgentType();
+                }
+            }
+            //System.out.println("sel ag: "+ Arrays.toString(selectedAGents));
+
+            String gamePlan[][] = new String[countSelectedAgents*(countSelectedAgents-1)][2]; // games to be played
+            int tmpGame = 0;
+            for (int i=0; i<countSelectedAgents; i++) {
+                for (int j=0; j<countSelectedAgents; j++) {
+                    if (i!=j) { // avoid agent to play against itself
+                        gamePlan[tmpGame][0] = selectedAGents[i];
+                        gamePlan[tmpGame++][1] = selectedAGents[j];
+                    }
+                }
+            }
+
+            System.out.println("Games to play: "+gamePlan.length);
+            for (String round[] : gamePlan)
+                System.out.println("["+round[0]+"] vs ["+round[1]+"]");
+
+            // send gameplan to custom multicompete to run competitions
+            // save game results in TSAgent objects?
         }
     }
 
