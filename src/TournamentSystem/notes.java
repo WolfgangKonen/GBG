@@ -42,8 +42,8 @@ public class notes
          * ++++++++++++++++++
          * Fragen:
          *
-         * welcher Einsatzpunkt?
-         *      {@link Arena#PlayGame()} oder
+         * welcher Einsatzpunkt Competition?
+         *      {@link Arena#PlayGame()} (erlaubt human und visualsiert spiel live) oder
          *      {@link XArenaFuncs#singleCompete(XArenaButtons, GameBoard)} oder
          *      {@link XArenaFuncs#multiCompete(boolean, XArenaButtons, GameBoard)} ?
          *      + neuen Taskstate in {@link Arena}
@@ -51,6 +51,9 @@ public class notes
          * Unterschied numGames und numCompetitions in {@link XArenaFuncs#multiCompete(boolean, XArenaButtons, GameBoard)} ?
          *
          * Wie komme ich in XArenaFuncs an meine GUI Eingaben?
+         *      {@link XArenaButtons} braucht eine Instanz als public Object
+         *      siehe {@link XArenaMenu} zeile 271
+         *      GUI extends JFrame?
          *
          * Exakte System in dem die Agenten gegeneinander antreten
          *      alle gegen alle
