@@ -66,6 +66,10 @@ public class notes
          *
          * ++++++++++++++++++
          *
+         * TimeMeasurement:
+         * {@link System#currentTimeMillis()} - Zeit seit 1.1.1970 in mS. Abhängig von Zeitzone usw - WallClockTime?
+         * {@link System#nanoTime()} - Zeitstempel im System in nS
+         *
          * Code Edited to implement TS
          * {@link XArenaMenu#XArenaMenu(Arena, JFrame)}
          *

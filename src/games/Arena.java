@@ -460,8 +460,14 @@ abstract public class Arena extends JPanel implements Runnable {
 	                    int N_EMPTY = 4;
 	                    if (DEBG) {
 	                    	actBest = getNextAction_DEBG(so,pa,p2,N_EMPTY);
-	                    } else {	
-	                        actBest = pa.getNextAction2(so, false, true);
+	                    } else {
+	                    	long startT = System.currentTimeMillis();
+	                    	long startTNano = System.nanoTime();
+	                        actBest = pa.getNextAction2(so, false, true); /** command to get agents next move */
+							long endT = System.currentTimeMillis();
+							long endTNano = System.nanoTime();
+							System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
+							System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
 	                    }
 	                    
 	                    so.storeBestActionInfo(actBest, actBest.getVTable());
