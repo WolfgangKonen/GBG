@@ -22,6 +22,7 @@ public class GridBagLayout {
     private JCheckBox TDSCheckBox;
     private JButton startButton;
     private JPanel mJPanel;
+    private JTextField gameNumTextField;
 
     private JFrame mFrame;
     private GameBoard gameBoard;
@@ -60,6 +61,16 @@ public class GridBagLayout {
 
     private void playPressed(){
         int countSelectedAgents = 0;
+        int numGamesPerMatch;
+        try {
+            numGamesPerMatch = Integer.parseInt(gameNumTextField.getText());
+        } catch(NumberFormatException n) {
+            n.printStackTrace();
+            System.out.println("ERROR :: not a valid number was entered in GameNum Textfield. Using value 1");
+            numGamesPerMatch = 1;
+        }
+        System.out.println("numGamesPerMatch: "+numGamesPerMatch);
+
         System.out.println("Startbutton clicked | checkbox states:");
         // durch alle checkboxen der agenten iterieren
         for (TSAgent agent : checkBoxen)
