@@ -1,6 +1,7 @@
 package TournamentSystem;
 
 import games.Arena;
+import games.ArenaTrain;
 import tools.Types;
 
 import javax.swing.*;
@@ -86,7 +87,7 @@ public class TournamentsystemGUI2 extends JFrame{
                 System.out.println(agent.guiCheckBox.getText() + ": deselected");
             }
         }
-        System.out.println("\n");
+        System.out.println("");
         if (countSelectedAgents < 2)
         {
             System.out.println("Error :: At least 2 Agents need to be selected for a tournament!");
@@ -120,6 +121,12 @@ public class TournamentsystemGUI2 extends JFrame{
 
             // send gameplan to custom multicompete to run competitions
             // save game results in TSAgent objects?
+            if (mArena.taskState != ArenaTrain.Task.IDLE) {
+                System.out.println("ERROR :: could not start Tourmenent, Arena is not IDLE");
+            }
+            else {
+                mArena.taskState = ArenaTrain.Task.TRNEMNT;
+            }
         }
     }
 

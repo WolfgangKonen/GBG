@@ -51,7 +51,7 @@ import tools.Types;
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
 		 //, INSPECTNTUP, BAT_TC, BATCH
-		 , COMPETE, SWAPCMP, MULTCMP, IDLE  };
+		 , COMPETE, SWAPCMP, MULTCMP, TRNEMNT, IDLE  };
 	public XArenaFuncs m_xfun;
 	public JFrame m_LaunchFrame = null;  
 	public XArenaMenu m_menu = null;
@@ -190,7 +190,13 @@ abstract public class Arena extends JPanel implements Runnable {
 				setStatusMessage("Multi Compete finished.");
 				UpdateBoard();
 				taskState = Task.IDLE; 
-				break;				
+				break;
+			case TRNEMNT:
+				// Tournament Code
+				// ...
+				System.out.println("ARENA : yay ein Tournament!");
+				taskState = Task.IDLE;
+				break;
 			case PLAY: 
 				//enableButtons(false);		// see Play.addActionListener in XArenaButtons
 				gb.showGameBoard(this,false);
