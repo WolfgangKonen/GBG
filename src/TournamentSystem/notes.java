@@ -78,7 +78,7 @@ public class notes
          * {@link XArenaMenu#generateTournamentMenu()}
          * @see TournamentSystem.TournamentSystemGUI
          * @see TournamentSystem.TSAgent
-         * @see TournamentSystem.GridBagLayout
+         * @see TournamentsystemGUI2
          *
          */
     }

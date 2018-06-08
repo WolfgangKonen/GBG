@@ -13,7 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import TournamentSystem.GridBagLayout;
+import TournamentSystem.TournamentsystemGUI2;
 import TournamentSystem.TournamentSystemGUI;
 import controllers.AgentBase;
 import controllers.ExpectimaxNAgent;
@@ -27,7 +27,6 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
-import games.RubiksCube.ArenaTrainCube;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
@@ -72,7 +71,7 @@ public class XArenaMenu extends JMenuBar {
 	private int numPlayers;
 	private boolean winCompVisible = false;
 	private TournamentSystemGUI tournamentSystemGUI = null;
-	private GridBagLayout gridBagLayout = null;
+	private TournamentsystemGUI2 tournamentsystemGUI2 = null;
 
 	// private final String agentList[] = { "Human", "Minimax", "TDS", "Random"
 	// };
@@ -394,10 +393,10 @@ public class XArenaMenu extends JMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				//m_arena.m_xab.helpFunction();
 				//JOptionPane.showMessageDialog(null, "menu item #2 clicked");
-				if(gridBagLayout == null) {
-					gridBagLayout = new GridBagLayout(/*m_arena.logManager,*/ m_arena.getGameBoard());
+				if(tournamentsystemGUI2 == null) {
+					tournamentsystemGUI2 = new TournamentsystemGUI2(/*m_arena.logManager, m_arena.getGameBoard()*/m_arena);
 				} else {
-					gridBagLayout.show();
+					tournamentsystemGUI2.show();
 				}
 			}
 		});

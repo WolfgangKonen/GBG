@@ -1,16 +1,14 @@
 package TournamentSystem;
 
-import games.GameBoard;
+import games.Arena;
 import tools.Types;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class GridBagLayout {
+public class TournamentsystemGUI2 extends JFrame{
     private JCheckBox randomCheckBox;
     private JCheckBox minimaxCheckBox;
     private JCheckBox maxNCheckBox;
@@ -24,18 +22,19 @@ public class GridBagLayout {
     private JPanel mJPanel;
     private JTextField gameNumTextField;
 
-    private JFrame mFrame;
-    private GameBoard gameBoard;
+    //private GameBoard gameBoard;
+    private Arena mArena;
     private ArrayList<TSAgent> checkBoxen;
 
-    public GridBagLayout(GameBoard gameBoard) {
-        mFrame = new JFrame("GridBagLayout");
-        mFrame.setContentPane(mJPanel);
-        //mFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        mFrame.pack();
-        mFrame.setVisible(true);
+    public TournamentsystemGUI2(Arena mArena) { //GameBoard gameBoard) {
+        super("TournamentsystemGUI2");
+        setContentPane(mJPanel);
+        //setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        pack();
+        setVisible(true);
 
-        this.gameBoard = gameBoard;
+        //this.gameBoard = gameBoard;
+        this.mArena = mArena;
 
         checkBoxen = new ArrayList<>();
         checkBoxen.add(new TSAgent("randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox));
@@ -125,18 +124,9 @@ public class GridBagLayout {
     }
 
     /**
-     * move the GUI to the front
-     */
-    public void show() {
-        mFrame.setVisible(true);
-        mFrame.setState(Frame.NORMAL);
-        mFrame.toFront();
-    }
-
-    /**
      * For Testing Only
      */
     public static void main(String[] args) {
-        new GridBagLayout(null);
+        new TournamentsystemGUI2(null);
     }
 }
