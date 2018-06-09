@@ -32,7 +32,7 @@ public class ParMaxN implements Serializable {
 	public ParMaxN() {	}
     
 	public ParMaxN(ParMaxN op) {
-		this.maxNTreeDepth = op.getMaxnDepth();
+		this.maxNTreeDepth = op.getMaxNDepth();
 		this.maxNHashmap = op.useMinimaxHashmap();	
 	}
 	
@@ -45,7 +45,11 @@ public class ParMaxN implements Serializable {
 		this.maxNHashmap = op.useMinimaxHashmap();	
 	}
 	
-	public int getMaxnDepth() {
+	public void setMaxNDepth(int treeDepth) {
+		this.maxNTreeDepth = treeDepth;
+	}
+
+	public int getMaxNDepth() {
 		return maxNTreeDepth;
 	}
 

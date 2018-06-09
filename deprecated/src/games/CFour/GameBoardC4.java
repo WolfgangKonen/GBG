@@ -2,7 +2,6 @@ package games.CFour;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -55,8 +54,8 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 	 */
 //	protected JButton[][] Board;
 	private StateObserverC4 m_so;
-	private int[][] m_board;		
-	private int[][] last_board;		
+	private int[][] m_board;		// =1: position occupied by "X" player
+									//=-1: position occupied by "O" player
 	private double[] VTable;
 	private boolean arenaActReq=false;
 	
@@ -82,7 +81,6 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 //		Table       = new int[3][3];
 		VTable		= new double[C4Base.COLCOUNT];
 		m_so		= new StateObserverC4();	// empty table
-		m_board 	= m_so.getBoard();
         rand 		= new Random(System.currentTimeMillis());	
 
 		JPanel titlePanel = new JPanel();
@@ -168,7 +166,6 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		if (boardClear) {
 			BoardPanel.setInitialBoard();
 			m_so = new StateObserverC4();			// empty Table
-			last_board = m_so.getBoard();
 		}
 		if (vClear) {
 			VTable		= new double[C4Base.COLCOUNT];
@@ -182,10 +179,10 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 	 * Update the play board and the associated values (labels).
 	 * 
 	 * @param so	the game state
-	 * @param enableOccupiedCells  if true, allow user interaction on occupied 
-	 * 				cells (may be needed for inspecting the value function)
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
 	 * 				(only if they are stored in 'so')
+	 * @param enableOccupiedCells  if true, allow user interaction on occupied 
+	 * 				cells (may be needed for inspecting the value function)
 	 */
 	@Override
 	public void updateBoard(StateObservation so, 
@@ -244,7 +241,6 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		} // if(so!=null)
 		
 		guiUpdateBoard(enableOccupiedCells,showValueOnGameboard);
-		repaint();
 	}
 
 	/**
@@ -252,14 +248,27 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 	 * The labels contain the values (scores) for each unoccupied board position (raw score*100).  
 	 * Occupied board positions have black/white background color, unoccupied positions are orange.
 	 * 
-	 * @param withReset If true, update the GUI to the current board state with a prior reset. 
-	 * If false, update the GUI assuming that it is in the previous board state (faster and allows
-	 * to mark the last move).
+	 * @param enable As a side effect the buttons Board[i][j] which are occupied by either "X" or "O"
+	 * will be set into enabled state <code>enable</code>. (All unoccupied positions will get state 
+	 * <code>true</code>.)
 	 */ 
-	private void guiUpdateBoard(boolean withReset, boolean showValueOnGameboard)
+	private void guiUpdateBoard(boolean enable, boolean showValueOnGameboard)
 	{		
-		if (withReset) guiUpdateBoard1();
-		else guiUpdateBoard2();
+		
+		// fill the BoardPanel row-by-row:
+		BoardPanel.resetBoard();
+		for(int j=0;j<C4Base.ROWCOUNT;j++){
+			for(int i=0;i<C4Base.COLCOUNT;i++){
+				if(m_board[i][j]==C4Base.PLAYER1)
+				{
+					BoardPanel.setPiece(i, (C4Base.PLAYER1-1));
+				}					
+				else if(m_board[i][j]==C4Base.PLAYER2)
+				{
+					BoardPanel.setPiece(i, (C4Base.PLAYER2-1));
+				}
+			}
+		}
 		
 		if (showValueOnGameboard) {
 			double[] value = new double[C4Base.COLCOUNT];
@@ -284,38 +293,6 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		this.repaint();
 	}		
 
-	private void guiUpdateBoard1() {
-		// --- this alternative works for the LogManager (it allows moving back & to set an   
-		// --- arbitrary board), but is slower and has not the last move marked.
-		BoardPanel.resetBoard();
-		for(int j=0;j<C4Base.ROWCOUNT;j++){
-			for(int i=0;i<C4Base.COLCOUNT;i++){
-				if(m_board[i][j]==C4Base.PLAYER1)
-				{
-					BoardPanel.unMarkMove(i,j, (C4Base.PLAYER1-1));
-				}					
-				else if(m_board[i][j]==C4Base.PLAYER2)
-				{
-					BoardPanel.unMarkMove(i,j, (C4Base.PLAYER2-1));
-				}
-			}
-		}		
-	}
-	
-	private void guiUpdateBoard2() {
-		// --- this alternative updates only the last move and has the last move 
-		// --- marked. It is faster, but does not work for the LogManager (does not allow to 
-		// --- move back & requires the board to be already in the previous position).
-		for(int j=0;j<C4Base.ROWCOUNT;j++){
-			for(int i=0;i<C4Base.COLCOUNT;i++){
-				if(m_board[i][j]!=last_board[i][j]) {
-					BoardPanel.setPiece(i,j, (m_board[i][j]-1));
-					last_board[i][j] = m_board[i][j];
-				}
-			}
-		}		
-	}
-	
 	/**
 	 * @return  true: if an action is requested from Arena or ArenaTrain
 	 * 			false: no action requested from Arena, next action has to come 
@@ -337,12 +314,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 
 	@Override
 	public void enableInteraction(boolean enable) {
-		BoardPanel.enableInteraction(enable);
-		if (enable) {
-	        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		} else {
-	        this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-		}
+
 	}
 
 	/**
@@ -368,11 +340,10 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 //		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		if (m_so.isLegalAction(act)) {
-			System.out.println(m_so.stringDescr());
 			m_so.advance(act);			// perform action (optionally add random elements from game 
 										// environment - not necessary in ConnectFour)
 			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-			updateBoard(null,false,false);
+			updateBoard(m_so,false,false);
 			arenaActReq = true;			// ask Arena for next action
 		}
 	}

@@ -417,19 +417,21 @@ public class NTParams extends Frame implements Serializable {
 			NTupleFixCo.setSelectedItem(""+1);
 			UseSymmetryC.setSelected(true);
 			AfterStateC.setSelected(false);
-			enableTcPart();
-			enableRandomPart();
 			switch (gameName) {
 			case "2048": 
 				NTupleSizeT.setText("3");
 				AfterStateC.setSelected(true);
 				enableAfterState(true);
 				break;
+			case "ConnectFour":
+				RandomnessC.setSelected(false);
 			default:	//  all other
 				NTupleSizeT.setText("6");	
 				enableAfterState(false);		// disable AFTERSTATE for all deterministic games
 				break;
 			}
+			enableTcPart();
+			enableRandomPart();
 			break;
 		}
 		

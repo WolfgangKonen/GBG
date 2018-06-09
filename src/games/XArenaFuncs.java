@@ -677,12 +677,13 @@ public class XArenaFuncs
 	 * @see XArenaButtons
 	 */
 	public static double competeBoth(PlayAgent pa, PlayAgent opponent, int competeNum,
-									 GameBoard gb) {
+									 GameBoard gb, StateObservation startSO) {
 		int verbose=0;
 		double[] res;
 		double resX, resO;
 
-		StateObservation startSO = gb.getDefaultStartState();  // empty board
+		// now passed as parameter
+		//StateObservation startSO = gb.getDefaultStartState();  // empty board
 
 		res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose);
 		resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]

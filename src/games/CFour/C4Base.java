@@ -1,5 +1,6 @@
 package games.CFour;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -22,21 +23,10 @@ import java.util.Arrays;
  *      00  06  12  18  24  30  36
  * </pre>
  * 
- * The <b>bitboard representation</b> codes the pieces of each player in the bits of the long 
- * variables {@code fieldP1, fieldP2}. Which bit is set when a cell is occupied by a player's 
- * piece is given in the following table (see {@code fieldMask} and {@link #setBoard(int[][])}:  
- * <pre>
- *      36  30  24  18  12  06  00 
- *      37  31  25  19  13  07  01
- *      38  32  26  20  14  08  02
- *      39  33  27  21  15  09  03
- *      40  34  28  29  16  10  04
- *      41  35  29  23  17  11  05
- * </pre>
  * @author Markus Thill
  * 
  */
-public class C4Base {
+public class C4Base implements Serializable {
 
 	/**
 	 * Constants for both player
@@ -49,10 +39,24 @@ public class C4Base {
 	 */
 	public static final int COLCOUNT = 7;
 	protected static final int ROWCOUNT = 6;
+	protected static final int CELLCOUNT = COLCOUNT*ROWCOUNT;
 	protected static final long EVENROWS = 0x15555555555L;
 	protected static final long ODDROWS = 0xA28A28A28AL;
 	protected static final long TOPROW = 0x1041041041L;
 	protected static final long FIELDFULL = 0x3FFFFFFFFFFL;
+	/**
+	 * The <b>bitboard representation</b> codes the pieces of each player in the bits of the long 
+	 * variables {@code fieldP1, fieldP2}. Which bit is set when a cell is occupied by a player's 
+	 * piece is given in the following table (see {@code fieldMask} and {@link #setBoard(int[][])}:  
+	 * <pre>
+	 *      36  30  24  18  12  06  00 
+	 *      37  31  25  19  13  07  01
+	 *      38  32  26  20  14  08  02
+	 *      39  33  27  21  15  09  03
+	 *      40  34  28  29  16  10  04
+	 *      41  35  29  23  17  11  05
+	 * </pre>
+	 */
 	public static final long fieldMask[][] = {
 			{ 2199023255552L, 1099511627776L, 549755813888L, 274877906944L,
 					137438953472L, 68719476736L }, //
@@ -68,7 +72,7 @@ public class C4Base {
 			0x3F000000L, 0xFC0000L, 0x3F000L, 0xFC0L, 0x3FL };
 
 	/**
-	 * All possible FourRows horizontally, diagonal and vertical
+	 * All possible FourRows horizontally, diagonal and vertical <br>
 	 * (seems to be never used)
 	 */
 	protected static final long fourRows[] = { 0x1041040000L, 0x41041000L,
@@ -134,6 +138,13 @@ public class C4Base {
 	protected final int colHeight[];
 
 	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .gamelog containing this object will become 
+	 * unreadable or you have to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 12L;
+
+	/**
 	 * Generate an empty Board
 	 */
 	public C4Base() {
@@ -163,8 +174,6 @@ public class C4Base {
 	 */
 	public C4Base(long fieldP1, long fieldP2) {
 		colHeight = new int[COLCOUNT];
-		// computeFieldMasks(); 12.09.2014: not needed anymore, save computation
-		// time
 		resetBoard();
 		setBoard(fieldP1, fieldP2);
 	}
@@ -253,7 +262,7 @@ public class C4Base {
 	}
 
 	/**
-	 * Get all Winning-Rows for one player (if existing)
+	 * Get all winning rows for one player (if existing)
 	 * 
 	 * @param player
 	 *            search for this player
@@ -424,10 +433,10 @@ public class C4Base {
 	}
 
 	/**
-	 * Generate all masks for the 42 fields of the board.
+	 * Generate all masks for the COLCOUNT*ROWCOUNT fields of the board.<br>
+	 * (not really needed anymore)
 	 */
 	private void computeFieldMasks() {
-		// Berechnet die Masken für alle 42 Zellen des Spielfeldes
 		for (int i = 0; i < COLCOUNT; i++) {
 			for (int j = 0; j < ROWCOUNT; j++) {
 				fieldMask[i][j] = getMask(i, j);
@@ -497,6 +506,8 @@ public class C4Base {
 		} else {
 			fieldP2 |= mask;
 		}
+		computeColHeight();
+		//colHeight[col]++;
 	}
 
 	/**
@@ -550,11 +561,24 @@ public class C4Base {
 	 * @return Number of pieces on the board (of both players) 
 	 */
 	public int countPieces() {
+		assertColHeight(); 		// temporarily, just as check
 		int count = 0;
 		for (int i = 0; i < COLCOUNT; i++) {
 			count += colHeight[i];
 		}
 		return count;
+	}
+	
+	private void assertColHeight() {
+		int len = colHeight.length;
+		int[] tmpColHeight=colHeight.clone();
+		computeColHeight();
+		for (int i=0; i<len; i++) {
+			if (tmpColHeight[i]!=colHeight[i]) {
+				System.out.println("computeColHeight() was necessary!!");
+				return;
+			}
+		}
 	}
 
 	/**
@@ -571,17 +595,17 @@ public class C4Base {
 	}
 
 	/**
-	 * @return true, if board is completly filled
+	 * @return true, if board is completely filled
 	 */
 	public boolean isDraw() {
 		return ((fieldP1 | fieldP2) & FIELDFULL) == FIELDFULL;
 	}
 
 	/**
-	 * Check if current Player can win with move x
+	 * Check if current Player can win with move in column x
 	 * 
 	 * @param x column number of the move
-	 * @return true, if Win
+	 * @return true, if win
 	 */
 	public boolean canWin(int x) {
 		int player = countPieces() % 2 == 0 ? PLAYER1 : PLAYER2;
@@ -589,7 +613,7 @@ public class C4Base {
 	}
 
 	/**
-	 * Check, if the player can Win in the specified column
+	 * Check, if the player can win in the specified column
 	 * 
 	 * @param player
 	 * @param x column number of the move
@@ -600,13 +624,12 @@ public class C4Base {
 	}
 
 	/**
-	 * Check if player can win in one field
+	 * Check if player can win in field (xx,yy)
 	 * 
-	 * @param player
-	 * @param xx
-	 *            column number of the move
-	 * @param yy
-	 *            row
+	 * @param player	PLAYER1 or PLAYER2
+	 * @param xx	column number of the move
+	 * @param yy	row
+	 *            
 	 * @return true, if that field completes a winning-row
 	 */
 	public boolean canWin(int player, int xx, int yy) {
@@ -2048,6 +2071,8 @@ public class C4Base {
 	}
 
 	/**
+	 * Apparently never used
+	 * 
 	 * @param player
 	 * @param colHeight
 	 *            Array with the Height of all Columns
@@ -2078,6 +2103,22 @@ public class C4Base {
 		System.out.println("Length: " + C4Base.fieldMask.length);
 		for (int i = 0; i < C4Base.fieldMask.length; i++)
 			System.out.println(Arrays.toString(C4Base.fieldMask[i]));
+		
+		c4 = new C4Base();
+		c4.putPiece(PLAYER1, 3);
+		c4.putPiece(PLAYER2, 6);
+		c4.putPiece(PLAYER1, 2);
+		c4.putPiece(PLAYER2, 6);
+		System.out.println("2 in 0, win for P1 in 0 : "+ c4.canWin(PLAYER1,0));
+		System.out.println("2 in 1, win for P2 in 6 : "+ c4.canWin(PLAYER2,6));
+		c4.putPiece(PLAYER1, 1);
+		c4.putPiece(PLAYER2, 6);
+		System.out.println("3 in 0, win for P1 in 0 : "+ c4.canWin(PLAYER1,0));
+		System.out.println("3 in 1, win for P2 in 6 : "+ c4.canWin(PLAYER2,6));
+		System.out.println("3 in 0, win for P1 in 0 : "+ c4.canWin(0));
+		System.out.println("3 in 1, win for P2 in 6 : "+ c4.canWin(6));
+		c4.printBoard();
+		
 	}
 
 }

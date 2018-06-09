@@ -319,8 +319,8 @@ public class Types {
      * initial agent choice for P0, P1, ... (for up to 5 players) 
      */
     public static final String[] GUI_AGENT_INITIAL  
-    	//= {"TD-Ntuple", "MC", "Human", "Human", "Human"};
-    	= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
+    	//= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
+    	= {"Human", "MCTS", "Human", "Human", "Human", "Human"};
 		//= {"TD-Ntuple-2", "Human", "MCTS Expectimax", "Human", "Human", "Human"};
     public static final String[] GUI_PLAYER_NAME  	// player names for P0, P1, ... (for up to 5 players)
     	//= {"P0", "P1", "P2", "P3", "P4"};

@@ -13,18 +13,21 @@ import games.XNTupleFuncs;
 //import params.TDParams;
 
 /**
- * {@link Arena} for TicTacToe. It borrows all functionality
- * from the general class {@link Arena}. It only overrides the abstract
- * methods {@link Arena#makeGameBoard()}, 
- * {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)},
- * and {@link Arena#makeFeatureClass(int)}, such that 
- * these factory methods return objects of class {@link GameBoardC4}, 
- * {@link EvaluatorC4}, and {@link FeatureC4}, respectively.
+ * {@link Arena} for Connect Four. It borrows all functionality
+ * from the general class {@link Arena}. It only overrides 
+ * the abstract methods <ul>
+ * <li> {@link Arena#makeGameBoard()}, 
+ * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)}, and 
+ * <li> {@link Arena#makeFeatureClass(int)}, 
+ * <li> {@link Arena#makeXNTupleFuncs()}, 
+ * </ul> 
+ * such that these factory methods return objects of class {@link GameBoardC4}, 
+ * {@link EvaluatorC4}, {@link FeatureC4}, and {@link XNTupleFuncsC4}, respectively.
  * 
  * @see GameBoardC4
  * @see EvaluatorC4
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln, May'18
  */
 public class ArenaC4 extends Arena   {
 	

@@ -29,7 +29,7 @@ import games.ArenaTrain;
  * @see GameBoardC4
  * @see EvaluatorC4
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln, May'18
  */
 public class ArenaTrainC4 extends ArenaTrain   {
 	

@@ -1,248 +1,500 @@
 package games.CFour;
 
+import controllers.MCTS.MCTSAgentT;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
+import controllers.TD.ntuple2.TDNTuple2Agt;
+import controllers.MaxNAgent;
+import controllers.PlayAgent;
+import controllers.RandomAgent;
+import games.Evaluator;
+import games.GameBoard;
+import games.StateObservation;
+import games.XArenaFuncs;
+import games.TicTacToe.Evaluator9;
+import games.TicTacToe.EvaluatorTTT;
+import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import params.ParMCTS;
+import params.ParMaxN;
+import params.ParOther;
+import tools.MessageBox;
+import tools.Types;
+import tools.Types.ACTIONS;
+
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JOptionPane;
 
 import agentIO.AgentLoader;
-import controllers.MinimaxAgent;
-import controllers.PlayAgent;
-import controllers.RandomAgent;
-import games.ArenaTrain;
-import games.Evaluator;
-import games.TicTacToe.Evaluator9;
-import games.GameBoard;
-import games.XArenaFuncs;
-import tools.MessageBox;
-import tools.Types;
+
 
 /**
- * Same as {@link Evaluator9}, but instead of {@link Evaluator9#evalAgent1(PlayAgent, boolean)} use
+ * Evaluator for the game C4 (ConnectFour). Depending on the value of parameter {@code mode} in constructor:
  * <ul>
- * <li> if mode=1: {@link EvaluatorC4#evaluateAgent1(PlayAgent,GameBoard)} (competition with MinimaxPlayer and RandomPlayer) or 
- * <li> if mode=2: {@link EvaluatorC4#evaluateAgent2(PlayAgent,PlayAgent,GameBoard)} (competition with MinimaxPlayer from different start positions). 
+ * <li> -1: no evaluation
+ * <li>  0: compete against MCTS
+ * <li>  1: compete against Random
+ * <li>  2: compete against Max-N
+ * <li> 10: compete against MCTS, different start states
+ * <li> 11: compete against TDReferee.agt.zip, different start states
  * </ul>  
- * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
+ * The value of mode is set in the constructor. 
  */
 public class EvaluatorC4 extends Evaluator {
- 	private static final int[] AVAILABLE_MODES = {0,1,2,9,11};
-	private String sRandom = Types.GUI_AGENT_LIST[2];
-	private String sMinimax = Types.GUI_AGENT_LIST[1];
-	private RandomAgent random_agent = new RandomAgent(sRandom);
-	private MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
+    private MaxNAgent maxnAgent = null; 
+    private final String logDir = "logs/ConnectFour/train";
+    protected int verbose = 0;
+    private MCTSAgentT mctsAgent = null;
+    private RandomAgent randomAgent = new RandomAgent(Types.GUI_AGENT_LIST[0]);
+    private double trainingThreshold = 0.8;
+    private GameBoard m_gb;
+    private PlayAgent playAgent;
+    private double lastResult = 0;
+    private int numStartStates = 1;
+    private int m_mode = 0;
+    private String m_msg = null;
 	private AgentLoader agtLoader = null;
-	private Evaluator9 m_evaluator9 = null; 
-	private int m_mode;
-	private double m_res=-1;		// avg. success against RandomPlayer, best is 0.9 (m_mode=0)
-									// or against MinimaxPlayer, best is 0.0 (m_mode=1,2)
-	private String m_msg;
-	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
-	private GameBoard m_gb;
-	
-	public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, stopEval);
-		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
-		initEvaluator(gb,1);
-	}
+    /**
+     * logResults toggles logging of training progress to a csv file located in {@link #logDir}
+     */
+    private boolean logResults = false;
+    private boolean fileCreated = false;
+    private PrintWriter logFile;
+    private StringBuilder logSB;
 
-	public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, stopEval);
-		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
-		initEvaluator(gb,mode);
-	}
+    public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
+        super(e_PlayAgent, stopEval, verbose);
+        m_mode = mode;
+        if (verbose == 1) {
+            System.out.println("Using evaluation mode " + mode);
+        }
+        initEvaluator(e_PlayAgent, gb);
+        if (m_mode == 2 && maxnAgent.getDepth() < C4Base.CELLCOUNT) {
+            System.out.println("Using Max-N with limited tree depth: " +
+                    maxnAgent.getDepth() + " used, " + C4Base.CELLCOUNT + " needed (for perfect play)");
+        }
+    }
 
-	public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, stopEval, verbose);
-		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
-		initEvaluator(gb,mode);
-	}
-	
-	private void initEvaluator(GameBoard gb, int mode) {
-		if (!isAvailableMode(mode)) 
-			throw new RuntimeException("EvaluatorC4: Value mode = "+mode+" is not allowed!");
-		m_mode = mode;
-		m_gb = gb;				
-	}
-	
-//	/**	
-//	 * Known callers of eval (outside this class): 
-//	 * 		{@link ArenaTrain#run()}, case TRAIN_X, TRAIN_O, 
-//	 * 		{@link XArenaFuncs#train(String, XArenaButtons, GameBoard)},
-//	 */
-//	public boolean eval() {
-//		return setState(eval_Agent());
-//	}
-	
-	/**
-	 * 
-	 * @return true if evaluateAgentX is above m_thresh.<br>
-	 * The choice for X=1 or 2 is made with 3rd parameter mode in 
-	 * {@link #EvaluatorC4(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
-	 * 
-	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
-	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
-	 */
-	@Override
-	public boolean eval_Agent(PlayAgent playAgent) {
-		m_PlayAgent = playAgent;
-		switch(m_mode) {
-		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
-		case 1:  return evaluateAgent1(m_PlayAgent,m_gb)>m_thresh[1];
-		case 2:  return evaluateAgent2(m_PlayAgent,minimax_agent,m_gb)>m_thresh[2];
-		case 11: 
-			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
-			return evaluateAgent2(m_PlayAgent,agtLoader.getAgent(),m_gb)>m_thresh[2];
-		case 9:  return m_evaluator9.eval_Agent(playAgent);
-		default: return false;
-		}
-	}
-	
-	/**	
-	 * @param gb		needed to get a default start state (competeBoth)
- 	 * @return
-	 * Known callers of evaluateAgent1 (outside this class): 
-	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
-	 */
- 	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
-		m_res = XArenaFuncs.competeBoth(pa, random_agent, 100, gb);
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
-		if (this.verbose>0) System.out.println(m_msg);
-		return m_res;
-	}
+    private void initEvaluator(PlayAgent playAgent, GameBoard gameBoard) {
+        this.m_gb = gameBoard;
+        this.playAgent = playAgent;
+        //maxnAgent is set once in evaluator constructor, so the search tree does not have to be rebuilt 
+        //every time a new evaluation is started.
+        //However, this prevents MaxN parameters from being adjusted while the program is running. 
+    	//Set needed tree depth during compile time.
+        ParMaxN params = new ParMaxN();
+        int maxNDepth =  6;
+        params.setMaxNDepth(maxNDepth);
+        maxnAgent = new MaxNAgent(Types.GUI_AGENT_LIST[2], params, new ParOther());
+    }
 
- 	/**	
-	 * @param gb		needed to get a default start state (competeBoth)
- 	 * @return
-	 * Known callers of evaluateAgent1 (outside this class): 
-	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
-	 */
- 	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
-		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, 1, gb);
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
-		if (this.verbose>0) System.out.println(m_msg);
-		return m_res;
-	}
- 	
- 	/**
- 	 * 
- 	 * @param pa
-	 * @param gb		needed to get a default start state (competeBoth)
- 	 * @return
- 	 */
- 	private double evaluateAgent2(PlayAgent pa, PlayAgent opponent, GameBoard gb) {
-		int verbose=0;
-		int competeNum=1;
-		int startPlayer=+1;
-		int[][] startTable=new int[3][3];
-		double[] res;
-		double resX, resO;
-		// all these start states have the result "Tie" for perfect playing agents:
-		String state[] = {"---------","--------X","-------X-"
-						, "------X--","-----X---","----X----"
-						, "---X-----","--X------","-X-------"
-						, "X--------"};
-		m_res=0;
-		
+    @Override
+    protected boolean eval_Agent(PlayAgent pa) {
+    	this.playAgent = pa;
+        //Disable evaluation by using mode -1
+        if (m_mode == -1) {
+            return true;
+        }
+
+        //Disable logging for the final evaluation after training
+        if (!fileCreated && playAgent.getGameNum() == playAgent.getMaxGameNum()) {
+            logResults = false;
+        }
+
+        if (logResults && !fileCreated) {
+    		tools.Utils.checkAndCreateFolder(logDir);
+            logSB = new StringBuilder();
+            logSB.append("training_matches");
+            logSB.append(",");
+            logSB.append("result");
+            logSB.append("\n");
+            try {
+                logFile = new PrintWriter(new File(logDir + "/" + getCurrentTimeStamp() + ".csv"));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            fileCreated = true;
+        }
+
+        double result;
+        int numEpisodes=8;
+        switch (m_mode) {
+            case 0:
+                result = competeAgainstMCTS(playAgent, m_gb, numEpisodes);
+                break;
+            case 1:
+                result = competeAgainstRandom(playAgent, m_gb);
+                break;
+            case 2:
+                result = competeAgainstMaxN(playAgent, m_gb, numEpisodes);
+                break;
+            case 10:
+            	if (playAgent instanceof TDNTuple2Agt) {
+            		// we can only call the parallel version, if playAgent's getNextAction2 is 
+            		// thread-safe, which is the case for TDNTuple2Agt
+            		// Also we have to construct MCTS opponent inside the callables, otherwise
+            		// we are not thread-safe as well:
+                    result = competeAgainstMCTS_diffStates_PAR(playAgent, m_gb, numEpisodes);
+            	} else {
+                    ParMCTS params = new ParMCTS();
+                    int numIterExp =  (Math.min(C4Base.CELLCOUNT,5) - 1);
+                    params.setNumIter((int) Math.pow(10, numIterExp));
+                    mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[5], new StateObserverC4(), params);
+
+            		result = competeAgainstOpponent_diffStates(playAgent, mctsAgent, m_gb, numEpisodes);
+            	}
+                break;
+            case 11:
+    			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
+        		result = competeAgainstOpponent_diffStates(playAgent, agtLoader.getAgent(), m_gb, numEpisodes);
+                break;
+            default:
+                return false;
+        }
+
+
+        if (logResults) {
+            logSB.append(playAgent.getGameNum());
+            logSB.append(",");
+            logSB.append(result);
+            logSB.append("\n");
+            logFile.write(logSB.toString());
+            logSB.delete(0, logSB.length());
+            logFile.flush();
+
+            //If the last game has been played, close the file handle.
+            //Does not work if the maximum number of training games is not divisible by the number of games per eval.
+            if (playAgent.getMaxGameNum() == playAgent.getGameNum()) {
+                logFile.close();
+            }
+        }
+
+        return result >= trainingThreshold;
+    }
+
+    /**
+     * Evaluates an agent's performance with perfect play, as long as tree and rollout depth are not limited.
+     * Scales poorly with board size, requires more than 8 GB RAM for board sizes higher than 4x4.
+     * Since the MaxN agent is a static object, the game tree is cached between evaluations. This also means that
+     * a restart of the program is required to change MaxN params and to free memory used by the game tree.
+     * Plays a high number of games for accurate measurements, since performance is high once tree is built.
+     *
+     * @param playAgent Agent to be evaluated
+     * @param gameBoard Game board the evaluation game is played on
+     * @return Percentage of games won on a scale of [0, 1] as double
+     */
+    private double competeAgainstMaxN(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+        double[] res = XArenaFuncs.compete(playAgent, maxnAgent, new StateObserverC4(), numEpisodes, verbose);
+        double success = res[0] - res[2];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+        if (this.verbose > 0) System.out.println(m_msg);
+        lastResult = success;
+        return success;
+    }
+
+    /**
+     * Evaluates an agent's performance using enough iterations to play (near-) perfectly on boards
+     * up to and including 5x5. No guarantees for 6x6 board or higher. Tends to require a lot of
+     * memory for 7x7 and up. Only one game per evaluation because of the high runtime of the MCTS agent.
+     *
+     * @param playAgent agent to be evaluated
+     * @param gameBoard Game board the evaluation game is played on
+     * @param numEpisodes number of episodes played during evaluation
+     * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
+     */
+    private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+        ParMCTS params = new ParMCTS();
+        int numIterExp =  (Math.min(C4Base.CELLCOUNT,5) - 2);
+        params.setNumIter((int) Math.pow(10, numIterExp));
+        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[5], new StateObserverC4(), params);
+
+//        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), numEpisodes, 0);
+//        double success = res[0];        	
+        double success = XArenaFuncs.competeBoth(playAgent, mctsAgent,  numEpisodes, gameBoard, new StateObserverC4());
+       m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+        //if (this.verbose > 0) 
+        	System.out.println(m_msg);
+        lastResult = success;
+        return success;
+    }
+
+    /**
+     * Similar to {@link EvaluatorC4#competeAgainstMCTS(PlayAgent, GameBoard, int)}, but:
+     * <ul> 
+     * <li>It does not only play evaluation games from the default start state (empty board) but 
+     * also games where the first player (Black) has made a losing moves and the agent as second
+     * player (White) will win, if it plays perfect (see {@link HexConfig#EVAL_START_ACTIONS}). 
+     * <li>It allows a different opponent than MCTS to be passed in as 2nd argument
+     * </ul>
+     *
+     * @param playAgent agent to be evaluated (it plays both 1st and 2nd)
+     * @param opponent 	agent against which {@code playAgent} plays
+     * @param gb 		Game board the evaluation game is played on
+     * @param numEpisodes number of episodes played during evaluation
+     * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
+     * 
+     * @see EvaluatorC4#competeAgainstMCTS(PlayAgent, GameBoard, int)
+     * @see HexConfig#EVAL_START_ACTIONS
+     */
+    private double competeAgainstOpponent_diffStates(PlayAgent playAgent, PlayAgent opponent, GameBoard gb, int numEpisodes) {
+        double[] res;
+        double success = 0;
+        
 		if (opponent == null) {
 			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
 			MessageBox.show(gb.getArena(),"ERROR: " + tdstr,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
-			m_res = Double.NaN;
-			return m_res;
+			return Double.NaN;
 		} 
 
-		for (int k=0; k<state.length; ++k) {
-			startPlayer = Evaluator9.string2table(state[k],startTable);
-			StateObserverC4 startSO = new StateObserverC4(startTable);
-			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose);
-			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
-											// resp. \in [-1,0], if opponent never looses.
-											// +1 is best for pa, -1 worst for pa.
-			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, verbose);
-			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
-											// resp. \in [-1,0], if opponent never looses.
-											// +1 is best for pa, -1 worst for pa.
-			m_res += (resX+resO)/2.0;
-		}
-		m_res=m_res/state.length;
-		
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
-		if (this.verbose>0) System.out.println(m_msg);
-		
-		return m_res;
-	}
- 	
- 	/**
- 	 * @return mean success rate against {@link MinimaxAgent}, best is 0.0. Either when starting from
- 	 * empty board ({@code mode==1}) or from different start positions ({@code mode==2}), 
- 	 * depending on {@code mode} as set in constructor.
- 	 */
- 	public double getOm() { return m_res; }
- 	
- 	@Override
- 	public double getLastResult() { 
- 		return (m_mode==9) ? m_evaluator9.getLastResult() : m_res; 
- 	}
- 	@Override
- 	public String getMsg() { 
- 		return (m_mode==9) ? m_evaluator9.getMsg() : m_msg; } 
- 	
-	@Override
- 	public boolean isAvailableMode(int mode) {
-		for (int i : AVAILABLE_MODES) {
-			if (mode==i) return true;
-		}
-		return false;
- 	}
- 	
- 	@Override
- 	public int[] getAvailableModes() {
- 		return AVAILABLE_MODES;
- 	}
- 	
- 	//@Override
- 	public static int getDefaultEvalMode() {
-		return AVAILABLE_MODES[2];		// mode 2
-	}
- 	
-	public int getQuickEvalMode() 
-	{
-		return 2;
-	}
-	public int getTrainEvalMode() 
-	{
-		return 9;
-	}
-	public int getMultiTrainEvalMode() 
-	{
-		return 0;
-	}
+        // find the start states to evaluate:
+        int [] startAction = {-1};
+        int N = 1; //HexConfig.BOARD_SIZE;
+        if (N>0) { //HexConfig.EVAL_START_ACTIONS.length-1) {
+            System.out.println("*** WARNING ***: 1-ply winning boards for board size N="+N+
+            		"are not coded in " +"HexConfig.EVAL_START_ACTIONS." );
+            System.out.println("*** WARNING ***: Evaluator(mode 10) will use only " +
+            		"empty board for evaluation.");
+        } else {
+            // the int's in startAction code the start board. -1: empty board (a winning 
+            // board for 1st player Black), 
+            // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, a winning
+            // board for 2nd player White)
+            startAction = null; //HexConfig.EVAL_START_ACTIONS[N];
+        }
+        numStartStates = startAction.length;
+        
+        // evaluate each start state in turn and return average success rate: 
+        for (int i=0; i<startAction.length; i++) {
+        	StateObserverC4 so = new StateObserverC4();
+        	if (startAction[i] == -1) {
+        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0);
+                success += res[0];        	
+        	} else {
+        		so.advance(new ACTIONS(startAction[i]));
+        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0);
+                success += res[2];        	
+        	}
+        }
+        success /= startAction.length;
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+//        if (this.verbose > 0) 
+        	System.out.println(m_msg);
+        lastResult = success;
+        return success;
+    }
 
-	@Override
-	public String getPrintString() {
-		switch (m_mode) {
-		case 0:  return "success rate (randomAgent, best is 0.9): ";
-		case 1:  return "success rate (minimax, best is 0.0): ";
-		case 2:  return "success rate (minimax, different starts, best is 0.0): ";
-		case 9:  return "success rate (Evaluator9, best is ?): ";	
-		case 11: return "success rate (TDReferee, different starts, best is 0.0): ";
-		default: return null;
-		}
-	}
+    /**
+     * Does the same as {@code competeAgainstMCTS_diffStates}, but with 6 parallel cores, 
+     * so it is 6 times faster. 
+     * <p>
+     * NOTES: <ul>
+     * <li> The memory consumption grows when this function is repeatedly called (by about 60 kB
+     * for each call, but there seems to be an effective limit for the Java process at 4.3 GB -- 
+     * beyond the garbage collector seems to do its work effectively)
+     * <li> The call to compete may not alter anything in {@code playAgent}. So the function 
+     * getNextAction2 invoked by compete should be thread-safe. This is valid, if getNextAction2 
+     * does not modify members in playAgent. Possible for TD-n-Tuple-agents, if we do not write 
+     * on class-global members (e.g. do not use BestScore, but use local variable BestScore2). 
+     * Parallel threads are not possible when playAgent is MCTSAgentT or MaxNAgent.
+     * </ul>
+     * 
+     * @param playAgent
+     * @param gameBoard
+     * @param numEpisodes
+     * @return
+     */
+    private double competeAgainstMCTS_diffStates_PAR(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+        ExecutorService executorService = Executors.newFixedThreadPool(6);
+        ParMCTS params = new ParMCTS();
+        int numIterExp =  (Math.min(C4Base.CELLCOUNT,5) - 1);
+        params.setNumIter((int) Math.pow(10, numIterExp));
+        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[5], new StateObserverHex(), params);
 
-	@Override
-	public String getPlotTitle() {
-		switch (m_mode) {
-		case 0:  return "success against Random";
-		case 1:  return "success against Minimax";
-		case 2:  return "success against Minimax, dStart";
-		case 9:  return "success Evaluator9";		
-		case 11: return "success TDReferee";		
-		default: return null;
-		}
-	}
+        // find the start states to evaluate:
+        int [] startAction = {-1};
+        int N = 1; //HexConfig.BOARD_SIZE;
+        if (N>0) { //HexConfig.EVAL_START_ACTIONS.length-1) {
+            System.out.println("*** WARNING ***: 1-ply winning boards for board size N="+N+
+            		"are not coded in " +"HexConfig.EVAL_START_ACTIONS." );
+            System.out.println("*** WARNING ***: Evaluator(mode 10) will use only " +
+            		"the empty board for evaluation.");
+        } else {
+            // the int's in startAction code the start board. -1: empty board (a winning 
+            // board for 1st player Black), 
+            // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, a winning
+            // board for 2nd player White)
+            startAction = null; //HexConfig.EVAL_START_ACTIONS[N];
+        }
+        numStartStates = startAction.length;
+        
+        List<Double> successObservers = new ArrayList<>();
+        List<Callable<Double>> callables = new ArrayList<>();
+        final int[] startAction2 = startAction;
 
+        // evaluate each start state in turn and return average success rate: 
+        for (int i=0; i<startAction.length; i++) {
+            int gameNumber = i+1;
+            final int i2 = i;
+            callables.add(() -> {
+                double[] res;
+                double success = 0;
+                long gameStartTime = System.currentTimeMillis();
+                StateObserverC4 so = new StateObserverC4();
+                
+                // important: mctsAgent2 has to be constructed inside the 'callables' function, 
+                // otherwise all parallel calls would operate on the same agent and would produce
+                // garbage.
+                MCTSAgentT mctsAgent2 = new MCTSAgentT(Types.GUI_AGENT_LIST[5], new StateObserverC4(), params);
+
+            	if (startAction2[i2] == -1) {
+            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0);
+                    success = res[0];        	
+            	} else {
+            		so.advance(new ACTIONS(startAction2[i2]));
+            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0);
+                    success = res[2];        	
+            	}
+                if(verbose == 0) {
+                    System.out.println("Finished evaluation " + gameNumber + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. ");
+                }
+            	return Double.valueOf(success);
+            });
+        }
+   
+        // invoke all callables and store results on List successObservers
+        try {
+            executorService.invokeAll(callables).stream().map(future -> {
+                try {
+                    return future.get();
+                }
+                catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }).forEach(successObservers::add);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // reduce results (here: calculate average success)
+        double averageSuccess = 0; 
+        for(Double suc : successObservers) {
+            averageSuccess += suc.doubleValue();
+        }
+        averageSuccess/= startAction.length;
+
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + averageSuccess;
+//        if (this.verbose > 0) 
+        	System.out.println(m_msg);
+        lastResult = averageSuccess;
+        return averageSuccess;
+    }
+
+    /**
+     * Very weak but fast evaluator to see if there is a training progress at all.
+     * Getting a high win rate against this evaluator does not guarantee good performance of the evaluated agent.
+     *
+     * @param playAgent Agent to be evaluated
+     * @param gameBoard Game board the evaluation game is played on
+     * @return Percentage of games won on a scale of [0, 1] as double
+     */
+    private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
+    	StateObservation so = new StateObserverC4();
+        double success = XArenaFuncs.competeBoth(playAgent, randomAgent,  50, gameBoard, so);
+        //double[] res = XArenaFuncs.compete(playAgent, randomAgent, so, 100, verbose);
+        //double success = res[0];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+        if (this.verbose > 0) System.out.println(m_msg);
+        lastResult = success;
+        return success;
+    }
+
+    @Override
+    public double getLastResult() {
+        return lastResult;
+    }
+
+    @Override
+    public boolean isAvailableMode(int mode) {
+        int[] availableModes = getAvailableModes();
+        for (int availableMode : availableModes) {
+            if (mode == availableMode) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public int[] getAvailableModes() {
+        return new int[]{-1, 0, 1, 2, 10, 11};
+    }
+
+    @Override
+    public int getQuickEvalMode() {
+        return 0;
+    }
+
+    @Override
+    public int getTrainEvalMode() {
+        return -1;
+    }
+
+    @Override
+    public int getMultiTrainEvalMode() {
+        return 0; //getAvailableModes()[0];
+//        return getQuickEvalMode();
+    }
+
+    @Override
+    public String getPrintString() {
+        switch (m_mode) {
+            case 0:  return "success against MCTS (best is 1.0): ";
+            case 1:  return "success against Random (best is 1.0): ";
+            case 2:  return "success against Minimax (best is 1.0): ";
+            case 10: return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
+            case 11: return "success against TDReferee (" + numStartStates + " diff. start states, best is 1.0): ";
+            default: return null;
+        }
+    }
+
+    @Override
+    public String getPlotTitle() {
+        switch (m_mode) {
+            case 0:  return "success against MCTS";
+            case 1:  return "success against Random";
+            case 2:  return "success against Minimax";
+            case 10: return "success against MCTS";
+            case 11: return "success against TDReferee";
+            default: return null;
+        }
+    }
+
+    @Override
+    public String getMsg() {
+        return m_msg;
+    }
+
+    /**
+     * generates String containing the current timestamp
+     *
+     * @return the timestamp
+     */
+    private static String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
+    }
 }

@@ -3,6 +3,7 @@ package games.CFour;
 import java.io.Serializable;
 import java.util.HashSet;
 
+import controllers.TD.ntuple2.NTupleFactory;
 import games.StateObservation;
 import games.XNTupleFuncs;
 
@@ -12,11 +13,8 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
      * change the version ID for serialization only if a newer version is no longer
      * compatible with an older one (older .gamelog or .agt.zip containing this object will
      * become unreadable or you have to provide a special version transformation)
-     * <p>
-     * [We need this strange number here, because serialVersionUID was not present before, 
-     * and the so far stored agents had this automatically created serialVersionUID.]
      */
-    private static final long serialVersionUID = 7556763505414386566L;
+    private static final long serialVersionUID = 12L;
 
     //
 	// The following five functions are only needed for the n-tuple interface:
@@ -26,16 +24,16 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 	 */
 	@Override
 	public int getNumCells() {
-		return 9;
+		return C4Base.COLCOUNT*C4Base.ROWCOUNT;
 	}
 	
 	/**
 	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
-	 * can have. For TicTacToe: P=3, with 0:"O", 1=empty, 2="X") 
+	 * can have. For ConnectFour: P=3, with 0=empty, 1="X", 2="o") 
 	 */
 	@Override
 	public int getNumPositionValues() {
-		return 3; 
+		return 4; 
 	}
 	
 	/**
@@ -48,23 +46,46 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 	
 	/**
 	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
-	 * cell of the board. In the case of TicTacToe the mapping is
+	 * cell of the board. In the case of ConnectFour with 7 columns and 6 rows the mapping is
 	 * <pre>
-	 *    0 1 2
-	 *    3 4 5
-	 *    6 7 8
+	 *      05  11  17  23  29  35  41
+	 *      04  10  16  22  28  34  40
+	 *      03  09  15  21  27  33  39
+	 *      02  08  14  20  26  32  38
+	 *      01  07  13  19  25  31  37
+	 *      00  06  12  18  24  30  36
 	 * </pre>
 	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
-	 * position value with 0:"O", 1=empty, 2="X".
+	 * position value which is with 
+	 * <ul> 
+	 * <li> 0=empty, 1="X", 2="O" in case {@link #getNumPositionValues()}==3 and
+	 * <li> 0=empty+not-reachable, 1="X", 2="O", 3=empty+reachable in case 
+	 *      {@link #getNumPositionValues()}==4 (the <b>recommended</b> case).
+	 * </ul>
+	 * An empty+reachable cell is an empty cell which is either in the lowest row or has a
+	 * piece directly below. 
 	 */
 	@Override
 	public int[] getBoardVector(StateObservation so) {
 		assert (so instanceof StateObserverC4);
-		int[][] table = null; // ((StateObserverC4) so).getTable();
+		int[][] board = ((StateObserverC4) so).getBoard();
 		int[] bvec = new int[getNumCells()]; 
-		for (int i=0, n=0;i<3;i++)
-			for (int j=0;j<3;j++, n++) 
-            	bvec[n]=table[i][j]+1;                					
+		for (int i = 0, n=0; i < C4Base.COLCOUNT; i++) {
+			for (int j = 0; j < C4Base.ROWCOUNT; j++, n++) {
+            	bvec[n]=board[i][j];  
+			}
+		}
+		if (this.getNumPositionValues()==4) {
+			for (int i = 0, n=0; i < C4Base.COLCOUNT; i++) {
+				for (int j = 0; j < C4Base.ROWCOUNT; j++, n++) {
+	            	if (board[i][j]==0) {
+	            		if (j==0 ) board[i][j]=3;
+	            		else if (board[i][j-1]==1 || board[i][j-1]==2) board[i][j]=3; 
+	            	}
+				}
+			}
+			
+		}
 
 		return bvec;   
 	}
@@ -76,22 +97,16 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
-	 * In the case of TicTacToe we have s=8 symmetries (4 board rotations * 2 board flips)
+	 * In the case of ConnectFour we have s=2 symmetries (the board itself + 1 vertical mirror flip)
 	 * 
 	 * @param boardVector
 	 * @return boardArray
 	 */
 	@Override
 	public int[][] symmetryVectors(int[] boardVector) {
-		int i;
-		int[][] equiv = null;
-		equiv = new int[8][];
+		int[][] equiv = new int[2][];
 		equiv[0] = boardVector;
-		for (i = 1; i < 4; i++)
-			equiv[i] = rotate(equiv[i - 1]);
-		equiv[i] = flip(boardVector);
-		for (i=5; i < 8; i++)
-			equiv[i] = rotate(equiv[i - 1]);
+		equiv[1] = flip(boardVector);
 
 		return equiv;
 	}
@@ -106,26 +121,86 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		// Examples for some NTuples for TicTacToe:
-		//best chosen 40, 4-tuples
-		int nTuple[][]={{6, 7, 4, 0},{4, 5, 8, 7},{4, 3, 0, 1},{4, 5, 2, 1},{6, 3, 0, 1},
-				{6, 3, 0, 4},{0, 1, 5, 2},{2, 1, 4, 7},{7, 3, 4, 5},{0, 4, 1, 2},{8, 4, 0, 1},{7, 4, 1, 0},
-				{7, 4, 0, 1},{8, 7, 4, 1},{7, 4, 8, 5},{8, 7, 4, 1},{7, 8, 5, 4},{4, 8, 7, 6},{2, 1, 5, 4},
-				{3, 0, 1, 4},{8, 7, 3, 4},{8, 4, 3, 0},{4, 1, 2, 5},{6, 3, 0, 4},{1, 2, 5, 8},{1, 4, 3, 7},
-				{6, 3, 0, 1},{8, 5, 4, 3},{3, 4, 7, 6},{5, 8, 7, 6},{5, 4, 0, 1},{6, 3, 4, 7},{0, 3, 4, 8},
-				{6, 3, 7, 8},{2, 1, 4, 0},{3, 7, 4, 1},{1, 2, 5, 4},{8, 5, 1, 4},{6, 7, 8, 4},{6, 3, 0, 1}
-		};
-		// int nTuple[][] = {{0,1,2,3,4,5,6,7,8}};
-		// int nTuple[][] = { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 0, 4, 8 } };
-		// int nTuple[][] = {{0,1,2,3,4,5,6,7}, {8,7,6,5,4,3,2,1},
-		// 		{8,7,6,5,4,3,2,0}, {0,1,2,3,4,5,6,8}};
-		// int nTuple[][] = {{0,1,2,5,8,7}, {0,3,6,7,8,5}, {0,3,6,1,4,7},
-		// 		{2,5,8,7,4,1}, {0,1,2,3,4,5}, {6,7,8,3,4,5}, {0,4,8,7,6,3}};
-		// int nTuple[][] =
-		// 		{{0,1,2,3},{4,5,6,7},{8,0,3,6},{1,4,7,2},{5,8,0,4},{6,4,2,0}};
-		// int nTuple[][] = {{0,1,2},{3,4,5},{6,7,8},{0,4,8},{0,1,2,5,8,7},
-		//	 	{0,3,6,7,8,5}, {0,3,6,1,4,7}, {2,5,8,7,4,1}, {0,1,2,3,4,5},
-		//	 	{6,7,8,3,4,5}, {0,4,8,7,6,3}};
+		// Standard Tuple-Set for C4 (COLCOUNT:7, ROWCOUNT:6)
+		// Use this Board representation:
+		// 5 11 17 23 29 35 41
+		// 4 10 16 22 28 34 40
+		// 3 9 15 21 27 33 39
+		// 2 8 14 20 26 32 38
+		// 1 7 13 19 25 31 37
+		// 0 6 12 18 24 30 36
+		int nTuple[][] =  { //
+				{ 0, 6, 7, 12, 13, 14, 19, 21 }, //
+				{ 13, 18, 19, 20, 21, 26, 27, 33 }, //
+				{ 1, 3, 4, 6, 7, 8, 9, 10 }, //
+				{ 7, 8, 9, 12, 15, 19, 25, 30 }, //
+				{ 4, 5, 9, 10, 11, 15, 16, 17 }, //
+				{ 1, 2, 3, 8, 9, 10, 16, 17 }, //
+				{ 3, 8, 9, 10, 11, 14, 15, 16 }, //
+				{ 0, 1, 2, 6, 8, 12, 13, 18 }, //
+				{ 25, 26, 27, 32, 33, 37, 38, 39 }, //
+				{ 3, 4, 8, 9, 11, 14, 15, 21 }, //
+				{ 2, 3, 4, 8, 9, 14, 15, 20 }, //
+				{ 18, 19, 24, 30, 31, 32, 36, 37 }, //
+				{ 3, 4, 8, 9, 10, 14, 15, 16 }, //
+				{ 5, 10, 11, 16, 17, 21, 22, 27 }, //
+				{ 4, 10, 15, 20, 21, 22, 27, 28 }, //
+				{ 18, 24, 25, 30, 31, 32, 37, 38 }, //
+				{ 11, 17, 21, 23, 27, 28, 33, 39 }, //
+				{ 21, 25, 26, 27, 32, 34, 35, 41 }, //
+				{ 22, 25, 26, 27, 30, 32, 33, 37 }, //
+				{ 4, 10, 11, 16, 20, 21, 22, 23 }, //
+				{ 0, 6, 7, 8, 12, 13, 14, 15 }, //
+				{ 17, 23, 28, 29, 32, 33, 34, 35 }, //
+				{ 0, 6, 7, 12, 18, 25, 32, 38 }, //
+				{ 2, 3, 4, 5, 8, 9, 10, 11 }, //
+				{ 27, 32, 33, 34, 37, 38, 39, 40 }, //
+				{ 4, 10, 16, 21, 26, 32, 33, 38 }, //
+				{ 0, 6, 7, 12, 13, 20, 27, 28 }, //
+				{ 0, 6, 12, 19, 25, 31, 32, 33 }, //
+				{ 1, 2, 6, 7, 13, 14, 15, 20 }, //
+				{ 1, 2, 5, 8, 11, 15, 16, 17 }, //
+				{ 13, 14, 16, 18, 21, 22, 23, 24 }, //
+				{ 2, 3, 9, 10, 11, 16, 17, 22 }, //
+				{ 15, 16, 17, 20, 22, 23, 25, 31 }, //
+				{ 15, 16, 17, 21, 22, 23, 28, 29 }, //
+				{ 24, 26, 30, 31, 32, 33, 36, 37 }, //
+				{ 12, 13, 18, 19, 20, 26, 27, 33 }, //
+				{ 1, 2, 3, 8, 9, 13, 14, 21 }, //
+				{ 13, 14, 18, 20, 24, 25, 31, 37 }, //
+				{ 14, 15, 16, 21, 26, 31, 38, 39 }, //
+				{ 1, 2, 6, 7, 12, 13, 14, 20 }, //
+				{ 4, 5, 10, 11, 17, 22, 23, 29 }, //
+				{ 2, 4, 5, 7, 9, 10, 14, 19 }, //
+				{ 5, 9, 10, 11, 15, 16, 21, 27 }, //
+				{ 1, 2, 3, 7, 8, 13, 14, 20 }, //
+				{ 1, 2, 8, 9, 14, 15, 21, 26 }, //
+				{ 22, 23, 29, 33, 34, 35, 38, 41 }, //
+				{ 13, 18, 19, 24, 25, 26, 31, 32 }, //
+				{ 27, 28, 29, 31, 32, 33, 37, 38 }, //
+				{ 10, 14, 15, 16, 17, 20, 21, 23 }, //
+				{ 4, 5, 9, 10, 15, 20, 21, 22 }, //
+				{ 13, 20, 25, 26, 27, 32, 34, 41 }, //
+				{ 30, 31, 33, 34, 36, 37, 38, 39 }, //
+				{ 11, 16, 23, 28, 34, 35, 40, 41 }, //
+				{ 3, 4, 10, 11, 14, 15, 16, 17 }, //
+				{ 15, 20, 21, 22, 26, 32, 33, 39 }, //
+				{ 18, 19, 25, 26, 31, 32, 34, 39 }, //
+				{ 4, 9, 11, 15, 16, 22, 23, 29 }, //
+				{ 26, 27, 31, 32, 33, 37, 38, 39 }, //
+				{ 20, 27, 28, 33, 34, 35, 40, 41 }, //
+				{ 1, 2, 7, 14, 20, 27, 28, 29 }, //
+				{ 8, 9, 10, 15, 16, 17, 22, 23 }, //
+				{ 9, 14, 15, 20, 21, 22, 27, 32 }, //
+				{ 1, 2, 3, 6, 7, 8, 9, 13 }, //
+				{ 10, 14, 15, 16, 20, 23, 25, 26 }, //
+				{ 0, 1, 2, 6, 7, 8, 13, 14 }, //
+				{ 1, 6, 7, 12, 13, 20, 26, 27 }, //
+				{ 8, 14, 20, 25, 26, 31, 33, 38 }, //
+				{ 20, 21, 26, 27, 28, 33, 35, 40 }, //
+				{ 2, 3, 4, 8, 9, 11, 16, 21 }, //
+				{ 1, 2, 3, 4, 5, 6, 11, 12 }, //
+		}; 
 		
 		return nTuple;		
 	}
@@ -144,21 +219,24 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 	 * @param iCell
 	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
 	 * 		a board vector) 
+	 * 
 	 */
 	public HashSet adjacencySet(int iCell) {
+		// used by NTupleFactory#generateRandomWalkNTuples()
+		//
 		int[] aList = new int[4];			// 4-point neighborhood
 		int count=0;
 		
-		if (iCell>2) {						// there is an upper neighbor
-			aList[count++]=iCell-3;  
+		if (iCell>=C4Base.ROWCOUNT) {			// there is a left neighbor
+			aList[count++]=iCell-C4Base.ROWCOUNT;  
 		}
-		if ((iCell+1)%3 != 0) {				// there is a right neighbor
+		if ((iCell+1)%C4Base.ROWCOUNT != 0) {	// there is an upper neighbor
 			aList[count++]=iCell+1;
 		}
-		if (iCell<6) {						// there is a lower neighbor
-			aList[count++]=iCell+3;  
+		if (iCell<C4Base.ROWCOUNT*(C4Base.COLCOUNT-1)) {	// there is a right neighbor
+			aList[count++]=iCell+C4Base.ROWCOUNT;  
 		}
-		if (iCell%3 != 0) {					// there is a left neighbor
+		if (iCell%C4Base.ROWCOUNT != 0) {		// there is a lower neighbor
 			aList[count++]=iCell-1;
 		}
 		
@@ -176,51 +254,28 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 
 	/**
 	 * Helper for {@link #symmetryVectors(int[])}: 
-	 * Rotate the given board clockwise by 90 degree. <p>
+	 * Flip the board around the center column. <p>
 	 * 
-	 * The board is represented as a 9-element int vector:
+	 * The board is represented as a COLCOUNT*ROWCOUNT-element int vector:
 	 * <pre>
-	 *    0 1 2          6 3 0
-	 *    3 4 5   --->   7 4 1   
-	 *    6 7 8          8 5 2
-	 * </pre>
-	 * 
-	 * @param board
-	 * @return the rotated board
-	 */
-	private int[] rotate(int[] board) {
-		//rotate TicTacToe board
-		int[] newBoard = new int[9];
-//		for (int i = 2, k = 0; i >= 0; i--)
-//			for (int j = 0; j < 9; j += 3)
-//				newBoard[k++] = board[i + j];
-		int[] ri = {6,3,0,7,4,1,8,5,2};
-		for (int k=0; k<9; k++) newBoard[k] =board[ri[k]];
-		return newBoard;
-	}
-
-	/**
-	 * Helper for {@link #symmetryVectors(int[])}: 
-	 * Flip the board around the center row. <p>
-	 * 
-	 * The board is represented as a 9-element int vector:
-	 * <pre>
-	 *    0 1 2          6 7 8
-	 *    3 4 5   --->   3 4 5   
-	 *    6 7 8          0 1 2
+	 *      05  11  17  23  29  35  41			41  35  29  23  17  11  05
+	 *      04  10  16  22  28  34  40          40  34  28  22  16  10  04
+	 *      03  09  15  21  27  33  39   --->   39  33  27  21  15  09  03
+	 *      02  08  14  20  26  32  38          38  32  26  20  14  08  02
+	 *      01  07  13  19  25  31  37          37  31  25  19  13  07  01
+	 *      00  06  12  18  24  30  36          36  30  24  18  12  06  00
 	 * </pre>
 	 * 
 	 * @param board
 	 * @return the mirrored board
 	 */
 	private int[] flip(int[] board) {
-		//mirror TicTacToe board (horizontal flip)
-		int[] newBoard = new int[9];
-//		for (int i = 2, k = 0; i >= 0; i--)
-//			for (int j = 0; j < 3; j++)
-//				newBoard[k++] = board[i * 3 + j];
-		int[] ri = {6,7,8,3,4,5,0,1,2};
-		for (int k=0; k<9; k++) newBoard[k] =board[ri[k]];
+		//mirror ConnectFour board (vertical flip)
+		int[] newBoard = new int[C4Base.ROWCOUNT*C4Base.COLCOUNT];
+		for (int i = C4Base.COLCOUNT-1, k=0; i>=0; i--)
+			for (int j =0; j < C4Base.ROWCOUNT; j++) 
+				newBoard[k++] = board[i*C4Base.ROWCOUNT + j];
+		
 		return newBoard;
 	}
 

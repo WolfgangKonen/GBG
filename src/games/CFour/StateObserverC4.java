@@ -21,7 +21,7 @@ import tools.Types.ACTIONS;
 public class StateObserverC4 extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
-	private int m_Player;			// Player who makes the next move (+1 or -1)
+	private int m_Player;			// Player who makes the next move (0 or 1)
 	private C4Base m_C4;
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
 	private boolean gameOver = false;
@@ -42,21 +42,22 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	public StateObserverC4() {
 		m_C4 = new C4Base();
 		m_counter=0;
-		m_Player = (m_C4.countPieces() % 2 == 0) ? C4Base.PLAYER1 : C4Base.PLAYER2;;
+		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
 		setAvailableActions();
 	}
 
 	public StateObserverC4(int[][] board) {
 		m_C4 = new C4Base(board);
 		m_counter = m_C4.countPieces();
-		m_Player = (m_counter % 2 == 0) ? C4Base.PLAYER1 : C4Base.PLAYER2;
+		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
 		setAvailableActions();		
 	}
 	
 	public StateObserverC4 copy() {
 		StateObserverC4 sot = new StateObserverC4(m_C4.getBoard());
 		sot.m_counter = this.m_counter;
-		sot.m_Player = (m_counter % 2 == 0) ? C4Base.PLAYER1 : C4Base.PLAYER2;
+		sot.m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
+		sot.gameOver = this.gameOver;
 		sot.setAvailableActions();
 		return sot;
 	}
@@ -168,29 +169,42 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	 */
 	public void advance(ACTIONS action) {
 		int iAction = action.toInt();
-		assert (0<=iAction && iAction<C4Base.COLCOUNT) : "iAction is not in 0,1,...,"+C4Base.COLCOUNT+".";
-		assert (m_C4.getColHeight(iAction)<C4Base.ROWCOUNT-1) : "desired move colum "+iAction+" is full!";
 		
+		assert (0<=iAction && iAction<C4Base.COLCOUNT) : "iAction is not in 0,1,...,"+C4Base.COLCOUNT+".";
+		assert (m_C4.getColHeight(iAction)<C4Base.ROWCOUNT) : "desired move colum "+iAction+" is full!";
+		
+//		System.out.println(iAction+", "+m_C4.getColHeight(iAction)+ ", "+ C4Base.ROWCOUNT);
+//		m_C4.printBoard();
+
 		gameOver = m_C4.canWin(iAction);
+//		System.out.println("can win: "+ gameOver);
+		
+//		if (gameOver) {
+//			try {
+//				Thread.sleep(250);
+//				// strange, but we need a certain waiting time here, otherwise
+//				// the state will not be the right one during PLAY (??)
+//				// --- the strange effect is gone after we replace gameOver in 
+//				// --- C4GameGui with isGameOver(), which returns 
+//				// --- gameBoardC4.getStateObs().isGameOver()
+//			} catch (Exception e) {
+//				System.out.println("Thread 1");
+//			}
+//		}
 		m_C4.putPiece(iAction);
 		if(!gameOver) gameOver = m_C4.isDraw();	// if game is not a win, test on draw
 		
     	setAvailableActions(); 			// IMPORTANT: adjust the available actions 
     	
-    	// set up player for next advance()
-    	int n=this.getNumPlayers();
-    	switch (n) {
-    	case (1): 
-    		m_Player = m_Player; 
-    		break;
-    	case (2): 
-    		m_Player = m_Player*(-1);    // 2-player games: 1,-1,1,-1,...
-    		break;
-    	default: 
-    		m_Player = (m_Player+1) % n;  // many-player games: 0,1,...,n-1,0,1,...
-    		break;
-    	}   		
-		super.incrementMoveCounter();
+    	
+		super.incrementMoveCounter();   // increment m_counter
+		// NOTE: Be aware that m_counter is not always the same as m_C4.countPieces() (!)
+		// m_counter counts the moves *after* the start board, i.e. if the start board has 
+		// one piece already set, it has m_counter=0, but m_C4.countPieces()=1.
+		// CONSEQUENCE: do not infer m_Player from m_counter, but only from m_C4.countPieces().
+		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1; 
+		
+//			System.out.println("player="+this.getPlayer()+", moveCounter="+this.getMoveCounter());
 	}
 
     /**
@@ -252,12 +266,16 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
         }
 	}
 
+	public int[][] getBoard() {
+		return m_C4.getBoard();
+	}
+	
 	/**
 	 * @return 	{0,1} for the player to move next. 
 	 * 			Player 0 is X, the player who starts the game. Player 1 is O.
 	 */
 	public int getPlayer() {
-		return (-m_Player+1)/2;
+		return m_Player;
 	}
 	
 	public int getNumPlayers() {

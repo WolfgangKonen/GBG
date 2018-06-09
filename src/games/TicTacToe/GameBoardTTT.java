@@ -187,10 +187,10 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	 * Update the play board and the associated values (labels).
 	 * 
 	 * @param so	the game state
-	 * @param showValueOnGameboard	if true, show the game values for the available actions
-	 * 				(only if they are stored in 'so')
 	 * @param enableOccupiedCells  if true, allow user interaction on occupied 
 	 * 				cells (may be needed for inspecting the value function)
+	 * @param showValueOnGameboard	if true, show the game values for the available actions
+	 * 				(only if they are stored in 'so')
 	 */
 	@Override
 	public void updateBoard(StateObservation so, 

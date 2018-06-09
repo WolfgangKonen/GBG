@@ -149,7 +149,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * <li> If {@link #MODE_3P}==0: Each player has its own reward function 
 	 * and its own value function V(s_t|p^(i)). In each update step N value function updates occur. 
 	 * <li> If {@link #MODE_3P}==1: Use the new n-ply logic with n=N as 
-	 * described in TR-TDNTuple.tex: one value function V(s_t|p_t) and each player maximizes
+	 * described in TR-TDNTuple.pdf: one value function V(s_t|p_t) and each player maximizes
 	 * its own game value or minimizes the next opponent's game value. 
 	 * <li> If {@link #MODE_3P}==2 [<b>recommended</b>]: Use {@link #MODE_3P}==0 for N=1 and N &gt; 2.  
 	 * For N==2, use a logic equivalent to 1-ply {@link #MODE_3P}==1 where the symmetry 

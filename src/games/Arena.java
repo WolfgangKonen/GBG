@@ -2,6 +2,7 @@ package games;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -303,7 +304,7 @@ abstract public class Arena extends JFrame implements Runnable {
 											// actBest=null
 						so.storeBestActionInfo(actBest, actBest.getVTable());
 
-					gb.updateBoard(so, false, true);
+					gb.updateBoard(so, true, true);
 				} else {
 					if (so.stopInspectOnGameOver()) {
 						gb.updateBoard(so, false, true);
@@ -474,6 +475,7 @@ abstract public class Arena extends JFrame implements Runnable {
 			{
 				if (gb.isActionReq()) {
 					so = gb.getStateObs();
+					gb.updateBoard(so, false, showValue); 
 					pa = qaVector[so.getPlayer()];
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
@@ -481,9 +483,11 @@ abstract public class Arena extends JFrame implements Runnable {
 						// leave the previously shown values if it is
 						// HumanPlayer
 					} else {
+						gb.enableInteraction(false);
+						
 						boolean DEBG = false; // false;true;
-						int N_EMPTY = 4;
 						if (DEBG) {
+							int N_EMPTY = 4;
 							actBest = getNextAction_DEBG(so, pa, p2, N_EMPTY);
 						} else {
 							actBest = pa.getNextAction2(so, false, true);
@@ -521,6 +525,7 @@ abstract public class Arena extends JFrame implements Runnable {
 						}
 						pstats = new PStats(1, so.getMoveCounter(), gameScore, (double) nEmpty, (double) cumEmpty);
 						psList.add(pstats);
+						gb.enableInteraction(true);
 
 					} // else (pa)
 
@@ -538,9 +543,21 @@ abstract public class Arena extends JFrame implements Runnable {
 					}
 				}
 				so = gb.getStateObs();
-				if (!agentX.equals("Human"))
+				pa = qaVector[so.getPlayer()];
+				if (!pa.getName().equals("Human")) 
 					System.out.println(so.stringDescr());
 				if (so.isGameOver()) {
+//					try {
+//						Thread.sleep(250);
+//						// strange, but we need in CFour a certain waiting time here, otherwise
+//						// the state will not be the right one (??)
+//						// --- the strange effect is gone after we replace gameOver in 
+//						// --- C4GameGui with isGameOver(), which returns 
+//						// --- gameBoardC4.getStateObs().isGameOver()
+//					} catch (Exception e) {
+//						System.out.println("Thread 3");
+//					}
+					
 					// for (agentX=="Human")-case: ensure to show the "Solved
 					// in..." text in leftInfo:
 					gb.updateBoard(so, false, showValue);
@@ -557,7 +574,8 @@ abstract public class Arena extends JFrame implements Runnable {
 						int win = so.getGameWinner().toInt();
 						Player = Types.PLAYER_PM[so.getPlayer()];
 						switch (Player * win) {
-						case (+1):
+						case  (+1):
+							gb.updateBoard(so, false, showValue);
 							MessageBox.show(m_LaunchFrame, "X (" + agentX + ") wins", "Game Over",
 									JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
@@ -569,6 +587,9 @@ abstract public class Arena extends JFrame implements Runnable {
 							MessageBox.show(m_LaunchFrame, "Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
 						} // switch(Player*win)
+						gb.updateBoard(so, false, showValue);
+						repaint();
+
 						break; // out of switch
 					default:
 						// TODO: implement s.th. for n-player games (n>2)

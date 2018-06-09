@@ -64,7 +64,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	public ExpectimaxNAgent(String name, ParMaxN mpar, ParOther opar)
 	{
 		this(name);
-		m_depth = mpar.getMaxnDepth();
+		m_depth = mpar.getMaxNDepth();
 		m_oPar = opar;		// AgentBase::m_oPar
 	}
 	

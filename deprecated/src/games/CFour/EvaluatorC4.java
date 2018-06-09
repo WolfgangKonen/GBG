@@ -1,4 +1,4 @@
-package games.TicTacToe;
+package games.CFour;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -15,7 +15,6 @@ import games.ArenaTrain;
 import games.Evaluator;
 import games.TicTacToe.Evaluator9;
 import games.GameBoard;
-import games.StateObservation;
 import games.XArenaFuncs;
 import tools.MessageBox;
 import tools.Types;
@@ -23,12 +22,12 @@ import tools.Types;
 /**
  * Same as {@link Evaluator9}, but instead of {@link Evaluator9#evalAgent1(PlayAgent, boolean)} use
  * <ul>
- * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition with MinimaxPlayer and RandomPlayer) or 
- * <li> if mode=2: {@link EvaluatorTTT#evaluateAgent2(PlayAgent,PlayAgent,GameBoard)} (competition with MinimaxPlayer from different start positions). 
+ * <li> if mode=1: {@link EvaluatorC4#evaluateAgent1(PlayAgent,GameBoard)} (competition with MinimaxPlayer and RandomPlayer) or 
+ * <li> if mode=2: {@link EvaluatorC4#evaluateAgent2(PlayAgent,PlayAgent,GameBoard)} (competition with MinimaxPlayer from different start positions). 
  * </ul>  
  * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
  */
-public class EvaluatorTTT extends Evaluator {
+public class EvaluatorC4 extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {0,1,2,9,11};
 	private String sRandom = Types.GUI_AGENT_LIST[2];
 	private String sMinimax = Types.GUI_AGENT_LIST[1];
@@ -43,19 +42,19 @@ public class EvaluatorTTT extends Evaluator {
 	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
 	private GameBoard m_gb;
 	
-	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
+	public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, stopEval);
 		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
 		initEvaluator(gb,1);
 	}
 
-	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
+	public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
 		super(e_PlayAgent, stopEval);
 		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
 		initEvaluator(gb,mode);
 	}
 
-	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
+	public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, stopEval, verbose);
 		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
 		initEvaluator(gb,mode);
@@ -63,7 +62,7 @@ public class EvaluatorTTT extends Evaluator {
 	
 	private void initEvaluator(GameBoard gb, int mode) {
 		if (!isAvailableMode(mode)) 
-			throw new RuntimeException("EvaluatorTTT: Value mode = "+mode+" is not allowed!");
+			throw new RuntimeException("EvaluatorC4: Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
 		m_gb = gb;				
 	}
@@ -81,7 +80,7 @@ public class EvaluatorTTT extends Evaluator {
 	 * 
 	 * @return true if evaluateAgentX is above m_thresh.<br>
 	 * The choice for X=1 or 2 is made with 3rd parameter mode in 
-	 * {@link #EvaluatorTTT(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
+	 * {@link #EvaluatorC4(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
 	 * 
 	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
 	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
@@ -108,8 +107,7 @@ public class EvaluatorTTT extends Evaluator {
 	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
 	 */
  	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
- 		StateObservation so = gb.getDefaultStartState();
-		m_res = XArenaFuncs.competeBoth(pa, random_agent, 100, gb, so);
+		m_res = XArenaFuncs.competeBoth(pa, random_agent, 100, gb);
 		m_msg = pa.getName()+": "+getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;
@@ -122,8 +120,7 @@ public class EvaluatorTTT extends Evaluator {
 	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
 	 */
  	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
- 		StateObservation so = gb.getDefaultStartState();
-		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, 1, gb, so);
+		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, 1, gb);
 		m_msg = pa.getName()+": "+getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;
@@ -159,7 +156,7 @@ public class EvaluatorTTT extends Evaluator {
 
 		for (int k=0; k<state.length; ++k) {
 			startPlayer = Evaluator9.string2table(state[k],startTable);
-			StateObserverTTT startSO = new StateObserverTTT(startTable,startPlayer);
+			StateObserverC4 startSO = new StateObserverC4(startTable);
 			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose);
 			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
 											// resp. \in [-1,0], if opponent never looses.

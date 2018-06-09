@@ -132,7 +132,7 @@ public class MaxNParams extends Frame
 	 * @param mp  ParMaxN of the re-loaded agent
 	 */
 	public void setFrom(ParMaxN mp) {
-		this.setMaxnDepth(mp.getMaxnDepth());
+		this.setMaxnDepth(mp.getMaxNDepth());
 		this.miniUseHmTrue.setSelected(mp.useMinimaxHashmap());
 	}
 	
