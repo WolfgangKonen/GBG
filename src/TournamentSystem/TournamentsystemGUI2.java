@@ -25,7 +25,8 @@ public class TournamentsystemGUI2 extends JFrame{
 
     //private GameBoard gameBoard;
     private Arena mArena;
-    private ArrayList<TSAgent> checkBoxen;
+    private TSAgentManager mTSAgentManager;
+    private final String TAG = "[TSAgent] ";
 
     public TournamentsystemGUI2(Arena mArena) { //GameBoard gameBoard) {
         super("TournamentsystemGUI2");
@@ -36,18 +37,18 @@ public class TournamentsystemGUI2 extends JFrame{
 
         //this.gameBoard = gameBoard;
         this.mArena = mArena;
+        mTSAgentManager = new TSAgentManager();
 
-        checkBoxen = new ArrayList<>();
-        checkBoxen.add(new TSAgent("randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox));
-        checkBoxen.add(new TSAgent("minimaxCheckBox",   Types.GUI_AGENT_LIST[1], minimaxCheckBox));
-        checkBoxen.add(new TSAgent("maxNCheckBox",      Types.GUI_AGENT_LIST[2], maxNCheckBox));
-        checkBoxen.add(new TSAgent("expectimaxNCheckBox", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox));
-        checkBoxen.add(new TSAgent("MCNCheckBox",       Types.GUI_AGENT_LIST[4], MCNCheckBox));
-        checkBoxen.add(new TSAgent("MCTSCheckBox",      Types.GUI_AGENT_LIST[5], MCTSCheckBox));
-        checkBoxen.add(new TSAgent("MCTSExpectimaxCheckBox", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox));
+        mTSAgentManager.addAgent( "randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox);
+        mTSAgentManager.addAgent("minimaxCheckBox",   Types.GUI_AGENT_LIST[1], minimaxCheckBox);
+        mTSAgentManager.addAgent("maxNCheckBox",      Types.GUI_AGENT_LIST[2], maxNCheckBox);
+        mTSAgentManager.addAgent("expectimaxNCheckBox", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox);
+        mTSAgentManager.addAgent("MCNCheckBox",       Types.GUI_AGENT_LIST[4], MCNCheckBox);
+        mTSAgentManager.addAgent("MCTSCheckBox",      Types.GUI_AGENT_LIST[5], MCTSCheckBox);
+        mTSAgentManager.addAgent("MCTSExpectimaxCheckBox", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox);
         // GUI_AGENT_LIST[7] ist der Human Player
-        checkBoxen.add(new TSAgent("TDNtuple2CheckBox", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox));
-        checkBoxen.add(new TSAgent("TDSCheckBox",       Types.GUI_AGENT_LIST[9], TDSCheckBox));
+        mTSAgentManager.addAgent("TDNtuple2CheckBox", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox);
+        mTSAgentManager.addAgent("TDSCheckBox",       Types.GUI_AGENT_LIST[9], TDSCheckBox);
 
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -66,65 +67,51 @@ public class TournamentsystemGUI2 extends JFrame{
             numGamesPerMatch = Integer.parseInt(gameNumTextField.getText());
         } catch(NumberFormatException n) {
             n.printStackTrace();
-            System.out.println("ERROR :: not a valid number was entered in GameNum Textfield. Using value 1");
+            System.out.println(TAG+"ERROR :: not a valid number was entered in GameNum Textfield. Using value 1");
             numGamesPerMatch = 1;
         }
-        System.out.println("numGamesPerMatch: "+numGamesPerMatch);
+        System.out.println(TAG+"numGamesPerMatch: "+numGamesPerMatch);
+        mTSAgentManager.setNumberOfGames(numGamesPerMatch);
 
-        System.out.println("Startbutton clicked | checkbox states:");
+        System.out.println(TAG+"Startbutton clicked | checkbox states:");
         // durch alle checkboxen der agenten iterieren
-        for (TSAgent agent : checkBoxen)
+        for (TSAgent agent : mTSAgentManager.mAgents)
         {
             //System.out.println(agent.getAgentType() +" == "+ agent.getName());
             // pruefen fuer jede checkbox, ob sie selected ist oder nicht
             if(agent.guiCheckBox.isSelected())
             {
-                System.out.println(agent.guiCheckBox.getText()+": selected");
+                System.out.println(TAG+agent.guiCheckBox.getText()+": selected");
                 countSelectedAgents++;
             }
             else
             {
-                System.out.println(agent.guiCheckBox.getText() + ": deselected");
+                System.out.println(TAG+agent.guiCheckBox.getText() + ": deselected");
             }
         }
-        System.out.println("");
+
         if (countSelectedAgents < 2)
         {
-            System.out.println("Error :: At least 2 Agents need to be selected for a tournament!");
+            System.out.println(TAG+"Error :: At least 2 Agents need to be selected for a tournament!");
         }
         else
         {
             // determin 1v1 gameplan with selected agents
-            String selectedAGents[] = new String[countSelectedAgents]; // just selected agents
-            int tmp = 0;
-            for (TSAgent agent : checkBoxen) {
-                if (agent.guiCheckBox.isSelected()) {
-                    selectedAGents[tmp++] = agent.getAgentType();
-                }
-            }
+            //String selectedAGents[] = mTSAgentManager.getNamesAgentsSelected();
             //System.out.println("sel ag: "+ Arrays.toString(selectedAGents));
+            //String gamePlan[][] = mTSAgentManager.generateGamePlan();
 
-            String gamePlan[][] = new String[countSelectedAgents*(countSelectedAgents-1)][2]; // games to be played
-            int tmpGame = 0;
-            for (int i=0; i<countSelectedAgents; i++) {
-                for (int j=0; j<countSelectedAgents; j++) {
-                    if (i!=j) { // avoid agent to play against itself
-                        gamePlan[tmpGame][0] = selectedAGents[i];
-                        gamePlan[tmpGame++][1] = selectedAGents[j];
-                    }
-                }
-            }
-
-            System.out.println("Games to play: "+gamePlan.length);
-            for (String round[] : gamePlan)
-                System.out.println("["+round[0]+"] vs ["+round[1]+"]");
+            mTSAgentManager.printGamePlan();
 
             // send gameplan to custom multicompete to run competitions
             // save game results in TSAgent objects?
             if (mArena.taskState != ArenaTrain.Task.IDLE) {
-                System.out.println("ERROR :: could not start Tourmenent, Arena is not IDLE");
+                System.out.println(TAG+"ERROR :: could not start Tourmenent, Arena is not IDLE");
             }
             else {
+                // hand over data
+                mArena.tournamentAgentManager = mTSAgentManager;
+
                 mArena.taskState = ArenaTrain.Task.TRNEMNT;
             }
         }

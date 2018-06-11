@@ -16,6 +16,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import TournamentSystem.TSAgent;
+import TournamentSystem.TSAgentManager;
 import agentIO.LoadSaveGBG;
 import tools.Progress;
 import controllers.AgentBase;
@@ -71,6 +73,10 @@ abstract public class Arena extends JPanel implements Runnable {
 	public int currentSleepDuration = 0;
 	public LogManager logManager;
 	private int logSessionid;
+
+	// TS variables
+	private final String TAG = "[Arena] ";
+	public TSAgentManager tournamentAgentManager = null;
 	
 	public Arena() {
 		initGame();
@@ -193,8 +199,21 @@ abstract public class Arena extends JPanel implements Runnable {
 				break;
 			case TRNEMNT:
 				// Tournament Code
-				// ...
-				System.out.println("ARENA : yay ein Tournament!");
+				tournamentAgentManager.lockToCompete();
+				//String tournamentGamePlan[][] = tournamentAgentManager.generateGamePlan();
+
+				while (tournamentAgentManager.hastNextGame()) {
+					String nextTeam[] = tournamentAgentManager.getNextCompetitionTeam();
+					// let team compete...
+					// enter winner
+					tournamentAgentManager.enterGameResultWinner(1); // 0=winAgent1 | 1=tie | 2=winAgent2
+				}
+				tournamentAgentManager.printGameResults();
+
+				// clean up
+				System.out.println(TAG+"Tournament done, cleaning up");
+				tournamentAgentManager.unlockAndClear();
+				tournamentAgentManager = null;
 				taskState = Task.IDLE;
 				break;
 			case PLAY: 
