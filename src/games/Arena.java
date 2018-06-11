@@ -203,7 +203,7 @@ abstract public class Arena extends JPanel implements Runnable {
 				//String tournamentGamePlan[][] = tournamentAgentManager.generateGamePlan();
 
 				while (tournamentAgentManager.hastNextGame()) {
-					String nextTeam[] = tournamentAgentManager.getNextCompetitionTeam();
+					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam();
 					// let team compete...
 					// enter winner
 					tournamentAgentManager.enterGameResultWinner(1); // 0=winAgent1 | 1=tie | 2=winAgent2

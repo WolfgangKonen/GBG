@@ -8,7 +8,7 @@ public class TSAgentManager {
     private boolean lockedToCompete = false;
     private final String TAG = "[TSAgentManager] ";
 
-    private String gamePlan[][] = null;
+    private int gamePlan[][] = null;
     private int gameResult[][] = null; // [ numGames ],[ [winAgent1],[tie],[winAgent2] ]
     private int nextGame = 0;
     private int numberOfGames = -1;
@@ -56,8 +56,30 @@ public class TSAgentManager {
     }
 
     public String[][] generateGamePlan() {
-        String selectedAgents[] = getNamesAgentsSelected();
-        String gamePlan[][] = new String[getNumAgentsSelected()*(getNumAgentsSelected()-1)][2]; // games to be played
+        int internalGamePlan[][] = generateGamePlanInternal();
+        String gamePlan[][] = new String[internalGamePlan.length][2]; // games to be played
+
+        for (int i=0; i<internalGamePlan.length; i++) {
+            gamePlan[i][0] = mAgents.get(internalGamePlan[i][0]).getName();
+            gamePlan[i][1] = mAgents.get(internalGamePlan[i][1]).getName();
+        }
+        return gamePlan;
+    }
+
+    private int[] getIDAgentsSelected() {
+        int selectedAgents[] = new int[getNumAgentsSelected()]; // just selected agents
+        int tmp = 0;
+        for (int i=0; i<mAgents.size(); i++) {
+            if (mAgents.get(i).guiCheckBox.isSelected()) {
+                selectedAgents[tmp++] = i;
+            }
+        }
+        return selectedAgents;
+    }
+
+    private int[][] generateGamePlanInternal() {
+        int selectedAgents[] = getIDAgentsSelected();
+        int gamePlan[][] = new int[getNumAgentsSelected()*(getNumAgentsSelected()-1)][2]; // games to be played
         int tmpGame = 0;
         for (int i=0; i<getNumAgentsSelected(); i++) {
             for (int j=0; j<getNumAgentsSelected(); j++) {
@@ -97,13 +119,14 @@ public class TSAgentManager {
             numberOfGames = 1;
         }
         lockedToCompete = true;
-        gamePlan = generateGamePlan();
+        gamePlan = generateGamePlanInternal();
         gameResult = new int[gamePlan.length][3]; // is initialized with all zeros by JDK
         nextGame = 0;
     }
 
-    public String[] getNextCompetitionTeam() {
-        return gamePlan[nextGame];
+    public TSAgent[] getNextCompetitionTeam() {
+        TSAgent out[] = {mAgents.get(gamePlan[nextGame][0]), mAgents.get(gamePlan[nextGame][1])};
+        return out;
     }
 
     public void enterGameResultWinner(int type) {
@@ -117,7 +140,16 @@ public class TSAgentManager {
         }
         else {
             gameResult[nextGame][type] = gameResult[nextGame][type] + 1;
-            if (type == 0)
+
+            TSAgent teamPlayed[] = getNextCompetitionTeam(); // save individual win or loss to the tsagent objects in magents list
+            if (type == 0){
+                teamPlayed[0].addWonGame();
+                teamPlayed[1].addLostGame();
+            }
+            if (type == 2){
+                teamPlayed[0].addLostGame();
+                teamPlayed[1].addWonGame();
+            }
         }
 
         if (gameResult[nextGame][0]+gameResult[nextGame][1]+gameResult[nextGame][2] == numberOfGames)
@@ -136,14 +168,25 @@ public class TSAgentManager {
             System.out.println(TAG+"printGameResults() failed - gamePlan.length != gameResult.length");
             return;
         }
+        System.out.println(TAG+"Info on individual games:");
         for (int i=0; i<gamePlan.length; i++) {
             System.out.print(TAG);
             System.out.print("Team: ");
-            System.out.print("["+gamePlan[i][0]+"] vs ["+gamePlan[i][1]+"] || ");
+            //System.out.print("["+gamePlan[i][0]+"] vs ["+gamePlan[i][1]+"] || ");
+            System.out.print("["+mAgents.get(gamePlan[i][0]).getName()+"] vs ["+mAgents.get(gamePlan[i][1]).getName()+"] || ");
             System.out.print("Res.: Win1: "+gameResult[i][0]+" Tie: "+gameResult[i][1]+" Win2: "+gameResult[i][2]);
             System.out.print("");
             System.out.print("");
-            System.out.println("");
+            System.out.println();
+        }
+        System.out.println(TAG+"Info on individual Agents:");
+        int[] selectedAgents = getIDAgentsSelected();
+        for (int id : selectedAgents) {
+            TSAgent a = mAgents.get(id);
+            System.out.print(TAG);
+            System.out.print("AgentName: "+a.getName()+" ");
+            System.out.print("GamesWon: "+a.getCountWonGames()+" GamesLost: "+a.getCountLostGames());
+            System.out.println();
         }
     }
 
