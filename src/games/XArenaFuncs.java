@@ -727,14 +727,14 @@ public class XArenaFuncs
 				
 				if(Player==1){		// make a X-move
 					int n=so.getNumAvailableActions();
-					actBest = paX.getNextAction2(so, false, nextMoveSilent);
+					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
 					so.advance(actBest);
 					Player=-1;
 				}
 				else				// i.e. O-Move
 				{
 					int n=so.getNumAvailableActions();
-					actBest = paO.getNextAction2(so, false, nextMoveSilent);
+					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
 					so.advance(actBest);
 					Player=+1;
 				}
@@ -817,11 +817,13 @@ public class XArenaFuncs
 
 				int verbose=1;
 
+				double [] c; // winrate how often = [0]:agentX wins [1]: ties [2]: agentO wins
 				if (swap) {
-					compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
+					c = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
 				} else {
-					compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);	
+					c = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
 				}
+				System.out.println(Arrays.toString(c));
 			}
 					
 		} catch(RuntimeException ex) {
@@ -834,6 +836,117 @@ public class XArenaFuncs
 
 	public void singleCompete(XArenaButtons xab, GameBoard gb) {
 		this.competeBase(false, xab, gb);
+	}
+
+	public int singleTournamentCompete(GameBoard gb) { // return who wins (agent1, tie, agent2) [0;2]
+		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
+		boolean swap = false;
+		int competeNum=xab.winCompOptions.getNumGames();
+		int numPlayers = gb.getStateObs().getNumPlayers();
+		if (numPlayers!=2) {
+			MessageBox.show(xab,
+					"Single/Swap Compete only available for 2-player games!",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		try {
+			String AgentX = xab.getSelectedAgent(0);
+			String AgentO = xab.getSelectedAgent(1);
+			if (AgentX.equals("Human") | AgentO.equals("Human")) {
+				MessageBox.show(xab,
+						"No compete for agent Human",
+						"Error", JOptionPane.ERROR_MESSAGE);
+			} else {
+				StateObservation startSO = gb.getDefaultStartState();  // empty board
+
+				PlayAgent[] paVector = fetchAgents(xab);
+
+				AgentBase.validTrainedAgents(paVector,numPlayers);
+				// may throw RuntimeException
+
+				PlayAgent[] qaVector = wrapAgents(paVector,xab.oPar,startSO);
+
+				int verbose=1;
+
+				double [] c; // winrate how often = [0]:agentX wins [1]: ties [2]: agentO wins
+				if (swap) {
+					c = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
+				} else {
+					c = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
+				}
+				System.out.println(Arrays.toString(c));
+			}
+
+		} catch(RuntimeException ex) {
+			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+
+		/**
+		// public double[] compete(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, int verbose)
+		double[] winrate = new double[3];
+		int xwinCount=0, owinCount=0, tieCount=0;
+		DecimalFormat frm = new DecimalFormat("#0.000");
+		int verbose = 1; // hardcoded in XArenaFuncs#competeBase()
+		boolean silent = (verbose==0 ? true : false);
+		boolean nextMoveSilent = (verbose<2 ? true : false);
+		StateObservation so;
+		Types.ACTIONS actBest;
+		String[] playersWithFeatures = {"TicTacToe.ValItPlayer","controllers.TD.TDAgent","TicTacToe.CMAPlayer"};
+
+		String paX_string = paX.stringDescr();
+		String paO_string = paO.stringDescr();
+		if (verbose>0) System.out.println("Competition: "+competeNum+" games "+paX_string+" vs "+paO_string);
+		for (int k=0; k<competeNum; k++) {
+			int Player=Types.PLAYER_PM[startSO.getPlayer()];
+			so = startSO.copy();
+
+			while(true)
+			{
+
+				if(Player==1){		// make a X-move
+					int n=so.getNumAvailableActions();
+					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
+					so.advance(actBest);
+					Player=-1;
+				}
+				else				// i.e. O-Move
+				{
+					int n=so.getNumAvailableActions();
+					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
+					so.advance(actBest);
+					Player=+1;
+				}
+				if (so.isGameOver()) {
+					int res = so.getGameWinner().toInt();
+					//  res is +1/0/-1  for X/tie/O win
+					int player = Types.PLAYER_PM[so.getPlayer()];
+					switch (res*player) {
+						case -1:
+							if (!silent) System.out.println(k+": O wins");
+							owinCount++;
+							break;
+						case 0:
+							if (!silent) System.out.println(k+": Tie");
+							tieCount++;
+							break;
+						case +1:
+							if (!silent) System.out.println(k+": X wins");
+							xwinCount++;
+							break;
+					}
+
+					break; // out of while
+
+				} // if (so.isGameOver())
+			}	// while(true)
+
+		} // for (k)
+		winrate[0] = (double)xwinCount/competeNum;
+		winrate[1] = (double)tieCount/competeNum;
+		winrate[2] = (double)owinCount/competeNum;
+		*/
+		return 1;
 	}
 	
 	public void swapCompete(XArenaButtons xab, GameBoard gb) {
