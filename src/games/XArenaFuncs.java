@@ -865,7 +865,9 @@ public class XArenaFuncs
 
 				// todo manipulation of selected agent in XrenaButtons!
 				xab.enableTournamentRemoteData(nextTeam);
-				// todo manipultaion of selected agents parameters!
+				// todo write custom compete() function
+				// todo add time measurement and save data somewhere
+				// todo data evaluation and visualization
 
 				PlayAgent[] paVector = fetchAgents(xab);
 
@@ -889,71 +891,6 @@ public class XArenaFuncs
 			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			return 42;
 		}
-
-		/**
-		// public double[] compete(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, int verbose)
-		double[] winrate = new double[3];
-		int xwinCount=0, owinCount=0, tieCount=0;
-		DecimalFormat frm = new DecimalFormat("#0.000");
-		int verbose = 1; // hardcoded in XArenaFuncs#competeBase()
-		boolean silent = (verbose==0 ? true : false);
-		boolean nextMoveSilent = (verbose<2 ? true : false);
-		StateObservation so;
-		Types.ACTIONS actBest;
-		String[] playersWithFeatures = {"TicTacToe.ValItPlayer","controllers.TD.TDAgent","TicTacToe.CMAPlayer"};
-
-		String paX_string = paX.stringDescr();
-		String paO_string = paO.stringDescr();
-		if (verbose>0) System.out.println("Competition: "+competeNum+" games "+paX_string+" vs "+paO_string);
-		for (int k=0; k<competeNum; k++) {
-			int Player=Types.PLAYER_PM[startSO.getPlayer()];
-			so = startSO.copy();
-
-			while(true)
-			{
-
-				if(Player==1){		// make a X-move
-					int n=so.getNumAvailableActions();
-					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
-					so.advance(actBest);
-					Player=-1;
-				}
-				else				// i.e. O-Move
-				{
-					int n=so.getNumAvailableActions();
-					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
-					so.advance(actBest);
-					Player=+1;
-				}
-				if (so.isGameOver()) {
-					int res = so.getGameWinner().toInt();
-					//  res is +1/0/-1  for X/tie/O win
-					int player = Types.PLAYER_PM[so.getPlayer()];
-					switch (res*player) {
-						case -1:
-							if (!silent) System.out.println(k+": O wins");
-							owinCount++;
-							break;
-						case 0:
-							if (!silent) System.out.println(k+": Tie");
-							tieCount++;
-							break;
-						case +1:
-							if (!silent) System.out.println(k+": X wins");
-							xwinCount++;
-							break;
-					}
-
-					break; // out of while
-
-				} // if (so.isGameOver())
-			}	// while(true)
-
-		} // for (k)
-		winrate[0] = (double)xwinCount/competeNum;
-		winrate[1] = (double)tieCount/competeNum;
-		winrate[2] = (double)owinCount/competeNum;
-		*/
 
 		if (c[0]==1.0)
 			return 0;
