@@ -15,6 +15,7 @@ import java.util.Random;
 
 import javax.swing.JOptionPane;
 
+import TournamentSystem.TSAgent;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
@@ -90,7 +91,9 @@ public class XArenaFuncs
 	protected XYSeries seriesQ; 
 	protected XYSeries seriesT; 
 	protected LineChartSuccess lChart;
-	
+
+	private final String TAG = "[XArenaFuncs] ";
+
 	public XArenaFuncs(Arena arena)
 	{
 		m_Arena = arena;
@@ -838,27 +841,30 @@ public class XArenaFuncs
 		this.competeBase(false, xab, gb);
 	}
 
-	public int singleTournamentCompete(GameBoard gb) { // return who wins (agent1, tie, agent2) [0;2]
+	public int singleTournamentCompete(GameBoard gb, TSAgent[] nextTeam, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
 		boolean swap = false;
-		int competeNum=xab.winCompOptions.getNumGames();
+		int competeNum = 1;//xab.winCompOptions.getNumGames();
 		int numPlayers = gb.getStateObs().getNumPlayers();
+		/*
 		if (numPlayers!=2) {
 			MessageBox.show(xab,
 					"Single/Swap Compete only available for 2-player games!",
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
-		}
+		}*/
 
 		try {
-			String AgentX = xab.getSelectedAgent(0);
-			String AgentO = xab.getSelectedAgent(1);
+			String AgentX = nextTeam[0].getAgentType();
+			String AgentO = nextTeam[1].getAgentType();
 			if (AgentX.equals("Human") | AgentO.equals("Human")) {
-				MessageBox.show(xab,
-						"No compete for agent Human",
-						"Error", JOptionPane.ERROR_MESSAGE);
+				//MessageBox.show(xab, "No compete for agent Human", "Error", JOptionPane.ERROR_MESSAGE);
+				System.out.println(TAG+"ERROR :: No compete for agent Human, select different agent");
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
+
+				// todo manipulation of selected agent in XrenaButtons!
+				// todo manipultaion of selected agents parameters!
 
 				PlayAgent[] paVector = fetchAgents(xab);
 
