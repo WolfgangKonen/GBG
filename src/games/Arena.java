@@ -207,7 +207,12 @@ abstract public class Arena extends JPanel implements Runnable {
 					// let team compete...
 					int winner = m_xfun.singleTournamentCompete(gb, nextTeam, m_xab);
 					// enter winner
-					tournamentAgentManager.enterGameResultWinner(winner); // 0=winAgent1 | 1=tie | 2=winAgent2
+					if (winner == 42) {
+						System.out.println(TAG+"ERROR :: singleTournamentCompete returned error value 42");
+					}
+					else {
+						tournamentAgentManager.enterGameResultWinner(winner); // 0=winAgent1 | 1=tie | 2=winAgent2
+					}
 				}
 				tournamentAgentManager.printGameResults();
 

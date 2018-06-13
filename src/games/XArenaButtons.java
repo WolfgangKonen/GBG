@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import TournamentSystem.TSAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import params.*;
 import tools.HtmlDisplay;
@@ -26,7 +27,7 @@ import tools.SolidBorder;
 public class XArenaButtons extends JPanel		
 {
 	private static final long serialVersionUID = 1L;
-	XArenaFuncs 		m_xfun;	
+	XArenaFuncs 		m_xfun;
 	public Arena	 	m_game;	// a reference to the Arena object passed in with the constructor
 	public OptionsComp 	winCompOptions = new OptionsComp(); // window with Competition Options
 	private LogManagerGUI logManagerGUI = null;
@@ -69,6 +70,10 @@ public class XArenaButtons extends JPanel
 	HtmlDisplay htmlDisplay = null;
 	boolean htmlDisplayActive = false;
 	boolean isNTupShowEnabled = false;
+
+	// tournament system remote data input
+	private boolean tournamentRemoteDataEnabled = false;
+	private TSAgent selectedAgents[] = null;
 
 	// the colors of the TH Köln logo (used for button coloring):
 	Color colTHK1 = new Color(183,29,13);
@@ -583,11 +588,27 @@ public class XArenaButtons extends JPanel
 	public boolean getShowValueOnGameBoard() {
 		return showValOnGB.getState();
 	}
+
 	public String getSelectedAgent(int i){
-		return choiceAgent[i].getSelectedItem();
+		if (!tournamentRemoteDataEnabled)
+			return choiceAgent[i].getSelectedItem();
+		else {
+			return selectedAgents[i].getAgentType();
+		}
 	}
+
 	public void setSelectedAgent(int i, String str){
 		choiceAgent[i].select(str);
+	}
+
+	public void enableTournamentRemoteData(TSAgent team[]) {
+		tournamentRemoteDataEnabled = true;
+		selectedAgents = team;
+	}
+
+	public void disableTournamentRemoteData() {
+		tournamentRemoteDataEnabled = false;
+		selectedAgents = null;
 	}
 	
 } // class XArenaButtons	

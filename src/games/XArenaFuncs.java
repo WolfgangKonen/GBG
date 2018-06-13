@@ -707,8 +707,7 @@ public class XArenaFuncs
 	 * @param verbose			0: silent, 1,2: more print-out
 	 * @return		double[3], the percentage of games with X-win, tie, O-win
 	 */
-	public static double[] compete(PlayAgent paX, PlayAgent paO, StateObservation startSO,
-			int competeNum, int verbose) {
+	public static double[] compete(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, int verbose) {
 		double[] winrate = new double[3];
 		int xwinCount=0, owinCount=0, tieCount=0;
 		DecimalFormat frm = new DecimalFormat("#0.000");
@@ -853,6 +852,7 @@ public class XArenaFuncs
 					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}*/
+		double[] c = {}; // winrate how often = [0]:agentX wins [1]: ties [2]: agentO wins
 
 		try {
 			String AgentX = nextTeam[0].getAgentType();
@@ -864,28 +864,30 @@ public class XArenaFuncs
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
 
 				// todo manipulation of selected agent in XrenaButtons!
+				xab.enableTournamentRemoteData(nextTeam);
 				// todo manipultaion of selected agents parameters!
 
 				PlayAgent[] paVector = fetchAgents(xab);
 
-				AgentBase.validTrainedAgents(paVector,numPlayers);
-				// may throw RuntimeException
+				AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
 
 				PlayAgent[] qaVector = wrapAgents(paVector,xab.oPar,startSO);
 
 				int verbose=1;
 
-				double [] c; // winrate how often = [0]:agentX wins [1]: ties [2]: agentO wins
 				if (swap) {
 					c = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
 				} else {
 					c = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
 				}
 				System.out.println(Arrays.toString(c));
+
+				xab.disableTournamentRemoteData();
 			}
 
 		} catch(RuntimeException ex) {
 			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			return 42;
 		}
 
 		/**
@@ -952,7 +954,14 @@ public class XArenaFuncs
 		winrate[1] = (double)tieCount/competeNum;
 		winrate[2] = (double)owinCount/competeNum;
 		*/
-		return 1;
+
+		if (c[0]==1.0)
+			return 0;
+		if (c[1]==1.0)
+			return 1;
+		if (c[2]==1.0)
+			return 2;
+		return 42;
 	}
 	
 	public void swapCompete(XArenaButtons xab, GameBoard gb) {
