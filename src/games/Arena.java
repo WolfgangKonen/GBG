@@ -3,12 +3,8 @@ package games;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.ListIterator;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,20 +14,15 @@ import javax.swing.SwingConstants;
 
 import TournamentSystem.TSAgent;
 import TournamentSystem.TSAgentManager;
+import TournamentSystem.TSTimeStorage;
 import agentIO.LoadSaveGBG;
 import tools.Progress;
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
-import games.Hex.GameBoardHex;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
-import games.RubiksCube.GameBoardCube;
-import games.RubiksCube.StateObserverCube;
-import games.MTrain;
-import games.Arena.Task;
 import games.TicTacToe.LaunchArenaTTT;
 import games.TicTacToe.LaunchTrainTTT;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -200,21 +191,28 @@ abstract public class Arena extends JPanel implements Runnable {
 			case TRNEMNT:
 				// Tournament Code
 				tournamentAgentManager.lockToCompete();
-				//String tournamentGamePlan[][] = tournamentAgentManager.generateGamePlan();
+				//String tournamentGamePlan[][] = tournamentAgentManager.getGamePlan();
 
 				while (tournamentAgentManager.hastNextGame()) {
 					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam();
+					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage();
 					// let team compete...
-					int winner = m_xfun.singleTournamentCompete(gb, nextTeam, m_xab);
+					int roundWinningAgent = m_xfun.singleTournamentCompeteBase(gb, nextTeam, nextTimes, m_xab);
 					// enter winner
-					if (winner == 42) {
-						System.out.println(TAG+"ERROR :: singleTournamentCompete returned error value 42");
+					if (roundWinningAgent > 40) {
+						System.out.println(TAG+"ERROR :: singleTournamentCompeteBase returned error value 42");
 					}
 					else {
-						tournamentAgentManager.enterGameResultWinner(winner); // 0=winAgent1 | 1=tie | 2=winAgent2
+						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
 					}
 				}
 				tournamentAgentManager.printGameResults();
+
+				// statitistische auswertung
+				// todo
+
+				// visualisierung
+				// todo
 
 				// clean up
 				System.out.println(TAG+"Tournament done, cleaning up");

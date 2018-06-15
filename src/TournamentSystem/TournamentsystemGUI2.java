@@ -99,7 +99,7 @@ public class TournamentsystemGUI2 extends JFrame{
             // determin 1v1 gameplan with selected agents
             //String selectedAGents[] = mTSAgentManager.getNamesAgentsSelected();
             //System.out.println("sel ag: "+ Arrays.toString(selectedAGents));
-            //String gamePlan[][] = mTSAgentManager.generateGamePlan();
+            //String gamePlan[][] = mTSAgentManager.getGamePlan();
 
             mTSAgentManager.printGamePlan();
 

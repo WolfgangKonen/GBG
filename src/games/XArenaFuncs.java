@@ -16,6 +16,7 @@ import java.util.Random;
 import javax.swing.JOptionPane;
 
 import TournamentSystem.TSAgent;
+import TournamentSystem.TSTimeStorage;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
@@ -777,6 +778,94 @@ public class XArenaFuncs
 
 		return winrate;
 	} // compete
+
+	public static double[] tournamentCompete(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, int verbose, TSTimeStorage[] nextTimes) {
+		double[] winrate = new double[3];
+		int xwinCount=0, owinCount=0, tieCount=0;
+		DecimalFormat frm = new DecimalFormat("#0.000");
+		boolean silent = (verbose == 0);
+		boolean nextMoveSilent = (verbose < 2);
+		StateObservation so;
+		Types.ACTIONS actBest;
+
+		String paX_string = paX.stringDescr();
+		String paO_string = paO.stringDescr();
+		if (verbose>0)
+			System.out.println("Competition: "+competeNum+" games "+paX_string+" vs "+paO_string);
+
+		for (int k=0; k<competeNum; k++) {
+			int Player = Types.PLAYER_PM[startSO.getPlayer()];
+			so = startSO.copy();
+
+			while(true) {
+				if(Player==1){		// make a X-move
+					int n = so.getNumAvailableActions();
+
+					long startT = System.currentTimeMillis();
+					long startTNano = System.nanoTime();
+					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
+					long endT = System.currentTimeMillis();
+					long endTNano = System.nanoTime();
+					System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
+					System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+					nextTimes[0].measuredTimesInNS.add(endTNano-startTNano);
+
+					so.advance(actBest);
+					Player = -1;
+				}
+				else				// i.e. O-Move
+				{
+					int n = so.getNumAvailableActions();
+
+					long startT = System.currentTimeMillis();
+					long startTNano = System.nanoTime();
+					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
+					long endT = System.currentTimeMillis();
+					long endTNano = System.nanoTime();
+					System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
+					System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+					nextTimes[1].measuredTimesInNS.add(endTNano-startTNano);
+
+					so.advance(actBest);
+					Player = +1;
+				}
+				if (so.isGameOver()) {
+					int res = so.getGameWinner().toInt();
+					//  res is +1/0/-1  for X/tie/O win
+					int player = Types.PLAYER_PM[so.getPlayer()];
+					switch (res*player) {
+						case -1:
+							if (!silent) System.out.println(k+": O wins");
+							owinCount++;
+							break;
+						case 0:
+							if (!silent) System.out.println(k+": Tie");
+							tieCount++;
+							break;
+						case +1:
+							if (!silent) System.out.println(k+": X wins");
+							xwinCount++;
+							break;
+					}
+
+					break; // out of while
+
+				} // if (so.isGameOver())
+			}	// while(true)
+
+		} // for (k)
+		winrate[0] = (double)xwinCount/competeNum;
+		winrate[1] = (double)tieCount/competeNum;
+		winrate[2] = (double)owinCount/competeNum;
+
+		if (!silent) {
+			System.out.print("win rates: ");
+			for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
+			System.out.println(" (X/Tie/O)");
+		}
+
+		return winrate;
+	} // compete
 	
 	/**
 	 * Does the main work for menu items 'Single Compete' and 'Swap Compete'. 
@@ -840,10 +929,10 @@ public class XArenaFuncs
 		this.competeBase(false, xab, gb);
 	}
 
-	public int singleTournamentCompete(GameBoard gb, TSAgent[] nextTeam, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
+	public int singleTournamentCompeteBase(GameBoard gb, TSAgent[] nextTeam, TSTimeStorage[] nextTimes, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
 		boolean swap = false;
-		int competeNum = 1;//xab.winCompOptions.getNumGames();
+		int competeNum = 1;//xab.winCompOptions.getNumGames(); | falls wert != 1 dann tournamentCompete() anpassen!
 		int numPlayers = gb.getStateObs().getNumPlayers();
 		/*
 		if (numPlayers!=2) {
@@ -867,6 +956,7 @@ public class XArenaFuncs
 				xab.enableTournamentRemoteData(nextTeam);
 				// todo write custom compete() function
 				// todo add time measurement and save data somewhere
+				// todo zeitauswertung auch pro agent global, nicht nur pro spiel/agent ?
 				// todo data evaluation and visualization
 
 				PlayAgent[] paVector = fetchAgents(xab);
@@ -876,12 +966,14 @@ public class XArenaFuncs
 				PlayAgent[] qaVector = wrapAgents(paVector,xab.oPar,startSO);
 
 				int verbose=1;
-
+				/*
 				if (swap) {
-					c = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
+					c = tournamentCompete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
 				} else {
-					c = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
+					c = tournamentCompete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
 				}
+				*/
+				c = tournamentCompete(qaVector[0], qaVector[1], startSO, competeNum, verbose, nextTimes);
 				System.out.println(Arrays.toString(c));
 
 				xab.disableTournamentRemoteData();
@@ -889,7 +981,8 @@ public class XArenaFuncs
 
 		} catch(RuntimeException ex) {
 			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			return 42;
+			System.out.println(TAG+"ERROR :: RuntimeException :: "+ex.getMessage());
+			return 43;
 		}
 
 		if (c[0]==1.0)
