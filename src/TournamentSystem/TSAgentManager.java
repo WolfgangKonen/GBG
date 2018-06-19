@@ -2,6 +2,7 @@ package TournamentSystem;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TSAgentManager {
     public ArrayList<TSAgent> mAgents;
@@ -207,6 +208,63 @@ public class TSAgentManager {
         gameResult = null;
         timeStorage = null;
         nextGame = 0;
+    }
+
+    /**
+     *  +++ STAISTIK +++
+     */
+
+    public void makeStats() {
+        // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
+        // headers for the table
+        String agenten[] = getNamesAgentsSelected();
+        String[] columns = new String[agenten.length+1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
+        columns[0] = "Y vs X";
+        for (int i=0; i<agenten.length; i++) {
+            columns[i+1] = agenten[i];
+        }
+
+        //actual data for the table in a 2d array
+        /*
+        String s = "W:1 | T:1 | L:1";
+        Object[][] data = new Object[][] {
+                {"Agent#1", "xxx",  s, s},
+                {"Agent#2", s,  "xxx", s},
+                {"Agent#3", s,  s, "xxx"},
+        };
+        */
+        String empty = "null";
+        int game = 0;
+        Object[][] data = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
+        for (int i=0; i<getNumAgentsSelected(); i++) {
+            data[i][0] = getNamesAgentsSelected()[i];
+            for (int j=0; j<getNumAgentsSelected(); j++) {
+                if (i==j) {
+                    data[i][j+1] = empty;
+                }
+                else {
+                    data[i][j+1] = "W:"+gameResult[game][0]+" | T:"+gameResult[game][1]+" | L:"+gameResult[game][2];
+                    game++;
+                }
+            }
+        }
+        /*
+        System.out.println(Arrays.toString(columns));
+        for (Object s[] : data)
+            System.out.println(Arrays.toString(s));
+            */
+
+        //create table with data
+        JTable table = new JTable(data, columns);
+
+        //add the table to the frame
+        JFrame frame = new JFrame();
+        frame.add(new JScrollPane(table));
+
+        frame.setTitle("Tournament Statistics");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
     }
 
 }

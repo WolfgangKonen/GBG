@@ -208,11 +208,10 @@ abstract public class Arena extends JPanel implements Runnable {
 				}
 				tournamentAgentManager.printGameResults();
 
-				// statitistische auswertung
-				// todo
-
-				// visualisierung
-				// todo
+				// statitistische auswertung + visualisierung
+				System.out.println(TAG+"starting stats");
+				tournamentAgentManager.makeStats();
+				System.out.println(TAG+"ending stats");
 
 				// clean up
 				System.out.println(TAG+"Tournament done, cleaning up");
