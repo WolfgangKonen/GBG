@@ -7,6 +7,7 @@ import games.TicTacToe.LaunchTrainTTT;
 
 import javax.swing.*;
 
+@Deprecated
 public class notes
 {
     public static void main(String[] args)

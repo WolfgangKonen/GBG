@@ -8,7 +8,7 @@ public class TSAgentManager {
     private boolean lockedToCompete = false;
     private final String TAG = "[TSAgentManager] ";
 
-    private int gamePlan[][] = null;
+    private int gamePlan[][] = null; // [ numGames ],[ [IDAgent1],[IDAgent2] ]
     private int gameResult[][] = null; // [ numGames ],[ [winAgent1],[tie],[winAgent2] ]
     public TSTimeStorage timeStorage[][] = null;
     private int nextGame = 0;
