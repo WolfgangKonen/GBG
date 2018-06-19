@@ -1,6 +1,7 @@
 package TournamentSystem;
 
 import javax.swing.*;
+import java.awt.*;
 
 @Deprecated
 public class Stuff {
@@ -36,10 +37,13 @@ public class Stuff {
         };
         //create table with data
         JTable table = new JTable(data, columns);
+        JTable table2 = new JTable(data, columns);
 
         //add the table to the frame
         JFrame frame = new JFrame();
-        frame.add(new JScrollPane(table));
+        frame.add(new JScrollPane(table), BorderLayout.CENTER);
+        frame.add(new JScrollPane(table2), BorderLayout.SOUTH);
+        frame.validate();
 
         frame.setTitle("Table Example");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

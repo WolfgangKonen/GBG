@@ -1,6 +1,7 @@
 package TournamentSystem;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -216,50 +217,75 @@ public class TSAgentManager {
 
     public void makeStats() {
         // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
+        /** Table 1 */
         // headers for the table
         String agenten[] = getNamesAgentsSelected();
-        String[] columns = new String[agenten.length+1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
-        columns[0] = "Y vs X";
-        for (int i=0; i<agenten.length; i++) {
-            columns[i+1] = agenten[i];
-        }
+        String[] columnNames = new String[agenten.length+1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
+        columnNames[0] = "Y vs X";
+        System.arraycopy(agenten, 0, columnNames, 1, agenten.length);
 
-        //actual data for the table in a 2d array
-        /*
-        String s = "W:1 | T:1 | L:1";
-        Object[][] data = new Object[][] {
-                {"Agent#1", "xxx",  s, s},
-                {"Agent#2", s,  "xxx", s},
-                {"Agent#3", s,  s, "xxx"},
-        };
-        */
         String empty = "null";
         int game = 0;
-        Object[][] data = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
+        Object[][] rowData = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
         for (int i=0; i<getNumAgentsSelected(); i++) {
-            data[i][0] = getNamesAgentsSelected()[i];
+            rowData[i][0] = getNamesAgentsSelected()[i];
             for (int j=0; j<getNumAgentsSelected(); j++) {
                 if (i==j) {
-                    data[i][j+1] = empty;
+                    rowData[i][j+1] = empty;
                 }
                 else {
-                    data[i][j+1] = "W:"+gameResult[game][0]+" | T:"+gameResult[game][1]+" | L:"+gameResult[game][2];
+                    rowData[i][j+1] = "W:"+gameResult[game][0]+" | T:"+gameResult[game][1]+" | L:"+gameResult[game][2];
                     game++;
                 }
             }
         }
-        /*
-        System.out.println(Arrays.toString(columns));
-        for (Object s[] : data)
-            System.out.println(Arrays.toString(s));
-            */
 
         //create table with data
-        JTable table = new JTable(data, columns);
+        JTable table = new JTable(rowData, columnNames);
+
+        /** Table 2 */
+        // headers for the table
+        String[] columnNames2 = {
+                "Spiel",
+                "Agent Name",
+                "Agent Typ",
+                "schnellster Zug",
+                "langsamster Zug",
+                "durchschnittliche Zeit",
+                "median Zeit"
+        };
+
+        final int numAgentsPerRound = 2;
+        Object[][] rowData2 = new Object[gameResult.length*numAgentsPerRound][columnNames2.length];
+        int pos = 0;
+        for (int i=0; i<gameResult.length; i++) {
+            for (int j=0; j<numAgentsPerRound; j++) {
+                // "Spiel"
+                rowData2[pos][0] = ""+(i+1);
+                // "Agent Name"
+                rowData2[pos][1] = mAgents.get(gamePlan[i][j]).getName();
+                // "Agent Typ"
+                rowData2[pos][2] = mAgents.get(gamePlan[i][j]).getAgentType();
+                // "schnellster Zug"
+                rowData2[pos][3] = ""+timeStorage[i][j].getMinTimeForGameMS()+"ms";
+                // "langsamster Zug"
+                rowData2[pos][4] = ""+timeStorage[i][j].getMaxTimeForGameMS()+"ms";
+                // "durchschnittliche Zeit"
+                rowData2[pos][5] = ""+timeStorage[i][j].getAverageTimeForGameMS()+"ms";
+                // "median Zeit"
+                rowData2[pos][6] = ""+timeStorage[i][j].getMedianTimeForGameMS()+"ms";
+                pos++;
+            }
+        }
+
+        //create table with data
+        JTable table2 = new JTable(rowData2, columnNames2);
 
         //add the table to the frame
         JFrame frame = new JFrame();
-        frame.add(new JScrollPane(table));
+        frame.add(new JScrollPane(table), BorderLayout.CENTER);
+        frame.add(new JScrollPane(table2), BorderLayout.SOUTH);
+        frame.validate();
 
         frame.setTitle("Tournament Statistics");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
