@@ -32,6 +32,7 @@ import games.Hex.StateObserverHex;
 import games.RubiksCube.GameBoardCube;
 import games.RubiksCube.StateObserverCube;
 import games.MTrain;
+import games.CFour.StateObserverC4;
 import games.Arena.Task;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
@@ -214,8 +215,8 @@ abstract public class Arena extends JFrame implements Runnable {
 				taskState = Task.IDLE;
 				break;
 			case PLAY:
-				// enableButtons(false); // see Play.addActionListener in
-				// XArenaButtons
+				// enableButtons(false); // see Play.addActionListener in XArenaButtons
+				// 
 				gb.showGameBoard(this, false);
 				gb.clearBoard(false, true);
 				PlayGame();
@@ -278,7 +279,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		System.out.println("[InspectGame] " + pa_string);
 
 		gb.clearBoard(true, true);
-		gb.updateBoard(null, false, true); // enable action buttons
+		gb.updateBoard(null, true, true); // update with reset
 
 		while (taskState == Task.INSPECTV) {
 			if (gb.isActionReq()) {
@@ -470,7 +471,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		logSessionid = logManager.newLoggingSession(so);
 
 		try {
-			while (taskState == Task.PLAY) // game play interruptible by hitting
+			while (taskState == Task.PLAY) 	// game play interruptible by hitting
 											// 'Play' again
 			{
 				if (gb.isActionReq()) {

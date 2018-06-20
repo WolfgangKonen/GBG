@@ -10,6 +10,7 @@ import org.jfree.data.Range;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import games.Evaluator;
 import games.XArenaButtons;
 
 
@@ -38,6 +39,7 @@ public class LineChartSuccess extends XYSeriesCollection
 	//XYSeriesCollection dat; 		// extends XYDataset
 	JFreeChart chart;
 	ChartFrame frame;
+	boolean PLOTTRAINEVAL=true;
 	
 	public LineChartSuccess(String title, String xLab, String yLab, 
 					 		boolean hasLines, boolean hasSymbols) 
@@ -70,8 +72,33 @@ public class LineChartSuccess extends XYSeriesCollection
 			renderer.setSeriesShapesVisible(i, hasSymbols);
 		}
 		chart.getXYPlot().setRenderer(renderer);
+		frame.setVisible(false);
 		this.clear();
 	}	
+	
+	public void initializeChartPlot(XArenaButtons xab, 
+			Evaluator m_evaluatorQ, boolean doTrainEvaluation) {
+		this.clearAndSetXY(xab);
+		// "Q Eval" is the key of the XYSeries object, accessible as lChart.getSeries(0):
+		this.addSeries(new XYSeries("Q Eval"));
+        // set Y-axis of existing lChart according to the current Quick Eval Mode:
+		this.setYAxisLabel(m_evaluatorQ.getPlotTitle());
+        if (doTrainEvaluation && PLOTTRAINEVAL) {
+			// "T Eval" is the key of the XYSeries object, accessible as lChart.getSeries(1):
+        	this.addSeries(new XYSeries("T Eval"));	       	
+        }
+		
+	}
+	
+	public void updateChartPlot(int gameNum, Evaluator m_evaluatorQ, 
+			Evaluator m_evaluatorT, boolean doTrainEvaluation) {
+		this.getSeries(0).add((double)gameNum, m_evaluatorQ.getLastResult());
+		if (doTrainEvaluation && PLOTTRAINEVAL) {
+			this.getSeries(1).add((double)gameNum, m_evaluatorT.getLastResult());
+		}
+		this.plot();		
+	}
+
 	/**
 	 * Reset the line chart such that the x-axis and y-axis will adjust to the new data
 	 * 

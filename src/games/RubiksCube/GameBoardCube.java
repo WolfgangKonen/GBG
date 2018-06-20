@@ -337,14 +337,13 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	 * Update the play board and the associated VBoard.
 	 * 
 	 * @param so	the game state
+	 * @param withReset  if true, reset the board prior to updating it to state so
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
-	 * 				(only if they are stored in 'so')
-	 * @param enableOccupiedCells  if true, allow user interaction on occupied 
-	 * 				cells (may be needed for inspecting the value function)
+	 * 				(only if they are stored in state {@code so}).
 	 */
 	@Override
 	public void updateBoard(StateObservation so, 
-							boolean enableOccupiedCells, boolean showValueOnGameboard) {
+							boolean withReset, boolean showValueOnGameboard) {
 		int i,j;
 		
 		// show ButtonPanel only if it is needed (for showing action values or for entering actions) 

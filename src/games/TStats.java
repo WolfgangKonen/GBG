@@ -12,6 +12,9 @@ import java.util.Iterator;
  *  <li> <b>moveNum</b>		the actual number of moves in this episode
  *  <li> <b>epiLength</b>	the maximum allowed episode length
  *  </ul>
+ *  
+ *  This class is mainly useful for game RubiksCube, but may not be completely useless
+ *  for other (puzzle) games as well.
  */
 public class TStats {
 	int n;
@@ -44,13 +47,16 @@ public class TStats {
 	}
 
 	/**
-	 * Class for aggregating the results in a list of {@link TStats} objects: All objects with a 
-	 * given {@code p} are aggregated to obtain: <ul>
+	 * Nested class for aggregating the results in a list of {@link TStats} objects: All objects 
+	 * with a given {@code p} (minimum episode length) are aggregated to obtain: <ul>
 	 *  <li> <b>size</b> 		the count
 	 *  <li> <b>percSolved</b> 	the percentage of episodes solved in minimum episode length  
 	 *  <li> <b>percLonger</b>	the percentage of longer episodes, but below max. episode length
 	 *  <li> <b>epiLength</b>	the percentage of episodes with maximum episode length
 	 *  </ul>
+	 *  
+	 *  This class is mainly useful for game RubiksCube, but may not be completely useless
+	 *  for other (puzzle) games as well.
 	 */
 	public static class TAggreg {
 		int size;
@@ -81,7 +87,7 @@ public class TStats {
 			this.percNotSol = ((double)nNot)/size;
 		}		
 
-	}
+	} // nested class TAggreg
 	
 	public static void printTAggregList(ArrayList<TAggreg> taList) {
 		DecimalFormat form = new DecimalFormat("000");
@@ -132,4 +138,4 @@ public class TStats {
 		return res/wghtSum;
 	}
 
-}
+} // class TStats

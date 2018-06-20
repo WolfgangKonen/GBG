@@ -498,7 +498,9 @@ public class C4Base implements Serializable {
 	 * @param col
 	 */
 	public void putPiece(int player, int col) {
-		// Es muss ggfs. geprüft werden, ob dieser Zug möglich ist
+		assert isLegalMove(col) : "Illegal move in C4Base::putPiece(player,co)";
+//		assert assertColHeight() : "Assertion colHeight: it is not what computeColHeight() demands!";
+		
 		long mask = fieldMask[col][colHeight[col]++];
 
 		if (player == PLAYER1) {
@@ -506,8 +508,12 @@ public class C4Base implements Serializable {
 		} else {
 			fieldP2 |= mask;
 		}
-		computeColHeight();
-		//colHeight[col]++;
+//		computeColHeight();		// not needed, we adapt colHeight already in the 
+								// line with 'fieldMask' above!
+		
+		// just as a check when we activate 'colHeight[col]++' above:  
+		// assert that colHeight is indeed valid
+		assert assertColHeight() : "Assertion colHeight: it is not what computeColHeight() demands!";
 	}
 
 	/**
@@ -561,7 +567,9 @@ public class C4Base implements Serializable {
 	 * @return Number of pieces on the board (of both players) 
 	 */
 	public int countPieces() {
-		assertColHeight(); 		// temporarily, just as check
+		// just as a check: normally colHeight should be already in the right state
+		assert assertColHeight() : "Assertion colHeight: it is not what computeColHeight() demands!";
+
 		int count = 0;
 		for (int i = 0; i < COLCOUNT; i++) {
 			count += colHeight[i];
@@ -569,16 +577,21 @@ public class C4Base implements Serializable {
 		return count;
 	}
 	
-	private void assertColHeight() {
+	/**
+	 * assert that colHeight is up-to-date, i.e. that the contents of colHeight
+	 * is the same as the result of computeColHeight() (based on fieldP1 and fieldP2)
+	 */
+	private boolean assertColHeight() {
 		int len = colHeight.length;
 		int[] tmpColHeight=colHeight.clone();
 		computeColHeight();
 		for (int i=0; i<len; i++) {
 			if (tmpColHeight[i]!=colHeight[i]) {
 				System.out.println("computeColHeight() was necessary!!");
-				return;
+				return false;
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -910,8 +923,8 @@ public class C4Base implements Serializable {
 	 */
 	public int hasWin(int player, int[] arr) {
 		int x, j = 0;
-		for (x = 0; x < 7; x++) {
-			if (colHeight[x] < 6) {
+		for (x = 0; x < C4Base.COLCOUNT; x++) {
+			if (colHeight[x] < C4Base.ROWCOUNT) {
 				if (canWin(player, x, colHeight[x])) {
 					arr[0] = x;
 					j++;
@@ -1240,7 +1253,7 @@ public class C4Base implements Serializable {
 	}
 
 	/**
-	 * Convert board into a special huffman-code representation. Is needed for
+	 * Convert board into a special Huffman code representation. Is needed for
 	 * the opening-books.
 	 * 
 	 * @param f1
@@ -1265,7 +1278,7 @@ public class C4Base implements Serializable {
 		// Stellungsbewertung reserviert
 		i = (mirrored ? 6 : 0);
 		inc = mirrored ? -1 : 1;
-		for (; (mirrored && i >= 0) || (!mirrored && i < 7); i += inc) {
+		for (; (mirrored && i >= 0) || (!mirrored && i < C4Base.COLCOUNT); i += inc) {
 			for (j = 0; j < colHeight[i]; j++) {
 				mask = (mirrored ? getMask((6 - i), j) : getMask(i, j));
 				if ((f1 & mask) != 0L) {
@@ -2075,9 +2088,9 @@ public class C4Base implements Serializable {
 	 * 
 	 * @param player
 	 * @param colHeight
-	 *            Array with the Height of all Columns
+	 *            array with the height of all columns
 	 * @param vTable
-	 *            Values of each Column
+	 *            values for each column
 	 * @return Move, that gets the best Value from vTable
 	 */
 	public int getBestMove(int player, int[] colHeight, double[] vTable) {

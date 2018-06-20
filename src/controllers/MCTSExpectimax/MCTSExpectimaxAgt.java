@@ -73,6 +73,8 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 */
     public MCTSExpectimaxAgt(String name, ParMCTSE mcPar, ParOther oPar) {
 		super(name);
+		params = new ParMCTSE();
+		params.setFrom(mcPar);
 		initMCTSEAgent(mcPar, oPar);
 	}
 

@@ -74,7 +74,7 @@ public class GameBoardHex implements GameBoard {
 
     @Override
     public void updateBoard(StateObservation so,  
-							boolean enableOccupiedCells, boolean showValueOnGameboard) {
+							boolean withReset, boolean showValueOnGameboard) {
     	gamePanel.setShowValues(showValueOnGameboard);
     	
         if (so == null) {

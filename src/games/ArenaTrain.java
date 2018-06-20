@@ -99,7 +99,7 @@ abstract public class ArenaTrain extends Arena
 			n = m_xab.getNumTrainBtn();
 			agentN = m_xab.getSelectedAgent(n);
 			if(!agentN.equals("MCTS") & !agentN.equals("Human")) {
-				enableButtons(false);	
+//				enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtons
 				setStatusMessage("Training "+agentN+"-Player X ...");
 
 				try {

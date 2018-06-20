@@ -385,7 +385,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     @Override
     public void updateBoard(StateObservation so,  
-    						boolean enableOccupiedCells, boolean showValueOnGameboard) {
+    						boolean withReset, boolean showValueOnGameboard) {
         if (so != null) {
             if (so instanceof StateObserver2048) {
                 StateObserver2048 soZTAV = (StateObserver2048) so;

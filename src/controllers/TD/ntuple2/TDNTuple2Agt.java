@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-//import params.NTParams;
-//import params.OtherParams;
-//import params.TDParams;
+import org.apache.commons.math3.stat.descriptive.rank.Min;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
@@ -1418,6 +1418,106 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			int dummy=1;
 		}
 	}
+	
+	/**
+	 * Analyze the weight distribution and - if TCL is active - the tcFactorArray distribution 
+	 * by calculating certain quantiles (percentiles)
+	 * @param per the quantiles to calculate. If null, then use DEFAULT_PER 
+	 * 			= {0,25,50,75,100}, where the numbers are given in percent.
+	 * @return res[][] with <ul>
+	 * 		<li> res[0][]: a copy of {@code per}
+	 * 		<li> res[1][]: the corresponding quantiles of the weights (from all LUTs)
+	 * 		<li> res[2][]: the corresponding quantiles of tcFactorArray (from all LUTs)
+	 * </ul>
+	 */
+	public double[][] weightAnalysis(double[] per) {
+		double[] DEFAULT_PER = {0,25,50,75,100};
+		if (per==null) per = DEFAULT_PER;
+		double[][] res = new double[3][per.length];  	// res[0]: per, res[1]: quantiles of data
+														// res[2]: quantiles of tcdat;
+		System.arraycopy(per, 0, res[0], 0, per.length);
+		
+		int count = 0;
+		NTuple2[] ntuples = m_Net.getNTuples();
+		for (int i=0; i<ntuples.length; i++) {
+			count += ntuples[i].getLutLength();
+		}
+		double[] data = new double[count];
+		double[] tcdat = new double[count];
+		double[] lut;
+		double[] tcf=null;
+		int i, pos=0;
+		
+		// --- this is fast, but has the disadvantage that many zeros are included --> 
+		// --- 25%- 50%- and 75%-quantiles tend to be exactly zero
+		// --- (the zeros come from the fact that many weights are never visited in training)
+//		for (i=0,len=0; i<ntuples.length; i++) {
+//			len = ntuples[i].getLutLength();
+//			lut = ntuples[i].getWeights();
+//			assert lut.length==len : "length assertion error";
+//			System.arraycopy(lut, 0, data, pos, len);
+//			pos += len; 
+//		}
+
+		// --- this is slower, but quantiles for active weights are more meaningful
+		// --- and not always 0.0 (!)
+		for (i=0; i<ntuples.length; i++) {
+			lut = ntuples[i].getWeights();
+			tcf = ntuples[i].getTcFactorArray();
+			for (int j=0; j<lut.length; j++) {
+				if (lut[j]!=0) {
+					 if (tcf!=null) tcdat[pos] = tcf[j];
+					data[pos++] = lut[j];
+				}
+			}
+		}
+		int nActive=pos;
+		int pActive = (int) (((double)nActive)/count*100);
+		double[] data2 = new double[nActive];
+		double[] tcdat2 = new double[nActive];
+		System.arraycopy(data, 0, data2, 0, nActive);
+		System.arraycopy(tcdat, 0, tcdat2, 0, nActive);
+		data = data2;
+		tcdat = tcdat2;
+		if (tcf==null) System.out.println("WARNING: tcFactorArray is null");
+
+		// --- only testing / debug ---
+//		double[] data = {0,1,2,3,4,5,6,7,8,9};
+//		int length2 = 1000;
+//		double[] data2 = new double[length2];
+//		System.arraycopy(data, 0, data2, 0, length2);
+//		data = data2;
+		
+		Percentile p = new Percentile(); // from commons-math3-3.6.1.jar, see https://commons.apache.org/proper/commons-math/javadocs/api-3.0/org/apache/commons/math3/stat/descriptive/rank/Percentile.html
+		Min m = new Min(); 
+		Percentile p2 = new Percentile();
+		Min m2 = new Min(); 
+		
+		p.setData(data);	
+		p2.setData(tcdat);
+		for (i=0; i<per.length; i++) {
+			if (per[i]==0) {
+				res[1][i] = m.evaluate(data);
+				res[2][i] = m2.evaluate(tcdat);
+			} else { 
+				res[1][i] = p.evaluate(per[i]);
+				res[2][i] = p2.evaluate(per[i]);
+			}
+		}
+
+		DecimalFormat form = new DecimalFormat("000");
+		DecimalFormat df = new DecimalFormat();				
+		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+		df.applyPattern("+0.0000000;-0.0000000");  
+		System.out.println("weight analysis TDNTuple2Agt ("
+				+count+" weights, "+nActive+" active ("+pActive+"%)): ");
+		for (i=0; i<per.length; i++) {
+			System.out.println("   Quantile [" + form.format(per[i]) + "] = "	
+					+df.format(res[1][i]) + " / " + ((tcf==null)?"NA":df.format(res[2][i])) );			
+		}
+		
+		return res;
+	}
 
 	
 	/**
@@ -1588,5 +1688,18 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
 	} // class NextState
 
-
+//	   public static void main(String[] args) {
+//
+//		      int arr1[] = { 0, 1, 2, 3, 4, 5 };
+//		      int arr2[] = { 5, 10, 20, 30, 40, 50 };
+//		    
+//		      // copies an array from the specified source array
+//		      System.arraycopy(arr1, 0, arr2, 0, 4);
+//		      System.out.print("array2 = ");
+//		      System.out.print(arr2[0] + " ");
+//		      System.out.print(arr2[1] + " ");
+//		      System.out.print(arr2[2] + " ");
+//		      System.out.print(arr2[3] + " ");
+//		      System.out.print(arr2[4] + " ");
+//		   }
 }

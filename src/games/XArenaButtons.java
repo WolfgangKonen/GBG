@@ -33,16 +33,18 @@ public class XArenaButtons extends JPanel
 	int numPlayers;
 	int m_numParamBtn;			// number of the last param button pressed
 	int m_numTrainBtn;			// number of the last train button pressed
+	
+	// with changedViaLoad[n]=true we inhibit that a change in item state of 
+	// m_arena.m_xab.choiceAgent[n] due to agent loading will trigger from the associated 
+	// ItemStateListener an agent-parameter-default-setting (we want the parameters
+	// from the agent just loaded to survive in m_arena.m_xab)
+	protected boolean[] changedViaLoad = null; 
 
 	JButton[] mParam;
 	JButton[] mTrain;
 	JButton MultiTrain;
 	JButton Play;
 	JButton InspectV;
-	//JButton TDparB;			// now in XArenaTabs
-	//JButton CMAparB;
-	//JButton TCparB;
-	//JButton OparB;
 	JButton NTupShowB;
 	JButton Logs; 
 	JSlider Delay;				// the sleep slider
@@ -114,6 +116,7 @@ public class XArenaButtons extends JPanel
 		mParam = new JButton[numPlayers];
 		mTrain = new JButton[numPlayers];
 		choiceAgent = new JComboBox[numPlayers];
+		changedViaLoad = new boolean[numPlayers];	// implicitly set to false
 		assert (numPlayers<=Types.GUI_PLAYER_NAME.length) 
 			: "GUI not configured for "+numPlayers+" players. Increase Types.GUI_PLAYER_NAME and GUI_AGENT_INITIAL";
 		tdPar = new TDParams[numPlayers];
@@ -176,11 +179,22 @@ public class XArenaButtons extends JPanel
 			
 			// whenever one of the agent choice boxes changes, call setParamDefaults
 			// to set the param tabs to sensible defaults for that agent and that game
+			// (but this call is inhibited by changeViaLoad[n] if a loadAgent-call triggered
+			// the choice-box change)
 			choiceAgent[n].addItemListener(
 					new ItemListenerHandler(n) { // this constructor will copy n to ItemListenerHandler.n
 						public void itemStateChanged(ItemEvent arg0) {
-							setParamDefaults(n, (String) choiceAgent[n].getSelectedItem(),
-									m_game.getGameName());
+							if (changedViaLoad[n]) {
+								// each change in choiceAgent[n] will trigger TWO ItemEvents: 
+								// 1) a DESELECTED event and 2) a SELECTED event. We reset
+								// the switch changeViaLoad[n] only after the 2nd event.
+								if (arg0.getStateChange()==ItemEvent.SELECTED)
+									changedViaLoad[n]=false;
+							} else {
+								// the normal case, if item change was triggered by user:
+								setParamDefaults(n, (String) choiceAgent[n].getSelectedItem(),
+										m_game.getGameName());								
+							}
 						}
 					}
 			);
@@ -259,7 +273,7 @@ public class XArenaButtons extends JPanel
 		
 		for (int n=0; n<numPlayers; n++) {
 			mParam[n].addActionListener(
-					new ActionHandler(n)		// this constructor will copy n to member x
+					new ActionHandler(n)		// constructor copies n to member x
 					{
 						public void actionPerformed(ActionEvent e)
 						{	
@@ -277,7 +291,16 @@ public class XArenaButtons extends JPanel
 						public void actionPerformed(ActionEvent e)
 						{	
 							m_numTrainBtn = x;
-							m_game.taskState = ArenaTrain.Task.TRAIN;
+							//m_game.taskState = ArenaTrain.Task.TRAIN;
+							// toggle m_game.state between TRAIN and IDLE
+							if (m_game.taskState!=ArenaTrain.Task.TRAIN) {
+								m_game.taskState = ArenaTrain.Task.TRAIN;
+								enableButtons(false);			// disable all buttons ...
+								mTrain[x].setEnabled(true);		// ... but the TRAIN button
+							} else {
+								m_game.taskState = ArenaTrain.Task.IDLE;
+								enableButtons(true);
+							}
 						}
 					}	
 			);
@@ -505,6 +528,7 @@ public class XArenaButtons extends JPanel
 	public void setParamDefaults(int n, String agentName, String gameName) {
 		tdPar[n].setParamDefaults(agentName, gameName);
 		ntPar[n].setParamDefaults(agentName, gameName);
+		ntPar[n].setFixedCoList(m_game.makeXNTupleFuncs().getAvailFixedNTupleModes());
 		oPar[n].setParamDefaults(agentName, gameName);
 		
 		if(agentName.equals("TDS")) {

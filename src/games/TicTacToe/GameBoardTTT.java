@@ -187,14 +187,13 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	 * Update the play board and the associated values (labels).
 	 * 
 	 * @param so	the game state
-	 * @param enableOccupiedCells  if true, allow user interaction on occupied 
-	 * 				cells (may be needed for inspecting the value function)
+	 * @param withReset  if true, reset the board prior to updating it to state so
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
-	 * 				(only if they are stored in 'so')
+	 * 				(only if they are stored in state {@code so}).
 	 */
 	@Override
 	public void updateBoard(StateObservation so, 
-							boolean enableOccupiedCells, boolean showValueOnGameboard) {
+							boolean withReset, boolean showValueOnGameboard) {
 		int i,j;
 		if (so!=null) {
 	        assert (so instanceof StateObserverTTT)
@@ -250,7 +249,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			} 
 		} // if(so!=null)
 		
-		guiUpdateBoard(enableOccupiedCells,showValueOnGameboard);
+		guiUpdateBoard(false,showValueOnGameboard);
 	}
 
 	/**

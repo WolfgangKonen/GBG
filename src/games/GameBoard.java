@@ -28,7 +28,15 @@ public interface GameBoard {
 	public void clearBoard(boolean boardClear, boolean vClear);
 	//public void updateBoard();
 	//public void updateBoard(StateObservation so);
-	public void updateBoard(StateObservation so, boolean enableOccupiedCells
+	/**
+	 * Update the play board and the associated values (labels).
+	 * 
+	 * @param so	the game state
+	 * @param withReset  if true, reset the board prior to updating it to state so
+	 * @param showValueOnGameboard	if true, show the game values for the available actions
+	 * 				(only if they are stored in state {@code so}).
+	 */
+	public void updateBoard(StateObservation so, boolean withReset
 			, boolean showValueOnGameboard);
 	public void showGameBoard(Arena arena,boolean alignToMain);
 	public void toFront();

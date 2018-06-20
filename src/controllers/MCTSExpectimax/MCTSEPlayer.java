@@ -86,7 +86,7 @@ public class MCTSEPlayer
 				StateObsNondeterministic son = (StateObsNondeterministic) so;
 				rootNode = new MCTSE1ChanceNode(son, null, null, random, this);
 			} else {
-				throw new RuntimeException("You need to implement the \"StateObservationNondeterministic\" interface to use the alternative version");
+				throw new RuntimeException("You need to implement the \"StateObservationNondeterministic\" interface to use MCTS-Expectimax");
 			}
 		}
     }

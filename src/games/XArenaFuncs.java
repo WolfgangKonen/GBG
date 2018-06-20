@@ -19,6 +19,7 @@ import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.YIntervalSeries;
 
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
@@ -43,6 +44,7 @@ import params.ParMaxN;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
+import tools.DeviationWeightsChart;
 import tools.LineChartSuccess;
 import tools.Measure;
 import tools.MessageBox;
@@ -87,17 +89,26 @@ public class XArenaFuncs
 	protected int numPlayers;
 	
 	protected Random rand;
-	protected XYSeries seriesQ; 
-	protected XYSeries seriesT; 
+//	protected XYSeries seriesQ; 
+//	protected XYSeries seriesT; 
+//	protected YIntervalSeries seriesYI0; 
+//	protected YIntervalSeries seriesYI1; 
 	protected LineChartSuccess lChart;
-	
+	protected DeviationWeightsChart wChart;	
+	/**
+	 * percentiles for weight chart plot on wChart (only relevant for TDNTuple2Agt)
+	 */
+	double[] per = {5,25,50,75,95};
+
 	public XArenaFuncs(Arena arena)
 	{
 		m_Arena = arena;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		m_PlayAgents = new PlayAgent[numPlayers];
 		//m_PlayAgents[0] = new MinimaxAgent(sMinimax);
-        rand = new Random(System.currentTimeMillis());	
+        rand = new Random(System.currentTimeMillis());
+        lChart=new LineChartSuccess("Training Progress","gameNum","",true,false);
+        wChart=new DeviationWeightsChart("","gameNum","",true,false);
 	}
 	
 	/**
@@ -315,12 +326,10 @@ public class XArenaFuncs
 								// >0: stop, if Evaluator stays true for stopEval games
 		int maxGameNum;			// maximum number of training games
 		int numEval;			// evaluate the trained agent every numEval games
-//		int epiLength;			// maximum length of an episode
 		boolean learnFromRM;	// if true, learn from random moves during training
 		int gameNum=0;
 		int verbose=2;
-		boolean PLOTTRAINEVAL=false;
-
+		
 		maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		numEval = xab.oPar[n].getNumEval();
 		if (numEval==0) numEval=500; // just for safety, to avoid ArithmeticException in 'gameNum%numEval' below
@@ -344,12 +353,9 @@ public class XArenaFuncs
 			return pa;			
 		} 
 		
-		if (lChart==null) 
-			lChart=new LineChartSuccess("Training Progress","gameNum","",
-													  true,false);
-		lChart.clearAndSetXY(xab);
-		seriesQ = new XYSeries("Q Eval");		// "Q Eval" is the key of the XYSeries object
-		lChart.addSeries(seriesQ);
+		// initialization weight distribution plot:
+		int plotWeightMode = xab.ntPar[n].getPlotWeightMethod();
+		wChart.initializeChartPlot(xab,pa,plotWeightMode);
 		
 		String pa_string = pa.getClass().getName();
 		System.out.println(pa.stringDescr());
@@ -360,14 +366,9 @@ public class XArenaFuncs
 		
 		stopTest = xab.oPar[n].getStopTest();
 		stopEval = xab.oPar[n].getStopEval();
-//		epiLength = xab.oPar[n].getEpiLength();
 		learnFromRM = xab.oPar[n].useLearnFromRM();
 		int qem = xab.oPar[n].getQuickEvalMode();
         m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
-        //
-        // set Y-axis of existing lChart according to the current Quick Eval Mode
-        lChart.setYAxisLabel(m_evaluatorQ.getPlotTitle());
-        
 		int tem = xab.oPar[n].getTrainEvalMode();
 		//
 		// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -377,12 +378,11 @@ public class XArenaFuncs
 		boolean doTrainEvaluation = (tem!=qem);
 		if (doTrainEvaluation) {
 	        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
-	        if (PLOTTRAINEVAL) {
-				seriesT = new XYSeries("T Eval");		// "T Eval" is the key of the XYSeries object
-				lChart.addSeries(seriesT);	        	
-	        }
 		}
 
+		// initialization line chart plot:
+		lChart.initializeChartPlot(xab,m_evaluatorQ,doTrainEvaluation);
+       
 		// Debug only: direct debug output to file debug.txt
 		//TDNTupleAgt.pstream = System.out;
 		//TDNTupleAgt.pstream = new PrintStream(new FileOutputStream("debug-TDNT.txt"));
@@ -395,7 +395,7 @@ public class XArenaFuncs
 		{		
 			StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
-			pa.trainAgent(so /*,epiLength,learnFromRM*/);
+			pa.trainAgent(so);
 			
 			if (doTrainStatistics) collectTrainStats(tsList,pa,so);
 				
@@ -409,13 +409,23 @@ public class XArenaFuncs
 				qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
 
 		        m_evaluatorQ.eval(qa);
-				seriesQ.add((double)gameNum, m_evaluatorQ.getLastResult());
-				if (doTrainEvaluation) {
+				if (doTrainEvaluation) 
 					m_evaluatorT.eval(qa);
-					if (PLOTTRAINEVAL) 
-						seriesT.add((double)gameNum, m_evaluatorT.getLastResult());
+				
+				// update line chart plot:
+				lChart.updateChartPlot(gameNum, m_evaluatorQ, m_evaluatorT, doTrainEvaluation);
+				
+				// update weight / TC factor distribution plot:
+				wChart.updateChartPlot(gameNum,pa,per);
+
+				// enable premature exit if TRAIN button is pressed again:
+				if (xab.m_game.taskState!=Arena.Task.TRAIN) {
+					MessageBox.show(xab, 
+							"Training stopped prematurely", 
+							"Warning", JOptionPane.WARNING_MESSAGE);
+					break; //out of while
 				}
-				lChart.plot();
+				
 				startTime = System.currentTimeMillis();
 			}
 			
@@ -445,7 +455,10 @@ public class XArenaFuncs
 			TStats.printTAggregList(taggList);
 		}
 		
-		xab.GameNumT.setText(Integer.toString(maxGameNum) );		// restore initial value (maxGameNum)
+		//xab.GameNumT.setText(Integer.toString(maxGameNum) );		// restore initial value (maxGameNum)
+														// not sensible in case of premature stop;
+														// and in case of normal end, it will be maxGameNum anyhow
+		
 		//samine
 		int test=2000;
 		if (gameNum%test!=0) 
@@ -523,7 +536,6 @@ public class XArenaFuncs
 
 		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
 		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
-//		int epiLength = xab.oPar[n].getEpiLength();
 		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
@@ -596,7 +608,7 @@ public class XArenaFuncs
 				{		
 					StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
-					pa.trainAgent(so /*,epiLength,learnFromRM*/);
+					pa.trainAgent(so);
 					
 					gameNum = pa.getGameNum();
 					actionNum = pa.getNumLrnActions();	
@@ -933,7 +945,7 @@ public class XArenaFuncs
 				{							
 					StateObservation so = soSelectStartState(gb,xab.oPar[0].useChooseStart01(), paX); 
 
-					paX.trainAgent(so /*,epiLength,learnFromRM*/);
+					paX.trainAgent(so);
 				}
 				paX.setAgentState(AgentState.TRAINED);
 			} 
@@ -952,7 +964,7 @@ public class XArenaFuncs
 				{							
 					StateObservation so = soSelectStartState(gb,xab.oPar[1].useChooseStart01(), paO); 
 
-					paO.trainAgent(so /*,epiLength,learnFromRM*/);
+					paO.trainAgent(so);
 				}
 				paO.setAgentState(AgentState.TRAINED);				
 			} 

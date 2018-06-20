@@ -486,6 +486,11 @@ public class XArenaMenu extends JMenuBar {
 			// the agent name and the active game (before setting the specific
 			// parameters in certain tabs with 'setFrom' from the agent loaded):
 			m_arena.m_xab.setParamDefaults(n, td.getName(), m_arena.getGameName());
+			// with changedViaLoad[n]=true we inhibit that a possible change in item state of 
+			// m_arena.m_xab.choiceAgent[n] will trigger from the associated 
+			// ItemStateListener an agent-parameter-default-setting (we want the parameters
+			// from the agent just loaded to survive in m_arena.m_xab):
+			m_arena.m_xab.changedViaLoad[n] = true;
 			
 			if (td instanceof TDAgent) {
 				// set the agent parameters in XArenaTabs:
@@ -526,6 +531,7 @@ public class XArenaMenu extends JMenuBar {
 				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getParTD(), td.getMaxGameNum());
 				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getParNT());
 				//m_arena.m_xab.oPar.numEval_T.setText(""+((TDNTuple2Agt) td).getOtherPar().getNumEval());
+				((TDNTuple2Agt) td).weightAnalysis(null);
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:

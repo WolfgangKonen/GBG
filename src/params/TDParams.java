@@ -71,15 +71,15 @@ public class TDParams extends Frame implements Serializable
 	JLabel tNply_L;
 	JLabel mode3P_L;
 	JPanel tdPanel;
-	public JTextField alphaT;
-	public JTextField alfinT;
-	public JTextField epsilT;
-	public JTextField epfinT;
-	public JTextField lambdaT;
-	public JTextField gammaT;
-	public JTextField epochT;
-	public JTextField tNply_T;
-	public JTextField mode3P_T;
+	private JTextField alphaT;
+	private JTextField alfinT;
+	private JTextField epsilT;
+	private JTextField epfinT;
+	private JTextField lambdaT;
+	private JTextField gammaT;
+	private JTextField epochT;
+	private JTextField tNply_T;
+	private JTextField mode3P_T;
 	
 	JLabel SigTypeL;
 	JLabel NormalizeL;

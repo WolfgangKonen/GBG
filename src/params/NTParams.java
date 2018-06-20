@@ -38,6 +38,7 @@ public class NTParams extends Frame implements Serializable {
 	private static String[] tcFactorString = { "Immediate", "Accumulating" };
 	private static String[] ntTupleTypeString={"RandomWalk","RandomPoint"};
 	private static String[] fixedTupleModeString={"1","2"};
+	private static String[] plotWghtString = { "none", "wght distr", "tcFactor distr" };
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -55,6 +56,7 @@ public class NTParams extends Frame implements Serializable {
 	JLabel NTupleNumL;
 	JLabel NTupleSizeL;
 	JLabel NTupleTypeL;
+	JLabel PlotWghtL;
 	JLabel UseSymmetryL;
 	JLabel AfterStateL;
 	//JLabel NTupleMaxL;
@@ -74,6 +76,7 @@ public class NTParams extends Frame implements Serializable {
 	public JComboBox tcFactorType;
 	public JComboBox NTupleTypeCo;
 	public JComboBox NTupleFixCo;
+	public JComboBox PlotWghtCo;
 
 	JPanel ntPanel;
 
@@ -99,7 +102,8 @@ public class NTParams extends Frame implements Serializable {
 		NTupleFixL.setEnabled(true);
 		NTupleTypeL=new JLabel("nTuple generation");
 		NTupleTypeL.setToolTipText(TIPNTUPLETYPE);
-
+		PlotWghtL=new JLabel("PLOT WEIGHTS");
+		
 		UseSymmetryL = new JLabel("USESYMMETRY");
 		UseSymmetryL.setToolTipText(TIPUSESYMMETRY);
 		AfterStateL = new JLabel("AFTERSTATE");
@@ -152,6 +156,8 @@ public class NTParams extends Frame implements Serializable {
 		NTupleTypeCo.setEnabled(false);
 		NTupleFixCo = new JComboBox(fixedTupleModeString);
 		NTupleFixCo.setEnabled(true); 
+		PlotWghtCo = new JComboBox(plotWghtString);
+		PlotWghtCo.setEnabled(true); 
 		
 		ntPanel = new JPanel();		// put the inner buttons into panel ntPanel. This panel
 									// can be handed over to a tab of a JTabbedPane object
@@ -190,8 +196,9 @@ public class NTParams extends Frame implements Serializable {
 		//forth row
 		ntPanel.add(NTupleTypeL);
 		ntPanel.add(NTupleTypeCo);
-		ntPanel.add(new Canvas());
-		ntPanel.add(new Canvas());
+		ntPanel.add(PlotWghtL);
+		ntPanel.add(PlotWghtCo);
+		
 		// fifth row
 		ntPanel.add(NTupleNumL);
 		ntPanel.add(NTupleNumT);
@@ -299,6 +306,10 @@ public class NTParams extends Frame implements Serializable {
 		return Integer.parseInt((String) NTupleFixCo.getSelectedItem());
 	}
 
+	public int getPlotWeightMethod() {
+		return PlotWghtCo.getSelectedIndex();
+	}
+
 	public boolean getTc() {
 		return TempCoC.isSelected();
 	}
@@ -401,8 +412,8 @@ public class NTParams extends Frame implements Serializable {
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// currently we have here only the sensible defaults for two games (2048 vs. other games)
-		// and two agent2 ("TD-Ntuple[-2]" = class TDNTuple[2]Agt):
+		// currently we have here only game-specific defaults for two games (2048 , ConnectFour)
+		// in the case of two agents ("TD-Ntuple[-2]" = class TDNTuple[2]Agt):
 		switch (agentName) {
 		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
@@ -411,7 +422,7 @@ public class NTParams extends Frame implements Serializable {
 			tcInitT.setEnabled(false);
 			tcIntervalT.setText("2");
 			tcIntervalT.setEnabled(false);
-			RandomnessC.setSelected(true);		// consequence: disable TupleType, nTupleNumT, nTupleMaxT
+			RandomnessC.setSelected(true);		// consequence: enable TupleType, nTupleNumT, nTupleMaxT
 			NTupleTypeCo.setSelectedIndex(0);
 			NTupleNumT.setText("10");
 			NTupleFixCo.setSelectedItem(""+1);
@@ -437,4 +448,14 @@ public class NTParams extends Frame implements Serializable {
 		
 	}
 	
+	/**
+	 * Set the combo box list for fixed n-tuple modes
+	 * @param modeList
+	 */
+	public void setFixedCoList(int[] modeList) {
+		NTupleFixCo.removeAllItems();
+		for (int i : modeList)
+			NTupleFixCo.addItem(Integer.toString(i));
+	}
+
 }

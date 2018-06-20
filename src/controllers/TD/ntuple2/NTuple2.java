@@ -323,7 +323,8 @@ public class NTuple2 implements Serializable {
 
 //		if (useIndexList) {		// useIndexList==true is the recommended choice
 			if (!TC || TcImm) {
-				if (!indexList.contains(IndexI)) lut[Index] += dW;				
+				if (!indexList.contains(IndexI)) 
+					lut[Index] += dW;				
 			}		
 			indexList.add(new Integer(IndexI));
 //		} 
@@ -338,20 +339,25 @@ public class NTuple2 implements Serializable {
 			dWArray[Index] += dW;		// /WK/
 	}
 
+	/**
+	 * Side effect: if (TC && TcImm), then tcFactorArray[Index] is also set
+	 * 
+	 * @param Index
+	 * @param delta
+	 * @return
+	 */
 	private double setTcFactor(int Index, double delta) {
-		double tcFactor = 		1;
-
 		if (TC == true) {
 			tcN[Index] += delta;
 			tcA[Index] += Math.abs(delta);
 
 			if (TcImm == true) {
-				tcFactor = (double) Math.abs(tcN[Index]) / tcA[Index];
-			} else {
-				tcFactor = tcFactorArray[Index];
-			}
+				tcFactorArray[Index] = (double) Math.abs(tcN[Index]) / tcA[Index];
+			} 
+			return tcFactorArray[Index];
+		} else {
+			return 1;
 		}
-		return tcFactor;
 	}
 	
 	// currently not used
@@ -393,6 +399,10 @@ public class NTuple2 implements Serializable {
 
 	public double[] getWeights() {
 		return lut;
+	}
+	
+	public double[] getTcFactorArray() {
+		return tcFactorArray;
 	}
 
 	public void clearIndices() {
@@ -436,6 +446,11 @@ public class NTuple2 implements Serializable {
 		return lut.length;
 	}
 
+	/**
+	 * Is called only in case (TC && !tcImm) 
+	 * 
+	 * @see TDNTuple2Agt#trainAgent(StateObservation)
+	 */
 	public void updateTC() {
 		if (TC == true) {
 
@@ -446,7 +461,7 @@ public class NTuple2 implements Serializable {
 			for (int i = 0; i < lut.length; i++) {
 				tcFactorArray[i] = (double) Math.abs(tcN[i]) / tcA[i];
 				//if (NEW_WK) tcFactorArray[i] *= tcDampArray[i]; 
-				lut[i] += tcFactorArray[i]* dWArray[i];
+				lut[i] += tcFactorArray[i]* dWArray[i];				// ??correct to update lut here?? TODO
 				dWArray[i]=0.0;
 			}
 		}
