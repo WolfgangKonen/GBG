@@ -280,16 +280,20 @@ public class TSAgentManager {
 
         //create table with data
         JTable table2 = new JTable(rowData2, columnNames2);
+        JTable table3 = new JTable(rowData2, columnNames2);
 
         //add the table to the frame
         JFrame frame = new JFrame();
-        frame.add(new JScrollPane(table), BorderLayout.CENTER);
-        frame.add(new JScrollPane(table2), BorderLayout.SOUTH);
-        frame.validate();
+        Container c  = frame.getContentPane();
+        c.setLayout(new GridLayout(3,0));
+        c.add(new JScrollPane(table));
+        c.add(new JScrollPane(table2));
+        c.add(new JScrollPane(table3));
 
         frame.setTitle("Tournament Statistics");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.pack();
+        //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setSize(1000,1000);
+        //frame.pack();
         frame.setVisible(true);
     }
 
