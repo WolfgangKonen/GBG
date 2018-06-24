@@ -158,6 +158,10 @@ public class TSAgentManager {
                 teamPlayed[0].addWonGame();
                 teamPlayed[1].addLostGame();
             }
+            if (type == 1){
+                teamPlayed[0].addTieGame();
+                teamPlayed[1].addTieGame();
+            }
             if (type == 2){
                 teamPlayed[0].addLostGame();
                 teamPlayed[1].addWonGame();
@@ -198,7 +202,7 @@ public class TSAgentManager {
             TSAgent a = mAgents.get(id);
             System.out.print(TAG);
             System.out.print("AgentName: "+a.getName()+" ");
-            System.out.print("GamesWon: "+a.getCountWonGames()+" GamesLost: "+a.getCountLostGames());
+            System.out.print("GamesWon: "+a.getCountWonGames()+" GamesTie: "+a.getCountTieGames()+" GamesLost: "+a.getCountLostGames());
             System.out.println();
         }
     }
@@ -212,7 +216,7 @@ public class TSAgentManager {
     }
 
     /**
-     *  +++ STAISTIK +++
+     *  +++ STATISTIK +++
      */
 
     public void makeStats() {
@@ -220,28 +224,41 @@ public class TSAgentManager {
         /** Table 1 */
         // headers for the table
         String agenten[] = getNamesAgentsSelected();
-        String[] columnNames = new String[agenten.length+1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
-        columnNames[0] = "Y vs X";
-        System.arraycopy(agenten, 0, columnNames, 1, agenten.length);
+        String[] columnNames1 = new String[agenten.length+1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
+        columnNames1[0] = "Y vs X";
+        System.arraycopy(agenten, 0, columnNames1, 1, agenten.length);
 
-        String empty = "null";
+        final float faktorWin = 1.0f;
+        final float faktorTie = 0.5f;
+        final float faktorLos = 0.0f;
+
+        final String empty = "null";
         int game = 0;
-        Object[][] rowData = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
+        Object[][] rowData1 = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
+        Object[][] rowData3 = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
         for (int i=0; i<getNumAgentsSelected(); i++) {
-            rowData[i][0] = getNamesAgentsSelected()[i];
+            rowData1[i][0] = getNamesAgentsSelected()[i];
+            rowData3[i][0] = getNamesAgentsSelected()[i];
             for (int j=0; j<getNumAgentsSelected(); j++) {
                 if (i==j) {
-                    rowData[i][j+1] = empty;
+                    rowData1[i][j+1] = empty;
+                    rowData3[i][j+1] = empty;
                 }
                 else {
-                    rowData[i][j+1] = "W:"+gameResult[game][0]+" | T:"+gameResult[game][1]+" | L:"+gameResult[game][2];
+                    rowData1[i][j+1] = "W:"+gameResult[game][0]+" | T:"+gameResult[game][1]+" | L:"+gameResult[game][2];
+                    float score = 0;
+                    score += gameResult[game][0] * faktorWin;
+                    score += gameResult[game][1] * faktorTie;
+                    score += gameResult[game][2] * faktorLos;
+                    rowData3[i][j+1] = ""+score;
                     game++;
                 }
             }
         }
 
         //create table with data
-        JTable table = new JTable(rowData, columnNames);
+        JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
+        JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
 
         /** Table 2 */
         // headers for the table
@@ -279,16 +296,15 @@ public class TSAgentManager {
         }
 
         //create table with data
-        JTable table2 = new JTable(rowData2, columnNames2);
-        JTable table3 = new JTable(rowData2, columnNames2);
+        JTable tableTimeDetail = new JTable(rowData2, columnNames2);
 
         //add the table to the frame
         JFrame frame = new JFrame();
         Container c  = frame.getContentPane();
         c.setLayout(new GridLayout(3,0));
-        c.add(new JScrollPane(table));
-        c.add(new JScrollPane(table2));
-        c.add(new JScrollPane(table3));
+        c.add(new JScrollPane(tableMatrixWTL));
+        c.add(new JScrollPane(tableMatrixSCR));
+        c.add(new JScrollPane(tableTimeDetail));
 
         frame.setTitle("Tournament Statistics");
         //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

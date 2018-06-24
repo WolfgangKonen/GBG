@@ -7,6 +7,7 @@ public class TSAgent {
     private String agent;
     private int won;
     private int lost;
+    private int tie;
     public JCheckBox guiCheckBox;
 
     public TSAgent(String name, String agent, JCheckBox checkbox) {
@@ -25,6 +26,10 @@ public class TSAgent {
         lost++;
     }
 
+    public void addTieGame(){
+        tie++;
+    }
+
     public String getName(){
         return name;
     }
@@ -39,6 +44,10 @@ public class TSAgent {
 
     public int getCountLostGames(){
         return lost;
+    }
+
+    public int getCountTieGames(){
+        return tie;
     }
 
 }
