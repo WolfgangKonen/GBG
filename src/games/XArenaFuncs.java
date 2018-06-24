@@ -806,8 +806,9 @@ public class XArenaFuncs
 					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
 					long endT = System.currentTimeMillis();
 					long endTNano = System.nanoTime();
-					System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
-					System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+					// Debug Printlines
+					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
+					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
 					nextTimes[0].measuredTimesInNS.add(endTNano-startTNano);
 
 					so.advance(actBest);
