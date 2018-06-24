@@ -187,7 +187,7 @@ public class GameBoardHex implements GameBoard {
 	
     private void createAndShowGUI() {
         gamePanel = new HexPanel();
-        m_frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        //m_frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         
         m_frame.getContentPane().setBackground(Color.black);
         Container content = m_frame.getContentPane();
