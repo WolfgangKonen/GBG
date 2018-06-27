@@ -39,7 +39,7 @@ import tools.Types;
  * Run this class for example from {@code main} in 
  * {@link LaunchArenaTTT} or {@link LaunchTrainTTT} for the TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  */
 abstract public class Arena extends JPanel implements Runnable {
 	public enum Task {PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
@@ -200,7 +200,7 @@ abstract public class Arena extends JPanel implements Runnable {
 					int roundWinningAgent = m_xfun.singleTournamentCompeteBase(gb, nextTeam, nextTimes, m_xab);
 					// enter winner
 					if (roundWinningAgent > 40) {
-						System.out.println(TAG+"ERROR :: singleTournamentCompeteBase returned error value 42");
+						System.out.println(TAG+"ERROR :: singleTournamentCompeteBase returned error value "+roundWinningAgent);
 					}
 					else {
 						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2

@@ -67,7 +67,7 @@ import tools.Types;
  * Known classes having {@link XArenaFuncs} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
  * 
  */
 public class XArenaFuncs 
@@ -823,8 +823,9 @@ public class XArenaFuncs
 					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
 					long endT = System.currentTimeMillis();
 					long endTNano = System.nanoTime();
-					System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
-					System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+					// Debug Printlines
+					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
+					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
 					nextTimes[1].measuredTimesInNS.add(endTNano-startTNano);
 
 					so.advance(actBest);
@@ -1055,7 +1056,7 @@ public class XArenaFuncs
 		for (int c=0; c<competitionNum; c++) { // durchlauf der einzelnen competitions
 			int player;
 
-			// beide agenten werden für die games jeder competition neu initialisiert
+			// beide agenten werden fï¿½r die games jeder competition neu initialisiert
 			try {
 				paX = this.constructAgent(0,AgentX, xab);
 				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);
