@@ -954,12 +954,17 @@ public class XArenaFuncs
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
 
-				// todo manipulation of selected agent in XrenaButtons!
+				// to do manipulation of selected agent in XrenaButtons!
 				xab.enableTournamentRemoteData(nextTeam);
-				// todo write custom compete() function
-				// todo add time measurement and save data somewhere
-				// todo zeitauswertung auch pro agent global, nicht nur pro spiel/agent ?
-				// todo data evaluation and visualization
+				// to do write custom compete() function - DONE
+				// to do add basic time measurement and save data somewhere - DONE
+				// todo zeitauswertung auch pro agent global, nicht nur pro spiel/agent?
+				// to do basic data evaluation and visualization - DONE
+				// todo load agent from disk
+				// todo vis. add round times (arithm. + median?)
+				// todo check advanced time measurement
+				// todo add gui scaling to TS gui + vis
+				// todo vis. auch elo/glicko/bayes elo berechnen und anzeigen?
 
 				PlayAgent[] paVector = fetchAgents(xab);
 
