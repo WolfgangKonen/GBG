@@ -964,7 +964,8 @@ public class XArenaFuncs
 				// todo vis. add round times (arithm. + median?)
 				// todo check advanced time measurement
 				// todo add gui scaling to TS gui + vis
-				// todo vis. auch elo/glicko/bayes elo berechnen und anzeigen?
+				// todo vis. auch elo/glicko/bayesElo berechnen und anzeigen?
+				// todo logmanager oder andere persistierung implementieren
 
 				PlayAgent[] paVector = fetchAgents(xab);
 
