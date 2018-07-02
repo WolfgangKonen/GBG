@@ -1,6 +1,7 @@
 package TournamentSystem;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -308,6 +309,9 @@ public class TSAgentManager {
 
         //create table with data
         JTable tableTimeDetail = new JTable(rowData2, columnNames2);
+        // right align column entries
+        DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
+        renderer.setHorizontalAlignment( JLabel.RIGHT );
 
         //add the table to the frame
         JFrame frame = new JFrame();
