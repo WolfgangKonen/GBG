@@ -4,10 +4,52 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TSTimeStorage {
-    public ArrayList<Long> measuredTimesInNS = new ArrayList<>();
+    private ArrayList<Long> measuredTimesInNS = new ArrayList<>();
+    private ArrayList<Long> roundTimesInNS = new ArrayList<>();
+    private ArrayList<Long> tmpRoundTimesInNS = new ArrayList<>();
 
     public double nanoToMS(double ns) {
         return ns/(1*Math.pow(10,6));
+    }
+
+    public void addNewTimeNS(long value) {
+        measuredTimesInNS.add(value);
+        tmpRoundTimesInNS.add(value);
+    }
+
+    public void roundFinished() {
+        long roundTime = 0;
+        for (long time : tmpRoundTimesInNS){
+            roundTime += time;
+        }
+        roundTimesInNS.add(roundTime);
+
+        tmpRoundTimesInNS = new ArrayList<>();
+    }
+
+    public double getAverageRoundTimeMS() {
+        long avRound = 0;
+        for (long val : roundTimesInNS)
+            avRound += val;
+        avRound /= roundTimesInNS.size();
+        return nanoToMS(avRound);
+    }
+
+    public double getMedianRoundTimeMS() {
+        long median;
+        long[] tmp = new long[roundTimesInNS.size()];
+
+        for (int i=0; i<roundTimesInNS.size(); i++)
+            tmp[i] = roundTimesInNS.get(i);
+
+        Arrays.sort(tmp);
+
+        if (tmp.length % 2 == 0)
+            median = (tmp[tmp.length/2] + tmp[tmp.length/2 - 1])/2;
+        else
+            median = tmp[tmp.length/2];
+
+        return nanoToMS(median);
     }
 
     public double getAverageTimeForGameNS() {
@@ -34,13 +76,12 @@ public class TSTimeStorage {
 
     public double getMedianTimeForGameNS() {
         double median;
-
         long[] tmp = getSortedArray();
 
         if (tmp.length % 2 == 0)
-            median = ((double)tmp[tmp.length/2] + (double)tmp[tmp.length/2 - 1])/2;
+            median = (tmp[tmp.length/2] + tmp[tmp.length/2 - 1])/2;
         else
-            median = (double)tmp[tmp.length/2];
+            median = tmp[tmp.length/2];
 
         return median;
     }

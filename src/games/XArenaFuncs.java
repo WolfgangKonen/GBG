@@ -809,7 +809,7 @@ public class XArenaFuncs
 					// Debug Printlines
 					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
 					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
-					nextTimes[0].measuredTimesInNS.add(endTNano-startTNano);
+					nextTimes[0].addNewTimeNS(endTNano-startTNano);
 
 					so.advance(actBest);
 					Player = -1;
@@ -826,7 +826,7 @@ public class XArenaFuncs
 					// Debug Printlines
 					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
 					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
-					nextTimes[1].measuredTimesInNS.add(endTNano-startTNano);
+					nextTimes[1].addNewTimeNS(endTNano-startTNano);
 
 					so.advance(actBest);
 					Player = +1;

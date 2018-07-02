@@ -166,6 +166,9 @@ public class TSAgentManager {
                 teamPlayed[0].addLostGame();
                 teamPlayed[1].addWonGame();
             }
+
+            timeStorage[nextGame][0].roundFinished();
+            timeStorage[nextGame][1].roundFinished();
         }
 
         if (gameResult[nextGame][0]+gameResult[nextGame][1]+gameResult[nextGame][2] == numberOfGames)
@@ -268,8 +271,11 @@ public class TSAgentManager {
                 "Agent Typ",
                 "schnellster Zug",
                 "langsamster Zug",
-                "durchschnittliche Zeit",
-                "median Zeit"
+                //"durchschnittliche Zeit",
+                "drchschn. Zug",
+                "median Zug",
+                "drchschn. Runde",
+                "median Runde"
         };
 
         final int numAgentsPerRound = 2;
@@ -287,10 +293,15 @@ public class TSAgentManager {
                 rowData2[pos][3] = ""+timeStorage[i][j].getMinTimeForGameMS()+"ms";
                 // "langsamster Zug"
                 rowData2[pos][4] = ""+timeStorage[i][j].getMaxTimeForGameMS()+"ms";
-                // "durchschnittliche Zeit"
+                // "durchschnittliche Zeit Zug"
                 rowData2[pos][5] = ""+timeStorage[i][j].getAverageTimeForGameMS()+"ms";
-                // "median Zeit"
+                // "median Zeit Zug"
                 rowData2[pos][6] = ""+timeStorage[i][j].getMedianTimeForGameMS()+"ms";
+                // "durchschnittliche Zeit Runde"
+                rowData2[pos][7] = ""+timeStorage[i][j].getAverageRoundTimeMS()+"ms";
+                // "median Zeit Runde"
+                rowData2[pos][8] = ""+timeStorage[i][j].getMedianRoundTimeMS()+"ms";
+
                 pos++;
             }
         }
