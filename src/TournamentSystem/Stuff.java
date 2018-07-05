@@ -1,5 +1,7 @@
 package TournamentSystem;
 
+import org.tc33.jheatchart.HeatChart;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -39,11 +41,43 @@ public class Stuff {
         JTable table = new JTable(data, columns);
         JTable table2 = new JTable(data, columns);
 
+        /** Make Heatmap
+         * http://www.tc33.org/jheatchart/javadoc/
+         * http://www.javaheatmap.com/
+         */
+        // Create some dummy data.
+        double[][] dataHM = {
+                {3,2,3,4,5,6},
+                {2,1,4,5,6,7},
+                {3,4,5,6,7,6},
+                {4,5,6,7,6,5}
+        };
+
+        // Step 1: Create our heat map chart using our data.
+        HeatChart map = new HeatChart(dataHM);
+
+        // Step 2: Customise the chart.
+        map.setTitle("This is my heat chart title");
+        map.setXAxisLabel("X Axis");
+        map.setYAxisLabel("Y Axis");
+        Object[] tmpX = {"Agent1","Agent2","Agent3","Agent4","Agent5","Agent6"};
+        map.setXValues(tmpX);
+        Object[] tmpY = {"Agent1","Agent2","Agent3","Agent4"};
+        map.setYValues(tmpY);
+
+        // Step 3: Output the chart to a file.
+        //map.saveToFile(new File("java-heat-chart.png"));
+        Image hm = map.getChartImage();
+
+        /** End Heatmap*/
+
         //add the table to the frame
         JFrame frame = new JFrame();
-        frame.add(new JScrollPane(table), BorderLayout.CENTER);
-        frame.add(new JScrollPane(table2), BorderLayout.SOUTH);
-        frame.validate();
+        Container c  = frame.getContentPane();
+        c.setLayout(new GridLayout(3,0));
+        c.add(new JScrollPane(table));
+        c.add(new JScrollPane(table2));
+        c.add(new JLabel(new ImageIcon(hm)));
 
         frame.setTitle("Table Example");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
