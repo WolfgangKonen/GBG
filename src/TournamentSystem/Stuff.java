@@ -47,10 +47,10 @@ public class Stuff {
          */
         // Create some dummy data.
         double[][] dataHM = {
-                {3,2,3,4,5,6},
-                {2,1,4,5,6,7},
-                {3,4,5,6,7,6},
-                {4,5,6,7,6,5}
+                {3,2,0,4,5,6},
+                {2,1,4,0,6,7},
+                {3,4,5,6,0,6},
+                {4,5,6,7,6,0}
         };
 
         // Step 1: Create our heat map chart using our data.
@@ -64,6 +64,7 @@ public class Stuff {
         map.setXValues(tmpX);
         Object[] tmpY = {"Agent1","Agent2","Agent3","Agent4"};
         map.setYValues(tmpY);
+        map.setCellSize(new Dimension(50,50));
 
         // Step 3: Output the chart to a file.
         //map.saveToFile(new File("java-heat-chart.png"));

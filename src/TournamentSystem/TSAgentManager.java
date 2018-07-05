@@ -1,5 +1,7 @@
 package TournamentSystem;
 
+import org.tc33.jheatchart.HeatChart;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
@@ -240,6 +242,7 @@ public class TSAgentManager {
         int game = 0;
         Object[][] rowData1 = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
         Object[][] rowData3 = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
+        double[][] rowDataHM = new double[getNumAgentsSelected()][getNumAgentsSelected()];
         for (int i=0; i<getNumAgentsSelected(); i++) {
             rowData1[i][0] = getNamesAgentsSelected()[i];
             rowData3[i][0] = getNamesAgentsSelected()[i];
@@ -247,6 +250,7 @@ public class TSAgentManager {
                 if (i==j) {
                     rowData1[i][j+1] = empty;
                     rowData3[i][j+1] = empty;
+                    rowDataHM[i][j] = -1;
                 }
                 else {
                     rowData1[i][j+1] = "W:"+gameResult[game][0]+" | T:"+gameResult[game][1]+" | L:"+gameResult[game][2];
@@ -255,6 +259,7 @@ public class TSAgentManager {
                     score += gameResult[game][1] * faktorTie;
                     score += gameResult[game][2] * faktorLos;
                     rowData3[i][j+1] = ""+score;
+                    rowDataHM[i][j] = score;
                     game++;
                 }
             }
@@ -263,6 +268,21 @@ public class TSAgentManager {
         //create table with data
         JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
         JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
+
+        // create Score HeatMap
+        HeatChart map = new HeatChart(rowDataHM);
+        map.setTitle("white = worst | black = best");
+        //map.setXAxisLabel("X Axis");
+        //map.setYAxisLabel("Y Axis");
+        //Object[] tmpX = {"Agent1","Agent2","Agent3","Agent4","Agent5","Agent6"};
+        //map.setXValues(tmpX);
+        //Object[] tmpY = {"Agent1","Agent2","Agent3","Agent4"};
+        //map.setYValues(tmpY);
+        Object[] agentNames = getNamesAgentsSelected();
+        map.setXValues(agentNames);
+        map.setYValues(agentNames);
+        map.setCellSize(new Dimension(45,45));
+        Image hm = map.getChartImage();
 
         /** Table 2 */
         // headers for the table
@@ -316,9 +336,10 @@ public class TSAgentManager {
         //add the table to the frame
         JFrame frame = new JFrame();
         Container c  = frame.getContentPane();
-        c.setLayout(new GridLayout(3,0));
+        c.setLayout(new GridLayout(4,0));
         c.add(new JScrollPane(tableMatrixWTL));
         c.add(new JScrollPane(tableMatrixSCR));
+        c.add(new JLabel(new ImageIcon(hm)));
         c.add(new JScrollPane(tableTimeDetail));
 
         frame.setTitle("Tournament Statistics");
