@@ -1,12 +1,15 @@
 package TournamentSystem;
 
+import controllers.PlayAgent;
 import games.Arena;
 import games.ArenaTrain;
+import tools.MessageBox;
 import tools.Types;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class TournamentsystemGUI2 extends JFrame{
@@ -22,11 +25,18 @@ public class TournamentsystemGUI2 extends JFrame{
     private JButton startButton;
     private JPanel mJPanel;
     private JTextField gameNumTextField;
+    private JButton loadAgentFromDiskButton;
+    private JCheckBox diskAgent1CheckBox;
+    private JCheckBox diskAgent2CheckBox;
+    private JCheckBox diskAgent3CheckBox;
+    private JCheckBox addNRandomMovesCheckBox;
+    private JTextField a2TextField;
 
     //private GameBoard gameBoard;
     private Arena mArena;
     private TSAgentManager mTSAgentManager;
     private final String TAG = "[TSAgent] ";
+    private ArrayList<PlayAgent> diskAgents = new ArrayList<>();
 
     public TournamentsystemGUI2(Arena mArena) { //GameBoard gameBoard) {
         super("TournamentsystemGUI2");
@@ -58,6 +68,37 @@ public class TournamentsystemGUI2 extends JFrame{
             }
         });
 
+        loadAgentFromDiskButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadAgentFromDisk();
+            }
+        });
+    }
+
+    private void loadAgentFromDisk() {
+        PlayAgent playAgent = null;
+
+        try {
+            playAgent = mArena.tdAgentIO.loadGBGAgent(null); // opens file dialog to locate agent
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // todo transfer loaded agents to GameManager or store there in the first place
+        // todo add logic to turnament gen functions to add agents
+        // todo add logic to compete functions to let loaded agents play
+
+        if (playAgent == null) {
+            String str = "No Agent loaded!";
+            MessageBox.show(mArena,"ERROR: " + str,"Load Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            System.out.println(TAG+"INFO :: loading from Disk successful for agent: "+playAgent.getName()+" with AgentState: "+playAgent.getAgentState());
+            //...
+            diskAgents.add(playAgent);
+            System.out.println(TAG+"Number of disk agents loaded into TS: "+diskAgents.size());
+            //...
+        }
     }
 
     private void playPressed(){
