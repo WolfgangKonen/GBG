@@ -19,6 +19,10 @@ public class TSAgentManager {
     private int nextGame = 0;
     private int numberOfGames = -1;
 
+    public static final float faktorWin = 1.0f;
+    public static final float faktorTie = 0.5f;
+    public static final float faktorLos = 0.0f;
+
     public TSAgentManager() {
         mAgents = new ArrayList<>();
     }
@@ -208,7 +212,8 @@ public class TSAgentManager {
             TSAgent a = mAgents.get(id);
             System.out.print(TAG);
             System.out.print("AgentName: "+a.getName()+" ");
-            System.out.print("GamesWon: "+a.getCountWonGames()+" GamesTie: "+a.getCountTieGames()+" GamesLost: "+a.getCountLostGames());
+            System.out.print("GamesWon: "+a.getCountWonGames()+" GamesTie: "+a.getCountTieGames()+" GamesLost: "+a.getCountLostGames()+" | ");
+            System.out.print("AgentScore: "+a.getAgentScore());
             System.out.println();
         }
     }
@@ -227,16 +232,12 @@ public class TSAgentManager {
 
     public void makeStats() {
         // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
-        /** Table 1 */
+        /** Table | WTL und Score*/
         // headers for the table
         String agenten[] = getNamesAgentsSelected();
         String[] columnNames1 = new String[agenten.length+1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
         columnNames1[0] = "Y vs X";
         System.arraycopy(agenten, 0, columnNames1, 1, agenten.length);
-
-        final float faktorWin = 1.0f;
-        final float faktorTie = 0.5f;
-        final float faktorLos = 0.0f;
 
         final String empty = "null";
         int game = 0;
@@ -269,6 +270,7 @@ public class TSAgentManager {
         JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
         JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
 
+        /** Score Heatmap */
         // create Score HeatMap
         HeatChart map = new HeatChart(rowDataHM);
         map.setTitle("white = worst | black = best");
@@ -284,7 +286,48 @@ public class TSAgentManager {
         map.setCellSize(new Dimension(45,45));
         Image hm = map.getChartImage();
 
-        /** Table 2 */
+        /** Agent Score Table*/
+        String[] columnNames4 = {
+                "Rank",
+                "Agent",
+                "Games Won",
+                "Games Tie",
+                "Games Lost",
+                "WTL Score"
+        };
+        Object[][] rowData4 = new Object[getNumAgentsSelected()][columnNames4.length];
+        TSAgent[] rankAgents = new TSAgent[getNumAgentsSelected()];
+        int[] selectedAgents = getIDAgentsSelected();
+        for (int i=0; i<selectedAgents.length; i++) {
+            rankAgents[i] = mAgents.get(selectedAgents[i]);
+        }
+
+        // sort rankAgent array
+        //...
+
+        // put data into table
+        for (int i=0; i<rowData4.length; i++) {
+            // "Rank",
+            rowData4[i][0] = ""+(i+1);
+            // "Agent",
+            rowData4[i][1] = rankAgents[i].getName();
+            // "Games Won",
+            rowData4[i][2] = rankAgents[i].getCountWonGames();
+            // "Games Tie",
+            rowData4[i][3] = rankAgents[i].getCountTieGames();
+            // "Games Lost",
+            rowData4[i][4] = rankAgents[i].getCountLostGames();
+            // "WTL Score"
+            rowData4[i][5] = rankAgents[i].getAgentScore();
+        }
+
+        //create table with data
+        JTable tableAgentScore = new JTable(rowData4, columnNames4);
+        // center align column entries
+        DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableAgentScore.getDefaultRenderer(Object.class);
+        renderer.setHorizontalAlignment( JLabel.CENTER );
+
+        /** Table | Zeiten*/
         // headers for the table
         String[] columnNames2 = {
                 "Spiel",
@@ -333,13 +376,14 @@ public class TSAgentManager {
         DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
         renderer.setHorizontalAlignment( JLabel.RIGHT );
 
-        //add the table to the frame
+        /** add the table to the frame */
         JFrame frame = new JFrame();
         Container c  = frame.getContentPane();
-        c.setLayout(new GridLayout(4,0));
+        c.setLayout(new GridLayout(5,0));
         c.add(new JScrollPane(tableMatrixWTL));
         c.add(new JScrollPane(tableMatrixSCR));
         c.add(new JLabel(new ImageIcon(hm)));
+        c.add(new JScrollPane(tableAgentScore));
         c.add(new JScrollPane(tableTimeDetail));
 
         frame.setTitle("Tournament Statistics");

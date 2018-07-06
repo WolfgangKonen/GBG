@@ -2,6 +2,10 @@ package TournamentSystem;
 
 import javax.swing.*;
 
+import static TournamentSystem.TSAgentManager.faktorLos;
+import static TournamentSystem.TSAgentManager.faktorTie;
+import static TournamentSystem.TSAgentManager.faktorWin;
+
 public class TSAgent {
     private String name;
     private String agent;
@@ -48,6 +52,11 @@ public class TSAgent {
 
     public int getCountTieGames(){
         return tie;
+    }
+
+    public float getAgentScore() {
+        float agentScore = getCountWonGames()*faktorWin+getCountTieGames()*faktorTie+getCountLostGames()*faktorLos;
+        return agentScore;
     }
 
 }
