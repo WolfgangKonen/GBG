@@ -7,6 +7,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class TSAgentManager {
     public ArrayList<TSAgent> mAgents;
@@ -283,7 +284,8 @@ public class TSAgentManager {
         Object[] agentNames = getNamesAgentsSelected();
         map.setXValues(agentNames);
         map.setYValues(agentNames);
-        map.setCellSize(new Dimension(45,45));
+        map.setCellSize(new Dimension(65,45));
+        //map.setTitleFont();
         Image hm = map.getChartImage();
 
         /** Agent Score Table*/
@@ -302,8 +304,26 @@ public class TSAgentManager {
             rankAgents[i] = mAgents.get(selectedAgents[i]);
         }
 
-        // sort rankAgent array
-        //...
+        // sort rankAgent array by agent WTL score
+        /*
+        Arrays.sort(rankAgents, new Comparator<TSAgent>() {
+            @Override
+            public int compare(final TSAgent entry1, final TSAgent entry2) {
+                if (entry1.getAgentScore()>entry2.getAgentScore())
+                    return -1;
+                if (entry1.getAgentScore()<entry2.getAgentScore())
+                    return +1;
+                return 0;
+            }
+        });
+        */
+        Arrays.sort(rankAgents, (entry1, entry2) -> { // same as above
+            if (entry1.getAgentScore()>entry2.getAgentScore())
+                return -1;
+            if (entry1.getAgentScore()<entry2.getAgentScore())
+                return +1;
+            return 0;
+        });
 
         // put data into table
         for (int i=0; i<rowData4.length; i++) {
@@ -373,16 +393,22 @@ public class TSAgentManager {
         //create table with data
         JTable tableTimeDetail = new JTable(rowData2, columnNames2);
         // right align column entries
-        DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
-        renderer.setHorizontalAlignment( JLabel.RIGHT );
+        DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
+        renderer2.setHorizontalAlignment( JLabel.RIGHT );
 
         /** add the table to the frame */
         JFrame frame = new JFrame();
         Container c  = frame.getContentPane();
         c.setLayout(new GridLayout(5,0));
         c.add(new JScrollPane(tableMatrixWTL));
+        /*
+        JScrollPane js = new JScrollPane();
+        js.setPreferredSize(tableMatrixWTL.getPreferredSize());
+        js.setViewportView(tableMatrixWTL);
+        c.add(js);
+        */
         c.add(new JScrollPane(tableMatrixSCR));
-        c.add(new JLabel(new ImageIcon(hm)));
+        c.add(new JScrollPane(new JLabel(new ImageIcon(hm))));
         c.add(new JScrollPane(tableAgentScore));
         c.add(new JScrollPane(tableTimeDetail));
 

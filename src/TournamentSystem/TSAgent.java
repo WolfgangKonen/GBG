@@ -59,4 +59,8 @@ public class TSAgent {
         return agentScore;
     }
 
+    public String toString() {
+        return "n:"+getName()+" t:"+getAgentType();
+    }
+
 }
