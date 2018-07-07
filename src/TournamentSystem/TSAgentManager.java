@@ -4,6 +4,7 @@ import org.tc33.jheatchart.HeatChart;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -233,7 +234,9 @@ public class TSAgentManager {
 
     public void makeStats() {
         // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
-        /** Table | WTL und Score*/
+        /**
+         * Table | WTL und Score
+         */
         // headers for the table
         String agenten[] = getNamesAgentsSelected();
         String[] columnNames1 = new String[agenten.length+1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
@@ -269,12 +272,16 @@ public class TSAgentManager {
 
         //create table with data
         JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
+        DefaultTableModel defTableMatrixWTL = new DefaultTableModel(rowData1, columnNames1);
         JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
+        DefaultTableModel defTableMatrixSCR = new DefaultTableModel(rowData3, columnNames1);
 
-        /** Score Heatmap */
+        /**
+         * Score Heatmap
+         */
         // create Score HeatMap
         HeatChart map = new HeatChart(rowDataHM);
-        map.setTitle("white = worst | black = best");
+        //map.setTitle("white = worst | black = best");
         //map.setXAxisLabel("X Axis");
         //map.setYAxisLabel("Y Axis");
         //Object[] tmpX = {"Agent1","Agent2","Agent3","Agent4","Agent5","Agent6"};
@@ -284,11 +291,13 @@ public class TSAgentManager {
         Object[] agentNames = getNamesAgentsSelected();
         map.setXValues(agentNames);
         map.setYValues(agentNames);
-        map.setCellSize(new Dimension(65,45));
+        map.setCellSize(new Dimension(25,25));
         //map.setTitleFont();
         Image hm = map.getChartImage();
 
-        /** Agent Score Table*/
+        /**
+         * Agent Score Table
+         */
         String[] columnNames4 = {
                 "Rank",
                 "Agent",
@@ -343,11 +352,14 @@ public class TSAgentManager {
 
         //create table with data
         JTable tableAgentScore = new JTable(rowData4, columnNames4);
+        DefaultTableModel defTableAgentScore = new DefaultTableModel(rowData4, columnNames4);
         // center align column entries
         DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableAgentScore.getDefaultRenderer(Object.class);
         renderer.setHorizontalAlignment( JLabel.CENTER );
 
-        /** Table | Zeiten*/
+        /**
+         * Table | Zeiten
+         */
         // headers for the table
         String[] columnNames2 = {
                 "Spiel",
@@ -392,21 +404,17 @@ public class TSAgentManager {
 
         //create table with data
         JTable tableTimeDetail = new JTable(rowData2, columnNames2);
+        DefaultTableModel defTableTimeDetail = new DefaultTableModel(rowData2, columnNames2);
         // right align column entries
         DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
         renderer2.setHorizontalAlignment( JLabel.RIGHT );
 
-        /** add the table to the frame */
+        /*
+        // add the table to the frame
         JFrame frame = new JFrame();
         Container c  = frame.getContentPane();
         c.setLayout(new GridLayout(5,0));
         c.add(new JScrollPane(tableMatrixWTL));
-        /*
-        JScrollPane js = new JScrollPane();
-        js.setPreferredSize(tableMatrixWTL.getPreferredSize());
-        js.setViewportView(tableMatrixWTL);
-        c.add(js);
-        */
         c.add(new JScrollPane(tableMatrixSCR));
         c.add(new JScrollPane(new JLabel(new ImageIcon(hm))));
         c.add(new JScrollPane(tableAgentScore));
@@ -417,6 +425,12 @@ public class TSAgentManager {
         frame.setSize(1000,1000);
         //frame.pack();
         frame.setVisible(true);
+        */
+
+        /**
+         * TS Results in a window
+         */
+        TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm));
     }
 
 }

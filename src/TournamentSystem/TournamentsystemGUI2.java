@@ -49,7 +49,7 @@ public class TournamentsystemGUI2 extends JFrame{
         this.mArena = mArena;
         mTSAgentManager = new TSAgentManager();
 
-        mTSAgentManager.addAgent( "randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox);
+        mTSAgentManager.addAgent("randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox);
         mTSAgentManager.addAgent("minimaxCheckBox",   Types.GUI_AGENT_LIST[1], minimaxCheckBox);
         mTSAgentManager.addAgent("maxNCheckBox",      Types.GUI_AGENT_LIST[2], maxNCheckBox);
         mTSAgentManager.addAgent("expectimaxNCheckBox", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox);
