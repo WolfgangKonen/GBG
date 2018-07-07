@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
 
+import controllers.TD.ntuple2.TDNTuple2Agt.EligType;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -373,25 +374,26 @@ public class NTuple2ValueFunc implements Serializable {
 
 		alphaM = ALPHA / (numTuples*equiv.length); 
 
-		// construct new EquivStates object, add it at head of LinkedList eList and remove 
+		// construct new EligStates object, add it at head of LinkedList eList and remove 
 		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):
-		EquivStates elem = new EquivStates(equiv,e);
+		EligStates elem = new EligStates(equiv,e);
 		eList.addFirst(elem);
 		if (eList.size()>horizon) eList.pollLast();
 		
 		// iterate over all list elements in horizon  (h+1 elements from t down to t_0):
-		ListIterator<EquivStates> iter = eList.listIterator();		
+		ListIterator<EligStates> iter = eList.listIterator();		
 		lamFactor=1;  // holds 1, LAMBDA, LAMBDA^2,... in successive passes through while-loop
 		while(iter.hasNext()) {
 			elem=iter.next();
 			equiv=elem.equiv;
-			assert (lamFactor >= Types.TD_HORIZONCUT) : "Error: lamFactor < TD_HORIZONCUT";
+			assert (lamFactor >= tdAgt.getParTD().getHorizonCut()) 
+					: "Error: lamFactor < ParTD.getHorizonCut";
 			e = lamFactor*elem.sigDeriv;
 			for (i = 0; i < numTuples; i++) {
 				nTuples[player][i].clearIndices();
 				for (j = 0; j < equiv.length; j++) {
 //					System.out.print("(i,j)=("+i+","+j+"):  ");		//debug
-					nTuples[player][i].updateNew(equiv[j], alphaM, delta, e /*, getLambda()*/);
+					nTuples[player][i].updateNew(equiv[j], alphaM, delta, e);
 				}
 			}
 			lamFactor *= getLambda(); 
@@ -399,7 +401,12 @@ public class NTuple2ValueFunc implements Serializable {
 		numLearnActions++;
 	}
 
-	// samine// updating TCfactor for all ntuples after every tcIn games
+	/**
+	 * Is called only in case (TC && !tcImm), but !tcImm is not recommended
+	 * 
+	 * @see TDNTuple2Agt#trainAgent(StateObservation)
+	 */
+	@Deprecated
 	public void updateTC() {
 		int i, k;
 			for (i = 0; i < numTuples; i++) {
@@ -456,9 +463,20 @@ public class NTuple2ValueFunc implements Serializable {
 		return tdAgt.getParNT().getUSESYMMETRY();
 	}
 
-	public void clearEquivList() {
+	public void clearEligList() {
 		eList.clear();
 	}
+	
+	public void clearEligList(EligType m_elig) {
+		switch(m_elig) {
+		case STANDARD: 
+			break;
+		case RESET: 
+			eList.clear();
+			break;
+		}
+	}
+
 	
 	public int getHorizon() {
 		return horizon;
@@ -468,7 +486,7 @@ public class NTuple2ValueFunc implements Serializable {
 		if (getLambda()==0.0) {
 			horizon=1;
 		} else {
-			horizon = 1+(int) (Math.log(Types.TD_HORIZONCUT)/Math.log(getLambda()));
+			horizon = 1+(int) (Math.log(tdAgt.getParTD().getHorizonCut())/Math.log(getLambda()));
 		}		
 	}
 
@@ -481,12 +499,12 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 
-	// class EquivStates is needed in update(int[],int,double,double)
-	private class EquivStates implements Serializable {
+	// class EligStates is needed in update(int[],int,double,double)
+	private class EligStates implements Serializable {
 		int[][] equiv;
 		double sigDeriv;
 		
-		EquivStates(int[][] equiv, double sigDeriv) {
+		EligStates(int[][] equiv, double sigDeriv) {
 			this.equiv=equiv.clone();
 			this.sigDeriv=sigDeriv;
 		}

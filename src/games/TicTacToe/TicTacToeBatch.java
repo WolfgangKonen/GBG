@@ -321,8 +321,8 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 						m_evaluator1.eval(m_PlayAgentX);
 				 		StateObservation so = gb.getDefaultStartState();
 						oe.add(m_evaluator1.getLastResult());								
-						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, 100, gb ,so));
-						om.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, minimax_agent, 1, gb, so));
+						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, so, 100 ,0, gb));
+						om.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, minimax_agent, so, 1, 0, gb));
 						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100));
 						//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);
 						oC.add(1+(or.getVal()-0.9+om.getVal())/2.0);
@@ -676,7 +676,7 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 						m_evaluator2.eval(m_PlayAgentX);
 				 		StateObservation so = gb.getDefaultStartState();
 						oe.add(m_evaluator1.getLastResult());								
-						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, 100, gb, so));
+						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, so, 100, 0, gb));
 						//om.add(competeBoth(m_PlayAgentX, minimax_agent, 1, gb));
 						om.add(m_evaluator2.getLastResult());
 						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100, gb));

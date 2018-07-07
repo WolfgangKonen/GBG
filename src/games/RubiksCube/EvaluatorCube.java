@@ -116,6 +116,8 @@ public class EvaluatorCube extends Evaluator {
  	 				so.resetMoveCounter();
  	 				
  	                while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
+ 	                	// --- the if-branch is just for speedup (definitely no symmetries during eval) ---
+ 	                	// --- but it is no longer really needed since we abandon symmetries also in training ---
  	                	if (pa instanceof TDNTuple2Agt) {
  	 	                    so.advance(((TDNTuple2Agt) pa).getNextAction2SYM(so, false, true, false)); 	                		
  	                	} else {

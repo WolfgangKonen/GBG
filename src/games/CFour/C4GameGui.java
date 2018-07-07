@@ -41,8 +41,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 
 	private static final long serialVersionUID = 12L;
 
-//	// the game buttons and text fields on the right of the window
-//	public C4Buttons c4Buttons;
 //
 //	public C4Menu c4Menu;
 	protected GameBoardC4 gameBoardC4;
@@ -71,28 +69,16 @@ public class C4GameGui extends JPanel implements ListOperation {
 	private Semaphore mutex = new Semaphore(1);
 
 	// Labels for the Values
-	JLabel lValueTitle;
-	JLabel lValueGTV;
-	JLabel lValueAgent;
+	private JLabel lValueTitle;
+	private String lBaseTitle = "Best score (value function)";
+//	JLabel lValueGTV;
+//	JLabel lValueAgent;
 //	JLabel lValueEval;
 
 	// The opening-books are loaded only once to save memory. All agents, that
 	// need them, use the same books.
 //	private final BookSum books = new BookSum();
 
-//	// Possible states
-//	protected enum State {
-//		TRAIN_X, TRAIN_O, TRAIN_EVAL, PLAY, COMPETE, MULTICOMPETE, IDLE, SETBOARD, TESTVALUEFUNC, TESTBESTMOVE, SHOWNTUPLE /* unused */, SETNTUPLE, INSPNTUPLE, MULTITRAIN, EVALUATE, SAVE_X, SAVE_O, SAVE_EVAL, LOAD_X, LOAD_O, LOAD_EVAL, SAVE_WEIGHTS_X, SAVE_WEIGHTS_O, SAVE_WEIGHTS_EVAL, LOAD_WEIGHTS_X, LOAD_WEIGHTS_O, LOAD_WEIGHTS_EVAL
-//	};
-//
-//	protected State state = State.IDLE;
-//
-//	// Possible Actions
-//	protected enum Action {
-//		NOACTION, MOVEBACK, NEXTMOVE, DELETE, CHANGE
-//	};
-//
-//	protected Action action = Action.NOACTION;
 
 	// Standard Alpha-Beta-Agent
 //	public AlphaBetaAgent alphaBetaStd = null;
@@ -157,9 +143,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 	// current agent to make a move
 	private boolean playStep = false;
 
-	// Saving/Loading of Agents is done with this
-//	private LoadSaveTD tdAgentIO;
-
 	public C4GameGui() {
 		initGame();
 	}
@@ -181,21 +164,23 @@ public class C4GameGui extends JPanel implements ListOperation {
 
 		playingBoardPanel = initPlayingBoard();
 
-		lValueTitle = new JLabel("Overall Result of the Value-Function");
-		lValueTitle.setFont(new Font("Times New Roman", 1, 18));
-		lValueGTV = new JLabel("Hallo");
-		lValueAgent = new JLabel("Hallo");
+		String lBaseTitle = "Best score or value function";
+		lValueTitle = new JLabel(lBaseTitle);
+		lValueTitle.setFont(new Font("Arial", 1, 14));
+		lValueTitle.setToolTipText("maximum of value function over columns (selected agent)");
+//		lValueGTV = new JLabel("  ");
+//		lValueAgent = new JLabel("  ");
 //		lValueEval = new JLabel("Hallo");
 
-		lValueGTV.setToolTipText("Value for the game-theoretic value");
-		lValueAgent.setToolTipText("Value for the selected Agent");
+//		lValueGTV.setToolTipText("Value for the game-theoretic value");
+//		lValueAgent.setToolTipText("Value for the selected Agent");
 //		lValueEval.setToolTipText("Value for the Evaluation");
 
-		JLabel Title;
-		Title = new JLabel("Connect Four",JLabel.CENTER);
-		Title.setForeground(Color.black);
-		Font font = new Font("Times New Roman", 1, 18);
-		Title.setFont(font);
+//		JLabel Title;
+//		Title = new JLabel("Connect Four",JLabel.CENTER);
+//		Title.setForeground(Color.black);
+//		Font font = new Font("Times New Roman", 1, 18);
+//		Title.setFont(font);
 
 		setLayout(new BorderLayout(10, 10));
 		setBackground(Color.white);
@@ -214,18 +199,17 @@ public class C4GameGui extends JPanel implements ListOperation {
 		c.gridy++;
 		boardPanel.add(lValueTitle, c);
 
-		c.gridy++;
-		boardPanel.add(lValueGTV, c);
-
-		c.gridy++;
-		boardPanel.add(lValueAgent, c);
-
+//		c.gridy++;
+//		boardPanel.add(lValueGTV, c);
+//
+//		c.gridy++;
+//		boardPanel.add(lValueAgent, c);
+//
 //		c.gridy++;
 //		boardPanel.add(lValueEval, c);
 
-//		add(c4Buttons, BorderLayout.EAST);
 		add(boardPanel, BorderLayout.CENTER);
-		add(Title, BorderLayout.NORTH);
+//		add(Title, BorderLayout.NORTH);
 
 //		changeState(State.IDLE);
 
@@ -546,7 +530,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 			col = mvList.readPrevMove();
 			if (col != -1)
 				markMove(col, c4.getColHeight(col) - 1, 1 - curPlayer);
-//			c4Buttons.setEnabledPlayStep(players[curPlayer] != null);
 			printValueBar();
 		}
 	}
@@ -564,7 +547,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 //				gameOver = true;
 			putPiece(col, curPlayer);
 			swapPlayer();
-//			c4Buttons.setEnabledPlayStep(players[curPlayer] != null);
 			printValueBar();
 		}
 
@@ -666,9 +648,9 @@ public class C4GameGui extends JPanel implements ListOperation {
 	{
 
 				// Reset Labels
-				lValueAgent.setText("Agent: ");
+//				lValueGTV.setText("GTV: ");
+//				lValueAgent.setText("Agent: ");
 //				lValueEval.setText("Eval: ");
-				lValueGTV.setText("GTV: ");
 
 				PlayAgent pa = null;
 				if (showAgentVals)
@@ -678,8 +660,13 @@ public class C4GameGui extends JPanel implements ListOperation {
 				double agentValsMax = max(agentVals);
 
 				if (agentVals!=null) {
-					int val = (int) (max(agentVals) * 100);
-					lValueAgent.setText("Agent:     " + val);
+					if (agentValsMax==-Double.MAX_VALUE) 	// this happens when all agentVals are NaN (e.g. Human) 
+						lValueTitle.setText(lBaseTitle);
+					else
+						lValueTitle.setText(lBaseTitle+":      "+(int) (agentValsMax * 100));
+//					int val = (int) (max(agentVals) * 100);
+//					lValueTitle.setText(lBaseTitle+":      "+val);
+//					lValueAgent.setText("Agent:     " + val);
 
 					for (int i = 0; i < agentVals.length; i++)
 						if (Math.abs(agentVals[i]) > 1.0) {
@@ -691,11 +678,11 @@ public class C4GameGui extends JPanel implements ListOperation {
 							agentVals[i] = Math.tanh(agentVals[i]);
 				}
 
-				if (realVals!=null) {
-					String valGTV = "GTV:        "+ (int) (max(realVals) * 100) + "";
-					lValueGTV.setText(valGTV);
-					lValueGTV.setPreferredSize(getMaximumSize());
-				}
+//				if (realVals!=null) {
+//					String valGTV = "GTV:        "+ (int) (max(realVals) * 100) + "";
+//					lValueGTV.setText(valGTV);
+//					lValueGTV.setPreferredSize(getMaximumSize());
+//				}
 //				if (evalVals!=null) {
 //					int val = (int) (max(evalVals) * 100);
 //					lValueEval.setText("Eval:        " + val + "");
@@ -711,10 +698,10 @@ public class C4GameGui extends JPanel implements ListOperation {
 							valueBoard[1][i].setText((int) (agentVals[i] * 100)+ "");						
 						}
 						if (agentVals[i]==agentValsMax) {
-							valueBoard[1][i].setBackground(new Color(46,158,121));		
+							valueBoard[1][i].setBackground(new Color(46,158,121));	// max = green	
 							valueBoard[1][i].setForeground(Color.WHITE);		
 						} else {
-							valueBoard[1][i].setBackground(colTHK2);
+							valueBoard[1][i].setBackground(colTHK2);		// normal = orange
 							valueBoard[1][i].setForeground(Color.BLACK);		
 						}
 					}

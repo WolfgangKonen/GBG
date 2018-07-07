@@ -40,8 +40,7 @@ import tools.Types;
  */
 public class GameBoardC4 extends JFrame implements GameBoard {
 
-	private int TICGAMEHEIGHT=600;
-	private C4GameGui BoardPanel;
+	private int C4GAMEHEIGHT=512;
 	private JLabel leftInfo=new JLabel("");
 	private JLabel rightInfo=new JLabel(""); 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
@@ -50,10 +49,10 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 	/**
 	 * The clickable representation of the board in the GUI. The buttons of {@link #Board} will 
 	 * be enabled only when "Play" or "Inspect V" are clicked. During "Play" and "Inspect V"  
-	 * only unoccupied fields are enabled. The value function of each {@link #Board} position
-	 * is displayed as its label.
+	 * only unoccupied columns are enabled. The value function of each column is displayed 
+	 * in the value bar (bottom).
 	 */
-//	protected JButton[][] Board;
+	private C4GameGui c4GameBoard;
 	private StateObserverC4 m_so;
 	private int[][] m_board;		
 	private int[][] last_board;		
@@ -76,10 +75,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
     private void initGameBoard(Arena arGame) 
 	{
 		m_Arena		= arGame;
-//		Board       = new JButton[3][3];
-//		BoardPanel	= InitBoard();
-		BoardPanel	= new C4GameGui(this);
-//		Table       = new int[3][3];
+		c4GameBoard	= new C4GameGui(this);
 		VTable		= new double[C4Base.COLCOUNT];
 		m_so		= new StateObserverC4();	// empty table
 		m_board 	= m_so.getBoard();
@@ -87,16 +83,11 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
-		JLabel Blank=new JLabel(" ");		// a little bit of space
-		//JLabel Title=new JLabel("Tic Tac Toe",SwingConstants.CENTER);
-//		JLabel Title=new JLabel("   ",SwingConstants.CENTER);  // no title, it appears sometimes in the wrong place
-//		Title.setForeground(Color.black);	
-//		Title.setFont(font);	
-		titlePanel.add(Blank);
-//		titlePanel.add(Title);
+//		JLabel Blank=new JLabel(" ");		// a little bit of space
+//		titlePanel.add(Blank);
 		
 		JPanel boardPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		boardPanel.add(BoardPanel);
+		boardPanel.add(c4GameBoard);
 		boardPanel.setBackground(Types.GUI_BGCOLOR);
 		
 		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -116,7 +107,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		add(infoPanel,BorderLayout.SOUTH);
 		pack();
 		setVisible(false);		// note that the true size of this component is set in 
-								// showGameBoard(Arena,boolean)
+								// this.showGameBoard(Arena,boolean)
 	}
 
 	// called from initGame() 
@@ -125,48 +116,15 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		JPanel panel=new JPanel();
 		//JButton b = new JButton();
 		panel.setLayout(new GridLayout(3,3,2,2));
-		int buSize = (int)(50*Types.GUI_SCALING_FACTORX);
-		Dimension minimumSize = new Dimension(buSize,buSize); //controls the button sizes
-//		for(int i=0;i<3;i++){
-//			for(int j=0;j<3;j++){
-//				Board[i][j] = new JButton("  ");
-//				Board[i][j].setBackground(colTHK2);
-//				Board[i][j].setForeground(Color.white);
-//				Board[i][j].setMargin(new Insets(0,0,0,0));  // sets zero margin between the button's
-//															 // border and the label (so that there 
-//															 // is room for big labels)
-//				Font font=new Font("Arial",Font.BOLD,Types.GUI_HELPFONTSIZE);
-//		        Board[i][j].setFont(font);
-//				Board[i][j].setEnabled(false);
-//				Board[i][j].setPreferredSize(minimumSize); 
-//				Board[i][j].addActionListener(					
-//						new ActionHandler(i,j)  // constructor copies (i,j) to members (x,y)
-//						{
-//							public void actionPerformed(ActionEvent e)
-//							{
-//								Arena.Task aTaskState = m_Arena.taskState;
-//								if (aTaskState == Arena.Task.PLAY)
-//								{
-//									HGameMove(x,y);		// i.e. make human move (i,j), if Board[i][j] is clicked								
-//								}
-//								if (aTaskState == Arena.Task.INSPECTV)
-//								{
-//									InspectMove(x,y);	// i.e. update inspection, if Board[i][j] is clicked								
-//								}	
-//								int dummy=1;
-//							}
-//						}
-//				);
-//				panel.add(Board[i][j]);
-//			}
-//		}
+//		int buSize = (int)(50*Types.GUI_SCALING_FACTORX);
+//		Dimension minimumSize = new Dimension(buSize,buSize); //controls the button sizes
 		return panel;
 	}
 	
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
-			BoardPanel.setInitialBoard();
+			c4GameBoard.setInitialBoard();
 			m_so = new StateObserverC4();			// empty Table
 			last_board = m_so.getBoard();
 		}
@@ -261,24 +219,25 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		else guiUpdateBoard2();
 		
 		if (showValueOnGameboard) {
-			double[] value = new double[C4Base.COLCOUNT];
-			String[] valueTxt = new String[C4Base.COLCOUNT];
-			for(int i=0;i<C4Base.COLCOUNT;i++){
-				if (VTable==null) { 
-					// HumanPlayer and MCTSAgentT do not have a VTable (!)
-					value[i] = Double.NaN;
-				} else {
-					value[i] = VTable[i];					
-				}
-				
-				if (Double.isNaN(value[i])) {
-					valueTxt[i] = "   ";
-				} else {
-					valueTxt[i] = " "+(int)(value[i]*100);
-					if (value[i]<0) valueTxt[i] = ""+(int)(value[i]*100);
-				}
-			}
-			BoardPanel.printValueBar(null, value, null);
+//			double[] value = new double[C4Base.COLCOUNT];
+//			String[] valueTxt = new String[C4Base.COLCOUNT];
+//			for(int i=0;i<C4Base.COLCOUNT;i++){
+//				if (VTable==null) { 
+//					// HumanPlayer and MCTSAgentT do not have a VTable (!)
+//					value[i] = Double.NaN;
+//				} else {
+//					value[i] = VTable[i];					
+//				}
+//				
+//				if (Double.isNaN(value[i])) {
+//					valueTxt[i] = "   ";
+//				} else {
+//					valueTxt[i] = " "+(int)(value[i]*100);
+//					if (value[i]<0) valueTxt[i] = ""+(int)(value[i]*100);
+//				}
+//			}
+//			c4GameBoard.printValueBar(null, value, null);
+			c4GameBoard.printValueBar(null, VTable, null);
 		}
 		this.repaint();
 	}		
@@ -286,16 +245,16 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 	private void guiUpdateBoard1() {
 		// --- this alternative works for the LogManager (it allows moving back & to set an   
 		// --- arbitrary board), but is slower and has not the last move marked.
-		BoardPanel.resetBoard();
+		c4GameBoard.resetBoard();
 		for(int j=0;j<C4Base.ROWCOUNT;j++){
 			for(int i=0;i<C4Base.COLCOUNT;i++){
 				if(m_board[i][j]==C4Base.PLAYER1)
 				{
-					BoardPanel.unMarkMove(i,j, (C4Base.PLAYER1-1));
+					c4GameBoard.unMarkMove(i,j, (C4Base.PLAYER1-1));
 				}					
 				else if(m_board[i][j]==C4Base.PLAYER2)
 				{
-					BoardPanel.unMarkMove(i,j, (C4Base.PLAYER2-1));
+					c4GameBoard.unMarkMove(i,j, (C4Base.PLAYER2-1));
 				}
 			}
 		}		
@@ -308,7 +267,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		for(int j=0;j<C4Base.ROWCOUNT;j++){
 			for(int i=0;i<C4Base.COLCOUNT;i++){
 				if(m_board[i][j]!=last_board[i][j]) {
-					BoardPanel.setPiece(i,j, (m_board[i][j]-1));
+					c4GameBoard.setPiece(i,j, (m_board[i][j]-1));
 					last_board[i][j] = m_board[i][j];
 				}
 			}
@@ -336,7 +295,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 
 	@Override
 	public void enableInteraction(boolean enable) {
-		BoardPanel.enableInteraction(enable);
+		c4GameBoard.enableInteraction(enable);
 		if (enable) {
 	        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		} else {
@@ -403,7 +362,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 				x = ticGame.m_LaunchFrame.getX();
 				y = ticGame.m_LaunchFrame.getY() + ticGame.m_LaunchFrame.getHeight() +1;
 				this.setSize(ticGame.m_LaunchFrame.getWidth(),
-							 (int)(Types.GUI_SCALING_FACTORY*TICGAMEHEIGHT));	
+							 (int)(Types.GUI_SCALING_FACTORY*C4GAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
 		}		

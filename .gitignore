@@ -27,6 +27,10 @@ FutureWork.docx
 ~$*.*
 ~*.tmp
 
+#Files from C4 not yet ready for publication on GitHub (around AlphaBeta and Opening Books)
+src/games/CFour/AlphaBetaAgent.java
+src/games/CFour/openingBook
+
 #Ordner mit veralteten Versuchen zur Parallelität
 src/games/ZweiTausendAchtundVierzig/Parallel/*
 
@@ -38,7 +42,7 @@ agents/2048/TEST*.agt.zip
 agents/2048/TC*.agt.zip
 agents/Hex/05/TEST*.agt.zip
 agents/ConnectFour/firstTD*.agt.zip
-agents/ConnectFour/TDNTal05-lam00-500k.agt.zip
+agents/ConnectFour/experiment
 agents/ConnectFour/TDNTal05-lam06-500k.agt.zip
 agents/ConnectFour/TDNTal10-lam03-500k.agt.zip
 

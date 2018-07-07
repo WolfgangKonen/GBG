@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
@@ -23,6 +24,7 @@ import agentIO.LoadSaveGBG;
 import tools.Progress;
 import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
+import controllers.HumanPlayer;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
@@ -54,7 +56,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	public enum Task {
 		PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
 		// , INSPECTNTUP, BAT_TC, BATCH
-		, COMPETE, SWAPCMP, MULTCMP, IDLE
+		, COMPETE, SWAPCMP, BOTHCMP, MULTCMP, IDLE
 	};
 
 	public XArenaFuncs m_xfun;
@@ -155,8 +157,10 @@ abstract public class Arena extends JFrame implements Runnable {
 	}
 	
 	public void run() {
-		String agentN;
+		String agentN, str;
 		int n;
+		double winXScore;
+		DecimalFormat frm = new DecimalFormat("#0.000");
 		gb.showGameBoard(this, true);
 
 		try {
@@ -180,10 +184,12 @@ abstract public class Arena extends JFrame implements Runnable {
 				enableButtons(false);
 				setStatusMessage("Running Single Compete ...");
 
-				m_xfun.singleCompete(m_xab, gb);
+				winXScore = m_xfun.singleCompete(m_xab, gb);
 
 				enableButtons(true);
-				setStatusMessage("Compete finished.");
+				str = "Compete finished. Avg. score for X: "+frm.format(winXScore)+" (best is 1.0).";
+				System.out.println(str);
+				setStatusMessage(str);
 				UpdateBoard();
 				taskState = Task.IDLE;
 				break;
@@ -191,10 +197,25 @@ abstract public class Arena extends JFrame implements Runnable {
 				enableButtons(false);
 				setStatusMessage("Running Swap Compete ...");
 
-				m_xfun.swapCompete(m_xab, gb);
+				winXScore = m_xfun.swapCompete(m_xab, gb);
 
 				enableButtons(true);
-				setStatusMessage("Swap Compete finished.");
+				str = "Swap Compete finished. Avg. score for X: "+frm.format(winXScore)+" (best is 1.0).";
+				System.out.println(str);
+				setStatusMessage(str);
+				UpdateBoard();
+				taskState = Task.IDLE;
+				break;
+			case BOTHCMP:
+				enableButtons(false);
+				setStatusMessage("Running Compete Both ...");
+
+				winXScore = m_xfun.bothCompete(m_xab, gb);
+
+				enableButtons(true);
+				str = "Compete Both finished. Avg. score for X: "+frm.format(winXScore)+" (best is 1.0).";
+				System.out.println(str);
+				setStatusMessage(str);
 				UpdateBoard();
 				taskState = Task.IDLE;
 				break;
@@ -254,7 +275,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	 * button "Train X"
 	 */
 	protected void InspectGame() {
-		String AgentX = m_xab.getSelectedAgent(0);
+		String agentX = m_xab.getSelectedAgent(0);
 		StateObservation so;
 		Types.ACTIONS_VT actBest;
 		PlayAgent paX;
@@ -276,7 +297,14 @@ abstract public class Arena extends JFrame implements Runnable {
 		}
 
 		String pa_string = paX.getClass().getName();
-		System.out.println("[InspectGame] " + pa_string);
+		String sMsg = "Inspecting the value function of "+ agentX +" (X) ...";
+		setStatusMessage(sMsg);
+		System.out.println("[InspectGame] " + sMsg);
+		
+		if (paX instanceof HumanPlayer) {
+			MessageBox.show(m_xab, "No value function known for 'Human'!", 
+							"Warning", JOptionPane.WARNING_MESSAGE);		
+		}
 
 		gb.clearBoard(true, true);
 		gb.updateBoard(null, true, true); // update with reset

@@ -36,19 +36,20 @@ public class NTuple2 implements Serializable {
 
 	private double INIT; // samine// N and A will be initialized with the same number(INIT)
 
-	protected static boolean TC = false; // samine//TC constant is implemented
-											// to turn on and off temporal
-											// coherence implementation
-	protected static boolean TcImm = true; // samine// TcImm=true: tcFactor is
-											// calculated after every change
-											// samine// TcImm=false: tcFactor is
-											// stored in array and will be
-											// updated after tcIn game
-	protected static int tcIn = 1; 		//
-	 									// samine// tcIn is the number of
-										// games that
-										// tcFactor will be updated after that
-										// (it is used only if TcImm is false)
+	private boolean TC = false; 		// TC constant is implemented
+										// to turn on and off temporal
+										// coherence implementation
+	private boolean tcImm = true;  		// should be always true: calculate tcFactorArray
+										// immediately from N and A 
+										// (recommended case in [Bagh14])
+	private boolean tcAccRW = true;		// If true, accumulate in N and A the recommended weight
+										// changes \delta*elig (case TCL[r] in [Bagh14]).
+										// If false, accumulate in N and A the error signal
+										// \delta (case TCL[\delta] in [Bagh14]).
+	private boolean tcEXP=true;		// If true, use exponential transfer function g(N/A)
+									// If false, use N/A directly for tcFactor
+	private double tcBeta=2.7;		// parameter for tcEXP (TCL-EXP in [Bagh14])
+
 	private double EPS = 0.5; /* random weights init scale */
 	Random rand;
 
@@ -64,7 +65,7 @@ public class NTuple2 implements Serializable {
 	// invoked more than once during a weight update for state s_k (multiple calls to updateNew(), 
 	// if there are equivalent states (symmetric to s_k)), then it is updated only *once*. This 
 	// is realized by remembering the already visited indices in indexList.
-	// This ensures that an update with ALPHA=1.0 changes the LUT in such a way that a subsequent
+	// It ensures that an update with ALPHA=1.0 changes the LUT in such a way that a subsequent
 	// call getScoreI() returns a value identical to the target of that update.
 	private transient LinkedList indexList = new LinkedList();
 //	private transient int trainCounter[] = null;
@@ -79,8 +80,11 @@ public class NTuple2 implements Serializable {
 	private transient int countP[]=null;			// # of weight changes with same direction as previous
 	private transient int countM[]=null;			// # of weight changes with opposite direction
 	private boolean DW_DBG=false;		// /WK/ accumulate countP, countM with help of dWOld
-	private boolean NEW_WK=false;		// /WK/ experimental: additional dampening of weights with frequent changes 
-	private double BETA=0.9; //0.8;		// dampening factor for NEW_WK
+//	private boolean NEW_WK=false;		// /WK/ experimental: additional dampening of weights with frequent changes 
+//	private double BETA=0.9; //0.8;		// dampening factor for NEW_WK
+	
+	private double muDampen=0.99;		// dampening for N and A, so that tcFactor slowly returns to 1
+										// --- TODO, not yet implemented ---
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -106,19 +110,21 @@ public class NTuple2 implements Serializable {
 		// samine//
 		INIT = ntPar.getTcInit();// samine//
 		TC = ntPar.getTc();
-		TcImm = ntPar.getTcImm();
+		tcImm = ntPar.getTcImm();
+		tcAccRW = (ntPar.getTcAccumulMode()==1);
+		tcEXP = (ntPar.getTcTransferMode()==1);
+		tcBeta = ntPar.getTcBeta();
 		rand = new Random();
 		this.nTuple = nTuple.clone();
 		this.posVals = posVals;
 		lut = new double[(int) Math.pow(posVals, nTuple.length)];
 		
 		if (TC) {
-			// samine//
 			tcN = new double[lut.length]; // matrix N in TC
 			tcA = new double[lut.length]; // matrix A in TC
 			tcFactorArray = new double[lut.length]; // tcFactor=|N|/A
 			//tcDampArray = new double[lut.length]; // /WK/ for NEW_WK
-			dWArray = new double[lut.length];	// for accumulating TC (tcImm==false)
+			//dWArray = new double[lut.length];	// for accumulating TC (tcImm==false)
 			
 			// initializing N and A matrices and tcFactor=|N|/A
 			for (int i = 0; i < lut.length; i++) {
@@ -264,13 +270,13 @@ public class NTuple2 implements Serializable {
 //
 //		double dW = alphaM*delta* e * tcFactor;
 //
-//		if (!TC || TcImm) {
+//		if (!TC || tcImm) {
 //			if (LAMBDA==0.0) {
 //				// the old and fast version, but without eligibility traces
 //				lut[Index] += dW;				
 //			} else {
 //				// elig traces active, we have to do it the long way (as long as we do not 
-//				// keep track of all elig traces > 0, *TODO*)
+//				// keep track of all elig traces > 0)
 //				double alphaDelta=alphaM*delta * tcFactor;		// the e-part is now in ev[i]
 //				for (int i=0; i<lut.length; i++)
 //					//if (ev[i]!=0.0) 				// DON'T, this extra 'if' slows down!
@@ -314,53 +320,62 @@ public class NTuple2 implements Serializable {
 //	 * @param LAMBDA -- obsolete now --
 //	 * @see NTuple2ValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 
 	public void updateNew(int[] board, double alphaM, double delta, double e /*, double LAMBDA*/) {
-		int Index = getIndex(board);
-		Integer IndexI = new Integer(Index);
+		int index = getIndex(board);
+		Integer indexI = new Integer(index);
 
-		double tcFactor = setTcFactor(Index,delta);	// returns 1 if TC==false
+		double tcFactor = getTcFactor(index);	// returns 1 if (!TC)
 				
-		double dW = alphaM*delta* e * tcFactor;
+		double rW = delta * e;					// recommended weight change
+		double dW = alphaM * rW * tcFactor;
+		
+		if (TC) { 			// update tcFactorArray *after* dW (do nothing if (!TC))
+			if (tcAccRW) {
+				setTcFactor(index,rW);			// accumulate recommended weight change	
+			} else {
+				setTcFactor(index,delta);		// accumulate error signal
+			}			
+		}
 
 //		if (useIndexList) {		// useIndexList==true is the recommended choice
-			if (!TC || TcImm) {
-				if (!indexList.contains(IndexI)) 
-					lut[Index] += dW;				
+			if (!TC || (TC && tcImm)) {
+				if (!indexList.contains(indexI)) 
+					lut[index] += dW;				
 			}		
-			indexList.add(new Integer(IndexI));
+			indexList.add(indexI);
 //		} 
-//		else {
-//			if (!TC || TcImm) {
-//				if (trainCounter[Index]==0) lut[Index] += dW;				
-//			}
-//			trainCounter[Index]++;   				
-//		}
 
-		if (TC)
-			dWArray[Index] += dW;		// /WK/
+//		if (TC)
+//			dWArray[Index] += dW;		// /WK/
 	}
 
 	/**
-	 * Side effect: if (TC && TcImm), then tcFactorArray[Index] is also set
+	 * If TC, update the accumumlators tcN and tcA with accum, then set tcFactorArray[index]
+	 * according to the TC transfer type (for next weight update)
 	 * 
-	 * @param Index
-	 * @param delta
+	 * @param index
+	 * @param accum
 	 * @return
 	 */
-	private double setTcFactor(int Index, double delta) {
-		if (TC == true) {
-			tcN[Index] += delta;
-			tcA[Index] += Math.abs(delta);
+	private double setTcFactor(int index, double accum) {
+		if (TC) {
+			tcN[index] += accum;
+			tcA[index] += Math.abs(accum);
 
-			if (TcImm == true) {
-				tcFactorArray[Index] = (double) Math.abs(tcN[Index]) / tcA[Index];
+			if (tcImm) {
+				double arg = (double) Math.abs(tcN[index]) / tcA[index];
+				if (tcEXP) {
+					arg = Math.exp(tcBeta*(arg-1));
+				}
+				tcFactorArray[index] = arg;
 			} 
-			return tcFactorArray[Index];
+			return tcFactorArray[index];
 		} else {
 			return 1;
 		}
 	}
 	
 	// currently not used
+	@Deprecated
 	public void weightDecay(double factor) {
 		for (int k=0; k<lut.length; k++)
 			lut[k] *= factor;
@@ -403,6 +418,10 @@ public class NTuple2 implements Serializable {
 	
 	public double[] getTcFactorArray() {
 		return tcFactorArray;
+	}
+	
+	public double getTcFactor(int Index) {
+		return (TC) ? tcFactorArray[Index] : 1.0;
 	}
 
 	public void clearIndices() {
@@ -447,20 +466,20 @@ public class NTuple2 implements Serializable {
 	}
 
 	/**
-	 * Is called only in case (TC && !tcImm) 
+	 * Is called only in case (TC && !tcImm), but !tcImm is not recommended
 	 * 
 	 * @see TDNTuple2Agt#trainAgent(StateObservation)
 	 */
+	@Deprecated
 	public void updateTC() {
 		if (TC == true) {
 
 			//System.out.println("updateTCfactor");
 			//for (int i = 0; i < lut.length; i++)
 			//	tcFactorArray[i] = (double) Math.abs(tcN[i]) / tcA[i];
-// /WK/
+
 			for (int i = 0; i < lut.length; i++) {
 				tcFactorArray[i] = (double) Math.abs(tcN[i]) / tcA[i];
-				//if (NEW_WK) tcFactorArray[i] *= tcDampArray[i]; 
 				lut[i] += tcFactorArray[i]* dWArray[i];				// ??correct to update lut here?? TODO
 				dWArray[i]=0.0;
 			}

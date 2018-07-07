@@ -109,7 +109,7 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		m_res = XArenaFuncs.competeBoth(pa, random_agent, 100, gb, so);
+		m_res = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;
@@ -123,7 +123,7 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, 1, gb, so);
+		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, so, 1, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;

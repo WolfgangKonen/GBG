@@ -637,6 +637,14 @@ public class XArenaFuncs
 											actionNum,trnMoveNum);
 						mtList.add(mTrain);
 
+						// enable premature exit if TRAIN button is pressed again:
+						if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+							MessageBox.show(xab, 
+									"MultiTraining stopped prematurely", 
+									"Warning", JOptionPane.WARNING_MESSAGE);
+							break; //out of while
+						}
+						
 						startTime = System.currentTimeMillis();
 					}
 				}
@@ -658,6 +666,9 @@ public class XArenaFuncs
 //				oM.add(m_evaluatorM.getLastResult());
 //			}
 			
+			if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+				break; //out of for
+			}
 		} // for (i)
 		System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
 		if (doTrainEvaluation && m_evaluatorT.getPrintString()!=null) 
@@ -682,15 +693,15 @@ public class XArenaFuncs
 	 * @param pa		a trained agent
 	 * @param opponent	a trained agent
 	 * @param competeNum
+	 * @param verbose TODO
 	 * @param gb		needed to get a default start state
 	 * @return the fitness of pa, which is +1 if pa always wins, 0 if always tie or if #win=#loose
 	 *         and -1 if pa always looses.  
 	 * 
 	 * @see XArenaButtons
 	 */
-	public static double competeBoth(PlayAgent pa, PlayAgent opponent, int competeNum,
-									 GameBoard gb, StateObservation startSO) {
-		int verbose=0;
+	public static double competeBoth(PlayAgent pa, PlayAgent opponent, StateObservation startSO,
+									 int competeNum, int verbose, GameBoard gb) {
 		double[] res;
 		double resX, resO;
 
@@ -722,7 +733,6 @@ public class XArenaFuncs
 		double[] winrate = new double[3];
 		int xwinCount=0, owinCount=0, tieCount=0;
 		DecimalFormat frm = new DecimalFormat("#0.000");
-		boolean silent = (verbose==0 ? true : false);
 		boolean nextMoveSilent = (verbose<2 ? true : false);
 		StateObservation so;
 		Types.ACTIONS actBest;
@@ -757,15 +767,15 @@ public class XArenaFuncs
 					int player = Types.PLAYER_PM[so.getPlayer()];
 					switch (res*player) {
 					case -1: 
-						if (!silent) System.out.println(k+": O wins");
+						if (verbose>0) System.out.println(k+": O wins");
 						owinCount++;
 						break;
 					case 0:
-						if (!silent) System.out.println(k+": Tie");
+						if (verbose>0) System.out.println(k+": Tie");
 						tieCount++;
 						break;
 					case +1: 
-						if (!silent) System.out.println(k+": X wins");
+						if (verbose>0) System.out.println(k+": X wins");
 						xwinCount++;
 						break;
 					}
@@ -780,7 +790,7 @@ public class XArenaFuncs
 		winrate[1] = (double)tieCount/competeNum;
 		winrate[2] = (double)owinCount/competeNum;
 		
-		if (!silent) {
+		if (verbose>0) {
 			System.out.print("win rates: ");
 			for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
 			System.out.println(" (X/Tie/O)");
@@ -798,9 +808,13 @@ public class XArenaFuncs
 	 * The agents are assumed to be trained (!)
 	 *  
 	 * @param swap {@code false} for 'Compete' and {@code true} for 'Swap Compete'
+	 * @param both {@code true} for 'competeBoth' ({@code swap} is then irrelevant)
 	 * @param xab	used only for reading parameter values from GUI members 
+	 * @param gb	
+	 * @return the fitness of pa, which is +1 if pa always wins, 0 if always tie or if #win=#loose
+	 *         and -1 if pa always looses.  
 	 */
-	protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb) {
+	protected double competeBase(boolean swap, boolean both, XArenaButtons xab, GameBoard gb) {
 		//int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
 		int competeNum=xab.winCompOptions.getNumGames();
 		int numPlayers = gb.getStateObs().getNumPlayers();
@@ -808,7 +822,7 @@ public class XArenaFuncs
 			MessageBox.show(xab, 
 					"Single/Swap Compete only available for 2-player games!", 
 					"Error", JOptionPane.ERROR_MESSAGE);	
-			return;
+			return 0.0;
 		}
 
 		try {
@@ -818,6 +832,7 @@ public class XArenaFuncs
 				MessageBox.show(xab, 
 						"No compete for agent Human", 
 						"Error", JOptionPane.ERROR_MESSAGE);
+				return 0.0;
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
 
@@ -830,10 +845,17 @@ public class XArenaFuncs
 
 				int verbose=1;
 
-				if (swap) {
-					compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
+				if (both) {
+					return competeBoth(qaVector[0],qaVector[1],startSO,competeNum,verbose,gb);
 				} else {
-					compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);	
+					double[] res;
+					if (swap) {
+						res = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
+						return res[2] - res[0];
+					} else {
+						res = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);	
+						return res[0] - res[2];
+					}					
 				}
 			}
 					
@@ -841,16 +863,20 @@ public class XArenaFuncs
 			MessageBox.show(xab, 
 					ex.getMessage(), 
 					"Error", JOptionPane.ERROR_MESSAGE);
-
+			return 0;
 		}
 	} // competeBase
 
-	public void singleCompete(XArenaButtons xab, GameBoard gb) {
-		this.competeBase(false, xab, gb);
+	public double singleCompete(XArenaButtons xab, GameBoard gb) {
+		return this.competeBase(false, false, xab, gb);
 	}
 	
-	public void swapCompete(XArenaButtons xab, GameBoard gb) {
-		this.competeBase(true, xab, gb);
+	public double swapCompete(XArenaButtons xab, GameBoard gb) {
+		return this.competeBase(true, false, xab, gb);
+	}
+
+	public double bothCompete(XArenaButtons xab, GameBoard gb) {
+		return this.competeBase(false, true, xab, gb);
 	}
 
 	/**

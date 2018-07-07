@@ -141,6 +141,7 @@ public class XArenaButtons extends JPanel
 		Play.setBorder(bord);
 		InspectV=new JButton("Inspect V");
 		InspectV.setBorder(bord);
+		InspectV.setToolTipText("Inspect the value function for player X");
 		NTupShowB = new JButton("Insp Ntuples");
 		NTupShowB.setBorder(bord);
 		Logs=new JButton("Logs");
@@ -151,6 +152,7 @@ public class XArenaButtons extends JPanel
 		AgentX_L = new JLabel("Agent Type: ");
         SleepDurationL = new JLabel("Sleep duration");
 		showValOnGB_L = new JLabel("Show V  ");
+		showValOnGB_L.setToolTipText("Show value function during game play");
 		showValOnGB = new JCheckBox("",true);
 		showValOnGB.setBackground(Types.GUI_BGCOLOR);
 
@@ -313,7 +315,17 @@ public class XArenaButtons extends JPanel
 					{
 //						m_xfun.m_NetIsLinear = tdPar.LinNetType.getState();
 //						m_xfun.m_NetHasSigmoid = tdPar.withSigType.getState();
-						m_game.taskState = ArenaTrain.Task.MULTTRN;
+						// toggle m_game.state between MULTTRN and IDLE
+						if (m_game.taskState!=ArenaTrain.Task.MULTTRN) {
+							m_game.taskState = ArenaTrain.Task.MULTTRN;
+							m_game.setStatusMessage("Multitrain for agent X ...");
+							enableButtons(false);			// disable all buttons ...
+							MultiTrain.setEnabled(true);	// ... but the MultiTrain button
+						} else {
+							m_game.taskState = ArenaTrain.Task.IDLE;
+							m_game.setStatusMessage("Done.");
+							enableButtons(true);
+						}
 					}
 				}	
 		);

@@ -1,5 +1,5 @@
-controllers.TD.ntuple2.TDNTuple2Agt: USESYMMETRY:true, NORMALIZE:false, sigmoid:tanh, lambda:0.6, horizon:5, AFTERSTATE:false, learnFromRM: false
-controllers.TD.ntuple2.TDNTuple2Agt: alpha_init->final:0.5->0.5, epsilon_init->final:0.1->0.1, gamma: 1.0, MODE_3P: 2
+controllers.TD.ntuple2.TDNTuple2Agt: USESYMMETRY:true, NORMALIZE:false, sigmoid:tanh, lambda:0.5, horizon:7, AFTERSTATE:false, learnFromRM: false
+controllers.TD.ntuple2.TDNTuple2Agt: alpha_init->final:2.0->2.0, epsilon_init->final:0.1->0.1, gamma: 1.0, MODE_3P: 2
 run, moveNum, gameScore, nEmptyTile, cumEmptyTl
 1, 1, 0, 0, 0
 1, 2, 0, 0, 0
@@ -35,3 +35,4 @@ run, moveNum, gameScore, nEmptyTile, cumEmptyTl
 1, 32, 0, 0, 0
 1, 33, 0, 0, 0
 1, 34, 0, 0, 0
+1, 35, 0, 0, 0

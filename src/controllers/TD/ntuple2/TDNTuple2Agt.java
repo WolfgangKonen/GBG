@@ -33,6 +33,7 @@ import games.GameBoard;
 import games.StateObservation;
 import games.StateObsNondeterministic;
 import games.XNTupleFuncs;
+import games.CFour.StateObserverC4;
 import games.RubiksCube.StateObserverCube;
 import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -79,6 +80,17 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * @see TDNTuple2Agt#getUpdateType(StateObservation)
 	 */
 	private enum UpdateType {SINGLE_UPDATE, MULTI_UPDATE};
+	
+	/**
+	 * EligType characterizes the eligibility trace mode: <ul>
+	 * <li> <b>STANDARD</b>: nothing happens on random move (RM) with the elig traces (only no update on RM)
+	 * <li> <b>RESET</b>: all elig traces are reset after RM (because a later 
+	 * 		reward has no meaning for states prior to RM)
+	 * </ul>
+	 * @see NTuple2ValueFunc#clearEligList(EligType)
+	 */
+	enum EligType {STANDARD, RESET}; // may later contain also REPLACE, RESREP
+	private EligType m_elig;
 	
 	private Random rand; // generate random Numbers 
 	
@@ -210,8 +222,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public static boolean DBG_NEW_3P=false;
 	// debug for Rubik's Cube:
 	public static boolean DBG_CUBE=true;
+	// debug ternary (old) update rule
+	public static boolean TERNARY=true;
 	
 	private boolean randomSelect = false;
+//	private boolean RESET_TRACES = false;
 	
 	/**
 	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link AgentBase#m_oPar} are needed for 
@@ -226,6 +241,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private int m_counter = 0;				// episode move counter (trainAgent)
 	private boolean m_finished = false;		// whether a training game is finished
 	private boolean m_randomMove = false;	// whether the last action was random
+	
+	// info only:
+	private int tieCounter = 0;
+	private int winXCounter = 0;
+	private int winOCounter = 0;
 
 
 	/**
@@ -271,7 +291,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		m_ntPar = ntPar;
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
 		MODE_3P = m_tdPar.getMode3P();
-		rand = new Random(42); //(System.currentTimeMillis());		
+		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
+		rand = new Random(System.currentTimeMillis());		//(42); 
 		
 		int posVals = xnf.getNumPositionValues();
 		int numCells = xnf.getNumCells();
@@ -309,6 +330,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
 		return getNextAction3(so, so, random, silent);
 	}
+	
+	// this function was just needed for EvaluatorCube if we want to avoid symmetries
+	// definitely during evaluation. But it is no longer really needed, since we avoid 
+	// symmetries throughout when doing Rubiks Cube.
+	@Deprecated
 	public Types.ACTIONS_VT getNextAction2SYM(StateObservation so, boolean random, boolean silent, boolean useSymmetry) {
 		boolean oldSymmetry = m_ntPar.getUSESYMMETRY();
 		m_ntPar.setUSESYMMETRY(useSymmetry);
@@ -316,6 +342,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		m_ntPar.setUSESYMMETRY(oldSymmetry);
 		return actBest;
 	}
+	
 	// 
 	// this private function is needed so that the recursive call inside getNextAction3 (see 
 	// g3_Evalualte) can transfer the referring state refer. 
@@ -392,10 +419,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
         } // for (i)
         actBest = bestActions.get(rand.nextInt(bestActions.size()));
+        // if several actions have the same best score, select one of them randomly
 
-        if (actBest==null) {
-        	int dummy=1;
-        }
         assert actBest != null : "Oops, no best action actBest";
 		if (!silent) {
 			int playerPM = calculatePlayerPM(refer); 	 
@@ -513,7 +538,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		boolean rgs = m_oPar.getRewardIsGameScore();
 
         double referReward = refer.getReward(refer,rgs); // 0; 
-        double rtilde = 0;
+        double rtilde,otilde;
         double kappa;
 	    int iBest;
 		int count = 1; // counts the moves with same g3BestScore
@@ -543,18 +568,41 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
 	        // but they usually differ for nondeterministic games.
 	        
-	        //rtilde = (NewSO.getReward(refer,rgs)-oldSO.getReward(oldSO,rgs));
+	        //otilde = oldSO.getReward(oldSO,rgs);
 	        //  -- possibly a bug, it should be ...getReward(refer,...) always --
-	        rtilde = (NewSO.getReward(refer,rgs)-oldSO.getReward(refer,rgs));
+	        otilde = oldSO.getReward(refer,rgs);
+	        rtilde = NewSO.getReward(refer,rgs)-otilde;
         	kappa = (NewSO.getPlayer()==refer.getPlayer()) ? +1 : -1;
 	        
-	        if (NewSO.isGameOver()) {
-	        	return rtilde+kappa*getGamma()*agentScore;		// game over, terminate for-loop
-	        }
-	        if (j==nply) {
-	        	return rtilde+kappa*getGamma()*agentScore;		// normal return
-	        }
+        	boolean TST_VERSION=false;
+        	if (TST_VERSION) {
+    	        if (NewSO.isGameOver()) {
+    	        	if (NewSO instanceof StateObserverC4) 
+    	        		assert otilde==0 : "Oops, otilde is not zero!";  
+    	        		// the state before the game-over state NewSO should have no reward
+    	        	
+    	        	return rtilde+kappa*getGamma()*agentScore;		// game over, terminate for-loop
+    	        }
+    	        if (j==nply) {
+    	        	if (NewSO instanceof StateObserverC4) 
+    		        	assert rtilde==0 : "Oops, rtilde is not zero!";  
+    	        		// an in-game state should have no reward	        	
+
+    	        	return rtilde+kappa*getGamma()*agentScore;		// normal return
+    	        }
+        	} else {
+    	        if (NewSO.isGameOver() || j==nply) {
+    	        	if (TERNARY) {
+    	        		return NewSO.isGameOver() ? rtilde : kappa*getGamma()*agentScore;
+    	        	}
+    	        	return rtilde+kappa*getGamma()*agentScore;		// game over, terminate for-loop
+    	        }
+        	}
 			
+        	//
+        	// we get here only in case nply>1 (and j<nply) :
+        	//
+        	
 	        // find the best action for NewSO's player by
 	        // maximizing the return from evalNPly
 	        ArrayList<Types.ACTIONS> acts = NewSO.getAvailableActions();
@@ -785,7 +833,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		String S_old = null;   // only as debug info
 		Types.ACTIONS_VT actBest;
 		StateObservation oldSO;
-		StateObservation aftSO;
+		StateObservation afterSO;
 		int[] curBoard;
 		int   curPlayer=so.getPlayer();
 		int[] nextBoard = null;
@@ -802,24 +850,24 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		oldRewardTuple = new ScoreTuple(so);
 
 
-		aftSO = so.getPrecedingAfterstate();
-    	curBoard = (aftSO==null) ? null : m_Net.xnf.getBoardVector(aftSO);
+		afterSO = so.getPrecedingAfterstate();
+    	curBoard = (afterSO==null) ? null : m_Net.xnf.getBoardVector(afterSO);
 
 		//System.out.println("Random test: "+ rand.nextDouble());
 		//System.out.println("Random test: "+ rand.nextDouble());
 		
-		m_Net.clearEquivList();
+		m_Net.clearEligList();
 		m_Net.setHorizon();
 		if (DBG_OLD_3P || DBG_NEW_3P) {
-			m_Net3.clearEquivList();
+			m_Net3.clearEligList();
 			m_Net3.setHorizon();
 		}
 		
 		m_counter=0;		// count the number of moves
 		m_finished=false;
 		while (true) {
-			VTable = new double[so.getNumAvailableActions()+1];
 	        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) {
+				VTable = new double[so.getNumAvailableActions()+1];
 	        	actBest = this.getFirstAction(so, true, VTable, true);	// DEBUG only
 	        } else {
 				actBest = this.getNextAction2(so, true, true);	// the normal case 
@@ -866,13 +914,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //						System.out.println("reward,reward2: "+reward+","+reward2);
 //		        	}
 		        	oldReward=oldRewardTuple.scTup[refPlayer];	        		
-	        		break;
+	        		break;	// out of switch
 	        	case SINGLE_UPDATE:
 	    			// do one training step (NEW target) only for current player
 	        		Z_nply = actBest.getVBest();
 	        		reward=trainSingleUpdate_3P(ns,Z_nply,curBoard,learnFromRM,epiLength,oldReward,m_Net);
 	        		if (DBG_NEW_3P) dbg_Z_NEW_3P(ns,curBoard,learnFromRM,epiLength,reward,oldReward,Z,ZZ,Z_nply);
-	        		break;
+	        		break;	// out of switch
 	        	} // switch
 	        } 
 	        else // i.e. VER_3P==false:
@@ -908,7 +956,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 						pstream.println("Terminated game "+(getGameNum()) + ". Reward = "+reward);
 					}
 				
-				break;
+				break;		// out of while
 			}
 
 		} // while
@@ -927,8 +975,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
             	}
             	break;
         	case SINGLE_UPDATE:
-    			// do one training step (NEW target) only for current player
-    			m_Net.updateWeightsNewTerminal(curBoard, curPlayer, so, false);
+        		if (!TERNARY) {
+        			// do one training step (NEW target) only for current player
+        			m_Net.updateWeightsNewTerminal(curBoard, curPlayer, so, false);
+        		}
         		break;
         	} // switch
         } 
@@ -948,12 +998,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		incrementGameNum();
 		if (this.getGameNum() % 500 == 0) {
 			System.out.println("gameNum: "+this.getGameNum());
-			int dummy=1;
 		}
-		//samine// updating tcFactor array after each complete game
+		
+		// is now irrelevant since tcImm is always true
 		if(getGameNum()%tcIn==0 && TC && !tcImm) {
-			 m_Net.updateTC();
-			 if (DBG_OLD_3P || DBG_NEW_3P) m_Net3.updateTC();
+			System.out.println("we should not get here!");
+			m_Net.updateTC();
+			if (DBG_OLD_3P || DBG_NEW_3P) m_Net3.updateTC();
 		}
 					
 		//if (DEBG) m_Net.printLutSum(pstream);
@@ -1006,6 +1057,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		if (m_randomMove && !learnFromRM) {
 			// no training, go to next move.
 			if (m_DEBG)  pstream.println("random move");
+			
+			m_Net.clearEligList(m_elig);
+				
 		} else {
 			// do one training step (NEW target) for all players' value functions (VER_3P)
 			for (int i=0; i<thisSO.getNumPlayers(); i++) {
@@ -1072,6 +1126,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		if (m_randomMove && !learnFromRM) {
 			// no training, go to next move.
 			if (m_DEBG)  pstream.println("random move");
+			
+			my_Net.clearEligList(m_elig);
+				
 		} else {
 			// do one training step (NEW target)
 			// target is passed as argument from g3_Eval_NPly()  (n-ply look-ahead)
@@ -1119,6 +1176,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		if (m_randomMove && !learnFromRM) {
 			// no training, go to next move.
 			if (m_DEBG)  pstream.println("random move");
+			
+			my_Net.clearEligList(m_elig);
+				
 		} else {
 			// do one training step (NEW target)
 			if (curBoard!=null) {
@@ -1322,6 +1382,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				   //+ ", lambda:" + m_Net.getLambda()
 				   + ", "+getGameNum() + " games"
 				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
+		str = str + ", (winX/tie/winO)=("+winXCounter+"/"+tieCounter+"/"+winOCounter+")";
+		winXCounter=tieCounter=winOCounter=0;
 		return str;
 	}
 
@@ -1567,9 +1629,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			NextState(StateObservation so, Types.ACTIONS actBest) {
 				refer = so.copy();
 				int nPlayers= refer.getNumPlayers();
-		        if (getAFTERSTATE()) {
-		        	/* assertion not needed anymore, advanceNondeterministic is also part of StateObservation */ 
-	            	// assert (so instanceof StateObsNondeterministic);
+		        if (getAFTERSTATE()) {   // if checkbox "AFTERSTATE" is checked
 		        	
 	            	// implement it in such a way that StateObservation so is *not* changed -> that is why 
 	            	// we copy *first* to afterState, then advance:
@@ -1642,15 +1702,23 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				return nextSO;
 			}
 
+			/**
+			 * @return the reward of next state <b>s''</b> from the perspective of state <b>s</b> = {@code so}
+			 */
 			public double getNextReward() {
 				return nextReward;
 			}
 
 			public double getNextRewardCheckFinished(int epiLength) {
-				double reward = this.getNextReward();
+				double reward = this.getNextReward();  // r(s_{t+1}|p_t)
 				
 				if (nextSO.isGameOver()) {
 					m_finished = true;
+					
+					// only info
+					if (reward==0.0) tieCounter++;
+					if (reward==1.0 & nextSO.getPlayer()==0) winOCounter++;
+					if (reward==1.0 & nextSO.getPlayer()==1) winXCounter++;
 				}
 
 				m_counter++;

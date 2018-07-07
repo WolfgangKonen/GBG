@@ -14,6 +14,7 @@ import controllers.ExpectimaxNAgent;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.NTuple2ValueFunc;
+import games.Arena;
 import games.StateObservation;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 
@@ -376,18 +377,12 @@ public class Types {
 	 */
 	public static final String GUI_DEFAULT_DIR_AGENT = "agents";
 	
-	/**
-	 * The parameter {@code C = } {@link #TD_HORIZONCUT} controls the horizon in eligibility traces: 
-	 * Retain only those elements in the TD-update equation where {@code lambda^(t-k)} &ge; {@code C}.  
-	 * <br>(The horizon {@code h = t-k} runs from 0,1,..., to the appropriate {@code h = ceil(log_lambda(C))}.
-	 * 
-	 * @see NTuple2ValueFunc#setHorizon()
-	 */
-	public static double TD_HORIZONCUT = 0.1;		// 0.01 (perhaps in RubiksCube)
+	// obsolete now, use ParTD.getHorizonCut()
+	//public static double TD_HORIZONCUT = 0.01;		// 0.1 or 0.01 
 	
 	/**
 	 * Set all global GUI elements to the right scale. <br>
-	 * (Call this function before setting any GUI elements.)
+	 * (Call this function before setting any GUI elements: see {@link Arena}, initGame())
 	 * 
 	 * @param auto  If {@code auto==false}, set the global scale according
 	 * to the value in {@link #GUI_SCALING_FACTOR}. <br>

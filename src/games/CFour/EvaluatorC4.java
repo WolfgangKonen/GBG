@@ -190,7 +190,7 @@ public class EvaluatorC4 extends Evaluator {
      * Plays a high number of games for accurate measurements, since performance is high once tree is built.
      *
      * @param playAgent Agent to be evaluated
-     * @param gameBoard Game board the evaluation game is played on
+     * @param gameBoard	game board for the evaluation episodes
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstMaxN(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
@@ -203,14 +203,15 @@ public class EvaluatorC4 extends Evaluator {
     }
 
     /**
-     * Evaluates an agent's performance using enough iterations to play (near-) perfectly on boards
-     * up to and including 5x5. No guarantees for 6x6 board or higher. Tends to require a lot of
-     * memory for 7x7 and up. Only one game per evaluation because of the high runtime of the MCTS agent.
+     * Evaluates {@code playAgent}'s performance when playing against MCTS using 1000 iterations.
+     * Plays {@code numEpisodes} episodes both as 1st and as 2nd player.
      *
      * @param playAgent agent to be evaluated
-     * @param gameBoard Game board the evaluation game is played on
+     * @param gameBoard game board for the evaluation episodes
      * @param numEpisodes number of episodes played during evaluation
-     * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
+     * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
+     * 		or oppenent. Best for {@code playAgent} is +1, worst is -1. (If opponent were perfect,  
+     * 		best is 0, since the agent can then only win those games where he is 1st player.)
      */
     private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
         ParMCTS params = new ParMCTS();
@@ -220,8 +221,8 @@ public class EvaluatorC4 extends Evaluator {
 
 //        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), numEpisodes, 0);
 //        double success = res[0];        	
-        double success = XArenaFuncs.competeBoth(playAgent, mctsAgent,  numEpisodes, gameBoard, new StateObserverC4());
-       m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+        double success = XArenaFuncs.competeBoth(playAgent, mctsAgent,  new StateObserverC4(), numEpisodes, 0, gameBoard);
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         //if (this.verbose > 0) 
         	System.out.println(m_msg);
         lastResult = success;
@@ -239,20 +240,20 @@ public class EvaluatorC4 extends Evaluator {
      *
      * @param playAgent agent to be evaluated (it plays both 1st and 2nd)
      * @param opponent 	agent against which {@code playAgent} plays
-     * @param gb 		Game board the evaluation game is played on
+     * @param gameBoard game board for the evaluation episodes
      * @param numEpisodes number of episodes played during evaluation
      * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
      * 
      * @see EvaluatorC4#competeAgainstMCTS(PlayAgent, GameBoard, int)
      * @see HexConfig#EVAL_START_ACTIONS
      */
-    private double competeAgainstOpponent_diffStates(PlayAgent playAgent, PlayAgent opponent, GameBoard gb, int numEpisodes) {
+    private double competeAgainstOpponent_diffStates(PlayAgent playAgent, PlayAgent opponent, GameBoard gameBoard, int numEpisodes) {
         double[] res;
         double success = 0;
         
 		if (opponent == null) {
 			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
-			MessageBox.show(gb.getArena(),"ERROR: " + tdstr,
+			MessageBox.show(gameBoard.getArena(),"ERROR: " + tdstr,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
 			return Double.NaN;
 		} 
@@ -310,7 +311,7 @@ public class EvaluatorC4 extends Evaluator {
      * </ul>
      * 
      * @param playAgent
-     * @param gameBoard
+     * @param gameBoard		game board for the evaluation episodes
      * @param numEpisodes
      * @return
      */
@@ -405,12 +406,12 @@ public class EvaluatorC4 extends Evaluator {
      * Getting a high win rate against this evaluator does not guarantee good performance of the evaluated agent.
      *
      * @param playAgent Agent to be evaluated
-     * @param gameBoard Game board the evaluation game is played on
+     * @param gameBoard	game board for the evaluation episodes
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
     	StateObservation so = new StateObserverC4();
-        double success = XArenaFuncs.competeBoth(playAgent, randomAgent,  50, gameBoard, so);
+        double success = XArenaFuncs.competeBoth(playAgent, randomAgent,  so, 50, 0, gameBoard);
         //double[] res = XArenaFuncs.compete(playAgent, randomAgent, so, 100, verbose);
         //double success = res[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;

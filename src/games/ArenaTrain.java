@@ -123,7 +123,7 @@ abstract public class ArenaTrain extends Arena
 			taskState = Task.IDLE; 
 			break;
 		case MULTTRN:
-			enableButtons(false);
+//			enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtons
 			
 	        setStatusMessage("MultiTrain started ...");
 	        long start_time = Calendar.getInstance().getTime().getTime();
