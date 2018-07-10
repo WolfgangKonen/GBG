@@ -33,9 +33,9 @@ public class TSAgentManager {
         numberOfGames = num;
     }
 
-    public void addAgent(String name, String agent, JCheckBox checkbox) {
+    public void addAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent) {
         if (!lockedToCompete)
-            mAgents.add(new TSAgent(name, agent, checkbox));
+            mAgents.add(new TSAgent(name, agent, checkbox, hddAgent));
         else
             System.out.println(TAG+"ERROR :: manager is locked to compete, can not add new agent");
     }

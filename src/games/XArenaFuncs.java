@@ -970,6 +970,7 @@ public class XArenaFuncs
 				// todo logmanager oder andere persistierung implementieren
 				// todo TS Messungen an 1 spieler spiele anpassen + erkennung
 				// todo startzustand spielbrett vorgeben können
+				// todo TSAgentManager/GUI erweitern dass wärend spiel checkboxen nicht geändert werden können
 
 				PlayAgent[] paVector = fetchAgents(xab);
 

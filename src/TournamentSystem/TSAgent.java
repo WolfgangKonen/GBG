@@ -9,14 +9,16 @@ import static TournamentSystem.TSAgentManager.faktorWin;
 public class TSAgent {
     private String name;
     private String agent;
+    private boolean isHddAgent;
     private int won;
     private int lost;
     private int tie;
     public JCheckBox guiCheckBox;
 
-    public TSAgent(String name, String agent, JCheckBox checkbox) {
+    public TSAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent) {
         this.name = name;
         this.agent = agent;
+        isHddAgent = hddAgent;
         guiCheckBox = checkbox;
         won = 0;
         lost = 0;
@@ -57,6 +59,10 @@ public class TSAgent {
     public float getAgentScore() {
         float agentScore = getCountWonGames()*faktorWin+getCountTieGames()*faktorTie+getCountLostGames()*faktorLos;
         return agentScore;
+    }
+
+    public boolean isHddAgent() {
+        return isHddAgent;
     }
 
     public String toString() {
