@@ -1,5 +1,6 @@
 package TournamentSystem;
 
+import controllers.PlayAgent;
 import org.tc33.jheatchart.HeatChart;
 
 import javax.swing.*;
@@ -8,7 +9,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 
 public class TSAgentManager {
     public ArrayList<TSAgent> mAgents;
@@ -33,9 +33,9 @@ public class TSAgentManager {
         numberOfGames = num;
     }
 
-    public void addAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent) {
+    public void addAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent, PlayAgent playAgent) {
         if (!lockedToCompete)
-            mAgents.add(new TSAgent(name, agent, checkbox, hddAgent));
+            mAgents.add(new TSAgent(name, agent, checkbox, hddAgent, playAgent));
         else
             System.out.println(TAG+"ERROR :: manager is locked to compete, can not add new agent");
     }
@@ -53,6 +53,14 @@ public class TSAgentManager {
                 num++;
             }
         }
+        return num;
+    }
+
+    public int getNumDiskAgents() {
+        int num = 0;
+        for (TSAgent t : mAgents)
+            if (t.isHddAgent())
+                num++;
         return num;
     }
 

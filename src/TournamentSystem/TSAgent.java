@@ -1,5 +1,7 @@
 package TournamentSystem;
 
+import controllers.PlayAgent;
+
 import javax.swing.*;
 
 import static TournamentSystem.TSAgentManager.faktorLos;
@@ -10,15 +12,17 @@ public class TSAgent {
     private String name;
     private String agent;
     private boolean isHddAgent;
+    private PlayAgent mPlayAgent;
     private int won;
     private int lost;
     private int tie;
     public JCheckBox guiCheckBox;
 
-    public TSAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent) {
+    public TSAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent, PlayAgent playAgent) {
         this.name = name;
         this.agent = agent;
         isHddAgent = hddAgent;
+        mPlayAgent = playAgent;
         guiCheckBox = checkbox;
         won = 0;
         lost = 0;
@@ -63,6 +67,10 @@ public class TSAgent {
 
     public boolean isHddAgent() {
         return isHddAgent;
+    }
+
+    public PlayAgent getPlayAgent() {
+        return mPlayAgent;
     }
 
     public String toString() {

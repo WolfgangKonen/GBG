@@ -19,6 +19,8 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
@@ -83,6 +85,7 @@ public class LoadSaveGBG {
 	private final XArenaButtons arenaButtons;
 	private final JFrame arenaFrame;
 	private String tdstr="";
+	private final String TAG = "[LoadSaveGBG] ";
 
 	public LoadSaveGBG(Arena areGame, XArenaButtons areButtons, JFrame areFrame) {
 		this.arenaGame = areGame;
@@ -406,6 +409,156 @@ public class LoadSaveGBG {
 		} 
 		
 		return pa;
+	}
+
+	/**
+	 * @throws IOException
+	 */
+	public Object[][] loadMultipleGBGAgent() throws IOException {
+		Object[][] output = new Object[0][2];
+		String filePath = null;
+		ObjectInputStream ois = null;
+		FileInputStream fis = null;
+		//File file = null;
+
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
+		String subDir = arenaGame.getGameBoard().getSubDir();
+		if (subDir != null){
+			strDir += "/"+subDir;
+		}
+		tools.Utils.checkAndCreateFolder(strDir);
+		/*
+		fc.removeChoosableFileFilter(txtExt);
+		fc.setFileFilter(tdAgentExt);
+		fc.setCurrentDirectory(new File(strDir));
+		fc.setAcceptAllFileFilterUsed(false);
+		*/
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setMultiSelectionEnabled(true);
+		fileChooser.removeChoosableFileFilter(txtExt);
+		fileChooser.setFileFilter(tdAgentExt);
+		fileChooser.setCurrentDirectory(new File(strDir));
+		fileChooser.setAcceptAllFileFilterUsed(false);
+
+		int returnVal = fileChooser.showOpenDialog(arenaGame);
+
+		if (returnVal == JFileChooser.APPROVE_OPTION)
+		{
+			File[] files = fileChooser.getSelectedFiles();
+			//String[] paths = new String[files.length];
+			output = new Object[files.length][2];
+
+			for(int i = 0; i<files.length; i++)
+			{
+				System.out.println("Selected file: " + files[i].getAbsolutePath());
+				//paths[i] = files[i].getAbsolutePath();
+				PlayAgent pa = null;
+				File file = files[i];
+
+				try {
+					filePath = file.getPath();
+					fis = new FileInputStream(filePath);
+				} catch (IOException e) {
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+					//e.printStackTrace();
+					throw e;
+				}
+
+				GZIPInputStream gs;
+				try {
+					gs = new GZIPInputStream(fis);
+				} catch (IOException e1) {
+					arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
+					throw e1;
+				}
+
+				long fileLength = (long) (estimateGZIPLength(file));
+				final ProgressTrackingObjectInputStream ptis = new ProgressTrackingObjectInputStream(
+						gs, new agentIO.IOProgress(fileLength));
+				try {
+					ois = new ObjectInputStream(ptis);
+				} catch (IOException e1) {
+					ptis.close();
+					arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
+					throw e1;
+				}
+
+				final JDialog dlg = createProgressDialog(ptis, "Loading...");
+
+				try {
+					// ois = new ObjectInputStream(gs);
+					Object obj = ois.readObject();
+					if (obj instanceof TDAgent) {
+						pa = (TDAgent) obj;
+					} else if (obj instanceof TDNTuple2Agt) {
+						pa = (TDNTuple2Agt) obj;
+					} else if (obj instanceof MCTSAgentT) {
+						pa = (MCTSAgentT) obj;
+					} else if (obj instanceof MCAgent) {
+						pa = (MCAgent) obj;
+					} else if (obj instanceof MCAgentN) {
+						pa = (MCAgentN) obj;
+					} else if (obj instanceof MinimaxAgent) {
+						pa = (MinimaxAgent) obj;
+					} else if (obj instanceof MaxNAgent) {
+						pa = (MaxNAgent) obj;
+					} else if (obj instanceof ExpectimaxNAgent) {
+						pa = (ExpectimaxNAgent) obj;
+					} else if (obj instanceof RandomAgent) {
+						pa = (RandomAgent) obj;
+					} else {
+						dlg.setVisible(false);
+						MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
+								+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
+						arenaGame.setStatusMessage("[ERROR: Could not load agent from "
+								+ filePath + "!]");
+						throw new ClassNotFoundException("ERROR: Unknown agent class");
+					}
+					dlg.setVisible(false);
+					arenaGame.setProgress(null);
+					arenaGame.setStatusMessage("Done.");
+				} catch (IOException e) {
+					dlg.setVisible(false);
+					MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
+							e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
+							+ " !]");
+					//e.printStackTrace();
+					//throw e;
+				} catch (ClassNotFoundException e) {
+					dlg.setVisible(false);
+					MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
+							e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+					e.printStackTrace();
+					//throw e;
+				} finally {
+					if (ois != null)
+						try {
+							ois.close();
+						} catch (IOException e) {
+						}
+					if (fis != null)
+						try {
+							fis.close();
+						} catch (IOException e) {
+						}
+				}
+
+				output[i][0] = pa;
+				Path p = Paths.get(filePath);
+				String fileNameSource = p.getFileName().toString();
+				//System.out.println(TAG+" "+fileNameSource); // minimax.agt.zip
+				//System.out.println(TAG+" "+fileNameSource.substring(0,fileNameSource.length()-8)); // minimax.agt.zip
+				output[i][1] = fileNameSource.substring(0,fileNameSource.length()-8);
+			} // for(int i = 0; i<files.length; i++)
+		} // if (returnVal == JFileChooser.APPROVE_OPTION)
+		else {
+			arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
+		}
+
+
+
+		return output;
 	}
 
 	public String getZipContentFiles(ZipFile zipFile,

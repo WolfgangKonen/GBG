@@ -8,7 +8,6 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Arena;
 import games.ArenaTrain;
-import tools.MessageBox;
 import tools.Types;
 
 import javax.swing.*;
@@ -31,9 +30,6 @@ public class TournamentsystemGUI2 extends JFrame{
     private JPanel mJPanel;
     private JTextField gameNumTextField;
     private JButton loadAgentFromDiskButton;
-    private JCheckBox diskAgent1CheckBox; // DUMMY
-    private JCheckBox diskAgent2CheckBox; // DUMMY
-    private JCheckBox diskAgent3CheckBox; // DUMMY
     private JCheckBox addNRandomMovesCheckBox;
     private JTextField numOfMovesTextField;
     private JPanel checkBoxJPanel;
@@ -43,7 +39,6 @@ public class TournamentsystemGUI2 extends JFrame{
     private Arena mArena;
     private TSAgentManager mTSAgentManager;
     private final String TAG = "[TSAgent] ";
-    private ArrayList<PlayAgent> diskAgents = new ArrayList<>();
 
     public TournamentsystemGUI2(Arena mArena) { //GameBoard gameBoard) {
         super("TournamentsystemGUI2");
@@ -56,16 +51,16 @@ public class TournamentsystemGUI2 extends JFrame{
         this.mArena = mArena;
         mTSAgentManager = new TSAgentManager();
 
-        mTSAgentManager.addAgent("randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox, false);
-        mTSAgentManager.addAgent("minimaxCheckBox",   Types.GUI_AGENT_LIST[1], minimaxCheckBox, false);
-        mTSAgentManager.addAgent("maxNCheckBox",      Types.GUI_AGENT_LIST[2], maxNCheckBox, false);
-        mTSAgentManager.addAgent("expectimaxNCheckBox", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false);
-        mTSAgentManager.addAgent("MCNCheckBox",       Types.GUI_AGENT_LIST[4], MCNCheckBox, false);
-        mTSAgentManager.addAgent("MCTSCheckBox",      Types.GUI_AGENT_LIST[5], MCTSCheckBox, false);
-        mTSAgentManager.addAgent("MCTSExpectimaxCheckBox", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false);
+        mTSAgentManager.addAgent("randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
+        mTSAgentManager.addAgent("minimaxCheckBox",   Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
+        mTSAgentManager.addAgent("maxNCheckBox",      Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
+        mTSAgentManager.addAgent("expectimaxNCheckBox", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
+        mTSAgentManager.addAgent("MCNCheckBox",       Types.GUI_AGENT_LIST[4], MCNCheckBox, false, null);
+        mTSAgentManager.addAgent("MCTSCheckBox",      Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
+        mTSAgentManager.addAgent("MCTSExpectimaxCheckBox", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
         // GUI_AGENT_LIST[7] ist der Human Player
-        mTSAgentManager.addAgent("TDNtuple2CheckBox", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false);
-        mTSAgentManager.addAgent("TDSCheckBox",       Types.GUI_AGENT_LIST[9], TDSCheckBox, false);
+        mTSAgentManager.addAgent("TDNtuple2CheckBox", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
+        mTSAgentManager.addAgent("TDSCheckBox",       Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
 
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -84,23 +79,25 @@ public class TournamentsystemGUI2 extends JFrame{
     }
 
     private void loadAgentFromDisk() {
-        PlayAgent playAgent = null;
+        Object[][] agentsAndFileNames;
 
         try {
-            playAgent = mArena.tdAgentIO.loadGBGAgent(null); // opens file dialog to locate agent
-        } catch (IOException | ClassNotFoundException e) {
+            //playAgent = mArena.tdAgentIO.loadGBGAgent(null); // opens file dialog to locate single agent
+            agentsAndFileNames = mArena.tdAgentIO.loadMultipleGBGAgent(); // opens file dialog to locate multiple agents
+        } catch (IOException /*| ClassNotFoundException*/ e) {
             e.printStackTrace();
+            return;
         }
 
         // todo transfer loaded agents to GameManager or store there in the first place
         // todo add logic to turnament gen functions to add agents
         // todo add logic to compete functions to let loaded agents play
 
-        if (playAgent == null) {
-            String str = "No Agent loaded!";
-            MessageBox.show(mArena,"ERROR: " + str,"Load Error", JOptionPane.ERROR_MESSAGE);
-        } else {
+        for (int i=0; i<agentsAndFileNames.length; i++) {
+            PlayAgent playAgent = (PlayAgent) agentsAndFileNames[i][0];
+            String agentName = (String)agentsAndFileNames[i][1];
             String agentType;
+
             if (playAgent instanceof TDAgent) {
                 agentType = "TDAgent";
             } else if (playAgent instanceof TDNTuple2Agt) {
@@ -123,22 +120,19 @@ public class TournamentsystemGUI2 extends JFrame{
                 agentType = "NaN";
             }
 
-            System.out.println(TAG+"INFO :: loading from Disk successful for agent: "+playAgent.getName()+" with AgentState: "+playAgent.getAgentState()+ " and type: "+agentType);
-
-            // add new agent internally
-            diskAgents.add(playAgent);
-            System.out.println(TAG+"Number of disk agents loaded into TS: "+diskAgents.size());
-            // save parameters somewhere?
+            System.out.println(TAG + "INFO :: loading from Disk successful for agent: " + agentName + " with AgentState: " + playAgent.getAgentState() + " and type: " + agentType);
 
             // add agent to gui
-            JCheckBox newAgent = new JCheckBox("HDD "+playAgent.getName());
+            JCheckBox newAgent = new JCheckBox("HDD " + agentName);
             checkBoxJPanel.add(newAgent);
-            mJPanel.revalidate();
-            mJPanel.repaint();
 
             // add to mTSAgentManager
-            mTSAgentManager.addAgent("HDD "+playAgent.getName(), "HDD "+agentType, newAgent, true);
-        }
+            mTSAgentManager.addAgent("HDD " + agentName, "HDD " + agentType, newAgent, true, playAgent);
+        } // for
+
+        System.out.println(TAG + "Number of disk agents loaded into TS: " + mTSAgentManager.getNumDiskAgents());
+        mJPanel.revalidate();
+        mJPanel.repaint();
     }
 
     private void playPressed(){

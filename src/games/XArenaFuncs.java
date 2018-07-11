@@ -972,7 +972,14 @@ public class XArenaFuncs
 				// todo startzustand spielbrett vorgeben können
 				// todo TSAgentManager/GUI erweitern dass wärend spiel checkboxen nicht geändert werden können
 
-				PlayAgent[] paVector = fetchAgents(xab);
+				PlayAgent[] paVector = new PlayAgent[2];
+				if (nextTeam[0].isHddAgent() || nextTeam[1].isHddAgent()) {
+					paVector[0] = nextTeam[0].getPlayAgent();
+					paVector[1] = nextTeam[1].getPlayAgent();
+				} else {
+					paVector = fetchAgents(xab);
+				}
+
 
 				AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
 
