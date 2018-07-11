@@ -417,9 +417,8 @@ public class LoadSaveGBG {
 	public Object[][] loadMultipleGBGAgent() throws IOException {
 		Object[][] output = new Object[0][2];
 		String filePath = null;
-		ObjectInputStream ois = null;
-		FileInputStream fis = null;
-		//File file = null;
+		ObjectInputStream ois;
+		FileInputStream fis;
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
 		String subDir = arenaGame.getGameBoard().getSubDir();
@@ -445,13 +444,11 @@ public class LoadSaveGBG {
 		if (returnVal == JFileChooser.APPROVE_OPTION)
 		{
 			File[] files = fileChooser.getSelectedFiles();
-			//String[] paths = new String[files.length];
 			output = new Object[files.length][2];
 
 			for(int i = 0; i<files.length; i++)
 			{
 				System.out.println("Selected file: " + files[i].getAbsolutePath());
-				//paths[i] = files[i].getAbsolutePath();
 				PlayAgent pa = null;
 				File file = files[i];
 
@@ -460,7 +457,6 @@ public class LoadSaveGBG {
 					fis = new FileInputStream(filePath);
 				} catch (IOException e) {
 					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
-					//e.printStackTrace();
 					throw e;
 				}
 
@@ -483,7 +479,7 @@ public class LoadSaveGBG {
 					throw e1;
 				}
 
-				final JDialog dlg = createProgressDialog(ptis, "Loading...");
+				//final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
 				try {
 					// ois = new ObjectInputStream(gs);
@@ -507,18 +503,18 @@ public class LoadSaveGBG {
 					} else if (obj instanceof RandomAgent) {
 						pa = (RandomAgent) obj;
 					} else {
-						dlg.setVisible(false);
+						//dlg.setVisible(false);
 						MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
 								+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
 						arenaGame.setStatusMessage("[ERROR: Could not load agent from "
 								+ filePath + "!]");
 						throw new ClassNotFoundException("ERROR: Unknown agent class");
 					}
-					dlg.setVisible(false);
+					//dlg.setVisible(false);
 					arenaGame.setProgress(null);
 					arenaGame.setStatusMessage("Done.");
 				} catch (IOException e) {
-					dlg.setVisible(false);
+					//dlg.setVisible(false);
 					MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
 							e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
@@ -526,7 +522,7 @@ public class LoadSaveGBG {
 					//e.printStackTrace();
 					//throw e;
 				} catch (ClassNotFoundException e) {
-					dlg.setVisible(false);
+					//dlg.setVisible(false);
 					MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
 							e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 					e.printStackTrace();
@@ -536,11 +532,13 @@ public class LoadSaveGBG {
 						try {
 							ois.close();
 						} catch (IOException e) {
+							e.printStackTrace();
 						}
 					if (fis != null)
 						try {
 							fis.close();
 						} catch (IOException e) {
+							e.printStackTrace();
 						}
 				}
 
@@ -555,8 +553,6 @@ public class LoadSaveGBG {
 		else {
 			arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
 		}
-
-
 
 		return output;
 	}

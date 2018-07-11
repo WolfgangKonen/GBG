@@ -11,6 +11,7 @@ import games.ArenaTrain;
 import tools.Types;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class TournamentsystemGUI2 extends JFrame{
     private JTextField numOfMovesTextField;
     private JPanel checkBoxJPanel;
     private JCheckBox addNSpecificMovesCheckBox;
+    private JScrollPane checkBoxScrollPane;
 
     //private GameBoard gameBoard;
     private Arena mArena;
@@ -125,14 +127,17 @@ public class TournamentsystemGUI2 extends JFrame{
             // add agent to gui
             JCheckBox newAgent = new JCheckBox("HDD " + agentName);
             checkBoxJPanel.add(newAgent);
+            //checkBoxScrollPane.add(newAgent);
 
             // add to mTSAgentManager
             mTSAgentManager.addAgent("HDD " + agentName, "HDD " + agentType, newAgent, true, playAgent);
         } // for
 
         System.out.println(TAG + "Number of disk agents loaded into TS: " + mTSAgentManager.getNumDiskAgents());
+        checkBoxJPanel.revalidate();
         mJPanel.revalidate();
         mJPanel.repaint();
+        pack(); // resize window
     }
 
     private void playPressed(){
@@ -197,5 +202,11 @@ public class TournamentsystemGUI2 extends JFrame{
      */
     public static void main(String[] args) {
         new TournamentsystemGUI2(null);
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+        checkBoxJPanel = new JPanel();
+        checkBoxJPanel.setLayout(new BoxLayout(checkBoxJPanel,BoxLayout.Y_AXIS));
     }
 }
