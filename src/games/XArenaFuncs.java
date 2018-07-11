@@ -973,17 +973,16 @@ public class XArenaFuncs
 				// todo TSAgentManager/GUI erweitern dass wärend spiel checkboxen nicht geändert werden können
 
 				PlayAgent[] paVector = new PlayAgent[2];
+				PlayAgent[] qaVector;
 				if (nextTeam[0].isHddAgent() || nextTeam[1].isHddAgent()) {
 					paVector[0] = nextTeam[0].getPlayAgent();
 					paVector[1] = nextTeam[1].getPlayAgent();
+					qaVector = paVector;
 				} else {
 					paVector = fetchAgents(xab);
+					AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
+					qaVector = wrapAgents(paVector,xab.oPar,startSO);
 				}
-
-
-				AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
-
-				PlayAgent[] qaVector = wrapAgents(paVector,xab.oPar,startSO);
 
 				int verbose=1;
 				/*

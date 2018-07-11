@@ -34,7 +34,9 @@ public class TournamentsystemGUI2 extends JFrame{
     private JCheckBox addNRandomMovesCheckBox;
     private JTextField numOfMovesTextField;
     private JPanel checkBoxJPanel;
-    private JCheckBox addNSpecificMovesCheckBox;
+    private JButton saveResultsToDiskButton;
+    private JButton loadResultsFromDiskButton;
+    private JButton reopenStatisticsButton;
     private JScrollPane checkBoxScrollPane;
 
     //private GameBoard gameBoard;

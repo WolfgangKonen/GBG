@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="TournamentSystem.TournamentsystemGUI2">
   <grid id="27dc6" binding="mJPanel" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="500" height="750"/>
+      <xy x="20" y="20" width="500" height="802"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -105,7 +105,7 @@
       </component>
       <component id="1645c" class="javax.swing.JButton" binding="startButton" default-binding="true">
         <constraints>
-          <grid row="23" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="22" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
@@ -146,7 +146,7 @@
       </vspacer>
       <vspacer id="50069">
         <constraints>
-          <grid row="24" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="28" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
           <gridbag top="0" left="0" bottom="20" right="0" weightx="0.0" weighty="0.0"/>
         </constraints>
       </vspacer>
@@ -188,7 +188,7 @@
       </component>
       <component id="9a403" class="javax.swing.JTextField" binding="numOfMovesTextField">
         <constraints>
-          <grid row="21" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+          <grid row="20" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
           </grid>
           <gridbag weightx="0.0" weighty="0.0"/>
@@ -199,7 +199,7 @@
       </component>
       <component id="f30ac" class="javax.swing.JLabel">
         <constraints>
-          <grid row="20" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="19" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
@@ -208,7 +208,7 @@
       </component>
       <vspacer id="311bd">
         <constraints>
-          <grid row="22" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="21" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
           <gridbag top="0" left="0" bottom="20" right="0" weightx="0.0" weighty="0.0"/>
         </constraints>
       </vspacer>
@@ -221,15 +221,45 @@
         <border type="none"/>
         <children/>
       </grid>
-      <component id="b7c76" class="javax.swing.JCheckBox" binding="addNSpecificMovesCheckBox" default-binding="true">
+      <component id="2c888" class="javax.swing.JButton" binding="saveResultsToDiskButton" default-binding="true">
         <constraints>
-          <grid row="19" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="26" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Add n specific moves at start"/>
+          <text value="Save Results to Disk"/>
         </properties>
       </component>
+      <vspacer id="f6589">
+        <constraints>
+          <grid row="25" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <gridbag top="0" left="0" bottom="5" right="0" weightx="0.0" weighty="0.0"/>
+        </constraints>
+      </vspacer>
+      <component id="d9370" class="javax.swing.JButton" binding="loadResultsFromDiskButton" default-binding="true">
+        <constraints>
+          <grid row="27" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="Load Results from Disk"/>
+        </properties>
+      </component>
+      <component id="e6d49" class="javax.swing.JButton" binding="reopenStatisticsButton" default-binding="true">
+        <constraints>
+          <grid row="24" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="Reopen Statistics"/>
+        </properties>
+      </component>
+      <vspacer id="a35a1">
+        <constraints>
+          <grid row="23" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <gridbag top="0" left="0" bottom="5" right="0" weightx="0.0" weighty="0.0"/>
+        </constraints>
+      </vspacer>
     </children>
   </grid>
 </form>
