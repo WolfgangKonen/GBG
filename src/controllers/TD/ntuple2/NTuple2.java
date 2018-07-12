@@ -306,7 +306,7 @@ public class NTuple2 implements Serializable {
 	 * <p>
 	 * **New** function according to [Jaskowski16]. It uses the LAMBDA-horizon mechanism
 	 * and it maintains for each n-tuple and each update step an index list such that 
-	 * reoccurring LUT-indices are changed only once.
+	 * re-occurring LUT-indices are changed only once.
 	 * 
 	 * @param board
 	 *            the representation of a game board (in case of TTT: vector of length 9,

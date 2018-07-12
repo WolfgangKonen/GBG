@@ -29,10 +29,18 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 	
 	/**
 	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
-	 * can have. For ConnectFour: P=3, with 0=empty, 1="X", 2="o") 
+	 * can have. For ConnectFour: 
+	 * <ul>
+	 * <li> either P=3, with 0=empty, 1="X", 2="O"
+	 * <li> or     P=4, with 0=non-reachable-empty, 1="X", 2="O", 3=reachable-empty 
+	 * 		(<b>recommended</b> case)
+	 * </ul> 
+	 * 
+	 * @see #getBoardVector(StateObservation)
 	 */
 	@Override
 	public int getNumPositionValues() {
+		// return 3; // (*not* recommended)
 		return 4; 
 	}
 	
@@ -59,10 +67,10 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 	 * position value which is with 
 	 * <ul> 
 	 * <li> 0=empty, 1="X", 2="O" in case {@link #getNumPositionValues()}==3 and
-	 * <li> 0=empty+not-reachable, 1="X", 2="O", 3=empty+reachable in case 
-	 *      {@link #getNumPositionValues()}==4 (the <b>recommended</b> case).
+	 * <li> 0=not-reachable-empty, 1="X", 2="O", 3=reachable-empty in case 
+	 *      {@link #getNumPositionValues()}==4 (<b>recommended</b> case).
 	 * </ul>
-	 * An empty+reachable cell is an empty cell which is either in the lowest row or has a
+	 * An reachable-empty cell is an empty cell which is either in the lowest row or has a
 	 * piece directly below. 
 	 */
 	@Override
@@ -79,8 +87,12 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 			for (int i = 0, n=0; i < C4Base.COLCOUNT; i++) {
 				for (int j = 0; j < C4Base.ROWCOUNT; j++, n++) {
 	            	if (board[i][j]==0) {
-	            		if (j==0 ) board[i][j]=3;
-	            		else if (board[i][j-1]==1 || board[i][j-1]==2) board[i][j]=3; 
+	            		if (j==0 ) bvec[n]=3;
+	            		else if (board[i][j-1]==1 || board[i][j-1]==2) bvec[n]=3; 
+	            		//
+	            		// this was a previous bug: we had board[i][j] where it should be bvec[n] !!!!
+//	            		if (j==0 ) board[i][j]=3;
+//	            		else if (board[i][j-1]==1 || board[i][j-1]==2) board[i][j]=3; 
 	            	}
 				}
 			}
@@ -105,8 +117,8 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 	@Override
 	public int[][] symmetryVectors(int[] boardVector) {
 		int[][] equiv = new int[2][];
-		equiv[0] = boardVector;
-		equiv[1] = flip(boardVector);
+		equiv[0] = boardVector.clone();
+		equiv[1] = (flip(boardVector)).clone();
 
 		return equiv;
 	}

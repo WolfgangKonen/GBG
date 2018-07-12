@@ -119,13 +119,16 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private double m_EpsilonChangeDelta = 0.001;
 	
 	private double BestScore;
-	//samine//
+	
 	private boolean TC; //true: using Temporal Coherence algorithm
 	private int tcIn; 	//temporal coherence interval: after tcIn games tcFactor will be updates
 	private boolean tcImm=true;		//true: immediate TC update, false: batch update (epochs)
-	private boolean randomness=false; //true: ntuples are created randomly (walk or points)
-	private boolean randWalk=true; 	//true: random walk is used to generate nTuples
-									//false: random points is used to generate nTuples//samine//
+	
+	// not needed anymore here, we hand in int[][] nTuples = = ntupfac.makeNTupleSet(...) 
+	// to the constructor: 
+//	private boolean randomness=false; //true: ntuples are created randomly (walk or points)
+//	private boolean randWalk=true; 	//true: random walk is used to generate nTuples
+//									//false: random points is used to generate nTuples//samine//
 
 	// Value function of the agent.
 	private NTuple2ValueFunc m_Net;
@@ -222,11 +225,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public static boolean DBG_NEW_3P=false;
 	// debug for Rubik's Cube:
 	public static boolean DBG_CUBE=true;
-	// debug ternary (old) update rule
+	// use ternary (old) target in update rule:
 	public static boolean TERNARY=true;
 	
 	private boolean randomSelect = false;
-//	private boolean RESET_TRACES = false;
 	
 	/**
 	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link AgentBase#m_oPar} are needed for 
@@ -576,6 +578,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        
         	boolean TST_VERSION=false;
         	if (TST_VERSION) {
+        		// this longer debug version is only to make some extra assertions for C4
     	        if (NewSO.isGameOver()) {
     	        	if (NewSO instanceof StateObserverC4) 
     	        		assert otilde==0 : "Oops, otilde is not zero!";  
@@ -588,14 +591,15 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
     		        	assert rtilde==0 : "Oops, rtilde is not zero!";  
     	        		// an in-game state should have no reward	        	
 
-    	        	return rtilde+kappa*getGamma()*agentScore;		// normal return
+    	        	return rtilde+kappa*getGamma()*agentScore;		// normal return (n-ply recursion)
     	        }
         	} else {
     	        if (NewSO.isGameOver() || j==nply) {
     	        	if (TERNARY) {
     	        		return NewSO.isGameOver() ? rtilde : kappa*getGamma()*agentScore;
     	        	}
-    	        	return rtilde+kappa*getGamma()*agentScore;		// game over, terminate for-loop
+    	        	return rtilde+kappa*getGamma()*agentScore;		// game over or n-ply-recursion over, 
+    	        													// --> terminate for-loop
     	        }
         	}
 			
@@ -961,7 +965,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 
 		} // while
 
-		// learn for each final state that the value function (estimated further reward)
+		// learn for each final state that its value function (estimated further reward)
 		// should be zero:
 		if (VER_3P)  {
         	switch (UPDATE) {
@@ -1058,7 +1062,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// no training, go to next move.
 			if (m_DEBG)  pstream.println("random move");
 			
-			m_Net.clearEligList(m_elig);
+			m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
 				
 		} else {
 			// do one training step (NEW target) for all players' value functions (VER_3P)
@@ -1127,7 +1131,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// no training, go to next move.
 			if (m_DEBG)  pstream.println("random move");
 			
-			my_Net.clearEligList(m_elig);
+			my_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
 				
 		} else {
 			// do one training step (NEW target)
@@ -1177,7 +1181,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// no training, go to next move.
 			if (m_DEBG)  pstream.println("random move");
 			
-			my_Net.clearEligList(m_elig);
+			my_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
 				
 		} else {
 			// do one training step (NEW target)
@@ -1297,8 +1301,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		tcIn=ntPar.getTcInterval();
 		TC=ntPar.getTc();
 		tcImm=ntPar.getTcImm();		
-		randomness=ntPar.getRandomness();
-		randWalk=ntPar.getRandomWalk();
+//		randomness=ntPar.getRandomness();
+//		randWalk=ntPar.getRandomWalk();
 		m_Net.setTdAgt(this);						 // WK: needed when loading an older agent
 	}
 

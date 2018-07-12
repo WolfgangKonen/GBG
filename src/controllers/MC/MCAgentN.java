@@ -38,7 +38,7 @@ import java.util.concurrent.Executors;
  */
 public class MCAgentN extends AgentBase implements PlayAgent {
     private Random random = new Random();
-    private ExecutorService executorService = Executors.newWorkStealingPool();
+    private transient ExecutorService executorService = Executors.newWorkStealingPool();
 
     private int totalRolloutDepth = 0;  // saves the average rollout depth for the mc Agent
     private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true

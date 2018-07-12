@@ -208,7 +208,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 		} else {
 			equiv = new int[1][];
-			equiv[0] = board;			
+			equiv[0] = board.clone();			
 		}
 		
 		return equiv;
@@ -272,15 +272,9 @@ public class NTuple2ValueFunc implements Serializable {
 	public void updateWeightsNew(int[] curBoard, int curPlayer, int[] nextBoard, int nextPlayer,
 			double reward, double target, /*boolean upTC,*/ StateObservation thisSO) {
 		double v_old = getScoreI(curBoard,curPlayer); // old value
-		double tg; // Target signal
-//		int sign=1;
-//		if (!TDNTuple2Agt.VER_3P && TDNTuple2Agt.NEW_2P) sign=-1;
-//		// Target tg is (reward + GAMMA * value of the after-state) for non-final states
-//		tg = reward + sign*getGamma() * getScoreI(nextBoard,nextPlayer);
-		tg = target;
-		// delta is the error signal
-		double delta = (tg - v_old);
-		// derivative of tanh ( if hasSigmoid()==true)
+		// delta is the error signal:
+		double delta = (target - v_old);
+		// derivative of tanh ( if hasSigmoid()==true):
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
 		update(curBoard, curPlayer, delta, e);
@@ -290,11 +284,11 @@ public class NTuple2ValueFunc implements Serializable {
 			double v_new = getScoreI(curBoard,curPlayer);
 			if (curPlayer==nextPlayer) {
 				System.out.println("updateWeightsNew[p="+curPlayer+", "+thisSO.stringDescr()
-				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+tg*MAXSCORE+", R="+reward);
+				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
 				dbg3PArr[curPlayer]=v_new*MAXSCORE;
 			} else {
 				System.out.println("updateWeights_2P[p="+curPlayer+", "+thisSO.stringDescr()
-				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+tg*MAXSCORE+", R="+reward);				
+				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);				
 				dbg3PArr[2]=v_new*MAXSCORE;				
 			}
 			if (Math.abs(reward)>0.5) {
@@ -323,9 +317,8 @@ public class NTuple2ValueFunc implements Serializable {
 	 */
 	public void updateWeightsNewTerminal(int[] curBoard, int curPlayer,StateObservation thisSO, boolean isNEW_3P) {
 		double v_old = getScoreI(curBoard,curPlayer); // old value
-		double tg = 0.0; // Target signal is 0 (!)
-		// delta is the error signal
-		double delta = (tg - v_old);
+		// delta is the error signal (here with target signal = 0.0):
+		double delta = (0.0 - v_old);
 		// derivative of tanh ( if hasSigmoid()==true)
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
@@ -366,11 +359,10 @@ public class NTuple2ValueFunc implements Serializable {
 	 */
 	private void update(int[] board, int player, double delta, double e) {
 		int i, j;
-		int[][] equiv = null;
 		double alphaM, sigDeriv, lamFactor;
 
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board,getUSESYMMETRY());
+		int[][] equiv = getSymBoards2(board,getUSESYMMETRY());
 
 		alphaM = ALPHA / (numTuples*equiv.length); 
 
@@ -386,6 +378,7 @@ public class NTuple2ValueFunc implements Serializable {
 		while(iter.hasNext()) {
 			elem=iter.next();
 			equiv=elem.equiv;
+			//System.out.println(eList.size()+" "+lamFactor+"   ["+ equiv[0]+"]");	// debug
 			assert (lamFactor >= tdAgt.getParTD().getHorizonCut()) 
 					: "Error: lamFactor < ParTD.getHorizonCut";
 			e = lamFactor*elem.sigDeriv;
@@ -470,6 +463,7 @@ public class NTuple2ValueFunc implements Serializable {
 	public void clearEligList(EligType m_elig) {
 		switch(m_elig) {
 		case STANDARD: 
+			// do nothing
 			break;
 		case RESET: 
 			eList.clear();

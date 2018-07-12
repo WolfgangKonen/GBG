@@ -43,6 +43,7 @@ agents/2048/TC*.agt.zip
 agents/Hex/05/TEST*.agt.zip
 agents/ConnectFour/firstTD*.agt.zip
 agents/ConnectFour/experiment
+agents/ConnectFour/old
 agents/ConnectFour/TDNTal05-lam06-500k.agt.zip
 agents/ConnectFour/TDNTal10-lam03-500k.agt.zip
 

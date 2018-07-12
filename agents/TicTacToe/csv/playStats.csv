@@ -1,5 +1,5 @@
-controllers.MaxNAgent, depth:10
-controllers.MaxNAgent:
+controllers.MC.MCAgentN: iterations:1000, rollout depth:20, # agents:1
+controllers.MC.MCAgentN:
 run, moveNum, gameScore, nEmptyTile, cumEmptyTl
 1, 1, 0, 0, 0
 1, 2, 0, 0, 0
