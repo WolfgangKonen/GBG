@@ -1,6 +1,13 @@
 package TournamentSystem;
 
 import controllers.PlayAgent;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.tc33.jheatchart.HeatChart;
 
 import javax.swing.*;
@@ -366,6 +373,59 @@ public class TSAgentManager {
         renderer.setHorizontalAlignment( JLabel.CENTER );
 
         /**
+         * Scatterplot AgentScore vs Time
+         */
+        // https://www.boraji.com/jfreechart-scatter-chart-example
+        // Create dataset
+        XYSeriesCollection dataset = new XYSeriesCollection();
+
+        int[] selectedAgents2 = getIDAgentsSelected();
+        for (int i=0; i<selectedAgents2.length; i++) {
+            TSAgent tmp = mAgents.get(selectedAgents2[i]);
+            ArrayList<Double> medianTimes = new ArrayList<>();
+            double median;
+
+            for (int gms=0; gms<timeStorage.length; gms++) { // spiele
+                for (int cpl=0; cpl<timeStorage[0].length; cpl++) { // hin+rückrunde
+                    for (int agt=0; agt<2; agt++) { // agent 1+2
+                        if (gamePlan[gms][cpl] == selectedAgents2[i]) {
+                            medianTimes.add(timeStorage[gms][cpl].getMedianRoundTimeMS());
+                        }
+                    }
+                }
+            }
+
+            double[] tmpD = new double[medianTimes.size()];
+
+            for (int j=0; j<medianTimes.size(); j++)
+                tmpD[j] = medianTimes.get(j);
+
+            Arrays.sort(tmpD);
+
+            if (tmpD.length % 2 == 0)
+                median = (tmpD[tmpD.length/2] + tmpD[tmpD.length/2 - 1])/2;
+            else
+                median = tmpD[tmpD.length/2];
+
+            XYSeries series1 = new XYSeries(tmp.getName());
+            series1.add(median, tmp.getAgentScore());
+            dataset.addSeries(series1);
+        }
+
+        // Create chart
+        JFreeChart chart = ChartFactory.createScatterPlot(
+                "", "Median Round Time [ms]", "Agent Score [WTL]", dataset);
+
+        //Changes background color
+        XYPlot plot = (XYPlot)chart.getPlot();
+        plot.setBackgroundPaint(new Color(230, 230, 230));
+
+        // Create Panel
+        ChartPanel scatterPlotASvT = new ChartPanel(chart);
+        scatterPlotASvT.setPreferredSize(new Dimension(350,250)); // plot size
+        //setContentPane(panel);
+
+        /**
          * Table | Zeiten
          */
         // headers for the table
@@ -438,7 +498,7 @@ public class TSAgentManager {
         /**
          * TS Results in a window
          */
-        TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm));
+        TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm), scatterPlotASvT);
     }
 
 }

@@ -1,5 +1,7 @@
 package TournamentSystem;
 
+import org.jfree.chart.ChartPanel;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -17,8 +19,9 @@ public class TSResultWindow extends JFrame{
     private JScrollPane jspHM;
     private JScrollPane jspASC;
     private JScrollPane jspTD;
+    private JPanel scatterPlotJPanel;
 
-    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon) {
+    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon, ChartPanel scatterPlotASvT) {
         super("Turnier Ergebnisse");
 
         tableMatrixWTL.setModel(m1);
@@ -39,6 +42,7 @@ public class TSResultWindow extends JFrame{
         renderer2.setHorizontalAlignment( JLabel.RIGHT );
         heatmapJL.setText("");
         heatmapJL.setIcon(imageIcon);
+        scatterPlotJPanel.add(scatterPlotASvT);
 
         setContentPane(mJPanel);
         //setSize(1000,1000);
