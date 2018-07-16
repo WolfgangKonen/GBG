@@ -56,10 +56,8 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 	public  boolean m_NetHasSigmoid = false;
 	public	PlayAgent m_PlayAgentX;
 	public	PlayAgent m_PlayAgentO;
-	String sRandom = Types.GUI_AGENT_LIST[2];
-	String sMinimax = Types.GUI_AGENT_LIST[1];
-	RandomAgent random_agent = new RandomAgent(sRandom);
-	MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
+	private RandomAgent random_agent = new RandomAgent("Random");
+	private MinimaxAgent minimax_agent = new MinimaxAgent("Minimax");
 	protected Evaluator m_evaluator1=null;
 	protected Evaluator m_evaluator2=null;
 	protected Evaluator m_evaluator3=null;

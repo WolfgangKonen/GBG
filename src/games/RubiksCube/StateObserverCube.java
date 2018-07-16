@@ -29,10 +29,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     private static final double REWARD_POSITIVE =  1.0;
 	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
     
-    public Types.ACTIONS[] storedActions = null;
-    public Types.ACTIONS storedActBest = null;
-    public double[] storedValues = null;
-    public double storedMaxScore; 
+    // --- this is now in ObserverBase ---
+//    public Types.ACTIONS[] storedActions = null;
+//    public Types.ACTIONS storedActBest = null;
+//    public double[] storedValues = null;
+//    public double storedMaxScore; 
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -91,6 +92,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		return true;
 	}
 	
+    @Override
+	public boolean isFinalRewardGame() {
+		return true;
+	}
+
     @Override
 	public boolean isLegalState() {
     	if (!m_state.twistSeq.equals("")) {
@@ -195,32 +201,33 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		return acts.get(i);
 	}
 
-	/**
-	 * Given the current state, store some info useful for inspecting the  
-	 * action actBest and double[] vtable returned by a call to <br>
-	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
-	 *  
-	 * @param actBest	the best action
-	 * @param vtable	one double for each action in this.getAvailableActions():
-	 * 					it stores the value of that action (as given by the double[] 
-	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
-	 */
-	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
-        //ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
-        storedActions = new Types.ACTIONS[acts.size()];
-        storedValues = new double[acts.size()];
-        for(int i = 0; i < storedActions.length; ++i)
-        {
-        	storedActions[i] = acts.get(i);
-        	storedValues[i] = vtable[i];
-        }
-        storedActBest = actBest;
-        if (actBest instanceof Types.ACTIONS_VT) {
-        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
-        } else {
-            storedMaxScore = vtable[acts.size()];        	
-        }
-	}
+    // --- this is now in ObserverBase ---
+//	/**
+//	 * Given the current state, store some info useful for inspecting the  
+//	 * action actBest and double[] vtable returned by a call to <br>
+//	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
+//	 *  
+//	 * @param actBest	the best action
+//	 * @param vtable	one double for each action in this.getAvailableActions():
+//	 * 					it stores the value of that action (as given by the double[] 
+//	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
+//	 */
+//	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
+//        //ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
+//        storedActions = new Types.ACTIONS[acts.size()];
+//        storedValues = new double[acts.size()];
+//        for(int i = 0; i < storedActions.length; ++i)
+//        {
+//        	storedActions[i] = acts.get(i);
+//        	storedValues[i] = vtable[i];
+//        }
+//        storedActBest = actBest;
+//        if (actBest instanceof Types.ACTIONS_VT) {
+//        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
+//        } else {
+//            storedMaxScore = vtable[acts.size()];        	
+//        }
+//	}
 
     public int getPlayer() {
         return 0;

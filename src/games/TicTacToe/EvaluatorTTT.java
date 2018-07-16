@@ -30,10 +30,8 @@ import tools.Types;
  */
 public class EvaluatorTTT extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {0,1,2,9,11};
-	private String sRandom = Types.GUI_AGENT_LIST[2];
-	private String sMinimax = Types.GUI_AGENT_LIST[1];
-	private RandomAgent random_agent = new RandomAgent(sRandom);
-	private MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
+	private RandomAgent random_agent = new RandomAgent("Random");
+	private MinimaxAgent minimax_agent = new MinimaxAgent("Minimax");
 	private AgentLoader agtLoader = null;
 	private Evaluator9 m_evaluator9 = null; 
 	private int m_mode;

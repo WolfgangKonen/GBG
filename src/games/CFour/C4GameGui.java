@@ -21,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import controllers.PlayAgent;
+import games.CFour.openingBook.BookSum;
 import tools.MessageBox;
 
 //import openingBook.BookSum;
@@ -80,15 +81,17 @@ public class C4GameGui extends JPanel implements ListOperation {
 //	private final BookSum books = new BookSum();
 
 
-	// Standard Alpha-Beta-Agent
-//	public AlphaBetaAgent alphaBetaStd = null;
 
 	// Players
 	protected PlayAgent[] players = new PlayAgent[3];
 	private int curPlayer;		// current player, either 0 or 1 
 
+	// The opening-books are loaded only once to save memory. All agents, that
+	// need them, use the same books.
+	private final BookSum books = new BookSum();
 	// Agent for the game-theoretic-values (perfect minimax-agent)
-	private PlayAgent GTVab = null;
+	// Standard Alpha-Beta-Agent
+	private AlphaBetaAgent alphaBetaStd = null;
 
 	// Flag that is set, when a game is won by a player or drawn.
 //	@Deprecated
@@ -718,37 +721,32 @@ public class C4GameGui extends JPanel implements ListOperation {
 		return amax;
 	}
 	
-	/*
 	private double[] getGTV() {
-		if (GTVab == null)
-			GTVab = initGTVAgent();
-		double[] vals = GTVab.getNextVTable(c4.getBoard(), true);
+		if (alphaBetaStd == null)
+			alphaBetaStd = initGTVAgent();
+		double[] vals = alphaBetaStd.getNextVTable(c4.getBoard(), true);
 		return vals;
 	}
 
 	private double getSingleGTV() {
-		if (GTVab == null)
-			GTVab = initGTVAgent();
-		return GTVab.getScore(c4.getBoard(), true);
+		if (alphaBetaStd == null)
+			alphaBetaStd = initGTVAgent();
+		return alphaBetaStd.getScore(c4.getBoard(), true);
 	}
 
-
-	private PlayAgent initGTVAgent() {
-		if (!winOptionsGTV.usePresetting()) {
-			AlphaBetaAgent ab = new AlphaBetaAgent(books);
-			ab.resetBoard();
-			// New
-			OptionsMinimax min = winOptionsGTV;
-			ab.setTransPosSize(min.getTableIndex());
-			ab.setBooks(min.useNormalBook(), min.useDeepBook(),
-					min.useDeepBookDist());
-			ab.setDifficulty(min.getSearchDepth());
-			ab.randomizeEqualMoves(min.randomizeEqualMoves());
-			return ab;
-		}
+	private AlphaBetaAgent initGTVAgent() {
+		// Initialize the standard Alpha-Beta-Agent
+		// (same as winOptionsGTB in MT's C4)
+		alphaBetaStd = new AlphaBetaAgent(books);
+		alphaBetaStd.resetBoard();
+		alphaBetaStd.setTransPosSize(4);		// index into table
+		alphaBetaStd.setBooks(true,false,true);	// use normal book and deep book dist
+		alphaBetaStd.setDifficulty(42);			// search depth
+		alphaBetaStd.randomizeEqualMoves(true);
 		return alphaBetaStd;
 	}
 
+	/*
 	protected PlayAgent initAlphaBetaAgent(int player) {
 		if (params[player] == null
 				|| !params[player].getClass().equals(OptionsMinimax.class))

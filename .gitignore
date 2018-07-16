@@ -9,7 +9,6 @@ count_states.csv
 *.idea
 *.iml
 *.settings
-*.dat
 .Rhistory
 src/out/production/GBG/*
 out/*
@@ -27,10 +26,6 @@ FutureWork.docx
 ~$*.*
 ~*.tmp
 
-#Files from C4 not yet ready for publication on GitHub (around AlphaBeta and Opening Books)
-src/games/CFour/AlphaBetaAgent.java
-src/games/CFour/openingBook
-
 #Ordner mit veralteten Versuchen zur Parallelität
 src/games/ZweiTausendAchtundVierzig/Parallel/*
 
@@ -41,6 +36,7 @@ agents/2048/fixed TEST eTiles 4 6-Tupels 200k TDNT2.agt.zip
 agents/2048/TEST*.agt.zip
 agents/2048/TC*.agt.zip
 agents/Hex/05/TEST*.agt.zip
+# too many for a regular save to GitHub
 agents/ConnectFour/firstTD*.agt.zip
 agents/ConnectFour/experiment
 agents/ConnectFour/old

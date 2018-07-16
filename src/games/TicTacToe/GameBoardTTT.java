@@ -222,17 +222,17 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 				
 			}
 			
-			if (showValueOnGameboard && soT.storedValues!=null) {
+			if (showValueOnGameboard && soT.getStoredValues()!=null) {
 				for(i=0;i<3;i++)
 					for(j=0;j<3;j++) 
 						VTable[i][j]=Double.NaN;	
 				
-				for (int k=0; k<soT.storedValues.length; k++) {
-					Types.ACTIONS action = soT.storedActions[k];
+				for (int k=0; k<soT.getStoredValues().length; k++) {
+					Types.ACTIONS action = soT.getStoredAction(k);
 					int iAction = action.toInt();
 					j=iAction%3;
 					i=(iAction-j)/3;
-					VTable[i][j] = soT.storedValues[k];					
+					VTable[i][j] = soT.getStoredValues()[k];					
 				}	
 				if (showValueOnGameboard) {
 					String splus = (m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
@@ -364,7 +364,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		m_so.advance(act);			// perform action (optionally add random elements from game 
 									// environment - not necessary in TicTacToe)
 		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-		updateBoard(null,false,false);
+//		updateBoard(null,false,false);
 		arenaActReq = true;			// ask Arena for next action
 	}
 	
@@ -381,7 +381,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		}
 		m_so.advance(act);			// perform action (optionally add random elements from game 
 									// environment - not necessary in TicTacToe)
-		updateBoard(null,false,false);
+//		updateBoard(null,false,false);
 		arenaActReq = true;		
 	}
 	

@@ -372,17 +372,17 @@ public class GameBoardCube extends JFrame implements GameBoard {
 				}				
 			}
 			
-			if (showValueOnGameboard && soT.storedValues!=null) {
+			if (showValueOnGameboard && soT.getStoredValues()!=null) {
 				for(i=0;i<3;i++)
 					for(j=0;j<3;j++) 
 						VTable[i][j]=Double.NaN;	
 				
-				for (int k=0; k<soT.storedValues.length; k++) {
-					Types.ACTIONS action = soT.storedActions[k];
+				for (int k=0; k<soT.getStoredValues().length; k++) {
+					Types.ACTIONS action = soT.getStoredAction(k);
 					int iAction = action.toInt();
 					j=iAction%3;
 					i=(iAction-j)/3;
-					VTable[i][j] = soT.storedValues[k];					
+					VTable[i][j] = soT.getStoredValues()[k];					
 				}	
 				rightInfo.setText("");					
 			} 

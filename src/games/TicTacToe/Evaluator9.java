@@ -123,8 +123,7 @@ public class Evaluator9 extends Evaluator {
 		DecimalFormat frm = new DecimalFormat("+0.000;-0.000");
 		DecimalFormat frM = new DecimalFormat("+0.0;-0.0");
 		DecimalFormat frk = new DecimalFormat("00");
-		String sMinimax = Types.GUI_AGENT_LIST[1];
-		MinimaxAgent referee = new MinimaxAgent(sMinimax);
+		MinimaxAgent referee = new MinimaxAgent("Minimax");
 //		double[] VTable = null;
 		Types.ACTIONS actBest;
 		int[][] rtable = new int[3][3];	// referee (Minimax) table for next move

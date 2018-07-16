@@ -133,6 +133,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 			for(int i=0;i<C4Base.COLCOUNT;i++){
 					VTable[i] = Double.NaN;
 			}
+			c4GameBoard.printValueBar(null, VTable, null);
 		}
 	}
 
@@ -175,15 +176,15 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 				
 			}
 			
-			if (showValueOnGameboard && soT.storedValues!=null) {
+			if (showValueOnGameboard && soT.getStoredValues()!=null) {
 				for(i=0;i<C4Base.COLCOUNT;i++){
 					VTable[i] = Double.NaN;
 				}
 				
-				for (int k=0; k<soT.storedValues.length; k++) {
-					Types.ACTIONS action = soT.storedActions[k];
+				for (int k=0; k<soT.getStoredValues().length; k++) {
+					Types.ACTIONS action = soT.getStoredAction(k);
 					int iAction = action.toInt();
-					VTable[iAction] = soT.storedValues[k];					
+					VTable[iAction] = soT.getStoredValues()[k];					
 				}	
 				if (showValueOnGameboard) {
 					String splus = (m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
@@ -330,7 +331,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 			m_so.advance(act);			// perform action (optionally add random elements from game 
 										// environment - not necessary in ConnectFour)
 			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-			updateBoard(null,false,false);
+//			updateBoard(null,false,false);
 			arenaActReq = true;			// ask Arena for next action
 		}
 	}
@@ -348,7 +349,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		}
 		m_so.advance(act);			// perform action (optionally add random elements from game 
 									// environment - not necessary in TicTacToe)
-		updateBoard(null,false,false);
+//		updateBoard(null,false,false);
 		arenaActReq = true;		
 	}
 	

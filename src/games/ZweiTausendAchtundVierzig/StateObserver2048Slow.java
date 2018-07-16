@@ -43,10 +43,12 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     private boolean ASSERTSAME = false; // if true, run through assertSameAdvance
     private boolean isNextActionDeterministic;
 
-    public ACTIONS[] storedActions = null;
-    public ACTIONS storedActBest = null;
-    public double[] storedValues = null;
-    public double storedMaxScore;
+    // --- this is now in ObserverBase ---
+//  public ACTIONS[] storedActions = null;
+//  public ACTIONS storedActBest = null;
+//  public double[] storedValues = null;
+//  private double storedMaxScore;
+  
     private ACTIONS nextNondeterministicAction;
 
     public final static double MAXSCORE = 3932156;
@@ -614,23 +616,24 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     	return null;
     }
 
-    @Override
-    public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
-        ArrayList<ACTIONS> acts = this.getAvailableActions();
-        storedActions = new ACTIONS[acts.size()];
-        storedValues = new double[acts.size()];
-        for(int i = 0; i < storedActions.length; ++i)
-        {
-            storedActions[i] = acts.get(i);
-            storedValues[i] = vtable[i];
-        }
-        storedActBest = actBest;
-        if (actBest instanceof ACTIONS_VT) {
-        	storedMaxScore = ((ACTIONS_VT) actBest).getVBest();
-        } else {
-            storedMaxScore = vtable[acts.size()];        	
-        }
-    }
+    // --- this is now in ObserverBase ---
+//    @Override
+//    public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
+//        ArrayList<ACTIONS> acts = this.getAvailableActions();
+//        storedActions = new ACTIONS[acts.size()];
+//        storedValues = new double[acts.size()];
+//        for(int i = 0; i < storedActions.length; ++i)
+//        {
+//            storedActions[i] = acts.get(i);
+//            storedValues[i] = vtable[i];
+//        }
+//        storedActBest = actBest;
+//        if (actBest instanceof ACTIONS_VT) {
+//        	storedMaxScore = ((ACTIONS_VT) actBest).getVBest();
+//        } else {
+//            storedMaxScore = vtable[acts.size()];        	
+//        }
+//    }
 
     @Override
     public int getPlayer() {
@@ -692,6 +695,11 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 		return false;
 	}
 	
+    @Override
+	public boolean isFinalRewardGame() {
+		return true;
+	}
+
 //    @Override
 //	public boolean has2OppositeRewards() {
 //		return true;

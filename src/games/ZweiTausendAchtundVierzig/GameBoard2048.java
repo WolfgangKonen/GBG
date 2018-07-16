@@ -392,14 +392,14 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                 // ** activate next line only if m_so is of class StateObserver2048: **
                 m_so = soZTAV.copy();
 
-                if (showValueOnGameboard && soZTAV.storedValues != null) {
+                if (showValueOnGameboard && soZTAV.getStoredValues() != null) {
                     for (int i = 0; i < 4; i++) {
                         vTable[i] = Double.NaN;
                     }
-                    for (int i = 0; i < soZTAV.storedValues.length; i++) {
-                        Types.ACTIONS action = soZTAV.storedActions[i];
+                    for (int i = 0; i < soZTAV.getStoredValues().length; i++) {
+                        Types.ACTIONS action = soZTAV.getStoredAction(i);
                         int iAction = action.toInt();
-                        vTable[iAction] = soZTAV.storedValues[i];
+                        vTable[iAction] = soZTAV.getStoredValues()[i];
                     }
                 }
             } else {

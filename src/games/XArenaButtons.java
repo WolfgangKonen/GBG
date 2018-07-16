@@ -130,9 +130,9 @@ public class XArenaButtons extends JPanel
 		// 
 		// initial settings for the GUI
 		//
-		AgentX = null; //Types.GUI_X_PLAYER;  // "MCTS"; "TDS"; "CMA-ES"; "Minimax" 
-		AgentO = null; //Types.GUI_O_PLAYER;  // "Human";"ValIt";
-		GameNumT=new JTextField("10000", 5); //("10000", 5);
+		AgentX = null;  
+		AgentO = null; 
+		GameNumT=new JTextField("10000", 5); 
 		TrainNumT=new JTextField("25", 5);
 
 		MultiTrain=new JButton("MultiTrain");
@@ -158,10 +158,17 @@ public class XArenaButtons extends JPanel
 
 		for (int n=0; n<numPlayers; n++) {
 			choiceAgent[n] = new JComboBox(Types.GUI_AGENT_LIST);
-			// --- the old code when choiceAgent was Choice[] (AWT) and not JComboBox[] (Swing) ---
-			//for (String s : Types.GUI_AGENT_LIST) choiceAgent[n].add(s);
-			//choiceAgent[n].select(Types.GUI_AGENT_INITIAL[n]);	
 			choiceAgent[n].setSelectedItem(Types.GUI_AGENT_INITIAL[n]);
+			
+			// only applicable agents:
+			if (m_game.getGameBoard().getDefaultStartState().isDeterministicGame()) {
+				choiceAgent[n].removeItem("Expectimax-N");
+				choiceAgent[n].removeItem("MCTS Expectimax");
+			} else {
+				choiceAgent[n].removeItem("Max-N");
+				choiceAgent[n].removeItem("MCTS");
+			}
+			
 			if (numPlayers==2) {
 				mParam[n]=new JButton("Param "+Types.GUI_2PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_2PLAYER_NAME[n]);

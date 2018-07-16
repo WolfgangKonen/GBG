@@ -14,6 +14,7 @@ import games.TicTacToe.Evaluator9;
 import games.TicTacToe.EvaluatorTTT;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import games.CFour.openingBook.BookSum;
 import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
@@ -44,7 +45,8 @@ import agentIO.AgentLoader;
  * <li> -1: no evaluation
  * <li>  0: compete against MCTS
  * <li>  1: compete against Random
- * <li>  2: compete against Max-N
+ * <li>  2: compete against Max-N (limited tree depth: 6)
+ * <li>  3: compete against AlphaBetaAgent (perfect play)
  * <li> 10: compete against MCTS, different start states
  * <li> 11: compete against TDReferee.agt.zip, different start states
  * </ul>  
@@ -55,7 +57,7 @@ public class EvaluatorC4 extends Evaluator {
     private final String logDir = "logs/ConnectFour/train";
     protected int verbose = 0;
     private MCTSAgentT mctsAgent = null;
-    private RandomAgent randomAgent = new RandomAgent(Types.GUI_AGENT_LIST[0]);
+    private RandomAgent randomAgent = new RandomAgent("Random");
     private double trainingThreshold = 0.8;
     private GameBoard m_gb;
     private PlayAgent playAgent;
@@ -64,6 +66,12 @@ public class EvaluatorC4 extends Evaluator {
     private int m_mode = 0;
     private String m_msg = null;
 	private AgentLoader agtLoader = null;
+	
+	// The opening-books are loaded only once to save memory. All agents, that
+	// need them, use the same books.
+	private final BookSum books = new BookSum();
+	private AlphaBetaAgent alphaBetaStd = null;
+
     /**
      * logResults toggles logging of training progress to a csv file located in {@link #logDir}
      */
@@ -95,7 +103,17 @@ public class EvaluatorC4 extends Evaluator {
         ParMaxN params = new ParMaxN();
         int maxNDepth =  6;
         params.setMaxNDepth(maxNDepth);
-        maxnAgent = new MaxNAgent(Types.GUI_AGENT_LIST[2], params, new ParOther());
+        maxnAgent = new MaxNAgent("Max-N", params, new ParOther());
+        
+		// Initialize the standard Alpha-Beta-Agent
+		// (same as winOptionsGTB in MT's C4)
+		alphaBetaStd = new AlphaBetaAgent(books);
+		alphaBetaStd.resetBoard();
+		alphaBetaStd.setTransPosSize(4);		// index into table
+		alphaBetaStd.setBooks(true,false,true);	// use normal book and deep book dist
+		alphaBetaStd.setDifficulty(42);			// search depth
+		alphaBetaStd.randomizeEqualMoves(true);
+
     }
 
     @Override
@@ -138,6 +156,10 @@ public class EvaluatorC4 extends Evaluator {
             case 2:
                 result = competeAgainstMaxN(playAgent, m_gb, numEpisodes);
                 break;
+            case 3:
+            	numEpisodes=20;
+                result = competeAgainstAlphaBeta(playAgent, m_gb, numEpisodes);
+                break;
             case 10:
             	if (playAgent instanceof TDNTuple2Agt) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
@@ -149,7 +171,7 @@ public class EvaluatorC4 extends Evaluator {
                     ParMCTS params = new ParMCTS();
                     int numIterExp =  (Math.min(C4Base.CELLCOUNT,5) - 1);
                     params.setNumIter((int) Math.pow(10, numIterExp));
-                    mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[5], new StateObserverC4(), params);
+                    mctsAgent = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
             		result = competeAgainstOpponent_diffStates(playAgent, mctsAgent, m_gb, numEpisodes);
             	}
@@ -184,10 +206,7 @@ public class EvaluatorC4 extends Evaluator {
 
     /**
      * Evaluates an agent's performance with perfect play, as long as tree and rollout depth are not limited.
-     * Scales poorly with board size, requires more than 8 GB RAM for board sizes higher than 4x4.
-     * Since the MaxN agent is a static object, the game tree is cached between evaluations. This also means that
-     * a restart of the program is required to change MaxN params and to free memory used by the game tree.
-     * Plays a high number of games for accurate measurements, since performance is high once tree is built.
+     * Scales poorly with board size, requires lots of GB and time for increased tree depth.
      *
      * @param playAgent Agent to be evaluated
      * @param gameBoard	game board for the evaluation episodes
@@ -198,6 +217,41 @@ public class EvaluatorC4 extends Evaluator {
         double success = res[0] - res[2];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         if (this.verbose > 0) System.out.println(m_msg);
+        lastResult = success;
+        return success;
+    }
+
+    /**
+     * Evaluates an agent's performance against perfect play, since {@link AlphaBetaAgent} with 
+     * opening books is an agent playing perfectly. We test only the games where  
+     * {@code playAgent} starts, since games where {@link AlphaBetaAgent} starts are a safe 
+     * win for {@link AlphaBetaAgent}.
+     *
+     * @param playAgent Agent to be evaluated
+     * @param gameBoard	game board for the evaluation episodes
+     * @param numEpisodes
+     * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
+     * 		or oppenent.
+     * <p>
+     * Note that the return value has a slightly different meaning than in 
+     * {@link #competeAgainstMCTS(PlayAgent, GameBoard, int)}. There the agent is evaluated 
+     * bothas 1st and 2nd player. Here it is evaluated only as 1st player, since it would  
+     * loose against the perfect {@link AlphaBetaAgent}. If v is the return value from this function,
+     * then v_both = (v+(-1)/2 = v/2 - 0.5 \in [-1,0] would be the corresponding competeBoth-value
+     * (best is 0.0). But we return here v in order to evaluate the same as in [Thill14]. 
+     */
+    private double competeAgainstAlphaBeta(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+//    	verbose=1;
+    	// only as debug test: if AlphaBetaAgent is implemented correctly and playing perfect,  
+    	// it should win every game when starting from the empty board, for each playAgent.
+    	// (This is indeed the case.)
+//        double[] res = XArenaFuncs.compete(alphaBetaStd, playAgent, new StateObserverC4(), numEpisodes, verbose);
+//        double success = res[2] - res[0];
+        double[] res = XArenaFuncs.compete(playAgent, alphaBetaStd, new StateObserverC4(), numEpisodes, verbose);
+        double success = res[0] - res[2];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+//      if (this.verbose > 0) 
+        	System.out.println(m_msg);
         lastResult = success;
         return success;
     }
@@ -217,7 +271,7 @@ public class EvaluatorC4 extends Evaluator {
         ParMCTS params = new ParMCTS();
         int numIterExp =  (Math.min(C4Base.CELLCOUNT,5) - 2);
         params.setNumIter((int) Math.pow(10, numIterExp));
-        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[5], new StateObserverC4(), params);
+        mctsAgent = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
 //        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), numEpisodes, 0);
 //        double success = res[0];        	
@@ -356,7 +410,7 @@ public class EvaluatorC4 extends Evaluator {
                 // important: mctsAgent2 has to be constructed inside the 'callables' function, 
                 // otherwise all parallel calls would operate on the same agent and would produce
                 // garbage.
-                MCTSAgentT mctsAgent2 = new MCTSAgentT(Types.GUI_AGENT_LIST[5], new StateObserverC4(), params);
+                MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
             	if (startAction2[i2] == -1) {
             		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0);
@@ -439,7 +493,7 @@ public class EvaluatorC4 extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{-1, 0, 1, 2, 10, 11};
+        return new int[]{-1, 0, 1, 2, 3, 10, 11};
     }
 
     @Override
@@ -463,7 +517,8 @@ public class EvaluatorC4 extends Evaluator {
         switch (m_mode) {
             case 0:  return "success against MCTS (best is 1.0): ";
             case 1:  return "success against Random (best is 1.0): ";
-            case 2:  return "success against Minimax (best is 1.0): ";
+            case 2:  return "success against Max-N (best is 1.0): ";
+            case 3:  return "success against AlphaBetaAgent (best is 1.0): ";
             case 10: return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
             case 11: return "success against TDReferee (" + numStartStates + " diff. start states, best is 1.0): ";
             default: return null;
@@ -475,7 +530,8 @@ public class EvaluatorC4 extends Evaluator {
         switch (m_mode) {
             case 0:  return "success against MCTS";
             case 1:  return "success against Random";
-            case 2:  return "success against Minimax";
+            case 2:  return "success against Max-N";
+            case 3:  return "success against AlphaBeta";
             case 10: return "success against MCTS";
             case 11: return "success against TDReferee";
             default: return null;
