@@ -3,7 +3,7 @@ package TournamentSystem;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.*;
-import games.TicTacToe.LaunchTrainTTT;
+import games.TicTacToe.ArenaTrainTTT;
 
 import javax.swing.*;
 

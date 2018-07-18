@@ -715,20 +715,20 @@ public class XArenaFuncs
 		for (int k=0; k<competeNum; k++) {
 			int Player=Types.PLAYER_PM[startSO.getPlayer()];			
 			so = startSO.copy();
-			 
+
 			while(true)
-			{	
-				
+			{
+
 				if(Player==1){		// make a X-move
 					int n=so.getNumAvailableActions();
-					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
+					actBest = paX.getNextAction2(so, false, nextMoveSilent);
 					so.advance(actBest);
 					Player=-1;
 				}
 				else				// i.e. O-Move
 				{
 					int n=so.getNumAvailableActions();
-					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
+					actBest = paO.getNextAction2(so, false, nextMoveSilent);
 					so.advance(actBest);
 					Player=+1;
 				}
@@ -737,18 +737,18 @@ public class XArenaFuncs
 					//  res is +1/0/-1  for X/tie/O win
 					int player = Types.PLAYER_PM[so.getPlayer()];
 					switch (res*player) {
-					case -1:
-						if (!silent) System.out.println(k+": O wins");
-						owinCount++;
-						break;
-					case 0:
-						if (!silent) System.out.println(k+": Tie");
-						tieCount++;
-						break;
-					case +1:
-						if (!silent) System.out.println(k+": X wins");
-						xwinCount++;
-						break;
+						case -1:
+							if (verbose>0) System.out.println(k+": O wins");
+							owinCount++;
+							break;
+						case 0:
+							if (verbose>0) System.out.println(k+": Tie");
+							tieCount++;
+							break;
+						case +1:
+							if (verbose>0) System.out.println(k+": X wins");
+							xwinCount++;
+							break;
 					}
 
 					break; // out of while
@@ -761,7 +761,7 @@ public class XArenaFuncs
 		winrate[1] = (double)tieCount/competeNum;
 		winrate[2] = (double)owinCount/competeNum;
 
-		if (!silent) {
+		if (verbose>0) {
 			System.out.print("win rates: ");
 			for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
 			System.out.println(" (X/Tie/O)");
@@ -941,8 +941,9 @@ public class XArenaFuncs
 
 	public double bothCompete(XArenaButtons xab, GameBoard gb) {
 		return this.competeBase(false, true, xab, gb);
+	}
 
-	public int singleTournamentCompeteBase(GameBoard gb, TSAgent[] nextTeam, TSTimeStorage[] nextTimes, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
+	protected int singleTournamentCompeteBase(GameBoard gb, TSAgent[] nextTeam, TSTimeStorage[] nextTimes, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
 		boolean swap = false;
 		int competeNum = 1;//xab.winCompOptions.getNumGames(); | falls wert != 1 dann tournamentCompete() anpassen!
@@ -1023,11 +1024,6 @@ public class XArenaFuncs
 			return 2;
 		return 42;
 	}
-
-	public void swapCompete(XArenaButtons xab, GameBoard gb) {
-		this.competeBase(true, xab, gb);
-	}
-
 
 	/**
 	 * Perform many (competitionNum) competitions between agents of type AgentX and agents 

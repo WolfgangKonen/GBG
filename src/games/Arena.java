@@ -50,8 +50,8 @@ import tools.Types;
  * This class contains the GUI and the task dispatcher for the game. The GUI for
  * buttons and choice boxes is in {@link XArenaButtons}.
  * <p>
- * Run this class for example from {@code main} in {@link LaunchArenaTTT} or
- * {@link LaunchTrainTTT} for the TicTacToe game.
+ * Run this class for example from {@code main} in {@link games.TicTacToe.ArenaTTT} or
+ * {@link games.TicTacToe.ArenaTrainTTT} for the TicTacToe game.
  * 
  * @author Wolfgang Konen, TH K�ln, Nov'16
  */
