@@ -244,7 +244,6 @@ abstract public class Arena extends JFrame implements Runnable {
 			case TRNEMNT:
 				// Tournament Code
 				tournamentAgentManager.lockToCompete();
-				//String tournamentGamePlan[][] = tournamentAgentManager.getGamePlan();
 
 				while (tournamentAgentManager.hastNextGame()) {
 					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam();

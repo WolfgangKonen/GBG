@@ -945,16 +945,9 @@ public class XArenaFuncs
 
 	protected int singleTournamentCompeteBase(GameBoard gb, TSAgent[] nextTeam, TSTimeStorage[] nextTimes, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
-		boolean swap = false;
 		int competeNum = 1;//xab.winCompOptions.getNumGames(); | falls wert != 1 dann tournamentCompete() anpassen!
 		int numPlayers = gb.getStateObs().getNumPlayers();
-		/*
-		if (numPlayers!=2) {
-			MessageBox.show(xab,
-					"Single/Swap Compete only available for 2-player games!",
-					"Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}*/
+
 		double[] c = {}; // winrate how often = [0]:agentX wins [1]: ties [2]: agentO wins
 
 		try {
@@ -973,7 +966,7 @@ public class XArenaFuncs
 				// to do add basic time measurement and save data somewhere - DONE
 				// todo zeitauswertung auch pro agent global, nicht nur pro spiel/agent?
 				// to do basic data evaluation and visualization - DONE
-				// todo load agent from disk | nur laden lassen wenn trained?
+				// todo load agent from disk
 				// to do vis. add round times (arithm. + median?) - DONE
 				// todo check advanced time measurement
 				// todo java zeitmessungs zuverlaessigkeit pruefen
@@ -996,14 +989,7 @@ public class XArenaFuncs
 					qaVector = wrapAgents(paVector,xab.oPar,startSO);
 				}
 
-				int verbose=1;
-				/*
-				if (swap) {
-					c = tournamentCompete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
-				} else {
-					c = tournamentCompete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
-				}
-				*/
+				int verbose = 1;
 				c = tournamentCompete(qaVector[0], qaVector[1], startSO, competeNum, verbose, nextTimes);
 				System.out.println(Arrays.toString(c));
 
