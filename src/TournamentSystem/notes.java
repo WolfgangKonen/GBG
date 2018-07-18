@@ -3,7 +3,6 @@ package TournamentSystem;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.*;
-import games.TicTacToe.ArenaTrainTTT;
 
 import javax.swing.*;
 
@@ -79,7 +78,7 @@ public class notes
          * {@link XArenaMenu#generateTournamentMenu()}
          * @see TournamentSystem.TournamentSystemGUI
          * @see TournamentSystem.TSAgent
-         * @see TournamentsystemGUI2
+         * @see TSSettingsGUI2
          *
          */
     }

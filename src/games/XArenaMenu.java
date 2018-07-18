@@ -13,8 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import TournamentSystem.TournamentsystemGUI2;
-import TournamentSystem.TournamentSystemGUI;
+import TournamentSystem.TSSettingsGUI2;
 import controllers.AgentBase;
 import controllers.ExpectimaxNAgent;
 import controllers.HumanPlayer;
@@ -72,8 +71,8 @@ public class XArenaMenu extends JMenuBar {
 	private int selectedAgent = 0;
 	private int numPlayers;
 	private boolean winCompVisible = false;
-	private TournamentSystemGUI tournamentSystemGUI = null;
-	private TournamentsystemGUI2 tournamentsystemGUI2 = null;
+	//private TournamentSystemGUI tournamentSystemGUI = null;
+	private TSSettingsGUI2 mTSSettingsGUI2 = null;
 
 	// private final String agentList[] = { "Human", "Minimax", "TDS", "Random"
 	// };
@@ -388,13 +387,14 @@ public class XArenaMenu extends JMenuBar {
 		menu.setMnemonic(KeyEvent.VK_A);
 		menu.getAccessibleContext().setAccessibleDescription("GBG Tournament System");
 
+		/*
 		menuItem = new JMenuItem("Start TS GUI");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//m_arena.m_xab.helpFunction();
 				//JOptionPane.showMessageDialog(null, "menu item #1 clicked");
 				if(tournamentSystemGUI == null) {
-					tournamentSystemGUI = new TournamentSystemGUI(/*m_arena.logManager,*/ m_arena.getGameBoard());
+					tournamentSystemGUI = new TournamentSystemGUI(m_arena.getGameBoard());
 				} else {
 					tournamentSystemGUI.show();
 				}
@@ -402,22 +402,24 @@ public class XArenaMenu extends JMenuBar {
 		});
 		menuItem.setToolTipText("<html><body>Start menu item #1</body></html>");
 		menu.add(menuItem);
+		*/
 
 		menuItem = new JMenuItem("Start TS GUI v2");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//m_arena.m_xab.helpFunction();
 				//JOptionPane.showMessageDialog(null, "menu item #2 clicked");
-				if(tournamentsystemGUI2 == null) {
-					tournamentsystemGUI2 = new TournamentsystemGUI2(/*m_arena.logManager, m_arena.getGameBoard()*/m_arena);
+				if(mTSSettingsGUI2 == null) {
+					mTSSettingsGUI2 = new TSSettingsGUI2(/*m_arena.logManager, m_arena.getGameBoard()*/m_arena);
 				} else {
-					tournamentsystemGUI2.show();
+					mTSSettingsGUI2.show();
 				}
 			}
 		});
-		menuItem.setToolTipText("<html><body>Start menu item #2</body></html>");
+		menuItem.setToolTipText("<html><body>Start TS GUI v2</body></html>");
 		menu.add(menuItem);
+		//add(menuItem);
 
+		/*
 		menuItem = new JMenuItem("menuitem#3");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -427,6 +429,7 @@ public class XArenaMenu extends JMenuBar {
 		});
 		menuItem.setToolTipText("<html><body>Start menu item #3</body></html>");
 		menu.add(menuItem);
+		*/
 
 		add(menu);
 	}

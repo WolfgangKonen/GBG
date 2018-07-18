@@ -11,13 +11,11 @@ import games.ArenaTrain;
 import tools.Types;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
 
-public class TournamentsystemGUI2 extends JFrame{
+public class TSSettingsGUI2 extends JFrame{
     private JCheckBox randomCheckBox;
     private JCheckBox minimaxCheckBox;
     private JCheckBox maxNCheckBox;
@@ -39,32 +37,30 @@ public class TournamentsystemGUI2 extends JFrame{
     private JButton reopenStatisticsButton;
     private JScrollPane checkBoxScrollPane;
 
-    //private GameBoard gameBoard;
     private Arena mArena;
     private TSAgentManager mTSAgentManager;
-    private final String TAG = "[TSAgent] ";
+    private final String TAG = "[TSSettingsGUI2] ";
 
-    public TournamentsystemGUI2(Arena mArena) { //GameBoard gameBoard) {
-        super("TournamentsystemGUI2");
+    public TSSettingsGUI2(Arena mArena) {
+        super("TSSettingsGUI2");
         setContentPane(mJPanel);
         //setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pack();
         setVisible(true);
 
-        //this.gameBoard = gameBoard;
         this.mArena = mArena;
         mTSAgentManager = new TSAgentManager();
 
-        mTSAgentManager.addAgent("randomCheckBox",    Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
-        mTSAgentManager.addAgent("minimaxCheckBox",   Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
-        mTSAgentManager.addAgent("maxNCheckBox",      Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
-        mTSAgentManager.addAgent("expectimaxNCheckBox", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
-        mTSAgentManager.addAgent("MCNCheckBox",       Types.GUI_AGENT_LIST[4], MCNCheckBox, false, null);
-        mTSAgentManager.addAgent("MCTSCheckBox",      Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
-        mTSAgentManager.addAgent("MCTSExpectimaxCheckBox", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
+        mTSAgentManager.addAgent("StandardRandom",    Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
+        mTSAgentManager.addAgent("StandardMinimax",   Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
+        mTSAgentManager.addAgent("StandardMaxN",      Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
+        mTSAgentManager.addAgent("StandardExpectimaxN", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
+        mTSAgentManager.addAgent("StandardMCN",       Types.GUI_AGENT_LIST[4], MCNCheckBox, false, null);
+        mTSAgentManager.addAgent("StandardMCTS",      Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
+        mTSAgentManager.addAgent("StandardMCTSExpectimax", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
         // GUI_AGENT_LIST[7] ist der Human Player
-        mTSAgentManager.addAgent("TDNtuple2CheckBox", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
-        mTSAgentManager.addAgent("TDSCheckBox",       Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
+        mTSAgentManager.addAgent("StandardTDNtuple2", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
+        mTSAgentManager.addAgent("StandardTDS",       Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
 
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -178,15 +174,8 @@ public class TournamentsystemGUI2 extends JFrame{
         }
         else
         {
-            // determin 1v1 gameplan with selected agents
-            //String selectedAGents[] = mTSAgentManager.getNamesAgentsSelected();
-            //System.out.println("sel ag: "+ Arrays.toString(selectedAGents));
-            //String gamePlan[][] = mTSAgentManager.getGamePlan();
-
             mTSAgentManager.printGamePlan();
 
-            // send gameplan to custom multicompete to run competitions
-            // save game results in TSAgent objects?
             if (mArena.taskState != ArenaTrain.Task.IDLE) {
                 System.out.println(TAG+"ERROR :: could not start Tourmenent, Arena is not IDLE");
             }
@@ -203,7 +192,7 @@ public class TournamentsystemGUI2 extends JFrame{
      * For Testing Only
      */
     public static void main(String[] args) {
-        new TournamentsystemGUI2(null);
+        new TSSettingsGUI2(null);
     }
 
     private void createUIComponents() {
