@@ -1,5 +1,7 @@
 package games.TicTacToe;
 
+import java.io.IOException;
+
 import javax.swing.JFrame;
 
 import controllers.PlayAgent;
@@ -13,12 +15,18 @@ import games.ArenaTrain;
 
 /**
  * {@link Arena} for TicTacToe. It borrows all functionality
- * from the general class {@link Arena}. It only overrides the abstract
- * methods {@link Arena#makeGameBoard()}, 
- * {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)},
- * and {@link Arena#makeFeatureClass(int)}, such that 
- * these factory methods return objects of class {@link GameBoardTTT}, 
- * {@link EvaluatorTTT}, and {@link FeatureTTT}, respectively.
+ * from the general class {@link Arena}. It only overrides 
+ * the abstract methods <ul>
+ * <li> {@link Arena#makeGameBoard()}, 
+ * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)}, and 
+ * <li> {@link Arena#makeFeatureClass(int)}, 
+ * <li> {@link Arena#makeXNTupleFuncs()}, 
+ * </ul> 
+ * such that these factory methods return objects of class {@link GameBoardTTT}, 
+ * {@link EvaluatorTTT}, {@link FeatureTTT}, and {@link XNTupleFuncsTTT}, respectively.
+ * <p>
+ * {@link ArenaTTT} has a short {@link #main(String[])} for launching the non-trainable 
+ * version of GBG. 
  * 
  * @see GameBoardTTT
  * @see EvaluatorTTT
@@ -31,10 +39,14 @@ public class ArenaTTT extends Arena   {
 		super();
 	}
 
-	public ArenaTTT(JFrame frame) {
-		super(frame);
-	}
+//	public ArenaTTT(JFrame frame) {
+//		super(frame);
+//	}
 
+	public ArenaTTT(String title) {
+		super(title);		
+	}
+	
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -83,5 +95,24 @@ public class ArenaTTT extends Arena   {
 	
 
 	public void performArenaDerivedTasks() {  }
+
+	
+	/**
+	 * Start GBG for TicTacToe (non-trainable version)
+	 * 
+	 * @param args
+	 * @throws IOException 
+	 */
+	public static void main(String[] args) throws IOException 
+	{
+		ArenaTTT t_Frame = new ArenaTTT("General Board Game Playing");
+
+		if (args.length==0) {
+			t_Frame.init();
+		} else {
+			throw new RuntimeException("[ArenaTTT.main] args="+args+" not allowed. Use TicTacToeBatch.");
+		}
+	}
+	
 
 }

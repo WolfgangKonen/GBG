@@ -35,7 +35,7 @@ public class CubeConfig {
 	/**
 	 * Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} is filled.
 	 */
-	public final static int pMax = 6;			// 3,4,5,6,7
+	public final static int pMax = 4;			// 3,4,5,6,7
 	
 	/**
 	 * Selector array for {@link GameBoardCube#chooseStartState(controllers.PlayAgent)}.

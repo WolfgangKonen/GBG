@@ -34,9 +34,7 @@ public class LaunchTrain2048 extends JFrame {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-    	
-//    	testLinkedList();
-    	
+   	
         LaunchTrain2048 t_Frame = new LaunchTrain2048("General Board Game Playing");
         if (args.length == 0) {
             t_Frame.init();
@@ -77,32 +75,4 @@ public class LaunchTrain2048 extends JFrame {
         }
     }
 
-    // this is just a test function for the LinkedList part in NTuple2ValueFunc
-    private static void testLinkedList() {
-    	
-    	int h=2;
-    	LinkedList sList = new LinkedList();
-    	sList.clear();
-    	Integer elem;	// Integer object is just a surrogate for the afterstate object s'_t 
-    	
-    	
-    	for (int t=1; t<5; t++) {
-    		// add element t at head of list and remove the element 
-    		// 'beyond horizon' t_0 = t-h (if any)
-    		elem = new Integer(t);
-    		sList.addFirst(elem);
-    		if (sList.size()>(h+1)) sList.pollLast();
-    		
-    		// iterate and print all elements in horizon: h+1 elements from t down to t_0
-    		ListIterator<Integer> iter = sList.listIterator();
-    		while(iter.hasNext()) {
-    			elem=iter.next();
-    			System.out.print(elem+" ");
-    		}
-    		System.out.println("");
-    		
-    	}
-    	
-    	
-    }
 }

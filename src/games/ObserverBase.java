@@ -1,7 +1,10 @@
 package games;
 
+import java.util.ArrayList;
+
 import controllers.PlayAgent;
 import tools.Types;
+import tools.Types.ACTIONS;
 import tools.Types.ScoreTuple;
 
 /**
@@ -15,6 +18,52 @@ import tools.Types.ScoreTuple;
  */
 abstract public class ObserverBase {
 	protected int m_counter = 0;
+	
+    protected Types.ACTIONS[] storedActions = null;
+    protected Types.ACTIONS storedActBest = null;
+    protected double[] storedValues = null;
+    protected double storedMaxScore; 
+	
+	/**
+	 * Given the current state, store some info useful for inspecting the  
+	 * action actBest and double[] vtable returned by a call to <br>
+	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
+	 *  
+	 * @param actBest	the best action
+	 * @param vtable	one double for each action in this.getAvailableActions():
+	 * 					it stores the value of that action (as given by the double[] 
+	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
+	 */
+	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
+        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
+        storedActions = new Types.ACTIONS[acts.size()];
+        storedValues = new double[acts.size()];
+        for(int i = 0; i < storedActions.length; ++i)
+        {
+        	storedActions[i] = acts.get(i);
+        	storedValues[i] = vtable[i];
+        }
+        storedActBest = actBest;
+        if (actBest instanceof Types.ACTIONS_VT) {
+        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
+        } else {
+            storedMaxScore = vtable[acts.size()];        	
+        }
+	}
+
+	public Types.ACTIONS getStoredAction(int k) {
+		return storedActions[k];
+	}
+
+	public double[] getStoredValues() {
+		return storedValues;
+	}
+	
+	/**
+	 * This is just to signal that derived classes will be either abstract or implement
+	 * getAvailableActions(), as required by the interface {@link StateObservation}.
+	 */
+	abstract public ArrayList<ACTIONS> getAvailableActions();
 	
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement

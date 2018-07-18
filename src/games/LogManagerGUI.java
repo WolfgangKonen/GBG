@@ -177,6 +177,7 @@ public class LogManagerGUI {
                         currentLog = tempLog;
                     }
 
+                    gameBoard.clearBoard(true,true);
                     loadBoard(0);
 
                     counter = 0;

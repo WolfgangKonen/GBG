@@ -24,7 +24,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private JPanel gameInfo;
     private double[] vTable;
     private JLabel leftInfo = new JLabel("");
-    private JLabel rightInfo = new JLabel("");
+    //private JLabel rightInfo = new JLabel("");
     private Arena m_Arena;
     private StateObserver2048 m_so;
     private boolean arenaActReq = false;
@@ -85,7 +85,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         JLabel Blank = new JLabel(" ");        // a little bit of space
         JLabel Title = new JLabel("2048", SwingConstants.CENTER);
         Title.setForeground(Color.black);
-        Font font = new Font("Arial", 1, 20);
+        Font font = new Font("Arial", 1, (int)(20*Types.GUI_SCALING_FACTORX));
         Title.setFont(font);
         titlePanel.add(Blank);
         titlePanel.add(Title);
@@ -107,9 +107,9 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
         JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         leftInfo.setFont(font);
-        rightInfo.setFont(font);
+        //rightInfo.setFont(font);
         infoPanel.add(leftInfo);
-        infoPanel.add(rightInfo);
+        //infoPanel.add(rightInfo);
         infoPanel.setSize(100, 10);
 
         setLayout(new BorderLayout(10, 0));
@@ -370,11 +370,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             }
             scoreLabel.setText("");
             leftInfo.setText("");
-            rightInfo.setText("");
-          /*  realScore.setText("");
-            highestTileInCorner.setText("");
-            highestTileValue.setText("");
-            emptyTiles.setText("");*/
+            //rightInfo.setText("");
         }
         if (vClear) {
             vTable = new double[4];
@@ -389,21 +385,21 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
     @Override
     public void updateBoard(StateObservation so,  
-    						boolean enableOccupiedCells, boolean showValueOnGameboard) {
+    						boolean withReset, boolean showValueOnGameboard) {
         if (so != null) {
             if (so instanceof StateObserver2048) {
                 StateObserver2048 soZTAV = (StateObserver2048) so;
                 // ** activate next line only if m_so is of class StateObserver2048: **
                 m_so = soZTAV.copy();
 
-                if (showValueOnGameboard && soZTAV.storedValues != null) {
+                if (showValueOnGameboard && soZTAV.getStoredValues() != null) {
                     for (int i = 0; i < 4; i++) {
                         vTable[i] = Double.NaN;
                     }
-                    for (int i = 0; i < soZTAV.storedValues.length; i++) {
-                        Types.ACTIONS action = soZTAV.storedActions[i];
+                    for (int i = 0; i < soZTAV.getStoredValues().length; i++) {
+                        Types.ACTIONS action = soZTAV.getStoredAction(i);
                         int iAction = action.toInt();
-                        vTable[iAction] = soZTAV.storedValues[i];
+                        vTable[iAction] = soZTAV.getStoredValues()[i];
                     }
                 }
             } else {
@@ -420,6 +416,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                         leftInfo.setText("You Lost!");
                         break;
                 }
+        		//System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
             }
 
         }

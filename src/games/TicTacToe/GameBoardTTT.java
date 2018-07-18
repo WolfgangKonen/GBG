@@ -1,20 +1,18 @@
 package games.TicTacToe;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.TextField;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,23 +41,18 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 
 	private int TICGAMEHEIGHT=280;
 	private JPanel BoardPanel;
-//	private JPanel VBoardPanel; 	// simplified: VBoardPanel no integrated in BoardPanel
 	private JLabel leftInfo=new JLabel("");
 	private JLabel rightInfo=new JLabel(""); 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
 									// infer the current taskState
 	protected Random rand;
 	/**
-	 * The clickable representation of the board in the GUI. The buttons of Board will be enabled only
-	 * when "Play" or "Inspect V" are clicked. During "Play" and "Inspect V" only unoccupied 
-	 * fields are enabled.
+	 * The clickable representation of the board in the GUI. The buttons of {@link #Board} will 
+	 * be enabled only when "Play" or "Inspect V" are clicked. During "Play" and "Inspect V"  
+	 * only unoccupied fields are enabled. The value function of each {@link #Board} position
+	 * is displayed as its label.
 	 */
-	protected Button[][] Board;
-	/**
-	 * The representation of the value function corresponding to the current 
-	 * {@link #Board} position.
-	 */
-//	protected Label[][] VBoard;		// simplified: VBoard no integrated in Board
+	protected JButton[][] Board;
 	private StateObserverTTT m_so;
 	private int[][] Table;			// =1: position occupied by "X" player
 									//=-1: position occupied by "O" player
@@ -72,6 +65,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	private Color colTHK3 = new Color(162,0,162);
 	
 	public GameBoardTTT(Arena ticGame) {
+		super("Tic Tac Toe");
 		initGameBoard(ticGame);
 	}
 	
@@ -81,10 +75,8 @@ public class GameBoardTTT extends JFrame implements GameBoard {
     private void initGameBoard(Arena ticGame) 
 	{
 		m_Arena		= ticGame;
-		Board       = new Button[3][3];
-//		VBoard		= new Label[3][3];
+		Board       = new JButton[3][3];
 		BoardPanel	= InitBoard();
-//		VBoardPanel = InitVBoard();
 		Table       = new int[3][3];
 		VTable		= new double[3][3];
 		m_so		= new StateObserverTTT();	// empty table
@@ -94,48 +86,53 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
 		JLabel Blank=new JLabel(" ");		// a little bit of space
 		//JLabel Title=new JLabel("Tic Tac Toe",SwingConstants.CENTER);
-		JLabel Title=new JLabel("   ",SwingConstants.CENTER);  // no title, it appears sometimes in the wrong place
-		Title.setForeground(Color.black);	
-		Font font=new Font("Arial",1,20);			
-		Title.setFont(font);	
+//		JLabel Title=new JLabel("   ",SwingConstants.CENTER);  // no title, it appears sometimes in the wrong place
+//		Title.setForeground(Color.black);	
+//		Title.setFont(font);	
 		titlePanel.add(Blank);
-		titlePanel.add(Title);
+//		titlePanel.add(Title);
 		
 		JPanel boardPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		boardPanel.add(BoardPanel);
 		boardPanel.setBackground(Types.GUI_BGCOLOR);
-		//boardPanel.add(new Label("    "));		// some space
-		//boardPanel.add(VBoardPanel);
 		
 		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		infoPanel.setBackground(Types.GUI_BGCOLOR);
-		Font font2=new Font("Arial",1,10);			
+//		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
+		Font font=new Font("Arial",0,(int)(1.2*Types.GUI_HELPFONTSIZE));			
 		leftInfo.setFont(font);	
 		rightInfo.setFont(font);	
+//		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
 		infoPanel.add(leftInfo);
 		infoPanel.add(rightInfo);
-		infoPanel.setSize(100,10);
+//		infoPanel.setSize(100,10);
 		
 		setLayout(new BorderLayout(10,0));
 		add(titlePanel,BorderLayout.NORTH);				
 		add(boardPanel,BorderLayout.CENTER);
 		add(infoPanel,BorderLayout.SOUTH);
 		pack();
-		setVisible(false);
+		setVisible(false);		// note that the true size of this component is set in 
+								// showGameBoard(Arena,boolean)
 	}
 
 	// called from initGame() 
 	private JPanel InitBoard()
 	{
 		JPanel panel=new JPanel();
+		//JButton b = new JButton();
 		panel.setLayout(new GridLayout(3,3,2,2));
-		Dimension minimumSize = new Dimension(50,50); //controls the button sizes
+		int buSize = (int)(50*Types.GUI_SCALING_FACTORX);
+		Dimension minimumSize = new Dimension(buSize,buSize); //controls the button sizes
 		for(int i=0;i<3;i++){
 			for(int j=0;j<3;j++){
-				Board[i][j] = new Button("  ");
+				Board[i][j] = new JButton("  ");
 				Board[i][j].setBackground(colTHK2);
 				Board[i][j].setForeground(Color.white);
-				Font font=new Font("Arial",Font.BOLD,14);
+				Board[i][j].setMargin(new Insets(0,0,0,0));  // sets zero margin between the button's
+															 // border and the label (so that there 
+															 // is room for big labels)
+				Font font=new Font("Arial",Font.BOLD,Types.GUI_HELPFONTSIZE);
 		        Board[i][j].setFont(font);
 				Board[i][j].setEnabled(false);
 				Board[i][j].setPreferredSize(minimumSize); 
@@ -163,30 +160,13 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		return panel;
 	}
 	
-//	private JPanel InitVBoard()
-//	{
-//		JPanel panel=new JPanel();
-//		panel.setLayout(new GridLayout(3,3,10,10));
-//		for(int i=0;i<3;i++){
-//			for(int j=0;j<3;j++){
-//				VBoard[i][j] = new Label("    ");
-//				VBoard[i][j].setBackground(Color.orange);
-//				VBoard[i][j].setForeground(Color.black);
-//				Font font=new Font("Arial",1,12);
-//				VBoard[i][j].setFont(font);
-//				panel.add(VBoard[i][j]);
-//			}
-//		}
-//		return panel;
-//	}
-
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
 			m_so = new StateObserverTTT();			// empty Table
 			for(int i=0;i<3;i++){
 				for(int j=0;j<3;j++){
-					Board[i][j].setLabel("  ");
+					Board[i][j].setText("  ");
 					Board[i][j].setBackground(colTHK2);
 					Board[i][j].setForeground(Color.white);
 					Board[i][j].setEnabled(false);
@@ -198,26 +178,22 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			for(int i=0;i<3;i++){
 				for(int j=0;j<3;j++){
 					VTable[i][j] = Double.NaN;
-//					VBoard[i][j].setText("   ");
-//					VBoard[i][j].setBackground(Color.orange);
-//					VBoard[i][j].setForeground(Color.black);
 				}
 			}
 		}
 	}
 
 	/**
-	 * Update the play board and the associated VBoard.
+	 * Update the play board and the associated values (labels).
 	 * 
 	 * @param so	the game state
+	 * @param withReset  if true, reset the board prior to updating it to state so
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
-	 * 				(only if they are stored in 'so')
-	 * @param enableOccupiedCells  if true, allow user interaction on occupied 
-	 * 				cells (may be needed for inspecting the value function)
+	 * 				(only if they are stored in state {@code so}).
 	 */
 	@Override
 	public void updateBoard(StateObservation so, 
-							boolean enableOccupiedCells, boolean showValueOnGameboard) {
+							boolean withReset, boolean showValueOnGameboard) {
 		int i,j;
 		if (so!=null) {
 	        assert (so instanceof StateObserverTTT)
@@ -246,17 +222,17 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 				
 			}
 			
-			if (showValueOnGameboard && soT.storedValues!=null) {
+			if (showValueOnGameboard && soT.getStoredValues()!=null) {
 				for(i=0;i<3;i++)
 					for(j=0;j<3;j++) 
 						VTable[i][j]=Double.NaN;	
 				
-				for (int k=0; k<soT.storedValues.length; k++) {
-					Types.ACTIONS action = soT.storedActions[k];
+				for (int k=0; k<soT.getStoredValues().length; k++) {
+					Types.ACTIONS action = soT.getStoredAction(k);
 					int iAction = action.toInt();
 					j=iAction%3;
 					i=(iAction-j)/3;
-					VTable[i][j] = soT.storedValues[k];					
+					VTable[i][j] = soT.getStoredValues()[k];					
 				}	
 				if (showValueOnGameboard) {
 					String splus = (m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
@@ -273,14 +249,13 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			} 
 		} // if(so!=null)
 		
-		guiUpdateBoard(enableOccupiedCells,showValueOnGameboard);
+		guiUpdateBoard(false,showValueOnGameboard);
 	}
 
 	/**
-	 * Update the play board and the associated VBoard to the state in m_so.
-	 * VBoard contains the values (scores) for each unoccupied board position (raw score*100).  
-	 * Occupied board positions have green background color, unoccupied positions are orange and
-	 * the best position has a yellow background color.
+	 * Update the play board and the associated values (labels) to the state in m_so.
+	 * The labels contain the values (scores) for each unoccupied board position (raw score*100).  
+	 * Occupied board positions have black/white background color, unoccupied positions are orange.
 	 * 
 	 * @param enable As a side effect the buttons Board[i][j] which are occupied by either "X" or "O"
 	 * will be set into enabled state <code>enable</code>. (All unoccupied positions will get state 
@@ -303,48 +278,41 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 				
 				if (Double.isNaN(value)) {
 					valueTxt = "   ";
-//					VBoard[i][j].setBackground(Color.green);						
 				} else {
 					valueTxt = " "+(int)(value*100);
 					if (value<0) valueTxt = ""+(int)(value*100);
-//					if (table[i][j]==0) {
-//						VBoard[i][j].setBackground(Color.orange);
-//					} else {
-//						VBoard[i][j].setBackground(Color.green);						
-//					}
 					if (value>maxvalue) {
 						maxvalue=value;
 						imax=i;
 						jmax=j;
 					}
 				}
-//				VBoard[i][j].setText(scoreTxt);
-//				VBoard[imax][jmax].setBackground(Color.yellow);
 				if(table[i][j]==1)
 				{
-					Board[i][j].setLabel("X");				
+					Board[i][j].setText("X");				
 					Board[i][j].setEnabled(enable);
 					Board[i][j].setBackground(Color.black);
 					Board[i][j].setForeground(Color.white);
 				}					
 				else if(table[i][j]==-1)
 				{
-					Board[i][j].setLabel("O");				
+					Board[i][j].setText("O");				
 					Board[i][j].setEnabled(enable);
 					Board[i][j].setBackground(Color.white);
 					Board[i][j].setForeground(Color.black);
 				}
 				else
 				{
-					Board[i][j].setLabel("  ");
+					Board[i][j].setText("  ");
 					Board[i][j].setEnabled(true);
 					Board[i][j].setForeground(Color.black);
 					Board[i][j].setBackground(colTHK2);
 				}
-				if (showValueOnGameboard) Board[i][j].setLabel(valueTxt);
+				if (showValueOnGameboard) Board[i][j].setText(valueTxt);
 			}
 		}
-		paint(this.getGraphics());
+		this.repaint();
+//		paint(this.getGraphics());   // this sometimes leave one of the buttons un-painted
 	}		
 
 	/**
@@ -396,7 +364,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		m_so.advance(act);			// perform action (optionally add random elements from game 
 									// environment - not necessary in TicTacToe)
 		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-		updateBoard(null,false,false);
+//		updateBoard(null,false,false);
 		arenaActReq = true;			// ask Arena for next action
 	}
 	
@@ -413,7 +381,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		}
 		m_so.advance(act);			// perform action (optionally add random elements from game 
 									// environment - not necessary in TicTacToe)
-		updateBoard(null,false,false);
+//		updateBoard(null,false,false);
 		arenaActReq = true;		
 	}
 	
@@ -426,10 +394,14 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			if (ticGame.m_LaunchFrame!=null) {
 				x = ticGame.m_LaunchFrame.getX();
 				y = ticGame.m_LaunchFrame.getY() + ticGame.m_LaunchFrame.getHeight() +1;
-				this.setSize(ticGame.m_LaunchFrame.getWidth(),TICGAMEHEIGHT);	
+				this.setSize(ticGame.m_LaunchFrame.getWidth(),
+							 (int)(Types.GUI_SCALING_FACTORY*TICGAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
 		}		
+//		System.out.println("GameBoardTTT size = " +super.getWidth() + " * " + super.getHeight());
+//		System.out.println("Arena size = " +ticGame.m_LaunchFrame.getWidth() + " * " + ticGame.m_LaunchFrame.getHeight());
+
 	}
 
 	public StateObservation getStateObs() {
@@ -481,7 +453,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
     
    @Override
 	public void toFront() {
-    	super.setState(Frame.NORMAL);	// if window is iconified, display it normally
+    	super.setState(JFrame.NORMAL);	// if window is iconified, display it normally
 		super.toFront();
 	}
 

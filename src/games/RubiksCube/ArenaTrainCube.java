@@ -1,5 +1,7 @@
 package games.RubiksCube;
 
+import java.io.IOException;
+
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
@@ -33,10 +35,14 @@ public class ArenaTrainCube extends ArenaTrain   {
 		super();
 	}
 
-	public ArenaTrainCube(JFrame frame) {
-		super(frame);
-	}
+//	public ArenaTrainCube(JFrame frame) {
+//		super(frame);
+//	}
 
+	public ArenaTrainCube(String title) {
+		super(title);		
+	}
+	
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -77,4 +83,21 @@ public class ArenaTrainCube extends ArenaTrain   {
 		return new XNTupleFuncsCube();
 	}
 
+	/**
+	 * Start GBG for Rubik's Cube (trainable version)
+	 * 
+	 * @param args
+	 * @throws IOException 
+	 */
+	public static void main(String[] args) throws IOException 
+	{
+		ArenaTrainCube t_Frame = new ArenaTrainCube("General Board Game Playing");
+
+		if (args.length==0) {
+			t_Frame.init();
+		} else {
+			throw new RuntimeException("[ArenaTrainCube.main] args="+args+" not allowed. Use batch facility.");
+		}
+	}
+	
 }

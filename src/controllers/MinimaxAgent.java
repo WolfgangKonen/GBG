@@ -53,7 +53,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	public MinimaxAgent(String name, ParMaxN mpar, ParOther opar)
 	{
 		this(name);
-		m_depth = mpar.getMaxnDepth();
+		m_depth = mpar.getMaxNDepth();
 		m_useHashMap = mpar.useMinimaxHashmap();
 		m_oPar = opar;	// AgentBase::m_oPar
 	}

@@ -144,8 +144,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 		// only for diagnostics
         hmC = new HashMap<String, CounterC>();
         hmX = new HashMap<String, HashMap<String,ScoreC>>();
-    	String sMinimax = Types.GUI_AGENT_LIST[1];
-		referee = new MinimaxAgent(sMinimax);
+		referee = new MinimaxAgent("Minimax");
 		
 	}
 	

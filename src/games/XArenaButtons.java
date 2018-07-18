@@ -35,31 +35,33 @@ public class XArenaButtons extends JPanel
 	int m_numParamBtn;			// number of the last param button pressed
 	int m_numTrainBtn;			// number of the last train button pressed
 
+	// with changedViaLoad[n]=true we inhibit that a change in item state of
+	// m_arena.m_xab.choiceAgent[n] due to agent loading will trigger from the associated
+	// ItemStateListener an agent-parameter-default-setting (we want the parameters
+	// from the agent just loaded to survive in m_arena.m_xab)
+	protected boolean[] changedViaLoad = null;
+
 	JButton[] mParam;
 	JButton[] mTrain;
 	JButton MultiTrain;
 	JButton Play;
 	JButton InspectV;
-	//JButton TDparB;			// now in XArenaTabs
-	//JButton CMAparB;
-	//JButton TCparB;
-	//JButton OparB;
 	JButton NTupShowB;
 	JButton Logs; 
 	JSlider Delay;				// the sleep slider
-	TextField GameNumT;
-	TextField TrainNumT;
+	JTextField GameNumT;
+	JTextField TrainNumT;
 	//TextField CompeteNumT;	// now in OptionsComp winCompOptions
 	//TextField CompetitionsT;	//
 	//Label Competitions_L;		//
 	//Label CompeteG_L;			//
-	Label GameNumL;
-	Label TrainNumL;
-	Label AgentX_L;
-	Label SleepDurationL;
-	Choice[] choiceAgent; 
+	JLabel GameNumL;
+	JLabel TrainNumL;
+	JLabel AgentX_L;
+	JLabel SleepDurationL;
+	JComboBox[] choiceAgent;
 	JLabel showValOnGB_L;
-	Checkbox showValOnGB;		// show game values on gameboard
+	JCheckBox showValOnGB;		// show game values on gameboard
 	TDParams[] tdPar;
 	NTParams[] ntPar;
 	MaxNParams[] maxnParams;
@@ -118,7 +120,8 @@ public class XArenaButtons extends JPanel
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		mParam = new JButton[numPlayers];
 		mTrain = new JButton[numPlayers];
-		choiceAgent = new Choice[numPlayers];
+		choiceAgent = new JComboBox[numPlayers];
+		changedViaLoad = new boolean[numPlayers];	// implicitly set to false
 		assert (numPlayers<=Types.GUI_PLAYER_NAME.length) 
 			: "GUI not configured for "+numPlayers+" players. Increase Types.GUI_PLAYER_NAME and GUI_AGENT_INITIAL";
 		tdPar = new TDParams[numPlayers];
@@ -132,10 +135,10 @@ public class XArenaButtons extends JPanel
 		// 
 		// initial settings for the GUI
 		//
-		AgentX = null; //Types.GUI_X_PLAYER;  // "MCTS"; "TDS"; "CMA-ES"; "Minimax" 
-		AgentO = null; //Types.GUI_O_PLAYER;  // "Human";"ValIt";
-		GameNumT=new TextField("10000", 5); //("10000", 5);
-		TrainNumT=new TextField("25", 5);
+		AgentX = null;
+		AgentO = null;
+		GameNumT=new JTextField("10000", 5);
+		TrainNumT=new JTextField("25", 5);
 
 		MultiTrain=new JButton("MultiTrain");
 		MultiTrain.setBorder(bord);
@@ -143,22 +146,34 @@ public class XArenaButtons extends JPanel
 		Play.setBorder(bord);
 		InspectV=new JButton("Inspect V");
 		InspectV.setBorder(bord);
+		InspectV.setToolTipText("Inspect the value function for player X");
 		NTupShowB = new JButton("Insp Ntuples");
 		NTupShowB.setBorder(bord);
 		Logs=new JButton("Logs");
 		Logs.setBorder(bord);
 		Delay = new JSlider(JSlider.HORIZONTAL, m_game.minSleepDuration,m_game.maxSleepDuration, m_game.currentSleepDuration);
-		GameNumL = new Label("Train Games");
-		TrainNumL = new Label("Agents trained");
-		AgentX_L = new Label("Agent Type: ");
-        SleepDurationL = new Label("Sleep duration");
+		GameNumL = new JLabel("Train Games");
+		TrainNumL = new JLabel("Agents trained");
+		AgentX_L = new JLabel("Agent Type: ");
+        SleepDurationL = new JLabel("Sleep duration");
 		showValOnGB_L = new JLabel("Show V  ");
-		showValOnGB = new Checkbox("",true);
+		showValOnGB_L.setToolTipText("Show value function during game play");
+		showValOnGB = new JCheckBox("",true);
+		showValOnGB.setBackground(Types.GUI_BGCOLOR);
 
 		for (int n=0; n<numPlayers; n++) {
-			choiceAgent[n] = new Choice();
-			for (String s : Types.GUI_AGENT_LIST) choiceAgent[n].add(s);
-			choiceAgent[n].select(Types.GUI_AGENT_INITIAL[n]);	
+			choiceAgent[n] = new JComboBox(Types.GUI_AGENT_LIST);
+			choiceAgent[n].setSelectedItem(Types.GUI_AGENT_INITIAL[n]);
+
+			// only applicable agents:
+			if (m_game.getGameBoard().getDefaultStartState().isDeterministicGame()) {
+				choiceAgent[n].removeItem("Expectimax-N");
+				choiceAgent[n].removeItem("MCTS Expectimax");
+			} else {
+				choiceAgent[n].removeItem("Max-N");
+				choiceAgent[n].removeItem("MCTS");
+			}
+
 			if (numPlayers==2) {
 				mParam[n]=new JButton("Param "+Types.GUI_2PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_2PLAYER_NAME[n]);
@@ -178,11 +193,22 @@ public class XArenaButtons extends JPanel
 			
 			// whenever one of the agent choice boxes changes, call setParamDefaults
 			// to set the param tabs to sensible defaults for that agent and that game
+			// (but this call is inhibited by changeViaLoad[n] if a loadAgent-call triggered
+			// the choice-box change)
 			choiceAgent[n].addItemListener(
 					new ItemListenerHandler(n) { // this constructor will copy n to ItemListenerHandler.n
 						public void itemStateChanged(ItemEvent arg0) {
-							setParamDefaults(n, choiceAgent[n].getSelectedItem(),
-									m_game.getGameName());
+							if (changedViaLoad[n]) {
+								// each change in choiceAgent[n] will trigger TWO ItemEvents:
+								// 1) a DESELECTED event and 2) a SELECTED event. We reset
+								// the switch changeViaLoad[n] only after the 2nd event.
+								if (arg0.getStateChange()==ItemEvent.SELECTED)
+									changedViaLoad[n]=false;
+							} else {
+								// the normal case, if item change was triggered by user:
+								setParamDefaults(n, (String) choiceAgent[n].getSelectedItem(),
+										m_game.getGameName());
+							}
 						}
 					}
 			);
@@ -261,7 +287,7 @@ public class XArenaButtons extends JPanel
 		
 		for (int n=0; n<numPlayers; n++) {
 			mParam[n].addActionListener(
-					new ActionHandler(n)		// this constructor will copy n to member x
+					new ActionHandler(n)		// constructor copies n to member x
 					{
 						public void actionPerformed(ActionEvent e)
 						{	
@@ -279,7 +305,16 @@ public class XArenaButtons extends JPanel
 						public void actionPerformed(ActionEvent e)
 						{	
 							m_numTrainBtn = x;
-							m_game.taskState = ArenaTrain.Task.TRAIN;
+							//m_game.taskState = ArenaTrain.Task.TRAIN;
+							// toggle m_game.state between TRAIN and IDLE
+							if (m_game.taskState!=ArenaTrain.Task.TRAIN) {
+								m_game.taskState = ArenaTrain.Task.TRAIN;
+								enableButtons(false);			// disable all buttons ...
+								mTrain[x].setEnabled(true);		// ... but the TRAIN button
+							} else {
+								m_game.taskState = ArenaTrain.Task.IDLE;
+								enableButtons(true);
+							}
 						}
 					}	
 			);
@@ -292,7 +327,17 @@ public class XArenaButtons extends JPanel
 					{
 //						m_xfun.m_NetIsLinear = tdPar.LinNetType.getState();
 //						m_xfun.m_NetHasSigmoid = tdPar.withSigType.getState();
-						m_game.taskState = ArenaTrain.Task.MULTTRN;
+						// toggle m_game.state between MULTTRN and IDLE
+						if (m_game.taskState!=ArenaTrain.Task.MULTTRN) {
+							m_game.taskState = ArenaTrain.Task.MULTTRN;
+							m_game.setStatusMessage("Multitrain for agent X ...");
+							enableButtons(false);			// disable all buttons ...
+							MultiTrain.setEnabled(true);	// ... but the MultiTrain button
+						} else {
+							m_game.taskState = ArenaTrain.Task.IDLE;
+							m_game.setStatusMessage("Done.");
+							enableButtons(true);
+						}
 					}
 				}	
 		);
@@ -453,10 +498,11 @@ public class XArenaButtons extends JPanel
 
 		JPanel psv = new JPanel();
 		psv.setBackground(Types.GUI_BGCOLOR);
+		psv.setAlignmentX(CENTER_ALIGNMENT); // does not work
 		psv.add(showValOnGB_L);
 		psv.add(showValOnGB);
-		psv.add(new JLabel("   "));		// add some space to the right
-		psv.add(new JLabel("   "));		//
+		//psv.add(new JLabel("   "));		// add some space to the right
+		//psv.add(new JLabel("   "));		//
 		
 		JPanel p3 = new JPanel();
 		p3.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
@@ -506,6 +552,7 @@ public class XArenaButtons extends JPanel
 	public void setParamDefaults(int n, String agentName, String gameName) {
 		tdPar[n].setParamDefaults(agentName, gameName);
 		ntPar[n].setParamDefaults(agentName, gameName);
+		ntPar[n].setFixedCoList(m_game.makeXNTupleFuncs().getAvailFixedNTupleModes());
 		oPar[n].setParamDefaults(agentName, gameName);
 		
 		if(agentName.equals("TDS")) {
@@ -586,19 +633,19 @@ public class XArenaButtons extends JPanel
 	}
 
 	public boolean getShowValueOnGameBoard() {
-		return showValOnGB.getState();
+		return showValOnGB.isSelected();
 	}
 
 	public String getSelectedAgent(int i){
 		if (!tournamentRemoteDataEnabled)
-			return choiceAgent[i].getSelectedItem();
+			return (String) choiceAgent[i].getSelectedItem();
 		else {
 			return selectedAgents[i].getAgentType();
 		}
 	}
 
 	public void setSelectedAgent(int i, String str){
-		choiceAgent[i].select(str);
+		choiceAgent[i].setSelectedItem(str);
 	}
 
 	public void enableTournamentRemoteData(TSAgent team[]) {
@@ -610,5 +657,5 @@ public class XArenaButtons extends JPanel
 		tournamentRemoteDataEnabled = false;
 		selectedAgents = null;
 	}
-	
+
 } // class XArenaButtons	

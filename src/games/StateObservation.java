@@ -34,6 +34,11 @@ public interface StateObservation extends Serializable{
 	public boolean isGameOver();
 
 	public boolean isDeterministicGame();
+	
+	/**
+	 * @return true, if the game emits rewards only in the final game position
+	 */
+	public boolean isFinalRewardGame();
 
 	public boolean isLegalState();
 	
@@ -202,8 +207,9 @@ public interface StateObservation extends Serializable{
      * @return the afterstate or {@code null}. <p>
      * 
      * For deterministic games, the afterstate is identical to {@code this}. For 
-     * nondeterministic games, it depends on the game: E.g. for 2048 it is not known, for 
-     * Backgammon it is the preceding board position without the nondeterministic dice part. 
+     * nondeterministic games, it depends on the game: E.g. for 2048 it is usually not known, 
+     * if we know only the current state {@code this}. For Backgammon it is the preceding 
+     * board position (if known) without the nondeterministic dice part. 
      */
     public StateObservation getPrecedingAfterstate();
 

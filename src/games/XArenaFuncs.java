@@ -21,6 +21,7 @@ import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.YIntervalSeries;
 
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
@@ -45,6 +46,7 @@ import params.ParMaxN;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
+import tools.DeviationWeightsChart;
 import tools.LineChartSuccess;
 import tools.Measure;
 import tools.MessageBox;
@@ -72,16 +74,8 @@ import tools.Types;
  */
 public class XArenaFuncs 
 {
-	//public  boolean m_NetIsLinear = false;
-	//public  boolean m_NetHasSigmoid = false;
-	//public	PlayAgent m_PlayAgentX;
-	//public	PlayAgent m_PlayAgentO;
 	public  PlayAgent[] m_PlayAgents;
 	private Arena m_Arena;
-	//String sRandom = Types.GUI_AGENT_LIST[2];
-	//String sMinimax = Types.GUI_AGENT_LIST[1];
-	//RandomAgent random_agent = new RandomAgent(sRandom);
-	//MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
 	protected Evaluator m_evaluatorT=null;
 	protected Evaluator m_evaluatorQ=null;
 //	protected Evaluator m_evaluatorM=null;
@@ -89,11 +83,15 @@ public class XArenaFuncs
 	protected int numPlayers;
 	
 	protected Random rand;
-	protected XYSeries seriesQ; 
-	protected XYSeries seriesT; 
 	protected LineChartSuccess lChart;
 
 	private final String TAG = "[XArenaFuncs] ";
+
+	protected DeviationWeightsChart wChart;
+	/**
+	 * percentiles for weight chart plot on wChart (only relevant for TDNTuple2Agt)
+	 */
+	double[] per = {5,25,50,75,95};
 
 	public XArenaFuncs(Arena arena)
 	{
@@ -101,7 +99,9 @@ public class XArenaFuncs
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		m_PlayAgents = new PlayAgent[numPlayers];
 		//m_PlayAgents[0] = new MinimaxAgent(sMinimax);
-        rand = new Random(System.currentTimeMillis());	
+        rand = new Random(System.currentTimeMillis());
+        lChart=new LineChartSuccess("Training Progress","gameNum","",true,false);
+        wChart=new DeviationWeightsChart("","gameNum","",true,false);
 	}
 	
 	/**
@@ -113,37 +113,16 @@ public class XArenaFuncs
 	 * @return			a new {@link PlayAgent} (initialized, but not yet trained)
 	 * @throws IOException 
 	 */
-	// OLD:  Side effect: the class members {@link XArenaFuncs#m_NetIsLinear}, {@link XArenaFuncs#m_NetHasSigmoid} are set.
 	protected PlayAgent constructAgent(int n, String sAgent, XArenaButtons m_xab) throws IOException {
 		PlayAgent pa = null;
 		int maxGameNum=Integer.parseInt(m_xab.GameNumT.getText());
 		int featmode = m_xab.tdPar[n].getFeatmode();
-//		double alpha = Double.valueOf(m_xab.tdPar.alphaT.getText()).doubleValue();
-//		double alphaFinal = Double.valueOf(m_xab.tdPar.alfinT.getText()).doubleValue();
-//		double lambda = Double.valueOf(m_xab.tdPar.lambdaT.getText()).doubleValue();
-//		double alphaChangeRatio = Math.pow(alphaFinal/alpha, 1.0/maxGameNum);
-//		if (sAgent.equals("ValIt")) alphaChangeRatio = 1.0; 
-//		this.m_NetIsLinear = m_xab.tdPar.LinNetType.getState();
-//		this.m_NetHasSigmoid = m_xab.tdPar.withSigType.getState();
 		
 		if (sAgent.equals("TDS")) {
 			Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
 			pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
 			//pa = m_xab.m_game.makeTDSAgent(sAgent,m_xab.tdPar,maxGameNum); 
 				// new TDPlayerTTT(sAgent,m_xab.tdPar,maxGameNum);
-//		} else if (sAgent.equals("TDS2")) {
-//			pa = new TDPlayerTT2(sAgent,m_xab.tdPar,maxGameNum);
-//		} else if (sAgent.equals("TDS-NTuple-2")) {
-//			// deprecated, only as debug check. Use class TD_NTPlayer instead
-//			pa = new TDPlayerTTT(m_xab.tdPar,maxGameNum);
-//		} else if (sAgent.equals("TD_NT")) {
-//			pa = new TD_NTPlayer(m_xab.tdPar,maxGameNum, m_xab.tcPar);
-//		} else if(sAgent.equals("TDS-NTuple")) {
-//			pa = new TDSNPlayer(m_xab.tdPar, m_xab.tcPar,maxGameNum);
-//		} else if (sAgent.equals("ValIt")) {
-//			pa = new ValItPlayer(m_xab.tdPar,this.m_NetHasSigmoid,this.m_NetIsLinear,featmode,maxGameNum);
-//		} else if (sAgent.equals("CMA-ES")) {
-//			pa = new CMAPlayer(alpha,alphaChangeRatio,m_xab.cmaPar,this.m_NetHasSigmoid,this.m_NetIsLinear,featmode);
 		} else if (sAgent.equals("TD-Ntuple-2")) {
 			try {
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
@@ -319,11 +298,9 @@ public class XArenaFuncs
 								// >0: stop, if Evaluator stays true for stopEval games
 		int maxGameNum;			// maximum number of training games
 		int numEval;			// evaluate the trained agent every numEval games
-//		int epiLength;			// maximum length of an episode
 		boolean learnFromRM;	// if true, learn from random moves during training
 		int gameNum=0;
 		int verbose=2;
-		boolean PLOTTRAINEVAL=false;
 
 		maxGameNum = Integer.parseInt(xab.GameNumT.getText());
 		numEval = xab.oPar[n].getNumEval();
@@ -348,12 +325,9 @@ public class XArenaFuncs
 			return pa;			
 		} 
 		
-		if (lChart==null) 
-			lChart=new LineChartSuccess("Training Progress","gameNum","",
-													  true,false);
-		lChart.clearAndSetXY(xab);
-		seriesQ = new XYSeries("Q Eval");		// "Q Eval" is the key of the XYSeries object
-		lChart.addSeries(seriesQ);
+		// initialization weight distribution plot:
+		int plotWeightMode = xab.ntPar[n].getPlotWeightMethod();
+		wChart.initializeChartPlot(xab,pa,plotWeightMode);
 		
 		String pa_string = pa.getClass().getName();
 		System.out.println(pa.stringDescr());
@@ -364,14 +338,9 @@ public class XArenaFuncs
 		
 		stopTest = xab.oPar[n].getStopTest();
 		stopEval = xab.oPar[n].getStopEval();
-//		epiLength = xab.oPar[n].getEpiLength();
 		learnFromRM = xab.oPar[n].useLearnFromRM();
 		int qem = xab.oPar[n].getQuickEvalMode();
         m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
-        //
-        // set Y-axis of existing lChart according to the current Quick Eval Mode
-        lChart.setYAxisLabel(m_evaluatorQ.getPlotTitle());
-        
 		int tem = xab.oPar[n].getTrainEvalMode();
 		//
 		// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -381,11 +350,10 @@ public class XArenaFuncs
 		boolean doTrainEvaluation = (tem!=qem);
 		if (doTrainEvaluation) {
 	        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
-	        if (PLOTTRAINEVAL) {
-				seriesT = new XYSeries("T Eval");		// "T Eval" is the key of the XYSeries object
-				lChart.addSeries(seriesT);	        	
-	        }
 		}
+
+		// initialization line chart plot:
+		lChart.initializeChartPlot(xab,m_evaluatorQ,doTrainEvaluation);
 
 		// Debug only: direct debug output to file debug.txt
 		//TDNTupleAgt.pstream = System.out;
@@ -399,7 +367,7 @@ public class XArenaFuncs
 		{		
 			StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
-			pa.trainAgent(so /*,epiLength,learnFromRM*/);
+			pa.trainAgent(so);
 			
 			if (doTrainStatistics) collectTrainStats(tsList,pa,so);
 				
@@ -413,13 +381,23 @@ public class XArenaFuncs
 				qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
 
 		        m_evaluatorQ.eval(qa);
-				seriesQ.add((double)gameNum, m_evaluatorQ.getLastResult());
-				if (doTrainEvaluation) {
+				if (doTrainEvaluation)
 					m_evaluatorT.eval(qa);
-					if (PLOTTRAINEVAL) 
-						seriesT.add((double)gameNum, m_evaluatorT.getLastResult());
+
+				// update line chart plot:
+				lChart.updateChartPlot(gameNum, m_evaluatorQ, m_evaluatorT, doTrainEvaluation);
+
+				// update weight / TC factor distribution plot:
+				wChart.updateChartPlot(gameNum,pa,per);
+
+				// enable premature exit if TRAIN button is pressed again:
+				if (xab.m_game.taskState!=Arena.Task.TRAIN) {
+					MessageBox.show(xab,
+							"Training stopped prematurely",
+							"Warning", JOptionPane.WARNING_MESSAGE);
+					break; //out of while
 				}
-				lChart.plot();
+
 				startTime = System.currentTimeMillis();
 			}
 			
@@ -449,7 +427,10 @@ public class XArenaFuncs
 			TStats.printTAggregList(taggList);
 		}
 		
-		xab.GameNumT.setText(Integer.toString(maxGameNum) );		// restore initial value (maxGameNum)
+		//xab.GameNumT.setText(Integer.toString(maxGameNum) );		// restore initial value (maxGameNum)
+														// not sensible in case of premature stop;
+														// and in case of normal end, it will be maxGameNum anyhow
+
 		//samine
 		int test=2000;
 		if (gameNum%test!=0) 
@@ -527,7 +508,6 @@ public class XArenaFuncs
 
 		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
 		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
-//		int epiLength = xab.oPar[n].getEpiLength();
 		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
@@ -600,7 +580,7 @@ public class XArenaFuncs
 				{		
 					StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
-					pa.trainAgent(so /*,epiLength,learnFromRM*/);
+					pa.trainAgent(so);
 					
 					gameNum = pa.getGameNum();
 					actionNum = pa.getNumLrnActions();	
@@ -629,6 +609,14 @@ public class XArenaFuncs
 											actionNum,trnMoveNum);
 						mtList.add(mTrain);
 
+						// enable premature exit if TRAIN button is pressed again:
+						if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+							MessageBox.show(xab,
+									"MultiTraining stopped prematurely",
+									"Warning", JOptionPane.WARNING_MESSAGE);
+							break; //out of while
+						}
+
 						startTime = System.currentTimeMillis();
 					}
 				}
@@ -650,6 +638,9 @@ public class XArenaFuncs
 //				oM.add(m_evaluatorM.getLastResult());
 //			}
 			
+			if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+				break; //out of for
+			}
 		} // for (i)
 		System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
 		if (doTrainEvaluation && m_evaluatorT.getPrintString()!=null) 
@@ -674,19 +665,20 @@ public class XArenaFuncs
 	 * @param pa		a trained agent
 	 * @param opponent	a trained agent
 	 * @param competeNum
+	 * @param verbose TODO
 	 * @param gb		needed to get a default start state
 	 * @return the fitness of pa, which is +1 if pa always wins, 0 if always tie or if #win=#loose
 	 *         and -1 if pa always looses.  
 	 * 
 	 * @see XArenaButtons
 	 */
-	public static double competeBoth(PlayAgent pa, PlayAgent opponent, int competeNum,
-									 GameBoard gb) {
-		int verbose=0;
+	public static double competeBoth(PlayAgent pa, PlayAgent opponent, StateObservation startSO,
+									 int competeNum, int verbose, GameBoard gb) {
 		double[] res;
 		double resX, resO;
 
-		StateObservation startSO = gb.getDefaultStartState();  // empty board
+		// now passed as parameter
+		//StateObservation startSO = gb.getDefaultStartState();  // empty board
 
 		res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose);
 		resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
@@ -712,7 +704,6 @@ public class XArenaFuncs
 		double[] winrate = new double[3];
 		int xwinCount=0, owinCount=0, tieCount=0;
 		DecimalFormat frm = new DecimalFormat("#0.000");
-		boolean silent = (verbose==0 ? true : false);
 		boolean nextMoveSilent = (verbose<2 ? true : false);
 		StateObservation so;
 		Types.ACTIONS actBest;
@@ -743,10 +734,10 @@ public class XArenaFuncs
 				}
 				if (so.isGameOver()) {
 					int res = so.getGameWinner().toInt();
-					//  res is +1/0/-1  for X/tie/O win	
+					//  res is +1/0/-1  for X/tie/O win
 					int player = Types.PLAYER_PM[so.getPlayer()];
 					switch (res*player) {
-					case -1: 
+					case -1:
 						if (!silent) System.out.println(k+": O wins");
 						owinCount++;
 						break;
@@ -754,7 +745,7 @@ public class XArenaFuncs
 						if (!silent) System.out.println(k+": Tie");
 						tieCount++;
 						break;
-					case +1: 
+					case +1:
 						if (!silent) System.out.println(k+": X wins");
 						xwinCount++;
 						break;
@@ -763,13 +754,13 @@ public class XArenaFuncs
 					break; // out of while
 
 				} // if (so.isGameOver())
-			}	// while(true) 
+			}	// while(true)
 
 		} // for (k)
 		winrate[0] = (double)xwinCount/competeNum;
 		winrate[1] = (double)tieCount/competeNum;
 		winrate[2] = (double)owinCount/competeNum;
-		
+
 		if (!silent) {
 			System.out.print("win rates: ");
 			for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
@@ -836,18 +827,18 @@ public class XArenaFuncs
 					//  res is +1/0/-1  for X/tie/O win
 					int player = Types.PLAYER_PM[so.getPlayer()];
 					switch (res*player) {
-						case -1:
-							if (!silent) System.out.println(k+": O wins");
-							owinCount++;
-							break;
-						case 0:
-							if (!silent) System.out.println(k+": Tie");
-							tieCount++;
-							break;
-						case +1:
-							if (!silent) System.out.println(k+": X wins");
-							xwinCount++;
-							break;
+					case -1: 
+						if (verbose>0) System.out.println(k+": O wins");
+						owinCount++;
+						break;
+					case 0:
+						if (verbose>0) System.out.println(k+": Tie");
+						tieCount++;
+						break;
+					case +1:
+						if (verbose>0) System.out.println(k+": X wins");
+						xwinCount++;
+						break;
 					}
 
 					break; // out of while
@@ -859,8 +850,8 @@ public class XArenaFuncs
 		winrate[0] = (double)xwinCount/competeNum;
 		winrate[1] = (double)tieCount/competeNum;
 		winrate[2] = (double)owinCount/competeNum;
-
-		if (!silent) {
+		
+		if (verbose>0) {
 			System.out.print("win rates: ");
 			for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
 			System.out.println(" (X/Tie/O)");
@@ -870,25 +861,30 @@ public class XArenaFuncs
 	} // compete
 	
 	/**
-	 * Does the main work for menu items 'Single Compete' and 'Swap Compete'. 
-	 * These items set enum {@link Arena#taskState} to either COMPETE or SWAPCMP. 
+	 * Does the main work for menu items 'Single Compete', 'Swap Compete' and 'Compete Both'.
+	 * These items set enum {@link Arena#taskState} to either COMPETE or SWAPCMP or BOTHCMP.
 	 * Then the appropriate cases of {@code switch} in Arena.run() will call competeBase. 
 	 * 'Compete' performs competeNum competitions AgentX as X vs. AgentO as O. 
 	 * 'Swap Compete' performs competeNum competitions AgentX as O vs. AgentO as X. 
-	 * The agents are assumed to be trained (!)
+	 * 'Compete Both' combines 'Compete' and 'Swap Compete'.
+	 * The agents AgentX and AgentO are fetched from {@code xab} and are assumed to be
+	 * trained (!). The parameters for X and O are fetched from the param tabs.
 	 *  
 	 * @param swap {@code false} for 'Compete' and {@code true} for 'Swap Compete'
-	 * @param xab	used only for reading parameter values from GUI members 
+	 * @param both {@code true} for 'Compete Both' ({@code swap} is then irrelevant)
+	 * @param xab	used only for reading parameter values from GUI members
+	 * @param gb	needed for {@code competeBoth}
+	 * @return the fitness of AgentX, which is +1 if AgentX always wins, 0 if always tie
+	 *         or if #win=#loose and, -1 if AgentX always looses.
 	 */
-	protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb) {
-		//int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
+	protected double competeBase(boolean swap, boolean both, XArenaButtons xab, GameBoard gb) {
 		int competeNum=xab.winCompOptions.getNumGames();
 		int numPlayers = gb.getStateObs().getNumPlayers();
 		if (numPlayers!=2) {
 			MessageBox.show(xab, 
 					"Single/Swap Compete only available for 2-player games!", 
 					"Error", JOptionPane.ERROR_MESSAGE);	
-			return;
+			return 0.0;
 		}
 
 		try {
@@ -898,6 +894,7 @@ public class XArenaFuncs
 				MessageBox.show(xab, 
 						"No compete for agent Human", 
 						"Error", JOptionPane.ERROR_MESSAGE);
+				return 0.0;
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
 
@@ -910,26 +907,40 @@ public class XArenaFuncs
 
 				int verbose=1;
 
-				double [] c; // winrate how often = [0]:agentX wins [1]: ties [2]: agentO wins
-				if (swap) {
-					c = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
+				if (both) {
+					return competeBoth(qaVector[0],qaVector[1],startSO,competeNum,verbose,gb);
 				} else {
-					c = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
+					double[] res;
+					if (swap) {
+						res = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
+						System.out.println(Arrays.toString(res));
+						return res[2] - res[0];
+					} else {
+						res = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
+						System.out.println(Arrays.toString(res));
+						return res[0] - res[2];
+					}
 				}
-				System.out.println(Arrays.toString(c));
 			}
 					
 		} catch(RuntimeException ex) {
 			MessageBox.show(xab, 
 					ex.getMessage(), 
 					"Error", JOptionPane.ERROR_MESSAGE);
-
+			return 0;
 		}
 	} // competeBase
 
-	public void singleCompete(XArenaButtons xab, GameBoard gb) {
-		this.competeBase(false, xab, gb);
+	public double singleCompete(XArenaButtons xab, GameBoard gb) {
+		return this.competeBase(false, false, xab, gb);
 	}
+
+	public double swapCompete(XArenaButtons xab, GameBoard gb) {
+		return this.competeBase(true, false, xab, gb);
+	}
+
+	public double bothCompete(XArenaButtons xab, GameBoard gb) {
+		return this.competeBase(false, true, xab, gb);
 
 	public int singleTournamentCompeteBase(GameBoard gb, TSAgent[] nextTeam, TSTimeStorage[] nextTimes, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
@@ -1012,10 +1023,11 @@ public class XArenaFuncs
 			return 2;
 		return 42;
 	}
-	
+
 	public void swapCompete(XArenaButtons xab, GameBoard gb) {
 		this.competeBase(true, xab, gb);
 	}
+
 
 	/**
 	 * Perform many (competitionNum) competitions between agents of type AgentX and agents 
@@ -1045,15 +1057,9 @@ public class XArenaFuncs
 		// take settings from GUI xab
 		String AgentX = xab.getSelectedAgent(0);  // enthalten AgentNamen als String (tools.Types.GUI_AGENT_LIST)
 		String AgentO = xab.getSelectedAgent(1);
-		//int competeNum=Integer.valueOf(xab.CompeteNumT.getText()).intValue();
-		//int competitionNum=Integer.valueOf(xab.CompetitionsT.getText()).intValue();
 		int competeNum=xab.winCompOptions.getNumGames();
 		int competitionNum=xab.winCompOptions.getNumCompetitions();
 		int maxGameNum = Integer.parseInt(xab.GameNumT.getText());
-		//int epiLength0 = xab.oPar[0].getEpiLength();
-		//int epiLength1 = xab.oPar[1].getEpiLength();
-		//boolean learnFromRM0 = xab.oPar[0].useLearnFromRM();
-		//boolean learnFromRM1 = xab.oPar[1].useLearnFromRM();
 		Evaluator m_evaluatorX=null;
 		Evaluator m_evaluatorO=null;
 		
@@ -1073,7 +1079,7 @@ public class XArenaFuncs
 		for (int c=0; c<competitionNum; c++) { // durchlauf der einzelnen competitions
 			int player;
 
-			// beide agenten werden f�r die games jeder competition neu initialisiert
+			// beide agenten werden fuer die games jeder competition neu initialisiert
 			try {
 				paX = this.constructAgent(0,AgentX, xab);
 				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);
@@ -1110,7 +1116,7 @@ public class XArenaFuncs
 				{							
 					StateObservation so = soSelectStartState(gb,xab.oPar[0].useChooseStart01(), paX); 
 
-					paX.trainAgent(so /*,epiLength,learnFromRM*/);
+					paX.trainAgent(so);
 				}
 				paX.setAgentState(AgentState.TRAINED);
 			} 
@@ -1129,7 +1135,7 @@ public class XArenaFuncs
 				{							
 					StateObservation so = soSelectStartState(gb,xab.oPar[1].useChooseStart01(), paO); 
 
-					paO.trainAgent(so /*,epiLength,learnFromRM*/);
+					paO.trainAgent(so);
 				}
 				paO.setAgentState(AgentState.TRAINED);				
 			} 

@@ -215,6 +215,10 @@ public class LoadSaveGBG {
 //					System.out.println("saveK_U1 "+mcts.getMCTSParams().getK_UCT());
 //					System.out.println("saveK_U2 "+mcts.getK());
 				}
+				if (pa instanceof TDNTuple2Agt) {
+					TDNTuple2Agt tdagt = (TDNTuple2Agt) pa;
+					int dummy=1;
+				}
 				oos.writeObject(pa);
 			} catch (IOException e) {
 				dlg.setVisible(false);

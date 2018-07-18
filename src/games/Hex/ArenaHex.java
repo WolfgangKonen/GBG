@@ -1,7 +1,13 @@
 package games.Hex;
 
 import controllers.PlayAgent;
-import games.*;
+import games.Arena;
+import games.Evaluator;
+import games.Feature;
+import games.GameBoard;
+import games.XNTupleFuncs;
+
+import java.io.IOException;
 
 import javax.swing.*;
 
@@ -24,10 +30,14 @@ public class ArenaHex extends Arena {
         super();
     }
 
-    public ArenaHex(JFrame frame) {
-        super(frame);
-    }
+//    public ArenaHex(JFrame frame) {
+//        super(frame);
+//    }
 
+	public ArenaHex(String title) {
+		super(title);		
+	}
+	
     /**
      * @return a name of the game, suitable as subdirectory name in the
      * {@code agents} directory
@@ -76,4 +86,21 @@ public class ArenaHex extends Arena {
     public void performArenaDerivedTasks() {
     }
 
+	/**
+	 * Start GBG for Hex (non-trainable version)
+	 * 
+	 * @param args
+	 * @throws IOException 
+	 */
+	public static void main(String[] args) throws IOException 
+	{
+		ArenaHex t_Frame = new ArenaHex("General Board Game Playing");
+
+		if (args.length==0) {
+			t_Frame.init();
+		} else {
+			throw new RuntimeException("[ArenaHex.main] args="+args+" not allowed.");
+		}
+	}
+	
 }

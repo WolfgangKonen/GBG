@@ -12,6 +12,7 @@ import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -42,7 +43,7 @@ public class MaxNParams extends Frame
 	JLabel maxnDepth_L;
 	JLabel miniUseHm_L;
 	public JTextField maxnDepth_T;
-	public Checkbox miniUseHmTrue;
+	public JCheckBox miniUseHmTrue;
 
 	JPanel mPanel;
 //	Button ok;
@@ -54,7 +55,7 @@ public class MaxNParams extends Frame
 		maxnDepth_L = new JLabel("Tree Depth");
 		maxnDepth_T = new JTextField(ParMaxN.DEFAULT_MAXN_TREE_DEPTH+"");				// 
 		miniUseHm_L = new JLabel("Minimax Hash ");
-		miniUseHmTrue = new Checkbox("use hashmap",true);
+		miniUseHmTrue = new JCheckBox("use hashmap",true);
 //		ok = new Button("OK");
 //		m_par = this;
 		mPanel = new JPanel();		// put the inner buttons into panel mPanel. This panel
@@ -123,7 +124,7 @@ public class MaxNParams extends Frame
 	}
 
 	public boolean useMinimaxHashmap() {
-		return miniUseHmTrue.getState();
+		return miniUseHmTrue.isSelected();
 	}
 	
 	/**
@@ -131,8 +132,8 @@ public class MaxNParams extends Frame
 	 * @param mp  ParMaxN of the re-loaded agent
 	 */
 	public void setFrom(ParMaxN mp) {
-		this.setMaxnDepth(mp.getMaxnDepth());
-		this.miniUseHmTrue.setState(mp.useMinimaxHashmap());
+		this.setMaxnDepth(mp.getMaxNDepth());
+		this.miniUseHmTrue.setSelected(mp.useMinimaxHashmap());
 	}
 	
 	/**

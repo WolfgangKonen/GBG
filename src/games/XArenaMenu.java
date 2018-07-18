@@ -41,6 +41,8 @@ public class XArenaMenu extends JMenuBar {
 
 	private static final String TIPEVALUATE = "";
 
+	private static final String TIPPARAMTABS = "Show the tabbed window with parameter settings";
+
 	private static final String TIPINSPECTLUT = "Inspect the lookup-tables (LUT) for the selected "
 			+ "N-Tuple-Agent. The selected agent also must be trained for this to work";
 
@@ -81,6 +83,7 @@ public class XArenaMenu extends JMenuBar {
 		m_frame = m_TicFrame;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 
+
 		generateFileMenu();
 		generateAgentMenu();
 		generateCompetitionMenu();
@@ -104,7 +107,7 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_tabs.showParamTabs(m_arena,true,0,m_arena.m_xab.getSelectedAgent(0));
 			}
 		});
-		menuItem.setToolTipText(TIPEVALUATE);
+		menuItem.setToolTipText(TIPPARAMTABS);
 		if (!(m_arena instanceof ArenaTrain))
 			menuItem.setEnabled(false);			// no param tabs for Arena
 		menu.add(menuItem);
@@ -267,11 +270,11 @@ public class XArenaMenu extends JMenuBar {
 		menuItem = new JMenuItem("Competition Options");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				winCompVisible = !m_arena.m_xab.winCompOptions.isVisible();
-				m_arena.m_xab.winCompOptions.showOptionsComp(m_arena,winCompVisible);
+//				winCompVisible = !m_arena.m_xab.winCompOptions.isVisible();
+				m_arena.m_xab.winCompOptions.showOptionsComp(m_arena,true);
 			}
 		});
-		menuItem.setToolTipText("Choose the options for single- and multi-Competitions");
+		menuItem.setToolTipText("Choose the options for single- and multi-competitions");
 		menu.add(menuItem);
 
 		// ==============================================================
@@ -303,6 +306,19 @@ public class XArenaMenu extends JMenuBar {
 				+ "are printed to the console</body></html>");
 		menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);
+		menuItem = new JMenuItem("Compete Both");
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				m_arena.taskState = Arena.Task.BOTHCMP;
+				String str = "[Start Competition Both]";
+				printStatus(str);
+			}
+		});
+		menuItem.setToolTipText("<html><body>Start a single competition between the selected Agents "
+				+ "in both roles. The results <br>"
+				+ "are printed to the console</body></html>");
+		menuItem.setEnabled(numPlayers>1);
+		menu.add(menuItem);
 
 		// ==============================================================
 		// Multi-Competition
@@ -311,14 +327,13 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				m_arena.taskState = Arena.Task.MULTCMP;
-				//ticGame.changeState(State.MULTICOMPETE);
 				String str = "[Start multi-Competition]";
 				printStatus(str);
 			}
 		});
 		menuItem.setToolTipText("<html><body>Start a multi-competition between the selected "
-				+ "Agents (do 'Competions' times a single competition). The results are printed to <br>"
-				+ "the console and saved to bin/TicTacToe.comp.csv.</body></html>");
+				+ "Agents (do 'Competions' times: agent training + single competition). The results are <br>"
+				+ "printed to the console and saved to bin/TicTacToe.comp.csv.</body></html>");
 		menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);
 
@@ -349,13 +364,13 @@ public class XArenaMenu extends JMenuBar {
 		menuItem = new JMenuItem("Start Multi-Training");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//ticGame.changeState(TicGame.State.MULTTRN);
+				m_arena.taskState = Arena.Task.MULTTRN;
 				String str = "[Start Multi-Training of TD-Agent]";
 				printStatus(str);
 			}
 		});
-		menuItem.setToolTipText("Start the multi-training of the TD-Agent. Be sure thtat the options "
-				+ "where choosen correctly and that both agents (TD and opponent) are initialized");
+		menuItem.setToolTipText("<html><body>Start the multi-training of the TD-Agent. Be sure that <br>"
+				+ "the options were choosen correctly and that all agents are initialized</body></html>");
 		if (!(m_arena instanceof ArenaTrain))
 			menuItem.setEnabled(false);			// no multi-training for Arena
 		submenu.add(menuItem);
@@ -434,18 +449,6 @@ public class XArenaMenu extends JMenuBar {
 				//ticGame.m_xab.setWindowPos(ticGame.winOptionsGTV);
 			}
 		});
-//		menuItem.setToolTipText("<html><body>1. Set the Size of the Hash-Table "
-//				+ "for the Agent that determines the game-theoretic <br>"
-//				+ "values in a lot of situations. If the Hash-Size is made "
-//				+ "smaller more time is needed to calculate the score <br>"
-//				+ "for a position. <br> "
-//				+ "2.Choose which databases shall be used "
-//				+ "for the Agent that determines the game-theoretic values in a lot of <br>"
-//				+ "Situations. The usage of the databases needes more memory but"
-//				+ " fastens the agent a lot <br>"
-//				+ "3. Set the Search Depth for the Agent "
-//				+ "that determines the game-theoretic values. The Search-depth <br>"
-//				+ "should be predefined value</body></html>");
 		menuItem.setToolTipText("(currently not implemented)");
 		menu.add(menuItem);
 
@@ -538,6 +541,11 @@ public class XArenaMenu extends JMenuBar {
 			// the agent name and the active game (before setting the specific
 			// parameters in certain tabs with 'setFrom' from the agent loaded):
 			m_arena.m_xab.setParamDefaults(n, td.getName(), m_arena.getGameName());
+			// with changedViaLoad[n]=true we inhibit that a possible change in item state of 
+			// m_arena.m_xab.choiceAgent[n] will trigger from the associated 
+			// ItemStateListener an agent-parameter-default-setting (we want the parameters
+			// from the agent just loaded to survive in m_arena.m_xab):
+			m_arena.m_xab.changedViaLoad[n] = true;
 			
 			if (td instanceof TDAgent) {
 				// set the agent parameters in XArenaTabs:
@@ -563,6 +571,9 @@ public class XArenaMenu extends JMenuBar {
 //				((TDNTupleAgt) td).setNTParams(((TDNTupleAgt) td).getNTParams());
 //			}
 			else if (td instanceof TDNTuple2Agt) {
+				// set horizon cut for older agents (where horCut was not part of ParTD):
+				if (((TDNTuple2Agt) td).getParTD().getHorizonCut()==0.0) 
+					((TDNTuple2Agt) td).getParTD().setHorizonCut(0.1);
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple2Agt) td).getParTD() );
 				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple2Agt) td).getParNT() );
@@ -574,10 +585,11 @@ public class XArenaMenu extends JMenuBar {
 				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
 				// get the loaded values)
 				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
-				// it doesn't hurt
+				// it doesn't hurt)
 				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getParTD(), td.getMaxGameNum());
 				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getParNT());
 				//m_arena.m_xab.oPar.numEval_T.setText(""+((TDNTuple2Agt) td).getOtherPar().getNumEval());
+				((TDNTuple2Agt) td).weightAnalysis(null);
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:

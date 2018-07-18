@@ -59,7 +59,7 @@ if (xquant=="actionNum") {
 #q <- q+geom_errorbar(aes(ymin=evalQ-se, ymax=evalQ+se), width=300, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 #q <- q+geom_line()
-q <- q+scale_y_continuous(limits=c(0,120000)) 
+q <- q+scale_y_continuous(limits=c(0,150000)) 
 #q <- q+guides(colour = guide_legend(reverse = TRUE))
 plot(q)
 

@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
 
+import controllers.TD.ntuple2.TDNTuple2Agt.EligType;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -207,7 +208,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 		} else {
 			equiv = new int[1][];
-			equiv[0] = board;			
+			equiv[0] = board.clone();			
 		}
 		
 		return equiv;
@@ -271,15 +272,9 @@ public class NTuple2ValueFunc implements Serializable {
 	public void updateWeightsNew(int[] curBoard, int curPlayer, int[] nextBoard, int nextPlayer,
 			double reward, double target, /*boolean upTC,*/ StateObservation thisSO) {
 		double v_old = getScoreI(curBoard,curPlayer); // old value
-		double tg; // Target signal
-//		int sign=1;
-//		if (!TDNTuple2Agt.VER_3P && TDNTuple2Agt.NEW_2P) sign=-1;
-//		// Target tg is (reward + GAMMA * value of the after-state) for non-final states
-//		tg = reward + sign*getGamma() * getScoreI(nextBoard,nextPlayer);
-		tg = target;
-		// delta is the error signal
-		double delta = (tg - v_old);
-		// derivative of tanh ( if hasSigmoid()==true)
+		// delta is the error signal:
+		double delta = (target - v_old);
+		// derivative of tanh ( if hasSigmoid()==true):
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
 		update(curBoard, curPlayer, delta, e);
@@ -289,11 +284,11 @@ public class NTuple2ValueFunc implements Serializable {
 			double v_new = getScoreI(curBoard,curPlayer);
 			if (curPlayer==nextPlayer) {
 				System.out.println("updateWeightsNew[p="+curPlayer+", "+thisSO.stringDescr()
-				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+tg*MAXSCORE+", R="+reward);
+				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
 				dbg3PArr[curPlayer]=v_new*MAXSCORE;
 			} else {
 				System.out.println("updateWeights_2P[p="+curPlayer+", "+thisSO.stringDescr()
-				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+tg*MAXSCORE+", R="+reward);				
+				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);				
 				dbg3PArr[2]=v_new*MAXSCORE;				
 			}
 			if (Math.abs(reward)>0.5) {
@@ -322,9 +317,8 @@ public class NTuple2ValueFunc implements Serializable {
 	 */
 	public void updateWeightsNewTerminal(int[] curBoard, int curPlayer,StateObservation thisSO, boolean isNEW_3P) {
 		double v_old = getScoreI(curBoard,curPlayer); // old value
-		double tg = 0.0; // Target signal is 0 (!)
-		// delta is the error signal
-		double delta = (tg - v_old);
+		// delta is the error signal (here with target signal = 0.0):
+		double delta = (0.0 - v_old);
 		// derivative of tanh ( if hasSigmoid()==true)
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
@@ -365,33 +359,34 @@ public class NTuple2ValueFunc implements Serializable {
 	 */
 	private void update(int[] board, int player, double delta, double e) {
 		int i, j;
-		int[][] equiv = null;
 		double alphaM, sigDeriv, lamFactor;
 
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board,getUSESYMMETRY());
+		int[][] equiv = getSymBoards2(board,getUSESYMMETRY());
 
 		alphaM = ALPHA / (numTuples*equiv.length); 
 
-		// construct new EquivStates object, add it at head of LinkedList eList and remove 
+		// construct new EligStates object, add it at head of LinkedList eList and remove 
 		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):
-		EquivStates elem = new EquivStates(equiv,e);
+		EligStates elem = new EligStates(equiv,e);
 		eList.addFirst(elem);
 		if (eList.size()>horizon) eList.pollLast();
 		
 		// iterate over all list elements in horizon  (h+1 elements from t down to t_0):
-		ListIterator<EquivStates> iter = eList.listIterator();		
+		ListIterator<EligStates> iter = eList.listIterator();		
 		lamFactor=1;  // holds 1, LAMBDA, LAMBDA^2,... in successive passes through while-loop
 		while(iter.hasNext()) {
 			elem=iter.next();
 			equiv=elem.equiv;
-			assert (lamFactor >= Types.TD_HORIZONCUT) : "Error: lamFactor < TD_HORIZONCUT";
+			//System.out.println(eList.size()+" "+lamFactor+"   ["+ equiv[0]+"]");	// debug
+			assert (lamFactor >= tdAgt.getParTD().getHorizonCut()) 
+					: "Error: lamFactor < ParTD.getHorizonCut";
 			e = lamFactor*elem.sigDeriv;
 			for (i = 0; i < numTuples; i++) {
 				nTuples[player][i].clearIndices();
 				for (j = 0; j < equiv.length; j++) {
 //					System.out.print("(i,j)=("+i+","+j+"):  ");		//debug
-					nTuples[player][i].updateNew(equiv[j], alphaM, delta, e /*, getLambda()*/);
+					nTuples[player][i].updateNew(equiv[j], alphaM, delta, e);
 				}
 			}
 			lamFactor *= getLambda(); 
@@ -399,7 +394,12 @@ public class NTuple2ValueFunc implements Serializable {
 		numLearnActions++;
 	}
 
-	// samine// updating TCfactor for all ntuples after every tcIn games
+	/**
+	 * Is called only in case (TC && !tcImm), but !tcImm is not recommended
+	 * 
+	 * @see TDNTuple2Agt#trainAgent(StateObservation)
+	 */
+	@Deprecated
 	public void updateTC() {
 		int i, k;
 			for (i = 0; i < numTuples; i++) {
@@ -456,9 +456,21 @@ public class NTuple2ValueFunc implements Serializable {
 		return tdAgt.getParNT().getUSESYMMETRY();
 	}
 
-	public void clearEquivList() {
+	public void clearEligList() {
 		eList.clear();
 	}
+	
+	public void clearEligList(EligType m_elig) {
+		switch(m_elig) {
+		case STANDARD: 
+			// do nothing
+			break;
+		case RESET: 
+			eList.clear();
+			break;
+		}
+	}
+
 	
 	public int getHorizon() {
 		return horizon;
@@ -468,7 +480,7 @@ public class NTuple2ValueFunc implements Serializable {
 		if (getLambda()==0.0) {
 			horizon=1;
 		} else {
-			horizon = 1+(int) (Math.log(Types.TD_HORIZONCUT)/Math.log(getLambda()));
+			horizon = 1+(int) (Math.log(tdAgt.getParTD().getHorizonCut())/Math.log(getLambda()));
 		}		
 	}
 
@@ -481,12 +493,12 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 
-	// class EquivStates is needed in update(int[],int,double,double)
-	private class EquivStates implements Serializable {
+	// class EligStates is needed in update(int[],int,double,double)
+	private class EligStates implements Serializable {
 		int[][] equiv;
 		double sigDeriv;
 		
-		EquivStates(int[][] equiv, double sigDeriv) {
+		EligStates(int[][] equiv, double sigDeriv) {
 			this.equiv=equiv.clone();
 			this.sigDeriv=sigDeriv;
 		}

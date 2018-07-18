@@ -2,12 +2,19 @@ package tools;
 
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Toolkit;
 import java.util.ArrayList;
+
+import javax.swing.UIManager;
+import javax.swing.plaf.FontUIResource;
 
 import controllers.ExpectimaxNAgent;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.NTuple2ValueFunc;
+import games.Arena;
 import games.StateObservation;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 
@@ -15,8 +22,8 @@ import java.awt.event.KeyEvent;
 import java.io.Serializable;
 
 /**
- * Class <b>Types</b> holds various constants, the class {@link Types.ScoreTuple} and the  
- * class {@link Types.ACTIONS} and its derived classes
+ * Class <b>Types</b> holds various constants, the class {@link ScoreTuple} and the  
+ * class {@link ACTIONS} and its derived classes.
  *
  */
 public class Types {
@@ -313,8 +320,8 @@ public class Types {
      * initial agent choice for P0, P1, ... (for up to 5 players) 
      */
     public static final String[] GUI_AGENT_INITIAL  
-    	//= {"TD-Ntuple", "MC", "Human", "Human", "Human"};
-    	= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
+    	//= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
+    	= {"Human", "MCTS", "Human", "Human", "Human", "Human"};
 		//= {"TD-Ntuple-2", "Human", "MCTS Expectimax", "Human", "Human", "Human"};
     public static final String[] GUI_PLAYER_NAME  	// player names for P0, P1, ... (for up to 5 players)
     	//= {"P0", "P1", "P2", "P3", "P4"};
@@ -328,14 +335,36 @@ public class Types {
     public static final String GUI_X_PLAYER = "TDS";  	// "MCTS" "TDS" "CMA-ES" "Minimax" 
     public static final String GUI_O_PLAYER = "MCTS";	// "Human";"MCTS";
 
-	public static final int GUI_ARENATRAIN_WIDTH = 465;	// width ArenaTrain window
-	public static final int GUI_ARENATRAIN_HEIGHT = 380;
-	public static final int GUI_WINCOMP_WIDTH = 350;	// width 'Competition Options' window
-	public static final int GUI_WINCOMP_HEIGHT = 300;
-	public static final int GUI_PARAMTABS_WIDTH = 464;	// wide enough to hold 6 tabs
-	public static final int GUI_PARAMTABS_HEIGHT = 330;
+    /**
+     * A global factor to scale all GUI components when working on larger / smaller displays. <br>
+     * The factor 1.0 is appropriate for display size (1600 x 900).
+     */
+    public static double GUI_SCALING_FACTOR = 1.0;
+    public static double GUI_SCALING_FACTORX = GUI_SCALING_FACTOR;
+    public static double GUI_SCALING_FACTORY = GUI_SCALING_FACTOR;
+    
+    /**
+     * width & height of Arena and ArenaTrain windows
+     */
+	public static int GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTORX);	 
+	public static int GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTORY);
+    /**
+     * width & height of 'Competition Options'  window
+     */
+	public static int GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTORX);	
+	public static int GUI_WINCOMP_HEIGHT = (int)(300*GUI_SCALING_FACTORY);
+    /**
+     * width & height of Param Tabs window, wide enough to hold 6 tabs
+     */
+	public static int GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTORX); 
+	public static int GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTORY);
 
-	public static final int GUI_HELPFONTSIZE = 14;
+	public static int GUI_HELPFONTSIZE = (int)(14*GUI_SCALING_FACTORX);
+	public static int GUI_MENUFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
+	public static int GUI_DIALOGFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
+	public static int GUI_TIPFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
+	public static int GUI_TITLEFONTSIZE = (int)(20*GUI_SCALING_FACTORX);
+	
 	
 	static final int gray = 215;
 	/**
@@ -348,14 +377,67 @@ public class Types {
 	 */
 	public static final String GUI_DEFAULT_DIR_AGENT = "agents";
 	
-	/**
-	 * The parameter {@code C = } {@link #TD_HORIZONCUT} controls the horizon in eligibility traces: 
-	 * Retain only those elements in the TD-update equation where {@code lambda^(t-k)} &ge; {@code C}.  
-	 * <br>(The horizon {@code h = t-k} runs from 0,1,..., to the appropriate {@code h = ceil(log_lambda(C))}.
-	 * 
-	 * @see NTuple2ValueFunc#setHorizon()
-	 */
-	public static double TD_HORIZONCUT = 0.1;		// 0.01 (perhaps in RubiksCube)
+	// obsolete now, use ParTD.getHorizonCut()
+	//public static double TD_HORIZONCUT = 0.01;		// 0.1 or 0.01 
 	
+	/**
+	 * Set all global GUI elements to the right scale. <br>
+	 * (Call this function before setting any GUI elements: see {@link Arena}, initGame())
+	 * 
+	 * @param auto  If {@code auto==false}, set the global scale according
+	 * to the value in {@link #GUI_SCALING_FACTOR}. <br>
+	 * If {@code auto==true}, start from {@link #GUI_SCALING_FACTOR}, but perform additionally
+	 * automatic scaling, based on the screen size of the current device.
+	 */
+	public static void globalGUIScaling(boolean auto) {
+		if (auto) {
+			// calculate scaling factors according to screen size and then recalculate
+			// all window sizes and font sizes:
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			double width = screenSize.getWidth();
+			double height = screenSize.getHeight();
+			GUI_SCALING_FACTORX = GUI_SCALING_FACTOR*(width/1600);
+			GUI_SCALING_FACTORY = GUI_SCALING_FACTOR*(height/900);
+		}
+		
+		GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTORX);	 
+		GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTORY);
+		GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTORX);	
+		GUI_WINCOMP_HEIGHT = (int)(300*GUI_SCALING_FACTORY);
+		GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTORX); 
+		GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTORY);
+
+		GUI_TITLEFONTSIZE = (int)(20*GUI_SCALING_FACTORX);
+		GUI_HELPFONTSIZE = (int)(14*GUI_SCALING_FACTORX);
+		GUI_DIALOGFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
+		GUI_MENUFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
+		GUI_TIPFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
+		
+		// set globally the font for all dialog texts:
+		Font lFont = new Font("Arial", Font.PLAIN, GUI_DIALOGFONTSIZE);
+		UIManager.put("Label.font", lFont);
+		UIManager.put("CheckBox.font", lFont);
+		UIManager.put("CheckBoxMenuItem.font", lFont);
+		UIManager.put("TextField.font", lFont);
+		Font dFont = new Font("Arial", Font.BOLD, GUI_DIALOGFONTSIZE);
+		UIManager.put("Button.font", dFont);
+		UIManager.put("List.font", dFont);
+		UIManager.put("RadioButton.font", dFont);
+		UIManager.put("RadioButtonMenuItem.font", dFont);
+		UIManager.put("TabbedPane.font", dFont);
+		UIManager.put("ComboBox.font", dFont);
+        // set globally the font for all menu texts:
+		Font mFont=new Font("Arial",Font.BOLD,GUI_MENUFONTSIZE);
+        UIManager.put("Menu.font", new FontUIResource(mFont));
+        UIManager.put("MenuItem.font", new FontUIResource(mFont));
+        // set globally the font for all tooltip texts:
+        UIManager.put("ToolTip.font",
+           new FontUIResource("SansSerif", Font.ITALIC, GUI_TIPFONTSIZE));
+		
+	}
+	public static void globalGUIScaling() {
+		globalGUIScaling(false);
+	}
+
  }
 

@@ -18,7 +18,6 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Arena.Task;
-import games.TicTacToe.LaunchAppletTTT;
 //import params.TDParams;
 import tools.MessageBox;
 import tools.StatusBar;
@@ -55,6 +54,11 @@ abstract public class ArenaTrain extends Arena
 	}
 	public ArenaTrain(JFrame frame) {
 		super(frame);
+		initArenaTrain();
+	}
+	
+	public ArenaTrain(String title) {
+		super(title);
 		initArenaTrain();
 	}
 	
@@ -95,7 +99,7 @@ abstract public class ArenaTrain extends Arena
 			n = m_xab.getNumTrainBtn();
 			agentN = m_xab.getSelectedAgent(n);
 			if(!agentN.equals("MCTS") & !agentN.equals("Human")) {
-				enableButtons(false);	
+//				enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtons
 				setStatusMessage("Training "+agentN+"-Player X ...");
 
 				try {
@@ -119,7 +123,7 @@ abstract public class ArenaTrain extends Arena
 			taskState = Task.IDLE; 
 			break;
 		case MULTTRN:
-			enableButtons(false);
+//			enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtons
 			
 	        setStatusMessage("MultiTrain started ...");
 	        long start_time = Calendar.getInstance().getTime().getTime();

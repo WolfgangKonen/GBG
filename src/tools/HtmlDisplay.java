@@ -38,7 +38,7 @@ public class HtmlDisplay extends JFrame implements HyperlinkListener
     		 //--- Alternative 1: load resource from in working dir ---
     		 //String curDir = System.getProperty("user.dir"); // fetch the working dir 
     		 //curDir = curDir.replace('\\', '/');
-    		 //url=new URL("file:///"+curDir+"/"+filename);
+			// url=new URL("file:///"+curDir+"/"+filename);
     		 //--- Alternative 2: absolute path to resource, not portable at all ---    		 
     		 //url=new URL("file:///C:/Dokumente%20und%20Einstellungen/wolfgang/Eigene%20Dateien/ProjectsWK/ReinforceLearn/TicTacToe/resources/"+filename);
     		 html=new JEditorPane();
@@ -48,8 +48,8 @@ public class HtmlDisplay extends JFrame implements HyperlinkListener
     		 // this magic work-around from http://stackoverflow.com/questions/12542733/setting-default-font-in-jeditorpane
     		 // is needed so that the font change becomes effective (!!)
     		 html.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-    		 font=new Font("Arial",1,Types.GUI_HELPFONTSIZE);			
-    		 html.setFont(font);	// does not work yet
+    		 font=new Font("Arial",Font.BOLD,Types.GUI_HELPFONTSIZE);			
+    		 html.setFont(font);	
     		 if (url!=null) {
     			 html.setPage(url);
     		 } else {

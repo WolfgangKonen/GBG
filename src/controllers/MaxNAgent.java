@@ -64,7 +64,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	public MaxNAgent(String name, ParMaxN mPar, ParOther oPar)
 	{
 		this(name);
-		m_depth = mPar.getMaxnDepth();
+		m_depth = mPar.getMaxNDepth();
 		m_useHashMap = mPar.useMinimaxHashmap();
 		m_oPar = new ParOther(oPar);		// AgentBase::m_oPar
 	}

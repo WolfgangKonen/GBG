@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  *  A test class: Given class Items with a key and a value, we want to check in 
  *  a set of Items whether it contains an item which is the same as a certain Item.
  *  The sameness shall be user-defined (in this case: equality of keys)
+ *  
+ *  Optional: Test a linked list (function testLinkedList)
  *
  */
 public class TestCompare {
@@ -119,6 +123,35 @@ public class TestCompare {
 		
 	}
     
+    // this is just a test function for the LinkedList part in NTuple2ValueFunc
+    private static void testLinkedList() {
+    	
+    	int h=2;
+    	LinkedList sList = new LinkedList();
+    	sList.clear();
+    	Integer elem;	// Integer object is just a surrogate for the afterstate object s'_t 
+    	
+    	
+    	for (int t=1; t<5; t++) {
+    		// add element t at head of list and remove the element 
+    		// 'beyond horizon' t_0 = t-h (if any)
+    		elem = new Integer(t);
+    		sList.addFirst(elem);
+    		if (sList.size()>(h+1)) sList.pollLast();
+    		
+    		// iterate and print all elements in horizon: h+1 elements from t down to t_0
+    		ListIterator<Integer> iter = sList.listIterator();
+    		while(iter.hasNext()) {
+    			elem=iter.next();
+    			System.out.print(elem+" ");
+    		}
+    		System.out.println("");
+    		
+    	}
+    	
+    	
+    }
+
     public static void main(String[] args) throws IOException
     {
     	TestCompare tc = new TestCompare();
@@ -128,7 +161,9 @@ public class TestCompare {
 //    	DecimalFormat form = new DecimalFormat("00");
 //    	String s = "k = "+ form.format(k);
 //    	System.out.println(s);		// liefert "k = 05“
-    	
+ 
+//    	testLinkedList();
+
     }
 
 }

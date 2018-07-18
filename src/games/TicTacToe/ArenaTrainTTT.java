@@ -1,15 +1,21 @@
 package games.TicTacToe;
 
+import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import controllers.PlayAgent;
 import games.Arena;
+import games.ArenaTrain;
 import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import games.ArenaTrain;
+import tools.Types;
 //import params.TDParams;
 
 /**
@@ -19,14 +25,18 @@ import games.ArenaTrain;
  * <li> {@link Arena#makeGameBoard()}, 
  * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)}, and 
  * <li> {@link Arena#makeFeatureClass(int)}, 
- * </ul> such that 
- * these factory methods return objects of class {@link GameBoardTTT}, 
- * {@link EvaluatorTTT}, and {@link FeatureTTT}, respectively.
+ * <li> {@link Arena#makeXNTupleFuncs()}, 
+ * </ul> 
+ * such that these factory methods return objects of class {@link GameBoardTTT}, 
+ * {@link EvaluatorTTT}, {@link FeatureTTT}, and {@link XNTupleFuncsTTT}, respectively.
+ * <p>
+ * {@link ArenaTrainTTT} has a short {@link #main(String[])} for launching the trainable 
+ * version of GBG. 
  * 
  * @see GameBoardTTT
  * @see EvaluatorTTT
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'16 - May'18
  */
 public class ArenaTrainTTT extends ArenaTrain   {
 	
@@ -34,10 +44,14 @@ public class ArenaTrainTTT extends ArenaTrain   {
 		super();
 	}
 
-	public ArenaTrainTTT(JFrame frame) {
-		super(frame);
-	}
+//	public ArenaTrainTTT(JFrame frame) {
+//		super(frame);
+//	}
 
+	public ArenaTrainTTT(String title) {
+		super(title);		
+	}
+	
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -54,6 +68,7 @@ public class ArenaTrainTTT extends ArenaTrain   {
 		gb = new GameBoardTTT(this);	
 		return gb;
 	}
+	
 	/**
 	 * Factory pattern method: make a new Evaluator
 	 * @param pa		the agent to evaluate
@@ -72,11 +87,6 @@ public class ArenaTrainTTT extends ArenaTrain   {
 		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
 	}
 
-//	@Override
-//	public PlayAgent makeTDSAgent(String sAgent, TDParams tdPar, int maxGameNum){
-//		return new TDPlayerTTT(sAgent,tdPar,maxGameNum);
-//	}
-
 	public Feature makeFeatureClass(int featmode) {
 		return new FeatureTTT(featmode);
 	}
@@ -85,4 +95,26 @@ public class ArenaTrainTTT extends ArenaTrain   {
 		return new XNTupleFuncsTTT();
 	}
 
+	/**
+	 * Start GBG for TicTacToe (trainable version)
+	 * 
+	 * @param args
+	 * @throws IOException 
+	 */
+	public static void main(String[] args) throws IOException 
+	{
+		ArenaTrainTTT t_Frame = new ArenaTrainTTT("General Board Game Playing");
+
+// ---  just for analysis: compute the state space & game tree complexity ---		
+//		System.out.println("Rough approximation for nStates = "+(int) Math.pow(3, 9)+ " = (3^9)");
+//		TicTDBase.countStates2(false);
+//		TicTDBase.countStates2(true);
+		
+		if (args.length==0) {
+			t_Frame.init();
+		} else {
+			throw new RuntimeException("[ArenaTrainTTT.main] args="+args+" not allowed. Use TicTacToeBatch.");
+		}
+	}
+	
 }

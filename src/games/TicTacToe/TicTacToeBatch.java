@@ -46,7 +46,7 @@ import tools.Types;
  *  
  *
  */
-public class TicTacToeBatch extends LaunchTrainTTT {
+public class TicTacToeBatch extends ArenaTrainTTT {
 
 	private static final long serialVersionUID = 1L;
 	public ArenaTrainTTT t_Game;
@@ -56,10 +56,8 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 	public  boolean m_NetHasSigmoid = false;
 	public	PlayAgent m_PlayAgentX;
 	public	PlayAgent m_PlayAgentO;
-	String sRandom = Types.GUI_AGENT_LIST[2];
-	String sMinimax = Types.GUI_AGENT_LIST[1];
-	RandomAgent random_agent = new RandomAgent(sRandom);
-	MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
+	private RandomAgent random_agent = new RandomAgent("Random");
+	private MinimaxAgent minimax_agent = new MinimaxAgent("Minimax");
 	protected Evaluator m_evaluator1=null;
 	protected Evaluator m_evaluator2=null;
 	protected Evaluator m_evaluator3=null;
@@ -118,11 +116,11 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 	public TicTacToeBatch(String title) {
 		super(title);
 		t_Batch = this;
-		t_Game = new ArenaTrainTTT(this);
-		setLayout(new BorderLayout(10,10));
-		setJMenuBar(t_Game.m_menu);
-		add(t_Game,BorderLayout.CENTER);
-		add(new Label(" "),BorderLayout.SOUTH);	// just a little space at the bottom
+//		t_Game = new ArenaTrainTTT(this);
+//		setLayout(new BorderLayout(10,10));
+//		setJMenuBar(t_Game.m_menu);
+//		add(t_Game,BorderLayout.CENTER);
+//		add(new Label(" "),BorderLayout.SOUTH);	// just a little space at the bottom
 		
 	}
 	
@@ -319,9 +317,10 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 	
 						}			
 						m_evaluator1.eval(m_PlayAgentX);
+				 		StateObservation so = gb.getDefaultStartState();
 						oe.add(m_evaluator1.getLastResult());								
-						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, 100, gb));
-						om.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, minimax_agent, 1, gb));
+						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, so, 100 ,0, gb));
+						om.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, minimax_agent, so, 1, 0, gb));
 						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100));
 						//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);
 						oC.add(1+(or.getVal()-0.9+om.getVal())/2.0);
@@ -673,8 +672,9 @@ public class TicTacToeBatch extends LaunchTrainTTT {
 						}		
 						m_evaluator1.eval(m_PlayAgentX);
 						m_evaluator2.eval(m_PlayAgentX);
+				 		StateObservation so = gb.getDefaultStartState();
 						oe.add(m_evaluator1.getLastResult());								
-						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, 100, gb));
+						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, so, 100, 0, gb));
 						//om.add(competeBoth(m_PlayAgentX, minimax_agent, 1, gb));
 						om.add(m_evaluator2.getLastResult());
 						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100, gb));

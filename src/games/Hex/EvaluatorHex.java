@@ -37,11 +37,11 @@ public class EvaluatorHex extends Evaluator {
     //minimaxAgent is static so the search tree does not have to be rebuilt every time a new evaluator is created.
     //However, this prevents minimax parameters from being adjusted while the program is running. Set needed tree depth
     //during compile time.
-    private static MinimaxAgent minimaxAgent = new MinimaxAgent(Types.GUI_AGENT_LIST[1]);
+    private static MinimaxAgent minimaxAgent = new MinimaxAgent("Minimax");
     private final String logDir = "logs/Hex/train";
     protected int verbose = 0;
     private MCTSAgentT mctsAgent = null;
-    private RandomAgent randomAgent = new RandomAgent(Types.GUI_AGENT_LIST[2]);
+    private RandomAgent randomAgent = new RandomAgent("Random");
     private double trainingThreshold = 0.8;
     private GameBoard m_gb;
     private PlayAgent playAgent;
@@ -127,7 +127,7 @@ public class EvaluatorHex extends Evaluator {
                     ParMCTS params = new ParMCTS();
                     int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
                     params.setNumIter((int) Math.pow(10, numIterExp));
-                    mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
+                    mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
             		result = competeAgainstOpponent_diffStates(playAgent, mctsAgent, m_gb, numEpisodes);
             	}
@@ -194,7 +194,7 @@ public class EvaluatorHex extends Evaluator {
         ParMCTS params = new ParMCTS();
         int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
         params.setNumIter((int) Math.pow(10, numIterExp));
-        mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
+        mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
         double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0);
         double success = res[0];        	
@@ -332,7 +332,7 @@ public class EvaluatorHex extends Evaluator {
                 // important: mctsAgent2 has to be constructed inside the 'callables' function, 
                 // otherwise all parallel calls would operate on the same agent and would produce
                 // garbage.
-                MCTSAgentT mctsAgent2 = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
+                MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
             	if (startAction2[i2] == -1) {
             		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0);

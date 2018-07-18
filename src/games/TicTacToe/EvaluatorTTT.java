@@ -15,6 +15,7 @@ import games.ArenaTrain;
 import games.Evaluator;
 import games.TicTacToe.Evaluator9;
 import games.GameBoard;
+import games.StateObservation;
 import games.XArenaFuncs;
 import tools.MessageBox;
 import tools.Types;
@@ -29,10 +30,8 @@ import tools.Types;
  */
 public class EvaluatorTTT extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {0,1,2,9,11};
-	private String sRandom = Types.GUI_AGENT_LIST[2];
-	private String sMinimax = Types.GUI_AGENT_LIST[1];
-	private RandomAgent random_agent = new RandomAgent(sRandom);
-	private MinimaxAgent minimax_agent = new MinimaxAgent(sMinimax);
+	private RandomAgent random_agent = new RandomAgent("Random");
+	private MinimaxAgent minimax_agent = new MinimaxAgent("Minimax");
 	private AgentLoader agtLoader = null;
 	private Evaluator9 m_evaluator9 = null; 
 	private int m_mode;
@@ -107,7 +106,8 @@ public class EvaluatorTTT extends Evaluator {
 	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
 	 */
  	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
-		m_res = XArenaFuncs.competeBoth(pa, random_agent, 100, gb);
+ 		StateObservation so = gb.getDefaultStartState();
+		m_res = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;
@@ -120,7 +120,8 @@ public class EvaluatorTTT extends Evaluator {
 	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
 	 */
  	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
-		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, 1, gb);
+ 		StateObservation so = gb.getDefaultStartState();
+		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, so, 1, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;
