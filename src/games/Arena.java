@@ -2,17 +2,12 @@ package games;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.ListIterator;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,19 +21,12 @@ import TournamentSystem.TSTimeStorage;
 import agentIO.LoadSaveGBG;
 import tools.Progress;
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
 import controllers.HumanPlayer;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
-import games.Hex.GameBoardHex;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
-import games.RubiksCube.GameBoardCube;
-import games.RubiksCube.StateObserverCube;
-import games.MTrain;
-import games.CFour.StateObserverC4;
-import games.Arena.Task;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
 import params.ParOther;
@@ -249,10 +237,10 @@ abstract public class Arena extends JFrame implements Runnable {
 					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam();
 					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage();
 					// let team compete...
-					int roundWinningAgent = m_xfun.singleTournamentCompeteBase(gb, nextTeam, nextTimes, m_xab);
+					int roundWinningAgent = m_xfun.singleCompeteBaseTS(gb, nextTeam, nextTimes, m_xab);
 					// enter winner
 					if (roundWinningAgent > 40) {
-						System.out.println(TAG+"ERROR :: singleTournamentCompeteBase returned error value "+roundWinningAgent);
+						System.out.println(TAG+"ERROR :: singleCompeteBaseTS returned error value "+roundWinningAgent);
 					}
 					else {
 						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
