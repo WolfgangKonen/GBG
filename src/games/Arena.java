@@ -93,7 +93,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	 */
 	protected void initGame() {
 		// scale the GUI (window sizes and fonts of all GUI elements)
-		Types.globalGUIScaling(true);
+		Types.globalGUIScaling(!true); // todo set to true to enable scaling
         // scale the font of all status messages:
 		Font lFont = new Font("Arial", Font.PLAIN, Types.GUI_DIALOGFONTSIZE);
 		statusBar.setFont(lFont);
