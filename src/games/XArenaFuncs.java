@@ -884,17 +884,14 @@ public class XArenaFuncs
 			String AgentX = xab.getSelectedAgent(0);
 			String AgentO = xab.getSelectedAgent(1);
 			if (AgentX.equals("Human") | AgentO.equals("Human")) {
-				MessageBox.show(xab, 
-						"No compete for agent Human", 
-						"Error", JOptionPane.ERROR_MESSAGE);
+				MessageBox.show(xab, "No compete for agent Human", "Error", JOptionPane.ERROR_MESSAGE);
 				return 0.0;
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
 
 				PlayAgent[] paVector = fetchAgents(xab);
 
-				AgentBase.validTrainedAgents(paVector,numPlayers);  
-				// may throw RuntimeException
+				AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
 				
 				PlayAgent[] qaVector = wrapAgents(paVector,xab.oPar,startSO);
 
@@ -917,9 +914,7 @@ public class XArenaFuncs
 			}
 					
 		} catch(RuntimeException ex) {
-			MessageBox.show(xab, 
-					ex.getMessage(), 
-					"Error", JOptionPane.ERROR_MESSAGE);
+			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			return 0;
 		}
 	} // competeBase
@@ -940,7 +935,6 @@ public class XArenaFuncs
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
 		int competeNum = 1;//xab.winCompOptions.getNumGames(); | falls wert != 1 dann competeTS() anpassen!
 		int numPlayers = gb.getStateObs().getNumPlayers();
-
 		double[] c = {}; // winrate how often = [0]:agentX wins [1]: ties [2]: agentO wins
 
 		try {
@@ -972,6 +966,7 @@ public class XArenaFuncs
 
 				PlayAgent[] paVector = new PlayAgent[2];
 				PlayAgent[] qaVector;
+
 				if (nextTeam[0].isHddAgent() || nextTeam[1].isHddAgent()) {
 					paVector[0] = nextTeam[0].getPlayAgent();
 					paVector[1] = nextTeam[1].getPlayAgent();
