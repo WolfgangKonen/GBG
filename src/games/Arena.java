@@ -255,7 +255,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 				// clean up
 				System.out.println(TAG+"Tournament done, cleaning up");
-				tournamentAgentManager.unlockAndClear();
+				tournamentAgentManager.unlockAfterComp();
 				tournamentAgentManager = null;
 				taskState = Task.IDLE;
 				break;

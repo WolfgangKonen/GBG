@@ -78,6 +78,18 @@ public class TSSettingsGUI2 extends JFrame {
                 loadAgentFromDisk();
             }
         });
+        reopenStatisticsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (mTSAgentManager.isTournamentDone()) {
+                    // tournament done - open stats window
+                    mTSAgentManager.makeStats();
+                }
+                else {
+                    // not done - cannot be opened
+                }
+            }
+        });
     }
 
     private void loadAgentFromDisk() {

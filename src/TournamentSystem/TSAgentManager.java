@@ -26,6 +26,7 @@ public class TSAgentManager {
     public TSTimeStorage timeStorage[][] = null;
     private int nextGame = 0;
     private int numberOfGames = -1;
+    private boolean tournamentDone = false;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
@@ -157,6 +158,7 @@ public class TSAgentManager {
 
     public TSAgent[] getNextCompetitionTeam() {
         TSAgent out[] = {mAgents.get(gamePlan[nextGame][0]), mAgents.get(gamePlan[nextGame][1])};
+        tournamentDone = false;
         return out;
     }
 
@@ -196,11 +198,15 @@ public class TSAgentManager {
 
         if (gameResult[nextGame][0]+gameResult[nextGame][1]+gameResult[nextGame][2] == numberOfGames)
             nextGame++;
+
+        tournamentDone = false;
     }
 
     public boolean hastNextGame() {
-        if (nextGame==gamePlan.length)
+        if (nextGame==gamePlan.length) {
+            tournamentDone = true;
             return false;
+        }
         else
             return true;
     }
@@ -234,12 +240,18 @@ public class TSAgentManager {
         }
     }
 
-    public void unlockAndClear() {
+    public void unlockAfterComp() {
         lockedToCompete = false;
+        /*
         gamePlan = null;
         gameResult = null;
         timeStorage = null;
         nextGame = 0;
+        */
+    }
+
+    public boolean isTournamentDone() {
+        return tournamentDone;
     }
 
     /**
@@ -247,6 +259,10 @@ public class TSAgentManager {
      */
 
     public void makeStats() {
+        if (!tournamentDone) {
+            System.out.println(TAG+"ERROR :: Stats Window cannot be opened, tournament data not available");
+            return;
+        }
         // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
         /**
          * Table | WTL und Score
@@ -310,7 +326,7 @@ public class TSAgentManager {
         Image hm = map.getChartImage();
 
         /**
-         * Agent Score Table
+         * Table | Agent Score
          */
         String[] columnNames4 = {
                 "Rank",
@@ -372,7 +388,7 @@ public class TSAgentManager {
         renderer.setHorizontalAlignment( JLabel.CENTER );
 
         /**
-         * Scatterplot AgentScore vs Time
+         * Scatterplot | AgentScore vs Time
          */
         // https://www.boraji.com/jfreechart-scatter-chart-example
         // Create dataset
@@ -476,27 +492,10 @@ public class TSAgentManager {
         DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
         renderer2.setHorizontalAlignment( JLabel.RIGHT );
 
-        /*
-        // add the table to the frame
-        JFrame frame = new JFrame();
-        Container c  = frame.getContentPane();
-        c.setLayout(new GridLayout(5,0));
-        c.add(new JScrollPane(tableMatrixWTL));
-        c.add(new JScrollPane(tableMatrixSCR));
-        c.add(new JScrollPane(new JLabel(new ImageIcon(hm))));
-        c.add(new JScrollPane(tableAgentScore));
-        c.add(new JScrollPane(tableTimeDetail));
-
-        frame.setTitle("Tournament Statistics");
-        //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(1000,1000);
-        //frame.pack();
-        frame.setVisible(true);
-        */
-
         /**
          * TS Results in a window
          */
+
         TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm), scatterPlotASvT);
     }
 
