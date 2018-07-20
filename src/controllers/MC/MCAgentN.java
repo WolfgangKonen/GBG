@@ -203,6 +203,8 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         	//executerService is called and it distributes all callables on all cores
         	//of the CPU. The callables perform the simulations and the results of these
         	//simulations are written to a stream:
+            if (executorService==null)
+                executorService = Executors.newWorkStealingPool();
             executorService.invokeAll(callables).stream().map(future -> {
                 try {
                     return future.get();
@@ -339,6 +341,8 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         	//executerService is called and it distributes all callables on all cores
         	//of the CPU. The callables perform the simulations and the results of these
         	//simulations are written to a stream:
+            if (executorService==null)
+                executorService = Executors.newWorkStealingPool();
             executorService.invokeAll(callables).stream().map(future -> {
                 try {
                     return future.get();

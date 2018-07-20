@@ -985,7 +985,7 @@ public class XArenaFuncs
 
 		} catch(RuntimeException ex) {
 			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			System.out.println(TAG+"ERROR :: RuntimeException :: "+ex.getMessage().toString());
+			System.out.println(TAG+"ERROR :: RuntimeException :: "+ex.getMessage());
 			return 43;
 		}
 
