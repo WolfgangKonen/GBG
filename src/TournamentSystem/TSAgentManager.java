@@ -421,7 +421,7 @@ public class TSAgentManager {
 
         // Create Panel
         ChartPanel scatterPlotASvT = new ChartPanel(chart);
-        scatterPlotASvT.setPreferredSize(new Dimension(350,250)); // plot size
+        scatterPlotASvT.setPreferredSize(new Dimension(400,300)); // plot size
         //setContentPane(panel);
 
         /**

@@ -19,13 +19,18 @@ public class TSResultWindow extends JFrame {
     private JScrollPane jspWTL;
     private boolean showjspWTL = false;
     private JScrollPane jspSCR;
+    private boolean showjspSCR = true;
     private JScrollPane jspHM;
     private JScrollPane jspASC;
+    private boolean showjspASC = true;
     private JScrollPane jspTD;
     private boolean showjspTD = false;
     private JPanel scatterPlotJPanel;
     private JButton showHideTableTimeTableButton;
     private JButton showHideTableWTLButton;
+    private JButton showHideTableSCRButton;
+    private JButton showHideTableASCButton;
+    private JButton hideAllTablesButton;
 
     public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon, ChartPanel scatterPlotASvT) {
         super("Turnier Ergebnisse");
@@ -50,8 +55,10 @@ public class TSResultWindow extends JFrame {
         heatmapJL.setIcon(imageIcon);
         scatterPlotJPanel.add(scatterPlotASvT);
 
-        jspWTL.setVisible(false);
-        jspTD.setVisible(false);
+        jspWTL.setVisible(showjspWTL);
+        jspSCR.setVisible(showjspSCR);
+        jspASC.setVisible(showjspASC);
+        jspTD.setVisible(showjspTD);
 
         setContentPane(mJPanel);
         //setSize(1000,1000);
@@ -73,6 +80,42 @@ public class TSResultWindow extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 showjspWTL = !showjspWTL;
                 jspWTL.setVisible(showjspWTL);
+                revalidate();
+                repaint();
+                pack();
+            }
+        });
+        showHideTableSCRButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showjspSCR = !showjspSCR;
+                jspSCR.setVisible(showjspSCR);
+                revalidate();
+                repaint();
+                pack();
+            }
+        });
+        showHideTableASCButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showjspASC = !showjspASC;
+                jspASC.setVisible(showjspASC);
+                revalidate();
+                repaint();
+                pack();
+            }
+        });
+        hideAllTablesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showjspWTL = false;
+                showjspSCR = false;
+                showjspASC = false;
+                showjspTD = false;
+                jspWTL.setVisible(showjspWTL);
+                jspSCR.setVisible(showjspSCR);
+                jspASC.setVisible(showjspASC);
+                jspTD.setVisible(showjspTD);
                 revalidate();
                 repaint();
                 pack();
@@ -109,34 +152,35 @@ public class TSResultWindow extends JFrame {
         label2.setText("Table with game scores calculated from game WTL");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label2, gbc);
         final JLabel label3 = new JLabel();
         label3.setText("Heatmap visualisation of game scores | white = worst ; black = best | Y vs. X");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 7;
+        gbc.gridy = 6;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label3, gbc);
         final JLabel label4 = new JLabel();
         label4.setText("Ranking of agents by overall Wins, Ties, Losses");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 13;
+        gbc.gridy = 9;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label4, gbc);
         final JLabel label5 = new JLabel();
-        label5.setText("Different time meassurements in [ms]");
+        label5.setText("Game time meassurements in [ms]");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 16;
+        gbc.gridy = 12;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label5, gbc);
         jspWTL = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 1;
+        gbc.gridwidth = 3;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspWTL, gbc);
         tableMatrixWTL = new JTable();
@@ -144,7 +188,8 @@ public class TSResultWindow extends JFrame {
         jspSCR = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy = 4;
+        gbc.gridwidth = 3;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspSCR, gbc);
         tableMatrixSCR = new JTable();
@@ -152,7 +197,7 @@ public class TSResultWindow extends JFrame {
         jspHM = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 8;
+        gbc.gridy = 7;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspHM, gbc);
         heatmapJL = new JLabel();
@@ -161,7 +206,8 @@ public class TSResultWindow extends JFrame {
         jspASC = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 14;
+        gbc.gridy = 10;
+        gbc.gridwidth = 3;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspASC, gbc);
         tableAgentScore = new JTable();
@@ -169,7 +215,8 @@ public class TSResultWindow extends JFrame {
         jspTD = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 18;
+        gbc.gridy = 13;
+        gbc.gridwidth = 3;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspTD, gbc);
         tableTimeDetail = new JTable();
@@ -177,66 +224,102 @@ public class TSResultWindow extends JFrame {
         final JPanel spacer1 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 2;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer1, gbc);
         final JPanel spacer2 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 6;
+        gbc.gridy = 5;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer2, gbc);
         final JPanel spacer3 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 9;
+        gbc.gridy = 11;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer3, gbc);
         final JPanel spacer4 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 15;
+        gbc.gridy = 8;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer4, gbc);
+        final JPanel spacer5 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 6;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 0, 25);
+        mJPanel.add(spacer5, gbc);
         final JLabel label6 = new JLabel();
         label6.setText("ScatterPlot AgentScore vs. RoundTime");
         gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 10;
+        gbc.gridx = 2;
+        gbc.gridy = 6;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label6, gbc);
         scatterPlotJPanel = new JPanel();
         scatterPlotJPanel.setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 11;
+        gbc.gridx = 2;
+        gbc.gridy = 7;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(scatterPlotJPanel, gbc);
-        final JPanel spacer5 = new JPanel();
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 12;
-        gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.insets = new Insets(0, 0, 10, 0);
-        mJPanel.add(spacer5, gbc);
-        showHideTableTimeTableButton = new JButton();
-        showHideTableTimeTableButton.setText("Show/Hide Table");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 17;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        mJPanel.add(showHideTableTimeTableButton, gbc);
         showHideTableWTLButton = new JButton();
-        showHideTableWTLButton.setText("Show/Hide Table");
+        showHideTableWTLButton.setText("Show/Hide WTL Table");
         gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridx = 2;
+        gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showHideTableWTLButton, gbc);
+        showHideTableTimeTableButton = new JButton();
+        showHideTableTimeTableButton.setText("Show/Hide Time Table");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 12;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(showHideTableTimeTableButton, gbc);
+        showHideTableSCRButton = new JButton();
+        showHideTableSCRButton.setText("Show/Hide Score Table");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(showHideTableSCRButton, gbc);
+        showHideTableASCButton = new JButton();
+        showHideTableASCButton.setText("Show/Hide Ranking Table");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 9;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(showHideTableASCButton, gbc);
+        final JPanel spacer6 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 14;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        mJPanel.add(spacer6, gbc);
+        hideAllTablesButton = new JButton();
+        hideAllTablesButton.setText("Hide all Tables");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 15;
+        gbc.gridwidth = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(hideAllTablesButton, gbc);
+        final JPanel spacer7 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 16;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 5, 0);
+        mJPanel.add(spacer7, gbc);
     }
 
     /**
