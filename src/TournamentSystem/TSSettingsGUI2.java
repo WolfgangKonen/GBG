@@ -96,30 +96,43 @@ public class TSSettingsGUI2 extends JFrame {
         // todo add logic to compete functions to let loaded agents play
 
         for (int i = 0; i < agentsAndFileNames.length; i++) {
-            PlayAgent playAgent = (PlayAgent) agentsAndFileNames[i][0];
+            PlayAgent playAgent;
+            Object agent = agentsAndFileNames[i][0];
             String agentName = (String) agentsAndFileNames[i][1];
             String agentType;
 
-            if (playAgent instanceof TDAgent) {
+            if (agent instanceof TDAgent) {
+                playAgent = (TDAgent) agent;
                 agentType = "TDAgent";
-            } else if (playAgent instanceof TDNTuple2Agt) {
+            } else if (agent instanceof TDNTuple2Agt) {
+                playAgent = (TDNTuple2Agt) agent;
                 agentType = "TDNTuple2Agt";
-            } else if (playAgent instanceof MCTSAgentT) {
+            } else if (agent instanceof MCTSAgentT) {
+                playAgent = (MCTSAgentT) agent;
                 agentType = "MCTSAgentT";
-            } else if (playAgent instanceof MCAgent) {
+            } else if (agent instanceof MCAgent) {
+                playAgent = (MCAgent) agent;
                 agentType = "MCAgent";
-            } else if (playAgent instanceof MCAgentN) {
+            } else if (agent instanceof MCAgentN) {
+                playAgent = (MCAgentN) agent;
                 agentType = "MCAgentN";
-            } else if (playAgent instanceof MinimaxAgent) {
+            } else if (agent instanceof MinimaxAgent) {
+                playAgent = (MinimaxAgent) agent;
                 agentType = "MinimaxAgent";
-            } else if (playAgent instanceof MaxNAgent) {
+            } else if (agent instanceof MaxNAgent) {
+                playAgent = (MaxNAgent) agent;
                 agentType = "MaxNAgent";
-            } else if (playAgent instanceof ExpectimaxNAgent) {
+            } else if (agent instanceof ExpectimaxNAgent) {
+                playAgent = (ExpectimaxNAgent) agent;
                 agentType = "ExpectimaxNAgent";
-            } else if (playAgent instanceof RandomAgent) {
+            } else if (agent instanceof RandomAgent) {
+                playAgent = (RandomAgent) agent;
                 agentType = "RandomAgent";
             } else {
-                agentType = "NaN";
+                //playAgent = null;
+                //agentType = "NaN";
+                System.out.println(TAG + "ERROR :: Unknown Agent Class");
+                break;
             }
 
             System.out.println(TAG + "INFO :: loading from Disk successful for agent: " + agentName + " with AgentState: " + playAgent.getAgentState() + " and type: " + agentType);

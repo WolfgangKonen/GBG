@@ -308,8 +308,7 @@ public class LoadSaveGBG {
 					filePath = file.getPath();
 					fis = new FileInputStream(filePath);
 				} catch (IOException e) {
-					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
-							+ " !]");
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 					//e.printStackTrace();
 					throw e;
 				}
@@ -321,8 +320,7 @@ public class LoadSaveGBG {
 				file = new File(filePath);
 				fis = new FileInputStream(filePath);
 			} catch (IOException e) {
-				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
-						+ " !]");
+				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 				//e.printStackTrace();
 				throw e;
 			}
@@ -333,8 +331,7 @@ public class LoadSaveGBG {
 			try {
 				gs = new GZIPInputStream(fis);
 			} catch (IOException e1) {
-				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for"
-								+ filePath + " !]");
+				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
 				throw e1;
 			}
 
@@ -345,8 +342,7 @@ public class LoadSaveGBG {
 				ois = new ObjectInputStream(ptis);
 			} catch (IOException e1) {
 				ptis.close();
-				arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for"
-								+ filePath + " !]");
+				arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
 				throw e1;
 			}
 
@@ -521,8 +517,7 @@ public class LoadSaveGBG {
 					//dlg.setVisible(false);
 					MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
 							e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
-					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
-							+ " !]");
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 					//e.printStackTrace();
 					//throw e;
 				} catch (ClassNotFoundException e) {
