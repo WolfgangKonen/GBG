@@ -41,6 +41,7 @@ import javax.swing.filechooser.FileFilter;
 // https://commons.apache.org/proper/commons-compress/download_compress.cgi
 // if the JAR file commons-compress-1.9.jar is not on your system, then
 // link the JAR file via Build Path - Java Build Path - Add JARs...
+import TournamentSystem.TSDiskAgentDataTransfer;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -414,8 +415,8 @@ public class LoadSaveGBG {
 	/**
 	 * @throws IOException
 	 */
-	public Object[][] loadMultipleGBGAgent() throws IOException {
-		Object[][] output = new Object[0][2];
+	public TSDiskAgentDataTransfer loadMultipleGBGAgent() throws IOException {
+		TSDiskAgentDataTransfer output = null;
 		String filePath = null;
 		ObjectInputStream ois;
 		FileInputStream fis;
@@ -444,7 +445,7 @@ public class LoadSaveGBG {
 		if (returnVal == JFileChooser.APPROVE_OPTION)
 		{
 			File[] files = fileChooser.getSelectedFiles();
-			output = new Object[files.length][2];
+			output = new TSDiskAgentDataTransfer(files.length);
 
 			for(int i = 0; i<files.length; i++)
 			{
@@ -480,6 +481,7 @@ public class LoadSaveGBG {
 				}
 
 				//final JDialog dlg = createProgressDialog(ptis, "Loading...");
+
 
 				try {
 					// ois = new ObjectInputStream(gs);
@@ -541,12 +543,13 @@ public class LoadSaveGBG {
 						}
 				}
 
-				output[i][0] = pa;
+				//output[i][0] = pa;
 				Path p = Paths.get(filePath);
 				String fileNameSource = p.getFileName().toString();
 				//System.out.println(TAG+" "+fileNameSource); // minimax.agt.zip
 				//System.out.println(TAG+" "+fileNameSource.substring(0,fileNameSource.length()-8)); // minimax.agt.zip
-				output[i][1] = fileNameSource.substring(0,fileNameSource.length()-8);
+				String filename = fileNameSource.substring(0,fileNameSource.length()-8);
+				output.addAgent(filename,pa);
 			} // for(int i = 0; i<files.length; i++)
 		} // if (returnVal == JFileChooser.APPROVE_OPTION)
 		else {

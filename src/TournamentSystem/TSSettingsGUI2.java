@@ -84,8 +84,7 @@ public class TSSettingsGUI2 extends JFrame {
                 if (mTSAgentManager.isTournamentDone()) {
                     // tournament done - open stats window
                     mTSAgentManager.makeStats();
-                }
-                else {
+                } else {
                     // not done - cannot be opened
                 }
             }
@@ -93,7 +92,7 @@ public class TSSettingsGUI2 extends JFrame {
     }
 
     private void loadAgentFromDisk() {
-        Object[][] agentsAndFileNames;
+        TSDiskAgentDataTransfer agentsAndFileNames;
 
         try {
             //playAgent = mArena.tdAgentIO.loadGBGAgent(null); // opens file dialog to locate single agent
@@ -103,16 +102,12 @@ public class TSSettingsGUI2 extends JFrame {
             return;
         }
 
-        // todo transfer loaded agents to GameManager or store there in the first place
-        // todo add logic to turnament gen functions to add agents
-        // todo add logic to compete functions to let loaded agents play
+        for (int i = 0; i < agentsAndFileNames.getSize(); i++) {
+            PlayAgent playAgent = agentsAndFileNames.getPlayAgent(i);
+            String agentName = agentsAndFileNames.getFilepath(i);
+            String agentType = agentsAndFileNames.getPlayAgentType(i);
 
-        for (int i = 0; i < agentsAndFileNames.length; i++) {
-            PlayAgent playAgent;
-            Object agent = agentsAndFileNames[i][0];
-            String agentName = (String) agentsAndFileNames[i][1];
-            String agentType;
-
+            /*
             if (agent instanceof TDAgent) {
                 playAgent = (TDAgent) agent;
                 agentType = "TDAgent";
@@ -146,11 +141,13 @@ public class TSSettingsGUI2 extends JFrame {
                 System.out.println(TAG + "ERROR :: Unknown Agent Class");
                 break;
             }
+            */
 
             System.out.println(TAG + "INFO :: loading from Disk successful for agent: " + agentName + " with AgentState: " + playAgent.getAgentState() + " and type: " + agentType);
 
             // add agent to gui
             JCheckBox newAgent = new JCheckBox("HDD " + agentName);
+            newAgent.setSelected(true); // set checkbox of new agent to selected
             checkBoxJPanel.add(newAgent);
             //checkBoxScrollPane.add(newAgent);
 
