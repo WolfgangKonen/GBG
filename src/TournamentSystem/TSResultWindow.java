@@ -19,10 +19,10 @@ public class TSResultWindow extends JFrame {
     private JScrollPane jspWTL;
     private boolean showjspWTL = false;
     private JScrollPane jspSCR;
-    private boolean showjspSCR = true;
+    private boolean showjspSCR = false;
     private JScrollPane jspHM;
     private JScrollPane jspASC;
-    private boolean showjspASC = true;
+    private boolean showjspASC = false;
     private JScrollPane jspTD;
     private boolean showjspTD = false;
     private JPanel scatterPlotJPanel;

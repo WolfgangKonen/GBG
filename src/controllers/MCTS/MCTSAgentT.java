@@ -216,6 +216,10 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		
 		assert so.isLegalState() 
 			: "Not a legal state"; // e.g. player to move does not fit to Table
+		if (m_Timer==null) {
+			m_Timer = new ElapsedCpuTimer(TimerType.CPU_TIME);
+			m_Timer.setMaxTimeMillis(40);
+		}
 		m_Timer.reset();
 		
 		// Ask MCTS for the best action ...

@@ -89,6 +89,18 @@ public class TSSettingsGUI2 extends JFrame {
                 }
             }
         });
+        saveResultsToDiskButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Function not yet implemented");
+            }
+        });
+        loadResultsFromDiskButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Function not yet implemented");
+            }
+        });
     }
 
     private void loadAgentFromDisk() {
@@ -307,21 +319,21 @@ public class TSSettingsGUI2 extends JFrame {
         startButton.setText("Start");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 22;
+        gbc.gridy = 24;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(startButton, gbc);
         final JLabel label2 = new JLabel();
         label2.setText("Games per Match");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 15;
+        gbc.gridy = 17;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label2, gbc);
         gameNumTextField = new JTextField();
         gameNumTextField.setText("1");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 16;
+        gbc.gridy = 18;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(gameNumTextField, gbc);
@@ -342,50 +354,36 @@ public class TSSettingsGUI2 extends JFrame {
         final JPanel spacer4 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 28;
+        gbc.gridy = 30;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer4, gbc);
         final JPanel spacer5 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 11;
+        gbc.gridy = 19;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer5, gbc);
-        final JPanel spacer6 = new JPanel();
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 17;
-        gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.insets = new Insets(0, 0, 20, 0);
-        mJPanel.add(spacer6, gbc);
         loadAgentFromDiskButton = new JButton();
         loadAgentFromDiskButton.setText("Load Agent from Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 12;
+        gbc.gridy = 14;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(loadAgentFromDiskButton, gbc);
-        final JPanel spacer7 = new JPanel();
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 14;
-        gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.insets = new Insets(0, 0, 20, 0);
-        mJPanel.add(spacer7, gbc);
         addNRandomMovesCheckBox = new JCheckBox();
         addNRandomMovesCheckBox.setText("Add n random moves at start");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 18;
+        gbc.gridy = 20;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(addNRandomMovesCheckBox, gbc);
         numOfMovesTextField = new JTextField();
         numOfMovesTextField.setText("2");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 20;
+        gbc.gridy = 22;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(numOfMovesTextField, gbc);
@@ -393,56 +391,84 @@ public class TSSettingsGUI2 extends JFrame {
         label3.setText("Number of moves");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 19;
+        gbc.gridy = 21;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label3, gbc);
-        final JPanel spacer8 = new JPanel();
+        final JPanel spacer6 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 21;
+        gbc.gridy = 23;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
-        mJPanel.add(spacer8, gbc);
+        mJPanel.add(spacer6, gbc);
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 13;
+        gbc.gridy = 15;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(checkBoxJPanel, gbc);
         saveResultsToDiskButton = new JButton();
         saveResultsToDiskButton.setText("Save Results to Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 26;
+        gbc.gridy = 28;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(saveResultsToDiskButton, gbc);
-        final JPanel spacer9 = new JPanel();
+        final JPanel spacer7 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 25;
+        gbc.gridy = 27;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 5, 0);
-        mJPanel.add(spacer9, gbc);
+        mJPanel.add(spacer7, gbc);
         loadResultsFromDiskButton = new JButton();
         loadResultsFromDiskButton.setText("Load Results from Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 27;
+        gbc.gridy = 29;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(loadResultsFromDiskButton, gbc);
         reopenStatisticsButton = new JButton();
         reopenStatisticsButton.setText("Reopen Statistics");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 24;
+        gbc.gridy = 26;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(reopenStatisticsButton, gbc);
+        final JPanel spacer8 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 25;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 5, 0);
+        mJPanel.add(spacer8, gbc);
+        final JLabel label4 = new JLabel();
+        label4.setText("Choose Standard OR Disk Agents");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 12;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(label4, gbc);
+        final JPanel spacer9 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 11;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        mJPanel.add(spacer9, gbc);
         final JPanel spacer10 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 23;
+        gbc.gridy = 13;
         gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer10, gbc);
+        final JPanel spacer11 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 16;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        mJPanel.add(spacer11, gbc);
     }
 
     /**
