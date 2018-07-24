@@ -229,7 +229,8 @@ public class EvaluatorC4 extends Evaluator {
      *
      * @param playAgent Agent to be evaluated
      * @param gameBoard	game board for the evaluation episodes
-     * @param numEpisodes
+     * @param numEpisodes	actually 2*numEpisodes single-compete games are played (to be
+     * 						comparable with the number of both-compete games in other funcs) 
      * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
      * 		or oppenent.
      * <p>
@@ -245,9 +246,9 @@ public class EvaluatorC4 extends Evaluator {
     	// only as debug test: if AlphaBetaAgent is implemented correctly and playing perfect,  
     	// it should win every game when starting from the empty board, for each playAgent.
     	// (This is indeed the case.)
-//        double[] res = XArenaFuncs.compete(alphaBetaStd, playAgent, new StateObserverC4(), numEpisodes, verbose);
+//        double[] res = XArenaFuncs.compete(alphaBetaStd, playAgent, new StateObserverC4(), 2*numEpisodes, verbose);
 //        double success = res[2] - res[0];
-        double[] res = XArenaFuncs.compete(playAgent, alphaBetaStd, new StateObserverC4(), numEpisodes, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, alphaBetaStd, new StateObserverC4(), 2*numEpisodes, verbose);
         double success = res[0] - res[2];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
 //      if (this.verbose > 0) 
@@ -273,9 +274,11 @@ public class EvaluatorC4 extends Evaluator {
         params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
-//        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), numEpisodes, 0);
-//        double success = res[0];        	
-        double success = XArenaFuncs.competeBoth(playAgent, mctsAgent,  new StateObserverC4(), numEpisodes, 0, gameBoard);
+        // this version (only testing), plays only games that playAgent can win (same as against AlphaBetaAgent):
+        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), 2*numEpisodes, 0);
+        double success = res[0] - res[2];        	
+        // this version, if you want to test both directions:
+//        double success = XArenaFuncs.competeBoth(playAgent, mctsAgent,  new StateObserverC4(), numEpisodes, 0, gameBoard);
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         //if (this.verbose > 0) 
         	System.out.println(m_msg);

@@ -12,19 +12,21 @@ source("summarySE.R")
 
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
 USEGAMESK=T       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
-USEEVALT=F        # if =T: use evalT measure; if =F: use evalQ measure
+USEEVALT=T        # if =T: use evalT measure; if =F: use evalQ measure
 
 wfac = ifelse(USEGAMESK,1000,1);
 gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
-evalVar = ifelse(USEEVALT,"evalT","evalQ")
-evalStr = ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
+#evalVar = ifelse(USEEVALT,"evalT","evalQ")
+evalStr = "eval score" #ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
 path <- "../../agents/ConnectFour/csv/"; limits=c(-1.0,1.0); errWidth=20000/wfac;
 
-filenames=c("TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR40-T.csv"
-           ,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR40.csv"
-           ,"TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-T.csv"
-           ,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR001.csv"
-           #,"TERNARY/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-RESET-T.csv"
+filenames=c("TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T9a.csv"
+            ,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single.csv"
+           #,"TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-T.csv"
+           #,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR001.csv"
+           #,"TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR40-T.csv"
+           #,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR40.csv"
+           #,,"TERNARY/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-RESET-T.csv"
            #,"nonTERNA/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-RESET.csv"
            #,"TERNARY/multiTrain_TCL-EXP-al20-lam05-500k-HOR010-T.csv"
            #,"multiTrain_TCL-EXP-al20-lam05-500k-HOR010.csv"
@@ -57,10 +59,10 @@ for (k in 1:length(filenames)) {
   }
   
   lambdaCol = switch(k
-                    ,rep("HOR40",nrow(df))
-                    ,rep("HOR40",nrow(df))
                     ,rep("H0.01",nrow(df))
                     ,rep("H0.01",nrow(df))
+                    ,rep("HOR40",nrow(df))
+                    ,rep("HOR40",nrow(df))
                     ,rep("RESET",nrow(df))
                     ,rep("RESET",nrow(df))
                     ,rep("TERNA",nrow(df))
@@ -106,9 +108,13 @@ tgc <- data.frame()
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
 # its mean, sd, se (standard dev of the mean), ci (conf.interval) and count N.
-tgc1 <- summarySE(dfBoth, measurevar=evalVar, groupvars=c(gamesVar,"lambda","targetMode"))
-names(tgc1)[5] <- "eval"  # rename evalVar
-tgc <- tgc1
+tgc1 <- summarySE(dfBoth, measurevar="evalQ", groupvars=c(gamesVar,"lambda","targetMode"))
+tgc1 <- cbind(tgc1,evalMode=rep("MCTS",nrow(tgc1)))
+names(tgc1)[5] <- "eval"  # rename "evalQ"
+tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c(gamesVar,"lambda","targetMode"))
+tgc2 <- cbind(tgc2,evalMode=rep("AB",nrow(tgc2)))
+names(tgc2)[5] <- "eval"  # rename "evalT"
+tgc <- rbind(tgc1,tgc2)
 tgc$lambda <- as.factor(tgc$lambda)
 tgc$targetMode <- as.factor(tgc$targetMode)
 
@@ -116,7 +122,7 @@ tgc$targetMode <- as.factor(tgc$targetMode)
 pd <- position_dodge(3000/wfac) # move them 3000 to the left and right
 
 if (USEGAMESK) {
-  q <- ggplot(tgc,aes(x=gamesK,y=eval,colour=lambda,linetype=targetMode))
+  q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=lambda,linetype=targetMode,color=evalMode))
   q <- q + xlab(bquote(paste("games [*",10^3,"]", sep=""))) + ylab(evalStr)
 } else {
   q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=lambda,linetype=targetMode))
