@@ -93,6 +93,8 @@ public class TSSettingsGUI2 extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null, "Function not yet implemented");
+                if (mTSAgentManager.results.tournamentDone)
+                    mArena.tdAgentIO.saveTSResult(mTSAgentManager.results);
             }
         });
         loadResultsFromDiskButton.addActionListener(new ActionListener() {
@@ -189,7 +191,7 @@ public class TSSettingsGUI2 extends JFrame {
 
         System.out.println(TAG + "Startbutton clicked | checkbox states:");
         // durch alle checkboxen der agenten iterieren
-        for (TSAgent agent : mTSAgentManager.mAgents) {
+        for (TSAgent agent : mTSAgentManager.results.mAgents) {
             //System.out.println(agent.getAgentType() +" == "+ agent.getName());
             // pruefen fuer jede checkbox, ob sie selected ist oder nicht
             if (agent.guiCheckBox.isSelected()) {

@@ -4,11 +4,13 @@ import controllers.PlayAgent;
 
 import javax.swing.*;
 
+import java.io.Serializable;
+
 import static TournamentSystem.TSAgentManager.faktorLos;
 import static TournamentSystem.TSAgentManager.faktorTie;
 import static TournamentSystem.TSAgentManager.faktorWin;
 
-public class TSAgent {
+public class TSAgent implements Serializable {
     private String name;
     private String agent;
     private boolean isHddAgent;

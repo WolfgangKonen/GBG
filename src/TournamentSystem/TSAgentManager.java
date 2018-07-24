@@ -13,47 +13,41 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TSAgentManager {
-    public ArrayList<TSAgent> mAgents;
-    private boolean lockedToCompete = false;
     private final String TAG = "[TSAgentManager] ";
-
-    private int gamePlan[][] = null; // [ numGames ],[ [IDAgent1],[IDAgent2] ]
-    private int gameResult[][] = null; // [ numGames ],[ [winAgent1],[tie],[winAgent2] ]
-    public TSTimeStorage timeStorage[][] = null;
-    private int nextGame = 0;
-    private int numberOfGames = -1;
-    private boolean tournamentDone = false;
+    public TSResultStorage results;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
     public static final float faktorLos = 0.0f;
 
     public TSAgentManager() {
-        mAgents = new ArrayList<>();
+        results = new TSResultStorage();
+        results.mAgents = new ArrayList<>();
     }
 
     public void setNumberOfGames(int num) {
-        numberOfGames = num;
+        results.numberOfGames = num;
     }
 
     public void addAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent, PlayAgent playAgent) {
-        if (!lockedToCompete)
-            mAgents.add(new TSAgent(name, agent, checkbox, hddAgent, playAgent));
+        if (!results.lockedToCompete)
+            results.mAgents.add(new TSAgent(name, agent, checkbox, hddAgent, playAgent));
         else
             System.out.println(TAG+"ERROR :: manager is locked to compete, can not add new agent");
     }
 
     public int getNumAgents() {
-        return mAgents.size();
+        return results.mAgents.size();
     }
 
     public int getNumAgentsSelected() {
         int num = 0;
-        for (TSAgent agent : mAgents)
+        for (TSAgent agent : results.mAgents)
         {
             if(agent.guiCheckBox.isSelected())
             {
@@ -65,7 +59,7 @@ public class TSAgentManager {
 
     public int getNumDiskAgents() {
         int num = 0;
-        for (TSAgent t : mAgents)
+        for (TSAgent t : results.mAgents)
             if (t.isHddAgent())
                 num++;
         return num;
@@ -74,7 +68,7 @@ public class TSAgentManager {
     public String[] getNamesAgentsSelected() {
         String selectedAGents[] = new String[getNumAgentsSelected()]; // just selected agents
         int tmp = 0;
-        for (TSAgent agent : mAgents) {
+        for (TSAgent agent : results.mAgents) {
             if (agent.guiCheckBox.isSelected()) {
                 selectedAGents[tmp++] = agent.getAgentType();
             }
@@ -87,8 +81,8 @@ public class TSAgentManager {
         String gamePlan[][] = new String[internalGamePlan.length][2]; // games to be played
 
         for (int i=0; i<internalGamePlan.length; i++) {
-            gamePlan[i][0] = mAgents.get(internalGamePlan[i][0]).getName();
-            gamePlan[i][1] = mAgents.get(internalGamePlan[i][1]).getName();
+            gamePlan[i][0] = results.mAgents.get(internalGamePlan[i][0]).getName();
+            gamePlan[i][1] = results.mAgents.get(internalGamePlan[i][1]).getName();
         }
         return gamePlan;
     }
@@ -96,8 +90,8 @@ public class TSAgentManager {
     private int[] getIDAgentsSelected() {
         int selectedAgents[] = new int[getNumAgentsSelected()]; // just selected agents
         int tmp = 0;
-        for (int i=0; i<mAgents.size(); i++) {
-            if (mAgents.get(i).guiCheckBox.isSelected()) {
+        for (int i=0; i<results.mAgents.size(); i++) {
+            if (results.mAgents.get(i).guiCheckBox.isSelected()) {
                 selectedAgents[tmp++] = i;
             }
         }
@@ -123,51 +117,51 @@ public class TSAgentManager {
         String gamePlan[][] = getGamePlan();
         System.out.println(TAG+"+ GamePlan Info: +");
         System.out.println(TAG+"Games to play: "+gamePlan.length);
-        System.out.println(TAG+"each Game is run "+numberOfGames+" time(s)");
+        System.out.println(TAG+"each Game is run "+results.numberOfGames+" time(s)");
         for (String round[] : gamePlan)
             System.out.println(TAG+"["+round[0]+"] vs ["+round[1]+"]");
         System.out.println(TAG+"+ End Info +");
     }
 
     public TSAgent getAgent(String name) {
-        for (TSAgent agnt : mAgents)
+        for (TSAgent agnt : results.mAgents)
             if (agnt.getName().equals(name))
                 return agnt;
         return null;
     }
 
     public boolean isLockedToCompete() {
-        return lockedToCompete;
+        return results.lockedToCompete;
     }
 
     public void lockToCompete() {
-        if (numberOfGames == -1) {
+        if (results.numberOfGames == -1) {
             System.out.println(TAG+"ERROR :: number of games was not set! using 1");
-            numberOfGames = 1;
+            results.numberOfGames = 1;
         }
-        lockedToCompete = true;
-        gamePlan = generateGamePlanInternal();
-        gameResult = new int[gamePlan.length][3]; // is initialized with all zeros by JDK
-        timeStorage = new TSTimeStorage[gamePlan.length][2];
-        for (TSTimeStorage t[] : timeStorage) { // initialize all positions
+        results.lockedToCompete = true;
+        results.gamePlan = generateGamePlanInternal();
+        results.gameResult = new int[results.gamePlan.length][3]; // is initialized with all zeros by JDK
+        results.timeStorage = new TSTimeStorage[results.gamePlan.length][2];
+        for (TSTimeStorage t[] : results.timeStorage) { // initialize all positions
             t[0] = new TSTimeStorage();
             t[1] = new TSTimeStorage();
         }
-        nextGame = 0;
+        results.nextGame = 0;
     }
 
     public TSAgent[] getNextCompetitionTeam() {
-        TSAgent out[] = {mAgents.get(gamePlan[nextGame][0]), mAgents.get(gamePlan[nextGame][1])};
-        tournamentDone = false;
+        TSAgent out[] = {results.mAgents.get(results.gamePlan[results.nextGame][0]), results.mAgents.get(results.gamePlan[results.nextGame][1])};
+        results.tournamentDone = false;
         return out;
     }
 
     public TSTimeStorage[] getNextCompetitionTimeStorage() {
-        return timeStorage[nextGame];
+        return results.timeStorage[results.nextGame];
     }
 
     public void enterGameResultWinner(int type) {
-        if (!lockedToCompete) {
+        if (!results.lockedToCompete) {
             System.out.println(TAG+"ERROR :: manager ist not locked, cannot enter result. run lockToCompete() first");
             return;
         }
@@ -176,7 +170,7 @@ public class TSAgentManager {
             return;
         }
         else {
-            gameResult[nextGame][type] = gameResult[nextGame][type] + 1;
+            results.gameResult[results.nextGame][type] = results.gameResult[results.nextGame][type] + 1;
 
             TSAgent teamPlayed[] = getNextCompetitionTeam(); // save individual win or loss to the tsagent objects in magents list
             if (type == 0){
@@ -192,19 +186,19 @@ public class TSAgentManager {
                 teamPlayed[1].addWonGame();
             }
 
-            timeStorage[nextGame][0].roundFinished();
-            timeStorage[nextGame][1].roundFinished();
+            results.timeStorage[results.nextGame][0].roundFinished();
+            results.timeStorage[results.nextGame][1].roundFinished();
         }
 
-        if (gameResult[nextGame][0]+gameResult[nextGame][1]+gameResult[nextGame][2] == numberOfGames)
-            nextGame++;
+        if (results.gameResult[results.nextGame][0]+results.gameResult[results.nextGame][1]+results.gameResult[results.nextGame][2] == results.numberOfGames)
+            results.nextGame++;
 
-        tournamentDone = false;
+        results.tournamentDone = false;
     }
 
     public boolean hastNextGame() {
-        if (nextGame==gamePlan.length) {
-            tournamentDone = true;
+        if (results.nextGame == results.gamePlan.length) {
+            results.tournamentDone = true;
             return false;
         }
         else
@@ -212,26 +206,26 @@ public class TSAgentManager {
     }
 
     public void printGameResults() {
-        if (gamePlan.length != gameResult.length) {
+        if (results.gamePlan.length != results.gameResult.length) {
             System.out.println(TAG+"printGameResults() failed - gamePlan.length != gameResult.length");
             return;
         }
         System.out.println(TAG+"Info on individual games:");
-        for (int i=0; i<gamePlan.length; i++) {
+        for (int i=0; i<results.gamePlan.length; i++) {
             System.out.print(TAG);
             System.out.print("Team: ");
             //System.out.print("["+gamePlan[i][0]+"] vs ["+gamePlan[i][1]+"] || ");
-            System.out.print("["+mAgents.get(gamePlan[i][0]).getName()+"] vs ["+mAgents.get(gamePlan[i][1]).getName()+"] || ");
-            System.out.print("Res.: Win1: "+gameResult[i][0]+" Tie: "+gameResult[i][1]+" Win2: "+gameResult[i][2]+" || ");
-            System.out.print("Agt.1 average Time MS: "+timeStorage[i][0].getAverageTimeForGameMS()+" ");
-            System.out.print("Agt.2 average Time MS: "+timeStorage[i][1].getAverageTimeForGameMS()+" ");
+            System.out.print("["+results.mAgents.get(results.gamePlan[i][0]).getName()+"] vs ["+results.mAgents.get(results.gamePlan[i][1]).getName()+"] || ");
+            System.out.print("Res.: Win1: "+results.gameResult[i][0]+" Tie: "+results.gameResult[i][1]+" Win2: "+results.gameResult[i][2]+" || ");
+            System.out.print("Agt.1 average Time MS: "+results.timeStorage[i][0].getAverageTimeForGameMS()+" ");
+            System.out.print("Agt.2 average Time MS: "+results.timeStorage[i][1].getAverageTimeForGameMS()+" ");
             System.out.print("");
             System.out.println();
         }
         System.out.println(TAG+"Info on individual Agents:");
         int[] selectedAgents = getIDAgentsSelected();
         for (int id : selectedAgents) {
-            TSAgent a = mAgents.get(id);
+            TSAgent a = results.mAgents.get(id);
             System.out.print(TAG);
             System.out.print("AgentName: "+a.getName()+" ");
             System.out.print("GamesWon: "+a.getCountWonGames()+" GamesTie: "+a.getCountTieGames()+" GamesLost: "+a.getCountLostGames()+" | ");
@@ -241,7 +235,7 @@ public class TSAgentManager {
     }
 
     public void unlockAfterComp() {
-        lockedToCompete = false;
+        results.lockedToCompete = false;
         /*
         gamePlan = null;
         gameResult = null;
@@ -251,7 +245,7 @@ public class TSAgentManager {
     }
 
     public boolean isTournamentDone() {
-        return tournamentDone;
+        return results.tournamentDone;
     }
 
     /**
@@ -259,7 +253,7 @@ public class TSAgentManager {
      */
 
     public void makeStats() {
-        if (!tournamentDone) {
+        if (!results.tournamentDone) {
             System.out.println(TAG+"ERROR :: Stats Window cannot be opened, tournament data not available");
             return;
         }
@@ -288,11 +282,11 @@ public class TSAgentManager {
                     rowDataHM[i][j] = -1;
                 }
                 else {
-                    rowData1[i][j+1] = "W:"+gameResult[game][0]+" | T:"+gameResult[game][1]+" | L:"+gameResult[game][2];
+                    rowData1[i][j+1] = "W:"+results.gameResult[game][0]+" | T:"+results.gameResult[game][1]+" | L:"+results.gameResult[game][2];
                     float score = 0;
-                    score += gameResult[game][0] * faktorWin;
-                    score += gameResult[game][1] * faktorTie;
-                    score += gameResult[game][2] * faktorLos;
+                    score += results.gameResult[game][0] * faktorWin;
+                    score += results.gameResult[game][1] * faktorTie;
+                    score += results.gameResult[game][2] * faktorLos;
                     rowData3[i][j+1] = ""+score;
                     rowDataHM[i][j] = score;
                     game++;
@@ -340,7 +334,7 @@ public class TSAgentManager {
         TSAgent[] rankAgents = new TSAgent[getNumAgentsSelected()];
         int[] selectedAgents = getIDAgentsSelected();
         for (int i=0; i<selectedAgents.length; i++) {
-            rankAgents[i] = mAgents.get(selectedAgents[i]);
+            rankAgents[i] = results.mAgents.get(selectedAgents[i]);
         }
 
         // sort rankAgent array by agent WTL score
@@ -396,15 +390,15 @@ public class TSAgentManager {
 
         int[] selectedAgents2 = getIDAgentsSelected();
         for (int i=0; i<selectedAgents2.length; i++) {
-            TSAgent tmp = mAgents.get(selectedAgents2[i]);
+            TSAgent tmp = results.mAgents.get(selectedAgents2[i]);
             ArrayList<Double> medianTimes = new ArrayList<>();
             double median;
 
-            for (int gms=0; gms<timeStorage.length; gms++) { // spiele
-                for (int cpl=0; cpl<timeStorage[0].length; cpl++) { // hin+rückrunde
+            for (int gms=0; gms<results.timeStorage.length; gms++) { // spiele
+                for (int cpl=0; cpl<results.timeStorage[0].length; cpl++) { // hin+rückrunde
                     for (int agt=0; agt<2; agt++) { // agent 1+2
-                        if (gamePlan[gms][cpl] == selectedAgents2[i]) {
-                            medianTimes.add(timeStorage[gms][cpl].getMedianRoundTimeMS());
+                        if (results.gamePlan[gms][cpl] == selectedAgents2[i]) {
+                            medianTimes.add(results.timeStorage[gms][cpl].getMedianRoundTimeMS());
                         }
                     }
                 }
@@ -458,28 +452,28 @@ public class TSAgentManager {
         };
 
         final int numAgentsPerRound = 2;
-        Object[][] rowData2 = new Object[gameResult.length*numAgentsPerRound][columnNames2.length];
+        Object[][] rowData2 = new Object[results.gameResult.length*numAgentsPerRound][columnNames2.length];
         int pos = 0;
-        for (int i=0; i<gameResult.length; i++) {
+        for (int i=0; i<results.gameResult.length; i++) {
             for (int j=0; j<numAgentsPerRound; j++) {
                 // "Spiel"
                 rowData2[pos][0] = ""+(i+1);
                 // "Agent Name"
-                rowData2[pos][1] = mAgents.get(gamePlan[i][j]).getName();
+                rowData2[pos][1] = results.mAgents.get(results.gamePlan[i][j]).getName();
                 // "Agent Typ"
-                rowData2[pos][2] = mAgents.get(gamePlan[i][j]).getAgentType();
+                rowData2[pos][2] = results.mAgents.get(results.gamePlan[i][j]).getAgentType();
                 // "schnellster Zug"
-                rowData2[pos][3] = ""+timeStorage[i][j].getMinTimeForGameMS()+"ms";
+                rowData2[pos][3] = ""+results.timeStorage[i][j].getMinTimeForGameMS()+"ms";
                 // "langsamster Zug"
-                rowData2[pos][4] = ""+timeStorage[i][j].getMaxTimeForGameMS()+"ms";
+                rowData2[pos][4] = ""+results.timeStorage[i][j].getMaxTimeForGameMS()+"ms";
                 // "durchschnittliche Zeit Zug"
-                rowData2[pos][5] = ""+timeStorage[i][j].getAverageTimeForGameMS()+"ms";
+                rowData2[pos][5] = ""+results.timeStorage[i][j].getAverageTimeForGameMS()+"ms";
                 // "median Zeit Zug"
-                rowData2[pos][6] = ""+timeStorage[i][j].getMedianTimeForGameMS()+"ms";
+                rowData2[pos][6] = ""+results.timeStorage[i][j].getMedianTimeForGameMS()+"ms";
                 // "durchschnittliche Zeit Runde"
-                rowData2[pos][7] = ""+timeStorage[i][j].getAverageRoundTimeMS()+"ms";
+                rowData2[pos][7] = ""+results.timeStorage[i][j].getAverageRoundTimeMS()+"ms";
                 // "median Zeit Runde"
-                rowData2[pos][8] = ""+timeStorage[i][j].getMedianRoundTimeMS()+"ms";
+                rowData2[pos][8] = ""+results.timeStorage[i][j].getMedianRoundTimeMS()+"ms";
 
                 pos++;
             }

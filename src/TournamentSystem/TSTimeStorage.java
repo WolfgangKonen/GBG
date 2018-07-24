@@ -1,9 +1,10 @@
 package TournamentSystem;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class TSTimeStorage {
+public class TSTimeStorage implements Serializable {
     private ArrayList<Long> measuredTimesInNS = new ArrayList<>();
     private ArrayList<Long> roundTimesInNS = new ArrayList<>();
     private ArrayList<Long> tmpRoundTimesInNS = new ArrayList<>();

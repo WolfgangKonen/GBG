@@ -41,7 +41,9 @@ import javax.swing.filechooser.FileFilter;
 // https://commons.apache.org/proper/commons-compress/download_compress.cgi
 // if the JAR file commons-compress-1.9.jar is not on your system, then
 // link the JAR file via Build Path - Java Build Path - Add JARs...
+import TournamentSystem.TSAgentManager;
 import TournamentSystem.TSDiskAgentDataTransfer;
+import TournamentSystem.TSResultStorage;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -251,6 +253,10 @@ public class LoadSaveGBG {
 
 		// Rescan current directory, hope it helps
 		fc.rescanCurrentDirectory();
+	}
+
+	public void saveTSResult(TSResultStorage tsr) {
+
 	}
 
 	public int estimateGZIPLength(File f) {
