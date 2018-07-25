@@ -14,6 +14,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -328,7 +330,8 @@ public class TSAgentManager {
                 "Games Won",
                 "Games Tie",
                 "Games Lost",
-                "WTL Score"
+                "WTL Score",
+                "WonGameRatio"
         };
         Object[][] rowData4 = new Object[getNumAgentsSelected()][columnNames4.length];
         TSAgent[] rankAgents = new TSAgent[getNumAgentsSelected()];
@@ -372,6 +375,12 @@ public class TSAgentManager {
             rowData4[i][4] = rankAgents[i].getCountLostGames();
             // "WTL Score"
             rowData4[i][5] = rankAgents[i].getAgentScore();
+            // "#Score"
+            float w = rankAgents[i].getCountWonGames();
+            float a = rankAgents[i].getCountAllGames();
+            float f = w/a;
+            NumberFormat formatter = new DecimalFormat("#0.0000");
+            rowData4[i][6] = formatter.format(f);
         }
 
         //create table with data

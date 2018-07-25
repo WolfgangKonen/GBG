@@ -62,6 +62,10 @@ public class TSAgent implements Serializable {
         return tie;
     }
 
+    public int getCountAllGames() {
+        return won + tie + lost;
+    }
+
     public float getAgentScore() {
         float agentScore = getCountWonGames()*faktorWin+getCountTieGames()*faktorTie+getCountLostGames()*faktorLos;
         return agentScore;
