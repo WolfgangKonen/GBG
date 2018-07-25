@@ -12,6 +12,7 @@ multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T7.csv: 	again with g3_EvalNPly
 multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T8.csv: 	new version with ZValue*, but old randomSelect: AB has 0.89 in the end 
 multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T9.csv: 	new ZValue*, new randomAgent, no ZValueSingle: AB has only 0.74 in the end (!) 
 multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T9a.csv: 	new ZValue*, new RandomAgent randomAgent, no ZValueSingle: AB has only 0.77 in the end (!) 
+multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T9b.csv: 	new ZValue*, old randomSelect: AB has only 0.77 in the end (!) 
 
 in comparison: 
 multiTrain_TCL-EXP-al50-lam05-500k-HOR001-T.csv: 		former run, with g3_EvalNPly, single only for AB: AB has 0.90 in the end (!)

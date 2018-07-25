@@ -20,7 +20,7 @@ gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
 evalStr = "eval score" #ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
 path <- "../../agents/ConnectFour/csv/"; limits=c(-1.0,1.0); errWidth=20000/wfac;
 
-filenames=c("TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T9a.csv"
+filenames=c("TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T9b.csv"
             ,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single.csv"
            #,"TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-T.csv"
            #,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR001.csv"

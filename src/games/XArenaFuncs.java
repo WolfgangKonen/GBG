@@ -320,11 +320,17 @@ public class XArenaFuncs
 			return pa;			
 		} 
 		
+		String pa_string = pa.getClass().getName();
+		if (!pa.isTrainable()) {
+			System.out.println(pa_string + " is not trainable");
+			return pa;
+		}
+			
+		
 		// initialization weight distribution plot:
 		int plotWeightMode = xab.ntPar[n].getPlotWeightMethod();
 		wChart.initializeChartPlot(xab,pa,plotWeightMode);
 		
-		String pa_string = pa.getClass().getName();
 		System.out.println(pa.stringDescr());
 		pa.setMaxGameNum(maxGameNum);
 		pa.setNumEval(numEval);

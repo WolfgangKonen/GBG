@@ -98,7 +98,17 @@ abstract public class ArenaTrain extends Arena
 		case TRAIN: 
 			n = m_xab.getNumTrainBtn();
 			agentN = m_xab.getSelectedAgent(n);
-			if(!agentN.equals("MCTS") & !agentN.equals("Human")) {
+			PlayAgent pa=null;
+			try {
+				pa = m_xfun.constructAgent(n,agentN, m_xab);
+				if (pa==null) throw new RuntimeException("Could not construct agent = " + agentN);
+				
+			}  catch(Exception e) {
+				MessageBox.show(m_xab, 
+						e.getMessage(), 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+			} 
+			if (pa!=null && pa.isTrainable()) {
 //				enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtons
 				setStatusMessage("Training "+agentN+"-Player X ...");
 
@@ -118,8 +128,8 @@ abstract public class ArenaTrain extends Arena
 					setStatusMessage("Done.");
 				}
 
-				enableButtons(true);
 			}
+			enableButtons(true);
 			taskState = Task.IDLE; 
 			break;
 		case MULTTRN:
