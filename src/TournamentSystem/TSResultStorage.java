@@ -18,4 +18,8 @@ public class TSResultStorage implements Serializable {
     public TSResultStorage() {
         //...
     }
+
+    public byte getSize() {
+        return 1;
+    } // dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
 }

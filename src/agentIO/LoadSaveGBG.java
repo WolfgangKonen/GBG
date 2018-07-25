@@ -1,89 +1,38 @@
 package agentIO;
 
-import java.awt.BorderLayout;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.io.Serializable;
+import TournamentSystem.TSDiskAgentDataTransfer;
+import TournamentSystem.TSResultStorage;
+import controllers.*;
+import controllers.MC.MCAgent;
+import controllers.MC.MCAgentN;
+import controllers.MCTS.MCTSAgentT;
+import controllers.TD.TDAgent;
+import controllers.TD.ntuple2.TDNTuple2Agt;
+import games.Arena;
+import games.XArenaButtons;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+import tools.MessageBox;
+import tools.Types;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Random;
-import java.util.Scanner;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.filechooser.FileFilter;
-
-// download the following imports from 
-// https://commons.apache.org/proper/commons-compress/download_compress.cgi
-// if the JAR file commons-compress-1.9.jar is not on your system, then
-// link the JAR file via Build Path - Java Build Path - Add JARs...
-import TournamentSystem.TSAgentManager;
-import TournamentSystem.TSDiskAgentDataTransfer;
-import TournamentSystem.TSResultStorage;
-import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.compress.utils.IOUtils;
-
-import controllers.AgentBase;
-import controllers.ExpectimaxNAgent;
-import controllers.MaxNAgent;
-import controllers.MinimaxAgent;
-import controllers.PlayAgent;
-import controllers.RandomAgent;
-import controllers.MC.MCAgent;
-import controllers.MC.MCAgentN;
-import controllers.MCTS.MCTSAgentT;
-import controllers.MCTS.SingleMCTSPlayer;
-import controllers.MCTS.SingleTreeNode;
-import controllers.PlayAgent.AgentState;
-import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
-import tools.ElapsedCpuTimer;
-import tools.MessageBox;
-import tools.Types;
-import tools.ElapsedCpuTimer.TimerType;
-import tools.Types.ACTIONS;
-import games.Arena;
-import games.StateObservation;
-import games.XArenaButtons;
-import params.ParMCTS;
-//import params.NTParams;
-//import params.TDParams;
-
 public class LoadSaveGBG {
 	private final JFileChooserApprove fc;
-	private final FileFilter tdAgentExt = new ExtensionFilter("agt.zip",
-			"TD-Agents");
-	private final FileFilter txtExt = new ExtensionFilter(".txt.zip",
-			"Compressed Text-Files (.txt.zip)");
+	private final FileFilter tdAgentExt = new ExtensionFilter("agt.zip", "TD-Agents");
+	private final FileFilter tdTSRExt = new ExtensionFilter("tsr.zip", "Tournament-Result");
+	private final FileFilter txtExt = new ExtensionFilter(".txt.zip", "Compressed Text-Files (.txt.zip)");
 	private final Arena arenaGame;
 	private final XArenaButtons arenaButtons;
 	private final JFrame arenaFrame;
@@ -143,42 +92,72 @@ public class LoadSaveGBG {
 	// Menu: Save Agent
 	// ==============================================================
 	public void saveGBGAgent(PlayAgent pa) throws IOException {
+		saveGBGHelper(pa, null);
+	}
+
+	public void saveTSResult(TSResultStorage tsr) throws IOException {
+		saveGBGHelper(null, tsr);
+	}
+
+	private void saveGBGHelper(PlayAgent pa, TSResultStorage tsr) throws IOException {
+		if (pa != null && tsr != null) {
+			System.out.println(TAG+"ERROR :: saveGBGHelper - pa and tsr handed over, just give one, aborting save");
+			return;
+		}
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
 		String subDir = arenaGame.getGameBoard().getSubDir();
 		if (subDir != null){
 			strDir += "/"+subDir;
 		}
+		if (tsr != null) // if TSR the save to subfolder
+			strDir += "/TSR/";
+
 		tools.Utils.checkAndCreateFolder(strDir);
 
 		fc.removeChoosableFileFilter(txtExt);
-		fc.setFileFilter(tdAgentExt);
+		if (pa != null)
+			fc.setFileFilter(tdAgentExt);
+		if (tsr != null)
+			fc.setFileFilter(tdTSRExt);
 		fc.setCurrentDirectory(new File(strDir));
 		fc.setAcceptAllFileFilterUsed(false);
 
 		int returnVal = fc.showSaveDialog(arenaGame);
-		String filePath = "";
+		String filePath;
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = null;
+			File file;
 			String path = fc.getSelectedFile().getPath();
 
-			if (!path.toLowerCase().endsWith(".agt.zip"))
-				path = path + ".agt.zip";
+			if (pa != null) {
+				if (!path.toLowerCase().endsWith(".agt.zip")) {
+					path += ".agt.zip";
+				}
+			}
+			if (tsr != null) {
+				if (!path.toLowerCase().endsWith(".tsr.zip")) {
+					path += ".tsr.zip";
+				}
+			}
 
 			file = new File(path);
 			filePath = file.getPath();
 
-			FileOutputStream fos = null;
+			FileOutputStream fos;
 			try {
 				fos = new FileOutputStream(filePath);
 			} catch (FileNotFoundException e2) {
-				MessageBox.show(arenaFrame,"ERROR: Could not save TDAgent to " + filePath,
+				if (pa != null)
+					MessageBox.show(arenaFrame,"ERROR: Could not save TDAgent to " + filePath,
 						"C4Game.saveTDAgent", JOptionPane.ERROR_MESSAGE);
-				arenaGame.setStatusMessage("[ERROR: Could not save to file "
-						+ filePath + " !]");
+				if (tsr != null)
+					MessageBox.show(arenaFrame,"ERROR: Could not save TSResultStorage to " + filePath,
+							"save TSResultStorage", JOptionPane.ERROR_MESSAGE);
+				arenaGame.setStatusMessage("[ERROR: Could not save to file " + filePath + " !]");
+				return;
 			}
 
-			GZIPOutputStream gz = null;
+			GZIPOutputStream gz;
 			try {
 				gz = new GZIPOutputStream(fos) {
 					{
@@ -187,30 +166,33 @@ public class LoadSaveGBG {
 				};
 
 			} catch (IOException e1) {
-				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for"
-								+ filePath + " !]");
+				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for" + filePath + " !]");
 				throw e1;
 			}
 
 			// estimate agent size
-			long bytes = pa.getSize();
+			long bytes = 0;
+			if (pa != null)
+				pa.getSize();
+			if (tsr != null)
+				tsr.getSize();
 			
 			// new
 			final agentIO.IOProgress p = new agentIO.IOProgress(bytes);
-			final ProgressTrackingOutputStream ptos = new ProgressTrackingOutputStream(
-					gz, p);
+			final ProgressTrackingOutputStream ptos = new ProgressTrackingOutputStream(gz, p);
 
-			ObjectOutputStream oos = null;
+			ObjectOutputStream oos;
 			try {
 				oos = new ObjectOutputStream(ptos);
 			} catch (IOException e) {
-				arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for"
-								+ filePath + " !]");
+				arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
+				return;
 			}
 
 			final JDialog dlg = createProgressDialog(ptos, "Saving...");
 
 			try {
+				/*
 				if (pa instanceof MCTSAgentT) {
 					MCTSAgentT mcts = (MCTSAgentT) pa;
 					// only for debug:
@@ -222,16 +204,22 @@ public class LoadSaveGBG {
 					TDNTuple2Agt tdagt = (TDNTuple2Agt) pa;
 					int dummy=1;
 				}
-				oos.writeObject(pa);
+				*/
+				if (pa != null)
+					oos.writeObject(pa);
+				if (tsr != null)
+					oos.writeObject(tsr);
 			} catch (IOException e) {
 				dlg.setVisible(false);
 				if (e instanceof NotSerializableException) {
-					MessageBox.show(arenaFrame,"ERROR: Object pa of class "+pa.getClass().getName()
-							+" is not serializable",
-							"C4Game.saveTDAgent", JOptionPane.ERROR_MESSAGE);
+					if (pa != null)
+						MessageBox.show(arenaFrame,"ERROR: Object pa of class "+pa.getClass().getName()
+							+" is not serializable", "C4Game.saveTDAgent", JOptionPane.ERROR_MESSAGE);
+					if (tsr != null)
+						MessageBox.show(arenaFrame,"ERROR: Object tsr of class "+tsr.getClass().getName()
+								+" is not serializable", "save TSResultStorage", JOptionPane.ERROR_MESSAGE);
 				}
-				arenaGame.setStatusMessage("[ERROR: Could not write to file "
-						+ filePath + " !]");
+				arenaGame.setStatusMessage("[ERROR: Could not write to file " + filePath + " !]");
 				throw new IOException("ERROR: Could not write object to file! ["+e.getClass().getName()+"]");
 			}
 
@@ -248,15 +236,15 @@ public class LoadSaveGBG {
 			arenaGame.setProgress(null);
 			arenaGame.setStatusMessage("Done.");
 
-		} else
-			arenaGame.setStatusMessage("[Save Agent: Aborted by User]");
+		} else {
+			if (pa != null)
+				arenaGame.setStatusMessage("[Save Agent: Aborted by User]");
+			if (tsr != null)
+				arenaGame.setStatusMessage("[Save TS-Result: Aborted by User]");
+		}
 
 		// Rescan current directory, hope it helps
 		fc.rescanCurrentDirectory();
-	}
-
-	public void saveTSResult(TSResultStorage tsr) {
-
 	}
 
 	public int estimateGZIPLength(File f) {
@@ -267,8 +255,7 @@ public class LoadSaveGBG {
 			raf.seek(raf.length() - 4);
 			byte[] bytes = new byte[4];
 			raf.read(bytes);
-			fileSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-					.getInt();
+			fileSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
 			if (fileSize < 0)
 				fileSize += (1L << 32);
 			raf.close();
@@ -310,7 +297,6 @@ public class LoadSaveGBG {
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				try {
-
 					file = fc.getSelectedFile();
 					filePath = file.getPath();
 					fis = new FileInputStream(filePath);
@@ -334,7 +320,7 @@ public class LoadSaveGBG {
 		}
 		
 		if (fis != null) {
-			GZIPInputStream gs = null;
+			GZIPInputStream gs;
 			try {
 				gs = new GZIPInputStream(fis);
 			} catch (IOException e1) {
@@ -391,8 +377,7 @@ public class LoadSaveGBG {
 				dlg.setVisible(false);
 				MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
-				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath
-						+ " !]");
+				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 				//e.printStackTrace();
 				//throw e;
 			} catch (ClassNotFoundException e) {

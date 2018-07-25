@@ -92,9 +92,16 @@ public class TSSettingsGUI2 extends JFrame {
         saveResultsToDiskButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Function not yet implemented");
-                if (mTSAgentManager.results.tournamentDone)
-                    mArena.tdAgentIO.saveTSResult(mTSAgentManager.results);
+                if (mTSAgentManager.results.tournamentDone) {
+                    String str;
+                    try {
+                        mArena.tdAgentIO.saveTSResult(mTSAgentManager.results);
+                        str = "Saved Tournament!";
+                    } catch(IOException ioe) {
+                        str = ioe.getMessage();
+                    }
+                    System.out.println(TAG+"[SaveTournament] "+str);
+                }
             }
         });
         loadResultsFromDiskButton.addActionListener(new ActionListener() {

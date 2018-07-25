@@ -14,7 +14,7 @@ public class TSAgent implements Serializable {
     private String name;
     private String agent;
     private boolean isHddAgent;
-    private PlayAgent mPlayAgent;
+    private transient PlayAgent mPlayAgent;
     private int won;
     private int lost;
     private int tie;
