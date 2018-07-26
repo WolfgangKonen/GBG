@@ -27,7 +27,6 @@ import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxNWrapper;
 import controllers.PlayAgent;
-import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
 import games.Feature;
 import games.GameBoard;
@@ -93,7 +92,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	enum EligType {STANDARD, RESET}; // may later contain also REPLACE, RESREP
 	private EligType m_elig;
 	
-	public Random rand; // generate random Numbers 
+	private Random rand; // generate random Numbers 
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -227,10 +226,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	// debug for Rubik's Cube:
 	public static boolean DBG_CUBE=true;
 	// use ternary (old) target in update rule:
-	public boolean TERNARY=true;
+	public static boolean TERNARY=true;
 	
 	// is set to true in getNextAction3(...), if the next action is a random selected one:
-	boolean randomSelect = false;
+	private boolean randomSelect = false;
 	
 	/**
 	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link AgentBase#m_oPar} are needed for 
@@ -245,7 +244,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private int m_counter = 0;				// episode move counter (trainAgent)
 	private boolean m_finished = false;		// whether a training game is finished
 	private boolean m_randomMove = false;	// whether the last action was random
-    private RandomAgent randomAgent = new RandomAgent("Random");
 	
 	// info only:
 	private int tieCounter = 0;
@@ -349,18 +347,16 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 	
 	// 
-	// This function is needed so that the recursive call inside getNextAction3 (see 
+	// this private function is needed so that the recursive call inside getNextAction3 (see 
 	// g3_Evalualte) can transfer the referring state refer. 
 	// (function GETNEXTACTIONNPLY in TR-TDNTuple.pdf, Algorithm 1)
-	// This function is package-visible since ZValueMulti may call it.
-	Types.ACTIONS_VT getNextAction3(StateObservation so, StateObservation refer, 
+	private Types.ACTIONS_VT getNextAction3(StateObservation so, StateObservation refer, 
 			boolean random, boolean silent) {
 		int i, j;
 		double BestScore3;
 		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
 									// maximized
 		boolean rgs = m_oPar.getRewardIsGameScore();
-		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we have to use TD targt
 		StateObservation NewSO;
 	    int iBest;
 		int count = 1; // counts the moves with same BestScore3
@@ -368,21 +364,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         Types.ACTIONS_VT actBestVT = null;
     	BestScore3 = -Double.MAX_VALUE;
 		double[] VTable;		
-    	ZValue zvalueS;
-		ZValueMulti zvalueM = new ZValueMulti(this); 
-    	int nply = (MODE_3P==1) ? so.getNumPlayers() : 1;
-		if (nply==1) {
-//			zvalueS = new ZValueSingle(this);
-			zvalueS = new ZValueSingleNPly(this,nply);
-		} else {
-			zvalueS = new ZValueSingleNPly(this,nply);
-		}
 	
         randomSelect = false;
 		if (random) {
 			randomSelect = (rand.nextDouble() < m_epsilon);
-//			if (rand.nextDouble() < m_epsilon) 
-//				return randomAgent.getNextAction2(so, true, silent);				
 		}
 		
 		// get the best (or eps-greedy random) action
@@ -403,18 +388,16 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
             if (VER_3P && UPDATE==UpdateType.SINGLE_UPDATE) {
             	// this has n-ply recursion, but does not reflect multi-moves:
             	//
-            	nply = (MODE_3P==1) ? so.getNumPlayers() : 1;
-//              CurrentScore = g3_Eval_NPly(so,acts.get(i),refer,nply,silent);   // OLD
-                CurrentScore = zvalueS.calculate(so,acts.get(i),refer,silent);   
+            	int nply = (MODE_3P==1) ? so.getNumPlayers() : 1;
+                CurrentScore = g3_Eval_NPly(so,acts.get(i),refer,nply,silent);   
 
 //              if (DBG_NEW_3P && so.getNumPlayers()==1) 
 //                sanityCheck1P(so,acts,i,refer,silent,CurrentScore);
                 
             } else {	// i.e. !VER_3P OR (UPDATE==UpdateType.MULTI_UPDATE)
             	// this has recursive multi-move recursion:
-//              CurrentScore = g3_Evaluate(so,acts.get(i),refer,silent);		// OLD
-                CurrentScore = zvalueM.calculate(so,acts.get(i),refer,silent);
-           }
+                CurrentScore = g3_Evaluate(so,acts.get(i),refer,silent);
+            }
             
 			// just a debug check:
 			if (Double.isInfinite(CurrentScore)) {
@@ -535,17 +518,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		// 		(NewSO.getReward(refer)-referReward)
 		// plus the estimated future rewards until game over (agentScore=getScore(NewSO), 
 		// the agent's value function for NewSO)
-		double rtilde = (NewSO.getReward(refer,rgs) - referReward);
-		CurrentScore = rtilde + getGamma()*playerPM*agentScore;				
-    													// --> terminate for-loop
-    	if (TERNARY) {
-    		CurrentScore = (NewSO.isGameOver() ? rtilde : getGamma()*playerPM*agentScore);
-    	}
-    	CurrentScore =  rtilde+getGamma()*playerPM*agentScore;		
+		CurrentScore = (NewSO.getReward(refer,rgs) - referReward) + getGamma()*playerPM*agentScore;				
 
 		if (!silent || DBG_REWARD) {
-			//System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*playerPM-1));			
-			System.out.println(NewSO.stringDescr()+", "+CurrentScore+", "+rtilde);
+			//System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*playerPM-1));
+			double deltaReward = (NewSO.getReward(refer,rgs) - referReward);
+			System.out.println(NewSO.stringDescr()+", "+CurrentScore+", "+deltaReward);
 			//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 		}
 
@@ -698,7 +676,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
      * Only in the (deprecated) case VER_3P==NEW_2P==false, it returns +1 or -1, depending on refer's player being 0 or 1, resp.
      * In case VER_3P==false, NEW_2P==true, it returns -1.
      */
-	public int calculatePlayerPM(StateObservation refer) {
+	private int calculatePlayerPM(StateObservation refer) {
         if (VER_3P) {
         	return 1;
         } else {
@@ -1095,12 +1073,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				if (curBoard!=null) {
 					double rw = rewardTuple.scTup[i]-oldRewardTuple.scTup[i];
 					// target is (reward + GAMMA * value of the after-state) for non-final states
-					double target;
-					if (TERNARY) {
-						target = (m_finished) ? rw : getGamma() * m_Net.getScoreI(nextBoard,i);
-					} else {
-						target = rw + getGamma() * m_Net.getScoreI(nextBoard,i);
-					}
+					double target = rw + getGamma() * m_Net.getScoreI(nextBoard,i);
 					m_Net.updateWeightsNew(curBoard, i /*thisPlayer*/, nextBoard, i /*nextPlayer*/,
 							rw,target,thisSO);
 				}

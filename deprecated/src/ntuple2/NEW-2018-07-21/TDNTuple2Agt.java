@@ -27,7 +27,6 @@ import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxNWrapper;
 import controllers.PlayAgent;
-import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
 import games.Feature;
 import games.GameBoard;
@@ -227,7 +226,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	// debug for Rubik's Cube:
 	public static boolean DBG_CUBE=true;
 	// use ternary (old) target in update rule:
-	public boolean TERNARY=true;
+	public static boolean TERNARY=true;
 	
 	// is set to true in getNextAction3(...), if the next action is a random selected one:
 	boolean randomSelect = false;
@@ -245,7 +244,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private int m_counter = 0;				// episode move counter (trainAgent)
 	private boolean m_finished = false;		// whether a training game is finished
 	private boolean m_randomMove = false;	// whether the last action was random
-    private RandomAgent randomAgent = new RandomAgent("Random");
 	
 	// info only:
 	private int tieCounter = 0;
@@ -359,8 +357,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		double BestScore3;
 		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
 									// maximized
+		double CurrentScoreZ = 0;
 		boolean rgs = m_oPar.getRewardIsGameScore();
-		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we have to use TD targt
 		StateObservation NewSO;
 	    int iBest;
 		int count = 1; // counts the moves with same BestScore3
@@ -381,8 +379,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
         randomSelect = false;
 		if (random) {
 			randomSelect = (rand.nextDouble() < m_epsilon);
-//			if (rand.nextDouble() < m_epsilon) 
-//				return randomAgent.getNextAction2(so, true, silent);				
 		}
 		
 		// get the best (or eps-greedy random) action
@@ -404,16 +400,22 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
             	// this has n-ply recursion, but does not reflect multi-moves:
             	//
             	nply = (MODE_3P==1) ? so.getNumPlayers() : 1;
-//              CurrentScore = g3_Eval_NPly(so,acts.get(i),refer,nply,silent);   // OLD
+//                CurrentScoreZ = g3_Eval_NPly(so,acts.get(i),refer,nply,silent);   
                 CurrentScore = zvalueS.calculate(so,acts.get(i),refer,silent);   
+//                if (!randomSelect) {
+//                	assert CurrentScore==CurrentScoreZ : "Oops, CurrentScore and CurrentScoreZ differ!";
+//                }
 
 //              if (DBG_NEW_3P && so.getNumPlayers()==1) 
 //                sanityCheck1P(so,acts,i,refer,silent,CurrentScore);
                 
             } else {	// i.e. !VER_3P OR (UPDATE==UpdateType.MULTI_UPDATE)
             	// this has recursive multi-move recursion:
-//              CurrentScore = g3_Evaluate(so,acts.get(i),refer,silent);		// OLD
+//                CurrentScoreZ = g3_Evaluate(so,acts.get(i),refer,silent);
                 CurrentScore = zvalueM.calculate(so,acts.get(i),refer,silent);
+//                if (!randomSelect) {
+//                   	assert CurrentScore==CurrentScoreZ : "Oops, CurrentScore and CurrentScoreZ differ!";
+//                }
            }
             
 			// just a debug check:
@@ -535,17 +537,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		// 		(NewSO.getReward(refer)-referReward)
 		// plus the estimated future rewards until game over (agentScore=getScore(NewSO), 
 		// the agent's value function for NewSO)
-		double rtilde = (NewSO.getReward(refer,rgs) - referReward);
-		CurrentScore = rtilde + getGamma()*playerPM*agentScore;				
-    													// --> terminate for-loop
-    	if (TERNARY) {
-    		CurrentScore = (NewSO.isGameOver() ? rtilde : getGamma()*playerPM*agentScore);
-    	}
-    	CurrentScore =  rtilde+getGamma()*playerPM*agentScore;		
+		CurrentScore = (NewSO.getReward(refer,rgs) - referReward) + getGamma()*playerPM*agentScore;				
 
 		if (!silent || DBG_REWARD) {
-			//System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*playerPM-1));			
-			System.out.println(NewSO.stringDescr()+", "+CurrentScore+", "+rtilde);
+			//System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*playerPM-1));
+			double deltaReward = (NewSO.getReward(refer,rgs) - referReward);
+			System.out.println(NewSO.stringDescr()+", "+CurrentScore+", "+deltaReward);
 			//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
 		}
 
@@ -1095,12 +1092,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				if (curBoard!=null) {
 					double rw = rewardTuple.scTup[i]-oldRewardTuple.scTup[i];
 					// target is (reward + GAMMA * value of the after-state) for non-final states
-					double target;
-					if (TERNARY) {
-						target = (m_finished) ? rw : getGamma() * m_Net.getScoreI(nextBoard,i);
-					} else {
-						target = rw + getGamma() * m_Net.getScoreI(nextBoard,i);
-					}
+					double target = rw + getGamma() * m_Net.getScoreI(nextBoard,i);
 					m_Net.updateWeightsNew(curBoard, i /*thisPlayer*/, nextBoard, i /*nextPlayer*/,
 							rw,target,thisSO);
 				}

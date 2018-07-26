@@ -217,7 +217,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public static boolean DBGF_TARGET=false;
 	// debug: repeat always the same sequence in one episode (to check a trivial convergence)
 	public static boolean DBG2_FIXEDSEQUENCE=false;
-	// debug printout in updateWeightsNew, g3_Evaluate, NextState:
+	// debug printout in updateWeightsNew, ZValueMulti, ZValueSingle:
 	public static boolean DBG_REWARD=false;
 	// debug VER_3P=true, MODE_3P=0: m_Net3 is updated in parallel to m_Net (compare 2P and 3P), 
 	// extra printout v_old,v_new in NTuple2ValueFunc::updateWeightsNew,updateWeightsNewTerminal 
@@ -227,10 +227,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	// debug for Rubik's Cube:
 	public static boolean DBG_CUBE=true;
 	// use ternary (old) target in update rule:
-	public boolean TERNARY=true;
-	
-	// is set to true in getNextAction3(...), if the next action is a random selected one:
-	boolean randomSelect = false;
+	public static boolean TERNARY=true;
 	
 	/**
 	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link AgentBase#m_oPar} are needed for 
@@ -246,6 +243,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	private boolean m_finished = false;		// whether a training game is finished
 	private boolean m_randomMove = false;	// whether the last action was random
     private RandomAgent randomAgent = new RandomAgent("Random");
+	
+//	// is set to true in getNextAction3(...), if the next action is a random selected one:
+	boolean randomSelect = false;
+    // --- not needed anymore, we let now getNextAction3 return randomAgent.getNextAction2 ---
 	
 	// info only:
 	private int tieCounter = 0;
@@ -349,25 +350,18 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 	
 	// 
-	// This function is needed so that the recursive call inside getNextAction3 (see 
-	// g3_Evalualte) can transfer the referring state refer. 
+	// this private function is needed so that the recursive call inside getNextAction3 (see 
+	// ZValueMulti.calculate) can transfer the referring state refer. 
 	// (function GETNEXTACTIONNPLY in TR-TDNTuple.pdf, Algorithm 1)
-	// This function is package-visible since ZValueMulti may call it.
 	Types.ACTIONS_VT getNextAction3(StateObservation so, StateObservation refer, 
 			boolean random, boolean silent) {
-		int i, j;
-		double BestScore3;
+		double bestScore3 = -Double.MAX_VALUE;
 		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
 									// maximized
-		boolean rgs = m_oPar.getRewardIsGameScore();
-		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we have to use TD targt
 		StateObservation NewSO;
-	    int iBest;
-		int count = 1; // counts the moves with same BestScore3
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
-    	BestScore3 = -Double.MAX_VALUE;
-		double[] VTable;		
+		double[] VTable;	
     	ZValue zvalueS;
 		ZValueMulti zvalueM = new ZValueMulti(this); 
     	int nply = (MODE_3P==1) ? so.getNumPlayers() : 1;
@@ -385,10 +379,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //				return randomAgent.getNextAction2(so, true, silent);				
 		}
 		
-		// get the best (or eps-greedy random) action
+		// get the best action
         ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
         List<Types.ACTIONS> bestActions = new ArrayList<>();
-        double agentScore;
         
         VTable = new double[acts.size()];  
         
@@ -398,13 +391,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 //			int dummy=1;
 //		}
         assert acts.size()>0 : "Oops, no available action";
-        for(i = 0; i < acts.size(); ++i)
+        for(int i = 0; i < acts.size(); ++i)
         {
             if (VER_3P && UPDATE==UpdateType.SINGLE_UPDATE) {
             	// this has n-ply recursion, but does not reflect multi-moves:
             	//
-            	nply = (MODE_3P==1) ? so.getNumPlayers() : 1;
-//              CurrentScore = g3_Eval_NPly(so,acts.get(i),refer,nply,silent);   // OLD
                 CurrentScore = zvalueS.calculate(so,acts.get(i),refer,silent);   
 
 //              if (DBG_NEW_3P && so.getNumPlayers()==1) 
@@ -412,9 +403,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
                 
             } else {	// i.e. !VER_3P OR (UPDATE==UpdateType.MULTI_UPDATE)
             	// this has recursive multi-move recursion:
-//              CurrentScore = g3_Evaluate(so,acts.get(i),refer,silent);		// OLD
                 CurrentScore = zvalueM.calculate(so,acts.get(i),refer,silent);
-           }
+            }
             
 			// just a debug check:
 			if (Double.isInfinite(CurrentScore)) {
@@ -429,11 +419,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// If there are multiple best actions, select afterwards one of them randomly 
 			// (better exploration)
 			//
-			if (BestScore3 < CurrentScore) {
-				BestScore3 = CurrentScore;
+			if (bestScore3 < CurrentScore) {
+				bestScore3 = CurrentScore;
                 bestActions.clear();
                 bestActions.add(acts.get(i));
-			} else if (BestScore3 == CurrentScore) {
+			} else if (bestScore3 == CurrentScore) {
                 bestActions.add(acts.get(i));
 			}
 
@@ -447,10 +437,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
             NewSO.advance(actBest);
-			System.out.println(NewSO.stringDescr()+", "+(2*BestScore3*playerPM-1));
+			System.out.println(NewSO.stringDescr()+", "+(2*bestScore3*playerPM-1));
 		}			
 		if (DBG2_TARGET) {
 			int playerPM = calculatePlayerPM(refer); 	 
+			boolean rgs = m_oPar.getRewardIsGameScore();
 			final double MAXSCORE = ((so instanceof StateObserver2048) ? 3932156 : 1);
 			// here we use the NextState version, because computation time does not matter
 			// inside DBG2_TARGET and because this version is correct for both values of 
@@ -463,235 +454,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			int dummy=1;
 		}
 		
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, BestScore3);
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestScore3);
 		return actBestVT;
 	} // getNextAction3
 
-    // calculate CurrentScore: 
-	// (g3_Evaluate is helper function for getNextAction3, if MODE_3P==0 or ==2)
-    // (function EVALUATE in TR-TDNTuple.pdf, Algorithm 6)
-    private double g3_Evaluate(	StateObservation so, Types.ACTIONS act, 
-    							StateObservation refer, boolean silent) {
-    	double CurrentScore,agentScore;
-		int rplayer = refer.getPlayer();
-		boolean rgs = m_oPar.getRewardIsGameScore();
-
-        double referReward = refer.getReward(refer,rgs); // 0; 
-    	Types.ACTIONS_VT actBestVT;
-    	StateObservation NewSO;
-    	StateObservation refer2 = refer; 
-        double kappa = 1.0;
-    			
-		if (randomSelect) {
-			CurrentScore = rand.nextDouble();
-			return CurrentScore;
-		} 
-		
-        NewSO = so.copy();
-    	if (VER_3P==true && MODE_3P==2 && so.getNumPlayers()==2) {
-    		refer2 = NewSO;
-        	kappa = (NewSO.getPlayer()==refer.getPlayer()) ? +1.0 : -1.0;
-    	}
-    	// This will normally result in kappa = -1.0. Only in the case of multi-moves, 
-    	// where NewSO.getPlayer()==so.getPlayer() can happen, we may have kappa = +1.0.
-        
-        if (getAFTERSTATE()) {
-        	NewSO.advanceDeterministic(act); 	// the afterstate
-        	agentScore = getScore(NewSO,refer2); // this is V(s')
-            NewSO.advanceNondeterministic(); 
-        } else { 
-        	// the non-afterstate logic for the case of single moves:
-            NewSO.advance(act);
-        	agentScore = getScore(NewSO,refer2); // this is V(s'')
-        }
-        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
-        // but they usually differ for nondeterministic games.
-        
-        boolean CUBE_DBG=false;
-        if (CUBE_DBG && !m_ntPar.getUSESYMMETRY()) {
-        	System.out.println(so + " <|> " +NewSO + " : " + agentScore);
-        }
-        
-        agentScore *= kappa; 
-        // kappa is -1 (and not 1) only for VER_3P==true && MODE_3P==2 && so.getNumPlayers()==2 
-        // and only if NewSO and refer have different players.
-
-
-        // the recursive part (only for deterministic games) is for the case of 
-        // multi-moves: the player who just moved gets from StateObservation 
-        // the signal for one (or more) additional move(s)
-        if (so.isDeterministicGame() && so.getNumPlayers()>1 && !NewSO.isGameOver()) {
-            if (NewSO.getPlayer()==rplayer) {
-            	actBestVT = getNextAction3(NewSO, refer, false, silent);
-            	NewSO.advance(actBestVT);
-            	CurrentScore = actBestVT.getVBest();
-            	return CurrentScore;
-            }
-        }
-	            
-		int playerPM = calculatePlayerPM(refer); 	
-		// new target logic:
-		// the score is the reward received for the transition from refer to NewSO 
-		// 		(NewSO.getReward(refer)-referReward)
-		// plus the estimated future rewards until game over (agentScore=getScore(NewSO), 
-		// the agent's value function for NewSO)
-		double rtilde = (NewSO.getReward(refer,rgs) - referReward);
-		CurrentScore = rtilde + getGamma()*playerPM*agentScore;				
-    													// --> terminate for-loop
-    	if (TERNARY) {
-    		CurrentScore = (NewSO.isGameOver() ? rtilde : getGamma()*playerPM*agentScore);
-    	}
-    	CurrentScore =  rtilde+getGamma()*playerPM*agentScore;		
-
-		if (!silent || DBG_REWARD) {
-			//System.out.println(NewSO.stringDescr()+", "+(2*CurrentScore*playerPM-1));			
-			System.out.println(NewSO.stringDescr()+", "+CurrentScore+", "+rtilde);
-			//print_V(Player, NewSO.getTable(), 2 * CurrentScore * Player - 1);
-		}
-
-		return CurrentScore;
-    }  // g3_Evaluate
-
-    // calculate CurrentScore: 
-	// (g3_Eval_NPly is helper function for getNextAction3, if SINGLE_UPDATE, i.e. 1) MODE_3P==1 or 
-    // 2) (MODE_3P==2 && N=2). In case 2) we have nply=1. )
-    // (function EVALUATENPLY in TR-TDNTuple.pdf, Algorithm 2)
-    private double g3_Eval_NPly(StateObservation so, Types.ACTIONS act, 
-    							StateObservation refer, int nply, boolean silent) {
-    	double CurrentScore,agentScore;
-    	double g3BestScore = -Double.MAX_VALUE;
-		int rplyer = refer.getPlayer();
-		boolean rgs = m_oPar.getRewardIsGameScore();
-
-        double referReward = refer.getReward(refer,rgs); // 0; 
-        double rtilde,otilde;
-        double kappa;
-	    int iBest;
-		int count = 1; // counts the moves with same g3BestScore
-        Types.ACTIONS actBest = null;
-    	StateObservation NewSO;
-    	StateObservation oldSO = so.copy();
-    	Types.ACTIONS_VT actBestVT;
-
-		if (randomSelect) {
-			CurrentScore = rand.nextDouble();
-			return CurrentScore;
-		} 
-		
-		for (int j=1; j<=nply; j++) {
-	        NewSO = oldSO.copy();
-	        
-	        if (getAFTERSTATE()) {
-	        	NewSO.advanceDeterministic(act); 	// the afterstate
-	        	agentScore = getScore(NewSO,NewSO); // this is V(s')
-	            NewSO.advanceNondeterministic(); 
-	        } else { 
-	        	// the non-afterstate logic for the case of single moves:
-            	//System.out.println("NewSO: "+NewSO.stringDescr()+", act: "+act.toInt()+", j(nply)="+j); // DEBUG
-	            NewSO.advance(act);
-	        	agentScore = getScore(NewSO,NewSO); // this is V(s'')
-	        }
-	        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
-	        // but they usually differ for nondeterministic games.
-	        
-	        //otilde = oldSO.getReward(oldSO,rgs);
-	        //  -- the above line was a possible bug, it should be ...getReward(refer,...) always --
-	        otilde = oldSO.getReward(refer,rgs);
-	        rtilde = NewSO.getReward(refer,rgs)-otilde;
-        	kappa = (NewSO.getPlayer()==refer.getPlayer()) ? +1 : -1;
-	        
-        	boolean TST_VERSION=false;
-        	if (TST_VERSION) {
-        		// this longer debug version is only to make some extra assertions for C4
-        		// or other 'only-final-reward' games
-    	        if (NewSO.isGameOver()) {
-    	        	if (NewSO instanceof StateObserverC4) 
-    	        		assert otilde==0 : "Oops, otilde is not zero!";  
-    	        		// the state before the game-over state NewSO should have no reward
-    	        	
-    	        	return rtilde+kappa*getGamma()*agentScore;		// game over, terminate for-loop
-    	        }
-    	        if (j==nply) {
-    	        	if (NewSO instanceof StateObserverC4) 
-    		        	assert rtilde==0 : "Oops, rtilde is not zero!";  
-    	        		// an in-game state should have no reward	        	
-
-    	        	return rtilde+kappa*getGamma()*agentScore;		// normal return (n-ply recursion)
-    	        }
-        	} else {
-    	        if (NewSO.isGameOver() || j==nply) {
-    	        	if (TERNARY) {
-    	        		return NewSO.isGameOver() ? rtilde : kappa*getGamma()*agentScore;
-    	        	}
-    	        	return rtilde+kappa*getGamma()*agentScore;		// game over or n-ply-recursion over, 
-    	        													// --> terminate for-loop
-    	        }
-        	}
-			
-        	//
-        	// we get here only in case nply>1 (and j<nply) :
-        	//
-        	
-	        // find the best action for NewSO's player by
-	        // maximizing the return from evalNPly
-	        ArrayList<Types.ACTIONS> acts = NewSO.getAvailableActions();
-
-	        assert acts.size()>0 : "Oops, no available action";
-	        g3BestScore = -Double.MAX_VALUE;		// bug fix!
-	        List<Types.ACTIONS> nextActions = new ArrayList<>();
-	        for(int i = 0; i < acts.size(); ++i)
-	        {
-	            CurrentScore = evalNPly(NewSO,acts.get(i), rgs); 
-	            
-				//
-				// Calculate g3BestScore and best action act.
-				// If there are multiple best actions, select afterwards one of them randomly 
-				// (better exploration)
-				//
-				if (g3BestScore < CurrentScore) {
-					g3BestScore = CurrentScore;
-	                nextActions.clear();
-	                nextActions.add(acts.get(i));
-				} else if (g3BestScore == CurrentScore) {
-	                nextActions.add(acts.get(i));
-				}
-	        } // for (i)
-	        act = nextActions.get(rand.nextInt(nextActions.size()));
-	        
-	        oldSO = NewSO.copy();
-	        
-		} // for (j)
-		
-		throw new RuntimeException("g3_Eval_NPly: we should not arrive here!");
-		// the return should happen in last pass through for-j-loop ('if (j==nply)')
-
-    } // g3_Eval_NPly
-
-		
-    // helper function for g3_Eval_NPly
-    // (function EVAL in TR-TDNTuple.pdf, Algorithm 2)
-    private double evalNPly(StateObservation s_v, Types.ACTIONS a_v, boolean rgs) {
-    	double agentScore,kappa,reward;
-    	StateObservation NewSO;
-    	
-    	NewSO = s_v.copy();
-        
-        if (getAFTERSTATE()) {
-        	NewSO.advanceDeterministic(a_v); 	// the afterstate
-        	agentScore = getScore(NewSO,NewSO); // this is V(s')
-            NewSO.advanceNondeterministic(); 
-        } else { 
-        	// the non-afterstate logic for the case of single moves:
-            NewSO.advance(a_v);
-        	agentScore = getScore(NewSO,NewSO); // this is V(s'')
-        }
-        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
-        // but they usually differ for nondeterministic games.
-        
-    	kappa = (NewSO.getPlayer()==s_v.getPlayer()) ? +1 : -1;
-    	reward = (NewSO.getReward(s_v,rgs)-s_v.getReward(s_v,rgs));
-    	return reward + kappa*getGamma()*agentScore;
-    }
 
     /**
      * This function returns normally (if VER_3P==true) just 1.
@@ -1095,12 +861,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				if (curBoard!=null) {
 					double rw = rewardTuple.scTup[i]-oldRewardTuple.scTup[i];
 					// target is (reward + GAMMA * value of the after-state) for non-final states
-					double target;
-					if (TERNARY) {
-						target = (m_finished) ? rw : getGamma() * m_Net.getScoreI(nextBoard,i);
-					} else {
-						target = rw + getGamma() * m_Net.getScoreI(nextBoard,i);
-					}
+					double target = rw + getGamma() * m_Net.getScoreI(nextBoard,i);
 					m_Net.updateWeightsNew(curBoard, i /*thisPlayer*/, nextBoard, i /*nextPlayer*/,
 							rw,target,thisSO);
 				}
@@ -1120,8 +881,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * 
 	 * @param ns
 	 * @param  target 
-	 * 				the target for the weight update, which is here the Z-score returned
-	 * 				from {@code g3_Eval_NPly()}
+	 * 				the target for the weight update, which is here the Z-value returned from
+	 * 				{@code ZValueSingle.calculate()}
 	 * @param curBoard
 	 * @param learnFromRM
 	 * @param epiLength
@@ -1165,7 +926,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				
 		} else {
 			// do one training step (NEW target)
-			// target is passed as argument from g3_Eval_NPly()  (n-ply look-ahead)
+			// target is passed as argument from ZValueSingle.calculate()  (n-ply look-ahead)
 			if (curBoard!=null) {
 				my_Net.updateWeightsNew(curBoard, thisPlayer, nextBoard, nextPlayer,
 						reward-oldReward,target,thisSO);
@@ -1477,21 +1238,24 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			StateObservation refer, boolean silent, double CurrentScore)
 	{
 		// This is just a sanity check for  the special case of 1-player games (N_P=nply=1), 
-		// e.g. 2048: Do g3_Evaluate and g3_Eval_NPly return the same value ?
+		// e.g. 2048: Do ZValueMulti.calculate() and ZValueSingle.calculate() return the 
+		// same value ?
 		//  
 		// (Does this work, if the nondeterministic part of advance may return something 
 		// different? - Yes, it does, since we do only 1 ply and the nondeterministic part 
 		// does not influence the value of CurrentScore, neither reward nor value 
 		// function (at least in the game 2048). ) 
-	    double CurrentScoreOLD = g3_Evaluate(so,acts.get(i),refer,silent);
+		ZValueSingleNPly zvalueS = new ZValueSingleNPly(this,so.getNumPlayers()); 
+		ZValueMulti zvalueM = new ZValueMulti(this); 
+	    double CurrentScoreOLD = zvalueM.calculate(so,acts.get(i),refer,silent);
 	    double delta = CurrentScoreOLD-CurrentScore;
 	    if (Math.abs(delta)>0.0) {
 	        System.out.println("CurrentScore, CurrentScoreOLD, delta="+CurrentScore+",  "+CurrentScoreOLD+",  "+delta);
 	        int dummy=1;
 	        // We should never get here, if everything is OK. But if we get here, the following two 
 	        // lines allow debugging the differences in both calls for the specific setting:
-	        CurrentScore = g3_Eval_NPly(so,acts.get(i),refer,so.getNumPlayers(),silent);   
-	        CurrentScoreOLD = g3_Evaluate(so,acts.get(i),refer,silent);
+	        CurrentScore = zvalueS.calculate(so,acts.get(i),refer,silent);   
+	        CurrentScoreOLD = zvalueM.calculate(so,acts.get(i),refer,silent);
 	    }
 	}
 	

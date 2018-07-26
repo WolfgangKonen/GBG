@@ -64,77 +64,66 @@ public class RandomAgent extends AgentBase implements PlayAgent
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
         ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
-        Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
+//        Types.ACTIONS[] actions = new Types.ACTIONS[acts.size()];
+        List<Types.ACTIONS> bestActions = new ArrayList<>();
 		double[] vtable = new double[acts.size()];  
-        //double[] VTable = new double[acts.size()+1];  
 		
-        // --- a copy of the code inside getNextAction:
 		int i,j;
 		double MaxScore = -Double.MAX_VALUE;
-		double CurrentScore = 0; 	// NetScore*Player, the quantity to be
-									// maximized
-		StateObservation NewSO;
-		int count = 1; // counts the moves with same MaxScore
-        int iBest;
+		double CurrentScore = 0; 	// the quantity to be maximized
+		
+//		StateObservation NewSO;
+//		int count = 1; // counts the moves with same MaxScore
+//      int iBest;
 
 		assert so.isLegalState() : "Not a legal state";
 
-        for(i = 0; i < actions.length; ++i)
+        for(i = 0; i < acts.size(); ++i)
         {
-        	actions[i] = acts.get(i);
-        	NewSO = so.copy();
-        	NewSO.advance(actions[i]);
+//        	actions[i] = acts.get(i);
+//        	NewSO = so.copy();
+//        	NewSO.advance(actions[i]);
         	CurrentScore = rand.nextDouble();
         	vtable[i] = CurrentScore;
         	if (MaxScore < CurrentScore) {
         		MaxScore = CurrentScore;
-        		actBest = actions[i];
-        		iBest  = i; 
-        		count = 1;
+                bestActions.clear();
+                bestActions.add(acts.get(i));
+//        		actBest = actions[i];
+//        		iBest  = i; 
+//        		count = 1;
         	} else if (MaxScore == CurrentScore) {
-        		count++;	        
+                bestActions.add(acts.get(i));
+//        		count++;	        
         	}
         } // for
-        if (count>1) {  // more than one action with MaxScore: 
-        	// break ties by selecting one of them randomly
-        	int selectJ = (int)(rand.nextDouble()*count);
-        	for (i=0, j=0; i < actions.length; ++i) 
-        	{
-        		if (vtable[i]==MaxScore) {
-        			if (j==selectJ) actBest = actions[i];
-        			j++;
-        		}
-        	}
-        }
+        actBest = bestActions.get(rand.nextInt(bestActions.size()));
+        // if several actions have the same best score, select one of them randomly
+// --- Old code, unnecessary complicated:         
+//        if (count>1) {  // more than one action with MaxScore: 
+//        	// break ties by selecting one of them randomly
+//        	int selectJ = (int)(rand.nextDouble()*count);
+//        	for (i=0, j=0; i < actions.length; ++i) 
+//        	{
+//        		if (vtable[i]==MaxScore) {
+//        			if (j==selectJ) actBest = actions[i];
+//        			j++;
+//        		}
+//        	}
+//        }
 
         // optional: show the best action
         assert actBest != null : "Oops, no best action actBest";
         if (!silent) {
-        	NewSO = so.copy();
+        	StateObservation NewSO = so.copy();
         	NewSO.advance(actBest);
         	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+MaxScore);
         }			
 		actBest.setRandomSelect(true);		// the action was a random move
-        // --- end of copy of the code inside getNextAction
 	
-		//for (i=0; i<vtable.length; i++) vtable[i]=VTable[i];
 		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, MaxScore);
         return actBestVT;
 	}
-
-
-//	/**
-//	 * 
-//	 * @return	returns true/false, whether the action suggested by last call 
-//	 * 			to getNextAction() was a random action. 
-//	 * 			Always true in the case of RandomAgent.
-//	 * <p>
-//	 * Use now {@link Types.ACTIONS#isRandomAction()}
-//	 */
-//	@Deprecated
-//	public boolean wasRandomAction() {
-//		return true;
-//	}
 
 
 	@Override

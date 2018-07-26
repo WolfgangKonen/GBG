@@ -374,7 +374,7 @@ public class XArenaFuncs
 				xab.GameNumT.setText(Integer.toString(gameNum ) );
 				
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
+				qa = wrapAgent(n, pa, xab.oPar, gb.getStateObs());
 
 		        m_evaluatorQ.eval(qa);
 				if (doTrainEvaluation)
@@ -399,7 +399,7 @@ public class XArenaFuncs
 			
 			if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				qa = wrapAgent(0, pa, xab.oPar, gb.getStateObs());
+				qa = wrapAgent(n, pa, xab.oPar, gb.getStateObs());
 		        
 				if (doTrainEvaluation) {
 					m_evaluatorT.eval(qa);
@@ -489,7 +489,8 @@ public class XArenaFuncs
 	/**
 	 * Perform trainNum cycles of training and evaluation for PlayAgent, each 
 	 * training with maxGameNum games. 
-	 * @param n			number of agent (player)
+	 * @param n			index of agent to train (the current GUI will call multiTrain 
+	 * 					always with n=0 
 	 * @param sAgent	a string containing the class name of the agent
 	 * @param xab		used only for reading parameter values from members td_par, cma_par
 	 * @throws IOException 
@@ -524,7 +525,7 @@ public class XArenaFuncs
 			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
 
 			try {
-				pa = constructAgent(0,sAgent, xab);
+				pa = constructAgent(n,sAgent, xab);
 				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
@@ -579,8 +580,6 @@ public class XArenaFuncs
 					pa.trainAgent(so);
 					
 					gameNum = pa.getGameNum();
-					actionNum = pa.getNumLrnActions();	
-					trnMoveNum = pa.getNumTrnMoves();
 					if (gameNum%numEval==0 ) { //|| gameNum==1) {
 						double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
 						System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
@@ -601,11 +600,13 @@ public class XArenaFuncs
 //						}
 						
                         // gather information for later printout to agents/gameName/csv/multiTrain.csv.
+						actionNum = pa.getNumLrnActions();	
+						trnMoveNum = pa.getNumTrnMoves();
 						mTrain = new MTrain(i,gameNum,evalQ,evalT,/*evalM,*/
 											actionNum,trnMoveNum);
 						mtList.add(mTrain);
 
-						// enable premature exit if TRAIN button is pressed again:
+						// enable premature exit if MULTITRAIN button is pressed again:
 						if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
 							MessageBox.show(xab,
 									"MultiTraining stopped prematurely",
