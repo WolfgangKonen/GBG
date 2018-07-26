@@ -52,6 +52,16 @@ public class TSAgentManager {
         return results.mAgents.size();
     }
 
+    public void disableAllAgentCheckboxen() {
+        for (TSAgent tsa : results.mAgents)
+            tsa.guiCheckBox.setEnabled(false);
+    }
+
+    public void enableAllAgentCheckboxen() {
+        for (TSAgent tsa : results.mAgents)
+            tsa.guiCheckBox.setEnabled(true);
+    }
+
     public int getNumAgentsSelected() {
         int num = 0;
         for (TSAgent agent : results.mAgents)
@@ -384,8 +394,8 @@ public class TSAgentManager {
             float w = rankAgents[i].getCountWonGames();
             float a = rankAgents[i].getCountAllGames();
             float f = w/a;
-            NumberFormat formatter = new DecimalFormat("#0.0000");
-            rowData4[i][6] = formatter.format(f);
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            rowData4[i][6] = formatter.format(f*100)+"%";
         }
 
         //create table with data

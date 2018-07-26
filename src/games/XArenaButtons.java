@@ -648,11 +648,18 @@ public class XArenaButtons extends JPanel
 		choiceAgent[i].setSelectedItem(str);
 	}
 
+	/**
+	 * externally set playing agents
+	 * @param team standard agents chosen by user
+	 */
 	public void enableTournamentRemoteData(TSAgent team[]) {
 		tournamentRemoteDataEnabled = true;
 		selectedAgents = team;
 	}
 
+	/**
+	 * disable externally set agents
+	 */
 	public void disableTournamentRemoteData() {
 		tournamentRemoteDataEnabled = false;
 		selectedAgents = null;

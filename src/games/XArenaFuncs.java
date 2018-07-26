@@ -767,6 +767,15 @@ public class XArenaFuncs
 		return winrate;
 	} // compete
 
+	/**
+	 * This is an adapted version of {@link XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int)}. Tournament parameters were added.
+	 * @param paX PlayAgent, a trained agent
+	 * @param paO PlayAgent, a trained agent
+	 * @param startSO	the start board position for the game
+	 * @param competeNum the number of games to play (always 1)
+	 * @param nextTimes timestorage to save measurements
+	 * @return
+	 */
 	public static double[] competeTS(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, TSTimeStorage[] nextTimes) {
 		double[] winrate = new double[3];
 		int xwinCount=0, owinCount=0, tieCount=0;
@@ -787,10 +796,10 @@ public class XArenaFuncs
 				if(Player==1){		// make a X-move
 					int n = so.getNumAvailableActions();
 
-					long startT = System.currentTimeMillis();
+					//long startT = System.currentTimeMillis();
 					long startTNano = System.nanoTime();
 					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
-					long endT = System.currentTimeMillis();
+					//long endT = System.currentTimeMillis();
 					long endTNano = System.nanoTime();
 					// Debug Printlines
 					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
@@ -932,6 +941,14 @@ public class XArenaFuncs
 		return this.competeBase(false, true, xab, gb);
 	}
 
+	/**
+	 * This is an adapted version of {@link XArenaFuncs#competeBoth(PlayAgent, PlayAgent, StateObservation, int, int, GameBoard)}. The tournament parameters were added.
+	 * @param gb gameboard to play on
+	 * @param nextTeam pair of agents playing
+	 * @param nextTimes time storage for the game
+	 * @param xab GUI params for standard agents
+	 * @return info who wins or error code
+	 */
 	protected int singleCompeteBaseTS(GameBoard gb, TSAgent[] nextTeam, TSTimeStorage[] nextTimes, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
 		int competeNum = 1;//xab.winCompOptions.getNumGames(); | falls wert != 1 dann competeTS() anpassen!
@@ -947,32 +964,29 @@ public class XArenaFuncs
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
 
-				// to do manipulation of selected agent in XrenaButtons!
+				// manipulation of selected standard agent in XrenaButtons!
 				xab.enableTournamentRemoteData(nextTeam);
 
-				// to do write custom compete() function - DONE
-				// to do add basic time measurement and save data somewhere - DONE
-				// todo zeitauswertung auch pro agent global, nicht nur pro spiel/agent?
-				// to do basic data evaluation and visualization - DONE
-				// todo load agent from disk
-				// to do vis. add round times (arithm. + median?) - DONE
-				// todo check advanced time measurement
-				// todo java zeitmessungs zuverlaessigkeit pruefen
-				// todo add gui scaling to TS gui + vis
-				// todo vis. auch elo/glicko/bayesElo berechnen und anzeigen?
-				// todo logmanager oder andere persistierung implementieren
-				// todo TS Messungen an 1 spieler spiele anpassen + erkennung
-				// todo startzustand spielbrett vorgeben können
-				// todo TSAgentManager/GUI erweitern dass wärend spiel checkboxen nicht geändert werden können
-
+				// prepare agents
 				PlayAgent[] paVector;
 				PlayAgent[] qaVector;
 
-				if (nextTeam[0].isHddAgent() || nextTeam[1].isHddAgent()) {
-					qaVector = new PlayAgent[2];
-					qaVector[0] = nextTeam[0].getPlayAgent();
-					qaVector[1] = nextTeam[1].getPlayAgent();
+				if (nextTeam[0].isHddAgent() && nextTeam[1].isHddAgent()) {
+					paVector = new PlayAgent[2];
+					paVector[0] = nextTeam[0].getPlayAgent();
+					paVector[1] = nextTeam[1].getPlayAgent();
+					AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
+					OtherParams[] hddPar = new OtherParams[2];
+					hddPar[0] = new OtherParams();
+					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
+					hddPar[1] = new OtherParams();
+					hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
+					qaVector = wrapAgents(paVector,hddPar,startSO);
 				} else {
+					if (nextTeam[0].isHddAgent() || nextTeam[1].isHddAgent()) {
+						System.out.println(TAG+"ERROR :: dont mix standard and hdd agents!");
+						return 44;
+					}
 					paVector = fetchAgents(xab);
 					AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
 					qaVector = wrapAgents(paVector,xab.oPar,startSO);

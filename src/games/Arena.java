@@ -232,31 +232,35 @@ abstract public class Arena extends JFrame implements Runnable {
 			case TRNEMNT:
 				// Tournament Code
 				tournamentAgentManager.lockToCompete();
+				tournamentAgentManager.disableAllAgentCheckboxen();
 
 				while (tournamentAgentManager.hastNextGame()) {
-					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam();
-					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage();
+					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
+					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
 					// let team compete...
 					int roundWinningAgent = m_xfun.singleCompeteBaseTS(gb, nextTeam, nextTimes, m_xab);
 					// enter winner
 					if (roundWinningAgent > 40) {
 						System.out.println(TAG+"ERROR :: singleCompeteBaseTS returned error value "+roundWinningAgent);
+						if (roundWinningAgent == 44) {
+							// hdd and standart agent mix, leave while, end tournament
+							break;
+						}
 					}
 					else {
 						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
 					}
 				}
-				tournamentAgentManager.printGameResults();
+				tournamentAgentManager.printGameResults(); // print some stats to the console
 
 				// statitistische auswertung + visualisierung
-				System.out.println(TAG+"starting stats");
-				tournamentAgentManager.makeStats();
-				System.out.println(TAG+"ending stats");
+				tournamentAgentManager.makeStats(); // calc data and create result stats window
 
 				// clean up
 				System.out.println(TAG+"Tournament done, cleaning up");
 				tournamentAgentManager.unlockAfterComp();
-				tournamentAgentManager = null;
+				tournamentAgentManager.enableAllAgentCheckboxen();
+				tournamentAgentManager = null; // delete all data to prepare for next tournament
 				taskState = Task.IDLE;
 				break;
 			case PLAY:
