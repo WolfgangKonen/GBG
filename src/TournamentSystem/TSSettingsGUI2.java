@@ -8,6 +8,7 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Arena;
 import games.ArenaTrain;
+import games.XArenaMenu;
 import tools.Types;
 
 import javax.swing.*;
@@ -16,6 +17,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+/**
+ * This class is the entrypoint to the tournament system and provides a GUI to configure and start a tournament.
+ * It gets called by {@link XArenaMenu#generateTournamentMenu()}. The {@link TSAgentManager} is instantiated
+ * and fed with data here.
+ * <p>
+ * This GUI was build with the IntelliJ GUI Designer.
+ *
+ * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ */
 public class TSSettingsGUI2 extends JFrame {
     private JCheckBox randomCheckBox;
     private JCheckBox minimaxCheckBox;

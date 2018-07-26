@@ -13,12 +13,17 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * This is the core of the GBG Tournament System.
+ * This class manages the procedure, agents and data handling and is called from {@link TSSettingsGUI2}.
+ *
+ * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ */
 public class TSAgentManager {
     private final String TAG = "[TSAgentManager] ";
     public TSResultStorage results;

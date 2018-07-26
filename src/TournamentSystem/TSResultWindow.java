@@ -9,6 +9,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * This class generates a GUI to visualize the tournament statistics and measurements.
+ * It's called in {@link TSAgentManager} after the tournament is finished or in
+ * {@link TSSettingsGUI2} if you reopen the result window in the settings GUI.
+ * <p>
+ * This GUI was build with the IntelliJ GUI Designer.
+ *
+ * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ */
 public class TSResultWindow extends JFrame {
     private JPanel mJPanel;
     private JTable tableMatrixWTL;

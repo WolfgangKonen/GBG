@@ -10,6 +10,14 @@ import static TournamentSystem.TSAgentManager.faktorLos;
 import static TournamentSystem.TSAgentManager.faktorTie;
 import static TournamentSystem.TSAgentManager.faktorWin;
 
+/**
+ * This class holds the individual {@link PlayAgent}, its information and game statistics.
+ * All Agents are stored in {@link TSResultStorage} and manages in {@link TSAgentManager}.
+ * <p>
+ * This class implements the Serializable interface to be savable to storage, except for the PlayAgent itself.
+ *
+ * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ */
 public class TSAgent implements Serializable {
     private String name;
     private String agent;
@@ -27,6 +35,7 @@ public class TSAgent implements Serializable {
         mPlayAgent = playAgent;
         guiCheckBox = checkbox;
         won = 0;
+        tie = 0;
         lost = 0;
     }
 

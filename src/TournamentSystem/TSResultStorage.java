@@ -3,6 +3,12 @@ package TournamentSystem;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * This class saves all measurements and data of a tournament. It is Serializable to allow the persisting on disk.
+ * This class gets instantiated in {@link TSAgentManager}.
+ *
+ * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ */
 public class TSResultStorage implements Serializable {
     public ArrayList<TSAgent> mAgents;
     public boolean lockedToCompete = false;

@@ -1,9 +1,16 @@
 package TournamentSystem;
 
+import agentIO.LoadSaveGBG;
 import controllers.PlayAgent;
 
 import java.util.Arrays;
 
+/**
+ * This class is used in {@link LoadSaveGBG#loadMultipleGBGAgent()} to transfer the {@link PlayAgent} objects and
+ * filenames as Strings to {@link TSSettingsGUI2}.
+ *
+ * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ */
 public class TSDiskAgentDataTransfer {
     private String[] filepaths;
     private PlayAgent[] agents;
