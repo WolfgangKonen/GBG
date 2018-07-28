@@ -47,10 +47,10 @@ import tools.Types;
  * This class contains the GUI and the task dispatcher for the game. The GUI for
  * buttons and choice boxes is in {@link XArenaButtons}.
  * <p>
- * Run this class for example from {@code main} in {@link LaunchArenaTTT} or
- * {@link LaunchTrainTTT} for the TicTacToe game.
+ * Run this class for example from {@code main} in {@link ArenaTTT} or
+ * {@link ArenaTrainTTT} for the TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln
  */
 abstract public class Arena extends JFrame implements Runnable {
 	public enum Task {

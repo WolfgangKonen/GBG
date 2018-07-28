@@ -217,7 +217,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public static boolean DBGF_TARGET=false;
 	// debug: repeat always the same sequence in one episode (to check a trivial convergence)
 	public static boolean DBG2_FIXEDSEQUENCE=false;
-	// debug printout in updateWeightsNew, g3_Evaluate, NextState:
+	// debug printout in updateWeightsNew, ZValueMulti, NextState:
 	public static boolean DBG_REWARD=false;
 	// debug VER_3P=true, MODE_3P=0: m_Net3 is updated in parallel to m_Net (compare 2P and 3P), 
 	// extra printout v_old,v_new in NTuple2ValueFunc::updateWeightsNew,updateWeightsNewTerminal 
@@ -350,7 +350,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	
 	// 
 	// This function is needed so that the recursive call inside getNextAction3 (see 
-	// g3_Evalualte) can transfer the referring state refer. 
+	// ZValueMulti) can transfer the referring state refer. 
 	// (function GETNEXTACTIONNPLY in TR-TDNTuple.pdf, Algorithm 1)
 	// This function is package-visible since ZValueMulti may call it.
 	Types.ACTIONS_VT getNextAction3(StateObservation so, StateObservation refer, 
@@ -894,8 +894,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * 
 	 * @param ns
 	 * @param  target 
-	 * 				the target for the weight update, which is here the Z-score returned
-	 * 				from {@code g3_Eval_NPly()}
+	 * 				the target for the weight update, which is here the Z-value returned
+	 * 				from {@link ZValueSingleNPly}
 	 * @param curBoard
 	 * @param learnFromRM
 	 * @param epiLength
@@ -939,7 +939,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 				
 		} else {
 			// do one training step (NEW target)
-			// target is passed as argument from g3_Eval_NPly()  (n-ply look-ahead)
+			// target is passed as argument from ZValueSingleNPly  (n-ply look-ahead)
 			if (curBoard!=null) {
 				my_Net.updateWeightsNew(curBoard, thisPlayer, nextBoard, nextPlayer,
 						reward-oldReward,target,thisSO);

@@ -21,9 +21,9 @@ evalStr = "eval score" #ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
 path <- "../../agents/ConnectFour/csv/"; limits=c(-1.0,1.0); errWidth=20000/wfac;
 
 filenames=c("TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-T9b.csv"
-            ,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single.csv"
-           #,"TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-T.csv"
-           #,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR001.csv"
+           ,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR001-single-9b.csv"
+           #,"TERNARY/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-single-T9b.csv"
+           #,"nonTERNA/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-single-9b.csv"
            #,"TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR40-T.csv"
            #,"nonTERNA/multiTrain_TCL-EXP-al50-lam05-500k-HOR40.csv"
            #,,"TERNARY/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-RESET-T.csv"
