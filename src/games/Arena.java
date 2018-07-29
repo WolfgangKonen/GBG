@@ -2,12 +2,17 @@ package games;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.ListIterator;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,12 +26,19 @@ import TournamentSystem.TSTimeStorage;
 import agentIO.LoadSaveGBG;
 import tools.Progress;
 import controllers.AgentBase;
+import controllers.ExpectimaxWrapper;
 import controllers.HumanPlayer;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
+import games.Hex.GameBoardHex;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
+import games.RubiksCube.GameBoardCube;
+import games.RubiksCube.StateObserverCube;
+import games.MTrain;
+import games.CFour.StateObserverC4;
+import games.Arena.Task;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
 import params.ParOther;
@@ -38,10 +50,10 @@ import tools.Types;
  * This class contains the GUI and the task dispatcher for the game. The GUI for
  * buttons and choice boxes is in {@link XArenaButtons}.
  * <p>
- * Run this class for example from {@code main} in {@link games.TicTacToe.ArenaTTT} or
- * {@link games.TicTacToe.ArenaTrainTTT} for the TicTacToe game.
+ * Run this class for example from {@code main} in {@link ArenaTTT} or
+ * {@link ArenaTrainTTT} for the TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Kï¿½ln, Nov'16
+ * @author Wolfgang Konen, TH Köln
  */
 abstract public class Arena extends JFrame implements Runnable {
 	public enum Task {
@@ -49,6 +61,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		// , INSPECTNTUP, BAT_TC, BATCH
 		, COMPETE, SWAPCMP, BOTHCMP, MULTCMP, TRNEMNT, IDLE
 	};
+
 	public XArenaFuncs m_xfun;
 	public JFrame m_LaunchFrame = null;
 	public XArenaMenu m_menu = null;
@@ -227,7 +240,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				enableButtons(true);
 				setStatusMessage("Multi Compete finished.");
 				UpdateBoard();
-				taskState = Task.IDLE; 
+				taskState = Task.IDLE;
 				break;
 			case TRNEMNT:
 				// Tournament Code
@@ -552,8 +565,8 @@ abstract public class Arena extends JFrame implements Runnable {
 							actBest = pa.getNextAction2(so, false, true); /** command to get agents next move */
 							long endT = System.currentTimeMillis();
 							long endTNano = System.nanoTime();
-							System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
-							System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
+							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
 						}
 
 						so.storeBestActionInfo(actBest, actBest.getVTable());

@@ -110,7 +110,7 @@ public class ArenaTTT extends Arena   {
 		if (args.length==0) {
 			t_Frame.init();
 		} else {
-			throw new RuntimeException("[ArenaTTT.main] args="+args+" not allowed. Use TicTacToeBatch.");
+			throw new RuntimeException("[Arena.main] args="+args+" not allowed. Use TicTacToeBatch.");
 		}
 	}
 	
