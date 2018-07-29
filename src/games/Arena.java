@@ -1,57 +1,38 @@
 package games;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.ListIterator;
-
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
 import TournamentSystem.TSAgent;
 import TournamentSystem.TSAgentManager;
 import TournamentSystem.TSTimeStorage;
 import agentIO.LoadSaveGBG;
-import tools.Progress;
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
 import controllers.HumanPlayer;
-import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
-import games.Hex.GameBoardHex;
+import controllers.PlayAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
-import games.RubiksCube.GameBoardCube;
-import games.RubiksCube.StateObserverCube;
-import games.MTrain;
-import games.CFour.StateObserverC4;
-import games.Arena.Task;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
 import params.ParOther;
 import tools.MessageBox;
+import tools.Progress;
 import tools.StatusBar;
 import tools.Types;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * This class contains the GUI and the task dispatcher for the game. The GUI for
  * buttons and choice boxes is in {@link XArenaButtons}.
  * <p>
- * Run this class for example from {@code main} in {@link ArenaTTT} or
- * {@link ArenaTrainTTT} for the TicTacToe game.
+ * Run this class for example from {@code main} in {@link games.TicTacToe.ArenaTTT} or
+ * {@link games.TicTacToe.ArenaTrainTTT} for the TicTacToe game.
  * 
  * @author Wolfgang Konen, TH Köln
  */
