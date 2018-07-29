@@ -1,6 +1,7 @@
 package TournamentSystem;
 
 import org.jfree.chart.ChartPanel;
+import tools.Types;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -42,10 +43,22 @@ public class TSResultWindow extends JFrame {
     private JButton hideAllTablesButton;
     private JButton showAllTablesButton;
 
+    /**
+     * create the result window with the tournament statistics with data provided from {@link TSAgentManager}
+     * @param m1 table matrix for game win/tie/loss results
+     * @param m2 table matrix for game win/tie/loss scores
+     * @param m3 table with agent score ranking
+     * @param m4 table with detailed time measurements
+     * @param imageIcon heatmap with visualisation of WTL scores
+     * @param scatterPlotASvT scatterplot of the agents score vs round time
+     */
     public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon, ChartPanel scatterPlotASvT) {
         super("Turnier Ergebnisse");
 
         $$$setupUI$$$();
+
+        Font lFont = new Font("Arial", Font.PLAIN, Types.GUI_DIALOGFONTSIZE);
+        //tableMatrixWTL.setFont(lFont); // todo also need to set cell height according to font height
         tableMatrixWTL.setModel(m1);
         tableMatrixWTL.setPreferredScrollableViewportSize(
                 new Dimension(tableMatrixWTL.getPreferredSize().width, tableMatrixWTL.getRowHeight() * tableMatrixWTL.getRowCount()));

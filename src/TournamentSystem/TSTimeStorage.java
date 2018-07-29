@@ -17,11 +17,18 @@ import java.util.Arrays;
  * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
  */
 public class TSTimeStorage implements Serializable {
+    /**
+     * change the version ID for serialization only if a newer version is no longer
+     * compatible with an older one (older .tsr.zip will become unreadable or you have
+     * to provide a special version transformation)
+     */
+    private static final long serialVersionUID = 1L;
+
     private ArrayList<Long> measuredTimesInNS = new ArrayList<>();
     private ArrayList<Long> roundTimesInNS = new ArrayList<>();
     private ArrayList<Long> tmpRoundTimesInNS = new ArrayList<>();
 
-    public double nanoToMS(double ns) {
+    private double nanoToMS(double ns) {
         return ns/(1*Math.pow(10,6));
     }
 
@@ -30,6 +37,9 @@ public class TSTimeStorage implements Serializable {
         tmpRoundTimesInNS.add(value);
     }
 
+    /**
+     * important to call this method when a round of a game is finished to have accurate round times.
+     */
     public void roundFinished() {
         long roundTime = 0;
         for (long time : tmpRoundTimesInNS){

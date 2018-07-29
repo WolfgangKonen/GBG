@@ -1,11 +1,6 @@
 package TournamentSystem;
 
 import controllers.*;
-import controllers.MC.MCAgent;
-import controllers.MC.MCAgentN;
-import controllers.MCTS.MCTSAgentT;
-import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Arena;
 import games.ArenaTrain;
 import games.XArenaMenu;
@@ -55,8 +50,9 @@ public class TSSettingsGUI2 extends JFrame {
     public TSSettingsGUI2(Arena mArena) {
         super("TSSettingsGUI2");
         $$$setupUI$$$();
-        setContentPane(mJPanel);
-        //setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        JScrollPane scroll = new JScrollPane(mJPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        //setContentPane(mJPanel);
+        setContentPane(scroll);
         pack();
         setVisible(true);
 
@@ -152,7 +148,7 @@ public class TSSettingsGUI2 extends JFrame {
 
         for (int i = 0; i < agentsAndFileNames.getSize(); i++) {
             PlayAgent playAgent = agentsAndFileNames.getPlayAgent(i);
-            String agentName = agentsAndFileNames.getFilepath(i);
+            String agentName = agentsAndFileNames.getFileName(i);
             String agentType = agentsAndFileNames.getPlayAgentType(i);
 
             /*

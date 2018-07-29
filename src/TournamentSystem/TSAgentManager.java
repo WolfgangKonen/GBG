@@ -37,10 +37,22 @@ public class TSAgentManager {
         results.mAgents = new ArrayList<>();
     }
 
+    /**
+     * set number of rounds per game to be played by every pair of agents
+     * @param num number of rounds per game
+     */
     public void setNumberOfGames(int num) {
         results.numberOfGames = num;
     }
 
+    /**
+     * add a new agent to the tournament
+     * @param name agent name
+     * @param agent agent type
+     * @param checkbox JCheckBox used in {@link TSSettingsGUI2}
+     * @param hddAgent {@code true} if the agent was loaded from disk
+     * @param playAgent instance of the hdd agent, {@code null} if its a standard agent
+     */
     public void addAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent, PlayAgent playAgent) {
         if (!results.lockedToCompete)
             results.mAgents.add(new TSAgent(name, agent, checkbox, hddAgent, playAgent));
@@ -48,20 +60,34 @@ public class TSAgentManager {
             System.out.println(TAG+"ERROR :: manager is locked to compete, can not add new agent");
     }
 
+    /**
+     * number of agents already added to tournament
+     * @return number of agents as int
+     */
     public int getNumAgents() {
         return results.mAgents.size();
     }
 
+    /**
+     * disables all checkboxes in {@link TSSettingsGUI2}, to be used before start of tournament
+     */
     public void disableAllAgentCheckboxen() {
         for (TSAgent tsa : results.mAgents)
             tsa.guiCheckBox.setEnabled(false);
     }
 
+    /**
+     * enables all checkboxes in {@link TSSettingsGUI2}, to be used after end of tournament
+     */
     public void enableAllAgentCheckboxen() {
         for (TSAgent tsa : results.mAgents)
             tsa.guiCheckBox.setEnabled(true);
     }
 
+    /**
+     * get the number of agents selected via checkbox in {@link TSSettingsGUI2}
+     * @return number of selected agents
+     */
     public int getNumAgentsSelected() {
         int num = 0;
         for (TSAgent agent : results.mAgents)
@@ -74,6 +100,10 @@ public class TSAgentManager {
         return num;
     }
 
+    /**
+     * get the number of agents loaded from disk selected via checkbox in {@link TSSettingsGUI2}
+     * @return number of selected hdd agents
+     */
     public int getNumDiskAgents() {
         int num = 0;
         for (TSAgent t : results.mAgents)
@@ -82,6 +112,10 @@ public class TSAgentManager {
         return num;
     }
 
+    /**
+     * get the names of the selected agents in {@link TSSettingsGUI2}
+     * @return string array with names of selected agents
+     */
     public String[] getNamesAgentsSelected() {
         String selectedAGents[] = new String[getNumAgentsSelected()]; // just selected agents
         int tmp = 0;
@@ -93,6 +127,10 @@ public class TSAgentManager {
         return selectedAGents;
     }
 
+    /**
+     * get the gameplan with all agent pairs playing against each other with their names in a string array
+     * @return string array with the names of agents playing against each other
+     */
     public String[][] getGamePlan() {
         int internalGamePlan[][] = generateGamePlanInternal();
         String gamePlan[][] = new String[internalGamePlan.length][2]; // games to be played
@@ -104,6 +142,10 @@ public class TSAgentManager {
         return gamePlan;
     }
 
+    /**
+     * get the IDs of the agents selected. the ID represents the agents position in arraylist {@code TSResultStorage.mAgents}
+     * @return arraylist positions of selected agents in {@code TSResultStorage.mAgents}
+     */
     private int[] getIDAgentsSelected() {
         int selectedAgents[] = new int[getNumAgentsSelected()]; // just selected agents
         int tmp = 0;
@@ -115,6 +157,10 @@ public class TSAgentManager {
         return selectedAgents;
     }
 
+    /**
+     * generates the gameplan and playing pairs of agents identified by the ID (position in mAgent Arraylist)
+     * @return gameplan with agent IDs
+     */
     private int[][] generateGamePlanInternal() {
         int selectedAgents[] = getIDAgentsSelected();
         int gamePlan[][] = new int[getNumAgentsSelected()*(getNumAgentsSelected()-1)][2]; // games to be played
@@ -130,6 +176,9 @@ public class TSAgentManager {
         return gamePlan;
     }
 
+    /**
+     * print the gameplan with agent names to the console
+     */
     public void printGamePlan() {
         String gamePlan[][] = getGamePlan();
         System.out.println(TAG+"+ GamePlan Info: +");
@@ -140,6 +189,11 @@ public class TSAgentManager {
         System.out.println(TAG+"+ End Info +");
     }
 
+    /**
+     * get agent by name
+     * @param name name of agent
+     * @return PlayAgent instance
+     */
     public TSAgent getAgent(String name) {
         for (TSAgent agnt : results.mAgents)
             if (agnt.getName().equals(name))
@@ -147,10 +201,18 @@ public class TSAgentManager {
         return null;
     }
 
+    /**
+     * check is the tournament is locked to avoid changes of input data
+     * @return boolean if tournament is locked
+     */
     public boolean isLockedToCompete() {
         return results.lockedToCompete;
     }
 
+    /**
+     * lock the tournament system to prevent data from changes.
+     * also the gameplan is calculated and measurements are prepared.
+     */
     public void lockToCompete() {
         if (results.numberOfGames == -1) {
             System.out.println(TAG+"ERROR :: number of games was not set! using 1");
@@ -167,16 +229,34 @@ public class TSAgentManager {
         results.nextGame = 0;
     }
 
+    /**
+     * get the agent and measurement data for the next playing agents according to the gameplan.
+     * <p>
+     * you also need to get {@link TSAgentManager#getNextCompetitionTimeStorage()} to save the time measurements
+     * @return TSAgent instances of the next playing agents
+     */
     public TSAgent[] getNextCompetitionTeam() {
         TSAgent out[] = {results.mAgents.get(results.gamePlan[results.nextGame][0]), results.mAgents.get(results.gamePlan[results.nextGame][1])};
         results.tournamentDone = false;
         return out;
     }
 
+    /**
+     * get the time measurement data for the next playing agents according to the gameplan
+     * @return time storage instance for the next game
+     */
     public TSTimeStorage[] getNextCompetitionTimeStorage() {
         return results.timeStorage[results.nextGame];
     }
 
+    /**
+     * after to agents did their game use this method to save the game result.
+     * this also prepares the time storage for the next game and updates the gameplan<p>
+     * 0 : agent 1 wins<p>
+     * 1 : tie<p>
+     * 2 : agent 2 wins
+     * @param type game result code
+     */
     public void enterGameResultWinner(int type) {
         if (!results.lockedToCompete) {
             System.out.println(TAG+"ERROR :: manager ist not locked, cannot enter result. run lockToCompete() first");
@@ -213,6 +293,10 @@ public class TSAgentManager {
         results.tournamentDone = false;
     }
 
+    /**
+     * returns if a next game is available according ot the gameplan
+     * @return boolean if a next game is available
+     */
     public boolean hastNextGame() {
         if (results.nextGame == results.gamePlan.length) {
             results.tournamentDone = true;
@@ -222,6 +306,9 @@ public class TSAgentManager {
             return true;
     }
 
+    /**
+     * print a summary of gameresults and basic statistics to the console
+     */
     public void printGameResults() {
         if (results.gamePlan.length != results.gameResult.length) {
             System.out.println(TAG+"printGameResults() failed - gamePlan.length != gameResult.length");
@@ -251,6 +338,9 @@ public class TSAgentManager {
         }
     }
 
+    /**
+     * unlock the tournament system to enable data changes
+     */
     public void unlockAfterComp() {
         results.lockedToCompete = false;
         /*
@@ -261,6 +351,10 @@ public class TSAgentManager {
         */
     }
 
+    /**
+     * returns if a tournament is running
+     * @return boolean if tournament is running
+     */
     public boolean isTournamentDone() {
         return results.tournamentDone;
     }
@@ -269,6 +363,9 @@ public class TSAgentManager {
      *  +++ STATISTIK +++
      */
 
+    /**
+     * call this method after the tournament ran to process the measurement data to generate the statistics window
+     */
     public void makeStats() {
         if (!results.tournamentDone) {
             System.out.println(TAG+"ERROR :: Stats Window cannot be opened, tournament data not available");

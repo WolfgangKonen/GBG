@@ -5,6 +5,11 @@ import org.tc33.jheatchart.HeatChart;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * This class is just used to test code outside the GBG and GBG-TS.
+ *
+ * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ */
 @Deprecated
 public class Stuff {
 
