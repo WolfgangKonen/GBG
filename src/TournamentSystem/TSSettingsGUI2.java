@@ -61,14 +61,27 @@ public class TSSettingsGUI2 extends JFrame {
 
         mTSAgentManager.addAgent("StandardRandom", Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
         mTSAgentManager.addAgent("StandardMinimax", Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
-        mTSAgentManager.addAgent("StandardMaxN", Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
-        mTSAgentManager.addAgent("StandardExpectimaxN", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
         mTSAgentManager.addAgent("StandardMCN", Types.GUI_AGENT_LIST[4], MCNCheckBox, false, null);
-        mTSAgentManager.addAgent("StandardMCTS", Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
-        mTSAgentManager.addAgent("StandardMCTSExpectimax", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
         // GUI_AGENT_LIST[7] ist der Human Player
         mTSAgentManager.addAgent("StandardTDNtuple2", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
+        TDNtuple2CheckBox.setVisible(false);
         mTSAgentManager.addAgent("StandardTDS", Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
+        TDSCheckBox.setVisible(false);
+
+
+        if (mArena.getGameBoard().getDefaultStartState().isDeterministicGame()) {
+            System.out.println(TAG+"game is deterministic");
+            mTSAgentManager.addAgent("StandardMaxN", Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
+            mTSAgentManager.addAgent("StandardMCTS", Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
+            expectimaxNCheckBox.setVisible(false);
+            MCTSExpectimaxCheckBox.setVisible(false);
+        } else {
+            System.out.println(TAG+"game is not deterministic");
+            mTSAgentManager.addAgent("StandardExpectimaxN", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
+            mTSAgentManager.addAgent("StandardMCTSExpectimax", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
+            maxNCheckBox.setVisible(false);
+            MCTSCheckBox.setVisible(false);
+        }
 
         // enable en/disabling of textfield later on in arena
         mTSAgentManager.gameNumJTF = gameNumTextField;
