@@ -70,6 +70,10 @@ public class TSSettingsGUI2 extends JFrame {
         mTSAgentManager.addAgent("StandardTDNtuple2", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
         mTSAgentManager.addAgent("StandardTDS", Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
 
+        // enable en/disabling of textfield later on in arena
+        mTSAgentManager.gameNumJTF = gameNumTextField;
+        mTSAgentManager.numOfMovesJTF = numOfMovesTextField;
+
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

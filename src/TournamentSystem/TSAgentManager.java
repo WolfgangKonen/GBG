@@ -27,6 +27,7 @@ import java.util.Arrays;
 public class TSAgentManager {
     private final String TAG = "[TSAgentManager] ";
     public TSResultStorage results;
+    public JTextField gameNumJTF, numOfMovesJTF;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
@@ -74,6 +75,8 @@ public class TSAgentManager {
     public void disableAllAgentCheckboxen() {
         for (TSAgent tsa : results.mAgents)
             tsa.guiCheckBox.setEnabled(false);
+        gameNumJTF.setEnabled(false);
+        numOfMovesJTF.setEnabled(false);
     }
 
     /**
@@ -82,6 +85,8 @@ public class TSAgentManager {
     public void enableAllAgentCheckboxen() {
         for (TSAgent tsa : results.mAgents)
             tsa.guiCheckBox.setEnabled(true);
+        gameNumJTF.setEnabled(true);
+        numOfMovesJTF.setEnabled(true);
     }
 
     /**
