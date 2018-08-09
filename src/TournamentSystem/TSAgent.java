@@ -3,6 +3,8 @@ package TournamentSystem;
 import TournamentSystem.Scoring.Elo.EloPlayer;
 import TournamentSystem.Scoring.Elo.EloPlayerFIDE;
 import TournamentSystem.Scoring.Elo.EloPlayerUSCF;
+import TournamentSystem.Scoring.Glicko2.Glicko2Rating;
+import TournamentSystem.Scoring.Glicko2.Glicko2RatingCalculator;
 import controllers.PlayAgent;
 
 import javax.swing.*;
@@ -39,6 +41,7 @@ public class TSAgent implements Serializable {
     public JCheckBox guiCheckBox;
     public EloPlayerFIDE mEloPlayerFIDE;
     public EloPlayerUSCF mEloPlayerUSCF;
+    public Glicko2Rating mGlicko2Rating;
 
     /**
      * Create a new {@link TSAgent} instance with its properties and data.
@@ -47,8 +50,9 @@ public class TSAgent implements Serializable {
      * @param checkbox JCheckBox used in {@link TSSettingsGUI2}
      * @param hddAgent boolean if this agent was loaded from disk
      * @param playAgent the agent itself ({@code null} if its a standard agent)
+     * @param glicko2RatingSystem
      */
-    public TSAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent, PlayAgent playAgent) {
+    public TSAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent, PlayAgent playAgent, Glicko2RatingCalculator glicko2RatingSystem) {
         this.name = name;
         this.agent = agent;
         isHddAgent = hddAgent;
@@ -59,6 +63,7 @@ public class TSAgent implements Serializable {
         lost = 0;
         mEloPlayerFIDE = new EloPlayerFIDE(name);
         mEloPlayerUSCF = new EloPlayerUSCF(name);
+        mGlicko2Rating = new Glicko2Rating(name, glicko2RatingSystem);
     }
 
     public void addWonGame(){

@@ -1,7 +1,8 @@
 package TournamentSystem;
 
 import TournamentSystem.Scoring.Elo.EloCalculator;
-import TournamentSystem.Scoring.Elo.EloPlayer;
+import TournamentSystem.Scoring.Glicko2.Glicko2RatingCalculator;
+import TournamentSystem.Scoring.Glicko2.Glicko2RatingPeriodResults;
 import controllers.PlayAgent;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -30,6 +31,8 @@ public class TSAgentManager {
     private final String TAG = "[TSAgentManager] ";
     public TSResultStorage results;
     public JTextField gameNumJTF, numOfMovesJTF;
+    private Glicko2RatingCalculator glicko2RatingSystem;
+    private Glicko2RatingPeriodResults glicko2Results;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
@@ -38,6 +41,9 @@ public class TSAgentManager {
     public TSAgentManager() {
         results = new TSResultStorage();
         results.mAgents = new ArrayList<>();
+
+        glicko2RatingSystem = new Glicko2RatingCalculator(0.06, 0.5); // todo values?
+        glicko2Results = new Glicko2RatingPeriodResults();
     }
 
     /**
@@ -58,7 +64,7 @@ public class TSAgentManager {
      */
     public void addAgent(String name, String agent, JCheckBox checkbox, boolean hddAgent, PlayAgent playAgent) {
         if (!results.lockedToCompete)
-            results.mAgents.add(new TSAgent(name, agent, checkbox, hddAgent, playAgent));
+            results.mAgents.add(new TSAgent(name, agent, checkbox, hddAgent, playAgent, glicko2RatingSystem));
         else
             System.out.println(TAG+"ERROR :: manager is locked to compete, can not add new agent");
     }
@@ -282,18 +288,21 @@ public class TSAgentManager {
                 teamPlayed[1].addLostGame();
                 EloCalculator.setNewElos(teamPlayed[0].mEloPlayerFIDE, +1, teamPlayed[1].mEloPlayerFIDE);
                 EloCalculator.setNewElos(teamPlayed[0].mEloPlayerUSCF, +1, teamPlayed[1].mEloPlayerUSCF);
+                glicko2Results.addResult(teamPlayed[0].mGlicko2Rating, teamPlayed[1].mGlicko2Rating);
             }
             if (type == 1){
                 teamPlayed[0].addTieGame();
                 teamPlayed[1].addTieGame();
                 EloCalculator.setNewElos(teamPlayed[0].mEloPlayerFIDE, 0, teamPlayed[1].mEloPlayerFIDE);
                 EloCalculator.setNewElos(teamPlayed[0].mEloPlayerUSCF, 0, teamPlayed[1].mEloPlayerUSCF);
+                glicko2Results.addDraw(teamPlayed[0].mGlicko2Rating, teamPlayed[1].mGlicko2Rating);
             }
             if (type == 2){
                 teamPlayed[0].addLostGame();
                 teamPlayed[1].addWonGame();
                 EloCalculator.setNewElos(teamPlayed[0].mEloPlayerFIDE, -1, teamPlayed[1].mEloPlayerFIDE);
                 EloCalculator.setNewElos(teamPlayed[0].mEloPlayerUSCF, -1, teamPlayed[1].mEloPlayerUSCF);
+                glicko2Results.addResult(teamPlayed[1].mGlicko2Rating, teamPlayed[0].mGlicko2Rating);
             }
 
             results.timeStorage[results.nextGame][0].roundFinished();
@@ -461,6 +470,7 @@ public class TSAgentManager {
                 "WTL Score",
                 "FIDE Elo",
                 "USCF Elo",
+                "Glicko2",
                 "WonGameRatio"
         };
         Object[][] rowData4 = new Object[getNumAgentsSelected()][columnNames4.length];
@@ -491,17 +501,19 @@ public class TSAgentManager {
             return 0;
         });
 
+        glicko2RatingSystem.updateRatings(glicko2Results); // update glicko2 ratings once after TS
+
         // put data into table
         for (int i=0; i<rowData4.length; i++) {
-            // "Rank",
+            // "Rank"
             rowData4[i][0] = ""+(i+1);
-            // "Agent",
+            // "Agent"
             rowData4[i][1] = rankAgents[i].getName();
-            // "Games Won",
+            // "Games Won"
             rowData4[i][2] = rankAgents[i].getCountWonGames();
-            // "Games Tie",
+            // "Games Tie"
             rowData4[i][3] = rankAgents[i].getCountTieGames();
-            // "Games Lost",
+            // "Games Lost"
             rowData4[i][4] = rankAgents[i].getCountLostGames();
             // "WTL Score"
             rowData4[i][5] = rankAgents[i].getAgentScore();
@@ -509,12 +521,16 @@ public class TSAgentManager {
             rowData4[i][6] = rankAgents[i].mEloPlayerFIDE.getEloRating();
             // "USCF Elo"
             rowData4[i][7] = rankAgents[i].mEloPlayerUSCF.getEloRating();
+            // "Glicko2"
+            //rowData4[i][8] = rankAgents[i].mGlicko2Rating.getRating();
+            NumberFormat formatter1 = new DecimalFormat("#0.00");
+            rowData4[i][8] = formatter1.format(rankAgents[i].mGlicko2Rating.getRating());
             // "WonGameRatio"
             float w = rankAgents[i].getCountWonGames();
             float a = rankAgents[i].getCountAllGames();
             float f = w/a;
-            NumberFormat formatter = new DecimalFormat("#0.00");
-            rowData4[i][8] = formatter.format(f*100)+"%";
+            NumberFormat formatter2 = new DecimalFormat("#0.00");
+            rowData4[i][9] = formatter2.format(f*100)+"%";
         }
 
         //create table with data
