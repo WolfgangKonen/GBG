@@ -1,5 +1,8 @@
 package TournamentSystem;
 
+import TournamentSystem.Scoring.Elo.EloPlayer;
+import TournamentSystem.Scoring.Elo.EloPlayerFIDE;
+import TournamentSystem.Scoring.Elo.EloPlayerUSCF;
 import controllers.PlayAgent;
 
 import javax.swing.*;
@@ -34,6 +37,8 @@ public class TSAgent implements Serializable {
     private int lost;
     private int tie;
     public JCheckBox guiCheckBox;
+    public EloPlayerFIDE mEloPlayerFIDE;
+    public EloPlayerUSCF mEloPlayerUSCF;
 
     /**
      * Create a new {@link TSAgent} instance with its properties and data.
@@ -52,6 +57,8 @@ public class TSAgent implements Serializable {
         won = 0;
         tie = 0;
         lost = 0;
+        mEloPlayerFIDE = new EloPlayerFIDE(name);
+        mEloPlayerUSCF = new EloPlayerUSCF(name);
     }
 
     public void addWonGame(){

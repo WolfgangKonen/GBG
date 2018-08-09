@@ -1,5 +1,7 @@
 package TournamentSystem;
 
+import TournamentSystem.Scoring.Elo.EloCalculator;
+import TournamentSystem.Scoring.Elo.EloPlayer;
 import controllers.PlayAgent;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -278,14 +280,20 @@ public class TSAgentManager {
             if (type == 0){
                 teamPlayed[0].addWonGame();
                 teamPlayed[1].addLostGame();
+                EloCalculator.setNewElos(teamPlayed[0].mEloPlayerFIDE, +1, teamPlayed[1].mEloPlayerFIDE);
+                EloCalculator.setNewElos(teamPlayed[0].mEloPlayerUSCF, +1, teamPlayed[1].mEloPlayerUSCF);
             }
             if (type == 1){
                 teamPlayed[0].addTieGame();
                 teamPlayed[1].addTieGame();
+                EloCalculator.setNewElos(teamPlayed[0].mEloPlayerFIDE, 0, teamPlayed[1].mEloPlayerFIDE);
+                EloCalculator.setNewElos(teamPlayed[0].mEloPlayerUSCF, 0, teamPlayed[1].mEloPlayerUSCF);
             }
             if (type == 2){
                 teamPlayed[0].addLostGame();
                 teamPlayed[1].addWonGame();
+                EloCalculator.setNewElos(teamPlayed[0].mEloPlayerFIDE, -1, teamPlayed[1].mEloPlayerFIDE);
+                EloCalculator.setNewElos(teamPlayed[0].mEloPlayerUSCF, -1, teamPlayed[1].mEloPlayerUSCF);
             }
 
             results.timeStorage[results.nextGame][0].roundFinished();
@@ -338,7 +346,9 @@ public class TSAgentManager {
             System.out.print(TAG);
             System.out.print("AgentName: "+a.getName()+" ");
             System.out.print("GamesWon: "+a.getCountWonGames()+" GamesTie: "+a.getCountTieGames()+" GamesLost: "+a.getCountLostGames()+" | ");
-            System.out.print("AgentScore: "+a.getAgentScore());
+            System.out.print("AgentScore: "+a.getAgentScore()+" | ");
+            System.out.print("FIDE-ELO: "+a.mEloPlayerFIDE.getEloRating()+" USCF-ELO: "+a.mEloPlayerUSCF.getEloRating());
+            //System.out.print("ELO: "+a.mEloPlayerFIDE+" | "+a.mEloPlayerUSCF);
             System.out.println();
         }
     }
@@ -364,8 +374,9 @@ public class TSAgentManager {
         return results.tournamentDone;
     }
 
-    /**
+    /** +++++++++++++++++
      *  +++ STATISTIK +++
+     *  +++++++++++++++++
      */
 
     /**
@@ -448,6 +459,8 @@ public class TSAgentManager {
                 "Games Tie",
                 "Games Lost",
                 "WTL Score",
+                "FIDE Elo",
+                "USCF Elo",
                 "WonGameRatio"
         };
         Object[][] rowData4 = new Object[getNumAgentsSelected()][columnNames4.length];
@@ -492,12 +505,16 @@ public class TSAgentManager {
             rowData4[i][4] = rankAgents[i].getCountLostGames();
             // "WTL Score"
             rowData4[i][5] = rankAgents[i].getAgentScore();
-            // "#Score"
+            // "FIDE Elo"
+            rowData4[i][6] = rankAgents[i].mEloPlayerFIDE.getEloRating();
+            // "USCF Elo"
+            rowData4[i][7] = rankAgents[i].mEloPlayerUSCF.getEloRating();
+            // "WonGameRatio"
             float w = rankAgents[i].getCountWonGames();
             float a = rankAgents[i].getCountAllGames();
             float f = w/a;
             NumberFormat formatter = new DecimalFormat("#0.00");
-            rowData4[i][6] = formatter.format(f*100)+"%";
+            rowData4[i][8] = formatter.format(f*100)+"%";
         }
 
         //create table with data
