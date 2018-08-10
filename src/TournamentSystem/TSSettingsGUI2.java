@@ -41,6 +41,9 @@ public class TSSettingsGUI2 extends JFrame {
     private JButton saveResultsToDiskButton;
     private JButton loadResultsFromDiskButton;
     private JButton reopenStatisticsButton;
+    private JButton selectAllHDDAgentsButton;
+    private JButton unselectAllHDDAgentsButton;
+    private JButton deleteSelectedHDDAgentsButton;
     private JScrollPane checkBoxScrollPane;
 
     private Arena mArena;
@@ -145,6 +148,28 @@ public class TSSettingsGUI2 extends JFrame {
                     return;
                 }
                 JOptionPane.showMessageDialog(null, "Function not yet implemented");
+            }
+        });
+
+        pack(); // resize window to adapt to all hidden elements
+
+        selectAllHDDAgentsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mTSAgentManager.setAllHDDAgentsSelected(true);
+            }
+        });
+        unselectAllHDDAgentsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mTSAgentManager.setAllHDDAgentsSelected(false);
+            }
+        });
+        deleteSelectedHDDAgentsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mTSAgentManager.deleteAllHDDAgentsSelected();
+                pack();
             }
         });
     }
@@ -267,6 +292,7 @@ public class TSSettingsGUI2 extends JFrame {
 
         if (countSelectedAgents < 2) {
             System.out.println(TAG + "Error :: At least 2 Agents need to be selected for a tournament!");
+            JOptionPane.showMessageDialog(null, "ERROR: not enough agents were selected to play");
         } else {
             mTSAgentManager.printGamePlan();
 

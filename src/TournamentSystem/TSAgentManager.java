@@ -20,6 +20,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * This is the core of the GBG Tournament System.
@@ -138,6 +139,30 @@ public class TSAgentManager {
             }
         }
         return selectedAGents;
+    }
+
+    public void setAllHDDAgentsSelected(boolean selected) {
+        for (TSAgent agent : results.mAgents) {
+            if (agent.isHddAgent()) {
+                agent.guiCheckBox.setSelected(selected);
+            }
+        }
+    }
+
+    public void deleteAllHDDAgentsSelected() {
+        int numAgents = getNumDiskAgents();
+        Iterator<TSAgent> i = results.mAgents.iterator();
+        while (i.hasNext()) {
+            TSAgent a = i.next();
+            if (a.isHddAgent()) {
+                if (a.guiCheckBox.isSelected()) {
+                    a.guiCheckBox.setVisible(false);
+                    System.out.println(TAG+"Deleted Agent "+a.getName());
+                    i.remove();
+                }
+            }
+        }
+        System.out.println(TAG+"Number of Disk Agents was reduced from "+numAgents+" to "+getNumDiskAgents());
     }
 
     /**
