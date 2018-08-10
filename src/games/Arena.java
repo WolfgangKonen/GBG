@@ -26,6 +26,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This class contains the GUI and the task dispatcher for the game. The GUI for
@@ -228,6 +229,22 @@ abstract public class Arena extends JFrame implements Runnable {
 				tournamentAgentManager.lockToCompete();
 				tournamentAgentManager.disableAllAgentCheckboxen();
 
+				JFrame progressBarJF = new JFrame();
+				progressBarJF.setSize(300, 100);
+				progressBarJF.setTitle("TS Progress...");
+				JPanel progressBarJP = new JPanel();
+				// JProgressBar-Objekt wird erzeugt
+				JProgressBar tsProgressBar = new JProgressBar(0, tournamentAgentManager.getTSProgress()[1]);
+				// Wert für den Ladebalken wird gesetzt
+				tsProgressBar.setValue(0);
+				// Der aktuelle Wert wird als
+				// Text in Prozent angezeigt
+				tsProgressBar.setStringPainted(true);
+				// JProgressBar wird Panel hinzugefügt
+				progressBarJP.add(tsProgressBar);
+				progressBarJF.add(progressBarJP);
+				progressBarJF.setVisible(true);
+
 				while (tournamentAgentManager.hastNextGame()) {
 					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
 					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
@@ -243,8 +260,14 @@ abstract public class Arena extends JFrame implements Runnable {
 					}
 					else {
 						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
+
+						// progressbar
+						int[] progress = tournamentAgentManager.getTSProgress();
+						tsProgressBar.setValue(progress[0]);
+						System.out.println(TAG+"TS Progress "+ Arrays.toString(progress));
 					}
 				}
+				progressBarJF.dispatchEvent(new WindowEvent(progressBarJF, WindowEvent.WINDOW_CLOSING)); // close progressbar window
 				tournamentAgentManager.printGameResults(); // print some stats to the console
 
 				// statitistische auswertung + visualisierung

@@ -4,6 +4,7 @@ import TournamentSystem.Scoring.Elo.EloCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingPeriodResults;
 import controllers.PlayAgent;
+import games.XArenaMenu;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -34,6 +35,7 @@ public class TSAgentManager {
     public JTextField gameNumJTF, numOfMovesJTF;
     private Glicko2RatingCalculator glicko2RatingSystem;
     private Glicko2RatingPeriodResults glicko2Results;
+    private int gamesPlayed;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
@@ -45,6 +47,8 @@ public class TSAgentManager {
 
         glicko2RatingSystem = new Glicko2RatingCalculator(0.06, 0.5); // todo values?
         glicko2Results = new Glicko2RatingPeriodResults();
+
+        gamesPlayed = 0;
     }
 
     /**
@@ -141,6 +145,10 @@ public class TSAgentManager {
         return selectedAGents;
     }
 
+    /**
+     * set if all HDD agents in {@link TSSettingsGUI2} should be selected
+     * @param selected selection state of hdd agent checkboxes
+     */
     public void setAllHDDAgentsSelected(boolean selected) {
         for (TSAgent agent : results.mAgents) {
             if (agent.isHddAgent()) {
@@ -149,6 +157,9 @@ public class TSAgentManager {
         }
     }
 
+    /**
+     * delete all HDD agents with a selected checkbox from tournament
+     */
     public void deleteAllHDDAgentsSelected() {
         int numAgents = getNumDiskAgents();
         Iterator<TSAgent> i = results.mAgents.iterator();
@@ -265,6 +276,7 @@ public class TSAgentManager {
             t[1] = new TSTimeStorage();
         }
         results.nextGame = 0;
+        gamesPlayed = 0;
     }
 
     /**
@@ -336,6 +348,8 @@ public class TSAgentManager {
 
         if (results.gameResult[results.nextGame][0]+results.gameResult[results.nextGame][1]+results.gameResult[results.nextGame][2] == results.numberOfGames)
             results.nextGame++;
+
+        gamesPlayed++;
 
         results.tournamentDone = false;
     }
@@ -677,11 +691,27 @@ public class TSAgentManager {
         TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm), scatterPlotASvT);
     }
 
+    /**
+     * load a saved {@link TSResultStorage} from disk, load it and open the result window {@link TSResultWindow}.
+     * Gets called in {@link XArenaMenu#generateTournamentMenu()} via the top menu.
+     * @param tsr instance of {@link TSResultStorage} loaded from disk. Is NULL if the FileChooser is closed
+     *            without a file chosen
+     */
     public void loadAndShowTSFromDisk(TSResultStorage tsr) {
+        if (tsr == null)
+            return;
         // load ts results from disk
         results = tsr;
         // visualize
-        if (results != null)
-            makeStats();
+        makeStats();
+    }
+
+    /**
+     * returns the current tournament progress
+     * @return [ rounds played , total number of rounds]
+     */
+    public int[] getTSProgress() {
+        int[] i = {gamesPlayed, results.gamePlan.length*results.numberOfGames };
+        return i;
     }
 }
