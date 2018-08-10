@@ -652,4 +652,11 @@ public class TSAgentManager {
         TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm), scatterPlotASvT);
     }
 
+    public void loadAndShowTSFromDisk(TSResultStorage tsr) {
+        // load ts results from disk
+        results = tsr;
+        // visualize
+        if (results != null)
+            makeStats();
+    }
 }

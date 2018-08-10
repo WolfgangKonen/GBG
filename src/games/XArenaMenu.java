@@ -13,6 +13,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import TournamentSystem.TSAgentManager;
+import TournamentSystem.TSResultStorage;
 import TournamentSystem.TSSettingsGUI2;
 import controllers.AgentBase;
 import controllers.ExpectimaxNAgent;
@@ -404,7 +406,7 @@ public class XArenaMenu extends JMenuBar {
 		menu.add(menuItem);
 		*/
 
-		menuItem = new JMenuItem("Start TS GUI v2");
+		menuItem = new JMenuItem("Start Tournament System");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//JOptionPane.showMessageDialog(null, "menu item #2 clicked");
@@ -415,21 +417,26 @@ public class XArenaMenu extends JMenuBar {
 				}
 			}
 		});
-		menuItem.setToolTipText("<html><body>Start TS GUI v2</body></html>");
+		menuItem.setToolTipText("<html><body>Start Tournament System GUI</body></html>");
 		menu.add(menuItem);
 		//add(menuItem);
 
-		/*
-		menuItem = new JMenuItem("menuitem#3");
+		menuItem = new JMenuItem("Load&Show Results from Disk");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//m_arena.m_xab.helpFunction();
-				JOptionPane.showMessageDialog(null, "menu item #3 clicked");
+				//JOptionPane.showMessageDialog(null, "menu item #3 clicked");
+				TSAgentManager mTSAgentManager = new TSAgentManager();
+				try {
+					TSResultStorage tsr = m_arena.tdAgentIO.loadGBGTSResult(null);
+					mTSAgentManager.loadAndShowTSFromDisk(tsr);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null, "ERROR : file could not be loaded");
+				}
 			}
 		});
-		menuItem.setToolTipText("<html><body>Start menu item #3</body></html>");
+		menuItem.setToolTipText("<html><body>Load and Visualize saved Tournament Data from Disk</body></html>");
 		menu.add(menuItem);
-		*/
 
 		add(menu);
 	}

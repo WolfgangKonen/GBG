@@ -70,13 +70,13 @@ public class TSSettingsGUI2 extends JFrame {
 
 
         if (mArena.getGameBoard().getDefaultStartState().isDeterministicGame()) {
-            System.out.println(TAG+"game is deterministic");
+            //System.out.println(TAG+"game is deterministic");
             mTSAgentManager.addAgent("StandardMaxN", Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
             mTSAgentManager.addAgent("StandardMCTS", Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
             expectimaxNCheckBox.setVisible(false);
             MCTSExpectimaxCheckBox.setVisible(false);
         } else {
-            System.out.println(TAG+"game is not deterministic");
+            //System.out.println(TAG+"game is not deterministic");
             mTSAgentManager.addAgent("StandardExpectimaxN", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
             mTSAgentManager.addAgent("StandardMCTSExpectimax", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
             maxNCheckBox.setVisible(false);
@@ -110,6 +110,7 @@ public class TSSettingsGUI2 extends JFrame {
                 } else {
                     // not done - cannot be opened
                     System.out.println(TAG+"ERROR :: Tournament is not done, cannot reopen stats");
+                    JOptionPane.showMessageDialog(null, "ERROR: Tournament is not done, cannot reopen stats");
                 }
             }
         });
@@ -118,6 +119,7 @@ public class TSSettingsGUI2 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (mArena.taskState != ArenaTrain.Task.IDLE) {
                     System.out.println(TAG+"ERROR :: ARENA is not IDLE, cannot save tournament, aborting");
+                    JOptionPane.showMessageDialog(null, "ERROR: Arena not IDLE");
                     return;
                 }
                 if (mTSAgentManager.results.tournamentDone) {
@@ -129,9 +131,12 @@ public class TSSettingsGUI2 extends JFrame {
                         str = ioe.getMessage();
                     }
                     System.out.println(TAG+"[SaveTournament] "+str);
+                } else {
+                    JOptionPane.showMessageDialog(null, "ERROR: Tournament not done!");
                 }
             }
         });
+        loadResultsFromDiskButton.setVisible(false); // hide button for now to move it to TS Menu
         loadResultsFromDiskButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -162,6 +167,9 @@ public class TSSettingsGUI2 extends JFrame {
             e.printStackTrace();
             return;
         }
+
+        if (agentsAndFileNames == null) // avoids crash when filedialog is closed with no file chosen
+            return;
 
         for (int i = 0; i < agentsAndFileNames.getSize(); i++) {
             PlayAgent playAgent = agentsAndFileNames.getPlayAgent(i);

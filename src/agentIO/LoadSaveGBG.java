@@ -404,6 +404,128 @@ public class LoadSaveGBG {
 	}
 
 	/**
+	 * load saved tournament results from disk to reopne visualisation
+	 * @param filePath		if null, open a file choose dialog. If not null, open this fully
+	 * 						qualified file with suffix .tsr.zip.
+	 * @return				the tournament result loaded
+	 * @throws IOException	error while loading the file from disk
+	 */
+	public TSResultStorage loadGBGTSResult(String filePath) throws IOException {
+		ObjectInputStream ois;
+		FileInputStream fis = null;
+		File file = null;
+		TSResultStorage tsr = null;
+
+		if (filePath==null) {
+			String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
+			String subDir = arenaGame.getGameBoard().getSubDir();
+			if (subDir != null){
+				strDir += "/"+subDir;
+			}
+			strDir += "/TSR/";
+			tools.Utils.checkAndCreateFolder(strDir);
+
+			fc.removeChoosableFileFilter(txtExt);
+			fc.setFileFilter(tdTSRExt);
+			fc.setCurrentDirectory(new File(strDir));
+			fc.setAcceptAllFileFilterUsed(false);
+
+			int returnVal = fc.showOpenDialog(arenaGame);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				try {
+					file = fc.getSelectedFile();
+					filePath = file.getPath();
+					fis = new FileInputStream(filePath);
+				} catch (IOException e) {
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+					//e.printStackTrace();
+					throw e;
+				}
+			} else {
+				arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
+			}
+		} else {	// i.e. if filePath is not null
+			try {
+				file = new File(filePath);
+				fis = new FileInputStream(filePath);
+			} catch (IOException e) {
+				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+				//e.printStackTrace();
+				throw e;
+			}
+		}
+
+		if (fis != null) {
+			GZIPInputStream gs;
+			try {
+				gs = new GZIPInputStream(fis);
+			} catch (IOException e1) {
+				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
+				throw e1;
+			}
+
+			long fileLength = (long) (estimateGZIPLength(file));
+			final ProgressTrackingObjectInputStream ptis = new ProgressTrackingObjectInputStream(
+					gs, new agentIO.IOProgress(fileLength));
+			try {
+				ois = new ObjectInputStream(ptis);
+			} catch (IOException e1) {
+				ptis.close();
+				arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
+				throw e1;
+			}
+
+			final JDialog dlg = createProgressDialog(ptis, "Loading...");
+
+			try {
+				// ois = new ObjectInputStream(gs);
+				Object obj = ois.readObject();
+				if (obj instanceof TSResultStorage) {
+					tsr = (TSResultStorage) obj;
+				} else {
+					dlg.setVisible(false);
+					MessageBox.show(arenaFrame,"ERROR: TSR class "+obj.getClass().getName()+" loaded from "
+							+ filePath + " not processable", "Unknown TS Class", JOptionPane.ERROR_MESSAGE);
+					arenaGame.setStatusMessage("[ERROR: Could not load TSR from "+ filePath + "!]");
+					throw new ClassNotFoundException("ERROR: Unknown TSR class");
+				}
+				dlg.setVisible(false);
+				arenaGame.setProgress(null);
+				arenaGame.setStatusMessage("Done.");
+			} catch (IOException e) {
+				dlg.setVisible(false);
+				MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
+						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+				//e.printStackTrace();
+				//throw e;
+			} catch (ClassNotFoundException e) {
+				dlg.setVisible(false);
+				MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
+						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+				//throw e;
+			} finally {
+				if (ois != null)
+					try {
+						ois.close();
+					} catch (IOException e) {
+						//...
+					}
+				if (fis != null)
+					try {
+						fis.close();
+					} catch (IOException e) {
+						//...
+					}
+			}
+		}
+
+		return tsr;
+	}
+
+	/**
 	 * @throws IOException
 	 */
 	public TSDiskAgentDataTransfer loadMultipleGBGAgent() throws IOException {
