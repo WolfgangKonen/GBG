@@ -43,6 +43,8 @@ public class TSResultWindow extends JFrame {
     private JButton hideAllTablesButton;
     private JButton showAllTablesButton;
     private JLabel startDateTSJL;
+    private JScrollPane jspHM2;
+    private JLabel heatmap2JL;
 
     /**
      * create the result window with the tournament statistics with data provided from {@link TSAgentManager}
@@ -51,10 +53,11 @@ public class TSResultWindow extends JFrame {
      * @param m3 table with agent score ranking
      * @param m4 table with detailed time measurements
      * @param imageIcon heatmap with visualisation of WTL scores
+     * @param imageIcon2 heatmap with visualisation of WTL scores sorted vertically by score
      * @param scatterPlotASvT scatterplot of the agents score vs round time
      * @param startDate
      */
-    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon, ChartPanel scatterPlotASvT, String startDate) {
+    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon, ImageIcon imageIcon2, ChartPanel scatterPlotASvT, String startDate) {
         super("Turnier Ergebnisse");
 
         $$$setupUI$$$();
@@ -80,6 +83,8 @@ public class TSResultWindow extends JFrame {
         renderer2.setHorizontalAlignment(JLabel.RIGHT);
         heatmapJL.setText("");
         heatmapJL.setIcon(imageIcon);
+        heatmap2JL.setText("");
+        heatmap2JL.setIcon(imageIcon2);
         scatterPlotJPanel.add(scatterPlotASvT);
 
         jspWTL.setVisible(showjspWTL);

@@ -278,6 +278,19 @@ public class TSSettingsGUI2 extends JFrame {
         System.out.println(TAG + "numGamesPerMatch: " + numGamesPerMatch);
         mTSAgentManager.setNumberOfGames(numGamesPerMatch);
 
+        if (addNRandomMovesCheckBox.isSelected()) {
+            try {
+                mTSAgentManager.setNumberOfRandomStartMoves(Integer.parseInt(numOfMovesTextField.getText()));
+            } catch (NumberFormatException n) {
+                n.printStackTrace();
+                System.out.println(TAG + "ERROR :: not a valid number was entered in NRandomStartMoves Textfield. Using value 0");
+                mTSAgentManager.setNumberOfRandomStartMoves(0);
+            }
+        }
+        else {
+            mTSAgentManager.setNumberOfRandomStartMoves(0);
+        }
+
         mTSAgentManager.setAutoSaveAfterTS(autoSaveAfterTSFinishedCheckBox.isSelected());
         mTSAgentManager.setResultsStartDate();
 

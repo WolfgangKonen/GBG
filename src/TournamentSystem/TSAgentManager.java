@@ -87,6 +87,14 @@ public class TSAgentManager {
     }
 
     /**
+     * set number of random startmoves per game
+     * @param num number of random start moves
+     */
+    public void setNumberOfRandomStartMoves(int num) {
+        results.numberOfRandomStartMoves = num;
+    }
+
+    /**
      * add a new agent to the tournament
      * @param name agent name
      * @param agent agent type
@@ -166,7 +174,7 @@ public class TSAgentManager {
         int tmp = 0;
         for (TSAgent agent : results.mAgents) {
             if (agent.guiCheckBox.isSelected()) {
-                selectedAGents[tmp++] = agent.getAgentType();
+                selectedAGents[tmp++] = agent.getName();
             }
         }
         return selectedAGents;
@@ -540,10 +548,13 @@ public class TSAgentManager {
                 "WonGameRatio"
         };
         Object[][] rowData4 = new Object[getNumAgentsSelected()][columnNames4.length];
-        TSAgent[] rankAgents = new TSAgent[getNumAgentsSelected()];
+        TSHMDataStorage[] rankAgents = new TSHMDataStorage[getNumAgentsSelected()]; // needed to pack agent and heatmap data into one to share sorting
         int[] selectedAgents = getIDAgentsSelected();
         for (int i=0; i<selectedAgents.length; i++) {
-            rankAgents[i] = results.mAgents.get(selectedAgents[i]);
+            rankAgents[i] = new TSHMDataStorage(); // must init to avoid NullPointerEX
+            rankAgents[i].agent = results.mAgents.get(selectedAgents[i]);
+            rankAgents[i].hmScoreValues = rowDataHM[i];
+            //System.out.println("DEVDEV "+rankAgents[i].agent.getName()+" -- "+Arrays.toString(rowDataHM[i]));
         }
 
         // sort rankAgent array by agent WTL score
@@ -560,9 +571,9 @@ public class TSAgentManager {
         });
         */
         Arrays.sort(rankAgents, (entry1, entry2) -> { // same as above
-            if (entry1.getAgentScore()>entry2.getAgentScore())
+            if (entry1.agent.getAgentScore()>entry2.agent.getAgentScore())
                 return -1;
-            if (entry1.getAgentScore()<entry2.getAgentScore())
+            if (entry1.agent.getAgentScore()<entry2.agent.getAgentScore())
                 return +1;
             return 0;
         });
@@ -574,26 +585,26 @@ public class TSAgentManager {
             // "Rank"
             rowData4[i][0] = ""+(i+1);
             // "Agent"
-            rowData4[i][1] = rankAgents[i].getName();
+            rowData4[i][1] = rankAgents[i].agent.getName();
             // "Games Won"
-            rowData4[i][2] = rankAgents[i].getCountWonGames();
+            rowData4[i][2] = rankAgents[i].agent.getCountWonGames();
             // "Games Tie"
-            rowData4[i][3] = rankAgents[i].getCountTieGames();
+            rowData4[i][3] = rankAgents[i].agent.getCountTieGames();
             // "Games Lost"
-            rowData4[i][4] = rankAgents[i].getCountLostGames();
+            rowData4[i][4] = rankAgents[i].agent.getCountLostGames();
             // "WTL Score"
-            rowData4[i][5] = rankAgents[i].getAgentScore();
+            rowData4[i][5] = rankAgents[i].agent.getAgentScore();
             // "FIDE Elo"
-            rowData4[i][6] = rankAgents[i].mEloPlayerFIDE.getEloRating();
+            rowData4[i][6] = rankAgents[i].agent.mEloPlayerFIDE.getEloRating();
             // "USCF Elo"
-            rowData4[i][7] = rankAgents[i].mEloPlayerUSCF.getEloRating();
+            rowData4[i][7] = rankAgents[i].agent.mEloPlayerUSCF.getEloRating();
             // "Glicko2"
             //rowData4[i][8] = rankAgents[i].mGlicko2Rating.getRating();
             NumberFormat formatter1 = new DecimalFormat("#0.00");
-            rowData4[i][8] = formatter1.format(rankAgents[i].mGlicko2Rating.getRating());
+            rowData4[i][8] = formatter1.format(rankAgents[i].agent.mGlicko2Rating.getRating());
             // "WonGameRatio"
-            float w = rankAgents[i].getCountWonGames();
-            float a = rankAgents[i].getCountAllGames();
+            float w = rankAgents[i].agent.getCountWonGames();
+            float a = rankAgents[i].agent.getCountAllGames();
             float f = w/a;
             NumberFormat formatter2 = new DecimalFormat("#0.00");
             rowData4[i][9] = formatter2.format(f*100)+"%";
@@ -605,6 +616,24 @@ public class TSAgentManager {
         // center align column entries
         DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableAgentScore.getDefaultRenderer(Object.class);
         renderer.setHorizontalAlignment( JLabel.CENTER );
+
+        /**
+         * HeatMap2 | Agent Scores sorted by Scores
+         */
+        // create Score HeatMap
+        double[][] dataHM2 = new double[rowDataHM.length][rowDataHM[0].length];
+        Object[] agentNamesX = getNamesAgentsSelected();
+        Object[] agentNamesY = new Object[rankAgents.length];
+        for (int i=0; i<rankAgents.length; i++) {
+            agentNamesY[i] = rankAgents[i].agent.getName();
+            dataHM2[i] = rankAgents[i].hmScoreValues;
+        }
+        HeatChart map2 = new HeatChart(dataHM2);
+        map2.setXValues(agentNamesX);
+        map2.setYValues(agentNamesY);
+        map2.setCellSize(new Dimension(25,25));
+        Image hm2 = map2.getChartImage();
+
 
         /**
          * Scatterplot | AgentScore vs Time
@@ -711,11 +740,14 @@ public class TSAgentManager {
         DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
         renderer2.setHorizontalAlignment( JLabel.RIGHT );
 
+        String startDate = results.startDate+" | Games per Match: "+results.numberOfGames+" | Number of random Startmoves: "+results.numberOfRandomStartMoves;
+
         /**
          * TS Results in a window
          */
 
-        TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm), scatterPlotASvT, results.startDate);
+        TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail,
+                new ImageIcon(hm), new ImageIcon(hm2), scatterPlotASvT, startDate);
     }
 
     /**
@@ -740,5 +772,10 @@ public class TSAgentManager {
     public int[] getTSProgress() {
         int[] i = {gamesPlayed, results.gamePlan.length*results.numberOfGames };
         return i;
+    }
+
+    public class TSHMDataStorage{
+        public TSAgent agent;
+        public double[] hmScoreValues;
     }
 }
