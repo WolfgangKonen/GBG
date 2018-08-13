@@ -44,6 +44,7 @@ public class TSSettingsGUI2 extends JFrame {
     private JButton selectAllHDDAgentsButton;
     private JButton unselectAllHDDAgentsButton;
     private JButton deleteSelectedHDDAgentsButton;
+    private JCheckBox autoSaveAfterTSFinishedCheckBox;
     private JScrollPane checkBoxScrollPane;
 
     private Arena mArena;
@@ -276,6 +277,8 @@ public class TSSettingsGUI2 extends JFrame {
         }
         System.out.println(TAG + "numGamesPerMatch: " + numGamesPerMatch);
         mTSAgentManager.setNumberOfGames(numGamesPerMatch);
+
+        mTSAgentManager.setAutoSaveAfterTS(autoSaveAfterTSFinishedCheckBox.isSelected());
 
         System.out.println(TAG + "Startbutton clicked | checkbox states:");
         // durch alle checkboxen der agenten iterieren

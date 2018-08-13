@@ -36,6 +36,7 @@ public class TSAgentManager {
     private Glicko2RatingCalculator glicko2RatingSystem;
     private Glicko2RatingPeriodResults glicko2Results;
     private int gamesPlayed;
+    private boolean autoSaveAfterTS;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
@@ -49,6 +50,23 @@ public class TSAgentManager {
         glicko2Results = new Glicko2RatingPeriodResults();
 
         gamesPlayed = 0;
+        autoSaveAfterTS = false;
+    }
+
+    /**
+     * en/disable automatically saving the tournament results to disk after TS is done
+     * @param b true:enable, false:disable (standard:disabled)
+     */
+    public void setAutoSaveAfterTS(boolean b) {
+        autoSaveAfterTS = b;
+    }
+
+    /**
+     * did the user enable auto save of results after TS is done
+     * @return boolean if auto save enabled after TS
+     */
+    public boolean getAutoSaveAfterTS() {
+        return autoSaveAfterTS;
     }
 
     /**

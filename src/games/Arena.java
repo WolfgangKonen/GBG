@@ -272,6 +272,13 @@ abstract public class Arena extends JFrame implements Runnable {
 
 				// statitistische auswertung + visualisierung
 				tournamentAgentManager.makeStats(); // calc data and create result stats window
+				if (tournamentAgentManager.getAutoSaveAfterTS()) {
+					try {
+						tdAgentIO.saveTSResult(tournamentAgentManager.results, true);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 
 				// clean up
 				System.out.println(TAG+"Tournament done, cleaning up");

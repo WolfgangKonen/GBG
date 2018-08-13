@@ -24,6 +24,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -92,14 +94,30 @@ public class LoadSaveGBG {
 	// Menu: Save Agent
 	// ==============================================================
 	public void saveGBGAgent(PlayAgent pa) throws IOException {
-		saveGBGHelper(pa, null);
+		saveGBGHelper(pa, null, false);
 	}
 
+	/**
+	 * save tournament results to disk with a filechooser to set name and folder
+	 * @param tsr tournament results
+	 * @throws IOException file not writable
+	 */
 	public void saveTSResult(TSResultStorage tsr) throws IOException {
-		saveGBGHelper(null, tsr);
+		saveGBGHelper(null, tsr, false);
 	}
 
-	private void saveGBGHelper(PlayAgent pa, TSResultStorage tsr) throws IOException {
+	/**
+	 * save tournament results to disk with a filechooser to set name and folder.
+	 * if autoSave is enabled, theres no filechooser and a generic date based name will be used
+	 * @param tsr tournament results
+	 * @param autoSave use autoSave
+	 * @throws IOException file not writeable
+	 */
+	public void saveTSResult(TSResultStorage tsr, boolean autoSave) throws IOException {
+		saveGBGHelper(null, tsr, autoSave);
+	}
+
+	private void saveGBGHelper(PlayAgent pa, TSResultStorage tsr, final boolean autoSaveEnabled) throws IOException {
 		if (pa != null && tsr != null) {
 			System.out.println(TAG+"ERROR :: saveGBGHelper - pa and tsr handed over, just give one, aborting save");
 			return;
@@ -122,12 +140,24 @@ public class LoadSaveGBG {
 		fc.setCurrentDirectory(new File(strDir));
 		fc.setAcceptAllFileFilterUsed(false);
 
-		int returnVal = fc.showSaveDialog(arenaGame);
+		int returnVal;
+		if (autoSaveEnabled)
+			returnVal = JFileChooser.APPROVE_OPTION;
+		else
+			returnVal = fc.showSaveDialog(arenaGame);
 		String filePath;
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file;
-			String path = fc.getSelectedFile().getPath();
+			String path;
+
+			if (autoSaveEnabled) {
+				String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
+				String autoSaveFilename = "TSResultAutoSave";
+				path = strDir + autoSaveFilename+"_"+currDateTime;
+			}
+			else
+				path = fc.getSelectedFile().getPath();
 
 			if (pa != null) {
 				if (!path.toLowerCase().endsWith(".agt.zip")) {
