@@ -113,7 +113,7 @@ public class TSSettingsGUI2 extends JFrame {
                     mTSAgentManager.makeStats();
                 } else {
                     // not done - cannot be opened
-                    System.out.println(TAG+"ERROR :: Tournament is not done, cannot reopen stats");
+                    System.out.println(TAG + "ERROR :: Tournament is not done, cannot reopen stats");
                     JOptionPane.showMessageDialog(null, "ERROR: Tournament is not done, cannot reopen stats");
                 }
             }
@@ -122,7 +122,7 @@ public class TSSettingsGUI2 extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (mArena.taskState != ArenaTrain.Task.IDLE) {
-                    System.out.println(TAG+"ERROR :: ARENA is not IDLE, cannot save tournament, aborting");
+                    System.out.println(TAG + "ERROR :: ARENA is not IDLE, cannot save tournament, aborting");
                     JOptionPane.showMessageDialog(null, "ERROR: Arena not IDLE");
                     return;
                 }
@@ -131,10 +131,10 @@ public class TSSettingsGUI2 extends JFrame {
                     try {
                         mArena.tdAgentIO.saveTSResult(mTSAgentManager.results);
                         str = "Saved Tournament!";
-                    } catch(IOException ioe) {
+                    } catch (IOException ioe) {
                         str = ioe.getMessage();
                     }
-                    System.out.println(TAG+"[SaveTournament] "+str);
+                    System.out.println(TAG + "[SaveTournament] " + str);
                 } else {
                     JOptionPane.showMessageDialog(null, "ERROR: Tournament not done!");
                 }
@@ -145,7 +145,7 @@ public class TSSettingsGUI2 extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (mArena.taskState != ArenaTrain.Task.IDLE) {
-                    System.out.println(TAG+"ERROR :: ARENA is not IDLE, cannot load tournament, aborting");
+                    System.out.println(TAG + "ERROR :: ARENA is not IDLE, cannot load tournament, aborting");
                     return;
                 }
                 JOptionPane.showMessageDialog(null, "Function not yet implemented");
@@ -180,7 +180,7 @@ public class TSSettingsGUI2 extends JFrame {
      */
     private void loadAgentFromDisk() {
         if (mArena.taskState != ArenaTrain.Task.IDLE) {
-            System.out.println(TAG+"ERROR :: ARENA is not IDLE, dont try to change data while its working, aborting");
+            System.out.println(TAG + "ERROR :: ARENA is not IDLE, dont try to change data while its working, aborting");
             return;
         }
 
@@ -262,7 +262,7 @@ public class TSSettingsGUI2 extends JFrame {
      */
     private void playPressed() {
         if (mArena.taskState != ArenaTrain.Task.IDLE) {
-            System.out.println(TAG+"ERROR :: ARENA is not IDLE, cannot start tournament, aborting");
+            System.out.println(TAG + "ERROR :: ARENA is not IDLE, cannot start tournament, aborting");
             return;
         }
 
@@ -286,8 +286,7 @@ public class TSSettingsGUI2 extends JFrame {
                 System.out.println(TAG + "ERROR :: not a valid number was entered in NRandomStartMoves Textfield. Using value 0");
                 mTSAgentManager.setNumberOfRandomStartMoves(0);
             }
-        }
-        else {
+        } else {
             mTSAgentManager.setNumberOfRandomStartMoves(0);
         }
 
@@ -423,24 +422,25 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(TDSCheckBox, gbc);
         startButton = new JButton();
+        startButton.setForeground(new Color(-16732416));
         startButton.setText("Start");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 24;
+        gbc.gridy = 32;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(startButton, gbc);
         final JLabel label2 = new JLabel();
         label2.setText("Games per Match");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 17;
+        gbc.gridy = 23;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label2, gbc);
         gameNumTextField = new JTextField();
         gameNumTextField.setText("1");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 18;
+        gbc.gridy = 24;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(gameNumTextField, gbc);
@@ -461,14 +461,14 @@ public class TSSettingsGUI2 extends JFrame {
         final JPanel spacer4 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 30;
+        gbc.gridy = 39;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer4, gbc);
         final JPanel spacer5 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 19;
+        gbc.gridy = 25;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer5, gbc);
@@ -483,28 +483,28 @@ public class TSSettingsGUI2 extends JFrame {
         addNRandomMovesCheckBox.setText("Add n random moves at start");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 20;
+        gbc.gridy = 26;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(addNRandomMovesCheckBox, gbc);
         numOfMovesTextField = new JTextField();
         numOfMovesTextField.setText("2");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 22;
+        gbc.gridy = 28;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(numOfMovesTextField, gbc);
         final JLabel label3 = new JLabel();
-        label3.setText("Number of moves");
+        label3.setText("Number of moves:");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 21;
+        gbc.gridy = 27;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label3, gbc);
         final JPanel spacer6 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 23;
+        gbc.gridy = 29;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer6, gbc);
@@ -517,34 +517,34 @@ public class TSSettingsGUI2 extends JFrame {
         saveResultsToDiskButton.setText("Save Results to Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 28;
+        gbc.gridy = 37;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(saveResultsToDiskButton, gbc);
         final JPanel spacer7 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 27;
+        gbc.gridy = 36;
         gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.insets = new Insets(0, 0, 1, 0);
         mJPanel.add(spacer7, gbc);
         loadResultsFromDiskButton = new JButton();
         loadResultsFromDiskButton.setText("Load Results from Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 29;
+        gbc.gridy = 38;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(loadResultsFromDiskButton, gbc);
         reopenStatisticsButton = new JButton();
         reopenStatisticsButton.setText("Reopen Statistics");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 26;
+        gbc.gridy = 35;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(reopenStatisticsButton, gbc);
         final JPanel spacer8 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 25;
+        gbc.gridy = 33;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 5, 0);
         mJPanel.add(spacer8, gbc);
@@ -572,10 +572,74 @@ public class TSSettingsGUI2 extends JFrame {
         final JPanel spacer11 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 16;
+        gbc.gridy = 22;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer11, gbc);
+        final JLabel label5 = new JLabel();
+        label5.setText("After the Tournament:");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 34;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(label5, gbc);
+        selectAllHDDAgentsButton = new JButton();
+        selectAllHDDAgentsButton.setText("select All HDD Agents");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 17;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(selectAllHDDAgentsButton, gbc);
+        unselectAllHDDAgentsButton = new JButton();
+        unselectAllHDDAgentsButton.setText("unselect All HDD Agents");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 19;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(unselectAllHDDAgentsButton, gbc);
+        deleteSelectedHDDAgentsButton = new JButton();
+        deleteSelectedHDDAgentsButton.setForeground(new Color(-65536));
+        deleteSelectedHDDAgentsButton.setText("delete selected HDD Agents");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 21;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(deleteSelectedHDDAgentsButton, gbc);
+        final JPanel spacer12 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 16;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 5, 0);
+        mJPanel.add(spacer12, gbc);
+        final JPanel spacer13 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 18;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 1, 0);
+        mJPanel.add(spacer13, gbc);
+        final JPanel spacer14 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 20;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 1, 0);
+        mJPanel.add(spacer14, gbc);
+        autoSaveAfterTSFinishedCheckBox = new JCheckBox();
+        autoSaveAfterTSFinishedCheckBox.setText("AutoSave after TS finished");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 30;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(autoSaveAfterTSFinishedCheckBox, gbc);
+        final JPanel spacer15 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 31;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        mJPanel.add(spacer15, gbc);
     }
 
     /**

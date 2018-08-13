@@ -141,7 +141,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 	public void init() {
 		// this causes Arena.run() to be executed as a separate thread
-		playThread = new Thread(this);
+		playThread = new Thread(this, "Arena playThread");
 		playThread.start();
 	}
 
@@ -260,6 +260,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					}
 					else {
 						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
+						//System.gc(); // todo reduziert RAM Problem aber nicht handle leak
 
 						// progressbar
 						int[] progress = tournamentAgentManager.getTSProgress();
