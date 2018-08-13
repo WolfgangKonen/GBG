@@ -87,9 +87,11 @@ public class TSSettingsGUI2 extends JFrame {
             MCTSCheckBox.setVisible(false);
         }
 
-        // enable en/disabling of textfield later on in arena
+        // enable en/disabling of textfield/settings checkboxen later on in arena
         mTSAgentManager.gameNumJTF = gameNumTextField;
         mTSAgentManager.numOfMovesJTF = numOfMovesTextField;
+        mTSAgentManager.nRandomJCB = addNRandomMovesCheckBox;
+        mTSAgentManager.autoSaveAfterTSJCB = autoSaveAfterTSFinishedCheckBox;
 
         startButton.addActionListener(new ActionListener() {
             @Override

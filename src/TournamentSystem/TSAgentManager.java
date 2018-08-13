@@ -35,6 +35,7 @@ public class TSAgentManager {
     private final String TAG = "[TSAgentManager] ";
     public TSResultStorage results;
     public JTextField gameNumJTF, numOfMovesJTF;
+    public JCheckBox nRandomJCB, autoSaveAfterTSJCB;
     private Glicko2RatingCalculator glicko2RatingSystem;
     private Glicko2RatingPeriodResults glicko2Results;
     private int gamesPlayed;
@@ -118,23 +119,16 @@ public class TSAgentManager {
     }
 
     /**
-     * disables all checkboxes in {@link TSSettingsGUI2}, to be used before start of tournament
+     * enables all checkboxes and textfields in {@link TSSettingsGUI2}, to be used before and after tournament
+     * @param state true enables gui elements of TS settings GUI
      */
-    public void disableAllAgentCheckboxen() {
+    public void setSettingsGUIElementsEnabled(boolean state) {
         for (TSAgent tsa : results.mAgents)
-            tsa.guiCheckBox.setEnabled(false);
-        gameNumJTF.setEnabled(false);
-        numOfMovesJTF.setEnabled(false);
-    }
-
-    /**
-     * enables all checkboxes in {@link TSSettingsGUI2}, to be used after end of tournament
-     */
-    public void enableAllAgentCheckboxen() {
-        for (TSAgent tsa : results.mAgents)
-            tsa.guiCheckBox.setEnabled(true);
-        gameNumJTF.setEnabled(true);
-        numOfMovesJTF.setEnabled(true);
+            tsa.guiCheckBox.setEnabled(state);
+        gameNumJTF.setEnabled(state);
+        numOfMovesJTF.setEnabled(state);
+        nRandomJCB.setEnabled(state);
+        autoSaveAfterTSJCB.setEnabled(state);
     }
 
     /**

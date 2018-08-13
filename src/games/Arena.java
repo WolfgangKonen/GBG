@@ -227,7 +227,7 @@ abstract public class Arena extends JFrame implements Runnable {
 			case TRNEMNT:
 				// Tournament Code
 				tournamentAgentManager.lockToCompete();
-				tournamentAgentManager.disableAllAgentCheckboxen();
+				tournamentAgentManager.setSettingsGUIElementsEnabled(false);
 
 				JFrame progressBarJF = new JFrame();
 				progressBarJF.setSize(300, 100);
@@ -284,7 +284,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				// clean up
 				System.out.println(TAG+"Tournament done, cleaning up");
 				tournamentAgentManager.unlockAfterComp();
-				tournamentAgentManager.enableAllAgentCheckboxen();
+				tournamentAgentManager.setSettingsGUIElementsEnabled(true);
 				tournamentAgentManager = null; // delete all data to prepare for next tournament
 				taskState = Task.IDLE;
 				break;
