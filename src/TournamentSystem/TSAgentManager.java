@@ -19,6 +19,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -51,6 +53,13 @@ public class TSAgentManager {
 
         gamesPlayed = 0;
         autoSaveAfterTS = false;
+    }
+
+    /**
+     * save the start date to the result storage for result visualization
+     */
+    public void setResultsStartDate() {
+        results.startDate = "Tournament Start Date: "+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     /**
@@ -706,7 +715,7 @@ public class TSAgentManager {
          * TS Results in a window
          */
 
-        TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm), scatterPlotASvT);
+        TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail, new ImageIcon(hm), scatterPlotASvT, results.startDate);
     }
 
     /**

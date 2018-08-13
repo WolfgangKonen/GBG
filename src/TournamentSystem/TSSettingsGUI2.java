@@ -279,6 +279,7 @@ public class TSSettingsGUI2 extends JFrame {
         mTSAgentManager.setNumberOfGames(numGamesPerMatch);
 
         mTSAgentManager.setAutoSaveAfterTS(autoSaveAfterTSFinishedCheckBox.isSelected());
+        mTSAgentManager.setResultsStartDate();
 
         System.out.println(TAG + "Startbutton clicked | checkbox states:");
         // durch alle checkboxen der agenten iterieren

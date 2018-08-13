@@ -42,6 +42,7 @@ public class TSResultWindow extends JFrame {
     private JButton showHideTableASCButton;
     private JButton hideAllTablesButton;
     private JButton showAllTablesButton;
+    private JLabel startDateTSJL;
 
     /**
      * create the result window with the tournament statistics with data provided from {@link TSAgentManager}
@@ -51,14 +52,16 @@ public class TSResultWindow extends JFrame {
      * @param m4 table with detailed time measurements
      * @param imageIcon heatmap with visualisation of WTL scores
      * @param scatterPlotASvT scatterplot of the agents score vs round time
+     * @param startDate
      */
-    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon, ChartPanel scatterPlotASvT) {
+    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon, ChartPanel scatterPlotASvT, String startDate) {
         super("Turnier Ergebnisse");
 
         $$$setupUI$$$();
 
         Font lFont = new Font("Arial", Font.PLAIN, Types.GUI_DIALOGFONTSIZE);
         //tableMatrixWTL.setFont(lFont); // todo also need to set cell height according to font height
+        startDateTSJL.setText(startDate);
         tableMatrixWTL.setModel(m1);
         tableMatrixWTL.setPreferredScrollableViewportSize(
                 new Dimension(tableMatrixWTL.getPreferredSize().width, tableMatrixWTL.getRowHeight() * tableMatrixWTL.getRowCount()));
