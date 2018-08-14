@@ -2,6 +2,7 @@ package games;
 
 import TournamentSystem.TSAgent;
 import TournamentSystem.TSAgentManager;
+import TournamentSystem.TSSinglePlayerDataTransfer;
 import TournamentSystem.TSTimeStorage;
 import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
@@ -12,6 +13,7 @@ import controllers.PlayAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import params.OtherParams;
 import params.ParMCTS;
 import params.ParOther;
 import tools.MessageBox;
@@ -67,6 +69,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	// TS variables
 	private final String TAG = "[Arena] ";
 	public TSAgentManager tournamentAgentManager = null;
+	public boolean singlePlayerTSRunning = false;
 
 	public Arena() {
 		initGame();
@@ -293,8 +296,10 @@ abstract public class Arena extends JFrame implements Runnable {
 				//
 				gb.showGameBoard(this, false);
 				gb.clearBoard(false, true);
-				PlayGame();
-				enableButtons(true);
+				if (!singlePlayerTSRunning) {
+					PlayGame();
+					enableButtons(true);
+				}
 				break;
 			case INSPECTV:
 				gb.showGameBoard(this, false);
@@ -462,6 +467,10 @@ abstract public class Arena extends JFrame implements Runnable {
 	 * "X vs. O".
 	 */
 	public void PlayGame() {
+		PlayGame(null);
+	}
+
+	public void PlayGame(TSSinglePlayerDataTransfer spDT) {
 		int Player;
 		StateObservation so;
 		Types.ACTIONS_VT actBest = null;
@@ -475,14 +484,33 @@ abstract public class Arena extends JFrame implements Runnable {
 		ArrayList<PStats> psList = new ArrayList<PStats>();
 
 		// fetch the agents in a way general for 1-, 2- and N-player games
-		int numPlayers = gb.getStateObs().getNumPlayers();
+		final int numPlayers = gb.getStateObs().getNumPlayers();
 		boolean showValue = (taskState == Task.PLAY) ? m_xab.getShowValueOnGameBoard() : true;
-		boolean showStoredV = true;
+		//boolean showStoredV = true;
 
 		try {
-			paVector = m_xfun.fetchAgents(m_xab);
-			AgentBase.validTrainedAgents(paVector, numPlayers);
-			qaVector = m_xfun.wrapAgents(paVector, m_xab.oPar, gb.getStateObs());
+			if (spDT==null) { // regular non TS game
+				paVector = m_xfun.fetchAgents(m_xab);
+				AgentBase.validTrainedAgents(paVector, numPlayers);
+				qaVector = m_xfun.wrapAgents(paVector, m_xab.oPar, gb.getStateObs());
+			} else { // TS game
+				if (spDT.standardAgentSelected) {
+					// GBG standard agent
+					m_xab.enableTournamentRemoteData(spDT.agent);
+					paVector = m_xfun.fetchAgents(m_xab);
+					m_xab.disableTournamentRemoteData();AgentBase.validTrainedAgents(paVector, numPlayers);
+					qaVector = m_xfun.wrapAgents(paVector, m_xab.oPar, gb.getStateObs());
+				} else {
+					// HDD agent
+					paVector = spDT.getPlayAgents();
+					OtherParams[] hddPar = new OtherParams[2];
+					hddPar[0] = new OtherParams();
+					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
+					hddPar[1] = new OtherParams();
+					hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
+					qaVector = m_xfun.wrapAgents(paVector, hddPar, gb.getStateObs());
+				}
+			}
 		} catch (RuntimeException e) {
 			MessageBox.show(m_xab, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;
@@ -528,8 +556,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		// if taskBefore==INSPECTV, start from the board left by InspectV,
 		// if taskBefore!=INSPECTV, select here the start state:
 		if (taskBefore != Task.INSPECTV) {
-			gb.clearBoard(true, true); // reset game board to default start
-										// state
+			gb.clearBoard(true, true); // reset game board to default start state
 			if (m_xab.oPar[0].useChooseStart01()) {
 				// this is mandatory for games like RubiksCube (but possible
 				// also for other games):
@@ -579,6 +606,8 @@ abstract public class Arena extends JFrame implements Runnable {
 							long endTNano = System.nanoTime();
 							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
 							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+							if (spDT!=null)
+								spDT.timeStorage[0].addNewTimeNS(endTNano-startTNano);
 						}
 
 						so.storeBestActionInfo(actBest, actBest.getVTable());
@@ -650,13 +679,17 @@ abstract public class Arena extends JFrame implements Runnable {
 					// in..." text in leftInfo:
 					gb.updateBoard(so, false, showValue);
 
-					switch (so.getNumPlayers()) {
+					//switch (so.getNumPlayers()) {
+					switch (numPlayers) {
 					case 1:
 						double gScore = so.getGameScore();
 						if (so instanceof StateObserver2048)
 							gScore *= StateObserver2048.MAXSCORE;
-						MessageBox.show(m_LaunchFrame, "Game finished with score " + gScore, "Game Over",
+						if (!singlePlayerTSRunning)
+							MessageBox.show(m_LaunchFrame, "Game finished with score " + gScore, "Game Over",
 								JOptionPane.INFORMATION_MESSAGE);
+						if (spDT!=null)
+							spDT.agent[0].setSinglePlayScore(gScore);
 						break; // out of switch
 					case 2:
 						int win = so.getGameWinner().toInt();
@@ -717,7 +750,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		logManager.endLoggingSession(logSessionid);
 		taskState = Task.IDLE;
 		setStatusMessage("Done.");
-	}
+	} // PlayGame()
 
 	/**
 	 * For debugging 2048 during {@link #PlayGame()}: This function is only

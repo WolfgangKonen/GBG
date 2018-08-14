@@ -4,6 +4,7 @@ import TournamentSystem.Scoring.Elo.EloCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingPeriodResults;
 import controllers.PlayAgent;
+import games.Arena;
 import games.XArenaMenu;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -40,12 +41,13 @@ public class TSAgentManager {
     private Glicko2RatingPeriodResults glicko2Results;
     private int gamesPlayed;
     private boolean autoSaveAfterTS;
+    private final int numPlayers;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
     public static final float faktorLos = 0.0f;
 
-    public TSAgentManager() {
+    public TSAgentManager(int gameNumberOfPlayers) {
         results = new TSResultStorage();
         results.mAgents = new ArrayList<>();
 
@@ -54,6 +56,7 @@ public class TSAgentManager {
 
         gamesPlayed = 0;
         autoSaveAfterTS = false;
+        numPlayers = gameNumberOfPlayers;
     }
 
     /**
@@ -215,7 +218,10 @@ public class TSAgentManager {
 
         for (int i=0; i<internalGamePlan.length; i++) {
             gamePlan[i][0] = results.mAgents.get(internalGamePlan[i][0]).getName();
-            gamePlan[i][1] = results.mAgents.get(internalGamePlan[i][1]).getName();
+            if (numPlayers>1)
+                gamePlan[i][1] = results.mAgents.get(internalGamePlan[i][1]).getName();
+            else
+                gamePlan[i][1] = "null";
         }
         return gamePlan;
     }
@@ -241,16 +247,27 @@ public class TSAgentManager {
      */
     private int[][] generateGamePlanInternal() {
         int selectedAgents[] = getIDAgentsSelected();
-        int gamePlan[][] = new int[getNumAgentsSelected()*(getNumAgentsSelected()-1)][2]; // games to be played
-        int tmpGame = 0;
-        for (int i=0; i<getNumAgentsSelected(); i++) {
-            for (int j=0; j<getNumAgentsSelected(); j++) {
-                if (i!=j) { // avoid agent to play against itself
-                    gamePlan[tmpGame][0] = selectedAgents[i];
-                    gamePlan[tmpGame++][1] = selectedAgents[j];
+        int gamePlan[][] = null;
+        if (numPlayers == 2) {
+            gamePlan = new int[getNumAgentsSelected() * (getNumAgentsSelected() - 1)][2]; // games to be played
+            int tmpGame = 0;
+            for (int i = 0; i < getNumAgentsSelected(); i++) {
+                for (int j = 0; j < getNumAgentsSelected(); j++) {
+                    if (i != j) { // avoid agent to play against itself
+                        gamePlan[tmpGame][0] = selectedAgents[i];
+                        gamePlan[tmpGame++][1] = selectedAgents[j];
+                    }
                 }
             }
         }
+        if (numPlayers == 1) {
+            gamePlan = new int[getNumAgentsSelected()][1]; // games to be played
+            for (int i = 0; i < getNumAgentsSelected(); i++) {
+                gamePlan[i][0] = selectedAgents[i];
+            }
+        }
+        if (numPlayers>2)
+            System.out.println(TAG+"ERROR :: GamePlan generation not supported for games >2 Players!!");
         return gamePlan;
     }
 
@@ -279,6 +296,10 @@ public class TSAgentManager {
         return null;
     }
 
+    public TSAgent getAgentByID(int id) {
+        return results.mAgents.get(id);
+    }
+
     /**
      * check is the tournament is locked to avoid changes of input data
      * @return boolean if tournament is locked
@@ -298,7 +319,7 @@ public class TSAgentManager {
         }
         results.lockedToCompete = true;
         results.gamePlan = generateGamePlanInternal();
-        results.gameResult = new int[results.gamePlan.length][3]; // is initialized with all zeros by JDK
+        results.gameResult = new int[results.gamePlan.length][3]; // is initialized with all zeros by JDK (primitive datatyp)
         results.timeStorage = new TSTimeStorage[results.gamePlan.length][2];
         for (TSTimeStorage t[] : results.timeStorage) { // initialize all positions
             t[0] = new TSTimeStorage();
@@ -315,7 +336,16 @@ public class TSAgentManager {
      * @return TSAgent instances of the next playing agents
      */
     public TSAgent[] getNextCompetitionTeam() {
-        TSAgent out[] = {results.mAgents.get(results.gamePlan[results.nextGame][0]), results.mAgents.get(results.gamePlan[results.nextGame][1])};
+        TSAgent out[] = null;
+        if (numPlayers == 2) {
+            out = new TSAgent[2];
+            out[0] = results.mAgents.get(results.gamePlan[results.nextGame][0]);
+            out[1] = results.mAgents.get(results.gamePlan[results.nextGame][1]);
+        }
+        if (numPlayers == 1) {
+            out = new TSAgent[1];
+            out[0] = results.mAgents.get(results.gamePlan[results.nextGame][0]);
+        }
         results.tournamentDone = false;
         return out;
     }
@@ -766,6 +796,30 @@ public class TSAgentManager {
     public int[] getTSProgress() {
         int[] i = {gamesPlayed, results.gamePlan.length*results.numberOfGames };
         return i;
+    }
+
+    /**
+     * run a single player tournament, started in {@link TSSettingsGUI2}, and show stats afterwards
+     * @param mArena arena to play in
+     */
+    public void runSinglePlayerTournament(Arena mArena) {
+        lockToCompete();
+        // alle ausgewählten agenten am stück durchgehen
+        // while
+        TSAgent nextTeam[] = getNextCompetitionTeam(); // get next Agents
+        TSTimeStorage nextTimes[] = getNextCompetitionTimeStorage(); // get timestorage for next game
+        TSSinglePlayerDataTransfer spDT = new TSSinglePlayerDataTransfer(nextTeam, nextTimes, true);
+        mArena.singlePlayerTSRunning = true;
+        mArena.taskState = Arena.Task.PLAY;
+        mArena.PlayGame(spDT);
+        mArena.singlePlayerTSRunning = false;
+        mArena.enableButtons(true);
+        unlockAfterComp();
+        // keine hdd und regulars mischen
+        // m mal jeweils kämpfen lassen
+        // scores erfassen
+        // stats window
+        System.out.println(TAG+"score: "+nextTeam[0].getSinglePlayScore());
     }
 
     public class TSHMDataStorage{

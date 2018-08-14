@@ -38,6 +38,7 @@ public class TSAgent implements Serializable {
     private int won;
     private int lost;
     private int tie;
+    private double singlePlayScore;
     public JCheckBox guiCheckBox;
     public EloPlayerFIDE mEloPlayerFIDE;
     public EloPlayerUSCF mEloPlayerUSCF;
@@ -64,6 +65,14 @@ public class TSAgent implements Serializable {
         mEloPlayerFIDE = new EloPlayerFIDE(name);
         mEloPlayerUSCF = new EloPlayerUSCF(name);
         mGlicko2Rating = new Glicko2Rating(name, glicko2RatingSystem);
+    }
+
+    public void setSinglePlayScore(double score) {
+        singlePlayScore = score;
+    }
+
+    public double getSinglePlayScore() {
+        return singlePlayScore;
     }
 
     public void addWonGame(){

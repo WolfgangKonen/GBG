@@ -425,7 +425,8 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//JOptionPane.showMessageDialog(null, "menu item #3 clicked");
-				TSAgentManager mTSAgentManager = new TSAgentManager();
+				int numPlayers = m_arena.getGameBoard().getStateObs().getNumPlayers();
+				TSAgentManager mTSAgentManager = new TSAgentManager(numPlayers);
 				try {
 					TSResultStorage tsr = m_arena.tdAgentIO.loadGBGTSResult(null);
 					mTSAgentManager.loadAndShowTSFromDisk(tsr);

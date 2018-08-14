@@ -50,6 +50,7 @@ public class TSSettingsGUI2 extends JFrame {
     private Arena mArena;
     private TSAgentManager mTSAgentManager;
     private final String TAG = "[TSSettingsGUI2] ";
+    final int numPlayers;
 
     public TSSettingsGUI2(Arena mArena) {
         super("TSSettingsGUI2");
@@ -61,7 +62,8 @@ public class TSSettingsGUI2 extends JFrame {
         setVisible(true);
 
         this.mArena = mArena;
-        mTSAgentManager = new TSAgentManager();
+        numPlayers = mArena.getGameBoard().getStateObs().getNumPlayers();
+        mTSAgentManager = new TSAgentManager(numPlayers);
 
         mTSAgentManager.addAgent("StandardRandom", Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
         mTSAgentManager.addAgent("StandardMinimax", Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
@@ -308,19 +310,30 @@ public class TSSettingsGUI2 extends JFrame {
             }
         }
 
-        if (countSelectedAgents < 2) {
+
+        if (countSelectedAgents < 2 && numPlayers == 2) {
             System.out.println(TAG + "Error :: At least 2 Agents need to be selected for a tournament!");
             JOptionPane.showMessageDialog(null, "ERROR: not enough agents were selected to play");
+            return;
+        }
+        if (countSelectedAgents < 1 && numPlayers == 1) {
+            System.out.println(TAG + "Error :: At least 1 Agent need to be selected for a tournament!");
+            JOptionPane.showMessageDialog(null, "ERROR: not enough agents were selected to play");
+            return;
+        }
+        mTSAgentManager.printGamePlan();
+
+        if (mArena.taskState != ArenaTrain.Task.IDLE) {
+            System.out.println(TAG + "ERROR :: could not start Tourmenent, Arena is not IDLE");
         } else {
-            mTSAgentManager.printGamePlan();
+            // hand over data
+            mArena.tournamentAgentManager = mTSAgentManager;
 
-            if (mArena.taskState != ArenaTrain.Task.IDLE) {
-                System.out.println(TAG + "ERROR :: could not start Tourmenent, Arena is not IDLE");
-            } else {
-                // hand over data
-                mArena.tournamentAgentManager = mTSAgentManager;
-
+            if (numPlayers > 1)
                 mArena.taskState = ArenaTrain.Task.TRNEMNT;
+            else {
+                // single player TS...
+                mTSAgentManager.runSinglePlayerTournament(mArena);
             }
         }
     }
