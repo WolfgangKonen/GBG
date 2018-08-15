@@ -422,8 +422,19 @@ public class TSAgentManager {
             results.tournamentDone = true;
             return false;
         }
-        else
+        else {
+            if (numPlayers == 1){
+                if (getNextCompetitionTeam()[0].getSinglePlayScores().length == results.numberOfGames) {
+                    results.nextGame++;
+                    if (results.nextGame == results.gamePlan.length) {
+                        results.tournamentDone = true;
+                        return false;
+                    }
+                }
+            }
+
             return true;
+        }
     }
 
     /**
@@ -805,21 +816,30 @@ public class TSAgentManager {
     public void runSinglePlayerTournament(Arena mArena) {
         lockToCompete();
         // alle ausgewählten agenten am stück durchgehen
-        // while
-        TSAgent nextTeam[] = getNextCompetitionTeam(); // get next Agents
-        TSTimeStorage nextTimes[] = getNextCompetitionTimeStorage(); // get timestorage for next game
-        TSSinglePlayerDataTransfer spDT = new TSSinglePlayerDataTransfer(nextTeam, nextTimes, true);
         mArena.singlePlayerTSRunning = true;
-        mArena.taskState = Arena.Task.PLAY;
-        mArena.PlayGame(spDT);
+        String res = "";
+
+        while (hastNextGame()) {
+            TSAgent nextTeam[] = getNextCompetitionTeam(); // get next Agents
+            TSTimeStorage nextTimes[] = getNextCompetitionTimeStorage(); // get timestorage for next game
+            TSSinglePlayerDataTransfer spDT = new TSSinglePlayerDataTransfer(nextTeam, nextTimes, true);
+            mArena.m_xab.enableTournamentRemoteData(nextTeam);
+            mArena.taskState = Arena.Task.PLAY;
+            mArena.PlayGame(spDT);
+            mArena.taskState = Arena.Task.IDLE;
+            mArena.m_xab.disableTournamentRemoteData();
+            res += TAG+"agent:"+nextTeam[0].getName()+" scores: "+Arrays.toString(nextTeam[0].getSinglePlayScores())+"\n";
+        }
+
         mArena.singlePlayerTSRunning = false;
-        mArena.enableButtons(true);
         unlockAfterComp();
+        mArena.enableButtons(true);
         // keine hdd und regulars mischen
         // m mal jeweils kämpfen lassen
         // scores erfassen
         // stats window
-        System.out.println(TAG+"score: "+nextTeam[0].getSinglePlayScore());
+        //System.out.println(TAG+"agent:"+nextTeam[0].getName()+" scores: "+Arrays.toString(nextTeam[0].getSinglePlayScores()));
+        System.out.println(res);
     }
 
     public class TSHMDataStorage{

@@ -297,6 +297,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				gb.showGameBoard(this, false);
 				gb.clearBoard(false, true);
 				if (!singlePlayerTSRunning) {
+					System.out.println(TAG+"public void run()#case PLAY");
 					PlayGame();
 					enableButtons(true);
 				}
@@ -467,6 +468,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	 * "X vs. O".
 	 */
 	public void PlayGame() {
+		System.out.println(TAG+"public void PlayGame()");
 		PlayGame(null);
 	}
 
@@ -496,9 +498,8 @@ abstract public class Arena extends JFrame implements Runnable {
 			} else { // TS game
 				if (spDT.standardAgentSelected) {
 					// GBG standard agent
-					m_xab.enableTournamentRemoteData(spDT.agent);
 					paVector = m_xfun.fetchAgents(m_xab);
-					m_xab.disableTournamentRemoteData();AgentBase.validTrainedAgents(paVector, numPlayers);
+					AgentBase.validTrainedAgents(paVector, numPlayers);
 					qaVector = m_xfun.wrapAgents(paVector, m_xab.oPar, gb.getStateObs());
 				} else {
 					// HDD agent
@@ -689,7 +690,7 @@ abstract public class Arena extends JFrame implements Runnable {
 							MessageBox.show(m_LaunchFrame, "Game finished with score " + gScore, "Game Over",
 								JOptionPane.INFORMATION_MESSAGE);
 						if (spDT!=null)
-							spDT.agent[0].setSinglePlayScore(gScore);
+							spDT.agent[0].addSinglePlayScore(gScore);
 						break; // out of switch
 					case 2:
 						int win = so.getGameWinner().toInt();

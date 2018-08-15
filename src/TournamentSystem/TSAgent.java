@@ -10,6 +10,7 @@ import controllers.PlayAgent;
 import javax.swing.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import static TournamentSystem.TSAgentManager.faktorLos;
 import static TournamentSystem.TSAgentManager.faktorTie;
@@ -38,7 +39,7 @@ public class TSAgent implements Serializable {
     private int won;
     private int lost;
     private int tie;
-    private double singlePlayScore;
+    private ArrayList<Double> singlePlayScore;
     public JCheckBox guiCheckBox;
     public EloPlayerFIDE mEloPlayerFIDE;
     public EloPlayerUSCF mEloPlayerUSCF;
@@ -62,17 +63,21 @@ public class TSAgent implements Serializable {
         won = 0;
         tie = 0;
         lost = 0;
+        singlePlayScore = new ArrayList<>();
         mEloPlayerFIDE = new EloPlayerFIDE(name);
         mEloPlayerUSCF = new EloPlayerUSCF(name);
         mGlicko2Rating = new Glicko2Rating(name, glicko2RatingSystem);
     }
 
-    public void setSinglePlayScore(double score) {
-        singlePlayScore = score;
+    public void addSinglePlayScore(double score) {
+        singlePlayScore.add(score);
     }
 
-    public double getSinglePlayScore() {
-        return singlePlayScore;
+    public double[] getSinglePlayScores() {
+        double[] out = new double[singlePlayScore.size()];
+        for (int i=0; i<singlePlayScore.size(); i++)
+            out[i] = singlePlayScore.get(i);
+        return out;
     }
 
     public void addWonGame(){

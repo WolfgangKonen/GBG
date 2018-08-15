@@ -112,6 +112,10 @@ public class TSSettingsGUI2 extends JFrame {
         reopenStatisticsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (numPlayers==1) {
+                    JOptionPane.showMessageDialog(null, "ERROR: not yet implemented for 1 player games");
+                    return;
+                }
                 if (mTSAgentManager.isTournamentDone()) {
                     // tournament done - open stats window
                     mTSAgentManager.makeStats();
@@ -125,6 +129,10 @@ public class TSSettingsGUI2 extends JFrame {
         saveResultsToDiskButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (numPlayers==1) {
+                    JOptionPane.showMessageDialog(null, "ERROR: not yet implemented for 1 player games");
+                    return;
+                }
                 if (mArena.taskState != ArenaTrain.Task.IDLE) {
                     System.out.println(TAG + "ERROR :: ARENA is not IDLE, cannot save tournament, aborting");
                     JOptionPane.showMessageDialog(null, "ERROR: Arena not IDLE");
