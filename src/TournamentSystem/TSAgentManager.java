@@ -824,7 +824,7 @@ public class TSAgentManager {
         while (hastNextGame()) {
             TSAgent nextTeam[] = getNextCompetitionTeam(); // get next Agents
             TSTimeStorage nextTimes[] = getNextCompetitionTimeStorage(); // get timestorage for next game
-            TSSinglePlayerDataTransfer spDT = new TSSinglePlayerDataTransfer(nextTeam, nextTimes, true);
+            TSSinglePlayerDataTransfer spDT = new TSSinglePlayerDataTransfer(nextTeam, nextTimes, results.numberOfRandomStartMoves);
             mArena.m_xab.enableTournamentRemoteData(nextTeam);
             mArena.taskState = Arena.Task.PLAY;
             mArena.PlayGame(spDT);

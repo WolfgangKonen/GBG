@@ -10,6 +10,7 @@ import controllers.HumanPlayer;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
+import controllers.RandomAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -574,7 +575,19 @@ abstract public class Arena extends JFrame implements Runnable {
 		gb.setActionReq(true);
 		so = gb.getStateObs();
 		so.resetMoveCounter();
-		System.out.println(so.stringDescr());
+		System.out.println("StartState: "+so.stringDescr());
+
+		if (spDT!=null) {
+			if (spDT.numberOfRandomStartMoves>0) {
+				RandomAgent raX = new RandomAgent("Random Agent X");
+				RandomAgent raO = new RandomAgent("Random Agent O");
+				for (int n = 0; n < spDT.numberOfRandomStartMoves; n++) {
+					so.advance(raX.getNextAction2(so, false, true));
+					so.advance(raO.getNextAction2(so, false, true));
+				}
+				System.out.println(TAG+"RandomStartState set: "+so);
+			}
+		}
 
 		assert qaVector.length == so.getNumPlayers() : "Number of agents does not match so.getNumPlayers()!";
 
