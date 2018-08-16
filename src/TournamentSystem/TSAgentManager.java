@@ -317,7 +317,6 @@ public class TSAgentManager {
             System.out.println(TAG+"ERROR :: number of games was not set! using 1");
             results.numberOfGames = 1;
         }
-        results.lockedToCompete = true;
         results.gamePlan = generateGamePlanInternal();
         results.gameResult = new int[results.gamePlan.length][3]; // is initialized with all zeros by JDK (primitive datatyp)
         results.timeStorage = new TSTimeStorage[results.gamePlan.length][2];
@@ -327,6 +326,8 @@ public class TSAgentManager {
         }
         results.nextGame = 0;
         gamesPlayed = 0;
+        results.resetAgentSingePlayerScores();
+        results.lockedToCompete = true;
     }
 
     /**
@@ -817,6 +818,7 @@ public class TSAgentManager {
      */
     public void runSinglePlayerTournament(Arena mArena) {
         lockToCompete();
+        setSettingsGUIElementsEnabled(false);
         // alle ausgewählten agenten am stück durchgehen
         mArena.singlePlayerTSRunning = true;
         String res = "";
@@ -835,6 +837,7 @@ public class TSAgentManager {
 
         mArena.singlePlayerTSRunning = false;
         unlockAfterComp();
+        setSettingsGUIElementsEnabled(true);
         mArena.enableButtons(true);
         // keine hdd und regulars mischen
         // m mal jeweils kämpfen lassen

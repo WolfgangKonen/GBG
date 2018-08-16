@@ -1,6 +1,5 @@
 package TournamentSystem;
 
-import TournamentSystem.Scoring.Elo.EloPlayer;
 import TournamentSystem.Scoring.Elo.EloPlayerFIDE;
 import TournamentSystem.Scoring.Elo.EloPlayerUSCF;
 import TournamentSystem.Scoring.Glicko2.Glicko2Rating;
@@ -71,6 +70,14 @@ public class TSAgent implements Serializable {
 
     public void addSinglePlayScore(double score) {
         singlePlayScore.add(score);
+    }
+
+    /**
+     * reset the agents single player storage and reinit. WARNING: just call this method from {@link TSResultStorage}
+     * and from nowhere else to avoid dataloss!
+     */
+    public void resetSinglePlayScore() {
+        singlePlayScore = new ArrayList<>();
     }
 
     public double[] getSinglePlayScores() {

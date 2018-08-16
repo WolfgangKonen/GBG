@@ -296,10 +296,10 @@ abstract public class Arena extends JFrame implements Runnable {
 			case PLAY:
 				// enableButtons(false); // see Play.addActionListener in XArenaButtons
 				//
-				gb.showGameBoard(this, false);
-				gb.clearBoard(false, true);
 				if (!singlePlayerTSRunning) {
-					System.out.println(TAG+"public void run()#case PLAY");
+					gb.showGameBoard(this, false);
+					gb.clearBoard(false, true);
+					//System.out.println(TAG+"public void run()#case PLAY");
 					PlayGame();
 					enableButtons(true);
 				}
@@ -470,7 +470,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	 * "X vs. O".
 	 */
 	public void PlayGame() {
-		System.out.println(TAG+"public void PlayGame()");
+		//System.out.println(TAG+"public void PlayGame()");
 		PlayGame(null);
 	}
 
@@ -526,7 +526,8 @@ abstract public class Arena extends JFrame implements Runnable {
 		String[] agentVec = new String[numPlayers];
 		String sMsg = "";
 
-		gb.toFront();
+		if (spDT==null)
+			gb.toFront();
 
 		switch (numPlayers) {
 		case (1):

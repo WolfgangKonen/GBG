@@ -334,11 +334,11 @@ public class TSSettingsGUI2 extends JFrame {
         if (mArena.taskState != ArenaTrain.Task.IDLE) {
             System.out.println(TAG + "ERROR :: could not start Tourmenent, Arena is not IDLE");
         } else {
-            // hand over data
-            mArena.tournamentAgentManager = mTSAgentManager;
-
-            if (numPlayers > 1)
+            if (numPlayers > 1) {
+                // hand over data
+                mArena.tournamentAgentManager = mTSAgentManager;
                 mArena.taskState = ArenaTrain.Task.TRNEMNT;
+            }
             else {
                 // single player TS...
                 mTSAgentManager.runSinglePlayerTournament(mArena);
