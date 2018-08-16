@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * This class stores every rounds time measurements and gets instantiated for every game.
- * Time is measured in Nanoseconds via {@link System#nanoTime()} in {@link games.XArenaFuncs#competeTS(PlayAgent, PlayAgent, StateObservation, int, TSTimeStorage[])}.
+ * Time is measured in Nanoseconds via {@link System#nanoTime()} in {@link games.XArenaFuncs#competeTS(PlayAgent, PlayAgent, StateObservation, int, TSTimeStorage[], int)}.
  * Times are saved in dynamic ArrayLists. There also also methods to convert the Nanosecond values to Millisecond for improved readability.
  * <p>
  * This class is called in {@link TSAgentManager} and provides the data for the tournament time statistics.
@@ -24,9 +24,9 @@ public class TSTimeStorage implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    private ArrayList<Long> measuredTimesInNS = new ArrayList<>();
-    private ArrayList<Long> roundTimesInNS = new ArrayList<>();
-    private ArrayList<Long> tmpRoundTimesInNS = new ArrayList<>();
+    private ArrayList<Long> measuredTimesInNS = new ArrayList<>(); // all times of every draw in every round/game
+    private ArrayList<Long> roundTimesInNS = new ArrayList<>(); // time all draws per round take
+    private ArrayList<Long> tmpRoundTimesInNS = new ArrayList<>(); // every draws time just of the current round
 
     private double nanoToMS(double ns) {
         return ns/(1*Math.pow(10,6));
@@ -45,13 +45,17 @@ public class TSTimeStorage implements Serializable {
         for (long time : tmpRoundTimesInNS){
             roundTime += time;
         }
-        roundTimesInNS.add(roundTime);
+        // just save time if the agent really made a move
+        if (roundTime>0)
+            roundTimesInNS.add(roundTime);
 
         tmpRoundTimesInNS = new ArrayList<>();
     }
 
     public double getAverageRoundTimeMS() {
         long avRound = 0;
+        if (roundTimesInNS.size()==0)
+            return -1;
         for (long val : roundTimesInNS)
             avRound += val;
         avRound /= roundTimesInNS.size();
@@ -61,6 +65,8 @@ public class TSTimeStorage implements Serializable {
     public double getMedianRoundTimeMS() {
         long median;
         long[] tmp = new long[roundTimesInNS.size()];
+        if (tmp.length==0)
+            return -1;
 
         for (int i=0; i<roundTimesInNS.size(); i++)
             tmp[i] = roundTimesInNS.get(i);
@@ -77,6 +83,8 @@ public class TSTimeStorage implements Serializable {
 
     public double getAverageTimeForGameNS() {
         double out = 0;
+        if (measuredTimesInNS.size()==0)
+            return -1;
 
         for (long l : measuredTimesInNS)
             out += l;
@@ -86,6 +94,8 @@ public class TSTimeStorage implements Serializable {
     }
 
     public double getAverageTimeForGameMS() {
+        if (getAverageTimeForGameNS()==-1)
+            return -1;
         return nanoToMS(getAverageTimeForGameNS());
     }
 
@@ -100,6 +110,8 @@ public class TSTimeStorage implements Serializable {
     public double getMedianTimeForGameNS() {
         double median;
         long[] tmp = getSortedArray();
+        if (tmp.length==0)
+            return -1;
 
         if (tmp.length % 2 == 0)
             median = (tmp[tmp.length/2] + tmp[tmp.length/2 - 1])/2;
@@ -110,32 +122,40 @@ public class TSTimeStorage implements Serializable {
     }
 
     public double getMedianTimeForGameMS() {
+        if (getMedianTimeForGameNS()==-1)
+            return -1;
         return nanoToMS(getMedianTimeForGameNS());
     }
 
     public double getMaxTimeForGameNS() {
-        double max;
+        double max = -1;
 
         long[] tmp = getSortedArray();
-        max = tmp[tmp.length-1];
+        if (tmp.length>0)
+            max = tmp[tmp.length-1];
 
         return max;
     }
 
     public double getMaxTimeForGameMS() {
+        if (getMaxTimeForGameNS()==-1)
+            return -1;
         return nanoToMS(getMaxTimeForGameNS());
     }
 
     public double getMinTimeForGameNS() {
-        double min;
+        double min = -1;
 
         long[] tmp = getSortedArray();
-        min = tmp[0];
+        if (tmp.length>0)
+            min = tmp[0];
 
         return min;
     }
 
     public double getMinTimeForGameMS() {
+        if (getMinTimeForGameNS()==-1)
+            return -1;
         return nanoToMS(getMinTimeForGameNS());
     }
 }

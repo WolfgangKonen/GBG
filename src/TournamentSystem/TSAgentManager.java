@@ -688,7 +688,9 @@ public class TSAgentManager {
                 for (int cpl=0; cpl<results.timeStorage[0].length; cpl++) { // hin+rückrunde
                     for (int agt=0; agt<2; agt++) { // agent 1+2
                         if (results.gamePlan[gms][cpl] == selectedAgents2[i]) {
-                            medianTimes.add(results.timeStorage[gms][cpl].getMedianRoundTimeMS());
+                            double medianRoundTimeMS = results.timeStorage[gms][cpl].getMedianRoundTimeMS();
+                            if (medianRoundTimeMS > -1) // avoid missing measurements marked with -1 value
+                                medianTimes.add(medianRoundTimeMS);
                         }
                     }
                 }

@@ -777,12 +777,13 @@ public class XArenaFuncs
 	 * This is an adapted version of {@link XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int)}. Tournament parameters were added.
 	 * @param paX PlayAgent, a trained agent
 	 * @param paO PlayAgent, a trained agent
-	 * @param startSO	the start board position for the game
+	 * @param startSO    the start board position for the game
 	 * @param competeNum the number of games to play (always 1)
 	 * @param nextTimes timestorage to save measurements
+	 * @param rndmStartMoves
 	 * @return
 	 */
-	public static double[] competeTS(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, TSTimeStorage[] nextTimes) {
+	public static double[] competeTS(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, TSTimeStorage[] nextTimes, int rndmStartMoves) {
 		double[] winrate = new double[3];
 		int xwinCount=0, owinCount=0, tieCount=0;
 		DecimalFormat frm = new DecimalFormat("#0.000");
@@ -792,9 +793,19 @@ public class XArenaFuncs
 
 		String paX_string = paX.stringDescr();
 		String paO_string = paO.stringDescr();
-		System.out.println("Competition: "+competeNum+" games "+paX_string+" vs "+paO_string);
+		System.out.println("Competition: "+competeNum+" games "+paX_string+" vs "+paO_string+" with "+rndmStartMoves+" random startmoves");
 
-		for (int k=0; k<competeNum; k++) {
+		if (rndmStartMoves>0) {
+			RandomAgent raX = new RandomAgent("Random Agent X");
+			RandomAgent raO = new RandomAgent("Random Agent O");
+			for (int n = 0; n < rndmStartMoves; n++) {
+				startSO.advance(raX.getNextAction2(startSO, false, true));
+				startSO.advance(raO.getNextAction2(startSO, false, true));
+			}
+			System.out.println("RandomStartState: "+startSO);
+		}
+
+		for (int k=0; k<competeNum; k++) { // ist im TS immer 1
 			int Player = Types.PLAYER_PM[startSO.getPlayer()];
 			so = startSO.copy();
 
@@ -953,9 +964,10 @@ public class XArenaFuncs
 	 * @param nextTeam pair of agents playing
 	 * @param nextTimes time storage for the game
 	 * @param xab GUI params for standard agents
+	 * @param rndmStartMoves number of random start moves set in {@link TournamentSystem.TSSettingsGUI2}
 	 * @return info who wins or error code
 	 */
-	protected int singleCompeteBaseTS(GameBoard gb, TSAgent[] nextTeam, TSTimeStorage[] nextTimes, XArenaButtons xab) { // return who wins (agent1, tie, agent2) [0;2]
+	protected int singleCompeteBaseTS(GameBoard gb, TSAgent[] nextTeam, TSTimeStorage[] nextTimes, XArenaButtons xab, int rndmStartMoves) { // return who wins (agent1, tie, agent2) [0;2]
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
 		int competeNum = 1;//xab.winCompOptions.getNumGames(); | falls wert != 1 dann competeTS() anpassen!
 		int numPlayers = gb.getStateObs().getNumPlayers();
@@ -998,7 +1010,7 @@ public class XArenaFuncs
 					qaVector = wrapAgents(paVector,xab.oPar,startSO);
 				}
 
-				c = competeTS(qaVector[0], qaVector[1], startSO, competeNum, nextTimes);
+				c = competeTS(qaVector[0], qaVector[1], startSO, competeNum, nextTimes, rndmStartMoves);
 				System.out.println(Arrays.toString(c));
 
 				xab.disableTournamentRemoteData();

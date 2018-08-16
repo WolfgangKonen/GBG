@@ -251,8 +251,9 @@ abstract public class Arena extends JFrame implements Runnable {
 				while (tournamentAgentManager.hastNextGame()) {
 					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
 					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
+					int rndmStartMoves = tournamentAgentManager.results.numberOfRandomStartMoves;
 					// let team compete...
-					int roundWinningAgent = m_xfun.singleCompeteBaseTS(gb, nextTeam, nextTimes, m_xab);
+					int roundWinningAgent = m_xfun.singleCompeteBaseTS(gb, nextTeam, nextTimes, m_xab, rndmStartMoves);
 					// enter winner
 					if (roundWinningAgent > 40) {
 						System.out.println(TAG+"ERROR :: singleCompeteBaseTS returned error value "+roundWinningAgent);
