@@ -41,7 +41,10 @@ public class ImgShowComponent extends JPanel {
 				 //	   <classpathentry excluding="**/*.java" kind="src" path="resources"/>
 				 // in your file .classpath (Eclipse) or have "resources" in your CLASSPATH environment variable
 				java.net.URL url = getClass().getResource("/"+str);
-				imgArr[i] = getToolkit().createImage(url);				
+				imgArr[i] = getToolkit().createImage(url);
+				if (url==null){
+					System.out.println("ImgShowComponent - ERROR :: could not load GUI images, did you set the resources folder correctly in buildpath?");
+				}
 			}
 		}
 		img = imgArr[index];
