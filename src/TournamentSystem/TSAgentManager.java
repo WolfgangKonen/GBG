@@ -802,7 +802,7 @@ public class TSAgentManager {
 
     /**
      * returns the current tournament progress
-     * @return [ rounds played , total number of rounds]
+     * @return [ rounds played , total number of rounds ]
      */
     public int[] getTSProgress() {
         int[] i = {gamesPlayed, results.gamePlan.length*results.numberOfGames };
@@ -842,6 +842,10 @@ public class TSAgentManager {
         System.out.println(res);
     }
 
+    /**
+     * helping class to create the sorted heatmap. this saves an agent and his score data
+     * in the heatmap to keep them together while sorting by score.
+     */
     public class TSHMDataStorage{
         public TSAgent agent;
         public double[] hmScoreValues;
