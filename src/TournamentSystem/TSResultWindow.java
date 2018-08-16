@@ -1,14 +1,14 @@
 package TournamentSystem;
 
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
 import tools.Types;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 /**
  * This class generates a GUI to visualize the tournament statistics and measurements.
@@ -32,7 +32,7 @@ public class TSResultWindow extends JFrame {
     private boolean showjspSCR = false;
     private JScrollPane jspHM;
     private JScrollPane jspASC;
-    private boolean showjspASC = false;
+    private boolean showjspASC = !false;
     private JScrollPane jspTD;
     private boolean showjspTD = false;
     private JPanel scatterPlotJPanel;
@@ -45,20 +45,22 @@ public class TSResultWindow extends JFrame {
     private JLabel startDateTSJL;
     private JScrollPane jspHM2;
     private JLabel heatmap2JL;
+    private JButton openBiggerScatterPlotButton;
 
     /**
      * create the result window with the tournament statistics with data provided from {@link TSAgentManager}
      *
-     * @param m1              table matrix for game win/tie/loss results
-     * @param m2              table matrix for game win/tie/loss scores
-     * @param m3              table with agent score ranking
-     * @param m4              table with detailed time measurements
-     * @param imageIcon       heatmap with visualisation of WTL scores
-     * @param imageIcon2      heatmap with visualisation of WTL scores sorted vertically by score
-     * @param scatterPlotASvT scatterplot of the agents score vs round time
-     * @param startDate
+     * @param m1          table matrix for game win/tie/loss results
+     * @param m2          table matrix for game win/tie/loss scores
+     * @param m3          table with agent score ranking
+     * @param m4          table with detailed time measurements
+     * @param imageIcon   heatmap with visualisation of WTL scores
+     * @param imageIcon2  heatmap with visualisation of WTL scores sorted vertically by score
+     * @param scatterPlot scatterplot XYPlot of the agents score vs round time
+     * @param startDate   info String with date and TS settings
      */
-    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, ImageIcon imageIcon, ImageIcon imageIcon2, ChartPanel scatterPlotASvT, String startDate) {
+    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4,
+                          ImageIcon imageIcon, ImageIcon imageIcon2, JFreeChart scatterPlot, String startDate) {
         super("Turnier Ergebnisse");
 
         $$$setupUI$$$();
@@ -66,26 +68,35 @@ public class TSResultWindow extends JFrame {
         Font lFont = new Font("Arial", Font.PLAIN, Types.GUI_DIALOGFONTSIZE);
         //tableMatrixWTL.setFont(lFont); // todo also need to set cell height according to font height
         startDateTSJL.setText(startDate);
+
         tableMatrixWTL.setModel(m1);
         tableMatrixWTL.setPreferredScrollableViewportSize(
                 new Dimension(tableMatrixWTL.getPreferredSize().width, tableMatrixWTL.getRowHeight() * tableMatrixWTL.getRowCount()));
+
         tableMatrixSCR.setModel(m2);
         tableMatrixSCR.setPreferredScrollableViewportSize(
                 new Dimension(tableMatrixSCR.getPreferredSize().width, tableMatrixSCR.getRowHeight() * tableMatrixSCR.getRowCount()));
+
         tableAgentScore.setModel(m3);
         tableAgentScore.setPreferredScrollableViewportSize(
                 new Dimension(tableAgentScore.getPreferredSize().width, tableAgentScore.getRowHeight() * tableAgentScore.getRowCount()));
         DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) tableAgentScore.getDefaultRenderer(Object.class);
         renderer.setHorizontalAlignment(JLabel.CENTER);
+
         tableTimeDetail.setModel(m4);
         tableTimeDetail.setPreferredScrollableViewportSize(
                 new Dimension(tableTimeDetail.getPreferredSize().width * 2, tableTimeDetail.getRowHeight() * tableTimeDetail.getRowCount()));
         DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer) tableTimeDetail.getDefaultRenderer(Object.class);
         renderer2.setHorizontalAlignment(JLabel.RIGHT);
+
         heatmapJL.setText("");
         heatmapJL.setIcon(imageIcon);
+
         heatmap2JL.setText("");
         heatmap2JL.setIcon(imageIcon2);
+
+        ChartPanel scatterPlotASvT = new ChartPanel(scatterPlot);
+        scatterPlotASvT.setPreferredSize(new Dimension(400, 300)); // plot size
         scatterPlotJPanel.add(scatterPlotASvT);
 
         jspWTL.setVisible(showjspWTL);
@@ -172,6 +183,18 @@ public class TSResultWindow extends JFrame {
                 pack();
             }
         });
+        openBiggerScatterPlotButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame frame = new JFrame();
+                ChartPanel scatterPlotASvTBig = new ChartPanel(scatterPlot);
+                scatterPlotASvTBig.setPreferredSize(new Dimension(1250, 1000)); // plot size
+                frame.setContentPane(scatterPlotASvTBig);
+                frame.setTitle("Big scatter plot");
+                frame.pack();
+                frame.setVisible(true);
+            }
+        });
     }
 
     /**
@@ -210,14 +233,14 @@ public class TSResultWindow extends JFrame {
         label4.setText("Ranking of agents by overall Wins, Ties, Losses");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 11;
+        gbc.gridy = 12;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label4, gbc);
         final JLabel label5 = new JLabel();
         label5.setText("Game time meassurements in [ms]");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 14;
+        gbc.gridy = 15;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label5, gbc);
         jspWTL = new JScrollPane();
@@ -250,7 +273,7 @@ public class TSResultWindow extends JFrame {
         jspASC = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 12;
+        gbc.gridy = 13;
         gbc.gridwidth = 5;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspASC, gbc);
@@ -259,7 +282,7 @@ public class TSResultWindow extends JFrame {
         jspTD = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 15;
+        gbc.gridy = 16;
         gbc.gridwidth = 5;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspTD, gbc);
@@ -282,14 +305,14 @@ public class TSResultWindow extends JFrame {
         final JPanel spacer3 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 13;
+        gbc.gridy = 14;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer3, gbc);
         final JPanel spacer4 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 10;
+        gbc.gridy = 11;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer4, gbc);
@@ -325,7 +348,7 @@ public class TSResultWindow extends JFrame {
         showHideTableTimeTableButton.setText("Show/Hide Time Table");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
-        gbc.gridy = 14;
+        gbc.gridy = 15;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showHideTableTimeTableButton, gbc);
         showHideTableSCRButton = new JButton();
@@ -339,13 +362,13 @@ public class TSResultWindow extends JFrame {
         showHideTableASCButton.setText("Show/Hide Ranking Table");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
-        gbc.gridy = 11;
+        gbc.gridy = 12;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showHideTableASCButton, gbc);
         final JPanel spacer6 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 16;
+        gbc.gridy = 17;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer6, gbc);
@@ -353,13 +376,13 @@ public class TSResultWindow extends JFrame {
         hideAllTablesButton.setText("Hide all Tables");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
-        gbc.gridy = 17;
+        gbc.gridy = 18;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(hideAllTablesButton, gbc);
         final JPanel spacer7 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 18;
+        gbc.gridy = 19;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 5, 0);
         mJPanel.add(spacer7, gbc);
@@ -367,7 +390,7 @@ public class TSResultWindow extends JFrame {
         showAllTablesButton.setText("Show all Tables");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 17;
+        gbc.gridy = 18;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showAllTablesButton, gbc);
         startDateTSJL = new JLabel();
@@ -408,6 +431,13 @@ public class TSResultWindow extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(0, 0, 0, 10);
         mJPanel.add(spacer9, gbc);
+        openBiggerScatterPlotButton = new JButton();
+        openBiggerScatterPlotButton.setText("Open bigger ScatterPlot");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 4;
+        gbc.gridy = 10;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(openBiggerScatterPlotButton, gbc);
     }
 
     /**

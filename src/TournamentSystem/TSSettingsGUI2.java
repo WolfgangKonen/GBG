@@ -112,7 +112,7 @@ public class TSSettingsGUI2 extends JFrame {
         reopenStatisticsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (numPlayers==1) {
+                if (numPlayers == 1) {
                     JOptionPane.showMessageDialog(null, "ERROR: not yet implemented for 1 player games");
                     return;
                 }
@@ -129,7 +129,7 @@ public class TSSettingsGUI2 extends JFrame {
         saveResultsToDiskButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (numPlayers==1) {
+                if (numPlayers == 1) {
                     JOptionPane.showMessageDialog(null, "ERROR: not yet implemented for 1 player games");
                     return;
                 }

@@ -465,8 +465,9 @@ public class TSAgentManager {
             System.out.print("AgentName: "+a.getName()+" ");
             System.out.print("GamesWon: "+a.getCountWonGames()+" GamesTie: "+a.getCountTieGames()+" GamesLost: "+a.getCountLostGames()+" | ");
             System.out.print("AgentScore: "+a.getAgentScore()+" | ");
-            System.out.print("FIDE-ELO: "+a.mEloPlayerFIDE.getEloRating()+" USCF-ELO: "+a.mEloPlayerUSCF.getEloRating());
-            //System.out.print("ELO: "+a.mEloPlayerFIDE+" | "+a.mEloPlayerUSCF);
+            System.out.print("FIDE-ELO: "+a.mEloPlayerFIDE.getEloRating()+" USCF-ELO: "+a.mEloPlayerUSCF.getEloRating()+" ");
+            NumberFormat formatter1 = new DecimalFormat("#0.0");
+            System.out.print("Glicko2: "+formatter1.format(a.mGlicko2Rating.getRating()));
             System.out.println();
         }
     }
@@ -543,9 +544,9 @@ public class TSAgentManager {
         }
 
         //create table with data
-        JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
+        //JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
         DefaultTableModel defTableMatrixWTL = new DefaultTableModel(rowData1, columnNames1);
-        JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
+        //JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
         DefaultTableModel defTableMatrixSCR = new DefaultTableModel(rowData3, columnNames1);
 
         /**
@@ -653,7 +654,7 @@ public class TSAgentManager {
         renderer.setHorizontalAlignment( JLabel.CENTER );
 
         /**
-         * HeatMap2 | Agent Scores sorted by Scores
+         * HeatMap2 | Agent Scores sorted by AgentScores
          */
         // create Score HeatMap
         double[][] dataHM2 = new double[rowDataHM.length][rowDataHM[0].length];
@@ -711,17 +712,16 @@ public class TSAgentManager {
         }
 
         // Create chart
-        JFreeChart chart = ChartFactory.createScatterPlot(
+        JFreeChart scatterPlot = ChartFactory.createScatterPlot(
                 "", "Median Round Time [ms]", "Agent Score [WTL]", dataset);
 
         //Changes background color
-        XYPlot plot = (XYPlot)chart.getPlot();
+        XYPlot plot = (XYPlot)scatterPlot.getPlot();
         plot.setBackgroundPaint(new Color(230, 230, 230));
 
-        // Create Panel
-        ChartPanel scatterPlotASvT = new ChartPanel(chart);
-        scatterPlotASvT.setPreferredSize(new Dimension(400,300)); // plot size
-        //setContentPane(panel);
+        // Create Panel - now done in GUI!
+        //ChartPanel scatterPlotASvT = new ChartPanel(chart);
+        //scatterPlotASvT.setPreferredSize(new Dimension(400,300)); // plot size
 
         /**
          * Table | Zeiten
@@ -782,7 +782,7 @@ public class TSAgentManager {
          */
 
         TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail,
-                new ImageIcon(hm), new ImageIcon(hm2), scatterPlotASvT, startDate);
+                new ImageIcon(hm), new ImageIcon(hm2), scatterPlot, startDate);
     }
 
     /**
