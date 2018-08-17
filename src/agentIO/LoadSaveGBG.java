@@ -1,6 +1,6 @@
 package agentIO;
 
-import TournamentSystem.TSDiskAgentDataTransfer;
+import TournamentSystem.tools.TSDiskAgentDataTransfer;
 import TournamentSystem.TSResultStorage;
 import controllers.*;
 import controllers.MC.MCAgent;

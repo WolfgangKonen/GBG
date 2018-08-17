@@ -1,5 +1,6 @@
 package TournamentSystem;
 
+import TournamentSystem.tools.TSDiskAgentDataTransfer;
 import controllers.*;
 import games.Arena;
 import games.ArenaTrain;

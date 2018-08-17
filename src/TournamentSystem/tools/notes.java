@@ -1,4 +1,4 @@
-package TournamentSystem;
+package TournamentSystem.tools;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;

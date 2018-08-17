@@ -2,7 +2,7 @@ package games;
 
 import TournamentSystem.TSAgent;
 import TournamentSystem.TSAgentManager;
-import TournamentSystem.TSSinglePlayerDataTransfer;
+import TournamentSystem.tools.TSSinglePlayerDataTransfer;
 import TournamentSystem.TSTimeStorage;
 import agentIO.LoadSaveGBG;
 import controllers.AgentBase;

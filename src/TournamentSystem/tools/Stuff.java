@@ -1,4 +1,4 @@
-package TournamentSystem;
+package TournamentSystem.tools;
 
 import org.tc33.jheatchart.HeatChart;
 

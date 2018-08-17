@@ -1,5 +1,6 @@
-package TournamentSystem;
+package TournamentSystem.tools;
 
+import TournamentSystem.TSSettingsGUI2;
 import agentIO.LoadSaveGBG;
 import controllers.PlayAgent;
 

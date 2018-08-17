@@ -1,5 +1,8 @@
-package TournamentSystem;
+package TournamentSystem.tools;
 
+import TournamentSystem.TSAgent;
+import TournamentSystem.TSAgentManager;
+import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
 
 /**
