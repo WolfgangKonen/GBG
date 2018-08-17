@@ -10,6 +10,7 @@ import javax.swing.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static TournamentSystem.TSAgentManager.faktorLos;
 import static TournamentSystem.TSAgentManager.faktorTie;
@@ -85,6 +86,54 @@ public class TSAgent implements Serializable {
         for (int i=0; i<singlePlayScore.size(); i++)
             out[i] = singlePlayScore.get(i);
         return out;
+    }
+
+    public double getAverageSinglePlayScore() {
+        double av = 0;
+
+        for (double d : singlePlayScore)
+            av += d;
+        av /= singlePlayScore.size();
+
+        return av;
+    }
+
+    public double getMedianSinglePlayerScore() {
+        double median;
+        double[] tmp = getSortedArray();
+        if (tmp.length==0)
+            return -1;
+
+        if (tmp.length % 2 == 0)
+            median = (tmp[tmp.length/2] + tmp[tmp.length/2 - 1])/2;
+        else
+            median = tmp[tmp.length/2];
+
+        return median;
+    }
+
+    public double getMinSinglePlayerScore() {
+        double[] tmp = getSortedArray();
+        if (tmp.length>0)
+            return tmp[0];
+
+        return -1;
+    }
+
+    public double getMaxSinglePlayerScore() {
+        double[] tmp = getSortedArray();
+        if (tmp.length>0)
+            return tmp[tmp.length-1];
+
+        return -1;
+    }
+
+    private double[] getSortedArray() {
+        double[] tmp = new double[singlePlayScore.size()];
+        for (int i=0; i<singlePlayScore.size(); i++)
+            tmp[i] = singlePlayScore.get(i);
+        Arrays.sort(tmp);
+        return tmp;
     }
 
     public void addWonGame(){

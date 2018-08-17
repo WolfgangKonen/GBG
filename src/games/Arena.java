@@ -506,11 +506,11 @@ abstract public class Arena extends JFrame implements Runnable {
 				} else {
 					// HDD agent
 					paVector = spDT.getPlayAgents();
-					OtherParams[] hddPar = new OtherParams[2];
+					OtherParams[] hddPar = new OtherParams[1];
 					hddPar[0] = new OtherParams();
 					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
-					hddPar[1] = new OtherParams();
-					hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
+					//hddPar[1] = new OtherParams();
+					//hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
 					qaVector = m_xfun.wrapAgents(paVector, hddPar, gb.getStateObs());
 				}
 			}

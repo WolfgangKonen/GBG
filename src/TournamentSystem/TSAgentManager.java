@@ -15,9 +15,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.tc33.jheatchart.HeatChart;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
@@ -319,10 +320,10 @@ public class TSAgentManager {
         }
         results.gamePlan = generateGamePlanInternal();
         results.gameResult = new int[results.gamePlan.length][3]; // is initialized with all zeros by JDK (primitive datatyp)
-        results.timeStorage = new TSTimeStorage[results.gamePlan.length][2];
+        results.timeStorage = new TSTimeStorage[results.gamePlan.length][numPlayers];
         for (TSTimeStorage t[] : results.timeStorage) { // initialize all positions
-            t[0] = new TSTimeStorage();
-            t[1] = new TSTimeStorage();
+            for (int p=0; p<numPlayers; p++)
+                t[p] = new TSTimeStorage();
         }
         results.nextGame = 0;
         gamesPlayed = 0;
@@ -507,67 +508,79 @@ public class TSAgentManager {
             System.out.println(TAG+"ERROR :: Stats Window cannot be opened, tournament data not available");
             return;
         }
-        // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
-        /**
-         * Table | WTL und Score
-         */
-        // headers for the table
-        String agenten[] = getNamesAgentsSelected();
-        String[] columnNames1 = new String[agenten.length+1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
-        columnNames1[0] = "Y vs X";
-        System.arraycopy(agenten, 0, columnNames1, 1, agenten.length);
 
-        final String empty = "null";
-        int game = 0;
-        Object[][] rowData1 = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
-        Object[][] rowData3 = new Object[getNumAgentsSelected()][getNumAgentsSelected()+1];
-        double[][] rowDataHM = new double[getNumAgentsSelected()][getNumAgentsSelected()];
-        for (int i=0; i<getNumAgentsSelected(); i++) {
-            rowData1[i][0] = getNamesAgentsSelected()[i];
-            rowData3[i][0] = getNamesAgentsSelected()[i];
-            for (int j=0; j<getNumAgentsSelected(); j++) {
-                if (i==j) {
-                    rowData1[i][j+1] = empty;
-                    rowData3[i][j+1] = empty;
-                    rowDataHM[i][j] = -1;
-                }
-                else {
-                    rowData1[i][j+1] = "W:"+results.gameResult[game][0]+" | T:"+results.gameResult[game][1]+" | L:"+results.gameResult[game][2];
-                    float score = 0;
-                    score += results.gameResult[game][0] * faktorWin;
-                    score += results.gameResult[game][1] * faktorTie;
-                    score += results.gameResult[game][2] * faktorLos;
-                    rowData3[i][j+1] = ""+score;
-                    rowDataHM[i][j] = score;
-                    game++;
+        String startDate = results.startDate+" | Games per Match: "+results.numberOfGames+" | Number of random Startmoves: "+results.numberOfRandomStartMoves;
+        boolean singlePlayerGame = false;
+        if (numPlayers==1)
+            singlePlayerGame = true;
+        TSResultWindow mTSRW = new TSResultWindow(startDate, singlePlayerGame);
+        double[][] rowDataHM = null;
+
+        if (numPlayers>1) {
+            // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
+            /**
+             * Table | WTL und Score
+             */
+            // headers for the table
+            String agenten[] = getNamesAgentsSelected();
+            String[] columnNames1 = new String[agenten.length + 1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
+            columnNames1[0] = "Y vs X";
+            System.arraycopy(agenten, 0, columnNames1, 1, agenten.length);
+
+            final String empty = "null";
+            int game = 0;
+            Object[][] rowData1 = new Object[getNumAgentsSelected()][getNumAgentsSelected() + 1];
+            Object[][] rowData3 = new Object[getNumAgentsSelected()][getNumAgentsSelected() + 1];
+            rowDataHM = new double[getNumAgentsSelected()][getNumAgentsSelected()];
+            for (int i = 0; i < getNumAgentsSelected(); i++) {
+                rowData1[i][0] = getNamesAgentsSelected()[i];
+                rowData3[i][0] = getNamesAgentsSelected()[i];
+                for (int j = 0; j < getNumAgentsSelected(); j++) {
+                    if (i == j) {
+                        rowData1[i][j + 1] = empty;
+                        rowData3[i][j + 1] = empty;
+                        rowDataHM[i][j] = -1;
+                    } else {
+                        rowData1[i][j + 1] = "W:" + results.gameResult[game][0] + " | T:" + results.gameResult[game][1] + " | L:" + results.gameResult[game][2];
+                        float score = 0;
+                        score += results.gameResult[game][0] * faktorWin;
+                        score += results.gameResult[game][1] * faktorTie;
+                        score += results.gameResult[game][2] * faktorLos;
+                        rowData3[i][j + 1] = "" + score;
+                        rowDataHM[i][j] = score;
+                        game++;
+                    }
                 }
             }
+
+            //create table with data
+            //JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
+            DefaultTableModel defTableMatrixWTL = new DefaultTableModel(rowData1, columnNames1);
+            mTSRW.setTableMatrixWTL(defTableMatrixWTL);
+            //JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
+            DefaultTableModel defTableMatrixSCR = new DefaultTableModel(rowData3, columnNames1);
+            mTSRW.setTableMatrixSCR(defTableMatrixSCR);
+
+            /**
+             * Score Heatmap
+             */
+            // create Score HeatMap
+            HeatChart map = new HeatChart(rowDataHM);
+            //map.setTitle("white = worst | black = best");
+            //map.setXAxisLabel("X Axis");
+            //map.setYAxisLabel("Y Axis");
+            //Object[] tmpX = {"Agent1","Agent2","Agent3","Agent4","Agent5","Agent6"};
+            //map.setXValues(tmpX);
+            //Object[] tmpY = {"Agent1","Agent2","Agent3","Agent4"};
+            //map.setYValues(tmpY);
+            Object[] agentNames = getNamesAgentsSelected();
+            map.setXValues(agentNames);
+            map.setYValues(agentNames);
+            map.setCellSize(new Dimension(25, 25));
+            //map.setTitleFont();
+            Image hm = map.getChartImage();
+            mTSRW.setHeatMap(new ImageIcon(hm));
         }
-
-        //create table with data
-        //JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
-        DefaultTableModel defTableMatrixWTL = new DefaultTableModel(rowData1, columnNames1);
-        //JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
-        DefaultTableModel defTableMatrixSCR = new DefaultTableModel(rowData3, columnNames1);
-
-        /**
-         * Score Heatmap
-         */
-        // create Score HeatMap
-        HeatChart map = new HeatChart(rowDataHM);
-        //map.setTitle("white = worst | black = best");
-        //map.setXAxisLabel("X Axis");
-        //map.setYAxisLabel("Y Axis");
-        //Object[] tmpX = {"Agent1","Agent2","Agent3","Agent4","Agent5","Agent6"};
-        //map.setXValues(tmpX);
-        //Object[] tmpY = {"Agent1","Agent2","Agent3","Agent4"};
-        //map.setYValues(tmpY);
-        Object[] agentNames = getNamesAgentsSelected();
-        map.setXValues(agentNames);
-        map.setYValues(agentNames);
-        map.setCellSize(new Dimension(25,25));
-        //map.setTitleFont();
-        Image hm = map.getChartImage();
 
         /**
          * Table | Agent Score
@@ -584,13 +597,26 @@ public class TSAgentManager {
                 "Glicko2",
                 "WonGameRatio"
         };
+        if (singlePlayerGame) {
+            columnNames4 = new String[]{
+                    "Rank",
+                    "Agent",
+                    "highest Score",
+                    "lowest Score",
+                    "average Score",
+                    "median Score"
+            };
+        }
         Object[][] rowData4 = new Object[getNumAgentsSelected()][columnNames4.length];
         TSHMDataStorage[] rankAgents = new TSHMDataStorage[getNumAgentsSelected()]; // needed to pack agent and heatmap data into one to share sorting
         int[] selectedAgents = getIDAgentsSelected();
         for (int i=0; i<selectedAgents.length; i++) {
             rankAgents[i] = new TSHMDataStorage(); // must init to avoid NullPointerEX
             rankAgents[i].agent = results.mAgents.get(selectedAgents[i]);
-            rankAgents[i].hmScoreValues = rowDataHM[i];
+            if (numPlayers>1)
+                rankAgents[i].hmScoreValues = rowDataHM[i];
+            else
+                rankAgents[i].hmScoreValues = null; // fuer zweite HM, wird nur bei spielen Player>1 gerendert
             //System.out.println("DEVDEV "+rankAgents[i].agent.getName()+" -- "+Arrays.toString(rowDataHM[i]));
         }
 
@@ -607,13 +633,23 @@ public class TSAgentManager {
             }
         });
         */
-        Arrays.sort(rankAgents, (entry1, entry2) -> { // same as above
-            if (entry1.agent.getAgentScore()>entry2.agent.getAgentScore())
-                return -1;
-            if (entry1.agent.getAgentScore()<entry2.agent.getAgentScore())
-                return +1;
-            return 0;
-        });
+        if (!singlePlayerGame) { // multiplayer game
+            Arrays.sort(rankAgents, (entry1, entry2) -> { // same as above
+                if (entry1.agent.getAgentScore() > entry2.agent.getAgentScore())
+                    return -1;
+                if (entry1.agent.getAgentScore() < entry2.agent.getAgentScore())
+                    return +1;
+                return 0;
+            });
+        } else { // singleplayer game
+            Arrays.sort(rankAgents, (entry1, entry2) -> { // same as above
+                if (entry1.agent.getMedianSinglePlayerScore() > entry2.agent.getMedianSinglePlayerScore())
+                    return -1;
+                if (entry1.agent.getMedianSinglePlayerScore() < entry2.agent.getMedianSinglePlayerScore())
+                    return +1;
+                return 0;
+            });
+        }
 
         glicko2RatingSystem.updateRatings(glicko2Results); // update glicko2 ratings once after TS
 
@@ -623,54 +659,69 @@ public class TSAgentManager {
             rowData4[i][0] = ""+(i+1);
             // "Agent"
             rowData4[i][1] = rankAgents[i].agent.getName();
-            // "Games Won"
-            rowData4[i][2] = rankAgents[i].agent.getCountWonGames();
-            // "Games Tie"
-            rowData4[i][3] = rankAgents[i].agent.getCountTieGames();
-            // "Games Lost"
-            rowData4[i][4] = rankAgents[i].agent.getCountLostGames();
-            // "WTL Score"
-            rowData4[i][5] = rankAgents[i].agent.getAgentScore();
-            // "FIDE Elo"
-            rowData4[i][6] = rankAgents[i].agent.mEloPlayerFIDE.getEloRating();
-            // "USCF Elo"
-            rowData4[i][7] = rankAgents[i].agent.mEloPlayerUSCF.getEloRating();
-            // "Glicko2"
-            //rowData4[i][8] = rankAgents[i].mGlicko2Rating.getRating();
-            NumberFormat formatter1 = new DecimalFormat("#0.00");
-            rowData4[i][8] = formatter1.format(rankAgents[i].agent.mGlicko2Rating.getRating());
-            // "WonGameRatio"
-            float w = rankAgents[i].agent.getCountWonGames();
-            float a = rankAgents[i].agent.getCountAllGames();
-            float f = w/a;
-            NumberFormat formatter2 = new DecimalFormat("#0.00");
-            rowData4[i][9] = formatter2.format(f*100)+"%";
+            if (!singlePlayerGame) {
+                // "Games Won"
+                rowData4[i][2] = rankAgents[i].agent.getCountWonGames();
+                // "Games Tie"
+                rowData4[i][3] = rankAgents[i].agent.getCountTieGames();
+                // "Games Lost"
+                rowData4[i][4] = rankAgents[i].agent.getCountLostGames();
+                // "WTL Score"
+                rowData4[i][5] = rankAgents[i].agent.getAgentScore();
+                // "FIDE Elo"
+                rowData4[i][6] = rankAgents[i].agent.mEloPlayerFIDE.getEloRating();
+                // "USCF Elo"
+                rowData4[i][7] = rankAgents[i].agent.mEloPlayerUSCF.getEloRating();
+                // "Glicko2"
+                //rowData4[i][8] = rankAgents[i].mGlicko2Rating.getRating();
+                NumberFormat formatter1 = new DecimalFormat("#0.00");
+                rowData4[i][8] = formatter1.format(rankAgents[i].agent.mGlicko2Rating.getRating());
+                // "WonGameRatio"
+                float w = rankAgents[i].agent.getCountWonGames();
+                float a = rankAgents[i].agent.getCountAllGames();
+                float f = w / a;
+                NumberFormat formatter2 = new DecimalFormat("#0.00");
+                rowData4[i][9] = formatter2.format(f * 100) + "%";
+            }
+            else {
+                // "highest Score"
+                rowData4[i][2] = rankAgents[i].agent.getMaxSinglePlayerScore();
+                // "lowest Score",
+                rowData4[i][3] = rankAgents[i].agent.getMinSinglePlayerScore();
+                // "average Score"
+                rowData4[i][4] = rankAgents[i].agent.getAverageSinglePlayScore();
+                // "median Score"
+                rowData4[i][5] = rankAgents[i].agent.getMedianSinglePlayerScore();
+            }
         }
 
         //create table with data
         JTable tableAgentScore = new JTable(rowData4, columnNames4);
         DefaultTableModel defTableAgentScore = new DefaultTableModel(rowData4, columnNames4);
+        mTSRW.setTableAgentScore(defTableAgentScore);
         // center align column entries
-        DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableAgentScore.getDefaultRenderer(Object.class);
-        renderer.setHorizontalAlignment( JLabel.CENTER );
+        //DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableAgentScore.getDefaultRenderer(Object.class);
+        //renderer.setHorizontalAlignment( JLabel.CENTER );
 
-        /**
-         * HeatMap2 | Agent Scores sorted by AgentScores
-         */
-        // create Score HeatMap
-        double[][] dataHM2 = new double[rowDataHM.length][rowDataHM[0].length];
-        Object[] agentNamesX = getNamesAgentsSelected();
-        Object[] agentNamesY = new Object[rankAgents.length];
-        for (int i=0; i<rankAgents.length; i++) {
-            agentNamesY[i] = rankAgents[i].agent.getName();
-            dataHM2[i] = rankAgents[i].hmScoreValues;
+        if (numPlayers>1) {
+            /**
+             * HeatMap2 | Agent Scores sorted by AgentScores
+             */
+            // create Score HeatMap
+            double[][] dataHM2 = new double[rowDataHM.length][rowDataHM[0].length];
+            Object[] agentNamesX = getNamesAgentsSelected();
+            Object[] agentNamesY = new Object[rankAgents.length];
+            for (int i = 0; i < rankAgents.length; i++) {
+                agentNamesY[i] = rankAgents[i].agent.getName();
+                dataHM2[i] = rankAgents[i].hmScoreValues;
+            }
+            HeatChart map2 = new HeatChart(dataHM2);
+            map2.setXValues(agentNamesX);
+            map2.setYValues(agentNamesY);
+            map2.setCellSize(new Dimension(25, 25));
+            Image hm2 = map2.getChartImage();
+            mTSRW.setHeatMapSorted(new ImageIcon(hm2));
         }
-        HeatChart map2 = new HeatChart(dataHM2);
-        map2.setXValues(agentNamesX);
-        map2.setYValues(agentNamesY);
-        map2.setCellSize(new Dimension(25,25));
-        Image hm2 = map2.getChartImage();
-
 
         /**
          * Scatterplot | AgentScore vs Time
@@ -687,7 +738,7 @@ public class TSAgentManager {
 
             for (int gms=0; gms<results.timeStorage.length; gms++) { // spiele
                 for (int cpl=0; cpl<results.timeStorage[0].length; cpl++) { // hin+rückrunde
-                    for (int agt=0; agt<2; agt++) { // agent 1+2
+                    for (int agt=0; agt<numPlayers; agt++) { // agent 1+2
                         if (results.gamePlan[gms][cpl] == selectedAgents2[i]) {
                             double medianRoundTimeMS = results.timeStorage[gms][cpl].getMedianRoundTimeMS();
                             if (medianRoundTimeMS > -1) // avoid missing measurements marked with -1 value
@@ -710,17 +761,25 @@ public class TSAgentManager {
                 median = tmpD[tmpD.length/2];
 
             XYSeries series1 = new XYSeries(tmp.getName());
-            series1.add(median, tmp.getAgentScore());
+            if (singlePlayerGame)
+                series1.add(median, tmp.getAverageSinglePlayScore());
+            else
+                series1.add(median, tmp.getAgentScore());
             dataset.addSeries(series1);
         }
 
         // Create chart
+        String scplYAxis = "Agent Score [WTL]";
+        if (singlePlayerGame)
+            scplYAxis = "average Agent Game Score";
         JFreeChart scatterPlot = ChartFactory.createScatterPlot(
-                "", "Median Round Time [ms]", "Agent Score [WTL]", dataset);
+                "", "Median Round Time [ms]", scplYAxis, dataset);
 
         //Changes background color
         XYPlot plot = (XYPlot)scatterPlot.getPlot();
         plot.setBackgroundPaint(new Color(230, 230, 230));
+
+        mTSRW.setScatterPlotASvT(scatterPlot);
 
         // Create Panel - now done in GUI!
         //ChartPanel scatterPlotASvT = new ChartPanel(chart);
@@ -743,7 +802,7 @@ public class TSAgentManager {
                 "median Runde"
         };
 
-        final int numAgentsPerRound = 2;
+        final int numAgentsPerRound = numPlayers;
         Object[][] rowData2 = new Object[results.gameResult.length*numAgentsPerRound][columnNames2.length];
         int pos = 0;
         for (int i=0; i<results.gameResult.length; i++) {
@@ -774,18 +833,19 @@ public class TSAgentManager {
         //create table with data
         JTable tableTimeDetail = new JTable(rowData2, columnNames2);
         DefaultTableModel defTableTimeDetail = new DefaultTableModel(rowData2, columnNames2);
+        mTSRW.setTableTimeDetail(defTableTimeDetail);
         // right align column entries
-        DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
-        renderer2.setHorizontalAlignment( JLabel.RIGHT );
-
-        String startDate = results.startDate+" | Games per Match: "+results.numberOfGames+" | Number of random Startmoves: "+results.numberOfRandomStartMoves;
+        //DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
+        //renderer2.setHorizontalAlignment( JLabel.RIGHT );
 
         /**
          * TS Results in a window
          */
 
-        TSResultWindow mTSRW = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail,
+        /*
+        TSResultWindow mTSRW2 = new TSResultWindow(defTableMatrixWTL, defTableMatrixSCR, defTableAgentScore, defTableTimeDetail,
                 new ImageIcon(hm), new ImageIcon(hm2), scatterPlot, startDate);
+                */
     }
 
     /**
@@ -819,8 +879,26 @@ public class TSAgentManager {
     public void runSinglePlayerTournament(Arena mArena) {
         lockToCompete();
         setSettingsGUIElementsEnabled(false);
-        // alle ausgewählten agenten am stück durchgehen
         mArena.singlePlayerTSRunning = true;
+
+        /* Progressbar not visible, thread problem?
+        JFrame progressBarJF = new JFrame();
+        progressBarJF.setSize(300, 100);
+        progressBarJF.setTitle("TS Progress...");
+        JPanel progressBarJP = new JPanel();
+        // JProgressBar-Objekt wird erzeugt
+        JProgressBar tsProgressBar = new JProgressBar(0, getTSProgress()[1]);
+        // Wert für den Ladebalken wird gesetzt
+        tsProgressBar.setValue(0);
+        // Der aktuelle Wert wird als
+        // Text in Prozent angezeigt
+        tsProgressBar.setStringPainted(true);
+        // JProgressBar wird Panel hinzugefügt
+        progressBarJP.add(tsProgressBar);
+        progressBarJF.add(progressBarJP);
+        progressBarJF.setVisible(true);
+        */
+
         String res = "";
 
         while (hastNextGame()) {
@@ -830,19 +908,32 @@ public class TSAgentManager {
             mArena.m_xab.enableTournamentRemoteData(nextTeam);
             mArena.taskState = Arena.Task.PLAY;
             mArena.PlayGame(spDT);
+            nextTimes[0].roundFinished();
+            /*
+            // progressbar
+            gamesPlayed++;
+            int[] progress = getTSProgress();
+            tsProgressBar.setValue(progress[0]);
+            System.out.println(TAG+"TS Progress "+ Arrays.toString(progress));
+            */
             mArena.taskState = Arena.Task.IDLE;
             mArena.m_xab.disableTournamentRemoteData();
             res += TAG+"agent:"+nextTeam[0].getName()+" scores: "+Arrays.toString(nextTeam[0].getSinglePlayScores())+"\n";
         }
 
+        makeStats();
+        if (getAutoSaveAfterTS()) {
+            try {
+                mArena.tdAgentIO.saveTSResult(results, true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        //progressBarJF.dispatchEvent(new WindowEvent(progressBarJF, WindowEvent.WINDOW_CLOSING)); // close progressbar window
         mArena.singlePlayerTSRunning = false;
         unlockAfterComp();
         setSettingsGUIElementsEnabled(true);
         mArena.enableButtons(true);
-        // keine hdd und regulars mischen
-        // m mal jeweils kämpfen lassen
-        // scores erfassen
-        // stats window
         //System.out.println(TAG+"agent:"+nextTeam[0].getName()+" scores: "+Arrays.toString(nextTeam[0].getSinglePlayScores()));
         System.out.println(res);
     }

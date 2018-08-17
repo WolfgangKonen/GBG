@@ -7,7 +7,7 @@
     <properties/>
     <border type="none"/>
     <children>
-      <component id="76568" class="javax.swing.JLabel">
+      <component id="76568" class="javax.swing.JLabel" binding="tableWTLLabel">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
@@ -16,7 +16,7 @@
           <text value="Table with Win, Tie, Loss Results"/>
         </properties>
       </component>
-      <component id="9842d" class="javax.swing.JLabel">
+      <component id="9842d" class="javax.swing.JLabel" binding="tableSCRLabel">
         <constraints>
           <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
@@ -25,7 +25,7 @@
           <text value="Table with game scores calculated from game WTL"/>
         </properties>
       </component>
-      <component id="f1166" class="javax.swing.JLabel">
+      <component id="f1166" class="javax.swing.JLabel" binding="heatmapH1JL">
         <constraints>
           <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
@@ -264,12 +264,12 @@
           <component id="dbcc2" class="javax.swing.JLabel" binding="heatmap2JL">
             <constraints/>
             <properties>
-              <text value="Label"/>
+              <text value="HeatMapSorted"/>
             </properties>
           </component>
         </children>
       </scrollpane>
-      <component id="167b9" class="javax.swing.JLabel">
+      <component id="167b9" class="javax.swing.JLabel" binding="heatmap2H1JL">
         <constraints>
           <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
