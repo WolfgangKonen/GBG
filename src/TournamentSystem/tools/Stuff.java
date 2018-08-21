@@ -57,9 +57,11 @@ public class Stuff {
                 {3,4,5,6,0,6},
                 {4,5,6,7,6,0}
         };
+        System.out.println("HeatChart.max(dataHM): "+HeatChart.max(dataHM));
 
         // Step 1: Create our heat map chart using our data.
-        HeatChart map = new HeatChart(dataHM);
+        HeatChart map = new HeatChart(dataHM, 1, 7);
+        //HeatChart map = new HeatChart(dataHM);
 
         // Step 2: Customise the chart.
         map.setTitle("This is my heat chart title");

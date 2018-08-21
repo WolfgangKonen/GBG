@@ -9,6 +9,7 @@ import games.Arena;
 import games.XArenaMenu;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -513,8 +514,11 @@ public class TSAgentManager {
         boolean singlePlayerGame = false;
         if (numPlayers==1)
             singlePlayerGame = true;
-        TSResultWindow mTSRW = new TSResultWindow(startDate, singlePlayerGame);
+
+        TSResultWindow tsResultWindow = new TSResultWindow(startDate, singlePlayerGame);
         double[][] rowDataHM = null;
+        NumberFormat numberFormat00 = new DecimalFormat("#0.00");
+        NumberFormat numberFormat00000 = new DecimalFormat("#0.00000");
 
         if (numPlayers>1) {
             // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
@@ -556,16 +560,16 @@ public class TSAgentManager {
             //create table with data
             //JTable tableMatrixWTL = new JTable(rowData1, columnNames1);
             DefaultTableModel defTableMatrixWTL = new DefaultTableModel(rowData1, columnNames1);
-            mTSRW.setTableMatrixWTL(defTableMatrixWTL);
+            tsResultWindow.setTableMatrixWTL(defTableMatrixWTL);
             //JTable tableMatrixSCR = new JTable(rowData3, columnNames1);
             DefaultTableModel defTableMatrixSCR = new DefaultTableModel(rowData3, columnNames1);
-            mTSRW.setTableMatrixSCR(defTableMatrixSCR);
+            tsResultWindow.setTableMatrixSCR(defTableMatrixSCR);
 
             /**
              * Score Heatmap
              */
             // create Score HeatMap
-            HeatChart map = new HeatChart(rowDataHM);
+            HeatChart map = new HeatChart(rowDataHM, 0, HeatChart.max(rowDataHM));
             //map.setTitle("white = worst | black = best");
             //map.setXAxisLabel("X Axis");
             //map.setYAxisLabel("Y Axis");
@@ -579,7 +583,7 @@ public class TSAgentManager {
             map.setCellSize(new Dimension(25, 25));
             //map.setTitleFont();
             Image hm = map.getChartImage();
-            mTSRW.setHeatMap(new ImageIcon(hm));
+            tsResultWindow.setHeatMap(new ImageIcon(hm));
         }
 
         /**
@@ -674,14 +678,12 @@ public class TSAgentManager {
                 rowData4[i][7] = rankAgents[i].agent.mEloPlayerUSCF.getEloRating();
                 // "Glicko2"
                 //rowData4[i][8] = rankAgents[i].mGlicko2Rating.getRating();
-                NumberFormat formatter1 = new DecimalFormat("#0.00");
-                rowData4[i][8] = formatter1.format(rankAgents[i].agent.mGlicko2Rating.getRating());
+                rowData4[i][8] = numberFormat00.format(rankAgents[i].agent.mGlicko2Rating.getRating());
                 // "WonGameRatio"
                 float w = rankAgents[i].agent.getCountWonGames();
                 float a = rankAgents[i].agent.getCountAllGames();
                 float f = w / a;
-                NumberFormat formatter2 = new DecimalFormat("#0.00");
-                rowData4[i][9] = formatter2.format(f * 100) + "%";
+                rowData4[i][9] = numberFormat00.format(f * 100) + "%";
             }
             else {
                 // "highest Score"
@@ -696,12 +698,9 @@ public class TSAgentManager {
         }
 
         //create table with data
-        JTable tableAgentScore = new JTable(rowData4, columnNames4);
+        //JTable tableAgentScore = new JTable(rowData4, columnNames4);
         DefaultTableModel defTableAgentScore = new DefaultTableModel(rowData4, columnNames4);
-        mTSRW.setTableAgentScore(defTableAgentScore);
-        // center align column entries
-        //DefaultTableCellRenderer renderer = (DefaultTableCellRenderer)tableAgentScore.getDefaultRenderer(Object.class);
-        //renderer.setHorizontalAlignment( JLabel.CENTER );
+        tsResultWindow.setTableAgentScore(defTableAgentScore);
 
         if (numPlayers>1) {
             /**
@@ -715,12 +714,12 @@ public class TSAgentManager {
                 agentNamesY[i] = rankAgents[i].agent.getName();
                 dataHM2[i] = rankAgents[i].hmScoreValues;
             }
-            HeatChart map2 = new HeatChart(dataHM2);
+            HeatChart map2 = new HeatChart(dataHM2, 0, HeatChart.max(dataHM2));
             map2.setXValues(agentNamesX);
             map2.setYValues(agentNamesY);
             map2.setCellSize(new Dimension(25, 25));
             Image hm2 = map2.getChartImage();
-            mTSRW.setHeatMapSorted(new ImageIcon(hm2));
+            tsResultWindow.setHeatMapSorted(new ImageIcon(hm2));
         }
 
         /**
@@ -777,9 +776,12 @@ public class TSAgentManager {
 
         //Changes background color
         XYPlot plot = (XYPlot)scatterPlot.getPlot();
-        plot.setBackgroundPaint(new Color(230, 230, 230));
+        plot.setBackgroundPaint(new Color(180, 180, 180));
+        //To change the lower bound of X-axis
+        NumberAxis xAxis = (NumberAxis) plot.getDomainAxis();
+        xAxis.setLowerBound(-1); // show x axis from -1 to move marker away from axis
 
-        mTSRW.setScatterPlotASvT(scatterPlot);
+        tsResultWindow.setScatterPlotASvT(scatterPlot);
 
         // Create Panel - now done in GUI!
         //ChartPanel scatterPlotASvT = new ChartPanel(chart);
@@ -790,16 +792,16 @@ public class TSAgentManager {
          */
         // headers for the table
         String[] columnNames2 = {
-                "Spiel",
+                "Game",
                 "Agent Name",
                 "Agent Typ",
-                "schnellster Zug",
-                "langsamster Zug",
+                "fastest turn",
+                "slowest turn",
                 //"durchschnittliche Zeit",
-                "drchschn. Zug",
-                "median Zug",
-                "drchschn. Runde",
-                "median Runde"
+                "average draw",
+                "median draw",
+                "average round",
+                "median round"
         };
 
         final int numAgentsPerRound = numPlayers;
@@ -814,29 +816,26 @@ public class TSAgentManager {
                 // "Agent Typ"
                 rowData2[pos][2] = results.mAgents.get(results.gamePlan[i][j]).getAgentType();
                 // "schnellster Zug"
-                rowData2[pos][3] = ""+results.timeStorage[i][j].getMinTimeForGameMS()+"ms";
+                rowData2[pos][3] = numberFormat00000.format(results.timeStorage[i][j].getMinTimeForGameMS());
                 // "langsamster Zug"
-                rowData2[pos][4] = ""+results.timeStorage[i][j].getMaxTimeForGameMS()+"ms";
+                rowData2[pos][4] = numberFormat00000.format(results.timeStorage[i][j].getMaxTimeForGameMS());
                 // "durchschnittliche Zeit Zug"
-                rowData2[pos][5] = ""+results.timeStorage[i][j].getAverageTimeForGameMS()+"ms";
+                rowData2[pos][5] = numberFormat00000.format(results.timeStorage[i][j].getAverageTimeForGameMS());
                 // "median Zeit Zug"
-                rowData2[pos][6] = ""+results.timeStorage[i][j].getMedianTimeForGameMS()+"ms";
+                rowData2[pos][6] = numberFormat00000.format(results.timeStorage[i][j].getMedianTimeForGameMS());
                 // "durchschnittliche Zeit Runde"
-                rowData2[pos][7] = ""+results.timeStorage[i][j].getAverageRoundTimeMS()+"ms";
+                rowData2[pos][7] = numberFormat00000.format(results.timeStorage[i][j].getAverageRoundTimeMS());
                 // "median Zeit Runde"
-                rowData2[pos][8] = ""+results.timeStorage[i][j].getMedianRoundTimeMS()+"ms";
+                rowData2[pos][8] = numberFormat00000.format(results.timeStorage[i][j].getMedianRoundTimeMS());
 
                 pos++;
             }
         }
 
         //create table with data
-        JTable tableTimeDetail = new JTable(rowData2, columnNames2);
+        //JTable tableTimeDetail = new JTable(rowData2, columnNames2);
         DefaultTableModel defTableTimeDetail = new DefaultTableModel(rowData2, columnNames2);
-        mTSRW.setTableTimeDetail(defTableTimeDetail);
-        // right align column entries
-        //DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer)tableTimeDetail.getDefaultRenderer(Object.class);
-        //renderer2.setHorizontalAlignment( JLabel.RIGHT );
+        tsResultWindow.setTableTimeDetail(defTableTimeDetail);
 
         /**
          * TS Results in a window

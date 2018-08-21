@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="TournamentSystem.TSResultWindow">
   <grid id="27dc6" binding="mJPanel" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="809" height="593"/>
+      <xy x="20" y="20" width="809" height="1111"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -13,7 +13,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Table with Win, Tie, Loss Results"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Table with Win, Tie, Loss (WTL) Results&lt;/strong&gt;&lt;br&gt;&#10;column agent plays against the row agent&lt;br&gt;&#10;win and loss are from the column agent perspective&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
       <component id="9842d" class="javax.swing.JLabel" binding="tableSCRLabel">
@@ -22,7 +22,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Table with game scores calculated from game WTL"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Table with game scores calculated from game WTL&lt;/body&gt;&lt;/html&gt;&#10;"/>
         </properties>
       </component>
       <component id="f1166" class="javax.swing.JLabel" binding="heatmapH1JL">
@@ -31,7 +31,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="&lt;html&gt;&lt;body&gt;Heatmap visualisation of game scores&lt;br&gt;white = worst ; black = best | Y vs. X&lt;/body&gt;&lt;/html&gt;"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Heatmap visualisation of game scores&lt;/strong&gt;&lt;br&gt;&#10;white = worst or agent against itself&lt;br&gt;&#10;black = best score&lt;br&gt;&#10;column agent plays against the row agent&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
       <component id="9f0ba" class="javax.swing.JLabel">
@@ -40,7 +40,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Ranking of agents by overall Wins, Ties, Losses"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Ranking of agents by overall Wins, Ties, Losses&lt;/strong&gt;&lt;/body&gt;&lt;/html&gt;&#10;"/>
         </properties>
       </component>
       <component id="9cc94" class="javax.swing.JLabel">
@@ -49,7 +49,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Game time meassurements in [ms]"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Game time meassurements in [ms]&lt;/strong&gt;&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
       <scrollpane id="4a66" binding="jspWTL">
@@ -160,7 +160,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="ScatterPlot AgentScore vs. RoundTime"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;ScatterPlot AgentScore vs. RoundTime&lt;/strong&gt;&lt;br&gt;&#10;Agent WinTieLoss Score vs median RoundTime&lt;/body&gt;&lt;/html&gt;&#10;"/>
         </properties>
       </component>
       <grid id="d070" binding="scatterPlotJPanel" layout-manager="GridBagLayout">
@@ -179,6 +179,7 @@
         </constraints>
         <properties>
           <text value="Show/Hide WTL Table"/>
+          <toolTipText value="Show or hide the WinTieLoss Table by clicking this button"/>
         </properties>
       </component>
       <component id="7c3e5" class="javax.swing.JButton" binding="showHideTableTimeTableButton">
@@ -188,6 +189,7 @@
         </constraints>
         <properties>
           <text value="Show/Hide Time Table"/>
+          <toolTipText value="Show or hide the time measurement table by clicking this button"/>
         </properties>
       </component>
       <component id="fd56e" class="javax.swing.JButton" binding="showHideTableSCRButton">
@@ -197,6 +199,7 @@
         </constraints>
         <properties>
           <text value="Show/Hide Score Table"/>
+          <toolTipText value="Show or hide the Score Table by clicking this button"/>
         </properties>
       </component>
       <component id="46e85" class="javax.swing.JButton" binding="showHideTableASCButton">
@@ -206,6 +209,7 @@
         </constraints>
         <properties>
           <text value="Show/Hide Ranking Table"/>
+          <toolTipText value="Show or hide the agent ranking table by clicking this button"/>
         </properties>
       </component>
       <vspacer id="38bed">
@@ -221,6 +225,7 @@
         </constraints>
         <properties>
           <text value="Hide all Tables"/>
+          <toolTipText value="Hide all tables by clicking this button"/>
         </properties>
       </component>
       <vspacer id="935f6">
@@ -236,6 +241,7 @@
         </constraints>
         <properties>
           <text value="Show all Tables"/>
+          <toolTipText value="Show all tables by clicking this button"/>
         </properties>
       </component>
       <component id="ffe58" class="javax.swing.JLabel" binding="startDateTSJL">
@@ -275,7 +281,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Heatmap sorted by AgentScore"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Heatmap sorted by AgentScore&lt;/strong&gt;&lt;br&gt;&#10;rows are sorted with the best agent on top&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
       <hspacer id="baeca">
@@ -291,6 +297,7 @@
         </constraints>
         <properties>
           <text value="Open bigger ScatterPlot"/>
+          <toolTipText value="Open the Agentscore vs. Roundtime plot in a new and bigger window"/>
         </properties>
       </component>
     </children>

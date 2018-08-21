@@ -2,7 +2,6 @@ package TournamentSystem;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import tools.Types;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -297,7 +296,7 @@ public class TSResultWindow extends JFrame {
         mJPanel = new JPanel();
         mJPanel.setLayout(new GridBagLayout());
         tableWTLLabel = new JLabel();
-        tableWTLLabel.setText("Table with Win, Tie, Loss Results");
+        tableWTLLabel.setText("<html><body><strong>Table with Win, Tie, Loss (WTL) Results</strong><br>\ncolumn agent plays against the row agent<br>\nwin and loss are from the column agent perspective</body></html>");
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -305,28 +304,28 @@ public class TSResultWindow extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(tableWTLLabel, gbc);
         tableSCRLabel = new JLabel();
-        tableSCRLabel.setText("Table with game scores calculated from game WTL");
+        tableSCRLabel.setText("<html><body><strong>Table with game scores calculated from game WTL</body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(tableSCRLabel, gbc);
         heatmapH1JL = new JLabel();
-        heatmapH1JL.setText("<html><body>Heatmap visualisation of game scores<br>white = worst ; black = best | Y vs. X</body></html>");
+        heatmapH1JL.setText("<html><body><strong>Heatmap visualisation of game scores</strong><br>\nwhite = worst or agent against itself<br>\nblack = best score<br>\ncolumn agent plays against the row agent</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 8;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(heatmapH1JL, gbc);
         final JLabel label1 = new JLabel();
-        label1.setText("Ranking of agents by overall Wins, Ties, Losses");
+        label1.setText("<html><body><strong>Ranking of agents by overall Wins, Ties, Losses</strong></body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 12;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label1, gbc);
         final JLabel label2 = new JLabel();
-        label2.setText("Game time meassurements in [ms]");
+        label2.setText("<html><body><strong>Game time meassurements in [ms]</strong></body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 15;
@@ -413,7 +412,7 @@ public class TSResultWindow extends JFrame {
         gbc.insets = new Insets(0, 0, 0, 10);
         mJPanel.add(spacer5, gbc);
         final JLabel label3 = new JLabel();
-        label3.setText("ScatterPlot AgentScore vs. RoundTime");
+        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. RoundTime</strong><br>\nAgent WinTieLoss Score vs median RoundTime</body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 8;
@@ -428,6 +427,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(scatterPlotJPanel, gbc);
         showHideTableWTLButton = new JButton();
         showHideTableWTLButton.setText("Show/Hide WTL Table");
+        showHideTableWTLButton.setToolTipText("Show or hide the WinTieLoss Table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 2;
@@ -435,6 +435,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(showHideTableWTLButton, gbc);
         showHideTableTimeTableButton = new JButton();
         showHideTableTimeTableButton.setText("Show/Hide Time Table");
+        showHideTableTimeTableButton.setToolTipText("Show or hide the time measurement table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 15;
@@ -442,6 +443,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(showHideTableTimeTableButton, gbc);
         showHideTableSCRButton = new JButton();
         showHideTableSCRButton.setText("Show/Hide Score Table");
+        showHideTableSCRButton.setToolTipText("Show or hide the Score Table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 5;
@@ -449,6 +451,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(showHideTableSCRButton, gbc);
         showHideTableASCButton = new JButton();
         showHideTableASCButton.setText("Show/Hide Ranking Table");
+        showHideTableASCButton.setToolTipText("Show or hide the agent ranking table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 12;
@@ -463,6 +466,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(spacer6, gbc);
         hideAllTablesButton = new JButton();
         hideAllTablesButton.setText("Hide all Tables");
+        hideAllTablesButton.setToolTipText("Hide all tables by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 18;
@@ -477,6 +481,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(spacer7, gbc);
         showAllTablesButton = new JButton();
         showAllTablesButton.setText("Show all Tables");
+        showAllTablesButton.setToolTipText("Show all tables by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 18;
@@ -507,7 +512,7 @@ public class TSResultWindow extends JFrame {
         heatmap2JL.setText("HeatMapSorted");
         jspHM2.setViewportView(heatmap2JL);
         heatmap2H1JL = new JLabel();
-        heatmap2H1JL.setText("Heatmap sorted by AgentScore");
+        heatmap2H1JL.setText("<html><body><strong>Heatmap sorted by AgentScore</strong><br>\nrows are sorted with the best agent on top</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
         gbc.gridy = 8;
@@ -522,6 +527,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(spacer9, gbc);
         openBiggerScatterPlotButton = new JButton();
         openBiggerScatterPlotButton.setText("Open bigger ScatterPlot");
+        openBiggerScatterPlotButton.setToolTipText("Open the Agentscore vs. Roundtime plot in a new and bigger window");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 10;
