@@ -277,6 +277,25 @@ public class XArenaFuncs
 		return qa;
 	}
 
+	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, StateObservation so) 
+	{
+		PlayAgent[] qaVector = new PlayAgent[numPlayers];
+		for (int n=0; n<numPlayers; n++) {
+			PlayAgent pa = paVector[n];
+			PlayAgent qa = pa;
+			int nply = paVector[n].getParOther().getWrapperNPly();
+			if (nply>0 && !(pa instanceof HumanPlayer)) {
+				if (so.isDeterministicGame()) {
+					qa = new MaxNWrapper(pa,nply);
+				} else {
+					qa = new ExpectimaxWrapper(pa,nply);
+				}
+			}
+			qaVector[n] = qa;
+		} // for (n)
+		return qaVector;
+	}
+
 
 	/**
 	 * Perform one training of a {@link PlayAgent} sAgent with maxGameNum episodes. 
@@ -994,12 +1013,13 @@ public class XArenaFuncs
 					paVector[0] = nextTeam[0].getPlayAgent();
 					paVector[1] = nextTeam[1].getPlayAgent();
 					AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
-					OtherParams[] hddPar = new OtherParams[2];
-					hddPar[0] = new OtherParams();
-					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
-					hddPar[1] = new OtherParams();
-					hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
-					qaVector = wrapAgents(paVector,hddPar,startSO);
+//					OtherParams[] hddPar = new OtherParams[2];
+//					hddPar[0] = new OtherParams();
+//					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
+//					hddPar[1] = new OtherParams();
+//					hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
+//					qaVector = wrapAgents(paVector,hddPar,startSO);
+					qaVector = wrapAgents(paVector,startSO);
 				} else {
 					if (nextTeam[0].isHddAgent() || nextTeam[1].isHddAgent()) {
 						System.out.println(TAG+"ERROR :: dont mix standard and hdd agents!");

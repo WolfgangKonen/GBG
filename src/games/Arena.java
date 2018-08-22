@@ -506,12 +506,13 @@ abstract public class Arena extends JFrame implements Runnable {
 				} else {
 					// HDD agent
 					paVector = spDT.getPlayAgents();
-					OtherParams[] hddPar = new OtherParams[1];
-					hddPar[0] = new OtherParams();
-					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
-					//hddPar[1] = new OtherParams();
-					//hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
-					qaVector = m_xfun.wrapAgents(paVector, hddPar, gb.getStateObs());
+//					OtherParams[] hddPar = new OtherParams[1];
+//					hddPar[0] = new OtherParams();
+//					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
+//					//hddPar[1] = new OtherParams();
+//					//hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
+//					qaVector = m_xfun.wrapAgents(paVector, hddPar, gb.getStateObs());
+					qaVector = m_xfun.wrapAgents(paVector, gb.getStateObs());
 				}
 			}
 		} catch (RuntimeException e) {
@@ -677,8 +678,8 @@ abstract public class Arena extends JFrame implements Runnable {
 				}
 				so = gb.getStateObs();
 				pa = qaVector[so.getPlayer()];
-				if (!pa.getName().equals("Human"))
-					System.out.println(so.stringDescr());
+//				if (!pa.getName().equals("Human"))
+//					System.out.println(so.stringDescr());
 				if (so.isGameOver()) {
 //					try {
 //						Thread.sleep(250);
