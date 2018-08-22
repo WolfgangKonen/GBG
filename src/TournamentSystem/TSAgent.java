@@ -41,6 +41,7 @@ public class TSAgent implements Serializable {
     private int tie;
     private ArrayList<Double> singlePlayScore;
     public JCheckBox guiCheckBox;
+    private final Glicko2RatingCalculator mGlicko2RatingCalculator;
     public EloPlayerFIDE mEloPlayerFIDE;
     public EloPlayerUSCF mEloPlayerUSCF;
     public Glicko2Rating mGlicko2Rating;
@@ -63,10 +64,11 @@ public class TSAgent implements Serializable {
         won = 0;
         tie = 0;
         lost = 0;
+        mGlicko2RatingCalculator = glicko2RatingSystem;
         singlePlayScore = new ArrayList<>();
         mEloPlayerFIDE = new EloPlayerFIDE(name);
         mEloPlayerUSCF = new EloPlayerUSCF(name);
-        mGlicko2Rating = new Glicko2Rating(name, glicko2RatingSystem);
+        mGlicko2Rating = new Glicko2Rating(name, mGlicko2RatingCalculator);
     }
 
     public void addSinglePlayScore(double score) {
@@ -77,8 +79,14 @@ public class TSAgent implements Serializable {
      * reset the agents single player storage and reinit. WARNING: just call this method from {@link TSResultStorage}
      * and from nowhere else to avoid dataloss!
      */
-    public void resetSinglePlayScore() {
+    public void resetScore() {
         singlePlayScore = new ArrayList<>();
+        won = 0;
+        tie = 0;
+        lost = 0;
+        mEloPlayerFIDE = new EloPlayerFIDE(name);
+        mEloPlayerUSCF = new EloPlayerUSCF(name);
+        mGlicko2Rating = new Glicko2Rating(name, mGlicko2RatingCalculator);
     }
 
     public double[] getSinglePlayScores() {

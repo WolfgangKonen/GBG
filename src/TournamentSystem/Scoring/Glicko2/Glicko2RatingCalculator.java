@@ -24,8 +24,8 @@ public class Glicko2RatingCalculator {
 	private final static double MULTIPLIER =  173.7178;
 	private final static double CONVERGENCE_TOLERANCE =  0.000001;
 	
-	private double tau; // constrains volatility over time
-	private double defaultVolatility;
+	private final double tau; // constrains volatility over time
+	private final double defaultVolatility;
 	
 	
 	/**

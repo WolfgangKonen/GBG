@@ -41,14 +41,14 @@ public class TSResultStorage implements Serializable {
     /**
      * reset the single player score storages of all tournament agents. this method can just be called when no tournament is running
      */
-    public void resetAgentSingePlayerScores() {
+    public void resetAgentScores() {
         if (lockedToCompete) {
-            System.out.println(TAG+"ERROR :: cannot resetAgentSingePlayerScores, ResultStorage is lockedToCompete");
+            System.out.println(TAG+"ERROR :: cannot resetAgentScores, ResultStorage is lockedToCompete");
             return;
         }
 
         for (TSAgent a : mAgents) {
-            a.resetSinglePlayScore();
+            a.resetScore();
         }
     }
 }

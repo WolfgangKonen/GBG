@@ -18,7 +18,6 @@ import org.tc33.jheatchart.HeatChart;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -328,7 +327,7 @@ public class TSAgentManager {
         }
         results.nextGame = 0;
         gamesPlayed = 0;
-        results.resetAgentSingePlayerScores();
+        results.resetAgentScores();
         results.lockedToCompete = true;
     }
 
