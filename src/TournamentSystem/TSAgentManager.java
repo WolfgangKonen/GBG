@@ -679,9 +679,10 @@ public class TSAgentManager {
                 //rowData4[i][8] = rankAgents[i].mGlicko2Rating.getRating();
                 rowData4[i][8] = numberFormat00.format(rankAgents[i].agent.mGlicko2Rating.getRating());
                 // "WonGameRatio"
-                float w = rankAgents[i].agent.getCountWonGames();
-                float a = rankAgents[i].agent.getCountAllGames();
-                float f = w / a;
+                //float w = rankAgents[i].agent.getCountWonGames();
+                float s = rankAgents[i].agent.getAgentScore(); // score agent
+                float a = rankAgents[i].agent.getCountAllGames()*faktorWin; // max possible score with every game won
+                float f = s / a;
                 rowData4[i][9] = numberFormat00.format(f * 100) + "%";
             }
             else {

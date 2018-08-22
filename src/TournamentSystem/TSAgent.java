@@ -185,7 +185,9 @@ public class TSAgent implements Serializable {
      * @return agents WTL score
      */
     public float getAgentScore() {
-        float agentScore = getCountWonGames()*faktorWin+getCountTieGames()*faktorTie+getCountLostGames()*faktorLos;
+        float agentScore = getCountWonGames()*faktorWin
+                            +getCountTieGames()*faktorTie
+                            +getCountLostGames()*faktorLos;
         return agentScore;
     }
 
