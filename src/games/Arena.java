@@ -265,7 +265,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					}
 					else {
 						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
-						//System.gc(); // todo reduziert RAM Problem aber nicht handle leak
+						System.gc(); // call to keep system memory usage low
 
 						// progressbar
 						int[] progress = tournamentAgentManager.getTSProgress();
