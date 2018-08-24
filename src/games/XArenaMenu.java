@@ -561,73 +561,61 @@ public class XArenaMenu extends JMenuBar {
 			if (td instanceof TDAgent) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar[n].setFrom( ((TDAgent) td).getTDParams() );
-				if (((TDAgent) td).getParOther() == null ) 
-					((TDAgent) td).setDefaultOtherPar();
+				// now done in LoadSaveGBG::loadGBGAgent():
+//				if (((TDAgent) td).getParOther() == null ) 
+//					((TDAgent) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((TDAgent) td).getParOther() );
 			}
-//			else if (td instanceof TDNTupleAgt) {
-//				// set the agent parameters in XArenaTabs:
-//				m_arena.m_xab.tdPar.setFrom( ((TDNTupleAgt) td).getTDParams() );
-//				m_arena.m_xab.ntPar.setFrom( ((TDNTupleAgt) td).getNTParams() );
-//				if (((TDNTupleAgt) td).getOtherPar() == null ) 
-//					((TDNTupleAgt) td).setDefaultOtherPar();
-//				m_arena.m_xab.oPar.setFrom( ((TDNTupleAgt) td).getOtherPar() );
-//				//
+			else if (td instanceof TDNTuple2Agt) {
+				// --- now done in LoadSaveGBG::loadGBGAgent():
+//				if (((TDNTuple2Agt) td).getParOther() == null ) 
+//					((TDNTuple2Agt) td).setDefaultOtherPar();
+				// --- now done in LoadSaveGBG::loadGBGAgent():
 //				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 //				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
 //				// get the loaded values)
 //				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
-//				// it doesn't hurt
-//				((TDNTupleAgt) td).setTDParams(((TDNTupleAgt) td).getTDParams(), td.getMaxGameNum());
-//				((TDNTupleAgt) td).setNTParams(((TDNTupleAgt) td).getNTParams());
-//			}
-			else if (td instanceof TDNTuple2Agt) {
-				// set horizon cut for older agents (where horCut was not part of ParTD):
-				if (((TDNTuple2Agt) td).getParTD().getHorizonCut()==0.0) 
-					((TDNTuple2Agt) td).getParTD().setHorizonCut(0.1);
+//				// it doesn't hurt)
+//				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getParTD(), td.getMaxGameNum());
+//				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getParNT());
+//				((TDNTuple2Agt) td).weightAnalysis(null);
+				
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple2Agt) td).getParTD() );
 				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple2Agt) td).getParNT() );
-				if (((TDNTuple2Agt) td).getParOther() == null ) 
-					((TDNTuple2Agt) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple2Agt) td).getParOther() );
-				//
-				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
-				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
-				// get the loaded values)
-				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
-				// it doesn't hurt)
-				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getParTD(), td.getMaxGameNum());
-				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getParNT());
 				//m_arena.m_xab.oPar.numEval_T.setText(""+((TDNTuple2Agt) td).getOtherPar().getNumEval());
-				((TDNTuple2Agt) td).weightAnalysis(null);
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT) td).getParMCTS() );
-				if (((MCTSAgentT) td).getParOther() == null ) 
-					((MCTSAgentT) td).setDefaultOtherPar();
+				// now done in LoadSaveGBG::loadGBGAgent():
+//				if (((MCTSAgentT) td).getParOther() == null ) 
+//					((MCTSAgentT) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT) td).getParOther() );
 			}
 			else if (td instanceof MCTSExpectimaxAgt) {
+				// now done in LoadSaveGBG::loadGBGAgent():
+//				if (((MCTSExpectimaxAgt) td).getParOther() == null ) 
+//					((MCTSExpectimaxAgt) td).setDefaultOtherPar();
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctsExpectimaxParams[n].setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
-				if (((MCTSExpectimaxAgt) td).getParOther() == null ) 
-					((MCTSExpectimaxAgt) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((MCTSExpectimaxAgt) td).getParOther() );
 			}
 			else if (td instanceof MCAgent) {
+				// now done in LoadSaveGBG::loadGBGAgent():
+//				if (((MCAgent) td).getParOther() == null ) 
+//					((MCAgent) td).setDefaultOtherPar();
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mcParams[n].setFrom( ((MCAgent) td).getMCPar() );
-				if (((MCAgent) td).getParOther() == null ) 
-					((MCAgent) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((MCAgent) td).getParOther() );
 			}
 			else if (td instanceof MCAgentN) {
+				// now done in LoadSaveGBG::loadGBGAgent():
+//				if (((MCAgentN) td).getParOther() == null ) 
+//					((MCAgentN) td).setDefaultOtherPar();
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mcParams[n].setFrom( ((MCAgentN) td).getMCPar() );
-				if (((MCAgentN) td).getParOther() == null ) 
-					((MCAgentN) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((MCAgentN) td).getParOther() );
 			}
 			else if (td instanceof MinimaxAgent) {
@@ -636,11 +624,11 @@ public class XArenaMenu extends JMenuBar {
 			}
 			else if (td instanceof MaxNAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MinimaxAgent) td).getDepth() );
+				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MaxNAgent) td).getDepth() );
 			}
 			else if (td instanceof ExpectimaxNAgent) {
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MinimaxAgent) td).getDepth() );
+				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((ExpectimaxNAgent) td).getDepth() );
 			}
 			
 			if (td instanceof TDAgent || td instanceof TDNTuple2Agt /* || td instanceof TDNTupleAgt */) {
@@ -653,8 +641,10 @@ public class XArenaMenu extends JMenuBar {
 			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
 				m_arena.m_xab.tdPar[n].enableMode3P(true);
 				m_arena.m_xab.tdPar[n].enableNPly(false);
-				// if it is one of the older agents (before nply was added to oPar), it will
+				// if it is one of the older agents (before nply was added to tdPar), it will
 				// have nply=0. Then set nply=1: 
+				// [NOTE: This is not the wrapperNply of ParOther, but an nply internal to 
+				// the next-action logic of TDNTuple2Agt. It defaults to 1.]
 				if (m_arena.m_xab.tdPar[n].getNPly()==0) {
 					m_arena.m_xab.tdPar[n].setNPly(1);
 					((TDNTuple2Agt) td).getParTD().setNPly(1);

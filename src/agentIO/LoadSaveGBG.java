@@ -297,6 +297,8 @@ public class LoadSaveGBG {
 	}
 
 	/**
+	 * Load a GBG agent from disk and update it, if necessary (older agents on disk might 
+	 * not yet have certain elements, which are then filled in from defaults)
 	 * 
 	 * @param filePath		if null, open a file choose dialog. If not null, open this fully 
 	 * 						qualified file with suffix .agt.zip.
@@ -378,6 +380,15 @@ public class LoadSaveGBG {
 					pa = (TDAgent) obj;
 				} else if (obj instanceof TDNTuple2Agt) {
 					pa = (TDNTuple2Agt) obj;
+					// set horizon cut for older agents (where horCut was not part of ParTD):
+					if (((TDNTuple2Agt) pa).getParTD().getHorizonCut()==0.0) 
+						((TDNTuple2Agt) pa).getParTD().setHorizonCut(0.1);
+					// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+					// (they would stay otherwise at their default values, would not 
+					// get the loaded values)
+					((TDNTuple2Agt) pa).setTDParams(((TDNTuple2Agt) pa).getParTD(), pa.getMaxGameNum());
+					((TDNTuple2Agt) pa).setNTParams(((TDNTuple2Agt) pa).getParNT());
+					((TDNTuple2Agt) pa).weightAnalysis(null);
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;
 				} else if (obj instanceof MCAgent) {
@@ -400,6 +411,15 @@ public class LoadSaveGBG {
 									+ filePath + "!]");
 					throw new ClassNotFoundException("ERROR: Unknown agent class");
 				}
+				
+				if (pa instanceof AgentBase) {
+					// Some older agents on disk might not have ParOther m_oPar.
+					// If this is the case, replace the null value with a default ParOther:
+					if (((AgentBase) pa).getParOther() == null ) {
+						((AgentBase) pa).setDefaultOtherPar();
+					}						
+				}
+
 				dlg.setVisible(false);
 				arenaGame.setProgress(null);
 				arenaGame.setStatusMessage("Done.");
@@ -434,7 +454,7 @@ public class LoadSaveGBG {
 	}
 
 	/**
-	 * load saved tournament results from disk to reopne visualisation
+	 * load saved tournament results from disk to reopen visualization
 	 * @param filePath		if null, open a file choose dialog. If not null, open this fully
 	 * 						qualified file with suffix .tsr.zip.
 	 * @return				the tournament result loaded
@@ -556,6 +576,10 @@ public class LoadSaveGBG {
 	}
 
 	/**
+	 * Load multiple GBG agents from disk and update them, if necessary (older agents on disk might 
+	 * not yet have certain elements, which are then filled in from defaults)
+	 * 
+	 * @return object to transfer the loaded agents and their filenames
 	 * @throws IOException
 	 */
 	public TSDiskAgentDataTransfer loadMultipleGBGAgent() throws IOException {
@@ -633,6 +657,14 @@ public class LoadSaveGBG {
 						pa = (TDAgent) obj;
 					} else if (obj instanceof TDNTuple2Agt) {
 						pa = (TDNTuple2Agt) obj;
+						// set horizon cut for older agents (where horCut was not part of ParTD):
+						if (((TDNTuple2Agt) pa).getParTD().getHorizonCut()==0.0) 
+							((TDNTuple2Agt) pa).getParTD().setHorizonCut(0.1);
+						// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+						// (they would stay otherwise at their default values, would not 
+						// get the loaded values)
+						((TDNTuple2Agt) pa).setTDParams(((TDNTuple2Agt) pa).getParTD(), pa.getMaxGameNum());
+						((TDNTuple2Agt) pa).setNTParams(((TDNTuple2Agt) pa).getParNT());
 					} else if (obj instanceof MCTSAgentT) {
 						pa = (MCTSAgentT) obj;
 					} else if (obj instanceof MCAgent) {
@@ -655,6 +687,16 @@ public class LoadSaveGBG {
 								+ filePath + "!]");
 						throw new ClassNotFoundException("ERROR: Unknown agent class");
 					}
+					
+					// bug fix WK 08/2018
+					if (pa instanceof AgentBase) {
+						// Some older agents on disk might not have ParOther m_oPar.
+						// If this is the case, replace the null value with a default ParOther:
+						if (((AgentBase) pa).getParOther() == null ) {
+							((AgentBase) pa).setDefaultOtherPar();
+						}						
+					}
+					
 					//dlg.setVisible(false);
 					arenaGame.setProgress(null);
 					arenaGame.setStatusMessage("Done.");
