@@ -164,10 +164,27 @@ public class TSAgentManager {
     }
 
     /**
-     * get the names of the selected agents in {@link TSSettingsGUI2}
-     * @return string array with names of selected agents
+     * get the ID names of the selected agents in {@link TSSettingsGUI2}
+     * @return string array with ID names of selected agents
      */
     public String[] getNamesAgentsSelected() {
+        String selectedAGents[] = new String[getNumAgentsSelected()]; // just selected agents
+        int tmp = 0;
+        int ID = 0;
+        for (TSAgent agent : results.mAgents) {
+            if (agent.guiCheckBox.isSelected()) {
+                //selectedAGents[tmp++] = agent.getName();
+                selectedAGents[tmp++] = "Agent #"+ID++;
+            }
+        }
+        return selectedAGents;
+    }
+
+    /**
+     * get the filenames of the selected agents in {@link TSSettingsGUI2}
+     * @return string array with filenames of selected agents
+     */
+    public String[] getFileNamesAgentsSelected() {
         String selectedAGents[] = new String[getNumAgentsSelected()]; // just selected agents
         int tmp = 0;
         for (TSAgent agent : results.mAgents) {
@@ -591,6 +608,7 @@ public class TSAgentManager {
         String[] columnNames4 = {
                 "Rank",
                 "Agent",
+                "Filename",
                 "Games Won",
                 "Games Tie",
                 "Games Lost",
@@ -616,6 +634,7 @@ public class TSAgentManager {
         for (int i=0; i<selectedAgents.length; i++) {
             rankAgents[i] = new TSHMDataStorage(); // must init to avoid NullPointerEX
             rankAgents[i].agent = results.mAgents.get(selectedAgents[i]);
+            rankAgents[i].name = getNamesAgentsSelected()[i];
             if (numPlayers>1)
                 rankAgents[i].hmScoreValues = rowDataHM[i];
             else
@@ -661,39 +680,41 @@ public class TSAgentManager {
             // "Rank"
             rowData4[i][0] = ""+(i+1);
             // "Agent"
-            rowData4[i][1] = rankAgents[i].agent.getName();
+            rowData4[i][1] = rankAgents[i].name;
+            // "Filename"
+            rowData4[i][2] = rankAgents[i].agent.getName();
             if (!singlePlayerGame) {
                 // "Games Won"
-                rowData4[i][2] = rankAgents[i].agent.getCountWonGames();
+                rowData4[i][3] = rankAgents[i].agent.getCountWonGames();
                 // "Games Tie"
-                rowData4[i][3] = rankAgents[i].agent.getCountTieGames();
+                rowData4[i][4] = rankAgents[i].agent.getCountTieGames();
                 // "Games Lost"
-                rowData4[i][4] = rankAgents[i].agent.getCountLostGames();
+                rowData4[i][5] = rankAgents[i].agent.getCountLostGames();
                 // "WTL Score"
-                rowData4[i][5] = rankAgents[i].agent.getAgentScore();
+                rowData4[i][6] = rankAgents[i].agent.getAgentScore();
                 // "FIDE Elo"
-                rowData4[i][6] = rankAgents[i].agent.mEloPlayerFIDE.getEloRating();
+                rowData4[i][7] = rankAgents[i].agent.mEloPlayerFIDE.getEloRating();
                 // "USCF Elo"
-                rowData4[i][7] = rankAgents[i].agent.mEloPlayerUSCF.getEloRating();
+                rowData4[i][8] = rankAgents[i].agent.mEloPlayerUSCF.getEloRating();
                 // "Glicko2"
                 //rowData4[i][8] = rankAgents[i].mGlicko2Rating.getRating();
-                rowData4[i][8] = numberFormat00.format(rankAgents[i].agent.mGlicko2Rating.getRating());
+                rowData4[i][9] = numberFormat00.format(rankAgents[i].agent.mGlicko2Rating.getRating());
                 // "WonGameRatio"
                 //float w = rankAgents[i].agent.getCountWonGames();
                 float s = rankAgents[i].agent.getAgentScore(); // score agent
                 float a = rankAgents[i].agent.getCountAllGames()*faktorWin; // max possible score with every game won
                 float f = s / a;
-                rowData4[i][9] = numberFormat00.format(f * 100) + "%";
+                rowData4[i][10] = numberFormat00.format(f * 100) + "%";
             }
             else {
                 // "highest Score"
-                rowData4[i][2] = rankAgents[i].agent.getMaxSinglePlayerScore();
+                rowData4[i][3] = rankAgents[i].agent.getMaxSinglePlayerScore();
                 // "lowest Score",
-                rowData4[i][3] = rankAgents[i].agent.getMinSinglePlayerScore();
+                rowData4[i][4] = rankAgents[i].agent.getMinSinglePlayerScore();
                 // "average Score"
-                rowData4[i][4] = rankAgents[i].agent.getAverageSinglePlayScore();
+                rowData4[i][5] = rankAgents[i].agent.getAverageSinglePlayScore();
                 // "median Score"
-                rowData4[i][5] = rankAgents[i].agent.getMedianSinglePlayerScore();
+                rowData4[i][6] = rankAgents[i].agent.getMedianSinglePlayerScore();
             }
         }
 
@@ -712,7 +733,8 @@ public class TSAgentManager {
             Object[] agentNamesY = new Object[rankAgents.length];
             // agents sorted vertically
             for (int i = 0; i < rankAgents.length; i++) {
-                agentNamesY[i] = rankAgents[i].agent.getName();
+                //agentNamesY[i] = rankAgents[i].agent.getName();
+                agentNamesY[i] = rankAgents[i].name;
                 dataHM2[i] = rankAgents[i].hmScoreValues;
             }
             // sort agents horizontally
@@ -810,7 +832,8 @@ public class TSAgentManager {
             else
                 median = tmpD[tmpD.length/2];
 
-            XYSeries series1 = new XYSeries(tmp.getName());
+            //XYSeries series1 = new XYSeries(tmp.getName());
+            XYSeries series1 = new XYSeries(getNamesAgentsSelected()[i]);
             if (singlePlayerGame)
                 series1.add(median, tmp.getAverageSinglePlayScore());
             else
@@ -844,7 +867,7 @@ public class TSAgentManager {
         // headers for the table
         String[] columnNames2 = {
                 "Game",
-                "Agent Name",
+                "Filename",
                 "Agent Typ",
                 "fastest turn",
                 "slowest turn",
@@ -993,6 +1016,7 @@ public class TSAgentManager {
      * in the heatmap to keep them together while sorting by score.
      */
     public class TSHMDataStorage{
+        public String name;
         public TSAgent agent;
         public double[] hmScoreValues;
     }

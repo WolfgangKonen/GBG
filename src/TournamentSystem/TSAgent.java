@@ -156,6 +156,10 @@ public class TSAgent implements Serializable {
         tie++;
     }
 
+    /**
+     * Get the filename of the agent
+     * @return filename as string
+     */
     public String getName(){
         return name;
     }
