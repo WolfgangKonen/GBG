@@ -716,33 +716,40 @@ public class TSAgentManager {
                 dataHM2[i] = rankAgents[i].hmScoreValues;
             }
             // sort agents horizontally
+            /*
             for (int i=0; i<dataHM2.length; i++){
                 System.out.println("i:"+i+" "+Arrays.toString(dataHM2[i])+" agentX: "+agentNamesX[i]);
             }
             System.out.println("UnSorted:");
+            */
             //altes array durchgehen und daten rausziehen
-            TSHM2DataStorage[] dataHM2Sorted = new TSHM2DataStorage[dataHM2.length];
+            TSHM2DataStorage[] dataHM2UnSorted = new TSHM2DataStorage[dataHM2.length];
             for (int x=0; x<dataHM2[0].length; x++) {
                 double[] column = new double[dataHM2.length];
                 for (int y=0; y<dataHM2.length; y++) {
                    column[y] = dataHM2[y][x];
                 }
                 //System.out.println(Arrays.toString(column));
-                dataHM2Sorted[x] = new TSHM2DataStorage((String)agentNamesX[x], column);
-                System.out.println(Arrays.toString(column)+" sum: "+dataHM2Sorted[x].columnSum+" agentX: "+dataHM2Sorted[x].agentName);
+                dataHM2UnSorted[x] = new TSHM2DataStorage((String)agentNamesX[x], column);
+                //System.out.println(Arrays.toString(column)+" sum: "+dataHM2UnSorted[x].columnSum+" agentX: "+dataHM2UnSorted[x].agentName);
             }
-            System.out.println("Sorted:");
-            //sortieren
-            Arrays.sort(dataHM2Sorted, (entry1, entry2) -> { // same as above
-                if (entry1.columnSum > entry2.columnSum)
-                    return -1;
-                if (entry1.columnSum < entry2.columnSum)
-                    return +1;
-                return 0;
-            });
+            //System.out.println("Sorted:");
+            //sortieren nach namen
+            TSHM2DataStorage[] dataHM2Sorted = new TSHM2DataStorage[dataHM2UnSorted.length];
+            for (int i=0; i<agentNamesY.length; i++) {
+                for (int j=0; j<dataHM2UnSorted.length; j++) {
+                    if (agentNamesY[i].equals(dataHM2UnSorted[j].agentName)) {
+                        dataHM2Sorted[i] = dataHM2UnSorted[j];
+                        break;
+                    }
+                }
+            }
+            /*
             for (TSHM2DataStorage t : dataHM2Sorted)
                 System.out.println(t);
+
             System.out.println("NewOrigArray:");
+            */
             //wieder auslesen und in altes array zurückgeben
             for (int x=0; x<dataHM2[0].length; x++) {
                 for (int y=0; y<dataHM2.length; y++) {
@@ -750,9 +757,13 @@ public class TSAgentManager {
                 }
                 agentNamesX[x] = dataHM2Sorted[x].agentName;
             }
+            /*
             for (int i=0; i<dataHM2.length; i++){
                 System.out.println("i:"+i+" "+Arrays.toString(dataHM2[i])+" agentX: "+agentNamesX[i]);
             }
+            System.out.println("agentNamesX: "+Arrays.toString(agentNamesX));
+            System.out.println("agentNamesY: "+Arrays.toString(agentNamesY));
+            */
 
             HeatChart map2 = new HeatChart(dataHM2, 0, HeatChart.max(dataHM2));
             map2.setXValues(agentNamesX);
@@ -986,21 +997,26 @@ public class TSAgentManager {
         public double[] hmScoreValues;
     }
 
+    /**
+     * helping class to create the sorted heatmap. This saves the agent name and the column scores
+     * after the rows are sorted.
+     */
     public class TSHM2DataStorage{
         public String agentName;
-        public double columnSum;
         public double[] verticalScoreValues;
 
+        /**
+         * Constructor to init this class before sorting the heatmap data horizontally
+         * @param name name of the rows agent
+         * @param verticalScores vertical scores of the agents column
+         */
         public TSHM2DataStorage(String name, double[] verticalScores) {
             agentName = name;
             verticalScoreValues = verticalScores;
-            columnSum = 0;
-            for (double d : verticalScores)
-                columnSum += d;
         }
 
         public String toString() {
-            return "ColumnScores: "+Arrays.toString(verticalScoreValues)+" ColumnSum: "+columnSum+" AgentX: "+agentName;
+            return "ColumnScores: "+Arrays.toString(verticalScoreValues)+" AgentX: "+agentName;
         }
     }
 }
