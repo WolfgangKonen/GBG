@@ -636,13 +636,18 @@ abstract public class Arena extends JFrame implements Runnable {
 						// }
 						so.advance(actBest);
 						logManager.addLogEntry(actBest, so, logSessionid);
-						try {
-							Thread.sleep(currentSleepDuration);
-							// waiting time between agent-agent actions
-						} catch (Exception e) {
-							System.out.println("Thread 1");
+						if (spDT==null) {
+							try {
+								Thread.sleep(currentSleepDuration);
+								// waiting time between agent-agent actions
+							} catch (Exception e) {
+								System.out.println("Thread 1");
+							}
+							gb.updateBoard(so, false, showValue);
+						} else {
+							gb.updateBoard(so, false, false);
+							System.out.println(so);
 						}
-						gb.updateBoard(so, false, showValue);
 
 						// gather information for later printout to
 						// agents/gameName/csv/playStats.csv.
