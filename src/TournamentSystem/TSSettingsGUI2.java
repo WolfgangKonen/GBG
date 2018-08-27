@@ -331,8 +331,7 @@ public class TSSettingsGUI2 extends JFrame {
                 // hand over data
                 mArena.tournamentAgentManager = mTSAgentManager;
                 mArena.taskState = ArenaTrain.Task.TRNEMNT;
-            }
-            else {
+            } else {
                 // single player TS...
                 mTSAgentManager.runSinglePlayerTournament(mArena);
             }
@@ -615,7 +614,8 @@ public class TSSettingsGUI2 extends JFrame {
         mJPanel.add(unselectAllHDDAgentsButton, gbc);
         deleteSelectedHDDAgentsButton = new JButton();
         deleteSelectedHDDAgentsButton.setForeground(new Color(-65536));
-        deleteSelectedHDDAgentsButton.setText("delete selected HDD Agents");
+        deleteSelectedHDDAgentsButton.setText("remove selected HDD Agents from TS");
+        deleteSelectedHDDAgentsButton.setToolTipText("Selected Agents are just removed from the tournament, this will not affect/alter the saved agent file on disk!");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 21;

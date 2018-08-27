@@ -310,7 +310,8 @@
         </constraints>
         <properties>
           <foreground color="-65536"/>
-          <text value="delete selected HDD Agents"/>
+          <text value="remove selected HDD Agents from TS"/>
+          <toolTipText value="Selected Agents are just removed from the tournament, this will not affect/alter the saved agent file on disk!"/>
         </properties>
       </component>
       <vspacer id="cd6e7">

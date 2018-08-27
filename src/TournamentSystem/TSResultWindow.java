@@ -296,7 +296,7 @@ public class TSResultWindow extends JFrame {
         mJPanel = new JPanel();
         mJPanel.setLayout(new GridBagLayout());
         tableWTLLabel = new JLabel();
-        tableWTLLabel.setText("<html><body><strong>Table with Win, Tie, Loss (WTL) Results</strong><br>\ncolumn agent plays against the row agent<br>\nwin and loss are from the column agent perspective</body></html>");
+        tableWTLLabel.setText("<html><body><strong>Table with Win, Tie, Loss (WTL) Results</strong><br>\nRow agent plays against the column agent<br>\nWin and loss are from the row agents perspective</body></html>");
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -318,7 +318,7 @@ public class TSResultWindow extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(heatmapH1JL, gbc);
         final JLabel label1 = new JLabel();
-        label1.setText("<html><body><strong>Ranking of agents by overall Wins, Ties, Losses</strong></body></html>\n");
+        label1.setText("<html><body><strong>Ranking of Agents by overall Wins, Ties, Losses</strong></body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 12;
@@ -412,7 +412,7 @@ public class TSResultWindow extends JFrame {
         gbc.insets = new Insets(0, 0, 0, 10);
         mJPanel.add(spacer5, gbc);
         final JLabel label3 = new JLabel();
-        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. RoundTime</strong><br>\nAgent WinTieLoss Score vs median RoundTime</body></html>\n");
+        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. RoundTime</strong><br>\nagent WinTieLoss score vs median roundtime</body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 8;

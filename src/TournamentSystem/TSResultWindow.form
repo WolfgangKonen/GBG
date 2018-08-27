@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="TournamentSystem.TSResultWindow">
   <grid id="27dc6" binding="mJPanel" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="809" height="1111"/>
+      <xy x="20" y="20" width="809" height="1129"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -13,7 +13,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Table with Win, Tie, Loss (WTL) Results&lt;/strong&gt;&lt;br&gt;&#10;column agent plays against the row agent&lt;br&gt;&#10;win and loss are from the column agent perspective&lt;/body&gt;&lt;/html&gt;"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Table with Win, Tie, Loss (WTL) Results&lt;/strong&gt;&lt;br&gt;&#10;Row agent plays against the column agent&lt;br&gt;&#10;Win and loss are from the row agents perspective&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
       <component id="9842d" class="javax.swing.JLabel" binding="tableSCRLabel">
@@ -40,7 +40,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Ranking of agents by overall Wins, Ties, Losses&lt;/strong&gt;&lt;/body&gt;&lt;/html&gt;&#10;"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Ranking of Agents by overall Wins, Ties, Losses&lt;/strong&gt;&lt;/body&gt;&lt;/html&gt;&#10;"/>
         </properties>
       </component>
       <component id="9cc94" class="javax.swing.JLabel">
@@ -160,7 +160,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;ScatterPlot AgentScore vs. RoundTime&lt;/strong&gt;&lt;br&gt;&#10;Agent WinTieLoss Score vs median RoundTime&lt;/body&gt;&lt;/html&gt;&#10;"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;ScatterPlot AgentScore vs. RoundTime&lt;/strong&gt;&lt;br&gt;&#10;agent WinTieLoss score vs median roundtime&lt;/body&gt;&lt;/html&gt;&#10;"/>
         </properties>
       </component>
       <grid id="d070" binding="scatterPlotJPanel" layout-manager="GridBagLayout">
