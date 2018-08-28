@@ -487,7 +487,10 @@ public class TSAgentManager {
             System.out.print("AgentScore: "+a.getAgentScore()+" | ");
             System.out.print("FIDE-ELO: "+a.mEloPlayerFIDE.getEloRating()+" USCF-ELO: "+a.mEloPlayerUSCF.getEloRating()+" ");
             NumberFormat formatter1 = new DecimalFormat("#0.0");
-            System.out.print("Glicko2: "+formatter1.format(a.mGlicko2Rating.getRating()));
+            System.out.print("Glicko2: "+formatter1.format(a.mGlicko2Rating.getRating())+" ");
+            NumberFormat formatter2 = new DecimalFormat("#0.000");
+            System.out.print("radev.: "+formatter2.format(a.mGlicko2Rating.getRatingDeviation())+" ");
+            System.out.print("vol.: "+formatter2.format(a.mGlicko2Rating.getVolatility())+" ");
             System.out.println();
         }
     }
@@ -872,15 +875,15 @@ public class TSAgentManager {
         // detailed time table
         final int numAgentsPerRound = numPlayers;
         Object[][] rowDataTimeDetail = new Object[results.gameResult.length*numAgentsPerRound][columnNamesTimeDetail.length];
-        TSSimpleTimeTableHelper[] simpleTimes = new TSSimpleTimeTableHelper[getNumAgentsSelected()];
+        TSSimpleTimeTableHelper[] simpleTimes = new TSSimpleTimeTableHelper[getNumAgentsSelected()]; // collect times for simplified view
         for (int i=0; i<simpleTimes.length; i++) {
-            simpleTimes[i] = new TSSimpleTimeTableHelper(getIDAgentsSelected()[i]);
+            simpleTimes[i] = new TSSimpleTimeTableHelper(getIDAgentsSelected()[i]); // init with IDs of selected agents
         }
         int pos = 0;
         for (int i=0; i<results.gameResult.length; i++) {
             for (int j=0; j<numAgentsPerRound; j++) {
                 TSSimpleTimeTableHelper timeHelper = null;
-                for (TSSimpleTimeTableHelper tss : simpleTimes) { // find matching timehelper for agent
+                for (TSSimpleTimeTableHelper tss : simpleTimes) { // find matching timehelper for agent in gameplan
                     if (tss.agentID == results.gamePlan[i][j]) {
                         timeHelper = tss;
                     }

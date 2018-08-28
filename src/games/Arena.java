@@ -274,10 +274,12 @@ abstract public class Arena extends JFrame implements Runnable {
 					}
 				}
 				progressBarJF.dispatchEvent(new WindowEvent(progressBarJF, WindowEvent.WINDOW_CLOSING)); // close progressbar window
-				tournamentAgentManager.printGameResults(); // print some stats to the console
+				//tournamentAgentManager.printGameResults(); // print some stats to the console
 
 				// statitistische auswertung + visualisierung
 				tournamentAgentManager.makeStats(); // calc data and create result stats window
+				tournamentAgentManager.printGameResults(); // print some stats to the console
+
 				if (tournamentAgentManager.getAutoSaveAfterTS()) {
 					try {
 						tdAgentIO.saveTSResult(tournamentAgentManager.results, true);
