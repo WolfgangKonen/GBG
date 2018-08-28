@@ -5,7 +5,10 @@ import TournamentSystem.Scoring.Glicko2.Glicko2RatingCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingPeriodResults;
 import TournamentSystem.tools.TSSinglePlayerDataTransfer;
 import controllers.PlayAgent;
+import controllers.RandomAgent;
 import games.Arena;
+import games.GameBoard;
+import games.StateObservation;
 import games.XArenaMenu;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -44,6 +47,7 @@ public class TSAgentManager {
     private int gamesPlayed;
     private boolean autoSaveAfterTS;
     private final int numPlayers;
+    private StateObservation[] randomStartStates;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
@@ -331,7 +335,7 @@ public class TSAgentManager {
      * lock the tournament system to prevent data from changes.
      * also the gameplan is calculated and measurements are prepared.
      */
-    public void lockToCompete() {
+    public void lockToCompete(GameBoard gb) {
         if (results.numberOfGames == -1) {
             System.out.println(TAG+"ERROR :: number of games was not set! using 1");
             results.numberOfGames = 1;
@@ -347,6 +351,41 @@ public class TSAgentManager {
         gamesPlayed = 0;
         results.resetAgentScores();
         results.lockedToCompete = true;
+
+        randomStartStates = new StateObservation[results.numberOfGames];
+        for (int game=0; game<results.numberOfGames; game++) {
+            randomStartStates[game] = gb.getDefaultStartState();
+
+            if (results.numberOfRandomStartMoves>0) {
+                System.out.println(TAG+"Calculation Random Start Moves...");
+                RandomAgent raX = new RandomAgent("Random Agent X");
+
+                for (int i = 0; i < results.numberOfRandomStartMoves; i++) {
+                    randomStartStates[game].advance(raX.getNextAction2(randomStartStates[game], false, true));
+                }
+
+                try { Thread.sleep(200); } catch (InterruptedException e) { e.printStackTrace(); }
+            }
+        }
+
+        /*
+        if (results.numberOfRandomStartMoves>0) {
+            for (int i=0; i<randomStartStates.length; i++) {
+                for (int j=0; j<randomStartStates.length; j++) {
+                    if (i != j) {
+                        if (randomStartStates[i].stringDescr().equals(randomStartStates[j].stringDescr())) {
+                            System.out.println("states gleich! i: "+i);
+                        }
+                    }
+                }
+            }
+        }
+        */
+
+        System.out.println(TAG+"Start States:");
+        for (StateObservation s : randomStartStates)
+            System.out.println(s);
+
     }
 
     /**
@@ -1010,7 +1049,7 @@ public class TSAgentManager {
      * @param mArena arena to play in
      */
     public void runSinglePlayerTournament(Arena mArena) {
-        lockToCompete();
+        lockToCompete(mArena.getGameBoard());
         setSettingsGUIElementsEnabled(false);
         mArena.singlePlayerTSRunning = true;
 
@@ -1101,6 +1140,13 @@ public class TSAgentManager {
             median = medianTimes[medianTimes.length/2];
 
         return median;
+    }
+
+    public StateObservation getNextStartState() {
+        int gameNumNow = results.gameResult[results.nextGame][0]
+                +results.gameResult[results.nextGame][1]
+                +results.gameResult[results.nextGame][2];
+        return randomStartStates[gameNumNow];
     }
 
     /**

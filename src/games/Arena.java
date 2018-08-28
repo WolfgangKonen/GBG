@@ -2,6 +2,7 @@ package games;
 
 import TournamentSystem.TSAgent;
 import TournamentSystem.TSAgentManager;
+import TournamentSystem.tools.TSMultiPlayerDataTransfer;
 import TournamentSystem.tools.TSSinglePlayerDataTransfer;
 import TournamentSystem.TSTimeStorage;
 import agentIO.LoadSaveGBG;
@@ -230,7 +231,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				break;
 			case TRNEMNT:
 				// Tournament Code
-				tournamentAgentManager.lockToCompete();
+				tournamentAgentManager.lockToCompete(getGameBoard());
 				tournamentAgentManager.setSettingsGUIElementsEnabled(false);
 
 				JFrame progressBarJF = new JFrame();
@@ -253,13 +254,15 @@ abstract public class Arena extends JFrame implements Runnable {
 					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
 					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
 					int rndmStartMoves = tournamentAgentManager.results.numberOfRandomStartMoves;
+					StateObservation startSo = tournamentAgentManager.getNextStartState();
+                    TSMultiPlayerDataTransfer data = new TSMultiPlayerDataTransfer(nextTeam, nextTimes, rndmStartMoves, startSo);
 					// let team compete...
-					int roundWinningAgent = m_xfun.singleCompeteBaseTS(gb, nextTeam, nextTimes, m_xab, rndmStartMoves);
+					int roundWinningAgent = m_xfun.singleCompeteBaseTS(gb, m_xab, data);
 					// enter winner
 					if (roundWinningAgent > 40) {
 						System.out.println(TAG+"ERROR :: singleCompeteBaseTS returned error value "+roundWinningAgent);
 						if (roundWinningAgent == 44) {
-							// hdd and standart agent mix, leave while, end tournament
+							// hdd and standard agent mix, leave while, end tournament
 							break;
 						}
 					}
@@ -581,13 +584,13 @@ abstract public class Arena extends JFrame implements Runnable {
 		so.resetMoveCounter();
 		System.out.println("StartState: "+so.stringDescr());
 
-		if (spDT!=null) {
+		if (spDT!=null) { // set random startmoves for TS
 			if (spDT.numberOfRandomStartMoves>0) {
 				RandomAgent raX = new RandomAgent("Random Agent X");
-				RandomAgent raO = new RandomAgent("Random Agent O");
+				//RandomAgent raO = new RandomAgent("Random Agent O");
 				for (int n = 0; n < spDT.numberOfRandomStartMoves; n++) {
 					so.advance(raX.getNextAction2(so, false, true));
-					so.advance(raO.getNextAction2(so, false, true));
+					//so.advance(raO.getNextAction2(so, false, true));
 				}
 				System.out.println(TAG+"RandomStartState set: "+so);
 			}
