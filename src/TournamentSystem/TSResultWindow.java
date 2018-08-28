@@ -49,7 +49,12 @@ public class TSResultWindow extends JFrame {
     private JLabel tableSCRLabel;
     private JLabel heatmapH1JL;
     private JLabel heatmap2H1JL;
+    private JButton toggleAdvancedInfoTimeButton;
+
     private JFreeChart scatterPlot = null;
+    private DefaultTableModel timeDetail, timeSimple = null;
+    private boolean timeSimpleSelected = true;
+
     private final String TAG = "[TSResultWindow] ";
 
     /**
@@ -59,19 +64,20 @@ public class TSResultWindow extends JFrame {
      * @param m2          table matrix for game win/tie/loss scores
      * @param m3          table with agent score ranking
      * @param m4          table with detailed time measurements
+     * @param m5          table with simplified time measurements
      * @param imageIcon   heatmap with visualisation of WTL scores
      * @param imageIcon2  heatmap with visualisation of WTL scores sorted vertically by score
      * @param scatterPlot scatterplot XYPlot of the agents score vs round time
      * @param startDate   info String with date and TS settings
      */
-    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4,
+    public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, DefaultTableModel m5,
                           ImageIcon imageIcon, ImageIcon imageIcon2, JFreeChart scatterPlot, String startDate) {
         this(startDate, false);
 
         setTableMatrixWTL(m1);
         setTableMatrixSCR(m2);
         setTableAgentScore(m3);
-        setTableTimeDetail(m4);
+        setTableTimeDetail(m4, m5);
         setHeatMap(imageIcon);
         setHeatMapSorted(imageIcon2);
         setScatterPlotASvT(scatterPlot);
@@ -211,6 +217,24 @@ public class TSResultWindow extends JFrame {
                 frame.setVisible(true);
             }
         });
+        toggleAdvancedInfoTimeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // show or hide detailed time table
+                timeSimpleSelected = !timeSimpleSelected;
+
+                if (timeSimpleSelected) {
+                    tableTimeDetail.setModel(timeSimple);
+                } else {
+                    tableTimeDetail.setModel(timeDetail);
+                }
+                tableTimeDetail.setPreferredScrollableViewportSize(
+                        new Dimension(tableTimeDetail.getPreferredSize().width * 2, tableTimeDetail.getRowHeight() * tableTimeDetail.getRowCount()));
+                DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer) tableTimeDetail.getDefaultRenderer(Object.class);
+                renderer2.setHorizontalAlignment(JLabel.RIGHT);
+                pack();
+            }
+        });
     } // public TSResultWindow(...)
 
     public void setTableMatrixWTL(DefaultTableModel m1) {
@@ -244,10 +268,15 @@ public class TSResultWindow extends JFrame {
         pack();
     }
 
-    public void setTableTimeDetail(DefaultTableModel m4) {
+    public void setTableTimeDetail(DefaultTableModel m4, DefaultTableModel m5) {
+        timeDetail = m4;
+        timeSimple = m5;
         showHideTableTimeTableButton.setVisible(true);
 
-        tableTimeDetail.setModel(m4);
+        if (timeSimpleSelected)
+            tableTimeDetail.setModel(m5);
+        else
+            tableTimeDetail.setModel(m4);
         tableTimeDetail.setPreferredScrollableViewportSize(
                 new Dimension(tableTimeDetail.getPreferredSize().width * 2, tableTimeDetail.getRowHeight() * tableTimeDetail.getRowCount()));
         DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer) tableTimeDetail.getDefaultRenderer(Object.class);
@@ -533,6 +562,13 @@ public class TSResultWindow extends JFrame {
         gbc.gridy = 10;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(openBiggerScatterPlotButton, gbc);
+        toggleAdvancedInfoTimeButton = new JButton();
+        toggleAdvancedInfoTimeButton.setText("Toggle Advanced Time Info");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 15;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(toggleAdvancedInfoTimeButton, gbc);
     }
 
     /**

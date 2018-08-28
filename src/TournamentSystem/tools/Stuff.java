@@ -4,6 +4,9 @@ import org.tc33.jheatchart.HeatChart;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * This class is just used to test code outside the GBG and GBG-TS.
@@ -18,7 +21,14 @@ public class Stuff {
     //--------------------------------------
 
     public Stuff() {
-        makeJTable();
+        //makeJTable();
+        ArrayList<Double> al = new ArrayList<>();
+        al.add(5.0);
+        al.add(2.0);
+        al.add(1.0);
+        al.add(8.0);
+        al.add(3.0);
+        System.out.println(Collections.min(al));
     }
 
     private void makeJTable() {

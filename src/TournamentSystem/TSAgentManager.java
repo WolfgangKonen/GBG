@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -622,6 +623,7 @@ public class TSAgentManager {
             columnNames4 = new String[]{
                     "Rank",
                     "Agent",
+                    "Filename",
                     "highest Score",
                     "lowest Score",
                     "average Score",
@@ -820,17 +822,7 @@ public class TSAgentManager {
                 }
             }
 
-            double[] tmpD = new double[medianTimes.size()];
-
-            for (int j=0; j<medianTimes.size(); j++)
-                tmpD[j] = medianTimes.get(j);
-
-            Arrays.sort(tmpD);
-
-            if (tmpD.length % 2 == 0)
-                median = (tmpD[tmpD.length/2] + tmpD[tmpD.length/2 - 1])/2;
-            else
-                median = tmpD[tmpD.length/2];
+            median = calculateMedian(medianTimes);
 
             //XYSeries series1 = new XYSeries(tmp.getName());
             XYSeries series1 = new XYSeries(getNamesAgentsSelected()[i]);
@@ -862,54 +854,119 @@ public class TSAgentManager {
         //scatterPlotASvT.setPreferredSize(new Dimension(400,300)); // plot size
 
         /**
-         * Table | Zeiten
+         * Table | Zeiten (detailed and simplified)
          */
-        // headers for the table
-        String[] columnNames2 = {
+        // headers for detailed time table
+        String[] columnNamesTimeDetail = {
                 "Game",
                 "Filename",
                 "Agent Typ",
                 "fastest turn",
                 "slowest turn",
-                //"durchschnittliche Zeit",
                 "average draw",
                 "median draw",
                 "average round",
                 "median round"
         };
 
+        // detailed time table
         final int numAgentsPerRound = numPlayers;
-        Object[][] rowData2 = new Object[results.gameResult.length*numAgentsPerRound][columnNames2.length];
+        Object[][] rowDataTimeDetail = new Object[results.gameResult.length*numAgentsPerRound][columnNamesTimeDetail.length];
+        TSSimpleTimeTableHelper[] simpleTimes = new TSSimpleTimeTableHelper[getNumAgentsSelected()];
+        for (int i=0; i<simpleTimes.length; i++) {
+            simpleTimes[i] = new TSSimpleTimeTableHelper(getIDAgentsSelected()[i]);
+        }
         int pos = 0;
         for (int i=0; i<results.gameResult.length; i++) {
             for (int j=0; j<numAgentsPerRound; j++) {
+                TSSimpleTimeTableHelper timeHelper = null;
+                for (TSSimpleTimeTableHelper tss : simpleTimes) { // find matching timehelper for agent
+                    if (tss.agentID == results.gamePlan[i][j]) {
+                        timeHelper = tss;
+                    }
+                }
+
                 // "Spiel"
-                rowData2[pos][0] = ""+(i+1);
+                rowDataTimeDetail[pos][0] = ""+(i+1);
                 // "Agent Name"
-                rowData2[pos][1] = results.mAgents.get(results.gamePlan[i][j]).getName();
+                rowDataTimeDetail[pos][1] = results.mAgents.get(results.gamePlan[i][j]).getName();
                 // "Agent Typ"
-                rowData2[pos][2] = results.mAgents.get(results.gamePlan[i][j]).getAgentType();
+                rowDataTimeDetail[pos][2] = results.mAgents.get(results.gamePlan[i][j]).getAgentType();
                 // "schnellster Zug"
-                rowData2[pos][3] = numberFormat00000.format(results.timeStorage[i][j].getMinTimeForGameMS());
+                rowDataTimeDetail[pos][3] = numberFormat00000.format(results.timeStorage[i][j].getMinTimeForGameMS());
+                if (results.timeStorage[i][j].getMinTimeForGameMS()>0) // just store value if >0 := proper measurement is available
+                    timeHelper.minTimeForGameMS.add(results.timeStorage[i][j].getMinTimeForGameMS());
                 // "langsamster Zug"
-                rowData2[pos][4] = numberFormat00000.format(results.timeStorage[i][j].getMaxTimeForGameMS());
+                rowDataTimeDetail[pos][4] = numberFormat00000.format(results.timeStorage[i][j].getMaxTimeForGameMS());
+                if (results.timeStorage[i][j].getMaxTimeForGameMS()>0)
+                    timeHelper.maxTimeForGameMS.add(results.timeStorage[i][j].getMaxTimeForGameMS());
                 // "durchschnittliche Zeit Zug"
-                rowData2[pos][5] = numberFormat00000.format(results.timeStorage[i][j].getAverageTimeForGameMS());
+                rowDataTimeDetail[pos][5] = numberFormat00000.format(results.timeStorage[i][j].getAverageTimeForGameMS());
+                if (results.timeStorage[i][j].getAverageTimeForGameMS()>0)
+                    timeHelper.averageTimeForGameMS.add(results.timeStorage[i][j].getAverageTimeForGameMS());
                 // "median Zeit Zug"
-                rowData2[pos][6] = numberFormat00000.format(results.timeStorage[i][j].getMedianTimeForGameMS());
+                rowDataTimeDetail[pos][6] = numberFormat00000.format(results.timeStorage[i][j].getMedianTimeForGameMS());
+                if (results.timeStorage[i][j].getMedianTimeForGameMS()>0)
+                    timeHelper.medianTimeForGameMS.add(results.timeStorage[i][j].getMedianTimeForGameMS());
                 // "durchschnittliche Zeit Runde"
-                rowData2[pos][7] = numberFormat00000.format(results.timeStorage[i][j].getAverageRoundTimeMS());
+                rowDataTimeDetail[pos][7] = numberFormat00000.format(results.timeStorage[i][j].getAverageRoundTimeMS());
+                if (results.timeStorage[i][j].getAverageRoundTimeMS()>0)
+                    timeHelper.averageRoundTimeMS.add(results.timeStorage[i][j].getAverageRoundTimeMS());
                 // "median Zeit Runde"
-                rowData2[pos][8] = numberFormat00000.format(results.timeStorage[i][j].getMedianRoundTimeMS());
+                rowDataTimeDetail[pos][8] = numberFormat00000.format(results.timeStorage[i][j].getMedianRoundTimeMS());
+                if (results.timeStorage[i][j].getMedianRoundTimeMS()>0)
+                    timeHelper.medianRoundTimeMS.add(results.timeStorage[i][j].getMedianRoundTimeMS());
 
                 pos++;
             }
         }
 
+        // headers for simplified time table
+        String[] columnNamesTimeSimple = {
+                "Agent",
+                "Filename",
+                "Agent Typ",
+                "fastest turn",
+                "slowest turn",
+                "average draw",
+                "median draw",
+                "average round",
+                "median round"
+        };
+
+        // simplified time data
+        Object[][] rowDataTimeSimple = new Object[getNumAgentsSelected()][columnNamesTimeSimple.length];
+        int[] selectedAgents3 = getIDAgentsSelected();
+        for (int i=0; i<selectedAgents3.length; i++) {
+            TSAgent tmp = results.mAgents.get(selectedAgents3[i]);
+            String name = getNamesAgentsSelected()[i];
+            TSSimpleTimeTableHelper timeHelper = simpleTimes[i];
+
+            // "Agent"
+            rowDataTimeSimple[i][0] = name;
+            // "Filename"
+            rowDataTimeSimple[i][1] = tmp.getName();
+            // "Agent Typ"
+            rowDataTimeSimple[i][2] = tmp.getAgentType();
+            // "schnellster Zug"
+            rowDataTimeSimple[i][3] = numberFormat00000.format(timeHelper.getMinTimeForGameMS());
+            // "langsamster Zug"
+            rowDataTimeSimple[i][4] = numberFormat00000.format(timeHelper.getMaxTimeForGameMS());
+            // "durchschnittliche Zeit Zug"
+            rowDataTimeSimple[i][5] = numberFormat00000.format(calculateMedian(timeHelper.averageTimeForGameMS));
+            // "median Zeit Zug"
+            rowDataTimeSimple[i][6] = numberFormat00000.format(calculateMedian(timeHelper.medianTimeForGameMS));
+            // "durchschnittliche Zeit Runde"
+            rowDataTimeSimple[i][7] = numberFormat00000.format(calculateMedian(timeHelper.averageRoundTimeMS));
+            // "median Zeit Runde"
+            rowDataTimeSimple[i][8] = numberFormat00000.format(calculateMedian(timeHelper.medianRoundTimeMS));
+        }
+
         //create table with data
-        //JTable tableTimeDetail = new JTable(rowData2, columnNames2);
-        DefaultTableModel defTableTimeDetail = new DefaultTableModel(rowData2, columnNames2);
-        tsResultWindow.setTableTimeDetail(defTableTimeDetail);
+        //JTable tableTimeDetail = new JTable(rowDataTimeDetail, columnNamesTimeDetail);
+        DefaultTableModel defTableTimeDetail = new DefaultTableModel(rowDataTimeDetail, columnNamesTimeDetail);
+        DefaultTableModel defTableTimeSimple = new DefaultTableModel(rowDataTimeSimple, columnNamesTimeSimple);
+        tsResultWindow.setTableTimeDetail(defTableTimeDetail, defTableTimeSimple);
 
         /**
          * TS Results in a window
@@ -1012,6 +1069,38 @@ public class TSAgentManager {
     }
 
     /**
+     * calculate the median from an ArrayList of doubles
+     * @param medianTimes ArrayList with double values
+     * @return the median
+     */
+    private double calculateMedian(ArrayList<Double> medianTimes) {
+        double[] tmpD = new double[medianTimes.size()];
+
+        for (int j=0; j<medianTimes.size(); j++)
+            tmpD[j] = medianTimes.get(j);
+
+        return calculateMedian(tmpD);
+    }
+
+    /**
+     * calculate the median from an array of doubles
+     * @param medianTimes array with double values
+     * @return the median
+     */
+    private double calculateMedian(double[] medianTimes) {
+        double median;
+
+        Arrays.sort(medianTimes);
+
+        if (medianTimes.length % 2 == 0)
+            median = (medianTimes[medianTimes.length/2] + medianTimes[medianTimes.length/2 - 1])/2;
+        else
+            median = medianTimes[medianTimes.length/2];
+
+        return median;
+    }
+
+    /**
      * helping class to create the sorted heatmap. this saves an agent and his score data
      * in the heatmap to keep them together while sorting by score.
      */
@@ -1042,5 +1131,28 @@ public class TSAgentManager {
         public String toString() {
             return "ColumnScores: "+Arrays.toString(verticalScoreValues)+" AgentX: "+agentName;
         }
+    }
+
+    public class TSSimpleTimeTableHelper{
+        public int agentID;
+        public ArrayList<Double> minTimeForGameMS = new ArrayList<>();
+        public ArrayList<Double> maxTimeForGameMS = new ArrayList<>();
+        public ArrayList<Double> averageTimeForGameMS = new ArrayList<>();
+        public ArrayList<Double> medianTimeForGameMS = new ArrayList<>();
+        public ArrayList<Double> averageRoundTimeMS = new ArrayList<>();
+        public ArrayList<Double> medianRoundTimeMS = new ArrayList<>();
+
+        public TSSimpleTimeTableHelper(int agentID) {
+            this.agentID = agentID;
+        }
+
+        public double getMinTimeForGameMS() {
+            return Collections.min(minTimeForGameMS);
+        }
+
+        public double getMaxTimeForGameMS() {
+            return Collections.max(maxTimeForGameMS);
+        }
+
     }
 }
