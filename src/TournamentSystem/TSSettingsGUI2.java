@@ -280,12 +280,22 @@ public class TSSettingsGUI2 extends JFrame {
             System.out.println(TAG + "ERROR :: not a valid number was entered in GameNum Textfield. Using value 1");
             numGamesPerMatch = 1;
         }
+        if (numGamesPerMatch<1) {
+            System.out.println(TAG + "ERROR :: not a valid number was entered in GameNum Textfield, must be >=1. Using value 1");
+            numGamesPerMatch = 1;
+        }
         System.out.println(TAG + "numGamesPerMatch: " + numGamesPerMatch);
         mTSAgentManager.setNumberOfGames(numGamesPerMatch);
 
         if (addNRandomMovesCheckBox.isSelected()) {
+            int randomStartMoves ;
             try {
-                mTSAgentManager.setNumberOfRandomStartMoves(Integer.parseInt(numOfMovesTextField.getText()));
+                randomStartMoves = Integer.parseInt(numOfMovesTextField.getText());
+                if (randomStartMoves<1) {
+                    System.out.println(TAG + "ERROR :: not a valid number was entered in RandomStartMoves Textfield, must be >=0. Using value 0");
+                    randomStartMoves = 0;
+                }
+                mTSAgentManager.setNumberOfRandomStartMoves(randomStartMoves);
             } catch (NumberFormatException n) {
                 n.printStackTrace();
                 System.out.println(TAG + "ERROR :: not a valid number was entered in NRandomStartMoves Textfield. Using value 0");
