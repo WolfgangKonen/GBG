@@ -29,6 +29,12 @@ public class Stuff {
         al.add(8.0);
         al.add(3.0);
         System.out.println(Collections.min(al));
+
+        String a = "a";
+        String b = a;
+        System.out.println(b);
+        a = "c";
+        System.out.println(b);
     }
 
     private void makeJTable() {

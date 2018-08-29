@@ -980,7 +980,7 @@ public class XArenaFuncs
 				// prepare agents
 				PlayAgent[] paVector;
 				PlayAgent[] qaVector;
-
+				/*
 				if (dataTS.nextTeam[0].isHddAgent() && dataTS.nextTeam[1].isHddAgent()) {
 					paVector = new PlayAgent[2];
 					paVector[0] = dataTS.nextTeam[0].getPlayAgent();
@@ -1001,6 +1001,30 @@ public class XArenaFuncs
 					paVector = fetchAgents(xab);
 					AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
 					qaVector = wrapAgents(paVector,xab.oPar,startSO);
+				}
+				*/
+				if (dataTS.nextTeam[0].isHddAgent() && dataTS.nextTeam[1].isHddAgent()) {
+					paVector = new PlayAgent[2];
+					paVector[0] = dataTS.nextTeam[0].getPlayAgent();
+					paVector[1] = dataTS.nextTeam[1].getPlayAgent();
+					AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
+//					OtherParams[] hddPar = new OtherParams[2];
+//					hddPar[0] = new OtherParams();
+//					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
+//					hddPar[1] = new OtherParams();
+//					hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
+//					qaVector = wrapAgents(paVector,hddPar,startSO);
+					qaVector = wrapAgents(paVector,startSO);
+				} else {
+					paVector = fetchAgents(xab);
+					if (dataTS.nextTeam[0].isHddAgent()) {
+						paVector[0] = dataTS.nextTeam[0].getPlayAgent();
+					}
+					if (dataTS.nextTeam[1].isHddAgent()) {
+						paVector[1] = dataTS.nextTeam[1].getPlayAgent();
+					}
+					AgentBase.validTrainedAgents(paVector, numPlayers); // may throw RuntimeException
+					qaVector = wrapAgents(paVector, xab.oPar, startSO);
 				}
 
 				//c = competeTS(qaVector[0], qaVector[1], startSO, competeNum, dataTS.nextTimes, dataTS.rndmStartMoves);

@@ -75,7 +75,7 @@ public class XArenaButtons extends JPanel
 
 	// tournament system remote data input
 	private boolean tournamentRemoteDataEnabled = false;
-	private TSAgent selectedAgents[] = null;
+	private String selectedAgentTypes[] = null;
 
 	// the colors of the TH Köln logo (used for button coloring):
 	Color colTHK1 = new Color(183,29,13);
@@ -640,7 +640,7 @@ public class XArenaButtons extends JPanel
 		if (!tournamentRemoteDataEnabled)
 			return (String) choiceAgent[i].getSelectedItem();
 		else {
-			return selectedAgents[i].getAgentType();
+			return selectedAgentTypes[i];
 		}
 	}
 
@@ -654,7 +654,25 @@ public class XArenaButtons extends JPanel
 	 */
 	public void enableTournamentRemoteData(TSAgent team[]) {
 		tournamentRemoteDataEnabled = true;
-		selectedAgents = team;
+
+		String[] types;
+		if (numPlayers==1) {
+		    types = new String[]{team[0].getAgentType()};
+        } else {
+            types = new String[2];
+            types[0] = team[0].getAgentType();
+            types[1] = team[1].getAgentType();
+
+            // create a dummy standard agent to be set into the GUI to let HDD und standard agents play together
+            if (team[0].isHddAgent() && !team[1].isHddAgent()) {
+                types[0] = Types.GUI_AGENT_LIST[0]; // random agent to hide HDD agent
+            }
+            if (!team[0].isHddAgent() && team[1].isHddAgent()) {
+                types[1] = Types.GUI_AGENT_LIST[0];
+            }
+        }
+
+		selectedAgentTypes = types;
 	}
 
 	/**
@@ -662,7 +680,7 @@ public class XArenaButtons extends JPanel
 	 */
 	public void disableTournamentRemoteData() {
 		tournamentRemoteDataEnabled = false;
-		selectedAgents = null;
+		selectedAgentTypes = null;
 	}
 
 } // class XArenaButtons	

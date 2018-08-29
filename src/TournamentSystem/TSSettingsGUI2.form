@@ -255,7 +255,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Choose Standard OR Disk Agents"/>
+          <text value="&lt;html&gt;&lt;body&gt;Your can choose Standard and Disk Agents.&lt;br&gt;&#10;To load Disk Agents use the Button below&lt;/body&gt;&lt;/html&gt;&#10;"/>
         </properties>
       </component>
       <vspacer id="21af6">

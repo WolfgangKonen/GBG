@@ -66,26 +66,26 @@ public class TSSettingsGUI2 extends JFrame {
         numPlayers = mArena.getGameBoard().getStateObs().getNumPlayers();
         mTSAgentManager = new TSAgentManager(numPlayers);
 
-        mTSAgentManager.addAgent("StandardRandom", Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
-        mTSAgentManager.addAgent("StandardMinimax", Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
-        mTSAgentManager.addAgent("StandardMCN", Types.GUI_AGENT_LIST[4], MCNCheckBox, false, null);
+        mTSAgentManager.addAgent("Standard Random", Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
+        mTSAgentManager.addAgent("Standard Minimax", Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
+        mTSAgentManager.addAgent("Standard MCN", Types.GUI_AGENT_LIST[4], MCNCheckBox, false, null);
         // GUI_AGENT_LIST[7] ist der Human Player
-        mTSAgentManager.addAgent("StandardTDNtuple2", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
+        mTSAgentManager.addAgent("Standard TDNtuple2", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
         TDNtuple2CheckBox.setVisible(false);
-        mTSAgentManager.addAgent("StandardTDS", Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
+        mTSAgentManager.addAgent("Standard TDS", Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
         TDSCheckBox.setVisible(false);
 
 
         if (mArena.getGameBoard().getDefaultStartState().isDeterministicGame()) {
             //System.out.println(TAG+"game is deterministic");
-            mTSAgentManager.addAgent("StandardMaxN", Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
-            mTSAgentManager.addAgent("StandardMCTS", Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
+            mTSAgentManager.addAgent("Standard MaxN", Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
+            mTSAgentManager.addAgent("Standard MCTS", Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
             expectimaxNCheckBox.setVisible(false);
             MCTSExpectimaxCheckBox.setVisible(false);
         } else {
             //System.out.println(TAG+"game is not deterministic");
-            mTSAgentManager.addAgent("StandardExpectimaxN", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
-            mTSAgentManager.addAgent("StandardMCTSExpectimax", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
+            mTSAgentManager.addAgent("Standard ExpectimaxN", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
+            mTSAgentManager.addAgent("Standard MCTSExpectimax", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
             maxNCheckBox.setVisible(false);
             MCTSCheckBox.setVisible(false);
         }
@@ -564,7 +564,7 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.insets = new Insets(0, 0, 5, 0);
         mJPanel.add(spacer8, gbc);
         final JLabel label4 = new JLabel();
-        label4.setText("Choose Standard OR Disk Agents");
+        label4.setText("<html><body>Your can choose Standard and Disk Agents.<br>\nTo load Disk Agents use the Button below</body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 12;
