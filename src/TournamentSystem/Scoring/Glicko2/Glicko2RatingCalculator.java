@@ -6,6 +6,7 @@
  */
 package TournamentSystem.Scoring.Glicko2;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,13 @@ import java.util.List;
  * @author Jeremy Gooch
  * 
  */
-public class Glicko2RatingCalculator {
+public class Glicko2RatingCalculator implements Serializable {
+	/**
+	 * change the version ID for serialization only if a newer version is no longer
+	 * compatible with an older one (older .tsr.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private final static double DEFAULT_RATING =  1500.0;
 	private final static double DEFAULT_DEVIATION =  350;
