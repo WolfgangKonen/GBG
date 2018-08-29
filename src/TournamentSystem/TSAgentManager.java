@@ -3,7 +3,7 @@ package TournamentSystem;
 import TournamentSystem.Scoring.Elo.EloCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingPeriodResults;
-import TournamentSystem.tools.TSSinglePlayerDataTransfer;
+import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import games.Arena;
@@ -1076,7 +1076,8 @@ public class TSAgentManager {
         while (hastNextGame()) {
             TSAgent nextTeam[] = getNextCompetitionTeam(); // get next Agents
             TSTimeStorage nextTimes[] = getNextCompetitionTimeStorage(); // get timestorage for next game
-            TSSinglePlayerDataTransfer spDT = new TSSinglePlayerDataTransfer(nextTeam, nextTimes, results.numberOfRandomStartMoves);
+            StateObservation startSo = getNextStartState();
+            TSGameDataTransfer spDT = new TSGameDataTransfer(nextTeam, nextTimes, results.numberOfRandomStartMoves, startSo);
             mArena.m_xab.enableTournamentRemoteData(nextTeam);
             mArena.taskState = Arena.Task.PLAY;
             mArena.PlayGame(spDT);
@@ -1143,9 +1144,14 @@ public class TSAgentManager {
     }
 
     public StateObservation getNextStartState() {
-        int gameNumNow = results.gameResult[results.nextGame][0]
-                +results.gameResult[results.nextGame][1]
-                +results.gameResult[results.nextGame][2];
+        int gameNumNow;
+        if (numPlayers==1) {
+            gameNumNow = getNextCompetitionTeam()[0].getSinglePlayScores().length;
+        } else {
+            gameNumNow = results.gameResult[results.nextGame][0]
+                    + results.gameResult[results.nextGame][1]
+                    + results.gameResult[results.nextGame][2];
+        }
         return randomStartStates[gameNumNow];
     }
 

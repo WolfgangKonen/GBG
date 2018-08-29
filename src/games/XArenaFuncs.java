@@ -1,55 +1,27 @@
 package games;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.*; 		// DecimalFormat, NumberFormat
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Random;
-
-import javax.swing.JOptionPane;
-
-import TournamentSystem.TSAgent;
 import TournamentSystem.TSTimeStorage;
-import TournamentSystem.tools.TSMultiPlayerDataTransfer;
+import TournamentSystem.tools.TSGameDataTransfer;
+import controllers.*;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
-
-import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
-import controllers.RandomAgent;
-import controllers.AgentBase;
-import controllers.ExpectimaxNAgent;
-import controllers.ExpectimaxWrapper;
-import controllers.HumanPlayer;
-import controllers.MaxNAgent;
-import controllers.MaxNWrapper;
-import controllers.MinimaxAgent;
 import controllers.MCTS.MCTSAgentT;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
+import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.TStats.TAggreg;
-import params.OtherParams;
-import params.ParMC;
-import params.ParMCTS;
-import params.ParMCTSE;
-import params.ParMaxN;
-import params.ParNT;
-import params.ParOther;
-import params.ParTD;
-import tools.DeviationWeightsChart;
-import tools.LineChartSuccess;
-import tools.Measure;
-import tools.MessageBox;
-import tools.Types;
+import params.*;
+import tools.*;
 
-
+import javax.swing.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.DecimalFormat;
+import java.util.*;
 
 /**
  * Class {@link XArenaFuncs} contains several methods to train, evaluate and measure the 
@@ -987,7 +959,7 @@ public class XArenaFuncs
 	 * @param dataTS helper class containing data and settings for the next game
 	 * @return info who wins or error code
 	 */
-	protected int singleCompeteBaseTS(GameBoard gb, XArenaButtons xab, TSMultiPlayerDataTransfer dataTS) { // return who wins (agent1, tie, agent2) [0;2]
+	protected int singleCompeteBaseTS(GameBoard gb, XArenaButtons xab, TSGameDataTransfer dataTS) { // return who wins (agent1, tie, agent2) [0;2]
 		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
 		int competeNum = 1;//xab.winCompOptions.getNumGames(); | falls wert != 1 dann competeTS() anpassen!
 		int numPlayers = gb.getStateObs().getNumPlayers();
@@ -1033,7 +1005,7 @@ public class XArenaFuncs
 
 				//c = competeTS(qaVector[0], qaVector[1], startSO, competeNum, dataTS.nextTimes, dataTS.rndmStartMoves);
 				c = competeTS(qaVector[0], qaVector[1], dataTS.startSO, competeNum, dataTS.nextTimes, dataTS.rndmStartMoves);
-				System.out.println(Arrays.toString(c));
+				//System.out.println(Arrays.toString(c));
 
 				xab.disableTournamentRemoteData();
 			}

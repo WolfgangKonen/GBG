@@ -2,9 +2,8 @@ package games;
 
 import TournamentSystem.TSAgent;
 import TournamentSystem.TSAgentManager;
-import TournamentSystem.tools.TSMultiPlayerDataTransfer;
-import TournamentSystem.tools.TSSinglePlayerDataTransfer;
 import TournamentSystem.TSTimeStorage;
+import TournamentSystem.tools.TSGameDataTransfer;
 import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
 import controllers.HumanPlayer;
@@ -15,7 +14,6 @@ import controllers.RandomAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
-import params.OtherParams;
 import params.ParMCTS;
 import params.ParOther;
 import tools.MessageBox;
@@ -255,7 +253,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
 					int rndmStartMoves = tournamentAgentManager.results.numberOfRandomStartMoves;
 					StateObservation startSo = tournamentAgentManager.getNextStartState();
-                    TSMultiPlayerDataTransfer data = new TSMultiPlayerDataTransfer(nextTeam, nextTimes, rndmStartMoves, startSo);
+                    TSGameDataTransfer data = new TSGameDataTransfer(nextTeam, nextTimes, rndmStartMoves, startSo);
 					// let team compete...
 					int roundWinningAgent = m_xfun.singleCompeteBaseTS(gb, m_xab, data);
 					// enter winner
@@ -479,7 +477,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		PlayGame(null);
 	}
 
-	public void PlayGame(TSSinglePlayerDataTransfer spDT) {
+	public void PlayGame(TSGameDataTransfer spDT) {
 		int Player;
 		StateObservation so;
 		Types.ACTIONS_VT actBest = null;
@@ -585,13 +583,16 @@ abstract public class Arena extends JFrame implements Runnable {
 		System.out.println("StartState: "+so.stringDescr());
 
 		if (spDT!=null) { // set random startmoves for TS
-			if (spDT.numberOfRandomStartMoves>0) {
+			if (spDT.rndmStartMoves>0) {
+				/*
 				RandomAgent raX = new RandomAgent("Random Agent X");
 				//RandomAgent raO = new RandomAgent("Random Agent O");
-				for (int n = 0; n < spDT.numberOfRandomStartMoves; n++) {
+				for (int n = 0; n < spDT.rndmStartMoves; n++) {
 					so.advance(raX.getNextAction2(so, false, true));
 					//so.advance(raO.getNextAction2(so, false, true));
 				}
+				*/
+				so = spDT.startSO;
 				System.out.println(TAG+"RandomStartState set: "+so);
 			}
 		}
@@ -629,7 +630,7 @@ abstract public class Arena extends JFrame implements Runnable {
 							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
 							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
 							if (spDT!=null)
-								spDT.timeStorage[0].addNewTimeNS(endTNano-startTNano);
+								spDT.nextTimes[0].addNewTimeNS(endTNano-startTNano);
 						}
 
 						so.storeBestActionInfo(actBest, actBest.getVTable());
@@ -716,7 +717,7 @@ abstract public class Arena extends JFrame implements Runnable {
 							MessageBox.show(m_LaunchFrame, "Game finished with score " + gScore, "Game Over",
 								JOptionPane.INFORMATION_MESSAGE);
 						if (spDT!=null)
-							spDT.agent[0].addSinglePlayScore(gScore);
+							spDT.nextTeam[0].addSinglePlayScore(gScore);
 						break; // out of switch
 					case 2:
 						int win = so.getGameWinner().toInt();
