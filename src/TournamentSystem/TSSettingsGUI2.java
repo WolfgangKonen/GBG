@@ -46,6 +46,8 @@ public class TSSettingsGUI2 extends JFrame {
     private JButton unselectAllHDDAgentsButton;
     private JButton deleteSelectedHDDAgentsButton;
     private JCheckBox autoSaveAfterTSFinishedCheckBox;
+    private JRadioButton singleRoundRobinRadioButton;
+    private JRadioButton doubleRoundRobinRadioButton;
     private JScrollPane checkBoxScrollPane;
 
     private Arena mArena;
@@ -75,7 +77,6 @@ public class TSSettingsGUI2 extends JFrame {
         mTSAgentManager.addAgent("Standard TDS", Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
         TDSCheckBox.setVisible(false);
 
-
         if (mArena.getGameBoard().getDefaultStartState().isDeterministicGame()) {
             //System.out.println(TAG+"game is deterministic");
             mTSAgentManager.addAgent("Standard MaxN", Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
@@ -90,11 +91,18 @@ public class TSSettingsGUI2 extends JFrame {
             MCTSCheckBox.setVisible(false);
         }
 
+        if (numPlayers == 1) {
+            singleRoundRobinRadioButton.setEnabled(false);
+            doubleRoundRobinRadioButton.setEnabled(false);
+        }
+
         // enable en/disabling of textfield/settings checkboxen later on in arena
         mTSAgentManager.gameNumJTF = gameNumTextField;
         mTSAgentManager.numOfMovesJTF = numOfMovesTextField;
         mTSAgentManager.nRandomJCB = addNRandomMovesCheckBox;
         mTSAgentManager.autoSaveAfterTSJCB = autoSaveAfterTSFinishedCheckBox;
+        mTSAgentManager.singleRR = singleRoundRobinRadioButton;
+        mTSAgentManager.doubleRR = doubleRoundRobinRadioButton;
 
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -271,7 +279,7 @@ public class TSSettingsGUI2 extends JFrame {
             return;
         }
 
-        int countSelectedAgents = 0;
+        // get and set number of games per match
         int numGamesPerMatch;
         try {
             numGamesPerMatch = Integer.parseInt(gameNumTextField.getText());
@@ -280,18 +288,19 @@ public class TSSettingsGUI2 extends JFrame {
             System.out.println(TAG + "ERROR :: not a valid number was entered in GameNum Textfield. Using value 1");
             numGamesPerMatch = 1;
         }
-        if (numGamesPerMatch<1) {
+        if (numGamesPerMatch < 1) {
             System.out.println(TAG + "ERROR :: not a valid number was entered in GameNum Textfield, must be >=1. Using value 1");
             numGamesPerMatch = 1;
         }
         System.out.println(TAG + "numGamesPerMatch: " + numGamesPerMatch);
         mTSAgentManager.setNumberOfGames(numGamesPerMatch);
 
+        // get and set if random start moves are set
         if (addNRandomMovesCheckBox.isSelected()) {
-            int randomStartMoves ;
+            int randomStartMoves;
             try {
                 randomStartMoves = Integer.parseInt(numOfMovesTextField.getText());
-                if (randomStartMoves<1) {
+                if (randomStartMoves < 1) {
                     System.out.println(TAG + "ERROR :: not a valid number was entered in RandomStartMoves Textfield, must be >=0. Using value 0");
                     randomStartMoves = 0;
                 }
@@ -305,9 +314,20 @@ public class TSSettingsGUI2 extends JFrame {
             mTSAgentManager.setNumberOfRandomStartMoves(0);
         }
 
+        // set tournament mode
+        if (singleRoundRobinRadioButton.isSelected()) {
+            mTSAgentManager.setDoubleRoundRobin(false);
+        }
+        if (doubleRoundRobinRadioButton.isSelected()) {
+            mTSAgentManager.setDoubleRoundRobin(true);
+        }
+
+        // set auto save of TS result aber finish
         mTSAgentManager.setAutoSaveAfterTS(autoSaveAfterTSFinishedCheckBox.isSelected());
+        // save date and time for the result window
         mTSAgentManager.setResultsStartDate();
 
+        int countSelectedAgents = 0;
         System.out.println(TAG + "Startbutton clicked | checkbox states:");
         // durch alle checkboxen der agenten iterieren
         for (TSAgent agent : mTSAgentManager.results.mAgents) {
@@ -320,7 +340,6 @@ public class TSSettingsGUI2 extends JFrame {
                 System.out.println(TAG + agent.guiCheckBox.getText() + ": deselected");
             }
         }
-
 
         if (countSelectedAgents < 2 && numPlayers == 2) {
             System.out.println(TAG + "Error :: At least 2 Agents need to be selected for a tournament!");
@@ -451,21 +470,21 @@ public class TSSettingsGUI2 extends JFrame {
         startButton.setText("Start");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 32;
+        gbc.gridy = 36;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(startButton, gbc);
         final JLabel label2 = new JLabel();
         label2.setText("Games per Match");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 23;
+        gbc.gridy = 27;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label2, gbc);
         gameNumTextField = new JTextField();
         gameNumTextField.setText("1");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 24;
+        gbc.gridy = 28;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(gameNumTextField, gbc);
@@ -486,14 +505,14 @@ public class TSSettingsGUI2 extends JFrame {
         final JPanel spacer4 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 39;
+        gbc.gridy = 43;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer4, gbc);
         final JPanel spacer5 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 25;
+        gbc.gridy = 29;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer5, gbc);
@@ -508,14 +527,14 @@ public class TSSettingsGUI2 extends JFrame {
         addNRandomMovesCheckBox.setText("Add n random moves at start");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 26;
+        gbc.gridy = 30;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(addNRandomMovesCheckBox, gbc);
         numOfMovesTextField = new JTextField();
         numOfMovesTextField.setText("2");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 28;
+        gbc.gridy = 32;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(numOfMovesTextField, gbc);
@@ -523,13 +542,13 @@ public class TSSettingsGUI2 extends JFrame {
         label3.setText("Number of moves:");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 27;
+        gbc.gridy = 31;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label3, gbc);
         final JPanel spacer6 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 29;
+        gbc.gridy = 33;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer6, gbc);
@@ -542,13 +561,13 @@ public class TSSettingsGUI2 extends JFrame {
         saveResultsToDiskButton.setText("Save Results to Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 37;
+        gbc.gridy = 41;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(saveResultsToDiskButton, gbc);
         final JPanel spacer7 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 36;
+        gbc.gridy = 40;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 1, 0);
         mJPanel.add(spacer7, gbc);
@@ -556,20 +575,20 @@ public class TSSettingsGUI2 extends JFrame {
         loadResultsFromDiskButton.setText("Load Results from Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 38;
+        gbc.gridy = 42;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(loadResultsFromDiskButton, gbc);
         reopenStatisticsButton = new JButton();
         reopenStatisticsButton.setText("Reopen Statistics");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 35;
+        gbc.gridy = 39;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(reopenStatisticsButton, gbc);
         final JPanel spacer8 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 33;
+        gbc.gridy = 37;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 5, 0);
         mJPanel.add(spacer8, gbc);
@@ -605,7 +624,7 @@ public class TSSettingsGUI2 extends JFrame {
         label5.setText("After the Tournament:");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 34;
+        gbc.gridy = 38;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label5, gbc);
         selectAllHDDAgentsButton = new JButton();
@@ -656,16 +675,49 @@ public class TSSettingsGUI2 extends JFrame {
         autoSaveAfterTSFinishedCheckBox.setText("AutoSave after TS finished");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 30;
+        gbc.gridy = 34;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(autoSaveAfterTSFinishedCheckBox, gbc);
         final JPanel spacer15 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 31;
+        gbc.gridy = 35;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer15, gbc);
+        final JLabel label6 = new JLabel();
+        label6.setText("Tournament Style (MultiPlayer):");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 23;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(label6, gbc);
+        final JPanel spacer16 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 26;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        mJPanel.add(spacer16, gbc);
+        singleRoundRobinRadioButton = new JRadioButton();
+        singleRoundRobinRadioButton.setText("Single Round Robin");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 24;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(singleRoundRobinRadioButton, gbc);
+        doubleRoundRobinRadioButton = new JRadioButton();
+        doubleRoundRobinRadioButton.setSelected(true);
+        doubleRoundRobinRadioButton.setText("Double Round Robin");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 25;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(doubleRoundRobinRadioButton, gbc);
+        ButtonGroup buttonGroup;
+        buttonGroup = new ButtonGroup();
+        buttonGroup.add(singleRoundRobinRadioButton);
+        buttonGroup.add(doubleRoundRobinRadioButton);
     }
 
     /**
