@@ -3,6 +3,7 @@ package TournamentSystem;
 import TournamentSystem.Scoring.Elo.EloCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingPeriodResults;
+import TournamentSystem.jheatchart.HeatChart;
 import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
@@ -16,7 +17,6 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.tc33.jheatchart.HeatChart;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

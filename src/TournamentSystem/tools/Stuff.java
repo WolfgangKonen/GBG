@@ -1,11 +1,10 @@
 package TournamentSystem.tools;
 
-import org.tc33.jheatchart.HeatChart;
+import TournamentSystem.jheatchart.HeatChart;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -73,7 +72,7 @@ public class Stuff {
                 {3,4,5,6,0,6},
                 {4,5,6,7,6,0}
         };
-        System.out.println("HeatChart.max(dataHM): "+HeatChart.max(dataHM));
+        System.out.println("HeatChart.max(dataHM): "+ HeatChart.max(dataHM));
 
         // Step 1: Create our heat map chart using our data.
         HeatChart map = new HeatChart(dataHM, 1, 7);
