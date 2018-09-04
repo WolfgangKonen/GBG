@@ -631,13 +631,13 @@ public class TSAgentManager {
                     if (i == j) { // main axis of agents playing against itself
                         rowData1[i][j + 1] = empty;
                         rowData3[i][j + 1] = empty;
-                        rowDataHM[i][j] = -1;
+                        rowDataHM[i][j] = -1; // diagonale
                     } else {
                         int gameNum = getPosGamePlan(getIDAgentsSelected()[i],getIDAgentsSelected()[j], results.gamePlan); // position of game in gameplan
                         if (gameNum == -1) { // game not available
                             rowData1[i][j + 1] = noGame;
                             rowData3[i][j + 1] = noGame;
-                            rowDataHM[i][j] = -1;
+                            rowDataHM[i][j] = -2; // not played
                         } else { // game was played
                             //int gameNum = getPosFullGamePlan(getIDAgentsSelected()[i], getIDAgentsSelected()[j]);
                             rowData1[i][j + 1] = "W:" + results.gameResult[gameNum][0] + " | T:" + results.gameResult[gameNum][1] + " | L:" + results.gameResult[gameNum][2];
@@ -664,7 +664,7 @@ public class TSAgentManager {
              * Score Heatmap
              */
             // create Score HeatMap
-            HeatChart map = new HeatChart(rowDataHM, 0, HeatChart.max(rowDataHM));
+            HeatChart map = new HeatChart(rowDataHM, 0, HeatChart.max(rowDataHM), true);
             //map.setTitle("white = worst | black = best");
             //map.setXAxisLabel("X Axis");
             //map.setYAxisLabel("Y Axis");
@@ -867,7 +867,7 @@ public class TSAgentManager {
             System.out.println("agentNamesY: "+Arrays.toString(agentNamesY));
             */
 
-            HeatChart map2 = new HeatChart(dataHM2, 0, HeatChart.max(dataHM2));
+            HeatChart map2 = new HeatChart(dataHM2, 0, HeatChart.max(dataHM2), true);
             map2.setXValues(agentNamesX);
             map2.setYValues(agentNamesY);
             map2.setCellSize(new Dimension(25, 25));

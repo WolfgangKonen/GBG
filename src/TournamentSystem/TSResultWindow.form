@@ -31,7 +31,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Heatmap visualisation of game scores&lt;/strong&gt;&lt;br&gt;&#10;white = worst or agent against itself&lt;br&gt;&#10;black = best score&lt;br&gt;&#10;column agent plays against the row agent&lt;/body&gt;&lt;/html&gt;"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Heatmap visualisation of game scores&lt;/strong&gt;&lt;br&gt;&#10;white = worst | black = best score&lt;br&gt;&#10;blue = agent against itself&lt;br&gt;&#10;green = game was not played in specific tournament mode&lt;br&gt;&#10;row agent plays against the column agent&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
       <component id="9f0ba" class="javax.swing.JLabel">

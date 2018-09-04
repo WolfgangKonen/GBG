@@ -340,7 +340,7 @@ public class TSResultWindow extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(tableSCRLabel, gbc);
         heatmapH1JL = new JLabel();
-        heatmapH1JL.setText("<html><body><strong>Heatmap visualisation of game scores</strong><br>\nwhite = worst or agent against itself<br>\nblack = best score<br>\ncolumn agent plays against the row agent</body></html>");
+        heatmapH1JL.setText("<html><body><strong>Heatmap visualisation of game scores</strong><br>\nwhite = worst | black = best score<br>\nblue = agent against itself<br>\ngreen = game was not played in specific tournament mode<br>\nrow agent plays against the column agent</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 8;

@@ -75,7 +75,7 @@ public class Stuff {
         System.out.println("HeatChart.max(dataHM): "+ HeatChart.max(dataHM));
 
         // Step 1: Create our heat map chart using our data.
-        HeatChart map = new HeatChart(dataHM, 1, 7);
+        HeatChart map = new HeatChart(dataHM, 1, 7, false);
         //HeatChart map = new HeatChart(dataHM);
 
         // Step 2: Customise the chart.

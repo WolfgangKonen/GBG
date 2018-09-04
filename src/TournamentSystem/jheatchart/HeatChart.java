@@ -210,6 +210,9 @@ public class HeatChart { // based on JHeatChart v0.6
 	
 	// Control variable for mapping z-values to colours.
 	private double colourScale;
+
+	// enables tournament mode (no data below 0 and -1 and -2 interpreted as dedicated data)
+	private boolean modeTSEnabled = false;
 	
 	/**
 	 * Constructs a heatmap for the given z-values against x/y-values that by 
@@ -218,9 +221,10 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * 
 	 * @param zValues the z-values, where each element is a row of z-values
 	 * in the resultant heat chart.
+	 * @param enableTSMode en/disable tournament system mode with special data interpretation
 	 */
-	public HeatChart(double[][] zValues) {
-		this(zValues, min(zValues), max(zValues));
+	public HeatChart(double[][] zValues, boolean enableTSMode) {
+		this(zValues, min(zValues), max(zValues), enableTSMode);
 	}
 	
 	/**
@@ -234,11 +238,17 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * z-values.
 	 * @param high the maximum possible value, which may or may not appear in 
 	 * the z-values.
+	 * @param enableTSMode en/disable tournament system mode with special data interpretation
 	 */
-	public HeatChart(double[][] zValues, double low, double high) {
+	public HeatChart(double[][] zValues, double low, double high, boolean enableTSMode) {
 		this.zValues = zValues;
 		this.lowValue = low;
 		this.highValue = high;
+
+		modeTSEnabled = enableTSMode;
+		if (modeTSEnabled) { // no values in TS mode can be lower then 0
+			lowValue = 0;
+		}
 		
 		// Default x/y-value settings.
 		setXValues(0, 1);
@@ -259,10 +269,10 @@ public class HeatChart { // based on JHeatChart v0.6
 		this.yAxisLabel = null;
 		this.axisThickness = 2;
 		this.axisColour = Color.BLACK;
-		this.axisLabelsFont = new Font("Sans-Serif", Font.PLAIN, 12);
+		this.axisLabelsFont = new Font("Sans-Serif", Font.PLAIN, 13); // yAchsen label
 		this.axisLabelColour = Color.BLACK;
 		this.axisValuesColour = Color.BLACK;
-		this.axisValuesFont = new Font("Sans-Serif", Font.PLAIN, 10);
+		this.axisValuesFont = new Font("Sans-Serif", Font.PLAIN, 13); // xAchsen label
 		this.xAxisValuesFrequency = 1;
 		this.xAxisValuesHeight = 0;
 		this.xValuesHorizontal = false;
@@ -1598,7 +1608,7 @@ public class HeatChart { // based on JHeatChart v0.6
 				continue;
 			}
 			
-			String xValueStr = xValues[i].toString();
+			String xValueStr = xValues[i].toString()+" ";
 			
 			chartGraphics.setFont(axisValuesFont);
 			FontMetrics metrics = chartGraphics.getFontMetrics();
@@ -1646,7 +1656,7 @@ public class HeatChart { // based on JHeatChart v0.6
 				continue;
 			}
 			
-			String yValueStr = yValues[i].toString();
+			String yValueStr = yValues[i].toString()+" ";
 			
 			chartGraphics.setFont(axisValuesFont);
 			FontMetrics metrics = chartGraphics.getFontMetrics();
@@ -1682,7 +1692,10 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * Determines what colour a heat map cell should be based upon the cell 
 	 * values.
 	 */
-	private Color getCellColour(double data, double min, double max) {		
+	private Color getCellColour(double data, double min, double max) {
+		if (modeTSEnabled)
+			min = 0;
+
 		double range = max - min;
 		double position = data - min;
 
@@ -1714,7 +1727,16 @@ public class HeatChart { // based on JHeatChart v0.6
 				b = changeColourValue(b, bDistance);
 			}
 		}
-		
+
+		if (modeTSEnabled) {
+			if (data == -1) { // diagonale
+				return new Color(0, 0, 255);
+			}
+			if (data == -2) { // games not played
+				return new Color(0, 255, 0);
+			}
+		}
+
 		return new Color(r, g, b);
 	}
 	
