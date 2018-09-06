@@ -8,6 +8,8 @@ import games.XArenaMenu;
 import tools.Types;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,6 +50,9 @@ public class TSSettingsGUI2 extends JFrame {
     private JCheckBox autoSaveAfterTSFinishedCheckBox;
     private JRadioButton singleRoundRobinRadioButton;
     private JRadioButton doubleRoundRobinRadioButton;
+    private JRadioButton variableDoubleRoundRobinRadioButton;
+    private JSlider variableDRoundRobinSlider;
+    private JLabel variableDRRInfoLabel;
     private JScrollPane checkBoxScrollPane;
 
     private Arena mArena;
@@ -94,7 +99,10 @@ public class TSSettingsGUI2 extends JFrame {
         if (numPlayers == 1) {
             singleRoundRobinRadioButton.setEnabled(false);
             doubleRoundRobinRadioButton.setEnabled(false);
+            variableDoubleRoundRobinRadioButton.setEnabled(false);
         }
+        variableDRRInfoLabel.setVisible(false);
+        updateSliderAndLabel();
 
         // enable en/disabling of textfield/settings checkboxen later on in arena
         mTSAgentManager.gameNumJTF = gameNumTextField;
@@ -116,6 +124,7 @@ public class TSSettingsGUI2 extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 loadAgentFromDisk();
+                updateSliderAndLabel();
             }
         });
         reopenStatisticsButton.addActionListener(new ActionListener() {
@@ -171,21 +180,52 @@ public class TSSettingsGUI2 extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 mTSAgentManager.setAllHDDAgentsSelected(true);
+                updateSliderAndLabel();
             }
         });
         unselectAllHDDAgentsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 mTSAgentManager.setAllHDDAgentsSelected(false);
+                updateSliderAndLabel();
             }
         });
         deleteSelectedHDDAgentsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 mTSAgentManager.deleteAllHDDAgentsSelected();
+                updateSliderAndLabel();
                 pack();
             }
         });
+        variableDRoundRobinSlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                //System.out.println("min " + variableDRoundRobinSlider.getMinimum() + " max " + variableDRoundRobinSlider.getMaximum() + " val " + variableDRoundRobinSlider.getValue());
+                //variableDRRInfoLabel.setText(variableDRoundRobinSlider.getValue() + " / " + variableDRoundRobinSlider.getMaximum() + " matches will be played");
+                updateSliderAndLabel();
+            }
+        });
+        variableDoubleRoundRobinRadioButton.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                //System.out.println(variableDoubleRoundRobinRadioButton.isSelected());
+                updateSliderAndLabel();
+                variableDRRInfoLabel.setVisible(variableDoubleRoundRobinRadioButton.isSelected()); //todo not very efficient code, called too often
+            }
+        });
+    }
+
+    private void updateSliderAndLabel() {
+        int matches;
+        int countSelectedAgents = mTSAgentManager.getNumAgentsSelected();
+        matches = countSelectedAgents * (countSelectedAgents - 1);
+        if (mTSAgentManager.getNumAgentsSelected() > 0)
+            variableDRoundRobinSlider.setMinimum((countSelectedAgents / 2) + 1);
+        else
+            variableDRoundRobinSlider.setMinimum(0);
+        variableDRoundRobinSlider.setMaximum(matches);
+        variableDRRInfoLabel.setText(variableDRoundRobinSlider.getValue() + " / " + variableDRoundRobinSlider.getMaximum() + " matches will be played");
     }
 
     /**
@@ -316,10 +356,13 @@ public class TSSettingsGUI2 extends JFrame {
 
         // set tournament mode
         if (singleRoundRobinRadioButton.isSelected()) {
-            mTSAgentManager.setDoubleRoundRobin(false);
+            mTSAgentManager.setTournamentMode(0, -1);
         }
         if (doubleRoundRobinRadioButton.isSelected()) {
-            mTSAgentManager.setDoubleRoundRobin(true);
+            mTSAgentManager.setTournamentMode(1, -1);
+        }
+        if (variableDoubleRoundRobinRadioButton.isSelected()) {
+            mTSAgentManager.setTournamentMode(2, variableDRoundRobinSlider.getValue());
         }
 
         // set auto save of TS result aber finish
@@ -470,21 +513,21 @@ public class TSSettingsGUI2 extends JFrame {
         startButton.setText("Start");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 36;
+        gbc.gridy = 39;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(startButton, gbc);
         final JLabel label2 = new JLabel();
         label2.setText("Games per Match");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 27;
+        gbc.gridy = 30;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label2, gbc);
         gameNumTextField = new JTextField();
         gameNumTextField.setText("1");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 28;
+        gbc.gridy = 31;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(gameNumTextField, gbc);
@@ -505,14 +548,14 @@ public class TSSettingsGUI2 extends JFrame {
         final JPanel spacer4 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 43;
+        gbc.gridy = 46;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer4, gbc);
         final JPanel spacer5 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 29;
+        gbc.gridy = 32;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer5, gbc);
@@ -527,14 +570,14 @@ public class TSSettingsGUI2 extends JFrame {
         addNRandomMovesCheckBox.setText("Add n random moves at start");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 30;
+        gbc.gridy = 33;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(addNRandomMovesCheckBox, gbc);
         numOfMovesTextField = new JTextField();
         numOfMovesTextField.setText("2");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 32;
+        gbc.gridy = 35;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(numOfMovesTextField, gbc);
@@ -542,13 +585,13 @@ public class TSSettingsGUI2 extends JFrame {
         label3.setText("Number of moves:");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 31;
+        gbc.gridy = 34;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label3, gbc);
         final JPanel spacer6 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 33;
+        gbc.gridy = 36;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer6, gbc);
@@ -561,13 +604,13 @@ public class TSSettingsGUI2 extends JFrame {
         saveResultsToDiskButton.setText("Save Results to Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 41;
+        gbc.gridy = 44;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(saveResultsToDiskButton, gbc);
         final JPanel spacer7 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 40;
+        gbc.gridy = 43;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 1, 0);
         mJPanel.add(spacer7, gbc);
@@ -575,20 +618,20 @@ public class TSSettingsGUI2 extends JFrame {
         loadResultsFromDiskButton.setText("Load Results from Disk");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 42;
+        gbc.gridy = 45;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(loadResultsFromDiskButton, gbc);
         reopenStatisticsButton = new JButton();
         reopenStatisticsButton.setText("Reopen Statistics");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 39;
+        gbc.gridy = 42;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(reopenStatisticsButton, gbc);
         final JPanel spacer8 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 37;
+        gbc.gridy = 40;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 5, 0);
         mJPanel.add(spacer8, gbc);
@@ -624,7 +667,7 @@ public class TSSettingsGUI2 extends JFrame {
         label5.setText("After the Tournament:");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 38;
+        gbc.gridy = 41;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label5, gbc);
         selectAllHDDAgentsButton = new JButton();
@@ -675,13 +718,13 @@ public class TSSettingsGUI2 extends JFrame {
         autoSaveAfterTSFinishedCheckBox.setText("AutoSave after TS finished");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 34;
+        gbc.gridy = 37;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(autoSaveAfterTSFinishedCheckBox, gbc);
         final JPanel spacer15 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 35;
+        gbc.gridy = 38;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer15, gbc);
@@ -695,7 +738,7 @@ public class TSSettingsGUI2 extends JFrame {
         final JPanel spacer16 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
-        gbc.gridy = 26;
+        gbc.gridy = 29;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer16, gbc);
@@ -714,10 +757,35 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.gridy = 25;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(doubleRoundRobinRadioButton, gbc);
+        variableDoubleRoundRobinRadioButton = new JRadioButton();
+        variableDoubleRoundRobinRadioButton.setText("variable Double Round Robin");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 26;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(variableDoubleRoundRobinRadioButton, gbc);
+        variableDRoundRobinSlider = new JSlider();
+        variableDRoundRobinSlider.setPaintLabels(true);
+        variableDRoundRobinSlider.setPaintTicks(true);
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 27;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(variableDRoundRobinSlider, gbc);
+        variableDRRInfoLabel = new JLabel();
+        variableDRRInfoLabel.setEnabled(true);
+        variableDRRInfoLabel.setText("xx / xx will be played");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 28;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(variableDRRInfoLabel, gbc);
         ButtonGroup buttonGroup;
         buttonGroup = new ButtonGroup();
         buttonGroup.add(singleRoundRobinRadioButton);
         buttonGroup.add(doubleRoundRobinRadioButton);
+        buttonGroup.add(variableDoubleRoundRobinRadioButton);
     }
 
     /**

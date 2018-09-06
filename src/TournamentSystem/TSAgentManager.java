@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * This is the core of the GBG Tournament System.
@@ -50,6 +51,7 @@ public class TSAgentManager {
     private final int numPlayers;
     private StateObservation[] randomStartStates;
     private boolean playDoubleRoundRobin = true;
+    private int userGameNumLimitDRR;
 
     public static final float faktorWin = 1.0f;
     public static final float faktorTie = 0.5f;
@@ -76,10 +78,20 @@ public class TSAgentManager {
 
     /**
      * set is the tournament should be double or single round robin
-     * @param doubleRR true = double round robin TS
+     * @param mode code to set tournament mode<br>
+     *             0 = single round robin<br>
+     *             1 = double round robin<br>
+     *             2 = double round robin with custom number of matches
+     * @param numGames number of matches to play in mode 2
      */
-    public void setDoubleRoundRobin(boolean doubleRR) {
-        playDoubleRoundRobin = doubleRR;
+    public void setTournamentMode(int mode, int numGames) {
+        switch (mode) {
+            case 0: playDoubleRoundRobin = false; break;
+            case 1: playDoubleRoundRobin = true; break;
+            case 2: playDoubleRoundRobin = true; break;
+            default: playDoubleRoundRobin = true; break;
+        }
+        userGameNumLimitDRR = numGames;
     }
 
     /**
@@ -298,6 +310,49 @@ public class TSAgentManager {
                         }
                     }
                 }
+                if (userGameNumLimitDRR > 0) {
+                    // ... remove games from gameplan as set by user
+                    final int numGamesToPlay = userGameNumLimitDRR;
+                    final int numGamesToRemove = gamePlan.length - userGameNumLimitDRR;
+                    final int numGamesMinimum = (getNumAgentsSelected() / 2) + 1;
+
+                    // matches which have to be played to make sure every agent played once
+                    // this saves the position of the matches in the original double roun robin gameplan
+                    // if the number of players is uneven the last agent plays against the first
+                    int[] safeMatches = new int[numGamesMinimum];
+
+                    for (int i=0; i<selectedAgents.length; i+=2) {
+                        if (i+1 == selectedAgents.length) {
+                            safeMatches[i/2] = getPosGamePlan(selectedAgents[i],selectedAgents[0], gamePlan); // position of game in gameplan
+                        } else {
+                            safeMatches[i/2] = getPosGamePlan(selectedAgents[i],selectedAgents[i+1], gamePlan); // position of game in gameplan
+                        }
+                    }
+
+                    // this holds the gameplan positions of matches to be deleted, randomly chosen
+                    int[] matchesToDelete = getNRandomInts(0, gamePlan.length-1, numGamesToRemove, safeMatches);
+
+                    int newGamePlan[][] = new int[numGamesToPlay][2];
+                    int pos = 0;
+
+                    for (int i=0; i<gamePlan.length; i++) {
+                        boolean skip = false;
+
+                        for (int j:matchesToDelete) {
+                            if (j==i) {
+                                skip = true; // check if game is to be deleted
+                            }
+                        }
+
+                        if (!skip) { // if not then copy match to new gameplan
+                            newGamePlan[pos][0] = gamePlan[i][0];
+                            newGamePlan[pos][1] = gamePlan[i][1];
+                            pos++;
+                        }
+                    }
+
+                    return newGamePlan;
+                }
             } else { // single round robin
                 gamePlan = new int[(getNumAgentsSelected() * (getNumAgentsSelected() - 1))/2][2]; // games to be played
                 for (int i = 0; i < getNumAgentsSelected(); i++) {
@@ -321,6 +376,38 @@ public class TSAgentManager {
         if (numPlayers>2)
             System.out.println(TAG+"ERROR :: GamePlan generation not supported for games >2 Players!!");
         return gamePlan;
+    }
+
+    private int[] getNRandomInts(int low, int high, int count, int[] safe) {
+        int[] randoms = new int[count];
+        int pos = 0;
+
+        while (pos<count) {
+            boolean failed = false;
+            int rnd = getRandomInt(low, high);
+
+            for (int i:safe) {
+                if (i == rnd) {
+                    failed = true;
+                }
+            }
+
+            for (int i=0; i<pos; i++) {
+                if (randoms[i] == rnd) {
+                    failed = true;
+                }
+            }
+
+            if (!failed) {
+                randoms[pos++] = rnd;
+            }
+        }
+
+        return randoms;
+    }
+
+    private int getRandomInt(int low, int high) {
+        return ThreadLocalRandom.current().nextInt(low, high + 1);
     }
 
     /**
@@ -1102,10 +1189,12 @@ public class TSAgentManager {
      * @param agentBID ID of second agent
      * @return positiom of of game in gameplan or -1 if not found
      */
+    /*
     private int getPosFullGamePlan(int agentAID, int agentBID) {
         int doubleRRGamePlan[][] = generateGamePlanInternal(true);
         return getPosGamePlan(agentAID, agentBID, doubleRRGamePlan);
     }
+    */
 
     /**
      * run a single player tournament, started in {@link TSSettingsGUI2}, and show stats afterwards

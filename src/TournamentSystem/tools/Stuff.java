@@ -5,7 +5,9 @@ import TournamentSystem.jheatchart.HeatChart;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * This class is just used to test code outside the GBG and GBG-TS.
@@ -21,6 +23,7 @@ public class Stuff {
 
     public Stuff() {
         //makeJTable();
+        /*
         ArrayList<Double> al = new ArrayList<>();
         al.add(5.0);
         al.add(2.0);
@@ -28,12 +31,63 @@ public class Stuff {
         al.add(8.0);
         al.add(3.0);
         System.out.println(Collections.min(al));
-
+        */
+        /*
         String a = "a";
         String b = a;
         System.out.println(b);
         a = "c";
         System.out.println(b);
+        */
+        /*
+        int i = 5;
+        System.out.println((i/2)+1);
+        */
+        /*
+        for (int j=0; j<15; j++)
+            System.out.println("random "+getRandomNum(1,9));
+        */
+
+        int[] safe = {1,2,3,4,5};
+        //System.out.println(Arrays.toString(getNRandomNums(1, 15, 8, safe)));
+        for (int i=0; i<safe.length; i+=2) {
+            if (i+1 == safe.length)
+                System.out.println(safe[i] + " " + safe[0]);
+            else
+                System.out.println(safe[i] + " " + safe[i + 1]);
+        }
+    }
+
+    private int[] getNRandomNums(int low, int high, int count, int[] safe) {
+        int[] randoms = new int[count];
+        int pos = 0;
+
+        while (pos<count) {
+            boolean failed = false;
+            int rnd = getRandomNum(low, high);
+
+            for (int i:safe) {
+                if (i == rnd) {
+                    failed = true;
+                }
+            }
+
+            for (int i=0; i<pos; i++) {
+                if (randoms[i] == rnd) {
+                    failed = true;
+                }
+            }
+
+            if (!failed) {
+                randoms[pos++] = rnd;
+            }
+        }
+
+        return randoms;
+    }
+
+    private int getRandomNum(int low, int high) {
+        return ThreadLocalRandom.current().nextInt(low, high + 1);
     }
 
     private void makeJTable() {
