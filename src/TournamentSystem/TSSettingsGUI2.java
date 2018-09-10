@@ -73,8 +73,32 @@ public class TSSettingsGUI2 extends JFrame {
         numPlayers = mArena.getGameBoard().getStateObs().getNumPlayers();
         mTSAgentManager = new TSAgentManager(numPlayers);
 
+        randomCheckBox.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                    updateSliderAndLabel();
+                }
+            }
+        });
         mTSAgentManager.addAgent("Standard Random", Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
+        minimaxCheckBox.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                    updateSliderAndLabel();
+                }
+            }
+        });
         mTSAgentManager.addAgent("Standard Minimax", Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
+        MCNCheckBox.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                    updateSliderAndLabel();
+                }
+            }
+        });
         mTSAgentManager.addAgent("Standard MCN", Types.GUI_AGENT_LIST[4], MCNCheckBox, false, null);
         // GUI_AGENT_LIST[7] ist der Human Player
         mTSAgentManager.addAgent("Standard TDNtuple2", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
@@ -84,13 +108,45 @@ public class TSSettingsGUI2 extends JFrame {
 
         if (mArena.getGameBoard().getDefaultStartState().isDeterministicGame()) {
             //System.out.println(TAG+"game is deterministic");
+            maxNCheckBox.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                        updateSliderAndLabel();
+                    }
+                }
+            });
             mTSAgentManager.addAgent("Standard MaxN", Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
+            MCTSCheckBox.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                        updateSliderAndLabel();
+                    }
+                }
+            });
             mTSAgentManager.addAgent("Standard MCTS", Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
             expectimaxNCheckBox.setVisible(false);
             MCTSExpectimaxCheckBox.setVisible(false);
         } else {
             //System.out.println(TAG+"game is not deterministic");
+            expectimaxNCheckBox.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                        updateSliderAndLabel();
+                    }
+                }
+            });
             mTSAgentManager.addAgent("Standard ExpectimaxN", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
+            MCTSExpectimaxCheckBox.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                        updateSliderAndLabel();
+                    }
+                }
+            });
             mTSAgentManager.addAgent("Standard MCTSExpectimax", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
             maxNCheckBox.setVisible(false);
             MCTSCheckBox.setVisible(false);
@@ -124,7 +180,9 @@ public class TSSettingsGUI2 extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 loadAgentFromDisk();
-                updateSliderAndLabel();
+                if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                    updateSliderAndLabel();
+                }
             }
         });
         reopenStatisticsButton.addActionListener(new ActionListener() {
@@ -220,11 +278,20 @@ public class TSSettingsGUI2 extends JFrame {
         int matches;
         int countSelectedAgents = mTSAgentManager.getNumAgentsSelected();
         matches = countSelectedAgents * (countSelectedAgents - 1);
-        if (mTSAgentManager.getNumAgentsSelected() > 0)
-            variableDRoundRobinSlider.setMinimum((countSelectedAgents / 2) + 1);
-        else
-            variableDRoundRobinSlider.setMinimum(0);
-        variableDRoundRobinSlider.setMaximum(matches);
+        if (mTSAgentManager.getNumAgentsSelected() > 0) {
+            int newMinimum = (countSelectedAgents / 2) + 1;
+            if (newMinimum != variableDRoundRobinSlider.getMinimum()) { // avoid acessing the slider too often
+                variableDRoundRobinSlider.setMinimum(newMinimum); // just change when the values really changeg
+            }
+        }
+        else {
+            if (variableDRoundRobinSlider.getMinimum() != 0) {
+                variableDRoundRobinSlider.setMinimum(0);
+            }
+        }
+        if (variableDRoundRobinSlider.getMaximum() != matches) {
+            variableDRoundRobinSlider.setMaximum(matches);
+        }
         variableDRRInfoLabel.setText(variableDRoundRobinSlider.getValue() + " / " + variableDRoundRobinSlider.getMaximum() + " matches will be played");
     }
 
@@ -296,6 +363,14 @@ public class TSSettingsGUI2 extends JFrame {
             // add agent to gui
             JCheckBox newAgent = new JCheckBox("HDD " + agentName);
             newAgent.setSelected(true); // set checkbox of new agent to selected
+            newAgent.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+                        updateSliderAndLabel();
+                    }
+                }
+            });
             checkBoxJPanel.add(newAgent);
             //checkBoxScrollPane.add(newAgent);
 
