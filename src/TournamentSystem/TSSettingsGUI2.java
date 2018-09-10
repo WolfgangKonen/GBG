@@ -274,14 +274,18 @@ public class TSSettingsGUI2 extends JFrame {
         });
     }
 
+    /**
+     * update the variable round robin slider limits to the current amount of selected agents in {@link TSSettingsGUI2}.
+     * Update will just take place when the upper or lower limit actually changed.
+     */
     private void updateSliderAndLabel() {
         int matches;
         int countSelectedAgents = mTSAgentManager.getNumAgentsSelected();
         matches = countSelectedAgents * (countSelectedAgents - 1);
         if (mTSAgentManager.getNumAgentsSelected() > 0) {
             int newMinimum = (countSelectedAgents / 2) + 1;
-            if (newMinimum != variableDRoundRobinSlider.getMinimum()) { // avoid acessing the slider too often
-                variableDRoundRobinSlider.setMinimum(newMinimum); // just change when the values really changeg
+            if (newMinimum != variableDRoundRobinSlider.getMinimum()) { // avoid accessing the slider too often
+                variableDRoundRobinSlider.setMinimum(newMinimum); // just change when the values really changed
             }
         }
         else {

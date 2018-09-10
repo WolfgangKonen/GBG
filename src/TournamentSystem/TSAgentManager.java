@@ -293,6 +293,7 @@ public class TSAgentManager {
 
     /**
      * generates the gameplan and playing pairs of agents identified by the ID (position in mAgent Arraylist)
+     * @param doubleRoundRobin is the tournament mode double round robin?
      * @return gameplan with agent IDs
      */
     private int[][] generateGamePlanInternal(boolean doubleRoundRobin) {
@@ -378,6 +379,14 @@ public class TSAgentManager {
         return gamePlan;
     }
 
+    /**
+     * generate an array of unique random Integers in a specified range excluding specified Integers
+     * @param low lower limit which is included
+     * @param high upper limit which is still included
+     * @param count how many random numbers are requested
+     * @param safe which Integers must not be returned
+     * @return array of random Integers fitting the given parameters
+     */
     private int[] getNRandomInts(int low, int high, int count, int[] safe) {
         int[] randoms = new int[count];
         int pos = 0;
@@ -406,6 +415,12 @@ public class TSAgentManager {
         return randoms;
     }
 
+    /**
+     * generate a random Integer between a lower and upper limit
+     * @param low lower limit which is included
+     * @param high upper limit which is still included
+     * @return random Integers fitting the given parameters
+     */
     private int getRandomInt(int low, int high) {
         return ThreadLocalRandom.current().nextInt(low, high + 1);
     }
@@ -435,6 +450,11 @@ public class TSAgentManager {
         return null;
     }
 
+    /**
+     * return a specific agent by its tournament ID
+     * @param id tournament ID
+     * @return specified agent
+     */
     public TSAgent getAgentByID(int id) {
         return results.mAgents.get(id);
     }
@@ -1340,6 +1360,9 @@ public class TSAgentManager {
         }
     }
 
+    /**
+     * helping class to create the simplified time measurement table
+     */
     public class TSSimpleTimeTableHelper{
         public int agentID;
         public ArrayList<Double> minTimeForGameMS = new ArrayList<>();
