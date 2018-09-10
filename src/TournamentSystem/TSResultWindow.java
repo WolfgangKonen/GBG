@@ -1,5 +1,6 @@
 package TournamentSystem;
 
+import TournamentSystem.tools.TSHeatmapDataTransfer;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
@@ -31,7 +32,7 @@ public class TSResultWindow extends JFrame {
     private boolean showjspSCR = false;
     private JScrollPane jspHM;
     private JScrollPane jspASC;
-    private boolean showjspASC = !false;
+    private boolean showjspASC = true;
     private JScrollPane jspTD;
     private boolean showjspTD = false;
     private JPanel scatterPlotJPanel;
@@ -50,10 +51,22 @@ public class TSResultWindow extends JFrame {
     private JLabel heatmapH1JL;
     private JLabel heatmap2H1JL;
     private JButton toggleAdvancedInfoTimeButton;
+    private JButton openAdvancedHeatmapAnalysisButton;
+    private boolean showAdvHMAnalysis = false;
+    private JScrollPane jspHMadv1;
+    private JLabel heatmapJLadv1;
+    private JLabel heatmapJLadv1Title;
+    private JScrollPane jspHMadv2;
+    private JLabel heatmapJLadv2;
+    private JLabel heatmapJLadv2Title;
+    private JScrollPane jspHMadv3;
+    private JLabel heatmapJLadv3;
+    private JLabel heatmapJLadv3Title;
 
     private JFreeChart scatterPlot = null;
     private DefaultTableModel timeDetail, timeSimple = null;
     private boolean timeSimpleSelected = true;
+    private boolean isSinglePlayerGame;
 
     private final String TAG = "[TSResultWindow] ";
 
@@ -65,21 +78,19 @@ public class TSResultWindow extends JFrame {
      * @param m3          table with agent score ranking
      * @param m4          table with detailed time measurements
      * @param m5          table with simplified time measurements
-     * @param imageIcon   heatmap with visualisation of WTL scores
-     * @param imageIcon2  heatmap with visualisation of WTL scores sorted vertically by score
+     * @param dataHM      heatmap data for all heatmaps
      * @param scatterPlot scatterplot XYPlot of the agents score vs round time
      * @param startDate   info String with date and TS settings
      */
     public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, DefaultTableModel m5,
-                          ImageIcon imageIcon, ImageIcon imageIcon2, JFreeChart scatterPlot, String startDate) {
+                          TSHeatmapDataTransfer dataHM, JFreeChart scatterPlot, String startDate) {
         this(startDate, false);
 
         setTableMatrixWTL(m1);
         setTableMatrixSCR(m2);
         setTableAgentScore(m3);
         setTableTimeDetail(m4, m5);
-        setHeatMap(imageIcon);
-        setHeatMapSorted(imageIcon2);
+        setHeatMap(dataHM);
         setScatterPlotASvT(scatterPlot);
     }
 
@@ -108,13 +119,31 @@ public class TSResultWindow extends JFrame {
         heatmap2JL.setVisible(false);
         jspHM.setVisible(false);
         jspHM2.setVisible(false);
+        jspHMadv1.setVisible(false);
+        heatmapJLadv1Title.setVisible(false);
+        jspHMadv2.setVisible(false);
+        heatmapJLadv2Title.setVisible(false);
+        jspHMadv3.setVisible(false);
+        heatmapJLadv3Title.setVisible(false);
+
+        isSinglePlayerGame = singlePlayerGame;
 
         //Font lFont = new Font("Arial", Font.PLAIN, Types.GUI_DIALOGFONTSIZE);
         //tableMatrixWTL.setFont(lFont); // todo also need to set cell height according to font height
         startDateTSJL.setText(startDate);
 
-        if (singlePlayerGame)
+        if (singlePlayerGame) {
             showjspTD = true;
+            showAdvHMAnalysis = false;
+            openAdvancedHeatmapAnalysisButton.setEnabled(false);
+        } else {
+            jspHMadv1.setVisible(showAdvHMAnalysis);
+            heatmapJLadv1Title.setVisible(showAdvHMAnalysis);
+            jspHMadv2.setVisible(showAdvHMAnalysis);
+            heatmapJLadv2Title.setVisible(showAdvHMAnalysis);
+            jspHMadv3.setVisible(showAdvHMAnalysis);
+            heatmapJLadv3Title.setVisible(showAdvHMAnalysis);
+        }
         jspWTL.setVisible(showjspWTL);
         jspSCR.setVisible(showjspSCR);
         jspASC.setVisible(showjspASC);
@@ -235,6 +264,20 @@ public class TSResultWindow extends JFrame {
                 pack();
             }
         });
+        openAdvancedHeatmapAnalysisButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showAdvHMAnalysis = !showAdvHMAnalysis;
+
+                jspHMadv1.setVisible(showAdvHMAnalysis);
+                heatmapJLadv1Title.setVisible(showAdvHMAnalysis);
+                jspHMadv2.setVisible(showAdvHMAnalysis);
+                heatmapJLadv2Title.setVisible(showAdvHMAnalysis);
+                jspHMadv3.setVisible(showAdvHMAnalysis);
+                heatmapJLadv3Title.setVisible(showAdvHMAnalysis);
+                pack();
+            }
+        });
     } // public TSResultWindow(...)
 
     public void setTableMatrixWTL(DefaultTableModel m1) {
@@ -284,23 +327,24 @@ public class TSResultWindow extends JFrame {
         pack();
     }
 
-    public void setHeatMap(ImageIcon imageIcon) {
+    public void setHeatMap(TSHeatmapDataTransfer dataTransfer) {
         heatmapH1JL.setVisible(true);
         heatmapJL.setVisible(true);
         jspHM.setVisible(true);
-
-        heatmapJL.setText("");
-        heatmapJL.setIcon(imageIcon);
-        pack();
-    }
-
-    public void setHeatMapSorted(ImageIcon imageIcon2) {
         heatmap2H1JL.setVisible(true);
         heatmap2JL.setVisible(true);
         jspHM2.setVisible(true);
 
+        heatmapJL.setText("");
+        heatmapJL.setIcon(dataTransfer.scoreHeatmap);
+        heatmapJLadv1.setText("");
+        heatmapJLadv1.setIcon(dataTransfer.scoreHeatmapA1);
+        heatmapJLadv2.setText("");
+        heatmapJLadv2.setIcon(dataTransfer.scoreHeatmapA2);
+        heatmapJLadv3.setText("");
+        heatmapJLadv3.setIcon(dataTransfer.scoreHeatmapA3);
         heatmap2JL.setText("");
-        heatmap2JL.setIcon(imageIcon2);
+        heatmap2JL.setIcon(dataTransfer.scoreHeatmapSorted);
         pack();
     }
 
@@ -309,7 +353,19 @@ public class TSResultWindow extends JFrame {
         openBiggerScatterPlotButton.setVisible(true);
 
         ChartPanel scatterPlotASvT = new ChartPanel(scatterPlot);
-        scatterPlotASvT.setPreferredSize(new Dimension(400, 300)); // plot size
+        int width = 400;
+        int height = 400;
+
+        if (!isSinglePlayerGame) {
+            if (heatmapJL.getWidth() > width) {
+                width = heatmapJL.getWidth();
+            }
+            if (heatmapJL.getHeight() > height) {
+                height = heatmapJL.getHeight();
+            }
+        }
+
+        scatterPlotASvT.setPreferredSize(new Dimension(width, height)); // plot size
         scatterPlotJPanel.add(scatterPlotASvT);
         pack();
     }
@@ -350,14 +406,14 @@ public class TSResultWindow extends JFrame {
         label1.setText("<html><body><strong>Ranking of Agents by overall Wins, Ties, Losses</strong></body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 12;
+        gbc.gridy = 14;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label1, gbc);
         final JLabel label2 = new JLabel();
         label2.setText("<html><body><strong>Game time meassurements in [ms]</strong></body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 15;
+        gbc.gridy = 17;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label2, gbc);
         jspWTL = new JScrollPane();
@@ -390,7 +446,7 @@ public class TSResultWindow extends JFrame {
         jspASC = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 13;
+        gbc.gridy = 15;
         gbc.gridwidth = 5;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspASC, gbc);
@@ -399,7 +455,7 @@ public class TSResultWindow extends JFrame {
         jspTD = new JScrollPane();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 16;
+        gbc.gridy = 18;
         gbc.gridwidth = 5;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspTD, gbc);
@@ -422,14 +478,14 @@ public class TSResultWindow extends JFrame {
         final JPanel spacer3 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 14;
+        gbc.gridy = 16;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer3, gbc);
         final JPanel spacer4 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 11;
+        gbc.gridy = 13;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer4, gbc);
@@ -467,7 +523,7 @@ public class TSResultWindow extends JFrame {
         showHideTableTimeTableButton.setToolTipText("Show or hide the time measurement table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
-        gbc.gridy = 15;
+        gbc.gridy = 17;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showHideTableTimeTableButton, gbc);
         showHideTableSCRButton = new JButton();
@@ -483,13 +539,13 @@ public class TSResultWindow extends JFrame {
         showHideTableASCButton.setToolTipText("Show or hide the agent ranking table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
-        gbc.gridy = 12;
+        gbc.gridy = 14;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showHideTableASCButton, gbc);
         final JPanel spacer6 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 17;
+        gbc.gridy = 19;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 10, 0);
         mJPanel.add(spacer6, gbc);
@@ -498,13 +554,13 @@ public class TSResultWindow extends JFrame {
         hideAllTablesButton.setToolTipText("Hide all tables by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
-        gbc.gridy = 18;
+        gbc.gridy = 20;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(hideAllTablesButton, gbc);
         final JPanel spacer7 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 19;
+        gbc.gridy = 21;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 5, 0);
         mJPanel.add(spacer7, gbc);
@@ -513,7 +569,7 @@ public class TSResultWindow extends JFrame {
         showAllTablesButton.setToolTipText("Show all tables by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 18;
+        gbc.gridy = 20;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showAllTablesButton, gbc);
         startDateTSJL = new JLabel();
@@ -566,9 +622,64 @@ public class TSResultWindow extends JFrame {
         toggleAdvancedInfoTimeButton.setText("Toggle Advanced Time Info");
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
-        gbc.gridy = 15;
+        gbc.gridy = 17;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(toggleAdvancedInfoTimeButton, gbc);
+        openAdvancedHeatmapAnalysisButton = new JButton();
+        openAdvancedHeatmapAnalysisButton.setText("Toggle Advanced Heatmap Analysis");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 10;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        mJPanel.add(openAdvancedHeatmapAnalysisButton, gbc);
+        jspHMadv1 = new JScrollPane();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 12;
+        gbc.fill = GridBagConstraints.BOTH;
+        mJPanel.add(jspHMadv1, gbc);
+        heatmapJLadv1 = new JLabel();
+        heatmapJLadv1.setText("heatmapJLadv1");
+        jspHMadv1.setViewportView(heatmapJLadv1);
+        heatmapJLadv1Title = new JLabel();
+        heatmapJLadv1Title.setText("Is Wab = Wba true? | green=yes ; red=no");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 11;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(heatmapJLadv1Title, gbc);
+        jspHMadv2 = new JScrollPane();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 12;
+        gbc.fill = GridBagConstraints.BOTH;
+        mJPanel.add(jspHMadv2, gbc);
+        heatmapJLadv2 = new JLabel();
+        heatmapJLadv2.setText("heatmapJLadv2");
+        jspHMadv2.setViewportView(heatmapJLadv2);
+        heatmapJLadv2Title = new JLabel();
+        heatmapJLadv2Title.setText("Is Wab = 1-Wba true?");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 11;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(heatmapJLadv2Title, gbc);
+        jspHMadv3 = new JScrollPane();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 4;
+        gbc.gridy = 12;
+        gbc.fill = GridBagConstraints.BOTH;
+        mJPanel.add(jspHMadv3, gbc);
+        heatmapJLadv3 = new JLabel();
+        heatmapJLadv3.setText("heatmapJLadv3");
+        jspHMadv3.setViewportView(heatmapJLadv3);
+        heatmapJLadv3Title = new JLabel();
+        heatmapJLadv3Title.setText("Is Is Wab = Wba AND Wab = 1-Wba true?");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 4;
+        gbc.gridy = 11;
+        gbc.anchor = GridBagConstraints.WEST;
+        mJPanel.add(heatmapJLadv3Title, gbc);
     }
 
     /**

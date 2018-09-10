@@ -140,6 +140,28 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * A basic exponential scale value of 3.0.
 	 */
 	public static final double SCALE_EXPONENTIAL = 3;
+
+	// TS Mode Color Codes
+	/**
+	 * color code for the main diagonale (agent against itself).<br>
+	 * HeatChart MUST be in tournament mode to apply the color!
+	 */
+	public static final int COLOR_DIAGONALE = -1;
+	/**
+	 * color code for games which did not take place.<br>
+	 * HeatChart MUST be in tournament mode to apply the color!
+	 */
+	public static final int COLOR_GAMENOTPLAYED = -2;
+	/**
+	 * color code for an analysis with a POSITIVE outcome.<br>
+	 * HeatChart MUST be in tournament mode to apply the color!
+	 */
+	public static final int COLOR_ANALYSISPOS = -3;
+	/**
+	 * color code for an analysis with a NEGATIVE outcome.<br>
+	 * HeatChart MUST be in tournament mode to apply the color!
+	 */
+	public static final int COLOR_ANALYSISNEG = -4;
 	
 	// x, y, z data values.
 	private double[][] zValues;
@@ -1735,12 +1757,18 @@ public class HeatChart { // based on JHeatChart v0.6
 			if (data == -2) { // games not played
 				return new Color(0, 255, 0);
 			}
+			if (data == -3) { // analysis positive
+				return new Color(0, 255, 0);
+			}
+			if (data == -4) { // analysis negative
+				return new Color(255, 0, 0);
+			}
 		}
 
 		return new Color(r, g, b);
 	}
 	
-	/*
+	/**
 	 * Returns how many colour shifts are required from the lowValueColour to 
 	 * get to the correct colour position. The result will be different 
 	 * depending on the colour scale used: LINEAR, LOGARITHMIC, EXPONENTIAL.
@@ -1781,10 +1809,26 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * @return the smallest value in the array.
 	 */
 	public static double min(double[][] values) {
+		return min(values, false);
+	}
+
+	/**
+	 * Finds and returns the minimum value in a 2-dimensional array of doubles but ignores non data fields in tournament mode (<0)
+	 *
+	 * @param modeTSEnabled toggle tournament mode for data interpretation
+	 * @return the smallest value in the array
+	 */
+	public static double min(double[][] values, boolean modeTSEnabled) {
 		double min = Double.MAX_VALUE;
 		for (int i=0; i<values.length; i++) {
 			for (int j=0; j<values[i].length; j++) {
-				min = (values[i][j] < min) ? values[i][j] : min;
+				if (!modeTSEnabled) {
+					min = (values[i][j] < min) ? values[i][j] : min;
+				} else {
+					if (values[i][j] >= 0) { // ignore non data fields
+						min = (values[i][j] < min) ? values[i][j] : min;
+					}
+				}
 			}
 		}
 		return min;

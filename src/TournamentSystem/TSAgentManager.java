@@ -5,6 +5,7 @@ import TournamentSystem.Scoring.Glicko2.Glicko2RatingCalculator;
 import TournamentSystem.Scoring.Glicko2.Glicko2RatingPeriodResults;
 import TournamentSystem.jheatchart.HeatChart;
 import TournamentSystem.tools.TSGameDataTransfer;
+import TournamentSystem.tools.TSHeatmapDataTransfer;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import games.Arena;
@@ -711,6 +712,7 @@ public class TSAgentManager {
             singlePlayerGame = true;
 
         TSResultWindow tsResultWindow = new TSResultWindow(startDate, singlePlayerGame);
+        TSHeatmapDataTransfer mTSHeatmapDataTransfer = new TSHeatmapDataTransfer();
         double[][] rowDataHM = null;
         NumberFormat numberFormat00 = new DecimalFormat("#0.00");
         NumberFormat numberFormat00000 = new DecimalFormat("#0.00000");
@@ -738,17 +740,17 @@ public class TSAgentManager {
                     if (i == j) { // main axis of agents playing against itself
                         rowData1[i][j + 1] = empty;
                         rowData3[i][j + 1] = empty;
-                        rowDataHM[i][j] = -1; // diagonale
+                        rowDataHM[i][j] = HeatChart.COLOR_DIAGONALE; // diagonale
                     } else {
                         int gameNum = getPosGamePlan(getIDAgentsSelected()[i],getIDAgentsSelected()[j], results.gamePlan); // position of game in gameplan
                         if (gameNum == -1) { // game not available
                             rowData1[i][j + 1] = noGame;
                             rowData3[i][j + 1] = noGame;
-                            rowDataHM[i][j] = -2; // not played
+                            rowDataHM[i][j] = HeatChart.COLOR_GAMENOTPLAYED; // not played
                         } else { // game was played
                             //int gameNum = getPosFullGamePlan(getIDAgentsSelected()[i], getIDAgentsSelected()[j]);
                             rowData1[i][j + 1] = "W:" + results.gameResult[gameNum][0] + " | T:" + results.gameResult[gameNum][1] + " | L:" + results.gameResult[gameNum][2];
-                            float score = 0;
+                            double score = 0;
                             score += results.gameResult[gameNum][0] * faktorWin;
                             score += results.gameResult[gameNum][1] * faktorTie;
                             score += results.gameResult[gameNum][2] * faktorLos;
@@ -785,7 +787,105 @@ public class TSAgentManager {
             map.setCellSize(new Dimension(25, 25));
             //map.setTitleFont();
             Image hm = map.getChartImage();
-            tsResultWindow.setHeatMap(new ImageIcon(hm));
+            //tsResultWindow.setHeatMap(new ImageIcon(hm));
+            mTSHeatmapDataTransfer.scoreHeatmap = new ImageIcon(hm);
+
+            /**
+             * Score Heatmap Analysis
+             */
+            // copy score heatmap data into seperate array
+            double[][] agentScoreHMData = new double[rowDataHM.length][rowDataHM[0].length];
+            for (int i = 0; i < rowDataHM.length; i++) {
+                System.arraycopy(rowDataHM[i], 0, agentScoreHMData[i], 0, rowDataHM[i].length);
+            }
+
+            /*
+            System.out.println("\nDEV ## Score Heatmap Analysis");
+            System.out.println("agentScoreHMData data:");
+            for (double[] d:agentScoreHMData)
+                System.out.println(Arrays.toString(d));
+                */
+
+            double minimum = HeatChart.min(agentScoreHMData, true); // lowest value in dataset (score)
+            double maximum = HeatChart.max(agentScoreHMData); // highest value in dataset (score)
+            //System.out.println("data min "+minimum+" max: "+maximum);
+            //System.out.println("data minNorm. "+normalize(minimum, minimum, maximum)+" max: "+normalize(maximum, minimum, maximum));
+
+            // convert score values to normalized values between 0 and 1
+            for (int i=0; i<agentScoreHMData.length; i++) {
+                for (int j=0; j<agentScoreHMData[0].length; j++) {
+                    if (agentScoreHMData[i][j]>=0) { // leave out -1 values, which mark the main diagonale
+                        agentScoreHMData[i][j] = normalize(agentScoreHMData[i][j], minimum, maximum);
+                    }
+                }
+            }
+            /*
+            System.out.println("agentScoreHMData data normalized:");
+            for (double[] d:agentScoreHMData)
+                System.out.println(Arrays.toString(d));
+                */
+
+            double[][] dataHMAnalysis1 = new double[agentScoreHMData.length][agentScoreHMData[0].length];
+            double[][] dataHMAnalysis2 = new double[agentScoreHMData.length][agentScoreHMData[0].length];
+            double[][] dataHMAnalysis3 = new double[agentScoreHMData.length][agentScoreHMData[0].length];
+            for (int i=0; i<agentScoreHMData.length; i++) {
+                for (int j=0; j<agentScoreHMData[0].length; j++) {
+                    if (i==j) {
+                        dataHMAnalysis1[i][j] = HeatChart.COLOR_DIAGONALE;
+                        dataHMAnalysis2[i][j] = HeatChart.COLOR_DIAGONALE;
+                        dataHMAnalysis3[i][j] = HeatChart.COLOR_DIAGONALE;
+                    } else {
+                        boolean both = true;
+
+                        // advanced analysis 1 - is Wab = Wba
+                        if (agentScoreHMData[i][j] == agentScoreHMData[j][i]) {
+                            dataHMAnalysis1[i][j] = HeatChart.COLOR_ANALYSISPOS;
+                        } else {
+                            dataHMAnalysis1[i][j] = HeatChart.COLOR_ANALYSISNEG;
+                            both = false;
+                        }
+
+                        // advanced analysis 2 - is Wab = 1-Wba
+                        if (agentScoreHMData[i][j] == 1-agentScoreHMData[j][i]) {
+                            dataHMAnalysis2[i][j] = HeatChart.COLOR_ANALYSISPOS;
+                        } else {
+                            dataHMAnalysis2[i][j] = HeatChart.COLOR_ANALYSISNEG;
+                            both = false;
+                        }
+
+                        // advanced analysis 3 - are both previous test true
+                        if (both) {
+                            dataHMAnalysis3[i][j] = HeatChart.COLOR_ANALYSISPOS;
+                        } else {
+                            dataHMAnalysis3[i][j] = HeatChart.COLOR_ANALYSISNEG;
+                        }
+                    }
+                }
+            }
+
+            HeatChart mapA1 = new HeatChart(dataHMAnalysis1, 0, 1, true);
+            mapA1.setXValues(getNamesAgentsSelected());
+            mapA1.setYValues(getNamesAgentsSelected());
+            mapA1.setCellSize(new Dimension(25, 25));
+            Image hmA1 = mapA1.getChartImage();
+            mTSHeatmapDataTransfer.scoreHeatmapA1 = new ImageIcon(hmA1);
+
+            HeatChart mapA2 = new HeatChart(dataHMAnalysis2, 0, 1, true);
+            mapA2.setXValues(getNamesAgentsSelected());
+            mapA2.setYValues(getNamesAgentsSelected());
+            mapA2.setCellSize(new Dimension(25, 25));
+            Image hmA2 = mapA2.getChartImage();
+            mTSHeatmapDataTransfer.scoreHeatmapA2 = new ImageIcon(hmA2);
+
+            HeatChart mapA3 = new HeatChart(dataHMAnalysis3, 0, 1, true);
+            mapA3.setXValues(getNamesAgentsSelected());
+            mapA3.setYValues(getNamesAgentsSelected());
+            mapA3.setCellSize(new Dimension(25, 25));
+            Image hmA3 = mapA3.getChartImage();
+            mTSHeatmapDataTransfer.scoreHeatmapA3 = new ImageIcon(hmA3);
+
+            //System.out.println("\nDEV ## Score Heatmap Analysis DONE");
+            //tsResultWindow.setHeatMap(mTSHeatmapDataTransfer); // moved below after creation of sorted heatmap
         }
 
         /**
@@ -979,7 +1079,9 @@ public class TSAgentManager {
             map2.setYValues(agentNamesY);
             map2.setCellSize(new Dimension(25, 25));
             Image hm2 = map2.getChartImage();
-            tsResultWindow.setHeatMapSorted(new ImageIcon(hm2));
+            //tsResultWindow.setHeatMapSorted(new ImageIcon(hm2));
+            mTSHeatmapDataTransfer.scoreHeatmapSorted = new ImageIcon(hm2);
+            tsResultWindow.setHeatMap(mTSHeatmapDataTransfer);
         }
 
         /**
@@ -1313,6 +1415,30 @@ public class TSAgentManager {
             median = medianTimes[medianTimes.length/2];
 
         return median;
+    }
+
+    /**
+     * normalize a double value in a range to the range 0 to 1
+     * @param data value to be normalized
+     * @param dataLow lower limit of data
+     * @param dataHigh upper limit of data
+     * @return normalized value
+     */
+    public double normalize(double data, double dataLow, double dataHigh) {
+        return normalize(data, dataLow, dataHigh, 0, 1);
+    }
+
+    /**
+     * normalize a double value in a range and specifie the range it should be normalized to
+     * @param data value to be normalized
+     * @param dataLow lower limit of data
+     * @param dataHigh upper limit of data
+     * @param normalizedLow lower limit of normalization
+     * @param normalizedHigh upper limit of normalization
+     * @return normalized value
+     */
+    public double normalize(double data, double dataLow, double dataHigh, double normalizedLow, double normalizedHigh) {
+        return ((data - dataLow) / (dataHigh - dataLow)) * (normalizedHigh - normalizedLow) + normalizedLow;
     }
 
     public StateObservation getNextStartState() {
