@@ -706,7 +706,7 @@ public class TSAgentManager {
             return;
         }
 
-        String startDate = results.startDate+" | Matches: "+results.gamePlan.length+" | Games per Match: "+results.numberOfGames+" | Random Startmoves: "+results.numberOfRandomStartMoves;
+        String startDate = results.startDate+" | Matches: "+results.gamePlan.length+" | Games per Match: "+results.numberOfGames+" | Random Start Moves: "+results.numberOfRandomStartMoves;
         boolean singlePlayerGame = false;
         if (numPlayers==1)
             singlePlayerGame = true;

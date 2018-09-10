@@ -102,7 +102,7 @@ public class TSResultWindow extends JFrame {
      * @param singlePlayerGame boolean if the game is a 1 player game
      */
     public TSResultWindow(String startDate, boolean singlePlayerGame) {
-        super("Turnier Ergebnisse");
+        super("Tournament Results");
 
         $$$setupUI$$$();
 
@@ -674,7 +674,7 @@ public class TSResultWindow extends JFrame {
         heatmapJLadv3.setText("heatmapJLadv3");
         jspHMadv3.setViewportView(heatmapJLadv3);
         heatmapJLadv3Title = new JLabel();
-        heatmapJLadv3Title.setText("Is Is Wab = Wba AND Wab = 1-Wba true?");
+        heatmapJLadv3Title.setText("Is Wab = Wba AND Wab = 1-Wba true?");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 11;

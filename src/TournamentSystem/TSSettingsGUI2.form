@@ -192,7 +192,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Number of moves:"/>
+          <text value="Number of moves (ply):"/>
         </properties>
       </component>
       <vspacer id="311bd">
