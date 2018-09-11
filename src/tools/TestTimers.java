@@ -11,16 +11,19 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 
 /**
- *  A test class: Given class Items with a key and a value, we want to check in 
- *  a set of Items whether it contains an item which is the same as a certain Item.
- *  The sameness shall be user-defined (in this case: equality of keys)
+ *  A test class for different ways to measure time in Java
  *  
- *  Optional: Test a linked list (function testLinkedList)
- *
  */
 public class TestTimers {
 	
-
+	// approximate duration 60 microsec on my laptop
+	public static void doSomethingLong() {
+    	double sum=0.0;
+    	long NN=60000;
+    	for (long i=0; i<NN; i++)
+    		sum=sum+Math.sqrt(Math.abs(Math.sin(0.3)));		
+	}
+	
     public static void main(String[] args) throws IOException
     {
     	ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
@@ -29,11 +32,10 @@ public class TestTimers {
     	long startTNanoInstant = Instant.now().getNano();
     	long startTNano = System.nanoTime();
     	
-    	long NN=100000;
-    	double dummy;
-    	double sum=0.0;
-    	for (long i=0; i<NN; i++)
-    		sum=sum+Math.sqrt(Math.abs(Math.sin(0.3)));
+    	long N=1000;
+    	for (long i=0; i<N; i++) 
+    		doSomethingLong();
+    			
     	
     	// the following time enters System.nanoTime, Instant.* but NOT threadMXBean-time 
     	// (the current thread sleeps, so it does not get the time passing by added)
@@ -53,7 +55,7 @@ public class TestTimers {
     	System.out.println(startTNanoThread+","+endTNanoThread);
     	System.out.println(startTNanoInstant+","+endTNanoInstant);
     	long offset = 0;
-    	System.out.println("Nanos per op: "+((double)(endTNano-startTNano-offset))/NN);
+    	System.out.println("Micros per op: "+((double)(endTNano-startTNano-offset))/(N*1000));
     	
 
     }
