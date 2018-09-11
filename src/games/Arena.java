@@ -652,7 +652,7 @@ abstract public class Arena extends JFrame implements Runnable {
 							gb.updateBoard(so, false, showValue);
 						} else {
 							gb.updateBoard(so, false, false);
-							System.out.println(so);
+							//System.out.println(so);
 						}
 
 						// gather information for later printout to
