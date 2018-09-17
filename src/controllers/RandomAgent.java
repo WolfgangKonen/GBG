@@ -1,17 +1,11 @@
 package controllers;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import games.StateObservation;
-import games.TicTacToe.StateObserverTTT;
-import params.ParMC;
 import params.ParOther;
 import tools.Types;
 
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * the Random {@link PlayAgent} for TicTacToe 
@@ -19,23 +13,28 @@ import tools.Types;
  * @author Wolfgang Konen, TH Köln, Nov'16
  * 
  */
-public class RandomAgent extends AgentBase implements PlayAgent
-{
+public class RandomAgent extends AgentBase implements PlayAgent {
 	private Random rand;
 	private int[][] m_trainTable=null;
 	private double[][] m_deltaTable=null;
 		
-	public RandomAgent(String name)
-	{
+	public RandomAgent(String name) {
 		super(name);
 		super.setMaxGameNum(1000); 		
 		super.setGameNum(0); 			
         rand = new Random(System.currentTimeMillis());
 		setAgentState(AgentState.TRAINED);
 	}
+
+	public RandomAgent(String name, long randomSeed) {
+		super(name);
+		super.setMaxGameNum(1000);
+		super.setGameNum(0);
+		rand = new Random(randomSeed);
+		setAgentState(AgentState.TRAINED);
+	}
 		
-    public RandomAgent(String name, ParOther oPar)
-    {
+    public RandomAgent(String name, ParOther oPar) {
         super(name);
 		super.setMaxGameNum(1000); 		
 		super.setGameNum(0); 			

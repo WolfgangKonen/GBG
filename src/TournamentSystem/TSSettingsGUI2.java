@@ -268,7 +268,8 @@ public class TSSettingsGUI2 extends JFrame {
             @Override
             public void stateChanged(ChangeEvent e) {
                 //System.out.println(variableDoubleRoundRobinRadioButton.isSelected());
-                updateSliderAndLabel();
+                if (mTSAgentManager.getNumAgentsSelected() > numPlayers)
+                    updateSliderAndLabel();
                 variableDRRInfoLabel.setVisible(variableDoubleRoundRobinRadioButton.isSelected()); //todo not very efficient code, called too often
             }
         });
@@ -287,8 +288,7 @@ public class TSSettingsGUI2 extends JFrame {
             if (newMinimum != variableDRoundRobinSlider.getMinimum()) { // avoid accessing the slider too often
                 variableDRoundRobinSlider.setMinimum(newMinimum); // just change when the values really changed
             }
-        }
-        else {
+        } else {
             if (variableDRoundRobinSlider.getMinimum() != 0) {
                 variableDRoundRobinSlider.setMinimum(0);
             }
@@ -661,7 +661,7 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(numOfMovesTextField, gbc);
         final JLabel label3 = new JLabel();
-        label3.setText("Number of moves:");
+        label3.setText("Number of moves (ply):");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 34;

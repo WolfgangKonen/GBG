@@ -381,7 +381,7 @@ public class TSResultWindow extends JFrame {
         mJPanel = new JPanel();
         mJPanel.setLayout(new GridBagLayout());
         tableWTLLabel = new JLabel();
-        tableWTLLabel.setText("<html><body><strong>Table with Win, Tie, Loss (WTL) Results</strong><br>\nRow agent plays against the column agent<br>\nWin and loss are from the row agents perspective</body></html>");
+        tableWTLLabel.setText("<html><body><strong>Table with Win, Tie, Loss (WTL) Results</strong><br>\nRow agent (1st) plays against the column agent (2nd)<br>\nWin and loss are from the row agents perspective</body></html>");
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -396,7 +396,7 @@ public class TSResultWindow extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(tableSCRLabel, gbc);
         heatmapH1JL = new JLabel();
-        heatmapH1JL.setText("<html><body><strong>Heatmap visualisation of game scores</strong><br>\nwhite = worst | black = best score<br>\nblue = agent against itself<br>\ngreen = game was not played in specific tournament mode<br>\nrow agent plays against the column agent</body></html>");
+        heatmapH1JL.setText("<html><body><strong>Heatmap visualisation of game scores</strong><br>\nwhite = worst | black = best score<br>\nblue = agent against itself<br>\ngreen = game was not played in specific tournament mode<br>\nrow agent (1st) plays against the column agent (2nd)</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 8;

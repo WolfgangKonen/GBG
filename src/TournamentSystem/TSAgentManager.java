@@ -495,13 +495,15 @@ public class TSAgentManager {
 
             if (results.numberOfRandomStartMoves>0) {
                 System.out.println(TAG+"Calculation Random Start Moves...");
-                RandomAgent raX = new RandomAgent("Random Agent X");
+                long rnd = getRandomInt(111111,9999999)*1234567890;
+                //System.out.println("DEVDEV:: "+rnd);
+                RandomAgent raX = new RandomAgent("Random Agent X", rnd);
 
                 for (int i = 0; i < results.numberOfRandomStartMoves; i++) {
                     randomStartStates[game].advance(raX.getNextAction2(randomStartStates[game], false, true));
                 }
 
-                try { Thread.sleep(200); } catch (InterruptedException e) { e.printStackTrace(); }
+                //try { Thread.sleep(200); } catch (InterruptedException e) { e.printStackTrace(); } // replaced by externally set random seed in new random agent constructor
             }
         }
 
@@ -1148,10 +1150,10 @@ public class TSAgentManager {
                 "Game",
                 "Filename",
                 "Agent Typ",
-                "fastest turn",
-                "slowest turn",
-                "average draw",
-                "median draw",
+                "fastest move",
+                "slowest move",
+                "average move",
+                "median move",
                 "average round",
                 "median round"
         };
@@ -1213,10 +1215,10 @@ public class TSAgentManager {
                 "Agent",
                 "Filename",
                 "Agent Typ",
-                "fastest turn",
-                "slowest turn",
-                "average draw",
-                "median draw",
+                "fastest move",
+                "slowest move",
+                "average move",
+                "median move",
                 "average round",
                 "median round"
         };
