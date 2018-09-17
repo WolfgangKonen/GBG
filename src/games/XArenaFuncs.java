@@ -803,19 +803,37 @@ public class XArenaFuncs
 			int Player = Types.PLAYER_PM[startSO.getPlayer()];
 			so = startSO.copy();
 
+			//ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+			//System.out.println("threadMXBean.isCurrentThreadCpuTimeSupported() "+threadMXBean.isCurrentThreadCpuTimeSupported());
+
 			while(true) {
 				if(Player==1){		// make a X-move
 					int n = so.getNumAvailableActions();
 
 					//long startT = System.currentTimeMillis();
+					//StopWatch stopwatch = new StopWatch(); // teil des apache common lang3 pakets - verwendet intern aber auch nur System.nanoTime()
+					//stopwatch.start();
 					long startTNano = System.nanoTime();
+					//long startTNanoThread = threadMXBean.getCurrentThreadCpuTime();
+					//long startTNanoInstant = Instant.now().getNano();
+					//long startTNanoInstant = Instant.now().toEpochMilli();
+
 					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
 					//long endT = System.currentTimeMillis();
+					//stopwatch.stop();
 					long endTNano = System.nanoTime();
+					//long endTNanoThread = threadMXBean.getCurrentThreadCpuTime();
+					//long endTNanoInstant = Instant.now().getNano(); // ca selbe ergebnis wie System.nanoTime
+					//long endTNanoInstant = Instant.now().toEpochMilli(); // bei zeiten <1ms eigentlich immer 0
 					// Debug Printlines
 					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
 					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
 					nextTimes[0].addNewTimeNS(endTNano-startTNano);
+					//System.out.println("Time nanoTime:::: "+ (endTNano-startTNano)+"ns = "+ timeDiffNStoMS(startTNano,endTNano)+"ms");
+					//System.out.println("Time ThreadNano:: "+ (endTNanoThread-startTNanoThread)+"ns = "+ timeDiffNStoMS(startTNanoThread,endTNanoThread)+"ms");
+					//System.out.println("Time InstantNano: "+ (endTNanoInstant-startTNanoInstant)+"ns = "+ timeDiffNStoMS(startTNanoInstant,endTNanoInstant)+"ms");
+					//System.out.println("Time StWatchNano: "+ (stopwatch.getNanoTime())+"ns = "+ timeNStoMS(stopwatch.getNanoTime())+"ms");
+					//System.out.println("-----------------");
 
 					so.advance(actBest);
 					Player = -1;
@@ -873,6 +891,17 @@ public class XArenaFuncs
 
 		return winrate;
 	} // competeTS
+
+	private static double timeDiffNStoMS(long startT, long endT) {
+		double s = startT;
+		double e = endT;
+		double r = e - s;
+		return r/1000000;
+	}
+	private static double timeNStoMS(long startT) {
+		double r = startT;
+		return r/1000000;
+	}
 	
 	/**
 	 * Does the main work for menu items 'Single Compete', 'Swap Compete' and 'Compete Both'.
