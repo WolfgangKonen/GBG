@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="TournamentSystem.TSResultWindow">
   <grid id="27dc6" binding="mJPanel" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="809" height="1280"/>
+      <xy x="20" y="20" width="809" height="1672"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -340,7 +340,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Is Wab = Wba true? | green=yes ; red=no"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Heatmap Is W&lt;sub&gt;ab&lt;/sub&gt; = W&lt;sub&gt;ba&lt;/sub&gt; True?&lt;/strong&gt;&lt;br&gt;&#10;green = yes | light grey = almost | black = NO&lt;br&gt;&#10;blue = agent against itself&lt;br&gt;&#10;row agent (1st) plays against the column agent (2nd)&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
       <scrollpane id="11794" binding="jspHMadv2">
@@ -365,7 +365,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Is Wab = 1-Wba true?"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Heatmap Is W&lt;sub&gt;ab&lt;/sub&gt; = 1-W&lt;sub&gt;ba&lt;/sub&gt; true?&lt;/strong&gt;&lt;br&gt;&#10;green = yes | light grey = almost | black = NO&lt;br&gt;&#10;blue = agent against itself&lt;br&gt;&#10;row agent (1st) plays against the column agent (2nd)&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
       <scrollpane id="70e5" binding="jspHMadv3">
@@ -390,7 +390,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Is Wab = Wba AND Wab = 1-Wba true?"/>
+          <text value="&lt;html&gt;&lt;body&gt;&lt;strong&gt;Heatmap Is W&lt;sub&gt;ab&lt;/sub&gt; = W&lt;sub&gt;ba&lt;/sub&gt; AND W&lt;sub&gt;ab&lt;/sub&gt; = 1-W&lt;sub&gt;ba&lt;/sub&gt; true?&lt;/strong&gt;&lt;br&gt;&#10;green = yes | red = NO&lt;br&gt;&#10;blue = agent against itself&lt;br&gt;&#10;row agent (1st) plays against the column agent (2nd)&lt;/body&gt;&lt;/html&gt;"/>
         </properties>
       </component>
     </children>

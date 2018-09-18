@@ -642,7 +642,7 @@ public class TSResultWindow extends JFrame {
         heatmapJLadv1.setText("heatmapJLadv1");
         jspHMadv1.setViewportView(heatmapJLadv1);
         heatmapJLadv1Title = new JLabel();
-        heatmapJLadv1Title.setText("Is Wab = Wba true? | green=yes ; red=no");
+        heatmapJLadv1Title.setText("<html><body><strong>Heatmap Is W<sub>ab</sub> = W<sub>ba</sub> True?</strong><br>\ngreen = yes | light grey = almost | black = NO<br>\nblue = agent against itself<br>\nrow agent (1st) plays against the column agent (2nd)</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 11;
@@ -658,7 +658,7 @@ public class TSResultWindow extends JFrame {
         heatmapJLadv2.setText("heatmapJLadv2");
         jspHMadv2.setViewportView(heatmapJLadv2);
         heatmapJLadv2Title = new JLabel();
-        heatmapJLadv2Title.setText("Is Wab = 1-Wba true?");
+        heatmapJLadv2Title.setText("<html><body><strong>Heatmap Is W<sub>ab</sub> = 1-W<sub>ba</sub> true?</strong><br>\ngreen = yes | light grey = almost | black = NO<br>\nblue = agent against itself<br>\nrow agent (1st) plays against the column agent (2nd)</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
         gbc.gridy = 11;
@@ -674,7 +674,7 @@ public class TSResultWindow extends JFrame {
         heatmapJLadv3.setText("heatmapJLadv3");
         jspHMadv3.setViewportView(heatmapJLadv3);
         heatmapJLadv3Title = new JLabel();
-        heatmapJLadv3Title.setText("Is Wab = Wba AND Wab = 1-Wba true?");
+        heatmapJLadv3Title.setText("<html><body><strong>Heatmap Is W<sub>ab</sub> = W<sub>ba</sub> AND W<sub>ab</sub> = 1-W<sub>ba</sub> true?</strong><br>\ngreen = yes | red = NO<br>\nblue = agent against itself<br>\nrow agent (1st) plays against the column agent (2nd)</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 11;

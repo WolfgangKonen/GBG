@@ -842,16 +842,20 @@ public class TSAgentManager {
                         // advanced analysis 1 - is Wab = Wba
                         if (agentScoreHMData[i][j] == agentScoreHMData[j][i]) {
                             dataHMAnalysis1[i][j] = HeatChart.COLOR_ANALYSISPOS;
+                            //dataHMAnalysis1[i][j] = Math.abs(agentScoreHMData[i][j] - agentScoreHMData[j][i]);
                         } else {
-                            dataHMAnalysis1[i][j] = HeatChart.COLOR_ANALYSISNEG;
+                            //dataHMAnalysis1[i][j] = HeatChart.COLOR_ANALYSISNEG;
+                            dataHMAnalysis1[i][j] = Math.abs(agentScoreHMData[i][j] - agentScoreHMData[j][i]);
                             both = false;
                         }
 
                         // advanced analysis 2 - is Wab = 1-Wba
                         if (agentScoreHMData[i][j] == 1-agentScoreHMData[j][i]) {
                             dataHMAnalysis2[i][j] = HeatChart.COLOR_ANALYSISPOS;
+                            //dataHMAnalysis2[i][j] = Math.abs(agentScoreHMData[i][j] - (1-agentScoreHMData[j][i]));
                         } else {
-                            dataHMAnalysis2[i][j] = HeatChart.COLOR_ANALYSISNEG;
+                            //dataHMAnalysis2[i][j] = HeatChart.COLOR_ANALYSISNEG;
+                            dataHMAnalysis2[i][j] = Math.abs(agentScoreHMData[i][j] - (1-agentScoreHMData[j][i]));
                             both = false;
                         }
 
