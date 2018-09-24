@@ -708,7 +708,7 @@ public class TSAgentManager {
             return;
         }
 
-        String startDate = results.startDate+" | Matches: "+results.gamePlan.length+" | Games per Match: "+results.numberOfGames+" | Random Start Moves: "+results.numberOfRandomStartMoves;
+        String startDate = results.startDate+" | Matches: "+results.gamePlan.length+" | Episodes per Match: "+results.numberOfGames+" | Random Start Moves: "+results.numberOfRandomStartMoves;
         boolean singlePlayerGame = false;
         if (numPlayers==1)
             singlePlayerGame = true;
@@ -1159,8 +1159,8 @@ public class TSAgentManager {
                 "slowest move",
                 "average move",
                 "median move",
-                "average round",
-                "median round"
+                "average episode",
+                "median episode"
         };
 
         // detailed time table
@@ -1224,8 +1224,8 @@ public class TSAgentManager {
                 "slowest move",
                 "average move",
                 "median move",
-                "average round",
-                "median round"
+                "average episode",
+                "median episode"
         };
 
         // simplified time data
