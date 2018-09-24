@@ -1138,7 +1138,8 @@ public class TSAgentManager {
         plot.setBackgroundPaint(new Color(180, 180, 180));
         //To change the lower bound of X-axis
         NumberAxis xAxis = (NumberAxis) plot.getDomainAxis();
-        xAxis.setLowerBound(-1); // show x axis from -1 to move marker away from axis
+        //xAxis.setLowerBound(-1); // show x axis from -1 to move marker away from axis
+        xAxis.setLowerBound(-1*dataset.getDomainUpperBound(false)*0.02); // draw x axis from -2% to the left of total width to move marker at 0 away from y axis
 
         tsResultWindow.setScatterPlotASvT(scatterPlot);
 
