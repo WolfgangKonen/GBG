@@ -15,8 +15,14 @@ import java.util.Random;
  */
 public class RandomAgent extends AgentBase implements PlayAgent {
 	private Random rand;
-	private int[][] m_trainTable=null;
-	private double[][] m_deltaTable=null;
+	private int[][] m_trainTable = null;
+	private double[][] m_deltaTable = null;
+	/**
+	 * change the version ID for serialization only if a newer version is no longer
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 12L;
 		
 	public RandomAgent(String name) {
 		super(name);
@@ -49,7 +55,7 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 	 * 
 	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent
+	 * @param silent		execute silently without outputs
 	 * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
