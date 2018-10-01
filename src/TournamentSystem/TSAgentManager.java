@@ -1107,9 +1107,13 @@ public class TSAgentManager {
                 for (int cpl=0; cpl<results.timeStorage[0].length; cpl++) { // hin+rückrunde
                     for (int agt=0; agt<numPlayers; agt++) { // agent 1+2
                         if (results.gamePlan[gms][cpl] == selectedAgents2[i]) {
-                            double medianRoundTimeMS = results.timeStorage[gms][cpl].getMedianRoundTimeMS();
-                            if (medianRoundTimeMS > -1) // avoid missing measurements marked with -1 value
-                                medianTimes.add(medianRoundTimeMS);
+                            if (numPlayers > 1) {
+                                double medianRoundTimeMS = results.timeStorage[gms][cpl].getMedianRoundTimeMS();
+                                if (medianRoundTimeMS > -1) // avoid missing measurements marked with -1 value
+                                    medianTimes.add(medianRoundTimeMS);
+                            } else {
+                                medianTimes.add(results.timeStorage[gms][cpl].getMedianTimeForGameMS());
+                            }
                         }
                     }
                 }
@@ -1127,11 +1131,15 @@ public class TSAgentManager {
         }
 
         // Create chart
-        String scplYAxis = "Agent Score [WTL]";
-        if (singlePlayerGame)
+        String scplXAxis = "Median Round Time [ms]"; // X Axis Label
+        String scplYAxis = "Agent Score [WTL]"; // Y Axis Label
+
+        if (singlePlayerGame) {
+            scplXAxis = "Median Move Time [ms]";
             scplYAxis = "average Agent Game Score";
-        JFreeChart scatterPlot = ChartFactory.createScatterPlot(
-                "", "Median Round Time [ms]", scplYAxis, dataset);
+        }
+
+        JFreeChart scatterPlot = ChartFactory.createScatterPlot("", scplXAxis, scplYAxis, dataset);
 
         //Changes background color
         XYPlot plot = (XYPlot)scatterPlot.getPlot();
