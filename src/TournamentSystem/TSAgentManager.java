@@ -708,7 +708,17 @@ public class TSAgentManager {
             return;
         }
 
-        String startDate = results.startDate+" | Matches: "+results.gamePlan.length+" | Episodes per Match: "+results.numberOfGames+" | Random Start Moves: "+results.numberOfRandomStartMoves;
+        NumberFormat numberFormat0 = new DecimalFormat("#0.0");
+        NumberFormat numberFormat00 = new DecimalFormat("#0.00");
+        NumberFormat numberFormat000 = new DecimalFormat("#0.000");
+        NumberFormat numberFormat0000 = new DecimalFormat("#0.0000");
+        NumberFormat numberFormat00000 = new DecimalFormat("#0.00000");
+
+        String startDate = results.startDate+" | Matches: "+results.gamePlan.length
+                +" | Episodes per Match: "+results.numberOfGames
+                +" | Random Start Moves: "+results.numberOfRandomStartMoves
+                +" | Duration: "+numberFormat000.format(results.getTSTotalPlayTimeS())+"[s] = "
+                +numberFormat00.format(results.getTSTotalPlayTimeS()/60)+"[min]";
         boolean singlePlayerGame = false;
         if (numPlayers==1)
             singlePlayerGame = true;
@@ -716,8 +726,6 @@ public class TSAgentManager {
         TSResultWindow tsResultWindow = new TSResultWindow(startDate, singlePlayerGame);
         TSHeatmapDataTransfer mTSHeatmapDataTransfer = new TSHeatmapDataTransfer();
         double[][] rowDataHM = null;
-        NumberFormat numberFormat00 = new DecimalFormat("#0.00");
-        NumberFormat numberFormat00000 = new DecimalFormat("#0.00000");
 
         if (numPlayers>1) {
             // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
@@ -1131,7 +1139,7 @@ public class TSAgentManager {
         }
 
         // Create chart
-        String scplXAxis = "Median Round Time [ms]"; // X Axis Label
+        String scplXAxis = "Median Match Time [ms]"; // X Axis Label
         String scplYAxis = "Agent Score [WTL]"; // Y Axis Label
 
         if (singlePlayerGame) {
@@ -1168,7 +1176,10 @@ public class TSAgentManager {
                 "average move",
                 "median move",
                 "average episode",
-                "median episode"
+                "median episode",
+                "total time",
+                "average move count",
+                "median move count"
         };
 
         // detailed time table
@@ -1218,7 +1229,13 @@ public class TSAgentManager {
                 rowDataTimeDetail[pos][8] = numberFormat00000.format(results.timeStorage[i][j].getMedianRoundTimeMS());
                 if (results.timeStorage[i][j].getMedianRoundTimeMS()>0)
                     timeHelper.medianRoundTimeMS.add(results.timeStorage[i][j].getMedianRoundTimeMS());
-
+                // "total time"
+                rowDataTimeDetail[pos][9] = numberFormat00000.format(results.timeStorage[i][j].getTotalTimeMS());
+                timeHelper.totalPlayTimeMS += results.timeStorage[i][j].getTotalTimeMS();
+                // "average move count",
+                rowDataTimeDetail[pos][10] = results.timeStorage[i][j].getAverageCountOfMovesPerEpisode();
+                // "median move count",
+                rowDataTimeDetail[pos][11] = results.timeStorage[i][j].getMedianCountOfMovesPerEpisode();
                 pos++;
             }
         }
@@ -1233,7 +1250,8 @@ public class TSAgentManager {
                 "average move",
                 "median move",
                 "average episode",
-                "median episode"
+                "median episode",
+                "total time"
         };
 
         // simplified time data
@@ -1262,6 +1280,8 @@ public class TSAgentManager {
             rowDataTimeSimple[i][7] = numberFormat00000.format(calculateMedian(timeHelper.averageRoundTimeMS));
             // "median Zeit Runde"
             rowDataTimeSimple[i][8] = numberFormat00000.format(calculateMedian(timeHelper.medianRoundTimeMS));
+            // "total play time"
+            rowDataTimeSimple[i][9] = numberFormat000.format(timeHelper.totalPlayTimeMS);
         }
 
         //create table with data
@@ -1512,6 +1532,7 @@ public class TSAgentManager {
         public ArrayList<Double> medianTimeForGameMS = new ArrayList<>();
         public ArrayList<Double> averageRoundTimeMS = new ArrayList<>();
         public ArrayList<Double> medianRoundTimeMS = new ArrayList<>();
+        public double totalPlayTimeMS = 0;
 
         public TSSimpleTimeTableHelper(int agentID) {
             this.agentID = agentID;

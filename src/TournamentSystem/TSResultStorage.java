@@ -51,4 +51,22 @@ public class TSResultStorage implements Serializable {
             a.resetScore();
         }
     }
+
+    public double getTSTotalPlayTimeMS() {
+        if (timeStorage == null)
+            return -1;
+        double time = 0;
+
+        for (TSTimeStorage[] tst : timeStorage) {
+            for (TSTimeStorage st : tst) {
+                time += st.getTotalTimeMS();
+            }
+        }
+
+        return time;
+    }
+
+    public double getTSTotalPlayTimeS() {
+        return getTSTotalPlayTimeMS()/(1*Math.pow(10,3));
+    }
 }
