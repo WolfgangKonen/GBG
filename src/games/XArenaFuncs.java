@@ -807,6 +807,7 @@ public class XArenaFuncs
 			//System.out.println("threadMXBean.isCurrentThreadCpuTimeSupported() "+threadMXBean.isCurrentThreadCpuTimeSupported());
 
 			while(true) {
+				System.out.print("#"); // simple progressbar so user knows something is happening
 				if(Player==1){		// make a X-move
 					int n = so.getNumAvailableActions();
 
@@ -856,6 +857,7 @@ public class XArenaFuncs
 					Player = +1;
 				}
 				if (so.isGameOver()) {
+					System.out.println(); // make new line to not put text at end of ##### progressbar (1st line of while)
 					int res = so.getGameWinner().toInt();
 					//  res is +1/0/-1  for X/tie/O win
 					int player = Types.PLAYER_PM[so.getPlayer()];
