@@ -272,7 +272,20 @@ abstract public class Arena extends JFrame implements Runnable {
 						int[] progress = tournamentAgentManager.getTSProgress();
 						tsProgressBar.setValue(progress[0]);
 						System.out.println(TAG+"TS Progress "+ Arrays.toString(progress));
-					}
+					}/*
+					if (nextTeam[0].getAgentType().contains("Minimax") ||
+							nextTeam[1].getAgentType().contains("Minimax") ||
+							nextTeam[0].getAgentType().contains("MaxN") ||
+							nextTeam[1].getAgentType().contains("MaxN") ) { // is one a minimax or a maxn agent?
+						try {
+							System.out.println(TAG+"Pause to breathe...");
+							Thread.sleep(2500);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					} /*else {
+						System.out.println(TAG + "Agents played - A1:"+nextTeam[0].getAgentType()+" A2:"+nextTeam[1].getAgentType());
+					}*/
 				}
 				progressBarJF.dispatchEvent(new WindowEvent(progressBarJF, WindowEvent.WINDOW_CLOSING)); // close progressbar window
 				//tournamentAgentManager.printGameResults(); // print some stats to the console

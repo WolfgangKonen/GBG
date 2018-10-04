@@ -21,6 +21,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -797,6 +799,8 @@ public class XArenaFuncs
 			System.out.println("RandomStartState: "+startSO);
 		}
 		*/
+		String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
+		System.out.println("Episode Start @ "+currDateTime);
 		System.out.println("(Random)StartState: "+startSO);
 
 		for (int k=0; k<competeNum; k++) { // ist im TS immer 1
