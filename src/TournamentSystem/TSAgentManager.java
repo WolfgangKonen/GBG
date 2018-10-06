@@ -716,9 +716,11 @@ public class TSAgentManager {
 
         String startDate = results.startDate+" | Matches: "+results.gamePlan.length
                 +" | Episodes per Match: "+results.numberOfGames
-                +" | Random Start Moves: "+results.numberOfRandomStartMoves
+                +" | Random Start Moves: "+results.numberOfRandomStartMoves/*
                 +" | Duration: "+numberFormat000.format(results.getTSTotalPlayTimeS())+"[s] = "
-                +numberFormat00.format(results.getTSTotalPlayTimeS()/60)+"[min]";
+                +numberFormat00.format(results.getTSTotalPlayTimeS()/60.0)+"[min]";*/
+                +" | Duration: "+numberFormat000.format(results.durationTSMS/1000.0)+"[s] = "
+                +numberFormat00.format(results.durationTSMS/60000.0)+"[min]";
         boolean singlePlayerGame = false;
         if (numPlayers==1)
             singlePlayerGame = true;

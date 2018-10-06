@@ -10,7 +10,6 @@ import controllers.HumanPlayer;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
-import controllers.RandomAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -248,6 +247,8 @@ abstract public class Arena extends JFrame implements Runnable {
 				progressBarJF.add(progressBarJP);
 				progressBarJF.setVisible(true);
 
+				long start = System.currentTimeMillis();
+
 				while (tournamentAgentManager.hastNextGame()) {
 					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
 					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
@@ -266,7 +267,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					}
 					else {
 						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
-						System.gc(); // call to keep system memory usage low
+						//System.gc(); // call to keep system memory usage low but creates MASSIVE time delays every episode
 
 						// progressbar
 						int[] progress = tournamentAgentManager.getTSProgress();
@@ -287,6 +288,10 @@ abstract public class Arena extends JFrame implements Runnable {
 						System.out.println(TAG + "Agents played - A1:"+nextTeam[0].getAgentType()+" A2:"+nextTeam[1].getAgentType());
 					}*/
 				}
+
+				long end = System.currentTimeMillis();
+				tournamentAgentManager.results.durationTSMS = end - start;
+
 				progressBarJF.dispatchEvent(new WindowEvent(progressBarJF, WindowEvent.WINDOW_CLOSING)); // close progressbar window
 				//tournamentAgentManager.printGameResults(); // print some stats to the console
 

@@ -67,7 +67,7 @@ public class TSTimeStorage implements Serializable {
      * get the total time of all episodes moves from this agent in this match
      * @return amount of time in nanoseconds
      */
-    public double getTotalTimeNS() {
+    public long getTotalTimeNS() {
         long total = 0;
         for (long l : measuredTimesInNS)
             total += l;
@@ -77,8 +77,11 @@ public class TSTimeStorage implements Serializable {
      * get the total time of all episodes moves from this agent in this match
      * @return amount of time in milliseconds
      */
-    public double getTotalTimeMS() {
-        return nanoToMS(getTotalTimeNS());
+    public long getTotalTimeMS() {
+        long total = 0;
+        for (long l : measuredTimesInNS)
+            total += nanoToMS(l);
+        return total;
     }
 
     public double getTotalTimeS() {
