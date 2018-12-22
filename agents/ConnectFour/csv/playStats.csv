@@ -1,5 +1,5 @@
-controllers.MC.MCAgentN: iterations:1000, rollout depth:20, # agents:1
-controllers.MC.MCAgentN:
+controllers.TD.ntuple2.TDNTuple2Agt: USESYMMETRY:true, NORMALIZE:false, sigmoid:tanh, lambda:0.6, horizon:14, AFTERSTATE:false, learnFromRM: false
+controllers.TD.ntuple2.TDNTuple2Agt: alpha_init->final:0.5->0.5, epsilon_init->final:0.1->0.1, gamma: 1.0, MODE_3P: 2
 run, moveNum, gameScore, nEmptyTile, cumEmptyTl
 1, 1, 0, 0, 0
 1, 2, 0, 0, 0
@@ -21,25 +21,3 @@ run, moveNum, gameScore, nEmptyTile, cumEmptyTl
 1, 18, 0, 0, 0
 1, 19, 0, 0, 0
 1, 20, 0, 0, 0
-1, 21, 0, 0, 0
-1, 22, 0, 0, 0
-1, 23, 0, 0, 0
-1, 24, 0, 0, 0
-1, 25, 0, 0, 0
-1, 26, 0, 0, 0
-1, 27, 0, 0, 0
-1, 28, 0, 0, 0
-1, 29, 0, 0, 0
-1, 30, 0, 0, 0
-1, 31, 0, 0, 0
-1, 32, 0, 0, 0
-1, 33, 0, 0, 0
-1, 34, 0, 0, 0
-1, 35, 0, 0, 0
-1, 36, 0, 0, 0
-1, 37, 0, 0, 0
-1, 38, 0, 0, 0
-1, 39, 0, 0, 0
-1, 40, 0, 0, 0
-1, 41, 0, 0, 0
-1, 42, 0, 0, 0

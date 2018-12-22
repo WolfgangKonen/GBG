@@ -40,7 +40,6 @@ public class ZValueMulti implements ZValue {
     	StateObservation refer2 = refer; 
         double kappa = 1.0;
     			
-    	// --- this is now handled in getNextAction3 directly ---
 		if (tdnt.randomSelect) {
 			CurrentScore = tdnt.rand.nextDouble();
 			return CurrentScore;

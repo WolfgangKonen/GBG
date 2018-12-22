@@ -229,6 +229,14 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		return acts;
 	}
 	
+	public ArrayList<ACTIONS> getAllAvailableActions() {
+        ArrayList allActions = new ArrayList<>();
+        for (int j = 0; j < C4Base.COLCOUNT; j++) 
+        	allActions.add(Types.ACTIONS.fromInt(j));
+        
+        return allActions;
+	}
+	
 	public int getNumAvailableActions() {
 		return acts.size();
 	}

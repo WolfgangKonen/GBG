@@ -196,7 +196,7 @@ public class Types {
      *	@see MaxNAgent
      */
     public static class ScoreTuple {
-    	public enum CombineOP {AVG,MIN,MAX};
+    	public enum CombineOP {AVG,MIN,MAX,DIFF};
     	/**
     	 * the tuple values
     	 */
@@ -231,8 +231,8 @@ public class Types {
     	}
     	
     	/**
-    	 * Combine {@code this} {@link ScoreTuple} with the information in the new {@link ScoreTuple}  
-    	 * {@code tuple}. Combine according to operator {@code cOP}:
+    	 * Combine {@code this} {@link ScoreTuple} with the information in the other {@link ScoreTuple}  
+    	 * {@code tuple2nd}. Combine according to operator {@code cOP}:
     	 * <ul>
     	 * <li> <b>AVG</b>: weighted average or expectation value with probability weight 
     	 * 		{@code currProbab}. The probability weights of all combined tuples should sum
@@ -241,37 +241,42 @@ public class Types {
     	 * 		minimal value in {@code scTup[playNum]}, the score for player {@code playNum}
     	 * <li> <b>MAX</b>: combine by retaining the {@code currScoreTuple}, which has the
     	 * 		maximal value in {@code scTup[playNum]}, the score for player {@code playNum}
+    	 * <li> <b>DIFF</b>: subtract from {@code this} all values in the other {@link ScoreTuple}  
+    	 * 		{@code tuple2nd}.
     	 * </ul>
     	 * 
-    	 * @param tuple 		the new {@link ScoreTuple} 
+    	 * @param tuple2nd 		the new {@link ScoreTuple} 
     	 * @param cOP			combine operator 	
     	 * @param playNum		player number (needed for {@code cOP}==MIN,MAX)
     	 * @param currProbab	probability (needed for {@code cOP}==AVG)
     	 */
-    	public void combine(ScoreTuple tuple, CombineOP cOP, int playNum, double currProbab)
+    	public void combine(ScoreTuple tuple2nd, CombineOP cOP, int playNum, double currProbab)
     	{
     		switch(cOP) {
     		case AVG: 
-        		for (int i=0; i<scTup.length; i++) scTup[i] += currProbab*tuple.scTup[i];
+        		for (int i=0; i<scTup.length; i++) scTup[i] += currProbab*tuple2nd.scTup[i];
         		break;
     		case MIN:
-    			if (tuple.scTup[playNum]<minValue) {
-    				minValue = tuple.scTup[playNum];
-    				this.scTup = tuple.scTup.clone();
+    			if (tuple2nd.scTup[playNum]<minValue) {
+    				minValue = tuple2nd.scTup[playNum];
+    				this.scTup = tuple2nd.scTup.clone();
     				count=1;
-    			}  else if (tuple.scTup[playNum]==minValue) {
+    			}  else if (tuple2nd.scTup[playNum]==minValue) {
     				count++;
     			}  	
     			break;
     		case MAX:
-    			if (tuple.scTup[playNum]>maxValue) {
-    				maxValue = tuple.scTup[playNum];
-    				this.scTup = tuple.scTup.clone();
+    			if (tuple2nd.scTup[playNum]>maxValue) {
+    				maxValue = tuple2nd.scTup[playNum];
+    				this.scTup = tuple2nd.scTup.clone();
     				count=1;
-    			}  else if (tuple.scTup[playNum]==maxValue) {
+    			}  else if (tuple2nd.scTup[playNum]==maxValue) {
     				count++;
     			}
     			break;
+    		case DIFF: 
+        		for (int i=0; i<scTup.length; i++) scTup[i] = scTup[i] - tuple2nd.scTup[i];
+        		break;
     		}
     	}
     } // ScoreTuple
@@ -315,13 +320,14 @@ public class Types {
      */
     public static final String[] GUI_AGENT_LIST 	 
     	= {"Random", "Minimax", "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", 
-    	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TDS"};
+    	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "Sarsa", "TDS"};
     /**
      * initial agent choice for P0, P1, ... (for up to 5 players) 
      */
     public static final String[] GUI_AGENT_INITIAL  
     	//= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
-    	= {"Human", "MCTS", "Human", "Human", "Human", "Human"};
+    	//= {"Human", "MCTS", "Human", "Human", "Human", "Human"};
+    	= {"Sarsa", "MCTS", "Human", "Human", "Human", "Human"};
 		//= {"TD-Ntuple-2", "Human", "MCTS Expectimax", "Human", "Human", "Human"};
     public static final String[] GUI_PLAYER_NAME  	// player names for P0, P1, ... (for up to 5 players)
     	//= {"P0", "P1", "P2", "P3", "P4"};

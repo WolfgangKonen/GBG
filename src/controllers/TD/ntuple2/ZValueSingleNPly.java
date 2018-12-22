@@ -54,7 +54,6 @@ public class ZValueSingleNPly implements ZValue {
     	StateObservation NewSO;
     	StateObservation oldSO = so.copy();
 
-    	// --- this is now handled in getNextAction3 directly ---
 		if (tdnt.randomSelect) {
 			CurrentScore = tdnt.rand.nextDouble();
 			return CurrentScore;

@@ -26,27 +26,29 @@ public class TestTimers {
 	
     public static void main(String[] args) throws IOException
     {
+    	long N=10000;
+    	long startTNano, endTNano;
+
     	ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
     	System.out.println("CpuTimeSupported():"+threadMXBean.isCurrentThreadCpuTimeSupported());
     	long startTNanoThread = threadMXBean.getCurrentThreadCpuTime();
     	long startTNanoInstant = Instant.now().getNano();
-    	long startTNano = System.nanoTime();
+    	startTNano = System.nanoTime();
     	
-    	long N=1000;
     	for (long i=0; i<N; i++) 
     		doSomethingLong();
     			
     	
-    	// the following time enters System.nanoTime, Instant.* but NOT threadMXBean-time 
-    	// (the current thread sleeps, so it does not get the time passing by added)
-		try {
-	    	Thread.sleep(0);
-			// waiting time between agent-agent actions in milliseconds
-		} catch (Exception e) {
-			System.out.println("Thread 1");
-		}
+//    	// the following time enters System.nanoTime, Instant.* but NOT threadMXBean-time 
+//    	// (the current thread sleeps, so it does not get the time passing by added)
+//		try {
+//	    	Thread.sleep(0);
+//			// waiting time between agent-agent actions in milliseconds
+//		} catch (Exception e) {
+//			System.out.println("Thread 1");
+//		}
     	
-    	long endTNano = System.nanoTime();
+    	endTNano = System.nanoTime();
     	long endTNanoThread = threadMXBean.getCurrentThreadCpuTime();
     	long endTNanoInstant = Instant.now().getNano();
     	System.out.println("Time    nanoTime: "+(endTNano-startTNano));

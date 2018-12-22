@@ -138,6 +138,15 @@ public class Evaluator2048_EA extends Evaluator {
         return"success rate";
     }
 
+	@Override
+	public String getTooltipString() {
+		return "0: TODO\n"
+				+ "1: TODO\n"
+				+ "2: against Minimax, different starts, best is 0.0\n"
+				+ "9: evaluate set of states, best is ?\n"
+				+ "11: against TDReferee.agt.zip, different starts";
+	}
+
     @Override
     public String getPlotTitle() {
         return "success";

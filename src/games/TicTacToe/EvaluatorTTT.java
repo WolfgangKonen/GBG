@@ -29,7 +29,7 @@ import tools.Types;
  * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
  */
 public class EvaluatorTTT extends Evaluator {
- 	private static final int[] AVAILABLE_MODES = {0,1,2,9,11};
+ 	private static final int[] AVAILABLE_MODES = {-1,0,1,2,9,11};
 	private RandomAgent random_agent = new RandomAgent("Random");
 	private MinimaxAgent minimax_agent = new MinimaxAgent("Minimax");
 	private AgentLoader agtLoader = null;
@@ -232,6 +232,18 @@ public class EvaluatorTTT extends Evaluator {
 		case 11: return "success rate (TDReferee, different starts, best is 0.0): ";
 		default: return null;
 		}
+	}
+	
+	@Override
+	public String getTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>-1: none<br>"
+				+ "0: against Random, best is 0.9<br>"
+				+ "1: against Minimax, best is 0.0<br>"
+				+ "2: against Minimax, different starts, best is 0.0<br>"
+				+ "9: evaluate set of states, best is ?<br>"
+				+ "11: against TDReferee.agt.zip, different starts"
+				+ "</html>";
 	}
 
 	@Override

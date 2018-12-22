@@ -249,6 +249,18 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
     }
 
     @Override
+    public ArrayList<Types.ACTIONS> getAllAvailableActions() {
+        ArrayList allActions = new ArrayList<>();
+        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+                    int actionInt = i * HexConfig.BOARD_SIZE + j;
+                    allActions.add(Types.ACTIONS.fromInt(actionInt));
+            }
+        }
+        return allActions;
+    }
+    
+    @Override
     public ArrayList<Types.ACTIONS> getAvailableActions() {
         return actions;
     }
@@ -322,10 +334,6 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
     public int getPlayer() {
         return currentPlayer;
     }
-
-//  int getCurrentPlayer() {
-//  return currentPlayer;
-//}
 
     public HexTile[][] getBoard() {
         return board;

@@ -10,10 +10,12 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
+import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.TStats.TAggreg;
 import params.*;
 import tools.*;
+import tools.Types.ACTIONS;
 
 import javax.swing.*;
 import java.io.BufferedWriter;
@@ -108,6 +110,21 @@ public class XArenaFuncs
 				//e.printStackTrace();
 				pa=null;			
 			}
+		} else if (sAgent.equals("Sarsa")) {
+			try {
+				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+				NTupleFactory ntupfac = new NTupleFactory(); 
+				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
+				int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+				pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
+									  new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
+			} catch (Exception e) {
+				MessageBox.show(m_xab, 
+						e.getMessage(), 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+				//e.printStackTrace();
+				pa=null;			
+			}
 		} else if (sAgent.equals("Minimax")) {
 			pa = new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Max-N")) {
@@ -187,6 +204,21 @@ public class XArenaFuncs
 							MessageBox.show(m_xab, 
 									e.getMessage(), 
 									"Warning", JOptionPane.WARNING_MESSAGE);
+							//e.printStackTrace();
+							pa=null;			
+						}
+					} else if (sAgent.equals("Sarsa")) {
+						try {
+							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+							NTupleFactory ntupfac = new NTupleFactory(); 
+							int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
+							int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+							pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
+											  new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
+						} catch (Exception e) {
+							MessageBox.show(m_xab, 
+									e.getMessage(), 
+									"Warning Sarsa", JOptionPane.WARNING_MESSAGE);
 							//e.printStackTrace();
 							pa=null;			
 						}
@@ -340,10 +372,9 @@ public class XArenaFuncs
 		int tem = xab.oPar[n].getTrainEvalMode();
 		//
 		// doTrainEvaluation flags whether Train Evaluator is executed:
-		// Evaluator m_evaluatorT is only constructed and evaluated, if the choice
-		// boxes 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' have
-		// different values. 
-		boolean doTrainEvaluation = (tem!=qem);
+		// Evaluator m_evaluatorT is only constructed and evaluated, if in tab 'Other pars' 
+		// the choice box 'Train Eval Mode' is not -1 ("none").
+		boolean doTrainEvaluation = (tem!=-1);
 		if (doTrainEvaluation) {
 	        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
 		}
@@ -381,7 +412,7 @@ public class XArenaFuncs
 					m_evaluatorT.eval(qa);
 
 				// update line chart plot:
-				lChart.updateChartPlot(gameNum, m_evaluatorQ, m_evaluatorT, doTrainEvaluation);
+				lChart.updateChartPlot(gameNum, m_evaluatorQ, m_evaluatorT, doTrainEvaluation, false);
 
 				// update weight / TC factor distribution plot:
 				wChart.updateChartPlot(gameNum,pa,per);
@@ -488,12 +519,18 @@ public class XArenaFuncs
 
 	/**
 	 * Perform trainNum cycles of training and evaluation for PlayAgent, each 
-	 * training with maxGameNum games. 
+	 * training with maxGameNum games. Record results in {@code multiTrain.csv}, see below.
+	 * 
 	 * @param n			index of agent to train (the current GUI will call multiTrain 
 	 * 					always with n=0 
 	 * @param sAgent	a string containing the class name of the agent
 	 * @param xab		used only for reading parameter values from members td_par, cma_par
-	 * @throws IOException 
+	 * @throws IOException if something goes wrong with {@code multiTrain.csv}, see below
+	 * <p>
+	 * Side effect: writes results of multi-training to <b>{@code agents/<gameDir>/csv/multiTrain.csv}</b>.
+	 * This file has the columns: <br>
+	 * {@code run, gameNum, evalQ, evalT, evalM, actionNum, trnMoves}. <br>
+	 * The contents may be visualized with one of the R-scripts in {@code resources\R_plotTools}.
 	 */
 	public PlayAgent multiTrain(int n, String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
 		DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");

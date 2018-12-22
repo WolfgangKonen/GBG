@@ -17,7 +17,32 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
      * and the so far stored agents had this automatically created serialVersionUID.]
      */
     private static final long serialVersionUID = 7556763505414386566L;
+    
+    private int[] actionVector = {0,1,2,3,4,5,6,7,8};
+    private int[][] newplace;
+    private int[][] actionArray;
 
+    public XNTupleFuncsTTT() {
+    	// calculate actionArray[][]: for a given action with key j, the element
+    	// actionArray[i][j] holds the equivalent action when the state is transformed to 
+    	// equiv[i] = symmetryVectors(int[] boardVector)[i]
+    	newplace = symmetryVectors(actionVector);
+    	actionArray = new int[8][];
+    	for (int i=0; i<actionArray.length; i++) {
+    		actionArray[i] = new int[9];
+    		for (int j=0; j<9; j++)
+    			actionArray[i][j] = whereHas(newplace[i],j);
+    	}
+
+    }
+    
+    // helper function for XNTupleFuncsTTT(): "Where has array arr the content j?"
+    private int whereHas(int[] arr, int j) {
+    	for (int i=0; i<arr.length; i++) 
+    		if (arr[i]==j) return i;
+    	throw new RuntimeException("whereHas: arr does not contain j!!");
+    }
+    
     //
 	// The following five functions are only needed for the n-tuple interface:
 	//
@@ -94,6 +119,33 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 			equiv[i] = rotate(equiv[i - 1]);
 
 		return equiv;
+	}
+	
+	/**
+	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 
+	 * and a certain action to be taken in <b>{@code so}</b>, generate the array of equivalent 
+	 * action keys {@code equivAction} for the symmetric states.
+	 * <p>
+	 * This method is needed for Q-learning and Sarsa.
+	 * 
+	 * @param actionKey
+	 * 				the key of the action to be taken in <b>{@code so}</b> 
+	 * @return <b>equivAction</b>
+	 * 				array of the equivalent actions' keys. 
+	 * <p>
+	 * equivAction[i] is the key of the action equivalent to actionKey in the
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 */
+	public int[] symmetryActions(int actionKey) {
+		int i;
+		//int[] corr = {0,3,2,1,4,5,6,7};
+		int numEquiv = actionArray.length;
+		int[] equivAction = new int[numEquiv];
+		for (i = 0; i < numEquiv; i++) {
+			equivAction[i] = actionArray[i][actionKey];
+		}
+
+		return equivAction;
 	}
 	
 	/** 

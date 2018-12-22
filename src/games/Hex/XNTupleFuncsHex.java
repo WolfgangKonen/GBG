@@ -18,7 +18,33 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
      */
     private static final long serialVersionUID = -2631312361401190002L;
     
-    @Override
+    private int[] actionVector;
+    private int[][] newplace;
+    private int[][] actionArray;
+
+    public XNTupleFuncsHex() {
+    	actionVector = new int[getNumCells()];
+    	for (int i=0; i<actionVector.length; i++) actionVector[i]=i;
+    	// calculate actionArray[][]: for a given action with key j, the element
+    	// actionArray[i][j] holds the equivalent action when the state is transformed to 
+    	// equiv[i] = symmetryVectors(int[] boardVector)[i]
+    	newplace = symmetryVectors(actionVector);
+    	actionArray = new int[newplace.length][];
+    	for (int i=0; i<actionArray.length; i++) {
+    		actionArray[i] = new int[this.getNumCells()];
+    		for (int j=0; j<this.getNumCells(); j++)
+    			actionArray[i][j] = whereHas(newplace[i],j);
+    	}
+    }
+    
+    // helper function for XNTupleFuncsHex(): "Where has array arr the content j?"
+    private int whereHas(int[] arr, int j) {
+    	for (int i=0; i<arr.length; i++) 
+    		if (arr[i]==j) return i;
+    	throw new RuntimeException("whereHas: arr does not contain j!!");
+    }
+    
+   @Override
     public int getNumCells() {
         return HexConfig.TILE_COUNT;
     }
@@ -60,6 +86,32 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
         return symmetries;
     }
 
+	/**
+	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 
+	 * and a certain action to be taken in <b>{@code so}</b>, 
+	 * generate the array of equivalent action keys {@code equivAction} for the symmetric states.
+	 * <p>
+	 * This method is needed for Q-learning and Sarsa.
+	 * 
+	 * @param actionKey
+	 * 				the key of the action to be taken in <b>{@code so}</b> 
+	 * @return <b>equivAction</b>
+	 * 				array of the equivalent actions' keys. 
+	 * <p>
+	 * equivAction[i] is the key of the action equivalent to actionKey in the
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 */
+	public int[] symmetryActions(int actionKey) {
+		int i;
+		int numEquiv = actionArray.length;
+		int[] equivAction = new int[numEquiv];
+		for (i = 0; i < numEquiv; i++) {
+			equivAction[i] = actionArray[i][actionKey];
+		}
+
+		return equivAction;
+	}
+	
 	/** 
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 

@@ -161,7 +161,9 @@ public class XArenaButtons extends JPanel
 		showValOnGB = new JCheckBox("",true);
 		showValOnGB.setBackground(Types.GUI_BGCOLOR);
 
-		for (int n=0; n<numPlayers; n++) {
+		// for-loop over *decrementing* n so that we set on the last pass (n=0) the default
+		// for GameNumT from the Player at position 0 (which is the usual one to train)
+		for (int n=numPlayers-1; n>=0; n--) {
 			choiceAgent[n] = new JComboBox(Types.GUI_AGENT_LIST);
 			choiceAgent[n].setSelectedItem(Types.GUI_AGENT_INITIAL[n]);
 
@@ -241,6 +243,8 @@ public class XArenaButtons extends JPanel
 				oPar[n].setTrainEvalList(dummyEvaluator.getAvailableModes());
 				oPar[n].setQuickEvalMode(dummyEvaluator.getQuickEvalMode());
 				oPar[n].setTrainEvalMode(dummyEvaluator.getTrainEvalMode());
+				oPar[n].setQuickEvalTooltip(dummyEvaluator.getTooltipString());
+				oPar[n].setTrainEvalTooltip(dummyEvaluator.getTooltipString());
 			} catch (RuntimeException ignored){ 
 				System.out.println(ignored.getMessage());				
 			}
@@ -555,19 +559,18 @@ public class XArenaButtons extends JPanel
 		ntPar[n].setFixedCoList(m_game.makeXNTupleFuncs().getAvailFixedNTupleModes());
 		oPar[n].setParamDefaults(agentName, gameName);
 		
-		if(agentName.equals("TDS")) {
-			switch(gameName) {
-			case "TicTacToe":
-				GameNumT.setText("10000");				
-			}
+		switch (agentName) {
+		case "TDS":
+			GameNumT.setText("10000");				
+			break;
+		case "Sarsa":
+			GameNumT.setText("30000");				
+			break;
+		default:
+			GameNumT.setText("10000");				
 		}
 		if(agentName.equals("TD-Ntuple")) {
 			NTupShowB.setEnabled(true);	// enable this button only if agentName is an n-tuple agent
-			switch(gameName) {
-			case "TicTacToe":
-			default: 
-				GameNumT.setText("10000");				
-			}
 		}
 		else {
 			NTupShowB.setEnabled(false);			

@@ -1,6 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
+import games.CFour.C4Base;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
@@ -608,6 +609,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         nextNondeterministicAction = null;
     }
 
+    @Override
     public ArrayList<ACTIONS> getAvailableActions() {
         ArrayList<ACTIONS> availAct = new ArrayList<>();
         for(int viableMove : availableMoves) {
@@ -616,7 +618,16 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return availAct;
     }
 
-    public int getNumAvailableActions() {
+    @Override
+	public ArrayList<ACTIONS> getAllAvailableActions() {
+        ArrayList allActions = new ArrayList<>();
+        for (int j = 0; j < 4; j++) 
+        	allActions.add(Types.ACTIONS.fromInt(j));
+        
+        return allActions;
+	}
+	
+   public int getNumAvailableActions() {
         return availableMoves.size();
     }
     

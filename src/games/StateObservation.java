@@ -213,6 +213,16 @@ public interface StateObservation extends Serializable{
      */
     public StateObservation getPrecedingAfterstate();
 
+    /**
+     * Return all available actions (all actions possible in this game)
+     * @return {@code ArrayList<ACTIONS>}
+     */
+	public ArrayList<ACTIONS> getAllAvailableActions();
+
+	/**
+	 * Return the actions available in this specific state
+	 * @return {@code ArrayList<ACTIONS>}
+	 */
 	public ArrayList<ACTIONS> getAvailableActions();
 
 	public int getNumAvailableActions();
@@ -239,7 +249,7 @@ public interface StateObservation extends Serializable{
 	
 	/**
 	 * 
-	 * @return  {0,1,...,n-1} for an n-player game: who moves next
+	 * @return  {0,1,...,n-1} for an n-player game: <b>who moves next</b>
 	 */
 	public int getPlayer();
 

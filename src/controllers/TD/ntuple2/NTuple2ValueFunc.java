@@ -6,12 +6,19 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Random;
 
-import controllers.TD.ntuple2.TDNTuple2Agt.EligType;
+import org.apache.commons.math3.stat.descriptive.rank.Min;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+
+import controllers.AgentBase;
+import controllers.PlayAgent;
+import controllers.TD.ntuple2.NTupleAgt.EligType;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -30,6 +37,9 @@ import tools.Types;
  *         from {@link #hasSigmoid()}. The learning rate alpha decreases exponentially 
  *         from a start value at the beginning of the training to an end value after a 
  *         certain amount of games.
+ * 
+ * @see TDNTuple2Agt
+ * @see SarsaAgt
  * 
  * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Köln, Feb'17  
  */
@@ -56,17 +66,21 @@ public class NTuple2ValueFunc implements Serializable {
     // Turns usage of symmetry on or off
 //	private boolean useSymmetry = false;	// use now getUSESYMMETRY() - don't store/maintain value twice
 
-	// Number of n-tuples
-	private int numTuples = 0;
-
+	// number of outputs (TD-learning: only 1 output, Q-Learning + Sarsa: multiple outputs)
+	private int numOutputs = 1; 
+	
+	// number of players
 	private int numPlayers; 
 	
+	// number of n-tuples
+	private int numTuples = 0;
+
 	private static double[][] dbgScoreArr = new double[100][2];
 	
-	TDNTuple2Agt tdAgt;		// the 'parent' - used to access the parameters in m_tdPar, m_ntPar
+	NTupleAgt tdAgt;		// the 'parent' - used to access the parameters in m_tdPar, m_ntPar
 	
-	// The generated n-tuples
-	private NTuple2 nTuples[][];
+	// The generated n-tuples [numOutputs][numPlayers][numTuples]
+	private NTuple2 nTuples[][][];
 	
 	public XNTupleFuncs xnf=null; 
 	
@@ -107,14 +121,18 @@ public class NTuple2ValueFunc implements Serializable {
 	 *            randomly
 	 * @param tcPar
 	 * @param numCells
+	 * 			  the number of cells on the board (used to check validity of {@code nTuplesI})
+	 * @param numOutputs
+	 * 			  the number of outputs for the network (1 in TD-learning, numActions in SARSA)
 	 * @throws RuntimeException
 	 */
-	public NTuple2ValueFunc(TDNTuple2Agt parent, int nTuplesI[][], XNTupleFuncs xnf, int posVals,
-			boolean randInitWeights, ParNT tcPar, int numCells) 
+	public NTuple2ValueFunc(NTupleAgt parent, int nTuplesI[][], XNTupleFuncs xnf, int posVals,
+			boolean randInitWeights, ParNT tcPar, int numCells, int numOutputs) 
 					throws RuntimeException {
 //		this.useSymmetry = useSymmetry;
 		this.xnf = xnf;
 		this.numPlayers = xnf.getNumPlayers();
+		this.numOutputs = numOutputs;
 		this.tdAgt = parent;
 		
 		if (nTuplesI!=null) {
@@ -127,17 +145,21 @@ public class NTuple2ValueFunc implements Serializable {
 
 	void initNTuples(int[][] nTuplesI, int posVals, boolean randInitWeights,
 			ParNT ntPar, int numCells) {
-		this.nTuples = new NTuple2[numPlayers][numTuples];
+		if (numOutputs==0) 
+			throw new RuntimeException("initNTuples: numOutputs is 0!");
+		this.nTuples = new NTuple2[numOutputs][numPlayers][numTuples];
 		for (int i = 0; i < numTuples; i++) {
 			for (int j=0; j<nTuplesI[i].length; j++) {
 				int v = nTuplesI[i][j];
 				if (v<0 || v>=numCells) 
 					throw new RuntimeException("Invalid cell number "+v+" in n-tuple no. "+i);
 			}
-			for (int k=0; k<numPlayers; k++) {
-				this.nTuples[k][i] = new NTuple2(nTuplesI[i], posVals, ntPar);
-				if (randInitWeights) {
-					this.nTuples[k][i].initWeights(true);
+			for (int o=0; o<numOutputs; o++) {
+				for (int k=0; k<numPlayers; k++) {
+					this.nTuples[o][k][i] = new NTuple2(nTuplesI[i], posVals, ntPar);
+					if (randInitWeights) {
+						this.nTuples[o][k][i].initWeights(true);
+					}				
 				}				
 			}
 		}
@@ -147,10 +169,11 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @return The list of n-Tuples
 	 */
 	public NTuple2[] getNTuples() {
-		NTuple2 list[] = new NTuple2[numTuples * numPlayers];
-		for (int j = 0, k = 0; j < nTuples[0].length; j++)
-			for (int i = 0; i < nTuples.length; i++)
-				list[k++] = nTuples[i][j];
+		NTuple2 list[] = new NTuple2[numOutputs * numPlayers * numTuples];
+		for (int j = 0, k = 0; j < nTuples[0][0].length; j++)
+			for (int i = 0; i < nTuples[0].length; i++)
+				for (int o = 0; o < nTuples.length; o++)
+					list[k++] = nTuples[o][i][j];
 		return list;
 	}
 
@@ -158,6 +181,39 @@ public class NTuple2ValueFunc implements Serializable {
 		ALPHA = ALPHA * m_AlphaChangeRatio;
 	}
 
+	/**
+	 * Get the action-value function Q for action {@code act} and state {@code board} in 
+	 * int[]-representation. {@code act} determines which output cell {@code o} of the 
+	 * network is used. 
+	 * 
+	 * @param board 
+	 * 			  the state as 1D-integer vector (position value for each board cell) 
+	 * @param player
+	 *            the player who has to move on {@code board} (0,...,N-1)
+	 * @param act
+	 *            the action to perform on {@code board}
+	 * @return
+	 */
+	public double getQFunc(int[] board, int player, Types.ACTIONS act) {
+		int i, j;
+		int o = act.toInt();
+		double score = 0.0; 
+		int[][] equiv = null;
+		int[] equivAction;
+
+		// Get equivalent boards (including self)
+		equiv = getSymBoards2(board, getUSESYMMETRY());
+		equivAction = xnf.symmetryActions(act.toInt());
+
+		for (i = 0; i < numTuples; i++) {
+			for (j = 0; j < equiv.length; j++) {
+				score += nTuples[equivAction[j]][player][i].getScore(equiv[j]);
+			}
+		}
+
+		return (hasSigmoid() ? Math.tanh(score) : score);
+	}
+	
 	/**
 	 * Get the value for this state in int[]-representation
 	 * 
@@ -179,7 +235,7 @@ public class NTuple2ValueFunc implements Serializable {
 		for (i = 0; i < numTuples; i++) {
 			for (j = 0; j < equiv.length; j++) {
 //				System.out.print("g(i,j)=("+i+","+j+"):  ");		//debug
-				score += nTuples[player][i].getScore(equiv[j]);
+				score += nTuples[0][player][i].getScore(equiv[j]);
 			}
 		}
 		//if (getUSESYMMETRY()) score /= equiv.length; // DON'T, at least for TTT clearly inferior
@@ -212,6 +268,19 @@ public class NTuple2ValueFunc implements Serializable {
 		}
 		
 		return equiv;
+	}
+
+	private int[] getSymActions(int output, boolean useSymmetry) {
+		int[] equivActions;
+		if (useSymmetry) {
+			equivActions = xnf.symmetryActions(output);
+
+		} else {
+			equivActions = new int[1];
+			equivActions[0] = output;			
+		}
+		
+		return equivActions;
 	}
 
 //	/**
@@ -277,7 +346,7 @@ public class NTuple2ValueFunc implements Serializable {
 		// derivative of tanh ( if hasSigmoid()==true):
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
-		update(curBoard, curPlayer, delta, e);
+		update(curBoard, curPlayer, 0, delta, e, false);
 		
 		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
@@ -308,6 +377,45 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 	/**
+	 * Update the weights of the n-tuple system in case of Q-learning ({@link SarsaAgt} or QlearnAgt). 
+	 * 
+	 * @param curBoard
+	 *            the current board
+	 * @param curPlayer
+	 *            the player whose value function is updated (the p in V(s_t|p) )
+	 * @param nextBoard
+	 *            the following board
+	 * @param nextPlayer
+	 *            the player to use in the target value function (the p in \gamma*V(s_{t+1}|p) )
+	 * @param reward
+	 *            the delta reward given for the transition into nextBoard
+	 * @param target
+	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
+	 *            non-terminal states. But the target can be as well (r + GAMMA * V) for an
+	 *            n-ply look-ahead or (r - GAMMA * V(opponent)).  
+	 * @param thisSO
+	 * 			  only for debug info: access to the current state's stringDescr()
+	 */
+	public void updateWeightsQ(int[] curBoard, int nextPlayer, Types.ACTIONS lastAction,
+			double qLast, double reward, double target, StateObservation thisSO) {
+		// delta is the error signal:
+		double delta = (target - qLast);
+		// derivative of tanh ( if hasSigmoid()==true):
+		double e = (hasSigmoid() ? (1.0 - qLast * qLast) : 1.0);
+
+		int o = lastAction.toInt();
+		update(curBoard, nextPlayer, o, delta, e, true);
+		
+		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
+			final double MAXSCORE = 1; // 1; 3932156;
+			double v_new = getQFunc(curBoard,nextPlayer,lastAction);
+			System.out.println("updateWeightsNew[p="+nextPlayer+", "+thisSO.stringDescr()
+			+"] qLast,v_new:"+qLast*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
+			dbg3PArr[nextPlayer]=v_new*MAXSCORE;
+		}
+	}
+
+	/**
 	 * Update the weights of the n-Tuple-system for a terminal state (target is 0).
 	 * 
 	 * @param curBoard 	the current board
@@ -322,7 +430,7 @@ public class NTuple2ValueFunc implements Serializable {
 		// derivative of tanh ( if hasSigmoid()==true)
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
-		update(curBoard, curPlayer, delta, e);
+		update(curBoard, curPlayer, 0, delta, e, false);
 
 		if (TDNTuple2Agt.DBGF_TARGET || TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
@@ -352,14 +460,22 @@ public class NTuple2ValueFunc implements Serializable {
 	 *            as 1D-integer vector (position value for each board cell) 
 	 * @param player
 	 *            the player who has to move on {@code board}
+	 * @param output
+	 *            the output unit for which we provide the delta (the action key)
+	 *            (for TD this is always 0, but Sarsa and Q-learning have several output units)
 	 * @param delta
+	 * 			  the delta signal we propagate back
 	 * @param e   derivative of tanh ( if hasSigmoid()==true)
-	 * 
+	 * @param QMODE   
+	 * 			  whether called via {@code updateWeightsQ} (Sarsa, Q) or {@code updateWeightsNew*} (TD)
+	 * <p>
 	 * The value added to all active weights is alphaM*delta*e   (in case LAMBDA==0)
 	 */
-	private void update(int[] board, int player, double delta, double e) {
-		int i, j;
+	private void update(int[] board, int player, int output, double delta, double e, 
+						boolean QMODE) {
+		int i, j, out;
 		double alphaM, sigDeriv, lamFactor;
+		int[] equivAction;
 
 		// Get equivalent boards (including self)
 		int[][] equiv = getSymBoards2(board,getUSESYMMETRY());
@@ -368,6 +484,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 		// construct new EligStates object, add it at head of LinkedList eList and remove 
 		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):
+		// *** TODO: add actions to EligStates!! ***
 		EligStates elem = new EligStates(equiv,e);
 		eList.addFirst(elem);
 		if (eList.size()>horizon) eList.pollLast();
@@ -378,20 +495,42 @@ public class NTuple2ValueFunc implements Serializable {
 		while(iter.hasNext()) {
 			elem=iter.next();
 			equiv=elem.equiv;
+			equivAction = getSymActions(output, getUSESYMMETRY());
+//			printEquivs(equiv,equivAction);		// debug (TTT only)
 			//System.out.println(eList.size()+" "+lamFactor+"   ["+ equiv[0]+"]");	// debug
 			assert (lamFactor >= tdAgt.getParTD().getHorizonCut()) 
 					: "Error: lamFactor < ParTD.getHorizonCut";
 			e = lamFactor*elem.sigDeriv;
 			for (i = 0; i < numTuples; i++) {
-				nTuples[player][i].clearIndices();
+				nTuples[output][player][i].clearIndices();
 				for (j = 0; j < equiv.length; j++) {
+					// this assertion is only valid for TicTacToe, where each action should be 
+					// on an empty field which is coded as '1' here:
+					//assert (equiv[j][equivAction[j]]==1) : "Oops, action TicTacToe not viable";
+					
+					out = (QMODE ? equivAction[j] : output);
 //					System.out.print("(i,j)=("+i+","+j+"):  ");		//debug
-					nTuples[player][i].updateNew(equiv[j], alphaM, delta, e);
+					nTuples[out][player][i].updateNew(equiv[j], alphaM, delta, e);
 				}
 			}
 			lamFactor *= getLambda(); 
 		}
 		numLearnActions++;
+	}
+
+	// debug TicTacToe only: print equivalent boards & equivalent actions
+	private void printEquivs(int[][] equiv, int[] equivAction) {
+		int j,k,m,n;
+		String[] symb = {"o","-","X"};
+		for (j = 0; j < equiv.length; j++) {
+			for (k=0,m=0; m<3; m++) {
+				for (n=0; n<3; n++,k++) 
+					System.out.print(symb[equiv[j][k]]);
+				System.out.println("");
+			}
+			System.out.println("Action = "+equivAction[j]);
+		}
+		
 	}
 
 	/**
@@ -402,9 +541,11 @@ public class NTuple2ValueFunc implements Serializable {
 	@Deprecated
 	public void updateTC() {
 		int i, k;
-			for (i = 0; i < numTuples; i++) {
-				for (k = 0; k < numPlayers; k++)
-					nTuples[k][i].updateTC();
+			for (int o=0; o < numOutputs; o++) {
+				for (i = 0; i < numTuples; i++) {
+					for (k = 0; k < numPlayers; k++)
+						nTuples[o][k][i].updateTC();
+				}
 			}
 
 	}
@@ -420,7 +561,7 @@ public class NTuple2ValueFunc implements Serializable {
 	public void setEpochs(int epochs) {
 		epochMax = epochs;
 	}
-	public void setTdAgt(TDNTuple2Agt tdAgt) {
+	public void setTdAgt(NTupleAgt tdAgt) {
 		this.tdAgt = tdAgt;
 	}
 	
@@ -460,7 +601,7 @@ public class NTuple2ValueFunc implements Serializable {
 		eList.clear();
 	}
 	
-	public void clearEligList(EligType m_elig) {
+	public void clearEligList(NTupleAgt.EligType m_elig) {
 		switch(m_elig) {
 		case STANDARD: 
 			// do nothing
@@ -516,32 +657,141 @@ public class NTuple2ValueFunc implements Serializable {
 
 	//samine// print "tableN" and "tableA"
 	public void printTables(){
-		 nTuples[0][0].printTable();
+		 nTuples[0][0][0].printTable();
 	}
 	
 	public void printLutHashSum(PrintStream pstream) {
-		for (int p=0; p<nTuples.length; p++) {
-			pstream.print("LUT hash sum player "+p+": ");
-			for (int j = 0; j < nTuples[p].length; j++)
-				pstream.print(" " + (nTuples[p][j].lutHashSum()) + "|");
-			pstream.println("");
-		}		
+		for (int o=0; o < numOutputs; o++) {
+			pstream.print("\nLUT output unit "+o+": ");
+			for (int p=0; p<nTuples.length; p++) {
+				pstream.print("LUT hash sum player "+p+": ");
+				for (int j = 0; j < nTuples[p].length; j++)
+					pstream.print(" " + (nTuples[o][p][j].lutHashSum()) + "|");
+				pstream.println("");
+			}		
+		}
 	}
 	
 	public void printLutSum(PrintStream pstream) {
-		for (int p=0; p<nTuples.length; p++) {
-			pstream.print("LUT sum player "+p+": ");
-			for (int j = 0; j < nTuples[p].length; j++)
-				pstream.print(frmS.format(nTuples[p][j].lutSum())+"|");
-			pstream.println("");
-		}
-		for (int p=0; p<nTuples.length; p++) {
-			pstream.print("LUT ABS player "+p+": ");
-			for (int j = 0; j < nTuples[p].length; j++)
-				pstream.print(frmS.format(nTuples[p][j].lutSumAbs())+"|");
-			pstream.println("");
+		for (int o=0; o < numOutputs; o++) {
+			pstream.print("\nLUT output unit "+o+": ");
+			for (int p=0; p<nTuples.length; p++) {
+				pstream.print("LUT sum player "+p+": ");
+				for (int j = 0; j < nTuples[p].length; j++)
+					pstream.print(frmS.format(nTuples[o][p][j].lutSum())+"|");
+				pstream.println("");
+			}
+			for (int p=0; p<nTuples.length; p++) {
+				pstream.print("LUT ABS player "+p+": ");
+				for (int j = 0; j < nTuples[p].length; j++)
+					pstream.print(frmS.format(nTuples[o][p][j].lutSumAbs())+"|");
+				pstream.println("");
+			}
 		}
 		
 	}
+	
+	/**
+	 * Analyze the weight distribution and - if TCL is active - the tcFactorArray distribution 
+	 * by calculating certain quantiles (percentiles)
+	 * @param per the quantiles to calculate. If null, then use DEFAULT_PER 
+	 * 			= {0,25,50,75,100}, where the numbers are given in percent.
+	 * @return res[][] with <ul>
+	 * 		<li> res[0][]: a copy of {@code per}
+	 * 		<li> res[1][]: the corresponding quantiles of the weights (from all LUTs)
+	 * 		<li> res[2][]: the corresponding quantiles of tcFactorArray (from all LUTs)
+	 * </ul>
+	 */
+	public double[][] weightAnalysis(double[] per) {
+		double[] DEFAULT_PER = {0,25,50,75,100};
+		if (per==null) per = DEFAULT_PER;
+		double[][] res = new double[3][per.length];  	// res[0]: per, res[1]: quantiles of data
+														// res[2]: quantiles of tcdat;
+		System.arraycopy(per, 0, res[0], 0, per.length);
+		
+		int count = 0;
+		NTuple2[] ntuples = this.getNTuples();
+		for (int i=0; i<ntuples.length; i++) {
+			count += ntuples[i].getLutLength();
+		}
+		double[] data = new double[count];
+		double[] tcdat = new double[count];
+		double[] lut;
+		double[] tcf=null;
+		int i, pos=0;
+		
+		// --- this is fast, but has the disadvantage that many zeros are included --> 
+		// --- 25%- 50%- and 75%-quantiles tend to be exactly zero
+		// --- (the zeros come from the fact that many weights are never visited in training)
+//		for (i=0,len=0; i<ntuples.length; i++) {
+//			len = ntuples[i].getLutLength();
+//			lut = ntuples[i].getWeights();
+//			assert lut.length==len : "length assertion error";
+//			System.arraycopy(lut, 0, data, pos, len);
+//			pos += len; 
+//		}
+
+		// --- this is slower, but quantiles for active weights are more meaningful
+		// --- and not always 0.0 (!)
+		for (i=0; i<ntuples.length; i++) {
+			lut = ntuples[i].getWeights();
+			tcf = ntuples[i].getTcFactorArray();
+			for (int j=0; j<lut.length; j++) {
+				if (lut[j]!=0) {
+					 if (tcf!=null) tcdat[pos] = tcf[j];
+					data[pos++] = lut[j];
+				}
+			}
+		}
+		int nActive=pos;
+		int pActive = (int) (((double)nActive)/count*100);
+		double[] data2 = new double[nActive];
+		double[] tcdat2 = new double[nActive];
+		System.arraycopy(data, 0, data2, 0, nActive);
+		System.arraycopy(tcdat, 0, tcdat2, 0, nActive);
+		data = data2;
+		tcdat = tcdat2;
+		if (tcf==null) System.out.println("WARNING: tcFactorArray is null");
+
+		// --- only testing / debug ---
+//		double[] data = {0,1,2,3,4,5,6,7,8,9};
+//		int length2 = 1000;
+//		double[] data2 = new double[length2];
+//		System.arraycopy(data, 0, data2, 0, length2);
+//		data = data2;
+		
+		Percentile p = new Percentile(); // from commons-math3-3.6.1.jar, see https://commons.apache.org/proper/commons-math/javadocs/api-3.0/org/apache/commons/math3/stat/descriptive/rank/Percentile.html
+		Min m = new Min(); 
+		Percentile p2 = new Percentile();
+		Min m2 = new Min(); 
+		
+		p.setData(data);	
+		p2.setData(tcdat);
+		for (i=0; i<per.length; i++) {
+			if (per[i]==0) {
+				res[1][i] = m.evaluate(data);
+				res[2][i] = m2.evaluate(tcdat);
+			} else { 
+				res[1][i] = p.evaluate(per[i]);
+				res[2][i] = p2.evaluate(per[i]);
+			}
+		}
+
+		DecimalFormat form = new DecimalFormat("000");
+		DecimalFormat df = new DecimalFormat();				
+		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+		df.applyPattern("+0.0000000;-0.0000000");  
+		System.out.println("weight analysis SarsaAgt ("
+				+count+" weights, "+nActive+" active ("+pActive+"%)): ");
+		for (i=0; i<per.length; i++) {
+			System.out.println("   Quantile [" + form.format(per[i]) + "] = "	
+					+df.format(res[1][i]) + " / " + ((tcf==null)?"NA":df.format(res[2][i])) );			
+		}
+		
+		return res;
+	}
+
+	
+
 }
 

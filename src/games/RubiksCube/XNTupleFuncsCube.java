@@ -114,6 +114,26 @@ public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
 		return equiv;
 	}
 	
+	/**
+	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 
+	 * and a certain action to be taken in <b>{@code so}</b>, 
+	 * generate the array of equivalent action keys {@code equivAction} for the symmetric states.
+	 * <p>
+	 * This method is needed for Q-learning and Sarsa.
+	 * 
+	 * @param actionKey
+	 * 				the key of the action to be taken in <b>{@code so}</b> 
+	 * @return <b>equivAction</b>
+	 * 				array of the equivalent actions' keys. 
+	 * <p>
+	 * equivAction[i] is the key of the action equivalent to actionKey in the
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 */
+	public int[] symmetryActions(int actionKey) {
+		/* TODO */
+		return null;
+	}
+	
 	/** 
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 

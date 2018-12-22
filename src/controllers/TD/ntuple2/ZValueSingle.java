@@ -38,7 +38,6 @@ public class ZValueSingle implements ZValue {
     public double calculate(   StateObservation so, Types.ACTIONS act, 
     							StateObservation refer, boolean silent) {
     	double CurrentScore,agentScore;
-    	double g3BestScore = -Double.MAX_VALUE;
 		int rplyer = refer.getPlayer();
 		boolean rgs = tdnt.getParOther().getRewardIsGameScore();
 
@@ -48,7 +47,6 @@ public class ZValueSingle implements ZValue {
 
     	StateObservation NewSO = so.copy();
         
-    	// --- this is now handled in getNextAction3 directly ---
 		if (tdnt.randomSelect) {
 			CurrentScore = tdnt.rand.nextDouble();
 			return CurrentScore;

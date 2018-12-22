@@ -211,6 +211,16 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     	return this;
     }
 
+    @Override
+    public ArrayList<Types.ACTIONS> getAllAvailableActions() {
+        ArrayList allActions = new ArrayList<>();
+        for (int i = 0; i < 3; i++) 
+            for (int j = 0; j < 3; j++) 
+            	allActions.add(Types.ACTIONS.fromInt(i * 3 + j));
+        
+        return allActions;
+    }
+    
 	public ArrayList<ACTIONS> getAvailableActions() {
 		return acts;
 	}

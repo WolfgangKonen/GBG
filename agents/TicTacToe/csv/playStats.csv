@@ -1,5 +1,5 @@
-controllers.MC.MCAgentN: iterations:1000, rollout depth:20, # agents:1
-controllers.MC.MCAgentN:
+controllers.TD.ntuple2.SarsaAgt: USESYMMETRY:true, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: true
+controllers.TD.ntuple2.SarsaAgt: alpha_init->final:1.0->0.5, epsilon_init->final:0.1->0.0, gamma: 1.0
 run, moveNum, gameScore, nEmptyTile, cumEmptyTl
 1, 1, 0, 0, 0
 1, 2, 0, 0, 0

@@ -169,6 +169,7 @@ abstract public class Evaluator {
 	abstract public int getMultiTrainEvalMode();
 	
 	abstract public String getPrintString();
+	abstract public String getTooltipString();
 	abstract public String getPlotTitle();
 	
 }

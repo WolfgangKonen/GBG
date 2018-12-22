@@ -528,6 +528,19 @@ public class EvaluatorC4 extends Evaluator {
         }
     }
 
+	@Override
+	public String getTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>-1: none<br>"
+				+ "0: against MCTS, best is 1.0<br>"
+				+ "1: against Random, best is 1.0<br>"
+				+ "2: against Max-N, best is 1.0<br>"
+				+ "3: against AlphaBetaAgent, best is 1.0<br>"
+				+ "10: against MCTS, different starts, best is 1.0<br>"
+				+ "11: against TDReferee.agt.zip, different starts, best is 1.0"
+				+ "</html>";
+	}
+
     @Override
     public String getPlotTitle() {
         switch (m_mode) {

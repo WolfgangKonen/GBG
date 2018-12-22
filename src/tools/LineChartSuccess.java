@@ -40,6 +40,7 @@ public class LineChartSuccess extends XYSeriesCollection
 	JFreeChart chart;
 	ChartFrame frame;
 	boolean PLOTTRAINEVAL=true;
+	boolean firstUpdate=true;
 	
 	public LineChartSuccess(String title, String xLab, String yLab, 
 					 		boolean hasLines, boolean hasSymbols) 
@@ -90,13 +91,28 @@ public class LineChartSuccess extends XYSeriesCollection
 		
 	}
 	
+	/**
+	 * 
+	 * @param gameNum
+	 * @param m_evaluatorQ
+	 * @param m_evaluatorT
+	 * @param doTrainEvaluation
+	 * @param visibleFlag	true: make window visible on every call; false: only on first call
+	 */
 	public void updateChartPlot(int gameNum, Evaluator m_evaluatorQ, 
-			Evaluator m_evaluatorT, boolean doTrainEvaluation) {
+			Evaluator m_evaluatorT, boolean doTrainEvaluation, boolean visibleFlag) {
 		this.getSeries(0).add((double)gameNum, m_evaluatorQ.getLastResult());
 		if (doTrainEvaluation && PLOTTRAINEVAL) {
 			this.getSeries(1).add((double)gameNum, m_evaluatorT.getLastResult());
 		}
-		this.plot();		
+		
+		// this little logic allows with visibleFlag==false, that the plot window is only made 
+		// visible on first update, but later it remains 'silent' and does NOT request the focus 
+		// on every update during train:
+		if (visibleFlag || firstUpdate) {
+			this.plot();		
+			firstUpdate=false;
+		}
 	}
 
 	/**

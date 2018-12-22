@@ -313,7 +313,7 @@ public class Evaluator2048 extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{0, 1, 2};
+        return new int[]{-1,0, 1, 2};
     }
 
     @Override
@@ -335,6 +335,15 @@ public class Evaluator2048 extends Evaluator {
     public String getPrintString() {
         return"success rate";
     }
+
+	@Override
+	public String getTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>-1: none<br>"
+				+ "0: TODO<br>"
+				+ "1: TODO<br>"
+				+ "</html>";
+	}
 
     @Override
     public String getPlotTitle() {

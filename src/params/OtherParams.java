@@ -274,6 +274,10 @@ public class OtherParams extends Frame {
 			choiceEvalQ.addItem(Integer.toString(i));
 	}
 
+	public void setQuickEvalTooltip(String str) {
+		choiceEvalQ.setToolTipText(str);
+	}
+
 	public void setTrainEvalMode(int tEvalmode) {
 		// If the mode list has not been initialized, add the selected mode to
 		// the list
@@ -286,6 +290,10 @@ public class OtherParams extends Frame {
 	public void setTrainEvalList(int[] modeList) {
 		for (int i : modeList)
 			choiceEvalT.addItem(Integer.toString(i));
+	}
+
+	public void setTrainEvalTooltip(String str) {
+		choiceEvalT.setToolTipText(str);
 	}
 
 	public void setStopTest(int value) {
@@ -352,6 +360,14 @@ public class OtherParams extends Frame {
 			epiLeng_T.setText("50"); 		// the maximum episode length (when playing a game)
 			break;
 		default:	//  all other
+			break;
+		}
+		switch (agentName) {
+		case "Sarsa":
+			learnRM.setState(true);
+			break;
+		default: 
+			learnRM.setState(false);
 			break;
 		}
 	}

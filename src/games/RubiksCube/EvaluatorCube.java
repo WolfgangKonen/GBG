@@ -35,7 +35,7 @@ import tools.Types;
  * The value of mode is set in the constructor. 
  */
 public class EvaluatorCube extends Evaluator {
- 	private static final int[] AVAILABLE_MODES = new int[]{0,1};
+ 	private static final int[] AVAILABLE_MODES = new int[]{-1,0,1};
 	private Random rand;
 	private int m_mode;
 	private double m_res=-1;		// avg. success on array D of distance sets
@@ -193,6 +193,15 @@ public class EvaluatorCube extends Evaluator {
 		case 1:  return countStates+" cubes: % solved below epiLength="+ CubeConfig.EVAL_EPILENGTH +" (best is 1.0): ";
 		default: return null;
 		}
+	}
+
+	@Override
+	public String getTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>-1: none<br>"
+				+ "0: % solved with min. twists, best is 1.0<br>"
+				+ "1: % solved below epiLength, best is 1.0"
+				+ "</html>";
 	}
 
 	@Override

@@ -504,6 +504,7 @@ public class NTParams extends Frame implements Serializable {
 		switch (agentName) {
 		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
+		case "Sarsa":
 			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
 			tcInitT.setText("0.0001");
 			setTcImmediate(tcFactorString[0]);	// "Immediate"
@@ -520,6 +521,10 @@ public class NTParams extends Frame implements Serializable {
 			AfterStateC.setSelected(false);		// disable AFTERSTATE for all deterministic games
 			enableAfterState(false);
 			switch (gameName) {
+			case "TicTacToe": 
+				NTupleNumT.setText("1");
+				NTupleSizeT.setText("9");	
+				break;
 			case "2048": 
 				NTupleSizeT.setText("3");
 				AfterStateC.setSelected(true);

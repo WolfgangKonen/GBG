@@ -30,6 +30,7 @@ import controllers.PlayAgent;
 import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.ZValueMulti;
+import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
@@ -39,6 +40,11 @@ import games.CFour.StateObserverC4;
 import games.RubiksCube.StateObserverCube;
 import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+
+//
+// !!! NOTE: We currently do not use NTupleBase as a base class for TDNTuple2Agt (although
+// !!! we could) because this would invalidate all TDNTuple2Agt agents stored so far on dis
+// 
 
 /**
  * The TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning)
@@ -55,8 +61,8 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * <ul>
  * <li> no eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
  * 		memory consumptive)
- * <li> option AFTERSTATE (relevant only for nondeterministic games like 2048), which builds the value 
- * 		function on the argument afterstate <b>s'</b> (before adding random element) instead 
+ * <li> option AFTERSTATE (relevant only for nondeterministic games like 2048), which builds the  
+ * 		value function on the argument afterstate <b>s'</b> (before adding random element) instead 
  * 		of next state <b>s''</b> (faster learning and better generalization).
  * <li> has the random move rate bug fixed: Now EPSILON=0.0 means really 'no random moves'.
  * <li> learning rate ALPHA differently scaled: if ALPHA=1.0, the new value for a
@@ -73,7 +79,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * 
  * @author Wolfgang Konen, TH Köln, Aug'17
  */
-public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
+public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Serializable {
 	/**
 	 * UpdateType characterizes the weight update mode: <ul>
 	 * <li> <b>SINGLE_UPDATE</b>: Each learn action updates only a single value function (that of the current player)
@@ -81,18 +87,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * </ul>
 	 * @see TDNTuple2Agt#getUpdateType(StateObservation)
 	 */
-	private enum UpdateType {SINGLE_UPDATE, MULTI_UPDATE};
+	enum UpdateType {SINGLE_UPDATE, MULTI_UPDATE};
 	
-	/**
-	 * EligType characterizes the eligibility trace mode: <ul>
-	 * <li> <b>STANDARD</b>: nothing happens on random move (RM) with the elig traces (only no update on RM)
-	 * <li> <b>RESET</b>: all elig traces are reset after RM (because a later 
-	 * 		reward has no meaning for states prior to RM)
-	 * </ul>
-	 * @see NTuple2ValueFunc#clearEligList(EligType)
-	 */
-	enum EligType {STANDARD, RESET}; // may later contain also REPLACE, RESREP
-	private EligType m_elig;
+	private NTupleAgt.EligType m_elig;
 	
 	public Random rand; // generate random Numbers 
 	
@@ -304,10 +301,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 		int numCells = xnf.getNumCells();
 		
 		m_Net = new NTuple2ValueFunc(this,nTuples, xnf, posVals,
-				RANDINITWEIGHTS,ntPar,numCells);
+				RANDINITWEIGHTS,ntPar,numCells,1);
 		if (DBG_OLD_3P || DBG_NEW_3P) {
 			m_Net3 = new NTuple2ValueFunc(this,nTuples, xnf, posVals,
-					RANDINITWEIGHTS,ntPar,numCells);
+					RANDINITWEIGHTS,ntPar,numCells,1);
 		}
 		
 		setNTParams(ntPar);
@@ -456,7 +453,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 			// here we use the NextState version, because computation time does not matter
 			// inside DBG2_TARGET and because this version is correct for both values of 
 			// getAFTERSTATE():
-	        NextState ns = new NextState(so,actBest);
+	        NextState ns = new NextState(this,so,actBest);
 			double deltaReward = ns.getNextSO().getReward(so,rgs) - so.getReward(so,rgs);
 			double sc = (deltaReward + playerPM * getScore(ns.getAfterState()))*MAXSCORE;
 			
@@ -681,7 +678,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	        
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	               
-	        ns = new NextState(so,actBest);	        
+	        ns = new NextState(this,so,actBest);	        // this contains advance
 	        nextPlayer = ns.getNextSO().getPlayer();
 	        
 	        if (DBG_CUBE) {
@@ -892,6 +889,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * <p>
 	 * Do only an update for the value function of {@code ns.getSO()}'s player 
 	 * (i.e. SINGLE_UPDATE, only a single value function is updated)
+	 * <p>
+	 * This version is the recommended one for (N=2)-player games.
 	 * 
 	 * @param ns
 	 * @param  target 
@@ -1020,7 +1019,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * @return playerPM*reward for actual state {@code so} 
 	 */
 	@Deprecated
-	private double fetchReward(StateObservation so, StateObservation refer, int playerPM) 
+	double fetchReward(StateObservation so, StateObservation refer, int playerPM) 
 	{
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		double reward = playerPM*so.getReward(refer,rgs);
@@ -1035,7 +1034,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * @param refer		referring state
 	 * @return reward for actual state {@code so} 
 	 */
-	private double fetchReward2P(StateObservation so, StateObservation refer) 
+	double fetchReward2P(StateObservation so, StateObservation refer) 
 	{
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		double reward = so.getReward(refer,rgs);
@@ -1114,6 +1113,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	public void setAlpha(double alpha) {
 		m_Net.setAlpha(alpha);
 	}
+	
+	public void setFinished(boolean m) {
+		this.m_finished=m;
+	}
 
 	public double getAlpha() {
 		// only for debug & testing
@@ -1137,7 +1140,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 	
 	/**
-	 * the number of calls to {@link NTuple2ValueFunc#update(int[], int, double, double)}
+	 * the number of calls to {@link NTuple2ValueFunc#update(int[], int, int, double, double)}
 	 */
 	@Override
 	public long getNumLrnActions() {
@@ -1227,13 +1230,69 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	 * @param so	to get N=={@code so.getNumPlayers()}
 	 * @return the update type
 	 */
-	private UpdateType getUpdateType(StateObservation so) {
+	public UpdateType getUpdateType(StateObservation so) {
 		if (MODE_3P==1 || (MODE_3P==2 && so.getNumPlayers()==2))
 			return UpdateType.SINGLE_UPDATE;	
 		return UpdateType.MULTI_UPDATE;
 	}
 	
+	// Callback function from NextState (because the counter needs to be on the agent-global
+	// level)
+	public void incrementMoveCounter() {
+		m_counter++;
+	}
+	
+	// Callback function from NextState (because the counters need to be on the agent-global
+	// level)
+	public void incrementWinCounters(double reward, NextState ns) {
+		if (reward==0.0) tieCounter++;
+		if (reward==1.0 & ns.refer.getPlayer()==0) winXCounter++;
+		if (reward==1.0 & ns.refer.getPlayer()==1) winOCounter++;
+	}
+	
+	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
+	// It sets various elements of NextState ns (nextReward, nextRewardTuple).
+	// It is part of TDNTuple2Agt (and not part of NextState), because it uses various elements
+	// private to TDNTuple2Agt (VER_3P, MODE_3P, NEW_2P, DBG_REWARD, normalize2, fetchReward*).
+	// Returns a modified object NextState ns.
+	public void collectReward(NextState ns) {
+		UpdateType UPDATE = getUpdateType(ns.refer);
 
+		if (VER_3P) {
+        	switch (UPDATE) {
+        	case MULTI_UPDATE:
+				boolean rgs = m_oPar.getRewardIsGameScore();
+				ns.nextRewardTuple = new ScoreTuple(ns.refer);
+				for (int i=0; i<ns.refer.getNumPlayers(); i++) {
+					ns.nextRewardTuple.scTup[i] = normalize2(ns.nextSO.getReward(i,rgs),ns.nextSO);
+				}
+				break;
+        	case SINGLE_UPDATE:
+				ns.nextReward = fetchReward2P(ns.nextSO,ns.refer);
+	        	// this is r(s_{t+1}|p_t). It is equivalent to (-1)*r(s_{t+1}|p_{t+1}) for 
+				// 2-player games.
+				break;
+			}
+		} else {	// i.e. VER_3P==false
+	        if (NEW_2P) {
+				ns.nextReward = fetchReward2P(ns.nextSO,ns.refer);
+	        	// this is r(s_{t+1}|p_t). It is equivalent to (-1)*r(s_{t+1}|p_{t+1}).
+	        } else {
+				ns.nextReward = fetchReward(ns.nextSO,ns.refer,Types.PLAYER_PM[ns.refer.getPlayer()]);
+	        }
+		}
+
+		if (DBG_REWARD && ns.nextSO.isGameOver()) {
+			if (VER_3P && MODE_3P==0) {
+				System.out.print("Rewards: ");
+				System.out.print(ns.nextRewardTuple.toString());
+			} else {
+				System.out.print("Reward: "+ns.nextReward);
+			}
+			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore() + " for player " + ns.nextSO.getPlayer());
+		}
+	}
+	
 	// Debug only: 
 	//
 	private void printTable(PrintStream pstream, int[] board) {
@@ -1294,278 +1353,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,Serializable {
 	}
 	
 	/**
-	 * Analyze the weight distribution and - if TCL is active - the tcFactorArray distribution 
-	 * by calculating certain quantiles (percentiles)
-	 * @param per the quantiles to calculate. If null, then use DEFAULT_PER 
-	 * 			= {0,25,50,75,100}, where the numbers are given in percent.
-	 * @return res[][] with <ul>
-	 * 		<li> res[0][]: a copy of {@code per}
-	 * 		<li> res[1][]: the corresponding quantiles of the weights (from all LUTs)
-	 * 		<li> res[2][]: the corresponding quantiles of tcFactorArray (from all LUTs)
-	 * </ul>
+	 * see {@link NTuple2ValueFunc#weightAnalysis(double[])}
 	 */
 	public double[][] weightAnalysis(double[] per) {
-		double[] DEFAULT_PER = {0,25,50,75,100};
-		if (per==null) per = DEFAULT_PER;
-		double[][] res = new double[3][per.length];  	// res[0]: per, res[1]: quantiles of data
-														// res[2]: quantiles of tcdat;
-		System.arraycopy(per, 0, res[0], 0, per.length);
-		
-		int count = 0;
-		NTuple2[] ntuples = m_Net.getNTuples();
-		for (int i=0; i<ntuples.length; i++) {
-			count += ntuples[i].getLutLength();
-		}
-		double[] data = new double[count];
-		double[] tcdat = new double[count];
-		double[] lut;
-		double[] tcf=null;
-		int i, pos=0;
-		
-		// --- this is fast, but has the disadvantage that many zeros are included --> 
-		// --- 25%- 50%- and 75%-quantiles tend to be exactly zero
-		// --- (the zeros come from the fact that many weights are never visited in training)
-//		for (i=0,len=0; i<ntuples.length; i++) {
-//			len = ntuples[i].getLutLength();
-//			lut = ntuples[i].getWeights();
-//			assert lut.length==len : "length assertion error";
-//			System.arraycopy(lut, 0, data, pos, len);
-//			pos += len; 
-//		}
-
-		// --- this is slower, but quantiles for active weights are more meaningful
-		// --- and not always 0.0 (!)
-		for (i=0; i<ntuples.length; i++) {
-			lut = ntuples[i].getWeights();
-			tcf = ntuples[i].getTcFactorArray();
-			for (int j=0; j<lut.length; j++) {
-				if (lut[j]!=0) {
-					 if (tcf!=null) tcdat[pos] = tcf[j];
-					data[pos++] = lut[j];
-				}
-			}
-		}
-		int nActive=pos;
-		int pActive = (int) (((double)nActive)/count*100);
-		double[] data2 = new double[nActive];
-		double[] tcdat2 = new double[nActive];
-		System.arraycopy(data, 0, data2, 0, nActive);
-		System.arraycopy(tcdat, 0, tcdat2, 0, nActive);
-		data = data2;
-		tcdat = tcdat2;
-		if (tcf==null) System.out.println("WARNING: tcFactorArray is null");
-
-		// --- only testing / debug ---
-//		double[] data = {0,1,2,3,4,5,6,7,8,9};
-//		int length2 = 1000;
-//		double[] data2 = new double[length2];
-//		System.arraycopy(data, 0, data2, 0, length2);
-//		data = data2;
-		
-		Percentile p = new Percentile(); // from commons-math3-3.6.1.jar, see https://commons.apache.org/proper/commons-math/javadocs/api-3.0/org/apache/commons/math3/stat/descriptive/rank/Percentile.html
-		Min m = new Min(); 
-		Percentile p2 = new Percentile();
-		Min m2 = new Min(); 
-		
-		p.setData(data);	
-		p2.setData(tcdat);
-		for (i=0; i<per.length; i++) {
-			if (per[i]==0) {
-				res[1][i] = m.evaluate(data);
-				res[2][i] = m2.evaluate(tcdat);
-			} else { 
-				res[1][i] = p.evaluate(per[i]);
-				res[2][i] = p2.evaluate(per[i]);
-			}
-		}
-
-		DecimalFormat form = new DecimalFormat("000");
-		DecimalFormat df = new DecimalFormat();				
-		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
-		df.applyPattern("+0.0000000;-0.0000000");  
-		System.out.println("weight analysis TDNTuple2Agt ("
-				+count+" weights, "+nActive+" active ("+pActive+"%)): ");
-		for (i=0; i<per.length; i++) {
-			System.out.println("   Quantile [" + form.format(per[i]) + "] = "	
-					+df.format(res[1][i]) + " / " + ((tcf==null)?"NA":df.format(res[2][i])) );			
-		}
-		
-		return res;
+		return m_Net.weightAnalysis(per);
 	}
-
 	
-	/**
-	 * Class NextState bundles the different states in state advancing and two different modes of 
-	 * state advancing.
-	 * <p>
-	 * If {@link TDNTuple2Agt#getAFTERSTATE()}==false, then {@code ns=new NextState(so,actBest)}  
-	 * simply advances {@code so} and lets ns.getAfterState() and ns.getNextSO() return the same next 
-	 * state so.advance(actBest). 
-	 * <p>
-	 * If {@link TDNTuple2Agt#getAFTERSTATE()}==true, then {@code ns=new NextState(so,actBest)}  
-	 * advances {@code so} in two steps: ns.getAfterState() returns the <b>afterstate s'</b> (after  
-	 * the deterministic advance (e.g. the merge in case of 2048)) and ns.getNextSO() returns  
-	 * the next state <b>s''</b> (after adding the nondeterministic part (e.g. adding the random 
-	 * tile in case of 2048)).
-	 * <p>
-	 * The nondeterministic part is done once at the time of constructing an object of class
-	 * {@code NextState}, so multiple calls to {@code ns.getNextSO()} are guaranteed to return
-	 * the  same state.
-	 * <p> 
-	 * For deterministic games, the behavior is identical to the case with 
-	 * {@code getAFTERSTATE()==false}: ns.getAfterState() and ns.getNextSO() return the same  
-	 * next state so.advance(actBest).
-	 * 
-	 * @see TDNTuple2Agt#getAFTERSTATE()
-	 * @see TDNTuple2Agt#trainAgent(StateObservation)
-	 */
-	class NextState {
-			StateObservation refer;
-			StateObservation afterState;
-			StateObservation nextSO;
-			/**
-			 * the reward of next state <b>s''</b> from the perspective of state <b>s</b> = {@code so} 
-			 */
-			double nextReward;
-			
-			/**
-			 * a ScoreTuple holding  the rewards of 
-			 * {@code nextSO} from the perspective of player 0,1,...N-1
-			 */
-			private ScoreTuple nextRewardTuple = null;
-			
-			/**
-			 * Advance state <b>s</b> = {@code so} by action {@code actBest}. Store the afterstate 
-			 * <b>s'</b> and the next state <b>s''</b>. 
-			 */
-			NextState(StateObservation so, Types.ACTIONS actBest) {
-				refer = so.copy();
-				int nPlayers= refer.getNumPlayers();
-		        if (getAFTERSTATE()) {   // if checkbox "AFTERSTATE" is checked
-		        	
-	            	// implement it in such a way that StateObservation so is *not* changed -> that is why 
-	            	// we copy *first* to afterState, then advance:
-	                afterState = so.copy();
-	                afterState.advanceDeterministic(actBest);
-	                nextSO = afterState.copy();
-	                nextSO.advanceNondeterministic(); 
-		        	
-		        } else {
-	                nextSO = so.copy();
-	                nextSO.advance(actBest);
-					afterState = nextSO.copy();
-		        }
-		        
-				UpdateType UPDATE = getUpdateType(so);
-
-				if (VER_3P) {
-		        	switch (UPDATE) {
-		        	case MULTI_UPDATE:
-						boolean rgs = m_oPar.getRewardIsGameScore();
-						nextRewardTuple = new ScoreTuple(so);
-						for (int i=0; i<nPlayers; i++) {
-							nextRewardTuple.scTup[i] = normalize2(nextSO.getReward(i,rgs),nextSO);
-						}
-						break;
-		        	case SINGLE_UPDATE:
-						nextReward = fetchReward2P(nextSO,refer);
-			        	// this is r(s_{t+1}|p_t). It is equivalent to (-1)*r(s_{t+1}|p_{t+1}) for 
-						// 2-player games.
-						break;
-					}
-				} else {	// i.e. VER_3P==false
-			        if (NEW_2P) {
-						nextReward = fetchReward2P(nextSO,refer);
-			        	// this is r(s_{t+1}|p_t). It is equivalent to (-1)*r(s_{t+1}|p_{t+1}).
-			        } else {
-						nextReward = fetchReward(nextSO,refer,Types.PLAYER_PM[refer.getPlayer()]);
-			        }
-				}
-
-				if (DBG_REWARD && nextSO.isGameOver()) {
-					if (VER_3P && MODE_3P==0) {
-						System.out.print("Rewards: ");
-						System.out.print(nextRewardTuple.toString());
-					} else {
-						System.out.print("Reward: "+nextReward);
-					}
-					System.out.println("   ["+nextSO.stringDescr()+"]  " + nextSO.getGameScore() + " for player " + nextSO.getPlayer());
-				}
-			}
-
-			/**
-			 * @return the original state <b>s</b> = {@code so}
-			 */
-			public StateObservation getSO() {
-				return refer;
-			}
-
-			/**
-			 * @return the afterstate <b>s'</b>
-			 */
-			public StateObservation getAfterState() {
-				return afterState;
-			}
-
-			/**
-			 * @return the next state <b>s''</b> (with random part from environment added).
-			 */
-			public StateObservation getNextSO() {
-				return nextSO;
-			}
-
-			/**
-			 * @return the reward of next state <b>s''</b> from the perspective of state <b>s</b> = {@code so}
-			 */
-			public double getNextReward() {
-				return nextReward;
-			}
-
-			public double getNextRewardCheckFinished(int epiLength) {
-				double reward = this.getNextReward();  // r(s_{t+1}|p_t)
-				
-				if (nextSO.isGameOver()) {
-					m_finished = true;
-					
-					// only info
-					if (reward==0.0) tieCounter++;
-					if (reward==1.0 & nextSO.getPlayer()==0) winOCounter++;
-					if (reward==1.0 & nextSO.getPlayer()==1) winXCounter++;
-				}
-
-				m_counter++;
-				if (m_counter==epiLength) {
-					reward=estimateGameValue(nextSO);
-					m_finished = true; 
-				}
-				
-				return reward;
-			}
-
-			/**
-			 * @return the tuple of rewards of {@code nextSO} from the perspective of player 0,1,...N-1
-			 */
-			public ScoreTuple getNextRewardTuple() {
-				return nextRewardTuple;
-			}
-
-			public ScoreTuple getNextRewardTupleCheckFinished(int epiLength) {
-				ScoreTuple rewardTuple = this.getNextRewardTuple();
-				
-				if (nextSO.isGameOver()) {
-					m_finished = true;
-				}
-
-				m_counter++;
-				if (m_counter==epiLength) {
-					rewardTuple=estimateGameValueTuple(nextSO);
-					m_finished = true; 
-				}
-				
-				return rewardTuple;
-			}
-
-
-	} // class NextState
-
 }

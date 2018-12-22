@@ -35,11 +35,13 @@ agents/2048/fixed 4 6-Tupels 100k TDNT2 afterState.agt.zip
 agents/2048/fixed TEST eTiles 4 6-Tupels 200k TDNT2.agt.zip
 agents/2048/TEST*.agt.zip
 agents/2048/TC*.agt.zip
+agents/Hex/04/old
 agents/Hex/05/TEST*.agt.zip
 # too many for a regular save to GitHub
 agents/ConnectFour/firstTD*.agt.zip
 agents/ConnectFour/experiment
 agents/ConnectFour/old
+agents/ConnectFour/old2D
 agents/ConnectFour/TDNTal05-lam06-500k.agt.zip
 agents/ConnectFour/TDNTal10-lam03-500k.agt.zip
 

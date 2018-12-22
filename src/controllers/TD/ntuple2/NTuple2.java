@@ -29,7 +29,7 @@ import params.ParNT;
  * {@link XNTupleFuncs#getBoardVector(StateObservation)} before they are passed to 
  * {@link NTuple2} methods. 
  * 
- * @author Markus Thill, Samineh Bagheri, Wolfgang Konen, FH Köln, Sep'11
+ * @author Markus Thill, Samineh Bagheri, Wolfgang Konen, TH Köln, Sep'18
  * 
  */
 public class NTuple2 implements Serializable {
@@ -315,7 +315,7 @@ public class NTuple2 implements Serializable {
 	 * @param delta  target minus V(s_t)
 	 * @param e		 derivative of sigmoid (1 if no sigmoid) * LAMBDA^(t-k)
 	 * 
-	 * @see NTuple2ValueFunc#update(int[], int, double, double) 
+	 * @see NTuple2ValueFunc#update(int[], int, int, double, double) 
 	 */
 //	 * @param LAMBDA -- obsolete now --
 //	 * @see NTuple2ValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 

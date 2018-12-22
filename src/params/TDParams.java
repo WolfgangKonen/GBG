@@ -428,9 +428,11 @@ public class TDParams extends Frame implements Serializable
 		// added with suitable nested switch(gameName). 
 		// Currently we have only one switch(gameName) on the initial featmode (=3 for 
 		// TicTacToe, =2 for Hex, and =0 for all others)
+		boolean mode3PEnable=true;
 		switch (agentName) {
 		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
+		case "Sarsa":
 			switch (agentName) {
 			case "TD-Ntuple": 
 				alphaT.setText("0.001");  		// the defaults
@@ -439,6 +441,15 @@ public class TDParams extends Frame implements Serializable
 			case "TD-Ntuple-2": 
 				alphaT.setText("0.2");  		// the defaults
 				alfinT.setText("0.2");			//
+				break;
+			case "Sarsa": 
+				alphaT.setText("1.0");  		// the defaults
+				alfinT.setText("0.5");			//
+				epsilT.setText("0.1");  		//
+				mode3PEnable=false;				//
+				break;
+			default:	//  all other
+				epsilT.setText("0.3");				
 				break;
 			}
 			epfinT.setText("0.0");				//
@@ -460,14 +471,11 @@ public class TDParams extends Frame implements Serializable
 			choiceFeatTDS.setEnabled(false);
 			epochL.setEnabled(false);
 			epochT.setEnabled(false);
-			mode3P_L.setEnabled(true);
-			mode3P_T.setEnabled(true);
+			mode3P_L.setEnabled(mode3PEnable);
+			mode3P_T.setEnabled(mode3PEnable);
 			switch (gameName) {
 			case "2048": 
 				epsilT.setText("0.0");				
-				break;
-			default:	//  all other
-				epsilT.setText("0.3");				
 				break;
 			}
 			break;

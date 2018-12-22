@@ -7,6 +7,7 @@ import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Arena;
 import games.XArenaButtons;
@@ -211,11 +212,12 @@ public class LoadSaveGBG {
 			final agentIO.IOProgress p = new agentIO.IOProgress(bytes);
 			final ProgressTrackingOutputStream ptos = new ProgressTrackingOutputStream(gz, p);
 
-			ObjectOutputStream oos;
+			ObjectOutputStream oos=null;
 			try {
 				oos = new ObjectOutputStream(ptos);
 			} catch (IOException e) {
 				arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
+				oos.close();
 				return;
 			}
 
@@ -389,6 +391,17 @@ public class LoadSaveGBG {
 					((TDNTuple2Agt) pa).setTDParams(((TDNTuple2Agt) pa).getParTD(), pa.getMaxGameNum());
 					((TDNTuple2Agt) pa).setNTParams(((TDNTuple2Agt) pa).getParNT());
 					((TDNTuple2Agt) pa).weightAnalysis(null);
+				} else if (obj instanceof SarsaAgt) {
+					pa = (SarsaAgt) obj;
+					// set horizon cut for older agents (where horCut was not part of ParTD):
+					if (((SarsaAgt) pa).getParTD().getHorizonCut()==0.0) 
+						((SarsaAgt) pa).getParTD().setHorizonCut(0.1);
+					// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+					// (they would stay otherwise at their default values, would not 
+					// get the loaded values)
+					((SarsaAgt) pa).setTDParams(((SarsaAgt) pa).getParTD(), pa.getMaxGameNum());
+					((SarsaAgt) pa).setNTParams(((SarsaAgt) pa).getParNT());
+					((SarsaAgt) pa).weightAnalysis(null);
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;
 				} else if (obj instanceof MCAgent) {

@@ -209,7 +209,7 @@ public class EvaluatorHex extends Evaluator {
      * Similar to {@link EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)}, but:
      * <ul> 
      * <li>It does not only play evaluation games from the default start state (empty board) but 
-     * also games where the first player (Black) has made a losing moves and the agent as second
+     * also games where the first player (Black) has made a losing move and the agent as second
      * player (White) will win, if it plays perfect (see {@link HexConfig#EVAL_START_ACTIONS}). 
      * <li>It allows a different opponent than MCTS to be passed in as 2nd argument
      * </ul>
@@ -444,6 +444,18 @@ public class EvaluatorHex extends Evaluator {
             default: return null;
         }
     }
+
+	@Override
+	public String getTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>-1: none<br>"
+				+ "0: against MCTS, best is 1.0<br>"
+				+ "1: against Random, best is 1.0<br>"
+				+ "2: against Max-N, best is 1.0<br>"
+				+ "10: against MCTS, different starts, best is 1.0<br>"
+				+ "11: against TDReferee.agt.zip, different starts"
+				+ "</html>";
+	}
 
     @Override
     public String getPlotTitle() {

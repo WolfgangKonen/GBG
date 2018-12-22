@@ -59,6 +59,13 @@ abstract public class ObserverBase {
 		return storedValues;
 	}
 	
+	/** 
+	 * dummy implementation 
+	 */
+	public ArrayList<ACTIONS> getAllAvailableActions() {
+		throw new RuntimeException("getAllAvailableActions() is not implemented!");
+	}
+
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement
 	 * getAvailableActions(), as required by the interface {@link StateObservation}.
