@@ -364,6 +364,7 @@ public class OtherParams extends Frame {
 		}
 		switch (agentName) {
 		case "Sarsa":
+		case "TD-NTuple-3":
 			learnRM.setState(true);
 			break;
 		default: 

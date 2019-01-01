@@ -14,9 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-import org.apache.commons.math3.stat.descriptive.rank.Min;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
@@ -36,19 +33,17 @@ import games.GameBoard;
 import games.StateObservation;
 import games.StateObsNondeterministic;
 import games.XNTupleFuncs;
-import games.CFour.StateObserverC4;
-import games.RubiksCube.StateObserverCube;
 import games.XArenaMenu;
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
 
 /**
  * The SARSA {@link PlayAgent} <b>with n-tuples</b>. 
  * It has a one-layer (perceptron-like) neural network with or without output-nonlinearity  
- * {@code tanh} to model the value function. 
- * The net follows closely the (pseudo-)code by [SuttonBonde93]. 
+ * {@code tanh} to model the Q-function. 
+ * The net follows closely the (pseudo-)code by [SuttonBarto98]. 
  * <p>
- * Some functionality is packed in the superclass 
- * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...)
+ * Some functionality is packed in the superclasses 
+ * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...) and
+ * {@link NTupleBase} (finishUpdateWeights, increment*Counters, isTrainable, normalize2, ...)
  * <p>
  * {@link SarsaAgt} replaces the older {@code TDNTupleAgt}. 
  * The differences of {@link SarsaAgt} to {@code TDNTupleAgt} are:
@@ -70,8 +65,9 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * 
  * @see PlayAgent
  * @see AgentBase
+ * @see NTupleBase
  * 
- * @author Wolfgang Konen, TH Köln, Aug'17
+ * @author Wolfgang Konen, TH Köln, Dec'18
  */
 public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializable {
 	
@@ -98,7 +94,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	// debug printout in collectReward:
 	public static boolean DBG_REWARD=false;
 	
-	// is set to true in getNextAction3(...), if the next action is a random selected one:
+	// is set to true in getNextAction2(...), if the next action is a random selected one:
 	boolean randomSelect = false;
 	
 	
@@ -188,9 +184,6 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		int i, j;
 		double bestQValue;
         double qValue=0;			// the quantity to be maximized
-//		double CurrentScore = 0; 	
-//		double rtilde,otilde;
-//		boolean rgs = m_oPar.getRewardIsGameScore();
 		StateObservation NewSO;
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
@@ -250,6 +243,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			}
 
         }
+        assert bestActions.size()>0; 
         actBest = bestActions.get(rand.nextInt(bestActions.size()));
         // if several actions have the same best Q value, select one of them randomly
 
@@ -363,7 +357,6 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
     			m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
     				
     		} else {
-    			//System.out.println("UPDATE");
             	nextBoard = m_Net.xnf.getBoardVector(s_after);
     			m_Net.updateWeightsQ(curBoard, nextPlayer, aLast[nextPlayer], qLast,
     					r_next,target,ns.getSO());
@@ -404,7 +397,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		
 		for (int n=0; n<numPlayers; n++) {
 			if (n!=nextPlayer) {
-				if (sLast[n]!=null ) { //&& !randLast[n]) {
+				if (sLast[n]!=null ) { 
 					assert aLast[n] != null : "Ooops, aLast[n] is null!";
 					target = R.scTup[n] - rLast.scTup[n]; 		// delta reward
 			        // TODO: think whether the subtraction rlast.scTup[n] is right for every n
@@ -423,7 +416,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		        		}
 		        		String s1 = sLast[n].stringDescr();
 		        		String s2 = s_next.stringDescr();
-		        		if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
+		        		if (target!=0.0) {//(target==-1.0) { 
 		                	qLastNew = m_Net.getQFunc(curBoard,n,aLast[n]);
 		                	int actionKey = aLast[n].toInt();
 		                	System.out.println(s1+" "+s2+","+qLast+"->"+qLastNew+" target="+target
@@ -466,11 +459,9 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		StateObservation s_t = so.copy();
 		Types.ACTIONS a_t = getNextAction2(s_t, true, true);
 		for (int n=0; n<numPlayers; n++) {
-			sLast[n] = (n==nextPlayer ? s_t : null);	// nextPlayer=so.getPlayer()
-			aLast[n] = (n==nextPlayer ? a_t : null);
+			sLast[n] = (n==nextPlayer ? s_t : null);	// nextPlayer is so.getPlayer()
+			aLast[n] = (n==nextPlayer ? a_t : null);	//
 		}
-		//sLast[nextPlayer] = s_t;	// this is done now in for-loop above
-		//aLast[nextPlayer] = a_t;	//
 		do {
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	               
@@ -547,7 +538,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 				   //+ ", lambda:" + m_Net.getLambda()
 				   + ", "+getGameNum() + " games"
 				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
-		str = str + ", (winX/tie/winO)=("+winXCounter+"/"+tieCounter+"/"+winOCounter+")";
+		if (this.m_Net.getNumPlayers()==2) 
+			str = str + ", (winX/tie/winO)=("+winXCounter+"/"+tieCounter+"/"+winOCounter+")";
 		winXCounter=tieCounter=winOCounter=0;
 		return str;
 	}
@@ -555,7 +547,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
 	// It sets various elements of NextState ns (nextReward, nextRewardTuple).
 	// It is part of SarsaAgt (and not part of NextState), because it uses various elements
-	// private to SarsaAgt (DBG_REWARD, normalize2)
+	// private to SarsaAgt (DBG_REWARD, referringState, normalize2)
 	public void collectReward(NextState ns) {
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		ns.nextRewardTuple = new ScoreTuple(ns.refer);
@@ -563,8 +555,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			ns.nextRewardTuple.scTup[i] = normalize2(ns.nextSO.getReward(i,rgs),ns.nextSO);
 		}
 
-		// for completeness, not really needed in SarsaAgt
-		ns.nextReward = normalize2(ns.nextSO.getReward(ns.refer,rgs),ns.refer);
+		// for completeness, ns.nextReward is not really needed in SarsaAgt
+		ns.nextReward = normalize2(ns.nextSO.getReward(ns.nextSO,rgs),ns.refer);
 
 		if (DBG_REWARD && ns.nextSO.isGameOver()) {
 			System.out.print("Rewards: ");

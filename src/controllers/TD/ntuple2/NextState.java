@@ -7,7 +7,7 @@ import tools.Types.ScoreTuple;
 
 /**
  * Class NextState bundles the different states in state advancing and two different modes of 
- * state advancing. Helper class for {@link TDNTuple2Agt} and {@link SarsaAgt}, both 
+ * state advancing. Helper class for {@link TDNTuple2Agt}, {@link TDNTuple2Agt} and {@link SarsaAgt}, both 
  * implementing interface {@link NTupleAgt}.
  * <p>
  * If {@link NTupleAgt#getAFTERSTATE()}==false, then {@code ns=new NextState(so,actBest)}  
@@ -30,6 +30,7 @@ import tools.Types.ScoreTuple;
  * 
  * @see TDNTuple2Agt#getAFTERSTATE()
  * @see TDNTuple2Agt#trainAgent(StateObservation)
+ * @see TDNTuple3Agt#trainAgent(StateObservation)
  * @see SarsaAgt#trainAgent(StateObservation)
  */
 public class NextState {
@@ -108,7 +109,8 @@ public class NextState {
 		}
 
 		public double getNextRewardCheckFinished(int epiLength) {
-			double reward = this.getNextReward();  // r(s_{t+1}|p_t)
+			double reward = this.getNextReward();  	// r(s_{t+1}|p_t) for TDNTuple2Agt
+													// r(s_{t+1}|p_{t+1}) for SarsaAgt, TDNTuple3Agt
 			
 			if (nextSO.isGameOver()) {
 				tdAgt.setFinished(true);
@@ -138,6 +140,9 @@ public class NextState {
 			
 			if (nextSO.isGameOver()) {
 				tdAgt.setFinished(true);
+				
+				// only info
+				tdAgt.incrementWinCounters(rewardTuple.scTup[nextSO.getPlayer()],this);
 			}
 
 			tdAgt.incrementMoveCounter();

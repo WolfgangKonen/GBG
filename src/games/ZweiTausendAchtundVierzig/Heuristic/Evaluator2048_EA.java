@@ -102,11 +102,10 @@ public class Evaluator2048_EA extends Evaluator {
     @Override
     public boolean isAvailableMode(int mode) {
         switch (mode) {
-            case 1:
-                return true;
-            case 2:
-                return true;
-            case 3:
+        	case -1: 
+        	case  0:
+            case  1:
+            case  2:
                 return true;
             default:
                 return false;
@@ -115,7 +114,7 @@ public class Evaluator2048_EA extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{0, 1, 2};
+        return new int[]{-1, 0, 1, 2};
     }
 
     @Override
@@ -140,11 +139,12 @@ public class Evaluator2048_EA extends Evaluator {
 
 	@Override
 	public String getTooltipString() {
-		return "0: TODO\n"
-				+ "1: TODO\n"
-				+ "2: against Minimax, different starts, best is 0.0\n"
-				+ "9: evaluate set of states, best is ?\n"
-				+ "11: against TDReferee.agt.zip, different starts";
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>-1: none<br>"
+				+ "0: avg score from 50 games<br>"
+				+ "1: Evaluator2048_BoardPositions<br>"
+				+ "2: Evaluator2048_EA<br>"
+				+ "</html>";
 	}
 
     @Override

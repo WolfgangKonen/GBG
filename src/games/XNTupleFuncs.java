@@ -57,6 +57,11 @@ public interface XNTupleFuncs {
 	 * Symmetric board vectors are board vectors with the same value and with equivalent best
 	 * next actions. For example, TicTacToe has 8 symmetries: 4 rotations (0°, 90°, 180°, 270°)
 	 * times 2 mirror reflections.
+	 * <p>
+	 * If a game has no symmetries, this method should return an  array {@code int[1][] boardArray} with
+	 * <pre>
+	 * 		boardArray[0] = boardVector
+	 * </pre>
 	 * 
 	 * @param boardVector e.g. from {@link #getBoardVector(StateObservation)}
 	 * @return a (s x length(boardVector))-matrix 
@@ -68,7 +73,8 @@ public interface XNTupleFuncs {
 	 * and a certain action to be taken in <b>{@code so}</b>, 
 	 * generate the array of equivalent action keys {@code equivAction} for the symmetric states.
 	 * <p>
-	 * This method is needed for Q-learning and Sarsa.
+	 * This method is needed only for Q-learning and Sarsa. Implementations of this interface
+	 * may just throw an Exception if they do not need this method.
 	 * 
 	 * @param actionKey
 	 * 				the key of the action to be taken in <b>{@code so}</b> 

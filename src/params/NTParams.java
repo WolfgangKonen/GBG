@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import games.Nim.NimConfig;
 
 /**
  *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTuple2Agt}.
@@ -504,6 +505,7 @@ public class NTParams extends Frame implements Serializable {
 		switch (agentName) {
 		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
+		case "TD-Ntuple-3": 
 		case "Sarsa":
 			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
 			tcInitT.setText("0.0001");
@@ -524,6 +526,10 @@ public class NTParams extends Frame implements Serializable {
 			case "TicTacToe": 
 				NTupleNumT.setText("1");
 				NTupleSizeT.setText("9");	
+				break;
+			case "Nim": 
+				NTupleNumT.setText("1");
+				NTupleSizeT.setText(NimConfig.NUMBER_HEAPS+"");	
 				break;
 			case "2048": 
 				NTupleSizeT.setText("3");

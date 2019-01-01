@@ -8,7 +8,7 @@ import tools.Types;
 
 
 /**
- * Implementation of {@link Feature} for game TicTacToe.<p>
+ * Implementation of {@link Feature} for game C4.<p>
  * 
  * Method {@link #prepareFeatVector(StateObservation)} returns the feature vector. 
  * The constructor accepts argument {@code featmode} to construct different types 
@@ -19,7 +19,7 @@ import tools.Types;
  * the protected method {@link TicTDBase#prepareInputVector(int, int[][])} to do 
  * the main work.
  *
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln, Nov'18
  */
 public class FeatureC4 implements Feature, Serializable {
 	

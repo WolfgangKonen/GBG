@@ -5,13 +5,13 @@ package games.ZweiTausendAchtundVierzig;
  */
 public class ConfigEvaluator {
     //The Evaluator that is used when clicking on Quick Evaluation
-    //0 > Evaluator2048, evaluates whole games
-    //1 > Evaluator2048_BoardPositions, evaluates single GameStates, used for calculating Certainty
+    //0: Evaluator2048, evaluates whole games
+    //1: Evaluator2048_BoardPositions, evaluates single GameStates, used for calculating Certainty
     public static final int DEFAULTEVALUATOR = 0;
 
 
     //Evaluator2048 Settings
-    public static final int NUMBEREVALUATIONS = 50;
+    public static final int NUMBEREVALUATIONS = 250;
     public static final int MINPOINTS = 10000;
     public static final boolean PLAYSTATS_CSV = false;	// if true, print out playing statistics
     // to agents/gameName/csv/playStats.csv (it is recommended to reduce NUMBEREVALUATIONS

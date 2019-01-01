@@ -96,12 +96,12 @@ public class NTuple2 implements Serializable {
 	/**
 	 * Each NTuple consists of {@link NTuple2#getLength()} positions on the game
 	 * board.<br>
-	 * Each position can carry one out of {@code posVals} values. Here the
-	 * values are 0 ("O"), 1 (empty), 2 ("X").
+	 * Each position can carry one out of {@code posVals} values. For example in TicTacToe, 
+	 * these values are 0 ("O"), 1 (empty), 2 ("X").
 	 * 
 	 * @param nTuple
-	 *            the position vector, carrying numbers from 0 to 8 (cells of
-	 *            TicTacToe board)
+	 *            the position vector, carrying numbers from 0 to NC-1 (NC: number of cells 
+	 *            on the board)
 	 * @param posVals
 	 *            number of possible values at each position
 	 */
@@ -519,6 +519,7 @@ public class NTuple2 implements Serializable {
 		System.out.println("***end***");			
 	}
 	
+	// only valid for TicTacToe!
 	static public String stringRep(int[] board) {
 		String[] a = {"O","-","X"};
 		String s = "";

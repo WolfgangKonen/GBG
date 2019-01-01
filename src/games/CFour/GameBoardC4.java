@@ -363,7 +363,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 				x = ticGame.m_LaunchFrame.getX();
 				y = ticGame.m_LaunchFrame.getY() + ticGame.m_LaunchFrame.getHeight() +1;
 				this.setSize(ticGame.m_LaunchFrame.getWidth(),
-							 (int)(Types.GUI_SCALING_FACTORY*C4GAMEHEIGHT));	
+							 (int)(Types.GUI_SCALING_FACTOR_Y*C4GAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
 		}		

@@ -204,7 +204,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				winXScore = m_xfun.bothCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete Both finished. Avg. score for X: "+frm.format(winXScore)+" (best is 1.0).";
+				str = "Compete Both finished. Avg. score for X: "+frm.format(winXScore)+" (best is 0.0).";
 				System.out.println(str);
 				setStatusMessage(str);
 				UpdateBoard();

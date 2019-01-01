@@ -262,6 +262,7 @@ public class TDParams extends Frame implements Serializable
 	}
 	public int getFeatmode() {
 		String s = (String) choiceFeatTDS.getSelectedItem();
+		if (s==null) return 0;
 		//int i = Integer.valueOf(s).intValue();
 		return Integer.valueOf(s).intValue();
 	}
@@ -441,6 +442,11 @@ public class TDParams extends Frame implements Serializable
 			case "TD-Ntuple-2": 
 				alphaT.setText("0.2");  		// the defaults
 				alfinT.setText("0.2");			//
+				break;
+			case "TD-Ntuple-3": 
+				alphaT.setText("0.2");  		// the defaults
+				alfinT.setText("0.2");			//
+				mode3PEnable=false;				//
 				break;
 			case "Sarsa": 
 				alphaT.setText("1.0");  		// the defaults

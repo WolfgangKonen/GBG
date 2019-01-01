@@ -319,8 +319,8 @@ public class Types {
      * list of available agents = list of choices in Agent Selectors
      */
     public static final String[] GUI_AGENT_LIST 	 
-    	= {"Random", "Minimax", "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", 
-    	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "Sarsa", "TDS"};
+    	= {"Random", /*"Minimax",*/ "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", 
+    	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TD-Ntuple-3", "Sarsa", "TDS"};
     /**
      * initial agent choice for P0, P1, ... (for up to 5 players) 
      */
@@ -346,30 +346,30 @@ public class Types {
      * The factor 1.0 is appropriate for display size (1600 x 900).
      */
     public static double GUI_SCALING_FACTOR = 1.0;
-    public static double GUI_SCALING_FACTORX = GUI_SCALING_FACTOR;
-    public static double GUI_SCALING_FACTORY = GUI_SCALING_FACTOR;
+    public static double GUI_SCALING_FACTOR_X = GUI_SCALING_FACTOR;
+    public static double GUI_SCALING_FACTOR_Y = GUI_SCALING_FACTOR;
     
     /**
      * width & height of Arena and ArenaTrain windows
      */
-	public static int GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTORX);	 
-	public static int GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTORY);
+	public static int GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTOR_X);	 
+	public static int GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTOR_Y);
     /**
      * width & height of 'Competition Options'  window
      */
-	public static int GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTORX);	
-	public static int GUI_WINCOMP_HEIGHT = (int)(300*GUI_SCALING_FACTORY);
+	public static int GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTOR_X);	
+	public static int GUI_WINCOMP_HEIGHT = (int)(300*GUI_SCALING_FACTOR_Y);
     /**
      * width & height of Param Tabs window, wide enough to hold 6 tabs
      */
-	public static int GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTORX); 
-	public static int GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTORY);
+	public static int GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTOR_X); 
+	public static int GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTOR_Y);
 
-	public static int GUI_HELPFONTSIZE = (int)(14*GUI_SCALING_FACTORX);
-	public static int GUI_MENUFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
-	public static int GUI_DIALOGFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
-	public static int GUI_TIPFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
-	public static int GUI_TITLEFONTSIZE = (int)(20*GUI_SCALING_FACTORX);
+	public static int GUI_HELPFONTSIZE = (int)(14*GUI_SCALING_FACTOR_X);
+	public static int GUI_MENUFONTSIZE = (int)(12*GUI_SCALING_FACTOR_X);
+	public static int GUI_DIALOGFONTSIZE = (int)(12*GUI_SCALING_FACTOR_X);
+	public static int GUI_TIPFONTSIZE = (int)(12*GUI_SCALING_FACTOR_X);
+	public static int GUI_TITLEFONTSIZE = (int)(20*GUI_SCALING_FACTOR_X);
 	
 	
 	static final int gray = 215;
@@ -402,22 +402,22 @@ public class Types {
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 			double width = screenSize.getWidth();
 			double height = screenSize.getHeight();
-			GUI_SCALING_FACTORX = GUI_SCALING_FACTOR*(width/1600);
-			GUI_SCALING_FACTORY = GUI_SCALING_FACTOR*(height/900);
+			GUI_SCALING_FACTOR_X = GUI_SCALING_FACTOR*(width/1600);
+			GUI_SCALING_FACTOR_Y = GUI_SCALING_FACTOR*(height/900);
 		}
 		
-		GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTORX);	 
-		GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTORY);
-		GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTORX);	
-		GUI_WINCOMP_HEIGHT = (int)(300*GUI_SCALING_FACTORY);
-		GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTORX); 
-		GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTORY);
+		GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTOR_X);	 
+		GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTOR_Y);
+		GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTOR_X);	
+		GUI_WINCOMP_HEIGHT = (int)(300*GUI_SCALING_FACTOR_Y);
+		GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTOR_X); 
+		GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTOR_Y);
 
-		GUI_TITLEFONTSIZE = (int)(20*GUI_SCALING_FACTORX);
-		GUI_HELPFONTSIZE = (int)(14*GUI_SCALING_FACTORX);
-		GUI_DIALOGFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
-		GUI_MENUFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
-		GUI_TIPFONTSIZE = (int)(12*GUI_SCALING_FACTORX);
+		GUI_TITLEFONTSIZE = (int)(20*GUI_SCALING_FACTOR_X);
+		GUI_HELPFONTSIZE = (int)(14*GUI_SCALING_FACTOR_X);
+		GUI_DIALOGFONTSIZE = (int)(12*GUI_SCALING_FACTOR_X);
+		GUI_MENUFONTSIZE = (int)(12*GUI_SCALING_FACTOR_X);
+		GUI_TIPFONTSIZE = (int)(12*GUI_SCALING_FACTOR_X);
 		
 		// set globally the font for all dialog texts:
 		Font lFont = new Font("Arial", Font.PLAIN, GUI_DIALOGFONTSIZE);

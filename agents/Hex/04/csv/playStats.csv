@@ -1,5 +1,5 @@
-controllers.MCTS.MCTSAgentT: iterations:1000, rollout depth:200, K_UCT:1.4142135623730951, tree depth:10
-controllers.MCTS.MCTSAgentT:
+controllers.TD.ntuple2.TDNTuple3Agt: USESYMMETRY:true, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: true
+controllers.TD.ntuple2.TDNTuple3Agt: alpha_init->final:0.2->0.2, epsilon_init->final:0.2->0.0, gamma: 1.0
 run, moveNum, gameScore, nEmptyTile, cumEmptyTl
 1, 1, 0, 0, 0
 1, 2, 0, 0, 0
@@ -8,3 +8,5 @@ run, moveNum, gameScore, nEmptyTile, cumEmptyTl
 1, 5, 0, 0, 0
 1, 6, 0, 0, 0
 1, 7, 0, 0, 0
+1, 8, 0, 0, 0
+1, 9, 0, 0, 0

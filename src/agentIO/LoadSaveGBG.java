@@ -9,6 +9,7 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.XArenaButtons;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -391,6 +392,17 @@ public class LoadSaveGBG {
 					((TDNTuple2Agt) pa).setTDParams(((TDNTuple2Agt) pa).getParTD(), pa.getMaxGameNum());
 					((TDNTuple2Agt) pa).setNTParams(((TDNTuple2Agt) pa).getParNT());
 					((TDNTuple2Agt) pa).weightAnalysis(null);
+				} else if (obj instanceof TDNTuple3Agt) {
+					pa = (TDNTuple3Agt) obj;
+					// set horizon cut for older agents (where horCut was not part of ParTD):
+					if (((TDNTuple3Agt) pa).getParTD().getHorizonCut()==0.0) 
+						((TDNTuple3Agt) pa).getParTD().setHorizonCut(0.1);
+					// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+					// (they would stay otherwise at their default values, would not 
+					// get the loaded values)
+					((TDNTuple3Agt) pa).setTDParams(((TDNTuple3Agt) pa).getParTD(), pa.getMaxGameNum());
+					((TDNTuple3Agt) pa).setNTParams(((TDNTuple3Agt) pa).getParNT());
+					((TDNTuple3Agt) pa).weightAnalysis(null);
 				} else if (obj instanceof SarsaAgt) {
 					pa = (SarsaAgt) obj;
 					// set horizon cut for older agents (where horCut was not part of ParTD):

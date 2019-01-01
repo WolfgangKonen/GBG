@@ -12,6 +12,7 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.TStats.TAggreg;
 import params.*;
 import tools.*;
@@ -110,6 +111,20 @@ public class XArenaFuncs
 				//e.printStackTrace();
 				pa=null;			
 			}
+		} else if (sAgent.equals("TD-Ntuple-3")) {
+			try {
+				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+				NTupleFactory ntupfac = new NTupleFactory(); 
+				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
+				pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
+									  new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
+			} catch (Exception e) {
+				MessageBox.show(m_xab, 
+						e.getMessage(), 
+						"Warning", JOptionPane.WARNING_MESSAGE);
+				//e.printStackTrace();
+				pa=null;			
+			}
 		} else if (sAgent.equals("Sarsa")) {
 			try {
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
@@ -199,6 +214,20 @@ public class XArenaFuncs
 							NTupleFactory ntupfac = new NTupleFactory(); 
 							int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
 							pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
+									              new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
+						} catch (Exception e) {
+							MessageBox.show(m_xab, 
+									e.getMessage(), 
+									"Warning", JOptionPane.WARNING_MESSAGE);
+							//e.printStackTrace();
+							pa=null;			
+						}
+					} else if (sAgent.equals("TD-Ntuple-3")) {
+						try {
+							XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+							NTupleFactory ntupfac = new NTupleFactory(); 
+							int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
+							pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 									              new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 						} catch (Exception e) {
 							MessageBox.show(m_xab, 
@@ -394,6 +423,12 @@ public class XArenaFuncs
 		{		
 			StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
+			// --- only debug TTT -----
+//			so.advance(new ACTIONS(4));
+//			so.advance(new ACTIONS(5));
+//			so.advance(new ACTIONS(8));
+//			so.advance(new ACTIONS(7));
+			
 			pa.trainAgent(so);
 			
 			if (doTrainStatistics) collectTrainStats(tsList,pa,so);

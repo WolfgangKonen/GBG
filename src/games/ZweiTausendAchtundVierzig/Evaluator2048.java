@@ -10,6 +10,8 @@ import games.Arena;
 import games.PStats;
 import tools.Types;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -150,7 +152,7 @@ public class Evaluator2048 extends Evaluator {
             }
 
         } else {
-            //sync for other Agents (MC Agent uses multiple Cores naturally)
+            //sync for other Agents (MC Agent uses multiple cores naturally, TD agents are very fast)
             for (int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
                 long gameStartTime = System.currentTimeMillis();
                 StateObserver2048 so = new StateObserver2048();
@@ -247,9 +249,15 @@ public class Evaluator2048 extends Evaluator {
     @Override
     public String getMsg() {
         String tilesString = "";
+		DecimalFormat frm = new DecimalFormat("00000");
+		DecimalFormat frm1 = new DecimalFormat("000");
+		DecimalFormat frm2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+		frm2.applyPattern("#0.0%");  
 
         for (Map.Entry tile : tiles.entrySet()) {
-            tilesString += "\n" + tile.getKey() + ", " + tile.getValue();
+            tilesString += "\n" + frm.format(((Integer)tile.getKey()).longValue()) 
+            	+ ", " + frm1.format(((Integer)tile.getValue()).longValue())
+            	+ "  ("+ frm2.format(((Integer)tile.getValue()).doubleValue()/ConfigEvaluator.NUMBEREVALUATIONS)+")";
         }
 
         long duration = (stopTime - startTime);
@@ -278,11 +286,10 @@ public class Evaluator2048 extends Evaluator {
                 "\n" +
                 "\nResults:" +
                 "\nLowest score is: " + minScore +
-                "\nAverage score is: " + Math.round(averageScore) + " +- " + Math.round(standarddeviation) +
+                "\nAverage score is: " + Math.round(averageScore) + 
+                " +- " + Math.round(standarddeviation/Math.sqrt(ConfigEvaluator.NUMBEREVALUATIONS)) +
                 "\nMedian score is: " + Math.round(medianScore) +
                 "\nHighest score is: " + maxScore +
-//              "\nStandard deviation is: " + standarddeviation +
-//              "\nAverage rollout depth is: " + averageRolloutDepth +
                 "\nAverage game duration: " +  Math.round((double)duration / (double)ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
 //              "\nDuration of evaluation: " + Math.round((double)duration/(double)1000) + "s" +
                 "\nMoves per second: " + Math.round(moves/((double)duration/(double)1000)) +
@@ -300,11 +307,10 @@ public class Evaluator2048 extends Evaluator {
     @Override
     public boolean isAvailableMode(int mode) {
         switch (mode) {
-            case 1:
-                return true;
-            case 2:
-                return true;
-            case 3:
+        	case -1: 
+        	case  0:
+            case  1:
+            case  2:
                 return true;
             default:
                 return false;
@@ -333,20 +339,21 @@ public class Evaluator2048 extends Evaluator {
 
     @Override
     public String getPrintString() {
-        return"success rate";
+        return"average score";
     }
 
 	@Override
 	public String getTooltipString() {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
-				+ "0: TODO<br>"
-				+ "1: TODO<br>"
+				+ "0: avg score from 50 games<br>"
+				+ "1: Evaluator2048_BoardPositions<br>"
+				+ "2: Evaluator2048_EA<br>"
 				+ "</html>";
 	}
 
     @Override
     public String getPlotTitle() {
-        return "success";
+        return "average score";
     }
 }

@@ -51,7 +51,7 @@ import tools.Types.ACTIONS;
 public class GameBoardCube extends JFrame implements GameBoard {
 
 	private int TICGAMEHEIGHT=280;
-	private int labSize = (int)(20*Types.GUI_SCALING_FACTORX);
+	private int labSize = (int)(20*Types.GUI_SCALING_FACTOR_X);
 	private JPanel BoardPanel;
 	private JPanel ButtonPanel;
 	private JLabel leftInfo=new JLabel("");
@@ -185,7 +185,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		JPanel panel=new JPanel();
 		panel.setLayout(new GridLayout(6,8,1,1));
 		panel.setBackground(Types.GUI_BGCOLOR);
-		int buSize = (int)(25*Types.GUI_SCALING_FACTORX);
+		int buSize = (int)(25*Types.GUI_SCALING_FACTOR_X);
 		Dimension minimumSize = new Dimension(buSize,buSize); //controls the cube face sizes
 		for(int i=0;i<6;i++){
 			for(int j=0;j<8;j++){
@@ -214,7 +214,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		JPanel panel=new JPanel();
 		panel.setLayout(new GridLayout(5,4,4,4));
 		panel.setBackground(Types.GUI_BGCOLOR);
-		int buSize = (int)(35*Types.GUI_SCALING_FACTORX);
+		int buSize = (int)(35*Types.GUI_SCALING_FACTOR_X);
 		Dimension minimumSize = new Dimension(buSize,buSize); //controls the button sizes
 		for (int j=0; j<3; j++) {
 			JLabel jlab = new JLabel();
@@ -581,7 +581,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 				x = ticGame.m_LaunchFrame.getX();
 				y = ticGame.m_LaunchFrame.getY() + ticGame.m_LaunchFrame.getHeight() +1;
 				this.setSize(ticGame.m_LaunchFrame.getWidth(),
-						 (int)(Types.GUI_SCALING_FACTORY*TICGAMEHEIGHT));	
+						 (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
 		}		

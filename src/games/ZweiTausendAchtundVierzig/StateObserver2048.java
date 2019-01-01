@@ -34,7 +34,12 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
  * digit 3 representing the leftmost tile in this row and so on. <br>
  * Each hex digit represents the exponent {@code exp} of a tile value {@code 2^exp}. The 
  * value {@code exp = 0} codes an empty tile. <br>
- * Example: Hex digit {@code a} codes tile value {@code 2^a} = 1024.  <p>
+ * Example: Hex digit {@code a} codes tile value {@code 2^a} = 1024.  
+ * <p>
+ * See {@link #getBoardVector()} for the numbering of the cells in a {@code int[] boardVector}.
+ * <p>
+ * See {@link #updateAvailableMoves()} for the numbering of actions:<br>
+ * 0: left, 1: up, 2: right, 3: down.
  *
  * @author Wolfgang Konen, THK
  * @author Johannes Kutsch
@@ -895,6 +900,10 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
 
     // updateAvaliableMoves is package-visible (for StateObserver2048Slow::assertSameAdvance)
+    /**
+	 * Update class memeber {@code List<Integer> availableMoves}:<br>
+	 * The possible actions are: 0: left, 1: up, 2: right, 3: down.
+     */
     void updateAvailableMoves() {
         availableMoves.clear();
         int oldScore = score;

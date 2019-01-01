@@ -1,0 +1,166 @@
+package games.Nim;
+
+import java.io.Serializable;
+import java.util.HashSet;
+
+import games.StateObservation;
+import games.XNTupleFuncs;
+import controllers.TD.ntuple2.NTupleFactory;
+
+public class XNTupleFuncsNim implements XNTupleFuncs, Serializable {
+
+    /**
+     * change the version ID for serialization only if a newer version is no longer
+     * compatible with an older one (older .gamelog or .agt.zip containing this object will
+     * become unreadable or you have to provide a special version transformation)
+    */
+    private static final long serialVersionUID = 12L;
+    
+    private int[] actionVector;
+    private int[][] actionArray;
+
+    public XNTupleFuncsNim() {
+    	// calculate actionArray[][]: for a given action with key j, the element
+    	// actionArray[i][j] holds the equivalent action when the state is transformed to 
+    	// equiv[i] = symmetryVectors(int[] boardVector)[i]
+       	actionVector = new int[NimConfig.NUMBER_HEAPS*NimConfig.MAX_SUB];
+    	for (int i=0; i<actionVector.length; i++)
+    		actionVector[i] = i;
+    	actionArray = new int[1][];
+    	actionArray[0] = actionVector.clone();
+    }
+    
+	/**
+	 * @return the number of board cells = number of heaps
+	 */
+	@Override
+	public int getNumCells() {
+		return NimConfig.NUMBER_HEAPS;
+	}
+	
+	/**
+	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
+	 * can have. For Nim: P=HEAP_SIZE+1, coding 0,1,2,...,HEAP_SIZE items on the heap 
+	 */
+	@Override
+	public int getNumPositionValues() {
+		return NimConfig.HEAP_SIZE+1; 
+	}
+	
+	/**
+	 * @return the number of players in this game 
+	 */
+	@Override
+	public int getNumPlayers() {
+		return 2;
+	}
+	
+	/**
+	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
+	 * heap.
+	 * 
+	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
+	 * position value (0,1,2,...,HEAP_SIZE items on the heap).
+	 */
+	@Override
+	public int[] getBoardVector(StateObservation so) {
+		assert (so instanceof StateObserverNim);
+
+		return ((StateObserverNim) so).getHeaps();   
+	}
+	
+	/**
+	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
+	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * <li> the first row {@code boardArray[0]} is the board vector itself
+	 * <li> the other rows are the board vectors when transforming {@code boardVector}
+	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
+	 * </ul>
+	 * In the case of Nim there are no symmetries.<br>
+	 * (There are for N heaps the N-permutation symmetries, but it is too costly to code them as 
+	 * equivalent states. It is better to sort always the heaps in decreasing order. That is, 
+	 * when a move is made, we check the modified heap, if it is in the right position. If not, 
+	 * we exchange it with a heap to the right.)
+	 * 
+	 * @param boardVector
+	 * @return boardArray
+	 */
+	@Override
+	public int[][] symmetryVectors(int[] boardVector) {
+		int i;
+		int[][] equiv = null;
+		equiv = new int[1][];
+		equiv[0] = boardVector.clone();
+		
+		return equiv;
+	}
+	
+	/**
+	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 
+	 * and a certain action to be taken in <b>{@code so}</b>, generate the array of equivalent 
+	 * action keys {@code equivAction} for the symmetric states.
+	 * <p>
+	 * This method is needed only for Q-learning and Sarsa.
+	 * 
+	 * @param actionKey
+	 * 				the key of the action to be taken in <b>{@code so}</b> 
+	 * @return <b>equivAction</b>
+	 * 				array of the equivalent actions' keys. 
+	 * <p>
+	 * equivAction[i] is the key of the action equivalent to actionKey in the
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 */
+	public int[] symmetryActions(int actionKey) {
+		int numEquiv = 1; //actionArray.length;   
+		int[] equivAction = new int[numEquiv];
+		for (int i = 0; i < numEquiv; i++) {
+			equivAction[i] = actionArray[i][actionKey];
+		}
+
+		return equivAction;
+	}
+	
+	/** 
+	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
+	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
+	 * containing the cells 0, 1, and 4.
+	 * 
+	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
+	 * @return nTuples[numTuples][]
+	 */
+	@Override
+	public int[][] fixedNTuples(int mode) {
+		int nTuple[][]=new int[1][NimConfig.NUMBER_HEAPS];	
+		
+		for (int i=0; i<nTuple[0].length; i++) nTuple[0][i] = i;
+								// i.e. one n-tuple {0,1,...,NUMBER_HEAPS-1} (covers all heaps)
+		return nTuple;				
+	}
+
+    private static int[] fixedModes = {1};
+    
+	public int[] getAvailFixedNTupleModes() {
+		return fixedModes;
+	}
+
+
+	/**
+	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
+	 * for board coding. Needed for random-walk n-tuple generation.
+	 * 
+	 * @param iCell
+	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
+	 * 		a board vector) 
+	 * 
+	 * @see NTupleFactory#generateRandomWalkNTuples(int,int,int,XNTupleFuncs)
+	 */
+	public HashSet adjacencySet(int iCell) {
+		HashSet adjSet = new HashSet();
+		for (int i=0; i<NimConfig.NUMBER_HEAPS; i++) 
+			if (i!=iCell) adjSet.add(i);
+		
+		return adjSet;
+	}
+
+
+}

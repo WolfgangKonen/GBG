@@ -126,7 +126,7 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 	 * and a certain action to be taken in <b>{@code so}</b>, generate the array of equivalent 
 	 * action keys {@code equivAction} for the symmetric states.
 	 * <p>
-	 * This method is needed for Q-learning and Sarsa.
+	 * This method is needed only for Q-learning and Sarsa.
 	 * 
 	 * @param actionKey
 	 * 				the key of the action to be taken in <b>{@code so}</b> 
@@ -137,11 +137,9 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
 	 */
 	public int[] symmetryActions(int actionKey) {
-		int i;
-		//int[] corr = {0,3,2,1,4,5,6,7};
 		int numEquiv = actionArray.length;
 		int[] equivAction = new int[numEquiv];
-		for (i = 0; i < numEquiv; i++) {
+		for (int i = 0; i < numEquiv; i++) {
 			equivAction[i] = actionArray[i][actionKey];
 		}
 

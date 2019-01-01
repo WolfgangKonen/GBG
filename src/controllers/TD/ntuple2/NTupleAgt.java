@@ -7,7 +7,7 @@ import tools.Types;
 
 /**
  * Interface NTupleAgt is needed to make {@link NTuple2ValueFunc} and {@link NextState} usable for 
- * both agents {@link TDNTuple2Agt} and {@link SarsaAgt}. 
+ * all agents {@link TDNTuple2Agt},  {@link TDNTuple3Agt} and {@link SarsaAgt}. 
  */
 abstract interface NTupleAgt {
 	

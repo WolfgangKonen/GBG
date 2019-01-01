@@ -39,6 +39,7 @@ import tools.Types;
  *         certain amount of games.
  * 
  * @see TDNTuple2Agt
+ * @see TDNTuple3Agt
  * @see SarsaAgt
  * 
  * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Köln, Feb'17  
@@ -326,9 +327,9 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param curPlayer
 	 *            the player whose value function is updated (the p in V(s_t|p) )
 	 * @param nextBoard
-	 *            the following board
+	 *            the following board (not really needed)
 	 * @param nextPlayer
-	 *            the player to use in the target value function (the p in \gamma*V(s_{t+1}|p) )
+	 *            the player on next board (only needed for debug)
 	 * @param reward
 	 *            the delta reward given for the transition into nextBoard
 	 * @param target
@@ -377,22 +378,57 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 	/**
-	 * Update the weights of the n-tuple system in case of Q-learning ({@link SarsaAgt} or QlearnAgt). 
+	 * Update the weights of the n-tuple system in case of *new* TD-learning ({@link TDNTuple3Agt}). 
 	 * 
 	 * @param curBoard
 	 *            the current board
 	 * @param curPlayer
-	 *            the player whose value function is updated (the p in V(s_t|p) )
-	 * @param nextBoard
-	 *            the following board
-	 * @param nextPlayer
-	 *            the player to use in the target value function (the p in \gamma*V(s_{t+1}|p) )
+	 *            the player to move on current board
+	 * @param vLast
+	 *            the value V(s) for s=curBoard and player curPlayer
 	 * @param reward
-	 *            the delta reward given for the transition into nextBoard
+	 *            the delta reward given for the transition into next board
 	 * @param target
 	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
 	 *            non-terminal states. But the target can be as well (r + GAMMA * V) for an
 	 *            n-ply look-ahead or (r - GAMMA * V(opponent)).  
+	 * @param thisSO
+	 * 			  only for debug info: access to the current state's stringDescr()
+	 */
+	public void updateWeightsTD(int[] curBoard, int curPlayer, 
+			double vLast, double reward, double target, StateObservation thisSO) {
+		// delta is the error signal:
+		double delta = (target - vLast);
+		// derivative of tanh ( if hasSigmoid()==true):
+		double e = (hasSigmoid() ? (1.0 - vLast * vLast) : 1.0);
+
+		update(curBoard, curPlayer, 0, delta, e, false);
+		
+		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
+			final double MAXSCORE = 1; // 1; 3932156;
+			double v_new = getScoreI(curBoard,curPlayer);
+			System.out.println("updateWeightsNew[p="+curPlayer+", "+thisSO.stringDescr()
+			+"] qLast,v_new:"+vLast*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
+			dbg3PArr[curPlayer]=v_new*MAXSCORE;
+		}
+	}
+
+	/**
+	 * Update the weights of the n-tuple system in case of Q-learning ({@link SarsaAgt} or QLearnAgt). 
+	 * 
+	 * @param curBoard
+	 *            the current board
+	 * @param nextPlayer
+	 *            the player to move on current board
+	 * @param lastAction
+	 *            the action taken in current board
+	 * @param qLast
+	 *            the Q-value Q(s,a) for s=curBoard and a=lastAction
+	 * @param reward
+	 *            the delta reward given for taking action a in state s
+	 * @param target
+	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
+	 *            non-terminal states.   
 	 * @param thisSO
 	 * 			  only for debug info: access to the current state's stringDescr()
 	 */
@@ -467,7 +503,8 @@ public class NTuple2ValueFunc implements Serializable {
 	 * 			  the delta signal we propagate back
 	 * @param e   derivative of tanh ( if hasSigmoid()==true)
 	 * @param QMODE   
-	 * 			  whether called via {@code updateWeightsQ} (Sarsa, Q) or {@code updateWeightsNew*} (TD)
+	 * 			  whether called via {@code updateWeightsQ} (Sarsa, Q-learning) 
+	 * 			  or via {@code updateWeightsNew*} (TD-learning)
 	 * <p>
 	 * The value added to all active weights is alphaM*delta*e   (in case LAMBDA==0)
 	 */
@@ -475,17 +512,17 @@ public class NTuple2ValueFunc implements Serializable {
 						boolean QMODE) {
 		int i, j, out;
 		double alphaM, sigDeriv, lamFactor;
-		int[] equivAction;
 
-		// Get equivalent boards (including self)
+		// Get equivalent boards (including self) and corresponding actions
 		int[][] equiv = getSymBoards2(board,getUSESYMMETRY());
+		int[] equivAction = (QMODE ? getSymActions(output, getUSESYMMETRY()) : null); 
+		// equivAction only needed for QMODE==true
 
 		alphaM = ALPHA / (numTuples*equiv.length); 
 
 		// construct new EligStates object, add it at head of LinkedList eList and remove 
 		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):
-		// *** TODO: add actions to EligStates!! ***
-		EligStates elem = new EligStates(equiv,e);
+		EligStates elem = new EligStates(equiv,equivAction,e);
 		eList.addFirst(elem);
 		if (eList.size()>horizon) eList.pollLast();
 		
@@ -495,7 +532,7 @@ public class NTuple2ValueFunc implements Serializable {
 		while(iter.hasNext()) {
 			elem=iter.next();
 			equiv=elem.equiv;
-			equivAction = getSymActions(output, getUSESYMMETRY());
+			equivAction=elem.equivAction;
 //			printEquivs(equiv,equivAction);		// debug (TTT only)
 			//System.out.println(eList.size()+" "+lamFactor+"   ["+ equiv[0]+"]");	// debug
 			assert (lamFactor >= tdAgt.getParTD().getHorizonCut()) 
@@ -625,6 +662,10 @@ public class NTuple2ValueFunc implements Serializable {
 		}		
 	}
 
+	public long getNumPlayers() {
+		return numPlayers;
+	}
+
 	public long getNumLearnActions() {
 		return numLearnActions;
 	}
@@ -634,13 +675,15 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 
-	// class EligStates is needed in update(int[],int,double,double)
+	// class EligStates is needed in update(int[],int,int,double,double,boolean)
 	private class EligStates implements Serializable {
 		int[][] equiv;
+		int[] equivAction;
 		double sigDeriv;
 		
-		EligStates(int[][] equiv, double sigDeriv) {
+		EligStates(int[][] equiv, int[] equivAction, double sigDeriv) {
 			this.equiv=equiv.clone();
+			this.equivAction=(equivAction==null ? null : equivAction.clone());
 			this.sigDeriv=sigDeriv;
 		}
 	}
@@ -781,7 +824,7 @@ public class NTuple2ValueFunc implements Serializable {
 		DecimalFormat df = new DecimalFormat();				
 		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
 		df.applyPattern("+0.0000000;-0.0000000");  
-		System.out.println("weight analysis SarsaAgt ("
+		System.out.println("weight analysis " + tdAgt.getClass().getSimpleName() + " ("
 				+count+" weights, "+nActive+" active ("+pActive+"%)): ");
 		for (i=0; i<per.length; i++) {
 			System.out.println("   Quantile [" + form.format(per[i]) + "] = "	

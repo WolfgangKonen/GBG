@@ -10,10 +10,15 @@ gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
 path <- "../../agents/Hex/04/csv/"; limits=c(0.0,1.0); errWidth=300/wfac;
 
 filenames=c("multiTrainSarsa.csv"
-           #,"multiTrainSarsaInitNull.csv"
-           ,"multiTrainSarsaNoLearnRM.csv"
-           ,"multiTrainSarsaNoFinalAdapt.csv"
-           #,"multiTrain_TCL-EXP-al10-lam06-500k-eps0025.csv"
+            ,"multiTrainSarsa-eps02.csv"
+            ,"multiTrainSarsa-lam05-hor010.csv"
+           #,"multiTrainSarsa-lam05-hor001.csv"
+           #,"multiTrainSarsaNoLearnRM.csv"
+           #,"multiTrainSarsaNoFinalAdapt.csv"
+           ,"multiTrainTD2-10-6-lam00.csv"
+           ,"multiTrainTD2-10-6-eps02.csv"
+           #,"multiTrainTD2-20-5-lam00.csv"
+           #,"multiTrain-noLearnFromRM-01-al050-2P.csv" # older TD2 (11/2017)
            )
 # other pars: alpha=0.2, eps = 1.0 ... 0.1, ChooseStart01=F
 # evalMode= 0 (evalQ) is from default start state against MCTS, 
@@ -26,6 +31,7 @@ for (k in 1:length(filenames)) {
   df <- read.csv(file=filename, dec=".",skip=2)
   df$run <- as.factor(df$run)
   df <- df[,setdiff(names(df),"trnMoves")]
+  df <- df[,setdiff(names(df),"evalM")]
   #if (k==1) df <- cbind(df,actionNum=rep(0,nrow(df)))
   
   if (PLOTALLLINES) {
@@ -38,10 +44,14 @@ for (k in 1:length(filenames)) {
   
   lambdaCol = switch(k
                     ,rep("Sarsa",nrow(df))
-                    #,rep("init null",nrow(df)) # 
-                    ,rep("no learnRM",nrow(df))
-                    ,rep("no f.a.",nrow(df))   # no finalAdaptAgents
-                    #,rep("al50",nrow(df))
+                    ,rep("Sarsa, eps=0.2",nrow(df))
+                    ,rep("0.5, hor=0.1",nrow(df)) # 
+                    #,rep("0.5, hor=0.01",nrow(df)) # 
+                    #,rep("no learnRM",nrow(df))
+                    #,rep("no f.a.",nrow(df))   # no finalAdaptAgents
+                    ,rep("TD-2, 10-6",nrow(df))
+                    ,rep("TD-2, eps=0.2",nrow(df))
+                    #,rep("TD-2, 20-5",nrow(df))
                     #,rep("eps0.025",nrow(df))
                     #,rep(0.80,nrow(df))
                     #,rep(0.90,nrow(df))
@@ -67,7 +77,7 @@ tgc <- data.frame()
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
 # its mean, sd, se (standard dev of the mean), ci (conf.interval) and count N.
 tgc1 <- summarySE(dfBoth, measurevar="evalQ", groupvars=c(gamesVar,"lambda"))
-tgc1 <- cbind(tgc1,evalMode=rep(2,nrow(tgc1)))
+tgc1 <- cbind(tgc1,evalMode=rep(0,nrow(tgc1)))
 names(tgc1)[4] <- "eval"  # rename "evalQ"
 # tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c(gamesVar,"lambda"))
 # tgc2 <- cbind(tgc2,evalMode=rep(10,nrow(tgc2)))

@@ -198,10 +198,14 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 		m_counter++;
 	}
 	
+	/**
+	 * @param reward = r(s_{t+1}|p_{t+1}) with s_{t+1} = ns.nextSO
+	 */
+	@Override
 	public void incrementWinCounters(double reward, NextState ns) {
 		if (reward==0.0) tieCounter++;
-		if (reward==1.0 & ns.refer.getPlayer()==0) winXCounter++;
-		if (reward==1.0 & ns.refer.getPlayer()==1) winOCounter++;
+		if (reward==-1.0 & ns.refer.getPlayer()==0) winXCounter++;
+		if (reward==-1.0 & ns.refer.getPlayer()==1) winOCounter++;
 	}
 	
 	/**

@@ -122,7 +122,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 		JPanel panel=new JPanel();
 		//JButton b = new JButton();
 		panel.setLayout(new GridLayout(3,3,2,2));
-		int buSize = (int)(50*Types.GUI_SCALING_FACTORX);
+		int buSize = (int)(50*Types.GUI_SCALING_FACTOR_X);
 		Dimension minimumSize = new Dimension(buSize,buSize); //controls the button sizes
 		for(int i=0;i<3;i++){
 			for(int j=0;j<3;j++){
@@ -395,7 +395,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 				x = ticGame.m_LaunchFrame.getX();
 				y = ticGame.m_LaunchFrame.getY() + ticGame.m_LaunchFrame.getHeight() +1;
 				this.setSize(ticGame.m_LaunchFrame.getWidth(),
-							 (int)(Types.GUI_SCALING_FACTORY*TICGAMEHEIGHT));	
+							 (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
 		}		

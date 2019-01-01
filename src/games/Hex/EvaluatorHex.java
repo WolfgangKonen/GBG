@@ -2,6 +2,8 @@ package games.Hex;
 
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
+import controllers.TD.ntuple2.NTupleBase;
+import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
@@ -117,9 +119,9 @@ public class EvaluatorHex extends Evaluator {
                 result = competeAgainstMinimax(playAgent, m_gb);
                 break;
             case 10:
-            	if (playAgent instanceof TDNTuple2Agt) {
+            	if (playAgent instanceof TDNTuple2Agt || playAgent instanceof NTupleBase) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
-            		// thread-safe, which is the case for TDNTuple2Agt
+            		// thread-safe, which is the case for TDNTuple2Agt, TDNTuple3Agt or SarsaAgt.
             		// Also we have to construct MCTS opponent inside the callables, otherwise
             		// we are not thread-safe as well:
                     result = competeAgainstMCTS_diffStates_PAR(playAgent, m_gb, numEpisodes);

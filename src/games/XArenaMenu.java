@@ -29,6 +29,7 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
@@ -587,13 +588,18 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple2Agt) td).getParOther() );
 				//m_arena.m_xab.oPar.numEval_T.setText(""+((TDNTuple2Agt) td).getOtherPar().getNumEval());
 			}
+			else if (td instanceof TDNTuple3Agt) {			
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple3Agt) td).getParTD() );
+				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple3Agt) td).getParNT() );
+				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple3Agt) td).getParOther() );
+			}
 			else if (td instanceof SarsaAgt) {
 				
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar[n].setFrom( ((SarsaAgt) td).getParTD() );
 				m_arena.m_xab.ntPar[n].setFrom( ((SarsaAgt) td).getParNT() );
 				m_arena.m_xab.oPar[n].setFrom( ((SarsaAgt) td).getParOther() );
-				//m_arena.m_xab.oPar.numEval_T.setText(""+((SarsaAgt) td).getOtherPar().getNumEval());
 			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:

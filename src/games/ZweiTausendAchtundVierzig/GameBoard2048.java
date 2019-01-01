@@ -85,7 +85,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         JLabel Blank = new JLabel(" ");        // a little bit of space
         JLabel Title = new JLabel("2048", SwingConstants.CENTER);
         Title.setForeground(Color.black);
-        Font font = new Font("Arial", 1, (int)(20*Types.GUI_SCALING_FACTORX));
+        Font font = new Font("Arial", 1, (int)(20*Types.GUI_SCALING_FACTOR_X));
         Title.setFont(font);
         titlePanel.add(Blank);
         titlePanel.add(Title);

@@ -18,6 +18,41 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
      */
     private static final long serialVersionUID = -4486168568704181430L;
 
+    private int[] actionVector = {0,1,2,3};
+//    private int[][] newplace;
+    private int[][] actionArray;
+
+	/**
+	 * Constructor, generates actionArray as needed for {@link #symmetryActions(int)}
+	 * <p>
+	 * See {@link StateObserver2048#updateAvailableMoves()} for the numbering of actions:<br>
+	 * 0: left, 1: up, 2: right, 3: down.
+	 * 
+	 */
+    public XNTupleFuncs2048() {
+    	// calculate actionArray[][]: for a given action with key j, the element
+    	// actionArray[i][j] holds the equivalent action when the state is transformed to 
+    	// equiv[i] = symmetryVectors(int[] boardVector)[i]
+    	actionArray = new int[8][];
+    	int[] rotatedActionVector = actionVector.clone();
+		int[] mirroredActionVector = mirrorActionVector(actionVector);
+
+		for(int i = 0; i < 8; i+=2) {
+			actionArray[i] = rotatedActionVector;
+			actionArray[i+1] = mirroredActionVector;
+
+			mirroredActionVector = rotateActionVector(mirroredActionVector);
+			rotatedActionVector = rotateActionVector(rotatedActionVector);
+		}
+    }
+    
+//    // helper function for XNTupleFuncsTTT(): "Where has array arr the content j?"
+//    private int whereHas(int[] arr, int j) {
+//    	for (int i=0; i<arr.length; i++) 
+//    		if (arr[i]==j) return i;
+//    	throw new RuntimeException("whereHas: arr does not contain j!!");
+//    }
+    
 	//
 	// The following five functions are only needed for the n-tuple interface:
 	//
@@ -89,6 +124,8 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 			symmetries[i] = boardVector;
 			symmetries[i+1] = mirroredBoardVector;
 
+			if (i==6) break; // a little speedup
+			
 			mirroredBoardVector = rotateBoardVector(mirroredBoardVector);
 			boardVector = rotateBoardVector(boardVector);
 		}
@@ -100,7 +137,7 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	 * and a certain action to be taken in <b>{@code so}</b>, 
 	 * generate the array of equivalent action keys {@code equivAction} for the symmetric states.
 	 * <p>
-	 * This method is needed for Q-learning and Sarsa.
+	 * This method is needed only for Q-learning and Sarsa.
 	 * 
 	 * @param actionKey
 	 * 				the key of the action to be taken in <b>{@code so}</b> 
@@ -111,8 +148,13 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
 	 */
 	public int[] symmetryActions(int actionKey) {
-		/* TODO */
-		return null;
+		int numEquiv = actionArray.length;
+		int[] equivAction = new int[numEquiv];
+		for (int i = 0; i < numEquiv; i++) {
+			equivAction[i] = actionArray[i][actionKey];
+		}
+
+		return equivAction;
 	}
 	
 	/** 
@@ -262,4 +304,42 @@ public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
 		mirroredArray[15] = array[3];
 		return mirroredArray;
 	}
+
+	/**
+	 * Rotate an action vector 90 degree clockwise.
+	 * <p>
+	 * See {@link StateObserver2048#updateAvailableMoves()} for the numbering of actions:<br>
+	 * 0: left, 1: up, 2: right, 3: down.
+	 * 
+	 * @param array
+	 * @return
+	 */
+	private int[] rotateActionVector(int[] array) {
+		int[] rotatedArray = new int[4];
+		rotatedArray[0] = array[1];
+		rotatedArray[1] = array[2];
+		rotatedArray[2] = array[3];
+		rotatedArray[3] = array[0];
+		return rotatedArray;
+	}
+
+	/**
+	 * Mirror an action vector upside-down.
+	 * <p>
+	 * See {@link StateObserver2048#updateAvailableMoves()} for the numbering of actions:<br>
+	 * 0: left, 1: up, 2: right, 3: down.
+	 * 
+	 * @param array
+	 * @return
+	 */
+	private int[] mirrorActionVector(int[] array) {
+		int[] mirroredArray = new int[4];
+		mirroredArray[0] = array[0];
+		mirroredArray[1] = array[3];
+		mirroredArray[2] = array[2];
+		mirroredArray[3] = array[1];
+		return mirroredArray;
+	}
+
 }
+
