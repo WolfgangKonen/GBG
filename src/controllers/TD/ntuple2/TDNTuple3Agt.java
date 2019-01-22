@@ -45,8 +45,18 @@ import games.XArenaMenu;
  * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...) and
  * {@link NTupleBase} (finishUpdateWeights, increment*Counters, isTrainable, normalize2, ...)
  * <p>
- * {@link TDNTuple3Agt} replaces the older {@code TDNTupleAgt}. 
- * The differences of {@link TDNTuple3Agt} to {@code TDNTupleAgt} are:
+ * {@link TDNTuple3Agt} is an alternative to {@link TDNTuple2Agt}. 
+ * The differences between {@link TDNTuple3Agt} and {@link TDNTuple2Agt} are:
+ * <ul>
+ * <li> {@link TDNTuple3Agt} updates the value of a state for a player based on the value/reward
+ * 		that the <b>same</b> player achieves in his next turn. It is in this way more similar to 
+ * 		{@link SarsaAgt}. The updates of {@link TDNTuple2Agt} are based on the value/reward of 
+ * 		the <b>next state</b> (may require sign change, depending on the number of players).
+ * <li> Eligible states: {@link TDNTuple3Agt} updates with ELIST_PP=true, i.e. it has a separate 
+ * 		{@code eList[p]} per player p. {@link TDNTuple2Agt} uses only one common {@code eList[0]}. 
+ * 		Only relevant for LAMBDA>0. 
+ * </ul>
+ * The similarities of {@link TDNTuple3Agt} and {@link TDNTuple2Agt} are:
  * <ul>
  * <li> no eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
  * 		memory consumptive)
@@ -83,6 +93,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	private double BestScore;
 	
 	private int numPlayers;
+	/**
+	 * sLast[curPlayer] stores the last afterstate that curPlayer generated in his previous move
+	 * (initially null)
+	 */
 	transient private StateObservation[] sLast;	// last state of player p
 //	transient private Types.ACTIONS[] aLast;	// last action of player p
 	transient private boolean[] randLast;		// whether last action of player p was a random action
@@ -90,12 +104,12 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	private boolean RANDINITWEIGHTS = false;// If true, init weights of value function randomly
 
-	private boolean m_DEBG = false; //false;
+	private boolean m_DEBG = false; //false;true;
 	// debug printout in collectReward:
 	public static boolean DBG_REWARD=false;
 	
-	// is set to true in getNextAction2(...), if the next action is a random selected one:
-	boolean randomSelect = false;
+	// use ternary target in update rule:
+	public boolean TERNARY=true;		// remains true only if it is a final-reward-game (see getNextAction2)
 	
 	
 	private int acount=0;
@@ -171,13 +185,13 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow random action selection with probability m_epsilon
 	 * @param silent
-	 * @return actBest		the best action. If several actions have the same
+	 * @return actBest,		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).<br>
-	 * actBest has also the members vTable and vBest to store the Q value for each available
-	 * action (as returned by so.getAvailableActions()) and the Q value for the best action actBest.
+	 * actBest has also the members vTable and vBest to store the Q-value for each available
+	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action actBest, resp.
 	 */
 	@Override
 	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
@@ -186,6 +200,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         double value=0;			// the quantity to be maximized
         double otilde, rtilde;
 		boolean rgs = this.getParOther().getRewardIsGameScore();
+		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we have to use TD target
 		StateObservation NewSO;
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
@@ -194,7 +209,9 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		
         otilde = so.getReward(so,rgs);
 
-        randomSelect = false;
+    	
+    	boolean randomSelect;		// true signals: the next action is a random selected one
+    	randomSelect = false;
 		if (random) {
 			randomSelect = (rand.nextDouble() < m_epsilon);
 		}
@@ -226,7 +243,12 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	        // but they usually differ for nondeterministic games.
             	
     	        rtilde = NewSO.getReward(so,rgs)-otilde;
-    	        value = rtilde + getGamma()*value;
+            	if (TERNARY) {
+            		value = NewSO.isGameOver() ? rtilde : getGamma()*value;
+            	} else {
+        	        value = rtilde + getGamma()*value;
+            	}
+    	        
     		}
        	
 			// just a debug check:
@@ -336,6 +358,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	}
 
 	/**
+	 * Adapt the n-tuple weights for state {@code sLast[curPlayer]}, the last afterstate that current
+	 * player generated, towards the target derived from {@code s_next}.
 	 * 
 	 * @param curPlayer		the player to move in state {@code ns.getSO()}
 	 * @param R				the (cumulative) reward tuple received when moving into {@code s_next}
@@ -345,8 +369,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	private void adaptAgentV(int curPlayer, ScoreTuple R, NextState ns) {
 		StateObservation s_after = ns.getAfterState();
 		StateObservation s_next = ns.getNextSO();
-//		int nextPlayer = ns.getNextSO().getPlayer();
-		int[] curBoard, nextBoard;
+		int[] curBoard;
 		double v_next,vLast,vLastNew,target;
 		boolean learnFromRM = m_oPar.useLearnFromRM();
 		
@@ -360,7 +383,11 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		if (sLast[curPlayer]!=null) {
 			// delta reward from curPlayer's perspective when moving into s_next
 			double r_next = R.scTup[curPlayer] - rLast.scTup[curPlayer];  
-			target = r_next + getGamma()*v_next;
+        	if (TERNARY) {
+        		target = s_next.isGameOver() ? r_next : getGamma()*v_next;
+        	} else {
+    			target = r_next + getGamma()*v_next;        		
+        	}
 //			if (target==-1.0) {
 //				int dummy=0;
 //			}
@@ -378,7 +405,6 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     			m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
     				
     		} else {
-            	//nextBoard = m_Net.xnf.getBoardVector(s_after);
     			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, r_next,target,ns.getSO());
     		}
     		
@@ -390,24 +416,20 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	    		}
 	    		String s1 = sLast[curPlayer].stringDescr();
 	    		String s2 = s_next.stringDescr();
-	    		if (target<0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
+	    		if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
 	            	vLastNew = m_Net.getScoreI(curBoard,curPlayer);
 	            	System.out.println(s1+" "+s2+","+vLast+"->"+vLastNew+" target="+target
-	            			+" player="+(curPlayer==0 ? "X" : "o"));
+	            			+" player="+(curPlayer==0 ? "X" : "O"));
 	            	if (++acount % 50 ==0) {
 	            		int dummy=1;
 	            	}
 	    		}
-//	    		if (s_next.stringDescr()=="XooX-o-XX") {
-//	    			System.out.println(this.getGameNum()+" target="+target);
-//	    			int dummy=1;
-//	    		}
 			}
 
 		}  // if(sLast[..]!=null)
 	}
 	
-	void finalAdaptAgents(int curPlayer, ScoreTuple R, NextState ns) {
+	private void finalAdaptAgents(int curPlayer, ScoreTuple R, NextState ns) {
 		double target,vLast,vLastNew;
 		int[] curBoard, nextBoard;
 		StateObservation s_after = ns.getAfterState();
@@ -415,35 +437,46 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		
 		for (int n=0; n<numPlayers; n++) {
 			if (n!=curPlayer) {
+				// adapt the value of the last state sLast[n] of each player other than curPlayer
+				// towards the reward received when curPlayer did his terminal move
 				if (sLast[n]!=null ) { 
 					target = R.scTup[n] - rLast.scTup[n]; 		// delta reward
 			        // TODO: think whether the subtraction rlast.scTup[n] is right for every n
 					//		 (or whether we need to correct rLast before calling finalAdaptAgents)
 					curBoard = m_Net.xnf.getBoardVector(sLast[n]); 
-		        	vLast = m_Net.getScoreI(curBoard,curPlayer);
+		        	vLast = m_Net.getScoreI(curBoard,n);
 		        	
 	    			m_Net.updateWeightsTD(curBoard, n, vLast, R.scTup[n], target, ns.getSO());
 
 	    			//debug only:
 	    			if (m_DEBG) {
 	    	    		if (s_next.isGameOver()) {
-	    	            	vLastNew = m_Net.getScoreI(curBoard,curPlayer);
+	    	            	vLastNew = m_Net.getScoreI(curBoard,n);
 	    	            	int dummy=1;
 	    	    		}
 	    	    		String s1 = sLast[n].stringDescr();
 	    	    		String s2 = s_next.stringDescr();
 	    	    		if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
-	    	            	vLastNew = m_Net.getScoreI(curBoard,curPlayer);
+	    	            	vLastNew = m_Net.getScoreI(curBoard,n);
 	    	            	System.out.println(s1+" "+s2+","+vLast+"->"+vLastNew+" target="+target
-	    	            			+" player="+(n==0 ? "X" : "o")+" (f)"+this.getGameNum());
+	    	            			+" player="+(n==0 ? "X" : "O")+" (f)"+this.getGameNum());
 	    	            	if (++acount % 50 ==0) {
 	    	            		int dummy=1;
 	    	            	}
 	    	    		}
 	    			}
 				}
+			} else { // if n==curPlayer
+				// adapt the value of the *next state* that curPlayer observed after he did his 
+				// final move towards target 0. (This is only relevant for TERNARY==false, since 
+				// only then the value of this next state is used in getNextAction2.)
+				curBoard = m_Net.xnf.getBoardVector(s_next); 
+	        	vLast = m_Net.getScoreI(curBoard,curPlayer);
+	        	
+    			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, R.scTup[curPlayer], 0.0, s_next);
+				
 			}
-		}
+		} // for
 		
 	}
 	
@@ -479,7 +512,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		do {
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	        
-	        // choose action a_t, using eps-greedy policy based on V
+	        // choose action a_t, using epsilon-greedy policy based on V
 			a_t = getNextAction2(s_t, true, true);
 	               
 	        // take action a_t and observe reward & next state 
@@ -539,7 +572,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		String cs = getClass().getName();
 		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
 						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
-						+ ", gamma: " + m_tdPar.getGamma();
+						+ ", gamma: " + m_tdPar.getGamma()
+						+ ", "+stringDescrNTuple();		// see NTupleBase
 		return str;
 	}
 		

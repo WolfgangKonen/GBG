@@ -39,9 +39,9 @@ public class NTuple2 implements Serializable {
 	private boolean TC = false; 		// TC constant is implemented
 										// to turn on and off temporal
 										// coherence implementation
-	private boolean tcImm = true;  		// should be always true: calculate tcFactorArray
-										// immediately from N and A 
-										// (recommended case in [Bagh14])
+	private boolean tcImm = true;  		// true: immediate TC update, false: batch update (epochs).
+										// Should be always true: calculate tcFactorArray
+										// immediately from N and A (recommended case in [Bagh14])
 	private boolean tcAccRW = true;		// If true, accumulate in N and A the recommended weight
 										// changes \delta*elig (case TCL[r] in [Bagh14]).
 										// If false, accumulate in N and A the error signal
@@ -422,6 +422,14 @@ public class NTuple2 implements Serializable {
 	
 	public double getTcFactor(int Index) {
 		return (TC) ? tcFactorArray[Index] : 1.0;
+	}
+	
+	public boolean getTc() {
+		return TC;
+	}
+
+	public boolean getTcImm() {
+		return tcImm;
 	}
 
 	public void clearIndices() {

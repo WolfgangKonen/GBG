@@ -11,7 +11,7 @@ class HexConfig {
     /**
      * Length of one side of the game board in tiles
      */
-    final static int BOARD_SIZE = 4;
+    final static int BOARD_SIZE = 6;
 
     /**
      * Size of hexagons in px (from one side to the opposite one)
@@ -33,6 +33,10 @@ class HexConfig {
      */
     final static int TILE_COUNT = BOARD_SIZE * BOARD_SIZE;
  
+    /**
+     * Number of episodes to play when evaluating an agent
+     * @see EvaluatorHex
+     */
     final static int EVAL_NUMEPISODES = 3;
 
     /**

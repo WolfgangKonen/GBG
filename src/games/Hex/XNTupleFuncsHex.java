@@ -124,29 +124,79 @@ public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
     public int[][] fixedNTuples(int mode) {
         int[][] tuples = new int[(HexConfig.BOARD_SIZE * 2) + 1][HexConfig.BOARD_SIZE];
 
-        //All diagonal lines
-        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
-            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
-                int actionInt = i * HexConfig.BOARD_SIZE + j;
-                tuples[i][j] = actionInt;
+        int[][] fixedTuples6x6 = {			// a tuple config which gave good results
+    			{4, 5, 9, 10, 11, 15},
+    			{18, 6, 7, 8, 12, 13},
+    			{19, 20, 8, 24, 13, 14},
+    			{16, 17, 21, 22, 23, 11},
+    			{16, 4, 5, 9, 10, 11},
+    			{18, 24, 12, 13, 30, 31},
+    			{32, 33, 21, 22, 26, 27},
+    			{19, 20, 9, 13, 14, 15},
+    			{32, 16, 33, 21, 22, 27},
+    			{18, 19, 24, 25, 26, 30},
+    			{18, 19, 7, 8, 12, 13},
+    			{16, 20, 21, 25, 10, 27},
+    			{0, 1, 2, 3, 6, 7},
+    			{2, 7, 8, 12, 14, 15},
+    			{1, 2, 3, 6, 7, 8},
+    			{32, 33, 25, 26, 27, 31},
+    			{34, 35, 23, 27, 28, 29},
+    			{0, 1, 2, 3, 4, 7},
+    			{0, 1, 2, 3, 6, 12},
+    			{23, 26, 27, 28, 29, 31},
+    			{32, 20, 25, 26, 27, 31},
+    			{18, 19, 20, 21, 25, 30},
+    			{1, 2, 6, 7, 8, 13},
+    			{32, 34, 35, 27, 28, 29},
+    			{32, 33, 25, 26, 27, 31} };
+        
+        switch (mode) {
+        case 1:
+            //All diagonal lines
+            for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+                for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+                    int actionInt = i * HexConfig.BOARD_SIZE + j;
+                    tuples[i][j] = actionInt;
 
-                actionInt = j * HexConfig.BOARD_SIZE + i;
-                tuples[i + HexConfig.BOARD_SIZE][j] = actionInt;
+                    actionInt = j * HexConfig.BOARD_SIZE + i;
+                    tuples[i + HexConfig.BOARD_SIZE][j] = actionInt;
+                }
             }
-        }
 
-        //The straight line in the center of the board
-        //(0, n); (1, n-1); ... (n-1, 1); (n, 0);
-        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
-            int j = HexConfig.BOARD_SIZE - i;
-            int actionInt = i * HexConfig.BOARD_SIZE + j;
-            tuples[HexConfig.BOARD_SIZE * 2][i] = actionInt - 1;
+            //The straight line in the center of the board
+            //(0, n); (1, n-1); ... (n-1, 1); (n, 0);
+            for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+                int j = HexConfig.BOARD_SIZE - i;
+                int actionInt = i * HexConfig.BOARD_SIZE + j;
+                tuples[HexConfig.BOARD_SIZE * 2][i] = actionInt - 1;
+            }
+        	break;
+        case 2:			// individual settings
+        	switch (HexConfig.BOARD_SIZE) {
+        	case 6: 
+        		tuples = fixedTuples6x6;
+        		break;
+        	default:
+            	throw new RuntimeException("[fixedNTuples] mode=2 for board size="+HexConfig.BOARD_SIZE+" not allowed");
+        	}
+        	break;
+        default:
+        	throw new RuntimeException("[fixedNTuples] mode="+mode+" not allowed");
         }
 
         return tuples;
     }
     
-    private static int[] fixedModes = {1};
+	@Override
+	public String fixedTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>"
+				+ "1: TODO"
+				+ "</html>";
+	}
+
+    private static int[] fixedModes = {1,2};
     
 	public int[] getAvailFixedNTupleModes() {
 		return fixedModes;

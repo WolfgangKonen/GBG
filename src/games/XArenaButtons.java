@@ -556,15 +556,24 @@ public class XArenaButtons extends JPanel
 	public void setParamDefaults(int n, String agentName, String gameName) {
 		tdPar[n].setParamDefaults(agentName, gameName);
 		ntPar[n].setParamDefaults(agentName, gameName);
-		ntPar[n].setFixedCoList(m_game.makeXNTupleFuncs().getAvailFixedNTupleModes());
+		ntPar[n].setFixedCoList(m_game.makeXNTupleFuncs().getAvailFixedNTupleModes(),
+								m_game.makeXNTupleFuncs().fixedTooltipString());
 		oPar[n].setParamDefaults(agentName, gameName);
 		
 		switch (agentName) {
 		case "TDS":
+		case "TD-Ntuple-2": 
+		case "TD-Ntuple-3": 
 			GameNumT.setText("10000");				
 			break;
 		case "Sarsa":
-			GameNumT.setText("30000");				
+			switch (gameName) {
+			case "Nim": 
+				GameNumT.setText("10000");		
+				break;
+			default:
+				GameNumT.setText("30000");		
+			}
 			break;
 		default:
 			GameNumT.setText("10000");				

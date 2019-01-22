@@ -101,6 +101,11 @@ public interface XNTupleFuncs {
 	 */
 	public int[][] fixedNTuples(int mode);
 	
+	/**
+	 * @return a tooltip string describing the different mode options of {@link #fixedNTuples(int)}
+	 */
+	public String fixedTooltipString();
+	
 	public int[] getAvailFixedNTupleModes();
 
 	/**

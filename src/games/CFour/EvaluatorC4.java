@@ -2,6 +2,7 @@ package games.CFour;
 
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
+import controllers.TD.ntuple2.NTupleBase;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
@@ -146,9 +147,11 @@ public class EvaluatorC4 extends Evaluator {
 
         double result;
         int numEpisodes=8;
+        int mctsF=2; 	// in case 0 (opponent=MCTS) we increase numEpisodes by factor mctsF, 
+        				// since MCTS results otherwise have such a large fluctuation
         switch (m_mode) {
             case 0:
-                result = competeAgainstMCTS(playAgent, m_gb, numEpisodes);
+                result = competeAgainstMCTS(playAgent, m_gb, mctsF*numEpisodes);
                 break;
             case 1:
                 result = competeAgainstRandom(playAgent, m_gb);
@@ -160,10 +163,13 @@ public class EvaluatorC4 extends Evaluator {
             	numEpisodes=20;
                 result = competeAgainstAlphaBeta(playAgent, m_gb, numEpisodes);
                 break;
+            case 4:
+                result = competeAgainstOpponent_diffStates(playAgent, alphaBetaStd, m_gb, numEpisodes);
+                break;
             case 10:
-            	if (playAgent instanceof TDNTuple2Agt) {
+            	if (playAgent instanceof TDNTuple2Agt || playAgent instanceof NTupleBase) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
-            		// thread-safe, which is the case for TDNTuple2Agt
+            		// thread-safe, which is the case for TDNTuple2Agt, TDNTuple3Agt and SarsaAgt. 
             		// Also we have to construct MCTS opponent inside the callables, otherwise
             		// we are not thread-safe as well:
                     result = competeAgainstMCTS_diffStates_PAR(playAgent, m_gb, numEpisodes);
@@ -177,6 +183,10 @@ public class EvaluatorC4 extends Evaluator {
             	}
                 break;
             case 11:
+            	// just debug code to find out which is a winning startAction in competeAgainstOpponent_diffStates:
+//            	AlphaBetaAgent alphaBetaAgentP = new AlphaBetaAgent(books);
+//        		result = competeAgainstOpponent_diffStates(alphaBetaAgentP, alphaBetaStd, m_gb, numEpisodes);
+
     			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
         		result = competeAgainstOpponent_diffStates(playAgent, agtLoader.getAgent(), m_gb, numEpisodes);
                 break;
@@ -233,13 +243,6 @@ public class EvaluatorC4 extends Evaluator {
      * 						comparable with the number of both-compete games in other funcs) 
      * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
      * 		or oppenent.
-     * <p>
-     * Note that the return value has a slightly different meaning than in 
-     * {@link #competeAgainstMCTS(PlayAgent, GameBoard, int)}. There the agent is evaluated 
-     * bothas 1st and 2nd player. Here it is evaluated only as 1st player, since it would  
-     * loose against the perfect {@link AlphaBetaAgent}. If v is the return value from this function,
-     * then v_both = (v+(-1)/2 = v/2 - 0.5 \in [-1,0] would be the corresponding competeBoth-value
-     * (best is 0.0). But we return here v in order to evaluate the same as in [Thill14]. 
      */
     private double competeAgainstAlphaBeta(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
 //    	verbose=1;
@@ -259,14 +262,13 @@ public class EvaluatorC4 extends Evaluator {
 
     /**
      * Evaluates {@code playAgent}'s performance when playing against MCTS using 1000 iterations.
-     * Plays {@code numEpisodes} episodes both as 1st and as 2nd player.
+     * Plays {@code numEpisodes} episodes as 1st player (those episodes that {@code playAgent} can win).
      *
      * @param playAgent agent to be evaluated
      * @param gameBoard game board for the evaluation episodes
      * @param numEpisodes number of episodes played during evaluation
      * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
-     * 		or oppenent. Best for {@code playAgent} is +1, worst is -1. (If opponent were perfect,  
-     * 		best is 0, since the agent can then only win those games where he is 1st player.)
+     * 		or opponent. Best for {@code playAgent} is +1, worst is -1. 
      */
     private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
         ParMCTS params = new ParMCTS();
@@ -274,7 +276,7 @@ public class EvaluatorC4 extends Evaluator {
         params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
-        // this version (only testing), plays only games that playAgent can win (same as against AlphaBetaAgent):
+        // this version plays only games that playAgent can win (same as against AlphaBetaAgent):
         double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), 2*numEpisodes, 0);
         double success = res[0] - res[2];        	
         // this version, if you want to test both directions:
@@ -290,8 +292,8 @@ public class EvaluatorC4 extends Evaluator {
      * Similar to {@link EvaluatorC4#competeAgainstMCTS(PlayAgent, GameBoard, int)}, but:
      * <ul> 
      * <li>It does not only play evaluation games from the default start state (empty board) but 
-     * also games where the first player (Black) has made a losing moves and the agent as second
-     * player (White) will win, if it plays perfect (see {@link HexConfig#EVAL_START_ACTIONS}). 
+     * also games where the first player (Yellow) has made a losing moves and the agent as second
+     * player (Red) will win, if it plays perfect. 
      * <li>It allows a different opponent than MCTS to be passed in as 2nd argument
      * </ul>
      *
@@ -315,32 +317,29 @@ public class EvaluatorC4 extends Evaluator {
 			return Double.NaN;
 		} 
 
-        // find the start states to evaluate:
-        int [] startAction = {-1};
-        int N = 1; //HexConfig.BOARD_SIZE;
-        if (N>0) { //HexConfig.EVAL_START_ACTIONS.length-1) {
-            System.out.println("*** WARNING ***: 1-ply winning boards for board size N="+N+
-            		"are not coded in " +"HexConfig.EVAL_START_ACTIONS." );
-            System.out.println("*** WARNING ***: Evaluator(mode 10) will use only " +
-            		"empty board for evaluation.");
-        } else {
-            // the int's in startAction code the start board. -1: empty board (a winning 
-            // board for 1st player Black), 
-            // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, a winning
-            // board for 2nd player White)
-            startAction = null; //HexConfig.EVAL_START_ACTIONS[N];
-        }
-        numStartStates = startAction.length;
+        int [] startAction = {-1,0,1,5,6};
+        // The start states to evaluate:
+        // the int's in startAction code the start board. -1: empty board (a winning 
+        // board for 1st player Yellow), 
+        // 0/1/...: Black's 1st move was column 0/1/... (it is a losing move, so it is a winning
+        // board for 2nd player Red)
+        //
+        // [We found out by the now commented out lines System.out... here and the commented lines
+        //  in case 11 in eval_Agent that the winning start actions are -1,0,1,5,6. (3 is a loosing
+        //  action and 2 and 4 are a Tie.)]
+       numStartStates = startAction.length;
         
         // evaluate each start state in turn and return average success rate: 
         for (int i=0; i<startAction.length; i++) {
         	StateObserverC4 so = new StateObserverC4();
         	if (startAction[i] == -1) {
         		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0);
+        		//System.out.println("start "+startAction[i]+": "+res[0]+". Tie="+res[1]);
                 success += res[0];        	
         	} else {
         		so.advance(new ACTIONS(startAction[i]));
         		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0);
+        		//System.out.println("start "+startAction[i]+": "+res[2]+". Tie="+res[1]);
                 success += res[2];        	
         	}
         }
@@ -353,8 +352,8 @@ public class EvaluatorC4 extends Evaluator {
     }
 
     /**
-     * Does the same as {@code competeAgainstMCTS_diffStates}, but with 6 parallel cores, 
-     * so it is 6 times faster. 
+     * Does the same as {@code competeAgainstOpponent_diffStates} with opponent=MCTS,  
+     * but with 6 parallel cores, so it is 6 times faster. 
      * <p>
      * NOTES: <ul>
      * <li> The memory consumption grows when this function is repeatedly called (by about 60 kB
@@ -379,22 +378,13 @@ public class EvaluatorC4 extends Evaluator {
         params.setNumIter((int) Math.pow(10, numIterExp));
         //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[5], new StateObserverHex(), params);
 
-        // find the start states to evaluate:
-        int [] startAction = {-1};
-        int N = 1; //HexConfig.BOARD_SIZE;
-        if (N>0) { //HexConfig.EVAL_START_ACTIONS.length-1) {
-            System.out.println("*** WARNING ***: 1-ply winning boards for board size N="+N+
-            		"are not coded in " +"HexConfig.EVAL_START_ACTIONS." );
-            System.out.println("*** WARNING ***: Evaluator(mode 10) will use only " +
-            		"the empty board for evaluation.");
-        } else {
-            // the int's in startAction code the start board. -1: empty board (a winning 
-            // board for 1st player Black), 
-            // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, a winning
-            // board for 2nd player White)
-            startAction = null; //HexConfig.EVAL_START_ACTIONS[N];
-        }
-        numStartStates = startAction.length;
+        int [] startAction = {-1,0,1,5,6};
+        // The start states to evaluate:
+        // the int's in startAction code the start board. -1: empty board (a winning 
+        // board for 1st player Yellow), 
+        // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, so it is a winning
+        // board for 2nd player Red)
+       numStartStates = startAction.length;
         
         List<Double> successObservers = new ArrayList<>();
         List<Callable<Double>> callables = new ArrayList<>();
@@ -496,7 +486,7 @@ public class EvaluatorC4 extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{-1, 0, 1, 2, 3, 10, 11};
+        return new int[]{-1, 0, 1, 2, 3, 4, 10, 11};
     }
 
     @Override
@@ -522,6 +512,7 @@ public class EvaluatorC4 extends Evaluator {
             case 1:  return "success against Random (best is 1.0): ";
             case 2:  return "success against Max-N (best is 1.0): ";
             case 3:  return "success against AlphaBetaAgent (best is 1.0): ";
+            case 4:  return "success against AlphaBetaAgent (" + numStartStates + " diff. start states, best is 1.0): ";
             case 10: return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
             case 11: return "success against TDReferee (" + numStartStates + " diff. start states, best is 1.0): ";
             default: return null;
@@ -536,6 +527,7 @@ public class EvaluatorC4 extends Evaluator {
 				+ "1: against Random, best is 1.0<br>"
 				+ "2: against Max-N, best is 1.0<br>"
 				+ "3: against AlphaBetaAgent, best is 1.0<br>"
+				+ "4: against AlphaBetaAgent, different starts, best is 1.0<br>"
 				+ "10: against MCTS, different starts, best is 1.0<br>"
 				+ "11: against TDReferee.agt.zip, different starts, best is 1.0"
 				+ "</html>";
@@ -548,7 +540,8 @@ public class EvaluatorC4 extends Evaluator {
             case 1:  return "success against Random";
             case 2:  return "success against Max-N";
             case 3:  return "success against AlphaBeta";
-            case 10: return "success against MCTS";
+            case 4:  return "success against AlphaBeta, dStart";
+            case 10: return "success against MCTS, dStart";
             case 11: return "success against TDReferee";
             default: return null;
         }

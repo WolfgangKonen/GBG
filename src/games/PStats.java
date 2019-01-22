@@ -1,8 +1,10 @@
 package games;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -76,23 +78,40 @@ public class PStats {
 		strDir += "/csv";
 		tools.Utils.checkAndCreateFolder(strDir);
 
+		boolean retry=true;
 		PrintWriter mtWriter = null;
-		try {
-			mtWriter = new PrintWriter(new FileWriter(strDir+"/"+"playStats.csv",false));
-		} catch (IOException e) {
-			e.printStackTrace();
+		BufferedReader bufIn=new BufferedReader(new InputStreamReader(System.in));
+		while (retry) {
+			try {
+				mtWriter = new PrintWriter(new FileWriter(strDir+"/"+"playStats.csv",false));
+				retry = false;
+			} catch (IOException e) {
+				try {
+					// We may get here if multiTrain.csv is open in another application (e.g. Excel).
+					// Here we give the user the chance to close the file in the other application:
+				    System.out.print("*** Warning *** Could not open "+strDir+"/"+"playStats.csv. Retry? (y/n): ");
+				    String s = bufIn.readLine();
+				    retry = (s.contains("y")) ? true : false;
+				} catch (IOException e2) {
+					e2.printStackTrace();					
+				}
+			}			
 		}
 		
-		mtWriter.println(pa.stringDescr());		
-		mtWriter.println(pa.stringDescr2());
-		
-		mtWriter.println("run, moveNum, gameScore, nEmptyTile, cumEmptyTl");
-		ListIterator<PStats> iter = psList.listIterator();		
-		while(iter.hasNext()) {
-			(iter.next()).print(mtWriter);
-		}
+		if (mtWriter!=null) {
+			mtWriter.println(pa.stringDescr());		
+			mtWriter.println(pa.stringDescr2());
+			
+			mtWriter.println("run, moveNum, gameScore, nEmptyTile, cumEmptyTl");
+			ListIterator<PStats> iter = psList.listIterator();		
+			while(iter.hasNext()) {
+				(iter.next()).print(mtWriter);
+			}
 
-	    mtWriter.close();
+		    mtWriter.close();			
+		} else {
+			System.out.print("*** Warning *** Could not write "+strDir+"/"+"playStats.csv.");
+		}
 	}
 
 }

@@ -429,10 +429,12 @@ public class TDParams extends Frame implements Serializable
 		// added with suitable nested switch(gameName). 
 		// Currently we have only one switch(gameName) on the initial featmode (=3 for 
 		// TicTacToe, =2 for Hex, and =0 for all others)
-		boolean mode3PEnable=true;
+		boolean mode3PEnable= (agentName=="TD-Ntuple-2" ? true : false);
+		horcutT.setText("0.1"); 			//
 		switch (agentName) {
 		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
+		case "TD-Ntuple-3": 
 		case "Sarsa":
 			switch (agentName) {
 			case "TD-Ntuple": 
@@ -440,13 +442,17 @@ public class TDParams extends Frame implements Serializable
 				alfinT.setText("0.001");		//
 				break;
 			case "TD-Ntuple-2": 
-				alphaT.setText("0.2");  		// the defaults
-				alfinT.setText("0.2");			//
-				break;
 			case "TD-Ntuple-3": 
-				alphaT.setText("0.2");  		// the defaults
-				alfinT.setText("0.2");			//
-				mode3PEnable=false;				//
+				switch (gameName) {
+				case "ConnectFour":
+					alphaT.setText("5.0");  		// the defaults
+					alfinT.setText("5.0");			//
+					horcutT.setText("0.001"); 			//
+					break;
+				default: 
+					alphaT.setText("0.2");  		// the defaults
+					alfinT.setText("0.2");			//
+				}
 				break;
 			case "Sarsa": 
 				alphaT.setText("1.0");  		// the defaults
@@ -460,7 +466,6 @@ public class TDParams extends Frame implements Serializable
 			}
 			epfinT.setText("0.0");				//
 			lambdaT.setText("0.0"); 			//
-			horcutT.setText("0.1"); 			//
 			gammaT.setText("1.0");				//
 			epochT.setText("1");				//
 			withSigType.setSelected(true);		// tanh

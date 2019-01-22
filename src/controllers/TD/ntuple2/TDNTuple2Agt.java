@@ -119,9 +119,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	
 	private double BestScore;
 	
-	private boolean TC; //true: using Temporal Coherence algorithm
-	private int tcIn; 	//temporal coherence interval: after tcIn games tcFactor will be updates
-	private boolean tcImm=true;		//true: immediate TC update, false: batch update (epochs)
+//	private boolean TC; 			//obsolete, use now m_Net.getTc()
+//	private boolean tcImm=true;		//obsolete, use now m_Net.getTcImm()
+	private int tcIn; 	// obsolete (since tcImm always true); was: temporal coherence interval: 
+						// if (!tcImm), then after tcIn games tcFactor will be updates
 	
 	// not needed anymore here, we hand in int[][] nTuples = = ntupfac.makeNTupleSet(...) 
 	// to the constructor: 
@@ -224,8 +225,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	public static boolean DBG_NEW_3P=false;
 	// debug for Rubik's Cube:
 	public static boolean DBG_CUBE=true;
-	// use ternary (old) target in update rule:
-	public boolean TERNARY=true;
+	// use ternary target in update rule:
+	public boolean TERNARY=true;		// remains true only if it is a final-reward-game (see getNextAction3)
 	
 	// is set to true in getNextAction3(...), if the next action is a random selected one:
 	boolean randomSelect = false;
@@ -802,7 +803,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		}
 		
 		// is now irrelevant since tcImm is always true
-		if(getGameNum()%tcIn==0 && TC && !tcImm) {
+		if(getGameNum()%tcIn==0 && m_Net.getTc() && !m_Net.getTcImm()) {
 			System.out.println("we should not get here!");
 			m_Net.updateTC();
 			if (DBG_OLD_3P || DBG_NEW_3P) m_Net3.updateTC();
@@ -811,7 +812,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		//if (DEBG) m_Net.printLutSum(pstream);
 		if (m_DEBG) m_Net.printLutHashSum(pstream);
 		if (PRINTTABLES) {
-			if(getGameNum()%10==0 && TC)
+			if(getGameNum()%10==0 && m_Net.getTc() )
 				m_Net.printTables();
 		}
 		
@@ -1102,9 +1103,11 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	}
 
 	public void setNTParams(ParNT ntPar) {
-		tcIn=ntPar.getTcInterval();
-		TC=ntPar.getTc();
-		tcImm=ntPar.getTcImm();		
+//		TC=ntPar.getTc();					// obsolete, use now m_Net.getTc()
+//		tcImm=ntPar.getTcImm();				// obsolete, use now m_Net.getTcImm()
+		tcIn=ntPar.getTcInterval();			// obsolete (since m_Net.getTcImm() always true)
+		// not needed anymore here, we hand in int[][] nTuples = = ntupfac.makeNTupleSet(...) 
+		// to the constructor: 
 //		randomness=ntPar.getRandomness();
 //		randWalk=ntPar.getRandomWalk();
 		m_Net.setTdAgt(this);						 // WK: needed when loading an older agent
@@ -1178,10 +1181,23 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		String cs = getClass().getName();
 		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
 						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
-						+ ", gamma: " + m_tdPar.getGamma() +", MODE_3P: "+ m_tdPar.getMode3P();
+						+ ", gamma: " + m_tdPar.getGamma() +", MODE_3P: "+ m_tdPar.getMode3P()
+						+ ", "+stringDescrNTuple();		
 		return str;
 	}
 		
+	/**
+	 * @return a short description of the n-tuple configuration
+	 */
+	protected String stringDescrNTuple() {
+		if (m_ntPar.getRandomness()) {
+			return "random "+m_ntPar.getNtupleNumber() +" "+m_ntPar.getNtupleMax()+"-tuple";
+		} else {
+			int mode = m_ntPar.getFixedNtupleMode();
+			return "fixed n-tuple, mode="+mode;
+		}
+	}
+	
 	public String printTrainStatus() {
 		DecimalFormat frm = new DecimalFormat("#0.0000");
 		DecimalFormat frme= new DecimalFormat();

@@ -34,7 +34,10 @@ import javax.swing.JOptionPane;
 
 import agentIO.AgentLoader;
 
-
+/**
+ * Evaluate Hex agents. See {@link #getAvailableModes()} and {@link #eval_Agent(PlayAgent)} 
+ * for available evaluators. 
+ */
 public class EvaluatorHex extends Evaluator {
     //minimaxAgent is static so the search tree does not have to be rebuilt every time a new evaluator is created.
     //However, this prevents minimax parameters from being adjusted while the program is running. Set needed tree depth
@@ -121,7 +124,8 @@ public class EvaluatorHex extends Evaluator {
             case 10:
             	if (playAgent instanceof TDNTuple2Agt || playAgent instanceof NTupleBase) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
-            		// thread-safe, which is the case for TDNTuple2Agt, TDNTuple3Agt or SarsaAgt.
+            		// thread-safe, which is the case for TDNTuple2Agt, TDNTuple3Agt or SarsaAgt
+            		// (the latter two are childs of NTupleBase).
             		// Also we have to construct MCTS opponent inside the callables, otherwise
             		// we are not thread-safe as well:
                     result = competeAgainstMCTS_diffStates_PAR(playAgent, m_gb, numEpisodes);

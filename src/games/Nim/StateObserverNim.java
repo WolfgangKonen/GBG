@@ -1,6 +1,7 @@
 package games.Nim;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import controllers.PlayAgent;
 import games.ObserverBase;
@@ -52,6 +53,10 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	public StateObserverNim copy() {
 		StateObserverNim so = new StateObserverNim(m_heap,m_player);
 		so.m_counter = this.m_counter;
+		so.storedActBest = this.storedActBest;
+		so.storedMaxScore = this.storedMaxScore;
+		if (this.storedActions!=null) so.storedActions = this.storedActions.clone();
+		if (this.storedValues!=null) so.storedValues = this.storedValues.clone();
 		return so;
 	}
 
@@ -86,10 +91,10 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	
 	public boolean isLegalAction(ACTIONS act) {
 		int iAction = act.toInt();						
-		int j=iAction%NimConfig.MAX_SUB;
-		int heap=(iAction-j)/NimConfig.MAX_SUB;		// from which heap to subtract
+		int j=iAction%NimConfig.MAX_MINUS;
+		int heap=(iAction-j)/NimConfig.MAX_MINUS;		// from which heap to subtract
 		int subtractor = j+1;
-										// reverse: iAction = MAX_SUB*heap + j
+										// reverse: iAction = MAX_MINUS*heap + j
 		
 		assert heap < NimConfig.NUMBER_HEAPS : "Oops, heap no "+heap+" is not available!";
 				
@@ -99,9 +104,10 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	@Override
     public String stringDescr() {
 		String sout = "";
+		String[] play = {"X","O"};
 	
 		for (int i=0;i<NimConfig.NUMBER_HEAPS;i++) 
-				sout = sout + this.m_heap[i];
+				sout = sout + play[m_player]+"," + this.m_heap[i];
 		
  		return sout;
 	}
@@ -157,21 +163,21 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 * Advance the current state with action {@code action} to a new state
 	 * @param action the action having key  
 	 * <pre>
-	 * 		iAction = i*NimConfig.MAX_SUB+j
+	 * 		iAction = i*NimConfig.MAX_MINUS+j
 	 * </pre> 
-	 * with j = 0,...,{@link NimConfig#MAX_SUB} means: 
+	 * with j = 0,...,{@link NimConfig#MAX_MINUS} means: 
 	 * Subtract {@code j+1} items from heap no {@code i}. 
 	 */
 	public void advance(ACTIONS action) {
 		int iAction = action.toInt();
-		int j=iAction%NimConfig.MAX_SUB;
-		int heap=(iAction-j)/NimConfig.MAX_SUB;		// from which heap to subtract
+		int j=iAction%NimConfig.MAX_MINUS;
+		int heap=(iAction-j)/NimConfig.MAX_MINUS;		// from which heap to subtract
 		int subtractor = j+1;
-										// reverse: iAction = MAX_SUB*heap + j
+											  // reverse: iAction = MAX_MINUS*heap + j
 		
-		assert heap < NimConfig.NUMBER_HEAPS : "Oops, heap no "+heap+" is not available!";
-		assert subtractor <= NimConfig.MAX_SUB : "Oops, cannot take more than "+NimConfig.MAX_SUB+" items from heap!";
-		assert m_heap[heap]>=subtractor : "Oops, heap no "+heap+" has not "+subtractor+" items left!"; 		
+		assert heap < NimConfig.NUMBER_HEAPS : "Oops, heap "+heap+" is not available!";
+		assert subtractor <= NimConfig.MAX_MINUS : "Oops, cannot take more than "+NimConfig.MAX_MINUS+" items from heap!";
+		assert m_heap[heap]>=subtractor : "Oops, heap "+heap+" has not "+subtractor+" items left!"; 		
 		
 		m_heap[heap] -= subtractor;
     	
@@ -196,7 +202,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
     @Override
     public ArrayList<Types.ACTIONS> getAllAvailableActions() {
         ArrayList allActions = new ArrayList<>();
-        for (int i = 0; i < NimConfig.NUMBER_HEAPS*NimConfig.MAX_SUB; i++) 
+        for (int i = 0; i < NimConfig.NUMBER_HEAPS*NimConfig.MAX_MINUS; i++) 
             	allActions.add(Types.ACTIONS.fromInt(i));
         
         return allActions;
@@ -216,17 +222,17 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 * 
 	 * Action 
 	 * <pre>
-	 * 		iAction = i*NimConfig.MAX_SUB+j
+	 * 		iAction = i*NimConfig.MAX_MINUS+j
 	 * </pre> 
-	 * with j = 0,...,{@link NimConfig#MAX_SUB} means: 
+	 * with j = 0,...,{@link NimConfig#MAX_MINUS} means: 
 	 * Subtract {@code j+1} items from heap no {@code i}. 
 	 * <p>
 	 */
 	public void setAvailableActions() {
 		acts.clear();
 		for (int i=0;i<NimConfig.NUMBER_HEAPS;i++) {
-			for (int j=0; j<NimConfig.MAX_SUB; j++) 
-				if (j<m_heap[i]) acts.add(Types.ACTIONS.fromInt(i*NimConfig.MAX_SUB+j));
+			for (int j=0; j<NimConfig.MAX_MINUS; j++) 
+				if (j<m_heap[i]) acts.add(Types.ACTIONS.fromInt(i*NimConfig.MAX_MINUS+j));
 			
 		}
 	}
@@ -251,5 +257,85 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		return 2;				// Nim is a 2-player game
 	}
 
+	/**
+	 * Calculate the winning move for the Nim configuration in {@code heaps} according to 
+	 * Bouton's theory. See <a href="https://en.wikipedia.org/wiki/Nim">
+	 * https://en.wikipedia.org/wiki/Nim</a>. If there is no winning move, make a dummy 
+	 * move (take 1 item from the 1st heap).
+	 * 
+	 * @param heaps the array of heaps, element {@code i} has the number of items in the 
+	 * 		  {@code i}th heap
+	 * @return a tuple with two values: <br>
+	 * 		(index of the heap to change, amount of items to remove) 
+	 */
+	public int[] bouton(int[] heaps) {
+		/*
+		 * 	the Python implementation (from https://en.wikipedia.org/wiki/Nim):
+		 * 
+		    nim_sum = functools.reduce(lambda x, y: x ^ y, heaps)
+		    if nim_sum == 0:
+		        return "You will lose :("
+	    */
+		//
+		// The equivalent Java implementation: The sequence heaps is fed into the lambda-construct 
+		// (x,y) -> x ^ y: via reduce: the first two elements are bitwise XOR'ed, then the
+		// result of this together with the 3rd element is bitwise XOR'ed, then the
+		// result of this together with the 4th element is bitwise XOR'ed, and so on. 
+		// The final result is the binary digital sum or nim-sum of all heaps.
+		//
+		// Why do we apply %K, i.e. modulo K, before XORing x and y? - If we have the constraint
+		// that at most K-1 items may be taken from any heap, then a safe winning position is one 
+		// where every heap has K items or multiples of it (clear?). So we try to reach such a 
+		// winning position. This means that only the *remainder* of x and y in excess of multiples
+		// of K (i.e. x%K) is relevant to compute the nim sum and find the winning move.
+		//
+		// Why int startValue=0? - Because then reduce directly returns an int as well.
+		//
+		int startValue=0;
+		int K = NimConfig.MAX_MINUS+1;
+		int nim_sum = Arrays.stream(heaps).reduce(startValue, (x,y) -> (x%K) ^ (y%K));
+		if ( nim_sum==0 ) 
+			return new int[] {0,1};		// we will loose with any move --> return dummy move
 
+	    // We are in a winning position: Calculate which move to make
+		// (again adapted from https://en.wikipedia.org/wiki/Nim)
+	    int index=0;
+	    for (int heap : heaps) {
+	        int target_size = heap ^ nim_sum;		// ^ : bitwise XOR
+	        if (target_size < heap) {
+	            int amount_to_remove = heap - target_size;
+	            return new int [] {index, amount_to_remove};	        	
+	        }
+	        index++;
+	    }
+	    
+	    // we should never get here, just for safety:
+	    throw new RuntimeException("Oops, bouton() failed!");
+	}
+	
+	/**
+	 * Apply {@link #bouton(int[])} to the heaps of {@code this}.
+	 */
+	public int[] bouton() {
+		return bouton(this.m_heap);
+	}
+	
+	/**
+	 * Return the game value of configuration {@code heaps}  according to Bouton's theory.
+	 * See <a href="https://en.wikipedia.org/wiki/Nim">
+	 * https://en.wikipedia.org/wiki/Nim</a>. 
+	 * 
+	 * @param heaps	{@code heaps[i]} has the number of items in the {@code i}th heap
+	 * @return 	Return +1.0 or -1.0, depending on whether the configuration in {@code heaps} is a 
+	 * 			win (for the player which performed the action leading to {@code heaps}) or not.
+	 */
+	public double boutonValue(int[] heaps) {
+		int startValue=0;
+		int K = NimConfig.MAX_MINUS+1;
+		// see same line in method bouton(int[] heaps) for an explanation of the following statement:
+		int nim_sum = Arrays.stream(heaps).reduce(startValue, (x,y) -> (x%K) ^ (y%K));
+		// if nim_sum==0, heaps is a winning configuration, else not:
+		return (nim_sum==0) ? +1.0 : -1.0;
+	}
+	
 }

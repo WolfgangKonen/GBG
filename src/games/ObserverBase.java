@@ -54,7 +54,11 @@ abstract public class ObserverBase {
 	public Types.ACTIONS getStoredAction(int k) {
 		return storedActions[k];
 	}
-
+	
+	public Types.ACTIONS getStoredActBest() {
+		return storedActBest;
+	}
+	
 	public double[] getStoredValues() {
 		return storedValues;
 	}

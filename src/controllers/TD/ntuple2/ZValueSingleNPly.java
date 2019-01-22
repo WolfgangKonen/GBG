@@ -100,12 +100,12 @@ public class ZValueSingleNPly implements ZValue {
     	        	return rtilde+kappa*tdnt.getGamma()*agentScore;		// normal return (n-ply recursion)
     	        }
         	} else {
-    	        if (NewSO.isGameOver() || j==nply) {
+    	        if (NewSO.isGameOver() || j==nply) {					// game over or n-ply-recursion over, 
+    	        														// --> terminate for-loop
     	        	if (tdnt.TERNARY) {
     	        		return NewSO.isGameOver() ? rtilde : kappa*tdnt.getGamma()*agentScore;
     	        	}
-    	        	return rtilde+kappa*tdnt.getGamma()*agentScore;		// game over or n-ply-recursion over, 
-    	        													// --> terminate for-loop
+    	        	return rtilde+kappa*tdnt.getGamma()*agentScore;		
     	        }
         	}
 			

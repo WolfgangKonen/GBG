@@ -238,6 +238,15 @@ public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
 		
 		return nTuple;		
 	}
+	
+	@Override
+	public String fixedTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>"
+				+ "1: 70 specific 8-tuples"
+				+ "</html>";
+	}
+
 
     private static int[] fixedModes = {1};
     

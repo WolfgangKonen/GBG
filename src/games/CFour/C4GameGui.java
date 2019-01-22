@@ -288,31 +288,8 @@ public class C4GameGui extends JPanel implements ListOperation {
 	}
 
 	private void handleMouseClick(int x, int y) {
-		gameBoardC4.HGameMove(x, y);
-//		switch (state) {
-//		case PLAY:
-//			if (players[curPlayer] == null && !gameOver)
-//				makeCompleteMove(x, "You");
-//			break;
-////		case SETBOARD:
-////			makeCompleteMove(x, "HuiBuh");
-////			break;
-////		case SETNTUPLE:
-////			int index = winConfigTuples.getSelectedIndex();
-////			ArrayList<Integer> nTuple = nTupleList.get(index);
-////			int find = findInNTuple(x * 6 + y, nTuple);
-////			if (find <= -1) {
-////				nTuple.add(x * 6 + y);
-////				putPiece(x, y, 2);
-////			} else {
-////				nTuple.remove(find);
-////				removePiece(x, y, 2);
-////			}
-////			action = Action.CHANGE;
-////			break;
-//		default:
-//			break;
-//		}
+		if (playingBoardPanel.isEnabled())
+			gameBoardC4.HGameMove(x, y);
 	}
 
 	private class MouseHandler implements MouseListener {

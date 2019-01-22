@@ -42,7 +42,7 @@ public class NTupleFactory {
 	 */
 	public int[][] makeNTupleSet(ParNT ntPar, XNTupleFuncs xnf) throws Exception {
 		int nTuplesI[][]; 
-		boolean randomness=false; //ntPar.getRandomness();
+		boolean randomness=ntPar.getRandomness(); //false; 
 		boolean randWalk=ntPar.getRandomWalk();
 		int numTuple=ntPar.getNtupleNumber();
 		int maxTupleLen=ntPar.getNtupleMax();

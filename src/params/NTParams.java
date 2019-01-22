@@ -530,6 +530,7 @@ public class NTParams extends Frame implements Serializable {
 			case "Nim": 
 				NTupleNumT.setText("1");
 				NTupleSizeT.setText(NimConfig.NUMBER_HEAPS+"");	
+				RandomnessC.setSelected(false);	// use fixed n-tuples, mode==1
 				break;
 			case "2048": 
 				NTupleSizeT.setText("3");
@@ -537,6 +538,7 @@ public class NTParams extends Frame implements Serializable {
 				enableAfterState(true);
 				break;
 			case "ConnectFour":
+				TempCoC.setSelected(true);
 				RandomnessC.setSelected(false);
 				break;
 			}
@@ -552,10 +554,11 @@ public class NTParams extends Frame implements Serializable {
 	 * Set the combo box list for fixed n-tuple modes
 	 * @param modeList
 	 */
-	public void setFixedCoList(int[] modeList) {
+	public void setFixedCoList(int[] modeList, String tooltipString) {
 		NTupleFixCo.removeAllItems();
 		for (int i : modeList)
 			NTupleFixCo.addItem(Integer.toString(i));
+		NTupleFixCo.setToolTipText(tooltipString);
 	}
 
 }

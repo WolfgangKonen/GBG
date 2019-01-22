@@ -180,6 +180,14 @@ public class XNTupleFuncsTTT implements XNTupleFuncs, Serializable {
 		return nTuple;		
 	}
 
+	@Override
+	public String fixedTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>"
+				+ "1: TODO"
+				+ "</html>";
+	}
+
     private static int[] fixedModes = {1};
     
 	public int[] getAvailFixedNTupleModes() {

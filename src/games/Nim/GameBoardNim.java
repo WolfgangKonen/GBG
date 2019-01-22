@@ -9,6 +9,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -25,6 +26,7 @@ import games.Arena;
 import games.Arena.Task;
 import games.ArenaTrain;
 import tools.Types;
+import tools.Types.ACTIONS;
 
 /**
  * Class GameBoardNim implements interface GameBoard for Nim.
@@ -53,12 +55,14 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	 * is displayed as its label.
 	 */
 	protected JLabel[] Heap;  
-	protected JButton[][] Board;
-	protected JLabel[][] VBoard;
+	protected JButton[][] Board;	// the clickable actions
+	protected JLabel[][] VBoard;	// the values for each action as estimated by the agent to move
+	protected JLabel[][] OptBoard;	// the optimal values for each action
 	private StateObserverNim m_so;
 	private int[][] Table;			// =1: position occupied by "X" player
 									//=-1: position occupied by "O" player
 	private double[][] VTable;
+	private double[][] OptTable;
 	private boolean arenaActReq=false;
 	
 	// the colors of the TH Köln logo (used for button coloring):
@@ -80,9 +84,11 @@ public class GameBoardNim extends JFrame implements GameBoard {
 		m_so		= new StateObserverNim();	// heaps according to NimConfig
 		m_Arena		= nimGame;
 		Heap		= new JLabel[NimConfig.NUMBER_HEAPS];
-		Board       = new JButton[NimConfig.NUMBER_HEAPS][NimConfig.MAX_SUB];
-		VBoard      = new JLabel[NimConfig.NUMBER_HEAPS][NimConfig.MAX_SUB];
-		VTable		= new double[NimConfig.NUMBER_HEAPS][NimConfig.MAX_SUB];
+		Board       = new JButton[NimConfig.NUMBER_HEAPS][NimConfig.MAX_MINUS];
+		VBoard      = new JLabel[NimConfig.NUMBER_HEAPS][NimConfig.MAX_MINUS];
+		OptBoard    = new JLabel[NimConfig.NUMBER_HEAPS][NimConfig.MAX_MINUS];
+		VTable		= new double[NimConfig.NUMBER_HEAPS][NimConfig.MAX_MINUS];
+		OptTable		= new double[NimConfig.NUMBER_HEAPS][NimConfig.MAX_MINUS];
 		BoardPanel	= InitBoard();
         rand 		= new Random(System.currentTimeMillis());	
 
@@ -135,8 +141,8 @@ public class GameBoardNim extends JFrame implements GameBoard {
 			Heap[i].setHorizontalAlignment(SwingConstants.CENTER);
 			hPanel.add(Heap[i],BorderLayout.CENTER);
 			JPanel bPanel=new JPanel();
-			bPanel.setLayout(new GridLayout(2,NimConfig.MAX_SUB,2,2));
-			for(int j=0;j<NimConfig.MAX_SUB;j++){
+			bPanel.setLayout(new GridLayout(3,NimConfig.MAX_MINUS,2,2));
+			for(int j=0;j<NimConfig.MAX_MINUS;j++){
 				Board[i][j] = new JButton("  ");
 				Board[i][j].setBackground(colTHK2);
 				Board[i][j].setForeground(Color.white);
@@ -167,9 +173,10 @@ public class GameBoardNim extends JFrame implements GameBoard {
 				);
 				bPanel.add(Board[i][j]);
 			} // for(j)
-			for(int j=0;j<NimConfig.MAX_SUB;j++){
+			for(int j=0;j<NimConfig.MAX_MINUS;j++){
 				VBoard[i][j] = new JLabel("  ");
 				VBoard[i][j].setForeground(colTHK1);
+//				VBoard[i][j].setBackground(Color.DARK_GRAY);	// has no effect - unclear why
 				VBoard[i][j].setHorizontalAlignment(SwingConstants.CENTER);
 //				VBoard[i][j].setMargin(new Insets(0,0,0,0));  // sets zero margin between the button's
 //															 // border and the label (so that there 
@@ -178,6 +185,15 @@ public class GameBoardNim extends JFrame implements GameBoard {
 				VBoard[i][j].setEnabled(true);
 				VBoard[i][j].setPreferredSize(minimumSize); 
 				bPanel.add(VBoard[i][j]);
+			} // for(j)
+			for(int j=0;j<NimConfig.MAX_MINUS;j++){
+				OptBoard[i][j] = new JLabel("  ");
+				OptBoard[i][j].setForeground(colTHK1);
+				OptBoard[i][j].setHorizontalAlignment(SwingConstants.CENTER);
+				OptBoard[i][j].setFont(font);
+				OptBoard[i][j].setEnabled(true);
+				OptBoard[i][j].setPreferredSize(minimumSize); 
+				bPanel.add(OptBoard[i][j]);
 			} // for(j)
 			hPanel.add(bPanel,BorderLayout.SOUTH);
 			panel.add(hPanel);
@@ -192,7 +208,7 @@ public class GameBoardNim extends JFrame implements GameBoard {
 			m_so = new StateObserverNim();			// heaps according to NimConfig
 			for(int i=0;i<NimConfig.NUMBER_HEAPS;i++){
 				Heap[i].setText(m_so.getHeaps()[i]+"");
-				for(int j=0;j<NimConfig.MAX_SUB;j++){
+				for(int j=0;j<NimConfig.MAX_MINUS;j++){
 			        Board[i][j].setText((j+1)+"");
 					Board[i][j].setBackground(colTHK2);
 					Board[i][j].setForeground(Color.white);
@@ -202,16 +218,17 @@ public class GameBoardNim extends JFrame implements GameBoard {
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 			for (int k=0; k<acts.size(); k++) {
 				int iAction = acts.get(k).toInt();
-				int j=iAction%NimConfig.MAX_SUB;
-				int i=(iAction-j)/NimConfig.MAX_SUB;		
+				int j=iAction%NimConfig.MAX_MINUS;
+				int i=(iAction-j)/NimConfig.MAX_MINUS;		
 				Board[i][j].setEnabled(true);
 			}
 				
 		}
 		if (vClear) {
 			for(int i=0;i<NimConfig.NUMBER_HEAPS;i++){
-				for(int j=0;j<NimConfig.MAX_SUB;j++){
+				for(int j=0;j<NimConfig.MAX_MINUS;j++){
 					VTable[i][j] = Double.NaN;
+					OptTable[i][j] = Double.NaN;
 				}
 			}
 		}
@@ -220,7 +237,7 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	/**
 	 * Update the play board and the associated values (labels) to the new state {@code so}.
 	 * 
-	 * @param so	the game state. If {@code null}, call only {@link #guiUpdateBoard(boolean, boolean)}.
+	 * @param so	the game state. If {@code null}, call only {@link #guiUpdateBoard(boolean)}.
 	 * @param withReset  if true, reset the board prior to updating it to state {@code so}
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
 	 * 				(only if they are stored in state {@code so}).
@@ -229,6 +246,8 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
 		int i,j;
+		boolean isTaskPlay = (m_Arena.taskState == Arena.Task.PLAY);
+		boolean isTaskInspectV = (m_Arena.taskState == Arena.Task.INSPECTV);
 		if (so!=null) {
 	        assert (so instanceof StateObserverNim)
 			: "StateObservation 'so' is not an instance of StateObserverNim";
@@ -252,37 +271,63 @@ public class GameBoardNim extends JFrame implements GameBoard {
 				case(0):
 					leftInfo.setText("Tie         "); break;
 				}
+				rightInfo.setText("");
 				
 			}
 			
 			if (showValueOnGameboard && soT.getStoredValues()!=null) {
 				for(i=0;i<NimConfig.NUMBER_HEAPS;i++)
-					for(j=0;j<NimConfig.MAX_SUB;j++)
+					for(j=0;j<NimConfig.MAX_MINUS;j++) {
 						VTable[i][j]=Double.NaN;	
+						OptTable[i][j]=Double.NaN;	
+					}
 				
-				for (int k=0; k<soT.getStoredValues().length; k++) {
-					Types.ACTIONS action = soT.getStoredAction(k);
-					int iAction = action.toInt();
-					j=iAction%NimConfig.MAX_SUB;
-					i=(iAction-j)/NimConfig.MAX_SUB;		
-					VTable[i][j] = soT.getStoredValues()[k];					
-				}	
-				if (showValueOnGameboard) {
-					String splus = (m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
-					String sminus= (m_Arena.taskState == Arena.Task.INSPECTV) ? "O" : "X";
+				if (so.isGameOver()) {
+					rightInfo.setText("");
+				} else {
+					int[] heaps = soT.getHeaps().clone();
+					if (isTaskPlay) {
+						// if called from 'Play', then reverse the action actBest in heaps
+						// (because we want to store in OptTable the optimal values
+						// *before* actBest was taken)
+						ACTIONS actBest = soT.getStoredActBest();
+						int iAction = actBest.toInt();
+						j=iAction%NimConfig.MAX_MINUS;		// j+1: number of items taken
+						i=(iAction-j)/NimConfig.MAX_MINUS;	// i  : heap number	
+						heaps[i] += (j+1);
+					}
+					for (int k=0; k<soT.getStoredValues().length; k++) {
+						Types.ACTIONS action = soT.getStoredAction(k);
+						int iAction = action.toInt();
+						j=iAction%NimConfig.MAX_MINUS;		// j+1: number of items to take
+						i=(iAction-j)/NimConfig.MAX_MINUS;	// i  : heap number		
+						VTable[i][j] = soT.getStoredValues()[k];
+						
+						// Calculate the optimal value of this action according 
+						// to Bouton's theory. The values OptTable[i][j] are shown 
+						// in GUI (last row) if showValueOnGameboard is true.
+						heaps[i] -= (j+1);
+						OptTable[i][j]=soT.boutonValue(heaps);
+						heaps[i] += (j+1);
+					}	
+					
+					String splus = isTaskInspectV ? "X" : "O";
+					String sminus= isTaskInspectV ? "O" : "X";
 					switch(Player) {
 					case(+1): 
 						rightInfo.setText("    Score for " + splus); break;
 					case(-1):
 						rightInfo.setText("    Score for " + sminus); break;
 					}					
-				} else {
-					rightInfo.setText("");					
+					
 				}
 			} 
+			if (!showValueOnGameboard)
+				rightInfo.setText("");
+				
 		} // if(so!=null)
 		
-		guiUpdateBoard(false,showValueOnGameboard);
+		guiUpdateBoard(showValueOnGameboard);
 	}
 
 	/**
@@ -290,41 +335,105 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	 * The labels contain the values (scores) for each unoccupied board position (raw score*100).  
 	 * Occupied board positions have black/white background color, unoccupied positions are orange.
 	 * 
-	 * @param enable As a side effect the buttons Board[i][j] which are occupied by either "X" or "O"
-	 * will be set into enabled state <code>enable</code>. (All unoccupied positions will get state 
+	 * As a side effect the buttons Board[i][j] which are non-viable actions
+	 * will be set into enabled state <code>false</code>. (All other positions will get state 
 	 * <code>true</code>.)
 	 */ 
-	private void guiUpdateBoard(boolean enable, boolean showValueOnGameboard)
+	private void guiUpdateBoard(boolean showValueOnGameboard)
 	{		
 		double value, maxvalue=Double.NEGATIVE_INFINITY;
-		String valueTxt;
 		int imax=0,jmax=0;
 		for(int i=0;i<NimConfig.NUMBER_HEAPS;i++){
 			Heap[i].setText(m_so.getHeaps()[i]+"");
 		}
 		for(int i=0;i<NimConfig.NUMBER_HEAPS;i++){
-			for(int j=0;j<NimConfig.MAX_SUB;j++){
+			for(int j=0;j<NimConfig.MAX_MINUS;j++){
 				Board[i][j].setEnabled(false);
+				OptBoard[i][j].setText("");
 
-				value = VTable[i][j];	
-				if (Double.isNaN(value)) {
-					valueTxt = "   ";
-				} else {
-					valueTxt = " "+(int)(value*100);
-					if (value<0) valueTxt = ""+(int)(value*100);
-				}
-				if (showValueOnGameboard) VBoard[i][j].setText(valueTxt);
+				setValueBoard(VBoard,i,j,VTable[i][j],showValueOnGameboard);
+				setValueBoard(OptBoard,i,j,OptTable[i][j],showValueOnGameboard);
+				//VBoard[i][j].setBackground(Color.DARK_GRAY); // has no effect - unclear why
 			}
 		}
-		ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
-		for (int k=0; k<acts.size(); k++) {
-			int iAction = acts.get(k).toInt();
-			int j=iAction%NimConfig.MAX_SUB;
-			int i=(iAction-j)/NimConfig.MAX_SUB;		
+		
+		// just debug:
+//		int [] idealMove = m_so.bouton(); 
+		
+
+		// for all viable actions: enable the associated action button
+		for (ACTIONS action : m_so.getAvailableActions()) {
+			int iAction = action.toInt();
+			int j=iAction%NimConfig.MAX_MINUS;		// j+1: number of items to take
+			int i=(iAction-j)/NimConfig.MAX_MINUS;	// i  : heap number	
 			Board[i][j].setEnabled(true);
 		}
+		
 		this.repaint();
 	}		
+
+	/**
+	 * Set the values in the JLabel array XBoard.
+	 * @param XBoard	either VBoard or OptBoard
+	 * @param i
+	 * @param j
+	 * @param value
+	 * @param showValueOnGameboard
+	 */
+	private void setValueBoard(JLabel[][] XBoard, int i, int j, double value, boolean showValueOnGameboard) {
+		String valueTxt;
+		Color col;
+		if (Double.isNaN(value)) {
+			valueTxt = "   ";
+		} else {
+			valueTxt = " "+(int)(value*100);
+			if (value<0) valueTxt = ""+(int)(value*100);
+			col = calculateXBoardColor(value);
+			XBoard[i][j].setForeground(col);
+		}
+		if (showValueOnGameboard) {
+			XBoard[i][j].setText(valueTxt);
+		}
+
+	}
+	
+    /**
+     * Calculate the color for a specific XBoard value (either VBoard or OptBoard).
+     * Uses three color stops: Red for value -1, Yellow for value 0, Green for value +1.
+     * Colors for values between -1 and 0 are interpolated between red and yellow.
+     * Colors for values between 0 and +1 are interpolated between yellow and green.
+     *
+     * @param xValue Value of the specific VBoard element
+     * @return Color the VBoard element is supposed to have
+     */
+    public static Color calculateXBoardColor(double xValue) {
+        float percentage = (float) Math.abs(xValue);
+        float inverse_percentage = 1 - percentage;
+
+        Color colorLow;
+        Color colorHigh;
+        Color colorNeutral = Color.YELLOW;
+        int red, blue, green;
+
+        if (xValue < 0) {
+            colorLow = colorNeutral;
+            colorHigh = Color.RED;
+        } else {
+            colorLow = colorNeutral;
+            colorHigh = Color.GREEN;
+        }
+
+        red = Math.min(Math.max(Math.round(colorLow.getRed() * inverse_percentage
+                + colorHigh.getRed() * percentage), 0), 255);
+        blue = Math.min(Math.max(Math.round(colorLow.getBlue() * inverse_percentage
+                + colorHigh.getBlue() * percentage), 0), 255);
+        green = Math.min(Math.max(Math.round(colorLow.getGreen() * inverse_percentage
+                + colorHigh.getGreen() * percentage), 0), 255);
+
+        double fac=1.5;	// a factor to make the foreground color a bit darker, so that numbers are 
+        				// better readable on the light gray background
+        return new Color((int)(red/fac), (int)(green/fac), (int)(blue/fac), 255);
+    }
 
 	/**
 	 * @return  true: if an action is requested from Arena or ArenaTrain
@@ -369,8 +478,8 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	
 	private void HGameMove(int x, int y)
 	{
-		// reverse: iAction = MAX_SUB*heap + j
-		int iAction = NimConfig.MAX_SUB*x+y;
+		// reverse: iAction = MAX_MINUS*heap + j
+		int iAction = NimConfig.MAX_MINUS*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		m_so.advance(act);			// perform action (optionally add random elements from game 
@@ -382,8 +491,8 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	
 	private void InspectMove(int x, int y)
 	{
-		// reverse: iAction = MAX_SUB*heap + j
-		int iAction = NimConfig.MAX_SUB*x+y;
+		// reverse: iAction = MAX_MINUS*heap + j
+		int iAction = NimConfig.MAX_MINUS*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if (!m_so.isLegalAction(act)) {
 			System.out.println("Desired action is not legal!");
@@ -456,7 +565,10 @@ public class GameBoardNim extends JFrame implements GameBoard {
 
 	@Override
 	public String getSubDir() {
-		return null;
+		DecimalFormat form = new DecimalFormat("00");
+		return  "N"+form.format(NimConfig.NUMBER_HEAPS)+
+				"-S"+form.format(NimConfig.HEAP_SIZE)+
+				"-M"+form.format(NimConfig.MAX_MINUS);
 	}
 	
     @Override

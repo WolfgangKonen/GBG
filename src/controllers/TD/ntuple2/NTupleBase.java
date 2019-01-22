@@ -16,6 +16,13 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	public Random rand; // generate random Numbers 
 	
 	/**
+	 * change the version ID for serialization only if a newer version is no longer 
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long  serialVersionUID = 13L;
+
+	/**
 	 * Controls the amount of explorative moves in
 	 * {@link #getNextAction2(StateObservation, boolean, boolean)}
 	 * during training. <br>
@@ -32,9 +39,10 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	 */
 	protected double m_EpsilonChangeDelta = 0.001;
 	
-	protected boolean TC; //true: using Temporal Coherence algorithm
-	protected int tcIn; 	//temporal coherence interval: after tcIn games tcFactor will be updates
-	protected boolean tcImm=true;		//true: immediate TC update, false: batch update (epochs)
+//	protected boolean TC; 				//obsolete, use now m_Net.getTc()
+//	protected boolean tcImm=true;		//obsolete, use now m_Net.getTcImm()
+	protected int tcIn; 	// obsolete (since tcImm always true); was: temporal coherence interval: 
+							// if (!tcImm), then after tcIn games tcFactor will be updates
 	
 	// Value function of the agent.
 	protected NTuple2ValueFunc m_Net;
@@ -112,6 +120,20 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 		epsilon.println("" +m_epsilon2);
 		epsilon.close();
 	}
+	
+	/**
+	 * @return a short description of the n-tuple configuration
+	 */
+	protected String stringDescrNTuple() {
+		if (m_ntPar.getRandomness()) {
+			return "random "+m_ntPar.getNtupleNumber() +" "+m_ntPar.getNtupleMax()+"-tuple";
+		} else {
+			int mode = m_ntPar.getFixedNtupleMode();
+			return "fixed n-tuple, mode="+mode;
+		}
+	}
+	
+
 
 	public void setTDParams(ParTD tdPar, int maxGameNum) {
 		double alpha = tdPar.getAlpha();
@@ -127,12 +149,11 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	}
 
 	public void setNTParams(ParNT ntPar) {
-		tcIn=ntPar.getTcInterval();
-		TC=ntPar.getTc();
-		tcImm=ntPar.getTcImm();		
-//		randomness=ntPar.getRandomness();
-//		randWalk=ntPar.getRandomWalk();
-		m_Net.setTdAgt(this);						 // WK: needed when loading an older agent
+//		TC=ntPar.getTc();					// obsolete, use now m_Net.getTc()
+//		tcImm=ntPar.getTcImm();				// obsolete, use now m_Net.getTcImm()
+		tcIn=ntPar.getTcInterval();			// obsolete (since m_Net.getTcImm() always true)
+		
+		m_Net.setTdAgt(this);				// needed when loading an older agent
 	}
 
 	public void setAlpha(double alpha) {

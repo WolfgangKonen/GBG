@@ -139,8 +139,8 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     			// speed up MinimaxPlayer for repeated calls by storing/retrieving the 
     			// scores of visited states in HashMap hm:
     			stringRep = NewSO.stringDescr();
-    			//System.out.println(stringRep);
     			sc = hm.get(stringRep); 		// returns null if not in hm
+    			//System.out.println(stringRep+":"+sc);
         	} else {
         		sc = null;
         	}
@@ -149,7 +149,10 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 					// here is the recursion: getAllScores may call getBestAction back:
 					currScoreTuple = getAllScores(NewSO,refer,depth+1);	
 					
-					if (m_useHashMap) hm.put(stringRep, currScoreTuple);
+					if (m_useHashMap) {
+						hm.put(stringRep, currScoreTuple);
+		    			//System.out.println(stringRep+":"+currScoreTuple);
+					}
 				} else {
 					currScoreTuple = sc;
 				}

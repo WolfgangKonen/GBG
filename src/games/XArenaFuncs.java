@@ -388,6 +388,7 @@ public class XArenaFuncs
 		wChart.initializeChartPlot(xab,pa,plotWeightMode);
 		
 		System.out.println(pa.stringDescr());
+		System.out.println(pa.stringDescr2());
 		pa.setMaxGameNum(maxGameNum);
 		pa.setNumEval(numEval);
 		pa.setGameNum(0);
@@ -633,6 +634,7 @@ public class XArenaFuncs
 			if (i==0) {
 				String pa_string = pa.getClass().getName();
 				System.out.println(pa.stringDescr());
+				System.out.println(pa.stringDescr2());
 			}
 			pa.setMaxGameNum(maxGameNum);
 			pa.setGameNum(0);
@@ -827,7 +829,7 @@ public class XArenaFuncs
 
 		} // for (k)
 		winrate[0] = (double)xwinCount/competeNum;
-		winrate[1] = (double)tieCount/competeNum;
+		winrate[1] = (double) tieCount/competeNum;
 		winrate[2] = (double)owinCount/competeNum;
 
 		if (verbose>0) {
@@ -959,7 +961,7 @@ public class XArenaFuncs
 
 		} // for (k)
 		winrate[0] = (double)xwinCount/competeNum;
-		winrate[1] = (double)tieCount/competeNum;
+		winrate[1] = (double) tieCount/competeNum;
 		winrate[2] = (double)owinCount/competeNum;
 
 		System.out.print("win rates: ");

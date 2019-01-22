@@ -23,7 +23,7 @@ public class XNTupleFuncsNim implements XNTupleFuncs, Serializable {
     	// calculate actionArray[][]: for a given action with key j, the element
     	// actionArray[i][j] holds the equivalent action when the state is transformed to 
     	// equiv[i] = symmetryVectors(int[] boardVector)[i]
-       	actionVector = new int[NimConfig.NUMBER_HEAPS*NimConfig.MAX_SUB];
+       	actionVector = new int[NimConfig.NUMBER_HEAPS*NimConfig.MAX_MINUS];
     	for (int i=0; i<actionVector.length; i++)
     		actionVector[i] = i;
     	actionArray = new int[1][];
@@ -125,8 +125,10 @@ public class XNTupleFuncsNim implements XNTupleFuncs, Serializable {
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.
 	 * 
-	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
-	 * @return nTuples[numTuples][]
+	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()} <br>
+	 * 			   1: one n-tuple with length {@link NimConfig#NUMBER_HEAPS}
+	 * @return nTuples[numTuples][], where {@code nTuples[i]} describes the {@code i}'th 
+	 * n-tuple as an int-array, with {@code i=0,...,numTuples-1}
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
@@ -137,7 +139,18 @@ public class XNTupleFuncsNim implements XNTupleFuncs, Serializable {
 		return nTuple;				
 	}
 
-    private static int[] fixedModes = {1};
+	@Override
+	public String fixedTooltipString() {
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>"
+				+ "1: one n-tuple with length NUMBER_HEAPS"
+				+ "</html>";
+	}
+
+	/**
+	 * 1: one n-tuple with length {@link NimConfig#NUMBER_HEAPS}
+	 */
+    private static int[] fixedModes = {1};		
     
 	public int[] getAvailFixedNTupleModes() {
 		return fixedModes;

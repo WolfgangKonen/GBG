@@ -1,17 +1,31 @@
 package games.Nim;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 /**
  * A simple main program to calculate the number of states in the game of NIM.
+ * <p>
+ * This class counts the number of heap configurations. The number of game states is roughly 
+ * twice as big, since nearly every state (except the initial state and the one with only one 
+ * piece subtracted from the initial state) can be reached by both players. (Note that the 
+ * complete state representation in {@link StateObserverNim} has members 
+ * {@code int[] m_heap} and  {@code int m_player}.)
+ * <p>
+ * This class counts the <b>unordered</b> heap configurations which are simply
+ * <pre>    (nPiece+1)^nHeap  </pre>
+ * and the <b>ordered</b> heap configurations where after each moves the heaps are sorted in decreasing 
+ * order.
  *  
- * @author Wolfgang Konen, TH Köln , Jan'18
+ * @author Wolfgang Konen, TH Köln , Jan'18 - Jan'19
  */
 public class CountNim {
 
-	public int nHeap = 10;
-	public int nPiece = 5;
+	public int nHeap = NimConfig.NUMBER_HEAPS;
+	public int nPiece = NimConfig.HEAP_SIZE;
+	public int verbose = 0;					// if >0, print all ordered heap configurations
 	public int gCount1 = 0, gCount2=0;
+	
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -41,20 +55,21 @@ public class CountNim {
 		for (int k=0; k<heap.length; k++) heap[k]=nPiece;
 		while (heap[0]>0) {		// while leftmost heap has pieces left
 			counter1++;
-			printHeap(heap);
+			if (verbose>0) printHeap(heap);
 			heap = decreaseHeaps(heap, nHeap-1);
 		}
 		counter1++; // one more for the last state (0 0 ... 0)
-		printHeap(heap);
+		if (verbose>0) printHeap(heap);
 		double perc1 = counter1/nUnordered;
 		
-		// recursive calculation
+		// recursive calculation of *ordered* NIM states 
 		int counter2 = gFunc(nHeap,nPiece);
 		double perc2 = counter2/nUnordered;
 		
+		DecimalFormat form = new DecimalFormat("0.000%");
 		System.out.println("count  NIM unordered states: " + ((int) nUnordered));
-		System.out.println("count1 NIM ordered states: " + counter1+ " ("+perc1*100+"% of unordered states)");
-		System.out.println("count2 NIM ordered states: " + counter2+ " ("+perc2*100+"% of unordered states)");
+		System.out.println("count1 NIM ordered states: " + counter1+ " ("+form.format(perc1)+" of unordered states)");
+		System.out.println("count2 NIM ordered states: " + counter2+ " ("+form.format(perc2)+" of unordered states)");
 		System.out.println("recursive calls (with summation): " + gCount1 + " ("+gCount2+")");
 	}
 	

@@ -300,7 +300,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 		if (enable) {
 	        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		} else {
-	        this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+//	        this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		}
 	}
 

@@ -88,7 +88,7 @@ public class NTuple2ValueFunc implements Serializable {
 	// elements needed for TD(lambda)-update with finite horizon, 
 	// see update(int[],int,double,double):
 	private int horizon=0;
-	private transient LinkedList eList = new LinkedList();		
+	private transient LinkedList[] eList;		
 
 	private boolean PRINTNTUPLES = false;	// /WK/ control the file printout of n-tuples
 	private DecimalFormat frmS = new DecimalFormat("+0.00000;-0.00000");
@@ -134,6 +134,8 @@ public class NTuple2ValueFunc implements Serializable {
 		this.xnf = xnf;
 		this.numPlayers = xnf.getNumPlayers();
 		this.numOutputs = numOutputs;
+		this.eList = new LinkedList[this.numPlayers];
+		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList();
 		this.tdAgt = parent;
 		
 		if (nTuplesI!=null) {
@@ -316,8 +318,8 @@ public class NTuple2ValueFunc implements Serializable {
 //	}
 
 	/**
-	 * Update the weights of the n-Tuple-System. The difference to former {@code updateWeights}
-	 * is that the target is now: reward + GAMMA*valueFunction(next), irrespective of the 
+	 * Update the weights of the n-tuple system in case of {@link TDNTuple2Agt}. The difference 
+	 * to former {@code updateWeights} is that the target is now: reward + GAMMA*valueFunction(next), irrespective of the 
 	 * former parameter {@code finished}.
 	 * The value function estimated by {@code this} has a different meaning: it 
 	 * estimates the sum of future rewards.
@@ -347,7 +349,7 @@ public class NTuple2ValueFunc implements Serializable {
 		// derivative of tanh ( if hasSigmoid()==true):
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
-		update(curBoard, curPlayer, 0, delta, e, false);
+		update(curBoard, curPlayer, 0, delta, e, false, false);
 		
 		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
@@ -387,11 +389,10 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param vLast
 	 *            the value V(s) for s=curBoard and player curPlayer
 	 * @param reward
-	 *            the delta reward given for the transition into next board
+	 *            the delta reward given for the transition into next board (only for debug info)
 	 * @param target
 	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
-	 *            non-terminal states. But the target can be as well (r + GAMMA * V) for an
-	 *            n-ply look-ahead or (r - GAMMA * V(opponent)).  
+	 *            non-terminal states.   
 	 * @param thisSO
 	 * 			  only for debug info: access to the current state's stringDescr()
 	 */
@@ -402,7 +403,7 @@ public class NTuple2ValueFunc implements Serializable {
 		// derivative of tanh ( if hasSigmoid()==true):
 		double e = (hasSigmoid() ? (1.0 - vLast * vLast) : 1.0);
 
-		update(curBoard, curPlayer, 0, delta, e, false);
+		update(curBoard, curPlayer, 0, delta, e, false, true);
 		
 		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
@@ -440,7 +441,7 @@ public class NTuple2ValueFunc implements Serializable {
 		double e = (hasSigmoid() ? (1.0 - qLast * qLast) : 1.0);
 
 		int o = lastAction.toInt();
-		update(curBoard, nextPlayer, o, delta, e, true);
+		update(curBoard, nextPlayer, o, delta, e, true, true);
 		
 		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
@@ -452,7 +453,7 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 	/**
-	 * Update the weights of the n-Tuple-system for a terminal state (target is 0).
+	 * Update the weights of the n-Tuple-system in case of {@link TDNTuple2Agt} for a terminal state towards target 0.
 	 * 
 	 * @param curBoard 	the current board
 	 * @param curPlayer the player whose value function is updated (the p in V(s_t|p) )
@@ -466,7 +467,7 @@ public class NTuple2ValueFunc implements Serializable {
 		// derivative of tanh ( if hasSigmoid()==true)
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
-		update(curBoard, curPlayer, 0, delta, e, false);
+		update(curBoard, curPlayer, 0, delta, e, false, false);
 
 		if (TDNTuple2Agt.DBGF_TARGET || TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
@@ -489,7 +490,10 @@ public class NTuple2ValueFunc implements Serializable {
 
 	/**
 	 * Update all n-Tuple LUTs. Simply add dW to all relevant weights. Also
-	 * update the symmetric boards (equivalent states), if wanted (if {@link #getUSESYMMETRY()}{@code =true}).
+	 * update the symmetric boards (equivalent states), if wanted 
+	 * (if {@link #getUSESYMMETRY()}{@code =true}).
+	 * <p>
+	 * The value added to all active weights is alphaM*delta*e   (in case LAMBDA==0)
 	 * 
 	 * @param board
 	 *            board, for which the weights shall be updated,
@@ -501,15 +505,17 @@ public class NTuple2ValueFunc implements Serializable {
 	 *            (for TD this is always 0, but Sarsa and Q-learning have several output units)
 	 * @param delta
 	 * 			  the delta signal we propagate back
-	 * @param e   derivative of tanh ( if hasSigmoid()==true)
-	 * @param QMODE   
-	 * 			  whether called via {@code updateWeightsQ} (Sarsa, Q-learning) 
-	 * 			  or via {@code updateWeightsNew*} (TD-learning)
-	 * <p>
-	 * The value added to all active weights is alphaM*delta*e   (in case LAMBDA==0)
+	 * @param e   derivative of tanh (if hasSigmoid()==true)
+	 * @param QMODE :<br>  
+	 * 			  {@code true}, if called via {@code updateWeightsQ} (Q-learning via {@link SarsaAgt});<br> 
+	 * 			  {@code false}, if called from TD-learning (via  {@code updateWeightsNew*}, {@link TDNTuple2Agt},
+	 * 			  or via {@code updateWeightsTD}, {@link TDNTuple3Agt})	
+	 * @param ELIST_PP (eList-per-player, whether to keep separate eligibility lists per player):<br>   
+	 * 			  {@code true}, if called from 'new' TD-learning {@link SarsaAgt} or {@link TDNTuple3Agt};<br> 
+	 * 			  {@code false}, if called from 'old' TD-learning (via {@link TDNTuple2Agt})	
 	 */
 	private void update(int[] board, int player, int output, double delta, double e, 
-						boolean QMODE) {
+						boolean QMODE, boolean ELIST_PP) {
 		int i, j, out;
 		double alphaM, sigDeriv, lamFactor;
 
@@ -520,21 +526,24 @@ public class NTuple2ValueFunc implements Serializable {
 
 		alphaM = ALPHA / (numTuples*equiv.length); 
 
-		// construct new EligStates object, add it at head of LinkedList eList and remove 
-		// from the list the element 'beyond horizon' t_0 = t-horizon (if any):
+		// construct new EligStates object, add it at head of LinkedList eList[ie] and remove 
+		// from the list the element 'beyond horizon' t_0 = t-horizon (if any).
+		// The LinkedList to use is either always the same one (ie=0, if ELIST_PP==false) or 
+		// the list kept for each specific player 'player' (if ELIST_PP==true):
+		int ie = (ELIST_PP ? player : 0);
 		EligStates elem = new EligStates(equiv,equivAction,e);
-		eList.addFirst(elem);
-		if (eList.size()>horizon) eList.pollLast();
+		eList[ie].addFirst(elem);
+		if (eList[ie].size()>horizon) eList[ie].pollLast();
 		
-		// iterate over all list elements in horizon  (h+1 elements from t down to t_0):
-		ListIterator<EligStates> iter = eList.listIterator();		
+		// iterate over all list elements in horizon  (at most h+1 elements from t down to t_0):
+		ListIterator<EligStates> iter = eList[ie].listIterator();		
 		lamFactor=1;  // holds 1, LAMBDA, LAMBDA^2,... in successive passes through while-loop
 		while(iter.hasNext()) {
 			elem=iter.next();
 			equiv=elem.equiv;
 			equivAction=elem.equivAction;
 //			printEquivs(equiv,equivAction);		// debug (TTT only)
-			//System.out.println(eList.size()+" "+lamFactor+"   ["+ equiv[0]+"]");	// debug
+			//System.out.println(eList[ie].size()+" "+lamFactor+"   ["+ equiv[0]+"]");	// debug
 			assert (lamFactor >= tdAgt.getParTD().getHorizonCut()) 
 					: "Error: lamFactor < ParTD.getHorizonCut";
 			e = lamFactor*elem.sigDeriv;
@@ -555,20 +564,6 @@ public class NTuple2ValueFunc implements Serializable {
 		numLearnActions++;
 	}
 
-	// debug TicTacToe only: print equivalent boards & equivalent actions
-	private void printEquivs(int[][] equiv, int[] equivAction) {
-		int j,k,m,n;
-		String[] symb = {"o","-","X"};
-		for (j = 0; j < equiv.length; j++) {
-			for (k=0,m=0; m<3; m++) {
-				for (n=0; n<3; n++,k++) 
-					System.out.print(symb[equiv[j][k]]);
-				System.out.println("");
-			}
-			System.out.println("Action = "+equivAction[j]);
-		}
-		
-	}
 
 	/**
 	 * Is called only in case (TC && !tcImm), but !tcImm is not recommended
@@ -622,6 +617,18 @@ public class NTuple2ValueFunc implements Serializable {
 		return xnf;
 	}
 
+	public boolean getTc() {
+		return this.nTuples[0][0][0].getTc();
+	}
+
+	public boolean getTcImm() {
+		return this.nTuples[0][0][0].getTcImm();
+	}
+
+	public boolean getUSESYMMETRY() {
+		return tdAgt.getParNT().getUSESYMMETRY();
+	}
+
 	public boolean hasSigmoid() {
 		return tdAgt.getParTD().hasSigmoid();
 	}
@@ -630,26 +637,6 @@ public class NTuple2ValueFunc implements Serializable {
 		return tdAgt.getParTD().hasRpropLrn();
 	}
 
-	public boolean getUSESYMMETRY() {
-		return tdAgt.getParNT().getUSESYMMETRY();
-	}
-
-	public void clearEligList() {
-		eList.clear();
-	}
-	
-	public void clearEligList(NTupleAgt.EligType m_elig) {
-		switch(m_elig) {
-		case STANDARD: 
-			// do nothing
-			break;
-		case RESET: 
-			eList.clear();
-			break;
-		}
-	}
-
-	
 	public int getHorizon() {
 		return horizon;
 	}
@@ -675,6 +662,23 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 
+	public void clearEligList() {
+		for (int ie=0; ie<eList.length; ie++)
+			eList[ie].clear();
+	}
+	
+	public void clearEligList(NTupleAgt.EligType m_elig) {
+		switch(m_elig) {
+		case STANDARD: 
+			// do nothing
+			break;
+		case RESET: 
+			clearEligList();
+			break;
+		}
+	}
+
+	
 	// class EligStates is needed in update(int[],int,int,double,double,boolean)
 	private class EligStates implements Serializable {
 		int[][] equiv;
@@ -734,15 +738,81 @@ public class NTuple2ValueFunc implements Serializable {
 		
 	}
 	
+	// debug TicTacToe only: print equivalent boards & equivalent actions
+	private void printEquivs(int[][] equiv, int[] equivAction) {
+		int j,k,m,n;
+		String[] symb = {"o","-","X"};
+		for (j = 0; j < equiv.length; j++) {
+			for (k=0,m=0; m<3; m++) {
+				for (n=0; n<3; n++,k++) 
+					System.out.print(symb[equiv[j][k]]);
+				System.out.println("");
+			}
+			System.out.println("Action = "+equivAction[j]);
+		}
+		
+	}
+	
 	/**
-	 * Analyze the weight distribution and - if TCL is active - the tcFactorArray distribution 
-	 * by calculating certain quantiles (percentiles)
+	 * Print the configuration of all n-tuples to file {@code agents/theNtuple.txt}.
+	 * <p> 
+	 * For each n-tuple we print
+	 * <pre>   {0,4,15,22, ...} </pre>
+	 * i. e. the list of cells covered by this n-tuple.
+	 * 
+	 * @throws IOException
+	 */
+	public void printNTuples() throws IOException {
+		String str;
+		PrintWriter theNtuple = new PrintWriter(new FileWriter("agents/theNtuple.txt",false));
+		theNtuple.println("{");
+		for (int i=0; i<this.nTuples[0][0].length; i++) {
+			str = "  {"+this.nTuples[0][0][i].getPosition(0);
+			theNtuple.print(str);
+			//System.out.print(str);
+			for (int j=1; j<this.nTuples[0][0][i].getLength(); j++) {
+				str = ", "+this.nTuples[0][0][i].getPosition(j);
+				theNtuple.print(str);
+				//System.out.print(str);
+			}
+			str = (i==(this.nTuples[0][0].length-1)) ? "}" : "},";
+			theNtuple.println(str);
+			//System.out.println(str);
+		}		
+		theNtuple.println("}");
+		theNtuple.close();
+	}
+
+
+	/**
+	 * Analyze the weight distribution and - if TCL is active - the {@code tcFactorArray} distribution 
+	 * by calculating certain quantiles (percentiles). For example, quantile[25]=0.134 means 
+	 * that 25% of the data are smaller than or equal to 0.134.
+	 * <p>
+	 * Some remarks: <ul>
+	 * <li> Quantiles are calculated only over <b>active</b> weights. This is necessary, because 
+	 * 		normally only less than 10% of the weights are active: otherwise quantile[25] and 
+	 *  	other would tend to be zero.
+	 * <li> {@code tcFactorArray} is only available directly after training. If an agent is stored
+	 * 		to disk, {@code tcFactorArray} is not stored (to minimize file size, it is only 
+	 * 		necessary during training). When reloading an agent from disk, we will have 
+	 * 		{@code tcFactorArray=null}, even if TCL is active.
+	 * <li> The analysis results are printed to {@code System.out} in the form
+	 * <pre>
+	 *             per       LUT     / tcFactor
+	 *   Quantile [000] = -1.6982614 / NA 
+	 *   ...       ...                              </pre>
+	 * 		where {@code NA} indicates that {@code tcFactorArray} is not available.
+	 * <li> As a side effect, this method writes the configuration of all n-tuples to file
+	 * 		{@code agents/theNtuple.txt}, see {@link #printNTuples()}.
+	 * </ul>
 	 * @param per the quantiles to calculate. If null, then use DEFAULT_PER 
-	 * 			= {0,25,50,75,100}, where the numbers are given in percent.
-	 * @return res[][] with <ul>
-	 * 		<li> res[0][]: a copy of {@code per}
-	 * 		<li> res[1][]: the corresponding quantiles of the weights (from all LUTs)
-	 * 		<li> res[2][]: the corresponding quantiles of tcFactorArray (from all LUTs)
+	 * 			= {0,25,50,75,100}, where the numbers are given in percent. (Note that quantile[0]
+	 * 			and quantile[100] specify minimum and maximum of the data.)
+	 * @return {@code double res[][]} with <ul>
+	 * 		<li> {@code res[0][]}: a copy of {@code per}
+	 * 		<li> {@code res[1][]}: the corresponding quantiles of the LUT weights (from all n-tuples)
+	 * 		<li> {@code res[2][]}: the corresponding quantiles of {@code tcFactorArray} (from all n-tuples)
 	 * </ul>
 	 */
 	public double[][] weightAnalysis(double[] per) {
@@ -757,7 +827,11 @@ public class NTuple2ValueFunc implements Serializable {
 		for (int i=0; i<ntuples.length; i++) {
 			count += ntuples[i].getLutLength();
 		}
-		double[] data = new double[count];
+		
+		// data is an array big enough to hold all LUT data. It will be filled below with all 
+		// active LUT weights (i.e. LUT  != 0.0). This distinction between active and 
+		// inactive weights works of course only, if LUTs are initialized with 0.0.
+		double[] data = new double[count];		
 		double[] tcdat = new double[count];
 		double[] lut;
 		double[] tcf=null;
@@ -788,13 +862,13 @@ public class NTuple2ValueFunc implements Serializable {
 		}
 		int nActive=pos;
 		int pActive = (int) (((double)nActive)/count*100);
-		double[] data2 = new double[nActive];
+		  
+		double[] data2 = new double[nActive];	// data2 is an array holding all *active* LUT data.
 		double[] tcdat2 = new double[nActive];
 		System.arraycopy(data, 0, data2, 0, nActive);
 		System.arraycopy(tcdat, 0, tcdat2, 0, nActive);
 		data = data2;
 		tcdat = tcdat2;
-		if (tcf==null) System.out.println("WARNING: tcFactorArray is null");
 
 		// --- only testing / debug ---
 //		double[] data = {0,1,2,3,4,5,6,7,8,9};
@@ -811,7 +885,7 @@ public class NTuple2ValueFunc implements Serializable {
 		p.setData(data);	
 		p2.setData(tcdat);
 		for (i=0; i<per.length; i++) {
-			if (per[i]==0) {
+			if (per[i]==0) {	// this is because class Percentile cannot calculate quantile[0], the min of all data
 				res[1][i] = m.evaluate(data);
 				res[2][i] = m2.evaluate(tcdat);
 			} else { 
@@ -824,11 +898,20 @@ public class NTuple2ValueFunc implements Serializable {
 		DecimalFormat df = new DecimalFormat();				
 		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
 		df.applyPattern("+0.0000000;-0.0000000");  
-		System.out.println("weight analysis " + tdAgt.getClass().getSimpleName() + " ("
+		System.out.println("[NTuple2ValueFunc.weightAnalysis] " + tdAgt.getClass().getSimpleName() + " ("
 				+count+" weights, "+nActive+" active ("+pActive+"%)): ");
+		if (tcf==null) System.out.println("WARNING: tcFactorArray is null");
+		System.out.println("             per       LUT     / tcFactor");
 		for (i=0; i<per.length; i++) {
 			System.out.println("   Quantile [" + form.format(per[i]) + "] = "	
 					+df.format(res[1][i]) + " / " + ((tcf==null)?"NA":df.format(res[2][i])) );			
+		}
+
+		// print the n-tuple layout to file
+		try {
+			this.printNTuples();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 		return res;

@@ -327,7 +327,7 @@ public class Types {
     public static final String[] GUI_AGENT_INITIAL  
     	//= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
     	//= {"Human", "MCTS", "Human", "Human", "Human", "Human"};
-    	= {"Sarsa", "MCTS", "Human", "Human", "Human", "Human"};
+    	= {"TD-Ntuple-3", "MCTS", "Human", "Human", "Human", "Human"};
 		//= {"TD-Ntuple-2", "Human", "MCTS Expectimax", "Human", "Human", "Human"};
     public static final String[] GUI_PLAYER_NAME  	// player names for P0, P1, ... (for up to 5 players)
     	//= {"P0", "P1", "P2", "P3", "P4"};

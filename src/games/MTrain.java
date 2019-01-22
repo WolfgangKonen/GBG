@@ -1,8 +1,10 @@
 package games;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -25,7 +27,6 @@ class MTrain {
 	public int gameNum;			// number of training games (episodes) during a run
 	public double evalQ;		// quick eval score
 	public double evalT;		// train eval score
-//	public double evalM;		// multi train eval score
 	public long actionNum;		// number of learning actions (excluding random moves)
 	public long trnMoveNum;		// number of train moves (including random moves)
 	
@@ -35,7 +36,6 @@ class MTrain {
 		this.gameNum=gameNum;
 		this.evalQ=evalQ;
 		this.evalT=evalT;
-//		this.evalM=evalM;
 		this.actionNum=actionNum;
 		this.trnMoveNum=trnMoveNum;
 	}
@@ -66,24 +66,40 @@ class MTrain {
 		strDir += "/csv";
 		tools.Utils.checkAndCreateFolder(strDir);
 
+		boolean retry=true;
 		PrintWriter mtWriter = null;
-		try {
-			mtWriter = new PrintWriter(new FileWriter(strDir+"/"+"multiTrain.csv",false));
-		} catch (IOException e) {
-			e.printStackTrace();
+		BufferedReader bufIn=new BufferedReader(new InputStreamReader(System.in));
+		while (retry) {
+			try {
+				mtWriter = new PrintWriter(new FileWriter(strDir+"/"+"multiTrain.csv",false));
+				retry = false;
+			} catch (IOException e) {
+				try {
+					// We may get here if multiTrain.csv is open in another application (e.g. Excel).
+					// Here we give the user the chance to close the file in the other application:
+				    System.out.print("*** Warning *** Could not open "+strDir+"/"+"multiTrain.csv. Retry? (y/n): ");
+				    String s = bufIn.readLine();
+				    retry = (s.contains("y")) ? true : false;
+				} catch (IOException e2) {
+					e2.printStackTrace();					
+				}
+			}			
 		}
 		
-		mtWriter.println(pa.stringDescr());		
-		mtWriter.println(pa.stringDescr2());
-		
-//		mtWriter.println("run, gameNum, evalQ, evalT, evalM, actionNum, trnMoves");
-		mtWriter.println("run, gameNum, evalQ, evalT, actionNum, trnMoves");
-		ListIterator<MTrain> iter = mtList.listIterator();		
-		while(iter.hasNext()) {
-			(iter.next()).print(mtWriter);
-		}
+		if (mtWriter!=null) {
+			mtWriter.println(pa.stringDescr());		
+			mtWriter.println(pa.stringDescr2());
+			
+			mtWriter.println("run, gameNum, evalQ, evalT, actionNum, trnMoves");
+			ListIterator<MTrain> iter = mtList.listIterator();		
+			while(iter.hasNext()) {
+				(iter.next()).print(mtWriter);
+			}
 
-	    mtWriter.close();
+		    mtWriter.close();
+		} else {
+			System.out.print("*** Warning *** Could not write "+strDir+"/"+"multiTrain.csv.");
+		}
 	}
 
 }

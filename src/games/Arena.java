@@ -226,8 +226,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				UpdateBoard();
 				taskState = Task.IDLE;
 				break;
-			case TRNEMNT:
-				// Tournament Code
+			case TRNEMNT:    // Tournament Code
 				tournamentAgentManager.lockToCompete(getGameBoard());
 				tournamentAgentManager.setSettingsGUIElementsEnabled(false);
 
@@ -235,14 +234,11 @@ abstract public class Arena extends JFrame implements Runnable {
 				progressBarJF.setSize(300, 100);
 				progressBarJF.setTitle("TS Progress...");
 				JPanel progressBarJP = new JPanel();
-				// JProgressBar-Objekt wird erzeugt
+				// generate new JProgressBar object
 				JProgressBar tsProgressBar = new JProgressBar(0, tournamentAgentManager.getTSProgress()[1]);
-				// Wert für den Ladebalken wird gesetzt
 				tsProgressBar.setValue(0);
-				// Der aktuelle Wert wird als
-				// Text in Prozent angezeigt
+				// show the actual value as text in percent
 				tsProgressBar.setStringPainted(true);
-				// JProgressBar wird Panel hinzugefügt
 				progressBarJP.add(tsProgressBar);
 				progressBarJF.add(progressBarJP);
 				progressBarJF.setVisible(true);
@@ -295,7 +291,6 @@ abstract public class Arena extends JFrame implements Runnable {
 				progressBarJF.dispatchEvent(new WindowEvent(progressBarJF, WindowEvent.WINDOW_CLOSING)); // close progressbar window
 				//tournamentAgentManager.printGameResults(); // print some stats to the console
 
-				// statitistische auswertung + visualisierung
 				tournamentAgentManager.makeStats(); // calc data and create result stats window
 				tournamentAgentManager.printGameResults(); // print some stats to the console
 
@@ -320,8 +315,8 @@ abstract public class Arena extends JFrame implements Runnable {
 				if (!singlePlayerTSRunning) {
 					gb.showGameBoard(this, false);
 					gb.clearBoard(false, true);
-					//System.out.println(TAG+"public void run()#case PLAY");
 					PlayGame();
+					gb.enableInteraction(false);
 					enableButtons(true);
 				}
 				break;
@@ -330,6 +325,8 @@ abstract public class Arena extends JFrame implements Runnable {
 				gb.clearBoard(false, true);
 				gb.setActionReq(true);
 				InspectGame();
+				gb.enableInteraction(false);
+				enableButtons(true);
 				break;
 			case IDLE:
 			default:
@@ -362,10 +359,10 @@ abstract public class Arena extends JFrame implements Runnable {
 		Types.ACTIONS_VT actBest;
 		PlayAgent paX;
 		PlayAgent[] paVector, qaVector;
+		int numPlayers = gb.getStateObs().getNumPlayers();
 
 		boolean DBG_HEX = false;
 
-		int numPlayers = gb.getStateObs().getNumPlayers();
 		try {
 			paVector = m_xfun.fetchAgents(m_xab);
 			AgentBase.validTrainedAgents(paVector, numPlayers);
@@ -399,10 +396,8 @@ abstract public class Arena extends JFrame implements Runnable {
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
 					XNTupleFuncs xnf = this.makeXNTupleFuncs();
-					int[] bvec = xnf.getBoardVector(soh); // look at bvec in
-															// debugger to see
-															// the board
-															// representation
+					int[] bvec = xnf.getBoardVector(soh); // look at bvec in debugger to see
+														  // the board representation
 					// int Index = this.getHexIndex(soh.getBoard());
 					// System.out.println("Index: "+Index);
 					System.out.println("[" + soh.stringDescr() + "]");
@@ -411,19 +406,19 @@ abstract public class Arena extends JFrame implements Runnable {
 
 				if (so.isLegalState() && !so.isGameOver()) {
 					actBest = paX.getNextAction2(so, false, true);
-					if (actBest != null) // a HumanAgent will return
+					if (actBest != null) 	// a HumanAgent will return
 											// actBest=null
 						so.storeBestActionInfo(actBest, actBest.getVTable());
 
 					gb.updateBoard(so, true, true);
 				} else {
 					if (so.stopInspectOnGameOver()) {
-						gb.updateBoard(so, false, true);
+						gb.updateBoard(so, true, true);
 						// not a valid play position >> show the board settings,
 						// i.e.
 						// the game-over position, but clear the values:
 						gb.clearBoard(false, true);
-
+					
 						break; // out of while, i.e. finish INSPECTV
 					} else {
 						// we get here e.g. in case RubiksCube where the initial
@@ -600,7 +595,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		so.resetMoveCounter();
 		System.out.println("StartState: "+so.stringDescr());
 
-		if (spDT!=null) { // set random startmoves for TS
+		if (spDT!=null) { // set random start moves for TS
 			if (spDT.rndmStartMoves>0) {
 				/*
 				RandomAgent raX = new RandomAgent("Random Agent X");
@@ -725,7 +720,6 @@ abstract public class Arena extends JFrame implements Runnable {
 					// in..." text in leftInfo:
 					gb.updateBoard(so, false, showValue);
 
-					//switch (so.getNumPlayers()) {
 					switch (numPlayers) {
 					case 1:
 						double gScore = so.getGameScore();
@@ -796,7 +790,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		logManager.endLoggingSession(logSessionid);
 		taskState = Task.IDLE;
 		setStatusMessage("Done.");
-	} // PlayGame()
+	} // PlayGame(TSGameDataTransfer spDT)
 
 	/**
 	 * For debugging 2048 during {@link #PlayGame()}: This function is only
