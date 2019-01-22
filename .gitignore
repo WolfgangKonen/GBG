@@ -43,8 +43,12 @@ agents/ConnectFour/firstTD*.agt.zip
 agents/ConnectFour/experiment
 agents/ConnectFour/old
 agents/ConnectFour/old2D
-agents/ConnectFour/TDNTal05-lam06-500k.agt.zip
-agents/ConnectFour/TDNTal10-lam03-500k.agt.zip
+agents/ConnectFour/TDNT*.agt.zip
+agents/ConnectFour/TCL-EXP-al*.agt.zip
+agents/ConnectFour/TCL-EXP-NT3-al50-lam025-500k-HOR001.agt.zip
+agents/ConnectFour/TCL-EXP-NT3-al50-lam025-500k-HOR001-T.agt.zip
+agents/ConnectFour/TCL-EXP-NT3-al50-lam025-500k-HOR001-T-epsfin0-V2.agt.zip
+# (the only agent we have in repos is TCL-EXP-NT3-al50-lam025-500k-HOR001-T-epsfin0.agt.zip)
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
