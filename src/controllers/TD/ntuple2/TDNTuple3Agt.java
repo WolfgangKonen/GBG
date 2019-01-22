@@ -333,7 +333,28 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so) {
-		throw new RuntimeException("getScoreTuple(StateObservation so) not available for TDNTuple3Agt");			        		
+		ScoreTuple sc = new ScoreTuple(so);
+		int[] bvec = m_Net.xnf.getBoardVector(so);
+		switch (so.getNumPlayers()) {
+		case 1: 
+			sc.scTup[0] = m_Net.getScoreI(bvec,so.getPlayer());
+			break;
+		case 2:
+			int player = so.getPlayer();
+			int opponent = (player==0) ? 1 : 0;
+			sc.scTup[player] = m_Net.getScoreI(bvec,player);
+			sc.scTup[opponent] = -sc.scTup[player];
+			break;
+		default: 	
+			throw new RuntimeException("getScoreTuple(StateObservation so) not available for TDNTuple3Agt and numPlayer>2");			        		
+		}
+		
+		// In any case: add the reward obtained so far, since the net predicts
+		// with getScoreI only the expected future reward.
+		boolean rgs = m_oPar.getRewardIsGameScore();
+		for (int i=0; i<so.getNumPlayers(); i++) 
+			sc.scTup[i] += so.getReward(i, rgs);
+    	return sc;
 	}
 
 	/**
