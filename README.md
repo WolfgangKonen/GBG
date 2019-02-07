@@ -21,6 +21,9 @@ For a quick overview of GBG see the [GBG Wiki](https://github.com/WolfgangKonen/
 For an in-depth description of classes and interfaces in GBG see the [technical report on GBG [Konen2017]](resources/TR-GBG.pdf). This technical report describes in tutorial form 
 the set of interfaces, abstract and non-abstract classes which help to standardize and implement
 those parts of board game playing and learning that otherwise would be tedious and repetitive parts in coding. 
-Alternatively, you can reach the technical report after starting the GBG framework via  `Help - Show TR-GBG.pdf`
+Alternatively, you can reach the technical report after starting the GBG framework via  `Help - Show TR-GBG.pdf`.
+
+For publications and research on GBG see [Research page GBG Wiki](https://github.com/WolfgangKonen/GBG/wiki/Research).
 
 ![ArenaTrain](https://github.com/WolfgangKonen/GBG/blob/master/resources/figArenaTrain.png)
+![ArenaTrain](https://github.com/WolfgangKonen/GBG/blob/master/resources/HexGameboard01_w.png)
