@@ -17,12 +17,12 @@ import tools.Types.ACTIONS;
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
- *
  */
 public class StateObserverNim extends ObserverBase implements StateObservation {
 	private int[] m_heap;		// has for each heap the count of items in it
-	private int m_player;			// Player who makes the next move 
+	private int m_player;		// player who makes the next move (0 or 1)
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
+	private boolean SORT_IT = false;
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -79,11 +79,6 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		return true;
 	}
 
-//    @Override
-//	public boolean has2OppositeRewards() {
-//		return true;
-//	}
-
     @Override
 	public boolean isLegalState() {
 		return true;
@@ -96,7 +91,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		int subtractor = j+1;
 										// reverse: iAction = MAX_MINUS*heap + j
 		
-		assert heap < NimConfig.NUMBER_HEAPS : "Oops, heap no "+heap+" is not available!";
+		assert heap < NimConfig.NUMBER_HEAPS : "Oops, heap "+heap+" is not available!";
 				
 		return (m_heap[heap]>=subtractor); 		
 	}
@@ -106,8 +101,10 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		String sout = "";
 		String[] play = {"X","O"};
 	
-		for (int i=0;i<NimConfig.NUMBER_HEAPS;i++) 
-				sout = sout + play[m_player]+"," + this.m_heap[i];
+		sout = sout + play[m_player]+"("+this.m_heap[0];
+		for (int i=1;i<NimConfig.NUMBER_HEAPS;i++) 
+			sout = sout + "," + this.m_heap[i];
+		sout = sout + ")";
 		
  		return sout;
 	}
@@ -181,6 +178,8 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		
 		m_heap[heap] -= subtractor;
     	
+		if (SORT_IT) Arrays.sort(m_heap);	// still experimental
+		
     	setAvailableActions(); 			// IMPORTANT: adjust the available actions (have reduced by one)
     	
     	// set up player for next advance()
@@ -224,7 +223,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 * <pre>
 	 * 		iAction = i*NimConfig.MAX_MINUS+j
 	 * </pre> 
-	 * with j = 0,...,{@link NimConfig#MAX_MINUS} means: 
+	 * with j = 0,...,{@link NimConfig#MAX_MINUS}-1 means: 
 	 * Subtract {@code j+1} items from heap no {@code i}. 
 	 * <p>
 	 */
@@ -278,18 +277,18 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	    */
 		//
 		// The equivalent Java implementation: The sequence heaps is fed into the lambda-construct 
-		// (x,y) -> x ^ y: via reduce: the first two elements are bitwise XOR'ed, then the
+		// (x,y) -> x ^ y via reduce: the first two elements are bitwise XOR'ed, then the
 		// result of this together with the 3rd element is bitwise XOR'ed, then the
 		// result of this together with the 4th element is bitwise XOR'ed, and so on. 
 		// The final result is the binary digital sum or nim-sum of all heaps.
 		//
 		// Why do we apply %K, i.e. modulo K, before XORing x and y? - If we have the constraint
 		// that at most K-1 items may be taken from any heap, then a safe winning position is one 
-		// where every heap has K items or multiples of it (clear?). So we try to reach such a 
+		// where every heap has K items or multiples of K items (clear?). So we try to reach such a 
 		// winning position. This means that only the *remainder* of x and y in excess of multiples
-		// of K (i.e. x%K) is relevant to compute the nim sum and find the winning move.
+		// of K (i.e. x%K) is relevant to compute the nim-sum and find the winning move.
 		//
-		// Why int startValue=0? - Because then reduce directly returns an int as well.
+		// Why int startValue=0? - Because then reduce() directly returns an int as well.
 		//
 		int startValue=0;
 		int K = NimConfig.MAX_MINUS+1;
@@ -334,7 +333,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		int K = NimConfig.MAX_MINUS+1;
 		// see same line in method bouton(int[] heaps) for an explanation of the following statement:
 		int nim_sum = Arrays.stream(heaps).reduce(startValue, (x,y) -> (x%K) ^ (y%K));
-		// if nim_sum==0, heaps is a winning configuration, else not:
+		// if nim_sum==0, heaps is a winning configuration for the player who created it, else not:
 		return (nim_sum==0) ? +1.0 : -1.0;
 	}
 	

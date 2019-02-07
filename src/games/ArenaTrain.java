@@ -32,13 +32,10 @@ import tools.Types;
  * The functions are implemented in {@link XArenaFuncs}.
  * The GUI for buttons and choice boxes is in {@link XArenaButtons}. <p>
  *
- * Run this class either as applet (from {@link LaunchAppletTTT}) or as main (from 
- * {@link games.TicTacToe.LaunchTrainTTT LaunchTrainTTT} or from
- * {@link games.TicTacToe.LaunchArenaTTT LaunchArenaTTT}) for the TicTacToe game.
+ * Run this class as main (from one of the derived classes {@code ArenaTrain*}).
  * 
  * @see XArenaButtons 
  * @see XArenaFuncs
- * @see LaunchAppletTTT 
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  *
@@ -67,6 +64,7 @@ abstract public class ArenaTrain extends Arena
 		int n = this.m_xab.choiceAgent.length;
 		for (int i=0; i<n; i++) {
 			this.m_xab.choiceAgent[i].setEnabled(true);
+			this.m_xab.mParam[i].setText("Param "+Types.GUI_2PLAYER_NAME[i]);
 			this.m_xab.mParam[i].setVisible(true);
 			this.m_xab.mTrain[i].setVisible(true);
 		}
@@ -74,6 +72,11 @@ abstract public class ArenaTrain extends Arena
 		this.m_xab.TrainNumT.setEnabled(true);		
 		this.enableButtons(true);
 	}
+	
+	public boolean hasTrainRights() {
+		return true;
+	}
+	
 	/**
 	 * This method uses the member taskState from parent class {@link Arena}, 
 	 * performs several actions only appropriate for {@link ArenaTrain} 

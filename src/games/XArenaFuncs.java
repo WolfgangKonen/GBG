@@ -82,6 +82,7 @@ public class XArenaFuncs
 	 * Construct and return a new {@link PlayAgent}, based on the settings in 
 	 * {@code sAgent} and {@code m_xab}. 
 	 * <p>
+	 * @param n			the player number
 	 * @param sAgent	the string from the agent-select box
 	 * @param m_xab		used only for reading parameter values from GUI members 
 	 * @return			a new {@link PlayAgent} (initialized, but not yet trained)

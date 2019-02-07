@@ -1143,7 +1143,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	}
 	
 	/**
-	 * the number of calls to {@link NTuple2ValueFunc#update(int[], int, int, double, double)}
+	 * the number of calls to {@link NTuple2ValueFunc#update(int[], int, int, double, double, boolean, boolean)}
 	 */
 	@Override
 	public long getNumLrnActions() {

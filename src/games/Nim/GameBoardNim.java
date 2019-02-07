@@ -35,9 +35,14 @@ import tools.Types.ACTIONS;
  * and allows user interactions with the board to enter legal moves during 
  * game play or to enter board positions for which the agent reaction is 
  * inspected. 
+ * <p>
+ * The game Nim is a quite simple game, mostly used for debugging purposes:
+ * <p>
+ * There are {@link NimConfig#NUMBER_HEAPS} heaps, each having initially {@link NimConfig#HEAP_SIZE}
+ * items. There are two players and each player removes between 1 and {@link NimConfig#MAX_MINUS} 
+ * items from one heap in each move. The player who removes the last item wins. 
  * 
  * @author Wolfgang Konen, TH Köln, Dec'18
- *
  */
 public class GameBoardNim extends JFrame implements GameBoard {
 

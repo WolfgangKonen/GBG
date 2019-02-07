@@ -365,14 +365,14 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * 
 	 * <h2>Example</h2>
 	 * 
-	 * <blockcode><pre>
+	 * <pre>
 	 * new double[][]{
 	 *   {1.0,1.2,1.4},
 	 *   {1.2,1.3,1.5},
 	 *   {0.9,1.3,1.2},
 	 *   {0.8,1.6,1.1}
 	 * };
-	 * </pre></blockcode>
+	 * </pre>
 	 * 
 	 * The above zValues array is equivalent to:
 	 * 

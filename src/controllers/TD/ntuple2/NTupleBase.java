@@ -4,6 +4,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Random;
 
 import controllers.AgentBase;
@@ -12,6 +15,12 @@ import games.StateObservation;
 import params.ParNT;
 import params.ParTD;
 
+/**
+ *  Abstract superclass for {@link SarsaAgt} and {@link TDNTuple3Agt}.
+ *
+ *	@see SarsaAgt
+ *	@see TDNTuple3Agt
+ */
 abstract public class NTupleBase extends AgentBase implements NTupleAgt, Serializable {
 	public Random rand; // generate random Numbers 
 	
@@ -24,7 +33,7 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 
 	/**
 	 * Controls the amount of explorative moves in
-	 * {@link #getNextAction2(StateObservation, boolean, boolean)}
+	 * {@link TDNTuple3Agt#getNextAction2(StateObservation, boolean, boolean)}
 	 * during training. <br>
 	 * m_epsilon = 0.0: no random moves, <br>
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
@@ -121,6 +130,24 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 		epsilon.close();
 	}
 	
+	public String printTrainStatus() {
+		DecimalFormat frm = new DecimalFormat("#0.0000");
+		DecimalFormat frme= new DecimalFormat();
+		frme = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+		frme.applyPattern("0.0E00");  
+
+		String cs = ""; //getClass().getName() + ": ";   // optional class name
+		String str = cs + "alpha="+frm.format(m_Net.getAlpha()) 
+				   + ", epsilon="+frm.format(getEpsilon())
+				   //+ ", lambda:" + m_Net.getLambda()
+				   + ", "+getGameNum() + " games"
+				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
+		if (this.m_Net.getNumPlayers()==2) 
+			str = str + ", (winX/tie/winO)=("+winXCounter+"/"+tieCounter+"/"+winOCounter+")";
+		winXCounter=tieCounter=winOCounter=0;
+		return str;
+	}
+
 	/**
 	 * @return a short description of the n-tuple configuration
 	 */
@@ -177,7 +204,7 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	}
 	
 	/**
-	 * the number of calls to {@link NTuple2ValueFunc#update(int[], int, int, double, double)}
+	 * the number of calls to {@link NTuple2ValueFunc#update(int[], int, int, double, double, boolean, boolean)}
 	 */
 	@Override
 	public long getNumLrnActions() {

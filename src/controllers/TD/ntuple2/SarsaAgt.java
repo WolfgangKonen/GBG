@@ -45,20 +45,32 @@ import games.XArenaMenu;
  * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...) and
  * {@link NTupleBase} (finishUpdateWeights, increment*Counters, isTrainable, normalize2, ...)
  * <p>
- * {@link SarsaAgt} replaces the older {@code TDNTupleAgt}. 
- * The differences of {@link SarsaAgt} to {@code TDNTupleAgt} are:
+ * {@link SarsaAgt} is an alternative to {@link TDNTuple2Agt}. 
+ * The differences between {@link SarsaAgt} and {@link TDNTuple2Agt} are:
  * <ul>
- * <li> no eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
- * 		memory consumptive)
- * <li> option AFTERSTATE (relevant only for nondeterministic games like 2048), which builds the value 
+ * <li> {@link SarsaAgt} updates the value of a state for a player based on the value/reward
+ * 		that the <b>same</b> player achieves in his next turn. It is in this way more similar to 
+ * 		{@link TDNTuple3Agt}. (Note that the updates of {@link TDNTuple2Agt} are based on the value/reward of 
+ * 		the <b>next state</b>. This may require sign change, depending on the number of players.)
+ * 		Thus {@link SarsaAgt} is much simpler to generalize to 1-, 2-, 3-, ..., N-player games
+ * 		than {@link TDNTuple2Agt}.
+ * <li> Eligible states: {@link SarsaAgt} updates with ELIST_PP=true, i.e. it has a separate 
+ * 		{@code eList[p]} per player p. {@link SarsaAgt} uses only one common {@code eList[0]}. 
+ * 		Only relevant for LAMBDA &gt; 0. 
+ * </ul>
+ * The similarities of {@link SarsaAgt} and {@link TDNTuple2Agt} are:
+ * <ul>
+ * <li> No eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
+ * 		memory consumptive).
+ * <li> Option AFTERSTATE (relevant only for nondeterministic games like 2048), which builds the value 
  * 		function on the argument afterstate <b>s'</b> (before adding random element) instead 
  * 		of next state <b>s''</b> (faster learning and better generalization).
- * <li> has the random move rate bug fixed: Now EPSILON=0.0 means really 'no random moves'.
- * <li> learning rate ALPHA differently scaled: if ALPHA=1.0, the new value for a
+ * <li> Has the random move rate bug fixed: Now EPSILON=0.0 means really 'no random moves'.
+ * <li> Learning rate ALPHA differently scaled: if ALPHA=1.0, the new value for a
  * 		state just trained will be exactly the target. Therefore, recommended ALPHA values are 
  * 		m*N_s bigger than in {@code TDNTupleAgt}, where m=number of n-tuples, N_s=number of 
  * 		symmetric (equivalent) states. 
- * <li> a change in the update formula: when looping over different equivalent
+ * <li> A change in the update formula: when looping over different equivalent
  * 		states, at most one update per index is allowed (see comment in {@link NTuple2} for 
  * 		member {@code indexList}).
  * </ul>
@@ -526,24 +538,6 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		return str;
 	}
 		
-	public String printTrainStatus() {
-		DecimalFormat frm = new DecimalFormat("#0.0000");
-		DecimalFormat frme= new DecimalFormat();
-		frme = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
-		frme.applyPattern("0.0E00");  
-
-		String cs = ""; //getClass().getName() + ": ";   // optional class name
-		String str = cs + "alpha="+frm.format(m_Net.getAlpha()) 
-				   + ", epsilon="+frm.format(getEpsilon())
-				   //+ ", lambda:" + m_Net.getLambda()
-				   + ", "+getGameNum() + " games"
-				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
-		if (this.m_Net.getNumPlayers()==2) 
-			str = str + ", (winX/tie/winO)=("+winXCounter+"/"+tieCounter+"/"+winOCounter+")";
-		winXCounter=tieCounter=winOCounter=0;
-		return str;
-	}
-
 	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
 	// It sets various elements of NextState ns (nextReward, nextRewardTuple).
 	// It is part of SarsaAgt (and not part of NextState), because it uses various elements

@@ -151,8 +151,8 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 	/**
 	 * @param field
-	 *            a 7x6 Connect-Four Board: 1 -> Player 1 (Beginner) 2 -> Player
-	 *            2
+	 *            a 7x6 Connect-Four board with '1' for player 1 (who starts) 
+	 *            and '2' for player 2
 	 */
 	public AlphaBetaAgent(int field[][], BookSum books) {
 		super(field);
@@ -3846,7 +3846,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 	/**
 	 * This method currently only works for boards with not more than 2 threats
-	 * (>70% of all boards)
+	 * (&gt 70% of all boards)
 	 * 
 	 * @return estimated Value for the current board
 	 */

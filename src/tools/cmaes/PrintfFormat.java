@@ -217,7 +217,7 @@ import java.util.Vector;
  *      character is used.
  * <dt>-<dd> result of the conversion is left-justified
  *      within the field.  (It will be right-justified
- *      if this flag is not specified).</td></tr>
+ *      if this flag is not specified).
  * <dt>+<dd> result of a signed conversion always
  *      begins with a sign (+ or -).  (It will begin
  *      with a sign only when a negative value is

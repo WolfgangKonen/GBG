@@ -232,19 +232,19 @@ public class EvaluatorNim extends Evaluator {
 			// competeBoth games, RandomAgent will always loose, in the other half it may 
 			// win if it chooses by accident always a correct move: If there are exactly MAX_MINUS+1
 			// items left on 1 heap and the other agent moves, the probability for RandomAgent
-			// to win is lastMoveWin=(1/mx)*(1/mx+...+1/1), averaging over 1,2,..,mx=MAX_MINUS items  
-			// taken by the other. nMoves is the number
+			// to win is pLastMoveWin=(1/mx)*(1/mx+...+1/1), averaging over 1,2,..,mx=MAX_MINUS items  
+			// taken by the other agent. nMoves is the number
 			// of moves that RandomAgent has to make to reach MAX_MINUS+1. The probability
 			// to guess the correct move is in each case (1/MAX_MINUS). So the total probability that 
 			// the *other* agent wins is
-			//		1 - (1/MAX_MINUS)^nMoves * lastMoveWin / 2.0
+			//		1 - (1/MAX_MINUS)^nMoves * pLastMoveWin / 2.0
 			int nItems = NimConfig.NUMBER_HEAPS*NimConfig.HEAP_SIZE;		// # of items on all heaps
 			int mx = NimConfig.MAX_MINUS;
 			int nMoves = (int) Math.floor((nItems-1e-6)/(mx+1));	// approx. # of moves of one agent
-			double lastMoveWin = 0.0;
-			for (int i=1; i<=mx; i++) lastMoveWin += (1.0/i);
-			lastMoveWin /= mx;
-			double sr = 1.0 - Math.pow(1.0/mx, nMoves)*lastMoveWin/2.0;
+			double pLastMoveWin = 0.0;
+			for (int i=1; i<=mx; i++) pLastMoveWin += (1.0/i);
+			pLastMoveWin /= mx;
+			double sr = 1.0 - Math.pow(1.0/mx, nMoves)*pLastMoveWin/2.0;
 			return df.format(sr);
 		case 1:  return "0.0"; // minimax, competeBoth
 		case 2:  return "0.0"; // minimax, diff. starts, competeBoth

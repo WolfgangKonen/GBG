@@ -82,7 +82,7 @@ public class EvaluatorCube extends Evaluator {
 	/**
 	 * @return true if evaluateAgentX is above {@link #m_thresh}.
 	 * The choice for {@link #m_thresh} is made with 4th parameter mode in 
-	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int)} [default: mode=0].<p>
+	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int)} [default: mode=0].
 	 */
 	@Override
 	public boolean eval_Agent(PlayAgent playAgent) {

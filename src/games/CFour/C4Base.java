@@ -156,7 +156,8 @@ public class C4Base implements Serializable {
 
 	/**
 	 * @param field
-	 *            a 7x6 Connect-Four Board: 1 -> Player 1 (Beginner), 2 -> Player 2
+	 *            a 7x6 Connect-Four board with '1' for player 1 (who starts) 
+	 *            and '2' for player 2
 	 */
 	public C4Base(int field[][]) {
 		colHeight = new int[COLCOUNT];
@@ -1223,7 +1224,7 @@ public class C4Base implements Serializable {
 	/**
 	 * mirror the board for one player at the center-column
 	 * 
-	 * @param player
+	 * @param field
 	 * @return mirrored BitBoard
 	 */
 	public static long getMirroredField(long field) {
@@ -1242,7 +1243,7 @@ public class C4Base implements Serializable {
 	/**
 	 * mirror the board for one player at the center-column
 	 * 
-	 * @param player
+	 * @param board
 	 * @return mirrored board
 	 */
 	public static int[][] getMirroredField(int[][] board) {
@@ -2060,7 +2061,7 @@ public class C4Base implements Serializable {
 	}
 
 	/**
-	 * Like {@link C4Base#generateMoves(int)}, but without move-ordering.
+	 * Like {@link C4Base#generateMoves(int,boolean)}, but without move-ordering.
 	 * 
 	 * @param sameLength
 	 *            If sameLength = true, then always a moveList with 8 elements

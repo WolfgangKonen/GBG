@@ -15,10 +15,6 @@ import tools.Types;
  * of feature vectors. The acceptable values for {@code featmode} are
  * retrieved with {@link #getAvailFeatmode()}.
  * 
- * Class {@link FeatureC4} is derived from {@link TicTDBase} in order to access 
- * the protected method {@link TicTDBase#prepareInputVector(int, int[][])} to do 
- * the main work.
- *
  * @author Wolfgang Konen, TH Köln, Nov'18
  */
 public class FeatureC4 implements Feature, Serializable {

@@ -22,7 +22,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 	private int[][] m_Table;		// current board position
-	private int m_Player;			// Player who makes the next move 
+	private int m_Player;			// player who makes the next move (+1 or -1)
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
 //	protected Types.ACTIONS[] actions;
     
@@ -133,12 +133,14 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 			return Types.WINNER.PLAYER_LOSES;
 		if (TicTDBase.tie(m_Table)) 
 			return Types.WINNER.TIE;
-		if (TicTDBase.Win(m_Table, m_Player)) {		
-			int dummy=1; // this should normally not happen in TTT
-						 // (the player who is to move is not the winner if game is over)
-			return Types.WINNER.PLAYER_WINS;
-		}
-		return null;
+		
+		throw new RuntimeException("Unexpected case: we cannot have a win for the player to move!");
+//		if (TicTDBase.Win(m_Table, m_Player)) {		
+//			int dummy=1; // this should normally not happen in TTT
+//						 // (the player who is to move is not the winner if game is over)
+//			return Types.WINNER.PLAYER_WINS;
+//		}
+//		return null;
 	}
 
 	/**
@@ -187,18 +189,19 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     	setAvailableActions(); 			// IMPORTANT: adjust the available actions (have reduced by one)
     	
     	// set up player for next advance()
-    	int n=this.getNumPlayers();
-    	switch (n) {
-    	case (1): 
-    		m_Player = m_Player; 
-    		break;
-    	case (2): 
+//    	int n=this.getNumPlayers();
+//    	switch (n) {
+//    	case (1): 
+//    		m_Player = m_Player; 
+//    		break;
+//    	case (2): 
     		m_Player = m_Player*(-1);    // 2-player games: 1,-1,1,-1,...
-    		break;
-    	default: 
-    		m_Player = (m_Player+1) % n;  // many-player games: 0,1,...,n-1,0,1,...
-    		break;
-    	}   		
+//    		break;
+//    	default: 
+//    		m_Player = (m_Player+1) % n;  // many-player games: 0,1,...,n-1,0,1,...
+//    		break;
+//    	}   	
+    		
 		super.incrementMoveCounter();
 	}
 

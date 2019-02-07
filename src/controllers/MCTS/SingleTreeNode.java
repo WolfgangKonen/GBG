@@ -5,6 +5,7 @@ import tools.ElapsedCpuTimer;
 import tools.Types;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Random;
 
 /**
@@ -21,7 +22,10 @@ public class SingleTreeNode implements Serializable
     public SingleTreeNode parent=null;
     public SingleTreeNode[] children=null;
     public SingleMCTSPlayer m_player=null;
-    public double totValue;
+    /**
+     * the total value of {@code this} as a child for the parent of {@code this}. 
+     */
+    public double totValue;			
     public int nVisits;
     public static Random m_rnd=null;
     private int m_depth;
@@ -154,19 +158,9 @@ public class SingleTreeNode implements Serializable
         }
         VTable[K]=bestValue;
 
-        
         // /WK/ some diagnostic checks (not required for normal operation)
         assert this.nVisits==numIters : "mroot's visits do not match numIters!";
-        int cVisits=0;
-        for (SingleTreeNode c : this.children) {
-        	if (c!=null) {
-        		cVisits += c.nVisits;
-        		if (m_player.getVerbosity()>1)
-        			System.out.println(c.m_state.stringDescr() + ": " + c.nVisits + ", " + c.totValue*3932156/c.nVisits);
-    				//System.out.println(c.m_state.stringDescr() + ": " + c.nVisits + ", " + c.totValue/c.nVisits);
-        	}
-        }
-        assert cVisits==numIters : "children visits do not match numIters!";
+        this.printChildInfo(0,true);
         
         /*
          * --- just a sanity check, not required for normal operation: ---
@@ -185,10 +179,40 @@ public class SingleTreeNode implements Serializable
         */
 
         if (m_player.getVerbosity()>0)
-        	System.out.println("-- " + numIters + " -- ( " + this.numDescendants() + ", " +avgTimeTaken + ")");
+        	System.out.println("--  iter=" + numIters + " -- ( nodes=" + this.numDescendants() + ", time=" +avgTimeTaken + ")");
 
     }
 
+    public void printChildInfo(int nIndention, boolean doAssert) {
+        // /WK/ some diagnostic checks (not required for normal operation)
+        DecimalFormat form = new DecimalFormat("0.0000");
+        DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
+            DecimalFormat ifor = new DecimalFormat("0000");
+        int cVisits=0;
+		String indention="";
+		for (int n=0; n<nIndention; n++) indention += "  ";
+		
+        for (SingleTreeNode c : this.children) {
+        	if (c!=null) {
+        		cVisits += c.nVisits;
+        		if (m_player.getVerbosity()>1) {
+        			double uct_exploit = c.totValue/(c.nVisits+this.epsilon);
+        			double uct_explore = m_player.getK() * Math.sqrt(Math.log(this.nVisits + 1) / (c.nVisits + this.epsilon));
+        			//System.out.println(c.m_state.stringDescr() + ": " + c.nVisits + ", " + form.format(c.totValue*3932156/c.nVisits));  // for 2048
+    				System.out.println(indention + c.m_state.stringDescr() + ": " 
+    						+ ifor.format(c.nVisits) + ", "
+    						+ for2.format(uct_exploit) + " + "
+    						+ form.format(uct_explore) + " = "
+    						+ form.format(uct_exploit+uct_explore));
+        		}
+        		if (m_player.getVerbosity()>2) 
+        			c.printChildInfo(nIndention+1,false);
+        	}
+        }
+        if (doAssert) assert cVisits==this.nVisits : "children visits do not match numIters!";
+    	
+    }
+    
     public SingleTreeNode treePolicy() {
 
         SingleTreeNode cur = this;
@@ -251,12 +275,11 @@ public class SingleTreeNode implements Serializable
         double bestValue = -Double.MAX_VALUE;
         for (SingleTreeNode child : this.children)
         {
-            double hvVal = child.totValue;
-            double childValue =  hvVal / (child.nVisits + this.epsilon);
+            double childValue =  child.totValue / (child.nVisits + this.epsilon);
 
-            double uctValue = childValue +
-                    m_player.getK() * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon)) +
-                    this.m_rnd.nextDouble() * this.epsilon;
+            double uctValue = childValue 
+                    + m_player.getK() * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon))
+                    + this.m_rnd.nextDouble() * this.epsilon;
             		// small sampleRandom numbers: break ties in unexpanded nodes
             
             if (uctValue > bestValue) {
@@ -314,6 +337,13 @@ public class SingleTreeNode implements Serializable
     }
 
 
+    /**
+     * Play a rollout from {@code this.m_state}
+     * 
+     * @return the value (game score) of the rollout from the perspective of {@code this.m_state}. 
+     * 		I. e. if the rollout produces a win for the player who has to move in {@code m_state}
+     * 		then return a positive reward.
+     */
     public double rollOut()
     {
         StateObservation rollerState = m_state.copy();
@@ -380,7 +410,7 @@ public class SingleTreeNode implements Serializable
             	delta = - delta; 		// /WK/ negamax variant for 2-player tree
             	break;
             default:		// i.e. n-player, n>2
-            	throw new RuntimeException("MCTS.backUp is not yet implemented for n-player games (n>2).");
+            	throw new RuntimeException("MCTS.backUp is not yet implemented for (n>2)-player games (n>2).");
             }
             
             n = n.parent;

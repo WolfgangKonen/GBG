@@ -47,7 +47,7 @@ public class GameBoardC4 extends JFrame implements GameBoard {
 									// infer the current taskState
 	protected Random rand;
 	/**
-	 * The clickable representation of the board in the GUI. The buttons of {@link #Board} will 
+	 * The clickable representation of the board in the GUI. The buttons of {@link #m_board} will 
 	 * be enabled only when "Play" or "Inspect V" are clicked. During "Play" and "Inspect V"  
 	 * only unoccupied columns are enabled. The value function of each column is displayed 
 	 * in the value bar (bottom).

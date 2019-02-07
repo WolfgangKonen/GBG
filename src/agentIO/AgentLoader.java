@@ -23,7 +23,7 @@ public class AgentLoader {
 	 * 
 	 * @param arena		the game arena, needed to access game-specific settings
 	 * @param filename	the filename of the agent to load from the game-specific agent directory
-	 * 					agents/<gameName>/<subdir>/. If null, set it to "TDReferee.agt.zip" 
+	 * 					{@code agents/gameName/subdir/}. If null, set it to {@code TDReferee.agt.zip}. 
 	 */
 	public AgentLoader(Arena arena, String filename) {
 		m_Arena = arena;

@@ -350,17 +350,17 @@ public class Types {
     public static double GUI_SCALING_FACTOR_Y = GUI_SCALING_FACTOR;
     
     /**
-     * width & height of Arena and ArenaTrain windows
+     * width and height of Arena and ArenaTrain windows
      */
 	public static int GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTOR_X);	 
 	public static int GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTOR_Y);
     /**
-     * width & height of 'Competition Options'  window
+     * width and height of 'Competition Options'  window
      */
 	public static int GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTOR_X);	
 	public static int GUI_WINCOMP_HEIGHT = (int)(300*GUI_SCALING_FACTOR_Y);
     /**
-     * width & height of Param Tabs window, wide enough to hold 6 tabs
+     * width and height of Param Tabs window, wide enough to hold 6 tabs
      */
 	public static int GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTOR_X); 
 	public static int GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTOR_Y);

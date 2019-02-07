@@ -566,7 +566,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 
 	/**
-	 * Is called only in case (TC && !tcImm), but !tcImm is not recommended
+	 * Is called only in case {@code (TC && !tcImm)}, but {@code !tcImm} is not recommended
 	 * 
 	 * @see TDNTuple2Agt#trainAgent(StateObservation)
 	 */

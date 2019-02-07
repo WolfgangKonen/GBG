@@ -81,7 +81,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @param random		allow epsilon-greedy random action selection	
 	 * @param silent
 	 * @return actBest		the best action 
-	 * @throws RuntimeException, if {@code so} is not of class StateObservationNondet
+	 * @throws RuntimeException if {@code so} is not of class {@link StateObsNondeterministic}
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).<br>

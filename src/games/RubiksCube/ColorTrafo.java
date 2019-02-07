@@ -89,6 +89,8 @@ public class ColorTrafo implements Serializable {
 
 	/**
 	 * Whole-cube rotation, {@code times} * 90° counter-clockwise around the u-face
+	 * @param times		how many times
+	 * @return			{@code this}
 	 */
 	public ColorTrafo uTr(int times) {
 		for (int i = 0; i < times; i++)	this.uTr();
@@ -97,6 +99,8 @@ public class ColorTrafo implements Serializable {
 
 	/**
 	 * Whole-cube rotation, {@code times} * 90° counter-clockwise around the l-face
+	 * @param times		how many times
+	 * @return			{@code this}
 	 */
 	public ColorTrafo lTr(int times) {
 		for (int i = 0; i < times; i++)	this.lTr();
@@ -105,6 +109,8 @@ public class ColorTrafo implements Serializable {
 
 	/**
 	 * Whole-cube rotation, {@code times} * 90° counter-clockwise around the f-face
+	 * @param times		how many times
+	 * @return			{@code this}
 	 */
 	public ColorTrafo fTr(int times) {
 		for (int i = 0; i < times; i++) this.fTr();
@@ -143,6 +149,8 @@ public class ColorTrafo implements Serializable {
 	 * {@code this} and {@code other}. (This differs from
 	 * {@link Object#equals(Object)}, since the latter tests, whether the
 	 * objects are the same, not their content.)
+	 * @param other
+	 * @return
 	 */
 	public boolean isEqual(ColorTrafo other) {
 		for (int i = 0; i < fcol.length; i++) {

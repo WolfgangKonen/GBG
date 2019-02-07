@@ -51,17 +51,13 @@ public class XArenaButtons extends JPanel
 	JSlider Delay;				// the sleep slider
 	JTextField GameNumT;
 	JTextField TrainNumT;
-	//TextField CompeteNumT;	// now in OptionsComp winCompOptions
-	//TextField CompetitionsT;	//
-	//Label Competitions_L;		//
-	//Label CompeteG_L;			//
 	JLabel GameNumL;
 	JLabel TrainNumL;
 	JLabel AgentX_L;
 	JLabel SleepDurationL;
 	JComboBox[] choiceAgent;
 	JLabel showValOnGB_L;
-	JCheckBox showValOnGB;		// show game values on gameboard
+	JCheckBox showValOnGB;		// show game values on GameBoard
 	TDParams[] tdPar;
 	NTParams[] ntPar;
 	MaxNParams[] maxnParams;
@@ -177,10 +173,10 @@ public class XArenaButtons extends JPanel
 			}
 
 			if (numPlayers==2) {
-				mParam[n]=new JButton("Param "+Types.GUI_2PLAYER_NAME[n]);
+				mParam[n]=new JButton(" "+Types.GUI_2PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_2PLAYER_NAME[n]);
 			} else {
-				mParam[n]=new JButton("Param "+Types.GUI_PLAYER_NAME[n]);
+				mParam[n]=new JButton(" "+Types.GUI_PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_PLAYER_NAME[n]);
 			}
 			mParam[n].setForeground(Color.white);
@@ -189,9 +185,11 @@ public class XArenaButtons extends JPanel
 			mTrain[n].setBackground(colTHK1);		//
 			mParam[n].setBorder(bord);
 			mTrain[n].setBorder(bord);
+			mParam[n].setVisible(true);
 			
-			choiceAgent[n].setEnabled(false);		
-			// Arena does not allow user to modify choice boxes (see ArenaTrain)
+			choiceAgent[n].setEnabled(true);
+			// Now we allow choice-box selection.
+			// OLD: Arena does not allow user to modify choice boxes (see ArenaTrain)
 			
 			// whenever one of the agent choice boxes changes, call setParamDefaults
 			// to set the param tabs to sensible defaults for that agent and that game
@@ -251,13 +249,13 @@ public class XArenaButtons extends JPanel
 
 		} // for
 
-		this.enableButtons(false);
-		GameNumT.setEnabled(false);		// Arena allows no training / multi-training 
-		TrainNumT.setEnabled(false);	// (see ArenaTrain for enabling this)	
+		this.enableButtons(true);
+//--- this is now handled via hasTrainRights() ---
+//		GameNumT.setEnabled(false);		// Arena allows no training / multi-training 
+//		TrainNumT.setEnabled(false);	// (see ArenaTrain for enabling this)	
 		Play.setEnabled(true);
 		InspectV.setEnabled(true);
 		Logs.setEnabled(true);
-		// Arena enables only button Play & Inspect V
 
 		MultiTrain.setForeground(Color.white);
 		Play.setForeground(Color.white);
@@ -309,7 +307,6 @@ public class XArenaButtons extends JPanel
 						public void actionPerformed(ActionEvent e)
 						{	
 							m_numTrainBtn = x;
-							//m_game.taskState = ArenaTrain.Task.TRAIN;
 							// toggle m_game.state between TRAIN and IDLE
 							if (m_game.taskState!=ArenaTrain.Task.TRAIN) {
 								m_game.taskState = ArenaTrain.Task.TRAIN;
@@ -329,8 +326,6 @@ public class XArenaButtons extends JPanel
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-//						m_xfun.m_NetIsLinear = tdPar.LinNetType.getState();
-//						m_xfun.m_NetHasSigmoid = tdPar.withSigType.getState();
 						// toggle m_game.state between MULTTRN and IDLE
 						if (m_game.taskState!=ArenaTrain.Task.MULTTRN) {
 							m_game.taskState = ArenaTrain.Task.MULTTRN;
@@ -475,9 +470,13 @@ public class XArenaButtons extends JPanel
 			qplay.setBackground(Types.GUI_BGCOLOR);
 			qplay.add(choiceAgent[n]);
 			qplay.add(qparam);
-			qplay.add(qtrain);
+			if (arena.hasTrainRights()) {
+				qplay.add(qtrain);
+			} else {
+				qplay.add(new JLabel(""));  // just some vertical space
+			}
 			q.add(qplay);	
-			mParam[n].setVisible(false);		// see ArenaTrain for making them
+			mParam[n].setVisible(true);		// see ArenaTrain for making them
 			mTrain[n].setVisible(false);		// visible
 		}
 		if (numPlayers<3) q.add(jPanel);
@@ -486,8 +485,13 @@ public class XArenaButtons extends JPanel
 		p1.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
 		p1.setBackground(Types.GUI_BGCOLOR);
 		
-		p1.add(GameNumL);
-		p1.add(GameNumT);
+		if (arena.hasTrainRights()) {
+			p1.add(GameNumL);
+			p1.add(GameNumT);			
+		} else {
+			p1.add(new Canvas());
+			p1.add(new Canvas());
+		}
 		p1.add(new Canvas());
 		p1.add(Logs);
 
@@ -495,9 +499,15 @@ public class XArenaButtons extends JPanel
 		p2.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
 		p2.setBackground(Types.GUI_BGCOLOR);
 
-		p2.add(TrainNumL);
-		p2.add(TrainNumT);
-		p2.add(MultiTrain);
+		if (arena.hasTrainRights()) {
+			p2.add(TrainNumL);
+			p2.add(TrainNumT);
+			p2.add(MultiTrain);
+		} else {
+			p2.add(new Canvas());
+			p2.add(new Canvas());
+			p2.add(new Canvas());			
+		}
 		p2.add(new Canvas());
 
 		JPanel psv = new JPanel();

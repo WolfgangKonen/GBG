@@ -385,7 +385,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 *        {@code =false}: count the possible legal boards (without symmetry considerations);<br>   
 	 * 		  {@code =true}: count the number of nodes in the game tree
 	 * 
-	 * @see games.TicTacToe.LaunchTrainTTT
+	 * @see games.TicTacToe.ArenaTrainTTT
 	 */
 	public static void countStates2(boolean gameTreeStates) {
 		hm2 = new HashMap<String, Integer>();

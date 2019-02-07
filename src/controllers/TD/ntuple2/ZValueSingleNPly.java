@@ -35,7 +35,6 @@ public class ZValueSingleNPly implements ZValue {
 	 * @param so
 	 * @param act
 	 * @param refer		rewards are calculated with reference to this state {@code refer} 
-	 * @param nply
 	 * @param silent
 	 * @return
 	 * 

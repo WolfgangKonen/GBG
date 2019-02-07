@@ -160,6 +160,8 @@ public class XNTupleFuncsNim implements XNTupleFuncs, Serializable {
 	/**
 	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
 	 * for board coding. Needed for random-walk n-tuple generation.
+	 * <p>
+	 * Here each cell (each heap) is adjacent to all other cells (heaps).
 	 * 
 	 * @param iCell
 	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 

@@ -315,10 +315,8 @@ public class NTuple2 implements Serializable {
 	 * @param delta  target minus V(s_t)
 	 * @param e		 derivative of sigmoid (1 if no sigmoid) * LAMBDA^(t-k)
 	 * 
-	 * @see NTuple2ValueFunc#update(int[], int, int, double, double) 
+	 * @see NTuple2ValueFunc#update(int[], int, int, double, double, boolean, boolean)
 	 */
-//	 * @param LAMBDA -- obsolete now --
-//	 * @see NTuple2ValueFunc#updateWeights(int[], int, int[], int, boolean, double, boolean) 
 	public void updateNew(int[] board, double alphaM, double delta, double e /*, double LAMBDA*/) {
 		int index = getIndex(board);
 		Integer indexI = new Integer(index);
@@ -474,7 +472,7 @@ public class NTuple2 implements Serializable {
 	}
 
 	/**
-	 * Is called only in case (TC && !tcImm), but !tcImm is not recommended
+	 * Is called only in case {@code (TC && !tcImm)}, but {@code !tcImm} is not recommended
 	 * 
 	 * @see TDNTuple2Agt#trainAgent(StateObservation)
 	 */

@@ -156,12 +156,10 @@ abstract public class Arena extends JFrame implements Runnable {
 
 		try {
 			m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
-			// ensure that m_PlayAgents has the agents selected, even if the
-			// first
-			// thing is to issue a save agent command.
-			// ensure that the most recent parameters for this agent are fetched
-			// from
-			// the params tab.
+			// Ensure that m_PlayAgents has the agents selected, even if the
+			// first thing is to issue a save agent command.
+			// Ensure that the most recent parameters for this agent are fetched
+			// from the params tab.
 		} catch (RuntimeException e) {
 			MessageBox.show(m_xab, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;
@@ -878,6 +876,10 @@ abstract public class Arena extends JFrame implements Runnable {
 		return false;
 	}
 
+	public boolean hasTrainRights() {
+		return false;
+	}
+	
 	public GameBoard getGameBoard() {
 		return gb;
 	}

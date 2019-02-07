@@ -36,7 +36,8 @@ import games.XNTupleFuncs;
 import games.XArenaMenu;
 
 /**
- * The SARSA {@link PlayAgent} <b>with n-tuples</b>. 
+ * The alternative TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning)
+ * <b>with n-tuples</b>. 
  * It has a one-layer (perceptron-like) neural network with or without output-nonlinearity  
  * {@code tanh} to model the Q-function. 
  * The net follows closely the (pseudo-)code by [SuttonBarto98]. 
@@ -50,25 +51,27 @@ import games.XArenaMenu;
  * <ul>
  * <li> {@link TDNTuple3Agt} updates the value of a state for a player based on the value/reward
  * 		that the <b>same</b> player achieves in his next turn. It is in this way more similar to 
- * 		{@link SarsaAgt}. The updates of {@link TDNTuple2Agt} are based on the value/reward of 
- * 		the <b>next state</b> (may require sign change, depending on the number of players).
+ * 		{@link SarsaAgt}. (Note that the updates of {@link TDNTuple2Agt} are based on the value/reward of 
+ * 		the <b>next state</b>. This may require sign change, depending on the number of players.)
+ * 		Thus {@link TDNTuple3Agt} is much simpler to generalize to 1-, 2-, 3-, ..., N-player games
+ * 		than {@link TDNTuple2Agt}.
  * <li> Eligible states: {@link TDNTuple3Agt} updates with ELIST_PP=true, i.e. it has a separate 
  * 		{@code eList[p]} per player p. {@link TDNTuple2Agt} uses only one common {@code eList[0]}. 
- * 		Only relevant for LAMBDA>0. 
+ * 		Only relevant for LAMBDA &gt; 0. 
  * </ul>
  * The similarities of {@link TDNTuple3Agt} and {@link TDNTuple2Agt} are:
  * <ul>
- * <li> no eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
- * 		memory consumptive)
- * <li> option AFTERSTATE (relevant only for nondeterministic games like 2048), which builds the value 
+ * <li> No eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
+ * 		memory consumptive).
+ * <li> Option AFTERSTATE (relevant only for nondeterministic games like 2048), which builds the value 
  * 		function on the argument afterstate <b>s'</b> (before adding random element) instead 
  * 		of next state <b>s''</b> (faster learning and better generalization).
- * <li> has the random move rate bug fixed: Now EPSILON=0.0 means really 'no random moves'.
- * <li> learning rate ALPHA differently scaled: if ALPHA=1.0, the new value for a
+ * <li> Has the random move rate bug fixed: Now EPSILON=0.0 means really 'no random moves'.
+ * <li> Learning rate ALPHA differently scaled: if ALPHA=1.0, the new value for a
  * 		state just trained will be exactly the target. Therefore, recommended ALPHA values are 
  * 		m*N_s bigger than in {@code TDNTupleAgt}, where m=number of n-tuples, N_s=number of 
  * 		symmetric (equivalent) states. 
- * <li> a change in the update formula: when looping over different equivalent
+ * <li> A change in the update formula: when looping over different equivalent
  * 		states, at most one update per index is allowed (see comment in {@link NTuple2} for 
  * 		member {@code indexList}).
  * </ul>
@@ -132,8 +135,6 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * @param ntPar			n-tuples and temporal coherence parameter
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
-	 * @param numOutputs	the number of outputs of the n-tuple network (=number of all
-	 * 						available actions)
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
@@ -164,7 +165,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		m_ntPar = ntPar;
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
 		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
-		rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis());		(42); 
+		rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42); 
 		
 		int posVals = xnf.getNumPositionValues();
 		int numCells = xnf.getNumCells();
@@ -200,7 +201,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         double value=0;			// the quantity to be maximized
         double otilde, rtilde;
 		boolean rgs = this.getParOther().getRewardIsGameScore();
-		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we have to use TD target
+		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we use TD target r + gamma*V
 		StateObservation NewSO;
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
@@ -305,7 +306,6 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	/**
 	 * Return the agent's estimate of the score for that after state 
-	 * (both versions, {@link VER_3P}==true/false).
 	 * Return V(s_t|p_refer), that is the value function from the perspective of the player
 	 * who moves in state {@code refer}. 
 	 * For 1-player games like 2048 it is the estimated (total or future) reward.
@@ -598,24 +598,6 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		return str;
 	}
 		
-	public String printTrainStatus() {
-		DecimalFormat frm = new DecimalFormat("#0.0000");
-		DecimalFormat frme= new DecimalFormat();
-		frme = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
-		frme.applyPattern("0.0E00");  
-
-		String cs = ""; //getClass().getName() + ": ";   // optional class name
-		String str = cs + "alpha="+frm.format(m_Net.getAlpha()) 
-				   + ", epsilon="+frm.format(getEpsilon())
-				   //+ ", lambda:" + m_Net.getLambda()
-				   + ", "+getGameNum() + " games"
-				   + " ("+frme.format(getNumLrnActions()) + " learn actions)";
-		if (this.m_Net.getNumPlayers()==2) 
-			str = str + ", (winX/tie/winO)=("+winXCounter+"/"+tieCounter+"/"+winOCounter+")";
-		winXCounter=tieCounter=winOCounter=0;
-		return str;
-	}
-
 	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
 	// It sets various elements of NextState ns (nextReward, nextRewardTuple).
 	// It is part of TDNTuple3Agt (and not part of NextState), because it uses various elements

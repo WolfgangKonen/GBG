@@ -169,44 +169,26 @@ public class SingleMCTSPlayer implements Serializable
     public int getNUM_ACTIONS() {
 		return NUM_ACTIONS;
 	}
-//	public void setNUM_ACTIONS(int nUM_ACTIONS) {
-//		NUM_ACTIONS = nUM_ACTIONS;
-//	}
+
 	public int getROLLOUT_DEPTH() {
 		return m_parMCTS.getRolloutDepth();
 	}
-//	public void setROLLOUT_DEPTH(int rOLLOUT_DEPTH) {
-//		ROLLOUT_DEPTH = rOLLOUT_DEPTH;
-//		m_mcPar.setRolloutDepth(rOLLOUT_DEPTH);
-//	}
+
 	public int getTREE_DEPTH() {
 		return m_parMCTS.getTreeDepth();
 	}
-//	public void setTREE_DEPTH(int tREE_DEPTH) {
-//		TREE_DEPTH = tREE_DEPTH;
-//		m_mcPar.setTreeDepth(tREE_DEPTH);
-//	}
+
     public int getNUM_ITERS() {
 		return m_parMCTS.getNumIter();
 	}
-//	public void setNUM_ITERS(int nUM_ITERS) {
-//		NUM_ITERS = nUM_ITERS;
-//		m_mcPar.setNumIter(nUM_ITERS);
-//	}
+
 	public double getK() {
 		return m_parMCTS.getK_UCT();
 	}
-//	public void setK(double k) {
-//		K = k;
-//		m_mcPar.setK_UCT(k);
-//	}
+
     public int getVerbosity() {
 		return m_parMCTS.getVerbosity();
 	}
-//	public void setVerbosity(int verbosity) {
-//		verbose = verbosity;
-//		m_mcPar.setVerbosity(verbosity);;
-//	}
     
     public int getNRolloutFinished() {
         return nRolloutFinished;
