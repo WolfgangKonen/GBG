@@ -22,7 +22,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	private int[] m_heap;		// has for each heap the count of items in it
 	private int m_player;		// player who makes the next move (0 or 1)
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
-	private boolean SORT_IT = false;
+	private boolean SORT_IT = false;		// experimental
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
