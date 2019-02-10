@@ -140,8 +140,8 @@ public class MCTSEChanceNode
     /**
      * Select the next {@link MCTSETreeNode} that should be evaluated
      *
-     * If the current Node is not fully expanded a random unexpanded {@link MCTSETreeNode} will be chosen
-     * If the current Node is fully expanded the {@link MCTSETreeNode} will be select with uct()
+     * If the current node is not fully expanded, a random unexpanded {@link MCTSETreeNode} will be chosen
+     * If the current node is fully expanded the {@link MCTSETreeNode} will be select with uct()
      *
      * @return the {@link MCTSETreeNode} that should be evaluated
      */

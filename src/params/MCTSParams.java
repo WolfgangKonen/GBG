@@ -19,6 +19,8 @@ import javax.swing.JTextField;
 
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
+import controllers.TD.TDAgent;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
  * MCTS (Monte Carlo Tree Search) parameters for board games.<p>
@@ -173,4 +175,28 @@ public class MCTSParams extends Frame implements Serializable
 		setTreeDepth(tp.getTreeDepth());
 		setVerbosity(tp.getVerbosity());
 	}
+	
+	/**
+	 * Set sensible parameters for a specific agent and specific game. By "sensible
+	 * parameters" we mean parameter producing good results. Likewise, some parameter
+	 * choices may be enabled or disabled.
+	 * 
+	 * @param agentName currently only "MCTS" 
+	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 */
+	public void setParamDefaults(String agentName, String gameName) {
+		switch (agentName) {
+		case "MCTS": 
+			switch (gameName) {
+			case "Nim": 
+				numIter_T.setText("10000");		
+				kUCT_T.setText("1.414");
+				break;
+			}
+			break;
+		}
+		
+	}
+	
+
 } // class MCTSParams

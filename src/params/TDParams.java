@@ -358,12 +358,6 @@ public class TDParams extends Frame implements Serializable
 		mode3P_L.setEnabled(enable);
 		mode3P_T.setEnabled(enable);
 	}
-//	public void setMaxGameNum(int maxGameNum) {
-//		this.maxGameNum = maxGameNum;
-//	}
-//	public void setNumEval(int numEval) {
-//		this.numEval = numEval;
-//	}
 	
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
@@ -386,8 +380,6 @@ public class TDParams extends Frame implements Serializable
 		setFeatmode(tp.getFeatmode());
 		setNPly(tp.getNPly());
 		setMode3P(tp.getMode3P());
-//		setMaxGameNum(tp.getMaxGameNum());	// this is now in AgentBase
-//		setNumEval(tp.getNumEval());		// this is obsolete now (we have ParOther)
 	}
 	
 	/**
@@ -418,7 +410,9 @@ public class TDParams extends Frame implements Serializable
 	 * parameters" we mean parameter producing good results. Likewise, some parameter
 	 * choices may be enabled or disabled.
 	 * 
-	 * @param agentName either "TD-Ntuple-2" (for {@link TDNTuple2Agt}) or "TDS" (for {@link TDAgent})
+	 * @param agentName one out of "TD-Ntuple-2" ({@link TDNTuple2Agt}), 
+	 * 			"TD-Ntuple-3" ({@link TDNTuple2Agt}), 
+	 * 			"Sarsa" ({@link SarsaAgt}) or "TDS" ({@link TDAgent})
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
@@ -432,15 +426,10 @@ public class TDParams extends Frame implements Serializable
 		boolean mode3PEnable= (agentName=="TD-Ntuple-2" ? true : false);
 		horcutT.setText("0.1"); 			//
 		switch (agentName) {
-		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
 		case "TD-Ntuple-3": 
 		case "Sarsa":
 			switch (agentName) {
-			case "TD-Ntuple": 
-				alphaT.setText("0.001");  		// the defaults
-				alfinT.setText("0.001");		//
-				break;
 			case "TD-Ntuple-2": 
 			case "TD-Ntuple-3": 
 				switch (gameName) {
@@ -536,8 +525,7 @@ public class TDParams extends Frame implements Serializable
 				break;
 			}
 			break;
-		}
-		
+		}		
 	}
 	
 } // class TDParams

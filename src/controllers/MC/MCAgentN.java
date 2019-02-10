@@ -8,8 +8,6 @@ import games.StateObservation;
 import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
-//import params.MCParams;
-//import params.OtherParams;
 import params.ParMC;
 import params.ParOther;
 import tools.Types;
@@ -35,6 +33,7 @@ import java.util.concurrent.Executors;
  * @see MCAgent
  * @see MCAgentConfig
  * @see RandomSearch
+ * @see ParMC
  */
 public class MCAgentN extends AgentBase implements PlayAgent {
     private Random random = new Random();
