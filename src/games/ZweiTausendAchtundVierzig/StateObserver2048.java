@@ -45,6 +45,7 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
  * @author Johannes Kutsch
  */
 public class StateObserver2048 extends ObserverBase implements StateObsNondeterministic {
+	public static final String[] ACTIONSTRING = {" left", "   up", "right", " down"};
     private Random random = new Random();
     protected List<Integer> emptyTiles = new ArrayList();
     protected List<Integer> availableMoves = new ArrayList();   // 0: left, 1: up, 2: right, 3: down
@@ -53,13 +54,13 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     private long boardB;
 
     private int winState = 0;                                   // 0 = running, 1 = won, -1 = lost
-    public int score = 0;
-    public int highestTileValue = Integer.MIN_VALUE;
-    public boolean highestTileInCorner = false;
-    public int rowLength = 0;
-    public int rowValue = 0;
-    public int mergeValue = 0;
-    public int moves = 0;
+    public int score = 0;						// up-,down-,left-,rightAction add to this score
+    private int highestTileValue = Integer.MIN_VALUE;
+    private boolean highestTileInCorner = false;
+    private int rowLength = 0;
+    private int rowValue = 0;
+    private int mergeValue = 0;
+    private int moves = 0;
     private long cumulEmptyTiles = 0;
     private boolean isNextActionDeterministic;
 
@@ -71,10 +72,10 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     
     private ACTIONS nextNondeterministicAction;
 
-    public final static double MAXSCORE = 3932156;
-    public final static double MINSCORE = 0;
-    private static final double REWARD_NEGATIVE = -1.0;
-    private static final double REWARD_POSITIVE =  1.0;
+    public final static double MAXSCORE = 3932156.0;
+    public final static double MINSCORE = 0;				// never used
+    private static final double REWARD_NEGATIVE = -1.0;		// questionable
+    private static final double REWARD_POSITIVE =  1.0;		// questionable
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -511,7 +512,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     public double getGameValue() { return getGameScore(); }
 
     public double getGameScore() {
-        return score / MAXSCORE;
+		return score / MAXSCORE;
     }
 
     public double getGameScore(StateObservation referingState) {
@@ -522,7 +523,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	/**
 	 * The cumulative reward
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
+	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
 	 * @return the cumulative reward
 	 */
     @Override
@@ -538,7 +539,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	 * Same as getReward(), but relative to referringState. 
 	 * @param referringState
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
+	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
 	 * @return  the cumulative reward 
 	 */
     @Override
@@ -554,7 +555,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	 * Same as getReward(referringState), but with the player of referringState. 
 	 * @param player the player of referringState, a number in 0,1,...,N.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
+	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
 	 * @return  the cumulative reward 
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
@@ -747,24 +748,6 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     	return null;
     }
     
-    // --- this is now in ObserverBase ---
-//    public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
-//        ArrayList<ACTIONS> acts = this.getAvailableActions();
-//        storedActions = new ACTIONS[acts.size()];
-//        storedValues = new double[acts.size()];
-//        for(int i = 0; i < storedActions.length; ++i)
-//        {
-//            storedActions[i] = acts.get(i);
-//            storedValues[i] = vtable[i];
-//        }
-//        storedActBest = actBest;
-//        if (actBest instanceof ACTIONS_VT) {
-//        	storedMaxScore = ((ACTIONS_VT) actBest).getVBest();
-//        } else {
-//            storedMaxScore = vtable[acts.size()];        	
-//        }
-//    }
-
     public int getPlayer() {
         return 0;
     }
@@ -774,12 +757,19 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
 
     public String stringDescr() {
-        return String.format("%016x", boardB);        // format as 16-hex-digit number with
-        // leading 0's (if necessary)
-        //return Long.toHexString(boardB);                // no leading zeros
+        return String.format("%016x", boardB);  // format as 16-hex-digit number with leading 0's (if necessary)
+        //return Long.toHexString(boardB);            // no leading zeros
     }
 
-    public String toString() {
+	/**
+	 * 
+	 * @return a string representation of actions {@code act}
+	 */
+	public String stringActionDescr(ACTIONS act) {
+		return ACTIONSTRING[act.toInt()];
+	}
+
+	public String toString() {
         return stringDescr();
     }
 
@@ -791,11 +781,6 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	public boolean isFinalRewardGame() {
 		return false;
 	}
-
-//    @Override
-//	public boolean has2OppositeRewards() {
-//		return true;
-//	}
 
     public boolean isLegalAction(ACTIONS action) {
         return availableMoves.contains(action.toInt());
@@ -813,6 +798,9 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return emptyTiles.size();
     }
 
+    /**
+     * @return the cumulated number of empty tiles
+     */
     public long getCumulEmptyTiles() {
         return cumulEmptyTiles;
     }
@@ -1154,6 +1142,12 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 		return sc;
 	}
 	
+	public int getHighestTileValue() {
+		return this.highestTileValue;
+	}
+	public int getMoves() {
+		return moves;
+	}
 } // class StateObserver2048
 
 /**

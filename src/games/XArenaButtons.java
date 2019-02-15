@@ -568,7 +568,7 @@ public class XArenaButtons extends JPanel
 		ntPar[n].setParamDefaults(agentName, gameName);
 		ntPar[n].setFixedCoList(m_game.makeXNTupleFuncs().getAvailFixedNTupleModes(),
 								m_game.makeXNTupleFuncs().fixedTooltipString());
-		mctsParams[n].setParamDefaults(agentName, gameName);
+		mctsParams[n].setParamDefaults(agentName, gameName, numPlayers);
 		oPar[n].setParamDefaults(agentName, gameName);
 		
 		switch (agentName) {

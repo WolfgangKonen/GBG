@@ -38,14 +38,15 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 { 
     private transient ElapsedCpuTimer m_Timer;
     
-    @Deprecated 
-    // should use this.getParMCTS() instead 
-	//private MCTSParams params;
-    private ParMCTS pmcts; 
+//    @Deprecated 
+//    // should use this.getParMCTS() instead 
+//	//private MCTSParams params;
+//    private ParMCTS pmcts; 
     
-	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
-	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
-	private static boolean NEW_GNA=true;	
+    // --- now we use always getNextAction2 ---
+//	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
+//	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
+//	private static boolean NEW_GNA=true;	
 
     /**
      * The MCTS-UCT implementation
@@ -97,8 +98,8 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     
     private void initMCTSAgent(StateObservation so, ParMCTS parMCTS, ParOther oPar) {    	
         //Create the player.
-        mctsPlayer = new SingleMCTSPlayer(new Random(),parMCTS);		
-        //mctsPlayer = new SingleMCTSPlayer(new Random(1),mcPar);	// /WK/ reproducible debugging: seed 1
+        mctsPlayer = new SingleMCTSPlayer(this,new Random(),parMCTS);		
+        //mctsPlayer = new SingleMCTSPlayer(this,new Random(1),mcPar);	// /WK/ reproducible debugging: seed 1
 		m_oPar = oPar;		// AgentBase::m_oPar
 
         //Set the available actions for stateObs.
@@ -248,27 +249,31 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 
 	@Override
 	public double getScore(StateObservation so) {
-		double[] vtable = new double[so.getNumAvailableActions()+1];
-        double nextActionScore = Double.NEGATIVE_INFINITY;
+		int nAct = so.getNumAvailableActions();
+		double[] vtable = new double[nAct+1];
 		
 		assert so.isLegalState() 
 		: "Not a legal state"; // e.g. player to move does not fit to Table
 	
 		// This if branch is vital: It was missing before, and if 'so' was a game-over state
 		// this resulted in a NullpointerException later, because no child was added to root.
-		// Now we fix this by returning so.getGameScore(so):
+		// Now we fix this by returning so.getReward(so,rgs):
         if (so.isGameOver()) {
-        	return so.getGameScore(so);
+    		boolean rgs = this.getParOther().getRewardIsGameScore();
+    		return so.getReward(so, rgs);
+//        	return so.getGameScore(so);
         } else {
         	
     		// Ask MCTS for the best action ...
     		Types.ACTIONS actBest = act(so,m_Timer,vtable);
 
-            for (int i = 0; i < so.getNumAvailableActions(); i++) {
-                if (nextActionScore <= vtable[i]) {
-                    nextActionScore = vtable[i];
-                }
-            }
+//            double nextActionScore = Double.NEGATIVE_INFINITY;
+//            for (int i = 0; i < so.getNumAvailableActions(); i++) {
+//                if (nextActionScore <= vtable[i]) {
+//                    nextActionScore = vtable[i];
+//                }
+//            }
+            double nextActionScore = vtable[nAct];
 
             return nextActionScore;
         }

@@ -237,6 +237,14 @@ abstract public class ObserverBase {
 	 */
 	abstract public String stringDescr();
 
+	/**
+	 * 
+	 * @return a string representation of action {@code act}
+	 */
+	public String stringActionDescr(ACTIONS act) {
+		return ""+act.toInt();
+	}
+
     public String toString() {
         return stringDescr();
     }

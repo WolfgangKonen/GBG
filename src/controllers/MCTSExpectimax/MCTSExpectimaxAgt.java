@@ -30,11 +30,9 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	public ParMCTSE params;
     private MCTSEPlayer player;
 
-	private ParOther m_oPar = new ParOther();
-
 	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
 	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
-	private static boolean NEW_GNA=true;	
+//	private static boolean NEW_GNA=true;	
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -42,18 +40,6 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 * to provide a special version transformation)
 	 */
 	private static final long  serialVersionUID = 12L;
-
-//	/**
-//	 * @param name	agent name, should be "MCTS Expectimax"
-//	 * @param mcPar Settings for the Agent
-//	 */
-//	@Deprecated
-//    public MCTSExpectimaxAgt(String name, MCTSExpectimaxParams mcPar) {
-//		super(name);
-//		params = new ParMCTSE(mcPar);
-//
-//		initMCTSEAgent(params, new ParOther());
-//	}
 
 	/**
 	 * @param name	agent name, should be "MCTS Expectimax"
@@ -78,22 +64,9 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 		initMCTSEAgent(mcPar, oPar);
 	}
 
-//	/**
-//	 * @param name	agent name, should be "MCTS Expectimax"
-//	 * @param mcPar Settings for the Agent
-//	 */
-//    @Deprecated
-//    public MCTSExpectimaxAgt(String name, MCTSExpectimaxParams mcPar, OtherParams oPar) {
-//		super(name);
-//		params = new ParMCTSE();
-//		params.setFrom(mcPar);
-//
-//		initMCTSEAgent(params, new ParOther(oPar));
-//	}
-
     private void initMCTSEAgent(ParMCTSE mcPar, ParOther oPar) {   
-		player = new MCTSEPlayer(new Random(), mcPar);
-		m_oPar = oPar;
+		super.m_oPar = oPar;		// m_oPar is in AgentBase
+		player = new MCTSEPlayer(this,new Random(), mcPar);
 
 		setAgentState(AgentState.TRAINED);
     }
@@ -131,7 +104,7 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	}
 
 	/**
-	 * majority Vote
+	 * majority vote
 	 */
     private Types.ACTIONS actMultipleAgents(StateObservation stateObs, double[] vtable, int numAgents) {
 		double[] vtableIgnore = new double[vtable.length];
@@ -254,18 +227,6 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	}
 
 
-//	/**
-//	 * @return	returns true/false, whether the action suggested by last call 
-//	 * 			to getNextAction() was a random action. 
-//	 * 			Always false in the case of MCTS Expectimax
-//	 * <p>
-//	 * Use now {@link Types.ACTIONS#isRandomAction()}
-//	 */
-//	@Deprecated
-//	public boolean wasRandomAction() {
-//		return false;
-//	}
-
 
 	/**
 	 * Get the best next action and return its score
@@ -314,15 +275,16 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 		return player.getParMCTSE();
 	}
 	
-	/**
-	 * Set defaults for m_oPar 
-	 * (needed in {@link XArenaMenu#loadAgent} when loading older agents, where 
-	 * m_oPar=null in the saved version).
-	 */
-	public void setDefaultOtherPar() {
-		m_oPar = new ParOther();
-	}
-	public ParOther getParOther() {
-		return m_oPar;
-	}
+	
+	// --- not needed here, is identically in AgentBase ---
+//	public ParOther getParOther() {
+//		return m_oPar;
+//	}
+//	/**
+//	 * Set defaults for m_oPar (needed in {@link XArenaMenu#loadAgent} when
+//	 * loading older agents, where m_oPar=null in the saved version).
+//	 */
+//	public void setDefaultOtherPar() {
+//		m_oPar = new ParOther();
+//	}
 }

@@ -1,8 +1,8 @@
 package controllers.MCTS;
 
 import games.StateObservation;
-//import params.MCTSParams;
 import params.ParMCTS;
+import params.ParOther;
 import tools.ElapsedCpuTimer;
 import tools.Types;
 
@@ -45,8 +45,11 @@ public class SingleMCTSPlayer implements Serializable
 	 * Member {@link #m_parMCTS} is only needed for saving and loading the agent
 	 * (to restore the agent with all its parameter settings)
 	 */
-	//private MCTSParams m_mcPar;
 	private ParMCTS m_parMCTS;
+	/**
+	 * Member {@link #m_parent} is only needed for access to {@link MCTSAgenT#getParOther()}
+	 */
+    private transient MCTSAgentT m_parent;		//  
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -60,6 +63,7 @@ public class SingleMCTSPlayer implements Serializable
 	 * Default constructor for SingleMCTSPlayer, needed for loading a serialized version
 	 */
 	public SingleMCTSPlayer() {
+		m_parent = null;
 		m_parMCTS = new ParMCTS();
 		//m_mcPar = new MCTSParams();
         m_rnd = new Random();
@@ -71,44 +75,14 @@ public class SingleMCTSPlayer implements Serializable
      * @param a_rnd 	random number generator object.
      * @param parMCTS		parameters for MCTS
      */
-    public SingleMCTSPlayer(Random a_rnd, ParMCTS parMCTS)
+    public SingleMCTSPlayer(MCTSAgentT parent, Random a_rnd, ParMCTS parMCTS)
     {
+    	m_parent = parent;
 		m_parMCTS = parMCTS;
         m_rnd = a_rnd;
         m_root = new SingleTreeNode(a_rnd,this);
     }
    	
-//	/**
-//     * Creates the MCTS player. 
-//     * @param a_rnd 	random number generator object.
-//     * @param mcPar		parameters for MCTS
-//     */
-//    @Deprecated
-//    public SingleMCTSPlayer(Random a_rnd, MCTSParams mcPar)
-//    {
-    	// --- OLD, can be deleted, when the new version is tested and works:  ---
-    	//
-    	// Why do we have m_mcpar and the several single parameters?
-    	// We need both, m_mcPar for saving to disk and re-loading (use setFrom() to set
-    	// the values in the params tab). And the single parameters for computational
-    	// efficient access from the nodes of the tree.
-    	//
-    	// The setters are responsible for updating the parameters in both locations (!)    	
-//		m_mcPar = new MCTSParams();
-//		m_mcPar.setFrom(mcPar);
-//    	m_mcPar = new MCTSParams();
-//    	if (mcPar!=null) {
-//            this.setK(mcPar.getK_UCT());
-//            this.setNUM_ITERS(mcPar.getNumIter());
-//            this.setROLLOUT_DEPTH(mcPar.getRolloutDepth());
-//            this.setTREE_DEPTH(mcPar.getTreeDepth());
-//            this.setVerbosity(mcPar.getVerbosity());
-//    	}
-    	
-//		m_parMCTS = new ParMCTS(mcPar);
-//        m_rnd = a_rnd;
-//        m_root = new SingleTreeNode(a_rnd,this);
-//    }
 
     /**
      * Set the available actions for state {@code so}.
@@ -190,11 +164,19 @@ public class SingleMCTSPlayer implements Serializable
 		return m_parMCTS.getVerbosity();
 	}
     
+    public boolean getNormalize() {
+		return m_parMCTS.getNormalize();
+	}
+    
     public int getNRolloutFinished() {
         return nRolloutFinished;
     }
 
     public ParMCTS getParMCTS() {
 		return m_parMCTS;
+	}
+
+    public ParOther getParOther() {
+		return m_parent.getParOther();
 	}
 }

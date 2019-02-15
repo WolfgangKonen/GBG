@@ -65,7 +65,7 @@ public class Evaluator2048 extends Evaluator {
             MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
 
         	if (verbose == 0) 
-        		System.out.println("Detected MCTS Expectimax Agent, iterations: " + mctsExpectimaxAgt.params.getNumIter() + ", rolloutdepth: " + mctsExpectimaxAgt.params.getRolloutDepth() + ", Treedepth: " + mctsExpectimaxAgt.params.getTreeDepth() + ", k: " + mctsExpectimaxAgt.params.getK_UCT() + ", maxnodes: " + mctsExpectimaxAgt.params.getMaxNodes() + ", alternative version: " + mctsExpectimaxAgt.params.getAlternativeVersion());
+        		System.out.println("Detected MCTS Expectimax Agent, iterations: " + mctsExpectimaxAgt.params.getNumIter() + ", rolloutdepth: " + mctsExpectimaxAgt.params.getRolloutDepth() + ", Treedepth: " + mctsExpectimaxAgt.params.getTreeDepth() + ", k: " + mctsExpectimaxAgt.params.getK_UCT() + ", maxnodes: " + mctsExpectimaxAgt.params.getMaxNodes() + ", alternative version: " + mctsExpectimaxAgt.params.getAlternateVersion());
 
             //play Games
             for(int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
@@ -87,7 +87,9 @@ public class Evaluator2048 extends Evaluator {
                     }
 
                     if(verbose == 0) {
-                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + 
+                        		" after " + (System.currentTimeMillis() - gameStartTime) + "ms."+
+                        		" Highest tile is " + so.getHighestTileValue() + ".\n");
                     }
                     return so;
                 });
@@ -131,7 +133,7 @@ public class Evaluator2048 extends Evaluator {
                     }
 
                     if(verbose == 0) {
-                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. Highest tile is " + so.getHighestTileValue() + ".\n");
                     }
                     return so;
                 });
@@ -177,7 +179,9 @@ public class Evaluator2048 extends Evaluator {
                 }
 
                 if(verbose == 0) {
-                    System.out.print("Finished game " + (i + 1) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. Highest tile is " + so.highestTileValue + ".\n");
+                    System.out.print("Finished game " + (i + 1) + " with score " + so.score + 
+                    		" after " + (System.currentTimeMillis() - gameStartTime) + "ms."+ 
+                    		"Highest tile is " + so.getHighestTileValue() + ".\n");
                 }
 
                 stateObservers.add(so);
@@ -192,11 +196,11 @@ public class Evaluator2048 extends Evaluator {
         //evaluate games
         //Min/Max/Average Score
         for(StateObserver2048 so : stateObservers) {
-            Integer value = tiles.get(so.highestTileValue);
+            Integer value = tiles.get(so.getHighestTileValue());
             if (value == null) {
-                tiles.put(so.highestTileValue, 1);
+                tiles.put(so.getHighestTileValue(), 1);
             } else {
-                tiles.put(so.highestTileValue, value + 1);
+                tiles.put(so.getHighestTileValue(), value + 1);
             }
 
             scores.add(so.score);
@@ -209,7 +213,7 @@ public class Evaluator2048 extends Evaluator {
                 maxScore = so.score;
             }
 
-            moves += so.moves;
+            moves += so.getMoves();
         }
 
         averageScore/= ConfigEvaluator.NUMBEREVALUATIONS;

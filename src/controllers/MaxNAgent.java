@@ -93,7 +93,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         List<ACTIONS> actions = so.getAvailableActions();
 		double[] VTable = new double[actions.size()+1];  
 		
-		ACTIONS_ST act_best = getBestAction(so, so,  random,  VTable,  silent, 0);
+		ACTIONS_ST act_best = getBestAction(so, so,  random,  VTable,  silent, 0+1);
 		
         return new ACTIONS_VT(act_best.toInt(), act_best.isRandomAction(), VTable);
 	}
@@ -123,6 +123,8 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 
         assert so.isLegalState() : "Not a legal state"; 
 
+        System.out.println("MaxN: depth="+depth+"  "+so.stringDescr());
+        
         double pMaxScore = -Double.MAX_VALUE;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
         ACTIONS[] actions = new ACTIONS[acts.size()];
@@ -136,7 +138,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         	NewSO.advance(actions[i]);
         	
         	if (m_useHashMap) {
-    			// speed up MinimaxPlayer for repeated calls by storing/retrieving the 
+    			// speed up MaxNAgent for repeated calls by storing/retrieving the 
     			// scores of visited states in HashMap hm:
     			stringRep = NewSO.stringDescr();
     			sc = hm.get(stringRep); 		// returns null if not in hm

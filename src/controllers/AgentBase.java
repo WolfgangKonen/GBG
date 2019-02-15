@@ -17,7 +17,7 @@ import tools.Types.ScoreTuple;
 
 /**
  * Class AgentBase implements functionality of the interface {@link PlayAgent}
- * common to all agents (things related to gameNum, maxGameNum, AgentState).
+ * common to all agents (things related to gameNum, maxGameNum, AgentState + m_oPar).
  * 
  * @see PlayAgent
  * @see controllers.MCTS.MCTSAgentT
@@ -85,7 +85,6 @@ abstract public class AgentBase implements Serializable {
 	 *         class implements for {@link #getScore(StateObservation)}.
 	 */
 	public double estimateGameValue(StateObservation sob) {
-		// TODO: generalize this to the VER_3P case:
 		return getScore(sob);
 	};
 
@@ -121,10 +120,12 @@ abstract public class AgentBase implements Serializable {
 		m_name = name;
 	}
 
-	// --- epiLength, learnFromRM are now available via member ParOther m_oPar:
+	
 	// ---
-	public boolean trainAgent(
-			StateObservation so /* , int epiLength, boolean learnFromRM */) {
+	public boolean trainAgent(StateObservation so 
+			/* , int epiLength, boolean learnFromRM */
+			/* --- epiLength, learnFromRM are now available via member ParOther m_oPar */
+			) {
 		m_GameNum++;
 		return false;
 	}
@@ -147,8 +148,8 @@ abstract public class AgentBase implements Serializable {
 	}
 
 	public byte getSize() {
-		return 1;
-	} // dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
+		return 1;  // dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
+	} 
 
 	public int getGameNum() {
 		return m_GameNum;
@@ -197,7 +198,6 @@ abstract public class AgentBase implements Serializable {
 	public ParOther getParOther() {
 		return m_oPar;
 	}
-
 	/**
 	 * Set defaults for m_oPar (needed in {@link XArenaMenu#loadAgent} when
 	 * loading older agents, where m_oPar=null in the saved version).

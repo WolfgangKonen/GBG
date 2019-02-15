@@ -27,17 +27,17 @@ public class SingleTreeNode implements Serializable {
 	 * .
 	 */
 	public double totValue;
-	public int nVisits;
+	private int nVisits=0;
 	public static Random m_rnd = null;
 	private int m_depth;
 	private static double[] lastBounds = new double[] { 0, 1 };
 	private static double[] curBounds = new double[] { 0, 1 };
-	/**
-	 * egreedyEpsilon = probability that a random action is taken (instead
-	 * greedy action). This is *only* relevant, if function egreedy() is used as
-	 * variant to uct() (which is currently *not* the case).
-	 */
-	public static double egreedyEpsilon = 0.05;
+//	/**
+//	 * egreedyEpsilon = probability that a random action is taken (instead
+//	 * greedy action). This is *only* relevant, if function egreedy() is used as
+//	 * variant to uct() (which is currently *not* the case).
+//	 */
+//	public static double egreedyEpsilon = 0.15;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no
@@ -90,10 +90,10 @@ public class SingleTreeNode implements Serializable {
 																			// NEW!
 		}
 		totValue = 0.0;
-		if (parent != null)
-			m_depth = parent.m_depth + 1;
-		else
+		if (parent == null)
 			m_depth = 0;
+		else
+			m_depth = parent.m_depth + 1;
 	}
 
 	/**
@@ -149,14 +149,15 @@ public class SingleTreeNode implements Serializable {
 			ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 			SingleTreeNode selected = treePolicy();
 			double delta = selected.rollOut();
-			if (m_state.getNumPlayers() == 2) {
-				delta = 1-delta;		// /WK/ "1-" is the bug fix 2019-02-09
-				// why '1-'? - If the score of 'selected' is a loss for the player who
-				// has to move on 'selected',
-				// then it is a win for the player who created 'selected'
-				// (negamax principle)
-			}
+// --- this is now equivalently in backUp(), first pass through while-loop ---			
+//			if (m_state.getNumPlayers() == 2) {
+//				delta = negate(delta);		
+//				// why 'negate'? - If the score of 'selected' is a loss for the player who
+//				// has to move on 'selected', then it is a win for the player who created 
+//				// 'selected' (negamax principle)
+//			}
 			backUp(selected, delta);
+			
 			// if (numIters%10==0) System.out.println("numIters="+numIters+",
 			// remaining="+remaining+", avgTimeTaken="+avgTimeTaken);
 			// if (numIters%10==0) System.out.println("numIters="+numIters+",
@@ -182,7 +183,11 @@ public class SingleTreeNode implements Serializable {
 			for (int i = 0; i < children.length; i++) {
 				if (children[i].m_act == m_state.getAction(k)) {
 					v = children[i].totValue / children[i].nVisits;
-					VTable[k] = v*deltaGS + minGS;		// map back to interval [minGS,maxGS]
+					if (m_player.getNormalize()) {
+						VTable[k] = v*deltaGS + minGS;		// map back to interval [minGS,maxGS]
+					} else {
+						VTable[k] = v;
+					}
 					if (VTable[k] > bestValue)
 						bestValue = VTable[k];
 				}
@@ -205,12 +210,15 @@ public class SingleTreeNode implements Serializable {
 
 		if (m_player.getVerbosity() > 0)
 			System.out.println(
-					"--  iter=" + numIters + " -- ( nodes=" + this.numDescendants() + ", time=" + avgTimeTaken + ")");
+					"--  iter=" + numIters + " -- "+
+							
+					" "+m_state.stringDescr()+" "+
+					"( nodes=" + this.numDescendants() + ", time=" + avgTimeTaken + ")"+
+					"  value = "+this.totValue/this.nVisits);
 
 	}
 
-	public void printChildInfo(int nIndention, boolean doAssert) {
-		// /WK/ some diagnostic checks (not required for normal operation)
+	public void printChildInfo(int nIndention, boolean isRootNode) {
 		DecimalFormat form = new DecimalFormat("0.0000");
 		DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
 		DecimalFormat ifor = new DecimalFormat("0000");
@@ -226,34 +234,63 @@ public class SingleTreeNode implements Serializable {
 				if (verbose > 1) { 	// =2: print direct child info
 					double uct_exploit = c.totValue / (c.nVisits + this.epsilon);
 					double uct_explore = m_player.getK()
-							* Math.sqrt(Math.log(this.nVisits + 1) / (c.nVisits + this.epsilon));
-					// System.out.println(c.m_state.stringDescr() + ": " +
-					// c.nVisits + ", " +
-					// form.format(c.totValue*3932156/c.nVisits)); // for 2048
+							* Math.sqrt(2*Math.log(this.nVisits + 1) / (c.nVisits + this.epsilon));
+//							* Math.pow(Math.log(this.nVisits + 1) / (c.nVisits + this.epsilon),4.0);
+					double c_value = c.allChildrenValue();
+					if (c.m_state.getNumPlayers()==2) c_value = negate(c_value);
+					// Why is uct_exploit=c.totValue/c.nVisits not the same as c.allChildrenvalue()? - 
+					// Because uct_exploit has one visit more (from the 'birth' of c, where it did not have 
+					// any children yet). If c has few visits, this value from the first visit might spoil the 
+					// result (it is from a less precise tree), but in the limit of many visits to c, both 
+					// values will approach.
 					System.out.println(indention + c.m_state.stringDescr() + ": " + ifor.format(c.nVisits) + ", "
 							+ for2.format(uct_exploit) + " + " + form.format(uct_explore) + " = "
-							+ form.format(uct_exploit + uct_explore));
+							+ form.format(uct_exploit + uct_explore)
+							+ "  [c_value = " + form.format(c_value)+"]");
 				}
 				if (verbose > 2)	// =3: children+grandchildren, =4: 3 generations, =5: 4 gen, ...
 					if (c.m_depth<=(verbose-2)) c.printChildInfo(nIndention + 1, false);
 			}
 		}
-		if (doAssert)
-			assert cVisits == this.nVisits : "children visits do not match numIters!";
-
+		int offs = (isRootNode) ? 0 : 1; // why '1'? - every non-root node n has one visit more 
+		// than all its children. This stems from its 'birth' visit, i.e. the time 
+		// where it was 'selected' but did not yet have any children.
+		assert offs + cVisits == this.nVisits : "children visits do not match the visits of this!";
+	}
+	
+	private double allChildrenValue() {
+		double val = 0.0;
+		double visits = 0;
+		for (SingleTreeNode c : this.children) {
+			if (c!=null) {
+				val+=c.totValue;
+				visits+=c.nVisits;
+			}
+		}
+		if (visits==0) return Double.NaN;	// not availabe, 'this' is leaf node
+		return val/visits;
 	}
 
 	public SingleTreeNode treePolicy() {
 
 		SingleTreeNode cur = this;
+		SingleTreeNode next;
 
 		while (!cur.m_state.isGameOver() && cur.m_depth < m_player.getTREE_DEPTH()) {
 			if (cur.notFullyExpanded()) {
 				return cur.expand();
 
 			} else {
-				SingleTreeNode next = cur.uct();
-				// SingleTreeNode next = cur.egreedy();
+				switch(m_player.getParMCTS().getSelectMode()) {
+				case 0: 
+					next = cur.uct();
+					break;
+				case 1: 
+					next = cur.egreedy();
+					break; 
+				default: 
+					throw new RuntimeException("this selectMode is not yet implemented");
+				}
 				cur = next;
 			}
 		}
@@ -273,15 +310,18 @@ public class SingleTreeNode implements Serializable {
 
 		int bestAction = 0;
 		double bestValue = -1;
+		double x;
 
 		// System.out.println("expand() for m_state.actions.length =
 		// "+m_state.getNumAvailableActions());
 
 		for (int i = 0; i < children.length; i++) {
-			double x = m_rnd.nextDouble();
-			if (x > bestValue && children[i] == null) {
-				bestAction = i;
-				bestValue = x;
+			if (children[i] == null) {
+				x = m_rnd.nextDouble();
+				if (x > bestValue) {
+					bestAction = i;
+					bestValue = x;
+				}
 			}
 		}
 
@@ -305,12 +345,14 @@ public class SingleTreeNode implements Serializable {
 		double bestValue = -Double.MAX_VALUE;
 		for (SingleTreeNode child : this.children) {
 			double childValue = child.totValue / (child.nVisits + this.epsilon);
-			assert (childValue >= 0) : "childValue is negative";
-
+			if (m_player.getNormalize())
+				assert (childValue >= 0) : "childValue is negative";
+				
 			double uctValue = childValue
-					+ m_player.getK() * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon))
+					+ m_player.getK() * Math.sqrt(2*Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon))
+//					+ m_player.getK() * Math.pow(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon),4.0)
 					+ this.m_rnd.nextDouble() * this.epsilon;
-			// small sampleRandom numbers: break ties in unexpanded nodes
+					// small random numbers: break ties in unexpanded nodes
 
 			if (uctValue > bestValue) {
 				selected = child;
@@ -333,8 +375,9 @@ public class SingleTreeNode implements Serializable {
 	public SingleTreeNode egreedy() {
 
 		SingleTreeNode selected = null;
+		double epsGreedy = m_player.getParMCTS().getEpsGreedy();
 
-		if (m_rnd.nextDouble() < egreedyEpsilon) {
+		if (m_rnd.nextDouble() < epsGreedy) {
 			// Choose randomly
 			int selectedIdx = m_rnd.nextInt(children.length);
 			selected = this.children[selectedIdx];
@@ -343,12 +386,12 @@ public class SingleTreeNode implements Serializable {
 			// pick the best Q.
 			double bestValue = -Double.MAX_VALUE;
 			for (SingleTreeNode child : this.children) {
-				double hvVal = child.totValue;
+				double cval = child.totValue;
 
 				// small sampleRandom numbers: break ties in unexpanded nodes
-				if (hvVal > bestValue) {
+				if (cval > bestValue) {
 					selected = child;
-					bestValue = hvVal;
+					bestValue = cval;
 				}
 			}
 
@@ -401,19 +444,26 @@ public class SingleTreeNode implements Serializable {
 
 	/**
 	 * Assign the final rollerState a value (reward).
+	 * <p>
+	 * If 'Normalize (UCT)' is checked, the reward is passed through a normalizing function q()
+	 * which maps to [0,1]. Otherwise q() is the identity function.
 	 * 
 	 * @param so
 	 *            the final state
 	 * @param referingState
 	 *            the state where the rollout (playout) started
 	 * 
-	 * @return reward the game score (relative to referingState)
+	 * @return q(reward), the reward or game score for {@code so} (relative to {@code referingState})
 	 */
 	public double value(StateObservation so, StateObservation referingState) {
-		double v = so.getGameScore(referingState);
-		// /WK/ bug fix 2019-02-09: map v to [0,1] (this is q(reward) in notes_MCTS.docx)
-		v = (v - so.getMinGameScore()) / (so.getMaxGameScore() - so.getMinGameScore());
-		assert ((v >= 0) && (v <= 1)) : "Error: value is not in range [0,1]";
+		boolean rgs = m_player.getParOther().getRewardIsGameScore();
+		double v = so.getReward(so, rgs);
+//		double v = so.getGameScore(referingState);
+		if (m_player.getNormalize()) {
+			// /WK/ bug fix 2019-02-09: map v to [0,1] (this is q(reward) in notes_MCTS.docx)
+			v = (v - so.getMinGameScore()) / (so.getMaxGameScore() - so.getMinGameScore());
+			assert ((v >= 0) && (v <= 1)) : "Error: value is not in range [0,1]";
+		}
 		return v;
 	}
 
@@ -427,26 +477,63 @@ public class SingleTreeNode implements Serializable {
 		return false;
 	}
 
-	public void backUp(SingleTreeNode node, double delta) {
-		SingleTreeNode n = node;
+	public void backUp(SingleTreeNode selected, double delta) {
+		SingleTreeNode n = selected;
 		while (n != null) {
-			n.nVisits++;
-			n.totValue += delta;
+			// Why do we call 'negate' *before* the first '+=' to n.totValue is made? - 
+			// If the score of 'selected' is a loss for the player who has to move on 
+			// 'selected', then it is a win for the player who created 'selected'  
+			// (negamax principle)
 			switch (m_state.getNumPlayers()) {
 			case (1):
 				break;
 			case (2):	// negamax variant for 2-player tree
-				delta = 1-delta; // /WK/ "1-" is the bug fix 2019-02-09 (always n.totValue>=0)
-				//delta = -delta;
+				delta = negate(delta);
 				break;
 			default: // i.e. n-player, n>2
 				throw new RuntimeException("MCTS.backUp is not yet implemented for (n>2)-player games (n>2).");
 			}
 
+			n.nVisits++;
+			n.totValue += delta;
+
+			// --- only a debug assertion
+			if (!n.isLeafNode() && n.parent!=null) {
+				int cVisits=0;
+				for (SingleTreeNode c : n.children) {
+					if (c!=null) cVisits+=c.nVisits;
+				}
+				int offs=1;
+				assert (n.nVisits == offs+cVisits) :	// why '1+'? - every non-root node n has one visit more 
+					// than all its children. This stems from its 'birth' visit, i.e. the time 
+					// where it was 'selected' but did not yet have any children.
+					"node n's nVisits differs from the 1+(sum of its children visits)";
+				
+			}
+			
 			n = n.parent;
 		}
 	}
+	
+	private boolean isLeafNode() {
+		for (SingleTreeNode c : this.children) {
+			if (c!=null) return false;
+		}
+		return true;
+	}
 
+	private double negate(double delta) {
+		if (m_player.getNormalize()) {
+			// map a normalized delta \in [0,1] again to [0,1], but reverse the order.
+			// /WK/ "1-" is the bug fix 2019-02-09 needed to achieve always child.totValue>=0
+			return 1-delta; 
+		} else {
+			// reverse the delta-order for arbitrarily distributed delta;
+			// maps from interval [a,b] to [-b,-a] (this can be problematic for UCT-rule)
+			return -delta;
+		}
+	}
+	
 	public int mostVisitedAction() {
 		int selected = -1;
 		double bestValue = -Double.MAX_VALUE;

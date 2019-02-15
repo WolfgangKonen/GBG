@@ -68,6 +68,12 @@ public interface StateObservation extends Serializable{
 	public String stringDescr();
 
 	/**
+	 * 
+	 * @return a string representation of actions {@code act}
+	 */
+	public String stringActionDescr(ACTIONS act);
+
+	/**
 	 * This method should be only called if game is over. The player is 
 	 * the player who would be next in turn (if the game were not over)
 	 * <p>

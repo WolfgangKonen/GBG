@@ -3,12 +3,16 @@ package controllers.MCTSExpectimax;
 import games.StateObservation;
 import games.ZweiTausendAchtundVierzig.ConfigGame;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
+import params.ParMCTSE;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.Types;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import controllers.MCTS.SingleTreeNode;
 
 /**
  * This is adapted from Diego Perez MCTS reference implementation
@@ -24,25 +28,25 @@ public class MCTSEChanceNode
 {
     public static double epsilon = 1e-6;		                                // tiebreaker
     public StateObservation so = null;
-    private Types.ACTIONS action = null;		                                // the action which leads from parent's state to this state
+    public Types.ACTIONS action = null;		                                // the action which leads from parent's state to this state
     private MCTSETreeNode parentNode = null;
     public List<MCTSETreeNode> childrenNodes = new ArrayList<>();
-    public MCTSEPlayer player = null;
+    public MCTSEPlayer m_player = null;
 
-    public List<Types.ACTIONS> notExpandedActions = new ArrayList<>();         // Actions that are not represented by a Note
-    public double value = 0;                                                    // total value
-    public int visits = 0;                                                      // total number of visits
-    public Random random;
+    public List<Types.ACTIONS> notExpandedActions = new ArrayList<>();         // Actions that are not represented by a node
+    public double value = 0;   				// total value
+    public int visits = 0; 					// total number of visits
+    public static Random m_rnd;
     public int depth;
 
     public int iterations = 0;
     public int numberTreeNodes = 0;
     public int numberChanceNodes = 1;
 
-    public double maxRolloutScore = 0;                                                 //The max score that was reached during a rollout
+    public double maxRolloutScore = 0;  	//The max score that was reached during a rollout
 
     /**
-     * This Class represents a MCTS Expectmiax Chance Node.
+     * This Class represents a MCTS Expectimax Chance Node.
      * Each Chance Node has multiple {@link MCTSETreeNode} children and one {@link MCTSETreeNode} parent.
      *
      * @param so            the state of the node
@@ -55,8 +59,8 @@ public class MCTSEChanceNode
         this.so = so;
         this.action = action;
         this.parentNode = parentNode;
-        this.player = player;
-        this.random = random;
+        this.m_player = player;
+        this.m_rnd = random;
 
         notExpandedActions = so.getAvailableActions();
 
@@ -98,27 +102,28 @@ public class MCTSEChanceNode
      * 		  K entries and the maximum of all {@code U(i)} in {@code vTable[K]}
      */
     public void mctsSearch(double[] vTable) {
-        while (iterations < player.getNUM_ITERS()) {
-            //select an childNode
+        while (iterations < m_player.getNUM_ITERS()) {
+            //select a child node
             MCTSEChanceNode selected = treePolicy();
 
             double score;
 
-            if(selected.so instanceof StateObserver2048 && player.getParMCTSE().getEnableHeuristics()) {
-                //get Heuristic bonus
-                score = ((StateObserver2048)selected.so).getHeuristicBonus(player.getHeuristicSettings2048());
-                if(player.getHeuristicSettings2048().enableRollout) {
-                    //add rollout bonus
-                    score += selected.rollOut1() * player.getHeuristicSettings2048().rolloutWeighting;
+            if(selected.so instanceof StateObserver2048 && m_player.getParMCTSE().getEnableHeuristics()) {
+                // only for game 2048: use special heuristic and add non-normalized score:
+                // a) get Heuristic bonus
+                score = ((StateObserver2048)selected.so).getHeuristicBonus(m_player.getHeuristicSettings2048());
+                if(m_player.getHeuristicSettings2048().enableRollout) {
+                    // b) add rollout bonus (non-normalized score)
+                    score += selected.rollOut1() * m_player.getHeuristicSettings2048().rolloutWeighting;
                 }
             } else {
-                //get "normal" mctse score
+                //get "normal" MCTSE score
                 score = selected.rollOut();
             }
 
-            //set max Score in root Node
-            if(player.getRootNode().maxRolloutScore < score) {
-                player.getRootNode().maxRolloutScore = score;
+            //set max score in root node
+            if(m_player.getRootNode().maxRolloutScore < score) {
+                m_player.getRootNode().maxRolloutScore = score;
             }
 
             //backup the score
@@ -135,6 +140,16 @@ public class MCTSEChanceNode
                 }
             }
         }
+        
+		// /WK/ some diagnostic checks (not required for normal operation)
+		this.printChildInfo(0, true);
+
+		if (m_player.getVerbosity() > 0)
+			System.out.println(
+					"--  iter=" + iterations + " -- (tree/chance)-nodes=(" +
+					m_player.getRootNode().numberTreeNodes+"/"+
+					m_player.getRootNode().numberChanceNodes + ") = "+ 
+					this.numDescendants(0));
     }
 
     /**
@@ -146,11 +161,11 @@ public class MCTSEChanceNode
      * @return the {@link MCTSETreeNode} that should be evaluated
      */
     private MCTSEChanceNode treePolicy() {
-        if(so.isGameOver() || depth >= player.getTREE_DEPTH()) {
+        if(so.isGameOver() || depth >= m_player.getTREE_DEPTH()) {
             return this;
 
         } else if(notExpandedActions.size() != 0) {
-            if(player.getRootNode().numberTreeNodes < player.getMaxNodes()) {
+            if(m_player.getRootNode().numberTreeNodes < m_player.getMaxNodes()) {
                 return expand().treePolicy();
             } else {
                 return this;
@@ -163,8 +178,42 @@ public class MCTSEChanceNode
         }
     }
 
+	public void printChildInfo(int nIndention, boolean doAssert) {
+		DecimalFormat form = new DecimalFormat("0.0000");
+		DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
+		DecimalFormat ifor = new DecimalFormat("0000");
+        double multiplier = 1/(m_player.getRootNode().maxRolloutScore+ this.epsilon);
+		int cVisits = 0;
+		int verbose = m_player.getVerbosity();
+		String indention = "";
+		for (int n = 0; n < nIndention; n++)
+			indention += "  ";
+
+		for (MCTSETreeNode c : this.childrenNodes) {
+			if (c != null) {
+				cVisits += c.visits;
+				if (verbose > 1) { 	// =2: print direct child info
+					double uct_exploit = c.value * multiplier / (c.visits + this.epsilon);
+					double uct_explore = m_player.getK()
+							* Math.sqrt(Math.log(this.visits + 1) / (c.visits + this.epsilon));
+					// System.out.println(c.m_state.stringDescr() + ": " +
+					// c.nVisits + ", " +
+					// form.format(c.totValue*3932156/c.nVisits)); // for 2048
+					System.out.println(indention + c.so.stringActionDescr(c.action) + ": " + ifor.format(c.visits) + ", "
+							+ for2.format(uct_exploit) + " + " + form.format(uct_explore) + " = "
+							+ form.format(uct_exploit + uct_explore));
+				}
+				if (verbose > 2)	// =3: children+grandchildren, =4: 3 generations, =5: 4 gen, ...
+					if (c.depth<=(verbose-2)) c.printChildInfo(nIndention + 1, false);
+			}
+		}
+		if (doAssert)
+			assert cVisits == this.visits : "children visits do not match the visits of this!";
+
+	}
+
     /**
-     * Select the child node with the highest uct value
+     * Select the child node with the highest UCT value
      *
      * @return the selected child node
      */
@@ -174,7 +223,9 @@ public class MCTSEChanceNode
 
         for (MCTSETreeNode child : childrenNodes)
         {
-            double uctValue = child.value / child.visits + player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits)) + random.nextDouble() * epsilon; // small sampleRandom numbers: break ties in unexpanded node
+            double uctValue = child.value / child.visits + m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + this.epsilon)) 
+            		+ m_rnd.nextDouble() * epsilon; 
+            		// small random numbers: break ties in unexpanded node
 
             if (uctValue > selectedValue) {
                 selected = child;
@@ -186,22 +237,25 @@ public class MCTSEChanceNode
     }
 
     private MCTSETreeNode uctNormalised() {
-        if(player.getRootNode().iterations < 100) {
-            return uct();
+        if(m_player.getRootNode().iterations < 100) { 
+            return uct();			// run the first 100 iterations w/o normalization to establish
+            						// a rough estimate of maxRolloutScore
         } else {
             double multiplier;
 
-            if(player.getRootNode().maxRolloutScore == 0.0d) {
+            if(m_player.getRootNode().maxRolloutScore == 0.0d) {
                 multiplier = 1;
             } else {
-                multiplier = 1/player.getRootNode().maxRolloutScore;
+                multiplier = 1/m_player.getRootNode().maxRolloutScore;
             }
 
             MCTSETreeNode selected = null;
             double selectedValue = -Double.MAX_VALUE;
 
             for (MCTSETreeNode child : childrenNodes) {
-                double uctValue = child.value * multiplier / child.visits + player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits)) + random.nextDouble() * epsilon; // small sampleRandom numbers: break ties in unexpanded node
+                double uctValue = child.value * multiplier / child.visits + m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + this.epsilon)) 
+                		+ m_rnd.nextDouble() * epsilon; 
+                		// small random numbers: break ties in unexpanded node
 
                 if (uctValue > selectedValue) {
                     selected = child;
@@ -209,9 +263,17 @@ public class MCTSEChanceNode
                 }
             }
 
-            if(selected == null) {
-                System.out.println("2: " + childrenNodes.size());
-            }
+            assert selected != null : "Error: No tree node selected!";
+            
+            // just debug info for 2048:
+            double selVal = selected.value/selected.visits*StateObserver2048.MAXSCORE;
+            double selVal2 = selected.value/selected.visits*multiplier;
+            double maxVal = m_player.getRootNode().maxRolloutScore*StateObserver2048.MAXSCORE;
+            int selAct = selected.action.toInt();
+            int dummy=1;
+//            if(selected == null) {
+//                System.out.println("2: " + childrenNodes.size());
+//            }
 
             return selected;
         }
@@ -223,8 +285,8 @@ public class MCTSEChanceNode
      * @return the best child node
      */
     public MCTSETreeNode egreedy() {
-        if (random.nextDouble() < MCTSExpectimaxConfig.EGREEDYEPSILON) {
-            return childrenNodes.get(random.nextInt(childrenNodes.size()));
+        if (m_rnd.nextDouble() < ParMCTSE.EGREEDYEPSILON) {
+            return childrenNodes.get(m_rnd.nextInt(childrenNodes.size()));
         } else {
             MCTSETreeNode selected = null;
             double selectedValue = -Double.MAX_VALUE;
@@ -247,21 +309,25 @@ public class MCTSEChanceNode
      * @return the selected child node
      */
     public MCTSETreeNode expand() {
-        Types.ACTIONS action = notExpandedActions.get(random.nextInt(notExpandedActions.size()));
+        Types.ACTIONS action = notExpandedActions.get(m_rnd.nextInt(notExpandedActions.size()));
         notExpandedActions.remove(action);
 
 //      StateObserver2048 childSo = (StateObserver2048) so.copy();		// /WK/ can be done w/o using StateObserver2048:
         StateObservation childSo = so.copy();
 
-        MCTSETreeNode child = new MCTSETreeNode(childSo, action, this, random,player);
+        MCTSETreeNode child = new MCTSETreeNode(childSo, action, this, m_rnd,m_player);
         childrenNodes.add(child);
         return child;
     }
 
     /**
-     * starting from this leaf node a game with random actions will be played until the game is over or the maximum rollout depth is reached
+     * Starting from this leaf node a game with random actions will be played until the game 
+     * is over or the maximum rollout depth is reached.
      *
-     * @return the {@link StateObservation#getGameScore()} after the rollout is finished
+     * @return 	the {@link StateObservation#getReward(StateObservation, boolean) reward} 
+     * 			after the rollout is finished
+     * 
+     * @see StateObservation#getReward(StateObservation, boolean)
      */
     public double rollOut() {
         StateObservation rollerState = so.copy();
@@ -269,23 +335,24 @@ public class MCTSEChanceNode
 
         while (!finishRollout(rollerState, thisDepth)) {
             rollerState.setAvailableActions();
-            int action = random.nextInt(rollerState.getNumAvailableActions());
+            int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
             rollerState.advance(rollerState.getAction(action));
             thisDepth++;
         }
 
         if (rollerState.isGameOver()) {
-            player.nRolloutFinished++;
+            m_player.nRolloutFinished++;
         }
 
-        return rollerState.getGameScore(so);
+        return rollerState.getReward(so,m_player.rgs);
     }
 
     /**
-     * starting from this leaf node a game with random actions will be played until the game is over or the maximum rollout depth is reached
-     * this rollout variant only works for 2048 and returns the not normalised gamescore
+     * Starting from this leaf node a game with random actions will be played until the game 
+     * is over or the maximum rollout depth is reached.
+     * This rollout variant works only for 2048 and returns the non-normalized raw score.
      *
-     * @return the {@link StateObservation#getGameScore()} after the rollout is finished
+     * @return the 2048-raw-score after the rollout is finished
      */
     public double rollOut1() {
         assert so instanceof StateObserver2048: "so is not instanceof StateObserver2048, use rollOut() instead off rollOut1()";
@@ -294,13 +361,13 @@ public class MCTSEChanceNode
 
         while (!finishRollout(rollerState, thisDepth)) {
             rollerState.setAvailableActions();
-            int action = random.nextInt(rollerState.getNumAvailableActions());
+            int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
             rollerState.advance(rollerState.getAction(action));
             thisDepth++;
         }
 
         if (rollerState.isGameOver()) {
-            player.nRolloutFinished++;
+            m_player.nRolloutFinished++;
         }
 
         return rollerState.score;
@@ -314,7 +381,7 @@ public class MCTSEChanceNode
      * @return true if the rollout is finished, false if not
      */
     public boolean finishRollout(StateObservation rollerState, int depth) {
-        if (depth >= player.getROLLOUT_DEPTH()) {
+        if (depth >= m_player.getROLLOUT_DEPTH()) {
             return true;
         }
 
@@ -384,7 +451,7 @@ public class MCTSEChanceNode
         double currentValue;
 
         for (MCTSETreeNode child: childrenNodes) {
-            currentValue = child.value / child.visits + random.nextDouble() * epsilon;
+            currentValue = child.value / child.visits + m_rnd.nextDouble() * epsilon;
             if (currentValue > bestValue) {
                 bestValue = currentValue;
                 selected = child.action;
@@ -393,4 +460,23 @@ public class MCTSEChanceNode
 
         return selected;
     }
+    
+	/**
+	 * just for diagnostics:
+	 * 
+	 * @return number of nodes in the MCTSE tree
+	 */
+	public int numDescendants(int depth) {
+		int N = 1; // include this
+		for (MCTSETreeNode c : this.childrenNodes) {			
+			if (c != null)
+				N += c.numDescendants(depth+1);
+//			if (depth==0) {
+//				System.out.println(N);
+//				int dummy=1;
+//			}
+		}			
+		return N;
+	}
+
 }

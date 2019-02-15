@@ -56,19 +56,19 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	/**
 	 * The clickable representation of the board in the GUI. The buttons of {@link #Board} will 
 	 * be enabled only when "Play" or "Inspect V" are clicked. During "Play" and "Inspect V"  
-	 * only unoccupied fields are enabled. The value function of each {@link #Board} position
-	 * is displayed as its label.
+	 * only allowed actions are enabled. The value function of each allowed action 
+	 * is displayed below the action button.
 	 */
 	protected JLabel[] Heap;  
 	protected JButton[][] Board;	// the clickable actions
 	protected JLabel[][] VBoard;	// the values for each action as estimated by the agent to move
-	protected JLabel[][] OptBoard;	// the optimal values for each action
+	protected JLabel[][] OptBoard;	// the optimal values for each action (Bouton's theory)
 	private StateObserverNim m_so;
-	private int[][] Table;			// =1: position occupied by "X" player
-									//=-1: position occupied by "O" player
 	private double[][] VTable;
 	private double[][] OptTable;
 	private boolean arenaActReq=false;
+	private int iBest,jBest;
+	private double vWorst;
 	
 	// the colors of the TH Köln logo (used for button coloring):
 	private Color colTHK1 = new Color(183,29,13);
@@ -256,7 +256,7 @@ public class GameBoardNim extends JFrame implements GameBoard {
 		if (so!=null) {
 	        assert (so instanceof StateObserverNim)
 			: "StateObservation 'so' is not an instance of StateObserverNim";
-			StateObserverNim soT = (StateObserverNim) so;
+			StateObserverNim soN = (StateObserverNim) so;
 			m_so = ((StateObserverNim) so).copy();
 			int Player=Types.PLAYER_PM[m_so.getPlayer()];
 			switch(Player) {
@@ -280,7 +280,7 @@ public class GameBoardNim extends JFrame implements GameBoard {
 				
 			}
 			
-			if (showValueOnGameboard && soT.getStoredValues()!=null) {
+			if (showValueOnGameboard && soN.getStoredValues()!=null) {
 				for(i=0;i<NimConfig.NUMBER_HEAPS;i++)
 					for(j=0;j<NimConfig.MAX_MINUS;j++) {
 						VTable[i][j]=Double.NaN;	
@@ -290,29 +290,35 @@ public class GameBoardNim extends JFrame implements GameBoard {
 				if (so.isGameOver()) {
 					rightInfo.setText("");
 				} else {
-					int[] heaps = soT.getHeaps().clone();
+					int[] heaps = soN.getHeaps().clone();
+					vWorst = Double.MAX_VALUE;
 					if (isTaskPlay) {
 						// if called from 'Play', then reverse the action actBest in heaps
 						// (because we want to store in OptTable the optimal values
 						// *before* actBest was taken)
-						ACTIONS actBest = soT.getStoredActBest();
+						ACTIONS actBest = soN.getStoredActBest();
 						int iAction = actBest.toInt();
 						j=iAction%NimConfig.MAX_MINUS;		// j+1: number of items taken
 						i=(iAction-j)/NimConfig.MAX_MINUS;	// i  : heap number	
 						heaps[i] += (j+1);
 					}
-					for (int k=0; k<soT.getStoredValues().length; k++) {
-						Types.ACTIONS action = soT.getStoredAction(k);
+					for (int k=0; k<soN.getStoredValues().length; k++) {
+						Types.ACTIONS action = soN.getStoredAction(k);
 						int iAction = action.toInt();
 						j=iAction%NimConfig.MAX_MINUS;		// j+1: number of items to take
 						i=(iAction-j)/NimConfig.MAX_MINUS;	// i  : heap number		
-						VTable[i][j] = soT.getStoredValues()[k];
+						VTable[i][j] = soN.getStoredValues()[k];
+						if (action.equals(soN.getStoredActBest())) {
+							iBest=i;
+							jBest=j; 
+						}
+						if (VTable[i][j]<vWorst) vWorst=VTable[i][j];
 						
 						// Calculate the optimal value of this action according 
 						// to Bouton's theory. The values OptTable[i][j] are shown 
 						// in GUI (last row) if showValueOnGameboard is true.
 						heaps[i] -= (j+1);
-						OptTable[i][j]=soT.boutonValue(heaps);
+						OptTable[i][j]=soN.boutonValue(heaps);
 						heaps[i] += (j+1);
 					}	
 					
@@ -362,6 +368,12 @@ public class GameBoardNim extends JFrame implements GameBoard {
 			}
 		}
 		
+		if (VTable[iBest][jBest]!=vWorst) {
+			// mark the best action in green (but only if not all actions are equal to the worst)
+			setValueBoard(VBoard,iBest,jBest,VTable[iBest][jBest],
+					showValueOnGameboard,new Color(0,(int)(255/1.5),0));
+		}
+		
 		// just debug:
 //		int [] idealMove = m_so.bouton(); 
 		
@@ -377,6 +389,10 @@ public class GameBoardNim extends JFrame implements GameBoard {
 		this.repaint();
 	}		
 
+	private void setValueBoard(JLabel[][] XBoard, int i, int j, double value, 
+			boolean showValueOnGameboard) {
+		setValueBoard(XBoard,i,j,value,showValueOnGameboard,null);
+	}
 	/**
 	 * Set the values in the JLabel array XBoard.
 	 * @param XBoard	either VBoard or OptBoard
@@ -384,8 +400,10 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	 * @param j
 	 * @param value
 	 * @param showValueOnGameboard
+	 * @param color  the foreground color. If null, use {@link #calculateXBoardColor(double)}.
 	 */
-	private void setValueBoard(JLabel[][] XBoard, int i, int j, double value, boolean showValueOnGameboard) {
+	private void setValueBoard(JLabel[][] XBoard, int i, int j, double value, 
+					boolean showValueOnGameboard, Color color) {
 		String valueTxt;
 		Color col;
 		if (Double.isNaN(value)) {
@@ -393,7 +411,7 @@ public class GameBoardNim extends JFrame implements GameBoard {
 		} else {
 			valueTxt = " "+(int)(value*100);
 			if (value<0) valueTxt = ""+(int)(value*100);
-			col = calculateXBoardColor(value);
+			col = (color==null) ? calculateXBoardColor(value) : color;
 			XBoard[i][j].setForeground(col);
 		}
 		if (showValueOnGameboard) {
@@ -409,7 +427,7 @@ public class GameBoardNim extends JFrame implements GameBoard {
      * Colors for values between 0 and +1 are interpolated between yellow and green.
      *
      * @param xValue Value of the specific VBoard element
-     * @return Color the VBoard element is supposed to have
+     * @return the color that the XBoard element is supposed to have
      */
     public static Color calculateXBoardColor(double xValue) {
         float percentage = (float) Math.abs(xValue);
