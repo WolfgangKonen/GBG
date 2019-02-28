@@ -44,6 +44,7 @@ public class MCTSEChanceNode
     public int numberChanceNodes = 1;
 
     public double maxRolloutScore = 0;  	//The max score that was reached during a rollout
+    public double scoreNonNormalized = 0;
 
     /**
      * This Class represents a MCTS Expectimax Chance Node.
@@ -101,8 +102,8 @@ public class MCTSEChanceNode
      * 		  moves for the root state. Contains on output {@code U(i)} in the first 
      * 		  K entries and the maximum of all {@code U(i)} in {@code vTable[K]}
      */
-    public void mctsSearch(double[] vTable) {
-        while (iterations < m_player.getNUM_ITERS()) {
+    public void mctseSearch(double[] vTable) {
+    	while (iterations < m_player.getNUM_ITERS()) {
             //select a child node
             MCTSEChanceNode selected = treePolicy();
 
@@ -121,9 +122,10 @@ public class MCTSEChanceNode
                 score = selected.rollOut();
             }
 
-            //set max score in root node
-            if(m_player.getRootNode().maxRolloutScore < score) {
-                m_player.getRootNode().maxRolloutScore = score;
+            //set maxScore in root node (needed in value())
+            double s = m_player.getRootNode().scoreNonNormalized;
+            if(m_player.getRootNode().maxRolloutScore < s) {
+                m_player.getRootNode().maxRolloutScore = s;
             }
 
             //backup the score
@@ -139,6 +141,8 @@ public class MCTSEChanceNode
                     vTable[i] = child.value / child.visits;
                 }
             }
+            if (m_player.getNormalize()) 
+            	vTable[i] = vTable[i]*m_player.getRootNode().maxRolloutScore;
         }
         
 		// /WK/ some diagnostic checks (not required for normal operation)
@@ -153,12 +157,13 @@ public class MCTSEChanceNode
     }
 
     /**
-     * Select the next {@link MCTSETreeNode} that should be evaluated
+     * Select the next {@link MCTSEChanceNode} that should be evaluated
      *
      * If the current node is not fully expanded, a random unexpanded {@link MCTSETreeNode} will be chosen
-     * If the current node is fully expanded the {@link MCTSETreeNode} will be select with uct()
+     * If the current node is fully expanded, the child {@link MCTSETreeNode} will be selected with 
+     * uct() and its child {@link MCTSEChanceNode} will be returned with treePolicy() 
      *
-     * @return the {@link MCTSETreeNode} that should be evaluated
+     * @return the {@link MCTSEChanceNode} that should be evaluated
      */
     private MCTSEChanceNode treePolicy() {
         if(so.isGameOver() || depth >= m_player.getTREE_DEPTH()) {
@@ -171,10 +176,23 @@ public class MCTSEChanceNode
                 return this;
             }
         } else {
-            //recursively go down the tree
-            //select a child with uct(), select/create a chance node with treePolicy() and call this method in the new chance node
+            //recursively go down the tree:
+            //select a child (MCTSETreeNode) with UCT or eps-greedy, 
+        	//select/create a chance node with treePolicy() 
+        	//and call treePolicy() again in the new MCTSEChanceNode
+        	
+			switch(m_player.getParMCTSE().getSelectMode()) {
+			case 0: 
+				// uctNormalised() is obsolete now. We do the optional normalization via value(),
+				// which is called by rollOut()
+//	            return uctNormalised().treePolicy().treePolicy();	
+	            return uct().treePolicy().treePolicy();	// TODO: clarify why 2-times tree-policy!!
+			case 1: 
+	            return egreedy().treePolicy().treePolicy();
+			default: 
+				throw new RuntimeException("this selectMode is not yet implemented");
+			}
 
-            return uctNormalised().treePolicy().treePolicy();
         }
     }
 
@@ -223,7 +241,8 @@ public class MCTSEChanceNode
 
         for (MCTSETreeNode child : childrenNodes)
         {
-            double uctValue = child.value / child.visits + m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + this.epsilon)) 
+            double uctValue = child.value / child.visits 
+            		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + this.epsilon)) 
             		+ m_rnd.nextDouble() * epsilon; 
             		// small random numbers: break ties in unexpanded node
 
@@ -236,24 +255,30 @@ public class MCTSEChanceNode
         return selected;
     }
 
+    @Deprecated
     private MCTSETreeNode uctNormalised() {
+    	// we do this now differently with an extra rootNode in MCTSEPlayer::init()
+    	// and with the proper normalization done in this.value():
         if(m_player.getRootNode().iterations < 100) { 
             return uct();			// run the first 100 iterations w/o normalization to establish
             						// a rough estimate of maxRolloutScore
         } else {
-            double multiplier;
+            double multiplier = m_player.getRootNode().maxRolloutScore;
+            assert multiplier != 0 : "Error: maxRolloutScore is 0.0";
+            multiplier = 1/multiplier;
 
-            if(m_player.getRootNode().maxRolloutScore == 0.0d) {
-                multiplier = 1;
-            } else {
-                multiplier = 1/m_player.getRootNode().maxRolloutScore;
-            }
+//            if(m_player.getRootNode().maxRolloutScore == 0.0d) {
+//                multiplier = 1;
+//            } else {
+//                multiplier = 1/m_player.getRootNode().maxRolloutScore;
+//            }
 
             MCTSETreeNode selected = null;
             double selectedValue = -Double.MAX_VALUE;
 
             for (MCTSETreeNode child : childrenNodes) {
-                double uctValue = child.value * multiplier / child.visits + m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + this.epsilon)) 
+                double uctValue = child.value * multiplier / child.visits 
+                		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + this.epsilon)) 
                 		+ m_rnd.nextDouble() * epsilon; 
                 		// small random numbers: break ties in unexpanded node
 
@@ -266,11 +291,11 @@ public class MCTSEChanceNode
             assert selected != null : "Error: No tree node selected!";
             
             // just debug info for 2048:
-            double selVal = selected.value/selected.visits*StateObserver2048.MAXSCORE;
-            double selVal2 = selected.value/selected.visits*multiplier;
-            double maxVal = m_player.getRootNode().maxRolloutScore*StateObserver2048.MAXSCORE;
-            int selAct = selected.action.toInt();
-            int dummy=1;
+//            double selVal = selected.value/selected.visits*StateObserver2048.MAXSCORE;
+//            double selVal2 = selected.value/selected.visits*multiplier;
+//            double maxVal = m_player.getRootNode().maxRolloutScore*StateObserver2048.MAXSCORE;
+//            int selAct = selected.action.toInt();
+//            int dummy=1;
 //            if(selected == null) {
 //                System.out.println("2: " + childrenNodes.size());
 //            }
@@ -285,7 +310,7 @@ public class MCTSEChanceNode
      * @return the best child node
      */
     public MCTSETreeNode egreedy() {
-        if (m_rnd.nextDouble() < ParMCTSE.EGREEDYEPSILON) {
+        if (m_rnd.nextDouble() < ParMCTSE.DEFAULT_EPSILONGREEDY) {
             return childrenNodes.get(m_rnd.nextInt(childrenNodes.size()));
         } else {
             MCTSETreeNode selected = null;
@@ -344,7 +369,8 @@ public class MCTSEChanceNode
             m_player.nRolloutFinished++;
         }
 
-        return rollerState.getReward(so,m_player.rgs);
+//        return rollerState.getReward(so,m_player.rgs);
+        return value(rollerState,so);
     }
 
     /**
@@ -373,11 +399,46 @@ public class MCTSEChanceNode
         return rollerState.score;
     }
 
+	/**
+	 * Assign the final rollerState a value (reward).
+	 * <p>
+	 * If 'Normalize' is checked, the reward is passed through a normalizing function q()
+	 * which maps to [0,1]. Otherwise q() is the identity function.
+	 * 
+	 * @param so
+	 *            the final state
+	 * @param referingState
+	 *            the state where the rollout (playout) started
+	 * 
+	 * @return q(reward), the reward or game score for {@code so} (relative to {@code referingState})
+	 */
+	public double value(StateObservation so, StateObservation referingState) {
+		double v = so.getReward(so, m_player.rgs);
+		m_player.getRootNode().scoreNonNormalized=v;
+		double maxScore;
+		if (m_player.getNormalize()) {
+			if (so.getName()=="2048") {
+				// a special normalization for 2048: maxRolloutScore is an estimate of the maximum
+				// expected rollout score from the current root node (estimated initially by
+				// a quick 100-iterations mctseScearch())
+	            maxScore = m_player.getRootNode().maxRolloutScore;
+	            maxScore = (v>maxScore) ? v : maxScore;
+	            assert maxScore != 0 : "Error: maxRolloutScore is 0.0";
+			} else {
+				maxScore = so.getMaxGameScore();
+			}
+			// /WK/ map v to [0,1] (this is q(reward) in notes_MCTS.docx)
+			v = (v - so.getMinGameScore()) / (maxScore - so.getMinGameScore());
+			assert ((v >= 0) && (v <= 1)) : "Error: value v is not in range [0,1]";
+		}
+		return v;
+	}
+
     /**
      * checks if a rollout is finished
      *
-     * @param rollerState the current gamestate
-     * @param depth the current rolloutdepth
+     * @param rollerState the current game state
+     * @param depth the current rollout depth
      * @return true if the rollout is finished, false if not
      */
     public boolean finishRollout(StateObservation rollerState, int depth) {
@@ -403,15 +464,25 @@ public class MCTSEChanceNode
     }
 
     /**
-     * The value of a node is the sum of all it childnodes
+     * The value of a node is the sum of all it child nodes
      *
-     * @param score the value of the new childnode
+     * @param score the value of the new child node
      */
     private void backUpSum(double score) {
-        if (so.getNumPlayers()==2) {
-            score =- score;
-        }
-
+		switch (so.getNumPlayers()) {
+		case (1):
+			break;
+		case (2):	// negamax variant for 2-player tree
+			// Why do we call 'negate' *before* the first '+=' to n.totValue is made? - 
+			// If the score of 'selected' is a loss for the player who has to move on 
+			// 'selected', then it is a win for the player who created 'selected'  
+			// (negamax principle)
+			score = negate(score);
+			break;
+		default: // i.e. n-player, n>2
+			throw new RuntimeException("MCTS.backUp is not yet implemented for (n>2)-player games (n>2).");
+		}
+		
         visits++;
         value += score;
 
@@ -421,15 +492,26 @@ public class MCTSEChanceNode
     }
 
     /**
-     * The value of a node is the value of the lowest childnode
+     * The value of a node is the value of the lowest child node<br>
+     * (This method is currently not used)
      *
-     * @param score the value of the new childnode
+     * @param score the value of the new child node
      */
     private void backUpMin(double score) {
-        if (so.getNumPlayers()==2) {
-            score =- score;
-        }
-
+		switch (so.getNumPlayers()) {
+		case (1):
+			break;
+		case (2):	// negamax variant for 2-player tree
+			// Why do we call 'negate' *before* the first '+=' to n.totValue is made? - 
+			// If the score of 'selected' is a loss for the player who has to move on 
+			// 'selected', then it is a win for the player who created 'selected'  
+			// (negamax principle)
+			score = negate(score);
+			break;
+		default: // i.e. n-player, n>2
+			throw new RuntimeException("MCTS.backUp is not yet implemented for (n>2)-player games (n>2).");
+		}
+		
         visits++;
         if(score < value || value == 0) {
             value = score;
@@ -440,6 +522,18 @@ public class MCTSEChanceNode
         }
     }
 
+	private double negate(double delta) {
+		if (m_player.getNormalize()) {
+			// map a normalized delta \in [0,1] again to [0,1], but reverse the order.
+			// /WK/ "1-" is the bug fix 2019-02-09 needed to achieve always child.totValue>=0
+			return 1-delta; 
+		} else {
+			// reverse the delta-order for arbitrarily distributed delta;
+			// maps from interval [a,b] to [-b,-a] (this can be problematic for UCT-rule)
+			return -delta;
+		}
+	}
+	
     /**
      * Selects the best Action of an expanded tree
      *

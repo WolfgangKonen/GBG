@@ -23,6 +23,7 @@ import tools.Types.ScoreTuple;
  * 		{@link controllers.MCTSExpectimax.MCTSExpectimaxAgt}		
  * 		{@link controllers.TD.TDAgent}, 
  * 		{@link controllers.TD.ntuple2.TDNTuple2Agt}, 
+ * 		{@link games.CFour.AlphaBetaAgent}, 
  * </ul> 
  *
  * @author Wolfgang Konen, TH Köln, Nov'16

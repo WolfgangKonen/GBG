@@ -23,9 +23,15 @@ import tools.Types.ScoreTuple;
  * @see controllers.MCTS.MCTSAgentT
  */
 abstract public class AgentBase implements Serializable {
+	/**
+	 * number of performed training games for trainable agents  
+	 */
 	private int m_GameNum;
+	/**
+	 * maximum number of training games
+	 */
 	private int m_MaxGameNum;
-	private int m_NumEval;
+//	private int m_NumEval;
 	private String m_name;
 	private AgentState m_agentState = AgentState.RAW;
 	private int epochMax = 0;
@@ -121,11 +127,7 @@ abstract public class AgentBase implements Serializable {
 	}
 
 	
-	// ---
-	public boolean trainAgent(StateObservation so 
-			/* , int epiLength, boolean learnFromRM */
-			/* --- epiLength, learnFromRM are now available via member ParOther m_oPar */
-			) {
+	public boolean trainAgent(StateObservation so) {
 		m_GameNum++;
 		return false;
 	}

@@ -29,7 +29,7 @@ public class XArenaTabs extends JFrame
 			tp[i].addTab("MaxN pars", arena.m_xab.maxnParams[i].getPanel());			// 2		
 			tp[i].addTab("MC pars", arena.m_xab.mcParams[i].getPanel());    			// 3
 			tp[i].addTab("MCTS pars", arena.m_xab.mctsParams[i].getPanel());			// 4
-			tp[i].addTab("MCTSE pars", arena.m_xab.mctsExpectimaxParams[i].getPanel()); // 5
+			tp[i].addTab("MCTSE pars", arena.m_xab.mctseParams[i].getPanel()); // 5
 			tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());					// 6
 			tp[i].setSize(getMinimumSize());
 			tp[i].setEnabledAt(i, true); 			// do we need this?

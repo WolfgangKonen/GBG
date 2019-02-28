@@ -16,16 +16,15 @@ import tools.Types.ScoreTuple;
 
 /**
  * 
- * This class is an implementation of an Alpha-Beta-Agent. It is recommended to
- * use the implemented Methods by Agent. This agent uses transposition tables,
- * move-ordering, opening books, symmetries and some other techniques to get
- * fast results.
+ * This class is an implementation of an Alpha-Beta-Agent, specialized to the game CFour. 
+ * This agent uses transposition tables, move-ordering, opening books, symmetries and 
+ * some other techniques to get fast results.
  * 
- * <br>
+ * <p>
  * Changes: <br>
  * 12.12.2011: alphaBetaStartP1 and alphaBetaStartP2 look for the most distant
  * loss. This makes the search a little bit slower, but allows a better
- * evaluation of the td-agent
+ * evaluation of the TD-agent
  * 
  * @author Markus Thill
  * 
@@ -193,8 +192,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	}
 
 	/**
-	 * The difficulty of the AlphaBeta-Player is distinguished by the search
-	 * Depth
+	 * The difficulty of {@link AlphaBetaAgent} is distinguished by the {@code searchDepth}
 	 * 
 	 * @param searchDepth
 	 */
@@ -204,9 +202,9 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 
 	/**
-	 * This Method (the source) was generated with a C-program, because its
+	 * This method (the source) was generated with a C-program, because its
 	 * source-code is very long. <br>
-	 * Find a field, in which player can create a threat.
+	 * Find a column, in which player can create a threat.
 	 * 
 	 * @param player
 	 * @param startWithCol
@@ -3846,7 +3844,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 	/**
 	 * This method currently only works for boards with not more than 2 threats
-	 * (&gt 70% of all boards)
+	 * (&gt; 70% of all boards)
 	 * 
 	 * @return estimated Value for the current board
 	 */
@@ -3943,9 +3941,9 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	}
 
 	/**
-	 * Find the best move for the current Player. If there are equal move,
-	 * select randomly. If this board is a loss, make a completly random move.
-	 * This method always rests the variable randomizeLosses.
+	 * Find the best move for the current Player. If there are equivalent moves,
+	 * select one randomly. If this board is a loss, make a completely random move.
+	 * This method always resets the variable randomizeLosses.
 	 * 
 	 * @param table
 	 * @return best move (random choice)
@@ -4043,8 +4041,8 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 //	}
 
 	/**
-	 * Find the best move for the current Player. If there are equal moves,
-	 * select randomly
+	 * Find the best move for the current Player. If there are equivalent moves,
+	 * select one randomly
 	 * 
 	 * @param table
 	 * @return best move (random choice)

@@ -63,7 +63,7 @@ public class XArenaButtons extends JPanel
 	MaxNParams[] maxnParams;
 	MCTSParams[] mctsParams;
 	MCParams[] mcParams;
-	MCTSExpectimaxParams[] mctsExpectimaxParams;
+	MCTSExpectimaxParams[] mctseParams;
 	OtherParams[] oPar;
 	HtmlDisplay htmlDisplay = null;
 	boolean htmlDisplayActive = false;
@@ -125,7 +125,7 @@ public class XArenaButtons extends JPanel
 		maxnParams = new MaxNParams[numPlayers];
 		mctsParams = new MCTSParams[numPlayers];
 		mcParams = new MCParams[numPlayers];
-		mctsExpectimaxParams = new MCTSExpectimaxParams[numPlayers];
+		mctseParams = new MCTSExpectimaxParams[numPlayers];
 		oPar = new OtherParams[numPlayers];
 
 		// 
@@ -218,7 +218,7 @@ public class XArenaButtons extends JPanel
 			maxnParams[n] = new MaxNParams();
 			mctsParams[n] = new MCTSParams();
 			mcParams[n] = new MCParams();
-			mctsExpectimaxParams[n] = new MCTSExpectimaxParams();
+			mctseParams[n] = new MCTSExpectimaxParams();
 			oPar[n] = new OtherParams();
 			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_game.getGameName());
 			
@@ -569,6 +569,7 @@ public class XArenaButtons extends JPanel
 		ntPar[n].setFixedCoList(m_game.makeXNTupleFuncs().getAvailFixedNTupleModes(),
 								m_game.makeXNTupleFuncs().fixedTooltipString());
 		mctsParams[n].setParamDefaults(agentName, gameName, numPlayers);
+		mctseParams[n].setParamDefaults(agentName, gameName, numPlayers);
 		oPar[n].setParamDefaults(agentName, gameName);
 		
 		switch (agentName) {

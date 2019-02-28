@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**

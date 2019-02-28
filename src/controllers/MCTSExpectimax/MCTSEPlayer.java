@@ -3,6 +3,7 @@ package controllers.MCTSExpectimax;
 //import controllers.MCTSExpectimax.MCTSExpectimax1.MCTSE1ChanceNode;
 import games.StateObservation;
 import games.StateObsNondeterministic;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 //import params.MCTSExpectimaxParams;
 //import params.MCTSParams;
@@ -87,10 +88,10 @@ public class MCTSEPlayer
         //at first it seems confusing that the root node is a chance node, but because the first 
         //generation of children are tree nodes, the root node has to be a chance node.
 		if(!mctsExpectimaxParams.getAlternateVersion()) {
-			// this is the recommended version:
+			// /WK/ this is the recommended version:
 			rootNode = new MCTSEChanceNode(so, null, null, random, this);
 		} else {
-			// currently NOT recommended, see comment childrenNodes in AltTreeNode (!):
+			// /WK/ currently NOT recommended, see comment childrenNodes in AltTreeNode (!):
 			if(so instanceof StateObsNondeterministic) {
 				System.out.println("MCTSE: Using alternate version ...");
 				StateObsNondeterministic son = (StateObsNondeterministic) so;
@@ -99,6 +100,22 @@ public class MCTSEPlayer
 				throw new RuntimeException("You need to implement the \"StateObservationNondeterministic\" interface to use MCTS-Expectimax");
 			}
 		}
+		
+    	if (this.getNormalize() && so instanceof StateObserver2048) {
+    		// make a quick mctseSearch to establish an state-dependent estimate of maxRolloutScore
+    		rootNode.maxRolloutScore=1e-5;
+    		int numIters=this.getNUM_ITERS();
+    		this.mctsExpectimaxParams.setNumIter(100);
+    		double[] VTable = new double[actions.size()+1];
+    		this.getRootNode().mctseSearch(VTable);
+    		double maxRolloutScore = rootNode.maxRolloutScore;
+    		
+    		// generate a 'fresh' rootNode and set its maxRolloutScore:
+			rootNode = new MCTSEChanceNode(so, null, null, random, this);
+			rootNode.maxRolloutScore = maxRolloutScore;
+    		this.mctsExpectimaxParams.setNumIter(numIters);
+    	}
+
     }
 
     /**
@@ -113,7 +130,7 @@ public class MCTSEPlayer
     {
     	this.nRolloutFinished=0;
 		//Do the search
-        rootNode.mctsSearch(vtable);
+        rootNode.mctseSearch(vtable);
 
         //Determine the best action to take and return it
 		Types.ACTIONS action = rootNode.bestAction();
@@ -147,6 +164,9 @@ public class MCTSEPlayer
 	}
     public ParMCTSE getParMCTSE() {
 		return mctsExpectimaxParams;
+	}
+    public ParOther getParOther() {
+		return m_parent.getParOther();
 	}
     public int getNRolloutFinished() {
         return nRolloutFinished;

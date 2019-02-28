@@ -29,30 +29,34 @@ import java.io.Serializable;
 public class ParMCTSE implements Serializable
 {
 	public static final int DEFAULT_VERBOSITY = 0; 
-    public static final int DEFAULT_ITERATIONS = 3500;                  //Number of Games played for every available Action
-    public static final int DEFAULT_ROLLOUTDEPTH = 150;                 //Number of times advance() is called for every Iteration
+    public static final int DEFAULT_ITERATIONS = 3500;                  //Number of games played for all available actions
+    public static final int DEFAULT_ROLLOUTDEPTH = 150;                 //Number of times advance() is called for every random rollout
     public static final int DEFAULT_TREEDEPTH = 10;
     public static final double DEFAULT_K = Math.round(1000*Math.sqrt(2))/1000.0;;
+	/**
+	 * epsGreedy = probability that a random action is taken (instead of a 
+	 * greedy action). This is *only* relevant, if function egreedy() is used in
+	 * MCTSE treePolicy, which is the case if selectMode==1 ("eps-greedy").
+	 */
+    public static final double DEFAULT_EPSILONGREEDY = 0.05;
     public static final int DEFAULT_MAXNODES = 500;                     //Max number of nodes expand() can create
     public static final boolean DEFAULT_ALTERNATEVERSION = false;      //Use AltChanceNode instead of MCTSEChanceNode
     public static final boolean DEFAULT_ENABLEHEURISTICS = false;
+    public static final boolean DEFAULT_NORMALIZE = true;
     public static final int DEFAULT_NUMAGENTS = 1;                      //number Agents for majority vote
-    /**
-     *  egreedyEpsilon = probability that a random action is taken (instead
-     *  greedy action). This is *only* relevant, if function egreedy() is
-     *  used as variant to uct() (which is currently *not* the case).
-     */
-    public static final double EGREEDYEPSILON = 0.05;
+    public static final int DEFAULT_SELECT_MODE = 0;	// 0:[UCT], 1:[eps-greedy], 2:[roulette wheel]
     private int numIters = DEFAULT_ITERATIONS;
 	private int rolloutDepth = DEFAULT_ROLLOUTDEPTH;
     private int treeDepth = DEFAULT_TREEDEPTH;
+    private int verbosity = DEFAULT_VERBOSITY;
+    private int selectMode = DEFAULT_SELECT_MODE;
     private double kUCT = DEFAULT_K;
+    private double epsGreedy = DEFAULT_EPSILONGREEDY;
+    private boolean useNormalize = DEFAULT_NORMALIZE;
     private int maxNodes = DEFAULT_MAXNODES; 
     private int numAgents = DEFAULT_NUMAGENTS;
     private boolean alternateVersion = DEFAULT_ALTERNATEVERSION;
     private boolean enableHeuristics = DEFAULT_ENABLEHEURISTICS;
-    private int verbosity = DEFAULT_VERBOSITY;
-    private boolean useNormalize = true;
 
 	private HeuristicSettings2048 heuristicSettings2048;
 
@@ -82,12 +86,14 @@ public class ParMCTSE implements Serializable
 		setRolloutDepth(tp.getRolloutDepth());
 		setTreeDepth(tp.getTreeDepth());
 		setK_UCT(tp.getK_UCT());
+		this.setEpsGreedy(tp.getEpsGreedy());
 		setMaxNodes(tp.getMaxNodes());						
 		setNumAgents(tp.getNumAgents());					
 		setVerbosity(tp.getVerbosity());
 		setAlternateVersion(tp.getAlternateVersion());	
 		setEnableHeuristics(tp.getEnableHeuristics());
 		setHeuristicSettings2048(tp.getHeuristicSettings2048());
+		this.setSelectMode(tp.getSelectMode());
 		this.useNormalize = tp.getNormalize();
 	}
 	
@@ -100,23 +106,31 @@ public class ParMCTSE implements Serializable
 		setRolloutDepth(tp.getRolloutDepth());
 		setTreeDepth(tp.getTreeDepth());
 		setK_UCT(tp.getK_UCT());
+		this.setEpsGreedy(tp.getEpsGreedy());
 		setMaxNodes(tp.getMaxNodes());						
 		setNumAgents(tp.getNumAgents());					
 		setVerbosity(tp.getVerbosity());
 		setAlternateVersion(tp.getAlternateVersion());	
 		setEnableHeuristics(tp.getEnableHeuristics());
 		setHeuristicSettings2048(tp.getHeuristicSettings2048());
+		this.setSelectMode(tp.getSelectMode());
 		this.useNormalize = tp.getNormalize();
 	}
 	
 	public int getNumIter() {
 		return this.numIters;
 	}
+	public int getSelectMode() {
+		return selectMode;
+	}
 	public double getK_UCT() {
 		return this.kUCT;
 	}
 	public boolean getNormalize() {
 		return useNormalize;
+	}
+	public double getEpsGreedy() {
+		return epsGreedy;
 	}
 	public int getTreeDepth() {
 		return this.treeDepth;
@@ -151,6 +165,9 @@ public class ParMCTSE implements Serializable
 	public void setTreeDepth(int value) {
 		treeDepth = value;
 	}
+	public void setSelectMode(int selectMode) {
+		this.selectMode=selectMode;
+	}
 	public void setRolloutDepth(int value) {
 		rolloutDepth = value;
 	}
@@ -168,6 +185,9 @@ public class ParMCTSE implements Serializable
 	}
 	public void setHeuristicSettings2048(HeuristicSettings2048 heuristicSettings2048) {
 		this.heuristicSettings2048 = heuristicSettings2048;
+	}
+	public void setEpsGreedy(double value) {
+		this.epsGreedy = value;
 	}
 	public void setVerbosity(int verbosity) {
 		this.verbosity = verbosity;

@@ -123,7 +123,8 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 
         assert so.isLegalState() : "Not a legal state"; 
 
-        System.out.println("MaxN: depth="+depth+"  "+so.stringDescr());
+        if (this instanceof MaxNWrapper) 
+        	System.out.println("MaxN: depth="+depth+"  "+so.stringDescr());
         
         double pMaxScore = -Double.MAX_VALUE;
         ArrayList<ACTIONS> acts = so.getAvailableActions();

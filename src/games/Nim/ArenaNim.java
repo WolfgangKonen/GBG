@@ -52,7 +52,7 @@ public class ArenaNim extends Arena   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "";
+		return "Nim";
 	}
 	
 	/**

@@ -614,7 +614,7 @@ public class XArenaMenu extends JMenuBar {
 //				if (((MCTSExpectimaxAgt) td).getParOther() == null ) 
 //					((MCTSExpectimaxAgt) td).setDefaultOtherPar();
 				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mctsExpectimaxParams[n].setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
+				m_arena.m_xab.mctseParams[n].setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
 				m_arena.m_xab.oPar[n].setFrom( ((MCTSExpectimaxAgt) td).getParOther() );
 			}
 			else if (td instanceof MCAgent) {

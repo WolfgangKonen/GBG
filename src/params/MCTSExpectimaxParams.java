@@ -8,6 +8,8 @@ import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.Serializable;
 
 /**
@@ -28,16 +30,27 @@ import java.io.Serializable;
  */
 public class MCTSExpectimaxParams extends Frame implements Serializable
 {
-	private static final String TIPNORMALIZEL = "Normalize UCT value q(reward) to range [0,1]";
+	private static final String TIPNUMITERL = "Number of iterations during MCTSE search";
+	private static final String TIPKUCTL = "Parameter K in UCT rule ";
+	private static final String TIPEPSILONGREEDY = "epsilon in eps-greedy node selection";
+	private static final String TIPTREEDEPL = "maximum tree depth";
+	private static final String TIPROLLOUTL = "maximum rollout depth (random moves from a leaf)";
+	private static final String TIPNORMALIZEL = "<html>Normalize rollout value q(reward) to range [0,1]<br>"
+			+ "(special online normalization for 2048)</html>";
+	private static final String TIPSELECTORL = "Which selector to use in tree policy";
 	private static final String TIPVERBOSET = "<html>0: print nothing,<br>"
 			+ "1: one line per MCTS call, <br>"
 			+ "2: for each child (=action) one line, <br>"
-			+ "3 and more: more level of children, grandchildren for each child"
+			+ "&ge; 3: more levels of children, grandchildren, ..."
 			+ "</html>";
 	// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 
+	private static String[] selTypeString = { "UCT","eps-greedy","roulette wheel" };
+
 	private JLabel numIter_L;
+	JLabel selector_L;
 	private JLabel kUCT_L;
+	private JLabel epsGreedy_L;
 	private JLabel normalize_L;
 	private JLabel treedep_L;
 	private JLabel rollout_L;
@@ -46,6 +59,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	private JLabel verbose_L;
 	private JTextField numIter_T;
 	private JTextField kUCT_T;
+	private JTextField epsGreedy_T;
 	private JCheckBox normalize;
 	private JTextField treedep_T;
 	private JTextField rollout_T;
@@ -54,6 +68,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	private JTextField verbose_T;
 	private JCheckBox alternateVersion_CB;
 	private JCheckBox enableHeuristics_CB;
+	private JComboBox choiceSelector;
 	private JPanel mPanel;
 
 	private HeuristicSettings2048 heuristicSettings2048;
@@ -72,17 +87,27 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		heuristicSettings2048 = new HeuristicSettings2048();
 
 		numIter_L = new JLabel("Iterations");
-		kUCT_L = new JLabel("K (UCT)");
-		normalize_L = new JLabel("Normalize (UCT): ");
 		treedep_L = new JLabel("Tree Depth");
 		rollout_L = new JLabel("Rollout Depth");
+		verbose_L = new JLabel("Verbosity");
+		selector_L = new JLabel("Selector: ");
+		kUCT_L = new JLabel("K (UCT)");
+		epsGreedy_L = new JLabel("epsilon (greedy)");
+		normalize_L = new JLabel("Normalize: ");
+		choiceSelector = new JComboBox(selTypeString);
+		choiceSelector.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				enableUCTPart();
+			}
+		});
 		maxNodes_L = new JLabel("Max Nodes");
 		numAgents_L = new JLabel("Number Agents");
-		verbose_L = new JLabel("Verbosity");
 		alternateVersion_CB = new JCheckBox("alternate Version (~4% faster)", ParMCTSE.DEFAULT_ALTERNATEVERSION);
 		enableHeuristics_CB = new JCheckBox("enable Heuristics", ParMCTSE.DEFAULT_ENABLEHEURISTICS);
 		numIter_T = new JTextField(ParMCTSE.DEFAULT_ITERATIONS+"");
 		kUCT_T = new JTextField(ParMCTSE.DEFAULT_K+"");					//
+		epsGreedy_T = new JTextField(ParMCTSE.DEFAULT_EPSILONGREEDY+"");					// 
 		treedep_T = new JTextField(ParMCTSE.DEFAULT_TREEDEPTH+"");
 		rollout_T = new JTextField(ParMCTSE.DEFAULT_ROLLOUTDEPTH+"");
 		maxNodes_T = new JTextField(ParMCTSE.DEFAULT_MAXNODES+"");
@@ -93,13 +118,17 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 									// can be handed over to a tab of a JTabbedPane 
 									// (see class XArenaTabs)
 		
-		numIter_L.setToolTipText("Number of iterations during MCTSE search");
-		kUCT_L.setToolTipText("Parameter K in UCT rule ");
-		treedep_L.setToolTipText("MCTSE tree depth");
-		rollout_L.setToolTipText("MCTSE rollout depth");
+		numIter_L.setToolTipText(TIPNUMITERL);
+		treedep_L.setToolTipText(TIPTREEDEPL);
+		rollout_L.setToolTipText(TIPROLLOUTL);
+		verbose_L.setToolTipText(TIPVERBOSET);
+		verbose_T.setToolTipText(TIPVERBOSET);
+		selector_L.setToolTipText(TIPSELECTORL);
+		kUCT_L.setToolTipText(TIPKUCTL);
+		epsGreedy_L.setToolTipText(TIPEPSILONGREEDY);
+		normalize_L.setToolTipText(TIPNORMALIZEL);
 		maxNodes_L.setToolTipText("Max number of tree nodes");
 		numAgents_L.setToolTipText("Number of agents for majority Vote");
-		normalize_L.setToolTipText(TIPNORMALIZEL);
 
 
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
@@ -110,35 +139,45 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		iterPanel.add(numIter_T);
 		mPanel.add(iterPanel);
 
-		JPanel kPanel = new JPanel(new GridLayout(0,2,10,10));
-		kPanel.add(kUCT_L);
-		kPanel.add(kUCT_T);
-		mPanel.add(kPanel);
+		JPanel sePanel = new JPanel(new GridLayout(0,2,10,10));
+		sePanel.add(selector_L);
+		sePanel.add(choiceSelector);
+		mPanel.add(sePanel);
 
 		JPanel tdPanel = new JPanel(new GridLayout(0,2,10,10));
 		tdPanel.add(treedep_L);
 		tdPanel.add(treedep_T);
 		mPanel.add(tdPanel);
 
-		JPanel noPanel = new JPanel(new GridLayout(0,2,10,10));
-		noPanel.add(normalize_L);
-		noPanel.add(normalize);
-		mPanel.add(noPanel);
+		JPanel kPanel = new JPanel(new GridLayout(0,2,10,10));
+		kPanel.add(kUCT_L);
+		kPanel.add(kUCT_T);
+		mPanel.add(kPanel);
 
 		JPanel rdPanel = new JPanel(new GridLayout(0,2,10,10));
 		rdPanel.add(rollout_L);
 		rdPanel.add(rollout_T);
 		mPanel.add(rdPanel);
 
-		JPanel mnPanel = new JPanel(new GridLayout(0,2,10,10));
-		mnPanel.add(maxNodes_L);
-		mnPanel.add(maxNodes_T);
-		mPanel.add(mnPanel);
+		JPanel epPanel = new JPanel(new GridLayout(0,2,10,10));
+		epPanel.add(epsGreedy_L);
+		epPanel.add(epsGreedy_T);
+		mPanel.add(epPanel);
 
 		JPanel vePanel = new JPanel(new GridLayout(0,2,10,10));
 		vePanel.add(verbose_L);
 		vePanel.add(verbose_T);
 		mPanel.add(vePanel);
+
+		JPanel noPanel = new JPanel(new GridLayout(0,2,10,10));
+		noPanel.add(normalize_L);
+		noPanel.add(normalize);
+		mPanel.add(noPanel);
+
+		JPanel mnPanel = new JPanel(new GridLayout(0,2,10,10));
+		mnPanel.add(maxNodes_L);
+		mnPanel.add(maxNodes_T);
+		mPanel.add(mnPanel);
 
 		JPanel naPanel = new JPanel(new GridLayout(0,2,10,10));
 		naPanel.add(numAgents_L);
@@ -152,8 +191,20 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 
 		add(mPanel,BorderLayout.CENTER);
 				
+		enableUCTPart();
+		
 		pack();
 		setVisible(false);
+	}
+	
+	private void enableUCTPart() {
+		String selString = (String) choiceSelector.getSelectedItem();
+		boolean selUCT = selString.equals(selTypeString[0]); 		// "UCT"
+		this.kUCT_L.setEnabled(selUCT);
+		this.kUCT_T.setEnabled(selUCT);
+		boolean selEpsGreedy = selString.equals(selTypeString[1]); 	// "eps-greedy"
+		this.epsGreedy_L.setEnabled(selEpsGreedy);
+		this.epsGreedy_T.setEnabled(selEpsGreedy);
 	}
 	
 	public JPanel getPanel() {
@@ -162,11 +213,20 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	public int getNumIter() {
 		return Integer.valueOf(numIter_T.getText());
 	}
+	/**
+	 * @return 0: "UCT", 1: "eps-greedy", 2: "roulette wheel" 
+	 */
+	public int getSelectMode() {
+		return this.choiceSelector.getSelectedIndex();
+	}
 	public double getK_UCT() {
 		return Double.valueOf(kUCT_T.getText());
 	}
 	public boolean getNormalize() {
 		return normalize.isSelected();
+	}
+	public double getEpsGreedy() {
+		return Double.valueOf(epsGreedy_T.getText()).doubleValue();	
 	}
 	public int getTreeDepth() {
 		return Integer.valueOf(treedep_T.getText());
@@ -195,8 +255,14 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	public void setNumIter(int value) {
 		numIter_T.setText(value+"");
 	}
+	public void setSelectMode(int value) {
+		this.choiceSelector.setSelectedIndex(value);
+	}
 	public void setK_UCT(double value) {
 		kUCT_T.setText(value+"");
+	}
+	public void setEpsGreedy(double value) {
+		epsGreedy_T.setText(value+"");
 	}
 	public void setTreeDepth(int value) {
 		treedep_T.setText(value+"");
@@ -232,13 +298,18 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	 */
 	public void setFrom(MCTSExpectimaxParams tp) {
 		setK_UCT(tp.getK_UCT());
-		setNormalize(tp.getNormalize());
+		setEpsGreedy(tp.getEpsGreedy());
 		setNumIter(tp.getNumIter());
 		setRolloutDepth(tp.getRolloutDepth());
 		setTreeDepth(tp.getTreeDepth());
 		setVerbosity(tp.getVerbosity());
-		setMaxNodes(tp.getMaxNodes());						// /WK/ this was missing
-		setAlternateVersion(tp.getAlternateVersion());	// /WK/ this was missing
+		setNormalize(tp.getNormalize());
+		setMaxNodes(tp.getMaxNodes());						
+		setNumAgents(tp.getNumAgents());					
+		setAlternateVersion(tp.getAlternateVersion());	
+		setEnableHeuristics(tp.getEnableHeuristics());
+		setSelectMode(tp.getSelectMode());
+		enableUCTPart();
 	}
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
@@ -246,13 +317,18 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	 */
 	public void setFrom(ParMCTSE tp) {
 		setK_UCT(tp.getK_UCT());
-		setNormalize(tp.getNormalize());
+		setEpsGreedy(tp.getEpsGreedy());
 		setNumIter(tp.getNumIter());
 		setRolloutDepth(tp.getRolloutDepth());
 		setTreeDepth(tp.getTreeDepth());
 		setVerbosity(tp.getVerbosity());
-		setMaxNodes(tp.getMaxNodes());						// /WK/ this was missing
-		setAlternateVersion(tp.getAlternateVersion());	// /WK/ this was missing
+		setNormalize(tp.getNormalize());
+		setMaxNodes(tp.getMaxNodes());					
+		setNumAgents(tp.getNumAgents());					
+		setAlternateVersion(tp.getAlternateVersion());	
+		setEnableHeuristics(tp.getEnableHeuristics());
+		setSelectMode(tp.getSelectMode());
+		enableUCTPart();
 	}
 
 	/**
@@ -266,7 +342,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	 */
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
 		switch (agentName) {
-		case "MCTSE": 
+		case "MCTS Expectimax": 
 			switch (gameName) {
 			case "Nim": 
 				numIter_T.setText("10000");		
@@ -284,6 +360,8 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 			}
 			break;
 		}
+		choiceSelector.setEnabled(true);
+		enableUCTPart();		
 	}	
 
 }

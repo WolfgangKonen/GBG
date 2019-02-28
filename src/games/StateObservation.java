@@ -69,7 +69,7 @@ public interface StateObservation extends Serializable{
 
 	/**
 	 * 
-	 * @return a string representation of actions {@code act}
+	 * @return a string representation of action {@code act}
 	 */
 	public String stringActionDescr(ACTIONS act);
 

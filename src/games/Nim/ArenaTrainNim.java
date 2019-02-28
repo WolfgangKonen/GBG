@@ -44,10 +44,6 @@ public class ArenaTrainNim extends ArenaTrain   {
 		super();
 	}
 
-//	public ArenaTrainNim(JFrame frame) {
-//		super(frame);
-//	}
-
 	public ArenaTrainNim(String title) {
 		super(title);		
 	}
@@ -105,15 +101,10 @@ public class ArenaTrainNim extends ArenaTrain   {
 	{
 		ArenaTrainNim t_Frame = new ArenaTrainNim("General Board Game Playing");
 
-// ---  just for analysis: compute the state space & game tree complexity ---		
-//		System.out.println("Rough approximation for nStates = "+(int) Math.pow(3, 9)+ " = (3^9)");
-//		TicTDBase.countStates2(false);
-//		TicTDBase.countStates2(true);
-		
 		if (args.length==0) {
 			t_Frame.init();
 		} else {
-			throw new RuntimeException("[ArenaTrainNim.main] args="+args+" not allowed. Use TicTacToeBatch.");
+			throw new RuntimeException("[ArenaTrainNim.main] args="+args+" not allowed.");
 		}
 	}
 	

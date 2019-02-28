@@ -445,7 +445,7 @@ public class SingleTreeNode implements Serializable {
 	/**
 	 * Assign the final rollerState a value (reward).
 	 * <p>
-	 * If 'Normalize (UCT)' is checked, the reward is passed through a normalizing function q()
+	 * If 'Normalize' is checked, the reward is passed through a normalizing function q()
 	 * which maps to [0,1]. Otherwise q() is the identity function.
 	 * 
 	 * @param so
@@ -467,6 +467,13 @@ public class SingleTreeNode implements Serializable {
 		return v;
 	}
 
+    /**
+     * checks if a rollout is finished
+     *
+     * @param rollerState the current game state
+     * @param depth the current rollout depth
+     * @return true if the rollout is finished, false if not
+     */
 	public boolean finishRollout(StateObservation rollerState, int depth) {
 		if (depth >= m_player.getROLLOUT_DEPTH()) // rollout end condition.
 			return true;
@@ -480,14 +487,14 @@ public class SingleTreeNode implements Serializable {
 	public void backUp(SingleTreeNode selected, double delta) {
 		SingleTreeNode n = selected;
 		while (n != null) {
-			// Why do we call 'negate' *before* the first '+=' to n.totValue is made? - 
-			// If the score of 'selected' is a loss for the player who has to move on 
-			// 'selected', then it is a win for the player who created 'selected'  
-			// (negamax principle)
 			switch (m_state.getNumPlayers()) {
 			case (1):
 				break;
 			case (2):	// negamax variant for 2-player tree
+				// Why do we call 'negate' *before* the first '+=' to n.totValue is made? - 
+				// If the score of 'selected' is a loss for the player who has to move on 
+				// 'selected', then it is a win for the player who created 'selected'  
+				// (negamax principle)
 				delta = negate(delta);
 				break;
 			default: // i.e. n-player, n>2
@@ -596,7 +603,7 @@ public class SingleTreeNode implements Serializable {
 			}
 		}
 
-		assert (selected != -1) : "Unexpected selection 2!";
+		assert (selected != -1) : "Selection in bestAction() did not work!";
 
 		return selected;
 	}

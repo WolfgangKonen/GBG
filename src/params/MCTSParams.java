@@ -46,12 +46,12 @@ public class MCTSParams extends Frame implements Serializable
 	private static final String TIPEPSILONGREEDY = "epsilon in eps-greedy node selection";
 	private static final String TIPTREEDEPL = "maximum tree depth";
 	private static final String TIPROLLOUTL = "maximum rollout depth (random moves from a leaf)";
-	private static final String TIPNORMALIZEL = "Normalize UCT value q(reward) to range [0,1]";
+	private static final String TIPNORMALIZEL = "Normalize rollout value q(reward) to range [0,1]";
 	private static final String TIPSELECTORL = "Which selector to use in tree policy";
 	private static final String TIPVERBOSET = "<html>0: print nothing,<br>"
 			+ "1: one line per MCTS call, <br>"
 			+ "2: for each child (=action) one line, <br>"
-			+ "3 and more: more level of children, grandchildren for each child"
+			+ "&ge; 3: more levels of children, grandchildren, ..."
 			+ "</html>";
 	// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 	
@@ -166,10 +166,10 @@ public class MCTSParams extends Frame implements Serializable
 	
 	private void enableUCTPart() {
 		String selString = (String) choiceSelector.getSelectedItem();
-		boolean selUCT = selString.equals(selTypeString[0]); // "UCT"
+		boolean selUCT = selString.equals(selTypeString[0]); 		// "UCT"
 		this.kUCT_L.setEnabled(selUCT);
 		this.kUCT_T.setEnabled(selUCT);
-		boolean selEpsGreedy = selString.equals(selTypeString[1]); // "eps-greedy"
+		boolean selEpsGreedy = selString.equals(selTypeString[1]); 	// "eps-greedy"
 		this.epsGreedy_L.setEnabled(selEpsGreedy);
 		this.epsGreedy_T.setEnabled(selEpsGreedy);
 	}
@@ -179,7 +179,6 @@ public class MCTSParams extends Frame implements Serializable
 		return Integer.valueOf(numIter_T.getText()).intValue();
 	}
 	/**
-	 * 
 	 * @return 0: "UCT", 1: "eps-greedy", 2: "roulette wheel" 
 	 */
 	public int getSelectMode() {

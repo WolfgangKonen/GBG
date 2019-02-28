@@ -74,7 +74,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
     public final static double MAXSCORE = 3932156.0;
     public final static double MINSCORE = 0;				// never used
-    private static final double REWARD_NEGATIVE = -1.0;		// questionable
+//    private static final double REWARD_NEGATIVE = -1.0;		// questionable
+    private static final double REWARD_NEGATIVE =  0.0;		
     private static final double REWARD_POSITIVE =  1.0;		// questionable
 
 	/**
