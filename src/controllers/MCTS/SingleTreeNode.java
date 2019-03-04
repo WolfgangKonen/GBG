@@ -8,6 +8,8 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Random;
 
+import controllers.MCTSExpectimax.MCTSETreeNode;
+
 /**
  * This is adapted from Diego Perez MCTS reference implementation<br>
  * <a href="http://gvgai.net/cont.php">http://gvgai.net/cont.php</a><br>
@@ -17,27 +19,26 @@ import java.util.Random;
 public class SingleTreeNode implements Serializable {
 	public static double epsilon = 1e-6; // tiebreaker
 	public StateObservation m_state = null;
-	public Types.ACTIONS m_act = null; // the action which leads from parent's
-										// state to this state
 	public SingleTreeNode parent = null;
 	public SingleTreeNode[] children = null;
 	public SingleMCTSPlayer m_player = null;
 	/**
+	 * the action which leads from parent's  state to this state
+	 */
+	public Types.ACTIONS m_act = null; 
+	/**
 	 * the total value of {@code this} as a child for the parent of {@code this}
-	 * .
 	 */
 	public double totValue;
 	private int nVisits=0;
 	public static Random m_rnd = null;
 	private int m_depth;
-	private static double[] lastBounds = new double[] { 0, 1 };
-	private static double[] curBounds = new double[] { 0, 1 };
-//	/**
-//	 * egreedyEpsilon = probability that a random action is taken (instead
-//	 * greedy action). This is *only* relevant, if function egreedy() is used as
-//	 * variant to uct() (which is currently *not* the case).
-//	 */
-//	public static double egreedyEpsilon = 0.15;
+//	private static double[] lastBounds = new double[] { 0, 1 };
+//	private static double[] curBounds = new double[] { 0, 1 };
+	/**
+	 * cumulative probability, needed in {@link #rouletteWheel()}
+	 */
+    private double cumProb=0;				
 
 	/**
 	 * change the version ID for serialization only if a newer version is no
@@ -133,8 +134,8 @@ public class SingleTreeNode implements Serializable {
 	 */
 	public void mctsSearch(ElapsedCpuTimer elapsedTimer, double[] VTable) {
 
-		lastBounds[0] = curBounds[0];
-		lastBounds[1] = curBounds[1];
+//		lastBounds[0] = curBounds[0];
+//		lastBounds[1] = curBounds[1];
 
 		double avgTimeTaken = 0;
 		double acumTimeTaken = 0;
@@ -149,7 +150,7 @@ public class SingleTreeNode implements Serializable {
 			ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 			SingleTreeNode selected = treePolicy();
 			double delta = selected.rollOut();
-// --- this is now equivalently in backUp(), first pass through while-loop ---			
+// --- this is now equivalently in backUp(), in the first pass through while-loop ---			
 //			if (m_state.getNumPlayers() == 2) {
 //				delta = negate(delta);		
 //				// why 'negate'? - If the score of 'selected' is a loss for the player who
@@ -288,6 +289,9 @@ public class SingleTreeNode implements Serializable {
 				case 1: 
 					next = cur.egreedy();
 					break; 
+				case 2: 
+					next = cur.rouletteWheel();
+					break; 
 				default: 
 					throw new RuntimeException("this selectMode is not yet implemented");
 				}
@@ -339,6 +343,14 @@ public class SingleTreeNode implements Serializable {
 
 	}
 
+    /**
+     * Select the child node with the highest UCT value
+     *
+     * @return the selected child node
+     * 
+     * @see #rouletteWheel()
+     * @see #egreedy()
+     */
 	public SingleTreeNode uct() {
 
 		SingleTreeNode selected = null;
@@ -367,11 +379,14 @@ public class SingleTreeNode implements Serializable {
 		return selected;
 	}
 
-	/**
-	 * Epsilon-Greedy, a variant to UCT
-	 * 
-	 * @return the best child node
-	 */
+    /**
+     * Epsilon-Greedy, a variant to UCT
+     *
+     * @return the selected child node
+     * 
+     * @see #uct()
+     * @see #rouletteWheel()
+     */
 	public SingleTreeNode egreedy() {
 
 		SingleTreeNode selected = null;
@@ -403,6 +418,63 @@ public class SingleTreeNode implements Serializable {
 
 		return selected;
 	}
+
+    /**
+     * Roulette-wheel selection, a variant to UCT. See Sec. 2.5.1 in [Swiechowski15],
+     * <a href="http://dx.doi.org/10.1155/2015/986262">http://dx.doi.org/10.1155/2015/986262</a>: <br>
+     * Swiechowski, M., et al.: <i>Recent Advances in General Game Playing</i>, The Scientific World Journal, Volume 2015, Article ID 986262.
+     * <p>
+     * Each child gets a sector on the roulette wheel (0,1] with its sector size being  
+     * proportional to the child's utility
+     * <pre>
+     * 		 U(child) = child.value/child.visits. </pre> 
+     * Now a random number from (0,1] is chosen and the child whose sector 
+     * contains this random number is selected.
+     * <p>
+     * @return the selected child node
+     * 
+     * @see #uct()
+     * @see #egreedy()
+     */
+    public SingleTreeNode rouletteWheel() {
+    	// TODO: implement one-move wins and one-move losses acc. to [Swiechowski15]
+        double rnd = m_rnd.nextDouble();
+        double vTotal = 0.0;
+        double vMin = 0.0;
+        double cumProb = 0.0;		// cumulative probability of all children up to current child
+        SingleTreeNode selected = null;
+
+        // We assign to each child a probability which is the softmax of its utility U(child):
+        // 		p(i)  =  U(child) / vTotal  =  U(child) / sum_j U(child_j)
+        // Example: 3 children with probabilities p(0)=0.2, p(1)=0.5, p(2)=0.3. This defines a 
+        // segmentation of the roulette wheel in three sectors:
+        //		child_0: (0,0.2], child_1: (0.2,0.7], child_3: (0.7,1.0].
+        // The LHS of the intervals are the cumulative probabilities child.cumProb. We select 
+        // that child which is the first with its LHS >= rnd.
+		vMin = (m_player.getNormalize()) ? 0.0 : m_state.getMinGameScore();
+        for (SingleTreeNode child : this.children) {
+        	vTotal += (child.totValue/child.nVisits)-vMin; 
+        }
+        for (SingleTreeNode child : this.children) {
+        	cumProb = cumProb + ((child.totValue/child.nVisits)-vMin)/vTotal;
+        	child.cumProb = cumProb;
+        	// We do not really need child.cumProb, we could just work with the local variable
+        	// cumProb. We have child.cumProb only for debugging purposes in order to have in 
+        	// this.children all cumulative probabilities and see if they converge to 1.
+        	if (cumProb>=rnd) {
+        		return child;		// the normal return
+        	}
+        }
+        // --- only for debugging, if we comment 'if (cumProb...)' above out in order to ensure
+        // --- calculation of all child.cumProb:
+//        for (SingleTreeNode child : this.children) {
+//        	if (child.cumProb>=rnd) {
+//        		return child;		// the normal return
+//        	}
+//        }
+
+        throw new RuntimeException("rouletteWheel: We should not arrive here!");
+    }
 
 	/**
 	 * Play a rollout from {@code this.m_state}

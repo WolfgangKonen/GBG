@@ -1044,7 +1044,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	
 	/**
 	 * 
-	 * @param score
+	 * @param score 
 	 * @param so	needed for accessing getMinGameScore(), getMaxGameScore()
 	 * @return normalized score to [-1,+1] (the appropriate range for tanh-sigmoid) if 
 	 * 		switch {@link #m_tdPar}{@code .getNormalize()} is set.
@@ -1054,7 +1054,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 			// since we have - in contrast to TDAgent - here only one sigmoid
 			// choice, namely tanh, we can take fixed [min,max] = [-1,+1]. 
 			// If we would later extend to several sigmoids, we would have to 
-			// adapt here:		
+			// adapt normalize2 accordingly:		
 			score = normalize(score,so.getMinGameScore(),
 							   		so.getMaxGameScore(),-1.0,+1.0);
 		}

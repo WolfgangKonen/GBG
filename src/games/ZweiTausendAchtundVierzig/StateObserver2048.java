@@ -608,9 +608,9 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     public void advance(ACTIONS action) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
-        move(iAction);
+        move(iAction);				// deterministic part
         updateEmptyTiles();
-        addRandomTile();
+        addRandomTile();			// non-deterministic part
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
@@ -767,6 +767,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	 * @return a string representation of actions {@code act}
 	 */
 	public String stringActionDescr(ACTIONS act) {
+		if (act==null) return "";
 		return ACTIONSTRING[act.toInt()];
 	}
 

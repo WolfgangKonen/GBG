@@ -777,7 +777,10 @@ public class XArenaMenu extends JMenuBar {
 					"Error", JOptionPane.ERROR_MESSAGE);			
 			printStatus("Done");
 		} else {
-			printStatus("Running Quick Evaluation ...");
+			printStatus("Running Quick Evaluation of PlayAgent "+index+" ...");
+			// problem: this text only appears in the status bar when the action handler is left
+			// ... and then it is usually obsolete, since it is already overwritten by 
+			// ... printStatus(qEvaluator.getShortMsg()) (see below)
 			try {
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
 				int verb = 0;

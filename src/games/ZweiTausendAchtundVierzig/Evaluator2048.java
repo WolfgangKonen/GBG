@@ -54,7 +54,9 @@ public class Evaluator2048 extends Evaluator {
 		ArrayList<PStats> psList = new ArrayList<PStats>();
         startTime = System.currentTimeMillis();
         if(verbose == 0) {
-            System.out.print("Starting evaluation of " + ConfigEvaluator.NUMBEREVALUATIONS + " games, this may take a while...\n");
+            System.out.println("Starting evaluation of " + ConfigEvaluator.NUMBEREVALUATIONS 
+            		+ " games, this may take a while...");
+            System.out.println("   " + pa.stringDescr() + "\n   " + pa.stringDescr2());
         }
         List<StateObserver2048> stateObservers = new ArrayList<>();
 
@@ -133,7 +135,9 @@ public class Evaluator2048 extends Evaluator {
                     }
 
                     if(verbose == 0) {
-                        System.out.print("Finished game " + gameNumber + " with scores " + so.score + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. Highest tile is " + so.getHighestTileValue() + ".\n");
+                        System.out.print("Finished game " + gameNumber + " with scores " + so.score 
+                        		+ " after " + (System.currentTimeMillis() - gameStartTime) 
+                        		+ "ms. Highest tile is " + so.getHighestTileValue() + ".\n");
                     }
                     return so;
                 });

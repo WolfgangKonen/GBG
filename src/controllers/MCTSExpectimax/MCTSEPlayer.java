@@ -1,6 +1,5 @@
 package controllers.MCTSExpectimax;
 
-//import controllers.MCTSExpectimax.MCTSExpectimax1.MCTSE1ChanceNode;
 import games.StateObservation;
 import games.StateObsNondeterministic;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -15,12 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import controllers.MCTS.SingleMCTSPlayer;
+
 /**
- * This is adapted from Diego Perez MCTS reference implementation
- * 		http://gvgai.net/cont.php
- * (with a bug fix concerning the number of available actions and an 
- *  extension for 1- and 2-player games, adjusted for nondeterministic
- *  games and the return of VTable information.)
+ * This is adapted from {@link SingleMCTSPlayer} for the <b>non-deterministic</b> case.
  *
  * @author Johannes Kutsch
  */
@@ -102,7 +99,7 @@ public class MCTSEPlayer
 		}
 		
     	if (this.getNormalize() && so instanceof StateObserver2048) {
-    		// make a quick mctseSearch to establish an state-dependent estimate of maxRolloutScore
+    		// make a quick mctseSearch to establish a state-dependent estimate of maxRolloutScore
     		rootNode.maxRolloutScore=1e-5;
     		int numIters=this.getNUM_ITERS();
     		this.mctsExpectimaxParams.setNumIter(100);

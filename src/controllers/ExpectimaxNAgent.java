@@ -35,6 +35,7 @@ import java.util.Random;
  * 
  * @see ScoreTuple
  * @see MaxNAgent
+ * @see ExpectimaxWrapper
  */
 public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
@@ -150,6 +151,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
     				// this terminates the recursion:
     				// (after finishing the for-loop for every element of acts)
     				currScoreTuple = estimateGameValueTuple(NewSO);
+    				// For derived class ExpectimaxWrapper, estimateGameValueTuple returns
+    				// the score tuple of the wrapped agent. 
     			}
             	if (!silent && depth<3) printAfterstate(soND,actions[i],currScoreTuple,depth);
             	VTable[i] = currScoreTuple.scTup[player];
@@ -202,7 +205,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				sumProbab += currProbab;
 				// if cOP==AVG, expecScoreTuple will contain the average ScoreTuple
 				// if cOP==MIN, expecScoreTuple will contain the worst ScoreTuple for 
-				// player (this considers environment as adversarial player)
+				// player (this considers the environment as an adversarial player)
 				expecScoreTuple.combine(currScoreTuple, cOP, player, currProbab);
             }
             assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
@@ -280,12 +283,17 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score (tuple for all players). This function may be overridden 
-	 * in a game-specific way by classes derived from {@link ExpectimaxNAgent}. <p>
+	 * in a agent-specific way by classes derived from {@link ExpectimaxNAgent}. For example, 
+	 * {@link ExpectimaxWrapper} will override it to return the score tuple of the wrapped 
+	 * agent.
+	 * <p>
 	 * This  stub method just returns {@link StateObservation#getReward(boolean)} for all 
 	 * players, which might be too simplistic for not-yet finished games, because the current 
 	 * reward may not reflect future rewards.
 	 * @param sob	the state observation
 	 * @return		the estimated score tuple
+	 * 
+	 * @see ExpectimaxWrapper
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob) {

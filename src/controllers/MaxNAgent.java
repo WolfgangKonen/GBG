@@ -160,7 +160,11 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 					currScoreTuple = sc;
 				}
 			} else {
+				// this terminates the recursion:
+				// (after finishing the for-loop for every element of acts)
 				currScoreTuple = estimateGameValueTuple(NewSO);
+				// For derived class MaxNWrapper, estimateGameValueTuple returns
+				// the score tuple of the wrapped agent. 
 			}
         	VTable[i] = currScoreTuple.scTup[player];
 			

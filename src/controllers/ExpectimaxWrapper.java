@@ -8,6 +8,8 @@ import tools.Types.ScoreTuple;
 /**
  * Wrapper based on {@link ExpectimaxNAgent} for n-ply look-ahead in nondeterministic games.
  * Wrap agent {@code pa} into an {@link ExpectimaxNAgent} with {@code nply} plies look-ahead.
+ * Override {@link #estimateGameValue(StateObservation)} such that it returns the score tuple
+ * of the wrapped agent {@code pa}.
  * 
  * @author Wolfgang Konen, TH Köln, Dec'17
  * 

@@ -27,8 +27,14 @@ import controllers.MCTS.SingleTreeNode;
 public class MCTSEChanceNode
 {
     public static double epsilon = 1e-6;		                                // tiebreaker
+    /**
+     * the state of the node
+     */
     public StateObservation so = null;
-    public Types.ACTIONS action = null;		                                // the action which leads from parent's state to this state
+    /**
+     * (It seems that this member {@link #action} is never really needed)
+     */
+    public Types.ACTIONS action = null;
     private MCTSETreeNode parentNode = null;
     public List<MCTSETreeNode> childrenNodes = new ArrayList<>();
     public MCTSEPlayer m_player = null;
@@ -44,7 +50,7 @@ public class MCTSEChanceNode
     public int numberChanceNodes = 1;
 
     public double maxRolloutScore = 0;  	//The max score that was reached during a rollout
-    public double scoreNonNormalized = 0;
+//    public double scoreNonNormalized = 0;
 
     /**
      * This Class represents a MCTS Expectimax Chance Node.
@@ -80,24 +86,26 @@ public class MCTSEChanceNode
      * Perform an MCTS Expectimax search, i.e. a selection of the best next action given the state
      * in the root node of the tree. The tree consists of alternating layers of {@link MCTSETreeNode}
      * and {@link MCTSEChanceNode}.
-     *
+     * <p>
      * Called by {@link MCTSEPlayer#run(double[])}.
-     *
-     * Do for {@code player.NUM_ITERS} iterations
-     * --- select a {@link MCTSEChanceNode} leaf node via {@link #treePolicy()} (this
-     *     includes {@link #expand()} of not fully expanded nodes, as long as the maximum tree
-     *     depth is not yet reached)
-     * --- make a {@link #rollOut()} starting from this leaf node (a game
-     *     with random actions until game is over or until the maximum rollout depth is reached)
-     * --- {@link #backUp(double)} the resulting score {@code score} and
-     *     the number of visits for all nodes on {@code value} and {@code visits}.
-     * --- Do this for all nodes on the path from the leaf up to the root.
-     *
+     * <p>
+     * Do for {@code player.NUM_ITERS} iterations:
+     * <ul>
+     * <li> select a {@link MCTSEChanceNode} leaf node via {@link #treePolicy()} (this
+     *      includes {@link #expand()} of not fully expanded nodes, as long as the maximum tree
+     *      depth is not yet reached)
+     * <li> make a {@link #rollOut()} starting from this leaf node (a game
+     *      with random actions until game is over or until the maximum rollout depth is reached)
+     * <li> {@link #backUp(double)} the resulting score {@code score} and
+     *      the number of visits for all nodes on {@code value} and {@code visits}.
+     * <li> Do this for all nodes on the path from the leaf up to the root.
+     * </ul>
      * 
-     * Once this method is completed, the method {@link #bestAction()} will return the
+     * Once this method is completed, method {@link #bestAction()} will return the
      * action {@link Types.ACTIONS} of the root's childrenNodes which maximizes
-     * U(i) = childrenNodes[i].value/childrenNodes[i].visits
-     *
+     * <pre>
+     *        U(i) = childrenNodes[i].value / childrenNodes[i].visits
+     * </pre>
      * @param vTable on input an array of length K+1, where K is the number of available
      * 		  moves for the root state. Contains on output {@code U(i)} in the first 
      * 		  K entries and the maximum of all {@code U(i)} in {@code vTable[K]}
@@ -122,11 +130,12 @@ public class MCTSEChanceNode
                 score = selected.rollOut();
             }
 
-            //set maxScore in root node (needed in value())
-            double s = m_player.getRootNode().scoreNonNormalized;
-            if(m_player.getRootNode().maxRolloutScore < s) {
-                m_player.getRootNode().maxRolloutScore = s;
-            }
+            // --- this is now done in value(): directly ---
+//            //set maxRolloutScore in root node (needed in value())
+//            double s = m_player.getRootNode().scoreNonNormalized;
+//            if(m_player.getRootNode().maxRolloutScore < s) {
+//                m_player.getRootNode().maxRolloutScore = s;
+//            }
 
             //backup the score
             selected.backUp(score);
@@ -146,8 +155,8 @@ public class MCTSEChanceNode
         }
         
 		// /WK/ some diagnostic checks (not required for normal operation)
-		this.printChildInfo(0, true);
-
+		if (m_player.getVerbosity() > 1) 
+			this.printChildInfo(0, true);
 		if (m_player.getVerbosity() > 0)
 			System.out.println(
 					"--  iter=" + iterations + " -- (tree/chance)-nodes=(" +
@@ -178,17 +187,26 @@ public class MCTSEChanceNode
         } else {
             //recursively go down the tree:
             //select a child (MCTSETreeNode) with UCT or eps-greedy, 
-        	//select/create a chance node with treePolicy() 
-        	//and call treePolicy() again in the new MCTSEChanceNode
+        	//select/create a chance node with MCTSETreeNode::treePolicy() 
+        	//and call MCTSEChanceNode::treePolicy() again to ensure recursion
         	
 			switch(m_player.getParMCTSE().getSelectMode()) {
 			case 0: 
-				// uctNormalised() is obsolete now. We do the optional normalization via value(),
-				// which is called by rollOut()
 //	            return uctNormalised().treePolicy().treePolicy();	
-	            return uct().treePolicy().treePolicy();	// TODO: clarify why 2-times tree-policy!!
+				// uctNormalised() is obsolete now. We do the optional normalization via value(),
+				// which is called by rollOut(). (The initial estimate for root's maxRolloutScore
+				// is now calculated in MCTSEPlayer::init().) Given this optional normalization, 
+				// we can use always normal uct() here: 
+	            return uct().treePolicy().treePolicy();	 
+	            // Why 2-times treePolicy()? - Because uct() returns a MCTSETreeNode
+	            // and uct().treePolicy returns a MCTSEChanceNode. If we would stop here we would 
+	            // have no recursion, we would just select a chance node 2 layers down. With 
+	            // the second .treePolicy() we ensure that a complete recursion is done (until a 
+	            // terminal state or the prescribe tree depth is reached).
 			case 1: 
 	            return egreedy().treePolicy().treePolicy();
+			case 2: 
+	            return rouletteWheel().treePolicy().treePolicy();
 			default: 
 				throw new RuntimeException("this selectMode is not yet implemented");
 			}
@@ -196,44 +214,13 @@ public class MCTSEChanceNode
         }
     }
 
-	public void printChildInfo(int nIndention, boolean doAssert) {
-		DecimalFormat form = new DecimalFormat("0.0000");
-		DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
-		DecimalFormat ifor = new DecimalFormat("0000");
-        double multiplier = 1/(m_player.getRootNode().maxRolloutScore+ this.epsilon);
-		int cVisits = 0;
-		int verbose = m_player.getVerbosity();
-		String indention = "";
-		for (int n = 0; n < nIndention; n++)
-			indention += "  ";
-
-		for (MCTSETreeNode c : this.childrenNodes) {
-			if (c != null) {
-				cVisits += c.visits;
-				if (verbose > 1) { 	// =2: print direct child info
-					double uct_exploit = c.value * multiplier / (c.visits + this.epsilon);
-					double uct_explore = m_player.getK()
-							* Math.sqrt(Math.log(this.visits + 1) / (c.visits + this.epsilon));
-					// System.out.println(c.m_state.stringDescr() + ": " +
-					// c.nVisits + ", " +
-					// form.format(c.totValue*3932156/c.nVisits)); // for 2048
-					System.out.println(indention + c.so.stringActionDescr(c.action) + ": " + ifor.format(c.visits) + ", "
-							+ for2.format(uct_exploit) + " + " + form.format(uct_explore) + " = "
-							+ form.format(uct_exploit + uct_explore));
-				}
-				if (verbose > 2)	// =3: children+grandchildren, =4: 3 generations, =5: 4 gen, ...
-					if (c.depth<=(verbose-2)) c.printChildInfo(nIndention + 1, false);
-			}
-		}
-		if (doAssert)
-			assert cVisits == this.visits : "children visits do not match the visits of this!";
-
-	}
-
     /**
      * Select the child node with the highest UCT value
      *
      * @return the selected child node
+     * 
+     * @see #rouletteWheel()
+     * @see #egreedy()
      */
     private MCTSETreeNode uct() {
         MCTSETreeNode selected = null;
@@ -257,7 +244,7 @@ public class MCTSEChanceNode
 
     @Deprecated
     private MCTSETreeNode uctNormalised() {
-    	// we do this now differently with an extra rootNode in MCTSEPlayer::init()
+    	// we do this now differently with an extra short mctseSearch in MCTSEPlayer::init()
     	// and with the proper normalization done in this.value():
         if(m_player.getRootNode().iterations < 100) { 
             return uct();			// run the first 100 iterations w/o normalization to establish
@@ -307,7 +294,10 @@ public class MCTSEChanceNode
     /**
      * Epsilon-Greedy, a variant to UCT
      *
-     * @return the best child node
+     * @return the selected child node
+     * 
+     * @see #uct()
+     * @see #rouletteWheel()
      */
     public MCTSETreeNode egreedy() {
         if (m_rnd.nextDouble() < ParMCTSE.DEFAULT_EPSILONGREEDY) {
@@ -326,6 +316,56 @@ public class MCTSEChanceNode
 
             return selected;
         }
+    }
+
+    /**
+     * Roulette-wheel selection, a variant to UCT. See Sec. 2.5.1 in [Swiechowski15],
+     * <a href="http://dx.doi.org/10.1155/2015/986262">http://dx.doi.org/10.1155/2015/986262</a>: <br>
+     * Swiechowski, M., et al.: <i>Recent Advances in General Game Playing</i>, The Scientific World Journal, Volume 2015, Article ID 986262.
+     * <p>
+     * Each child gets a sector on the roulette wheel (0,1] with its sector size being  
+     * proportional to the child's utility
+     * <pre>
+     * 		 U(child) = child.value/child.visits. </pre> 
+     * Now a random number from (0,1] is chosen and the child whose sector 
+     * contains this random number is selected.
+     * <p>
+     * @return the selected child node
+     * 
+     * @see #uct()
+     * @see #egreedy()
+     */
+    public MCTSETreeNode rouletteWheel() {
+    	// TODO: implement one-move wins and one-move losses acc. to [Swiechowski15]
+        double rnd = m_rnd.nextDouble();
+        double vTotal = 0.0;
+        double vMin = 0.0;
+        double cumProb = 0.0;		// cumulative probability of all children up to current child
+        MCTSETreeNode selected = null;
+
+        // We assign each child a probability which is the softmax of its utility U(child):
+        // 		p(i)  =  U(child) / vTotal  =  U(child) / sum_j U(child_j)
+        // Example: 3 children with probabilities p(0)=0.2, p(1)=0.5, p(2)=0.3. This defines a 
+        // segmentation of the roulette wheel in three sectors:
+        //		child_0: (0,0.2], child_1: (0.2,0.7], child_3: (0.7,1.0].
+        // The LHS of the intervals are the cumulative probabilities child.cumProb. We select 
+        // that child which is the first with its LHS >= rnd.
+		vMin = (m_player.getNormalize()) ? 0.0 : so.getMinGameScore();
+        for (MCTSETreeNode child : childrenNodes) {
+        	vTotal += child.value / child.visits - vMin;
+        }
+        for (MCTSETreeNode child : childrenNodes) {
+        	cumProb = cumProb + ((child.value/child.visits)-vMin)/vTotal;
+        	child.cumProb = cumProb;
+        	// We do not really need child.cumProb, we could just work with the local variable
+        	// cumProb. We have child.cumProb only for debugging purposes in order to have in 
+        	// this.children all cumulative probabilities and see if they converge to 1.
+        	if (cumProb>=rnd) {
+        		return child;		// the normal return
+        	}
+        }
+
+        throw new RuntimeException("rouletteWheel: We should not arrive here!");
     }
 
     /**
@@ -414,16 +454,22 @@ public class MCTSEChanceNode
 	 */
 	public double value(StateObservation so, StateObservation referingState) {
 		double v = so.getReward(so, m_player.rgs);
-		m_player.getRootNode().scoreNonNormalized=v;
+//		m_player.getRootNode().scoreNonNormalized=v;
 		double maxScore;
 		if (m_player.getNormalize()) {
 			if (so.getName()=="2048") {
-				// a special normalization for 2048: maxRolloutScore is an estimate of the maximum
-				// expected rollout score from the current root node (estimated initially by
-				// a quick 100-iterations mctseScearch())
+				// A special normalization for 2048: maxRolloutScore is an estimate of the maximum
+				// expected rollout score from the current root node (estimated initially in 
+				// MCTSEPlayer::init() by a quick 100-iterations mctseScearch() and then updated 
+				// whenever a larger rollout score arrives).
+				// [Why this rollout score and not so.getMaxGameScore()? - Because the maximum 
+				// game score in 2048 is MAXSCORE=3932156 is only a theoretical limit 
+				// when tile 2^16 is reached, which does not happen in a 'normal' rollout.
+				// Using this MAXSCORE would result in too small child values (no exploitation).]
 	            maxScore = m_player.getRootNode().maxRolloutScore;
-	            maxScore = (v>maxScore) ? v : maxScore;
-	            assert maxScore != 0 : "Error: maxRolloutScore is 0.0";
+	            if (v>maxScore)
+	            	maxScore = m_player.getRootNode().maxRolloutScore = v;
+	            //assert maxScore != 0 : "Error: maxRolloutScore is 0.0";
 			} else {
 				maxScore = so.getMaxGameScore();
 			}
@@ -469,20 +515,8 @@ public class MCTSEChanceNode
      * @param score the value of the new child node
      */
     private void backUpSum(double score) {
-		switch (so.getNumPlayers()) {
-		case (1):
-			break;
-		case (2):	// negamax variant for 2-player tree
-			// Why do we call 'negate' *before* the first '+=' to n.totValue is made? - 
-			// If the score of 'selected' is a loss for the player who has to move on 
-			// 'selected', then it is a win for the player who created 'selected'  
-			// (negamax principle)
-			score = negate(score);
-			break;
-		default: // i.e. n-player, n>2
-			throw new RuntimeException("MCTS.backUp is not yet implemented for (n>2)-player games (n>2).");
-		}
-		
+    	// note that the score-negation necessary for 2-player games is done in 
+    	// MCTSETreeNode::backUp...()
         visits++;
         value += score;
 
@@ -498,20 +532,8 @@ public class MCTSEChanceNode
      * @param score the value of the new child node
      */
     private void backUpMin(double score) {
-		switch (so.getNumPlayers()) {
-		case (1):
-			break;
-		case (2):	// negamax variant for 2-player tree
-			// Why do we call 'negate' *before* the first '+=' to n.totValue is made? - 
-			// If the score of 'selected' is a loss for the player who has to move on 
-			// 'selected', then it is a win for the player who created 'selected'  
-			// (negamax principle)
-			score = negate(score);
-			break;
-		default: // i.e. n-player, n>2
-			throw new RuntimeException("MCTS.backUp is not yet implemented for (n>2)-player games (n>2).");
-		}
-		
+    	// note that the score-negation necessary for 2-player games is done in 
+    	// MCTSETreeNode::backUp...()
         visits++;
         if(score < value || value == 0) {
             value = score;
@@ -522,22 +544,13 @@ public class MCTSEChanceNode
         }
     }
 
-	private double negate(double delta) {
-		if (m_player.getNormalize()) {
-			// map a normalized delta \in [0,1] again to [0,1], but reverse the order.
-			// /WK/ "1-" is the bug fix 2019-02-09 needed to achieve always child.totValue>=0
-			return 1-delta; 
-		} else {
-			// reverse the delta-order for arbitrarily distributed delta;
-			// maps from interval [a,b] to [-b,-a] (this can be problematic for UCT-rule)
-			return -delta;
-		}
-	}
-	
     /**
      * Selects the best Action of an expanded tree
      *
-     * @return the {@link Types.ACTIONS} of the root's childrenNodes which maximizes U(i) = childrenNodes[i].value/childrenNodes[i].visits
+     * @return the action from the child of root's childrenNodes which maximizes
+     * <pre>
+     * 		 U(i) = childrenNodes[i].value/childrenNodes[i].visits
+     * </pre>
      */
     public Types.ACTIONS bestAction() {
         Types.ACTIONS selected = null;
@@ -571,6 +584,46 @@ public class MCTSEChanceNode
 //			}
 		}			
 		return N;
+	}
+
+	/**
+	 * More diagnostic info, printed in case {@link #m_player}{@code .getVerbosity} &gt; 2.
+	 * 
+	 * @param nIndention	indent text by 2*nIndention white spaces
+	 * @param doAssert		whether to do assertions
+	 */
+	public void printChildInfo(int nIndention, boolean doAssert) {
+		DecimalFormat form = new DecimalFormat("0.0000");
+		DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
+		DecimalFormat ifor = new DecimalFormat("0000");
+        double multiplier = 1/(m_player.getRootNode().maxRolloutScore+ this.epsilon);
+		int cVisits = 0;
+		int verbose = m_player.getVerbosity();
+		String indention = "";
+		for (int n = 0; n < nIndention; n++)
+			indention += "  ";
+
+		for (MCTSETreeNode c : this.childrenNodes) {
+			if (c != null) {
+				cVisits += c.visits;
+				if (verbose > 1) { 	// =2: print direct child info
+					double uct_exploit = c.value * multiplier / (c.visits + this.epsilon);
+					double uct_explore = m_player.getK()
+							* Math.sqrt(Math.log(this.visits + 1) / (c.visits + this.epsilon));
+					// System.out.println(c.m_state.stringDescr() + ": " +
+					// c.nVisits + ", " +
+					// form.format(c.totValue*3932156/c.nVisits)); // for 2048
+					System.out.println(indention + c.so.stringActionDescr(c.action) + ": " + ifor.format(c.visits) + ", "
+							+ for2.format(uct_exploit) + " + " + form.format(uct_explore) + " = "
+							+ form.format(uct_exploit + uct_explore));
+				}
+				if (verbose > 2)	// =3: children+grandchildren, =4: 3 generations, =5: 4 gen, ...
+					if (c.depth<=(verbose-2)) c.printChildInfo(nIndention + 1, false);
+			}
+		}
+		if (doAssert)
+			assert cVisits == this.visits : "children visits do not match the visits of this!";
+
 	}
 
 }

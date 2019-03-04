@@ -97,7 +97,7 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 			// since we have - in contrast to TDAgent - here only one sigmoid
 			// choice, namely tanh, we can take fixed [min,max] = [-1,+1]. 
 			// If we would later extend to several sigmoids, we would have to 
-			// adapt here:		
+			// adapt normalize2 accordingly:		
 			score = normalize(score,so.getMinGameScore(),
 							   		so.getMaxGameScore(),-1.0,+1.0);
 		}

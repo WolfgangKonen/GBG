@@ -53,7 +53,7 @@ public class AltTreeNode extends MCTSETreeNode {
         if(!childrenNodes.containsKey(action)) {
             //create a new child node
             childSo.advanceNondeterministic();
-            child = new AltChanceNode(childSo, action, this, random, player);
+            child = new AltChanceNode(childSo, action, this, random, m_player);
             childrenNodes.put(action, child);
         } else {
             //a child node representing this boardstate already exists
