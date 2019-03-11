@@ -11,7 +11,8 @@ import java.util.Locale;
 import javax.swing.JOptionPane;
 
 import agentIO.AgentLoader;
-import controllers.MinimaxAgent;
+import controllers.MaxNAgent;
+//import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
@@ -41,7 +42,8 @@ import tools.Types;
 public class EvaluatorNim extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {-1,0,1,2,3,4,11};
 	private RandomAgent random_agent = new RandomAgent("Random");
-	private MinimaxAgent minimaxAgent = new MinimaxAgent("Minimax");
+//	private MinimaxAgent minimaxAgent = new MinimaxAgent("Minimax");
+	private MaxNAgent maxNAgent = new MaxNAgent("Max-N");
     private MCTSAgentT mctsAgent = null;
 	private AgentLoader agtLoader = null;
 	private int m_mode;
@@ -91,8 +93,8 @@ public class EvaluatorNim extends Evaluator {
 		m_PlayAgent = playAgent;
 		switch(m_mode) {
 		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
-		case 1:  return evaluateAgent1(m_PlayAgent,minimaxAgent,m_gb)>m_thresh[1];
-		case 2:  return evaluateAgent2(m_PlayAgent,minimaxAgent,m_gb)>m_thresh[2];
+		case 1:  return evaluateAgent1(m_PlayAgent,maxNAgent,m_gb)>m_thresh[1];
+		case 2:  return evaluateAgent2(m_PlayAgent,maxNAgent,m_gb)>m_thresh[2];
 		case 3:  return evaluateAgent1(m_PlayAgent,mctsAgent,m_gb)>m_thresh[1];
 		case 4:  return evaluateAgent2(m_PlayAgent,mctsAgent,m_gb)>m_thresh[2];
 		case 11: 
@@ -246,8 +248,8 @@ public class EvaluatorNim extends Evaluator {
 			pLastMoveWin /= mx;
 			double sr = 1.0 - Math.pow(1.0/mx, nMoves)*pLastMoveWin/2.0;
 			return df.format(sr);
-		case 1:  return "0.0"; // minimax, competeBoth
-		case 2:  return "0.0"; // minimax, diff. starts, competeBoth
+		case 1:  return "0.0"; // MaxN, competeBoth
+		case 2:  return "0.0"; // MaxN, diff. starts, competeBoth
 		case 3:  return "0.0"; // MCTS, competeBoth
 		case 4:  return "0.0"; // MCTS, diff. starts, competeBoth
 		case 11: return "?";   // TDReferee, different starts, competeBoth
@@ -260,8 +262,8 @@ public class EvaluatorNim extends Evaluator {
 		String strBest = getBestResultString();
 		switch (m_mode) {
 		case 0:  return "success rate (randomAgent, best is "+strBest+"): ";
-		case 1:  return "success rate (minimax, best is "+strBest+"): ";
-		case 2:  return "success rate (minimax, different starts, best is "+strBest+"): ";
+		case 1:  return "success rate (Max-N, best is "+strBest+"): ";
+		case 2:  return "success rate (Max-N, different starts, best is "+strBest+"): ";
 		case 3:  return "success rate (MCTS, best is "+strBest+"): ";	
 		case 4:  return "success rate (MCTS, different starts, best is "+strBest+"): ";	
 		case 11: return "success rate (TDReferee, different starts, best is "+strBest+"): ";
@@ -275,8 +277,8 @@ public class EvaluatorNim extends Evaluator {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
 				+ "0: against Random, best is "+strBest+"<br>"
-				+ "1: against Minimax, best is "+strBest+"<br>"
-				+ "2: against Minimax, different starts, best is "+strBest+"<br>"
+				+ "1: against Max-N, best is "+strBest+"<br>"
+				+ "2: against Max-N, different starts, best is "+strBest+"<br>"
 				+ "3: against MCTS, best is "+strBest+"<br>"
 				+ "4: against MCTS, different starts, best is "+strBest+"<br>"
 				+ "11: against TDReferee.agt.zip, different starts"
@@ -287,8 +289,8 @@ public class EvaluatorNim extends Evaluator {
 	public String getPlotTitle() {
 		switch (m_mode) {
 		case 0:  return "success against Random";
-		case 1:  return "success against Minimax";
-		case 2:  return "success against Minimax, dStart";
+		case 1:  return "success against Max-N";
+		case 2:  return "success against Max-N, dStart";
 		case 3:  return "success against MCTS";
 		case 4:  return "success against MCTS, dStart";
 		case 11: return "success TDReferee";		

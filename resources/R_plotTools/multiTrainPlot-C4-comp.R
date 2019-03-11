@@ -1,4 +1,6 @@
 #
+# **** These are old results with TDNTuple2Agt from June/July 2018 ****
+# 
 # This script shows results for ConnectFour in the TCL-case with various TD-settings:
 #   HOR001: horizon cut at 0.01 in the eligibility traces
 #   TERNARY: ternary target: (finished) ? reward : gamma*value, instead of usual 
@@ -6,7 +8,7 @@
 #   RESET: reset eligibility trace on random move instead of standard elig traces
 # It compares the new version (after 'reachable'-bug fix in getBoardVector) with the
 # old version (before this bug fix).
-# 
+#
 library(ggplot2)
 library(grid)
 source("summarySE.R")

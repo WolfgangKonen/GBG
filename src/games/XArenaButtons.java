@@ -436,7 +436,7 @@ public class XArenaButtons extends JPanel
 		JPanel q1 = new JPanel();
 		q1.setLayout(new GridLayout(0,1,10,10));
 		q1.setBackground(Types.GUI_BGCOLOR);
-		q1.add(AgentX_L);
+		q1.add(AgentX_L);			// "Agent Type:"
 		q1.add(new Canvas());
 		q1.add(new Canvas());
 		q.add(q1);
@@ -473,7 +473,9 @@ public class XArenaButtons extends JPanel
 			if (arena.hasTrainRights()) {
 				qplay.add(qtrain);
 			} else {
-				qplay.add(new JLabel(""));  // just some vertical space
+				JLabel gameLabel = new JLabel(arena.getGameName());
+				gameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+				qplay.add(gameLabel);  // just the game name as place filler
 			}
 			q.add(qplay);	
 			mParam[n].setVisible(true);		// see ArenaTrain for making them
@@ -488,11 +490,18 @@ public class XArenaButtons extends JPanel
 		if (arena.hasTrainRights()) {
 			p1.add(GameNumL);
 			p1.add(GameNumT);			
+			p1.add(new Canvas());
 		} else {
 			p1.add(new Canvas());
-			p1.add(new Canvas());
+			JLabel gameLabel1 = new JLabel(arena.getGameName());
+			gameLabel1.setHorizontalAlignment(SwingConstants.CENTER);
+			JLabel gameLabel2 = new JLabel(arena.getGameName());
+			gameLabel2.setHorizontalAlignment(SwingConstants.CENTER);
+			p1.add(gameLabel1);  // just the game name as place filler
+			p1.add(gameLabel2);  // just the game name as place filler
+//			p1.add(new Canvas());
+//			p1.add(new Canvas());
 		}
-		p1.add(new Canvas());
 		p1.add(Logs);
 
 		JPanel p2 = new JPanel();
@@ -505,6 +514,12 @@ public class XArenaButtons extends JPanel
 			p2.add(MultiTrain);
 		} else {
 			p2.add(new Canvas());
+//			JLabel gameLabel1 = new JLabel(arena.getGameName());
+//			gameLabel1.setHorizontalAlignment(SwingConstants.CENTER);
+//			JLabel gameLabel2 = new JLabel(arena.getGameName());
+//			gameLabel2.setHorizontalAlignment(SwingConstants.CENTER);
+//			p2.add(gameLabel1);  // just the game name as place filler
+//			p2.add(gameLabel2);  // just the game name as place filler
 			p2.add(new Canvas());
 			p2.add(new Canvas());			
 		}

@@ -176,7 +176,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				winXScore = m_xfun.singleCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete finished. Avg. score for X: "+frm.format(winXScore)+" (best is 1.0).";
+				str = "Compete finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
 				UpdateBoard();
@@ -189,7 +189,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				winXScore = m_xfun.swapCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Swap Compete finished. Avg. score for X: "+frm.format(winXScore)+" (best is 1.0).";
+				str = "Swap Compete finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
 				UpdateBoard();
@@ -202,7 +202,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				winXScore = m_xfun.bothCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete Both finished. Avg. score for X: "+frm.format(winXScore)+" (best is 0.0).";
+				str = "Compete Both finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
 				UpdateBoard();
@@ -364,7 +364,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		try {
 			paVector = m_xfun.fetchAgents(m_xab);
 			AgentBase.validTrainedAgents(paVector, numPlayers);
-			qaVector = m_xfun.wrapAgents(paVector, m_xab.oPar, gb.getStateObs());
+			qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
 			paX = qaVector[0];
 		} catch (RuntimeException e) {
 			MessageBox.show(m_xab, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -385,6 +385,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 		gb.clearBoard(true, true);
 		gb.updateBoard(null, true, true); // update with reset
+		gb.enableInteraction(true); // needed for CFour
 
 		while (taskState == Task.INSPECTV) {
 			if (gb.isActionReq()) {
@@ -510,13 +511,13 @@ abstract public class Arena extends JFrame implements Runnable {
 			if (spDT==null) { // regular non TS game
 				paVector = m_xfun.fetchAgents(m_xab);
 				AgentBase.validTrainedAgents(paVector, numPlayers);
-				qaVector = m_xfun.wrapAgents(paVector, m_xab.oPar, gb.getStateObs());
+				qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
 			} else { // TS game
 				if (spDT.standardAgentSelected) {
 					// GBG standard agent
 					paVector = m_xfun.fetchAgents(m_xab);
 					AgentBase.validTrainedAgents(paVector, numPlayers);
-					qaVector = m_xfun.wrapAgents(paVector, m_xab.oPar, gb.getStateObs());
+					qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
 				} else {
 					// HDD agent
 					paVector = spDT.getPlayAgents();
@@ -526,7 +527,7 @@ abstract public class Arena extends JFrame implements Runnable {
 //					//hddPar[1] = new OtherParams();
 //					//hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
 //					qaVector = m_xfun.wrapAgents(paVector, hddPar, gb.getStateObs());
-					qaVector = m_xfun.wrapAgents(paVector, gb.getStateObs());
+					qaVector = m_xfun.wrapAgents(paVector, gb.getStateObs(), m_xab);
 				}
 			}
 		} catch (RuntimeException e) {
@@ -553,8 +554,10 @@ abstract public class Arena extends JFrame implements Runnable {
 				sMsg = "Playing a game ... [ " + agentX + ", nPly=" + wrappedNPly + " ]";
 			break;
 		case (2):
-			agentX = m_xab.getSelectedAgent(0);
-			agentO = m_xab.getSelectedAgent(1);
+//			agentX = m_xab.getSelectedAgent(0);
+//			agentO = m_xab.getSelectedAgent(1);
+			agentX = qaVector[0].getName();
+			agentO = qaVector[1].getName();
 			sMsg = "Playing a game ... [" + agentX + " (X) vs. " + agentO + " (O)]";
 			break;
 		default:

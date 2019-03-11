@@ -41,7 +41,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
 	private Random rand;
 	protected int m_depth=10;
-	protected boolean m_useHashMap=true;
+	protected boolean m_useHashMap=false; //true;
 	private HashMap<String,ScoreTuple> hm;
 	
 	/**
@@ -65,7 +65,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	{
 		this(name);
 		m_depth = mPar.getMaxNDepth();
-		m_useHashMap = mPar.useMinimaxHashmap();
+		m_useHashMap = mPar.useMaxNHashmap();
 		m_oPar = new ParOther(oPar);		// AgentBase::m_oPar
 	}
 		
@@ -123,8 +123,8 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 
         assert so.isLegalState() : "Not a legal state"; 
 
-        if (this instanceof MaxNWrapper) 
-        	System.out.println("MaxN: depth="+depth+"  "+so.stringDescr());
+//        if (this instanceof MaxNWrapper) 
+//        	System.out.println("MaxN: depth="+depth+"  "+so.stringDescr());
         
         double pMaxScore = -Double.MAX_VALUE;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
@@ -256,7 +256,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 * in a game-specific way by classes derived from {@link MaxNAgent}. 
 	 * <p>
 	 * This  stub method just returns {@link StateObservation#getReward(boolean)} for every 
-	 * players, which might be too simplistic for not-yet finished games, because the current 
+	 * player, which might be too simplistic for not-yet finished games, because the current 
 	 * reward may not reflect future rewards.
 	 * @param sob	the state observation
 	 * @return		the estimated score tuple

@@ -2,7 +2,6 @@ package games.ZweiTausendAchtundVierzig.Heuristic;
 
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
-//import params.MCTSExpectimaxParams;
 import params.ParMCTSE;
 import tools.Types;
 import tools.cmaes.fitness.IObjectiveFunction;
@@ -15,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by Johannes on 27.06.2017.
+ * Created by Johannes Kutsch on 27.06.2017.
  */
 public class HeuristicSettings2048 implements IObjectiveFunction {
     private int geneLength = 15;

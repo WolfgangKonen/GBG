@@ -19,15 +19,14 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Feature;
 
 /**
  * This class realizes other parameter settings for board games. Most parameter
- * are only relevant for trainable agents ({@link TDAgent}, {@link TDNTuple2Agt}
+ * are only relevant for trainable agents ({@link TDAgent}, {@link TDNTuple3Agt}
  * ), but 'Quick Eval Mode' is relevant for all agents
  * <p>
- * 
  * These parameters and their [defaults] are:
  * <ul>
  * <li><b>Quick Eval Mode</b>: evaluation mode used during 'Quick Evaluation'
@@ -39,14 +38,14 @@ import games.Feature;
  * goal is reached
  * <li><b>stopEval</b>: [100] During training: How many successful evaluator
  * calls are needed to stop training prematurely?
- * <li><b> chooseStartState01</b>: [false] whether to start always from default
+ * <li><b> chooseStartState01</b>: [false] During training: Whether to start always from default
  * start state ({@code false}, or to start 50% from default, 50% from a random
  * 1-ply state ({@code true}
  * <li><b> learn from RM</b>: [false] whether to learn from random moves or not
  * </ul>
  * 
  * @see TDAgent
- * @see TDNTuple2Agt
+ * @see TDNTuple3Agt
  * @see games.XArenaButtons
  */
 public class OtherParams extends Frame {
@@ -77,13 +76,6 @@ public class OtherParams extends Frame {
 	public Checkbox learnRM;
 	public Checkbox rewardIsGameScore;
 
-	// --- this is now in MaxNParams: ---
-	// public JTextField miniDepth_T;
-	// public Checkbox miniUseHmTrue;
-
-	// CheckboxGroup cbgUseHashmap;
-	// public Checkbox miniUseHmFalse;
-	// Choice choiceBatch;
 	Button ok;
 	JPanel oPanel;
 	OtherParams m_par;
@@ -110,15 +102,9 @@ public class OtherParams extends Frame {
 		learnRM_L = new JLabel("Learn from RM");
 		rgs_L = new JLabel("Reward = Score");
 		wNply_L = new JLabel("Wrapper nPly");
-		// miniDepth_L = new JLabel("Minimax Depth");
-		// miniUseHm_L = new JLabel("Minimax Hash ");
-		// miniUseHmTrue = new Checkbox("use hashmap",true);
 		chooseS01 = new Checkbox("", false);
 		learnRM = new Checkbox("", false);
 		rewardIsGameScore = new Checkbox("", true);
-		// miniUseHmFalse = new Checkbox("false",cbgUseHashmap,false);
-		// batchL = new JLabel("BatchNum");
-		// cbgUseHashmap = new CheckboxGroup();
 		ok = new Button("OK");
 		m_par = this;
 		oPanel = new JPanel(); // put the inner buttons into panel oPanel. This
@@ -140,8 +126,6 @@ public class OtherParams extends Frame {
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		wNply_L.setToolTipText(
 				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
-		// miniDepth_L.setToolTipText("Minimax tree depth");
-		// miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
 
 		// this.setQuickEvalMode(0);
 		// this.setTrainEvalMode(0);
@@ -151,10 +135,6 @@ public class OtherParams extends Frame {
 				m_par.setVisible(false);
 			}
 		});
-
-		// this.choiceBatch = new Choice();
-		// for (int i=1; i<=batchMax; i++) choiceBatch.add(i+"");
-		// choiceBatch.select(batchMax+"");
 
 		setLayout(new BorderLayout(10, 0)); // rows,columns,hgap,vgap
 		oPanel.setLayout(new GridLayout(0, 4, 10, 10));
@@ -188,11 +168,6 @@ public class OtherParams extends Frame {
 		oPanel.add(wNply_T);
 		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
-
-		// oPanel.add(miniUseHm_L);
-		// oPanel.add(miniUseHmTrue);
-		// oPanel.add(new Canvas());
-		// oPanel.add(new Canvas());
 
 		add(oPanel, BorderLayout.CENTER);
 		add(ok, BorderLayout.SOUTH);
@@ -256,10 +231,6 @@ public class OtherParams extends Frame {
 		return rewardIsGameScore.getState();
 	}
 
-	// public boolean useMinimaxHashmap() {
-	// return miniUseHmTrue.getState();
-	// }
-
 	public void setQuickEvalMode(int qEvalmode) {
 		// If the mode list has not been initialized, add the selected mode to
 		// the list
@@ -316,9 +287,6 @@ public class OtherParams extends Frame {
 		if (value == Integer.MAX_VALUE) value=-1;
 		epiLeng_T.setText(value + "");
 	}
-	// public void setMinimaxDepth(int value) {
-	// miniDepth_T.setText(value+"");
-	// }
 
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded
@@ -338,8 +306,6 @@ public class OtherParams extends Frame {
 		this.chooseS01.setState(op.useChooseStart01());
 		this.learnRM.setState(op.useLearnFromRM());
 		this.rewardIsGameScore.setState(op.getRewardIsGameScore());
-		// this.setMinimaxDepth(op.getMinimaxDepth());
-		// this.miniUseHmTrue.setState(op.useMinimaxHashmap());
 	}
 
 	/**

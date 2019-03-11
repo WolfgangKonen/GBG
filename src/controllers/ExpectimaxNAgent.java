@@ -1,7 +1,7 @@
 package controllers;
 
 import controllers.PlayAgent;
-import controllers.MinimaxAgent;
+//import controllers.MinimaxAgent;
 import games.StateObservation;
 import games.StateObsNondeterministic;
 import params.MaxNParams;
@@ -20,16 +20,13 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * The Expectimax-N agent implements the Max-N algorithm [Korf91] via interface {@link PlayAgent}. 
+ * The Expectimax-N agent implements the Expectimax-N algorithm via interface {@link PlayAgent}. 
  * Expectimax-N  is the generalization {@link MaxNAgent} to nondeterministic games. It works on  
  * {@link ScoreTuple}, an N-tuple of game scores. It traverses the game tree up to a prescribed 
  * depth (default: 10, see {@link MaxNParams}).   
  * <p>
- * {@link ExpectimaxNAgent} is for <b>nondeterministic</b> games. For deterministic games see 
+ * {@link ExpectimaxNAgent} is for <b>non-deterministic</b> games. For deterministic games see 
  * {@link MaxNAgent}.
- * <p>
- * See [Korf91] 
- * R. E. Korf: <em>Multi-Player Alpha-Beta Pruning</em>, Artificial Intelligence 48, 1991, 99-111.
  * 
  * @author Wolfgang Konen, TH Köln, Dec'17
  * 

@@ -29,7 +29,7 @@ import games.Feature;
  * {@link MaxNAgent}, {@link ExpectimaxNAgent}.
  * These parameters and their [defaults] are: <ul>
  * <li> <b>tree depth</b>: 	[10] initial strength of learning parameter 
- * <li> <b>useHashMap</b>: 	[true] (only Minimax) whether to store calculated values in a hash map or not 
+ * <li> <b>useHashMap</b>: 	[true] (only MaxN and Minimax) whether to store calculated values in a hash map or not 
  * </ul> 
  * The defaults are defined in {@link ParMaxN}. 
  * 
@@ -41,9 +41,9 @@ public class MaxNParams extends Frame
 	private static final long serialVersionUID = 1L;
 
 	JLabel maxnDepth_L;
-	JLabel miniUseHm_L;
+	JLabel maxnUseHm_L;
 	public JTextField maxnDepth_T;
-	public JCheckBox miniUseHmTrue;
+	public JCheckBox maxnUseHmTrue;
 
 	JPanel mPanel;
 //	Button ok;
@@ -54,8 +54,8 @@ public class MaxNParams extends Frame
 		
 		maxnDepth_L = new JLabel("Tree Depth");
 		maxnDepth_T = new JTextField(ParMaxN.DEFAULT_MAXN_TREE_DEPTH+"");				// 
-		miniUseHm_L = new JLabel("Minimax Hash ");
-		miniUseHmTrue = new JCheckBox("use hashmap",true);
+		maxnUseHm_L = new JLabel("MaxN Hashmap ");
+		maxnUseHmTrue = new JCheckBox("use hashmap",true);
 //		ok = new Button("OK");
 //		m_par = this;
 		mPanel = new JPanel();		// put the inner buttons into panel mPanel. This panel
@@ -63,7 +63,7 @@ public class MaxNParams extends Frame
 									// (see class XArenaTabs)
 		
 		maxnDepth_L.setToolTipText("Tree depth (for MaxN, Minimax or ExpectimaxN)");
-		miniUseHm_L.setToolTipText("Minimax: use hashmap to save values of visited states");
+		maxnUseHm_L.setToolTipText("MaxN: use hashmap to save values of visited states");
 		
 //		ok.addActionListener(
 //				new ActionListener()
@@ -83,8 +83,8 @@ public class MaxNParams extends Frame
 		mPanel.add(new Canvas());
 		mPanel.add(new Canvas());
 
-		mPanel.add(miniUseHm_L);
-		mPanel.add(miniUseHmTrue);
+		mPanel.add(maxnUseHm_L);
+		mPanel.add(maxnUseHmTrue);
 		mPanel.add(new Canvas());
 		mPanel.add(new Canvas());
 
@@ -123,8 +123,8 @@ public class MaxNParams extends Frame
 		return Integer.valueOf(maxnDepth_T.getText()).intValue();
 	}
 
-	public boolean useMinimaxHashmap() {
-		return miniUseHmTrue.isSelected();
+	public boolean useMaxNHashmap() {
+		return maxnUseHmTrue.isSelected();
 	}
 	
 	/**
@@ -133,7 +133,7 @@ public class MaxNParams extends Frame
 	 */
 	public void setFrom(ParMaxN mp) {
 		this.setMaxnDepth(mp.getMaxNDepth());
-		this.miniUseHmTrue.setSelected(mp.useMinimaxHashmap());
+		this.maxnUseHmTrue.setSelected(mp.useMaxNHashmap());
 	}
 	
 	/**

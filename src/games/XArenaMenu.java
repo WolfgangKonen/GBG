@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -33,6 +34,7 @@ import controllers.TD.ntuple2.TDNTuple3Agt;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
+import tools.Types.ACTIONS;
 
 /**
  * Main menu for {@link Arena} and {@link ArenaTrain}.
@@ -760,11 +762,11 @@ public class XArenaMenu extends JMenuBar {
 
 		try {
 			// ensure with fetchAgents that for agents like MCTS a new agent with the 
-			// latest settings in the MCTS pars tab is constructed:
+			// latest settings in the MCTS parameter tab is constructed:
 			m_arena.m_xfun.m_PlayAgents = m_arena.m_xfun.fetchAgents(m_arena.m_xab);
 			AgentBase.validTrainedAgents(m_arena.m_xfun.m_PlayAgents,numPlayers);
 			paVector = m_arena.m_xfun.wrapAgents(m_arena.m_xfun.m_PlayAgents, 
-					m_arena.m_xab.oPar, m_arena.gb.getStateObs());
+					m_arena.m_xab, m_arena.gb.getStateObs());
 		} catch (RuntimeException e) {
 			MessageBox.show(m_arena, e.getMessage(), 
 					"Error", JOptionPane.ERROR_MESSAGE);
@@ -781,6 +783,25 @@ public class XArenaMenu extends JMenuBar {
 			// problem: this text only appears in the status bar when the action handler is left
 			// ... and then it is usually obsolete, since it is already overwritten by 
 			// ... printStatus(qEvaluator.getShortMsg()) (see below)
+			
+			// measure the number of moves per second for agent pa by calling pa.getNextAction2()
+			// as often as possible within one second.
+	        int n=1;
+	        long startTime = System.currentTimeMillis();
+	        long elapsedTime = 0;
+	        long upperTime = n*1000;
+	        long moveCount = 0;
+	        StateObservation newSO, so = m_arena.gb.getDefaultStartState();
+	        ArrayList actList = so.getAvailableActions();
+	        while (elapsedTime<upperTime) {
+	        	pa.getNextAction2(so, false, true);
+	        	newSO = so.copy();							// just for comparable time measurement: 
+	        	newSO.advance((ACTIONS) actList.get(0)); 	// do a dummy advance
+	        	moveCount++;
+	        	elapsedTime = System.currentTimeMillis() - startTime;
+	        }
+	        System.out.println("Moves/second for "+ pa.getName() + ": "+(double)(moveCount)/n);
+
 			try {
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
 				int verb = 0;

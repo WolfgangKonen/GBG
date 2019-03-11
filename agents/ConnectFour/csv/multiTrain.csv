@@ -1,5 +1,0 @@
-controllers.TD.ntuple2.TDNTuple3Agt: USESYMMETRY:true, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false
-controllers.TD.ntuple2.TDNTuple3Agt: alpha_init->final:5.0->5.0, epsilon_init->final:0.3->0.0, gamma: 1.0, fixed n-tuple, mode=1
-run, gameNum, evalQ, evalT, actionNum, trnMoves
-0, 500, -1.0, -1.0, 6442, 7898
-0, 1000, -1.0, -1.0, 15079, 17059

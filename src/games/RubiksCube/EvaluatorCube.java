@@ -14,7 +14,7 @@ import controllers.RandomAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.ArenaTrain;
 import games.Evaluator;
-import games.TicTacToe.Evaluator9;
+//import games.TicTacToe.Evaluator9;
 import games.GameBoard;
 import games.PStats;
 import games.TStats;

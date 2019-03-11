@@ -54,7 +54,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	{
 		this(name);
 		m_depth = mpar.getMaxNDepth();
-		m_useHashMap = mpar.useMinimaxHashmap();
+		m_useHashMap = mpar.useMaxNHashmap();
 		m_oPar = opar;	// AgentBase::m_oPar
 	}
 	

@@ -13,8 +13,6 @@ count_states.csv
 src/out/production/GBG/*
 out/*
 
-src/games/Logs/*
-src/logs/*
 *.gamelog
 games/Logs/*
 logs/*
@@ -41,17 +39,14 @@ agents/Hex/04/old
 agents/Hex/05/old
 agents/Hex/05/sarsaNT-eps02.agt.zip
 agents/Hex/06/old
-# too many for a regular save to GitHub
-agents/ConnectFour/firstTD*.agt.zip
-agents/ConnectFour/experiment
-agents/ConnectFour/old
+# too many/too big for a regular save to GitHub
 agents/ConnectFour/old2D
 agents/ConnectFour/TDNT*.agt.zip
 agents/ConnectFour/TCL-EXP-al*.agt.zip
-agents/ConnectFour/TCL-EXP-NT3-al50-lam025-500k-HOR001.agt.zip
-agents/ConnectFour/TCL-EXP-NT3-al50-lam025-500k-HOR001-T.agt.zip
-agents/ConnectFour/TCL-EXP-NT3-al50-lam025-500k-HOR001-T-epsfin0-V2.agt.zip
-# (the only ConnectFour agent we have in repos is TCL-EXP-NT3-al50-lam025-500k-HOR001-T-epsfin0.agt.zip)
+agents/ConnectFour/TCL-EXP-NT3-al50-lam000*.agt.zip
+agents/ConnectFour/TCL-EXP-NT3-al50-lam009*.agt.zip
+agents/ConnectFour/TCL-EXP-NT3-al50-lam025*.agt.zip
+# (the only ConnectFour agent we have in repos is TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0.agt.zip)
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)
 

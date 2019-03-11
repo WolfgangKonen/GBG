@@ -80,7 +80,7 @@ abstract public class AgentBase implements Serializable {
 	 * 
 	 * <b>Important note</b>: Derived classes that use
 	 * {@link #estimateGameValue} inside {@link #getScore(StateObservation)}
-	 * (e.g. Minimax, MC or MCTS when reaching the predefined rollout depth)
+	 * (e.g. Max-N, MC or MCTS when reaching the predefined rollout depth)
 	 * have to <b>override</b> this function with a function <b>not</b> using
 	 * {@link #getScore(StateObservation)}, otherwise an infinite loop would
 	 * result.

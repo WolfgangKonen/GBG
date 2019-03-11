@@ -10,7 +10,7 @@ import controllers.MinimaxAgent;
  * Parameters for {@link MinimaxAgent}, {@link MaxNAgent}, {@link ExpectimaxNAgent}
  * <ul>
  * <li> <b> Tree Depth</b>: [10] depth of search tree
- * <li> <b> Max-N Hashmap</b>: [true] (only Minimax) whether to hash already visited states or not
+ * <li> <b> Max-N Hashmap</b>: [true] (only MaxN and Minimax) whether to hash already visited states or not
  * </ul>
  *
  * @see MaxNParams
@@ -33,7 +33,7 @@ public class ParMaxN implements Serializable {
     
 	public ParMaxN(ParMaxN op) {
 		this.maxNTreeDepth = op.getMaxNDepth();
-		this.maxNHashmap = op.useMinimaxHashmap();	
+		this.maxNHashmap = op.useMaxNHashmap();	
 	}
 	
     public ParMaxN(MaxNParams op) { 
@@ -42,7 +42,7 @@ public class ParMaxN implements Serializable {
     
 	public void setFrom(MaxNParams op) {
 		this.maxNTreeDepth = op.getMaxnDepth();
-		this.maxNHashmap = op.useMinimaxHashmap();	
+		this.maxNHashmap = op.useMaxNHashmap();	
 	}
 	
 	public void setMaxNDepth(int treeDepth) {
@@ -53,7 +53,7 @@ public class ParMaxN implements Serializable {
 		return maxNTreeDepth;
 	}
 
-	public boolean useMinimaxHashmap() {
+	public boolean useMaxNHashmap() {
 		return maxNHashmap;
 	}
 

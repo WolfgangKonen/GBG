@@ -342,8 +342,19 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		case 2:
 			int player = so.getPlayer();
 			int opponent = (player==0) ? 1 : 0;
-			sc.scTup[player] = m_Net.getScoreI(bvec,player);
-			sc.scTup[opponent] = -sc.scTup[player];
+//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
+//			sc.scTup[opponent] = -sc.scTup[player];
+			// 
+			// This is an important bug fix (2019-03-10) for TDNTuple3Agt: 
+			// If we want to get the score tuple for state 'so' where 
+			// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player), 
+			// because the net did never learn this, it was trained on getScore(so,refer), where
+			// refer is the player who *created* 'so' (the opponent). We construct the score 
+			// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has 
+			// for opponent, and infer from this the player's value by negation:
+			// 
+			sc.scTup[opponent] = m_Net.getScoreI(bvec,opponent);  
+			sc.scTup[player] = 	-sc.scTup[opponent];
 			break;
 		default: 	
 			throw new RuntimeException("getScoreTuple(StateObservation so) not available for TDNTuple3Agt and numPlayer>2");			        		

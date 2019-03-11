@@ -8,12 +8,12 @@ import java.io.PrintWriter;
 import javax.swing.JOptionPane;
 
 import agentIO.AgentLoader;
-import controllers.MinimaxAgent;
+import controllers.MaxNAgent;
+//import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import games.ArenaTrain;
 import games.Evaluator;
-import games.TicTacToe.Evaluator9;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
@@ -21,41 +21,42 @@ import tools.MessageBox;
 import tools.Types;
 
 /**
- * Same as {@link Evaluator9}, but instead of {@link Evaluator9#evalAgent1(PlayAgent, boolean)} use
+ * Evaluator for TicTacToe:
  * <ul>
- * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition with MinimaxPlayer and RandomPlayer) or 
- * <li> if mode=2: {@link EvaluatorTTT#evaluateAgent2(PlayAgent,PlayAgent,GameBoard)} (competition with MinimaxPlayer from different start positions). 
+ * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition with MaxNAgent and RandomPlayer) or 
+ * <li> if mode=2: {@link EvaluatorTTT#evaluateAgent2(PlayAgent,PlayAgent,GameBoard)} (competition with MaxNAgent from different start positions). 
  * </ul>  
  * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
  */
 public class EvaluatorTTT extends Evaluator {
- 	private static final int[] AVAILABLE_MODES = {-1,0,1,2,9,11};
+ 	private static final int[] AVAILABLE_MODES = {-1,0,1,2,11};		//9,
 	private RandomAgent random_agent = new RandomAgent("Random");
-	private MinimaxAgent minimax_agent = new MinimaxAgent("Minimax");
+//	private MinimaxAgent maxNAgent = new MinimaxAgent("Minimax");
+	private MaxNAgent maxNAgent = new MaxNAgent("Max-N");
 	private AgentLoader agtLoader = null;
-	private Evaluator9 m_evaluator9 = null; 
+//	private Evaluator9 m_evaluator9 = null; 
 	private int m_mode;
 	private double m_res=-1;		// avg. success against RandomPlayer, best is 0.9 (m_mode=0)
-									// or against MinimaxPlayer, best is 0.0 (m_mode=1,2)
+									// or against MaxNAgent, best is 0.0 (m_mode=1,2)
 	private String m_msg;
 	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
 	private GameBoard m_gb;
 	
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, stopEval);
-		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
+//		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
 		initEvaluator(gb,1);
 	}
 
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
 		super(e_PlayAgent, stopEval);
-		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
+//		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
 		initEvaluator(gb,mode);
 	}
 
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, stopEval, verbose);
-		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
+//		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
 		initEvaluator(gb,mode);
 	}
 	
@@ -66,17 +67,7 @@ public class EvaluatorTTT extends Evaluator {
 		m_gb = gb;				
 	}
 	
-//	/**	
-//	 * Known callers of eval (outside this class): 
-//	 * 		{@link ArenaTrain#run()}, case TRAIN_X, TRAIN_O, 
-//	 * 		{@link XArenaFuncs#train(String, XArenaButtons, GameBoard)},
-//	 */
-//	public boolean eval() {
-//		return setState(eval_Agent());
-//	}
-	
 	/**
-	 * 
 	 * @return true if evaluateAgentX is above m_thresh.<br>
 	 * The choice for X=1 or 2 is made with 3rd parameter mode in 
 	 * {@link #EvaluatorTTT(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
@@ -90,11 +81,11 @@ public class EvaluatorTTT extends Evaluator {
 		switch(m_mode) {
 		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
 		case 1:  return evaluateAgent1(m_PlayAgent,m_gb)>m_thresh[1];
-		case 2:  return evaluateAgent2(m_PlayAgent,minimax_agent,m_gb)>m_thresh[2];
+		case 2:  return evaluateAgent2(m_PlayAgent,maxNAgent,m_gb)>m_thresh[2];
 		case 11: 
 			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
 			return evaluateAgent2(m_PlayAgent,agtLoader.getAgent(),m_gb)>m_thresh[2];
-		case 9:  return m_evaluator9.eval_Agent(playAgent);
+//		case 9:  return m_evaluator9.eval_Agent(playAgent);
 		default: return false;
 		}
 	}
@@ -121,7 +112,7 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		m_res = XArenaFuncs.competeBoth(pa, minimax_agent, so, 1, 0, gb);
+		m_res = XArenaFuncs.competeBoth(pa, maxNAgent, so, 1, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + m_res;
 		if (this.verbose>0) System.out.println(m_msg);
 		return m_res;
@@ -156,7 +147,7 @@ public class EvaluatorTTT extends Evaluator {
 		} 
 
 		for (int k=0; k<state.length; ++k) {
-			startPlayer = Evaluator9.string2table(state[k],startTable);
+			startPlayer = EvaluatorTTT.string2table(state[k],startTable);
 			StateObserverTTT startSO = new StateObserverTTT(startTable,startPlayer);
 			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose);
 			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
@@ -177,7 +168,7 @@ public class EvaluatorTTT extends Evaluator {
 	}
  	
  	/**
- 	 * @return mean success rate against {@link MinimaxAgent}, best is 0.0. Either when starting from
+ 	 * @return mean success rate against {@link MaxNAgent}, best is 0.0. Either when starting from
  	 * empty board ({@code mode==1}) or from different start positions ({@code mode==2}), 
  	 * depending on {@code mode} as set in constructor.
  	 */
@@ -185,11 +176,14 @@ public class EvaluatorTTT extends Evaluator {
  	
  	@Override
  	public double getLastResult() { 
- 		return (m_mode==9) ? m_evaluator9.getLastResult() : m_res; 
+ 		return m_res;
+// 		return (m_mode==9) ? m_evaluator9.getLastResult() : m_res; 
  	}
  	@Override
  	public String getMsg() { 
- 		return (m_mode==9) ? m_evaluator9.getMsg() : m_msg; } 
+ 		return m_msg;
+// 		return (m_mode==9) ? m_evaluator9.getMsg() : m_msg; 
+ 	} 
  	
 	@Override
  	public boolean isAvailableMode(int mode) {
@@ -226,9 +220,9 @@ public class EvaluatorTTT extends Evaluator {
 	public String getPrintString() {
 		switch (m_mode) {
 		case 0:  return "success rate (randomAgent, best is 0.9): ";
-		case 1:  return "success rate (minimax, best is 0.0): ";
-		case 2:  return "success rate (minimax, different starts, best is 0.0): ";
-		case 9:  return "success rate (Evaluator9, best is ?): ";	
+		case 1:  return "success rate (Max-N, best is 0.0): ";
+		case 2:  return "success rate (Max-N, different starts, best is 0.0): ";
+//		case 9:  return "success rate (Evaluator9, best is ?): ";	
 		case 11: return "success rate (TDReferee, different starts, best is 0.0): ";
 		default: return null;
 		}
@@ -239,9 +233,9 @@ public class EvaluatorTTT extends Evaluator {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
 				+ "0: against Random, best is 0.9<br>"
-				+ "1: against Minimax, best is 0.0<br>"
-				+ "2: against Minimax, different starts, best is 0.0<br>"
-				+ "9: evaluate set of states, best is ?<br>"
+				+ "1: against Max-N, best is 0.0<br>"
+				+ "2: against Max-N, different starts, best is 0.0<br>"
+//				+ "9: evaluate set of states, best is ?<br>"
 				+ "11: against TDReferee.agt.zip, different starts"
 				+ "</html>";
 	}
@@ -250,12 +244,43 @@ public class EvaluatorTTT extends Evaluator {
 	public String getPlotTitle() {
 		switch (m_mode) {
 		case 0:  return "success against Random";
-		case 1:  return "success against Minimax";
-		case 2:  return "success against Minimax, dStart";
-		case 9:  return "success Evaluator9";		
+		case 1:  return "success against Max-N";
+		case 2:  return "success against Max-N, dStart";
+//		case 9:  return "success Evaluator9";		
 		case 11: return "success TDReferee";		
 		default: return null;
 		}
 	}
+	
+	/** Transform a string like "Xo-X---o-" into its board position and the player 
+	 *  who makes the next move 
+	 * 
+	 * @param state_k	a string like "Xo-X---o-" coding a board position
+	 * @param table		on input an allocated memory area, on output it contains the board position
+	 * @return			+1 or -1 if either X or O makes the next move
+	 */
+	public static int string2table(String state_k, int table[][]) {
+		int Xcount=0, Ocount=0;
+		for (int i=0;i<3;++i)
+			for (int j=0;j<3;++j) {
+				if (state_k.charAt(3*i+j)=='X') {
+					table[i][j]=+1;
+					Xcount++;
+				}
+				else if (state_k.charAt(3*i+j)=='o') {
+					table[i][j]=-1;
+					Ocount++;
+				}
+				else {
+					table[i][j]=0;					
+				}
+			}
+		int player = (Ocount-Xcount)*2+1;	// the player who makes the next move
+		if (player!=-1 && player!=1)
+			throw new RuntimeException("invalid state!!");
+		return player;
+	}
+	
+
 
 }

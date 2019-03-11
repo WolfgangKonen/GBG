@@ -1,4 +1,6 @@
 #
+# **** These are old results with TDNTuple2Agt from June/July 2018 ****
+# 
 # This script shows results for ConnectFour in the TCL-case with various TD-settings:
 #   H0.01:  horizon cut at 0.01 in the eligibility traces
 #   HOR40:  horizon 40 (plies)

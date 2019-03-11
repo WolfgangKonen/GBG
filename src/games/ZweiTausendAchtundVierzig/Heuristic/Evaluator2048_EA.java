@@ -6,7 +6,7 @@ import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import tools.cmaes.CMAEvolutionStrategy;
 
 /**
- * Created by Johannes on 29.06.2017.
+ * Created by Johannes Kutsch on 29.06.2017.
  */
 public class Evaluator2048_EA extends Evaluator {
     private HeuristicSettings2048 fitfun = new HeuristicSettings2048();

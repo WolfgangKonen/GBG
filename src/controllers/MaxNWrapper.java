@@ -3,6 +3,9 @@ package controllers;
 import java.io.Serializable;
 
 import games.StateObservation;
+import params.ParMaxN;
+import params.ParOther;
+import tools.Types;
 import tools.Types.ScoreTuple;
 
 /**
@@ -20,6 +23,13 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 		this.wrapped_pa = pa;
 	}
 	
+	// XArenaFuncs::wrapAgent is now based on this agent to get MaxN tree depth
+	// and useHashMap-flag from ParMaxN mPar
+	public MaxNWrapper(PlayAgent pa, ParMaxN mPar, ParOther oPar) {
+		super("MaxNWrapper", mPar, oPar);
+		this.wrapped_pa = pa;
+	}
+	
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score (tuple for all players).  
@@ -31,16 +41,11 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
+		//--- only debug ---
+//		double x = wrapped_pa.getScoreTuple(sob).scTup[0];
+//		System.out.println(sob.stringDescr()+":  "+x);
+		
 		return wrapped_pa.getScoreTuple(sob);
-		//
-		// the following would be too specific to TDNTuple2Agt, we delegate it to *its* 
-		// getScoreTuple:
-//		boolean rgs = m_oPar.getRewardIsGameScore();
-//		ScoreTuple sc = new ScoreTuple(sob);
-//		sc = wrapped_pa.getScoreTuple(sob);
-//		for (int i=0; i<sob.getNumPlayers(); i++) 
-//			sc.scTup[i] += sob.getReward(i, rgs);
-//		return sc;
 	}
 	
 	public PlayAgent getWrappedPlayAgent() {
@@ -56,7 +61,7 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 
 	@Override
 	public String getName() {
-		String cs = wrapped_pa.getClass().getSimpleName();
+		String cs = wrapped_pa.getName();
 		cs = cs + "[nPly="+m_depth+"]";
 		return cs;
 	}

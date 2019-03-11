@@ -32,14 +32,16 @@ public class Evaluator2048 extends Evaluator {
     private double averageRolloutDepth;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
+    private int m_mode = 0;
     private long startTime;
     private long stopTime;
     private int verbose;
     private Arena ar;		// needed in eval_agent, if PStats.printPlayStats(psList, m_PlayAgent,ar) is called
 
 
-    public Evaluator2048(PlayAgent e_PlayAgent, int stopEval, int verbose, Arena ar) {
+    public Evaluator2048(PlayAgent e_PlayAgent, int stopEval, int mode, int verbose, Arena ar) {
         super(e_PlayAgent, stopEval, verbose);
+        this.m_mode = mode;
         this.verbose = verbose;
         this.ar = ar;
     }
@@ -47,6 +49,10 @@ public class Evaluator2048 extends Evaluator {
     @Override
     protected boolean eval_Agent(PlayAgent pa) {
     	m_PlayAgent = pa;
+        //Disable evaluation by using mode -1
+        if (m_mode == -1) {
+            return true;
+        }
 		int nEmpty = 0,cumEmpty=0;
 		int moveNum=0;
 		double gameScore=0.0;
@@ -61,7 +67,7 @@ public class Evaluator2048 extends Evaluator {
         List<StateObserver2048> stateObservers = new ArrayList<>();
 
 
-        if(	m_PlayAgent.getName().equals("MCTS Expectimax")  ) {
+        if(	m_PlayAgent.getName().equals("MCTS Expectimax") ) {
             //async for MCTS Expectimax agents 
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
             MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
@@ -111,7 +117,7 @@ public class Evaluator2048 extends Evaluator {
                 e.printStackTrace();
             }
 
-        } else if (	m_PlayAgent.getName().equals("ExpectimaxWrapper") ) {
+        } else if (	m_PlayAgent.getName().equals("ExpectimaxWrapper2") ) {
             //async for wrapper agents (ExpectiMaxN or MaxN tree nply)
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
 
@@ -185,7 +191,7 @@ public class Evaluator2048 extends Evaluator {
                 if(verbose == 0) {
                     System.out.print("Finished game " + (i + 1) + " with score " + so.score + 
                     		" after " + (System.currentTimeMillis() - gameStartTime) + "ms."+ 
-                    		"Highest tile is " + so.getHighestTileValue() + ".\n");
+                    		" Highest tile is " + so.getHighestTileValue() + ".\n");
                 }
 
                 stateObservers.add(so);

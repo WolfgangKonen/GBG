@@ -22,10 +22,6 @@ public class ParOther implements Serializable {
     private boolean learnFromRM = false;
     private boolean rewardIsGameScore = true;
     
-    // --- this is now in ParMaxN: ---
-//    private int minimaxDepth = DEFAULT_MINIMAX_DEPTH;
-//    private boolean minimaxHashmap = true;
-
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 

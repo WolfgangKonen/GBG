@@ -11,7 +11,7 @@ import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
-import games.TicTacToe.Evaluator9;
+//import games.TicTacToe.Evaluator9;
 import games.TicTacToe.EvaluatorTTT;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;

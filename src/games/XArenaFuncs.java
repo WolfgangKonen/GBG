@@ -253,7 +253,7 @@ public class XArenaFuncs
 							pa=null;			
 						}
 					}					
-				} else {
+				} else {   // i.e. if m_PlayAgents[n]!=null
 					PlayAgent inner_pa = m_PlayAgents[n];
 					if (m_PlayAgents[n].getName()=="ExpectimaxWrapper") 
 						inner_pa = ((ExpectimaxWrapper) inner_pa).getWrappedPlayAgent();
@@ -278,11 +278,14 @@ public class XArenaFuncs
 	 * The tree is of type Max-N for deterministic games and of type
 	 * Expectimax-N for nondeterministic games. No wrapping occurs for agent {@link HumanPlayer}.
 	 * <p>
-	 * Caution: Larger values for {@code nply}, e.g. greater 5, may lead to long execution times!
+	 * Caution: Larger values for {@code nply}, e.g. greater 5, may lead to long execution times 
+	 * and large memory requirements!
 	 * 
 	 * @param paVector	the (unwrapped) agents for each player 
-	 * @param oPar		the vector of {@link OtherParams}, needed to access 
-	 * 					{@code nply = oPar[n].getWrapperNPly()} for  each agent separately
+	 * @param m_xab		for access to m_xab.oPar, the vector of {@link OtherParams}, 
+	 * 					containing {@code nply = oPar[n].getWrapperNPly()} for 
+	 * 					each agent separately. And for access to m_xab.maxnParams, the vector of
+	 * 					{@link MaxNParams} containing {@code boolean maxNHashMap}.
 	 * @param so		needed only to detect whether game is deterministic or not.
 	 * @return a vector of agents ({@code paVector} itself if {@code nply==0}; wrapped agents 
 	 * 					if {@code nply>0})
@@ -290,36 +293,47 @@ public class XArenaFuncs
 	 * @see MaxNWrapper
 	 * @see ExpectimaxWrapper
 	 */
-	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, OtherParams[] oPar, StateObservation so) 
+	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so) 
+//	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, OtherParams[] oPar, StateObservation so) 
 	{
+		// avt1, avt2, avt3 are only for (temporary) debug info
+//		Types.ACTIONS_VT avt1 = paVector[0].getNextAction2(so,false,true);
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n=0; n<numPlayers; n++) {
-			qaVector[n] = wrapAgent(n, paVector[n], new ParOther(oPar[n]), so);
+			qaVector[n] = wrapAgent(n, paVector[n], new ParOther(m_xab.oPar[n])
+												  , new ParMaxN(m_xab.maxnParams[n]), so);
 		} // for (n)
+//		Types.ACTIONS_VT avt2 = qaVector[0].getNextAction2(so,false,true);
+//		PlayAgent qa = ((MaxNWrapper)qaVector[0]).getWrappedPlayAgent();
+//		Types.ACTIONS_VT avt3 = qa.getNextAction2(so,false,true);
 		return qaVector;
 	}
 
 	// a similar function, just needed by TS
-	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, StateObservation so) 
+	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, StateObservation so, XArenaButtons m_xab) 
 	{
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n=0; n<numPlayers; n++) {
-			qaVector[n] = wrapAgent(n, paVector[n], paVector[n].getParOther(), so);
+			qaVector[n] = wrapAgent(n, paVector[n], paVector[n].getParOther()
+												  , new ParMaxN(m_xab.maxnParams[n]), so);
 		} // for (n)
 		return qaVector;
 	}
 
-	protected PlayAgent wrapAgent(int n, PlayAgent pa, ParOther oPar, StateObservation so) 
+	protected PlayAgent wrapAgent(int n, PlayAgent pa, ParOther oPar, ParMaxN mPar, StateObservation so) 
 	{
 		PlayAgent qa;
-		qa=pa;
 		int nply = oPar.getWrapperNPly();
+		mPar.setMaxNDepth(nply);
 		if (nply>0 && !(pa instanceof HumanPlayer)) {
 			if (so.isDeterministicGame()) {
-				qa = new MaxNWrapper(pa,nply);
+				qa = new MaxNWrapper(pa,mPar,oPar);		// mPar has useMaxNHashMap
+//				qa = new MaxNWrapper(pa,nply);			// always maxNHashMap==false
 			} else {
 				qa = new ExpectimaxWrapper(pa,nply);
 			}
+		} else {
+			qa=pa;			
 		}
 		return qa;
 	}
@@ -433,7 +447,7 @@ public class XArenaFuncs
 				xab.GameNumT.setText(Integer.toString(gameNum ) );
 				
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), gb.getStateObs());
+				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 
 		        m_evaluatorQ.eval(qa);
 				if (doTrainEvaluation)
@@ -458,7 +472,7 @@ public class XArenaFuncs
 			
 			if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), gb.getStateObs());
+				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 		        
 				if (doTrainEvaluation) {
 					m_evaluatorT.eval(qa);
@@ -583,6 +597,7 @@ public class XArenaFuncs
 //		Measure oM = new Measure();			// multiTrain eval measure
 		MTrain mTrain;
 		double evalQ=0.0, evalT=0.0, evalM=0.0;
+		double elapsedTime=0.0, numEvalTime;
 		ArrayList<MTrain> mtList = new ArrayList<MTrain>();
 		int maxGameNumV=10000;
 		
@@ -638,6 +653,7 @@ public class XArenaFuncs
 			
 			{
 				long startTime = System.currentTimeMillis();
+				long startTime0 = startTime;
 				gb.initialize();
 				while (pa.getGameNum()<pa.getMaxGameNum())
 				{		
@@ -647,12 +663,13 @@ public class XArenaFuncs
 					
 					gameNum = pa.getGameNum();
 					if (gameNum%numEval==0 ) { //|| gameNum==1) {
-						double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
-						System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
+						numEvalTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+						// numEvalTime: the time in sec for the last numEval training games
+						System.out.println(pa.printTrainStatus()+", "+numEvalTime+" sec");
 						xab.GameNumT.setText(Integer.toString(gameNum ) );
 						
 						// construct 'qa' anew (possibly wrapped agent for eval)
-						qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), gb.getStateObs());
+						qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 				        
 						m_evaluatorQ.eval(qa);
 						evalQ = m_evaluatorQ.getLastResult();
@@ -668,8 +685,10 @@ public class XArenaFuncs
                         // gather information for later printout to agents/gameName/csv/multiTrain.csv.
 						actionNum = pa.getNumLrnActions();	
 						trnMoveNum = pa.getNumTrnMoves();
+						elapsedTime += numEvalTime;   	// the time needed since start of training 
+													 	//(only self-play, excluding evaluations)
 						mTrain = new MTrain(i,gameNum,evalQ,evalT,/*evalM,*/
-											actionNum,trnMoveNum);
+											actionNum,trnMoveNum,elapsedTime,actionNum/elapsedTime);
 						mtList.add(mTrain);
 
 						// enable premature exit if MULTITRAIN button is pressed again:
@@ -687,7 +706,7 @@ public class XArenaFuncs
 			} // if(sAgent)..else
 			
 			// construct 'qa' anew (possibly wrapped agent for eval)
-			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), gb.getStateObs());
+			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 
 	        // evaluate again at the end of a training run:
 			m_evaluatorQ.eval(qa);
@@ -1015,7 +1034,7 @@ public class XArenaFuncs
 
 				AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
 				
-				PlayAgent[] qaVector = wrapAgents(paVector,xab.oPar,startSO);
+				PlayAgent[] qaVector = wrapAgents(paVector,xab,startSO);
 
 				int verbose=1;
 
@@ -1115,7 +1134,7 @@ public class XArenaFuncs
 //					hddPar[1] = new OtherParams();
 //					hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
 //					qaVector = wrapAgents(paVector,hddPar,startSO);
-					qaVector = wrapAgents(paVector,startSO);
+					qaVector = wrapAgents(paVector,startSO, xab);
 				} else {
 					paVector = fetchAgents(xab);
 					if (dataTS.nextTeam[0].isHddAgent()) {
@@ -1125,7 +1144,7 @@ public class XArenaFuncs
 						paVector[1] = dataTS.nextTeam[1].getPlayAgent();
 					}
 					AgentBase.validTrainedAgents(paVector, numPlayers); // may throw RuntimeException
-					qaVector = wrapAgents(paVector, xab.oPar, startSO);
+					qaVector = wrapAgents(paVector, xab, startSO);
 				}
 
 				//c = competeTS(qaVector[0], qaVector[1], startSO, competeNum, dataTS.nextTimes, dataTS.rndmStartMoves);
@@ -1243,7 +1262,7 @@ public class XArenaFuncs
 			} 
 
 			// construct 'qa' anew (possibly wrapped agent for eval)
-			qa = wrapAgent(0, paX, new ParOther(xab.oPar[0]), gb.getStateObs());
+			qa = wrapAgent(0, paX, new ParOther(xab.oPar[0]), new ParMaxN(xab.maxnParams[0]), gb.getStateObs());
 			m_evaluatorX.eval(qa);
 			evalC[c][0] = m_evaluatorX.getLastResult();
 			optimCountX += evalC[c][0];
@@ -1262,7 +1281,7 @@ public class XArenaFuncs
 			} 
 
 			// construct 'qa' anew (possibly wrapped agent for eval)
-			qa = wrapAgent(1, paO, new ParOther(xab.oPar[1]), gb.getStateObs());
+			qa = wrapAgent(1, paO, new ParOther(xab.oPar[1]), new ParMaxN(xab.maxnParams[1]), gb.getStateObs());
 			m_evaluatorO.eval(qa);
 			evalC[c][1] = m_evaluatorO.getLastResult();
 			optimCountO += evalC[c][1];

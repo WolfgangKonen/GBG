@@ -13,8 +13,8 @@ import games.RubiksCube.CubeConfig;
  * inspected. 
  * <p>
  * {@link GameBoard} has an internal object derived from {@link StateObservation} which represents the 
- * current game state. It can be retrieved with {@link #getStateObs()}, it can be reset and 
- * retrieved with {@link #getDefaultStartState()}, or a random start state can be retrieved 
+ * current game state. This game state can be retrieved (getStateObs()), 
+ * reset-retrieved (getDefaultStartState()) , or a random start state can be retrieved 
  * with {@link #chooseStartState(PlayAgent)}.  
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16

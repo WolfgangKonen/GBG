@@ -58,4 +58,11 @@ public class ExpectimaxWrapper extends ExpectimaxNAgent implements Serializable 
 		return cs;
 	}
 
+	@Override
+	public String getName() {
+		String cs = wrapped_pa.getClass().getSimpleName();
+		cs = cs + "[nPly="+m_depth+"]";
+		return cs;
+	}
+
 }

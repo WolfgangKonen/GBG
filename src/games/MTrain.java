@@ -29,6 +29,8 @@ class MTrain {
 	public double evalT;		// train eval score
 	public long actionNum;		// number of learning actions (excluding random moves)
 	public long trnMoveNum;		// number of train moves (including random moves)
+	public double elapsedTime=0.0;
+	public double movesSecond=0.0;
 	
 	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/ 
 			long actionNum, long trnMoveNum) {
@@ -40,11 +42,23 @@ class MTrain {
 		this.trnMoveNum=trnMoveNum;
 	}
 	
+	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/ 
+			long actionNum, long trnMoveNum, double elapsedTime, double movesSecond) {
+		this.i=i;
+		this.gameNum=gameNum;
+		this.evalQ=evalQ;
+		this.evalT=evalT;
+		this.actionNum=actionNum;
+		this.trnMoveNum=trnMoveNum;
+		this.elapsedTime=elapsedTime;
+		this.movesSecond=movesSecond;
+	}
+	
 	public void print(PrintWriter mtWriter)  {
 		String sep = ", ";
 		mtWriter.print(i + sep + gameNum + sep);
 		mtWriter.println(evalQ + sep + evalT /*+ sep + evalM */
-				+ sep + actionNum + sep + trnMoveNum);
+				+ sep + actionNum + sep + trnMoveNum + sep + elapsedTime + sep + movesSecond);
 	}
 	
 	/**
@@ -90,7 +104,7 @@ class MTrain {
 			mtWriter.println(pa.stringDescr());		
 			mtWriter.println(pa.stringDescr2());
 			
-			mtWriter.println("run, gameNum, evalQ, evalT, actionNum, trnMoves");
+			mtWriter.println("run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond");
 			ListIterator<MTrain> iter = mtList.listIterator();		
 			while(iter.hasNext()) {
 				(iter.next()).print(mtWriter);
