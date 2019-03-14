@@ -22,6 +22,7 @@ import javax.swing.JTextField;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import games.Arena;
 
 /**
  * This class realizes the parameter settings (GUI tab) for TD players 
@@ -44,7 +45,7 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 public class TDParams extends Frame implements Serializable
 {
 	private static final String TIPGAMMAL = "Discount factor in range [0,1] ";
-	private static final String TIPEPOCHL = "Accumulate gradient for Epochs iterations, then update weights";
+	private static final String TIPEPOCHL = "Only TDS: Accumulate gradient for Epochs iterations, then update weights";
 	private static final String TIPNORMALIZEL = "Normalize StateObservation's game score to the range of the agent's sigmoid function";
 	private static final String TIPALPHA1L = "Initial learn step size";
 	private static final String TIPALPHA2L = "Final learn step size";
@@ -74,7 +75,7 @@ public class TDParams extends Frame implements Serializable
 	JLabel horcutL;
 	JLabel gammaL;
 	JLabel epochL;
-	JLabel tNply_L;
+	JLabel tNplyL;
 	JLabel mode3P_L;
 	JPanel tdPanel;
 	private JTextField alphaT;
@@ -135,9 +136,9 @@ public class TDParams extends Frame implements Serializable
 		horcutL = new JLabel("Horizon cut");
 		gammaL = new JLabel("Gamma");
 		epochL = new JLabel("Epochs");
-		tNply_L = new JLabel("Train nPly");
+		tNplyL = new JLabel("Train nPly");		// only TD-Ntuple-2, currently not shown
+		FeatTDS_L = new JLabel("Feature set");
 		mode3P_L = new JLabel("MODE_3P");
-		epochL.setToolTipText(TIPEPOCHL);
 		alphaL.setToolTipText(TIPALPHA1L);
 		alfinL.setToolTipText(TIPALPHA2L);
 		lambdaL.setToolTipText(TIPLAMBDAL);
@@ -145,8 +146,10 @@ public class TDParams extends Frame implements Serializable
 		epsilL.setToolTipText(TIPEPSIL1L);
 		epfinL.setToolTipText(TIPEPSIL2L);
 		gammaL.setToolTipText(TIPGAMMAL);
-		tNply_L.setToolTipText("Train n-ply look ahead (currently only TD-NTuple-2)");
-		mode3P_L.setToolTipText("Mode for TD-NTuple-2: 0: multi, 1: single, 2: mixed");
+		epochL.setToolTipText(TIPEPOCHL);
+		tNplyL.setToolTipText("Only TD-Ntuple-2: Train n-ply look ahead");
+		FeatTDS_L.setToolTipText("Only TDS: select feature mode");
+		mode3P_L.setToolTipText("Only TD-Ntuple-2: mode 0: multi, 1: single, 2: mixed");
 		
 		withSigType = new JCheckBox();
 		normalize = new JCheckBox();
@@ -169,8 +172,14 @@ public class TDParams extends Frame implements Serializable
 		choiceLrnType = new JComboBox(lrnTypeString);
 		//for (String s : lrnTypeString) choiceLrnType.addItem(s);
 		
-		FeatTDS_L = new JLabel("Feature set");
 		this.choiceFeatTDS = new JComboBox();
+
+		lambdaT.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				enableLambdaPart();
+			}
+		});
 
 		tdPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
 									// can be handed over to a tab of a JTabbedPane 
@@ -196,8 +205,15 @@ public class TDParams extends Frame implements Serializable
 		
 		tdPanel.add(horcutL);
 		tdPanel.add(horcutT);
-		tdPanel.add(NormalizeL);
-		tdPanel.add(normalize);
+		tdPanel.add(epochL);
+		tdPanel.add(epochT);
+
+//		tdPanel.add(LrnTypeL);
+//		tdPanel.add(choiceLrnType);
+		tdPanel.add(eligTypeL);
+		tdPanel.add(eligModeType);		
+		tdPanel.add(mode3P_L);
+		tdPanel.add(mode3P_T);
 
 		tdPanel.add(NetTypeL);
 		tdPanel.add(choiceNetType);
@@ -206,17 +222,10 @@ public class TDParams extends Frame implements Serializable
 //		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
 //		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
 		
-//		tdPanel.add(LrnTypeL);
-//		tdPanel.add(choiceLrnType);
-		tdPanel.add(eligTypeL);
-		tdPanel.add(eligModeType);		
-		tdPanel.add(mode3P_L);
-		tdPanel.add(mode3P_T);
-
 		tdPanel.add(FeatTDS_L);
 		tdPanel.add(choiceFeatTDS);
-		tdPanel.add(epochL);
-		tdPanel.add(epochT);
+		tdPanel.add(NormalizeL);
+		tdPanel.add(normalize);
 		
 		add(tdPanel,BorderLayout.CENTER);
 		
@@ -234,6 +243,61 @@ public class TDParams extends Frame implements Serializable
 //		this.setFrom(tdPar);
 //	}
 	
+	/**
+	 * Needed for {@link Arena} (which has no train rights) to disable this param tab 
+	 * @param enable
+	 */
+	public void enableAll(boolean enable) {
+		this.alphaT.setEnabled(enable);
+		this.alfinT.setEnabled(enable);
+		this.epsilT.setEnabled(enable);
+		this.epfinT.setEnabled(enable);
+		this.lambdaT.setEnabled(enable);
+		this.eligModeType.setEnabled(enable);
+		this.horcutL.setEnabled(enable);
+		this.horcutT.setEnabled(enable);
+		this.gammaT.setEnabled(enable);
+		this.epochT.setEnabled(enable);
+		this.mode3P_T.setEnabled(enable);
+		this.choiceNetType.setEnabled(enable);
+		this.normalize.setEnabled(enable);
+		this.normalize.setEnabled(enable);
+		this.withSigType.setEnabled(enable);
+		this.choiceFeatTDS.setEnabled(enable);
+	}
+	
+	private void enableAgentPart(String agentName) {
+		boolean mode3PEnable= ((agentName=="TD-Ntuple-2" && TDNTuple2Agt.VER_3P )? true : false);
+		boolean featureEnable= (agentName=="TDS" ? true : false);
+		boolean netTypeEnable= (agentName=="TDS" ? true : false);		
+		mode3P_L.setEnabled(mode3PEnable);
+		mode3P_T.setEnabled(mode3PEnable);
+		FeatTDS_L.setEnabled(featureEnable);
+		choiceFeatTDS.setEnabled(featureEnable);		
+		epochL.setEnabled(netTypeEnable);			// epochs currently only for TDS
+		epochT.setEnabled(netTypeEnable);
+		NetTypeL.setEnabled(netTypeEnable);
+		choiceNetType.setEnabled(netTypeEnable);
+		LrnTypeL.setEnabled(netTypeEnable);			// LrnType currently not shown
+		choiceLrnType.setEnabled(netTypeEnable);
+		if (!netTypeEnable) 
+			choiceNetType.setSelectedIndex(0);		// n-tuple agents: always linear net
+	}
+	
+	private void enableLambdaPart() {
+		if (getLambda()==0.0){
+			this.eligTypeL.setEnabled(false);
+			this.eligModeType.setEnabled(false);
+			this.horcutL.setEnabled(false);
+			this.horcutT.setEnabled(false);
+		}else{
+			this.eligTypeL.setEnabled(true);
+			this.eligModeType.setEnabled(true);
+			this.horcutL.setEnabled(true);
+			this.horcutT.setEnabled(true);
+		}
+	}
+
 	public JPanel getPanel() {
 		return tdPanel;
 	}
@@ -351,8 +415,9 @@ public class TDParams extends Frame implements Serializable
 		this.eligModeType.setSelectedIndex(value);
 	}
 	
+	@Deprecated
 	public void enableNPly(boolean enable) {
-		tNply_L.setEnabled(enable);
+		tNplyL.setEnabled(enable);
 		tNply_T.setEnabled(enable);
 	}
 	public void enableMode3P(boolean enable) {
@@ -424,7 +489,6 @@ public class TDParams extends Frame implements Serializable
 		// added with suitable nested switch(gameName). 
 		// Currently we have only one switch(gameName) on the initial featmode (=3 for 
 		// TicTacToe, =2 for Hex, and =0 for all others)
-		boolean mode3PEnable= (agentName=="TD-Ntuple-2" ? true : false);
 		horcutT.setText("0.1"); 			//
 		switch (agentName) {
 		case "TD-Ntuple-2": 
@@ -448,7 +512,7 @@ public class TDParams extends Frame implements Serializable
 				alphaT.setText("1.0");  		// the defaults
 				alfinT.setText("0.5");			//
 				epsilT.setText("0.1");  		//
-				mode3PEnable=false;				//
+//				mode3PEnable=false;				//
 				break;
 			default:	//  all other
 				epsilT.setText("0.3");				
@@ -460,20 +524,12 @@ public class TDParams extends Frame implements Serializable
 			epochT.setText("1");				//
 			withSigType.setSelected(true);		// tanh
 			normalize.setSelected(false);		// 
-			withSigType.setEnabled(true); // NEW		
+//			withSigType.setEnabled(true); // NEW		
 			SigTypeL.setEnabled(true);    // NEW
-			eligTypeL.setEnabled(true);
-			eligModeType.setEnabled(true);
-			NetTypeL.setEnabled(false);
-			choiceNetType.setEnabled(false);
-			LrnTypeL.setEnabled(false);
-			choiceLrnType.setEnabled(false);
-			FeatTDS_L.setEnabled(false);
-			choiceFeatTDS.setEnabled(false);
-			epochL.setEnabled(false);
-			epochT.setEnabled(false);
-			mode3P_L.setEnabled(mode3PEnable);
-			mode3P_T.setEnabled(mode3PEnable);
+//			eligTypeL.setEnabled(true);			// now via enableLambdaPart()
+//			eligModeType.setEnabled(true);
+//			epochL.setEnabled(false);			// now via enableAgentPart()
+//			epochT.setEnabled(false);
 			switch (gameName) {
 			case "2048": 
 				epsilT.setText("0.0");				
@@ -490,20 +546,12 @@ public class TDParams extends Frame implements Serializable
 			epochT.setText("1");				//
 			withSigType.setSelected(false);		// Fermi fct
 			normalize.setSelected(false);		// 
-			eligTypeL.setEnabled(false);
-			eligModeType.setEnabled(false);
-			withSigType.setEnabled(true);		
+//			withSigType.setEnabled(true);		
 			SigTypeL.setEnabled(true);
-			NetTypeL.setEnabled(true);
-			choiceNetType.setEnabled(true);
-			LrnTypeL.setEnabled(true);
-			choiceLrnType.setEnabled(true);
-			FeatTDS_L.setEnabled(true);
-			choiceFeatTDS.setEnabled(true);
-			epochL.setEnabled(true);
-			epochT.setEnabled(true);
-			mode3P_L.setEnabled(false);
-			mode3P_T.setEnabled(false);
+//			eligTypeL.setEnabled(false);		// now via enableLambdaPart()
+//			eligModeType.setEnabled(false);
+//			epochL.setEnabled(true);			// now via enableAgentPart()
+//			epochT.setEnabled(true);
 			switch (gameName) {
 			case "TicTacToe": 
 				setFeatmode(3);
@@ -526,7 +574,9 @@ public class TDParams extends Frame implements Serializable
 				break;
 			}
 			break;
-		}		
+		}	
+		enableLambdaPart();
+		enableAgentPart(agentName);
 	}
 	
 } // class TDParams

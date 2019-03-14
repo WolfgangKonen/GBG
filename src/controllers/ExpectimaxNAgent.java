@@ -39,7 +39,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	private Random rand;
 	protected int m_depth=10;
 //	protected boolean m_rgs=true;  // use now AgentBase::m_oPar.getRewardIsGameScore()
-	//private boolean m_useHashMap=true;
+	//private boolean m_useHashMap=true;		// don't use HashMap in ExpectimaxNAgent!
 	//private HashMap<String,ScoreTuple> hm;
 	
 	/**

@@ -409,8 +409,8 @@ public class GameBoardNim extends JFrame implements GameBoard {
 		if (Double.isNaN(value)) {
 			valueTxt = "   ";
 		} else {
-			valueTxt = " "+(int)(value*100);
-			if (value<0) valueTxt = ""+(int)(value*100);
+			valueTxt = " "+Math.round(value*100);
+			if (value<0) valueTxt = ""+Math.round(value*100);
 			col = (color==null) ? calculateXBoardColor(value) : color;
 			XBoard[i][j].setForeground(col);
 		}

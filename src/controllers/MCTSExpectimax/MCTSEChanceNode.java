@@ -453,7 +453,7 @@ public class MCTSEChanceNode
 	 * @return q(reward), the reward or game score for {@code so} (relative to {@code referingState})
 	 */
 	public double value(StateObservation so, StateObservation referingState) {
-		double v = so.getReward(so, m_player.rgs);
+		double v = so.getReward(referingState, m_player.rgs);
 //		m_player.getRootNode().scoreNonNormalized=v;
 		double maxScore;
 		if (m_player.getNormalize()) {

@@ -315,7 +315,7 @@ public class EvaluatorHex extends Evaluator {
         } else {
             // the int's in startAction code the start board. -1: empty board (a winning 
             // board for 1st player Black), 
-            // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, a winning
+            // 0/1/...: Black's 1st move was tile 00/01/... (it is a losing move, thus a winning
             // board for 2nd player White)
             startAction = HexConfig.EVAL_START_ACTIONS[N];
         }

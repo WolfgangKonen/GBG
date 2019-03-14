@@ -124,7 +124,8 @@ tgcMCTS <- tgc[c(1,nrow(tgc)),]   # 2 lines with first and last gameNum
 tgcMCTS$lambda <- "0.16"
 tgcMCTS$agent <- "MCTS"
 tgcMCTS$N <- 5
-tgcMCTS$eval <- (-0.825-0.825-0.7-0.725-0.875)/5   # 5 manual QuickEvals with MCTS
+#tgcMCTS$eval <- (-0.825-0.825-0.7-0.725-0.875)/5   # 5 manual QuickEvals with MCTS (buggy version before 2019-03-12)
+tgcMCTS$eval <- (-0.099-0.275+0.05)/3   # 3 manual QuickEvals with MCTS (K=1.414, 10000 iter, depth 10, normalize)
 tgcMCTS$se <- 0.033
 tgc <- rbind(tgc,tgcMCTS)
 

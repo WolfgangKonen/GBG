@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Random;
 
+import controllers.MCTS0.SingleTreeNode0;
 import controllers.MCTSExpectimax.MCTSETreeNode;
 
 /**
@@ -16,7 +17,8 @@ import controllers.MCTSExpectimax.MCTSETreeNode;
  * (with a bug fix concerning the number of available actions and an extension
  * for 1- and 2-player games. And the return of VTable information.)
  */
-public class SingleTreeNode implements Serializable {
+public class SingleTreeNode implements Serializable 
+{
 	public static double epsilon = 1e-6; // tiebreaker
 	public StateObservation m_state = null;
 	public SingleTreeNode parent = null;
@@ -77,8 +79,8 @@ public class SingleTreeNode implements Serializable {
 	 *            a reference to the one MCTS agent where {@code this} is part
 	 *            of (needed to access several parameters of the MCTS agent)
 	 */
-	public SingleTreeNode(StateObservation state, Types.ACTIONS act, SingleTreeNode parent, Random rnd,
-			SingleMCTSPlayer mplay) {
+	public SingleTreeNode(StateObservation state, Types.ACTIONS act, SingleTreeNode parent, 
+			Random rnd,	SingleMCTSPlayer mplay) {
 		this.m_state = state;
 		this.m_act = act;
 		this.parent = parent;
@@ -152,6 +154,7 @@ public class SingleTreeNode implements Serializable {
 			double delta = selected.rollOut();
 // --- this is now equivalently in backUp(), in the first pass through while-loop ---			
 //			if (m_state.getNumPlayers() == 2) {
+////				delta = -delta;
 //				delta = negate(delta);		
 //				// why 'negate'? - If the score of 'selected' is a loss for the player who
 //				// has to move on 'selected', then it is a win for the player who created 
@@ -189,8 +192,7 @@ public class SingleTreeNode implements Serializable {
 					} else {
 						VTable[k] = v;
 					}
-					if (VTable[k] > bestValue)
-						bestValue = VTable[k];
+					if (VTable[k] > bestValue) bestValue = VTable[k];
 				}
 			}
 		}
@@ -201,24 +203,36 @@ public class SingleTreeNode implements Serializable {
 		this.printChildInfo(0, true);
 
 		/*
-		 * --- just a sanity check, not required for normal operation: --- int
-		 * k=0; for (SingleTreeNode c : this.children) { if (c!=null) { int
-		 * nGrandchilds=0; for (SingleTreeNode g : c.children) if (g!=null)
-		 * nGrandchilds++; //System.out.println(k+": nGrandchilds="
-		 * +nGrandchilds); assert nGrandchilds < children.length :
-		 * "Too many grandchilds!"; k++; } } //System.out.println("");
+		 * --- just a sanity check, not required for normal operation: --- 
 		 */
+//		int k=0; 
+//		for (SingleTreeNode c : this.children) { 
+//			if (c!=null) { 
+//				int nGrandchilds=0; 
+//				for (SingleTreeNode g : c.children) 
+//					if (g!=null) nGrandchilds++; 
+//				System.out.println(k+": nGrandchilds=" +nGrandchilds); 
+//				assert nGrandchilds < children.length : "Too many grandchilds!"; 
+//				k++; 
+//			} 
+//		} 
+//		System.out.println("");
 
-		if (m_player.getVerbosity() > 0)
+		if (m_player.getVerbosity() > 0) {
 			System.out.println(
 					"--  iter=" + numIters + " -- "+
 							
 					" "+m_state.stringDescr()+" "+
 					"( nodes=" + this.numDescendants() + ", time=" + avgTimeTaken + ")"+
 					"  value = "+this.totValue/this.nVisits);
-
+			// for UCT and more than 10.000 iteration, bestAction() and  
+			// mostVisitedAction() are normally the same:
+			System.out.println("-- bestAction="+this.bestAction()+
+					   ", mostVisitedAction="+this.mostVisitedAction());
+		}
 	}
 
+	
 	public void printChildInfo(int nIndention, boolean isRootNode) {
 		DecimalFormat form = new DecimalFormat("0.0000");
 		DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
@@ -259,6 +273,10 @@ public class SingleTreeNode implements Serializable {
 		assert offs + cVisits == this.nVisits : "children visits do not match the visits of this!";
 	}
 	
+	/**
+	 * 
+	 * @return (total value of all children)/(total visits of all children)  of {@code this}
+	 */
 	private double allChildrenValue() {
 		double val = 0.0;
 		double visits = 0;
@@ -275,27 +293,32 @@ public class SingleTreeNode implements Serializable {
 	public SingleTreeNode treePolicy() {
 
 		SingleTreeNode cur = this;
-		SingleTreeNode next;
 
-		while (!cur.m_state.isGameOver() && cur.m_depth < m_player.getTREE_DEPTH()) {
+		while (!cur.m_state.isGameOver() && cur.m_depth < m_player.getTREE_DEPTH()) 
+		{
 			if (cur.notFullyExpanded()) {
 				return cur.expand();
 
 			} else {
 				switch(m_player.getParMCTS().getSelectMode()) {
 				case 0: 
-					next = cur.uct();
+//					SingleTreeNode next0 = cur.uct();
+//					cur = next0;
+					cur = cur.uct();
 					break;
 				case 1: 
-					next = cur.egreedy();
+//					SingleTreeNode next1 = cur.egreedy();
+//					cur = next1;
+					cur = cur.egreedy();
 					break; 
 				case 2: 
-					next = cur.rouletteWheel();
+//					SingleTreeNode next2 = cur.rouletteWheel();
+//					cur = next2;
+					cur = cur.rouletteWheel();
 					break; 
 				default: 
 					throw new RuntimeException("this selectMode is not yet implemented");
 				}
-				cur = next;
 			}
 		}
 
@@ -314,20 +337,16 @@ public class SingleTreeNode implements Serializable {
 
 		int bestAction = 0;
 		double bestValue = -1;
-		double x;
 
-		// System.out.println("expand() for m_state.actions.length =
-		// "+m_state.getNumAvailableActions());
+		//System.out.println("expand() for m_state.actions.length = "+m_state.getNumAvailableActions());
 
-		for (int i = 0; i < children.length; i++) {
-			if (children[i] == null) {
-				x = m_rnd.nextDouble();
-				if (x > bestValue) {
-					bestAction = i;
-					bestValue = x;
-				}
-			}
-		}
+        for (int i = 0; i < children.length; i++) {
+            double x = m_rnd.nextDouble();
+            if (x > bestValue && children[i] == null) {
+                bestAction = i;
+                bestValue = x;
+            }
+        }
 
 		assert m_state != null : "Warning: state is null!";
 		assert m_state.getNumAvailableActions() == children.length : "s.th. wrong with children.length";
@@ -335,7 +354,7 @@ public class SingleTreeNode implements Serializable {
 
 		StateObservation nextState = m_state.copy();
 		// nextState.advance(m_player.actions[bestAction]);
-		nextState.advance(actBest); // /WK/ NEW!
+		nextState.advance(actBest); 		// /WK/ NEW!
 
 		SingleTreeNode tn = new SingleTreeNode(nextState, actBest, this, this.m_rnd, this.m_player);
 		children[bestAction] = tn;
@@ -355,14 +374,13 @@ public class SingleTreeNode implements Serializable {
 
 		SingleTreeNode selected = null;
 		double bestValue = -Double.MAX_VALUE;
-		for (SingleTreeNode child : this.children) {
+		for (SingleTreeNode child : this.children) 
+		{
 			double childValue = child.totValue / (child.nVisits + this.epsilon);
-			if (m_player.getNormalize())
-				assert (childValue >= 0) : "childValue is negative";
+			if (m_player.getNormalize()) assert (childValue >= 0) : "childValue is negative";
 				
 			double uctValue = childValue
-					+ m_player.getK() * Math.sqrt(2*Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon))
-//					+ m_player.getK() * Math.pow(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon),4.0)
+					+ m_player.getK() * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon))
 					+ this.m_rnd.nextDouble() * this.epsilon;
 					// small random numbers: break ties in unexpanded nodes
 
@@ -401,7 +419,7 @@ public class SingleTreeNode implements Serializable {
 			// pick the best Q.
 			double bestValue = -Double.MAX_VALUE;
 			for (SingleTreeNode child : this.children) {
-				double cval = child.totValue;
+				double cval = child.totValue / (child.nVisits + this.epsilon);
 
 				// small sampleRandom numbers: break ties in unexpanded nodes
 				if (cval > bestValue) {
@@ -484,7 +502,8 @@ public class SingleTreeNode implements Serializable {
 	 *         player who has to move in {@code m_state} then return a positive
 	 *         reward.
 	 */
-	public double rollOut() {
+	public double rollOut() 
+	{
 		StateObservation rollerState = m_state.copy();
 		int thisDepth = this.m_depth;
 
@@ -506,11 +525,9 @@ public class SingleTreeNode implements Serializable {
 		// // Is it part of MCTS or part of the special GVGP implementation?
 		// if(delta < curBounds[0]) curBounds[0] = delta;
 		// if(delta > curBounds[1]) curBounds[1] = delta;
-		//
-		// double normDelta = Utils.normalise(delta ,lastBounds[0],
-		// lastBounds[1]);
-		//
+		// double normDelta = Utils.normalise(delta ,lastBounds[0], lastBounds[1]);
 		// return normDelta;
+		//
 		return delta;
 	}
 
@@ -529,7 +546,7 @@ public class SingleTreeNode implements Serializable {
 	 */
 	public double value(StateObservation so, StateObservation referingState) {
 		boolean rgs = m_player.getParOther().getRewardIsGameScore();
-		double v = so.getReward(so, rgs);
+		double v = so.getReward(referingState, rgs);
 //		double v = so.getGameScore(referingState);
 		if (m_player.getNormalize()) {
 			// /WK/ bug fix 2019-02-09: map v to [0,1] (this is q(reward) in notes_MCTS.docx)
@@ -546,7 +563,8 @@ public class SingleTreeNode implements Serializable {
      * @param depth the current rollout depth
      * @return true if the rollout is finished, false if not
      */
-	public boolean finishRollout(StateObservation rollerState, int depth) {
+	public boolean finishRollout(StateObservation rollerState, int depth) 
+	{
 		if (depth >= m_player.getROLLOUT_DEPTH()) // rollout end condition.
 			return true;
 
@@ -556,7 +574,8 @@ public class SingleTreeNode implements Serializable {
 		return false;
 	}
 
-	public void backUp(SingleTreeNode selected, double delta) {
+	public void backUp(SingleTreeNode selected, double delta) 
+	{
 		SingleTreeNode n = selected;
 		while (n != null) {
 			switch (m_state.getNumPlayers()) {
@@ -575,20 +594,29 @@ public class SingleTreeNode implements Serializable {
 
 			n.nVisits++;
 			n.totValue += delta;
+//            switch (m_state.getNumPlayers()) {
+//            case (1): break;
+//            case (2): 
+////            	delta = - delta; 		// /WK/ negamax variant for 2-player tree
+//            	delta = negate(delta);	// /WK/ negamax variant for 2-player tree
+//            	break;
+//            default:		// i.e. n-player, n>2
+//            	throw new RuntimeException("MCTS.backUp is not yet implemented for n-player games (n>2).");
+//            }
 
 			// --- only a debug assertion
-			if (!n.isLeafNode() && n.parent!=null) {
-				int cVisits=0;
-				for (SingleTreeNode c : n.children) {
-					if (c!=null) cVisits+=c.nVisits;
-				}
-				int offs=1;
-				assert (n.nVisits == offs+cVisits) :	// why '1+'? - every non-root node n has one visit more 
-					// than all its children. This stems from its 'birth' visit, i.e. the time 
-					// where it was 'selected' but did not yet have any children.
-					"node n's nVisits differs from the 1+(sum of its children visits)";
-				
-			}
+//			if (!n.isLeafNode() && n.parent!=null) {
+//				int cVisits=0;
+//				for (SingleTreeNode c : n.children) {
+//					if (c!=null) cVisits+=c.nVisits;
+//				}
+//				int offs=1;
+//				assert (n.nVisits == offs+cVisits) :	// why '1+'? - every non-root node n has one visit more 
+//					// than all its children. This stems from its 'birth' visit, i.e. the time 
+//					// where it was 'selected' but did not yet have any children.
+//					"node n's nVisits differs from the 1+(sum of its children visits)";
+//				
+//			}
 			
 			n = n.parent;
 		}
@@ -693,7 +721,8 @@ public class SingleTreeNode implements Serializable {
 	/**
 	 * just for diagnostics:
 	 * 
-	 * @return number of nodes in the MCTS tree
+	 * @return number of nodes in the MCTS tree from {@code this} downwards. <br>
+	 * 		   If {@code this} is the root node, it is the number of nodes in the whole tree. 
 	 */
 	public int numDescendants() {
 		int N = 1; // include this

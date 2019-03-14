@@ -319,7 +319,7 @@ public class Types {
      * list of available agents = list of choices in Agent Selectors
      */
     public static final String[] GUI_AGENT_LIST 	 
-    	= {"Random", /*"Minimax",*/ "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", 
+    	= {"Random", /*"Minimax",*/ "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", "MCTS0",  
     	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TD-Ntuple-3", "Sarsa", "TDS"};
     /**
      * initial agent choice for P0, P1, ... (for up to 5 players) 
@@ -354,6 +354,8 @@ public class Types {
      */
 	public static int GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTOR_X);	 
 	public static int GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTOR_Y);
+	public static int GUI_ARENA_WIDTH = (int)(465*GUI_SCALING_FACTOR_X);	 
+	public static int GUI_ARENA_HEIGHT = (int)(315*GUI_SCALING_FACTOR_Y);
     /**
      * width and height of 'Competition Options'  window
      */

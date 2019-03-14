@@ -60,10 +60,11 @@ abstract public class ArenaTrain extends Arena
 	}
 	
 	private void initArenaTrain() {
-		m_title.setText("ArenaTrain");
+		m_title.setText("ArenaTrain  "+this.getGameName());
 		int n = this.m_xab.choiceAgent.length;
 		for (int i=0; i<n; i++) {
 			this.m_xab.choiceAgent[i].setEnabled(true);
+			this.m_xab.mParam[i].setEnabled(true);
 			this.m_xab.mParam[i].setText("Param "+Types.GUI_2PLAYER_NAME[i]);
 			this.m_xab.mParam[i].setVisible(true);
 			this.m_xab.mTrain[i].setVisible(true);
@@ -75,6 +76,10 @@ abstract public class ArenaTrain extends Arena
 	
 	public boolean hasTrainRights() {
 		return true;
+	}
+	
+	public int getGuiArenaHeight() {
+		return Types.GUI_ARENATRAIN_HEIGHT;
 	}
 	
 	/**
@@ -89,15 +94,6 @@ abstract public class ArenaTrain extends Arena
 		String agentN;
 		int n;
 		switch (taskState) {
-		case PARAM: 
-			n = m_xab.getNumParamBtn();
-			agentN = m_xab.getSelectedAgent(n);
-			setStatusMessage("Params for "+agentN+ " ...");
-			//m_tabs.showParamTabs(this,true,0,agentN);
-			// this is for later, when we have extended to N tabs:
-			m_tabs.showParamTabs(this,true,n,agentN);
-			taskState = Task.IDLE; 
-			break;
 		case TRAIN: 
 			n = m_xab.getNumTrainBtn();
 			agentN = m_xab.getSelectedAgent(n);

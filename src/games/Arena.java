@@ -10,6 +10,7 @@ import controllers.HumanPlayer;
 import controllers.MC.MCAgent;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
+import games.Arena.Task;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -90,7 +91,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	 */
 	protected void initGame() {
 		// scale the GUI (window sizes and fonts of all GUI elements)
-		Types.globalGUIScaling(true); // todo set to true to enable scaling
+		Types.globalGUIScaling(true); // set to true to enable scaling
         // scale the font of all status messages:
 		Font lFont = new Font("Arial", Font.PLAIN, Types.GUI_DIALOGFONTSIZE);
 		statusBar.setFont(lFont);
@@ -105,7 +106,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
 		JLabel Blank = new JLabel(" "); // a little bit of space
-		m_title = new JLabel("Arena", SwingConstants.CENTER);
+		m_title = new JLabel("Arena  "+this.getGameName(), SwingConstants.CENTER);
 		m_title.setForeground(Color.black);
 		Font tFont = new Font("Arial", 1, Types.GUI_TITLEFONTSIZE);
 		m_title.setFont(tFont);
@@ -135,8 +136,8 @@ abstract public class Arena extends JFrame implements Runnable {
 		// initialize GUI elements (NEW version: 'Arena extends JFrame')
 		addWindowListener(new WindowClosingAdapter());
 		setJMenuBar(m_menu);
-		setSize(Types.GUI_ARENATRAIN_WIDTH,Types.GUI_ARENATRAIN_HEIGHT);
-		setBounds(0,0,Types.GUI_ARENATRAIN_WIDTH,Types.GUI_ARENATRAIN_HEIGHT);
+		setSize(Types.GUI_ARENATRAIN_WIDTH, getGuiArenaHeight());
+		setBounds(0,0,Types.GUI_ARENATRAIN_WIDTH, getGuiArenaHeight());
 		//pack();
 		setVisible(true);
 	}
@@ -169,6 +170,15 @@ abstract public class Arena extends JFrame implements Runnable {
 
 		while (true) {
 			switch (taskState) {
+			case PARAM: 
+				n = m_xab.getNumParamBtn();
+				agentN = m_xab.getSelectedAgent(n);
+				setStatusMessage("Params for "+agentN+ " ...");
+				//m_tabs.showParamTabs(this,true,0,agentN);
+				// this is for later, when we have extended to N tabs:
+				m_tabs.showParamTabs(this,true,n,agentN);
+				taskState = Task.IDLE; 
+				break;
 			case COMPETE:
 				enableButtons(false);
 				setStatusMessage("Running Single Compete ...");
@@ -881,6 +891,10 @@ abstract public class Arena extends JFrame implements Runnable {
 
 	public boolean hasTrainRights() {
 		return false;
+	}
+	
+	public int getGuiArenaHeight() {
+		return Types.GUI_ARENA_HEIGHT;
 	}
 	
 	public GameBoard getGameBoard() {

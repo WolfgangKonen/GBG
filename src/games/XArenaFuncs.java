@@ -6,6 +6,7 @@ import controllers.*;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
+import controllers.MCTS0.MCTSAgentT0;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
@@ -149,6 +150,8 @@ public class XArenaFuncs
 			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Random")) {
 			pa = new RandomAgent(sAgent, new ParOther(m_xab.oPar[n]));
+		} else if (sAgent.equals("MCTS0")) {
+			pa = new MCTSAgentT0(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS")) {
 			pa = new MCTSAgentT(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS Expectimax")) {
@@ -194,6 +197,8 @@ public class XArenaFuncs
 				pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("Random")) {
 				pa= new RandomAgent(sAgent, new ParOther(m_xab.oPar[n]));
+			} else if (sAgent.equals("MCTS0")) {
+				pa= new MCTSAgentT0(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("MCTS")) {
 				pa= new MCTSAgentT(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("MCTS Expectimax")) {

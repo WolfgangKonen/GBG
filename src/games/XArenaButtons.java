@@ -173,10 +173,10 @@ public class XArenaButtons extends JPanel
 			}
 
 			if (numPlayers==2) {
-				mParam[n]=new JButton(" "+Types.GUI_2PLAYER_NAME[n]);
+				mParam[n]=new JButton("Param "+Types.GUI_2PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_2PLAYER_NAME[n]);
 			} else {
-				mParam[n]=new JButton(" "+Types.GUI_PLAYER_NAME[n]);
+				mParam[n]=new JButton("Param "+Types.GUI_PLAYER_NAME[n]);
 				mTrain[n]=new JButton("Train "+Types.GUI_PLAYER_NAME[n]);
 			}
 			mParam[n].setForeground(Color.white);
@@ -208,6 +208,11 @@ public class XArenaButtons extends JPanel
 								// the normal case, if item change was triggered by user:
 								setParamDefaults(n, (String) choiceAgent[n].getSelectedItem(),
 										m_game.getGameName());
+								if (!m_game.hasTrainRights()) {
+									m_game.m_xab.tdPar[n].enableAll(false);
+									m_game.m_xab.ntPar[n].enableAll(false);									
+								}
+									
 							}
 						}
 					}
@@ -294,7 +299,7 @@ public class XArenaButtons extends JPanel
 						public void actionPerformed(ActionEvent e)
 						{	
 							m_numParamBtn = x;
-							m_game.taskState = ArenaTrain.Task.PARAM;
+							m_game.taskState = Arena.Task.PARAM;
 						}
 					}	
 			);
@@ -472,11 +477,7 @@ public class XArenaButtons extends JPanel
 			qplay.add(qparam);
 			if (arena.hasTrainRights()) {
 				qplay.add(qtrain);
-			} else {
-				JLabel gameLabel = new JLabel(arena.getGameName());
-				gameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-				qplay.add(gameLabel);  // just the game name as place filler
-			}
+			} 
 			q.add(qplay);	
 			mParam[n].setVisible(true);		// see ArenaTrain for making them
 			mTrain[n].setVisible(false);		// visible
@@ -491,39 +492,25 @@ public class XArenaButtons extends JPanel
 			p1.add(GameNumL);
 			p1.add(GameNumT);			
 			p1.add(new Canvas());
-		} else {
 			p1.add(new Canvas());
-			JLabel gameLabel1 = new JLabel(arena.getGameName());
-			gameLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-			JLabel gameLabel2 = new JLabel(arena.getGameName());
-			gameLabel2.setHorizontalAlignment(SwingConstants.CENTER);
-			p1.add(gameLabel1);  // just the game name as place filler
-			p1.add(gameLabel2);  // just the game name as place filler
-//			p1.add(new Canvas());
-//			p1.add(new Canvas());
+		} else {
+//			JLabel gameLabel1 = new JLabel(arena.getGameName());
+//			gameLabel1.setHorizontalAlignment(SwingConstants.CENTER);
+//			JLabel gameLabel2 = new JLabel(arena.getGameName());
+//			gameLabel2.setHorizontalAlignment(SwingConstants.CENTER);
+//			p1.add(gameLabel1);  // just the game name as place filler
+//			p1.add(gameLabel2);  // just the game name as place filler
+			for (int i=0; i<4; i++) p1.add(new Canvas());
 		}
-		p1.add(Logs);
 
 		JPanel p2 = new JPanel();
 		p2.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
 		p2.setBackground(Types.GUI_BGCOLOR);
 
-		if (arena.hasTrainRights()) {
-			p2.add(TrainNumL);
-			p2.add(TrainNumT);
-			p2.add(MultiTrain);
-		} else {
-			p2.add(new Canvas());
-//			JLabel gameLabel1 = new JLabel(arena.getGameName());
-//			gameLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-//			JLabel gameLabel2 = new JLabel(arena.getGameName());
-//			gameLabel2.setHorizontalAlignment(SwingConstants.CENTER);
-//			p2.add(gameLabel1);  // just the game name as place filler
-//			p2.add(gameLabel2);  // just the game name as place filler
-			p2.add(new Canvas());
-			p2.add(new Canvas());			
-		}
-		p2.add(new Canvas());
+		p2.add(TrainNumL);
+		p2.add(TrainNumT);
+		p2.add(MultiTrain);
+		p2.add(NTupShowB);		
 
 		JPanel psv = new JPanel();
 		psv.setBackground(Types.GUI_BGCOLOR);
@@ -539,14 +526,16 @@ public class XArenaButtons extends JPanel
 	
 		p3.add(Play);
 		p3.add(psv);
-		p3.add(NTupShowB);		
+		p3.add(Logs);
 		p3.add(InspectV);
 
 		JPanel ptp = new JPanel();
 		ptp.setLayout(new GridLayout(0,1,10,10));	// rows,columns,hgap,vgap
 		ptp.setBackground(Types.GUI_BGCOLOR);
 		ptp.add(p1);
-		ptp.add(p2);
+		if (arena.hasTrainRights()) {
+			ptp.add(p2);			
+		}
 		ptp.add(p3);
 		// adding to ptp three objects of equal height helps the layout manager to balance the height distribution
 		

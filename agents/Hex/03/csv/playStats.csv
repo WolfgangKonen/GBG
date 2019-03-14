@@ -1,0 +1,8 @@
+controllers.MCTS.MCTSAgentT: iterations:10000, rollout depth:200, K_UCT:2.0, tree depth:10
+controllers.MCTS.MCTSAgentT:
+run, moveNum, gameScore, nEmptyTile, cumEmptyTl
+1, 1, 0, 0, 0
+1, 2, 0, 0, 0
+1, 3, 0, 0, 0
+1, 4, 0, 0, 0
+1, 5, 0, 0, 0

@@ -21,6 +21,7 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	public MaxNWrapper(PlayAgent pa, int nply) {
 		super("MaxNWrapper", nply);
 		this.wrapped_pa = pa;
+		this.m_useHashMap = false;		// bug fix 2019-03-13: no HashMap in MaxNWrapper!
 	}
 	
 	// XArenaFuncs::wrapAgent is now based on this agent to get MaxN tree depth
@@ -28,6 +29,7 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	public MaxNWrapper(PlayAgent pa, ParMaxN mPar, ParOther oPar) {
 		super("MaxNWrapper", mPar, oPar);
 		this.wrapped_pa = pa;
+		this.m_useHashMap = false;		// bug fix 2019-03-13: no HashMap in MaxNWrapper!
 	}
 	
 	/**

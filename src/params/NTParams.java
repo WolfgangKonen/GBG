@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import games.Arena;
 import games.Nim.NimConfig;
 
 /**
@@ -241,7 +242,6 @@ public class NTParams extends Frame implements Serializable {
 	
 		enableTcPart();
 		enableRandomPart();
-		
 		pack();
 		setVisible(false);
 	} // constructor NTParams()
@@ -251,6 +251,32 @@ public class NTParams extends Frame implements Serializable {
 //		this.setFrom(ntPar);
 //	}
 
+	/**
+	 * Needed for {@link Arena} (which has no train rights) to disable this param tab 
+	 * @param enable
+	 */
+	public void enableAll(boolean enable) {
+		TempCoC.setEnabled(enable);
+		tcInitT.setEnabled(enable);
+		tcFactorType.setEnabled(enable);
+		tcTransferType.setEnabled(enable);
+		tcAccumulType.setEnabled(enable);
+		tcIntervalT.setEnabled(enable);
+		tcBetaT.setEnabled(enable);
+		
+		RandomnessC.setEnabled(enable);
+		NTupleNumT.setEnabled(enable);
+		NTupleSizeT.setEnabled(enable);
+		NTupleTypeCo.setEnabled(enable);
+		NTupleFixCo.setEnabled(enable);
+		
+		PlotWghtCo.setEnabled(enable);
+		UseSymmetryC.setEnabled(enable);
+		AfterStateC.setEnabled(enable);
+		AfterStateL.setEnabled(true);
+
+	}
+	
 	private void enableTcPart() {
 		if (getTc()==false){
 			tcInitL.setEnabled(false);
