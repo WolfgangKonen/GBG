@@ -203,6 +203,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	public double getScore(StateObservation sob) {
 		return getScore(sob,sob,0);
 	}
+	
 	private double getScore(StateObservation sob, StateObservation refer, int depth) {
 //		String stringRep = sob.stringDescr();
 //		if (stringRep.equals("XXoXXooo-")) {		// only debug for TTT
@@ -228,15 +229,15 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score. This function may be overridden in a game-
 	 * specific way by classes derived from {@link MinimaxAgent}. <p>
-	 * This  stub method just returns {@link StateObservation#getGameScore()}, which might 
-	 * be too simplistic for not-yet finished games, because the score does not reflect  
-	 * future returns.
+	 * This  stub method just returns {@link StateObservation#getGameScore(StateObservation)}, 
+	 * which might be too simplistic for not-yet finished games, because the score does not   
+	 * reflect future returns.
 	 * @param sob	the state observation
 	 * @return		the estimated score
 	 */
 	@Override
 	public double estimateGameValue(StateObservation sob) {
-		return sob.getGameScore();
+		return sob.getGameScore(sob);
 	}
 
 	@Override

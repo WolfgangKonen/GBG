@@ -136,10 +136,4 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 		return rand.nextDouble();
 	}
 
-	@Override
-	public String stringDescr() {
-		String cs = getClass().getName();
-		return cs;
-	}
-	
 }

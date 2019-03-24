@@ -129,20 +129,20 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 			For Nim only game-over states have a non-zero game score. 
-	 * 			It is the reward for the player who *would* move next (if 
-	 * 			the game were not over). 
+	 * 			It is the reward from the perspective of {@code refer}.
 	 */
-	public double getGameScore() {
+	public double getGameScore(StateObservation refer) {
+		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
         boolean gameOver = this.isGameOver();
         if(gameOver) {
             Types.WINNER win = this.getGameWinner();
         	switch(win) {
         	case PLAYER_LOSES:
-                return NimConfig.REWARD_NEGATIVE;
+                return sign*NimConfig.REWARD_NEGATIVE;
         	case TIE:
                 return 0;
         	case PLAYER_WINS:
-                return NimConfig.REWARD_POSITIVE;
+                return sign*NimConfig.REWARD_POSITIVE;
             default:
             	throw new RuntimeException("Wrong enum for Types.WINNER win !");
         	}
@@ -276,8 +276,11 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		        return "You will lose :("
 	    */
 		//
-		// The equivalent Java implementation: The sequence heaps is fed into the lambda-construct 
-		// (x,y) -> x ^ y via reduce: the first two elements are bitwise XOR'ed, then the
+		// The equivalent Java implementation is
+		// 		Arrays.stream(heaps).reduce(startValue, (x,y) -> (x%K) ^ (y%K));
+		// The sequence heaps is fed into the lambda-construct 
+		// 		(x,y) -> (x%K) ^ (y%K) 
+		// via reduce: the first two elements are bitwise XOR'ed, then the
 		// result of this together with the 3rd element is bitwise XOR'ed, then the
 		// result of this together with the 4th element is bitwise XOR'ed, and so on. 
 		// The final result is the binary digital sum or nim-sum of all heaps.
@@ -288,7 +291,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		// winning position. This means that only the *remainder* of x and y in excess of multiples
 		// of K (i.e. x%K) is relevant to compute the nim-sum and find the winning move.
 		//
-		// Why int startValue=0? - Because then reduce() directly returns an int as well.
+		// Why int startValue=0? - Because reduce(int,...) directly returns an int as well.
 		//
 		int startValue=0;
 		int K = NimConfig.MAX_MINUS+1;

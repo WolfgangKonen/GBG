@@ -238,7 +238,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	        	// the non-afterstate logic for the case of single moves:
     	        	//System.out.println("NewSO: "+NewSO.stringDescr()+", act: "+act.toInt()); // DEBUG
     	            NewSO.advance(acts.get(i));
-    	            value = this.getScore(NewSO,so); // this is V(s'') from so-perspective
+    	            value = this.getScore(NewSO,so); // this is V(s'') from the perspective of so
     	        }
     	        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
     	        // but they usually differ for nondeterministic games.
@@ -290,13 +290,13 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		
 	/**
 	 * Return the agent's estimate of the score for that after state 
-	 * For 2-player games like TTT, the score is V(), the probability that 
-	 * X (Player +1) wins from that after state. V(s_t|p_t) learns this probability for every t.
-	 * p_t*V(s_t) is the quantity to be maximized by getNextAction2.
+	 * For 2-player games like TTT, the score is V(), the probability that the player to move
+	 * wins from that after state. V(s_t|p_t) learns this probability for every t.
+	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
 	 * For 1-player games like 2048 it is the estimated (total or future) reward.
 	 * 
 	 * @param so			the state for which the value is desired
-	 * @return the agent's estimate of the future score for that after state
+	 * @return the agent's estimate of the future score for that after state (its value)
 	 */
 	public double getScore(StateObservation so) {
 		int[] bvec = m_Net.xnf.getBoardVector(so);
@@ -589,7 +589,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	public String stringDescr() {
 		m_Net.setHorizon();
-		String cs = getClass().getName();
+		String cs = getClass().getSimpleName();
 		String str = cs + ": USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
@@ -601,7 +601,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	}
 		
 	public String stringDescr2() {
-		String cs = getClass().getName();
+		String cs = getClass().getSimpleName();
 		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
 						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
 						+ ", gamma: " + m_tdPar.getGamma()
@@ -627,7 +627,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			System.out.print("Rewards: ");
 			System.out.print(ns.nextRewardTuple.toString());
 //			System.out.print("Reward: "+ns.nextReward);
-			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore() + " for player " + ns.nextSO.getPlayer());
+			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore(ns.nextSO) 
+							 + " for player " + ns.nextSO.getPlayer());
 		}
 	}
 	

@@ -3,7 +3,7 @@ package games.RubiksCube;
 import games.StateObservation;
 
 /**
- * A simple class derived from {@link StateObserverCube}. It ensures that whenever an 
+ * A class derived from {@link StateObserverCube}. It ensures that whenever an 
  * object of type StateObserverCubeCleared is created, its {@link CubeState} members lastTwist
  * and lastTimes are cleared. This is essential when such an object is used as a start state of 
  * an episode: It guarantees that <b>all</b> possible actions are considered as available.

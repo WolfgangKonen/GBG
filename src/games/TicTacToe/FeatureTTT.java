@@ -35,6 +35,15 @@ public class FeatureTTT extends TicTDBase implements Feature, Serializable {
 		super("", featmode);
 	}
 	
+	/**
+	 * This dummy stub is just needed here, because {@link FeatureTTT} is derived from 
+	 * {@link AgentBase}, which implements {@link PlayAgent} and thus requires this method. 
+	 * It should not be called. If called, it throws a RuntimeException.
+	 */
+	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+		throw new RuntimeException("FeatureTTT does not implement getNextAction2");
+	}
+	
 	@Override
 	public double[] prepareFeatVector(StateObservation sob) {
 		assert (sob instanceof StateObserverTTT) : "Input 'sob' is not of class StateObserverTTT";

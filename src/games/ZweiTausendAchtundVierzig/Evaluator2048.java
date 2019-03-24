@@ -117,7 +117,7 @@ public class Evaluator2048 extends Evaluator {
                 e.printStackTrace();
             }
 
-        } else if (	m_PlayAgent.getName().equals("ExpectimaxWrapper2") ) {
+        } else if (	m_PlayAgent.getName().equals("ExpectimaxWrapper") ) {
             //async for wrapper agents (ExpectiMaxN or MaxN tree nply)
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
 
@@ -181,7 +181,7 @@ public class Evaluator2048 extends Evaluator {
                         assert (so instanceof StateObserver2048) : "Oops, so is not a StateObserver2048 object!";
                     	StateObserver2048 so2048 = (StateObserver2048) so;
                     	nEmpty = so2048.getNumEmptyTiles();  
-                    	gameScore = so2048.getGameScore()*so2048.MAXSCORE;
+                    	gameScore = so2048.getGameScore(so2048)*so2048.MAXSCORE;
                     	cumEmpty += nEmpty;
                         pstats = new PStats(i,moveNum,gameScore,(double)nEmpty,(double)cumEmpty);
             			psList.add(pstats);

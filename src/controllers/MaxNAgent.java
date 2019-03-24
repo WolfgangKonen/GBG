@@ -58,15 +58,20 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		super.setGameNum(0);
         rand = new Random(System.currentTimeMillis());
 		hm = new HashMap<String, ScoreTuple>();
-		setAgentState(AgentState.TRAINED);
+		super.setAgentState(AgentState.TRAINED);
 	}
 	
 	public MaxNAgent(String name, ParMaxN mPar, ParOther oPar)
 	{
-		this(name);
+		super(name,oPar);
+		super.setMaxGameNum(1000);		
+		super.setGameNum(0);
+        rand = new Random(System.currentTimeMillis());
+		hm = new HashMap<String, ScoreTuple>();
+		super.setAgentState(AgentState.TRAINED);
 		m_depth = mPar.getMaxNDepth();
 		m_useHashMap = mPar.useMaxNHashmap();
-		m_oPar = new ParOther(oPar);		// AgentBase::m_oPar
+//		m_oPar = new ParOther(oPar);		// AgentBase::m_oPar
 	}
 		
 	public MaxNAgent(String name, int nply)
@@ -169,7 +174,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         	VTable[i] = currScoreTuple.scTup[player];
 			
 			// always *maximize* P's element in the tuple currScoreTuple, 
-			// where P is the player to move in state soND:
+			// where P is the player to move in state so:
 			ScoreTuple.CombineOP cOP = ScoreTuple.CombineOP.MAX;
 			scBest.combine(currScoreTuple, cOP, player, 0.0);            	
         } // for
@@ -239,15 +244,15 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 * an estimate of the game score. This function may be overridden in a game-
 	 * specific way by classes derived from {@link MaxNAgent}. 
 	 * <p>
-	 * This  stub method just returns {@link StateObservation#getReward(boolean)}, which might 
-	 * be too simplistic for not-yet finished games, because the current reward does not reflect  
-	 * future rewards.
+	 * This  stub method just returns {@link StateObservation#getReward(StateObservation, boolean)},
+	 * which might be too simplistic for not-yet finished games, because the current reward does   
+	 * not reflect future rewards.
 	 * @param sob	the state observation
 	 * @return		the estimated score
 	 */
 	@Override
 	public double estimateGameValue(StateObservation sob) {
-		return sob.getReward(true);
+		return sob.getReward(sob,true);
 	}
 
 	/**
@@ -255,7 +260,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 * an estimate of the game score (tuple for all players). This function may be overridden 
 	 * in a game-specific way by classes derived from {@link MaxNAgent}. 
 	 * <p>
-	 * This  stub method just returns {@link StateObservation#getReward(boolean)} for every 
+	 * This  stub method just returns {@link StateObservation#getReward(int,boolean)} for every 
 	 * player, which might be too simplistic for not-yet finished games, because the current 
 	 * reward may not reflect future rewards.
 	 * @param sob	the state observation

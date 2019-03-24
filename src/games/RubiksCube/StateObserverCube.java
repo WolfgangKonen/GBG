@@ -123,11 +123,13 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public CubeState getCubeState() {
 		return m_state;
 	}
+	
 	/**
+	 * @param refer only needed for the interface, not relevant in 1-person game
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 			For Rubik's Cube only game-over states have a non-zero game score. 
 	 */
-	public double getGameScore() {
+	public double getGameScore(StateObservation refer) {
         if(isGameOver()) return REWARD_POSITIVE;
         return 0; 
 	}

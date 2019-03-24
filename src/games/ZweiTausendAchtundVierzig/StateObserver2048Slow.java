@@ -394,7 +394,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     @Override
     public double getGameScore(StateObservation referingState) {
         assert (referingState instanceof StateObserver2048Slow) : "referingState is not of class StateObserver2048Slow";
-        return this.getGameScore();
+        return this.getGameScore(this);
     }
 
 	/**
@@ -405,7 +405,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 	 */
     @Override
 	public double getReward(boolean rewardIsGameScore) {
-		return getGameScore();
+		return this.getGameScore(this);
 	}
 	
 	/**
@@ -428,7 +428,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 	 * @return  the cumulative reward 
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
-        return this.getGameScore();
+        return this.getGameScore(this);
 	}
 
     @Override
@@ -1080,23 +1080,25 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
         updateAvailableMoves();
     }
     
-	/**
-	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
-	 * @return  the game score
-	 */
-	public double getGameScore(int player) {
-		return getGameScore();
-	}
+    // --- take the default implementation from ObserverBase ---
+//	/**
+//	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
+//	 * @param player the player of referringState, a number in 0,1,...,N.
+//	 * @return  the game score
+//	 */
+//	public double getGameScore(int player) {
+//		return getGameScore();
+//	}
 	
-	/**
-	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
-	 */
-	public ScoreTuple getGameScoreTuple() {
-		ScoreTuple sc = new ScoreTuple(1);
-		sc.scTup[0] = this.getGameScore();
-		return sc;
-	}
+    // --- take the default implementation from ObserverBase ---
+//	/**
+//	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
+//	 */
+//	public ScoreTuple getGameScoreTuple() {
+//		ScoreTuple sc = new ScoreTuple(1);
+//		sc.scTup[0] = this.getGameScore();
+//		return sc;
+//	}
 
 } // class StateObserver2048Slow
 

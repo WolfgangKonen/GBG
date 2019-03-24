@@ -145,20 +145,20 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 			For C4 only game-over states have a non-zero game score. 
-	 * 			It is the reward for the player who *would* move next (if 
-	 * 			the game were not over). 
+	 * 			It is the reward from the perspective of {@code refer}.
 	 */
-	public double getGameScore() {
+	public double getGameScore(StateObservation refer) {
+		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
         boolean gameOver = this.isGameOver();
         if(gameOver) {
             Types.WINNER win = this.getGameWinner();
         	switch(win) {
         	case PLAYER_LOSES:
-                return REWARD_NEGATIVE;
+                return sign*REWARD_NEGATIVE;
         	case TIE:
                 return 0;
         	case PLAYER_WINS:
-                return REWARD_POSITIVE;
+                return sign*REWARD_POSITIVE;
             default:
             	throw new RuntimeException("Wrong enum for Types.WINNER win !");
         	}

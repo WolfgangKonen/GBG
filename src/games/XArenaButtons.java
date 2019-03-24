@@ -157,10 +157,21 @@ public class XArenaButtons extends JPanel
 		showValOnGB = new JCheckBox("",true);
 		showValOnGB.setBackground(Types.GUI_BGCOLOR);
 
+		// add game-specific agent names for certain games (currently ConnectFour and Nim)
+		String gName = m_game.getGameName();
+		int offset = (gName=="ConnectFour" || gName=="Nim") ? 1 : 0;
+		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
+		for (int i=0; i<Types.GUI_AGENT_LIST.length; i++) gui_agent_list[i] = Types.GUI_AGENT_LIST[i];
+		if (gName=="ConnectFour") {
+			gui_agent_list[gui_agent_list.length-1] = "AlphaBeta";
+		} else if (gName=="Nim") {
+			gui_agent_list[gui_agent_list.length-1] = "Bouton";
+		}
+		
 		// for-loop over *decrementing* n so that we set on the last pass (n=0) the default
 		// for GameNumT from the Player at position 0 (which is the usual one to train)
 		for (int n=numPlayers-1; n>=0; n--) {
-			choiceAgent[n] = new JComboBox(Types.GUI_AGENT_LIST);
+			choiceAgent[n] = new JComboBox(gui_agent_list);
 			choiceAgent[n].setSelectedItem(Types.GUI_AGENT_INITIAL[n]);
 
 			// only applicable agents:

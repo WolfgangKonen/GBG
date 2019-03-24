@@ -43,9 +43,4 @@ public class HumanPlayer extends AgentBase implements PlayAgent
 //		return false;
 //	}
 
-	@Override
-	public String stringDescr() {
-		String cs = getClass().getName();
-		return cs;
-	}
 }

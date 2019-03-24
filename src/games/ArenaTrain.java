@@ -85,7 +85,11 @@ abstract public class ArenaTrain extends Arena
 	/**
 	 * This method uses the member taskState from parent class {@link Arena}, 
 	 * performs several actions only appropriate for {@link ArenaTrain} 
-	 * and - importantly - changes taskState back to IDLE (when appropriate)
+	 * and - importantly - changes taskState back to IDLE (when appropriate).
+	 * <p>
+	 * A class derived from {@link ArenaTrain} may override this method, but it 
+	 * should usually call inside with {@code super.performArenaDerivedTask()} this method, 
+	 * before extensions are added.
 	 * 
 	 * @see Arena
 	 */
@@ -156,7 +160,7 @@ abstract public class ArenaTrain extends Arena
 
 			enableButtons(true);
 			taskState = Task.IDLE; 
-			UpdateBoard();
+			updateBoard();
 			break;	
 //		case INSPECTNTUP:
 //			gb.clearBoard(false,true);
@@ -165,26 +169,27 @@ abstract public class ArenaTrain extends Arena
 //			break;
 		
 		}
-		
-		performArenaTrainDerivedTasks();
+	
+		//--- obsolete now, see super.performArenaDerivedTasks() in JavaDoc above
+//		performArenaTrainDerivedTasks();
 
 	}
 	
-	/**
-	 * This (empty) method is called from {@link #performArenaDerivedTasks()} and it 
-	 * may to be overridden by classes derived from {@link ArenaTrain}. <p>
-	 * 
-	 * It allows to add additional tasks to the task switch.
-	 * 
-	 * This method will use member {@code taskState} from {@link Arena}. 
-	 * It performs several actions appropriate for the derived class 
-	 * and - importantly - changes taskState back to IDLE (when appropriate)
-	 * 
-	 * @see Arena
-	 */
-	public void performArenaTrainDerivedTasks() {
-		
-	}
+//	/**
+//	 * This (empty) method is called from {@link #performArenaDerivedTasks()} and it 
+//	 * may to be overridden by classes derived from {@link ArenaTrain}. <p>
+//	 * 
+//	 * It allows to add additional tasks to the task switch.
+//	 * 
+//	 * This method will use member {@code taskState} from {@link Arena}. 
+//	 * It performs several actions appropriate for the derived class 
+//	 * and - importantly - changes taskState back to IDLE (when appropriate)
+//	 * 
+//	 * @see Arena
+//	 */
+//	public void performArenaTrainDerivedTasks() {
+//		
+//	}
 
 // *TODO* --- this may be integrated later in the general interface ---
 //

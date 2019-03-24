@@ -189,7 +189,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				str = "Compete finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
-				UpdateBoard();
+				updateBoard();
 				taskState = Task.IDLE;
 				break;
 			case SWAPCMP:
@@ -202,7 +202,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				str = "Swap Compete finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
-				UpdateBoard();
+				updateBoard();
 				taskState = Task.IDLE;
 				break;
 			case BOTHCMP:
@@ -215,7 +215,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				str = "Compete Both finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
-				UpdateBoard();
+				updateBoard();
 				taskState = Task.IDLE;
 				break;
 			case MULTCMP:
@@ -231,7 +231,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 				enableButtons(true);
 				setStatusMessage("Multi Compete finished.");
-				UpdateBoard();
+				updateBoard();
 				taskState = Task.IDLE;
 				break;
 			case TRNEMNT:    // Tournament Code
@@ -277,20 +277,7 @@ abstract public class Arena extends JFrame implements Runnable {
 						int[] progress = tournamentAgentManager.getTSProgress();
 						tsProgressBar.setValue(progress[0]);
 						System.out.println(TAG+"TS Progress "+ Arrays.toString(progress));
-					}/*
-					if (nextTeam[0].getAgentType().contains("Minimax") ||
-							nextTeam[1].getAgentType().contains("Minimax") ||
-							nextTeam[0].getAgentType().contains("MaxN") ||
-							nextTeam[1].getAgentType().contains("MaxN") ) { // is one a minimax or a maxn agent?
-						try {
-							System.out.println(TAG+"Pause to breathe...");
-							Thread.sleep(2500);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					} /*else {
-						System.out.println(TAG + "Agents played - A1:"+nextTeam[0].getAgentType()+" A2:"+nextTeam[1].getAgentType());
-					}*/
+					}
 				}
 
 				long end = System.currentTimeMillis();
@@ -348,10 +335,10 @@ abstract public class Arena extends JFrame implements Runnable {
 			// a derived class, e.g. ArenaTrain, may define additional tasks
 			// in this method
 
-		}
+		} // while (true)
 	}
 
-	protected void UpdateBoard() {
+	protected void updateBoard() {
 		gb.updateBoard(null, false, false);
 	}
 
@@ -688,9 +675,9 @@ abstract public class Arena extends JFrame implements Runnable {
 							StateObserver2048 so2048 = (StateObserver2048) so;
 							nEmpty = so2048.getNumEmptyTiles();
 							cumEmpty += nEmpty;
-							gameScore = so2048.getGameScore() * so2048.MAXSCORE;
+							gameScore = so2048.getGameScore(so2048) * so2048.MAXSCORE;
 						} else {
-							gameScore = so.getGameScore();
+							gameScore = so.getGameScore(so);
 						}
 						pstats = new PStats(1, so.getMoveCounter(), gameScore, (double) nEmpty, (double) cumEmpty);
 						psList.add(pstats);
@@ -733,7 +720,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 					switch (numPlayers) {
 					case 1:
-						double gScore = so.getGameScore();
+						double gScore = so.getGameScore(so);
 						if (so instanceof StateObserver2048)
 							gScore *= StateObserver2048.MAXSCORE;
 						if (!singlePlayerTSRunning)
@@ -772,7 +759,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				} // if isGameOver
 
 				if (so.getMoveCounter() > m_xab.oPar[0].getEpisodeLength()) {
-					double gScore = so.getGameScore();
+					double gScore = so.getGameScore(so);
 					int epiLength = m_xab.oPar[0].getEpisodeLength();
 					if (so instanceof StateObserver2048)
 						gScore *= StateObserver2048.MAXSCORE;

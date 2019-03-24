@@ -22,7 +22,7 @@ import tools.Types.ScoreTuple;
  * @see PlayAgent
  * @see controllers.MCTS.MCTSAgentT
  */
-abstract public class AgentBase implements Serializable {
+abstract public class AgentBase implements PlayAgent, Serializable {
 	/**
 	 * number of performed training games for trainable agents  
 	 */
@@ -56,6 +56,18 @@ abstract public class AgentBase implements Serializable {
 	public AgentBase(String name) {
 		m_name = name;
 	}
+
+	public AgentBase(String name, ParOther oPar) {
+		m_name = name;
+		m_oPar = new ParOther(oPar);
+	}
+
+	/**
+	 * This is just to signal that derived classes will be either abstract or
+	 * implement getNextAction2(), as required by the interface {@link PlayAgent} as
+	 * well. 
+	 */
+	 abstract public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
 
 	/**
 	 * This is just to signal that derived classes will be either abstract or
@@ -289,6 +301,11 @@ abstract public class AgentBase implements Serializable {
 		this.epochMax = epochMax;
 	}
 
+	public String stringDescr() {
+		String cs = getClass().getSimpleName();
+		return cs;
+	}
+	
 	public String stringDescr2() {
 		return getClass().getName() + ":";
 	}

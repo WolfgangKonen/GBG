@@ -728,7 +728,7 @@ public class SingleTreeNode implements Serializable
 		int N = 1; // include this
 		for (SingleTreeNode c : this.children)
 			if (c != null)
-				N += 1 + c.numDescendants();
+				N += c.numDescendants();
 		return N;
 	}
 

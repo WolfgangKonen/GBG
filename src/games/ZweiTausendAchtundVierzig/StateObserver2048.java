@@ -510,34 +510,27 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return null;
     }
 
-    public double getGameValue() { return getGameScore(); }
-
-    public double getGameScore() {
+	/**
+	 * @param refer only needed for the interface, not relevant in 1-person game 2048
+	 * @return 	the game score
+	 *  
+	 */
+    public double getGameScore(StateObservation referingState) {
 		return score / MAXSCORE;
     }
 
-    public double getGameScore(StateObservation referingState) {
-        //assert (referingState instanceof StateObserver2048) : "referingState is not of class StateObserver2048";
-        return this.getGameScore();
-    }
-
 	/**
-	 * The cumulative reward
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
-	 * @return the cumulative reward
+	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @return  the game score
 	 */
-    @Override
-	public double getReward(boolean rewardIsGameScore) {
-    	if (rewardIsGameScore) {
-    		return this.getGameScore();    		
-    	} else {
-    		return this.getCumulEmptyTiles();
-    	}
+	public double getGameScore(int player) {
+		return this.getGameScore(this);		// there is only one player in 2048
 	}
 	
 	/**
-	 * Same as getReward(), but relative to referringState. 
+	 * The cumulative reward, seen from the perspective of {@code referingState}'s player. This 
+	 * relativeness is usually only relevant for games with more than one player.
 	 * @param referringState
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
@@ -561,12 +554,29 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
     	if (rewardIsGameScore) {
-    		return getGameScore();    		
+    		return this.getGameScore(this);    		
     	} else {
     		return this.getCumulEmptyTiles();
     	}
 	}
 
+	// -- use the default implementation in ObserverBase which will call
+	// -- this.getReward(this,rewardIsGameScore)
+//	/**
+//	 * The cumulative reward
+//	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+//	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
+//	 * @return the cumulative reward
+//	 */
+//    @Override
+//	public double getReward(boolean rewardIsGameScore) {
+//    	if (rewardIsGameScore) {
+//    		return this.getGameScore(this);    		
+//    	} else {
+//    		return this.getCumulEmptyTiles();
+//    	}
+//	}
+	
     public double getMinGameScore() {
         return REWARD_NEGATIVE;
     }
@@ -1126,23 +1136,22 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return Long.hashCode(boardB);
     }
     
-	/**
-	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
-	 * @return  the game score
-	 */
-	public double getGameScore(int player) {
-		return getGameScore();
-	}
-	
-	/**
-	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
-	 */
-	public ScoreTuple getGameScoreTuple() {
-		ScoreTuple sc = new ScoreTuple(1);
-		sc.scTup[0] = this.getGameScore();
-		return sc;
-	}
+//    public double getGameValue() { return this.getGameScore(this); }
+
+    // --- take the default implementation from ObserverBase ---
+//    public double getGameScore() {
+//        return this.getGameScore(this);
+//    }
+
+    // --- take the default implementation from ObserverBase ---
+//	/**
+//	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
+//	 */
+//	public ScoreTuple getGameScoreTuple() {
+//		ScoreTuple sc = new ScoreTuple(1);
+//		sc.scTup[0] = this.getGameScore();
+//		return sc;
+//	}
 	
 	public int getHighestTileValue() {
 		return this.highestTileValue;

@@ -199,13 +199,19 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
     }
 
     @Override
-    public double getGameScore() {
+	/**
+	 * @return 	the game score, i.e. the sum of rewards for the current state. 
+	 * 			For Hex only game-over states have a non-zero game score. 
+	 * 			It is the reward from the perspective of {@code refer}.
+	 */
+    public double getGameScore(StateObservation refer) {
+		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
         int winner = determineWinner();
         if (winner == PLAYER_NONE) {
             return 0;
         }
 
-        return (winner == currentPlayer ? REWARD_NEGATIVE : REWARD_POSITIVE);
+        return sign*(winner == currentPlayer ? REWARD_NEGATIVE : REWARD_POSITIVE);
     }
 
     @Override

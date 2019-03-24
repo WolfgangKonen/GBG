@@ -556,7 +556,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			System.out.print("Rewards: ");
 			System.out.print(ns.nextRewardTuple.toString());
 //			System.out.print("Reward: "+ns.nextReward);
-			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore() + " for player " + ns.nextSO.getPlayer());
+			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore(ns.nextSO) 
+							 + " for player " + ns.nextSO.getPlayer());
 		}
 	}
 	

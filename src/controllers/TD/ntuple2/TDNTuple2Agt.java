@@ -1306,7 +1306,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 			} else {
 				System.out.print("Reward: "+ns.nextReward);
 			}
-			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore() + " for player " + ns.nextSO.getPlayer());
+			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore(ns.nextSO) 
+							 + " for player " + ns.nextSO.getPlayer());
 		}
 	}
 	

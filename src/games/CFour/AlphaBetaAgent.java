@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 import controllers.PlayAgent;
+import controllers.PlayAgent.AgentState;
 import games.StateObservation;
 //import nTupleTD.TDSAgent;
 import games.CFour.openingBook.BookSum;
@@ -34,6 +35,8 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	private static final long serialVersionUID = 5000820077350196867L;
 
 	private Random rand = new Random();
+	private AgentState m_agentState = AgentState.TRAINED;
+	private String m_name = "Alpha-Beta-Agent";
 
 	// Binary Semaphore, to prevent multiple access (e.g. by parallel threads)
 	private Semaphore mutex; // = new Semaphore(1);
@@ -4297,7 +4300,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	 * @see c4.PlayAgent#getName()
 	 */
 	public String getName() {
-		return new String("Alpha-Beta-Agent");
+		return m_name;
 	}
 
 	/*
@@ -4386,41 +4389,41 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	}
 
 	@Override
-	public double getScore(StateObservation sob) {
-		assert (sob instanceof StateObserverC4);
-		StateObserverC4 sc = (StateObserverC4) sob; 
+	public double getScore(StateObservation so) {
+		assert (so instanceof StateObserverC4);
+		StateObserverC4 sc = (StateObserverC4) so; 
 		this.setBoard(sc.getBoard());
 		return getScore(sc.getBoard(),false);
 	}
 
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation sob) {
-		// TODO Auto-generated method stub
-		return null;
+	public ScoreTuple getScoreTuple(StateObservation so) {
+        int player = so.getPlayer();
+        int opponent = (player==0) ? 1 : 0;
+		ScoreTuple sTuple = new ScoreTuple(2);
+		sTuple.scTup[player] = getScore(so);
+		sTuple.scTup[opponent] = -sTuple.scTup[player];
+		return sTuple;
 	}
 
 	@Override
-	public double estimateGameValue(StateObservation sob) {
-		// TODO Auto-generated method stub
-		return 0;
+	public double estimateGameValue(StateObservation so) {
+		return getScore(so);
 	}
 
 	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
-		// TODO Auto-generated method stub
-		return null;
+	public ScoreTuple estimateGameValueTuple(StateObservation so) {
+		return getScoreTuple(so);
 	}
 
 	@Override
 	public boolean trainAgent(StateObservation so) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public String printTrainStatus() {
-		// TODO Auto-generated method stub
-		return null;
+		return "AlphaBetaAgent::printTrain"; // dummy stub
 	}
 
 	@Override
@@ -4430,21 +4433,19 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 	@Override
 	public String stringDescr() {
-		String cs = getClass().getName();
+		String cs = getClass().getSimpleName();
 		cs = cs + ", depth:"+this.searchDepth;
 		return cs;
 	}
 
 	@Override
 	public String stringDescr2() {
-		// TODO Auto-generated method stub
-		return null;
+		return getClass().getName() + ":";
 	}
 
 	@Override
 	public byte getSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1;  // dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
 	}
 
 	@Override
@@ -4509,20 +4510,17 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 	@Override
 	public AgentState getAgentState() {
-		// TODO Auto-generated method stub
-		return null;
+		return m_agentState;
 	}
 
 	@Override
 	public void setAgentState(AgentState aState) {
-		// TODO Auto-generated method stub
-		
+		m_agentState = aState;
 	}
 
 	@Override
 	public void setName(String name) {
-		// TODO Auto-generated method stub
-		
+		m_name = name;
 	}
 
 

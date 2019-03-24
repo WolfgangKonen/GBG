@@ -194,6 +194,7 @@ public class Types {
      *	ScoreTuple: a tuple with scores (game values) for all players.
      * 
      *	@see MaxNAgent
+     *	@see BoutonAgent
      */
     public static class ScoreTuple {
     	public enum CombineOP {AVG,MIN,MAX,DIFF};
@@ -237,9 +238,9 @@ public class Types {
     	 * <li> <b>AVG</b>: weighted average or expectation value with probability weight 
     	 * 		{@code currProbab}. The probability weights of all combined tuples should sum
     	 *   	up to 1.
-    	 * <li> <b>MIN</b>: combine by retaining the {@code currScoreTuple}, which has the
+    	 * <li> <b>MIN</b>: combine by retaining this {@link ScoreTuple}, which has the
     	 * 		minimal value in {@code scTup[playNum]}, the score for player {@code playNum}
-    	 * <li> <b>MAX</b>: combine by retaining the {@code currScoreTuple}, which has the
+    	 * <li> <b>MAX</b>: combine by retaining this {@link ScoreTuple}, which has the
     	 * 		maximal value in {@code scTup[playNum]}, the score for player {@code playNum}
     	 * <li> <b>DIFF</b>: subtract from {@code this} all values in the other {@link ScoreTuple}  
     	 * 		{@code tuple2nd}.
@@ -247,13 +248,14 @@ public class Types {
     	 * 
     	 * @param tuple2nd 		the new {@link ScoreTuple} 
     	 * @param cOP			combine operator 	
-    	 * @param playNum		player number (needed for {@code cOP}==MIN,MAX)
-    	 * @param currProbab	probability (needed for {@code cOP}==AVG)
+    	 * @param playNum		player number (needed only for {@code cOP}==MIN,MAX)
+    	 * @param currProbab	probability weight of {@code tuple2nd} (needed for {@code cOP}==AVG)
     	 */
     	public void combine(ScoreTuple tuple2nd, CombineOP cOP, int playNum, double currProbab)
     	{
     		switch(cOP) {
     		case AVG: 
+    			// form a weighted average of all combined tuples where the weight of tuple2nd is currProbab:
         		for (int i=0; i<scTup.length; i++) scTup[i] += currProbab*tuple2nd.scTup[i];
         		break;
     		case MIN:
@@ -288,7 +290,7 @@ public class Types {
      *  @see ACTIONS_VT
      *  @see MaxNAgent
      */
-    public static class ACTIONS_ST extends Types.ACTIONS {
+    public static class ACTIONS_ST extends ACTIONS {
     	public ScoreTuple m_st;
     	public ACTIONS_ST(Types.ACTIONS oa, ScoreTuple st) {
     		super(oa);

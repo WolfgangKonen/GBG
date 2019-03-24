@@ -34,19 +34,32 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
-	 * an estimate of the game score (tuple for all players).  
+	 * an estimate of the game score.  
 	 * <p>
-	 * Here we use the wrapped {@link PlayAgent} to return a score tuple.
+	 * Here we use the wrapped {@link PlayAgent} to return a game value.
 	 * 
 	 * @param sob	the state observation
-	 * @return		the estimated score tuple
+	 * @return		the estimated score 
+	 */
+	@Override
+	public double estimateGameValue(StateObservation sob) {	
+		return wrapped_pa.getScore(sob);
+	}
+
+	/**
+	 * When the recursion tree has reached its maximal depth m_depth, then return
+	 * an estimate of the game score (tuple for all players).  
+	 * <p>
+	 * Here we use the wrapped {@link PlayAgent} to return a tuple of game values.
+	 * 
+	 * @param sob	the state observation
+	 * @return		the tuple of estimated score 
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
 		//--- only debug ---
 //		double x = wrapped_pa.getScoreTuple(sob).scTup[0];
-//		System.out.println(sob.stringDescr()+":  "+x);
-		
+//		System.out.println(sob.stringDescr()+":  "+x);		
 		return wrapped_pa.getScoreTuple(sob);
 	}
 	
@@ -61,8 +74,9 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 		return cs;
 	}
 
-	@Override
-	public String getName() {
+	// getName: use method ObserverBase::getName()
+	
+	public String getFullName() {
 		String cs = wrapped_pa.getName();
 		cs = cs + "[nPly="+m_depth+"]";
 		return cs;

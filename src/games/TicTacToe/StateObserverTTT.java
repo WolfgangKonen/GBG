@@ -24,7 +24,6 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	private int[][] m_Table;		// current board position
 	private int m_Player;			// player who makes the next move (+1 or -1)
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
-//	protected Types.ACTIONS[] actions;
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -79,11 +78,6 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		return true;
 	}
 
-//    @Override
-//	public boolean has2OppositeRewards() {
-//		return true;
-//	}
-
     @Override
 	public boolean isLegalState() {
 		return TicTDBase.legalState(m_Table,m_Player);
@@ -135,31 +129,25 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 			return Types.WINNER.TIE;
 		
 		throw new RuntimeException("Unexpected case: we cannot have a win for the player to move!");
-//		if (TicTDBase.Win(m_Table, m_Player)) {		
-//			int dummy=1; // this should normally not happen in TTT
-//						 // (the player who is to move is not the winner if game is over)
-//			return Types.WINNER.PLAYER_WINS;
-//		}
-//		return null;
 	}
 
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 			For TTT only game-over states have a non-zero game score. 
-	 * 			It is the reward for the player who *would* move next (if 
-	 * 			the game were not over). 
+	 * 			It is the reward from the perspective of {@code refer}.
 	 */
-	public double getGameScore() {
+	public double getGameScore(StateObservation refer) {
+		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
         boolean gameOver = this.isGameOver();
         if(gameOver) {
             Types.WINNER win = this.getGameWinner();
         	switch(win) {
         	case PLAYER_LOSES:
-                return REWARD_NEGATIVE;
+                return sign*REWARD_NEGATIVE;
         	case TIE:
                 return 0;
         	case PLAYER_WINS:
-                return REWARD_POSITIVE;
+                return sign*REWARD_POSITIVE;
             default:
             	throw new RuntimeException("Wrong enum for Types.WINNER win !");
         	}
@@ -186,21 +174,9 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		assert m_Table[i][j]==0 : "The desired move would alter an already occupied field!";
     	m_Table[i][j] = m_Player;
     	
-    	setAvailableActions(); 			// IMPORTANT: adjust the available actions (have reduced by one)
+    	setAvailableActions(); 		// IMPORTANT: adjust the available actions (have reduced by one)
     	
-    	// set up player for next advance()
-//    	int n=this.getNumPlayers();
-//    	switch (n) {
-//    	case (1): 
-//    		m_Player = m_Player; 
-//    		break;
-//    	case (2): 
-    		m_Player = m_Player*(-1);    // 2-player games: 1,-1,1,-1,...
-//    		break;
-//    	default: 
-//    		m_Player = (m_Player+1) % n;  // many-player games: 0,1,...,n-1,0,1,...
-//    		break;
-//    	}   	
+		m_Player = m_Player*(-1);    // 2-player games: 1,-1,1,-1,...
     		
 		super.incrementMoveCounter();
 	}
@@ -273,13 +249,6 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	public int getPlayer() {
 		return (-m_Player+1)/2;
 	}
-//	/**
-//	 * @return 	{+1,-1} for the player to move next
-//	 * 			Player +1 is X, the player who starts the game. Player -1 is O.
-//	 */
-//	public int getPlayerPM() {
-//		return m_Player;
-//	}
 	
 	public int getNumPlayers() {
 		return 2;				// TicTacToe is a 2-player game

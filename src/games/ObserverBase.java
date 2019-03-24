@@ -8,21 +8,26 @@ import tools.Types.ACTIONS;
 import tools.Types.ScoreTuple;
 
 /**
- * Class {@link ObserverBase} implements functionality of the interface {@link StateObservation} 
- * common to all games (things related to advance, game value, reward, ...).
+ * Class {@link ObserverBase} implements as <b>abstract</b> class the interface  
+ * {@link StateObservation} common to all games (things related to advance, game score, reward, ...).
  * <p>
  * This default behavior in {@link ObserverBase} - which may be overridden in derived classes -
- * is for deterministic, 2-player games, where reward and game score are the same.
+ * is for deterministic, 2-player games, where reward and game score are the same. (If one of 
+ * the {@code getReward}-functions in {@link ObserverBase} is called with 
+ * 		{@code boolean rewardIsGameScore==false}, 
+ * a warning is issued.)
  * 
  * @see StateObservation
  */
-abstract public class ObserverBase {
+abstract public class ObserverBase implements StateObservation {
 	protected int m_counter = 0;
 	
     protected Types.ACTIONS[] storedActions = null;
     protected Types.ACTIONS storedActBest = null;
     protected double[] storedValues = null;
     protected double storedMaxScore; 
+    
+    private String sWarn = "WARNING getReward: Case rgs==false is not handled in Observerbase!";
 	
 	/**
 	 * Given the current state, store some info useful for inspecting the  
@@ -123,29 +128,38 @@ abstract public class ObserverBase {
 	}
 	
 	/**
-	 * This is just to signal that derived classes will be either abstract or implement
-	 * getGameScore(), as required by the interface {@link StateObservation} as well.
-	 */
-	abstract public double getGameScore();
-
-	/**
-	 * Same as getGameScore(), but relative to referingState. This relativeness
-	 * is usually only relevant for games with more than one player.
+	 * The game score of {@code this}, from the perspective of the player to move in {@code this}.
 	 * <p>
 	 * This implementation is valid for all classes implementing {@link StateObservation}, once
-	 * they have a valid implementation for {@link #getGameScore(int)}.
+	 * they have a valid implementation for {@link #getGameScore(StateObservation)}.
+	 * <p>
+	 * This method is deprecated, use instead 
+	 * {@link #getGameScore(StateObservation) this.getGameScore(this)}.
+	 */
+	@Deprecated
+	public double getGameScore() {
+		return this.getGameScore((StateObservation) this);
+	}
+
+	/**
+	 * The game score, seen from the perspective of {@code referingState}'s player. This 
+	 * relativeness is usually only relevant for games with more than one player.
+	 * <p>
+	 * The keyword abstract signals that derived classes will be either abstract or implement
+	 * {@link #getGameScore(StateObservation)}, as required by the interface {@link StateObservation} as well.
 	 * 
 	 * @param referringState see below
-	 * @return  If referringState has the same player as this, then it is getGameScore().<br> 
+	 * @return  If referringState has the same player as {@code this}, then it is getGameScore().<br> 
 	 * 			If referringState has opposite player, then it is getGameScore()*(-1). 
 	 */
-    public double getGameScore(StateObservation referringState) {
-    	return getGameScore(referringState.getPlayer());
-    }
+    abstract public double getGameScore(StateObservation referringState);
+//    public double getGameScore(StateObservation referringState) {
+//    	return getGameScore(referringState.getPlayer());
+//    }
 	
 
 	/**
-	 * Same as {@link #getGameScore()}, but from the perspective of player {@code player}. The 
+	 * The game score, seen from the perspective of player {@code player}. The 
 	 * perspective shift is usually only relevant for games with more than one player.
 	 * <p>
 	 * This implementation in {@link ObserverBase} is only valid for 1- or 2-player games.
@@ -155,8 +169,8 @@ abstract public class ObserverBase {
 	 * 			If they are different, then it is getGameScore()*(-1). 
 	 */
 	public double getGameScore(int player) {
-    	assert (this.getNumPlayers()<=2) : "ObserverBase's implementation of getGameScore(ref) is not valid for current class";
-		return (this.getPlayer() == player ? getGameScore() : (-1)*getGameScore() );
+    	assert (this.getNumPlayers()<=2) : "ObserverBase's implementation of getGameScore(int) is not valid for current class";
+		return (this.getPlayer() == player ? this.getGameScore(this) : (-1)*this.getGameScore(this) );
 	}
 	
 	/**
@@ -175,19 +189,26 @@ abstract public class ObserverBase {
 	}
 
 	/**
-	 * The cumulative reward. 
+	 * The cumulative reward of {@code this}, from the perspective of the player to move in {@code this}.
+	 * <p> 
 	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
+	 * <p>
+	 * This method is deprecated, use instead
+	 * {@link #getReward(StateObservation,boolean) this.getGameScore(this,rewardIsGameScore)}.
 	 * 
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return the cumulative reward
 	 */
+	@Deprecated
 	public double getReward(boolean rewardIsGameScore) {
-		return getGameScore();
+		return this.getReward(this,rewardIsGameScore);
 	}
 	
 	/**
-	 * Same as getReward(), but relative to referringState. 
+	 * The cumulative reward, seen from the perspective of {@code referingState}'s player. This 
+	 * relativeness is usually only relevant for games with more than one player.
+	 * <p> 
 	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
 	 * 
 	 * @param referringState
@@ -196,11 +217,16 @@ abstract public class ObserverBase {
 	 * @return the cumulative reward 
 	 */
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+		if (rewardIsGameScore==false) {
+			System.out.println(sWarn);
+//			throw new RuntimeException(sWarn);
+		}
 		return getGameScore(referringState);
 	}
 
 	/**
 	 * Same as {@link #getReward(StateObservation,boolean)}, but with the player of referringState.
+	 * <p>
 	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
 	 *  
 	 * @param player the player of referringState, a number in 0,1,...,N.
@@ -209,7 +235,9 @@ abstract public class ObserverBase {
 	 * @return  the cumulative reward 
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
-        return getGameScore(player);
+    	assert (this.getNumPlayers()<=2) : "ObserverBase's implementation of getReward(int,boolean) is not valid for current class";
+		return (this.getPlayer() == player ? this.getReward(this,rewardIsGameScore) 
+									  : (-1)*this.getReward(this,rewardIsGameScore) );
 	}
 	
 	/**

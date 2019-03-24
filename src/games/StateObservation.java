@@ -94,28 +94,35 @@ public interface StateObservation extends Serializable{
 //	public double getGameValue();
 	
 	/**
-	 * @return 	the game score, i.e. the sum of rewards for the current state. 
+	 * This method is deprecated, use instead 
+	 * {@link #getGameScore(StateObservation) this.getGameScore(this)}.
+	 * 
+	 * @return 	the game score of {@code this}, from the perspective of the player to move in {@code this}.
 	 * 			For a 2-player game the score is often only non-zero for a 
-	 * 			game-over state.  
-	 * 			For a 1-player game it is the cumulative reward.
+	 * 			game-over state. For all games it is the cumulative score.
+	 * <p>
 	 */
+	@Deprecated
 	public double getGameScore();
 	
 	/**
-	 * Same as {@link #getGameScore()}, but relative to referringState. This relativeness
-	 * is only relevant for &ge; 2-player games.
-	 * @param referringState	see below
-	 * @return  If referringState has the same player as this, then it is getGameScore().<br> 
-	 * 			If referringState has opposite player, then it is getGameScore()*(-1). <br>
-	 * 			This is for 2-player games. For N-player games, it has to return the game 
-	 * 			score for the player of referringState.
+	 * The game score, seen from the perspective of {@code referingState}'s player. This 
+	 * relativeness is usually only relevant for games with more than one player.
+	 * <p>
+	 * The keyword abstract signals that derived classes will be either abstract or implement
+	 * {@link #getGameScore(StateObservation)}, as required by the interface {@link StateObservation} as well.
+	 * 
+	 * @param referringState see below
+	 * @return  If referringState has the same player as {@code this}, then it is getGameScore().<br> 
+	 * 			If referringState has opposite player, then it is getGameScore()*(-1). 
 	 */
 	public double getGameScore(StateObservation referringState);
 	
 	/**
-	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
-	 * @return  the game score
+	 * Same as {@link #getGameScore(StateObservation refer)}, but with the player of state refer. 
+	 * @param player the player whose perspective is taken, a number in 0,1,...,N.
+	 * @return  If {@code player} and {@code this.player} are the same, then it is getGameScore().<br> 
+	 * 			If they are different, then it is getGameScore()*(-1). 
 	 */
 	public double getGameScore(int player);
 	
@@ -126,15 +133,21 @@ public interface StateObservation extends Serializable{
 	public ScoreTuple getGameScoreTuple();
 
 	/**
-	 * The cumulative reward, can be the same as getGameScore()
+	 * The cumulative reward of {@code this}, from the perspective of the player to move in {@code this}.
+	 * <p>
+	 * This method is deprecated, use instead
+	 * {@link #getReward(StateObservation,boolean) this.getGameScore(this,rewardIsGameScore)}.
+	 * 
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return the cumulative reward
 	 */
+	@Deprecated
 	public double getReward(boolean rewardIsGameScore);
 	
 	/**
-	 * Same as getReward(), but relative to referringState. 
+	 * The cumulative reward, seen from the perspective of {@code referingState}'s player. This 
+	 * relativeness is usually only relevant for games with more than one player.
 	 * @param referringState	see {@link #getGameScore(StateObservation)}
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
