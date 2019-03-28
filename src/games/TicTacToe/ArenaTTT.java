@@ -11,7 +11,6 @@ import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
 import games.ArenaTrain;
-//import params.TDParams;
 
 /**
  * {@link Arena} for TicTacToe. It borrows all functionality
@@ -38,10 +37,6 @@ public class ArenaTTT extends Arena   {
 	public ArenaTTT() {
 		super();
 	}
-
-//	public ArenaTTT(JFrame frame) {
-//		super(frame);
-//	}
 
 	public ArenaTTT(String title) {
 		super(title);		
@@ -72,12 +67,10 @@ public class ArenaTTT extends Arena   {
 	 * 					prematurely)
 	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-	 * 					If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		if (mode==-1) mode=EvaluatorTTT.getDefaultEvalMode();
 		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
 	}
 	
@@ -88,11 +81,6 @@ public class ArenaTTT extends Arena   {
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncsTTT();
 	}
-
-//	public PlayAgent makeTDSAgent(String sAgent, TDParams tdPar, int maxGameNum){
-//		return new TDPlayerTTT(sAgent,tdPar,maxGameNum);
-//	}
-	
 
 	public void performArenaDerivedTasks() {  }
 
@@ -114,5 +102,4 @@ public class ArenaTTT extends Arena   {
 		}
 	}
 	
-
 }

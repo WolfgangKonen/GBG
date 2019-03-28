@@ -11,7 +11,6 @@ import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
 import games.ArenaTrain;
-//import params.TDParams;
 
 /**
  * {@link Arena} for Nim. It borrows all functionality
@@ -38,10 +37,6 @@ public class ArenaNim extends Arena   {
 	public ArenaNim() {
 		super();
 	}
-
-//	public ArenaNim(JFrame frame) {
-//		super(frame);
-//	}
 
 	public ArenaNim(String title) {
 		super(title);		
@@ -72,12 +67,11 @@ public class ArenaNim extends Arena   {
 	 * 					prematurely)
 	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-	 * 					If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		if (mode==-1) mode=EvaluatorNim.getDefaultEvalMode();
+//		if (mode==-1) mode=EvaluatorNim.getDefaultEvalMode();
 		return new EvaluatorNim(pa,gb,stopEval,mode,verbose);
 	}
 	

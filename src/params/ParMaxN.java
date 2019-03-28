@@ -20,7 +20,7 @@ public class ParMaxN implements Serializable {
     public static int DEFAULT_MAXN_TREE_DEPTH = 10;
     
     private int maxNTreeDepth = DEFAULT_MAXN_TREE_DEPTH;
-    private boolean maxNHashmap = true;
+    private boolean maxNUseHashmap = true;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -33,7 +33,7 @@ public class ParMaxN implements Serializable {
     
 	public ParMaxN(ParMaxN op) {
 		this.maxNTreeDepth = op.getMaxNDepth();
-		this.maxNHashmap = op.useMaxNHashmap();	
+		this.maxNUseHashmap = op.useMaxNHashmap();	
 	}
 	
     public ParMaxN(MaxNParams op) { 
@@ -42,11 +42,15 @@ public class ParMaxN implements Serializable {
     
 	public void setFrom(MaxNParams op) {
 		this.maxNTreeDepth = op.getMaxnDepth();
-		this.maxNHashmap = op.useMaxNHashmap();	
+		this.maxNUseHashmap = op.useMaxNHashmap();	
 	}
 	
 	public void setMaxNDepth(int treeDepth) {
 		this.maxNTreeDepth = treeDepth;
+	}
+
+	public void setMaxNUseHashmap(boolean useHM) {
+		this.maxNUseHashmap = useHM;
 	}
 
 	public int getMaxNDepth() {
@@ -54,7 +58,7 @@ public class ParMaxN implements Serializable {
 	}
 
 	public boolean useMaxNHashmap() {
-		return maxNHashmap;
+		return maxNUseHashmap;
 	}
 
 }

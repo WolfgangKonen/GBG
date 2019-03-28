@@ -26,7 +26,7 @@ import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
-import controllers.MCTS0.MCTSAgentT0;
+//import controllers.MCTS0.MCTSAgentT0;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.SarsaAgt;
@@ -604,20 +604,14 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.ntPar[n].setFrom( ((SarsaAgt) td).getParNT() );
 				m_arena.m_xab.oPar[n].setFrom( ((SarsaAgt) td).getParOther() );
 			}
-			else if (td instanceof MCTSAgentT0) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT0) td).getParMCTS() );
-				// now done in LoadSaveGBG::loadGBGAgent():
-//				if (((MCTSAgentT) td).getParOther() == null ) 
-//					((MCTSAgentT) td).setDefaultOtherPar();
-				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT0) td).getParOther() );
-			}
+//			else if (td instanceof MCTSAgentT0) {
+//				// set the agent parameters in XArenaTabs:
+//				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT0) td).getParMCTS() );
+//				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT0) td).getParOther() );
+//			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT) td).getParMCTS() );
-				// now done in LoadSaveGBG::loadGBGAgent():
-//				if (((MCTSAgentT) td).getParOther() == null ) 
-//					((MCTSAgentT) td).setDefaultOtherPar();
 				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT) td).getParOther() );
 			}
 			else if (td instanceof MCTSExpectimaxAgt) {

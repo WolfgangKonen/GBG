@@ -4,12 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.swing.JOptionPane;
-
 import agentIO.AgentLoader;
 import controllers.MaxNAgent;
-//import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import games.ArenaTrain;
@@ -31,39 +28,28 @@ import tools.Types;
 public class EvaluatorTTT extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {-1,0,1,2,11};		//9,
 	private RandomAgent random_agent = new RandomAgent("Random");
-//	private MinimaxAgent maxNAgent = new MinimaxAgent("Minimax");
 	private MaxNAgent maxNAgent = new MaxNAgent("Max-N");
 	private AgentLoader agtLoader = null;
-//	private Evaluator9 m_evaluator9 = null; 
-	private int m_mode;
-	private double m_res=-1;		// avg. success against RandomPlayer, best is 0.9 (m_mode=0)
-									// or against MaxNAgent, best is 0.0 (m_mode=1,2)
-	private String m_msg;
+//	private int m_mode;
 	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
 	private GameBoard m_gb;
 	
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, stopEval);
-//		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
-		initEvaluator(gb,1);
+		super(e_PlayAgent, 1, stopEval);
+		initEvaluator(gb);
 	}
 
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, stopEval);
-//		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
-		initEvaluator(gb,mode);
+		super(e_PlayAgent, mode, stopEval);
+		initEvaluator(gb);
 	}
 
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, stopEval, verbose);
-//		m_evaluator9 = new Evaluator9(e_PlayAgent,stopEval);
-		initEvaluator(gb,mode);
+		super(e_PlayAgent, mode, stopEval, verbose);
+		initEvaluator(gb);
 	}
 	
-	private void initEvaluator(GameBoard gb, int mode) {
-		if (!isAvailableMode(mode)) 
-			throw new RuntimeException("EvaluatorTTT: Value mode = "+mode+" is not allowed!");
-		m_mode = mode;
+	private void initEvaluator(GameBoard gb) {
 		m_gb = gb;				
 	}
 	
@@ -79,13 +65,16 @@ public class EvaluatorTTT extends Evaluator {
 	public boolean eval_Agent(PlayAgent playAgent) {
 		m_PlayAgent = playAgent;
 		switch(m_mode) {
+		case -1: 
+			m_msg = "no evaluation done ";
+			lastResult = Double.NaN;
+			return false;
 		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
 		case 1:  return evaluateAgent1(m_PlayAgent,m_gb)>m_thresh[1];
 		case 2:  return evaluateAgent2(m_PlayAgent,maxNAgent,m_gb)>m_thresh[2];
 		case 11: 
 			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
 			return evaluateAgent2(m_PlayAgent,agtLoader.getAgent(),m_gb)>m_thresh[2];
-//		case 9:  return m_evaluator9.eval_Agent(playAgent);
 		default: return false;
 		}
 	}
@@ -98,10 +87,10 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		m_res = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
+		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return m_res;
+		return lastResult;
 	}
 
  	/**	
@@ -112,10 +101,10 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		m_res = XArenaFuncs.competeBoth(pa, maxNAgent, so, 1, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
+		lastResult = XArenaFuncs.competeBoth(pa, maxNAgent, so, 1, 0, gb);
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return m_res;
+		return lastResult;
 	}
  	
  	/**
@@ -136,14 +125,15 @@ public class EvaluatorTTT extends Evaluator {
 						, "------X--","-----X---","----X----"
 						, "---X-----","--X------","-X-------"
 						, "X--------"};
-		m_res=0;
+		lastResult=0;
 		
 		if (opponent == null) {
 			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
 			MessageBox.show(gb.getArena(),"ERROR: " + tdstr,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
-			m_res = Double.NaN;
-			return m_res;
+			lastResult = Double.NaN;
+			m_msg = "EvaluatorTTT: opponent is null!";
+			return lastResult;
 		} 
 
 		for (int k=0; k<state.length; ++k) {
@@ -157,14 +147,14 @@ public class EvaluatorTTT extends Evaluator {
 			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
 											// resp. \in [-1,0], if opponent never looses.
 											// +1 is best for pa, -1 worst for pa.
-			m_res += (resX+resO)/2.0;
+			lastResult += (resX+resO)/2.0;
 		}
-		m_res=m_res/state.length;
+		lastResult=lastResult/state.length;
 		
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		
-		return m_res;
+		return lastResult;
 	}
  	
  	/**
@@ -172,26 +162,28 @@ public class EvaluatorTTT extends Evaluator {
  	 * empty board ({@code mode==1}) or from different start positions ({@code mode==2}), 
  	 * depending on {@code mode} as set in constructor.
  	 */
- 	public double getOm() { return m_res; }
+ 	public double getOm() { return lastResult; }
  	
- 	@Override
- 	public double getLastResult() { 
- 		return m_res;
-// 		return (m_mode==9) ? m_evaluator9.getLastResult() : m_res; 
- 	}
- 	@Override
- 	public String getMsg() { 
- 		return m_msg;
-// 		return (m_mode==9) ? m_evaluator9.getMsg() : m_msg; 
- 	} 
+ 	// --- implemented by Evaluator ---
+// 	@Override
+// 	public double getLastResult() { 
+// 		return lastResult;
+// 	}
  	
-	@Override
- 	public boolean isAvailableMode(int mode) {
-		for (int i : AVAILABLE_MODES) {
-			if (mode==i) return true;
-		}
-		return false;
- 	}
+ 	// --- implemented by Evaluator ---
+// 	@Override
+// 	public String getMsg() { 
+// 		return m_msg;
+// 	} 
+ 	
+ 	// --- implemented by Evaluator ---
+//	@Override
+// 	public boolean isAvailableMode(int mode) {
+//		for (int i : AVAILABLE_MODES) {
+//			if (mode==i) return true;
+//		}
+//		return false;
+// 	}
  	
  	@Override
  	public int[] getAvailableModes() {
@@ -199,7 +191,7 @@ public class EvaluatorTTT extends Evaluator {
  	}
  	
  	//@Override
- 	public static int getDefaultEvalMode() {
+ 	public int getDefaultEvalMode() {
 		return AVAILABLE_MODES[2];		// mode 2
 	}
  	
@@ -211,31 +203,37 @@ public class EvaluatorTTT extends Evaluator {
 	{
 		return 9;
 	}
-	public int getMultiTrainEvalMode() 
-	{
-		return 0;
-	}
+//	public int getMultiTrainEvalMode() 
+//	{
+//		return 0;
+//	}
 
 	@Override
 	public String getPrintString() {
 		switch (m_mode) {
-		case 0:  return "success rate (randomAgent, best is 0.9): ";
-		case 1:  return "success rate (Max-N, best is 0.0): ";
-		case 2:  return "success rate (Max-N, different starts, best is 0.0): ";
-//		case 9:  return "success rate (Evaluator9, best is ?): ";	
-		case 11: return "success rate (TDReferee, different starts, best is 0.0): ";
+		case -1: return "no evaluation done ";
+		case 0:  return "success rate (against randomAgent, best is 0.9): ";
+		case 1:  return "success rate (against Max-N, best is 0.0): ";
+		case 2:  return "success rate (against Max-N, different starts, best is 0.0): ";
+		case 11: return "success rate (against TDReferee, different starts, best is ?): ";
 		default: return null;
 		}
 	}
 	
+	/**
+	 * Derived classes return a tooltip string with this method. Use 
+	 * <pre>
+	 *    "&lt;html> ... &lt;br> ... &lt;/html>"  </pre>
+	 * to get multi-line tooltip text 
+	 * @return the tooltip string for evaluator boxes in "Other pars"
+	 */
+	// Use "<html> ... <br> ... </html>" to get multi-line tooltip text
 	@Override
 	public String getTooltipString() {
-		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
 				+ "0: against Random, best is 0.9<br>"
 				+ "1: against Max-N, best is 0.0<br>"
 				+ "2: against Max-N, different starts, best is 0.0<br>"
-//				+ "9: evaluate set of states, best is ?<br>"
 				+ "11: against TDReferee.agt.zip, different starts"
 				+ "</html>";
 	}
@@ -246,7 +244,6 @@ public class EvaluatorTTT extends Evaluator {
 		case 0:  return "success against Random";
 		case 1:  return "success against Max-N";
 		case 2:  return "success against Max-N, dStart";
-//		case 9:  return "success Evaluator9";		
 		case 11: return "success TDReferee";		
 		default: return null;
 		}

@@ -17,10 +17,6 @@ public class Arena2048 extends Arena {
         super();
     }
 
-//    public Arena2048(JFrame frame) {
-//        super(frame);
-//    }
-
 	public Arena2048(String title) {
 		super(title);		
 	}

@@ -16,7 +16,6 @@ import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
 import tools.Types;
-//import params.TDParams;
 
 /**
  * {@link ArenaTrain} for TicTacToe. It borrows all functionality
@@ -43,10 +42,6 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	public ArenaTrainTTT() {
 		super();
 	}
-
-//	public ArenaTrainTTT(JFrame frame) {
-//		super(frame);
-//	}
 
 	public ArenaTrainTTT(String title) {
 		super(title);		
@@ -76,14 +71,12 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 * @param stopEval	the number of successful evaluations needed to reach the 
 	 * 					evaluator goal (may be used during training to stop it 
 	 * 					prematurely)
-	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
-	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-	 * 					If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
+	 * @param mode		which evaluator mode. Throws a runtime exception 
+	 * 					if {@code mode} is not in the set {@link EvaluatorTTT#getAvailableModes()}.
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		if (mode==-1) mode=EvaluatorTTT.getDefaultEvalMode();
 		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
 	}
 

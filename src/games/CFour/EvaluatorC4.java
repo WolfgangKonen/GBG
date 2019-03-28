@@ -62,10 +62,7 @@ public class EvaluatorC4 extends Evaluator {
     private double trainingThreshold = 0.8;
     private GameBoard m_gb;
     private PlayAgent playAgent;
-    private double lastResult = 0;
     private int numStartStates = 1;
-    private int m_mode = 0;
-    private String m_msg = null;
 	private AgentLoader agtLoader = null;
 	
 	// The opening-books are loaded only once to save memory. All agents, that
@@ -82,13 +79,12 @@ public class EvaluatorC4 extends Evaluator {
     private StringBuilder logSB;
 
     public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-        super(e_PlayAgent, stopEval, verbose);
-        m_mode = mode;
+        super(e_PlayAgent, mode, stopEval, verbose);
         if (verbose == 1) {
             System.out.println("Using evaluation mode " + mode);
         }
         initEvaluator(e_PlayAgent, gb);
-        if (m_mode == 2 && maxnAgent.getDepth() < C4Base.CELLCOUNT) {
+        if (mode == 2 && maxnAgent.getDepth() < C4Base.CELLCOUNT) {
             System.out.println("Using Max-N with limited tree depth: " +
                     maxnAgent.getDepth() + " used, " + C4Base.CELLCOUNT + " needed (for perfect play)");
         }
@@ -467,22 +463,24 @@ public class EvaluatorC4 extends Evaluator {
         return success;
     }
 
-    @Override
-    public double getLastResult() {
-        return lastResult;
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public double getLastResult() {
+//        return lastResult;
+//    }
 
-    @Override
-    public boolean isAvailableMode(int mode) {
-        int[] availableModes = getAvailableModes();
-        for (int availableMode : availableModes) {
-            if (mode == availableMode) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public boolean isAvailableMode(int mode) {
+//        int[] availableModes = getAvailableModes();
+//        for (int availableMode : availableModes) {
+//            if (mode == availableMode) {
+//                return true;
+//            }
+//        }
+//
+//        return false;
+//    }
 
     @Override
     public int[] getAvailableModes() {
@@ -499,11 +497,10 @@ public class EvaluatorC4 extends Evaluator {
         return -1;
     }
 
-    @Override
-    public int getMultiTrainEvalMode() {
-        return 0; //getAvailableModes()[0];
-//        return getQuickEvalMode();
-    }
+//    @Override
+//    public int getMultiTrainEvalMode() {
+//        return 0; //getAvailableModes()[0];
+//    }
 
     @Override
     public String getPrintString() {
@@ -547,10 +544,11 @@ public class EvaluatorC4 extends Evaluator {
         }
     }
 
-    @Override
-    public String getMsg() {
-        return m_msg;
-    }
+ 	// --- implemented by Evaluator ---
+//  @Override
+//  public String getMsg() {
+//      return m_msg;
+//  }
 
     /**
      * generates String containing the current timestamp

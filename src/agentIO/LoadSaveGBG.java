@@ -6,7 +6,7 @@ import controllers.*;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
-import controllers.MCTS0.MCTSAgentT0;
+//import controllers.MCTS0.MCTSAgentT0;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
@@ -415,8 +415,8 @@ public class LoadSaveGBG {
 					((SarsaAgt) pa).setTDParams(((SarsaAgt) pa).getParTD(), pa.getMaxGameNum());
 					((SarsaAgt) pa).setNTParams(((SarsaAgt) pa).getParNT());
 					((SarsaAgt) pa).weightAnalysis(null);
-				} else if (obj instanceof MCTSAgentT0) {
-					pa = (MCTSAgentT0) obj;
+//				} else if (obj instanceof MCTSAgentT0) {
+//					pa = (MCTSAgentT0) obj;
 				} else if (obj instanceof MCTSAgentT) {
 					pa = (MCTSAgentT) obj;
 				} else if (obj instanceof MCAgent) {
@@ -693,8 +693,8 @@ public class LoadSaveGBG {
 						// get the loaded values)
 						((TDNTuple2Agt) pa).setTDParams(((TDNTuple2Agt) pa).getParTD(), pa.getMaxGameNum());
 						((TDNTuple2Agt) pa).setNTParams(((TDNTuple2Agt) pa).getParNT());
-					} else if (obj instanceof MCTSAgentT0) {
-						pa = (MCTSAgentT0) obj;
+//					} else if (obj instanceof MCTSAgentT0) {
+//						pa = (MCTSAgentT0) obj;
 					} else if (obj instanceof MCTSAgentT) {
 						pa = (MCTSAgentT) obj;
 					} else if (obj instanceof MCAgent) {

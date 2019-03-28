@@ -5,7 +5,8 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.ntuple2.NTupleBase;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
-import controllers.MinimaxAgent;
+import controllers.MaxNAgent;
+//import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import games.Evaluator;
@@ -14,6 +15,8 @@ import games.XArenaFuncs;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
+import params.ParMaxN;
+import params.ParOther;
 import tools.MessageBox;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -39,10 +42,8 @@ import agentIO.AgentLoader;
  * for available evaluators. 
  */
 public class EvaluatorHex extends Evaluator {
-    //minimaxAgent is static so the search tree does not have to be rebuilt every time a new evaluator is created.
-    //However, this prevents minimax parameters from being adjusted while the program is running. Set needed tree depth
-    //during compile time.
-    private static MinimaxAgent minimaxAgent = new MinimaxAgent("Minimax");
+	private MaxNAgent maxNAgent=null; 
+//  private static MinimaxAgent maxNAgent = new MinimaxAgent("Minimax");
     private final String logDir = "logs/Hex/train";
     protected int verbose = 0;
     private MCTSAgentT mctsAgent = null;
@@ -50,10 +51,8 @@ public class EvaluatorHex extends Evaluator {
     private double trainingThreshold = 0.8;
     private GameBoard m_gb;
     private PlayAgent playAgent;
-    private double lastResult = 0;
     private int numStartStates = 1;
-    private int m_mode = 0;
-    private String m_msg = null;
+//    private int m_mode = 0;			// now in Evaluator
 	private AgentLoader agtLoader = null;
     /**
      * logResults toggles logging of training progress to a csv file located in {@link #logDir}
@@ -64,21 +63,26 @@ public class EvaluatorHex extends Evaluator {
     private StringBuilder logSB;
 
     public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-        super(e_PlayAgent, stopEval, verbose);
-        m_mode = mode;
+        super(e_PlayAgent, mode, stopEval, verbose);
+//        m_mode = mode;
         if (verbose == 1) {
             System.out.println("Using evaluation mode " + mode);
         }
         initEvaluator(e_PlayAgent, gb);
-        if (m_mode == 2 && minimaxAgent.getDepth() < HexConfig.TILE_COUNT) {
-            System.out.println("Using minimax with limited tree depth: " +
-                    minimaxAgent.getDepth() + " used, " + HexConfig.TILE_COUNT + " needed");
+        if (mode == 2 && maxNAgent.getDepth() < HexConfig.TILE_COUNT) {
+            System.out.println("Using Max-N with limited tree depth: " +
+                    maxNAgent.getDepth() + " used, " + HexConfig.TILE_COUNT + " needed");
         }
     }
 
     private void initEvaluator(PlayAgent playAgent, GameBoard gameBoard) {
         this.m_gb = gameBoard;
         this.playAgent = playAgent;
+        
+    	ParMaxN parM = new ParMaxN();
+    	parM.setMaxNDepth(10);
+    	parM.setMaxNUseHashmap(true);
+    	maxNAgent = new MaxNAgent("Max-N", parM, new ParOther());
     }
 
     @Override
@@ -86,7 +90,9 @@ public class EvaluatorHex extends Evaluator {
     	this.playAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {
-            return true;
+			m_msg = "no evaluation done ";
+			lastResult = Double.NaN;
+            return false;
         }
 
         //Disable logging for the final evaluation after training
@@ -119,7 +125,7 @@ public class EvaluatorHex extends Evaluator {
                 result = competeAgainstRandom(playAgent, m_gb);
                 break;
             case 2:
-                result = competeAgainstMinimax(playAgent, m_gb);
+                result = competeAgainstMaxN(playAgent, m_gb, numEpisodes);
                 break;
             case 10:
             	if (playAgent instanceof TDNTuple2Agt || playAgent instanceof NTupleBase) {
@@ -169,22 +175,25 @@ public class EvaluatorHex extends Evaluator {
     /**
      * Evaluates an agent's performance with perfect play, as long as tree and rollout depth are not limited.
      * Scales poorly with board size, requires more than 8 GB RAM for board sizes higher than 4x4.
-     * Since the minimax agent is a static object, the game tree is cached between evaluations. This also means that
-     * a restart of the program is required to change minimax params and to free memory used by the game tree.
-     * Plays a high number of games for accurate measurements, since performance is high once tree is built.
+     * And the execution time is unbearable for board sizes of 5x5 and higher.
      *
      * @param playAgent Agent to be evaluated
      * @param gameBoard Game board the evaluation game is played on
      * @return Percentage of games won on a scale of [0, 1] as double
      */
-    private double competeAgainstMinimax(PlayAgent playAgent, GameBoard gameBoard) {
-        double[] res = XArenaFuncs.compete(playAgent, minimaxAgent, new StateObserverHex(), 100, verbose);
-        double success = res[0];
-        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+    private double competeAgainstMaxN(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+        double[] res = XArenaFuncs.compete(playAgent, maxNAgent, new StateObserverHex(), numEpisodes, verbose);
+        double success = res[0]-res[2];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success + "  (#="+numEpisodes+")";
         if (this.verbose > 0) System.out.println(m_msg);
         lastResult = success;
         return success;
     }
+// --- This text is no longer valid: ---
+//  * Since the Max-N agent is a static object, the game tree is cached between evaluations. This also means that
+//  * a restart of the program is required to change Max-N params and to free memory used by the game tree.
+//  * Plays a high number of games for accurate measurements, since performance is high once tree is built.
+
 
     /**
      * Evaluates an agent's performance using enough iterations to play (near-) perfectly on boards
@@ -203,7 +212,7 @@ public class EvaluatorHex extends Evaluator {
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
         double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0);
-        double success = res[0];        	
+        double success = res[0]-res[2];        	
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         //if (this.verbose > 0) 
         	System.out.println(m_msg);
@@ -262,11 +271,11 @@ public class EvaluatorHex extends Evaluator {
         	StateObserverHex so = new StateObserverHex();
         	if (startAction[i] == -1) {
         		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0);
-                success += res[0];        	
+                success += res[0]-res[2];        	
         	} else {
         		so.advance(new ACTIONS(startAction[i]));
         		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0);
-                success += res[2];        	
+                success += res[2]-res[0];        	
         	}
         }
         success /= startAction.length;
@@ -289,7 +298,7 @@ public class EvaluatorHex extends Evaluator {
      * getNextAction2 invoked by compete should be thread-safe. This is valid, if getNextAction2 
      * does not modify members in playAgent. Possible for TD-n-Tuple-agents, if we do not write 
      * on class-global members (e.g. do not use BestScore, but use local variable BestScore2). 
-     * Parallel threads are not possible when playAgent is MCTSAgentT or MinimaxAgent.
+     * Parallel threads are not possible when playAgent is MCTSAgentT or MaxNAgent.
      * </ul>
      * 
      * @param playAgent
@@ -342,11 +351,11 @@ public class EvaluatorHex extends Evaluator {
 
             	if (startAction2[i2] == -1) {
             		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0);
-                    success = res[0];        	
+                    success = res[0]-res[2];        	
             	} else {
             		so.advance(new ACTIONS(startAction2[i2]));
             		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0);
-                    success = res[2];        	
+                    success = res[2]-res[0];        	
             	}
                 if(verbose == 0) {
                     System.out.println("Finished evaluation " + gameNumber + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. ");
@@ -394,29 +403,31 @@ public class EvaluatorHex extends Evaluator {
     private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
         //double success = XArenaFuncs.competeBoth(playAgent, randomAgent, 10, gameBoard);
         double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose);
-        double success = res[0];
+        double success = res[0]-res[2];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         if (this.verbose > 0) System.out.println(m_msg);
         lastResult = success;
         return success;
     }
 
-    @Override
-    public double getLastResult() {
-        return lastResult;
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public double getLastResult() {
+//        return lastResult;
+//    }
 
-    @Override
-    public boolean isAvailableMode(int mode) {
-        int[] availableModes = getAvailableModes();
-        for (int availableMode : availableModes) {
-            if (mode == availableMode) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public boolean isAvailableMode(int mode) {
+//        int[] availableModes = getAvailableModes();
+//        for (int availableMode : availableModes) {
+//            if (mode == availableMode) {
+//                return true;
+//            }
+//        }
+//
+//        return false;
+//    }
 
     @Override
     public int[] getAvailableModes() {
@@ -433,18 +444,18 @@ public class EvaluatorHex extends Evaluator {
         return -1;
     }
 
-    @Override
-    public int getMultiTrainEvalMode() {
-        return 0; //getAvailableModes()[0];
-//        return getQuickEvalMode();
-    }
+//    @Override
+//    public int getMultiTrainEvalMode() {
+//        return 0; //getAvailableModes()[0];
+//    }
 
     @Override
     public String getPrintString() {
         switch (m_mode) {
+			case -1: return "no evaluation done ";
             case 0:  return "success against MCTS (best is 1.0): ";
             case 1:  return "success against Random (best is 1.0): ";
-            case 2:  return "success against Minimax (best is 1.0): ";
+            case 2:  return "success against Max-N (best is 1.0): ";
             case 10: return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
             case 11: return "success against TDReferee (" + numStartStates + " diff. start states, best is 1.0): ";
             default: return null;
@@ -468,17 +479,18 @@ public class EvaluatorHex extends Evaluator {
         switch (m_mode) {
             case 0:  return "success against MCTS";
             case 1:  return "success against Random";
-            case 2:  return "success against Minimax";
+            case 2:  return "success against Max-N";
             case 10: return "success against MCTS";
             case 11: return "success against TDReferee";
             default: return null;
         }
     }
 
-    @Override
-    public String getMsg() {
-        return m_msg;
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public String getMsg() {
+//        return m_msg;
+//    }
 
     /**
      * generates String containing the current timestamp

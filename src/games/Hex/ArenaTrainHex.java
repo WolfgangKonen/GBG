@@ -15,10 +15,6 @@ public class ArenaTrainHex extends ArenaTrain {
 
     public ArenaTrainHex(){ super();}
 
-//    public ArenaTrainHex(JFrame frame) {
-//        super(frame);
-//    }
-
 	public ArenaTrainHex(String title) {
 		super(title);		
 	}

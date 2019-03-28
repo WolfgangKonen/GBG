@@ -8,6 +8,7 @@ import games.Evaluator;
 import games.GameBoard;
 import games.Arena;
 import games.PStats;
+import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
 import tools.Types;
 
 import java.text.DecimalFormat;
@@ -18,12 +19,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by Johannes on 02.12.2016.
+ * Base evaluator for 2048: average score from playing 50 episodes.
+ * <p>
+ * Note that the mode-selection for 2048 evaluators is done in 
+ * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}.
+ * <p>
+ * Created by Johannes Kutsch, TH Köln, 2016-12.
+ * 
+ * @see Evaluator2048_BoardPositions
+ * @see Evaluator2048_EA
  */
 public class Evaluator2048 extends Evaluator {
     private ExecutorService executorService = Executors.newFixedThreadPool(6);
 
-    private double averageScore;
     private double medianScore;
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = Integer.MIN_VALUE;
@@ -32,7 +40,7 @@ public class Evaluator2048 extends Evaluator {
     private double averageRolloutDepth;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
-    private int m_mode = 0;
+//	private int m_mode;			// now in Evaluator
     private long startTime;
     private long stopTime;
     private int verbose;
@@ -40,8 +48,7 @@ public class Evaluator2048 extends Evaluator {
 
 
     public Evaluator2048(PlayAgent e_PlayAgent, int stopEval, int mode, int verbose, Arena ar) {
-        super(e_PlayAgent, stopEval, verbose);
-        this.m_mode = mode;
+        super(e_PlayAgent, mode, stopEval, verbose);
         this.verbose = verbose;
         this.ar = ar;
     }
@@ -215,7 +222,7 @@ public class Evaluator2048 extends Evaluator {
 
             scores.add(so.score);
 
-            averageScore += so.score;
+            lastResult += so.score;
             if (so.score < minScore) {
                 minScore = so.score;
             }
@@ -226,11 +233,11 @@ public class Evaluator2048 extends Evaluator {
             moves += so.getMoves();
         }
 
-        averageScore/= ConfigEvaluator.NUMBEREVALUATIONS;
+        lastResult/= ConfigEvaluator.NUMBEREVALUATIONS;
 
         //Standard deviation
         for(int score : scores) {
-            standarddeviation += (score-averageScore)*(score-averageScore);
+            standarddeviation += (score-lastResult)*(score-lastResult);
         }
         standarddeviation/= ConfigEvaluator.NUMBEREVALUATIONS;
         standarddeviation = Math.sqrt(standarddeviation);
@@ -250,15 +257,16 @@ public class Evaluator2048 extends Evaluator {
 
         //System.out.print("\n");
         if (verbose==1) System.out.println("Finished evaluation of "+ConfigEvaluator.NUMBEREVALUATIONS+" games with average score "
-        		+ Math.round(averageScore) + " +- " + Math.round(standarddeviation/Math.sqrt(ConfigEvaluator.NUMBEREVALUATIONS)));
+        		+ Math.round(lastResult) + " +- " + Math.round(standarddeviation/Math.sqrt(ConfigEvaluator.NUMBEREVALUATIONS)));
 
-        return averageScore > ConfigEvaluator.MINPOINTS;
+        return lastResult > ConfigEvaluator.MINPOINTS;
     }
 
-    @Override
-    public double getLastResult() {
-        return averageScore;
-    }
+ 	// --- implemented by Evaluator ---
+//  @Override
+//  public double getLastResult() {
+//      return lastResult;
+//  }
 
     @Override
     public String getMsg() {
@@ -300,7 +308,7 @@ public class Evaluator2048 extends Evaluator {
                 "\n" +
                 "\nResults:" +
                 "\nLowest score is: " + minScore +
-                "\nAverage score is: " + Math.round(averageScore) + 
+                "\nAverage score is: " + Math.round(lastResult) + 
                 " +- " + Math.round(standarddeviation/Math.sqrt(ConfigEvaluator.NUMBEREVALUATIONS)) +
                 "\nMedian score is: " + Math.round(medianScore) +
                 "\nHighest score is: " + maxScore +
@@ -315,21 +323,22 @@ public class Evaluator2048 extends Evaluator {
     
     @Override
     public String getShortMsg() {
-        return "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(averageScore);    	
+        return "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(lastResult);    	
     }
 
-    @Override
-    public boolean isAvailableMode(int mode) {
-        switch (mode) {
-        	case -1: 
-        	case  0:
-            case  1:
-            case  2:
-                return true;
-            default:
-                return false;
-        }
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public boolean isAvailableMode(int mode) {
+//        switch (mode) {
+//        	case -1: 
+//        	case  0:
+//            case  1:
+//            case  2:
+//                return true;
+//            default:
+//                return false;
+//        }
+//    }
 
     @Override
     public int[] getAvailableModes() {
@@ -346,14 +355,14 @@ public class Evaluator2048 extends Evaluator {
         return 0;
     }
 
-    @Override
-    public int getMultiTrainEvalMode() {
-        return 0;
-    }
+//    @Override
+//    public int getMultiTrainEvalMode() {
+//        return 0;
+//    }
 
     @Override
     public String getPrintString() {
-        return"average score";
+        return "average score";
     }
 
 	@Override

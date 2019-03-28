@@ -37,9 +37,7 @@ import tools.Types;
 public class EvaluatorCube extends Evaluator {
  	private static final int[] AVAILABLE_MODES = new int[]{-1,0,1};
 	private Random rand;
-	private int m_mode;
-	private double m_res=-1;		// avg. success on array D of distance sets
-	private String m_msg;
+//	private int m_mode;			// now in Evaluator
 	private CSArrayList[] T;		// the array of distance sets
 	private	int countStates=0;
 
@@ -49,17 +47,17 @@ public class EvaluatorCube extends Evaluator {
 	protected double[] m_thresh={0.85,0.9}; // 
 	
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, stopEval);
+		super(e_PlayAgent, 0, stopEval);
 		initEvaluator(gb,0);
 	}
 
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, stopEval);
+		super(e_PlayAgent, mode, stopEval);
 		initEvaluator(gb,mode);
 	}
 
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, stopEval, verbose);
+		super(e_PlayAgent, mode, stopEval, verbose);
 		initEvaluator(gb,mode);
 	}
 	
@@ -67,9 +65,10 @@ public class EvaluatorCube extends Evaluator {
 //		long seed = 999;
 //		rand 		= new Random(seed);
 	    rand 		= new Random(System.currentTimeMillis());	
-		if (!isAvailableMode(mode)) 
-			throw new RuntimeException("EvaluatorCube: Value mode = "+mode+" is not allowed!");
-		m_mode = mode;
+		// --- this is now in Evaluator ---
+//		if (!isAvailableMode(mode)) 
+//			throw new RuntimeException("EvaluatorCube: Value mode = "+mode+" is not allowed!");
+//		m_mode = mode;
 		if (gb != null) {
 			assert (gb instanceof GameBoardCube);	
 			T = ((GameBoardCube)gb).getT();			
@@ -89,6 +88,10 @@ public class EvaluatorCube extends Evaluator {
 		assert (m_thresh.length >= AVAILABLE_MODES.length);
 		m_PlayAgent = playAgent;
 		switch(m_mode) {
+		case -1: 
+			m_msg = "no evaluation done ";
+			lastResult = Double.NaN;
+			return false;
 		case 0:  return evaluateAgent0(m_PlayAgent)>m_thresh[0];
 		case 1:  return evaluateAgent0(m_PlayAgent)>m_thresh[1];
 		default: return false;
@@ -97,7 +100,7 @@ public class EvaluatorCube extends Evaluator {
 	
 	/**	
 	 * @param pa 
- 	 * @return
+ 	 * @return average success on array D of distance sets
 	 */
  	private double evaluateAgent0(PlayAgent pa) {
 		ArrayList tsList = new ArrayList<TStats>();
@@ -137,31 +140,35 @@ public class EvaluatorCube extends Evaluator {
  			tagg = new TAggreg(tsList,p);
  			taggList.add(tagg);
  		} // for (p)
-		m_res = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
+		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>=0) {
 			TStats.printTAggregList(taggList);
 			//System.out.println((CubeConfig.stateCube==StateType.CUBESTATE) ? "CUBESTATE" : "CUBEPLUSACTION");
 		}
-		return m_res;
+		return lastResult;
 	}
 
- 	@Override
- 	public double getLastResult() { 
- 		return m_res; 
- 	}
- 	@Override
- 	public String getMsg() { 
- 		return m_msg; 
- 	} 
+ 	// --- implemented by Evaluator ---
+// 	@Override
+// 	public double getLastResult() { 
+// 		return lastResult; 
+// 	}
  	
-	@Override
- 	public boolean isAvailableMode(int mode) {
-		for (int i : AVAILABLE_MODES) {
-			if (mode==i) return true;
-		}
-		return false;
- 	}
+ 	// --- implemented by Evaluator ---
+// 	@Override
+// 	public String getMsg() { 
+// 		return m_msg; 
+// 	} 
+ 	
+ 	// --- implemented by Evaluator ---
+//	@Override
+// 	public boolean isAvailableMode(int mode) {
+//		for (int i : AVAILABLE_MODES) {
+//			if (mode==i) return true;
+//		}
+//		return false;
+// 	}
  	
  	@Override
  	public int[] getAvailableModes() {
@@ -169,7 +176,7 @@ public class EvaluatorCube extends Evaluator {
  	}
  	
  	//@Override
- 	public static int getDefaultEvalMode() {
+ 	public int getDefaultEvalMode() {
 		return 0;		
 	}
  	
@@ -181,10 +188,10 @@ public class EvaluatorCube extends Evaluator {
 	{
 		return 0;
 	}
-	public int getMultiTrainEvalMode() 
-	{
-		return 0;
-	}
+//	public int getMultiTrainEvalMode() 
+//	{
+//		return 0;
+//	}
 
 	@Override
 	public String getPrintString() {

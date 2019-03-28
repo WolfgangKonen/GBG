@@ -17,10 +17,6 @@ public class ArenaTrain2048 extends ArenaTrain {
         super();
     }
 
-//    public ArenaTrain2048(JFrame frame) {
-//        super(frame);
-//    }
-
 	public ArenaTrain2048(String title) {
 		super(title);		
 	}

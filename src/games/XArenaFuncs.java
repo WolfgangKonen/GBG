@@ -6,7 +6,7 @@ import controllers.*;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
-import controllers.MCTS0.MCTSAgentT0;
+//import controllers.MCTS0.MCTSAgentT0;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
@@ -35,9 +35,9 @@ import java.util.*;
 /**
  * Class {@link XArenaFuncs} contains several methods to train, evaluate and measure the 
  * performance of agents. <ul>
- * <li> train:		train an agent one time for maxGameNum games and evaluate it with evalAgent
+ * <li> train:		train an agent one time for maxGameNum episodes and evaluate it with evalAgent
  * <li> multiTrain: train an agent multiple times and evaluate it with evalAgent
- * <li> compete:	one competition 'X vs. O', several games, measure win/tie/loose rate
+ * <li> compete:	one competition 'X vs. O', several episodes, measure win/tie/loose rate
  * <li> competeBoth call compete for pair (pa,opponent) in both roles, X and O  
  * <li> multiCompete: many competitions, measure win/tie/loose rate and avg. correct moves
  * <li> eval: 	(as part of the protected {@link Evaluator} elements) measure agent success
@@ -157,8 +157,8 @@ public class XArenaFuncs
 			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Random")) {
 			pa = new RandomAgent(sAgent, new ParOther(m_xab.oPar[n]));
-		} else if (sAgent.equals("MCTS0")) {
-			pa = new MCTSAgentT0(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
+//		} else if (sAgent.equals("MCTS0")) {
+//			pa = new MCTSAgentT0(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS")) {
 			pa = new MCTSAgentT(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS Expectimax")) {
@@ -215,8 +215,8 @@ public class XArenaFuncs
 			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Random")) {
 			pa= new RandomAgent(sAgent, new ParOther(m_xab.oPar[n]));
-		} else if (sAgent.equals("MCTS0")) {
-			pa= new MCTSAgentT0(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
+//		} else if (sAgent.equals("MCTS0")) {
+//			pa= new MCTSAgentT0(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS")) {
 			pa= new MCTSAgentT(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("MCTS Expectimax")) {
@@ -834,9 +834,9 @@ public class XArenaFuncs
 	 * @param paX	PlayAgent,	a trained agent
 	 * @param paO	PlayAgent,	a trained agent
 	 * @param startSO	the start board position for the game
-	 * @param competeNum		the number of games to play
+	 * @param competeNum		the number of episodes to play
 	 * @param verbose			0: silent, 1,2: more print-out
-	 * @return		double[3], the percentage of games with X-win, tie, O-win
+	 * @return		double[3], the percentage of episodes with X-win, tie, O-win
 	 */
 	public static double[] compete(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, int verbose) {
 		double[] winrate = new double[3];
@@ -850,7 +850,7 @@ public class XArenaFuncs
 		
 		String paX_string = paX.stringDescr();
 		String paO_string = paO.stringDescr();
-		if (verbose>0) System.out.println("Competition:+, "+competeNum+" games: \n"
+		if (verbose>0) System.out.println("Competition, "+competeNum+" episodes: \n"
 				+"      "+paX_string + "\n"
 				+"   vs "+paO_string);
 		for (int k=0; k<competeNum; k++) {
@@ -910,7 +910,7 @@ public class XArenaFuncs
 				for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
 				System.out.println(" (X/Tie/O)");				
 			}
-			System.out.println("Avg # moves in "+ competeNum +" games = "+ frm.format(moveCount));			
+			System.out.println("Avg # moves in "+ competeNum +" episodes = "+ frm.format(moveCount));			
 		}
 
 		return winrate;
@@ -921,7 +921,7 @@ public class XArenaFuncs
 	 * @param paX PlayAgent, a trained agent
 	 * @param paO PlayAgent, a trained agent
 	 * @param startSO    the start board position for the game
-	 * @param competeNum the number of games to play (always 1)
+	 * @param competeNum the number of episodes to play (always 1)
 	 * @param nextTimes timestorage to save measurements
 	 * @param rndmStartMoves count of random startmoves at beginning
 	 * @return code with information wh won
@@ -936,7 +936,7 @@ public class XArenaFuncs
 
 		String paX_string = paX.stringDescr();
 		String paO_string = paO.stringDescr();
-		System.out.println("Competition: "+competeNum+" games "+paX_string+" vs "+paO_string+" with "+rndmStartMoves+" random startmoves");
+		System.out.println("Competition: "+competeNum+" episodes "+paX_string+" vs "+paO_string+" with "+rndmStartMoves+" random startmoves");
 		/*
 		if (rndmStartMoves>0) {
 			RandomAgent raX = new RandomAgent("Random Agent X");
@@ -1238,7 +1238,7 @@ public class XArenaFuncs
 	 * of type AgentO. The agents (if trainable) are trained anew before each competition. 
 	 * @param silent
 	 * @param xab		used only for reading parameter values from GUI members 
-	 * @return			double[3], the percentage of games with X-win, tie, O-win 
+	 * @return			double[3], the percentage of episodes with X-win, tie, O-win 
 	 * 					(averaged over all competitions) 
 	 * @throws IOException 
 	 */
@@ -1272,7 +1272,7 @@ public class XArenaFuncs
 		double[][] evalC = new double[competitionNum][2];
 		PlayAgent paX=null, paO=null, qa=null;
 		if (verbose>0) System.out.println("Multi-Competition: "+competitionNum+" competitions with "
-										 +competeNum+" games each, "+AgentX+" vs "+AgentO);
+										 +competeNum+" episodes each, "+AgentX+" vs "+AgentO);
 
 		if (AgentX.equals("Human") | AgentO.equals("Human")) {
 			MessageBox.show(xab, 

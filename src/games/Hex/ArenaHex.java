@@ -30,10 +30,6 @@ public class ArenaHex extends Arena {
         super();
     }
 
-//    public ArenaHex(JFrame frame) {
-//        super(frame);
-//    }
-
 	public ArenaHex(String title) {
 		super(title);		
 	}
@@ -66,12 +62,11 @@ public class ArenaHex extends Arena {
      *                 prematurely)
      * @param mode     which evaluator mode: 0,1,2,9. Throws a runtime exception
      *                 if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-     *                 If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
      * @param verbose  how verbose or silent the evaluator is
      * @return		   the evaluator
      */
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-        if (mode == -1) mode = EvaluatorHex.getDefaultEvalMode();
+//        if (mode == -1) mode = EvaluatorHex.getDefaultEvalMode();
         return new EvaluatorHex(pa, gb, stopEval, mode, verbose);
     }
 

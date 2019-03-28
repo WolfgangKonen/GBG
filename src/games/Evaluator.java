@@ -27,8 +27,27 @@ abstract public class Evaluator {
 	private int gnumTrue;
 	private int m_stopEval;
 	private int m_counter;
+	
+	// these variables may be used by derived classes:
+	//
 	protected PlayAgent m_PlayAgent;
 	protected int verbose=1;
+	/**
+	 * Derived classes write the result (average success rate) of the last call to method 
+	 * {@link #eval_Agent(PlayAgent)} to this variable {@link #lastResult}
+	 * @see #getLastResult()
+	 */
+	protected double lastResult=0.0;
+	/**
+	 * Derived classes write an info string of the last call to method 
+	 * {@link #eval_Agent(PlayAgent)} to this variable {@link #m_msg}
+	 * @see #getMsg()
+	 */
+	protected String m_msg="";
+	/**
+	 * The mode of the evaluator, to be used by derived classes
+	 */
+	protected int m_mode=0;
 	
 	/**
 	 * 
@@ -36,15 +55,18 @@ abstract public class Evaluator {
 	 * @param stopEval		how many successfull calls to {@link #eval(PlayAgent)} are needed
 	 * 						until {@link #goalReached(int)} returns true
 	 */
-	public Evaluator(PlayAgent e_PlayAgent, int stopEval) {
-		initEvaluator(e_PlayAgent,stopEval);
+	public Evaluator(PlayAgent e_PlayAgent, int mode, int stopEval) {
+		initEvaluator(e_PlayAgent, mode,stopEval);
 	}
-	public Evaluator(PlayAgent e_PlayAgent, int stopEval,int verbose) {
-		initEvaluator(e_PlayAgent,stopEval);
+	public Evaluator(PlayAgent e_PlayAgent, int mode, int stopEval,int verbose) {
+		initEvaluator(e_PlayAgent, mode,stopEval);
 		this.verbose = verbose;
 	}
-	private void initEvaluator(PlayAgent e_PlayAgent, int stopEval) {
+	private void initEvaluator(PlayAgent e_PlayAgent, int mode, int stopEval) {
 		m_PlayAgent = e_PlayAgent;
+		if (!isAvailableMode(mode)) 
+			throw new RuntimeException(this.getClass().getSimpleName()+": Value mode = "+mode+" is not allowed!");
+		m_mode = mode;
 		prevEval = false;
 		thisEval = false;
 		m_stopEval=stopEval;
@@ -70,22 +92,18 @@ abstract public class Evaluator {
 	}
 
 	/**
-	 * This function needs to be implemented in derived classes.
+	 * This function needs to be implemented in derived classes. It implements the evaluation
+	 * of playAgent.
+	 * Should write its results on protected members {@link #lastResult} and {@link #m_msg}.
 	 * 
 	 * @return
 	 *  	a boolean predicate (fail/success) for the result of the evaluation. 
 	 *  	Might be for example (avg.success &gt; -0.15) when playing TTT against Minimax.
+	 *  
+	 * @see #getLastResult()
+	 * @see #getMsg()
 	 */
 	abstract protected boolean eval_Agent(PlayAgent playAgent);
-
-	/**
-	 * This function needs to be implemented in derived classes.
-	 * 
-	 * @return
-	 *  	the result from the last call to {@link #eval_Agent(PlayAgent)}, which might be for example
-	 *  	the average success rate of games played against a Minimax player.
-	 */
- 	abstract public double getLastResult();
 
 	/**
 	 * Set member gnumTrue to gameNum if {@link #eval(PlayAgent)} has returned true for 
@@ -108,12 +126,23 @@ abstract public class Evaluator {
 	public boolean getState() { return thisEval; }
 	
 	/**
-	 * @return long message of evaluator result (multi-line) for {@code System.out}
+	 * @return
+	 *  	the result from the last call to {@link #eval_Agent(PlayAgent)}, which might be for example
+	 *  	the average success rate of games played against a Minimax player.
 	 */
-	abstract public String getMsg(); 
+ 	public double getLastResult(){ 
+ 		return lastResult; 
+ 	};
+
+	/**
+	 * @return long message of evaluator result (may be multi-line) for {@code System.out}
+	 */
+	public String getMsg(){ 
+ 		return m_msg;
+ 	}  
 	
 	/**
-	 * If not implemented by implementing class, {@link #getShortMsg()} returns {@link #getMsg()}
+	 * If not overridden by derived class, {@link #getShortMsg()} returns {@link #getMsg()}.
 	 * 
 	 * @return short message of evaluator result (one line) for status window 
 	 */
@@ -133,21 +162,33 @@ abstract public class Evaluator {
 	}
 	
 	/**
-	 * 
-	 * @param mode the evaluator mode
-	 * @return true, if {@code mode} is in {@link #getAvailableModes} or 
-	 * 		if Evaluator does not use {@code mode}.
-	 */
-	abstract public boolean isAvailableMode(int mode);
-	
-	/**
-	 * @return the allowed values for parameter {@code mode} in a call 
-	 *     to {@code Arena.makeEvaluator}.     
-	 *     If an Evaluator does not use {@code mode}, it returns null.
+	 * @return the allowed values for parameter {@code mode} in a call to Evaluator constructor or 
+	 *     to {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena.makeEvaluator(...)}.  <br>   
+	 *     If an Evaluator does not use {@code mode}, it should return an {@code int[]} 
+	 *     containing just 0.
 	 */
 	abstract public int[] getAvailableModes();
 	
-	public static int getDefaultEvalMode() 
+	/**
+	 * 
+	 * @param mode the evaluator mode
+	 * @return true, if {@code mode} is in {@link #getAvailableModes()}.
+	 */
+	public boolean isAvailableMode(int mode) {
+//		if (getAvailableModes()==null) return true;
+		for (int i : getAvailableModes()) {
+			if (mode==i) return true;
+		}
+		return false;
+
+	}
+	
+	/**
+	 * If not overridden by derived class, {@link #getDefaultEvalMode()} returns 0.
+	 * 
+	 * @return the default evaluation mode for this {@link Evaluator} 
+	 */
+	public int getDefaultEvalMode() 
 	{
 		return 0;
 	}
@@ -161,14 +202,26 @@ abstract public class Evaluator {
 	 */
 	abstract public int getTrainEvalMode();
 	
-	/**
-	 * @return the optional third evaluator mode which may be used in multiTrain.
-	 * 		If the mode returned here equals to the mode of one of the other two 
-	 * 		Evaluator objects, the third Evaluator will be skipped.
-	 */
-	abstract public int getMultiTrainEvalMode();
+//	/**
+//	 * @return the optional third evaluator mode which may be used in multiTrain.
+//	 * 		If the mode returned here equals to the mode of one of the other two 
+//	 * 		Evaluator objects, the third Evaluator will be skipped.
+//	 */
+//	abstract public int getMultiTrainEvalMode();
 	
+	/**
+	 * @return a one line info message, depending on the evaluator's mode
+	 */
 	abstract public String getPrintString();
+	
+	/**
+	 * Derived classes return a tooltip string with this method. Use 
+	 * <pre>
+	 *    "&lt;html> ... &lt;br> ... &lt;/html>"  </pre>
+	 * to get multi-line tooltip text 
+	 * @return the tooltip string for evaluator boxes in "Other pars"
+	 */
+	// Use "<html> ... <br> ... </html>" to get multi-line tooltip text
 	abstract public String getTooltipString();
 	abstract public String getPlotTitle();
 	

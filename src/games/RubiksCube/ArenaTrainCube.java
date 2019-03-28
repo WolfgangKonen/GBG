@@ -35,10 +35,6 @@ public class ArenaTrainCube extends ArenaTrain   {
 		super();
 	}
 
-//	public ArenaTrainCube(JFrame frame) {
-//		super(frame);
-//	}
-
 	public ArenaTrainCube(String title) {
 		super(title);		
 	}
@@ -66,12 +62,11 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 * 					evaluator goal (may be used to stop training prematurely)
 	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-	 * 					If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		if (mode==-1) mode=EvaluatorCube.getDefaultEvalMode();
+//		if (mode==-1) mode=EvaluatorCube.getDefaultEvalMode();
 		return new EvaluatorCube(pa,gb,stopEval,mode,verbose);
 	}
 

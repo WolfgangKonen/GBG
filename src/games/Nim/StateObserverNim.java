@@ -244,6 +244,12 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		return m_heap;
 	}
 
+	public int getHeapSum() {
+		int s=0;
+		for (int h : m_heap) s+=h;
+		return s;
+	}
+
 	/**
 	 * @return 	{0,1} for the player to move next. 
 	 * 			Player 0 is X, the player who starts the game. Player 1 is O.

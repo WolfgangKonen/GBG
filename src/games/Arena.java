@@ -934,8 +934,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	 *            evaluator goal (may be used during training to stop it
 	 *            prematurely)
 	 * @param mode
-	 *            which evaluator mode. If -1, take the default evalMode
-	 *            {@link Evaluator#getDefaultEvalMode()}
+	 *            which evaluator mode. 
 	 * @param verbose
 	 *            how verbose or silent the evaluator is
 	 * @return the evaluator

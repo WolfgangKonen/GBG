@@ -4,6 +4,8 @@ import controllers.MC.MCAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
+import games.GameBoard;
+import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
 import params.MCParams;
 //import params.MCTSExpectimaxParams;
 import params.ParMC;
@@ -21,16 +23,22 @@ import java.util.concurrent.Executors;
 import static java.util.Arrays.deepEquals;
 
 /**
- * Created by Johannes on 09.02.2016.
+ * Board-position evaluator for 2048: 
+ * <p>
+ * Note that the mode-selection for 2048 evaluators is done in 
+ * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}.
+ * <p>
+ * Created by Johannes Kutsch, TH Köln, 2016-12.
+ * 
+ * @see Evaluator2048
+ * @see Evaluator2048_EA
  */
 public class Evaluator2048_BoardPositions extends Evaluator{
     private Random random = new Random();
     private ExecutorService executorService = Executors.newWorkStealingPool();
 
-
-
     public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, int stopEval, int verbose) {
-        super(e_PlayAgent, stopEval, verbose);
+        super(e_PlayAgent, 1, stopEval, verbose);
     }
 
     @Override
@@ -386,28 +394,30 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         return mirroredArray;
     }
 
-    @Override
-    public double getLastResult() {
-        throw new RuntimeException("getLastResult is not yet implemented for Evaluator2048_BoardPositions");
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public double getLastResult() {
+//        throw new RuntimeException("getLastResult is not yet implemented for Evaluator2048_BoardPositions");
+//    }
 
     @Override
     public String getMsg() {
         return "use this spreadsheet to analyse output: https://docs.google.com/spreadsheets/d/1fAX-gwf4keZut4vuAZ2GQro5ubiLOeVvwhzn74zPTKs/edit?usp=sharing";
     }
 
-    @Override
-    public boolean isAvailableMode(int mode) {
-        switch (mode) {
-        	case -1: 
-        	case  0:
-            case  1:
-            case  2:
-                return true;
-            default:
-                return false;
-        }
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public boolean isAvailableMode(int mode) {
+//        switch (mode) {
+//        	case -1: 
+//        	case  0:
+//            case  1:
+//            case  2:
+//                return true;
+//            default:
+//                return false;
+//        }
+//    }
 
     @Override
     public int[] getAvailableModes() {
@@ -424,14 +434,14 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         return 0;
     }
 
-    @Override
-    public int getMultiTrainEvalMode() {
-        return 0;
-    }
+//    @Override
+//    public int getMultiTrainEvalMode() {
+//        return 0;
+//    }
 
     @Override
     public String getPrintString() {
-        return"success rate";
+        return "success rate";
     }
 
 	@Override

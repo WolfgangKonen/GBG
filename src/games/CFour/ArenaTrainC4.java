@@ -12,7 +12,6 @@ import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
 import games.ArenaTrain;
-//import params.TDParams;
 
 /**
  * {@link ArenaTrain} for Connect Four. It borrows all functionality
@@ -66,19 +65,13 @@ public class ArenaTrainC4 extends ArenaTrain   {
 	 * 					prematurely)
 	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-	 * 					If mode==-1, set it from {@link Evaluator#getDefaultEvalMode()}.
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		if (mode==-1) mode=EvaluatorC4.getDefaultEvalMode();
+//		if (mode==-1) mode=EvaluatorC4.getDefaultEvalMode();
 		return new EvaluatorC4(pa,gb,stopEval,mode,verbose);
 	}
-
-//	@Override
-//	public PlayAgent makeTDSAgent(String sAgent, TDParams tdPar, int maxGameNum){
-//		return new TDPlayerC4(sAgent,tdPar,maxGameNum);
-//	}
 
 	public Feature makeFeatureClass(int featmode) {
 		return new FeatureC4(featmode);

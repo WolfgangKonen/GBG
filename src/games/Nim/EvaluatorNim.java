@@ -23,6 +23,8 @@ import games.StateObservation;
 import games.XArenaFuncs;
 import games.Hex.StateObserverHex;
 import params.ParMCTS;
+import params.ParMaxN;
+import params.ParOther;
 import tools.MessageBox;
 import tools.Types;
 
@@ -43,46 +45,48 @@ public class EvaluatorNim extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {-1,0,1,2,3,4,11};
 	private RandomAgent random_agent = new RandomAgent("Random");
 //	private MinimaxAgent minimaxAgent = new MinimaxAgent("Minimax");
-	private MaxNAgent maxNAgent = new MaxNAgent("Max-N");
+	private MaxNAgent maxNAgent = null;
     private MCTSAgentT mctsAgent = null;
 	private AgentLoader agtLoader = null;
-	private int m_mode;
-	private double m_res=-1;		// avg. success against RandomPlayer, best is 0.9 (m_mode=0)
-									// or against MinimaxPlayer, best is 0.0 (m_mode=1,2)
-	private String m_msg;
+//	private int m_mode;			// now in Evaluator
 	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
 	private GameBoard m_gb;
 	
 	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, stopEval);
-		initEvaluator(gb,1);
+		super(e_PlayAgent, 1, stopEval);
+		initEvaluator(gb);
 	}
 
 	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, stopEval);
-		initEvaluator(gb,mode);
+		super(e_PlayAgent, mode, stopEval);
+		initEvaluator(gb);
 	}
 
 	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, stopEval, verbose);
-		initEvaluator(gb,mode);
+		super(e_PlayAgent, mode, stopEval, verbose);
+		initEvaluator(gb);
 	}
 	
-	private void initEvaluator(GameBoard gb, int mode) {
-		if (!isAvailableMode(mode)) 
-			throw new RuntimeException("EvaluatorNim: Value mode = "+mode+" is not allowed!");
-		m_mode = mode;
+	private void initEvaluator(GameBoard gb) {
+		// --- this is now in Evaluator ---
+//		if (!isAvailableMode(mode)) 
+//			throw new RuntimeException("EvaluatorNim: Value mode = "+mode+" is not allowed!");
+//		m_mode = mode;
 		m_gb = gb;		
         ParMCTS params = new ParMCTS();
         params.setNumIter(1000);
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
-
+        
+    	ParMaxN parM = new ParMaxN();
+    	parM.setMaxNDepth(15);
+    	parM.setMaxNUseHashmap(true);
+    	maxNAgent = new MaxNAgent("Max-N", parM, new ParOther());
 	}
 	
 	/**
 	 * 
 	 * @return true if evaluateAgentX is above m_thresh.<br>
-	 * The choice for X=1 or 2 is made with 3rd parameter mode in 
+	 * The choice for X=0, 1 or 2 is made with 4th parameter mode in 
 	 * {@link #EvaluatorNim(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
 	 * 
 	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
@@ -91,6 +95,13 @@ public class EvaluatorNim extends Evaluator {
 	@Override
 	public boolean eval_Agent(PlayAgent playAgent) {
 		m_PlayAgent = playAgent;
+		if (m_mode==1 || m_mode==2) {
+			StateObserverNim so = (StateObserverNim) m_gb.getDefaultStartState();
+			int heapsum = so.getHeapSum();
+			int depth = maxNAgent.getDepth();
+			if (depth<heapsum)
+				System.out.println("Warning: Max-N depth = "+depth+" is smaller than required: heap sum ="+heapsum+" !");
+		}
 		switch(m_mode) {
 		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
 		case 1:  return evaluateAgent1(m_PlayAgent,maxNAgent,m_gb)>m_thresh[1];
@@ -112,10 +123,10 @@ public class EvaluatorNim extends Evaluator {
 	 */
  	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		m_res = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
+		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return m_res;
+		return lastResult;
 	}
 
  	/**
@@ -131,13 +142,13 @@ public class EvaluatorNim extends Evaluator {
 			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
 			MessageBox.show(gb.getArena(),"ERROR: " + tdstr,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
-			m_res = Double.NaN;
-			return m_res;
+			lastResult = Double.NaN;
+			return lastResult;
 		}
-		m_res = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
+		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return m_res;
+		return lastResult;
 	}
  	
  	/**
@@ -156,11 +167,12 @@ public class EvaluatorNim extends Evaluator {
 			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
 			MessageBox.show(gb.getArena(),"ERROR: " + tdstr,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
-			m_res = Double.NaN;
-			return m_res;
+			lastResult = Double.NaN;
+			m_msg = "EvaluatorTTT: opponent is null!";
+			return lastResult;
 		} 
 
-		m_res=0;
+		lastResult=0;
  		
 		int numK=10;
 		for (int k=0; k<numK; ++k) {
@@ -175,31 +187,35 @@ public class EvaluatorNim extends Evaluator {
 			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
 											// resp. \in [-1,0], if opponent never looses.
 											// +1 is best for pa, -1 worst for pa.
-			m_res += (resX+resO)/2.0;
+			lastResult += (resX+resO)/2.0;
 		}
-		m_res=m_res/numK;
+		lastResult=lastResult/numK;
 		
-		m_msg = pa.getName()+": "+getPrintString() + m_res;
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);		// this.verbose is def'd in Evaluator
 		
-		return m_res;
+		return lastResult;
 	}
  	
- 	@Override
- 	public double getLastResult() { 
- 		return m_res; 
- 	}
- 	@Override
- 	public String getMsg() { 
- 		return m_msg; } 
+ 	// --- implemented by Evaluator ---
+// 	@Override
+// 	public double getLastResult() { 
+// 		return lastResult; 
+// 	}
  	
-	@Override
- 	public boolean isAvailableMode(int mode) {
-		for (int i : AVAILABLE_MODES) {
-			if (mode==i) return true;
-		}
-		return false;
- 	}
+ 	// --- implemented by Evaluator ---
+// 	@Override
+// 	public String getMsg() { 
+// 		return m_msg; } 
+ 	
+ 	// --- implemented by Evaluator ---
+//	@Override
+// 	public boolean isAvailableMode(int mode) {
+//		for (int i : AVAILABLE_MODES) {
+//			if (mode==i) return true;
+//		}
+//		return false;
+// 	}
  	
  	@Override
  	public int[] getAvailableModes() {
@@ -207,7 +223,7 @@ public class EvaluatorNim extends Evaluator {
  	}
  	
  	//@Override
- 	public static int getDefaultEvalMode() {
+ 	public int getDefaultEvalMode() {
 		return AVAILABLE_MODES[3];		// mode 2
 	}
  	
@@ -219,10 +235,10 @@ public class EvaluatorNim extends Evaluator {
 	{
 		return 3;
 	}
-	public int getMultiTrainEvalMode() 
-	{
-		return 0;
-	}
+//	public int getMultiTrainEvalMode() 
+//	{
+//		return 0;
+//	}
 
 	private String getBestResultString() {
 		DecimalFormat df = new DecimalFormat();				

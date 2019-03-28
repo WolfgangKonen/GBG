@@ -2,19 +2,29 @@ package games.ZweiTausendAchtundVierzig.Heuristic;
 
 import controllers.PlayAgent;
 import games.Evaluator;
+import games.GameBoard;
+import games.ZweiTausendAchtundVierzig.Arena2048;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
+import games.ZweiTausendAchtundVierzig.Evaluator2048;
 import tools.cmaes.CMAEvolutionStrategy;
 
 /**
- * Created by Johannes Kutsch on 29.06.2017.
+ * Evolutionary algorithm (EA) evaluator for 2048: 
+ * <p>
+ * Note that the mode-selection for 2048 evaluators is done in 
+ * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}.
+ * <p>
+ * Created by Johannes Kutsch, TH Köln, 2016-12.
+ * 
+ * @see Evaluator2048
+ * @see Evaluator2048_BoardPositions
  */
 public class Evaluator2048_EA extends Evaluator {
     private HeuristicSettings2048 fitfun = new HeuristicSettings2048();
     private CMAEvolutionStrategy cma = new CMAEvolutionStrategy();
-    private double bestFitness = 0;
 
     public Evaluator2048_EA(PlayAgent e_PlayAgent, int stopEval, int verbose) {
-        super(e_PlayAgent, stopEval, verbose);
+        super(e_PlayAgent, 2, stopEval, verbose);
     }
 
     @Override
@@ -59,8 +69,8 @@ public class Evaluator2048_EA extends Evaluator {
                 cma.println();
 
 
-            bestFitness = (1-cma.getBestFunctionValue())*100000;
-            cma.println("\nbest fitness " + bestFitness
+            lastResult = (1-cma.getBestFunctionValue())*100000;
+            cma.println("\nbest fitness " + lastResult
                     + " at evaluation " + cma.getBestEvaluationNumber());
 
             System.out.println("best settings are: ");
@@ -70,14 +80,14 @@ public class Evaluator2048_EA extends Evaluator {
             }
         }
 
-        bestFitness = (1-cma.getBestFunctionValue())*100000;
+        lastResult = (1-cma.getBestFunctionValue())*100000;
 
         cma.writeToDefaultFiles(1);
         cma.println();
         cma.println("\nTerminated due to");
         for (String s : cma.stopConditions.getMessages())
             cma.println("  " + s);
-        cma.println("best fitness " + bestFitness
+        cma.println("best fitness " + lastResult
                 + " at evaluation " + cma.getBestEvaluationNumber());
 
         System.out.println("best settings are: ");
@@ -89,28 +99,30 @@ public class Evaluator2048_EA extends Evaluator {
         return true;
     }
 
-    @Override
-    public double getLastResult() {
-        return bestFitness;
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public double getLastResult() {
+//        return lastResult;
+//    }
 
     @Override
     public String getMsg() {
         return "";
     }
 
-    @Override
-    public boolean isAvailableMode(int mode) {
-        switch (mode) {
-        	case -1: 
-        	case  0:
-            case  1:
-            case  2:
-                return true;
-            default:
-                return false;
-        }
-    }
+ 	// --- implemented by Evaluator ---
+//    @Override
+//    public boolean isAvailableMode(int mode) {
+//        switch (mode) {
+//        	case -1: 
+//        	case  0:
+//            case  1:
+//            case  2:
+//                return true;
+//            default:
+//                return false;
+//        }
+//    }
 
     @Override
     public int[] getAvailableModes() {
@@ -127,14 +139,14 @@ public class Evaluator2048_EA extends Evaluator {
         return 0;
     }
 
-    @Override
-    public int getMultiTrainEvalMode() {
-        return 0;
-    }
+//    @Override
+//    public int getMultiTrainEvalMode() {
+//        return 0;
+//    }
 
     @Override
     public String getPrintString() {
-        return"success rate";
+        return "success rate";
     }
 
 	@Override
