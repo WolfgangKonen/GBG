@@ -421,9 +421,9 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * Sets the x-values which are plotted along the x-axis. The x-values are 
 	 * calculated based upon the indexes of the z-values array:
 	 * 
-	 * <blockcode><pre>
+	 * <pre>
 	 * x-value = x-offset + (column-index * x-interval)
-	 * </pre></blockcode>
+	 * </pre>
 	 * 
 	 * <p>The x-interval defines the gap between each x-value and the x-offset 
 	 * is applied to each value to offset them all from zero.
@@ -460,9 +460,9 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * Sets the y-values which are plotted along the y-axis. The y-values are 
 	 * calculated based upon the indexes of the z-values array:
 	 * 
-	 * <blockcode><pre>
+	 * <pre>
 	 * y-value = y-offset + (column-index * y-interval)
-	 * </pre></blockcode>
+	 * </pre>
 	 * 
 	 * <p>The y-interval defines the gap between each y-value and the y-offset 
 	 * is applied to each value to offset them all from zero.
@@ -1813,7 +1813,7 @@ public class HeatChart { // based on JHeatChart v0.6
 	}
 
 	/**
-	 * Finds and returns the minimum value in a 2-dimensional array of doubles but ignores non data fields in tournament mode (<0)
+	 * Finds and returns the minimum value in a 2-dimensional array of doubles but ignores non data fields in tournament mode (&lt;0)
 	 *
 	 * @param modeTSEnabled toggle tournament mode for data interpretation
 	 * @return the smallest value in the array

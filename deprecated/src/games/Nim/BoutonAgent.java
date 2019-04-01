@@ -41,6 +41,10 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
 		int i,j;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
 		double[] VTable = new double[acts.size()+1];  
+//		ScoreTuple currScoreTuple=new ScoreTuple(2);
+//      ScoreTuple scBest=new ScoreTuple(so);		// make a new ScoreTuple, which starts by default with the lowest possible maxValue
+//      ACTIONS_ST act_best = null;
+//    	String stringRep ="";
 		StateObserverNim NewSO;
         ACTIONS actBest = null;
         List<Types.ACTIONS> bestActions = new ArrayList<>();
@@ -51,6 +55,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         double maxValue = -1.0;
         double value;
         int player = so.getPlayer();
+//  	int opponent = (player==0) ? 1 : 0;
         
         for(i = 0; i < acts.size(); ++i)
         {
@@ -62,6 +67,16 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         	// Always *maximize* 'value' which is the value for the player to move in 'so'.
         	if (value>maxValue) maxValue = value;
         	if (value==1.0) bestActions.add(acts.get(i));
+            // --- old version, too complicated ---
+//			currScoreTuple.scTup[player] = NewSO.boutonValue(NewSO.getHeaps());
+//			currScoreTuple.scTup[opponent] = -currScoreTuple.scTup[player];
+//			
+//        	VTable[i] = currScoreTuple.scTup[player];
+//			
+//			// always *maximize* P's element in the tuple currScoreTuple, 
+//			// where P is the player to move in state so:
+//			ScoreTuple.CombineOP cOP = ScoreTuple.CombineOP.MAX;
+//			scBest.combine(currScoreTuple, cOP, player, 0.0);            	
         } // for
         if (maxValue==-1.0) 	// 'so' is a loosing state --> all available actions are equally bad,
         	bestActions = acts;	// thus all are equally possible	
@@ -69,6 +84,16 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         // There might be one or more than one action with maxValue. 
         // Break ties by selecting one of them randomly:
         actBest = bestActions.get(rand.nextInt(bestActions.size()));
+        // --- old version, too complicated ---
+//    	int selectJ = (int)(rand.nextDouble()*scBest.count);
+//    	//System.out.println(selectJ + " of " + scBest.count);
+//    	maxValue = scBest.scTup[player];
+//    	for (i=0, j=0; i < acts.size(); ++i) {
+//    		if (VTable[i]==maxValue) {
+//    			if ((j++)==selectJ) actBest = new ACTIONS(acts.get(i));
+//    		}
+//    	}
+//    	assert actBest != null : "Oops, no best action actBest";
 
         // optional: print the best action
         if (!silent) {
@@ -78,8 +103,10 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         }			
 
         VTable[acts.size()] = maxValue;
-        
-        return new ACTIONS_VT(actBest.toInt(), false, VTable);
+        actBest.setRandomSelect(false);
+//        act_best = new ACTIONS_ST(actBest, scBest);
+		
+        return new ACTIONS_VT(actBest.toInt(), actBest.isRandomAction(), VTable);
 	}
 
 	@Override
@@ -116,5 +143,56 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
 	public boolean isTrainable() {
 		return false;
 	}
+
+	// --- take default implementation from AgentBase ---
+//	@Override
+//	public String stringDescr() {
+//		String cs = getClass().getSimpleName();
+//		return cs;
+//	}
+//
+//	@Override
+//	public String stringDescr2() {
+//		return getClass().getName() + ":";
+//	}
+
+//	@Override
+//	public int getMaxGameNum() {
+//		return 0;
+//	}
+
+//	@Override
+//	public int getGameNum() {
+//		return 0;
+//	}
+
+//	@Override
+//	public void setMaxGameNum(int num) {
+//
+//	}
+
+//	@Override
+//	public void setGameNum(int num) {
+//	}
+
+//	@Override
+//	public AgentState getAgentState() {
+//		return m_agentState;
+//	}
+//
+//	@Override
+//	public void setAgentState(AgentState aState) {
+//		m_agentState = aState;
+//	}
+
+//	@Override
+//	public String getName() {
+//		return m_name;
+//	}
+//
+//	@Override
+//	public void setName(String name) {
+//		m_name = name;
+//	}
 
 }

@@ -19,7 +19,7 @@ public class NimConfig {
     /**
      * Initial heap size (maximum number of items in each heap)
      */
-    public final static int HEAP_SIZE = 5; // 50
+    public final static int HEAP_SIZE = 10; // 50
 
     /**
      * Maximum number of items to subtract ('minus') from a heap in one move.

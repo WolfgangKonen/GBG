@@ -52,7 +52,7 @@ abstract public class Evaluator {
 	/**
 	 * 
 	 * @param e_PlayAgent	the agent to evaluate
-	 * @param stopEval		how many successfull calls to {@link #eval(PlayAgent)} are needed
+	 * @param stopEval		how many successful calls to {@link #eval(PlayAgent)} are needed
 	 * 						until {@link #goalReached(int)} returns true
 	 */
 	public Evaluator(PlayAgent e_PlayAgent, int mode, int stopEval) {
@@ -217,7 +217,7 @@ abstract public class Evaluator {
 	/**
 	 * Derived classes return a tooltip string with this method. Use 
 	 * <pre>
-	 *    "&lt;html> ... &lt;br> ... &lt;/html>"  </pre>
+	 *    "&lt;html&gt; ... &lt;br&gt; ... &lt;/html&gt;"  </pre>
 	 * to get multi-line tooltip text 
 	 * @return the tooltip string for evaluator boxes in "Other pars"
 	 */

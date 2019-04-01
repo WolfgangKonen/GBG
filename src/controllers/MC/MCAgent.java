@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 /**
  * Monte Carlo (MC) agent.<br>
  * 
- * --- This class is deprecated, use {@link MCAgentN} instead. --
+ * --- This class is deprecated, use {@link MCAgentN} instead. ---
  * 
  * @see MCAgentN
  * @see MCAgentConfig

@@ -519,7 +519,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 
 	public String stringDescr() {
 		m_Net.setHorizon();
-		String cs = getClass().getName();
+		String cs = getClass().getSimpleName();
 		String str = cs + ": USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
@@ -531,7 +531,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	}
 		
 	public String stringDescr2() {
-		String cs = getClass().getName();
+		String cs = getClass().getSimpleName();
 		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
 						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
 						+ ", gamma: " + m_tdPar.getGamma();

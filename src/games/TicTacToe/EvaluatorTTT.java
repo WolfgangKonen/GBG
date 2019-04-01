@@ -223,7 +223,7 @@ public class EvaluatorTTT extends Evaluator {
 	/**
 	 * Derived classes return a tooltip string with this method. Use 
 	 * <pre>
-	 *    "&lt;html> ... &lt;br> ... &lt;/html>"  </pre>
+	 *    "&lt;html&gt; ... &lt;br&gt; ... &lt;/html&gt;"  </pre>
 	 * to get multi-line tooltip text 
 	 * @return the tooltip string for evaluator boxes in "Other pars"
 	 */

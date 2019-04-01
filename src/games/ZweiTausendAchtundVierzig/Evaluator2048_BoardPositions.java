@@ -1,6 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
-import controllers.MC.MCAgent;
+//import controllers.MC.MCAgent;
+import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
@@ -130,7 +131,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
         mcParams.setRolloutDepth(ConfigEvaluator.ROLLOUTDEPTH - 1);
         mcParams.setIterations(ConfigEvaluator.ITERATIONS);
         mcParams.setNumAgents(ConfigEvaluator.NUMBERAGENTS);
-        MCAgent mcAgent = new MCAgent(mcParams);
+        MCAgentN mcAgent = new MCAgentN(mcParams);
 
         int maxCertainty = ConfigEvaluator.NC*gameStateGroup.size();
         double mcCertainty = 0;
@@ -225,7 +226,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                 int gameNumber = i;
                 callables.add(() -> {
                     StateObserver2048 gameState = new StateObserver2048();
-                    PlayAgent playAgent = new MCAgent(new ParMC());
+                    PlayAgent playAgent = new MCAgentN(new ParMC());
                     List<StateObserver2048> tempGameStates = new ArrayList<>();
                     while (!gameState.isGameOver()) {
                         tempGameStates.add(gameState.copy());
@@ -255,7 +256,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             for(int i = ConfigEvaluator.GAMESFORNEWGAMESTATES; i > 0; i--) {
                 int gameNumber = i;
                 StateObserver2048 gameState = new StateObserver2048();
-                PlayAgent playAgent = new MCAgent(new ParMC());
+                PlayAgent playAgent = new MCAgentN(new ParMC());
                 tempGameStates = new ArrayList<>();
                 while (!gameState.isGameOver()) {
                     tempGameStates.add(gameState.copy());

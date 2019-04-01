@@ -18,12 +18,14 @@ import tools.Types.ScoreTuple;
  * 		{@link controllers.MaxNWrapper}, 
  * 		{@link controllers.ExpectimaxNAgent}, 
  * 		{@link controllers.ExpectimaxWrapper}, 
- * 		{@link controllers.MC.MCAgent}		
+ * 		{@link controllers.MC.MCAgentN}		
  * 		{@link controllers.MCTS.MCTSAgentT}		
  * 		{@link controllers.MCTSExpectimax.MCTSExpectimaxAgt}		
  * 		{@link controllers.TD.TDAgent}, 
- * 		{@link controllers.TD.ntuple2.TDNTuple2Agt}, 
+ * 		{@link controllers.TD.ntuple2.TDNTuple3Agt}, 
+ * 		{@link controllers.TD.ntuple2.SarsaAgt}, 
  * 		{@link games.CFour.AlphaBetaAgent}, 
+ * 		{@link games.Nim.BoutonAgent}, 
  * </ul> 
  *
  * @author Wolfgang Konen, TH Köln, Nov'16

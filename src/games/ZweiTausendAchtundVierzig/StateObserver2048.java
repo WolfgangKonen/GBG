@@ -515,7 +515,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	 * @return 	the game score
 	 *  
 	 */
-    public double getGameScore(StateObservation referingState) {
+    public double getGameScore(StateObservation refer) {
 		return score / MAXSCORE;
     }
 

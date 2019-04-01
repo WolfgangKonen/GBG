@@ -27,6 +27,7 @@ import javax.swing.border.BevelBorder;
 
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.GameBoard;
 import games.StateObservation;
 import games.Arena;
@@ -642,7 +643,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	 * @return 	the start state for the next training episode
 	 *      
 	 * @see PlayAgent#trainAgent(StateObservation)   
-	 * @see TDNTuple2Agt#trainAgent(StateObservation) 
+	 * @see TDNTuple3Agt#trainAgent(StateObservation) 
 	 */
 	@Override
 	public StateObservation chooseStartState(PlayAgent pa) {

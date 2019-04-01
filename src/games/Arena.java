@@ -8,6 +8,7 @@ import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
 import controllers.HumanPlayer;
 import controllers.MC.MCAgent;
+import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.Arena.Task;
@@ -853,9 +854,9 @@ abstract public class Arena extends JFrame implements Runnable {
 					ibest = i;
 				}
 			}
-			if (pa instanceof MCAgent) {
-				int nRolloutFinished = ((MCAgent) pa).getNRolloutFinished();
-				int nIterations = ((MCAgent) pa).getNIterations();
+			if (pa instanceof MCAgentN) {
+				int nRolloutFinished = ((MCAgentN) pa).getNRolloutFinished();
+				int nIterations = ((MCAgentN) pa).getNIterations();
 				System.out.println(";  Best = " + ibest + ", Finished=" + nRolloutFinished + "/" + nIterations);
 			} else {
 				System.out.println(";  Best = " + ibest);

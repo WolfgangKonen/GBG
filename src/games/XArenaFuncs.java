@@ -96,7 +96,7 @@ public class XArenaFuncs
 	 * @return			a new {@link PlayAgent} (initialized, but not yet trained)
 	 * @throws IOException 
 	 * 
-	 * @see {@link #fetchAgents(XArenaButtons)}
+	 * @see #fetchAgents(XArenaButtons)
 	 */
 	protected PlayAgent constructAgent(int n, String sAgent, XArenaButtons m_xab) throws IOException {
 		PlayAgent pa = null;

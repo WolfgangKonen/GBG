@@ -15,7 +15,7 @@ public class ParOther implements Serializable {
     private int trainEvalMode = DEFAULT_TRAIN_EVAL_MODE;
     private int numEval = DEFAULT_NUM_EVAL;
     private int episodeLength = DEFAULT_EPISODE_LENGTH;
-    private int stopTest = DEFAULT_STOP_TEST;
+	private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 
     private int wrapperNply = DEFAULT_WRAPPER_NPLY; 
     private boolean chooseStart01 = false;

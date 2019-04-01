@@ -154,7 +154,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public String printTrainStatus() {
-		return "AgentBase::printTrain"; // dummy stub
+		return this.getClass().getSimpleName()+"::printTrain"; // dummy stub
 	}
 
 	public boolean isTrainable() {

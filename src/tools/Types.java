@@ -16,6 +16,7 @@ import controllers.PlayAgent;
 import controllers.TD.ntuple2.NTuple2ValueFunc;
 import games.Arena;
 import games.StateObservation;
+import games.Nim.BoutonAgent;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 
 import java.awt.event.KeyEvent;

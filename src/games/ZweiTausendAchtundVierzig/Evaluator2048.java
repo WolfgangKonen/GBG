@@ -1,6 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.MC.MCAgent;
+import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
@@ -290,7 +291,7 @@ public class Evaluator2048 extends Evaluator {
         String agentSettings = "";
 
         if(m_PlayAgent.getName() == "MC") {
-            MCAgent mcAgent = (MCAgent)m_PlayAgent;
+            MCAgentN mcAgent = (MCAgentN)m_PlayAgent;
             agentSettings = "\nROLLOUTDEPTH: " + mcAgent.getMCPar().getRolloutDepth() +
                     "\nITERATIONS: " + mcAgent.getMCPar().getNumIter() +
                     "\nNUMBERAGENTS: " + mcAgent.getMCPar().getNumAgents();

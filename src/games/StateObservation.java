@@ -202,7 +202,7 @@ public interface StateObservation extends Serializable{
      *
      * (This method is not really necessary for deterministic games - it does the same as 
      * {@link #advance(ACTIONS)} - but we have it in the interface to allow the same syntax in 
-     * {@link TDNTuple2Agt} when making an action for any StateObservation, deterministic 
+     * {@link TDNTuple3Agt} when making an action for any StateObservation, deterministic 
      * or nondeterministic.)
      * 
      * @param action the action
@@ -213,7 +213,7 @@ public interface StateObservation extends Serializable{
      * Advance the current afterstate to a new state (do the nondeterministic part of advance).<p>
      * 
      * (This method is not really necessary for deterministic games - it does just nothing - but we
-     * have it here to allow the same syntax in {@link TDNTuple2Agt} when making an action for
+     * have it here to allow the same syntax in {@link TDNTuple3Agt} when making an action for
      * any StateObservation, deterministic or nondeterministic.)
      */
     public void advanceNondeterministic();

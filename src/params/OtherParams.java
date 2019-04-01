@@ -313,7 +313,7 @@ public class OtherParams extends Frame {
 	 * parameters" we mean parameter producing good results. Likewise, some parameter
 	 * choices may be enabled or disabled.
 	 * 
-	 * @param agentName either "TD-Ntuple-2" (for {@link TDNTuple2Agt}) or "TDS" (for {@link TDAgent})
+	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "TDS" (for {@link TDAgent})
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {

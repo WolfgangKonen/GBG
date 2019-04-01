@@ -2,6 +2,8 @@ package games.TicTacToe;
 
 import java.io.Serializable;
 
+import controllers.AgentBase;
+import controllers.PlayAgent;
 import games.Feature;
 import games.StateObservation;
 import games.TicTacToe.StateObserverTTT;

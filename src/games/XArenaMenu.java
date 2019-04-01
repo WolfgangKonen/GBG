@@ -564,11 +564,11 @@ public class XArenaMenu extends JMenuBar {
 			m_arena.m_xab.changedViaLoad[n] = true;
 			
 			if (td instanceof TDAgent) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar[n].setFrom( ((TDAgent) td).getTDParams() );
 				// now done in LoadSaveGBG::loadGBGAgent():
 //				if (((TDAgent) td).getParOther() == null ) 
 //					((TDAgent) td).setDefaultOtherPar();
+				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.tdPar[n].setFrom( ((TDAgent) td).getTDParams() );
 				m_arena.m_xab.oPar[n].setFrom( ((TDAgent) td).getParOther() );
 			}
 			else if (td instanceof TDNTuple2Agt) {
@@ -598,42 +598,27 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple3Agt) td).getParOther() );
 			}
 			else if (td instanceof SarsaAgt) {
-				
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.tdPar[n].setFrom( ((SarsaAgt) td).getParTD() );
 				m_arena.m_xab.ntPar[n].setFrom( ((SarsaAgt) td).getParNT() );
 				m_arena.m_xab.oPar[n].setFrom( ((SarsaAgt) td).getParOther() );
 			}
-//			else if (td instanceof MCTSAgentT0) {
-//				// set the agent parameters in XArenaTabs:
-//				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT0) td).getParMCTS() );
-//				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT0) td).getParOther() );
-//			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT) td).getParMCTS() );
 				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT) td).getParOther() );
 			}
 			else if (td instanceof MCTSExpectimaxAgt) {
-				// now done in LoadSaveGBG::loadGBGAgent():
-//				if (((MCTSExpectimaxAgt) td).getParOther() == null ) 
-//					((MCTSExpectimaxAgt) td).setDefaultOtherPar();
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctseParams[n].setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
 				m_arena.m_xab.oPar[n].setFrom( ((MCTSExpectimaxAgt) td).getParOther() );
 			}
 			else if (td instanceof MCAgent) {
-				// now done in LoadSaveGBG::loadGBGAgent():
-//				if (((MCAgent) td).getParOther() == null ) 
-//					((MCAgent) td).setDefaultOtherPar();
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mcParams[n].setFrom( ((MCAgent) td).getMCPar() );
 				m_arena.m_xab.oPar[n].setFrom( ((MCAgent) td).getParOther() );
 			}
 			else if (td instanceof MCAgentN) {
-				// now done in LoadSaveGBG::loadGBGAgent():
-//				if (((MCAgentN) td).getParOther() == null ) 
-//					((MCAgentN) td).setDefaultOtherPar();
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mcParams[n].setFrom( ((MCAgentN) td).getMCPar() );
 				m_arena.m_xab.oPar[n].setFrom( ((MCAgentN) td).getParOther() );

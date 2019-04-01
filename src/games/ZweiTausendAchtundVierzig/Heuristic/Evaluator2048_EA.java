@@ -6,6 +6,7 @@ import games.GameBoard;
 import games.ZweiTausendAchtundVierzig.Arena2048;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import games.ZweiTausendAchtundVierzig.Evaluator2048;
+import games.ZweiTausendAchtundVierzig.Evaluator2048_BoardPositions;
 import tools.cmaes.CMAEvolutionStrategy;
 
 /**

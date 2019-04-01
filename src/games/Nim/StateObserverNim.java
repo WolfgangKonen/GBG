@@ -284,9 +284,9 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		//
 		// The equivalent Java implementation is
 		// 		Arrays.stream(heaps).reduce(startValue, (x,y) -> (x%K) ^ (y%K));
-		// The sequence heaps is fed into the lambda-construct 
+		// The variable heaps, which is a sequence of int's, is fed via reduce into the lambda-construct 
 		// 		(x,y) -> (x%K) ^ (y%K) 
-		// via reduce: the first two elements are bitwise XOR'ed, then the
+		// where ^ is the XOR operator: the first two elements are bitwise XOR'ed, then the
 		// result of this together with the 3rd element is bitwise XOR'ed, then the
 		// result of this together with the 4th element is bitwise XOR'ed, and so on. 
 		// The final result is the binary digital sum or nim-sum of all heaps.
@@ -297,7 +297,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		// winning position. This means that only the *remainder* of x and y in excess of multiples
 		// of K (i.e. x%K) is relevant to compute the nim-sum and find the winning move.
 		//
-		// Why int startValue=0? - Because reduce(int,...) directly returns an int as well.
+		// Why reduce(startValue,...)? - Because reduce(int,...) directly returns an int as well.
 		//
 		int startValue=0;
 		int K = NimConfig.MAX_MINUS+1;
