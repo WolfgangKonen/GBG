@@ -16,13 +16,13 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 /**
- * This class is the entrypoint to the tournament system and provides a GUI to configure and start a tournament.
- * It gets called by {@link XArenaMenu#generateTournamentMenu()}. The {@link TSAgentManager} is instantiated
- * and fed with data here.
+ * This class is the entry point to the tournament system and provides a GUI to configure and start 
+ * a tournament. It gets called by {@link XArenaMenu#generateTournamentMenu()}. 
+ * The {@link TSAgentManager} is instantiated and fed with data here.
  * <p>
  * This GUI was build with the IntelliJ GUI Designer.
  *
- * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ * @author Felix Barsnick, Cologne University of Applied Sciences, 2018
  */
 public class TSSettingsGUI2 extends JFrame {
     private JCheckBox randomCheckBox;
@@ -66,7 +66,8 @@ public class TSSettingsGUI2 extends JFrame {
         JScrollPane scroll = new JScrollPane(mJPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         //setContentPane(mJPanel);
         setContentPane(scroll);
-        pack();
+		pack();
+
         setVisible(true);
 
         this.mArena = mArena;
@@ -81,7 +82,12 @@ public class TSSettingsGUI2 extends JFrame {
                 }
             }
         });
-        mTSAgentManager.addAgent("Standard Random", Types.GUI_AGENT_LIST[0], randomCheckBox, false, null);
+        // /WK/04/2019 BugFix: in the following we use the explicit strings, e.g. "Random", "MCTS"
+        // from Types.GUI_AGENT_LIST and NOT GUI_AGENT_LIST[0] or similar, because GUI_AGENT_LIST 
+        // may change in the future and then the element GUI_AGENT_LIST[i] is no longer the same.
+        //
+        mTSAgentManager.addAgent("Standard Random", "Random"/*Types.GUI_AGENT_LIST[0]*/, randomCheckBox, false, null);
+        // --- note WK: "Minimax" is now deprecated! ---
         minimaxCheckBox.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -90,7 +96,8 @@ public class TSSettingsGUI2 extends JFrame {
                 }
             }
         });
-        mTSAgentManager.addAgent("Standard Minimax", Types.GUI_AGENT_LIST[1], minimaxCheckBox, false, null);
+        minimaxCheckBox.setVisible(false);
+        mTSAgentManager.addAgent("Standard Minimax", "Minimax"/*Types.GUI_AGENT_LIST[1]*/, minimaxCheckBox, false, null);
         MCNCheckBox.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -99,11 +106,11 @@ public class TSSettingsGUI2 extends JFrame {
                 }
             }
         });
-        mTSAgentManager.addAgent("Standard MCN", Types.GUI_AGENT_LIST[4], MCNCheckBox, false, null);
-        // GUI_AGENT_LIST[7] ist der Human Player
-        mTSAgentManager.addAgent("Standard TDNtuple2", Types.GUI_AGENT_LIST[8], TDNtuple2CheckBox, false, null);
+        mTSAgentManager.addAgent("Standard MCN", "MC-N"/*Types.GUI_AGENT_LIST[4]*/, MCNCheckBox, false, null);
+        // GUI_AGENT_LIST[6] is Human player
+        mTSAgentManager.addAgent("Standard TDNtuple2",  "TD-Ntuple-2"/*Types.GUI_AGENT_LIST[8]*/, TDNtuple2CheckBox, false, null);
         TDNtuple2CheckBox.setVisible(false);
-        mTSAgentManager.addAgent("Standard TDS", Types.GUI_AGENT_LIST[9], TDSCheckBox, false, null);
+        mTSAgentManager.addAgent("Standard TDS", "TDS"/*Types.GUI_AGENT_LIST[9]*/, TDSCheckBox, false, null);
         TDSCheckBox.setVisible(false);
 
         if (mArena.getGameBoard().getDefaultStartState().isDeterministicGame()) {
@@ -116,7 +123,7 @@ public class TSSettingsGUI2 extends JFrame {
                     }
                 }
             });
-            mTSAgentManager.addAgent("Standard MaxN", Types.GUI_AGENT_LIST[2], maxNCheckBox, false, null);
+            mTSAgentManager.addAgent("Standard MaxN", "Max-N"/*Types.GUI_AGENT_LIST[2]*/, maxNCheckBox, false, null);
             MCTSCheckBox.addChangeListener(new ChangeListener() {
                 @Override
                 public void stateChanged(ChangeEvent e) {
@@ -125,7 +132,7 @@ public class TSSettingsGUI2 extends JFrame {
                     }
                 }
             });
-            mTSAgentManager.addAgent("Standard MCTS", Types.GUI_AGENT_LIST[5], MCTSCheckBox, false, null);
+            mTSAgentManager.addAgent("Standard MCTS", "MCTS"/*Types.GUI_AGENT_LIST[4]*/, MCTSCheckBox, false, null);
             expectimaxNCheckBox.setVisible(false);
             MCTSExpectimaxCheckBox.setVisible(false);
         } else {
@@ -138,7 +145,7 @@ public class TSSettingsGUI2 extends JFrame {
                     }
                 }
             });
-            mTSAgentManager.addAgent("Standard ExpectimaxN", Types.GUI_AGENT_LIST[3], expectimaxNCheckBox, false, null);
+            mTSAgentManager.addAgent("Standard ExpectimaxN", "Expectimax-N"/*Types.GUI_AGENT_LIST[3]*/, expectimaxNCheckBox, false, null);
             MCTSExpectimaxCheckBox.addChangeListener(new ChangeListener() {
                 @Override
                 public void stateChanged(ChangeEvent e) {
@@ -147,7 +154,7 @@ public class TSSettingsGUI2 extends JFrame {
                     }
                 }
             });
-            mTSAgentManager.addAgent("Standard MCTSExpectimax", Types.GUI_AGENT_LIST[6], MCTSExpectimaxCheckBox, false, null);
+            mTSAgentManager.addAgent("Standard MCTSExpectimax", "MCTS Expectimax"/*Types.GUI_AGENT_LIST[6]*/, MCTSExpectimaxCheckBox, false, null);
             maxNCheckBox.setVisible(false);
             MCTSCheckBox.setVisible(false);
         }
@@ -179,7 +186,7 @@ public class TSSettingsGUI2 extends JFrame {
         loadAgentFromDiskButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                loadAgentFromDisk();
+                loadAgentsFromDisk();
                 if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
                     updateSliderAndLabel();
                 }
@@ -253,7 +260,8 @@ public class TSSettingsGUI2 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 mTSAgentManager.deleteAllHDDAgentsSelected();
                 updateSliderAndLabel();
-                pack();
+                pack(); 					// resize window ...
+                adjustComponentHeight();	// ... but constrained by 95% screen height	
             }
         });
         variableDRoundRobinSlider.addChangeListener(new ChangeListener() {
@@ -273,8 +281,21 @@ public class TSSettingsGUI2 extends JFrame {
                 variableDRRInfoLabel.setVisible(variableDoubleRoundRobinRadioButton.isSelected()); //todo not very efficient code, called too often
             }
         });
-    }
+      
+        this.adjustComponentHeight();
 
+    } // TSSettingsGUI2
+
+    private void adjustComponentHeight() {
+        // here we set the component height to not more than 95% of screen height --> 
+        // this lets the component not stretch over the Windows task bar
+ 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int height = (int)(screenSize.getHeight()*0.95);
+		height = (height>this.getHeight()) ? this.getHeight() : height;
+		setSize(this.getWidth(), height);
+		setBounds(0,0,this.getWidth(), height);
+    }
+    
     /**
      * update the variable round robin slider limits to the current amount of selected agents in {@link TSSettingsGUI2}.
      * Update will just take place when the upper or lower limit actually changed.
@@ -302,7 +323,7 @@ public class TSSettingsGUI2 extends JFrame {
     /**
      * loads previously saved agents from disk into the tournament system
      */
-    private void loadAgentFromDisk() {
+    private void loadAgentsFromDisk() {
         if (mArena.taskState != ArenaTrain.Task.IDLE) {
             System.out.println(TAG + "ERROR :: ARENA is not IDLE, dont try to change data while its working, aborting");
             return;
@@ -313,54 +334,23 @@ public class TSSettingsGUI2 extends JFrame {
         try {
             //playAgent = mArena.tdAgentIO.loadGBGAgent(null); // opens file dialog to locate single agent
             agentsAndFileNames = mArena.tdAgentIO.loadMultipleGBGAgent(); // opens file dialog to locate multiple agents
-        } catch (IOException /*| ClassNotFoundException*/ e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println(TAG + "ERROR :: No agent loaded from disk");
+            //e.printStackTrace();
+            return;
+        } catch (ClassNotFoundException e) {
+            System.out.println(TAG + "ERROR :: No agent loaded from disk");
+            //e.printStackTrace();
             return;
         }
 
-        if (agentsAndFileNames == null) // avoids crash when filedialog is closed with no file chosen
+        if (agentsAndFileNames == null) // avoids crash when file dialog is closed with no file chosen
             return;
 
         for (int i = 0; i < agentsAndFileNames.getSize(); i++) {
             PlayAgent playAgent = agentsAndFileNames.getPlayAgent(i);
             String agentName = agentsAndFileNames.getFileName(i);
             String agentType = agentsAndFileNames.getPlayAgentType(i);
-
-            /*
-            if (agent instanceof TDAgent) {
-                playAgent = (TDAgent) agent;
-                agentType = "TDAgent";
-            } else if (agent instanceof TDNTuple2Agt) {
-                playAgent = (TDNTuple2Agt) agent;
-                agentType = "TDNTuple2Agt";
-            } else if (agent instanceof MCTSAgentT) {
-                playAgent = (MCTSAgentT) agent;
-                agentType = "MCTSAgentT";
-            } else if (agent instanceof MCAgent) {
-                playAgent = (MCAgent) agent;
-                agentType = "MCAgent";
-            } else if (agent instanceof MCAgentN) {
-                playAgent = (MCAgentN) agent;
-                agentType = "MCAgentN";
-            } else if (agent instanceof MinimaxAgent) {
-                playAgent = (MinimaxAgent) agent;
-                agentType = "MinimaxAgent";
-            } else if (agent instanceof MaxNAgent) {
-                playAgent = (MaxNAgent) agent;
-                agentType = "MaxNAgent";
-            } else if (agent instanceof ExpectimaxNAgent) {
-                playAgent = (ExpectimaxNAgent) agent;
-                agentType = "ExpectimaxNAgent";
-            } else if (agent instanceof RandomAgent) {
-                playAgent = (RandomAgent) agent;
-                agentType = "RandomAgent";
-            } else {
-                //playAgent = null;
-                //agentType = "NaN";
-                System.out.println(TAG + "ERROR :: Unknown Agent Class");
-                break;
-            }
-            */
 
             System.out.println(TAG + "INFO :: loading from Disk successful for agent: " + agentName + " with AgentState: " + playAgent.getAgentState() + " and type: " + agentType);
 
@@ -386,7 +376,8 @@ public class TSSettingsGUI2 extends JFrame {
         checkBoxJPanel.revalidate();
         mJPanel.revalidate();
         mJPanel.repaint();
-        pack(); // resize window
+        pack(); 					// resize window ...
+        adjustComponentHeight();	// ... but constrained by 95% screen height	
     }
 
     /**
@@ -451,10 +442,10 @@ public class TSSettingsGUI2 extends JFrame {
 
         int countSelectedAgents = 0;
         System.out.println(TAG + "Startbutton clicked | checkbox states:");
-        // durch alle checkboxen der agenten iterieren
+        // iterate through all agent check-boxes durch alle checkboxen der agenten iterieren
         for (TSAgent agent : mTSAgentManager.results.mAgents) {
             //System.out.println(agent.getAgentType() +" == "+ agent.getName());
-            // pruefen fuer jede checkbox, ob sie selected ist oder nicht
+            // look for each check-box whether it is selected or not
             if (agent.guiCheckBox.isSelected()) {
                 System.out.println(TAG + agent.guiCheckBox.getText() + ": selected");
                 countSelectedAgents++;

@@ -219,7 +219,7 @@ public class EvaluatorC4 extends Evaluator {
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstMaxN(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
-        double[] res = XArenaFuncs.compete(playAgent, maxnAgent, new StateObserverC4(), numEpisodes, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, maxnAgent, new StateObserverC4(), numEpisodes, verbose, null);
         double success = res[0] - res[2];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         if (this.verbose > 0) System.out.println(m_msg);
@@ -247,7 +247,7 @@ public class EvaluatorC4 extends Evaluator {
     	// (This is indeed the case.)
 //        double[] res = XArenaFuncs.compete(alphaBetaStd, playAgent, new StateObserverC4(), 2*numEpisodes, verbose);
 //        double success = res[2] - res[0];
-        double[] res = XArenaFuncs.compete(playAgent, alphaBetaStd, new StateObserverC4(), 2*numEpisodes, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, alphaBetaStd, new StateObserverC4(), 2*numEpisodes, verbose, null);
         double success = res[0] - res[2];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
 //      if (this.verbose > 0) 
@@ -273,7 +273,7 @@ public class EvaluatorC4 extends Evaluator {
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
         // this version plays only games that playAgent can win (same as against AlphaBetaAgent):
-        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), 2*numEpisodes, 0);
+        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), 2*numEpisodes, 0, null);
         double success = res[0] - res[2];        	
         // this version, if you want to test both directions:
 //        double success = XArenaFuncs.competeBoth(playAgent, mctsAgent,  new StateObserverC4(), numEpisodes, 0, gameBoard);
@@ -329,12 +329,12 @@ public class EvaluatorC4 extends Evaluator {
         for (int i=0; i<startAction.length; i++) {
         	StateObserverC4 so = new StateObserverC4();
         	if (startAction[i] == -1) {
-        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0);
+        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0, null);
         		//System.out.println("start "+startAction[i]+": "+res[0]+". Tie="+res[1]);
                 success += res[0];        	
         	} else {
         		so.advance(new ACTIONS(startAction[i]));
-        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0);
+        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0, null);
         		//System.out.println("start "+startAction[i]+": "+res[2]+". Tie="+res[1]);
                 success += res[2];        	
         	}
@@ -402,11 +402,11 @@ public class EvaluatorC4 extends Evaluator {
                 MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
             	if (startAction2[i2] == -1) {
-            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0);
+            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0, null);
                     success = res[0];        	
             	} else {
             		so.advance(new ACTIONS(startAction2[i2]));
-            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0);
+            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0, null);
                     success = res[2];        	
             	}
                 if(verbose == 0) {

@@ -8,7 +8,7 @@ import controllers.PlayAgent;
  * This class is used in {@link LoadSaveGBG#loadMultipleGBGAgent()} to transfer the {@link PlayAgent} objects and
  * filenames as Strings to {@link TSSettingsGUI2}.
  *
- * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ * @author Felix Barsnick, Cologne University of Applied Sciences, 2018
  */
 public class TSDiskAgentDataTransfer {
     private String[] filenames;

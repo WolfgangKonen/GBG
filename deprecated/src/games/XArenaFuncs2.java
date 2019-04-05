@@ -33,7 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * Class {@link XArenaFuncs} contains several methods to train, evaluate and measure the 
+ * Class {@link XArenaFuncs2} contains several methods to train, evaluate and measure the 
  * performance of agents. <ul>
  * <li> train:		train an agent one time for maxGameNum episodes and evaluate it with evalAgent
  * <li> multiTrain: train an agent multiple times and evaluate it with evalAgent
@@ -44,13 +44,13 @@ import java.util.*;
  * </ul> 
  * --- Batch methods are now in TicTacToeBatch ---
  * <p>
- * Known classes having {@link XArenaFuncs} objects as members: 
+ * Known classes having {@link XArenaFuncs2} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
  * @author Wolfgang Konen, TH K�ln, Nov'16
  * 
  */
-public class XArenaFuncs 
+public class XArenaFuncs2 
 {
 	public  PlayAgent[] m_PlayAgents;
 	private Arena m_Arena;
@@ -71,7 +71,7 @@ public class XArenaFuncs
 	 */
 	double[] per = {5,25,50,75,95};
 
-	public XArenaFuncs(Arena arena)
+	public XArenaFuncs2(Arena arena)
 	{
 		m_Arena = arena;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
@@ -287,7 +287,6 @@ public class XArenaFuncs
 					}
 				}					
 			} else {   // i.e. if m_PlayAgents[n]!=null
-				// --- questionable, the code concerned with wrapper!! ---
 				PlayAgent inner_pa = m_PlayAgents[n];
 				if (m_PlayAgents[n].getName()=="ExpectimaxWrapper") 
 					inner_pa = ((ExpectimaxWrapper) inner_pa).getWrappedPlayAgent();
@@ -818,11 +817,11 @@ public class XArenaFuncs
 		// now passed as parameter
 		//StateObservation startSO = gb.getDefaultStartState();  // empty board
 
-		res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose, null);
+		res = XArenaFuncs2.compete(pa, opponent, startSO, competeNum, verbose);
 		resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
 										// resp. \in [-1,0], if opponent never looses.
 										// +1 is best for pa, -1 worst for pa.
-		res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, verbose, null);
+		res = XArenaFuncs2.compete(opponent, pa, startSO, competeNum, verbose);
 		resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
 										// resp. \in [-1,0], if opponent never looses.
 										// +1 is best for pa, -1 worst for pa.
@@ -836,13 +835,9 @@ public class XArenaFuncs
 	 * @param startSO	the start board position for the game
 	 * @param competeNum		the number of episodes to play
 	 * @param verbose			0: silent, 1,2: more print-out
-	 * @param nextTimes storage to save time measurements, null if not needed (currently only used 
-	 * 				by tournament system). If {@code nextTimes} is not null, some extra info for the tournament
-	 *              log is printed to {@code System.out}.
-	 * @return	double[3], the percentage of episodes with X-win, tie, O-win
+	 * @return		double[3], the percentage of episodes with X-win, tie, O-win
 	 */
-	public static double[] compete(PlayAgent paX, PlayAgent paO, StateObservation startSO, 
-			int competeNum, int verbose, TSTimeStorage[] nextTimes) {
+	public static double[] compete(PlayAgent paX, PlayAgent paO, StateObservation startSO, int competeNum, int verbose) {
 		double[] winrate = new double[3];
 		int xwinCount=0, owinCount=0, tieCount=0;
 		double moveCount = 0.0;
@@ -850,44 +845,30 @@ public class XArenaFuncs
 		boolean nextMoveSilent = (verbose<2 ? true : false);
 		StateObservation so;
 		Types.ACTIONS actBest;
+		String[] playersWithFeatures = {"TicTacToe.ValItPlayer","controllers.TD.TDAgent","TicTacToe.CMAPlayer"}; 
 		
 		String paX_string = paX.stringDescr();
 		String paO_string = paO.stringDescr();
 		if (verbose>0) System.out.println("Competition, "+competeNum+" episodes: \n"
 				+"      "+paX_string + "\n"
 				+"   vs "+paO_string);
-		
-		if (nextTimes != null) {
-			// some diagnostic info to print when called via tournament system:
-			System.out.println("Competition: "+competeNum+" episodes "+paX_string+" vs "+paO_string/*+" with "+rndmStartMoves+" random startmoves"*/);
-			String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
-			System.out.println("Episode Start @ "+currDateTime);
-			System.out.println("start state: "+startSO);			
-		}
-
 		for (int k=0; k<competeNum; k++) {
-			int Player = Types.PLAYER_PM[startSO.getPlayer()];			
+			int Player=Types.PLAYER_PM[startSO.getPlayer()];			
 			so = startSO.copy();
 
 			while(true)
 			{
 
 				if(Player==1){		// make a X-move
-//					int n=so.getNumAvailableActions();
-					long startTNano = System.nanoTime();
+					int n=so.getNumAvailableActions();
 					actBest = paX.getNextAction2(so, false, nextMoveSilent);
-					long endTNano = System.nanoTime();
-					if (nextTimes!=null) nextTimes[0].addNewTimeNS(endTNano-startTNano);
 					so.advance(actBest);
 					Player=-1;
 				}
 				else				// i.e. O-Move
 				{
-//					int n=so.getNumAvailableActions();
-					long startTNano = System.nanoTime();
+					int n=so.getNumAvailableActions();
 					actBest = paO.getNextAction2(so, false, nextMoveSilent);
-					long endTNano = System.nanoTime();
-					if (nextTimes!=null) nextTimes[1].addNewTimeNS(endTNano-startTNano);
 					so.advance(actBest);
 					Player=+1;
 				}
@@ -934,176 +915,163 @@ public class XArenaFuncs
 		return winrate;
 	} // compete
 
-	// --- no longer needed, use XArenaFuncs.compete() instead ---
-//	/**
-//	 * This is an adapted version of {@link XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.compete()}. 
-//	 * The adaption is for the tournament system: the tournament parameters are added.
-//	 * <p>
-//	 * -- no longer needed, use {@link XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.compete()} instead. --
-//	 * @param paX PlayAgent, a trained agent
-//	 * @param paO PlayAgent, a trained agent
-//	 * @param startSO    the start board position for the game
-//	 * @param competeNum the number of episodes to play (always 1)
-//	 * @param nextTimes time storage to save measurements
-//	 * @return double[3], the percentage of episodes with X-win, tie, O-win
-//	 */
-//	// @param rndmStartMoves -- seems obsolete now /WK/2019/04/ ---
-//	@Deprecated
-//	public static double[] competeTS(PlayAgent paX, PlayAgent paO, StateObservation startSO, 
-//			int competeNum, int verbose, TSTimeStorage[] nextTimes /*, int rndmStartMoves*/) {
-//		double[] winrate = new double[3];
-//		int xwinCount=0, owinCount=0, tieCount=0;
-//		DecimalFormat frm = new DecimalFormat("#0.000");
-//		boolean nextMoveSilent = (verbose<2 ? true : false);
-//		StateObservation so;
-//		Types.ACTIONS actBest;
-//
-//		String paX_string = paX.stringDescr();
-//		String paO_string = paO.stringDescr();
-//		System.out.println("Competition: "+competeNum+" episodes "+paX_string+" vs "+paO_string/*+" with "+rndmStartMoves+" random startmoves"*/);
-//		/*
-//		if (rndmStartMoves>0) {
-//			RandomAgent raX = new RandomAgent("Random Agent X");
-//			//RandomAgent raO = new RandomAgent("Random Agent O");
-//			for (int n = 0; n < rndmStartMoves; n++) {
-//				startSO.advance(raX.getNextAction2(startSO, false, true));
-//				//startSO.advance(raO.getNextAction2(startSO, false, true));
-//			}
-//			System.out.println("RandomStartState: "+startSO);
-//		}
-//		*/
-//		
-//		// --- this part specific to competeTS() ---
-//		String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
-//		System.out.println("Episode Start @ "+currDateTime);
-//		System.out.println("start state: "+startSO);
-//
-//		for (int k=0; k<competeNum; k++) { // ist im TS immer 1
-//			int Player = Types.PLAYER_PM[startSO.getPlayer()];
-//			so = startSO.copy();
-//
-//			//ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-//			//System.out.println("threadMXBean.isCurrentThreadCpuTimeSupported() "+threadMXBean.isCurrentThreadCpuTimeSupported());
-//
-//			while(true) {
-//				System.out.print("#"); // simple progressbar so user knows something is happening
-//				if(Player==1){		// make a X-move
-//					int n = so.getNumAvailableActions();
-//
-//					//long startT = System.currentTimeMillis();
-//					//StopWatch stopwatch = new StopWatch(); // teil des apache common lang3 pakets - verwendet intern aber auch nur System.nanoTime()
-//					//stopwatch.start();
-//					long startTNano = System.nanoTime();
-//					//long startTNanoThread = threadMXBean.getCurrentThreadCpuTime();
-//					//long startTNanoInstant = Instant.now().getNano();
-//					//long startTNanoInstant = Instant.now().toEpochMilli();
-//
-//					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
-//					//long endT = System.currentTimeMillis();
-//					//stopwatch.stop();
-//					long endTNano = System.nanoTime();
-//					//long endTNanoThread = threadMXBean.getCurrentThreadCpuTime();
-//					//long endTNanoInstant = Instant.now().getNano(); // ca selbe ergebnis wie System.nanoTime
-//					//long endTNanoInstant = Instant.now().toEpochMilli(); // bei zeiten <1ms eigentlich immer 0
-//					// Debug Printlines
-//					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
-//					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
-//					nextTimes[0].addNewTimeNS(endTNano-startTNano);
-//					//System.out.println("Time nanoTime:::: "+ (endTNano-startTNano)+"ns = "+ timeDiffNStoMS(startTNano,endTNano)+"ms");
-//					//System.out.println("Time ThreadNano:: "+ (endTNanoThread-startTNanoThread)+"ns = "+ timeDiffNStoMS(startTNanoThread,endTNanoThread)+"ms");
-//					//System.out.println("Time InstantNano: "+ (endTNanoInstant-startTNanoInstant)+"ns = "+ timeDiffNStoMS(startTNanoInstant,endTNanoInstant)+"ms");
-//					//System.out.println("Time StWatchNano: "+ (stopwatch.getNanoTime())+"ns = "+ timeNStoMS(stopwatch.getNanoTime())+"ms");
-//					//System.out.println("-----------------");
-//
-//					so.advance(actBest);
-//					Player = -1;
-//				}
-//				else				// i.e. O-Move
-//				{
-//					int n = so.getNumAvailableActions();
-//
-//					//long startT = System.currentTimeMillis();
-//					long startTNano = System.nanoTime();
-//					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
-//					//long endT = System.currentTimeMillis();
-//					long endTNano = System.nanoTime();
-//					// Debug Printlines
-//					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
-//					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
-//					nextTimes[1].addNewTimeNS(endTNano-startTNano);
-//
-//					so.advance(actBest);
-//					Player = +1;
-//				}
-//				if (so.isGameOver()) {
-//					System.out.println(); // make new line to not put text at end of ##### progressbar (1st line of while)
-//					int res = so.getGameWinner().toInt();
-//					//  res is +1/0/-1  for X/tie/O win
-//					int player = Types.PLAYER_PM[so.getPlayer()];
-//					switch (res*player) {
-//					case -1:
-//						System.out.println(k+": O wins");
-//						owinCount++;
-//						break;
-//					case 0:
-//						System.out.println(k+": Tie");
-//						tieCount++;
-//						break;
-//					case +1:
-//						System.out.println(k+": X wins");
-//						xwinCount++;
-//						break;
-//					}
-//
-//					break; // out of while
-//
-//				} // if (so.isGameOver())
-//			}	// while(true)
-//
-//		} // for (k)
-//		winrate[0] = (double)xwinCount/competeNum;
-//		winrate[1] = (double) tieCount/competeNum;
-//		winrate[2] = (double)owinCount/competeNum;
-//
-//		System.out.print("win rates: ");
-//		for (int i=0; i<3; i++)
-//			System.out.print(frm.format(winrate[i])+"  ");
-//		System.out.println(" (X/Tie/O)");
-//
-//		return winrate;
-//	} // competeTS
+	/**
+	 * This is an adapted version of {@link XArenaFuncs2#compete(PlayAgent, PlayAgent, StateObservation, int, int) XArenaFuncs.compete()}. 
+	 * The adaption is for the tournament system: the tournament parameters were added.
+	 * @param paX PlayAgent, a trained agent
+	 * @param paO PlayAgent, a trained agent
+	 * @param startSO    the start board position for the game
+	 * @param competeNum the number of episodes to play (always 1)
+	 * @param nextTimes time storage to save time measurements
+	 * @param rndmStartMoves count of random start moves at beginning
+	 * @return code with information who has won
+	 */
+	public static double[] competeTS(PlayAgent paX, PlayAgent paO, StateObservation startSO, 
+			int competeNum, TSTimeStorage[] nextTimes, int rndmStartMoves) {
+		double[] winrate = new double[3];
+		int xwinCount=0, owinCount=0, tieCount=0;
+		DecimalFormat frm = new DecimalFormat("#0.000");
+		boolean nextMoveSilent = true;
+		StateObservation so;
+		Types.ACTIONS actBest;
 
-	// --- seems obsolete now, see TSTimeStorage ---
-//	private static double timeDiffNStoMS(long startT, long endT) {
-//		double s = startT;
-//		double e = endT;
-//		double r = e - s;
-//		return r/1000000;
-//	}
-//	private static double timeNStoMS(long startT) {
-//		double r = startT;
-//		return r/1000000;
-//	}
+		String paX_string = paX.stringDescr();
+		String paO_string = paO.stringDescr();
+		System.out.println("Competition: "+competeNum+" episodes "+paX_string+" vs "+paO_string+" with "+rndmStartMoves+" random startmoves");
+		/*
+		if (rndmStartMoves>0) {
+			RandomAgent raX = new RandomAgent("Random Agent X");
+			//RandomAgent raO = new RandomAgent("Random Agent O");
+			for (int n = 0; n < rndmStartMoves; n++) {
+				startSO.advance(raX.getNextAction2(startSO, false, true));
+				//startSO.advance(raO.getNextAction2(startSO, false, true));
+			}
+			System.out.println("RandomStartState: "+startSO);
+		}
+		*/
+		String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
+		System.out.println("Episode Start @ "+currDateTime);
+		System.out.println("start state: "+startSO);
+
+		for (int k=0; k<competeNum; k++) { // ist im TS immer 1
+			int Player = Types.PLAYER_PM[startSO.getPlayer()];
+			so = startSO.copy();
+
+			while(true) {
+				System.out.print("#"); // simple progressbar so user knows something is happening
+				if(Player==1){		// make a X-move
+//					int n = so.getNumAvailableActions();
+
+					//long startT = System.currentTimeMillis();
+					//StopWatch stopwatch = new StopWatch(); // teil des apache common lang3 pakets - verwendet intern aber auch nur System.nanoTime()
+					//stopwatch.start();
+					long startTNano = System.nanoTime();
+					//long startTNanoThread = threadMXBean.getCurrentThreadCpuTime();
+					//long startTNanoInstant = Instant.now().getNano();
+					//long startTNanoInstant = Instant.now().toEpochMilli();
+
+					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
+					//long endT = System.currentTimeMillis();
+					//stopwatch.stop();
+					long endTNano = System.nanoTime();
+					//long endTNanoThread = threadMXBean.getCurrentThreadCpuTime();
+					//long endTNanoInstant = Instant.now().getNano(); // ca selbe ergebnis wie System.nanoTime
+					//long endTNanoInstant = Instant.now().toEpochMilli(); // bei zeiten <1ms eigentlich immer 0
+					// Debug Printlines
+					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
+					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+					nextTimes[0].addNewTimeNS(endTNano-startTNano);
+					//System.out.println("Time nanoTime:::: "+ (endTNano-startTNano)+"ns = "+ timeDiffNStoMS(startTNano,endTNano)+"ms");
+					//System.out.println("Time ThreadNano:: "+ (endTNanoThread-startTNanoThread)+"ns = "+ timeDiffNStoMS(startTNanoThread,endTNanoThread)+"ms");
+					//System.out.println("Time InstantNano: "+ (endTNanoInstant-startTNanoInstant)+"ns = "+ timeDiffNStoMS(startTNanoInstant,endTNanoInstant)+"ms");
+					//System.out.println("Time StWatchNano: "+ (stopwatch.getNanoTime())+"ns = "+ timeNStoMS(stopwatch.getNanoTime())+"ms");
+					//System.out.println("-----------------");
+
+					so.advance(actBest);
+					Player = -1;
+				}
+				else				// i.e. O-Move
+				{
+//					int n = so.getNumAvailableActions();
+
+					//long startT = System.currentTimeMillis();
+					long startTNano = System.nanoTime();
+					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
+					//long endT = System.currentTimeMillis();
+					long endTNano = System.nanoTime();
+					// Debug Printlines
+					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
+					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+					nextTimes[1].addNewTimeNS(endTNano-startTNano);
+
+					so.advance(actBest);
+					Player = +1;
+				}
+				if (so.isGameOver()) {
+					System.out.println(); // make new line to not put text at end of ##### progressbar (1st line of while)
+					int res = so.getGameWinner().toInt();
+					//  res is +1/0/-1  for X/tie/O win
+					int player = Types.PLAYER_PM[so.getPlayer()];
+					switch (res*player) {
+					case -1:
+						System.out.println(k+": O wins");
+						owinCount++;
+						break;
+					case 0:
+						System.out.println(k+": Tie");
+						tieCount++;
+						break;
+					case +1:
+						System.out.println(k+": X wins");
+						xwinCount++;
+						break;
+					}
+
+					break; // out of while
+
+				} // if (so.isGameOver())
+			}	// while(true)
+
+		} // for (k)
+		winrate[0] = (double)xwinCount/competeNum;
+		winrate[1] = (double) tieCount/competeNum;
+		winrate[2] = (double)owinCount/competeNum;
+
+		System.out.print("win rates: ");
+		for (int i=0; i<3; i++)
+			System.out.print(frm.format(winrate[i])+"  ");
+		System.out.println(" (X/Tie/O)");
+
+		return winrate;
+	} // competeTS
+
+	private static double timeDiffNStoMS(long startT, long endT) {
+		double s = startT;
+		double e = endT;
+		double r = e - s;
+		return r/1000000;
+	}
+	private static double timeNStoMS(long startT) {
+		double r = startT;
+		return r/1000000;
+	}
 	
 	/**
 	 * Does the main work for menu items 'Single Compete', 'Swap Compete' and 'Compete Both'.
-	 * These menu items set enum {@link Arena#taskState} to either COMPETE or SWAPCMP or BOTHCMP.
+	 * These items set enum {@link Arena#taskState} to either COMPETE or SWAPCMP or BOTHCMP.
 	 * Then the appropriate cases of {@code switch} in Arena.run() will call competeBase. 
-	 * <p>
-	 * 'Single Compete' performs {@code competeNum} competitions AgentX as X vs. AgentO as O. 
+	 * 'Compete' performs competeNum competitions AgentX as X vs. AgentO as O. 
 	 * 'Swap Compete' performs competeNum competitions AgentX as O vs. AgentO as X. 
 	 * 'Compete Both' combines 'Compete' and 'Swap Compete'.
-	 * <p>
 	 * The agents AgentX and AgentO are fetched from {@code xab} and are assumed to be
-	 * trained (!). The parameters for X and O are fetched from the param tabs. The parameter
-	 *  {@code competeNum} is fetched from the Competition options window ("# of games per competition").
+	 * trained (!). The parameters for X and O are fetched from the param tabs.
 	 *  
 	 * @param swap {@code false} for 'Compete' and {@code true} for 'Swap Compete'
 	 * @param both {@code true} for 'Compete Both' ({@code swap} is then irrelevant)
 	 * @param xab	used only for reading parameter values from GUI members
 	 * @param gb	needed for {@code competeBoth}
-	 * @return the fitness of AgentX, which is in the range [-1.0,+1.0]: +1.0 if AgentX always wins,  
-	 * 		   0.0 if always tie or if #win=#loose, and -1.0 if AgentX always looses.
+	 * @return the fitness of AgentX, which is +1 if AgentX always wins, 0 if always tie
+	 *         or if #win=#loose and, -1 if AgentX always looses.
 	 */
 	protected double competeBase(boolean swap, boolean both, XArenaButtons xab, GameBoard gb) {
 		int competeNum = xab.winCompOptions.getNumGames();
@@ -1137,11 +1105,11 @@ public class XArenaFuncs
 				} else {
 					double[] res;
 					if (swap) {
-						res = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose, null);
+						res = compete(qaVector[1],qaVector[0],startSO,competeNum,verbose);
 						System.out.println(Arrays.toString(res));
 						return res[2] - res[0];
 					} else {
-						res = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose, null);
+						res = compete(qaVector[0],qaVector[1],startSO,competeNum,verbose);
 						System.out.println(Arrays.toString(res));
 						return res[0] - res[2];
 					}
@@ -1167,20 +1135,18 @@ public class XArenaFuncs
 	}
 
 	/**
-	 * This is an adapted version of {@link XArenaFuncs#competeBase(boolean, boolean, XArenaButtons, GameBoard) XArenaFuncs.competeBase()} 
-	 * which is called for each match during a tournament. 
-	 * The tournament parameters {@code dataTS} are added. Each match is currently fixed to one episode
-	 * per match ({@code competeNum=1})
-	 * 
-	 * @param gb game board to play on
-	 * @param xab used to access the param tabs for standard agents
-	 * @param dataTS helper class containing data and settings for the next match in the tournament
-	 * @return info who wins [(0/1/2) if (X/tie/O) wins] or error code (>40)
+	 * This is an adapted version of {@link XArenaFuncs2#competeBase(boolean, boolean, XArenaButtons, GameBoard) XArenaFuncs.competeBase()}. 
+	 * The tournament parameters were added.
+	 * @param gb gameboard to play on
+	 * @param xab GUI params for standard agents
+	 * @param dataTS helper class containing data and settings for the next game
+	 * @return info who wins or error code
 	 */
-	protected int singleCompeteBaseTS(GameBoard gb, XArenaButtons xab, TSGameDataTransfer dataTS) { 
-		int competeNum = 1;//xab.winCompOptions.getNumGames(); | if value > 1 then adjust competeTS()!
+	protected int singleCompeteBaseTS(GameBoard gb, XArenaButtons xab, TSGameDataTransfer dataTS) { // return who wins (agent1, tie, agent2) [0;2]
+		// protected void competeBase(boolean swap, XArenaButtons xab, GameBoard gb)
+		int competeNum = 1;//xab.winCompOptions.getNumGames(); | falls wert != 1 dann competeTS() anpassen!
 		int numPlayers = gb.getStateObs().getNumPlayers();
-		double[] c = {}; // win rate how often = [0]:agentX wins [1]: ties [2]: agentO wins
+		double[] c = {}; // winrate how often = [0]:agentX wins [1]: ties [2]: agentO wins
 
 		try {
 			String AgentX = dataTS.nextTeam[0].getAgentType();
@@ -1192,12 +1158,35 @@ public class XArenaFuncs
 			} else {
 				StateObservation startSO = gb.getDefaultStartState();  // empty board
 
-				// manipulation of selected standard agent in XArenaButtons!
+				// manipulation of selected standard agent in XrenaButtons!
 				xab.enableTournamentRemoteData(dataTS.nextTeam);
 
 				// prepare agents
 				PlayAgent[] paVector;
 				PlayAgent[] qaVector;
+				/*
+				if (dataTS.nextTeam[0].isHddAgent() && dataTS.nextTeam[1].isHddAgent()) {
+					paVector = new PlayAgent[2];
+					paVector[0] = dataTS.nextTeam[0].getPlayAgent();
+					paVector[1] = dataTS.nextTeam[1].getPlayAgent();
+					AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
+//					OtherParams[] hddPar = new OtherParams[2];
+//					hddPar[0] = new OtherParams();
+//					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
+//					hddPar[1] = new OtherParams();
+//					hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
+//					qaVector = wrapAgents(paVector,hddPar,startSO);
+					qaVector = wrapAgents(paVector,startSO);
+				} else {
+					if (dataTS.nextTeam[0].isHddAgent() || dataTS.nextTeam[1].isHddAgent()) {
+						System.out.println(TAG+"ERROR :: dont mix standard and hdd agents!");
+						return 44;
+					}
+					paVector = fetchAgents(xab);
+					AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
+					qaVector = wrapAgents(paVector,xab.oPar,startSO);
+				}
+				*/
 				if (dataTS.nextTeam[0].isHddAgent() && dataTS.nextTeam[1].isHddAgent()) {
 					paVector = new PlayAgent[2];
 					paVector[0] = dataTS.nextTeam[0].getPlayAgent();
@@ -1222,9 +1211,8 @@ public class XArenaFuncs
 					qaVector = wrapAgents(paVector, xab, startSO);
 				}
 
-				//c = competeTS(qaVector[0], qaVector[1],        startSO, competeNum, 0, dataTS.nextTimes /*, dataTS.rndmStartMoves*/);
-				//c = competeTS(qaVector[0], qaVector[1], dataTS.startSO, competeNum, 0, dataTS.nextTimes /*, dataTS.rndmStartMoves*/);
-				c = compete(qaVector[0], qaVector[1], dataTS.startSO, competeNum, 0, dataTS.nextTimes /*, dataTS.rndmStartMoves*/);
+				//c = competeTS(qaVector[0], qaVector[1], startSO, competeNum, dataTS.nextTimes, dataTS.rndmStartMoves);
+				c = competeTS(qaVector[0], qaVector[1], dataTS.startSO, competeNum, dataTS.nextTimes, dataTS.rndmStartMoves);
 				//System.out.println(Arrays.toString(c));
 
 				xab.disableTournamentRemoteData();
@@ -1236,14 +1224,12 @@ public class XArenaFuncs
 			return 43;
 		}
 
-		if (c[0]-c[2]>0.0)		// X wins (more often)
+		if (c[0]==1.0)
 			return 0;
-		if (c[0]-c[2]==0.0)		// tie or equal number of X and O wins
+		if (c[1]==1.0)
 			return 1;
-		if (c[0]-c[2]<1.0)		// O wins (more often)
+		if (c[2]==1.0)
 			return 2;
-		
-		// we should never arrive here
 		return 42;
 	}
 
@@ -1366,7 +1352,7 @@ public class XArenaFuncs
 
 			StateObservation startSO = gb.getDefaultStartState();  // empty board
 			
-			winrateC[c] = compete(paX,paO,startSO,competeNum,0, null);
+			winrateC[c] = compete(paX,paO,startSO,competeNum,0);
 			
 			for (int i=0; i<3; i++) winrate[i] += winrateC[c][i];				
 			if (!silent) {

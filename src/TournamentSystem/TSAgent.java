@@ -12,9 +12,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static TournamentSystem.TSAgentManager.faktorLos;
-import static TournamentSystem.TSAgentManager.faktorTie;
-import static TournamentSystem.TSAgentManager.faktorWin;
+import static TournamentSystem.TSAgentManager.factorLoss;
+import static TournamentSystem.TSAgentManager.factorTie;
+import static TournamentSystem.TSAgentManager.factorWin;
 
 /**
  * This class holds the individual {@link PlayAgent}, its information and game statistics.
@@ -22,7 +22,7 @@ import static TournamentSystem.TSAgentManager.faktorWin;
  * <p>
  * This class implements the Serializable interface to be savable to storage, except for the PlayAgent itself.
  *
- * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ * @author Felix Barsnick, Cologne University of Applied Sciences, 2018
  */
 public class TSAgent implements Serializable {
     /**
@@ -189,9 +189,9 @@ public class TSAgent implements Serializable {
      * @return agents WTL score
      */
     public float getAgentScore() {
-        float agentScore = getCountWonGames()*faktorWin
-                            +getCountTieGames()*faktorTie
-                            +getCountLostGames()*faktorLos;
+        float agentScore = getCountWonGames()*factorWin
+                            +getCountTieGames()*factorTie
+                            +getCountLostGames()*factorLoss;
         return agentScore;
     }
 

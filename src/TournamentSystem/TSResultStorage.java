@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * This class saves all measurements and data of a tournament. It is Serializable to allow the persisting on disk.
  * This class gets instantiated in {@link TSAgentManager}.
  *
- * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ * @author Felix Barsnick, Cologne University of Applied Sciences, 2018
  */
 public class TSResultStorage implements Serializable {
     /**

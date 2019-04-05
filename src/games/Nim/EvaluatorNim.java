@@ -179,11 +179,11 @@ public class EvaluatorNim extends Evaluator {
 			// Choose randomly one of the possible 0-1-ply start states. Repeat 
 			// this numK times to sample a representative subset of possible configurations.
 			StateObservation startSO = gb.chooseStartState();
-			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, this.verbose-1);
+			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, this.verbose-1, null);
 			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
 											// resp. \in [-1,0], if opponent never looses.
 											// +1 is best for pa, -1 worst for pa.
-			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, this.verbose-1);
+			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, this.verbose-1, null);
 			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
 											// resp. \in [-1,0], if opponent never looses.
 											// +1 is best for pa, -1 worst for pa.

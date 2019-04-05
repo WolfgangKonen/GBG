@@ -139,11 +139,11 @@ public class EvaluatorTTT extends Evaluator {
 		for (int k=0; k<state.length; ++k) {
 			startPlayer = EvaluatorTTT.string2table(state[k],startTable);
 			StateObserverTTT startSO = new StateObserverTTT(startTable,startPlayer);
-			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose);
+			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose, null);
 			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
 											// resp. \in [-1,0], if opponent never looses.
 											// +1 is best for pa, -1 worst for pa.
-			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, verbose);
+			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, verbose, null);
 			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
 											// resp. \in [-1,0], if opponent never looses.
 											// +1 is best for pa, -1 worst for pa.

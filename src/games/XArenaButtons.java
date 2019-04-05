@@ -702,7 +702,7 @@ public class XArenaButtons extends JPanel
             types[0] = team[0].getAgentType();
             types[1] = team[1].getAgentType();
 
-            // create a dummy standard agent to be set into the GUI to let HDD und standard agents play together
+            // create a dummy standard agent to be set into the GUI to let HDD and standard agents play together
             if (team[0].isHddAgent() && !team[1].isHddAgent()) {
                 types[0] = Types.GUI_AGENT_LIST[0]; // random agent to hide HDD agent
             }

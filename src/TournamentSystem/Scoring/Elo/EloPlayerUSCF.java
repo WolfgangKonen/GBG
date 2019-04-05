@@ -8,7 +8,7 @@ import java.io.Serializable;
  * <p>
  * This code uses parts of the following source <a href="https://bitbucket.org/marioosh/java-elo">java-elo</a>
  *
- * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ * @author Felix Barsnick, Cologne University of Applied Sciences, 2018
  */
 public class EloPlayerUSCF extends EloPlayer implements Serializable {
     /**

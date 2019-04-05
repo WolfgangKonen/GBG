@@ -13,7 +13,7 @@ import games.StateObservation;
  * <p>
  * This class is called in {@link TSAgentManager} and provides the data for a single player tournament.
  *
- * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ * @author Felix Barsnick, Cologne University of Applied Sciences, 2018
  */
 public class TSGameDataTransfer {
     public TSAgent[] nextTeam;

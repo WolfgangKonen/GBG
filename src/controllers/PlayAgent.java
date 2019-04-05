@@ -10,25 +10,10 @@ import tools.Types.ScoreTuple;
 /**
  * The abstract interface for game playing agents.
  * <p>
- * Known implementations: <ul>
- * <li> {@link controllers.RandomAgent}, 
- * 		{@link controllers.HumanPlayer},
- * 		{@link controllers.MinimaxAgent}, 
- * 		{@link controllers.MaxNAgent}, 
- * 		{@link controllers.MaxNWrapper}, 
- * 		{@link controllers.ExpectimaxNAgent}, 
- * 		{@link controllers.ExpectimaxWrapper}, 
- * 		{@link controllers.MC.MCAgentN}		
- * 		{@link controllers.MCTS.MCTSAgentT}		
- * 		{@link controllers.MCTSExpectimax.MCTSExpectimaxAgt}		
- * 		{@link controllers.TD.TDAgent}, 
- * 		{@link controllers.TD.ntuple2.TDNTuple3Agt}, 
- * 		{@link controllers.TD.ntuple2.SarsaAgt}, 
- * 		{@link games.CFour.AlphaBetaAgent}, 
- * 		{@link games.Nim.BoutonAgent}, 
- * </ul> 
+ * See {@link AgentBase} for a base implementation of this interface. Other implementing classes 
+ * should usually inherit from {@link AgentBase}.
  *
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Köln
  */
 public interface PlayAgent {
 	public enum AgentState {RAW, INIT, TRAINED};

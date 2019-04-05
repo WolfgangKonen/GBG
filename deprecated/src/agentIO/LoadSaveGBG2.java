@@ -33,7 +33,7 @@ import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class LoadSaveGBG {
+public class LoadSaveGBG2 {
 	private final JFileChooserApprove fc;
 	private final FileFilter tdAgentExt = new ExtensionFilter("agt.zip", "TD-Agents");
 	private final FileFilter tdTSRExt = new ExtensionFilter("tsr.zip", "Tournament-Result");
@@ -44,7 +44,7 @@ public class LoadSaveGBG {
 	private String tdstr="";
 	private final String TAG = "[LoadSaveGBG] ";
 
-	public LoadSaveGBG(Arena areGame, XArenaButtons areButtons, JFrame areFrame) {
+	public LoadSaveGBG2(Arena areGame, XArenaButtons areButtons, JFrame areFrame) {
 		this.arenaGame = areGame;
 		this.arenaButtons = areButtons;
 		this.arenaFrame = areFrame;
@@ -377,7 +377,105 @@ public class LoadSaveGBG {
 
 			final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
-			pa = transformObjectToPlayAgent(ois, fis, filePath, dlg);
+			try {
+				// ois = new ObjectInputStream(gs);
+				Object obj = ois.readObject();
+				if (obj instanceof TDAgent) {
+					pa = (TDAgent) obj;
+				} else if (obj instanceof TDNTuple2Agt) {
+					pa = (TDNTuple2Agt) obj;
+					// set horizon cut for older agents (where horCut was not part of ParTD):
+					if (((TDNTuple2Agt) pa).getParTD().getHorizonCut()==0.0) 
+						((TDNTuple2Agt) pa).getParTD().setHorizonCut(0.1);
+					// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+					// (they would stay otherwise at their default values, would not 
+					// get the loaded values)
+					((TDNTuple2Agt) pa).setTDParams(((TDNTuple2Agt) pa).getParTD(), pa.getMaxGameNum());
+					((TDNTuple2Agt) pa).setNTParams(((TDNTuple2Agt) pa).getParNT());
+					((TDNTuple2Agt) pa).weightAnalysis(null);
+				} else if (obj instanceof TDNTuple3Agt) {
+					pa = (TDNTuple3Agt) obj;
+					// set horizon cut for older agents (where horCut was not part of ParTD):
+					if (((TDNTuple3Agt) pa).getParTD().getHorizonCut()==0.0) 
+						((TDNTuple3Agt) pa).getParTD().setHorizonCut(0.1);
+					// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+					// (they would stay otherwise at their default values, would not 
+					// get the loaded values)
+					((TDNTuple3Agt) pa).setTDParams(((TDNTuple3Agt) pa).getParTD(), pa.getMaxGameNum());
+					((TDNTuple3Agt) pa).setNTParams(((TDNTuple3Agt) pa).getParNT());
+					((TDNTuple3Agt) pa).weightAnalysis(null);
+				} else if (obj instanceof SarsaAgt) {
+					pa = (SarsaAgt) obj;
+					// set horizon cut for older agents (where horCut was not part of ParTD):
+					if (((SarsaAgt) pa).getParTD().getHorizonCut()==0.0) 
+						((SarsaAgt) pa).getParTD().setHorizonCut(0.1);
+					// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+					// (they would stay otherwise at their default values, would not 
+					// get the loaded values)
+					((SarsaAgt) pa).setTDParams(((SarsaAgt) pa).getParTD(), pa.getMaxGameNum());
+					((SarsaAgt) pa).setNTParams(((SarsaAgt) pa).getParNT());
+					((SarsaAgt) pa).weightAnalysis(null);
+//				} else if (obj instanceof MCTSAgentT0) {
+//					pa = (MCTSAgentT0) obj;
+				} else if (obj instanceof MCTSAgentT) {
+					pa = (MCTSAgentT) obj;
+				} else if (obj instanceof MCAgent) {
+					pa = (MCAgent) obj;
+				} else if (obj instanceof MCAgentN) {
+					pa = (MCAgentN) obj;
+				} else if (obj instanceof MinimaxAgent) {
+					pa = (MinimaxAgent) obj;
+				} else if (obj instanceof MaxNAgent) {
+					pa = (MaxNAgent) obj;
+				} else if (obj instanceof ExpectimaxNAgent) {
+					pa = (ExpectimaxNAgent) obj;
+				} else if (obj instanceof RandomAgent) {
+					pa = (RandomAgent) obj;
+				} else {
+					dlg.setVisible(false);
+					MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
+							+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
+					arenaGame.setStatusMessage("[ERROR: Could not load agent from "
+									+ filePath + "!]");
+					throw new ClassNotFoundException("ERROR: Unknown agent class");
+				}
+				
+				if (pa instanceof AgentBase) {
+					// Some older agents on disk might not have ParOther m_oPar.
+					// If this is the case, replace the null value with a default ParOther:
+					if (((AgentBase) pa).getParOther() == null ) {
+						((AgentBase) pa).setDefaultOtherPar();
+					}						
+				}
+
+				dlg.setVisible(false);
+				arenaGame.setProgress(null);
+				arenaGame.setStatusMessage("Done.");
+			} catch (IOException e) {
+				dlg.setVisible(false);
+				MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
+						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+				//e.printStackTrace();
+				//throw e;
+			} catch (ClassNotFoundException e) {
+				dlg.setVisible(false);
+				MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
+						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+				//throw e;
+			} finally {
+				if (ois != null)
+					try {
+						ois.close();
+					} catch (IOException e) {
+					}
+				if (fis != null)
+					try {
+						fis.close();
+					} catch (IOException e) {
+					}
+			}
 		} 
 		
 		return pa;
@@ -512,7 +610,7 @@ public class LoadSaveGBG {
 	 * @return object to transfer the loaded agents and their filenames
 	 * @throws IOException
 	 */
-	public TSDiskAgentDataTransfer loadMultipleGBGAgent() throws IOException, ClassNotFoundException {
+	public TSDiskAgentDataTransfer loadMultipleGBGAgent() throws IOException {
 		TSDiskAgentDataTransfer output = null;
 		String filePath = null;
 		ObjectInputStream ois;
@@ -579,8 +677,87 @@ public class LoadSaveGBG {
 
 				//final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
-				pa = transformObjectToPlayAgent(ois, fis, filePath, null);
-				
+
+				try {
+					// ois = new ObjectInputStream(gs);
+					Object obj = ois.readObject();
+					if (obj instanceof TDAgent) {
+						pa = (TDAgent) obj;
+					} else if (obj instanceof TDNTuple2Agt) {
+						pa = (TDNTuple2Agt) obj;
+						// set horizon cut for older agents (where horCut was not part of ParTD):
+						if (((TDNTuple2Agt) pa).getParTD().getHorizonCut()==0.0) 
+							((TDNTuple2Agt) pa).getParTD().setHorizonCut(0.1);
+						// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+						// (they would stay otherwise at their default values, would not 
+						// get the loaded values)
+						((TDNTuple2Agt) pa).setTDParams(((TDNTuple2Agt) pa).getParTD(), pa.getMaxGameNum());
+						((TDNTuple2Agt) pa).setNTParams(((TDNTuple2Agt) pa).getParNT());
+//					} else if (obj instanceof MCTSAgentT0) {
+//						pa = (MCTSAgentT0) obj;
+					} else if (obj instanceof MCTSAgentT) {
+						pa = (MCTSAgentT) obj;
+					} else if (obj instanceof MCAgent) {
+						pa = (MCAgent) obj;
+					} else if (obj instanceof MCAgentN) {
+						pa = (MCAgentN) obj;
+					} else if (obj instanceof MinimaxAgent) {
+						pa = (MinimaxAgent) obj;
+					} else if (obj instanceof MaxNAgent) {
+						pa = (MaxNAgent) obj;
+					} else if (obj instanceof ExpectimaxNAgent) {
+						pa = (ExpectimaxNAgent) obj;
+					} else if (obj instanceof RandomAgent) {
+						pa = (RandomAgent) obj;
+					} else {
+						//dlg.setVisible(false);
+						MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
+								+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
+						arenaGame.setStatusMessage("[ERROR: Could not load agent from "
+								+ filePath + "!]");
+						throw new ClassNotFoundException("ERROR: Unknown agent class");
+					}
+					
+					// bug fix WK 08/2018
+					if (pa instanceof AgentBase) {
+						// Some older agents on disk might not have ParOther m_oPar.
+						// If this is the case, replace the null value with a default ParOther:
+						if (((AgentBase) pa).getParOther() == null ) {
+							((AgentBase) pa).setDefaultOtherPar();
+						}						
+					}
+					
+					//dlg.setVisible(false);
+					arenaGame.setProgress(null);
+					arenaGame.setStatusMessage("Done.");
+				} catch (IOException e) {
+					//dlg.setVisible(false);
+					MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
+							e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+					//e.printStackTrace();
+					//throw e;
+				} catch (ClassNotFoundException e) {
+					//dlg.setVisible(false);
+					MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
+							e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+					e.printStackTrace();
+					//throw e;
+				} finally {
+					if (ois != null)
+						try {
+							ois.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					if (fis != null)
+						try {
+							fis.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+				}
+
 				//output[i][0] = pa;
 				Path p = Paths.get(filePath);
 				String fileNameSource = p.getFileName().toString();
@@ -596,112 +773,6 @@ public class LoadSaveGBG {
 
 		return output;
 	}
-
-	private PlayAgent transformObjectToPlayAgent(ObjectInputStream ois, FileInputStream fis, String filePath, 
-										 JDialog dlg) throws IOException, ClassNotFoundException {
-		PlayAgent pa=null; 
-		try {
-			// ois = new ObjectInputStream(gs);
-			Object obj = ois.readObject();
-			if (obj instanceof TDAgent) {
-				pa = (TDAgent) obj;
-			} else if (obj instanceof TDNTuple2Agt) {
-				pa = (TDNTuple2Agt) obj;
-				// set horizon cut for older agents (where horCut was not part of ParTD):
-				if (((TDNTuple2Agt) pa).getParTD().getHorizonCut()==0.0) 
-					((TDNTuple2Agt) pa).getParTD().setHorizonCut(0.1);
-				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
-				// (they would stay otherwise at their default values, would not 
-				// get the loaded values)
-				((TDNTuple2Agt) pa).setTDParams(((TDNTuple2Agt) pa).getParTD(), pa.getMaxGameNum());
-				((TDNTuple2Agt) pa).setNTParams(((TDNTuple2Agt) pa).getParNT());
-				((TDNTuple2Agt) pa).weightAnalysis(null);
-			} else if (obj instanceof TDNTuple3Agt) {
-				pa = (TDNTuple3Agt) obj;
-				// set horizon cut for older agents (where horCut was not part of ParTD):
-				if (((TDNTuple3Agt) pa).getParTD().getHorizonCut()==0.0) 
-					((TDNTuple3Agt) pa).getParTD().setHorizonCut(0.1);
-				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
-				// (they would stay otherwise at their default values, would not 
-				// get the loaded values)
-				((TDNTuple3Agt) pa).setTDParams(((TDNTuple3Agt) pa).getParTD(), pa.getMaxGameNum());
-				((TDNTuple3Agt) pa).setNTParams(((TDNTuple3Agt) pa).getParNT());
-				((TDNTuple3Agt) pa).weightAnalysis(null);
-			} else if (obj instanceof SarsaAgt) {
-				pa = (SarsaAgt) obj;
-				// set horizon cut for older agents (where horCut was not part of ParTD):
-				if (((SarsaAgt) pa).getParTD().getHorizonCut()==0.0) 
-					((SarsaAgt) pa).getParTD().setHorizonCut(0.1);
-				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
-				// (they would stay otherwise at their default values, would not 
-				// get the loaded values)
-				((SarsaAgt) pa).setTDParams(((SarsaAgt) pa).getParTD(), pa.getMaxGameNum());
-				((SarsaAgt) pa).setNTParams(((SarsaAgt) pa).getParNT());
-				((SarsaAgt) pa).weightAnalysis(null);
-//			} else if (obj instanceof MCTSAgentT0) {
-//				pa = (MCTSAgentT0) obj;
-			} else if (obj instanceof MCTSAgentT) {
-				pa = (MCTSAgentT) obj;
-			} else if (obj instanceof MCAgent) {
-				pa = (MCAgent) obj;
-			} else if (obj instanceof MCAgentN) {
-				pa = (MCAgentN) obj;
-			} else if (obj instanceof MinimaxAgent) {
-				pa = (MinimaxAgent) obj;
-			} else if (obj instanceof MaxNAgent) {
-				pa = (MaxNAgent) obj;
-			} else if (obj instanceof ExpectimaxNAgent) {
-				pa = (ExpectimaxNAgent) obj;
-			} else if (obj instanceof RandomAgent) {
-				pa = (RandomAgent) obj;
-			} else {
-				if (dlg!=null) dlg.setVisible(false);
-				MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
-						+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
-				arenaGame.setStatusMessage("[ERROR: Could not load agent from "
-								+ filePath + "!]");
-				throw new ClassNotFoundException("ERROR: Unknown agent class");
-			}
-			
-			if (pa instanceof AgentBase) {
-				// Some older agents on disk might not have ParOther m_oPar.
-				// If this is the case, replace the null value with a default ParOther:
-				if (((AgentBase) pa).getParOther() == null ) {
-					((AgentBase) pa).setDefaultOtherPar();
-				}						
-			}
-
-			if (dlg!=null) dlg.setVisible(false);
-			arenaGame.setProgress(null);
-			arenaGame.setStatusMessage("Done.");
-		} catch (IOException e) {
-			if (dlg!=null) dlg.setVisible(false);
-			MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
-					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
-			arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
-			//e.printStackTrace();
-			throw e;
-		} catch (ClassNotFoundException e) {
-			if (dlg!=null) dlg.setVisible(false);
-			MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
-					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
-			//e.printStackTrace();
-			throw e;
-		} finally {
-			if (ois != null)
-				try {
-					ois.close();
-				} catch (IOException e) {
-				}
-			if (fis != null)
-				try {
-					fis.close();
-				} catch (IOException e) {
-				}
-		}
-		return pa;
-	}
-
 
 	public String getZipContentFiles(ZipFile zipFile,
 			ZipArchiveEntry zipArchiveEntry) {

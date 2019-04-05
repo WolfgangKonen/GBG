@@ -9,7 +9,7 @@ import javax.swing.*;
  * An instance of this class gets passed from {@link TSAgentManager} to {@link TournamentSystem.TSResultWindow}
  * to hand over the processed data for rendering.
  *
- * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ * @author Felix Barsnick, Cologne University of Applied Sciences, 2018
  */
 public class TSHeatmapDataTransfer {
     /**

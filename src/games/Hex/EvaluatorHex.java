@@ -182,7 +182,7 @@ public class EvaluatorHex extends Evaluator {
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstMaxN(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
-        double[] res = XArenaFuncs.compete(playAgent, maxNAgent, new StateObserverHex(), numEpisodes, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, maxNAgent, new StateObserverHex(), numEpisodes, verbose, null);
         double success = res[0]-res[2];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success + "  (#="+numEpisodes+")";
         if (this.verbose > 0) System.out.println(m_msg);
@@ -211,7 +211,7 @@ public class EvaluatorHex extends Evaluator {
         params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
-        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0);
+        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0, null);
         double success = res[0]-res[2];        	
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         //if (this.verbose > 0) 
@@ -270,11 +270,11 @@ public class EvaluatorHex extends Evaluator {
         for (int i=0; i<startAction.length; i++) {
         	StateObserverHex so = new StateObserverHex();
         	if (startAction[i] == -1) {
-        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0);
+        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0, null);
                 success += res[0]-res[2];        	
         	} else {
         		so.advance(new ACTIONS(startAction[i]));
-        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0);
+        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0, null);
                 success += res[2]-res[0];        	
         	}
         }
@@ -350,11 +350,11 @@ public class EvaluatorHex extends Evaluator {
                 MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
             	if (startAction2[i2] == -1) {
-            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0);
+            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0, null);
                     success = res[0]-res[2];        	
             	} else {
             		so.advance(new ACTIONS(startAction2[i2]));
-            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0);
+            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0, null);
                     success = res[2]-res[0];        	
             	}
                 if(verbose == 0) {
@@ -402,7 +402,7 @@ public class EvaluatorHex extends Evaluator {
      */
     private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
         //double success = XArenaFuncs.competeBoth(playAgent, randomAgent, 10, gameBoard);
-        double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose);
+        double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose, null);
         double success = res[0]-res[2];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         if (this.verbose > 0) System.out.println(m_msg);

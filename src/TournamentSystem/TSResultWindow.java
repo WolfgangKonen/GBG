@@ -17,7 +17,7 @@ import java.awt.event.*;
  * <p>
  * This GUI was build with the IntelliJ GUI Designer.
  *
- * @author Felix Barsnick, University of Applied Sciences Cologne, 2018
+ * @author Felix Barsnick, Cologne University of Applied Sciences, 2018
  */
 public class TSResultWindow extends JFrame {
     private JPanel mJPanel;
@@ -154,46 +154,59 @@ public class TSResultWindow extends JFrame {
         setContentPane(scroll);
         //setSize(1000,1000);
         pack();
+        adjustComponentHeight();
         setVisible(true);
 
         showHideTableTimeTableButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showjspTD = !showjspTD;
+                if (showjspTD) showHideTableTimeTableButton.setText("Hide Time Table");
+                else         showHideTableTimeTableButton.setText("Show Time Table");
                 jspTD.setVisible(showjspTD);
                 revalidate();
                 repaint();
                 pack();
+                adjustComponentHeight();
             }
         });
         showHideTableWTLButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showjspWTL = !showjspWTL;
+                if (showjspWTL) showHideTableWTLButton.setText("Hide WTL Table");
+                else         showHideTableWTLButton.setText("Show WTL Table");
                 jspWTL.setVisible(showjspWTL);
                 revalidate();
                 repaint();
                 pack();
+                adjustComponentHeight();
             }
         });
         showHideTableSCRButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showjspSCR = !showjspSCR;
+                if (showjspSCR) showHideTableSCRButton.setText("Hide Score Table");
+                else         showHideTableSCRButton.setText("Show Score Table");
                 jspSCR.setVisible(showjspSCR);
                 revalidate();
                 repaint();
                 pack();
+                adjustComponentHeight();
             }
         });
         showHideTableASCButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showjspASC = !showjspASC;
+                if (showjspASC) showHideTableASCButton.setText("Hide Ranking Table");
+                else         showHideTableASCButton.setText("Show Ranking Table");
                 jspASC.setVisible(showjspASC);
                 revalidate();
                 repaint();
                 pack();
+                adjustComponentHeight();
             }
         });
         hideAllTablesButton.addActionListener(new ActionListener() {
@@ -207,9 +220,14 @@ public class TSResultWindow extends JFrame {
                 jspSCR.setVisible(showjspSCR);
                 jspASC.setVisible(showjspASC);
                 jspTD.setVisible(showjspTD);
+                showHideTableWTLButton.setText("Show WTL Table");
+                showHideTableSCRButton.setText("Show Score Table");
+                showHideTableASCButton.setText("Show Ranking Table");
+                showHideTableTimeTableButton.setText("Show Time Table");
                 revalidate();
                 repaint();
                 pack();
+                adjustComponentHeight();
             }
         });
         showAllTablesButton.addActionListener(new ActionListener() {
@@ -225,9 +243,14 @@ public class TSResultWindow extends JFrame {
                 jspSCR.setVisible(showjspSCR);
                 jspASC.setVisible(showjspASC);
                 jspTD.setVisible(showjspTD);
+                showHideTableWTLButton.setText("Hide WTL Table");
+                showHideTableSCRButton.setText("Hide Score Table");
+                showHideTableASCButton.setText("Hide Ranking Table");
+                showHideTableTimeTableButton.setText("Hide Time Table");
                 revalidate();
                 repaint();
                 pack();
+                adjustComponentHeight();
             }
         });
         openBiggerScatterPlotButton.addActionListener(new ActionListener() {
@@ -262,6 +285,7 @@ public class TSResultWindow extends JFrame {
                 DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer) tableTimeDetail.getDefaultRenderer(Object.class);
                 renderer2.setHorizontalAlignment(JLabel.RIGHT);
                 pack();
+                adjustComponentHeight();
             }
         });
         openAdvancedHeatmapAnalysisButton.addActionListener(new ActionListener() {
@@ -276,9 +300,23 @@ public class TSResultWindow extends JFrame {
                 jspHMadv3.setVisible(showAdvHMAnalysis);
                 heatmapJLadv3Title.setVisible(showAdvHMAnalysis);
                 pack();
+                adjustComponentHeight();
             }
         });
     } // public TSResultWindow(...)
+
+    private void adjustComponentHeight() {
+        // here we set the component height to not more than 95% of screen height --> 
+        // this lets the component not stretch over the Windows task bar
+ 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int height = (int)(screenSize.getHeight()*0.95);
+		height = (height>this.getHeight()) ? this.getHeight() : height;
+		int width = (int)(screenSize.getWidth()*0.98);
+		width = (width>this.getWidth()) ? this.getWidth() : width;
+		setSize(width, height);
+		setBounds(0,0, width, height);
+    }
+    
 
     public void setTableMatrixWTL(DefaultTableModel m1) {
         showHideTableWTLButton.setVisible(true);
@@ -288,6 +326,7 @@ public class TSResultWindow extends JFrame {
         tableMatrixWTL.setPreferredScrollableViewportSize(
                 new Dimension(tableMatrixWTL.getPreferredSize().width, tableMatrixWTL.getRowHeight() * tableMatrixWTL.getRowCount()));
         pack();
+        adjustComponentHeight();
     }
 
     public void setTableMatrixSCR(DefaultTableModel m2) {
@@ -298,6 +337,7 @@ public class TSResultWindow extends JFrame {
         tableMatrixSCR.setPreferredScrollableViewportSize(
                 new Dimension(tableMatrixSCR.getPreferredSize().width, tableMatrixSCR.getRowHeight() * tableMatrixSCR.getRowCount()));
         pack();
+        adjustComponentHeight();
     }
 
     public void setTableAgentScore(DefaultTableModel m3) {
@@ -309,6 +349,7 @@ public class TSResultWindow extends JFrame {
         DefaultTableCellRenderer renderer = (DefaultTableCellRenderer) tableAgentScore.getDefaultRenderer(Object.class);
         renderer.setHorizontalAlignment(JLabel.CENTER);
         pack();
+        adjustComponentHeight();
     }
 
     public void setTableTimeDetail(DefaultTableModel m4, DefaultTableModel m5) {
@@ -325,6 +366,7 @@ public class TSResultWindow extends JFrame {
         DefaultTableCellRenderer renderer2 = (DefaultTableCellRenderer) tableTimeDetail.getDefaultRenderer(Object.class);
         renderer2.setHorizontalAlignment(JLabel.RIGHT);
         pack();
+        adjustComponentHeight();
     }
 
     public void setHeatMap(TSHeatmapDataTransfer dataTransfer) {
@@ -346,6 +388,7 @@ public class TSResultWindow extends JFrame {
         heatmap2JL.setText("");
         heatmap2JL.setIcon(dataTransfer.scoreHeatmapSorted);
         pack();
+        adjustComponentHeight();
     }
 
     public void setScatterPlotASvT(JFreeChart scatterPlot) {
@@ -368,6 +411,7 @@ public class TSResultWindow extends JFrame {
         scatterPlotASvT.setPreferredSize(new Dimension(width, height)); // plot size
         scatterPlotJPanel.add(scatterPlotASvT);
         pack();
+        adjustComponentHeight();
     }
 
     /**
@@ -381,7 +425,9 @@ public class TSResultWindow extends JFrame {
         mJPanel = new JPanel();
         mJPanel.setLayout(new GridBagLayout());
         tableWTLLabel = new JLabel();
-        tableWTLLabel.setText("<html><body><strong>Table with Win, Tie, Loss (WTL) Results</strong><br>\nRow agent (1st) plays against the column agent (2nd)<br>\nWin and loss are from the row agents perspective</body></html>");
+        tableWTLLabel.setText("<html><body><strong>Table with Win, Tie, Loss (WTL) Results</strong><br>"
+        		+ "\nRow agent (1st) plays against the column agent (2nd)<br>"
+        		+ "\nWin and loss are from the row agent's perspective</body></html>");
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -511,7 +557,8 @@ public class TSResultWindow extends JFrame {
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(scatterPlotJPanel, gbc);
         showHideTableWTLButton = new JButton();
-        showHideTableWTLButton.setText("Show/Hide WTL Table");
+        if (showjspWTL) showHideTableWTLButton.setText("Hide WTL Table");
+        else         showHideTableWTLButton.setText("Show WTL Table");
         showHideTableWTLButton.setToolTipText("Show or hide the WinTieLoss Table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
@@ -519,7 +566,8 @@ public class TSResultWindow extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showHideTableWTLButton, gbc);
         showHideTableTimeTableButton = new JButton();
-        showHideTableTimeTableButton.setText("Show/Hide Time Table");
+        if (showjspTD) showHideTableTimeTableButton.setText("Hide Time Table");
+        else         showHideTableTimeTableButton.setText("Show Time Table");
         showHideTableTimeTableButton.setToolTipText("Show or hide the time measurement table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
@@ -527,7 +575,8 @@ public class TSResultWindow extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showHideTableTimeTableButton, gbc);
         showHideTableSCRButton = new JButton();
-        showHideTableSCRButton.setText("Show/Hide Score Table");
+        if (showjspSCR) showHideTableSCRButton.setText("Hide Score Table");
+        else         showHideTableSCRButton.setText("Show Score Table");
         showHideTableSCRButton.setToolTipText("Show or hide the Score Table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
@@ -535,7 +584,8 @@ public class TSResultWindow extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(showHideTableSCRButton, gbc);
         showHideTableASCButton = new JButton();
-        showHideTableASCButton.setText("Show/Hide Ranking Table");
+        if (showjspASC) showHideTableASCButton.setText("Hide Ranking Table");
+        else         showHideTableASCButton.setText("Show Ranking Table");
         showHideTableASCButton.setToolTipText("Show or hide the agent ranking table by clicking this button");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
@@ -620,6 +670,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(openBiggerScatterPlotButton, gbc);
         toggleAdvancedInfoTimeButton = new JButton();
         toggleAdvancedInfoTimeButton.setText("Toggle Advanced Time Info");
+        toggleAdvancedInfoTimeButton.setToolTipText("Toggles rows for each match and columns 'Average Move Count' and 'Median Move Count'");
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
         gbc.gridy = 17;

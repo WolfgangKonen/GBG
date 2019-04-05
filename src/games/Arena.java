@@ -254,8 +254,9 @@ abstract public class Arena extends JFrame implements Runnable {
 
 				long start = System.currentTimeMillis();
 
-				while (tournamentAgentManager.hastNextGame()) {
+				while (tournamentAgentManager.hasNextGame()) {
 					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
+					//System.out.println("DEBUG: "+nextTeam[0].getAgentType() + " vs. "+nextTeam[1].getAgentType());
 					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
 					int rndmStartMoves = tournamentAgentManager.results.numberOfRandomStartMoves;
 					StateObservation startSo = tournamentAgentManager.getNextStartState();
@@ -269,12 +270,16 @@ abstract public class Arena extends JFrame implements Runnable {
 							// hdd and standard agent mix, leave while, end tournament
 							break;
 						}
+						if (roundWinningAgent == 43) {
+							// a RuntimeException was thrown, leave while, end tournament
+							break;
+						}
 					}
 					else {
 						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
 						//System.gc(); // call to keep system memory usage low but creates MASSIVE time delays every episode
 
-						// progressbar
+						// progress bar
 						int[] progress = tournamentAgentManager.getTSProgress();
 						tsProgressBar.setValue(progress[0]);
 						System.out.println(TAG+"TS Progress "+ Arrays.toString(progress));
