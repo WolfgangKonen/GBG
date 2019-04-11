@@ -28,7 +28,7 @@ public class TSResultStorage implements Serializable {
     public int gameResult[][] = null; // [ numGames ],[ [winAgent1],[tie],[winAgent2] ]
     public TSTimeStorage timeStorage[][] = null;
     public int nextGame = 0;
-    public int numberOfGames = -1;
+    public int numberOfEpisodes = -1;
     public boolean tournamentDone = false;
     public String startDate = "Tournament Start Date: xx.xx.xxxx xx:xx:xx";
     public int numberOfRandomStartMoves = 0;

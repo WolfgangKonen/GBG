@@ -253,6 +253,10 @@ public class XArenaButtons extends JPanel
 			
 			try {
 				Evaluator dummyEvaluator = m_game.makeEvaluator(null, null, 0, 0, 0); 
+				// Why is it a dummyEvaluator? - It is an Evaluator of the specific game, so it knows
+				// which modes are available, what the tooltip string is and so on. But it is 'dummy'
+				// w.r.t. mode, which is here set to 0. Once a mode is selected and an evaluation 
+				// process is started, a new Evaluator with the selected mode will be constructed.
 				oPar[n].setQuickEvalList(dummyEvaluator.getAvailableModes());
 				oPar[n].setTrainEvalList(dummyEvaluator.getAvailableModes());
 				oPar[n].setQuickEvalMode(dummyEvaluator.getQuickEvalMode());

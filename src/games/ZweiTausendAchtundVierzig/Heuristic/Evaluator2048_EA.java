@@ -29,7 +29,7 @@ public class Evaluator2048_EA extends Evaluator {
     }
 
     @Override
-    protected boolean eval_Agent(PlayAgent pa) {
+    protected boolean evalAgent(PlayAgent pa) {
     	m_PlayAgent = pa;
         cma.setDimension(15);
         cma.setInitialX(0.5);

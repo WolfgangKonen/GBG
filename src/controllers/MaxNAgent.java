@@ -135,7 +135,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         ArrayList<ACTIONS> acts = so.getAvailableActions();
         ACTIONS[] actions = new ACTIONS[acts.size()];
     	scBest=new ScoreTuple(so);		// make a new ScoreTuple with lowest possible maxValue
-        int player = so.getPlayer();
+        int P = so.getPlayer();
         
         for(i = 0; i < acts.size(); ++i)
         {
@@ -171,18 +171,18 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 				// For derived class MaxNWrapper, estimateGameValueTuple returns
 				// the score tuple of the wrapped agent. 
 			}
-        	VTable[i] = currScoreTuple.scTup[player];
+        	VTable[i] = currScoreTuple.scTup[P];
 			
 			// always *maximize* P's element in the tuple currScoreTuple, 
 			// where P is the player to move in state so:
 			ScoreTuple.CombineOP cOP = ScoreTuple.CombineOP.MAX;
-			scBest.combine(currScoreTuple, cOP, player, 0.0);            	
+			scBest.combine(currScoreTuple, cOP, P, 0.0);            	
         } // for
         
         // There might be one or more than one action with pMaxScore. 
         // Break ties by selecting one of them randomly:
     	int selectJ = (int)(rand.nextDouble()*scBest.count);
-    	pMaxScore = scBest.scTup[player];
+    	pMaxScore = scBest.scTup[P];
     	for (i=0, j=0; i < actions.length; ++i) {
     		if (VTable[i]==pMaxScore) {
     			if ((j++)==selectJ) actBest = new ACTIONS(actions[i]);

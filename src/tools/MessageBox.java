@@ -16,7 +16,7 @@ public class MessageBox {
 	public static void show (Component parent, String message, String title, 
 							 int msgCode) 
 	{
-		Font font=new Font("Arial",1,16);			
+		Font font=new Font("Arial",1,(int)(1.2*Types.GUI_HELPFONTSIZE)); //16			
 		show(parent, message, title, msgCode, font);
 	}
 

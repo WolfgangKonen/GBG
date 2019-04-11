@@ -114,7 +114,7 @@ public class EvaluatorC4 extends Evaluator {
     }
 
     @Override
-    protected boolean eval_Agent(PlayAgent pa) {
+    protected boolean evalAgent(PlayAgent pa) {
     	this.playAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {
@@ -505,6 +505,8 @@ public class EvaluatorC4 extends Evaluator {
     @Override
     public String getPrintString() {
         switch (m_mode) {
+        	// Note: the best result is always 1.0 here, because the start state is in all cases
+        	// such that the agent to be evaluated can win if he plays perfect.
             case 0:  return "success against MCTS (best is 1.0): ";
             case 1:  return "success against Random (best is 1.0): ";
             case 2:  return "success against Max-N (best is 1.0): ";
@@ -528,6 +530,8 @@ public class EvaluatorC4 extends Evaluator {
 				+ "10: against MCTS, different starts, best is 1.0<br>"
 				+ "11: against TDReferee.agt.zip, different starts, best is 1.0"
 				+ "</html>";
+    	// Note: the best result is always 1.0 here, because the start state is in all cases
+    	// such that the agent to be evaluated can win if he plays perfect.
 	}
 
     @Override

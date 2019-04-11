@@ -84,7 +84,7 @@ public class EvaluatorCube extends Evaluator {
 	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int)} [default: mode=0].
 	 */
 	@Override
-	public boolean eval_Agent(PlayAgent playAgent) {
+	public boolean evalAgent(PlayAgent playAgent) {
 		assert (m_thresh.length >= AVAILABLE_MODES.length);
 		m_PlayAgent = playAgent;
 		switch(m_mode) {

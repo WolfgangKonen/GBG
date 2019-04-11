@@ -55,7 +55,7 @@ public class Evaluator2048 extends Evaluator {
     }
 
     @Override
-    protected boolean eval_Agent(PlayAgent pa) {
+    protected boolean evalAgent(PlayAgent pa) {
     	m_PlayAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {

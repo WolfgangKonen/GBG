@@ -13,6 +13,8 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.XArenaButtons;
+import games.Nim.BoutonAgent;
+
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
@@ -654,6 +656,8 @@ public class LoadSaveGBG {
 				pa = (ExpectimaxNAgent) obj;
 			} else if (obj instanceof RandomAgent) {
 				pa = (RandomAgent) obj;
+			} else if (obj instanceof BoutonAgent) {	// special agent for game Nim
+				pa = (BoutonAgent) obj;
 			} else {
 				if (dlg!=null) dlg.setVisible(false);
 				MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "

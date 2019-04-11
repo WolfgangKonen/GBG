@@ -93,7 +93,7 @@ public class EvaluatorNim extends Evaluator {
 	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
 	 */
 	@Override
-	public boolean eval_Agent(PlayAgent playAgent) {
+	public boolean evalAgent(PlayAgent playAgent) {
 		m_PlayAgent = playAgent;
 		if (m_mode==1 || m_mode==2) {
 			StateObserverNim so = (StateObserverNim) m_gb.getDefaultStartState();
@@ -240,11 +240,11 @@ public class EvaluatorNim extends Evaluator {
 //		return 0;
 //	}
 
-	private String getBestResultString() {
+	private String getBestResultString(int mode) {
 		DecimalFormat df = new DecimalFormat();				
 		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
 		df.applyPattern("0.00");  
-		switch (m_mode) {
+		switch (mode) {
 		case 0:  				// random agent, competeBoth
 			// a rough estimate of the probability that RandomAgent wins: in one half of the 
 			// competeBoth games, RandomAgent will always loose, in the other half it may 
@@ -275,7 +275,7 @@ public class EvaluatorNim extends Evaluator {
 		
 	@Override
 	public String getPrintString() {
-		String strBest = getBestResultString();
+		String strBest = getBestResultString(m_mode);
 		switch (m_mode) {
 		case 0:  return "success rate (randomAgent, best is "+strBest+"): ";
 		case 1:  return "success rate (Max-N, best is "+strBest+"): ";
@@ -289,14 +289,13 @@ public class EvaluatorNim extends Evaluator {
 	
 	@Override
 	public String getTooltipString() {
-		String strBest = getBestResultString();
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
-				+ "0: against Random, best is "+strBest+"<br>"
-				+ "1: against Max-N, best is "+strBest+"<br>"
-				+ "2: against Max-N, different starts, best is "+strBest+"<br>"
-				+ "3: against MCTS, best is "+strBest+"<br>"
-				+ "4: against MCTS, different starts, best is "+strBest+"<br>"
+				+ "0: against Random, best is "+getBestResultString(0)+"<br>"
+				+ "1: against Max-N, best is "+getBestResultString(1)+"<br>"
+				+ "2: against Max-N, different starts, best is "+getBestResultString(2)+"<br>"
+				+ "3: against MCTS, best is "+getBestResultString(3)+"<br>"
+				+ "4: against MCTS, different starts, best is "+getBestResultString(4)+"<br>"
 				+ "11: against TDReferee.agt.zip, different starts"
 				+ "</html>";
 	}

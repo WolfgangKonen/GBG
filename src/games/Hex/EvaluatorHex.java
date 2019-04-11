@@ -38,7 +38,7 @@ import javax.swing.JOptionPane;
 import agentIO.AgentLoader;
 
 /**
- * Evaluate Hex agents. See {@link #getAvailableModes()} and {@link #eval_Agent(PlayAgent)} 
+ * Evaluate Hex agents. See {@link #getAvailableModes()} and {@link #evalAgent(PlayAgent)} 
  * for available evaluators. 
  */
 public class EvaluatorHex extends Evaluator {
@@ -86,7 +86,7 @@ public class EvaluatorHex extends Evaluator {
     }
 
     @Override
-    protected boolean eval_Agent(PlayAgent pa) {
+    protected boolean evalAgent(PlayAgent pa) {
     	this.playAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {

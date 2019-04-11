@@ -62,7 +62,7 @@ public class EvaluatorTTT extends Evaluator {
 	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
 	 */
 	@Override
-	public boolean eval_Agent(PlayAgent playAgent) {
+	public boolean evalAgent(PlayAgent playAgent) {
 		m_PlayAgent = playAgent;
 		switch(m_mode) {
 		case -1: 

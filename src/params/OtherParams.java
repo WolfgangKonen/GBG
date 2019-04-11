@@ -154,6 +154,11 @@ public class OtherParams extends Frame {
 		oPanel.add(stopEval_L);
 		oPanel.add(stopEval_T);
 
+		oPanel.add(wNply_L);
+		oPanel.add(wNply_T);
+		oPanel.add(new Canvas());
+		oPanel.add(new Canvas());
+
 		oPanel.add(chooseS01L);
 		oPanel.add(chooseS01);
 		oPanel.add(learnRM_L);
@@ -161,11 +166,6 @@ public class OtherParams extends Frame {
 
 		oPanel.add(rgs_L);
 		oPanel.add(rewardIsGameScore);
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
-
-		oPanel.add(wNply_L);
-		oPanel.add(wNply_T);
 		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
 

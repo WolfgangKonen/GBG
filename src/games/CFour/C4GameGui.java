@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import controllers.PlayAgent;
 import games.CFour.openingBook.BookSum;
 import tools.MessageBox;
+import tools.Types;
 
 //import openingBook.BookSum;
 //
@@ -169,7 +170,7 @@ public class C4GameGui extends JPanel implements ListOperation {
 
 		String lBaseTitle = "Best score or value function";
 		lValueTitle = new JLabel(lBaseTitle);
-		lValueTitle.setFont(new Font("Arial", 1, 14));
+		lValueTitle.setFont(new Font("Arial", 1, Types.GUI_HELPFONTSIZE));
 		lValueTitle.setToolTipText("maximum of value function over columns (selected agent)");
 //		lValueGTV = new JLabel("  ");
 //		lValueAgent = new JLabel("  ");
@@ -182,7 +183,7 @@ public class C4GameGui extends JPanel implements ListOperation {
 //		JLabel Title;
 //		Title = new JLabel("Connect Four",JLabel.CENTER);
 //		Title.setForeground(Color.black);
-//		Font font = new Font("Times New Roman", 1, 18);
+//		Font font = new Font("Times New Roman", 1, (int)(1.3*Types.GUI_HELPFONTSIZE));
 //		Title.setFont(font);
 
 		setLayout(new BorderLayout(10, 10));

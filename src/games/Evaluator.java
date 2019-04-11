@@ -7,7 +7,7 @@ import controllers.PlayAgent;
  * 
  * Evaluator is an abstract class which evaluates when an agent meets a certain 
  * criterion for stopEval evaluator calls in succession. This criterion is met once when the
- * method boolean {@link #eval_Agent(PlayAgent)} returns ‘true’. This abstract method {@link #eval_Agent(PlayAgent)} is 
+ * method boolean {@link #evalAgent(PlayAgent)} returns ‘true’. This abstract method {@link #evalAgent(PlayAgent)} is 
  * defined in child classes of Evaluator. The criterion might be for example a success 
  * rate better than -0.15 in a certain game against Minimax (where 0 is the ideal success rate).
  * <p>  
@@ -17,7 +17,7 @@ import controllers.PlayAgent;
  * the training prematurely. 
  * <p> 
  * This class is a base class; derived classes should implement concrete versions of
- * {@link #eval_Agent(PlayAgent)}.
+ * {@link #evalAgent(PlayAgent)}.
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
  */
@@ -34,13 +34,13 @@ abstract public class Evaluator {
 	protected int verbose=1;
 	/**
 	 * Derived classes write the result (average success rate) of the last call to method 
-	 * {@link #eval_Agent(PlayAgent)} to this variable {@link #lastResult}
+	 * {@link #evalAgent(PlayAgent)} to this variable {@link #lastResult}
 	 * @see #getLastResult()
 	 */
 	protected double lastResult=0.0;
 	/**
 	 * Derived classes write an info string of the last call to method 
-	 * {@link #eval_Agent(PlayAgent)} to this variable {@link #m_msg}
+	 * {@link #evalAgent(PlayAgent)} to this variable {@link #m_msg}
 	 * @see #getMsg()
 	 */
 	protected String m_msg="";
@@ -82,7 +82,7 @@ abstract public class Evaluator {
 	 * 		boolean predicate from {@link #eval_Agent}
 	 */
 	public boolean eval(PlayAgent playAgent) {
-		thisEval = eval_Agent(playAgent);
+		thisEval = evalAgent(playAgent);
 		if (thisEval) {
 			m_counter++;
 		} else {
@@ -103,7 +103,7 @@ abstract public class Evaluator {
 	 * @see #getLastResult()
 	 * @see #getMsg()
 	 */
-	abstract protected boolean eval_Agent(PlayAgent playAgent);
+	abstract protected boolean evalAgent(PlayAgent playAgent);
 
 	/**
 	 * Set member gnumTrue to gameNum if {@link #eval(PlayAgent)} has returned true for 
@@ -127,7 +127,7 @@ abstract public class Evaluator {
 	
 	/**
 	 * @return
-	 *  	the result from the last call to {@link #eval_Agent(PlayAgent)}, which might be for example
+	 *  	the result from the last call to {@link #evalAgent(PlayAgent)}, which might be for example
 	 *  	the average success rate of games played against a Minimax player.
 	 */
  	public double getLastResult(){ 

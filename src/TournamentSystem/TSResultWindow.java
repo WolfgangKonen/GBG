@@ -3,17 +3,27 @@ package TournamentSystem;
 import TournamentSystem.tools.TSHeatmapDataTransfer;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.LogarithmicAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+
 import java.awt.*;
 import java.awt.event.*;
 
 /**
  * This class generates a GUI to visualize the tournament statistics and measurements.
- * It's called in {@link TSAgentManager} after the tournament is finished or in
- * {@link TSSettingsGUI2} if you reopen the result window in the settings GUI.
+ * It is called in {@link TSAgentManager} after the tournament is finished or in
+ * {@link TSSettingsGUI2} if you reopen the result window (button "Reopen Statistics") or if 
+ * you reload a saved tournament (menu item "Load&amp;Show Results From Disk").
  * <p>
  * This GUI was build with the IntelliJ GUI Designer.
  *
@@ -36,6 +46,7 @@ public class TSResultWindow extends JFrame {
     private JScrollPane jspTD;
     private boolean showjspTD = false;
     private JPanel scatterPlotJPanel;
+    private JPanel scatterHeadJPanel;
     private JButton showHideTableTimeTableButton;
     private JButton showHideTableWTLButton;
     private JButton showHideTableSCRButton;
@@ -62,6 +73,7 @@ public class TSResultWindow extends JFrame {
     private JScrollPane jspHMadv3;
     private JLabel heatmapJLadv3;
     private JLabel heatmapJLadv3Title;
+    private JCheckBox logarithmicXAxisCheckbox;
 
     private JFreeChart scatterPlot = null;
     private DefaultTableModel timeDetail, timeSimple = null;
@@ -69,6 +81,21 @@ public class TSResultWindow extends JFrame {
     private boolean isSinglePlayerGame;
 
     private final String TAG = "[TSResultWindow] ";
+
+    protected String[] columnTimeToolTips = {
+    		null,		// Match (detail) or Agent (simple)
+            null,		// Filename
+            null,		// Agent Type
+            null,		// Fastest Move
+            null,		// Slowest Move
+            "Average move time over all moves in all episodes with this Agent [& Match]", // Average Move
+            "Median move time over all moves in all episodes with this Agent [& Match]",  // Median Move
+            "Average episode time over all episodes with this Agent [& Match]", // Average Episode
+            "Median episode time over all episodes with this Agent [& Match]",  // Median Episode
+            "Sum of all move times with this Agent [& Match]",  // Total Time
+            null,		// Average Move Count (detail only)
+            null		// Median Move Count (detail only)
+            };
 
     /**
      * create the result window with the tournament statistics with data provided from {@link TSAgentManager}
@@ -82,6 +109,7 @@ public class TSResultWindow extends JFrame {
      * @param scatterPlot scatterplot XYPlot of the agents score vs round time
      * @param startDate   info String with date and TS settings
      */
+    // --- probably never used ---
     public TSResultWindow(DefaultTableModel m1, DefaultTableModel m2, DefaultTableModel m3, DefaultTableModel m4, DefaultTableModel m5,
                           TSHeatmapDataTransfer dataHM, JFreeChart scatterPlot, String startDate) {
         this(startDate, false);
@@ -131,6 +159,9 @@ public class TSResultWindow extends JFrame {
         //Font lFont = new Font("Arial", Font.PLAIN, Types.GUI_DIALOGFONTSIZE);
         //tableMatrixWTL.setFont(lFont); // todo also need to set cell height according to font height
         startDateTSJL.setText(startDate);
+
+        logarithmicXAxisCheckbox = new JCheckBox();
+        logarithmicXAxisCheckbox.setText("log X");
 
         if (singlePlayerGame) {
             showjspTD = true;
@@ -183,7 +214,7 @@ public class TSResultWindow extends JFrame {
                 adjustComponentHeight();
             }
         });
-        showHideTableSCRButton.addActionListener(new ActionListener() {
+        showHideTableSCRButton.addActionListener(new ActionListener() {  // Score Table
             @Override
             public void actionPerformed(ActionEvent e) {
                 showjspSCR = !showjspSCR;
@@ -196,7 +227,7 @@ public class TSResultWindow extends JFrame {
                 adjustComponentHeight();
             }
         });
-        showHideTableASCButton.addActionListener(new ActionListener() {
+        showHideTableASCButton.addActionListener(new ActionListener() {  // Ranking Table
             @Override
             public void actionPerformed(ActionEvent e) {
                 showjspASC = !showjspASC;
@@ -269,6 +300,13 @@ public class TSResultWindow extends JFrame {
                 frame.setVisible(true);
             }
         });
+        logarithmicXAxisCheckbox.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+            	adjustScatterPlotASvT();
+            }
+        });
+
         toggleAdvancedInfoTimeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -306,12 +344,13 @@ public class TSResultWindow extends JFrame {
     } // public TSResultWindow(...)
 
     private void adjustComponentHeight() {
-        // here we set the component height to not more than 95% of screen height --> 
+        // here we set the component height to be not more than 95% of screen height --> 
         // this lets the component not stretch over the Windows task bar
  		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int height = (int)(screenSize.getHeight()*0.95);
 		height = (height>this.getHeight()) ? this.getHeight() : height;
-		int width = (int)(screenSize.getWidth()*0.98);
+		// similarly for component width:
+		int width = (int)(screenSize.getWidth()*0.99);
 		width = (width>this.getWidth()) ? this.getWidth() : width;
 		setSize(width, height);
 		setBounds(0,0, width, height);
@@ -410,10 +449,48 @@ public class TSResultWindow extends JFrame {
 
         scatterPlotASvT.setPreferredSize(new Dimension(width, height)); // plot size
         scatterPlotJPanel.add(scatterPlotASvT);
+        final JLabel label3 = new JLabel();
+        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. RoundTime</strong><br>\nAgent WTL score vs Median Episode Time</body></html>\n");
+        scatterHeadJPanel.add(label3);
+        scatterHeadJPanel.add(logarithmicXAxisCheckbox);
         pack();
         adjustComponentHeight();
     }
 
+    /**
+     * Toggles the logarithmic X axis in {@code scatterPlot} on/off. <br>
+     * Called by the stateChanged-listener of "log X" CheckBox. 
+     * <p>
+     * We only use data from {@code scatterPlot} here, not any data from 
+     * {@link TSAgentManager}, because {@link TSResultWindow} (multiple instances) should 
+     * operate after construction independent of {@link TSAgentManager}.
+     */
+    private void adjustScatterPlotASvT() {
+        XYPlot plot = (XYPlot)scatterPlot.getPlot();
+        String scXAxis = plot.getDomainAxis().getLabel();
+        Font font = plot.getDomainAxis().getLabelFont();
+        XYSeriesCollection dataset = (XYSeriesCollection) scatterPlot.getXYPlot().getDataset();
+        if (logarithmicXAxisCheckbox.isSelected()) {
+        	NumberAxis domainAxis = new LogarithmicAxis(scXAxis);
+        	domainAxis.setLabelFont(font);
+        	plot.setDomainAxis(domainAxis);
+        } else {
+            //To change the lower bound of X-axis (for linear axis, to see the low-time symbols)
+        	NumberAxis xAxis = new org.jfree.chart.axis.NumberAxis(scXAxis);
+            // draw x axis from -2% to the left of total width to move marker at 0 away from y axis:        	
+            xAxis.setLowerBound(-1*dataset.getDomainUpperBound(false)*0.02); 
+            // draw plot upper bound 3% higher than data upper bound to see highest symbol:
+            xAxis.setUpperBound(dataset.getDomainUpperBound(false)*1.03);
+            xAxis.setLabelFont(font);
+        	plot.setDomainAxis(xAxis);
+        }
+    	
+    }
+    
+    public boolean isLogarithmicXAxisSelected() {
+    	return logarithmicXAxisCheckbox.isSelected();
+    }
+    
     /**
      * Method generated by IntelliJ IDEA GUI Designer
      * >>> IMPORTANT!! <<<
@@ -505,7 +582,23 @@ public class TSResultWindow extends JFrame {
         gbc.gridwidth = 5;
         gbc.fill = GridBagConstraints.BOTH;
         mJPanel.add(jspTD, gbc);
-        tableTimeDetail = new JTable();
+//      tableTimeDetail = new JTable();
+        tableTimeDetail = new JTable(){
+        	
+            //Implement table header tool tips. 
+        	// --- from https://docs.oracle.com/javase/tutorial/uiswing/components/table.html#headertooltip ---
+            protected JTableHeader createDefaultTableHeader() {
+                return new JTableHeader(columnModel) {
+                    public String getToolTipText(MouseEvent e) {
+                        String tip = null;
+                        java.awt.Point p = e.getPoint();
+                        int index = columnModel.getColumnIndexAtX(p.x);
+                        int realIndex = columnModel.getColumn(index).getModelIndex();
+                        return columnTimeToolTips[realIndex];
+                    }
+                };
+            }
+        };
         jspTD.setViewportView(tableTimeDetail);
         final JPanel spacer1 = new JPanel();
         gbc = new GridBagConstraints();
@@ -542,13 +635,15 @@ public class TSResultWindow extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(0, 0, 0, 10);
         mJPanel.add(spacer5, gbc);
-        final JLabel label3 = new JLabel();
-        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. RoundTime</strong><br>\nagent WinTieLoss score vs median roundtime</body></html>\n");
+//        final JLabel label3 = new JLabel();
+//        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. RoundTime</strong><br>\nagent WinTieLoss score vs median roundtime</body></html>\n");
+        scatterHeadJPanel = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 8;
         gbc.anchor = GridBagConstraints.WEST;
-        mJPanel.add(label3, gbc);
+//      mJPanel.add(label3, gbc);
+        mJPanel.add(scatterHeadJPanel, gbc);
         scatterPlotJPanel = new JPanel();
         scatterPlotJPanel.setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();

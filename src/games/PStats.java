@@ -28,7 +28,7 @@ import tools.Types;
  *  Class PStats is just for diagnostic purposes, it has no influence on the game strategy. 
  *  
  *  @see Arena#PlayGame()
- *  @see games.ZweiTausendAchtundVierzig.Evaluator2048#eval_Agent(PlayAgent)
+ *  @see games.ZweiTausendAchtundVierzig.Evaluator2048#evalAgent(PlayAgent)
  *  @see games.MTrain
  */
 public class PStats {

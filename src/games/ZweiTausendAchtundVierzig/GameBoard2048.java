@@ -129,7 +129,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             updateBoardLabel(pos);
             board[pos].setForeground(Color.black);
             board[pos].setBorder(BorderFactory.createLineBorder(Color.black, 2));
-            Font font = new Font("Consolas", 1, 22);
+            Font font = new Font("Consolas", 1, (int)(1.1*Types.GUI_TITLEFONTSIZE));  // 22
             board[pos].setFont(font);
             panel.add(board[pos]);
         }
@@ -144,7 +144,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
         buttons[2] = new JButton("right");
         buttons[3] = new JButton("down");
 
-        Font font = new Font("Arial", 1, 22);
+        Font font = new Font("Arial", 1, (int)(1.1*Types.GUI_TITLEFONTSIZE));  //22
 
         for (int i = 0; i < 4; i++) {
             buttons[i].setBackground(Color.white);
@@ -197,7 +197,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             vBoard[i].setOpaque(true);
             vBoard[i].setBackground(Color.orange);
             vBoard[i].setForeground(Color.black);
-            Font font = new Font("Consolas", 1, 22);
+            Font font = new Font("Consolas", 1, (int)(1.1*Types.GUI_TITLEFONTSIZE));  //22
             vBoard[i].setFont(font);
         }
         panel.add(new Label());
@@ -218,7 +218,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     private JPanel initGameInfo() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(1, 2, 10, 0));
-        Font font = new Font("Arial", 1, 16);
+        Font font = new Font("Arial", 1, (int)(1.2*Types.GUI_HELPFONTSIZE)); // 16
 
      /*   Label ScoreDescription = new Label("Score:");
         ScoreDescription.setFont(font);
