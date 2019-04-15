@@ -100,7 +100,6 @@ public interface StateObservation extends Serializable{
 	 * @return 	the game score of {@code this}, from the perspective of the player to move in {@code this}.
 	 * 			For a 2-player game the score is often only non-zero for a 
 	 * 			game-over state. For all games it is the cumulative score.
-	 * <p>
 	 */
 	@Deprecated
 	public double getGameScore();

@@ -513,6 +513,7 @@ public class LoadSaveGBG {
 	 * 
 	 * @return object to transfer the loaded agents and their filenames
 	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
 	public TSDiskAgentDataTransfer loadMultipleGBGAgent() throws IOException, ClassNotFoundException {
 		TSDiskAgentDataTransfer output = null;

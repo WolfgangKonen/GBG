@@ -146,53 +146,6 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
     	return actBest;         
 	}
 
-//	/**
-//	 * Get the best next action and return it
-//	 *
-//	 * @param so			current game state (not changed on return)
-//	 * @param random		allow epsilon-greedy random action selection, currently not implemented
-//	 * @param vtable		the score for each available action (corresponding to sob.getAvailableActions())
-//	 * @param silent		verbosity control
-//	 *
-//	 * @return actBest		the best action 
-//	 */	
-//	@Deprecated
-//	@Override
-//	public Types.ACTIONS getNextAction(StateObservation so, boolean random, double[] vtable, boolean silent) {
-//
-//		// this function selector is just intermediate, as long as we want to test getNextAction2 
-//		// against getNextAction1 (the former getNextAction). Once everything works fine with
-//		// getNextAction2, we should use only this function and make getNextAction deprecated 
-//		// (requires appropriate changes in all other agents implementing interface PlayAgent).
-//		if (!NEW_GNA) {
-//	        return getNextAction1(so, vtable, silent);
-//		} else {
-//			Types.ACTIONS_VT actBestVT = getNextAction2(so, random, silent);
-//			double[] VTable = actBestVT.getVTable();
-//			for (int i=0; i<VTable.length; i++) vtable[i] = VTable[i];
-//			vtable[VTable.length] = actBestVT.getVBest();
-//			return actBestVT;			
-//		}
-//    }
-//
-//    /**
-//     * Get the best next action and return it (old version, NEW_GNA==false).
-//     * Called by calcCertainty and getNextAction.
-//     * 
-//     * @param sob			current game state (not changed on return)
-//     * @param vtable		must be an array of size n+1 on input, where
-//     * 						n=sob.getNumAvailableActions(). On output,
-//     * 						elements 0,...,n-1 hold the score for each available
-//     * 						action (corresponding to sob.getAvailableActions())
-//     * 						In addition, vtable[n] has the score for the
-//     * 						best action.
-//     * @return nextAction	the next action
-//     */
-//    private Types.ACTIONS getNextAction1(StateObservation so, double[] vtable, boolean silent) {
-//		assert so.isLegalState() : "Not a legal state";
-//    	return act(so,vtable);
-//	}
-
     /**
      * Get the best next action and return it (new version, NEW_GNA==true).
      * Called by calcCertainty and getNextAction.
@@ -275,16 +228,4 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 		return player.getParMCTSE();
 	}
 	
-	
-	// --- not needed here, is identically in AgentBase ---
-//	public ParOther getParOther() {
-//		return m_oPar;
-//	}
-//	/**
-//	 * Set defaults for m_oPar (needed in {@link XArenaMenu#loadAgent} when
-//	 * loading older agents, where m_oPar=null in the saved version).
-//	 */
-//	public void setDefaultOtherPar() {
-//		m_oPar = new ParOther();
-//	}
 }

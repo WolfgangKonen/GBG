@@ -53,14 +53,14 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
     private long boardB;
 
-    private int winState = 0;                                   // 0 = running, 1 = won, -1 = lost
-    public int score = 0;						// up-,down-,left-,rightAction add to this score
+    private int winState = 0;           // 0 = running, 1 = won, -1 = lost
+    public int score = 0;				// up-,down-,left-,rightAction add to this score
     private int highestTileValue = Integer.MIN_VALUE;
     private boolean highestTileInCorner = false;
     private int rowLength = 0;
     private int rowValue = 0;
     private int mergeValue = 0;
-    private int moves = 0;
+//  private int moves = 0;				// obsolete, we have ObserverBase.m_counter
     private long cumulEmptyTiles = 0;
     private boolean isNextActionDeterministic;
 
@@ -155,6 +155,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     public StateObserver2048 copy() {
     	StateObserver2048 so2 =  new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
     	so2.m_counter = this.m_counter;
+//    	so2.moves = this.moves;
     	return so2;
     }
 
@@ -618,12 +619,13 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     public void advance(ACTIONS action) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
-        move(iAction);				// deterministic part
+        move(iAction);				// deterministic part, contains super.incrementMoveCounter()
         updateEmptyTiles();
         addRandomTile();			// non-deterministic part
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
+//		super.incrementMoveCounter();		
     }
 
     @Override
@@ -679,11 +681,11 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
-        move(iAction);
+        move(iAction);					// deterministic part, contains super.incrementMoveCounter()
         updateEmptyTiles();
 
         isNextActionDeterministic = false;
-		super.incrementMoveCounter();
+//		super.incrementMoveCounter();
     }
 
     public void advanceNondeterministic(ACTIONS action) {
@@ -696,13 +698,15 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
         //System.out.println("Action: " + iAction + " Value: " + ((iAction%2)+1) + " Position: " + (iAction/2));
 
+        //here we add a specific tile (according to 'action', which was selected before randomly, 
+        //see setNextNondeterministicAction())
         addTile(emptyTiles.get(iAction/2), (iAction%2)+1);
 
         updateEmptyTiles();
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
-		super.incrementMoveCounter();
+//		super.incrementMoveCounter();
    	
     }
     
@@ -729,7 +733,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         //select a Tile
         int action = random.nextInt(emptyTiles.size()) * 2;
 
-        //select the new Tile Value
+        //select the new tile value (90% no change in action --> tile value 2, 10% (if nextInt(10)==9) 
+        //incrementing action by 1 --> tile value 4 
         if(random.nextInt(10) == 9) {
             action += 1;
         }
@@ -999,7 +1004,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
                 downAction();
                 break;
         }
-        moves++;
+//      moves++;
+        super.incrementMoveCounter();
 
         for(int i = 0; i < 16; i++) {
             updateHighestTile((int)(boardB >> (15-i)*4 & 0x0fL));
@@ -1156,9 +1162,12 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	public int getHighestTileValue() {
 		return this.highestTileValue;
 	}
-	public int getMoves() {
-		return moves;
-	}
+	
+	// --- obsolete, we have ObserverBase.getMoveCounter() ---
+//	public int getMoves() {
+//		return moves;
+//	}
+	
 } // class StateObserver2048
 
 /**

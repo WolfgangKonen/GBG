@@ -52,9 +52,9 @@ public class OptionsComp extends JFrame {
 	private Choice cSecondPlayer;
 
 	public OptionsComp() {
-		super("(Multi-)Competition Parameters");
-		setSize(320, 700);
-		setBounds(0, 0, 320, 700);
+		super("Competition Options");
+//		setSize(320, 500);
+//		setBounds(0, 0, 320, 500);
 		setLayout(new BorderLayout(10, 10));
 		add(new JLabel(" "), BorderLayout.SOUTH); 
 
@@ -121,23 +121,19 @@ public class OptionsComp extends JFrame {
 		p.add(lNumGames);
 		p.add(tNumGames);
 
-		p.add(lNumCompetitions);
-		p.add(tNumCompetitions);
+		// --- no Multi-Compete anymore
+//		p.add(lNumCompetitions);
+//		p.add(tNumCompetitions);
 
 		p.add(cbUseCurBoard);
-		//p.add(new Canvas());
 
 		//p.add(lPlayUntil);
 		//p.add(tNumPieces);
 
 		p.add(cbLogValues);
-		//p.add(new Canvas());
 		
-		p.add(cbswapPlayers);
-		//p.add(new Canvas());
-
-		//p.add(ok);
-		//p.add(new Canvas());
+		// --- no Multi-Compete anymore
+//		p.add(cbswapPlayers);
 
 		add(p);
 

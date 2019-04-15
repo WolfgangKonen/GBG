@@ -49,6 +49,13 @@ abstract public class Evaluator {
 	 */
 	protected int m_mode=0;
 	
+	
+	public class EvaluationResult {
+		public double lastResult;
+		public boolean success;
+		public String msg;
+	}
+	
 	/**
 	 * 
 	 * @param e_PlayAgent	the agent to evaluate
@@ -75,11 +82,11 @@ abstract public class Evaluator {
 	}
 	
 	/**
-	 * Calls {@link #eval_Agent} which returns a boolean predicate (fail/success). It counts
+	 * Calls {@link #evalAgent(PlayAgent) evalAgent} which returns a boolean predicate (fail/success). It counts
 	 * the number of consecutive successes. If this number reaches m_stopEval, the 
 	 * method {@link #goalReached(int)} will return true.
 	 * @return
-	 * 		boolean predicate from {@link #eval_Agent}
+	 * 		boolean predicate from {@link #evalAgent(PlayAgent)}
 	 */
 	public boolean eval(PlayAgent playAgent) {
 		thisEval = evalAgent(playAgent);
@@ -92,10 +99,11 @@ abstract public class Evaluator {
 	}
 
 	/**
-	 * This function needs to be implemented in derived classes. It implements the evaluation
+	 * This function has to be implemented by the derived classes. It implements the evaluation
 	 * of playAgent.
-	 * Should write its results on protected members {@link #lastResult} and {@link #m_msg}.
+	 * It should write its results on protected members {@link #lastResult} and {@link #m_msg}.
 	 * 
+	 * @param playAgent the agent to be evaluated
 	 * @return
 	 *  	a boolean predicate (fail/success) for the result of the evaluation. 
 	 *  	Might be for example (avg.success &gt; -0.15) when playing TTT against Minimax.

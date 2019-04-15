@@ -104,6 +104,7 @@ public class LogManager {
      * starts a new logging session, for example when a new game is started
      *
      * @param stateObservation the initial StateObservation
+     * @return session ID 
      */
     public int newLoggingSession(StateObservation stateObservation) {
         //find first empty sessionid

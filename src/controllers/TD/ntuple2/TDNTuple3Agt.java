@@ -231,6 +231,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     			value = rand.nextDouble();
     		} else {
     	        if (this.getAFTERSTATE()) {
+    	        	// if parameter "AFTERSTATE" is checked in ParNT, i.e. we use afterstate logic:
+    	        	//
     	        	NewSO.advanceDeterministic(acts.get(i)); 	// the afterstate
     	        	value = this.getScore(NewSO,so); // this is V(s') from so-perspective
     	            NewSO.advanceNondeterministic(); 

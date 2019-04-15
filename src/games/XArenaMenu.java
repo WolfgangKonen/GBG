@@ -326,62 +326,65 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);
 
-		// ==============================================================
-		// Multi-Competition
-		// ==============================================================
-		menuItem = new JMenuItem("Multi-Competition");
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				m_arena.taskState = Arena.Task.MULTCMP;
-				String str = "[Start multi-Competition]";
-				printStatus(str);
-			}
-		});
-		menuItem.setToolTipText("<html><body>Start a multi-competition between the selected "
-				+ "Agents (do 'Competions' times: agent training + single competition). The results are <br>"
-				+ "printed to the console and saved to bin/TicTacToe.comp.csv.</body></html>");
-		menuItem.setEnabled(numPlayers>1);
-		menu.add(menuItem);
+		// --- Multi-Competition is deprecated now                                 --- 
+		// --- (use Tournament System or MultiTrain with suitable evaluator modes) ---
+//		// ==============================================================
+//		// Multi-Competition
+//		// ==============================================================
+//		menuItem = new JMenuItem("Multi-Competition");
+//		menuItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				m_arena.taskState = Arena.Task.MULTCMP;
+//				String str = "[Start multi-Competition]";
+//				printStatus(str);
+//			}
+//		});
+//		menuItem.setToolTipText("<html><body>Start a multi-competition between the selected "
+//				+ "Agents (do 'Competions' times: agent training + single competition). The results are <br>"
+//				+ "printed to the console and saved to bin/TicTacToe.comp.csv.</body></html>");
+//		menuItem.setEnabled(numPlayers>1);
+//		menu.add(menuItem);
 
-		
-		menu.addSeparator();
-		
-		submenu = new JMenu("Multi-Training");
-		// ==============================================================
-		// Options for Multi-Training
-		// ==============================================================
-		menuItem = new JMenuItem("Options");
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				//ticGame.c4Buttons.setWindowPos(ticGame.winMultiTrainOptions);
-			}
-		});
-		menuItem.setToolTipText("Set Options for the multi-training. The agent that shall "
-				+ "be trained (TD) and the opponent must be selected here.");
-		if (!(m_arena instanceof ArenaTrain))
-			menuItem.setEnabled(false);			// no multi-training for Arena
-		submenu.add(menuItem);
-		if (!(m_arena instanceof ArenaTrain))
-			submenu.setEnabled(false);			// no multi-training for Arena
 
-		// ==============================================================
-		// Start Multi-Training
-		// ==============================================================
-		menuItem = new JMenuItem("Start Multi-Training");
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				m_arena.taskState = Arena.Task.MULTTRN;
-				String str = "[Start Multi-Training of TD-Agent]";
-				printStatus(str);
-			}
-		});
-		menuItem.setToolTipText("<html><body>Start the multi-training of the TD-Agent. Be sure that <br>"
-				+ "the options were choosen correctly and that all agents are initialized</body></html>");
-		if (!(m_arena instanceof ArenaTrain))
-			menuItem.setEnabled(false);			// no multi-training for Arena
-		submenu.add(menuItem);
-
-		menu.add(submenu);
+		// --- Multi-Training *in menu* is obsolete (we have the MultiTrain button in ArenaTrain) ---
+//		menu.addSeparator();
+//		
+//		submenu = new JMenu("Multi-Training");
+//		// ==============================================================
+//		// Options for Multi-Training
+//		// ==============================================================
+//		menuItem = new JMenuItem("Options");
+//		menuItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				//ticGame.c4Buttons.setWindowPos(ticGame.winMultiTrainOptions);
+//			}
+//		});
+//		menuItem.setToolTipText("Set Options for the multi-training. The agent that shall "
+//				+ "be trained (TD) and the opponent must be selected here.");
+//		if (!(m_arena instanceof ArenaTrain))
+//			menuItem.setEnabled(false);			// no multi-training for Arena
+//		submenu.add(menuItem);
+//		if (!(m_arena instanceof ArenaTrain))
+//			submenu.setEnabled(false);			// no multi-training for Arena
+//
+//		// ==============================================================
+//		// Start Multi-Training
+//		// ==============================================================
+//		menuItem = new JMenuItem("Start Multi-Training");
+//		menuItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				m_arena.taskState = Arena.Task.MULTTRN;
+//				String str = "[Start Multi-Training of TD-Agent]";
+//				printStatus(str);
+//			}
+//		});
+//		menuItem.setToolTipText("<html><body>Start the multi-training of the TD-Agent. Be sure that <br>"
+//				+ "the options were choosen correctly and that all agents are initialized</body></html>");
+//		if (!(m_arena instanceof ArenaTrain))
+//			menuItem.setEnabled(false);			// no multi-training for Arena
+//		submenu.add(menuItem);
+//
+//		menu.add(submenu);
 
 		add(menu);
 	}

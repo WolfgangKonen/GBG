@@ -494,7 +494,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 	public void PlayGame(TSGameDataTransfer spDT) {
 		int Player;
-		StateObservation so;
+		StateObservation so, startSO;
 		Types.ACTIONS_VT actBest = null;
 		MCTSAgentT p2 = new MCTSAgentT("MCTS", null, new ParMCTS(m_xab.mctsParams[0]), new ParOther(m_xab.oPar[0])); // only
 																														// DEBG
@@ -597,7 +597,10 @@ abstract public class Arena extends JFrame implements Runnable {
 		gb.setActionReq(true);
 		so = gb.getStateObs();
 		so.resetMoveCounter();
-		System.out.println("StartState: "+so.stringDescr());
+		startSO = so.copy();
+		System.out.println("StartState: "+startSO.stringDescr());
+		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, (double) nEmpty, (double) cumEmpty);
+		psList.add(pstats);
 
 		if (spDT!=null) { // set random start moves for TS
 			if (spDT.rndmStartMoves>0) {
@@ -685,7 +688,7 @@ abstract public class Arena extends JFrame implements Runnable {
 						} else {
 							gameScore = so.getGameScore(so);
 						}
-						pstats = new PStats(1, so.getMoveCounter(), gameScore, (double) nEmpty, (double) cumEmpty);
+						pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), actBest.toInt(), gameScore, (double) nEmpty, (double) cumEmpty);
 						psList.add(pstats);
 						gb.enableInteraction(true);
 
@@ -790,7 +793,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		}
 
 		// game over - leave the Task.PLAY task:
-		PStats.printPlayStats(psList, paVector[0], this);
+		PStats.printPlayStats(psList, startSO, paVector, this);
 		logManager.endLoggingSession(logSessionid);
 		taskState = Task.IDLE;
 		setStatusMessage("Done.");

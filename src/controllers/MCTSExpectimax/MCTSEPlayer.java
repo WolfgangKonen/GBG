@@ -28,15 +28,6 @@ public class MCTSEPlayer
 	boolean rgs;		// rewardIsGameScore, package-wide visible
     private Random random;
 
-    // --- not needed anymore, we use the getters of mctsExpectimaxParams: --- 
-//    private int ROLLOUT_DEPTH = MCTSExpectimaxConfig.DEFAULT_ROLLOUTDEPTH; //default values
-//    private int TREE_DEPTH = MCTSExpectimaxConfig.DEFAULT_TREEDEPTH;
-//    private int NUM_ITERS = MCTSExpectimaxConfig.DEFAULT_ITERATIONS;
-//    private double K = MCTSExpectimaxConfig.DEFAULT_K;
-//    private int MAX_NODES = MCTSExpectimaxConfig.DEFAULT_MAXNODES;
-//    private HeuristicSettings2048 heuristicSettings2048;
-//    private int verbosity = 0; 
-
     public int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 
 	/**
@@ -57,12 +48,6 @@ public class MCTSEPlayer
     	this.m_parent = parent;
     	rgs = m_parent.getParOther().getRewardIsGameScore();
     	if (mctsExpectimaxParams!=null) {
-//            this.setK(mctsExpectimaxParams.getK_UCT());
-//            this.setNUM_ITERS(mctsExpectimaxParams.getNumIter());
-//            this.setROLLOUT_DEPTH(mctsExpectimaxParams.getRolloutDepth());
-//            this.setTREE_DEPTH(mctsExpectimaxParams.getTreeDepth());
-//            this.setMaxNodes(mctsExpectimaxParams.getMaxNodes());
-//			  this.heuristicSettings2048 = mctsExpectimaxParams.getHeuristicSettings2048();
 			this.mctsExpectimaxParams = mctsExpectimaxParams;
     	} else {
 			this.mctsExpectimaxParams = new ParMCTSE();
@@ -171,19 +156,4 @@ public class MCTSEPlayer
 	public MCTSEChanceNode getRootNode() {
     	return rootNode;
 	}
-//	public void setROLLOUT_DEPTH(int rOLLOUT_DEPTH) {
-//		ROLLOUT_DEPTH = rOLLOUT_DEPTH;
-//	}
-//	public void setTREE_DEPTH(int tREE_DEPTH) {
-//		TREE_DEPTH = tREE_DEPTH;
-//	}
-//	public void setNUM_ITERS(int nUM_ITERS) {
-//		NUM_ITERS = nUM_ITERS;
-//	}
-//	public void setK(double k) {
-//		K = k;
-//	}
-//	public void setMaxNodes(int value) {
-//		MAX_NODES = value;
-//	}
 }

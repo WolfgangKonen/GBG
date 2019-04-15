@@ -11,6 +11,7 @@ import games.Arena;
 import games.PStats;
 import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
 import tools.Types;
+import tools.Types.ACTIONS_VT;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -61,10 +62,12 @@ public class Evaluator2048 extends Evaluator {
         if (m_mode == -1) {
             return true;
         }
-		int nEmpty = 0,cumEmpty=0;
-		int moveNum=0;
-		double gameScore=0.0;
-		PStats pstats;
+		int cumEmpty=0;
+		// --- this part now in makePStats ---
+//		int nEmpty = 0;
+//		int moveNum=0;
+//		double gameScore=0.0;
+//		PStats pstats;
 		ArrayList<PStats> psList = new ArrayList<PStats>();
         startTime = System.currentTimeMillis();
         if(verbose == 0) {
@@ -175,38 +178,45 @@ public class Evaluator2048 extends Evaluator {
             //sync for other Agents (MC Agent uses multiple cores naturally, TD agents are very fast)
             for (int i = 0; i < ConfigEvaluator.NUMBEREVALUATIONS; i++) {
                 long gameStartTime = System.currentTimeMillis();
-                StateObserver2048 so = new StateObserver2048();
+                cumEmpty=0;
+                ACTIONS_VT actBest;
+                StateObserver2048 so2048 = new StateObserver2048();
+//              moveNum=0;
+//        		pstats = new PStats(i, so2048.getMoveCounter(), so2048.getPlayer(), -1, gameScore, (double) nEmpty, (double) cumEmpty);
+//        		psList.add(pstats);
+        		psList.add(makePStats2048(i, so2048, null, cumEmpty));
 
-                moveNum=cumEmpty=0;
-                while (!so.isGameOver()) {
+                while (!so2048.isGameOver()) {
                     long gameMoveTime = System.currentTimeMillis();
-                    so.advance(m_PlayAgent.getNextAction2(so, false, true));
-//                    System.out.print("Finished move " + (so.moves) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameMoveTime) + "ms.\n");
+                    actBest = m_PlayAgent.getNextAction2(so2048, false, true);
+                    so2048.advance(actBest);
+//                  System.out.print("Finished move " + (so.moves) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameMoveTime) + "ms.\n");
                     
                     // gather information for later printout to agents/gameName/csv/playStats.csv:
                     if (ConfigEvaluator.PLAYSTATS_CSV) {
-                        moveNum++;
-                        assert (so instanceof StateObserver2048) : "Oops, so is not a StateObserver2048 object!";
-                    	StateObserver2048 so2048 = (StateObserver2048) so;
-                    	nEmpty = so2048.getNumEmptyTiles();  
-                    	gameScore = so2048.getGameScore(so2048)*so2048.MAXSCORE;
-                    	cumEmpty += nEmpty;
-                        pstats = new PStats(i,moveNum,gameScore,(double)nEmpty,(double)cumEmpty);
-            			psList.add(pstats);
+//                        moveNum++;
+//                    	nEmpty = so2048.getNumEmptyTiles();  
+//                    	gameScore = so2048.getGameScore(so2048)*so2048.MAXSCORE;
+//                    	cumEmpty += nEmpty;
+//                		pstats = new PStats(i, moveNum, so2048.getPlayer(), actBest.toInt(), gameScore, (double) nEmpty, (double) cumEmpty);
+                		psList.add(makePStats2048(i, so2048, actBest, cumEmpty));
                     }
                 }
 
                 if(verbose == 0) {
-                    System.out.print("Finished game " + (i + 1) + " with score " + so.score + 
+                    System.out.print("Finished game " + (i + 1) + " with score " + so2048.score + 
                     		" after " + (System.currentTimeMillis() - gameStartTime) + "ms."+ 
-                    		" Highest tile is " + so.getHighestTileValue() + ".\n");
+                    		" Highest tile is " + so2048.getHighestTileValue() + ".\n");
                 }
 
-                stateObservers.add(so);
+                stateObservers.add(so2048);
                 
             }
             if (ConfigEvaluator.PLAYSTATS_CSV) {
-        		PStats.printPlayStats(psList, m_PlayAgent,this.ar);
+            	PlayAgent[] paVector = {m_PlayAgent};
+        		PStats.printPlayStats(psList, null, paVector,this.ar);
+        									//we do not hand over a startSO, since psList may have many runs, 
+        									//each with a different startSO.
             }
             
         } // else
@@ -231,7 +241,7 @@ public class Evaluator2048 extends Evaluator {
                 maxScore = so.score;
             }
 
-            moves += so.getMoves();
+            moves += so.getMoveCounter();
         }
 
         lastResult/= ConfigEvaluator.NUMBEREVALUATIONS;
@@ -268,6 +278,16 @@ public class Evaluator2048 extends Evaluator {
 //  public double getLastResult() {
 //      return lastResult;
 //  }
+    
+    private PStats makePStats2048(int i, StateObserver2048 so2048, ACTIONS_VT actBest, int cumEmpty) {
+    	int moveNum = so2048.getMoveCounter();
+    	int actNum = (actBest==null) ? (-1) : actBest.toInt();
+     	int nEmpty = so2048.getNumEmptyTiles();  
+    	double gameScore = so2048.getGameScore(so2048)*so2048.MAXSCORE;
+    	cumEmpty += nEmpty;
+		PStats pstats = new PStats(i, moveNum, so2048.getPlayer(), actNum, gameScore, (double) nEmpty, (double) cumEmpty);
+		return pstats;
+    }
 
     @Override
     public String getMsg() {
