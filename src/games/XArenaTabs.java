@@ -98,7 +98,9 @@ public class XArenaTabs extends JFrame
 		if (selectedAgent.equals("TDS")) tp[n].setSelectedIndex(0);
 		if (selectedAgent.equals("TD-Ntuple")) tp[n].setSelectedIndex(1);
 		if (selectedAgent.equals("TD-Ntuple-2")) tp[n].setSelectedIndex(1);
+		if (selectedAgent.equals("TD-Ntuple-3")) tp[n].setSelectedIndex(1);
 		if (selectedAgent.equals("Sarsa")) tp[n].setSelectedIndex(1);
+//		if (selectedAgent.equals("Sarsa-2")) tp[n].setSelectedIndex(1);
 		if (selectedAgent.equals("Minimax")) tp[n].setSelectedIndex(2);
 		if (selectedAgent.equals("Max-N")) tp[n].setSelectedIndex(2);
 		if (selectedAgent.equals("Expectimax-N")) tp[n].setSelectedIndex(2);

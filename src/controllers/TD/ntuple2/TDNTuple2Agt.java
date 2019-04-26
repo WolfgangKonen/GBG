@@ -779,6 +779,9 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
         	case SINGLE_UPDATE:
         		if (!TERNARY) {
         			// do one training step (NEW target) only for current player
+        			// [Note: curPlayer is the player who generated curBoard, the afterstate preceding the 
+        			// terminal state. This is because we reach the current point after a *break* out of the 
+        			// while-loop, *before* curPlayer is updated to nextPlayer.] 
         			m_Net.updateWeightsNewTerminal(curBoard, curPlayer, so, false);
         		}
         		break;

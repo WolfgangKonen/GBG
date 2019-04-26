@@ -238,9 +238,9 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	public boolean getAFTERSTATE() {
 		return m_ntPar.getAFTERSTATE();
 	}
-	public boolean getLearnFromRM() {
-		return m_oPar.useLearnFromRM();
-	}
+//	public boolean getLearnFromRM() {
+//		return m_oPar.useLearnFromRM();
+//	}
 
 	public void incrementMoveCounter() {
 		m_counter++;

@@ -33,6 +33,7 @@ src/games/ZweiTausendAchtundVierzig/Parallel/*
 agents/2048/fixed TEST eTiles 4 6-Tupels 200k TDNT2.agt.zip
 agents/2048/TEST*.agt.zip
 agents/2048/TC*.agt.zip
+agents/2048/Sarsa*.agt.zip
 agents/2048/old
 #(the only 2048 agent we have in repos is sample-TDNT2-forGitHub.agt.zip)
 agents/Hex/04/old

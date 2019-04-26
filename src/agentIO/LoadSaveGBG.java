@@ -8,6 +8,7 @@ import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 //import controllers.MCTS0.MCTSAgentT0;
 import controllers.TD.TDAgent;
+//import controllers.TD.ntuple2.Sarsa2Agt;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
@@ -641,6 +642,14 @@ public class LoadSaveGBG {
 				((SarsaAgt) pa).setTDParams(((SarsaAgt) pa).getParTD(), pa.getMaxGameNum());
 				((SarsaAgt) pa).setNTParams(((SarsaAgt) pa).getParNT());
 				((SarsaAgt) pa).weightAnalysis(null);
+//			} else if (obj instanceof Sarsa2Agt) {
+//				pa = (Sarsa2Agt) obj;
+//				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+//				// (they would stay otherwise at their default values, would not 
+//				// get the loaded values)
+//				((Sarsa2Agt) pa).setTDParams(((Sarsa2Agt) pa).getParTD(), pa.getMaxGameNum());
+//				((Sarsa2Agt) pa).setNTParams(((Sarsa2Agt) pa).getParNT());
+//				((Sarsa2Agt) pa).weightAnalysis(null);
 //			} else if (obj instanceof MCTSAgentT0) {
 //				pa = (MCTSAgentT0) obj;
 			} else if (obj instanceof MCTSAgentT) {

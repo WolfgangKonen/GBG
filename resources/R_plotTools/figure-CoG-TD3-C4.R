@@ -2,10 +2,11 @@
 # **** These are new results with TDNTuple3Agt from January 2019 ****
 #
 # This script shows results for ConnectFour in the TCL-EXP-case with various TD-settings:
-#   lambda \in {0.0, 0.09, 0.16, 0.25, 0.36},
+#   lambda \in {0.16, 0.25, 0.36},
 #   horizon cut at 0.01 in the eligibility traces,
 #   ET: standard eligibility traces (NO reset on random move).
-# It uses the ternary version (target as ternary term finished?r:gamma*V).
+# It uses the ternary version ("-T" in filename, target is the ternary term 
+# finished?r:gamma*V).
 # 
 library(ggplot2)
 library(grid)
@@ -14,7 +15,7 @@ source("summarySE.R")
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
 USEGAMESK=T       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
 USEEVALT=T        # if =T: use evalT measure; if =F: use evalQ measure
-MAPWINRATE=T
+MAPWINRATE=T      # if =T: map y-axis to win rate (range [0,1]); if =F: range [-1,1]
 
 wfac = ifelse(USEGAMESK,1000,1);
 gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
@@ -44,7 +45,7 @@ filenames=c(#"multiTrain_TCL-EXP-NT3-al50-lam000-500k-T-epsfin0.csv",
            )
 # other pars: eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, NORMALIZE=F, SIGMOID=tanh, 
 # LEARNFROMRM=F, MODE_3P==2, fixed ntuple mode 1: 70 8-tuples. TC_INIT=1e-4, TC_EXP
-# with TC beta =2.7, rec.weight-change accumulation.500.000 training games, 10 runs.
+# with TC beta =2.7, rec.weight-change accumulation.500.000 training games, 3 runs.
 # opponent= 0 (evalQ) is from default start state against MCTS, 
 # opponent= 3 (evalT) is from default start state against AlphaBeta. 
 
@@ -131,11 +132,11 @@ tgc <- rbind(tgc,tgcMCTS)
 
 tgc$lambda <- as.factor(tgc$lambda)
 tgc$targetMode <- as.factor(tgc$targetMode)
-tgc$eval = (tgc$eval+1)/2
+if (MAPWINRATE) tgc$eval = (tgc$eval+1)/2   # map y-axis to win rate (range [0,1])
 
 
 # The errorbars may overlap, so use position_dodge to move them horizontally
-pd <- position_dodge(10000/wfac) # move them 30000/wfac to the left and right
+pd <- position_dodge(10000/wfac) # move them 10000/wfac to the left and right
 
 if (USEGAMESK) {
   q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=lambda,linetype=lambda,color=agent))
@@ -148,7 +149,7 @@ q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0,colour=
 q <- q+scale_y_continuous(limits=limits) 
 #q <- q+guides(colour = guide_legend(reverse = TRUE))
 q <- q+ scale_color_manual(values=c("#0010FF", "#FF6F00", "#56B4E9"))  # manual colors
-q <- q+theme(legend.key.width = unit(0.9, "cm"))           # width of legend symbol
+q <- q+theme(legend.key.width = unit(0.9, "cm"))            # width of legend symbol
 q <- q+theme(axis.title = element_text(size = rel(1.2)))    # bigger axis labels 
 q <- q+theme(axis.text = element_text(size = rel(1.2)))     # bigger tick mark text  
 q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text  

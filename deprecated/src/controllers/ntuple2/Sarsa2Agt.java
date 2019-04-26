@@ -36,6 +36,9 @@ import games.XNTupleFuncs;
 import games.XArenaMenu;
 
 /**
+ * --- This is a variant to {@link SarsaAgt} which disables any afterstate usage. ---
+ * --- (No longer needed, we took the changes over to SarsaAgt.) ---
+ * <p>
  * The SARSA {@link PlayAgent} <b>with n-tuples</b>. 
  * It has a one-layer (perceptron-like) neural network with or without output-nonlinearity  
  * {@code tanh} to model the Q-function. 
@@ -45,20 +48,20 @@ import games.XArenaMenu;
  * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...) and
  * {@link NTupleBase} (finishUpdateWeights, increment*Counters, isTrainable, normalize2, ...)
  * <p>
- * {@link SarsaAgt} is an alternative to {@link TDNTuple2Agt}. 
- * The differences between {@link SarsaAgt} and {@link TDNTuple2Agt} are:
+ * {@link Sarsa2Agt} is an alternative to {@link TDNTuple2Agt}. 
+ * The differences between {@link Sarsa2Agt} and {@link TDNTuple2Agt} are:
  * <ul>
- * <li> {@link SarsaAgt} updates the value of a state for a player based on the value/reward
+ * <li> {@link Sarsa2Agt} updates the value of a state for a player based on the value/reward
  * 		that the <b>same</b> player achieves in his next turn. It is in this way more similar to 
  * 		{@link TDNTuple3Agt}. (Note that the updates of {@link TDNTuple2Agt} are based on the value/reward of 
  * 		the <b>next state</b>. This may require sign change, depending on the number of players.)
- * 		Thus {@link SarsaAgt} is much simpler to generalize to 1-, 2-, 3-, ..., N-player games
+ * 		Thus {@link Sarsa2Agt} is much simpler to generalize to 1-, 2-, 3-, ..., N-player games
  * 		than {@link TDNTuple2Agt}.
- * <li> Eligible states: {@link SarsaAgt} updates with ELIST_PP=true, i.e. it has a separate 
- * 		{@code eList[p]} per player p. {@link SarsaAgt} uses only one common {@code eList[0]}. 
+ * <li> Eligible states: {@link Sarsa2Agt} updates with ELIST_PP=true, i.e. it has a separate 
+ * 		{@code eList[p]} per player p. {@link Sarsa2Agt} uses only one common {@code eList[0]}. 
  * 		Only relevant for LAMBDA &gt; 0. 
  * </ul>
- * The similarities of {@link SarsaAgt} and {@link TDNTuple2Agt} are:
+ * The similarities of {@link Sarsa2Agt} and {@link TDNTuple2Agt} are:
  * <ul>
  * <li> No eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
  * 		memory consumptive).
@@ -81,7 +84,7 @@ import games.XArenaMenu;
  * 
  * @author Wolfgang Konen, TH Köln, Dec'18
  */
-public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializable {
+public class Sarsa2Agt extends NTupleBase implements PlayAgent,NTupleAgt,Serializable {
 	
 	private NTupleAgt.EligType m_elig;
 	
@@ -92,6 +95,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 */
 	private static final long  serialVersionUID = 13L;
 
+	private double BestScore;
+	
 	private int numPlayers;
 	transient private StateObservation[] sLast;	// last state of player p
 	transient private Types.ACTIONS[] aLast;	// last action of player p
@@ -107,15 +112,12 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	// is set to true in getNextAction2(...), if the next action is a random selected one:
 	boolean randomSelect = false;
 	
-	// use finalAdaptAgents(...), normaly true. Set only to false if you want to test how agents behave otherwise:
-	private boolean FINALADAPTAGENTS=true;
-	
 	
 	private int acount=0;
 	/**
-	 * Default constructor for {@link SarsaAgt}, needed for loading a serialized version
+	 * Default constructor for {@link Sarsa2Agt}, needed for loading a serialized version
 	 */
-	public SarsaAgt() throws IOException {
+	public Sarsa2Agt() throws IOException {
 		super();
 		ParTD tdPar = new ParTD();
 		ParNT ntPar = new ParNT();
@@ -124,7 +126,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	}
 
 	/**
-	 * Create a new {@link SarsaAgt}
+	 * Create a new {@link Sarsa2Agt}
 	 * 
 	 * @param name			agent name
 	 * @param tdPar			temporal difference parameters
@@ -136,7 +138,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
-	public SarsaAgt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar, 
+	public Sarsa2Agt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar, 
 			int[][] nTuples, XNTupleFuncs xnf, int numOutputs, int maxGameNum) throws IOException {
 		super(name);
 		this.numPlayers = xnf.getNumPlayers();
@@ -220,8 +222,10 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
     			qValue = rand.nextDouble();
     		} else {
     			//
-    			// TODO: currently we cannot mirror in Q-learning the afterstate logic 
-    			// that we have optionally in TDNTuple2Agt
+    			// In Q-learning and SARSA the action decision is based on the current state so and 
+    			// *not* the afterstate preceding it.
+    			// We cannot mirror the afterstate logic that we have in TDNTuple3Agt (see comment
+    			// in trainAgent() for an explanation why). 
     			
     			int[] bvec = m_Net.xnf.getBoardVector(so);
             	qValue = m_Net.getQFunc(bvec,so.getPlayer(),acts.get(i));
@@ -329,15 +333,14 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 * @param R				the (cumulative) reward tuple received when moving into {@code s_next}
 	 * @param ns			the {@code NextState} object holds the afterstate {@code ns.getAfterState()}
 	 * 						and the next state {@code s_next=ns.getNextSO()}
-	 * @return {@code a_next}, the action to perform in state {@code s_next} when following the 
+	 * @return {@code a_next}, the action to perform in state {@code s_next} when following the  
 	 * 						(epsilon-greedy) policy derived from Q
 	 */
 	private Types.ACTIONS adaptAgentQ(int nextPlayer, ScoreTuple R, NextState ns) {
 		Types.ACTIONS a_next=null;
-		StateObservation s_after = ns.getAfterState();
 		StateObservation s_next = ns.getNextSO();
 		int[] curBoard;
-		double qValue,qLast,qLastNew,target;
+		double qValue,qLast,target;
 		boolean learnFromRM = m_oPar.useLearnFromRM();
 		
 		if (s_next.isGameOver()) {
@@ -345,7 +348,6 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			qValue = 0.0;
 		} else {
 			a_next = getNextAction2(s_next,true,true);
-//			int[] nextBoard = m_Net.xnf.getBoardVector(s_after);
 			int[] nextBoard = m_Net.xnf.getBoardVector(s_next);	// WK: NEW: next state instead of afterstate
         	qValue = m_Net.getQFunc(nextBoard,nextPlayer,a_next);
 		}
@@ -374,13 +376,13 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
     			m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
     				
     		} else {
-//            	nextBoard = m_Net.xnf.getBoardVector(s_after);
     			m_Net.updateWeightsQ(curBoard, nextPlayer, aLast[nextPlayer], qLast,
     					r_next,target,ns.getSO());
     		}
     		
     		//debug only:
 			if (m_DEBG) {
+				double qLastNew;
 	    		if (s_next.isGameOver()) {
 	            	qLastNew = m_Net.getQFunc(curBoard,nextPlayer,aLast[nextPlayer]);
 	            	int dummy=1;
@@ -406,20 +408,9 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		return a_next;
 	}
 	
-	/**
-	 * This function is called when {@code ns.getNextSO()} is terminal. 
-	 * It takes the final delta reward r (from the perspective of each player other than {@code nextPlayer})  
-	 * and adapts the value of the last state of each other player to this r.
-	 * [This method is irrelevant for 1-player games where we have no other players.]
-	 * 
-	 * @param nextPlayer the player to move in {@code ns.getNextSO()} 
-	 * @param R          the reward tuple for {@code ns.getNextSO()}
-	 * @param ns		 the next state object when applying action {@code a_t} in state {@code s_t}
-	 */
-	private void finalAdaptAgents(int nextPlayer, ScoreTuple R, NextState ns) {
+	void finalAdaptAgents(int nextPlayer, ScoreTuple R, NextState ns) {
 		double target,qLast,qLastNew;
 		int[] curBoard, nextBoard;
-//		StateObservation s_after = ns.getAfterState();
 		StateObservation s_next = ns.getNextSO();
 		
 		for (int n=0; n<numPlayers; n++) {
@@ -492,9 +483,9 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		do {
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	               
-	        // take action a_t and observe reward & next state 
+	        // take action a_t and observe reward, afterstate and next state 
 	        ns = new NextState(this,s_t,a_t);	        
-	        nextPlayer = ns.getNextSO().getPlayer();
+	        nextPlayer = ns.getNextSO().getPlayer();		
 	        R = ns.getNextRewardTupleCheckFinished(epiLength);
 	        
 	        a_next = adaptAgentQ(nextPlayer, R, ns);
@@ -504,19 +495,18 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	        // (and not the afterstate before it, where e.g. in 2048 the random tile was not yet added, 
 	        // because the action to chose may be influenced by the random tile).
 	        // For deterministic games, ns.getAfterState() and ns.getNextSO() are the same.
-	        //
+	        // 
 //	        sLast[nextPlayer] = ns.getAfterState(); 		// the afterstate generated by curPlayer
 	        sLast[nextPlayer] = s_t = ns.getNextSO(); 		// WK: NEW the *next* state generated by curPlayer
 	        aLast[nextPlayer] = a_t = a_next;
 	        rLast.scTup[nextPlayer] = R.scTup[nextPlayer];
 	        randLast[nextPlayer] = (a_next==null ? false : a_next.isRandomAction());
-			 					  //a_next is null if ns.getNextSO() is terminal  	
+	        					 //a_next is null if ns.getNextSO() is terminal  	
 			t++;
 			
 		} while(!s_t.isGameOver());
 		
-		if (FINALADAPTAGENTS) 
-			finalAdaptAgents(nextPlayer, R, ns);
+		finalAdaptAgents(nextPlayer, R, ns);
 		
 		
 		try {

@@ -5,8 +5,9 @@
 #   H0.01:  horizon cut at 0.01 in the eligibility traces
 #   HOR40:  horizon 40 (plies)
 #   RESET: reset eligibility trace on random move instead of standard elig traces
-# It compares the ternary version (target as ternary term finished?r:gamma*V) with the
-# non-ternary TD-version (r + gamma*V) [Switch TERNARY in TDNTuple2Agt].
+# It compares the ternary version ("-T" in filename, target is the ternary term 
+# finished?r:gamma*V) with the non-ternary TD-version (no "-T" in filename, target 
+# is r + gamma*V) [Switch TERNARY in TDNTuple3Agt].
 # 
 library(ggplot2)
 library(grid)
@@ -15,17 +16,21 @@ source("summarySE.R")
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
 USEGAMESK=T       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
 USEEVALT=T        # if =T: use evalT measure; if =F: use evalQ measure
+MAPWINRATE=T      # if =T: map y-axis to win rate (range [0,1]); if =F: range [-1,1]
 
 wfac = ifelse(USEGAMESK,1000,1);
 gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
 #evalVar = ifelse(USEEVALT,"evalT","evalQ")
 evalStr = ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
-#evalStr = "eval score" #ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
-path <- "../../agents/ConnectFour/csv/"; limits=c(-1.0,1.0); errWidth=20000/wfac;
+evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
+path <- "../../agents/ConnectFour/csv/"; 
+limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=20000/wfac;
 
-filenames=c("multiTrain_TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0.csv"
+filenames=c("multiTrain_TCL-EXP-NT3-al50-lam000-500k-T-epsfin0.csv"
+           ,"multiTrain_TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0.csv"
            ,"multiTrain_TCL-EXP-NT3-al50-lam025-500k-HOR001-T-epsfin0-V2.csv"
-           #,"multiTrain_TCL-EXP-NT3-al50-lam036-500k-HOR001-T-epsfin0.csv"
+           #,"multiTrain_TCL-EXP-NT3-al50-lam036-500k-HOR001-T-epsfin0-V2.csv"
+           ,"multiTrain_TCL-EXP-NT3-al50-lam000-500k-HOR001-T-epsfin0-noFA.csv"
            #,"TERNARY/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-single-T9b.csv"
            #,"nonTERNA/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-single-9b.csv"
            #,"TERNARY/multiTrain_TCL-EXP-al50-lam05-500k-HOR40-T.csv"
@@ -40,10 +45,15 @@ filenames=c("multiTrain_TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0.csv"
            #,"multiTrain_TCL-EXP-al10-lam06-500k-eps0025.csv"
            )
 # other pars: eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, NORMALIZE=F, SIGMOID=tanh, 
-# LEARNFROMRM=F, MODE_3P==2, fixed ntuple mode 1: 70 8-tuples. TC_INIT=1e-4, TC_EXP
-# with TC beta =2.7, rec.weight-change accumulation.500.000 training games, 10 runs.
+# LEARNFROMRM=T, MODE_3P==2, fixed ntuple mode 1: 70 8-tuples. TC_INIT=1e-4, TC_EXP
+# with TC beta =2.7, rec.weight-change accumulation.500.000 training games, 3 runs.
 # evalMode= 0 (evalQ) is from default start state against MCTS, 
 # evalMode= 3 (evalT) is from default start state against AlphaBeta. 
+# 
+# If a file appears besides its base form also in form ...-V2.csv or ...-V3.csv, 
+# these are just runs with exactly the same parameters but other random numbers.
+# In the limit of ininite many runs they should be all the same. But we have here
+# only 3 runs.
 
   
 dfBoth = data.frame()
@@ -63,8 +73,10 @@ for (k in 1:length(filenames)) {
   }
   
   lambdaCol = switch(k
+                    ,rep("0.00",nrow(df))   
                     ,rep("0.16",nrow(df))   
-                    ,rep("0.25",nrow(df))   
+                    ,rep("0.25",nrow(df))  
+                    ,rep("no f.a.",nrow(df))
                     ,rep("0.36",nrow(df))   
                     ,rep("HOR40",nrow(df))
                     ,rep("HOR40",nrow(df))
@@ -123,9 +135,10 @@ tgc <- rbind(tgc1,tgc2)
 #tgc <- tgc2
 tgc$lambda <- as.factor(tgc$lambda)
 tgc$targetMode <- as.factor(tgc$targetMode)
+if (MAPWINRATE) tgc$eval = (tgc$eval+1)/2   # map y-axis to win rate (range [0,1])
 
 # The errorbars may overlap, so use position_dodge to move them horizontally
-pd <- position_dodge(3000/wfac) # move them 3000 to the left and right
+pd <- position_dodge(10000/wfac) # move them 10000/wfac to the left and right
 
 if (USEGAMESK) {
   q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=lambda,linetype=lambda,color=evalMode))
@@ -133,7 +146,7 @@ if (USEGAMESK) {
 } else {
   q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=lambda,linetype=lambda))
 }
-q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=errWidth, position=pd)
+q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=3*errWidth, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+scale_y_continuous(limits=limits) 
 q <- q+guides(colour = guide_legend(reverse = TRUE))

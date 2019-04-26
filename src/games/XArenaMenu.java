@@ -29,6 +29,7 @@ import controllers.MCTS.MCTSAgentT;
 //import controllers.MCTS0.MCTSAgentT0;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
+//import controllers.TD.ntuple2.Sarsa2Agt;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
@@ -606,6 +607,12 @@ public class XArenaMenu extends JMenuBar {
 				m_arena.m_xab.ntPar[n].setFrom( ((SarsaAgt) td).getParNT() );
 				m_arena.m_xab.oPar[n].setFrom( ((SarsaAgt) td).getParOther() );
 			}
+//			else if (td instanceof Sarsa2Agt) {
+//				// set the agent parameters in XArenaTabs:
+//				m_arena.m_xab.tdPar[n].setFrom( ((Sarsa2Agt) td).getParTD() );
+//				m_arena.m_xab.ntPar[n].setFrom( ((Sarsa2Agt) td).getParNT() );
+//				m_arena.m_xab.oPar[n].setFrom( ((Sarsa2Agt) td).getParOther() );
+//			}
 			else if (td instanceof MCTSAgentT) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT) td).getParMCTS() );

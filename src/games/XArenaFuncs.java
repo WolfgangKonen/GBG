@@ -11,6 +11,7 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
+//import controllers.TD.ntuple2.Sarsa2Agt;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
@@ -149,6 +150,21 @@ public class XArenaFuncs
 				//e.printStackTrace();
 				pa=null;			
 			}
+//		} else if (sAgent.equals("Sarsa-2")) {
+//			try {
+//				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+//				NTupleFactory ntupfac = new NTupleFactory(); 
+//				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
+//				int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+//				pa = new Sarsa2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
+//								   new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
+//			} catch (Exception e) {
+//				MessageBox.show(m_xab, 
+//						e.getMessage(), 
+//						"Warning", JOptionPane.WARNING_MESSAGE);
+//				//e.printStackTrace();
+//				pa=null;			
+//			}
 		} else if (sAgent.equals("Minimax")) {
 			pa = new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Max-N")) {
@@ -285,6 +301,21 @@ public class XArenaFuncs
 						//e.printStackTrace();
 						pa=null;			
 					}
+//				} else if (sAgent.equals("Sarsa-2")) {
+//					try {
+//						XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+//						NTupleFactory ntupfac = new NTupleFactory(); 
+//						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
+//						int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+//						pa = new Sarsa2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
+//										   new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
+//					} catch (Exception e) {
+//						MessageBox.show(m_xab, 
+//								e.getMessage(), 
+//								"Warning Sarsa", JOptionPane.WARNING_MESSAGE);
+//						//e.printStackTrace();
+//						pa=null;			
+//					}
 				}					
 			} else {   // i.e. if m_PlayAgents[n]!=null
 				// --- questionable, the code concerned with wrapper!! ---

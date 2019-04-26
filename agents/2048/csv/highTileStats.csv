@@ -1,0 +1,17 @@
+P0: TDNTuple3Agt: USESYMMETRY:true, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:true, learnFromRM: false
+P0: TDNTuple3Agt: alpha_init->final:1.0->1.0, epsilon_init->final:0.0->0.0, gamma: 1.0, fixed n-tuple, mode=2
+Start state = 1000000000000001
+run, moveNum, player, action, gameScore, nEmptyTile, cumEmptyTl, highestTile
+1, 1, 0, 2, +0.00, 13, 13, 2
+1, 2, 0, 0, +4.00, 13, 26, 4
+1, 6, 0, 3, +20.00, 12, 72, 8
+1, 17, 0, 0, +60.00, 7, 166, 16
+1, 27, 0, 3, +160.00, 8, 222, 32
+1, 45, 0, 1, +376.00, 8, 311, 64
+1, 91, 0, 0, +992.00, 8, 610, 128
+1, 155, 0, 2, +2036.00, 8, 981, 256
+1, 333, 0, 0, +5116.00, 7, 1801, 512
+1, 600, 0, 0, +10844.00, 5, 2978, 1024
+1, 1171, 0, 2, +24124.00, 6, 5322, 2048
+1, 1921, 0, 0, +45052.00, 8, 8315, 4096
+1, 3726, 0, 0, +96836.00, 10, 15171, 8192

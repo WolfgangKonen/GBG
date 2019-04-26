@@ -500,7 +500,7 @@ abstract public class Arena extends JFrame implements Runnable {
 																														// DEBG
 		PlayAgent pa;
 		PlayAgent[] paVector, qaVector;
-		int nEmpty = 0, cumEmpty = 0;
+		int nEmpty = 0, cumEmpty = 0, highestTile=0;
 		double gameScore = 0.0;
 		PStats pstats;
 		ArrayList<PStats> psList = new ArrayList<PStats>();
@@ -599,7 +599,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		so.resetMoveCounter();
 		startSO = so.copy();
 		System.out.println("StartState: "+startSO.stringDescr());
-		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, (double) nEmpty, (double) cumEmpty);
+		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, (double) nEmpty, (double) cumEmpty, highestTile);
 		psList.add(pstats);
 
 		if (spDT!=null) { // set random start moves for TS
@@ -684,11 +684,12 @@ abstract public class Arena extends JFrame implements Runnable {
 							StateObserver2048 so2048 = (StateObserver2048) so;
 							nEmpty = so2048.getNumEmptyTiles();
 							cumEmpty += nEmpty;
+							highestTile = so2048.getHighestTileValue();
 							gameScore = so2048.getGameScore(so2048) * so2048.MAXSCORE;
 						} else {
 							gameScore = so.getGameScore(so);
 						}
-						pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), actBest.toInt(), gameScore, (double) nEmpty, (double) cumEmpty);
+						pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), actBest.toInt(), gameScore, (double) nEmpty, (double) cumEmpty, highestTile);
 						psList.add(pstats);
 						gb.enableInteraction(true);
 
@@ -794,6 +795,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 		// game over - leave the Task.PLAY task:
 		PStats.printPlayStats(psList, startSO, paVector, this);
+//		PStats.printHighTileStats(psList, startSO, paVector, this);
 		logManager.endLoggingSession(logSessionid);
 		taskState = Task.IDLE;
 		setStatusMessage("Done.");
