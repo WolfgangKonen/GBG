@@ -22,7 +22,7 @@ import tools.SolidBorder;
  * <li> has the action code for Param-, Train-, MultiTrain-, and Play-button events.
  * </ul>
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH KÃ¶ln, Nov'16
  */
 public class XArenaButtons extends JPanel		
 {
@@ -73,7 +73,7 @@ public class XArenaButtons extends JPanel
 	private boolean tournamentRemoteDataEnabled = false;
 	private String selectedAgentTypes[] = null;
 
-	// the colors of the TH Köln logo (used for button coloring):
+	// the colors of the TH KÃ¶ln logo (used for button coloring):
 	Color colTHK1 = new Color(183,29,13);
 	Color colTHK2 = new Color(255,137,0);
 	Color colTHK3 = new Color(162,0,162);
@@ -157,15 +157,18 @@ public class XArenaButtons extends JPanel
 		showValOnGB = new JCheckBox("",true);
 		showValOnGB.setBackground(Types.GUI_BGCOLOR);
 
-		// add game-specific agent names for certain games (currently ConnectFour and Nim)
+		// add game-specific agent names for certain games (currently ConnectFour, Nim and Othello)
 		String gName = m_game.getGameName();
-		int offset = (gName=="ConnectFour" || gName=="Nim") ? 1 : 0;
+		int offset = (gName=="ConnectFour" || gName=="Nim") ? 1 : (gName=="Othello") ? 2: 0;
 		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
 		for (int i=0; i<Types.GUI_AGENT_LIST.length; i++) gui_agent_list[i] = Types.GUI_AGENT_LIST[i];
 		if (gName=="ConnectFour") {
 			gui_agent_list[gui_agent_list.length-1] = "AlphaBeta";
 		} else if (gName=="Nim") {
 			gui_agent_list[gui_agent_list.length-1] = "Bouton";
+		}else if (gName=="Othello") {
+			gui_agent_list[gui_agent_list.length-2] = "HeurPlayer";
+			gui_agent_list[gui_agent_list.length-1] = "BenchPlayer";
 		}
 		
 		// for-loop over *decrementing* n so that we set on the last pass (n=0) the default

@@ -18,6 +18,7 @@ import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
 import games.Nim.BoutonAgent;
+import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.TStats.TAggreg;
 import params.*;
 import tools.*;
@@ -195,6 +196,10 @@ public class XArenaFuncs
 			pa = alphaBetaStd;
 		} else if (sAgent.equals("Bouton")) {		// Nim only, see gui_agent_list in XArenaButtons
 			pa = new BoutonAgent(sAgent);
+		}else if (sAgent.equals("HeurPlayer")) {		// Othello only, see gui_agent_list in XArenaButtons
+			pa = new BenchMarkPlayer("HeurPlayer",0);
+		}else if (sAgent.equals("BenchPlayer")) {		// Othello only, see gui_agent_list in XArenaButtons
+			pa = new BenchMarkPlayer("BenchPlayer",1);
 		}
 		return pa;
 	}
@@ -253,6 +258,10 @@ public class XArenaFuncs
 			pa = alphaBetaStd;
 		} else if (sAgent.equals("Bouton")) {		// Nim only, see gui_agent_list in XArenaButtons
 			pa = new BoutonAgent(sAgent);
+		} else if (sAgent.equals("HeurPlayer")) {		// Othello only, see gui_agent_list in XArenaButtons
+			pa = new BenchMarkPlayer("HeurPlayer",0);
+		}else if (sAgent.equals("BenchPlayer")) {		// Othello only, see gui_agent_list in XArenaButtons
+			pa = new BenchMarkPlayer("BenchPlayer",1);
 		} else { // all the trainable agents:
 			if (m_PlayAgents[n]==null) {
 				if (sAgent.equals("TDS")) {
