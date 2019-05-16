@@ -7,6 +7,7 @@ import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.StateObservation;
 import games.Nim.StateObserverNim;
+import games.Othello.BaseOthello;
 import games.Othello.ConfigOthello;
 import games.Othello.StateObserverOthello;
 import tools.ElapsedCpuTimer;
@@ -60,7 +61,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		for(int i = 0, z = 0; i < 8; i++) {
 			for(int j = 0; j < 8; j++, z++) {
 				if(so.getCurrentGameState()[i][j] == player) scorePlayer += ConfigOthello.BENCHMARKPLAYERMAPPING[mode][z];
-				else if(so.getCurrentGameState()[i][j] == ((so.getPlayer() == 1) ? 2 : 1)) scorePlayer += -1 * ConfigOthello.BENCHMARKPLAYERMAPPING[mode][z];
+				else if(so.getCurrentGameState()[i][j] == BaseOthello.getOpponent(player)) scorePlayer += -1 * ConfigOthello.BENCHMARKPLAYERMAPPING[mode][z];
 			}
 		}
 		return scorePlayer;
@@ -100,7 +101,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so) {
         int player = so.getPlayer();
-        int opponent = ((so.getPlayer() == 1) ? 2 : 1);
+        int opponent = BaseOthello.getOpponent(player) ;
 		ScoreTuple sTuple = new ScoreTuple(2);
 		sTuple.scTup[player] = this.getScore(so);
 		sTuple.scTup[opponent] = -sTuple.scTup[player];

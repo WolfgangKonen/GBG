@@ -17,34 +17,34 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 	private int[] actionVector = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8 , 9, 10, 11, 12, 13, 14, 15 , 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 , 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 , 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};;	
 	private int[][] symmetryActions; //Gives a 2D representation of all SymmetryVectors
 	private int[][] actionPositions; //Given a action key, it gives all symmetric actions
-	
+
 	public XNTupleFuncsOthello() {
 		symmetryActions = symmetryVectors(actionVector);
 		actionPositions = new int[actionVector.length][symmetryActions.length];
-    	for (int i = 0; i < actionPositions.length; i++) 
-    	{
-    		for(int j = 0; j < symmetryActions.length; j++)
-    		{
-    			actionPositions[i][j] = indexOf(symmetryActions[j], i);
-    		}
-    	}
+		for (int i = 0; i < actionPositions.length; i++) 
+		{
+			for(int j = 0; j < symmetryActions.length; j++)
+			{
+				actionPositions[i][j] = indexOf(symmetryActions[j], i);
+			}
+		}
 	}
-	
+
 	private int indexOf(int[] arr, int j) {
-    	for (int i = 0; i < arr.length; i++)
-    	{
-    		if (arr[i] == j) return i;
-    	}
-    	throw new RuntimeException("indexOf: Arr does not contain " + j);
-    }
-	
+		for (int i = 0; i < arr.length; i++)
+		{
+			if (arr[i] == j) return i;
+		}
+		throw new RuntimeException("indexOf: Arr does not contain " + j);
+	}
+
 	private void calcActionVector() {
 		for(int i = 0; i < getNumCells(); i++)
 		{
-			
+
 		}
 	}
-	
+
 	/**
 	 * @return integer of total board cells
 	 */
@@ -115,7 +115,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		int s = 8;
 		int[][] symmetryVectors = new int[s][boardVector.length];
 		symmetryVectors[0] = boardVector;
-		
+
 		for(int i = 1; i < 4; i++) {
 			symmetryVectors[i] = rotate(symmetryVectors[i-1]);
 		}
@@ -126,7 +126,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		}
 		return symmetryVectors;
 	}
-	
+
 	/**
 	 * Helper function for  {@link #symmetryVectors(int[])}: 
 	 * Rotates the given boardVector 90 degrees clockwise
@@ -148,8 +148,8 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 	 */
 	private int[] rotate(int[] boardVector)
 	{	    
-//		int[] rotationIndex = new int[] { 56, 48, 40, 32, 24, 16, 8, 0, 57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18, 10, 2, 59, 51, 43, 35, 27, 19, 11, 03, 
-//			60, 52, 44, 36, 28, 20, 12, 4, 61, 53, 45, 37, 29, 21, 13, 5, 62, 54, 46, 38, 30, 22, 14, 6, 63, 55, 47, 39, 31, 23, 15, 7 };
+		//		int[] rotationIndex = new int[] { 56, 48, 40, 32, 24, 16, 8, 0, 57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18, 10, 2, 59, 51, 43, 35, 27, 19, 11, 03, 
+		//			60, 52, 44, 36, 28, 20, 12, 4, 61, 53, 45, 37, 29, 21, 13, 5, 62, 54, 46, 38, 30, 22, 14, 6, 63, 55, 47, 39, 31, 23, 15, 7 };
 
 		int[] result = new int[boardVector.length];
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
@@ -158,7 +158,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 			{
 				int oldPosition = i * ConfigOthello.BOARD_SIZE + j;
 				int newPosition = (ConfigOthello.BOARD_SIZE * ConfigOthello.BOARD_SIZE - ConfigOthello.BOARD_SIZE) + i - (j * ConfigOthello.BOARD_SIZE);
-				
+
 				result[newPosition] = boardVector[oldPosition];
 			}	
 		}
@@ -168,11 +168,11 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 			result[i] = result[result.length - 1 - i];
 			result[result.length - 1 - i] = temp;
 		}
-		
+
 		return result;
-		
+
 	}
-	
+
 	/**
 	 * Helper function for  {@link #symmetryVectors(int[])}: 
 	 * Mirrors the board along its diagonal from top left to bottom right
@@ -203,7 +203,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 			{
 				int oldPosition = i * ConfigOthello.BOARD_SIZE + j;
 				int newPosition = j * ConfigOthello.BOARD_SIZE + i;
-				
+
 				result[newPosition] = boardVector[oldPosition];
 			}	
 		}
@@ -283,11 +283,11 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		{
 		//--- 10 1-Tuples
 		case 0:	return new int[][] {
-				{0}, 
-				{8}, {9},
-				{16}, {17}, {18},
-				{24}, {25}, {26}, {27}
-				};
+			{0}, 
+			{8}, {9},
+			{16}, {17}, {18},
+			{24}, {25}, {26}, {27}
+		};
 		//--- 32 Straight 2-Tuple
 		case 1: return new int[][] {
 			{0, 8}, {0, 9}, {1, 9}, {2, 10}, {3, 11},
@@ -297,7 +297,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 			{32, 41}, {33, 42}, {34, 43},
 			{40, 49}, {41, 50},
 			{48, 57}
-			};
+		};
 		//--- 24 Straight 3-Tuple
 		case 2: return new int[][] {
 			{0, 8, 16}, {0, 9, 18}, {1, 9, 17}, {3, 10, 18}, {4, 11, 19},
@@ -306,7 +306,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 			{24, 33, 42}, {25, 34, 43}, {26, 35, 44},
 			{32, 41, 50}, {33, 42, 51},
 			{40, 49, 58}
-			};
+		};
 		//--- 8 Random snakey bakey 4-Tuple
 		case 3: return new int[][] {
 			{0, 1, 8, 9}, {2, 11, 10, 3}, 
@@ -314,8 +314,8 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 			{18, 19, 26, 35}, 
 			{33, 32, 40, 48},
 			{44, 36, 43, 51}, {45, 53, 54, 62}
-			};
-			default: throw new OutOfRangeException(mode, 0, 3);
+		};
+		default: throw new OutOfRangeException(mode, 0, 3);
 		}
 	}
 
@@ -340,24 +340,26 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 			for(int j = -1; j < 2; j++) 
 			{
 				if(i == 0 && j == 0)
+					continue; 
+
+				int x = cellX + i;
+				int y = cellY + j;
+				if(x >= ConfigOthello.BOARD_SIZE || y >= ConfigOthello.BOARD_SIZE)
 					continue;
-				
-				cellX += i;
-				cellY += j;
-				
-				if(cellX < 0 || cellX > ConfigOthello.BOARD_SIZE || cellY < 0 || cellY > ConfigOthello.BOARD_SIZE) {
-					neighbours.add(0);
+
+				if(x < 0 || x > ConfigOthello.BOARD_SIZE || y < 0 || y > ConfigOthello.BOARD_SIZE) {
+
 				}
 				else {
-					neighbours.add(cellX * ConfigOthello.BOARD_SIZE + cellY);
+					neighbours.add(x * ConfigOthello.BOARD_SIZE + y);
 				}
 			}
 		}
 		return neighbours;
 	}
-	
-	 private static int[] fixedModes = {0, 1, 2, 3};
-		
+
+	private static int[] fixedModes = {0, 1, 2, 3};
+
 
 
 }

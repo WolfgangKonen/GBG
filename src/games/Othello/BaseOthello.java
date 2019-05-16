@@ -17,26 +17,20 @@ import tools.Types.ACTIONS_VT;
 import tools.Types.ScoreTuple;
 
 
-public class BaseOthello implements Serializable{
-
-	
+public class BaseOthello implements Serializable
+{
 	
 	public static final long serialVersionUID = 12L;
-
-	
 
 	/**
 	 * The Feature vector consist of the depending player which is activated in featureclass
 	 * Therefor the optimal feature will be calculated given by a board pattern which contains the cummulative value for 
 	 * the current players move. We will try to maximize the Score 
 	 */
-	
 
-
-	
 	/**
 	 * Given a state as string, return the corresponding board position table.
-	 * -1 for 'X' +1 for 'O' and 0 for '-'
+	 * 2 for 'X' +1 for 'O' and 0 for '-'
 	 * @param state [input] board position as string
 	 * @param table [output] the corresponding board.
 	 */
@@ -44,12 +38,11 @@ public class BaseOthello implements Serializable{
 	{
 		for (int i=0, x=0;i<ConfigOthello.BOARD_SIZE;i++)
 			for (int j=0;j<ConfigOthello.BOARD_SIZE;j++, x++) {
-				if (state.charAt(x)=='X') table[i][j] = 2;
+				if (state.charAt(x)=='X') table[i][j] = getOpponent(1);
 				else if (state.charAt(x)=='O') table[i][j] = 1;
 				else table[i][j] = 0;
 			}
 	}
-	
 	
 	protected String tableToString(int table[][])
 	{
@@ -59,13 +52,12 @@ public class BaseOthello implements Serializable{
 			for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
 			{
 				if (table[i][j] == 1) str += "O";
-				else if (table[i][j] == 2) str += "X";
+				else if (table[i][j] == getOpponent(1)) str += "X";
 				else str += "-";
 			}
 		}
 		return str;
 	}
-	
 	
 	private int[] tableToVector(int[][] table)
 	{
@@ -78,24 +70,13 @@ public class BaseOthello implements Serializable{
 			}
 		}
 		return retVal;
-	}
-	
+	}	
 	
 	protected String inputToString(double[] vec)
 	{
-		
-		
 		return "";
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	/**
 	 * Used to determine availableActions
 	 */
@@ -130,8 +111,6 @@ public class BaseOthello implements Serializable{
 		}
 	}
 
-
-
 	/**
 	 * 
 	 * @param cgs  current game state
@@ -157,16 +136,11 @@ public class BaseOthello implements Serializable{
 		}
 		return retVal;
 	}
-	
-	private static int getOpponent(int player)
-	{
-		return player == 1 ? 2 : 1;
-	}
 
 	/**
 	 * 
 	 * @param currentGameState the game state of the board
-	 * @param player who has to place a token   -1 = Black    1 = White
+	 * @param player who has to place a token   2 = Black    1 = White
 	 * @return returns an ArrayList with all possible Actions from which can be picked from.
 	 */
 	public static ArrayList<ACTIONS> possibleActions(int[][] currentGameState, int player)
@@ -188,11 +162,11 @@ public class BaseOthello implements Serializable{
 	}
 
 	/**
-	 * 0 = Empty 1 = white -1 = Black
+	 * 0 = Empty 1 = white 2 = Black
 	 * @param cgs currentGameState[i][j]
 	 * @param i index
 	 * @param j index
-	 * @param player who has to place a token   -1 = Black    1 = White
+	 * @param player who has to place a token   2 = Black    1 = White
 	 * @return
 	 */
 	private static boolean isLegalAction(int[][] cgs, int i, int j, int player) 
@@ -281,8 +255,15 @@ public class BaseOthello implements Serializable{
 		return 0 <= row && row < ConfigOthello.BOARD_SIZE && 0 <= col && col <  ConfigOthello.BOARD_SIZE;
 	}
 
+	/**
+	 * Returns the opponent of a given player
+	 * @param player 
+	 * @return the int representation of the opponent
+	 */
+	public static int getOpponent(int player)
+	{
+		return player == 1 ? 2 : 1;
+//		return player * -1;
+	}
 
 }
-
-	
-

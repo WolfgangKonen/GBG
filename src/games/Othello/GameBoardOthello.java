@@ -46,6 +46,7 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 	protected JButton[][] board;
 	private JButton restart;
 	private JLabel winner;
+	private Color boardColor = Color.ORANGE;
 	
 	private int counterWhite, counterBlack;
 
@@ -196,6 +197,7 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 			int player=Types.PLAYER_PM[m_so.getPlayer()];
 			switch(player) 
 			{
+			case(-1):
 			case(2):
 				leftInfoTurn.setText("White has to move");
 				break;
@@ -280,13 +282,11 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 					}
 				}
 				if(m_so.getCurrentGameState()[i][j] == 1) {
-					board[i][j].setText("White");
 					board[i][j].setForeground(Color.BLACK);
 					board[i][j].setBackground(Color.WHITE);
 					counterWhite++;
 				}
-				else if(m_so.getCurrentGameState()[i][j] == 2) {
-					board[i][j].setText("Black");
+				else if(m_so.getCurrentGameState()[i][j] == BaseOthello.getOpponent(1)) {
 					board[i][j].setForeground(Color.WHITE);
 					board[i][j].setBackground(Color.BLACK);
 					counterBlack++;
@@ -294,10 +294,9 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 				else {
 					board[i][j].setText("");
 					board[i][j].setForeground(Color.RED);
-					board[i][j].setBackground(Color.GREEN);
+					board[i][j].setBackground(boardColor);
 					if(showValueOnGameboard) board[i][j].setText(valueText);
 				}
-				
 			}
 		}
 		leftInfoWhite.setText("White: " + counterWhite);
@@ -374,6 +373,4 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		}
 		public void actionPerformed(ActionEvent e) {}
 	}
-
-	
 }

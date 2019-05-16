@@ -44,8 +44,8 @@ public class StateObserverOthello extends ObserverBase{
 	{
 		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		currentGameState[3][3] = 1;
-		currentGameState[3][4] = 2;
-		currentGameState[4][3] = 2;
+		currentGameState[3][4] = BaseOthello.getOpponent(1);
+		currentGameState[4][3] = BaseOthello.getOpponent(1);
 		currentGameState[4][4] = 1;
 		playerNextMove = 2;
 		setAvailableActions();
@@ -208,9 +208,12 @@ public class StateObserverOthello extends ObserverBase{
 		}
 	}
 
+	/**
+	* TODO: Determine if this logic is correct
+	*/
 	@Override
 	public int getPlayer() {
-		return playerNextMove == 2 ? 0 : 1;
+		return playerNextMove == getOpponent(1) ? 0 : 1;
 	}
 
 	@Override
@@ -246,7 +249,7 @@ public class StateObserverOthello extends ObserverBase{
 		String sout = "";
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++) {
 			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++) {
-				sout += (currentGameState[i][j] == 2) ? "O" : (currentGameState[i][j] == +1) ? "X": "-";
+				sout += (currentGameState[i][j] == BaseOthello.getOpponent(1)) ? "O" : (currentGameState[i][j] == +1) ? "X": "-";
 			}
 		}
 		return sout;
@@ -281,6 +284,6 @@ public class StateObserverOthello extends ObserverBase{
 	
 	private int getOpponent(int player)
 	{
-		return player == 1 ? 2 : 1;
+		return BaseOthello.getOpponent(player);
 	}
 }
