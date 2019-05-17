@@ -8,10 +8,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import games.Othello.Edax.CommandLineInteractor;
+
 public class TestMain {
 
 	public static void main(String[] args)
 	{		
+		System.out.flush();
+		/**
+		 * New Fancy Way
+		 */
+		CommandLineInteractor cli = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);
+		new Thread(cli).start();
+		System.out.println(cli.doAction("mode 1"));
+		System.out.println(cli.doAction("f4"));
+		System.out.println(cli.doAction("f6"));
+		cli.stop();
+
+		/*Old Way to do stuff, just for reference*/
+		/**
 		Process p = null;
 		System.out.flush();
 		try {
@@ -21,9 +36,9 @@ public class TestMain {
 			p = pb.start();
 			new Thread(new SyncPipe(p.getErrorStream(), System.err), System.currentTimeMillis() + "").start();
 		    new Thread(new SyncPipe(p.getInputStream(), System.out), System.currentTimeMillis() + "").start();
-		    
+
 		    PrintWriter pw = new PrintWriter(p.getOutputStream(), true);
-		   
+
 		    pw.println("mode 1");
 		    Thread.sleep(250);
 		    for(int i = 0; i < 7; i++)
@@ -45,7 +60,7 @@ public class TestMain {
 			p.destroyForcibly();
 		}
 	}	
-	
+
 	public static class SyncPipe implements Runnable
 	{
 	public SyncPipe(InputStream istrm, OutputStream ostrm) {
@@ -61,7 +76,7 @@ public class TestMain {
 //	              ostrm_.write(buffer, 0, length);
 	        	  String str = new String(buffer, StandardCharsets.UTF_8);
 	        	  Pattern test = Pattern.compile(".*[eE]dax plays ([A-z][0-8]).*");
-	        	  
+
 	        	  Matcher m = test.matcher(str);
 	        	  if(m.find())
 	        		  System.out.println(m.group(1));
@@ -75,4 +90,6 @@ public class TestMain {
 	  private final OutputStream ostrm_;
 	  private final InputStream istrm_;
 	}
+*/
+	}	
 }
