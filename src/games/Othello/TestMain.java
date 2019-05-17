@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TestMain {
 
 	public static void main(String[] args)
-	{
+	{		
 		Process p = null;
 		System.out.flush();
 		try {
@@ -17,23 +19,17 @@ public class TestMain {
 			pb.command("cmd.exe", "/c", "edax.exe");
 			pb.directory(new File("agents\\Othello\\Edax"));
 			p = pb.start();
-			Thread error = new Thread(new SyncPipe(p.getErrorStream(), System.err), System.currentTimeMillis() + "");
-			error.start();
-		    Thread output = new Thread(new SyncPipe(p.getInputStream(), System.out), System.currentTimeMillis() + "");
-		    output.start();
+			new Thread(new SyncPipe(p.getErrorStream(), System.err), System.currentTimeMillis() + "").start();
+		    new Thread(new SyncPipe(p.getInputStream(), System.out), System.currentTimeMillis() + "").start();
 		    
-		    PrintWriter pw = new PrintWriter(p.getOutputStream());
-		    pw.write("mode 1");
-		    pw.write("play f4");
-		    pw.write("f3");
-		    
-//		    pw.println("D3");
-//		    pw.flush();
-//		    pw.print("");
-//		    pw.print("D6");
+		    PrintWriter pw = new PrintWriter(p.getOutputStream(), true);
+		    pw.println("mode 1");
+		    Thread.sleep(250);
+		    pw.println("f4");
+		    Thread.sleep(250);
+		    pw.println("f6");
 		    pw.close();
 		    p.waitFor();
-//		    p.destroyForcibly();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -56,6 +52,13 @@ public class TestMain {
 	          for (int length = 0; (length = istrm_.read(buffer)) != -1; )
 	          {
 	              ostrm_.write(buffer, 0, length);
+//	        	  String str = new String(buffer, StandardCharsets.UTF_8);
+////	        	  System.out.println(str);
+//	        	  Pattern test = Pattern.compile(".*[eE]dax played ([A-z][0-8]).*");
+//	        	  
+//	        	  Matcher m = test.matcher(str);
+//	        	  if(m.find())
+//	        		  System.out.println(m.group(1) + " YAYYYYY");
 	          }
 	      }
 	      catch (Exception e)
