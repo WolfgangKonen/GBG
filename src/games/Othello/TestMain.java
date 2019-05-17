@@ -23,11 +23,18 @@ public class TestMain {
 		    new Thread(new SyncPipe(p.getInputStream(), System.out), System.currentTimeMillis() + "").start();
 		    
 		    PrintWriter pw = new PrintWriter(p.getOutputStream(), true);
+		   
 		    pw.println("mode 1");
 		    Thread.sleep(250);
-		    pw.println("f4");
-		    Thread.sleep(250);
-		    pw.println("f6");
+		    for(int i = 0; i < 7; i++)
+		    {
+		    	pw.println("f4");
+		    	Thread.sleep(250);		    	
+		    }
+//		    pw.println("f6");
+//		    Thread.sleep(250);
+//		    pw.println("c4");
+//		    Thread.sleep(250);
 		    pw.close();
 		    p.waitFor();
 		} catch (Exception e) {
@@ -51,14 +58,13 @@ public class TestMain {
 	          final byte[] buffer = new byte[1024];
 	          for (int length = 0; (length = istrm_.read(buffer)) != -1; )
 	          {
-	              ostrm_.write(buffer, 0, length);
-//	        	  String str = new String(buffer, StandardCharsets.UTF_8);
-////	        	  System.out.println(str);
-//	        	  Pattern test = Pattern.compile(".*[eE]dax played ([A-z][0-8]).*");
-//	        	  
-//	        	  Matcher m = test.matcher(str);
-//	        	  if(m.find())
-//	        		  System.out.println(m.group(1) + " YAYYYYY");
+//	              ostrm_.write(buffer, 0, length);
+	        	  String str = new String(buffer, StandardCharsets.UTF_8);
+	        	  Pattern test = Pattern.compile(".*[eE]dax plays ([A-z][0-8]).*");
+	        	  
+	        	  Matcher m = test.matcher(str);
+	        	  if(m.find())
+	        		  System.out.println(m.group(1));
 	          }
 	      }
 	      catch (Exception e)
