@@ -576,8 +576,16 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		StateObservation s_t = so.copy();
 		for (int n=0; n<numPlayers; n++) {
 			sLast[n] = null;
-//			sLast[n] = (n==curPlayer ? s_t.getPrecedingAfterstate() : null); // curPlayer is so.getPlayer()
 		}
+		int kk= (so.getPlayer()-1+numPlayers)%numPlayers;
+		sLast[kk] = so.getPrecedingAfterstate();
+		// The player who generated 'so' gets so's preceding afterstate as its sLast.
+		// (This is important for RubiksCube, in order to learn from the first move on in 
+		// this deterministic single-player game: The player who generated 'so' is so.getPlayer()
+		// itself and the preceding afterstate is 'so' itself.)
+		
+		m_counter=0;		// /WK/bug fix 2019-05-21
+		m_finished=false;	// /WK/bug fix 2019-05-21
 		do {
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	        
@@ -602,6 +610,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        s_t = ns.getNextSO();
 			t++;
 			
+			if (m_finished) break; 		// out of while  (/WK/bug fix 2019-05-21)
 		} while(!s_t.isGameOver());
 		
 		if (FINALADAPTAGENTS) 

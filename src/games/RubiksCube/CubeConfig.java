@@ -23,7 +23,7 @@ public class CubeConfig {
 	/**
 	 * EvalNmax: how many states to pick randomly from each distance set T[p]
 	 */
-	final static int[] EvalNmax = {0,10,50,300, 2000,2000,2000,2000, 2000,2000,2000,2000};
+	final static int[] EvalNmax = {0,10,50,300,  300, 300,2000,2000, 2000,2000,2000,2000};
 //		                           0            4                    8
 
 	/**

@@ -95,7 +95,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	 * If true, select in {@link #chooseStartState(PlayAgent)} from distance set {@link #D}.
 	 * If false, use {@link #selectByTwists2(int)}. 
 	 */
-	private boolean SELECT_FROM_D = false;  
+	private boolean SELECT_FROM_D = true;  
 	/**
 	 * If true, increment the matrix realPMat, which measures the real p of each start state.  
 	 * Make a debug printout of realPMat every 10000 training games.
@@ -118,7 +118,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		this.T = generateDistanceSets(rand2);
 		if (this.SELECT_FROM_D) {
 			this.D = generateDistanceSets(rand);
-			//this.checkIntersects();   // print out the intersection sizes of D and T 
+			this.checkIntersects();   // print out the intersection sizes of D and T 
 		} 
 		
 		// ensure that ButtonBoard is already visible in the beginning, 

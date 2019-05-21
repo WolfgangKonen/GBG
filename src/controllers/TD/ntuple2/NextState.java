@@ -146,7 +146,7 @@ public class NextState {
 			}
 
 			tdAgt.incrementMoveCounter();
-			if (tdAgt.getMoveCounter()==epiLength) {
+			if (tdAgt.getMoveCounter()>=epiLength) {
 				rewardTuple=tdAgt.estimateGameValueTuple(nextSO);
 				tdAgt.setFinished(true); 
 			}

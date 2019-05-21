@@ -48,6 +48,7 @@ public class StateObserverOthello extends ObserverBase{
 		currentGameState[4][3] = BaseOthello.getOpponent(1);
 		currentGameState[4][4] = 1;
 		playerNextMove = 2;
+//		playerNextMove = getOpponent(1);	// /WK/ the correct choice
 		setAvailableActions();
 	}
 	

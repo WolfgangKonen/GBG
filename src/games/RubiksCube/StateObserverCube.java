@@ -144,6 +144,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * Set the available actions for the new state.
 	 * @param action
 	 */
+	@Override
 	public void advance(ACTIONS action) {
 		int iAction = action.toInt();
 		assert (0<=iAction && iAction<9) : "iAction is not in 0,1,...,8.";
@@ -168,10 +169,12 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     	return this;
     }
 
+	@Override
 	public ArrayList<ACTIONS> getAvailableActions() {
 		return acts;
 	}
 	
+	@Override
 	public int getNumAvailableActions() {
 		return acts.size();
 	}

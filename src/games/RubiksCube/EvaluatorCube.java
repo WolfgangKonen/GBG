@@ -44,7 +44,7 @@ public class EvaluatorCube extends Evaluator {
 	/**
 	 * threshold for each value of m_mode
 	 */
-	protected double[] m_thresh={0.85,0.9}; // 
+	protected double[] m_thresh={0.0,0.85,0.9}; // 
 	
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, 0, stopEval);

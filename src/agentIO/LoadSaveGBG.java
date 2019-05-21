@@ -622,9 +622,10 @@ public class LoadSaveGBG {
 				((TDNTuple2Agt) pa).weightAnalysis(null);
 			} else if (obj instanceof TDNTuple3Agt) {
 				pa = (TDNTuple3Agt) obj;
-				// set horizon cut for older agents (where horCut was not part of ParTD):
-				if (((TDNTuple3Agt) pa).getParTD().getHorizonCut()==0.0) 
-					((TDNTuple3Agt) pa).getParTD().setHorizonCut(0.1);
+				assert ((TDNTuple3Agt) pa).getParTD().getHorizonCut()!=0.0;
+//				// set horizon cut for older agents (where horCut was not part of ParTD):
+//				if (((TDNTuple3Agt) pa).getParTD().getHorizonCut()==0.0) 
+//					((TDNTuple3Agt) pa).getParTD().setHorizonCut(0.1);
 				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 				// (they would stay otherwise at their default values, would not 
 				// get the loaded values)

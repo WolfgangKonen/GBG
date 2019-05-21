@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -799,15 +800,21 @@ public class XArenaMenu extends JMenuBar {
 	        long moveCount = 0;
 	        StateObservation newSO, so = m_arena.gb.getDefaultStartState();
 	        ArrayList actList = so.getAvailableActions();
+	        if (so.getName()=="RubiksCube") {		  // Moves/second works for RubiksCube & MCTS only
+	        	so.advance((ACTIONS) actList.get(4)); // if 'so' is not the default start state (otherwise
+	        }										  // all children are null and an assertion fires)	
 	        while (elapsedTime<upperTime) {
 	        	pa.getNextAction2(so, false, true);
 	        	newSO = so.copy();							// just for comparable time measurement: 
 	        	newSO.advance((ACTIONS) actList.get(0)); 	// do a dummy advance
 	        	moveCount++;
 	        	elapsedTime = System.currentTimeMillis() - startTime;
+	        	//System.out.println("elapsed: "+elapsedTime);
 	        }
-	        System.out.println("Moves/second for "+ pa.getName() + ": "+(double)(moveCount)/n);
-
+			DecimalFormat form = new DecimalFormat("0.00");
+	        double movesPerSecond = ((double)moveCount)/n/((double)elapsedTime/1000);
+	        System.out.println("Moves/second for "+ pa.getName() + ": "+form.format(movesPerSecond));
+	        
 			try {
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
 				int verb = 0;

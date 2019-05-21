@@ -185,14 +185,16 @@ public class SingleTreeNode implements Serializable
 		int K = m_state.getNumAvailableActions();
 		for (int k = 0; k < K; k++) {
 			for (int i = 0; i < children.length; i++) {
-				if (children[i].m_act == m_state.getAction(k)) {
-					v = children[i].totValue / children[i].nVisits;
-					if (m_player.getNormalize()) {
-						VTable[k] = v*deltaGS + minGS;		// map back to interval [minGS,maxGS]
-					} else {
-						VTable[k] = v;
+				if (children[i]!=null) {	// needed for safety (RubiksCube & default start state)
+					if (children[i].m_act == m_state.getAction(k)) {
+						v = children[i].totValue / children[i].nVisits;
+						if (m_player.getNormalize()) {
+							VTable[k] = v*deltaGS + minGS;		// map back to interval [minGS,maxGS]
+						} else {
+							VTable[k] = v;
+						}
+						if (VTable[k] > bestValue) bestValue = VTable[k];
 					}
-					if (VTable[k] > bestValue) bestValue = VTable[k];
 				}
 			}
 		}

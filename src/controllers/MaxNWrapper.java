@@ -74,7 +74,14 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 		return cs;
 	}
 
-	// getName: use method ObserverBase::getName()
+	// override AgentBase::getName()
+	@Override
+	public String getName() {
+		String cs = super.getName();;
+		cs = cs + "["+wrapped_pa.getName()+","+m_depth+"]";
+		return cs;
+	}
+
 	
 	public String getFullName() {
 		String cs = wrapped_pa.getName();
