@@ -1,5 +1,7 @@
 package games.Othello.Edax;
 
+import java.io.IOException;
+
 import controllers.PlayAgent;
 import games.StateObservation;
 import params.ParOther;
@@ -14,7 +16,12 @@ public class Edax implements PlayAgent
 	{
 		firstTurn = true;
 		
-		Process edax = Runtime.getRuntime().exec("~\\")
+		try {					// WK would not compile w/o try-catch
+			Process edax = Runtime.getRuntime().exec("~\\");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// exec edax.exe
 		// set Mode -> Console
 		// 

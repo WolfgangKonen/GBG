@@ -610,8 +610,9 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        s_t = ns.getNextSO();
 			t++;
 			
-			if (m_finished) break; 		// out of while  (/WK/bug fix 2019-05-21)
-		} while(!s_t.isGameOver());
+//			if (m_finished) break; 		// out of while  (/WK/bug fix 2019-05-21)
+//		} while(!s_t.isGameOver());
+		} while(!m_finished);			// simplification: m_finished is set by ns.getNextRewardTupleCheckFinished
 		
 		if (FINALADAPTAGENTS) 
 			finalAdaptAgents(curPlayer, R, ns);

@@ -7,8 +7,8 @@ import tools.Types.ScoreTuple;
 
 /**
  * Class NextState bundles the different states in state advancing and two different modes of 
- * state advancing. Helper class for {@link TDNTuple2Agt}, {@link TDNTuple2Agt} and {@link SarsaAgt}, both 
- * implementing interface {@link NTupleAgt}.
+ * state advancing. Helper class for {@link TDNTuple2Agt}, {@link TDNTuple3Agt} and {@link SarsaAgt}, all 
+ * three implementing interface {@link NTupleAgt}.
  * <p>
  * If {@link NTupleAgt#getAFTERSTATE()}==false, then {@code ns=new NextState(so,actBest)}  
  * simply advances {@code so} and lets ns.getAfterState() and ns.getNextSO() return the same next 

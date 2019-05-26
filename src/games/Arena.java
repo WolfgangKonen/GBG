@@ -73,6 +73,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	public boolean singlePlayerTSRunning = false;
 
 	public Arena() {
+		m_LaunchFrame = this;
 		initGame();
 	}
 
