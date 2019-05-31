@@ -159,7 +159,7 @@ public class XArenaButtons extends JPanel
 
 		// add game-specific agent names for certain games (currently ConnectFour, Nim and Othello)
 		String gName = m_game.getGameName();
-		int offset = (gName=="ConnectFour" || gName=="Nim") ? 1 : (gName=="Othello") ? 2: 0;
+		int offset = (gName=="ConnectFour" || gName=="Nim") ? 1 : (gName=="Othello") ? 3: 0;
 		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
 		for (int i=0; i<Types.GUI_AGENT_LIST.length; i++) gui_agent_list[i] = Types.GUI_AGENT_LIST[i];
 		if (gName=="ConnectFour") {
@@ -167,8 +167,9 @@ public class XArenaButtons extends JPanel
 		} else if (gName=="Nim") {
 			gui_agent_list[gui_agent_list.length-1] = "Bouton";
 		}else if (gName=="Othello") {
-			gui_agent_list[gui_agent_list.length-2] = "HeurPlayer";
-			gui_agent_list[gui_agent_list.length-1] = "BenchPlayer";
+			gui_agent_list[gui_agent_list.length-3] = "HeurPlayer";
+			gui_agent_list[gui_agent_list.length-2] = "BenchPlayer";
+			gui_agent_list[gui_agent_list.length-1] = "Edax";
 		}
 		
 		// for-loop over *decrementing* n so that we set on the last pass (n=0) the default

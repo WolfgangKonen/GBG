@@ -1,41 +1,63 @@
 package games.Othello.Edax;
 
-import java.io.IOException;
+import java.io.Serializable;
 
+import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
+import games.Othello.StateObserverOthello;
 import params.ParOther;
+import tools.Types;
 import tools.Types.ACTIONS_VT;
 import tools.Types.ScoreTuple;
 
-public class Edax implements PlayAgent
+public class Edax extends AgentBase implements PlayAgent, Serializable
 {
-	private boolean firstTurn;
+	private static final long serialVersionUID = 13l;
+	private boolean firstTurn = true;
 	
-	public Edax(int mode)
+	private CommandLineInteractor commandLineInteractor;
+	
+	public Edax()
 	{
-		firstTurn = true;
-		
-		try {					// WK would not compile w/o try-catch
-			Process edax = Runtime.getRuntime().exec("~\\");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// exec edax.exe
-		// set Mode -> Console
-		// 
+		super("Edax");
+		System.out.println("creating edax");
+		super.setAgentState(AgentState.TRAINED);
+		commandLineInteractor = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);		
 	}
 
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
-		// TODO 
+		assert sob instanceof StateObserverOthello: "sob not instance of StateObserverOthello";
+		StateObserverOthello so = (StateObserverOthello) sob;
+		
+		String edaxMove = "";
+		
 		if(firstTurn)
 		{
-			firstTurn = false;			
+			firstTurn = false;
+			if(so.getLastMove() == -1) // if nothing was played sofar
+			{
+				edaxMove = commandLineInteractor.sendAndAwait("mode 1"); // Edax goes first
+			}
+			else
+			{
+				commandLineInteractor.sendCommand("mode 0"); // Edax goes second
+				edaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()));
+			}
+		}
+		else {
+			edaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()));
+			
+		}
+		System.out.println("Last SO move: " + so.getLastMove() + " EdaxMove: " + edaxMove);
+		ACTIONS_VT action = new ACTIONS_VT(EdaxMoveConverter.converteEdaxToInt(edaxMove), false, new double[so.getAvailableActions().size()]);
+		if(!so.getAvailableActions().contains(action))
+		{
+			System.err.println("EDAX IST AM CHEATEN!");
 		}
 		
-		return null;
+		return action;
 	}
 
 	@Override
@@ -161,26 +183,23 @@ public class Edax implements PlayAgent
 	@Override
 	public AgentState getAgentState() {
 		// TODO Auto-generated method stub
-		return null;
+		return super.getAgentState();
 	}
 
 	@Override
 	public void setAgentState(AgentState aState) {
 		// TODO Auto-generated method stub
-		
+		super.setAgentState(aState);
 	}
 
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return null;
+		return super.getName();
 	}
 
 	@Override
 	public void setName(String name) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
+		super.setName(name);
+	}	
 }

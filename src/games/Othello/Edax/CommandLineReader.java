@@ -45,7 +45,7 @@ public class CommandLineReader implements Runnable
 	{
 		try
 		{
-			final byte[] buffer = new byte[2048];
+			byte[] buffer = new byte[2048];
 			while (inputStream.read(buffer) != -1)
 			{
 				String str = new String(buffer, StandardCharsets.UTF_8);
@@ -53,6 +53,8 @@ public class CommandLineReader implements Runnable
 				Matcher m = regexPattern.matcher(str);
 				if(m.find()) {
 					lastMatch = m.group(regexGroup);
+					System.out.println("Last Match: " + lastMatch);
+					buffer = new byte[2048];
 					matchSemaphore.release();
 				}
 			}

@@ -55,8 +55,11 @@ public class StateObserverOthello extends ObserverBase{
 		setAvailableActions();
 	}
 	
-	public StateObserverOthello(int[][] gameState, int playerMove)
+	public StateObserverOthello(int[][] gameState, int playerMove, ArrayList<Integer> lm, int turn)
 	{
+		System.out.println("CREATING NEW OBJ");
+		this.playedMoves = lm;
+		this.turn = turn;
 		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		playerNextMove = playerMove;
 		BaseOthello.deepCopyGameState(gameState, currentGameState);
@@ -76,7 +79,7 @@ public class StateObserverOthello extends ObserverBase{
 	
 	@Override
 	public StateObservation copy() {
-		return new StateObserverOthello(currentGameState,playerNextMove);
+		return new StateObserverOthello(currentGameState,playerNextMove,playedMoves,turn);
 	}
 	
 	/**
@@ -198,6 +201,10 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	@Override
 	public void advance(ACTIONS action) {
+//		if(!this.getAvailableActions().contains(action))
+//		{
+//			return; 
+//		}
 		int iAction = action.toInt();
 		int j = iAction % ConfigOthello.BOARD_SIZE;
 		int i = (iAction-j) / ConfigOthello.BOARD_SIZE;
@@ -212,8 +219,8 @@ public class StateObserverOthello extends ObserverBase{
 		}
 		playedMoves.add(action.toInt());
 		turn++;
-		System.out.println("TURN: " + turn);
-		System.out.println("Last move: " + getLastMove());
+//		System.out.println("TURN: " + turn);
+//		System.out.println("Last move: " + getLastMove());
 	}
 
 	/**
