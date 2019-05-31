@@ -2,6 +2,8 @@ package games.Othello.Edax;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,6 +13,8 @@ public class CommandLineReader implements Runnable
 	private final Pattern regexPattern;
 	private final int regexGroup;
 	
+	private Semaphore matchSemaphore;
+	
 	private String lastMatch;
 	
 	/**
@@ -19,7 +23,7 @@ public class CommandLineReader implements Runnable
 	 */
 	public CommandLineReader(InputStream input)
 	{
-		this(input, ".*", 0);
+		this(input, "[\\s\\S]*", 0);
 	}
 	
 	/**
@@ -33,20 +37,23 @@ public class CommandLineReader implements Runnable
 		inputStream = input;
 		regexPattern = Pattern.compile(pattern);
 		regexGroup = group;
+		
+		matchSemaphore = new Semaphore(0);
 	}
 	
 	public void run()
 	{
 		try
 		{
-			final byte[] buffer = new byte[1024];
+			final byte[] buffer = new byte[2048];
 			while (inputStream.read(buffer) != -1)
 			{
 				String str = new String(buffer, StandardCharsets.UTF_8);
 
 				Matcher m = regexPattern.matcher(str);
 				if(m.find()) {
-					lastMatch = m.group(regexGroup);				
+					lastMatch = m.group(regexGroup);
+					matchSemaphore.release();
 				}
 			}
 		}
@@ -58,6 +65,17 @@ public class CommandLineReader implements Runnable
 	
 	public String getLastMatch()
 	{
-		return lastMatch;
+		try 
+		{
+			if(matchSemaphore.tryAcquire(5000, TimeUnit.MILLISECONDS))
+			{
+				return lastMatch;
+			}
+		}
+		catch(InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		return "";
 	}
 }
