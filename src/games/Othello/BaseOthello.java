@@ -12,10 +12,7 @@ import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import games.StateObservation;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_ST;
-import tools.Types.ACTIONS_VT;
-import tools.Types.ScoreTuple;
-
+import tools.Types.ACTIONS;
 
 public class BaseOthello implements Serializable
 {
@@ -258,12 +255,12 @@ public class BaseOthello implements Serializable
 	/**
 	 * Returns the opponent of a given player
 	 * @param player 
-	 * @return the int representation of the opponent
+	 * @return int representation of the opponent
 	 */
 	public static int getOpponent(int player)
 	{
 		return player == 1 ? 2 : 1;
-//		return player * -1;
 	}
+	
 
 }

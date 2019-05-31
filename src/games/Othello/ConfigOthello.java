@@ -1,13 +1,31 @@
 package games.Othello;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+
+import tools.Types;
+
 public class ConfigOthello {
 
 	/**
 	 *  Board size
 	 */
 	public static final int BOARD_SIZE = 8;
-	
-	
+	/**
+	 * Tile
+	 */
+	public static Color BOARDCOLOR = Color.ORANGE;
+	public static Color LASTMOVECOLOR = Color.RED;
+	public static Color POSSIBLEMOVECOLOR = Color.GREEN;
+	public static Color NORMALBORDERCOLOR = Color.YELLOW;
+	public static Dimension DIMENSIONTILE = new Dimension(
+			(int) Types.GUI_SCALING_FACTOR * 80,
+			(int) Types.GUI_SCALING_FACTOR * 80
+			);
+	public static Font ITEM = new Font("Arial",Font.CENTER_BASELINE,18);
 	
 	/**
 	 * 

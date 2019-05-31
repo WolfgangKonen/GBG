@@ -8,37 +8,38 @@ import games.StateObservation;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
-
+/**
+ * Class {@link StateObserverOthello} holds any valid Othello game state. It's coded
+ * in a two dimensional int[8][8] array, where each index represents either 
+ * an empty cell = 0,
+ * an White cell = 1,
+ * an black cell = 2
+ * <pre>
+ * 	For example the starting state:
+ * 												row
+ * 			0	0	0	0	0	0	0	0   	0
+ * 			0	0	0	0	0	0	0	0		1
+ * 			0	0	0	0	0	0	0	0		2
+ * 			0	0	0	1	2	0	0	0 		3
+ * 			0	0	0	2	1	0	0	0		4
+ * 			0	0	0	0	0	0	0	0		5	
+ * 			0	0	0	0	0	0	0	0		6
+ * 			0	0	0	0	0	0	0	0		7
+ *
+ *  	col	0	1	2	3	4	5	6	7	
+ */
 public class StateObserverOthello extends ObserverBase{
 
-	/**
-	 * Class {@link StateObserverOthello} holds any valid Othello game state. It's coded
-	 * in a two dimensional int[8][8] array, where each index represents either 
-	 * an empty cell = 0,
-	 * an White cell = 1,
-	 * an black cell = -1
-	 * <pre>
-	 * 	For example the starting state:
-	 * 												row
-	 * 			0	0	0	0	0	0	0	0   	0
-	 * 			0	0	0	0	0	0	0	0		1
-	 * 			0	0	0	0	0	0	0	0		2
-	 * 			0	0	0	0	0	0	0	0 		3
-	 * 			0	0	0	0	0	0	0	0		4
-	 * 			0	0	0	0	0	0	0	0		5	
-	 * 			0	0	0	0	0	0	0	0		6
-	 * 			0	0	0	0	0	0	0	0		7
-	 *
-	 *  	col	0	1	2	3	4	5	6	7	
-	 */
+	
 	
 	public static final long serialVersionUID = 12L;
 	private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
 	
 	private int[][] currentGameState;
-	private int playerNextMove;
+	private int playerNextMove, countBlack, countWhite , turn;
 	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
-	private boolean isGameOver;
+	private ArrayList<Integer> playedMoves = new ArrayList<Integer>();
+
 	
 	public StateObserverOthello()
 	{
@@ -47,8 +48,10 @@ public class StateObserverOthello extends ObserverBase{
 		currentGameState[3][4] = BaseOthello.getOpponent(1);
 		currentGameState[4][3] = BaseOthello.getOpponent(1);
 		currentGameState[4][4] = 1;
-//		playerNextMove = 2;
 		playerNextMove = getOpponent(1);	// /WK/ the correct choice
+		countBlack = 2;
+		countWhite = 2;
+		turn = 0;
 		setAvailableActions();
 	}
 	
@@ -77,7 +80,7 @@ public class StateObserverOthello extends ObserverBase{
 	}
 	
 	/**
-	 * @param return a boolean whether the game has no possible actions for either player.
+	 * @param return a boolean whether the game has no possible actions for any player.
 	 */
 	@Override
 	public boolean isGameOver() {
@@ -125,13 +128,11 @@ public class StateObserverOthello extends ObserverBase{
 
 	@Override
 	public double getMinGameScore() {
-//		return 0;
 		return -1;			// WK the right choice
 	}
 
 	@Override
 	public double getMaxGameScore() {
-//		return 64;
 		return +1;			// WK the right choice
 	}
 
@@ -209,6 +210,10 @@ public class StateObserverOthello extends ObserverBase{
 			playerNextMove = getOpponent(playerNextMove); // Used for passing a turn
 			setAvailableActions();
 		}
+		playedMoves.add(action.toInt());
+		turn++;
+		System.out.println("TURN: " + turn);
+		System.out.println("Last move: " + getLastMove());
 	}
 
 	/**
@@ -224,15 +229,18 @@ public class StateObserverOthello extends ObserverBase{
 		return 2;
 	}
 
+	public int getLastMove() {
+		if (playedMoves.size() == 0) return -1;
+		return playedMoves.get(playedMoves.size()-1);
+	}
+	
+	
 	/**
 	 * Used to calculate the score for the current game state
 	 */
 	@Override
 	public double getGameScore(StateObservation referringState) {
-//		int retVal = (referringState.getPlayer() == this.playerNextMove) ? 1 : (2);
 		int retVal = (referringState.getPlayer() == this.playerNextMove) ? 1 :(-1); // WK: probably the right choice
-		StateObserverOthello so = (StateObserverOthello)referringState;
-//		if(BaseOthello.isGameOver(so.getCurrentGameState())) {			// WRONG!!!
 		if(BaseOthello.isGameOver(this.getCurrentGameState())) {		// WK bug fix		
 			Types.WINNER win = this.getGameWinner();
 			switch(win) {
@@ -291,4 +299,10 @@ public class StateObserverOthello extends ObserverBase{
 	{
 		return BaseOthello.getOpponent(player);
 	}
+	
+	public int getCountWhite() { return countWhite;}
+	public int getCountBlack() { return countBlack;}
+	public void setCountWhite(int w) {countWhite = w;}
+	public void setCountBlack(int b) {countBlack = b;}
+	public int getTurn() {return turn;}
 }

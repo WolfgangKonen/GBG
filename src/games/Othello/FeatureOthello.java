@@ -9,8 +9,6 @@ import java.util.Set;
 
 import games.Feature;
 import games.StateObservation;
-import games.CFour.StateObserverC4;
-import games.TicTacToe.StateObserverTTT;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;

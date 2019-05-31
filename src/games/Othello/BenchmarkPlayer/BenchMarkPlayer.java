@@ -4,13 +4,10 @@ import java.io.Serializable;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import games.StateObservation;
-import games.Nim.StateObserverNim;
 import games.Othello.BaseOthello;
 import games.Othello.ConfigOthello;
 import games.Othello.StateObserverOthello;
-import tools.ElapsedCpuTimer;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 import tools.Types.ScoreTuple;

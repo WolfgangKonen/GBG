@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,6 +19,9 @@ import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
 import games.StateObservation;
+import games.Othello.Gui.Gamestats;
+import games.Othello.Gui.Legend;
+import games.Othello.Gui.Tile;
 import tools.Types;
 
 
@@ -31,22 +35,18 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 	/**
 	 * Game Attributes
 	 */
-	protected Arena m_Arena;
+	public Arena m_Arena;
 	private StateObserverOthello m_so;
 	private int[][] gameState;  // 1 = White   2 = Black
 	private double[][] vGameState;
 	private boolean arenaActReq = false;
 	protected Random rand;
 	
-	/**
-	 * Gui Stuff
-	 */
-	private JLabel leftInfoTurn, leftInfoBlack, leftInfoWhite;
-	private JPanel boardPanel;
-	protected JButton[][] board;
-	private JButton restart;
-	private JLabel winner;
-	private Color boardColor = Color.ORANGE;
+	
+	private Gamestats gameStats; // Displaying Game information
+	private Legend legend;
+	private JPanel boardPanel; 	// Container for the 8 x 8 game board
+	private Tile[][] board;		// representation of the game board
 	
 	private int counterWhite, counterBlack;
 
@@ -59,82 +59,50 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 	{
 		super("Othello");
 		initGameBoard(arena);
-		setSize(1000, 1000);
+		setSize((int)Types.GUI_SCALING_FACTOR_X * 1000,(int) Types.GUI_SCALING_FACTOR_Y  * 1000);
+		setBackground(Types.GUI_BGCOLOR);
+		pack();
+		setVisible(true);
 	}
 	
+	/**
+	 * Initialising the game board using {@code initBoard()} and other game relevant information
+	 * @param arena
+	 */
 	public void initGameBoard(Arena arena)
 	{
+		// Initializing necessary elements
 		m_Arena = arena;
-		board = new JButton[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
+		board = new Tile[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		gameState = new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		vGameState = new double[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		m_so = new StateObserverOthello();
 		rand = new Random();
-		// LeftInfo Block
-		leftInfoTurn= new JLabel("");
-		leftInfoBlack = new JLabel("White: 2");
-		leftInfoWhite = new JLabel("Black: 2");
-		JPanel leftInfo = new JPanel();
-		leftInfo.setLayout(new GridLayout(3,0));
-		leftInfo.add(leftInfoTurn);
-		leftInfo.add(leftInfoWhite);
-		leftInfo.add(leftInfoBlack);
-		
-		//rightInfo
-		restart = new JButton("Restart");
-		restart.setPreferredSize(new Dimension(50,50));
-		restart.addActionListener(
-				new ActionHandler() {
-					public void actionPerformed(ActionEvent e) {
-						clearBoard(true,true);
-						}
-					});
-		winner = new JLabel();
-		JPanel bottomInfo = new JPanel();
-		bottomInfo.setLayout(new GridLayout(0,4));
-		bottomInfo.add(new JLabel("")); //Added Dummy for space
-		bottomInfo.add(new JLabel("")); //Added Dummy for space
-		bottomInfo.add(winner);
-		bottomInfo.add(restart);
-		// Game Block
+		// Northern display of the JFrame containing the game stats
+		gameStats = new Gamestats();
+		add(gameStats, BorderLayout.NORTH);
+		// Center display of the JFrame containing the game board
 		boardPanel = initBoard();
-		//Main Frame Block
-		setLayout(new BorderLayout(0,4));
 		add(boardPanel, BorderLayout.CENTER);
-		add(leftInfo, BorderLayout.WEST);
-		add(bottomInfo, BorderLayout.SOUTH);
-		setSize(1000, 1000);
-		pack();
-		setVisible(true);
+		// Southern display of the JFrame containing the legend
+		legend = new Legend();
+		add(legend, BorderLayout.SOUTH);
+		
+		
 		updateBoard(m_so, false, true);
 	}
 	
+	/**
+	 * Initialising the displaying representation of the game board.
+	 * @return JPanel containing the 8x8 grid {@link Tile} stored in {@code board}
+	 */
 	private JPanel initBoard()
 	{
 		JPanel retVal = new JPanel();
-		retVal.setLayout(new GridLayout(ConfigOthello.BOARD_SIZE,ConfigOthello.BOARD_SIZE,2,2));
-		Dimension minSize = new Dimension(20,20);
-		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
-		{
-			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
-			{
-				JButton dummy = new JButton();
-				dummy.setMargin(new Insets(0,0,0,0));
-				dummy.setPreferredSize(minSize); 
-				dummy.addActionListener(
-						new ActionHandler(i,j) {
-							public void actionPerformed(ActionEvent e) {
-								Arena.Task aTaskState = m_Arena.taskState;
-								if(aTaskState == Arena.Task.PLAY) {
-									HGameMove(i,j); // Human play
-									//TODO: Adding for other
-								}else if( aTaskState == Arena.Task.INSPECTV) {
-									inspectMove(i,j);
-								}
-							}
-						}
-				);
-				board[i][j] = dummy;
+		retVal.setLayout(new GridLayout(ConfigOthello.BOARD_SIZE,ConfigOthello.BOARD_SIZE,1,1));
+		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++){
+			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++){
+				board[i][j] = new Tile(this,i,j);
 				retVal.add(board[i][j]);
 			}
 		}
@@ -142,35 +110,13 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		return retVal;
 	}
 	
-	public void HGameMove(int x, int y) {
-		int iAction = ConfigOthello.BOARD_SIZE * x + y;
-		//TODO: MAY CHANGE
-		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
-		if( m_so.isLegalAction(act)) {			
-			m_so.advance(act);
-			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-			arenaActReq = true;	
-			updateBoard(m_so, false, false);
-		}
-		else {
-			System.out.println("Not Allowed: illegal Action");
-		}
-	}
-	
-	public void inspectMove(int x, int y)
-	{
-		int iAction = ConfigOthello.BOARD_SIZE * x + y;
-		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
-		if(m_so.isLegalAction(act)) {
-			m_Arena.setStatusMessage("Inspecting the value function ...");
-			m_so.advance(act);
-		}else m_Arena.setStatusMessage("Desired Action is not legal");
-		arenaActReq = true;
-	}
 	
 	@Override
 	public void initialize() {}
 
+	/**
+	 * Resets the game to it starting state {@link StateObserverOthello}
+	 */
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if(boardClear) {
@@ -187,29 +133,34 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		updateCells(false);
 	}
 
+	/**
+	 * Using the following helper methods:<ol>
+	 * <li> {@link #updatePlayersMove(int)} to update the label from {@link Gamestats#setGameWinner(int)} </li>
+	 * </ol>
+	 * -- updatePlayersMove
+	 * -- update Count
+	 */
 	@Override
 	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
 		if(so != null) {
 			assert ( so instanceof StateObserverOthello) : "so is not an instance of StateOberverOthello";
 			StateObserverOthello sot = ((StateObserverOthello) so);
 			m_so = sot;
-			updateCells(true);
+			updateCells(showValueOnGameboard);
 			int player=Types.PLAYER_PM[m_so.getPlayer()];
-			switch(player) 
-			{
-			case(-1):
-			case(2):
-				leftInfoTurn.setText("White has to move");
-				break;
-			case(1): 
-				leftInfoTurn.setText("Black has to move");
-				break;
-			}
+			updatePlayersMove(player);
+			m_so.setCountBlack(counterBlack);
+			m_so.setCountWhite(counterWhite);
+			updateGameStats(m_so.getCountBlack(),m_so.getCountWhite(),m_so.getTurn());
 			if(m_so.isGameOver()) 
 			{
-				if(counterBlack > counterWhite) winner.setText("Black won: " + counterBlack + " to " + counterWhite);
-				else if(counterBlack < counterWhite) winner.setText("White won: " + counterWhite + " to " + counterBlack);
-				else winner.setText("Tie: " + counterWhite + " to " + counterBlack);	
+				if(m_so.getCountBlack() > m_so.getCountWhite()) {
+					gameStats.setGameWinner("Winner: Black");
+				}else if(m_so.getCountBlack() == m_so.getCountWhite()) {
+					gameStats.setGameWinner("Tie");
+				}else {
+					gameStats.setGameWinner("Winner: Black");
+				}
 			}
 			
 			if(showValueOnGameboard && sot.getStoredValues() != null) {
@@ -218,7 +169,6 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 						vGameState[i][j] = Double.NaN; 
 				for(int y = 0 ; y < sot.getStoredValues().length; y++)
 				{
-					// Map stored Value to our currentGameState index
 					Types.ACTIONS action = sot.getStoredAction(y);
 					int iAction = action.toInt();
 					int jFirst= iAction%ConfigOthello.BOARD_SIZE;
@@ -226,29 +176,37 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 					vGameState[iFirst][jFirst] = sot.getStoredValues()[y];
 				}
 			}
-			/**
-			// TESTING
-			if(showValueOnGameboard) {
-				for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
-					for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
-						vGameState[i][j] = Double.NaN; 
-				
-				
-				for(int y = 0 ; y < sot.getAvailableActions().size(); y++)
-				{
-					StateObserverOthello advanceState = new StateObserverOthello(sot.getCurrentGameState(),sot.getPlayer());
-					// Map stored Value to our currentGameState index
-					Types.ACTIONS action = sot.getAvailableActions().get(y);
-					advanceState.advance(action);
-					int iAction = action.toInt();
-					int jFirst= iAction%ConfigOthello.BOARD_SIZE;
-					int iFirst= (iAction-jFirst)/ConfigOthello.BOARD_SIZE;
-					vGameState[iFirst][jFirst] = BaseOthello.nextState(advanceState, iFirst, jFirst);
-				}
-			}**/
 		}
-		updateCells(showValueOnGameboard);
+		//updateCells(showValueOnGameboard);
 	}
+	
+	private void updatePlayersMove(int player) {
+		switch(player) {
+		case(1):
+			gameStats.changeNextMove("Next move: Black");
+			break;
+		case(-1): 
+			gameStats.changeNextMove("Next move: White");
+			break;
+		}
+	}
+	
+	/**
+	 * Updating the {@code Gamestats}
+	 * @param blackDiscs	Amount of black discs placed on the board
+	 * @param whiteDiscs	Amount of white discs placed on the board
+	 * @param turnCount		turn counter range 1-60
+	 */
+	private void updateGameStats(int blackDiscs, int whiteDiscs, int turnCount) {
+		gameStats.setWhiteCount(whiteDiscs);
+		gameStats.setBlackCount(blackDiscs);
+		gameStats.setTurnCount(turnCount);
+	}
+	
+	
+	
+	
+	
 
 	/**
 	 * Updating the cell's color and text.
@@ -273,35 +231,63 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 				if (Double.isNaN(value)) {
 					valueText = "   ";
 				} else {
-					valueText = " "+(int)(value*100);				// WK *100
-					if (value<0) valueText = ""+(int)(-value*100);	// WK *100
+					valueText = " "+(int)(value*100);
+					if (value<0) valueText = ""+(int)(-value *100);
 					if (value>maxValue) {
 						maxValue=value;
 						maxI=i;
 						maxJ=j;
 					}
 				}
+				board[i][j].setBorder((m_so.getLastMove() == (i * ConfigOthello.BOARD_SIZE + j)));
 				if(m_so.getCurrentGameState()[i][j] == 1) {
-					board[i][j].setForeground(Color.BLACK);
+					
 					board[i][j].setBackground(Color.WHITE);
 					counterWhite++;
 				}
 				else if(m_so.getCurrentGameState()[i][j] == BaseOthello.getOpponent(1)) {
-					board[i][j].setForeground(Color.WHITE);
 					board[i][j].setBackground(Color.BLACK);
 					counterBlack++;
 				}
 				else {
-					board[i][j].setText("");
+					board[i][j].markAsPossiblePlacement(
+							m_so.getAvailableActions().contains(
+									new Types.ACTIONS(i*ConfigOthello.BOARD_SIZE + j)));
 					board[i][j].setForeground(Color.RED);
-					board[i][j].setBackground(boardColor);
 					if(showValueOnGameboard) board[i][j].setText(valueText);
 				}
 			}
 		}
-		leftInfoWhite.setText("White: " + counterWhite);
-		leftInfoBlack.setText("Black: " + counterBlack);
-		
+	}
+	
+	/**
+	 * Human places a disc on board[x][y]
+	 * @param x	index for board[x][]
+	 * @param y index for board[][y]
+	 */
+	public void hGameMove(int x, int y) {
+		int iAction = ConfigOthello.BOARD_SIZE * x + y;
+		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
+		if( m_so.isLegalAction(act)) {			
+			m_so.advance(act);
+			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+			arenaActReq = true;	
+			updateBoard(m_so, false, false);
+		}
+		else {
+			System.out.println("Not Allowed: illegal Action");
+		}
+	}
+	
+	public void inspectMove(int x, int y)
+	{
+		int iAction = ConfigOthello.BOARD_SIZE * x + y;
+		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
+		if(m_so.isLegalAction(act)) {
+			m_Arena.setStatusMessage("Inspecting the value function ...");
+			m_so.advance(act);
+		}else m_Arena.setStatusMessage("Desired Action is not legal");
+		arenaActReq = true;
 	}
 	
 	
@@ -312,8 +298,6 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 
 	@Override
 	public void toFront() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -362,15 +346,5 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		return m_so;
 	}
 	
-	class ActionHandler implements ActionListener
-	{
-		int i, j;
-		ActionHandler(int i, int j){
-			this.i = i;
-			this.j = j;
-		}
-		ActionHandler(){
-		}
-		public void actionPerformed(ActionEvent e) {}
-	}
+	
 }
