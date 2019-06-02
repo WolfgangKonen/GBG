@@ -1,6 +1,7 @@
 package games.Othello;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -8,12 +9,20 @@ import java.util.HashSet;
 import org.apache.commons.math3.exception.OutOfRangeException;
 
 import controllers.TD.ntuple2.NTupleFactory;
+import games.Arena;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 
+    /**
+     * Provide a version ID here. Change the version ID for serialization only if a newer version is no 
+     * longer compatible with an older one (older .gamelog or .agt.zip containing this object will
+     * become unreadable or you have to provide a special version transformation)  /WK/
+     */
+    private static final long serialVersionUID = 42L;
+    
 	private int[] actionVector = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8 , 9, 10, 11, 12, 13, 14, 15 , 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 , 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 , 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};;	
 	private int[][] symmetryActions; //Gives a 2D representation of all SymmetryVectors
 	private int[][] actionPositions; //Given a action key, it gives all symmetric actions
@@ -228,7 +237,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 	 * @param boardVector
 	 * @return
 	 */
-	private int[] mirrorHorizontally(int[] boardVector)
+	public int[] mirrorHorizontallyOLD(int[] boardVector)		// WK this is the old, buggy version
 	{
 		int[] result = new int[boardVector.length];
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
@@ -241,6 +250,22 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		}
 		return result;
 	}
+	public int[] mirrorHorizontally(int[] boardVector)		// WK this is the new, correct version
+	{
+		int BS = ConfigOthello.BOARD_SIZE;
+		int[] result = boardVector.clone();
+		int offset = BS*BS;
+		for(int i = 0; i < result.length / 2; i++)
+		{
+			if ((i%8)==0) offset -= BS;
+			int newI = offset+(i%8);
+			int temp = result[i];
+			result[i] = result[newI];
+			result[newI] = temp;
+		}
+		return result;
+	}
+
 
 	/**
 	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 
@@ -360,6 +385,48 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 
 	private static int[] fixedModes = {0, 1, 2, 3};
 
-
+	public static void main(String[] args) {
+//		Arena ar = new ArenaOthello();
+//		StateObservation sob = ar.getGameBoard().getDefaultStartState();
+		XNTupleFuncsOthello xnf = new XNTupleFuncsOthello();
+		int[] bv2 = makeBoardVectorEachCellDifferent(xnf);
+		int[][] sv2 = xnf.symmetryVectors(bv2);
+//		for (int i = 0;  i < 2; i++)
+		for (int i = 0;  i < ConfigOthello.BOARD_SIZE; i++) {
+			System.out.println("*** i="+i+" ***");
+			prettyPrintBoardVector(sv2[i]);
+		}
+		int dummy =1;
+		System.out.println("\nCheck mirrorHorizontally\n  *** Originoal ***");
+		prettyPrintBoardVector(bv2);
+		System.out.println("  *** Mirrored ***");
+		prettyPrintBoardVector(xnf.mirrorHorizontally(bv2));
+		System.out.println("  *** Mirrored (buggy) ***");
+		prettyPrintBoardVector(xnf.mirrorHorizontallyOLD(bv2));
+	}
+	
+	public static int[] makeBoardVectorEachCellDifferent(XNTupleFuncsOthello xnf) {
+		int BS = ConfigOthello.BOARD_SIZE;
+		int [][] gameState = new int[BS][BS];
+		for(int i = 0, n=0;  i < BS; i++) {
+			for(int j = 0; j < BS; j++,n++) {
+				gameState[i][j] = n;
+			}	
+		}
+		StateObservation sob2 = new StateObserverOthello(gameState,1);
+		int[] bv2 = xnf.getBoardVector(sob2);
+		return bv2;		
+	}
+	
+	public static void prettyPrintBoardVector(int[] bv) {
+		int BS = ConfigOthello.BOARD_SIZE;
+		DecimalFormat dform=new DecimalFormat("00");
+		for(int i = 0, n=0;  i < BS; i++) {
+			for(int j = 0; j < BS; j++,n++) {
+				System.out.print(" "+dform.format(bv[n]));
+			}	
+			System.out.println("");
+		}	
+	}
 
 }

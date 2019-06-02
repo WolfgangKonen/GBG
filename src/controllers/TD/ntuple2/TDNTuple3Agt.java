@@ -577,12 +577,12 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		for (int n=0; n<numPlayers; n++) {
 			sLast[n] = null;
 		}
-		int kk= (so.getPlayer()-1+numPlayers)%numPlayers;
+		int kk= (so.getPlayer()-1+numPlayers)%numPlayers;	// p=0,N=1 --> kk=0; p=0,N=2 --> kk=1
 		sLast[kk] = so.getPrecedingAfterstate();
-		// The player who generated 'so' gets so's preceding afterstate as its sLast.
+		// The player kk who generated 'so' gets so's preceding afterstate as its sLast.
 		// (This is important for RubiksCube, in order to learn from the first move on in 
 		// this deterministic single-player game: The player who generated 'so' is so.getPlayer()
-		// itself and the preceding afterstate is 'so' itself.)
+		// itself, thus kk=0, and the preceding afterstate is 'so' itself.)
 		
 		m_counter=0;		// /WK/bug fix 2019-05-21
 		m_finished=false;	// /WK/bug fix 2019-05-21
@@ -596,7 +596,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        ns = new NextState(this,s_t,a_t);	
 	        curPlayer = ns.getSO().getPlayer();
 	        nextPlayer = ns.getNextSO().getPlayer();
-	        R = ns.getNextRewardTupleCheckFinished(epiLength);
+	        R = ns.getNextRewardTupleCheckFinished(epiLength);	// this sets m_finished
 	        
 	        adaptAgentV(curPlayer, R, ns);
 	        

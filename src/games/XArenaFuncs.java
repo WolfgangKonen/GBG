@@ -101,7 +101,7 @@ public class XArenaFuncs
 	 * 
 	 * @see #fetchAgents(XArenaButtons)
 	 */
-	protected PlayAgent constructAgent(int n, String sAgent, XArenaButtons m_xab) throws IOException {
+	public PlayAgent constructAgent(int n, String sAgent, XArenaButtons m_xab) throws IOException {
 		PlayAgent pa = null;
 		int maxGameNum=Integer.parseInt(m_xab.GameNumT.getText());
 		int featmode = m_xab.tdPar[n].getFeatmode();

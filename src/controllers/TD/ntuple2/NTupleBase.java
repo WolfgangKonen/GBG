@@ -247,13 +247,17 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	}
 	
 	/**
+	 * *** This method currently works only for N<=2 players! ***
+	 * <p>
 	 * @param reward = r(s_{t+1}|p_{t+1}) with s_{t+1} = ns.nextSO
 	 */
 	@Override
 	public void incrementWinCounters(double reward, NextState ns) {
 		if (reward==0.0) tieCounter++;
-		if (reward==-1.0 & ns.refer.getPlayer()==0) winXCounter++;
+		if (reward==-1.0 & ns.refer.getPlayer()==0) winXCounter++;		// ns.refer = s_{t}
 		if (reward==-1.0 & ns.refer.getPlayer()==1) winOCounter++;
+		if (reward==+1.0 & ns.refer.getPlayer()==0) winOCounter++;
+		if (reward==+1.0 & ns.refer.getPlayer()==1) winXCounter++;
 	}
 	
 	/**

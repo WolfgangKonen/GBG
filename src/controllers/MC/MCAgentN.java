@@ -180,7 +180,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                 	//fetch the first action (of rollout) and execute it on the game state:
                     newSob.advance(actions.get(firstActionIdentifier));
 
-                    //construct Random Agent and let it simulate a (random) rollout:
+                    //construct Random Agent and let it simulate a (random) rollout until game over:
                     agent.startAgent(newSob, depth);			// contains BUG1 fix
                     
                     avgScoreTuple.combine(newSob.getGameScoreTuple(), cOP1, sobPlayer, currProbab);

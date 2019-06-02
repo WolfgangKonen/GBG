@@ -1264,10 +1264,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	
 	// Callback function from NextState (because the counters need to be on the agent-global
 	// level)
+	// *** This method currently works only for N<=2 players ***
 	public void incrementWinCounters(double reward, NextState ns) {
-		if (reward==0.0) tieCounter++;
-		if (reward==1.0 & ns.refer.getPlayer()==0) winXCounter++;
-		if (reward==1.0 & ns.refer.getPlayer()==1) winOCounter++;
+		if (reward== 0.0) tieCounter++;
+		if (reward==+1.0 & ns.refer.getPlayer()==0) winXCounter++;
+		if (reward==+1.0 & ns.refer.getPlayer()==1) winOCounter++;
+		if (reward==-1.0 & ns.refer.getPlayer()==0) winOCounter++;
+		if (reward==-1.0 & ns.refer.getPlayer()==1) winXCounter++;
 	}
 	
 	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
