@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -26,13 +27,11 @@ public class Legend extends JPanel {
 		textRedMark = new JLabel("last Move: ");
 		textGreenMark = new JLabel("possible Moves: ");
 		// red mark
-		redMark = new JLabel("  ");
-		redMark.setBackground(ConfigOthello.LASTMOVECOLOR);
-		redMark.setOpaque(true);
+		redMark = new JLabel("   ");
+		redMark.setBorder(BorderFactory.createLineBorder(ConfigOthello.LASTMOVECOLOR, 2));
 		//green mark
-		greenMark = new JLabel("  ");
-		greenMark.setBackground(ConfigOthello.POSSIBLEMOVECOLOR);
-		greenMark.setOpaque(true);
+		greenMark = new JLabel("   ");
+		greenMark.setBorder(BorderFactory.createLineBorder(ConfigOthello.POSSIBLEMOVECOLOR, 2));
 		add(textRedMark);
 		add(redMark);
 		add(textGreenMark);

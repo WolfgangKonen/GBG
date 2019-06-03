@@ -43,11 +43,13 @@ public class StateObserverOthello extends ObserverBase{
 	
 	public StateObserverOthello()
 	{
+		
 		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		currentGameState[3][3] = 1;
 		currentGameState[3][4] = BaseOthello.getOpponent(1);
 		currentGameState[4][3] = BaseOthello.getOpponent(1);
 		currentGameState[4][4] = 1;
+//		BaseOthello.deepCopyGameState(ConfigOthello.DEBUG[2], currentGameState);
 		playerNextMove = getOpponent(1);	// /WK/ the correct choice
 		countBlack = 2;
 		countWhite = 2;
@@ -57,13 +59,12 @@ public class StateObserverOthello extends ObserverBase{
 	
 	public StateObserverOthello(int[][] gameState, int playerMove, ArrayList<Integer> lm, int turn)
 	{
-		System.out.println("CREATING NEW OBJ");
 		this.playedMoves = lm;
 		this.turn = turn;
-		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
-		playerNextMove = playerMove;
+		this.currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
+		this.playerNextMove = playerMove;
 		BaseOthello.deepCopyGameState(gameState, currentGameState);
-		setAvailableActions();
+		this.setAvailableActions();
 	}
 	
 	public ArrayList<ACTIONS> getAllAvailableActions(){
@@ -87,14 +88,9 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	@Override
 	public boolean isGameOver() {
-		if(availableActions.size() == 0) {
-			playerNextMove = getOpponent(playerNextMove); // Used for passing a turn
-			setAvailableActions();
-			if(availableActions.size() == 0) {
-				return true;
-			}
-		}
-		return false;
+		return (BaseOthello.possibleActions(currentGameState, playerNextMove).size() == 0 
+				&& 
+				BaseOthello.possibleActions(currentGameState, this.getOpponent(playerNextMove)).size() == 0 );
 	}
 
 	@Override
@@ -210,17 +206,14 @@ public class StateObserverOthello extends ObserverBase{
 		int i = (iAction-j) / ConfigOthello.BOARD_SIZE;
 		BaseOthello.flip(currentGameState, i, j, playerNextMove);
 		currentGameState[i][j] = playerNextMove;
-		playerNextMove = getOpponent(playerNextMove);
-		setAvailableActions();
 		super.incrementMoveCounter();
-		if(availableActions.size() == 0) {
-			playerNextMove = getOpponent(playerNextMove); // Used for passing a turn
-			setAvailableActions();
+		if(BaseOthello.possibleActions(currentGameState, 
+				this.getOpponent(playerNextMove)).size() != 0 ) {
+			playerNextMove = getOpponent(playerNextMove); 
 		}
+		setAvailableActions();
 		playedMoves.add(action.toInt());
 		turn++;
-//		System.out.println("TURN: " + turn);
-//		System.out.println("Last move: " + getLastMove());
 	}
 
 	/**
