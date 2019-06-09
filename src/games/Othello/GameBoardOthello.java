@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
@@ -130,12 +131,14 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 				}
 			}
 		}
-		updateCells(false);
+		updateBoard(m_so,true,false);
 	}
 
 	/**
-	 * Using the following helper methods:<ol>
+	 * Using the following helper methods to update the user interface
+	 * <ol>
 	 * <li> {@link #updatePlayersMove(int)} to update the label from {@link Gamestats#setGameWinner(int)} </li>
+	 * <li> {@link #updateGameStats(int, int, int, int)} to update all turn based label from {@link GameStats} </li>
 	 * </ol>
 	 * -- updatePlayersMove
 	 * -- update Count
@@ -146,23 +149,15 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 			assert ( so instanceof StateObserverOthello) : "so is not an instance of StateOberverOthello";
 			StateObserverOthello sot = ((StateObserverOthello) so);
 			m_so = sot;
-			updateCells(showValueOnGameboard);
 			int player=Types.PLAYER_PM[m_so.getPlayer()];
-			updatePlayersMove(player);
 			m_so.setCountBlack(counterBlack);
 			m_so.setCountWhite(counterWhite);
-			updateGameStats(m_so.getCountBlack(),m_so.getCountWhite(),m_so.getTurn());
+			updateGameStats(m_so.getCountBlack(),m_so.getCountWhite(),m_so.getTurn(),player);
 			if(m_so.isGameOver()) 
 			{
-				if(m_so.getCountBlack() > m_so.getCountWhite()) {
-					gameStats.setGameWinner("Winner: Black");
-				}else if(m_so.getCountBlack() == m_so.getCountWhite()) {
-					gameStats.setGameWinner("Tie");
-				}else {
-					gameStats.setGameWinner("Winner: Black");
-				}
+				System.out.println("TURN: " + m_so.getTurn());
+				
 			}
-			
 			if(showValueOnGameboard && sot.getStoredValues() != null) {
 				for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
 					for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
@@ -177,10 +172,22 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 				}
 			}
 		}
-		//updateCells(showValueOnGameboard);
+		updateCells(showValueOnGameboard);
+		
 	}
 	
-	private void updatePlayersMove(int player) {
+	
+	/**
+	 * Updating the {@link Gamestats} object.
+	 * @param blackDiscs	Amount of black discs placed on the board
+	 * @param whiteDiscs	Amount of white discs placed on the board
+	 * @param turnCount		turn counter range 1-60
+	 * @param player		player who has to make the next move
+	 */
+	private void updateGameStats(int blackDiscs, int whiteDiscs, int turnCount, int player) {
+		gameStats.setWhiteCount(whiteDiscs);
+		gameStats.setBlackCount(blackDiscs);
+		gameStats.setTurnCount(turnCount);
 		switch(player) {
 		case(1):
 			gameStats.changeNextMove("Next move: Black");
@@ -190,27 +197,10 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 			break;
 		}
 	}
-	
-	/**
-	 * Updating the {@code Gamestats}
-	 * @param blackDiscs	Amount of black discs placed on the board
-	 * @param whiteDiscs	Amount of white discs placed on the board
-	 * @param turnCount		turn counter range 1-60
-	 */
-	private void updateGameStats(int blackDiscs, int whiteDiscs, int turnCount) {
-		gameStats.setWhiteCount(whiteDiscs);
-		gameStats.setBlackCount(blackDiscs);
-		gameStats.setTurnCount(turnCount);
-	}
-	
-	
-	
-	
-	
 
 	/**
 	 * Updating the cell's color and text.
-	 * Updating the tokenCounters for both player.
+	 * Updating the DiscCounters for both player.
 	 */
 	private void updateCells(boolean showValueOnGameboard)
 	{
@@ -221,6 +211,7 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		counterWhite = 0;
 		for(int i = 0; i < board.length; i++)
 		{
+			
 			for(int j = 0; j < board[i].length; j++)
 			{
 				if(vGameState==null) {
@@ -239,25 +230,33 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 						maxJ=j;
 					}
 				}
+			
 				board[i][j].setBorder((m_so.getLastMove() == (i * ConfigOthello.BOARD_SIZE + j)));
 				if(m_so.getCurrentGameState()[i][j] == 1) {
-					
 					board[i][j].setBackground(Color.WHITE);
+					board[i][j].setText("");
 					counterWhite++;
 				}
 				else if(m_so.getCurrentGameState()[i][j] == BaseOthello.getOpponent(1)) {
 					board[i][j].setBackground(Color.BLACK);
+					board[i][j].setText("");
 					counterBlack++;
 				}
 				else {
 					board[i][j].markAsPossiblePlacement(
 							m_so.getAvailableActions().contains(
 									new Types.ACTIONS(i*ConfigOthello.BOARD_SIZE + j)));
-					board[i][j].setForeground(Color.RED);
-					if(showValueOnGameboard) board[i][j].setText(valueText);
+					board[i][j].setBackground(ConfigOthello.BOARDCOLOR);
+					if(showValueOnGameboard) {
+						// Added so human player does not see any values of the opponent
+						if(arenaActReq) {board[i][j].setText(valueText);} 
+						else {board[i][j].setText("");}
+						board[i][j].setForeground(Color.RED);
+					}else board[i][j].setForeground(ConfigOthello.BOARDCOLOR);
 				}
 			}
 		}
+		this.repaint();
 	}
 	
 	/**
@@ -298,6 +297,8 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 
 	@Override
 	public void toFront() {
+		super.setState(JFrame.NORMAL);
+		super.toFront();
 	}
 
 	@Override
