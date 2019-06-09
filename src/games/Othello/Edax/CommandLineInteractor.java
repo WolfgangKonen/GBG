@@ -51,7 +51,6 @@ public class CommandLineInteractor
 	public String sendAndAwait(String command)
 	{
 		printWriter.println(command);
-		System.out.println("Sending: " + command);
 		try {
 			Thread.sleep(300);
 		} catch (InterruptedException e) {

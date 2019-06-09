@@ -55,11 +55,18 @@ public class StateObserverOthello extends ObserverBase{
 		setAvailableActions();
 	}
 	
-	public StateObserverOthello(int[][] gameState, int playerMove, ArrayList<Integer> lm, int turn)
+	public StateObserverOthello(int[][] gameState, int playerMove, ArrayList<Integer> lastMoves, int turn)
 	{
-		System.out.println("CREATING NEW OBJ");
-		this.playedMoves = lm;
+		this.playedMoves = lastMoves;
 		this.turn = turn;
+		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
+		playerNextMove = playerMove;
+		BaseOthello.deepCopyGameState(gameState, currentGameState);
+		setAvailableActions();
+	}
+	
+	public StateObserverOthello(int[][] gameState, int playerMove)
+	{
 		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		playerNextMove = playerMove;
 		BaseOthello.deepCopyGameState(gameState, currentGameState);
@@ -87,14 +94,8 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	@Override
 	public boolean isGameOver() {
-		if(availableActions.size() == 0) {
-			playerNextMove = getOpponent(playerNextMove); // Used for passing a turn
-			setAvailableActions();
-			if(availableActions.size() == 0) {
-				return true;
-			}
-		}
-		return false;
+		return (BaseOthello.possibleActions(currentGameState, ConfigOthello.PLAYER[this.getPlayer()]).size() == 0 ) &&
+				(BaseOthello.possibleActions(currentGameState, ConfigOthello.OPPONENT[this.getPlayer()]).size() == 0);
 	}
 
 	@Override
