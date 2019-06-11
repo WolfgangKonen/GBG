@@ -35,7 +35,7 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 		if(firstTurn)
 		{
 			firstTurn = false;
-			if(so.getLastMove() == -1) // if nothing was played sofar
+			if(so.getLastMove() == -1) // if nothing was played so far
 			{
 				lastEdaxMove = commandLineInteractor.sendAndAwait("mode 1"); // Edax goes first
 			}
@@ -45,13 +45,12 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 				lastEdaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()));
 			}
 		}
-		else {
-			if(!lastEdaxMove.equals(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove())))
-				lastEdaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()));
-			else
+		else { // some turns were played
+			if(!lastEdaxMove.equals(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()))) // If Edax plays after the opponent played
+				lastEdaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove())); 
+			else // If Edax plays two or more consecutive turns
 				lastEdaxMove = commandLineInteractor.sendAndAwait("play");
 		}
-//		System.out.println("Last SO move: " + so.getLastMove() + " EdaxMove: " + edaxMove);
 		ACTIONS_VT action = new ACTIONS_VT(EdaxMoveConverter.converteEdaxToInt(lastEdaxMove), false, new double[so.getAvailableActions().size()]);
 		so.getPlayer();
 		if(!so.getAvailableActions().contains(action))

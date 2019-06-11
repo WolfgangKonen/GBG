@@ -47,13 +47,6 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		throw new RuntimeException("indexOf: Arr does not contain " + j);
 	}
 
-	private void calcActionVector() {
-		for(int i = 0; i < getNumCells(); i++)
-		{
-
-		}
-	}
-
 	/**
 	 * @return integer of total board cells
 	 */
@@ -384,7 +377,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 	}
 
 	private static int[] fixedModes = {0, 1, 2, 3};
-//
+
 //	public static void main(String[] args) {
 ////		Arena ar = new ArenaOthello();
 ////		StateObservation sob = ar.getGameBoard().getDefaultStartState();
