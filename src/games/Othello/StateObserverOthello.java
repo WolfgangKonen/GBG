@@ -11,20 +11,21 @@ import tools.Types.WINNER;
 /**
  * Class {@link StateObserverOthello} holds any valid Othello game state. It's coded
  * in a two dimensional int[8][8] array, where each index represents either 
- * an empty cell = 0,
+ * an empty cell = 2,
  * an White cell = 1,
- * an black cell = 2
+ * an black cell = 0
  * <pre>
+ * the black starts the game.
  * 	For example the starting state:
  * 												row
- * 			0	0	0	0	0	0	0	0   	0
- * 			0	0	0	0	0	0	0	0		1
- * 			0	0	0	0	0	0	0	0		2
- * 			0	0	0	1	2	0	0	0 		3
- * 			0	0	0	2	1	0	0	0		4
- * 			0	0	0	0	0	0	0	0		5	
- * 			0	0	0	0	0	0	0	0		6
- * 			0	0	0	0	0	0	0	0		7
+ * 			2	2	2	2	2	2	2	2   	0
+ * 			2	2	2	2	2	2	2	2		1
+ * 			2	2	2	2	3	2	2	2		2
+ * 			2	2	2	1	0	3	2	2 		3
+ * 			2	2	3	0	1	2	2	2		4
+ * 			2	2	2	3	2	2	2	2		5	
+ * 			2	2	2	2	2	2	2	2		6
+ * 			2	2	2	2	2	2	2	2		7
  *
  *  	col	0	1	2	3	4	5	6	7	
  */
@@ -32,34 +33,52 @@ public class StateObserverOthello extends ObserverBase{
 
 	
 	
-	public static final long serialVersionUID = 12L;
+	public static final long serialVersionID = 12L;
 	private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
 	
 	private int[][] currentGameState;
-	private int playerNextMove, countBlack, countWhite , turn;
+	private int playerNextMove, countBlack, countWhite;
 	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
-	private ArrayList<Integer> playedMoves = new ArrayList<Integer>();
-
+	private ArrayList<Integer> lastMoves;
+	private int turn;
 	
 	public StateObserverOthello()
 	{
+		lastMoves = new ArrayList<Integer>();
 		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
+		for(int i = 0; i < 8; i++) {
+			for(int j = 0; j < 8; j++)
+			{
+				currentGameState[i][j] = ConfigOthello.EMPTY;
+			}
+		}
 		currentGameState[3][3] = 1;
 		currentGameState[3][4] = BaseOthello.getOpponent(1);
 		currentGameState[4][3] = BaseOthello.getOpponent(1);
 		currentGameState[4][4] = 1;
+//		BaseOthello.deepCopyGameState(ConfigOthello.DEBUG[2], currentGameState);
 		playerNextMove = getOpponent(1);	// /WK/ the correct choice
 		countBlack = 2;
 		countWhite = 2;
 		turn = 0;
+		
 		setAvailableActions();
 	}
 	
-	public StateObserverOthello(int[][] gameState, int playerMove, ArrayList<Integer> lm, int turn)
+	public StateObserverOthello(int[][] gameState, int playerMove, ArrayList<Integer> lastMoves, int turn)
 	{
-		System.out.println("CREATING NEW OBJ");
-		this.playedMoves = lm;
+		this.lastMoves = new ArrayList<Integer>();
+		this.lastMoves = lastMoves;
+		this.currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
+		this.playerNextMove = playerMove;
+		BaseOthello.deepCopyGameState(gameState, currentGameState);
 		this.turn = turn;
+		this.setAvailableActions();
+	}
+	
+	public StateObserverOthello(int[][] gameState, int playerMove)
+	{
+		this.lastMoves = new ArrayList<Integer>();
 		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		playerNextMove = playerMove;
 		BaseOthello.deepCopyGameState(gameState, currentGameState);
@@ -69,7 +88,7 @@ public class StateObserverOthello extends ObserverBase{
 	public ArrayList<ACTIONS> getAllAvailableActions(){
 		ArrayList<ACTIONS> retVal = new ArrayList<>();
 		for(int i = 0, n = 0; i < currentGameState.length; i++) {
-			for(int j = 0; j < currentGameState[0].length; j++,n++)
+			for(int j = 0; j < currentGameState[i].length; j++,n++)
 			{
 				if(n != 27 && n != 28 && n != 35 && n != 36) retVal.add(new ACTIONS(n));
 			}
@@ -78,8 +97,9 @@ public class StateObserverOthello extends ObserverBase{
 	}
 	
 	@Override
-	public StateObservation copy() {
-		return new StateObserverOthello(currentGameState,playerNextMove,playedMoves,turn);
+	public StateObserverOthello copy() {
+		StateObserverOthello so = new StateObserverOthello(this.currentGameState, this.playerNextMove);
+		return so;
 	}
 	
 	/**
@@ -87,14 +107,8 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	@Override
 	public boolean isGameOver() {
-		if(availableActions.size() == 0) {
-			playerNextMove = getOpponent(playerNextMove); // Used for passing a turn
-			setAvailableActions();
-			if(availableActions.size() == 0) {
-				return true;
-			}
-		}
-		return false;
+		return (BaseOthello.possibleActions(currentGameState, playerNextMove).size() == 0 ) &&
+				(BaseOthello.possibleActions(currentGameState, this.getOpponent(playerNextMove)).size() == 0);
 	}
 
 	@Override
@@ -112,6 +126,9 @@ public class StateObserverOthello extends ObserverBase{
 		return true;
 	}
 
+	/**
+	 * Determines the winner after the game is over by counting each players discs
+	 */
 	@Override
 	public WINNER getGameWinner() {
 		assert isGameOver() :"Game isn't over";
@@ -120,8 +137,8 @@ public class StateObserverOthello extends ObserverBase{
 		{
 			for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
 			{
-				if(currentGameState[i][j] == playerNextMove) countPlayer++;
-				if(currentGameState[i][j] == (getOpponent(playerNextMove))) countOpponent++;
+				if(currentGameState[i][j] == this.getPlayer()) countPlayer++;
+				if(currentGameState[i][j] == (this.getOpponent(playerNextMove))) countOpponent++;
 			}
 		}
 		if(countPlayer > countOpponent) return WINNER.PLAYER_WINS;
@@ -159,7 +176,6 @@ public class StateObserverOthello extends ObserverBase{
 	}
 
 	/**
-	 * Called by advance();
 	 * updating the ArrayList, which contains all possible actions for the actual 
 	 * players move.
 	 */
@@ -201,26 +217,19 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	@Override
 	public void advance(ACTIONS action) {
-//		if(!this.getAvailableActions().contains(action))
-//		{
-//			return; 
-//		}
 		int iAction = action.toInt();
 		int j = iAction % ConfigOthello.BOARD_SIZE;
 		int i = (iAction-j) / ConfigOthello.BOARD_SIZE;
 		BaseOthello.flip(currentGameState, i, j, playerNextMove);
 		currentGameState[i][j] = playerNextMove;
-		playerNextMove = getOpponent(playerNextMove);
-		setAvailableActions();
 		super.incrementMoveCounter();
-		if(availableActions.size() == 0) {
-			playerNextMove = getOpponent(playerNextMove); // Used for passing a turn
-			setAvailableActions();
+		if(BaseOthello.possibleActions(currentGameState, 
+				this.getOpponent(playerNextMove)).size() != 0 ) {
+			playerNextMove = getOpponent(playerNextMove); 
 		}
-		playedMoves.add(action.toInt());
+		setAvailableActions();
+		lastMoves.add(action.toInt());
 		turn++;
-//		System.out.println("TURN: " + turn);
-//		System.out.println("Last move: " + getLastMove());
 	}
 
 	/**
@@ -228,7 +237,7 @@ public class StateObserverOthello extends ObserverBase{
 	*/
 	@Override
 	public int getPlayer() {
-		return playerNextMove == getOpponent(1) ? 0 : 1;
+		return playerNextMove;
 	}
 
 	@Override
@@ -237,8 +246,8 @@ public class StateObserverOthello extends ObserverBase{
 	}
 
 	public int getLastMove() {
-		if (playedMoves.size() == 0) return -1;
-		return playedMoves.get(playedMoves.size()-1);
+		if (lastMoves.size() == 0) return -1;
+		return lastMoves.get(lastMoves.size()-1);
 	}
 	
 	
@@ -248,7 +257,7 @@ public class StateObserverOthello extends ObserverBase{
 	@Override
 	public double getGameScore(StateObservation referringState) {
 		int retVal = (referringState.getPlayer() == this.playerNextMove) ? 1 :(-1); // WK: probably the right choice
-		if(BaseOthello.isGameOver(this.getCurrentGameState())) {		// WK bug fix		
+		if(this.isGameOver()) {		// 	Working correctly now	
 			Types.WINNER win = this.getGameWinner();
 			switch(win) {
 			case PLAYER_LOSES:
@@ -302,7 +311,7 @@ public class StateObserverOthello extends ObserverBase{
 		this.playerNextMove = p;
 	}
 	
-	private int getOpponent(int player)
+	public int getOpponent(int player)
 	{
 		return BaseOthello.getOpponent(player);
 	}
@@ -311,5 +320,5 @@ public class StateObserverOthello extends ObserverBase{
 	public int getCountBlack() { return countBlack;}
 	public void setCountWhite(int w) {countWhite = w;}
 	public void setCountBlack(int b) {countBlack = b;}
-	public int getTurn() {return turn;}
+	public int getTurn() { return turn; }
 }

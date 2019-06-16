@@ -48,26 +48,47 @@ public class CommandLineInteractor
 		}
 	}
 
-	public String sendAndAwait(String command)
+	/**
+	 * Sends a command to the commandLine and awaits a response
+	 * @param command The command to be sent
+	 * @param timeOut The amount of time in milliseconds to wait for a response
+	 * @return Response of the command line
+	 */
+	public String sendAndAwait(String command, long timeOut)
 	{
 		printWriter.println(command);
-		System.out.println("Sending: " + command);
 		try {
 			Thread.sleep(300);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return commandLineReader.getLastMatch();			
+		return commandLineReader.getLastMatch(timeOut);			
 	}
 
+	/**
+	 * Sends a command to the command line and awaits a response with 5 seconds for the timeOut, see {@code sendAndAwait(String command, long timeOut)} for reference
+	 * @param command The command to be sent
+	 * @return Response of the command line
+	 */
+	public String sendAndAwait(String command)
+	{
+		return sendAndAwait(command, 5000);
+	}
+	
+	/**
+	 * Sends a command to the command line without expecting a response
+	 * @param command The command to be sent
+	 */
 	public void sendCommand(String command)
 	{
 		printWriter.println(command);
 	}
 
+	/**
+	 * Stops the process
+	 */
 	public void stop()
 	{
-		printWriter.println("eof");
 		process.destroy();
 	}
 }
@@ -87,6 +108,7 @@ class SyncPipe implements Runnable
             for (int length = 0; (length = istrm_.read(buffer)) != -1; )
             {
                 ostrm_.write(buffer, 0, length);
+                ostrm_.flush();
             }
         }
         catch (Exception e)

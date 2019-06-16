@@ -1,7 +1,11 @@
 package games.Othello.Edax;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -12,13 +16,14 @@ public class CommandLineReader implements Runnable
 	private final InputStream inputStream;
 	private final Pattern regexPattern;
 	private final int regexGroup;
+	private BufferedReader bufferedReader;
 	
 	private Semaphore matchSemaphore;
 	
 	private String lastMatch;
 	
 	/**
-	 * Creates a CommandLineReader
+	 * Creates a CommandLineReader that will return the whole content of the CommandLine
 	 * @param input The InputStream of the CommandLine
 	 */
 	public CommandLineReader(InputStream input)
@@ -27,7 +32,7 @@ public class CommandLineReader implements Runnable
 	}
 	
 	/**
-	 * Creates a CommandLineReader
+	 * Creates a CommandLineReader that will only return information according to the given regex
 	 * @param input The inputstream of the commandLine
 	 * @param pattern The regex pattern the Reader is looking for
 	 * @param group The regex group the Reader is looking for
@@ -38,23 +43,26 @@ public class CommandLineReader implements Runnable
 		regexPattern = Pattern.compile(pattern);
 		regexGroup = group;
 		
+		bufferedReader = new BufferedReader(new InputStreamReader(input));
+		
 		matchSemaphore = new Semaphore(0);
 	}
 	
+	/**
+	 * The run method. Inherited from {@link Runnable}
+	 */
 	public void run()
 	{
 		try
 		{
-			byte[] buffer = new byte[2048];
-			while (inputStream.read(buffer) != -1)
+			String line;
+			while((line = bufferedReader.readLine()) != null)
 			{
-				String str = new String(buffer, StandardCharsets.UTF_8);
+				String str = line;
 
 				Matcher m = regexPattern.matcher(str);
 				if(m.find()) {
 					lastMatch = m.group(regexGroup);
-					System.out.println("Last Match: " + lastMatch);
-					buffer = new byte[2048];
 					matchSemaphore.release();
 				}
 			}
@@ -65,12 +73,17 @@ public class CommandLineReader implements Runnable
 		}
 	}
 	
-	public String getLastMatch()
+	/**
+	 * Returns the last match written to the command line
+	 * @param timeOut The time in milliseconds to wait for an match
+	 * @return The last match
+	 */
+	public String getLastMatch(long timeOut)
 	{
 		try 
 		{
-			if(matchSemaphore.tryAcquire(5000, TimeUnit.MILLISECONDS))
-			{
+			if(matchSemaphore.tryAcquire(timeOut, TimeUnit.MILLISECONDS))
+			{	
 				return lastMatch;
 			}
 		}
@@ -78,6 +91,15 @@ public class CommandLineReader implements Runnable
 		{
 			e.printStackTrace();
 		}
-		return "";
+		return "-1";
+	}
+	
+	/**
+	 * Returns the last match written to the command line, with a default timeout of 5 seconds
+	 * @return the last match
+	 */
+	public String getLastMatch()
+	{
+		return getLastMatch(5000);
 	}
 }

@@ -110,34 +110,8 @@ public class BaseOthello implements Serializable
 
 	/**
 	 * 
-	 * @param cgs  current game state
-	 * @return true if no possible action is available for any player.
-	 */
-	public static boolean isGameOver(int[][] cgs)
-	{
-		if(possibleActionsTotal(cgs,1) == 0) return true;
-		return false;
-	}
-
-	public static int possibleActionsTotal(int[][] currentGameState, int player)
-	{
-		int retVal = 0;
-		for(int i = 0, n = 0; i < currentGameState.length; i++) {
-			for(int j = 0; j < currentGameState[0].length; j++,n++)
-			{
-				if(currentGameState[i][j] == 0) {
-					if(isLegalAction(currentGameState,i,j,player)) retVal++;
-					if(isLegalAction(currentGameState,i,j, getOpponent(player))) retVal++;
-				}
-			}
-		}
-		return retVal;
-	}
-
-	/**
-	 * 
 	 * @param currentGameState the game state of the board
-	 * @param player who has to place a token   2 = Black    1 = White
+	 * @param player who has to place a token   0 = Black    1 = White
 	 * @return returns an ArrayList with all possible Actions from which can be picked from.
 	 */
 	public static ArrayList<ACTIONS> possibleActions(int[][] currentGameState, int player)
@@ -146,7 +120,7 @@ public class BaseOthello implements Serializable
 		for(int i = 0, n = 0; i < currentGameState.length; i++) {
 			for(int j = 0; j < currentGameState[0].length; j++, n++)
 			{
-				if(currentGameState[i][j] == 0) {
+				if(currentGameState[i][j] == ConfigOthello.EMPTY) {
 					if(isLegalAction(currentGameState,i,j,player)) {
 						
 						retVal.add(new ACTIONS(n));
@@ -159,11 +133,11 @@ public class BaseOthello implements Serializable
 	}
 
 	/**
-	 * 0 = Empty 1 = white 2 = Black
+	 * 2 = Empty 1 = white 0 = Black
 	 * @param cgs currentGameState[i][j]
 	 * @param i index
 	 * @param j index
-	 * @param player who has to place a token   2 = Black    1 = White
+	 * @param player who has to place a token   0 = Black    1 = White
 	 * @return
 	 */
 	private static boolean isLegalAction(int[][] cgs, int i, int j, int player) 
@@ -188,12 +162,12 @@ public class BaseOthello implements Serializable
 	 * @param playerColor	integer -1 or 1 representing the actual player.
 	 * @return
 	 */
-	private static boolean validateAction(int[][] cgs, int i, int j, Modifier x, int playerColor) 
+	private static boolean validateAction(int[][] cgs, int i, int j, Modifier x, int player) 
 	{
 		while(inBounds(i+x.x,j+x.y))
 		{
-			if(cgs[(i+x.x)][(j+x.y)] == playerColor) return true;
-			if(cgs[(i+x.x)][(j+x.y)] == 0) return false; 
+			if(cgs[(i+x.x)][(j+x.y)] == player) return true;
+			if(cgs[(i+x.x)][(j+x.y)] == ConfigOthello.EMPTY) return false; 
 			
 			i += x.x;
 			j += x.y;
@@ -219,7 +193,7 @@ public class BaseOthello implements Serializable
 			int setY = j;
 			while(inBounds(setX += x.x, setY += x.y))
 			{
-				if(cgs[setX][setY] == 0) {
+				if(cgs[setX][setY] == ConfigOthello.EMPTY) {
 					break;
 				}
 
@@ -259,7 +233,7 @@ public class BaseOthello implements Serializable
 	 */
 	public static int getOpponent(int player)
 	{
-		return player == 1 ? 2 : 1;
+		return player == ConfigOthello.WHITE ? ConfigOthello.BLACK : ConfigOthello.WHITE;
 	}
 	
 

@@ -13,8 +13,9 @@ import tools.Types.ScoreTuple;
 
 public class Edax extends AgentBase implements PlayAgent, Serializable
 {
-	private static final long serialVersionUID = 13l;
+	private static final long serialVersionID = 13l;
 	private boolean firstTurn = true;
+	private String lastEdaxMove;
 	
 	private CommandLineInteractor commandLineInteractor;
 	
@@ -29,36 +30,37 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
 		assert sob instanceof StateObserverOthello: "sob not instance of StateObserverOthello";
-		StateObserverOthello so = (StateObserverOthello) sob;
-		
-		String edaxMove = "";
+		StateObserverOthello so = (StateObserverOthello) sob.copy();
 		
 		if(firstTurn)
 		{
 			firstTurn = false;
-			if(so.getLastMove() == -1) // if nothing was played sofar
+			if(so.getLastMove() == -1) // if nothing was played so far
 			{
-				edaxMove = commandLineInteractor.sendAndAwait("mode 1"); // Edax goes first
+				lastEdaxMove = commandLineInteractor.sendAndAwait("mode 1"); // Edax goes first
 			}
 			else
 			{
 				commandLineInteractor.sendCommand("mode 0"); // Edax goes second
-				edaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()));
+				lastEdaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()));
 			}
 		}
-		else {
-			edaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()));
-			
+		else { // some turns were played
+			if(!lastEdaxMove.equals(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove()))) // If Edax plays after the opponent played
+				lastEdaxMove = commandLineInteractor.sendAndAwait(EdaxMoveConverter.ConverteIntToEdaxMove(so.getLastMove())); 
+			else // If Edax plays two or more consecutive turns
+				lastEdaxMove = commandLineInteractor.sendAndAwait("play");
 		}
-		System.out.println("Last SO move: " + so.getLastMove() + " EdaxMove: " + edaxMove);
-		ACTIONS_VT action = new ACTIONS_VT(EdaxMoveConverter.converteEdaxToInt(edaxMove), false, new double[so.getAvailableActions().size()]);
+		ACTIONS_VT action = new ACTIONS_VT(EdaxMoveConverter.converteEdaxToInt(lastEdaxMove), false, new double[so.getAvailableActions().size()]);
+		so.getPlayer();
 		if(!so.getAvailableActions().contains(action))
 		{
-			System.err.println("EDAX IST AM CHEATEN!");
+			System.err.println("EDAX IST AM SCHUMMELN!");
 		}
 		
 		return action;
 	}
+	
 
 	@Override
 	public double getScore(StateObservation sob) {

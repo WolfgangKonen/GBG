@@ -25,7 +25,6 @@ public class EdaxMoveConverter
 	public static int converteEdaxToInt(String move)
 	{
 		move = move.trim();
-		System.out.println(move);
 		int j = letterToIntConverter(move.charAt(0));
 		int i = Integer.parseInt("" + move.charAt(1));
 		return (i-1) * ConfigOthello.BOARD_SIZE + j;

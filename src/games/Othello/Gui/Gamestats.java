@@ -30,33 +30,23 @@ public class Gamestats extends JPanel{
 
 	private int turn;
 	
-	private JLabel nextMove, whiteCount, blackCount, turnCount, gameWinner;
+	private JLabel nextMove, whiteCount, blackCount, turnCount;
 	
 	public Gamestats() {
 		nextMove = createLabel("Next move: Black");
 		whiteCount = createLabel("White: 2");
 		blackCount = createLabel("Black: 2");
 		turnCount = createLabel("Turn: 1");
-		gameWinner = createLabel("Winner: None");
 		setLayout(new FlowLayout(FlowLayout.CENTER,(int) Types.GUI_SCALING_FACTOR_Y * 20,
 				(int) Types.GUI_SCALING_FACTOR_Y * 10));
 		setBackground(Types.GUI_BGCOLOR);
-		this.add(whiteCount);
 		this.add(blackCount);
+		this.add(whiteCount);
 		this.add(turnCount);
 		this.add(nextMove);
-		this.add(gameWinner);
 	}
 	
-	/**
-	 * Updates the JLabel {@code gameWinner}, which displays the winner after
-	 * the {@link StateObserverOthello} signals that the game ended.</br>
-	 * The only known caller using this method is {@link GameBoardOthello}
-	 * @param text "Winner: Black" or "Winner: White" or "Tie"
-	 */
-	public void setGameWinner(String text) {
-		this.gameWinner.setText(text);
-	}
+	
 	
 	public void setWhiteCount(int amountOfWhiteDiscs) {
 		this.whiteCount.setText("White: " + amountOfWhiteDiscs);
@@ -86,4 +76,3 @@ public class Gamestats extends JPanel{
 	}
 	
 }
-
