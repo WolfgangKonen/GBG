@@ -243,7 +243,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	}
 
 	/**
-	 * @return 	{0,1} for the player to move next. 
+	 * @return 	{0,1} for the player to move in this state 
 	 * 			Player 0 is X, the player who starts the game. Player 1 is O.
 	 */
 	public int getPlayer() {

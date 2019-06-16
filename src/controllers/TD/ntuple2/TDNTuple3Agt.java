@@ -456,6 +456,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	            	vLastNew = m_Net.getScoreI(curBoard,curPlayer);
 	            	int dummy=1;
 	    		}
+            	ScoreTuple sc1 = s_next.getGameScoreTuple();
+            	ScoreTuple sc2 = this.getScoreTuple(s_next);
 	    		String s1 = sLast[curPlayer].stringDescr();
 	    		String s2 = s_next.stringDescr();
 	    		if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
@@ -518,6 +520,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	    			if (m_DEBG) {
 	    	    		if (s_next.isGameOver()) {
 	    	            	vLastNew = m_Net.getScoreI(curBoard,n);
+	    	            	ScoreTuple sc1 = s_next.getGameScoreTuple();
+	    	            	ScoreTuple sc2 = this.getScoreTuple(s_next);
 	    	            	int dummy=1;
 	    	    		}
 	    	    		String s1 = sLast[n].stringDescr();

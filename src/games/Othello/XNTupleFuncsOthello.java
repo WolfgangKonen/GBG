@@ -2,6 +2,7 @@ package games.Othello;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -389,7 +390,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 //		Arena ar = new ArenaOthello();
 //		StateObservation sob = ar.getGameBoard().getDefaultStartState();
 		XNTupleFuncsOthello xnf = new XNTupleFuncsOthello();
-		int[] bv2 = makeBoardVectorEachCellDifferent(xnf);
+		int[] bv2 = xnf.makeBoardVectorEachCellDifferent();
 		int[][] sv2 = xnf.symmetryVectors(bv2);
 //		for (int i = 0;  i < 2; i++)
 		for (int i = 0;  i < ConfigOthello.BOARD_SIZE; i++) {
@@ -405,7 +406,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		prettyPrintBoardVector(xnf.mirrorHorizontallyOLD(bv2));
 	}
 	
-	public static int[] makeBoardVectorEachCellDifferent(XNTupleFuncsOthello xnf) {
+	public int[] makeBoardVectorEachCellDifferent() {
 		int BS = ConfigOthello.BOARD_SIZE;
 		int [][] gameState = new int[BS][BS];
 		for(int i = 0, n=0;  i < BS; i++) {
@@ -413,8 +414,8 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 				gameState[i][j] = n;
 			}	
 		}
-		StateObservation sob2 = new StateObserverOthello(gameState,1);
-		int[] bv2 = xnf.getBoardVector(sob2);
+		StateObservation sob2 = new StateObserverOthello(gameState,1, new ArrayList<Integer>(), 0);
+		int[] bv2 = this.getBoardVector(sob2);
 		return bv2;		
 	}
 	

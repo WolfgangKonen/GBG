@@ -27,23 +27,38 @@ public class ValidateStateObserver {
 		ScoreTuple sc;
 		StateObservation newSob = sob.copy();
 		boolean random=true;
-		boolean silent=true;
+		boolean silent=true, verbose=true;
+		//
+		// Check if sob.getGameScoreTuple runs correctly through and returns valid numbers.
+		//		
+		int n=0;
 		while(!newSob.isGameOver()) {
 			sc = newSob.getGameScoreTuple();
-			checkScoreTuple(sc,newSob);
+			if (n++ > 4) verbose=false;
+			checkScoreTuple(sc,newSob,verbose);
 			a = pa.getNextAction2(newSob, random, silent);
 			newSob.advance(a);
 		}
+		System.out.println("getGameScoreTuple check ... OK");
+		//
+		// Check if the final score tuple (which usually contains non-zero rewards) has for 2-player
+		// games a sum of zero, i.e. 2 opposite entries.
+		//
 		sc = newSob.getGameScoreTuple();
-		checkScoreTuple(sc,newSob);
-		System.out.println("getScoreTuple check ... OK");
+		checkScoreTuple(sc,newSob,true);
+		if (sob.getNumPlayers()==2) {
+			assert(sc.scTup[1]==-sc.scTup[0]) : "elements of final ScoreTuple do not sum to zero";
+		}
+		System.out.println("final getScoreTuple check ... OK");
 	}
 
-	private boolean checkScoreTuple(ScoreTuple sc, StateObservation sob) {
+	private boolean checkScoreTuple(ScoreTuple sc, StateObservation sob, boolean verbose) {
 		double scMin = sob.getMinGameScore();
 		double scMax = sob.getMaxGameScore();
-		System.out.print(sc);
-		System.out.println("     "+scMin+"-->"+ scMax);
+		if (verbose) {
+			System.out.print(sc);
+			System.out.println("     "+scMin+"-->"+ scMax);
+		}
 		for (int i=0; i<sc.scTup.length; i++) {
 			assert !Double.isNaN(sc.scTup[i]);
 			assert Double.isFinite(sc.scTup[i]);		
@@ -53,17 +68,23 @@ public class ValidateStateObserver {
 		return true;
 	}
 	
-	public static void main(String[] args) {
-		Arena ar = new ArenaOthello();
+	private static PlayAgent constructTDNTuple3Agt(Arena ar) {
 		PlayAgent p;
-//		p = new BenchMarkPlayer("bp",1);
-//		p = new RandomAgent("bp",1);
 		try {
 			p = ar.m_xfun.constructAgent(0, "TD-Ntuple-3", ar.m_xab);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			p=null;			
 		}
+		return p;
+	}
+	
+	public static void main(String[] args) {
+		Arena ar = new ArenaOthello();
+		PlayAgent p;
+//		p = new BenchMarkPlayer("bp",1);
+//		p = new RandomAgent("bp",1);
+		p = constructTDNTuple3Agt(ar);
 		
 		//
 		// choose a state observer to validate

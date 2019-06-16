@@ -267,7 +267,7 @@ public interface StateObservation extends Serializable{
 	
 	/**
 	 * 
-	 * @return  {0,1,...,n-1} for an n-player game: <b>who moves next</b>
+	 * @return  {0,1,...,n-1} for an n-player game: <b>who moves in this state</b>
 	 */
 	public int getPlayer();
 
