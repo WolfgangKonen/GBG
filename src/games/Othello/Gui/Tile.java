@@ -24,6 +24,7 @@ public class Tile extends JButton{
 	
 	private GameBoardOthello gb;
 	private int index;
+	private boolean isMarked = false;
 	
 	public Tile(GameBoardOthello gb, int i, int j) {
 		setBackground(ConfigOthello.BOARDCOLOR);
@@ -53,8 +54,12 @@ public class Tile extends JButton{
 	public void markAsPossiblePlacement(boolean b) {
 		if(b) this.setBorder(BorderFactory.createLineBorder(ConfigOthello.POSSIBLEMOVECOLOR, 4));
 		else this.setBorder(BorderFactory.createLineBorder(ConfigOthello.NORMALBORDERCOLOR, 2));
+		this.setEnabled(b);
+		isMarked = b;
 	}
 	
+	
+	public boolean isMarked() { return isMarked;}
 	
 	/**
 	 * Adding actionlistener to each tile
@@ -70,7 +75,7 @@ public class Tile extends JButton{
 				if(aTaskState == Arena.Task.PLAY) {
 					gb.hGameMove(i,j); // Human play
 				}else if( aTaskState == Arena.Task.INSPECTV) {
-					gb.inspectMove(i,j); // Inpsect
+					gb.inspectMove(i,j); // Inspect
 				}
 			}
 		});

@@ -26,9 +26,10 @@ import tools.Types.ScoreTuple;
 public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializable {
 
 	
-		
-	private static final long serialVersionUID = 13L;
+	public static final long serialVersionID = 13L;
 	private Random random;
+	private boolean strong = false;
+	private double min, max;
 	/**
 	 * Depending on the mode which player has been chosen
 	 */
@@ -42,6 +43,8 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		super.setAgentState(AgentState.TRAINED);
 		this.mode = mode;
 		random = new Random();
+		min = ConfigOthello.BENCHMIN[mode];
+		max = ConfigOthello.BENCHMAX[mode];
 	}
 	
 	
@@ -57,19 +60,28 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	private double evaluate(StateObservation sob) {
 		assert ( sob instanceof StateObserverOthello) : "sob is not an instance of StateObserverOthello";
 		StateObserverOthello so = (StateObserverOthello)sob;
-		int player = ConfigOthello.OPPONENT[sob.getPlayer()], opponent = ConfigOthello.PLAYER[so.getPlayer()]; // reverse cause the state has been advanced already
+		int player = so.getOpponent(so.getPlayer());// reverse cause the state has been advanced already
+		int opponent = so.getPlayer(); // reverse cause the state has been advanced already
 		double scorePlayer=0;
 		for(int i = 0; i < 8; i++) {
 			for(int j = 0; j < 8; j++) {
-				if(so.getCurrentGameState()[i][j] == player) scorePlayer += 
+				if(so.getCurrentGameState()[i][j] == player) {
+					scorePlayer += ConfigOthello.BENCHMARKPLAYERMAPPING[mode][i* ConfigOthello.BOARD_SIZE + j];
+				}
+				else if(so.getCurrentGameState()[i][j] == opponent) {
+					scorePlayer -= 
 						ConfigOthello.BENCHMARKPLAYERMAPPING[mode][i* ConfigOthello.BOARD_SIZE + j];
-				else if(so.getCurrentGameState()[i][j] == opponent) scorePlayer -= 
-						ConfigOthello.BENCHMARKPLAYERMAPPING[mode][i* ConfigOthello.BOARD_SIZE + j];
+				}
 			}
 		}
 		return scorePlayer;
 	}
 
+	
+	private double normalize(double score) {
+		return (((score - min) * (1 +1))/(max-min)) -1;
+	}
+	
 	/**
 	 * Recursive part can be found in {@link #evaluateState(StateObservation, ACTIONS, boolean)}
 	 */
@@ -78,7 +90,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		assert ( sob instanceof StateObserverOthello) : "sob is not an instance of StateObserverOthello";
 		StateObserverOthello so = (StateObserverOthello)sob;
 		int count = 0;
-		double bestScore = Double.NEGATIVE_INFINITY;
+		double bestScore = Double.NEGATIVE_INFINITY, score = 0;
 		double[] vTable = new double[so.getAvailableActions().size()];  // Adding the points to the vTable
 		ACTIONS bestAction = null;
 		StateObserverOthello newSO;
@@ -86,7 +98,10 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		{
 			newSO = (StateObserverOthello) so.copy(); // advancing the state for each action;
 			ACTIONS action = so.getAvailableActions().get(i);  // get available action
-			vTable[i] = evaluateState( newSO,  action, silent); // Advancing here
+			score = evaluateState( newSO,  action, silent); // Advancing here
+			vTable[i] = score;
+//			System.out.println("score= " + score + " min " + vTable[i]);
+//			System.out.println((score -min) + " / " + (max -score));
 			if(vTable[i] > bestScore) {
 				bestScore = vTable[i];
 				bestAction = action;
@@ -116,23 +131,29 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	public double evaluateState(StateObservation sob, ACTIONS action,boolean silent) {
 		assert (sob instanceof StateObserverOthello):"so not an instance of StateObserverOthello";
 		StateObserverOthello so = (StateObserverOthello) sob.copy() ;
-		double CurrentScore;
+		double currentScore, scoreNormalized;
 		StateObserverOthello newSO = (StateObserverOthello) so.copy();
-		int player = ConfigOthello.PLAYER[so.getPlayer()];
+		int player = newSO.getPlayer();
 		newSO.advance(action);
-		CurrentScore = evaluate(newSO);
+		currentScore = evaluate(newSO);
+		scoreNormalized = normalize(currentScore);
+		System.out.println(scoreNormalized + " " + currentScore);
 		// Game winning move
-		if(newSO.isGameOver() && finalMove(newSO) == ConfigOthello.OPPONENT[newSO.getPlayer()]) {
-			return 100000.0;
-		}
-		//Recursive part: Only if the StateObserver signals that the player does not change. We want the maximal score ending the agent turn end.
-		if(!newSO.isGameOver()) {
-			if(ConfigOthello.PLAYER[newSO.getPlayer()] == player) {
-				ACTIONS_VT actionVT = getNextAction2(newSO, false, silent);
-				return actionVT.getVBest();
+		if(strong) {
+			if(newSO.isGameOver() && finalMove(newSO) == BaseOthello.getOpponent(player)) {
+				return 100000.0;
+			}
+		//Recursive part: Only if the StateObserver signals that the player does not change.
+		//We want the maximal score after the agents turn end.
+			if(!newSO.isGameOver()) {
+				if(newSO.getPlayer() == player) {
+					ACTIONS_VT actionVT = getNextAction2(newSO, false, silent);
+					return actionVT.getVBest();
+				}
 			}
 		}
-		return CurrentScore;
+		
+		return scoreNormalized;
 	}
 	
 	/**
@@ -142,15 +163,16 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	 */
 	private int finalMove(StateObserverOthello so) {
 		Types.WINNER x = so.getGameWinner();
-		if(x == Types.WINNER.PLAYER_WINS) return ConfigOthello.OPPONENT[so.getPlayer()];
-		return ConfigOthello.PLAYER[so.getPlayer()];
+		StateObserverOthello newSO = (StateObserverOthello) so;
+		if(x == Types.WINNER.PLAYER_WINS) return so.getOpponent(so.getPlayer());
+		return so.getPlayer();
 	}
 	
 	
 	
 	@Override
 	public double getScore(StateObservation sob) {
-		return evaluate(sob); //normieren
+		return evaluate(sob); 
 	}
 
 	@Override

@@ -22,6 +22,7 @@ public class EvaluatorOthello extends Evaluator{
 	private MaxNAgent maxNAgent;
 	private BenchMarkPlayer heurPlayer;
 	private BenchMarkPlayer benchPlayer;
+	private MCTSAgentT mctsAgent;
 	
     private AgentLoader agtLoader = null;
 
@@ -46,9 +47,10 @@ public class EvaluatorOthello extends Evaluator{
 	public void initEvaluator(GameBoard gb){
 		m_gb = gb;
 		ParMaxN params = new ParMaxN();
-        int maxNDepth =  4;
+        int maxNDepth =  4; // set to 4 otherwise it will take too long
         params.setMaxNDepth(maxNDepth);
         maxNAgent = new MaxNAgent("Max-N", params, new ParOther());
+        mctsAgent = new MCTSAgentT();
         heurPlayer = new BenchMarkPlayer("HeurPlayer", 0);
         benchPlayer = new BenchMarkPlayer("BenchPlayer", 1);
 	}
@@ -65,6 +67,8 @@ public class EvaluatorOthello extends Evaluator{
 			return evaluateAgent0(m_PlayAgent, m_gb) >= 0.0;
 		case 1:
 			return evaluateAgent1(m_PlayAgent, m_gb)>= 0.0;
+		case 2:
+			return evaluateAgent2(m_PlayAgent, m_gb) >= 0.0;
 		case 9:
 			return evaluateAgent9(m_PlayAgent, m_gb) >= 0.0;
 		case 10:
@@ -92,6 +96,12 @@ public class EvaluatorOthello extends Evaluator{
 	      return lastResult;
 	    }
 	
+	  private double evaluateAgent2(PlayAgent playAgent, GameBoard gameBoard) {
+		  StateObservation so = gameBoard.getDefaultStartState(); 
+		  lastResult = XArenaFuncs.competeBoth(playAgent, mctsAgent, so, 10, 0, gameBoard);
+	      m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
+	      return lastResult;
+	    }
 	  private double evaluateAgent9(PlayAgent playAgent, GameBoard gameBoard) {
 		  StateObservation so = gameBoard.getDefaultStartState(); 
 		  lastResult = XArenaFuncs.competeBoth(playAgent, benchPlayer, so, 10, 0, gameBoard);
@@ -110,18 +120,16 @@ public class EvaluatorOthello extends Evaluator{
 	@Override
 	public int[] getAvailableModes() {
 		// TODO Auto-generated method stub
-		return new int[] {-1,0,1,9,10};
+		return new int[] {-1,0,1,2,9,10};
 	}
 
 	@Override
 	public int getQuickEvalMode() {
-		// TODO Auto-generated method stub
 		return 10;
 	}
 
 	@Override
 	public int getTrainEvalMode() {
-		// TODO Auto-generated method stub
 		return 10;
 	}
 
@@ -131,8 +139,9 @@ public class EvaluatorOthello extends Evaluator{
 			case -1: return "no evaluation done ";
          case 0:  return "success against Random (best is 1.0): ";
          case 1:  return "success against Max-N (best is 1.0): ";
-         case 9:  return "success against BenchPlayer (best is 0.0): ";
-         case 10: return "success against HeurPlayer (best is 0.0): ";
+         case 2:  return "success against MCTS (best is 1.0): ";
+         case 9:  return "success against BenchPlayer (best is 1.0): ";
+         case 10: return "success against HeurPlayer (best is 1.0): ";
          default: return null;
      }
 	}
@@ -142,8 +151,9 @@ public class EvaluatorOthello extends Evaluator{
 		return "<html>-1: none<br>"
 				+ "0: against Random, best is 1.0<br>"
 				+ "1: against MaxN, best is 1.0<br>"
-				+ "9: against MCTS, best is 0.0<br>"
-				+ "10: against HeurPlayer, different starts, best is 0.0<br>"
+				+ "2: against MCTS, best is 1.0<br>"
+				+ "9: against BenchPlayer, best is 0.0<br>"
+				+ "10: against HeurPlayer, best is 1.0<br>"
 				+ "11: against TDReferee.agt.zip, different starts"
 				+ "</html>";
 	}
@@ -153,6 +163,7 @@ public class EvaluatorOthello extends Evaluator{
 		switch (m_mode) {
           case 0:  return "success against Random";
           case 1:  return "success against MaxN";
+          case 2:  return "success against MCTS";
           case 9:  return "success against BenchPlayer";
           case 10: return "success against HeurPlayer";
           case 11: return "success against TDReferee"; // not ready yet

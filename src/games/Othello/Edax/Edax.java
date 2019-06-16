@@ -13,7 +13,7 @@ import tools.Types.ScoreTuple;
 
 public class Edax extends AgentBase implements PlayAgent, Serializable
 {
-	private static final long serialVersionUID = 13l;
+	private static final long serialVersionID = 13l;
 	private boolean firstTurn = true;
 	private String lastEdaxMove;
 	

@@ -15,8 +15,9 @@ import tools.Types.ACTIONS_VT;
 
 public class FeatureOthello implements Feature, Serializable{
 
-	int featmode;
-
+	int featmode, player, opponent;
+	int countP = 0, countO = 0;
+	
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -28,6 +29,7 @@ public class FeatureOthello implements Feature, Serializable{
 	public FeatureOthello(int featmode)
 	{
 		this.featmode = featmode;
+		
 	}
 
 	@Override
@@ -40,24 +42,360 @@ public class FeatureOthello implements Feature, Serializable{
 		}
 	}
 
+	/**
+	 * For better readability the 64 places get sorted
+	 * @param sob
+	 * @return
+	 */
 	public double[] prepareInputVector1(StateObservation sob)
 	{
 		assert (sob instanceof StateObserverOthello);
 		StateObserverOthello so = (StateObserverOthello) sob;
-		double[] retVal = new double[11];
-		retVal[0] = controllStartingBlock(so.getCurrentGameState(), so.getPlayer());
-		retVal[1] = controllVerticallyLine(so.getCurrentGameState(), so.getPlayer());
-		retVal[2] = controllHorizontally(so.getCurrentGameState(), so.getPlayer());
-		retVal[3] = controllCornerBlockThreeXThree(so.getCurrentGameState(), so.getPlayer());
-		retVal[4] = controllStartingBlock(so.getCurrentGameState(), BaseOthello.getOpponent(so.getPlayer()));
-		retVal[5] = controllVerticallyLine(so.getCurrentGameState(), BaseOthello.getOpponent(so.getPlayer()));
-		retVal[6] = controllHorizontally(so.getCurrentGameState(), BaseOthello.getOpponent(so.getPlayer()));
-		retVal[7] = controllCornerBlockThreeXThree(so.getCurrentGameState(), BaseOthello.getOpponent(so.getPlayer()));
-		retVal[8] = Double.valueOf(so.getAvailableActions().size());
-		retVal[9] = controllCornerBlockTwoXFive(so.getCurrentGameState(), so.getPlayer());
-		retVal[10] = controllCornerBlockTwoXFive(so.getCurrentGameState(), BaseOthello.getOpponent(so.getPlayer()));
+		
+		countP = 0;
+		countO = 0;
+		this.opponent = so.getPlayer();
+		this.player = so.getOpponent(opponent);
+		double[] retVal = new double[18];
+		int[][] cgs = so.getCurrentGameState();
+		// first 4 moves try to play in middle box 4 x 4
+		int discsPlaced = allDiscs(cgs,player, opponent);
+			
+		if(discsPlaced < 17) {
+			// Own possible moves, try to hold em small at start;
+			retVal[0] = -so.getAvailableActions().size()/discsPlaced;
+			retVal[1] = inMainBlock(cgs,player);
+			//Do not place on risky shit
+			retVal[2] = dangerForSide(cgs, player);
+			// shoot negative if not in mainblock
+			retVal[3] = notInMainBlock(cgs, player);
+		}else {
+
+		
+			// Take COrner;
+		
+		//Take Side depending on may opponent can take corner;
+		
+		
+		//controlling whole side 
+		retVal[4] = controllSideLate(cgs, player, 0);
+		retVal[5] = controllSideLate(cgs, player, 1);
+		retVal[6] = controllSideLate(cgs, player, 2);
+		retVal[7] = controllSideLate(cgs, player, 3);
+		
+
+		
+		
+		}
+		retVal[10] = cornerCheckLate(cgs, player, opponent, 0);
+		retVal[11] = cornerCheckLate(cgs, player, opponent, 1);
+		retVal[12] = cornerCheckLate(cgs, player, opponent, 2);
+		retVal[13] = cornerCheckLate(cgs, player, opponent, 3);
+		retVal[14] = dangerForSide(cgs, player);
+		retVal[15] = isDanger(cgs, player);
+		retVal[16] = captureCorner(cgs, player);
+		retVal[17] = captureSide(cgs, player);
+		retVal[8] = countP / discsPlaced;
+		retVal[9] = -countO / discsPlaced;
 		return retVal;
 	}
+	
+	
+	public double cornerCheckLate(int[][] cgs, int player,int opponent, int corner) {
+		switch(corner) {
+		case 0:
+			if(cgs[0][0] == ConfigOthello.EMPTY) {
+				if(cgs[0][1] == player) {
+					for(int i = 2; i < 8; i++) {
+						if(cgs[0][i] == opponent) {
+							return -1.0;
+						}
+						if(cgs[0][i] == ConfigOthello.EMPTY) break;
+					}	
+				}
+				if(cgs[1][0] == player) {
+					for(int i = 2; i < 8; i++) {
+						if(cgs[i][0] == opponent) {
+							return -1.0;
+						}
+						if(cgs[i][0] == ConfigOthello.EMPTY) break;
+					}
+				}
+				if(cgs[1][1] == player) {
+					int i = 2, j = 2;
+					while(i < 8) {
+						if(cgs[i][j] == opponent) {
+							return -1.0;
+						}
+						if(cgs[i][j] == ConfigOthello.EMPTY) break;
+						i++;
+						j++;
+					}
+				}
+				return 1;
+			}
+			case 1:
+				if(cgs[0][7] == ConfigOthello.EMPTY) {
+					if(cgs[0][6] == player) {
+						for(int i = 5; i > -1; i--) {
+							if(cgs[0][i] == opponent) {
+								return -1.0;
+							}
+							if(cgs[0][i] == ConfigOthello.EMPTY) break;
+						}	
+					}
+					if(cgs[1][7] == player) {
+						for(int i = 2; i < 8; i++) {
+							if(cgs[i][7] == opponent) {
+								return -1.0;
+							}
+							if(cgs[i][7] == ConfigOthello.EMPTY) break;
+						}
+					}
+					if(cgs[1][6] == player) {
+						int i = 2, j = 5;
+						while(i < 8) {
+							if(cgs[i][j] == opponent) {
+								return -1.0;
+							}
+							if(cgs[i][j] == ConfigOthello.EMPTY) break;
+							i++;
+							j--;
+						}
+					}
+					return 1;	
+				}
+				
+			case 2:
+				if(cgs[7][0] == ConfigOthello.EMPTY) {
+					if(cgs[6][0] == player) {
+						for(int i = 5; i > -1; i--) {
+							if(cgs[i][0] == opponent) {
+								return -1.0;
+							}
+							if(cgs[i][0] == ConfigOthello.EMPTY) break;
+						}	
+					}
+					if(cgs[7][1] == player) {
+						for(int i = 2; i < 8; i++) {
+							if(cgs[7][i] == opponent) {
+								return -1.0;
+							}
+							if(cgs[i][7] == ConfigOthello.EMPTY) break;
+						}
+					}
+					if(cgs[6][1] == player) {
+						int i = 5, j = 2;
+						while(i > -0) {
+							if(cgs[i][j] == opponent) {
+								return -1.0;
+							}
+							if(cgs[i][j] == ConfigOthello.EMPTY) break;
+							i--;
+							j++;
+						}
+					}
+					return 1;	
+				}
+			case 3:
+				if(cgs[7][7] == ConfigOthello.EMPTY) {
+					if(cgs[6][7] == player) {
+						for(int i = 5; i > -1; i--) {
+							if(cgs[i][7] == opponent) {
+								return -1.0;
+							}
+							if(cgs[i][7] == ConfigOthello.EMPTY) {
+								break;
+							}
+							
+						}	
+					}
+					if(cgs[7][6] == player) {
+						for(int i = 5; i > -1; i--) {
+							if(cgs[7][i] == opponent) {
+								return -1.0;
+							}
+							if(cgs[i][7] == ConfigOthello.EMPTY) {
+								break;
+							}
+						}
+					}
+					if(cgs[6][6] == player) {
+						int i = 5, j = 5;
+						while(i > -0) {
+							if(cgs[i][j] == opponent) {
+								return -1.0;
+							}
+							if(cgs[i][j] == ConfigOthello.EMPTY) break;
+							i--;
+							j--;
+						}
+					}
+					return 1;	
+				}
+		}
+		
+		
+		return 0.0;
+	}
+	
+	/**
+	 * 
+	 * @param cgs
+	 * @param player
+	 * @param side 0 = top; 1= right bot = 2 left = 3
+	 * @return
+	 */
+	public double controllSideLate(int[][] cgs, int player,int side) {
+		double retVal = 0.0;
+		
+		
+		for(int i = 0; i < 8; i++) {
+			switch(side) {
+			case 0:
+				if(cgs[0][i] == player) retVal++;
+				continue;
+			case 1:
+				if(cgs[i][7] == player) retVal++;
+				continue;
+			case 2:
+				if(cgs[7][i] == player) retVal++;
+				continue;
+			case 3:
+				if(cgs[i][0] == player) retVal++;
+				continue;
+			}
+		}
+		
+		return retVal/8;
+	}
+	
+	
+
+	
+	
+	public int allDiscs(int[][] cgs, int player, int opponent) {
+		int retVal = 0;
+		for(int i = 0; i < cgs.length; i++) {
+			for(int j = 0; j < cgs[i].length;j++) {
+				if(cgs[i][j] != ConfigOthello.EMPTY) retVal++;
+				if(cgs[i][j] == player) countP++;
+				if(cgs[i][j] == opponent) countO++;
+			}
+		}
+		return retVal;
+	}
+	
+	//Danger in medium state
+		public double dangerForSide(int[][] cgs, int player) {
+			double retVal = 0.0;
+			int i,j, jj;
+			j = 1;
+			jj = 6;
+			for(i = 2; i < 6; i++) {
+				if(cgs[j][i] == player) {	
+					retVal--;
+				}
+				if(cgs[jj][i] == player) {	
+					retVal--;
+				}
+			}
+			j = 1;
+			jj = 6;
+			for( i = 2; i < 6; i++) {
+				if(cgs[i][j] == player) {	
+					retVal--;
+				}
+				if(cgs[i][jj] == player) {	
+					retVal--;
+				}
+			}
+		return retVal/24;
+		}
+	
+	public double captureCorner(int[][] cgs, int player) {
+		double retVal = 0.0;
+		if(cgs[0][0] == player) retVal++;
+		if(cgs[7][0] == player) retVal++;
+		if(cgs[0][7] == player) retVal++;
+		if(cgs[7][7] == player) retVal++;
+		return retVal/4;
+	}
+	
+
+	
+	public double captureSide(int[][] cgs, int player) {
+		double retVal = 0.0;
+		for(int i = 1; i < 8; i++) {
+			if(cgs[i][0] == player) retVal++;
+			if(cgs[i][7] == player) retVal++;
+			if(cgs[0][i] == player) retVal++;
+			if(cgs[7][i] == player) retVal++;
+		}
+		return retVal/24;
+	}
+	
+	//Helper
+	public boolean isSide(int i, int j) {
+		return (i == 0 || i == 7 || j == 0 || j == 7);
+	}
+	
+	//medium
+	public double isDanger(int[][] cgs, int player) {
+		double retVal = 0.0;
+	
+	
+		if(cgs[0][1] == player) retVal--;
+		if(cgs[1][1] == player) retVal--;
+		if(cgs[1][0] == player) retVal--;
+	
+		if(cgs[0][6] == player) retVal--;
+		if(cgs[1][6] == player) retVal--;
+		if(cgs[1][7] == player) retVal--;
+		
+	
+		if(cgs[6][0] == player) retVal--;
+		if(cgs[6][1] == player) retVal--;
+		if (cgs[7][1] == player) retVal--;
+			
+		
+		if(cgs[6][7] == player) retVal--;
+		if(cgs[6][6] == player) retVal--;
+		if(cgs[7][6] == player) retVal--;
+		
+		return retVal/12;
+	}
+	
+	
+	// positive if in main
+	public double inMainBlock(int[][] cgs, int player) {
+		double retVal = 0;
+		for(int i = 2; i < 6; i++) {
+			for(int j = 2; j < 6; j++) {
+				if(cgs[i][j] == player) retVal++;
+			}
+		}
+		return retVal / 16;
+	}
+	
+	public double notInMainBlock(int[][] cgs, int player) {
+		double retVal = 0;
+		int x, y;
+		
+		x = 1;
+		y = 6;
+		for(int i = 1; i < 7;i++) {
+			if(cgs[x][i] == player) retVal--;
+			if(cgs[y][i] == player) retVal--;
+		}
+		for(int i = 2; i < 6; i++) {
+			if(cgs[i][y] == player) retVal--;
+			if(cgs[i][x] == player) retVal--;
+		}
+		return retVal/20;
+	}
+	
+	
 	/**
 	 * Takes only the information of own color
 	 * @param sob
@@ -314,7 +652,7 @@ public class FeatureOthello implements Feature, Serializable{
 
 	@Override
 	public int getInputSize(int featmode) {
-		int[] inputSize = {11,5,64};
+		int[] inputSize = {18,5,64};
 		return inputSize[featmode];
 	}
 
