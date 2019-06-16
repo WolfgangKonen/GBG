@@ -50,6 +50,8 @@ agents/ConnectFour/TCL-EXP-NT3-al50-lam025*.agt.zip
 # (the only ConnectFour agent we have in repos is TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0.agt.zip)
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)
+agents/Othello/csv/playStats.csv
+agents/theNtuple.txt
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
