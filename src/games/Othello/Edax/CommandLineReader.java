@@ -91,7 +91,7 @@ public class CommandLineReader implements Runnable
 		{
 			e.printStackTrace();
 		}
-		return "-1";
+		throw new RuntimeException("TimeOut");
 	}
 	
 	/**

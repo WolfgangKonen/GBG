@@ -98,7 +98,7 @@ public class StateObserverOthello extends ObserverBase{
 	
 	@Override
 	public StateObserverOthello copy() {
-		StateObserverOthello so = new StateObserverOthello(this.currentGameState, this.playerNextMove);
+		StateObserverOthello so = new StateObserverOthello(this.currentGameState, this.playerNextMove,this.lastMoves,  turn);
 		return so;
 	}
 	

@@ -111,7 +111,7 @@ public class EvaluatorOthello extends Evaluator{
 	
 	  private double evaluateAgent10(PlayAgent playAgent, GameBoard gameBoard) {
 		  StateObservation so = gameBoard.getDefaultStartState(); 
-		  lastResult = XArenaFuncs.competeBoth(playAgent, heurPlayer, so, 10, 0, gameBoard);
+		  lastResult = XArenaFuncs.competeBoth(playAgent, heurPlayer, so, 100, 0, gameBoard);
 		  m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
 		  return lastResult;
 	    }
