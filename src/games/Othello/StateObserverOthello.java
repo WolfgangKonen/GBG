@@ -90,7 +90,7 @@ public class StateObserverOthello extends ObserverBase{
 		for(int i = 0, n = 0; i < currentGameState.length; i++) {
 			for(int j = 0; j < currentGameState[i].length; j++,n++)
 			{
-				if(n != 27 && n != 28 && n != 35 && n != 36) 			
+//				if(n != 27 && n != 28 && n != 35 && n != 36) 			
 				// WK comment the preceding line out as bug fix for Sarsa: 
 				// Although the actions 27, 38, 35, 36 will never happen in an Othello game, we add them
 				// here to retVal. This is necessary to let getAllAvailableActions() return a list with size
