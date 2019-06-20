@@ -100,7 +100,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 			ACTIONS action = so.getAvailableActions().get(i);  // get available action
 			score = evaluateState( newSO,  action, silent); // Advancing here
 			vTable[i] = score;
-//			System.out.println("score= " + score + " min " + vTable[i]);
+//			System.out.println("score= " + score + " min " + vTable[i]);	// WK too much output
 //			System.out.println((score -min) + " / " + (max -score));
 			if(vTable[i] > bestScore) {
 				bestScore = vTable[i];
@@ -137,7 +137,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		newSO.advance(action);
 		currentScore = evaluate(newSO);
 		scoreNormalized = normalize(currentScore);
-		System.out.println(scoreNormalized + " " + currentScore);
+//		System.out.println(scoreNormalized + " " + currentScore);
 		// Game winning move
 		if(strong) {
 			if(newSO.isGameOver() && finalMove(newSO) == BaseOthello.getOpponent(player)) {

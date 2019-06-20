@@ -90,7 +90,15 @@ public class StateObserverOthello extends ObserverBase{
 		for(int i = 0, n = 0; i < currentGameState.length; i++) {
 			for(int j = 0; j < currentGameState[i].length; j++,n++)
 			{
-				if(n != 27 && n != 28 && n != 35 && n != 36) retVal.add(new ACTIONS(n));
+				if(n != 27 && n != 28 && n != 35 && n != 36) 			
+				// WK comment the preceding line out as bug fix for Sarsa: 
+				// Although the actions 27, 38, 35, 36 will never happen in an Othello game, we add them
+				// here to retVal. This is necessary to let getAllAvailableActions() return a list with size
+				// 64. Only then nTuples will be constructed in SarsaAgt with numOutputs=64. This in turn is 
+				// necessary, because actions with minimum 0 and maximum 63 can occur. Otherwise we would
+				// get a OutOfBoundException in NTuple2ValueFunc.getQFunc() whenever equivAction has an
+				// element >= 60 (60 would be retVal's size if the preceding line were NOT comented out)
+					retVal.add(new ACTIONS(n));
 			}
 		}
 		return retVal;
@@ -307,6 +315,7 @@ public class StateObserverOthello extends ObserverBase{
 		return currentGameState[i][j] == 0 ? "Empty" : currentGameState[i][j]  == 1 ? "White" : "Black";
 	}
 	
+	// WK obsolete (never used) and probably dangerous (may create invalid game states) 
 	public void setPlayer(int p) {
 		this.playerNextMove = p;
 	}
