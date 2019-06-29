@@ -90,15 +90,20 @@ public class StateObserverOthello extends ObserverBase{
 		for(int i = 0, n = 0; i < currentGameState.length; i++) {
 			for(int j = 0; j < currentGameState[i].length; j++,n++)
 			{
-//				if(n != 27 && n != 28 && n != 35 && n != 36) 			
-				// WK comment the preceding line out as bug fix for Sarsa: 
+				if(n != 27 && n != 28 && n != 35 && n != 36) 	
+				// WK 2019-06-15: 1st fix: comment the preceding line out as bug fix for Sarsa: 
 				// Although the actions 27, 38, 35, 36 will never happen in an Othello game, we add them
 				// here to retVal. This is necessary to let getAllAvailableActions() return a list with size
 				// 64. Only then nTuples will be constructed in SarsaAgt with numOutputs=64. This in turn is 
 				// necessary, because actions with minimum 0 and maximum 63 can occur. Otherwise we would
 				// get a OutOfBoundException in NTuple2ValueFunc.getQFunc() whenever equivAction has an
 				// element >= 60 (60 would be retVal's size if the preceding line were NOT comented out)
-					retVal.add(new ACTIONS(n));
+				//
+				// WK 2019-06-23: 2nd fix: The bug fix above is no longer necessary, because we changed in XArenaFuncs
+				// what is done with allAvailableActions: now it will infer minimum 0 and maximum 63 from the 
+				// set of actions and set numOutputs to 63-0+1=64, although the ArrayList may contain only 
+				// 60 actions. Thus, both ways will work: commenting out preceding line or not.
+				retVal.add(new ACTIONS(n));
 			}
 		}
 		return retVal;
