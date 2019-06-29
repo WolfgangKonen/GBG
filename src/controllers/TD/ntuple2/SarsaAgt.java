@@ -11,6 +11,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Random;
 
@@ -97,7 +98,11 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	transient private Types.ACTIONS[] aLast;	// last action of player p
 	transient private boolean[] randLast;		// whether last action of player p was a random action
 	transient private ScoreTuple rLast;
-
+	
+	private int numOutputs;
+	private int actionIndexMin;
+	private int actionIndexMax;
+	
 	private boolean RANDINITWEIGHTS = false;// If true, init weights of value function randomly
 
 	private boolean m_DEBG = false;
@@ -131,21 +136,43 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 * @param ntPar			n-tuples and temporal coherence parameter
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
-	 * @param numOutputs	the number of outputs of the n-tuple network (=number of all
-	 * 						available actions)
+	 * @param allAvailActions	neede to infer the number of outputs of the n-tuple network
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
 	public SarsaAgt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar, 
-			int[][] nTuples, XNTupleFuncs xnf, int numOutputs, int maxGameNum) throws IOException {
+			int[][] nTuples, XNTupleFuncs xnf, ArrayList<ACTIONS> allAvailActions, int maxGameNum) throws IOException {
 		super(name);
 		this.numPlayers = xnf.getNumPlayers();
 		this.sLast = new StateObservation[numPlayers];
 		this.aLast = new Types.ACTIONS[numPlayers];
 		this.randLast = new boolean[numPlayers];
+		processAvailActions(allAvailActions);		// calc members actionIndexMin, actionIndexMax, numOutputs
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, numOutputs, maxGameNum);			
 	}
 
+	/** 
+	 * Infer members actionIndexMin, actionIndexMax, numOutputs from allAvailActions
+	 * @param allAvailActions
+	 */
+	private void processAvailActions(ArrayList<ACTIONS> allAvailActions) {
+		ListIterator<ACTIONS> iter = allAvailActions.listIterator();
+		this.actionIndexMin = Integer.MAX_VALUE;
+		this.actionIndexMax = Integer.MIN_VALUE;
+		while (iter.hasNext()) {
+			int key = ((ACTIONS) iter.next()).toInt();
+			if (key<actionIndexMin) actionIndexMin=key;
+			if (key>actionIndexMax) actionIndexMax=key;
+		}
+		this.numOutputs = (actionIndexMax+1);
+		
+		if (actionIndexMin < 0) {
+			System.err.println("*** Warning: actionIndexMin="+actionIndexMin+" is < 0 ***");
+			System.err.println("This does not work for SarsaAgt and all member funcs of NTuple2ValueFunc.");
+		}
+		
+	}
+	
 	/**
 	 * 
 	 * @param tdPar			temporal difference parameters

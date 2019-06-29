@@ -210,7 +210,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 		for (i=0; i<equivAction.length; i++) {
 			if (equivAction[i]>=nTuples.length) {
-				System.err.println("Warning: equivAction["+i+"]="+equivAction[i]+" is not smaller than nTuples.length="+nTuples.length+"!!!");
+				System.err.println("Warning: equivAction["+i+"]="+equivAction[i]+" is not smaller than nTuples.length="+nTuples.length+" !!!");
 				// this should normally not happen. If it happens, we are out for an OutOfBoundException in the 
 				// following lines ...
 			}

@@ -33,6 +33,7 @@ public class ConfigOthello {
 
 	/**
 	 * Values for BenchmarkPlayer
+	 * [first index: mode=0: HeurPlayer, mode=1: BenchPlayer]
 	 */
 	public static int[][] BENCHMARKPLAYERMAPPING = {
 		

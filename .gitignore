@@ -27,6 +27,7 @@ FutureWork.docx
 #Folder with outdated trials for parallelism
 src/games/ZweiTausendAchtundVierzig/Parallel/*
 
+agents/*/playStats.csv
 agents/theNtuple.txt
 # too big (92 MB) for a regular save to GitHub (remember that GitHub has a hard file limit at 100 MB -
 # and if such a >100-MB file happens to be in a commit, the commit will fail - and so far there is no other 
@@ -51,7 +52,6 @@ agents/ConnectFour/TCL-EXP-NT3-al50-lam025*.agt.zip
 # (the only ConnectFour agent we have in repos is TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0.agt.zip)
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)
-agents/Othello/csv/playStats.csv
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

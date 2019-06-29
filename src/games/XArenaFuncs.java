@@ -142,9 +142,10 @@ public class XArenaFuncs
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
-				int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+//				int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+				ArrayList<ACTIONS> allAvailActions = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions();
 				pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
-								  new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
+								  new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
 						e.getMessage(), 
@@ -305,9 +306,10 @@ public class XArenaFuncs
 						XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory(); 
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
-						int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+//						int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+						ArrayList<ACTIONS> allAvailActions = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions();
 						pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
-										  new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
+										  new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
 					} catch (Exception e) {
 						MessageBox.show(m_xab, 
 								e.getMessage(), 
