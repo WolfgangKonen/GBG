@@ -280,4 +280,9 @@ abstract public class ObserverBase implements StateObservation {
     public boolean stopInspectOnGameOver() {
     	return true;
     }
+    
+    public int getGameWinner3player() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
