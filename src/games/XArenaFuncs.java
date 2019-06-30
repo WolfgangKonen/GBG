@@ -885,6 +885,21 @@ public class XArenaFuncs
 		return (resX+resO)/2.0;
 	}
 	
+	public static double compete3(PlayAgent pa, PlayAgent opponent, PlayAgent opponent2, StateObservation startSO,
+			 int competeNum, int verbose, GameBoard gb)
+	{
+		double[] res;
+		// now passed as parameter
+		//StateObservation startSO = gb.getDefaultStartState();  // empty board
+
+		res = XArenaFuncs.compete3Player(pa, opponent, opponent2, startSO, competeNum, verbose, null);
+				// X-win minus O-win percentage, \in [-1,1]
+										// resp. \in [-1,0], if opponent never looses.
+										// +1 is best for pa, -1 worst for pa.
+		
+		return res[1];
+	}
+	
 	/**
 	 * Perform a competition paX vs. paO consisting of competeNum games, starting from StateObservation startSO.
 	 * @param paX	PlayAgent,	a trained agent
@@ -1161,6 +1176,119 @@ public class XArenaFuncs
 	 * @return the fitness of AgentX, which is in the range [-1.0,+1.0]: +1.0 if AgentX always wins,  
 	 * 		   0.0 if always tie or if #win=#loose, and -1.0 if AgentX always looses.
 	 */
+	
+	public static double[] compete3Player(PlayAgent pa0, PlayAgent pa1, PlayAgent pa2, StateObservation startSO, 
+			int competeNum, int verbose, TSTimeStorage[] nextTimes) {
+		double[] winrate = new double[4];
+		int winCount0 = 0, winCount1 = 0, winCount2 = 2,tieCount=0;
+		double moveCount = 0.0;
+		DecimalFormat frm = new DecimalFormat("#0.000");
+		boolean nextMoveSilent = (verbose<2 ? true : false);
+		StateObservation so;
+		Types.ACTIONS actBest;
+		
+		String pa0_string = pa0.stringDescr();
+		String pa1_string = pa1.stringDescr();
+		String pa2_string = pa2.stringDescr();
+		if (verbose>0) System.out.println("Competition, "+competeNum+" episodes: \n"
+				+"      "+pa0_string + "\n"
+				+"   vs "+pa1_string);
+		
+		if (nextTimes != null) {
+			// some diagnostic info to print when called via tournament system:
+			System.out.println("Competition: "+competeNum+" episodes "+pa0_string+" vs "+pa1_string/*+" with "+rndmStartMoves+" random startmoves"*/);
+			String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
+			System.out.println("Episode Start @ "+currDateTime);
+			System.out.println("start state: "+startSO);			
+		}
+
+		for (int k=0; k<competeNum; k++) {
+			int player = startSO.getPlayer();			
+			so = startSO.copy();
+
+			while(true)
+			{
+
+				if(player == 0)
+				{		
+					long startTNano = System.nanoTime();
+					actBest = pa0.getNextAction2(so, false, nextMoveSilent);
+					long endTNano = System.nanoTime();
+					if (nextTimes!=null) nextTimes[0].addNewTimeNS(endTNano-startTNano);
+					so.advance(actBest);
+					player = so.getPlayer();
+				}
+				else if(player == 1)				
+				{
+					long startTNano = System.nanoTime();
+					actBest = pa1.getNextAction2(so, false, nextMoveSilent);
+					long endTNano = System.nanoTime();
+					if (nextTimes!=null) nextTimes[1].addNewTimeNS(endTNano-startTNano);
+					so.advance(actBest);
+					player = so.getPlayer();
+				}
+				else
+				{
+					long startTNano = System.nanoTime();
+					actBest = pa2.getNextAction2(so, false, nextMoveSilent);
+					long endTNano = System.nanoTime();
+					if (nextTimes!=null) nextTimes[2].addNewTimeNS(endTNano-startTNano);
+					so.advance(actBest);
+					player = so.getPlayer();
+				}
+				if (so.isGameOver()) 
+				{
+					int res = so.getGameWinner().toInt();
+					moveCount += so.getMoveCounter();
+					//  res is +1/0/-1  for X/tie/O win
+					
+					switch (res) 
+					{
+						case -1:
+							if (verbose>0) System.out.println(k+": Tie");
+							tieCount++;
+							break;
+						case 0:
+							if (verbose>0) System.out.println(k+": 0 Wins");
+							winCount1++;
+							winCount2++;
+							break;
+						case 1:
+							if (verbose>0) System.out.println(k+": 1 wins");
+							winCount0++;
+							winCount2++;
+							break;
+						case 2:
+							if (verbose>0) System.out.println(k+": 2 wins");
+							winCount0++;
+							winCount1++;
+							break;
+					}
+
+					break; // out of while
+
+				} // if (so.isGameOver())
+			}	// while(true)
+
+		} // for (k)
+		winrate[0] = (double) tieCount/competeNum;
+		winrate[1] = (double) winCount0/competeNum;
+		winrate[2] = (double) winCount1/competeNum;
+		winrate[3] = (double) winCount2/competeNum;
+		
+		moveCount /= competeNum;
+
+		if (verbose>0) {
+			if (verbose>1) {
+				System.out.print("win rates: ");
+				for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
+				System.out.println(" (X/Tie/O)");				
+			}
+			System.out.println("Avg # moves in "+ competeNum +" episodes = "+ frm.format(moveCount));			
+		}
+
+		return winrate;
+	}
 	protected double competeBase(boolean swap, boolean both, XArenaButtons xab, GameBoard gb) {
 		int competeNum = xab.winCompOptions.getNumGames();
 		int numPlayers = gb.getStateObs().getNumPlayers();

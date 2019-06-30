@@ -65,7 +65,7 @@ abstract public class ArenaTrain extends Arena
 		for (int i=0; i<n; i++) {
 			this.m_xab.choiceAgent[i].setEnabled(true);
 			this.m_xab.mParam[i].setEnabled(true);
-			this.m_xab.mParam[i].setText("Param "+Types.GUI_2PLAYER_NAME[i]);
+			this.m_xab.mParam[i].setText("Param "+Types.GUI_PLAYER_NAME[i]); //this.m_xab.mParam[i].setText("Param "+Types.GUI_2PLAYER_NAME[i]);
 			this.m_xab.mParam[i].setVisible(true);
 			this.m_xab.mTrain[i].setVisible(true);
 		}

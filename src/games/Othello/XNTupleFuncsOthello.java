@@ -13,7 +13,7 @@ import controllers.TD.ntuple2.NTupleFactory;
 import games.Arena;
 import games.StateObservation;
 import games.XNTupleFuncs;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 

@@ -9,8 +9,6 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
-import com.sun.javafx.geom.Ellipse2D;
-
 import games.Arena;
 import games.Othello.ConfigOthello;
 import games.Othello.GameBoardOthello;

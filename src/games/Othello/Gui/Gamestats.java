@@ -9,11 +9,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.sun.prism.paint.Color;
-
 import games.Othello.GameBoardOthello;
 import games.Othello.StateObserverOthello;
-import javafx.scene.layout.Border;
 import tools.Types;
 
 
