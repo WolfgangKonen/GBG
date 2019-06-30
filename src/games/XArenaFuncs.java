@@ -18,6 +18,7 @@ import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
 import games.Nim.BoutonAgent;
+import games.Othello.StateObserverOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax;
 import games.TStats.TAggreg;
@@ -922,6 +923,22 @@ public class XArenaFuncs
 		}
 
 		for (int k=0; k<competeNum; k++) {
+			// These four lines are fudge factors, but currently needed to get a Othello competition running: 
+			// We need to construct a new Edax for each competition game and we need to reset
+			// startSO's member lastMoves to an empty array in order that Edax makes on its first call
+			// of getNextAction2 (where firstTurn==true) the right decision.
+			if (paX instanceof Edax) paX = new Edax();
+			if (paO instanceof Edax) paO = new Edax();
+			if (startSO instanceof StateObserverOthello)
+				((StateObserverOthello) startSO).resetLastMoves();
+			//
+			// TODO: this is all not a nice design, because very Othello-specific things are part of 
+			// XArenaFuncs.compete(). Instead we should better generalize the interface of 
+			// (1) PlayAgent such that there is initialize(), which initializes this agent to a new game
+			//     (new Edax for Edax, nothing to do for all other agents)
+			// (2) StateObservation, such that there is reset(), which resets this startSO to be a valid
+			// 	   start state (empty lastMoves for StateObserverOthello, nothing to do for all other)
+
 			int Player = Types.PLAYER_PM[startSO.getPlayer()];			
 			so = startSO.copy();
 
@@ -935,7 +952,8 @@ public class XArenaFuncs
 					long endTNano = System.nanoTime();
 					if (nextTimes!=null) nextTimes[0].addNewTimeNS(endTNano-startTNano);
 					so.advance(actBest);
-					Player=-1;
+					//Player=-1;		// WK: bug, will not work for Othello, where the other player may pass
+					Player = Types.PLAYER_PM[so.getPlayer()];
 				}
 				else				// i.e. O-Move
 				{
@@ -945,7 +963,8 @@ public class XArenaFuncs
 					long endTNano = System.nanoTime();
 					if (nextTimes!=null) nextTimes[1].addNewTimeNS(endTNano-startTNano);
 					so.advance(actBest);
-					Player=+1;
+					//Player=+1;		// WK: bug, will not work for Othello, where the other player may pass
+					Player = Types.PLAYER_PM[so.getPlayer()];
 				}
 				if (so.isGameOver()) {
 					int res = so.getGameWinner().toInt();

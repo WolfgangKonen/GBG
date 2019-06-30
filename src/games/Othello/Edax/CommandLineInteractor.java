@@ -57,11 +57,11 @@ public class CommandLineInteractor
 	public String sendAndAwait(String command, long timeOut)
 	{
 		printWriter.println(command);
-		try {
-			Thread.sleep(300);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			Thread.sleep(300);				// WK: not clear why this is necessary
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		return commandLineReader.getLastMatch(timeOut);			
 	}
 
@@ -72,7 +72,7 @@ public class CommandLineInteractor
 	 */
 	public String sendAndAwait(String command)
 	{
-		return sendAndAwait(command, 5000);
+		return sendAndAwait(command, 10000);	// WK changed from 5000 to 10000
 	}
 	
 	/**

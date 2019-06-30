@@ -24,7 +24,8 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 		super("Edax");
 		System.out.println("creating edax");
 		super.setAgentState(AgentState.TRAINED);
-		commandLineInteractor = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);		
+		commandLineInteractor = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);
+		//commandLineInteractor.sendCommand("level 1"); // WK just a try to set search depth
 	}
 
 	@Override
@@ -51,7 +52,9 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 			else // If Edax plays two or more consecutive turns
 				lastEdaxMove = commandLineInteractor.sendAndAwait("play");
 		}
-		ACTIONS_VT action = new ACTIONS_VT(EdaxMoveConverter.converteEdaxToInt(lastEdaxMove), false, new double[so.getAvailableActions().size()]);
+		ACTIONS_VT action = new ACTIONS_VT(EdaxMoveConverter.converteEdaxToInt(lastEdaxMove), 
+										   false, new double[so.getAvailableActions().size()+1]);
+																							// "+1" added /WK/
 		so.getPlayer();
 		if(!so.getAvailableActions().contains(action))
 		{

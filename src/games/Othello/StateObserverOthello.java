@@ -236,10 +236,17 @@ public class StateObserverOthello extends ObserverBase{
 		BaseOthello.flip(currentGameState, i, j, playerNextMove);
 		currentGameState[i][j] = playerNextMove;
 		super.incrementMoveCounter();
+		
+		// Set playerNextMove.
+		// The normal case: if the opponent of playerNextMove (the player who just advanced) has possible
+		// actions, then playerNextMove will become this opponent. If however the opponent has no possible
+		// moves, he has to pass, and playerNextMove will stay at the value it has (and the next advance
+		// will be done by the same playerNextMove):
 		if(BaseOthello.possibleActions(currentGameState, 
 				this.getOpponent(playerNextMove)).size() != 0 ) {
 			playerNextMove = getOpponent(playerNextMove); 
 		}
+		
 		setAvailableActions();
 		lastMoves.add(action.toInt());
 		turn++;
@@ -261,6 +268,10 @@ public class StateObserverOthello extends ObserverBase{
 	public int getLastMove() {
 		if (lastMoves.size() == 0) return -1;
 		return lastMoves.get(lastMoves.size()-1);
+	}
+	
+	public void resetLastMoves() {
+		this.lastMoves = new ArrayList<Integer>();		
 	}
 	
 	

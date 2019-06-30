@@ -100,6 +100,6 @@ public class CommandLineReader implements Runnable
 	 */
 	public String getLastMatch()
 	{
-		return getLastMatch(5000);
+		return getLastMatch(10000);		// WK changed from 5000 to 10000
 	}
 }
