@@ -67,8 +67,8 @@ public class StateObserverOthello extends ObserverBase{
 	
 	public StateObserverOthello(int[][] gameState, int playerMove, ArrayList<Integer> lastMoves, int turn)
 	{
-		this.lastMoves = new ArrayList<Integer>();
-		this.lastMoves = lastMoves;
+		//this.lastMoves = new ArrayList<Integer>();					// WK: obsolete
+		this.lastMoves = (ArrayList<Integer>) lastMoves.clone();		// WK: bug fix, added missing .clone() 
 		this.currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		this.playerNextMove = playerMove;
 		BaseOthello.deepCopyGameState(gameState, currentGameState);

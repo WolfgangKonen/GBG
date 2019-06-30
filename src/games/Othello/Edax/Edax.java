@@ -26,6 +26,12 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 		super.setAgentState(AgentState.TRAINED);
 		commandLineInteractor = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);
 		//commandLineInteractor.sendCommand("level 1"); // WK just a try to set search depth
+		commandLineInteractor.sendCommand("move-time 10"); // WK limit time-per-move to 10 sec
+	}
+	
+	public void initForNewGame() {
+		firstTurn=true;
+		commandLineInteractor.sendCommand("init"); // Edax starts a new game		
 	}
 
 	@Override

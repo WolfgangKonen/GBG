@@ -939,20 +939,25 @@ public class XArenaFuncs
 
 		for (int k=0; k<competeNum; k++) {
 			// These four lines are fudge factors, but currently needed to get a Othello competition running: 
-			// We need to construct a new Edax for each competition game and we need to reset
+			// We need to initialize Edax for a new game before each competition game and we need to reset
 			// startSO's member lastMoves to an empty array in order that Edax makes on its first call
 			// of getNextAction2 (where firstTurn==true) the right decision.
-			if (paX instanceof Edax) paX = new Edax();
-			if (paO instanceof Edax) paO = new Edax();
+			if (paX instanceof Edax) ((Edax) paX).initForNewGame(); // paX = new Edax();
+			if (paO instanceof Edax) ((Edax) paO).initForNewGame(); // paO = new Edax();
 			if (startSO instanceof StateObserverOthello)
 				((StateObserverOthello) startSO).resetLastMoves();
 			//
 			// TODO: this is all not a nice design, because very Othello-specific things are part of 
 			// XArenaFuncs.compete(). Instead we should better generalize the interface of 
-			// (1) PlayAgent such that there is initialize(), which initializes this agent to a new game
-			//     (new Edax for Edax, nothing to do for all other agents)
+			// (1) PlayAgent such that there is initForNewGame(), which initializes this agent for a new 
+			//     game (command "init" for Edax, nothing to do for all other agents)
 			// (2) StateObservation, such that there is reset(), which resets this startSO to be a valid
 			// 	   start state (empty lastMoves for StateObserverOthello, nothing to do for all other)
+			// Another thing TODO: 
+			// If Edax is initialized for a new game, it will start from the default start position. 
+			// If startSO deviates from this, this is not yet transported over to Edax. We need an additional
+			// interface member
+			//		initForNewGame(StateObservation startSO)
 
 			int Player = Types.PLAYER_PM[startSO.getPlayer()];			
 			so = startSO.copy();
