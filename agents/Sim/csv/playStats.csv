@@ -1,0 +1,24 @@
+P0: RandomAgent
+P0: controllers.RandomAgent:
+P1: RandomAgent
+P1: controllers.RandomAgent:
+P2: RandomAgent
+P2: controllers.RandomAgent:
+Start state = ---------------
+run, moveNum, player, action, gameScore, nEmptyTile, cumEmptyTl, highestTile
+1, 0, 0, -1, +0.00, 0, 0, 0
+1, 1, 1, 8, -1.00, 0, 0, 0
+1, 2, 2, 9, -1.00, 0, 0, 0
+1, 3, 0, 10, -1.00, 0, 0, 0
+1, 4, 1, 3, -1.00, 0, 0, 0
+1, 5, 2, 5, -1.00, 0, 0, 0
+1, 6, 0, 7, -1.00, 0, 0, 0
+1, 7, 1, 4, -1.00, 0, 0, 0
+1, 8, 2, 12, -1.00, 0, 0, 0
+1, 9, 0, 0, -1.00, 0, 0, 0
+1, 10, 1, 13, -1.00, 0, 0, 0
+1, 11, 2, 1, -1.00, 0, 0, 0
+1, 12, 0, 14, -1.00, 0, 0, 0
+1, 13, 1, 11, -1.00, 0, 0, 0
+1, 14, 2, 2, -1.00, 0, 0, 0
+1, 15, 0, 6, +0.00, 0, 0, 0
