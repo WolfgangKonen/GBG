@@ -88,8 +88,8 @@ public class ValidateAgent {
 		// construct a board vector bv where each element is different and check based on this board vector
 		// that each board vector returned by  xnf.symmetryVectors(bv) is different from all the others.
 		// 
-		// [This check is at the moment tied to game Othello, as long as we have not
-		//  makeBoardVectorEachCellDifferent() as part of interface XNTupleFuncs.]
+		// [This check is at the moment tied to game Othello, as long as we have 
+		//  makeBoardVectorEachCellDifferent() not as part of interface XNTupleFuncs.]
 		//
 		if (ar instanceof ArenaTrainOthello) {
 			XNTupleFuncsOthello xnf = (XNTupleFuncsOthello) ((ArenaTrainOthello)ar).makeXNTupleFuncs();

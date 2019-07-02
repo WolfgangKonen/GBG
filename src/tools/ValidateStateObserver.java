@@ -28,6 +28,7 @@ public class ValidateStateObserver {
 		StateObservation newSob = sob.copy();
 		boolean random=true;
 		boolean silent=true, verbose=true;
+		
 		//
 		// Check if sob.getGameScoreTuple runs correctly through and returns valid numbers.
 		//		
@@ -40,9 +41,10 @@ public class ValidateStateObserver {
 			newSob.advance(a);
 		}
 		System.out.println("getGameScoreTuple check ... OK");
+		
 		//
-		// Check if the final score tuple (which usually contains non-zero rewards) has for 2-player
-		// games a sum of zero, i.e. 2 opposite entries.
+		// Check for 2-player games whether the final score tuple (which usually contains non-zero rewards)
+		//  has a sum of zero, i.e. 2 opposite entries.
 		//
 		sc = newSob.getGameScoreTuple();
 		checkScoreTuple(sc,newSob,true);

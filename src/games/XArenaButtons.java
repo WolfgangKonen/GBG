@@ -510,15 +510,9 @@ public class XArenaButtons extends JPanel
 		if (arena.hasTrainRights()) {
 			p1.add(GameNumL);
 			p1.add(GameNumT);			
-			p1.add(new Canvas());
-			p1.add(new Canvas());
+//			p1.add(new Canvas());		// WK: 	comment this out to let player-1 choicebox 
+//			p1.add(new Canvas());		//		appear in full length (always)
 		} else {
-//			JLabel gameLabel1 = new JLabel(arena.getGameName());
-//			gameLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-//			JLabel gameLabel2 = new JLabel(arena.getGameName());
-//			gameLabel2.setHorizontalAlignment(SwingConstants.CENTER);
-//			p1.add(gameLabel1);  // just the game name as place filler
-//			p1.add(gameLabel2);  // just the game name as place filler
 			for (int i=0; i<4; i++) p1.add(new Canvas());
 		}
 
@@ -536,8 +530,6 @@ public class XArenaButtons extends JPanel
 		psv.setAlignmentX(CENTER_ALIGNMENT); // does not work
 		psv.add(showValOnGB_L);
 		psv.add(showValOnGB);
-		//psv.add(new JLabel("   "));		// add some space to the right
-		//psv.add(new JLabel("   "));		//
 		
 		JPanel p3 = new JPanel();
 		p3.setLayout(new GridLayout(0,4,10,10));		// rows,columns,hgap,vgap
@@ -565,15 +557,12 @@ public class XArenaButtons extends JPanel
 		delayPanel.add(SleepDurationL, java.awt.BorderLayout.WEST);
 		delayPanel.add(Delay,java.awt.BorderLayout.CENTER);
 		
-		//JPanel s = new JPanel();
-		//s.setLayout(new GridLayout(0,1,10,10));		// rows,columns,hgap,vgap (1 column = allow long messages)
 		m_game.setStatusMessage("Init done.");
 		
 		setLayout(new BorderLayout(10,10));
 		add(q,java.awt.BorderLayout.NORTH);
 		add(ptp,java.awt.BorderLayout.CENTER);
 		add(delayPanel,java.awt.BorderLayout.SOUTH);
-		//add(s,java.awt.BorderLayout.SOUTH);
 		
 		// infoPanel (StatusMessage) is in Arena.java
 		
