@@ -21,6 +21,7 @@ import games.Nim.BoutonAgent;
 import games.Othello.StateObserverOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax;
+import games.Othello.Edax.Edax2;
 import games.TStats.TAggreg;
 import params.*;
 import tools.*;
@@ -204,8 +205,10 @@ public class XArenaFuncs
 		}else if (sAgent.equals("BenchPlayer")) {		// Othello only, see gui_agent_list in XArenaButtons
 			pa = new BenchMarkPlayer("BenchPlayer",1);
 		}else if (sAgent.equals("Edax")) {		// Othello only, see gui_agent_list in XArenaButtons
-		pa = new Edax();
-	}
+			pa = new Edax();
+		}else if (sAgent.equals("Edax2")) {		// Othello only, see gui_agent_list in XArenaButtons
+			pa = new Edax2();
+		}
 		return pa;
 	}
 
@@ -269,6 +272,8 @@ public class XArenaFuncs
 			pa = new BenchMarkPlayer("BenchPlayer",1);
 		}else if (sAgent.equals("Edax")) {		// Othello only, see gui_agent_list in XArenaButtons
 			pa = new Edax();
+		}else if (sAgent.equals("Edax2")) {		// Othello only, see gui_agent_list in XArenaButtons
+			pa = new Edax2();
 		} else { // all the trainable agents:
 			if (m_PlayAgents[n]==null) {
 				if (sAgent.equals("TDS")) {

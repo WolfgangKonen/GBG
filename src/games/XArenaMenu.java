@@ -34,6 +34,7 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.Othello.Edax.Edax2;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
@@ -645,6 +646,9 @@ public class XArenaMenu extends JMenuBar {
 			else if (td instanceof ExpectimaxNAgent) {
 				// set the agent parameters in XArenaTabs:
 				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((ExpectimaxNAgent) td).getDepth() );
+			}
+			else if (td instanceof Edax2) {
+				// set the agent parameters in XArenaTabs:
 			}
 			
 //			if (td instanceof TDAgent || td instanceof TDNTuple2Agt || td instanceof SarsaAgt /* || td instanceof TDNTupleAgt */) {

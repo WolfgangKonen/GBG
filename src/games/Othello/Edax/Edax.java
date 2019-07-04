@@ -1,6 +1,7 @@
 package games.Othello.Edax;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
@@ -8,6 +9,7 @@ import games.StateObservation;
 import games.Othello.StateObserverOthello;
 import params.ParOther;
 import tools.Types;
+import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 import tools.Types.ScoreTuple;
 
@@ -25,13 +27,22 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 		System.out.println("creating edax");
 		super.setAgentState(AgentState.TRAINED);
 		commandLineInteractor = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);
-		//commandLineInteractor.sendCommand("level 1"); // WK just a try to set search depth
+//		commandLineInteractor.sendCommand("level 2"); 	//  set search depth (default: 21)
 		commandLineInteractor.sendCommand("move-time 10"); // WK limit time-per-move to 10 sec
+		
 	}
 	
 	public void initForNewGame() {
 		firstTurn=true;
 		commandLineInteractor.sendCommand("init"); // Edax starts a new game		
+	}
+
+	public void initForNewGame(StateObservation sob) {
+		assert sob instanceof StateObserverOthello: "sob not instance of StateObserverOthello";
+		StateObserverOthello so = (StateObserverOthello) sob.copy();
+		firstTurn=true;
+		commandLineInteractor.sendCommand("init"); // Edax starts a new game		
+		commandLineInteractor.sendCommand("setboard "+so.toEdaxString()); 
 	}
 
 	@Override
@@ -65,6 +76,38 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 		if(!so.getAvailableActions().contains(action))
 		{
 			System.err.println("EDAX IST AM SCHUMMELN!");
+		}
+		
+		return action;
+	}
+	
+	/**
+	 * This is for task INSPECTV: force Edax to play in state {@code sob}. <br>
+	 * Set {@code vTable} of returned ACTIONS_VT in such a way that it is 1.0 for the chosen action, 0.0
+	 * for all other available actions.	 
+	 */
+	public ACTIONS_VT forceNextAction(StateObservation sob, boolean random, boolean silent) {
+		assert sob instanceof StateObserverOthello: "sob not instance of StateObserverOthello";
+		StateObserverOthello so = (StateObserverOthello) sob.copy();
+		ArrayList<ACTIONS> availActions = so.getAvailableActions();
+		
+		commandLineInteractor.sendCommand("init"); 
+		commandLineInteractor.sendCommand("setboard "+so.toEdaxString()); 
+		lastEdaxMove = commandLineInteractor.sendAndAwait("go"); 
+		System.out.println(lastEdaxMove);
+		
+		int actInteger = EdaxMoveConverter.converteEdaxToInt(lastEdaxMove);
+		double[] vTable = new double[availActions.size()+1];
+		for (int i=0; i<availActions.size(); i++) {
+			if (availActions.get(i).toInt()==actInteger) vTable[i]=1.0;
+		}
+		vTable[availActions.size()]=1.0;
+		
+		ACTIONS_VT action = new ACTIONS_VT(actInteger, false, vTable);
+																							
+		if(!so.getAvailableActions().contains(action))
+		{
+			System.err.println("force: EDAX IST AM SCHUMMELN!");
 		}
 		
 		return action;

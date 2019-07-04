@@ -31,6 +31,8 @@ public class ConfigOthello {
 	public static int WHITE = 1;
 	public static int EMPTY = 2;
 
+	public static String[] EDAX_STRING = {"x","o","."};		// Edax coding for BLACK/WHITE/EMPTY
+	
 	/**
 	 * Values for BenchmarkPlayer
 	 * [first index: mode=0: HeurPlayer, mode=1: BenchPlayer]

@@ -91,7 +91,7 @@ public class BoardPanel extends JPanel {
 	
 	private void doDrawing(Graphics g)
 	{
-		var g2d = (Graphics2D) g;
+		Graphics2D g2d = (Graphics2D) g;
 		g2d.setColor(Color.black);
 		
 		for(int i = 0; i < circles.length; i++)

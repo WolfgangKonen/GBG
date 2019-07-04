@@ -245,6 +245,8 @@ public class StateObserverOthello extends ObserverBase{
 		if(BaseOthello.possibleActions(currentGameState, 
 				this.getOpponent(playerNextMove)).size() != 0 ) {
 			playerNextMove = getOpponent(playerNextMove); 
+		} else {
+			int dummy=1;
 		}
 		
 		setAvailableActions();
@@ -316,6 +318,18 @@ public class StateObserverOthello extends ObserverBase{
 				System.out.printf( Integer.toString(currentGameState[i][j]) +" ");
 			}
 		}
+	}
+	
+	public String toEdaxString() {
+		String sout = "";	
+		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++) {
+			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++) {
+				sout += ConfigOthello.EDAX_STRING[currentGameState[i][j]]; 
+			}
+		}
+		sout += ConfigOthello.EDAX_STRING[this.getPlayer()];		// last char: player to move next
+//		System.out.println(sout);
+		return sout;
 	}
 	
 	public int[][] getCurrentGameState(){return currentGameState;}

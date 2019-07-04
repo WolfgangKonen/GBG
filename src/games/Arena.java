@@ -14,6 +14,7 @@ import controllers.PlayAgent;
 import games.Arena.Task;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
+import games.Othello.Edax.Edax;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
 import params.ParOther;
@@ -408,7 +409,11 @@ abstract public class Arena extends JFrame implements Runnable {
 				}
 
 				if (so.isLegalState() && !so.isGameOver()) {
-					actBest = paX.getNextAction2(so, false, true);
+					if (paX instanceof Edax) {		// making it work for Edax (TODO: not so nice design)
+						actBest = ((Edax) paX).forceNextAction(so, false, true);
+					} else {
+						actBest = paX.getNextAction2(so, false, true);						
+					}
 					if (actBest != null) 	// a HumanAgent will return
 											// actBest=null
 						so.storeBestActionInfo(actBest, actBest.getVTable());
@@ -579,9 +584,12 @@ abstract public class Arena extends JFrame implements Runnable {
 		setStatusMessage(sMsg);
 		System.out.println(sMsg);
 
-		// if taskBefore==INSPECTV, start from the board left by InspectV,
-		// if taskBefore!=INSPECTV, select here the start state:
-		if (taskBefore != Task.INSPECTV) {
+		if (taskBefore == Task.INSPECTV) {
+			// if taskBefore==INSPECTV, start from the board left by InspectV
+			pa = qaVector[0];
+			if (pa instanceof Edax) ((Edax) pa).initForNewGame(gb.getStateObs()); // paX = new Edax();
+		} else {
+			// if taskBefore!=INSPECTV, select here the start state:
 			gb.clearBoard(true, true); // reset game board to default start state
 			if (m_xab.oPar[0].useChooseStart01()) {
 				// this is mandatory for games like RubiksCube (but possible
