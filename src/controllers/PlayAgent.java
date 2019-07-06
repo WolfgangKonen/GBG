@@ -2,6 +2,7 @@ package controllers;
 
 import games.StateObservation;
 import params.ParOther;
+import agentIO.LoadSaveGBG;
 import games.Evaluator;
 import games.GameBoard;
 import tools.Types;
@@ -113,6 +114,15 @@ public interface PlayAgent {
 	
 	public boolean isTrainable();
 	
+	/**
+	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members), put the relevant code in here.
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public void instantiateAfterLoading();
+	
+
 	/**
 	 * @return a string with information about this agent
 	 * @see #stringDescr2()

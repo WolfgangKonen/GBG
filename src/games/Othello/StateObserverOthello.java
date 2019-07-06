@@ -33,7 +33,7 @@ public class StateObserverOthello extends ObserverBase{
 
 	
 	
-	public static final long serialVersionID = 12L;
+	public static final long serialVersionUID = 12L;
 	private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
 	
 	private int[][] currentGameState;

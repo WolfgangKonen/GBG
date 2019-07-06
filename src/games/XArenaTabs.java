@@ -31,6 +31,10 @@ public class XArenaTabs extends JFrame
 			tp[i].addTab("MCTS pars", arena.m_xab.mctsParams[i].getPanel());			// 4
 			tp[i].addTab("MCTSE pars", arena.m_xab.mctseParams[i].getPanel()); 			// 5
 			tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());					// 6
+			if (arena.getGameName().equals("Othello")) {
+				tp[i].addTab("Edax pars", arena.m_xab.edParams[i].getPanel());			// 7
+				tp[i].setToolTipTextAt(7, "Edax (Othello-specific)");
+			}
 			tp[i].setSize(getMinimumSize());
 			tp[i].setEnabledAt(i, true); 			// do we need this?
 			tp[i].setToolTipTextAt(0, "Temporal Difference & Sarsa");
@@ -111,6 +115,8 @@ public class XArenaTabs extends JFrame
 		if (selectedAgent.equals("MCTS Expectimax")) tp[n].setSelectedIndex(5);
 		if (selectedAgent.equals("Random")) tp[n].setSelectedIndex(6);		// OtherParams
 		if (selectedAgent.equals("Human")) tp[n].setSelectedIndex(6);		// OtherParams
+		if (selectedAgent.equals("Edax")) tp[n].setSelectedIndex(7);		// EdaxParams
+		if (selectedAgent.equals("Edax2")) tp[n].setSelectedIndex(7);		// EdaxParams		
 	}
 
 }

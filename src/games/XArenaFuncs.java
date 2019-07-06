@@ -207,7 +207,7 @@ public class XArenaFuncs
 		}else if (sAgent.equals("Edax")) {		// Othello only, see gui_agent_list in XArenaButtons
 			pa = new Edax();
 		}else if (sAgent.equals("Edax2")) {		// Othello only, see gui_agent_list in XArenaButtons
-			pa = new Edax2();
+			pa = new Edax2(sAgent, new ParEdax(m_xab.edParams[n]));
 		}
 		return pa;
 	}
@@ -273,7 +273,7 @@ public class XArenaFuncs
 		}else if (sAgent.equals("Edax")) {		// Othello only, see gui_agent_list in XArenaButtons
 			pa = new Edax();
 		}else if (sAgent.equals("Edax2")) {		// Othello only, see gui_agent_list in XArenaButtons
-			pa = new Edax2();
+			pa = new Edax2(sAgent, new ParEdax(m_xab.edParams[n]));
 		} else { // all the trainable agents:
 			if (m_PlayAgents[n]==null) {
 				if (sAgent.equals("TDS")) {

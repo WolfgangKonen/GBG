@@ -17,6 +17,7 @@ import java.util.Random;
 import org.apache.commons.math3.stat.descriptive.rank.Min;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
+import agentIO.LoadSaveGBG;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
@@ -315,6 +316,24 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		setAgentState(AgentState.INIT);
 	}
 
+	/**
+	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members), put the relevant code in here.
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public void instantiateAfterLoading() {
+		// set horizon cut for older agents (where horCut was not part of ParTD):
+		if (this.getParTD().getHorizonCut()==0.0) 
+			this.getParTD().setHorizonCut(0.1);
+		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+		// (they would stay otherwise at their default values, would not 
+		// get the loaded values)
+		this.setTDParams(this.getParTD(), this.getMaxGameNum());
+		this.setNTParams(this.getParNT());
+		this.weightAnalysis(null);
+	}
+	
 	/**
 	 * Get the best next action and return it 
 	 * (NEW version: ACTIONS_VT and recursive part for multi-moves)

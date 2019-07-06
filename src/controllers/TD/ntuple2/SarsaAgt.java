@@ -15,6 +15,7 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Random;
 
+import agentIO.LoadSaveGBG;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
@@ -205,6 +206,24 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		setAgentState(AgentState.INIT);
 	}
 
+	/**
+	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members), put the relevant code in here.
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public void instantiateAfterLoading() {
+		// set horizon cut for older agents (where horCut was not part of ParTD):
+		if (this.getParTD().getHorizonCut()==0.0) 
+			this.getParTD().setHorizonCut(0.1);
+		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+		// (they would stay otherwise at their default values, would not 
+		// get the loaded values)
+		this.setTDParams(this.getParTD(), this.getMaxGameNum());
+		this.setNTParams(this.getParNT());
+		this.weightAnalysis(null);
+	}
+	
 	/**
 	 * Get the best next action and return it 
 	 * 
@@ -563,6 +582,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	} // trainAgent
 
 
+    @Override
 	public String stringDescr() {
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
@@ -576,6 +596,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		return str;
 	}
 		
+    @Override
 	public String stringDescr2() {
 		String cs = getClass().getSimpleName();
 		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()

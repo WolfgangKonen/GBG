@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+import agentIO.LoadSaveGBG;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
@@ -180,6 +181,22 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		setAgentState(AgentState.INIT);
 	}
 
+	/**
+	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members), put the relevant code in here.
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public void instantiateAfterLoading() {
+		assert this.getParTD().getHorizonCut()!=0.0;
+		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+		// (they would stay otherwise at their default values, would not 
+		// get the loaded values)
+		this.setTDParams(this.getParTD(), this.getMaxGameNum());
+		this.setNTParams(this.getParNT());
+		this.weightAnalysis(null);
+	}
+	
 	/**
 	 * Get the best next action and return it 
 	 * 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
+import agentIO.LoadSaveGBG;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.StateObservation;
@@ -193,6 +194,15 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 			lFlag[i] = 0;
 		}
 	}
+	
+	/**
+	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members), put the relevant code in here.
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public void instantiateAfterLoading() { }
+
 
 	/**
 	 * The difficulty of {@link AlphaBetaAgent} is distinguished by the {@code searchDepth}

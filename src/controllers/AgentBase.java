@@ -161,6 +161,8 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return false; // dummy stub
 	}
 
+	public void instantiateAfterLoading() { }
+	
 	public byte getSize() {
 		return 1;  // dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
 	} 

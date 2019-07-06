@@ -44,7 +44,6 @@ import tools.Types.ACTIONS;
  * Main menu for {@link Arena} and {@link ArenaTrain}.
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16
- * 
  */
 public class XArenaMenu extends JMenuBar {
 
@@ -64,11 +63,11 @@ public class XArenaMenu extends JMenuBar {
 			+ "doesn't work for other agent-types. The selected agent also must <br>"
 			+ "be trained for this to work</body></html>";
 
-	private static final String TIPSAVE = "<html><body>Save a COMPLETE TD-Agent. All lookup-tables and configurations of the agent "
+	private static final String TIPSAVE = "<html><body>Save agent to disk. All lookup-tables and configurations of the agent "
 			+ "will be saved to HDD. Make sure, that enough <br>hdd-memory is available (all lookup-tables "
 			+ "can get huge sometimes)</body></html>";
 
-	private static final String TIPLOAD = "Open a COMPLETE TD-Agent. All lookup-tables and configurations of the agent "
+	private static final String TIPLOAD = "Load agent from disk. All lookup-tables and configurations of the agent "
 			+ "will be loaded and assigned to the selected agent";
 
 	private static final long serialVersionUID = -7247378225730684090L;
@@ -649,6 +648,7 @@ public class XArenaMenu extends JMenuBar {
 			}
 			else if (td instanceof Edax2) {
 				// set the agent parameters in XArenaTabs:
+				m_arena.m_xab.edParams[n].setFrom( ((Edax2) td).getParEdax() );
 			}
 			
 //			if (td instanceof TDAgent || td instanceof TDNTuple2Agt || td instanceof SarsaAgt /* || td instanceof TDNTupleAgt */) {

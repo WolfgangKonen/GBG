@@ -26,7 +26,7 @@ import tools.Types.ScoreTuple;
 public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializable {
 
 	
-	public static final long serialVersionID = 13L;
+	public static final long serialVersionUID = 13L;
 	private Random random;
 	private boolean strong = false;
 	private double min, max;

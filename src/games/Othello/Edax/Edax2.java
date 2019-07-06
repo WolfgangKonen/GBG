@@ -3,10 +3,12 @@ package games.Othello.Edax;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
 import games.Othello.StateObserverOthello;
+import params.ParEdax;
 import params.ParOther;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -15,29 +17,55 @@ import tools.Types.ScoreTuple;
 
 public class Edax2 extends AgentBase implements PlayAgent, Serializable
 {
-	private static final long serialVersionID = 13L;
+	private static final long serialVersionUID = 13L;
 	private String lastEdaxMove;
 	
-	private int level;			// ... for later
-	private double moveTime;	//
+	private ParEdax edaxPar;
 	
 	transient private CommandLineInteractor commandLineInteractor;
 	
 	public Edax2()
 	{
 		super("Edax2");
+		edaxPar = new ParEdax();
 		System.out.println("creating edax2");
 		super.setAgentState(AgentState.TRAINED);
+		initializeCLI();
+	}
+	
+	public Edax2(String agentName, ParEdax ePar) {
+		super(agentName);
+		edaxPar = new ParEdax(ePar);
+		System.out.println("creating edax2");
+		super.setAgentState(AgentState.TRAINED);
+		initializeCLI();
+	}
+	
+	private void initializeCLI() {
 		commandLineInteractor = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);
 		commandLineInteractor.sendCommand("mode 3"); // no automatic moves
-//		commandLineInteractor.sendCommand("level 1"); 		//  set search depth (default: 21)
-		commandLineInteractor.sendCommand("move-time 10"); // WK limit time-per-move to 10 sec
-		
+		commandLineInteractor.sendCommand("level "+edaxPar.getDepth()); 		//  set search depth 
+		commandLineInteractor.sendCommand("move-time "+edaxPar.getMoveTime()); //  set time per move		
 	}
 	
 	/**
+	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members), put the relevant code in here.
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public void instantiateAfterLoading() {
+		// since member commandLineInteractor is transient (not serializable), it will be null
+		// when loading a saved Edaxs2 from disk  -->  we need to restore it (from member edaxPar) 
+		// as it is done in constructor 
+		if (commandLineInteractor==null)
+			initializeCLI();
+	}
+	
+	/**
+	 * Given state {@code sob}, let Edax find the best next action.  
 	 * Set {@code vTable} of returned ACTIONS_VT in such a way that it is 1.0 for the action chosen
-	 * by Edax, 0.0 for all other available actions.	 
+	 * by Edax, 0.0 for all other available actions (needed for display in InspectV).	 
 	 */
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
@@ -66,6 +94,14 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 		return action;
 	}
 	
+    @Override
+	public String stringDescr() {
+		String cs = getClass().getSimpleName();
+		String str = cs + ": depth:" + edaxPar.getDepth()
+						+ ", moveTime:" + edaxPar.getMoveTime();
+		return str;
+	}
+		
 	@Override
 	public double getScore(StateObservation sob) {
 		// Edax has no estimates for score values, so we return 0 ...
@@ -78,4 +114,7 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 		return new ScoreTuple(sob.getNumPlayers());
 	}
 
+	public ParEdax getParEdax() {
+		return edaxPar;
+	}
 }
