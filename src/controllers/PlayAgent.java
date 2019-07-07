@@ -114,6 +114,19 @@ public interface PlayAgent {
 	
 	public boolean isTrainable();
 	
+	public void incrementDurationTrainingMs(long incr);	
+	public void incrementDurationEvaluationMs(long incr);
+	
+	/**
+	 * Time [ms] needed for training this agent
+	 */
+	public long getDurationTrainingMs();
+	/**
+	 * 
+	 * Time [ms] needed for evaluations during training
+	 */
+	public long getDurationEvaluationMs();
+	
 	/**
 	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
 	 * of transient members), put the relevant code in here.

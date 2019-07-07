@@ -1,0 +1,7 @@
+TDNTuple3Agt: USESYMMETRY:true, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false
+TDNTuple3Agt: alpha_init->final:0.2->0.2, epsilon_init->final:0.2->0.2, gamma: 1.0, random 50 6-tuple
+run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond
+0, 2000, -0.6, -0.9, 96899, 117700, 17.659, 5487.230307491931
+0, 4000, -0.5, -0.6, 193414, 235041, 34.517, 5603.441782310166
+1, 2000, -0.8500000000000001, -0.5, 98620, 119821, 13.728, 7183.857808857809
+1, 4000, -0.4, -0.8, 195920, 237619, 30.879, 6344.765050681693

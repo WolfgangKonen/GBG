@@ -36,6 +36,8 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	private AgentState m_agentState = AgentState.RAW;
 	private int epochMax = 0;
 	protected long m_numTrnMoves = 0L;
+	private long durationTrainingMs = 0L;		// total time in ms used for training
+	private long durationEvaluationMs = 0L;		// total time in ms used for evaluation (during training)
 	protected ParOther m_oPar = new ParOther();
 
 	/**
@@ -138,6 +140,21 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_name = name;
 	}
 
+	public void incrementDurationTrainingMs(long incr) {
+		this.durationTrainingMs += incr;
+	}
+	
+	public void incrementDurationEvaluationMs(long incr) {
+		this.durationEvaluationMs += incr;
+	}
+	
+	public long getDurationTrainingMs() {
+		return this.durationTrainingMs;
+	}
+	
+	public long getDurationEvaluationMs() {
+		return this.durationEvaluationMs;
+	}
 	
 	public boolean trainAgent(StateObservation so) {
 		m_GameNum++;

@@ -264,6 +264,9 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	 * see {@link NTuple2ValueFunc#weightAnalysis(double[])}
 	 */
 	public double[][] weightAnalysis(double[] per) {
+		System.out.println("Training duration: "+(double)getDurationTrainingMs()/1000+" sec");
+		System.out.println("Eval for training: "+(double)getDurationEvaluationMs()/1000+" sec");
+
 		return m_Net.weightAnalysis(per);
 	}
 

@@ -465,6 +465,7 @@ public class XArenaFuncs
 		int maxGameNum;			// maximum number of training games
 		int numEval;			// evaluate the trained agent every numEval games
 		boolean learnFromRM;	// if true, learn from random moves during training
+		long elapsedMs = 0L;
 		int gameNum=0;
 		int verbose=2;
 
@@ -531,28 +532,24 @@ public class XArenaFuncs
 		//TDNTupleAgt.pstream = System.out;
 		//TDNTupleAgt.pstream = new PrintStream(new FileOutputStream("debug-TDNT.txt"));
 		
-		//{
-		
 		long startTime = System.currentTimeMillis();
 		gb.initialize();
 		while (pa.getGameNum()<pa.getMaxGameNum())
 		{		
 			StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
-			// --- only debug TTT -----
-//			so.advance(new ACTIONS(4));
-//			so.advance(new ACTIONS(5));
-//			so.advance(new ACTIONS(8));
-//			so.advance(new ACTIONS(7));
-			
 			pa.trainAgent(so);
 			
 			if (doTrainStatistics) collectTrainStats(tsList,pa,so);
 				
 			gameNum = pa.getGameNum();
 			if (gameNum%numEval==0 ) { //|| gameNum==1) {
-				double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+				elapsedMs = (System.currentTimeMillis() - startTime);
+				pa.incrementDurationTrainingMs(elapsedMs);
+				double elapsedTime = (double)elapsedMs/1000.0;
 				System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
+				startTime = System.currentTimeMillis();
+
 				xab.GameNumT.setText(Integer.toString(gameNum ) );
 				
 				// construct 'qa' anew (possibly wrapped agent for eval)
@@ -567,6 +564,9 @@ public class XArenaFuncs
 
 				// update weight / TC factor distribution plot:
 				wChart.updateChartPlot(gameNum,pa,per);
+
+				elapsedMs = (System.currentTimeMillis() - startTime);
+				pa.incrementDurationEvaluationMs(elapsedMs);
 
 				// enable premature exit if TRAIN button is pressed again:
 				if (xab.m_game.taskState!=Arena.Task.TRAIN) {
@@ -589,6 +589,11 @@ public class XArenaFuncs
 				}
 				
 				m_evaluatorQ.eval(qa); 
+				
+				elapsedMs = (System.currentTimeMillis() - startTime);
+				pa.incrementDurationEvaluationMs(elapsedMs);
+				startTime = System.currentTimeMillis();
+
 				if(m_evaluatorQ.goalReached(gameNum)) break;  // out of while
 				
 			}
@@ -597,8 +602,6 @@ public class XArenaFuncs
 		// Debug only
 		//TDNTupleAgt.pstream.close();
 			
-		//} // if(sAgent)..else
-		
 		if (doTrainStatistics) {
 			taggList = aggregateTrainStats(tsList);
 			System.out.println("--- Train Statistics ---");
@@ -689,29 +692,31 @@ public class XArenaFuncs
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		DecimalFormat frm2 = new DecimalFormat("+0.00;-0.00");
 		DecimalFormat frm1 = new DecimalFormat("#0.00");
+		long elapsedMs = 0L;
 		int verbose=1;
 		int stopEval = 0;
+		boolean doTrainEvaluation = false;
 
 		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
 		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
 		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
-		boolean doTrainEvaluation=false;
-		boolean doMultiEvaluation=false;
-
 		System.out.println("*** Starting multiTrain with trainNum = "+trainNum+" ***");
 
 		Measure oQ = new Measure();			// quick eval measure
 		Measure oT = new Measure();			// train eval measure
-//		Measure oM = new Measure();			// multiTrain eval measure
 		MTrain mTrain;
 		double evalQ=0.0, evalT=0.0, evalM=0.0;
-		double elapsedTime=0.0, numEvalTime;
 		ArrayList<MTrain> mtList = new ArrayList<MTrain>();
-		int maxGameNumV=10000;
 		
 		for (int i=0; i<trainNum; i++) {
+			int player; 
+			int numEval = xab.oPar[n].getNumEval();
+			int gameNum;
+			long actionNum, trnMoveNum;
+			double totalTrainSec=0.0, elapsedTime;
+			
 			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
 
 			try {
@@ -731,23 +736,12 @@ public class XArenaFuncs
 			int tem = xab.oPar[n].getTrainEvalMode();
 			//
 			// doTrainEvaluation flags whether Train Evaluator is executed:
-			// Evaluator m_evaluatorT is only constructed and evaluated, if the choice
-			// boxes 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' have
-			// different values. 
-			doTrainEvaluation = (tem!=qem);
+			// Evaluator m_evaluatorT is only constructed and evaluated, if in tab 'Other pars' 
+			// the choice box 'Train Eval Mode' is not -1 ("none").
+			doTrainEvaluation = (tem!=-1);
 			if (doTrainEvaluation)
 		        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
 			
-//			int mem = m_evaluatorQ.getMultiTrainEvalMode();
-//			//
-//			// doMultiEvaluation flags whether Multi Train Evaluator is executed:
-//			// Evaluator m_evaluatorM is only constructed and evaluated, if the value of
-//			// getMultiTrainEvalMode() differs from the values in choice boxes
-//			// 'Quick Eval Mode' and 'Train Eval Mode' in tab 'Other pars' . 
-//			doMultiEvaluation = ((mem!=qem) && (mem!=tem));
-//			if (doMultiEvaluation)
-//		        m_evaluatorM = xab.m_game.makeEvaluator(pa,gb,stopEval,mem,1);
-
 			if (i==0) {
 				String pa_string = pa.getClass().getName();
 				System.out.println(pa.stringDescr());
@@ -755,65 +749,60 @@ public class XArenaFuncs
 			}
 			pa.setMaxGameNum(maxGameNum);
 			pa.setGameNum(0);
-			int player; 
-			int numEval = xab.oPar[n].getNumEval();
-			int gameNum;
-			long actionNum, trnMoveNum;
-			PlayAgent[] paVector;
-			
-			{
-				long startTime = System.currentTimeMillis();
-				long startTime0 = startTime;
-				gb.initialize();
-				while (pa.getGameNum()<pa.getMaxGameNum())
-				{		
-					StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
+			long startTime = System.currentTimeMillis();
+			gb.initialize();
+			while (pa.getGameNum()<pa.getMaxGameNum())
+			{		
+				StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
 
-					pa.trainAgent(so);
-					
-					gameNum = pa.getGameNum();
-					if (gameNum%numEval==0 ) { //|| gameNum==1) {
-						numEvalTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
-						// numEvalTime: the time in sec for the last numEval training games
-						System.out.println(pa.printTrainStatus()+", "+numEvalTime+" sec");
-						xab.GameNumT.setText(Integer.toString(gameNum ) );
-						
-						// construct 'qa' anew (possibly wrapped agent for eval)
-						qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
-				        
-						m_evaluatorQ.eval(qa);
-						evalQ = m_evaluatorQ.getLastResult();
-						if (doTrainEvaluation) {
-							m_evaluatorT.eval(qa);
-							evalT = m_evaluatorT.getLastResult();
-						}
-//						if (doMultiEvaluation) {
-//							m_evaluatorM.eval(qa);
-//							evalM = m_evaluatorM.getLastResult();
-//						}
-						
-                        // gather information for later printout to agents/gameName/csv/multiTrain.csv.
-						actionNum = pa.getNumLrnActions();	
-						trnMoveNum = pa.getNumTrnMoves();
-						elapsedTime += numEvalTime;   	// the time needed since start of training 
-													 	//(only self-play, excluding evaluations)
-						mTrain = new MTrain(i,gameNum,evalQ,evalT,/*evalM,*/
-											actionNum,trnMoveNum,elapsedTime,actionNum/elapsedTime);
-						mtList.add(mTrain);
-
-						// enable premature exit if MULTITRAIN button is pressed again:
-						if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
-							MessageBox.show(xab,
-									"MultiTraining stopped prematurely",
-									"Warning", JOptionPane.WARNING_MESSAGE);
-							break; //out of while
-						}
-
-						startTime = System.currentTimeMillis();
-					}
-				}
+				pa.trainAgent(so);
 				
-			} // if(sAgent)..else
+				gameNum = pa.getGameNum();
+				if (gameNum%numEval==0 ) { //|| gameNum==1) {
+					elapsedMs = (System.currentTimeMillis() - startTime);
+					pa.incrementDurationTrainingMs(elapsedMs);
+					elapsedTime = (double)elapsedMs/1000.0;
+					// elapsedTime: time [sec] for the last numEval training games
+					System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
+					startTime = System.currentTimeMillis();
+
+					xab.GameNumT.setText(Integer.toString(gameNum ) );
+					
+					// construct 'qa' anew (possibly wrapped agent for eval)
+					qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+			        
+					m_evaluatorQ.eval(qa);
+					evalQ = m_evaluatorQ.getLastResult();
+					if (doTrainEvaluation) {
+						m_evaluatorT.eval(qa);
+						evalT = m_evaluatorT.getLastResult();
+					}
+					
+                    // gather information for later printout to agents/gameName/csv/multiTrain.csv.
+					actionNum = pa.getNumLrnActions();	
+					trnMoveNum = pa.getNumTrnMoves();
+					totalTrainSec = (double)pa.getDurationTrainingMs()/1000.0;   	
+					// totalTrainSec = time [sec] needed since start of training 
+					// (only self-play, excluding evaluations)
+					mTrain = new MTrain(i,gameNum,evalQ,evalT,/*evalM,*/
+										actionNum,trnMoveNum,totalTrainSec,actionNum/totalTrainSec);
+					mtList.add(mTrain);
+
+					elapsedMs = (System.currentTimeMillis() - startTime);
+					pa.incrementDurationEvaluationMs(elapsedMs);
+
+					// enable premature exit if MULTITRAIN button is pressed again:
+					if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+						MessageBox.show(xab,
+								"MultiTraining stopped prematurely",
+								"Warning", JOptionPane.WARNING_MESSAGE);
+						break; //out of while
+					}
+
+					startTime = System.currentTimeMillis();
+				}
+			}
+				
 			
 			// construct 'qa' anew (possibly wrapped agent for eval)
 			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
@@ -825,11 +814,11 @@ public class XArenaFuncs
 				m_evaluatorT.eval(qa);
 				oT.add(m_evaluatorT.getLastResult());								
 			}
-//			if (doMultiEvaluation) {
-//				m_evaluatorM.eval(qa);
-//				oM.add(m_evaluatorM.getLastResult());
-//			}
 			
+			elapsedMs = (System.currentTimeMillis() - startTime);
+			pa.incrementDurationEvaluationMs(elapsedMs);
+			startTime = System.currentTimeMillis();
+
 			if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
 				break; //out of for
 			}
@@ -844,8 +833,6 @@ public class XArenaFuncs
 		{
 		  System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
 		}
-//		if (doMultiEvaluation)
-//		  System.out.println("Avg. "+ m_evaluatorM.getPrintString()+frm3.format(oM.getMean()) + " +- " + frm.format(oM.getStd()));
 		if (m_evaluatorQ.m_mode==(-1)) {
 			this.lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
 		} else {

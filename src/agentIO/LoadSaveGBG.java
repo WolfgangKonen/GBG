@@ -620,7 +620,7 @@ public class LoadSaveGBG {
 				
 			// Some older agents on disk might not have ParOther m_oPar.
 			// If this is the case, replace the null value with a default ParOther:
-			if (((AgentBase) pa).getParOther() == null ) {
+			if (pa.getParOther() == null ) {
 				((AgentBase) pa).setDefaultOtherPar();
 			}						
 

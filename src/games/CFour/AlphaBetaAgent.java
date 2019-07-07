@@ -4431,6 +4431,14 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 		return false;
 	}
 
+	public void incrementDurationTrainingMs(long incr) {	}
+	
+	public void incrementDurationEvaluationMs(long incr) {	}
+	
+	public long getDurationTrainingMs() {  return 0L;  }
+	
+	public long getDurationEvaluationMs() {  return 0L;  }
+	
 	@Override
 	public String printTrainStatus() {
 		return "AlphaBetaAgent::printTrain"; // dummy stub
