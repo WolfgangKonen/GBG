@@ -112,7 +112,18 @@ public interface PlayAgent {
 	
 	public String printTrainStatus();
 	
+	/**
+	 * @return true, if it is a trainable agent
+	 */
 	public boolean isTrainable();
+	
+	/**
+	 * @return true, if it was retrained (default: false) <br>
+	 * [An agent is called 'retrained' if it was - after 1st training - trained again for a 
+	 * second, third, ... time. This possibility for retraining is however for the future, 
+	 * it is not yet implemented.]
+	 */
+	public boolean isRetrained(); 
 	
 	public void incrementDurationTrainingMs(long incr);	
 	public void incrementDurationEvaluationMs(long incr);
@@ -130,10 +141,11 @@ public interface PlayAgent {
 	/**
 	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
 	 * of transient members), put the relevant code in here.
+	 * @return true on success
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
-	public void instantiateAfterLoading();
+	public boolean instantiateAfterLoading();
 	
 
 	/**

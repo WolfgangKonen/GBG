@@ -175,13 +175,19 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public boolean isTrainable() {
-		return false; // dummy stub
+		return false; 	// dummy stub
 	}
 
-	public void instantiateAfterLoading() { }
+	public boolean isRetrained() {
+		return false; 	// dummy stub
+	}
+
+	public boolean instantiateAfterLoading() { 
+		return true; 	// dummy stub, see LoadSaveTD.saveTDAgent
+	}
 	
 	public byte getSize() {
-		return 1;  // dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
+		return 1;  		// dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
 	} 
 
 	public int getGameNum() {

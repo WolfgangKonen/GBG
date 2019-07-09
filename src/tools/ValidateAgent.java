@@ -6,16 +6,15 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import controllers.PlayAgent;
-import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.XArenaFuncs;
+import games.XNTupleFuncs;
 import games.StateObservation;
 import games.Othello.ArenaOthello;
 import games.Othello.ArenaTrainOthello;
-import games.Othello.GameBoardOthello;
-import games.Othello.XNTupleFuncsOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
+import games.TicTacToe.ArenaTrainTTT;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
@@ -29,20 +28,21 @@ import tools.Types.ScoreTuple;
  * Run these checks by constructing in {@link #main(String[])} a certain {@link Arena} {@code ar} object, 
  * a {@link StateObservation} {@code sob} object  and a {@link PlayAgent} {@code p} object of the agent 
  * class you want to validate. Then perform the checks by calling 
- * {@link #ValidateAgent(PlayAgent, StateObservation)}.
+ * {@link #runTests(PlayAgent, StateObservation, Arena)}.
+ * <p>
+ * IMPORTANT: Run {@link #main(String[])} with VM argument {@code -ea} (enable assertions).
  */
 public class ValidateAgent {
 
 	public ValidateAgent() {};
 	
 	public boolean runTests(PlayAgent pa, StateObservation sob, Arena ar) {
-		boolean random=true;
-		boolean silent=true, verbose=true;
 		//
-		// Check if pa.getScoreTuple and pa.estimateGameValueTuple run correctly through and return valid numbers.
-		// Check this with different StateObservation objects so that there is at least one state for 
-		// every player. (Of course this test is not exhaustive.)
+		// Check if pa.getScoreTuple and pa.estimateGameValueTuple run correctly through and return valid
+		// numbers. Check this with different StateObservation objects so that there is at least one 
+		// state for every player. (Of course this test is not exhaustive.)
 		//		
+		boolean verbose=true;
 		ScoreTuple sc;
 		sc = pa.getScoreTuple(sob);
 		checkScoreTuple(sc,sob,verbose);
@@ -64,51 +64,46 @@ public class ValidateAgent {
 		//
 		while (!sob.isGameOver()) {
 			ArrayList<ACTIONS> arr = sob.getAvailableActions();
-			ACTIONS a = pa.getNextAction2(sob, random, silent);
+			ACTIONS a = pa.getNextAction2(sob, false, true);
 			sob.advance(a);
 		}
 		sc = pa.getScoreTuple(sob);
 		checkScoreTuple(sc,sob,verbose);
 		sc = sob.getGameScoreTuple();
 		checkScoreTuple(sc,sob,verbose);
-		if (sob.getNumPlayers()==2) {
-//			assert(sc.scTup[1]==-sc.scTup[0]) : "elements of final ScoreTuple do not sum to zero";
-		}
 		System.out.println("final getScoreTuple check ... OK");
 		
+		//
 		// check if a training episode runs through successfully 
-//		System.out.print("Starting pa.trainAgent ... ");
-//		int num = pa.getGameNum();
-//		pa.trainAgent(sob);
-//		assert (pa.getGameNum()-num == 1) : "Game counter not correctly incremented!";
-//		int dummy = 1;
-//		System.out.println("OK");
+		//
+		System.out.print("starting pa.trainAgent ... ");
+		int num = pa.getGameNum();
+		sob = ar.getGameBoard().getDefaultStartState();
+		pa.trainAgent(sob);
+		assert (pa.getGameNum()-num == 1) : "Game counter not correctly incremented!";
+		int dummy = 1;
+		System.out.println("OK");
 		
 		// 
-		// construct a board vector bv where each element is different and check based on this board vector
-		// that each board vector returned by  xnf.symmetryVectors(bv) is different from all the others.
+		// construct a board vector bv where each element is different and check that each board 
+		// vector returned by  xnf.symmetryVectors(bv) is different from all the others.
 		// 
-		// [This check is at the moment tied to game Othello, as long as we have 
-		//  makeBoardVectorEachCellDifferent() not as part of interface XNTupleFuncs.]
-		//
-		if (ar instanceof ArenaTrainOthello) {
-			XNTupleFuncsOthello xnf = (XNTupleFuncsOthello) ((ArenaTrainOthello)ar).makeXNTupleFuncs();
-			int[] bv = xnf.makeBoardVectorEachCellDifferent();
-			int[][] sym = xnf.symmetryVectors(bv);
-			boolean testPassed=true;
-			for (int i=0; i<(sym.length-1); i++) {
-				for (int j=i+1; j<sym.length; j++) {
-					if (assertBvDifferent(sym[i],sym[j])==false) {
-						System.out.println("Error: symmetry states identical: "+i+", "+j);
-						testPassed=false;
-					}
+		XNTupleFuncs xnf = ar.makeXNTupleFuncs();
+		int[] bv = xnf.makeBoardVectorEachCellDifferent();
+		int[][] sym = xnf.symmetryVectors(bv);
+		boolean testPassed=true;
+		for (int i=0; i<(sym.length-1); i++) {
+			for (int j=i+1; j<sym.length; j++) {
+				if (assertBvDifferent(sym[i],sym[j])==false) {
+					System.out.println("Error: symmetry states identical: "+i+", "+j);
+					testPassed=false;
 				}
 			}
-			if (testPassed) {
-				System.out.println("symmetryVectors check ... OK");
-			} else {
-				throw new RuntimeException("symmetryVectors check ... FAILED");
-			}
+		}
+		if (testPassed) {
+			System.out.println("symmetryVectors check ... OK");
+		} else {
+			throw new RuntimeException("symmetryVectors check ... FAILED");
 		}
 		
 		return true;
@@ -121,19 +116,31 @@ public class ValidateAgent {
 		return false;
 	}
 
+	/**
+	 * Check that {@code sc}'s values are valid, finite numbers, lie between min and max score
+	 * and that they sum to 0.0.
+	 * 
+	 * @param sc
+	 * @param sob
+	 * @param verbose
+	 * @return
+	 */
 	private boolean checkScoreTuple(ScoreTuple sc, StateObservation sob, boolean verbose) {
 		double scMin = sob.getMinGameScore();
 		double scMax = sob.getMaxGameScore();
+		double scSum = 0.0;
 		if (verbose) {
 			System.out.print(sc);
 			System.out.println("     "+scMin+"-->"+ scMax);
 		}
 		for (int i=0; i<sc.scTup.length; i++) {
+			scSum += sc.scTup[i];
 			assert !Double.isNaN(sc.scTup[i]);
 			assert Double.isFinite(sc.scTup[i]);		
 			assert (scMin <= sc.scTup[i]) : "ScoreTuple < getMinScore() : "+sc.scTup[i]+" < "+scMin;
 			assert (sc.scTup[i] <= scMax) : "ScoreTuple > getMaxScore() : "+sc.scTup[i]+" > "+scMax;
 		}
+		assert (Math.abs(scSum) < 1e-20) : "ScoreTuple does not sum to 0: "+scSum;
 		return true;
 	}
 	
@@ -149,26 +156,29 @@ public class ValidateAgent {
 	}
 	
 	public static void main(String[] args) {
+		//
+		// choose an Arena
+		//
 		Arena ar = new ArenaTrainOthello();
-//		GameBoard gb = new GameBoardOthello();		// this gives null pointer exception
+//		Arena ar = new ArenaTrainTTT();
 		
 		//
 		// choose an agent to validate
 		//
-		PlayAgent p;
-//		p = new BenchMarkPlayer("bp",1);
-		p = constructTDNTuple3Agt(ar);
+		PlayAgent pa;
+//		pa = new BenchMarkPlayer("bp",1);
+		pa = constructTDNTuple3Agt(ar);
 		
 		//
 		// start validation
 		//
-		if (p==null) {
+		if (pa==null) {
 			System.out.println("PlayAgent p is null!");
 		} else {
 			StateObservation sob = ar.getGameBoard().getDefaultStartState();
 			ValidateAgent va = new ValidateAgent();
 			try {
-				va.runTests(p,sob, ar);				
+				va.runTests(pa,sob, ar);				
 				System.out.println("ValidateAgent finished successfully");
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -179,7 +189,8 @@ public class ValidateAgent {
 			}
 			
 		}
-
+		
+		ar.destruct();
 	}
 
 }

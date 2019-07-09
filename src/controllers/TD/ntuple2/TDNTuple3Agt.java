@@ -187,7 +187,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
-	public void instantiateAfterLoading() {
+	public boolean instantiateAfterLoading() {
 		assert this.getParTD().getHorizonCut()!=0.0;
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
@@ -195,6 +195,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		this.setTDParams(this.getParTD(), this.getMaxGameNum());
 		this.setNTParams(this.getParNT());
 		this.weightAnalysis(null);
+		return true;
 	}
 	
 	/**

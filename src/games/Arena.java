@@ -75,7 +75,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 	public Arena() {
 		m_LaunchFrame = this;
-		initGame();
+		initGame(); 
 	}
 
 	public Arena(JFrame frame) {
@@ -344,6 +344,12 @@ abstract public class Arena extends JFrame implements Runnable {
 			// in this method
 
 		} // while (true)
+	}
+	
+	public void destruct() {
+		this.setVisible(false);
+		this.dispose();
+		System.exit(0);		
 	}
 
 	protected void updateBoard() {

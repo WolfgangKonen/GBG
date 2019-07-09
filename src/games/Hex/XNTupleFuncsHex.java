@@ -1,12 +1,13 @@
 package games.Hex;
 
 import games.StateObservation;
+import games.XNTupleBase;
 import games.XNTupleFuncs;
 
 import java.io.Serializable;
 import java.util.HashSet;
 
-public class XNTupleFuncsHex implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serializable {
 	
     /**
      * change the version ID for serialization only if a newer version is no longer

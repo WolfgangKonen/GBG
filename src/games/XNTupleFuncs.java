@@ -6,6 +6,8 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 
 import java.util.HashSet;
 
+import agentIO.LoadSaveGBG;
+
 
 /**
  * Interface for the n-tuple implementation in {@link TDNTuple2Agt} and 
@@ -23,6 +25,15 @@ import java.util.HashSet;
  * @author Wolfgang Konen, TH Köln, Feb'17
  */
 public interface XNTupleFuncs {
+	/**
+	 * If XNTuple object need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members, setting of defaults for older .agt.zip), put the relevant code in here.
+	 * @return true on success
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public boolean instantiateAfterLoading();
+	
 	/**
 	 * @return the number of board cells
 	 */
@@ -46,6 +57,11 @@ public interface XNTupleFuncs {
 	 */
 	public int[] getBoardVector(StateObservation so);
 
+	/**
+	 * @return a board vector where each cell has a different int 
+	 */
+	public int[] makeBoardVectorEachCellDifferent();
+	
 	/**
 	 * Given a board vector and given that the game has s symmetries,  
 	 * return an array which holds s symmetric board vectors: 

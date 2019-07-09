@@ -6,12 +6,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import games.StateObservation;
+import games.XNTupleBase;
 import games.XNTupleFuncs;
 import games.RubiksCube.ColorTrafoMap.ColMapType;
 import games.RubiksCube.CubeConfig.StateType;
 import games.RubiksCube.CubeStateMap.CsMapType;
 
-public class XNTupleFuncsCube implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Serializable {
 
 	private CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
 	private ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);

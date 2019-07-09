@@ -127,9 +127,7 @@ public class XArenaMenu extends JMenuBar {
 				ActionEvent.ALT_MASK));
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_frame.setVisible(false);
-				m_frame.dispose();
-				System.exit(0);
+				m_arena.destruct();
 			}
 		});
 		menuItem.setToolTipText(TIPEVALUATE);

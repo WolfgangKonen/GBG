@@ -4,10 +4,11 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 import games.StateObservation;
+import games.XNTupleBase;
 import games.XNTupleFuncs;
 import controllers.TD.ntuple2.NTupleFactory;
 
-public class XNTupleFuncsNim implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsNim extends XNTupleBase implements XNTupleFuncs, Serializable {
 
     /**
      * change the version ID for serialization only if a newer version is no longer

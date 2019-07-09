@@ -3,9 +3,10 @@ package games.Sim;
 import java.util.HashSet;
 
 import games.StateObservation;
+import games.XNTupleBase;
 import games.XNTupleFuncs;
 
-public class XNTupleFuncsSim implements XNTupleFuncs {
+public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs {
 
 	
     public XNTupleFuncsSim() 

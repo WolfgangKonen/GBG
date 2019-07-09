@@ -212,7 +212,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
-	public void instantiateAfterLoading() {
+	public boolean instantiateAfterLoading() {
 		// set horizon cut for older agents (where horCut was not part of ParTD):
 		if (this.getParTD().getHorizonCut()==0.0) 
 			this.getParTD().setHorizonCut(0.1);
@@ -222,6 +222,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		this.setTDParams(this.getParTD(), this.getMaxGameNum());
 		this.setNTParams(this.getParNT());
 		this.weightAnalysis(null);
+		return true;
 	}
 	
 	/**

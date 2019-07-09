@@ -5,9 +5,10 @@ import java.util.HashSet;
 
 import controllers.TD.ntuple2.NTupleFactory;
 import games.StateObservation;
+import games.XNTupleBase;
 import games.XNTupleFuncs;
 
-public class XNTupleFuncsC4 implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Serializable {
 
     /**
      * change the version ID for serialization only if a newer version is no longer

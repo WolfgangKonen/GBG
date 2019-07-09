@@ -201,7 +201,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
-	public void instantiateAfterLoading() { }
+	public boolean instantiateAfterLoading() { return true; }
 
 
 	/**
@@ -4446,6 +4446,11 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 	@Override
 	public boolean isTrainable() {
+		return false;
+	}
+
+	@Override
+	public boolean isRetrained() {
 		return false;
 	}
 

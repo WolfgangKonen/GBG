@@ -89,10 +89,10 @@ public class ArenaC4 extends Arena   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaC4 t_Frame = new ArenaC4("General Board Game Playing");
+		ArenaC4 ar = new ArenaC4("General Board Game Playing");
 
 		if (args.length==0) {
-			t_Frame.init();
+			ar.init();
 		} else {
 			throw new RuntimeException("[ArenaC4.main] args="+args+" not allowed. Use batch facility.");
 		}

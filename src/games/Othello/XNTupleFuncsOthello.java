@@ -12,21 +12,29 @@ import org.apache.commons.math3.exception.OutOfRangeException;
 import controllers.TD.ntuple2.NTupleFactory;
 import games.Arena;
 import games.StateObservation;
+import games.XNTupleBase;
 import games.XNTupleFuncs;
 
 
-public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Serializable {
 
+	private static int[] fixedModes = {0, 1, 2, 3};
+
+	private int numPositionValues = 3;  // either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
+//	private int numPositionValues = 4;  // or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty
+	// [Having numPositionValues as a member allows it that we can restore both versions, those
+	//  with P=3 and those with P=4, from disk.]
+	
     /**
-     * Provide a version ID here. Change the version ID for serialization only if a newer version is no 
+     * Provide a version UID here. Change the version UID for serialization only if a newer version is no 
      * longer compatible with an older one (older .gamelog or .agt.zip containing this object will
-     * become unreadable or you have to provide a special version transformation)  /WK/
+     * become unreadable)  
      */
     private static final long serialVersionUID = 42L;
     
 	private int[] actionVector = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8 , 9, 10, 11, 12, 13, 14, 15 , 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 , 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 , 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};	
 	private int[][] symmetryActions; //Gives a 2D representation of all SymmetryVectors
-	private int[][] actionPositions; //Given a action key, it gives all symmetric actions
+	private int[][] actionPositions; //Given an action key, it gives all symmetric actions
 
 	public XNTupleFuncsOthello() {
 		symmetryActions = symmetryVectors(actionVector);
@@ -48,6 +56,14 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		throw new RuntimeException("indexOf: Arr does not contain " + j);
 	}
 
+	@Override
+	public boolean instantiateAfterLoading() { 
+		if (numPositionValues==0) { 	// older stored agents might not have this member
+			numPositionValues=3;		// --> this was the (P=3)-version, so we restore it this way 
+		}
+		return true; 
+	}
+
 	/**
 	 * @return integer of total board cells
 	 */
@@ -57,15 +73,23 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 	}
 
 	/**
-	 * @return integer total of different board values
+	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
+	 * can have. For Othello: 
+	 * <ul>
+	 * <li> either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
+	 * <li> or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty 
+	 * 		(<b>recommended</b> case)
+	 * </ul> 
+	 * 
+	 * @see #getBoardVector(StateObservation)
 	 */
 	@Override
 	public int getNumPositionValues() {
-		return 3;
+		return numPositionValues;
 	}
 
 	/**
-	 * @return Number of Players
+	 * @return number of Players
 	 */
 	@Override
 	public int getNumPlayers() {
@@ -86,7 +110,7 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 	 * </pre>
 	 * @param The StateObservation of the current game state
 	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
-	 * position value with 0 = empty , 1 = white, -1 = black.
+	 * position value with 0 = BLACK , 1 = WHITE, 2 = EMPTY.
 	 */
 	@Override
 	public int[] getBoardVector(StateObservation so) {
@@ -176,42 +200,44 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 
 	}
 
-	/**
-	 * Helper function for  {@link #symmetryVectors(int[])}: 
-	 * Mirrors the board along its diagonal from top left to bottom right
-	 * 
-	 * <h4>Unused</h4>
-	 * 
-	 * <pre>
-	 * 
-	 * 00 01 02 03 04 05 06 07			00 08 16 24 32 40 48 56
-	 * 08 09 10 11 12 13 14 15			01 09 17 25 32 41 49 57
-	 * 16 17 18 19 20 21 22 23			02 10 18 26 33 42 50 58
-	 * 24 25 26 27 28 29 30 31  ---> 	03 11 19 27 34 43 51 59
-	 * 32 33 34 35 36 37 38 39			04 12 20 28 35 44 52 60
-	 * 40 41 42 43 44 45 46 47			05 13 21 29 36 45 53 61
-	 * 48 49 50 51 52 53 54 55			06 14 22 30 37 46 54 62
-	 * 56 57 58 59 60 61 62 63			07 15 23 31 38 47 55 63
-	 * 
-	 * </pre>
-	 * @param boardVector
-	 * @return
-	 */
-	private int[] mirrorDiagonally(int[] boardVector)
-	{
-		int[] result = new int[boardVector.length];
-		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
-		{
-			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
-			{
-				int oldPosition = i * ConfigOthello.BOARD_SIZE + j;
-				int newPosition = j * ConfigOthello.BOARD_SIZE + i;
-
-				result[newPosition] = boardVector[oldPosition];
-			}	
-		}
-		return result;
-	}
+	// --- mirrorDiagonally: never used ---
+//	/**
+//	 * Helper function for  {@link #symmetryVectors(int[])}: 
+//	 * Mirrors the board along its diagonal from top left to bottom right
+//	 * 
+//	 * <h4>Unused</h4>
+//	 * 
+//	 * <pre>
+//	 * 
+//	 * 00 01 02 03 04 05 06 07			00 08 16 24 32 40 48 56
+//	 * 08 09 10 11 12 13 14 15			01 09 17 25 32 41 49 57
+//	 * 16 17 18 19 20 21 22 23			02 10 18 26 33 42 50 58
+//	 * 24 25 26 27 28 29 30 31  ---> 	03 11 19 27 34 43 51 59
+//	 * 32 33 34 35 36 37 38 39			04 12 20 28 35 44 52 60
+//	 * 40 41 42 43 44 45 46 47			05 13 21 29 36 45 53 61
+//	 * 48 49 50 51 52 53 54 55			06 14 22 30 37 46 54 62
+//	 * 56 57 58 59 60 61 62 63			07 15 23 31 38 47 55 63
+//	 * 
+//	 * </pre>
+//	 * @param boardVector
+//	 * @return
+//	 */
+//	private int[] mirrorDiagonally(int[] boardVector)
+//	{
+//		int[] result = new int[boardVector.length];
+//		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
+//		{
+//			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
+//			{
+//				int oldPosition = i * ConfigOthello.BOARD_SIZE + j;
+//				int newPosition = j * ConfigOthello.BOARD_SIZE + i;
+//
+//				result[newPosition] = boardVector[oldPosition];
+//			}	
+//		}
+//		return result;
+//	}
+	
 	/**
 	 * Helper function for  {@link #symmetryVectors(int[])}: 
 	 * Mirrors the board along its horizontal central axis
@@ -231,19 +257,6 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 	 * @param boardVector
 	 * @return
 	 */
-	public int[] mirrorHorizontallyOLD(int[] boardVector)		// WK this is the old, buggy version
-	{
-		int[] result = new int[boardVector.length];
-		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
-		{
-			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
-			{
-				int oldPosition = (ConfigOthello.BOARD_SIZE - 1 - i) * ConfigOthello.BOARD_SIZE + (ConfigOthello.BOARD_SIZE - 1 - j);
-				result[i * ConfigOthello.BOARD_SIZE + j] = boardVector[oldPosition];
-			}
-		}
-		return result;
-	}
 	public int[] mirrorHorizontally(int[] boardVector)		// WK this is the new, correct version
 	{
 		int BS = ConfigOthello.BOARD_SIZE;
@@ -260,6 +273,19 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		return result;
 	}
 
+//	public int[] mirrorHorizontallyOLD(int[] boardVector)		// WK this is the old, buggy version
+//	{
+//		int[] result = new int[boardVector.length];
+//		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
+//		{
+//			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
+//			{
+//				int oldPosition = (ConfigOthello.BOARD_SIZE - 1 - i) * ConfigOthello.BOARD_SIZE + (ConfigOthello.BOARD_SIZE - 1 - j);
+//				result[i * ConfigOthello.BOARD_SIZE + j] = boardVector[oldPosition];
+//			}
+//		}
+//		return result;
+//	}
 
 	/**
 	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 
@@ -377,39 +403,23 @@ public class XNTupleFuncsOthello implements XNTupleFuncs, Serializable {
 		return neighbours;
 	}
 
-	private static int[] fixedModes = {0, 1, 2, 3};
-
+	// just some debug code to test the symmetries
+	//
 	public static void main(String[] args) {
-//		Arena ar = new ArenaOthello();
-//		StateObservation sob = ar.getGameBoard().getDefaultStartState();
 		XNTupleFuncsOthello xnf = new XNTupleFuncsOthello();
 		int[] bv2 = xnf.makeBoardVectorEachCellDifferent();
 		int[][] sv2 = xnf.symmetryVectors(bv2);
-//		for (int i = 0;  i < 2; i++)
 		for (int i = 0;  i < ConfigOthello.BOARD_SIZE; i++) {
 			System.out.println("*** i="+i+" ***");
 			prettyPrintBoardVector(sv2[i]);
 		}
 		int dummy =1;
-		System.out.println("\nCheck mirrorHorizontally\n  *** Originoal ***");
+		System.out.println("\nCheck mirrorHorizontally\n  *** Original ***");
 		prettyPrintBoardVector(bv2);
 		System.out.println("  *** Mirrored ***");
 		prettyPrintBoardVector(xnf.mirrorHorizontally(bv2));
-		System.out.println("  *** Mirrored (buggy) ***");
-		prettyPrintBoardVector(xnf.mirrorHorizontallyOLD(bv2));
-	}
-	
-	public int[] makeBoardVectorEachCellDifferent() {
-		int BS = ConfigOthello.BOARD_SIZE;
-		int [][] gameState = new int[BS][BS];
-		for(int i = 0, n=0;  i < BS; i++) {
-			for(int j = 0; j < BS; j++,n++) {
-				gameState[i][j] = n;
-			}	
-		}
-		StateObservation sob2 = new StateObserverOthello(gameState,1, new ArrayList<Integer>(), 0);
-		int[] bv2 = this.getBoardVector(sob2);
-		return bv2;		
+//		System.out.println("  *** Mirrored (buggy) ***");
+//		prettyPrintBoardVector(xnf.mirrorHorizontallyOLD(bv2));
 	}
 	
 	public static void prettyPrintBoardVector(int[] bv) {

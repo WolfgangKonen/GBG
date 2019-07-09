@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 import games.StateObservation;
+import games.XNTupleBase;
 import games.XNTupleFuncs;
 
-public class XNTupleFuncs2048 implements XNTupleFuncs, Serializable {
+public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Serializable {
 
     /**
      * change the version ID for serialization only if a newer version is no longer

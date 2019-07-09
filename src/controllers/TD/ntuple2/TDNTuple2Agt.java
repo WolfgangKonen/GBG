@@ -322,7 +322,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
-	public void instantiateAfterLoading() {
+	public boolean instantiateAfterLoading() {
 		// set horizon cut for older agents (where horCut was not part of ParTD):
 		if (this.getParTD().getHorizonCut()==0.0) 
 			this.getParTD().setHorizonCut(0.1);
@@ -332,6 +332,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		this.setTDParams(this.getParTD(), this.getMaxGameNum());
 		this.setNTParams(this.getParNT());
 		this.weightAnalysis(null);
+		return true;
 	}
 	
 	/**
