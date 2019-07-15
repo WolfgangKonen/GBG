@@ -20,7 +20,7 @@ import tools.Types.ScoreTuple;
  * @see StateObservation
  */
 abstract public class ObserverBase implements StateObservation {
-	protected int m_counter = 0;
+	protected int m_counter = 0;		// move counter
 	
     protected Types.ACTIONS[] storedActions = null;
     protected Types.ACTIONS storedActBest = null;
@@ -68,12 +68,11 @@ abstract public class ObserverBase implements StateObservation {
 		return storedValues;
 	}
 	
-	/** 
-	 * dummy implementation 
+	/**
+	 * This is just to signal that derived classes will be either abstract or implement
+	 * getAvailableActions(), as required by the interface {@link StateObservation}.
 	 */
-	public ArrayList<ACTIONS> getAllAvailableActions() {
-		throw new RuntimeException("getAllAvailableActions() is not implemented!");
-	}
+	abstract public ArrayList<ACTIONS> getAllAvailableActions();
 
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement
@@ -128,20 +127,6 @@ abstract public class ObserverBase implements StateObservation {
 	}
 	
 	/**
-	 * The game score of {@code this}, from the perspective of the player to move in {@code this}.
-	 * <p>
-	 * This implementation is valid for all classes implementing {@link StateObservation}, once
-	 * they have a valid implementation for {@link #getGameScore(StateObservation)}.
-	 * <p>
-	 * This method is deprecated, use instead 
-	 * {@link #getGameScore(StateObservation) this.getGameScore(this)}.
-	 */
-	@Deprecated
-	public double getGameScore() {
-		return this.getGameScore((StateObservation) this);
-	}
-
-	/**
 	 * The game score, seen from the perspective of {@code referingState}'s player. This 
 	 * relativeness is usually only relevant for games with more than one player.
 	 * <p>
@@ -149,13 +134,10 @@ abstract public class ObserverBase implements StateObservation {
 	 * {@link #getGameScore(StateObservation)}, as required by the interface {@link StateObservation} as well.
 	 * 
 	 * @param referringState see below
-	 * @return  If referringState has the same player as {@code this}, then it is getGameScore().<br> 
-	 * 			If referringState has opposite player, then it is getGameScore()*(-1). 
+	 * @return  The game score, seen from the perspective of {@code referingState}'s player.<br> 
+	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1). 
 	 */
     abstract public double getGameScore(StateObservation referringState);
-//    public double getGameScore(StateObservation referringState) {
-//    	return getGameScore(referringState.getPlayer());
-//    }
 	
 
 	/**
@@ -188,23 +170,6 @@ abstract public class ObserverBase implements StateObservation {
 		return sc;
 	}
 
-	/**
-	 * The cumulative reward of {@code this}, from the perspective of the player to move in {@code this}.
-	 * <p> 
-	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
-	 * <p>
-	 * This method is deprecated, use instead
-	 * {@link #getReward(StateObservation,boolean) this.getGameScore(this,rewardIsGameScore)}.
-	 * 
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return the cumulative reward
-	 */
-	@Deprecated
-	public double getReward(boolean rewardIsGameScore) {
-		return this.getReward(this,rewardIsGameScore);
-	}
-	
 	/**
 	 * The cumulative reward, seen from the perspective of {@code referingState}'s player. This 
 	 * relativeness is usually only relevant for games with more than one player.

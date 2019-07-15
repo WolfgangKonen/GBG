@@ -7,7 +7,7 @@ import java.util.HashSet;
 import games.Othello.ConfigOthello;
 import games.Othello.StateObserverOthello;
 
-public abstract class XNTupleBase implements Serializable, XNTupleFuncs {
+abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 
     /**
      * Provide a version UID here. Change the version UID for serialization only if a newer version is no 

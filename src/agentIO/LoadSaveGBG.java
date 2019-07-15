@@ -12,6 +12,7 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.XArenaButtons;
+import games.CFour.AlphaBetaAgent;
 import games.Nim.BoutonAgent;
 import games.Othello.Edax.Edax2;
 
@@ -609,6 +610,7 @@ public class LoadSaveGBG {
 			if (obj instanceof PlayAgent) {
 				pa = (PlayAgent) obj;
 				pa.instantiateAfterLoading();	// special treatment of agents after loading (if necessary)
+				// [instantiateAfterLoading replaces completely the long and complicated switch statement we had here before (!)]
 			} else {
 				if (dlg!=null) dlg.setVisible(false);
 				MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
@@ -619,9 +621,9 @@ public class LoadSaveGBG {
 			}
 				
 			// Some older agents on disk might not have ParOther m_oPar.
-			// If this is the case, replace the null value with a default ParOther:
-			if (pa.getParOther() == null ) {
-				((AgentBase) pa).setDefaultOtherPar();
+			// If this is the case, replace the null value with a default ParOther.
+			if (pa.getParOther() == null) {
+				((AgentBase) pa).setDefaultParOther();
 			}						
 
 			if (dlg!=null) dlg.setVisible(false);
@@ -633,13 +635,19 @@ public class LoadSaveGBG {
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 			//e.printStackTrace();
-			throw e;
+			pa=null;
 		} catch (ClassNotFoundException e) {
 			if (dlg!=null) dlg.setVisible(false);
 			MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			//e.printStackTrace();
-			throw e;
+			pa=null;
+		} catch (AssertionError e) {
+			if (dlg!=null) dlg.setVisible(false);
+			MessageBox.show(arenaFrame,"Instantiation failed: " + e.getMessage(),
+					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+			//e.printStackTrace();
+			pa=null;
 		} finally {
 			if (ois != null)
 				try {

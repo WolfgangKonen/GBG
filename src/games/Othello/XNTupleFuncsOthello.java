@@ -14,14 +14,15 @@ import games.Arena;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
+import tools.Types.ACTIONS;
 
 
 public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Serializable {
 
 	private static int[] fixedModes = {0, 1, 2, 3};
 
-	private int numPositionValues = 3;  // either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
-//	private int numPositionValues = 4;  // or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty
+//	private int numPositionValues = 3;  // either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
+	private int numPositionValues = 4;  // or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty
 	// [Having numPositionValues as a member allows it that we can restore both versions, those
 	//  with P=3 and those with P=4, from disk.]
 	
@@ -58,9 +59,9 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 
 	@Override
 	public boolean instantiateAfterLoading() { 
-		if (numPositionValues==0) { 	// older stored agents might not have this member
-			numPositionValues=3;		// --> this was the (P=3)-version, so we restore it this way 
-		}
+		if (numPositionValues==0) { 	// older stored agents did not have this member
+			numPositionValues=3;		// --> 	the older agents had the (P=3)-version, so we 
+		}								// 		restore it this way 
 		return true; 
 	}
 
@@ -120,6 +121,12 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 		for(int i = 0, n = 0; i < ConfigOthello.BOARD_SIZE; i++){
 			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++, n++)
 				retVal[n] = gameState[i][j];
+		}
+		if (this.getNumPositionValues()==4) {
+			ArrayList<ACTIONS> availActs = so.getAvailableActions();
+            for(int i = 0; i < availActs.size(); ++i) {
+            	retVal[availActs.get(i).toInt()] = 3;
+            }
 		}
 		return retVal;
 	}
@@ -366,7 +373,12 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 
 	@Override
 	public String fixedTooltipString() {
-		return "<html>"	+ "1: TODO"	+ "</html>";
+		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
+		return "<html>"	+ "0: 10 1-Tuples "
+				+ "<br>1: 32 straight 2-Tuple"	
+				+ "<br>2: 24 straight 3-Tuple"	
+				+ "<br>3: 8 random snakey bakey 4-Tuple"	
+				+ "</html>";
 	}
 
 	@Override

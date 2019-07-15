@@ -1,8 +1,10 @@
 package controllers;
 
 import games.StateObservation;
+import games.XArenaMenu;
 import params.ParOther;
 import agentIO.LoadSaveGBG;
+import games.Arena;
 import games.Evaluator;
 import games.GameBoard;
 import tools.Types;
@@ -147,7 +149,16 @@ public interface PlayAgent {
 	 */
 	public boolean instantiateAfterLoading();
 	
-
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena);
+	
 	/**
 	 * @return a string with information about this agent
 	 * @see #stringDescr2()

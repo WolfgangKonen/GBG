@@ -175,16 +175,6 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
         }
     }
 
-    @Override
-
-    public double getGameScore() {
-        if(score == 0) {
-            return 0;
-        } else {
-            return score / MAXSCORE;
-        }
-    }
-
     public double getGameScore1() {
         if (isGameOver()) {
             double penalisation = ConfigGame.PENALISATION;
@@ -398,18 +388,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     }
 
 	/**
-	 * The cumulative reward, here: the same as getGameScore()
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return the cumulative reward
-	 */
-    @Override
-	public double getReward(boolean rewardIsGameScore) {
-		return this.getGameScore(this);
-	}
-	
-	/**
-	 * Same as getReward(), but relative to referringState. 
+	 * The cumulative reward relative to referringState. 
 	 * @param referringState
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
@@ -486,6 +465,15 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
         updateAvailableMoves();
     }
 
+    @Override
+	public ArrayList<ACTIONS> getAllAvailableActions() {
+        ArrayList allActions = new ArrayList<>();
+        for (int j = 0; j < 4; j++) 
+        	allActions.add(Types.ACTIONS.fromInt(j));
+        
+        return allActions;
+	}
+	
     @Override
     public ArrayList<ACTIONS> getAvailableActions() {
         ArrayList<ACTIONS> availAct = new ArrayList<>();

@@ -65,9 +65,6 @@ public class EvaluatorC4 extends Evaluator {
     private int numStartStates = 1;
 	private AgentLoader agtLoader = null;
 	
-	// The opening-books are loaded only once to save memory. All agents, that
-	// need them, use the same books.
-	private final BookSum books = new BookSum();
 	private AlphaBetaAgent alphaBetaStd = null;
 
     /**
@@ -104,13 +101,8 @@ public class EvaluatorC4 extends Evaluator {
         
 		// Initialize the standard Alpha-Beta-Agent
 		// (same as winOptionsGTB in MT's C4)
-		alphaBetaStd = new AlphaBetaAgent(books);
-		alphaBetaStd.resetBoard();
-		alphaBetaStd.setTransPosSize(4);		// index into table
-		alphaBetaStd.setBooks(true,false,true);	// use normal book and deep book dist
-		alphaBetaStd.setDifficulty(42);			// search depth
-		alphaBetaStd.randomizeEqualMoves(true);
-
+		alphaBetaStd = new AlphaBetaAgent(new BookSum());
+		alphaBetaStd.instantiateAfterLoading();
     }
 
     @Override
@@ -180,7 +172,7 @@ public class EvaluatorC4 extends Evaluator {
                 break;
             case 11:
             	// just debug code to find out which is a winning startAction in competeAgainstOpponent_diffStates:
-//            	AlphaBetaAgent alphaBetaAgentP = new AlphaBetaAgent(books);
+//            	AlphaBetaAgent alphaBetaAgentP = new AlphaBetaAgent(new BookSum());
 //        		result = competeAgainstOpponent_diffStates(alphaBetaAgentP, alphaBetaStd, m_gb, numEpisodes);
 
     			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
@@ -463,24 +455,6 @@ public class EvaluatorC4 extends Evaluator {
         return success;
     }
 
- 	// --- implemented by Evaluator ---
-//    @Override
-//    public double getLastResult() {
-//        return lastResult;
-//    }
-
- 	// --- implemented by Evaluator ---
-//    @Override
-//    public boolean isAvailableMode(int mode) {
-//        int[] availableModes = getAvailableModes();
-//        for (int availableMode : availableModes) {
-//            if (mode == availableMode) {
-//                return true;
-//            }
-//        }
-//
-//        return false;
-//    }
 
     @Override
     public int[] getAvailableModes() {
@@ -496,11 +470,6 @@ public class EvaluatorC4 extends Evaluator {
     public int getTrainEvalMode() {
         return -1;
     }
-
-//    @Override
-//    public int getMultiTrainEvalMode() {
-//        return 0; //getAvailableModes()[0];
-//    }
 
     @Override
     public String getPrintString() {

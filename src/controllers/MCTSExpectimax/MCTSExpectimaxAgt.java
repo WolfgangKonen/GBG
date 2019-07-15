@@ -3,6 +3,7 @@ package controllers.MCTSExpectimax;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.MCTS.MCTSAgentT;
+import games.Arena;
 import games.StateObservation;
 import games.XArenaMenu;
 //import params.MCTSExpectimaxParams;
@@ -71,6 +72,21 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 		setAgentState(AgentState.TRAINED);
     }
 
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 * @see XArenaTabs
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setMctseParFrom(n, this.getParMCTSE() );
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+	}
+	
     /**
      * Picks an action. This function is called every game step to request an
      * action from the player.

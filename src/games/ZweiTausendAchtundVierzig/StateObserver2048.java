@@ -547,7 +547,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	}
     
 	/**
-	 * Same as getReward(referringState), but with the player of referringState. 
+	 * Same as getReward(referringState,rgs), but with the player of referringState. 
 	 * @param player the player of referringState, a number in 0,1,...,N.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
@@ -561,23 +561,6 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     	}
 	}
 
-	// -- use the default implementation in ObserverBase which will call
-	// -- this.getReward(this,rewardIsGameScore)
-//	/**
-//	 * The cumulative reward
-//	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-//	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
-//	 * @return the cumulative reward
-//	 */
-//    @Override
-//	public double getReward(boolean rewardIsGameScore) {
-//    	if (rewardIsGameScore) {
-//    		return this.getGameScore(this);    		
-//    	} else {
-//    		return this.getCumulEmptyTiles();
-//    	}
-//	}
-	
     public double getMinGameScore() {
         return REWARD_NEGATIVE;
     }
@@ -1142,31 +1125,9 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return Long.hashCode(boardB);
     }
     
-//    public double getGameValue() { return this.getGameScore(this); }
-
-    // --- take the default implementation from ObserverBase ---
-//    public double getGameScore() {
-//        return this.getGameScore(this);
-//    }
-
-    // --- take the default implementation from ObserverBase ---
-//	/**
-//	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int i)}
-//	 */
-//	public ScoreTuple getGameScoreTuple() {
-//		ScoreTuple sc = new ScoreTuple(1);
-//		sc.scTup[0] = this.getGameScore();
-//		return sc;
-//	}
-	
 	public int getHighestTileValue() {
 		return this.highestTileValue;
 	}
-	
-	// --- obsolete, we have ObserverBase.getMoveCounter() ---
-//	public int getMoves() {
-//		return moves;
-//	}
 	
 } // class StateObserver2048
 

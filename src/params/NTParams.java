@@ -529,7 +529,7 @@ public class NTParams extends Frame implements Serializable {
 		// currently we have here only game-specific defaults for two games (2048 , ConnectFour)
 		// in the case of two agents ("TD-Ntuple[-2]" = class TDNTuple[2]Agt):
 		switch (agentName) {
-		case "TD-Ntuple": 
+//		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
 		case "TD-Ntuple-3": 
 		case "Sarsa":

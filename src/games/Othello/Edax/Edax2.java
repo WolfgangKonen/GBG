@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
 import controllers.PlayAgent;
+import games.Arena;
 import games.StateObservation;
+import games.XArenaMenu;
 import games.Othello.StateObserverOthello;
 import params.ParEdax;
 import params.ParOther;
@@ -56,12 +58,27 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 	 */
 	public boolean instantiateAfterLoading() {
 		// since member commandLineInteractor is transient (not serializable), it will be null
-		// when loading a saved Edaxs2 from disk  -->  we need to restore it (from member edaxPar) 
-		// as it is done in constructor 
+		// when loading a saved Edaxs2 from disk  -->  we need to restore it (with the help of 
+		// member edaxPar) as it is done in constructor 
 		if (commandLineInteractor==null)
 			initializeCLI();
 		
 		return true;
+	}
+	
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 * @see XArenaTabs
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setEdaxParFrom(n, this.getParEdax() );
+//		m_arena.m_xab.setOParFrom(n, this.getParOther() );		// do or don't?
 	}
 	
 	/**

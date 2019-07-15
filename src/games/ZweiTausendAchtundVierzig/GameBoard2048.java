@@ -500,7 +500,7 @@ public class GameBoard2048 extends JFrame implements GameBoard {
 
         scoreLabel.setText("" + m_so.getScore());
 
-      /*  realScore.setText("" + Math.round(m_so.getGameScore() * m_so.MAXSCORE));
+      /*  realScore.setText("" + Math.round(m_so.getGameScore(m_so) * m_so.MAXSCORE));
         rowValue.setText("" + (m_so.rowValue));
         mergeValue.setText("" + (m_so.mergeValue));
         highestTileInCorner.setText("" + m_so.highestTileInCorner);

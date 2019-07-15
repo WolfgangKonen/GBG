@@ -169,6 +169,15 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     	return this;
     }
 
+    @Override
+	public ArrayList<ACTIONS> getAllAvailableActions() {
+        ArrayList allActions = new ArrayList<>();
+        for (int j = 0; j < 9; j++) 
+        	allActions.add(Types.ACTIONS.fromInt(j));
+        
+        return allActions;
+	}
+	
 	@Override
 	public ArrayList<ACTIONS> getAvailableActions() {
 		return acts;

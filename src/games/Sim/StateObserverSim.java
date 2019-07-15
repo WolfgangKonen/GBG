@@ -194,6 +194,19 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return acts.get(i);
 	}
 
+    @Override
+	public ArrayList<ACTIONS> getAllAvailableActions() {
+		int action = 0;
+        ArrayList allActions = new ArrayList<>();
+		for(int i = 0; i < nodes.length -1 ; i++) {
+			for(int j = 0; j < nodes.length - 1 - i; j++) {
+				acts.add(Types.ACTIONS.fromInt(action));
+				action++;
+			}
+		}       
+        return allActions;
+	}
+	
 	@Override
 	public ArrayList<ACTIONS> getAvailableActions() {
 		return acts;

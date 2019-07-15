@@ -9,6 +9,7 @@ import javax.swing.event.ChangeListener;
 
 import TournamentSystem.TSAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import params.*;
 import tools.HtmlDisplay;
 import tools.Types;
@@ -606,10 +607,14 @@ public class XArenaButtons extends JPanel
 		default:
 			GameNumT.setText("10000");				
 		}
-		if(agentName.equals("TD-Ntuple")) {
+		
+		switch (agentName) {
+		case "TD-Ntuple-2": 
+		case "TD-Ntuple-3": 
+		case "Sarsa":
 			NTupShowB.setEnabled(true);	// enable this button only if agentName is an n-tuple agent
-		}
-		else {
+			break;
+		default:
 			NTupShowB.setEnabled(false);			
 		}
 	}
@@ -723,4 +728,34 @@ public class XArenaButtons extends JPanel
 		selectedAgentTypes = null;
 	}
 
+	//
+	// setter functions to make the param members accessible from PlayAgent.fillParamTabsAfterLoading
+	//
+	public void setTdParFrom(int n, ParTD parTD) {
+		this.tdPar[n].setFrom( parTD );
+	}
+	public void setNtParFrom(int n, ParNT parNT) {
+		this.ntPar[n].setFrom( parNT );
+	}
+	public void setOParFrom(int n, ParOther parOther) {
+		this.oPar[n].setFrom( parOther );
+	}
+	public void setEdaxParFrom(int n, ParEdax parEdax) {
+		this.edParams[n].setFrom( parEdax );
+	}
+	public void setMaxNParFrom(int n, ParMaxN parMaxN) {
+		this.maxnParams[n].setFrom( parMaxN );
+	}
+	public void setMaxNDepthFrom(int n, int depth) {
+		this.maxnParams[n].setMaxnDepth(depth);
+	}
+	public void setMcParFrom(int n, ParMC parMC) {
+		this.mcParams[n].setFrom( parMC );
+	}
+	public void setMctsParFrom(int n, ParMCTS parMcts) {
+		this.mctsParams[n].setFrom( parMcts );
+	}
+	public void setMctseParFrom(int n, ParMCTSE parMctse) {
+		this.mctseParams[n].setFrom( parMctse );
+	}
 } // class XArenaButtons	

@@ -22,8 +22,8 @@ public class ConfigOthello {
 	public static Color POSSIBLEMOVECOLOR = Color.GREEN;
 	public static Color NORMALBORDERCOLOR = Color.YELLOW;
 	public static Dimension DIMENSIONTILE = new Dimension(
-			(int) Types.GUI_SCALING_FACTOR * 80,
-			(int) Types.GUI_SCALING_FACTOR * 80
+			(int) Types.GUI_SCALING_FACTOR * 75,
+			(int) Types.GUI_SCALING_FACTOR * 75
 			);
 	
 	

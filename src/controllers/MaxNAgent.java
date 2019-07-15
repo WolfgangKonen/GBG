@@ -2,7 +2,9 @@ package controllers;
 
 import controllers.PlayAgent;
 import controllers.MinimaxAgent;
+import games.Arena;
 import games.StateObservation;
+import games.XArenaMenu;
 import params.MaxNParams;
 import params.ParMaxN;
 import params.ParOther;
@@ -80,6 +82,21 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 //		m_oPar = new ParOther(oPar);		// AgentBase::m_oPar
 	}
 		
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 * @see XArenaTabs
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setMaxNDepthFrom(n, this.getDepth() );
+//		m_arena.m_xab.setOParFrom(n, this.getParOther() );		// do or don't?
+	}
+	
 	/**
 	 * Get the best next action and return it
 	 * @param so			current game state (not changed on return)

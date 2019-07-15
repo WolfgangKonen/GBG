@@ -13,6 +13,7 @@ public class XArenaTabs extends JFrame
 {
 	JTabbedPane outer;
 	JTabbedPane[] tp;
+	int opIndex = 6;		// index of tab "Other pars"
 	
 	public XArenaTabs(Arena arena) {
 		super(arena.getGameName()+" Parameters");
@@ -30,10 +31,14 @@ public class XArenaTabs extends JFrame
 			tp[i].addTab("MC pars", arena.m_xab.mcParams[i].getPanel());    			// 3
 			tp[i].addTab("MCTS pars", arena.m_xab.mctsParams[i].getPanel());			// 4
 			tp[i].addTab("MCTSE pars", arena.m_xab.mctseParams[i].getPanel()); 			// 5
-			tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());					// 6
 			if (arena.getGameName().equals("Othello")) {
-				tp[i].addTab("Edax pars", arena.m_xab.edParams[i].getPanel());			// 7
-				tp[i].setToolTipTextAt(7, "Edax (Othello-specific)");
+				tp[i].addTab("Edax pars", arena.m_xab.edParams[i].getPanel());			// 6
+				tp[i].setToolTipTextAt(6, "Edax (Othello-specific)");
+				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 7
+				opIndex=7;
+			} else {
+				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 6
+				opIndex=6;
 			}
 			tp[i].setSize(getMinimumSize());
 			tp[i].setEnabledAt(i, true); 			// do we need this?
@@ -43,21 +48,16 @@ public class XArenaTabs extends JFrame
 			tp[i].setToolTipTextAt(3, "Monte Carlo");
 			tp[i].setToolTipTextAt(4, "Monte Carlo Tree Search");
 			tp[i].setToolTipTextAt(5, "MCTS-Expectimax");
-			tp[i].setToolTipTextAt(6, "Evaluator, Wrapper & General Training");
+			tp[i].setToolTipTextAt(opIndex, "Evaluator, Wrapper & General Training");
 
 
-//			String s = tp[i].getTitleAt(1);
-//			System.out.println("Title tab 5: " + s);
-//			System.out.println("Index of 'Other pars' tab:" + tp[i].indexOfTab("Other pars"));
-
-			//getContentPane().add(tp[i], BorderLayout.CENTER);
 			String str = (numPlayer==2) ? Types.GUI_2PLAYER_NAME[i] : Types.GUI_PLAYER_NAME[i];
 			outer.addTab(str, tp[i]);
 			if (!arena.hasTrainRights()) {
 				arena.m_xab.tdPar[i].enableAll(false);				
 				arena.m_xab.ntPar[i].enableAll(false);				
 			}
-		}
+		} // for (i9
 		getContentPane().add(outer, BorderLayout.CENTER);
 	}
 
@@ -100,7 +100,7 @@ public class XArenaTabs extends JFrame
 		outer.setSelectedIndex(n);
 		tp[n].setSelectedIndex(0);
 		if (selectedAgent.equals("TDS")) tp[n].setSelectedIndex(0);
-		if (selectedAgent.equals("TD-Ntuple")) tp[n].setSelectedIndex(1);
+//		if (selectedAgent.equals("TD-Ntuple")) tp[n].setSelectedIndex(1);
 		if (selectedAgent.equals("TD-Ntuple-2")) tp[n].setSelectedIndex(1);
 		if (selectedAgent.equals("TD-Ntuple-3")) tp[n].setSelectedIndex(1);
 		if (selectedAgent.equals("Sarsa")) tp[n].setSelectedIndex(1);
@@ -113,10 +113,11 @@ public class XArenaTabs extends JFrame
 //		if (selectedAgent.equals("MCTS0")) tp[n].setSelectedIndex(4);
 		if (selectedAgent.equals("MCTS")) tp[n].setSelectedIndex(4);
 		if (selectedAgent.equals("MCTS Expectimax")) tp[n].setSelectedIndex(5);
-		if (selectedAgent.equals("Random")) tp[n].setSelectedIndex(6);		// OtherParams
-		if (selectedAgent.equals("Human")) tp[n].setSelectedIndex(6);		// OtherParams
-		if (selectedAgent.equals("Edax")) tp[n].setSelectedIndex(7);		// EdaxParams
-		if (selectedAgent.equals("Edax2")) tp[n].setSelectedIndex(7);		// EdaxParams		
+		if (selectedAgent.equals("Random")) tp[n].setSelectedIndex(opIndex);	// OtherParams
+		if (selectedAgent.equals("Human")) tp[n].setSelectedIndex(opIndex);		// OtherParams
+		if (selectedAgent.equals("AlphaBeta")) tp[n].setSelectedIndex(opIndex);	// OtherParams
+		if (selectedAgent.equals("Edax")) tp[n].setSelectedIndex(6);		// EdaxParams
+		if (selectedAgent.equals("Edax2")) tp[n].setSelectedIndex(6);		// EdaxParams		
 	}
 
 }

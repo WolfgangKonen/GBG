@@ -4,6 +4,7 @@ import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxNWrapper;
 import controllers.PlayAgent;
+import games.Arena;
 import games.StateObservation;
 import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
@@ -80,6 +81,21 @@ public class MCAgent extends AgentBase implements PlayAgent {
         setAgentState(AgentState.TRAINED);
     }
 
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 * @see XArenaTabs
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setMcParFrom(n, this.getParMC() );
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+	}
+	
 	/**
 	 * Get the best next action and return it 
 	 * (NEW version: returns ACTIONS_VT)
@@ -201,8 +217,6 @@ public class MCAgent extends AgentBase implements PlayAgent {
         //for each resultContainer in list resultContainers: add its game score
         //to the appropriate action in vtable:
         for(ResultContainer resultContainer : resultContainers) {
-            //vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore();	
-        	// /WK/ **BUG2** in line above: referingState was missing. Use instead next line:
         	vtable[resultContainer.firstAction] += resultContainer.sob.getGameScore(sob);
             totalRolloutDepth += resultContainer.rolloutDepth;
             if(resultContainer.sob.isGameOver()) {
@@ -275,8 +289,6 @@ public class MCAgent extends AgentBase implements PlayAgent {
                     RandomSearch agent = new RandomSearch();
                     agent.startAgent(newSob, depth);			// contains BUG1 fix
 
-                    //averageScore += newSob.getGameScore();	
-                	// /WK/ **BUG2** in line above: referringState sob was missing. Corrected:
                     averageScore += newSob.getGameScore(sob);
                     if (newSob.isGameOver()) nRolloutFinished++;
                     totalRolloutDepth += agent.getRolloutDepth();
@@ -435,7 +447,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
     public int getNIterations() {
         return nIterations;
     }
-	public ParMC getMCPar() {
+	public ParMC getParMC() {
 		return m_mcPar;
 	}
 	

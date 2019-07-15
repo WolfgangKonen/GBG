@@ -29,6 +29,7 @@ import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.ZValueMulti;
 import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
+import games.Arena;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
@@ -188,7 +189,9 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
-		assert this.getParTD().getHorizonCut()!=0.0;
+		this.m_Net.xnf.instantiateAfterLoading();
+		assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
+		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
 		// get the loaded values)
@@ -660,7 +663,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	public String stringDescr() {
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
-		String str = cs + ": USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
+		String str = cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
+						+ ", P:" + (m_Net.getXnf().getNumPositionValues())
 						+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda()

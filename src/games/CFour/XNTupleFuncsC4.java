@@ -11,15 +11,12 @@ import games.XNTupleFuncs;
 public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Serializable {
 
     /**
-     * change the version ID for serialization only if a newer version is no longer
-     * compatible with an older one (older .gamelog or .agt.zip containing this object will
-     * become unreadable or you have to provide a special version transformation)
+     * Provide a version UID here. Change the version ID for serialization only if a newer version 
+     * is no longer compatible with an older one (older .gamelog or .agt.zip containing this object
+     * will become unreadable or you have to provide a special version transformation)
      */
     private static final long serialVersionUID = 12L;
 
-    //
-	// The following five functions are only needed for the n-tuple interface:
-	//
 	/**
 	 * @return the number of board cells
 	 */

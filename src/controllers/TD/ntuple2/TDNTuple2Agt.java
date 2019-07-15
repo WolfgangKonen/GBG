@@ -32,6 +32,7 @@ import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.ZValueMulti;
 import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
+import games.Arena;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
@@ -323,6 +324,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		this.m_Net.xnf.instantiateAfterLoading();
 		// set horizon cut for older agents (where horCut was not part of ParTD):
 		if (this.getParTD().getHorizonCut()==0.0) 
 			this.getParTD().setHorizonCut(0.1);
@@ -333,6 +335,22 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		this.setNTParams(this.getParNT());
 		this.weightAnalysis(null);
 		return true;
+	}
+	
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 * @see XArenaTabs
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setTdParFrom(n, this.getParTD() );
+		m_arena.m_xab.setNtParFrom(n, this.getParNT() );
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
 	}
 	
 	/**

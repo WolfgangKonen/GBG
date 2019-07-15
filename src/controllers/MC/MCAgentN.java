@@ -4,6 +4,7 @@ import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxNWrapper;
 import controllers.PlayAgent;
+import games.Arena;
 import games.StateObservation;
 import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
@@ -65,6 +66,21 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         setAgentState(AgentState.TRAINED);
     }
 
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 * @see XArenaTabs
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setMcParFrom(n, this.getParMC() );
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+	}
+	
 	/**
 	 * Get the best next action and return it 
 	 * (NEW version: returns ACTIONS_VT)
@@ -624,7 +640,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
     public int getNIterations() {
         return nIterations;
     }
-	public ParMC getMCPar() {
+	public ParMC getParMC() {
 		return m_mcPar;
 	}
 	

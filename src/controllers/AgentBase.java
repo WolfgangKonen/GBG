@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
+import games.Arena;
 import games.StateObservation;
 import games.XArenaMenu;
 import params.ParOther;
@@ -186,6 +187,10 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return true; 	// dummy stub, see LoadSaveTD.saveTDAgent
 	}
 	
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		; 				// dummy stub, see XArenaMenu.loadAgent
+	}
+	
 	public byte getSize() {
 		return 1;  		// dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
 	} 
@@ -241,7 +246,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * Set defaults for m_oPar (needed in {@link XArenaMenu#loadAgent} when
 	 * loading older agents, where m_oPar=null in the saved version).
 	 */
-	public void setDefaultOtherPar() {
+	public void setDefaultParOther() {
 		m_oPar = new ParOther();
 	}
 

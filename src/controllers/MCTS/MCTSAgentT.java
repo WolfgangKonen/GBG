@@ -5,6 +5,7 @@ import controllers.ExpectimaxWrapper;
 import controllers.MaxNWrapper;
 import controllers.PlayAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
+import games.Arena;
 import games.StateObservation;
 import games.XArenaMenu;
 //import params.MCTSParams;
@@ -111,6 +112,21 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     }
 
     
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 * @see XArenaTabs
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setMctsParFrom(n, this.getParMCTS() );
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+	}
+	
     /**
      * Picks an action. This function is called every game step to request an
      * action from the player.

@@ -29,11 +29,9 @@ import tools.Types.ScoreTuple;
  * 
  * <p>
  * Changes: <br>
- * 2011-12-12: /MT/ alphaBetaStartP1 and alphaBetaStartP2 look for the most distant
+ * 12.12.2011: alphaBetaStartP1 and alphaBetaStartP2 look for the most distant
  * loss. This makes the search a little bit slower, but allows a better
- * evaluation of the TD-agent <br>
- * 2019-07-13: /WK/ because {@link C4Base} now extends {@link AgentBase}, this class has 
- * now all methods and members that {@link AgentBase} has.
+ * evaluation of the TD-agent
  * 
  * @author Markus Thill
  * 
@@ -45,7 +43,6 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	private Random rand = new Random();
 //	private AgentState m_agentState;			// now in AgentBase
 //	private String m_name = "AlphaBeta";		// now in AgentBase
-//	protected ParOther m_oPar = new ParOther();	// now in AgentBase
 
 	// Binary Semaphore, to prevent multiple access (e.g. by parallel threads)
 	private Semaphore mutex; // = new Semaphore(1);
@@ -136,7 +133,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	private byte lFlag[] = new byte[lTransPosSize];
 
 	// If is already searching for a far loose: Don't Change!!!
-	private boolean seekFarLoose = true; //false;
+	private boolean seekFarLoose = false;
 	private int looseIntervall = 20;
 
 	// All opening Books
@@ -149,59 +146,43 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	// For a loss make a complete random Move;
 	private boolean randomizeLosses = false;
 
+//	protected ParOther m_oPar = new ParOther();		// now in AgentBase
+
 	/**
 	 * Generate an empty Board
 	 */
 	public AlphaBetaAgent(BookSum books) {
 		super();
-		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
+		this.books = books;
 		mutex = new Semaphore(1);
 		setAgentState(AgentState.TRAINED);
 	}
 
 	/**
-	 * (currently never used in GBG)
-	 * 
-	 * @param field  a 7x6 Connect-Four board with '1' for player 1 (who starts) 
-	 *               and '2' for player 2
+	 * @param field
+	 *            a 7x6 Connect-Four board with '1' for player 1 (who starts) 
+	 *            and '2' for player 2
 	 */
 	public AlphaBetaAgent(int field[][], BookSum books) {
 		super(field);
-		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
+		this.books = books;
 		mutex = new Semaphore(1);
 		setAgentState(AgentState.TRAINED);
 	}
 
 	/**
-	 * (currently never used in GBG)
+	 * Create a new Board
 	 * 
-	 * @param fieldP1  BitBoard of Player1
-	 * @param fieldP2  BitBoard of Player2
+	 * @param fieldP1
+	 *            BitBoard of Player1
+	 * @param fieldP2
+	 *            BitBoard of Player2
 	 */
 	public AlphaBetaAgent(long fieldP1, long fieldP2, BookSum books) {
 		super(fieldP1, fieldP2);
-		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
+		this.books = books;
 		mutex = new Semaphore(1);
 		setAgentState(AgentState.TRAINED);
-	}
-
-	/**
-	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
-	 * of transient members), put the relevant code in here.
-	 * 
-	 * @see LoadSaveGBG#transformObjectToPlayAgent
-	 */
-	public boolean instantiateAfterLoading() {
-		this.books = new BookSum();
-		// the book members of 'books' may be initially null. They are read in 
-		// on first use by one of the methods BookSum.getOpeningBook[Deep][Dist] which are 
-		// called by alphaBetaStartP1, getNextVTable or getScore(int[][],boolean).
-		this.resetBoard();
-		this.setTransPosSize(4);		// index into table
-		this.setBooks(true,false,true);	// use normal book and deep book dist
-		this.setDifficulty(42);			// search depth
-		this.randomizeEqualMoves(true);
-		return true; 
 	}
 
 	/**
@@ -222,6 +203,22 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 		}
 	}
 	
+	/**
+	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members), put the relevant code in here.
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public boolean instantiateAfterLoading() {
+		this.books = new BookSum();
+		this.resetBoard();
+		this.setTransPosSize(4);		// index into table
+		this.setBooks(true,false,true);	// use normal book and deep book dist
+		this.setDifficulty(42);			// search depth
+		this.randomizeEqualMoves(true);
+		return true; 
+	}
+
 
 	/**
 	 * The difficulty of {@link AlphaBetaAgent} is distinguished by the {@code searchDepth}
@@ -231,6 +228,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	public void setDifficulty(int searchDepth) {
 		this.searchDepth = (searchDepth + (searchDepth % 2 == 0 ? 1 : 0));
 	}
+
 
 	/**
 	 * This method (the source) was generated with a C-program, because its
@@ -4383,5 +4381,139 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 		cs = cs + ", depth:"+this.searchDepth;
 		return cs;
 	}
+
+	// -- in AgentBase --
+//	public String getName() {
+//		return m_name;
+//	}
+
+	// -- in AgentBase --
+//	@Override
+//	public double estimateGameValue(StateObservation so) {
+//		return getScore(so);
+//	}
+
+	// -- in AgentBase --
+//	@Override
+//	public boolean trainAgent(StateObservation so) {
+//		return false;
+//	}
+//	
+//	public void incrementDurationTrainingMs(long incr) {	}
+//	
+//	public void incrementDurationEvaluationMs(long incr) {	}
+//	
+//	public long getDurationTrainingMs() {  return 0L;  }
+//	
+//	public long getDurationEvaluationMs() {  return 0L;  }
+//	
+//	@Override
+//	public String printTrainStatus() {
+//		return "AlphaBetaAgent::printTrain"; // dummy stub
+//	}
+//
+//	@Override
+//	public boolean isTrainable() {
+//		return false;
+//	}
+//
+//	@Override
+//	public boolean isRetrained() {
+//		return false;
+//	}
+
+	// -- in AgentBase --
+//	@Override
+//	public String stringDescr2() {
+//		return getClass().getName() + ":";
+//	}
+//
+//	@Override
+//	public byte getSize() {
+//		return 1;  // dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
+//	}
+//
+//	@Override
+//	public int getMaxGameNum() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public int getGameNum() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public long getNumLrnActions() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public long getNumTrnMoves() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public int getMoveCounter() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public void setMaxGameNum(int num) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void setGameNum(int num) {
+//		// TODO Auto-generated method stub
+//	}
+//
+//	@Override
+//	public ParOther getParOther() {
+//		return this.m_oPar;
+//	}
+//
+//	/**
+//	 * Set defaults for m_oPar (needed in  {@link LoadSaveGBG#transformObjectToPlayAgent(ObjectInputStream ois, FileInputStream fis, String filePath, JDialog dlg) LoadSaveGBG#transformObjectToPlayAgent} 
+//	 * when loading older agents, where m_oPar=null in the saved version).
+//	 */
+//	public void setDefaultParOther() {
+//		m_oPar = new ParOther();
+//	}
+//
+//	@Override
+//	public int getNumEval() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public void setNumEval(int num) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+
+	// -- in AgentBase
+//	@Override
+//	public AgentState getAgentState() {
+//		return m_agentState;
+//	}
+//
+//	@Override
+//	public void setAgentState(AgentState aState) {
+//		m_agentState = aState;
+//	}
+//
+//	@Override
+//	public void setName(String name) {
+//		m_name = name;
+//	}
+
 
 }

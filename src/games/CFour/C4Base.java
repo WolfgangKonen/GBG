@@ -3,6 +3,10 @@ package games.CFour;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import controllers.AgentBase;
+import games.StateObservation;
+import tools.Types.ACTIONS_VT;
+
 /**
  * Implementation of the basic methods needed for a Connect-Four-Game. The
  * public methods should be sufficient for normal use. Contains: the
@@ -26,7 +30,7 @@ import java.util.Arrays;
  * @author Markus Thill
  * 
  */
-public class C4Base implements Serializable {
+public class C4Base extends AgentBase implements Serializable {
 
 	/**
 	 * Constants for both player
@@ -148,6 +152,7 @@ public class C4Base implements Serializable {
 	 * Generate an empty Board
 	 */
 	public C4Base() {
+		super("AlphaBeta");
 		colHeight = new int[COLCOUNT];
 		// computeFieldMasks(); 12.09.2014: not needed anymore, save computation
 		// time
@@ -160,6 +165,7 @@ public class C4Base implements Serializable {
 	 *            and '2' for player 2
 	 */
 	public C4Base(int field[][]) {
+		super("AlphaBeta");
 		colHeight = new int[COLCOUNT];
 		resetBoard();
 		setBoard(field);
@@ -174,6 +180,7 @@ public class C4Base implements Serializable {
 	 *            BitBoard of Player2
 	 */
 	public C4Base(long fieldP1, long fieldP2) {
+		super("AlphaBeta");
 		colHeight = new int[COLCOUNT];
 		resetBoard();
 		setBoard(fieldP1, fieldP2);
@@ -192,6 +199,7 @@ public class C4Base implements Serializable {
 	 *            Array, containing the heights of all 7 columns
 	 */
 	public C4Base(long fieldP1, long fieldP2, int[] colHeight) {
+		super("AlphaBeta");
 		this.fieldP1 = fieldP1;
 		this.fieldP2 = fieldP2;
 		if (colHeight.length != COLCOUNT)
@@ -2133,6 +2141,18 @@ public class C4Base implements Serializable {
 		System.out.println("3 in 1, win for P2 in 6 : "+ c4.canWin(6));
 		c4.printBoard();
 		
+	}
+
+	@Override
+	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+		throw new RuntimeException("C4Base.getNextAction2 has to be overridden by derived classes!");
+//		return null;
+	}
+
+	@Override
+	public double getScore(StateObservation sob) {
+		throw new RuntimeException("C4Base.getScore has to be overridden by derived classes!");
+//		return 0;
 	}
 
 }

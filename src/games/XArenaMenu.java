@@ -544,14 +544,14 @@ public class XArenaMenu extends JMenuBar {
 		PlayAgent td=null;
 		try {
 			td = m_arena.tdAgentIO.loadGBGAgent(null);			
-		} catch(IOException e) {
+		} catch(Exception e) {
 			str = e.getMessage();			
-		} catch(ClassNotFoundException e) {
-			str = e.getMessage();			
+//		} catch(ClassNotFoundException e) {
+//			str = e.getMessage();			
 		} 
 		
 		if (td == null) {
-			str = str + "\nNo Agent loaded!";
+			str = str + "\n No Agent loaded!";
 			MessageBox.show(m_arena,"ERROR: " + str,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
 
@@ -566,88 +566,34 @@ public class XArenaMenu extends JMenuBar {
 			// from the agent just loaded to survive in m_arena.m_xab):
 			m_arena.m_xab.changedViaLoad[n] = true;
 			
-			if (td instanceof TDAgent) {
-				// now done in LoadSaveGBG::loadGBGAgent():
-//				if (((TDAgent) td).getParOther() == null ) 
-//					((TDAgent) td).setDefaultOtherPar();
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar[n].setFrom( ((TDAgent) td).getTDParams() );
-				m_arena.m_xab.oPar[n].setFrom( ((TDAgent) td).getParOther() );
-			}
-			else if (td instanceof TDNTuple2Agt) {
-				// --- now done in LoadSaveGBG::loadGBGAgent():
-//				if (((TDNTuple2Agt) td).getParOther() == null ) 
-//					((TDNTuple2Agt) td).setDefaultOtherPar();
-				// --- now done in LoadSaveGBG::loadGBGAgent():
-//				// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
-//				// (WK bug fix 08/2017, they would stay otherwise at their default values, would not 
-//				// get the loaded values)
-//				// (may be obsolete now, 09/2017, since m_Net has no longer these params, but
-//				// it doesn't hurt)
-//				((TDNTuple2Agt) td).setTDParams(((TDNTuple2Agt) td).getParTD(), td.getMaxGameNum());
-//				((TDNTuple2Agt) td).setNTParams(((TDNTuple2Agt) td).getParNT());
-//				((TDNTuple2Agt) td).weightAnalysis(null);
-				
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple2Agt) td).getParTD() );
-				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple2Agt) td).getParNT() );
-				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple2Agt) td).getParOther() );
-				//m_arena.m_xab.oPar.numEval_T.setText(""+((TDNTuple2Agt) td).getOtherPar().getNumEval());
-			}
-			else if (td instanceof TDNTuple3Agt) {			
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar[n].setFrom( ((TDNTuple3Agt) td).getParTD() );
-				m_arena.m_xab.ntPar[n].setFrom( ((TDNTuple3Agt) td).getParNT() );
-				m_arena.m_xab.oPar[n].setFrom( ((TDNTuple3Agt) td).getParOther() );
-			}
-			else if (td instanceof SarsaAgt) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.tdPar[n].setFrom( ((SarsaAgt) td).getParTD() );
-				m_arena.m_xab.ntPar[n].setFrom( ((SarsaAgt) td).getParNT() );
-				m_arena.m_xab.oPar[n].setFrom( ((SarsaAgt) td).getParOther() );
-			}
-//			else if (td instanceof Sarsa2Agt) {
-//				// set the agent parameters in XArenaTabs:
-//				m_arena.m_xab.tdPar[n].setFrom( ((Sarsa2Agt) td).getParTD() );
-//				m_arena.m_xab.ntPar[n].setFrom( ((Sarsa2Agt) td).getParNT() );
-//				m_arena.m_xab.oPar[n].setFrom( ((Sarsa2Agt) td).getParOther() );
+			td.fillParamTabsAfterLoading(n, m_arena); 
+			// fillParamTabsAfterLoading replaces the old, lengthy if ... else if ...
+			// [fillParamTabsAfterLoading replaces completely the long and complicated if ... else if ... statement we had here before (!)]
+			//
+//			if (td instanceof TDAgent) {
 //			}
-			else if (td instanceof MCTSAgentT) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mctsParams[n].setFrom( ((MCTSAgentT) td).getParMCTS() );
-				m_arena.m_xab.oPar[n].setFrom( ((MCTSAgentT) td).getParOther() );
-			}
-			else if (td instanceof MCTSExpectimaxAgt) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mctseParams[n].setFrom( ((MCTSExpectimaxAgt) td).getParMCTSE() );
-				m_arena.m_xab.oPar[n].setFrom( ((MCTSExpectimaxAgt) td).getParOther() );
-			}
-			else if (td instanceof MCAgent) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mcParams[n].setFrom( ((MCAgent) td).getMCPar() );
-				m_arena.m_xab.oPar[n].setFrom( ((MCAgent) td).getParOther() );
-			}
-			else if (td instanceof MCAgentN) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.mcParams[n].setFrom( ((MCAgentN) td).getMCPar() );
-				m_arena.m_xab.oPar[n].setFrom( ((MCAgentN) td).getParOther() );
-			}
-			else if (td instanceof MinimaxAgent) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MinimaxAgent) td).getDepth() );
-			}
-			else if (td instanceof MaxNAgent) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((MaxNAgent) td).getDepth() );
-			}
-			else if (td instanceof ExpectimaxNAgent) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.maxnParams[n].setMaxnDepth( ((ExpectimaxNAgent) td).getDepth() );
-			}
-			else if (td instanceof Edax2) {
-				// set the agent parameters in XArenaTabs:
-				m_arena.m_xab.edParams[n].setFrom( ((Edax2) td).getParEdax() );
-			}
+//			else if (td instanceof TDNTuple2Agt) {
+//			}
+//			else if (td instanceof TDNTuple3Agt) {			
+//			}
+//			else if (td instanceof SarsaAgt) {
+//			}
+//			else if (td instanceof MCTSAgentT) {
+//			}
+//			else if (td instanceof MCTSExpectimaxAgt) {
+//			}
+//			else if (td instanceof MCAgent) {
+//			}
+//			else if (td instanceof MCAgentN) {
+//			}
+//			else if (td instanceof MinimaxAgent) {
+//			}
+//			else if (td instanceof MaxNAgent) {
+//			}
+//			else if (td instanceof ExpectimaxNAgent) {
+//			}
+//			else if (td instanceof Edax2) {
+//			}
 			
 //			if (td instanceof TDAgent || td instanceof TDNTuple2Agt || td instanceof SarsaAgt /* || td instanceof TDNTupleAgt */) {
 			if (td.isTrainable()) {
@@ -673,7 +619,7 @@ public class XArenaMenu extends JMenuBar {
 			}
 			
 			// if called via Arena, then disable all actionable elements in all param tabs
-			// "TD pars" and "NT par" (only reading)
+			// "TD pars" and "NT par" (allow only viewing of parameters)
 			if (!m_arena.hasTrainRights()) {
 				m_arena.m_xab.tdPar[n].enableAll(false);
 				m_arena.m_xab.ntPar[n].enableAll(false);
@@ -760,11 +706,13 @@ public class XArenaMenu extends JMenuBar {
 */
 
 	/**
+	 * Do quick evaluation
+	 * 
 	 * @param index		number of the player (agent)
 	 */
 	private void evaluate(int index) {
 		// ensure that m_PlayAgents has the agents selected
-		String str = "[Start Evaluation of PlayAgent "+index+"]";
+		String str = "[Start Quick Evaluation of PlayAgent "+index+"]";
 		printStatus(str);
 		System.out.println(str);
 		PlayAgent[] paVector;

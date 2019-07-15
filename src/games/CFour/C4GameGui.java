@@ -77,21 +77,11 @@ public class C4GameGui extends JPanel implements ListOperation {
 //	JLabel lValueAgent;
 //	JLabel lValueEval;
 
-	// The opening-books are loaded only once to save memory. All agents, that
-	// need them, use the same books.
-//	private final BookSum books = new BookSum();
-
-
-
 	// Players
 	protected PlayAgent[] players = new PlayAgent[3];
 	private int curPlayer;		// current player, either 0 or 1 
 
-	// The opening-books are loaded only once to save memory. All agents, that
-	// need them, use the same books.
-	private final BookSum books = new BookSum();
-	// Agent for the game-theoretic-values (perfect minimax-agent)
-	// Standard Alpha-Beta-Agent
+	// Agent for the game-theoretic-values (perfect Alpha-Beta-Agent)
 	private AlphaBetaAgent alphaBetaStd = null;
 
 	// Flag that is set, when a game is won by a player or drawn.
@@ -107,25 +97,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 	private Color colTHK1 = new Color(183,29,13);
 	private Color colTHK2 = new Color(255,137,0);
 	private Color colTHK3 = new Color(162,0,162);
-
-//	// Competition
-//	private Competition comp;
-//
-//	// Progress for some Functions
-//	private Progress progress = null;
-//
-//	// Other Windows
-//	protected OptionsMinimax winOptionsGTV = new OptionsMinimax(
-//			AlphaBetaAgent.TRANSPOSBYTES);
-//	protected OptionsComp winCompOptions = new OptionsComp();
-//	protected ResultOverview winCompResult = new ResultOverview();
-//	protected OptionsValueFunc winValueFuncOptions = new OptionsValueFunc();
-//	// Not needed anymore: protected ShowNTuples winNTupleWindow = new
-//	// ShowNTuples(this);
-//	protected ShowTupleList winConfigTuples = new ShowTupleList(this, gameBoardC4,
-//			this, "N-Tuple Configuration");
-//	protected LUTShow winLUTShow = new LUTShow(this);
-//	protected OptionsMultiTrain winMultiTrainOptions = new OptionsMultiTrain();
 
 	// Options-Windows for the current agent-type
 	// params[0]:Player X
@@ -172,19 +143,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 		lValueTitle = new JLabel(lBaseTitle);
 		lValueTitle.setFont(new Font("Arial", 1, Types.GUI_HELPFONTSIZE));
 		lValueTitle.setToolTipText("maximum of value function over columns (selected agent)");
-//		lValueGTV = new JLabel("  ");
-//		lValueAgent = new JLabel("  ");
-//		lValueEval = new JLabel("Hallo");
-
-//		lValueGTV.setToolTipText("Value for the game-theoretic value");
-//		lValueAgent.setToolTipText("Value for the selected Agent");
-//		lValueEval.setToolTipText("Value for the Evaluation");
-
-//		JLabel Title;
-//		Title = new JLabel("Connect Four",JLabel.CENTER);
-//		Title.setForeground(Color.black);
-//		Font font = new Font("Times New Roman", 1, (int)(1.3*Types.GUI_HELPFONTSIZE));
-//		Title.setFont(font);
 
 		setLayout(new BorderLayout(10, 10));
 		setBackground(Color.white);
@@ -203,35 +161,7 @@ public class C4GameGui extends JPanel implements ListOperation {
 		c.gridy++;
 		boardPanel.add(lValueTitle, c);
 
-//		c.gridy++;
-//		boardPanel.add(lValueGTV, c);
-//
-//		c.gridy++;
-//		boardPanel.add(lValueAgent, c);
-//
-//		c.gridy++;
-//		boardPanel.add(lValueEval, c);
-
 		add(boardPanel, BorderLayout.CENTER);
-//		add(Title, BorderLayout.NORTH);
-
-//		changeState(State.IDLE);
-
-//		printCurAgents();
-
-//		// Init the Standard Alpha-Beta-Agent
-//		// Until yet, there were no changes of the Options
-//		OptionsMinimax min = winOptionsGTV;
-//		alphaBetaStd = new AlphaBetaAgent(books);
-//		alphaBetaStd.resetBoard();
-//		alphaBetaStd.setTransPosSize(min.getTableIndex());
-//		alphaBetaStd.setBooks(min.useNormalBook(), min.useDeepBook(),
-//				min.useDeepBookDist());
-//		alphaBetaStd.setDifficulty(min.getSearchDepth());
-//		alphaBetaStd.randomizeEqualMoves(min.randomizeEqualMoves());
-//
-//		// Init evaluation
-//		eval = new Evaluate(alphaBetaStd);
 	}
 
 	private JPanel initValuePanel() {
@@ -465,21 +395,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 		}
 	}
 
-	// --- exactly the same as unMarkMove(int,int,int) ---
-//	private void putPiece(int x, int y, int player) {
-//		int imgIndex = (player == 0 ? ImgShowComponent.YELLOW
-//				: ImgShowComponent.RED);
-//		ImgShowComponent newImg = replaceImage(playingBoard[x][y], imgIndex, x,
-//				y);
-//		if (newImg != playingBoard[x][y]) {
-//			playingBoardPanel.remove((5 - y) * 7 + x);
-//			playingBoard[x][y] = newImg;
-//			playingBoardPanel.add(playingBoard[x][y], (5 - y) * 7 + x);
-//			playingBoardPanel.invalidate();
-//			playingBoardPanel.validate();
-//		}
-//	}
-
 	private void removePiece(int x, int player) {
 		int y = c4.getColHeight(x) - 1;
 		c4.removePiece(player + 1, x);
@@ -628,11 +543,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 	protected void printValueBar(double[] realVals, double[] agentVals, double[] evalVals) 
 	{
 
-				// Reset Labels
-//				lValueGTV.setText("GTV: ");
-//				lValueAgent.setText("Agent: ");
-//				lValueEval.setText("Eval: ");
-
 				PlayAgent pa = null;
 				if (showAgentVals)
 					pa = players[curPlayer];
@@ -645,9 +555,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 						lValueTitle.setText(lBaseTitle);
 					else
 						lValueTitle.setText(lBaseTitle+":      "+(int) (agentValsMax * 100));
-//					int val = (int) (max(agentVals) * 100);
-//					lValueTitle.setText(lBaseTitle+":      "+val);
-//					lValueAgent.setText("Agent:     " + val);
 
 					for (int i = 0; i < agentVals.length; i++)
 						if (Math.abs(agentVals[i]) > 1.0) {
@@ -659,15 +566,6 @@ public class C4GameGui extends JPanel implements ListOperation {
 							agentVals[i] = Math.tanh(agentVals[i]);
 				}
 
-//				if (realVals!=null) {
-//					String valGTV = "GTV:        "+ (int) (max(realVals) * 100) + "";
-//					lValueGTV.setText(valGTV);
-//					lValueGTV.setPreferredSize(getMaximumSize());
-//				}
-//				if (evalVals!=null) {
-//					int val = (int) (max(evalVals) * 100);
-//					lValueEval.setText("Eval:        " + val + "");
-//				}
 				for (int i = 0; i < C4Base.COLCOUNT; i++) {
 					if (realVals != null)
 						valueBoard[0][i]
@@ -715,88 +613,9 @@ public class C4GameGui extends JPanel implements ListOperation {
 	private AlphaBetaAgent initGTVAgent() {
 		// Initialize the standard Alpha-Beta-Agent
 		// (same as winOptionsGTB in MT's C4)
-		alphaBetaStd = new AlphaBetaAgent(books);
-		alphaBetaStd.resetBoard();
-		alphaBetaStd.setTransPosSize(4);		// index into table
-		alphaBetaStd.setBooks(true,false,true);	// use normal book and deep book dist
-		alphaBetaStd.setDifficulty(42);			// search depth
-		alphaBetaStd.randomizeEqualMoves(true);
+		alphaBetaStd = new AlphaBetaAgent(new BookSum());
+		alphaBetaStd.instantiateAfterLoading();
 		return alphaBetaStd;
 	}
 
-	/*
-	protected PlayAgent initAlphaBetaAgent(int player) {
-		if (params[player] == null
-				|| !params[player].getClass().equals(OptionsMinimax.class))
-			params[player] = new OptionsMinimax(AlphaBetaAgent.TRANSPOSBYTES);
-		OptionsMinimax min = (OptionsMinimax) params[player];
-		if (!min.usePresetting()) {
-			AlphaBetaAgent ab = new AlphaBetaAgent(books);
-			ab.resetBoard();
-
-			ab.setTransPosSize(min.getTableIndex());
-			ab.setBooks(min.useNormalBook(), min.useDeepBook(),
-					min.useDeepBookDist());
-			ab.setDifficulty(min.getSearchDepth());
-			ab.randomizeEqualMoves(min.randomizeEqualMoves());
-
-			// Using N-Tuple-System for move-Ordering
-			// ab.setTDAgent((TDSAgent) players[2]);
-			return ab;
-		}
-		return alphaBetaStd;
-	}
-
-
-	protected PlayAgent initAlphaBetaTDSAgent(int player) {
-		if (params[player] == null
-				|| !params[player].getClass().equals(OptionsMinimax.class))
-			params[player] = new OptionsMinimax(AlphaBetaAgent.TRANSPOSBYTES);
-		OptionsMinimax min = (OptionsMinimax) params[player];
-
-		// Evaluation must be a TDS-Player
-		AlphaBetaTDSAgent abTDS = new AlphaBetaTDSAgent(books,
-				(TDSAgent) players[2]);
-		abTDS.resetBoard();
-
-		abTDS.setTransPosSize(min.getTableIndex());
-		abTDS.setBooks(min.useNormalBook(), min.useDeepBook(),
-				min.useDeepBookDist());
-		abTDS.setDifficulty(min.getSearchDepth());
-		abTDS.randomizeEqualMoves(min.randomizeEqualMoves());
-
-		return abTDS;
-	}
-
-	protected PlayAgent initTDSAgent(int player) {
-		TDParams tdPar;
-		if (params[player] == null
-				|| !params[player].getClass().equals(OptionsTD.class))
-			params[player] = new OptionsTD(new TDParams());
-		OptionsTD opTD = (OptionsTD) params[player];
-		tdPar = opTD.getTDParams();
-		AlphaBetaAgent ab = null;
-		if (tdPar.stopAfterMoves < 40)
-			ab = alphaBetaStd;
-
-		TDSAgent tds = new TDSAgent(tdPar, ab);
-
-		// Set N-Tuples in the Options
-		Integer nTuples[][] = tds.m_Net.getNTuples1Dim();
-		opTD.setNTuples(nTuples);
-
-		return tds;
-	}
-
-	protected PlayAgent initMCTSAgent(int player) {
-		if (params[player] == null
-				|| !params[player].getClass().equals(OptionsMCTS.class))
-			params[player] = new OptionsMCTS(new MCTSParams());
-		OptionsMCTS opMCTS = (OptionsMCTS) params[player];
-		MCTSPlayer mctsPlayer = new MCTSPlayer(opMCTS.getMCTSParams());
-
-		return mctsPlayer;
-	}
-
-    */
 }

@@ -226,6 +226,9 @@ public class Types {
     	private double minValue = Double.MAX_VALUE;
     	private double maxValue = -Double.MAX_VALUE;
     	
+    	/**
+    	 * @param N number of players
+    	 */
     	public ScoreTuple(int N) {
     		this.scTup = new double[N];
     	}

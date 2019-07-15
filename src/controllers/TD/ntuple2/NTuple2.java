@@ -471,6 +471,10 @@ public class NTuple2 implements Serializable {
 		return lut.length;
 	}
 
+	public int getPosVals() {
+		return posVals;
+	}
+
 	/**
 	 * Is called only in case {@code (TC && !tcImm)}, but {@code !tcImm} is not recommended
 	 * 

@@ -3,6 +3,8 @@ package controllers;
 import controllers.PlayAgent;
 //import controllers.MinimaxAgent;
 import games.StateObservation;
+import games.XArenaMenu;
+import games.Arena;
 import games.StateObsNondeterministic;
 import params.MaxNParams;
 import params.ParMaxN;
@@ -72,6 +74,21 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		m_depth = nply;
 	}
 		
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see XArenaMenu#loadAgent
+	 * @see XArenaTabs
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setMaxNDepthFrom(n, this.getDepth() );
+//		m_arena.m_xab.setOParFrom(n, this.getParOther() );		// do or don't?
+	}
+	
 	/**
 	 * Get the best next action and return it
 	 * @param so			current game state (not changed on return), has to be an 
