@@ -45,7 +45,7 @@ public class ArenaTrainSim extends ArenaTrain {
 	
 	public XNTupleFuncs makeXNTupleFuncs()
 	{
-		return new XNTupleFuncsTTT();
+		return new XNTupleFuncsSim();
 	}
 
 	public static void main(String[] args) throws IOException 
