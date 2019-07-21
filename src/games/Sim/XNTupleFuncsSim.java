@@ -142,10 +142,11 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		int[]  vec = new int[15];
 		int index = 0;
 		
-		for(int i = 0; i < splittedVec.length;i++)
+		for(int i = 0; i < splittedVec.length; i++)
 			for(int j = 0; j < splittedVec[i].length; j++)
 			{
 				vec[index] = splittedVec[i][j];
+				index++;
 			}
 		return vec;
 	}

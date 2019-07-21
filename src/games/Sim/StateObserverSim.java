@@ -14,6 +14,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private static final double REWARD_NEGATIVE = -1;
 	private static final double REWARD_POSITIVE = 1;
 	//board
+	private int numNodes;
+	private int numPlayers;
 	private int player;
 	private int lastPlayer;
 	private Node [] nodes;
@@ -26,21 +28,33 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	StateObserverSim() 
 	{
-		setupNodes(6);
-		player = 0;
-		winner = -2;
-		looser = -1;
-		setAvailableActions();
+		config(2,6);
 	}
 	
-	StateObserverSim(Node [] nodes, int player, int winner, int looser)
+	StateObserverSim(Node [] nodes, int player, int winner, int looser,int numPlayers, int numNodes)
 	{
-		setupNodes(6);
+		setupNodes(numNodes);
 		copyNodes(nodes);
-
+		
+		this.numNodes = numNodes;
+		this.numPlayers = numPlayers;
 		this.player = player;
 		this.winner = winner;
 		this.looser = looser;
+		setAvailableActions();
+	}
+	
+	private void config(int numberOfPlayer, int numberOfNodes)
+	{
+		this.numNodes = numberOfNodes;
+		this.numPlayers = numberOfPlayer;
+		setupNodes(numberOfNodes);
+		if(numberOfPlayer > 2)
+			this.player = 0;
+		else
+			this.player = 1;
+		this.winner = -2;
+		this.looser = -1;
 		setAvailableActions();
 	}
 	
@@ -60,7 +74,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	@Override
 	public StateObserverSim copy() 
 	{
-		StateObserverSim sos = new StateObserverSim(this.nodes,this.player, this.winner, this.looser);
+		StateObserverSim sos = new StateObserverSim(this.nodes,this.player, this.winner, this.looser, this.numPlayers, this.numNodes);
 		sos.m_counter = this.m_counter;
 		return sos;
 	}
@@ -79,6 +93,19 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return false;
 	}
 	
+	private boolean hasLost2Player(int player)
+	{
+		for(int i = 1; i <= nodes.length; i++)
+			if(i == lastNode1 || i == lastNode2)
+				continue;
+			else
+			{
+				if(nodes[i-1].getLinkPlayer(lastNode1) == player && nodes[i-1].getLinkPlayer(lastNode2) == player)
+					return true;
+			}
+		
+		return false;
+	}
 	
 	private boolean isDraw()
 	{
@@ -109,6 +136,29 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	@Override
 	public boolean isLegalState() {
+		return (numPlayers > 2) ? isLegalState3Player() : isLegalState2Player();
+	}
+
+	private boolean isLegalState2Player()
+	{
+		int countX = 0, countO = 0;
+		int delta=-(player-1)/2;			// the desired countX-countO
+		for(int i = 0; i < nodes.length -1 ; i++)
+		{
+			for(int j = 0; j < nodes.length - 1 - i; j++)
+			{
+				if(nodes[i].getLinkPlayerPos(j) == 1)
+					countX++;
+				else if(nodes[i].getLinkPlayerPos(j) == -1)
+					countO++;
+			}
+		}
+		if (countX-countO==delta) return true;
+		return false;
+	}
+	
+	private boolean isLegalState3Player()
+	{
 		int count1 = 0, count2 = 0, count3 = 0;
 		for(int i = 0; i < nodes.length -1 ; i++)
 		{
@@ -132,12 +182,14 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		else
 			return false;
 	}
-
+	
 	@Override
 	public WINNER getGameWinner() {
 		assert isGameOver() : "Game is not over yet!";
-		if (winner > -1)		// why -m_Player? advance() has changed m_player (although game is over) 
+		if (winner == 1)		// why -m_Player? advance() has changed m_player (although game is over) 
 			return Types.WINNER.PLAYER_WINS;
+		else if(winner == -1)
+			return Types.WINNER.PLAYER_LOSES;
 		else
 			return Types.WINNER.TIE;
 	}
@@ -147,6 +199,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		assert isGameOver() : "Game is not over yet!";
 		return winner;
 	}  
+	
 	
 	@Override
 	public double getMinGameScore() {
@@ -234,44 +287,90 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			
 	}
 	
+	private void checkIfPlayerLost2Player()
+	{
+		if(hasLost2Player(player))
+			winner = player*(-1);
+		else if(isDraw())
+			winner = 0;
+	}
+	
 	@Override
 	public void advance(ACTIONS action) {
 		int iAction = action.toInt();
 		
-		setAction(iAction);
+		if(numPlayers > 2)
+			advance3Player(iAction);
+		else
+    		advance2Player(iAction);
+		super.incrementMoveCounter();
+	}
+	
+	private void advance2Player(int action)
+	{
+		setAction2Player(action);
+		setAvailableActions();
+		
+		checkIfPlayerLost2Player();
+		
+		player = player*(-1);
+	}
+	
+	private void advance3Player(int action)
+	{
+		setAction(action);
     	setAvailableActions(); 		// IMPORTANT: adjust the available actions (have reduced by one)
     	
     	checkIfPlayerLost();
     	
-    	setLastPlayer(player);
+    	//setLastPlayer(player);
 		player = getNextPlayer();    // 2-player games: 1,-1,1,-1,...
-    		
-		super.incrementMoveCounter();
 	}
 
 	@Override
 	public int getPlayer() {
-		return player;
+		if(numPlayers > 2)
+			return player;
+		else
+			return getPlayer2Player();
 	}
 
 	@Override
 	public int getNumPlayers() {
-		return 3;
+		return numPlayers;
 	}
 
 	@Override
 	public double getGameScore(StateObservation referringState) {
         //boolean gameOver = this.isGameOver();
       
-		if(looser == referringState.getPlayer())
-			return REWARD_NEGATIVE;
-		else if(winner == -1)
+		if(numPlayers > 2)
+			return getGameScore3Player(referringState.getPlayer());
+		else
+			return getGameScore2Player(referringState.getPlayer());
+									
+	}
+	
+	private double getGameScore2Player(int player)
+	{
+		if(winner == -1)
         	return 0;
-        else if(referringState.getPlayer() == winner)
+        else if(player == winner)
         	return REWARD_POSITIVE;
         else
         	return REWARD_NEGATIVE;
-  
+	}
+	
+	private double getGameScore3Player(int player)
+	{
+		if(looser == player)
+			return REWARD_NEGATIVE;
+		else if(winner == -1)
+        	return 0;
+        else if(player == winner)
+        	return REWARD_POSITIVE;
+        else
+        	return REWARD_NEGATIVE;
 	}
 
 	@Override
@@ -307,6 +406,26 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		}
 	}
 	
+	void setAction2Player(int action)
+	{
+		int k = 0;
+		
+		for(int i = 0; i < nodes.length -1 ; i++)
+		{
+			for(int j = 0; j < nodes.length - 1 - i; j++)
+			{
+				if(k == action)
+				{
+					nodes[i].setPlayerPos(j,player);
+					nodes[nodes[i].getLinkNodePos(j)-1].setPlayerNode(i+1, player);
+					setLastNodes(nodes[i].getNumber(), nodes[nodes[i].getLinkNodePos(j)-1].getNumber());
+					return;
+				}
+				k++;
+			}
+		}
+	}
+
 	private boolean isLegal(int action)
 	{
 		int k = 0;
@@ -395,6 +514,11 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return nextPlayer;
 	}
 	
+	private int getPlayer2Player()
+	{
+		return (-player+1)/2;
+	}
+	
 	private int nextPlayer()
 	{
 		if(player == 2)
@@ -409,13 +533,13 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			lastNode2 = y;
 	}
 
-	public int getLastPlayer() {
-		return lastPlayer;
-	}
+	//public int getLastPlayer() {
+		//return lastPlayer;
+	//}
 
-	public void setLastPlayer(int lastPlayer) {
-		this.lastPlayer = lastPlayer;
-	}
+	//public void setLastPlayer(int lastPlayer) {
+		//this.lastPlayer = lastPlayer;
+	//}
 	
 	public int getLooser() {
 		return looser;

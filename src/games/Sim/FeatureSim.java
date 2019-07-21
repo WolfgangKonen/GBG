@@ -43,14 +43,23 @@ public class FeatureSim implements Feature{
 
 	@Override
 	public int[] getAvailFeatmode() {
-		return new int[]{0};
+		return new int[]{0,1};
 	}
 
 	@Override
 	public int getInputSize(int featmode) {
 		// inpSize[i] has to match the length of the vector which
     	// TicTDBase.prepareInputVector() returns for featmode==i:
-    	return 45;
+		switch (featMode)
+		{
+    	case 0:
+    		//ToDo: what is a Feat Vector and is this correct?
+    		return 45;
+    	case 1:
+    		return 15;
+    	default:
+    		throw new RuntimeException("Unknown featmode: " + featMode);
+		}
 	}
 
 
@@ -61,13 +70,15 @@ public class FeatureSim implements Feature{
     	switch (featMode){
         	case 0:
         		//ToDo: what is a Feat Vector and is this correct?
-        		return intToDoubleArray(som.getNodes());
+        		return intToDoubleArray3Player(som.getNodes());
+        	case 1:
+        		return intToDoubleArray2Player(som.getNodes());
         	default:
         		throw new RuntimeException("Unknown featmode: " + featMode);
     	}
 	}
 	
-	private double[] intToDoubleArray(Node [] nodes)
+	private double[] intToDoubleArray3Player(Node [] nodes)
 	{
 		double input[] = new double[getInputSize(featMode)];
 		int k = 0;
@@ -110,4 +121,20 @@ public class FeatureSim implements Feature{
 		return input; 
 	}
 	
+	
+	private double[] intToDoubleArray2Player(Node [] nodes)
+	{
+		double input[] = new double[getInputSize(featMode)];
+		int k = 0;
+		for(int i = 0; i < nodes.length -1 ; i++)
+		{
+			for(int j = 0; j < nodes.length - 1 - i; j++)
+			{
+				input[k] = nodes[i].getLinkPlayerPos(j);
+				k++;
+			}
+		}
+		
+		return input; 
+	}
 }

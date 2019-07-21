@@ -90,7 +90,7 @@ public class GameBoardSim implements GameBoard {
 			}
 			
 			if (so.isGameOver()) {
-				int looser = som.getGameWinner3player();
+				int looser = (som.getNumPlayers() > 3) ? som.getGameWinner3player() : som.getGameWinner().toInt();
 				if(looser == -1)
 					System.out.println("Tie");
 				else
