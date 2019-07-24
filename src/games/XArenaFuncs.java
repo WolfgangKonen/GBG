@@ -59,9 +59,8 @@ public class XArenaFuncs
 {
 	public  PlayAgent[] m_PlayAgents;
 	private Arena m_Arena;
-	protected Evaluator m_evaluatorT=null;
 	protected Evaluator m_evaluatorQ=null;
-//	protected Evaluator m_evaluatorM=null;
+	protected Evaluator m_evaluatorT=null;
 	protected String lastMsg="";
 	protected int numPlayers;
 	
@@ -81,7 +80,6 @@ public class XArenaFuncs
 		m_Arena = arena;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		m_PlayAgents = new PlayAgent[numPlayers];
-		//m_PlayAgents[0] = new MinimaxAgent(sMinimax);
         rand = new Random(System.currentTimeMillis());
         lChart=new LineChartSuccess("Training Progress","gameNum","",true,false);
         wChart=new DeviationWeightsChart("","gameNum","",true,false);
@@ -641,12 +639,13 @@ public class XArenaFuncs
 	 * 					always with n=0 
 	 * @param sAgent	a string containing the class name of the agent
 	 * @param xab		used only for reading parameter values from members td_par, cma_par
+	 * @param gb		the game board, needed for evaluators and start state selection
 	 * @return the (last) trained agent
 	 * @throws IOException if something goes wrong with {@code multiTrain.csv}, see below
 	 * <p>
 	 * Side effect: writes results of multi-training to <b>{@code agents/<gameDir>/csv/multiTrain.csv}</b>.
 	 * This file has the columns: <br>
-	 * {@code run, gameNum, evalQ, evalT, evalM, actionNum, trnMoves}. <br>
+	 * {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}. <br>
 	 * The contents may be visualized with one of the R-scripts in {@code resources\R_plotTools}.
 	 */
 	public PlayAgent multiTrain(int n, String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
@@ -654,6 +653,8 @@ public class XArenaFuncs
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		DecimalFormat frm2 = new DecimalFormat("+0.00;-0.00");
 		DecimalFormat frm1 = new DecimalFormat("#0.00");
+		String userTitle1 = "", userTitle2 = "";
+		double userValue1 = 0., userValue2 = 0.0;
 		long elapsedMs = 0L;
 		int verbose=1;
 		int stopEval = 0;
@@ -669,7 +670,7 @@ public class XArenaFuncs
 		Measure oQ = new Measure();			// quick eval measure
 		Measure oT = new Measure();			// train eval measure
 		MTrain mTrain;
-		double evalQ=0.0, evalT=0.0, evalM=0.0;
+		double evalQ=0.0, evalT=0.0;
 		ArrayList<MTrain> mtList = new ArrayList<MTrain>();
 		
 		for (int i=0; i<trainNum; i++) {
@@ -680,6 +681,13 @@ public class XArenaFuncs
 			double totalTrainSec=0.0, elapsedTime;
 			
 			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
+			
+			// add here - if wanted - user-specific code which varies for each i some of the 
+			// parameters and writes them to userValue*:
+			double lambda = i*0.1;
+			userTitle1="lambda";	userValue1=lambda;
+			userTitle2="null";		userValue2=0.0;
+			xab.tdPar[0].setLambda(i*0.1);
 
 			try {
 				pa = constructAgent(n,sAgent, xab);
@@ -704,11 +712,11 @@ public class XArenaFuncs
 			if (doTrainEvaluation)
 		        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
 			
-			if (i==0) {
+//			if (i==0) {
 				String pa_string = pa.getClass().getName();
 				System.out.println(pa.stringDescr());
 				System.out.println(pa.stringDescr2());
-			}
+//			}
 			pa.setMaxGameNum(maxGameNum);
 			pa.setGameNum(0);
 			long startTime = System.currentTimeMillis();
@@ -746,8 +754,9 @@ public class XArenaFuncs
 					totalTrainSec = (double)pa.getDurationTrainingMs()/1000.0;   	
 					// totalTrainSec = time [sec] needed since start of training 
 					// (only self-play, excluding evaluations)
-					mTrain = new MTrain(i,gameNum,evalQ,evalT,/*evalM,*/
-										actionNum,trnMoveNum,totalTrainSec,actionNum/totalTrainSec);
+					mTrain = new MTrain(i,gameNum,evalQ,evalT,
+										actionNum,trnMoveNum,totalTrainSec,actionNum/totalTrainSec,
+										userValue1,userValue2);
 					mtList.add(mTrain);
 
 					elapsedMs = (System.currentTimeMillis() - startTime);
@@ -781,10 +790,14 @@ public class XArenaFuncs
 			pa.incrementDurationEvaluationMs(elapsedMs);
 			startTime = System.currentTimeMillis();
 
+			// print the full list mtList after finishing each i
+			MTrain.printMultiTrainList(mtList, pa, m_Arena, userTitle1, userTitle2);
+			
 			if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
 				break; //out of for
 			}
 		} // for (i)
+		
 		if (m_evaluatorQ.m_mode!=(-1)) 
 			// m_mode=-1 signals: 'no evaluation done' --> oT did not receive evaluation results
 		{
@@ -801,8 +814,6 @@ public class XArenaFuncs
 			this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
 		}
 		
-		MTrain.printMultiTrainList(mtList, pa, m_Arena);
-		
 		xab.TrainNumT.setText(Integer.toString(trainNum) );
 		return pa;
 		
@@ -814,7 +825,7 @@ public class XArenaFuncs
 	 * @param pa		a trained agent
 	 * @param opponent	a trained agent
 	 * @param competeNum
-	 * @param verbose TODO
+	 * @param verbose 
 	 * @param gb		needed to get a default start state
 	 * @return the fitness of pa, which is +1 if pa always wins, 0 if always tie or if #win=#loose
 	 *         and -1 if pa always looses.  

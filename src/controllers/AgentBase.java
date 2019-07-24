@@ -32,7 +32,6 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * maximum number of training games
 	 */
 	private int m_MaxGameNum;
-//	private int m_NumEval;
 	private String m_name;
 	private AgentState m_agentState = AgentState.RAW;
 	private int epochMax = 0;
@@ -312,14 +311,6 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}
-		// if (agentName.equals("CMA-ES") &
-		// !pa_string.equals("TicTacToe.CMAPlayer")) {
-		// MessageBox.show(parent,
-		// "Cannot execute command. "+"Current "+s_p+" agent is not a CMAPlayer:
-		// "+ pa_string+".",
-		// "Warning", JOptionPane.WARNING_MESSAGE);
-		// return false;
-		// }
 		return true;
 	}
 

@@ -31,6 +31,9 @@ class MTrain {
 	public long trnMoveNum;		// number of train moves (including random moves)
 	public double elapsedTime=0.0;
 	public double movesSecond=0.0;
+	public double userValue1=0.0;
+	public double userValue2=0.0;
+	static String sep = ", ";
 	
 	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/ 
 			long actionNum, long trnMoveNum) {
@@ -43,7 +46,8 @@ class MTrain {
 	}
 	
 	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/ 
-			long actionNum, long trnMoveNum, double elapsedTime, double movesSecond) {
+			long actionNum, long trnMoveNum, double elapsedTime, double movesSecond,
+			double userValue1, double userValue2) {
 		this.i=i;
 		this.gameNum=gameNum;
 		this.evalQ=evalQ;
@@ -52,17 +56,19 @@ class MTrain {
 		this.trnMoveNum=trnMoveNum;
 		this.elapsedTime=elapsedTime;
 		this.movesSecond=movesSecond;
+		this.userValue1=userValue1;
+		this.userValue2=userValue2;
 	}
 	
 	public void print(PrintWriter mtWriter)  {
-		String sep = ", ";
 		mtWriter.print(i + sep + gameNum + sep);
 		mtWriter.println(evalQ + sep + evalT /*+ sep + evalM */
-				+ sep + actionNum + sep + trnMoveNum + sep + elapsedTime + sep + movesSecond);
+				+ sep + actionNum + sep + trnMoveNum + sep + elapsedTime + sep + movesSecond
+				+ sep + userValue1 + sep + userValue2);
 	}
 	
 	/**
-	 * Print the results from {@link XArenaFuncs#multiTrain(int n, String, XArenaButtons, GameBoard)} to
+	 * Print the results from {@link XArenaFuncs#multiTrain(int, String, XArenaButtons, GameBoard)} to
 	 * file <br>
 	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/multiTrain.csv}. <br>
 	 * where the optional {@code subdir} is for games with different flavors (like Hex: board size). 
@@ -70,8 +76,12 @@ class MTrain {
 	 * 
 	 * @param mtList	the results from {@code multiTrain}
 	 * @param pa		the agent used in {@code multiTrain} 
+	 * @param ar		needed for game name and {@code subdir}
+	 * @param userTitle1	title of 1st user column
+	 * @param userTitle2	title of 2nd user column
 	 */
-	public static void printMultiTrainList(ArrayList<MTrain> mtList, PlayAgent pa, Arena ar){
+	public static void printMultiTrainList(ArrayList<MTrain> mtList, PlayAgent pa, Arena ar,
+			String userTitle1, String userTitle2){
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+ar.getGameName();
 		String subDir = ar.getGameBoard().getSubDir();
 		if (subDir != null){
@@ -104,7 +114,8 @@ class MTrain {
 			mtWriter.println(pa.stringDescr());		
 			mtWriter.println(pa.stringDescr2());
 			
-			mtWriter.println("run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond");
+			mtWriter.println("run"+sep+"gameNum"+sep+"evalQ"+sep+"evalT"+sep+"actionNum"+sep
+					+"trnMoves"+sep+"elapsedTime"+sep+"movesSecond"+sep+userTitle1+sep+userTitle2);
 			ListIterator<MTrain> iter = mtList.listIterator();		
 			while(iter.hasNext()) {
 				(iter.next()).print(mtWriter);
