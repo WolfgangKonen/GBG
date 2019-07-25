@@ -28,7 +28,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	StateObserverSim() 
 	{
-		config(3,6);
+		config(2,6);
 	}
 	
 	StateObserverSim(Node [] nodes, int player, int winner, int looser,int numPlayers, int numNodes)
@@ -279,7 +279,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	{
 		if(hasLost(player))
 		{
-			System.out.println("player who lost = " + player);
 			winner = getNextPlayer2Player();
 		}
 		else if(isDraw())

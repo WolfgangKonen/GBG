@@ -91,25 +91,13 @@ public class GameBoardSim implements GameBoard {
 			
 			if (so.isGameOver()) 
 			{
-				if(som.getNumPlayers() > 3)
-				{
+				
 					int winner = som.getGameWinner3player();
 					if(winner == -1)
 						System.out.println("Tie");
 					else
 						System.out.println(winner + 1  + " has won");
 					
-				}
-				else
-				{
-					int winner = som.getGameWinner().toInt();
-					if(winner == 0)
-						System.out.println("Tie");
-					else if(winner == 1)
-						System.out.println(1  + " has won");
-					else
-						System.out.println(2 + " has won");
-				}
 			}
 		}
 		
