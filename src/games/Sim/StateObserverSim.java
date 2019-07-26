@@ -430,6 +430,21 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		
 		return -1;
 	}
+	
+	public int inputToActionInt(int n1, int n2)
+	{
+		int i = 0;
+		
+		for(int j = 1; j < nodes.length; j++)
+			for(int k = j + 1; k < nodes.length + 1; k++)
+			{
+				if((n1 == j || n1 == k) && (n2 == j || n2 == k))
+					return i;
+				i++;
+			}
+		
+		return -1;
+	}
 
 	public Node [] getNodes() {
 		return nodes;

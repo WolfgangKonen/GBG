@@ -1,5 +1,6 @@
 package games.Sim;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
@@ -18,7 +19,7 @@ public class BoardPanel extends JPanel {
 	
 	BoardPanel(Node [] nodes)
 	{
-		this.setBounds(0, 30, 600, 400);
+		this.setBounds(0, 0, 600, 400);
 		this.setBackground(Color.white);
 		setupNodes(nodes.length);
 		//this.nodes = nodes;
@@ -61,11 +62,6 @@ public class BoardPanel extends JPanel {
 		
 	}
 	
-	private void setupCircleEdges(int size)
-	{
-		circleEdge = new Point[size];
-
-	}
 	
 	private int sum(int size)
 	{
@@ -93,14 +89,9 @@ public class BoardPanel extends JPanel {
 	{
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setColor(Color.black);
+		g2d.setStroke(new BasicStroke(3));
 		
-		for(int i = 0; i < circles.length; i++)
-		{
-			g2d.drawOval(circles[i].getX(), circles[i].getY(), 30, 30);
-			g2d.drawString(Integer.toString(i+1), circles[i].getX() + 12, circles[i].getY() + 20);
-		}
 		
-	
 		
 		int k = 0;
 		
@@ -120,6 +111,13 @@ public class BoardPanel extends JPanel {
 				g2d.drawLine(lines[k].getP1().getX(), lines[k].getP1().getY(), lines[k].getP2().getX(), lines[k].getP2().getY());
 				k++;
 			}
+		}
+		g2d.setStroke(new BasicStroke(0));
+		g2d.setColor(Color.black);
+		for(int i = 0; i < circles.length; i++)
+		{
+			//g2d.drawString(Integer.toString(i+1), circles[i].getX() + 12, circles[i].getY() + 20);
+			g2d.fillOval(circles[i].getX(), circles[i].getY(), 30, 30);
 		}
 		
 		
