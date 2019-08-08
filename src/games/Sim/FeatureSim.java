@@ -54,9 +54,9 @@ public class FeatureSim implements Feature{
 		{
     	case 0:
     		//ToDo: what is a Feat Vector and is this correct?
-    		return 45;
-    	case 1:
     		return 15;
+    	case 1:
+    		return 45;
     	default:
     		throw new RuntimeException("Unknown featmode: " + featMode);
 		}
@@ -70,9 +70,9 @@ public class FeatureSim implements Feature{
     	switch (featMode){
         	case 0:
         		//ToDo: what is a Feat Vector and is this correct?
-        		return intToDoubleArray3Player(som.getNodes());
-        	case 1:
         		return intToDoubleArray2Player(som.getNodes());
+        	case 1:
+        		return intToDoubleArray3Player(som.getNodes());
         	default:
         		throw new RuntimeException("Unknown featmode: " + featMode);
     	}
@@ -125,13 +125,27 @@ public class FeatureSim implements Feature{
 	private double[] intToDoubleArray2Player(Node [] nodes)
 	{
 		double input[] = new double[getInputSize(featMode)];
-		int k = 0;
+		int k = 0,pl = 0;
 		for(int i = 0; i < nodes.length -1 ; i++)
 		{
 			for(int j = 0; j < nodes.length - 1 - i; j++)
 			{
-				input[k] = nodes[i].getLinkPlayerPos(j);
-				k++;
+				pl = nodes[i].getLinkPlayerPos(j);
+				switch(pl)
+				{
+				case 0:
+					input[k] = 0.0;
+					k++;
+					break;
+				case 1:
+					input[k] = 1.0;
+					k++;
+					break;
+				case 2:
+					input[k] = -1.0;
+					k++;
+					break;
+				}
 			}
 		}
 		
