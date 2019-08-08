@@ -175,9 +175,9 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	public WINNER getGameWinner() {
 		assert isGameOver() : "Game is not over yet!";
 		if (winner == 1)		// why -m_Player? advance() has changed m_player (although game is over) 
-			return Types.WINNER.PLAYER_WINS;
-		else if(winner == 0)
 			return Types.WINNER.PLAYER_LOSES;
+		else if(winner == 0)
+			return Types.WINNER.PLAYER_WINS;
 		else
 			return Types.WINNER.TIE;
 	}

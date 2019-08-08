@@ -1,10 +1,15 @@
-P0: HumanPlayer
-P0: controllers.HumanPlayer:
-P1: RandomAgent
-P1: controllers.RandomAgent:
+P0: controllers.TD.TDAgent: BP, with sigmoid, NORMALIZE:false, lambda:0.0, features:0, learnFromRM: false
+P0: controllers.TD.TDAgent: alpha_init->final:0.1->0.001, epsilon_init->final:0.3->0.0, gamma: 1.0, MODE_3P: 2
+P1: controllers.MaxNAgent, depth:6
+P1: controllers.MaxNAgent:
 Start state = ---------------
 run, moveNum, player, action, gameScore, nEmptyTile, cumEmptyTl, highestTile
 1, 0, 0, -1, +0.00, 0, 0, 0
-1, 2, 0, 14, -1.00, 0, 0, 0
-1, 4, 0, 13, -1.00, 0, 0, 0
-1, 6, 0, 12, +1.00, 0, 0, 0
+1, 1, 1, 7, -1.00, 0, 0, 0
+1, 2, 0, 9, -1.00, 0, 0, 0
+1, 3, 1, 12, -1.00, 0, 0, 0
+1, 4, 0, 1, -1.00, 0, 0, 0
+1, 5, 1, 11, -1.00, 0, 0, 0
+1, 6, 0, 14, -1.00, 0, 0, 0
+1, 7, 1, 10, -1.00, 0, 0, 0
+1, 8, 0, 2, +1.00, 0, 0, 0
