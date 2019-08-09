@@ -5,7 +5,11 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 import tools.Types;
@@ -16,17 +20,31 @@ public class BoardPanel extends JPanel {
 	Point2[] lines;
 	Point[] circleEdge;
 	private Node[] nodes;
+	Image img;
 	
 	BoardPanel(Node [] nodes)
 	{
 		this.setBounds(0, 0, 600, 400);
 		this.setBackground(Color.white);
-		setupNodes(nodes.length);
-		//this.nodes = nodes;
 		
+		setupNodes(nodes.length);
 		setupCircles(nodes.length);
-		//setupCircleEdges();
 		setupLines(nodes.length);
+		getImages();
+		
+	}
+	
+	private void getImages()
+	{
+		try
+		{
+			img = ImageIO.read(new File("C:\\Users\\bashx\\Desktop\\green_btn.jpg"));
+		}
+		catch(IOException ex)
+		{
+			System.out.println("geht nicht lol");
+		}
+		
 	}
 	
 	private void setupNodes(int size)
@@ -116,10 +134,9 @@ public class BoardPanel extends JPanel {
 		g2d.setColor(Color.black);
 		for(int i = 0; i < circles.length; i++)
 		{
-			//g2d.drawString(Integer.toString(i+1), circles[i].getX() + 12, circles[i].getY() + 20);
-			g2d.fillOval(circles[i].getX(), circles[i].getY(), 30, 30);
+			//g2d.fillOval(circles[i].getX(), circles[i].getY(), 30, 30);
+			g2d.drawImage(img,circles[i].getX(),circles[i].getY(),30,30,this);
 		}
-		
 		
 	}
 	
