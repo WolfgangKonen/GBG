@@ -836,7 +836,6 @@ public class XArenaFuncs
 									 int competeNum, int verbose, GameBoard gb) {
 		double[] res;
 		double resX, resO;
-
 		// now passed as parameter
 		//StateObservation startSO = gb.getDefaultStartState();  // empty board
 
@@ -981,7 +980,7 @@ public class XArenaFuncs
 		winrate[1] = (double) tieCount/competeNum;
 		winrate[2] = (double)owinCount/competeNum;
 		moveCount /= competeNum;
-
+		
 		if (verbose>0) {
 			if (verbose>1) {
 				System.out.print("win rates: ");

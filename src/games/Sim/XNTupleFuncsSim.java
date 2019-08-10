@@ -2,14 +2,12 @@ package games.Sim;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
-import tools.Types;
 
 public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serializable {
 
