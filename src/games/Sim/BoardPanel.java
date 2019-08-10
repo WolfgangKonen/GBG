@@ -30,7 +30,7 @@ public class BoardPanel extends JPanel {
 		setupNodes(nodes.length);
 		setupCircles(nodes.length);
 		setupLines(nodes.length);
-		getImages();
+		//getImages();
 		
 	}
 	
@@ -134,8 +134,8 @@ public class BoardPanel extends JPanel {
 		g2d.setColor(Color.black);
 		for(int i = 0; i < circles.length; i++)
 		{
-			//g2d.fillOval(circles[i].getX(), circles[i].getY(), 30, 30);
-			g2d.drawImage(img,circles[i].getX(),circles[i].getY(),30,30,this);
+			g2d.fillOval(circles[i].getX(), circles[i].getY(), 30, 30);
+			//g2d.drawImage(img,circles[i].getX(),circles[i].getY(),30,30,this);
 		}
 		
 	}
