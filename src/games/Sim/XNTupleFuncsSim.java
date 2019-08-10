@@ -16,6 +16,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	List<int[]> list = new ArrayList<int[]>();
 	AllPermutation perm;
 	private static int[] fixedModes = {1};
+	int cells, positionValues, numPlayers;
     /**
 	 * 
 	 */
@@ -25,8 +26,12 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 * 
 	 */
 
-	public XNTupleFuncsSim() 
+	public XNTupleFuncsSim(int cl, int val, int pl) 
     {
+		cells = cl;
+		positionValues = val;
+		numPlayers = pl;
+		
 		int [] nodes = {1,2,3,4,5,6};
 		
 		perm = new AllPermutation(nodes);
@@ -44,19 +49,19 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	@Override
 	public int getNumCells() 
 	{
-		return 15;
+		return cells;
 	}
 
 	@Override
 	public int getNumPositionValues() 
 	{
-		return 4;
+		return positionValues;
 	}
 
 	@Override
 	public int getNumPlayers() 
 	{
-		return 3;
+		return numPlayers;
 	}
 
 	@Override
@@ -78,7 +83,6 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		return board;
 	}
 
-	//not tested yet
 	@Override
 	public int[][] symmetryVectors(int[] boardVector) {
 		int [][] symmetricVectors = new int [list.size()][];
@@ -176,8 +180,75 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 
 	@Override
 	public HashSet adjacencySet(int iCell) {
-		// TODO Auto-generated method stub
-		return null;
+		HashSet adjSet = new HashSet();
+		switch(iCell)
+		{
+		case 0:
+			adjSet.add(1);
+			adjSet.add(8);
+		case 1:
+			adjSet.add(0);
+			adjSet.add(2);
+			adjSet.add(5);
+			adjSet.add(9);
+		case 2:
+			adjSet.add(1);
+			adjSet.add(3);
+			adjSet.add(6);
+			adjSet.add(12);
+		case 3:
+			adjSet.add(2);
+			adjSet.add(4);
+			adjSet.add(7);
+			adjSet.add(14);
+		case 4:
+			adjSet.add(3);
+			adjSet.add(8);
+		case 5:
+			adjSet.add(6);
+			adjSet.add(1);
+		case 6:
+			adjSet.add(5);
+			adjSet.add(7);
+			adjSet.add(11);
+			adjSet.add(2);
+		case 7:
+			adjSet.add(6);
+			adjSet.add(8);
+			adjSet.add(3);
+			adjSet.add(10);
+		case 8:
+			adjSet.add(7);
+			adjSet.add(0);
+			adjSet.add(9);
+			adjSet.add(4);
+		case 9:
+			adjSet.add(1);
+			adjSet.add(10);
+			adjSet.add(8);
+			adjSet.add(12);
+		case 10:
+			adjSet.add(9);
+			adjSet.add(11);
+			adjSet.add(7);
+			adjSet.add(13);
+		case 11:
+			adjSet.add(10);
+			adjSet.add(6);
+		case 12:
+			adjSet.add(2);
+			adjSet.add(13);
+			adjSet.add(9);
+			adjSet.add(14);
+		case 13:
+			adjSet.add(10);
+			adjSet.add(12);
+		case 14:
+			adjSet.add(3);
+			adjSet.add(12);
+		}
+		
+		return adjSet;
 	}
 
 	

@@ -17,7 +17,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int numNodes;
 	private int numPlayers;
 	private int player;
-	private int lastPlayer;
 	private Node [] nodes;
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();
 	//Serial number
