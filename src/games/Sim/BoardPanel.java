@@ -110,7 +110,7 @@ public class BoardPanel extends JPanel {
 		g2d.setStroke(new BasicStroke(3));
 		
 		
-		
+		// draw lines
 		int k = 0;
 		
 		for(int i = 0; i < nodes.length -1 ; i++)
@@ -120,16 +120,18 @@ public class BoardPanel extends JPanel {
 				if(nodes[i].getLinkPlayerPos(j) == 0)
 					g2d.setColor(Color.black);
 				else if(nodes[i].getLinkPlayerPos(j) == 1)
-					g2d.setColor(Color.green);
+					g2d.setColor(new Color(250,8,250));
 				else if(nodes[i].getLinkPlayerPos(j) == 2)
 					g2d.setColor(Color.blue);
 				else
-					g2d.setColor(Color.red);
+					g2d.setColor(new Color(8,222,250));
 				
 				g2d.drawLine(lines[k].getP1().getX(), lines[k].getP1().getY(), lines[k].getP2().getX(), lines[k].getP2().getY());
 				k++;
 			}
 		}
+		
+		//draw circles
 		g2d.setStroke(new BasicStroke(0));
 		g2d.setColor(Color.black);
 		for(int i = 0; i < circles.length; i++)

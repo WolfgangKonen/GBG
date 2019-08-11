@@ -407,7 +407,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	public boolean isLegalAction(ACTIONS act)
 	{
 		int iAction = act.toInt();
-		System.out.println("call isLegalAction");
 		return isLegal(iAction); 
 	}
 	

@@ -30,7 +30,6 @@ public class GameBoardSim implements GameBoard {
 	JFrame frame;
 	
 	//panels
-	InputPanel input;
 	BoardPanel board;
 	
 	public GameBoardSim(Arena simGame)
@@ -50,15 +49,10 @@ public class GameBoardSim implements GameBoard {
 		frame = new JFrame("Sim");
 		frame.setSize(600, 400);
 		frame.setLocation(550, 0);
-		
-		//input = new InputPanel();
-		//frame.add(input);
-		
 		 
 		board = new BoardPanel(m_so.getNodes());
 		board.addMouseListener(new Mouse());
 		frame.add(board);
-		//frame.addMouseListener(new Mouse());
 	           
 	}
 	
@@ -109,6 +103,9 @@ public class GameBoardSim implements GameBoard {
 					
 			}
 		}
+		if(m_so.getStoredValues() != null)
+		for(int i = 0; i < m_so.getStoredValues().length; i++)
+			System.out.println(m_so.getStoredValues()[i]);
 		
 		board.setNodesCopy(m_so.getNodes());
 		frame.repaint();
@@ -178,81 +175,6 @@ public class GameBoardSim implements GameBoard {
 		board.toFront();
 		//input.toFront();
 	}
-	
-	public class InputPanel extends JPanel implements ActionListener {
-		
-		JLabel inputLabel1, inputLabel2;
-		JTextField inputText1, inputText2; 
-		JButton okButton;
-		
-		InputPanel()
-		{
-			//setup Panel
-			this.setLayout(new FlowLayout(FlowLayout.CENTER));
-			this.setBounds(0, 0, 600, 30);
-			this.setBackground(Color.LIGHT_GRAY);
-			
-			//setup components
-			inputLabel1 = new JLabel("Node 1");
-			inputLabel2 = new JLabel("Node 2");
-			inputText1 = new JTextField(2);
-			inputText2 = new JTextField(2);
-			okButton = new JButton("ok");
-			okButton.setPreferredSize(new Dimension(40,22));
-			okButton.addActionListener(this);
-			
-			//add components
-			this.add(inputLabel1);
-			this.add(inputText1);
-			this.add(inputLabel2);
-			this.add(inputText2);
-			this.add(okButton);
-		}
-		
-		public void toFront() {
-			super.setVisible(true);
-		}
-
-		public void move(int m)
-		{
-			Types.ACTIONS act = Types.ACTIONS.fromInt(m);
-			assert m_so.isLegalAction(act) : "Desired action is not legal";
-			m_so.advance(act);			// perform action (optionally add random elements from game 
-										// environment - not necessary in TicTacToe)
-			arenaActReq = true;	
-		}
-		
-		public void inspectMove(int m)
-		{
-			Types.ACTIONS act = Types.ACTIONS.fromInt(m);
-			if (!m_so.isLegalAction(act)) 
-			{
-				System.out.println("Desired action is not legal!");
-				return;
-			} 
-			m_so.advance(act);			// perform action (optionally add random elements from game 						// environment - not necessary in TicTacToe)
-//			updateBoard(null,false,false);
-			arenaActReq = true;		
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) 
-		{
-			if(e.getSource() == okButton)
-			{
-				String text1 = inputText1.getText();
-				String text2 = inputText2.getText();
-				Arena.Task aTaskState = m_arena.taskState;
-				
-				if (aTaskState == Arena.Task.PLAY)
-				{
-					move(m_so.inputToAction(text1, text2));		
-				}
-				
-			}
-		}
-		
-	}
 
 	public class Mouse implements MouseListener
 	{
@@ -300,23 +222,35 @@ public class GameBoardSim implements GameBoard {
 			{
 				if(x  > circles[i].getX() && x < circles[i].getX() + 30 && y > circles[i].getY() && y < circles[i].getY() + 30)
 				{
-					if(node == 0)
-						node = i + 1;
-					else if(node == i + 1)
-						break;
-					else
-					{
-						Types.ACTIONS act = Types.ACTIONS.fromInt(m_so.inputToActionInt(node, i+1));
-						assert m_so.isLegalAction(act) : "Desired action is not legal";
-						m_so.advance(act);
-						
-						arenaActReq = true;
-						node = 0;
-					}
+					setAction(i);
 				}
 			}
 		}
-
+		
+		private void setAction(int i)
+		{
+			if(node == 0)
+				node = i + 1;
+			else if(node == i + 1)
+				return;
+			else
+			{
+				Types.ACTIONS act = Types.ACTIONS.fromInt(m_so.inputToActionInt(node, i+1));
+				if(m_so.isLegalAction(act))
+				{
+					m_so.advance(act);
+					
+					arenaActReq = true;
+					node = 0;
+				}
+				else
+				{
+					System.out.println("action is not legal!");
+					node = 0;
+				}
+			}
+		}
+		
 		@Override
 		public void mousePressed(MouseEvent e) {
 		}
