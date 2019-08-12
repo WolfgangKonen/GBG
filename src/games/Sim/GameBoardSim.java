@@ -222,32 +222,49 @@ public class GameBoardSim implements GameBoard {
 			{
 				if(x  > circles[i].getX() && x < circles[i].getX() + 30 && y > circles[i].getY() && y < circles[i].getY() + 30)
 				{
-					setAction(i);
+					setInput(i);
 				}
 			}
 		}
 		
-		private void setAction(int i)
+		private void setInput(int i)
 		{
 			if(node == 0)
+			{
 				node = i + 1;
+				board.setInputNode1(i);
+				board.setInputNode2(-1);
+			}
 			else if(node == i + 1)
+			{
+				node = 0;
+				board.setInputNode1(-1);
+				frame.repaint();
 				return;
+			}
 			else
 			{
-				Types.ACTIONS act = Types.ACTIONS.fromInt(m_so.inputToActionInt(node, i+1));
-				if(m_so.isLegalAction(act))
-				{
-					m_so.advance(act);
-					
-					arenaActReq = true;
-					node = 0;
-				}
-				else
-				{
-					System.out.println("action is not legal!");
-					node = 0;
-				}
+				setAction(i);
+				board.setInputNode2(i);
+			}
+			
+			frame.repaint();
+		}
+		
+		private void setAction(int i)
+		{
+			Types.ACTIONS act = Types.ACTIONS.fromInt(m_so.inputToActionInt(node, i+1));
+			if(m_so.isLegalAction(act))
+			{
+				m_so.advance(act);
+				
+				arenaActReq = true;
+				node = 0;
+			}
+			else
+			{
+				System.out.println("action is not legal!");
+				node = 0;
 			}
 		}
 		

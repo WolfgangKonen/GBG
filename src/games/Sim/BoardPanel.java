@@ -20,6 +20,7 @@ public class BoardPanel extends JPanel {
 	Point2[] lines;
 	Point[] circleEdge;
 	private Node[] nodes;
+	private int inputNode1, inputNode2;
 	Image img;
 	
 	BoardPanel(Node [] nodes)
@@ -31,6 +32,8 @@ public class BoardPanel extends JPanel {
 		setupCircles(nodes.length);
 		setupLines(nodes.length);
 		//getImages();
+		inputNode1 = -1;
+		inputNode2 = -1;
 		
 	}
 	
@@ -133,9 +136,13 @@ public class BoardPanel extends JPanel {
 		
 		//draw circles
 		g2d.setStroke(new BasicStroke(0));
-		g2d.setColor(Color.black);
 		for(int i = 0; i < circles.length; i++)
 		{
+			if(i == inputNode1 || i == inputNode2)
+				g2d.setColor(Color.GRAY);
+			else
+				g2d.setColor(Color.BLACK);
+			
 			g2d.fillOval(circles[i].getX(), circles[i].getY(), 30, 30);
 			//g2d.drawImage(img,circles[i].getX(),circles[i].getY(),30,30,this);
 		}
@@ -168,5 +175,19 @@ public class BoardPanel extends JPanel {
 			this.nodes[i].setLinksCopy(nodes[i].getLinks());
 	}
 	
+	public void setInputNode1(int i)
+	{
+		inputNode1 = i;
+	}
 
+	public void setInputNode2(int i)
+	{
+		inputNode2 = i;
+	}
+	
+	public void resetInputNodes()
+	{
+		inputNode1 = -1;
+		inputNode2 = -1;
+	}
 }
