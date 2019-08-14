@@ -20,7 +20,6 @@ public class ArenaOthello extends Arena {
 	
 	@Override
 	public String getGameName() {
-		// TODO Auto-generated method stub
 		return "Othello";
 	}
 
