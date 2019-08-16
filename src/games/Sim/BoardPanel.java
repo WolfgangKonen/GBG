@@ -22,6 +22,7 @@ public class BoardPanel extends JPanel {
 	private Node[] nodes;
 	private int inputNode1, inputNode2;
 	Image img;
+	double [] actionValues;
 	
 	BoardPanel(Node [] nodes)
 	{
@@ -106,6 +107,19 @@ public class BoardPanel extends JPanel {
 		
 	}
 	
+	private Color getColor(double d)
+	{
+		Color color;
+		if(d <= 0.3)
+			color = Color.red;
+		if(d > 0.3 && d <= 0.7 )
+			color = Color.yellow;
+		else
+			color = Color.green;
+		
+		return color;
+	}
+	
 	private void doDrawing(Graphics g)
 	{
 		Graphics2D g2d = (Graphics2D) g;
@@ -115,13 +129,19 @@ public class BoardPanel extends JPanel {
 		
 		// draw lines
 		int k = 0;
-		
+		int v = 0;
 		for(int i = 0; i < nodes.length -1 ; i++)
 		{
 			for(int j = 0; j < nodes.length - 1 - i; j++)
 			{
 				if(nodes[i].getLinkPlayerPos(j) == 0)
-					g2d.setColor(Color.black);
+				{
+					if(actionValues != null && actionValues[v] != Double.NaN)
+						g2d.setColor(getColor(actionValues[v]));
+					else
+						g2d.setColor(Color.black);
+					v++;
+				}
 				else if(nodes[i].getLinkPlayerPos(j) == 1)
 					g2d.setColor(new Color(250,8,250));
 				else if(nodes[i].getLinkPlayerPos(j) == 2)
@@ -189,5 +209,10 @@ public class BoardPanel extends JPanel {
 	{
 		inputNode1 = -1;
 		inputNode2 = -1;
+	}
+	
+	void setActionValues(double [] values)
+	{
+		actionValues = values;
 	}
 }
