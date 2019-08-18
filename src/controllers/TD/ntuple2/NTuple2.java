@@ -118,7 +118,6 @@ public class NTuple2 implements Serializable {
 		this.nTuple = nTuple.clone();
 		this.posVals = posVals;
 		lut = new double[(int) Math.pow(posVals, nTuple.length)];
-		
 		if (TC) {
 			tcN = new double[lut.length]; // matrix N in TC
 			tcA = new double[lut.length]; // matrix A in TC

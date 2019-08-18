@@ -13,6 +13,8 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 
 	List<int[]> list = new ArrayList<int[]>();
 	AllPermutation perm;
+	int [][] actions;
+	int [][] symVec;
 	private static int[] fixedModes = {1};
 	int cells, positionValues, numPlayers;
     /**
@@ -30,6 +32,13 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		positionValues = val;
 		numPlayers = pl;
 		
+		setPermutations();
+		setActions();
+		
+    }
+	
+	private void setPermutations()
+	{
 		int [] nodes = {1,2,3,4,5,6};
 		
 		perm = new AllPermutation(nodes);
@@ -40,10 +49,31 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	       { 
 			 list.add(perm.GetNext());
 	            
-	       } 
-		
-    }
+	       }
+	}
 	
+	private void setActions()
+	{
+		int [] vec = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+		symVec = symmetryVectors(vec);
+		actions = new int[symVec.length][];
+		
+		for (int i = 0; i < actions.length; i++) 
+		{
+    		actions[i] = new int[15];
+    		for (int j = 0; j < 15; j++)
+    			actions[i][j] = whereHas(symVec[i],j);
+    	}
+		
+	}
+	
+	 private int whereHas(int[] arr, int j) 
+	 {
+	    	for (int i = 0; i < arr.length; i++) 
+	    		if (arr[i] == j) return i;
+	    	throw new RuntimeException("whereHas: arr does not contain j!!");
+	}
+	 
 	@Override
 	public int getNumCells() 
 	{
@@ -153,9 +183,13 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		return vec;
 	}
 	@Override
-	public int[] symmetryActions(int actionKey) {
-		// TODO 
-		 throw new RuntimeException("symmetricActions in XNTuple.java noch nicht implementiert");
+	public int[] symmetryActions(int actionKey) 
+	{
+		int[] equivAction = new int[actions.length];
+		for (int i = 0; i < actions.length; i++) 
+			equivAction[i] = actions[i][actionKey];
+
+		return equivAction;
 	}
 
 	@Override
