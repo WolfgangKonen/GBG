@@ -36,6 +36,8 @@ public class BoardPanel extends JPanel {
 		inputNode1 = -1;
 		inputNode2 = -1;
 		
+		actionValues = null;
+		
 	}
 	
 	private void getImages()
@@ -136,11 +138,15 @@ public class BoardPanel extends JPanel {
 			{
 				if(nodes[i].getLinkPlayerPos(j) == 0)
 				{
-					if(actionValues != null && actionValues[v] != Double.NaN)
+					if(actionValues != null)
+					{
 						g2d.setColor(getColor(actionValues[v]));
+						v++;
+					}
+						
 					else
 						g2d.setColor(Color.black);
-					v++;
+			
 				}
 				else if(nodes[i].getLinkPlayerPos(j) == 1)
 					g2d.setColor(new Color(250,8,250));

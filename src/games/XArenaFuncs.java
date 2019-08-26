@@ -865,7 +865,7 @@ public class XArenaFuncs
 										// resp. \in [-1,0], if opponent never looses.
 										// +1 is best for pa, -1 worst for pa.
 		
-		return res[1];
+		return res[0];
 	}
 	
 	/**
@@ -1262,10 +1262,11 @@ public class XArenaFuncs
 			}	// while(true)
 
 		} // for (k)
-		winrate[0] = (double) tieCount/competeNum;
-		winrate[1] = (double) winCount0/competeNum;
-		winrate[2] = (double) winCount1/competeNum;
-		winrate[3] = (double) winCount2/competeNum;
+		
+		winrate[0] = (double) winCount0/competeNum;
+		winrate[1] = (double) winCount1/competeNum;
+		winrate[2] = (double) winCount2/competeNum;
+		winrate[3] = (double) tieCount/competeNum;
 		
 		moveCount /= competeNum;
 

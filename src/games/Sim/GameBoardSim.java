@@ -102,13 +102,15 @@ public class GameBoardSim implements GameBoard {
 						System.out.println(winner + 1  + " has won");
 					
 			}
-			if(som.getStoredValues() != null)
+			if(som.getStoredValues() != null && showValueOnGameboard)
 			{
+				
 				//for(int i = 0; i < som.getStoredValues().length; i++)
 					//System.out.println(som.getStoredValues()[i]);
 				board.setActionValues(som.getStoredValues());
 			}
 		}
+		
 		board.setNodesCopy(m_so.getNodes());
 		frame.repaint();
 	}

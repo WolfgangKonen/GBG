@@ -114,7 +114,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	@Override
 	public int[][] symmetryVectors(int[] boardVector) {
 		int [][] symmetricVectors = new int [list.size()][];
-		
+		//symmetricVectors.length
 		for(int i = 0; i < symmetricVectors.length; i++)
 			symmetricVectors[i] = getSymVector(boardVector,list.get(i));
 		return symmetricVectors;
