@@ -24,6 +24,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int winner;
 	private int lastNode1, lastNode2;
 	private int looser;
+	private int[] allRewards;		// currently just as debug info:
+									// allRewards[i] is the reward for player i in case isGameOver()
 	
 	StateObserverSim() 
 	{
@@ -40,6 +42,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		this.player = player;
 		this.winner = winner;
 		this.looser = looser;
+		this.allRewards = new int[numPlayers]; 		// initialized with 0 - the tie case reward
 		setAvailableActions();
 	}
 	
@@ -51,6 +54,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		this.player = 0;
 		this.winner = -2;
 		this.looser = -1;
+		this.allRewards = new int[numPlayers]; 		// initialized with 0 - the tie case reward
 		setAvailableActions();
 	}
 	
@@ -254,6 +258,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	{
 		if(hasLost(player))
 		{ 
+			allRewards[player] = -1;
 			if(looser == -1)
 			{
 				if(isDraw())
@@ -277,6 +282,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		if(hasLost(player))
 		{
 			winner = getNextPlayer2Player();
+			allRewards[player] = -1;
+			allRewards[winner] = +1;
 		}
 		else if(isDraw())
 			winner = -1;
@@ -337,24 +344,30 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	private double getGameScore2Player(int player)
 	{
-		if(winner == -1)
-        	return 0;
-        else if(player == winner)
-        	return REWARD_POSITIVE;
-        else
-        	return REWARD_NEGATIVE;
+        if(isGameOver()) {
+    		if(winner == -1)
+            	return 0;
+            else if(player == winner)
+            	return REWARD_POSITIVE;
+            else
+            	return REWARD_NEGATIVE;
+	    }
+        return 0;
 	}
 	
 	private double getGameScore3Player(int player)
 	{
-		if(looser == player)
-			return REWARD_NEGATIVE;
-		else if(winner == -1)
-        	return 0;
-        else if(player == winner)
-        	return REWARD_POSITIVE;
-        else
-        	return REWARD_NEGATIVE;
+        if(isGameOver()) {
+			if(looser == player)
+				return REWARD_NEGATIVE;
+			else if(winner == -1)
+	        	return 0;
+	        else if(player == winner)
+	        	return REWARD_POSITIVE;
+	        else
+	        	return REWARD_NEGATIVE;
+	    }
+        return 0;
 	}
 
 	@Override

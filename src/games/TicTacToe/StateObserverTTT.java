@@ -138,8 +138,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	 */
 	public double getGameScore(StateObservation refer) {
 		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
-        boolean gameOver = this.isGameOver();
-        if(gameOver) {
+        if(isGameOver()) {
             Types.WINNER win = this.getGameWinner();
         	switch(win) {
         	case PLAYER_LOSES:
