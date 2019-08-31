@@ -8,6 +8,7 @@ import games.Arena;
 import games.StateObservation;
 import games.Othello.ArenaOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
+import games.Sim.ArenaSim;
 import tools.Types.ACTIONS;
 import tools.Types.ScoreTuple;
 
@@ -82,8 +83,19 @@ public class ValidateStateObserver {
 	}
 	
 	public static void main(String[] args) {
-		Arena ar = new ArenaOthello();
+		Arena ar;
 		PlayAgent p;
+		
+		//
+		// choose an Arena (a game) to validate
+		//
+		ar = new ArenaSim();
+//		ar = new ArenaOthello();
+		
+		
+		//
+		// choose a PlayAgent to validate
+		//
 //		p = new BenchMarkPlayer("bp",1);
 //		p = new RandomAgent("bp",1);
 		p = constructTDNTuple3Agt(ar);
@@ -103,6 +115,7 @@ public class ValidateStateObserver {
 			
 			System.out.println("ValidateStateObserver finished successfully");
 		}
+		ar.destruct();
 	}
 
 }

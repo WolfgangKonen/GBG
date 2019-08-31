@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.math3.exception.OutOfRangeException;
+
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -194,8 +196,24 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		int nTuple[][] = {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14}};
-		return nTuple;
+		// /WK/ bug: the next line is not general enough (specific to K_6 graph) AND it is 
+		// also a too big n-tuple, at least for P=3 players (would raise an out-of-mem error).
+//		int nTuple[][] = {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14}};
+		
+		// /WK/ just some other choice (not necessarily sensible)
+		switch(mode)
+		{
+		//--- 8 2-Tuple
+		case 0: return new int[][] {
+			{0, 8}, {0, 9}, {1, 9}, {2, 4}, {2, 6}, {2, 10}, {3, 11}, {4, 11} 
+		};
+		//--- 4 Random 4-Tuple
+		case 1: return new int[][] {
+			{0, 1, 8, 9}, {2, 11, 10, 3}, 
+			{11, 5, 4, 8}, {14, 8, 6, 2}
+		};
+		default: throw new OutOfRangeException(mode, 0, 1);
+		}
 	}
 
 	@Override

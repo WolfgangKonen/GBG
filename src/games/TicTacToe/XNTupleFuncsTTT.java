@@ -85,7 +85,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	@Override
 	public int[] getBoardVector(StateObservation so) {
-		assert (so instanceof StateObserverTTT);
+		assert (so instanceof StateObserverTTT) : "Oops, not StateObserverTTT";
 		int[][] table = ((StateObserverTTT) so).getTable();
 		int[] bvec = new int[getNumCells()]; 
 		for (int i=0, n=0;i<3;i++)

@@ -45,7 +45,10 @@ public class ArenaTrainSim extends ArenaTrain {
 	
 	public XNTupleFuncs makeXNTupleFuncs()
 	{
-		return new XNTupleFuncsSim(15,3,2);
+//		return new XNTupleFuncsSim(15,3,2);		// /WK/ Bug: this is special to K_6 + 2 players. Generalize!!
+		return new XNTupleFuncsSim(ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2,
+								   ConfigSim.NUM_PLAYERS+1,
+								   ConfigSim.NUM_PLAYERS);		
 	}
 
 	public static void main(String[] args) throws IOException 

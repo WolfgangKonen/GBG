@@ -2,12 +2,17 @@ package games.Sim;
 
 import java.util.ArrayList;
 
+import controllers.PlayAgent;
+import controllers.RandomAgent;
+import games.Arena;
 import games.ObserverBase;
 import games.StateObservation;
+import games.Othello.ArenaOthello;
 import games.TicTacToe.TicTDBase;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
 import tools.Types;
+import tools.ValidateStateObserver;
 
 public class StateObserverSim extends ObserverBase implements StateObservation {
 	//rewards
@@ -29,7 +34,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	StateObserverSim() 
 	{
-		config(2,6);
+		config(ConfigSim.NUM_PLAYERS, ConfigSim.GRAPH_SIZE);
 	}
 	
 	StateObserverSim(Node [] nodes, int player, int winner, int looser,int numPlayers, int numNodes)
@@ -128,21 +133,21 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	private boolean isLegalState2Player()
 	{
-		int count1 = 0, count2 = 0;
+		int count0 = 0, count1 = 0;			// counti: number of links that player i=0,1 occupies
 		for(int i = 0; i < nodes.length -1 ; i++)
 		{
 			for(int j = 0; j < nodes.length - 1 - i; j++)
 			{
 				if(nodes[i].getLinkPlayerPos(j) == 1)
-					count1++;
+					count0++;
 				else if(nodes[i].getLinkPlayerPos(j) == 2)
-					count2++;
+					count1++;
 			}
 		}
 		
-		if(player == 0 && count1 == count2)
+		if(player == 0 && count0 == count1)
 			return true;
-		else if(player == 1 && count1 > count2)
+		else if(player == 1 && count0 > count1)
 			return true;
 		else
 			return false;
@@ -150,28 +155,37 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	private boolean isLegalState3Player()
 	{
-		int count1 = 0, count2 = 0, count3 = 0;
+		int count0 = 0, count1 = 0, count2 = 0;		// counti: number of links that player i=0,1,2 occupies
 		for(int i = 0; i < nodes.length -1 ; i++)
 		{
 			for(int j = 0; j < nodes.length - 1 - i; j++)
 			{
 				if(nodes[i].getLinkPlayerPos(j) == 1)
-					count1++;
+					count0++;
 				else if(nodes[i].getLinkPlayerPos(j) == 2)
-					count2++;
+					count1++;
 				else if(nodes[i].getLinkPlayerPos(j) == 3)
-					count3++;
+					count2++;
 			}
 		}
 		
-		if(player == 0 && count1 == count2 && count1 == count3)
+		if (looser==-1) {		// /WK/ bug fix, this if-condition was missing before. In the case 
+								// that one player has already lost, the counts for that player do 
+								// not longer necessarily fulfill the conditions below
+			if(player == 0 && count0 == count1 && count0 == count2)
+				return true;
+			else if(player == 1 && count0 > count1 && count1 == count2)
+				return true;
+			else if(player == 2 && count0 > count2 && count1 > count2)
+				return true;
+			else
+				return false;
+		} else {
+			// TODO: if one player has already lost, then the count-check could be done for the 
+			// remaining two players in the way of isLegalState2Player(). But for the moment too 
+			// complicated (lengthy) to code.
 			return true;
-		else if(player == 1 && count1 > count2 && count2 == count3)
-			return true;
-		else if(player == 2 && count1 > count3 && count2 > count3)
-			return true;
-		else
-			return false;
+		}
 	}
 	
 	@Override
@@ -254,11 +268,22 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return acts;
 	}
 
-	private void checkIfPlayerLost()
+	private boolean twoPlayerLost()
+	{
+		int s = 0;
+		for (int i=0; i<allRewards.length; i++) s+=allRewards[i];
+		return (s==-2) ? true : false;
+	}
+	
+	private void checkIfPlayerLost3Player()
 	{
 		if(hasLost(player))
 		{ 
+			String sout = this.stringDescr();
 			allRewards[player] = -1;
+			if (twoPlayerLost()) {
+				allRewards[getNextPlayer3Player()]=1;	// getNextPlayer() is winner
+			}
 			if(looser == -1)
 			{
 				if(isDraw())
@@ -270,7 +295,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 					looser = player;
 			}
 			else
-				winner = getNextPlayer();
+				winner = getNextPlayer3Player();
 		}
 		else if(isDraw())
 			winner = -1;
@@ -298,6 +323,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		else
     		advance2Player(iAction);
 		super.incrementMoveCounter();
+		
+//		System.out.println(this.stringDescr());		// only debug
 	}
 	
 	private void advance2Player(int action)
@@ -315,10 +342,10 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		setAction(action);
     	setAvailableActions(); 		// IMPORTANT: adjust the available actions (have reduced by one)
     	
-    	checkIfPlayerLost();
+    	checkIfPlayerLost3Player();
     	
     	//setLastPlayer(player);
-		player = getNextPlayer();    // 2-player games: 1,-1,1,-1,...
+		player = getNextPlayer3Player();    // 2-player games: 1,-1,1,-1,...
 	}
 
 	@Override
@@ -330,16 +357,28 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	public int getNumPlayers() {
 		return numPlayers;
 	}
+	
+	public int[] getAllRewards() {
+		return allRewards;
+	}
 
+	@Override
+	public double getGameScore(int player) {
+		if(numPlayers > 2)
+			return getGameScore3Player(player);
+		else
+			return getGameScore2Player(player);									
+	}
+	
 	@Override
 	public double getGameScore(StateObservation referringState) {
         //boolean gameOver = this.isGameOver();
       
-		if(numPlayers > 2)
-			return getGameScore3Player(referringState.getPlayer());
-		else
-			return getGameScore2Player(referringState.getPlayer());
-									
+//		if(numPlayers > 2)
+//			return getGameScore3Player(referringState.getPlayer());
+//		else
+//			return getGameScore2Player(referringState.getPlayer());
+		return getGameScore(referringState.getPlayer());									
 	}
 	
 	private double getGameScore2Player(int player)
@@ -491,15 +530,17 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			return player - 1;
 	}
 	
-	private int getNextPlayer()
+	private int getNextPlayer3Player()
 	{
-		int nextPlayer = nextPlayer();
+//		int nextPlayer = nextPlayer();
+		int nextPlayer = (player+1)%3;
 		
 		if(nextPlayer == looser)
 		{
-			nextPlayer++;
-			if(nextPlayer > 2)
-				nextPlayer = 0;
+//			nextPlayer++;
+//			if(nextPlayer > 2)
+//				nextPlayer = 0;
+			nextPlayer = (nextPlayer+1)%3;
 		}
 		
 		return nextPlayer;
@@ -510,13 +551,14 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return (player == 0) ? 1 : 0;
 	}
 	
-	private int nextPlayer()
-	{
-		if(player == 2)
-			return 0;
-		else
-			return player + 1;
-	}
+	// --- /WK/ obsolete now
+//	private int nextPlayer()
+//	{
+//		if(player == 2)
+//			return 0;
+//		else
+//			return player + 1;
+//	}
 	
 	private void setLastNodes(int x, int y)
 	{
@@ -538,5 +580,37 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	public void setLooser(int looser) {
 		this.looser = looser;
+	}
+	
+	public static void main(String[] args) {
+		// /WK/ just some validation code: 
+		// We play R random Sim games. 
+		// * assert that, once a game is over, getGameScore[k] (the logic based on winner&looser)
+		//	 and allRewards[k] (the other logic) match in every case
+		// * print the final reward vector for each game and check manually that, if R is large enough, 
+		// 	 eventually all possible reward vectors occur:
+		//		*  0/ 0/ 0
+		//		* -1/-1/ 1 (and permutations)
+		//		* -1/ 0/ 0 (and permutations)
+		//
+		int R = 20;
+		Arena ar = new ArenaSim();
+		PlayAgent p = new RandomAgent("");
+		
+		for (int i=0; i<R; i++) {
+			StateObserverSim sob = (StateObserverSim) ar.getGameBoard().getDefaultStartState();
+			while (!sob.isGameOver()) 
+				sob.advance(p.getNextAction2(sob, true, true));
+			
+			for (int k=0; k<sob.getNumPlayers(); k++) {
+//				System.out.println("i="+i+",k="+k+":"+(int)sob.getGameScore(k)+"/"+sob.getAllRewards()[k]);
+				assert ((int)sob.getGameScore(k) == sob.getAllRewards()[k]) : "Oops";
+			}
+			System.out.print("i="+i+", allRewards=");	// print reward vector
+			for (int k=0; k<sob.getNumPlayers(); k++) System.out.print(sob.getAllRewards()[k]+"/");
+			System.out.println();
+		}
+		
+		ar.destruct();
 	}
 }

@@ -230,8 +230,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		double[] VTable;		
 		
         otilde = so.getReward(so,rgs);
-
-    	
+        
     	boolean randomSelect;		// true signals: the next action is a random selected one
     	randomSelect = false;
 		if (random) {
