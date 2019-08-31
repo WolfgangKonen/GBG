@@ -138,7 +138,7 @@ public class BoardPanel extends JPanel {
 			{
 				if(nodes[i].getLinkPlayerPos(j) == 0)
 				{
-					if(actionValues != null)
+					if(actionValues != null && v < actionValues.length)
 					{
 						g2d.setColor(getColor(actionValues[v]));
 						v++;

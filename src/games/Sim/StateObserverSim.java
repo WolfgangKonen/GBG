@@ -145,12 +145,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			}
 		}
 		
-		if(player == 0 && count0 == count1)
-			return true;
-		else if(player == 1 && count0 > count1)
-			return true;
-		else
-			return false;
+		return checkIfLegal2(count0,count1);
 	}
 	
 	private boolean isLegalState3Player()
@@ -169,24 +164,94 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			}
 		}
 		
-		if (looser==-1) {		// /WK/ bug fix, this if-condition was missing before. In the case 
+		if (looser==-1) 
+		{						// /WK/ bug fix, this if-condition was missing before. In the case 
 								// that one player has already lost, the counts for that player do 
 								// not longer necessarily fulfill the conditions below
-			if(player == 0 && count0 == count1 && count0 == count2)
-				return true;
-			else if(player == 1 && count0 > count1 && count1 == count2)
-				return true;
-			else if(player == 2 && count0 > count2 && count1 > count2)
-				return true;
-			else
-				return false;
+			return checkIfLegal3(count0, count1, count2);
 		} else {
 			// TODO: if one player has already lost, then the count-check could be done for the 
 			// remaining two players in the way of isLegalState2Player(). But for the moment too 
 			// complicated (lengthy) to code.
-			return true;
+			int [] remainingPlayers = getRemainingPlayers();
+			int [] remainingCounts = getRemainingCount(count0, count1, count2);
+			return checkIfLegal2Variabel(remainingPlayers, remainingCounts);
 		}
 	}
+	
+	private boolean checkIfLegal2(int count0, int count1)
+	{
+		if(player == 0 && count0 == count1)
+			return true;
+		else if(player == 1 && count0 > count1)
+			return true;
+		else
+			return false;
+	}
+	
+	private boolean checkIfLegal3(int count0, int count1, int count2)
+	{
+		if(player == 0 && count0 == count1 && count0 == count2)
+			return true;
+		else if(player == 1 && count0 > count1 && count1 == count2)
+			return true;
+		else if(player == 2 && count0 > count2 && count1 > count2)
+			return true;
+		else
+			return false;
+	}
+	
+	private boolean checkIfLegal2Variabel(int [] players, int [] counts)
+	{
+		if(player == players[0] && counts[0] == counts[1])
+			return true;
+		else if(player == players[1] && counts[0] > counts[1])
+			return true;
+		else
+			return false;
+	}
+	private int[] getRemainingPlayers()
+	{
+		int [] players = new int[2];
+		switch(looser)
+		{
+		case 0:
+			players[0] = 1;
+			players[1] = 2;
+			break;
+		case 1:
+			players[0] = 0;
+			players[1] = 2;
+			break;
+		case 2:
+			players[0] = 0;
+			players[1] = 1;
+			break;		
+		}
+		return players;
+	}
+	
+	private int[] getRemainingCount(int count0, int count1, int count2)
+	{
+		int [] counts = new int[2];
+		switch(looser)
+		{
+		case 0:
+			counts[0] = count0;
+			counts[1] = count1;
+			break;
+		case 1:
+			counts[0] = count0;
+			counts[1] = count2;
+			break;
+		case 2:
+			counts[0] = count0;
+			counts[1] = count1;
+			break;		
+		}
+		return counts;
+	}
+	
 	
 	@Override
 	public WINNER getGameWinner() {

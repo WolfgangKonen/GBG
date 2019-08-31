@@ -102,12 +102,23 @@ public class GameBoardSim implements GameBoard {
 						System.out.println(winner + 1  + " has won");
 					
 			}
+			if(som.getStoredValues() != null )
+			{
+				System.out.println(som.getStoredValues().length);
+				System.out.println(showValueOnGameboard);
+			}
+			//ShowValue bug, because the updateGameboad Method is called twice.
 			if(som.getStoredValues() != null && showValueOnGameboard)
 			{
 				
 				//for(int i = 0; i < som.getStoredValues().length; i++)
 					//System.out.println(som.getStoredValues()[i]);
 				board.setActionValues(som.getStoredValues());
+			}
+			else
+			{
+				System.out.println("else");
+				//board.setActionValues(null);
 			}
 		}
 		
