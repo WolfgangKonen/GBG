@@ -11,5 +11,5 @@ public class ConfigSim {
 	 *  Number of players
 	 */
 	public static final int NUM_PLAYERS = 2;
-		
+	
 }

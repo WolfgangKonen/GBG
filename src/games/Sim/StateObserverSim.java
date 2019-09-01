@@ -53,6 +53,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	private void config(int numberOfPlayer, int numberOfNodes)
 	{
+	
 		this.numNodes = numberOfNodes;
 		this.numPlayers = numberOfPlayer;
 		setupNodes(numberOfNodes);
