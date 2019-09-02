@@ -309,10 +309,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		BestScore = -Double.MAX_VALUE;
 		double[] VTable;
        
-//		if (so.getNumPlayers()>2)
-//			throw new RuntimeException("TDAgent.getNextAction2 does not yet "+
-//									   "implement case so.getNumPlayers()>2");
-
 		int player = refer.getPlayer(); 	 
 	
 		// ??????
@@ -678,6 +674,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			if(firstRound)
 			{
 				m_Net[player].calcScoresAndElig(m_feature.prepareFeatVector(so));
+				lastInput[player] = m_feature.prepareFeatVector(so);
 				if(player == 2)
 					firstRound = false;
 			}
@@ -685,8 +682,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			actBest = this.getNextAction2(so, true, true);
 			randomMove = actBest.isRandomAction();
 			so.advance(actBest);
-			
-			lastInput[player] = m_feature.prepareFeatVector(so);
 			
 			counter++;
 			if (counter==epiLength) {
@@ -696,8 +691,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			if (randomMove && !so.isGameOver() && !learnFromRM) 
 			{
 				// no training, go to next move
-				input = m_feature.prepareFeatVector(so);
-				m_Net[player].calcScoresAndElig(input); // calculate score, write it to
+				lastInput[player] = m_feature.prepareFeatVector(so);
+				m_Net[player].calcScoresAndElig(lastInput[player]); // calculate score, write it to
 												// old_y[k] for
 												// next pass & update
 												// eligibilities (NEW
@@ -736,8 +731,9 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				}
 				else
 				{
-					input = m_feature.prepareFeatVector(so);
-					m_Net[player].updateWeights(0.0, input, so.isGameOver(), wghtChange);
+					//input = m_feature.prepareFeatVector(so);
+					m_Net[player].updateWeights(0.0, lastInput[player], so.isGameOver(), wghtChange);
+					lastInput[player] = m_feature.prepareFeatVector(so);
 				}
 			}
 			

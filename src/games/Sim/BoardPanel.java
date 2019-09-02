@@ -44,7 +44,7 @@ public class BoardPanel extends JPanel {
 	{
 		try
 		{
-			img = ImageIO.read(new File("C:\\Users\\bashx\\Desktop\\green_btn.jpg"));
+			img = ImageIO.read(new File("green_btn.jpg"));
 		}
 		catch(IOException ex)
 		{
@@ -112,13 +112,15 @@ public class BoardPanel extends JPanel {
 	private Color getColor(double d)
 	{
 		Color color;
-		if(d <= 0.3)
-			color = Color.red;
-		if(d > 0.3 && d <= 0.7 )
-			color = Color.yellow;
+		if(d < 0)
+		{
+			color = Color.black;
+		}
 		else
-			color = Color.green;
-		
+		{
+			double intensity = 255 * d;
+			color = new Color(0,255,0,(int)intensity);
+		}
 		return color;
 	}
 	

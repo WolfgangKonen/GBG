@@ -43,7 +43,7 @@ public class FeatureSim implements Feature{
 
 	@Override
 	public int[] getAvailFeatmode() {
-		return new int[]{0,1};
+		return new int[]{0};
 	}
 
 	@Override
@@ -53,16 +53,20 @@ public class FeatureSim implements Feature{
 		switch (featMode)
 		{
     	case 0:
-    		//ToDo: what is a Feat Vector and is this correct?
-    		return 15;
-    	case 1:
-    		return 45;
+    		if(ConfigSim.NUM_PLAYERS > 2)
+    			return getEdgesCount() * ConfigSim.NUM_PLAYERS;
+    		else
+    			return getEdgesCount();
     	default:
     		throw new RuntimeException("Unknown featmode: " + featMode);
 		}
 	}
 
-
+	private int getEdgesCount()
+	{
+		int count = (ConfigSim.GRAPH_SIZE * (ConfigSim.GRAPH_SIZE - 1)) / 2;
+		return count;
+	}
 	@Override
 	public double[] prepareFeatVector(StateObservation so) {
 		StateObserverSim som = (StateObserverSim) so;
