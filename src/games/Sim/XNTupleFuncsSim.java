@@ -14,10 +14,10 @@ import games.XNTupleFuncs;
 public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serializable {
 
 	List<int[]> list = new ArrayList<int[]>();
-	AllPermutation perm;
+	transient AllPermutation perm;
 	int [][] actions;
 	int [][] symVec;
-	private static int[] fixedModes = {1};
+	private static int[] fixedModes = {2};
 	int cells, positionValues, numPlayers;
     /**
 	 * 

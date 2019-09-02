@@ -126,8 +126,26 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return true;
 	}
 
+	private void assertNodeSymmetry() {
+		// this code just asserts that the link from node a to node b has always 
+		// the same player as the link from node b to node a
+		int p1,p2,n1,n2;
+		for(int i = 0; i < nodes.length -1 ; i++)
+		{
+			for(int j = 0; j < nodes.length - 1 - i; j++)
+			{
+				n1 = nodes[i].getNumber();
+				p1 = nodes[i].getLinkPlayerPos(j);
+				n2 = nodes[i].getLinkNodePos(j);
+				p2 = nodes[n2-1].getLinkPlayer(i+1);
+				assert (p1==p2) : "Node symmetry in Sim violated between nodes "+n1+" and "+n2;
+			}
+		}
+		
+	}
 	@Override
 	public boolean isLegalState() {
+		assertNodeSymmetry();
 		return (numPlayers > 2) ? isLegalState3Player() : isLegalState2Player();
 	}
 
@@ -478,7 +496,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	public String stringDescr() {
 		String sout = "";
 		String str[] = new String[4]; 
-		str[0] = "-"; str[1]="1"; str[2]="2";str[3]="3" ;
+		str[0] = "_"; str[1]="0"; str[2]="1";str[3]="2" ;
 		
 		for(int i = 0; i < nodes.length -1 ; i++)
 			for(int j = 0; j < nodes.length - 1 - i; j++)

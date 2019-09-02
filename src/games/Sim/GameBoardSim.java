@@ -17,6 +17,7 @@ import games.Hex.StateObserverHex;
 import games.Sim.Point;
 import games.TicTacToe.StateObserverTTT;
 import tools.Types;
+import tools.Types.ACTIONS;
 import games.Arena;
 
 public class GameBoardSim implements GameBoard {
@@ -25,6 +26,9 @@ public class GameBoardSim implements GameBoard {
 	protected Arena m_arena;
 	private StateObserverSim m_so;
 	private boolean arenaActReq = false;
+	
+	// debug: start with simpler start states in getDefaultStartState()
+	private boolean m_DEBG = false; // false; true;
 	
 	//JFrame
 	JFrame frame;
@@ -85,11 +89,11 @@ public class GameBoardSim implements GameBoard {
 			int player = som.getPlayer();
 			switch(player) {
 			case(0): 
-				System.out.println("1 to move   "); break;
+				System.out.println("0 to move   "); break;
 			case(1):
-				System.out.println("2 to move   "); break;
+				System.out.println("1 to move   "); break;
 			case(2):
-				System.out.println("3 to move   "); break;
+				System.out.println("2 to move   "); break;
 			}
 			
 			if (so.isGameOver()) 
@@ -99,7 +103,7 @@ public class GameBoardSim implements GameBoard {
 					if(winner == -1)
 						System.out.println("Tie");
 					else
-						System.out.println(winner + 1  + " has won");
+						System.out.println(winner  + " has won");
 					
 			}
 			if(som.getStoredValues() != null )
@@ -170,6 +174,24 @@ public class GameBoardSim implements GameBoard {
 	@Override
 	public StateObservation getDefaultStartState() {
 		clearBoard(true, true);
+		if (m_DEBG) {		// just simpler to debug start states
+			// 1) If ACTIONS(8) below is active: a simple position with only 3 moves left.
+			//    X to move and ACTIONS(10) lets X win, the other 2 let O win.
+			// 2) If ACTIONS(8) below is commented out: another simple position with 4 moves left.
+			//    now O can win with ACTIONS(10), the other 3 let X win.
+			m_so.advance(new ACTIONS( 0));	// P0: node 1 to 2
+			m_so.advance(new ACTIONS( 2));	// P1: node 1 to 4
+			m_so.advance(new ACTIONS( 4));	// P0: node 1 to 6
+			m_so.advance(new ACTIONS( 7));	// P1: node 2 to 5
+			m_so.advance(new ACTIONS( 5));	// P0: node 2 to 3
+			m_so.advance(new ACTIONS(11));	// P1: node 3 to 6
+			m_so.advance(new ACTIONS(12));	// P0: node 4 to 5
+			m_so.advance(new ACTIONS(13));	// P1: node 4 to 6
+			m_so.advance(new ACTIONS( 3));	// P0: node 1 to 5
+			m_so.advance(new ACTIONS( 1));	// P1: node 1 to 3
+			m_so.advance(new ACTIONS( 6));	// P0: node 2 to 4
+			//m_so.advance(new ACTIONS( 8));	// P1: node 2 to 6
+		}
 		return m_so;
 	}
 

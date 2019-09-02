@@ -35,6 +35,7 @@ import games.GameBoard;
 import games.StateObservation;
 import games.StateObsNondeterministic;
 import games.XNTupleFuncs;
+import games.Sim.StateObserverSim;
 import games.XArenaMenu;
 
 /**
@@ -413,6 +414,21 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		return sc;
 	}
 
+	private void assertStateForSim(StateObservation s_next, StateObservation s_last) {
+		if (s_next instanceof StateObserverSim) {
+			// just some assertion code for adaptAgentV in the case of game Sim to check that 
+			// numPlayer moves have happened between s_last=sLast[curPlayer] and s_next
+			String strNext=s_next.stringDescr();
+			String strLast=s_last.stringDescr();
+			int movesLeftNext=0,movesLeftLast=0;
+			for (int i=0; i<strNext.length(); i++) {
+				if (strNext.charAt(i)=='_') movesLeftNext++;
+				if (strLast.charAt(i)=='_') movesLeftLast++;
+			}
+			assert(movesLeftLast-movesLeftNext==s_next.getNumPlayers());
+		}
+	}
+
 	/**
 	 * Adapt the n-tuple weights for state {@code sLast[curPlayer]}, the last afterstate that current
 	 * player generated, towards the target derived from {@code s_next}.
@@ -459,14 +475,23 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			curBoard = m_Net.xnf.getBoardVector(sLast[curPlayer]); 
         	vLast = m_Net.getScoreI(curBoard,curPlayer);
         	
-        	// if last action of curPlayer was a random move: 
-    		if (randLast[curPlayer] && !learnFromRM && !s_next.isGameOver()) {
+//    		if (randLast[curPlayer] && !learnFromRM && !s_next.isGameOver()) {
+        	// the above line was the statement before 2019-09-02. But it is wrong (at 
+        	// least for the game Sim, and probably also other games) to learn on s_next.isGameOver():
+        	// Because in Sim a game-over situation means that curPlayer has lost --> it is not 
+        	// correct to learn on such a random move, because another move might be a winning or 
+        	// tie move --> sLast[curPlayer] would learn the wrong (negative) target!
+        	// That is why we learn now *never* on a random move (except learnFromRM is true):
+        	if (randLast[curPlayer] && !learnFromRM) {
+            	// if last action (of curPlayer) leading to s_next was a random move: 
     			// no training, go to next move.
-    			if (m_DEBG) System.out.println("random move");
+    			if (m_DEBG) 
+    				System.out.println("random move --> no train");
     			
     			m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
     				
     		} else {
+    			
     			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, target,r_next,ns.getSO());
     		}
     		
@@ -476,13 +501,16 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	            	vLastNew = m_Net.getScoreI(curBoard,curPlayer);
 	            	int dummy=1;
 	    		}
+	    		assertStateForSim(s_next, sLast[curPlayer]);	// this is only for debugging Sim
             	ScoreTuple sc1 = s_next.getGameScoreTuple();
             	ScoreTuple sc2 = this.getScoreTuple(s_next);
 	    		String s1 = sLast[curPlayer].stringDescr();
 	    		String s2 = s_next.stringDescr();
 	    		if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
 	            	vLastNew = m_Net.getScoreI(curBoard,curPlayer);
-	            	System.out.println(s1+" "+s2+","+vLast+"->"+vLastNew+" target="+target
+	            	System.out.println(s1+" "+s2+", "
+	            			+String.format("%.4f",vLast)+" -> "+String.format("%.4f",vLastNew)
+	            			+" target="+String.format("%.4f",target) 
 	            			+" player="+(curPlayer==0 ? "X" : "O"));
 	            	if (++acount % 50 ==0) {
 	            		int dummy=1;
@@ -538,6 +566,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	    			//debug only:
 	    			if (m_DEBG) {
+	    				assert s_next.isLegalState() : "s_next is not legal";
 	    	    		if (s_next.isGameOver()) {
 	    	            	vLastNew = m_Net.getScoreI(curBoard,n);
 	    	            	ScoreTuple sc1 = s_next.getGameScoreTuple();
@@ -548,7 +577,9 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	    	    		String s2 = s_next.stringDescr();
 	    	    		if (target!=0.0) { //(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
 	    	            	vLastNew = m_Net.getScoreI(curBoard,n);
-	    	            	System.out.println(s1+" "+s2+","+vLast+"->"+vLastNew+" target="+target
+	    	            	System.out.println(s1+" "+s2+", "
+	    	            			+String.format("%.4f",vLast)+" -> "+String.format("%.4f",vLastNew)
+	    	            			+" target="+String.format("%.4f",target)
 	    	            			+" player="+(n==0 ? "X" : "O")+" (f)"+this.getGameNum());
 	    	            	if (++acount % 50 ==0) {
 	    	            		int dummy=1;
@@ -615,11 +646,16 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        
 	        // choose action a_t, using epsilon-greedy policy based on V
 			a_t = getNextAction2(s_t, true, true);
+			// only for debug:
+//			if (a_t.isRandomAction() && s_t.getPlayer()==1) {
+//				int dummy = 1;
+//			}
 	               
 	        // take action a_t and observe reward & next state 
 	        ns = new NextState(this,s_t,a_t);	
 	        curPlayer = ns.getSO().getPlayer();
 	        nextPlayer = ns.getNextSO().getPlayer();
+	        randLast[curPlayer] = a_t.isRandomAction(); // /WK/ bug fix: has to come before adaptAgentV (!)
 	        R = ns.getNextRewardTupleCheckFinished(epiLength);	// this sets m_finished
 	        
 	        adaptAgentV(curPlayer, R, ns);
@@ -629,7 +665,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        // we advance. 
 	        // (for deterministic games, ns.getAfterState() and ns.getNextSO() are the same)
 	        sLast[curPlayer] = ns.getAfterState();
-	        randLast[curPlayer] = a_t.isRandomAction();
+//	        randLast[curPlayer] = a_t.isRandomAction(); // /WK/ bug fix: has to come before adaptAgentV (!)
 	        rLast.scTup[curPlayer] = R.scTup[curPlayer];
 	        s_t = ns.getNextSO();
 			t++;

@@ -15,6 +15,7 @@ import games.Arena.Task;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Othello.Edax.Edax;
+import games.Sim.StateObserverSim;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMCTS;
 import params.ParOther;
@@ -594,9 +595,11 @@ abstract public class Arena extends JFrame implements Runnable {
 			// if taskBefore==INSPECTV, start from the board left by InspectV
 			pa = qaVector[0];
 			if (pa instanceof Edax) ((Edax) pa).initForNewGame(gb.getStateObs()); // paX = new Edax();
+			so = gb.getStateObs();
 		} else {
 			// if taskBefore!=INSPECTV, select here the start state:
-			gb.clearBoard(true, true); // reset game board to default start state
+			//gb.clearBoard(true, true); // reset game board to default start state
+			so = gb.getDefaultStartState();
 			if (m_xab.oPar[0].useChooseStart01()) {
 				// this is mandatory for games like RubiksCube (but possible
 				// also for other games):
@@ -604,16 +607,15 @@ abstract public class Arena extends JFrame implements Runnable {
 				// choose randomly a
 				// different one:
 				so = gb.chooseStartState();
-				gb.updateBoard(so, false, showValue);
 			}
 		}
 		taskBefore = Task.IDLE;
 
+		System.out.println("StartState: "+so.stringDescr());
+		gb.updateBoard(so, false, showValue);
 		gb.setActionReq(true);
-		so = gb.getStateObs();
 		so.resetMoveCounter();
 		startSO = so.copy();
-		System.out.println("StartState: "+startSO.stringDescr());
 		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, (double) nEmpty, (double) cumEmpty, highestTile);
 		psList.add(pstats);
 
@@ -642,7 +644,8 @@ abstract public class Arena extends JFrame implements Runnable {
 			{
 				if (gb.isActionReq()) {
 					so = gb.getStateObs();
-					gb.updateBoard(so, false, showValue);
+					if (!(so instanceof StateObserverSim))	// /WK/ test whether the following updateBoard is obsolete for Sim
+						gb.updateBoard(so, false, showValue);
 					pa = qaVector[so.getPlayer()];
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
@@ -677,7 +680,7 @@ abstract public class Arena extends JFrame implements Runnable {
 						// }
 						so.advance(actBest);
 						logManager.addLogEntry(actBest, so, logSessionid);
-						if (spDT==null) {
+						if (spDT==null) {		// the normal play (non-TS, i.e. no tournament)
 							try {
 								Thread.sleep(currentSleepDuration);
 								// waiting time between agent-agent actions
@@ -777,6 +780,7 @@ abstract public class Arena extends JFrame implements Runnable {
 						break; // out of switch
 					default:
 						// TODO: implement s.th. for n-player games (n>2)
+						System.err.println("Game-over case not yet implemented for n>2 players");
 						break; // out of switch
 					}
 

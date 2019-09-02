@@ -3,7 +3,8 @@ package games.Sim;
 public class Link 
 {
 
-	private int node,player;
+	private int node,		// the number of the 'to'-node (from 1 to 6 in case of K_6)
+				player;
 	
 	Link(int no, int pl)
 	{

@@ -3,12 +3,12 @@ package games.Sim;
 public class Node 
 {
 	private Link [] links; 
-	private int number;
+	private int number;			// the number of the node (from 1 to 6 in case of K_6)
 	
 	Node(int size, int num)
 	{
 		number = num;
-		links = new Link [size-1];
+		links = new Link [size-1];	// each node has size-1 links to all other nodes
 		setupLinks();
 	}
 
@@ -19,7 +19,7 @@ public class Node
 		{
 			if(n > links.length + 1)
 				n = 1;
-			links[i] = new Link(n, 0);
+			links[i] = new Link(n, 0);	// link to node n with pl=0 ("empty", no player owns this link)
 			n++;
 		}
 	}
@@ -49,12 +49,17 @@ public class Node
 		this.number = number;
 	}
 	
+	/**
+	 * @param node the 'to'-node, i.e. the link is from this to 'to'-node
+	 * @return the link's player number (1,2,3), which is GBG player number + 1
+	 */
 	public int getLinkPlayer(int node)
 	{
 		for(Link link : links)
 			if(node == link.getNode())
 				return link.getPlayer();
-		return 0;
+		//return 0;
+		throw new RuntimeException("We should never get here");  // /WK/
 	}
 	
 	public int getLinkNodePos(int pos)
