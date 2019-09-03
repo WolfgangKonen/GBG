@@ -662,7 +662,8 @@ abstract public class Arena extends JFrame implements Runnable {
 						} else {
 							long startT = System.currentTimeMillis();
 							long startTNano = System.nanoTime();
-							actBest = pa.getNextAction2(so, false, true); /** command to get agents next move */
+//							actBest = pa.getNextAction2(so, false, true); /** command to get agents next move */
+							actBest = pa.getNextAction2(so, false, false); /** command to get agents next move */
 							long endT = System.currentTimeMillis();
 							long endTNano = System.nanoTime();
 							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");

@@ -17,7 +17,6 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	transient AllPermutation perm;
 	int [][] actions;
 	int [][] symVec;
-	private static int[] fixedModes = {2};
 	int cells, positionValues, numPlayers;
     /**
 	 * 
@@ -34,28 +33,28 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		positionValues = val;
 		numPlayers = pl;
 		
-		setPermutations();
+		setPermutations();			// /WK/ what for? perm is never used
 		setActions();
 		
     }
 	
 	private void setPermutations()
 	{
-		int [] nodes = {1,2,3,4,5,6};
+		int [] nodes = {1,2,3,4,5,6};		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
 		
 		perm = new AllPermutation(nodes);
 		
 		list.add(perm.GetFirst());
 		
 		while (perm.HasNext()) 
-	       { 
-			 list.add(perm.GetNext());
-	            
-	       }
+		{ 
+			list.add(perm.GetNext());
+		}
 	}
 	
 	private void setActions()
 	{
+		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
 		int [] vec = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
 		symVec = symmetryVectors(vec);
 		actions = new int[symVec.length][];
@@ -127,6 +126,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		int [][] splittedBoardVec = splitVector(boardVector);
 		int [][] splittedSymVec = new int[5][];
 		
+		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
 		for(int i = 0; i < 5; i++)
 				splittedSymVec[i] = getValuesSameNode(i,splittedBoardVec,permutation);
 		
@@ -193,36 +193,144 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 
 		return equivAction;
 	}
+	
+	/**
+	 * @return an array A with the link 3-tuples of all triangles contained in the Sim graph.<p>
+	 * 		In more detail: A[k][] is an int[3] vector carrying the 3 link numbers which make up 
+	 * 		the k'the triangle. <br>
+	 * 		There are Z=combination(K,3) such triangles (K={@link ConfigSim#GRAPH_SIZE}). 
+	 * 		Z=20 for K=6.
+	 */
+	private int[][] allTriangleTuples() {
+		int K = ConfigSim.GRAPH_SIZE;
+		StateObserverSim so = ConfigSim.SO;
+		Link[] link = new Link[3];
+		int nTr = 1; 
+		for (int i=K; i>K-3; i--) nTr = nTr*i;
+		nTr /= 6;
+		int[][] A = new int[nTr][3]; 
+		
+		// first we build an ArrayList of all links emerging from node no=1,...,K 
+		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
+		arrLink.add(link); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
+		for (Node node : so.getNodes()) {
+			arrLink.add(node.getNumber(), node.getLinks());
+		}
+		
+		// now we loop over the nodes that are the corners of each triangle
+		for (int i=1,m=0; i<K-1; i++) 
+			for (int j=i+1; j<K; j++)
+				for (int k=j+1; k<=K; k++,m++) {
+					// find the links connecting those nodes and add them to A[m][]
+					link[0] = findLink(i,j,arrLink);
+					link[1] = findLink(j,k,arrLink);
+					link[2] = findLink(i,k,arrLink);
+					for (int n=0; n<3; n++)
+						A[m][n] = link[n].getNum();
+				}
+		return A;
+	}
+	
+	/**
+	 * @return an array A with the link 4-tuples of all quadruples contained in the Sim graph.<p>
+	 * 		In more detail: A[k][] is an int[4] vector carrying the 4 link numbers which make up 
+	 * 		the k'the quadruple. <br>
+	 * 		There are Z=combination(K,4) such triangles (K={@link ConfigSim#GRAPH_SIZE}). 
+	 * 		Z=15 for K=6.
+	 */
+	private int[][] allQuadrupleTuples() {
+		int K = ConfigSim.GRAPH_SIZE;
+		StateObserverSim so = ConfigSim.SO;
+		Link[] link = new Link[4];
+		int nTr = 1; 
+		for (int i=K; i>K-4; i--) nTr = nTr*i;
+		nTr /= 24;
+		int[][] A = new int[nTr][4]; 
+		
+		// first we build an ArrayList of all links emerging from node no=1,...,K 
+		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
+		arrLink.add(link); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
+		for (Node node : so.getNodes()) {
+			arrLink.add(node.getNumber(), node.getLinks());
+		}
+		
+		// now we loop over the nodes that are the corners of each quadruple
+		for (int i=1,m=0; i<K-2; i++) 
+			for (int j=i+1; j<K-1; j++)
+				for (int k=j+1; k<K; k++) 
+					for (int l=k+1; l<=K; l++,m++)
+				{
+					// find the links connecting those nodes and add them to A[m][]
+					link[0] = findLink(i,j,arrLink);
+					link[1] = findLink(j,k,arrLink);
+					link[2] = findLink(k,l,arrLink);
+					link[3] = findLink(i,l,arrLink);
+					for (int n=0; n<4; n++)
+						A[m][n] = link[n].getNum();
+				}
+		return A;
+	}
+	
+	// helper function for allTriangleTuples + allQuadrupleTuples
+	private Link findLink(int i, int j, ArrayList<Link[]> arrLink) {
+		// find the link from node i to node j. Condition: i<j (!)
+		for (Link lnk : arrLink.get(i)) 
+			if (lnk.getNode()==j) {
+				return lnk;
+			}
+		throw new RuntimeException("findLink: Link ("+i+","+j+") not found!");
+	}
 
+	private int[][] merge(int[][] A, int[][] B) {
+		int[][] C = new int[A.length+B.length][];
+		for (int i=0; i<A.length; i++) C[i]=A[i];
+		int c=A.length;
+		for (int i=0; i<B.length; i++) C[i+c]=B[i];
+		return C;
+	}
+	
 	@Override
 	public int[][] fixedNTuples(int mode) {
 		// /WK/ bug: the next line is not general enough (specific to K_6 graph) AND it is 
 		// also a too big n-tuple, at least for P=3 players (would raise an out-of-mem error).
 //		int nTuple[][] = {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14}};
 		
-		// /WK/ just some other choice (not necessarily sensible)
+		// /WK/ just some other choice (not all necessarily sensible).
+		//		Recommended: mode==3.
 		switch(mode)
 		{
-		//--- 8 2-Tuple
 		case 0: return new int[][] {
+			//--- 8 random 2-tuples
 			{0, 8}, {0, 9}, {1, 9}, {2, 4}, {2, 6}, {2, 10}, {3, 11}, {4, 11} 
 		};
-		//--- 4 Random 4-Tuple
 		case 1: return new int[][] {
+			//--- 4 random 4-tuples
 			{0, 1, 8, 9}, {2, 11, 10, 3}, 
 			{11, 5, 4, 8}, {14, 8, 6, 2}
 		};
-		default: throw new OutOfRangeException(mode, 0, 1);
+		case 2: 
+			//--- all triangle tuples ---
+			return allTriangleTuples();
+		case 3:
+			//--- all triangle tuples + all quadruple tuples
+			return merge(allTriangleTuples(),allQuadrupleTuples());
+		default: 
+			throw new OutOfRangeException(mode, 0, fixedModes.length-1);
 		}
 	}
 
 	@Override
 	public String fixedTooltipString() {
 		return "<html>"
-				+ "1: TODO"
+				+ "0: 8 random 2-tuples<br>"
+				+ "1: 4 random 4-tuples<br>"
+				+ "2: all triangle 3-tuples<br>"
+				+ "3: all triangle + all quadruple tuples<br>"
 				+ "</html>";
 	}
 
+	private static int[] fixedModes = {0,1,2,3};
+	
 	@Override
 	public int[] getAvailFixedNTupleModes() {
 		return fixedModes;

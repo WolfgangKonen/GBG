@@ -63,7 +63,7 @@ public class EvaluatorSim extends Evaluator {
 
 	private double evaluateMCTS(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(pa, mctsAgent, so, 1, 0, gb);
+		lastResult = XArenaFuncs.competeBoth(pa, mctsAgent, so, 5, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		return lastResult;
@@ -79,7 +79,7 @@ public class EvaluatorSim extends Evaluator {
 	
 	private double evaluateMCTS3Player(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.compete3(pa, mctsAgent,mctsAgent2, so, 1, 0, gb);
+		lastResult = XArenaFuncs.compete3(pa, mctsAgent,mctsAgent2, so, 5, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		return lastResult;

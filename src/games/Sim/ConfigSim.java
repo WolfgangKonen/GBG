@@ -12,4 +12,8 @@ public class ConfigSim {
 	 */
 	public static final int NUM_PLAYERS = 2;
 	
+	/**
+	 *  A dummy state, needed as reference in XNTupleFuncsSim
+	 */
+	public static final StateObserverSim SO = new StateObserverSim();
 }

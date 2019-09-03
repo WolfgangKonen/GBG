@@ -9,17 +9,23 @@ public class Node
 	{
 		number = num;
 		links = new Link [size-1];	// each node has size-1 links to all other nodes
-		setupLinks();
+		setupLinks(size);
 	}
 
-	private void setupLinks()
+	private void setupLinks(int size)
 	{
 		int n = number + 1;
+		int k = 0;
+		for(int nod=1; nod<number; nod++) 
+			k += (size-nod);
+		// now k carries the link number of the first link starting from node 'number'
+		
 		for(int i = 0; i < links.length; i++)
 		{
 			if(n > links.length + 1)
 				n = 1;
-			links[i] = new Link(n, 0);	// link to node n with pl=0 ("empty", no player owns this link)
+			links[i] = new Link(k,n,0); // link to node n with pl=0 ("empty", no player owns this link)
+			k++;
 			n++;
 		}
 	}

@@ -167,9 +167,9 @@ public class XArenaFuncs
 			}
 		} catch (Exception e) {
 			MessageBox.show(m_xab, 
-					e.getMessage(), 
+					e.getClass().getName() +": "+ e.getMessage(), 
 					"Warning", JOptionPane.WARNING_MESSAGE);
-			//e.printStackTrace();
+			e.printStackTrace();
 			pa=null;			
 		}
 

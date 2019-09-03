@@ -20,9 +20,11 @@ import params.ParOther;
 import params.ParTD;
 import tools.Types;
 import tools.Types.ACTIONS;
+import tools.Types.ACTIONS_VT;
 import tools.Types.ScoreTuple;
 import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
+import controllers.MaxNAgent;
 import controllers.MaxNWrapper;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
@@ -118,7 +120,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	// use finalAdaptAgents(...), normally true. Set only to false if you want to test how agents behave otherwise:
 	private boolean FINALADAPTAGENTS=true;
 	
-	private int acount=0;
+	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
+	
 	/**
 	 * Default constructor for {@link TDNTuple3Agt}, needed for loading a serialized version
 	 */
@@ -303,6 +306,28 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
             NewSO = so.copy();
             NewSO.advance(actBest);
 			System.out.println("---Best Move: "+NewSO.stringDescr()+", "+(bestValue));
+			
+			boolean DBG_SIM = true;
+			if (DBG_SIM && so instanceof StateObserverSim) {
+				String[] pl = {"(X)","(O)"};
+				MaxNAgent maxNAgent = new MaxNAgent("Max-N",15,true);
+				// if there are 12 moves to go, MaxNAgent(...,12,false) will take 1-2 minutes,
+				// but MaxNAgent(...,12,true) only 2 seconds. If there are 15 moves to go, then
+				// MaxNAgent(...,15,true) will still take only a few seconds. 
+				// So: activating the hash map is important for MaxN-speed!
+				ACTIONS_VT actMax = maxNAgent.getNextAction2(so, false,true);
+				double[] VTableMax = actMax.getVTable();
+				System.out.print("MaxN : ");
+				for (i=0; i<VTableMax.length-1; i++) 
+					System.out.print(String.format("% .4f; ", VTableMax[i]));
+					// "% .4f" means: a space before positive numbers, so that negative numbers
+					// (with an additional minus sign) are printed aligned
+				System.out.println(pl[so.getPlayer()]);
+				System.out.print("TDNT3: ");
+				for (i=0; i<VTable.length; i++) 
+					System.out.print(String.format("% .4f; ", VTable[i]));
+				System.out.println(pl[so.getPlayer()]);
+			}
 		}	
 		
 		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestValue);
@@ -481,7 +506,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         	// Because in Sim a game-over situation means that curPlayer has lost --> it is not 
         	// correct to learn on such a random move, because another move might be a winning or 
         	// tie move --> sLast[curPlayer] would learn the wrong (negative) target!
-        	// That is why we learn now *never* on a random move (except learnFromRM is true):
+        	// That is why we learn now *never* on a random move (except if learnFromRM is true):
         	if (randLast[curPlayer] && !learnFromRM) {
             	// if last action (of curPlayer) leading to s_next was a random move: 
     			// no training, go to next move.

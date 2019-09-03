@@ -69,6 +69,13 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		m_depth = depth;
 	}
 		
+	public MaxNAgent(String name, int depth, boolean useHashMap)
+	{
+		this(name);
+		m_depth = depth;
+		m_useHashMap = useHashMap;
+	}
+		
 	public MaxNAgent(String name, ParMaxN mPar, ParOther oPar)
 	{
 		super(name,oPar);
