@@ -212,7 +212,7 @@ public class XArenaButtons extends JPanel
 			
 			// whenever one of the agent choice boxes changes, call setParamDefaults
 			// to set the param tabs to sensible defaults for that agent and that game
-			// (but this call is inhibited by changeViaLoad[n] if a loadAgent-call triggered
+			// (but this call is inhibited by changedViaLoad[n]==true if a loadAgent-call triggered
 			// the choice-box change)
 			choiceAgent[n].addItemListener(
 					new ItemListenerHandler(n) { // this constructor will copy n to ItemListenerHandler.n
@@ -220,7 +220,7 @@ public class XArenaButtons extends JPanel
 							if (changedViaLoad[n]) {
 								// each change in choiceAgent[n] will trigger TWO ItemEvents:
 								// 1) a DESELECTED event and 2) a SELECTED event. We reset
-								// the switch changeViaLoad[n] only after the 2nd event.
+								// the switch changedViaLoad[n] only after the 2nd event.
 								if (arg0.getStateChange()==ItemEvent.SELECTED)
 									changedViaLoad[n]=false;
 							} else {
@@ -587,6 +587,7 @@ public class XArenaButtons extends JPanel
 								m_game.makeXNTupleFuncs().fixedTooltipString());
 		mctsParams[n].setParamDefaults(agentName, gameName, numPlayers);
 		mctseParams[n].setParamDefaults(agentName, gameName, numPlayers);
+		maxnParams[n].setParamDefaults(agentName, gameName, numPlayers);
 		oPar[n].setParamDefaults(agentName, gameName);
 		
 		switch (agentName) {

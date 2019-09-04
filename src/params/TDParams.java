@@ -501,7 +501,7 @@ public class TDParams extends Frame implements Serializable
 				case "ConnectFour":
 					alphaT.setText("5.0");  		// the defaults
 					alfinT.setText("5.0");			//
-					horcutT.setText("0.001"); 			//
+					horcutT.setText("0.001"); 		//
 					break;
 				default: 
 					alphaT.setText("0.2");  		// the defaults

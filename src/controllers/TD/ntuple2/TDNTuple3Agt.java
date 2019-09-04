@@ -681,6 +681,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        curPlayer = ns.getSO().getPlayer();
 	        nextPlayer = ns.getNextSO().getPlayer();
 	        randLast[curPlayer] = a_t.isRandomAction(); // /WK/ bug fix: has to come before adaptAgentV (!)
+	        	// Remark: This line was missing before 2019-09-02, it was only done 4 lines later, after
+	        	// adaptAgentV(). As a result, in the old version randLast[curPlayer] would be false, even
+	        	// if a_t was a random action. (Only in the next round, when a_t might be greedy again,
+	        	// randLast[curPlayer] would be true.). This was the wrong behavior, which is now fixed.
 	        R = ns.getNextRewardTupleCheckFinished(epiLength);	// this sets m_finished
 	        
 	        adaptAgentV(curPlayer, R, ns);

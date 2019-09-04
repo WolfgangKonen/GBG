@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.Random;
 
 import controllers.PlayAgent;
 import games.GameBoard;
@@ -27,8 +29,10 @@ public class GameBoardSim implements GameBoard {
 	private StateObserverSim m_so;
 	private boolean arenaActReq = false;
 	
+	protected Random rand;
+
 	// debug: start with simpler start states in getDefaultStartState()
-	private boolean m_DEBG = true; // false; true;
+	private boolean m_DEBG = false; // false; true;
 	
 	//JFrame
 	JFrame frame;
@@ -41,6 +45,7 @@ public class GameBoardSim implements GameBoard {
 		//Framework
 		m_arena = simGame;
 		m_so = new StateObserverSim();
+        rand 		= new Random(System.currentTimeMillis());	
 		arenaActReq = false;
 		
 		//GUI
@@ -161,8 +166,8 @@ public class GameBoardSim implements GameBoard {
 	
 	@Override
 	public String getSubDir() {
-		// TODO Auto-generated method stub
-		return null;
+		// /WK/ was missing:
+		return "K"+ConfigSim.GRAPH_SIZE+"_Player"+ConfigSim.NUM_PLAYERS;
 	}
 
 	@Override
@@ -171,6 +176,10 @@ public class GameBoardSim implements GameBoard {
 		return m_arena;
 	}
 
+	/**
+	 * @return the 'empty-board' start state. <br>
+	 * If {@code m_DEBG==true}, another default start state is returned (see source code).
+	 */
 	@Override
 	public StateObservation getDefaultStartState() {
 		clearBoard(true, true);
@@ -187,18 +196,23 @@ public class GameBoardSim implements GameBoard {
 			//    position with 10 moves left. O has 5 first moves to win.
 			// 6) If ACTIONS(7) and ACTIONS(5) below are commented out as well: a medium-complex 
 			//    position with 12 moves left. O has 10 first moves to win.
+			// 7) If ACTIONS(2) and ACTIONS(4) below are commented out as well: identical to the 
+			//    full K6-Sim, only the symmetry is broken towards the first move being link 0.
+			// 	  (Makes the game tree smaller, but the game difficulty remains the same. The other 
+			//    1st-ply moves lead to equivalent episodes). 14 moves to go. Surprisingly, 
+			//    *every* 2nd-ply move of player O is a winning move (!)
 			m_so.advance(new ACTIONS( 0));	// P0: node 1 to 2
 //			m_so.advance(new ACTIONS( 2));	// P1: node 1 to 4
 //			m_so.advance(new ACTIONS( 4));	// P0: node 1 to 6
-			//m_so.advance(new ACTIONS( 7));	// P1: node 2 to 5
-			//m_so.advance(new ACTIONS( 5));	// P0: node 2 to 3
-			//m_so.advance(new ACTIONS(11));	// P1: node 3 to 6
-			//m_so.advance(new ACTIONS(12));	// P0: node 4 to 5
-			//m_so.advance(new ACTIONS(13));	// P1: node 4 to 6
-			//m_so.advance(new ACTIONS( 3));	// P0: node 1 to 5
-			//m_so.advance(new ACTIONS( 1));	// P1: node 1 to 3
-			//m_so.advance(new ACTIONS( 6));	// P0: node 2 to 4
-			//m_so.advance(new ACTIONS( 8));	// P1: node 2 to 6
+//			m_so.advance(new ACTIONS( 7));	// P1: node 2 to 5
+//			m_so.advance(new ACTIONS( 5));	// P0: node 2 to 3
+//			m_so.advance(new ACTIONS(11));	// P1: node 3 to 6
+//			m_so.advance(new ACTIONS(12));	// P0: node 4 to 5
+//			m_so.advance(new ACTIONS(13));	// P1: node 4 to 6
+//			m_so.advance(new ACTIONS( 3));	// P0: node 1 to 5
+//			m_so.advance(new ACTIONS( 1));	// P1: node 1 to 3
+//			m_so.advance(new ACTIONS( 6));	// P0: node 2 to 4
+//			m_so.advance(new ACTIONS( 8));	// P1: node 2 to 6
 		}
 		return m_so;
 	}
@@ -208,9 +222,22 @@ public class GameBoardSim implements GameBoard {
 		return chooseStartState();
 	}
 
+	/**
+	 * @return a start state which is with probability 0.5 the default start state 
+	 * 		start state and with probability 0.5 one of the possible one-ply 
+	 * 		successors
+	 */
 	@Override
 	public StateObservation chooseStartState() {
-		clearBoard(true, true);			// m_so is in default start state 
+		getDefaultStartState();			// m_so is in default start state 
+		// /WK/ this part was missing before 2019-09-04:
+		if (rand.nextDouble()>0.5) {
+			// choose randomly one of the possible actions in default 
+			// start state and advance m_so by one ply
+			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
+			int i = (int) (rand.nextInt(acts.size()));
+			m_so.advance(acts.get(i));
+		}
 		return m_so;
 	}
 

@@ -12,12 +12,14 @@ import games.XArenaFuncs;
 
 public class EvaluatorSim extends Evaluator {
 	
-	private static final int[] AVAILABLE_MODES = {-1,0,1};		//9,
+	private static final int[] AVAILABLE_MODES = {-1,0,1,2};		//9,
 	private RandomAgent random_agent = new RandomAgent("Random");
 	private RandomAgent random_agent2 = new RandomAgent("Random2");
 	private MCTSAgentT mctsAgent = new MCTSAgentT();
 	private MCTSAgentT mctsAgent2 = new MCTSAgentT();
-	protected double[] thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
+	private MaxNAgent maxNAgent = new MaxNAgent("MaxN",15,true);
+	private MaxNAgent maxNAgent2 = new MaxNAgent("MaxN",15,true);
+	protected double[] thresh={0.8,-0.15,-0.15, -0.15}; // threshold for each value of m_mode
 	private GameBoard gb;
 
 	public EvaluatorSim(PlayAgent e_PlayAgent, int mode, int stopEval) {
@@ -48,6 +50,12 @@ public class EvaluatorSim extends Evaluator {
 			else
 				return evaluateMCTS(m_PlayAgent,gb)>thresh[0];
 		
+		case 2:
+			if(ConfigSim.NUM_PLAYERS > 2)
+				return evaluateMaxN3Player(m_PlayAgent,gb)>thresh[0];
+			else
+				return evaluateMaxN(m_PlayAgent,gb)>thresh[0];
+		
 		default: return false;
 		}
 	}
@@ -61,6 +69,14 @@ public class EvaluatorSim extends Evaluator {
 		return lastResult;
 	}
 
+	private double evaluateMaxN(PlayAgent pa, GameBoard gb) {
+ 		StateObservation so = gb.getDefaultStartState();
+		lastResult = XArenaFuncs.competeBoth(pa, maxNAgent, so, 5, 0, gb);
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+		if (this.verbose>0) System.out.println(m_msg);
+		return lastResult;
+	}
+	
 	private double evaluateMCTS(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
 		lastResult = XArenaFuncs.competeBoth(pa, mctsAgent, so, 5, 0, gb);
@@ -80,6 +96,14 @@ public class EvaluatorSim extends Evaluator {
 	private double evaluateMCTS3Player(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
 		lastResult = XArenaFuncs.compete3(pa, mctsAgent,mctsAgent2, so, 5, 0, gb);
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+		if (this.verbose>0) System.out.println(m_msg);
+		return lastResult;
+	}
+	
+	private double evaluateMaxN3Player(PlayAgent pa, GameBoard gb) {
+ 		StateObservation so = gb.getDefaultStartState();
+		lastResult = XArenaFuncs.compete3(pa, maxNAgent,maxNAgent2, so, 5, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		return lastResult;
@@ -108,6 +132,8 @@ public class EvaluatorSim extends Evaluator {
 		{
 		case -1: return "no evaluation done ";
 		case 0:  return "success rate (against randomAgent, best is 0.9): ";
+		case 1:  return "success rate (against MCTS, best is 0.0): ";
+		case 2:  return "success rate (against MaxN, best is 0.0): ";
 		default: return null;
 		}
 	}
@@ -116,6 +142,8 @@ public class EvaluatorSim extends Evaluator {
 	public String getTooltipString() {
 		return "<html>-1: none<br>"
 				+ "0: against Random, best is 0.9<br>"
+				+ "1: against MCTS, best is 0.0<br>"
+				+ "2: against MaxN, best is 0.0<br>"
 				+ "</html>";
 	}
 
@@ -123,6 +151,8 @@ public class EvaluatorSim extends Evaluator {
 	public String getPlotTitle() {
 		switch (m_mode) {
 		case 0:  return "success against Random";		
+		case 1:  return "success against MCTS";		
+		case 2:  return "success against MaxN";		
 		default: return null;
 		}
 	}

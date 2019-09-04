@@ -18,6 +18,15 @@ public class Link
 		return node;
 	}
 
+	/**
+	 * 
+	 * @return the link number. In each Sim graph the links are numbered in a systematic way: 
+	 *  	first from node 1 to higher nodes, then from node 2 to higher nodes, and so on. 
+	 *  	Example for K_6-graph: <pre>
+	 *      start node 1 1 1 1 1 | 2 2 2 2 | 3  3  3 | 4  4 | 5 
+	 *        end node 2 3 4 5 6 | 3 4 5 6 | 4  5  6 | 5  6 | 6
+	 *        link num 0 1 2 3 4 | 5 6 7 8 | 9 10 11 |12 13 |14 </pre>
+	 */
 	public int getNum() {
 		return num;
 	}

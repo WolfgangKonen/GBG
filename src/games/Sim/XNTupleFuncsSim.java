@@ -197,7 +197,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	/**
 	 * @return an array A with the link 3-tuples of all triangles contained in the Sim graph.<p>
 	 * 		In more detail: A[k][] is an int[3] vector carrying the 3 link numbers which make up 
-	 * 		the k'the triangle. <br>
+	 * 		the k'th triangle. <br>
 	 * 		There are Z=combination(K,3) such triangles (K={@link ConfigSim#GRAPH_SIZE}). 
 	 * 		Z=20 for K=6.
 	 */
@@ -205,10 +205,10 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		int K = ConfigSim.GRAPH_SIZE;
 		StateObserverSim so = ConfigSim.SO;
 		Link[] link = new Link[3];
-		int nTr = 1; 
-		for (int i=K; i>K-3; i--) nTr = nTr*i;
-		nTr /= 6;
-		int[][] A = new int[nTr][3]; 
+		int Z = 1; 
+		for (int i=K; i>K-3; i--) Z = Z*i;
+		Z /= 6;		// 6 = 3!
+		int[][] A = new int[Z][3]; 
 		
 		// first we build an ArrayList of all links emerging from node no=1,...,K 
 		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
@@ -234,18 +234,23 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	/**
 	 * @return an array A with the link 4-tuples of all quadruples contained in the Sim graph.<p>
 	 * 		In more detail: A[k][] is an int[4] vector carrying the 4 link numbers which make up 
-	 * 		the k'the quadruple. <br>
-	 * 		There are Z=combination(K,4) such triangles (K={@link ConfigSim#GRAPH_SIZE}). 
-	 * 		Z=15 for K=6.
+	 * 		the k'th quadruple. <br>
+	 * 		There are Z=2*combination(K,4) such quadruples (K={@link ConfigSim#GRAPH_SIZE}). 
+	 * 		combination(K,4) is the number of 4-nodes-subsets in the graph.
+	 * 		Why factor 2? - Because for each 4-nodes-subset there are 2 (!) possible 
+	 * 		closed paths: <br><pre>
+	 * 			(1-2, 2-3, 3-4, 4-1) and (1-3, 3-4, 4-2, 2-1). </pre>
+	 * 		Z=30 for K=6.
 	 */
 	private int[][] allQuadrupleTuples() {
 		int K = ConfigSim.GRAPH_SIZE;
 		StateObserverSim so = ConfigSim.SO;
 		Link[] link = new Link[4];
-		int nTr = 1; 
-		for (int i=K; i>K-4; i--) nTr = nTr*i;
-		nTr /= 24;
-		int[][] A = new int[nTr][4]; 
+		int Z = 1; 
+		for (int i=K; i>K-4; i--) Z = Z*i;
+		Z /= 24;	// 24 = 4!
+		Z *= 2;
+		int[][] A = new int[Z][4]; 
 		
 		// first we build an ArrayList of all links emerging from node no=1,...,K 
 		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
@@ -258,22 +263,78 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		for (int i=1,m=0; i<K-2; i++) 
 			for (int j=i+1; j<K-1; j++)
 				for (int k=j+1; k<K; k++) 
-					for (int l=k+1; l<=K; l++,m++)
-				{
-					// find the links connecting those nodes and add them to A[m][]
-					link[0] = findLink(i,j,arrLink);
-					link[1] = findLink(j,k,arrLink);
-					link[2] = findLink(k,l,arrLink);
-					link[3] = findLink(i,l,arrLink);
-					for (int n=0; n<4; n++)
-						A[m][n] = link[n].getNum();
-				}
+					for (int l=k+1; l<=K; l++)
+					{
+						// find the links connecting those nodes and add them to A[m][]
+						// 1st path:
+						link[0] = findLink(i,j,arrLink);
+						link[1] = findLink(j,k,arrLink);
+						link[2] = findLink(k,l,arrLink);
+						link[3] = findLink(i,l,arrLink);
+						for (int n=0; n<4; n++)
+							A[m][n] = link[n].getNum();
+						m++;
+						// 2nd path:
+						link[0] = findLink(i,k,arrLink);
+						link[1] = findLink(k,l,arrLink);
+						link[2] = findLink(j,l,arrLink);
+						link[3] = findLink(i,j,arrLink);
+						for (int n=0; n<4; n++)
+							A[m][n] = link[n].getNum();
+						m++;
+					}
 		return A;
 	}
 	
-	// helper function for allTriangleTuples + allQuadrupleTuples
+	/**
+	 * @return an array A with the link 6-tuples of all 4-cliques contained in the Sim graph.<p>
+	 * 		In more detail: A[k][] is an int[6] vector carrying the 6 link numbers which make up 
+	 * 		the k'th 4-clique. <br> 
+	 * 		The difference between quadruple and 4-clique: a quadruple connects the 
+	 * 		4 nodes by a closed path of 4 links, but a 4-clique has all the 6 links that 
+	 * 		exist between the 4 nodes of the subset. <br>
+	 * 		There are Z=combination(K,4) such 4-cliques (K={@link ConfigSim#GRAPH_SIZE}). 
+	 * 		Z=15 for K=6.
+	 */
+	private int[][] all4CliqueTuples() {
+		int K = ConfigSim.GRAPH_SIZE;
+		StateObserverSim so = ConfigSim.SO;
+		Link[] link = new Link[6];
+		int Z = 1; 		
+		for (int i=K; i>K-4; i--) Z = Z*i;
+		Z /= 24;	// 24 = 4!		
+		int[][] A = new int[Z][6]; 
+		
+		// first we build an ArrayList of all links emerging from node no=1,...,K 
+		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
+		arrLink.add(link); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
+		for (Node node : so.getNodes()) {
+			arrLink.add(node.getNumber(), node.getLinks());
+		}
+		
+		// now we loop over the nodes that are the corners of each 4-clique
+		for (int i=1,m=0; i<K-2; i++) 
+			for (int j=i+1; j<K-1; j++)
+				for (int k=j+1; k<K; k++) 
+					for (int l=k+1; l<=K; l++,m++)
+					{
+						// find the links connecting those nodes and add them to A[m][]
+						link[0] = findLink(i,j,arrLink);
+						link[1] = findLink(i,k,arrLink);
+						link[2] = findLink(i,l,arrLink);
+						link[3] = findLink(j,k,arrLink);
+						link[4] = findLink(j,l,arrLink);
+						link[5] = findLink(k,l,arrLink);
+						for (int n=0; n<6; n++)
+							A[m][n] = link[n].getNum();
+					}
+		return A;
+	}
+	
+	// Helper function for allTriangleTuples, allQuadrupleTuples & all4CliqueTuples:
+	// Find the link that connects node i with node j. 
+	// Condition: i<j (!)
 	private Link findLink(int i, int j, ArrayList<Link[]> arrLink) {
-		// find the link from node i to node j. Condition: i<j (!)
 		for (Link lnk : arrLink.get(i)) 
 			if (lnk.getNode()==j) {
 				return lnk;
@@ -314,6 +375,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		case 3:
 			//--- all triangle tuples + all quadruple tuples
 			return merge(allTriangleTuples(),allQuadrupleTuples());
+		case 4:
+			//--- all triangle tuples + all quadruple tuples
+			return merge(allTriangleTuples(),all4CliqueTuples());
 		default: 
 			throw new OutOfRangeException(mode, 0, fixedModes.length-1);
 		}
@@ -326,10 +390,11 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 				+ "1: 4 random 4-tuples<br>"
 				+ "2: all triangle 3-tuples<br>"
 				+ "3: all triangle + all quadruple tuples<br>"
+				+ "4: all triangle + all 4-clique tuples<br>"
 				+ "</html>";
 	}
 
-	private static int[] fixedModes = {0,1,2,3};
+	private static int[] fixedModes = {0,1,2,3,4};
 	
 	@Override
 	public int[] getAvailFixedNTupleModes() {
@@ -338,6 +403,8 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 
 	@Override
 	public HashSet adjacencySet(int iCell) {
+		// /WK/ this is buggy, because in a symmetric graph every link should have the same number
+		// of adjacent links.
 		HashSet adjSet = new HashSet();
 		switch(iCell)
 		{

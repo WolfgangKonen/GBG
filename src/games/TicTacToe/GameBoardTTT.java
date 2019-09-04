@@ -418,13 +418,13 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	}
 
 	/**
-	 * @return a start state which is with probability 0.5 the empty board 
+	 * @return a start state which is with probability 0.5 the default start state 
 	 * 		start state and with probability 0.5 one of the possible one-ply 
 	 * 		successors
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		clearBoard(true, true);			// m_so is in default start state 
+		getDefaultStartState();			// m_so is in default start state 
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply

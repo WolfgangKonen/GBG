@@ -137,6 +137,29 @@ public class MaxNParams extends Frame
 	}
 	
 	/**
+	 * Set sensible parameters for a specific agent and specific game. By "sensible
+	 * parameters" we mean parameter producing good results. Likewise, some parameter
+	 * choices may be enabled or disabled.
+	 * 
+	 * @param agentName currently only "MaxN" 
+	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param numPlayers
+	 */
+	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
+		switch (agentName) {
+		case "MaxN": 
+		case "Max-N": 
+			switch (gameName) {
+			case "Sim": 
+				maxnDepth_T.setText("15");		
+				maxnUseHmTrue.setSelected(true);
+				break;
+			}
+			break;
+		}
+	}	
+
+	/**
 	 * @return	the {@link ParMaxN} representation of {@code this}
 	 */
 	public ParMaxN getParMaxN() {
