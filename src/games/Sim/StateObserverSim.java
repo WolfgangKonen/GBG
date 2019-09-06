@@ -189,9 +189,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 								// not longer necessarily fulfill the conditions below
 			return checkIfLegal3(count0, count1, count2);
 		} else {
-			// TODO: if one player has already lost, then the count-check could be done for the 
-			// remaining two players in the way of isLegalState2Player(). But for the moment too 
-			// complicated (lengthy) to code.
+			
 			int [] remainingPlayers = getRemainingPlayers();
 			int [] remainingCounts = getRemainingCount(count0, count1, count2);
 			return checkIfLegal2Variabel(remainingPlayers, remainingCounts);
