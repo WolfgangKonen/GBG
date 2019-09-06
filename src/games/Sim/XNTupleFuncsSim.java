@@ -438,73 +438,26 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		// for every ConfigSim.GRAPH_SIZE: For the given link number iCell, use proper logic and 
 		// findLink() to find all other links connected to link iCell.
 		HashSet adjSet = new HashSet();
-		switch(iCell)
+		int node1 = -1, node2 = -1, count = 0;
+		for(int i = 0; i < ConfigSim.GRAPH_SIZE -1 ; i++)
 		{
-		case 0:
-			adjSet.add(1);
-			adjSet.add(8);
-		case 1:
-			adjSet.add(0);
-			adjSet.add(2);
-			adjSet.add(5);
-			adjSet.add(9);
-		case 2:
-			adjSet.add(1);
-			adjSet.add(3);
-			adjSet.add(6);
-			adjSet.add(12);
-		case 3:
-			adjSet.add(2);
-			adjSet.add(4);
-			adjSet.add(7);
-			adjSet.add(14);
-		case 4:
-			adjSet.add(3);
-			adjSet.add(8);
-		case 5:
-			adjSet.add(6);
-			adjSet.add(1);
-		case 6:
-			adjSet.add(5);
-			adjSet.add(7);
-			adjSet.add(11);
-			adjSet.add(2);
-		case 7:
-			adjSet.add(6);
-			adjSet.add(8);
-			adjSet.add(3);
-			adjSet.add(10);
-		case 8:
-			adjSet.add(7);
-			adjSet.add(0);
-			adjSet.add(9);
-			adjSet.add(4);
-		case 9:
-			adjSet.add(1);
-			adjSet.add(10);
-			adjSet.add(8);
-			adjSet.add(12);
-		case 10:
-			adjSet.add(9);
-			adjSet.add(11);
-			adjSet.add(7);
-			adjSet.add(13);
-		case 11:
-			adjSet.add(10);
-			adjSet.add(6);
-		case 12:
-			adjSet.add(2);
-			adjSet.add(13);
-			adjSet.add(9);
-			adjSet.add(14);
-		case 13:
-			adjSet.add(10);
-			adjSet.add(12);
-		case 14:
-			adjSet.add(3);
-			adjSet.add(12);
+			for(int j = 0; j < ConfigSim.GRAPH_SIZE - 1 - i; j++)
+			{
+				if(iCell == count)
+				{
+					node1 = i;
+					node2 = (i+1) + j;
+				}
+				else
+					count++;
+			}
 		}
 		
+		for(int i = 0; i < ConfigSim.GRAPH_SIZE; i++)
+		{
+			if(i != node1 && i != node2)
+				adjSet.add(i);
+		}
 		return adjSet;
 	}
 
