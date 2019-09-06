@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.math3.exception.OutOfRangeException;
 
+import agentIO.LoadSaveGBG;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -14,29 +15,50 @@ import games.XNTupleFuncs;
 public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serializable {
 
 	List<int[]> list = new ArrayList<int[]>();
-	transient AllPermutation perm;
+	transient AllPermutation perm; // /WK/ 'perm' is only needed to build 'list'. 'perm' could be local to setPermutations()
+	
+	/**
+	 * {@link #arrLink}{@code .get(i)} holds all links emerging from node {@code i}.
+	 */
+	transient ArrayList<Link[]> arrLink;
+	
 	int [][] actions;
 	int [][] symVec;
-	int cells, positionValues, numPlayers;
+	int nCells, nPositionValues, nPlayers;
+	
     /**
-	 * 
-	 */
+     * Provide a version UID here. Change the version UID for serialization only if a newer version is no 
+     * longer compatible with an older one (older .gamelog or .agt.zip containing this object will
+     * become unreadable)  
+     */
 	private static final long serialVersionUID = 5296353414404403319L;
-
-	/**
-	 * 
-	 */
 
 	public XNTupleFuncsSim(int cl, int val, int pl) 
     {
-		cells = cl;
-		positionValues = val;
-		numPlayers = pl;
+		nCells = cl;
+		nPositionValues = val;
+		nPlayers = pl;
 		
-		setPermutations();			// /WK/ what for? perm is never used
-		setActions();
-		
+		setPermutations();			// fills 'list' with all permutations of nodes 
+		setArrLink();
+		setActions();	
     }
+	
+	/**
+	 * Special treatment after loading from disk (e. g. instantiation
+	 * of transient members, setting of defaults for older .agt.zip). <br>
+	 * Here, the default stub does just nothing. 
+	 * @return true 
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	@Override
+	public boolean instantiateAfterLoading() { 
+		setPermutations();			// fills 'list' with all permutations of nodes 
+		setArrLink();
+		setActions();		
+		return true; 
+	}
 	
 	private void setPermutations()
 	{
@@ -50,6 +72,20 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		{ 
 			list.add(perm.GetNext());
 		}
+	}
+	
+	/**
+	 * Build member {@link #arrLink} which is needed by {@link #findLink(int, int)}.<br>
+	 * {@link #arrLink}{@code .get(i)} holds all links emerging from node {@code i}.
+	 */
+	private void setArrLink() {
+		// we build an ArrayList of all links emerging from node no=1,...,ConfigSim.GRAPH_SIZE 
+		arrLink = new ArrayList<Link[]>(ConfigSim.GRAPH_SIZE+1);
+		arrLink.add(new Link[1]); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
+		StateObserverSim so = ConfigSim.SO;
+		for (Node node : so.getNodes()) {
+			arrLink.add(node.getNumber(), node.getLinks());
+		}		
 	}
 	
 	private void setActions()
@@ -78,19 +114,19 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	@Override
 	public int getNumCells() 
 	{
-		return cells;
+		return nCells;
 	}
 
 	@Override
 	public int getNumPositionValues() 
 	{
-		return positionValues;
+		return nPositionValues;
 	}
 
 	@Override
 	public int getNumPlayers() 
 	{
-		return numPlayers;
+		return nPlayers;
 	}
 
 	@Override
@@ -203,28 +239,20 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	private int[][] allTriangleTuples() {
 		int K = ConfigSim.GRAPH_SIZE;
-		StateObserverSim so = ConfigSim.SO;
 		Link[] link = new Link[3];
 		int Z = 1; 
 		for (int i=K; i>K-3; i--) Z = Z*i;
 		Z /= 6;		// 6 = 3!
 		int[][] A = new int[Z][3]; 
 		
-		// first we build an ArrayList of all links emerging from node no=1,...,K 
-		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
-		arrLink.add(link); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
-		for (Node node : so.getNodes()) {
-			arrLink.add(node.getNumber(), node.getLinks());
-		}
-		
-		// now we loop over the nodes that are the corners of each triangle
+		// we loop over all nodes that are corners of a triangle
 		for (int i=1,m=0; i<K-1; i++) 
 			for (int j=i+1; j<K; j++)
 				for (int k=j+1; k<=K; k++,m++) {
 					// find the links connecting those nodes and add them to A[m][]
-					link[0] = findLink(i,j,arrLink);
-					link[1] = findLink(j,k,arrLink);
-					link[2] = findLink(i,k,arrLink);
+					link[0] = findLink(i,j);
+					link[1] = findLink(j,k);
+					link[2] = findLink(i,k);
 					for (int n=0; n<3; n++)
 						A[m][n] = link[n].getNum();
 				}
@@ -244,7 +272,6 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	private int[][] allQuadrupleTuples() {
 		int K = ConfigSim.GRAPH_SIZE;
-		StateObserverSim so = ConfigSim.SO;
 		Link[] link = new Link[4];
 		int Z = 1; 
 		for (int i=K; i>K-4; i--) Z = Z*i;
@@ -252,14 +279,16 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		Z *= 2;
 		int[][] A = new int[Z][4]; 
 		
-		// first we build an ArrayList of all links emerging from node no=1,...,K 
-		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
-		arrLink.add(link); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
-		for (Node node : so.getNodes()) {
-			arrLink.add(node.getNumber(), node.getLinks());
-		}
+		// --- now done in constructor ---
+//		// first we build an ArrayList of all links emerging from node no=1,...,K 
+//		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
+//		arrLink.add(link); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
+//		StateObserverSim so = ConfigSim.SO;
+//		for (Node node : so.getNodes()) {
+//			arrLink.add(node.getNumber(), node.getLinks());
+//		}
 		
-		// now we loop over the nodes that are the corners of each quadruple
+		//  we loop over all nodes that are corners of a quadruple
 		for (int i=1,m=0; i<K-2; i++) 
 			for (int j=i+1; j<K-1; j++)
 				for (int k=j+1; k<K; k++) 
@@ -267,18 +296,18 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 					{
 						// find the links connecting those nodes and add them to A[m][]
 						// 1st path:
-						link[0] = findLink(i,j,arrLink);
-						link[1] = findLink(j,k,arrLink);
-						link[2] = findLink(k,l,arrLink);
-						link[3] = findLink(i,l,arrLink);
+						link[0] = findLink(i,j);
+						link[1] = findLink(j,k);
+						link[2] = findLink(k,l);
+						link[3] = findLink(i,l);
 						for (int n=0; n<4; n++)
 							A[m][n] = link[n].getNum();
 						m++;
 						// 2nd path:
-						link[0] = findLink(i,k,arrLink);
-						link[1] = findLink(k,l,arrLink);
-						link[2] = findLink(j,l,arrLink);
-						link[3] = findLink(i,j,arrLink);
+						link[0] = findLink(i,k);
+						link[1] = findLink(k,l);
+						link[2] = findLink(j,l);
+						link[3] = findLink(i,j);
 						for (int n=0; n<4; n++)
 							A[m][n] = link[n].getNum();
 						m++;
@@ -298,33 +327,34 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	private int[][] all4CliqueTuples() {
 		int K = ConfigSim.GRAPH_SIZE;
-		StateObserverSim so = ConfigSim.SO;
 		Link[] link = new Link[6];
 		int Z = 1; 		
 		for (int i=K; i>K-4; i--) Z = Z*i;
 		Z /= 24;	// 24 = 4!		
 		int[][] A = new int[Z][6]; 
 		
-		// first we build an ArrayList of all links emerging from node no=1,...,K 
-		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
-		arrLink.add(link); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
-		for (Node node : so.getNodes()) {
-			arrLink.add(node.getNumber(), node.getLinks());
-		}
+		// --- now done in constructor ---
+//		// first we build an ArrayList of all links emerging from node no=1,...,K 
+//		ArrayList<Link[]> arrLink = new ArrayList<Link[]>(K+1);
+//		arrLink.add(link); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
+//		StateObserverSim so = ConfigSim.SO;
+//		for (Node node : so.getNodes()) {
+//			arrLink.add(node.getNumber(), node.getLinks());
+//		}
 		
-		// now we loop over the nodes that are the corners of each 4-clique
+		// we loop over all nodes that are elements of a 4-clique
 		for (int i=1,m=0; i<K-2; i++) 
 			for (int j=i+1; j<K-1; j++)
 				for (int k=j+1; k<K; k++) 
 					for (int l=k+1; l<=K; l++,m++)
 					{
 						// find the links connecting those nodes and add them to A[m][]
-						link[0] = findLink(i,j,arrLink);
-						link[1] = findLink(i,k,arrLink);
-						link[2] = findLink(i,l,arrLink);
-						link[3] = findLink(j,k,arrLink);
-						link[4] = findLink(j,l,arrLink);
-						link[5] = findLink(k,l,arrLink);
+						link[0] = findLink(i,j);
+						link[1] = findLink(i,k);
+						link[2] = findLink(i,l);
+						link[3] = findLink(j,k);
+						link[4] = findLink(j,l);
+						link[5] = findLink(k,l);
 						for (int n=0; n<6; n++)
 							A[m][n] = link[n].getNum();
 					}
@@ -334,8 +364,8 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	// Helper function for allTriangleTuples, allQuadrupleTuples & all4CliqueTuples:
 	// Find the link that connects node i with node j. 
 	// Condition: i<j (!)
-	private Link findLink(int i, int j, ArrayList<Link[]> arrLink) {
-		for (Link lnk : arrLink.get(i)) 
+	private Link findLink(int i, int j) {
+		for (Link lnk : arrLink.get(i)) 	// arrLink.get(i) holds the links of node i
 			if (lnk.getNode()==j) {
 				return lnk;
 			}
@@ -356,7 +386,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		// also a too big n-tuple, at least for P=3 players (would raise an out-of-mem error).
 //		int nTuple[][] = {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14}};
 		
-		// /WK/ just some other choice (not all necessarily sensible).
+		// /WK/ just some other choices (case 0 and 1 are not necessarily sensible).
 		//		Recommended: mode==3.
 		switch(mode)
 		{
@@ -404,7 +434,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	@Override
 	public HashSet adjacencySet(int iCell) {
 		// /WK/ this is buggy, because in a symmetric graph every link should have the same number
-		// of adjacent links.
+		// of adjacent links. Also, it should be done programmatically in a way that generalizes 
+		// for every ConfigSim.GRAPH_SIZE: For the given link number iCell, use proper logic and 
+		// findLink() to find all other links connected to link iCell.
 		HashSet adjSet = new HashSet();
 		switch(iCell)
 		{

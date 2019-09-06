@@ -686,10 +686,10 @@ public class XArenaFuncs
 			// parameters and writes them to userValue*:
 			// *** DON'T FORGET to comment it out again if you want to have normal behavior back
 			// *** (same settings for all runs i)
-//			double lambda = i*0.1;
-//			userTitle1="lambda";	userValue1=lambda;
-//			userTitle2="null";		userValue2=0.0;
-//			xab.tdPar[0].setLambda(i*0.1);
+			double lambda = i*0.1;
+			userTitle1="lambda";	userValue1=lambda;
+			userTitle2="null";		userValue2=0.0;
+			xab.tdPar[0].setLambda(i*0.1);
 
 			try {
 				pa = constructAgent(n,sAgent, xab);

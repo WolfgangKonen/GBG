@@ -21,8 +21,8 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 
 	private static int[] fixedModes = {0, 1, 2, 3};
 
-	private int numPositionValues = 3;  // either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
-//	private int numPositionValues = 4;  // or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty
+//	private int numPositionValues = 3;  // either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
+	private int numPositionValues = 4;  // or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty
 	// [Having numPositionValues as a member allows it that we can restore both versions, those
 	//  with P=3 and those with P=4, from disk.]
 	
