@@ -41,9 +41,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		
 		setPermutations();			// fills 'list' with all permutations of nodes 
 		setArrLink();
-		setActions();	
+		setActions();
+		
     }
-	
 	/**
 	 * Special treatment after loading from disk (e. g. instantiation
 	 * of transient members, setting of defaults for older .agt.zip). <br>
@@ -447,16 +447,26 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 				{
 					node1 = i;
 					node2 = (i+1) + j;
+					count++;
 				}
 				else
 					count++;
 			}
 		}
-		
-		for(int i = 0; i < ConfigSim.GRAPH_SIZE; i++)
+		count = 0;
+		System.out.println(node1 + "    " +  node2);
+		for(int i = 0; i < ConfigSim.GRAPH_SIZE -1 ; i++)
 		{
-			if(i != node1 && i != node2)
-				adjSet.add(i);
+			for(int j = 0; j < ConfigSim.GRAPH_SIZE - 1 - i; j++)
+			{
+				if(((node1 == i || node2 == i) || (node1 == (i+1) + j || node2 == (i+1) + j)) && !(node1 == i && node2 == (i+1) + j))
+				{
+					adjSet.add(count);
+					count++;
+				}
+				else
+					count++;
+			}
 		}
 		return adjSet;
 	}
