@@ -88,10 +88,19 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		}		
 	}
 	
+	private int [] initVector()
+	{
+		int [] vec = new int [ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2];
+		for(int i = 0; i < vec.length; i++)
+			vec[i] = i;
+			
+		return vec;
+	}
+	
 	private void setActions()
 	{
 		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
-		int [] vec = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+		int [] vec = initVector();
 		symVec = symmetryVectors(vec);
 		actions = new int[symVec.length][];
 		
