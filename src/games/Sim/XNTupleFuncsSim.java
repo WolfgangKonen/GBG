@@ -60,9 +60,18 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		return true; 
 	}
 	
+	private int [] getNodes()
+	{
+		int [] nodes = new int [ConfigSim.GRAPH_SIZE];
+		for(int i = 0; i < ConfigSim.GRAPH_SIZE; i++)
+			nodes[i] = i + 1;
+			
+		return nodes;
+	}
+	
 	private void setPermutations()
 	{
-		int [] nodes = {1,2,3,4,5,6};		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
+		int [] nodes = getNodes();		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
 		
 		perm = new AllPermutation(nodes);
 		
@@ -106,8 +115,8 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		
 		for (int i = 0; i < actions.length; i++) 
 		{
-    		actions[i] = new int[15];
-    		for (int j = 0; j < 15; j++)
+    		actions[i] = new int[vec.length];
+    		for (int j = 0; j < vec.length; j++)
     			actions[i][j] = whereHas(symVec[i],j);
     	}
 		
@@ -142,7 +151,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	public int[] getBoardVector(StateObservation so) 
 	{
 		StateObserverSim sim = (StateObserverSim) so;
-		int [] board = new int[15]; 
+		int [] board = new int[ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2]; 
 		int k = 0;
 		
 		for(int i = 0; i < sim.getNodes().length -1 ; i++)
@@ -169,10 +178,10 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	private int [] getSymVector(int [] boardVector,int [] permutation)
 	{
 		int [][] splittedBoardVec = splitVector(boardVector);
-		int [][] splittedSymVec = new int[5][];
+		int [][] splittedSymVec = new int[ConfigSim.GRAPH_SIZE-1][];
 		
 		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < ConfigSim.GRAPH_SIZE-1; i++)
 				splittedSymVec[i] = getValuesSameNode(i,splittedBoardVec,permutation);
 		
 		return mergeVector(splittedSymVec);
@@ -180,12 +189,12 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private int [][] splitVector(int [] boardVector)
 	{
-		int [][] vec = new int [5][];
+		int [][] vec = new int [ConfigSim.GRAPH_SIZE - 1][];
 		int index = 0;
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < ConfigSim.GRAPH_SIZE - 1; i++)
 		{
-			vec [i] = new int[5-i];
-			for(int j = 0; j < 5 - i; j++)
+			vec [i] = new int[ConfigSim.GRAPH_SIZE - 1 - i];
+			for(int j = 0; j < vec.length - i; j++)
 			{
 				vec[i][j] = boardVector[index];
 				index++;
@@ -197,9 +206,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private int[] getValuesSameNode(int pos,int [][] boardVec, int [] permutation)
 	{
-		int[] vec = new int[5 - pos];
+		int[] vec = new int[ConfigSim.GRAPH_SIZE - 1 - pos];
 		int index = 0;
-		for(int i = pos + 1; i < 6; i++)
+		for(int i = pos + 1; i < ConfigSim.GRAPH_SIZE; i++)
 		{
 			if(permutation[i] < permutation[pos])
 			{
@@ -218,7 +227,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 
 	private int [] mergeVector(int [][] splittedVec)
 	{
-		int[]  vec = new int[15];
+		int[]  vec = new int[ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2];
 		int index = 0;
 		
 		for(int i = 0; i < splittedVec.length; i++)

@@ -781,7 +781,8 @@ abstract public class Arena extends JFrame implements Runnable {
 						break; // out of switch
 					default:
 						// TODO: implement s.th. for n-player games (n>2)
-						int winner = so.getGameWinner().toInt();
+						
+						int winner = ((ObserverBase)so).getGameWinner3player();
 						if(winner >= 0)
 							MessageBox.show(m_LaunchFrame,"P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 						else
