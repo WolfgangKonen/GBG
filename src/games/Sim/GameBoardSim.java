@@ -90,7 +90,6 @@ public class GameBoardSim implements GameBoard {
 			: "StateObservation 'so' is not an instance of StateObserverSim";
 			StateObserverSim som = (StateObserverSim) so;
 			m_so = som.copy();
-			//m_so.setState(som);
 			int player = som.getPlayer();
 			switch(player) {
 			case(0): 

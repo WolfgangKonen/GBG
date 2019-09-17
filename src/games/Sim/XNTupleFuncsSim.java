@@ -78,7 +78,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private void setPermutations()
 	{
-		int [] nodes = getNodes();		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
+		int [] nodes = getNodes();		
 		
 		perm = new AllPermutation(nodes);
 		
@@ -115,7 +115,6 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private void setActions()
 	{
-		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
 		int [] vec = initVector();
 		symVec = symmetryVectors(vec);
 		actions = new int[symVec.length][];
@@ -187,7 +186,6 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		int [][] splittedBoardVec = splitVector(boardVector);
 		int [][] splittedSymVec = new int[ConfigSim.GRAPH_SIZE-1][];
 		
-		// /WK/ specific to K_6 graph. Better use ConfigSim.GRAPH_SIZE
 		for(int i = 0; i < ConfigSim.GRAPH_SIZE-1; i++)
 				splittedSymVec[i] = getValuesSameNode(i,splittedBoardVec,permutation);
 		
@@ -458,10 +456,6 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 
 	@Override
 	public HashSet adjacencySet(int iCell) {
-		// /WK/ this is buggy, because in a symmetric graph every link should have the same number
-		// of adjacent links. Also, it should be done programmatically in a way that generalizes 
-		// for every ConfigSim.GRAPH_SIZE: For the given link number iCell, use proper logic and 
-		// findLink() to find all other links connected to link iCell.
 		HashSet adjSet = new HashSet();
 		int node1 = -1, node2 = -1, count = 0;
 		for(int i = 0; i < ConfigSim.GRAPH_SIZE -1 ; i++)

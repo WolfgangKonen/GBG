@@ -12,11 +12,11 @@ count_states.csv
 .Rhistory
 src/out/production/GBG/*
 out/*
-
 *.gamelog
 games/Logs/*
 logs/*
 agents/temp/*
+
 
 #Files not for the public GitHub version
 TDNTupleAgt.docx
@@ -27,7 +27,6 @@ FutureWork.docx
 #Folder with outdated trials for parallelism
 src/games/ZweiTausendAchtundVierzig/Parallel/*
 
-agents/*/playStats.csv
 agents/theNtuple.txt
 # too big (92 MB) for a regular save to GitHub (remember that GitHub has a hard file limit at 100 MB -
 # and if such a >100-MB file happens to be in a commit, the commit will fail - and so far there is no other 
@@ -53,6 +52,16 @@ agents/ConnectFour/TCL-EXP-NT3-al50-lam025*.agt.zip
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)
 
+agents/theNtuple.txt
+agents/2048/csv/playStats.csv
+agents/ConnectFour/csv/playStats.csv
+agents/Othello/csv/playStats.csv
+agents/Sim/K6_Player2/csv/playStats.csv
+agents/Sim/K6_Player3/csv/playStats.csv
+agents/Othello/csv/playStats.csv
+agents/TicTacToe/csv/playStats.csv
+agents/theNtuple.txt
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
@@ -63,19 +72,10 @@ agents/RubiksCube/tooBigForGit
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# =========================
-# Operating System Files
-# =========================
-
-# OSX
-# =========================
 
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Thumbnails
-._*
 
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100
@@ -101,9 +101,6 @@ ehthumbs.db
 
 # Folder config file
 Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
 
 # Windows Installer files
 *.cab
