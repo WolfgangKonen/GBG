@@ -309,7 +309,18 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			
 			boolean DBG_SIM = true;
 			if (DBG_SIM && so instanceof StateObserverSim) {
-				String[] pl = {"(X)","(O)"};
+				String []pl = new String[so.getNumPlayers()];
+				if(so.getNumPlayers() > 2)
+				{
+					pl[0] = "(P0)";
+					pl[1] = "(P1)";
+					pl[2] = "(P2)";
+				}
+				else
+				{
+					pl[0] = "(X)";
+					pl[1] = "(O)";
+				}
 				MaxNAgent maxNAgent = new MaxNAgent("Max-N",15,true);
 				// if there are 12 moves to go, MaxNAgent(...,12,false) will take 1-2 minutes,
 				// but MaxNAgent(...,12,true) only 2 seconds. If there are 15 moves to go, then

@@ -83,7 +83,8 @@ public interface StateObservation extends Serializable{
 	 */
 	public Types.WINNER getGameWinner();
 	// Do we need this method really?
-
+	
+	
 	/**
 	 * The game score, seen from the perspective of {@code referingState}'s player. This 
 	 * relativeness is usually only relevant for games with more than one player.
