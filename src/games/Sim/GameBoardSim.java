@@ -197,7 +197,7 @@ public class GameBoardSim implements GameBoard {
 			// 6) If ACTIONS(7) and ACTIONS(5) below are commented out as well: a medium-complex 
 			//    position with 12 moves left. O has 10 first moves to win.
 			// 7) If ACTIONS(2) and ACTIONS(4) below are commented out as well: identical to the 
-			//    full K6-Sim, only the symmetry is broken towards the first move being link 0.
+			//    full K6-Sim, only the symmetry is broken by setting the first move to be link 0.
 			// 	  (Makes the game tree smaller, but the game difficulty remains the same. The other 
 			//    1st-ply moves lead to equivalent episodes). 14 moves to go. Surprisingly, 
 			//    *every* 2nd-ply move of player O is a winning move (!)

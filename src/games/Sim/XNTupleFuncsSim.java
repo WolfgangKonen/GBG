@@ -54,6 +54,13 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	@Override
 	public boolean instantiateAfterLoading() { 
+		if (this.nCells==0 || this.nPlayers==0 || this.nPositionValues==0) {
+			// /WK/ for unclear reasons, re-loading a Sim agent from disk has all these
+			// xnf-members equal to 0, so we re-instantiate them
+			this.nCells = ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2;
+			this.nPositionValues = ConfigSim.NUM_PLAYERS+1;
+			this.nPlayers = ConfigSim.NUM_PLAYERS;
+		}
 		setPermutations();			// fills 'list' with all permutations of nodes 
 		setArrLink();
 		setActions();		

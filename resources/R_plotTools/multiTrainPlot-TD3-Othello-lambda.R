@@ -26,7 +26,9 @@ evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
 path <- "../../agents/Othello/csv/"; 
 limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=20000/wfac;
 
-filenames=c("multiTrain-lambda.csv"
+fname = "multiTrain-lambda.csv"; sep=";"
+fname = "multiTrain-lambda2.csv"; sep=","
+filenames=c(fname
            #,"multiTrain_TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0.csv"
            #,"multiTrain_TCL-EXP-NT3-al50-lam025-500k-HOR001-T-epsfin0-V2.csv"
            #,"multiTrain_TCL-EXP-NT3-al50-lam036-500k-HOR001-T-epsfin0-V2.csv"
@@ -59,7 +61,7 @@ filenames=c("multiTrain-lambda.csv"
 dfBoth = data.frame()
 for (k in 1:length(filenames)) {
   filename <- paste0(path,filenames[k])
-  df <- read.csv(file=filename, sep=";",dec=".",skip=2)
+  df <- read.csv(file=filename, sep=sep,dec=".",skip=2)
   df$run <- as.factor(df$run)
   df <- df[,setdiff(names(df),c("trnMoves","elapsedTime", "movesSecond"))]
   df <- df[df$run %in% c(0,4,5,6,7),]
