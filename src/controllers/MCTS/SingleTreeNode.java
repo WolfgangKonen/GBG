@@ -677,7 +677,6 @@ public class SingleTreeNode implements Serializable
 	
 	public void backUp3Player(SingleTreeNode selected, int [] delta) 
 	{
-		System.out.println("[" + delta[0] + "," + delta[1] + "," + delta[2] + "]");
 		SingleTreeNode n = selected;
 		while (n != null) {
 			
