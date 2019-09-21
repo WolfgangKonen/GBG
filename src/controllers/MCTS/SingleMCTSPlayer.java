@@ -115,7 +115,6 @@ public class SingleMCTSPlayer implements Serializable
         //m_root.state = so;
     	m_root = new SingleTreeNode(so,null,null,m_rnd,this);// /WK/ bug fix: needed if a_gameState  
     														 // allows fewer actions than MCTSAgentT.NUM_ACTIONS 
-
     }
 
     /**

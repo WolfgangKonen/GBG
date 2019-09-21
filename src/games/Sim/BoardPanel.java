@@ -23,11 +23,12 @@ public class BoardPanel extends JPanel {
 	private int inputNode1, inputNode2;
 	Image img;
 	double [] actionValues;
+	private Color colTHK2 = new Color(255,137,0);
 	
 	BoardPanel(Node [] nodes)
 	{
 		this.setBounds(0, 0, 600, 400);
-		this.setBackground(Color.white);
+		this.setBackground(Color.gray);
 		
 		setupNodes(nodes.length);
 		setupCircles(nodes.length);
@@ -127,7 +128,7 @@ public class BoardPanel extends JPanel {
 	private void doDrawing(Graphics g)
 	{
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.setColor(Color.black);
+		g2d.setColor(colTHK2);
 		g2d.setStroke(new BasicStroke(3));
 		
 		
@@ -147,15 +148,15 @@ public class BoardPanel extends JPanel {
 					}
 						
 					else
-						g2d.setColor(Color.black);
+						g2d.setColor(colTHK2);
 			
 				}
 				else if(nodes[i].getLinkPlayerPos(j) == 1)
-					g2d.setColor(new Color(250,8,250));
+					g2d.setColor(Color.black);
 				else if(nodes[i].getLinkPlayerPos(j) == 2)
-					g2d.setColor(Color.blue);
+					g2d.setColor(Color.white);
 				else
-					g2d.setColor(new Color(8,222,250));
+					g2d.setColor(Color.red);
 				
 				g2d.drawLine(lines[k].getP1().getX(), lines[k].getP1().getY(), lines[k].getP2().getX(), lines[k].getP2().getY());
 				k++;
@@ -167,9 +168,9 @@ public class BoardPanel extends JPanel {
 		for(int i = 0; i < circles.length; i++)
 		{
 			if(i == inputNode1 || i == inputNode2)
-				g2d.setColor(Color.GRAY);
+				g2d.setColor(Color.darkGray);
 			else
-				g2d.setColor(Color.BLACK);
+				g2d.setColor(colTHK2);
 			
 			g2d.fillOval(circles[i].getX(), circles[i].getY(), 30, 30);
 			//g2d.drawImage(img,circles[i].getX(),circles[i].getY(),30,30,this);

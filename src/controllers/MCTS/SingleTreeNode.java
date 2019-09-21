@@ -1,6 +1,7 @@
 package controllers.MCTS;
 
 import games.StateObservation;
+import games.Sim.StateObserverSim;
 import tools.ElapsedCpuTimer;
 import tools.Types;
 
@@ -151,16 +152,25 @@ public class SingleTreeNode implements Serializable
 			// while(remaining > 2*avgTimeTaken && remaining > remainingLimit){
 			ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 			SingleTreeNode selected = treePolicy();
-			double delta = selected.rollOut();
-// --- this is now equivalently in backUp(), in the first pass through while-loop ---			
-//			if (m_state.getNumPlayers() == 2) {
-////				delta = -delta;
-//				delta = negate(delta);		
-//				// why 'negate'? - If the score of 'selected' is a loss for the player who
-//				// has to move on 'selected', then it is a win for the player who created 
-//				// 'selected' (negamax principle)
-//			}
-			backUp(selected, delta);
+			if(m_state.getNumPlayers() == 3)
+			{
+				int [] delta = selected.rollOut3Player();
+				backUp3Player(selected,delta);
+			}
+			else
+			{
+				double delta = selected.rollOut();
+				// --- this is now equivalently in backUp(), in the first pass through while-loop ---			
+//							if (m_state.getNumPlayers() == 2) {
+////								delta = -delta;
+//								delta = negate(delta);		
+//								// why 'negate'? - If the score of 'selected' is a loss for the player who
+//								// has to move on 'selected', then it is a win for the player who created 
+//								// 'selected' (negamax principle)
+//							}
+							backUp(selected, delta);
+			}
+			
 			
 			// if (numIters%10==0) System.out.println("numIters="+numIters+",
 			// remaining="+remaining+", avgTimeTaken="+avgTimeTaken);
@@ -235,6 +245,7 @@ public class SingleTreeNode implements Serializable
 	}
 
 	
+	
 	public void printChildInfo(int nIndention, boolean isRootNode) {
 		DecimalFormat form = new DecimalFormat("0.0000");
 		DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
@@ -295,7 +306,6 @@ public class SingleTreeNode implements Serializable
 	public SingleTreeNode treePolicy() {
 
 		SingleTreeNode cur = this;
-
 		while (!cur.m_state.isGameOver() && cur.m_depth < m_player.getTREE_DEPTH()) 
 		{
 			if (cur.notFullyExpanded()) {
@@ -323,7 +333,7 @@ public class SingleTreeNode implements Serializable
 				}
 			}
 		}
-
+		
 		return cur;
 	}
 
@@ -520,9 +530,34 @@ public class SingleTreeNode implements Serializable
 		}
 		if (rollerState.isGameOver())
 			m_player.nRolloutFinished++;
-
 		double delta = value(rollerState, this.m_state);
+		// // /WK/ not really clear what these normalizations are for.
+		// // Is it part of MCTS or part of the special GVGP implementation?
+		// if(delta < curBounds[0]) curBounds[0] = delta;
+		// if(delta > curBounds[1]) curBounds[1] = delta;
+		// double normDelta = Utils.normalise(delta ,lastBounds[0], lastBounds[1]);
+		// return normDelta;
+		//
+		return delta;
+	}
+	
+	public int [] rollOut3Player()
+	{
+		StateObservation rollerState = m_state.copy();
+		int thisDepth = this.m_depth;
 
+		while (!finishRollout(rollerState, thisDepth)) {
+
+			// int action = m_rnd.nextInt(m_player.NUM_ACTIONS);
+			// rollerState.advance(m_player.actions[action]);
+			rollerState.setAvailableActions();
+			int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
+			rollerState.advance(rollerState.getAction(action));
+			thisDepth++;
+		}
+		if (rollerState.isGameOver())
+			m_player.nRolloutFinished++;
+		int [] delta = value3Player(rollerState, this.m_state);
 		// // /WK/ not really clear what these normalizations are for.
 		// // Is it part of MCTS or part of the special GVGP implementation?
 		// if(delta < curBounds[0]) curBounds[0] = delta;
@@ -558,6 +593,21 @@ public class SingleTreeNode implements Serializable
 		return v;
 	}
 
+	public int [] value3Player(StateObservation so, StateObservation referingState) {
+		boolean rgs = m_player.getParOther().getRewardIsGameScore();
+		
+		int [] v = ((StateObserverSim)so).getAllRewards();
+//		double v = so.getGameScore(referingState);
+		if (m_player.getNormalize()) {
+			for(int i = 0; i < v.length; i++)
+			{
+				v[i] = (v[i] - (int)so.getMinGameScore()) / (int)(so.getMaxGameScore() - so.getMinGameScore());
+				assert ((v[i] >= 0) && (v[i] <= 1)) : "Error: value is not in range [0,1]";
+			}
+			// /WK/ bug fix 2019-02-09: map v to [0,1] (this is q(reward) in notes_MCTS.docx)
+		}
+		return v;
+	}
     /**
      * checks if a rollout is finished
      *
@@ -596,6 +646,7 @@ public class SingleTreeNode implements Serializable
 
 			n.nVisits++;
 			n.totValue += delta;
+			
 //            switch (m_state.getNumPlayers()) {
 //            case (1): break;
 //            case (2): 
@@ -624,6 +675,43 @@ public class SingleTreeNode implements Serializable
 		}
 	}
 	
+	public void backUp3Player(SingleTreeNode selected, int [] delta) 
+	{
+		System.out.println("[" + delta[0] + "," + delta[1] + "," + delta[2] + "]");
+		SingleTreeNode n = selected;
+		while (n != null) {
+			
+
+			n.nVisits++;
+			n.totValue += (double)delta[selected.m_state.getPlayer()];
+			
+//            switch (m_state.getNumPlayers()) {
+//            case (1): break;
+//            case (2): 
+////            	delta = - delta; 		// /WK/ negamax variant for 2-player tree
+//            	delta = negate(delta);	// /WK/ negamax variant for 2-player tree
+//            	break;
+//            default:		// i.e. n-player, n>2
+//            	throw new RuntimeException("MCTS.backUp is not yet implemented for n-player games (n>2).");
+//            }
+
+			// --- only a debug assertion
+//			if (!n.isLeafNode() && n.parent!=null) {
+//				int cVisits=0;
+//				for (SingleTreeNode c : n.children) {
+//					if (c!=null) cVisits+=c.nVisits;
+//				}
+//				int offs=1;
+//				assert (n.nVisits == offs+cVisits) :	// why '1+'? - every non-root node n has one visit more 
+//					// than all its children. This stems from its 'birth' visit, i.e. the time 
+//					// where it was 'selected' but did not yet have any children.
+//					"node n's nVisits differs from the 1+(sum of its children visits)";
+//				
+//			}
+			
+			n = n.parent;
+		}
+	}
 	private boolean isLeafNode() {
 		for (SingleTreeNode c : this.children) {
 			if (c!=null) return false;
