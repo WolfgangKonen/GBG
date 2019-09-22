@@ -119,6 +119,10 @@ public class GameBoardSim implements GameBoard {
 					//System.out.println(som.getStoredValues()[i]);
 				board.setActionValues(som.getStoredValues());
 			}
+			if(!showValueOnGameboard)
+			{
+				board.setActionValues(null);
+			}
 			
 		}
 		

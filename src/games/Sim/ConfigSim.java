@@ -5,12 +5,12 @@ public class ConfigSim {
 	/**
 	 *  Graph size
 	 */
-	public static final int GRAPH_SIZE = 6;
+	public static final int GRAPH_SIZE = 17;
 	
 	/**
 	 *  Number of players
 	 */
-	public static final int NUM_PLAYERS = 2;
+	public static final int NUM_PLAYERS = 3;
 	
 	/**
 	 *  A dummy state, needed as reference in XNTupleFuncsSim

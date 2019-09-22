@@ -141,7 +141,6 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 
     	//Set the available actions for stateObs.
     	mctsPlayer.initActions(stateObs);				// /WK/ needed to get always the right 'actions'
-    	
         //Set the state observation object as the new root of the tree.
         mctsPlayer.init(stateObs);
 
@@ -230,7 +229,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		double[] VTable, vtable;
         vtable = new double[actions.size()];  
         VTable = new double[actions.size()+1];  
-		
+	
 		assert so.isLegalState() 
 			: "Not a legal state"; // e.g. player to move does not fit to Table
 		if (m_Timer==null) {
