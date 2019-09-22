@@ -111,3 +111,4 @@ Desktop.ini
 # Windows shortcuts
 *.lnk
 /bin/
+agents/Sim/K6_Player2/csv/playStats.csv

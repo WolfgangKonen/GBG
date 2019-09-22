@@ -218,7 +218,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         if (!silent) {
         	NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore);
+        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore);
         }			
 
         VTable[actions.length] = pMaxScore;

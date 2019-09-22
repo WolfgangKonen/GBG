@@ -74,7 +74,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         if (!silent) {
         	NewSO = ((StateObserverNim) so).copy();
         	NewSO.advance(actBest);
-        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+maxValue);
+        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxValue);
         }			
 
         VTable[acts.size()] = maxValue;

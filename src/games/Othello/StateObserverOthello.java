@@ -9,25 +9,30 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
 /**
- * Class {@link StateObserverOthello} holds any valid Othello game state. It's coded
- * in a two dimensional int[8][8] array, where each index represents either 
- * an empty cell = 2,
- * an White cell = 1,
- * an black cell = 0
+ * Class {@link StateObserverOthello} holds any valid Othello game state. It is coded
+ * in a two dimensional int[8][8] array, where each index represents either <br>
+ * a  Black cell = 0,<br>
+ * a  White cell = 1,<br>
+ * an empty cell = 2,<br>
+ * a  reachable empty cell = 3.<br>
+ * This last case "3" is for {@link XNTupleFuncsOthello#getNumPositionValues()}{@code =4}: Every empty 
+ * cell which can be taken by the player to move is coded with "3" instead of "2".
+ * <p>
+ * Black starts the game.<br>
+ * For example the starting state is coded in case {@link XNTupleFuncsOthello#getNumPositionValues()}{@code =4} as:
  * <pre>
- * the black starts the game.
- * 	For example the starting state:
- * 												row
- * 			2	2	2	2	2	2	2	2   	0
- * 			2	2	2	2	2	2	2	2		1
- * 			2	2	2	2	3	2	2	2		2
- * 			2	2	2	1	0	3	2	2 		3
- * 			2	2	3	0	1	2	2	2		4
- * 			2	2	2	3	2	2	2	2		5	
- * 			2	2	2	2	2	2	2	2		6
- * 			2	2	2	2	2	2	2	2		7
+ *                                            row
+ *         2   2   2   2   2   2   2   2       0
+ *         2   2   2   2   2   2   2   2       1
+ *         2   2   2   3   2   2   2   2       2
+ *         2   2   2   1   0   2   2   2       3
+ *         2   2   3   0   1   3   2   2       4
+ *         2   2   2   2   3   2   2   2       5
+ *         2   2   2   2   2   2   2   2       6
+ *         2   2   2   2   2   2   2   2       7
  *
- *  	col	0	1	2	3	4	5	6	7	
+ *     col 0   1   2   3   4   5   6   7
+ *  </pre>
  */
 public class StateObserverOthello extends ObserverBase{
 
@@ -70,8 +75,9 @@ public class StateObserverOthello extends ObserverBase{
 		//this.lastMoves = new ArrayList<Integer>();					// WK: obsolete
 		this.lastMoves = (ArrayList<Integer>) lastMoves.clone();		// WK: bug fix, added missing .clone() 
 		this.currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
-		this.playerNextMove = playerMove;
 		BaseOthello.deepCopyGameState(gameState, currentGameState);
+		// /WK/ wouldn't "this.currentGameState = gameState.clone();" do the same as the preceding two lines? 
+		this.playerNextMove = playerMove;
 		this.turn = turn;
 		this.setAvailableActions();
 	}
@@ -80,8 +86,9 @@ public class StateObserverOthello extends ObserverBase{
 	{
 		this.lastMoves = new ArrayList<Integer>();
 		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
-		playerNextMove = playerMove;
 		BaseOthello.deepCopyGameState(gameState, currentGameState);
+		// /WK/ wouldn't "this.currentGameState = gameState.clone();" do the same as the preceding two lines?
+		playerNextMove = playerMove;
 		setAvailableActions();
 	}
 	

@@ -196,7 +196,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
         if (!silent) {
         	NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+iMaxScore);
+        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+iMaxScore);
         }			
 
         VTable[actions.length] = iMaxScore;

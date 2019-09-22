@@ -26,9 +26,10 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();
 	//Serial number
 	private static final long serialVersionUID = 12L;
-	private int winner;
+	private int winner;				// starts with -2; gets -1 on draw, otherwise i=0,1,2 on game over where i is the winning player
 	private int lastNode1, lastNode2;
-	private int looser;
+	private int looser;				// starts with -1; gets i=0,1,2, if player i has just lost (game may not 
+									// be over in the 3-player case!)
 	private int[] allRewards;		// currently just as debug info:
 									// allRewards[i] is the reward for player i in case isGameOver()
 	
@@ -617,7 +618,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 //		int nextPlayer = nextPlayer();
 		int nextPlayer = (player+1)%3;
 		
-		if(nextPlayer == looser)
+		if(nextPlayer == looser)		// if nextPlayer has already lost, pass to the next one once more
 		{
 //			nextPlayer++;
 //			if(nextPlayer > 2)

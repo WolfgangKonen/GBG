@@ -4346,7 +4346,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
         if (!silent) {
         	newsc = sc.copy();
         	newsc.advance(actBest);
-        	System.out.print("---Best Move: "+newsc.stringDescr()+"   "+iMaxScore);
+        	System.out.println("---Best Move: "+newsc.stringDescr()+"   "+iMaxScore);
         }			
 
         vtable[actions.size()] = iMaxScore;

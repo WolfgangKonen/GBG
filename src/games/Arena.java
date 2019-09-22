@@ -505,11 +505,23 @@ abstract public class Arena extends JFrame implements Runnable {
 		PlayGame(null);
 	}
 
+	/**
+	 * Play a game. Is called either via {@link Arena}'s Play button or from the Tournament System (TS). In 
+	 * the TS-case, the game is a single-player game, since only then the tournament is a game play of 
+	 * each agent and the results are recorded. <br>
+	 * [In both cases we have {@code this.taskState == Task.PLAY}.]
+	 * 
+	 * @param spDT if {@code null} then {@link #PlayGame(TSGameDataTransfer)} was called via 
+	 * Play button, if not, it was called from the Tournament System.
+	 */
 	public void PlayGame(TSGameDataTransfer spDT) {
 		int Player;
+		final int numPlayers = gb.getStateObs().getNumPlayers();
 		StateObservation so, startSO;
 		Types.ACTIONS_VT actBest = null;
-		MCTSAgentT p2 = new MCTSAgentT("MCTS", null, new ParMCTS(m_xab.mctsParams[0]), new ParOther(m_xab.oPar[0])); // only
+		MCTSAgentT p2 = null;
+		boolean DEBG = false; // false;true;
+		if (DEBG) p2= new MCTSAgentT("MCTS", null, new ParMCTS(m_xab.mctsParams[0]), new ParOther(m_xab.oPar[0])); // only
 																														// DEBG
 		PlayAgent pa;
 		PlayAgent[] paVector, qaVector;
@@ -518,11 +530,11 @@ abstract public class Arena extends JFrame implements Runnable {
 		PStats pstats;
 		ArrayList<PStats> psList = new ArrayList<PStats>();
 
-		// fetch the agents in a way general for 1-, 2- and N-player games
-		final int numPlayers = gb.getStateObs().getNumPlayers();
-		boolean showValue = (taskState == Task.PLAY) ? m_xab.getShowValueOnGameBoard() : true;
-		//boolean showStoredV = true;
+		// since PlayGame() is always called with taskState == Task.PLAY, we do not need this distinction:
+//		boolean showValue = (taskState == Task.PLAY) ? m_xab.getShowValueOnGameBoard() : true;
+		boolean showValue = m_xab.getShowValueOnGameBoard();
 
+		// fetch the agents in a way general for 1-, 2- and N-player games
 		try {
 			if (spDT==null) { // regular non TS game
 				paVector = m_xfun.fetchAgents(m_xab);
@@ -570,8 +582,6 @@ abstract public class Arena extends JFrame implements Runnable {
 				sMsg = "Playing a game ... [ " + agentX + ", nPly=" + wrappedNPly + " ]";
 			break;
 		case (2):
-//			agentX = m_xab.getSelectedAgent(0);
-//			agentO = m_xab.getSelectedAgent(1);
 			agentX = qaVector[0].getName();
 			agentO = qaVector[1].getName();
 			sMsg = "Playing a game ... [" + agentX + " (X) vs. " + agentO + " (O)]";
@@ -604,8 +614,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				// this is mandatory for games like RubiksCube (but possible
 				// also for other games):
 				// do not start from the default start state (solved cube), but
-				// choose randomly a
-				// different one:
+				// choose randomly a different one:
 				so = gb.chooseStartState();
 			}
 		}
@@ -621,14 +630,6 @@ abstract public class Arena extends JFrame implements Runnable {
 
 		if (spDT!=null) { // set random start moves for TS
 			if (spDT.rndmStartMoves>0) {
-				/*
-				RandomAgent raX = new RandomAgent("Random Agent X");
-				//RandomAgent raO = new RandomAgent("Random Agent O");
-				for (int n = 0; n < spDT.rndmStartMoves; n++) {
-					so.advance(raX.getNextAction2(so, false, true));
-					//so.advance(raO.getNextAction2(so, false, true));
-				}
-				*/
 				so = spDT.startSO;
 				System.out.println(TAG+"RandomStartState set: "+so);
 			}
@@ -655,7 +656,6 @@ abstract public class Arena extends JFrame implements Runnable {
 					} else {
 						gb.enableInteraction(false);
 
-						boolean DEBG = false; // false;true;
 						if (DEBG) {
 							int N_EMPTY = 4;
 							actBest = getNextAction_DEBG(so, pa, p2, N_EMPTY);
@@ -673,12 +673,6 @@ abstract public class Arena extends JFrame implements Runnable {
 						}
 
 						so.storeBestActionInfo(actBest, actBest.getVTable());
-						// if (so.getNumPlayers()==1) {
-						// // show state and stored vtable *before* advance
-						// gb.updateBoard(so,false,showValue);
-						// showStoredV=false; // this is for 2nd updateBoard
-						// below
-						// }
 						so.advance(actBest);
 						logManager.addLogEntry(actBest, so, logSessionid);
 						if (spDT==null) {		// the normal play (non-TS, i.e. no tournament)
@@ -689,16 +683,14 @@ abstract public class Arena extends JFrame implements Runnable {
 								System.out.println("Thread 1");
 							}
 							gb.updateBoard(so, false, showValue);
-						} else {
+						} else {				// the TS-play case (single-player games):
 							gb.updateBoard(so, false, false);
-							//System.out.println(so);
 						}
 
 						// gather information for later printout to
 						// agents/gameName/csv/playStats.csv.
-						// This is mostly for diagnostics in game 2048, but not
-						// completely useless for other
-						// games as well.
+						// This is mostly for diagnostics in game 2048, but useful
+						// for other games as well.
 						if (so instanceof StateObserver2048) {
 							StateObserver2048 so2048 = (StateObserver2048) so;
 							nEmpty = so2048.getNumEmptyTiles();
@@ -728,9 +720,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					}
 				}
 				so = gb.getStateObs();
-				pa = qaVector[so.getPlayer()];
-//				if (!pa.getName().equals("Human"))
-//					System.out.println(so.stringDescr());
+				pa = qaVector[so.getPlayer()];		// /WK/ really needed?
 				if (so.isGameOver()) {
 //					try {
 //						Thread.sleep(250);
@@ -763,7 +753,7 @@ abstract public class Arena extends JFrame implements Runnable {
 						Player = Types.PLAYER_PM[so.getPlayer()];
 						switch (Player * win) {
 						case  (+1):
-							gb.updateBoard(so, false, showValue);
+							gb.updateBoard(so, false, showValue);				// /WK/ really needed?
 							MessageBox.show(m_LaunchFrame, "X (" + agentX + ") wins", "Game Over",
 									JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
@@ -804,7 +794,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					break; // this is the final break out of while loop
 				} // if (so.getMoveCounter()...)
 
-			} // while(taskState == Task.PLAY) [will be left only by
+			} 	// while(taskState == Task.PLAY) [will be left only by
 				// the last break(s) above OR when taskState changes]
 		} catch (RuntimeException e) {
 			// a possible RuntimeException is raised when an agent for

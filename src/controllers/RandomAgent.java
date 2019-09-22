@@ -122,7 +122,7 @@ public class RandomAgent extends AgentBase implements PlayAgent {
         if (!silent) {
         	StateObservation NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.print("---Best Move: "+NewSO.stringDescr()+"   "+MaxScore);
+        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+MaxScore);
         }			
 		actBest.setRandomSelect(true);		// the action was a random move
 	
