@@ -678,35 +678,14 @@ public class SingleTreeNode implements Serializable
 	public void backUp3Player(SingleTreeNode selected, int [] delta) 
 	{
 		SingleTreeNode n = selected;
+		int nPlayer;
 		while (n != null) {
 			
+			nPlayer = n.m_state.getPlayer();		// /WK/ bug fix: select the player of current n
 
 			n.nVisits++;
-			n.totValue += (double)delta[selected.m_state.getPlayer()];
-			
-//            switch (m_state.getNumPlayers()) {
-//            case (1): break;
-//            case (2): 
-////            	delta = - delta; 		// /WK/ negamax variant for 2-player tree
-//            	delta = negate(delta);	// /WK/ negamax variant for 2-player tree
-//            	break;
-//            default:		// i.e. n-player, n>2
-//            	throw new RuntimeException("MCTS.backUp is not yet implemented for n-player games (n>2).");
-//            }
-
-			// --- only a debug assertion
-//			if (!n.isLeafNode() && n.parent!=null) {
-//				int cVisits=0;
-//				for (SingleTreeNode c : n.children) {
-//					if (c!=null) cVisits+=c.nVisits;
-//				}
-//				int offs=1;
-//				assert (n.nVisits == offs+cVisits) :	// why '1+'? - every non-root node n has one visit more 
-//					// than all its children. This stems from its 'birth' visit, i.e. the time 
-//					// where it was 'selected' but did not yet have any children.
-//					"node n's nVisits differs from the 1+(sum of its children visits)";
-//				
-//			}
+//			n.totValue += (double)delta[selected.m_state.getPlayer()]; // /WK/ bug, always the same delta
+			n.totValue += (double)delta[nPlayer];	// /WK/ bug fix: backup delta for nPlayer
 			
 			n = n.parent;
 		}

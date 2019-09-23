@@ -221,12 +221,17 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	private boolean checkIfLegal2Variabel(int [] players, int [] counts)
 	{
-		if(player == players[0] && counts[0] == counts[1])
-			return true;
-		else if(player == players[1] && counts[0] > counts[1])
-			return true;
-		else
-			return false;
+		if (Math.abs(counts[0]-counts[1])<=1) return true;
+		return false;
+		
+		// /wK/ this check seems to strong, it leads sometimes (seldom) to a wrongly firing 
+		// assertion (because players=[1,2] and counts[1] = counts[2]+1)
+//		if(player == players[0] && counts[0] == counts[1])
+//			return true;
+//		else if(player == players[1] && counts[0] > counts[1])
+//			return true;
+//		else
+//			return false;
 	}
 	private int[] getRemainingPlayers()
 	{
