@@ -39,7 +39,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		nPositionValues = val;
 		nPlayers = pl;
 		
-		setPermutations();			// fills 'list' with all permutations of nodes 
+		//setPermutations();			// fills 'list' with all permutations of nodes 
 		setArrLink();
 		setActions();
 		

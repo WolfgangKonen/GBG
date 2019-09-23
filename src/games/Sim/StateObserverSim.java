@@ -370,22 +370,29 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		if(hasLost(player))
 		{ 
 			String sout = this.stringDescr();
-			allRewards[player] = -1;
-			if (twoPlayerLost()) {
-				allRewards[getNextPlayer3Player()]=1;	// getNextPlayer() is winner
-			}
+			//allRewards[player] = -1;
+			//if (twoPlayerLost()) {
+				//allRewards[getNextPlayer3Player()]=1;	// getNextPlayer() is winner
+			//}
 			if(looser == -1)
 			{
 				if(isDraw())
 				{
+					allRewards[player] = -1;
 					looser = player;
 					winner = -1;
 				}
 				else
+				{
+					allRewards[player] = -1;
 					looser = player;
+				}
 			}
 			else
+			{
 				winner = getNextPlayer3Player();
+				allRewards[winner] = +1;
+			}
 		}
 		else if(isDraw())
 			winner = -1;

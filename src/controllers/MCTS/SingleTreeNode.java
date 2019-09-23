@@ -236,7 +236,7 @@ public class SingleTreeNode implements Serializable
 							
 					" "+m_state.stringDescr()+" "+
 					"( nodes=" + this.numDescendants() + ", time=" + avgTimeTaken + ")"+
-					"  value = "+this.totValue/this.nVisits);
+					"  value = "+this.totValue/this.nVisits + "this total value " + this.totValue );
 			// for UCT and more than 10.000 iteration, bestAction() and  
 			// mostVisitedAction() are normally the same:
 			System.out.println("-- bestAction="+this.bestAction()+
@@ -680,12 +680,11 @@ public class SingleTreeNode implements Serializable
 		SingleTreeNode n = selected;
 		int nPlayer;
 		while (n != null) {
-			
 			nPlayer = n.m_state.getPlayer();		// /WK/ bug fix: select the player of current n
 
 			n.nVisits++;
 //			n.totValue += (double)delta[selected.m_state.getPlayer()]; // /WK/ bug, always the same delta
-			n.totValue += (double)delta[nPlayer];	// /WK/ bug fix: backup delta for nPlayer
+			n.totValue += (double)delta[2];	// /WK/ bug fix: backup delta for nPlayer
 			
 			n = n.parent;
 		}

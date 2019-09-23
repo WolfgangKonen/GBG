@@ -5,7 +5,7 @@ public class ConfigSim {
 	/**
 	 *  Graph size
 	 */
-	public static final int GRAPH_SIZE = 6;
+	public static final int GRAPH_SIZE = 9;
 	
 	/**
 	 *  Number of players
