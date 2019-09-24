@@ -260,8 +260,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		switch(looser)
 		{
 		case 0:
-			counts[0] = count0;
-			counts[1] = count1;
+			counts[0] = count1;			// /WK/ bug fix (was count0 before)
+			counts[1] = count2;
 			break;
 		case 1:
 			counts[0] = count0;
