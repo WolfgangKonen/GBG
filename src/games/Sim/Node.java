@@ -1,9 +1,14 @@
 package games.Sim;
 
-public class Node 
+import java.io.Serializable;
+
+public class Node implements Serializable
 {
 	private Link [] links; 
 	private int number;			// the number of the node (from 1 to 6 in case of K_6)
+	
+	//Serial number
+	private static final long serialVersionUID = 12L;
 	
 	Node(int size, int num)
 	{

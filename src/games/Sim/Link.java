@@ -1,12 +1,17 @@
 package games.Sim;
 
-public class Link 
+import java.io.Serializable;
+
+public class Link implements Serializable 
 {
 
 	private int num,		// the link number (0,...,14 in case of K_6) 
 				node,		// the number of the 'to'-node (from 1 to 6 in case of K_6)
 				player;		// the player (1,2,3) who owns the node (0 if empty) 
 	
+	//Serial number
+	private static final long serialVersionUID = 12L;
+
 	Link(int k, int no, int pl)
 	{
 		num = k;

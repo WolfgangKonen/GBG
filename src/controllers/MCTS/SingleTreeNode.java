@@ -684,7 +684,8 @@ public class SingleTreeNode implements Serializable
 
 			n.nVisits++;
 //			n.totValue += (double)delta[selected.m_state.getPlayer()]; // /WK/ bug, always the same delta
-			n.totValue += (double)delta[2];	// /WK/ bug fix: backup delta for nPlayer
+			n.totValue += (double)delta[nPlayer];	// /WK/ bug fix: backup delta for nPlayer
+//			n.totValue += (double)delta[2];	// temporary change PW
 			
 			n = n.parent;
 		}
