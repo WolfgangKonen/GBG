@@ -647,16 +647,6 @@ public class SingleTreeNode implements Serializable
 			n.nVisits++;
 			n.totValue += delta;
 			
-//            switch (m_state.getNumPlayers()) {
-//            case (1): break;
-//            case (2): 
-////            	delta = - delta; 		// /WK/ negamax variant for 2-player tree
-//            	delta = negate(delta);	// /WK/ negamax variant for 2-player tree
-//            	break;
-//            default:		// i.e. n-player, n>2
-//            	throw new RuntimeException("MCTS.backUp is not yet implemented for n-player games (n>2).");
-//            }
-
 			// --- only a debug assertion
 //			if (!n.isLeafNode() && n.parent!=null) {
 //				int cVisits=0;
@@ -678,14 +668,21 @@ public class SingleTreeNode implements Serializable
 	public void backUp3Player(SingleTreeNode selected, int [] delta) 
 	{
 		SingleTreeNode n = selected;
-		int nPlayer;
+		int nPlayer,pPlayer;
 		while (n != null) {
 			nPlayer = n.m_state.getPlayer();		// /WK/ bug fix: select the player of current n
-
+			pPlayer = (nPlayer+2)%3;				// pPlayer: the player preceding nPlayer
+			
 			n.nVisits++;
 //			n.totValue += (double)delta[selected.m_state.getPlayer()]; // /WK/ bug, always the same delta
-			n.totValue += (double)delta[nPlayer];	// /WK/ bug fix: backup delta for nPlayer
-//			n.totValue += (double)delta[2];	// temporary change PW
+//			n.totValue += (double)delta[nPlayer];	// /WK/ 1st fix, but still a bug: backup delta for nPlayer
+			n.totValue += (double)delta[pPlayer];	// /WK/ 2nd bug fix: backup delta for pPlayer
+			// Why pPlayer? - This is for the same reason why we call in backUp() negate *before* the first 
+			// '+=' to n.totValue is made: If the result of a random rollout from n as a leaf is a loss for 
+			// n, this does not really count. What counts is the result for pPlayer, the player who *created* 
+			// n. Why? Because pPlayer looks for the best action, and if n is advantageous for pPlayer, it 
+			// should have a high totValue. So we have to accumulate in n.totValue the rewards achievable 
+			// from the perspective of pPlayer. 
 			
 			n = n.parent;
 		}
