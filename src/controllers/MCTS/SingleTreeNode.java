@@ -102,11 +102,10 @@ public class SingleTreeNode implements Serializable
 
 	/**
 	 * Perform an MCTS search, i.e. a selection of the best next action given
-	 * the state in the root node of the tree. <br>
-	 * Called by {@link SingleMCTSPlayer#run(ElapsedCpuTimer, double[])}.
+	 * the state in {@code this}, the root node of the tree. <br>
 	 * <p>
 	 *
-	 * Do for {@code m_player.NUM_ITERS} iterations:
+	 * MCTS search: Do for {@code m_player.NUM_ITERS} iterations:
 	 * <ul>
 	 * <li>select a leaf node via {@link #treePolicy()} (this includes
 	 *    {@link #expand()} of not fully expanded nodes, as long as the maximum
@@ -121,7 +120,7 @@ public class SingleTreeNode implements Serializable
 	 * </ul>
 	 * 
 	 * Once this method is completed, the method {@link #bestAction()} will
-	 * return the index {@code i} of the root's children which maximizes
+	 * return the index {@code i} of that child among root's children which maximizes
 	 * 
 	 * <pre>
 	 * U(i) = children[i].totValue / children[i].nVisits
@@ -134,6 +133,8 @@ public class SingleTreeNode implements Serializable
 	 *            available moves for the root state. Contains on output
 	 *            {@code U(i)} in the first K entries and the maximum of all
 	 *            {@code U(i)} in {@code VTable[K]}
+	 *            
+	 * @see SingleMCTSPlayer#run(ElapsedCpuTimer, double[])
 	 */
 	public void mctsSearch(ElapsedCpuTimer elapsedTimer, double[] VTable) {
 
@@ -210,8 +211,12 @@ public class SingleTreeNode implements Serializable
 		}
 		VTable[K] = bestValue;
 
-		// /WK/ some diagnostic checks (not required for normal operation)
-		assert this.nVisits == numIters : "mroot's visits do not match numIters!";
+		// /WK/ here follow some diagnostic checks (not required for normal operation)
+		
+		// the following assertion is only for cases where we *not* use backUp3Player(), because
+		// in the 3-player case we never update nVisits for the root node.
+		if (m_state.getNumPlayers()!=3)
+			assert this.nVisits == numIters : "mroot's visits do not match numIters!";
 		this.printChildInfo(0, true);
 
 		/*
@@ -280,10 +285,15 @@ public class SingleTreeNode implements Serializable
 					if (c.m_depth<=(verbose-2)) c.printChildInfo(nIndention + 1, false);
 			}
 		}
-		int offs = (isRootNode) ? 0 : 1; // why '1'? - every non-root node n has one visit more 
-		// than all its children. This stems from its 'birth' visit, i.e. the time 
-		// where it was 'selected' but did not yet have any children.
-		assert offs + cVisits == this.nVisits : "children visits do not match the visits of this!";
+		
+		// the following assertion shall *not* be executed in the case that 'this' is the root node
+		// and we have 3 players, because we never update nVisits for the root node in the 3-player case .
+		if (!(isRootNode && m_state.getNumPlayers()==3)) {
+			int offs = (isRootNode) ? 0 : 1; // why '1'? - every non-root node n has one visit more 
+			// than all its children. This stems from its 'birth' visit, i.e. the time 
+			// where it was 'selected' but did not yet have any children.
+			assert offs + cVisits == this.nVisits : "children visits do not match the visits of this!";
+		}
 	}
 	
 	/**
@@ -668,21 +678,33 @@ public class SingleTreeNode implements Serializable
 	public void backUp3Player(SingleTreeNode selected, int [] delta) 
 	{
 		SingleTreeNode n = selected;
-		int nPlayer,pPlayer;
-		while (n != null) {
-			nPlayer = n.m_state.getPlayer();		// /WK/ bug fix: select the player of current n
-			pPlayer = (nPlayer+2)%3;				// pPlayer: the player preceding nPlayer
+//		int nPlayer;
+		int pPlayer;
+		while (n.parent != null) {
+			// Why do we test on n.parent here? - Because we need n.parent below to calculate the player
+			// preceding n's player. But isn't this incomplete because we then never accumulate n.totValue
+			// when n==mroot? - No, it is not incomplete, because n.totValue and n.nVisits are only needed
+			// for nodes n being *children* of some other nodes (see bestAction()). And the root node is
+			// not the child of anyone. 
+			// [As a consequence we have to inhibit some assertions on n.nVisits when n is root node.]
+			
+//			nPlayer = n.m_state.getPlayer();		// /WK/ bug fix: select the player of current n
+//			pPlayer = (nPlayer+2)%3;				// pPlayer: the player preceding nPlayer (but this is 
+			// also buggy in special cases: if P1 has already lost, then the player preceding P2 is P0, 
+			// and not P1, but (nPlayer+2)%3=1 would return P1). Therefore we use the bug fix of the 
+			// next line:
+			pPlayer = n.parent.m_state.getPlayer();	// pPlayer: the player really preceding n's player
 			
 			n.nVisits++;
 //			n.totValue += (double)delta[selected.m_state.getPlayer()]; // /WK/ bug, always the same delta
 //			n.totValue += (double)delta[nPlayer];	// /WK/ 1st fix, but still a bug: backup delta for nPlayer
 			n.totValue += (double)delta[pPlayer];	// /WK/ 2nd bug fix: backup delta for pPlayer
 			// Why pPlayer? - This is for the same reason why we call in backUp() negate *before* the first 
-			// '+=' to n.totValue is made: If the result of a random rollout from n as a leaf is a loss for 
+			// '+=' to n.totValue is made: If the result of a random roll-out from n as a leaf is a loss for 
 			// n, this does not really count. What counts is the result for pPlayer, the player who *created* 
-			// n. Why? Because pPlayer looks for the best action, and if n is advantageous for pPlayer, it 
-			// should have a high totValue. So we have to accumulate in n.totValue the rewards achievable 
-			// from the perspective of pPlayer. 
+			// n. Why? Because pPlayer looks for the best action among its children, and if child n is 
+			// advantageous for pPlayer, it should have a high totValue. So we have to accumulate in  
+			// n.totValue the rewards achievable from the perspective of pPlayer. 
 			
 			n = n.parent;
 		}
@@ -744,7 +766,7 @@ public class SingleTreeNode implements Serializable
 
 	/**
 	 * 
-	 * @return the index {@code i} of the child maximizing
+	 * @return the index {@code i} of that child of {@code this} that maximizes
 	 * 
 	 *         <pre>
 	 *         U(i) = children[i].totValue / children[i].nVisits
