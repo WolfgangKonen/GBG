@@ -156,8 +156,8 @@ public class SingleTreeNode implements Serializable
 			if(m_state.getNumPlayers() == 3)
 			{
 				double [] delta = selected.rollOut3Player();
-				System.out.println("[" + delta[0] + "," + delta[1] + "," + delta[2] + "]");
-				System.out.println(((StateObserverSim)selected.m_state).getGameWinner3player());
+				//System.out.println("[" + delta[0] + "," + delta[1] + "," + delta[2] + "]");
+				//System.out.println(((StateObserverSim)selected.m_state).getGameWinner3player());
 				backUp3Player(selected,delta);
 			}
 			else
