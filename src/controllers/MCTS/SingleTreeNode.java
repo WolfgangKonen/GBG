@@ -155,7 +155,9 @@ public class SingleTreeNode implements Serializable
 			SingleTreeNode selected = treePolicy();
 			if(m_state.getNumPlayers() == 3)
 			{
-				int [] delta = selected.rollOut3Player();
+				double [] delta = selected.rollOut3Player();
+				System.out.println("[" + delta[0] + "," + delta[1] + "," + delta[2] + "]");
+				System.out.println(((StateObserverSim)selected.m_state).getGameWinner3player());
 				backUp3Player(selected,delta);
 			}
 			else
@@ -551,7 +553,7 @@ public class SingleTreeNode implements Serializable
 		return delta;
 	}
 	
-	public int [] rollOut3Player()
+	public double [] rollOut3Player()
 	{
 		StateObservation rollerState = m_state.copy();
 		int thisDepth = this.m_depth;
@@ -567,7 +569,7 @@ public class SingleTreeNode implements Serializable
 		}
 		if (rollerState.isGameOver())
 			m_player.nRolloutFinished++;
-		int [] delta = value3Player(rollerState, this.m_state);
+		double [] delta = value3Player(rollerState, this.m_state);
 		// // /WK/ not really clear what these normalizations are for.
 		// // Is it part of MCTS or part of the special GVGP implementation?
 		// if(delta < curBounds[0]) curBounds[0] = delta;
@@ -603,10 +605,13 @@ public class SingleTreeNode implements Serializable
 		return v;
 	}
 
-	public int [] value3Player(StateObservation so, StateObservation referingState) {
+	public double [] value3Player(StateObservation so, StateObservation referingState) {
 		boolean rgs = m_player.getParOther().getRewardIsGameScore();
 		
-		int [] v = ((StateObserverSim)so).getAllRewards();
+		double [] v = new double[3];
+		v[0] = ((StateObserverSim)so).getGameScore(0);
+		v[1] = ((StateObserverSim)so).getGameScore(1);
+		v[2] = ((StateObserverSim)so).getGameScore(2);
 //		double v = so.getGameScore(referingState);
 		if (m_player.getNormalize()) {
 			for(int i = 0; i < v.length; i++)
@@ -675,7 +680,7 @@ public class SingleTreeNode implements Serializable
 		}
 	}
 	
-	public void backUp3Player(SingleTreeNode selected, int [] delta) 
+	public void backUp3Player(SingleTreeNode selected, double [] delta) 
 	{
 		SingleTreeNode n = selected;
 //		int nPlayer;
@@ -698,7 +703,7 @@ public class SingleTreeNode implements Serializable
 			n.nVisits++;
 //			n.totValue += (double)delta[selected.m_state.getPlayer()]; // /WK/ bug, always the same delta
 //			n.totValue += (double)delta[nPlayer];	// /WK/ 1st fix, but still a bug: backup delta for nPlayer
-			n.totValue += (double)delta[pPlayer];	// /WK/ 2nd bug fix: backup delta for pPlayer
+			n.totValue += delta[pPlayer];	// /WK/ 2nd bug fix: backup delta for pPlayer
 			// Why pPlayer? - This is for the same reason why we call in backUp() negate *before* the first 
 			// '+=' to n.totValue is made: If the result of a random roll-out from n as a leaf is a loss for 
 			// n, this does not really count. What counts is the result for pPlayer, the player who *created* 
