@@ -1,6 +1,8 @@
 package tools;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 import controllers.PlayAgent;
 import controllers.RandomAgent;
@@ -22,8 +24,15 @@ import tools.Types.ScoreTuple;
  * {@link #ValidateAgent(PlayAgent, StateObservation)}.
  */
 public class ValidateStateObserver {
-
+	StateObservation sob;
+	PlayAgent pa;
+	
 	public ValidateStateObserver(StateObservation sob, PlayAgent pa) {
+		this.sob = sob;
+		this.pa = pa;
+	}
+	
+	public boolean run() {
 		ACTIONS a;
 		ScoreTuple sc;
 		StateObservation newSob = sob.copy();
@@ -53,6 +62,19 @@ public class ValidateStateObserver {
 			assert(sc.scTup[1]==-sc.scTup[0]) : "elements of final ScoreTuple do not sum to zero";
 		}
 		System.out.println("final getScoreTuple check ... OK");
+		
+		//
+		// Check whether sob is serializable (needed for logging)
+		//
+		try {
+			checkSerializable(sob,true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("\nStateObservation sob is not serializable!");
+            return false;
+        }
+		System.out.println("serialization check ... OK");
+		return true;
 	}
 
 	private boolean checkScoreTuple(ScoreTuple sc, StateObservation sob, boolean verbose) {
@@ -68,6 +90,17 @@ public class ValidateStateObserver {
 			assert (scMin <= sc.scTup[i]) : "ScoreTuple < getMinScore() : "+sc.scTup[i]+" < "+scMin;
 			assert (sc.scTup[i] <= scMax) : "ScoreTuple > getMaxScore() : "+sc.scTup[i]+" > "+scMax;
 		}
+		return true;
+	}
+	
+	private boolean checkSerializable(StateObservation sob, boolean verbose) throws IOException {
+		String tempPath = "logs\\temp";
+		tools.Utils.checkAndCreateFolder(tempPath);
+            FileOutputStream fos = new FileOutputStream(tempPath + "\\temp_.temp");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(sob);
+            fos.close();
+            oos.close();
 		return true;
 	}
 	
@@ -112,8 +145,10 @@ public class ValidateStateObserver {
 			System.out.println("PlayAgent p is null!");
 		} else {
 			ValidateStateObserver vs = new ValidateStateObserver(sob, p);
+			boolean res = vs.run();
 			
-			System.out.println("ValidateStateObserver finished successfully");
+			if (res)
+				System.out.println("ValidateStateObserver finished successfully");
 		}
 		ar.destruct();
 	}

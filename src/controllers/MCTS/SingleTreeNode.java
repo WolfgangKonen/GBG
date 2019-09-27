@@ -4,6 +4,7 @@ import games.StateObservation;
 import games.Sim.StateObserverSim;
 import tools.ElapsedCpuTimer;
 import tools.Types;
+import tools.Types.ScoreTuple;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -110,10 +111,10 @@ public class SingleTreeNode implements Serializable
 	 * <li>select a leaf node via {@link #treePolicy()} (this includes
 	 *    {@link #expand()} of not fully expanded nodes, as long as the maximum
 	 *    tree depth is not yet reached),
-	 * <li>make a {@link #rollOut()} starting from this leaf node (a game with
+	 * <li>make a {@link #rollOut2Player()} starting from this leaf node (a game with
 	 *    random actions until game is over or until the maximum rollout depth is
 	 *    reached)
-	 * <li>{@link #backUp(SingleTreeNode, double)} the resulting score
+	 * <li>{@link #backUp2Player(SingleTreeNode, double)} the resulting score
 	 *    {@code delta} and the number of visits for all nodes on {@code totValue}
 	 *    and {@code nVisits}. Do this for all nodes on the path from the leaf up
 	 *    to the root.
@@ -162,7 +163,7 @@ public class SingleTreeNode implements Serializable
 			}
 			else
 			{
-				double delta = selected.rollOut();
+				double delta = selected.rollOut2Player();
 				// --- this is now equivalently in backUp(), in the first pass through while-loop ---			
 //							if (m_state.getNumPlayers() == 2) {
 ////								delta = -delta;
@@ -171,7 +172,7 @@ public class SingleTreeNode implements Serializable
 //								// has to move on 'selected', then it is a win for the player who created 
 //								// 'selected' (negamax principle)
 //							}
-							backUp(selected, delta);
+							backUp2Player(selected, delta);
 			}
 			
 			
@@ -526,7 +527,7 @@ public class SingleTreeNode implements Serializable
 	 *         player who has to move in {@code m_state} then return a positive
 	 *         reward.
 	 */
-	public double rollOut() 
+	public double rollOut2Player() 
 	{
 		StateObservation rollerState = m_state.copy();
 		int thisDepth = this.m_depth;
@@ -542,7 +543,12 @@ public class SingleTreeNode implements Serializable
 		}
 		if (rollerState.isGameOver())
 			m_player.nRolloutFinished++;
-		double delta = value(rollerState, this.m_state);
+		double delta = value2Player(rollerState, this.m_state);
+		
+		// just a debug check that value() does the same as value2Player():
+		double [] delta2 = value(rollerState);
+		assert delta==delta2[m_state.getPlayer()] : "Oops, delta and delta2 differ for i="+m_state.getPlayer();
+
 		// // /WK/ not really clear what these normalizations are for.
 		// // Is it part of MCTS or part of the special GVGP implementation?
 		// if(delta < curBounds[0]) curBounds[0] = delta;
@@ -569,7 +575,37 @@ public class SingleTreeNode implements Serializable
 		}
 		if (rollerState.isGameOver())
 			m_player.nRolloutFinished++;
-		double [] delta = value3Player(rollerState, this.m_state);
+		double [] delta = value3Player(rollerState);
+		
+		// just a debug check that value() does the same as value3Player():
+		double [] delta2 = value(rollerState);
+		for (int i=1; i<m_state.getNumPlayers(); i++)
+			assert delta[i]==delta2[i] : "Oops, delta and delta2 differ for i="+i;
+			
+		// // /WK/ not really clear what these normalizations are for.
+		// // Is it part of MCTS or part of the special GVGP implementation?
+		// if(delta < curBounds[0]) curBounds[0] = delta;
+		// if(delta > curBounds[1]) curBounds[1] = delta;
+		// double normDelta = Utils.normalise(delta ,lastBounds[0], lastBounds[1]);
+		// return normDelta;
+		//
+		return delta;
+	}
+
+	public double[] rollOut()
+	{
+		StateObservation rollerState = m_state.copy();
+		int thisDepth = this.m_depth;
+
+		while (!finishRollout(rollerState, thisDepth)) {
+			rollerState.setAvailableActions();
+			int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
+			rollerState.advance(rollerState.getAction(action));
+			thisDepth++;
+		}
+		if (rollerState.isGameOver())
+			m_player.nRolloutFinished++;
+		double[] delta = value(rollerState);
 		// // /WK/ not really clear what these normalizations are for.
 		// // Is it part of MCTS or part of the special GVGP implementation?
 		// if(delta < curBounds[0]) curBounds[0] = delta;
@@ -583,17 +619,17 @@ public class SingleTreeNode implements Serializable
 	/**
 	 * Assign the final rollerState a value (reward).
 	 * <p>
-	 * If 'Normalize' is checked, the reward is passed through a normalizing function q()
-	 * which maps to [0,1]. Otherwise q() is the identity function.
+	 * This method is only valid for 1- and 2-player games.
 	 * 
 	 * @param so
 	 *            the final state
 	 * @param referingState
 	 *            the state where the rollout (playout) started
 	 * 
-	 * @return q(reward), the reward or game score for {@code so} (relative to {@code referingState})
+	 * @return q(reward), the reward or game score for {@code so} (relative to {@code referingState})<br>
+	 * 		q() normalizes reward to [0,1] if flag 'Normalize' is checked. Otherwise it is the identity function.
 	 */
-	public double value(StateObservation so, StateObservation referingState) {
+	public double value2Player(StateObservation so, StateObservation referingState) {
 		boolean rgs = m_player.getParOther().getRewardIsGameScore();
 		double v = so.getReward(referingState, rgs);
 //		double v = so.getGameScore(referingState);
@@ -605,7 +641,7 @@ public class SingleTreeNode implements Serializable
 		return v;
 	}
 
-	public double [] value3Player(StateObservation so, StateObservation referingState) {
+	public double [] value3Player(StateObservation so) {
 		boolean rgs = m_player.getParOther().getRewardIsGameScore();
 		
 		double [] v = new double[3];
@@ -616,13 +652,43 @@ public class SingleTreeNode implements Serializable
 		if (m_player.getNormalize()) {
 			for(int i = 0; i < v.length; i++)
 			{
-				v[i] = (v[i] - (int)so.getMinGameScore()) / (int)(so.getMaxGameScore() - so.getMinGameScore());
+				// /WK/ bug fix 2019-02-09: map v to [0,1] (this is q(reward) in notes_MCTS.docx)
+				v[i] = (v[i] - so.getMinGameScore()) / (so.getMaxGameScore() - so.getMinGameScore());
 				assert ((v[i] >= 0) && (v[i] <= 1)) : "Error: value is not in range [0,1]";
 			}
-			// /WK/ bug fix 2019-02-09: map v to [0,1] (this is q(reward) in notes_MCTS.docx)
 		}
 		return v;
 	}
+	
+	/**
+	 * Assign the final rollerState a value (reward).
+	 * <p>
+	 * This method is valid for N-player games with arbitrary N.
+	 * 
+	 * @param so
+	 *            the final state
+	 * 
+	 * @return a vector of length N, where the {@code i}th element holds q(reward[{@code i}]), the reward  
+	 * for the {@code i}th player in state {@code so}.<br>
+	 * q() normalizes the rewards to [0,1] if flag 'Normalize' is checked. Otherwise it is the identity function.
+	 */
+	public double[] value(StateObservation so) {
+		boolean rgs = m_player.getParOther().getRewardIsGameScore();
+		
+		ScoreTuple tup = so.getRewardTuple(rgs);
+		double[] v =tup.scTup;
+		
+		if (m_player.getNormalize()) {
+			for(int i = 0; i < v.length; i++)
+			{
+				// /WK/ bug fix 2019-02-09: map v to [0,1] (this is q(reward) in notes_MCTS.docx)
+				v[i] = (v[i] - so.getMinGameScore()) / (so.getMaxGameScore() - so.getMinGameScore());
+				assert ((v[i] >= 0) && (v[i] <= 1)) : "Error: value is not in range [0,1]";
+			}
+		}
+		return v;
+	}
+
     /**
      * checks if a rollout is finished
      *
@@ -641,7 +707,7 @@ public class SingleTreeNode implements Serializable
 		return false;
 	}
 
-	public void backUp(SingleTreeNode selected, double delta) 
+	public void backUp2Player(SingleTreeNode selected, double delta) 
 	{
 		SingleTreeNode n = selected;
 		while (n != null) {
@@ -714,6 +780,34 @@ public class SingleTreeNode implements Serializable
 			n = n.parent;
 		}
 	}
+	
+	public void backUp(SingleTreeNode selected, double [] delta) 
+	{
+		SingleTreeNode n = selected;
+		int pPlayer;
+		while (n.parent != null) {
+			// Why do we test on n.parent here? - Because we need n.parent below to calculate the player
+			// preceding n's player. But isn't this incomplete because we then never accumulate n.totValue
+			// when n==mroot? - No, it is not incomplete, because n.totValue and n.nVisits are only needed
+			// for nodes n being *children* of some other nodes (see bestAction()). And the root node is
+			// not the child of anyone. 
+			// [As a consequence we have to inhibit some assertions on n.nVisits when n is root node.]
+			
+			pPlayer = n.parent.m_state.getPlayer();	// pPlayer: the player preceding n's player
+			
+			n.nVisits++;
+			n.totValue += delta[pPlayer];	// backup delta for pPlayer
+			// Why pPlayer? - This is for the same reason why we call in backUp2Player() negate *before* the  
+			// first '+=' to n.totValue is made: If the result of a random roll-out from n as a leaf is a loss  
+			// for n, this does not really count. What counts is the result for pPlayer, the player who  
+			// *created* n. Why? Because pPlayer looks for the best action among its children, and if child  
+			// n is advantageous for pPlayer, it should have a high totValue. So we have to accumulate in  
+			// n.totValue the rewards achievable from the perspective of pPlayer. 
+			
+			n = n.parent;
+		}
+	}
+	
 	private boolean isLeafNode() {
 		for (SingleTreeNode c : this.children) {
 			if (c!=null) return false;

@@ -507,6 +507,11 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
         return 0;
 	}
 
+	public double getReward(int player, boolean rewardIsGameScore) {
+		// currently, getReward and getGameScore are the same in Sim.  
+		return getGameScore(player);
+	}
+	
 	@Override
 	public String stringDescr() {
 		String sout = "";

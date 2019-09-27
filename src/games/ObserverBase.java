@@ -193,6 +193,7 @@ abstract public class ObserverBase implements StateObservation {
 	 * Same as {@link #getReward(StateObservation,boolean)}, but with the player of referringState.
 	 * <p>
 	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
+	 *  It is only valid for N &le; 2. Games with N &gt; 2 have to override this method.
 	 *  
 	 * @param player the player of referringState, a number in 0,1,...,N.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
