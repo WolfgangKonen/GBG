@@ -227,7 +227,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 //		}
 		if (sob.isGameOver())
 		{
-			int res = sob.getGameWinner().toInt(); 
+			double res = sob.getGameScore(refer); 
 			return res; 	
 			// +1/0/-1  for Player/tie/Opponent win	
 			// e.g.: if board is a win for O, then X is to 'move' and res 

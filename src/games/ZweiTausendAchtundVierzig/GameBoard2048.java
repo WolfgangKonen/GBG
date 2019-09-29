@@ -4,6 +4,7 @@ import games.Arena;
 import games.GameBoard;
 import games.StateObservation;
 import tools.Types;
+import tools.Types.ScoreTuple;
 
 import javax.swing.*;
 
@@ -402,23 +403,23 @@ public class GameBoard2048 extends JFrame implements GameBoard {
                         vTable[iAction] = soZTAV.getStoredValues()[i];
                     }
                 }
+
+                if (so.isGameOver()) {
+                    int win = soZTAV.getWinState();
+                    switch (win) {
+                        case (+1):
+                            leftInfo.setText("You Won!");
+                            break;
+                        case (-1):
+                            leftInfo.setText("You Lost!");
+                            break;
+                    }
+            		//System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
+                }
+
             } else {
                 throw new RuntimeException("StateObservation 'so' is not an instance of StateObserver2048");
             }
-
-            if (so.isGameOver()) {
-                int win = so.getGameWinner().toInt();
-                switch (win) {
-                    case (+1):
-                        leftInfo.setText("You Won!");
-                        break;
-                    case (-1):
-                        leftInfo.setText("You Lost!");
-                        break;
-                }
-        		//System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
-            }
-
         }
         guiUpdateBoard(showValueOnGameboard);
     }

@@ -257,7 +257,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		int n=sob.getNumAvailableActions();
 		double[] vtable	= new double[n+1];
 		
-		// here is the recursion: getBestAction calls getScore(...,depth+1):
+		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
 		act_st = getBestAction(sob, refer, false,  vtable,  true, depth);  // sets vtable[n]=iMaxScore
 		
 		return act_st.m_st;		// return ScoreTuple for best action

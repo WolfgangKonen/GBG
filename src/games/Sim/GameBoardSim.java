@@ -20,6 +20,7 @@ import games.Sim.Point;
 import games.TicTacToe.StateObserverTTT;
 import tools.Types;
 import tools.Types.ACTIONS;
+import tools.Types.ScoreTuple;
 import games.Arena;
 
 public class GameBoardSim implements GameBoard {
@@ -90,25 +91,30 @@ public class GameBoardSim implements GameBoard {
 			: "StateObservation 'so' is not an instance of StateObserverSim";
 			StateObserverSim som = (StateObserverSim) so;
 			m_so = som.copy();
-			int player = som.getPlayer();
-			switch(player) {
-			case(0): 
-				System.out.println("0 to move   "); break;
-			case(1):
-				System.out.println("1 to move   "); break;
-			case(2):
-				System.out.println("2 to move   "); break;
-			}
 			
 			if (so.isGameOver()) 
 			{
 				
-					int winner = som.getGameWinner3player();
-					if(winner == -1)
-						System.out.println("Tie");
-					else
-						System.out.println(winner  + " has won");
+				ScoreTuple sc = som.getGameScoreTuple();
+				int winner = sc.argmax();
+				if (sc.max()==0.0) winner = -2;	// tie indicator
+//				int winner = som.getGameWinner3player();		// make getGameWinner3player obsolete
+				if(winner < 0)
+					System.out.println("Tie");
+				else
+					System.out.println(winner  + " has won");
 					
+			} else {
+				
+				int player = som.getPlayer();
+				switch(player) {
+				case(0): 
+					System.out.println("0 to move   "); break;
+				case(1):
+					System.out.println("1 to move   "); break;
+				case(2):
+					System.out.println("2 to move   "); break;
+				}
 			}
 			
 			//ShowValue bug, because the updateGameboad Method is called twice.

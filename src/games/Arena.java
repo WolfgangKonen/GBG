@@ -23,6 +23,7 @@ import tools.MessageBox;
 import tools.Progress;
 import tools.StatusBar;
 import tools.Types;
+import tools.Types.ScoreTuple;
 
 import javax.swing.*;
 import java.awt.*;
@@ -589,7 +590,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		default:
 			sMsg = "Playing a game ... [";
 			for (int n = 0; n < numPlayers; n++) {
-				agentVec[n] = m_xab.getSelectedAgent(0);
+				agentVec[n] = qaVector[n].getName();
 				sMsg = sMsg + agentVec[n] + "(" + n + ")";
 				if (n < numPlayers - 1)
 					sMsg = sMsg + ", ";
@@ -721,6 +722,8 @@ abstract public class Arena extends JFrame implements Runnable {
 				}
 				so = gb.getStateObs();
 				pa = qaVector[so.getPlayer()];		// /WK/ really needed?
+				int winner;
+				ScoreTuple sc;
 				if (so.isGameOver()) {
 //					try {
 //						Thread.sleep(250);
@@ -749,34 +752,62 @@ abstract public class Arena extends JFrame implements Runnable {
 							spDT.nextTeam[0].addSinglePlayScore(gScore);
 						break; // out of switch
 					case 2:
-						int win = so.getGameWinner().toInt();
-						Player = Types.PLAYER_PM[so.getPlayer()];
-						switch (Player * win) {
-						case  (+1):
+						sc = so.getGameScoreTuple();
+						winner = sc.argmax();
+						if (sc.max()==0.0) winner = -2;	// tie indicator
+						switch (winner) {
+						case  (0):
 							gb.updateBoard(so, false, showValue);				// /WK/ really needed?
 							MessageBox.show(m_LaunchFrame, "X (" + agentX + ") wins", "Game Over",
 									JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
-						case (-1):
+						case (1):
 							MessageBox.show(m_LaunchFrame, "O (" + agentO + ") wins", "Game Over",
 									JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
-						case (0):
+						case (-2):
 							MessageBox.show(m_LaunchFrame, "Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
-						} // switch(Player*win)
+						} // switch(winner)
+
+						// this old version was buggy for game Sim. And getGameWinner() is a difficult to 
+						// understand and difficult to generalize interface --> make it obsolete
+//						int win = so.getGameWinner().toInt();
+//						Player = Types.PLAYER_PM[so.getPlayer()];
+//						switch (Player * win) {
+//						case  (+1):
+//							gb.updateBoard(so, false, showValue);				// /WK/ really needed?
+//							MessageBox.show(m_LaunchFrame, "X (" + agentX + ") wins", "Game Over",
+//									JOptionPane.INFORMATION_MESSAGE);
+//							break; // out of inner switch
+//						case (-1):
+//							MessageBox.show(m_LaunchFrame, "O (" + agentO + ") wins", "Game Over",
+//									JOptionPane.INFORMATION_MESSAGE);
+//							break; // out of inner switch
+//						case (0):
+//							MessageBox.show(m_LaunchFrame, "Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+//							break; // out of inner switch
+//						} // switch(Player*win)
 						gb.updateBoard(so, false, showValue);
 						repaint();
 
 						break; // out of switch
 					default:
-						// TODO: implement s.th. for n-player games (n>2)
-						
-						int winner = ((ObserverBase)so).getGameWinner3player();
+						sc = so.getGameScoreTuple();
+						winner = sc.argmax();
+						if (sc.max()==0.0) winner = -2;	// tie indicator
 						if(winner >= 0)
 							MessageBox.show(m_LaunchFrame,"P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 						else
 							MessageBox.show(m_LaunchFrame,"Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+	
+						// this old version was specific to N=3 players and needed a special function
+						// getGameWinner3player() which is not necessary:
+//						int winner = ((ObserverBase)so).getGameWinner3player();
+//						if(winner >= 0)
+//							MessageBox.show(m_LaunchFrame,"P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+//						else
+//							MessageBox.show(m_LaunchFrame,"Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 						
 						break; // out of switch
 					}

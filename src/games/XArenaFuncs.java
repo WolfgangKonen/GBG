@@ -26,6 +26,7 @@ import games.TStats.TAggreg;
 import params.*;
 import tools.*;
 import tools.Types.ACTIONS;
+import tools.Types.ScoreTuple;
 
 import javax.swing.*;
 import java.io.BufferedWriter;
@@ -954,24 +955,44 @@ public class XArenaFuncs
 					Player = Types.PLAYER_PM[so.getPlayer()];
 				}
 				if (so.isGameOver()) {
-					int res = so.getGameWinner().toInt();
-					moveCount += so.getMoveCounter();
-					//  res is +1/0/-1  for X/tie/O win
-					int player = Types.PLAYER_PM[so.getPlayer()];
-					switch (res*player) {
-						case -1:
-							if (verbose>0) System.out.println(k+": O wins");
-							owinCount++;
-							break;
-						case 0:
-							if (verbose>0) System.out.println(k+": Tie");
-							tieCount++;
-							break;
-						case +1:
-							if (verbose>0) System.out.println(k+": X wins");
-							xwinCount++;
-							break;
-					}
+					ScoreTuple sc = so.getGameScoreTuple();
+					int winner = sc.argmax();
+					if (sc.max()==0.0) winner = -2;	// tie indicator
+					switch (winner) {
+					case  (0):
+						if (verbose>0) System.out.println(k+": X wins");
+						xwinCount++;
+						break;
+					case (1):
+						if (verbose>0) System.out.println(k+": O wins");
+						owinCount++;
+						break;
+					case (-2):
+						if (verbose>0) System.out.println(k+": Tie");
+						tieCount++;
+						break;
+					} // switch(winner)
+
+					// this old version used getGameWinner(), which has a difficult to 
+					// understand and difficult to generalize interface --> make it obsolete
+//					int res = so.getGameWinner().toInt();
+//					moveCount += so.getMoveCounter();
+//					//  res is +1/0/-1  for X/tie/O win
+//					int player = Types.PLAYER_PM[so.getPlayer()];
+//					switch (res*player) {
+//						case -1:
+//							if (verbose>0) System.out.println(k+": O wins");
+//							owinCount++;
+//							break;
+//						case 0:
+//							if (verbose>0) System.out.println(k+": Tie");
+//							tieCount++;
+//							break;
+//						case +1:
+//							if (verbose>0) System.out.println(k+": X wins");
+//							xwinCount++;
+//							break;
+//					}
 
 					break; // out of while
 
@@ -996,157 +1017,6 @@ public class XArenaFuncs
 		return winrate;
 	} // compete
 
-	// --- no longer needed, use XArenaFuncs.compete(...,TSTimeStorage[] nextTimes) instead ---
-//	/**
-//	 * This is an adapted version of {@link XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.compete()}. 
-//	 * The adaption is for the tournament system: the tournament parameters are added.
-//	 * <p>
-//	 * -- no longer needed, use {@link XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.compete()} instead. --
-//	 * @param paX PlayAgent, a trained agent
-//	 * @param paO PlayAgent, a trained agent
-//	 * @param startSO    the start board position for the game
-//	 * @param competeNum the number of episodes to play (always 1)
-//	 * @param nextTimes time storage to save measurements
-//	 * @return double[3], the percentage of episodes with X-win, tie, O-win
-//	 */
-//	// @param rndmStartMoves -- seems obsolete now /WK/2019/04/ ---
-//	@Deprecated
-//	public static double[] competeTS(PlayAgent paX, PlayAgent paO, StateObservation startSO, 
-//			int competeNum, int verbose, TSTimeStorage[] nextTimes /*, int rndmStartMoves*/) {
-//		double[] winrate = new double[3];
-//		int xwinCount=0, owinCount=0, tieCount=0;
-//		DecimalFormat frm = new DecimalFormat("#0.000");
-//		boolean nextMoveSilent = (verbose<2 ? true : false);
-//		StateObservation so;
-//		Types.ACTIONS actBest;
-//
-//		String paX_string = paX.stringDescr();
-//		String paO_string = paO.stringDescr();
-//		System.out.println("Competition: "+competeNum+" episodes "+paX_string+" vs "+paO_string/*+" with "+rndmStartMoves+" random startmoves"*/);
-//		/*
-//		if (rndmStartMoves>0) {
-//			RandomAgent raX = new RandomAgent("Random Agent X");
-//			//RandomAgent raO = new RandomAgent("Random Agent O");
-//			for (int n = 0; n < rndmStartMoves; n++) {
-//				startSO.advance(raX.getNextAction2(startSO, false, true));
-//				//startSO.advance(raO.getNextAction2(startSO, false, true));
-//			}
-//			System.out.println("RandomStartState: "+startSO);
-//		}
-//		*/
-//		
-//		// --- this part specific to competeTS() ---
-//		String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
-//		System.out.println("Episode Start @ "+currDateTime);
-//		System.out.println("start state: "+startSO);
-//
-//		for (int k=0; k<competeNum; k++) { // ist im TS immer 1
-//			int Player = Types.PLAYER_PM[startSO.getPlayer()];
-//			so = startSO.copy();
-//
-//			//ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-//			//System.out.println("threadMXBean.isCurrentThreadCpuTimeSupported() "+threadMXBean.isCurrentThreadCpuTimeSupported());
-//
-//			while(true) {
-//				System.out.print("#"); // simple progressbar so user knows something is happening
-//				if(Player==1){		// make a X-move
-//					int n = so.getNumAvailableActions();
-//
-//					//long startT = System.currentTimeMillis();
-//					//StopWatch stopwatch = new StopWatch(); // teil des apache common lang3 pakets - verwendet intern aber auch nur System.nanoTime()
-//					//stopwatch.start();
-//					long startTNano = System.nanoTime();
-//					//long startTNanoThread = threadMXBean.getCurrentThreadCpuTime();
-//					//long startTNanoInstant = Instant.now().getNano();
-//					//long startTNanoInstant = Instant.now().toEpochMilli();
-//
-//					actBest = paX.getNextAction2(so, false, nextMoveSilent); // agent moves!
-//					//long endT = System.currentTimeMillis();
-//					//stopwatch.stop();
-//					long endTNano = System.nanoTime();
-//					//long endTNanoThread = threadMXBean.getCurrentThreadCpuTime();
-//					//long endTNanoInstant = Instant.now().getNano(); // ca selbe ergebnis wie System.nanoTime
-//					//long endTNanoInstant = Instant.now().toEpochMilli(); // bei zeiten <1ms eigentlich immer 0
-//					// Debug Printlines
-//					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
-//					//System.out.println("paX.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
-//					nextTimes[0].addNewTimeNS(endTNano-startTNano);
-//					//System.out.println("Time nanoTime:::: "+ (endTNano-startTNano)+"ns = "+ timeDiffNStoMS(startTNano,endTNano)+"ms");
-//					//System.out.println("Time ThreadNano:: "+ (endTNanoThread-startTNanoThread)+"ns = "+ timeDiffNStoMS(startTNanoThread,endTNanoThread)+"ms");
-//					//System.out.println("Time InstantNano: "+ (endTNanoInstant-startTNanoInstant)+"ns = "+ timeDiffNStoMS(startTNanoInstant,endTNanoInstant)+"ms");
-//					//System.out.println("Time StWatchNano: "+ (stopwatch.getNanoTime())+"ns = "+ timeNStoMS(stopwatch.getNanoTime())+"ms");
-//					//System.out.println("-----------------");
-//
-//					so.advance(actBest);
-//					Player = -1;
-//				}
-//				else				// i.e. O-Move
-//				{
-//					int n = so.getNumAvailableActions();
-//
-//					//long startT = System.currentTimeMillis();
-//					long startTNano = System.nanoTime();
-//					actBest = paO.getNextAction2(so, false, nextMoveSilent); // agent moves!
-//					//long endT = System.currentTimeMillis();
-//					long endTNano = System.nanoTime();
-//					// Debug Printlines
-//					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
-//					//System.out.println("paO.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
-//					nextTimes[1].addNewTimeNS(endTNano-startTNano);
-//
-//					so.advance(actBest);
-//					Player = +1;
-//				}
-//				if (so.isGameOver()) {
-//					System.out.println(); // make new line to not put text at end of ##### progressbar (1st line of while)
-//					int res = so.getGameWinner().toInt();
-//					//  res is +1/0/-1  for X/tie/O win
-//					int player = Types.PLAYER_PM[so.getPlayer()];
-//					switch (res*player) {
-//					case -1:
-//						System.out.println(k+": O wins");
-//						owinCount++;
-//						break;
-//					case 0:
-//						System.out.println(k+": Tie");
-//						tieCount++;
-//						break;
-//					case +1:
-//						System.out.println(k+": X wins");
-//						xwinCount++;
-//						break;
-//					}
-//
-//					break; // out of while
-//
-//				} // if (so.isGameOver())
-//			}	// while(true)
-//
-//		} // for (k)
-//		winrate[0] = (double)xwinCount/competeNum;
-//		winrate[1] = (double) tieCount/competeNum;
-//		winrate[2] = (double)owinCount/competeNum;
-//
-//		System.out.print("win rates: ");
-//		for (int i=0; i<3; i++)
-//			System.out.print(frm.format(winrate[i])+"  ");
-//		System.out.println(" (X/Tie/O)");
-//
-//		return winrate;
-//	} // competeTS
-
-	// --- seems obsolete now, see TSTimeStorage ---
-//	private static double timeDiffNStoMS(long startT, long endT) {
-//		double s = startT;
-//		double e = endT;
-//		double r = e - s;
-//		return r/1000000;
-//	}
-//	private static double timeNStoMS(long startT) {
-//		double r = startT;
-//		return r/1000000;
-//	}
-	
 	/**
 	 * Does the main work for menu items 'Single Compete', 'Swap Compete' and 'Compete Both'.
 	 * These menu items set enum {@link Arena#taskState} to either COMPETE or SWAPCMP or BOTHCMP.

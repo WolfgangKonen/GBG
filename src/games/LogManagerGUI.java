@@ -280,7 +280,8 @@ public class LogManagerGUI {
     private void loadBoard(int position) {
         if(currentLog.stateObservations.size() > position && position >= 0) {
             counter = position;
-            gameBoard.updateBoard(currentLog.stateObservations.get(position), true, true);
+    		boolean showValue = gameBoard.getArena().m_xab.getShowValueOnGameBoard();
+            gameBoard.updateBoard(currentLog.stateObservations.get(position), true, showValue);
             jTFNextAction.setText("" + (position + 1));
 
             if(currentLog.stateObservations.size() > position + 1) {

@@ -241,6 +241,24 @@ public class Types {
     	public ScoreTuple(ScoreTuple ost) {
     		this.scTup = ost.scTup.clone();
     	}
+    	
+    	public double max() {
+    		double f = -Double.MAX_VALUE;
+    		for (int i=0; i<scTup.length; i++) f = (scTup[i]>f) ? scTup[i] : f;
+    		return f;
+    	}
+    	
+    	public int argmax() {
+    		double f = -Double.MAX_VALUE;
+    		int ind=0;
+    		for (int i=0; i<scTup.length; i++) 
+    			if (scTup[i]>f) {
+    				f = scTup[i];
+    				ind = i;
+    			}
+    		return ind;
+    	}
+    	
     	public String toString() {
     		String cs = "(";
     		//double f = StateObserver2048.MAXSCORE;		// only temporarily

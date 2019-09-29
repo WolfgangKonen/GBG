@@ -8,6 +8,7 @@ import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
 import tools.Types.ACTIONS;
+import tools.Types.ScoreTuple;
 
 /**
  * Class StateObservation observes the current state of the game, it has utility functions for
@@ -133,19 +134,23 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 */
 	public double getGameScore(StateObservation refer) {
 		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
-        boolean gameOver = this.isGameOver();
-        if(gameOver) {
-            Types.WINNER win = this.getGameWinner();
-        	switch(win) {
-        	case PLAYER_LOSES:
-                return sign*NimConfig.REWARD_NEGATIVE;
-        	case TIE:
-                return 0;
-        	case PLAYER_WINS:
-                return sign*NimConfig.REWARD_POSITIVE;
-            default:
-            	throw new RuntimeException("Wrong enum for Types.WINNER win !");
-        	}
+        if(isGameOver()) {
+        	// if the game is over, it is a win for the player who made the action towards this
+        	// --> it is a loss for the player to move in this.
+        	// [There is no tie in game Nim.]
+        	return -sign;
+        	
+//          Types.WINNER win = this.getGameWinner();
+//        	switch(win) {
+//        	case PLAYER_LOSES:
+//                return sign*NimConfig.REWARD_NEGATIVE;
+//        	case TIE:
+//                return 0;
+//        	case PLAYER_WINS:
+//                return sign*NimConfig.REWARD_POSITIVE;
+//            default:
+//            	throw new RuntimeException("Wrong enum for Types.WINNER win !");
+//        	}
         }
         
         return 0; 

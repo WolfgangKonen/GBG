@@ -139,17 +139,24 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	public double getGameScore(StateObservation refer) {
 		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
         if(isGameOver()) {
-            Types.WINNER win = this.getGameWinner();
-        	switch(win) {
-        	case PLAYER_LOSES:
-                return sign*REWARD_NEGATIVE;
-        	case TIE:
-                return 0;
-        	case PLAYER_WINS:
-                return sign*REWARD_POSITIVE;
-            default:
-            	throw new RuntimeException("Wrong enum for Types.WINNER win !");
-        	}
+    		if (TicTDBase.tie(m_Table)) 
+    			return 0;
+        	// if the game is over and not a tie, it is a win for the player who made the action towards 
+        	// state 'this' --> it is a loss for this.getPlayer().
+        	return -sign;
+    		
+        	// old code, more complicated and it uses getGameWinner() which we want to be obsolete
+//            Types.WINNER win = this.getGameWinner();
+//        	switch(win) {
+//        	case PLAYER_LOSES:
+//                return sign*REWARD_NEGATIVE;
+//        	case TIE:
+//                return 0;
+//        	case PLAYER_WINS:
+//                return sign*REWARD_POSITIVE;
+//            default:
+//            	throw new RuntimeException("Wrong enum for Types.WINNER win !");
+//        	}
         }
         
         return 0; 

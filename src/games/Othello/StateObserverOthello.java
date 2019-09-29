@@ -128,7 +128,7 @@ public class StateObserverOthello extends ObserverBase{
 	@Override
 	public boolean isGameOver() {
 		return (BaseOthello.possibleActions(currentGameState, playerNextMove).size() == 0 ) &&
-				(BaseOthello.possibleActions(currentGameState, this.getOpponent(playerNextMove)).size() == 0);
+				(BaseOthello.possibleActions(currentGameState, getOpponent(playerNextMove)).size() == 0);
 	}
 
 	@Override

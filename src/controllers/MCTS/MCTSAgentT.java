@@ -305,18 +305,29 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so) {
 		ScoreTuple sc = new ScoreTuple(so);
+		int player; 
 		switch (so.getNumPlayers()) {
 		case 1: 
 			sc.scTup[0] = this.getScore(so);
 			break;
 		case 2:
-			int player = so.getPlayer();
+			player = so.getPlayer();
 			int opponent = (player==0) ? 1 : 0;
 			sc.scTup[player] = this.getScore(so);
 			sc.scTup[opponent] = -sc.scTup[player];
 			break;
 		default: 
-    		throw new RuntimeException("Cannot create ScoreTuple for MCTSAgentT and numPlayer>=3");			        		
+			boolean rgs = mctsPlayer.getParOther().getRewardIsGameScore();
+			player = so.getPlayer();
+			
+			// this is only partially correct, because for non-game-over states 'so' the tuple value for 
+			// other players than so.getPlayer() will be zero (at least for final-reward games). But 
+			// most methods that use getScoreTuple (like MaxNWrapper.estimateGameValueTuple) need only 
+			// the correct value for so.getPlayer(), which will be inserted into sc in the 3rd line:
+			sc = so.getRewardTuple(rgs);
+			if (!so.isGameOver())
+				sc.scTup[player] = this.getScore(so);	
+				// return MCTS' estimate of the value of so for the player to move in so
 		}
     	return sc;
 	}

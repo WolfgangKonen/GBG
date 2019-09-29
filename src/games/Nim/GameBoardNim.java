@@ -27,6 +27,7 @@ import games.Arena.Task;
 import games.ArenaTrain;
 import tools.Types;
 import tools.Types.ACTIONS;
+import tools.Types.ScoreTuple;
 
 /**
  * Class GameBoardNim implements interface GameBoard for Nim.
@@ -266,16 +267,28 @@ public class GameBoardNim extends JFrame implements GameBoard {
 				leftInfo.setText("O to move   "); break;
 			}
 			if (so.isGameOver()) {
-				int win = so.getGameWinner().toInt();
-				int check = Player*win;
-				switch(check) {
-				case(+1): 
+				ScoreTuple sc = so.getGameScoreTuple();
+				int winner = sc.argmax();
+				if (sc.max()==0.0) winner = -2;	// tie indicator
+				switch(winner) {
+				case( 0): 
 					leftInfo.setText("X has won   "); break;
-				case(-1):
+				case( 1):
 					leftInfo.setText("O has won   "); break;
-				case(0):
+				case(-2):
 					leftInfo.setText("Tie         "); break;
 				}
+				// old code, we want to make getGameWinner obsolete
+//				int win = so.getGameWinner().toInt();
+//				int check = Player*win;
+//				switch(check) {
+//				case(+1): 
+//					leftInfo.setText("X has won   "); break;
+//				case(-1):
+//					leftInfo.setText("O has won   "); break;
+//				case(0):
+//					leftInfo.setText("Tie         "); break;
+//				}
 				rightInfo.setText("");
 				
 			}

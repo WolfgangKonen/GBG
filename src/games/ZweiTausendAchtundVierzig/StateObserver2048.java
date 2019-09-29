@@ -155,6 +155,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     public StateObserver2048 copy() {
     	StateObserver2048 so2 =  new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
     	so2.m_counter = this.m_counter;
+    	so2.winState = this.winState;
+    	so2.highestTileValue = this.highestTileValue;
 //    	so2.moves = this.moves;
     	return so2;
     }
