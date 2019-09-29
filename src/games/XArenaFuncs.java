@@ -22,6 +22,7 @@ import games.Othello.StateObserverOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax;
 import games.Othello.Edax.Edax2;
+import games.Sim.StateObserverSim;
 import games.TStats.TAggreg;
 import params.*;
 import tools.*;
@@ -869,6 +870,47 @@ public class XArenaFuncs
 		return res[0];
 	}
 	
+	public double [] singleCompete3(XArenaButtons xab, GameBoard gb)
+	{
+		int competeNum = xab.winCompOptions.getNumGames();
+		int numPlayers = gb.getStateObs().getNumPlayers();
+		double [] res = {0.0,0.0,0.0,0.0};
+		try 
+		{
+			String P0 = xab.getSelectedAgent(0);
+			String P1 = xab.getSelectedAgent(1);
+			String P2 = xab.getSelectedAgent(2);
+			if (P0.equals("Human") | P1.equals("Human") | P2.equals("Human") ) 
+			{
+				MessageBox.show(xab, "No compete for agent Human", "Error", JOptionPane.ERROR_MESSAGE);
+				return res;
+			} 
+			else
+			{
+				StateObservation startSO = gb.getDefaultStartState();  // empty board
+
+				PlayAgent[] paVector = fetchAgents(xab);
+
+				AgentBase.validTrainedAgents(paVector,numPlayers); // may throw RuntimeException
+				
+				PlayAgent[] qaVector = wrapAgents(paVector,xab,startSO);
+
+				int verbose=1;
+
+				
+				res = compete3Player(qaVector[0],qaVector[1],qaVector[2],startSO,competeNum,verbose, null);
+				System.out.println(Arrays.toString(res));
+				return res;
+			}
+				
+			
+					
+		} catch(RuntimeException ex) {
+			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			return res;
+		}
+	}
+	
 	/**
 	 * Perform a competition paX vs. paO consisting of competeNum games, starting from StateObservation startSO.
 	 * @param paX	PlayAgent,	a trained agent
@@ -1040,8 +1082,8 @@ public class XArenaFuncs
 	
 	public static double[] compete3Player(PlayAgent pa0, PlayAgent pa1, PlayAgent pa2, StateObservation startSO, 
 			int competeNum, int verbose, TSTimeStorage[] nextTimes) {
-		double[] winrate = new double[4];
-		int winCount0 = 0, winCount1 = 0, winCount2 = 2,tieCount=0;
+		double[] winrate = new double[3];
+		int winCount0 = 0, winCount1 = 0, winCount2 = 2;
 		double moveCount = 0.0;
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		boolean nextMoveSilent = (verbose<2 ? true : false);
@@ -1099,32 +1141,12 @@ public class XArenaFuncs
 				}
 				if (so.isGameOver()) 
 				{
-					int res = so.getGameWinner().toInt();
+					winCount0 += so.getGameScore(0);
+					winCount1 += so.getGameScore(1);
+					winCount2 += so.getGameScore(2);
 					moveCount += so.getMoveCounter();
 					//  res is +1/0/-1  for X/tie/O win
 					
-					switch (res) 
-					{
-						case -1:
-							if (verbose>0) System.out.println(k+": Tie");
-							tieCount++;
-							break;
-						case 0:
-							if (verbose>0) System.out.println(k+": 0 Wins");
-							winCount1++;
-							winCount2++;
-							break;
-						case 1:
-							if (verbose>0) System.out.println(k+": 1 wins");
-							winCount0++;
-							winCount2++;
-							break;
-						case 2:
-							if (verbose>0) System.out.println(k+": 2 wins");
-							winCount0++;
-							winCount1++;
-							break;
-					}
 
 					break; // out of while
 
@@ -1136,8 +1158,6 @@ public class XArenaFuncs
 		winrate[0] = (double) winCount0/competeNum;
 		winrate[1] = (double) winCount1/competeNum;
 		winrate[2] = (double) winCount2/competeNum;
-		winrate[3] = (double) tieCount/competeNum;
-		
 		moveCount /= competeNum;
 
 		if (verbose>0) {

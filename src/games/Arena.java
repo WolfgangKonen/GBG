@@ -157,6 +157,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		String agentN, str;
 		int n;
 		double winXScore;
+		double [] allWinScores;
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		gb.showGameBoard(this, true);
 
@@ -187,7 +188,17 @@ abstract public class Arena extends JFrame implements Runnable {
 			case COMPETE:
 				enableButtons(false);
 				setStatusMessage("Running Single Compete ...");
-
+				if(gb.getStateObs().getNumPlayers() > 2)
+				{
+					allWinScores = m_xfun.singleCompete3(m_xab, gb);
+					enableButtons(true);
+					str = "Compete finished. Avg. score for all PLayer: ["+ allWinScores[0] + "," + allWinScores[1] + "," + allWinScores[2] + "]";
+					System.out.println(str);
+					setStatusMessage(str);
+					updateBoard();
+					taskState = Task.IDLE;
+					break;
+				}
 				winXScore = m_xfun.singleCompete(m_xab, gb);
 
 				enableButtons(true);
