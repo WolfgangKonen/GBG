@@ -108,7 +108,7 @@ public class SingleTreeNode implements Serializable
 	 *
 	 * MCTS search: Do for {@code m_player.NUM_ITERS} iterations:
 	 * <ul>
-	 * <li>select a leaf node via {@link #treePolicy()} (this includes
+	 * <li>select a leaf node via {@link #treePolicy()} (this includes UCT or other select modes and 
 	 *    {@link #expand()} of not fully expanded nodes, as long as the maximum
 	 *    tree depth is not yet reached),
 	 * <li>make a {@link #rollOut2Player()} starting from this leaf node (a game with
@@ -117,7 +117,7 @@ public class SingleTreeNode implements Serializable
 	 * <li>{@link #backUp2Player(SingleTreeNode, double)} the resulting score
 	 *    {@code delta} and the number of visits for all nodes on {@code totValue}
 	 *    and {@code nVisits}. Do this for all nodes on the path from the leaf up
-	 *    to the root.
+	 *    to the root (with the exception that the root node has its {@code totValue} not updated).
 	 * </ul>
 	 * 
 	 * Once this method is completed, the method {@link #bestAction()} will
@@ -216,10 +216,7 @@ public class SingleTreeNode implements Serializable
 
 		// /WK/ here follow some diagnostic checks (not required for normal operation)
 		
-		// the following assertion is only for cases where we *not* use backUp3Player(), because
-		// in the 3-player case we never update nVisits for the root node.
-		if (m_state.getNumPlayers()!=3)
-			assert this.nVisits == numIters : "mroot's visits do not match numIters!";
+		assert this.nVisits == numIters : "mroot's visits do not match numIters!";
 		this.printChildInfo(0, true);
 
 		/*
@@ -289,14 +286,15 @@ public class SingleTreeNode implements Serializable
 			}
 		}
 		
-		// the following assertion shall *not* be executed in the case that 'this' is the root node
+		// NEW: we again update nVisits for mroot. Thus we can do the assertion in all cases.
+		// OLD: the following assertion shall *not* be executed in the case that 'this' is the root node
 		// and we have 3 players, because we never update nVisits for the root node in the 3-player case .
-		if (!(isRootNode && m_state.getNumPlayers()==3)) {
-			int offs = (isRootNode) ? 0 : 1; // why '1'? - every non-root node n has one visit more 
-			// than all its children. This stems from its 'birth' visit, i.e. the time 
-			// where it was 'selected' but did not yet have any children.
-			assert offs + cVisits == this.nVisits : "children visits do not match the visits of this!";
-		}
+//		if (!(isRootNode && m_state.getNumPlayers()==3)) {
+			int offset = (isRootNode) ? 0 : 1; // why '1'? - every non-root node n has one visit more 
+							// than all its children. This stems from its 'birth' visit, i.e. the time 
+							// where it was 'selected' but did not yet have any children.
+			assert offset + cVisits == this.nVisits : "children visits do not match the visits of this!";
+//		}
 	}
 	
 	/**
@@ -327,22 +325,16 @@ public class SingleTreeNode implements Serializable
 			} else {
 				switch(m_player.getParMCTS().getSelectMode()) {
 				case 0: 
-//					SingleTreeNode next0 = cur.uct();
-//					cur = next0;
 					cur = cur.uct();
 					break;
 				case 1: 
-//					SingleTreeNode next1 = cur.egreedy();
-//					cur = next1;
 					cur = cur.egreedy();
 					break; 
 				case 2: 
-//					SingleTreeNode next2 = cur.rouletteWheel();
-//					cur = next2;
 					cur = cur.rouletteWheel();
 					break; 
 				default: 
-					throw new RuntimeException("this selectMode is not yet implemented");
+					throw new RuntimeException("this selectMode ("+m_player.getParMCTS().getSelectMode()+")is not implemented");
 				}
 			}
 		}
@@ -751,25 +743,28 @@ public class SingleTreeNode implements Serializable
 		SingleTreeNode n = selected;
 //		int nPlayer;
 		int pPlayer;
-		while (n.parent != null) {
-			// Why do we test on n.parent here? - Because we need n.parent below to calculate the player
-			// preceding n's player. But isn't this incomplete because we then never accumulate n.totValue
-			// when n==mroot? - No, it is not incomplete, because n.totValue and n.nVisits are only needed
-			// for nodes n being *children* of some other nodes (see bestAction()). And the root node is
-			// not the child of anyone. 
-			// [As a consequence we have to inhibit some assertions on n.nVisits when n is root node.]
-			
-//			nPlayer = n.m_state.getPlayer();		// /WK/ bug fix: select the player of current n
-//			pPlayer = (nPlayer+2)%3;				// pPlayer: the player preceding nPlayer (but this is 
-			// also buggy in special cases: if P1 has already lost, then the player preceding P2 is P0, 
-			// and not P1, but (nPlayer+2)%3=1 would return P1). Therefore we use the bug fix of the 
-			// next line:
-			pPlayer = n.parent.m_state.getPlayer();	// pPlayer: the player really preceding n's player
-			
+		while (n != null) {
 			n.nVisits++;
-//			n.totValue += (double)delta[selected.m_state.getPlayer()]; // /WK/ bug, always the same delta
-//			n.totValue += (double)delta[nPlayer];	// /WK/ 1st fix, but still a bug: backup delta for nPlayer
-			n.totValue += delta[pPlayer];	// /WK/ 2nd bug fix: backup delta for pPlayer
+			
+			if (n.parent != null) {
+				// Why do we test on n.parent here? - Because we need n.parent to calculate the player
+				// preceding n's player. But isn't this incomplete because we then never accumulate n.totValue
+				// when n==mroot? - No, it is not incomplete, because n.totValue is only needed
+				// for nodes n being *children* of some other nodes (see bestAction() and uct()). And the root
+				// node is not the child of anyone.  
+				// [Note that uct() needs mroot.nVisits, that's why we increment nVisits for all n.]
+				
+//				nPlayer = n.m_state.getPlayer();		// /WK/ bug fix: select the player of current n
+//				pPlayer = (nPlayer+2)%3;				// pPlayer: the player preceding nPlayer (but this is 
+				// also buggy in special cases: if P1 has already lost, then the player preceding P2 is P0, 
+				// and not P1, but (nPlayer+2)%3=1 would return P1). 
+				// Therefore we use the bug fix shown in the next line:
+				pPlayer = n.parent.m_state.getPlayer();	// pPlayer: the player really preceding n's player
+				
+//				n.totValue += (double)delta[selected.m_state.getPlayer()]; // /WK/ bug, always the same delta
+//				n.totValue += (double)delta[nPlayer];	// /WK/ 1st fix, but still a bug: backup delta for nPlayer
+				n.totValue += delta[pPlayer];	// /WK/ 2nd bug fix: backup delta for pPlayer
+			}
 			// Why pPlayer? - This is for the same reason why we call in backUp() negate *before* the first 
 			// '+=' to n.totValue is made: If the result of a random roll-out from n as a leaf is a loss for 
 			// n, this does not really count. What counts is the result for pPlayer, the player who *created* 
@@ -785,18 +780,19 @@ public class SingleTreeNode implements Serializable
 	{
 		SingleTreeNode n = selected;
 		int pPlayer;
-		while (n.parent != null) {
-			// Why do we test on n.parent here? - Because we need n.parent below to calculate the player
-			// preceding n's player. But isn't this incomplete because we then never accumulate n.totValue
-			// when n==mroot? - No, it is not incomplete, because n.totValue and n.nVisits are only needed
-			// for nodes n being *children* of some other nodes (see bestAction()). And the root node is
-			// not the child of anyone. 
-			// [As a consequence we have to inhibit some assertions on n.nVisits when n is root node.]
-			
-			pPlayer = n.parent.m_state.getPlayer();	// pPlayer: the player preceding n's player
-			
+		while (n != null) {
 			n.nVisits++;
-			n.totValue += delta[pPlayer];	// backup delta for pPlayer
+			
+			if (n.parent != null) {
+				// Why do we test on n.parent here? - Because we need n.parent to know the player
+				// preceding n's player. But isn't this incomplete because we then never accumulate n.totValue
+				// when n==mroot? - No, it is not incomplete, because n.totValue is only needed
+				// for nodes n being *children* of some other nodes (see bestAction() and uct()). And the root
+				// node is not the child of anyone.  
+				// [Note that uct() needs mroot.nVisits, that's why we increment nVisits for all n.]
+				pPlayer = n.parent.m_state.getPlayer();	// pPlayer: the player preceding n's player
+				n.totValue += delta[pPlayer];	// backup delta for pPlayer
+			}
 			// Why pPlayer? - This is for the same reason why we call in backUp2Player() negate *before* the  
 			// first '+=' to n.totValue is made: If the result of a random roll-out from n as a leaf is a loss  
 			// for n, this does not really count. What counts is the result for pPlayer, the player who  
