@@ -183,6 +183,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 					count2++;
 			}
 		}
+		// now count0,1,2 have the # of links occupied by player P0,1,2
 		
 		if (looser==-1) 
 		{						// /WK/ bug fix, this if-condition was missing before. In the case 
