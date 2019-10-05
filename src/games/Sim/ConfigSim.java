@@ -10,7 +10,7 @@ public class ConfigSim {
 	/**
 	 *  Number of players
 	 */
-	public static final int NUM_PLAYERS = 3;
+	public static final int NUM_PLAYERS = 2;
 	
 	/**
 	 *  A dummy state, needed as reference in XNTupleFuncsSim

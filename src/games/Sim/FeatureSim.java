@@ -73,13 +73,18 @@ public class FeatureSim implements Feature{
 
     	switch (featMode){
         	case 0:
-        		//ToDo: what is a Feat Vector and is this correct?
-        		return intToDoubleArray2Player(som.getNodes());
-        	case 1:
-        		return intToDoubleArray3Player(som.getNodes());
+        		return feature0Vector(som);
         	default:
         		throw new RuntimeException("Unknown featmode: " + featMode);
     	}
+	}
+	
+	private double [] feature0Vector(StateObserverSim som)
+	{
+		if(ConfigSim.NUM_PLAYERS > 2)
+			return intToDoubleArray3Player(som.getNodes());
+		else
+			return intToDoubleArray2Player(som.getNodes());
 	}
 	
 	private double[] intToDoubleArray3Player(Node [] nodes)
