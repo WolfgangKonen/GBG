@@ -54,7 +54,7 @@ public class FeatureSim implements Feature{
 		{
     	case 0:
     		if(ConfigSim.NUM_PLAYERS > 2)
-    			return getEdgesCount() * ConfigSim.NUM_PLAYERS;
+    			return getEdgesCount() * ConfigSim.NUM_PLAYERS + 3;
     		else
     			return getEdgesCount();
     	default:
@@ -82,16 +82,20 @@ public class FeatureSim implements Feature{
 	private double [] feature0Vector(StateObserverSim som)
 	{
 		if(ConfigSim.NUM_PLAYERS > 2)
-			return intToDoubleArray3Player(som.getNodes());
+			return intToDoubleArray3Player(som.getNodes(), som.getPlayer());
 		else
 			return intToDoubleArray2Player(som.getNodes());
 	}
 	
-	private double[] intToDoubleArray3Player(Node [] nodes)
+	private double[] intToDoubleArray3Player(Node [] nodes, int player)
 	{
 		double input[] = new double[getInputSize(featMode)];
 		int k = 0;
 		int pl = 0;
+		
+		input[player] = 1.0;
+		input[(player+1)%3] = 0.0;
+		input[(player+2)%3] = 0.0;
 		for(int i = 0; i < nodes.length -1 ; i++)
 		{
 			for(int j = 0; j < nodes.length - 1 - i; j++)
