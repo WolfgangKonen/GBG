@@ -120,12 +120,12 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	}
 	
 
-	public Types.WINNER getGameWinner() {
-		assert isGameOver() : "Game is not yet over!";
-		if (win())							  // advance() has changed m_player (although game is over): 
-			return Types.WINNER.PLAYER_LOSES; // the player, who would have to move, looses.
-		return null;
-	}
+//	public Types.WINNER getGameWinner() {
+//		assert isGameOver() : "Game is not yet over!";
+//		if (win())							  // advance() has changed m_player (although game is over): 
+//			return Types.WINNER.PLAYER_LOSES; // the player, who would have to move, looses.
+//		return null;
+//	}
 
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 

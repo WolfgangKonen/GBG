@@ -149,8 +149,7 @@ public class StateObserverOthello extends ObserverBase{
 	/**
 	 * Determines the winner after the game is over by counting each players discs
 	 */
-	@Override
-	public WINNER getGameWinner() {
+	public WINNER winStatus() {
 		assert isGameOver() :"Game isn't over";
 		int countPlayer = 0, countOpponent = 0;
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
@@ -289,14 +288,14 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	@Override
 	public double getGameScore(StateObservation referringState) {
-		int retVal = (referringState.getPlayer() == this.playerNextMove) ? 1 :(-1); // WK: probably the right choice
+		int sign = (referringState.getPlayer() == this.playerNextMove) ? 1 :(-1); 
 		if(this.isGameOver()) {		// 	Working correctly now	
-			Types.WINNER win = this.getGameWinner();
+			Types.WINNER win = this.winStatus();
 			switch(win) {
 			case PLAYER_LOSES:
-				return retVal * REWARD_NEGATIVE;
+				return sign * REWARD_NEGATIVE;
 			case PLAYER_WINS:
-				return retVal * REWARD_POSITIVE;
+				return sign * REWARD_POSITIVE;
 			case TIE:
 				return 0.0;
 			default:

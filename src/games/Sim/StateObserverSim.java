@@ -277,22 +277,22 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	}
 	
 	
-	@Override
-	public WINNER getGameWinner() {
-		assert isGameOver() : "Game is not over yet!";
-		if(winner == 0)
-			return Types.WINNER.PLAYER_WINS;
-		else if(winner == 1)
-			return Types.WINNER.PLAYER_LOSES;
-		else
-			return Types.WINNER.TIE;
-	}
-	
-	@Override
-	public int getGameWinner3player() {
-		assert isGameOver() : "Game is not over yet!";
-		return winner;
-	}  
+//	@Override
+//	public WINNER getGameWinner() {
+//		assert isGameOver() : "Game is not over yet!";
+//		if(winner == 0)
+//			return Types.WINNER.PLAYER_WINS;
+//		else if(winner == 1)
+//			return Types.WINNER.PLAYER_LOSES;
+//		else
+//			return Types.WINNER.TIE;
+//	}
+//	
+//	@Override
+//	public int getGameWinner3player() {
+//		assert isGameOver() : "Game is not over yet!";
+//		return winner;
+//	}  
 	
 	
 	@Override

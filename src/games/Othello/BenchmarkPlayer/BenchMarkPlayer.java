@@ -162,7 +162,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	 * @return	Integer representing the player
 	 */
 	private int finalMove(StateObserverOthello so) {
-		Types.WINNER x = so.getGameWinner();
+		Types.WINNER x = so.winStatus();
 		StateObserverOthello newSO = (StateObserverOthello) so;
 		if(x == Types.WINNER.PLAYER_WINS) return so.getOpponent(so.getPlayer());
 		return so.getPlayer();

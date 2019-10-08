@@ -73,16 +73,16 @@ public interface StateObservation extends Serializable{
 	 */
 	public String stringActionDescr(ACTIONS act);
 
-	/**
-	 * This method should be only called if game is over. The player is 
-	 * the player who would be next in turn (if the game were not over)
-	 * <p>
-	 * WINNER::key() returns the number of the player who has won.
-	 * 
-	 * @return PLAYER_LOSES(-1), TIE(0), PLAYER_WINS(1)
-	 */
-	public Types.WINNER getGameWinner();
-	// Do we need this method really?
+//	/**
+//	 * This method should be only called if game is over. The player is 
+//	 * the player who would be next in turn (if the game were not over)
+//	 * <p>
+//	 * WINNER::key() returns the number of the player who has won.
+//	 * 
+//	 * @return PLAYER_LOSES(-1), TIE(0), PLAYER_WINS(1)
+//	 */
+//	public Types.WINNER getGameWinner();
+//	// Do we need this method really?
 	
 	
 	/**

@@ -174,15 +174,15 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return true;
     }
 
-    public Types.WINNER getGameWinner() {
-        assert isGameOver() : "Game is not yet over!";
-        switch (winState) {
-            case 1:
-                return Types.WINNER.PLAYER_WINS;
-            default:
-                return Types.WINNER.PLAYER_LOSES;
-        }
-    }
+//    public Types.WINNER getGameWinner() {
+//        assert isGameOver() : "Game is not yet over!";
+//        switch (winState) {
+//            case 1:
+//                return Types.WINNER.PLAYER_WINS;
+//            default:
+//                return Types.WINNER.PLAYER_LOSES;
+//        }
+//    }
 
 
     public double getHeuristicBonus(HeuristicSettings2048 settings) {

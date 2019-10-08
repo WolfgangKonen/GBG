@@ -164,16 +164,16 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
         return true;
     }
 
-    @Override
-    public Types.WINNER getGameWinner() {
-        assert isGameOver() : "Game is not yet over!";
-        switch (winState) {
-            case 1:
-                return Types.WINNER.PLAYER_WINS;
-            default:
-                return Types.WINNER.PLAYER_LOSES;
-        }
-    }
+//    @Override
+//    public Types.WINNER getGameWinner() {
+//        assert isGameOver() : "Game is not yet over!";
+//        switch (winState) {
+//            case 1:
+//                return Types.WINNER.PLAYER_WINS;
+//            default:
+//                return Types.WINNER.PLAYER_LOSES;
+//        }
+//    }
 
     public double getGameScore1() {
         if (isGameOver()) {

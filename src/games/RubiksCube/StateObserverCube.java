@@ -115,10 +115,10 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
  		return m_state.toString();
 	}
 	
-	public Types.WINNER getGameWinner() {
-		assert isGameOver() : "Game is not yet over!";
-		return Types.WINNER.PLAYER_WINS;
-	}
+//	public Types.WINNER getGameWinner() {
+//		assert isGameOver() : "Game is not yet over!";
+//		return Types.WINNER.PLAYER_WINS;
+//	}
 
 	public CubeState getCubeState() {
 		return m_state;

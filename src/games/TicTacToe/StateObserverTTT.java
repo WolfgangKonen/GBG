@@ -121,15 +121,15 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	}
 	
 
-	public Types.WINNER getGameWinner() {
-		assert isGameOver() : "Game is not yet over!";
-		if (TicTDBase.Win(m_Table, -m_Player))		// why -m_Player? advance() has changed m_player (although game is over) 
-			return Types.WINNER.PLAYER_LOSES;
-		if (TicTDBase.tie(m_Table)) 
-			return Types.WINNER.TIE;
-		
-		throw new RuntimeException("Unexpected case: we cannot have a win for the player to move!");
-	}
+//	public Types.WINNER getGameWinner() {
+//		assert isGameOver() : "Game is not yet over!";
+//		if (TicTDBase.Win(m_Table, -m_Player))		// why -m_Player? advance() has changed m_player (although game is over) 
+//			return Types.WINNER.PLAYER_LOSES;
+//		if (TicTDBase.tie(m_Table)) 
+//			return Types.WINNER.TIE;
+//		
+//		throw new RuntimeException("Unexpected case: we cannot have a win for the player to move!");
+//	}
 
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 

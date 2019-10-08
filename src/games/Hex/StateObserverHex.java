@@ -120,10 +120,10 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
         return determineWinner() != PLAYER_NONE || getNumAvailableActions() == 0;
     }
 
-    @Override
-    public Types.WINNER getGameWinner() {
-        return (determineWinner() == currentPlayer ? Types.WINNER.PLAYER_LOSES : Types.WINNER.PLAYER_WINS);
-    }
+//    @Override
+//    public Types.WINNER getGameWinner() {
+//        return (determineWinner() == currentPlayer ? Types.WINNER.PLAYER_LOSES : Types.WINNER.PLAYER_WINS);
+//    }
 
     /**
      * Uses information about the tile on which the last stone has been placed to determine if the chain containing

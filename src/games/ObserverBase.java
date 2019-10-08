@@ -247,8 +247,8 @@ abstract public class ObserverBase implements StateObservation {
     	return true;
     }
     
-    public int getGameWinner3player() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+//  public int getGameWinner3player() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
 }

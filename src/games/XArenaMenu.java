@@ -312,7 +312,7 @@ public class XArenaMenu extends JMenuBar {
 				+ "are printed to the console</body></html>");
 		menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);
-		menuItem = new JMenuItem("Compete Both");
+		menuItem = new JMenuItem("Compete In All Roles");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				m_arena.taskState = Arena.Task.BOTHCMP;

@@ -132,15 +132,15 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	}
 	
 
-	public Types.WINNER getGameWinner() {
-		assert isGameOver() : "Game is not yet over!";
-		if (m_C4.isDraw()) 
-			return Types.WINNER.TIE;
-		
-		// if we arrive here, the game is over and it is a win for the other player: 
-		return Types.WINNER.PLAYER_LOSES;
-		// (the player who is to move is not the winner if game is over)
-	}
+//	public Types.WINNER getGameWinner() {
+//		assert isGameOver() : "Game is not yet over!";
+//		if (m_C4.isDraw()) 
+//			return Types.WINNER.TIE;
+//		
+//		// if we arrive here, the game is over and it is a win for the other player: 
+//		return Types.WINNER.PLAYER_LOSES;
+//		// (the player who is to move is not the winner if game is over)
+//	}
 
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
