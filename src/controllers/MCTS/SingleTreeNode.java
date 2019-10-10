@@ -3,8 +3,8 @@ package controllers.MCTS;
 import games.StateObservation;
 import games.Sim.StateObserverSim;
 import tools.ElapsedCpuTimer;
+import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;

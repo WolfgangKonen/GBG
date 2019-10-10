@@ -3,7 +3,7 @@ package controllers.TD.ntuple2;
 import games.StateObservation;
 import params.ParNT;
 import params.ParTD;
-import tools.Types;
+import tools.ScoreTuple;
 
 /**
  * Interface NTupleAgt is needed to make {@link NTuple2ValueFunc} and {@link NextState} usable for 
@@ -28,7 +28,7 @@ abstract interface NTupleAgt {
 	// methods needed in class NextState:
 	public boolean getAFTERSTATE();
 	public double estimateGameValue(StateObservation sob);
-	public Types.ScoreTuple estimateGameValueTuple(StateObservation sob);
+	public ScoreTuple estimateGameValueTuple(StateObservation sob);
 	public int getMoveCounter();
 	// the compiler requires that the following four methods are public, although
 	// they should be used only from class NextState (and not by anybody):

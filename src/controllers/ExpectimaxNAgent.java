@@ -9,11 +9,11 @@ import games.StateObsNondeterministic;
 import params.MaxNParams;
 import params.ParMaxN;
 import params.ParOther;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
-import tools.Types.ScoreTuple;
 
 import java.io.Serializable;
 import java.util.ArrayList;

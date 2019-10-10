@@ -3,7 +3,7 @@ package controllers;
 import java.io.Serializable;
 
 import games.StateObservation;
-import tools.Types.ScoreTuple;
+import tools.ScoreTuple;
 
 /**
  * Wrapper based on {@link ExpectimaxNAgent} for n-ply look-ahead in nondeterministic games.

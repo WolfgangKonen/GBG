@@ -7,8 +7,8 @@ import agentIO.LoadSaveGBG;
 import games.Arena;
 import games.Evaluator;
 import games.GameBoard;
+import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 /**
  * The abstract interface for game playing agents.
@@ -99,7 +99,7 @@ public interface PlayAgent {
 	 * 						The return value is a tuple containing  
 	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
 	 */
-	public Types.ScoreTuple estimateGameValueTuple(StateObservation sob);
+	public ScoreTuple estimateGameValueTuple(StateObservation sob);
 	
 	/**
 	 * Train the Agent for one complete game episode. <p>

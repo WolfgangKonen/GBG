@@ -27,7 +27,6 @@ import games.TStats.TAggreg;
 import params.*;
 import tools.*;
 import tools.Types.ACTIONS;
-import tools.Types.ScoreTuple;
 
 import javax.swing.*;
 import java.io.BufferedWriter;
@@ -855,6 +854,106 @@ public class XArenaFuncs
 		return (resX+resO)/2.0;
 	}
 	
+	// Work in progress.....
+	// --- the generalization of old compete & compete3Player to arbitrary N players ---
+	public static ScoreTuple competeNPlayer(PlayAgtVector paVector, StateObservation startSO, 
+			int competeNum, int verbose, TSTimeStorage[] nextTimes) {
+		int numPlayers = paVector.getNumPlayers();
+		ScoreTuple sc, scMean=new ScoreTuple(numPlayers);
+		double sWeight = 1/(double)competeNum;
+		double moveCount = 0.0;
+		DecimalFormat frm = new DecimalFormat("#0.000");
+		boolean nextMoveSilent = (verbose<2 ? true : false);
+		StateObservation so;
+		Types.ACTIONS actBest;
+		String sMsg;
+		
+		String[] pa_string = new String[numPlayers];
+		for (int i=0; i<numPlayers; i++) pa_string[i] = paVector.pavec[i].stringDescr();
+		
+		switch (numPlayers) {
+		case (1):
+			sMsg = "Competition, "+competeNum+" episodes: \n" + pa_string[0];
+		case (2):
+			sMsg = "Competition, "+competeNum+" episodes: \n" 
+					+ "      "+pa_string[0] + " (X) \n " 
+					+ "   vs "+pa_string[1] + " (O) ";
+			break;
+		default:
+			sMsg = "Competition, "+competeNum+" episodes: \n"; 
+			for (int n = 0; n < numPlayers; n++) {
+				sMsg = sMsg + pa_string[n] + "(" + n + ")";
+				if (n < numPlayers - 1)
+					sMsg = sMsg + ", \n";
+			}
+			break;
+		}
+		if (verbose>0) System.out.println(sMsg);
+		
+		if (nextTimes != null) {
+			// some diagnostic info to print when called via tournament system:
+			System.out.println("Competition: "+competeNum+" episodes "+pa_string[0]+" vs "+pa_string[1]/*+" with "+rndmStartMoves+" random startmoves"*/);
+			String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
+			System.out.println("Episode Start @ "+currDateTime);
+			System.out.println("start state: "+startSO);			
+		}
+
+		for (int k=0; k<competeNum; k++) {
+			int player = startSO.getPlayer();			
+			so = startSO.copy();
+
+			while(true) {
+				// TODO: add Edax-specific lines
+				
+				long startTNano = System.nanoTime();
+				actBest = paVector.pavec[player].getNextAction2(so, false, nextMoveSilent);
+				long endTNano = System.nanoTime();
+				if (nextTimes!=null) nextTimes[0].addNewTimeNS(endTNano-startTNano);
+				so.advance(actBest);
+				player = so.getPlayer();
+
+				if (so.isGameOver()) {
+					sc = so.getGameScoreTuple();
+					scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
+					moveCount += so.getMoveCounter();
+					if (verbose>0) System.out.println(sc.printEpisodeWinner(k));
+					
+					break; // out of while
+
+				} // if (so.isGameOver())
+			}	// while(true)
+
+		} // for (k)
+		
+		moveCount /= competeNum;
+
+		if (verbose>0) {
+			if (verbose>1) {
+				System.out.print("Avg ScoreTuple for all players: ");
+				System.out.println("   " + scMean.toStringFrm());				
+			}
+			System.out.println("Avg # moves in "+ competeNum +" episodes = "+ frm.format(moveCount));			
+		}
+
+		return scMean;
+	}
+	// --- the generalization of old competeBoth to arbitrary N players ---
+	public static ScoreTuple competeNPlayerAllRoles(PlayAgtVector paVector, StateObservation startSO,
+			 int competeNum, int verbose)
+	{
+		int N = startSO.getNumPlayers();
+		double sWeight = 1/(double)N;
+		ScoreTuple sc, shiftedTuple, scMean=new ScoreTuple(N);
+		PlayAgtVector qaVector;
+		for (int k=0; k<N; k++) {
+			qaVector = paVector.shift(k);
+			sc = competeNPlayer(qaVector, startSO, competeNum, verbose, null);
+			shiftedTuple = sc.shift(N-k);
+			scMean.combine(shiftedTuple, ScoreTuple.CombineOP.AVG, 0, sWeight);
+		}
+		return scMean;
+	}
+	
 	public static double compete3(PlayAgent pa, PlayAgent opponent, PlayAgent opponent2, StateObservation startSO,
 			 int competeNum, int verbose, GameBoard gb)
 	{
@@ -1059,27 +1158,6 @@ public class XArenaFuncs
 		return winrate;
 	} // compete
 
-	/**
-	 * Does the main work for menu items 'Single Compete', 'Swap Compete' and 'Compete Both'.
-	 * These menu items set enum {@link Arena#taskState} to either COMPETE or SWAPCMP or BOTHCMP.
-	 * Then the appropriate cases of {@code switch} in Arena.run() will call competeBase. 
-	 * <p>
-	 * 'Single Compete' performs {@code competeNum} competitions AgentX as X vs. AgentO as O. 
-	 * 'Swap Compete' performs competeNum competitions AgentX as O vs. AgentO as X. 
-	 * 'Compete Both' combines 'Compete' and 'Swap Compete'.
-	 * <p>
-	 * The agents AgentX and AgentO are fetched from {@code xab} and are assumed to be
-	 * trained (!). The parameters for X and O are fetched from the param tabs. The parameter
-	 *  {@code competeNum} is fetched from the Competition options window ("# of games per competition").
-	 *  
-	 * @param swap {@code false} for 'Compete' and {@code true} for 'Swap Compete'
-	 * @param both {@code true} for 'Compete Both' ({@code swap} is then irrelevant)
-	 * @param xab	used only for reading parameter values from GUI members
-	 * @param gb	needed for {@code competeBoth}
-	 * @return the fitness of AgentX, which is in the range [-1.0,+1.0]: +1.0 if AgentX always wins,  
-	 * 		   0.0 if always tie or if #win=#loose, and -1.0 if AgentX always looses.
-	 */
-	
 	public static double[] compete3Player(PlayAgent pa0, PlayAgent pa1, PlayAgent pa2, StateObservation startSO, 
 			int competeNum, int verbose, TSTimeStorage[] nextTimes) {
 		double[] winrate = new double[3];
@@ -1171,6 +1249,27 @@ public class XArenaFuncs
 
 		return winrate;
 	}
+	
+	/**
+	 * Does the main work for menu items 'Single Compete', 'Swap Compete' and 'Compete Both'.
+	 * These menu items set enum {@link Arena#taskState} to either COMPETE or SWAPCMP or BOTHCMP.
+	 * Then the appropriate cases of {@code switch} in Arena.run() will call competeBase. 
+	 * <p>
+	 * 'Single Compete' performs {@code competeNum} competitions AgentX as X vs. AgentO as O. 
+	 * 'Swap Compete' performs competeNum competitions AgentX as O vs. AgentO as X. 
+	 * 'Compete Both' combines 'Compete' and 'Swap Compete'.
+	 * <p>
+	 * The agents AgentX and AgentO are fetched from {@code xab} and are assumed to be
+	 * trained (!). The parameters for X and O are fetched from the param tabs. The parameter
+	 *  {@code competeNum} is fetched from the Competition options window ("# of games per competition").
+	 *  
+	 * @param swap {@code false} for 'Compete' and {@code true} for 'Swap Compete'
+	 * @param both {@code true} for 'Compete Both' ({@code swap} is then irrelevant)
+	 * @param xab	used only for reading parameter values from GUI members
+	 * @param gb	needed for {@code competeBoth}
+	 * @return the fitness of AgentX, which is in the range [-1.0,+1.0]: +1.0 if AgentX always wins,  
+	 * 		   0.0 if always tie or if #win=#loose, and -1.0 if AgentX always looses.
+	 */
 	protected double competeBase(boolean swap, boolean both, XArenaButtons xab, GameBoard gb) {
 		int competeNum = xab.winCompOptions.getNumGames();
 		int numPlayers = gb.getStateObs().getNumPlayers();

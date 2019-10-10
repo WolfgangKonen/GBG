@@ -8,7 +8,6 @@ import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
-import tools.Types.ScoreTuple;
 
 import java.io.Serializable;
 import java.util.ArrayList;

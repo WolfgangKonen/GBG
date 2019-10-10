@@ -8,7 +8,6 @@ import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ScoreTuple;
 
 /**
  * Class StateObservation observes the current state of the game, it has utility functions for

@@ -12,7 +12,6 @@ import games.Othello.ArenaOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Sim.ArenaSim;
 import tools.Types.ACTIONS;
-import tools.Types.ScoreTuple;
 
 /**
  * Class {@link ValidateAgent} performs certain consistency checks of a state observer class. These checks 

@@ -13,8 +13,8 @@ import games.StateObservation;
 import games.XArenaMenu;
 import params.ParOther;
 import tools.MessageBox;
+import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 /**
  * Class AgentBase implements functionality of the interface {@link PlayAgent}
@@ -119,7 +119,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 *         The return value is a tuple containing
 	 *         {@link StateObservation#getNumPlayers()} {@code double}'s.
 	 */
-	public Types.ScoreTuple estimateGameValueTuple(StateObservation sob) {
+	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
 		throw new RuntimeException(
 				"Agents derived from AgentBase have to implement this method: estimateGameValueTuple");
 	}

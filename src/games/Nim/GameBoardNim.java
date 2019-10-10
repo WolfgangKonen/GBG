@@ -25,9 +25,9 @@ import games.StateObservation;
 import games.Arena;
 import games.Arena.Task;
 import games.ArenaTrain;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ScoreTuple;
 
 /**
  * Class GameBoardNim implements interface GameBoard for Nim.

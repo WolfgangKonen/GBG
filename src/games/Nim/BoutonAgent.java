@@ -9,11 +9,11 @@ import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.StateObservation;
 import params.ParOther;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
-import tools.Types.ScoreTuple;
 
 /**
  *  Implements the perfect player for game Nim according to Bouton's theory.

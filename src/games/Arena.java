@@ -21,9 +21,9 @@ import params.ParMCTS;
 import params.ParOther;
 import tools.MessageBox;
 import tools.Progress;
+import tools.ScoreTuple;
 import tools.StatusBar;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 import javax.swing.*;
 import java.awt.*;

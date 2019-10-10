@@ -8,10 +8,10 @@ import controllers.PlayAgent;
 import games.StateObservation;
 import games.Othello.StateObserverOthello;
 import params.ParOther;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
-import tools.Types.ScoreTuple;
 
 public class Edax extends AgentBase implements PlayAgent, Serializable
 {

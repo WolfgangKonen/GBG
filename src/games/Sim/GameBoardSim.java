@@ -18,9 +18,9 @@ import games.StateObservation;
 import games.Hex.StateObserverHex;
 import games.Sim.Point;
 import games.TicTacToe.StateObserverTTT;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ScoreTuple;
 import games.Arena;
 
 public class GameBoardSim implements GameBoard {

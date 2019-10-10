@@ -10,10 +10,10 @@ import games.StateObservation;
 import games.Othello.BaseOthello;
 import games.Othello.ConfigOthello;
 import games.Othello.StateObserverOthello;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
-import tools.Types.ScoreTuple;
 
 
 

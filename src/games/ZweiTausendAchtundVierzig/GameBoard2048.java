@@ -4,7 +4,6 @@ import games.Arena;
 import games.GameBoard;
 import games.StateObservation;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 import javax.swing.*;
 

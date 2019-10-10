@@ -2,8 +2,8 @@ package controllers.TD.ntuple2;
 
 import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
 import games.StateObservation;
+import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 /**
  * Class NextState bundles the different states in state advancing and two different modes of 

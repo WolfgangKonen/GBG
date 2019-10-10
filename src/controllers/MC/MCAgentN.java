@@ -11,8 +11,8 @@ import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMC;
 import params.ParOther;
+import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 import java.util.ArrayList;
 import java.util.List;

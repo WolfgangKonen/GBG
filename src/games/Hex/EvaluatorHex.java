@@ -173,6 +173,24 @@ public class EvaluatorHex extends Evaluator {
     }
 
     /**
+     * Very weak but fast evaluator to see if there is a training progress at all.
+     * Getting a high win rate against this evaluator does not guarantee good performance of the evaluated agent.
+     *
+     * @param playAgent Agent to be evaluated
+     * @param gameBoard Game board the evaluation game is played on
+     * @return Percentage of games won on a scale of [0, 1] as double
+     */
+    private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
+        //double success = XArenaFuncs.competeBoth(playAgent, randomAgent, 10, gameBoard);
+        double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose, null);
+        double success = res[0]-res[2];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+        if (this.verbose > 0) System.out.println(m_msg);
+        lastResult = success;
+        return success;
+    }
+
+    /**
      * Evaluates an agent's performance with perfect play, as long as tree and rollout depth are not limited.
      * Scales poorly with board size, requires more than 8 GB RAM for board sizes higher than 4x4.
      * And the execution time is unbearable for board sizes of 5x5 and higher.
@@ -390,24 +408,6 @@ public class EvaluatorHex extends Evaluator {
         	System.out.println(m_msg);
         lastResult = averageSuccess;
         return averageSuccess;
-    }
-
-    /**
-     * Very weak but fast evaluator to see if there is a training progress at all.
-     * Getting a high win rate against this evaluator does not guarantee good performance of the evaluated agent.
-     *
-     * @param playAgent Agent to be evaluated
-     * @param gameBoard Game board the evaluation game is played on
-     * @return Percentage of games won on a scale of [0, 1] as double
-     */
-    private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
-        //double success = XArenaFuncs.competeBoth(playAgent, randomAgent, 10, gameBoard);
-        double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose, null);
-        double success = res[0]-res[2];
-        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
-        if (this.verbose > 0) System.out.println(m_msg);
-        lastResult = success;
-        return success;
     }
 
  	// --- implemented by Evaluator ---

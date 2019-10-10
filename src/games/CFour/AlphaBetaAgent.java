@@ -17,9 +17,9 @@ import games.XArenaMenu;
 //import nTupleTD.TDSAgent;
 import games.CFour.openingBook.BookSum;
 import params.ParOther;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS_VT;
-import tools.Types.ScoreTuple;
 
 /**
  * 

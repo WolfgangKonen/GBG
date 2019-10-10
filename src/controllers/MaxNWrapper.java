@@ -5,8 +5,8 @@ import java.io.Serializable;
 import games.StateObservation;
 import params.ParMaxN;
 import params.ParOther;
+import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 /**
  * Wrapper based on {@link MaxNAgent} for n-ply look-ahead in deterministic games

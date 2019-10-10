@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.*;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ScoreTuple;
 
 /**
  * Class StateObservation observes the current state of the game, it has utility functions for

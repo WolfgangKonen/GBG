@@ -25,8 +25,8 @@ import games.StateObservation;
 import games.Arena;
 import games.Arena.Task;
 import games.ArenaTrain;
+import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ScoreTuple;
 
 /**
  * Class GameBoardC4 implements interface GameBoard for Connect Four.

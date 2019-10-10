@@ -14,7 +14,7 @@ import params.ParMCTS;
 import params.ParOther;
 import tools.ElapsedCpuTimer;
 import tools.ElapsedCpuTimer.TimerType;
-import tools.Types.ScoreTuple;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.io.Serializable;

@@ -20,14 +20,15 @@ import tools.Types;
 /**
  * Evaluator for TicTacToe:
  * <ul>
- * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition with MaxNAgent and RandomPlayer) or 
- * <li> if mode=2: {@link EvaluatorTTT#evaluateAgent2(PlayAgent,PlayAgent,GameBoard)} (competition with MaxNAgent from different start positions). 
+ * <li> if mode=0: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition against RandomAgent) or 
+ * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition against MaxNAgent) or 
+ * <li> if mode=2: {@link EvaluatorTTT#evaluateAgent2(PlayAgent,PlayAgent,GameBoard)} (competition against MaxNAgent from different start positions). 
  * </ul>  
  * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.
  */
 public class EvaluatorTTT extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {-1,0,1,2,11};		//9,
-	private RandomAgent random_agent = new RandomAgent("Random");
+	private RandomAgent randomAgent = new RandomAgent("Random");
 	private MaxNAgent maxNAgent = new MaxNAgent("Max-N");
 	private AgentLoader agtLoader = null;
 //	private int m_mode;
@@ -69,8 +70,8 @@ public class EvaluatorTTT extends Evaluator {
 			m_msg = "no evaluation done ";
 			lastResult = Double.NaN;
 			return false;
-		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
-		case 1:  return evaluateAgent1(m_PlayAgent,m_gb)>m_thresh[1];
+		case 0:  return evaluateAgent1(m_PlayAgent,randomAgent,m_gb)>m_thresh[0];
+		case 1:  return evaluateAgent1(m_PlayAgent,maxNAgent,m_gb)>m_thresh[1];
 		case 2:  return evaluateAgent2(m_PlayAgent,maxNAgent,m_gb)>m_thresh[2];
 		case 11: 
 			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
@@ -79,29 +80,25 @@ public class EvaluatorTTT extends Evaluator {
 		}
 	}
 	
-	/**	
-	 * @param gb		needed to get a default start state (competeBoth)
- 	 * @return
-	 * Known callers of evaluateAgent1 (outside this class): 
-	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
-	 */
- 	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
- 		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + lastResult;
-		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
-	}
+//	/**	
+//	 * @param gb		needed to get a default start state (competeBoth)
+// 	 * @return the result from competeBoth
+//	 */
+// 	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
+// 		StateObservation so = gb.getDefaultStartState();
+//		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
+//		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+//		if (this.verbose>0) System.out.println(m_msg);
+//		return lastResult;
+//	}
 
  	/**	
 	 * @param gb		needed to get a default start state (competeBoth)
- 	 * @return
-	 * Known callers of evaluateAgent1 (outside this class): 
-	 * 		{@link XArenaFuncs#multiTrain(String,TicGameButtons)}
+ 	 * @return the result from competeBoth
 	 */
- 	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
+ 	private double evaluateAgent1(PlayAgent pa, PlayAgent opponent, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(pa, maxNAgent, so, 1, 0, gb);
+		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		return lastResult;

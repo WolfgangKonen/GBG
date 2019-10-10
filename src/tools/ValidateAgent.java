@@ -19,7 +19,6 @@ import params.ParNT;
 import params.ParOther;
 import params.ParTD;
 import tools.Types.ACTIONS;
-import tools.Types.ScoreTuple;
 
 /**
  * Class {@link ValidateAgent} performs certain consistency checks of an agent class. These checks 

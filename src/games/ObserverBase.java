@@ -3,9 +3,9 @@ package games;
 import java.util.ArrayList;
 
 import controllers.PlayAgent;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ScoreTuple;
 
 /**
  * Class {@link ObserverBase} implements as <b>abstract</b> class the interface  
