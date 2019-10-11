@@ -17,6 +17,12 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
+/**
+ * 
+ * Edax2 replaces the former agent Edax. 
+ * It has a simpler interface and it has no need for initialization
+ *
+ */
 public class Edax2 extends AgentBase implements PlayAgent, Serializable
 {
 	private static final long serialVersionUID = 13L;

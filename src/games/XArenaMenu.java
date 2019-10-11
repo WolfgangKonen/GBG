@@ -310,18 +310,18 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.setToolTipText("<html><body>Start a single competition between the selected Agents "
 				+ "in swapped order. The results <br>"
 				+ "are printed to the console</body></html>");
-		menuItem.setEnabled(numPlayers>1);
+		menuItem.setEnabled(numPlayers==2);
 		menu.add(menuItem);
 		menuItem = new JMenuItem("Compete In All Roles");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_arena.taskState = Arena.Task.BOTHCMP;
+				m_arena.taskState = Arena.Task.ALLCMP;
 				String str = "[Start Competition Both]";
 				printStatus(str);
 			}
 		});
 		menuItem.setToolTipText("<html><body>Start a single competition between the selected Agents "
-				+ "in both roles. The results <br>"
+				+ "in all roles. The results <br>"
 				+ "are printed to the console</body></html>");
 		menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);

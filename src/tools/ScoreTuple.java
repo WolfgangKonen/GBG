@@ -78,9 +78,8 @@ public class ScoreTuple {
 	public String toStringFrm() {
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		String cs = "(";
-		double f = 1.0;
 		for (int i=0; i<scTup.length-1; i++) cs = cs + frm.format(scTup[i]) + ", ";
-		cs = cs + scTup[scTup.length-1]*f + ")";
+		cs = cs + frm.format(scTup[scTup.length-1]) + ")";
 		return(cs);
 	}
 

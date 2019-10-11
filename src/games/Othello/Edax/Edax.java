@@ -13,6 +13,8 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
+// not really needed anymore, we have the simpler class Edax2
+@Deprecated
 public class Edax extends AgentBase implements PlayAgent, Serializable
 {
 	private static final long serialVersionUID = 13l;
@@ -152,108 +154,110 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 
 	@Override
 	public boolean isTrainable() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public String stringDescr() {
-		// TODO Auto-generated method stub
-		return null;
+		String cs = getClass().getSimpleName();
+		String str = cs + ": depth: 21"
+						+ ", moveTime: 10";
+		return str;
 	}
 
-	@Override
-	public String stringDescr2() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public byte getSize() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getMaxGameNum() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getGameNum() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long getNumLrnActions() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long getNumTrnMoves() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getMoveCounter() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setMaxGameNum(int num) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setGameNum(int num) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public ParOther getParOther() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int getNumEval() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setNumEval(int num) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public AgentState getAgentState() {
-		// TODO Auto-generated method stub
-		return super.getAgentState();
-	}
-
-	@Override
-	public void setAgentState(AgentState aState) {
-		// TODO Auto-generated method stub
-		super.setAgentState(aState);
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return super.getName();
-	}
-
-	@Override
-	public void setName(String name) {
-		super.setName(name);
-	}	
+	// all the following methods are implemented in AgentBase:
+	
+//	@Override
+//	public String stringDescr2() {
+//		return stringDescr();
+//	}
+//
+//	@Override
+//	public byte getSize() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public int getMaxGameNum() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public int getGameNum() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public long getNumLrnActions() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public long getNumTrnMoves() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public int getMoveCounter() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public void setMaxGameNum(int num) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void setGameNum(int num) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public ParOther getParOther() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	@Override
+//	public int getNumEval() {
+//		// TODO Auto-generated method stub
+//		return 0;
+//	}
+//
+//	@Override
+//	public void setNumEval(int num) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public AgentState getAgentState() {
+//		// TODO Auto-generated method stub
+//		return super.getAgentState();
+//	}
+//
+//	@Override
+//	public void setAgentState(AgentState aState) {
+//		// TODO Auto-generated method stub
+//		super.setAgentState(aState);
+//	}
+//
+//	@Override
+//	public String getName() {
+//		// TODO Auto-generated method stub
+//		return super.getName();
+//	}
+//
+//	@Override
+//	public void setName(String name) {
+//		super.setName(name);
+//	}	
 }

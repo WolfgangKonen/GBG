@@ -47,7 +47,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	public enum Task {
 		PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
 		// , INSPECTNTUP, BAT_TC, BATCH
-		, COMPETE, SWAPCMP, BOTHCMP, MULTCMP, TRNEMNT, IDLE
+		, COMPETE, SWAPCMP, ALLCMP, MULTCMP, TRNEMNT, IDLE
 	};
 
 	public XArenaFuncs m_xfun;
@@ -156,8 +156,10 @@ abstract public class Arena extends JFrame implements Runnable {
 	public void run() {
 		String agentN, str;
 		int n;
-		double winXScore;
+		int numPlayers = gb.getStateObs().getNumPlayers();
+		double firstScore;
 		double [] allWinScores;
+		String firstPlayer = (numPlayers==2) ? "X" : "P0";
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		gb.showGameBoard(this, true);
 
@@ -188,21 +190,21 @@ abstract public class Arena extends JFrame implements Runnable {
 			case COMPETE:
 				enableButtons(false);
 				setStatusMessage("Running Single Compete ...");
-				if(gb.getStateObs().getNumPlayers() > 2)
-				{
-					allWinScores = m_xfun.singleCompete3(m_xab, gb);
-					enableButtons(true);
-					str = "Compete finished. Avg. score for all PLayer: ["+ allWinScores[0] + "," + allWinScores[1] + "," + allWinScores[2] + "]";
-					System.out.println(str);
-					setStatusMessage(str);
-					updateBoard();
-					taskState = Task.IDLE;
-					break;
-				}
-				winXScore = m_xfun.singleCompete(m_xab, gb);
+//				if(numPlayers > 2)
+//				{
+//					allWinScores = m_xfun.singleCompete3(m_xab, gb);
+//					enableButtons(true);
+//					str = "Compete finished. Avg. score for all PLayer: ["+ allWinScores[0] + "," + allWinScores[1] + "," + allWinScores[2] + "]";
+//					System.out.println(str);
+//					setStatusMessage(str);
+//					updateBoard();
+//					taskState = Task.IDLE;
+//					break;
+//				}
+				firstScore = m_xfun.singleCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
+				str = "Compete finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();
@@ -212,23 +214,23 @@ abstract public class Arena extends JFrame implements Runnable {
 				enableButtons(false);
 				setStatusMessage("Running Swap Compete ...");
 
-				winXScore = m_xfun.swapCompete(m_xab, gb);
+				firstScore = m_xfun.swapCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Swap Compete finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
+				str = "Swap Compete finished. Avg. score for X: "+frm.format(firstScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();
 				taskState = Task.IDLE;
 				break;
-			case BOTHCMP:
+			case ALLCMP:
 				enableButtons(false);
 				setStatusMessage("Running Compete Both ...");
 
-				winXScore = m_xfun.bothCompete(m_xab, gb);
+				firstScore = m_xfun.bothCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete Both finished. Avg. score for X: "+frm.format(winXScore)+" (from range [-1.0,1.0]).";
+				str = "Compete All Roles finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]).";
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();
@@ -277,7 +279,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					StateObservation startSo = tournamentAgentManager.getNextStartState();
                     TSGameDataTransfer data = new TSGameDataTransfer(nextTeam, nextTimes, rndmStartMoves, startSo);
 					// let team compete...
-					int roundWinningAgent = m_xfun.singleCompeteBaseTS(gb, m_xab, data);
+					int roundWinningAgent = m_xfun.competeDispatcherTS(gb, m_xab, data);
 					// enter winner
 					if (roundWinningAgent > 40) {
 						System.out.println(TAG+"ERROR :: singleCompeteBaseTS returned error value "+roundWinningAgent);
