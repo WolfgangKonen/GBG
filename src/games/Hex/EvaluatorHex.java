@@ -8,6 +8,7 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.MaxNAgent;
 //import controllers.MinimaxAgent;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import games.Evaluator;
 import games.GameBoard;
@@ -18,6 +19,7 @@ import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
 import tools.MessageBox;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -182,12 +184,13 @@ public class EvaluatorHex extends Evaluator {
      */
     private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
         //double success = XArenaFuncs.competeBoth(playAgent, randomAgent, 10, gameBoard);
-        double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose, null);
-        double success = res[0]-res[2];
-        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+//      double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose, null);
+//      lastResult = res[0]-res[2];
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, randomAgent), new StateObserverHex(), 100, verbose, null);
+		lastResult = sc.scTup[0];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
         if (this.verbose > 0) System.out.println(m_msg);
-        lastResult = success;
-        return success;
+        return lastResult;
     }
 
     /**
@@ -200,12 +203,13 @@ public class EvaluatorHex extends Evaluator {
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstMaxN(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
-        double[] res = XArenaFuncs.compete(playAgent, maxNAgent, new StateObserverHex(), numEpisodes, verbose, null);
-        double success = res[0]-res[2];
-        m_msg = playAgent.getName() + ": " + this.getPrintString() + success + "  (#="+numEpisodes+")";
+//      double[] res = XArenaFuncs.compete(playAgent, maxNAgent, new StateObserverHex(), numEpisodes, verbose, null);
+//      lastResult = res[0]-res[2];
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, maxNAgent), new StateObserverHex(), numEpisodes, verbose, null);
+		lastResult = sc.scTup[0];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult + "  (#="+numEpisodes+")";
         if (this.verbose > 0) System.out.println(m_msg);
-        lastResult = success;
-        return success;
+        return lastResult;
     }
 // --- This text is no longer valid: ---
 //  * Since the Max-N agent is a static object, the game tree is cached between evaluations. This also means that
@@ -229,13 +233,14 @@ public class EvaluatorHex extends Evaluator {
         params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
-        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0, null);
-        double success = res[0]-res[2];        	
-        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
+//      double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0, null);
+//      lastResult = res[0]-res[2];        	
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent), new StateObserverHex(), numEpisodes, 0, null);
+		lastResult = sc.scTup[0];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
         //if (this.verbose > 0) 
         	System.out.println(m_msg);
-        lastResult = success;
-        return success;
+        return lastResult;
     }
 
     /**
@@ -288,12 +293,16 @@ public class EvaluatorHex extends Evaluator {
         for (int i=0; i<startAction.length; i++) {
         	StateObserverHex so = new StateObserverHex();
         	if (startAction[i] == -1) {
-        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0, null);
-                success += res[0]-res[2];        	
+//        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0, null);
+//              success += res[0]-res[2];        	
+        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null);
+        		success = sc.scTup[0];
         	} else {
         		so.advance(new ACTIONS(startAction[i]));
-        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0, null);
-                success += res[2]-res[0];        	
+//        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0, null);
+//              success += res[2]-res[0];        	
+        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(opponent, playAgent), so, numEpisodes, 0, null);
+        		success = sc.scTup[1];
         	}
         }
         success /= startAction.length;
@@ -368,12 +377,16 @@ public class EvaluatorHex extends Evaluator {
                 MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
             	if (startAction2[i2] == -1) {
-            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0, null);
-                    success = res[0]-res[2];        	
+//            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0, null);
+//                  success = res[0]-res[2];        	
+            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent2), so, numEpisodes, 0, null);
+            		success = sc.scTup[0];
             	} else {
             		so.advance(new ACTIONS(startAction2[i2]));
-            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0, null);
-                    success = res[2]-res[0];        	
+//            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0, null);
+//                  success = res[2]-res[0];        	
+            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(mctsAgent2, playAgent), so, numEpisodes, 0, null);
+            		success = sc.scTup[1];
             	}
                 if(verbose == 0) {
                     System.out.println("Finished evaluation " + gameNumber + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. ");

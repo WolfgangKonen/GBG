@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import agentIO.AgentLoader;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import games.ArenaTrain;
 import games.Evaluator;
@@ -15,6 +16,7 @@ import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
 import tools.MessageBox;
+import tools.ScoreTuple;
 import tools.Types;
 
 /**
@@ -98,7 +100,9 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private double evaluateAgent1(PlayAgent pa, PlayAgent opponent, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
+//		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 1, 0);
+		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		return lastResult;
@@ -136,15 +140,17 @@ public class EvaluatorTTT extends Evaluator {
 		for (int k=0; k<state.length; ++k) {
 			startPlayer = EvaluatorTTT.string2table(state[k],startTable);
 			StateObserverTTT startSO = new StateObserverTTT(startTable,startPlayer);
-			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose, null);
-			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
-											// resp. \in [-1,0], if opponent never looses.
-											// +1 is best for pa, -1 worst for pa.
-			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, verbose, null);
-			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
-											// resp. \in [-1,0], if opponent never looses.
-											// +1 is best for pa, -1 worst for pa.
-			lastResult += (resX+resO)/2.0;
+//			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose, null);
+//			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
+//											// resp. \in [-1,0], if opponent never looses.
+//											// +1 is best for pa, -1 worst for pa.
+//			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, verbose, null);
+//			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
+//											// resp. \in [-1,0], if opponent never looses.
+//											// +1 is best for pa, -1 worst for pa.
+//			lastResult += (resX+resO)/2.0;
+			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), startSO, competeNum, verbose);
+			lastResult = sc.scTup[0];
 		}
 		lastResult=lastResult/state.length;
 		

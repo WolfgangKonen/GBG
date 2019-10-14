@@ -3,22 +3,27 @@ package games.Sim;
 import agentIO.AgentLoader;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
 import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
+import tools.ScoreTuple;
 
 public class EvaluatorSim extends Evaluator {
 	
 	private static final int[] AVAILABLE_MODES = {-1,0,1,2};		//9,
-	private RandomAgent random_agent = new RandomAgent("Random");
-	private RandomAgent random_agent2 = new RandomAgent("Random2");
+	private RandomAgent randomAgent = new RandomAgent("Random");
+	private RandomAgent randomAgent2 = new RandomAgent("Random2");
 	private MCTSAgentT mctsAgent = new MCTSAgentT();
 	private MCTSAgentT mctsAgent2 = new MCTSAgentT();
 	private MaxNAgent maxNAgent = new MaxNAgent("MaxN",15,true);
 	private MaxNAgent maxNAgent2 = new MaxNAgent("MaxN",15,true);
+	private PlayAgent secondAgent, thirdAgent;
+	private PlayAgtVector paVector;
+	protected int[] competeNum={100,5,5};
 	protected double[] thresh={0.8,-0.15,-0.15, -0.15}; // threshold for each value of m_mode
 	private GameBoard gb;
 
@@ -40,75 +45,120 @@ public class EvaluatorSim extends Evaluator {
 			lastResult = Double.NaN;
 			return false;
 		case 0:
-			if(ConfigSim.NUM_PLAYERS > 2)
-				return evaluateAgentRandom3Player(m_PlayAgent,gb)>thresh[0];
-			else
-				return evaluateAgentRandom(m_PlayAgent,gb)>thresh[0];
+			secondAgent = randomAgent;
+			thirdAgent = randomAgent2;
+			break;
+//			if(ConfigSim.NUM_PLAYERS > 2)
+//				return evaluateAgentRandom3Player(m_PlayAgent,gb)>thresh[0];
+//			else
+//				return evaluateAgentRandom(m_PlayAgent,gb)>thresh[0];
 		case 1:
-			if(ConfigSim.NUM_PLAYERS > 2)
-				return evaluateMCTS3Player(m_PlayAgent,gb)>thresh[0];
-			else
-				return evaluateMCTS(m_PlayAgent,gb)>thresh[0];
-		
+			secondAgent = mctsAgent;
+			thirdAgent = mctsAgent2;
+			break;
+//			if(ConfigSim.NUM_PLAYERS > 2)
+//				return evaluateMCTS3Player(m_PlayAgent,gb)>thresh[1];
+//			else
+//				return evaluateMCTS(m_PlayAgent,gb)>thresh[1];		
 		case 2:
-			if(ConfigSim.NUM_PLAYERS > 2)
-				return evaluateMaxN3Player(m_PlayAgent,gb)>thresh[0];
-			else
-				return evaluateMaxN(m_PlayAgent,gb)>thresh[0];
-		
-		default: return false;
+			secondAgent = maxNAgent;
+			thirdAgent = maxNAgent2;
+			break;
+//			if(ConfigSim.NUM_PLAYERS > 2)
+//				return evaluateMaxN3Player(m_PlayAgent,gb)>thresh[2];
+//			else
+//				return evaluateMaxN(m_PlayAgent,gb)>thresh[2];
+		default: 
+			return false;
 		}
+		
+		switch (ConfigSim.NUM_PLAYERS) {
+		case 2: 
+			paVector = new PlayAgtVector(m_PlayAgent,secondAgent);
+			break;
+		case 3:
+			paVector = new PlayAgtVector(m_PlayAgent,secondAgent,thirdAgent);
+			break;
+		default:
+			paVector = null;
+		}
+		
+		return evaluateAgainstOpponents(paVector, competeNum[m_mode], gb)>thresh[m_mode];
 	}
 	
-	private double evaluateAgentRandom3Player(PlayAgent pa, GameBoard gb)
-	{
-		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.compete3(pa, random_agent, random_agent2, so, 100, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+	private double evaluateAgainstOpponents(PlayAgtVector paVector, int competeNum, GameBoard gb) {
+ 		StateObservation so = gb.getDefaultStartState();
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, competeNum, 0);
+		lastResult = sc.scTup[0];
+		m_msg = paVector.pavec[0].getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		return lastResult;
 	}
+	
 
-	private double evaluateMaxN(PlayAgent pa, GameBoard gb) {
- 		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(pa, maxNAgent, so, 5, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + lastResult;
-		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
-	}
-	
-	private double evaluateMCTS(PlayAgent pa, GameBoard gb) {
- 		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(pa, mctsAgent, so, 5, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + lastResult;
-		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
-	}
-	
-	private double evaluateAgentRandom(PlayAgent pa, GameBoard gb) {
- 		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + lastResult;
-		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
-	}
-	
-	private double evaluateMCTS3Player(PlayAgent pa, GameBoard gb) {
- 		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.compete3(pa, mctsAgent,mctsAgent2, so, 5, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + lastResult;
-		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
-	}
-	
-	private double evaluateMaxN3Player(PlayAgent pa, GameBoard gb) {
- 		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.compete3(pa, maxNAgent,maxNAgent2, so, 5, 0, gb);
-		m_msg = pa.getName()+": "+getPrintString() + lastResult;
-		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
-	}
-	
+	// all the following six functions are obsolete: we have evaluateAgainstOpponents()
+	// and a new unifying logic in evalAgent.
+	//
+//	private double evaluateAgentRandom(PlayAgent pa, GameBoard gb) {
+// 		StateObservation so = gb.getDefaultStartState();
+////		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
+//		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa, randomAgent), so, 100, 0);
+//		lastResult = sc.scTup[0];
+//		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+//		if (this.verbose>0) System.out.println(m_msg);
+//		return lastResult;
+//	}
+//	
+//	private double evaluateMaxN(PlayAgent pa, GameBoard gb) {
+// 		StateObservation so = gb.getDefaultStartState();
+////		lastResult = XArenaFuncs.competeBoth(pa, maxNAgent, so, 5, 0, gb);
+//		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa, maxNAgent), so, 5, 0);
+//		lastResult = sc.scTup[0];
+//		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+//		if (this.verbose>0) System.out.println(m_msg);
+//		return lastResult;
+//	}
+//	
+//	private double evaluateMCTS(PlayAgent pa, GameBoard gb) {
+// 		StateObservation so = gb.getDefaultStartState();
+////		lastResult = XArenaFuncs.competeBoth(pa, mctsAgent, so, 5, 0, gb);
+//		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa, mctsAgent), so, 5, 0);
+//		lastResult = sc.scTup[0];
+//		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+//		if (this.verbose>0) System.out.println(m_msg);
+//		return lastResult;
+//	}
+//	
+//	private double evaluateAgentRandom3Player(PlayAgent pa, GameBoard gb)
+//	{
+//		StateObservation so = gb.getDefaultStartState();
+////		lastResult = XArenaFuncs.compete3(pa, random_agent, random_agent2, so, 100, 0, gb);
+//		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa, randomAgent, randomAgent2), so, 100, 0);
+//		lastResult = sc.scTup[0];
+//		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+//		if (this.verbose>0) System.out.println(m_msg);
+//		return lastResult;
+//	}
+//
+//	private double evaluateMaxN3Player(PlayAgent pa, GameBoard gb) {
+// 		StateObservation so = gb.getDefaultStartState();
+////		lastResult = XArenaFuncs.compete3(pa, maxNAgent,maxNAgent2, so, 5, 0, gb);
+//		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa, maxNAgent,maxNAgent2), so, 5, 0);
+//		lastResult = sc.scTup[0];
+//		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+//		if (this.verbose>0) System.out.println(m_msg);
+//		return lastResult;
+//	}
+//	
+//	private double evaluateMCTS3Player(PlayAgent pa, GameBoard gb) {
+// 		StateObservation so = gb.getDefaultStartState();
+////		lastResult = XArenaFuncs.compete3(pa, mctsAgent,mctsAgent2, so, 5, 0, gb);
+//		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa, mctsAgent,mctsAgent2), so, 5, 0);
+//		lastResult = sc.scTup[0];
+//		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+//		if (this.verbose>0) System.out.println(m_msg);
+//		return lastResult;
+//	}
 	
 	@Override
 	public int[] getAvailableModes() {

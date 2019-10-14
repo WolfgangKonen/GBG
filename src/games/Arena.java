@@ -46,8 +46,8 @@ import java.util.Arrays;
 abstract public class Arena extends JFrame implements Runnable {
 	public enum Task {
 		PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
-		// , INSPECTNTUP, BAT_TC, BATCH
-		, COMPETE, SWAPCMP, ALLCMP, MULTCMP, TRNEMNT, IDLE
+		// , INSPECTNTUP, BAT_TC, BATCH, MULTCMP 
+		, COMPETE, SWAPCMP, ALLCMP, TRNEMNT, IDLE
 	};
 
 	public XArenaFuncs m_xfun;
@@ -236,22 +236,22 @@ abstract public class Arena extends JFrame implements Runnable {
 				updateBoard();
 				taskState = Task.IDLE;
 				break;
-			case MULTCMP:
-				boolean silent = false;
-				enableButtons(false);
-				setStatusMessage("Running Multi Compete ...");
-
-				try {
-					m_xfun.multiCompete(silent, m_xab, gb);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-
-				enableButtons(true);
-				setStatusMessage("Multi Compete finished.");
-				updateBoard();
-				taskState = Task.IDLE;
-				break;
+//			case MULTCMP:
+//				boolean silent = false;
+//				enableButtons(false);
+//				setStatusMessage("Running Multi Compete ...");
+//
+//				try {
+//					m_xfun.multiCompete(silent, m_xab, gb);
+//				} catch (IOException e1) {
+//					e1.printStackTrace();
+//				}
+//
+//				enableButtons(true);
+//				setStatusMessage("Multi Compete finished.");
+//				updateBoard();
+//				taskState = Task.IDLE;
+//				break;
 			case TRNEMNT:    // Tournament Code
 				tournamentAgentManager.lockToCompete(getGameBoard());
 				tournamentAgentManager.setSettingsGUIElementsEnabled(false);
@@ -282,7 +282,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					int roundWinningAgent = m_xfun.competeDispatcherTS(gb, m_xab, data);
 					// enter winner
 					if (roundWinningAgent > 40) {
-						System.out.println(TAG+"ERROR :: singleCompeteBaseTS returned error value "+roundWinningAgent);
+						System.out.println(TAG+"ERROR :: competeDispatcherTS returned error value "+roundWinningAgent);
 						if (roundWinningAgent == 44) {
 							// hdd and standard agent mix, leave while, end tournament
 							break;

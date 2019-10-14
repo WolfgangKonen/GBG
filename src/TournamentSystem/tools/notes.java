@@ -39,7 +39,7 @@ public class notes
          * Kette Aufrufe Wettkampf
          * @see Arena#run() -> while() taskState==COMPETE
          * @see games.XArenaFuncs#singleCompete(XArenaButtons, GameBoard)
-         * @see games.XArenaFuncs#competeBase(boolean, XArenaButtons, GameBoard)
+         * @see games.XArenaFuncs#competeDispatcher(boolean, XArenaButtons, GameBoard)
          * @see games.XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int)  -> while()
          *
          * @see PlayAgent#getNextAction2(StateObservation, boolean, boolean) // berechnung des nächsten zuges des agenten

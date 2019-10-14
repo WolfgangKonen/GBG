@@ -14,6 +14,7 @@ import agentIO.AgentLoader;
 import controllers.MaxNAgent;
 //import controllers.MinimaxAgent;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
 import games.ArenaTrain;
@@ -26,6 +27,7 @@ import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
 import tools.MessageBox;
+import tools.ScoreTuple;
 import tools.Types;
 
 /**
@@ -123,7 +125,9 @@ public class EvaluatorNim extends Evaluator {
 	 */
  	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
+//		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,random_agent), so, 100, 0);
+		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		return lastResult;
@@ -145,7 +149,9 @@ public class EvaluatorNim extends Evaluator {
 			lastResult = Double.NaN;
 			return lastResult;
 		}
-		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
+//		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 1, 0);
+		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
 		return lastResult;
@@ -179,15 +185,17 @@ public class EvaluatorNim extends Evaluator {
 			// Choose randomly one of the possible 0-1-ply start states. Repeat 
 			// this numK times to sample a representative subset of possible configurations.
 			StateObservation startSO = gb.chooseStartState();
-			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, this.verbose-1, null);
-			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
-											// resp. \in [-1,0], if opponent never looses.
-											// +1 is best for pa, -1 worst for pa.
-			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, this.verbose-1, null);
-			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
-											// resp. \in [-1,0], if opponent never looses.
-											// +1 is best for pa, -1 worst for pa.
-			lastResult += (resX+resO)/2.0;
+//			res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, this.verbose-1, null);
+//			resX  = res[0] - res[2];		// X-win minus O-win percentage, \in [-1,1]
+//											// resp. \in [-1,0], if opponent never looses.
+//											// +1 is best for pa, -1 worst for pa.
+//			res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, this.verbose-1, null);
+//			resO  = res[2] - res[0];		// O-win minus X-win percentage, \in [-1,1]
+//											// resp. \in [-1,0], if opponent never looses.
+//											// +1 is best for pa, -1 worst for pa.
+//			lastResult += (resX+resO)/2.0;
+			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), startSO, competeNum, 0);
+			lastResult = sc.scTup[0];
 		}
 		lastResult=lastResult/numK;
 		

@@ -18,6 +18,7 @@ import org.jfree.data.xy.XYSeries;
 
 import controllers.MinimaxAgent;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import controllers.TD.TDAgent;
 import games.ArenaTrain;
@@ -32,6 +33,7 @@ import params.ParOther;
 import params.ParTD;
 import tools.LineChartSuccess;
 import tools.Measure;
+import tools.ScoreTuple;
 import tools.Types;
 
 /**
@@ -319,8 +321,8 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 						m_evaluator1.eval(m_PlayAgentX);
 				 		StateObservation so = gb.getDefaultStartState();
 						oe.add(m_evaluator1.getLastResult());								
-						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, so, 100 ,0, gb));
-						om.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, minimax_agent, so, 1, 0, gb));
+						or.add(t_Game.m_xfun.competeNPlayerAllRoles(new PlayAgtVector(m_PlayAgentX, random_agent), so, 100, 0).scTup[0]);
+						om.add(t_Game.m_xfun.competeNPlayerAllRoles(new PlayAgtVector(m_PlayAgentX, minimax_agent), so, 1, 0).scTup[0]);
 						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100));
 						//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);
 						oC.add(1+(or.getVal()-0.9+om.getVal())/2.0);
@@ -674,7 +676,7 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 						m_evaluator2.eval(m_PlayAgentX);
 				 		StateObservation so = gb.getDefaultStartState();
 						oe.add(m_evaluator1.getLastResult());								
-						or.add(t_Game.m_xfun.competeBoth(m_PlayAgentX, random_agent, so, 100, 0, gb));
+						or.add(t_Game.m_xfun.competeNPlayerAllRoles(new PlayAgtVector(m_PlayAgentX, random_agent), so, 100, 0).scTup[0]);
 						//om.add(competeBoth(m_PlayAgentX, minimax_agent, 1, gb));
 						om.add(m_evaluator2.getLastResult());
 						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100, gb));

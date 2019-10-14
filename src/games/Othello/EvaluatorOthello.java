@@ -3,6 +3,7 @@ package games.Othello;
 import agentIO.AgentLoader;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
 import games.Evaluator;
@@ -14,6 +15,7 @@ import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
+import tools.ScoreTuple;
 
 /**
  * Evaluator for the game Othello. Depending on the value of parameter {@code mode} in constructor:
@@ -104,7 +106,9 @@ public class EvaluatorOthello extends Evaluator{
 	
 	private double evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, int competeNum, GameBoard gameBoard) {
 		StateObservation so = gameBoard.getDefaultStartState();
-		lastResult = XArenaFuncs.competeBoth(playAgent, opponent, so, competeNum, 0, gameBoard);
+//		lastResult = XArenaFuncs.competeBoth(playAgent, opponent, so, competeNum, 0, gameBoard);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, competeNum, 0);
+		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult; 
 	    return lastResult;
 	    }
