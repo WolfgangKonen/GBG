@@ -61,7 +61,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 			this.nPositionValues = ConfigSim.NUM_PLAYERS+1;
 			this.nPlayers = ConfigSim.NUM_PLAYERS;
 		}
-		setPermutations();			// fills 'list' with all permutations of nodes 
+//		setPermutations();			// fills 'list' with all permutations of nodes 
 		setArrLink();
 		setActions();		
 		return true; 

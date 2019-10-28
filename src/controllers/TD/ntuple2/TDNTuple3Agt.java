@@ -307,7 +307,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
             NewSO.advance(actBest);
 			System.out.println("---Best Move: "+NewSO.stringDescr()+", "+(bestValue));
 			
-			boolean DBG_SIM = true;
+			boolean DBG_SIM = false;		// set to true only for K6 (!!)
 			if (DBG_SIM && so instanceof StateObserverSim) {
 				String []pl = new String[so.getNumPlayers()];
 				if(so.getNumPlayers() > 2)

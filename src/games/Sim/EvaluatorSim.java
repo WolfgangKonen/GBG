@@ -23,7 +23,7 @@ public class EvaluatorSim extends Evaluator {
 	private MaxNAgent maxNAgent2 = new MaxNAgent("MaxN",15,true);
 	private PlayAgent secondAgent, thirdAgent;
 	private PlayAgtVector paVector;
-	protected int[] competeNum={100,5,5};
+	protected int[] competeNum={100,5,20};
 	protected double[] thresh={0.8,-0.15,-0.15, -0.15}; // threshold for each value of m_mode
 	private GameBoard gb;
 
