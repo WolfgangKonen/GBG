@@ -26,6 +26,7 @@ abstract public class ObserverBase implements StateObservation {
     protected Types.ACTIONS storedActBest = null;
     protected double[] storedValues = null;
     protected double storedMaxScore; 
+	protected int creatingPlayer = -1;
     
     private String sWarn = "WARNING getReward: Case rgs==false is not handled in Observerbase!";
 	
@@ -80,6 +81,10 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	abstract public ArrayList<ACTIONS> getAvailableActions();
 	
+	protected void advanceBase() {
+		this.creatingPlayer = this.getPlayer();
+	}
+
 	/**
 	 * This is just to signal that derived classes will be either abstract or implement
 	 * advance(ACTIONS), as required by the interface {@link StateObservation}.
@@ -106,6 +111,10 @@ abstract public class ObserverBase implements StateObservation {
 
 	abstract public int getPlayer();
 	abstract public int getNumPlayers();
+	
+	public int getCreatingPlayer() {
+		return this.creatingPlayer;
+	}
 
 	public int getMinEpisodeLength() {
 		return 1;
