@@ -43,16 +43,16 @@ public class ValidateAgent {
 		//		
 		boolean verbose=true;
 		ScoreTuple sc;
-		sc = pa.getScoreTuple(sob);
+		sc = pa.getScoreTuple(sob, null);
 		checkScoreTuple(sc,sob,verbose);
-		sc = pa.estimateGameValueTuple(sob);
+		sc = pa.estimateGameValueTuple(sob, null);
 		checkScoreTuple(sc,sob,verbose);
 		for (int i=1; i<sob.getNumPlayers(); i++) {
 			ACTIONS a = sob.getAvailableActions().get(0);
 			sob.advance(a);
-			sc = pa.getScoreTuple(sob);
+			sc = pa.getScoreTuple(sob, null);
 			checkScoreTuple(sc,sob,verbose);
-			sc = pa.estimateGameValueTuple(sob);
+			sc = pa.estimateGameValueTuple(sob, null);
 			checkScoreTuple(sc,sob,verbose);
 		}
 		System.out.println("getScoreTuple check ... OK");
@@ -66,7 +66,7 @@ public class ValidateAgent {
 			ACTIONS a = pa.getNextAction2(sob, false, true);
 			sob.advance(a);
 		}
-		sc = pa.getScoreTuple(sob);
+		sc = pa.getScoreTuple(sob, null);
 		checkScoreTuple(sc,sob,verbose);
 		sc = sob.getGameScoreTuple();
 		checkScoreTuple(sc,sob,verbose);

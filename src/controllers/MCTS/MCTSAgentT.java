@@ -297,13 +297,13 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
 	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
-	 * 
 	 * @param so	the state s_t for which the value is desired
+	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
 	 * 				the future score for s_t from the perspective of player i
 	 */
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation so) {
+	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 		ScoreTuple sc = new ScoreTuple(so);
 		int player; 
 		switch (so.getNumPlayers()) {
@@ -332,6 +332,11 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     	return sc;
 	}
 
+	@Override
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
+		return this.getScoreTuple(sob, prevTuple);
+	}
+	
 	@Override
 	public String stringDescr() {
 		String cs = getClass().getName();

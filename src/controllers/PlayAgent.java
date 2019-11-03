@@ -74,12 +74,23 @@ public interface PlayAgent {
 	 */
 	public double getScore(StateObservation sob);
 	
-	public ScoreTuple getScoreTuple(StateObservation sob);
+	/**
+	 * 
+	 * @param sob			the current game state
+	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
+	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
+	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
+	 * @return				the agent's estimate of the final reward <b>for all players</b>. 
+	 * 						The return value is a tuple containing  
+	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
+	 */
+	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple);
 	
 	/**
 	 * Return the agent's estimate of the final game value (final reward). Is called when
-	 * maximum episode length (TD) or maximum tree depth for certain agents (Minimax) 
-	 * is reached.
+	 * maximum episode length (TD) or maximum tree depth for certain agents ({@link MaxNAgent}, 
+	 * {@link ExpectimaxNAgent}) is reached.
 	 * 
 	 * @param sob			the current game state;
 	 * @return				the agent's estimate of the final reward. This may be 
@@ -92,14 +103,18 @@ public interface PlayAgent {
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
 	 * Is called when maximum episode length (TD) or maximum tree depth for certain agents 
-	 * (Max-N, Expectimax-N) is reached.
+	 * ({@link MaxNAgent}, {@link ExpectimaxNAgent}) is reached.
 	 * 
 	 * @param sob			the current game state
+	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
+	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
+	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
 	 * @return				the agent's estimate of the final reward <b>for all players</b>. 
 	 * 						The return value is a tuple containing  
 	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
 	 */
-	public ScoreTuple estimateGameValueTuple(StateObservation sob);
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple);
 	
 	/**
 	 * Train the Agent for one complete game episode. <p>

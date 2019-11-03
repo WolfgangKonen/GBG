@@ -164,7 +164,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
     			} else {
     				// this terminates the recursion:
     				// (after finishing the for-loop for every element of acts)
-    				currScoreTuple = estimateGameValueTuple(NewSO);
+    				currScoreTuple = estimateGameValueTuple(NewSO, null);
     				// For derived class ExpectimaxWrapper, estimateGameValueTuple returns
     				// the score tuple of the wrapped agent. 
     			}
@@ -271,7 +271,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		return getAllScores(soND,sob,true,0).scTup[sob.getPlayer()];
 	}
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation sob) {
+	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
 		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
 		
@@ -311,7 +311,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @see ExpectimaxWrapper
 	 */
 	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		ScoreTuple sc = new ScoreTuple(sob);
 		for (int i=0; i<sob.getNumPlayers(); i++) 

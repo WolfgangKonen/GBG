@@ -93,7 +93,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
 	}
 
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation so) {
+	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
         int player = so.getPlayer();
         int opponent = (player==0) ? 1 : 0;
 		ScoreTuple sTuple = new ScoreTuple(2);
@@ -108,8 +108,8 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
 	}
 
 	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation so) {
-		return getScoreTuple(so);
+	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
+		return getScoreTuple(so, null);
 	}
 
 	@Override

@@ -42,8 +42,10 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	 * @return		the estimated score 
 	 */
 	@Override
+	@Deprecated
 	public double estimateGameValue(StateObservation sob) {	
-		return wrapped_pa.getScore(sob);
+//		return wrapped_pa.getScore(sob);
+		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
 	}
 
 	/**
@@ -56,11 +58,11 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	 * @return		the tuple of estimated score 
 	 */
 	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
 		//--- only debug ---
 //		double x = wrapped_pa.getScoreTuple(sob).scTup[0];
 //		System.out.println(sob.stringDescr()+":  "+x);		
-		return wrapped_pa.getScoreTuple(sob);
+		return wrapped_pa.estimateGameValueTuple(sob, prevTuple);
 	}
 	
 	public PlayAgent getWrappedPlayAgent() {

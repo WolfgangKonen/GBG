@@ -176,7 +176,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	}
 
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation so) {
+	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
         int player = so.getPlayer();
         int opponent = BaseOthello.getOpponent(player) ;
 		ScoreTuple sTuple = new ScoreTuple(2);
@@ -191,8 +191,8 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	}
 
 	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation so) {
-		return getScoreTuple(so);
+	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
+		return getScoreTuple(so, null);
 	}
 
 	@Override

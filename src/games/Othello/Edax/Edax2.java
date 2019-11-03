@@ -134,7 +134,7 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 	}
 
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation sob) {
+	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		// ... and so also no real score tuple
 		return new ScoreTuple(sob.getNumPlayers());
 	}

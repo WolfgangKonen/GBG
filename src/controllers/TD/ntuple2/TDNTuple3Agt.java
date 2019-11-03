@@ -348,28 +348,42 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 		
 	/**
-	 * Return the agent's estimate of the score for that after state 
+	 * Return the agent's estimate of the score for that afterstate {@code so}.
 	 * For 2-player games like TTT, the score is V(), the probability that the player to move
 	 * wins from that after state. V(s_t|p_t) learns this probability for every t.
 	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
 	 * For 1-player games like 2048 it is the estimated (total or future) reward.
+	 * <p>
+	 * NOTE: For {@link TDNTuple3Agt} and N>1, this method should be never called, since the score
+	 * of {@code so} from perspective of player {@code so.getPlayer()} is never trained. What is trained 
+	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
+	 * {@link #getScore(StateObservation, StateObservation)}.
+	 * <p> 
+	 * Method {@link #getScore(StateObservation)}is only implemented here to satisfy {@link PlayAgent}'s interface. If called, 
+	 * it throws an exception.
 	 * 
-	 * @param so			the state for which the value is desired
-	 * @return the agent's estimate of the future score for that after state (its value)
+	 * @param so		   the (after-)state for which the value is desired
+	 * @return V(s_t|p_t), the agent's estimate of the future score for that after state (its value)
 	 */
+	@Deprecated
 	public double getScore(StateObservation so) {
-		int[] bvec = m_Net.xnf.getBoardVector(so);
-		double score = m_Net.getScoreI(bvec,so.getPlayer());
-		return score;
+		throw new RuntimeException("getScore(so) is not valid for TDNTuple3Agt --> use getScore(so,PreSO) instead");
+//		int[] bvec = m_Net.xnf.getBoardVector(so);
+//		double score = m_Net.getScoreI(bvec,so.getPlayer());
+//		return score;
 	}
 
 	/**
-	 * Return the agent's estimate of the score for that after state 
+	 * Return the agent's estimate of the score for that afterstate {@code so}. 
 	 * Return V(s_t|p_refer), that is the value function from the perspective of the player
 	 * who moves in state {@code refer}. 
 	 * For 1-player games like 2048 it is the estimated (total or future) reward.
+	 * <p>
+	 * NOTE: For {@link TDNTuple3Agt} and N>1, this method should be only called in the form 
+	 * {@code getScore(NextSO,so)}. This is actually the case, 
+	 * see {@link #getNextAction2(StateObservation, boolean, boolean)}.
 	 * 
-	 * @param so	the state s_t for which the value is desired
+	 * @param so	the (after-)state s_t for which the value is desired
 	 * @param refer	the referring state
 	 * @return		V(s_t|p_refer), the agent's estimate of the future score for s_t
 	 * 				from the perspective of the player in state {@code refer}
@@ -384,13 +398,17 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
 	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
+	 * @param so			the state s_t for which the value is desired
+	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
+	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
+	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
 	 * 
-	 * @param so	the state s_t for which the value is desired
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
 	 * 				the future score for s_t from the perspective of player i
 	 */
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation so) {
+	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 		ScoreTuple sc = new ScoreTuple(so);
 		int[] bvec = m_Net.xnf.getBoardVector(so);
 		switch (so.getNumPlayers()) {
@@ -415,10 +433,17 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			sc.scTup[player] = 	-sc.scTup[opponent];
 			break;
 		default: 	
-			throw new RuntimeException("getScoreTuple(StateObservation so) not available for TDNTuple3Agt and numPlayer>2");
 			//
-			// here we would have to add new logic in the case of 3-,4-,...,N-player games (!)
+			// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
+			// prevTuple, fill in the game value for the player for which TDNTuple3Agt has learned the value:
+			// This is the player who *created* so. (We do not know the game values from the perspective 
+			// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
 			//
+			if (prevTuple!=null) sc = new ScoreTuple(prevTuple);
+			int cp = so.getCreatingPlayer();
+			if (cp!=-1) {
+				sc.scTup[cp] = m_Net.getScoreI(bvec,cp);  
+			}
 		}
 		
 		// In any case: add the reward obtained so far, since the net predicts
@@ -431,23 +456,29 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. <br>
-	 * Is only called when training an agent in multi-update mode AND the maximum episode length
+	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called when training an agent in multi-update mode AND the maximum episode length
 	 * is reached. 
 	 * 
 	 * @param sob			the current game state
+	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
+	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
+	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}.  
 	 * @return				the agent's estimate of the final game value <b>for all players</b>. 
 	 * 						The return value is a tuple containing  
 	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
 	 */
 	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
-		boolean rgs = m_oPar.getRewardIsGameScore();
-		ScoreTuple sc = new ScoreTuple(sob);
-		for (int i=0; i<sob.getNumPlayers(); i++) 
-			sc.scTup[i] = sob.getReward(i, rgs);
-			// this is valid, but it may be a bad estimate in games where the reward is only 
-			// meaningful for game-over-states.
-		return sc;
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
+		return this.getScoreTuple(sob, prevTuple);
+//		boolean rgs = m_oPar.getRewardIsGameScore();
+//		ScoreTuple sc = new ScoreTuple(sob);
+//		for (int i=0; i<sob.getNumPlayers(); i++) 
+//			sc.scTup[i] = sob.getReward(i, rgs);
+//			// this is valid, but it may be a bad estimate in games where the reward is only 
+//			// meaningful for game-over-states.
+//		return sc;
 	}
 
 	private void assertStateForSim(StateObservation s_next, StateObservation s_last) {
@@ -539,7 +570,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	    		}
 	    		assertStateForSim(s_next, sLast[curPlayer]);	// this is only for debugging Sim
             	ScoreTuple sc1 = s_next.getGameScoreTuple();
-            	ScoreTuple sc2 = this.getScoreTuple(s_next);
+            	ScoreTuple sc2 = this.getScoreTuple(s_next, null);
 	    		String s1 = sLast[curPlayer].stringDescr();
 	    		String s2 = s_next.stringDescr();
 	    		if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
@@ -606,7 +637,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	    	    		if (s_next.isGameOver()) {
 	    	            	vLastNew = m_Net.getScoreI(curBoard,n);
 	    	            	ScoreTuple sc1 = s_next.getGameScoreTuple();
-	    	            	ScoreTuple sc2 = this.getScoreTuple(s_next);
+	    	            	ScoreTuple sc2 = this.getScoreTuple(s_next, null);
 	    	            	int dummy=1;
 	    	    		}
 	    	    		String s1 = sLast[n].stringDescr();

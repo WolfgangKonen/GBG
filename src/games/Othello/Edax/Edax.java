@@ -123,7 +123,7 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 	}
 
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation sob) {
+	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -135,7 +135,7 @@ public class Edax extends AgentBase implements PlayAgent, Serializable
 	}
 
 	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
 		// TODO Auto-generated method stub
 		return null;
 	}

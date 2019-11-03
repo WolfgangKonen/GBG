@@ -28,7 +28,7 @@ abstract interface NTupleAgt {
 	// methods needed in class NextState:
 	public boolean getAFTERSTATE();
 	public double estimateGameValue(StateObservation sob);
-	public ScoreTuple estimateGameValueTuple(StateObservation sob);
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple);
 	public int getMoveCounter();
 	// the compiler requires that the following four methods are public, although
 	// they should be used only from class NextState (and not by anybody):

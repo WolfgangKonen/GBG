@@ -39,6 +39,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	private long durationTrainingMs = 0L;		// total time in ms used for training
 	private long durationEvaluationMs = 0L;		// total time in ms used for evaluation (during training)
 	protected ParOther m_oPar = new ParOther();
+	public static String EGV_EXCEPTION_TEXT = "Agents derived from AgentBase have to implement this method: estimateGameValueTuple";
 
 	/**
 	 * change the version ID for serialization only if a newer version is no
@@ -74,8 +75,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	/**
 	 * This is just to signal that derived classes will be either abstract or
 	 * implement getScore(), as required by the interface {@link PlayAgent} as
-	 * well. The definition of getScore() is needed here, because
-	 * {@link #estimateGameValue(StateObservation)} needs it.
+	 * well. 
 	 * 
 	 * @param sob
 	 *            the state observation object
@@ -83,7 +83,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 */
 	abstract public double getScore(StateObservation sob);
 
-	public ScoreTuple getScoreTuple(StateObservation sob) {
+	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		throw new RuntimeException("Agents derived from AgentBase have to implement this method: getScoreTuple");
 	}
 
@@ -104,8 +104,10 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * @return {@link #getScore(StateObservation)}, that is whatever the derived
 	 *         class implements for {@link #getScore(StateObservation)}.
 	 */
+	@Deprecated
 	public double estimateGameValue(StateObservation sob) {
-		return getScore(sob);
+//		return getScore(sob);
+		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
 	};
 
 	/**
@@ -113,15 +115,21 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * reward) <b>for all players</b>. Is called when maximum episode length
 	 * (TD) or maximum tree depth for certain agents (Max-N) is reached.
 	 * 
+	 * <b>Important note</b>: Derived classes that use
+	 * {@link #estimateGameValueTuple} inside {@link #getScore(StateObservation)}
+	 * (e.g. Max-N, MC or MCTS when reaching the predefined rollout depth)
+	 * have to <b>override</b> this function with a function <b>not</b> using
+	 * {@link #getScore(StateObservation)}, otherwise an infinite loop would
+	 * result.
+	 * 
 	 * @param sob
 	 *            the current game state
 	 * @return the agent's estimate of the final reward <b>for all players</b>.
 	 *         The return value is a tuple containing
 	 *         {@link StateObservation#getNumPlayers()} {@code double}'s.
 	 */
-	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
-		throw new RuntimeException(
-				"Agents derived from AgentBase have to implement this method: estimateGameValueTuple");
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
+		throw new RuntimeException(EGV_EXCEPTION_TEXT);
 	}
 
 	public AgentState getAgentState() {

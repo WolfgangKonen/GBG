@@ -234,10 +234,14 @@ public interface StateObservation extends Serializable{
 	public void storeBestActionInfo(ACTIONS actBest, double[] vtable); 
 	
 	/**
-	 * 
 	 * @return  {0,1,...,n-1} for an n-player game: <b>who moves in this state</b>
 	 */
 	public int getPlayer();
+	
+	/**
+	 * @return the player who created this state
+	 */
+	public int getCreatingPlayer();
 
 //	/**
 //	 * @return  1 for a 1-player game (e.g. 2048),  

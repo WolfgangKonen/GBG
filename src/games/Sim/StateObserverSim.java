@@ -415,6 +415,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	@Override
 	public void advance(ACTIONS action) {
+		super.advanceBase();
 		int iAction = action.toInt();
 		
 		if(numPlayers > 2)

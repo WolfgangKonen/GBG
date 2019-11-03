@@ -685,6 +685,13 @@ abstract public class Arena extends JFrame implements Runnable {
 							if (spDT!=null)
 								spDT.nextTimes[0].addNewTimeNS(endTNano-startTNano);
 						}
+						if (actBest==null) {
+							// an exception occurred and was catched:
+							System.out.println("Cannot play a game with "+pa.getName());
+							taskState = Task.IDLE;
+							setStatusMessage("Done.");
+							return;
+						}
 
 						so.storeBestActionInfo(actBest, actBest.getVTable());
 						so.advance(actBest);

@@ -527,8 +527,8 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * Return a tuple with the agent's estimate of {@code sob}'s final game value (final reward) 
 	 * <b>for all players</b>. <br>
 	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
-	 * 
 	 * @param so	the state s_t for which the value is desired
+	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
 	 * 				the future score for s_t from the perspective of player i.
 	 * <p>
@@ -537,7 +537,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * the returned {@link Types.ACTIONS_VT} object the score tuple.
 	 */
 	@Override
-	public ScoreTuple getScoreTuple(StateObservation so) {
+	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 		ScoreTuple sc = new ScoreTuple(so);
 		switch (so.getNumPlayers()) {
 		case 1: 
@@ -565,7 +565,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>.
 	 * <p>
-	 * The difference to {@link #getScoreTuple(StateObservation)} is that this function should 
+	 * The difference to {@link #getScoreTuple(StateObservation, ScoreTuple)} is that this function should 
 	 * <b>not</b> call getScore or getScoreTuple in any way, to avoid endless recursion.
 	 * 
 	 * @param sob			the current game state
@@ -574,7 +574,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
 	 */
 	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation sob) {
+	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
 		ScoreTuple sc = new ScoreTuple(sob);
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		for (int i=0; i<sob.getNumPlayers(); i++) 
