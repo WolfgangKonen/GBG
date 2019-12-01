@@ -19,7 +19,7 @@ import tools.Types.ACTIONS;
 
 public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Serializable {
 
-	private static int[] fixedModes = {0, 1, 2, 3};
+	private static int[] fixedModes = {0, 1, 2, 3, 4, 5};
 
 //	private int numPositionValues = 3;  // either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
 	private int numPositionValues = 4;  // or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty
@@ -130,7 +130,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 		}
 		return retVal;
 	}
-
+	
 	/**
 	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
 	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
@@ -352,7 +352,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 		};
 		//--- 24 Straight 3-Tuple
 		case 2: return new int[][] {
-			{0, 8, 16}, {0, 9, 18}, {1, 9, 17}, {3, 10, 18}, {4, 11, 19},
+			{0, 8, 16}, {0, 9, 18}, {1, 9, 17}, {2, 10, 18}, {3, 11, 19},
 			{8, 16, 24}, {8, 17, 26}, {9, 17, 25}, {9, 18, 27}, {10, 18, 26}, {11, 19, 27},
 			{16, 24, 32}, {16, 25, 34}, {17, 25, 33}, {17, 26, 35}, {18, 27, 36}, {18, 28, 38}, {19, 28, 37},
 			{24, 33, 42}, {25, 34, 43}, {26, 35, 44},
@@ -367,7 +367,34 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 			{33, 32, 40, 48},
 			{44, 36, 43, 51}, {45, 53, 54, 62}
 		};
-		default: throw new OutOfRangeException(mode, 0, 3);
+		//--- Mixed NTuple1
+		case 4: return new int[][] {
+			
+			{0,1,8,9},
+			{1,2,3,4},
+			{1,2,9,10},
+			{0,8,16},
+			{17,18,19,20,25,26},
+			{3,11,19,27},
+			{9,18,19,26,27},
+			{2,9},
+			{8,16},
+			{2,10,16,17,18},
+			{9,17,25,18,26,27}
+			
+			
+		};
+		//--- Mixed NTuple2
+		case 5:return new int[][] {
+			{0,1,8,9},
+			{9,17,18,25,26},
+			{10,11,19,20},
+			{10,17,18,19,26},
+			{18,19,20,21,27,28},
+			{0,1,2,8,9,16,17}
+		};
+		
+		default: throw new OutOfRangeException(mode, 0, 5);
 		}
 	}
 
@@ -377,7 +404,9 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 		return "<html>"	+ "0: 10 1-Tuples "
 				+ "<br>1: 32 straight 2-Tuple"	
 				+ "<br>2: 24 straight 3-Tuple"	
-				+ "<br>3: 8 random snakey bakey 4-Tuple"	
+				+ "<br>3: 8 random snakey bakey 4-Tuple"
+				+ "<br>3: Self crafted mixed-Tuple"	
+				+ "<br>3: Self crafted mixed-Tuple"	
 				+ "</html>";
 	}
 
@@ -422,16 +451,16 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 		int[] bv2 = xnf.makeBoardVectorEachCellDifferent();
 		int[][] sv2 = xnf.symmetryVectors(bv2);
 		for (int i = 0;  i < ConfigOthello.BOARD_SIZE; i++) {
-			System.out.println("*** i="+i+" ***");
+			System.out.println("* i="+i+" *");
 			prettyPrintBoardVector(sv2[i]);
 		}
 		int dummy =1;
-		System.out.println("\nCheck mirrorHorizontally\n  *** Original ***");
+		System.out.println("\nCheck mirrorHorizontally\n  * Original *");
 		prettyPrintBoardVector(bv2);
-		System.out.println("  *** Mirrored ***");
-		prettyPrintBoardVector(xnf.mirrorHorizontally(bv2));
-//		System.out.println("  *** Mirrored (buggy) ***");
-//		prettyPrintBoardVector(xnf.mirrorHorizontallyOLD(bv2));
+		System.out.println("  * Mirrored *");
+		prettyPrintBoardVector(xnf.rotate(bv2));
+	
+	
 	}
 	
 	public static void prettyPrintBoardVector(int[] bv) {
