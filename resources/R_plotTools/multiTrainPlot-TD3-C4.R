@@ -2,7 +2,7 @@
 # **** These are new results with TDNTuple3Agt from January 2019 ****
 #
 # This script shows results for ConnectFour in the TCL-case with various TD-settings:
-#   H0.01:  horizon cut at 0.01 in the eligibility traces
+#   H001:  horizon cut at 0.01 in the eligibility traces
 #   HOR40:  horizon 40 (plies)
 #   RESET: reset eligibility trace on random move instead of standard elig traces
 # It compares the ternary version ("-T" in filename, target is the ternary term 
@@ -26,8 +26,8 @@ evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
 path <- "../../agents/ConnectFour/csv/"; 
 limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=20000/wfac;
 
-filenames=c("multiTrain_TCL-EXP-NT3-al50-lam000-500k-T-epsfin0.csv"
-           ,"multiTrain_TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0.csv"
+filenames=c("multiTrain_TCL-EXP-NT3-al50-lam000-500k-T-epsfin0-V2.csv"
+           ,"multiTrain_TCL-EXP-NT3-al50-lam016-500k-HOR001-T-epsfin0-V2.csv"
            ,"multiTrain_TCL-EXP-NT3-al50-lam025-500k-HOR001-T-epsfin0-V2.csv"
            #,"multiTrain_TCL-EXP-NT3-al50-lam036-500k-HOR001-T-epsfin0-V2.csv"
            ,"multiTrain_TCL-EXP-NT3-al50-lam000-500k-HOR001-T-epsfin0-noFA.csv"
@@ -52,7 +52,7 @@ filenames=c("multiTrain_TCL-EXP-NT3-al50-lam000-500k-T-epsfin0.csv"
 # 
 # If a file appears besides its base form also in form ...-V2.csv or ...-V3.csv, 
 # these are just runs with exactly the same parameters but other random numbers.
-# In the limit of ininite many runs they should be all the same. But we have here
+# In the limit of infinite many runs they should be all the same. But we have here
 # only 3 runs.
 
   
@@ -61,7 +61,7 @@ for (k in 1:length(filenames)) {
   filename <- paste0(path,filenames[k])
   df <- read.csv(file=filename, dec=".",skip=2)
   df$run <- as.factor(df$run)
-  df <- df[,setdiff(names(df),c("trnMoves","elapsedTime", "movesSecond"))]
+  df <- df[,setdiff(names(df),c("trnMoves","elapsedTime", "movesSecond","lambda","null","X","X.1"))]
   #if (k==1) df <- cbind(df,actionNum=rep(0,nrow(df)))
   
   if (PLOTALLLINES) {

@@ -115,7 +115,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	public static boolean DBG_REWARD=false;
 	
 	// use ternary target in update rule:
-	private boolean TERNARY=true;		// remains true only if it is a final-reward-game (see getNextAction2)
+	private boolean TERNARY=false;		// if true, it remains true only for final-reward-games (see getNextAction2)
 	
 	// use finalAdaptAgents(...), normally true. Set only to false if you want to test how agents behave otherwise:
 	private boolean FINALADAPTAGENTS=true;
@@ -604,8 +604,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * 		and adapts the value of the last state of each other player to this r.
 	 * 		[This first part is irrelevant for 1-player games where we have no other players.]
 	 * <li> It adapts {@code ns.getAfterState()}, the afterstate preceding the terminal state, towards 0. 
-	 * 		[This second part is only relevant if TERNARY==false in source code. This happens currently only 
-	 * 		for non-final-reward games like 2048.]
+	 * 		[This second part is only relevant if TERNARY==false in source code.]
 	 * </ol>
 	 * 
 	 * @param curPlayer the player to move in @{@code ns.getSO()} = the player who generates {@code ns.getNextSO()}
