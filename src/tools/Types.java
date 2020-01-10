@@ -22,7 +22,7 @@ import java.awt.event.KeyEvent;
 import java.io.Serializable;
 
 /**
- * Class <b>Types</b> holds various constants, the class {@link ScoreTuple} and the  
+ * Class <b>Types</b> holds various constants and the  
  * class {@link ACTIONS} and its derived classes.
  *
  */

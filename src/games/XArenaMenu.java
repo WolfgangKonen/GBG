@@ -170,7 +170,7 @@ public class XArenaMenu extends JMenuBar {
 			menuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					try {
-						loadAgent(j);						
+						loadAgent(j,null);						
 					} catch (Exception exc) {	
 						System.out.println(exc.getMessage());
 					}
@@ -539,11 +539,12 @@ public class XArenaMenu extends JMenuBar {
 	/**
 	 * @param n   number of the player (agent)
 	 */
-	void loadAgent(int n) {
+	boolean loadAgent(int n, String filePath) {
 		String str=TIPEVALUATE;
 		PlayAgent td=null;
+		boolean res = false;
 		try {
-			td = m_arena.tdAgentIO.loadGBGAgent(null);			
+			td = m_arena.tdAgentIO.loadGBGAgent(filePath);			
 		} catch(Exception e) {
 			str = e.getMessage();			
 //		} catch(ClassNotFoundException e) {
@@ -552,9 +553,10 @@ public class XArenaMenu extends JMenuBar {
 		
 		if (td == null) {
 			str = str + "\n No Agent loaded!";
-			MessageBox.show(m_arena,"ERROR: " + str,
+			if (filePath==null) 	// MessageBox only when called via menu, NOT in batch mode (GBGBatch)
+				MessageBox.show(m_arena,"ERROR: " + str,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
-
+			res = false;
 		} else {
 			// enable / disable certain parameter settings according to 
 			// the agent name and the active game (before setting the specific
@@ -634,9 +636,11 @@ public class XArenaMenu extends JMenuBar {
 												"Agent-"+Types.GUI_PLAYER_NAME[n];
 			str = "Agent "+td.getName()+" succesfully loaded to "
 				+ strAgent + "!";
+			res = true;
 		}
 		printStatus(str);
 		System.out.println("[LoadAgent] "+str);
+		return res;
 	}
 
 	/**

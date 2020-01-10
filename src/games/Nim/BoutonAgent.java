@@ -104,7 +104,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
 
 	@Override
 	public double estimateGameValue(StateObservation so) {
-		return getScore(so);
+		return so.getGameScore(so.getPlayer());
 	}
 
 	@Override

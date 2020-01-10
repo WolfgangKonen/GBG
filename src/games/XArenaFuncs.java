@@ -633,8 +633,10 @@ public class XArenaFuncs
 	}
 
 	/**
-	 * Perform trainNum cycles of training and evaluation for PlayAgent, each 
-	 * training with maxGameNum games. Record results in {@code multiTrain.csv}, see below.
+	 * Perform trainNum cycles of training and evaluation for PlayAgent, and perform each self-play 
+	 * training with maxGameNum training games. 
+	 * Both trainNum and maxGameNum are inferred from {@code xab}.<br>
+	 * Record results in {@code multiTrain.csv}, see below.
 	 * 
 	 * @param n			index of agent to train (the current GUI will call multiTrain 
 	 * 					always with n=0 
@@ -647,7 +649,7 @@ public class XArenaFuncs
 	 * Side effect: writes results of multi-training to <b>{@code agents/<gameDir>/csv/multiTrain.csv}</b>.
 	 * This file has the columns: <br>
 	 * {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}. <br>
-	 * The contents may be visualized with one of the R-scripts in {@code resources\R_plotTools}.
+	 * The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
 	 */
 	public PlayAgent multiTrain(int n, String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
 		DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");

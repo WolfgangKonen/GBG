@@ -28,10 +28,10 @@ path <- "../../agents/ConnectFour/csv/";
 limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=20000/wfac;
 
 filenames=c("multiTrain_TCL-EXP-NT3-al50-lam000-750k-T-epsfin0.csv"
-           ,"multiTrain_TCL-EXP-NT3-al50-lam000-750k-epsfin0.csv"
+           ,"multiTrain_TCL-EXP-NT3-al50-lam000-750k-epsfin0-V9.csv"
            ,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-HOR001-T-epsfin0.csv"
            ,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-HOR001-epsfin0.csv"
-           ,"multiTrain_TCL-EXP-NT3-al50-lam000-750k-epsfin0-noFA.csv"
+           ,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-epsfin0-noFA.csv"
            #,"multiTrain_TCL-EXP-NT3-al50-lam025-500k-HOR001-T-epsfin0-V2.csv"
            #,"nonTERNA/multiTrain_TCL-EXP-al20-lam05-500k-HOR001-single-9b.csv"
            )
@@ -68,7 +68,7 @@ for (k in 1:length(filenames)) {
                     ,rep("0.00",nrow(df))   
                     ,rep("0.16",nrow(df))   
                     ,rep("0.16",nrow(df))  
-                    ,rep("0 no f.a.",nrow(df))
+                    ,rep("no f.a.",nrow(df))
                     ,rep("0.36",nrow(df))   
                     ,rep("HOR40",nrow(df))
                     ,rep("HOR40",nrow(df))
