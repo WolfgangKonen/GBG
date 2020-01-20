@@ -109,7 +109,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
 
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
-		return getScoreTuple(so, null);
+		return so.getRewardTuple(true);  //getScoreTuple(so, null);
 	}
 
 	@Override

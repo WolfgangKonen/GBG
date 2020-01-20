@@ -374,7 +374,7 @@ abstract public class Arena extends JFrame implements Runnable {
 	/**
 	 * Inspect the value function in m_PlayAgent[0] of {@link #m_xfun}. This
 	 * agent will be initially the one set in {@link XArenaFuncs}'s constructor
-	 * (usually {@link controllers.MinimaxAgent}) or the agent last trained via
+	 * (usually {@link controllers.MCTS.MCTSAgentT}) or the agent last trained via
 	 * button "Train X"
 	 */
 	protected void InspectGame() {

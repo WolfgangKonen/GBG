@@ -13,12 +13,12 @@ import java.util.Map;
 import java.util.Random;
 
 import controllers.PlayAgent;
+import controllers.AgentBase;
+import controllers.MCTS.MCTSAgentT;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import tools.Types;
 import tools.Types.ACTIONS;
-import controllers.AgentBase;
-import controllers.MinimaxAgent;
 
 
 /**
@@ -58,7 +58,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 
 	protected Random rand;			// needed by derived class TDSNPlayer
 	//private boolean MakeMove;		// true, if an agent move is requested 
-	protected transient MinimaxAgent referee;
+	protected transient MCTSAgentT referee;
 	/**
 	 * @deprecated (use {@link TDNTuple2Agt} instead)
 	 */
@@ -144,7 +144,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 		// only for diagnostics
         hmC = new HashMap<String, CounterC>();
         hmX = new HashMap<String, HashMap<String,ScoreC>>();
-		referee = new MinimaxAgent("Minimax");
+		referee = new MCTSAgentT();
 		
 	}
 	

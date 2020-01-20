@@ -142,7 +142,7 @@ abstract public class ArenaTrain extends Arena
 	        long start_time = Calendar.getInstance().getTime().getTime();
 			try {
 				
-				m_xfun.m_PlayAgents[0] = m_xfun.multiTrain(0, m_xab.getSelectedAgent(0), m_xab, gb);
+				m_xfun.m_PlayAgents[0] = m_xfun.multiTrain(0, m_xab.getSelectedAgent(0), m_xab, gb, "multiTrain.csv");
 			
 			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();

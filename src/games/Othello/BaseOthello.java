@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Random;
 
 import controllers.AgentBase;
-import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import games.StateObservation;
 import tools.Types.ACTIONS;

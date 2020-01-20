@@ -16,7 +16,7 @@ import javax.swing.JFrame;
 
 import org.jfree.data.xy.XYSeries;
 
-import controllers.MinimaxAgent;
+import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
@@ -59,7 +59,7 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 	public	PlayAgent m_PlayAgentX;
 	public	PlayAgent m_PlayAgentO;
 	private RandomAgent random_agent = new RandomAgent("Random");
-	private MinimaxAgent minimax_agent = new MinimaxAgent("Minimax");
+	private MaxNAgent maxn_agent = new MaxNAgent("MaxN");
 	protected Evaluator m_evaluator1=null;
 	protected Evaluator m_evaluator2=null;
 	protected Evaluator m_evaluator3=null;
@@ -322,7 +322,7 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 				 		StateObservation so = gb.getDefaultStartState();
 						oe.add(m_evaluator1.getLastResult());								
 						or.add(t_Game.m_xfun.competeNPlayerAllRoles(new PlayAgtVector(m_PlayAgentX, random_agent), so, 100, 0).scTup[0]);
-						om.add(t_Game.m_xfun.competeNPlayerAllRoles(new PlayAgtVector(m_PlayAgentX, minimax_agent), so, 1, 0).scTup[0]);
+						om.add(t_Game.m_xfun.competeNPlayerAllRoles(new PlayAgtVector(m_PlayAgentX, maxn_agent), so, 1, 0).scTup[0]);
 						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100));
 						//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);
 						oC.add(1+(or.getVal()-0.9+om.getVal())/2.0);
@@ -490,7 +490,7 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 //							}
 //							//System.out.println("irun="+irun+", eval="+cma_agent.getCountEval());
 //							System.out.println("(irun: minimax, valit,random) = ("+irun+": " 
-//								+ frm5.format(competeBoth(m_PlayAgentX, minimax_agent, 1)) + ", "
+//								+ frm5.format(competeBoth(m_PlayAgentX, maxn_agent, 1)) + ", "
 //								//+ frm5.format(competeBoth(m_PlayAgentX, valit_agent, 100)) + ", "
 //								+ frm5.format(competeBoth(m_PlayAgentX, random_agent, 100)) + ")");
 //						} // for (irun)
@@ -498,7 +498,7 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 //						m_evaluator.set_MixDelta(0.0);
 //						oe.add(m_evaluator.evalAgent1(m_PlayAgentX,true));
 //						or.add(competeBoth(m_PlayAgentX, random_agent, 100));
-//						om.add(competeBoth(m_PlayAgentX, minimax_agent, 1));
+//						om.add(competeBoth(m_PlayAgentX, maxn_agent, 1));
 //						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100));
 //						//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);
 //						oC.add(1+(or.getVal()-0.9+om.getVal())/2.0);
@@ -677,7 +677,7 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 				 		StateObservation so = gb.getDefaultStartState();
 						oe.add(m_evaluator1.getLastResult());								
 						or.add(t_Game.m_xfun.competeNPlayerAllRoles(new PlayAgtVector(m_PlayAgentX, random_agent), so, 100, 0).scTup[0]);
-						//om.add(competeBoth(m_PlayAgentX, minimax_agent, 1, gb));
+						//om.add(competeBoth(m_PlayAgentX, maxn_agent, 1, gb));
 						om.add(m_evaluator2.getLastResult());
 						//ov.add(competeBoth(m_PlayAgentX, valit_agent, 100, gb));
 						//oC.add(1+(or.getVal()-0.9+om.getVal()+ov.getVal())/3.0);

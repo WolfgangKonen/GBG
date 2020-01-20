@@ -19,13 +19,12 @@ import javax.swing.JTextField;
 
 import controllers.ExpectimaxNAgent;
 import controllers.MaxNAgent;
-import controllers.MinimaxAgent;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Feature;
 
 /**
- * This class realizes the parameter settings (GUI tab) for for {@link MinimaxAgent}, 
+ * This class realizes the parameter settings (GUI tab) for  
  * {@link MaxNAgent}, {@link ExpectimaxNAgent}.
  * These parameters and their [defaults] are: <ul>
  * <li> <b>tree depth</b>: 	[10] initial strength of learning parameter 

@@ -22,7 +22,6 @@ import controllers.AgentBase;
 import controllers.ExpectimaxNAgent;
 import controllers.HumanPlayer;
 import controllers.MaxNAgent;
-import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;

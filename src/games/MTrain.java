@@ -68,20 +68,24 @@ class MTrain {
 	}
 	
 	/**
-	 * Print the results from {@link XArenaFuncs#multiTrain(int, String, XArenaButtons, GameBoard)} to
+	 * Print the results from {@link XArenaFuncs#multiTrain(int, String, XArenaButtons, GameBoard) XArenaFuncs.multiTrain} to
 	 * file <br>
-	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/multiTrain.csv}. <br>
+	 * 
+	 * <pre>  {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/<csvName>} </pre> 
+	 * 
 	 * where the optional {@code subdir} is for games with different flavors (like Hex: board size). 
 	 * The directory is created, if it does not exist.   
 	 * 
+	 * @param csvName	where to write results, e.g. "multiTrain.csv"
 	 * @param mtList	the results from {@code multiTrain}
 	 * @param pa		the agent used in {@code multiTrain} 
 	 * @param ar		needed for game name and {@code subdir}
 	 * @param userTitle1	title of 1st user column
 	 * @param userTitle2	title of 2nd user column
 	 */
-	public static void printMultiTrainList(ArrayList<MTrain> mtList, PlayAgent pa, Arena ar,
+	public static void printMultiTrainList(String csvName, ArrayList<MTrain> mtList, PlayAgent pa, Arena ar,
 			String userTitle1, String userTitle2){
+		PrintWriter mtWriter = null;
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+ar.getGameName();
 		String subDir = ar.getGameBoard().getSubDir();
 		if (subDir != null){
@@ -91,17 +95,16 @@ class MTrain {
 		tools.Utils.checkAndCreateFolder(strDir);
 
 		boolean retry=true;
-		PrintWriter mtWriter = null;
 		BufferedReader bufIn=new BufferedReader(new InputStreamReader(System.in));
 		while (retry) {
 			try {
-				mtWriter = new PrintWriter(new FileWriter(strDir+"/"+"multiTrain.csv",false));
+				mtWriter = new PrintWriter(new FileWriter(strDir+"/"+csvName,false));
 				retry = false;
 			} catch (IOException e) {
 				try {
 					// We may get here if multiTrain.csv is open in another application (e.g. Excel).
 					// Here we give the user the chance to close the file in the other application:
-				    System.out.print("*** Warning *** Could not open "+strDir+"/"+"multiTrain.csv. Retry? (y/n): ");
+				    System.out.print("*** Warning *** Could not open "+strDir+"/"+csvName+". Retry? (y/n): ");
 				    String s = bufIn.readLine();
 				    retry = (s.contains("y")) ? true : false;
 				} catch (IOException e2) {
@@ -123,7 +126,7 @@ class MTrain {
 
 		    mtWriter.close();
 		} else {
-			System.out.print("*** Warning *** Could not write "+strDir+"/"+"multiTrain.csv.");
+			System.out.print("*** Warning *** Could not write "+strDir+"/"+csvName+".");
 		}
 	}
 

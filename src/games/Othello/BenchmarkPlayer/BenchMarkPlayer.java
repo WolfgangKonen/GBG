@@ -187,12 +187,12 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 
 	@Override
 	public double estimateGameValue(StateObservation so) {
-		return getScore(so);
+		return so.getGameScore(so.getPlayer());     //getScore(so);
 	}
 
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
-		return getScoreTuple(so, null);
+		return so.getRewardTuple(true);  //getScoreTuple(so, null);
 	}
 
 	@Override

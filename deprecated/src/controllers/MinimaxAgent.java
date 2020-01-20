@@ -19,7 +19,7 @@ import java.util.Random;
  * depth (default: 10, see {@link ParOther}). To speed up calculations, already 
  * visited states are stored in a HashMap.  
  * <p>
- * {@link MinimaxAgent} is only viable for 1- and 2-player games. Therefore it is <b>deprecated</b>
+ * This class is only viable for 1- and 2-player games. Therefore it is <b>deprecated</b>
  * and one should use instead {@link MaxNAgent} for the arbitrary n-player variant.
  * 
  * @author Wolfgang Konen, TH Köln, Nov'16

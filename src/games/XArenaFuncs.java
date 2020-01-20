@@ -131,8 +131,8 @@ public class XArenaFuncs
 				ArrayList<ACTIONS> allAvailActions = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions();
 				pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 								  new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
-			} else if (sAgent.equals("Minimax")) {
-				pa = new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
+//			} else if (sAgent.equals("Minimax")) {
+//				pa = new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("Max-N")) {
 				pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("Expectimax-N")) {
@@ -201,9 +201,10 @@ public class XArenaFuncs
 	{
 		PlayAgent pa=null;
 		int maxGameNum=Integer.parseInt(m_xab.GameNumT.getText());
-		if (sAgent.equals("Minimax")) {
-			pa= new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
-		} else if (sAgent.equals("Max-N")) {
+//		if (sAgent.equals("Minimax")) {
+//			pa= new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
+//		} else 
+		if (sAgent.equals("Max-N")) {
 			pa= new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Expectimax-N")) {
 			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
@@ -636,22 +637,23 @@ public class XArenaFuncs
 	 * Perform trainNum cycles of training and evaluation for PlayAgent, and perform each self-play 
 	 * training with maxGameNum training games. 
 	 * Both trainNum and maxGameNum are inferred from {@code xab}.<br>
-	 * Record results in {@code multiTrain.csv}, see below.
+	 * Write results to {@code csvName}, see below.
 	 * 
 	 * @param n			index of agent to train (the current GUI will call multiTrain 
 	 * 					always with n=0 
 	 * @param sAgent	a string containing the class name of the agent
 	 * @param xab		used only for reading parameter values from members td_par, cma_par
 	 * @param gb		the game board, needed for evaluators and start state selection
+	 * @param csvName	results are written to this filename 
 	 * @return the (last) trained agent
-	 * @throws IOException if something goes wrong with {@code multiTrain.csv}, see below
+	 * @throws IOException if something goes wrong with {@code csvName}, see below
 	 * <p>
-	 * Side effect: writes results of multi-training to <b>{@code agents/<gameDir>/csv/multiTrain.csv}</b>.
+	 * Side effect: writes results of multi-training to <b>{@code agents/<gameDir>/csv/<csvName>}</b>.
 	 * This file has the columns: <br>
 	 * {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}. <br>
 	 * The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
 	 */
-	public PlayAgent multiTrain(int n, String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
+	public PlayAgent multiTrain(int n, String sAgent, XArenaButtons xab, GameBoard gb, String csvName) throws IOException {
 		DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		DecimalFormat frm2 = new DecimalFormat("+0.00;-0.00");
@@ -797,7 +799,7 @@ public class XArenaFuncs
 
 			// print the full list mtList after finishing each i
 			// (overwrites the file written from previous i)
-			MTrain.printMultiTrainList(mtList, pa, m_Arena, userTitle1, userTitle2);
+			MTrain.printMultiTrainList(csvName, mtList, pa, m_Arena, userTitle1, userTitle2);
 			
 			if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
 				break; //out of for

@@ -2,7 +2,6 @@ package controllers;
 
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
-import controllers.MinimaxAgent;
 import games.Arena;
 import games.StateObservation;
 import games.XArenaMenu;
@@ -26,7 +25,7 @@ import javax.swing.JOptionPane;
 
 /**
  * The Max-N agent implements the Max-N algorithm [Korf91] via interface {@link PlayAgent}. 
- * Max-N is the generalization of {@link MinimaxAgent} to N players. It works on {@link ScoreTuple}, 
+ * Max-N is the generalization of the well-known Minimax agent to N players. It works on {@link ScoreTuple}, 
  * an N-tuple of game scores. It traverses the game tree up to a prescribed 
  * depth (default: 10, see {@link MaxNParams}). To speed up calculations, already 
  * visited states are stored in a HashMap.  
