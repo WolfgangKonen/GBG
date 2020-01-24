@@ -107,12 +107,12 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 	 */
 	public void init()
 	{	
-		addWindowListener(new WindowClosingAdapter());
+		m_ArenaFrame.addWindowListener(new WindowClosingAdapter());
 		t_Game.init();
-		setSize(465,400);		
-		setBounds(0,0,465,400);
+		m_ArenaFrame.setSize(465,400);		
+		m_ArenaFrame.setBounds(0,0,465,400);
 		//pack();
-		setVisible(true);
+		m_ArenaFrame.setVisible(true);
 	}	
 
 	public TicTacToeBatch(String title) {

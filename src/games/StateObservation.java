@@ -24,7 +24,7 @@ import tools.Types.ACTIONS;
  * 
  * @see StateObsNondeterministic
  * 
- * @author Wolfgang Konen, TH Köln, Feb'17
+ * @author Wolfgang Konen, TH Koeln, 2017
  */
 public interface StateObservation extends Serializable{
     //Types.ACTIONS[] actions=null;

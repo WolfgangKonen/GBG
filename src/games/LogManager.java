@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * This class is responsible for logging games
  * 
- * @author Johannes Kutsch, TH Köln, Nov'16
+ * @author Johannes Kutsch, TH Koeln, 2016
  * 
  * @see LogManagerGUI
  */

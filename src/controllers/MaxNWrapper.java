@@ -11,7 +11,7 @@ import tools.Types;
 /**
  * Wrapper based on {@link MaxNAgent} for n-ply look-ahead in deterministic games
  * 
- * @author Wolfgang Konen, TH Köln, Dec'17
+ * @author Wolfgang Konen, TH Koeln, 2017
  * 
  * @see MaxNAgent
  */

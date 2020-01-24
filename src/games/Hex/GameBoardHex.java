@@ -72,6 +72,13 @@ public class GameBoardHex implements GameBoard {
         m_frame.paint(m_frame.getGraphics());
     }
 
+	   @Override
+	   public void destroy() {
+		   m_frame.setVisible(false);
+		   m_frame.dispose();
+	   }
+
+
     @Override
     public void updateBoard(StateObservation so,  
 							boolean withReset, boolean showValueOnGameboard) {

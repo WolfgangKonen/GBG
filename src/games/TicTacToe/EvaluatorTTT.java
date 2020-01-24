@@ -130,8 +130,7 @@ public class EvaluatorTTT extends Evaluator {
 		
 		if (opponent == null) {
 			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
-			MessageBox.show(gb.getArena(),"ERROR: " + tdstr,
-					"Load Error", JOptionPane.ERROR_MESSAGE);
+			gb.getArena().showMessage("ERROR: " + tdstr,"Load Error", JOptionPane.ERROR_MESSAGE);
 			lastResult = Double.NaN;
 			m_msg = "EvaluatorTTT: opponent is null!";
 			return lastResult;

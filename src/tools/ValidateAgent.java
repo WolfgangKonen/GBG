@@ -189,7 +189,7 @@ public class ValidateAgent {
 			
 		}
 		
-		ar.destruct();
+		ar.destroy();
 	}
 
 }

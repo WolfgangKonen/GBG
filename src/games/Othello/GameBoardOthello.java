@@ -284,8 +284,8 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		this.setVisible(true);
 		if (alignToMain) {
 			// place window with game board to the left of the main window
-			int x = arena.getX() + arena.m_xab.getWidth() + 18;
-			int y = arena.getY();
+			int x = arena.m_ArenaFrame.getX() + arena.m_xab.getWidth() + 18;
+			int y = arena.m_ArenaFrame.getY();
 			this.setLocation(x,y);	
 		}		
 	}
@@ -342,5 +342,11 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		return m_so;
 	}
 	
+	   @Override
+	   public void destroy() {
+		   this.setVisible(false);
+		   this.dispose();
+	   }
+
 	
 }

@@ -146,9 +146,9 @@ public class OptionsComp extends JFrame {
 		this.setVisible(isVisible);
 		int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
 		int y = ticGame.m_xab.getLocation().y;
-		if (ticGame.m_LaunchFrame!=null) {
-			x = ticGame.m_LaunchFrame.getX() + ticGame.m_LaunchFrame.getWidth() + 1;
-			y = ticGame.m_LaunchFrame.getY();
+		if (ticGame.m_ArenaFrame!=null) {
+			x = ticGame.m_ArenaFrame.getX() + ticGame.m_ArenaFrame.getWidth() + 1;
+			y = ticGame.m_ArenaFrame.getY();
 		}
 		x += ticGame.m_tabs.getX() + 1;
 		ticGame.m_xab.winCompOptions.setLocation(x,y);

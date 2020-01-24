@@ -23,7 +23,7 @@ import tools.SolidBorder;
  * <li> has the action code for Param-, Train-, MultiTrain-, and Play-button events.
  * </ul>
  * 
- * @author Wolfgang Konen, TH Koeln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016-2020
  */
 public class XArenaButtons extends JPanel		
 {

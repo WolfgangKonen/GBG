@@ -43,15 +43,18 @@ import java.util.Arrays;
  * 
  * @author Wolfgang Konen, TH Köln
  */
-abstract public class Arena extends JFrame implements Runnable {
+//abstract public class Arena extends JFrame implements Runnable {
+abstract public class Arena implements Runnable {
 	public enum Task {
 		PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
-		// , INSPECTNTUP, BAT_TC, BATCH, MULTCMP 
+		// , INSPECTNTUP 
 		, COMPETE, SWAPCMP, ALLCMP, TRNEMNT, IDLE
 	};
 
+	public static boolean withUI=true;
 	public XArenaFuncs m_xfun;
-	public JFrame m_LaunchFrame = null;
+	public JFrame m_ArenaFrame = null;
+	public GBGLaunch m_LauncherObj = null;
 	public XArenaMenu m_menu = null;
 	public XArenaTabs m_tabs = null;
 	public XArenaButtons m_xab; // the game buttons and text fields
@@ -76,21 +79,22 @@ abstract public class Arena extends JFrame implements Runnable {
 	public boolean singlePlayerTSRunning = false;
 
 	public Arena() {
-		m_LaunchFrame = this;
+//		m_ArenaFrame = this;
+		m_ArenaFrame = new JFrame();
 		initGame(); 
 	}
 
-	public Arena(JFrame frame) {
-		m_LaunchFrame = frame;
-		initGame();
-	}
-
 	public Arena(String title) {
-		super(title);
-		m_LaunchFrame = this;
+//		super(title);
+//		m_ArenaFrame = this;
+		m_ArenaFrame = new JFrame(title);
 		initGame();
 	}
 
+	public void setLauncherObj(GBGLaunch launcher) {
+		m_LauncherObj = launcher;
+	}
+	
 	/**
 	 * called by constructors
 	 */
@@ -106,7 +110,7 @@ abstract public class Arena extends JFrame implements Runnable {
 
 		m_xfun = new XArenaFuncs(this);
 		m_xab = new XArenaButtons(m_xfun, this); // needs a constructed 'gb'
-		tdAgentIO = new LoadSaveGBG(this, m_xab, m_LaunchFrame);
+		tdAgentIO = new LoadSaveGBG(this, m_xab, m_ArenaFrame);
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
@@ -121,30 +125,30 @@ abstract public class Arena extends JFrame implements Runnable {
 		JPanel infoPanel = new JPanel(new BorderLayout(0, 0));
 		infoPanel.setBackground(Types.GUI_BGCOLOR);
 		statusBar.setBackground(Types.GUI_BGCOLOR);
-		setLayout(new BorderLayout(10, 0));
-		setBackground(Types.GUI_BGCOLOR); // Color.white
+		m_ArenaFrame.setLayout(new BorderLayout(10, 0));
+		m_ArenaFrame.setBackground(Types.GUI_BGCOLOR); // Color.white
 		JPanel jPanel = new JPanel();
 		jPanel.setBackground(Types.GUI_BGCOLOR);
 		infoPanel.add(jPanel, BorderLayout.NORTH); // a little gap
 		infoPanel.add(statusBar, BorderLayout.CENTER);
 		infoPanel.add(jPanel, BorderLayout.SOUTH); // just a little space at the bottom
 
-		m_menu = new XArenaMenu(this, m_LaunchFrame);
+		m_menu = new XArenaMenu(this);
 		m_tabs = new XArenaTabs(this);
-		add(titlePanel, BorderLayout.NORTH);
-		add(m_xab, BorderLayout.CENTER);
-		add(infoPanel, BorderLayout.SOUTH);
+		m_ArenaFrame.add(titlePanel, BorderLayout.NORTH);
+		m_ArenaFrame.add(m_xab, BorderLayout.CENTER);
+		m_ArenaFrame.add(infoPanel, BorderLayout.SOUTH);
 
 		logManager = new LogManager();
 		logManager.setSubDir(gb.getSubDir());
 
 		// initialize GUI elements (NEW version: 'Arena extends JFrame')
-		addWindowListener(new WindowClosingAdapter());
-		setJMenuBar(m_menu);
-		setSize(Types.GUI_ARENATRAIN_WIDTH, getGuiArenaHeight());
-		setBounds(0,0,Types.GUI_ARENATRAIN_WIDTH, getGuiArenaHeight());
-		//pack();
-		setVisible(true);
+		m_ArenaFrame.addWindowListener(new WindowClosingAdapter(this));
+		m_ArenaFrame.setJMenuBar(m_menu);
+		m_ArenaFrame.setSize(Types.GUI_ARENATRAIN_WIDTH, getGuiArenaHeight());
+		m_ArenaFrame.setBounds(0,0,Types.GUI_ARENATRAIN_WIDTH, getGuiArenaHeight());
+		//m_ArenaFrame.pack();
+		m_ArenaFrame.setVisible(true);
 	}
 
 	public void init() {
@@ -170,7 +174,7 @@ abstract public class Arena extends JFrame implements Runnable {
 			// Ensure that the most recent parameters for this agent are fetched
 			// from the params tab.
 		} catch (RuntimeException e) {
-			MessageBox.show(m_xab, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+			showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;
 			setStatusMessage("Done.");
 			// return;
@@ -361,10 +365,15 @@ abstract public class Arena extends JFrame implements Runnable {
 		} // while (true)
 	}
 	
-	public void destruct() {
-		this.setVisible(false);
-		this.dispose();
-		System.exit(0);		
+	public void destroy() {
+		m_ArenaFrame.setVisible(false);
+		m_ArenaFrame.dispose();
+		this.gb.destroy();
+		if (this.m_LauncherObj==null) {
+			System.exit(0);				
+		} else {
+			this.m_LauncherObj.launcherState = GBGLaunch.LaunchTask.STARTSELECTOR;
+		}
 	}
 
 	protected void updateBoard() {
@@ -393,7 +402,7 @@ abstract public class Arena extends JFrame implements Runnable {
 			qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
 			paX = qaVector[0];
 		} catch (RuntimeException e) {
-			MessageBox.show(m_xab, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+			showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;
 			setStatusMessage("Done.");
 			return;
@@ -405,7 +414,7 @@ abstract public class Arena extends JFrame implements Runnable {
 		System.out.println("[InspectGame] " + sMsg);
 		
 		if (paX instanceof HumanPlayer) {
-			MessageBox.show(m_xab, "No value function known for 'Human'!",
+			showMessage("No value function known for 'Human'!",
 							"Warning", JOptionPane.WARNING_MESSAGE);
 		}
 
@@ -573,7 +582,7 @@ abstract public class Arena extends JFrame implements Runnable {
 				}
 			}
 		} catch (RuntimeException e) {
-			MessageBox.show(m_xab, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+			showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;
 			setStatusMessage("Done.");
 			return;
@@ -766,7 +775,7 @@ abstract public class Arena extends JFrame implements Runnable {
 						if (so instanceof StateObserver2048)
 							gScore *= StateObserver2048.MAXSCORE;
 						if (!singlePlayerTSRunning)
-							MessageBox.show(m_LaunchFrame, "Game finished with score " + gScore, "Game Over",
+							showMessage("Game finished with score " + gScore, "Game Over",
 								JOptionPane.INFORMATION_MESSAGE);
 						if (spDT!=null)
 							spDT.nextTeam[0].addSinglePlayScore(gScore);
@@ -778,15 +787,15 @@ abstract public class Arena extends JFrame implements Runnable {
 						switch (winner) {
 						case  (0):
 							gb.updateBoard(so, false, showValue);				// /WK/ really needed?
-							MessageBox.show(m_LaunchFrame, "X (" + agentX + ") wins", "Game Over",
+							showMessage("X (" + agentX + ") wins", "Game Over",
 									JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
 						case (1):
-							MessageBox.show(m_LaunchFrame, "O (" + agentO + ") wins", "Game Over",
+							showMessage("O (" + agentO + ") wins", "Game Over",
 									JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
 						case (-2):
-							MessageBox.show(m_LaunchFrame, "Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+							showMessage("Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 							break; // out of inner switch
 						} // switch(winner)
 
@@ -797,19 +806,19 @@ abstract public class Arena extends JFrame implements Runnable {
 //						switch (Player * win) {
 //						case  (+1):
 //							gb.updateBoard(so, false, showValue);				// /WK/ really needed?
-//							MessageBox.show(m_LaunchFrame, "X (" + agentX + ") wins", "Game Over",
+//							showMessage("X (" + agentX + ") wins", "Game Over",
 //									JOptionPane.INFORMATION_MESSAGE);
 //							break; // out of inner switch
 //						case (-1):
-//							MessageBox.show(m_LaunchFrame, "O (" + agentO + ") wins", "Game Over",
+//							showMessage("O (" + agentO + ") wins", "Game Over",
 //									JOptionPane.INFORMATION_MESSAGE);
 //							break; // out of inner switch
 //						case (0):
-//							MessageBox.show(m_LaunchFrame, "Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+//							showMessage("Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 //							break; // out of inner switch
 //						} // switch(Player*win)
 						gb.updateBoard(so, false, showValue);
-						repaint();
+						m_ArenaFrame.repaint();
 
 						break; // out of switch
 					default:
@@ -817,17 +826,17 @@ abstract public class Arena extends JFrame implements Runnable {
 						winner = sc.argmax();
 						if (sc.max()==0.0) winner = -2;	// tie indicator
 						if(winner >= 0)
-							MessageBox.show(m_LaunchFrame,"P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+							showMessage("P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 						else
-							MessageBox.show(m_LaunchFrame,"Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+							showMessage("Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 	
 						// this old version was specific to N=3 players and needed a special function
 						// getGameWinner3player() which is not necessary:
 //						int winner = ((ObserverBase)so).getGameWinner3player();
 //						if(winner >= 0)
-//							MessageBox.show(m_LaunchFrame,"P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+//							showMessage("P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 //						else
-//							MessageBox.show(m_LaunchFrame,"Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+//							showMessage("Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 						
 						break; // out of switch
 					}
@@ -840,7 +849,7 @@ abstract public class Arena extends JFrame implements Runnable {
 					int epiLength = m_xab.oPar[0].getEpisodeLength();
 					if (so instanceof StateObserver2048)
 						gScore *= StateObserver2048.MAXSCORE;
-					MessageBox.show(m_LaunchFrame, "Game stopped (epiLength) with score " + gScore, "Game Over",
+					showMessage("Game stopped (epiLength) with score " + gScore, "Game Over",
 							JOptionPane.INFORMATION_MESSAGE);
 					break; // this is the final break out of while loop
 				} // if (so.getMoveCounter()...)
@@ -854,7 +863,7 @@ abstract public class Arena extends JFrame implements Runnable {
 			// (deterministic)
 			// StateObservation object
 			e.printStackTrace();
-			MessageBox.show(m_xab, e.getClass().getName() + ":" + e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
+			showMessage(e.getClass().getName() + ":" + e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;
 			setStatusMessage("Done.");
 			return;
@@ -1071,21 +1080,30 @@ abstract public class Arena extends JFrame implements Runnable {
 	 */
 	abstract public void performArenaDerivedTasks();
 
+	public void showMessage(String message, String title, int msgCode) {
+		if (this.withUI) {
+			MessageBox.show(this.m_ArenaFrame,message,title,msgCode);
+		} else {
+			System.err.println("["+title+"] "+message);
+		}
+	}
+	
 	/**
-	 * helper class for the NEW 'Arena extends JFrame'-version
+	 * helper class 
 	 *
 	 * @see Arena#initGame()
 	 */
 	protected static class WindowClosingAdapter
 	extends WindowAdapter
 	{
-		public WindowClosingAdapter()  {  }
+		Arena m_ar;
+		public WindowClosingAdapter(Arena ar)  {  
+			m_ar = ar;
+		}
 
 		public void windowClosing(WindowEvent event)
 		{
-			event.getWindow().setVisible(false);
-			event.getWindow().dispose();
-			System.exit(0);
+			m_ar.destroy();
 		}
 	}
 

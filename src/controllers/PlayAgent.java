@@ -16,7 +16,7 @@ import tools.Types;
  * See {@link AgentBase} for a base implementation of this interface. Other implementing classes 
  * should usually inherit from {@link AgentBase}.
  *
- * @author Wolfgang Konen, TH Köln
+ * @author Wolfgang Konen, TH Koeln
  */
 public interface PlayAgent {
 	public enum AgentState {RAW, INIT, TRAINED};

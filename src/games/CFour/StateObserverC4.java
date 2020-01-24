@@ -16,7 +16,6 @@ import tools.Types.ACTIONS;
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
- *
  */
 public class StateObserverC4 extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;

@@ -53,7 +53,7 @@ import java.util.*;
  * Known classes having {@link XArenaFuncs} objects as members: 
  * 		{@link Arena}, {@link XArenaButtons} 
  * 
- * @author Wolfgang Konen, TH K�ln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016-2020
  * 
  */
 public class XArenaFuncs 
@@ -167,7 +167,7 @@ public class XArenaFuncs
 				pa = new Edax2(sAgent, new ParEdax(m_xab.edParams[n]));
 			}
 		} catch (Exception e) {
-			MessageBox.show(m_xab, 
+			m_Arena.showMessage( 
 					e.getClass().getName() +": "+ e.getMessage(), 
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			e.printStackTrace();
@@ -249,7 +249,7 @@ public class XArenaFuncs
 						pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 								              new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
-						MessageBox.show(m_xab, 
+						m_Arena.showMessage( 
 								e.getMessage(), 
 								"Warning", JOptionPane.WARNING_MESSAGE);
 						//e.printStackTrace();
@@ -263,7 +263,7 @@ public class XArenaFuncs
 						pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 								              new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
-						MessageBox.show(m_xab, 
+						m_Arena.showMessage( 
 								e.getMessage(), 
 								"Warning", JOptionPane.WARNING_MESSAGE);
 						//e.printStackTrace();
@@ -279,7 +279,7 @@ public class XArenaFuncs
 						pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 										  new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
 					} catch (Exception e) {
-						MessageBox.show(m_xab, 
+						m_Arena.showMessage( 
 								e.getMessage(), 
 								"Warning Sarsa", JOptionPane.WARNING_MESSAGE);
 						//e.printStackTrace();
@@ -294,7 +294,7 @@ public class XArenaFuncs
 //						pa = new Sarsa2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 //										   new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
 //					} catch (Exception e) {
-//						MessageBox.show(m_xab, 
+//						m_Arena.showMessage( 
 //								e.getMessage(), 
 //								"Warning Sarsa", JOptionPane.WARNING_MESSAGE);
 //						//e.printStackTrace();
@@ -448,7 +448,7 @@ public class XArenaFuncs
 			if (pa==null) throw new RuntimeException("Could not construct agent = " + sAgent);
 			
 		}  catch(RuntimeException e) {
-			MessageBox.show(xab, 
+			m_Arena.showMessage( 
 					e.getMessage(), 
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			return pa;			
@@ -532,7 +532,7 @@ public class XArenaFuncs
 
 				// enable premature exit if TRAIN button is pressed again:
 				if (xab.m_game.taskState!=Arena.Task.TRAIN) {
-					MessageBox.show(xab,
+					m_Arena.showMessage(
 							"Training stopped prematurely",
 							"Warning", JOptionPane.WARNING_MESSAGE);
 					break; //out of while
@@ -701,7 +701,7 @@ public class XArenaFuncs
 				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
-				MessageBox.show(xab, 
+				m_Arena.showMessage( 
 						e.getMessage(), 
 						"Warning", JOptionPane.WARNING_MESSAGE);
 				return pa;			
@@ -771,7 +771,7 @@ public class XArenaFuncs
 
 					// enable premature exit if MULTITRAIN button is pressed again:
 					if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
-						MessageBox.show(xab,
+						m_Arena.showMessage(
 								"MultiTraining stopped prematurely",
 								"Warning", JOptionPane.WARNING_MESSAGE);
 						break; //out of while
@@ -1037,7 +1037,7 @@ public class XArenaFuncs
 //			String P2 = xab.getSelectedAgent(2);
 //			if (P0.equals("Human") | P1.equals("Human") | P2.equals("Human") ) 
 //			{
-//				MessageBox.show(xab, "No compete for agent Human", "Error", JOptionPane.ERROR_MESSAGE);
+//				m_Arena.showMessage( "No compete for agent Human", "Error", JOptionPane.ERROR_MESSAGE);
 //				return res;
 //			} 
 //			else
@@ -1062,7 +1062,7 @@ public class XArenaFuncs
 //			
 //					
 //		} catch(RuntimeException ex) {
-//			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+//			m_Arena.showMessage( ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 //			return res;
 //		}
 //	}
@@ -1342,7 +1342,7 @@ public class XArenaFuncs
 			String AgentO = xab.getSelectedAgent(1);
 			for (int i=0; i<numPlayers; i++) 
 				if (xab.getSelectedAgent(i).equals("Human") ) {
-					MessageBox.show(xab, "No compete for agent Human", "Error", JOptionPane.ERROR_MESSAGE);
+					m_Arena.showMessage( "No compete for agent Human", "Error", JOptionPane.ERROR_MESSAGE);
 					return 0.0;
 				}
 			
@@ -1380,7 +1380,7 @@ public class XArenaFuncs
 			}
 					
 		} catch(RuntimeException ex) {
-			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			m_Arena.showMessage( ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			return 0;
 		}
 	} // competeDispatcher
@@ -1466,7 +1466,7 @@ public class XArenaFuncs
 			}
 
 		} catch(RuntimeException ex) {
-			MessageBox.show(xab, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			m_Arena.showMessage( ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			System.out.println(TAG+"ERROR :: RuntimeException :: "+ex.getMessage());
 			return 43;
 		}
@@ -1507,7 +1507,7 @@ public class XArenaFuncs
 //		
 //		int numPlayers = gb.getStateObs().getNumPlayers();
 //		if (numPlayers!=2) {
-//			MessageBox.show(xab, 
+//			m_Arena.showMessage( 
 //					"Multi-Competition only available for 2-player games!", 
 //					"Error", JOptionPane.ERROR_MESSAGE);	
 //			return winrate;
@@ -1531,7 +1531,7 @@ public class XArenaFuncs
 //										 +competeNum+" episodes each, "+AgentX+" vs "+AgentO);
 //
 //		if (AgentX.equals("Human") | AgentO.equals("Human")) {
-//			MessageBox.show(xab, 
+//			m_Arena.showMessage( 
 //					"No multiCompete for agent Human", 
 //					"Error", JOptionPane.ERROR_MESSAGE);
 //			return winrate;
@@ -1545,7 +1545,7 @@ public class XArenaFuncs
 //				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);
 //			}  catch(RuntimeException e) 
 //			{
-//				MessageBox.show(xab, 
+//				m_Arena.showMessage( 
 //						e.getMessage(), 
 //						"Warning", JOptionPane.WARNING_MESSAGE);
 //				return winrate;			
@@ -1558,7 +1558,7 @@ public class XArenaFuncs
 //				if (paO==null) throw new RuntimeException("Could not construct AgentO = " + AgentO);
 //			}  catch(RuntimeException e) 
 //			{
-//				MessageBox.show(xab, 
+//				m_Arena.showMessage( 
 //						e.getMessage(), 
 //						"Warning", JOptionPane.WARNING_MESSAGE);
 //				return winrate;			
@@ -1677,7 +1677,7 @@ public class XArenaFuncs
 ////		}
 //		
 //		} catch(RuntimeException ex) {
-//			MessageBox.show(xab, 
+//			m_Arena.showMessage( 
 //					ex.getMessage(), 
 //					"Error", JOptionPane.ERROR_MESSAGE);
 //		}

@@ -66,13 +66,8 @@ public class GBGBatch { //extends ArenaTrain {
 	private static GBGBatch t_Batch=null;
 	private static String filePath = null;
 
-	public  boolean m_NetIsLinear = false;
-	public  boolean m_NetHasSigmoid = false;
-	public	PlayAgent m_PlayAgentX;
-	public	PlayAgent m_PlayAgentO;
 	protected Evaluator m_evaluatorQ=null;
 	protected Evaluator m_evaluatorT=null;
-	protected String lastMsg="";
 	
 	/**
 	 * @param args <br>
@@ -321,9 +316,7 @@ public class GBGBatch { //extends ArenaTrain {
 				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
-				MessageBox.show(xab, 
-						e.getMessage(), 
-						"Warning", JOptionPane.WARNING_MESSAGE);
+				gb.getArena().showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
 				return pa;			
 			} 
 
@@ -428,11 +421,13 @@ public class GBGBatch { //extends ArenaTrain {
 		{
 		  System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
 		}
-		if (m_evaluatorQ.m_mode==(-1)) {
-			this.lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
-		} else {
-			this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
-		}
+		
+//		String lastMsg="";
+//		if (m_evaluatorQ.m_mode==(-1)) {
+//			lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
+//		} else {
+//			lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
+//		}
 		
 		xab.TrainNumT.setText(Integer.toString(trainNum) );
 		return pa;
@@ -507,9 +502,7 @@ public class GBGBatch { //extends ArenaTrain {
 				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
-				MessageBox.show(xab, 
-						e.getMessage(), 
-						"Warning", JOptionPane.WARNING_MESSAGE);
+				gb.getArena().showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
 				return pa;			
 			} 
 
@@ -614,11 +607,13 @@ public class GBGBatch { //extends ArenaTrain {
 		{
 		  System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
 		}
-		if (m_evaluatorQ.m_mode==(-1)) {
-			this.lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
-		} else {
-			this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
-		}
+		
+//		String lastMsg="";
+//		if (m_evaluatorQ.m_mode==(-1)) {
+//			lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
+//		} else {
+//			lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
+//		}
 		
 		xab.TrainNumT.setText(Integer.toString(trainNum) );
 		return pa;

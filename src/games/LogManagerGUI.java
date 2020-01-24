@@ -14,7 +14,7 @@ import java.io.ObjectInputStream;
 /**
  * The GUI for {@link LogManager}
  * 
- * @author Johannes Kutsch, TH Köln, Nov'16
+ * @author Johannes Kutsch, TH Koeln, 2016
  * 
  * @see LogManager
  */

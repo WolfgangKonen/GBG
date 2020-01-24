@@ -549,16 +549,16 @@ public class GameBoardNim extends JFrame implements GameBoard {
 			// place window with game board below the main window
 			int x = nimGame.m_xab.getX() + nimGame.m_xab.getWidth() + 8;
 			int y = nimGame.m_xab.getLocation().y;
-			if (nimGame.m_LaunchFrame!=null) {
-				x = nimGame.m_LaunchFrame.getX();
-				y = nimGame.m_LaunchFrame.getY() + nimGame.m_LaunchFrame.getHeight() +1;
-				this.setSize(nimGame.m_LaunchFrame.getWidth(),
+			if (nimGame.m_ArenaFrame!=null) {
+				x = nimGame.m_ArenaFrame.getX();
+				y = nimGame.m_ArenaFrame.getY() + nimGame.m_ArenaFrame.getHeight() +1;
+				this.setSize(nimGame.m_ArenaFrame.getWidth(),
 							 (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
 		}		
 //		System.out.println("GameBoardNim size = " +super.getWidth() + " * " + super.getHeight());
-//		System.out.println("Arena size = " +ticGame.m_LaunchFrame.getWidth() + " * " + ticGame.m_LaunchFrame.getHeight());
+//		System.out.println("Arena size = " +ticGame.m_ArenaFrame.getWidth() + " * " + ticGame.m_ArenaFrame.getHeight());
 
 	}
 
@@ -617,5 +617,11 @@ public class GameBoardNim extends JFrame implements GameBoard {
     	super.setState(JFrame.NORMAL);	// if window is iconified, display it normally
 		super.toFront();
 	}
+
+   @Override
+   public void destroy() {
+	   this.setVisible(false);
+	   this.dispose();
+   }
 
 }

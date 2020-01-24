@@ -49,7 +49,7 @@ import tools.Types.ACTIONS;
  * classes. <p>
  * Known classes having {@link TicTDBase} as super class: {@link FeatureTTT}
  * 
- * @author Wolfgang Konen, TH Köln, Dec'08 - Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016
  */
 abstract public class TicTDBase  extends AgentBase implements Serializable {
 	private int[][] crosspoint_w;

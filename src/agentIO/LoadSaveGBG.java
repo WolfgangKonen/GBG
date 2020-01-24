@@ -60,7 +60,7 @@ public class LoadSaveGBG {
 	public JDialog createProgressDialog(final IGetProgress streamProgress,
 			final String msg) {
 		// ------------------------------------------------------------
-		// Setup Progressbar Dialog
+		// setup progress-bar dialog
 		final JDialog dlg = new JDialog(arenaFrame, msg, true);
 		final JProgressBar dpb = new JProgressBar(0, 100);
 		dlg.add(BorderLayout.CENTER, dpb);
@@ -104,7 +104,7 @@ public class LoadSaveGBG {
 	}
 
 	/**
-	 * save tournament results to disk with a filechooser to set name and folder
+	 * save tournament results to disk with a file chooser to set name and folder
 	 * @param tsr tournament results
 	 * @throws IOException file not writable
 	 */
@@ -113,8 +113,8 @@ public class LoadSaveGBG {
 	}
 
 	/**
-	 * save tournament results to disk with a filechooser to set name and folder.
-	 * if autoSave is enabled, theres no filechooser and a generic date based name will be used
+	 * save tournament results to disk with a file chooser to set name and folder.
+	 * if autoSave is enabled, there is no file chooser and a generic date based name will be used
 	 * @param tsr tournament results
 	 * @param autoSave use autoSave
 	 * @throws IOException file not writeable
@@ -150,7 +150,7 @@ public class LoadSaveGBG {
 		if (autoSaveEnabled)
 			returnVal = JFileChooser.APPROVE_OPTION;
 		else
-			returnVal = fc.showSaveDialog(arenaGame);
+			returnVal = fc.showSaveDialog(arenaFrame);
 		String filePath;
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -332,7 +332,7 @@ public class LoadSaveGBG {
 			fc.setCurrentDirectory(new File(strDir));
 			fc.setAcceptAllFileFilterUsed(false);
 
-			int returnVal = fc.showOpenDialog(arenaGame);
+			int returnVal = fc.showOpenDialog(arenaFrame);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				try {
@@ -413,7 +413,7 @@ public class LoadSaveGBG {
 			fc.setCurrentDirectory(new File(strDir));
 			fc.setAcceptAllFileFilterUsed(false);
 
-			int returnVal = fc.showOpenDialog(arenaGame);
+			int returnVal = fc.showOpenDialog(arenaFrame);
 
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				try {
@@ -541,7 +541,7 @@ public class LoadSaveGBG {
 		fileChooser.setCurrentDirectory(new File(strDir));
 		fileChooser.setAcceptAllFileFilterUsed(false);
 
-		int returnVal = fileChooser.showOpenDialog(arenaGame);
+		int returnVal = fileChooser.showOpenDialog(arenaFrame);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION)
 		{

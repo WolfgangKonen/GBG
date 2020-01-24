@@ -716,6 +716,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			System.out.println();
 		}
 		
-		ar.destruct();
+		ar.destroy();
 	}
 }

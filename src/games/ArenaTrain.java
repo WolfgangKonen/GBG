@@ -49,10 +49,6 @@ abstract public class ArenaTrain extends Arena
 		super();
 		initArenaTrain();
 	}
-	public ArenaTrain(JFrame frame) {
-		super(frame);
-		initArenaTrain();
-	}
 	
 	public ArenaTrain(String title) {
 		super(title);
@@ -106,10 +102,8 @@ abstract public class ArenaTrain extends Arena
 				pa = m_xfun.constructAgent(n,agentN, m_xab);
 				if (pa==null) throw new RuntimeException("Could not construct agent = " + agentN);
 				
-			}  catch(Exception e) {
-				MessageBox.show(m_xab, 
-						e.getMessage(), 
-						"Warning", JOptionPane.WARNING_MESSAGE);
+			} catch(Exception e) {
+				this.showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
 			} 
 			if (pa!=null && pa.isTrainable()) {
 //				enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtons

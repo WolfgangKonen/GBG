@@ -35,7 +35,7 @@ import tools.Types;
  * @see GameBoardTTT
  * @see EvaluatorTTT
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16 - May'18
+ * @author Wolfgang Konen, TH Koeln, 2016-2020
  */
 public class ArenaTrainTTT extends ArenaTrain   {
 	

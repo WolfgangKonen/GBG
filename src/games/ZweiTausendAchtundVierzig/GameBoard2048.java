@@ -520,9 +520,9 @@ public class GameBoard2048 extends JFrame implements GameBoard {
             // place window with game board below the main window
             int x = ztavGame.m_xab.getX() + ztavGame.m_xab.getWidth() + 8;
             int y = ztavGame.m_xab.getLocation().y;
-            if (ztavGame.m_LaunchFrame != null) {
-                x = ztavGame.m_LaunchFrame.getX();
-                y = ztavGame.m_LaunchFrame.getY() + ztavGame.m_LaunchFrame.getHeight() + 1;
+            if (ztavGame.m_ArenaFrame != null) {
+                x = ztavGame.m_ArenaFrame.getX();
+                y = ztavGame.m_ArenaFrame.getY() + ztavGame.m_ArenaFrame.getHeight() + 1;
                 this.setSize(850, 550);
             }
             this.setLocation(x, y);        	
@@ -612,6 +612,12 @@ public class GameBoard2048 extends JFrame implements GameBoard {
     	super.setState(Frame.NORMAL);	// if window is iconified, display it normally
 		super.toFront();
 	}
+
+	   @Override
+	   public void destroy() {
+		   this.setVisible(false);
+		   this.dispose();
+	   }
 
 
 }

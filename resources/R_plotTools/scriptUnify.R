@@ -7,7 +7,7 @@
 path <- "../../agents/ConnectFour/csv/"; 
 
 filenames=c( "multiTrainLambda.csv"
-            ,"multiTrainLambda2.csv"
+            ,"multiTrainLambda3.csv"
             #"multiTrain_TCL-EXP-NT3-al25-lam000-750k-epsfin0-V6m.csv"
             #,"multiTrain_TCL-EXP-NT3-al25-lam000-750k-epsfin0-V6m-2.csv"
            )

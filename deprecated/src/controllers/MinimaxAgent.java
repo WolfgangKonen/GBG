@@ -22,7 +22,7 @@ import java.util.Random;
  * This class is only viable for 1- and 2-player games. Therefore it is <b>deprecated</b>
  * and one should use instead {@link MaxNAgent} for the arbitrary n-player variant.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016
  * 
  * @see MaxNAgent
  */

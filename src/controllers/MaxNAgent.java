@@ -36,7 +36,7 @@ import javax.swing.JOptionPane;
  * See [Korf91] 
  * R. E. Korf: <em>Multi-Player Alpha-Beta Pruning</em>, Artificial Intelligence 48, 1991, 99-111.
  * 
- * @author Wolfgang Konen, TH Köln, Dec'17
+ * @author Wolfgang Konen, TH Koeln, 2017-2020
  * 
  * @see ScoreTuple
  * @see ExpectimaxNAgent

@@ -18,7 +18,7 @@ import games.RubiksCube.GameBoardCube;
  * reset-retrieved (getDefaultStartState()) , or a random start state can be retrieved 
  * with {@link #chooseStartState(PlayAgent)}.  
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016-2020
  *
  */
 public interface GameBoard {
@@ -27,8 +27,11 @@ public interface GameBoard {
 	 */
 	public void initialize();
 	public void clearBoard(boolean boardClear, boolean vClear);
-	//public void updateBoard();
-	//public void updateBoard(StateObservation so);
+	/**
+	 * things to be done when disposing a GameBoard object
+	 */
+	public void destroy();
+	
 	/**
 	 * Update the play board and the associated values (labels).
 	 * 

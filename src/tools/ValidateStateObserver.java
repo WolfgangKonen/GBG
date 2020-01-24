@@ -149,7 +149,7 @@ public class ValidateStateObserver {
 			if (res)
 				System.out.println("ValidateStateObserver finished successfully");
 		}
-		ar.destruct();
+		ar.destroy();
 	}
 
 }

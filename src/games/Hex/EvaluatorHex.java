@@ -267,8 +267,7 @@ public class EvaluatorHex extends Evaluator {
         
 		if (opponent == null) {
 			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
-			MessageBox.show(gb.getArena(),"ERROR: " + tdstr,
-					"Load Error", JOptionPane.ERROR_MESSAGE);
+			gb.getArena().showMessage("ERROR: " + tdstr,"Load Error", JOptionPane.ERROR_MESSAGE);
 			return Double.NaN;
 		} 
 

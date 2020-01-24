@@ -40,7 +40,7 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
  * See {@link #updateAvailableMoves()} for the numbering of actions:<br>
  * 0: left, 1: up, 2: right, 3: down.
  *
- * @author Wolfgang Konen, THK
+ * @author Wolfgang Konen, TH Koeln
  * @author Johannes Kutsch
  */
 public class StateObserver2048 extends ObserverBase implements StateObsNondeterministic {

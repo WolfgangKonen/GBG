@@ -578,10 +578,10 @@ public class GameBoardCube extends JFrame implements GameBoard {
 			// place window with game board below the main window
 			int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
 			int y = ticGame.m_xab.getLocation().y;
-			if (ticGame.m_LaunchFrame!=null) {
-				x = ticGame.m_LaunchFrame.getX();
-				y = ticGame.m_LaunchFrame.getY() + ticGame.m_LaunchFrame.getHeight() +1;
-				this.setSize(ticGame.m_LaunchFrame.getWidth(),
+			if (ticGame.m_ArenaFrame!=null) {
+				x = ticGame.m_ArenaFrame.getX();
+				y = ticGame.m_ArenaFrame.getY() + ticGame.m_ArenaFrame.getHeight() +1;
+				this.setSize(ticGame.m_ArenaFrame.getWidth(),
 						 (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
@@ -852,5 +852,12 @@ public class GameBoardCube extends JFrame implements GameBoard {
 		}
 		
 	}
+	
+	   @Override
+	   public void destroy() {
+		   this.setVisible(false);
+		   this.dispose();
+	   }
+
    
 }

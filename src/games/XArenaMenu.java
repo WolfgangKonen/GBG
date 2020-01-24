@@ -1,7 +1,5 @@
 package games;
 
-import javax.swing.JMenu;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -9,6 +7,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import javax.swing.JMenu;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -26,14 +25,12 @@ import controllers.PlayAgent;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
-//import controllers.MCTS0.MCTSAgentT0;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.TDAgent;
-//import controllers.TD.ntuple2.Sarsa2Agt;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
-import games.Othello.Edax.Edax2;
+//import games.Othello.Edax.Edax2;
 import tools.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
@@ -42,7 +39,7 @@ import tools.Types.ACTIONS;
 /**
  * Main menu for {@link Arena} and {@link ArenaTrain}.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016-2020
  */
 public class XArenaMenu extends JMenuBar {
 
@@ -75,7 +72,7 @@ public class XArenaMenu extends JMenuBar {
 
 	// private JRadioButtonMenuItem rbMenuItem;
 	// private JCheckBoxMenuItem cbMenuItem;
-	private JFrame m_frame;
+	//	private JFrame m_frame;
 	private int selectedAgent = 0;
 	private int numPlayers;
 	private boolean winCompVisible = false;
@@ -85,9 +82,8 @@ public class XArenaMenu extends JMenuBar {
 	// private final String agentList[] = { "Human", "Minimax", "TDS", "Random"
 	// };
 
-	XArenaMenu(Arena arena, JFrame m_TicFrame) {
+	XArenaMenu(Arena arena) {
 		m_arena = arena;
-		m_frame = m_TicFrame;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 
 
@@ -119,14 +115,14 @@ public class XArenaMenu extends JMenuBar {
 			menuItem.setEnabled(false);			// no param tabs for Arena
 		menu.add(menuItem);
 		// ==============================================================
-		// Quit Program
+		// Exit Game
 		// ==============================================================
-		menuItem = new JMenuItem("Quit Program", KeyEvent.VK_T);
+		menuItem = new JMenuItem("Exit Game", KeyEvent.VK_T);
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4,
 				ActionEvent.ALT_MASK));
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_arena.destruct();
+				m_arena.destroy();
 			}
 		});
 		menuItem.setToolTipText(TIPEVALUATE);
@@ -449,29 +445,30 @@ public class XArenaMenu extends JMenuBar {
 		add(menu);
 	}
 
-	private void generateOptionsMenu() {
-		JMenu menu;
-		JMenuItem menuItem;
-
-		menu = new JMenu("Options");
-		menu.setMnemonic(KeyEvent.VK_A);
-		menu.getAccessibleContext().setAccessibleDescription(
-				"Options for Competition");
-
-		// ==============================================================
-		// Options for Game-Theoretic Values
-		// ==============================================================
-		menuItem = new JMenuItem("Game-Theoretic Values");
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				//ticGame.m_xab.setWindowPos(ticGame.winOptionsGTV);
-			}
-		});
-		menuItem.setToolTipText("(currently not implemented)");
-		menu.add(menuItem);
-
-		add(menu);
-	}
+	// --- generateOptionsMenu() currently not needed ---
+//	private void generateOptionsMenu() {
+//		JMenu menu;
+//		JMenuItem menuItem;
+//
+//		menu = new JMenu("Options");
+//		menu.setMnemonic(KeyEvent.VK_A);
+//		menu.getAccessibleContext().setAccessibleDescription(
+//				"Options for Competition");
+//
+//		// ==============================================================
+//		// Options for Game-Theoretic Values
+//		// ==============================================================
+//		menuItem = new JMenuItem("Game-Theoretic Values");
+//		menuItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				//ticGame.m_xab.setWindowPos(ticGame.winOptionsGTV);
+//			}
+//		});
+//		menuItem.setToolTipText("(currently not implemented)");
+//		menu.add(menuItem);
+//
+//		add(menu);
+//	}
 
 	private void generateHelpMenu() {
 		JMenu menu;
@@ -500,7 +497,7 @@ public class XArenaMenu extends JMenuBar {
 									// getResource() will find .htm in ../resources/
 				System.out.println("URL = " + url);
 				if (url == null) {
-					MessageBox.show(m_frame,"ERROR: Could not locate URL with " + 
+					m_arena.showMessage("ERROR: Could not locate URL with " + 
 							"getClass().getResource(\"/HelpGUI-Arena-GBG.htm\")", 
 							"XArenaMenu",JOptionPane.ERROR_MESSAGE);
 					printStatus("[ERROR: Could not locate help file URL]");
@@ -519,7 +516,7 @@ public class XArenaMenu extends JMenuBar {
 									// getResource() will find .pdf in ../resources/
 				System.out.println("URL = " + url);
 				if (url == null) {
-					MessageBox.show(m_frame,"ERROR: Could not locate URL with " + 
+					m_arena.showMessage("ERROR: Could not locate URL with " + 
 							"getClass().getResource(\"/TR-GBG.pdf\")", 
 							"XArenaMenu",JOptionPane.ERROR_MESSAGE);
 					printStatus("[ERROR: Could not locate help file URL]");
@@ -553,7 +550,7 @@ public class XArenaMenu extends JMenuBar {
 		if (td == null) {
 			str = str + "\n No Agent loaded!";
 			if (filePath==null) 	// MessageBox only when called via menu, NOT in batch mode (GBGBatch)
-				MessageBox.show(m_arena,"ERROR: " + str,
+				m_arena.showMessage("ERROR: " + str,
 					"Load Error", JOptionPane.ERROR_MESSAGE);
 			res = false;
 		} else {
@@ -568,33 +565,7 @@ public class XArenaMenu extends JMenuBar {
 			m_arena.m_xab.changedViaLoad[n] = true;
 			
 			td.fillParamTabsAfterLoading(n, m_arena); 
-			// fillParamTabsAfterLoading replaces the old, lengthy if ... else if ...
-			// [fillParamTabsAfterLoading replaces completely the long and complicated if ... else if ... statement we had here before (!)]
-			//
-//			if (td instanceof TDAgent) {
-//			}
-//			else if (td instanceof TDNTuple2Agt) {
-//			}
-//			else if (td instanceof TDNTuple3Agt) {			
-//			}
-//			else if (td instanceof SarsaAgt) {
-//			}
-//			else if (td instanceof MCTSAgentT) {
-//			}
-//			else if (td instanceof MCTSExpectimaxAgt) {
-//			}
-//			else if (td instanceof MCAgent) {
-//			}
-//			else if (td instanceof MCAgentN) {
-//			}
-//			else if (td instanceof MinimaxAgent) {
-//			}
-//			else if (td instanceof MaxNAgent) {
-//			}
-//			else if (td instanceof ExpectimaxNAgent) {
-//			}
-//			else if (td instanceof Edax2) {
-//			}
+			// td.fillParamTabsAfterLoading replaces the old, lengthy if ... else if ...
 			
 //			if (td instanceof TDAgent || td instanceof TDNTuple2Agt || td instanceof SarsaAgt /* || td instanceof TDNTupleAgt */) {
 			if (td.isTrainable()) {
@@ -652,7 +623,7 @@ public class XArenaMenu extends JMenuBar {
 			m_arena.m_xfun.m_PlayAgents = m_arena.m_xfun.fetchAgents(m_arena.m_xab);
 			AgentBase.validTrainedAgents(m_arena.m_xfun.m_PlayAgents,numPlayers);
 		} catch (RuntimeException e) {
-			MessageBox.show(m_arena, e.getMessage(), 
+			m_arena.showMessage( e.getMessage(), 
 					"Error", JOptionPane.ERROR_MESSAGE);
 			printStatus("Done");
 			return;
@@ -728,14 +699,14 @@ public class XArenaMenu extends JMenuBar {
 			paVector = m_arena.m_xfun.wrapAgents(m_arena.m_xfun.m_PlayAgents, 
 					m_arena.m_xab, m_arena.gb.getStateObs());
 		} catch (RuntimeException e) {
-			MessageBox.show(m_arena, e.getMessage(), 
+			m_arena.showMessage( e.getMessage(), 
 					"Error", JOptionPane.ERROR_MESSAGE);
 			printStatus("Done");
 			return;
 		}
 		PlayAgent pa = paVector[index];
 		if (pa instanceof HumanPlayer) {
-			MessageBox.show(m_arena, "No evaluation for HumanPlayer", 
+			m_arena.showMessage( "No evaluation for HumanPlayer", 
 					"Error", JOptionPane.ERROR_MESSAGE);			
 			printStatus("Done");
 		} else {
@@ -777,7 +748,7 @@ public class XArenaMenu extends JMenuBar {
 				System.out.println(str);
 				printStatus(qEvaluator.getShortMsg());				
 			} catch (RuntimeException e) {
-				MessageBox.show(m_arena, e.getMessage(), 
+				m_arena.showMessage( e.getMessage(), 
 						"Error", JOptionPane.ERROR_MESSAGE);
 				printStatus("Done");
 				return;

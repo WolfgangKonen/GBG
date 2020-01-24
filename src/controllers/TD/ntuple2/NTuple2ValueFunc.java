@@ -42,7 +42,7 @@ import tools.Types;
  * @see TDNTuple3Agt
  * @see SarsaAgt
  * 
- * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Köln, Feb'17  
+ * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Koeln, 2017-2020  
  */
 public class NTuple2ValueFunc implements Serializable {
 	/* Experimental Parameters: */

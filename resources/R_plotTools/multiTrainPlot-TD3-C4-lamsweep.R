@@ -20,9 +20,8 @@ evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
 path <- "../../agents/ConnectFour/csv/"; 
 limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=20000/wfac;
 
-filenames=c(#"multiTrain_TCL-EXP-NT3-alSweep-lam000-750k-epsfin0.csv"
-            "multiTrainLambda.csv"
-            #"multiTrain_TCL-EXP-NT3-al37-lamSweep-750k-epsfin0-V12m.csv"
+filenames=c(#"multiTrainLambda.csv"
+            "multiTrain_TCL-EXP-NT3-al37-lamSweep-750k-epsfin0-V12m.csv"
            )
 # other pars: eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, NORMALIZE=F, SIGMOID=tanh, 
 # LEARNFROMRM=T, MODE_3P==2, fixed ntuple mode 1: 70 8-tuples. TC_INIT=1e-4, TC_EXP

@@ -290,7 +290,7 @@ public class C4GameGui extends JPanel implements ListOperation {
 				int col = mvList.readPrevMove();
 				if (!c4.canWin(2, col, c4.getColHeight(col) - 1)) {
 //					gameOver = true;
-					MessageBox.show(gameBoardC4.m_Arena, "Draw!!!       ", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+					gameBoardC4.m_Arena.showMessage("Draw!!!       ", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 			if (!isGameOver())
@@ -476,9 +476,9 @@ public class C4GameGui extends JPanel implements ListOperation {
 	private void checkWin(int player, int x, String sPlayer) {
 		if (c4.canWin(player + 1, x)) {
 			if (sPlayer != null)
-				MessageBox.show(gameBoardC4.m_Arena, sPlayer + " Win!!       ", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+				gameBoardC4.m_Arena.showMessage(sPlayer + " Win!!       ", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 			else
-				MessageBox.show(gameBoardC4.m_Arena,"Game Over!!!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+				gameBoardC4.m_Arena.showMessage("Game Over!!!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 //			gameOver = true;
 		}
 	}

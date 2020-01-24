@@ -10,7 +10,7 @@ import java.util.Random;
 /**
  * the Random {@link PlayAgent} for TicTacToe 
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016
  * 
  */
 public class RandomAgent extends AgentBase implements PlayAgent {

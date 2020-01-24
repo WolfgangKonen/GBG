@@ -91,9 +91,9 @@ public class XArenaTabs extends JFrame
 		// place window TD params on the right side of the main window
 		int x = arena.m_xab.getX() + arena.m_xab.getWidth() + 8;
 		int y = arena.m_xab.getLocation().y;
-		if (arena.m_LaunchFrame!=null) {
-			x = arena.m_LaunchFrame.getX() + arena.m_LaunchFrame.getWidth() + 1;
-			y = arena.m_LaunchFrame.getY();
+		if (arena.m_ArenaFrame!=null) {
+			x = arena.m_ArenaFrame.getX() + arena.m_ArenaFrame.getWidth() + 1;
+			y = arena.m_ArenaFrame.getY();
 		}
 		arena.m_tabs.setLocation(x,y);
 		arena.m_tabs.setSize(Types.GUI_PARAMTABS_WIDTH,Types.GUI_PARAMTABS_HEIGHT);	

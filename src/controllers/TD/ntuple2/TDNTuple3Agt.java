@@ -85,7 +85,7 @@ import games.XArenaMenu;
  * @see AgentBase
  * @see NTupleBase
  * 
- * @author Wolfgang Konen, TH Köln, Dec'18
+ * @author Wolfgang Konen, TH Koeln, 2018-2020
  */
 public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Serializable {
 	

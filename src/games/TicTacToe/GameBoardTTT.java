@@ -35,7 +35,7 @@ import tools.Types;
  * game play or to enter board positions for which the agent reaction is 
  * inspected. 
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016-2020
  *
  */
 public class GameBoardTTT extends JFrame implements GameBoard {
@@ -404,16 +404,16 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 			// place window with game board below the main window
 			int x = arena.m_xab.getX() + arena.m_xab.getWidth() + 8;
 			int y = arena.m_xab.getLocation().y;
-			if (arena.m_LaunchFrame!=null) {
-				x = arena.m_LaunchFrame.getX();
-				y = arena.m_LaunchFrame.getY() + arena.m_LaunchFrame.getHeight() +1;
-				this.setSize(arena.m_LaunchFrame.getWidth(),
+			if (arena.m_ArenaFrame!=null) {
+				x = arena.m_ArenaFrame.getX();
+				y = arena.m_ArenaFrame.getY() + arena.m_ArenaFrame.getHeight() +1;
+				this.setSize(arena.m_ArenaFrame.getWidth(),
 							 (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
 		}		
 //		System.out.println("GameBoardTTT size = " +super.getWidth() + " * " + super.getHeight());
-//		System.out.println("Arena size = " +ticGame.m_LaunchFrame.getWidth() + " * " + ticGame.m_LaunchFrame.getHeight());
+//		System.out.println("Arena size = " +ticGame.m_ArenaFrame.getWidth() + " * " + ticGame.m_ArenaFrame.getHeight());
 
 	}
 
@@ -469,5 +469,11 @@ public class GameBoardTTT extends JFrame implements GameBoard {
     	super.setState(JFrame.NORMAL);	// if window is iconified, display it normally
 		super.toFront();
 	}
+
+   @Override
+   public void destroy() {
+		this.setVisible(false);
+		this.dispose();
+   }
 
 }

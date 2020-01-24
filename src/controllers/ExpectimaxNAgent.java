@@ -30,7 +30,7 @@ import java.util.Random;
  * {@link ExpectimaxNAgent} is for <b>non-deterministic</b> games. For deterministic games see 
  * {@link MaxNAgent}.
  * 
- * @author Wolfgang Konen, TH Köln, Dec'17
+ * @author Wolfgang Konen, TH Koeln, 2017
  * 
  * @see ScoreTuple
  * @see MaxNAgent

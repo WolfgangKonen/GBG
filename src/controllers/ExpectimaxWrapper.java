@@ -11,7 +11,7 @@ import tools.ScoreTuple;
  * Override {@link #estimateGameValue(StateObservation)} such that it returns the score tuple
  * of the wrapped agent {@code pa}.
  * 
- * @author Wolfgang Konen, TH Köln, Dec'17
+ * @author Wolfgang Konen, TH Koeln, 2017
  * 
  * @see ExpectimaxNAgent
  */

@@ -73,6 +73,12 @@ public class GameBoardSim implements GameBoard {
 		
 	}
 
+	   @Override
+	   public void destroy() {
+			frame.setVisible(false);
+			frame.dispose();
+	   }
+
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		 if (boardClear) {

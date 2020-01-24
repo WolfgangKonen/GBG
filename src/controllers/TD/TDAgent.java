@@ -47,7 +47,7 @@ import games.Sim.StateObserverSim;
  * @see PlayAgent
  * @see AgentBase
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016
  */
 //abstract 
 public class TDAgent extends AgentBase implements PlayAgent,Serializable {

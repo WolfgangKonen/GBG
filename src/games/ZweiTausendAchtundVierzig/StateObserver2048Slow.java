@@ -20,7 +20,7 @@ import java.util.Random;
  * This is just an alternate class for {@link StateObserver2048}. It is only used if 
  * {@link StateObserver2048Slow} is copied to {@link StateObserver2048}. 
  * 
- * @author Johannes Kutsch, THK
+ * @author Johannes Kutsch, 2016
  */
 public class StateObserver2048Slow extends ObserverBase implements StateObsNondeterministic {
     private Random random = new Random();
