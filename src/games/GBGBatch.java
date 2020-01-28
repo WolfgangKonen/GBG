@@ -103,10 +103,10 @@ public class GBGBatch { //extends ArenaTrain {
 
 		switch(args[0]) {
 		case "TicTacToe": 
-			t_Game = new ArenaTrainTTT();
+			t_Game = new ArenaTrainTTT("",false);
 			break;
 		case "ConnectFour": 
-			t_Game = new ArenaTrainC4();
+			t_Game = new ArenaTrainC4("",false);
 			break;
 		default: 
 			System.err.println("[GBGBatch.main] args[0]="+args[0]+": This game is unknown.");
@@ -167,17 +167,17 @@ public class GBGBatch { //extends ArenaTrain {
 	public void batch1(int trainNum, int maxGameNum, String filePath,
 					   XArenaButtons xab,	GameBoard gb, String csvName) throws IOException {
 		// load an agent to fill xab with the appropriate parameter settings
-		boolean res = this.t_Game.m_menu.loadAgent(0, filePath);		
+		boolean res = this.t_Game.loadAgent(0, filePath);		
 		if (!res) return;
 		
 		// overwrite trainNum or maxGameNum in xab, if they specified here
-		if (trainNum!=-1) xab.TrainNumT.setText(""+trainNum);
-		if (maxGameNum!=-1) xab.GameNumT.setText(""+maxGameNum);
+		if (trainNum!=-1) xab.setTrainNumber(trainNum);
+		if (maxGameNum!=-1) xab.setGameNumber(maxGameNum);
 		
 		// run multiTrain
-		xab.m_game.taskState=Arena.Task.MULTTRN;
+		xab.m_arena.taskState=Arena.Task.MULTTRN;
 		t_Game.m_xfun.m_PlayAgents[0] = t_Game.m_xfun.multiTrain(0, xab.getSelectedAgent(0), xab, gb, csvName);
-		System.out.println("[GBGBatch.main] multiTrain finished: Results written to multiTrain.csv");
+		System.out.println("[GBGBatch.main] multiTrain finished: Results written to "+csvName);
 		
 	} // batch1
 
@@ -199,15 +199,15 @@ public class GBGBatch { //extends ArenaTrain {
 		double alphaArr[] = {1.0, 2.5, 3.7, 5.0, 7.5, 10.0};
 		double alphaFinalArr[] = alphaArr.clone();
 		// load an agent to fill xab with the appropriate parameter settings
-		boolean res = this.t_Game.m_menu.loadAgent(0, filePath);		
+		boolean res = this.t_Game.loadAgent(0, filePath);		
 		if (!res) return;
 		
 		// overwrite trainNum or maxGameNum in xab, if they specified here
-		if (trainNum!=-1) xab.TrainNumT.setText(""+trainNum);
-		if (maxGameNum!=-1) xab.GameNumT.setText(""+maxGameNum);
+		if (trainNum!=-1) xab.setTrainNumber(trainNum);
+		if (maxGameNum!=-1) xab.setGameNumber(maxGameNum);
 		
 		// run multiTrainAlphaSweep
-		xab.m_game.taskState=Arena.Task.MULTTRN;
+		xab.m_arena.taskState=Arena.Task.MULTTRN;
 		t_Game.m_xfun.m_PlayAgents[0] = multiTrainAlphaSweep(0, alphaArr, alphaFinalArr, xab, gb, csvName);
 		System.out.println("[GBGBatch.main] multiTrainAlphaSweep finished: Results written to "+csvName);
 		
@@ -229,15 +229,15 @@ public class GBGBatch { //extends ArenaTrain {
 					   XArenaButtons xab, GameBoard gb, String csvName) throws IOException {
 		double lambdaArr[] = {0.00, 0.04, 0.09, 0.16, 0.25};
 		// load an agent to fill xab with the appropriate parameter settings
-		boolean res = this.t_Game.m_menu.loadAgent(0, filePath);		
+		boolean res = this.t_Game.loadAgent(0, filePath);		
 		if (!res) return;
 		
 		// overwrite trainNum or maxGameNum in xab, if they specified here
-		if (trainNum!=-1) xab.TrainNumT.setText(""+trainNum);
-		if (maxGameNum!=-1) xab.GameNumT.setText(""+maxGameNum);
+		if (trainNum!=-1) xab.setTrainNumber(trainNum);
+		if (maxGameNum!=-1) xab.setGameNumber(maxGameNum);
 		
 		// run multiTrainLambdaSweep
-		xab.m_game.taskState=Arena.Task.MULTTRN;
+		xab.m_arena.taskState=Arena.Task.MULTTRN;
 		t_Game.m_xfun.m_PlayAgents[0] = multiTrainLambdaSweep(0, lambdaArr, xab, gb, csvName);
 		System.out.println("[GBGBatch.main] multiTrainLambdaSweep finished: Results written to "+csvName);
 		
@@ -278,8 +278,8 @@ public class GBGBatch { //extends ArenaTrain {
 		int stopEval = 0;
 		boolean doTrainEvaluation = false;
 
-		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
-		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
+		int trainNum=xab.getTrainNumber();
+		int maxGameNum=xab.getGameNumber();
 		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
@@ -299,7 +299,7 @@ public class GBGBatch { //extends ArenaTrain {
 			long actionNum, trnMoveNum;
 			double totalTrainSec=0.0, elapsedTime;
 			
-			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
+			xab.setTrainNumberText(trainNum, Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
 			
 			// sweep-specific code which varies alpha & alphaFinal for each k   
 			// and writes them to userValue1 & userValue2, resp.
@@ -322,7 +322,7 @@ public class GBGBatch { //extends ArenaTrain {
 
 
 			int qem = xab.oPar[n].getQuickEvalMode();
-	        m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
+	        m_evaluatorQ = xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,1);
 			int tem = xab.oPar[n].getTrainEvalMode();
 			//
 			// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -330,7 +330,7 @@ public class GBGBatch { //extends ArenaTrain {
 			// the choice box 'Train Eval Mode' is not -1 ("none").
 			doTrainEvaluation = (tem!=-1);
 			if (doTrainEvaluation)
-		        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
+		        m_evaluatorT = xab.m_arena.makeEvaluator(pa,gb,stopEval,tem,1);
 			
 			String pa_string = pa.getClass().getName();
 			System.out.println(pa.stringDescr());
@@ -355,7 +355,7 @@ public class GBGBatch { //extends ArenaTrain {
 					System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
 					startTime = System.currentTimeMillis();
 
-					xab.GameNumT.setText(Integer.toString(gameNum ) );
+					xab.setGameNumber(gameNum);
 					
 					// construct 'qa' anew (possibly wrapped agent for eval)
 					qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
@@ -405,7 +405,7 @@ public class GBGBatch { //extends ArenaTrain {
 			// (overwrites the file written from previous i)
 			MTrain.printMultiTrainList(csvName,mtList, pa, t_Game, userTitle1, userTitle2);
 			
-			if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+			if (xab.m_arena.taskState!=Arena.Task.MULTTRN) {
 				break; //out of for
 			}
 			} // for (k)
@@ -429,7 +429,7 @@ public class GBGBatch { //extends ArenaTrain {
 //			lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
 //		}
 		
-		xab.TrainNumT.setText(Integer.toString(trainNum) );
+		xab.setTrainNumber(trainNum);
 		return pa;
 		
 	} // multiTrainAlphaSweep
@@ -467,8 +467,8 @@ public class GBGBatch { //extends ArenaTrain {
 		int stopEval = 0;
 		boolean doTrainEvaluation = false;
 
-		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
-		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
+		int trainNum=xab.getTrainNumber();
+		int maxGameNum=xab.getGameNumber();
 		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
@@ -488,7 +488,7 @@ public class GBGBatch { //extends ArenaTrain {
 			long actionNum, trnMoveNum;
 			double totalTrainSec=0.0, elapsedTime;
 			
-			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
+			xab.setTrainNumberText(trainNum, Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
 			
 			// sweep-specific code which varies lambda for each k 
 			// and writes them to userValue1 & userValue2, resp.
@@ -508,7 +508,7 @@ public class GBGBatch { //extends ArenaTrain {
 
 
 			int qem = xab.oPar[n].getQuickEvalMode();
-	        m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
+	        m_evaluatorQ = xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,1);
 			int tem = xab.oPar[n].getTrainEvalMode();
 			//
 			// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -516,7 +516,7 @@ public class GBGBatch { //extends ArenaTrain {
 			// the choice box 'Train Eval Mode' is not -1 ("none").
 			doTrainEvaluation = (tem!=-1);
 			if (doTrainEvaluation)
-		        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
+		        m_evaluatorT = xab.m_arena.makeEvaluator(pa,gb,stopEval,tem,1);
 			
 			String pa_string = pa.getClass().getName();
 			System.out.println(pa.stringDescr());
@@ -541,7 +541,7 @@ public class GBGBatch { //extends ArenaTrain {
 					System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
 					startTime = System.currentTimeMillis();
 
-					xab.GameNumT.setText(Integer.toString(gameNum ) );
+					xab.setGameNumber(gameNum);
 					
 					// construct 'qa' anew (possibly wrapped agent for eval)
 					qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
@@ -591,7 +591,7 @@ public class GBGBatch { //extends ArenaTrain {
 			// (overwrites the file written from previous i)
 			MTrain.printMultiTrainList(csvName,mtList, pa, t_Game, userTitle1, userTitle2);
 			
-			if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+			if (xab.m_arena.taskState!=Arena.Task.MULTTRN) {
 				break; //out of for
 			}
 			} // for (k)
@@ -615,7 +615,7 @@ public class GBGBatch { //extends ArenaTrain {
 //			lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
 //		}
 		
-		xab.TrainNumT.setText(Integer.toString(trainNum) );
+		xab.setTrainNumber(trainNum);
 		return pa;
 		
 	} // multiTrainLambdaSweep

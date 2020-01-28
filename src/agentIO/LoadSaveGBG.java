@@ -59,43 +59,55 @@ public class LoadSaveGBG {
 
 	public JDialog createProgressDialog(final IGetProgress streamProgress,
 			final String msg) {
-		// ------------------------------------------------------------
-		// setup progress-bar dialog
-		final JDialog dlg = new JDialog(arenaFrame, msg, true);
-		final JProgressBar dpb = new JProgressBar(0, 100);
-		dlg.add(BorderLayout.CENTER, dpb);
-		dlg.add(BorderLayout.NORTH, new JLabel("Progress..."));
-		dlg.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dlg.setSize(300, 75);
-		dlg.setLocationRelativeTo(arenaFrame);
-
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				dlg.setVisible(true);
-			}
-		});
-		t.start();
-
-		arenaGame.setProgress(new tools.Progress() {
-			@Override
-			public String getStatusMessage() {
-				String str = new String(msg + getProgress() + "%");
-				return str;
-			}
-
-			@Override
-			public int getProgress() {
-				int i = (int) (streamProgress.getProgess().get() * 100);
-				if (i > 100)
-					i = 100;
-				dpb.setValue(i);
-				return i;
-			}
-		});
-		return dlg; // dialog has to be closed, if not needed anymore with
-					// dlg.setVisible(false)
+		return null;
+		// It seems that the progess bar dialog and its later disposal cause from time to 
+		// time the 'GUI hangs' problem --> therefore we disable it in the following and return just null
+		//
+//		// ------------------------------------------------------------
+//		// setup progress-bar dialog
+//		final JDialog dlg = new JDialog(arenaFrame, msg, true);
+//		final JProgressBar dpb = new JProgressBar(0, 100);
+//		dlg.add(BorderLayout.CENTER, dpb);
+//		dlg.add(BorderLayout.NORTH, new JLabel("Progress..."));
+//		dlg.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+//		dlg.setSize(300, 75);
+//		dlg.setLocationRelativeTo(arenaFrame);
+//
+//		Thread t = new Thread(new Runnable() {
+//			public void run() {
+//				dlg.setVisible(true);
+//			}
+//		});
+//		t.start();
+//
+//		arenaGame.setProgress(new tools.Progress() {
+//			@Override
+//			public String getStatusMessage() {
+//				String str = new String(msg + getProgress() + "%");
+//				return str;
+//			}
+//
+//			@Override
+//			public int getProgress() {
+//				int i = (int) (streamProgress.getProgess().get() * 100);
+//				if (i > 100)
+//					i = 100;
+//				dpb.setValue(i);
+//				return i;
+//			}
+//		});
+//		return dlg; // dialog has to be closed, if not needed anymore with
+//					// dlg.setVisible(false)
 	}
 
+	public void disposeProgressDialog(JDialog dlg) {
+		if (dlg!=null) {
+			dlg.setVisible(false);
+			dlg.dispose();
+			dlg=null;
+		}		
+	}
+	
 	// ==============================================================
 	// Menu: Save Agent
 	// ==============================================================
@@ -184,11 +196,11 @@ public class LoadSaveGBG {
 				fos = new FileOutputStream(filePath);
 			} catch (FileNotFoundException e2) {
 				if (pa != null)
-					MessageBox.show(arenaFrame,"ERROR: Could not save TDAgent to " + filePath,
-						"C4Game.saveTDAgent", JOptionPane.ERROR_MESSAGE);
+					arenaGame.showMessage("ERROR: Could not save TDAgent to " + filePath,
+						"LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
 				if (tsr != null)
-					MessageBox.show(arenaFrame,"ERROR: Could not save TSResultStorage to " + filePath,
-							"save TSResultStorage", JOptionPane.ERROR_MESSAGE);
+					arenaGame.showMessage("ERROR: Could not save TSResultStorage to " + filePath,
+							"LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
 				arenaGame.setStatusMessage("[ERROR: Could not save to file " + filePath + " !]");
 				return;
 			}
@@ -247,14 +259,14 @@ public class LoadSaveGBG {
 				if (tsr != null)
 					oos.writeObject(tsr);
 			} catch (IOException e) {
-				dlg.setVisible(false);
+				disposeProgressDialog(dlg);
 				if (e instanceof NotSerializableException) {
 					if (pa != null)
-						MessageBox.show(arenaFrame,"ERROR: Object pa of class "+pa.getClass().getName()
-							+" is not serializable", "C4Game.saveTDAgent", JOptionPane.ERROR_MESSAGE);
+						arenaGame.showMessage("ERROR: Object pa of class "+pa.getClass().getName()
+							+" is not serializable", "LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
 					if (tsr != null)
-						MessageBox.show(arenaFrame,"ERROR: Object tsr of class "+tsr.getClass().getName()
-								+" is not serializable", "save TSResultStorage", JOptionPane.ERROR_MESSAGE);
+						arenaGame.showMessage("ERROR: Object tsr of class "+tsr.getClass().getName()
+								+" is not serializable", "LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
 				}
 				arenaGame.setStatusMessage("[ERROR: Could not write to file " + filePath + " !]");
 				throw new IOException("ERROR: Could not write object to file! ["+e.getClass().getName()+"]");
@@ -266,10 +278,11 @@ public class LoadSaveGBG {
 				fos.close();
 			} catch (IOException e) {
 				arenaGame.setStatusMessage("[ERROR: Could not complete Save-Process]");
+				disposeProgressDialog(dlg);
 				throw new IOException("ERROR: Could not complete Save-Process ["+e.getClass().getName()+"]");
 			}
 
-			dlg.setVisible(false);
+			disposeProgressDialog(dlg);
 			arenaGame.setProgress(null);
 			arenaGame.setStatusMessage("Done.");
 
@@ -381,6 +394,9 @@ public class LoadSaveGBG {
 			final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
 			pa = transformObjectToPlayAgent(ois, fis, filePath, dlg);
+			
+			disposeProgressDialog(dlg);
+
 		} 
 		
 		return pa;
@@ -467,25 +483,25 @@ public class LoadSaveGBG {
 				if (obj instanceof TSResultStorage) {
 					tsr = (TSResultStorage) obj;
 				} else {
-					dlg.setVisible(false);
-					MessageBox.show(arenaFrame,"ERROR: TSR class "+obj.getClass().getName()+" loaded from "
+					disposeProgressDialog(dlg);
+					arenaGame.showMessage("ERROR: TSR class "+obj.getClass().getName()+" loaded from "
 							+ filePath + " not processable", "Unknown TS Class", JOptionPane.ERROR_MESSAGE);
 					arenaGame.setStatusMessage("[ERROR: Could not load TSR from "+ filePath + "!]");
 					throw new ClassNotFoundException("ERROR: Unknown TSR class");
 				}
-				dlg.setVisible(false);
+				disposeProgressDialog(dlg);
 				arenaGame.setProgress(null);
 				arenaGame.setStatusMessage("Done.");
 			} catch (IOException e) {
-				dlg.setVisible(false);
-				MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
+				disposeProgressDialog(dlg);
+				arenaGame.showMessage("ERROR: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 				//e.printStackTrace();
 				//throw e;
 			} catch (ClassNotFoundException e) {
-				dlg.setVisible(false);
-				MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
+				disposeProgressDialog(dlg);
+				arenaGame.showMessage("ERROR: Class not found: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
 				//throw e;
@@ -612,8 +628,8 @@ public class LoadSaveGBG {
 				pa.instantiateAfterLoading();	// special treatment of agents after loading (if necessary)
 				// [instantiateAfterLoading replaces completely the long and complicated switch statement we had here before (!)]
 			} else {
-				if (dlg!=null) dlg.setVisible(false);
-				MessageBox.show(arenaFrame,"ERROR: Agent class "+obj.getClass().getName()+" loaded from "
+				disposeProgressDialog(dlg);
+				arenaGame.showMessage("ERROR: Agent class "+obj.getClass().getName()+" loaded from "
 						+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
 				arenaGame.setStatusMessage("[ERROR: Could not load agent from "
 								+ filePath + "!]");
@@ -626,25 +642,25 @@ public class LoadSaveGBG {
 				((AgentBase) pa).setDefaultParOther();
 			}						
 
-			if (dlg!=null) dlg.setVisible(false);
+			disposeProgressDialog(dlg);
 			arenaGame.setProgress(null);
 			arenaGame.setStatusMessage("Done.");
 		} catch (IOException e) {
-			if (dlg!=null) dlg.setVisible(false);
-			MessageBox.show(arenaFrame,"ERROR: " + e.getMessage(),
+			disposeProgressDialog(dlg);
+			arenaGame.showMessage("ERROR: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 			//e.printStackTrace();
 			pa=null;
 		} catch (ClassNotFoundException e) {
-			if (dlg!=null) dlg.setVisible(false);
-			MessageBox.show(arenaFrame,"ERROR: Class not found: " + e.getMessage(),
+			disposeProgressDialog(dlg);
+			arenaGame.showMessage("ERROR: Class not found: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			//e.printStackTrace();
 			pa=null;
 		} catch (AssertionError e) {
-			if (dlg!=null) dlg.setVisible(false);
-			MessageBox.show(arenaFrame,"Instantiation failed: " + e.getMessage(),
+			disposeProgressDialog(dlg);
+			arenaGame.showMessage("Instantiation failed: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			//e.printStackTrace();
 			pa=null;
@@ -706,7 +722,7 @@ public class LoadSaveGBG {
 				}
 
 			}
-			dlg.setVisible(false);
+			disposeProgressDialog(dlg);
 			txtFileContent = sb.toString();
 			try {
 				br.close();

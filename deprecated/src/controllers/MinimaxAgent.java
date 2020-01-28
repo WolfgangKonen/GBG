@@ -66,7 +66,7 @@ public class MinimaxAgent extends AgentBase implements PlayAgent, Serializable
 	 * @param n         fill the {@code n}th parameter tab
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
-	 * @see XArenaMenu#loadAgent
+	 * @see Arena#loadAgent
 	 * @see XArenaTabs
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 

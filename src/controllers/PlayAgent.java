@@ -170,7 +170,7 @@ public interface PlayAgent {
 	 * 
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
-	 * @see XArenaMenu#loadAgent
+	 * @see Arena#loadAgent
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena);
 	

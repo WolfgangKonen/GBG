@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import games.Arena.Task;
-import games.Arena.WindowClosingAdapter;
 import games.CFour.ArenaTrainC4;
 import games.Hex.ArenaTrainHex;
 import games.Nim.ArenaTrainNim;

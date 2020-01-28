@@ -198,7 +198,8 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 		// called by alphaBetaStartP1, getNextVTable or getScore(int[][],boolean).
 		this.resetBoard();
 		this.setTransPosSize(4);		// index into table
-		this.setBooks(true,false,true);	// use normal book and deep book dist
+//		this.setBooks(true,false,true);	// use normal book and deep book dist
+		this.setBooks(true,true,true);	// use normal book and deep book dist
 		this.setDifficulty(42);			// search depth
 		this.randomizeEqualMoves(true);
 		return true; 

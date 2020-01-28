@@ -10,6 +10,7 @@ import controllers.HumanPlayer;
 import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
+import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.PlayAgent;
 import games.Arena.Task;
 import games.Hex.HexTile;
@@ -17,6 +18,7 @@ import games.Hex.StateObserverHex;
 import games.Othello.Edax.Edax;
 import games.Sim.StateObserverSim;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import gui.ArenaGui;
 import params.ParMCTS;
 import params.ParOther;
 import tools.MessageBox;
@@ -53,19 +55,18 @@ abstract public class Arena implements Runnable {
 
 	public static boolean withUI=true;
 	public XArenaFuncs m_xfun;
-	public JFrame m_ArenaFrame = null;
 	public GBGLaunch m_LauncherObj = null;
-	public XArenaMenu m_menu = null;
 	public XArenaTabs m_tabs = null;
 	public XArenaButtons m_xab; // the game buttons and text fields
 	private Thread playThread = null;
 	private Progress progress = null; // progress for some functions
-	public LoadSaveGBG tdAgentIO; // saving/loading of agents
-	protected JLabel m_title;
 	protected GameBoard gb;
-	protected StatusBar statusBar = new StatusBar();
+	public LoadSaveGBG tdAgentIO; // saving/loading of agents
 	public Task taskState = Task.IDLE;
 	public Task taskBefore = Task.IDLE;
+
+//	public JFrame m_ArenaFrame = null;
+	public ArenaGui m_ArenaFrame = null;
 
 	public int minSleepDuration = 0;
 	public int maxSleepDuration = 2000;
@@ -79,18 +80,21 @@ abstract public class Arena implements Runnable {
 	public boolean singlePlayerTSRunning = false;
 
 	public Arena() {
-//		m_ArenaFrame = this;
-		m_ArenaFrame = new JFrame();
-		initGame(); 
+		initGame(""); 
 	}
 
+	// launch Arena with UI
 	public Arena(String title) {
-//		super(title);
-//		m_ArenaFrame = this;
-		m_ArenaFrame = new JFrame(title);
-		initGame();
+		initGame(title);
 	}
 
+	// decide via withUI whether wit UI or not
+	public Arena(String title, boolean withUI) {
+		this.withUI = withUI;
+		initGame(title);
+	}
+
+	// see GBGLaunch
 	public void setLauncherObj(GBGLaunch launcher) {
 		m_LauncherObj = launcher;
 	}
@@ -98,57 +102,24 @@ abstract public class Arena implements Runnable {
 	/**
 	 * called by constructors
 	 */
-	protected void initGame() {
+	protected void initGame(String title) {
 		// scale the GUI (window sizes and fonts of all GUI elements)
 		Types.globalGUIScaling(true); // set to true to enable scaling
-        // scale the font of all status messages:
-		Font lFont = new Font("Arial", Font.PLAIN, Types.GUI_DIALOGFONTSIZE);
-		statusBar.setFont(lFont);
 
 		gb = makeGameBoard();
 		gb.setActionReq(false);
 
 		m_xfun = new XArenaFuncs(this);
 		m_xab = new XArenaButtons(m_xfun, this); // needs a constructed 'gb'
-		tdAgentIO = new LoadSaveGBG(this, m_xab, m_ArenaFrame);
-
-		JPanel titlePanel = new JPanel();
-		titlePanel.setBackground(Types.GUI_BGCOLOR);
-		JLabel Blank = new JLabel(" "); // a little bit of space
-		m_title = new JLabel("Arena  "+this.getGameName(), SwingConstants.CENTER);
-		m_title.setForeground(Color.black);
-		Font tFont = new Font("Arial", 1, Types.GUI_TITLEFONTSIZE);
-		m_title.setFont(tFont);
-		titlePanel.add(Blank);
-		titlePanel.add(m_title);
-
-		JPanel infoPanel = new JPanel(new BorderLayout(0, 0));
-		infoPanel.setBackground(Types.GUI_BGCOLOR);
-		statusBar.setBackground(Types.GUI_BGCOLOR);
-		m_ArenaFrame.setLayout(new BorderLayout(10, 0));
-		m_ArenaFrame.setBackground(Types.GUI_BGCOLOR); // Color.white
-		JPanel jPanel = new JPanel();
-		jPanel.setBackground(Types.GUI_BGCOLOR);
-		infoPanel.add(jPanel, BorderLayout.NORTH); // a little gap
-		infoPanel.add(statusBar, BorderLayout.CENTER);
-		infoPanel.add(jPanel, BorderLayout.SOUTH); // just a little space at the bottom
-
-		m_menu = new XArenaMenu(this);
 		m_tabs = new XArenaTabs(this);
-		m_ArenaFrame.add(titlePanel, BorderLayout.NORTH);
-		m_ArenaFrame.add(m_xab, BorderLayout.CENTER);
-		m_ArenaFrame.add(infoPanel, BorderLayout.SOUTH);
+		tdAgentIO = new LoadSaveGBG(this, m_xab, m_ArenaFrame);
 
 		logManager = new LogManager();
 		logManager.setSubDir(gb.getSubDir());
 
-		// initialize GUI elements (NEW version: 'Arena extends JFrame')
-		m_ArenaFrame.addWindowListener(new WindowClosingAdapter(this));
-		m_ArenaFrame.setJMenuBar(m_menu);
-		m_ArenaFrame.setSize(Types.GUI_ARENATRAIN_WIDTH, getGuiArenaHeight());
-		m_ArenaFrame.setBounds(0,0,Types.GUI_ARENATRAIN_WIDTH, getGuiArenaHeight());
-		//m_ArenaFrame.pack();
-		m_ArenaFrame.setVisible(true);
+		if (withUI) {
+			m_ArenaFrame = new ArenaGui(this, title);
+		} // if (withUI)
 	}
 
 	public void init() {
@@ -186,8 +157,6 @@ abstract public class Arena implements Runnable {
 				n = m_xab.getNumParamBtn();
 				agentN = m_xab.getSelectedAgent(n);
 				setStatusMessage("Params for "+agentN+ " ...");
-				//m_tabs.showParamTabs(this,true,0,agentN);
-				// this is for later, when we have extended to N tabs:
 				m_tabs.showParamTabs(this,true,n,agentN);
 				taskState = Task.IDLE; 
 				break;
@@ -240,89 +209,11 @@ abstract public class Arena implements Runnable {
 				updateBoard();
 				taskState = Task.IDLE;
 				break;
-//			case MULTCMP:
-//				boolean silent = false;
-//				enableButtons(false);
-//				setStatusMessage("Running Multi Compete ...");
-//
-//				try {
-//					m_xfun.multiCompete(silent, m_xab, gb);
-//				} catch (IOException e1) {
-//					e1.printStackTrace();
-//				}
-//
-//				enableButtons(true);
-//				setStatusMessage("Multi Compete finished.");
-//				updateBoard();
-//				taskState = Task.IDLE;
-//				break;
 			case TRNEMNT:    // Tournament Code
 				tournamentAgentManager.lockToCompete(getGameBoard());
 				tournamentAgentManager.setSettingsGUIElementsEnabled(false);
 
-				JFrame progressBarJF = new JFrame();
-				progressBarJF.setSize(300, 100);
-				progressBarJF.setTitle("TS Progress...");
-				JPanel progressBarJP = new JPanel();
-				// generate new JProgressBar object
-				JProgressBar tsProgressBar = new JProgressBar(0, tournamentAgentManager.getTSProgress()[1]);
-				tsProgressBar.setValue(0);
-				// show the actual value as text in percent
-				tsProgressBar.setStringPainted(true);
-				progressBarJP.add(tsProgressBar);
-				progressBarJF.add(progressBarJP);
-				progressBarJF.setVisible(true);
-
-				long start = System.currentTimeMillis();
-
-				while (tournamentAgentManager.hasNextGame()) {
-					TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
-					//System.out.println("DEBUG: "+nextTeam[0].getAgentType() + " vs. "+nextTeam[1].getAgentType());
-					TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
-					int rndmStartMoves = tournamentAgentManager.results.numberOfRandomStartMoves;
-					StateObservation startSo = tournamentAgentManager.getNextStartState();
-                    TSGameDataTransfer data = new TSGameDataTransfer(nextTeam, nextTimes, rndmStartMoves, startSo);
-					// let team compete...
-					int roundWinningAgent = m_xfun.competeDispatcherTS(gb, m_xab, data);
-					// enter winner
-					if (roundWinningAgent > 40) {
-						System.out.println(TAG+"ERROR :: competeDispatcherTS returned error value "+roundWinningAgent);
-						if (roundWinningAgent == 44) {
-							// hdd and standard agent mix, leave while, end tournament
-							break;
-						}
-						if (roundWinningAgent == 43) {
-							// a RuntimeException was thrown, leave while, end tournament
-							break;
-						}
-					}
-					else {
-						tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
-						//System.gc(); // call to keep system memory usage low but creates MASSIVE time delays every episode
-
-						// progress bar
-						int[] progress = tournamentAgentManager.getTSProgress();
-						tsProgressBar.setValue(progress[0]);
-						System.out.println(TAG+"TS Progress "+ Arrays.toString(progress));
-					}
-				}
-
-				long end = System.currentTimeMillis();
-				tournamentAgentManager.results.durationTSMS = end - start;
-
-				progressBarJF.dispatchEvent(new WindowEvent(progressBarJF, WindowEvent.WINDOW_CLOSING)); // close progressbar window
-				//tournamentAgentManager.printGameResults(); // print some stats to the console
-
-				tournamentAgentManager.makeStats(); // calc data and create result stats window
-				tournamentAgentManager.printGameResults(); // print some stats to the console
-
-				if (tournamentAgentManager.getAutoSaveAfterTS()) {
-					try {
-						tdAgentIO.saveTSResult(tournamentAgentManager.results, true);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+				RunTournament();
 
 				// clean up
 				System.out.println(TAG+"Tournament done, cleaning up");
@@ -366,8 +257,10 @@ abstract public class Arena implements Runnable {
 	}
 	
 	public void destroy() {
-		m_ArenaFrame.setVisible(false);
-		m_ArenaFrame.dispose();
+		if (withUI) {
+			m_ArenaFrame.setVisible(false);
+			m_ArenaFrame.dispose();
+		}
 		this.gb.destroy();
 		if (this.m_LauncherObj==null) {
 			System.exit(0);				
@@ -818,7 +711,7 @@ abstract public class Arena implements Runnable {
 //							break; // out of inner switch
 //						} // switch(Player*win)
 						gb.updateBoard(so, false, showValue);
-						m_ArenaFrame.repaint();
+						if (withUI) m_ArenaFrame.repaint();
 
 						break; // out of switch
 					default:
@@ -876,6 +769,72 @@ abstract public class Arena implements Runnable {
 		taskState = Task.IDLE;
 		setStatusMessage("Done.");
 	} // PlayGame(TSGameDataTransfer spDT)
+
+	void RunTournament() {
+		JFrame progressBarJF = new JFrame();
+		progressBarJF.setSize(300, 100);
+		progressBarJF.setTitle("TS Progress...");
+		JPanel progressBarJP = new JPanel();
+		// generate new JProgressBar object
+		JProgressBar tsProgressBar = new JProgressBar(0, tournamentAgentManager.getTSProgress()[1]);
+		tsProgressBar.setValue(0);
+		// show the actual value as text in percent
+		tsProgressBar.setStringPainted(true);
+		progressBarJP.add(tsProgressBar);
+		progressBarJF.add(progressBarJP);
+		progressBarJF.setVisible(true);
+
+		long start = System.currentTimeMillis();
+
+		while (tournamentAgentManager.hasNextGame()) {
+			TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
+			//System.out.println("DEBUG: "+nextTeam[0].getAgentType() + " vs. "+nextTeam[1].getAgentType());
+			TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
+			int rndmStartMoves = tournamentAgentManager.results.numberOfRandomStartMoves;
+			StateObservation startSo = tournamentAgentManager.getNextStartState();
+            TSGameDataTransfer data = new TSGameDataTransfer(nextTeam, nextTimes, rndmStartMoves, startSo);
+			// let team compete...
+			int roundWinningAgent = m_xfun.competeDispatcherTS(gb, m_xab, data);
+			// enter winner
+			if (roundWinningAgent > 40) {
+				System.out.println(TAG+"ERROR :: competeDispatcherTS returned error value "+roundWinningAgent);
+				if (roundWinningAgent == 44) {
+					// hdd and standard agent mix, leave while, end tournament
+					break;
+				}
+				if (roundWinningAgent == 43) {
+					// a RuntimeException was thrown, leave while, end tournament
+					break;
+				}
+			}
+			else {
+				tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
+				//System.gc(); // call to keep system memory usage low but creates MASSIVE time delays every episode
+
+				// progress bar
+				int[] progress = tournamentAgentManager.getTSProgress();
+				tsProgressBar.setValue(progress[0]);
+				System.out.println(TAG+"TS Progress "+ Arrays.toString(progress));
+			}
+		}
+
+		long end = System.currentTimeMillis();
+		tournamentAgentManager.results.durationTSMS = end - start;
+
+		progressBarJF.dispatchEvent(new WindowEvent(progressBarJF, WindowEvent.WINDOW_CLOSING)); // close progressbar window
+		//tournamentAgentManager.printGameResults(); // print some stats to the console
+
+		tournamentAgentManager.makeStats(); // calc data and create result stats window
+		tournamentAgentManager.printGameResults(); // print some stats to the console
+
+		if (tournamentAgentManager.getAutoSaveAfterTS()) {
+			try {
+				tdAgentIO.saveTSResult(tournamentAgentManager.results, true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}		
+	} // RunTournament()
 
 	/**
 	 * For debugging 2048 during {@link #PlayGame()}: This function is only
@@ -951,6 +910,95 @@ abstract public class Arena implements Runnable {
 		return actBest;
 	}
 
+	// We moved this method from XArenaMenu to Arena, because it can be used by batch 
+	// facility GBGBatch as well. Therefore it should not be part of the GUI (which
+	// XArenaMenu is)
+	/**
+	 * Load agent stored in <b>filePath</b> to player <b>n</b>
+	 * 
+	 * @param n   number of the player (agent) (0,...,numPlayers-1)
+	 * @param filePath with ending {@code .agt.zip}
+	 * @return true on success, false else
+	 */
+	boolean loadAgent(int n, String filePath) {
+		int numPlayers = this.getGameBoard().getStateObs().getNumPlayers();
+		String str="";
+		PlayAgent td=null;
+		boolean res = false;
+		try {
+			td = this.tdAgentIO.loadGBGAgent(filePath);			
+		} catch(Exception e) {
+			str = e.getMessage();			
+//		} catch(ClassNotFoundException e) {
+//			str = e.getMessage();			
+		} 
+		
+		if (td == null) {
+			str = str + "\n No Agent loaded!";
+			if (filePath==null) 	// MessageBox only when called via menu, NOT in batch mode (GBGBatch)
+				this.showMessage("ERROR: " + str,
+					"Load Error", JOptionPane.ERROR_MESSAGE);
+			res = false;
+		} else {
+			// enable / disable certain parameter settings according to 
+			// the agent name and the active game (before setting the specific
+			// parameters in certain tabs with 'setFrom' from the agent loaded):
+			this.m_xab.setParamDefaults(n, td.getName(), this.getGameName());
+			// with changedViaLoad[n]=true we inhibit that a possible change in item state of 
+			// this.m_xab.choiceAgent[n] will trigger from the associated 
+			// ItemStateListener an agent-parameter-default-setting (we want the parameters
+			// from the agent just loaded to survive in this.m_xab):
+			this.m_xab.changedViaLoad[n] = true;
+			
+			td.fillParamTabsAfterLoading(n, this); 
+			// td.fillParamTabsAfterLoading replaces the old, lengthy if ... else if ...
+			
+//			if (td instanceof TDAgent || td instanceof TDNTuple2Agt || td instanceof SarsaAgt /* || td instanceof TDNTupleAgt */) {
+			if (td.isTrainable()) {
+				// If it is one of the trainable agents: set maxGameNum and 
+				// numEval according to the settings in the loaded agent
+				// (at least maxGameNum is relevant for training): 
+				this.m_xab.setGameNumber(td.getMaxGameNum());
+				this.m_xab.oPar[n].numEval_T.setText(""+td.getNumEval());
+			}
+			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
+				this.m_xab.tdPar[n].enableMode3P(true);
+				this.m_xab.tdPar[n].enableNPly(false);
+				// if it is one of the older agents (before nply was added to tdPar), it will
+				// have nply=0. Then set nply=1: 
+				// [NOTE: This is not the wrapperNply of ParOther, but an nply internal to 
+				// the next-action logic of TDNTuple2Agt. It defaults to 1.]
+				if (this.m_xab.tdPar[n].getNPly()==0) {
+					this.m_xab.tdPar[n].setNPly(1);
+					((TDNTuple2Agt) td).getParTD().setNPly(1);
+				}
+			} else {
+				this.m_xab.tdPar[n].enableNPly(false);
+			}
+			
+			// if called via Arena, then disable all actionable elements in all param tabs
+			// "TD pars" and "NT par" (allow only viewing of parameters)
+			if (!this.hasTrainRights()) {
+				this.m_xab.tdPar[n].enableAll(false);
+				this.m_xab.ntPar[n].enableAll(false);
+			}
+
+			
+			// set selector according to class loaded:
+			this.m_xab.setSelectedAgent(n, td.getName());
+			
+			this.m_xfun.m_PlayAgents[n] = td;
+			String strAgent = (numPlayers==2) ? "Agent-"+Types.GUI_2PLAYER_NAME[n] :
+												"Agent-"+Types.GUI_PLAYER_NAME[n];
+			str = "Agent "+td.getName()+" succesfully loaded to "
+				+ strAgent + "!";
+			res = true;
+		}
+		this.setStatusMessage(str);
+		System.out.println("[LoadAgent] "+str);
+		return res;
+	}
+
 	/**
 	 * @return true, if there is at least one human agent in the game
 	 */
@@ -967,10 +1015,6 @@ abstract public class Arena implements Runnable {
 		return false;
 	}
 	
-	public int getGuiArenaHeight() {
-		return Types.GUI_ARENA_HEIGHT;
-	}
-	
 	public GameBoard getGameBoard() {
 		return gb;
 	}
@@ -983,14 +1027,25 @@ abstract public class Arena implements Runnable {
 		return logSessionid;
 	}
 
+//	public StatusBar getStatusBar() {
+//		return statusBar;
+//	}
+
 	public void setStatusMessage(String msg) {
-		statusBar.setMessage(msg);
+		if (m_ArenaFrame!=null)
+			m_ArenaFrame.setStatusMessage(msg);
 	}
 
-	public StatusBar getStatusBar() {
-		return statusBar;
+	public void setTitle(String title) {
+		if (m_ArenaFrame!=null)
+			m_ArenaFrame.setTitle(title);
 	}
 
+	// overridden by ArenaTrain
+	public int getGuiArenaHeight() {
+		return Types.GUI_ARENA_HEIGHT;
+	}
+	
 	// @Override
 	public void setProgress(tools.Progress p) {
 		this.progress = p;
@@ -1081,30 +1136,16 @@ abstract public class Arena implements Runnable {
 	abstract public void performArenaDerivedTasks();
 
 	public void showMessage(String message, String title, int msgCode) {
-		if (this.withUI) {
+		if (withUI) {
 			MessageBox.show(this.m_ArenaFrame,message,title,msgCode);
 		} else {
-			System.err.println("["+title+"] "+message);
+			if (msgCode==JOptionPane.ERROR_MESSAGE) {
+				System.err.println("["+title+"] "+message);
+			} else {
+				System.out.println("["+title+"] "+message);
+			}
 		}
 	}
 	
-	/**
-	 * helper class 
-	 *
-	 * @see Arena#initGame()
-	 */
-	protected static class WindowClosingAdapter
-	extends WindowAdapter
-	{
-		Arena m_ar;
-		public WindowClosingAdapter(Arena ar)  {  
-			m_ar = ar;
-		}
-
-		public void windowClosing(WindowEvent event)
-		{
-			m_ar.destroy();
-		}
-	}
 
 }

@@ -79,7 +79,7 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 * @param n         fill the {@code n}th parameter tab
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
-	 * @see XArenaMenu#loadAgent
+	 * @see Arena#loadAgent
 	 * @see XArenaTabs
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 

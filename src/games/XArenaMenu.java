@@ -82,7 +82,7 @@ public class XArenaMenu extends JMenuBar {
 	// private final String agentList[] = { "Human", "Minimax", "TDS", "Random"
 	// };
 
-	XArenaMenu(Arena arena) {
+	public XArenaMenu(Arena arena) {
 		m_arena = arena;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 
@@ -165,7 +165,7 @@ public class XArenaMenu extends JMenuBar {
 			menuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					try {
-						loadAgent(j,null);						
+						m_arena.loadAgent(j,null);						
 					} catch (Exception exc) {	
 						System.out.println(exc.getMessage());
 					}
@@ -533,87 +533,6 @@ public class XArenaMenu extends JMenuBar {
 	}
 	
 	/**
-	 * @param n   number of the player (agent)
-	 */
-	boolean loadAgent(int n, String filePath) {
-		String str=TIPEVALUATE;
-		PlayAgent td=null;
-		boolean res = false;
-		try {
-			td = m_arena.tdAgentIO.loadGBGAgent(filePath);			
-		} catch(Exception e) {
-			str = e.getMessage();			
-//		} catch(ClassNotFoundException e) {
-//			str = e.getMessage();			
-		} 
-		
-		if (td == null) {
-			str = str + "\n No Agent loaded!";
-			if (filePath==null) 	// MessageBox only when called via menu, NOT in batch mode (GBGBatch)
-				m_arena.showMessage("ERROR: " + str,
-					"Load Error", JOptionPane.ERROR_MESSAGE);
-			res = false;
-		} else {
-			// enable / disable certain parameter settings according to 
-			// the agent name and the active game (before setting the specific
-			// parameters in certain tabs with 'setFrom' from the agent loaded):
-			m_arena.m_xab.setParamDefaults(n, td.getName(), m_arena.getGameName());
-			// with changedViaLoad[n]=true we inhibit that a possible change in item state of 
-			// m_arena.m_xab.choiceAgent[n] will trigger from the associated 
-			// ItemStateListener an agent-parameter-default-setting (we want the parameters
-			// from the agent just loaded to survive in m_arena.m_xab):
-			m_arena.m_xab.changedViaLoad[n] = true;
-			
-			td.fillParamTabsAfterLoading(n, m_arena); 
-			// td.fillParamTabsAfterLoading replaces the old, lengthy if ... else if ...
-			
-//			if (td instanceof TDAgent || td instanceof TDNTuple2Agt || td instanceof SarsaAgt /* || td instanceof TDNTupleAgt */) {
-			if (td.isTrainable()) {
-				// If it is one of the trainable agents: set maxGameNum and 
-				// numEval according to the settings in the loaded agent
-				// (at least maxGameNum is relevant for training): 
-				m_arena.m_xab.GameNumT.setText(""+td.getMaxGameNum());
-				m_arena.m_xab.oPar[n].numEval_T.setText(""+td.getNumEval());
-			}
-			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
-				m_arena.m_xab.tdPar[n].enableMode3P(true);
-				m_arena.m_xab.tdPar[n].enableNPly(false);
-				// if it is one of the older agents (before nply was added to tdPar), it will
-				// have nply=0. Then set nply=1: 
-				// [NOTE: This is not the wrapperNply of ParOther, but an nply internal to 
-				// the next-action logic of TDNTuple2Agt. It defaults to 1.]
-				if (m_arena.m_xab.tdPar[n].getNPly()==0) {
-					m_arena.m_xab.tdPar[n].setNPly(1);
-					((TDNTuple2Agt) td).getParTD().setNPly(1);
-				}
-			} else {
-				m_arena.m_xab.tdPar[n].enableNPly(false);
-			}
-			
-			// if called via Arena, then disable all actionable elements in all param tabs
-			// "TD pars" and "NT par" (allow only viewing of parameters)
-			if (!m_arena.hasTrainRights()) {
-				m_arena.m_xab.tdPar[n].enableAll(false);
-				m_arena.m_xab.ntPar[n].enableAll(false);
-			}
-
-			
-			// set selector according to class loaded:
-			m_arena.m_xab.setSelectedAgent(n, td.getName());
-			
-			m_arena.m_xfun.m_PlayAgents[n] = td;
-			String strAgent = (numPlayers==2) ? "Agent-"+Types.GUI_2PLAYER_NAME[n] :
-												"Agent-"+Types.GUI_PLAYER_NAME[n];
-			str = "Agent "+td.getName()+" succesfully loaded to "
-				+ strAgent + "!";
-			res = true;
-		}
-		printStatus(str);
-		System.out.println("[LoadAgent] "+str);
-		return res;
-	}
-
-	/**
 	 * @param index   number of the player (agent)
 	 */
 	void saveAgent(int index) {
@@ -742,7 +661,7 @@ public class XArenaMenu extends JMenuBar {
 			try {
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
 				int verb = 0;
-				Evaluator qEvaluator = m_arena.m_xab.m_game.makeEvaluator(pa,m_arena.gb,0,qem,verb);
+				Evaluator qEvaluator = m_arena.m_xab.m_arena.makeEvaluator(pa,m_arena.gb,0,qem,verb);
 		        qEvaluator.eval(pa);
 				str = qEvaluator.getMsg();
 				System.out.println(str);

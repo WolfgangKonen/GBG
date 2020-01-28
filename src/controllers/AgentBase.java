@@ -250,7 +250,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return m_oPar;
 	}
 	/**
-	 * Set defaults for m_oPar (needed in {@link XArenaMenu#loadAgent} when
+	 * Set defaults for m_oPar (needed in {@link Arena#loadAgent} when
 	 * loading older agents, where m_oPar=null in the saved version).
 	 */
 	public void setDefaultParOther() {
@@ -299,22 +299,22 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 *            component to be disabled if a message dialog is shown
 	 * @return
 	 */
-	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, java.awt.Component parent) {
+	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, Arena arena) {
 		if (pa == null) {
-			MessageBox.show(parent, "Cannot execute command. " + agentName + " is null!", "Warning",
-					JOptionPane.WARNING_MESSAGE);
+			arena.showMessage("Cannot execute command. " + agentName + " is null!", 
+					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}
 		if (pa.getAgentState() != AgentState.TRAINED) {
-			MessageBox.show(parent, "Cannot execute command. " + agentName + " is not trained!", "Warning",
-					JOptionPane.WARNING_MESSAGE);
+			arena.showMessage("Cannot execute command. " + agentName + " is not trained!", 
+					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}
 
 		String s_p = (Player == +1 ? "X" : "O");
 		String pa_string = pa.getClass().getName();
 		if (agentName.equals("TDS") & !(pa instanceof TDAgent)) {
-			MessageBox.show(parent,
+			arena.showMessage(
 					"Cannot execute command. " + "Current " + s_p + " agent is not a TDSPlayer: " + pa_string + ".",
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;

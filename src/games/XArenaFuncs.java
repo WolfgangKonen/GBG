@@ -104,31 +104,31 @@ public class XArenaFuncs
 	 */
 	public PlayAgent constructAgent(int n, String sAgent, XArenaButtons m_xab) throws IOException {
 		PlayAgent pa = null;
-		int maxGameNum=Integer.parseInt(m_xab.GameNumT.getText());
+		int maxGameNum=m_xab.getGameNumber();
 		int featmode = m_xab.tdPar[n].getFeatmode();
 		
 		try {
 			if (sAgent.equals("TDS")) {
-				Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
+				Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
 				pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
 			} else if (sAgent.equals("TD-Ntuple-2")) {
-				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
 				pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 									  new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 			} else if (sAgent.equals("TD-Ntuple-3")) {
-				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
 				pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 									  new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 			} else if (sAgent.equals("Sarsa")) {
-				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
 //				int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-				ArrayList<ACTIONS> allAvailActions = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions();
+				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
 				pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 								  new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
 //			} else if (sAgent.equals("Minimax")) {
@@ -200,7 +200,7 @@ public class XArenaFuncs
 	private PlayAgent fetchAgent(int n, String sAgent, XArenaButtons m_xab)
 	{
 		PlayAgent pa=null;
-		int maxGameNum=Integer.parseInt(m_xab.GameNumT.getText());
+		int maxGameNum=m_xab.getGameNumber();
 //		if (sAgent.equals("Minimax")) {
 //			pa= new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 //		} else 
@@ -239,11 +239,11 @@ public class XArenaFuncs
 		} else { // all the trainable agents:
 			if (m_PlayAgents[n]==null) {
 				if (sAgent.equals("TDS")) {
-					Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
+					Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
 					pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
 				} else if (sAgent.equals("TD-Ntuple-2")) {
 					try {
-						XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory(); 
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
 						pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
@@ -257,7 +257,7 @@ public class XArenaFuncs
 					}
 				} else if (sAgent.equals("TD-Ntuple-3")) {
 					try {
-						XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory(); 
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
 						pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
@@ -271,11 +271,11 @@ public class XArenaFuncs
 					}
 				} else if (sAgent.equals("Sarsa")) {
 					try {
-						XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
+						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory(); 
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
 //						int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-						ArrayList<ACTIONS> allAvailActions = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions();
+						ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
 						pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
 										  new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
 					} catch (Exception e) {
@@ -431,7 +431,7 @@ public class XArenaFuncs
 		int gameNum=0;
 		int verbose=2;
 
-		maxGameNum = Integer.parseInt(xab.GameNumT.getText());
+		maxGameNum=xab.getGameNumber();
 		numEval = xab.oPar[n].getNumEval();
 		if (numEval==0) numEval=500; // just for safety, to avoid ArithmeticException in 'gameNum%numEval' below
 
@@ -476,7 +476,7 @@ public class XArenaFuncs
 		stopEval = xab.oPar[n].getStopEval();
 		learnFromRM = xab.oPar[n].useLearnFromRM();
 		int qem = xab.oPar[n].getQuickEvalMode();
-        m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
+        m_evaluatorQ = xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,1);
 		int tem = xab.oPar[n].getTrainEvalMode();
 		//
 		// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -484,7 +484,7 @@ public class XArenaFuncs
 		// the choice box 'Train Eval Mode' is not -1 ("none").
 		boolean doTrainEvaluation = (tem!=-1);
 		if (doTrainEvaluation) {
-	        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
+	        m_evaluatorT = xab.m_arena.makeEvaluator(pa,gb,stopEval,tem,1);
 		}
 
 		// initialization line chart plot:
@@ -512,7 +512,7 @@ public class XArenaFuncs
 				System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
 				startTime = System.currentTimeMillis();
 
-				xab.GameNumT.setText(Integer.toString(gameNum ) );
+				xab.setGameNumber(gameNum);
 				
 				// construct 'qa' anew (possibly wrapped agent for eval)
 				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
@@ -531,7 +531,7 @@ public class XArenaFuncs
 				pa.incrementDurationEvaluationMs(elapsedMs);
 
 				// enable premature exit if TRAIN button is pressed again:
-				if (xab.m_game.taskState!=Arena.Task.TRAIN) {
+				if (xab.m_arena.taskState!=Arena.Task.TRAIN) {
 					m_Arena.showMessage(
 							"Training stopped prematurely",
 							"Warning", JOptionPane.WARNING_MESSAGE);
@@ -665,8 +665,8 @@ public class XArenaFuncs
 		int stopEval = 0;
 		boolean doTrainEvaluation = false;
 
-		int trainNum=Integer.valueOf(xab.TrainNumT.getText()).intValue();
-		int maxGameNum=Integer.parseInt(xab.GameNumT.getText());
+		int trainNum=xab.getTrainNumber();
+		int maxGameNum=xab.getGameNumber();
 		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
@@ -685,7 +685,7 @@ public class XArenaFuncs
 			long actionNum, trnMoveNum;
 			double totalTrainSec=0.0, elapsedTime;
 			
-			xab.TrainNumT.setText(Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
+			xab.setTrainNumberText(trainNum,Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
 			
 			// add here - if wanted - user-specific code which varies for each i some of the 
 			// parameters and writes them to userValue*:
@@ -709,7 +709,7 @@ public class XArenaFuncs
 
 
 			int qem = xab.oPar[n].getQuickEvalMode();
-	        m_evaluatorQ = xab.m_game.makeEvaluator(pa,gb,stopEval,qem,1);
+	        m_evaluatorQ = xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,1);
 			int tem = xab.oPar[n].getTrainEvalMode();
 			//
 			// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -717,7 +717,7 @@ public class XArenaFuncs
 			// the choice box 'Train Eval Mode' is not -1 ("none").
 			doTrainEvaluation = (tem!=-1);
 			if (doTrainEvaluation)
-		        m_evaluatorT = xab.m_game.makeEvaluator(pa,gb,stopEval,tem,1);
+		        m_evaluatorT = xab.m_arena.makeEvaluator(pa,gb,stopEval,tem,1);
 			
 //			if (i==0) {
 				String pa_string = pa.getClass().getName();
@@ -743,7 +743,7 @@ public class XArenaFuncs
 					System.out.println(pa.printTrainStatus()+", "+elapsedTime+" sec");
 					startTime = System.currentTimeMillis();
 
-					xab.GameNumT.setText(Integer.toString(gameNum ) );
+					xab.setGameNumber(gameNum);
 					
 					// construct 'qa' anew (possibly wrapped agent for eval)
 					qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
@@ -770,7 +770,7 @@ public class XArenaFuncs
 					pa.incrementDurationEvaluationMs(elapsedMs);
 
 					// enable premature exit if MULTITRAIN button is pressed again:
-					if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+					if (xab.m_arena.taskState!=Arena.Task.MULTTRN) {
 						m_Arena.showMessage(
 								"MultiTraining stopped prematurely",
 								"Warning", JOptionPane.WARNING_MESSAGE);
@@ -801,7 +801,7 @@ public class XArenaFuncs
 			// (overwrites the file written from previous i)
 			MTrain.printMultiTrainList(csvName, mtList, pa, m_Arena, userTitle1, userTitle2);
 			
-			if (xab.m_game.taskState!=Arena.Task.MULTTRN) {
+			if (xab.m_arena.taskState!=Arena.Task.MULTTRN) {
 				break; //out of for
 			}
 		} // for (i)
@@ -822,7 +822,7 @@ public class XArenaFuncs
 			this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
 		}
 		
-		xab.TrainNumT.setText(Integer.toString(trainNum) );
+		xab.setTrainNumber(trainNum);
 		return pa;
 		
 	} // multiTrain
@@ -1487,205 +1487,6 @@ public class XArenaFuncs
 		// we should never arrive here
 		return 42;
 	} // competeDispatcherTS 
-
-	//	deprecated  --- use Tournament System or MultiTrain instead
-//	/**
-//	 * Perform many (competitionNum) competitions between agents of type AgentX and agents 
-//	 * of type AgentO. The agents (if trainable) are trained anew before each competition. 
-//	 * @param silent
-//	 * @param xab		used only for reading parameter values from GUI members 
-//	 * @return			double[3], the percentage of episodes with X-win, tie, O-win 
-//	 * 					(averaged over all competitions) 
-//	 * @throws IOException 
-//	 */
-//	public double[] multiCompete(boolean silent, XArenaButtons xab, GameBoard gb) 
-//			throws IOException {
-//		DecimalFormat frm = new DecimalFormat("#0.000");
-//		int verbose=1;
-//		int stopEval = 0;
-//		double[] winrate = new double[3];
-//		
-//		int numPlayers = gb.getStateObs().getNumPlayers();
-//		if (numPlayers!=2) {
-//			m_Arena.showMessage( 
-//					"Multi-Competition only available for 2-player games!", 
-//					"Error", JOptionPane.ERROR_MESSAGE);	
-//			return winrate;
-//		}
-//		
-//		try {
-//		// take settings from GUI xab
-//		String AgentX = xab.getSelectedAgent(0);  // has agent names as strings (as in Types.GUI_AGENT_LIST)
-//		String AgentO = xab.getSelectedAgent(1);
-//		int competeNum=xab.winCompOptions.getNumGames();
-//		int competitionNum=xab.winCompOptions.getNumCompetitions();
-//		int maxGameNum = Integer.parseInt(xab.GameNumT.getText());
-//		Evaluator m_evaluatorX=null;
-//		Evaluator m_evaluatorO=null;
-//		
-//		double optimCountX=0.0,optimCountO=0.0;
-//		double[][] winrateC = new double[competitionNum][3];
-//		double[][] evalC = new double[competitionNum][2];
-//		PlayAgent paX=null, paO=null, qa=null;
-//		if (verbose>0) System.out.println("Multi-Competition: "+competitionNum+" competitions with "
-//										 +competeNum+" episodes each, "+AgentX+" vs "+AgentO);
-//
-//		if (AgentX.equals("Human") | AgentO.equals("Human")) {
-//			m_Arena.showMessage( 
-//					"No multiCompete for agent Human", 
-//					"Error", JOptionPane.ERROR_MESSAGE);
-//			return winrate;
-//		} 
-//		for (int c=0; c<competitionNum; c++) { // for-loop over competitions
-//			int player;
-//
-//			// both agents are trained anew for the episodes of each competition
-//			try {
-//				paX = this.constructAgent(0,AgentX, xab);
-//				if (paX==null) throw new RuntimeException("Could not construct AgentX = " + AgentX);
-//			}  catch(RuntimeException e) 
-//			{
-//				m_Arena.showMessage( 
-//						e.getMessage(), 
-//						"Warning", JOptionPane.WARNING_MESSAGE);
-//				return winrate;			
-//			} 
-//			paX.setMaxGameNum(maxGameNum);
-//			paX.setGameNum(0);
-//			
-//			try {
-//				paO = this.constructAgent(1,AgentO, xab);
-//				if (paO==null) throw new RuntimeException("Could not construct AgentO = " + AgentO);
-//			}  catch(RuntimeException e) 
-//			{
-//				m_Arena.showMessage( 
-//						e.getMessage(), 
-//						"Warning", JOptionPane.WARNING_MESSAGE);
-//				return winrate;			
-//			} 
-//			paO.setMaxGameNum(maxGameNum);
-//			paO.setGameNum(0);
-//			
-//			// take the evaluator mode qem from the choice box 'Quick Eval Mode'
-//			// in tab 'Other pars':
-//			int qem = xab.oPar[0].getQuickEvalMode();
-//			m_evaluatorX = xab.m_game.makeEvaluator(paX,gb,stopEval,qem,1);
-//			
-//			if (paX.getAgentState()!=AgentState.TRAINED) {
-//				while (paX.getGameNum()<paX.getMaxGameNum())
-//				{							
-//					StateObservation so = soSelectStartState(gb,xab.oPar[0].useChooseStart01(), paX); 
-//
-//					paX.trainAgent(so);
-//				}
-//				paX.setAgentState(AgentState.TRAINED);
-//			} 
-//
-//			// construct 'qa' anew (possibly wrapped agent for eval)
-//			qa = wrapAgent(0, paX, new ParOther(xab.oPar[0]), new ParMaxN(xab.maxnParams[0]), gb.getStateObs());
-//			m_evaluatorX.eval(qa);
-//			evalC[c][0] = m_evaluatorX.getLastResult();
-//			optimCountX += evalC[c][0];
-//			
-//			qem = xab.oPar[1].getQuickEvalMode();
-//			m_evaluatorO = xab.m_game.makeEvaluator(paO,gb,stopEval,qem,1);
-//			
-//			if (paO.getAgentState()!=AgentState.TRAINED) {
-//				while (paO.getGameNum()<paO.getMaxGameNum())
-//				{							
-//					StateObservation so = soSelectStartState(gb,xab.oPar[1].useChooseStart01(), paO); 
-//
-//					paO.trainAgent(so);
-//				}
-//				paO.setAgentState(AgentState.TRAINED);				
-//			} 
-//
-//			// construct 'qa' anew (possibly wrapped agent for eval)
-//			qa = wrapAgent(1, paO, new ParOther(xab.oPar[1]), new ParMaxN(xab.maxnParams[1]), gb.getStateObs());
-//			m_evaluatorO.eval(qa);
-//			evalC[c][1] = m_evaluatorO.getLastResult();
-//			optimCountO += evalC[c][1];
-//
-//			StateObservation startSO = gb.getDefaultStartState();  // empty board
-//			
-//			winrateC[c] = compete(paX,paO,startSO,competeNum,0, null);
-//			
-//			for (int i=0; i<3; i++) winrate[i] += winrateC[c][i];				
-//			if (!silent) {
-//				System.out.print(c + ": ");
-//				for (int i=0; i<3; i++) System.out.print(" "+frm.format(winrateC[c][i]));
-//				System.out.println();
-//			}
-//		} // for (c)
-//		
-//		for (int i=0; i<3; i++) winrate[i] = winrate[i]/competitionNum;
-//		if (!silent) {
-//			System.out.println("*** Competition results: ***");
-//			System.out.println("Agent X: Avg. "+m_evaluatorX.getPrintString()+": "+frm.format((double)optimCountX/competitionNum));
-//			System.out.println("Agent O: Avg. "+m_evaluatorO.getPrintString()+": "+frm.format((double)optimCountO/competitionNum));
-//		}
-//
-//		//
-//		// write multiCompete statistics to "Arena.comp.csv"
-//		//
-//		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+xab.m_game.getGameName()+"/";
-//		String filename = "Arena.comp.csv";
-//		tools.Utils.checkAndCreateFolder(strDir);
-//		try {
-//			PrintWriter f; 
-//			f = new PrintWriter(new BufferedWriter(new FileWriter(strDir+filename)));
-//			
-//			// TODO: needs to be generalized to other agents but TDAgent: 
-//			for (int i=0; i<2; i++) {
-//				double alpha = xab.tdPar[i].getAlpha();
-//				double lambda = xab.tdPar[i].getLambda();
-//				f.println("alpha["+i+"]=" + alpha + ";  lambda["+i+"]=" + lambda + "; trained agents=" + competitionNum 
-//						  + ",  maxGameNum=" +maxGameNum);
-//			}
-//			f.print(AgentX);
-//			if (paX instanceof TDAgent) 
-//				f.print("("+((TDAgent)paX).getFeatmode()+")");
-//			f.print(" vs. ");  
-//			f.print(AgentO);
-//			if (paO instanceof TDAgent) 
-//				f.print("("+((TDAgent)paO).getFeatmode()+")");
-//			f.println(); f.println();
-//			f.println("C; X-win; tie; O-win; X success rate; O success rate");
-//			for (int c=0; c<competitionNum; c++) {
-//				f.print(c + "; ");
-//				for (int p=0; p<3; p++) f.print(winrateC[c][p] + "; ");
-//				for (int p=0; p<2; p++) f.print(evalC[c][p] + "; ");
-//				f.println();
-//			}
-//			f.println();
-//			f.println("Averages:");
-//			f.print(";");
-//			for (int p=0; p<3; p++) f.print(winrate[p] + "; ");
-//			f.print((double)optimCountX/competitionNum+"; ");
-//			f.print((double)optimCountO/competitionNum+"; ");
-//			f.println();
-//			f.close();
-//			System.out.println("multiCompete: Output written to " + strDir + filename);
-//		} catch (IOException e) {
-//			System.out.println("Could not write to "+strDir+filename+" in XArenaFuncs::multiCompete()");
-//		}
-//		
-////		if (!silent) {
-//			System.out.print("Avg. win rates: ");
-//			for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+"  ");
-//			System.out.println(" (X/Tie/O)");
-////		}
-//		
-//		} catch(RuntimeException ex) {
-//			m_Arena.showMessage( 
-//					ex.getMessage(), 
-//					"Error", JOptionPane.ERROR_MESSAGE);
-//		}
-//		
-//		return winrate;
-//		
-//	} // multiCompete
-	
 	
 	public String getLastMsg() {
 		return lastMsg;

@@ -344,7 +344,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * @param n         fill the {@code n}th parameter tab
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
-	 * @see XArenaMenu#loadAgent
+	 * @see Arena#loadAgent
 	 * @see XArenaTabs
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 

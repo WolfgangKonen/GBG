@@ -136,8 +136,8 @@ public class DeviationWeightsChart extends YIntervalSeriesCollection
 	public void clearAndSetXY(XArenaButtons xab) {
 		this.removeAllSeries();
 		
-		int x = xab.m_game.m_ArenaFrame.getX() + xab.m_game.m_ArenaFrame.getWidth() + 1;
-		int y = xab.m_game.m_tabs.getY() + xab.m_game.m_tabs.getHeight() +1;
+		int x = xab.m_arena.m_ArenaFrame.getX() + xab.m_arena.m_ArenaFrame.getWidth() + 1;
+		int y = xab.m_arena.m_tabs.getY() + xab.m_arena.m_tabs.getHeight() +1;
 		this.setLocation(x, y);  
 	}
 	

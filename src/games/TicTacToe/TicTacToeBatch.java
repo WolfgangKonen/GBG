@@ -178,10 +178,10 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 				//double alphaChangeRatio = Math.pow(alphaFinal/alpha, 1.0/maxGameNum);
 				// loop over the agent realizations:
 				for (int i=0; i<trainNum; i++) {
-					Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
+					Feature feat = xab.m_arena.makeFeatureClass(tdPar.getFeatmode());
 					m_PlayAgentX = new TDAgent("TDS", tdPar, oPar, feat, maxGameNum);
 					//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar, maxGameNum);
-			        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
+			        m_evaluator1 = xab.m_arena.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 
 					if (i==0) {
 						String pa_string = m_PlayAgentX.getClass().getName();
@@ -303,9 +303,9 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 					for (int i=0; i<trainNum; i++) {
 						long istarttime = System.currentTimeMillis();
 						//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar,maxGameNum);
-						Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
+						Feature feat = xab.m_arena.makeFeatureClass(tdPar.getFeatmode());
 						m_PlayAgentX = new TDAgent("TDS", tdPar, oPar, feat, maxGameNum);
-				        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
+				        m_evaluator1 = xab.m_arena.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 						if (i==0) {
 							System.out.println(m_PlayAgentX.stringDescr());
 						}
@@ -654,11 +654,11 @@ public class TicTacToeBatch extends ArenaTrainTTT {
 						tdPar.setLambda(lambda);
 						tdPar.setEpochs(epochMax);
 						//m_PlayAgentX = new TDPlayerTTT("TDS",tdPar,maxGameNum);
-						Feature feat = xab.m_game.makeFeatureClass(tdPar.getFeatmode());
+						Feature feat = xab.m_arena.makeFeatureClass(tdPar.getFeatmode());
 						m_PlayAgentX = new TDAgent("TDS", tdPar, oPar, feat, maxGameNum);
-				        m_evaluator1 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
+				        m_evaluator1 = xab.m_arena.makeEvaluator(m_PlayAgentX,gb,stopEval,9,1);
 				        		
-				        m_evaluator2 = xab.m_game.makeEvaluator(m_PlayAgentX,gb,stopEval,2,1);
+				        m_evaluator2 = xab.m_arena.makeEvaluator(m_PlayAgentX,gb,stopEval,2,1);
 
 						if (i==0) {
 							System.out.println(m_PlayAgentX.stringDescr());

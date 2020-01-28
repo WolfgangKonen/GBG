@@ -55,19 +55,16 @@ abstract public class ArenaTrain extends Arena
 		initArenaTrain();
 	}
 	
+	public ArenaTrain(String title, boolean withUI) {
+		super(title, withUI);
+		initArenaTrain();
+	}
+	
 	private void initArenaTrain() {
-		m_title.setText("ArenaTrain  "+this.getGameName());
-		int n = this.m_xab.choiceAgent.length;
-		for (int i=0; i<n; i++) {
-			this.m_xab.choiceAgent[i].setEnabled(true);
-			this.m_xab.mParam[i].setEnabled(true);
-			this.m_xab.mParam[i].setText("Param "+ ((n==2)?Types.GUI_2PLAYER_NAME[i]:Types.GUI_PLAYER_NAME[i])); 
-			this.m_xab.mParam[i].setVisible(true);
-			this.m_xab.mTrain[i].setVisible(true);
+		if (withUI) {
+			this.setTitle("ArenaTrain  "+this.getGameName());
+			this.m_xab.initTrain();
 		}
-		this.m_xab.GameNumT.setEnabled(true);	
-		this.m_xab.TrainNumT.setEnabled(true);		
-		this.enableButtons(true);
 	}
 	
 	public boolean hasTrainRights() {
