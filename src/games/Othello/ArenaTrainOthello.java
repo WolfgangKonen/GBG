@@ -22,6 +22,10 @@ public class ArenaTrainOthello extends ArenaTrain {
 		super(title);
 	}
 	
+	public ArenaTrainOthello(String title, boolean withUI) {
+		super(title,withUI);		
+	}
+	
 	@Override
 	public String getGameName() {
 		return "Othello";

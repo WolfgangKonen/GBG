@@ -20,7 +20,10 @@ public class ArenaTrainSim extends ArenaTrain {
 		super(title);		
 	}
 	
-	
+	public ArenaTrainSim(String title, boolean withUI) {
+		super(title,withUI);		
+	}
+		
 	@Override
 	public String getGameName() {
 		return "Sim";

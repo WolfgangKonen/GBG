@@ -261,7 +261,8 @@ abstract public class Arena implements Runnable {
 			m_ArenaFrame.setVisible(false);
 			m_ArenaFrame.dispose();
 		}
-		this.gb.destroy();
+		gb.destroy();
+		m_xfun.destroy();
 		if (this.m_LauncherObj==null) {
 			System.exit(0);				
 		} else {

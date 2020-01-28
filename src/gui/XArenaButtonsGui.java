@@ -561,10 +561,16 @@ public class XArenaButtonsGui extends JPanel {
 		return choiceAgent[i];
 	}
 	
+	public int getTrainNumber() {
+		return Integer.parseInt(TrainNumT.getText());
+	}
 	public void setTrainNumberText(String text) {
 		TrainNumT.setText(text);
 	}
 	
+	public int getGameNumber() {
+		return Integer.parseInt(GameNumT.getText());
+	}
 	public void setGameNumber(int gameNumber) {
 		GameNumT.setText(""+gameNumber);
 	}

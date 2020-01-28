@@ -19,6 +19,10 @@ public class ArenaTrainHex extends ArenaTrain {
 		super(title);		
 	}
 	
+	public ArenaTrainHex(String title, boolean withUI) {
+		super(title,withUI);		
+	}
+	
    @Override
     public String getGameName() {
         return "Hex";

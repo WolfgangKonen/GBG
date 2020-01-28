@@ -33,7 +33,13 @@ import games.StateObservation;
 import games.XArenaButtons;
 import games.XArenaFuncs;
 import games.CFour.ArenaTrainC4;
+import games.Hex.ArenaTrainHex;
+import games.Nim.ArenaTrainNim;
+import games.Othello.ArenaTrainOthello;
+import games.RubiksCube.ArenaTrainCube;
+import games.Sim.ArenaTrainSim;
 import games.TicTacToe.ArenaTrainTTT;
+import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import params.ParMaxN;
 //import params.OtherParams;
 import params.ParOther;
@@ -102,11 +108,29 @@ public class GBGBatch { //extends ArenaTrain {
 		}
 
 		switch(args[0]) {
+		case "ConnectFour": 
+			t_Game = new ArenaTrainC4("",false);
+			break;
+		case "Hex": 
+			t_Game = new ArenaTrainHex("",false);
+			break;
+		case "Nim": 
+			t_Game = new ArenaTrainNim("",false);
+			break;
+		case "Othello": 
+			t_Game = new ArenaTrainOthello("",false);
+			break;
+		case "RubiksCube": 
+			t_Game = new ArenaTrainCube("",false);
+			break;
+		case "Sim": 
+			t_Game = new ArenaTrainSim("",false);
+			break;
 		case "TicTacToe": 
 			t_Game = new ArenaTrainTTT("",false);
 			break;
-		case "ConnectFour": 
-			t_Game = new ArenaTrainC4("",false);
+		case "2048": 
+			t_Game = new ArenaTrain2048("",false);
 			break;
 		default: 
 			System.err.println("[GBGBatch.main] args[0]="+args[0]+": This game is unknown.");

@@ -151,6 +151,12 @@ public class LineChartSuccess extends XYSeriesCollection
 		axis.setLabel(yLab);
 		chart.getXYPlot().setRangeAxis(axis);
 	}
+	
+	public void destroy() {
+		frame.setVisible(false);
+		frame.dispose();
+	}
+
 }
 
 

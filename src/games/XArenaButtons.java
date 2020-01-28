@@ -291,6 +291,8 @@ public class XArenaButtons extends JPanel
 	}
 
 	public int getTrainNumber() {
+		if (this.m_XAB_gui!=null)
+			trainNumber = m_XAB_gui.getTrainNumber(); // be sure to get latest change from GUI (!)
 		return trainNumber;
 	}
 
@@ -299,6 +301,8 @@ public class XArenaButtons extends JPanel
 		if (this.m_XAB_gui!=null)
 			m_XAB_gui.setTrainNumberText(""+trainNumber);
 	}
+	
+	// to allow for text = "1/25" (first run out of 25)
 	public void setTrainNumberText(int trainNumber, String text) {
 		this.trainNumber = trainNumber;
 		if (this.m_XAB_gui!=null)
@@ -306,9 +310,11 @@ public class XArenaButtons extends JPanel
 	}
 	
 	public int getGameNumber() {
+		if (this.m_XAB_gui!=null)
+			gameNumber = m_XAB_gui.getGameNumber(); // be sure to get latest change from GUI (!)
 		return gameNumber;
 	}
-
+	
 	public void setGameNumber(int gameNumber) {
 		this.gameNumber = gameNumber;
 		if (this.m_XAB_gui!=null)

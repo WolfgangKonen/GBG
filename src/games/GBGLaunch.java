@@ -125,30 +125,31 @@ public class GBGLaunch {
 
 	static void startGBGame(String selectedGame, GBGLaunch t_Launch) {
 		String title = "General Board Game Playing";
+		boolean withUI = true;
 		switch(selectedGame) {
 		case "2048": 
-			t_Game = new ArenaTrain2048(title);
+			t_Game = new ArenaTrain2048(title,withUI);
 			break;
 		case "ConnectFour": 
-			t_Game = new ArenaTrainC4(title);
+			t_Game = new ArenaTrainC4(title,withUI);
 			break;
 		case "Hex": 
-			t_Game = new ArenaTrainHex(title);
+			t_Game = new ArenaTrainHex(title,withUI);
 			break;
 		case "Nim": 
-			t_Game = new ArenaTrainNim(title);
+			t_Game = new ArenaTrainNim(title,withUI);
 			break;
 		case "Othello": 
-			t_Game = new ArenaTrainOthello(title);
+			t_Game = new ArenaTrainOthello(title,withUI);
 			break;
 		case "RubiksCube": 
-			t_Game = new ArenaTrainCube(title);
+			t_Game = new ArenaTrainCube(title,withUI);
 			break;
 		case "Sim": 
-			t_Game = new ArenaTrainSim(title);
+			t_Game = new ArenaTrainSim(title,withUI);
 			break;
 		case "TicTacToe": 
-			t_Game = new ArenaTrainTTT(title);
+			t_Game = new ArenaTrainTTT(title,withUI);
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
@@ -182,11 +183,11 @@ public class GBGLaunch {
 		JComboBox choiceGame = new JComboBox(game_list);
 		choiceGame.setSelectedItem(selectedGame);
 		
-		JButton Play=new JButton("Start Game");
-		Play.setBorder(bord);
-		Play.setEnabled(true);
-		Play.setForeground(Color.white);
-		Play.setBackground(colTHK2);		
+		JButton StartG=new JButton("Start Game");
+		StartG.setBorder(bord);
+		StartG.setEnabled(true);
+		StartG.setForeground(Color.white);
+		StartG.setBackground(colTHK2);		
 
 		JButton Exit=new JButton("Exit");
 		Exit.setBorder(bord);
@@ -198,7 +199,7 @@ public class GBGLaunch {
 		launcherUI.setLayout(new GridLayout(0,1,10,10));		// rows,columns,hgap,vgap
 		launcherUI.add(titlePanel);
 		launcherUI.add(choiceGame);
-		launcherUI.add(Play);
+		launcherUI.add(StartG);
 		launcherUI.add(Exit);
 		launcherUI.addWindowListener(new WindowClosingAdapter());
 
@@ -207,7 +208,7 @@ public class GBGLaunch {
 		//launcherUI.pack();
 		launcherUI.setVisible(true);
 		
-		Play.addActionListener(
+		StartG.addActionListener(
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
