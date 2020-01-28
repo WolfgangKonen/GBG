@@ -201,8 +201,8 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 		this.setBooks(true,false,true);	// use normal book and deep book dist
 //		this.setBooks(true,true,true);	// use normal book and deep book dist
 		this.setDifficulty(42);			// search depth
-		this.randomizeEqualMoves(false);
-		this.randomizeLosses(false);
+		this.randomizeEqualMoves(true);
+		this.randomizeLosses(true);
 		return true; 
 	}
 
@@ -4089,15 +4089,19 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 	/**
 	 * @param useNormalBook
-	 *            true, if normal book shall be used
+	 *            true, if normal book shall be used. The normal book has for all states with 
+	 *            8 pieces coded if win/tie/loss
 	 * @param useDeepBook
-	 *            true, if deep book shall be used
+	 *            true, if deep book shall be used. The deep book has this for all states with 
+	 *            12 pieces
 	 * @param useDeepBookDist
-	 *            true, if normal deep book with exact distances shall be used
+	 *            true, if normal deep book with exact distances shall be used. This is a deep
+	 *            book where additionally the distance to win/tie/loss is coded in the value
+	 *            returned 
 	 */
 	public void setBooks(boolean useNormalBook, boolean useDeepBook,
 			boolean useDeepBookDist) {
-		useBook = useNormalBook;
+		this.useBook = useNormalBook;
 		this.useDeepBook = useDeepBook;
 		this.useDeepBookDist = useDeepBookDist;
 	}
