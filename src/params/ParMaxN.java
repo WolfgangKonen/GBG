@@ -9,7 +9,7 @@ import controllers.MaxNAgent;
  * Parameters for {@link MaxNAgent}, {@link ExpectimaxNAgent}
  * <ul>
  * <li> <b> Tree Depth</b>: [10] depth of search tree
- * <li> <b> Max-N Hashmap</b>: [true] (only MaxN and Minimax) whether to hash already visited states or not
+ * <li> <b> Max-N Hashmap</b>: [true] (only MaxN) whether to hash already visited states or not
  * </ul>
  *
  * @see MaxNParams

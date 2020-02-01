@@ -28,7 +28,7 @@ import games.Feature;
  * {@link MaxNAgent}, {@link ExpectimaxNAgent}.
  * These parameters and their [defaults] are: <ul>
  * <li> <b>tree depth</b>: 	[10] initial strength of learning parameter 
- * <li> <b>useHashMap</b>: 	[true] (only MaxN and Minimax) whether to store calculated values in a hash map or not 
+ * <li> <b>useHashMap</b>: 	[true] (only MaxN) whether to store calculated values in a hash map or not 
  * </ul> 
  * The defaults are defined in {@link ParMaxN}. 
  * 
@@ -61,7 +61,7 @@ public class MaxNParams extends Frame
 									// can be handed over to a tab of a JTabbedPane object
 									// (see class XArenaTabs)
 		
-		maxnDepth_L.setToolTipText("Tree depth (for MaxN, Minimax or ExpectimaxN)");
+		maxnDepth_L.setToolTipText("Tree depth (for MaxN or ExpectimaxN)");
 		maxnUseHm_L.setToolTipText("MaxN: use hashmap to save values of visited states");
 		
 //		ok.addActionListener(

@@ -1,5 +1,4 @@
 TDNTuple3Agt: USESYM:true, P:4, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: true
 TDNTuple3Agt: alpha_init->final:5.0->5.0, epsilon_init->final:0.1->0.0, gamma: 1.0, fixed n-tuple, mode=1
 run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, , 
-0, 5000, -1.0, -0.8500000000000004, 114872, 109872, 7.209, 15934.526286586213, 0.0, 0.0
-1, 5000, -1.0, -0.9750000000000005, 109858, 104858, 6.734, 16313.929313929313, 0.0, 0.0
+0, 5000, -0.9375, -1.0000000000000004, 109072, 104072, 8.48, 12862.264150943396, 0.0, 0.0

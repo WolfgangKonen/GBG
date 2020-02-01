@@ -104,7 +104,8 @@ abstract public class Arena implements Runnable {
 	 */
 	protected void initGame(String title) {
 		// scale the GUI (window sizes and fonts of all GUI elements)
-		Types.globalGUIScaling(true); // set to true to enable scaling
+		if (withUI)
+			Types.globalGUIScaling(true); // set to true to enable scaling
 
 		gb = makeGameBoard();
 		gb.setActionReq(false);
@@ -119,7 +120,7 @@ abstract public class Arena implements Runnable {
 
 		if (withUI) {
 			m_ArenaFrame = new ArenaGui(this, title);
-		} // if (withUI)
+		} 
 	}
 
 	public void init() {
@@ -260,6 +261,7 @@ abstract public class Arena implements Runnable {
 		if (withUI) {
 			m_ArenaFrame.setVisible(false);
 			m_ArenaFrame.dispose();
+			m_xab.destroy();
 		}
 		gb.destroy();
 		m_xfun.destroy();
@@ -909,6 +911,45 @@ abstract public class Arena implements Runnable {
 			}
 		}
 		return actBest;
+	}
+
+	// We moved this method from XArenaMenu to Arena, because it can be used by batch 
+	// facility GBGBatch as well. Therefore it should not be part of the GUI (which
+	// XArenaMenu is)
+	/**
+	 * @param index   number of the player (agent)
+	 */
+	boolean saveAgent(int index, String savePath) {
+		int numPlayers = getGameBoard().getStateObs().getNumPlayers();
+		boolean bstatus = false;
+		try {
+			// fetching the agents ensures that the actual parameters from the tabs
+			// are all taken (!)
+			m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
+			AgentBase.validTrainedAgents(m_xfun.m_PlayAgents,numPlayers);
+		} catch (RuntimeException e) {
+			this.showMessage( e.getMessage(), 
+					"Error", JOptionPane.ERROR_MESSAGE);
+			this.setStatusMessage("Done");
+			return bstatus;
+		}
+
+		PlayAgent td = this.m_xfun.m_PlayAgents[index];
+		String str = "";
+		try {
+			if (savePath==null) {
+				this.tdAgentIO.saveGBGAgent(td);		// open file chooser dialog
+			} else {
+				this.tdAgentIO.saveGBGAgent(td,savePath);
+			}
+			str = "Saved Agent!";
+			bstatus = true;
+		} catch(IOException e) {
+			str = e.getMessage();
+		}
+		this.setStatusMessage(str);
+		System.out.println("[SaveAgent] "+str);
+		return bstatus;
 	}
 
 	// We moved this method from XArenaMenu to Arena, because it can be used by batch 

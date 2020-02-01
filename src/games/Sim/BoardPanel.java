@@ -113,13 +113,13 @@ public class BoardPanel extends JPanel {
 	private Color getColor(double d)
 	{
 		Color color;
-		if(d < 0)
+//		if(d < 0)					// bug fix /WK/
+//		{
+//			color = Color.black;
+//		}
+//		else
 		{
-			color = Color.black;
-		}
-		else
-		{
-			double intensity = 255 * d;
+			double intensity = 255 * (d+1)/2; 	// map [-1,1] to [0,255]
 			color = new Color(0,255,0,(int)intensity);
 		}
 		return color;

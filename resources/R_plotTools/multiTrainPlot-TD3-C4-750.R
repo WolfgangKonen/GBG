@@ -25,10 +25,11 @@ gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
 evalStr = ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
 evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
 path <- "../../agents/ConnectFour/csv/"; 
-limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=20000/wfac;
+limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=10000/wfac;
 
 filenames=c(#"multiTrain_TCL-EXP-NT3-al50-lam000-750k-T-epsfin0.csv"
-           "multiTrain_TCL-EXP-NT3-al25-lam000-750k-epsfin0-V12m.csv"
+           #"multiTrain_TCL-EXP-NT3-al25-lam000-750k-epsfin0-V12m.csv"
+           "multiTrainLambda1-new.csv"
            #,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-HOR001-T-epsfin0.csv"
            #,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-HOR001-epsfin0.csv"
            #,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-epsfin0-noFA.csv"

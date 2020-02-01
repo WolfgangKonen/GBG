@@ -6,7 +6,6 @@ import controllers.TD.ntuple2.NTupleBase;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.MaxNAgent;
-//import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
@@ -45,7 +44,6 @@ import agentIO.AgentLoader;
  */
 public class EvaluatorHex extends Evaluator {
 	private MaxNAgent maxNAgent=null; 
-//  private static MinimaxAgent maxNAgent = new MinimaxAgent("Minimax");
     private final String logDir = "logs/Hex/train";
     protected int verbose = 0;
     private MCTSAgentT mctsAgent = null;

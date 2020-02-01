@@ -1,7 +1,6 @@
 package controllers;
 
 import controllers.PlayAgent;
-//import controllers.MinimaxAgent;
 import games.StateObservation;
 import games.XArenaMenu;
 import games.Arena;

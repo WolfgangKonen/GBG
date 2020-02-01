@@ -111,10 +111,101 @@ public class LoadSaveGBG {
 	// ==============================================================
 	// Menu: Save Agent
 	// ==============================================================
-	public void saveGBGAgent(PlayAgent pa) throws IOException {
-		saveGBGHelper(pa, null, false);
+	/**
+	 * Save agent to disk without file chooser dialog
+	 * 
+	 * @param pa
+	 * @param filePath
+	 * @throws IOException
+	 */
+	public void saveGBGAgent(PlayAgent pa, String filePath) throws IOException {
+		FileOutputStream fos;
+		
+		if (pa==null) {
+			throw new IOException("ERROR: pa=null, there is no agent to save to disk");
+		}
+		
+		try {
+			fos = new FileOutputStream(filePath);
+		} catch (FileNotFoundException e2) {
+			arenaGame.showMessage("ERROR: Could not save TDAgent to " + filePath,
+					"LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
+			arenaGame.setStatusMessage("[ERROR: Could not save to file " + filePath + " !]");
+			return;
+		}
+
+		GZIPOutputStream gz;
+		try {
+			gz = new GZIPOutputStream(fos) {
+				{
+					def.setLevel(Deflater.BEST_COMPRESSION);
+				}
+			};
+
+		} catch (IOException e1) {
+			arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for" + filePath + " !]");
+			throw e1;
+		}
+
+//		// estimate agent size
+		long bytes = 0;
+//		if (pa != null)
+//			pa.getSize();
+		
+		// new
+		final agentIO.IOProgress p = new agentIO.IOProgress(bytes);
+		final ProgressTrackingOutputStream ptos = new ProgressTrackingOutputStream(gz, p);
+
+		ObjectOutputStream oos=null;
+		try {
+			oos = new ObjectOutputStream(ptos);
+		} catch (IOException e) {
+			arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
+			oos.close();
+			return;
+		}
+
+//		final JDialog dlg = createProgressDialog(ptos, "Saving...");
+
+		try {
+			oos.writeObject(pa);
+		} catch (IOException e) {
+//			disposeProgressDialog(dlg);
+			if (e instanceof NotSerializableException) {
+				arenaGame.showMessage("ERROR: Object pa of class "+pa.getClass().getName()
+					+" is not serializable", "LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
+			}
+			arenaGame.setStatusMessage("[ERROR: Could not write to file " + filePath + " !]");
+			oos.close();
+			throw new IOException("ERROR: Could not write object to file! ["+e.getClass().getName()+"]");
+		}
+
+		try {
+			oos.flush();
+			oos.close();
+			fos.close();
+		} catch (IOException e) {
+			arenaGame.setStatusMessage("[ERROR: Could not complete save process]");
+//			disposeProgressDialog(dlg);
+			throw new IOException("ERROR: Could not complete save process ["+e.getClass().getName()+"]");
+		}
+
+//		disposeProgressDialog(dlg);
+		arenaGame.setProgress(null);
+		arenaGame.setStatusMessage("Done.");
 	}
 
+	// 
+	// several methods to save to disk with file chooser dialog
+	//
+	/**
+	 * save agent to disk with a file chooser
+	 * @param pa
+	 * @throws IOException
+	 */
+	public void saveGBGAgent(PlayAgent pa) throws IOException {
+		saveGBGHelper(pa, null, false);
+	}	
 	/**
 	 * save tournament results to disk with a file chooser to set name and folder
 	 * @param tsr tournament results
@@ -123,7 +214,6 @@ public class LoadSaveGBG {
 	public void saveTSResult(TSResultStorage tsr) throws IOException {
 		saveGBGHelper(null, tsr, false);
 	}
-
 	/**
 	 * save tournament results to disk with a file chooser to set name and folder.
 	 * if autoSave is enabled, there is no file chooser and a generic date based name will be used
@@ -145,7 +235,7 @@ public class LoadSaveGBG {
 		if (subDir != null){
 			strDir += "/"+subDir;
 		}
-		if (tsr != null) // if TSR the save to subfolder
+		if (tsr != null) // if TSR then save to subdir
 			strDir += "/TSR/";
 
 		tools.Utils.checkAndCreateFolder(strDir);
@@ -205,7 +295,7 @@ public class LoadSaveGBG {
 				return;
 			}
 
-			GZIPOutputStream gz;
+			GZIPOutputStream gz=null;
 			try {
 				gz = new GZIPOutputStream(fos) {
 					{
@@ -214,6 +304,7 @@ public class LoadSaveGBG {
 				};
 
 			} catch (IOException e1) {
+				gz.close();
 				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for" + filePath + " !]");
 				throw e1;
 			}

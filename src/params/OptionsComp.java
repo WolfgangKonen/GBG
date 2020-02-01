@@ -32,7 +32,7 @@ public class OptionsComp extends JFrame {
 	//private JLabel lsingleComp;
 	private JLabel lPlayUntil;
 	private JLabel lNumGames;
-	private JLabel lNumCompetitions;
+	//private JLabel lNumCompetitions;
 	//private JLabel lOpponents;
 	//private JLabel lFirstPlayer;
 	//private JLabel lSecondPlayer;
@@ -44,14 +44,14 @@ public class OptionsComp extends JFrame {
 	private JCheckBox cbLogValues;
 	private JCheckBox cbswapPlayers;
 
-	//private TextField tNumPieces;
 	private JTextField tNumGames;
-	private JTextField tNumCompetitions;
+	//private JTextField tNumCompetitions;
+	//private TextField tNumPieces;
 	
 	private Choice cFirstPlayer;
 	private Choice cSecondPlayer;
 
-	public OptionsComp() {
+	public OptionsComp(int competeNumber) {
 		super("Competition Options");
 //		setSize(320, 500);
 //		setBounds(0, 0, 320, 500);
@@ -62,11 +62,11 @@ public class OptionsComp extends JFrame {
 		//lsingleComp.setFont(new Font("Times New Roman", Font.BOLD, 14));
 		
 		lNumGames = new JLabel("# games/competition");
-		lNumCompetitions = new JLabel("# competitions (only MULTI)");
+		//lNumCompetitions = new JLabel("# competitions (only MULTI)");
 
 		lPlayUntil = new JLabel("Stop Game after x Moves: ");
-		tNumGames = new JTextField("3", 3);
-		tNumCompetitions = new JTextField("10", 3);
+		tNumGames = new JTextField(""+competeNumber, 3);
+		//tNumCompetitions = new JTextField("10", 3);
 
 		//ok = new JButton("OK");
 		m_par = this;
@@ -171,12 +171,16 @@ public class OptionsComp extends JFrame {
 //		return Integer.valueOf(tNumPieces.getText()).intValue();
 //	}
 	
+//	public int getNumCompetitions() {
+//	return Integer.valueOf(tNumCompetitions.getText()).intValue();
+//}
+
 	public int getNumGames() {
 		return Integer.valueOf(tNumGames.getText()).intValue();
 	}
 	
-	public int getNumCompetitions() {
-		return Integer.valueOf(tNumCompetitions.getText()).intValue();
+	public void setNumGames(int competeNumber) {
+		tNumGames.setText(""+competeNumber);
 	}
 	
 	public int getFirstPlayer() {

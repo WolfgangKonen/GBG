@@ -24,6 +24,7 @@ import controllers.MaxNWrapper;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
+import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import games.ArenaTrain;
 import games.Evaluator;
@@ -51,7 +52,7 @@ import tools.ScoreTuple;
 import tools.Types;
 
 /**
- * Wrapper class used to start GBG for batch runs via a <b>main method</b>: <br> 
+ * Class used to start GBG for batch runs via a <b>main method</b>: <br> 
  * Run this Java application on Ubuntu consoles without X11 server via command
  * <pre>
  *    xvfb-run java -jar GBGBatch.jar ...
@@ -71,6 +72,7 @@ public class GBGBatch { //extends ArenaTrain {
 	public static ArenaTrain t_Game;
 	private static GBGBatch t_Batch=null;
 	private static String filePath = null;
+	private static String savePath = null;
 
 	protected Evaluator m_evaluatorQ=null;
 	protected Evaluator m_evaluatorT=null;
@@ -90,9 +92,12 @@ public class GBGBatch { //extends ArenaTrain {
 	 *          [3] (optional) trainNum: number of agents to train (default -1). <br>
 	 *          [4] (optional) maxGameNum: maximum number of training games (default -1) <br>
 	 *          [5] (optional) csvName: filename for CSV results (defaults: "multiTrain.csv" or 
-	 *          	"multiTrainAlphaSweep", see {@code csvNameDef}<br>
+	 *          	"multiTrainAlphaSweep", see {@code csvNameDef})<p>
 	 *          
-	 * If trainNum or maxGameNum are not given, thus set to -1, the values stored in the agent file name are taken.
+	 * If trainNum or maxGameNum are not given, thus set to -1, the values stored in the agent file 
+	 * name are taken.<br>
+	 * Side effect: the last trained agent is stored to {@code<csvName>.agt.zip}, where 
+	 * {@code <csvname>} is the 5th argument w/o {@code .csv}
 	 *          	
 	 * @throws IOException 
 	 */
@@ -149,7 +154,10 @@ public class GBGBatch { //extends ArenaTrain {
 		if (args.length>=4) trainNum = Integer.parseInt(args[3]);
 		if (args.length>=5) maxGameNum = Integer.parseInt(args[4]);
 		if (args.length>=6) csvName = args[5];
-		
+
+		savePath = args[5].replaceAll("csv", "agt.zip");
+		savePath = strDir + "/" +savePath;
+
 		// start a batch run without any window
 		switch(args[1]) {
 		case "1":
@@ -201,8 +209,14 @@ public class GBGBatch { //extends ArenaTrain {
 		// run multiTrain
 		xab.m_arena.taskState=Arena.Task.MULTTRN;
 		t_Game.m_xfun.m_PlayAgents[0] = t_Game.m_xfun.multiTrain(0, xab.getSelectedAgent(0), xab, gb, csvName);
+		t_Game.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
 		System.out.println("[GBGBatch.main] multiTrain finished: Results written to "+csvName);
-		
+		res = t_Game.saveAgent(0, savePath);
+		if (res) {
+			System.out.println("[GBGBatch.main] multiTrain finished: last agent saved to "+savePath);
+		} else {
+			System.err.println("[GBGBatch.main] multiTrain finished, but could not save agent!");			
+		}
 	} // batch1
 
 	/**
@@ -233,7 +247,14 @@ public class GBGBatch { //extends ArenaTrain {
 		// run multiTrainAlphaSweep
 		xab.m_arena.taskState=Arena.Task.MULTTRN;
 		t_Game.m_xfun.m_PlayAgents[0] = multiTrainAlphaSweep(0, alphaArr, alphaFinalArr, xab, gb, csvName);
-		System.out.println("[GBGBatch.main] multiTrainAlphaSweep finished: Results written to "+csvName);
+		t_Game.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
+		System.out.println("[GBGBatch.main] multiTrain finished: Results written to "+csvName);
+		res = t_Game.saveAgent(0, savePath);
+		if (res) {
+			System.out.println("[GBGBatch.main] multiTrainAlphaSweep finished: last agent saved to "+savePath);
+		} else {
+			System.err.println("[GBGBatch.main] multiTrainAlphaSweep finished, but could not save agent!");			
+		}
 		
 	} // batch2
 
@@ -263,7 +284,14 @@ public class GBGBatch { //extends ArenaTrain {
 		// run multiTrainLambdaSweep
 		xab.m_arena.taskState=Arena.Task.MULTTRN;
 		t_Game.m_xfun.m_PlayAgents[0] = multiTrainLambdaSweep(0, lambdaArr, xab, gb, csvName);
-		System.out.println("[GBGBatch.main] multiTrainLambdaSweep finished: Results written to "+csvName);
+		t_Game.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
+		System.out.println("[GBGBatch.main] multiTrain finished: Results written to "+csvName);
+		res = t_Game.saveAgent(0, savePath);
+		if (res) {
+			System.out.println("[GBGBatch.main] multiTrainLambdaSweep finished: last agent saved to "+savePath);
+		} else {
+			System.err.println("[GBGBatch.main] multiTrainLambdaSweep finished, but could not save agent!");			
+		}
 		
 	} // batch3
 
@@ -413,13 +441,14 @@ public class GBGBatch { //extends ArenaTrain {
 			// construct 'qa' anew (possibly wrapped agent for eval)
 			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 
-	        // evaluate again at the end of a training run:
-			m_evaluatorQ.eval(qa);
-			oQ.add(m_evaluatorQ.getLastResult());
-			if (doTrainEvaluation) {
-				m_evaluatorT.eval(qa);
-				oT.add(m_evaluatorT.getLastResult());								
-			}
+			// --- not really necessary ---
+//	        // evaluate again at the end of a training run:
+//			m_evaluatorQ.eval(qa);
+//			oQ.add(m_evaluatorQ.getLastResult());
+//			if (doTrainEvaluation) {
+//				m_evaluatorT.eval(qa);
+//				oT.add(m_evaluatorT.getLastResult());								
+//			}
 			
 			elapsedMs = (System.currentTimeMillis() - startTime);
 			pa.incrementDurationEvaluationMs(elapsedMs);
@@ -599,13 +628,14 @@ public class GBGBatch { //extends ArenaTrain {
 			// construct 'qa' anew (possibly wrapped agent for eval)
 			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 
-	        // evaluate again at the end of a training run:
-			m_evaluatorQ.eval(qa);
-			oQ.add(m_evaluatorQ.getLastResult());
-			if (doTrainEvaluation) {
-				m_evaluatorT.eval(qa);
-				oT.add(m_evaluatorT.getLastResult());								
-			}
+			// --- not really necessary ---
+//	        // evaluate again at the end of a training run:
+//			m_evaluatorQ.eval(qa);
+//			oQ.add(m_evaluatorQ.getLastResult());
+//			if (doTrainEvaluation) {
+//				m_evaluatorT.eval(qa);
+//				oT.add(m_evaluatorT.getLastResult());								
+//			}
 			
 			elapsedMs = (System.currentTimeMillis() - startTime);
 			pa.incrementDurationEvaluationMs(elapsedMs);

@@ -138,6 +138,18 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	// If is already searching for a far loose: Don't Change!!!
 	private boolean seekFarLoose = true; //false;
 	private int looseIntervall = 20;
+	
+	// sigfac is relevant, if getNextVTable is called with useSigmoid=true, as it is done currently 
+	// in getNextAction2. Divide by sigfac prior to sigmoid squashing:
+	// - sigfac=1: no seeking of distant losses: if AlphaBetaAgent is confronted with a losing position,
+	//   it may give up early (this happens due to rounding errors in sigmoid([-1000,1000]))
+	// - sigfac=1000: effectively searching for distant losses: the positional values \in [-1000,1000] 
+	//   are mapped to [-1,1], so that the following sigmoid squashing maps to the active area of the 
+	//	 sigmoid and thus avoids rounding errors.
+	// [Results prior to 2020-01-29 were with sigfac=1. The AlphaBetaAgent with sigfac=1000 is harder
+	//  to beat.] [Another possibility to search for distant losses is to call getNextVTable with
+	//  useSigmoid=false.]
+	private int sigfac = 1000; //1000; 1;
 
 	// All opening Books
 	private transient BookSum books = null;		// transient: to make AlphaBetaAgent serializable
@@ -159,31 +171,31 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 		setAgentState(AgentState.TRAINED);
 	}
 
-	/**
-	 * (currently never used in GBG)
-	 * 
-	 * @param field  a 7x6 Connect-Four board with '1' for player 1 (who starts) 
-	 *               and '2' for player 2
-	 */
-	public AlphaBetaAgent(int field[][], BookSum books) {
-		super(field);
-		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
-		mutex = new Semaphore(1);
-		setAgentState(AgentState.TRAINED);
-	}
-
-	/**
-	 * (currently never used in GBG)
-	 * 
-	 * @param fieldP1  BitBoard of Player1
-	 * @param fieldP2  BitBoard of Player2
-	 */
-	public AlphaBetaAgent(long fieldP1, long fieldP2, BookSum books) {
-		super(fieldP1, fieldP2);
-		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
-		mutex = new Semaphore(1);
-		setAgentState(AgentState.TRAINED);
-	}
+//	/**
+//	 * (currently never used in GBG)
+//	 * 
+//	 * @param field  a 7x6 Connect-Four board with '1' for player 1 (who starts) 
+//	 *               and '2' for player 2
+//	 */
+//	public AlphaBetaAgent(int field[][], BookSum books) {
+//		super(field);
+//		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
+//		mutex = new Semaphore(1);
+//		setAgentState(AgentState.TRAINED);
+//	}
+//
+//	/**
+//	 * (currently never used in GBG)
+//	 * 
+//	 * @param fieldP1  BitBoard of Player1
+//	 * @param fieldP2  BitBoard of Player2
+//	 */
+//	public AlphaBetaAgent(long fieldP1, long fieldP2, BookSum books) {
+//		super(fieldP1, fieldP2);
+//		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
+//		mutex = new Semaphore(1);
+//		setAgentState(AgentState.TRAINED);
+//	}
 
 	/**
 	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
@@ -199,7 +211,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 		this.resetBoard();
 		this.setTransPosSize(4);		// index into table
 		this.setBooks(true,false,true);	// use normal book and deep book dist
-//		this.setBooks(true,true,true);	// use normal book and deep book dist
+//		this.setBooks(false,false,true);// use only deep book dist
 		this.setDifficulty(42);			// search depth
 		this.randomizeEqualMoves(true);
 		this.randomizeLosses(true);
@@ -245,7 +257,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	 * @return column for creating a threat, or else -1
 	 */
 	protected int findThreat(int player, int startWithCol) {
-		// Prüfen, ob eine Drohung erstellt werden kann
+		// check, if a threat can be posed
 		long temp = (player == PLAYER1 ? fieldP1 : fieldP2);
 		switch (startWithCol) {
 		case 0:
@@ -4201,7 +4213,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 
 		if (!useSigmoid)
 			return score;
-		return Math.tanh(score);
+		return Math.tanh(score/sigfac);
 	}
 
 	/*
@@ -4222,7 +4234,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 				if (canWin(player, x, colHeight[x])) {
 					values[x] = (player == PLAYER1 ? 1001 : -1001);
 					if (useSigmoid)
-						values[x] = Math.tanh(values[x]);
+						values[x] = Math.tanh(values[x]/sigfac);
 					continue;
 				}
 				putPiece(player, x);
@@ -4272,7 +4284,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 					score = rootNode(true);
 				values[x] = score;
 				if (useSigmoid)
-					values[x] = Math.tanh(values[x]);
+					values[x] = Math.tanh(values[x]/sigfac);
 				removePiece(player, x);
 			} else
 				values[x] = Double.NaN;
@@ -4316,7 +4328,8 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
         List<Types.ACTIONS> actions = sob.getAvailableActions();
 		double[] vtable;
         vtable = new double[actions.size()+1];  
-        double[] vtable7 = this.getNextVTable(sc.getBoard(), true);
+        double[] vtable7 = this.getNextVTable(sc.getBoard(), true);		// give up early, if loss (only if sigfac=1)	
+//        double[] vtable7 = this.getNextVTable(sc.getBoard(), false); 	// seek distant loss
         for(i = 0; i < actions.size(); ++i)
         {
 //        	newsc = sc.copy();

@@ -79,9 +79,6 @@ public class XArenaMenu extends JMenuBar {
 	//private TournamentSystemGUI tournamentSystemGUI = null;
 	private TSSettingsGUI2 mTSSettingsGUI2 = null;
 
-	// private final String agentList[] = { "Human", "Minimax", "TDS", "Random"
-	// };
-
 	public XArenaMenu(Arena arena) {
 		m_arena = arena;
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
@@ -180,7 +177,7 @@ public class XArenaMenu extends JMenuBar {
 			menuItem = new JMenuItem(strSave);
 			menuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					saveAgent(j);
+					m_arena.saveAgent(j,null);
 				}
 			});
 			menuItem.setToolTipText(TIPSAVE);
@@ -532,34 +529,6 @@ public class XArenaMenu extends JMenuBar {
 		add(menu);
 	}
 	
-	/**
-	 * @param index   number of the player (agent)
-	 */
-	void saveAgent(int index) {
-		try {
-			// fetching the agents ensures that the actual parameters from the tabs
-			// are all taken (!)
-			m_arena.m_xfun.m_PlayAgents = m_arena.m_xfun.fetchAgents(m_arena.m_xab);
-			AgentBase.validTrainedAgents(m_arena.m_xfun.m_PlayAgents,numPlayers);
-		} catch (RuntimeException e) {
-			m_arena.showMessage( e.getMessage(), 
-					"Error", JOptionPane.ERROR_MESSAGE);
-			printStatus("Done");
-			return;
-		}
-
-		PlayAgent td = m_arena.m_xfun.m_PlayAgents[index];
-		String str = TIPEVALUATE;
-		try {
-			m_arena.tdAgentIO.saveGBGAgent(td);
-			str = "Saved Agent!";
-		} catch(IOException e) {
-			str = e.getMessage();
-		}
-		printStatus(str);
-		System.out.println("[SaveAgent] "+str);
-	}
-
 	
 /*
 	private void showNTuples(int index) {

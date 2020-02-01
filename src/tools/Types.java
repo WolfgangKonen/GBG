@@ -228,7 +228,7 @@ public class Types {
      * list of available agents = list of choices in Agent Selectors
      */
     public static final String[] GUI_AGENT_LIST 	 
-    	= {"Random", /*"Minimax",*/ "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", /*"MCTS0",*/ 
+    	= {"Random", "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", /*"MCTS0",*/ 
     	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TD-Ntuple-3", 
     	   "Sarsa", /*"Sarsa-2",*/ "TDS"};
     /**
@@ -248,7 +248,7 @@ public class Types {
 		= {Color.BLACK, Color.WHITE, Color.RED, Color.BLUE, Color.ORANGE};
 
     // GUI_X_PLAYER and GUI_O_PLAYER is not necessary anymore:
-//  public static final String GUI_X_PLAYER = "TDS";  	// "MCTS" "TDS" "CMA-ES" "Minimax" 
+//  public static final String GUI_X_PLAYER = "TDS";  	// "MCTS" "TDS" "CMA-ES"  
 //  public static final String GUI_O_PLAYER = "MCTS";	// "Human";"MCTS";
 
     /**
@@ -352,9 +352,6 @@ public class Types {
         UIManager.put("ToolTip.font",
            new FontUIResource("SansSerif", Font.ITALIC, GUI_TIPFONTSIZE));
 		
-	}
-	public static void globalGUIScaling() {
-		globalGUIScaling(false);
 	}
 
  }

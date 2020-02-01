@@ -12,7 +12,6 @@ import javax.swing.JOptionPane;
 
 import agentIO.AgentLoader;
 import controllers.MaxNAgent;
-//import controllers.MinimaxAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
@@ -35,8 +34,8 @@ import tools.Types;
  * <ul>
  * <li> -1: no evaluation
  * <li>  0: compete against Random, best is 0.9
- * <li>  1: compete against Minimax, best is 0.0
- * <li>  2: compete against Minimax, different starts, best is 0.0
+ * <li>  1: compete against MaxNAgent, best is 0.0
+ * <li>  2: compete against MaxNAgent, different starts, best is 0.0
  * <li>  3: compete against MCTS, best is 0.0
  * <li>  4: compete against MCTS, different start states, best is 0.0
  * <li> 11: compete against TDReferee.agt.zip, different start states
@@ -46,7 +45,6 @@ import tools.Types;
 public class EvaluatorNim extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {-1,0,1,2,3,4,11};
 	private RandomAgent random_agent = new RandomAgent("Random");
-//	private MinimaxAgent minimaxAgent = new MinimaxAgent("Minimax");
 	private MaxNAgent maxNAgent = null;
     private MCTSAgentT mctsAgent = null;
 	private AgentLoader agtLoader = null;

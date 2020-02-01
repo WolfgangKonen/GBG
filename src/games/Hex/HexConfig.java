@@ -56,7 +56,7 @@ class HexConfig {
      * <p>
      * How to find out which boards are winning boards? - It is proven that the empty board is 
      * a winning board for all board sizes. The situation is more tricky for the 1-ply moves.
-     * For small board sizes N<5, the exact value of each move can be calculated with Minimax. 
+     * For small board sizes N<5, the exact value of each move can be calculated with MaxNAgent. 
      * For larger board sizes, it is possible to use Hexy (a strong Hex playing program): Make
      * a starting move and see whether Hexy can win as 2nd player. However, this has to be done
      * manually for each starting move and each new board size.

@@ -9,7 +9,7 @@ import controllers.PlayAgent;
  * criterion for stopEval evaluator calls in succession. This criterion is met once when the
  * method boolean {@link #evalAgent(PlayAgent)} returns ‘true’. This abstract method {@link #evalAgent(PlayAgent)} is 
  * defined in child classes of Evaluator. The criterion might be for example a success 
- * rate better than -0.15 in a certain game against Minimax (where 0 is the ideal success rate).
+ * rate better than -0.15 in a certain game against MaxNAgent (where 0 is the ideal success rate).
  * <p>  
  * If the Evaluator state stays true for {@code stopEval} calls, then 
  * 		{@link Evaluator#goalReached(int)} 
@@ -106,7 +106,7 @@ abstract public class Evaluator {
 	 * @param playAgent the agent to be evaluated
 	 * @return
 	 *  	a boolean predicate (fail/success) for the result of the evaluation. 
-	 *  	Might be for example (avg.success &gt; -0.15) when playing TTT against Minimax.
+	 *  	Might be for example (avg.success &gt; -0.15) when playing TTT against MaxNAgent.
 	 *  
 	 * @see #getLastResult()
 	 * @see #getMsg()
@@ -136,7 +136,7 @@ abstract public class Evaluator {
 	/**
 	 * @return
 	 *  	the result from the last call to {@link #evalAgent(PlayAgent)}, which might be for example
-	 *  	the average success rate of games played against a Minimax player.
+	 *  	the average success rate of games played against a MaxNAgent player.
 	 */
  	public double getLastResult(){ 
  		return lastResult; 

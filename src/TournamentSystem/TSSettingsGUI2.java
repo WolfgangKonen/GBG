@@ -26,7 +26,7 @@ import java.io.IOException;
  */
 public class TSSettingsGUI2 extends JFrame {
     private JCheckBox randomCheckBox;
-    private JCheckBox minimaxCheckBox;
+//    private JCheckBox minimaxCheckBox;
     private JCheckBox maxNCheckBox;
     private JCheckBox expectimaxNCheckBox;
     private JCheckBox MCNCheckBox;
@@ -88,17 +88,19 @@ public class TSSettingsGUI2 extends JFrame {
         // may change in the future and then the element GUI_AGENT_LIST[i] is no longer the same.
         //
         mTSAgentManager.addAgent("Standard Random", "Random"/*Types.GUI_AGENT_LIST[0]*/, randomCheckBox, false, null);
-        // --- note WK: "Minimax" is now deprecated! ---
-        minimaxCheckBox.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
-                    updateSliderAndLabel();
-                }
-            }
-        });
-        minimaxCheckBox.setVisible(false);
-        mTSAgentManager.addAgent("Standard Minimax", "Minimax"/*Types.GUI_AGENT_LIST[1]*/, minimaxCheckBox, false, null);
+        
+        // --- deprecated, since MinimaxAgent has become deprecated now ---
+//        minimaxCheckBox.addChangeListener(new ChangeListener() {
+//            @Override
+//            public void stateChanged(ChangeEvent e) {
+//                if (mTSAgentManager.getNumAgentsSelected() > 1 && variableDoubleRoundRobinRadioButton.isSelected()) {
+//                    updateSliderAndLabel();
+//                }
+//            }
+//        });
+//      mTSAgentManager.addAgent("Standard Minimax", "Minimax"/*Types.GUI_AGENT_LIST[1]*/, minimaxCheckBox, false, null);
+//      minimaxCheckBox.setVisible(false);
+
         MCNCheckBox.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -521,13 +523,13 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(randomCheckBox, gbc);
-        minimaxCheckBox = new JCheckBox();
-        minimaxCheckBox.setText("Minimax");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        gbc.anchor = GridBagConstraints.WEST;
-        mJPanel.add(minimaxCheckBox, gbc);
+//        minimaxCheckBox = new JCheckBox();
+//        minimaxCheckBox.setText("Minimax");
+//        gbc = new GridBagConstraints();
+//        gbc.gridx = 1;
+//        gbc.gridy = 3;
+//        gbc.anchor = GridBagConstraints.WEST;
+//        mJPanel.add(minimaxCheckBox, gbc);
         maxNCheckBox = new JCheckBox();
         maxNCheckBox.setText("Max-N");
         gbc = new GridBagConstraints();

@@ -145,9 +145,6 @@ public class XArenaFuncs {
 				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
 				pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]),
 						new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
-				// } else if (sAgent.equals("Minimax")) {
-				// pa = new MinimaxAgent(sAgent, new
-				// ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("Max-N")) {
 				pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 			} else if (sAgent.equals("Expectimax-N")) {
@@ -230,10 +227,6 @@ public class XArenaFuncs {
 	private PlayAgent fetchAgent(int n, String sAgent, XArenaButtons m_xab) {
 		PlayAgent pa = null;
 		int maxGameNum = m_xab.getGameNumber();
-		// if (sAgent.equals("Minimax")) {
-		// pa= new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new
-		// ParOther(m_xab.oPar[n]));
-		// } else
 		if (sAgent.equals("Max-N")) {
 			pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Expectimax-N")) {
@@ -709,14 +702,13 @@ public class XArenaFuncs {
 	 * @return the (last) trained agent
 	 * @throws IOException
 	 *             if something goes wrong with {@code csvName}, see below
-	 *             <p>
-	 *             Side effect: writes results of multi-training to <b>
-	 *             {@code agents/<gameDir>/csv/<csvName>}</b>. This file has the
-	 *             columns: <br>
-	 *             {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}
-	 *             . <br>
-	 *             The contents may be visualized with one of the R-scripts
-	 *             found in {@code resources\R_plotTools}.
+	 * <p>
+	 * Side effect: writes results of multi-training to <b>
+	 * {@code agents/<gameDir>/csv/<csvName>}</b>. This file has the columns: <br>
+	 * 
+	 *     {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}. <br>
+	 *     
+	 * The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
 	 */
 	public PlayAgent multiTrain(int n, String sAgent, XArenaButtons xab, GameBoard gb, String csvName)
 			throws IOException {
@@ -753,12 +745,13 @@ public class XArenaFuncs {
 
 			xab.setTrainNumberText(trainNum, Integer.toString(i + 1) + "/" + Integer.toString(trainNum));
 
-			// add here - if wanted - user-specific code which varies for each i
-			// some of the
-			// parameters and writes them to userValue*:
-			// *** DON'T FORGET to comment it out again if you want to have
-			// normal behavior back
-			// *** (same settings for all runs i)
+			// --- DON'T use this anymore! Use instead GBGBatch.multiTrainAlphaSweep or 
+			// --- GBGBatch.multiTrainLambdaSweep.
+			//
+			// //add here - if wanted - user-specific code which varies for each i some of the
+			// //parameters and writes them to userValue*:
+			// //*** DON'T FORGET to comment it out again if you want to have normal behavior back
+			// //*** (same settings for all runs i)
 			// double lambda = i*0.1;
 			// userTitle1="lambda"; userValue1=lambda;
 			// userTitle2="null"; userValue2=0.0;

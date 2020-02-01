@@ -116,7 +116,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 * vectors were visited during training. <p>
 	 * hmX has as key: input feature vector, as value: a HashMap containing all board positions  
 	 * (states) which are mapped to this feature vector; this inner HashMap has as key: a state and    
-	 * as value: a ScoreC object. ScoreC contains the ideal (Minimax) score and a counter how often 
+	 * as value: a ScoreC object. ScoreC contains the ideal (MaxNAgent) score and a counter how often 
 	 * this state was visited.
 	 * hmX is filled in member function <code>trainNet</code> of the derived class.
 	 * <p><b>Only for diagnostics.</b> 
@@ -1050,11 +1050,11 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	/**
 	 * Given a board position <code>state</code> (e.g. "XoX---Xo-") as input, calculate its 
 	 * corresponding feature vector FV and then the diversity of this feature vector FV, i.e. how 
-	 * many states belonging to FV are mapped by MinimaxAgent to -1 (O-win), 0 (tie), +1 (X-win).
+	 * many states belonging to FV are mapped by MaxNAgent to -1 (O-win), 0 (tie), +1 (X-win).
 	 * 
 	 * <p><b>Only for diagnostics.</b>
 	 * @param state	(e.g. "XoX---Xo-")
-	 * @param counters int[3] which contains on output: [0]: O-win, [1]: tie, [2]: X-win counts (Minimax)
+	 * @param counters int[3] which contains on output: [0]: O-win, [1]: tie, [2]: X-win counts (MaxNAgent)
 	 * @return a boolean flag <code>isDivergent</code>: false if all states are mapped to one score 
 	 * or true if they are mapped to different scores.
 	 */
@@ -1064,7 +1064,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 		int player = -stringToTable(state,table);
 		double[] Input = prepareInputVector(player,table);
 		String sI = inputToString(Input);
-		HashMap<String,ScoreC> hm = hmX.get(sI);	// note that hmX contains the *Minimax* score in its ScoreC objects
+		HashMap<String,ScoreC> hm = hmX.get(sI);	// note that hmX contains the *MaxNAgent* score in its ScoreC objects
 		if (hm==null) {
 			System.out.println("[diversityCheck] Nothing known in hmX about state "+state+" with feature vector "+sI);
 			return false;
@@ -1091,7 +1091,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	/**
 	 * Given a board position <code>state</code> (e.g. "XoX---Xo-") as input, calculate its 
 	 * corresponding feature vector FV and then the diversity of this feature vector FV, i.e. how 
-	 * many states belonging to FV are mapped by MinimaxAgent to -1 (O-win), 0 (tie), +1 (X-win).
+	 * many states belonging to FV are mapped by MaxNAgent to -1 (O-win), 0 (tie), +1 (X-win).
 	 * The resulting divCheck tag is "OK" if all states are mapped to one score or "W" (for 
 	 * 'wrong') if they are mapped to different scores. 
 	 * <p>

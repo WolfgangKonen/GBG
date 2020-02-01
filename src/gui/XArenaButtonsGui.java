@@ -552,6 +552,11 @@ public class XArenaButtonsGui extends JPanel {
 		htmlDisplayActive = !htmlDisplayActive;
 		htmlDisplay.setVisible(htmlDisplayActive);	
 	}
+	
+	public void destroy() {
+		if (logManagerGUI!=null) logManagerGUI.close();
+		if (htmlDisplay!=null) htmlDisplay.dispose();
+	}
 
 	public boolean getShowValueOnGameBoard() {
 		return showValOnGB.isSelected();

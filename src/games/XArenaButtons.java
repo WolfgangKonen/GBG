@@ -30,11 +30,12 @@ public class XArenaButtons extends JPanel
 {
 	int trainNumber = 25;
 	int gameNumber = 10000;
+	int competeNumber = 3;
 
 	private static final long serialVersionUID = 1L;
 	XArenaFuncs 		m_xfun;
 	public Arena	 	m_arena;	// a reference to the Arena object passed in with the constructor
-	public OptionsComp 	winCompOptions = new OptionsComp(); // window with Competition Options
+	public OptionsComp 	winCompOptions = null; 
 	public XArenaButtonsGui m_XAB_gui = null;
 	int numPlayers;
 	public int m_numParamBtn;			// number of the last param button pressed
@@ -68,8 +69,10 @@ public class XArenaButtons extends JPanel
 		m_xfun = game;
 		m_arena = arena;
 		
-		if (m_arena.withUI)
+		if (m_arena.withUI) {
 			m_XAB_gui = new XArenaButtonsGui(arena);
+			winCompOptions = new OptionsComp(competeNumber); // window with Competition Options
+		}
 
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		changedViaLoad = new boolean[numPlayers];	// implicitly set to false
@@ -241,10 +244,11 @@ public class XArenaButtons extends JPanel
 	}
 
 	public String getSelectedAgent(int i){
-		if (!tournamentRemoteDataEnabled)
-//			return (String) m_XAB_gui.getChoiceAgent(i).getSelectedItem();
+		if (!tournamentRemoteDataEnabled) {
+			if (m_XAB_gui!=null)		// bug fix to get the initial choice box selection
+				this.selectedAgents[i] = (String) m_XAB_gui.getChoiceAgent(i).getSelectedItem();
 			return this.selectedAgents[i];
-		else {
+		} else {
 			return selectedAgentTypes[i];
 		}
 	}
@@ -290,35 +294,57 @@ public class XArenaButtons extends JPanel
 		selectedAgentTypes = null;
 	}
 
+	public void destroy() {
+		if (m_XAB_gui!=null) {
+			m_XAB_gui.destroy();
+		}
+		if (winCompOptions != null) {
+			winCompOptions.setVisible(false);
+			winCompOptions.dispose();
+		}
+	}
+
 	public int getTrainNumber() {
-		if (this.m_XAB_gui!=null)
+		if (m_XAB_gui!=null)
 			trainNumber = m_XAB_gui.getTrainNumber(); // be sure to get latest change from GUI (!)
 		return trainNumber;
 	}
 
 	public void setTrainNumber(int trainNumber) {
 		this.trainNumber = trainNumber;
-		if (this.m_XAB_gui!=null)
+		if (m_XAB_gui!=null)
 			m_XAB_gui.setTrainNumberText(""+trainNumber);
 	}
 	
 	// to allow for text = "1/25" (first run out of 25)
 	public void setTrainNumberText(int trainNumber, String text) {
 		this.trainNumber = trainNumber;
-		if (this.m_XAB_gui!=null)
+		if (m_XAB_gui!=null)
 			m_XAB_gui.setTrainNumberText(text);
 	}
 	
 	public int getGameNumber() {
-		if (this.m_XAB_gui!=null)
+		if (m_XAB_gui!=null)
 			gameNumber = m_XAB_gui.getGameNumber(); // be sure to get latest change from GUI (!)
 		return gameNumber;
 	}
 	
 	public void setGameNumber(int gameNumber) {
 		this.gameNumber = gameNumber;
-		if (this.m_XAB_gui!=null)
+		if (m_XAB_gui!=null)
 			m_XAB_gui.setGameNumber(gameNumber);
+	}
+	
+	public int getCompeteNumber() {
+		if (this.winCompOptions!=null)
+			competeNumber = winCompOptions.getNumGames(); // be sure to get latest change from GUI (!)
+		return competeNumber;
+	}
+	
+	public void setCompeteNumber(int competeNumber) {
+		this.competeNumber = competeNumber;
+		if (this.winCompOptions!=null)
+			winCompOptions.setNumGames(competeNumber);
 	}
 	
 	//
