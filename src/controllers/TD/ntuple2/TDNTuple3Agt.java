@@ -784,7 +784,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
 						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
 						+ ", gamma: " + m_tdPar.getGamma()
-						+ ", "+stringDescrNTuple();		// see NTupleBase
+						+ ", "+stringDescrNTuple()		// see NTupleBase
+						+ ", evalQ: " + m_oPar.getQuickEvalMode() + ", evalT: " + m_oPar.getTrainEvalMode();
 		return str;
 	}
 		

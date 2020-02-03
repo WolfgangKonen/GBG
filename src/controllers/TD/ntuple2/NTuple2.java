@@ -29,7 +29,7 @@ import params.ParNT;
  * {@link XNTupleFuncs#getBoardVector(StateObservation)} before they are passed to 
  * {@link NTuple2} methods. 
  * 
- * @author Markus Thill, Samineh Bagheri, Wolfgang Konen, TH Köln, Sep'18
+ * @author Markus Thill, Samineh Bagheri, Wolfgang Konen, TH Koeln, Sep'18
  * 
  */
 public class NTuple2 implements Serializable {

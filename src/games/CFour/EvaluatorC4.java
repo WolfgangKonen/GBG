@@ -50,6 +50,8 @@ import agentIO.AgentLoader;
  * <li>  1: compete against Random
  * <li>  2: compete against Max-N (limited tree depth: 6)
  * <li>  3: compete against AlphaBetaAgent (perfect play)
+ * <li>  4: compete against AlphaBetaAgent, different start states (perfect play)
+ * <li>  5: compete against AlphaBetaAgentDistantLoss (perfect play)
  * <li> 10: compete against MCTS, different start states
  * <li> 11: compete against TDReferee.agt.zip, different start states
  * </ul>  
@@ -67,7 +69,8 @@ public class EvaluatorC4 extends Evaluator {
     private int numStartStates = 1;
 	private AgentLoader agtLoader = null;
 	
-	private AlphaBetaAgent alphaBetaStd = null;
+	private AlphaBetaAgent alphaBetaStd = null;		// random move in loss positions
+	private AlphaBetaAgent alphaBeta_DL = null;		// distant losses
 
     /**
      * logResults toggles logging of training progress to a csv file located in {@link #logDir}
@@ -101,10 +104,12 @@ public class EvaluatorC4 extends Evaluator {
         params.setMaxNDepth(maxNDepth);
         maxnAgent = new MaxNAgent("Max-N", params, new ParOther());
         
-		// Initialize the standard Alpha-Beta-Agent
+		// Initialize the Alpha-Beta-Agents
 		// (same as winOptionsGTB in MT's C4)
-		alphaBetaStd = new AlphaBetaAgent(new BookSum());
-		alphaBetaStd.instantiateAfterLoading();
+		alphaBetaStd = new AlphaBetaAgent(new BookSum());		// no search for distant losses
+		alphaBetaStd.instantiateAfterLoading();				
+		alphaBeta_DL = new AlphaBetaAgent(new BookSum(),1000);	// search for distant losses
+		alphaBeta_DL.instantiateAfterLoading();				
     }
 
     @Override
@@ -155,6 +160,10 @@ public class EvaluatorC4 extends Evaluator {
                 break;
             case 4:
                 result = competeAgainstOpponent_diffStates(playAgent, alphaBetaStd, m_gb, numEpisodes);
+                break;
+            case 5:
+            	numEpisodes=20;
+                result = competeAgainstAlphaBetaDistantLoss(playAgent, m_gb, numEpisodes);
                 break;
             case 10:
             	if (playAgent instanceof TDNTuple2Agt || playAgent instanceof NTupleBase) {
@@ -233,7 +242,7 @@ public class EvaluatorC4 extends Evaluator {
      * @param numEpisodes	actually 2*numEpisodes single-compete games are played (to be
      * 						comparable with the number of both-compete games in other funcs) 
      * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
-     * 		or oppenent.
+     * 		or opponent.
      */
     private double competeAgainstAlphaBeta(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
 //    	verbose=1;
@@ -247,8 +256,28 @@ public class EvaluatorC4 extends Evaluator {
 		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, alphaBetaStd), new StateObserverC4(), 2*numEpisodes, verbose, null);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
-//      if (this.verbose > 0) 
-        	System.out.println(m_msg);
+       	System.out.println(m_msg);
+        return lastResult;
+    }
+
+    /**
+     * Evaluates an agent's performance against perfect play, since {@link AlphaBetaAgent} with 
+     * opening books is an agent playing perfectly. We test only the games where  
+     * {@code playAgent} starts, since games where {@link AlphaBetaAgent} starts are a safe 
+     * win for {@link AlphaBetaAgent}.
+     *
+     * @param playAgent Agent to be evaluated
+     * @param gameBoard	game board for the evaluation episodes
+     * @param numEpisodes	actually 2*numEpisodes single-compete games are played (to be
+     * 						comparable with the number of both-compete games in other funcs) 
+     * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
+     * 		or opponent.
+     */
+    private double competeAgainstAlphaBetaDistantLoss(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, alphaBeta_DL), new StateObserverC4(), 2*numEpisodes, verbose, null);
+		lastResult = sc.scTup[0];
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
+       	System.out.println(m_msg);
         return lastResult;
     }
 
@@ -475,7 +504,7 @@ public class EvaluatorC4 extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[]{-1, 0, 1, 2, 3, 4, 10, 11};
+        return new int[]{-1, 0, 1, 2, 3, 4, 5, 10, 11};
     }
 
     @Override
@@ -498,6 +527,7 @@ public class EvaluatorC4 extends Evaluator {
             case 2:  return "success against Max-N (best is 1.0): ";
             case 3:  return "success against AlphaBetaAgent (best is 1.0): ";
             case 4:  return "success against AlphaBetaAgent (" + numStartStates + " diff. start states, best is 1.0): ";
+            case 5:  return "success against AlphaBetaAgentDistantLoss (best is 1.0): ";
             case 10: return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
             case 11: return "success against TDReferee (" + numStartStates + " diff. start states, best is 1.0): ";
             default: return null;
@@ -513,6 +543,7 @@ public class EvaluatorC4 extends Evaluator {
 				+ "2: against Max-N, best is 1.0<br>"
 				+ "3: against AlphaBetaAgent, best is 1.0<br>"
 				+ "4: against AlphaBetaAgent, different starts, best is 1.0<br>"
+				+ "5: against AlphaBetaAgentDistantLoss, best is 1.0<br>"
 				+ "10: against MCTS, different starts, best is 1.0<br>"
 				+ "11: against TDReferee.agt.zip, different starts, best is 1.0"
 				+ "</html>";
@@ -528,6 +559,7 @@ public class EvaluatorC4 extends Evaluator {
             case 2:  return "success against Max-N";
             case 3:  return "success against AlphaBeta";
             case 4:  return "success against AlphaBeta, dStart";
+            case 5:  return "success against AlphaBetaDL";
             case 10: return "success against MCTS, dStart";
             case 11: return "success against TDReferee";
             default: return null;

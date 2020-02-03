@@ -43,7 +43,7 @@ import tools.Types.ACTIONS;
  * items. There are two players and each player removes between 1 and {@link NimConfig#MAX_MINUS} 
  * items from one heap in each move. The player who removes the last item wins. 
  * 
- * @author Wolfgang Konen, TH Köln, Dec'18
+ * @author Wolfgang Konen, TH Koeln, Dec'18
  */
 public class GameBoardNim extends JFrame implements GameBoard {
 
@@ -71,7 +71,7 @@ public class GameBoardNim extends JFrame implements GameBoard {
 	private int iBest,jBest;
 	private double vWorst;
 	
-	// the colors of the TH Köln logo (used for button coloring):
+	// the colors of the TH Koeln logo (used for button coloring):
 	private Color colTHK1 = new Color(183,29,13);
 	private Color colTHK2 = new Color(255,137,0);
 	private Color colTHK3 = new Color(162,0,162);

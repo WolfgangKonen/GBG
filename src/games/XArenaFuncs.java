@@ -20,7 +20,6 @@ import games.CFour.openingBook.BookSum;
 import games.Nim.BoutonAgent;
 import games.Othello.StateObserverOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
-import games.Othello.Edax.Edax;
 import games.Othello.Edax.Edax2;
 import games.Sim.StateObserverSim;
 import games.TStats.TAggreg;
@@ -182,10 +181,10 @@ public class XArenaFuncs {
 														// gui_agent_list in
 														// XArenaButtons
 				pa = new BenchMarkPlayer("BenchPlayer", 1);
-			} else if (sAgent.equals("Edax")) { // Othello only, see
-												// gui_agent_list in
-												// XArenaButtons
-				pa = new Edax();
+//			} else if (sAgent.equals("Edax")) { // Othello only, see
+//												// gui_agent_list in
+//												// XArenaButtons
+//				pa = new Edax();
 			} else if (sAgent.equals("Edax2")) { // Othello only, see
 													// gui_agent_list in
 													// XArenaButtons
@@ -263,9 +262,9 @@ public class XArenaFuncs {
 													// gui_agent_list in
 													// XArenaButtons
 			pa = new BenchMarkPlayer("BenchPlayer", 1);
-		} else if (sAgent.equals("Edax")) { // Othello only, see gui_agent_list
-											// in XArenaButtons
-			pa = new Edax();
+//		} else if (sAgent.equals("Edax")) { // Othello only, see gui_agent_list
+//											// in XArenaButtons
+//			pa = new Edax();
 		} else if (sAgent.equals("Edax2")) { // Othello only, see gui_agent_list
 												// in XArenaButtons
 			pa = new Edax2(sAgent, new ParEdax(m_xab.edParams[n]));
@@ -999,18 +998,18 @@ public class XArenaFuncs {
 			// These six lines are fudge factors, but currently needed to get an
 			// Othello competition running:
 			// We need to initialize Edax for a new game before each competition
-			// game and we need to reset
-			// startSO's member lastMoves to an empty array in order that Edax
+			// game and 
+			// We need to reset startSO's member lastMoves to an empty array in order that Edax
 			// makes on its first call
 			// of getNextAction2 (where firstTurn==true) the right decision.
-			for (int n = 0; n < numPlayers; n++) {
-				if (paVector.pavec[n] instanceof Edax)
-					((Edax) paVector.pavec[n]).initForNewGame();
-			}
-			if (startSO instanceof StateObserverOthello)
-				((StateObserverOthello) startSO).resetLastMoves();
+//			for (int n = 0; n < numPlayers; n++) {
+//				if (paVector.pavec[n] instanceof Edax)
+//					((Edax) paVector.pavec[n]).initForNewGame();
+//			}
+//			if (startSO instanceof StateObserverOthello)
+//				((StateObserverOthello) startSO).resetLastMoves();
 			//
-			// TODO: this is all not a nice design, because very
+			// This is all not a nice design, because very
 			// Othello-specific things are part of
 			// XArenaFuncs.compete(). Instead we should better generalize the
 			// interface of

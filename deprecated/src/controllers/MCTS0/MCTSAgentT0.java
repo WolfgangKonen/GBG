@@ -32,7 +32,7 @@ import java.util.Random;
  * (with a bug fix concerning the number of available actions and  
  *  extensions for 1- and 2-player games)
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  * 
  * @see MCTSExpectimaxAgt MCTSExpectimaxAgt for non-deterministic games
  */

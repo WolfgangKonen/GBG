@@ -60,7 +60,7 @@ public class GameBoardTTT extends JFrame implements GameBoard {
 	private double[][] VTable;
 	private boolean arenaActReq=false;
 	
-	// the colors of the TH Köln logo (used for button coloring):
+	// the colors of the TH Koeln logo (used for button coloring):
 	private Color colTHK1 = new Color(183,29,13);
 	private Color colTHK2 = new Color(255,137,0);
 	private Color colTHK3 = new Color(162,0,162);

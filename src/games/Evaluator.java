@@ -19,7 +19,7 @@ import controllers.PlayAgent;
  * This class is a base class; derived classes should implement concrete versions of
  * {@link #evalAgent(PlayAgent)}.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 abstract public class Evaluator {
 	private boolean prevEval;

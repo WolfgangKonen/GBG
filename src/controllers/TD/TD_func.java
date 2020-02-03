@@ -9,7 +9,7 @@ package controllers.TD;
  * <li> {@link TDAgent}
  * </ul>
  * 
- * @author Wolfgang Konen, TH Köln, Apr'08-Nov'16
+ * @author Wolfgang Konen, TH Koeln, Apr'08-Nov'16
  *
  */
 public interface TD_func {

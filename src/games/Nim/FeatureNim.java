@@ -16,7 +16,7 @@ import tools.Types;
  * of feature vectors. The acceptable values for {@code featmode} are
  * retrieved with {@link #getAvailFeatmode()}.
  * 
- * @author Wolfgang Konen, TH Köln, Dec'18
+ * @author Wolfgang Konen, TH Koeln, Dec'18
  */
 public class FeatureNim implements Feature, Serializable {
 	

@@ -22,7 +22,7 @@ import agentIO.LoadSaveGBG;
  * use {@link TDNTuple2Agt}), it may just code stubs returning 0, {@code null}, 
  * or throwing a {@link RuntimeException}.
  *
- * @author Wolfgang Konen, TH Köln, Feb'17
+ * @author Wolfgang Konen, TH Koeln, Feb'17
  */
 public interface XNTupleFuncs {
 	/**

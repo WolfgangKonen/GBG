@@ -145,7 +145,7 @@ public class XArenaButtonsGui extends JPanel {
 
 		// add game-specific agent names for certain games (currently ConnectFour, Nim and Othello)
 		String gName = m_arena.getGameName();
-		int offset = (gName=="ConnectFour" || gName=="Nim") ? 1 : (gName=="Othello") ? 4: 0;
+		int offset = (gName=="ConnectFour" || gName=="Nim") ? 1 : (gName=="Othello") ? 3: 0;
 		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
 		for (int i=0; i<Types.GUI_AGENT_LIST.length; i++) gui_agent_list[i] = Types.GUI_AGENT_LIST[i];
 		if (gName=="ConnectFour") {
@@ -153,9 +153,9 @@ public class XArenaButtonsGui extends JPanel {
 		} else if (gName=="Nim") {
 			gui_agent_list[gui_agent_list.length-1] = "Bouton";
 		}else if (gName=="Othello") {
-			gui_agent_list[gui_agent_list.length-4] = "HeurPlayer";
-			gui_agent_list[gui_agent_list.length-3] = "BenchPlayer";
-			gui_agent_list[gui_agent_list.length-2] = "Edax";
+			gui_agent_list[gui_agent_list.length-3] = "HeurPlayer";
+			gui_agent_list[gui_agent_list.length-2] = "BenchPlayer";
+			//gui_agent_list[gui_agent_list.length-2] = "Edax";
 			gui_agent_list[gui_agent_list.length-1] = "Edax2";
 		}
 		
@@ -191,7 +191,7 @@ public class XArenaButtonsGui extends JPanel {
 			// Now we allow choice-box selection.
 			// OLD: Arena does not allow user to modify choice boxes (see ArenaTrain)
 			
-			// whenever one of the agent choice boxes changes, call setParamDefaults
+			// whenever one of the agent choice boxes changes, call XArenaButtons.setParamDefaults
 			// to set the param tabs to sensible defaults for that agent and that game
 			// (but this call is inhibited by changedViaLoad[n]==true if a loadAgent-call triggered
 			// the choice-box change)
@@ -207,7 +207,7 @@ public class XArenaButtonsGui extends JPanel {
 									m_arena.m_xab.changedViaLoad[n]=false;
 							} else {
 								// the normal case, if item change was triggered by user:
-								setParamDefaults(n, m_arena.m_xab.selectedAgents[n], m_arena.getGameName());
+								m_arena.m_xab.setParamDefaults(n, m_arena.m_xab.selectedAgents[n], m_arena.getGameName());
 								if (!m_arena.hasTrainRights()) {
 									m_arena.m_xab.tdPar[n].enableAll(false);
 									m_arena.m_xab.ntPar[n].enableAll(false);									
@@ -580,7 +580,7 @@ public class XArenaButtonsGui extends JPanel {
 		GameNumT.setText(""+gameNumber);
 	}
 	
-	public void setParamDefaults(int n, String agentName, String gameName) {		
+	public void setGuiParamDefaults(int n, String agentName, String gameName) {		
 		switch (agentName) {
 		case "TD-Ntuple-2": 
 		case "TD-Ntuple-3": 

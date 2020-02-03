@@ -30,7 +30,7 @@ import games.ArenaTrain;
  * @see GameBoardTTT
  * @see EvaluatorTTT
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 public class ArenaTTT extends Arena   {
 	

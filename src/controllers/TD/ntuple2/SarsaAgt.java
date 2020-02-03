@@ -81,7 +81,7 @@ import games.XArenaMenu;
  * @see AgentBase
  * @see NTupleBase
  * 
- * @author Wolfgang Konen, TH Köln, Dec'18
+ * @author Wolfgang Konen, TH Koeln, Dec'18
  */
 public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializable {
 	

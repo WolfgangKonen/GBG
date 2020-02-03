@@ -17,7 +17,7 @@ import java.io.IOException;
  * Launch class used to start game Hex in class {@link ArenaTrain} via 
  * a <b>main method</b>. <br> 
  *  
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  * 
  * @see Arena
  * @see ArenaTrain

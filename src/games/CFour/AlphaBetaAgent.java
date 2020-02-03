@@ -149,7 +149,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	// [Results prior to 2020-01-29 were with sigfac=1. The AlphaBetaAgent with sigfac=1000 is harder
 	//  to beat.] [Another possibility to search for distant losses is to call getNextVTable with
 	//  useSigmoid=false.]
-	private int sigfac = 1000; //1000; 1;
+	private int sigfac = 1; //1000; 1;
 
 	// All opening Books
 	private transient BookSum books = null;		// transient: to make AlphaBetaAgent serializable
@@ -167,6 +167,20 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	public AlphaBetaAgent(BookSum books) {
 		super();
 		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
+		mutex = new Semaphore(1);
+		setAgentState(AgentState.TRAINED);
+	}
+
+	/**
+	 * 
+	 * @param books
+	 * @param sigfac set to 1000, if agent should search for distant losses (the default is 
+	 * 				 1 and then it does NOT search for distant losses)
+	 */
+	public AlphaBetaAgent(BookSum books, int sigfac) {
+		super();
+		this.books = books; 	// see comment on 'books' in instantiateAfterLoading()
+		this.sigfac = sigfac;
 		mutex = new Semaphore(1);
 		setAgentState(AgentState.TRAINED);
 	}
@@ -4316,7 +4330,6 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 		int i,j,sign;
         int iBest;
 		int count = 1; // counts the moves with same iMaxScore
-		boolean useSigmoid=false;
 		double CurrentScore;
 		double iMaxScore = -Double.MAX_VALUE;
 		assert (sob instanceof StateObserverC4);
@@ -4328,8 +4341,13 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
         List<Types.ACTIONS> actions = sob.getAvailableActions();
 		double[] vtable;
         vtable = new double[actions.size()+1];  
-        double[] vtable7 = this.getNextVTable(sc.getBoard(), true);		// give up early, if loss (only if sigfac=1)	
-//        double[] vtable7 = this.getNextVTable(sc.getBoard(), false); 	// seek distant loss
+        double[] vtable7 = this.getNextVTable(sc.getBoard(), true);		// if sigfac=1: give up early, if loss 
+        																// if sigfac=1000: seeking for distant loss
+//        double[] vtable7 = this.getNextVTable(sc.getBoard(), false); 	// seeking for distant loss
+        // /WK/ it is recommended to use the first call, because then we can decide via sigfac whether 
+        // 		we search for distant loss or not.  All this requires that we load deep book dist (the
+        //		3rd one) in instantiateAfterLoading()
+        
         for(i = 0; i < actions.size(); ++i)
         {
 //        	newsc = sc.copy();

@@ -35,7 +35,7 @@ import tools.Types;
  * @see GameBoardNim
  * @see EvaluatorNim
  * 
- * @author Wolfgang Konen, TH Köln, Dec'18
+ * @author Wolfgang Konen, TH Koeln, Dec'18
  */
 public class ArenaTrainNim extends ArenaTrain   {
 	

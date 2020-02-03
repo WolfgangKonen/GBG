@@ -48,7 +48,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * @see AgentBase
  * @see TDNTuple2Agt
  * 
- * @author Wolfgang Konen, Samineh Bagheri, Markus Thill, TH Köln, Feb'17
+ * @author Wolfgang Konen, Samineh Bagheri, Markus Thill, TH Koeln, Feb'17
  */
 //
 // This agent is adapted from project SourceTTT, class TicTacToe.TDSNPlayer.

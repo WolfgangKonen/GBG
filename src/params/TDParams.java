@@ -425,32 +425,32 @@ public class TDParams extends Frame implements Serializable
 		mode3P_T.setEnabled(enable);
 	}
 	
-	/**
-	 * Needed to restore the param tab with the parameters from a re-loaded agent
-	 * @param tp  TDParams of the re-loaded agent
-	 */
-	public void setFrom(TDParams tp) {
-		setAlpha(tp.getAlpha());
-		setAlphaFinal(tp.getAlphaFinal());
-		setEpsilon(tp.getEpsilon());
-		setEpsilonFinal(tp.getEpsilonFinal());
-		setGamma(tp.getGamma());
-		setLambda(tp.getLambda());
-		setHorizonCut(tp.getHorizonCut());
-		setLinearNet(tp.hasLinearNet());
-		setRpropLrn(tp.hasRpropLrn());
-		setSigmoid(tp.hasSigmoid());
-		setNormalize(tp.getNormalize());
-		setEligMode(tp.getEligMode());
-		setEpochs(tp.getEpochs());
-		setFeatmode(tp.getFeatmode());
-		setNPly(tp.getNPly());
-		setMode3P(tp.getMode3P());
-	}
+//	/**
+//	 * Needed to restore the param tab with the parameters from a re-loaded agent
+//	 * @param tp  TDParams of the re-loaded agent
+//	 */
+//	public void setFrom(TDParams tp) {
+//		setAlpha(tp.getAlpha());
+//		setAlphaFinal(tp.getAlphaFinal());
+//		setEpsilon(tp.getEpsilon());
+//		setEpsilonFinal(tp.getEpsilonFinal());
+//		setGamma(tp.getGamma());
+//		setLambda(tp.getLambda());
+//		setHorizonCut(tp.getHorizonCut());
+//		setLinearNet(tp.hasLinearNet());
+//		setRpropLrn(tp.hasRpropLrn());
+//		setSigmoid(tp.hasSigmoid());
+//		setNormalize(tp.getNormalize());
+//		setEligMode(tp.getEligMode());
+//		setEpochs(tp.getEpochs());
+//		setFeatmode(tp.getFeatmode());
+//		setNPly(tp.getNPly());
+//		setMode3P(tp.getMode3P());
+//	}
 	
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
-	 * @param tp  TDParams of the re-loaded agent
+	 * @param tp  ParTD of the re-loaded agent
 	 */
 	public void setFrom(ParTD tp) {
 		setAlpha(tp.getAlpha());
@@ -473,7 +473,7 @@ public class TDParams extends Frame implements Serializable
 	
 	/**
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
-	 * parameters" we mean parameter producing good results. Likewise, some parameter
+	 * parameters" we mean parameters producing good results. Likewise, some parameter
 	 * choices may be enabled or disabled.
 	 * 
 	 * @param agentName one out of "TD-Ntuple-2" ({@link TDNTuple2Agt}), 
@@ -482,8 +482,8 @@ public class TDParams extends Frame implements Serializable
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// Currently we have here only the sensible defaults for three games ("TicTacToe", "Hex", "2048")
-		// and for three agents ("TD-Ntuple[-2]" = class TDNTuple[2]Agt and "TDS" = class TDAgent).
+		// Currently we have here only the sensible defaults for some games and
+		// for three agents ("TD-Ntuple[-2,-3]" = class TDNTuple[2,3]Agt and "TDS" = class TDAgent).
 		//
 		// If later good parameters for other games are found, they should be
 		// added with suitable nested switch(gameName). 

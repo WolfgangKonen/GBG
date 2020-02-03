@@ -15,7 +15,7 @@ import tools.cmaes.CMAEvolutionStrategy;
  * Note that the mode-selection for 2048 evaluators is done in 
  * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}.
  * <p>
- * Created by Johannes Kutsch, TH Köln, 2016-12.
+ * Created by Johannes Kutsch, TH Koeln, 2016-12.
  * 
  * @see Evaluator2048
  * @see Evaluator2048_BoardPositions

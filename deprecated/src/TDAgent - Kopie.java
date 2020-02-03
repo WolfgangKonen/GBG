@@ -44,7 +44,7 @@ import games.XArenaMenu;
  * @see PlayAgent
  * @see AgentBase
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 //abstract 
 public class TDAgent extends AgentBase implements PlayAgent,Serializable {

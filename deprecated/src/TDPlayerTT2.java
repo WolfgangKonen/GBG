@@ -53,7 +53,7 @@ import games.TicTacToe.TicTDBase;
  * @see TicTDBase
  * @see AgentBase
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 public class TDPlayerTT2 extends TicTDBase implements PlayAgent,Serializable {
 	protected TD_func m_Net;

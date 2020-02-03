@@ -22,7 +22,7 @@ import tools.Types;
  * the protected method {@link TicTDBase#prepareInputVector(int, int[][])} to do 
  * the main work.
  *
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 public class FeatureTTT extends TicTDBase implements Feature, Serializable {
 	

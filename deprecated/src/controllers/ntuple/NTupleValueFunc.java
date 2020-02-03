@@ -26,7 +26,7 @@ import params.TDParams;
  *         from a start value at the beginning of the training to an end value after a 
  *         certain amount of games.
  * 
- * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Köln, Feb'17  
+ * @author Markus Thill, Wolfgang Konen (extension TD(lambda)), TH Koeln, Feb'17  
  */
 public class NTupleValueFunc implements Serializable {
 	/* Experimental Parameters: */

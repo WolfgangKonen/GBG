@@ -72,7 +72,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * @see PlayAgent
  * @see AgentBase
  * 
- * @author Wolfgang Konen, TH Köln, Aug'17
+ * @author Wolfgang Konen, TH Koeln, Aug'17
  */
 public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Serializable {
 	/**

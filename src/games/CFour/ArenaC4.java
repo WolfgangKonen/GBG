@@ -26,7 +26,7 @@ import games.XNTupleFuncs;
  * @see GameBoardC4
  * @see EvaluatorC4
  * 
- * @author Wolfgang Konen, TH Köln, May'18
+ * @author Wolfgang Konen, TH Koeln, May'18
  */
 public class ArenaC4 extends Arena   {
 	

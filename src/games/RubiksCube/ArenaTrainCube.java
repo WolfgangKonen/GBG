@@ -27,7 +27,7 @@ import games.ArenaTrain;
  * @see GameBoardCube
  * @see EvaluatorCube
  * 
- * @author Wolfgang Konen, TH Köln, Feb'18
+ * @author Wolfgang Konen, TH Koeln, Feb'18
  */
 public class ArenaTrainCube extends ArenaTrain   {
 	

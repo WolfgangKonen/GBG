@@ -62,7 +62,7 @@ import games.RubiksCube.CubieTriple.Orientation;
  *      15 12				
  * </pre>
  * 
- * @author Wolfgang Konen, TH Köln, Feb'18
+ * @author Wolfgang Konen, TH Koeln, Feb'18
  */
 public class CubeState implements Serializable {
 	

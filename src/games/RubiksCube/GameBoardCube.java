@@ -47,7 +47,7 @@ import tools.Types.ACTIONS;
  * game play or to enter board positions for which the agent reaction is 
  * inspected. 
  * 
- * @author Wolfgang Konen, TH Köln, Feb'18
+ * @author Wolfgang Konen, TH Koeln, Feb'18
  */
 public class GameBoardCube extends JFrame implements GameBoard {
 
@@ -107,7 +107,7 @@ public class GameBoardCube extends JFrame implements GameBoard {
 	private boolean DBG_REALPMAT=false;
 
 	
-	// the colors of the TH Köln logo (used for button coloring):
+	// the colors of the TH Koeln logo (used for button coloring):
 	private Color colTHK1 = new Color(183,29,13);
 	private Color colTHK2 = new Color(255,137,0);
 	private Color colTHK3 = new Color(162,0,162);

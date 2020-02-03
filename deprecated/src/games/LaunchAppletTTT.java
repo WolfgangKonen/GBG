@@ -16,7 +16,7 @@ import tools.Types;
  * @see Arena
  * @see ArenaTrain
  *  
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  *
  */
 public class LaunchAppletTTT extends JApplet {

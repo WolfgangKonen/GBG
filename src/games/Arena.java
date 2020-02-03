@@ -1,9 +1,5 @@
 package games;
 
-import TournamentSystem.TSAgent;
-import TournamentSystem.TSAgentManager;
-import TournamentSystem.TSTimeStorage;
-import TournamentSystem.tools.TSGameDataTransfer;
 import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
 import controllers.HumanPlayer;
@@ -15,7 +11,6 @@ import controllers.PlayAgent;
 import games.Arena.Task;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
-import games.Othello.Edax.Edax;
 import games.Sim.StateObserverSim;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
@@ -26,15 +21,19 @@ import tools.Progress;
 import tools.ScoreTuple;
 import tools.StatusBar;
 import tools.Types;
+import TournamentSystem.TSAgent;
+import TournamentSystem.TSAgentManager;
+import TournamentSystem.TSTimeStorage;
+import TournamentSystem.tools.TSGameDataTransfer;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.*;
 
 /**
  * This class contains the GUI and the task dispatcher for the game. The GUI for
@@ -43,7 +42,7 @@ import java.util.Arrays;
  * Run this class for example from {@code main} in {@link games.TicTacToe.ArenaTTT} or
  * {@link games.TicTacToe.ArenaTrainTTT} for the TicTacToe game.
  * 
- * @author Wolfgang Konen, TH Köln
+ * @author Wolfgang Konen, TH Koeln
  */
 //abstract public class Arena extends JFrame implements Runnable {
 abstract public class Arena implements Runnable {
@@ -335,11 +334,7 @@ abstract public class Arena implements Runnable {
 				}
 
 				if (so.isLegalState() && !so.isGameOver()) {
-					if (paX instanceof Edax) {		// making it work for Edax (TODO: not so nice design)
-						actBest = ((Edax) paX).forceNextAction(so, false, true);
-					} else {
-						actBest = paX.getNextAction2(so, false, true);						
-					}
+					actBest = paX.getNextAction2(so, false, true);						
 					if (actBest != null) 	// a HumanAgent will return
 											// actBest=null
 						so.storeBestActionInfo(actBest, actBest.getVTable());
@@ -523,7 +518,6 @@ abstract public class Arena implements Runnable {
 		if (taskBefore == Task.INSPECTV) {
 			// if taskBefore==INSPECTV, start from the board left by InspectV
 			pa = qaVector[0];
-			if (pa instanceof Edax) ((Edax) pa).initForNewGame(gb.getStateObs()); // paX = new Edax();
 			so = gb.getStateObs();
 		} else {
 			// if taskBefore!=INSPECTV, select here the start state:

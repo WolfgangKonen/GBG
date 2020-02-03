@@ -189,7 +189,7 @@ public class XArenaButtons extends JPanel
 		setTrainNumber(25);
 
 		if (m_XAB_gui!=null)
-			m_XAB_gui.setParamDefaults(n, agentName, gameName);
+			m_XAB_gui.setGuiParamDefaults(n, agentName, gameName);
 	}
 	
 	public void helpFunction() {

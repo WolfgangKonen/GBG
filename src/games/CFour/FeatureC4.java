@@ -15,7 +15,7 @@ import tools.Types;
  * of feature vectors. The acceptable values for {@code featmode} are
  * retrieved with {@link #getAvailFeatmode()}.
  * 
- * @author Wolfgang Konen, TH Köln, Nov'18
+ * @author Wolfgang Konen, TH Koeln, Nov'18
  */
 public class FeatureC4 implements Feature, Serializable {
 	

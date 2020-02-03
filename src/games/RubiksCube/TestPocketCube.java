@@ -19,7 +19,7 @@ import java.util.Random;
 /**
  * A simple main program to calculate the number of states in the game of NIM.
  *  
- * @author Wolfgang Konen, TH Köln , Jan'18
+ * @author Wolfgang Konen, TH Koeln , Jan'18
  */
 public class TestPocketCube {
 

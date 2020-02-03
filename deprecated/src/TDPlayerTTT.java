@@ -20,7 +20,7 @@ import params.TDParams;
  * @see TDAgent
  * @see FeatureTTT
  * 
- * @author Wolfgang Konen, TH Köln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 public class TDPlayerTTT extends TDAgent implements PlayAgent,Serializable {
 	
