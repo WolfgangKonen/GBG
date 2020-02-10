@@ -89,7 +89,6 @@ public class MCAgent extends AgentBase implements PlayAgent {
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
 	 * @see Arena#loadAgent
-	 * @see XArenaTabs
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
 		m_arena.m_xab.setMcParFrom(n, this.getParMC() );

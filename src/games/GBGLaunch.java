@@ -36,7 +36,7 @@ import tools.Types;
  */
 public class GBGLaunch {
 	/**
-	 *  The possible games 
+	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Othello","RubiksCube","Sim","TicTacToe"} 
 	 */
 	String[] game_list = {"2048","ConnectFour","Hex","Nim","Othello","RubiksCube","Sim","TicTacToe"};
 	
@@ -89,7 +89,7 @@ public class GBGLaunch {
 					t_Launch.launcherState = LaunchTask.SELECTGAME;
 					break;
 				case SELECTGAME:
-					// this state is left when button Play ('Start Game') in launcher is hit
+					// this state is left when button StartG ('Start Game') in launcher is hit
 					try {
 						Thread.sleep(100);
 					} catch (Exception e) {

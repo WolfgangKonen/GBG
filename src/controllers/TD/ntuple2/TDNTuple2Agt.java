@@ -45,7 +45,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
 
 //
 // !!! NOTE: We currently do not use NTupleBase as a base class for TDNTuple2Agt (although
-// !!! we could) because this would invalidate all TDNTuple2Agt agents stored so far on dis
+// !!! we could) because this would invalidate all TDNTuple2Agt agents stored so far on disk
 // 
 
 /**
@@ -79,7 +79,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
  * @see PlayAgent
  * @see AgentBase
  * 
- * @author Wolfgang Konen, TH Koeln, Aug'17
+ * @author Wolfgang Konen, TH Koeln, 2017-2020
  */
 public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Serializable {
 	/**
@@ -294,7 +294,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,  
 			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		m_tdPar = new ParTD(tdPar);
-		m_ntPar = ntPar;
+		m_ntPar = new ParNT(ntPar);
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
 		MODE_3P = m_tdPar.getMode3P();
 		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
@@ -345,7 +345,6 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
 	 * @see Arena#loadAgent
-	 * @see XArenaTabs
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
 		m_arena.m_xab.setTdParFrom(n, this.getParTD() );

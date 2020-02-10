@@ -95,7 +95,6 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
 	 * @see Arena#loadAgent
-	 * @see XArenaTabs
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
 		m_arena.m_xab.setTdParFrom(n, this.getParTD() );

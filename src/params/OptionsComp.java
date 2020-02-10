@@ -29,24 +29,17 @@ import javax.swing.JFrame;
  */
 public class OptionsComp extends JFrame {
 	private static final long serialVersionUID = 1L;
-	//private JLabel lsingleComp;
 	private JLabel lPlayUntil;
 	private JLabel lNumGames;
-	//private JLabel lNumCompetitions;
 	//private JLabel lOpponents;
 	//private JLabel lFirstPlayer;
 	//private JLabel lSecondPlayer;
-
-	//private JButton ok;
-	private OptionsComp m_par;
 
 	private JCheckBox cbUseCurBoard;
 	private JCheckBox cbLogValues;
 	private JCheckBox cbswapPlayers;
 
 	private JTextField tNumGames;
-	//private JTextField tNumCompetitions;
-	//private TextField tNumPieces;
 	
 	private Choice cFirstPlayer;
 	private Choice cSecondPlayer;
@@ -58,18 +51,10 @@ public class OptionsComp extends JFrame {
 		setLayout(new BorderLayout(10, 10));
 		add(new JLabel(" "), BorderLayout.SOUTH); 
 
-		//lsingleComp = new JLabel("Multi-Competition");
-		//lsingleComp.setFont(new Font("Times New Roman", Font.BOLD, 14));
-		
 		lNumGames = new JLabel("# games/competition");
-		//lNumCompetitions = new JLabel("# competitions (only MULTI)");
 
 		lPlayUntil = new JLabel("Stop Game after x Moves: ");
 		tNumGames = new JTextField(""+competeNumber, 3);
-		//tNumCompetitions = new JTextField("10", 3);
-
-		//ok = new JButton("OK");
-		m_par = this;
 
 		cbUseCurBoard = new JCheckBox("Use current board");
 		cbUseCurBoard.setSelected(true);
@@ -79,8 +64,6 @@ public class OptionsComp extends JFrame {
 		
 		cbswapPlayers = new JCheckBox("Swap players (only MULTI)");
 		cbswapPlayers.setSelected(false);
-		
-		//tNumPieces = new TextField("42", 3);
 		
 //		lOpponents = new JLabel("Opponents");
 //		lFirstPlayer = new JLabel("First player");
@@ -97,18 +80,9 @@ public class OptionsComp extends JFrame {
 //		cSecondPlayer.select(1);
 		
 
-//		ok.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				m_par.setVisible(false);
-//			}
-//		});
-
 		Panel p = new Panel();
 		p.setLayout(new GridLayout2(0, 1, 5, 5));
 
-		//p.add(lsingleComp);
-		//p.add(new Canvas());
-		
 //		p.add(lOpponents);
 //		p.add(new Canvas());
 //		
@@ -121,38 +95,32 @@ public class OptionsComp extends JFrame {
 		p.add(lNumGames);
 		p.add(tNumGames);
 
-		// --- no Multi-Compete anymore
-//		p.add(lNumCompetitions);
-//		p.add(tNumCompetitions);
-
 		p.add(cbUseCurBoard);
 
 		//p.add(lPlayUntil);
-		//p.add(tNumPieces);
 
 		p.add(cbLogValues);
 		
-		// --- no Multi-Compete anymore
-//		p.add(cbswapPlayers);
-
 		add(p);
 
 		pack();
 		setVisible(false);
 	}
 	
-	public void showOptionsComp(Arena ticGame,boolean isVisible) {
-		// place window winCompOptions on the right side of the XArenaTabs window
-		this.setVisible(isVisible);
-		int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
-		int y = ticGame.m_xab.getLocation().y;
-		if (ticGame.m_ArenaFrame!=null) {
-			x = ticGame.m_ArenaFrame.getX() + ticGame.m_ArenaFrame.getWidth() + 1;
-			y = ticGame.m_ArenaFrame.getY();
+	public void showOptionsComp(Arena arena,boolean isVisible) {
+		if (arena.withUI) {
+			// place window winCompOptions on the right side of the XArenaTabs window
+			this.setVisible(isVisible);
+			int x = arena.m_xab.getX() + arena.m_xab.getWidth() + 8;
+			int y = arena.m_xab.getLocation().y;
+			if (arena.m_ArenaFrame!=null) {
+				x = arena.m_ArenaFrame.getX() + arena.m_ArenaFrame.getWidth() + 1;
+				y = arena.m_ArenaFrame.getY();
+			}
+			if (arena.m_tabs!=null) x += arena.m_tabs.getX() + 1;
+			arena.m_xab.winCompOptions.setLocation(x,y);
+			arena.m_xab.winCompOptions.setSize(Types.GUI_WINCOMP_WIDTH,Types.GUI_WINCOMP_HEIGHT);	
 		}
-		x += ticGame.m_tabs.getX() + 1;
-		ticGame.m_xab.winCompOptions.setLocation(x,y);
-		ticGame.m_xab.winCompOptions.setSize(Types.GUI_WINCOMP_WIDTH,Types.GUI_WINCOMP_HEIGHT);	
 	}
 
 	public boolean swapPlayers() {
@@ -166,14 +134,6 @@ public class OptionsComp extends JFrame {
 	public boolean logValues() {
 		return cbLogValues.isSelected();
 	}
-
-//	public int getNumPieces() {
-//		return Integer.valueOf(tNumPieces.getText()).intValue();
-//	}
-	
-//	public int getNumCompetitions() {
-//	return Integer.valueOf(tNumCompetitions.getText()).intValue();
-//}
 
 	public int getNumGames() {
 		return Integer.valueOf(tNumGames.getText()).intValue();

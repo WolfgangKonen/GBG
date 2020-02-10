@@ -129,7 +129,9 @@ public class LineChartSuccess extends XYSeriesCollection
 		this.removeAllSeries();
 		
 		int x = xab.m_arena.m_ArenaFrame.getX() + xab.m_arena.m_ArenaFrame.getWidth() + 1;
-		int y = xab.m_arena.m_tabs.getY() + xab.m_arena.m_tabs.getHeight() +1;
+		int y = +1; 
+		if (xab.m_arena.m_tabs!=null) 
+			y += xab.m_arena.m_tabs.getY() + xab.m_arena.m_tabs.getHeight() ;
 		this.setLocation(x, y);  
 	}
 //	void addSeries(XYSeries series) {

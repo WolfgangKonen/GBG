@@ -118,7 +118,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	private boolean TERNARY=false;		// if true, it remains true only for final-reward-games (see getNextAction2)
 	
 	// use finalAdaptAgents(...), normally true. Set only to false if you want to test how agents behave otherwise:
-	private boolean FINALADAPTAGENTS=true;
+	private boolean FINALADAPTAGENTS=false;
 	
 	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
 	
@@ -168,7 +168,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,  
 			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		m_tdPar = new ParTD(tdPar);
-		m_ntPar = ntPar;
+		m_ntPar = new ParNT(ntPar);
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
 		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
 		rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42); 

@@ -358,7 +358,7 @@ public class NTParams extends Frame implements Serializable {
 	public JPanel getPanel() {
 		return ntPanel;
 	}
-	public double getINIT() {
+	public double getTcInit() {
 		return Double.valueOf(tcInitT.getText()).doubleValue();
 	}
 
@@ -461,10 +461,10 @@ public class NTParams extends Frame implements Serializable {
 			return true;
 		return false;
 	}
-	public boolean getUseSymmetry() {
+	public boolean getUSESYMMETRY() {
 		return UseSymmetryC.isSelected();
 	}
-	public boolean getUseAfterState() {
+	public boolean getAFTERSTATE() {
 		return AfterStateC.isSelected();
 	}
 	
@@ -474,7 +474,7 @@ public class NTParams extends Frame implements Serializable {
 	 */
 	public void setFrom(NTParams nt) {
 		setTc(nt.getTc());
-		tcInitT.setText(""+nt.getINIT());
+		tcInitT.setText(""+nt.getTcInit());
 		setTcImmediate(nt.getTcImmediate());
 		setTcInterval(""+nt.getTcInterval());
 		setTcTransfer(nt.getTcTransfer());
@@ -486,8 +486,8 @@ public class NTParams extends Frame implements Serializable {
 		NTupleNumT.setText(nt.getNtupleNumber()+"");
 		NTupleSizeT.setText(nt.getNtupleMax()+"");
 		NTupleFixCo.setSelectedItem(""+nt.getFixedNtupleMode());
-		UseSymmetryC.setSelected(nt.getUseSymmetry());
-		AfterStateC.setSelected(nt.getUseAfterState());
+		UseSymmetryC.setSelected(nt.getUSESYMMETRY());
+		AfterStateC.setSelected(nt.getAFTERSTATE());
 		enableTcPart();
 		enableRandomPart();
 	}

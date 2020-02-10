@@ -68,16 +68,13 @@ public class GameBoardSim implements GameBoard {
 	
 	
 	@Override
-	public void initialize() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void initialize() {	}
 
-	   @Override
-	   public void destroy() {
-			frame.setVisible(false);
-			frame.dispose();
-	   }
+    @Override
+    public void destroy() {
+		frame.setVisible(false);
+		frame.dispose();
+    }
 
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {

@@ -149,8 +149,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_tdPar = new ParTD(tdPar);
 		m_oPar = new ParOther(oPar);  		// AgentBase::m_oPar
 		m_feature = feature; 
-		//super.setFeatmode(tdPar.getFeatmode());
-		//super.setEpochMax(tdPar.getEpochs());
 		
 			if (m_feature.getFeatmode() > 99) {
 				m_Net = null;
@@ -199,7 +197,6 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
 	 * @see Arena#loadAgent
-	 * @see XArenaTabs
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
 		m_arena.m_xab.setTdParFrom(n, this.getParTD() );

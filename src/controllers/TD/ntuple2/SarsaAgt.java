@@ -188,7 +188,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,  
 			int[][] nTuples, XNTupleFuncs xnf, int numOutputs, int maxGameNum) throws IOException {
 		m_tdPar = new ParTD(tdPar);
-		m_ntPar = ntPar;
+		m_ntPar = new ParNT(ntPar);
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
 		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
 		rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis());		(42); 

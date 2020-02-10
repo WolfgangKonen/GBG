@@ -50,6 +50,7 @@ public class XArenaButtonsGui extends JPanel {
 	JLabel TrainNumL;
 	JLabel AgentX_L;
 	JLabel SleepDurationL;
+	JPanel[][] qcol;			// the color stripes
 	JComboBox[] choiceAgent;
 	JLabel showValOnGB_L;
 	JCheckBox showValOnGB;		// show game values on GameBoard
@@ -57,7 +58,7 @@ public class XArenaButtonsGui extends JPanel {
 	HtmlDisplay htmlDisplay = null;
 	
 	// the colors of the TH Koeln logo (used for button coloring):
-	Color colTHK1 = new Color(183,29,13);
+	Color colTHK1 = new Color(183,29,13);	// dark red
 	Color colTHK2 = new Color(255,137,0);
 	Color colTHK3 = new Color(162,0,162);
 
@@ -420,7 +421,7 @@ public class XArenaButtonsGui extends JPanel {
 		JPanel jPanel = new JPanel();
 		jPanel.setBackground(Types.GUI_BGCOLOR);
 		if (numPlayers==1) q.add(jPanel);
-		JPanel[][] qcol = new JPanel[4][numPlayers];	// four color stripes: 2 for Param btn, 2 for Train btn
+		qcol = new JPanel[4][numPlayers];	// four color stripes: 2 for Param btn, 2 for Train btn
 		for (int n=0; n<numPlayers; n++) {
 			for (int c=0; c<4; c++) {
 				qcol[c][n] = new JPanel();
@@ -526,6 +527,14 @@ public class XArenaButtonsGui extends JPanel {
 		this.enableButtons(true);
 	}
 
+	public void colorStripes(Color[] stripeColor) {
+		for (int n=0; n<qcol[0].length; n++) {
+			for (int c=0; c<4; c++) {
+				qcol[c][n].setBackground(stripeColor[n]);
+				qcol[c][n].setPreferredSize(new Dimension(10,9));
+			}
+		}
+	}
 	
 	public void enableButtons(boolean state) {
 		Play.setEnabled(state);

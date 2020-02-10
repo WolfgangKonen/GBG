@@ -1,5 +1,5 @@
 #
-# **** These are new results with TDNTuple3Agt from January 2020 ****
+# **** These are new results with TDNTuple3Agt from February 2020 ****
 # **** same as multiTrainPlot-TD3-C4.R, but for runs with 6.000.000 training games
 #
 # This script shows results for ConnectFour in the TCL-case with various TD-settings:
@@ -25,25 +25,27 @@ gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
 evalStr = ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
 evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
 path <- "../../agents/ConnectFour/csv/"; 
-limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=300000/wfac;
+Ylimits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=300000/wfac;
+Xlimits=c(400,5100); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c(#"multiTrain_TCL-EXP-NT3-al50-lam000-750k-T-epsfin0.csv"
-           #"multiTrain_TCL-EXP-NT3-al25-lam000-750k-epsfin0-V12m.csv"
-           "multiTrain-DLm.csv"
-           #,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-HOR001-T-epsfin0.csv"
-           #,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-HOR001-epsfin0.csv"
-           #,"multiTrain_TCL-EXP-NT3-al50-lam016-750k-epsfin0-noFA.csv"
+filenames=c("multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
+           ,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm-noFA.csv"
+           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm.csv"
+           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm-noFA.csv"
+           #,".csv"
+           #,".csv"
+           #,".csv"
            )
-# other pars: eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, NORMALIZE=F, SIGMOID=tanh, 
-# LEARNFROMRM=T, MODE_3P==2, fixed ntuple mode 1: 70 8-tuples. TC_INIT=1e-4, TC_EXP
-# with TC beta =2.7, rec.weight-change accumulation. 750.000 training games, 3 runs.
-# evalMode= 0 (evalQ) is from default start state against MCTS, 
-# evalMode= 3 (evalT) is from default start state against AlphaBeta. 
-# 
-# If a file appears besides its base form also in form ...-V2.csv or ...-V3.csv, 
-# these are just runs with exactly the same parameters but other random numbers.
-# In the limit of infinite many runs they should be all the same. But we have here
-# only 3 runs.
+# suffix -DLm: evalQ is MCTS, evalT is AB with Distant Losses (DL),
+# suffix -ALm: both evaluators AB, 1st one w/o DL, 2nd one with DL,
+# in both cases the evaluators MCTS or AlphaBeta (AB) play 2nd --> ideal winrate is 1.0
+# in both cases the 'm' means that runs were performed on maanbs05.
+# suffix -noFA: no final adaptation RL (FARL) step.
+#
+# other pars: alpha = 3.7->3.7m eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, 
+# NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=T, fixed ntuple mode 1: 70 8-tuples. 
+# TC_INIT=1e-4, TC_EXP with TC beta =2.7, rec.weight-change accumulation. 
+# 6.000.000 training games, 10 runs.
 
   
 dfBoth = data.frame()
@@ -62,34 +64,24 @@ for (k in 1:length(filenames)) {
     plot(q)
   }
   
-  lambdaCol = switch(k
-                    #,rep("0.00",nrow(df))   
-                    ,rep("0.00",nrow(df))   
-                    #,rep("0.16",nrow(df))   
-                    #,rep("0.16",nrow(df))  
-                    ,rep("no f.a.",nrow(df))
-                    ,rep("0.36",nrow(df))   
-                    ,rep("HOR40",nrow(df))
-                    ,rep("HOR40",nrow(df))
-                    ,rep("RESET",nrow(df))
-                    )
+  algoCol = switch(k
+                   ,rep("FARL",nrow(df))   
+                   ,rep("no FARL",nrow(df))   
+  )
   targetModeCol = switch(k
-                       #,rep("TERNA",nrow(df))
-                       ,rep("TD",nrow(df))
-                       ,rep("TERNA",nrow(df))
-                       ,rep("TD",nrow(df))
-                       ,rep("TD",nrow(df))
-                      )
+                         ,rep("TD",nrow(df))
+                         ,rep("TD",nrow(df))
+                         #,rep("TERNA",nrow(df))
+                        )
   #browser()
-  dfBoth <- rbind(dfBoth,cbind(df,lambda=lambdaCol,targetMode=targetModeCol))
-                  
+  dfBoth <- rbind(dfBoth,cbind(df,algo=algoCol,targetMode=targetModeCol))
 }
 
 # This defines a new grouping variable  'gamesK':
-#       games                            gamesK
-#       10000,20000,30000,40000,50000  -->   50
-#       60000,70000,80000,90000,100000 -->  100
-#       ...                            -->  ...
+#       games                                     gamesK
+#       100000,200000,300000,400000, 500000 -->    500
+#       600000,700000,800000,900000,1000000 -->   1000
+#       ...                                 -->   ....
 # If USEGAMESK==T, then the subsequent summarySE calls will group 'along the x-axis'
 # as well (all measurements with the same gamesK-value in the same bucket)
 dfBoth <- cbind(dfBoth,gamesK=500*(ceiling(dfBoth$gameNum/500000)))
@@ -98,16 +90,17 @@ tgc <- data.frame()
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
 # its mean, sd, se (standard dev of the mean), ci (conf.interval) and count N.
-tgc1 <- summarySE(dfBoth, measurevar="evalQ", groupvars=c(gamesVar,"lambda","targetMode"))
-tgc1 <- cbind(tgc1,evalMode=rep("MCTS",nrow(tgc1)))
+tgc1 <- summarySE(dfBoth, measurevar="evalQ", groupvars=c(gamesVar,"algo","targetMode"))
+qeval <- ifelse(length(grep("-ALm",filename)==1),"AB","MCTS")
+tgc1 <- cbind(tgc1,evalMode=rep(qeval,nrow(tgc1)))
 names(tgc1)[5] <- "eval"  # rename "evalQ"
-tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c(gamesVar,"lambda","targetMode"))
-tgc2 <- cbind(tgc2,evalMode=rep("AB",nrow(tgc2)))
+tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c(gamesVar,"algo","targetMode"))
+tgc2 <- cbind(tgc2,evalMode=rep("AB-DL",nrow(tgc2)))
 names(tgc2)[5] <- "eval"  # rename "evalT"
 tgc <- rbind(tgc1,tgc2) # AB & MCTS
 #tgc <- tgc2              # AB only
-z=aggregate(dfBoth$evalT,dfBoth[,c(gamesVar,"lambda","targetMode")],mean)
-tgc$lambda <- as.factor(tgc$lambda)
+z=aggregate(dfBoth$evalT,dfBoth[,c(gamesVar,"algo","targetMode")],mean)
+tgc$algo <- as.factor(tgc$algo)
 tgc$targetMode <- as.factor(tgc$targetMode)
 if (MAPWINRATE) tgc$eval = (tgc$eval+1)/2   # map y-axis to win rate (range [0,1])
 
@@ -115,15 +108,16 @@ if (MAPWINRATE) tgc$eval = (tgc$eval+1)/2   # map y-axis to win rate (range [0,1
 pd <- position_dodge(100000/wfac) # move them 100000/wfac to the left and right
 
 if (USEGAMESK) {
-  q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=targetMode,linetype=lambda,color=evalMode))
+  q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=evalMode,linetype=algo,color=evalMode))
   q <- q + xlab(bquote(paste("games [*",10^3,"]", sep=""))) + ylab(evalStr)
+  q <- q+scale_x_continuous(limits=Xlimits) 
 } else {
-  q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=lambda,linetype=lambda))
+  q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=algo,linetype=algo))
 }
 q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=errWidth, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
-q <- q+scale_y_continuous(limits=limits) 
-q <- q+guides(colour = guide_legend(reverse = TRUE))
+q <- q+scale_y_continuous(limits=Ylimits) 
+q <- q+guides(colour = guide_legend(reverse = FALSE))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 
 q <- q+theme(axis.text = element_text(size = rel(1.5)))     # bigger tick mark text  
 q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text  

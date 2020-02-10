@@ -119,21 +119,24 @@ public class XArenaFuncs {
 		int maxGameNum = m_xab.getGameNumber();
 		int featmode = m_xab.tdPar[n].getFeatmode();
 
+		// be sure to get the latest changes from GUI (!)
+		m_xab.tdPar[n].pushFromTDParams();
+		
 		try {
 			if (sAgent.equals("TDS")) {
 				Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
-				pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
+				pa = new TDAgent(sAgent, m_xab.tdPar[n], new ParOther(m_xab.oPar[n]), feat, maxGameNum);
 			} else if (sAgent.equals("TD-Ntuple-2")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
-				pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]),
+				pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], new ParNT(m_xab.ntPar[n]),
 						new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 			} else if (sAgent.equals("TD-Ntuple-3")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
-				pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]),
+				pa = new TDNTuple3Agt(sAgent, m_xab.tdPar[n], new ParNT(m_xab.ntPar[n]),
 						new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 			} else if (sAgent.equals("Sarsa")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
@@ -142,7 +145,7 @@ public class XArenaFuncs {
 				// int numOutputs =
 				// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
 				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
-				pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]),
+				pa = new SarsaAgt(sAgent, m_xab.tdPar[n], new ParNT(m_xab.ntPar[n]),
 						new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
 			} else if (sAgent.equals("Max-N")) {
 				pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
@@ -166,7 +169,8 @@ public class XArenaFuncs {
 			} else if (sAgent.equals("AlphaBeta")) { // CFour only, see
 														// gui_agent_list in
 														// XArenaButtons
-				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum());
+//				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
+				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
 				alphaBetaStd.instantiateAfterLoading();
 				pa = alphaBetaStd;
 			} else if (sAgent.equals("Bouton")) { // Nim only, see
@@ -226,6 +230,10 @@ public class XArenaFuncs {
 	private PlayAgent fetchAgent(int n, String sAgent, XArenaButtons m_xab) {
 		PlayAgent pa = null;
 		int maxGameNum = m_xab.getGameNumber();
+		
+		// be sure to get the latest changes from the GUI's param tabs (!)
+		m_xab.tdPar[n].pushFromTDParams();
+
 		if (sAgent.equals("Max-N")) {
 			pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
 		} else if (sAgent.equals("Expectimax-N")) {
@@ -248,7 +256,8 @@ public class XArenaFuncs {
 		} else if (sAgent.equals("AlphaBeta")) { // CFour only, see
 													// gui_agent_list in
 													// XArenaButtons
-			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum());
+//			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
+			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
 			alphaBetaStd.instantiateAfterLoading();
 			pa = alphaBetaStd;
 		} else if (sAgent.equals("Bouton")) { // Nim only, see gui_agent_list in
@@ -272,13 +281,13 @@ public class XArenaFuncs {
 			if (m_PlayAgents[n] == null) {
 				if (sAgent.equals("TDS")) {
 					Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
-					pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
+					pa = new TDAgent(sAgent, m_xab.tdPar[n], new ParOther(m_xab.oPar[n]), feat, maxGameNum);
 				} else if (sAgent.equals("TD-Ntuple-2")) {
 					try {
 						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory();
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
-						pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]),
+						pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], new ParNT(m_xab.ntPar[n]),
 								new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -290,7 +299,7 @@ public class XArenaFuncs {
 						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory();
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
-						pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]),
+						pa = new TDNTuple3Agt(sAgent, m_xab.tdPar[n], new ParNT(m_xab.ntPar[n]),
 								new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -306,7 +315,7 @@ public class XArenaFuncs {
 						// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
 						ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
 								.getAllAvailableActions();
-						pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]),
+						pa = new SarsaAgt(sAgent, m_xab.tdPar[n], new ParNT(m_xab.ntPar[n]),
 								new ParOther(m_xab.oPar[n]), nTuples, xnf, allAvailActions, maxGameNum);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning Sarsa", JOptionPane.WARNING_MESSAGE);

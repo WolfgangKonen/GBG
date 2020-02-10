@@ -1,5 +1,6 @@
 package games.CFour;
 
+import java.awt.Color;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -36,7 +37,7 @@ public class ArenaC4 extends Arena   {
 
 	public ArenaC4(String title) {
 		super(title);		
-	}
+   	}
 	
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 

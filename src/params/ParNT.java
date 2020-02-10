@@ -45,13 +45,17 @@ public class ParNT implements Serializable {
 
 	public ParNT() {	}
     
+    public ParNT(ParNT tp) { 
+    	this.setFrom(tp);
+    }
+    
     public ParNT(NTParams tp) { 
     	this.setFrom(tp);
     }
     
-	public void setFrom(NTParams nt) {
+	public void setFrom(ParNT nt) {
 		this.tc = nt.getTc();
-		this.tcInit = nt.getINIT();
+		this.tcInit = nt.getTcInit();
 		this.tcImm = nt.getTcImm();
 		this.tcInterval = nt.getTcInterval();
 		this.tcTransfer = nt.getTcTransferMode();
@@ -62,8 +66,25 @@ public class ParNT implements Serializable {
 		this.numTuple = nt.getNtupleNumber();
 		this.maxTupleLen = nt.getNtupleMax();
 		this.fixedNtupleMode = nt.getFixedNtupleMode();
-		this.useSymmetry = nt.getUseSymmetry();
-		this.afterState = nt.getUseAfterState();
+		this.useSymmetry = nt.getUSESYMMETRY();
+		this.afterState = nt.getAFTERSTATE();
+	}
+
+	public void setFrom(NTParams nt) {
+		this.tc = nt.getTc();
+		this.tcInit = nt.getTcInit();
+		this.tcImm = nt.getTcImm();
+		this.tcInterval = nt.getTcInterval();
+		this.tcTransfer = nt.getTcTransferMode();
+		this.tcBeta = nt.getTcBeta();
+		this.tcAccumul = nt.getTcAccumulMode();
+		this.randomness = nt.getRandomness();
+		this.randomWalk = nt.getRandomWalk();
+		this.numTuple = nt.getNtupleNumber();
+		this.maxTupleLen = nt.getNtupleMax();
+		this.fixedNtupleMode = nt.getFixedNtupleMode();
+		this.useSymmetry = nt.getUSESYMMETRY();
+		this.afterState = nt.getAFTERSTATE();
 	}
 
 	public double getTcInit() {

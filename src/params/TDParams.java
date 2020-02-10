@@ -26,7 +26,7 @@ import games.Arena;
 
 /**
  * This class realizes the parameter settings (GUI tab) for TD players 
- * (agents {@link TDAgent} and {@link TDNTuple2Agt}).
+ * (agents {@link TDAgent},  {@link TDNTuple3Agt} and {@link SarsaAgt}).
  * These parameters and their [defaults] are: <ul>
  * <li> <b>alpha</b>: 		[0.001] initial strength of learning parameter 
  * <li> <b>alphaFinal</b>: 	[0.001] final strength of learning parameter  
@@ -40,7 +40,7 @@ import games.Arena;
  * 
  * @see ParTD
  * @see TDAgent
- * @see TDNTuple2Agt
+ * @see TDNTuple3Agt
  */
 public class TDParams extends Frame implements Serializable
 {
@@ -103,14 +103,6 @@ public class TDParams extends Frame implements Serializable
 	public JComboBox choiceFeatTDS;
 	String FeatTDS;
 	
-// -- obsolete, they are now stored in AgentBase
-//
-//	// These two members are here only to save these settings (from other param tabs) 
-//	// together with the agent, so that we can restore them later on load (at least 
-//	// maxGameNum is relevant for training): 
-//	private int maxGameNum;
-//	private int numEval;
-	
 	public TDParams() {
 		super("TD Parameter");
 		
@@ -153,9 +145,6 @@ public class TDParams extends Frame implements Serializable
 		
 		withSigType = new JCheckBox();
 		normalize = new JCheckBox();
-//		cbgSigType = new CheckboxGroup();
-//		wo_SigType = new Checkbox("without",cbgSigType,true);
-//		withSigType = new Checkbox("with",cbgSigType,false);
 
 		NetTypeL = new JLabel("Network Type: ");
 		SigTypeL = new JLabel("Output Sigmoid: ");
@@ -277,6 +266,7 @@ public class TDParams extends Frame implements Serializable
 		epochL.setEnabled(netTypeEnable);			// epochs currently only for TDS
 		epochT.setEnabled(netTypeEnable);
 		NetTypeL.setEnabled(netTypeEnable);
+		SigTypeL.setEnabled(true);    // NEW
 		choiceNetType.setEnabled(netTypeEnable);
 		LrnTypeL.setEnabled(netTypeEnable);			// LrnType currently not shown
 		choiceLrnType.setEnabled(netTypeEnable);
@@ -402,7 +392,7 @@ public class TDParams extends Frame implements Serializable
 	public void setLinearNet(boolean state) {
 		choiceNetType.setSelectedItem(state ? 0 : 1);
 	}
-	public void setRpropLrn(boolean state) {
+	public void setRprop(boolean state) {
 		choiceLrnType.setSelectedItem(state ? 1 : 0);
 	}
 	public void setNPly(int value) {
@@ -453,6 +443,15 @@ public class TDParams extends Frame implements Serializable
 	 * @param tp  ParTD of the re-loaded agent
 	 */
 	public void setFrom(ParTD tp) {
+		setFrom(tp,null);
+	}
+	/**
+	 * Needed to restore the param tab after {@link ParTD#setParamDefaults(String, String)} has been
+	 * called with a certain agent name
+	 * @param tp
+	 * @param agentName
+	 */
+	public void setFrom(ParTD tp, String agentName) {
 		setAlpha(tp.getAlpha());
 		setAlphaFinal(tp.getAlphaFinal());
 		setEpsilon(tp.getEpsilon());
@@ -460,18 +459,24 @@ public class TDParams extends Frame implements Serializable
 		setGamma(tp.getGamma());
 		setLambda(tp.getLambda());
 		setHorizonCut(tp.getHorizonCut());
-		setLinearNet(tp.hasLinearNet());
-		setRpropLrn(tp.hasRpropLrn());
+		setEpochs(tp.getEpochs());
+		setNPly(tp.getNPly());
 		setSigmoid(tp.hasSigmoid());
 		setNormalize(tp.getNormalize());
 		setEligMode(tp.getEligMode());
-		setEpochs(tp.getEpochs());
 		setFeatmode(tp.getFeatmode());
-		setNPly(tp.getNPly());
+		setLinearNet(tp.hasLinearNet());
+		setRprop(tp.hasRpropLrn());
 		setMode3P(tp.getMode3P());
+		
+		enableLambdaPart();
+		if (agentName!=null) 
+			enableAgentPart(agentName);
 	}
 	
 	/**
+	 * DEPRECATED: use {@link ParTD#setParamDefaults(String, String)} instead.
+	 * <p>
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
 	 * parameters" we mean parameters producing good results. Likewise, some parameter
 	 * choices may be enabled or disabled.
@@ -481,6 +486,7 @@ public class TDParams extends Frame implements Serializable
 	 * 			"Sarsa" ({@link SarsaAgt}) or "TDS" ({@link TDAgent})
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
+	@Deprecated
 	public void setParamDefaults(String agentName, String gameName) {
 		// Currently we have here only the sensible defaults for some games and
 		// for three agents ("TD-Ntuple[-2,-3]" = class TDNTuple[2,3]Agt and "TDS" = class TDAgent).

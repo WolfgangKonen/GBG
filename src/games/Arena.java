@@ -111,7 +111,6 @@ abstract public class Arena implements Runnable {
 
 		m_xfun = new XArenaFuncs(this);
 		m_xab = new XArenaButtons(m_xfun, this); // needs a constructed 'gb'
-		m_tabs = new XArenaTabs(this);
 		tdAgentIO = new LoadSaveGBG(this, m_xab, m_ArenaFrame);
 
 		logManager = new LogManager();
@@ -119,6 +118,7 @@ abstract public class Arena implements Runnable {
 
 		if (withUI) {
 			m_ArenaFrame = new ArenaGui(this, title);
+			m_tabs = new XArenaTabs(this);
 		} 
 	}
 
@@ -157,7 +157,8 @@ abstract public class Arena implements Runnable {
 				n = m_xab.getNumParamBtn();
 				agentN = m_xab.getSelectedAgent(n);
 				setStatusMessage("Params for "+agentN+ " ...");
-				m_tabs.showParamTabs(this,true,n,agentN);
+				if (m_tabs!=null) 
+					m_tabs.showParamTabs(this,true,n,agentN);
 				taskState = Task.IDLE; 
 				break;
 			case COMPETE:
@@ -261,6 +262,7 @@ abstract public class Arena implements Runnable {
 			m_ArenaFrame.setVisible(false);
 			m_ArenaFrame.dispose();
 			m_xab.destroy();
+			m_tabs.destroy();
 		}
 		gb.destroy();
 		m_xfun.destroy();
@@ -536,6 +538,7 @@ abstract public class Arena implements Runnable {
 		System.out.println("StartState: "+so.stringDescr());
 		gb.updateBoard(so, false, showValue);
 		gb.setActionReq(true);
+		gb.enableInteraction(true); // needed for CFour
 		so.resetMoveCounter();
 		startSO = so.copy();
 		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, (double) nEmpty, (double) cumEmpty, highestTile);

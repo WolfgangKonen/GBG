@@ -47,7 +47,7 @@ public class XArenaButtons extends JPanel
 	// from the agent just loaded to survive in m_arena.m_xab)
 	public boolean[] changedViaLoad = null;
 
-	public TDParams[] tdPar;
+	public ParTD[] tdPar;
 	public NTParams[] ntPar;
 	public MaxNParams[] maxnParams;
 	public MCTSParams[] mctsParams;
@@ -78,7 +78,7 @@ public class XArenaButtons extends JPanel
 		changedViaLoad = new boolean[numPlayers];	// implicitly set to false
 		assert (numPlayers<=Types.GUI_PLAYER_NAME.length) 
 			: "GUI not configured for "+numPlayers+" players. Increase Types.GUI_PLAYER_NAME and GUI_AGENT_INITIAL";
-		tdPar = new TDParams[numPlayers];
+		tdPar = new ParTD[numPlayers];
 		ntPar = new NTParams[numPlayers];
 		maxnParams = new MaxNParams[numPlayers];
 		mctsParams = new MCTSParams[numPlayers];
@@ -95,7 +95,7 @@ public class XArenaButtons extends JPanel
 		for (int n=numPlayers-1; n>=0; n--) {
 			selectedAgents[n] = Types.GUI_AGENT_INITIAL[n];
 			
-			tdPar[n] = new TDParams();
+			tdPar[n] = new ParTD(m_arena.withUI);
 			ntPar[n] = new NTParams();
 			maxnParams[n] = new MaxNParams();
 			mctsParams[n] = new MCTSParams();
@@ -136,9 +136,16 @@ public class XArenaButtons extends JPanel
 
 		} // for
 
-		if (m_arena.withUI)
+		if (m_arena.withUI) {
 			m_XAB_gui.configureGui();
-		
+			
+			if (m_arena.getGameName()=="ConnectFour") {
+		    	Color[] colPlayer= new Color[2];
+				colPlayer[0] = new Color(238,208,26);	// dark yellow as in resources/yellow.png
+				colPlayer[1] = new Color(204,0,0);		// dark red as in resources/red.png    		
+		    	colorStripes(colPlayer);
+			}
+		}
 		
 		m_arena.setStatusMessage("Init done.");
 		
@@ -285,6 +292,12 @@ public class XArenaButtons extends JPanel
 
 		selectedAgentTypes = types;
 	}
+	
+	public void colorStripes(Color[] stripeColor) {
+		if (m_XAB_gui!=null) 
+			m_XAB_gui.colorStripes(stripeColor);
+	}
+
 
 	/**
 	 * disable externally set agents
@@ -336,14 +349,14 @@ public class XArenaButtons extends JPanel
 	}
 	
 	public int getCompeteNumber() {
-		if (this.winCompOptions!=null)
+		if (winCompOptions!=null)
 			competeNumber = winCompOptions.getNumGames(); // be sure to get latest change from GUI (!)
 		return competeNumber;
 	}
 	
 	public void setCompeteNumber(int competeNumber) {
-		this.competeNumber = competeNumber;
-		if (this.winCompOptions!=null)
+		competeNumber = competeNumber;
+		if (winCompOptions!=null)
 			winCompOptions.setNumGames(competeNumber);
 	}
 	
