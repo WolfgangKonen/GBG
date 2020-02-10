@@ -15,7 +15,7 @@ import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
-import tools.MessageBox;
+import gui.MessageBox;
 import tools.ScoreTuple;
 import tools.Types;
 

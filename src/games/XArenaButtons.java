@@ -10,11 +10,11 @@ import javax.swing.event.ChangeListener;
 import TournamentSystem.TSAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import gui.HtmlDisplay;
+import gui.SolidBorder;
 import gui.XArenaButtonsGui;
 import params.*;
-import tools.HtmlDisplay;
 import tools.Types;
-import tools.SolidBorder;
 
 
 /**

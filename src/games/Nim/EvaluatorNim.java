@@ -22,10 +22,10 @@ import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
 import games.Hex.StateObserverHex;
+import gui.MessageBox;
 import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
-import tools.MessageBox;
 import tools.ScoreTuple;
 import tools.Types;
 

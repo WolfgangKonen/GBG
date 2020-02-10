@@ -19,10 +19,10 @@ import games.GameBoard;
 import games.PStats;
 import games.TStats;
 import games.TStats.TAggreg;
+import gui.MessageBox;
 import games.XArenaFuncs;
 import games.RubiksCube.CSArrayList.TupleInt;
 import games.RubiksCube.CubeConfig.StateType;
-import tools.MessageBox;
 import tools.Types;
 
 /**

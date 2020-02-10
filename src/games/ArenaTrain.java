@@ -18,9 +18,8 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.Arena.Task;
-//import params.TDParams;
-import tools.MessageBox;
-import tools.StatusBar;
+import gui.MessageBox;
+import gui.StatusBar;
 import tools.Types;
 
 

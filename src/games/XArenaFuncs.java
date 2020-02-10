@@ -23,6 +23,8 @@ import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
 import games.Sim.StateObserverSim;
 import games.TStats.TAggreg;
+import gui.DeviationWeightsChart;
+import gui.LineChartSuccess;
 import params.*;
 import tools.*;
 import tools.Types.ACTIONS;
@@ -85,8 +87,10 @@ public class XArenaFuncs {
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		m_PlayAgents = new PlayAgent[numPlayers];
 		rand = new Random(System.currentTimeMillis());
-		lChart = new LineChartSuccess("Training Progress", "gameNum", "", true, false);
-		wChart = new DeviationWeightsChart("", "gameNum", "", true, false);
+		if (m_Arena.withUI) {
+			lChart = new LineChartSuccess("Training Progress", "gameNum", "", true, false);
+			wChart = new DeviationWeightsChart("", "gameNum", "", true, false);
+		}
 	}
 
 	public void destroy() {
@@ -513,8 +517,10 @@ public class XArenaFuncs {
 		}
 
 		// initialization weight distribution plot:
-		int plotWeightMode = xab.ntPar[n].getPlotWeightMethod();
-		wChart.initializeChartPlot(xab, pa, plotWeightMode);
+		if (wChart != null)	{
+			int plotWeightMode = xab.ntPar[n].getPlotWeightMethod();
+			wChart.initializeChartPlot(xab, pa, plotWeightMode);
+		}
 
 		System.out.println(pa.stringDescr());
 		System.out.println(pa.stringDescr2());
@@ -540,7 +546,7 @@ public class XArenaFuncs {
 		}
 
 		// initialization line chart plot:
-		lChart.initializeChartPlot(xab, m_evaluatorQ, doTrainEvaluation);
+		if (lChart != null) lChart.initializeChartPlot(xab, m_evaluatorQ, doTrainEvaluation);
 
 		// Debug only: direct debug output to file debug.txt
 		// TDNTupleAgt.pstream = System.out;
@@ -575,10 +581,11 @@ public class XArenaFuncs {
 					m_evaluatorT.eval(qa);
 
 				// update line chart plot:
-				lChart.updateChartPlot(gameNum, m_evaluatorQ, m_evaluatorT, doTrainEvaluation, false);
+				if (lChart != null) 
+					lChart.updateChartPlot(gameNum, m_evaluatorQ, m_evaluatorT, doTrainEvaluation, false);
 
 				// update weight / TC factor distribution plot:
-				wChart.updateChartPlot(gameNum, pa, per);
+				if (wChart != null)	wChart.updateChartPlot(gameNum, pa, per);
 
 				elapsedMs = (System.currentTimeMillis() - startTime);
 				pa.incrementDurationEvaluationMs(elapsedMs);

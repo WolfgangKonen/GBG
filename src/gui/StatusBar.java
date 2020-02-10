@@ -1,7 +1,9 @@
-package tools;
+package gui;
 
 import java.awt.*;
 import javax.swing.JLabel;
+
+import tools.Types;
 
 public class StatusBar extends JLabel {
 

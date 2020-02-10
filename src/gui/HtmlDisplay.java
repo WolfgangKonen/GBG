@@ -1,4 +1,4 @@
-package tools;
+package gui;
 
 import java.awt.Font;
 
@@ -8,6 +8,8 @@ import java.net.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+
+import tools.Types;
 
 
 public class HtmlDisplay extends JFrame implements HyperlinkListener

@@ -41,13 +41,13 @@ import games.RubiksCube.ArenaTrainCube;
 import games.Sim.ArenaTrainSim;
 import games.TicTacToe.ArenaTrainTTT;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
+import gui.LineChartSuccess;
+import gui.MessageBox;
 import params.ParMaxN;
 //import params.OtherParams;
 import params.ParOther;
 import params.ParTD;
-import tools.LineChartSuccess;
 import tools.Measure;
-import tools.MessageBox;
 import tools.ScoreTuple;
 import tools.Types;
 

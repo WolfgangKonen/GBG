@@ -11,8 +11,8 @@ import controllers.TD.TDAgent;
 import games.Arena;
 import games.StateObservation;
 import games.XArenaMenu;
+import gui.MessageBox;
 import params.ParOther;
-import tools.MessageBox;
 import tools.ScoreTuple;
 import tools.Types;
 

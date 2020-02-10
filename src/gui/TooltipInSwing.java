@@ -1,4 +1,4 @@
-package tools;
+package gui;
 
 import javax.swing.*;
 import javax.swing.plaf.*;

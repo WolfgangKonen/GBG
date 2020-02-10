@@ -1,4 +1,4 @@
-package tools;
+package gui;
 
 import java.awt.Component;
 import java.awt.Font;
@@ -6,13 +6,16 @@ import java.awt.Font;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import tools.Types;
+
 /**
+ * Class to show a modal message dialog box
  * 
  * @author wolfgang
  *
  */
 public class MessageBox {
-	String[] test = {"1", "2"};
+	// String[] test = {"1", "2"};
 	public static void show (Component parent, String message, String title, 
 							 int msgCode) 
 	{

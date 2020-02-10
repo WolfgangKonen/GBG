@@ -5,7 +5,7 @@ import java.io.*;
 
 import org.jfree.data.xy.XYSeries;
 
-import tools.LineChartSuccess;
+import gui.LineChartSuccess;
 
 /** 
 

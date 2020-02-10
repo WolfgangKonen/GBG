@@ -25,7 +25,7 @@ import games.RubiksCube.ArenaTrainCube;
 import games.Sim.ArenaTrainSim;
 import games.TicTacToe.ArenaTrainTTT;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
-import tools.SolidBorder;
+import gui.SolidBorder;
 import tools.Types;
 
 /**

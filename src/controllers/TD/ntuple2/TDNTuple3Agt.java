@@ -118,7 +118,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	private boolean TERNARY=false;		// if true, it remains true only for final-reward-games (see getNextAction2)
 	
 	// use finalAdaptAgents(...), normally true. Set only to false if you want to test how agents behave otherwise:
-	private boolean FINALADAPTAGENTS=false;
+	private boolean FINALADAPTAGENTS=true;
 	
 	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
 	

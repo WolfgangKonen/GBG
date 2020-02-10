@@ -25,8 +25,6 @@ import games.Arena;
 import games.ArenaTrain;
 import games.LogManagerGUI;
 import games.XArenaButtons;
-import tools.HtmlDisplay;
-import tools.SolidBorder;
 import tools.Types;
 
 public class XArenaButtonsGui extends JPanel {

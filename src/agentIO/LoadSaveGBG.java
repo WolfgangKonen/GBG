@@ -15,11 +15,12 @@ import games.XArenaButtons;
 import games.CFour.AlphaBetaAgent;
 import games.Nim.BoutonAgent;
 import games.Othello.Edax.Edax2;
+import gui.MessageBox;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import tools.MessageBox;
+
 import tools.Types;
 
 import javax.swing.*;

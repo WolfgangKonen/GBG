@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 
 import controllers.PlayAgent;
 import games.CFour.openingBook.BookSum;
-import tools.MessageBox;
+import gui.MessageBox;
 import tools.Types;
 
 //import openingBook.BookSum;

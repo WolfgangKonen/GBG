@@ -15,7 +15,6 @@ import javax.swing.SwingConstants;
 
 import games.XArenaMenu;
 import games.Arena;
-import tools.StatusBar;
 import tools.Types;
 
 public class ArenaGui extends JFrame {
