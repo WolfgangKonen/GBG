@@ -35,8 +35,7 @@ import games.Arena;
  * <li> <b>lambda</b>: 		[0.0] eligibility trace parameter 
  * <li> <b>gamma</b>: 		[1.0] discount parameter 
  * </ul> 
- * The defaults are defined in {@link ParTD}. <br>
- * Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String)}.
+ * The defaults are defined in class {@link ParTD}. <br>
  * 
  * @see ParTD
  * @see TDAgent

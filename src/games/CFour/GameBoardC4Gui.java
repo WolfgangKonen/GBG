@@ -17,19 +17,33 @@ import games.Arena.Task;
 import tools.ScoreTuple;
 import tools.Types;
 
+/**
+ * Class GameBoardC4Gui has the board game GUI. 
+ * <p>
+ * It shows board game states, optionally the values of possible next actions,
+ * has an internal member of class {@link C4GameGui} for the low-level member functions.
+ * <p>
+ * [The user interaction method HGameMove (used to enter legal moves during game play or to enter board 
+ * positions during 'Inspect') stays in {@link GameBoardC4}, since it needs access to its members. 
+ * HGameMove is called from {@link C4GameGui}'s {@code handleMouseClick(int,int)}.]
+ * 
+ * @author Wolfgang Konen, TH Koeln, 2018-2020
+ *
+ */
 public class GameBoardC4Gui extends JFrame {
 	private int C4GAMEHEIGHT=512;
 	private int[][] m_board;		
 	private int[][] last_board;		
+	private double[] VTable;
 	private JLabel leftInfo=new JLabel("");
 	private JLabel rightInfo=new JLabel(""); 
-	// the colors of the TH Koeln logo (used for button coloring):
-	private Color colTHK1 = new Color(183,29,13);
-	private Color colTHK2 = new Color(255,137,0);
-	private Color colTHK3 = new Color(162,0,162);
+//	// the colors of the TH Koeln logo (used for button coloring):
+//	private Color colTHK1 = new Color(183,29,13);
+//	private Color colTHK2 = new Color(255,137,0);
+//	private Color colTHK3 = new Color(162,0,162);
 	
 	/**
-	 * The GameBoard GUI (contains title panel, board panel with c4GameBoard and info panel)
+	 * a reference to the 'parent' GameBoardC4 object
 	 */
 	private GameBoardC4 m_gb=null;
 	/**
@@ -65,6 +79,7 @@ public class GameBoardC4Gui extends JFrame {
     	c4GameBoard	= new C4GameGui(m_gb);
 		m_board 	= ((StateObserverC4) m_gb.getStateObs()).getBoard();
 		last_board	= ((StateObserverC4) m_gb.getStateObs()).getBoard();
+		VTable		= new double[C4Base.COLCOUNT];
 
     	JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
@@ -96,12 +111,16 @@ public class GameBoardC4Gui extends JFrame {
 		
 	}
 
-	public void clearBoard(boolean boardClear, boolean vClear, StateObserverC4 m_so, double[] VTable) {
+	public void clearBoard(boolean boardClear, boolean vClear, StateObserverC4 m_so) {
 		if (boardClear) {
 			c4GameBoard.setInitialBoard();
 			last_board = m_so.getBoard();
 		}
 		if (vClear) {
+			//VTable		= new double[C4Base.COLCOUNT];
+			for(int i=0;i<C4Base.COLCOUNT;i++){
+					VTable[i] = Double.NaN;
+			}
 			c4GameBoard.printValueBar(null, VTable, null);
 		}
 	}
@@ -115,7 +134,7 @@ public class GameBoardC4Gui extends JFrame {
 	 * If false, update the GUI assuming that it is in the previous board state (faster and allows
 	 * to mark the last move).
 	 */ 
-	public void guiUpdateBoard(StateObserverC4 soT, double[] VTable, Task taskState, 
+	public void guiUpdateBoard(StateObserverC4 soT, Task taskState, 
 			boolean withReset, boolean showValueOnGameboard)
 	{	
 		
@@ -155,6 +174,16 @@ public class GameBoardC4Gui extends JFrame {
 			}
 			
 			if (showValueOnGameboard && soT.getStoredValues()!=null) {
+				for(int i=0;i<C4Base.COLCOUNT;i++){
+					VTable[i] = Double.NaN;
+				}
+				
+				for (int k=0; k<soT.getStoredValues().length; k++) {
+					Types.ACTIONS action = soT.getStoredAction(k);
+					int iAction = action.toInt();
+					VTable[iAction] = soT.getStoredValues()[k];					
+				}	
+				
 				if (showValueOnGameboard) {
 					String splus = (taskState == Arena.Task.INSPECTV) ? "X" : "O";
 					String sminus= (taskState == Arena.Task.INSPECTV) ? "O" : "X";

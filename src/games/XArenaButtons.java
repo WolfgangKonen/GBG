@@ -26,7 +26,7 @@ import tools.Types;
  * 
  * @author Wolfgang Konen, TH Koeln, 2016-2020
  */
-public class XArenaButtons extends JPanel		
+public class XArenaButtons //extends JPanel		
 {
 	int trainNumber = 25;
 	int gameNumber = 10000;
@@ -48,12 +48,12 @@ public class XArenaButtons extends JPanel
 	public boolean[] changedViaLoad = null;
 
 	public ParTD[] tdPar;
-	public NTParams[] ntPar;
+	public ParNT[] ntPar;
+	public ParOther[] oPar;
 	public MaxNParams[] maxnParams;
 	public MCTSParams[] mctsParams;
 	public MCParams[] mcParams;
 	public MCTSExpectimaxParams[] mctseParams;
-	public OtherParams[] oPar;
 	public EdaxParams[] edParams;
 	public String[] selectedAgents;
 
@@ -79,12 +79,12 @@ public class XArenaButtons extends JPanel
 		assert (numPlayers<=Types.GUI_PLAYER_NAME.length) 
 			: "GUI not configured for "+numPlayers+" players. Increase Types.GUI_PLAYER_NAME and GUI_AGENT_INITIAL";
 		tdPar = new ParTD[numPlayers];
-		ntPar = new NTParams[numPlayers];
+		ntPar = new ParNT[numPlayers];
 		maxnParams = new MaxNParams[numPlayers];
 		mctsParams = new MCTSParams[numPlayers];
 		mcParams = new MCParams[numPlayers];
 		mctseParams = new MCTSExpectimaxParams[numPlayers];
-		oPar = new OtherParams[numPlayers];
+		oPar = new ParOther[numPlayers];
 		edParams = new EdaxParams[numPlayers];
 		selectedAgents = new String[numPlayers];
 		AgentX = null;
@@ -96,12 +96,12 @@ public class XArenaButtons extends JPanel
 			selectedAgents[n] = Types.GUI_AGENT_INITIAL[n];
 			
 			tdPar[n] = new ParTD(m_arena.withUI);
-			ntPar[n] = new NTParams();
+			ntPar[n] = new ParNT(m_arena.withUI);
+			oPar[n] = new ParOther(m_arena.withUI);
 			maxnParams[n] = new MaxNParams();
 			mctsParams[n] = new MCTSParams();
 			mcParams[n] = new MCParams();
 			mctseParams[n] = new MCTSExpectimaxParams();
-			oPar[n] = new OtherParams();
 			edParams[n] = new EdaxParams();
 			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_arena.getGameName());
 			
@@ -315,6 +315,24 @@ public class XArenaButtons extends JPanel
 			winCompOptions.setVisible(false);
 			winCompOptions.dispose();
 		}
+	}
+
+	public Point getLocation() {
+		if (m_XAB_gui!=null)
+			return m_XAB_gui.getLocation();
+		return null;
+	}
+
+	public int getWidth() {
+		if (m_XAB_gui!=null)
+			return m_XAB_gui.getWidth();
+		return 0;
+	}
+
+	public int getX() {
+		if (m_XAB_gui!=null)
+			return m_XAB_gui.getX();
+		return 0;
 	}
 
 	public int getTrainNumber() {

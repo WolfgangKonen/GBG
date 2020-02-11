@@ -525,7 +525,7 @@ abstract public class Arena implements Runnable {
 			// if taskBefore!=INSPECTV, select here the start state:
 			//gb.clearBoard(true, true); // reset game board to default start state
 			so = gb.getDefaultStartState();
-			if (m_xab.oPar[0].useChooseStart01()) {
+			if (m_xab.oPar[0].getChooseStart01()) {
 				// this is mandatory for games like RubiksCube (but possible
 				// also for other games):
 				// do not start from the default start state (solved cube), but
@@ -998,7 +998,7 @@ abstract public class Arena implements Runnable {
 				// numEval according to the settings in the loaded agent
 				// (at least maxGameNum is relevant for training): 
 				this.m_xab.setGameNumber(td.getMaxGameNum());
-				this.m_xab.oPar[n].numEval_T.setText(""+td.getNumEval());
+				this.m_xab.oPar[n].setNumEval(td.getNumEval());
 			}
 			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
 				this.m_xab.tdPar[n].enableMode3P(true);

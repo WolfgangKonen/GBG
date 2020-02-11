@@ -24,8 +24,8 @@ import games.Feature;
 
 /**
  * This class realizes other parameter settings for board games. Most parameter
- * are only relevant for trainable agents ({@link TDAgent}, {@link TDNTuple3Agt}
- * ), but 'Quick Eval Mode' is relevant for all agents
+ * are only relevant for trainable agents (like {@link TDAgent}, {@link TDNTuple3Agt}), 
+ * but <b>Quick Eval Mode</b> and <b>Wrapper nPly</b> are relevant for all agents
  * <p>
  * These parameters and their [defaults] are:
  * <ul>
@@ -38,10 +38,12 @@ import games.Feature;
  * goal is reached
  * <li><b>stopEval</b>: [100] During training: How many successful evaluator
  * calls are needed to stop training prematurely?
- * <li><b> chooseStartState01</b>: [false] During training: Whether to start always from default
+ * <li><b>Wrapper nPly</b>: [0] if &gt; 0, wrap the agent in an (Expecti)Max-N wrapper with
+ * n plies of look-ahead. CAUTION: n &gt; 5 can dramatically slow down computation. 
+ * <li><b>Choose Start 01</b>: [false] During training: Whether to start always from default
  * start state ({@code false}, or to start 50% from default, 50% from a random
  * 1-ply state ({@code true}
- * <li><b> learn from RM</b>: [false] whether to learn from random moves or not
+ * <li><b>Learn from RM</b>: [false] whether to learn from random moves or not
  * </ul>
  * 
  * @see TDAgent
@@ -177,6 +179,11 @@ public class OtherParams extends Frame {
 
 	} // constructor OtherParams()
 
+	public void enableChoosePart(boolean enable) {
+		chooseS01.setEnabled(enable);
+		chooseS01L.setEnabled(enable);
+	}
+	
 	public JPanel getPanel() {
 		return oPanel;
 	}
@@ -219,11 +226,11 @@ public class OtherParams extends Frame {
 		return elen;
 	}
 
-	public boolean useChooseStart01() {
+	public boolean getChooseStart01() {
 		return chooseS01.getState();
 	}
 
-	public boolean useLearnFromRM() {
+	public boolean getLearnFromRM() {
 		return learnRM.getState();
 	}
 
@@ -288,6 +295,18 @@ public class OtherParams extends Frame {
 		epiLeng_T.setText(value + "");
 	}
 
+	public void setChooseStart01(boolean bChooseStart01) {
+		chooseS01.setState(bChooseStart01);
+	}
+
+	public void setLearnFromRM(boolean bLearnFromRM) {
+		learnRM.setState(bLearnFromRM);
+	}
+
+	public void setRewardIsGameScore(boolean bRGS) {
+		rewardIsGameScore.setState(bRGS);
+	}
+
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded
 	 * agent
@@ -303,8 +322,8 @@ public class OtherParams extends Frame {
 		this.setStopTest(op.getStopTest());
 		this.setStopEval(op.getStopEval());
 		this.setWrapperNPly(op.getWrapperNPly());
-		this.chooseS01.setState(op.useChooseStart01());
-		this.learnRM.setState(op.useLearnFromRM());
+		this.chooseS01.setState(op.getChooseStart01());
+		this.learnRM.setState(op.getLearnFromRM());
 		this.rewardIsGameScore.setState(op.getRewardIsGameScore());
 	}
 
@@ -313,16 +332,16 @@ public class OtherParams extends Frame {
 	 * parameters" we mean parameter producing good results. Likewise, some parameter
 	 * choices may be enabled or disabled.
 	 * 
-	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "TDS" (for {@link TDAgent})
+	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "Sarsa" (for {@link SarsaAgt})
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
+	@Deprecated
 	public void setParamDefaults(String agentName, String gameName) {
 		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
 		switch (gameName) {
 		case "RubiksCube": 
 			chooseS01.setState(true);		// always select a non-solved cube as start state
-			chooseS01.setEnabled(false);
-			chooseS01L.setEnabled(false);
+			enableChoosePart(false);
 			epiLeng_T.setText("50"); 		// the maximum episode length (when playing a game)
 			break;
 		default:	//  all other

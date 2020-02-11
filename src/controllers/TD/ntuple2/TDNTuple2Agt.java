@@ -679,7 +679,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		int   nextPlayer;
 		NextState ns = null;
 
-		boolean learnFromRM = m_oPar.useLearnFromRM();
+		boolean learnFromRM = m_oPar.getLearnFromRM();
 		int epiLength = m_oPar.getEpisodeLength();
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 		
@@ -1213,7 +1213,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", horizon:" + m_Net.getHorizon()
 						+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
-						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");
+						+ ", learnFromRM: " + (m_oPar.getLearnFromRM()?"true":"false");
 		return str;
 	}
 		
@@ -1271,7 +1271,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		return m_ntPar.getAFTERSTATE();
 	}
 	public boolean getLearnFromRM() {
-		return m_oPar.useLearnFromRM();
+		return m_oPar.getLearnFromRM();
 	}
 
 	/**

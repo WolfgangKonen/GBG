@@ -29,12 +29,13 @@ import tools.ScoreTuple;
 import tools.Types;
 
 /**
- * Class GameBoardC4 implements interface GameBoard for Connect Four.
- * It has the board game GUI. 
- * It shows board game states, optionally the values of possible next actions,
- * and allows user interactions with the board to enter legal moves during 
- * game play or to enter board positions for which the agent reaction is 
- * inspected. 
+ * This class implements the GameBoard interface for Connect Four.
+ * Its member {@link GameBoardC4Gui} {@code m_gameFrame} has the game board GUI. 
+ * {@code m_gameFrame} may be {@code null} in batch runs. 
+ * <p>
+ * It implements the interface functions and has the user interaction method HGameMove (used to enter legal moves during game play or to enter board 
+ * positions during 'Inspect'), since HGameMove needs access to local  members. 
+ * HGameMove is called from {@link C4GameGui}'s {@code handleMouseClick(int,int)}.
  * 
  * @author Wolfgang Konen, TH Koeln, May'18
  *
@@ -43,23 +44,18 @@ public class GameBoardC4 implements GameBoard {
 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
 									// infer the current taskState
+	protected StateObserverC4 m_so;
 	protected Random rand;
-	private GameBoardC4Gui m_gameFrame;
-	private StateObserverC4 m_so;
-	private double[] VTable;
-	private boolean arenaActReq=false;
+	protected boolean arenaActReq=false;
+	private GameBoardC4Gui m_gameFrame = null;
 	
 	public GameBoardC4(Arena arGame) {
 		initGameBoard(arGame);
 	}
 	
-    @Override
-    public void initialize() {}
-
     private void initGameBoard(Arena arGame) 
 	{
 		m_Arena		= arGame;
-		VTable		= new double[C4Base.COLCOUNT];
 		m_so		= new StateObserverC4();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
         if (m_Arena.withUI) {
@@ -67,6 +63,9 @@ public class GameBoardC4 implements GameBoard {
         }
 
 	}
+
+    @Override
+    public void initialize() {}
 
     // --- obsolete? ---
 //	private JPanel InitBoard()
@@ -84,14 +83,8 @@ public class GameBoardC4 implements GameBoard {
 		if (boardClear) {
 			m_so = new StateObserverC4();			// empty Table
 		}
-		if (vClear) {
-			//VTable		= new double[C4Base.COLCOUNT];
-			for(int i=0;i<C4Base.COLCOUNT;i++){
-					VTable[i] = Double.NaN;
-			}
-		}
 		if (m_gameFrame!=null)
-			m_gameFrame.clearBoard(boardClear, vClear, m_so, VTable);
+			m_gameFrame.clearBoard(boardClear, vClear, m_so);
 	}
 
 	/**
@@ -114,21 +107,10 @@ public class GameBoardC4 implements GameBoard {
 			soT = (StateObserverC4) so;
 			m_so = soT.copy();
 			
-			if (showValueOnGameboard && soT.getStoredValues()!=null) {
-				for(i=0;i<C4Base.COLCOUNT;i++){
-					VTable[i] = Double.NaN;
-				}
-				
-				for (int k=0; k<soT.getStoredValues().length; k++) {
-					Types.ACTIONS action = soT.getStoredAction(k);
-					int iAction = action.toInt();
-					VTable[iAction] = soT.getStoredValues()[k];					
-				}	
-			} 
 		} // if(so!=null)
 		
 		if (m_gameFrame!=null)
-			m_gameFrame.guiUpdateBoard(soT, VTable, m_Arena.taskState, withReset,showValueOnGameboard);
+			m_gameFrame.guiUpdateBoard(soT, m_Arena.taskState, withReset,showValueOnGameboard);
 	}
 
 	/**
@@ -150,6 +132,39 @@ public class GameBoardC4 implements GameBoard {
 		arenaActReq=actReq;
 	}
 
+	protected void HGameMove(int x, int y)
+	{
+		int iAction = x;
+		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
+//		assert m_so.isLegalAction(act) : "Desired action is not legal";
+		if (m_so.isLegalAction(act)) {
+			m_so.advance(act);			// perform action (optionally add random elements from game 
+										// environment - not necessary in ConnectFour)
+			System.out.println(m_so.stringDescr());
+			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+//			updateBoard(null,false,false);
+			arenaActReq = true;			// ask Arena for next action
+		}
+	}
+	
+	// --- obsolete? (during Inspect we call just HGameMove) ---
+//	private void InspectMove(int x, int y)
+//	{
+//		int iAction = 3*x+y;
+//		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
+//		if (!m_so.isLegalAction(act)) {
+//			System.out.println("Desired action is not legal!");
+//			m_Arena.setStatusMessage("Desired action is not legal");
+//			return;
+//		} else {
+//			m_Arena.setStatusMessage("Inspecting the value function ...");
+//		}
+//		m_so.advance(act);			// perform action (optionally add random elements from game 
+//									// environment - not necessary in TicTacToe)
+////		updateBoard(null,false,false);
+//		arenaActReq = true;		
+//	}
+	
 	// --- obsolete? ---
 //	/**
 //	 * This class is needed for each ActionListener of {@code Board[i][j]} in 
@@ -167,38 +182,6 @@ public class GameBoardC4 implements GameBoard {
 //		}
 //		public void actionPerformed(ActionEvent e){}			
 //	}
-	
-	protected void HGameMove(int x, int y)
-	{
-		int iAction = x;
-		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
-//		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		if (m_so.isLegalAction(act)) {
-			m_so.advance(act);			// perform action (optionally add random elements from game 
-										// environment - not necessary in ConnectFour)
-			System.out.println(m_so.stringDescr());
-			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-//			updateBoard(null,false,false);
-			arenaActReq = true;			// ask Arena for next action
-		}
-	}
-	
-	private void InspectMove(int x, int y)
-	{
-		int iAction = 3*x+y;
-		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
-		if (!m_so.isLegalAction(act)) {
-			System.out.println("Desired action is not legal!");
-			m_Arena.setStatusMessage("Desired action is not legal");
-			return;
-		} else {
-			m_Arena.setStatusMessage("Inspecting the value function ...");
-		}
-		m_so.advance(act);			// perform action (optionally add random elements from game 
-									// environment - not necessary in TicTacToe)
-//		updateBoard(null,false,false);
-		arenaActReq = true;		
-	}
 	
 	public StateObservation getStateObs() {
 		return m_so;

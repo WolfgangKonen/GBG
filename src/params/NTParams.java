@@ -21,12 +21,13 @@ import games.Arena;
 import games.Nim.NimConfig;
 
 /**
- *  N-tuple parameters and TC (temporal coherence) parameters for agent {@link TDNTuple2Agt}.
- *  <p>
- *  Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String)}.
+ *  N-tuple parameters and TC (temporal coherence) parameters for TD agents. 
+ *  This class realizes the parameter settings (GUI tab). <br>
+ *  The defaults are defined in clas {@link ParNT}.
  *  
  *  @see ParNT
- *  @see TDNTuple2Agt
+ *  @see TDNTuple3Agt
+ *  @see SarsaAgt
  */
 public class NTParams extends Frame implements Serializable {
 	private static final String TIPTC = "whether to use Temporal Coherence (TC) or not";
@@ -251,10 +252,6 @@ public class NTParams extends Frame implements Serializable {
 //		this.setFrom(ntPar);
 //	}
 
-	/**
-	 * Needed for {@link Arena} (which has no train rights) to disable this param tab 
-	 * @param enable
-	 */
 	public void enableAll(boolean enable) {
 		TempCoC.setEnabled(enable);
 		tcInitT.setEnabled(enable);
@@ -358,6 +355,11 @@ public class NTParams extends Frame implements Serializable {
 	public JPanel getPanel() {
 		return ntPanel;
 	}
+	
+	public boolean getTc() {
+		return TempCoC.isSelected();
+	}
+
 	public double getTcInit() {
 		return Double.valueOf(tcInitT.getText()).doubleValue();
 	}
@@ -370,49 +372,15 @@ public class NTParams extends Frame implements Serializable {
 		return Double.valueOf(tcBetaT.getText()).doubleValue();
 	}
 
-	public int getNtupleNumber() {
-		return Integer.parseInt(NTupleNumT.getText());
-	}
-
-	public int getNtupleMax() {
-		int dummy = Integer.parseInt(NTupleSizeT.getText());
-		return dummy;
-	}
-
-	public int getFixedNtupleMode() {
-		return Integer.parseInt((String) NTupleFixCo.getSelectedItem());
-	}
-
-	/**
-	 * @return 	0: none, 1: plot weight distribution
-	 * 			2: plot tcFactor distribution
-	 */
-	public int getPlotWeightMethod() {
-		return PlotWghtCo.getSelectedIndex();
-	}
-
-	public boolean getTc() {
-		return TempCoC.isSelected();
-	}
-
-	public void setTc(boolean state) {
-		TempCoC.setSelected(state);
-	}
-
-	public void setTcImmediate(String strg) {
-		tcFactorType.setSelectedItem(strg);
-	}
-
 	public String getTcImmediate() {
 		return (String) tcFactorType.getSelectedItem();
 	}
 
-	public void setTcTransfer(String strg) {
-		tcTransferType.setSelectedItem(strg);
-	}
-
-	public void setTcAccumul(String strg) {
-		tcAccumulType.setSelectedItem(strg);
+	public boolean getTcImm() {
+		Object Type = tcFactorType.getSelectedItem();
+		if (Type == "Immediate")
+			return true;
+		return false;
 	}
 
 	public String getTcTransfer() {
@@ -431,28 +399,10 @@ public class NTParams extends Frame implements Serializable {
 		return tcAccumulType.getSelectedIndex();
 	}
 
-	public void setTcInterval(String strg) {
-		tcIntervalT.setText(strg);
-	}
-	
-	public void setTcBeta(String strg) {
-		tcBetaT.setText(strg);
-	}
-	
-	public boolean getTcImm() {
-		Object Type = tcFactorType.getSelectedItem();
-		if (Type == "Immediate")
-			return true;
-		return false;
-	}
-
-	public void setTcImm(boolean tcImm) {
-		tcFactorType.setSelectedItem(tcImm ? 0 : 1);
-	}
-
 	public boolean getRandomness() {
 		return RandomnessC.isSelected();
 	}
+	
 	public boolean getRandomWalk() {
 		//Object Type=TupleType.getSelectedItem();			// /WK/ Bug fix: this did not work, need to test on String equalness
 		//if(Type==ntTupleTypeString[0]) // "RandomWalk"
@@ -461,6 +411,7 @@ public class NTParams extends Frame implements Serializable {
 			return true;
 		return false;
 	}
+	
 	public boolean getUSESYMMETRY() {
 		return UseSymmetryC.isSelected();
 	}
@@ -468,26 +419,119 @@ public class NTParams extends Frame implements Serializable {
 		return AfterStateC.isSelected();
 	}
 	
+	public int getNtupleNumber() {
+		return Integer.parseInt(NTupleNumT.getText());
+	}
+
+	public int getNtupleMax() {
+		int ntmax = Integer.parseInt(NTupleSizeT.getText());
+		return ntmax;
+	}
+
+	public int getFixedNtupleMode() {
+		return Integer.parseInt((String) NTupleFixCo.getSelectedItem());
+	}
+
+	/**
+	 * @return 	0: none, 1: plot weight distribution
+	 * 			2: plot tcFactor distribution
+	 */
+	public int getPlotWeightMethod() {
+		return PlotWghtCo.getSelectedIndex();
+	}
+
+	public void setTc(boolean tc) {
+		TempCoC.setSelected(tc);
+	}
+
+	public void setTcInit(double tcInit) {
+		tcInitT.setText(""+tcInit);
+	}
+
+	public void setTcTransfer(String strg) {
+		tcTransferType.setSelectedItem(strg);
+	}
+
+	public void setTcAccumul(String strg) {
+		tcAccumulType.setSelectedItem(strg);
+	}
+
+	public void setTcInterval(String strg) {
+		tcIntervalT.setText(strg);
+	}
+	
+	public void setTcBeta(String strg) {
+		tcBetaT.setText(strg);
+	}
+	
+	public void setTcImm(boolean tcImm) {
+		tcFactorType.setSelectedIndex(tcImm ? 0 : 1);
+	}
+
+	public void setTcImmediate(String strg) {
+		tcFactorType.setSelectedItem(strg);
+	}
+
+	public void setRandomness(boolean state) {
+		RandomnessC.setSelected(state);
+	}
+	
+	public void setRandomWalk(boolean randomWalk) {
+		NTupleTypeCo.setSelectedIndex(randomWalk ? 0 : 1);
+	}
+	
+	public void setUSESYMMETRY(boolean useSymmetry) {
+		UseSymmetryC.setSelected(useSymmetry);
+	}
+	public void setAFTERSTATE(boolean useAfterstate) {
+		AfterStateC.setSelected(useAfterstate);
+	}
+	
+	public void setNtupleNumber(int numTuple) {
+		NTupleNumT.setText(""+numTuple);
+	}
+
+	public void setNtupleMax(int maxTupleLen) {
+		NTupleSizeT.setText(""+maxTupleLen);
+	}
+
+	public void setFixedNtupleMode(int fixedNtupleMode) {
+		NTupleFixCo.setSelectedItem(""+fixedNtupleMode);
+	}
+
+	/**
+	 * Set the combo box list for fixed n-tuple modes
+	 * @param modeList
+	 */
+	public void setFixedCoList(int[] modeList, String tooltipString) {
+		NTupleFixCo.removeAllItems();
+		for (int i : modeList)
+			NTupleFixCo.addItem(Integer.toString(i));
+		NTupleFixCo.setToolTipText(tooltipString);
+	}
+
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
 	 * @param nt  of the re-loaded agent
 	 */
 	public void setFrom(NTParams nt) {
 		setTc(nt.getTc());
-		tcInitT.setText(""+nt.getTcInit());
-		setTcImmediate(nt.getTcImmediate());
+		setTcInit(nt.getTcInit());
+		setTcImmediate(nt.getTcImm()==true ? tcFactorString[0] : tcFactorString[1]);
 		setTcInterval(""+nt.getTcInterval());
-		setTcTransfer(nt.getTcTransfer());
-		setTcAccumul(nt.getTcAccumul());
+		setTcTransfer(tcTransferString[nt.getTcTransferMode()]);
+		setTcAccumul(tcAccumulString[nt.getTcAccumulMode()]);
 		setTcBeta(nt.getTcBeta()+"");
-		RandomnessC.setSelected(nt.getRandomness());
-		int ntindex= nt.getRandomWalk()?0:1;
-		NTupleTypeCo.setSelectedIndex(ntindex);
-		NTupleNumT.setText(nt.getNtupleNumber()+"");
-		NTupleSizeT.setText(nt.getNtupleMax()+"");
-		NTupleFixCo.setSelectedItem(""+nt.getFixedNtupleMode());
-		UseSymmetryC.setSelected(nt.getUSESYMMETRY());
-		AfterStateC.setSelected(nt.getAFTERSTATE());
+		setRandomness(nt.getRandomness());
+		setRandomWalk(nt.getRandomWalk());
+		setNtupleNumber(nt.getNtupleNumber());
+		setNtupleMax(nt.getNtupleMax());
+		setFixedNtupleMode(nt.getFixedNtupleMode());
+		setUSESYMMETRY(nt.getUSESYMMETRY());
+		setAFTERSTATE(nt.getAFTERSTATE());
+
+		enableAfterState(nt.getAFTERSTATE());
+		enableTcTransferPart();
 		enableTcPart();
 		enableRandomPart();
 	}
@@ -498,38 +542,39 @@ public class NTParams extends Frame implements Serializable {
 	 */
 	public void setFrom(ParNT nt) {
 		setTc(nt.getTc());
-		tcInitT.setText(""+nt.getTcInit());
+		setTcInit(nt.getTcInit());
 		setTcImmediate(nt.getTcImm()==true ? tcFactorString[0] : tcFactorString[1]);
 		setTcInterval(""+nt.getTcInterval());
 		setTcTransfer(tcTransferString[nt.getTcTransferMode()]);
 		setTcAccumul(tcAccumulString[nt.getTcAccumulMode()]);
 		setTcBeta(nt.getTcBeta()+"");
-		RandomnessC.setSelected(nt.getRandomness());
-		int ntindex= (nt.getRandomWalk() ? 0 : 1);
-		NTupleTypeCo.setSelectedIndex(ntindex);
-		NTupleNumT.setText(nt.getNtupleNumber()+"");
-		NTupleSizeT.setText(nt.getNtupleMax()+"");
-		NTupleFixCo.setSelectedItem(""+nt.getFixedNtupleMode());
-		UseSymmetryC.setSelected(nt.getUSESYMMETRY());
-		AfterStateC.setSelected(nt.getAFTERSTATE());
+		setRandomness(nt.getRandomness());
+		setRandomWalk(nt.getRandomWalk());
+		setNtupleNumber(nt.getNtupleNumber());
+		setNtupleMax(nt.getNtupleMax());
+		setFixedNtupleMode(nt.getFixedNtupleMode());
+		setUSESYMMETRY(nt.getUSESYMMETRY());
+		setAFTERSTATE(nt.getAFTERSTATE());
+		
+		enableAfterState(nt.getAFTERSTATE());
+		enableTcTransferPart();
 		enableTcPart();
 		enableRandomPart();
 	}
 
 	/**
+	 * DEPRECATED: use {@link ParNT#setParamDefaults(String, String)} instead.
+	 * <p>
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
 	 * parameters" we mean parameter producing good results.
 	 * 
-	 * @param agentName currently only "TD-Ntuple-2"
-	 * 				(for {@link TDNTuple2Agt}), 
+	 * @param agentName currently only "TD-Ntuple-2","TD-Ntuple-3","Sarsa"
 	 * 				all other strings are without any effect
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
+	@Deprecated
 	public void setParamDefaults(String agentName, String gameName) {
-		// currently we have here only game-specific defaults for two games (2048 , ConnectFour)
-		// in the case of two agents ("TD-Ntuple[-2]" = class TDNTuple[2]Agt):
 		switch (agentName) {
-//		case "TD-Ntuple": 
 		case "TD-Ntuple-2": 
 		case "TD-Ntuple-3": 
 		case "Sarsa":
@@ -576,15 +621,4 @@ public class NTParams extends Frame implements Serializable {
 		
 	}
 	
-	/**
-	 * Set the combo box list for fixed n-tuple modes
-	 * @param modeList
-	 */
-	public void setFixedCoList(int[] modeList, String tooltipString) {
-		NTupleFixCo.removeAllItems();
-		for (int i : modeList)
-			NTupleFixCo.addItem(Integer.toString(i));
-		NTupleFixCo.setToolTipText(tooltipString);
-	}
-
 }

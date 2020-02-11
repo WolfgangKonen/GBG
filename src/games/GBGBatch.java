@@ -332,7 +332,7 @@ public class GBGBatch { //extends ArenaTrain {
 
 		int trainNum=xab.getTrainNumber();
 		int maxGameNum=xab.getGameNumber();
-		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
+		boolean learnFromRM = xab.oPar[n].getLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
 		System.out.println("*** Starting multiTrain with trainNum = "+trainNum+" ***");
@@ -394,7 +394,7 @@ public class GBGBatch { //extends ArenaTrain {
 			gb.initialize();
 			while (pa.getGameNum()<pa.getMaxGameNum())
 			{		
-				StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
+				StateObservation so = soSelectStartState(gb,xab.oPar[n].getChooseStart01(), pa); 
 
 				pa.trainAgent(so);
 				
@@ -522,7 +522,7 @@ public class GBGBatch { //extends ArenaTrain {
 
 		int trainNum=xab.getTrainNumber();
 		int maxGameNum=xab.getGameNumber();
-		boolean learnFromRM = xab.oPar[n].useLearnFromRM();
+		boolean learnFromRM = xab.oPar[n].getLearnFromRM();
 		PlayAgent pa = null, qa= null;
 		
 		System.out.println("*** Starting multiTrain with trainNum = "+trainNum+" ***");
@@ -581,7 +581,7 @@ public class GBGBatch { //extends ArenaTrain {
 			gb.initialize();
 			while (pa.getGameNum()<pa.getMaxGameNum())
 			{		
-				StateObservation so = soSelectStartState(gb,xab.oPar[n].useChooseStart01(), pa); 
+				StateObservation so = soSelectStartState(gb,xab.oPar[n].getChooseStart01(), pa); 
 
 				pa.trainAgent(so);
 				

@@ -105,14 +105,14 @@ public class XArenaFuncs2
 		
 		if (sAgent.equals("TDS")) {
 			Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
-			pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
+			pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), m_xab.oPar[n], feat, maxGameNum);
 		} else if (sAgent.equals("TD-Ntuple-2")) {
 			try {
 				XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory(); 
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
 				pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
-									  new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
+									  m_xab.oPar[n], nTuples, xnf, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
 						e.getMessage(), 
@@ -126,7 +126,7 @@ public class XArenaFuncs2
 				NTupleFactory ntupfac = new NTupleFactory(); 
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
 				pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
-									  new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
+									  m_xab.oPar[n], nTuples, xnf, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
 						e.getMessage(), 
@@ -141,7 +141,7 @@ public class XArenaFuncs2
 				int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]), xnf);
 				int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
 				pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
-								  new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
+								  m_xab.oPar[n], nTuples, xnf, numOutputs, maxGameNum);
 			} catch (Exception e) {
 				MessageBox.show(m_xab, 
 						e.getMessage(), 
@@ -150,25 +150,25 @@ public class XArenaFuncs2
 				pa=null;			
 			}
 		} else if (sAgent.equals("Minimax")) {
-			pa = new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("Max-N")) {
-			pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("Expectimax-N")) {
-			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("Random")) {
-			pa = new RandomAgent(sAgent, new ParOther(m_xab.oPar[n]));
+			pa = new RandomAgent(sAgent, m_xab.oPar[n]);
 //		} else if (sAgent.equals("MCTS0")) {
-//			pa = new MCTSAgentT0(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
+//			pa = new MCTSAgentT0(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("MCTS")) {
-			pa = new MCTSAgentT(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MCTSAgentT(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("MCTS Expectimax")) {
-			pa= new MCTSExpectimaxAgt(sAgent, new ParMCTSE(m_xab.mctseParams[n]), new ParOther(m_xab.oPar[n]));
+			pa= new MCTSExpectimaxAgt(sAgent, new ParMCTSE(m_xab.mctseParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
-			pa = new MCAgent(sAgent, new ParMC(m_xab.mcParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MCAgent(sAgent, new ParMC(m_xab.mcParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("MC-N")) {
-			pa = new MCAgentN(sAgent, new ParMC(m_xab.mcParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MCAgentN(sAgent, new ParMC(m_xab.mcParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("AlphaBeta")) {	// CFour only, see gui_agent_list in XArenaButtons
 			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum());
 			alphaBetaStd.resetBoard();
@@ -208,25 +208,25 @@ public class XArenaFuncs2
 		PlayAgent pa=null;
 		int maxGameNum=Integer.parseInt(m_xab.GameNumT.getText());
 		if (sAgent.equals("Minimax")) {
-			pa= new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
+			pa= new MinimaxAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("Max-N")) {
-			pa= new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
+			pa= new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("Expectimax-N")) {
-			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("Random")) {
-			pa = new RandomAgent(sAgent, new ParOther(m_xab.oPar[n]));
+			pa = new RandomAgent(sAgent, m_xab.oPar[n]);
 //		} else if (sAgent.equals("MCTS0")) {
-//			pa= new MCTSAgentT0(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
+//			pa= new MCTSAgentT0(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("MCTS")) {
-			pa = new MCTSAgentT(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MCTSAgentT(sAgent,null,new ParMCTS(m_xab.mctsParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("MCTS Expectimax")) {
-			pa = new MCTSExpectimaxAgt(sAgent, new ParMCTSE(m_xab.mctseParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MCTSExpectimaxAgt(sAgent, new ParMCTSE(m_xab.mctseParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
-			pa = new MCAgent(sAgent, new ParMC(m_xab.mcParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MCAgent(sAgent, new ParMC(m_xab.mcParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("MC-N")) {
-			pa = new MCAgentN(sAgent, new ParMC(m_xab.mcParams[n]), new ParOther(m_xab.oPar[n]));
+			pa = new MCAgentN(sAgent, new ParMC(m_xab.mcParams[n]), m_xab.oPar[n]);
 		} else if (sAgent.equals("AlphaBeta")) {	// CFour only, see gui_agent_list in XArenaButtons
 			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum());
 			alphaBetaStd.resetBoard();
@@ -241,14 +241,14 @@ public class XArenaFuncs2
 			if (m_PlayAgents[n]==null) {
 				if (sAgent.equals("TDS")) {
 					Feature feat = m_xab.m_game.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
-					pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), new ParOther(m_xab.oPar[n]), feat, maxGameNum);
+					pa = new TDAgent(sAgent, new ParTD(m_xab.tdPar[n]), m_xab.oPar[n], feat, maxGameNum);
 				} else if (sAgent.equals("TD-Ntuple-2")) {
 					try {
 						XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory(); 
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
 						pa = new TDNTuple2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
-								              new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
+								              m_xab.oPar[n], nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
 						MessageBox.show(m_xab, 
 								e.getMessage(), 
@@ -262,7 +262,7 @@ public class XArenaFuncs2
 						NTupleFactory ntupfac = new NTupleFactory(); 
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
 						pa = new TDNTuple3Agt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
-								              new ParOther(m_xab.oPar[n]), nTuples, xnf, maxGameNum);
+								              m_xab.oPar[n], nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
 						MessageBox.show(m_xab, 
 								e.getMessage(), 
@@ -277,7 +277,7 @@ public class XArenaFuncs2
 						int[][] nTuples = ntupfac.makeNTupleSet(new ParNT(m_xab.ntPar[n]),xnf);
 						int numOutputs = m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
 						pa = new SarsaAgt(sAgent, new ParTD(m_xab.tdPar[n]), new ParNT(m_xab.ntPar[n]), 
-										  new ParOther(m_xab.oPar[n]), nTuples, xnf, numOutputs, maxGameNum);
+										  m_xab.oPar[n], nTuples, xnf, numOutputs, maxGameNum);
 					} catch (Exception e) {
 						MessageBox.show(m_xab, 
 								e.getMessage(), 
@@ -355,7 +355,7 @@ public class XArenaFuncs2
 //		Types.ACTIONS_VT avt1 = paVector[0].getNextAction2(so,false,true);
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n=0; n<numPlayers; n++) {
-			qaVector[n] = wrapAgent(n, paVector[n], new ParOther(m_xab.oPar[n])
+			qaVector[n] = wrapAgent(n, paVector[n], m_xab.oPar[n]
 												  , new ParMaxN(m_xab.maxnParams[n]), so);
 		} // for (n)
 //		Types.ACTIONS_VT avt2 = qaVector[0].getNextAction2(so,false,true);

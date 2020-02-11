@@ -386,7 +386,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		StateObservation s_next = ns.getNextSO();
 		int[] curBoard;
 		double qValue,qLast,qLastNew,target;
-		boolean learnFromRM = m_oPar.useLearnFromRM();
+		boolean learnFromRM = m_oPar.getLearnFromRM();
 		
 		if (s_next.isGameOver()) {
 			a_next = null;
@@ -594,7 +594,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", horizon:" + m_Net.getHorizon()
 						+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
-						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");
+						+ ", learnFromRM: " + (m_oPar.getLearnFromRM()?"true":"false");
 		return str;
 	}
 		

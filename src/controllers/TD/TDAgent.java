@@ -516,7 +516,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		boolean isNtuplePlayer = (m_feature.getFeatmode() == 8
 				|| this.getClass().getName().equals("TD_NTPlayer"));
 
-		boolean learnFromRM = m_oPar.useLearnFromRM();
+		boolean learnFromRM = m_oPar.getLearnFromRM();
 		int epiLength = m_oPar.getEpisodeLength();
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 
@@ -655,7 +655,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		//String S_old, I_old = null;   // only as debug info
 		int player = so.getPlayer();;
 		Types.ACTIONS_VT actBest;
-		boolean learnFromRM = m_oPar.useLearnFromRM();
+		boolean learnFromRM = m_oPar.getLearnFromRM();
 		int epiLength = m_oPar.getEpisodeLength();
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 		
@@ -812,7 +812,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 						+ ", NORMALIZE:" + (NORMALIZE?"true":"false")
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", features:" + m_feature.getFeatmode()
-						+ ", learnFromRM: " + (m_oPar.useLearnFromRM()?"true":"false");
+						+ ", learnFromRM: " + (m_oPar.getLearnFromRM()?"true":"false");
 		return str;
 	}
 	

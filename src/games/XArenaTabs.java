@@ -62,16 +62,16 @@ public class XArenaTabs extends JFrame
 	}
 
 	// never used??
-	class NextTabActionListener implements ActionListener
-	{
-		public void actionPerformed(ActionEvent event)
-		{
-			int tab = tp[0].getSelectedIndex();
-			tab = (tab >= tp[0].getTabCount() - 1 ? 0 : tab + 1);
-			tp[0].setSelectedIndex(tab);
-			((JPanel)tp[0].getSelectedComponent()).requestDefaultFocus();
-		}
-	}
+//	class NextTabActionListener implements ActionListener
+//	{
+//		public void actionPerformed(ActionEvent event)
+//		{
+//			int tab = tp[0].getSelectedIndex();
+//			tab = (tab >= tp[0].getTabCount() - 1 ? 0 : tab + 1);
+//			tp[0].setSelectedIndex(tab);
+//			((JPanel)tp[0].getSelectedComponent()).requestDefaultFocus();
+//		}
+//	}
 
 	public void setEnabledAt(int k) {
 		tp[k].setEnabledAt(k, true);

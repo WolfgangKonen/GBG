@@ -11,6 +11,8 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
  *  TD (temporal difference) parameters for agents {@link TDAgent},  {@link TDNTuple3Agt} and {@link SarsaAgt}
+ *  <p>
+ *  Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String)}.
  *  
  *  @see TDParams
  *  @see TDAgent
@@ -48,7 +50,7 @@ public class ParTD implements Serializable {
     
     /**
      * This member is only constructed when the constructor {@link #ParTD(boolean) ParTD(boolean withUI)} 
-     * called with {@code withUI=true}. It holds then the GUI for {@link ParTD}.
+     * called with {@code withUI=true}. It holds the GUI for {@link ParTD}.
      */
     private transient TDParams tdparams = null;
     
@@ -154,8 +156,8 @@ public class ParTD implements Serializable {
 	// explicitly (e.g. when constructing an agent prior to training it)
 	
 	public double getAlpha() {
-//		if (tdparams!=null)
-//			alpha = tdparams.getAlpha(); // be sure to get latest change from GUI
+//		if (tdparams!=null)					// commented out, use instead pushFromTdparams() 
+//			alpha = tdparams.getAlpha(); 	// to get the latest changes from GUI (!)
 		return alpha;
 	}
 
