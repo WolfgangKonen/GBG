@@ -27,12 +27,12 @@ public class XArenaTabs extends JFrame
 			tp[i] = new JTabbedPane();
 			tp[i].addTab("TD pars", arena.m_xab.tdPar[i].getPanel());					// 0
 			tp[i].addTab("NT pars", arena.m_xab.ntPar[i].getPanel());					// 1
-			tp[i].addTab("MaxN pars", arena.m_xab.maxnParams[i].getPanel());			// 2		
-			tp[i].addTab("MC pars", arena.m_xab.mcParams[i].getPanel());    			// 3
-			tp[i].addTab("MCTS pars", arena.m_xab.mctsParams[i].getPanel());			// 4
-			tp[i].addTab("MCTSE pars", arena.m_xab.mctseParams[i].getPanel()); 			// 5
+			tp[i].addTab("MaxN pars", arena.m_xab.maxnPar[i].getPanel());				// 2		
+			tp[i].addTab("MC pars", arena.m_xab.mcPar[i].getPanel());    				// 3
+			tp[i].addTab("MCTS pars", arena.m_xab.mctsPar[i].getPanel());				// 4
+			tp[i].addTab("MCTSE pars", arena.m_xab.mctsePar[i].getPanel()); 			// 5
 			if (arena.getGameName().equals("Othello")) {
-				tp[i].addTab("Edax pars", arena.m_xab.edParams[i].getPanel());			// 6
+				tp[i].addTab("Edax pars", arena.m_xab.edPar[i].getPanel());				// 6
 				tp[i].setToolTipTextAt(6, "Edax (Othello-specific)");
 				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 7
 				opIndex=7;

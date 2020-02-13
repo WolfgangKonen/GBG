@@ -337,7 +337,7 @@ public class ParTD implements Serializable {
 
 	/**
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
-	 * parameters" we mean parameters producing good results. Likewise, some parameter
+	 * parameters" we mean parameters producing good results. If withUI, some parameter
 	 * choices may be enabled or disabled.
 	 * 
 	 * @param agentName one out of "TD-Ntuple-2" ({@link TDNTuple2Agt}), 

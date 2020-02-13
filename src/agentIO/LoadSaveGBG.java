@@ -38,7 +38,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class LoadSaveGBG {
-	private final JFileChooserApprove fc;
+	private JFileChooserApprove fc = null;
 	private final FileFilter tdAgentExt = new ExtensionFilter("agt.zip", "TD-Agents");
 	private final FileFilter tdTSRExt = new ExtensionFilter("tsr.zip", "Tournament-Result");
 	private final FileFilter txtExt = new ExtensionFilter(".txt.zip", "Compressed Text-Files (.txt.zip)");
@@ -54,8 +54,10 @@ public class LoadSaveGBG {
 		this.arenaFrame = areFrame;
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
-		fc = new JFileChooserApprove();
-		fc.setCurrentDirectory(new File(strDir));
+		if (arenaGame.withUI) {
+			fc = new JFileChooserApprove();
+			fc.setCurrentDirectory(new File(strDir));			
+		}
 	}
 
 	public JDialog createProgressDialog(final IGetProgress streamProgress,
@@ -240,6 +242,8 @@ public class LoadSaveGBG {
 			strDir += "/TSR/";
 
 		tools.Utils.checkAndCreateFolder(strDir);
+
+		if (fc==null) throw new IOException("No JFileChooser present!");
 
 		fc.removeChoosableFileFilter(txtExt);
 		if (pa != null)
@@ -431,7 +435,9 @@ public class LoadSaveGBG {
 				strDir += "/"+subDir;
 			}
 			tools.Utils.checkAndCreateFolder(strDir);
-
+			
+			if (fc==null) throw new IOException("No JFileChooser present!");
+			
 			fc.removeChoosableFileFilter(txtExt);
 			fc.setFileFilter(tdAgentExt);
 			fc.setCurrentDirectory(new File(strDir));
@@ -515,6 +521,8 @@ public class LoadSaveGBG {
 			}
 			strDir += "/TSR/";
 			tools.Utils.checkAndCreateFolder(strDir);
+
+			if (fc==null) throw new IOException("No JFileChooser present!");
 
 			fc.removeChoosableFileFilter(txtExt);
 			fc.setFileFilter(tdTSRExt);

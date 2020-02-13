@@ -1,5 +1,6 @@
 package params;
 
+import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
 import controllers.MCTSExpectimax.MCTSEChanceNode;
@@ -13,7 +14,8 @@ import java.awt.event.ActionListener;
 import java.io.Serializable;
 
 /**
- * MCTSE (Monte Carlo Tree Search Expectimax) parameters for board games.<p>
+ * This class realizes the parameter settings (GUI tab) for 
+ * MCTSE (Monte Carlo Tree Search Expectimax) agent {@link MCTSExpectimaxAgt}.<p>
  *  
  * These parameters and their [defaults] are: <ul>
  * <li> <b>Iterations</b>: 	[3500] number of iterations during MCTSE search 
@@ -101,6 +103,8 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 				enableUCTPart();
 			}
 		});
+		choiceSelector.setEnabled(true);
+		
 		maxNodes_L = new JLabel("Max Nodes");
 		numAgents_L = new JLabel("Number Agents");
 		alternateVersion_CB = new JCheckBox("alternate Version (~4% faster)", ParMCTSE.DEFAULT_ALTERNATEVERSION);
@@ -309,6 +313,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		setAlternateVersion(tp.getAlternateVersion());	
 		setEnableHeuristics(tp.getEnableHeuristics());
 		setSelectMode(tp.getSelectMode());
+		
 		enableUCTPart();
 	}
 	/**
@@ -328,6 +333,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		setAlternateVersion(tp.getAlternateVersion());	
 		setEnableHeuristics(tp.getEnableHeuristics());
 		setSelectMode(tp.getSelectMode());
+		
 		enableUCTPart();
 	}
 
@@ -340,6 +346,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 * @param numPlayers
 	 */
+	@Deprecated
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
 		switch (agentName) {
 		case "MCTS Expectimax": 

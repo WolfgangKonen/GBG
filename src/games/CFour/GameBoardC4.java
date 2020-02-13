@@ -33,8 +33,9 @@ import tools.Types;
  * Its member {@link GameBoardC4Gui} {@code m_gameFrame} has the game board GUI. 
  * {@code m_gameFrame} may be {@code null} in batch runs. 
  * <p>
- * It implements the interface functions and has the user interaction method HGameMove (used to enter legal moves during game play or to enter board 
- * positions during 'Inspect'), since HGameMove needs access to local  members. 
+ * It implements the interface functions and has the user interaction method HGameMove (used to enter 
+ * legal moves during game play or to enter board positions during 'Inspect'), 
+ * since HGameMove needs access to local  members. 
  * HGameMove is called from {@link C4GameGui}'s {@code handleMouseClick(int,int)}.
  * 
  * @author Wolfgang Konen, TH Koeln, May'18

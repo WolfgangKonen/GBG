@@ -410,7 +410,7 @@ public class GBGBatch { //extends ArenaTrain {
 					xab.setGameNumber(gameNum);
 					
 					// construct 'qa' anew (possibly wrapped agent for eval)
-					qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+					qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 			        
 					m_evaluatorQ.eval(qa);
 					evalQ = m_evaluatorQ.getLastResult();
@@ -439,7 +439,7 @@ public class GBGBatch { //extends ArenaTrain {
 				
 			
 			// construct 'qa' anew (possibly wrapped agent for eval)
-			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+			qa = wrapAgent(0, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
 			// --- not really necessary ---
 //	        // evaluate again at the end of a training run:
@@ -597,7 +597,7 @@ public class GBGBatch { //extends ArenaTrain {
 					xab.setGameNumber(gameNum);
 					
 					// construct 'qa' anew (possibly wrapped agent for eval)
-					qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+					qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 			        
 					m_evaluatorQ.eval(qa);
 					evalQ = m_evaluatorQ.getLastResult();
@@ -626,7 +626,7 @@ public class GBGBatch { //extends ArenaTrain {
 				
 			
 			// construct 'qa' anew (possibly wrapped agent for eval)
-			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+			qa = wrapAgent(0, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
 			// --- not really necessary ---
 //	        // evaluate again at the end of a training run:

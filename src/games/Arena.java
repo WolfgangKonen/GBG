@@ -437,7 +437,7 @@ abstract public class Arena implements Runnable {
 		Types.ACTIONS_VT actBest = null;
 		MCTSAgentT p2 = null;
 		boolean DEBG = false; // false;true;
-		if (DEBG) p2= new MCTSAgentT("MCTS", null, new ParMCTS(m_xab.mctsParams[0]), new ParOther(m_xab.oPar[0])); // only
+		if (DEBG) p2= new MCTSAgentT("MCTS", null, m_xab.mctsPar[0], m_xab.oPar[0]); // only
 																														// DEBG
 		PlayAgent pa;
 		PlayAgent[] paVector, qaVector;

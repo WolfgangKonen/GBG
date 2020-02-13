@@ -9,7 +9,7 @@ import controllers.MC.MCAgentConfig;
 import controllers.MC.MCAgentN;
 
 /**
- * MC (Monte Carlo) parameters for board games.<p>
+ * This class realizes the parameter settings (GUI tab) for {@link MCAgentN}.<p>
  *
  * These parameters and their [defaults] are: <ul>
  * <li> <b>Iterations</b>: 	    [1000]  number of iterations during MC search
@@ -106,13 +106,14 @@ public class MCParams extends Frame implements Serializable
     public boolean getCalcCertainty() {
         return CBCalcCertainty.isSelected();
     }
-    public void setIterations(int value) {
+    
+    public void setNumIter(int value) {
         TIterations.setText(value+"");
     }
-    public void setRolloutdepth(double value) {
+    public void setRolloutDepth(double value) {
         TRolloutdepth.setText(value+"");
     }
-    public void setNumberAgents(int value) {
+    public void setNumAgents(int value) {
         TNumberAgents.setText(value+"");
     }
     public void setCalcCertainty(boolean value) {
@@ -124,9 +125,9 @@ public class MCParams extends Frame implements Serializable
      * @param tp  of the re-loaded agent
      */
     public void setFrom(MCParams tp) {
-        setIterations(tp.getNumIter());
-        setRolloutdepth(tp.getRolloutDepth());
-        setNumberAgents(tp.getNumAgents());
+        setNumIter(tp.getNumIter());
+        setRolloutDepth(tp.getRolloutDepth());
+        setNumAgents(tp.getNumAgents());
         setCalcCertainty(tp.getCalcCertainty());
     }
     /**
@@ -134,9 +135,9 @@ public class MCParams extends Frame implements Serializable
      * @param tp  of the re-loaded agent
      */
     public void setFrom(ParMC tp) {
-        setIterations(tp.getNumIter());
-        setRolloutdepth(tp.getRolloutDepth());
-        setNumberAgents(tp.getNumAgents());
+        setNumIter(tp.getNumIter());
+        setRolloutDepth(tp.getRolloutDepth());
+        setNumAgents(tp.getNumAgents());
         setCalcCertainty(tp.getCalcCertainty());
     }
 }

@@ -45,8 +45,6 @@ public class MaxNParams extends Frame
 	public JCheckBox maxnUseHmTrue;
 
 	JPanel mPanel;
-//	Button ok;
-//	MaxNParams m_par;
 	
 	public MaxNParams() {
 		super("MaxN Parameter");
@@ -54,9 +52,7 @@ public class MaxNParams extends Frame
 		maxnDepth_L = new JLabel("Tree Depth");
 		maxnDepth_T = new JTextField(ParMaxN.DEFAULT_MAXN_TREE_DEPTH+"");				// 
 		maxnUseHm_L = new JLabel("MaxN Hashmap ");
-		maxnUseHmTrue = new JCheckBox("use hashmap",true);
-//		ok = new Button("OK");
-//		m_par = this;
+		maxnUseHmTrue = new JCheckBox("use hashmap",ParMaxN.DEFAULT_MAXN_USE_HASHMAP);
 		mPanel = new JPanel();		// put the inner buttons into panel mPanel. This panel
 									// can be handed over to a tab of a JTabbedPane object
 									// (see class XArenaTabs)
@@ -64,16 +60,6 @@ public class MaxNParams extends Frame
 		maxnDepth_L.setToolTipText("Tree depth (for MaxN or ExpectimaxN)");
 		maxnUseHm_L.setToolTipText("MaxN: use hashmap to save values of visited states");
 		
-//		ok.addActionListener(
-//				new ActionListener()
-//				{
-//					public void actionPerformed(ActionEvent e)
-//					{
-//						m_par.setVisible(false);
-//					}
-//				}					
-//		);
-
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
 		mPanel.setLayout(new GridLayout(0,4,10,10));		
 		
@@ -97,13 +83,7 @@ public class MaxNParams extends Frame
 		mPanel.add(new Canvas());
 		mPanel.add(new Canvas());
 
-//		oPanel.add(new Canvas());
-//		oPanel.add(new Canvas());
-//		oPanel.add(new Canvas());
-//		oPanel.add(new Canvas());
-
 		add(mPanel,BorderLayout.CENTER);
-//		add(ok,BorderLayout.SOUTH);
 				
 		pack();
 		setVisible(false);
@@ -114,16 +94,20 @@ public class MaxNParams extends Frame
 		return mPanel;
 	}
 
-	public void setMaxnDepth(int value) {
-		maxnDepth_T.setText(value+"");
-	}
-	
-	public int getMaxnDepth() {
+	public int getMaxNDepth() {
 		return Integer.valueOf(maxnDepth_T.getText()).intValue();
 	}
 
-	public boolean useMaxNHashmap() {
+	public boolean getMaxNUseHashmap() {
 		return maxnUseHmTrue.isSelected();
+	}
+	
+	public void setMaxNDepth(int value) {
+		maxnDepth_T.setText(value+"");
+	}
+	
+	public void setMaxNUseHashmap(boolean bval) {
+		maxnUseHmTrue.setSelected(bval);
 	}
 	
 	/**
@@ -131,8 +115,8 @@ public class MaxNParams extends Frame
 	 * @param mp  ParMaxN of the re-loaded agent
 	 */
 	public void setFrom(ParMaxN mp) {
-		this.setMaxnDepth(mp.getMaxNDepth());
-		this.maxnUseHmTrue.setSelected(mp.useMaxNHashmap());
+		this.setMaxNDepth(mp.getMaxNDepth());
+		this.setMaxNUseHashmap(mp.getMaxNUseHashmap());
 	}
 	
 	/**
@@ -144,6 +128,7 @@ public class MaxNParams extends Frame
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 * @param numPlayers
 	 */
+	@Deprecated
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
 		switch (agentName) {
 		case "MaxN": 

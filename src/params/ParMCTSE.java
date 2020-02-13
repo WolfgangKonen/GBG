@@ -60,6 +60,12 @@ public class ParMCTSE implements Serializable
 
 	private HeuristicSettings2048 heuristicSettings2048;
 
+    /**
+     * This member is only constructed when the constructor {@link #ParMC(boolean) ParMC(boolean withUI)} 
+     * called with {@code withUI=true}. It holds the GUI for {@link ParMC}.
+     */
+    private transient MCTSExpectimaxParams meparams = null;
+
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 
@@ -72,6 +78,17 @@ public class ParMCTSE implements Serializable
 		heuristicSettings2048 = new HeuristicSettings2048();
 	}
 	
+	public ParMCTSE(boolean withUI) {
+		heuristicSettings2048 = new HeuristicSettings2048();
+		if (withUI)
+			meparams = new MCTSExpectimaxParams();
+	}
+	
+    public ParMCTSE(ParMCTSE tp) { 
+		heuristicSettings2048 = new HeuristicSettings2048();
+    	this.setFrom(tp);
+    }
+    
     public ParMCTSE(MCTSExpectimaxParams tp) { 
 		heuristicSettings2048 = new HeuristicSettings2048();
     	this.setFrom(tp);
@@ -95,6 +112,9 @@ public class ParMCTSE implements Serializable
 		setHeuristicSettings2048(tp.getHeuristicSettings2048());
 		this.setSelectMode(tp.getSelectMode());
 		this.useNormalize = tp.getNormalize();
+		
+		if (meparams!=null)
+			meparams.setFrom(this);
 	}
 	
 	/**
@@ -115,8 +135,25 @@ public class ParMCTSE implements Serializable
 		setHeuristicSettings2048(tp.getHeuristicSettings2048());
 		this.setSelectMode(tp.getSelectMode());
 		this.useNormalize = tp.getNormalize();
+		
+		if (meparams!=null)
+			meparams.setFrom(this);
 	}
 	
+	/**
+	 * Call this from XArenaFuncs constructAgent or fetchAgent to get the latest changes from GUI
+	 */
+	public void pushFromMCTSEParams() {
+		if (meparams!=null)
+			this.setFrom(meparams);
+	}
+	
+	public JPanel getPanel() {
+		if (meparams!=null)		
+			return meparams.getPanel();
+		return null;
+	}
+
 	public int getNumIter() {
 		return this.numIters;
 	}
@@ -156,41 +193,104 @@ public class ParMCTSE implements Serializable
 	public int getVerbosity() {
 		return this.verbosity;
 	}
+	
 	public void setNumIter(int value) {
 		numIters = value;
+		if (meparams!=null)
+			meparams.setNumIter(value);
 	}
 	public void setK_UCT(double value) {
 		kUCT = value;
+		if (meparams!=null)
+			meparams.setK_UCT(value);
+	}
+	public void setNormalize(boolean state) {
+		useNormalize = state;
+		if (meparams!=null)
+			meparams.setNormalize(state);
 	}
 	public void setTreeDepth(int value) {
 		treeDepth = value;
+		if (meparams!=null)
+			meparams.setTreeDepth(value);
 	}
 	public void setSelectMode(int selectMode) {
 		this.selectMode=selectMode;
+		if (meparams!=null)
+			meparams.setSelectMode(selectMode);
 	}
 	public void setRolloutDepth(int value) {
 		rolloutDepth = value;
+		if (meparams!=null)
+			meparams.setRolloutDepth(value);
 	}
 	public void setMaxNodes(int value) {
 		maxNodes = value;
+		if (meparams!=null)
+			meparams.setMaxNodes(value);
 	}
 	public void setNumAgents(int value) { 
 		numAgents = value; 
+		if (meparams!=null)
+			meparams.setNumAgents(value);
 	}
 	public void setAlternateVersion(boolean value) {
 		alternateVersion = value;
+		if (meparams!=null)
+			meparams.setAlternateVersion(value);
 	}
 	public void setEnableHeuristics(boolean value) {
 		enableHeuristics = value;
+		if (meparams!=null)
+			meparams.setEnableHeuristics(value);
 	}
 	public void setHeuristicSettings2048(HeuristicSettings2048 heuristicSettings2048) {
 		this.heuristicSettings2048 = heuristicSettings2048;
+		if (meparams!=null)
+			meparams.setHeuristicSettings2048(heuristicSettings2048);
 	}
 	public void setEpsGreedy(double value) {
 		this.epsGreedy = value;
+		if (meparams!=null)
+			meparams.setEpsGreedy(value);
 	}
 	public void setVerbosity(int verbosity) {
 		this.verbosity = verbosity;
+		if (meparams!=null)
+			meparams.setVerbosity(verbosity);
 	}
 	
+	/**
+	 * Set sensible parameters for a specific agent and specific game. By "sensible
+	 * parameters" we mean parameter producing good results. If with UI, some parameter
+	 * choices may be enabled or disabled.
+	 * 
+	 * @param agentName currently only "MCTSE" 
+	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param numPlayers
+	 */
+	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
+		switch (agentName) {
+		case "MCTS Expectimax": 
+			switch (gameName) {
+			case "Nim": 
+				this.setNumIter(10000);		
+				this.setK_UCT(1.414);
+				break;
+			}
+			this.setAlternateVersion(false);
+			switch (numPlayers) {
+			case 1: 
+				this.setNormalize(true);
+				break;
+			default:
+				this.setNormalize(true);
+				break;
+			}
+			break;
+		}
+		if (meparams!=null)
+			meparams.setFrom(this);
+	}	
+
 }

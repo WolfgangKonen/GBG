@@ -141,7 +141,6 @@ public class EdaxParams extends Frame {
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
 		switch (gameName) {
 		default:	//  all other
 			break;

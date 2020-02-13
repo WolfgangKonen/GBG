@@ -24,7 +24,7 @@ import java.util.Random;
  * The Expectimax-N agent implements the Expectimax-N algorithm via interface {@link PlayAgent}. 
  * Expectimax-N  is the generalization {@link MaxNAgent} to nondeterministic games. It works on  
  * {@link ScoreTuple}, an N-tuple of game scores. It traverses the game tree up to a prescribed 
- * depth (default: 10, see {@link MaxNParams}).   
+ * depth (default: 10, see {@link ParMaxN}).   
  * <p>
  * {@link ExpectimaxNAgent} is for <b>non-deterministic</b> games. For deterministic games see 
  * {@link MaxNAgent}.

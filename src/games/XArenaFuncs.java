@@ -123,10 +123,14 @@ public class XArenaFuncs {
 		int maxGameNum = m_xab.getGameNumber();
 		int featmode = m_xab.tdPar[n].getFeatmode();
 
-		// be sure to get the latest changes from GUI (!)
+		// If there is a GUI: be sure to get the latest changes from the GUI's param tabs (!)
 		m_xab.tdPar[n].pushFromTDParams();
 		m_xab.ntPar[n].pushFromNTParams();
 		m_xab.oPar[n].pushFromOTParams();
+		m_xab.maxnPar[n].pushFromMaxNParams();
+		m_xab.mctsPar[n].pushFromMCTSParams();
+		m_xab.mctsePar[n].pushFromMCTSEParams();
+		m_xab.edPar[n].pushFromEdaxParams();
 		
 		try {
 			if (sAgent.equals("TDS")) {
@@ -154,24 +158,21 @@ public class XArenaFuncs {
 				pa = new SarsaAgt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
 			} else if (sAgent.equals("Max-N")) {
-				pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
+				pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("Expectimax-N")) {
-				pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
+				pa = new ExpectimaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("Random")) {
 				pa = new RandomAgent(sAgent, m_xab.oPar[n]);
-				// } else if (sAgent.equals("MCTS0")) {
-				// pa = new MCTSAgentT0(sAgent, null, new
-				// ParMCTS(m_xab.mctsParams[n]), m_xab.oPar[n]);
 			} else if (sAgent.equals("MCTS")) {
-				pa = new MCTSAgentT(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), m_xab.oPar[n]);
+				pa = new MCTSAgentT(sAgent, null, m_xab.mctsPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("MCTS Expectimax")) {
-				pa = new MCTSExpectimaxAgt(sAgent, new ParMCTSE(m_xab.mctseParams[n]), m_xab.oPar[n]);
+				pa = new MCTSExpectimaxAgt(sAgent, m_xab.mctsePar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("Human")) {
 				pa = new HumanPlayer(sAgent);
 			} else if (sAgent.equals("MC")) {
-				pa = new MCAgent(sAgent, new ParMC(m_xab.mcParams[n]), m_xab.oPar[n]);
+				pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("MC-N")) {
-				pa = new MCAgentN(sAgent, new ParMC(m_xab.mcParams[n]), m_xab.oPar[n]);
+				pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("AlphaBeta")) { // CFour only, see
 														// gui_agent_list in
 														// XArenaButtons
@@ -198,7 +199,7 @@ public class XArenaFuncs {
 			} else if (sAgent.equals("Edax2")) { // Othello only, see
 													// gui_agent_list in
 													// XArenaButtons
-				pa = new Edax2(sAgent, new ParEdax(m_xab.edParams[n]));
+				pa = new Edax2(sAgent, m_xab.edPar[n]);
 			}
 		} catch (Exception e) {
 			m_Arena.showMessage(e.getClass().getName() + ": " + e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -237,30 +238,31 @@ public class XArenaFuncs {
 		PlayAgent pa = null;
 		int maxGameNum = m_xab.getGameNumber();
 		
-		// be sure to get the latest changes from the GUI's param tabs (!)
+		// If there is a GUI: be sure to get the latest changes from the GUI's param tabs (!)
 		m_xab.tdPar[n].pushFromTDParams();
 		m_xab.ntPar[n].pushFromNTParams();
 		m_xab.oPar[n].pushFromOTParams();
+		m_xab.maxnPar[n].pushFromMaxNParams();
+		m_xab.mctsPar[n].pushFromMCTSParams();
+		m_xab.mctsePar[n].pushFromMCTSEParams();
+		m_xab.edPar[n].pushFromEdaxParams();
 
 		if (sAgent.equals("Max-N")) {
-			pa = new MaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
+			pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("Expectimax-N")) {
-			pa = new ExpectimaxNAgent(sAgent, new ParMaxN(m_xab.maxnParams[n]), m_xab.oPar[n]);
+			pa = new ExpectimaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("Random")) {
 			pa = new RandomAgent(sAgent, m_xab.oPar[n]);
-			// } else if (sAgent.equals("MCTS0")) {
-			// pa= new MCTSAgentT0(sAgent,null,new ParMCTS(m_xab.mctsParams[n]),
-			// m_xab.oPar[n]);
 		} else if (sAgent.equals("MCTS")) {
-			pa = new MCTSAgentT(sAgent, null, new ParMCTS(m_xab.mctsParams[n]), m_xab.oPar[n]);
+			pa = new MCTSAgentT(sAgent, null, m_xab.mctsPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("MCTS Expectimax")) {
-			pa = new MCTSExpectimaxAgt(sAgent, new ParMCTSE(m_xab.mctseParams[n]), m_xab.oPar[n]);
+			pa = new MCTSExpectimaxAgt(sAgent, m_xab.mctsePar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
 		} else if (sAgent.equals("MC")) {
-			pa = new MCAgent(sAgent, new ParMC(m_xab.mcParams[n]), m_xab.oPar[n]);
+			pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("MC-N")) {
-			pa = new MCAgentN(sAgent, new ParMC(m_xab.mcParams[n]), m_xab.oPar[n]);
+			pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("AlphaBeta")) { // CFour only, see
 													// gui_agent_list in
 													// XArenaButtons
@@ -284,7 +286,7 @@ public class XArenaFuncs {
 //			pa = new Edax();
 		} else if (sAgent.equals("Edax2")) { // Othello only, see gui_agent_list
 												// in XArenaButtons
-			pa = new Edax2(sAgent, new ParEdax(m_xab.edParams[n]));
+			pa = new Edax2(sAgent, m_xab.edPar[n]);
 		} else { // all the trainable agents:
 			if (m_PlayAgents[n] == null) {
 				if (sAgent.equals("TDS")) {
@@ -330,25 +332,6 @@ public class XArenaFuncs {
 						// e.printStackTrace();
 						pa = null;
 					}
-					// } else if (sAgent.equals("Sarsa-2")) {
-					// try {
-					// XNTupleFuncs xnf = m_xab.m_game.makeXNTupleFuncs();
-					// NTupleFactory ntupfac = new NTupleFactory();
-					// int[][] nTuples = ntupfac.makeNTupleSet(new
-					// ParNT(m_xab.ntPar[n]),xnf);
-					// int numOutputs =
-					// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-					// pa = new Sarsa2Agt(sAgent, new ParTD(m_xab.tdPar[n]), new
-					// ParNT(m_xab.ntPar[n]),
-					// m_xab.oPar[n], nTuples, xnf, numOutputs,
-					// maxGameNum);
-					// } catch (Exception e) {
-					// m_Arena.showMessage(
-					// e.getMessage(),
-					// "Warning Sarsa", JOptionPane.WARNING_MESSAGE);
-					// //e.printStackTrace();
-					// pa=null;
-					// }
 				}
 			} else { // i.e. if m_PlayAgents[n]!=null
 				// --- questionable, the code concerned with wrapper!! ---
@@ -409,7 +392,7 @@ public class XArenaFuncs {
 	 *            for access to m_xab.oPar, the vector of {@link ParOther},
 	 *            containing {@code nply = oPar[n].getWrapperNPly()} for each
 	 *            agent separately. And for access to m_xab.maxnParams, the
-	 *            vector of {@link MaxNParams} containing
+	 *            vector of {@link ParMaxN} containing
 	 *            {@code boolean maxNHashMap}.
 	 * @param so
 	 *            needed only to detect whether game is deterministic or not.
@@ -427,7 +410,7 @@ public class XArenaFuncs {
 		// Types.ACTIONS_VT avt1 = paVector[0].getNextAction2(so,false,true);
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n = 0; n < numPlayers; n++) {
-			qaVector[n] = wrapAgent(n, paVector[n], m_xab.oPar[n], new ParMaxN(m_xab.maxnParams[n]), so);
+			qaVector[n] = wrapAgent(n, paVector[n], m_xab.oPar[n], m_xab.maxnPar[n], so);
 		} // for (n)
 		// Types.ACTIONS_VT avt2 = qaVector[0].getNextAction2(so,false,true);
 		// PlayAgent qa = ((MaxNWrapper)qaVector[0]).getWrappedPlayAgent();
@@ -439,7 +422,7 @@ public class XArenaFuncs {
 	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, StateObservation so, XArenaButtons m_xab) {
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n = 0; n < numPlayers; n++) {
-			qaVector[n] = wrapAgent(n, paVector[n], paVector[n].getParOther(), new ParMaxN(m_xab.maxnParams[n]), so);
+			qaVector[n] = wrapAgent(n, paVector[n], paVector[n].getParOther(), m_xab.maxnPar[n], so);
 		} // for (n)
 		return qaVector;
 	}
@@ -578,7 +561,7 @@ public class XArenaFuncs {
 				xab.setGameNumber(gameNum);
 
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+				qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
 				m_evaluatorQ.eval(qa);
 				if (doTrainEvaluation)
@@ -605,7 +588,7 @@ public class XArenaFuncs {
 
 			if (stopTest > 0 && (gameNum - 1) % numEval == 0 && stopEval > 0) {
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+				qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
 				if (doTrainEvaluation) {
 					m_evaluatorT.eval(qa);
@@ -824,7 +807,7 @@ public class XArenaFuncs {
 					xab.setGameNumber(gameNum);
 
 					// construct 'qa' anew (possibly wrapped agent for eval)
-					qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+					qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
 					m_evaluatorQ.eval(qa);
 					evalQ = m_evaluatorQ.getLastResult();
@@ -860,7 +843,7 @@ public class XArenaFuncs {
 			}
 
 			// construct 'qa' anew (possibly wrapped agent for eval)
-			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+			qa = wrapAgent(0, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
 			// evaluate again at the end of a training run:
 			m_evaluatorQ.eval(qa);
@@ -908,42 +891,6 @@ public class XArenaFuncs {
 		return pa;
 
 	} // multiTrain
-
-	// this method is obsolete now, we have competeNPlayerAllRoles()
-	// /**
-	// * Test player pa by playing competeNum games against opponent, both as X
-	// and as O.
-	// * Start each game with an empty board.
-	// * @param pa a trained agent
-	// * @param opponent a trained agent
-	// * @param startSO the start board position for the game
-	// * @param competeNum
-	// * @param verbose
-	// * @param gb obsolete now
-	// * @return the fitness of pa, which is +1 if pa always wins, 0 if always
-	// tie or if #win=#loose
-	// * and -1 if pa always looses.
-	// *
-	// * @see XArenaButtons
-	// */
-	// public static double competeBoth(PlayAgent pa, PlayAgent opponent,
-	// StateObservation startSO,
-	// int competeNum, int verbose, GameBoard gb) {
-	// double[] res;
-	// double resX, resO;
-	//
-	// res = XArenaFuncs.compete(pa, opponent, startSO, competeNum, verbose,
-	// null);
-	// resX = res[0] - res[2]; // X-win minus O-win percentage, \in [-1,1]
-	// // resp. \in [-1,0], if opponent never looses.
-	// // +1 is best for pa, -1 worst for pa.
-	// res = XArenaFuncs.compete(opponent, pa, startSO, competeNum, verbose,
-	// null);
-	// resO = res[2] - res[0]; // O-win minus X-win percentage, \in [-1,1]
-	// // resp. \in [-1,0], if opponent never looses.
-	// // +1 is best for pa, -1 worst for pa.
-	// return (resX+resO)/2.0;
-	// }
 
 	// --- the generalization of old method compete() to arbitrary N players ---
 	/**
@@ -1014,43 +961,6 @@ public class XArenaFuncs {
 		}
 
 		for (int k = 0; k < competeNum; k++) {
-
-			// These six lines are fudge factors, but currently needed to get an
-			// Othello competition running:
-			// We need to initialize Edax for a new game before each competition
-			// game and 
-			// We need to reset startSO's member lastMoves to an empty array in order that Edax
-			// makes on its first call
-			// of getNextAction2 (where firstTurn==true) the right decision.
-//			for (int n = 0; n < numPlayers; n++) {
-//				if (paVector.pavec[n] instanceof Edax)
-//					((Edax) paVector.pavec[n]).initForNewGame();
-//			}
-//			if (startSO instanceof StateObserverOthello)
-//				((StateObserverOthello) startSO).resetLastMoves();
-			//
-			// This is all not a nice design, because very
-			// Othello-specific things are part of
-			// XArenaFuncs.compete(). Instead we should better generalize the
-			// interface of
-			// (1) PlayAgent such that there is initForNewGame(), which
-			// initializes this agent for a new
-			// game (command "init" for Edax, nothing to do for all other
-			// agents)
-			// (2) StateObservation, such that there is reset(), which resets
-			// this startSO to be a valid
-			// start state (empty lastMoves for StateObserverOthello, nothing to
-			// do for all other)
-			// Another thing TODO:
-			// If Edax is initialized for a new game, it will start from the
-			// default start position.
-			// If startSO deviates from this, this is not yet transported over
-			// to Edax. We need an additional
-			// interface member
-			// initForNewGame(StateObservation startSO)
-			//
-			// But probably all of this is not needed, if we can eliminate Edax
-			// in favor of Edax2
 
 			int player = startSO.getPlayer();
 			so = startSO.copy();
@@ -1123,344 +1033,6 @@ public class XArenaFuncs {
 		}
 		return scMean;
 	}
-
-	// now obsolete, we have competeNPlayer
-	// public static double compete3(PlayAgent pa, PlayAgent opponent, PlayAgent
-	// opponent2, StateObservation startSO,
-	// int competeNum, int verbose, GameBoard gb)
-	// {
-	// double[] res;
-	// // now passed as parameter
-	// //StateObservation startSO = gb.getDefaultStartState(); // empty board
-	//
-	// res = XArenaFuncs.compete3Player(pa, opponent, opponent2, startSO,
-	// competeNum, verbose, null);
-	// // X-win minus O-win percentage, \in [-1,1]
-	// // resp. \in [-1,0], if opponent never looses.
-	// // +1 is best for pa, -1 worst for pa.
-	// return res[0];
-	// }
-
-	// now obsolete, we have competeNPlayer
-	// public double [] singleCompete3(XArenaButtons xab, GameBoard gb)
-	// {
-	// int competeNum = xab.winCompOptions.getNumGames();
-	// int numPlayers = gb.getStateObs().getNumPlayers();
-	// double [] res = {0.0,0.0,0.0,0.0};
-	// try
-	// {
-	// String P0 = xab.getSelectedAgent(0);
-	// String P1 = xab.getSelectedAgent(1);
-	// String P2 = xab.getSelectedAgent(2);
-	// if (P0.equals("Human") | P1.equals("Human") | P2.equals("Human") )
-	// {
-	// m_Arena.showMessage( "No compete for agent Human", "Error",
-	// JOptionPane.ERROR_MESSAGE);
-	// return res;
-	// }
-	// else
-	// {
-	// StateObservation startSO = gb.getDefaultStartState(); // empty board
-	//
-	// PlayAgent[] paVector = fetchAgents(xab);
-	//
-	// AgentBase.validTrainedAgents(paVector,numPlayers); // may throw
-	// RuntimeException
-	//
-	// PlayAgent[] qaVector = wrapAgents(paVector,xab,startSO);
-	//
-	// int verbose=1;
-	//
-	// ScoreTuple sc = competeNPlayer(new PlayAgtVector(qaVector), startSO,
-	// competeNum, verbose, null);
-	//
-	// res =
-	// compete3Player(qaVector[0],qaVector[1],qaVector[2],startSO,competeNum,verbose,
-	// null);
-	// System.out.println(Arrays.toString(res));
-	// return res;
-	// }
-	//
-	//
-	//
-	// } catch(RuntimeException ex) {
-	// m_Arena.showMessage( ex.getMessage(), "Error",
-	// JOptionPane.ERROR_MESSAGE);
-	// return res;
-	// }
-	// }
-
-	// now obsolete, we have competeNPlayer
-	// /**
-	// * Perform a competition paX vs. paO consisting of competeNum games,
-	// starting from StateObservation startSO.
-	// * @param paX PlayAgent, a trained agent
-	// * @param paO PlayAgent, a trained agent
-	// * @param startSO the start board position for the game
-	// * @param competeNum the number of episodes to play
-	// * @param verbose 0: silent, 1,2: more print-out
-	// * @param nextTimes storage to save time measurements, null if not needed
-	// (currently only used
-	// * by tournament system). If {@code nextTimes} is not null, some extra
-	// info for the tournament
-	// * log is printed to {@code System.out}.
-	// * @return double[3], the percentage of episodes with X-win, tie, O-win
-	// */
-	// public static double[] compete(PlayAgent paX, PlayAgent paO,
-	// StateObservation startSO,
-	// int competeNum, int verbose, TSTimeStorage[] nextTimes) {
-	// double[] winrate = new double[3];
-	// int xwinCount=0, owinCount=0, tieCount=0;
-	// double moveCount = 0.0;
-	// DecimalFormat frm = new DecimalFormat("#0.000");
-	// boolean nextMoveSilent = (verbose<2 ? true : false);
-	// StateObservation so;
-	// Types.ACTIONS actBest;
-	//
-	// String paX_string = paX.stringDescr();
-	// String paO_string = paO.stringDescr();
-	// if (verbose>0) System.out.println("Competition, "+competeNum+" episodes:
-	// \n"
-	// +" "+paX_string + "\n"
-	// +" vs "+paO_string);
-	//
-	// if (nextTimes != null) {
-	// // some diagnostic info to print when called via tournament system:
-	// System.out.println("Competition: "+competeNum+" episodes "+paX_string+"
-	// vs "+paO_string/*+" with "+rndmStartMoves+" random startmoves"*/);
-	// String currDateTime =
-	// LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
-	// System.out.println("Episode Start @ "+currDateTime);
-	// System.out.println("start state: "+startSO);
-	// }
-	//
-	// for (int k=0; k<competeNum; k++) {
-	// // These four lines are fudge factors, but currently needed to get an
-	// Othello competition running:
-	// // We need to initialize Edax for a new game before each competition game
-	// and we need to reset
-	// // startSO's member lastMoves to an empty array in order that Edax makes
-	// on its first call
-	// // of getNextAction2 (where firstTurn==true) the right decision.
-	// if (paX instanceof Edax) ((Edax) paX).initForNewGame(); // paX = new
-	// Edax();
-	// if (paO instanceof Edax) ((Edax) paO).initForNewGame(); // paO = new
-	// Edax();
-	// if (startSO instanceof StateObserverOthello)
-	// ((StateObserverOthello) startSO).resetLastMoves();
-	// //
-	// // TODO: this is all not a nice design, because very Othello-specific
-	// things are part of
-	// // XArenaFuncs.compete(). Instead we should better generalize the
-	// interface of
-	// // (1) PlayAgent such that there is initForNewGame(), which initializes
-	// this agent for a new
-	// // game (command "init" for Edax, nothing to do for all other agents)
-	// // (2) StateObservation, such that there is reset(), which resets this
-	// startSO to be a valid
-	// // start state (empty lastMoves for StateObserverOthello, nothing to do
-	// for all other)
-	// // Another thing TODO:
-	// // If Edax is initialized for a new game, it will start from the default
-	// start position.
-	// // If startSO deviates from this, this is not yet transported over to
-	// Edax. We need an additional
-	// // interface member
-	// // initForNewGame(StateObservation startSO)
-	// //
-	// // But probably all of this is not needed, if we can eliminate Edax in
-	// favor of Edax2
-	//
-	// int Player = Types.PLAYER_PM[startSO.getPlayer()];
-	// so = startSO.copy();
-	//
-	// while(true)
-	// {
-	//
-	// if(Player==1){ // make a X-move
-	//// int n=so.getNumAvailableActions();
-	// long startTNano = System.nanoTime();
-	// actBest = paX.getNextAction2(so, false, nextMoveSilent);
-	// long endTNano = System.nanoTime();
-	// if (nextTimes!=null) nextTimes[0].addNewTimeNS(endTNano-startTNano);
-	// so.advance(actBest);
-	// //Player=-1; // WK: bug, will not work for Othello, where the other
-	// player may pass
-	// Player = Types.PLAYER_PM[so.getPlayer()];
-	// }
-	// else // i.e. O-Move
-	// {
-	//// int n=so.getNumAvailableActions();
-	// long startTNano = System.nanoTime();
-	// actBest = paO.getNextAction2(so, false, nextMoveSilent);
-	// long endTNano = System.nanoTime();
-	// if (nextTimes!=null) nextTimes[1].addNewTimeNS(endTNano-startTNano);
-	// so.advance(actBest);
-	// //Player=+1; // WK: bug, will not work for Othello, where the other
-	// player may pass
-	// Player = Types.PLAYER_PM[so.getPlayer()];
-	// }
-	// if (so.isGameOver()) {
-	// ScoreTuple sc = so.getGameScoreTuple();
-	// int winner = sc.argmax();
-	// if (sc.max()==0.0) winner = -2; // tie indicator
-	// switch (winner) {
-	// case (0):
-	// if (verbose>0) System.out.println(k+": X wins");
-	// xwinCount++;
-	// break;
-	// case (1):
-	// if (verbose>0) System.out.println(k+": O wins");
-	// owinCount++;
-	// break;
-	// case (-2):
-	// if (verbose>0) System.out.println(k+": Tie");
-	// tieCount++;
-	// break;
-	// } // switch(winner)
-	//
-	// // this old version used getGameWinner(), which has a difficult to
-	// // understand and difficult to generalize interface --> make it obsolete
-	//// int res = so.getGameWinner().toInt();
-	//// moveCount += so.getMoveCounter();
-	//// // res is +1/0/-1 for X/tie/O win
-	//// int player = Types.PLAYER_PM[so.getPlayer()];
-	//// switch (res*player) {
-	//// case -1:
-	//// if (verbose>0) System.out.println(k+": O wins");
-	//// owinCount++;
-	//// break;
-	//// case 0:
-	//// if (verbose>0) System.out.println(k+": Tie");
-	//// tieCount++;
-	//// break;
-	//// case +1:
-	//// if (verbose>0) System.out.println(k+": X wins");
-	//// xwinCount++;
-	//// break;
-	//// }
-	//
-	// break; // out of while
-	//
-	// } // if (so.isGameOver())
-	// } // while(true)
-	//
-	// } // for (k)
-	// winrate[0] = (double)xwinCount/competeNum;
-	// winrate[1] = (double) tieCount/competeNum;
-	// winrate[2] = (double)owinCount/competeNum;
-	// moveCount /= competeNum;
-	//
-	// if (verbose>0) {
-	// if (verbose>1) {
-	// System.out.print("win rates: ");
-	// for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+" ");
-	// System.out.println(" (X/Tie/O)");
-	// }
-	// System.out.println("Avg # moves in "+ competeNum +" episodes = "+
-	// frm.format(moveCount));
-	// }
-	//
-	// return winrate;
-	// } // compete
-
-	// now obsolete, we have competeNPlayer
-	// public static double[] compete3Player(PlayAgent pa0, PlayAgent pa1,
-	// PlayAgent pa2, StateObservation startSO,
-	// int competeNum, int verbose, TSTimeStorage[] nextTimes) {
-	// double[] winrate = new double[3];
-	// int winCount0 = 0, winCount1 = 0, winCount2 = 2;
-	// double moveCount = 0.0;
-	// DecimalFormat frm = new DecimalFormat("#0.000");
-	// boolean nextMoveSilent = (verbose<2 ? true : false);
-	// StateObservation so;
-	// Types.ACTIONS actBest;
-	//
-	// String pa0_string = pa0.stringDescr();
-	// String pa1_string = pa1.stringDescr();
-	// String pa2_string = pa2.stringDescr();
-	// if (verbose>0) System.out.println("Competition, "+competeNum+" episodes:
-	// \n"
-	// +" "+pa0_string + "\n"
-	// +" vs "+pa1_string);
-	//
-	// if (nextTimes != null) {
-	// // some diagnostic info to print when called via tournament system:
-	// System.out.println("Competition: "+competeNum+" episodes "+pa0_string+"
-	// vs "+pa1_string/*+" with "+rndmStartMoves+" random startmoves"*/);
-	// String currDateTime =
-	// LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
-	// System.out.println("Episode Start @ "+currDateTime);
-	// System.out.println("start state: "+startSO);
-	// }
-	//
-	// for (int k=0; k<competeNum; k++) {
-	// int player = startSO.getPlayer();
-	// so = startSO.copy();
-	//
-	// while(true)
-	// {
-	//
-	// if(player == 0)
-	// {
-	// long startTNano = System.nanoTime();
-	// actBest = pa0.getNextAction2(so, false, nextMoveSilent);
-	// long endTNano = System.nanoTime();
-	// if (nextTimes!=null) nextTimes[0].addNewTimeNS(endTNano-startTNano);
-	// so.advance(actBest);
-	// player = so.getPlayer();
-	// }
-	// else if(player == 1)
-	// {
-	// long startTNano = System.nanoTime();
-	// actBest = pa1.getNextAction2(so, false, nextMoveSilent);
-	// long endTNano = System.nanoTime();
-	// if (nextTimes!=null) nextTimes[1].addNewTimeNS(endTNano-startTNano);
-	// so.advance(actBest);
-	// player = so.getPlayer();
-	// }
-	// else
-	// {
-	// long startTNano = System.nanoTime();
-	// actBest = pa2.getNextAction2(so, false, nextMoveSilent);
-	// long endTNano = System.nanoTime();
-	// if (nextTimes!=null) nextTimes[2].addNewTimeNS(endTNano-startTNano);
-	// so.advance(actBest);
-	// player = so.getPlayer();
-	// }
-	// if (so.isGameOver())
-	// {
-	// winCount0 += so.getGameScore(0);
-	// winCount1 += so.getGameScore(1);
-	// winCount2 += so.getGameScore(2);
-	// moveCount += so.getMoveCounter();
-	// // res is +1/0/-1 for X/tie/O win
-	//
-	//
-	// break; // out of while
-	//
-	// } // if (so.isGameOver())
-	// } // while(true)
-	//
-	// } // for (k)
-	//
-	// winrate[0] = (double) winCount0/competeNum;
-	// winrate[1] = (double) winCount1/competeNum;
-	// winrate[2] = (double) winCount2/competeNum;
-	// moveCount /= competeNum;
-	//
-	// if (verbose>0) {
-	// if (verbose>1) {
-	// System.out.print("win rates: ");
-	// for (int i=0; i<3; i++) System.out.print(frm.format(winrate[i])+" ");
-	// System.out.println(" (X/Tie/O)");
-	// }
-	// System.out.println("Avg # moves in "+ competeNum +" episodes = "+
-	// frm.format(moveCount));
-	// }
-	//
-	// return winrate;
-	// }
 
 	/**
 	 * Does the main work for menu items 'Single Compete', 'Swap Compete' and

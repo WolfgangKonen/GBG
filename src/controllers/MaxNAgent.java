@@ -27,7 +27,7 @@ import javax.swing.JOptionPane;
  * The Max-N agent implements the Max-N algorithm [Korf91] via interface {@link PlayAgent}. 
  * Max-N is the generalization of the well-known Minimax agent to N players. It works on {@link ScoreTuple}, 
  * an N-tuple of game scores. It traverses the game tree up to a prescribed 
- * depth (default: 10, see {@link MaxNParams}). To speed up calculations, already 
+ * depth (default: 10, see {@link ParMaxN}). To speed up calculations, already 
  * visited states are stored in a HashMap.  
  * <p>
  * {@link MaxNAgent} is for <b>deterministic</b> games. For non-deterministic games see 
@@ -40,6 +40,7 @@ import javax.swing.JOptionPane;
  * 
  * @see ScoreTuple
  * @see ExpectimaxNAgent
+ * @see ParMaxN
  * @see MaxNParams
  */
 public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
@@ -88,7 +89,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		hm = new HashMap<String, ScoreTuple>();
 		super.setAgentState(AgentState.TRAINED);
 		m_depth = mPar.getMaxNDepth();
-		m_useHashMap = mPar.useMaxNHashmap();
+		m_useHashMap = mPar.getMaxNUseHashmap();
 //		m_oPar = new ParOther(oPar);		// AgentBase::m_oPar
 	}
 		

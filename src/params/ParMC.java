@@ -2,11 +2,13 @@ package params;
 
 import java.io.Serializable;
 
+import javax.swing.JPanel;
+
 import controllers.MC.MCAgentConfig;
 import controllers.MC.MCAgentN;
 
 /**
- * MC (Monte Carlo) parameters for board games.<p>
+ * Parameters for MC (Monte Carlo) agent {@link MCAgentN}.<p>
  *
  * These parameters and their [defaults] are: <ul>
  * <li> <b>Iterations</b>: 	    [1000]  number of iterations during MC search
@@ -27,6 +29,12 @@ public class ParMC implements Serializable {
 	private int rolloutDepth = MCAgentConfig.DEFAULT_ROLLOUTDEPTH;
     private boolean calcCertainty = MCAgentConfig.DOCALCCERTAINTY; 
 
+    /**
+     * This member is only constructed when the constructor {@link #ParMC(boolean) ParMC(boolean withUI)} 
+     * called with {@code withUI=true}. It holds the GUI for {@link ParMC}.
+     */
+    private transient MCParams mcparams = null;
+
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 
@@ -36,23 +44,52 @@ public class ParMC implements Serializable {
 
 	public ParMC() {	}
     
+	public ParMC(boolean withUI) {
+		if (withUI)
+			mcparams = new MCParams();
+	}
+	
     public ParMC(ParMC tp) {
-		this.numIters = tp.getNumIter();
-		this.numAgents = tp.getNumAgents();
-		this.rolloutDepth = tp.getRolloutDepth();
-		this.calcCertainty = tp.getCalcCertainty();
+    	this.setFrom(tp);
     }
     
     public ParMC(MCParams tp) { 
     	this.setFrom(tp);
     }
     
+	public void setFrom(ParMC tp) {
+		this.numIters = tp.getNumIter();
+		this.numAgents = tp.getNumAgents();
+		this.rolloutDepth = tp.getRolloutDepth();
+		this.calcCertainty = tp.getCalcCertainty();
+		
+		if (mcparams!=null)
+			mcparams.setFrom(this);
+	}
+
 	public void setFrom(MCParams tp) {
 		this.numIters = tp.getNumIter();
 		this.numAgents = tp.getNumAgents();
 		this.rolloutDepth = tp.getRolloutDepth();
 		this.calcCertainty = tp.getCalcCertainty();
+		
+		if (mcparams!=null)
+			mcparams.setFrom(this);
 	}
+
+	/**
+	 * Call this from XArenaFuncs constructAgent or fetchAgent to get the latest changes from GUI
+	 */
+	public void pushFromMCParams() {
+		if (mcparams!=null)
+			this.setFrom(mcparams);
+	}
+	
+    public JPanel getPanel() {
+		if (mcparams!=null)		
+			return mcparams.getPanel();
+		return null;
+    }
 
     public int getNumIter() {
 		return numIters;
@@ -69,15 +106,25 @@ public class ParMC implements Serializable {
 
 	public void setIterations(int numIters) {
 		this.numIters = numIters;
+		if (mcparams!=null)
+			mcparams.setNumIter(numIters);
 	}
 	public void setNumAgents(int numAgents) {
 		this.numAgents = numAgents;
+		if (mcparams!=null)
+			mcparams.setNumAgents(numAgents);
 	}
+	
 	public void setRolloutDepth(int rolloutDepth) {
 		this.rolloutDepth = rolloutDepth;
+		if (mcparams!=null)
+			mcparams.setRolloutDepth(rolloutDepth);
 	}
+	
 	public void setCalcCertainty(boolean calcCertainty) {
 		this.calcCertainty = calcCertainty;
+		if (mcparams!=null)
+			mcparams.setCalcCertainty(calcCertainty);
 	}
 
 }

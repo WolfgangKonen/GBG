@@ -513,7 +513,7 @@ public class XArenaFuncs
 				xab.GameNumT.setText(Integer.toString(gameNum ) );
 				
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+				qa = wrapAgent(n, pa, xab.oPar[n], new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 
 		        m_evaluatorQ.eval(qa);
 				if (doTrainEvaluation)
@@ -541,7 +541,7 @@ public class XArenaFuncs
 			
 			if (stopTest>0 && (gameNum-1)%numEval==0 && stopEval>0) {
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+				qa = wrapAgent(n, pa, xab.oPar[n], new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 		        
 				if (doTrainEvaluation) {
 					m_evaluatorT.eval(qa);
@@ -741,7 +741,7 @@ public class XArenaFuncs
 					xab.GameNumT.setText(Integer.toString(gameNum ) );
 					
 					// construct 'qa' anew (possibly wrapped agent for eval)
-					qa = wrapAgent(n, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+					qa = wrapAgent(n, pa, xab.oPar[n], new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 			        
 					m_evaluatorQ.eval(qa);
 					evalQ = m_evaluatorQ.getLastResult();
@@ -778,7 +778,7 @@ public class XArenaFuncs
 				
 			
 			// construct 'qa' anew (possibly wrapped agent for eval)
-			qa = wrapAgent(0, pa, new ParOther(xab.oPar[n]), new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
+			qa = wrapAgent(0, pa, xab.oPar[n], new ParMaxN(xab.maxnParams[n]), gb.getStateObs());
 
 	        // evaluate again at the end of a training run:
 			m_evaluatorQ.eval(qa);

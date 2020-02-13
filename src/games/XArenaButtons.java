@@ -50,11 +50,11 @@ public class XArenaButtons //extends JPanel
 	public ParTD[] tdPar;
 	public ParNT[] ntPar;
 	public ParOther[] oPar;
-	public MaxNParams[] maxnParams;
-	public MCTSParams[] mctsParams;
-	public MCParams[] mcParams;
-	public MCTSExpectimaxParams[] mctseParams;
-	public EdaxParams[] edParams;
+	public ParMaxN[] maxnPar;
+	public ParMCTS[] mctsPar;
+	public ParMC[] mcPar;
+	public ParMCTSE[] mctsePar;
+	public ParEdax[] edPar;
 	public String[] selectedAgents;
 
 	// tournament system remote data input
@@ -80,12 +80,12 @@ public class XArenaButtons //extends JPanel
 			: "GUI not configured for "+numPlayers+" players. Increase Types.GUI_PLAYER_NAME and GUI_AGENT_INITIAL";
 		tdPar = new ParTD[numPlayers];
 		ntPar = new ParNT[numPlayers];
-		maxnParams = new MaxNParams[numPlayers];
-		mctsParams = new MCTSParams[numPlayers];
-		mcParams = new MCParams[numPlayers];
-		mctseParams = new MCTSExpectimaxParams[numPlayers];
 		oPar = new ParOther[numPlayers];
-		edParams = new EdaxParams[numPlayers];
+		maxnPar = new ParMaxN[numPlayers];
+		mctsPar = new ParMCTS[numPlayers];
+		mcPar = new ParMC[numPlayers];
+		mctsePar = new ParMCTSE[numPlayers];
+		edPar = new ParEdax[numPlayers];
 		selectedAgents = new String[numPlayers];
 		AgentX = null;
 		AgentO = null;
@@ -98,11 +98,11 @@ public class XArenaButtons //extends JPanel
 			tdPar[n] = new ParTD(m_arena.withUI);
 			ntPar[n] = new ParNT(m_arena.withUI);
 			oPar[n] = new ParOther(m_arena.withUI);
-			maxnParams[n] = new MaxNParams();
-			mctsParams[n] = new MCTSParams();
-			mcParams[n] = new MCParams();
-			mctseParams[n] = new MCTSExpectimaxParams();
-			edParams[n] = new EdaxParams();
+			maxnPar[n] = new ParMaxN(m_arena.withUI);
+			mctsPar[n] = new ParMCTS(m_arena.withUI);
+			mcPar[n] = new ParMC(m_arena.withUI);
+			mctsePar[n] = new ParMCTSE(m_arena.withUI);
+			edPar[n] = new ParEdax(m_arena.withUI);
 			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_arena.getGameName());
 			
 			try {
@@ -170,9 +170,9 @@ public class XArenaButtons //extends JPanel
 		ntPar[n].setParamDefaults(agentName, gameName);
 		ntPar[n].setFixedCoList(m_arena.makeXNTupleFuncs().getAvailFixedNTupleModes(),
 								m_arena.makeXNTupleFuncs().fixedTooltipString());
-		mctsParams[n].setParamDefaults(agentName, gameName, numPlayers);
-		mctseParams[n].setParamDefaults(agentName, gameName, numPlayers);
-		maxnParams[n].setParamDefaults(agentName, gameName, numPlayers);
+		mctsPar[n].setParamDefaults(agentName, gameName, numPlayers);
+		mctsePar[n].setParamDefaults(agentName, gameName, numPlayers);
+		maxnPar[n].setParamDefaults(agentName, gameName, numPlayers);
 		oPar[n].setParamDefaults(agentName, gameName);
 
 		switch (agentName) {
@@ -391,21 +391,21 @@ public class XArenaButtons //extends JPanel
 		oPar[n].setFrom( parOther );
 	}
 	public void setEdaxParFrom(int n, ParEdax parEdax) {
-		edParams[n].setFrom( parEdax );
+		edPar[n].setFrom( parEdax );
 	}
 	public void setMaxNParFrom(int n, ParMaxN parMaxN) {
-		maxnParams[n].setFrom( parMaxN );
+		maxnPar[n].setFrom( parMaxN );
 	}
 	public void setMaxNDepthFrom(int n, int depth) {
-		maxnParams[n].setMaxnDepth(depth);
+		maxnPar[n].setMaxNDepth(depth);
 	}
 	public void setMcParFrom(int n, ParMC parMC) {
-		mcParams[n].setFrom( parMC );
+		mcPar[n].setFrom( parMC );
 	}
 	public void setMctsParFrom(int n, ParMCTS parMcts) {
-		mctsParams[n].setFrom( parMcts );
+		mctsPar[n].setFrom( parMcts );
 	}
 	public void setMctseParFrom(int n, ParMCTSE parMctse) {
-		mctseParams[n].setFrom( parMctse );
+		mctsePar[n].setFrom( parMctse );
 	}
 } // class XArenaButtons	

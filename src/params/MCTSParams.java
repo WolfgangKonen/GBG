@@ -25,7 +25,8 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
- * MCTS (Monte Carlo Tree Search) parameters for board games.<p>
+ * This class realizes the parameter settings (GUI tab) for MCTS (Monte Carlo Tree Search) 
+ * (class {@link MCTSAgentT}).<p>
  *  
  * These parameters and their [defaults] are: <ul>
  * <li> <b>Iterations</b>: 	[1000] number of iterations during MCTS search 
@@ -35,9 +36,9 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
  * </ul>
  * The defaults are defined in {@link ParMCTS}. 
  * 
+ * @see ParMCTS
  * @see MCTSAgentT
  * @see SingleMCTSPlayer
- * @see ParMCTS
  */
 public class MCTSParams extends Frame implements Serializable
 {
@@ -106,6 +107,7 @@ public class MCTSParams extends Frame implements Serializable
 				enableUCTPart();
 			}
 		});
+		choiceSelector.setEnabled(true);
 
 		mPanel = new JPanel();		// put the inner buttons into panel mPanel. This panel
 									// can be handed over to a tab of a JTabbedPane object
@@ -271,6 +273,7 @@ public class MCTSParams extends Frame implements Serializable
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 * @param numPlayers
 	 */
+	@Deprecated
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
 		switch (agentName) {
 		case "MCTS": 

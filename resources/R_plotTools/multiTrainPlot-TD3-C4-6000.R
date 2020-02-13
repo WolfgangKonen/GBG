@@ -36,8 +36,8 @@ filenames=c("multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
            #,".csv"
            #,".csv"
            )
-# suffix -DLm: evalQ is MCTS, evalT is AB with Distant Losses (DL),
-# suffix -ALm: both evaluators AB, 1st one w/o DL, 2nd one with DL,
+# suffix -DLm: evalQ is MCTS (0), evalT is AB with Distant Losses DL (5),
+# suffix -ALm: both evaluators AB, 1st one w/o DL (3), 2nd one with DL (5),
 # in both cases the evaluators MCTS or AlphaBeta (AB) play 2nd --> ideal winrate is 1.0
 # in both cases the 'm' means that runs were performed on maanbs05.
 # suffix -noFA: no final adaptation RL (FARL) step.
