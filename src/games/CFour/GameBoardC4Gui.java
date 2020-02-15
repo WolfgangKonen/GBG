@@ -37,13 +37,13 @@ public class GameBoardC4Gui extends JFrame {
 	private double[] VTable;
 	private JLabel leftInfo=new JLabel("");
 	private JLabel rightInfo=new JLabel(""); 
-//	// the colors of the TH Koeln logo (used for button coloring):
+//	// the colors of the TH Koeln logo (currently not used):
 //	private Color colTHK1 = new Color(183,29,13);
 //	private Color colTHK2 = new Color(255,137,0);
 //	private Color colTHK3 = new Color(162,0,162);
 	
 	/**
-	 * a reference to the 'parent' GameBoardC4 object
+	 * a reference to the 'parent' {@link GameBoardC4} object
 	 */
 	private GameBoardC4 m_gb=null;
 	/**
@@ -126,7 +126,7 @@ public class GameBoardC4Gui extends JFrame {
 	}
 	
 	/**
-	 * Update the play board and the associated values (labels) to the state in m_so.
+	 * Update the play board and the associated values (labels) to the state in soT.
 	 * The labels contain the values (scores) for each unoccupied board position (raw score*100).  
 	 * Occupied board positions have black/white background color, unoccupied positions are orange.
 	 * 

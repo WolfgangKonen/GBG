@@ -54,7 +54,7 @@ public class LoadSaveGBG {
 		this.arenaFrame = areFrame;
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
-		if (arenaGame.withUI) {
+		if (arenaGame.hasGUI()) {
 			fc = new JFileChooserApprove();
 			fc.setCurrentDirectory(new File(strDir));			
 		}

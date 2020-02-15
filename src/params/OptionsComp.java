@@ -108,7 +108,7 @@ public class OptionsComp extends JFrame {
 	}
 	
 	public void showOptionsComp(Arena arena,boolean isVisible) {
-		if (arena.withUI) {
+		if (arena.hasGUI()) {
 			// place window winCompOptions on the right side of the XArenaTabs window
 			this.setVisible(isVisible);
 			int x = arena.m_xab.getX() + arena.m_xab.getWidth() + 8;

@@ -52,7 +52,6 @@ abstract public class Arena implements Runnable {
 		, COMPETE, SWAPCMP, ALLCMP, TRNEMNT, IDLE
 	};
 
-	public static boolean withUI=true;
 	public XArenaFuncs m_xfun;
 	public GBGLaunch m_LauncherObj = null;
 	public XArenaTabs m_tabs = null;
@@ -72,6 +71,7 @@ abstract public class Arena implements Runnable {
 	public int currentSleepDuration = 0;
 	public LogManager logManager;
 	private int logSessionid;
+	private boolean withUI=true;	// whether to start GUI or not
 
 	// TS variables
 	private final String TAG = "[Arena] ";
@@ -1038,6 +1038,10 @@ abstract public class Arena implements Runnable {
 		return res;
 	}
 
+	public boolean hasGUI() {
+		return withUI;
+	}
+	
 	/**
 	 * @return true, if there is at least one human agent in the game
 	 */

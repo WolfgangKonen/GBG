@@ -69,7 +69,7 @@ public class XArenaButtons //extends JPanel
 		m_xfun = game;
 		m_arena = arena;
 		
-		if (m_arena.withUI) {
+		if (m_arena.hasGUI()) {
 			m_XAB_gui = new XArenaButtonsGui(arena);
 			winCompOptions = new OptionsComp(competeNumber); // window with Competition Options
 		}
@@ -95,14 +95,14 @@ public class XArenaButtons //extends JPanel
 		for (int n=numPlayers-1; n>=0; n--) {
 			selectedAgents[n] = Types.GUI_AGENT_INITIAL[n];
 			
-			tdPar[n] = new ParTD(m_arena.withUI);
-			ntPar[n] = new ParNT(m_arena.withUI);
-			oPar[n] = new ParOther(m_arena.withUI);
-			maxnPar[n] = new ParMaxN(m_arena.withUI);
-			mctsPar[n] = new ParMCTS(m_arena.withUI);
-			mcPar[n] = new ParMC(m_arena.withUI);
-			mctsePar[n] = new ParMCTSE(m_arena.withUI);
-			edPar[n] = new ParEdax(m_arena.withUI);
+			tdPar[n] = new ParTD(m_arena.hasGUI());
+			ntPar[n] = new ParNT(m_arena.hasGUI());
+			oPar[n] = new ParOther(m_arena.hasGUI());
+			maxnPar[n] = new ParMaxN(m_arena.hasGUI());
+			mctsPar[n] = new ParMCTS(m_arena.hasGUI());
+			mcPar[n] = new ParMC(m_arena.hasGUI());
+			mctsePar[n] = new ParMCTSE(m_arena.hasGUI());
+			edPar[n] = new ParEdax(m_arena.hasGUI());
 			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_arena.getGameName());
 			
 			try {
@@ -136,7 +136,7 @@ public class XArenaButtons //extends JPanel
 
 		} // for
 
-		if (m_arena.withUI) {
+		if (m_arena.hasGUI()) {
 			m_XAB_gui.configureGui();
 			
 			if (m_arena.getGameName()=="ConnectFour") {

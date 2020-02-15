@@ -34,7 +34,7 @@ import tools.Types;
 //import c4.Agent;
 
 /**
- * Contains the GUI
+ * Contains the GUI for Connect Four
  * 
  * @author Markus Thill
  * 

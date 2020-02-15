@@ -87,7 +87,7 @@ public class XArenaFuncs {
 		numPlayers = arena.getGameBoard().getStateObs().getNumPlayers();
 		m_PlayAgents = new PlayAgent[numPlayers];
 		rand = new Random(System.currentTimeMillis());
-		if (m_Arena.withUI) {
+		if (m_Arena.hasGUI()) {
 			lChart = new LineChartSuccess("Training Progress", "gameNum", "", true, false);
 			wChart = new DeviationWeightsChart("", "gameNum", "", true, false);
 		}

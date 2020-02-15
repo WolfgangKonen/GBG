@@ -48,7 +48,7 @@ public class GameBoardC4 implements GameBoard {
 	protected StateObserverC4 m_so;
 	protected Random rand;
 	protected boolean arenaActReq=false;
-	private GameBoardC4Gui m_gameFrame = null;
+	private GameBoardC4Gui m_gameGui = null;
 	
 	public GameBoardC4(Arena arGame) {
 		initGameBoard(arGame);
@@ -59,8 +59,8 @@ public class GameBoardC4 implements GameBoard {
 		m_Arena		= arGame;
 		m_so		= new StateObserverC4();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.withUI) {
-        	m_gameFrame = new GameBoardC4Gui(this);
+        if (m_Arena.hasGUI()) {
+        	m_gameGui = new GameBoardC4Gui(this);
         }
 
 	}
@@ -84,8 +84,8 @@ public class GameBoardC4 implements GameBoard {
 		if (boardClear) {
 			m_so = new StateObserverC4();			// empty Table
 		}
-		if (m_gameFrame!=null)
-			m_gameFrame.clearBoard(boardClear, vClear, m_so);
+		if (m_gameGui!=null)
+			m_gameGui.clearBoard(boardClear, vClear, m_so);
 	}
 
 	/**
@@ -110,8 +110,8 @@ public class GameBoardC4 implements GameBoard {
 			
 		} // if(so!=null)
 		
-		if (m_gameFrame!=null)
-			m_gameFrame.guiUpdateBoard(soT, m_Arena.taskState, withReset,showValueOnGameboard);
+		if (m_gameGui!=null)
+			m_gameGui.guiUpdateBoard(soT, m_Arena.taskState, withReset,showValueOnGameboard);
 	}
 
 	/**
@@ -232,26 +232,26 @@ public class GameBoardC4 implements GameBoard {
     
 	@Override
 	public void enableInteraction(boolean enable) {
-		if (m_gameFrame!=null)
-			m_gameFrame.enableInteraction(enable);
+		if (m_gameGui!=null)
+			m_gameGui.enableInteraction(enable);
 	}
 
 	@Override
 	public void showGameBoard(Arena ticGame, boolean alignToMain) {
-		if (m_gameFrame!=null)
-			m_gameFrame.showGameBoard(ticGame, alignToMain);
+		if (m_gameGui!=null)
+			m_gameGui.showGameBoard(ticGame, alignToMain);
 	}
 
    @Override
 	public void toFront() {
-		if (m_gameFrame!=null)
-			m_gameFrame.toFront();
+		if (m_gameGui!=null)
+			m_gameGui.toFront();
 	}
 
    @Override
    public void destroy() {
-		if (m_gameFrame!=null)
-			m_gameFrame.destroy();
+		if (m_gameGui!=null)
+			m_gameGui.destroy();
    }
 
 }

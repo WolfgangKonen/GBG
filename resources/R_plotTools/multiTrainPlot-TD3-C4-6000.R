@@ -53,7 +53,8 @@ for (k in 1:length(filenames)) {
   filename <- paste0(path,filenames[k])
   df <- read.csv(file=filename, dec=".",skip=2)
   df$run <- as.factor(df$run)
-  df <- df[,setdiff(names(df),c("trnMoves","elapsedTime", "movesSecond","lambda","null","X","X.1"))]
+  df <- df[,setdiff(names(df),c("trnMoves", "movesSecond","lambda","null","X","X.1"))]
+  #,"elapsedTime"
   #if (k==1) df <- cbind(df,actionNum=rep(0,nrow(df)))
   
   if (PLOTALLLINES) {
@@ -99,6 +100,7 @@ tgc2 <- cbind(tgc2,evalMode=rep("AB-DL",nrow(tgc2)))
 names(tgc2)[5] <- "eval"  # rename "evalT"
 tgc <- rbind(tgc1,tgc2) # AB & MCTS
 #tgc <- tgc2              # AB only
+tgcT <- summarySE(dfBoth, measurevar="elapsedTime", groupvars=c(gamesVar,"algo","targetMode"))
 z=aggregate(dfBoth$evalT,dfBoth[,c(gamesVar,"algo","targetMode")],mean)
 tgc$algo <- as.factor(tgc$algo)
 tgc$targetMode <- as.factor(tgc$targetMode)

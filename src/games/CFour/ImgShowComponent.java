@@ -6,10 +6,11 @@ import javax.swing.JPanel;
 
 /**
  * Allows to create the graphics for single fields of the board and to replace
- * them by other images
+ * them by other images. Helper for {@link C4GameGui}
  * 
  * @author Markus Thill
  * 
+ * @see C4GameGui
  */
 public class ImgShowComponent extends JPanel {
 

@@ -2,7 +2,7 @@
 # **** These are new results with TDNTuple3Agt from January 2020 ****
 #
 # This script shows results for ConnectFour in the TCL-case with various 
-# learning rates alpha \in {0.0, 2.5, 3.7, 5.0, 7.5, 10.0}.
+# eligibility params lambda \in {0.00, 0.04, 0.09,0.16, 0.25}.
 # 
 library(ggplot2)
 library(grid)
@@ -43,7 +43,8 @@ k=1 #for (k in 1:length(filenames)) {
   filename <- paste0(path,filenames[k])
   df <- read.csv(file=filename, dec=".",skip=2)
   df$run <- as.factor(df$run)
-  df <- df[,setdiff(names(df),c("trnMoves","elapsedTime", "movesSecond","null","X","X.1"))]
+  df <- df[,setdiff(names(df),c("trnMoves", "movesSecond","null","X","X.1"))]
+  #,"elapsedTime"
 
   if (PLOTALLLINES) {
     q <- ggplot(df,aes(x=gameNum,y=evalQ))
@@ -87,6 +88,9 @@ tgc <- tgc2               # AB-DL only
 tgc$lambda <- as.factor(tgc$lambda)
 #tgc$alpha <- as.factor(tgc$alpha)
 tgc$targetMode <- as.factor(tgc$targetMode)
+tgcT <- summarySE(dfBoth, measurevar="elapsedTime", groupvars=c(gamesVar,"lambda","targetMode"))
+tgcT <- cbind(tgcT,evalMode=rep("AB",nrow(tgcT)))
+#browser()
 if (MAPWINRATE) {
   tgc$eval = (tgc$eval+1)/2   # map y-axis to win rate (range [0,1]
   # z is just a control (manual comparison) that summarySE worked correctly
@@ -99,12 +103,14 @@ pd <- position_dodge(100000/wfac) # move them 100000/wfac to the left and right
 
 if (USEGAMESK) {
   q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=evalMode,linetype=evalMode,color=lambda))
+  #q <- ggplot(tgcT,aes(x=gamesK,y=elapsedTime,shape=evalMode,linetype=evalMode,color=lambda))
   q <- q + xlab(bquote(paste("games [*",10^3,"]", sep=""))) + ylab(evalStr)
   q <- q+scale_x_continuous(limits=Xlimits) 
 } else {
   q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=lambda,linetype=lambda))
 }
 q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=3*errWidth, position=pd)
+#q <- q+geom_errorbar(aes(ymin=elapsedTime-se, ymax=elapsedTime+se), width=3*errWidth, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+scale_y_continuous(limits=Ylimits) 
 q <- q+guides(colour = guide_legend(reverse = TRUE))

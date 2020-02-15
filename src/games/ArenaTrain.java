@@ -60,7 +60,7 @@ abstract public class ArenaTrain extends Arena
 	}
 	
 	private void initArenaTrain() {
-		if (withUI) {
+		if (hasGUI()) {
 			this.setTitle("ArenaTrain  "+this.getGameName());
 			this.m_xab.initTrain();
 		}
