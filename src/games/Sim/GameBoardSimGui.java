@@ -124,7 +124,7 @@ public class GameBoardSimGui {
 		public Mouse()
 		{
 			node = 0;
-			setupCircles(ConfigSim.NUM_NODES);
+			setupCircles(ConfigSim.NUM_NODES);	// bug fix WK: this had a 6 instead of NUM_NODES before
 		}
 
 		private void setupCircles(int size)

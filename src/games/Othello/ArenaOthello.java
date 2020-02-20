@@ -18,6 +18,10 @@ public class ArenaOthello extends Arena {
 		super(title);
 	}
 	
+	public ArenaOthello(String title, boolean withUI) {
+		super(title,withUI);		
+	}
+	
 	@Override
 	public String getGameName() {
 		return "Othello";

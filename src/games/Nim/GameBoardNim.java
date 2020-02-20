@@ -55,7 +55,7 @@ public class GameBoardNim implements GameBoard {
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
 									// infer the current taskState
 	protected Random rand;
-	private GameBoardNimGui m_gameGui = null;
+	private transient GameBoardNimGui m_gameGui = null;
 	private boolean arenaActReq=false;
 	
 	public GameBoardNim(Arena nimGame) {
@@ -96,12 +96,13 @@ public class GameBoardNim implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		StateObserverNim soN = (StateObserverNim) so;
+		StateObserverNim soN = null;
 		if (so!=null) {
 	        assert (so instanceof StateObserverNim)
 			: "StateObservation 'so' is not an instance of StateObserverNim";
+	        soN = (StateObserverNim) so;
 			m_so = soN.copy();
-		} // if(so!=null)
+		} 
 		
 		if (m_gameGui!=null)
 			m_gameGui.updateBoard(soN, withReset, showValueOnGameboard);

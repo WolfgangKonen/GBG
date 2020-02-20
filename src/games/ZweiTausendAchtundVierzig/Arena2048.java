@@ -21,6 +21,10 @@ public class Arena2048 extends Arena {
 		super(title);		
 	}
 	
+	public Arena2048(String title, boolean withUI) {
+		super(title,withUI);		
+	}
+	
     /**
      * @return a name of the game, suitable as subdirectory name in the
      *         {@code agents} directory

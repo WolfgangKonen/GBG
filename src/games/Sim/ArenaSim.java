@@ -25,6 +25,10 @@ public class ArenaSim extends Arena{
 		super(title);		
 	}
 	
+	public ArenaSim(String title, boolean withUI) {
+		super(title,withUI);		
+	}
+		
 	@Override
 	public String getGameName() {
 		return "Sim";

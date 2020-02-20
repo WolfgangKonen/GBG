@@ -39,6 +39,10 @@ public class ArenaC4 extends Arena   {
 		super(title);		
    	}
 	
+	public ArenaC4(String title, boolean withUI) {
+		super(title,withUI);		
+	}
+	
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
