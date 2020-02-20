@@ -60,7 +60,7 @@ public class HexUtils {
             g2.setStroke(new BasicStroke(3));
             g2.setColor(Color.RED);
         } else {
-            g2.setColor(GameBoardHex.COLOR_GRID);
+            g2.setColor(GameBoardHexGui.COLOR_GRID);
         }
 
         g2.drawPolygon(poly);

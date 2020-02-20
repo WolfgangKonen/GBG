@@ -48,7 +48,7 @@ public class GameBoardTTT implements GameBoard {
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
 									// infer the current taskState
 	protected Random rand;
-	private GameBoardTTTGui m_gameGui = null;
+	private transient GameBoardTTTGui m_gameGui = null;
 
 	protected StateObserverTTT m_so;
 	private boolean arenaActReq=false;
@@ -122,24 +122,6 @@ public class GameBoardTTT implements GameBoard {
 		arenaActReq=actReq;
 	}
 
-	// --- obsolete? ---
-//	/**
-//	 * This class is needed for each ActionListener of {@code Board[i][j]} in 
-//	 * {@link #InitBoard()}
-//	 *
-//	 */
-//	class ActionHandler implements ActionListener
-//	{
-//		int x,y;
-//		
-//		ActionHandler(int num1,int num2)			
-//		{		
-//			x=num1;
-//			y=num2;
-//		}
-//		public void actionPerformed(ActionEvent e){}			
-//	}
-	
 	protected void HGameMove(int x, int y)
 	{
 		int iAction = 3*x+y;

@@ -20,7 +20,8 @@ import javax.swing.*;
  * these factory methods return objects of class {@link GameBoardHex},
  * {@link EvaluatorHex}, and {@link FeatureHex}, respectively.
  *
- * @author Wolfgang Konen, TH Koeln, Nov'16
+ * @author Kevin Galitzki, Wolfgang Konen, TH Koeln, 2016-2020
+ * 
  * @see GameBoardHex
  * @see EvaluatorHex
  */
@@ -40,6 +41,21 @@ public class ArenaHex extends Arena {
      */
     public String getGameName() {
         return "Hex";
+    }
+
+    /**
+     * @return the Hex board size
+     */
+    public static int getBoardSize() {
+        return HexConfig.BOARD_SIZE;
+    }
+
+    /**
+     * set the Hex board size
+     */
+    public static void setBoardSize(int val) {
+        HexConfig.BOARD_SIZE = val;
+        HexConfig.TILE_COUNT = val*val;
     }
 
     /**

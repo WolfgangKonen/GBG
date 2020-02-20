@@ -64,7 +64,7 @@ public class FeatureSim implements Feature{
 
 	private int getEdgesCount()
 	{
-		int count = (ConfigSim.GRAPH_SIZE * (ConfigSim.GRAPH_SIZE - 1)) / 2;
+		int count = (ConfigSim.NUM_NODES * (ConfigSim.NUM_NODES - 1)) / 2;
 		return count;
 	}
 	@Override

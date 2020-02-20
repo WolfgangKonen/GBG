@@ -1,32 +1,35 @@
 package games.Othello;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Random;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
 import games.StateObservation;
+import games.Nim.GameBoardNimGui;
+import games.Nim.NimConfig;
+import games.Nim.StateObserverNim;
+import games.Othello.Gui.GameBoardOthelloGui;
 import games.Othello.Gui.Gamestats;
 import games.Othello.Gui.Legend;
 import games.Othello.Gui.Tile;
 import tools.Types;
 
 
-public class GameBoardOthello extends JFrame implements GameBoard {
+/**
+ * This class implements the GameBoard interface for Othello.
+ * Its member {@link GameBoardOthelloGui} {@code m_gameGui} has the game board GUI. 
+ * {@code m_gameGui} may be {@code null} in batch runs. 
+ * <p>
+ * It implements the interface functions and has the user interaction methods HGameMove and 
+ * InspectMove (used to enter legal moves during game play or 'Inspect'), 
+ * since these methods need access to local  members. They are called from {@link GameBoardOthelloGui}'s
+ * action handlers
+ * 
+ * @author Julian Coeln, Yannick Dittmar, TH Koeln, 2019
+ */
+public class GameBoardOthello implements GameBoard {
 
 	/**
 	 * SerialNumber
@@ -38,27 +41,14 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 	 */
 	public Arena m_Arena;
 	private StateObserverOthello m_so;
-	private int[][] gameState;  // 1 = White   2 = Black
-	private double[][] vGameState;
-	private boolean arenaActReq = false;
 	protected Random rand;
+	private boolean arenaActReq = false;
 	
-	
-	private Gamestats gameStats; // Displaying Game information
-	private Legend legend;
-	private JPanel boardPanel; 	// Container for the 8 x 8 game board
-	private Tile[][] board;		// representation of the game board
-	
-	private int counterWhite, counterBlack;
+	private transient GameBoardOthelloGui m_gameGui = null;
 	
 	public GameBoardOthello(Arena arena)
 	{
-		super("Othello");
 		initGameBoard(arena);
-		setSize((int)Types.GUI_SCALING_FACTOR_X * 1000,(int) Types.GUI_SCALING_FACTOR_Y  * 1000);
-		setBackground(Types.GUI_BGCOLOR);
-		pack();
-		setVisible(false);
 	}
 	
 	/**
@@ -67,41 +57,13 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 	 */
 	public void initGameBoard(Arena arena)
 	{
-		// Initializing necessary elements
 		m_Arena = arena;
-		board = new Tile[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
-		gameState = new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
-		vGameState = new double[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		m_so = new StateObserverOthello();
 		rand = new Random();
-		// Northern display of the JFrame containing the game stats
-		gameStats = new Gamestats();
-		add(gameStats, BorderLayout.NORTH);
-		// Center display of the JFrame containing the game board
-		boardPanel = initBoard();
-		add(boardPanel, BorderLayout.CENTER);
-		// Southern display of the JFrame containing the legend
-		legend = new Legend();
-		add(legend, BorderLayout.SOUTH);
+        if (m_Arena.hasGUI()) {
+        	m_gameGui = new GameBoardOthelloGui(this);
+        }
 	}
-	
-	/**
-	 * Initializing the board representation.
-	 * @return JPanel containing the 8x8 grid {@link Tile} stored in {@code board}
-	 */
-	private JPanel initBoard()
-	{
-		JPanel retVal = new JPanel();
-		retVal.setLayout(new GridLayout(ConfigOthello.BOARD_SIZE,ConfigOthello.BOARD_SIZE,1,1));
-		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++){
-			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++){
-				board[i][j] = new Tile(this,i,j);
-				retVal.add(board[i][j]);
-			}
-		}
-		return retVal;
-	}
-	
 	
 	@Override
 	public void initialize() {}
@@ -114,140 +76,24 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		if(boardClear) {
 			m_so = new StateObserverOthello();
 		}
-		if(vClear) {
-			vGameState = new double[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
-			for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++){
-				for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++){
-					vGameState[i][j] = Double.NaN;
-				}
-			}
-		}
-		updateBoard(m_so,false,true);
+		if (m_gameGui!=null)
+			m_gameGui.clearBoard(boardClear, vClear);
 	}
 
-	/**
-	 * Using the following helper methods to update the user interface
-	 * <ol>
-	 * <li> {@link #updatePlayersMove(int)} to update the label from {@link Gamestats#setGameWinner(int)} </li>
-	 * <li> {@link #updateGameStats(int, int, int, int)} to update all turn based label from {@link GameStats} </li>
-	 * </ol>
-	 * -- updatePlayersMove
-	 * -- update Count
-	 */
 	@Override
 	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
-		if(so != null) {
-			assert ( so instanceof StateObserverOthello) : "so is not an instance of StateOberverOthello";
-			StateObserverOthello sot = (StateObserverOthello) so;
-			m_so = sot.copy();
-			int player=m_so.getPlayer();
-			m_so.setCountBlack(counterBlack);
-			m_so.setCountWhite(counterWhite);
-			
-			updateGameStats(m_so.getCountBlack(),m_so.getCountWhite(),m_so.getTurn(),player);
+		StateObserverOthello soN=null;
+		if (so!=null) {
+	        assert (so instanceof StateObserverOthello)
+			: "StateObservation 'so' is not an instance of StateObserverOthello";
+	        soN = (StateObserverOthello) so;
+			m_so = soN.copy();
+		} 
 		
-			
-			if(showValueOnGameboard && sot.getStoredValues() != null) {
-				for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
-					for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
-						vGameState[i][j] = Double.NaN; 
-						
-				for(int y = 0 ; y < sot.getStoredValues().length; y++)
-				{
-					Types.ACTIONS action = sot.getStoredAction(y);
-					int iAction = action.toInt();
-					int jFirst= iAction%ConfigOthello.BOARD_SIZE;
-					int iFirst= (iAction-jFirst)/ConfigOthello.BOARD_SIZE;
-					vGameState[iFirst][jFirst] = sot.getStoredValues()[y];
-				}
-			}
-			updateCells(showValueOnGameboard);
-		}
+		if (m_gameGui!=null)
+			m_gameGui.updateBoard(soN, withReset, showValueOnGameboard);
 	}
 	
-	
-	/**
-	 * Updating the {@link Gamestats} object.
-	 * @param blackDiscs	Amount of black discs placed on the board
-	 * @param whiteDiscs	Amount of white discs placed on the board
-	 * @param turnCount		turn counter range 1-60
-	 * @param player		player who has to make the next move
-	 */
-	private void updateGameStats(int blackDiscs, int whiteDiscs, int turnCount, int player) {
-		gameStats.setWhiteCount(whiteDiscs);
-		gameStats.setBlackCount(blackDiscs);
-		gameStats.setTurnCount(turnCount);
-		switch(player) {
-		case(0):
-			gameStats.changeNextMove("Next move: Black");
-			break;
-		case(1): 
-			gameStats.changeNextMove("Next move: White");
-			break;
-		}
-	}
-
-	/**
-	 * Updating the cell's color and text.
-	 * Updating the DiscCounters for both player.
-	 */
-	private void updateCells(boolean showValueOnGameboard)
-	{
-		
-		double value, maxValue= Double.NEGATIVE_INFINITY;
-		int maxI = 0, maxJ = 0;
-		String valueText;
-		counterBlack = 0;
-		counterWhite = 0;
-		for(int i = 0; i < board.length; i++)
-		{
-			for(int j = 0; j < board[i].length; j++)
-			{
-				//Not necessary
-				if(vGameState==null) {
-					value = Double.NaN;
-				}else {
-					value = vGameState[i][j];
-				}
-				if (Double.isNaN(value)) {
-					valueText = "   ";
-				} else {
-					valueText = " "+(int)(value*100);
-					if (value<0) valueText = ""+(int)(-value *100);
-					if (value>maxValue) {
-						maxValue=value;
-						maxI=i;
-						maxJ=j;
-					}
-				}
-				// Disable every button.
-				board[i][j].setEnabled(false);
-				board[i][j].setForeground(Color.RED);
-				board[i][j].setBackground(ConfigOthello.BOARDCOLOR);
-				board[i][j].setBorder((m_so.getLastMove() == (i * ConfigOthello.BOARD_SIZE + j)));
-				board[i][j].setText("");
-				if(m_so.getCurrentGameState()[i][j] == ConfigOthello.WHITE) {
-					board[i][j].setBackground(Color.WHITE);
-					board[i][j].setText("");
-					counterWhite++;
-				}
-				else if(m_so.getCurrentGameState()[i][j] == ConfigOthello.BLACK) {
-					board[i][j].setBackground(Color.BLACK);
-					board[i][j].setText("");
-					counterBlack++;
-				}
-				else {
-					// Enable buttons, which are valid for a move
-					board[i][j].markAsPossiblePlacement(
-							m_so.getAvailableActions().contains(
-									new Types.ACTIONS(i*ConfigOthello.BOARD_SIZE + j)));
-					if(showValueOnGameboard) board[i][j].setText(valueText);
-				}
-				
-			}
-		}
-		this.repaint();
-	}
 	
 	/**
 	 * Human places a disc on board[x][y]
@@ -277,25 +123,7 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		}else {m_Arena.setStatusMessage("Desired Action is not legal");}
 		arenaActReq = true;
 	}
-	
-	
-	@Override
-	public void showGameBoard(Arena arena, boolean alignToMain) {
-		this.setVisible(true);
-		if (alignToMain) {
-			// place window with game board to the left of the main window
-			int x = arena.m_ArenaFrame.getX() + arena.m_xab.getWidth() + 18;
-			int y = arena.m_ArenaFrame.getY();
-			this.setLocation(x,y);	
-		}		
-	}
-
-	@Override
-	public void toFront() {
-		super.setState(JFrame.NORMAL);
-		super.toFront();
-	}
-
+		
 	@Override
 	public boolean isActionReq() {
 		return arenaActReq;
@@ -304,10 +132,6 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 	@Override
 	public void setActionReq(boolean actionReq) {
 		arenaActReq=actionReq;
-	}
-
-	@Override
-	public void enableInteraction(boolean enable) {
 	}
 
 	@Override
@@ -342,11 +166,28 @@ public class GameBoardOthello extends JFrame implements GameBoard {
 		return m_so;
 	}
 	
-	   @Override
-	   public void destroy() {
-		   this.setVisible(false);
-		   this.dispose();
-	   }
+	@Override
+	public void enableInteraction(boolean enable) {
+		if (m_gameGui!=null)
+			m_gameGui.enableInteraction(enable);
+	}
 
-	
+	@Override
+	public void showGameBoard(Arena arena, boolean alignToMain) {
+		if (m_gameGui!=null)
+			m_gameGui.showGameBoard(arena, alignToMain);
+	}
+
+	@Override
+	public void toFront() {
+		if (m_gameGui!=null)
+			m_gameGui.toFront();
+	}
+
+	@Override
+	public void destroy() {
+		if (m_gameGui!=null)
+			m_gameGui.destroy();
+	}
+
 }

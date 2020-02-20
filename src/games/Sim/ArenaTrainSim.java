@@ -24,6 +24,12 @@ public class ArenaTrainSim extends ArenaTrain {
 		super(title,withUI);		
 	}
 		
+	public ArenaTrainSim(String title, boolean withUI, int numPlayers, int numNodes) {
+		super(title,withUI);		
+		ConfigSim.NUM_PLAYERS=numPlayers;
+		ConfigSim.NUM_NODES=numNodes;
+	}
+		
 	@Override
 	public String getGameName() {
 		return "Sim";
@@ -49,7 +55,7 @@ public class ArenaTrainSim extends ArenaTrain {
 	public XNTupleFuncs makeXNTupleFuncs()
 	{
 //		return new XNTupleFuncsSim(15,3,2);		// /WK/ Bug: this is special to K_6 + 2 players. Generalize!!
-		return new XNTupleFuncsSim(ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2,
+		return new XNTupleFuncsSim(ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2,
 								   ConfigSim.NUM_PLAYERS+1,
 								   ConfigSim.NUM_PLAYERS);		
 	}

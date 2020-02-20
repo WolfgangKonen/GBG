@@ -1,16 +1,38 @@
 package games.Hex;
 
 import controllers.PlayAgent;
+import games.Arena;
 import games.ArenaTrain;
 import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
+import games.TicTacToe.EvaluatorTTT;
+import games.TicTacToe.FeatureTTT;
+import games.TicTacToe.GameBoardTTT;
+import games.TicTacToe.XNTupleFuncsTTT;
 
 import java.io.IOException;
 
 import javax.swing.*;
 
+/**
+ * {@link ArenaTrain} for Hex. It borrows all functionality
+ * from the general class {@link ArenaTrain} derived from {@link Arena}. It only overrides 
+ * the abstract methods <ul>
+ * <li> {@link Arena#makeGameBoard()}, 
+ * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)}, and 
+ * <li> {@link Arena#makeFeatureClass(int)}, 
+ * <li> {@link Arena#makeXNTupleFuncs()}, 
+ * </ul> 
+ * such that these factory methods return objects of class {@link GameBoardHex}, 
+ * {@link EvaluatorHex}, {@link FeatureHex}, and {@link XNTupleFuncsHex}, respectively.
+ * 
+ * @see GameBoardHex
+ * @see EvaluatorHex
+ * 
+ * @author Kevin Galitzki, Wolfgang Konen, TH Koeln, 2016-2020
+ */
 public class ArenaTrainHex extends ArenaTrain {
 
     public ArenaTrainHex(){ super();}

@@ -430,10 +430,12 @@ public class XArenaFuncs {
 	protected PlayAgent wrapAgent(int n, PlayAgent pa, ParOther oPar, ParMaxN mPar, StateObservation so) {
 		PlayAgent qa;
 		int nply = oPar.getWrapperNPly();
-		mPar.setMaxNDepth(nply);
+		ParMaxN wrap_mPar = new ParMaxN();		// make a copy! (bug fix 02-2020)
+		wrap_mPar.setMaxNDepth(nply);
+		wrap_mPar.setMaxNUseHashmap(mPar.getMaxNUseHashmap());
 		if (nply > 0 && !(pa instanceof HumanPlayer)) {
 			if (so.isDeterministicGame()) {
-				qa = new MaxNWrapper(pa, mPar, oPar); // mPar has useMaxNHashMap
+				qa = new MaxNWrapper(pa, wrap_mPar, oPar); // wrap_mPar has useMaxNHashMap
 				// qa = new MaxNWrapper(pa,nply); // always maxNHashMap==false
 			} else {
 				qa = new ExpectimaxWrapper(pa, nply);

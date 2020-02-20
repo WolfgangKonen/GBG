@@ -35,7 +35,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	StateObserverSim() 
 	{
-		config(ConfigSim.NUM_PLAYERS, ConfigSim.GRAPH_SIZE);
+		config(ConfigSim.NUM_PLAYERS, ConfigSim.NUM_NODES);
 	}
 	
 	StateObserverSim(Node [] nodes, int player, int winner, int looser,int numPlayers, int numNodes)

@@ -10,6 +10,8 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
+import games.Hex.HexConfig;
+import games.Sim.ConfigSim;
 import games.ArenaTrain;
 
 /**
@@ -50,6 +52,51 @@ public class ArenaNim extends Arena   {
 		return "Nim";
 	}
 	
+    /**
+     * @return the number of heaps in Nim
+     */
+    public static int getNumberHeaps() {
+        return NimConfig.NUMBER_HEAPS;
+    }
+
+    /**
+     * @return the initial heap size (initial number of items in each heap)
+     */
+    public static int getHeapSize() {
+        return NimConfig.HEAP_SIZE;
+    }
+
+    /**
+     * @return the maximum number of items to subtract ('minus') from a heap in one move.
+     * If == {@link #getHeapSize()}, then each heap can be cleared in one move.
+     */
+    public static int getMaxMinus() {
+        return NimConfig.MAX_MINUS;
+    }
+
+    /**
+     * set the number of heaps in Nim
+     */
+    public static void setNumHeaps(int val) {
+    	NimConfig.NUMBER_HEAPS = val;
+    }
+
+    /**
+     * set the initial heap size (initial number of items in each heap)
+     */
+    public static void setHeapSize(int val) {
+    	NimConfig.HEAP_SIZE = val;
+    }
+
+    /**
+     * set the maximum number of items to subtract ('minus') from a heap in one move.
+     * May not be bigger than {@link #getHeapSize()}. 
+     */
+    public static void setMaxMinus(int val) {
+    	assert val <= getHeapSize() : "ArenaNim.setMaxMinus: value may not be bigger than heap size!"; 
+    	NimConfig.MAX_MINUS = val;
+    }
+
 	/**
 	 * Factory pattern method: make a new GameBoard 
 	 * @return	the game board

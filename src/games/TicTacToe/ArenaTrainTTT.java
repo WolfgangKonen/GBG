@@ -28,9 +28,6 @@ import tools.Types;
  * </ul> 
  * such that these factory methods return objects of class {@link GameBoardTTT}, 
  * {@link EvaluatorTTT}, {@link FeatureTTT}, and {@link XNTupleFuncsTTT}, respectively.
- * <p>
- * {@link ArenaTrainTTT} has a short {@link #main(String[])} for launching the trainable 
- * version of GBG. 
  * 
  * @see GameBoardTTT
  * @see EvaluatorTTT

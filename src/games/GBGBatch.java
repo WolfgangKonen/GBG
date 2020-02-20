@@ -53,7 +53,7 @@ import tools.Types;
 
 /**
  * Class used to start GBG for batch runs via a <b>main method</b>: <br> 
- * Run this Java application on Ubuntu consoles without X11 server via command
+ * Run this Java application on Ubuntu consoles that have no X11 server via command
  * <pre>
  *    xvfb-run java -jar GBGBatch.jar ...
  * </pre>
@@ -66,7 +66,7 @@ import tools.Types;
  *  
  *
  */
-public class GBGBatch { //extends ArenaTrain {
+public class GBGBatch { 
 
 	private static final long serialVersionUID = 1L;
 	public static ArenaTrain t_Game;
@@ -200,7 +200,10 @@ public class GBGBatch { //extends ArenaTrain {
 					   XArenaButtons xab,	GameBoard gb, String csvName) throws IOException {
 		// load an agent to fill xab with the appropriate parameter settings
 		boolean res = this.t_Game.loadAgent(0, filePath);		
-		if (!res) return;
+		if (!res) {
+			System.err.println("\n[GBGBatch.batch1] Aborted (no agent found).");
+			return;
+		}
 		
 		// overwrite trainNum or maxGameNum in xab, if they specified here
 		if (trainNum!=-1) xab.setTrainNumber(trainNum);
@@ -238,7 +241,10 @@ public class GBGBatch { //extends ArenaTrain {
 		double alphaFinalArr[] = alphaArr.clone();
 		// load an agent to fill xab with the appropriate parameter settings
 		boolean res = this.t_Game.loadAgent(0, filePath);		
-		if (!res) return;
+		if (!res) {
+			System.err.println("\n[GBGBatch.batch2] Aborted (no agent found).");
+			return;
+		}
 		
 		// overwrite trainNum or maxGameNum in xab, if they specified here
 		if (trainNum!=-1) xab.setTrainNumber(trainNum);
@@ -275,7 +281,10 @@ public class GBGBatch { //extends ArenaTrain {
 		double lambdaArr[] = {0.00, 0.04, 0.09, 0.16, 0.25};
 		// load an agent to fill xab with the appropriate parameter settings
 		boolean res = this.t_Game.loadAgent(0, filePath);		
-		if (!res) return;
+		if (!res) {
+			System.err.println("\n[GBGBatch.batch3] Aborted (no agent found).");
+			return;
+		}
 		
 		// overwrite trainNum or maxGameNum in xab, if they specified here
 		if (trainNum!=-1) xab.setTrainNumber(trainNum);

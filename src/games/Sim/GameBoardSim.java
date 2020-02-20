@@ -16,6 +16,8 @@ import controllers.PlayAgent;
 import games.GameBoard;
 import games.StateObservation;
 import games.Hex.StateObserverHex;
+import games.Othello.StateObserverOthello;
+import games.Othello.Gui.GameBoardOthelloGui;
 import games.Sim.Point;
 import games.TicTacToe.StateObserverTTT;
 import tools.ScoreTuple;
@@ -23,11 +25,28 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import games.Arena;
 
+/**
+ * This class implements the GameBoard interface for Sim.
+ * Its member {@link GameBoardSimGui} {@code m_gameGui} has the game board GUI. 
+ * {@code m_gameGui} may be {@code null} in batch runs. 
+ * <p>
+ * It implements the interface functions and has the user interaction methods HGameMove and 
+ * InspectMove (used to enter legal moves during game play or 'Inspect'), 
+ * since these methods need access to local  members. They are called from {@link GameBoardOthelloGui}'s
+ * action handlers
+ * 
+ * @author Percy Wuensch, TH Koeln, 2019
+ */
 public class GameBoardSim implements GameBoard {
 
+	/**
+	 * SerialNumber
+	 */
+	private static final long serialVersionUID = 12L;
+	
 	//Framework
-	protected Arena m_arena;
-	private StateObserverSim m_so;
+	protected Arena m_Arena;
+	protected StateObserverSim m_so;
 	private boolean arenaActReq = false;
 	
 	protected Random rand;
@@ -35,70 +54,44 @@ public class GameBoardSim implements GameBoard {
 	// debug: start with simpler start states in getDefaultStartState()
 	private boolean m_DEBG = false; // false; true;
 	
-	//JFrame
-	JFrame frame;
-	
-	//panels
-	BoardPanel board;
+	private transient GameBoardSimGui m_gameGui = null;
 	
 	public GameBoardSim(Arena simGame)
 	{
 		//Framework
-		m_arena = simGame;
+		m_Arena = simGame;
 		m_so = new StateObserverSim();
         rand 		= new Random(System.currentTimeMillis());	
 		arenaActReq = false;
 		
-		//GUI
-		setupGUI();
+        if (m_Arena.hasGUI()) {
+        	m_gameGui = new GameBoardSimGui(this);
+        }
 	}
-	
-	private void setupGUI()
-	{
-		//frame
-		frame = new JFrame("Sim");
-		frame.setSize(600, 400);
-		frame.setLocation(550, 0);
-		 
-		board = new BoardPanel(m_so.getNodes());
-		board.addMouseListener(new Mouse());
-		frame.add(board);
-	           
-	}
-	
 	
 	@Override
 	public void initialize() {	}
 
-    @Override
-    public void destroy() {
-		frame.setVisible(false);
-		frame.dispose();
-    }
-
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
-		 if (boardClear) {
-	            m_so = new StateObserverSim();
-	            //board.setNodesCopy(m_so.getNodes());
-	        } if (vClear) {
-	            
-	        }
-	        frame.repaint();
+		if(boardClear) {
+            m_so = new StateObserverSim();
+		}
+		if (m_gameGui!=null)
+			m_gameGui.clearBoard(boardClear, vClear);
 	}
 
 	@Override
 	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+		StateObserverSim soS=null;
 		if (so!=null) {
 	        assert (so instanceof StateObserverSim)
 			: "StateObservation 'so' is not an instance of StateObserverSim";
-			StateObserverSim som = (StateObserverSim) so;
-			m_so = som.copy();
+	        soS = (StateObserverSim) so;
+			m_so = soS.copy();
 			
-			if (so.isGameOver()) 
-			{
-				
-				ScoreTuple sc = som.getGameScoreTuple();
+			if (so.isGameOver()) {				
+				ScoreTuple sc = soS.getGameScoreTuple();
 				int winner = sc.argmax();
 				if (sc.max()==0.0) winner = -2;	// tie indicator
 //				int winner = som.getGameWinner3player();		// make getGameWinner3player obsolete
@@ -108,40 +101,17 @@ public class GameBoardSim implements GameBoard {
 					System.out.println(winner  + " has won");
 					
 			} else {
-				
-				int player = som.getPlayer();
+				int player = soS.getPlayer();
 				switch(player) {
-				case(0): 
-					System.out.println("0 to move   "); break;
-				case(1):
-					System.out.println("1 to move   "); break;
-				case(2):
-					System.out.println("2 to move   "); break;
+				case(0): 	System.out.println("0 to move   "); break;
+				case(1):	System.out.println("1 to move   "); break;
+				case(2):	System.out.println("2 to move   "); break;
 				}
 			}
-			
-			//ShowValue bug, because the updateGameboad Method is called twice.
-			if(som.getStoredValues() != null && showValueOnGameboard)
-			{
-				
-				//for(int i = 0; i < som.getStoredValues().length; i++)
-					//System.out.println(som.getStoredValues()[i]);
-				board.setActionValues(som.getStoredValues());
-			}
-			if(!showValueOnGameboard)
-			{
-				board.setActionValues(null);
-			}
-			
-		}
+		} // if (so!=null)
 		
-		board.setNodesCopy(m_so.getNodes());
-		frame.repaint();
-	}
-
-	@Override
-	public void showGameBoard(Arena simGame, boolean alignToMain) {
-		frame.setVisible(true);
+		if (m_gameGui!=null)
+			m_gameGui.updateBoard(soS, withReset, showValueOnGameboard);
 	}
 
 	@Override
@@ -157,12 +127,6 @@ public class GameBoardSim implements GameBoard {
 	}
 
 	@Override
-	public void enableInteraction(boolean enable) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public StateObservation getStateObs() {
 		return m_so;
 	}
@@ -171,13 +135,13 @@ public class GameBoardSim implements GameBoard {
 	@Override
 	public String getSubDir() {
 		// /WK/ was missing:
-		return "K"+ConfigSim.GRAPH_SIZE+"_Player"+ConfigSim.NUM_PLAYERS;
+		return "K"+ConfigSim.NUM_NODES+"_Player"+ConfigSim.NUM_PLAYERS;
 	}
 
 	@Override
 	public Arena getArena() 
 	{
-		return m_arena;
+		return m_Arena;
 	}
 
 	/**
@@ -246,126 +210,27 @@ public class GameBoardSim implements GameBoard {
 	}
 
 	@Override
-	public void toFront() {
-		frame.setState(Frame.NORMAL);	// if window is iconified, display it normally
-		board.toFront();
-		//input.toFront();
+	public void enableInteraction(boolean enable) {
+		if (m_gameGui!=null)
+			m_gameGui.enableInteraction(enable);
 	}
 
-	public class Mouse implements MouseListener
-	{
-		Point[] circles;
-		int node;
-		
-		public Mouse()
-		{
-			node = 0;
-			setupCircles(6);
-		}
+	@Override
+	public void showGameBoard(Arena arena, boolean alignToMain) {
+		if (m_gameGui!=null)
+			m_gameGui.showGameBoard(arena, alignToMain);
+	}
 
-		private void setupCircles(int size)
-		{
-			int radius = 150;
-			int degree = 360 / size;
-			circles = new Point[size];
-			
-			for(int i = 0; i < size; i++)
-				circles[i] = new Point(calculateCirclePositionX(radius, degree * i, 280, 100),calculateCirclePositionY(radius, degree * i, 280, 100));
-			
-		}
-		
-		private int calculateCirclePositionX(int radius, int degree, int posX, int posY)
-		{
-			double t = Math.toRadians((double) degree);
-			
-			return (int)(posX + radius * Math.cos(t));
-		}
-		
-		private int calculateCirclePositionY(int radius, int degree, int posX, int posY)
-		{
-			double t = Math.toRadians((double) degree);
-			
-			return (int)((posX + radius * Math.sin(t)) - posY);
-		}
-		
-		@Override
-		public void mouseClicked(MouseEvent e) 
-		{
-			int x = e.getX();
-			int y = e.getY();
-			
-			for(int i = 0; i < m_so.getNodesLength(); i++)
-			{
-				if(x  > circles[i].getX() && x < circles[i].getX() + 30 && y > circles[i].getY() && y < circles[i].getY() + 30)
-				{
-					setInput(i);
-				}
-			}
-		}
-		
-		private void setInput(int i)
-		{
-			if(node == 0)
-			{
-				node = i + 1;
-				board.setInputNode1(i);
-				board.setInputNode2(-1);
-			}
-			else if(node == i + 1)
-			{
-				node = 0;
-				board.setInputNode1(-1);
-				frame.repaint();
-				return;
-			}
-			else
-			{
-				setAction(i);
-				board.setInputNode2(i);
-			}
-			
-			frame.repaint();
-		}
-		
-		private void setAction(int i)
-		{
-			Types.ACTIONS act = Types.ACTIONS.fromInt(m_so.inputToActionInt(node, i+1));
-			if(m_so.isLegalAction(act))
-			{
-				m_so.advance(act);
-				
-				arenaActReq = true;
-				node = 0;
-			}
-			else
-			{
-				System.out.println("action is not legal!");
-				node = 0;
-			}
-		}
-		
-		@Override
-		public void mousePressed(MouseEvent e) {
-		}
+	@Override
+	public void toFront() {
+		if (m_gameGui!=null)
+			m_gameGui.toFront();
+	}
 
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-		
+	@Override
+	public void destroy() {
+		if (m_gameGui!=null)
+			m_gameGui.destroy();
 	}
 
 }

@@ -21,7 +21,7 @@ path <- "../../agents/ConnectFour/csv/";
 Ylimits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=300000/wfac;
 Xlimits=c(400,6100); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c("multiTrainLambda-6000.csv"
+filenames=c("multiTrainLambda-6000.csv"  # to become suffix -ALm
             #"multiTrain_TCL-EXP-NT3-al37-lamSweep-750k-epsfin0-V12m.csv"
            )
 # suffix -DLm: evalQ is MCTS (0), evalT is AB with Distant Losses DL (5),

@@ -8,6 +8,7 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
+import games.Hex.HexConfig;
 import games.TicTacToe.ArenaTTT;
 import games.TicTacToe.EvaluatorTTT;
 import games.TicTacToe.FeatureTTT;
@@ -29,6 +30,20 @@ public class ArenaSim extends Arena{
 		return "Sim";
 	}
 
+    /**
+     * set the number of players for Sim
+     */
+    public static void setNumPlayers(int val) {
+    	ConfigSim.NUM_PLAYERS = val;
+    }
+
+    /**
+     * set the number of nodes for Sim
+     */
+    public static void setNumNodes(int val) {
+    	ConfigSim.NUM_NODES = val;
+    }
+
 	@Override
 	public GameBoard makeGameBoard() {
 		gb = new GameBoardSim(this);	
@@ -47,7 +62,7 @@ public class ArenaSim extends Arena{
 	public XNTupleFuncs makeXNTupleFuncs() {
 //		return new XNTupleFuncsTTT(); // /WK/ BUG!
 //		return new XNTupleFuncsSim(15,3,2);		// /WK/ Bug: this is special to K_6 + 2 players. Generalize!!
-		return new XNTupleFuncsSim(ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2,
+		return new XNTupleFuncsSim(ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2,
 				   ConfigSim.NUM_PLAYERS+1,
 				   ConfigSim.NUM_PLAYERS);		
 	}

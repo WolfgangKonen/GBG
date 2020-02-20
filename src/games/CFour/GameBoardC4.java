@@ -166,24 +166,6 @@ public class GameBoardC4 implements GameBoard {
 //		arenaActReq = true;		
 //	}
 	
-	// --- obsolete? ---
-//	/**
-//	 * This class is needed for each ActionListener of {@code Board[i][j]} in 
-//	 * {@link #InitBoard()}
-//	 *
-//	 */
-//	class ActionHandler implements ActionListener
-//	{
-//		int x,y;
-//		
-//		ActionHandler(int num1,int num2)			
-//		{		
-//			x=num1;
-//			y=num2;
-//		}
-//		public void actionPerformed(ActionEvent e){}			
-//	}
-	
 	public StateObservation getStateObs() {
 		return m_so;
 	}

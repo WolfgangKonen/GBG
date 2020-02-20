@@ -57,7 +57,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		if (this.nCells==0 || this.nPlayers==0 || this.nPositionValues==0) {
 			// /WK/ for unclear reasons, re-loading a Sim agent from disk has all these
 			// xnf-members equal to 0, so we re-instantiate them
-			this.nCells = ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2;
+			this.nCells = ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2;
 			this.nPositionValues = ConfigSim.NUM_PLAYERS+1;
 			this.nPlayers = ConfigSim.NUM_PLAYERS;
 		}
@@ -69,8 +69,8 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private int [] getNodes()
 	{
-		int [] nodes = new int [ConfigSim.GRAPH_SIZE];
-		for(int i = 0; i < ConfigSim.GRAPH_SIZE; i++)
+		int [] nodes = new int [ConfigSim.NUM_NODES];
+		for(int i = 0; i < ConfigSim.NUM_NODES; i++)
 			nodes[i] = i + 1;
 			
 		return nodes;
@@ -96,7 +96,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	private void setArrLink() {
 		// we build an ArrayList of all links emerging from node no=1,...,ConfigSim.GRAPH_SIZE 
-		arrLink = new ArrayList<Link[]>(ConfigSim.GRAPH_SIZE+1);
+		arrLink = new ArrayList<Link[]>(ConfigSim.NUM_NODES+1);
 		arrLink.add(new Link[1]); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
 		StateObserverSim so = ConfigSim.SO;
 		for (Node node : so.getNodes()) {
@@ -106,7 +106,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private int [] initVector()
 	{
-		int [] vec = new int [ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2];
+		int [] vec = new int [ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2];
 		for(int i = 0; i < vec.length; i++)
 			vec[i] = i;
 			
@@ -157,7 +157,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	public int[] getBoardVector(StateObservation so) 
 	{
 		StateObserverSim sim = (StateObserverSim) so;
-		int [] board = new int[ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2]; 
+		int [] board = new int[ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2]; 
 		int k = 0;
 		
 		for(int i = 0; i < sim.getNodes().length -1 ; i++)
@@ -184,9 +184,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	private int [] getSymVector(int [] boardVector,int [] permutation)
 	{
 		int [][] splittedBoardVec = splitVector(boardVector);
-		int [][] splittedSymVec = new int[ConfigSim.GRAPH_SIZE-1][];
+		int [][] splittedSymVec = new int[ConfigSim.NUM_NODES-1][];
 		
-		for(int i = 0; i < ConfigSim.GRAPH_SIZE-1; i++)
+		for(int i = 0; i < ConfigSim.NUM_NODES-1; i++)
 				splittedSymVec[i] = getValuesSameNode(i,splittedBoardVec,permutation);
 		
 		return mergeVector(splittedSymVec);
@@ -194,11 +194,11 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private int [][] splitVector(int [] boardVector)
 	{
-		int [][] vec = new int [ConfigSim.GRAPH_SIZE - 1][];
+		int [][] vec = new int [ConfigSim.NUM_NODES - 1][];
 		int index = 0;
-		for(int i = 0; i < ConfigSim.GRAPH_SIZE - 1; i++)
+		for(int i = 0; i < ConfigSim.NUM_NODES - 1; i++)
 		{
-			vec [i] = new int[ConfigSim.GRAPH_SIZE - 1 - i];
+			vec [i] = new int[ConfigSim.NUM_NODES - 1 - i];
 			for(int j = 0; j < vec.length - i; j++)
 			{
 				vec[i][j] = boardVector[index];
@@ -211,9 +211,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private int[] getValuesSameNode(int pos,int [][] boardVec, int [] permutation)
 	{
-		int[] vec = new int[ConfigSim.GRAPH_SIZE - 1 - pos];
+		int[] vec = new int[ConfigSim.NUM_NODES - 1 - pos];
 		int index = 0;
-		for(int i = pos + 1; i < ConfigSim.GRAPH_SIZE; i++)
+		for(int i = pos + 1; i < ConfigSim.NUM_NODES; i++)
 		{
 			if(permutation[i] < permutation[pos])
 			{
@@ -232,7 +232,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 
 	private int [] mergeVector(int [][] splittedVec)
 	{
-		int[]  vec = new int[ConfigSim.GRAPH_SIZE*(ConfigSim.GRAPH_SIZE-1)/2];
+		int[]  vec = new int[ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2];
 		int index = 0;
 		
 		for(int i = 0; i < splittedVec.length; i++)
@@ -257,11 +257,11 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 * @return an array A with the link 3-tuples of all triangles contained in the Sim graph.<p>
 	 * 		In more detail: A[k][] is an int[3] vector carrying the 3 link numbers which make up 
 	 * 		the k'th triangle. <br>
-	 * 		There are Z=combination(K,3) such triangles (K={@link ConfigSim#GRAPH_SIZE}). 
+	 * 		There are Z=combination(K,3) such triangles (K={@link ConfigSim#NUM_NODES}). 
 	 * 		Z=20 for K=6.
 	 */
 	private int[][] allTriangleTuples() {
-		int K = ConfigSim.GRAPH_SIZE;
+		int K = ConfigSim.NUM_NODES;
 		Link[] link = new Link[3];
 		int Z = 1; 
 		for (int i=K; i>K-3; i--) Z = Z*i;
@@ -286,7 +286,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 * @return an array A with the link 4-tuples of all quadruples contained in the Sim graph.<p>
 	 * 		In more detail: A[k][] is an int[4] vector carrying the 4 link numbers which make up 
 	 * 		the k'th quadruple. <br>
-	 * 		There are Z=2*combination(K,4) such quadruples (K={@link ConfigSim#GRAPH_SIZE}). 
+	 * 		There are Z=2*combination(K,4) such quadruples (K={@link ConfigSim#NUM_NODES}). 
 	 * 		combination(K,4) is the number of 4-nodes-subsets in the graph.
 	 * 		Why factor 2? - Because for each 4-nodes-subset there are 2 (!) possible 
 	 * 		closed paths: <br><pre>
@@ -294,7 +294,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 * 		Z=30 for K=6.
 	 */
 	private int[][] allQuadrupleTuples() {
-		int K = ConfigSim.GRAPH_SIZE;
+		int K = ConfigSim.NUM_NODES;
 		Link[] link = new Link[4];
 		int Z = 1; 
 		for (int i=K; i>K-4; i--) Z = Z*i;
@@ -345,11 +345,11 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 * 		The difference between quadruple and 4-clique: a quadruple connects the 
 	 * 		4 nodes by a closed path of 4 links, but a 4-clique has all the 6 links that 
 	 * 		exist between the 4 nodes of the subset. <br>
-	 * 		There are Z=combination(K,4) such 4-cliques (K={@link ConfigSim#GRAPH_SIZE}). 
+	 * 		There are Z=combination(K,4) such 4-cliques (K={@link ConfigSim#NUM_NODES}). 
 	 * 		Z=15 for K=6.
 	 */
 	private int[][] all4CliqueTuples() {
-		int K = ConfigSim.GRAPH_SIZE;
+		int K = ConfigSim.NUM_NODES;
 		Link[] link = new Link[6];
 		int Z = 1; 		
 		for (int i=K; i>K-4; i--) Z = Z*i;
@@ -458,9 +458,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	public HashSet adjacencySet(int iCell) {
 		HashSet adjSet = new HashSet();
 		int node1 = -1, node2 = -1, count = 0;
-		for(int i = 0; i < ConfigSim.GRAPH_SIZE -1 ; i++)
+		for(int i = 0; i < ConfigSim.NUM_NODES -1 ; i++)
 		{
-			for(int j = 0; j < ConfigSim.GRAPH_SIZE - 1 - i; j++)
+			for(int j = 0; j < ConfigSim.NUM_NODES - 1 - i; j++)
 			{
 				if(iCell == count)
 				{
@@ -474,9 +474,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		}
 		count = 0;
 		System.out.println(node1 + "    " +  node2);
-		for(int i = 0; i < ConfigSim.GRAPH_SIZE -1 ; i++)
+		for(int i = 0; i < ConfigSim.NUM_NODES -1 ; i++)
 		{
-			for(int j = 0; j < ConfigSim.GRAPH_SIZE - 1 - i; j++)
+			for(int j = 0; j < ConfigSim.NUM_NODES - 1 - i; j++)
 			{
 				if(((node1 == i || node2 == i) || (node1 == (i+1) + j || node2 == (i+1) + j)) && !(node1 == i && node2 == (i+1) + j))
 				{

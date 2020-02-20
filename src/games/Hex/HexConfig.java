@@ -1,6 +1,6 @@
 package games.Hex;
 
-class HexConfig {
+public class HexConfig {
     final static double REWARD_NEGATIVE = -1.0;
     final static double REWARD_POSITIVE = 1.0;
 
@@ -11,8 +11,13 @@ class HexConfig {
     /**
      * Length of one side of the game board in tiles
      */
-    final static int BOARD_SIZE = 5;
+    static int BOARD_SIZE = 5;
 
+    /**
+     * Number of tiles on the game board
+     */
+    static int TILE_COUNT = BOARD_SIZE * BOARD_SIZE;
+ 
     /**
      * Size of hexagons in px (from one side to the opposite one)
      */
@@ -28,11 +33,6 @@ class HexConfig {
      */
     final static int OFFSET = HEX_SIZE / 4;
 
-    /**
-     * Number of tiles on the game board
-     */
-    final static int TILE_COUNT = BOARD_SIZE * BOARD_SIZE;
- 
     /**
      * Number of episodes to play when evaluating an agent
      * @see EvaluatorHex

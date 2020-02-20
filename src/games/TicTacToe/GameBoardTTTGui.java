@@ -60,7 +60,6 @@ public class GameBoardTTTGui extends JFrame {
 	private int[][] Table;			// =1: position occupied by "X" player
 									//=-1: position occupied by "O" player
 	private double[][] VTable;
-	private boolean arenaActReq=false;
 	
 	/**
 	 * a reference to the 'parent' {@link GameBoardTTT} object

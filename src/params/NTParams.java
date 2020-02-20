@@ -18,6 +18,7 @@ import javax.swing.JTextField;
 
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Arena;
+import games.Nim.ArenaNim;
 import games.Nim.NimConfig;
 
 /**
@@ -600,7 +601,7 @@ public class NTParams extends Frame implements Serializable {
 				break;
 			case "Nim": 
 				NTupleNumT.setText("1");
-				NTupleSizeT.setText(NimConfig.NUMBER_HEAPS+"");	
+				NTupleSizeT.setText(ArenaNim.getNumberHeaps()+"");	
 				RandomnessC.setSelected(false);	// use fixed n-tuples, mode==1
 				break;
 			case "2048": 

@@ -3,14 +3,14 @@ package games.Sim;
 public class ConfigSim {
 
 	/**
-	 *  Graph size
+	 *  Number of nodes (graph size)
 	 */
-	public static final int GRAPH_SIZE = 6; //12;
+	public static int NUM_NODES = 6; //12;
 	
 	/**
 	 *  Number of players
 	 */
-	public static int NUM_PLAYERS = 3; //2; 3;
+	public static int NUM_PLAYERS = 2; //2; 3;
 	
 	/**
 	 *  A dummy state, needed as reference in XNTupleFuncsSim

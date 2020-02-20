@@ -29,7 +29,6 @@ public class ArenaOthello extends Arena {
 	 */
 	@Override
 	public GameBoard makeGameBoard() {
-		// TODO Auto-generated method stub
 		gb = new GameBoardOthello(this);
 		return gb;
 	}
@@ -58,10 +57,8 @@ public class ArenaOthello extends Arena {
 	}
 	
 	@Override
-	public void performArenaDerivedTasks() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void performArenaDerivedTasks() {	}
+	
 	public static void main(String[] args) {
 		ArenaOthello t_Frame = new ArenaOthello("General Board Game Playing");
 		if(args.length == 0) {

@@ -6,6 +6,7 @@ import javax.swing.JPanel;
 
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Arena;
+import games.Nim.ArenaNim;
 import games.Nim.NimConfig;
 
 /**
@@ -306,7 +307,7 @@ public class ParNT implements Serializable {
 				break;
 			case "Nim": 
 				this.setNumTuple(1);
-				this.setMaxTupleLen(NimConfig.NUMBER_HEAPS);	
+				this.setMaxTupleLen(ArenaNim.getNumberHeaps());	
 				this.setRandomness(false);	// use fixed n-tuples, mode==1
 				break;
 			case "2048": 

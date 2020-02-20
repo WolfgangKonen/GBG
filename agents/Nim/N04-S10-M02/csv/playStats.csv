@@ -1,0 +1,22 @@
+P0: HumanPlayer
+P0: controllers.HumanPlayer:
+P1: controllers.MCTS.MCTSAgentT: iterations:10000, rollout depth:200, K_UCT:1.414, tree depth:10
+P1: controllers.MCTS.MCTSAgentT:
+Start state = X(10,10,10,10)
+run, moveNum, player, action, gameScore, nEmptyTile, cumEmptyTl, highestTile
+1, 0, 0, -1, +0.00, 0, 0, 0
+1, 2, 0, 4, +0.00, 0, 0, 0
+1, 4, 0, 5, +0.00, 0, 0, 0
+1, 6, 0, 2, +0.00, 0, 0, 0
+1, 8, 0, 2, +0.00, 0, 0, 0
+1, 10, 0, 3, +0.00, 0, 0, 0
+1, 12, 0, 3, +0.00, 0, 0, 0
+1, 14, 0, 4, +0.00, 0, 0, 0
+1, 16, 0, 2, +0.00, 0, 0, 0
+1, 18, 0, 7, +0.00, 0, 0, 0
+1, 20, 0, 1, +0.00, 0, 0, 0
+1, 22, 0, 0, +0.00, 0, 0, 0
+1, 24, 0, 2, +0.00, 0, 0, 0
+1, 26, 0, 0, +0.00, 0, 0, 0
+1, 28, 0, 4, +0.00, 0, 0, 0
+1, 30, 0, 4, +0.00, 0, 0, 0

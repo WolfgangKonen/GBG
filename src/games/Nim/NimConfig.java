@@ -14,18 +14,18 @@ public class NimConfig {
     /**
      * Number of heaps
      */
-    public final static int NUMBER_HEAPS = 3;
+    protected static int NUMBER_HEAPS = 3;
 
     /**
      * Initial heap size (maximum number of items in each heap)
      */
-    public final static int HEAP_SIZE = 5; // 50
+    protected static int HEAP_SIZE = 5; // 50
 
     /**
      * Maximum number of items to subtract ('minus') from a heap in one move.
      * May not be bigger than {@link #HEAP_SIZE}. If == {@link #HEAP_SIZE}, then each heap can be 
      * cleared in one move.
      */
-    public final static int MAX_MINUS = 3;
+    protected static int MAX_MINUS = 3;
 
 }
