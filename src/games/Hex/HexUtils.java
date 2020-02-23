@@ -121,7 +121,7 @@ public class HexUtils {
      */
     public static Color calculateTileColor(double tileValue) {
         float percentage = (float) Math.abs(tileValue);
-        float inverse_percentage = 1 - percentage;
+        float remainder = 1 - percentage;
 
         Color colorLow;
         Color colorHigh;
@@ -136,12 +136,12 @@ public class HexUtils {
             colorHigh = Color.GREEN;
         }
 
-        red = Math.min(Math.max(Math.round(colorLow.getRed() * inverse_percentage
+        red = Math.min(Math.max(Math.round(colorLow.getRed() * remainder
                 + colorHigh.getRed() * percentage), 0), 255);
-        blue = Math.min(Math.max(Math.round(colorLow.getBlue() * inverse_percentage
-                + colorHigh.getBlue() * percentage), 0), 255);
-        green = Math.min(Math.max(Math.round(colorLow.getGreen() * inverse_percentage
+        green = Math.min(Math.max(Math.round(colorLow.getGreen() * remainder
                 + colorHigh.getGreen() * percentage), 0), 255);
+        blue = Math.min(Math.max(Math.round(colorLow.getBlue() * remainder
+                + colorHigh.getBlue() * percentage), 0), 255);
 
         return new Color(red, green, blue, 255);
     }

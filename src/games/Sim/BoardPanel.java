@@ -110,6 +110,9 @@ public class BoardPanel extends JPanel {
 		
 	}
 	
+    // this method is deprecated, since the colors (alpha channel of full green) 
+    // are not well distinguishable. Use instead calculateLinkColor
+    @Deprecated
 	private Color getColor(double d)
 	{
 		Color color;
@@ -125,6 +128,42 @@ public class BoardPanel extends JPanel {
 		return color;
 	}
 	
+    /**
+     * Calculate the color for a specific tile value (borrowed from HexUtils.calculateTileColor):
+     * Uses three color stops: Red for value -1, Yellow for value 0, Green for value +1.
+     * Colors for values between -1 and 0 are interpolated between red and yellow.
+     * Colors for values between 0 and +1 are interpolated between yellow and green.
+     *
+     * @param tileValue Value of the tile
+     * @return Color the tile is supposed to be drawn in
+     */
+    private Color calculateLinkColor(double tileValue) {
+        float percentage = (float) Math.abs(tileValue);
+        float remainder = 1 - percentage;
+
+        Color colorLow;
+        Color colorHigh;
+        Color colorNeutral = Color.YELLOW;
+        int red, blue, green;
+
+        if (tileValue < 0) {
+            colorLow = colorNeutral;
+            colorHigh = Color.RED;
+        } else {
+            colorLow = colorNeutral;
+            colorHigh = Color.GREEN;
+        }
+
+        red = Math.min(Math.max(Math.round(colorLow.getRed() * remainder
+                + colorHigh.getRed() * percentage), 0), 255);
+        green = Math.min(Math.max(Math.round(colorLow.getGreen() * remainder
+                + colorHigh.getGreen() * percentage), 0), 255);
+        blue = Math.min(Math.max(Math.round(colorLow.getBlue() * remainder
+                + colorHigh.getBlue() * percentage), 0), 255);
+
+        return new Color(red, green, blue, 255);
+    }
+
 	private void doDrawing(Graphics g)
 	{
 		Graphics2D g2d = (Graphics2D) g;
@@ -143,7 +182,8 @@ public class BoardPanel extends JPanel {
 				{
 					if(actionValues != null && v < actionValues.length)
 					{
-						g2d.setColor(getColor(actionValues[v]));
+//						g2d.setColor(getColor(actionValues[v]));
+						g2d.setColor(calculateLinkColor(actionValues[v]));
 						v++;
 					}
 						
@@ -152,11 +192,11 @@ public class BoardPanel extends JPanel {
 			
 				}
 				else if(nodes[i].getLinkPlayerPos(j) == 1)
-					g2d.setColor(Color.black);
+					g2d.setColor(Types.GUI_PLAYER_COLOR[0]);
 				else if(nodes[i].getLinkPlayerPos(j) == 2)
-					g2d.setColor(Color.white);
+					g2d.setColor(Types.GUI_PLAYER_COLOR[1]);
 				else
-					g2d.setColor(Color.red);
+					g2d.setColor(Types.GUI_PLAYER_COLOR[2]);
 				
 				g2d.drawLine(lines[k].getP1().getX(), lines[k].getP1().getY(), lines[k].getP2().getX(), lines[k].getP2().getY());
 				k++;

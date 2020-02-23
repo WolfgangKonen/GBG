@@ -245,7 +245,7 @@ public class Types {
     public static final String[] GUI_2PLAYER_NAME  	// player names for 2-player game
 		= {"X", "O"};
     public static final Color[] GUI_PLAYER_COLOR  	// player colors for P0, P1, ... (for up to 5 players)
-		= {Color.BLACK, Color.WHITE, Color.RED, Color.BLUE, Color.ORANGE};
+		= {Color.BLACK, Color.WHITE, Color.BLUE, Color.RED, Color.ORANGE};
 
     // GUI_X_PLAYER and GUI_O_PLAYER is not necessary anymore:
 //  public static final String GUI_X_PLAYER = "TDS";  	// "MCTS" "TDS" "CMA-ES"  
