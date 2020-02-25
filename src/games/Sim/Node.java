@@ -78,6 +78,9 @@ public class Node implements Serializable
 		return links[pos].getNode();
 	}
 	
+	/**
+	 * Return the player associated with the link {@code pos} emanating from  node {@code this}.
+	 */
 	public int getLinkPlayerPos(int pos)
 	{
 		return links[pos].getPlayer();

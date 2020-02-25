@@ -407,7 +407,7 @@ public class GBGLaunch {
 			scaPar2_L.setText("Nodes");
 			scaPar3_L.setText("");
 			setScaPar1List(new int[]{2,3});
-			setScaPar2List(new int[]{6,7,8,9});
+			setScaPar2List(new int[]{6,7,8,9,10,12,15,20});
 			setScaPar3List(new int[]{});
 			choiceScaPar1.setSelectedItem("2");		// the initial (recommended) values
 			choiceScaPar2.setSelectedItem("6");		// 

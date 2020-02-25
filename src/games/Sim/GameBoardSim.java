@@ -35,7 +35,7 @@ import games.Arena;
  * since these methods need access to local  members. They are called from {@link GameBoardOthelloGui}'s
  * action handlers
  * 
- * @author Percy Wuensch, TH Koeln, 2019
+ * @author Percy Wuensch, Wolfgang Konen, TH Koeln, 2019-2020
  */
 public class GameBoardSim implements GameBoard {
 

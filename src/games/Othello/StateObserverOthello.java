@@ -9,12 +9,14 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
 /**
- * Class {@link StateObserverOthello} holds any valid Othello game state. It is coded
- * in a two dimensional int[8][8] array, where each index represents either <br>
- * a  Black cell = 0,<br>
- * a  White cell = 1,<br>
- * an empty cell = 2,<br>
- * a  reachable empty cell = 3.<br>
+ * This class holds any valid Othello game state. It is coded
+ * in a two dimensional int[8][8] array, where each index represents either 
+ * <ul>
+ * <li>a  Black cell = 0,
+ * <li>a  White cell = 1,
+ * <li>an empty cell = 2,
+ * <li>a  reachable empty cell = 3.
+ * </ul>
  * This last case "3" is for {@link XNTupleFuncsOthello#getNumPositionValues()}{@code =4}: Every empty 
  * cell which can be taken by the player to move is coded with "3" instead of "2".
  * <p>
@@ -30,6 +32,21 @@ import tools.Types.WINNER;
  *         2   2   2   2   3   2   2   2       5
  *         2   2   2   2   2   2   2   2       6
  *         2   2   2   2   2   2   2   2       7
+ *
+ *     col 0   1   2   3   4   5   6   7
+ *  </pre>
+ *  The action number for board cell {@code (i,j)} is given by {@code 8*i+j}. Thus the 
+ *  possible action numbers are:
+ * <pre>
+ *                                            row
+ *        00  01  02  03  04  05  06  07       0
+ *        08  09  10  11  12  13  14  15       1
+ *        16  17  18  19  20  21  22  23       2
+ *        24  25  26  27  28  29  30  31       3
+ *        32  33  34  35  36  37  38  39       4
+ *        40  41  42  43  44  45  46  47       5
+ *        48  49  50  51  52  53  54  55       6
+ *        56  57  58  59  60  61  62  63       7
  *
  *     col 0   1   2   3   4   5   6   7
  *  </pre>

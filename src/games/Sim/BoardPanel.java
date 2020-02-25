@@ -5,30 +5,49 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+//import java.awt.Image;
+//import java.io.File;
+//import java.io.IOException;
+//import javax.imageio.ImageIO;
 
-import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import tools.Types;
 
+/**
+ * This class does all the drawing jobs for {@link GameBoardSimGui}.
+ * 
+ * @author Percy Wuensch, Wolfgang Konen, TH Koeln, 2019-2020
+ */
 public class BoardPanel extends JPanel {
 	
 	Point[] circles;
 	Point2[] lines;
-	Point[] circleEdge;
 	private Node[] nodes;
 	private int inputNode1, inputNode2;
-	Image img;
-	double [] actionValues;
-	private Color colTHK2 = new Color(255,137,0);
+	/**
+	 * the nodes of a losing triangle (values in [1,...,K]). All -1 if no loosing triangle yet.
+	 */
+	private int[] lastNodes = {-1,-1,-1}; 
+	GameBoardSim m_gb;
+	int CIRCLE_RADIUS = 15;
+//	Point[] circleEdge;
+//	Image img;
+//	private ArrayList<Types.ACTIONS> actions;
+//	double [] actionValues;
+	private boolean showValueOnGameBoard = false;
+	private Color colTHK1 = new Color(183,29,13);	// dark red
+	private Color colTHK2 = new Color(255,137,0);	// orange
+	private Color colTHK3 = new Color(162,0,162);	// dark magenta
+	private Color colLightGray = new Color(200,200,200);
 	
-	BoardPanel(Node [] nodes)
+	BoardPanel(Node [] nodes, GameBoardSim gb)
 	{
 		this.setBounds(0, 0, 600, 400);
 		this.setBackground(Color.gray);
+		this.m_gb = gb;
 		
 		setupNodes(nodes.length);
 		setupCircles(nodes.length);
@@ -37,22 +56,27 @@ public class BoardPanel extends JPanel {
 		inputNode1 = -1;
 		inputNode2 = -1;
 		
-		actionValues = null;
+//		actionValues = null;
 		
 	}
 	
-	private void getImages()
-	{
-		try
-		{
-			img = ImageIO.read(new File("green_btn.jpg"));
-		}
-		catch(IOException ex)
-		{
-			System.out.println("geht nicht lol");
-		}
-		
+	public void clearLastNodes() {
+		for (int i=0; i<lastNodes.length; i++) lastNodes[i]=-1; 
 	}
+	
+	// obsolete
+//	private void getImages()
+//	{
+//		try
+//		{
+//			img = ImageIO.read(new File("green_btn.jpg"));
+//		}
+//		catch(IOException ex)
+//		{
+//			System.out.println("geht nicht lol");
+//		}
+//		
+//	}
 	
 	private void setupNodes(int size)
 	{
@@ -75,70 +99,84 @@ public class BoardPanel extends JPanel {
 		return (int)((posX + radius * Math.sin(t)) - posY);
 	}
 	
-	
+	/**
+	 * Create {@code size} circle positions. A circle position is defined by the lower left corner
+	 * of its bounding rectangle. Its radius is defined by member {@link #CIRCLE_RADIUS}.
+	 * @param size
+	 */
 	private void setupCircles(int size)
 	{
+		int CENTERX = 275;
+		int CENTERY = 115;
 		int radius = 150;
 		int degree = 360 / size;
 		circles = new Point[size];
 		
 		for(int i = 0; i < size; i++)
-			circles[i] = new Point(calculateCirclePositionX(radius, degree * i, 280, 100),calculateCirclePositionY(radius, degree * i, 280, 100));
+			circles[i] = new Point(calculateCirclePositionX(radius, degree * i, CENTERX, CENTERY),
+								   calculateCirclePositionY(radius, degree * i, CENTERX, CENTERY));
 		
 	}
 	
-	
-	private int sum(int size)
-	{
-		int sum = 0;
-		for(int i = 1; i < size; i++)
-			sum += i;
-		
-		return sum;
+	/**
+	 * Return true, if mouse click (x,y) is inside circle i.
+	 */
+	boolean isInsideCircle(int i, int x, int y) {
+		if (i>=0 && i<circles.length) 
+			if (x > circles[i].getX() && x < circles[i].getX() + 2*CIRCLE_RADIUS && 
+				y > circles[i].getY() && y < circles[i].getY() + 2*CIRCLE_RADIUS) 
+					return true;
+		return false;
 	}
+	
+	void markLosingTriangle(int[] lNodes) {
+		lastNodes = lNodes.clone();
+		// the actual marking of the nodes is deferred to doDrawing(), because we need g2d
+	}
+	
+	// obsolete
+//	private int sum(int size)
+//	{
+//		int sum = 0;
+//		for(int i = 1; i < size; i++)
+//			sum += i;
+//		
+//		return sum;
+//	}
 	
 	private void setupLines(int size)
 	{
-		lines = new Point2[sum(size)];
-		int i = 0;
-		for(int j = 0; j < size - 1; j++)
-			for(int k = j + 1; k < size; k++)
+		lines = new Point2[size*(size-1)/2];
+		for(int j = 0, i = 0; j < size - 1; j++)
+			for(int k = j + 1; k < size; k++,i++)
 			{
-				lines[i] = new Point2(new Point(circles[j].getX()+ 15,circles[j].getY()+15), new Point(circles[k].getX()+15,circles[k].getY()+15));
-				i++;
+				lines[i] = new Point2(new Point(circles[j].getX()+CIRCLE_RADIUS,circles[j].getY()+CIRCLE_RADIUS), 
+						              new Point(circles[k].getX()+CIRCLE_RADIUS,circles[k].getY()+CIRCLE_RADIUS));
 			}
-		
 	}
 	
     // this method is deprecated, since the colors (alpha channel of full green) 
     // are not well distinguishable. Use instead calculateLinkColor
-    @Deprecated
-	private Color getColor(double d)
-	{
-		Color color;
-//		if(d < 0)					// bug fix /WK/
-//		{
-//			color = Color.black;
-//		}
-//		else
-		{
-			double intensity = 255 * (d+1)/2; 	// map [-1,1] to [0,255]
-			color = new Color(0,255,0,(int)intensity);
-		}
-		return color;
-	}
+//	private Color getColor(double d)
+//	{
+//		Color color;
+//		double intensity = 255 * (d+1)/2; 	// map [-1,1] to [0,255]
+//		color = new Color(0,255,0,(int)intensity);
+//		return color;
+//	}
 	
     /**
-     * Calculate the color for a specific tile value (borrowed from HexUtils.calculateTileColor):
-     * Uses three color stops: Red for value -1, Yellow for value 0, Green for value +1.
-     * Colors for values between -1 and 0 are interpolated between red and yellow.
-     * Colors for values between 0 and +1 are interpolated between yellow and green.
+     * Calculate the color for a specific action value (borrowed from HexUtils.calculateTileColor). 
+     * This is the color assigned to a link if {@link #showValueOnGameBoard}{@code ==true}.<br>
+     * Uses three color stops: RED for value -1, YELLOW for value 0, GREEN for value +1.
+     * Colors for values between -1 and 0 are interpolated between RED and YELLOW.
+     * Colors for values between 0 and +1 are interpolated between YELLOW and GREEN.
      *
-     * @param tileValue Value of the tile
-     * @return Color the tile is supposed to be drawn in
+     * @param actionValue value of the link (the action), which is a number from [-1,1]
+     * @return color for the link
      */
-    private Color calculateLinkColor(double tileValue) {
-        float percentage = (float) Math.abs(tileValue);
+    private Color calculateLinkColor(double actionValue) {
+        float percentage = (float) Math.abs(actionValue);
         float remainder = 1 - percentage;
 
         Color colorLow;
@@ -146,7 +184,7 @@ public class BoardPanel extends JPanel {
         Color colorNeutral = Color.YELLOW;
         int red, blue, green;
 
-        if (tileValue < 0) {
+        if (actionValue < 0) {
             colorLow = colorNeutral;
             colorHigh = Color.RED;
         } else {
@@ -171,71 +209,126 @@ public class BoardPanel extends JPanel {
 		g2d.setStroke(new BasicStroke(3));
 		
 		
-		// draw lines
-		int k = 0;
-		int v = 0;
-		for(int i = 0; i < nodes.length -1 ; i++)
+		// draw lines: 
+		// i) all lines in empty color (last move thick), 
+		// ii) (optional) action value coloring (last move thick), 
+		// iii) repaint occupied lines in player color (normal width)
+		int lastMove = m_gb.m_so.getLastMove();
+		g2d.setColor(colTHK2);
+		for (int k=0; k<lines.length; k++) {
+			drawLine(g2d,k);		
+			if (k==lastMove) drawLineThick(g2d,k);
+		}
+		
+		if (this.showValueOnGameBoard) 
+			if(m_gb.m_so.getStoredValues() != null) {
+				for (int i=0; i<m_gb.m_so.getStoredValues().length; i++) {
+					Types.ACTIONS act = m_gb.m_so.getStoredAction(i);
+					int k = act.toInt();
+					g2d.setColor(calculateLinkColor(m_gb.m_so.getStoredValues()[i]));
+					drawLine(g2d,k);
+					if (k==lastMove) drawLineThick(g2d,k);
+				}		
+			}
+		
+//		int v = 0;
+		for(int i = 0, k = 0; i < nodes.length -1 ; i++)
 		{
-			for(int j = 0; j < nodes.length - 1 - i; j++)
+			for(int j = 0; j < nodes.length - 1 - i; j++,k++)
 			{
-				if(nodes[i].getLinkPlayerPos(j) == 0)
-				{
-					if(actionValues != null && v < actionValues.length)
-					{
-//						g2d.setColor(getColor(actionValues[v]));
-						g2d.setColor(calculateLinkColor(actionValues[v]));
-						v++;
-					}
-						
-					else
-						g2d.setColor(colTHK2);
-			
-				}
-				else if(nodes[i].getLinkPlayerPos(j) == 1)
-					g2d.setColor(Types.GUI_PLAYER_COLOR[0]);
-				else if(nodes[i].getLinkPlayerPos(j) == 2)
-					g2d.setColor(Types.GUI_PLAYER_COLOR[1]);
-				else
-					g2d.setColor(Types.GUI_PLAYER_COLOR[2]);
+				// This code is not exactly what we want, because in case PLAY
+				// we have also an actionValue for the last move just taken by the player.
+				// Its coloring would be missing.
+//				if(nodes[i].getLinkPlayerPos(j) == 0)
+//				{
+//					if(actionValues != null && v < actionValues.length)
+//					{
+//						//g2d.setColor(getColor(actionValues[v]));
+//						g2d.setColor(calculateLinkColor(actionValues[v]));
+//						v++;
+//					}
+//						
+//					else
+//						g2d.setColor(colTHK2);
+//			
+//				}
 				
-				g2d.drawLine(lines[k].getP1().getX(), lines[k].getP1().getY(), lines[k].getP2().getX(), lines[k].getP2().getY());
-				k++;
+				if(nodes[i].getLinkPlayerPos(j) > 0) {		// if line is occupied by one of the players
+					if(nodes[i].getLinkPlayerPos(j) == 1)
+						g2d.setColor(Types.GUI_PLAYER_COLOR[0]);
+					else if(nodes[i].getLinkPlayerPos(j) == 2)
+						g2d.setColor(Types.GUI_PLAYER_COLOR[1]);
+					else if(nodes[i].getLinkPlayerPos(j) == 3)
+						g2d.setColor(Types.GUI_PLAYER_COLOR[2]);
+
+					drawLine(g2d,k);
+				}
 			}
 		}
 		
-		//draw circles
-		g2d.setStroke(new BasicStroke(0));
+		//draw circles (& mark circle borders of a losing triangle, if any)
 		for(int i = 0; i < circles.length; i++)
 		{
+			// note that lastNodes values \in [1,..,K] while i \in [0,K-1] (!)
+			if(i == lastNodes[0]-1 || i == lastNodes[1]-1 || i == lastNodes[2]-1) {
+				// mark the circle borders of a losing triangle:
+				g2d.setStroke(new BasicStroke(8));
+				g2d.setColor(colTHK1);		// dark red
+				//System.out.println("lastNode i:"+i+"  [lastNodes[2]="+lastNodes[2]+"]");
+			} else {
+				// the normal mark
+				g2d.setStroke(new BasicStroke(2));
+				//g2d.setColor(colTHK2);	// invisible border
+				g2d.setColor(colLightGray);	// light gray border
+			}
+			g2d.drawOval(circles[i].getX(), circles[i].getY(), 2*CIRCLE_RADIUS, 2*CIRCLE_RADIUS);
 			if(i == inputNode1 || i == inputNode2)
 				g2d.setColor(Color.darkGray);
 			else
 				g2d.setColor(colTHK2);
 			
-			g2d.fillOval(circles[i].getX(), circles[i].getY(), 30, 30);
-			//g2d.drawImage(img,circles[i].getX(),circles[i].getY(),30,30,this);
+			g2d.fillOval(circles[i].getX(), circles[i].getY(), 2*CIRCLE_RADIUS, 2*CIRCLE_RADIUS);
+			//g2d.drawImage(img,circles[i].getX(),circles[i].getY(),2*CIRCLE_RADIUS,2*CIRCLE_RADIUS,this);
 		}
 		
 	}
 	
-	 @Override
-	 public void paintComponent(Graphics g) 
-	 {
+	private void drawLine(Graphics2D g2d, int k) {
+		g2d.drawLine(lines[k].getP1().getX(), lines[k].getP1().getY(), 
+				     lines[k].getP2().getX(), lines[k].getP2().getY());			
+	}
+	
+	private void drawLineThick(Graphics2D g2d, int k) {
+		// First we calculate with (dx,dy) the vector pointing from P1 to P2.
+		// Then the vector (-dy,dx) is perpendicular to (dx,dy) and has length len. 
+		// Then (ox,oy) goes OFFSETWIDTH pixels 'up' in this perpendicular direction.
+		// We draw a thick line by drawing two lines with offset (ox,oy) and (-ox,-oy) side-to-side
+		// to the original line.
+		int OFFSETWIDTH = 3;
+		int x1=lines[k].getP1().getX();
+		int y1=lines[k].getP1().getY();
+		int x2=lines[k].getP2().getX();
+		int y2=lines[k].getP2().getY();
+		int dx=x2-x1;
+		int dy=y2-y1;
+		double len=Math.sqrt(dx*dx+dy*dy);
+		int ox=(int)(-dy*OFFSETWIDTH/len);
+		int oy=(int)(+dx*OFFSETWIDTH/len);
+				
+		g2d.drawLine(x1+ox, y1+oy, x2+ox, y2+oy); 
+		g2d.drawLine(x1-ox, y1-oy, x2-ox, y2-oy); 
+	}
+	
+	@Override
+	public void paintComponent(Graphics g) 
+	{
 		 super.paintComponent(g);
 		 doDrawing(g);
-	 }
-	 
-	 public void toFront() 
-	 {
- 		super.setVisible(true);
- 	}
-
-	public Node[] getNodes() {
-		return nodes;
 	}
-
-	public void setNodes(Node[] nodes) {
-		this.nodes = nodes;
+	 
+	public void toFront() 
+	{
+		super.setVisible(true);
 	}
 
 	public void setNodesCopy(Node [] nodes) 
@@ -260,8 +353,28 @@ public class BoardPanel extends JPanel {
 		inputNode2 = -1;
 	}
 	
-	void setActionValues(double [] values)
-	{
-		actionValues = values;
+	void setShowValueOnGameBoard(boolean show) {
+		this.showValueOnGameBoard = show;
 	}
+	
+	// never used
+//	public Node[] getNodes() {
+//		return nodes;
+//	}
+//
+//	public void setNodes(Node[] nodes) {
+//		this.nodes = nodes;
+//	}
+
+	// obsolete now:
+//	void setAvailableActions(ArrayList<Types.ACTIONS> acts)
+//	{
+//		actions = acts;
+//	}
+//	
+//	void setActionValues(double [] values)
+//	{
+//		actionValues = values;
+//	}
+	
 }

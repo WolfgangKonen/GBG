@@ -32,7 +32,7 @@ import games.Arena;
  * game play or to enter board positions for which the agent reaction is 
  * inspected. 
  * 
- * @author Percy Wuensch, TH Koeln, 2019
+ * @author Percy Wuensch, Wolfgang Konen, TH Koeln, 2019-2020
  */
 public class GameBoardSimGui {
 
@@ -62,39 +62,45 @@ public class GameBoardSimGui {
 		frame.setSize(600, 400);
 		frame.setLocation(550, 0);
 		 
-		board = new BoardPanel(m_gb.m_so.getNodes());
+		board = new BoardPanel(m_gb.m_so.getNodes(),m_gb);
 		board.addMouseListener(new Mouse());
 		frame.add(board);	           
 	}
 	
 	
 	public void clearBoard(boolean boardClear, boolean vClear) {
-		 if (boardClear) {
-			 m_gb.m_so = new StateObserverSim();
-	            //board.setNodesCopy(m_so.getNodes());
-	     } 
-	     frame.repaint();
+		board.clearLastNodes();
+	    frame.repaint();
 	}
 
-	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
-		if (so!=null) {
-	        assert (so instanceof StateObserverSim)
-			: "StateObservation 'so' is not an instance of StateObserverSim";
-			StateObserverSim soS = (StateObserverSim) so;
+	public void updateBoard(StateObserverSim soS, boolean withReset, boolean showValueOnGameboard) {
+		if (soS!=null) {
+			// not needed anymore:
+//	        assert (so instanceof StateObserverSim)
+//			: "StateObservation 'so' is not an instance of StateObserverSim";
+//			StateObserverSim soS = (StateObserverSim) so;
 			
-			//ShowValue bug, because the updateGameboad Method is called twice.
-			if(soS.getStoredValues() != null && showValueOnGameboard)
-			{				
-				//for(int i = 0; i < som.getStoredValues().length; i++)
-					//System.out.println(som.getStoredValues()[i]);
-				board.setActionValues(soS.getStoredValues());
+			board.setShowValueOnGameBoard(showValueOnGameboard);
+			
+			board.setNodesCopy(m_gb.m_so.getNodes());		// we could use soS instead of m_gb.m_so
+			
+			if (soS.hasLost(soS.getCreatingPlayer())) {
+				board.markLosingTriangle(soS.getLastNodes());
 			}
-			if(!showValueOnGameboard)
-			{
-				board.setActionValues(null);
-			}			
+			
+			// not needed anymore:
+//			if(soS.getStoredValues() != null && showValueOnGameboard)
+//			{				
+//				//for(int i = 0; i < som.getStoredValues().length; i++)
+//					//System.out.println(som.getStoredValues()[i]);
+//				board.setAvailableActions(soS.getAvailableActions());
+//				board.setActionValues(soS.getStoredValues());
+//			}
+//			if(!showValueOnGameboard)
+//			{
+//				board.setActionValues(null);
+//			}			
 		}		
-		board.setNodesCopy(m_gb.m_so.getNodes());
 		frame.repaint();
 	}
 
@@ -118,25 +124,28 @@ public class GameBoardSimGui {
 
 	public class Mouse implements MouseListener
 	{
-		Point[] circles;
+//		Point[] circles;
 		int node;
 		
 		public Mouse()
 		{
 			node = 0;
-			setupCircles(ConfigSim.NUM_NODES);	// bug fix WK: this had a 6 instead of NUM_NODES before
+//			setupCircles(ConfigSim.NUM_NODES);	// bug fix WK: this had a 6 instead of NUM_NODES before
 		}
 
-		private void setupCircles(int size)
-		{
-			int radius = 150;
-			int degree = 360 / size;
-			circles = new Point[size];
-			
-			for(int i = 0; i < size; i++)
-				circles[i] = new Point(calculateCirclePositionX(radius, degree * i, 280, 100),
-									   calculateCirclePositionY(radius, degree * i, 280, 100));			
-		}
+		// use instead board.circles and use board.isInsideCircles() in mouseClicked().
+//		private void setupCircles(int size)
+//		{
+//			int CENTERX = 275;
+//			int CENTERY = 115;
+//			int radius = 150;
+//			int degree = 360 / size;
+//			circles = new Point[size];
+//			
+//			for(int i = 0; i < size; i++)
+//				circles[i] = new Point(calculateCirclePositionX(radius, degree * i, CENTERX, CENTERY),
+//						   			   calculateCirclePositionY(radius, degree * i, CENTERX, CENTERY));			
+//		}
 		
 		private int calculateCirclePositionX(int radius, int degree, int posX, int posY)
 		{
@@ -160,13 +169,22 @@ public class GameBoardSimGui {
 			
 			for(int i = 0; i < m_gb.m_so.getNodesLength(); i++)
 			{
-				if(x  > circles[i].getX() && x < circles[i].getX() + 30 && y > circles[i].getY() && y < circles[i].getY() + 30)
+				if(board.isInsideCircle(i, x, y))
 				{
 					setInput(i);
 				}
 			}
 		}
 		
+		/**
+		 * Mark a link by clicking at its two nodes: 
+		 * <ul>
+		 * <li> If node==0, the click is to the first node and node is set to i+1
+		 * <li> If node==i+1, the click resets the first node and node is reset to 0
+		 * <li> Else, the link (and its associated action) is set from the two clicked nodes
+		 * </ul>
+		 * @param i
+		 */
 		private void setInput(int i)
 		{
 			if(node == 0)
@@ -220,6 +238,6 @@ public class GameBoardSimGui {
 		@Override
 		public void mouseExited(MouseEvent e) {		}
 		
-	}
+	} // class Mouse
 
 }

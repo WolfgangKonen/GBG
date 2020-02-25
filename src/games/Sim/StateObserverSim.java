@@ -8,12 +8,39 @@ import games.Arena;
 import games.ObserverBase;
 import games.StateObservation;
 import games.Othello.ArenaOthello;
+import games.Othello.XNTupleFuncsOthello;
 import games.TicTacToe.TicTDBase;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
 import tools.Types;
 import tools.ValidateStateObserver;
 
+/**
+ * This class holds any valid Sim game state. It is coded
+ * as array {@link Node}{@code [] nodes}, where each node carries links to all nodes with higher
+ * index in the array. Each link can be 
+ * <ul>
+ * <li>= 0 for an empty link,
+ * <li>= 1 for a P0 link,
+ * <li>= 2 for a P1 link,
+ * <li>= 3 for a P2 link (in the 3-player variant),
+ * </ul>
+ * where Pi refers to player i=0,1[,2]. 
+ * <p>
+ * P0 starts the game.<p>
+ * The available actions are the (empty) links, which are numbered in consecutively: If we have K nodes
+ * in total, then node i=0,...,K-1 has K-1-i links (to node i+1,...,K-1). For example, in the case
+ * K=6 we have K*(K-1)/2=15 actions which are numbered as: 
+ * <pre>
+ *      j  0   1   2   3   4   
+ *                                 i
+ *        00  01  02  03  04       0
+ *        05  06  07  08           1
+ *        09  10  11               2
+ *        12  13                   3
+ *        14                       4
+ *  </pre>
+ */
 public class StateObserverSim extends ObserverBase implements StateObservation {
 	//rewards
 	private static final double REWARD_NEGATIVE = -1;
@@ -24,18 +51,20 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int player;
 	private Node [] nodes;
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();
+	private ArrayList<Integer> lastMoves;
 	//Serial number
 	private static final long serialVersionUID = 12L;
+	private int lastNode1, lastNode2, lastNode3;
 	private int winner;				// starts with -2; gets -1 on draw, otherwise i=0,1,2 on game over where i is the winning player
-	private int lastNode1, lastNode2;
-	private int looser;				// starts with -1; gets i=0,1,2, if player i has just lost (game may not 
-									// be over in the 3-player case!)
-	private int[] allRewards;		// currently just as debug info:
-									// allRewards[i] is the reward for player i in case isGameOver()
+	private int looser;				// starts with -1; gets i=0,1,2, if player i has just lost (note that game 
+									// needs not to be over in the 3-player case!)
+	int[] allRewards;		// currently just as debug info:
+							// allRewards[i] is the reward for player i in case isGameOver()
 	
 	StateObserverSim() 
 	{
 		config(ConfigSim.NUM_PLAYERS, ConfigSim.NUM_NODES);
+		lastMoves = new ArrayList<Integer>();
 	}
 	
 	StateObserverSim(Node [] nodes, int player, int winner, int looser,int numPlayers, int numNodes)
@@ -50,6 +79,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		this.looser = looser;
 		this.allRewards = new int[numPlayers]; 		// initialized with 0 - the tie case reward
 		setAvailableActions();
+		lastMoves = new ArrayList<Integer>();
 	}
 	
 	private void config(int numberOfPlayer, int numberOfNodes)
@@ -83,23 +113,37 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	{
 		StateObserverSim sos = new StateObserverSim(this.nodes,this.player, this.winner, this.looser, this.numPlayers, this.numNodes);
 		sos.m_counter = this.m_counter;
+		sos.lastMoves = (ArrayList<Integer>) lastMoves.clone();		 
+		sos.storedActBest = this.storedActBest;
+		sos.storedMaxScore = this.storedMaxScore;
+		if (this.storedActions!=null) sos.storedActions = this.storedActions.clone();
+		if (this.storedValues!=null) sos.storedValues = this.storedValues.clone();
 		return sos;
 	}
 
-	private boolean hasLost(int player)
+	public boolean hasLost(int player)
 	{
-		for(int i = 1; i <= nodes.length; i++)
-			if(i == lastNode1 || i == lastNode2)
-				continue;
-			else
-			{
-				if(nodes[i-1].getLinkPlayer(lastNode1) == player + 1 && nodes[i-1].getLinkPlayer(lastNode2) == player + 1)
-					return true;
-			}
+		if (lastNode1 != lastNode2) {		// if an action was taken
+			for(int i = 1; i <= nodes.length; i++)
+				if(i == lastNode1 || i == lastNode2)
+					continue;
+				else
+				{
+					if(nodes[i-1].getLinkPlayer(lastNode1) == player + 1 && 
+					   nodes[i-1].getLinkPlayer(lastNode2) == player + 1) {
+						lastNode3 = i;
+						return true;
+					}
+				}
+		}
 		
 		return false;
 	}
 	
+	public int[] getLastNodes() {
+		int[] lastNodes =  {lastNode1,lastNode2,lastNode3};
+		return lastNodes;
+	}
 	
 	private boolean isDraw()
 	{
@@ -277,6 +321,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	}
 	
 	
+	// obsolete?
 //	@Override
 //	public WINNER getGameWinner() {
 //		assert isGameOver() : "Game is not over yet!";
@@ -327,15 +372,55 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		
 		for(int i = 0; i < nodes.length -1 ; i++)
 		{
-			for(int j = 0; j < nodes.length - 1 - i; j++)
+			for(int j = 0; j < nodes.length - 1 - i; j++, action++)
 			{
-				if(nodes[i].getLinkPlayerPos(j) == 0)
+				if(nodes[i].getLinkPlayerPos(j) == 0)			// all empty links are available actions
 					acts.add(Types.ACTIONS.fromInt(action));
-				action++;
+//				action++;	// /WK/ moved to for (int j...)
+				
+				// just debug:
+//				int action_fromij = getActionIntFromij( i,j);
+//				Point pnt = this.getIJfromActionInt(action_fromij);
+//				System.out.println("("+i+","+j+"): "+action+" | "+action_fromij + " ("+pnt.getX()+","+pnt.getY()+")");
 			}
 		}
+//		int dummy=1;
 	}
 
+	/**
+	 * Given i,j, calculate the action index. 
+	 * See triangular table in {@link StateObserverSim} for an example.
+	 * @param i	the node number \in 0,...,K-1
+	 * @param j the link number for this node
+	 * @return the action index
+	 */
+	public int getActionIntFromIJ(int i, int j) {
+		int s=0;
+		for (int k=1; k<=i; k++) s+=(nodes.length-k);
+		return s+j;
+	}
+
+	/**
+	 * Given the action index calculate (i,j). 
+	 * See triangular table in {@link StateObserverSim} for an example.
+	 * @param iAction the action index
+	 * @return {@link Point}(i,j)
+	 * 
+	 * @return
+	 */
+	public Point getIJfromActionInt(int iAction) {
+		int i=0;
+		int s=0, spre=0;
+		for (int k=1; k<nodes.length; k++) {
+			spre = s;
+			s+=(nodes.length-k);
+			if (s>iAction) break;	// out of for
+			i++;
+		}
+		int j = iAction-spre;
+		return new Point(i,j);
+	}
+	
 	@Override
 	public ACTIONS getAction(int i) {
 		return acts.get(i);
@@ -418,34 +503,32 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		super.advanceBase();
 		int iAction = action.toInt();
 		
+		setAction(iAction);
+		setAvailableActions();		// IMPORTANT: adjust the available actions (have reduced by one)
+		
 		if(numPlayers > 2)
 			advance3Player(iAction);
 		else
     		advance2Player(iAction);
 		super.incrementMoveCounter();
 		
+		lastMoves.add(action.toInt());
+//		System.out.println("lastMove: "+action.toInt());
 //		System.out.println(this.stringDescr());		// only debug
 	}
 	
 	private void advance2Player(int action)
 	{
-		setAction(action);
-		setAvailableActions();
-		
 		checkIfPlayerLost2Player();
 		
-		player = getNextPlayer2Player();
+		player = getNextPlayer2Player();	// 2-player games: 0,1,0,1,...
 	}
 	
 	private void advance3Player(int action)
 	{
-		setAction(action);
-    	setAvailableActions(); 		// IMPORTANT: adjust the available actions (have reduced by one)
-    	
     	checkIfPlayerLost3Player();
     	
-    	//setLastPlayer(player);
-		player = getNextPlayer3Player();    // 2-player games: 1,-1,1,-1,...
+		player = getNextPlayer3Player();    // 3-player games: 0,1,2,0,1,...
 	}
 
 	@Override
@@ -514,6 +597,15 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return getGameScore(player);
 	}
 	
+	public int getLastMove() {
+		if (lastMoves.size() == 0) return -1;
+		return lastMoves.get(lastMoves.size()-1);
+	}
+	
+	public void resetLastMoves() {
+		this.lastMoves = new ArrayList<Integer>();		
+	}
+	
 	@Override
 	public String stringDescr() {
 		String sout = "";
@@ -533,7 +625,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		
 		for(int i = 0; i < nodes.length -1 ; i++)
 		{
-			for(int j = 0; j < nodes.length - 1 - i; j++)
+			for(int j = 0; j < nodes.length - 1 - i; j++, k++)
 			{
 				if(k == action)
 				{
@@ -542,21 +634,18 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 					setLastNodes(nodes[i].getNumber(), nodes[nodes[i].getLinkNodePos(j)-1].getNumber());
 					return;
 				}
-				k++;
 			}
 		}
 	}
 
-	private boolean isLegal(int action)
+	private boolean isLegal(int iAction)
 	{
 		int k = 0;
 		
 		for(int i = 0; i < nodes.length -1 ; i++)
-			for(int j = 0; j < nodes.length - 1 - i; j++)
-				if(k == action && nodes[i].getLinkPlayerPos(j) == 0)
+			for(int j = 0; j < nodes.length - 1 - i; j++, k++)
+				if(k == iAction && nodes[i].getLinkPlayerPos(j) == 0)
 					return true;
-				else
-					k++;
 		
 		return false;
 	}
@@ -567,22 +656,23 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return isLegal(iAction); 
 	}
 	
-	public int inputToAction(String text1, String text2)
-	{
-		int n1 = Integer.parseInt(text1);
-		int n2 = Integer.parseInt(text2);
-		int i = 0;
-		
-		for(int j = 1; j < nodes.length; j++)
-			for(int k = j + 1; k < nodes.length + 1; k++)
-			{
-				if((n1 == j || n1 == k) && (n2 == j || n2 == k))
-					return i;
-				i++;
-			}
-		
-		return -1;
-	}
+	// obsolete?
+//	public int inputToAction(String text1, String text2)
+//	{
+//		int n1 = Integer.parseInt(text1);
+//		int n2 = Integer.parseInt(text2);
+//		int i = 0;
+//		
+//		for(int j = 1; j < nodes.length; j++)
+//			for(int k = j + 1; k < nodes.length + 1; k++)
+//			{
+//				if((n1 == j || n1 == k) && (n2 == j || n2 == k))
+//					return i;
+//				i++;
+//			}
+//		
+//		return -1;
+//	}
 	
 	public int inputToActionInt(int n1, int n2)
 	{
@@ -603,9 +693,10 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return nodes;
 	}
 
-	public void setNodes(Node [] nodes) {
-		this.nodes = nodes;
-	}
+	// obsolete?
+//	public void setNodes(Node [] nodes) {
+//		this.nodes = nodes;
+//	}
 	
 	public void setNodesCopy(Node [] nodes) 
 	{
@@ -619,21 +710,23 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return nodes.length;
 	}
 	
-	public void setState(StateObserverSim som)
-	{
-		copyNodes(som.getNodes());
-		this.player = som.getPlayer();
-		setAvailableActions();
-		this.m_counter = som.getMoveCounter();
-	}
+	// obsolete?
+//	public void setState(StateObserverSim som)
+//	{
+//		copyNodes(som.getNodes());
+//		this.player = som.getPlayer();
+//		setAvailableActions();
+//		this.m_counter = som.getMoveCounter();
+//	}
 	
-	public int getPreviousPlayer()
-	{
-		if(player == 0)
-			return 2;
-		else
-			return player - 1;
-	}
+	// obsolete?
+//	public int getPreviousPlayer()
+//	{
+//		if(player == 0)
+//			return 2;
+//		else
+//			return player - 1;
+//	}
 	
 	private int getNextPlayer3Player()
 	{
@@ -709,10 +802,10 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			
 			for (int k=0; k<sob.getNumPlayers(); k++) {
 //				System.out.println("i="+i+",k="+k+":"+(int)sob.getGameScore(k)+"/"+sob.getAllRewards()[k]);
-				assert ((int)sob.getGameScore(k) == sob.getAllRewards()[k]) : "Oops";
+				assert ((int)sob.getGameScore(k) == sob.allRewards[k]) : "Oops";
 			}
 			System.out.print("i="+i+", allRewards=");	// print reward vector
-			for (int k=0; k<sob.getNumPlayers(); k++) System.out.print(sob.getAllRewards()[k]+"/");
+			for (int k=0; k<sob.getNumPlayers(); k++) System.out.print(sob.allRewards[k]+"/");
 			System.out.println();
 		}
 		
