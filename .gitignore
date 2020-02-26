@@ -16,6 +16,9 @@ out/*
 games/Logs/*
 logs/*
 agents/temp/*
+GBGLaunch.jar
+GBGBatch.jar
+
 
 #Files not for the public GitHub version
 TDNTupleAgt.docx
