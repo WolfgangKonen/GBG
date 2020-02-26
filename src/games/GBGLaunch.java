@@ -375,6 +375,22 @@ public class GBGLaunch {
 				}	
 		);
 		
+		choiceScaPar2.addActionListener(
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{	
+						selectedGame = (String)choiceGame.getSelectedItem();
+						if (selectedGame=="Nim") {
+							String heapSize = (String)choiceScaPar2.getSelectedItem();
+							choiceScaPar3.removeAllItems();
+							setScaPar3List(new int[]{2,3,4,5});	
+							choiceScaPar3.addItem(heapSize);
+						}
+					}
+				}	
+		);
+		
 	}
 
 	/**
