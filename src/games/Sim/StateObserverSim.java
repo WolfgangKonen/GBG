@@ -40,6 +40,10 @@ import tools.ValidateStateObserver;
  *        12  13                   3
  *        14                       4
  *  </pre>
+ *  Note that index j does not refer to node numbers, but j=0 means "node plus 1", j=1 means 
+ *  "node plus 2" and so on.
+ *  <p>
+ *  The {@code lines} in {@link BoardPanel} are numbered exactly the same way as the actions.
  */
 public class StateObserverSim extends ObserverBase implements StateObservation {
 	//rewards
@@ -50,11 +54,24 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int numPlayers;
 	private int player;
 	private Node [] nodes;
+	/**
+	 * The list of avaialble actions
+	 */
 	private ArrayList<Types.ACTIONS> acts = new ArrayList();
+	/**
+	 * The list of last moves in an episode. Each move is stored as {@link Integer} {@code iAction}.
+	 */
 	private ArrayList<Integer> lastMoves;
+	/**
+	 * This array holds the nodes involved in the last action taken. More precisely, 
+	 * {@code lastNodes[0]} and {@code lastNodes[1]} hold the node numbers connected by 
+	 * the last link taken. {@code lastNodes[2]} is only set when {@link #hasLost(int)} is called and
+	 * returns {@code true}: It is the node number completing the losing triangle (needed in 
+	 * {@link BoardPanel} to color this triangle.
+	 */
+	private int[] lastNodes = {-1,-1,-1};
 	//Serial number
 	private static final long serialVersionUID = 12L;
-	private int lastNode1, lastNode2, lastNode3;
 	private int winner;				// starts with -2; gets -1 on draw, otherwise i=0,1,2 on game over where i is the winning player
 	private int looser;				// starts with -1; gets i=0,1,2, if player i has just lost (note that game 
 									// needs not to be over in the 3-player case!)
@@ -123,15 +140,15 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	public boolean hasLost(int player)
 	{
-		if (lastNode1 != lastNode2) {		// if an action was taken
+		if (lastNodes[0] != lastNodes[1]) {		// if an action was taken
 			for(int i = 1; i <= nodes.length; i++)
-				if(i == lastNode1 || i == lastNode2)
+				if(i == lastNodes[0] || i == lastNodes[1])
 					continue;
 				else
 				{
-					if(nodes[i-1].getLinkPlayer(lastNode1) == player + 1 && 
-					   nodes[i-1].getLinkPlayer(lastNode2) == player + 1) {
-						lastNode3 = i;
+					if(nodes[i-1].getLinkPlayer(lastNodes[0]) == player + 1 && 
+					   nodes[i-1].getLinkPlayer(lastNodes[1]) == player + 1) {
+						lastNodes[2] = i;
 						return true;
 					}
 				}
@@ -141,7 +158,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	}
 	
 	public int[] getLastNodes() {
-		int[] lastNodes =  {lastNode1,lastNode2,lastNode3};
 		return lastNodes;
 	}
 	
@@ -379,7 +395,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 //				action++;	// /WK/ moved to for (int j...)
 				
 				// just debug:
-//				int action_fromij = getActionIntFromij( i,j);
+//				int action_fromij = getActionIntFromIJ( i,j);
 //				Point pnt = this.getIJfromActionInt(action_fromij);
 //				System.out.println("("+i+","+j+"): "+action+" | "+action_fromij + " ("+pnt.getX()+","+pnt.getY()+")");
 			}
@@ -401,7 +417,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	}
 
 	/**
-	 * Given the action index calculate (i,j). 
+	 * Given the action index, calculate (i,j). 
 	 * See triangular table in {@link StateObserverSim} for an example.
 	 * @param iAction the action index
 	 * @return {@link Point}(i,j)
@@ -409,15 +425,12 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	 * @return
 	 */
 	public Point getIJfromActionInt(int iAction) {
-		int i=0;
-		int s=0, spre=0;
-		for (int k=1; k<nodes.length; k++) {
-			spre = s;
-			s+=(nodes.length-k);
-			if (s>iAction) break;	// out of for
-			i++;
+		int i=0, s=0;
+		for (; i<nodes.length-1; i++) {
+			if (s+(nodes.length-1-i)>iAction) break;	// out of for
+			s += (nodes.length-1-i);
 		}
-		int j = iAction-spre;
+		int j = iAction-s;
 		return new Point(i,j);
 	}
 	
@@ -760,8 +773,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	private void setLastNodes(int x, int y)
 	{
-			lastNode1 = x;
-			lastNode2 = y;
+			lastNodes[0] = x;
+			lastNodes[1] = y;
 	}
 
 	//public int getLastPlayer() {

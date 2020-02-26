@@ -46,12 +46,14 @@ public class GameBoardSimGui {
 	 */
 	private GameBoardSim m_gb=null;
 	
+	GameBoardSimGui m_gbsg;
 	JFrame frame;
 	BoardPanel board;
 	
 	public GameBoardSimGui(GameBoardSim gb)
 	{
 		m_gb = gb;
+		m_gbsg = this;
 		
 		setupGUI();
 	}
@@ -179,11 +181,11 @@ public class GameBoardSimGui {
 		/**
 		 * Mark a link by clicking at its two nodes: 
 		 * <ul>
-		 * <li> If node==0, the click is to the first node and node is set to i+1
-		 * <li> If node==i+1, the click resets the first node and node is reset to 0
-		 * <li> Else, the link (and its associated action) is set from the two clicked nodes
+		 * <li> If {@code node}==0, the click is to the first node and {@code node} is set to i+1
+		 * <li> If {@code node}==i+1, this is a resetting click: {@code node} is reset to 0
+		 * <li> Else, the link (and its associated action) is set from the two clicked nodes.
 		 * </ul>
-		 * @param i
+		 * @param i	the circle index \in [0,...,K-1] where K is the number of nodes
 		 */
 		private void setInput(int i)
 		{
@@ -203,9 +205,10 @@ public class GameBoardSimGui {
 			else
 			{
 				setAction(i);
-				board.setInputNode2(i);
+//				board.setInputNode2(i);
 			}
 			
+			board.setNodesCopy(m_gb.m_so.getNodes());		// copy the new action link
 			frame.repaint();
 		}
 		

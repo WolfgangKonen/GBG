@@ -8,8 +8,9 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * Class {@link ObserverBase} implements as <b>abstract</b> class the interface  
- * {@link StateObservation} common to all games (things related to advance, game score, reward, ...).
+ * Class {@link ObserverBase} implements as an <b>abstract</b> class all elements of the interface  
+ * {@link StateObservation} that are common to all games (things related to advance, game score, 
+ * reward, stored action and value info, ...).
  * <p>
  * This default behavior in {@link ObserverBase} - which may be overridden in derived classes -
  * is for deterministic, 2-player games, where reward and game score are the same. (If one of 
@@ -256,8 +257,4 @@ abstract public class ObserverBase implements StateObservation {
     	return true;
     }
     
-//  public int getGameWinner3player() {
-//		// TODO Auto-generated method stub
-//		return 0;
-//	}
 }

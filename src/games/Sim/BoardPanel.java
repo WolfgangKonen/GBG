@@ -147,11 +147,11 @@ public class BoardPanel extends JPanel {
 	private void setupLines(int size)
 	{
 		lines = new Point2[size*(size-1)/2];
-		for(int j = 0, i = 0; j < size - 1; j++)
-			for(int k = j + 1; k < size; k++,i++)
+		for(int i = 0, k = 0; i < size - 1; i++)
+			for(int j = i + 1; j < size; j++,k++)
 			{
-				lines[i] = new Point2(new Point(circles[j].getX()+CIRCLE_RADIUS,circles[j].getY()+CIRCLE_RADIUS), 
-						              new Point(circles[k].getX()+CIRCLE_RADIUS,circles[k].getY()+CIRCLE_RADIUS));
+				lines[k] = new Point2(new Point(circles[i].getX()+CIRCLE_RADIUS,circles[i].getY()+CIRCLE_RADIUS), 
+						              new Point(circles[j].getX()+CIRCLE_RADIUS,circles[j].getY()+CIRCLE_RADIUS));
 			}
 	}
 	

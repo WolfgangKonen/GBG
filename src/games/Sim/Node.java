@@ -10,6 +10,9 @@ public class Node implements Serializable
 	//Serial number
 	private static final long serialVersionUID = 12L;
 	
+	/**
+	 * Each node carries a number {@code num} \in [{@code 1,...,size}] and has {@code size - 1} links to other nodes.
+	 */
 	Node(int size, int num)
 	{
 		number = num;
@@ -56,9 +59,10 @@ public class Node implements Serializable
 		return number;
 	}
 
-	public void setNumber(int number) {
-		this.number = number;
-	}
+	// never used
+//	public void setNumber(int number) {
+//		this.number = number;
+//	}
 	
 	/**
 	 * @param node the 'to'-node, i.e. the link is from this to 'to'-node
