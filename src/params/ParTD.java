@@ -8,6 +8,7 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTuple2ValueFunc;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 
 /**
  *  TD (temporal difference) parameters for agents {@link TDAgent},  {@link TDNTuple3Agt} and {@link SarsaAgt}

@@ -21,6 +21,7 @@ import javax.swing.JTextField;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Feature;
+import games.Othello.Edax.Edax2;
 
 /**
  * This class realizes Edax parameter settings (specific to Othello). 

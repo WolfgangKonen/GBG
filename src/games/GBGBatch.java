@@ -88,7 +88,7 @@ public class GBGBatch {
 	 *          [2] agent file name, e.g. "tdntuple3.agt.zip". This agent is loaded from
 	 *          	{@code agents/}{@link Types#GUI_DEFAULT_DIR_AGENT} (+ a suitable subdir, if 
 	 *          	applicable). It specifies the agent type and all its parameters for the multi-training 
-	 *          	in {@link #batch1(int, int, XArenaButtons, GameBoard) batch1} or {@link #batch2(int, int, XArenaButtons, GameBoard) batch2}.<br>
+	 *          	in {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1} or {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}.<br>
 	 *          [3] (optional) trainNum: number of agents to train (default -1). <br>
 	 *          [4] (optional) maxGameNum: maximum number of training games (default -1) <br>
 	 *          [5] (optional) csvName: filename for CSV results (defaults: "multiTrain.csv" or 

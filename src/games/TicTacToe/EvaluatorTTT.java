@@ -22,8 +22,8 @@ import tools.Types;
 /**
  * Evaluator for TicTacToe:
  * <ul>
- * <li> if mode=0: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition against RandomAgent) or 
- * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,GameBoard)} (competition against MaxNAgent) or 
+ * <li> if mode=0: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,PlayAgent,GameBoard)} (competition against RandomAgent) or 
+ * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,PlayAgent,GameBoard)} (competition against MaxNAgent) or 
  * <li> if mode=2: {@link EvaluatorTTT#evaluateAgent2(PlayAgent,PlayAgent,GameBoard)} (competition against MaxNAgent from different start positions). 
  * </ul>  
  * The value of mode is set in the constructor. Class Evaluator2 works also for featmode==3.

@@ -232,7 +232,7 @@ public class GameBoardNimGui extends JFrame {
 	/**
 	 * Update the play board and the associated values (labels) to the new state {@code so}.
 	 * 
-	 * @param so	the game state. If {@code null}, call only {@link #guiUpdateBoard(boolean)}.
+	 * @param soN	the game state. If {@code null}, call only {@link #guiUpdateBoard(boolean)}.
 	 * @param withReset  if true, reset the board prior to updating it to state {@code so}
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
 	 * 				(only if they are stored in state {@code so}).

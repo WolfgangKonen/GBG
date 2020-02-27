@@ -4,7 +4,9 @@ import java.io.Serializable;
 
 import javax.swing.JPanel;
 
+import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.Nim.ArenaNim;
 import games.Nim.NimConfig;
@@ -19,7 +21,6 @@ import games.Nim.NimConfig;
  *  @see SarsaAgt
  */
 public class ParNT implements Serializable {
-	
     public static double DEFAULT_TC_INIT=0.001;  
     public static int DEFAULT_TC_INTERVAL=2;  
     public static int DEFAULT_TC_TRANSFER=0;   	// 0: id(), 1: TCL-EXP

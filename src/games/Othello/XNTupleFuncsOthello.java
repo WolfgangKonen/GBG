@@ -109,7 +109,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	 * 48 49 50 51 52 53 54 55
 	 * 56 57 58 59 60 61 62 63
 	 * </pre>
-	 * @param The StateObservation of the current game state
+	 * @param so the StateObservation of the current game state
 	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
 	 * position value with 0 = BLACK , 1 = WHITE, 2 = EMPTY.
 	 */

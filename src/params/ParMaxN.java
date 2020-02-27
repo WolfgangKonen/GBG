@@ -14,7 +14,7 @@ import controllers.MaxNAgent;
  * <li> <b> Max-N Hashmap</b>: [true] (only MaxN) whether to hash already visited states or not
  * </ul>
  *  <p>
- *  Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String)}.
+ *  Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String, int)}.
  *
  * @see MaxNParams
  */

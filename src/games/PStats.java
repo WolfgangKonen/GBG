@@ -21,7 +21,7 @@ import tools.Types.ACTIONS_VT;
  *  Class PStats holds the results from one move during game play.
  *  When playing one or multiple games, an object {@code ArrayList<PStats> psList} is 
  *  created and finally written with
- *  {@link PStats#printPlayStats(ArrayList, PlayAgent, Arena)} <br>
+ *  {@link PStats#printPlayStats(ArrayList, StateObservation, PlayAgent[], Arena)} <br>
  *  to file {@code playStats.csv}. <p>
  *  
  *  This class is currently in part specific to game 2048 (it records for example the number of 
@@ -96,14 +96,15 @@ public class PStats {
 	}
 	
 	/**
-	 * Print the results from playing one or multiple games to
+	 * Print the results from playing one or multiple episodes to
 	 * file <br>
 	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/playStats.csv} <br>
 	 * where the optional {@code subdir} is for games with different flavors (like Hex: board size). 
 	 * The directory of the file is created, if it does not exist.   
 	 * 
 	 * @param psList	the results from playing the game(s)
-	 * @param pa		the agent(s) used when playing a game 
+	 * @param startSO	the start state for each episode
+	 * @param paVector	the agent(s) used when playing a game
 	 * @param ar		needed for accessing {@code gameName} and the (optional) {@code subDir}
 	 */
 	public static void printPlayStats(ArrayList<PStats> psList, StateObservation startSO, PlayAgent[] paVector, Arena ar){
@@ -155,7 +156,7 @@ public class PStats {
 	}
 
 	/**
-	 * Print the highest tile statistics from playing one or multiple games to
+	 * Print the highest tile statistics from playing one or multiple episodes to
 	 * file <br>
 	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/highTileStats.csv} <br>
 	 * where the optional {@code subdir} is for games with different flavors (like Hex: board size). 
@@ -167,7 +168,8 @@ public class PStats {
 	 * in game-complexity.xlsx.
 	 * 
 	 * @param psList	the results from playing the game(s)
-	 * @param pa		the agent(s) used when playing a game 
+	 * @param startSO	the start state for each episode
+	 * @param paVector	the agent(s) used when playing a game
 	 * @param ar		needed for accessing {@code gameName} and the (optional) {@code subDir}
 	 */
 	public static void printHighTileStats(ArrayList<PStats> psList, StateObservation startSO, PlayAgent[] paVector, Arena ar){

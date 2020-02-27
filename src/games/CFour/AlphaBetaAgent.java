@@ -10,6 +10,7 @@ import java.util.concurrent.Semaphore;
 import javax.swing.JDialog;
 
 import agentIO.LoadSaveGBG;
+import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import games.StateObservation;
@@ -39,7 +40,6 @@ import tools.Types.ACTIONS_VT;
  * 
  */
 public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
-
 	private static final long serialVersionUID = 5000820077350196867L;
 
 	private Random rand = new Random();

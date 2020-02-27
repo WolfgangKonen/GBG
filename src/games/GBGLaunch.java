@@ -88,8 +88,6 @@ public class GBGLaunch {
 	 * <li>	{@code GBGLaunch 0 TicTacToe} : start directly TicTacToe, no launcher
 	 * <li>	{@code GBGLaunch 0} : the same
 	 * </ul>
-	 *          	
-	 * @throws IOException 
 	 */
 	public static void main(String[] args) {
 		GBGLaunch t_Launch;
@@ -478,7 +476,7 @@ public class GBGLaunch {
 	}
 
 	/**
-	 * helper class for {@link GBGLaunch#GBGLaunch(String)}
+	 * helper class for {@link GBGLaunch#GBGLaunch()}
 	 */
 	protected static class WindowClosingAdapter
 	extends WindowAdapter

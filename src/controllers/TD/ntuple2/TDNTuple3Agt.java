@@ -354,7 +354,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
 	 * For 1-player games like 2048 it is the estimated (total or future) reward.
 	 * <p>
-	 * NOTE: For {@link TDNTuple3Agt} and N>1, this method should be never called, since the score
+	 * NOTE: For {@link TDNTuple3Agt} and N &gt; 1, this method should be never called, since the score
 	 * of {@code so} from perspective of player {@code so.getPlayer()} is never trained. What is trained 
 	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
 	 * {@link #getScore(StateObservation, StateObservation)}.
@@ -379,7 +379,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * who moves in state {@code refer}. 
 	 * For 1-player games like 2048 it is the estimated (total or future) reward.
 	 * <p>
-	 * NOTE: For {@link TDNTuple3Agt} and N>1, this method should be only called in the form 
+	 * NOTE: For {@link TDNTuple3Agt} and N &gt; 1, this method should be only called in the form 
 	 * {@code getScore(NextSO,so)}. This is actually the case, 
 	 * see {@link #getNextAction2(StateObservation, boolean, boolean)}.
 	 * 

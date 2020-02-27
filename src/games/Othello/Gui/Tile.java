@@ -36,7 +36,7 @@ public class Tile extends JButton{
 	
 	/**
 	 * Setting the border to red if this tile is the last played move.
-	 * @param isLastMove boolean if the {@link StateObserverOthello#getLastMove()()} last
+	 * @param isLastMove boolean if the {@link StateObserverOthello#getLastMove()} last
 	 *  index is this tile's {@code index}
 	 */
 	public void setBorder(boolean isLastMove) {

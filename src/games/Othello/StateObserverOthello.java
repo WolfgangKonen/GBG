@@ -140,7 +140,7 @@ public class StateObserverOthello extends ObserverBase{
 	}
 	
 	/**
-	 * @param return a boolean whether the game has no possible actions for any player.
+	 * @return a boolean whether the game has no possible actions for any player.
 	 */
 	@Override
 	public boolean isGameOver() {

@@ -99,7 +99,7 @@ public class ArenaGui extends JFrame {
 	/**
 	 * helper class 
 	 *
-	 * @see Arena#initGame()
+	 * @see Arena#initGame(String)
 	 */
 	protected static class WindowClosingAdapter
 	extends WindowAdapter

@@ -20,7 +20,7 @@ import tools.Types.ACTIONS;
  * Run these checks by constructing in {@link #main(String[])} a certain {@link Arena} {@code ar} object, 
  * a {@link StateObservation} {@code sob} object  and a {@link PlayAgent} {@code p} object of the agent 
  * class you want to validate. Then perform the checks by calling 
- * {@link #ValidateAgent(PlayAgent, StateObservation)}.
+ * {@link #ValidateStateObserver(StateObservation, PlayAgent)}.
  */
 public class ValidateStateObserver {
 	StateObservation sob;

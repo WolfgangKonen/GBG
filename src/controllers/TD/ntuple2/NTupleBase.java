@@ -264,7 +264,7 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	}
 	
 	/**
-	 * *** This method currently works only for N<=2 players! ***
+	 * *** This method currently works only for N &le; 2 players! ***
 	 * <p>
 	 * @param reward = r(s_{t+1}|p_{t+1}) with s_{t+1} = ns.nextSO
 	 */

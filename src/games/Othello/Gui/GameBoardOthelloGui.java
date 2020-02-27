@@ -70,7 +70,7 @@ public class GameBoardOthelloGui extends JFrame {
 	
 	/**
 	 * Initialize the game board gui using {@link #initBoard()} and other game relevant information
-	 * @param arena
+	 * @param title
 	 */
 	public void initGameBoard(String title)
 	{
@@ -133,11 +133,8 @@ public class GameBoardOthelloGui extends JFrame {
 	/**
 	 * Using the following helper methods to update the user interface
 	 * <ol>
-	 * <li> {@link #updatePlayersMove(int)} to update the label from {@link Gamestats#setGameWinner(int)} </li>
-	 * <li> {@link #updateGameStats(int, int, int, int)} to update all turn based label from {@link GameStats} </li>
+	 * <li> {@link #updateGameStats(int, int, int, int)} to update all turn based label </li>
 	 * </ol>
-	 * -- updatePlayersMove
-	 * -- update Count
 	 */
 	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
 		if(so != null) {
