@@ -45,7 +45,7 @@ import javax.imageio.stream.FileImageOutputStream;
  * <h3>Instantiation</h3>
  * <p>
  * Construction of a new <code>HeatChart</code> instance is through its one
- * constructor which takes a 2-dimensional array of <tt>doubles</tt> which 
+ * constructor which takes a 2-dimensional array of {@code doubles} which 
  * should contain the z-values for the chart. Consider this array to be 
  * the grid of values which will instead be represented as colours in the chart.
  * 
@@ -378,7 +378,7 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * 
 	 * <table border="1">
 	 *   <tr>
-	 *     <td rowspan="4" width="20"><center><strong>y</strong></center></td>
+	 *     <td rowspan="4"><center><strong>y</strong></center></td>
 	 *     <td>1.0</td>
 	 *     <td>1.2</td>
 	 *     <td>1.4</td>
@@ -692,7 +692,7 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * horizontally at the top of any generated charts.
 	 * 
 	 * <p>
-	 * If the title is set to <tt>null</tt> then no title will be displayed.
+	 * If the title is set to {@code null} then no title will be displayed.
 	 * 
 	 * <p>
 	 * Defaults to null.
@@ -719,7 +719,7 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * horizontally central of the x-axis bar.
 	 * 
 	 * <p>
-	 * If the xAxisLabel is set to <tt>null</tt> then no label will be 
+	 * If the xAxisLabel is set to {@code null}  then no label will be 
 	 * displayed.
 	 * 
 	 * <p>
@@ -747,7 +747,7 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * horizontally central of the y-axis bar.
 	 * 
 	 * <p>
-	 * If the yAxisLabel is set to <tt>null</tt> then no label will be 
+	 * If the yAxisLabel is set to {@code null}  then no label will be 
 	 * displayed.
 	 * 
 	 * <p>

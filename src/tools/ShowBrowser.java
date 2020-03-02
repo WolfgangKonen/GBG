@@ -15,7 +15,7 @@ import java.util.Arrays;
  * Latest Version: <a href="http://www.centerkey.com/java/browser/">www.centerkey.com/java/browser</a><br>
  * 
  * Public Domain Software -- Free to Use as You Like
- * @author: Dem Pilafian<br>
+ * @author: Dem Pilafian
  * @version 3.1, June 6, 2010
  */
 public class ShowBrowser {

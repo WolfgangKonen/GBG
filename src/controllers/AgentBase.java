@@ -295,8 +295,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * @param agentName
 	 * @param Player
 	 *            needed for message forming
-	 * @param parent
-	 *            component to be disabled if a message dialog is shown
+	 * @param arena
 	 * @return
 	 */
 	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, Arena arena) {

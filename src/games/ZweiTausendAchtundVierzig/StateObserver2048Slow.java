@@ -757,7 +757,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 
     /**
      *
-     * @param winState {@literal-1  > lost, 0 > running, 1 > won}
+     * @param winState {@code -1: lost, 0: running, 1: won}
      */
     public void setWinState(int winState) {
         //if(this.winState == 0) {
