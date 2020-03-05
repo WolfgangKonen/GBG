@@ -49,8 +49,8 @@ public class Evaluator2048 extends Evaluator {
     private Arena ar;		// needed in eval_agent, if PStats.printPlayStats(psList, m_PlayAgent,ar) is called
 
 
-    public Evaluator2048(PlayAgent e_PlayAgent, int stopEval, int mode, int verbose, Arena ar) {
-        super(e_PlayAgent, mode, stopEval, verbose);
+    public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose, Arena ar) {
+        super(e_PlayAgent, gb, mode, stopEval, verbose);
         this.verbose = verbose;
         this.ar = ar;
     }

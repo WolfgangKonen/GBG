@@ -8,7 +8,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
-import agentIO.AgentLoader;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import controllers.TD.ntuple2.TDNTuple2Agt;
@@ -47,17 +46,17 @@ public class EvaluatorCube extends Evaluator {
 	protected double[] m_thresh={0.0,0.85,0.9}; // 
 	
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, 0, stopEval);
+		super(e_PlayAgent, gb, 0, stopEval);
 		initEvaluator(gb,0);
 	}
 
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, mode, stopEval);
+		super(e_PlayAgent, gb, mode, stopEval);
 		initEvaluator(gb,mode);
 	}
 
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, mode, stopEval, verbose);
+		super(e_PlayAgent, gb, mode, stopEval, verbose);
 		initEvaluator(gb,mode);
 	}
 	

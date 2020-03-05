@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.swing.JOptionPane;
-import agentIO.AgentLoader;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
@@ -32,29 +31,28 @@ public class EvaluatorTTT extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {-1,0,1,2,11};		//9,
 	private RandomAgent randomAgent = new RandomAgent("Random");
 	private MaxNAgent maxNAgent = new MaxNAgent("Max-N");
-	private AgentLoader agtLoader = null;
-//	private int m_mode;
 	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
-	private GameBoard m_gb;
+	
+//	private int m_mode;							// now in Evaluator
+//	private AgentLoader agtLoader = null;		// now in Evaluator
+//	private GameBoard m_gb;						// now in Evaluator
 	
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, 1, stopEval);
+		super(e_PlayAgent, gb, 1, stopEval);
 		initEvaluator(gb);
 	}
 
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, mode, stopEval);
+		super(e_PlayAgent, gb, mode, stopEval);
 		initEvaluator(gb);
 	}
 
 	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, mode, stopEval, verbose);
+		super(e_PlayAgent, gb, mode, stopEval, verbose);
 		initEvaluator(gb);
 	}
 	
-	private void initEvaluator(GameBoard gb) {
-		m_gb = gb;				
-	}
+	private void initEvaluator(GameBoard gb) { 	}
 	
 	/**
 	 * @return true if evaluateAgentX is above m_thresh.<br>
@@ -73,27 +71,15 @@ public class EvaluatorTTT extends Evaluator {
 			lastResult = Double.NaN;
 			return false;
 		case 0:  return evaluateAgent1(m_PlayAgent,randomAgent,m_gb)>m_thresh[0];
-		case 1:  return evaluateAgent1(m_PlayAgent,maxNAgent,m_gb)>m_thresh[1];
-		case 2:  return evaluateAgent2(m_PlayAgent,maxNAgent,m_gb)>m_thresh[2];
+		case 1:  return evaluateAgent1(m_PlayAgent,  maxNAgent,m_gb)>m_thresh[1];
+		case 2:  return evaluateAgent2(m_PlayAgent,  maxNAgent,m_gb)>m_thresh[2];
 		case 11: 
-			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
-			return evaluateAgent2(m_PlayAgent,agtLoader.getAgent(),m_gb)>m_thresh[2];
+			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
+			return evaluateAgent2(m_PlayAgent,this.getTDReferee(),m_gb)>m_thresh[2];
 		default: return false;
 		}
 	}
 	
-//	/**	
-//	 * @param gb		needed to get a default start state (competeBoth)
-// 	 * @return the result from competeBoth
-//	 */
-// 	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
-// 		StateObservation so = gb.getDefaultStartState();
-//		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-//		m_msg = pa.getName()+": "+getPrintString() + lastResult;
-//		if (this.verbose>0) System.out.println(m_msg);
-//		return lastResult;
-//	}
-
  	/**	
 	 * @param gb		needed to get a default start state (competeBoth)
  	 * @return the result from competeBoth
@@ -166,27 +152,6 @@ public class EvaluatorTTT extends Evaluator {
  	 */
  	public double getOm() { return lastResult; }
  	
- 	// --- implemented by Evaluator ---
-// 	@Override
-// 	public double getLastResult() { 
-// 		return lastResult;
-// 	}
- 	
- 	// --- implemented by Evaluator ---
-// 	@Override
-// 	public String getMsg() { 
-// 		return m_msg;
-// 	} 
- 	
- 	// --- implemented by Evaluator ---
-//	@Override
-// 	public boolean isAvailableMode(int mode) {
-//		for (int i : AVAILABLE_MODES) {
-//			if (mode==i) return true;
-//		}
-//		return false;
-// 	}
- 	
  	@Override
  	public int[] getAvailableModes() {
  		return AVAILABLE_MODES;
@@ -205,10 +170,6 @@ public class EvaluatorTTT extends Evaluator {
 	{
 		return 9;
 	}
-//	public int getMultiTrainEvalMode() 
-//	{
-//		return 0;
-//	}
 
 	@Override
 	public String getPrintString() {
@@ -258,7 +219,7 @@ public class EvaluatorTTT extends Evaluator {
 	 * @param table		on input an allocated memory area, on output it contains the board position
 	 * @return			+1 or -1 if either X or O makes the next move
 	 */
-	public static int string2table(String state_k, int table[][]) {
+	private static int string2table(String state_k, int table[][]) {
 		int Xcount=0, Ocount=0;
 		for (int i=0;i<3;++i)
 			for (int j=0;j<3;++j) {
@@ -279,7 +240,5 @@ public class EvaluatorTTT extends Evaluator {
 			throw new RuntimeException("invalid state!!");
 		return player;
 	}
-	
-
 
 }

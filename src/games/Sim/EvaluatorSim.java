@@ -1,6 +1,5 @@
 package games.Sim;
 
-import agentIO.AgentLoader;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
@@ -25,15 +24,16 @@ public class EvaluatorSim extends Evaluator {
 	private PlayAgtVector paVector;
 	protected int[] competeNum={100,5,20};
 	protected double[] thresh={0.8,-0.15,-0.15, -0.15}; // threshold for each value of m_mode
-	private GameBoard gb;
+	
+	private GameBoard m_gb;
 
-	public EvaluatorSim(PlayAgent e_PlayAgent, int mode, int stopEval) {
-		super(e_PlayAgent, mode, stopEval);
-	}
+//	public EvaluatorSim(PlayAgent e_PlayAgent, int mode, int stopEval) {
+//		super(e_PlayAgent, mode, stopEval);
+//	}
 	
 	public EvaluatorSim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, mode, stopEval, verbose);
-		this.gb = gb;
+		super(e_PlayAgent, gb, mode, stopEval, verbose);
+		this.m_gb = gb;
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class EvaluatorSim extends Evaluator {
 			paVector = null;
 		}
 		
-		return evaluateAgainstOpponents(paVector, competeNum[m_mode], gb)>thresh[m_mode];
+		return evaluateAgainstOpponents(paVector, competeNum[m_mode], m_gb)>thresh[m_mode];
 	}
 	
 	private double evaluateAgainstOpponents(PlayAgtVector paVector, int competeNum, GameBoard gb) {

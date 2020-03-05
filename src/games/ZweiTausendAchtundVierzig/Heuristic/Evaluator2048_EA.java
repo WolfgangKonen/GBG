@@ -24,8 +24,8 @@ public class Evaluator2048_EA extends Evaluator {
     private HeuristicSettings2048 fitfun = new HeuristicSettings2048();
     private CMAEvolutionStrategy cma = new CMAEvolutionStrategy();
 
-    public Evaluator2048_EA(PlayAgent e_PlayAgent, int stopEval, int verbose) {
-        super(e_PlayAgent, 2, stopEval, verbose);
+    public Evaluator2048_EA(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int verbose) {
+        super(e_PlayAgent, gb, 2, stopEval, verbose);
     }
 
     @Override

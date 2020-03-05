@@ -3,7 +3,7 @@ library(grid)
 source("summarySE.R")
 
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
-USEGAMESK=F       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
+USEGAMESK=T       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
 
 wfac = ifelse(USEGAMESK,1000,1);
 gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
@@ -14,9 +14,8 @@ filenames=c("multiTrainTD3.csv"
            ,"multiTrainTD3NoFinalAdapt.csv"
            #,"multiTrain_TCL-EXP-al10-lam06-500k-eps0025.csv"
            )
-# other pars: alpha=0.2, eps = 1.0 ... 0.1, ChooseStart01=F
-# evalMode= 0 (evalQ) is from default start state against MCTS, 
-# evalMode=10 (evalT) is from different start states against MCTS. 
+# other pars: alpha=1.0 .. 0.5, eps=0.1 ... 0.0, ChooseStart01=F
+# lambda=0.0, learnFromRM=true, NORM=F, sigmoid=tanh
 
   
 dfBoth = data.frame()
@@ -36,9 +35,9 @@ for (k in 1:length(filenames)) {
   }
   
   algoCol = switch(k
-                    ,rep("TD-Ntuple3",nrow(df))
+                    ,rep("TD-FARL",nrow(df))
                     ,rep("no learnRM",nrow(df))
-                    ,rep("no f.a.",nrow(df))   # no finalAdaptAgents
+                    ,rep("no FARL",nrow(df))   # no finalAdaptAgents
                     #,rep("al50",nrow(df))
                     #,rep("eps0.025",nrow(df))
                     #,rep(0.80,nrow(df))
@@ -58,7 +57,7 @@ for (k in 1:length(filenames)) {
 #       ...                             ...
 # If USEGAMESK==T, then the subsequent summarySE calls will group 'along the x-axis'
 # as well (all measurements with the same gamesK-value in the same bucket)
-dfBoth <- cbind(dfBoth,gamesK=50*(ceiling(dfBoth$gameNum/50000)))
+dfBoth <- cbind(dfBoth,gamesK=1*(ceiling(dfBoth$gameNum/1000)))
 
 tgc <- data.frame()
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
@@ -80,9 +79,10 @@ tgc$evalMode <- as.factor(tgc$evalMode)
 pd <- position_dodge(3/wfac) # move them 3000 to the left and right
 
 if (USEGAMESK) {
-  q <- ggplot(tgc,aes(x=gamesK,y=eval,colour=algorithm,linetype=evalMode))
+  q <- ggplot(tgc,aes(x=gamesK,y=eval,colour=algorithm))   #,linetype=evalMode
+  q <- q + xlab(bquote(paste("episodes [*",10^3,"]", sep=""))) + ylab(evalStr)
 } else {
-  q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=algorithm,linetype=evalMode))
+  q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=algorithm)) #,linetype=evalMode
 }
 q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=errWidth) #, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 

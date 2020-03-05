@@ -39,7 +39,6 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JOptionPane;
 
-import agentIO.AgentLoader;
 
 
 /**
@@ -64,10 +63,11 @@ public class EvaluatorC4 extends Evaluator {
     private MCTSAgentT mctsAgent = null;
     private RandomAgent randomAgent = new RandomAgent("Random");
     private double trainingThreshold = 0.8;
-    private GameBoard m_gb;
     private PlayAgent playAgent;
     private int numStartStates = 1;
-	private AgentLoader agtLoader = null;
+    
+//	private AgentLoader agtLoader = null;		// now in Evaluator
+//	private GameBoard m_gb;						// now in Evaluator
 	
 	private AlphaBetaAgent alphaBetaStd = null;		// random move in loss positions
 	private AlphaBetaAgent alphaBeta_DL = null;		// distant losses
@@ -81,7 +81,7 @@ public class EvaluatorC4 extends Evaluator {
     private StringBuilder logSB;
 
     public EvaluatorC4(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-        super(e_PlayAgent, mode, stopEval, verbose);
+        super(e_PlayAgent, gb, mode, stopEval, verbose);
         if (verbose == 1) {
             System.out.println("Using evaluation mode " + mode);
         }
@@ -186,8 +186,8 @@ public class EvaluatorC4 extends Evaluator {
 //            	AlphaBetaAgent alphaBetaAgentP = new AlphaBetaAgent(new BookSum());
 //        		result = competeAgainstOpponent_diffStates(alphaBetaAgentP, alphaBetaStd, m_gb, numEpisodes);
 
-    			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
-        		result = competeAgainstOpponent_diffStates(playAgent, agtLoader.getAgent(), m_gb, numEpisodes);
+    			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
+        		result = competeAgainstOpponent_diffStates(playAgent, getTDReferee(), m_gb, numEpisodes);
                 break;
             default:
                 return false;
@@ -339,7 +339,8 @@ public class EvaluatorC4 extends Evaluator {
 		if (opponent == null) {
 			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
 			gameBoard.getArena().showMessage("ERROR: " + tdstr,"Load Error", JOptionPane.ERROR_MESSAGE);
-			return Double.NaN;
+			lastResult = Double.NaN;
+			return lastResult;
 		} 
 
         int [] startAction = {-1,0,1,5,6};
@@ -448,7 +449,8 @@ public class EvaluatorC4 extends Evaluator {
                 if(verbose == 0) {
                     System.out.println("Finished evaluation " + gameNumber + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. ");
                 }
-            	return Double.valueOf(success);
+                lastResult = Double.valueOf(success);
+                return lastResult;
             });
         }
    
@@ -477,7 +479,7 @@ public class EvaluatorC4 extends Evaluator {
 //        if (this.verbose > 0) 
         	System.out.println(m_msg);
         lastResult = averageSuccess;
-        return averageSuccess;
+        return lastResult;
     }
 
     /**
@@ -498,7 +500,7 @@ public class EvaluatorC4 extends Evaluator {
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         if (this.verbose > 0) System.out.println(m_msg);
         lastResult = success;
-        return success;
+        return lastResult;
     }
 
 

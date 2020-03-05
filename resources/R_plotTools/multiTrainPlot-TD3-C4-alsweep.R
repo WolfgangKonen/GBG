@@ -18,17 +18,21 @@ gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
 evalStr = ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
 evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
 path <- "../../agents/ConnectFour/csv/"; 
-limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=20000/wfac;
+limits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=300000/wfac;
 
-filenames=c("multiTrain_TCL-EXP-NT3-alSweep-lam000-750k-epsfin0.csv"
+filenames=c(#"multiTrain_TCL-EXP-NT3-alSweep-lam000-750k-epsfin0.csv"
+            "multiTrain_TCL-EXP-NT3-alSweep-lam000-6000k-epsfin0-ALm.csv"
            )
-# other pars: eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, NORMALIZE=F, SIGMOID=tanh, 
-# LEARNFROMRM=T, MODE_3P==2, fixed ntuple mode 1: 70 8-tuples. TC_INIT=1e-4, TC_EXP
-# with TC beta =2.7, rec.weight-change accumulation. 750.000 training games, 3 runs.
-# evalMode= 0 (evalQ) is from default start state against MCTS, 
-# evalMode= 3 (evalT) is from default start state against AlphaBeta. 
-# 
-# 6 runs for each alpha \in {0.0, 2.5, 3.7, 5.0, 7.5, 10.0}.
+# suffix -ALm: both evaluators AB, 1st one w/o DL (3), 2nd one with DL (5),
+# in both cases the evaluators play 2nd --> ideal winrate is 1.0
+# in both cases the 'm' means that runs were performed on maanbs05.
+#
+# other pars: alpha = 3.7->3.7m eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, 
+# NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=T, fixed ntuple mode 1: 70 8-tuples. 
+# TC_INIT=1e-4, TC_EXP with TC beta =2.7, rec.weight-change accumulation. 
+# 6.000.000 training games.
+
+# 10 runs for each alpha \in {1.0, 2.5, 3.7, 5.0, 7.5, 10.0}.
 
   
 dfBoth = data.frame()
@@ -57,26 +61,26 @@ k=1 #for (k in 1:length(filenames)) {
 #} // for (k)
 
 # This defines a new grouping variable  'gamesK':
-#       games                            gamesK
-#       10000,20000,30000,40000,50000  -->   50
-#       60000,70000,80000,90000,100000 -->  100
-#       ...                            -->  ...
+#       games                                     gamesK
+#       100000,200000,300000,400000, 500000 -->    500
+#       600000,700000,800000,900000,1000000 -->   1000
+#       ...                                 -->    ...
 # If USEGAMESK==T, then the subsequent summarySE calls will group 'along the x-axis'
 # as well (all measurements with the same gamesK-value in the same bucket)
-dfBoth <- cbind(dfBoth,gamesK=50*(ceiling(dfBoth$gameNum/50000)))
+dfBoth <- cbind(dfBoth,gamesK=500*(ceiling(dfBoth$gameNum/500000)))
 
 tgc <- data.frame()
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
 # its mean, sd, se (standard dev of the mean), ci (conf.interval) and count N.
 tgc1 <- summarySE(dfBoth, measurevar="evalQ", groupvars=c(gamesVar,"alpha","targetMode"))
-tgc1 <- cbind(tgc1,evalMode=rep("MCTS",nrow(tgc1)))
+tgc1 <- cbind(tgc1,evalMode=rep("AB",nrow(tgc1)))
 names(tgc1)[5] <- "eval"  # rename "evalQ"
 tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c(gamesVar,"alpha","targetMode"))
-tgc2 <- cbind(tgc2,evalMode=rep("AB",nrow(tgc2)))
+tgc2 <- cbind(tgc2,evalMode=rep("AB-DL",nrow(tgc2)))
 names(tgc2)[5] <- "eval"  # rename "evalT"
-#tgc <- rbind(tgc1,tgc2)  # AB & MCTS
-tgc <- tgc2               # AB only
+tgc <- rbind(tgc1,tgc2)  # AB & AB-DL
+#tgc <- tgc2               # AB-DL only
 #tgc$lambda <- as.factor(tgc$lambda)
 tgc$alpha <- as.factor(tgc$alpha)
 tgc$targetMode <- as.factor(tgc$targetMode)
@@ -92,7 +96,7 @@ pd <- position_dodge(10000/wfac) # move them 10000/wfac to the left and right
 
 if (USEGAMESK) {
   q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=evalMode,linetype=evalMode,color=alpha))
-  q <- q + xlab(bquote(paste("games [*",10^3,"]", sep=""))) + ylab(evalStr)
+  q <- q + xlab(bquote(paste("episodes [*",10^3,"]", sep=""))) + ylab(evalStr)
 } else {
   q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=lambda,linetype=lambda))
 }

@@ -36,8 +36,6 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JOptionPane;
 
-import agentIO.AgentLoader;
-
 /**
  * Evaluate Hex agents. See {@link #getAvailableModes()} and {@link #evalAgent(PlayAgent)} 
  * for available evaluators. 
@@ -49,11 +47,12 @@ public class EvaluatorHex extends Evaluator {
     private MCTSAgentT mctsAgent = null;
     private RandomAgent randomAgent = new RandomAgent("Random");
     private double trainingThreshold = 0.8;
-    private GameBoard m_gb;
     private PlayAgent playAgent;
     private int numStartStates = 1;
-//    private int m_mode = 0;			// now in Evaluator
-	private AgentLoader agtLoader = null;
+    
+//  private int m_mode = 0;					// now in Evaluator
+//  private GameBoard m_gb;					// now in Evaluator
+//	private AgentLoader agtLoader = null;	// now in Evaluator
     /**
      * logResults toggles logging of training progress to a csv file located in {@link #logDir}
      */
@@ -63,8 +62,7 @@ public class EvaluatorHex extends Evaluator {
     private StringBuilder logSB;
 
     public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-        super(e_PlayAgent, mode, stopEval, verbose);
-//        m_mode = mode;
+        super(e_PlayAgent, gb, mode, stopEval, verbose);
         if (verbose == 1) {
             System.out.println("Using evaluation mode " + mode);
         }
@@ -145,8 +143,8 @@ public class EvaluatorHex extends Evaluator {
             	}
                 break;
             case 11:
-    			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
-        		result = competeAgainstOpponent_diffStates(playAgent, agtLoader.getAgent(), m_gb, numEpisodes);
+    			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
+        		result = competeAgainstOpponent_diffStates(playAgent, this.getTDReferee(), m_gb, numEpisodes);
                 break;
             default:
                 return false;

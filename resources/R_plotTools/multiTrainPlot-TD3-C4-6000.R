@@ -28,10 +28,10 @@ path <- "../../agents/ConnectFour/csv/";
 Ylimits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=300000/wfac;
 Xlimits=c(400,5100); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c("multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
-           ,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm-noFA.csv"
-           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm.csv"
-           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm-noFA.csv"
+filenames=c(#"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
+           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm-noFA.csv"
+            "multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm.csv"
+           ,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm-noFA.csv"
            #,".csv"
            #,".csv"
            #,".csv"
@@ -111,7 +111,7 @@ pd <- position_dodge(100000/wfac) # move them 100000/wfac to the left and right
 
 if (USEGAMESK) {
   q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=evalMode,linetype=algo,color=evalMode))
-  q <- q + xlab(bquote(paste("games [*",10^3,"]", sep=""))) + ylab(evalStr)
+  q <- q + xlab(bquote(paste("episodes [*",10^3,"]", sep=""))) + ylab(evalStr)
   q <- q+scale_x_continuous(limits=Xlimits) 
 } else {
   q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=algo,linetype=algo))

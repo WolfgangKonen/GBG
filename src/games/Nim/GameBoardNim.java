@@ -229,8 +229,8 @@ public class GameBoardNim implements GameBoard {
 
 	@Override
 	public void destroy() {
-			if (m_gameGui!=null)
-				m_gameGui.destroy();
+		if (m_gameGui!=null)
+			m_gameGui.destroy();
 	}
 
 }

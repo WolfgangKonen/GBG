@@ -11,7 +11,7 @@ import tools.Types;
  *	A class to load a specific agent from disk. 
  *  <p>
  *	After construction, the agent is available with {@link #getAgent()}. If something goes 
- *  wrong with loading, {@link #getLoadMsg()} has the error message.   
+ *  wrong with loading, then {@link #getAgent()} returns {@code null} and {@link #getLoadMsg()} has the error message.   
  *
  */
 public class AgentLoader {

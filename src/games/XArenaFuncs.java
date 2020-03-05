@@ -565,9 +565,10 @@ public class XArenaFuncs {
 				// construct 'qa' anew (possibly wrapped agent for eval)
 				qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
-				m_evaluatorQ.eval(qa);
-				if (doTrainEvaluation)
-					m_evaluatorT.eval(qa);
+				m_evaluatorQ.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
+				if (doTrainEvaluation) {
+					m_evaluatorT.eval(qa);	// throws RuntimeException, if TDReferee.agt.zip is not found
+				}
 
 				// update line chart plot:
 				if (lChart != null) 
@@ -704,6 +705,7 @@ public class XArenaFuncs {
 	 * @param csvName
 	 *            results are written to this filename
 	 * @return the (last) trained agent
+	 * 
 	 * @throws IOException
 	 *             if something goes wrong with {@code csvName}, see below
 	 * <p>
@@ -811,10 +813,10 @@ public class XArenaFuncs {
 					// construct 'qa' anew (possibly wrapped agent for eval)
 					qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
-					m_evaluatorQ.eval(qa);
+					m_evaluatorQ.eval(qa);			// throws RuntimeException, if TDReferee.agt.zip is not found
 					evalQ = m_evaluatorQ.getLastResult();
 					if (doTrainEvaluation) {
-						m_evaluatorT.eval(qa);
+						m_evaluatorT.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
 						evalT = m_evaluatorT.getLastResult();
 					}
 

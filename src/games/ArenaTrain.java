@@ -109,6 +109,11 @@ abstract public class ArenaTrain extends Arena
 					m_xfun.m_PlayAgents[n] = m_xfun.train(n,agentN, m_xab, gb);
 				} catch (IOException e2) {
 					e2.printStackTrace();
+				} catch (RuntimeException e) {
+					this.showMessage(e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+					enableButtons(true);
+					taskState = Task.IDLE; 
+					break;
 				}
 
 				if (m_xfun.m_PlayAgents[n] != null) {
@@ -138,7 +143,13 @@ abstract public class ArenaTrain extends Arena
 				e1.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (RuntimeException e) {
+				this.showMessage(e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+				enableButtons(true);
+				taskState = Task.IDLE; 
+				break;
 			}
+			
 			if (m_xfun.m_PlayAgents[0]==null) {
 		        setStatusMessage("Done.");
 			} else {

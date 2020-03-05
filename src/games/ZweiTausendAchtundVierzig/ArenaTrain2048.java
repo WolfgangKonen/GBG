@@ -60,13 +60,13 @@ public class ArenaTrain2048 extends ArenaTrain {
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose, ArenaTrain ar) {
         switch (mode) {
         	case -1:
-                return new Evaluator2048(pa, stopEval, -1, verbose,ar);
+                return new Evaluator2048(pa, gb, stopEval, -1, verbose,ar);
             case 0:
-                return new Evaluator2048(pa, stopEval, 0, verbose,ar);
+                return new Evaluator2048(pa, gb, stopEval, 0, verbose,ar);
             case 1:
-                return new Evaluator2048_BoardPositions(pa, stopEval, verbose);
+                return new Evaluator2048_BoardPositions(pa, gb, stopEval, verbose);
             case 2:
-                return new Evaluator2048_EA(pa, stopEval, verbose);
+                return new Evaluator2048_EA(pa, gb, stopEval, verbose);
             default:
                 throw new RuntimeException("Mode " + mode + " is not allowed for 2048");
         }

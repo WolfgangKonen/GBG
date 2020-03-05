@@ -1,5 +1,6 @@
 package games;
 
+import agentIO.AgentLoader;
 import controllers.PlayAgent;
 
 /**
@@ -27,6 +28,7 @@ abstract public class Evaluator {
 	private int gnumTrue;
 	private int m_stopEval;
 	private int m_counter;
+    private AgentLoader agtLoader = null;
 	
 	// these variables may be used by derived classes:
 	//
@@ -48,7 +50,11 @@ abstract public class Evaluator {
 	 * The mode of the evaluator, to be used by derived classes
 	 */
 	protected int m_mode=0;
-	
+	/**
+	 * Needed in {@link #getTDReferee()} to access game-specific properties. 
+	 * May be used in derived classes for the same purposes. 
+	 */
+    protected GameBoard m_gb;
 	
 	public class EvaluationResult {
 		public double lastResult;
@@ -62,15 +68,16 @@ abstract public class Evaluator {
 	 * @param stopEval		how many successful calls to {@link #eval(PlayAgent)} are needed
 	 * 						until {@link #goalReached(int)} returns true
 	 */
-	public Evaluator(PlayAgent e_PlayAgent, int mode, int stopEval) {
-		initEvaluator(e_PlayAgent, mode,stopEval);
+	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval) {
+		initEvaluator(e_PlayAgent, gb, mode,stopEval);
 	}
-	public Evaluator(PlayAgent e_PlayAgent, int mode, int stopEval,int verbose) {
-		initEvaluator(e_PlayAgent, mode,stopEval);
+	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval,int verbose) {
+		initEvaluator(e_PlayAgent, gb, mode,stopEval);
 		this.verbose = verbose;
 	}
-	private void initEvaluator(PlayAgent e_PlayAgent, int mode, int stopEval) {
+	private void initEvaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval) {
 		m_PlayAgent = e_PlayAgent;
+		m_gb = gb;
 		if (!isAvailableMode(mode)) 
 			throw new RuntimeException(this.getClass().getSimpleName()+": Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
@@ -133,6 +140,17 @@ abstract public class Evaluator {
 	public boolean setState(boolean stateE) { thisEval = stateE; return stateE; }
 	public boolean getState() { return thisEval; }
 	
+	/**
+	 * 
+	 * @return the agent stored in TDReferee.agt.zip 
+	 * @throws RuntimeException if TDReferee.agt.zip is not found (in the game-specific directory)
+	 */
+	public PlayAgent getTDReferee() throws RuntimeException {
+		if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
+		if (agtLoader.getAgent() == null) 
+			throw new RuntimeException(agtLoader.getLoadMsg());
+		return agtLoader.getAgent();
+	}
 	/**
 	 * @return
 	 *  	the result from the last call to {@link #evalAgent(PlayAgent)}, which might be for example

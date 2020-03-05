@@ -1,6 +1,5 @@
 package games.Othello;
 
-import agentIO.AgentLoader;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
@@ -32,35 +31,32 @@ import tools.ScoreTuple;
  */
 public class EvaluatorOthello extends Evaluator{
 
-    private GameBoard m_gb;
     private RandomAgent randomAgent;
 	private MaxNAgent maxNAgent;
 	private BenchMarkPlayer heurPlayer;
 	private BenchMarkPlayer benchPlayer;
 	private MCTSAgentT mctsAgent;
 	
-    private AgentLoader agtLoader = null;
 
 	
     public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, 1, stopEval);		// default mode: 1
+		super(e_PlayAgent, gb, 1, stopEval);		// default mode: 1
 		initEvaluator(gb);
 	}
     
     public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, mode, stopEval);
+		super(e_PlayAgent, gb, mode, stopEval);
 		initEvaluator(gb);
 	}
     
     
 	public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, mode, stopEval, verbose);
+		super(e_PlayAgent, gb, mode, stopEval, verbose);
 		initEvaluator(gb);
 
 	}
 	
 	public void initEvaluator(GameBoard gb){
-		m_gb = gb;
 		ParMaxN params = new ParMaxN();
         int maxNDepth =  4; // set to 4 otherwise it will take too long
         params.setMaxNDepth(maxNDepth);
@@ -80,26 +76,14 @@ public class EvaluatorOthello extends Evaluator{
 			m_msg = "no evaluation done ";
 			lastResult = Double.NaN;
 			return false;
-		case 0:
-			return evaluateAgainstOpponent(m_PlayAgent, randomAgent, competeNum, m_gb) > 0.0;	
-//			return evaluateAgent0(m_PlayAgent, m_gb) >= 0.0;
-		case 1:
-			return evaluateAgainstOpponent(m_PlayAgent, maxNAgent, competeNum, m_gb) > 0.0;	
-//			return evaluateAgent1(m_PlayAgent, m_gb)>= 0.0;
-		case 2:
-			return evaluateAgainstOpponent(m_PlayAgent, mctsAgent, competeNum, m_gb) > 0.0;	
-//			return evaluateAgent2(m_PlayAgent, m_gb) >= 0.0;
-		case 9:
-			return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, competeNum, m_gb) > 0.0;	
-//			return evaluateAgent9(m_PlayAgent, m_gb) >= 0.0;
-		case 10:
-			return evaluateAgainstOpponent(m_PlayAgent, heurPlayer, competeNum, m_gb) > 0.0;	
-//			return evaluateAgent10(m_PlayAgent, m_gb) >= 0.0;
+		case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, competeNum, m_gb) > 0.0;	
+		case 1:	return evaluateAgainstOpponent(m_PlayAgent,   maxNAgent, competeNum, m_gb) > 0.0;	
+		case 2:	return evaluateAgainstOpponent(m_PlayAgent,   mctsAgent, competeNum, m_gb) > 0.0;	
+		case 9:	return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, competeNum, m_gb) > 0.0;	
+		case 10:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, competeNum, m_gb) > 0.0;	
 		case 11: 
-			agtLoader = new AgentLoader(m_gb.getArena(), "TDReferee.agt.zip");
-			if (agtLoader.getAgent() == null) 
-				throw new RuntimeException("Could not load TDReferee.agt.zip!");
-			return evaluateAgainstOpponent(m_PlayAgent, agtLoader.getAgent(), competeNum, m_gb) > 0.0;	
+			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
+			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), competeNum, m_gb) > 0.0;	
 		default: return false;
 		}		
 	}
@@ -113,40 +97,6 @@ public class EvaluatorOthello extends Evaluator{
 	    return lastResult;
 	    }
 	 
-//	private double evaluateAgent0(PlayAgent playAgent, GameBoard gameBoard) {
-//		StateObservation so = gameBoard.getDefaultStartState();
-//		lastResult = XArenaFuncs.competeBoth(playAgent, randomAgent, so, 10, 0, gameBoard);
-//		m_msg = playAgent.getName()+": "+getPrintString() + lastResult; 
-//	    return lastResult;
-//	    }
-//	 
-//	  private double evaluateAgent1(PlayAgent playAgent, GameBoard gameBoard) {
-//		  StateObservation so = gameBoard.getDefaultStartState(); 
-//		  lastResult = XArenaFuncs.competeBoth(playAgent, maxNAgent, so, 10, 0, gameBoard);
-//	      m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
-//	      return lastResult;
-//	    }
-//	
-//	  private double evaluateAgent2(PlayAgent playAgent, GameBoard gameBoard) {
-//		  StateObservation so = gameBoard.getDefaultStartState(); 
-//		  lastResult = XArenaFuncs.competeBoth(playAgent, mctsAgent, so, 10, 0, gameBoard);
-//	      m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
-//	      return lastResult;
-//	    }
-//	  private double evaluateAgent9(PlayAgent playAgent, GameBoard gameBoard) {
-//		  StateObservation so = gameBoard.getDefaultStartState(); 
-//		  lastResult = XArenaFuncs.competeBoth(playAgent, benchPlayer, so, 10, 0, gameBoard);
-//		  m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
-//		  return lastResult;
-//	    }
-//	
-//	  private double evaluateAgent10(PlayAgent playAgent, GameBoard gameBoard) {
-//		  StateObservation so = gameBoard.getDefaultStartState(); 
-//		  lastResult = XArenaFuncs.competeBoth(playAgent, heurPlayer, so, 10, 0, gameBoard); // WK changed competeNum from 100 back to 10
-//		  m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
-//		  return lastResult;
-//	    }
-	  
 	  
 	@Override
 	public int[] getAvailableModes() {

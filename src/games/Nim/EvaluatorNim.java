@@ -10,7 +10,6 @@ import java.util.Locale;
 
 import javax.swing.JOptionPane;
 
-import agentIO.AgentLoader;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
@@ -47,23 +46,24 @@ public class EvaluatorNim extends Evaluator {
 	private RandomAgent random_agent = new RandomAgent("Random");
 	private MaxNAgent maxNAgent = null;
     private MCTSAgentT mctsAgent = null;
-	private AgentLoader agtLoader = null;
-//	private int m_mode;			// now in Evaluator
 	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
-	private GameBoard m_gb;
+	
+//	private int m_mode;						// now in Evaluator
+//	private AgentLoader agtLoader = null;	// now in Evaluator
+//	private GameBoard m_gb;					// now in Evaluator
 	
 	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, 1, stopEval);
+		super(e_PlayAgent, gb, 1, stopEval);
 		initEvaluator(gb);
 	}
 
 	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, mode, stopEval);
+		super(e_PlayAgent, gb, mode, stopEval);
 		initEvaluator(gb);
 	}
 
 	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, mode, stopEval, verbose);
+		super(e_PlayAgent, gb, mode, stopEval, verbose);
 		initEvaluator(gb);
 	}
 	
@@ -71,7 +71,6 @@ public class EvaluatorNim extends Evaluator {
 		// --- this is now in Evaluator ---
 //		if (!isAvailableMode(mode)) 
 //			throw new RuntimeException("EvaluatorNim: Value mode = "+mode+" is not allowed!");
-//		m_mode = mode;
 		m_gb = gb;		
         ParMCTS params = new ParMCTS();
         params.setNumIter(1000);
@@ -109,8 +108,8 @@ public class EvaluatorNim extends Evaluator {
 		case 3:  return evaluateAgent1(m_PlayAgent,mctsAgent,m_gb)>m_thresh[1];
 		case 4:  return evaluateAgent2(m_PlayAgent,mctsAgent,m_gb)>m_thresh[2];
 		case 11: 
-			if (agtLoader==null) agtLoader = new AgentLoader(m_gb.getArena(),"TDReferee.agt.zip");
-			return evaluateAgent2(m_PlayAgent,agtLoader.getAgent(),m_gb)>m_thresh[2];
+			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
+			return evaluateAgent2(m_PlayAgent,getTDReferee(),m_gb)>m_thresh[2];
 		default: return false;
 		}
 	}

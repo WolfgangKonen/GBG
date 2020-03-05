@@ -38,8 +38,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     private Random random = new Random();
     private ExecutorService executorService = Executors.newWorkStealingPool();
 
-    public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, int stopEval, int verbose) {
-        super(e_PlayAgent, 1, stopEval, verbose);
+    public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int verbose) {
+        super(e_PlayAgent, gb, 1, stopEval, verbose);
     }
 
     @Override
