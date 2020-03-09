@@ -78,6 +78,7 @@ abstract public class Arena implements Runnable {
 	public TSAgentManager tournamentAgentManager = null;
 	public boolean singlePlayerTSRunning = false;
 
+	// launch Arena with UI
 	public Arena() {
 		initGame(""); 
 	}
@@ -157,7 +158,7 @@ abstract public class Arena implements Runnable {
 				n = m_xab.getNumParamBtn();
 				agentN = m_xab.getSelectedAgent(n);
 				setStatusMessage("Params for "+agentN+ " ...");
-				if (m_tabs!=null) 
+				if (m_tabs!=null) 		// this implies withUI==true (see initGame)
 					m_tabs.showParamTabs(this,true,n,agentN);
 				taskState = Task.IDLE; 
 				break;
@@ -178,7 +179,8 @@ abstract public class Arena implements Runnable {
 				firstScore = m_xfun.singleCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]).";
+				str = "Compete finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
+						+ " win rate: " + frm.format((firstScore+1)/2)+".";
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();
@@ -191,7 +193,8 @@ abstract public class Arena implements Runnable {
 				firstScore = m_xfun.swapCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Swap Compete finished. Avg. score for X: "+frm.format(firstScore)+" (from range [-1.0,1.0]).";
+				str = "Swap Compete finished. Avg. score for X: "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
+						+ " win rate: " + frm.format((firstScore+1)/2)+".";
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();
@@ -204,7 +207,8 @@ abstract public class Arena implements Runnable {
 				firstScore = m_xfun.bothCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete All Roles finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]).";
+				str = "Compete All Roles finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
+						+ " win rate: " + frm.format((firstScore+1)/2)+".";
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();

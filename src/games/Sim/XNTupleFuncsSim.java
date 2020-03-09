@@ -450,7 +450,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	private static int[] fixedModes = {0,1,2,3,4};
 	
 	@Override
-	public int[] getAvailFixedNTupleModes() {
+	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
 	}
 

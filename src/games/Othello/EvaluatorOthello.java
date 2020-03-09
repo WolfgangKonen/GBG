@@ -90,7 +90,6 @@ public class EvaluatorOthello extends Evaluator{
 	
 	private double evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, int competeNum, GameBoard gameBoard) {
 		StateObservation so = gameBoard.getDefaultStartState();
-//		lastResult = XArenaFuncs.competeBoth(playAgent, opponent, so, competeNum, 0, gameBoard);
 		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, competeNum, 0);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult; 
@@ -131,12 +130,12 @@ public class EvaluatorOthello extends Evaluator{
 	@Override
 	public String getTooltipString() {
 		return "<html>-1: none<br>"
-				+ "0: against Random, best is 1.0<br>"
-				+ "1: against MaxN, best is 1.0<br>"
-				+ "2: against MCTS, best is 1.0<br>"
-				+ "9: against BenchPlayer, best is 0.0<br>"
-				+ "10: against HeurPlayer, best is 1.0<br>"
-				+ "11: against TDReferee.agt.zip"
+				+ " 0: vs. Random, best is 1.0<br>"
+				+ " 1: vs. MaxN, best is 1.0<br>"
+				+ " 2: vs. MCTS, best is 1.0<br>"
+				+ " 9: vs. BenchPlayer, best is 0.0<br>"
+				+ "10: vs. HeurPlayer, best is 1.0<br>"
+				+ "11: vs. TDReferee.agt.zip"
 				+ "</html>";
 	}
 

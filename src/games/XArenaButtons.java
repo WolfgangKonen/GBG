@@ -168,7 +168,7 @@ public class XArenaButtons //extends JPanel
 	public void setParamDefaults(int n, String agentName, String gameName) {
 		tdPar[n].setParamDefaults(agentName, gameName);
 		ntPar[n].setParamDefaults(agentName, gameName);
-		ntPar[n].setFixedCoList(m_arena.makeXNTupleFuncs().getAvailFixedNTupleModes(),
+		ntPar[n].setFixedCoList(m_arena.makeXNTupleFuncs().fixedNTupleModesAvailable(),
 								m_arena.makeXNTupleFuncs().fixedTooltipString());
 		mctsPar[n].setParamDefaults(agentName, gameName, numPlayers);
 		mctsePar[n].setParamDefaults(agentName, gameName, numPlayers);

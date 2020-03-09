@@ -34,14 +34,6 @@ import games.ArenaTrain;
  */
 public class ArenaTTT extends Arena   {
 	
-	public ArenaTTT() {
-		super();
-	}
-
-	public ArenaTTT(String title) {
-		super(title);		
-	}
-	
 	public ArenaTTT(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -97,7 +89,7 @@ public class ArenaTTT extends Arena   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTTT t_Frame = new ArenaTTT("General Board Game Playing");
+		ArenaTTT t_Frame = new ArenaTTT("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

@@ -13,14 +13,6 @@ import java.io.IOException;
 import javax.swing.*;
 
 public class Arena2048 extends Arena {
-    public Arena2048() {
-        super();
-    }
-
-	public Arena2048(String title) {
-		super(title);		
-	}
-	
 	public Arena2048(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -89,7 +81,7 @@ public class Arena2048 extends Arena {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		Arena2048 t_Frame = new Arena2048("General Board Game Playing");
+		Arena2048 t_Frame = new Arena2048("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

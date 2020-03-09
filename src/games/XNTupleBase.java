@@ -74,7 +74,7 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 	abstract public String fixedTooltipString();
 
 	@Override
-	abstract public int[] getAvailFixedNTupleModes();
+	abstract public int[] fixedNTupleModesAvailable();
 
 	@Override
 	abstract public HashSet adjacencySet(int iCell);

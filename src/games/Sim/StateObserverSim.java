@@ -805,7 +805,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		//		* -1/ 0/ 0 (and permutations)
 		//
 		int R = 20;
-		Arena ar = new ArenaSim();
+		Arena ar = new ArenaSim("",true);
 		PlayAgent p = new RandomAgent("");
 		
 		for (int i=0; i<R; i++) {

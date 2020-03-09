@@ -24,7 +24,7 @@ import tools.Types.ACTIONS_VT;
 
 /**
  * 
- * This class is an implementation of an Alpha-Beta-Agent, specialized to the game CFour. 
+ * This class is an implementation of an Alpha-Beta-Agent, specialized to the game ConnectFour. <br>
  * This agent uses transposition tables, move-ordering, opening books, symmetries and 
  * some other techniques to get fast results.
  * 
@@ -33,14 +33,48 @@ import tools.Types.ACTIONS_VT;
  * 2011-12-12: /MT/ alphaBetaStartP1 and alphaBetaStartP2 look for the most distant
  * loss. This makes the search a little bit slower, but allows a better
  * evaluation of the TD-agent <br>
- * 2019-07-13: /WK/ because {@link C4Base} now extends {@link AgentBase}, this class has 
- * now all methods and members that {@link AgentBase} has.
+ * 2019-07-13: /WK/ Because {@link C4Base} now extends {@link AgentBase}, this class has 
+ * now all methods and members that {@link AgentBase} has.<br>
+ * 2020-02-01: /WK/ In order to get an AlphaBetaAgent searching for distant losses, construct it with 
+ * {@link #AlphaBetaAgent(BookSum, int) <b>AlphaBetaAgent(books,1000)</b>}.
  * 
  * @author Markus Thill
  * 
  */
 public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	private static final long serialVersionUID = 5000820077350196867L;
+
+	// sigfac is relevant, if getNextVTable is called with useSigmoid=true, as it is done currently 
+	// in getNextAction2. Divide by sigfac prior to sigmoid squashing:
+	// - sigfac=1: no seeking for distant losses: if AlphaBetaAgent is confronted with a losing position,
+	//   it may give up early (this happens due to rounding errors in sigmoid([-1000,1000]))
+	// - sigfac=1000: effectively searching for distant losses: the positional values \in [-1000,1000] 
+	//   are mapped to [-1,1], so that the following sigmoid squashing maps to the active area of the 
+	//	 sigmoid and thus avoids rounding errors.
+	// [Results prior to 2020-01-29 were with sigfac=1. The AlphaBetaAgent with sigfac=1000 is harder
+	//  to beat.] [Another possibility to search for distant losses is to call in getNextAction2
+	// the method getNextVTable with useSigmoid=false.]
+	//
+	// Recommended choice: sigfac = 1000 (an AlphaBetaAgent that is harder to beat).
+	// This choice can be made with constructor AlphaBetaAgent(BookSum books, int sigfac)
+	private int sigfac = 1; //1000; 1;
+
+	/**
+	 *  All opening Books
+	 */
+	private transient BookSum books = null;		// transient: to make AlphaBetaAgent serializable
+
+	/**
+	 *  Random choice for a move if more than one equal value. 
+	 *  See {@link #getBestMove(int[][])}
+	 */
+	private boolean randomizeEqualMoves = true;
+
+	/**
+	 *  Random choice for a move if more than one equal value. For a loss, make a complete random move.
+	 *  See {@link #getBestMove(int[][])}
+	 */
+	private boolean randomizeLosses = false;
 
 	private Random rand = new Random();
 //	private AgentState m_agentState;			// now in AgentBase
@@ -139,30 +173,9 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	private boolean seekFarLoose = true; //false;
 	private int looseIntervall = 20;
 	
-	// sigfac is relevant, if getNextVTable is called with useSigmoid=true, as it is done currently 
-	// in getNextAction2. Divide by sigfac prior to sigmoid squashing:
-	// - sigfac=1: no seeking of distant losses: if AlphaBetaAgent is confronted with a losing position,
-	//   it may give up early (this happens due to rounding errors in sigmoid([-1000,1000]))
-	// - sigfac=1000: effectively searching for distant losses: the positional values \in [-1000,1000] 
-	//   are mapped to [-1,1], so that the following sigmoid squashing maps to the active area of the 
-	//	 sigmoid and thus avoids rounding errors.
-	// [Results prior to 2020-01-29 were with sigfac=1. The AlphaBetaAgent with sigfac=1000 is harder
-	//  to beat.] [Another possibility to search for distant losses is to call getNextVTable with
-	//  useSigmoid=false.]
-	private int sigfac = 1; //1000; 1;
-
-	// All opening Books
-	private transient BookSum books = null;		// transient: to make AlphaBetaAgent serializable
-
-	// Random Choice for a Move if more than one equal Value
-	private boolean randomizeEqualMoves = true;
-
-	// Random Choice for a Move, when more than one equal value
-	// For a loss make a complete random Move;
-	private boolean randomizeLosses = false;
-
 	/**
-	 * Generate an empty Board
+	 * Constructs AlphaBetaAgent with default {@code sigfac=1} (NO search for distant losses)
+	 * @param books
 	 */
 	public AlphaBetaAgent(BookSum books) {
 		super();
@@ -172,10 +185,10 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	}
 
 	/**
-	 * 
+	 * Constructs AlphaBetaAgent with the given {@code sigfac}. 
 	 * @param books
 	 * @param sigfac set to 1000, if agent should search for distant losses (the default is 
-	 * 				 1 and then it does NOT search for distant losses)
+	 * 				 1 and then it does NOT search for distant losses). Recommended choice: 1000.
 	 */
 	public AlphaBetaAgent(BookSum books, int sigfac) {
 		super();

@@ -126,7 +126,7 @@ public class XNTupleFuncsNim extends XNTupleBase implements XNTupleFuncs, Serial
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.
 	 * 
-	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()} <br>
+	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()} <br>
 	 * 			   1: one n-tuple with length {@link NimConfig#NUMBER_HEAPS}
 	 * @return nTuples[numTuples][], where {@code nTuples[i]} describes the {@code i}'th 
 	 * n-tuple as an int-array, with {@code i=0,...,numTuples-1}
@@ -153,7 +153,7 @@ public class XNTupleFuncsNim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
     private static int[] fixedModes = {1};		
     
-	public int[] getAvailFixedNTupleModes() {
+	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
 	}
 

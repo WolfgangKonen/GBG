@@ -158,8 +158,8 @@ public class ValidateAgent {
 		//
 		// choose an Arena
 		//
-		Arena ar = new ArenaTrainOthello();
-//		Arena ar = new ArenaTrainTTT();
+		Arena ar = new ArenaTrainOthello("",true);
+//		Arena ar = new ArenaTrainTTT("",true);
 		
 		//
 		// choose an agent to validate

@@ -17,14 +17,6 @@ import games.TicTacToe.XNTupleFuncsTTT;
 
 public class ArenaSim extends Arena{
 
-	public ArenaSim() {
-		super();
-	}
-
-	public ArenaSim(String title) {
-		super(title);		
-	}
-	
 	public ArenaSim(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -79,7 +71,7 @@ public class ArenaSim extends Arena{
 
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaSim t_Frame = new ArenaSim("General Board Game Playing");
+		ArenaSim t_Frame = new ArenaSim("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

@@ -78,13 +78,17 @@ public class XArenaTabs extends JFrame
 	}
 	
 	/**
+	 * Show the tabbed param window: on the right side of the {@link Arena} window and with the right tab 
+	 * selected, depending on the active agent. 
+	 * <p> 
+	 * This method is only called when Arena.withUI==true.
 	 * 
-	 * @param arena	the arena
-	 * @param isVisible	whether to make the tabs window visible
-	 * @param n			number of selected agent
+	 * @param arena			the arena
+	 * @param isVisible		whether to make the tabs window visible
+	 * @param n				number of selected agent
 	 * @param selectedAgent	name of selected agent
 	 */
-	public void showParamTabs(Arena arena,boolean isVisible,int n, String selectedAgent) {
+	public void showParamTabs(Arena arena, boolean isVisible, int n, String selectedAgent) {
 		arena.m_tabs.setVisible(isVisible);
 		arena.m_tabs.setState(Frame.NORMAL);	// if window is iconified, display it normally
 		arena.m_tabs.toFront();

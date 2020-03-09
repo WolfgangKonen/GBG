@@ -10,14 +10,6 @@ import games.CFour.FeatureC4;
 
 public class ArenaOthello extends Arena {
 
-	public ArenaOthello() {
-		super();
-	}
-
-	public ArenaOthello(String title) {
-		super(title);
-	}
-	
 	public ArenaOthello(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -64,7 +56,7 @@ public class ArenaOthello extends Arena {
 	public void performArenaDerivedTasks() {	}
 	
 	public static void main(String[] args) {
-		ArenaOthello t_Frame = new ArenaOthello("General Board Game Playing");
+		ArenaOthello t_Frame = new ArenaOthello("General Board Game Playing",true);
 		if(args.length == 0) {
 			t_Frame.init();
 		}else throw new RuntimeException("[Arena.main] args="+args+ "not allowed");

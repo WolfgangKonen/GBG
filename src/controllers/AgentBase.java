@@ -35,7 +35,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	private String m_name;
 	private AgentState m_agentState = AgentState.RAW;
 	private int epochMax = 0;
-	protected long m_numTrnMoves = 0L;
+	protected long m_numTrnMoves = 0L;			// moves (calls to getNextAction2) done during training
 	private long durationTrainingMs = 0L;		// total time in ms used for training
 	private long durationEvaluationMs = 0L;		// total time in ms used for evaluation (during training)
 	protected ParOther m_oPar = new ParOther();
@@ -223,7 +223,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public long getNumLrnActions() {
-		return 0L; // dummy stub for agents which are not trainable
+		return m_numTrnMoves; // dummy stub for agents which are not trainable
 	}
 
 	public long getNumTrnMoves() {

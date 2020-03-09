@@ -31,14 +31,6 @@ import games.XNTupleFuncs;
  */
 public class ArenaC4 extends Arena   {
 	
-	public ArenaC4() {
-		super();
-	}
-
-	public ArenaC4(String title) {
-		super(title);		
-   	}
-	
 	public ArenaC4(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -94,7 +86,7 @@ public class ArenaC4 extends Arena   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaC4 ar = new ArenaC4("General Board Game Playing");
+		ArenaC4 ar = new ArenaC4("General Board Game Playing",true);
 
 		if (args.length==0) {
 			ar.init();

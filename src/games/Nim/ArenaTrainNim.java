@@ -39,14 +39,6 @@ import tools.Types;
  */
 public class ArenaTrainNim extends ArenaTrain   {
 	
-	public ArenaTrainNim() {
-		super();
-	}
-
-	public ArenaTrainNim(String title) {
-		super(title);		
-	}
-	
 	public ArenaTrainNim(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -101,7 +93,7 @@ public class ArenaTrainNim extends ArenaTrain   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrainNim t_Frame = new ArenaTrainNim("General Board Game Playing");
+		ArenaTrainNim t_Frame = new ArenaTrainNim("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

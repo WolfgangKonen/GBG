@@ -148,7 +148,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.
 	 * 
-	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
+	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()}
 	 * @return nTuples[numTuples][]
 	 */
 	@Override
@@ -248,7 +248,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 
     private static int[] fixedModes = {1};
     
-	public int[] getAvailFixedNTupleModes() {
+	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
 	}
 

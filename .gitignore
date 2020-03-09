@@ -18,6 +18,7 @@ logs/*
 agents/temp/*
 GBGLaunch.jar
 GBGBatch.jar
+GBGBatch-noFA.jar
 
 
 #Files not for the public GitHub version
@@ -48,10 +49,13 @@ agents/ConnectFour/TCL-EXP-al*.agt.zip
 agents/ConnectFour/TCL-EXP-NT3-al50-lam000*.agt.zip
 agents/ConnectFour/TCL-EXP-NT3-al50-lam009*.agt.zip
 agents/ConnectFour/TCL-EXP-NT3-al50-lam025*.agt.zip
+agents/ConnectFour/TCL-*noFA.agt.zip
 agents/ConnectFour/mtLambda.agt.zip
 # (the only ConnectFour agent we have in repos is TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip)
+agents/Othello/TCL3-*noFA*.agt.zip
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)
+agents/TicTacToe/test.agt.zip
 
 agents/theNtuple.txt
 agents/2048/csv/playStats.csv

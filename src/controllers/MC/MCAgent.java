@@ -5,6 +5,7 @@ import controllers.ExpectimaxWrapper;
 import controllers.MaxNWrapper;
 import controllers.PlayAgent;
 import games.Arena;
+import games.GameBoard;
 import games.StateObservation;
 import games.XArenaMenu;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
@@ -458,6 +459,7 @@ public class MCAgent extends AgentBase implements PlayAgent {
 				+ ", # agents:"+ m_mcPar.getNumAgents();
 		return str;
     }
+    
 }
 
 

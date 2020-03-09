@@ -337,8 +337,7 @@ public class EvaluatorC4 extends Evaluator {
         lastResult = 0;
         
 		if (opponent == null) {
-			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
-			gameBoard.getArena().showMessage("ERROR: " + tdstr,"Load Error", JOptionPane.ERROR_MESSAGE);
+			gameBoard.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
 			lastResult = Double.NaN;
 			return lastResult;
 		} 

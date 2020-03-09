@@ -44,16 +44,19 @@ abstract public class ArenaTrain extends Arena
 	private static final long serialVersionUID = 1L;
 	private Thread playThreadAT = null;
 	
+	// launch ArenaTrain with UI
 	public ArenaTrain() {
 		super();
 		initArenaTrain();
 	}
 	
+	// launch ArenaTrain with UI
 	public ArenaTrain(String title) {
 		super(title);
 		initArenaTrain();
 	}
 	
+	// decide via withUI whether wit UI or not
 	public ArenaTrain(String title, boolean withUI) {
 		super(title, withUI);
 		initArenaTrain();

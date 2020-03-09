@@ -35,12 +35,6 @@ import javax.swing.*;
  */
 public class ArenaTrainHex extends ArenaTrain {
 
-    public ArenaTrainHex(){ super();}
-
-	public ArenaTrainHex(String title) {
-		super(title);		
-	}
-	
 	public ArenaTrainHex(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -76,7 +70,7 @@ public class ArenaTrainHex extends ArenaTrain {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrainHex t_Frame = new ArenaTrainHex("General Board Game Playing");
+		ArenaTrainHex t_Frame = new ArenaTrainHex("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

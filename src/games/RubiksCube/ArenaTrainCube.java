@@ -31,14 +31,6 @@ import games.ArenaTrain;
  */
 public class ArenaTrainCube extends ArenaTrain   {
 	
-	public ArenaTrainCube() {
-		super();
-	}
-
-	public ArenaTrainCube(String title) {
-		super(title);		
-	}
-	
 	public ArenaTrainCube(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -90,7 +82,7 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrainCube t_Frame = new ArenaTrainCube("General Board Game Playing");
+		ArenaTrainCube t_Frame = new ArenaTrainCube("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

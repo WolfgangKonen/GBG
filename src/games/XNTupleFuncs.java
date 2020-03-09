@@ -110,7 +110,7 @@ public interface XNTupleFuncs {
 	 * Other options than fixed n-tuples (that is, the generation of random n-tuples) are 
 	 * provided by {@link NTupleFactory#makeNTupleSet(params.ParNT, XNTupleFuncs)}
 	 * 
-	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
+	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()}
 	 * @return nTuples[numTuples][]
 	 * 
 	 * @see NTupleFactory#makeNTupleSet(params.ParNT, XNTupleFuncs)
@@ -122,7 +122,7 @@ public interface XNTupleFuncs {
 	 */
 	public String fixedTooltipString();
 	
-	public int[] getAvailFixedNTupleModes();
+	public int[] fixedNTupleModesAvailable();
 
 	/**
 	 * Return all neighbors of {@code iCell}

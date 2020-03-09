@@ -36,14 +36,6 @@ import games.ArenaTrain;
  */
 public class ArenaNim extends Arena   {
 	
-	public ArenaNim() {
-		super();
-	}
-
-	public ArenaNim(String title) {
-		super(title);		
-	}
-	
 	public ArenaNim(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -145,7 +137,7 @@ public class ArenaNim extends Arena   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaNim t_Frame = new ArenaNim("General Board Game Playing");
+		ArenaNim t_Frame = new ArenaNim("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

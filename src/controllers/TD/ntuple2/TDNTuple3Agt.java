@@ -118,7 +118,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	private boolean TERNARY=false;		// if true, it remains true only for final-reward-games (see getNextAction2)
 	
 	// use finalAdaptAgents(...), normally true. Set only to false if you want to test how agents behave otherwise:
-	private boolean FINALADAPTAGENTS=true;
+	private boolean FINALADAPTAGENTS=true; //false;
 	
 	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
 	
@@ -600,10 +600,11 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	/**
 	 * This function is called when {@code ns.getNextSO()} is terminal. It does two things:
 	 * <ol>
-	 * <li> It takes the final delta reward r (from the perspective of each player other than {@code curPlayer})  
-	 * 		and adapts the value of the last state of each other player to this r.
+	 * <li> It takes for each player <b>other than</b> {@code curPlayer} the final delta reward r (from the perspective of 
+	 * 		this other player) and adapts the value of the last state of this other player towards r.<br>
 	 * 		[This first part is irrelevant for 1-player games where we have no other players.]
-	 * <li> It adapts {@code ns.getAfterState()}, the afterstate preceding the terminal state, towards 0. 
+	 * <li> For {@code curPlayer} <b>only</b>: Adapt the value of {@code ns.getAfterState()}, the afterstate preceding 
+	 * 		the terminal state, towards 0. <br>
 	 * 		[This second part is only relevant if TERNARY==false in source code.]
 	 * </ol>
 	 * 

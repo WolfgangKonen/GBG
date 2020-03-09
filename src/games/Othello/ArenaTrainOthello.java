@@ -14,14 +14,6 @@ import games.TicTacToe.XNTupleFuncsTTT;
 
 public class ArenaTrainOthello extends ArenaTrain {
 
-	public ArenaTrainOthello() {
-		super();
-	}
-	
-	public ArenaTrainOthello(String title) {
-		super(title);
-	}
-	
 	public ArenaTrainOthello(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -53,7 +45,7 @@ public class ArenaTrainOthello extends ArenaTrain {
 	
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrainOthello t_Frame = new ArenaTrainOthello("General Board Game Playing");
+		ArenaTrainOthello t_Frame = new ArenaTrainOthello("General Board Game Playing",true);
 		
 		if (args.length==0) {
 			t_Frame.init();

@@ -19,7 +19,7 @@ import tools.Types.ACTIONS;
 
 public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Serializable {
 
-	private static int[] fixedModes = {0, 1, 2, 3, 4, 5};
+	private static int[] fixedModes = {0, 1, 2, 3, 4, 5, 6};
 
 //	private int numPositionValues = 3;  // either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
 	private int numPositionValues = 4;  // or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty
@@ -323,7 +323,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	 * 
 	 * The first N-Tuple Architecture is the Network proposed by Wojciech Jaskowski in his paper "Systematic N-Tuple Networks for Othello position evaluation" (2014)
 	 * 
-	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
+	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()}
 	 * @return nTuples[numTuples][]
 	 * 
 	 * @see NTupleFactory#makeNTupleSet(params.ParNT, XNTupleFuncs)
@@ -393,6 +393,59 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 			{18,19,20,21,27,28},
 			{0,1,2,8,9,16,17}
 		};
+		//--- 50 randomly chosen, but fixed 6-tuples
+		case 6:return new int[][] {
+			  {4, 20, 5, 6, 12, 13},
+			  {49, 50, 51, 40, 41, 42},
+			  {33, 49, 34, 40, 41, 43},
+			  {48, 33, 49, 40, 25, 42},
+			  {5, 6, 7, 13, 14, 15},
+			  {32, 17, 33, 18, 25, 26},
+			  {1, 2, 3, 4, 9, 11},
+			  {4, 5, 6, 23, 13, 14},
+			  {34, 50, 35, 41, 42, 43},
+			  {6, 22, 7, 23, 14, 15},
+			  {49, 34, 35, 52, 42, 43},
+			  {18, 2, 4, 9, 10, 11},
+			  {33, 34, 18, 25, 9, 26},
+			  {16, 17, 18, 24, 9, 10},
+			  {32, 16, 17, 33, 24, 25},
+			  {52, 58, 59, 43, 60, 61},
+			  {35, 36, 37, 38, 55, 46},
+			  {54, 55, 61, 62, 47, 63},
+			  {17, 34, 35, 26, 42, 43},
+			  {1, 2, 3, 9, 11, 12},
+			  {49, 33, 34, 56, 41, 42},
+			  {0, 16, 1, 8, 9, 10},
+			  {19, 20, 21, 6, 12, 13},
+			  {5, 6, 7, 13, 14, 15},
+			  {35, 51, 36, 42, 43, 44},
+			  {33, 34, 35, 26, 27, 43},
+			  {51, 52, 59, 43, 60, 61},
+			  {37, 38, 54, 39, 46, 31},
+			  {37, 22, 7, 23, 30, 15},
+			  {53, 54, 55, 62, 46, 63},
+			  {34, 35, 36, 21, 41, 28},
+			  {19, 26, 10, 11, 12, 28},
+			  {52, 54, 55, 60, 61, 46},
+			  {16, 1, 17, 8, 9, 10},
+			  {6, 7, 23, 14, 15, 31},
+			  {4, 21, 6, 7, 13, 14},
+			  {0, 16, 1, 17, 8, 9},
+			  {0, 1, 2, 8, 9, 10},
+			  {33, 49, 50, 41, 42, 58},
+			  {21, 37, 38, 29, 30, 46},
+			  {35, 19, 53, 27, 44, 28},
+			  {32, 33, 17, 18, 24, 25},
+			  {16, 17, 34, 24, 8, 25},
+			  {20, 36, 21, 28, 13, 29},
+			  {6, 22, 23, 14, 30, 15},
+			  {21, 38, 39, 12, 30, 31},
+			  {1, 2, 3, 8, 10, 11},
+			  {16, 17, 18, 25, 10, 11},
+			  {20, 39, 27, 28, 29, 30},
+			  {21, 22, 39, 30, 46, 31}
+		};
 		
 		default: throw new OutOfRangeException(mode, 0, 5);
 		}
@@ -402,16 +455,17 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	public String fixedTooltipString() {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>"	+ "0: 10 1-Tuples "
-				+ "<br>1: 32 straight 2-Tuple"	
-				+ "<br>2: 24 straight 3-Tuple"	
-				+ "<br>3: 8 random snakey bakey 4-Tuple"
-				+ "<br>3: Self crafted mixed-Tuple"	
-				+ "<br>3: Self crafted mixed-Tuple"	
+				+ "<br>1: 32 straight 2-tuples"	
+				+ "<br>2: 24 straight 3-tuples"	
+				+ "<br>3: 8 random snakey bakey 4-tuples"
+				+ "<br>4: Mixed n-tuple 1"	
+				+ "<br>5: Mixed n-tuple 2"	
+				+ "<br>6: 50 6-tuples"	
 				+ "</html>";
 	}
 
 	@Override
-	public int[] getAvailFixedNTupleModes() {
+	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
 	}
 

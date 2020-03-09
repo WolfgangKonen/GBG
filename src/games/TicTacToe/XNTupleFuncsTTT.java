@@ -3,6 +3,8 @@ package games.TicTacToe;
 import java.io.Serializable;
 import java.util.HashSet;
 
+import org.apache.commons.math3.exception.OutOfRangeException;
+
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -152,20 +154,32 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.
 	 * 
-	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
+	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()}
 	 * @return nTuples[numTuples][]
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		// Examples for some NTuples for TicTacToe:
+		switch(mode)
+		{
 		//best chosen 40, 4-tuples
-		int nTuple[][]={{6, 7, 4, 0},{4, 5, 8, 7},{4, 3, 0, 1},{4, 5, 2, 1},{6, 3, 0, 1},
+		case 1:	
+			return new int[][] {
+				{6, 7, 4, 0},{4, 5, 8, 7},{4, 3, 0, 1},{4, 5, 2, 1},{6, 3, 0, 1},
 				{6, 3, 0, 4},{0, 1, 5, 2},{2, 1, 4, 7},{7, 3, 4, 5},{0, 4, 1, 2},{8, 4, 0, 1},{7, 4, 1, 0},
 				{7, 4, 0, 1},{8, 7, 4, 1},{7, 4, 8, 5},{8, 7, 4, 1},{7, 8, 5, 4},{4, 8, 7, 6},{2, 1, 5, 4},
 				{3, 0, 1, 4},{8, 7, 3, 4},{8, 4, 3, 0},{4, 1, 2, 5},{6, 3, 0, 4},{1, 2, 5, 8},{1, 4, 3, 7},
 				{6, 3, 0, 1},{8, 5, 4, 3},{3, 4, 7, 6},{5, 8, 7, 6},{5, 4, 0, 1},{6, 3, 4, 7},{0, 3, 4, 8},
 				{6, 3, 7, 8},{2, 1, 4, 0},{3, 7, 4, 1},{1, 2, 5, 4},{8, 5, 1, 4},{6, 7, 8, 4},{6, 3, 0, 1}
-		};
+			};
+		//all straight 3-tuples
+		case 2:	
+			return new int[][] {
+				{ 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, 	// the horizontals
+				{ 0, 3, 6 }, { 1, 4, 7 }, { 2, 5, 8 }, 	// the verticals
+				{ 0, 4, 8 }, { 2, 4, 6 }				// the diagonals
+			};
+		default: throw new OutOfRangeException(mode, 1, 2);
+		}
 		// int nTuple[][] = {{0,1,2,3,4,5,6,7,8}};
 		// int nTuple[][] = { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 0, 4, 8 } };
 		// int nTuple[][] = {{0,1,2,3,4,5,6,7}, {8,7,6,5,4,3,2,1},
@@ -176,22 +190,21 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 		// 		{{0,1,2,3},{4,5,6,7},{8,0,3,6},{1,4,7,2},{5,8,0,4},{6,4,2,0}};
 		// int nTuple[][] = {{0,1,2},{3,4,5},{6,7,8},{0,4,8},{0,1,2,5,8,7},
 		//	 	{0,3,6,7,8,5}, {0,3,6,1,4,7}, {2,5,8,7,4,1}, {0,1,2,3,4,5},
-		//	 	{6,7,8,3,4,5}, {0,4,8,7,6,3}};
-		
-		return nTuple;		
+		//	 	{6,7,8,3,4,5}, {0,4,8,7,6,3}};		
 	}
 
 	@Override
 	public String fixedTooltipString() {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>"
-				+ "1: TODO"
+				+ "1: 40 best chosen 4-tuples"+"<br>" 
+				+ "2: all the straight 3-tuples" 
 				+ "</html>";
 	}
 
-    private static int[] fixedModes = {1};
+    private static int[] fixedModes = {1,2};
     
-	public int[] getAvailFixedNTupleModes() {
+	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
 	}
 

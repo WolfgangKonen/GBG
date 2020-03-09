@@ -140,8 +140,7 @@ public class EvaluatorNim extends Evaluator {
  	private double evaluateAgent1(PlayAgent pa, PlayAgent opponent, GameBoard gb) {
  		StateObservation so = gb.getDefaultStartState();
 		if (opponent == null) {
-			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
-			gb.getArena().showMessage("ERROR: " + tdstr,"Load Error", JOptionPane.ERROR_MESSAGE);
+			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
 			lastResult = Double.NaN;
 			return lastResult;
 		}
@@ -166,8 +165,7 @@ public class EvaluatorNim extends Evaluator {
 		double resX, resO;
 		
 		if (opponent == null) {
-			String tdstr = agtLoader.getLoadMsg() + " (no opponent)";
-			gb.getArena().showMessage("ERROR: " + tdstr,"Load Error", JOptionPane.ERROR_MESSAGE);
+			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
 			lastResult = Double.NaN;
 			m_msg = "EvaluatorTTT: opponent is null!";
 			return lastResult;

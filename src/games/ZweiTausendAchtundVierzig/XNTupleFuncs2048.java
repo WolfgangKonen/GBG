@@ -170,7 +170,7 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 	 * <p>
 	 * See {@link #getBoardVector(StateObservation)} for the numbering of cells in boardVector.
 	 * 
-	 * @param mode one of the values from {@link #getAvailFixedNTupleModes()}
+	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()}
 	 * @return nTuples[numTuples][]
 	 */
 	@Override
@@ -213,7 +213,7 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
      * </ul>
      * @see XNTupleFuncs2048#fixedNTuples(int)
      */
-    public int[] getAvailFixedNTupleModes() {
+    public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
 	}
 

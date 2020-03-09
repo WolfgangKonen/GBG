@@ -27,14 +27,6 @@ import javax.swing.*;
  */
 public class ArenaHex extends Arena {
 
-    public ArenaHex() {
-        super();
-    }
-
-	public ArenaHex(String title) {
-		super(title);		
-	}
-	
 	public ArenaHex(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -109,7 +101,7 @@ public class ArenaHex extends Arena {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaHex t_Frame = new ArenaHex("General Board Game Playing");
+		ArenaHex t_Frame = new ArenaHex("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

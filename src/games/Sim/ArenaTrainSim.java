@@ -12,14 +12,6 @@ import games.TicTacToe.XNTupleFuncsTTT;
 
 public class ArenaTrainSim extends ArenaTrain {
 
-	public ArenaTrainSim() {
-		super();
-	}
-
-	public ArenaTrainSim(String title) {
-		super(title);		
-	}
-	
 	public ArenaTrainSim(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -62,7 +54,7 @@ public class ArenaTrainSim extends ArenaTrain {
 
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrainSim t_Frame = new ArenaTrainSim("General Board Game Playing");
+		ArenaTrainSim t_Frame = new ArenaTrainSim("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

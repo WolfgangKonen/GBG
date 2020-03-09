@@ -5,10 +5,9 @@ import controllers.ExpectimaxWrapper;
 import controllers.MaxNWrapper;
 import controllers.PlayAgent;
 import games.Arena;
+import games.GameBoard;
 import games.StateObservation;
 import games.XArenaMenu;
-import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParMC;
 import params.ParOther;
 import tools.ScoreTuple;
@@ -53,7 +52,6 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 */
 	private static final long  serialVersionUID = 12L;
 
-    
     public MCAgentN(ParMC mcParams){
         this("MC", mcParams, new ParOther());    	
     }
@@ -651,7 +649,42 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 				+ ", # agents:"+ m_mcPar.getNumAgents();
 		return str;
     }
-}
+    
+	/**
+	 * @see #trainAgent(StateObservation)
+	 */
+    @Override
+	public boolean isTrainable() { return true; }
+	
+	/**
+	 * Train the agent for one complete game episode using self-play. This training is just a surrogate
+	 * to measure <b>moves/second</b> and/or to evaluate the agent multiple times. The agent itself is not modified. 
+	 * <p>
+	 * Side effects: Increment m_GameNum by +1. Increments m_numTrnMoves by number of calls to getAction2.
+	 * @param so		the state from which the episode is played 
+	 * @return			 	 
+	 */
+	public boolean trainAgent(StateObservation so) {
+		Types.ACTIONS  a_t;
+		StateObservation s_t = so.copy();
+		int epiLength = m_oPar.getEpisodeLength();
+		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
+		
+		do {
+	        m_numTrnMoves++;		// number of train moves 
+	        
+			a_t = getNextAction2(s_t, true, true);	// choose action a_t (perform MC simulations)
+			s_t.advance(a_t);
+				        
+		} while(!s_t.isGameOver());			
+				
+		incrementGameNum();
+		if (this.getGameNum() % 500 == 0) System.out.println("gameNum: "+this.getGameNum());
+		
+		return false;		
+	} 
+
+} // class MCAgentN
 
 class ResultContainerN {
     public int firstAction;

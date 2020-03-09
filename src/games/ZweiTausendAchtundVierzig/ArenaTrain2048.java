@@ -13,13 +13,6 @@ import java.io.IOException;
 import javax.swing.*;
 
 public class ArenaTrain2048 extends ArenaTrain {
-    public ArenaTrain2048() {
-        super();
-    }
-
-	public ArenaTrain2048(String title) {
-		super(title);		
-	}
 	
 	public ArenaTrain2048(String title, boolean withUI) {
 		super(title,withUI);		
@@ -88,7 +81,7 @@ public class ArenaTrain2048 extends ArenaTrain {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrain2048 t_Frame = new ArenaTrain2048("General Board Game Playing");
+		ArenaTrain2048 t_Frame = new ArenaTrain2048("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

@@ -36,14 +36,6 @@ import tools.Types;
  */
 public class ArenaTrainTTT extends ArenaTrain   {
 	
-	public ArenaTrainTTT() {
-		super();
-	}
-
-	public ArenaTrainTTT(String title) {
-		super(title);		
-	}
-	
 	public ArenaTrainTTT(String title, boolean withUI) {
 		super(title,withUI);		
 	}
@@ -97,7 +89,7 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrainTTT t_Frame = new ArenaTrainTTT("General Board Game Playing");
+		ArenaTrainTTT t_Frame = new ArenaTrainTTT("General Board Game Playing",true);
 
 // ---  just for analysis: compute the state space & game tree complexity ---		
 //		System.out.println("Rough approximation for nStates = "+(int) Math.pow(3, 9)+ " = (3^9)");
