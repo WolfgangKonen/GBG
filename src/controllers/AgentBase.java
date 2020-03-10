@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.StateObservation;
 import games.XArenaMenu;
@@ -164,10 +165,48 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return this.durationEvaluationMs;
 	}
 	
+	/**
+	 * @see #trainAgent(StateObservation)
+	 */
+    @Override
+	public boolean isTrainable() { return true; }
+	
+	/**
+	 * 'Train' the agent for one complete game episode using self-play. This base training is valid for <b>all</b> agents 
+	 * (except {@link HumanPlayer}), whether they are truly adaptable or not. Its purpose is 
+	 * to measure <b>moves/second</b> and/or to evaluate an agent multiple times during self-play. 
+	 * It is no real training, since the agent itself is not modified. 
+	 * <p>
+	 * Side effects: Increment m_GameNum by +1. Increments m_numTrnMoves by number of calls to getAction2. Execute a 
+	 * self-play episode (with the agent-specififc {@code getNextAction2} and game-specific {@code advance}) to let the caller of this
+	 * method measure how long that takes.
+	 * <p>
+	 * Truly adaptable agents (like {@link TDNTuple3Agt}) should override this method and program their 
+	 * adaptation behavior.
+	 * 
+	 * @param so		the state from which the episode is played 
+	 * @return			 	 
+	 */
+    @Override
 	public boolean trainAgent(StateObservation so) {
-		m_GameNum++;
-		return false;
-	}
+		Types.ACTIONS  a_t;
+		StateObservation s_t = so.copy();
+		int epiLength = m_oPar.getEpisodeLength();
+		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
+		
+		do {
+	        m_numTrnMoves++;		// number of train moves 
+	        
+			a_t = getNextAction2(s_t, true, true);	// choose action a_t (agent-specific behavior)
+			s_t.advance(a_t);		// advance the state (game-specific behavior)
+				        
+		} while(!s_t.isGameOver());			
+				
+		incrementGameNum();
+		if (this.getGameNum() % 500 == 0) System.out.println("gameNum: "+this.getGameNum());
+		
+		return false;		
+	} 
 
 	/**
 	 * Normalize game score or reward from range [oldMin,oldMax] to range
@@ -178,42 +217,37 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return reward;
 	}
 
+    @Override
 	public String printTrainStatus() {
 		return this.getClass().getSimpleName()+"::printTrain"; // dummy stub
 	}
 
-	public boolean isTrainable() {
-		return false; 	// dummy stub
-	}
-
+    @Override
 	public boolean isRetrained() {
 		return false; 	// dummy stub
 	}
 
+    @Override
 	public boolean instantiateAfterLoading() { 
 		return true; 	// dummy stub, see LoadSaveTD.saveTDAgent
 	}
 	
+    @Override
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
 		; 				// dummy stub, see XArenaMenu.loadAgent
 	}
 	
+    @Override
 	public byte getSize() {
 		return 1;  		// dummy stub (for size of agent, see LoadSaveTD.saveTDAgent)
 	} 
 
+    @Override
 	public int getGameNum() {
 		return m_GameNum;
 	}
 
-	public int getMaxGameNum() {
-		return m_MaxGameNum;
-	}
-
-	public void setMaxGameNum(int num) {
-		m_MaxGameNum = num;
-	}
-
+    @Override
 	public void setGameNum(int num) {
 		m_GameNum = num;
 	}
@@ -222,14 +256,27 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_GameNum++;
 	}
 
+    @Override
+	public int getMaxGameNum() {
+		return m_MaxGameNum;
+	}
+
+    @Override
+	public void setMaxGameNum(int num) {
+		m_MaxGameNum = num;
+	}
+
+    @Override
 	public long getNumLrnActions() {
 		return m_numTrnMoves; // dummy stub for agents which are not trainable
 	}
 
+    @Override
 	public long getNumTrnMoves() {
 		return m_numTrnMoves;
 	}
 
+    @Override
 	public int getMoveCounter() {
 		return 0;
 	}
@@ -238,14 +285,17 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * @return During training: Call the Evaluator after this number of training
 	 *         games
 	 */
+    @Override
 	public int getNumEval() {
 		return m_oPar.getNumEval();
 	}
 
+    @Override
 	public void setNumEval(int num) {
 		m_oPar.setNumEval(num);
 	}
 
+    @Override
 	public ParOther getParOther() {
 		return m_oPar;
 	}
@@ -253,7 +303,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * Set defaults for m_oPar (needed in {@link Arena#loadAgent} when
 	 * loading older agents, where m_oPar=null in the saved version).
 	 */
-	public void setDefaultParOther() {
+ 	public void setDefaultParOther() {
 		m_oPar = new ParOther();
 	}
 
@@ -329,11 +379,13 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		this.epochMax = epochMax;
 	}
 
+    @Override
 	public String stringDescr() {
 		String cs = getClass().getSimpleName();
 		return cs;
 	}
 	
+    @Override
 	public String stringDescr2() {
 		return getClass().getName() + ":";
 	}

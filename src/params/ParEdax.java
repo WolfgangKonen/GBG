@@ -59,11 +59,17 @@ public class ParEdax implements Serializable {
 	public void setFrom(ParEdax ep) {
 		this.depth = ep.getDepth();
 		this.moveTime = ep.getMoveTime();
+		
+		if (edparams!=null)
+			edparams.setFrom(this);
 	}
 	
 	public void setFrom(EdaxParams ep) {
 		this.depth = ep.getDepth();
 		this.moveTime = ep.getMoveTime();
+		
+		if (edparams!=null)
+			edparams.setFrom(this);
 	}
 	
 	/**

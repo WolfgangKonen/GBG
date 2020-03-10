@@ -1,5 +1,6 @@
 package games.Othello;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -14,6 +15,7 @@ import games.Othello.Gui.GameBoardOthelloGui;
 import games.Othello.Gui.Gamestats;
 import games.Othello.Gui.Legend;
 import games.Othello.Gui.Tile;
+import games.RubiksCube.GameBoardCube;
 import tools.Types;
 
 
@@ -155,14 +157,30 @@ public class GameBoardOthello implements GameBoard {
 		return m_so;
 	}
 
+	/**
+	 * Same as {@link #chooseStartState()}. (Only for {@link GameBoardCube} this method is different.)
+	 */
 	@Override
 	public StateObservation chooseStartState(PlayAgent pa) {
 		return chooseStartState();
 	}
 
+	/**
+	 * Choose with probability 0.3 the default start state and with probability 0.7
+	 * one of the 244 Othello states which are 4 plies away from the default start state.
+	 */
 	@Override
 	public StateObservation chooseStartState() {
-		clearBoard(true,true);
+		getDefaultStartState();				// m_so is in default start state
+		if (rand.nextDouble()>0.3) {
+			for (int k=0; k<4; k++) {
+				// choose randomly one of the possible actions in default 
+				// start state and advance m_so by one ply
+				ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
+				int i = (int) (rand.nextInt(acts.size()));
+				m_so.advance(acts.get(i));
+			}
+		}
 		return m_so;
 	}
 	

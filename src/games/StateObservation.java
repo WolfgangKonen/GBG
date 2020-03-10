@@ -200,7 +200,7 @@ public interface StateObservation extends Serializable{
     public StateObservation getPrecedingAfterstate();
 
     /**
-     * Return all available actions (all actions possible in this game)
+     * Return all available actions (all actions that can ever become possible in this game)
      * @return {@code ArrayList<ACTIONS>}
      */
 	public ArrayList<ACTIONS> getAllAvailableActions();

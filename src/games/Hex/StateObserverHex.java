@@ -2,8 +2,6 @@ package games.Hex;
 
 import games.ObserverBase;
 import games.StateObservation;
-import games.RubiksCube.CubeState;
-import games.RubiksCube.StateObserverCube;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -58,25 +56,47 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
         setAvailableActions();
     }
 
-    public StateObserverHex(HexTile[][] table) {
-        int pieceCount = 0;
-        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
-            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
-                pieceCount += (table[i][j].getPlayer() == HexConfig.PLAYER_ONE ? 1 : -1);
-            }
-        }
-        currentPlayer = (pieceCount % 2 == 0 ? HexConfig.PLAYER_ONE : PLAYER_TWO);
+    // never used
+//  public StateObserverHex(HexTile[][] table) {
+//        int pieceCount = 0;
+//        for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+//            for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+//                pieceCount += (table[i][j].getPlayer() == HexConfig.PLAYER_ONE ? 1 : -1);
+//            }
+//        }
+//        currentPlayer = (pieceCount % 2 == 0 ? HexConfig.PLAYER_ONE : PLAYER_TWO);
+//        board = new HexTile[HexConfig.BOARD_SIZE][HexConfig.BOARD_SIZE];
+//        copyTable(table);
+//        setAvailableActions();
+//  }
+
+//  public StateObserverHex(HexTile[][] table, int player, HexTile lastUpdatedTile) {
+//        board = new HexTile[HexConfig.BOARD_SIZE][HexConfig.BOARD_SIZE];
+//        copyTable(table);
+//        currentPlayer = player;
+//        this.lastUpdatedTile = lastUpdatedTile;
+//        setAvailableActions();
+//  }
+    
+    public StateObserverHex(StateObserverHex other) {		
         board = new HexTile[HexConfig.BOARD_SIZE][HexConfig.BOARD_SIZE];
-        copyTable(table);
-        setAvailableActions();
+        copyTable(other.board);
+        this.currentPlayer =other.currentPlayer;
+        this.lastUpdatedTile = other.lastUpdatedTile;
+        this.m_counter = other.m_counter;
+		this.actions = (ArrayList<ACTIONS>) other.actions.clone();
+					// note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
+					// just copied by reference. However, as far as we see, the ACTIONS are never altered, so 
+					// it should be o.k.
+//		this.setAvailableActions();		// this as replacement for clone() would be slower
     }
 
-    public StateObserverHex(HexTile[][] table, int player, HexTile lastUpdatedTile) {
-        board = new HexTile[HexConfig.BOARD_SIZE][HexConfig.BOARD_SIZE];
-        copyTable(table);
-        currentPlayer = player;
-        this.lastUpdatedTile = lastUpdatedTile;
-        setAvailableActions();
+    @Override
+    public StateObserverHex copy() {
+//    	StateObserverHex soh = new StateObserverHex(board, currentPlayer, lastUpdatedTile);
+//    	soh.m_counter = this.m_counter;
+//      return soh;
+    	return new StateObserverHex(this);
     }
 
     /**
@@ -106,13 +126,6 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
         }
 
         return newBoard;
-    }
-
-    @Override
-    public StateObserverHex copy() {
-    	StateObserverHex soh = new StateObserverHex(board, currentPlayer, lastUpdatedTile);
-    	soh.m_counter = this.m_counter;
-        return soh;
     }
 
     @Override

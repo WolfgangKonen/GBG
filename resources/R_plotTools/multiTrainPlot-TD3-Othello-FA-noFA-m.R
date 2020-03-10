@@ -26,15 +26,12 @@ evalStr = ifelse(USEEVALT,"eval TDRefer","eval Bench")
 evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
 path <- "../../agents/Othello/csv/"; 
 Ylimits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=300/wfac;
-Xlimits=c(0,251); # c(400,6100) (-/+100 to grab position-dodge-moved points)
+Xlimits=c(0,255); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c(#"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
-           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm-noFA.csv"
-            "TCL3-fixed6_250k-lam05_P4_H001-FAm.csv"
-           ,"TCL3-fixed6_250k-lam05_P4_H001-noFAm.csv"
-           #,".csv"
-           #,".csv"
-           #,".csv"
+filenames=c(#"TCL3-fixed6_250k-lam05_P4_H001-FAm.csv"
+            #,"TCL3-fixed6_250k-lam05_P4_H001-noFAm.csv"
+            "TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.csv"
+           ,"TCL3-fixed6_250k-lam05_P4_H001-diff1-noFAm.csv"  
            )
 # suffix -DLm: evalQ is MCTS (0), evalT is AB with Distant Losses DL (5),
 # suffix -ALm: both evaluators AB, 1st one w/o DL (3), 2nd one with DL (5),
@@ -53,8 +50,9 @@ for (k in 1:length(filenames)) {
   filename <- paste0(path,filenames[k])
   df <- read.csv(file=filename, dec=".",skip=2)
   df$run <- as.factor(df$run)
-  df <- df[,setdiff(names(df),c("trnMoves", "movesSecond","lambda","null","X","X.1"))]
-  #,"elapsedTime"
+  df <- df[,setdiff(names(df),c("trnMoves","lambda","null","X","X.1"))]
+  #,"elapsedTime", "movesSecond"
+  print(unique(df$run))
   #if (k==1) df <- cbind(df,actionNum=rep(0,nrow(df)))
   
   if (PLOTALLLINES) {
@@ -101,21 +99,21 @@ names(tgc2)[5] <- "eval"  # rename "evalT"
 tgc <- rbind(tgc1,tgc2) # AB & MCTS
 #tgc <- tgc1              # AB only
 #tgc <- tgc2              # AB only
-tgcT <- summarySE(dfBoth, measurevar="elapsedTime", groupvars=c(gamesVar,"algo","targetMode"))
+tgcT <- summarySE(dfBoth, measurevar="totalTrainSec", groupvars=c(gamesVar,"algo","targetMode"))
 z=aggregate(dfBoth$evalT,dfBoth[,c(gamesVar,"algo","targetMode")],mean)
 tgc$algo <- as.factor(tgc$algo)
 tgc$targetMode <- as.factor(tgc$targetMode)
 if (MAPWINRATE) tgc$eval = (tgc$eval+1)/2   # map y-axis to win rate (range [0,1])
 
 # The errorbars may overlap, so use position_dodge to move them horizontally
-pd <- position_dodge(1000/wfac) # move them 100000/wfac to the left and right
+pd <- position_dodge(3000/wfac) # move them 100000/wfac to the left and right
 
 if (USEGAMESK) {
-  q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=evalMode,linetype=algo,color=evalMode))
+  q <- ggplot(tgc,aes(x=gamesK,y=eval,shape=algo,linetype=algo,color=evalMode))
   q <- q + xlab(bquote(paste("episodes [*",10^3,"]", sep=""))) + ylab(evalStr)
   q <- q+scale_x_continuous(limits=Xlimits) 
 } else {
-  q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=algo,linetype=algo))
+  q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=evalMode,linetype=algo))
 }
 q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=errWidth, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 

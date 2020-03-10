@@ -87,28 +87,42 @@ public class StateObserverOthello extends ObserverBase{
 		setAvailableActions();
 	}
 	
-	public StateObserverOthello(int[][] gameState, int playerMove, ArrayList<Integer> lastMoves, int turn)
+	public StateObserverOthello(StateObserverOthello other)
 	{
-		//this.lastMoves = new ArrayList<Integer>();					// WK: obsolete
-		this.lastMoves = (ArrayList<Integer>) lastMoves.clone();		// WK: bug fix, added missing .clone() 
+		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();		// WK: bug fix, added missing .clone() 
 		this.currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
-		BaseOthello.deepCopyGameState(gameState, currentGameState);
-		// /WK/ wouldn't "this.currentGameState = gameState.clone();" do the same as the preceding two lines? 
-		this.playerNextMove = playerMove;
-		this.turn = turn;
-		this.setAvailableActions();
+		BaseOthello.deepCopyGameState(other.currentGameState, currentGameState);
+		// /WK/ wouldn't "this.currentGameState = other.currentGameState.clone();" do the same as the preceding two lines? 
+		//      No, that would not work, because it would not do a deep copy on int[][], it would only make a new int[8]
+		//      and hang the lines [0],...,[7] from other.currentGameState into this. What would work really 'deep':
+		// for (int i=0; i<ConfigOthello.BOARD_SIZE; i++) this.currentGameState[i] = other.currentGameState[i].clone(); 
+		//      but this is not faster, even slightly slower than the above deepCopyGameState. 
+		//		Anyhow, the real time-burner was 'this.setAvailableActions()' below, and we made the code 16x faster (!!)
+		// 	 	by simply cloning other.availableActions instead 
+		this.playerNextMove = other.playerNextMove;
+		this.turn = other.turn;
+		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+					// note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
+					// just copied by reference. However, as far as we see, these ACTIONS are never altered, so 
+					// it should be o.k.
+//		this.setAvailableActions();		// this as replacement for clone() would be very slow!
 	}
 	
-	public StateObserverOthello(int[][] gameState, int playerMove)
-	{
-		this.lastMoves = new ArrayList<Integer>();
-		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
-		BaseOthello.deepCopyGameState(gameState, currentGameState);
-		// /WK/ wouldn't "this.currentGameState = gameState.clone();" do the same as the preceding two lines?
-		playerNextMove = playerMove;
-		setAvailableActions();
-	}
+	// never used:
+//	public StateObserverOthello(int[][] gameState, int playerMove)
+//	{
+//		this.lastMoves = new ArrayList<Integer>();
+//		this.currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
+//		BaseOthello.deepCopyGameState(gameState, currentGameState);
+//		// /WK/ wouldn't "this.currentGameState = gameState.clone();" do the same as the preceding two lines? 
+//		playerNextMove = playerMove;
+//		setAvailableActions();
+//	}
 	
+    /**
+     * Return all available actions (all actions that can ever become possible in this game)
+     * @return {@code ArrayList<ACTIONS>}
+     */
 	public ArrayList<ACTIONS> getAllAvailableActions(){
 		ArrayList<ACTIONS> retVal = new ArrayList<>();
 		for(int i = 0, n = 0; i < currentGameState.length; i++) {
@@ -135,8 +149,7 @@ public class StateObserverOthello extends ObserverBase{
 	
 	@Override
 	public StateObserverOthello copy() {
-		StateObserverOthello so = new StateObserverOthello(this.currentGameState, this.playerNextMove,this.lastMoves,  turn);
-		return so;
+		return new StateObserverOthello(this);
 	}
 	
 	/**
@@ -144,8 +157,12 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	@Override
 	public boolean isGameOver() {
-		return (BaseOthello.possibleActions(currentGameState, playerNextMove).size() == 0 ) &&
-				(BaseOthello.possibleActions(currentGameState, getOpponent(playerNextMove)).size() == 0);
+//		return (BaseOthello.possibleActions(currentGameState, playerNextMove).size() == 0 ) &&
+//				(BaseOthello.possibleActions(currentGameState, getOpponent(playerNextMove)).size() == 0);
+		// /WK/ this does the same as above, but should be faster (possibleActions is a costly method):
+		if  (availableActions.size() == 0 ) 
+			return (BaseOthello.possibleActions(currentGameState, getOpponent(playerNextMove)).size() == 0);
+		return false;
 	}
 
 	@Override
@@ -259,27 +276,30 @@ public class StateObserverOthello extends ObserverBase{
 		BaseOthello.flip(currentGameState, i, j, playerNextMove);
 		currentGameState[i][j] = playerNextMove;
 		super.incrementMoveCounter();
+		int prevPlayer = playerNextMove;
 		
 		// Set playerNextMove.
 		// The normal case: if the opponent of playerNextMove (the player who just advanced) has possible
 		// actions, then playerNextMove will become this opponent. If however the opponent has no possible
 		// moves, he has to pass, and playerNextMove will stay at the value it has (and the next advance
 		// will be done by the same playerNextMove):
-		if(BaseOthello.possibleActions(currentGameState, 
-				this.getOpponent(playerNextMove)).size() != 0 ) {
+		availableActions = BaseOthello.possibleActions(currentGameState, this.getOpponent(playerNextMove));
+		if(availableActions.size() > 0 ) {
 			playerNextMove = getOpponent(playerNextMove); 
 		} else {
-			int dummy=1;
+			//int dummy=1;
 		}
 		
-		setAvailableActions();
+		if (playerNextMove==prevPlayer)
+			setAvailableActions();	// yes, we have to call possibleActions (inside setAvailableActions) a 2nd time
+									// in the rare cases where playerNextMove is identical prevPlayer (there was no 
+									// possible next move for opponent).
+									// In all other cases we can skip setAvailableActions: the member availableActions
+									// calculated above is valid!
 		lastMoves.add(action.toInt());
 		turn++;
 	}
 
-	/**
-	* TODO: Determine if this logic is correct
-	*/
 	@Override
 	public int getPlayer() {
 		return playerNextMove;

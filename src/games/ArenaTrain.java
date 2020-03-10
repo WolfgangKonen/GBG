@@ -113,18 +113,23 @@ abstract public class ArenaTrain extends Arena
 				} catch (IOException e2) {
 					e2.printStackTrace();
 				} catch (RuntimeException e) {
-					this.showMessage(e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+					String s = e.getMessage();
+					if (s==null) s=e.getClass().getName();
+					this.showMessage(s,"Error", JOptionPane.ERROR_MESSAGE);
 					enableButtons(true);
 					taskState = Task.IDLE; 
 					break;
 				}
 
 				if (m_xfun.m_PlayAgents[n] != null) {
-					Evaluator m_evaluator2 = makeEvaluator(m_xfun.m_PlayAgents[n],gb,0,m_xab.oPar[n].getQuickEvalMode(),1);
-					m_evaluator2.eval(m_xfun.m_PlayAgents[n]);
+					pa = m_xfun.m_PlayAgents[n];
+					Evaluator m_evaluator2 = makeEvaluator(pa,gb,0,m_xab.oPar[n].getQuickEvalMode(),1);
+					m_evaluator2.eval(pa);
 					System.out.println("final "+m_evaluator2.getMsg());
 					m_xfun.m_PlayAgents[n].setAgentState(AgentState.TRAINED);
 					setStatusMessage("final "+m_evaluator2.getMsg());
+					//System.out.println("Duration training: " + ((double)pa.getDurationTrainingMs()/1000));
+					//System.out.println("Duration evaluation: " + ((double)pa.getDurationEvaluationMs()/1000));
 				} else {
 					setStatusMessage("Done.");
 				}

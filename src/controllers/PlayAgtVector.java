@@ -1,5 +1,9 @@
 package controllers;
 
+/**
+ * A vector of {@link PlayAgent} objects. It has the additional property to allow cyclic shifting
+ * of all players (method {@link #shift(int)}).
+ */
 public class PlayAgtVector {
 
 	public PlayAgent[] pavec;

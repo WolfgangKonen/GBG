@@ -110,7 +110,7 @@ public class ScoreTuple {
 	
 	/**
 	 * Combine {@code this} {@link ScoreTuple} with the information in the other {@link ScoreTuple}  
-	 * {@code tuple2nd}. Combine according to operator {@code cOP}:
+	 * {@code tuple2nd}. The combination is done according to operator {@code cOP}:
 	 * <ul>
 	 * <li> <b>AVG</b>: weighted average or expectation value with probability weight 
 	 * 		{@code currProbab}. The probability weights of all combined tuples should sum
@@ -122,11 +122,12 @@ public class ScoreTuple {
 	 * <li> <b>DIFF</b>: subtract from {@code this} all values in the other {@link ScoreTuple}  
 	 * 		{@code tuple2nd}.
 	 * </ul>
+	 * The resulting information is returned in {@code this} {@link ScoreTuple}. 
 	 * 
 	 * @param tuple2nd 		the new {@link ScoreTuple} 
 	 * @param cOP			combine operator 	
 	 * @param playNum		player number (needed only for {@code cOP}==MIN,MAX)
-	 * @param currProbab	probability weight of {@code tuple2nd} (needed for {@code cOP}==AVG)
+	 * @param currProbab	probability weight of {@code tuple2nd} (needed only for {@code cOP}==AVG)
 	 */
 	public void combine(ScoreTuple tuple2nd, ScoreTuple.CombineOP cOP, int playNum, double currProbab)
 	{

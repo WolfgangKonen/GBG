@@ -57,7 +57,8 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		sot.m_counter = this.m_counter;
 		sot.m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
 		sot.gameOver = this.gameOver;
-		sot.setAvailableActions();
+		//sot.setAvailableActions();		// too slow
+		sot.acts = (ArrayList<ACTIONS>) this.acts.clone();
 		return sot;
 	}
 

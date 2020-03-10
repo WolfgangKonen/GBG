@@ -656,7 +656,7 @@ public class XArenaFuncs {
 						// average number of moves per second since start of this training 
 						// (counting only training time, excluding evaluation time)
 		DecimalFormat frm1 = new DecimalFormat("#0.00");
-		System.out.println("moves/s: "+frm1.format(movesSecond)+" (average for trainAgent time). ");
+		System.out.println("moves/s: "+frm1.format(movesSecond)+" [(#trainAgent-calls)/(total time spent in trainAgent)]. ");
 
 		return pa;
 	}
@@ -1030,10 +1030,10 @@ public class XArenaFuncs {
 
 	// --- the generalization of old competeBoth to arbitrary N players ---
 	/**
-	 * Perform a competition of the agents in {@code paVector}, consisting of
-	 * {@code competeNum}*{@code N} episodes, starting from StateObservation
+	 * Perform a competition of the agents in {@code paVector}. This competition consists of
+	 * {@code competeNum}*{@code N} episodes, all starting from StateObservation
 	 * {@code startSO}. Here, {@code N} is the number of players and each agent
-	 * plays cyclically each role of the 1st, 2nd, ... {@code N}th player. The
+	 * plays cyclically each role: the 1st, 2nd, ... {@code N}th player. The
 	 * results are mapped back to the score tuple of the 1st role
 	 * 
 	 * @param paVector

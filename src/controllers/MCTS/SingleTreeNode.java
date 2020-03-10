@@ -91,9 +91,10 @@ public class SingleTreeNode implements Serializable
 		if (state == null) {
 			children = new SingleTreeNode[m_player.getNUM_ACTIONS()];
 		} else {
-			children = new SingleTreeNode[state.getNumAvailableActions()]; // /WK/
-																			// NEW!
+			children = new SingleTreeNode[state.getNumAvailableActions()]; // /WK/ NEW!
 		}
+		assert (children != null ) : "Oops, children == null!";
+		
 		totValue = 0.0;
 		if (parent == null)
 			m_depth = 0;
@@ -389,6 +390,7 @@ public class SingleTreeNode implements Serializable
 
 		SingleTreeNode selected = null;
 		double bestValue = -Double.MAX_VALUE;
+		assert (children.length > 0) : "Ooops, children.length == 0";
 		for (SingleTreeNode child : this.children) 
 		{
 			double childValue = child.totValue / (child.nVisits + this.epsilon);
@@ -524,7 +526,9 @@ public class SingleTreeNode implements Serializable
 		int thisDepth = this.m_depth;
 
 		while (!finishRollout(rollerState, thisDepth)) {
-			rollerState.setAvailableActions();
+			//rollerState.setAvailableActions();	// /WK/ commented out since every advance() includes setAvailableActions()
+													// and m_state has also its available actions set. 
+													// Calling setAvailableActions without need slows down especially for Othello.
 			int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
 			rollerState.advance(rollerState.getAction(action));
 			thisDepth++;

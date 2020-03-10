@@ -604,27 +604,28 @@ public class XArenaMenu extends JMenuBar {
 			
 			// measure the number of moves per second for agent pa by calling pa.getNextAction2()
 			// as often as possible within one second.
-	        int n=1;
-	        long startTime = System.currentTimeMillis();
-	        long elapsedTime = 0;
-	        long upperTime = n*1000;
-	        long moveCount = 0;
-	        StateObservation newSO, so = m_arena.gb.getDefaultStartState();
-	        ArrayList actList = so.getAvailableActions();
-	        if (so.getName()=="RubiksCube") {		  // Moves/second works for RubiksCube & MCTS only
-	        	so.advance((ACTIONS) actList.get(4)); // if 'so' is not the default start state (otherwise
-	        }										  // all children are null and an assertion fires)	
-	        while (elapsedTime<upperTime) {
-	        	pa.getNextAction2(so, false, true);
-	        	newSO = so.copy();							// just for comparable time measurement: 
-	        	newSO.advance((ACTIONS) actList.get(0)); 	// do a dummy advance
-	        	moveCount++;
-	        	elapsedTime = System.currentTimeMillis() - startTime;
-	        	//System.out.println("elapsed: "+elapsedTime);
-	        }
-			DecimalFormat form = new DecimalFormat("0.00");
-	        double movesPerSecond = ((double)moveCount)/n/((double)elapsedTime/1000);
-	        System.out.println("Moves/second for "+ pa.getName() + ": "+form.format(movesPerSecond));
+			// --- deprecated, we measure now the moves/second during training or multi-train --- 
+//	        int n=1;
+//	        long startTime = System.currentTimeMillis();
+//	        long elapsedTime = 0;
+//	        long upperTime = n*1000;
+//	        long moveCount = 0;
+//	        StateObservation newSO, so = m_arena.gb.getDefaultStartState();
+//	        ArrayList actList = so.getAvailableActions();
+//	        if (so.getName()=="RubiksCube") {		  // Moves/second works for RubiksCube & MCTS only
+//	        	so.advance((ACTIONS) actList.get(4)); // if 'so' is not the default start state (otherwise
+//	        }										  // all children are null and an assertion fires)	
+//	        while (elapsedTime<upperTime) {
+//	        	pa.getNextAction2(so, false, true);
+//	        	newSO = so.copy();							// just for comparable time measurement: 
+//	        	newSO.advance((ACTIONS) actList.get(0)); 	// do a dummy advance
+//	        	moveCount++;
+//	        	elapsedTime = System.currentTimeMillis() - startTime;
+//	        	//System.out.println("elapsed: "+elapsedTime);
+//	        }
+//			DecimalFormat form = new DecimalFormat("0.00");
+//	        double movesPerSecond = ((double)moveCount)/n/((double)elapsedTime/1000);
+//	        System.out.println("Moves/second for "+ pa.getName() + ": "+form.format(movesPerSecond));
 	        
 			try {
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
@@ -633,7 +634,7 @@ public class XArenaMenu extends JMenuBar {
 		        qEvaluator.eval(pa);
 				str = qEvaluator.getMsg();
 				System.out.println(str);
-				printStatus(qEvaluator.getShortMsg());				
+				printStatus(qEvaluator.getShortMsg());		
 			} catch (RuntimeException e) {
 				m_arena.showMessage( e.getMessage(), 
 						"Error", JOptionPane.ERROR_MESSAGE);

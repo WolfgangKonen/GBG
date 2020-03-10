@@ -19,9 +19,14 @@ import tools.Types.ACTIONS_VT;
 
 /**
  * Implementation of {@link PlayAgent} for game Othello for any mapping agent.<p>
- * The constructor {@link #BenchMarkPlayer(String, int)} accepts argument {@code mode} to construct different types 
- * of Agents. The acceptable values for {@code mode} can
- * be found in {@link ConfigOthello#BENCHMARKPLAYERMAPPING}. 
+ * The constructor {@link #BenchMarkPlayer(String, int)} accepts arguments {@code mode=0} (<b>HeurPlayer</b>) and 
+ * {@code mode=1} (<b>BenchPlayer</b>)  to construct different types of agents. 
+ * The associated value maps can be found in {@link ConfigOthello#BENCHMARKPLAYERMAPPING}. 
+ * <p>
+ * Note that both BenchPlayer and HeurPlayer may have more than one best action in certain states. In these cases, one of 
+ * the actions leading to the best score is selected randomly. Consequently, the evaluation results with BenchPlayer and
+ * HeurPlayer can vary, even if the set of start states is exactly the same. Stronger variations for HeurPlayer, because 
+ * due to its symmetric values more actions may lead to the same best score.
  */
 public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializable {
 
@@ -113,6 +118,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 					bestAction = action;
 				}
 			}
+			//if (count>1) System.out.println("more than one best action");
 		}
 		ACTIONS_VT x = new ACTIONS_VT(bestAction.toInt(), false, vTable);
 		return x;

@@ -12,18 +12,14 @@ import controllers.PlayAgent;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Random;
 
 import static games.Hex.HexConfig.PLAYER_ONE;
 import static games.Hex.HexConfig.PLAYER_TWO;
 
 /**
- * Class {@link GameBoardHexGui} has the board game GUI for Hex. 
+ * This class has the board game GUI for Hex. 
  * <p>
  * It creates an instance of the child class HexPanel, which is the actual GUI.
- * GameBoardHex implements all functions required by the interface GameBoard.
  * It also contains configuration for the colors used by the GUI.
  * 
  * @author Kevin Galitzki, TH Koeln, 2018
@@ -54,7 +50,6 @@ public class GameBoardHexGui {
         //Increasing the board size by one increases total width of board by 3 times side length
         WINDOW_WIDTH = (int) (HexConfig.BOARD_SIZE * 3 * (HexUtils.getSideLengthFromHeight(HexConfig.HEX_SIZE)));
 
-
         createAndShowGUI();
     }
 
@@ -66,9 +61,6 @@ public class GameBoardHexGui {
         Container content = m_frame.getContentPane();
         content.add(gamePanel);
         m_frame.getContentPane().setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
-        // this is just a try instead of the 4 lines above: does it stop the "GUI hangs" bug? - not really
-//        m_frame.add(gamePanel);
-//        m_frame.setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         
         m_frame.pack();
         m_frame.setResizable(false);
@@ -77,8 +69,8 @@ public class GameBoardHexGui {
     }
 
     public void clearBoard(boolean boardClear, boolean vClear) {
-        //gamePanel.repaint();
-        m_frame.paint(m_frame.getGraphics());
+//      m_frame.paint(m_frame.getGraphics());	// *very* slow
+    	m_frame.repaint();			// much faster
     }
 
 
@@ -88,23 +80,27 @@ public class GameBoardHexGui {
     	
         if (so == null) {
         	// do we need this?
-            m_frame.paint(m_frame.getGraphics());
+//          m_frame.paint(m_frame.getGraphics());	// *very* slow
+        	m_frame.repaint();			// much faster
             return;        	
         }
 
-        if (m_gb.getArena().taskState != Arena.Task.PLAY) {
-            gamePanel.repaint();
-            //--- the above line results in a buggy behavior in connection with delay slider: not 
-            //--- every call to repaint will issue an update, so that after two delays all of a 
-            //--- sudden two moves would be displayed. The right thing is to call the paint() 
-            //--- method of the enclosing JFrame:         	
-        } else {
-    		m_frame.paint(m_frame.getGraphics());
-    		// this works well with the slider, with the little down-side of paint(): GameBoard 
-    		// tends to flicker when moves are displayed.
-    		// But it has problems when training: The Gameboard flickers AND part of the 
-    		// JFreeChart are 'hidden' --> so we do not use this in training.
-        }
+    	m_frame.repaint();		// this works well for both, Task.PLAY and other tasks
+    	
+    	  // --- no longer needed ---
+//        if (m_gb.getArena().taskState != Arena.Task.PLAY) {
+//            gamePanel.repaint();
+//           //--- the above line results in a buggy behavior in connection with delay slider: not 
+//            //--- every call to repaint will issue an update, so that after two delays all of a 
+//            //--- sudden two moves would be displayed. The right thing is to call the paint() 
+//            //--- method of the enclosing JFrame:         	
+//        } else {
+//    		m_frame.paint(m_frame.getGraphics());
+//    		// this works well with the slider, with the little down-side of paint(): GameBoard 
+//    		// tends to flicker when moves are displayed.
+//    		// But it has problems when training: The Gameboard flickers AND part of the 
+//    		// JFreeChart are 'hidden' --> so we do not use this in training.
+//        }
 
 
     }
@@ -113,7 +109,6 @@ public class GameBoardHexGui {
 
     public void showGameBoard(Arena arena, boolean alignToMain) {
         gamePanel.setVisible(true);
-        //gamePanel.repaint();
     }
 
 	public void toFront() {

@@ -30,8 +30,18 @@ public class HumanPlayer extends AgentBase implements PlayAgent
 
 	@Override
 	public double getScore(StateObservation sob) {
-		// TODO Auto-generated method stub
+		// dummy stub
 		return 0;
+	}
+
+	public boolean isTrainable() {
+		return false; 	
+	}
+
+	public boolean trainAgent(StateObservation so) {
+		// dummy stub
+		incrementGameNum();
+		return false;
 	}
 
 //	/**
