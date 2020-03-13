@@ -40,6 +40,13 @@ public class ArenaSim extends Arena{
     	ConfigSim.NUM_NODES = val;
     }
 
+    /**
+     * set the number of nodes for Sim
+     */
+    public static void setCoalition(String coalition) {
+    	ConfigSim.COALITION = coalition;
+    }
+
 	@Override
 	public GameBoard makeGameBoard() {
 		gb = new GameBoardSim(this);	

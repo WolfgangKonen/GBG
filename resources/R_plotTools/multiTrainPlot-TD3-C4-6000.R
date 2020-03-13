@@ -42,7 +42,7 @@ filenames=c(#"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
 # in both cases the 'm' means that runs were performed on maanbs05.
 # suffix -noFA: no final adaptation RL (FARL) step.
 #
-# other pars: alpha = 3.7->3.7m eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, 
+# other pars: alpha = 3.7->3.7, eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, 
 # NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=T, fixed ntuple mode 1: 70 8-tuples. 
 # TC_INIT=1e-4, TC_EXP with TC beta =2.7, rec.weight-change accumulation. 
 # 6.000.000 training games, 10 runs.

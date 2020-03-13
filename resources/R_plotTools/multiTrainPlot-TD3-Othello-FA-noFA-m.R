@@ -30,8 +30,10 @@ Xlimits=c(0,255); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
 filenames=c(#"TCL3-fixed6_250k-lam05_P4_H001-FAm.csv"
             #,"TCL3-fixed6_250k-lam05_P4_H001-noFAm.csv"
-            "TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.csv"
-           ,"TCL3-fixed6_250k-lam05_P4_H001-diff1-noFAm.csv"  
+            #"TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.csv"
+           #,"TCL3-fixed6_250k-lam05_P4_H001-diff1-noFAm.csv"  
+            "TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm"
+           ,"TCL3-fixed6_250k-lam05_P4_H001-diff2-noFAm.csv"
            )
 # suffix -DLm: evalQ is MCTS (0), evalT is AB with Distant Losses DL (5),
 # suffix -ALm: both evaluators AB, 1st one w/o DL (3), 2nd one with DL (5),

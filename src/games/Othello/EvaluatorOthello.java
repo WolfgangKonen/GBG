@@ -36,7 +36,7 @@ import tools.Types.ACTIONS;
  * </ul>  
  * The value of mode is set in the constructor. 
  */
-public class EvaluatorOthello extends Evaluator{
+public class EvaluatorOthello extends Evaluator {
 
     private RandomAgent randomAgent;
 	private MaxNAgent maxNAgent;
@@ -45,14 +45,17 @@ public class EvaluatorOthello extends Evaluator{
 	private MCTSAgentT mctsAgent;
 	
 	/**
-	 * A list of all Othello states which are NPLY_DS plies away from the default start state.
-	 * For NPLY_DS=(1, 2, 3, 4) these are (4, 12, 56, 244) states. <br>
-	 * According to [ReeWiering03], in case NPLY_DS==4,  only 236 of them are truly different.
+	 * A list of all Othello states which are {@link #NPLY_DS} plies away from the default start state.
+	 * For {@link #NPLY_DS}=(1, 2, 3, 4) these are (4, 12, 56, 244) states. <br>
+	 * According to [ReeWiering03], in case {@link #NPLY_DS}==4,  only 236 of them are truly different.
 	 * <p>
 	 * This list is a static member, so that it needs to be constructed only once. <br>
-	 * This list is used in {@code mode} 19, 20, 21.
+	 * This list is used in evaluation mode 19, 20 and 21.
 	 */
 	protected static ArrayList<StateObserverOthello> diffStartList = null;
+	/**
+	 * Number of plies for {@link #diffStartList}
+	 */
 	protected static int NPLY_DS = 4;
 
 	
@@ -70,7 +73,6 @@ public class EvaluatorOthello extends Evaluator{
 	public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, gb, mode, stopEval, verbose);
 		initEvaluator(gb);
-
 	}
 	
 	public void initEvaluator(GameBoard gb){
@@ -100,9 +102,10 @@ public class EvaluatorOthello extends Evaluator{
 	}
 	
 	public boolean evalAgent(PlayAgent playAgent){
-		int competeNum = (m_mode>11) ?  1 : 10;			// number of episodes in evaluation competition
-		m_PlayAgent = playAgent;
 		boolean diffStarts = true;
+		int competeNum = (m_mode>11) ?  1 : 10;			// number of episodes in evaluation competition.
+				// We take in the diffStarts-modes 19,20,21 only competeNum=1, since we have there 244 different
+				// start states in diffStartList (at least for NPLY_DS=4).
         
         // when evalAgent is called for the first time, construct diffStartList once for all 
         // EvaluatorOthello objects (will not change during runtime)
@@ -112,6 +115,7 @@ public class EvaluatorOthello extends Evaluator{
         	diffStartList = addAllNPlyStates(diffStartList,so,0);        	
         }
 
+		m_PlayAgent = playAgent;
 		switch(m_mode) {
 		case -1:
 			m_msg = "no evaluation done ";
@@ -164,7 +168,8 @@ public class EvaluatorOthello extends Evaluator{
 				}
 			}	
 			//System.out.println("count = "+ count);
-		} else 		// start always from default start state
+		} 
+		else 		// start always from default start state
 		{
 			scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, competeNum, 0);						
 		}

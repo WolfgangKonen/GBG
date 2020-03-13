@@ -73,7 +73,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	//Serial number
 	private static final long serialVersionUID = 12L;
 	private int winner;				// starts with -2; gets -1 on draw, otherwise i=0,1,2 on game over where i is the winning player
-	private int looser;				// starts with -1; gets i=0,1,2, if player i has just lost (note that game 
+	private int loser;				// starts with -1; gets i=0,1,2, if player i has just lost (note that game 
 									// needs not to be over in the 3-player case!)
 	int[] allRewards;		// currently just as debug info:
 							// allRewards[i] is the reward for player i in case isGameOver()
@@ -81,37 +81,74 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	StateObserverSim() 
 	{
 		config(ConfigSim.NUM_PLAYERS, ConfigSim.NUM_NODES);
-		lastMoves = new ArrayList<Integer>();
 	}
 	
-	StateObserverSim(Node [] nodes, int player, int winner, int looser,int numPlayers, int numNodes)
+	// obsolete now, we have StateObserverSim(StateObserverSim other)
+//	StateObserverSim(Node [] nodes, int player, int winner, int loser,int numPlayers, int numNodes)
+//	{
+//		setupNodes(numNodes);
+//		copyNodes(nodes);
+//		
+//		this.numNodes = numNodes;
+//		this.numPlayers = numPlayers;
+//		this.player = player;
+//		this.winner = winner;
+//		this.loser = loser;
+//		this.allRewards = new int[numPlayers]; 		// initialized with 0 - the tie case reward
+//		if (winner>=0) {
+//			for (int i=0; i<allRewards.length; i++) allRewards[i]=-1;	// all others have lost
+//			allRewards[winner]=+1;
+//		}
+//		if (loser>=0) allRewards[loser]=-1;
+//		setAvailableActions();
+//		lastMoves = new ArrayList<Integer>();
+//	}
+	
+	StateObserverSim(StateObserverSim other)
 	{
-		setupNodes(numNodes);
-		copyNodes(nodes);
+		super(other);
+		setupNodes(other.numNodes);
+		copyNodes(other.nodes);
 		
-		this.numNodes = numNodes;
-		this.numPlayers = numPlayers;
-		this.player = player;
-		this.winner = winner;
-		this.looser = looser;
-		this.allRewards = new int[numPlayers]; 		// initialized with 0 - the tie case reward
+		this.numNodes = other.numNodes;
+		this.numPlayers = other.numPlayers;
+		this.player = other.player;
+		this.winner = other.winner;
+		this.loser = other.loser;
+		this.allRewards = other.allRewards.clone();
 		setAvailableActions();
-		lastMoves = new ArrayList<Integer>();
+		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();
+		this.m_counter = other.m_counter;
 	}
 	
 	private void config(int numberOfPlayer, int numberOfNodes)
 	{
-	
+		setupNodes(numberOfNodes);
+		
 		this.numNodes = numberOfNodes;
 		this.numPlayers = numberOfPlayer;
-		setupNodes(numberOfNodes);
 		this.player = 0;
 		this.winner = -2;
-		this.looser = -1;
+		this.loser = -1;
 		this.allRewards = new int[numPlayers]; 		// initialized with 0 - the tie case reward
 		setAvailableActions();
+		this.lastMoves = new ArrayList<Integer>();
 	}
 	
+	@Override
+	public StateObserverSim copy() 
+	{
+//		StateObserverSim sos = new StateObserverSim(this.nodes,this.player, this.winner, this.loser, this.numPlayers, this.numNodes);
+//		sos.m_counter = this.m_counter;
+//		sos.lastMoves = (ArrayList<Integer>) lastMoves.clone();
+		StateObserverSim sos = new StateObserverSim(this);
+//		sos.storedMaxScore = this.storedMaxScore;
+//		sos.storedActBest = this.storedActBest;
+//		if (this.storedActions!=null) sos.storedActions = this.storedActions.clone();
+//		if (this.storedValues!=null) sos.storedValues = this.storedValues.clone();
+		return sos;
+	}
+
 	private void setupNodes(int size)
 	{
 		nodes = new Node[size];
@@ -125,19 +162,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			this.nodes[i].setLinksCopy(nodes[i].getLinks());
 	}
 	
-	@Override
-	public StateObserverSim copy() 
-	{
-		StateObserverSim sos = new StateObserverSim(this.nodes,this.player, this.winner, this.looser, this.numPlayers, this.numNodes);
-		sos.m_counter = this.m_counter;
-		sos.lastMoves = (ArrayList<Integer>) lastMoves.clone();		 
-		sos.storedActBest = this.storedActBest;
-		sos.storedMaxScore = this.storedMaxScore;
-		if (this.storedActions!=null) sos.storedActions = this.storedActions.clone();
-		if (this.storedValues!=null) sos.storedValues = this.storedValues.clone();
-		return sos;
-	}
-
 	public boolean hasLost(int player)
 	{
 		if (lastNodes[0] != lastNodes[1]) {		// if an action was taken
@@ -149,6 +173,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 					if(nodes[i-1].getLinkPlayer(lastNodes[0]) == player + 1 && 
 					   nodes[i-1].getLinkPlayer(lastNodes[1]) == player + 1) {
 						lastNodes[2] = i;
+						//System.out.println(this.stringDescr());
 						return true;
 					}
 				}
@@ -161,6 +186,9 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return lastNodes;
 	}
 	
+	/**
+	 * A draw occurs if no player has lost (no monochromatic triangle) AND no space left.
+	 */
 	private boolean isDraw()
 	{
 		for(Node node : nodes)
@@ -245,7 +273,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		}
 		// now count0,1,2 have the # of links occupied by player P0,1,2
 		
-		if (looser==-1) 
+		if (loser==-1) 
 		{						// /WK/ bug fix, this if-condition was missing before. In the case 
 								// that one player has already lost, the counts for that player do 
 								// not longer necessarily fulfill the conditions below
@@ -297,7 +325,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int[] getRemainingPlayers()
 	{
 		int [] players = new int[2];
-		switch(looser)
+		switch(loser)
 		{
 		case 0:
 			players[0] = 1;
@@ -318,7 +346,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int[] getRemainingCount(int count0, int count1, int count2)
 	{
 		int [] counts = new int[2];
-		switch(looser)
+		switch(loser)
 		{
 		case 0:
 			counts[0] = count1;			// /WK/ bug fix (was count0 before)
@@ -466,28 +494,35 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	private void checkIfPlayerLost3Player()
 	{
+		switch (ConfigSim.COALITION) {
+		case "None":
+			checkIfPlayerLost3PlayerNoCoalition();
+			break;
+		case "1-2":
+			checkIfPlayerLost3PlayerCoalition12();
+			break;
+		default:
+			throw new RuntimeException("Unknown case in ConfigSim.COAlITION");
+		}
+	}
+	private void checkIfPlayerLost3PlayerNoCoalition() 
+	{
 		if(hasLost(player))
 		{ 
-			String sout = this.stringDescr();
 			allRewards[player] = -1;
-			//if (twoPlayerLost()) {
-				//allRewards[getNextPlayer3Player()]=1;	// getNextPlayer() is winner
-			//}
-			if(looser == -1)
+			if(loser == -1)		// no one has lost so far
 			{
 				if(isDraw())
 				{
-					allRewards[player] = -1;
-					looser = player;
+					loser = player;
 					winner = -1;
 				}
 				else
 				{
-					allRewards[player] = -1;
-					looser = player;
+					loser = player;
 				}
 			}
-			else
+			else	// if there is already a loser AND the current player has lost, then the next player is the winner
 			{
 				winner = getNextPlayer3Player();
 				allRewards[winner] = +1;
@@ -497,6 +532,28 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		else if(isDraw())
 			winner = -1;
 			
+	}
+	private void checkIfPlayerLost3PlayerCoalition12() 
+	{
+		if(hasLost(player))
+		{ 
+			int[] winAlone     = {+1,-1,-1};
+			int[] winCoalition = {-1,+1,+1};
+			switch (player) {
+			case 0:
+				allRewards = winCoalition;
+				break;
+			case 1:
+			case 2:
+				allRewards = winAlone;
+				break;
+			default:
+				throw new RuntimeException("Unknown case in checkIfPlayerLost3PlayerCoalition12");
+			}
+			winner = -1; 	// signal that game is over
+		}
+		else if(isDraw())
+			winner = -1;
 	}
 	
 	private void checkIfPlayerLost2Player()
@@ -546,7 +603,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	@Override
 	public int getPlayer() {
-			return player;
+		return player;
 	}
 
 	@Override
@@ -593,14 +650,22 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private double getGameScore3Player(int player)
 	{
         if(isGameOver()) {
-			if(looser == player)
-				return REWARD_NEGATIVE;
-			else if(winner == -1)
-	        	return 0;
-	        else if(player == winner)
-	        	return REWARD_POSITIVE;
-	        else
-	        	return REWARD_NEGATIVE;
+        	// if these assertion all DO NOT fire, we can replace the code below just by
+        	//      return allRewards[player];
+//			if(loser == player) {
+//				assert (allRewards[player]==REWARD_NEGATIVE);
+//				return REWARD_NEGATIVE;
+//			} else if(winner == -1) {
+//				assert (allRewards[player]==0);
+//	        	return 0;
+//			} else if(player == winner) {
+//				assert (allRewards[player]==REWARD_POSITIVE);
+//	        	return REWARD_POSITIVE;
+//			} else {
+//				assert (allRewards[player]==REWARD_NEGATIVE);
+//	        	return REWARD_NEGATIVE;
+//			}
+        	return allRewards[player];
 	    }
         return 0;
 	}
@@ -746,7 +811,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 //		int nextPlayer = nextPlayer();
 		int nextPlayer = (player+1)%3;
 		
-		if(nextPlayer == looser)		// if nextPlayer has already lost, pass to the next one once more
+		if(nextPlayer == loser)		// if nextPlayer has already lost, pass to the next one once more
 		{
 //			nextPlayer++;
 //			if(nextPlayer > 2)
@@ -785,18 +850,18 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		//this.lastPlayer = lastPlayer;
 	//}
 	
-	public int getLooser() {
-		return looser;
+	public int getLoser() {
+		return loser;
 	}
 
-	public void setLooser(int looser) {
-		this.looser = looser;
+	public void setLooser(int loser) {
+		this.loser = loser;
 	}
 	
 	public static void main(String[] args) {
 		// /WK/ just some validation code: 
 		// We play R random Sim games. 
-		// * assert that, once a game is over, getGameScore[k] (the logic based on winner&looser)
+		// * assert that, once a game is over, getGameScore[k] (the logic based on winner & loser)
 		//	 and allRewards[k] (the other logic) match in every case
 		// * print the final reward vector for each game and check manually that, if R is large enough, 
 		// 	 eventually all possible reward vectors occur:

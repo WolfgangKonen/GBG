@@ -52,15 +52,18 @@ import tools.ScoreTuple;
 import tools.Types;
 
 /**
- * Class used to start GBG for batch runs via a <b>main method</b>: <br> 
- * Run this Java application on Ubuntu consoles that have no X11 server via command
+ * This class is used to start GBG for batch runs. See {@link #main(String[])} for details on the command line arguments
+ * <p>
+ * This program should normally not require any GUI facilities, so it should run on machines without graphical
+ * user interface system like X11 or Win. <br>
+ * If there should be any X11 incompatibilities, the program can be run anyhow on Ubuntu consoles without X11 via command
  * <pre>
  *    xvfb-run java -jar GBGBatch.jar ...
  * </pre>
- * since - although no windows are needed for operation - some X11 calls are started silently.
  *  
- * @author Wolfgang Konen
+ * @author Wolfgang Konen, TH Koeln, 2020
  * 
+ * @see GBGLaunch
  * @see ArenaTrain
  * @see XArenaFuncs
  *  
@@ -69,6 +72,10 @@ import tools.Types;
 public class GBGBatch { 
 
 	private static final long serialVersionUID = 1L;
+	/**
+	 * The default csv filename for the different batch facilities (batch1, batch2, batch3)
+	 */
+	public static String[] csvNameDef = {"multiTrain.csv","multiTrainAlphaSweep.csv","multiTrainLambdaSweep.csv"};
 	public static ArenaTrain t_Game;
 	private static GBGBatch t_Batch=null;
 	private static String filePath = null;
@@ -88,11 +95,13 @@ public class GBGBatch {
 	 *          [2] agent file name, e.g. "tdntuple3.agt.zip". This agent is loaded from
 	 *          	{@code agents/}{@link Types#GUI_DEFAULT_DIR_AGENT} (+ a suitable subdir, if 
 	 *          	applicable). It specifies the agent type and all its parameters for the multi-training 
-	 *          	in {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1} or {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}.<br>
+	 *          	in {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1},
+	 *          	{@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}  or 
+	 *          	{@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3}.<br>
 	 *          [3] (optional) trainNum: number of agents to train (default -1). <br>
 	 *          [4] (optional) maxGameNum: maximum number of training games (default -1) <br>
 	 *          [5] (optional) csvName: filename for CSV results (defaults: "multiTrain.csv" or 
-	 *          	"multiTrainAlphaSweep", see {@code csvNameDef})<p>
+	 *          	"multiTrainAlphaSweep", see {@link #csvNameDef})<p>
 	 *          
 	 * If trainNum or maxGameNum are not given, thus set to -1, the values stored in the agent file 
 	 * name are taken.<br>
@@ -102,7 +111,6 @@ public class GBGBatch {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		String[] csvNameDef = {"multiTrain.csv","multiTrainAlphaSweep.csv","multiTrainLambdaSweep.csv"};
 		GBGBatch t_Frame = new GBGBatch("General Board Game Playing");
 		int trainNum = -1;
 		int maxGameNum = -1;
@@ -205,7 +213,7 @@ public class GBGBatch {
 			return;
 		}
 		
-		// overwrite trainNum or maxGameNum in xab, if they specified here
+		// overwrite trainNum or maxGameNum in xab, if they are specified here
 		if (trainNum!=-1) xab.setTrainNumber(trainNum);
 		if (maxGameNum!=-1) xab.setGameNumber(maxGameNum);
 		
@@ -246,7 +254,7 @@ public class GBGBatch {
 			return;
 		}
 		
-		// overwrite trainNum or maxGameNum in xab, if they specified here
+		// overwrite trainNum or maxGameNum in xab, if they are specified here
 		if (trainNum!=-1) xab.setTrainNumber(trainNum);
 		if (maxGameNum!=-1) xab.setGameNumber(maxGameNum);
 		
@@ -286,7 +294,7 @@ public class GBGBatch {
 			return;
 		}
 		
-		// overwrite trainNum or maxGameNum in xab, if they specified here
+		// overwrite trainNum or maxGameNum in xab, if they are specified here
 		if (trainNum!=-1) xab.setTrainNumber(trainNum);
 		if (maxGameNum!=-1) xab.setGameNumber(maxGameNum);
 		

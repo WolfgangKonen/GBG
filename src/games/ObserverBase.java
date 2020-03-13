@@ -22,24 +22,33 @@ import tools.Types.ACTIONS;
  */
 abstract public class ObserverBase implements StateObservation {
 	protected int m_counter = 0;		// move counter
+	protected int creatingPlayer = -1;
 	
     protected Types.ACTIONS[] storedActions = null;
     protected Types.ACTIONS storedActBest = null;
     protected double[] storedValues = null;
     protected double storedMaxScore; 
-	protected int creatingPlayer = -1;
     
     private String sWarn = "WARNING getReward: Case rgs==false is not handled in Observerbase!";
 	
+    public ObserverBase() {    }
+    
+    public ObserverBase(ObserverBase other) {
+		this.storedMaxScore = other.storedMaxScore;
+		this.storedActBest = other.storedActBest;
+		if (other.storedActions!=null) this.storedActions = other.storedActions.clone();
+		if (other.storedValues!=null) this.storedValues = other.storedValues.clone();
+    }
+	
 	/**
-	 * Given the current state, store some info useful for inspecting the  
+	 * Given the current state, store some useful information for inspecting the  
 	 * action actBest and double[] vtable returned by a call to <br>
 	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
 	 *  
 	 * @param actBest	the best action
-	 * @param vtable	one double for each action in this.getAvailableActions():
-	 * 					it stores the value of that action (as given by the double[] 
-	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
+	 * @param vtable	one double for each action in {@link #getAvailableActions()}:
+	 * 					it stores the value of that action (as given by  <br>
+	 * 					{@code double[]} {@link Types.ACTIONS_VT#getVTable()}) 
 	 */
 	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
         ArrayList<Types.ACTIONS> acts = this.getAvailableActions();

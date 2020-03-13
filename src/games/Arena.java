@@ -3,7 +3,6 @@ package games;
 import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
 import controllers.HumanPlayer;
-import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.ntuple2.TDNTuple2Agt;
@@ -450,8 +449,6 @@ abstract public class Arena implements Runnable {
 		PStats pstats;
 		ArrayList<PStats> psList = new ArrayList<PStats>();
 
-		// since PlayGame() is always called with taskState == Task.PLAY, we do not need this distinction:
-//		boolean showValue = (taskState == Task.PLAY) ? m_xab.getShowValueOnGameBoard() : true;
 		boolean showValue = m_xab.getShowValueOnGameBoard();
 
 		// fetch the agents in a way general for 1-, 2- and N-player games
@@ -469,12 +466,6 @@ abstract public class Arena implements Runnable {
 				} else {
 					// HDD agent
 					paVector = spDT.getPlayAgents();
-//					OtherParams[] hddPar = new OtherParams[1];
-//					hddPar[0] = new OtherParams();
-//					hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
-//					//hddPar[1] = new OtherParams();
-//					//hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
-//					qaVector = m_xfun.wrapAgents(paVector, hddPar, gb.getStateObs());
 					qaVector = m_xfun.wrapAgents(paVector, gb.getStateObs(), m_xab);
 				}
 			}
@@ -485,8 +476,6 @@ abstract public class Arena implements Runnable {
 			return;
 		}
 
-		String agentX = "";
-		String agentO = "";
 		String[] agentVec = new String[numPlayers];
 		String sMsg = "";
 
@@ -495,16 +484,16 @@ abstract public class Arena implements Runnable {
 
 		switch (numPlayers) {
 		case (1):
-			agentX = m_xab.getSelectedAgent(0);
-			sMsg = "Playing a game ... [ " + agentX + " ]";
+			agentVec[0] = m_xab.getSelectedAgent(0);
+			sMsg = "Playing a game ... [ " + agentVec[0] + " ]";
 			int wrappedNPly = m_xab.oPar[0].getWrapperNPly();
 			if (wrappedNPly > 0)
-				sMsg = "Playing a game ... [ " + agentX + ", nPly=" + wrappedNPly + " ]";
+				sMsg = "Playing a game ... [ " + agentVec[0] + ", nPly=" + wrappedNPly + " ]";
 			break;
 		case (2):
-			agentX = qaVector[0].getName();
-			agentO = qaVector[1].getName();
-			sMsg = "Playing a game ... [" + agentX + " (X) vs. " + agentO + " (O)]";
+			agentVec[0] = qaVector[0].getName();
+			agentVec[1] = qaVector[1].getName();
+			sMsg = "Playing a game ... [" + agentVec[0] + " (X) vs. " + agentVec[1] + " (O)]";
 			break;
 		default:
 			sMsg = "Playing a game ... [";
@@ -531,10 +520,10 @@ abstract public class Arena implements Runnable {
 			so = gb.getDefaultStartState();
 			//if (m_xab.oPar[0].getChooseStart01()) {
 					// this is not recommended: an innocent start of Play with chooseStart01 set (by a previous training)
-					// will let the first agent make an unfortunate 1st move in half of the played games
+					// will let the first agent make (silently) an unfortunate 1st move in half of the played games
 			if (gb.getArena().getGameName()=="RubiksCube") {
 				// this is mandatory for the game RubiksCube (but may be a possible
-				// choice also for other games):
+				// option also for other games, if clearly announced):
 				// do not start from the default start state (solved cube), but
 				// choose randomly a different one:
 				so = gb.chooseStartState();
@@ -562,6 +551,9 @@ abstract public class Arena implements Runnable {
 
 		logSessionid = logManager.newLoggingSession(so);
 
+		//
+		// start the Play-Game loop
+		//
 		try {
 			while (taskState == Task.PLAY) 	// game play interruptible by hitting
 											// 'Play' again
@@ -617,10 +609,8 @@ abstract public class Arena implements Runnable {
 							gb.updateBoard(so, false, false);
 						}
 
-						// gather information for later printout to
-						// agents/gameName/csv/playStats.csv.
-						// This is mostly for diagnostics in game 2048, but useful
-						// for other games as well.
+						// gather information for later printout to agents/gameName/csv/playStats.csv.
+						// This is mostly for diagnostics in game 2048, but useful for other games as well.
 						if (so instanceof StateObserver2048) {
 							StateObserver2048 so2048 = (StateObserver2048) so;
 							nEmpty = so2048.getNumEmptyTiles();
@@ -634,8 +624,8 @@ abstract public class Arena implements Runnable {
 						psList.add(pstats);
 						gb.enableInteraction(true);
 
-					} // else (pa)
-
+					} // else (pa instanceof ...)
+					
 				} // if(gb.isActionReq())
 				else {
 					try {
@@ -649,10 +639,12 @@ abstract public class Arena implements Runnable {
 						System.out.println("Thread 3");
 					}
 				}
+				//pa = qaVector[so.getPlayer()];		// /WK/ not needed
+				
+				//
+				// test two conditions to break out of the while-loop
+				//
 				so = gb.getStateObs();
-				pa = qaVector[so.getPlayer()];		// /WK/ really needed?
-				int winner;
-				ScoreTuple sc;
 				if (so.isGameOver()) {
 //					try {
 //						Thread.sleep(250);
@@ -665,83 +657,32 @@ abstract public class Arena implements Runnable {
 //						System.out.println("Thread 3");
 //					}
 
-					// for (agentX=="Human")-case: ensure to show the "Solved
+					// for (agentVec[0]=="Human")-case: ensure to show the "Solved
 					// in..." text in leftInfo:
 					gb.updateBoard(so, false, showValue);
-
+					
+					String gostr = this.gameOverString(so,agentVec,spDT);
 					switch (numPlayers) {
 					case 1:
-						double gScore = so.getGameScore(so);
-						if (so instanceof StateObserver2048)
-							gScore *= StateObserver2048.MAXSCORE;
 						if (!singlePlayerTSRunning)
-							showMessage("Game finished with score " + gScore, "Game Over",
-								JOptionPane.INFORMATION_MESSAGE);
-						if (spDT!=null)
-							spDT.nextTeam[0].addSinglePlayScore(gScore);
-						break; // out of switch
+							showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+						break; 
 					case 2:
-						sc = so.getGameScoreTuple();
-						winner = sc.argmax();
-						if (sc.max()==0.0) winner = -2;	// tie indicator
-						switch (winner) {
-						case  (0):
-							gb.updateBoard(so, false, showValue);				// /WK/ really needed?
-							showMessage("X (" + agentX + ") wins", "Game Over",
-									JOptionPane.INFORMATION_MESSAGE);
-							break; // out of inner switch
-						case (1):
-							showMessage("O (" + agentO + ") wins", "Game Over",
-									JOptionPane.INFORMATION_MESSAGE);
-							break; // out of inner switch
-						case (-2):
-							showMessage("Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-							break; // out of inner switch
-						} // switch(winner)
+						gb.updateBoard(so, false, showValue);				// /WK/ really needed?
+						showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
 
-						// this old version was buggy for game Sim. And getGameWinner() is a difficult to 
-						// understand and difficult to generalize interface --> make it obsolete
-//						int win = so.getGameWinner().toInt();
-//						Player = Types.PLAYER_PM[so.getPlayer()];
-//						switch (Player * win) {
-//						case  (+1):
-//							gb.updateBoard(so, false, showValue);				// /WK/ really needed?
-//							showMessage("X (" + agentX + ") wins", "Game Over",
-//									JOptionPane.INFORMATION_MESSAGE);
-//							break; // out of inner switch
-//						case (-1):
-//							showMessage("O (" + agentO + ") wins", "Game Over",
-//									JOptionPane.INFORMATION_MESSAGE);
-//							break; // out of inner switch
-//						case (0):
-//							showMessage("Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-//							break; // out of inner switch
-//						} // switch(Player*win)
-						gb.updateBoard(so, false, showValue);
-						if (withUI) m_ArenaFrame.repaint();
-
-						break; // out of switch
-					default:
-						sc = so.getGameScoreTuple();
-						winner = sc.argmax();
-						if (sc.max()==0.0) winner = -2;	// tie indicator
-						if(winner >= 0)
-							showMessage("P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-						else
-							showMessage("Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+						gb.updateBoard(so, false, showValue);		// /WK/ really needed?
+						if (withUI) m_ArenaFrame.repaint();			// /WK/ really needed?
+						break; 
+					case 3:
+						showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
 	
-						// this old version was specific to N=3 players and needed a special function
-						// getGameWinner3player() which is not necessary:
-//						int winner = ((ObserverBase)so).getGameWinner3player();
-//						if(winner >= 0)
-//							showMessage("P" + winner + " wins", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-//						else
-//							showMessage("Tie", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-						
-						break; // out of switch
+						break; 
+					default:
+						throw new RuntimeException("Case numPlayers = "+numPlayers+" not handled!");
 					}
 
-					break; // this is the final break out of while loop
+					break; // this is the final break out of the while loop
 				} // if isGameOver
 
 				if (so.getMoveCounter() > m_xab.oPar[0].getEpisodeLength()) {
@@ -754,14 +695,12 @@ abstract public class Arena implements Runnable {
 					break; // this is the final break out of while loop
 				} // if (so.getMoveCounter()...)
 
-			} 	// while(taskState == Task.PLAY) [will be left only by
-				// the last break(s) above OR when taskState changes]
+			} 	// while(taskState == Task.PLAY) [will be left only by one
+				// of the last two break(s) above OR when taskState changes]
 		} catch (RuntimeException e) {
-			// a possible RuntimeException is raised when an agent for
-			// nondeterministic games
-			// (ExpectimaxNAgent, MCTSExpectimax) is called with a
-			// (deterministic)
-			// StateObservation object
+			// a possible RuntimeException is raised when an agent for nondeterministic games
+			// (ExpectimaxNAgent, MCTSExpectimax) is called with a (deterministic)
+			// StateObservation object:
 			e.printStackTrace();
 			showMessage(e.getClass().getName() + ":" + e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
 			taskState = Task.IDLE;
@@ -777,6 +716,88 @@ abstract public class Arena implements Runnable {
 		setStatusMessage("Done.");
 	} // PlayGame(TSGameDataTransfer spDT)
 
+	/**
+	 * Build the game-over string (helper for {@link #PlayGame()}, to be shown in MessageBox).
+	 * <p>
+	 * If a game should require a special string here, it may override this function.
+	 * 
+	 * @param so			the game-over state 
+	 * @param agentVec		the names of all agents
+	 * @param spDT			needed only in the tournament-case
+	 * @return
+	 */
+	protected String gameOverString(StateObservation so, String[] agentVec, TSGameDataTransfer spDT) {
+		ScoreTuple sc = so.getGameScoreTuple(); 
+		int numPlayers = so.getNumPlayers();
+		String goStr="";
+		int winner = 0;
+		switch (numPlayers) {
+		case 1:
+			double gScore = so.getGameScore(so);
+			if (so instanceof StateObserver2048)
+				gScore *= StateObserver2048.MAXSCORE;
+			goStr = "Game over: Score " + gScore;
+			if (spDT!=null)
+				spDT.nextTeam[0].addSinglePlayScore(gScore);
+			break; 
+		case 2:
+			winner = sc.argmax();
+			switch (winner) {
+			case  (0):
+				goStr = "X (" + agentVec[0] + ") wins";
+				break; // out of inner switch(winner)
+			case (1):
+				goStr = "O (" + agentVec[1] + ") wins";
+				break; // out of inner switch(winner)
+			} // switch(winner)
+			if (sc.max()==0.0) 
+				goStr = "Tie";
+
+			break; 
+		case 3:
+			// There are 4 possible game-over classes for 3 players:
+			// 1) a single player wins			--> goStr = "Px (agtName) wins"
+			// 2) a coalition of 2 player wins	--> goStr = "Px & Py win"
+			// 3) a tie between two players, the remaining player has lost.
+			//									--> goStr = "Tie between Px & Py"
+			// 4) a tie between all players		--> goStr = "Tie
+
+			System.out.println(sc.toString());		// just debug info
+
+			// count the winners: 
+			int numWinners=0;
+			for (int i=0; i<sc.scTup.length; i++) {
+				if (sc.scTup[i]==1) {
+					if (numWinners==0) goStr += "P" + i;
+					else goStr += " & P" + i;
+					winner = i;
+					numWinners++;
+				}
+			}
+			goStr += (numWinners==1) ? " (" + agentVec[winner] + ") wins" : " win";
+			
+			// count the ties:
+			if (sc.max()==0.0) {         
+				goStr = "Tie between ";
+				int numTies=0;
+				for (int i=0; i<sc.scTup.length; i++) {
+					if (sc.scTup[i]==0) {
+						if (numTies==0) goStr += "P" + i;
+						else goStr += " & P" + i;
+						numTies++;
+					}
+				}
+				if (numTies==3) goStr = "Tie";	// it's an all-player tie
+			} // if
+
+			break; 
+		default:
+			throw new RuntimeException("Case numPlayers = "+numPlayers+" in gameOverString() not handled!");
+		}
+		
+		return goStr;
+	}
+	
 	void RunTournament() {
 		JFrame progressBarJF = new JFrame();
 		progressBarJF.setSize(300, 100);
@@ -848,7 +869,7 @@ abstract public class Arena implements Runnable {
 	 * called if switch DEBG in source code of {@link #PlayGame()} is set to
 	 * true and if the number of empty tiles is below a threshold. - It calls
 	 * MCTSAgentT p2.getNextAction2() repeatedly and prints the vtable results
-	 * on console. It calls PlayAgent pa (usually MCAgent) repeatedly as well.
+	 * on console. It calls PlayAgent pa (usually {@link MCAgentN}) repeatedly as well.
 	 * In addition, it prints the best i and the number of rollouts (iterations)
 	 * in which the game terminates.
 	 * 
@@ -999,7 +1020,6 @@ abstract public class Arena implements Runnable {
 			td.fillParamTabsAfterLoading(n, this); 
 			// td.fillParamTabsAfterLoading replaces the old, lengthy if ... else if ...
 			
-//			if (td instanceof TDAgent || td instanceof TDNTuple2Agt || td instanceof SarsaAgt /* || td instanceof TDNTupleAgt */) {
 			if (td.isTrainable()) {
 				// If it is one of the trainable agents: set maxGameNum and 
 				// numEval according to the settings in the loaded agent

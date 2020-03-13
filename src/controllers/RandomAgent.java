@@ -79,6 +79,8 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 		
 		assert so.isLegalState() : "Not a legal state";
 
+		assert acts.size()>0 : "No available actions";
+		
         for(i = 0; i < acts.size(); ++i)
         {
         	CurrentScore = rand.nextDouble();

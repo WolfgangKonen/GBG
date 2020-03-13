@@ -399,7 +399,10 @@ public class MCTSEChanceNode
         int thisDepth = this.depth;
 
         while (!finishRollout(rollerState, thisDepth)) {
-            rollerState.setAvailableActions();
+			//rollerState.setAvailableActions();	// /WK/ commented out since every advance() includes setAvailableActions()
+        											// and the initial 'so' has also its available actions set. 
+													// Calling setAvailableActions without need slows down,
+													// especially for Othello (factor 3-4).
             int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
             rollerState.advance(rollerState.getAction(action));
             thisDepth++;

@@ -15,7 +15,7 @@ filenames=c("multiTrainTD3.csv"
            #,"multiTrain_TCL-EXP-al10-lam06-500k-eps0025.csv"
            )
 # other pars: alpha=1.0 .. 0.5, eps=0.1 ... 0.0, ChooseStart01=F
-# lambda=0.0, learnFromRM=true, NORM=F, sigmoid=tanh
+# lambda=0.0, learnFromRM=true, NORM=F, sigmoid=tanh. One 9-tuple.
 
   
 dfBoth = data.frame()

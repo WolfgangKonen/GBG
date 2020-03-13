@@ -39,14 +39,18 @@ import tools.Types;
 
 /**
  * This class is a general launcher for GBG. The user may select via launcher UI or predefine  
- * via command line arguments which GBG game will be started. 
+ * via command line arguments (see {@link #main(String[])}) which GBG game will be started. 
  * <p>
- * For scalable games, once the game is selected, the launcher will allow to set the scalable 
+ * For scalable games, once a game is chosen, the launcher will allow to select the scalable 
  * parameters (i.e. number of players, number of nodes for Sim). For non-scalable games (i.e. 
- * TicTacToe), the scalable parameter selector boxes will be disabled.
+ * TicTacToe), the scalable parameter select boxes will be disabled.
  * <p>
- * When GBG's Arena finishes, the launcher UI will show up again and allow to select another game.
+ * When 'Start Game' is clicked, the launcher UI becomes invisible and GBG's Arena shows up.<br>
+ * When GBG's Arena finishes, the launcher UI will show up again and allow to choose another game.
  * 
+ * @author Wolfgang Konen, TH Koeln, 2020
+ * 
+ * @see GBGBatch
  */
 public class GBGLaunch {
 	/**
@@ -64,12 +68,12 @@ public class GBGLaunch {
 	private JFrame launcherUI = null;
 	private static String selectedGame = "TicTacToe";
 
+	private JLabel scaPar0_L;
 	private JLabel scaPar1_L;
 	private JLabel scaPar2_L;
-	private JLabel scaPar3_L;
+	private JComboBox choiceScaPar0;
 	private JComboBox choiceScaPar1;
 	private JComboBox choiceScaPar2;
-	private JComboBox choiceScaPar3;
 
 	/**
 	 * Starts the  general launcher for GBG. The user may select via launcher UI or predefine  
@@ -85,9 +89,11 @@ public class GBGLaunch {
 	 * <ul>
 	 * <li>	{@code GBGLaunch 1 Nim} : start launcher, with Nim preselected
 	 * <li>	{@code GBGLaunch} : start launcher, with TicTacToe preselected
-	 * <li>	{@code GBGLaunch 0 TicTacToe} : start directly TicTacToe, no launcher
-	 * <li>	{@code GBGLaunch 0} : the same
+	 * <li>	{@code GBGLaunch 0 Hex} : start directly Hex, no launcher
+	 * <li>	{@code GBGLaunch 0} : start directly TicTacToe, no launcher
 	 * </ul>
+	 * When a scalable game is started w/o launcher, the method {@link #setDefaultScaPars()} will set 
+	 * appropriate default scalable parameters for the game in question.
 	 */
 	public static void main(String[] args) {
 		GBGLaunch t_Launch;
@@ -122,9 +128,9 @@ public class GBGLaunch {
 				case STARTGAME:
 					t_Launch.launcherUI.setVisible(false);
 					if (withTrainRights) {
-						startGBGame_T(selectedGame,t_Launch);
+						startGBGameTrain(selectedGame,t_Launch);
 					} else {
-						startGBGame_P(selectedGame,t_Launch);
+						startGBGamePlay(selectedGame,t_Launch);
 					}
 					t_Launch.launcherState = LaunchTask.IDLE;
 					break;
@@ -146,7 +152,7 @@ public class GBGLaunch {
 			}
 		} else {
 			// start selectedGame without launcherUI-loop
-			startGBGame_T(selectedGame,null);
+			startGBGameTrain(selectedGame,null);
 		}
 
 	}
@@ -156,11 +162,16 @@ public class GBGLaunch {
 	 * @param selectedGame
 	 * @param t_Launch
 	 */
-	private static void startGBGame_T(String selectedGame, GBGLaunch t_Launch) {
+	private static void startGBGameTrain(String selectedGame, GBGLaunch t_Launch) {
 		String title = "General Board Game Playing";
-		String s1 = (String) t_Launch.choiceScaPar1.getSelectedItem();
-		String s2 = (String) t_Launch.choiceScaPar2.getSelectedItem();
-		String s3 = (String) t_Launch.choiceScaPar3.getSelectedItem();
+		String[] scaPar = new String[3];
+		if (t_Launch==null) {
+			scaPar = setDefaultScaPars();
+		} else {
+			scaPar[0] = (String) t_Launch.choiceScaPar0.getSelectedItem();
+			scaPar[1] = (String) t_Launch.choiceScaPar1.getSelectedItem();
+			scaPar[2] = (String) t_Launch.choiceScaPar2.getSelectedItem();			
+		}
 		boolean withUI = true;
 		switch(selectedGame) {
 		case "2048": 
@@ -173,16 +184,16 @@ public class GBGLaunch {
 			// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaTrainHex, 
 			// which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
-			ArenaHex.setBoardSize(Integer.parseInt(s1));
+			ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
 			t_Game = new ArenaTrainHex(title,withUI);
 			break;
 		case "Nim": 
 			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
 			// ArenaTrainNim, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
-			ArenaNim.setNumHeaps(Integer.parseInt(s1));
-			ArenaNim.setHeapSize(Integer.parseInt(s2));
-			ArenaNim.setMaxMinus(Integer.parseInt(s3));
+			ArenaNim.setNumHeaps(Integer.parseInt(scaPar[0]));
+			ArenaNim.setHeapSize(Integer.parseInt(scaPar[1]));
+			ArenaNim.setMaxMinus(Integer.parseInt(scaPar[2]));
 			t_Game = new ArenaTrainNim(title,withUI);
 			break;
 		case "Othello": 
@@ -195,8 +206,9 @@ public class GBGLaunch {
 			// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaTrainSim, 
 			// which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
-			ArenaSim.setNumPlayers(Integer.parseInt(s1));
-			ArenaSim.setNumNodes(Integer.parseInt(s2));
+			ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
+			ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
+			ArenaSim.setCoalition(scaPar[2]);
 			t_Game = new ArenaTrainSim(title,withUI);
 			break;
 		case "TicTacToe": 
@@ -212,15 +224,20 @@ public class GBGLaunch {
 	}
 	
 	/**
-	 * Start a game without train rights 
+	 * Start a game without train rights (just play)
 	 * @param selectedGame
 	 * @param t_Launch
 	 */
-	private static void startGBGame_P(String selectedGame, GBGLaunch t_Launch) {
+	private static void startGBGamePlay(String selectedGame, GBGLaunch t_Launch) {
 		String title = "General Board Game Playing";
-		String s1 = (String) t_Launch.choiceScaPar1.getSelectedItem();
-		String s2 = (String) t_Launch.choiceScaPar2.getSelectedItem();
-		String s3 = (String) t_Launch.choiceScaPar3.getSelectedItem();
+		String[] scaPar = new String[3];
+		if (t_Launch==null) {
+			scaPar = setDefaultScaPars();
+		} else {
+			scaPar[0] = (String) t_Launch.choiceScaPar0.getSelectedItem();
+			scaPar[1] = (String) t_Launch.choiceScaPar1.getSelectedItem();
+			scaPar[2] = (String) t_Launch.choiceScaPar2.getSelectedItem();			
+		}
 		boolean withUI = true;
 		switch(selectedGame) {
 		case "2048": 
@@ -233,16 +250,16 @@ public class GBGLaunch {
 			// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaHex, 
 			// which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
-			ArenaHex.setBoardSize(Integer.parseInt(s1));
+			ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
 			t_Game = new ArenaHex(title,withUI);
 			break;
 		case "Nim": 
 			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
 			// ArenaNim, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
-			ArenaNim.setNumHeaps(Integer.parseInt(s1));
-			ArenaNim.setHeapSize(Integer.parseInt(s2));
-			ArenaNim.setMaxMinus(Integer.parseInt(s3));
+			ArenaNim.setNumHeaps(Integer.parseInt(scaPar[0]));
+			ArenaNim.setHeapSize(Integer.parseInt(scaPar[1]));
+			ArenaNim.setMaxMinus(Integer.parseInt(scaPar[2]));
 			t_Game = new ArenaNim(title,withUI);
 			break;
 		case "Othello": 
@@ -255,8 +272,9 @@ public class GBGLaunch {
 			// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaSim, 
 			// which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
-			ArenaSim.setNumPlayers(Integer.parseInt(s1));
-			ArenaSim.setNumNodes(Integer.parseInt(s2));
+			ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
+			ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
+			ArenaSim.setCoalition(scaPar[2]);
 			t_Game = new ArenaSim(title,withUI);
 			break;
 		case "TicTacToe": 
@@ -294,12 +312,16 @@ public class GBGLaunch {
 		JComboBox choiceGame = new JComboBox(game_list);
 		choiceGame.setSelectedItem(selectedGame);
 		
+		scaPar0_L = new JLabel("");
+		choiceScaPar0 = new JComboBox();
 		scaPar1_L = new JLabel("");
 		choiceScaPar1 = new JComboBox();
 		scaPar2_L = new JLabel("");
 		choiceScaPar2 = new JComboBox();
-		scaPar3_L = new JLabel("");
-		choiceScaPar3 = new JComboBox();
+		JPanel scaPar0Panel = new JPanel();
+		scaPar0Panel.setLayout(new GridLayout(1,0,2,2));		// rows,columns,hgap,vgap
+		scaPar0Panel.add(scaPar0_L);
+		scaPar0Panel.add(choiceScaPar0);
 		JPanel scaPar1Panel = new JPanel();
 		scaPar1Panel.setLayout(new GridLayout(1,0,2,2));		// rows,columns,hgap,vgap
 		scaPar1Panel.add(scaPar1_L);
@@ -308,10 +330,6 @@ public class GBGLaunch {
 		scaPar2Panel.setLayout(new GridLayout(1,0,2,2));		// rows,columns,hgap,vgap
 		scaPar2Panel.add(scaPar2_L);
 		scaPar2Panel.add(choiceScaPar2);
-		JPanel scaPar3Panel = new JPanel();
-		scaPar3Panel.setLayout(new GridLayout(1,0,2,2));		// rows,columns,hgap,vgap
-		scaPar3Panel.add(scaPar3_L);
-		scaPar3Panel.add(choiceScaPar3);
 
 		JButton StartG=new JButton("Start Game");
 		StartG.setBorder(bord);
@@ -329,9 +347,9 @@ public class GBGLaunch {
 		launcherUI.setLayout(new GridLayout(0,1,3,3));		// rows,columns,hgap,vgap
 		launcherUI.add(titlePanel);
 		launcherUI.add(choiceGame);
+		launcherUI.add(scaPar0Panel);
 		launcherUI.add(scaPar1Panel);
 		launcherUI.add(scaPar2Panel);
-		launcherUI.add(scaPar3Panel);
 		launcherUI.add(StartG);
 		launcherUI.add(Exit);
 		launcherUI.addWindowListener(new WindowClosingAdapter());
@@ -373,17 +391,17 @@ public class GBGLaunch {
 				}	
 		);
 		
-		choiceScaPar2.addActionListener(
+		choiceScaPar1.addActionListener(
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{	
 						selectedGame = (String)choiceGame.getSelectedItem();
 						if (selectedGame=="Nim") {
-							String heapSize = (String)choiceScaPar2.getSelectedItem();
-							choiceScaPar3.removeAllItems();
-							setScaPar3List(new int[]{2,3,4,5});	
-							choiceScaPar3.addItem(heapSize);
+							String heapSize = (String)choiceScaPar1.getSelectedItem();
+							choiceScaPar2.removeAllItems();
+							setScaPar2List(new int[]{2,3,4,5});	
+							choiceScaPar2.addItem(heapSize);
 						}
 					}
 				}	
@@ -392,51 +410,89 @@ public class GBGLaunch {
 	}
 
 	/**
-	 * Adjust the scalable parameters of a game after the game selector has changed.
+	 * Set default values for the scalable parameters (in case GBGLaunch is started w/o GUI)
 	 */
-	public void adjustScaParGuiPart() {
+	public static String[] setDefaultScaPars() {
+		String[] scaPar = new String[3];
 		switch(selectedGame) {
 		case "Hex": 
-			scaPar1_L.setText("Board Size");
-			scaPar2_L.setText("");
-			scaPar3_L.setText("");
-			setScaPar1List(new int[]{2,3,4,5,6,7,8});
-			setScaPar2List(new int[]{});
-			setScaPar3List(new int[]{});
-			choiceScaPar1.setSelectedItem("5");		// the initial (recommended) value	
+			scaPar[0]="5";		// the initial (recommended) value	
 			break;
 		case "Nim": 
-			scaPar1_L.setText("Heaps");
-			scaPar2_L.setText("Heap Size");
-			scaPar3_L.setText("Max Minus");
-			setScaPar1List(new int[]{2,3,4,5});				// int values are converted to 
-			setScaPar2List(new int[]{5,6,7,8,9,10,20,50});	// Strings in ChoiceBoxes 
-			setScaPar3List(new int[]{2,3,4,5});				//
-			choiceScaPar1.setSelectedItem("3");		// 
-			choiceScaPar2.setSelectedItem("5");		// the initial (recommended) values
-			choiceScaPar3.setSelectedItem("3");		//
+			scaPar[0]="3";		// 	
+			scaPar[1]="5";		// the initial (recommended) values	
+			scaPar[2]="3";		// 
 			break;
 		case "Sim": 
-			scaPar1_L.setText("Players");
-			scaPar2_L.setText("Nodes");
-			scaPar3_L.setText("");
-			setScaPar1List(new int[]{2,3});
-			setScaPar2List(new int[]{6,7,8,9,10,12,15,20});
-			setScaPar3List(new int[]{});
-			choiceScaPar1.setSelectedItem("2");		// the initial (recommended) values
-			choiceScaPar2.setSelectedItem("6");		// 
+			scaPar[0]="2";		 	
+			scaPar[1]="6";			
+			scaPar[2]="None";			
 			break;
 		case "2048": 
 		case "ConnectFour": 
 		case "Othello": 
 		case "RubiksCube": 
 		case "TicTacToe": 
+			//
+			// games with no scalable parameters
+			//
+			break;
+		default: 
+			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
+			System.exit(1);
+		}
+		return scaPar;
+	}
+	
+	/**
+	 * Adjust the scalable parameters of a game after the game selector has changed.
+	 */
+	public void adjustScaParGuiPart() {
+		switch(selectedGame) {
+		case "Hex": 
+			scaPar0_L.setText("Board Size");
 			scaPar1_L.setText("");
 			scaPar2_L.setText("");
-			scaPar3_L.setText("");
+			setScaPar0List(new int[]{2,3,4,5,6,7,8});
 			setScaPar1List(new int[]{});
 			setScaPar2List(new int[]{});
-			setScaPar3List(new int[]{});
+			choiceScaPar0.setSelectedItem("5");		// the initial (recommended) value	
+			break;
+		case "Nim": 
+			scaPar0_L.setText("Heaps");
+			scaPar1_L.setText("Heap Size");
+			scaPar2_L.setText("Max Minus");
+			setScaPar0List(new int[]{2,3,4,5});				// int values are converted to 
+			setScaPar1List(new int[]{5,6,7,8,9,10,20,50});	// Strings in ChoiceBoxes 
+			setScaPar2List(new int[]{2,3,4,5});				//
+			choiceScaPar0.setSelectedItem("3");		// 
+			choiceScaPar1.setSelectedItem("5");		// the initial (recommended) values
+			choiceScaPar2.setSelectedItem("3");		//
+			break;
+		case "Sim": 
+			scaPar0_L.setText("Players");
+			scaPar1_L.setText("Nodes");
+			scaPar2_L.setText("Coalition");
+			setScaPar0List(new int[]{2,3});
+			setScaPar1List(new int[]{4,5,6,7,8,9,10,12,15,20});
+			setScaPar2List(new int[]{});
+			choiceScaPar2.addItem("None");
+			choiceScaPar2.addItem("1-2");
+			choiceScaPar0.setSelectedItem("2");		// the initial (recommended) values
+			choiceScaPar1.setSelectedItem("6");		// 
+			choiceScaPar2.setSelectedItem("None");		// 
+			break;
+		case "2048": 
+		case "ConnectFour": 
+		case "Othello": 
+		case "RubiksCube": 
+		case "TicTacToe": 
+			scaPar0_L.setText("");
+			scaPar1_L.setText("");
+			scaPar2_L.setText("");
+			setScaPar0List(new int[]{});
+			setScaPar1List(new int[]{});
+			setScaPar2List(new int[]{});
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
@@ -445,6 +501,12 @@ public class GBGLaunch {
 		
 	}
 	
+	public void setScaPar0List(int[] modeList) {
+		choiceScaPar0.removeAllItems();
+		for (int i : modeList)
+			choiceScaPar0.addItem(Integer.toString(i));
+	}
+
 	public void setScaPar1List(int[] modeList) {
 		choiceScaPar1.removeAllItems();
 		for (int i : modeList)
@@ -457,22 +519,16 @@ public class GBGLaunch {
 			choiceScaPar2.addItem(Integer.toString(i));
 	}
 
-	public void setScaPar3List(int[] modeList) {
-		choiceScaPar3.removeAllItems();
-		for (int i : modeList)
-			choiceScaPar3.addItem(Integer.toString(i));
-	}
-
 	public void setScaPar1Tooltip(String str) {
-		choiceScaPar1.setToolTipText(str);
+		choiceScaPar0.setToolTipText(str);
 	}
 
 	public void setScaPar2Tooltip(String str) {
-		choiceScaPar2.setToolTipText(str);
+		choiceScaPar1.setToolTipText(str);
 	}
 
 	public void setScaPar3Tooltip(String str) {
-		choiceScaPar3.setToolTipText(str);
+		choiceScaPar2.setToolTipText(str);
 	}
 
 	/**

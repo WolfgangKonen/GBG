@@ -405,18 +405,11 @@ public class XArenaFuncs {
 	 * @see ExpectimaxWrapper
 	 */
 	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so)
-	// protected PlayAgent[] wrapAgents(PlayAgent[] paVector, OtherParams[]
-	// oPar, StateObservation so)
 	{
-		// avt1, avt2, avt3 are only for (temporary) debug info
-		// Types.ACTIONS_VT avt1 = paVector[0].getNextAction2(so,false,true);
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n = 0; n < numPlayers; n++) {
 			qaVector[n] = wrapAgent(n, paVector[n], m_xab.oPar[n], m_xab.maxnPar[n], so);
 		} // for (n)
-		// Types.ACTIONS_VT avt2 = qaVector[0].getNextAction2(so,false,true);
-		// PlayAgent qa = ((MaxNWrapper)qaVector[0]).getWrappedPlayAgent();
-		// Types.ACTIONS_VT avt3 = qa.getNextAction2(so,false,true);
 		return qaVector;
 	}
 
