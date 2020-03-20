@@ -48,7 +48,7 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
     private int currentPlayer;
     private HexTile[][] board;
     private HexTile lastUpdatedTile;
-    private ArrayList<Types.ACTIONS> actions;
+    private ArrayList<Types.ACTIONS> availableActions;
 
     public StateObserverHex() {
         board = defaultGameBoard();
@@ -78,13 +78,13 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 //        setAvailableActions();
 //  }
     
-    public StateObserverHex(StateObserverHex other) {		
+    public StateObserverHex(StateObserverHex other) {	
+    	super(other);
         board = new HexTile[HexConfig.BOARD_SIZE][HexConfig.BOARD_SIZE];
         copyTable(other.board);
         this.currentPlayer =other.currentPlayer;
         this.lastUpdatedTile = other.lastUpdatedTile;
-        this.m_counter = other.m_counter;
-		this.actions = (ArrayList<ACTIONS>) other.actions.clone();
+		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 					// note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
 					// just copied by reference. However, as far as we see, the ACTIONS are never altered, so 
 					// it should be o.k.
@@ -281,7 +281,7 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
     
     @Override
     public ArrayList<Types.ACTIONS> getAvailableActions() {
-        return actions;
+        return availableActions;
     }
     
     /**
@@ -295,17 +295,17 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 
     @Override
     public int getNumAvailableActions() {
-        return actions.size();
+        return availableActions.size();
     }
 
     @Override
     public void setAvailableActions() {
-        actions = new ArrayList<>();
+        availableActions = new ArrayList<>();
         for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 if (board[i][j].getPlayer() == HexConfig.PLAYER_NONE) {
                     int actionInt = i * HexConfig.BOARD_SIZE + j;
-                    actions.add(Types.ACTIONS.fromInt(actionInt));
+                    availableActions.add(Types.ACTIONS.fromInt(actionInt));
                 }
             }
         }
@@ -313,7 +313,7 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 
     @Override
     public Types.ACTIONS getAction(int i) {
-        return actions.get(i);
+        return availableActions.get(i);
     }
 
     @Override

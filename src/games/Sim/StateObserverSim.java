@@ -9,6 +9,7 @@ import games.ObserverBase;
 import games.StateObservation;
 import games.Othello.ArenaOthello;
 import games.Othello.XNTupleFuncsOthello;
+import games.Sim.Gui.BoardPanel;
 import games.TicTacToe.TicTDBase;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
@@ -57,7 +58,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	/**
 	 * The list of avaialble actions
 	 */
-	private ArrayList<Types.ACTIONS> acts = new ArrayList();
+	private ArrayList<Types.ACTIONS> availableActions = new ArrayList();
 	/**
 	 * The list of last moves in an episode. Each move is stored as {@link Integer} {@code iAction}.
 	 */
@@ -66,8 +67,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	 * This array holds the nodes involved in the last action taken. More precisely, 
 	 * {@code lastNodes[0]} and {@code lastNodes[1]} hold the node numbers connected by 
 	 * the last link taken. {@code lastNodes[2]} is only set when {@link #hasLost(int)} is called and
-	 * returns {@code true}: It is the node number completing the losing triangle (needed in 
-	 * {@link BoardPanel} to color this triangle.
+	 * returns {@code true}: It is the node number completing the losing triangle 
+	 * (needed in {@link BoardPanel} to color this triangle).
 	 */
 	private int[] lastNodes = {-1,-1,-1};
 	//Serial number
@@ -75,8 +76,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int winner;				// starts with -2; gets -1 on draw, otherwise i=0,1,2 on game over where i is the winning player
 	private int loser;				// starts with -1; gets i=0,1,2, if player i has just lost (note that game 
 									// needs not to be over in the 3-player case!)
-	int[] allRewards;		// currently just as debug info:
-							// allRewards[i] is the reward for player i in case isGameOver()
+	int[] allRewards;		// allRewards[i] is the reward for player i in case isGameOver()
 	
 	StateObserverSim() 
 	{
@@ -106,7 +106,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	StateObserverSim(StateObserverSim other)
 	{
-		super(other);
+		super(other);		// copy members m_counter and stored*
 		setupNodes(other.numNodes);
 		copyNodes(other.nodes);
 		
@@ -116,9 +116,11 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		this.winner = other.winner;
 		this.loser = other.loser;
 		this.allRewards = other.allRewards.clone();
-		setAvailableActions();
 		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();
-		this.m_counter = other.m_counter;
+		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
+				// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
+//		setAvailableActions();		// this as replacement for availableActions.clone() would be a bit slower
 	}
 	
 	private void config(int numberOfPlayer, int numberOfNodes)
@@ -138,10 +140,12 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	@Override
 	public StateObserverSim copy() 
 	{
+		StateObserverSim sos = new StateObserverSim(this);		// includes via 'super(other)' the copying of stored*-members in ObserverBase
+
+		// now obsolete:
 //		StateObserverSim sos = new StateObserverSim(this.nodes,this.player, this.winner, this.loser, this.numPlayers, this.numNodes);
 //		sos.m_counter = this.m_counter;
 //		sos.lastMoves = (ArrayList<Integer>) lastMoves.clone();
-		StateObserverSim sos = new StateObserverSim(this);
 //		sos.storedMaxScore = this.storedMaxScore;
 //		sos.storedActBest = this.storedActBest;
 //		if (this.storedActions!=null) sos.storedActions = this.storedActions.clone();
@@ -187,9 +191,10 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	}
 	
 	/**
-	 * A draw occurs if no player has lost (no monochromatic triangle) AND no space left.
+	 * Check if the graph is full (all links occupied).
+	 * This is a draw only, if no player has lost (no monochromatic triangle).
 	 */
-	private boolean isDraw()
+	private boolean isFull()
 	{
 		for(Node node : nodes)
 			if(node.hasSpaceLeft())
@@ -406,12 +411,12 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	@Override
 	public int getNumAvailableActions() {
-		return acts.size();
+		return availableActions.size();
 	}
 
 	@Override
 	public void setAvailableActions() {
-		acts.clear();
+		availableActions.clear();
 		int action = 0;
 		
 		for(int i = 0; i < nodes.length -1 ; i++)
@@ -419,7 +424,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			for(int j = 0; j < nodes.length - 1 - i; j++, action++)
 			{
 				if(nodes[i].getLinkPlayerPos(j) == 0)			// all empty links are available actions
-					acts.add(Types.ACTIONS.fromInt(action));
+					availableActions.add(Types.ACTIONS.fromInt(action));
 //				action++;	// /WK/ moved to for (int j...)
 				
 				// just debug:
@@ -464,7 +469,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	@Override
 	public ACTIONS getAction(int i) {
-		return acts.get(i);
+		return availableActions.get(i);
 	}
 
     @Override
@@ -482,14 +487,27 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	@Override
 	public ArrayList<ACTIONS> getAvailableActions() {
-		return acts;
+		return availableActions;
 	}
 
-	private boolean twoPlayerLost()
+	// never used
+//	private boolean twoPlayerLost()
+//	{
+//		int s = 0;
+//		for (int i=0; i<allRewards.length; i++) s+=allRewards[i];
+//		return (s==-2) ? true : false;
+//	}
+	
+	private void checkIfPlayerLost2Player()
 	{
-		int s = 0;
-		for (int i=0; i<allRewards.length; i++) s+=allRewards[i];
-		return (s==-2) ? true : false;
+		if(hasLost(player))
+		{
+			winner = getNextPlayer();
+			allRewards[player] = -1;
+			allRewards[winner] = +1;
+		}
+		else if(isFull())
+			winner = -1;	// it's a draw
 	}
 	
 	private void checkIfPlayerLost3Player()
@@ -510,12 +528,12 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		if(hasLost(player))
 		{ 
 			allRewards[player] = -1;
-			if(loser == -1)		// no one has lost so far
+			if(loser == -1)			// no one has lost so far
 			{
-				if(isDraw())
+				if(isFull())
 				{
 					loser = player;
-					winner = -1;
+					winner = -1;	// it's a tie between the two remaining players
 				}
 				else
 				{
@@ -524,13 +542,13 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			}
 			else	// if there is already a loser AND the current player has lost, then the next player is the winner
 			{
-				winner = getNextPlayer3Player();
+				winner = getNextPlayer();
 				allRewards[winner] = +1;
 				
 			}
 		}
-		else if(isDraw())
-			winner = -1;
+		else if(isFull())
+			winner = -1;			// it's a draw
 			
 	}
 	private void checkIfPlayerLost3PlayerCoalition12() 
@@ -552,20 +570,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			}
 			winner = -1; 	// signal that game is over
 		}
-		else if(isDraw())
-			winner = -1;
-	}
-	
-	private void checkIfPlayerLost2Player()
-	{
-		if(hasLost(player))
-		{
-			winner = getNextPlayer2Player();
-			allRewards[player] = -1;
-			allRewards[winner] = +1;
-		}
-		else if(isDraw())
-			winner = -1;
+		else if(isFull())
+			winner = -1;	// it's a draw
 	}
 	
 	@Override
@@ -577,29 +583,31 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		setAvailableActions();		// IMPORTANT: adjust the available actions (have reduced by one)
 		
 		if(numPlayers > 2)
-			advance3Player(iAction);
+	    	checkIfPlayerLost3Player();
 		else
-    		advance2Player(iAction);
-		super.incrementMoveCounter();
+			checkIfPlayerLost2Player();
 		
+		player = getNextPlayer();	// 2-player games: 0,1,0,1,...;   3-player games: 0,1,2,0,1,...
+		super.incrementMoveCounter();		
 		lastMoves.add(action.toInt());
 //		System.out.println("lastMove: "+action.toInt());
 //		System.out.println(this.stringDescr());		// only debug
 	}
 	
-	private void advance2Player(int action)
-	{
-		checkIfPlayerLost2Player();
-		
-		player = getNextPlayer2Player();	// 2-player games: 0,1,0,1,...
-	}
-	
-	private void advance3Player(int action)
-	{
-    	checkIfPlayerLost3Player();
-    	
-		player = getNextPlayer3Player();    // 3-player games: 0,1,2,0,1,...
-	}
+	// obsolete now: 
+//	private void advance2Player(int action)
+//	{
+//		checkIfPlayerLost2Player();
+//		
+//		player = getNextPlayer();	// 2-player games: 0,1,0,1,...
+//	}
+//	
+//	private void advance3Player(int action)
+//	{
+//    	checkIfPlayerLost3Player();
+//    	
+//		player = getNextPlayer();    // 3-player games: 0,1,2,0,1,...
+//	}
 
 	@Override
 	public int getPlayer() {
@@ -771,16 +779,16 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return nodes;
 	}
 
-	// obsolete?
+	// obsolete
 //	public void setNodes(Node [] nodes) {
 //		this.nodes = nodes;
 //	}
-	
-	public void setNodesCopy(Node [] nodes) 
-	{
-		for(int i = 0; i < nodes.length; i++)
-			this.nodes[i].setLinksCopy(nodes[i].getLinks());
-	}
+//	
+//	public void setNodesCopy(Node [] nodes) 
+//	{
+//		for(int i = 0; i < nodes.length; i++)
+//			this.nodes[i].setLinksCopy(nodes[i].getLinks());
+//	}
 	
 	
 	public int getNodesLength()
@@ -788,7 +796,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return nodes.length;
 	}
 	
-	// obsolete?
+	// obsolete
 //	public void setState(StateObserverSim som)
 //	{
 //		copyNodes(som.getNodes());
@@ -797,7 +805,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 //		this.m_counter = som.getMoveCounter();
 //	}
 	
-	// obsolete?
+	// obsolete
 //	public int getPreviousPlayer()
 //	{
 //		if(player == 0)
@@ -806,26 +814,37 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 //			return player - 1;
 //	}
 	
-	private int getNextPlayer3Player()
+	private int getNextPlayer()
 	{
-//		int nextPlayer = nextPlayer();
-		int nextPlayer = (player+1)%3;
+		int nextPlayer = (player+1)%numPlayers;
 		
 		if(nextPlayer == loser)		// if nextPlayer has already lost, pass to the next one once more
-		{
-//			nextPlayer++;
-//			if(nextPlayer > 2)
-//				nextPlayer = 0;
-			nextPlayer = (nextPlayer+1)%3;
-		}
+			nextPlayer = (nextPlayer+1)%numPlayers;
 		
 		return nextPlayer;
 	}
 	
-	private int getNextPlayer2Player()
-	{
-		return (player == 0) ? 1 : 0;
-	}
+	// --- /WK/ obsolete now, we have unified this in getNextPlayer()
+//	private int getNextPlayer3Player()
+//	{
+////		int nextPlayer = nextPlayer();
+//		int nextPlayer = (player+1)%3;
+//		
+//		if(nextPlayer == loser)		// if nextPlayer has already lost, pass to the next one once more
+//		{
+////			nextPlayer++;
+////			if(nextPlayer > 2)
+////				nextPlayer = 0;
+//			nextPlayer = (nextPlayer+1)%3;
+//		}
+//		
+//		return nextPlayer;
+//	}
+//	
+//	private int getNextPlayer2Player()
+//	{
+//		return (player == 0) ? 1 : 0;
+//	}
 	
 	// --- /WK/ obsolete now
 //	private int nextPlayer()
@@ -849,14 +868,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	//public void setLastPlayer(int lastPlayer) {
 		//this.lastPlayer = lastPlayer;
 	//}
-	
-	public int getLoser() {
-		return loser;
-	}
-
-	public void setLooser(int loser) {
-		this.loser = loser;
-	}
 	
 	public static void main(String[] args) {
 		// /WK/ just some validation code: 

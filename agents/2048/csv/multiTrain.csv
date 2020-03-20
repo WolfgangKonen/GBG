@@ -1,13 +1,5 @@
-controllers.TD.ntuple2.TDNTuple3Agt: USESYMMETRY:true, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:true, learnFromRM: false;;;;;;;
-controllers.TD.ntuple2.TDNTuple3Agt: alpha_init->final:1.0->1.0, epsilon_init->final:0.0->0.0, gamma: 1.0, fixed n-tuple, mode=2;;;;;;;
-run; gameNum; evalQ; evalT; actionNum; trnMoves; elapsedTime; movesSecond
-0;5000;0;0;6256694;6256694;99.222;63057.52756
-0;10000;0;0;16255766;16255766;253.042;64241.37495
-0;15000;0;0;28141256;28141256;433.232;64956.54984
-0;20000;0;0;41342582;41342582;630.344;65587.33327
-0;25000;0;0;55595009;55595009;842.161;66014.70384
-0;30000;0;0;70655227;70655227;1066.844;66228.26486
-0;35000;0;0;86600046;86600046;1303.337;66444.86115
-0;40000;0;0;103223780;103223780;1556.051;66337.01595
-0;45000;0;0;120666560;120666560;1820.079;66297.42995
-0;50000;0;0;138691209;138691209;2091.054;66325.98154
+TDNTuple3Agt: USESYM:true, P:15, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:true, learnFromRM: false
+TDNTuple3Agt: alpha_init->final:1.0->1.0, epsilon_init->final:0.0->0.0, gamma: 1.0, fixed n-tuple, mode=2, evalQ: 0, evalT: -1
+run, gameNum, evalQ, evalT, actionNum, trnMoves, totalTrainSec, movesSecond, , 
+0, 5000, 31218.176, 0.0, 6023818, 6028818, 55.702, 108143.65731930631, 0.0, 0.0
+0, 10000, 42608.232703999995, 0.0, 15753513, 15763513, 142.36, 110659.68670974992, 0.0, 0.0

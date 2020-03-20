@@ -24,7 +24,7 @@ import games.Nim.GameBoardNim;
 import games.Othello.ConfigOthello;
 import games.Othello.GameBoardOthello;
 import games.Othello.StateObserverOthello;
-import games.Othello.Gui.Gamestats;
+import games.Othello.Gui.GameStats;
 import games.Othello.Gui.Legend;
 import games.Othello.Gui.Tile;
 import tools.Types;
@@ -54,7 +54,7 @@ public class GameBoardOthelloGui extends JFrame {
 	
 //	private int[][] gameState;  // 1 = White   2 = Black // never used
 	private double[][] vGameState;	
-	private Gamestats gameStats; 	// Displaying Game information
+	private GameStats gameStats; 	// Displaying Game information
 	private Legend legend;
 	private JPanel boardPanel; 		// Container for the 8 x 8 game board
 	private Tile[][] board;			// representation of the game board
@@ -79,7 +79,7 @@ public class GameBoardOthelloGui extends JFrame {
 //		gameState = new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE]; // never used
 		vGameState = new double[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		// Northern display of the JFrame containing the game stats
-		gameStats = new Gamestats();
+		gameStats = new GameStats();
 		add(gameStats, BorderLayout.NORTH);
 		// Center display of the JFrame containing the game board
 		boardPanel = initBoard();
@@ -166,7 +166,7 @@ public class GameBoardOthelloGui extends JFrame {
 	
 	
 	/**
-	 * Updating the {@link Gamestats} object.
+	 * Updating the {@link GameStats} object.
 	 * @param blackDiscs	Amount of black discs placed on the board
 	 * @param whiteDiscs	Amount of white discs placed on the board
 	 * @param turnCount		turn counter range 1-60

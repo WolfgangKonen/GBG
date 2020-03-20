@@ -1,4 +1,4 @@
-package games.Sim;
+package games.Sim.Gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import games.Sim.GameBoardSim;
+import games.Sim.Node;
+import games.Sim.Point;
 import tools.Types;
 
 /**
@@ -25,7 +28,7 @@ public class BoardPanel extends JPanel {
 	
 	Point[] circles;
 	Point2[] lines;
-	private Node[] nodes;
+	private Node[] nodes;			// do we really need a copy of the nodes in here?
 	private int inputNode1, inputNode2;
 	/**
 	 * the nodes of a losing triangle (values in [1,...,K]). All -1 if no loosing triangle yet.
@@ -33,10 +36,6 @@ public class BoardPanel extends JPanel {
 	private int[] lastNodes = {-1,-1,-1}; 
 	GameBoardSim m_gb;
 	int CIRCLE_RADIUS = 15;
-//	Point[] circleEdge;
-//	Image img;
-//	private ArrayList<Types.ACTIONS> actions;
-//	double [] actionValues;
 	private boolean showValueOnGameBoard = false;
 	private Color colTHK1 = new Color(183,29,13);	// dark red
 	private Color colTHK2 = new Color(255,137,0);	// orange
@@ -52,31 +51,13 @@ public class BoardPanel extends JPanel {
 		setupNodes(nodes.length);
 		setupCircles(nodes.length);
 		setupLines(nodes.length);
-		//getImages();
 		inputNode1 = -1;
 		inputNode2 = -1;
-		
-//		actionValues = null;
-		
 	}
 	
 	public void clearLastNodes() {
 		for (int i=0; i<lastNodes.length; i++) lastNodes[i]=-1; 
 	}
-	
-	// obsolete
-//	private void getImages()
-//	{
-//		try
-//		{
-//			img = ImageIO.read(new File("green_btn.jpg"));
-//		}
-//		catch(IOException ex)
-//		{
-//			System.out.println("geht nicht lol");
-//		}
-//		
-//	}
 	
 	private void setupNodes(int size)
 	{
@@ -134,16 +115,6 @@ public class BoardPanel extends JPanel {
 		// the actual marking of the nodes is deferred to doDrawing(), because we need g2d
 	}
 	
-	// obsolete
-//	private int sum(int size)
-//	{
-//		int sum = 0;
-//		for(int i = 1; i < size; i++)
-//			sum += i;
-//		
-//		return sum;
-//	}
-	
 	private void setupLines(int size)
 	{
 		lines = new Point2[size*(size-1)/2];
@@ -154,16 +125,6 @@ public class BoardPanel extends JPanel {
 						              new Point(circles[j].getX()+CIRCLE_RADIUS,circles[j].getY()+CIRCLE_RADIUS));
 			}
 	}
-	
-    // this method is deprecated, since the colors (alpha channel of full green) 
-    // are not well distinguishable. Use instead calculateLinkColor
-//	private Color getColor(double d)
-//	{
-//		Color color;
-//		double intensity = 255 * (d+1)/2; 	// map [-1,1] to [0,255]
-//		color = new Color(0,255,0,(int)intensity);
-//		return color;
-//	}
 	
     /**
      * Calculate the color for a specific action value (borrowed from HexUtils.calculateTileColor). 
@@ -208,11 +169,10 @@ public class BoardPanel extends JPanel {
 		g2d.setColor(colTHK2);
 		g2d.setStroke(new BasicStroke(3));
 		
-		
 		// draw lines: 
 		// i) all lines in empty color (last move thick), 
 		// ii) (optional) action value coloring (last move thick), 
-		// iii) repaint occupied lines in player color (normal width)
+		// iii) overlay occupied lines in player color (normal width)
 		int lastMove = m_gb.m_so.getLastMove();
 		g2d.setColor(colTHK2);
 		for (int k=0; k<lines.length; k++) {
@@ -269,9 +229,9 @@ public class BoardPanel extends JPanel {
 		//draw circles (& mark circle borders of a losing triangle, if any)
 		for(int i = 0; i < circles.length; i++)
 		{
-			// note that lastNodes values \in [1,..,K] while i \in [0,K-1] (!)
+			// note that lastNodes values are \in [1,..,K] while i \in [0,K-1] (!)
 			if(i == lastNodes[0]-1 || i == lastNodes[1]-1 || i == lastNodes[2]-1) {
-				// mark the circle borders of a losing triangle:
+				// mark the circle borders of a losing triangle in dark red:
 				g2d.setStroke(new BasicStroke(8));
 				g2d.setColor(colTHK1);		// dark red
 				//System.out.println("lastNode i:"+i+"  [lastNodes[2]="+lastNodes[2]+"]");
@@ -288,7 +248,6 @@ public class BoardPanel extends JPanel {
 				g2d.setColor(colTHK2);
 			
 			g2d.fillOval(circles[i].getX(), circles[i].getY(), 2*CIRCLE_RADIUS, 2*CIRCLE_RADIUS);
-			//g2d.drawImage(img,circles[i].getX(),circles[i].getY(),2*CIRCLE_RADIUS,2*CIRCLE_RADIUS,this);
 		}
 		
 	}
@@ -357,24 +316,5 @@ public class BoardPanel extends JPanel {
 		this.showValueOnGameBoard = show;
 	}
 	
-	// never used
-//	public Node[] getNodes() {
-//		return nodes;
-//	}
-//
-//	public void setNodes(Node[] nodes) {
-//		this.nodes = nodes;
-//	}
-
-	// obsolete now:
-//	void setAvailableActions(ArrayList<Types.ACTIONS> acts)
-//	{
-//		actions = acts;
-//	}
-//	
-//	void setActionValues(double [] values)
-//	{
-//		actionValues = values;
-//	}
 	
 }

@@ -117,8 +117,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	// use ternary target in update rule:
 	private boolean TERNARY=false;		// if true, it remains true only for final-reward-games (see getNextAction2)
 	
-	// use finalAdaptAgents(...), normally true. Set only to false if you want to test how agents behave otherwise:
+	// variable FINALADAPTAGENTS is normally true (use finalAdaptAgents). Set only to false if you want to test how agents behave otherwise:
 	private boolean FINALADAPTAGENTS=true; //false;
+	// variable FINALADAPT_PART2 is normally true. Set only to false if you want to test how agents behave otherwise:
+	private boolean FINALADAPT_PART2=true; //false;
 	
 	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
 	
@@ -655,16 +657,18 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	    			}
 				}
 			} else { // if n==curPlayer
-				// The following is equivalent to TDNTuple2Agt's call of m_Net.updateWeightsNewTerminal():
-				//
-				// If s_next is terminal, adapt the value of the *afterstate* that 
-				// curPlayer observed after he did his final move. Adapt it towards 
-				// target 0. (This is only relevant for TERNARY==false, since 
-				// only then the value of this afterstate is used in getNextAction2.)
-				curBoard = m_Net.xnf.getBoardVector(s_after); 	// WK/04/2019: NEW use afterstate, *not* next state
-	        	vLast = m_Net.getScoreI(curBoard,curPlayer);
-	        	
-    			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);
+				if (FINALADAPT_PART2) {
+					// The following is equivalent to TDNTuple2Agt's call of m_Net.updateWeightsNewTerminal():
+					//
+					// If s_next is terminal, adapt the value of the *afterstate* that 
+					// curPlayer observed after he did his final move. Adapt it towards 
+					// target 0. (This is only relevant for TERNARY==false, since 
+					// only then the value of this afterstate is used in getNextAction2.)
+					curBoard = m_Net.xnf.getBoardVector(s_after); 	// WK/04/2019: NEW use afterstate, *not* next state
+		        	vLast = m_Net.getScoreI(curBoard,curPlayer);
+		        	
+	    			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);					
+				}
 				
 			}
 		} // for

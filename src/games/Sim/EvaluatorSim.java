@@ -53,14 +53,6 @@ public class EvaluatorSim extends Evaluator {
 //			else
 //				return evaluateAgentRandom(m_PlayAgent,gb)>thresh[0];
 		case 1:
-			secondAgent = mctsAgent;
-			thirdAgent = mctsAgent2;
-			break;
-//			if(ConfigSim.NUM_PLAYERS > 2)
-//				return evaluateMCTS3Player(m_PlayAgent,gb)>thresh[1];
-//			else
-//				return evaluateMCTS(m_PlayAgent,gb)>thresh[1];		
-		case 2:
 			secondAgent = maxNAgent;
 			thirdAgent = maxNAgent2;
 			break;
@@ -68,6 +60,14 @@ public class EvaluatorSim extends Evaluator {
 //				return evaluateMaxN3Player(m_PlayAgent,gb)>thresh[2];
 //			else
 //				return evaluateMaxN(m_PlayAgent,gb)>thresh[2];
+		case 2:
+			secondAgent = mctsAgent;
+			thirdAgent = mctsAgent2;
+			break;
+//			if(ConfigSim.NUM_PLAYERS > 2)
+//				return evaluateMCTS3Player(m_PlayAgent,gb)>thresh[1];
+//			else
+//				return evaluateMCTS(m_PlayAgent,gb)>thresh[1];		
 		default: 
 			return false;
 		}
@@ -182,8 +182,8 @@ public class EvaluatorSim extends Evaluator {
 		{
 		case -1: return "no evaluation done ";
 		case 0:  return "success rate (against randomAgent, best is 0.9): ";
-		case 1:  return "success rate (against MCTS, best is 0.0): ";
-		case 2:  return "success rate (against MaxN, best is 0.0): ";
+		case 1:  return "success rate (against MaxN, best is 0.0): ";
+		case 2:  return "success rate (against MCTS, best is 0.0): ";
 		default: return null;
 		}
 	}
@@ -192,8 +192,8 @@ public class EvaluatorSim extends Evaluator {
 	public String getTooltipString() {
 		return "<html>-1: none<br>"
 				+ "0: against Random, best is 0.9<br>"
-				+ "1: against MCTS, best is 0.0<br>"
-				+ "2: against MaxN, best is 0.0<br>"
+				+ "1: against MaxN, best is 0.0<br>"
+				+ "2: against MCTS, best is 0.0<br>"
 				+ "</html>";
 	}
 
@@ -201,8 +201,8 @@ public class EvaluatorSim extends Evaluator {
 	public String getPlotTitle() {
 		switch (m_mode) {
 		case 0:  return "success against Random";		
-		case 1:  return "success against MCTS";		
-		case 2:  return "success against MaxN";		
+		case 1:  return "success against MaxN";		
+		case 2:  return "success against MCTS";		
 		default: return null;
 		}
 	}

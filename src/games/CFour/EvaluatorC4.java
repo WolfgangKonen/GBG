@@ -265,6 +265,9 @@ public class EvaluatorC4 extends Evaluator {
      * opening books is an agent playing perfectly. We test only the games where  
      * {@code playAgent} starts, since games where {@link AlphaBetaAgent} starts are a safe 
      * win for {@link AlphaBetaAgent}.
+     * <p>
+     * Here, it is an AlphaBeta agent <b>with distant losses</b>, which is harder to beat. It selects among a 
+     * set of losing moves always that move that postpones the loss as far in the future as possible.
      *
      * @param playAgent Agent to be evaluated
      * @param gameBoard	game board for the evaluation episodes
@@ -318,16 +321,17 @@ public class EvaluatorC4 extends Evaluator {
      * Similar to {@link EvaluatorC4#competeAgainstMCTS(PlayAgent, GameBoard, int)}, but:
      * <ul> 
      * <li>It does not only play evaluation games from the default start state (empty board) but 
-     * also games where the first player (Yellow) has made a losing moves and the agent as second
+     * also games where the first player (Yellow) has made a losing move and the agent as second
      * player (Red) will win, if it plays perfect. 
      * <li>It allows a different opponent than MCTS to be passed in as 2nd argument
+     * <li>It plays all episodes in both roles, 
      * </ul>
      *
      * @param playAgent agent to be evaluated (it plays both 1st and 2nd)
      * @param opponent 	agent against which {@code playAgent} plays
      * @param gameBoard game board for the evaluation episodes
      * @param numEpisodes number of episodes played during evaluation
-     * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
+     * @return a value between -1 and 1, with 0 as expected result, if opponent is strong and playAgent is strong
      * 
      * @see EvaluatorC4#competeAgainstMCTS(PlayAgent, GameBoard, int)
      * @see HexConfig#EVAL_START_ACTIONS
@@ -530,7 +534,7 @@ public class EvaluatorC4 extends Evaluator {
             case 4:  return "success against AlphaBetaAgent (" + numStartStates + " diff. start states, best is 1.0): ";
             case 5:  return "success against AlphaBetaAgentDistantLoss (best is 1.0): ";
             case 10: return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
-            case 11: return "success against TDReferee (" + numStartStates + " diff. start states, best is 1.0): ";
+            case 11: return "success against TDReferee (" + numStartStates + " diff. start states, expected 0.0): ";
             default: return null;
         }
     }
@@ -543,10 +547,10 @@ public class EvaluatorC4 extends Evaluator {
 				+ "1: against Random, best is 1.0<br>"
 				+ "2: against Max-N, best is 1.0<br>"
 				+ "3: against AlphaBetaAgent, best is 1.0<br>"
-				+ "4: against AlphaBetaAgent, different starts, best is 1.0<br>"
+				+ "4: against AlphaBetaAgent, diff. starts, best is 1.0<br>"
 				+ "5: against AlphaBetaAgentDistantLoss, best is 1.0<br>"
-				+ "10: against MCTS, different starts, best is 1.0<br>"
-				+ "11: against TDReferee.agt.zip, different starts, best is 1.0"
+				+ "10: against MCTS, diff. starts, best is 1.0<br>"
+				+ "11: against TDReferee.agt.zip, diff. starts, expected 0.0"
 				+ "</html>";
     	// Note: the best result is always 1.0 here, because the start state is in all cases
     	// such that the agent to be evaluated can win if he plays perfect.

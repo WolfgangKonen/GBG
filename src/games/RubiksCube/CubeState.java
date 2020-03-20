@@ -21,7 +21,7 @@ import games.RubiksCube.CubieTriple.Orientation;
  * <li> <b>TRAFO_R</b>: transformation representation for Rubik's cube
  * </ul>
  * Its member {@code fcol} has 24 or 48 elements for pocket and Rubik's cube, resp. 
- * It stores in the case of a <b>color representation</b> type in {@code fcol[i]} the color of 
+ * It stores in the case of a <b>color representation</b> type in {@code fcol[i]} the face color of 
  * cubie face i, which is one out of {0,1,2,3,4,5} for colors {w,b,o,y,g,r} = 
  * {white,blue,orange,yellow,green,red}. For transformation representation type TRAFO_* see below.
  * <p>
@@ -69,7 +69,11 @@ public class CubeState implements Serializable {
 	public static enum Type {POCKET,RUBIKS,TRAFO_P,TRAFO_R};
 	public static enum Twist {ID,U,L,F};
 	
-	public int[] fcol;   // fcol[i] holds the face color (or location) for cubie face no. i 
+	/**
+	 * {@code fcol} is the face color array with 24 (<b>POCKET</b>) or 48 (<b>RUBIKS</b>) elements. <br> 
+	 * {@code fcol[i]} holds the face color (or location) for cubie face no {@code i}. 
+	 */
+	public int[] fcol;   
 
 	Type type = Type.POCKET;
 	Twist lastTwist = Twist.ID;
@@ -250,7 +254,7 @@ public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * U-face twist, counter-clockwise {@code times} * 90° 
+	 * U-face twist, counter-clockwise with {@code times} * 90 degrees
 	 */
 	public CubeState UTw(int times) {
 		for (int i=0; i<times; i++) this.UTw();
@@ -260,7 +264,7 @@ public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * L-face twist, counter-clockwise {@code times} * 90° 
+	 * L-face twist, counter-clockwise with {@code times} * 90 degrees
 	 */
 	public CubeState LTw(int times) {
 		for (int i=0; i<times; i++) this.LTw();
@@ -270,7 +274,7 @@ public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * F-face twist, counter-clockwise {@code times} * 90° 
+	 * F-face twist, counter-clockwise with {@code times} * 90 degrees 
 	 */
 	public CubeState FTw(int times) {
 		for (int i=0; i<times; i++) this.FTw();

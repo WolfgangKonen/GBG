@@ -13,7 +13,7 @@ public class Node implements Serializable
 	/**
 	 * Each node carries a number {@code num} \in [{@code 1,...,size}] and has {@code size - 1} links to other nodes.
 	 */
-	Node(int size, int num)
+	public Node(int size, int num)
 	{
 		number = num;
 		links = new Link [size-1];	// each node has size-1 links to all other nodes

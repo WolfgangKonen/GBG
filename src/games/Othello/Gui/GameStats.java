@@ -20,22 +20,22 @@ import tools.Types;
  * Amount of discs each player owns for Black {@code #blackCount}
  * for white {@code #whiteCount}. The Player which has to place the 
  * next disc {@code #nextMove} and the information about the turn
- * {@code #turnCount}. Remind the maximal turnCount is 60, which is
- * the last possible move. After each field has been occupied by a player.
+ * {@code #turnCount}. Note that the maximal turn count is 60, which is
+ * the last possible move. 
  */
-public class Gamestats extends JPanel{
+public class GameStats extends JPanel{
 
 	private int turn;
 	
 	private JLabel nextMove, whiteCount, blackCount, turnCount;
 	
-	public Gamestats() {
+	public GameStats() {
 		nextMove = createLabel("Next move: Black");
 		whiteCount = createLabel("White: 2");
 		blackCount = createLabel("Black: 2");
-		turnCount = createLabel("Turn: 1");
-		setLayout(new FlowLayout(FlowLayout.CENTER,(int) Types.GUI_SCALING_FACTOR_Y * 20,
-				(int) Types.GUI_SCALING_FACTOR_Y * 10));
+		turnCount = createLabel("Turn: 0");
+		setLayout(new FlowLayout(FlowLayout.CENTER,(int) (Types.GUI_SCALING_FACTOR_X * 15), (int) (Types.GUI_SCALING_FACTOR_Y * 7)));
+		   		   // FlowLayout(aligh,hgap,vgap), where the gaps are between components and between components and border
 		setBackground(Types.GUI_BGCOLOR);
 		this.add(blackCount);
 		this.add(whiteCount);

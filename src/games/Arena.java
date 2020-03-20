@@ -227,14 +227,15 @@ abstract public class Arena implements Runnable {
 				taskState = Task.IDLE;
 				break;
 			case PLAY:
-				// enableButtons(false); // see Play.addActionListener in XArenaButtons
+				// enableButtons(false); // see Play.addActionListener in XArenaButtonsGui
 				//
 				if (!singlePlayerTSRunning) {
 					gb.showGameBoard(this, false);
 					gb.clearBoard(false, true);
 					PlayGame();
 					gb.enableInteraction(false);
-					enableButtons(true);
+					//enableButtons(true);		// see Play.addActionListener in XArenaButtonsGui
+												// (it is better to do it there, otherwise the branches PLAY and INSPECTV may interfere)
 				}
 				break;
 			case INSPECTV:
@@ -243,7 +244,7 @@ abstract public class Arena implements Runnable {
 				gb.setActionReq(true);
 				InspectGame();
 				gb.enableInteraction(false);
-				enableButtons(true);
+				//enableButtons(true);			// see Inspect.addActionListener in XArenaButtonsGui
 				break;
 			case IDLE:
 			default:

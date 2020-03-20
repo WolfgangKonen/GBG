@@ -393,17 +393,19 @@ public class SingleTreeNode implements Serializable
 		assert (children.length > 0) : "Ooops, children.length == 0";
 		for (SingleTreeNode child : this.children) 
 		{
-			double childValue = child.totValue / (child.nVisits + this.epsilon);
-			if (m_player.getNormalize()) assert (childValue >= 0) : "childValue is negative";
-				
-			double uctValue = childValue
-					+ m_player.getK() * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon))
-					+ this.m_rnd.nextDouble() * this.epsilon;
-					// small random numbers: break ties in unexpanded nodes
+			if (child != null) {
+				double childValue = child.totValue / (child.nVisits + this.epsilon);
+				if (m_player.getNormalize()) assert (childValue >= 0) : "childValue is negative";
+					
+				double uctValue = childValue
+						+ m_player.getK() * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + this.epsilon))
+						+ this.m_rnd.nextDouble() * this.epsilon;
+						// small random numbers: break ties in unexpanded nodes
 
-			if (uctValue > bestValue) {
-				selected = child;
-				bestValue = uctValue;
+				if (uctValue > bestValue) {
+					selected = child;
+					bestValue = uctValue;
+				}				
 			}
 		}
 
@@ -436,13 +438,15 @@ public class SingleTreeNode implements Serializable
 			// pick the best Q.
 			double bestValue = -Double.MAX_VALUE;
 			for (SingleTreeNode child : this.children) {
-				double eVal = child.totValue / (child.nVisits + this.epsilon)
+				if (child != null) {
+					double eVal = child.totValue / (child.nVisits + this.epsilon)
 							+ this.m_rnd.nextDouble() * this.epsilon;
 							// small sampleRandom numbers: break ties in unexpanded nodes
 				
-				if (eVal > bestValue) {
-					selected = child;
-					bestValue = eVal;
+					if (eVal > bestValue) {
+						selected = child;
+						bestValue = eVal;
+					}
 				}
 			}
 
@@ -489,16 +493,20 @@ public class SingleTreeNode implements Serializable
         // that child which is the first with its LHS >= rnd.
 		vMin = (m_player.getNormalize()) ? 0.0 : m_state.getMinGameScore();
         for (SingleTreeNode child : this.children) {
-        	vTotal += (child.totValue/child.nVisits)-vMin; 
+        	if (child != null) {
+            	vTotal += (child.totValue/child.nVisits)-vMin; 
+        	}
         }
         for (SingleTreeNode child : this.children) {
-        	cumProb = cumProb + ((child.totValue/child.nVisits)-vMin)/vTotal;
-        	child.cumProb = cumProb;
-        	// We do not really need child.cumProb, we could just work with the local variable
-        	// cumProb. We have child.cumProb only for debugging purposes in order to have in 
-        	// this.children all cumulative probabilities and see if they converge to 1.
-        	if (cumProb>=rnd) {
-        		return child;		// the normal return
+        	if (child != null) {
+            	cumProb = cumProb + ((child.totValue/child.nVisits)-vMin)/vTotal;
+            	child.cumProb = cumProb;
+            	// We do not really need child.cumProb, we could just work with the local variable
+            	// cumProb. We have child.cumProb only for debugging purposes in order to have in 
+            	// this.children all cumulative probabilities and see if they converge to 1.
+            	if (cumProb>=rnd) {
+            		return child;		// the normal return
+            	}
         	}
         }
         // --- only for debugging, if we comment 'if (cumProb...)' above out in order to ensure
@@ -891,13 +899,14 @@ public class SingleTreeNode implements Serializable
 		assert children.length > 0 : "No children in function bestAction()!";
 
 		for (int i = 0; i < children.length; i++) {
-
-			tieBreaker = m_rnd.nextDouble() * epsilon;
-			dTotVal = children[i].totValue / children[i].nVisits + tieBreaker;
-			// /WK/: bug fix: '/children[i].nVisits' added (!)
-			if (children[i] != null && dTotVal > bestValue) {
-				bestValue = dTotVal;
-				selected = i;
+			if (children[i] != null) {
+				tieBreaker = m_rnd.nextDouble() * epsilon;
+				dTotVal = children[i].totValue / children[i].nVisits + tieBreaker;
+				// /WK/: bug fix: '/children[i].nVisits' added (!)
+				if (children[i] != null && dTotVal > bestValue) {
+					bestValue = dTotVal;
+					selected = i;
+				}				
 			}
 		}
 

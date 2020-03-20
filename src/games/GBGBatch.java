@@ -56,7 +56,8 @@ import tools.Types;
  * <p>
  * This program should normally not require any GUI facilities, so it should run on machines without graphical
  * user interface system like X11 or Win. <br>
- * If there should be any X11 incompatibilities, the program can be run anyhow on Ubuntu consoles without X11 via command
+ * If there should be any X11 incompatibilities, the program can be run anyhow on Ubuntu consoles having no X11 
+ * if you use the command
  * <pre>
  *    xvfb-run java -jar GBGBatch.jar ...
  * </pre>
@@ -77,44 +78,48 @@ public class GBGBatch {
 	 */
 	public static String[] csvNameDef = {"multiTrain.csv","multiTrainAlphaSweep.csv","multiTrainLambdaSweep.csv"};
 	public static ArenaTrain t_Game;
-	private static GBGBatch t_Batch=null;
+	private static GBGBatch t_Batch = null;
 	private static String filePath = null;
 	private static String savePath = null;
 
-	protected Evaluator m_evaluatorQ=null;
-	protected Evaluator m_evaluatorT=null;
+	protected Evaluator m_evaluatorQ = null;
+	protected Evaluator m_evaluatorT = null;
 	
 	/**
+	 * Syntax:
+	 * <pre>
+	 * GBGBatch gameName n agentFile [ trainNum maxGameNum csvFile ] </pre>
 	 * @param args <br>
-	 * 			[0] a name of the game, suitable as subdirectory name in the 
+	 * 			[0] {@code gameName}: name of the game, suitable as subdirectory name in the 
 	 *         		{@code agents} directory <br>
-	 *          [1] "1", "2" or "3"  to call either {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1} 
+	 *          [1] {@code n}: "1", "2" or "3"  to call either {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1} 
 	 *              (multiTrain) or {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2} 
 	 *              (multiTrainAlphaSweep) or {@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3} 
 	 *              (multiTrainLambdaSweep)<br>
-	 *          [2] agent file name, e.g. "tdntuple3.agt.zip". This agent is loaded from
+	 *          [2] {@code agentFile}: e.g. "tdntuple3.agt.zip". This agent is loaded from
 	 *          	{@code agents/}{@link Types#GUI_DEFAULT_DIR_AGENT} (+ a suitable subdir, if 
-	 *          	applicable). It specifies the agent type and all its parameters for the multi-training 
+	 *          	applicable). It specifies the agent type and all its parameters for multi-training 
 	 *          	in {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1},
 	 *          	{@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}  or 
 	 *          	{@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3}.<br>
-	 *          [3] (optional) trainNum: number of agents to train (default -1). <br>
-	 *          [4] (optional) maxGameNum: maximum number of training games (default -1) <br>
-	 *          [5] (optional) csvName: filename for CSV results (defaults: "multiTrain.csv" or 
-	 *          	"multiTrainAlphaSweep", see {@link #csvNameDef})<p>
+	 *          [3] (optional) trainNum: how many agents to train (default -1). <br>
+	 *          [4] (optional) maxGameNum: maximum number of training episodes (default -1) <br>
+	 *          [5] (optional) csvFile: filename for CSV results (defaults: "multiTrain.csv" or 
+	 *          	"multiTrainAlphaSweep.csv" or "multiTrainLambdaSweep.csv", see {@link #csvNameDef})<p>
 	 *          
-	 * If trainNum or maxGameNum are not given, thus set to -1, the values stored in the agent file 
-	 * name are taken.<br>
+	 * If trainNum or maxGameNum are -1, their respective values stored in {@code agentFile} are taken.<br>
 	 * Side effect: the last trained agent is stored to {@code<csvName>.agt.zip}, where 
 	 * {@code <csvname>} is the 5th argument w/o {@code .csv}
 	 *          	
-	 * @throws IOException 
+	 * @throws IOException if s.th. goes wrong when loading the agent or saving the csv file.
 	 */
 	public static void main(String[] args) throws IOException {
-		GBGBatch t_Frame = new GBGBatch("General Board Game Playing");
+//		GBGBatch t_Frame = new GBGBatch("General Board Game Playing");
+		t_Batch = new GBGBatch("General Board Game Playing");
 		int trainNum = -1;
 		int maxGameNum = -1;
-
+		String csvName = "";
+		
 		if (args.length<3) {
 			System.err.println("[GBGBatch.main] needs at least 3 arguments.");
 			System.exit(1);
@@ -150,7 +155,13 @@ public class GBGBatch {
 			System.exit(1);
 		}
 
-		String csvName = csvNameDef[Integer.parseInt(args[1])-1];
+		try {
+			csvName = csvNameDef[Integer.parseInt(args[1])-1];
+		} catch(NumberFormatException e) {
+			e.printStackTrace(System.err);
+			System.err.println("[GBGBatch.main]: args[1]='"+args[1]+"' is not a number!");
+			System.exit(1);
+		}
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+t_Game.getGameName();
 		String subDir = t_Game.getGameBoard().getSubDir();
@@ -159,8 +170,20 @@ public class GBGBatch {
 		}
 		filePath = strDir + "/" +args[2]; //+ "tdntuple3.agt.zip";
 
-		if (args.length>=4) trainNum = Integer.parseInt(args[3]);
-		if (args.length>=5) maxGameNum = Integer.parseInt(args[4]);
+		try {
+			if (args.length>=4) trainNum = Integer.parseInt(args[3]);
+		} catch(NumberFormatException e) {
+			e.printStackTrace(System.err);
+			System.err.println("[GBGBatch.main]: args[3]='"+args[3]+"' is not a number!");
+			System.exit(1);
+		}
+		try {
+			if (args.length>=5) maxGameNum = Integer.parseInt(args[4]);
+		} catch(NumberFormatException e) {
+			e.printStackTrace(System.err);
+			System.err.println("[GBGBatch.main]: args[4]='"+args[4]+"' is not a number!");
+			System.exit(1);
+		}
 		if (args.length>=6) csvName = args[5];
 
 		savePath = args[5].replaceAll("csv", "agt.zip");
@@ -170,15 +193,17 @@ public class GBGBatch {
 		switch(args[1]) {
 		case "1":
 			t_Batch.batch1(trainNum,maxGameNum,filePath,
-					t_Frame.t_Game.m_xab,t_Frame.t_Game.getGameBoard(),csvName);
+					t_Batch.t_Game.m_xab,t_Batch.t_Game.getGameBoard(),csvName);
 			break;
 		case "2":
 			t_Batch.batch2(trainNum,maxGameNum,filePath,
-					t_Frame.t_Game.m_xab,t_Frame.t_Game.getGameBoard(),csvName); 
+					t_Batch.t_Game.m_xab,t_Batch.t_Game.getGameBoard(),csvName);
+//					t_Frame.t_Game.m_xab,t_Frame.t_Game.getGameBoard(),csvName); 
 			break;
 		case "3":
 			t_Batch.batch3(trainNum,maxGameNum,filePath,
-					t_Frame.t_Game.m_xab,t_Frame.t_Game.getGameBoard(),csvName); 
+					t_Batch.t_Game.m_xab,t_Batch.t_Game.getGameBoard(),csvName);
+//					t_Frame.t_Game.m_xab,t_Frame.t_Game.getGameBoard(),csvName); 
 			break;
 		default:
 			System.err.println("[GBGBatch.main] args[1]="+args[1]+" not allowed.");
@@ -234,7 +259,7 @@ public class GBGBatch {
 	 * Perform multi-training with alpha sweep. The alpha values to sweep are coded in
 	 * arrays {@code alphaArr} and {@code alphaFinalArr}. <br> 
 	 * Write results to file {@code csvName}. 
-	 * @param trainNum		how many agents to train
+	 * @param trainNum		how many agents to train for each alpha
 	 * @param maxGameNum	maximum number of training games 
 	 * @param filePath		full path of the agent file	
 	 * @param xab			arena buttons object, to assess parameters	
@@ -275,7 +300,7 @@ public class GBGBatch {
 	/**
 	 * Perform multi-training with lambda sweep. The lambda values to sweep are coded in
 	 * array {@code lambdaArr} in this method. <br> Write results to file {@code csvName}. 
-	 * @param trainNum		how many agents to train
+	 * @param trainNum		how many agents to train for each lambda
 	 * @param maxGameNum	maximum number of training games 
 	 * @param filePath		full path of the agent file	
 	 * @param xab			arena buttons object, to assess parameters	
@@ -440,8 +465,8 @@ public class GBGBatch {
 					actionNum = pa.getNumLrnActions();	
 					trnMoveNum = pa.getNumTrnMoves();
 					totalTrainSec = (double)pa.getDurationTrainingMs()/1000.0;   	
-					// totalTrainSec = time [sec] needed since start of training 
-					// (only self-play, excluding evaluations)
+						// totalTrainSec = time [sec] needed since start of training 
+						// (only self-play, excluding evaluations)
 					mTrain = new MTrain(i,gameNum,evalQ,evalT,
 										actionNum,trnMoveNum,totalTrainSec,actionNum/totalTrainSec,
 										userValue1,userValue2);
@@ -458,15 +483,6 @@ public class GBGBatch {
 			// construct 'qa' anew (possibly wrapped agent for eval)
 			qa = wrapAgent(0, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
-			// --- not really necessary ---
-//	        // evaluate again at the end of a training run:
-//			m_evaluatorQ.eval(qa);
-//			oQ.add(m_evaluatorQ.getLastResult());
-//			if (doTrainEvaluation) {
-//				m_evaluatorT.eval(qa);
-//				oT.add(m_evaluatorT.getLastResult());								
-//			}
-			
 			elapsedMs = (System.currentTimeMillis() - startTime);
 			pa.incrementDurationEvaluationMs(elapsedMs);
 			startTime = System.currentTimeMillis();
@@ -491,13 +507,6 @@ public class GBGBatch {
 		{
 		  System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
 		}
-		
-//		String lastMsg="";
-//		if (m_evaluatorQ.m_mode==(-1)) {
-//			lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
-//		} else {
-//			lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
-//		}
 		
 		xab.setTrainNumber(trainNum);
 		return pa;
@@ -627,8 +636,8 @@ public class GBGBatch {
 					actionNum = pa.getNumLrnActions();	
 					trnMoveNum = pa.getNumTrnMoves();
 					totalTrainSec = (double)pa.getDurationTrainingMs()/1000.0;   	
-					// totalTrainSec = time [sec] needed since start of training 
-					// (only self-play, excluding evaluations)
+						// totalTrainSec = time [sec] needed since start of training 
+						// (only self-play, excluding evaluations)
 					mTrain = new MTrain(i,gameNum,evalQ,evalT,
 										actionNum,trnMoveNum,totalTrainSec,actionNum/totalTrainSec,
 										userValue1,userValue2);
@@ -645,15 +654,6 @@ public class GBGBatch {
 			// construct 'qa' anew (possibly wrapped agent for eval)
 			qa = wrapAgent(0, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
 
-			// --- not really necessary ---
-//	        // evaluate again at the end of a training run:
-//			m_evaluatorQ.eval(qa);
-//			oQ.add(m_evaluatorQ.getLastResult());
-//			if (doTrainEvaluation) {
-//				m_evaluatorT.eval(qa);
-//				oT.add(m_evaluatorT.getLastResult());								
-//			}
-			
 			elapsedMs = (System.currentTimeMillis() - startTime);
 			pa.incrementDurationEvaluationMs(elapsedMs);
 			startTime = System.currentTimeMillis();
@@ -678,13 +678,6 @@ public class GBGBatch {
 		{
 		  System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
 		}
-		
-//		String lastMsg="";
-//		if (m_evaluatorQ.m_mode==(-1)) {
-//			lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
-//		} else {
-//			lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- " + frm1.format(oQ.getStd()) + "");			
-//		}
 		
 		xab.setTrainNumber(trainNum);
 		return pa;

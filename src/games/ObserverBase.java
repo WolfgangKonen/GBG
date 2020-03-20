@@ -34,6 +34,7 @@ abstract public class ObserverBase implements StateObservation {
     public ObserverBase() {    }
     
     public ObserverBase(ObserverBase other) {
+		this.m_counter = other.m_counter;
 		this.storedMaxScore = other.storedMaxScore;
 		this.storedActBest = other.storedActBest;
 		if (other.storedActions!=null) this.storedActions = other.storedActions.clone();

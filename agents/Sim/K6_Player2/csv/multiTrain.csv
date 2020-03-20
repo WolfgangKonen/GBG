@@ -1,0 +1,9 @@
+TDNTuple3Agt: USESYM:false, P:3, NORMALIZE:false, sigmoid:tanh, lambda:0.5, horizon:7, AFTERSTATE:false, learnFromRM: false
+TDNTuple3Agt: alpha_init->final:1.0->0.1, epsilon_init->final:0.3->0.0, gamma: 1.0, fixed n-tuple, mode=4, evalQ: 1, evalT: -1
+run, gameNum, evalQ, evalT, actionNum, trnMoves, totalTrainSec, movesSecond, , 
+0, 5000, -0.6000000000000001, 0.0, 46210, 61820, 0.891, 51863.07519640853, 0.0, 0.0
+0, 10000, -0.4, 0.0, 97248, 126131, 1.801, 53996.66851749029, 0.0, 0.0
+0, 15000, 0.0, 0.0, 152277, 191905, 2.756, 55252.90275761974, 0.0, 0.0
+0, 20000, -0.8, 0.0, 211345, 258674, 3.837, 55080.79228563982, 0.0, 0.0
+0, 25000, -0.2, 0.0, 275680, 327815, 5.077, 54299.783336616114, 0.0, 0.0
+0, 30000, -0.8, 0.0, 345092, 398896, 6.564, 52573.430834856794, 0.0, 0.0

@@ -24,17 +24,14 @@ import tools.Types.ACTIONS;
  */
 public class StateObserverCube extends ObserverBase implements StateObservation {
 	private CubeState m_state;
-	private ACTIONS m_action; 		// the action which led to m_state (9 if not known)
+	/**
+	 * the action which led to m_state (9 if not known)
+	 */
+	private ACTIONS m_action; 		
 	private static CubeState def = new CubeState(); // a solved cube as reference
     private static final double REWARD_POSITIVE =  1.0;
 	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
     
-    // --- this is now in ObserverBase ---
-//    public Types.ACTIONS[] storedActions = null;
-//    public Types.ACTIONS storedActBest = null;
-//    public double[] storedValues = null;
-//    public double storedMaxScore; 
-	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
@@ -48,6 +45,10 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		setAvailableActions();
 	}
 
+	/**
+	 * 
+	 * @param fcol is an array with face colors, see {@link CubeState}.
+	 */
 	public StateObserverCube(int[] fcol) {
 		m_state = new CubeState(fcol);
 		m_action = new ACTIONS(9);		// 9 codes 'not known'
@@ -61,11 +62,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 	
 	public StateObserverCube(StateObserverCube other) {
+		super(other);		// copy members m_counter and stored*
 		m_state = new CubeState(other.m_state);
 //		m_state.lastTwist = Twist.ID;		// we assume that we do not know the last twist
 //											// when we get a new initial state
 		m_action = new ACTIONS(other.m_action);
-		super.m_counter = other.m_counter;
 		setAvailableActions();
 	}
 	
@@ -115,11 +116,6 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
  		return m_state.toString();
 	}
 	
-//	public Types.WINNER getGameWinner() {
-//		assert isGameOver() : "Game is not yet over!";
-//		return Types.WINNER.PLAYER_WINS;
-//	}
-
 	public CubeState getCubeState() {
 		return m_state;
 	}
@@ -191,6 +187,9 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * Given the current state in m_Table, what are the available actions? 
 	 * Set them in member {@code ArrayList<ACTIONS> acts}.
+	 * <p>
+	 * Note that actions with the same flavor (U,L,F) as the last twist would be in principle also available,
+	 * but they could be subsumed with the last twist. So they are omitted in order to reduce complexity.
 	 */
 	public void setAvailableActions() {
 		acts.clear();
@@ -214,34 +213,6 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public Types.ACTIONS getAction(int i) {
 		return acts.get(i);
 	}
-
-    // --- this is now in ObserverBase ---
-//	/**
-//	 * Given the current state, store some info useful for inspecting the  
-//	 * action actBest and double[] vtable returned by a call to <br>
-//	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
-//	 *  
-//	 * @param actBest	the best action
-//	 * @param vtable	one double for each action in this.getAvailableActions():
-//	 * 					it stores the value of that action (as given by the double[] 
-//	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
-//	 */
-//	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
-//        //ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
-//        storedActions = new Types.ACTIONS[acts.size()];
-//        storedValues = new double[acts.size()];
-//        for(int i = 0; i < storedActions.length; ++i)
-//        {
-//        	storedActions[i] = acts.get(i);
-//        	storedValues[i] = vtable[i];
-//        }
-//        storedActBest = actBest;
-//        if (actBest instanceof Types.ACTIONS_VT) {
-//        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
-//        } else {
-//            storedMaxScore = vtable[acts.size()];        	
-//        }
-//	}
 
     public int getPlayer() {
         return 0;

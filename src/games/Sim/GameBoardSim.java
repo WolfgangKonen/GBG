@@ -19,6 +19,7 @@ import games.Hex.StateObserverHex;
 import games.Othello.StateObserverOthello;
 import games.Othello.Gui.GameBoardOthelloGui;
 import games.Sim.Point;
+import games.Sim.Gui.GameBoardSimGui;
 import games.TicTacToe.StateObserverTTT;
 import tools.ScoreTuple;
 import tools.Types;
@@ -46,8 +47,9 @@ public class GameBoardSim implements GameBoard {
 	
 	//Framework
 	protected Arena m_Arena;
-	protected StateObserverSim m_so;
+	public StateObserverSim m_so;		// is public so that the classes in games.Sim.Gui can access it
 	private boolean arenaActReq = false;
+	public boolean isEnabled = false;	// is public so that GameBoardSimGui.Mouse can access it
 	
 	protected Random rand;
 
@@ -101,12 +103,12 @@ public class GameBoardSim implements GameBoard {
 					System.out.println(winner  + " has won");
 					
 			} else {
-				int player = soS.getPlayer();
-				switch(player) {
-				case(0): 	System.out.println("0 to move   "); break;
-				case(1):	System.out.println("1 to move   "); break;
-				case(2):	System.out.println("2 to move   "); break;
-				}
+//				int player = soS.getPlayer();
+//				switch(player) {
+//					case(0): 	System.out.println("0 to move   "); break;
+//					case(1):	System.out.println("1 to move   "); break;
+//					case(2):	System.out.println("2 to move   "); break;
+//				}
 			}
 		} // if (so!=null)
 		
@@ -211,6 +213,7 @@ public class GameBoardSim implements GameBoard {
 
 	@Override
 	public void enableInteraction(boolean enable) {
+		isEnabled =enable;
 		if (m_gameGui!=null)
 			m_gameGui.enableInteraction(enable);
 	}

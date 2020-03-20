@@ -34,7 +34,8 @@ import tools.Types.ACTIONS;
  * <li> 20: compete against HeurPlayer, different starts
  * <li> 21: compete against TDReferee.agt.zip, different starts
  * </ul>  
- * The value of mode is set in the constructor. 
+ * The value of mode is set in the constructor. <br>
+ * For 'different starts' see {@link #diffStartList}.
  */
 public class EvaluatorOthello extends Evaluator {
 
@@ -234,7 +235,7 @@ public class EvaluatorOthello extends Evaluator {
 		case 2:  return "success against MCTS (best is 1.0): ";
 		case 9:  return "success against BenchPlayer (best is 1.0): ";
 		case 10: return "success against HeurPlayer (best is 1.0): ";
-		case 11: return "success against TDReferee.agt.zip (best is 1.0): ";
+		case 11: return "success against TDReferee.agt.zip (expected 0.0): ";
 		case 19: return "success against BenchPlayer, diff starts (best is 1.0): ";
 		case 20: return "success against HeurPlayer, diff starts (best is 1.0): ";
 		case 21: return "success against TDReferee.agt.zip, diff starts (expected 0.0): ";

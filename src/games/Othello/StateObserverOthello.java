@@ -89,6 +89,7 @@ public class StateObserverOthello extends ObserverBase{
 	
 	public StateObserverOthello(StateObserverOthello other)
 	{
+		super(other);		// copy members m_counter and stored*
 		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();		// WK: bug fix, added missing .clone() 
 		this.currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		BaseOthello.deepCopyGameState(other.currentGameState, currentGameState);
@@ -100,12 +101,13 @@ public class StateObserverOthello extends ObserverBase{
 		//		Anyhow, the real time-burner was 'this.setAvailableActions()' below, and we made the code 16x faster (!!)
 		// 	 	by simply cloning other.availableActions instead 
 		this.playerNextMove = other.playerNextMove;
+		this.countBlack = other.countBlack;
+		this.countWhite = other.countWhite;
 		this.turn = other.turn;
 		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
-					// note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
-					// just copied by reference. However, as far as we see, these ACTIONS are never altered, so 
-					// it should be o.k.
-//		this.setAvailableActions();		// this as replacement for clone() would be very slow!
+					// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
+					// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
+//		this.setAvailableActions();		// this as replacement for availableActions.clone() would be very slow!
 	}
 	
 	// never used:

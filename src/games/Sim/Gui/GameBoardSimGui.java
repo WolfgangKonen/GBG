@@ -1,4 +1,4 @@
-package games.Sim;
+package games.Sim.Gui;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -16,9 +16,10 @@ import controllers.PlayAgent;
 import games.GameBoard;
 import games.StateObservation;
 import games.Hex.StateObserverHex;
-import games.Othello.GameBoardOthello;
+import games.Sim.GameBoardSim;
 import games.Sim.Point;
-import games.TicTacToe.StateObserverTTT;
+import games.Sim.StateObserverSim;
+import games.Sim.Gui.GameStatsSim;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -48,6 +49,8 @@ public class GameBoardSimGui {
 	
 	GameBoardSimGui m_gbsg;
 	JFrame frame;
+	private GameStatsSim gameStats; 	// Displaying Game information
+	private GameInfoSim gameInfo;
 	BoardPanel board;
 	
 	public GameBoardSimGui(GameBoardSim gb)
@@ -61,12 +64,16 @@ public class GameBoardSimGui {
 	private void setupGUI()
 	{
 		frame = new JFrame("Sim");
-		frame.setSize(600, 400);
+		frame.setSize(600, 440);
 		frame.setLocation(550, 0);
 		 
+		gameStats = new GameStatsSim();
 		board = new BoardPanel(m_gb.m_so.getNodes(),m_gb);
 		board.addMouseListener(new Mouse());
-		frame.add(board);	           
+		gameInfo = new GameInfoSim();
+		frame.add(gameStats, BorderLayout.NORTH);
+		frame.add(board, BorderLayout.CENTER);	      
+		frame.add(gameInfo, BorderLayout.SOUTH);	
 	}
 	
 	
@@ -77,10 +84,6 @@ public class GameBoardSimGui {
 
 	public void updateBoard(StateObserverSim soS, boolean withReset, boolean showValueOnGameboard) {
 		if (soS!=null) {
-			// not needed anymore:
-//	        assert (so instanceof StateObserverSim)
-//			: "StateObservation 'so' is not an instance of StateObserverSim";
-//			StateObserverSim soS = (StateObserverSim) so;
 			
 			board.setShowValueOnGameBoard(showValueOnGameboard);
 			
@@ -90,23 +93,15 @@ public class GameBoardSimGui {
 				board.markLosingTriangle(soS.getLastNodes());
 			}
 			
-			// not needed anymore:
-//			if(soS.getStoredValues() != null && showValueOnGameboard)
-//			{				
-//				//for(int i = 0; i < som.getStoredValues().length; i++)
-//					//System.out.println(som.getStoredValues()[i]);
-//				board.setAvailableActions(soS.getAvailableActions());
-//				board.setActionValues(soS.getStoredValues());
-//			}
-//			if(!showValueOnGameboard)
-//			{
-//				board.setActionValues(null);
-//			}			
+			gameStats.changeNextMove(soS);
+			gameStats.setTurnCount(soS.getMoveCounter());
 		}		
 		frame.repaint();
 	}
 
-	public void enableInteraction(boolean enable) {  	}
+	public void enableInteraction(boolean enable) {  
+		board.setEnabled(enable);
+	}
 
 	public void showGameBoard(Arena simGame, boolean alignToMain) {
 		frame.setVisible(true);
@@ -115,7 +110,6 @@ public class GameBoardSimGui {
 	public void toFront() {
 		frame.setState(Frame.NORMAL);	// if window is iconified, display it normally
 		board.toFront();
-		//input.toFront();
 	}
 	
     public void destroy() {
@@ -126,29 +120,13 @@ public class GameBoardSimGui {
 
 	public class Mouse implements MouseListener
 	{
-//		Point[] circles;
 		int node;
 		
 		public Mouse()
 		{
 			node = 0;
-//			setupCircles(ConfigSim.NUM_NODES);	// bug fix WK: this had a 6 instead of NUM_NODES before
 		}
 
-		// use instead board.circles and use board.isInsideCircles() in mouseClicked().
-//		private void setupCircles(int size)
-//		{
-//			int CENTERX = 275;
-//			int CENTERY = 115;
-//			int radius = 150;
-//			int degree = 360 / size;
-//			circles = new Point[size];
-//			
-//			for(int i = 0; i < size; i++)
-//				circles[i] = new Point(calculateCirclePositionX(radius, degree * i, CENTERX, CENTERY),
-//						   			   calculateCirclePositionY(radius, degree * i, CENTERX, CENTERY));			
-//		}
-		
 		private int calculateCirclePositionX(int radius, int degree, int posX, int posY)
 		{
 			double t = Math.toRadians((double) degree);
@@ -166,16 +144,14 @@ public class GameBoardSimGui {
 		@Override
 		public void mouseClicked(MouseEvent e) 
 		{
+			if (!m_gb.isEnabled) return;
+
 			int x = e.getX();
 			int y = e.getY();
 			
 			for(int i = 0; i < m_gb.m_so.getNodesLength(); i++)
-			{
 				if(board.isInsideCircle(i, x, y))
-				{
 					setInput(i);
-				}
-			}
 		}
 		
 		/**
@@ -220,11 +196,13 @@ public class GameBoardSimGui {
 				m_gb.m_so.advance(act);
 				
 				m_gb.setActionReq(true);
+				gameInfo.changeMessage("");
 				node = 0;
 			}
 			else
 			{
-				System.out.println("action is not legal!");
+				//System.out.println("action is not legal!");
+				gameInfo.changeMessage("Not a legal move!");
 				node = 0;
 			}
 		}

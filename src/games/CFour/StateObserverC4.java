@@ -22,7 +22,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
     private static final double REWARD_POSITIVE =  1.0;
 	private int m_Player;			// Player who makes the next move (0 or 1)
 	private C4Base m_C4;
-	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
+	private ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
 	private boolean gameOver = false;
     
     // --- this is now in ObserverBase ---
@@ -45,20 +45,33 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		setAvailableActions();
 	}
 
-	public StateObserverC4(int[][] board) {
-		m_C4 = new C4Base(board);
-		m_counter = m_C4.countPieces();
-		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
-		setAvailableActions();		
+	// obsolete now: 
+//	public StateObserverC4(int[][] board) {
+//		m_C4 = new C4Base(board);
+//		m_counter = m_C4.countPieces();
+//		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
+//		setAvailableActions();		
+//	}
+	
+	public StateObserverC4(StateObserverC4 other) {
+		super(other);		// copy members m_counter and stored*
+		this.m_C4 = new C4Base(other.getBoard());
+		this.m_Player = other.m_Player;
+		this.gameOver = other.gameOver;
+		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
+				// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
+//		setAvailableActions();		// this would be  slower
 	}
 	
 	public StateObserverC4 copy() {
-		StateObserverC4 sot = new StateObserverC4(m_C4.getBoard());
-		sot.m_counter = this.m_counter;
-		sot.m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
-		sot.gameOver = this.gameOver;
-		//sot.setAvailableActions();		// too slow
-		sot.acts = (ArrayList<ACTIONS>) this.acts.clone();
+//		StateObserverC4 sot = new StateObserverC4(m_C4.getBoard());
+//		sot.m_counter = this.m_counter;
+//		sot.m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
+//		sot.gameOver = this.gameOver;
+//		//sot.setAvailableActions();		// too slow
+//		sot.availableActions = (ArrayList<ACTIONS>) this.availableActions.clone();
+		StateObserverC4 sot = new StateObserverC4(this);
 		return sot;
 	}
 
@@ -156,7 +169,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
         	// --> it is a loss for this.getPlayer().
         	return -sign;
         	
-        	// old code, more complicated and it uses getGameWinner() which we want to be obsolete
+        	// old code, more complicated and it uses getGameWinner() which we want to become obsolete
 //            Types.WINNER win = this.getGameWinner();
 //        	switch(win) {
 //        	case PLAYER_LOSES:
@@ -232,7 +245,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
     }
 
 	public ArrayList<ACTIONS> getAvailableActions() {
-		return acts;
+		return availableActions;
 	}
 	
 	public ArrayList<ACTIONS> getAllAvailableActions() {
@@ -244,7 +257,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	}
 	
 	public int getNumAvailableActions() {
-		return acts.size();
+		return availableActions.size();
 	}
 
 	/**
@@ -252,14 +265,14 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	 * Set them in member ACTIONS[] actions.
 	 */
 	public void setAvailableActions() {
-		acts.clear();
+		availableActions.clear();
 		int[] moves = m_C4.generateMoves(false);
 		for (int j=0; j<moves.length; j++)
-			acts.add(Types.ACTIONS.fromInt(moves[j]));
+			availableActions.add(Types.ACTIONS.fromInt(moves[j]));
 	}
 	
 	public Types.ACTIONS getAction(int i) {
-		return acts.get(i);
+		return availableActions.get(i);
 	}
 
     // --- this is now in ObserverBase ---

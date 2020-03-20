@@ -46,8 +46,8 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 public class StateObserver2048 extends ObserverBase implements StateObsNondeterministic {
 	public static final String[] ACTIONSTRING = {" left", "   up", "right", " down"};
     private Random random = new Random();
-    protected List<Integer> emptyTiles = new ArrayList();
-    protected List<Integer> availableMoves = new ArrayList();   // 0: left, 1: up, 2: right, 3: down
+    protected ArrayList<Integer> emptyTiles = new ArrayList();
+    protected ArrayList<Integer> availableMoves = new ArrayList();   // 0: left, 1: up, 2: right, 3: down
     protected ACTIONS[] actions;
 
     private long boardB;
@@ -59,16 +59,9 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     private int rowLength = 0;
     private int rowValue = 0;
     private int mergeValue = 0;
-//  private int moves = 0;				// obsolete, we have ObserverBase.m_counter
     private long cumulEmptyTiles = 0;
     private boolean isNextActionDeterministic;
 
-    // --- this is now in ObserverBase ---
-//    public ACTIONS[] storedActions = null;
-//    public ACTIONS storedActBest = null;
-//    public double[] storedValues = null;
-//    private double storedMaxScore;
-    
     private ACTIONS nextNondeterministicAction;
 
     public final static double MAXSCORE = 3932156.0;
@@ -149,9 +142,33 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         updateAvailableMoves();
     }
 
-    // Note: StateObserver2048::copy() copies the board state, score, winState, cumulEmptyTiles, 
-    // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
+    public StateObserver2048(StateObserver2048 other) {
+    	super(other);
+        this.isNextActionDeterministic = other.isNextActionDeterministic;
+        this.boardB=other.boardB;
+        this.score = other.score;
+        this.cumulEmptyTiles = other.cumulEmptyTiles; 
+        this.winState = other.winState;
+        this.winState = other.winState;
+        this.highestTileValue = other.highestTileValue;
+		this.actions = other.actions.clone();
+		this.availableMoves = (ArrayList<Integer>) other.availableMoves.clone();
+		this.emptyTiles = (ArrayList<Integer>) other.emptyTiles.clone();
+				// Note that clone does only clone the ArrayList, but not the contained objects, they are 
+				// just copied by reference. However, these objects are never altered, so it is o.k.
+//		updateEmptyTiles();			// this as replacement for clone() 
+//		updateAvailableMoves();		// would be 20% slower
+    }
+
+    @Override
     public StateObserver2048 copy() {
+//    	return copyOLD();
+    	return copyNEW();
+    }
+    
+    // Note: StateObserver2048::copyOLD() copies the board state, score, winState, cumulEmptyTiles, 
+    // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
+    public StateObserver2048 copyOLD() {
     	StateObserver2048 so2 =  new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
     	so2.m_counter = this.m_counter;
     	so2.winState = this.winState;
@@ -160,6 +177,13 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     	return so2;
     }
 
+    // Note: StateObserver2048::copyNEW() copies everything, but is faster since it avoids updateEmptyTiles and
+    // updateAvailableMoves
+    public StateObserver2048 copyNEW() {
+    	StateObserver2048 so2 =  new StateObserver2048(this);
+    	return so2;
+    }
+    
     public boolean isGameOver() {
         if(availableMoves.size() == 0) {
             return true;
@@ -828,7 +852,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
      * @param value        the exponent (2^value is the tile value)
      */
     private void addTile(int position, int value) {
-        boolean succ = emptyTiles.remove(new Integer(position));
+        boolean succ = emptyTiles.remove(Integer.valueOf(position));
         assert succ : "Something wrong in emptyTiles removal";
         //System.out.println(Long.toHexString(boardB));
         long b = (boardB >> (4*position)) & 0x0fL;
@@ -855,7 +879,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         emptyTiles.clear();
         long b = boardB;
         for (int j=0; j<16; j++) {
-            if ((b & 0x0fL)==0) emptyTiles.add(new Integer(j));
+            if ((b & 0x0fL)==0) emptyTiles.add(Integer.valueOf(j));
             b = b >> 4;                // shift down by one hex digit
         }
         cumulEmptyTiles += emptyTiles.size() - 1;  

@@ -21,7 +21,7 @@ import tools.Types.ACTIONS;
 public class StateObserverNim extends ObserverBase implements StateObservation {
 	private int[] m_heap;		// has for each heap the count of items in it
 	private int m_player;		// player who makes the next move (0 or 1)
-	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
+	private ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
 	private boolean SORT_IT = false;		// experimental
     
 	/**
@@ -43,20 +43,33 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		setAvailableActions();
 	}
 
-	public StateObserverNim(int[] heaps, int player) {
-		assert heaps.length==NimConfig.NUMBER_HEAPS;
-		m_heap = heaps.clone();
-		m_player = player;
-		setAvailableActions();
+	// obsolete now:
+//	public StateObserverNim(int[] heaps, int player) {
+//		assert heaps.length==NimConfig.NUMBER_HEAPS;
+//		m_heap = heaps.clone();
+//		m_player = player;
+//		setAvailableActions();
+//	}
+	
+	public StateObserverNim(StateObserverNim other) {
+		super(other);		// copy members m_counter and stored*
+		this.m_heap = other.m_heap.clone();
+		this.m_player = other.m_player;
+		this.SORT_IT = other.SORT_IT;
+		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
+				// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
+//		setAvailableActions();		// this would be a bit slower
 	}
 	
 	public StateObserverNim copy() {
-		StateObserverNim so = new StateObserverNim(m_heap,m_player);
-		so.m_counter = this.m_counter;
-		so.storedActBest = this.storedActBest;
-		so.storedMaxScore = this.storedMaxScore;
-		if (this.storedActions!=null) so.storedActions = this.storedActions.clone();
-		if (this.storedValues!=null) so.storedValues = this.storedValues.clone();
+		StateObserverNim so = new StateObserverNim(this);
+		// obsolete, this is now done via super(other) in copy constructor:
+//		so.m_counter = this.m_counter;
+//		so.storedActBest = this.storedActBest;
+//		so.storedMaxScore = this.storedMaxScore;
+//		if (this.storedActions!=null) so.storedActions = this.storedActions.clone();
+//		if (this.storedValues!=null) so.storedValues = this.storedValues.clone();
 		return so;
 	}
 
@@ -212,11 +225,11 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
     }
     
 	public ArrayList<ACTIONS> getAvailableActions() {
-		return acts;
+		return availableActions;
 	}
 	
 	public int getNumAvailableActions() {
-		return acts.size();
+		return availableActions.size();
 	}
 
 	/**
@@ -232,16 +245,16 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 * <p>
 	 */
 	public void setAvailableActions() {
-		acts.clear();
+		availableActions.clear();
 		for (int i=0;i<NimConfig.NUMBER_HEAPS;i++) {
 			for (int j=0; j<NimConfig.MAX_MINUS; j++) 
-				if (j<m_heap[i]) acts.add(Types.ACTIONS.fromInt(i*NimConfig.MAX_MINUS+j));
+				if (j<m_heap[i]) availableActions.add(Types.ACTIONS.fromInt(i*NimConfig.MAX_MINUS+j));
 			
 		}
 	}
 	
 	public Types.ACTIONS getAction(int i) {
-		return acts.get(i);
+		return availableActions.get(i);
 	}
 
 	public int[] getHeaps() {

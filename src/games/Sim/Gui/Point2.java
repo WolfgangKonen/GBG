@@ -1,4 +1,6 @@
-package games.Sim;
+package games.Sim.Gui;
+
+import games.Sim.Point;
 
 public class Point2 {
 	

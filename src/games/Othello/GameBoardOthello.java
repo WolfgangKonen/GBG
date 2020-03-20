@@ -12,7 +12,7 @@ import games.Nim.GameBoardNimGui;
 import games.Nim.NimConfig;
 import games.Nim.StateObserverNim;
 import games.Othello.Gui.GameBoardOthelloGui;
-import games.Othello.Gui.Gamestats;
+import games.Othello.Gui.GameStats;
 import games.Othello.Gui.Legend;
 import games.Othello.Gui.Tile;
 import games.RubiksCube.GameBoardCube;

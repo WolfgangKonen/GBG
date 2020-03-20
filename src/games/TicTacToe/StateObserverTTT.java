@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import controllers.PlayAgent;
 import games.ObserverBase;
 import games.StateObservation;
+import games.Othello.StateObserverOthello;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -23,7 +24,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     private static final double REWARD_POSITIVE =  1.0;
 	private int[][] m_Table;		// current board position
 	private int m_Player;			// player who makes the next move (+1 or -1)
-	private ArrayList<Types.ACTIONS> acts = new ArrayList();	// holds all available actions
+	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -38,17 +39,18 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		setAvailableActions();
 	}
 
-	public StateObserverTTT(int[][] Table) {
-		int pieceCount=0;
-		for (int i=0; i<3; i++) 
-			for (int j=0; j<3; j++) {
-				pieceCount += Table[i][j];
-			}
-		m_Player = (pieceCount%2==0 ? +1 : -1);
-		m_Table = new int[3][3];
-		TicTDBase.copyTable(Table,m_Table); 
-		setAvailableActions();
-	}
+	// never used
+//	public StateObserverTTT(int[][] Table) {
+//		int pieceCount=0;
+//		for (int i=0; i<3; i++) 
+//			for (int j=0; j<3; j++) {
+//				pieceCount += Table[i][j];
+//			}
+//		m_Player = (pieceCount%2==0 ? +1 : -1);
+//		m_Table = new int[3][3];
+//		TicTDBase.copyTable(Table,m_Table); 
+//		setAvailableActions();
+//	}
 	
 	public StateObserverTTT(int[][] Table, int Player) {
 		m_Table = new int[3][3];
@@ -57,9 +59,20 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		setAvailableActions();
 	}
 	
+	public StateObserverTTT(StateObserverTTT other)
+	{
+		super(other);		// copy members m_counter and stored*
+		this.m_Table = new int[3][3];
+		TicTDBase.copyTable(other.m_Table,m_Table); 
+		m_Player = other.m_Player;
+		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
+				// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
+//		setAvailableActions();		// this would be a bit slower
+	}
+	
 	public StateObserverTTT copy() {
-		StateObserverTTT sot = new StateObserverTTT(m_Table,m_Player);
-		sot.m_counter = this.m_counter;
+		StateObserverTTT sot = new StateObserverTTT(this);
 		return sot;
 	}
 
@@ -207,11 +220,11 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     }
     
 	public ArrayList<ACTIONS> getAvailableActions() {
-		return acts;
+		return availableActions;
 	}
 	
 	public int getNumAvailableActions() {
-		return acts.size();
+		return availableActions.size();
 	}
 
 	/**
@@ -219,16 +232,16 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	 * Set them in member ACTIONS[] actions.
 	 */
 	public void setAvailableActions() {
-		acts.clear();
-		if (m_Table[0][0]==0)  acts.add(Types.ACTIONS.fromInt(0));
-		if (m_Table[0][1]==0)  acts.add(Types.ACTIONS.fromInt(1));
-		if (m_Table[0][2]==0)  acts.add(Types.ACTIONS.fromInt(2));
-		if (m_Table[1][0]==0)  acts.add(Types.ACTIONS.fromInt(3));
-		if (m_Table[1][1]==0)  acts.add(Types.ACTIONS.fromInt(4));
-		if (m_Table[1][2]==0)  acts.add(Types.ACTIONS.fromInt(5));
-		if (m_Table[2][0]==0)  acts.add(Types.ACTIONS.fromInt(6));
-		if (m_Table[2][1]==0)  acts.add(Types.ACTIONS.fromInt(7));
-		if (m_Table[2][2]==0)  acts.add(Types.ACTIONS.fromInt(8));
+		availableActions.clear();
+		if (m_Table[0][0]==0)  availableActions.add(Types.ACTIONS.fromInt(0));
+		if (m_Table[0][1]==0)  availableActions.add(Types.ACTIONS.fromInt(1));
+		if (m_Table[0][2]==0)  availableActions.add(Types.ACTIONS.fromInt(2));
+		if (m_Table[1][0]==0)  availableActions.add(Types.ACTIONS.fromInt(3));
+		if (m_Table[1][1]==0)  availableActions.add(Types.ACTIONS.fromInt(4));
+		if (m_Table[1][2]==0)  availableActions.add(Types.ACTIONS.fromInt(5));
+		if (m_Table[2][0]==0)  availableActions.add(Types.ACTIONS.fromInt(6));
+		if (m_Table[2][1]==0)  availableActions.add(Types.ACTIONS.fromInt(7));
+		if (m_Table[2][2]==0)  availableActions.add(Types.ACTIONS.fromInt(8));
 //        // /WK/ Get the available actions in an array.
 //		// *TODO* Does this work if acts.size()==0 ?
 //        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
@@ -241,7 +254,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	}
 	
 	public Types.ACTIONS getAction(int i) {
-		return acts.get(i);
+		return availableActions.get(i);
 	}
 
 	public int[][] getTable() {

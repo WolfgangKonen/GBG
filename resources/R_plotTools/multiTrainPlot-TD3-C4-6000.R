@@ -32,6 +32,7 @@ filenames=c(#"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
            #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm-noFA.csv"
             "multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm.csv"
            ,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm-noFA.csv"
+           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm-noFA2.csv"
            #,".csv"
            #,".csv"
            #,".csv"
@@ -40,7 +41,10 @@ filenames=c(#"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
 # suffix -ALm: both evaluators AB, 1st one w/o DL (3), 2nd one with DL (5),
 # in both cases the evaluators MCTS or AlphaBeta (AB) play 2nd --> ideal winrate is 1.0
 # in both cases the 'm' means that runs were performed on maanbs05.
-# suffix -noFA: no final adaptation RL (FARL) step.
+# suffix -noFA: no final adaptation RL (FARL) step (both FARL steps inhibited).
+# suffix -noFA2: no final adaptation RL (FARL) step (only 2nd FARL step inhibited).
+#
+# The 1st selected file should be FARL, the 2nd a -noFA (or -noFA2) file.
 #
 # other pars: alpha = 3.7->3.7, eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, 
 # NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=T, fixed ntuple mode 1: 70 8-tuples. 
@@ -53,6 +57,8 @@ for (k in 1:length(filenames)) {
   filename <- paste0(path,filenames[k])
   df <- read.csv(file=filename, dec=".",skip=2)
   df$run <- as.factor(df$run)
+  names(df)[7] <- "totalTrainSec"
+  print(unique(df$run))
   df <- df[,setdiff(names(df),c("trnMoves", "movesSecond","lambda","null","X","X.1"))]
   #,"elapsedTime"
   #if (k==1) df <- cbind(df,actionNum=rep(0,nrow(df)))
@@ -100,7 +106,7 @@ tgc2 <- cbind(tgc2,evalMode=rep("AB-DL",nrow(tgc2)))
 names(tgc2)[5] <- "eval"  # rename "evalT"
 tgc <- rbind(tgc1,tgc2) # AB & MCTS
 #tgc <- tgc2              # AB only
-tgcT <- summarySE(dfBoth, measurevar="elapsedTime", groupvars=c(gamesVar,"algo","targetMode"))
+tgcT <- summarySE(dfBoth, measurevar="totalTrainSec", groupvars=c(gamesVar,"algo","targetMode"))
 z=aggregate(dfBoth$evalT,dfBoth[,c(gamesVar,"algo","targetMode")],mean)
 tgc$algo <- as.factor(tgc$algo)
 tgc$targetMode <- as.factor(tgc$targetMode)

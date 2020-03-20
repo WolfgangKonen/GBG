@@ -325,6 +325,7 @@ public class XArenaButtonsGui extends JPanel {
 							// store this in taskBefore:
 							m_arena.taskBefore=ArenaTrain.Task.INSPECTV;
 						}
+						
 						// toggle m_arena.state between PLAY and IDLE
 						if (m_arena.taskState!=ArenaTrain.Task.PLAY) {
 							m_arena.taskState = ArenaTrain.Task.PLAY;
@@ -546,6 +547,7 @@ public class XArenaButtonsGui extends JPanel {
 		if (!state) isNTupShowEnabled = NTupShowB.isEnabled();
 		NTupShowB.setEnabled(state);
 		if (state) NTupShowB.setEnabled(isNTupShowEnabled);
+		showValOnGB.setEnabled(state);		// /WK/03/2020: added
 	}
 
 	public void helpFunction() {
