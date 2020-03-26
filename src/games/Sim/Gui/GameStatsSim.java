@@ -39,7 +39,8 @@ public class GameStatsSim extends JPanel{
 	}	
 	
 	public void changeNextMove(StateObserverSim so) {
-		String str =  "Next move: " + Types.GUI_PLAYER_COLOR_NAME[so.getPlayer()];
+		String str =  "Next move: ";
+		if (!so.isGameOver()) str = str + Types.GUI_PLAYER_COLOR_NAME[so.getPlayer()];
 		nextMove.setText(str); 
 	}
 	

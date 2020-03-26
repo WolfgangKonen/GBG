@@ -524,6 +524,25 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.setToolTipText("<html><body>Show Technical Report on GBG in your default PDF viewer</body></html>");
 		menu.add(menuItem);
 
+		menuItem = new JMenuItem("Game Rules");
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				java.net.URL url = getClass().getResource("/GameRules-GBG.htm");  
+									// getResource() will find .htm in ../resources/
+				System.out.println("URL = " + url);
+				if (url == null) {
+					m_arena.showMessage("ERROR: Could not locate URL with " + 
+							"getClass().getResource(\"/GameRules-GBG.htm\")", 
+							"XArenaMenu",JOptionPane.ERROR_MESSAGE);
+					printStatus("[ERROR: Could not locate game rules file URL]");
+				} else {
+					ShowBrowser.openURL(url);
+				}
+			}
+		});
+		menuItem.setToolTipText("<html><body>Show game rules in your default browser</body></html>");
+		menu.add(menuItem);
+
 
 		add(menu);
 	}

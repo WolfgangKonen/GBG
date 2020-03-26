@@ -232,31 +232,32 @@ public class GameBoardTTTGui extends JFrame {
 				
 			}
 			
-			if (showValueOnGameboard && soT.getStoredValues()!=null) {
-				for(i=0;i<3;i++)
-					for(j=0;j<3;j++) 
-						VTable[i][j]=Double.NaN;	
-				
-				for (int k=0; k<soT.getStoredValues().length; k++) {
-					Types.ACTIONS action = soT.getStoredAction(k);
-					int iAction = action.toInt();
-					j=iAction%3;
-					i=(iAction-j)/3;
-					VTable[i][j] = soT.getStoredValues()[k];					
-				}	
-				if (showValueOnGameboard) {
-					String splus = (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
-					String sminus= (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "O" : "X";
-					switch(Player) {
-					case(+1): 
-						rightInfo.setText("    Score for " + splus); break;
-					case(-1):
-						rightInfo.setText("    Score for " + sminus); break;
-					}					
-				} else {
-					rightInfo.setText("");					
+			if (showValueOnGameboard) {
+				if (soT.getStoredValues()!=null) {
+					for(i=0;i<3;i++)
+						for(j=0;j<3;j++) 
+							VTable[i][j]=Double.NaN;	
+					
+					for (int k=0; k<soT.getStoredValues().length; k++) {
+						Types.ACTIONS action = soT.getStoredAction(k);
+						int iAction = action.toInt();
+						j=iAction%3;
+						i=(iAction-j)/3;
+						VTable[i][j] = soT.getStoredValues()[k];					
+					}	
 				}
-			} 
+
+				String splus = (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
+				String sminus= (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "O" : "X";
+				switch(Player) {
+				case(+1): 
+					rightInfo.setText("    Score for " + splus); break;
+				case(-1):
+					rightInfo.setText("    Score for " + sminus); break;
+				}					
+			} else {
+				rightInfo.setText("");					
+			}
 		} // if(so!=null)
 		
 		guiUpdateBoard(false,showValueOnGameboard);

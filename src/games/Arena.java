@@ -77,15 +77,16 @@ abstract public class Arena implements Runnable {
 	public TSAgentManager tournamentAgentManager = null;
 	public boolean singlePlayerTSRunning = false;
 
-	// launch Arena with UI
-	public Arena() {
-		initGame(""); 
-	}
-
-	// launch Arena with UI
-	public Arena(String title) {
-		initGame(title);
-	}
+	// --- never used ---
+//	// launch Arena with UI
+//	public Arena() {
+//		initGame(""); 
+//	}
+//
+//	// launch Arena with UI
+//	public Arena(String title) {
+//		initGame(title);
+//	}
 
 	// decide via withUI whether wit UI or not
 	public Arena(String title, boolean withUI) {
@@ -203,7 +204,7 @@ abstract public class Arena implements Runnable {
 				enableButtons(false);
 				setStatusMessage("Running Compete Both ...");
 
-				firstScore = m_xfun.bothCompete(m_xab, gb);
+				firstScore = m_xfun.allCompete(m_xab, gb);
 
 				enableButtons(true);
 				str = "Compete All Roles finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
@@ -227,24 +228,27 @@ abstract public class Arena implements Runnable {
 				taskState = Task.IDLE;
 				break;
 			case PLAY:
-				// enableButtons(false); // see Play.addActionListener in XArenaButtonsGui
-				//
+				enableButtons(false,true,false); 
 				if (!singlePlayerTSRunning) {
 					gb.showGameBoard(this, false);
 					gb.clearBoard(false, true);
+					
 					PlayGame();
+					
 					gb.enableInteraction(false);
-					//enableButtons(true);		// see Play.addActionListener in XArenaButtonsGui
-												// (it is better to do it there, otherwise the branches PLAY and INSPECTV may interfere)
 				}
+				enableButtons(true);		
 				break;
 			case INSPECTV:
+				enableButtons(false,true,true); 
 				gb.showGameBoard(this, false);
 				gb.clearBoard(false, true);
 				gb.setActionReq(true);
+				
 				InspectGame();
+				
 				gb.enableInteraction(false);
-				//enableButtons(true);			// see Inspect.addActionListener in XArenaButtonsGui
+				enableButtons(true);			
 				break;
 			case IDLE:
 			default:
@@ -252,6 +256,8 @@ abstract public class Arena implements Runnable {
 					Thread.sleep(100);
 				} catch (Exception e) {
 				}
+//				if (gb.getStateObs().isGameOver())
+//					enableButtons(true);
 			}
 
 			performArenaDerivedTasks();
@@ -353,7 +359,8 @@ abstract public class Arena implements Runnable {
 						// i.e.
 						// the game-over position, but clear the values:
 						gb.clearBoard(false, true);
-					
+//						this.enableButtons(true);
+				
 						break; // out of while, i.e. finish INSPECTV
 					} else {
 						// we get here e.g. in case RubiksCube where the initial
@@ -661,6 +668,7 @@ abstract public class Arena implements Runnable {
 					// for (agentVec[0]=="Human")-case: ensure to show the "Solved
 					// in..." text in leftInfo:
 					gb.updateBoard(so, false, showValue);
+//					this.enableButtons(true);
 					
 					String gostr = this.gameOverString(so,agentVec,spDT);
 					switch (numPlayers) {
@@ -1123,7 +1131,15 @@ abstract public class Arena implements Runnable {
 	}
 
 	public void enableButtons(boolean state) {
-		m_xab.enableButtons(state);
+		m_xab.enableButtons(state, state, state);
+	}
+
+	public void enableButtons(boolean state, boolean playEnabled) {
+		m_xab.enableButtons(state, playEnabled, state);
+	}
+
+	public void enableButtons(boolean state, boolean playEnabled, boolean inspectVEnabled) {
+		m_xab.enableButtons(state, playEnabled, inspectVEnabled);
 	}
 
 	abstract public String getGameName();

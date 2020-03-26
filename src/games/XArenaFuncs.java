@@ -1153,7 +1153,7 @@ public class XArenaFuncs {
 		return this.competeDispatcher(true, false, xab, gb);
 	}
 
-	public double bothCompete(XArenaButtons xab, GameBoard gb) {
+	public double allCompete(XArenaButtons xab, GameBoard gb) {
 		return this.competeDispatcher(false, true, xab, gb);
 	}
 

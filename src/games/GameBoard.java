@@ -26,6 +26,11 @@ public interface GameBoard {
 	 * things to be initialized prior to starting a training 
 	 */
 	public void initialize();
+	/**
+	 * Set {@link GameBoard}'s state to the default start state and clear the game board
+	 * @param boardClear
+	 * @param vClear
+	 */
 	public void clearBoard(boolean boardClear, boolean vClear);
 	/**
 	 * things to be done when disposing a GameBoard object

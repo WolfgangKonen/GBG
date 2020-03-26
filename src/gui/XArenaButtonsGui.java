@@ -221,7 +221,7 @@ public class XArenaButtonsGui extends JPanel {
 	
 	public void configureGui() {
 		SolidBorder bord = new SolidBorder();
-		this.enableButtons(true);
+		this.enableButtons(true,true,true);
 //--- this is now handled via hasTrainRights() ---
 //		GameNumT.setEnabled(false);		// Arena allows no training / multi-training 
 //		TrainNumT.setEnabled(false);	// (see ArenaTrain for enabling this)	
@@ -282,11 +282,11 @@ public class XArenaButtonsGui extends JPanel {
 							// toggle m_arena.state between TRAIN and IDLE
 							if (m_arena.taskState!=ArenaTrain.Task.TRAIN) {
 								m_arena.taskState = ArenaTrain.Task.TRAIN;
-								enableButtons(false);			// disable all buttons ...
-								mTrain[x].setEnabled(true);		// ... but the TRAIN button
+								enableButtons(false,false,false);	// disable all buttons ...
+								mTrain[x].setEnabled(true);			// ... but the TRAIN button
 							} else {
 								m_arena.taskState = ArenaTrain.Task.IDLE;
-								enableButtons(true);
+								enableButtons(true,true,true);
 							}
 						}
 					}	
@@ -302,12 +302,12 @@ public class XArenaButtonsGui extends JPanel {
 						if (m_arena.taskState!=ArenaTrain.Task.MULTTRN) {
 							m_arena.taskState = ArenaTrain.Task.MULTTRN;
 							m_arena.setStatusMessage("Multitrain for agent X ...");
-							enableButtons(false);			// disable all buttons ...
-							MultiTrain.setEnabled(true);	// ... but the MultiTrain button
+							enableButtons(false,false,false);	// disable all buttons ...
+							MultiTrain.setEnabled(true);		// ... but the MultiTrain button
 						} else {
 							m_arena.taskState = ArenaTrain.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
-							enableButtons(true);
+							enableButtons(true,true,true);
 						}
 					}
 				}	
@@ -330,12 +330,13 @@ public class XArenaButtonsGui extends JPanel {
 						if (m_arena.taskState!=ArenaTrain.Task.PLAY) {
 							m_arena.taskState = ArenaTrain.Task.PLAY;
 							m_arena.setStatusMessage("Playing a game ...");
-							enableButtons(false);		// disable all buttons ...
-							Play.setEnabled(true);		// ... but the Play button
+							// this is now donw in Arena.run again ...
+//							enableButtons(false);		// disable all buttons ...
+//							Play.setEnabled(true);		// ... but the Play button
 						} else {
 							m_arena.taskState = ArenaTrain.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
-							enableButtons(true);
+//							enableButtons(true);
 						}
 						
 					}
@@ -351,13 +352,14 @@ public class XArenaButtonsGui extends JPanel {
 						if (m_arena.taskState!=ArenaTrain.Task.INSPECTV) {
 							m_arena.taskState = ArenaTrain.Task.INSPECTV;
 							m_arena.setStatusMessage("Inspecting the value function ...");
-							enableButtons(false);			// disable all buttons ...
-							InspectV.setEnabled(true);		// ... but the InspectV button
-							Play.setEnabled(true);			// ... and the Play button
+							// this is now done in Arena.run again ...
+//							enableButtons(false);			// disable all buttons ...
+//							InspectV.setEnabled(true);		// ... but the InspectV button
+//							Play.setEnabled(true);			// ... and the Play button
 						} else {
 							m_arena.taskState = ArenaTrain.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
-							enableButtons(true);
+//							enableButtons(true);
 						}
 					}
 				}	
@@ -523,7 +525,7 @@ public class XArenaButtonsGui extends JPanel {
 		}
 		GameNumT.setEnabled(true);	
 		TrainNumT.setEnabled(true);		
-		this.enableButtons(true);
+		this.enableButtons(true,true,true);
 	}
 
 	public void colorStripes(Color[] stripeColor) {
@@ -535,9 +537,16 @@ public class XArenaButtonsGui extends JPanel {
 		}
 	}
 	
-	public void enableButtons(boolean state) {
-		Play.setEnabled(state);
-		InspectV.setEnabled(state);
+	/**
+	 * Enable/disable the buttons of {@link Arena} or {@link ArenaTrain} 
+	 * 
+	 * @param state			if true: enable, if false: disable
+	 * @param playEnabled		the state for button Play (overrides {@code state})
+	 * @param inspectVEnabled 	the state for button InspectV (overrides {@code state})
+	 */
+	public void enableButtons(boolean state, boolean playEnabled, boolean inspectVEnabled) {
+		Play.setEnabled(playEnabled);
+		InspectV.setEnabled(inspectVEnabled);
 		Logs.setEnabled(state);
 		for (int n=0; n<numPlayers; n++) {
 			mParam[n].setEnabled(state);
@@ -552,7 +561,6 @@ public class XArenaButtonsGui extends JPanel {
 
 	public void helpFunction() {
 		if (htmlDisplay==null) {
-			//htmlDisplay =new HtmlDisplay("HelpGUI-test.htm");
 			htmlDisplay =new HtmlDisplay("HelpGUI-Arena-GBG.htm");
 			htmlDisplay.setTitle("Help for Arena in GBG");
 			htmlDisplay.setSize(800,600);

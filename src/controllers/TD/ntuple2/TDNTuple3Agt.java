@@ -104,19 +104,17 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * (initially null)
 	 */
 	transient private StateObservation[] sLast;	// last state of player p
-//	transient private Types.ACTIONS[] aLast;	// last action of player p
 	transient private boolean[] randLast;		// whether last action of player p was a random action
 	transient private ScoreTuple rLast;
 
-	private boolean RANDINITWEIGHTS = false;// If true, init weights of value function randomly
+	private boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
 
 	private boolean m_DEBG = false; //false;true;
 	// debug printout in collectReward:
 	public static boolean DBG_REWARD=false;
 	
-	// use ternary target in update rule:
-	private boolean TERNARY=false;		// if true, it remains true only for final-reward-games (see getNextAction2)
-	
+	// variable TERNARY is normally false. If true, use ternary target in update rule:
+	private boolean TERNARY=false;		// In this case it remains true only for final-reward-games (see getNextAction2)	
 	// variable FINALADAPTAGENTS is normally true (use finalAdaptAgents). Set only to false if you want to test how agents behave otherwise:
 	private boolean FINALADAPTAGENTS=true; //false;
 	// variable FINALADAPT_PART2 is normally true. Set only to false if you want to test how agents behave otherwise:
@@ -151,7 +149,6 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		super(name);
 		this.numPlayers = xnf.getNumPlayers();
 		this.sLast = new StateObservation[numPlayers];
-//		this.aLast = new Types.ACTIONS[numPlayers];
 		this.randLast = new boolean[numPlayers];
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);			
 	}

@@ -205,9 +205,9 @@ public class XArenaButtons //extends JPanel
 	}
 
 	// Known caller outside XArenaButtons: Arena.run()
-	void enableButtons(boolean state) {
+	void enableButtons(boolean state, boolean playEnabled, boolean inspectVEnabled) {
 		if (m_XAB_gui != null)
-			m_XAB_gui.enableButtons(state);
+			m_XAB_gui.enableButtons(state,playEnabled,inspectVEnabled);
 	}
 	
 //	/** 

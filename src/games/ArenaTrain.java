@@ -43,18 +43,19 @@ abstract public class ArenaTrain extends Arena
 {
 	private static final long serialVersionUID = 1L;
 	private Thread playThreadAT = null;
-	
-	// launch ArenaTrain with UI
-	public ArenaTrain() {
-		super();
-		initArenaTrain();
-	}
-	
-	// launch ArenaTrain with UI
-	public ArenaTrain(String title) {
-		super(title);
-		initArenaTrain();
-	}
+
+	// --- never used ---
+//	// launch ArenaTrain with UI
+//	public ArenaTrain() {
+//		super();
+//		initArenaTrain();
+//	}
+//	
+//	// launch ArenaTrain with UI
+//	public ArenaTrain(String title) {
+//		super(title);
+//		initArenaTrain();
+//	}
 	
 	// decide via withUI whether wit UI or not
 	public ArenaTrain(String title, boolean withUI) {
@@ -105,11 +106,12 @@ abstract public class ArenaTrain extends Arena
 				this.showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
 			} 
 			if (pa!=null && pa.isTrainable()) {
-//				enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtons
+//				enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtonsGui
 				setStatusMessage("Training "+agentN+"-Player X ...");
-
 				try {
+					
 					m_xfun.m_PlayAgents[n] = m_xfun.train(n,agentN, m_xab, gb);
+					
 				} catch (IOException e2) {
 					e2.printStackTrace();
 				} catch (RuntimeException e) {
@@ -139,7 +141,7 @@ abstract public class ArenaTrain extends Arena
 			taskState = Task.IDLE; 
 			break;
 		case MULTTRN:
-//			enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtons
+//			enableButtons(false);	// see MultiTrain.addActionListener in XArenaButtonsGui
 			
 	        setStatusMessage("MultiTrain started ...");
 	        long start_time = Calendar.getInstance().getTime().getTime();
@@ -179,27 +181,8 @@ abstract public class ArenaTrain extends Arena
 		
 		}
 	
-		//--- obsolete now, see super.performArenaDerivedTasks() in JavaDoc above
-//		performArenaTrainDerivedTasks();
-
 	}
 	
-//	/**
-//	 * This (empty) method is called from {@link #performArenaDerivedTasks()} and it 
-//	 * may to be overridden by classes derived from {@link ArenaTrain}. <p>
-//	 * 
-//	 * It allows to add additional tasks to the task switch.
-//	 * 
-//	 * This method will use member {@code taskState} from {@link Arena}. 
-//	 * It performs several actions appropriate for the derived class 
-//	 * and - importantly - changes taskState back to IDLE (when appropriate)
-//	 * 
-//	 * @see Arena
-//	 */
-//	public void performArenaTrainDerivedTasks() {
-//		
-//	}
-
 // *TODO* --- this may be integrated later in the general interface ---
 //
 //	/**

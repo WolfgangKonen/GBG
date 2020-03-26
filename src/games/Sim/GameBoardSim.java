@@ -91,25 +91,26 @@ public class GameBoardSim implements GameBoard {
 			: "StateObservation 'so' is not an instance of StateObserverSim";
 	        soS = (StateObserverSim) so;
 			m_so = soS.copy();
-			
-			if (so.isGameOver()) {				
-				ScoreTuple sc = soS.getGameScoreTuple();
-				int winner = sc.argmax();
-				if (sc.max()==0.0) winner = -2;	// tie indicator
-//				int winner = som.getGameWinner3player();		// make getGameWinner3player obsolete
-				if(winner < 0)
-					System.out.println("Tie");
-				else
-					System.out.println(winner  + " has won");
-					
-			} else {
-//				int player = soS.getPlayer();
-//				switch(player) {
-//					case(0): 	System.out.println("0 to move   "); break;
-//					case(1):	System.out.println("1 to move   "); break;
-//					case(2):	System.out.println("2 to move   "); break;
-//				}
-			}
+	
+			// --- this is now all done in m_gameGui.updateBoard ---
+//			if (so.isGameOver()) {				
+//				ScoreTuple sc = soS.getGameScoreTuple();
+//				int winner = sc.argmax();
+//				if (sc.max()==0.0) winner = -2;	// tie indicator
+////				int winner = som.getGameWinner3player();		// make getGameWinner3player obsolete
+//				if(winner < 0)
+//					System.out.println("Tie");
+//				else
+//					System.out.println(winner  + " has won");
+//					
+//			} else {
+////				int player = soS.getPlayer();
+////				switch(player) {
+////					case(0): 	System.out.println("0 to move   "); break;
+////					case(1):	System.out.println("1 to move   "); break;
+////					case(2):	System.out.println("2 to move   "); break;
+////				}
+//			}
 		} // if (so!=null)
 		
 		if (m_gameGui!=null)

@@ -95,6 +95,17 @@ public class GameBoardSimGui {
 			
 			gameStats.changeNextMove(soS);
 			gameStats.setTurnCount(soS.getMoveCounter());
+			
+			if (soS.isGameOver()) {
+				ScoreTuple sc = soS.getGameScoreTuple();
+				int winner = sc.argmax();
+				if (sc.max()==0.0) winner = -2;	// tie indicator
+				if(winner < 0)
+					gameInfo.changeMessage("Tie");
+				else
+					gameInfo.changeMessage(Types.GUI_PLAYER_COLOR_NAME[winner]  + " has won");
+				
+			}
 		}		
 		frame.repaint();
 	}
