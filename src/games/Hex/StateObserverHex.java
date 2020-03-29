@@ -84,7 +84,8 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
         copyTable(other.board);
         this.currentPlayer =other.currentPlayer;
         this.lastUpdatedTile = other.lastUpdatedTile;
-		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+		if (other.availableActions!=null)	// this check is needed when loading older logs
+			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 					// note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
 					// just copied by reference. However, as far as we see, the ACTIONS are never altered, so 
 					// it should be o.k.

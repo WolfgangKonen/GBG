@@ -117,7 +117,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		this.loser = other.loser;
 		this.allRewards = other.allRewards.clone();
 		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();
-		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+		if (other.availableActions!=null)	// this check is needed when loading older logs
+			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
 				// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
 //		setAvailableActions();		// this as replacement for availableActions.clone() would be a bit slower

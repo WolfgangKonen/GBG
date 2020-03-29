@@ -58,7 +58,8 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		this.m_C4 = new C4Base(other.getBoard());
 		this.m_Player = other.m_Player;
 		this.gameOver = other.gameOver;
-		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+		if (other.availableActions!=null)	// this check is needed when loading older logs
+			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
 				// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
 //		setAvailableActions();		// this would be  slower

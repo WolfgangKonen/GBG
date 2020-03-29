@@ -152,8 +152,10 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         this.winState = other.winState;
         this.highestTileValue = other.highestTileValue;
 		this.actions = other.actions.clone();
-		this.availableMoves = (ArrayList<Integer>) other.availableMoves.clone();
-		this.emptyTiles = (ArrayList<Integer>) other.emptyTiles.clone();
+		if (other.availableMoves!=null)	// this check is needed when loading older logs
+			this.availableMoves = (ArrayList<Integer>) other.availableMoves.clone();
+		if (other.emptyTiles!=null)	// this check is needed when loading older logs
+			this.emptyTiles = (ArrayList<Integer>) other.emptyTiles.clone();
 				// Note that clone does only clone the ArrayList, but not the contained objects, they are 
 				// just copied by reference. However, these objects are never altered, so it is o.k.
 //		updateEmptyTiles();			// this as replacement for clone() 

@@ -65,7 +65,8 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		this.m_Table = new int[3][3];
 		TicTDBase.copyTable(other.m_Table,m_Table); 
 		m_Player = other.m_Player;
-		this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
+		if (other.availableActions!=null)	// this check is needed when loading older logs
+			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
 				// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
 //		setAvailableActions();		// this would be a bit slower
