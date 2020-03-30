@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -474,79 +475,94 @@ public class XArenaMenu extends JMenuBar {
 		menu.setMnemonic(KeyEvent.VK_A);
 		menu.getAccessibleContext().setAccessibleDescription("Help");
 
-		menuItem = new JMenuItem("Show Help-File");
-		menuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				m_arena.m_xab.helpFunction();
-				//java.net.URL url = getClass().getResource("/doc/index.htm");
-				//ShowBrowser.openURL(url);			
-			}
-		});
-		menuItem.setToolTipText("<html><body>Show Help File</body></html>");
-		menu.add(menuItem);
+//		menuItem = new JMenuItem("Show Help-File");
+//		menuItem.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				m_arena.m_xab.helpFunction();
+//				//java.net.URL url = getClass().getResource("/doc/index.htm");
+//				//ShowBrowser.openURL(url);			
+//			}
+//		});
+//		menuItem.setToolTipText("<html><body>Show Help File</body></html>");
+//		menu.add(menuItem);
 		
-		menuItem = new JMenuItem("Help-File in Browser");
+		menuItem = new JMenuItem("Help File in Browser");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//java.net.URL url = getClass().getResource("/doc/HelpGUI-Arena-GBG.htm");
-				java.net.URL url = getClass().getResource("/HelpGUI-Arena-GBG.htm");  
-									// getResource() will find .htm in ../resources/
-				System.out.println("URL = " + url);
-				if (url == null) {
-					m_arena.showMessage("ERROR: Could not locate URL with " + 
-							"getClass().getResource(\"/HelpGUI-Arena-GBG.htm\")", 
-							"XArenaMenu",JOptionPane.ERROR_MESSAGE);
-					printStatus("[ERROR: Could not locate help file URL]");
-				} else {
-					ShowBrowser.openURL(url);
-				}
+				showResource("/HelpGUI-Arena-GBG.htm");
 			}
 		});
-		menuItem.setToolTipText("<html><body>Show Help-File in your default browser</body></html>");
+		menuItem.setToolTipText("<html><body>Show help file in your default browser</body></html>");
 		menu.add(menuItem);
 
-		menuItem = new JMenuItem("Show TR-GBG.pdf");
+		menuItem = new JMenuItem("Help File as PDF");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				java.net.URL url = getClass().getResource("/TR-GBG.pdf");  
-									// getResource() will find .pdf in ../resources/
-				System.out.println("URL = " + url);
-				if (url == null) {
-					m_arena.showMessage("ERROR: Could not locate URL with " + 
-							"getClass().getResource(\"/TR-GBG.pdf\")", 
-							"XArenaMenu",JOptionPane.ERROR_MESSAGE);
-					printStatus("[ERROR: Could not locate help file URL]");
-				} else {
-					ShowBrowser.openURL(url);
-				}
+				showResource("/HelpGUI-Arena-GBG.pdf");
 			}
 		});
-		menuItem.setToolTipText("<html><body>Show Technical Report on GBG in your default PDF viewer</body></html>");
+		menuItem.setToolTipText("<html><body>Show help file in your default PDF viewer</body></html>");
 		menu.add(menuItem);
 
 		menuItem = new JMenuItem("Game Rules");
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				java.net.URL url = getClass().getResource("/GameRules-GBG.htm");  
-									// getResource() will find .htm in ../resources/
-				System.out.println("URL = " + url);
-				if (url == null) {
-					m_arena.showMessage("ERROR: Could not locate URL with " + 
-							"getClass().getResource(\"/GameRules-GBG.htm\")", 
-							"XArenaMenu",JOptionPane.ERROR_MESSAGE);
-					printStatus("[ERROR: Could not locate game rules file URL]");
-				} else {
-					ShowBrowser.openURL(url);
-				}
+				showResource("/GameRules-GBG.htm");
 			}
 		});
 		menuItem.setToolTipText("<html><body>Show game rules in your default browser</body></html>");
+		menu.add(menuItem);
+
+		menuItem = new JMenuItem("Game Rules as PDF");
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showResource("/GameRules-GBG.pdf");
+			}
+		});
+		menuItem.setToolTipText("<html><body>Show game rules in your default PDF viewer</body></html>");
+		menu.add(menuItem);
+
+		menuItem = new JMenuItem("Show TR-GBG.pdf");
+		menuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showResource("/TR-GBG.pdf");
+				// --- this is now in showResource ---
+//				java.net.URL url = getClass().getResource("/TR-GBG.pdf");  
+//									// getResource() will find .pdf in ../resources/
+//		    	InputStream is = getClass().getResourceAsStream("/TR-GBG.pdf");  
+//				System.out.println("URL = " + url);
+//				if (url == null) {
+//					m_arena.showMessage("ERROR: Could not locate URL with " + 
+//							"getClass().getResource(\"/TR-GBG.pdf\")", 
+//							"XArenaMenu",JOptionPane.ERROR_MESSAGE);
+//					printStatus("[ERROR: Could not locate help file URL]");
+//				} else {
+//					ShowBrowser.openURL(url,is);
+//				}
+			}
+		});
+		menuItem.setToolTipText("<html><body>Show Technical Report on GBG in your default PDF viewer</body></html>");
 		menu.add(menuItem);
 
 
 		add(menu);
 	}
 	
+	private void showResource(String resourceName) {
+		java.net.URL url = getClass().getResource(resourceName);  
+				// getResource() will find resourceName in ../bin, it is automatically copied from ../resources/
+				// to ../bin when Refresh - Build Project is issued
+		InputStream is = getClass().getResourceAsStream(resourceName);  
+		System.out.println("URL = " + url);
+		if (url == null) {
+			m_arena.showMessage("ERROR: Could not locate URL with " + 
+					"getClass().getResource(\""+resourceName+"\")", 
+					"XArenaMenu",JOptionPane.ERROR_MESSAGE);
+					printStatus("ERROR: Could not locate help file URL");
+		} else {
+			ShowBrowser.openURL(url,is);
+		}		
+	}
 	
 /*
 	private void showNTuples(int index) {
