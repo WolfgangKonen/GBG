@@ -9,7 +9,7 @@ import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
 import games.RubiksCube.ColorTrafoMap.ColMapType;
-import games.RubiksCube.CubeConfig.StateType;
+import games.RubiksCube.CubeConfig.BoardVecType;
 import games.RubiksCube.CubeStateMap.CsMapType;
 
 public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Serializable {
@@ -32,13 +32,13 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int getNumCells() {
-		switch(CubeConfig.stateCube) {
+		switch(CubeConfig.boardVecType) {
 		case CUBESTATE: 
 			return 24;
 		case CUBEPLUSACTION:
 			return 26;
 		default: 
-			throw new RuntimeException("Unallowed value in switch stateCube");
+			throw new RuntimeException("Unallowed value in switch boardVecType");
 		}
 	}
 	
@@ -148,7 +148,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		// Examples for some n-tuples for Rubik's PocketCube:
 		switch (mode) {
 		case 1: 
-			switch(CubeConfig.stateCube) {
+			switch(CubeConfig.boardVecType) {
 			case CUBESTATE: 
 				// the 4 "ring" 8-tuples:
 				return new int[][]{ {15,14,9,8,0,3,22,21} ,{12,13,10,11,1,2,23,20},
@@ -229,8 +229,8 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		
 		// If the board vector includes lastAction, we follow the model that the first 6 fcol-cells have
 		// cell 24 + 25 (coding lastAction) as neighbors:
-//		if (CubeConfig.stateCube==StateType.CUBEPLUSACTION) {	// OLD: all cells, is inferior
-		if (CubeConfig.stateCube==StateType.CUBEPLUSACTION && iCell<6) {
+//		if (CubeConfig.boardVecType==BoardVecType.CUBEPLUSACTION) {	// OLD: all cells, is inferior
+		if (CubeConfig.boardVecType==BoardVecType.CUBEPLUSACTION && iCell<6) {
 			adjSet.add(24);
 			adjSet.add(25);
 		}

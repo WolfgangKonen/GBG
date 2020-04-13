@@ -22,7 +22,7 @@ import games.RubiksCube.CubieTriple.Orientation;
  * </ul>
  * Its member {@code fcol} has 24 or 48 elements for pocket and Rubik's cube, resp. 
  * It stores in the case of a <b>color representation</b> type in {@code fcol[i]} the face color of 
- * cubie face i, which is one out of {0,1,2,3,4,5} for colors {w,b,o,y,g,r} = 
+ * cubie face i. The color is one out of {0,1,2,3,4,5} for colors {w,b,o,y,g,r} = 
  * {white,blue,orange,yellow,green,red}. For transformation representation type TRAFO_* see below.
  * <p>
  * Its member {@code lastTwist} stores the last twist action (U,L,F) performed on this cube
@@ -71,7 +71,7 @@ public class CubeState implements Serializable {
 	
 	/**
 	 * {@code fcol} is the face color array with 24 (<b>POCKET</b>) or 48 (<b>RUBIKS</b>) elements. <br> 
-	 * {@code fcol[i]} holds the face color (or location) for cubie face no {@code i}. 
+	 * {@code fcol[i]} holds the face color (or location) for cubie face (sticker) with number {@code i}. 
 	 */
 	public int[] fcol;   
 
@@ -97,6 +97,10 @@ public class CubeState implements Serializable {
 		this(Type.POCKET);
 	}
 	
+	/**
+	 * Construct a new cube of Type {@code type} in default (solved) state
+	 * @param type
+	 */
 	public CubeState(Type type) {
 		this.type = type;
 		switch(type) {
@@ -122,6 +126,10 @@ public class CubeState implements Serializable {
 		}
 	}
 	
+	/**
+	 * Construct a new cube of <b>color representation</b> type with face colors given by {@code fcol}
+	 * @param fcol
+	 */
 	public CubeState(int[] fcol) {
 		switch(fcol.length) {
 		case 24: 
@@ -145,6 +153,11 @@ public class CubeState implements Serializable {
 		this.minTwists = cs.minTwists;
 		this.fcol = cs.fcol.clone();
 	}
+	
+	// 
+	// The following methods are only for 2x2x2 Pocket Cube.
+	// (They need to be generalized later to the 3x3x3 case.)
+	//
 	
 	/**
 	 * Whole-cube rotation counter-clockwise around the u-face
@@ -214,7 +227,6 @@ public class CubeState implements Serializable {
 		int[] tmp = this.fcol.clone();
 		for (i=0; i<invT.length; i++) tmp[i] = this.fcol[invT[i]];
 		for (i=0; i<invT.length; i++) this.fcol[i] = tmp[i]; 
-		this.lastTwist=Twist.U;
 		return this;
 		//
 		// use the following line once on a default TRAFO_P CubeState to generate int[] invT above:
@@ -232,7 +244,6 @@ public class CubeState implements Serializable {
 		int[] tmp = this.fcol.clone();
 		for (i=0; i<invT.length; i++) tmp[i] = this.fcol[invT[i]];
 		for (i=0; i<invT.length; i++) this.fcol[i] = tmp[i]; 
-		this.lastTwist=Twist.L;
 		return this;
 		//
 		// use the following line once on a default TRAFO_P CubeState to generate int[] invT above:
@@ -245,11 +256,11 @@ public class CubeState implements Serializable {
 	private CubeState FTw() {
 		int i;
 		// fcol(invT[i]) is the color which cubie face i gets after transformation:
-		int[] invT = {18,19,2,3,1,5,6,0,11,8,9,10,12,7,4,15,16,17,13,14,20,21,22,23};
+		//            0          4        8          12         16           20
+		int[] invT = {18,19,2,3, 1,5,6,0, 11,8,9,10, 12,7,4,15, 16,17,13,14, 20,21,22,23};
 		int[] tmp = this.fcol.clone();
 		for (i=0; i<invT.length; i++) tmp[i] = this.fcol[invT[i]];
 		for (i=0; i<invT.length; i++) this.fcol[i] = tmp[i]; 
-		this.lastTwist=Twist.F;
 		return this;
 	}
 	
@@ -259,6 +270,7 @@ public class CubeState implements Serializable {
 	public CubeState UTw(int times) {
 		for (int i=0; i<times; i++) this.UTw();
 		this.twistSeq = this.twistSeq + "U"+times;
+		this.lastTwist = Twist.U;
 		this.lastTimes = times;
 		return this;
 	}
@@ -269,6 +281,7 @@ public class CubeState implements Serializable {
 	public CubeState LTw(int times) {
 		for (int i=0; i<times; i++) this.LTw();
 		this.twistSeq = this.twistSeq + "L"+times;
+		this.lastTwist = Twist.L;
 		this.lastTimes = times;
 		return this;
 	}
@@ -279,12 +292,13 @@ public class CubeState implements Serializable {
 	public CubeState FTw(int times) {
 		for (int i=0; i<times; i++) this.FTw();
 		this.twistSeq = this.twistSeq + "F"+times;
+		this.lastTwist = Twist.F;
 		this.lastTimes = times;
 		return this;
 	}
 	
 	/**
-	 * Apply transformation trafo to this
+	 * Apply transformation {@code trafo} to this
 	 * @param trafo a {@link CubeState} object of type TRAFO_P or TRAFO_R
 	 * @return 
 	 */
@@ -346,9 +360,13 @@ public class CubeState implements Serializable {
 		throw new RuntimeException("Invalid cube, we should not arrive here!");
 	}
 
+	/**
+	 * 
+	 * @return an int[] vector representing the 'board' state (= cube state)
+	 */
 	public int[] getBoardVector() {
 		int[] bvec;
-		switch (CubeConfig.stateCube) {
+		switch (CubeConfig.boardVecType) {
 		case CUBESTATE: 
 			bvec = fcol.clone();
 			break;
@@ -359,7 +377,7 @@ public class CubeState implements Serializable {
 			bvec[fcol.length+1] = this.lastTimes;
 			break;
 		default: 
-			throw new RuntimeException("Unallowed value in switch stateCube");
+			throw new RuntimeException("Unallowed value in switch boardVecType");
 		}
 		return bvec;   
 	}

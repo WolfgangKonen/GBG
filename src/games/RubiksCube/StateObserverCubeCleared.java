@@ -21,16 +21,19 @@ public class StateObserverCubeCleared extends StateObserverCube implements State
 	
 	public StateObserverCubeCleared() {
 		super();
+		this.resetMoveCounter();
 		this.clearLast(0);
 	}
 
 	public StateObserverCubeCleared(StateObserverCubeCleared other) {
 		super(other);
+		this.resetMoveCounter();
 		this.clearLast(this.getCubeState().minTwists);
 	}
 
 	public StateObserverCubeCleared(StateObserverCube other, int p) {
 		super(other);
+		this.resetMoveCounter();
 		this.clearLast(p);
 	}
 

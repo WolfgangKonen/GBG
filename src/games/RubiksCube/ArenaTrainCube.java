@@ -11,6 +11,9 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
+import games.RubiksCube.CubeConfig.BoardVecType;
+import games.RubiksCube.CubeConfig.CubeType;
+import games.Sim.ConfigSim;
 import games.ArenaTrain;
 
 /**
@@ -38,7 +41,10 @@ public class ArenaTrainCube extends ArenaTrain   {
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
+	 *         
+	 * @see GameBoardCube#getSubDir() 
 	 */
+	@Override
 	public String getGameName() {
 		return "RubiksCube";
 	}
@@ -46,6 +52,7 @@ public class ArenaTrainCube extends ArenaTrain   {
 	/**
 	 * Factory pattern method
 	 */
+	@Override
 	public GameBoard makeGameBoard() {
 		gb = new GameBoardCube(this);	
 		return gb;
@@ -61,18 +68,43 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return
 	 */
+	@Override
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
 //		if (mode==-1) mode=EvaluatorCube.getDefaultEvalMode();
 		return new EvaluatorCube(pa,gb,stopEval,mode,verbose);
 	}
 
+	@Override
 	public Feature makeFeatureClass(int featmode) {
 		return new FeatureCube(featmode);
 	}
 
+	@Override
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncsCube();
 	}
+
+    /**
+     * set the cube type (POCKET or RUBIKS) for Rubik's Cube
+     */
+    public static void setCubeType(String sCube) {
+    	switch(sCube) {
+    	case "2x2x2": CubeConfig.cubeType = CubeType.POCKET; break;
+    	case "3x3x3": CubeConfig.cubeType = CubeType.RUBIKS; break;
+    	default: throw new RuntimeException("Cube type "+sCube+" is not known.");
+    	}
+    }
+
+    /**
+     * set the board vector type for Rubik's Cube
+     */
+    public static void setBoardVecType(String bvType) {
+    	switch(bvType) {
+    	case "CSTATE": CubeConfig.boardVecType = BoardVecType.CUBESTATE; break;
+    	case "CPLUS": CubeConfig.boardVecType = BoardVecType.CUBEPLUSACTION; break;
+    	default: throw new RuntimeException("Board vector type "+bvType+" is not known.");
+    	}
+    }
 
 	/**
 	 * Start GBG for Rubik's Cube (trainable version)

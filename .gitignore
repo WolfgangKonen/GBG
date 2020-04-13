@@ -1,6 +1,7 @@
 *.class
 bin/*
 doc/*
+myDocs/*
 .classpath
 .project
 Arena.comp.csv
@@ -21,9 +22,11 @@ GBGBatch.jar
 GBGBatch-noFA.jar
 
 
+
 #Files not for the public GitHub version
-TDNTupleAgt.docx
-FutureWork.docx
+#TODO.docx		-- now in myDocs
+#TDNTupleAgt.docx	-- now in myDocs	
+#FutureWork.docx	-- now in myDocs
 ~$*.*
 ~*.tmp
 

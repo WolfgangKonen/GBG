@@ -39,7 +39,7 @@ public class LogManagerGUI {
     private JPanel jPMain = new JPanel();
     private JTextField jTFNextAction = new JTextField("0");
     private JLabel jLNumberActions = new JLabel("/ 0");
-    private JButton jBJump = new JButton("Jump to Boardstate");
+    private JButton jBJump = new JButton("Jump to Move");
     private JButton jBNextAction = new JButton("no next action");
     private JButton jBPreviousAction = new JButton("no previous action");
 
@@ -286,7 +286,8 @@ public class LogManagerGUI {
 
             if(currentLog.stateObservations.size() > position + 1) {
                 jBNextAction.setEnabled(true);
-                jBNextAction.setText("advance (" + currentLog.actions.get(position+1) + ")");
+                //jBNextAction.setText("advance (" + currentLog.actions.get(position+1) + ")");
+                jBNextAction.setText("Advance");
             } else {
                 jBNextAction.setEnabled(false);
                 jBNextAction.setText("no next action");
@@ -294,7 +295,8 @@ public class LogManagerGUI {
 
             if(position > 0) {
                 jBPreviousAction.setEnabled(true);
-                jBPreviousAction.setText("revert (" + currentLog.actions.get(position) + ")");
+                //jBPreviousAction.setText("revert (" + currentLog.actions.get(position) + ")");
+                jBPreviousAction.setText("Revert");
             } else {
                 jBPreviousAction.setEnabled(false);
                 jBPreviousAction.setText("no previous action");

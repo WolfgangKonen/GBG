@@ -185,7 +185,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 
 	/**
-	 * Given the current state in m_Table, what are the available actions? 
+	 * Given the current state in {@link #m_state}, what are the available actions? 
 	 * Set them in member {@code ArrayList<ACTIONS> acts}.
 	 * <p>
 	 * Note that actions with the same flavor (U,L,F) as the last twist would be in principle also available,

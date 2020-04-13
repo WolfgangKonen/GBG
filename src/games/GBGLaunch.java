@@ -200,6 +200,11 @@ public class GBGLaunch {
 			t_Game = new ArenaTrainOthello(title,withUI);
 			break;
 		case "RubiksCube": 
+			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
+			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaTrainCube.setCubeType(scaPar[0]);
+			ArenaTrainCube.setBoardVecType(scaPar[1]);
 			t_Game = new ArenaTrainCube(title,withUI);
 			break;
 		case "Sim": 
@@ -266,6 +271,11 @@ public class GBGLaunch {
 			t_Game = new ArenaOthello(title,withUI);
 			break;
 		case "RubiksCube": 
+			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
+			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaTrainCube.setCubeType(scaPar[0]);
+			ArenaTrainCube.setBoardVecType(scaPar[1]);
 			t_Game = new ArenaTrainCube(title,withUI);		// ArenaCube still missing
 			break;
 		case "Sim": 
@@ -410,7 +420,10 @@ public class GBGLaunch {
 	}
 
 	/**
-	 * Set default values for the scalable parameters (in case GBGLaunch is started w/o GUI)
+	 * Set default values for the scalable parameters.
+	 * <p>
+	 * This is for the case where GBGLaunch is started with {@code args[0]=0}, which means "Start
+	 * the game directly, w/o launcher UI".
 	 */
 	public static String[] setDefaultScaPars() {
 		String[] scaPar = new String[3];
@@ -428,10 +441,13 @@ public class GBGLaunch {
 			scaPar[1]="6";			
 			scaPar[2]="None";			
 			break;
+		case "RubiksCube": 
+			scaPar[0]="2x2x2";		 	
+			scaPar[1]="CUBESTATE";			
+			scaPar[2]="None";			
 		case "2048": 
 		case "ConnectFour": 
 		case "Othello": 
-		case "RubiksCube": 
 		case "TicTacToe": 
 			//
 			// games with no scalable parameters
@@ -473,19 +489,36 @@ public class GBGLaunch {
 			scaPar0_L.setText("Players");
 			scaPar1_L.setText("Nodes");
 			scaPar2_L.setText("Coalition");
+			scaPar0_L.setToolTipText("Number of players");
+			scaPar1_L.setToolTipText("Number of nodes in Sim graph");
+			scaPar2_L.setToolTipText("'1-2': coalition of player 1+2 against player 0 (only 3-player)");
 			setScaPar0List(new int[]{2,3});
 			setScaPar1List(new int[]{4,5,6,7,8,9,10,12,15,20});
 			setScaPar2List(new int[]{});
 			choiceScaPar2.addItem("None");
 			choiceScaPar2.addItem("1-2");
-			choiceScaPar0.setSelectedItem("2");		// the initial (recommended) values
-			choiceScaPar1.setSelectedItem("6");		// 
-			choiceScaPar2.setSelectedItem("None");		// 
+			choiceScaPar0.setSelectedItem("2");		// 
+			choiceScaPar1.setSelectedItem("6");		// the initial (recommended) values 
+			choiceScaPar2.setSelectedItem("None");	// 
+			break;
+		case "RubiksCube": 
+			scaPar0_L.setText("Cube Type");
+			scaPar1_L.setText("Board Vec");
+			scaPar2_L.setText("");
+			scaPar0_L.setToolTipText("Pocket Cube or Rubik's Cube");
+			scaPar1_L.setToolTipText("Type of board vectors (only n-tuple agents)");
+			setScaPar0List(new int[]{});
+			setScaPar1List(new int[]{});
+			setScaPar2List(new int[]{});
+			choiceScaPar0.addItem("2x2x2");					// currently we allow only 2x2x2
+			//choiceScaPar0.addItem("3x3x3");
+			choiceScaPar1.addItem("CSTATE");
+			choiceScaPar1.addItem("CPLUS");
+			choiceScaPar1.setSelectedItem("CSTATE");		// the initial (recommended) value	
 			break;
 		case "2048": 
 		case "ConnectFour": 
 		case "Othello": 
-		case "RubiksCube": 
 		case "TicTacToe": 
 			scaPar0_L.setText("");
 			scaPar1_L.setText("");

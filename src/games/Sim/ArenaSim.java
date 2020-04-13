@@ -9,6 +9,7 @@ import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
 import games.Hex.HexConfig;
+import games.RubiksCube.GameBoardCube;
 import games.TicTacToe.ArenaTTT;
 import games.TicTacToe.EvaluatorTTT;
 import games.TicTacToe.FeatureTTT;
@@ -21,31 +22,16 @@ public class ArenaSim extends Arena{
 		super(title,withUI);		
 	}
 		
+	/**
+	 * @return a name of the game, suitable as subdirectory name in the 
+	 *         {@code agents} directory
+	 *         
+	 * @see GameBoardSim#getSubDir() 
+	 */
 	@Override
 	public String getGameName() {
 		return "Sim";
 	}
-
-    /**
-     * set the number of players for Sim
-     */
-    public static void setNumPlayers(int val) {
-    	ConfigSim.NUM_PLAYERS = val;
-    }
-
-    /**
-     * set the number of nodes for Sim
-     */
-    public static void setNumNodes(int val) {
-    	ConfigSim.NUM_NODES = val;
-    }
-
-    /**
-     * set the number of nodes for Sim
-     */
-    public static void setCoalition(String coalition) {
-    	ConfigSim.COALITION = coalition;
-    }
 
 	@Override
 	public GameBoard makeGameBoard() {
@@ -70,11 +56,29 @@ public class ArenaSim extends Arena{
 				   ConfigSim.NUM_PLAYERS);		
 	}
 
-	
 	@Override
-	public void performArenaDerivedTasks() {
-	
-	}
+	public void performArenaDerivedTasks() {    }
+
+    /**
+     * set the number of players for Sim
+     */
+    public static void setNumPlayers(int val) {
+    	ConfigSim.NUM_PLAYERS = val;
+    }
+
+    /**
+     * set the number of nodes for Sim
+     */
+    public static void setNumNodes(int val) {
+    	ConfigSim.NUM_NODES = val;
+    }
+
+    /**
+     * set the number of nodes for Sim
+     */
+    public static void setCoalition(String coalition) {
+    	ConfigSim.COALITION = coalition;
+    }
 
 	public static void main(String[] args) throws IOException 
 	{

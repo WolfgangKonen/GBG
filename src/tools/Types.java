@@ -356,5 +356,7 @@ public class Types {
 		
 	}
 
- }
+	public static boolean PLAYSTATS_WRITING= false;
+	public static String PLAYSTATS_FILENAME= "playStats.csv";
+}
 

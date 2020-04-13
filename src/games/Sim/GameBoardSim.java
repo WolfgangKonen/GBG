@@ -137,7 +137,6 @@ public class GameBoardSim implements GameBoard {
 	
 	@Override
 	public String getSubDir() {
-		// /WK/ was missing:
 		return "K"+ConfigSim.NUM_NODES+"_Player"+ConfigSim.NUM_PLAYERS;
 	}
 

@@ -21,9 +21,9 @@ import java.text.DecimalFormat;
  */
 public class CountNim {
 
-	public int nHeap = NimConfig.NUMBER_HEAPS;
-	public int nPiece = NimConfig.HEAP_SIZE;
-	public int verbose = 0;					// if >0, print all ordered heap configurations
+	public int nHeap = 4; //NimConfig.NUMBER_HEAPS;
+	public int nPiece = 4; //NimConfig.HEAP_SIZE;
+	public int verbose = 1;					// if >0, print all ordered heap configurations
 	public int gCount1 = 0, gCount2=0;
 	
 	private static final long serialVersionUID = 1L;

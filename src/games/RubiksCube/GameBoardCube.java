@@ -59,9 +59,14 @@ public class GameBoardCube implements GameBoard {
 	
 	/**
 	 * If true, select in {@link #chooseStartState(PlayAgent)} from distance set {@link #D}.
-	 * If false, use {@link #selectByTwists2(int)}. 
+	 * If false, use {@link #selectByTwists1(int)}. 
 	 */
-	private boolean SELECT_FROM_D = true;  
+	private boolean SELECT_FROM_D = false;  
+	/**
+	 * If true, select in {@link #chooseStartState()} from distance set {@link #T}.
+	 * If false, use {@link #selectByTwists1(int)}. 
+	 */
+	private boolean SELECT_FROM_T = false;  
 	/**
 	 * If true, increment the matrix realPMat, which measures the real p of each start state.  
 	 * Make a debug printout of realPMat every 10000 training games.
@@ -89,7 +94,9 @@ public class GameBoardCube implements GameBoard {
     	D2 		= new CSArrayList[12];
 		D2[0] 	= new CSArrayList(CSAListType.GenerateD0);
 		D2[1] 	= new CSArrayList(CSAListType.GenerateD1);	
-		this.T = generateDistanceSets(rand2);
+		if (this.SELECT_FROM_T) {
+			this.T = generateDistanceSets(rand2);
+		}
 		if (this.SELECT_FROM_D) {
 			this.D = generateDistanceSets(rand);
 			this.checkIntersects();   // print out the intersection sizes of D and T 
@@ -251,13 +258,24 @@ public class GameBoardCube implements GameBoard {
 	@Override
 	public StateObservation chooseStartState() {
 		clearBoard(true, true);			// m_so is in default start state 
-		int p = 1+rand.nextInt(CubeConfig.pMax);
-		System.out.println("p = "+p);
-		int index = rand.nextInt(T[p].size());
-		CubeState cS = (CubeState)T[p].get(index);
-		m_so = new StateObserverCube(cS);
-//		m_so = clearCube(m_so,p);
+		int p = 1+rand.nextInt(CubeConfig.pMax);		// random p \in {1,2,...,pMax}
+		if (m_gameGui!=null) {
+			String str=m_gameGui.getScramblingTwists();
+			if (str!="RANDOM") p = Integer.valueOf(str).intValue();
+		}
+		if (SELECT_FROM_T) {
+			int index = rand.nextInt(T[p].size());
+			CubeState cS = (CubeState)T[p].get(index);
+			m_so = new StateObserverCube(cS);
+		} else {
+			m_so = selectByTwists1(p);
+		}
+		
+		// StateObserverCubeCleared is important, so that no actions are 'forgotten' when 
+		// trying to solve m_so (!!). It also resets moveCounter
 		m_so = new StateObserverCubeCleared(m_so,p);
+		
+		System.out.println("p = "+p+",  "+m_so.getCubeState().twistSeq);
 		return m_so;
 	}
 
@@ -298,8 +316,8 @@ public class GameBoardCube implements GameBoard {
 //			D[p].remove(cS);	// remove elements already picked -- currently NOT used
 			m_so = new StateObserverCube(D[p].get(index));
 		} else {
-//			m_so = selectByTwists1(p);
-			m_so = selectByTwists2(p);
+			m_so = selectByTwists1(p);
+//			m_so = selectByTwists2(p);
 			
 			// only debug:
 			if (DBG_REALPMAT) {
@@ -314,29 +332,31 @@ public class GameBoardCube implements GameBoard {
 			}
 		}
 		
-		// StateObserverCubeCleared is VERY important, so that no actions are 'forgotten' when 
+		// StateObserverCubeCleared is important, so that no actions are 'forgotten' when 
 		// trying to solve m_so (!!)
 		m_so = new StateObserverCubeCleared(m_so,p);
 		return m_so;
 	}
 	
 	/** 
-	 * --- NOT the recommended choice! --> better use selectByTwists2 ---
+	 * alternative: selectByTwists2 ---
 	 * 
-	 * Experimental method to select a start state by doing 1.2*p random twist on the default cube. 
+	 * Experimental method to select a start state by doing p random twist on the default cube. 
 	 * This may be the only way to select a start state being p=8,9,... twists away from the 
 	 * solved cube (where the distance D[p] becomes to big). 
+	 * <p>
 	 * But it has the caveat that p random twists do not guarantee to produce a state in D[p]. 
-	 * Due to twins etc. the resulting state may be actually in D[p-1], D[p-2], ...
+	 * Due to twins etc. the resulting state may be actually in D[p-1], D[p-2] and below.
+	 * However, it works for arbitrary p.
 	 */
 	private StateObserverCubeCleared selectByTwists1(int p) {
 		StateObserverCubeCleared d_so;
 		CubeState cS;
 		int index;
 		d_so = new StateObserverCubeCleared(); // default cube
-		// the not-recommended choice: make 1.2*p twists and hope that we land in 
-		// distance set D[p] (which is very often not true for p>5)
-		int twists = (int)(1.2*p);
+		// make p twists and hope that we land in 
+		// distance set D[p] (which is often not true for p>5)
+		int twists = (int)(p);
 		for (int k=0; k<twists; k++)  {
 			index = rand.nextInt(d_so.getAvailableActions().size());
 			d_so.advance(d_so.getAction(index));  				
@@ -396,25 +416,6 @@ public class GameBoardCube implements GameBoard {
 		return d_soC; 
 	}
 
-	// --- obsolete now, we have StateObserverCubeCleared ---
-//	private StateObserverCube clearCube(StateObserverCube d_so, int p) {
-////		CubeState cS;
-////		cS = d_so.getCubeState();
-////		cS.minTwists = p;
-////		cS.clearLast();
-////		d_so = new StateObserverCube(cS);
-//		d_so.getCubeState().minTwists = p; 
-//		d_so.getCubeState().clearLast(); 	// clear lastTwist and lastTimes (which we do not know 
-//											// for the initial state in an episode)	
-//		d_so.setAvailableActions();	// then set the available actions which causes all
-//									// 9 actions to be added to m_so.acts. We need this
-//									// to test all 9 actions when looking for the best
-//									// next action.
-//		// (If lastTwist were set, 3 actions would be excluded
-//		// which we do not want for a start state.) 
-//		return d_so;
-//	}
-	
     /**
      * @return the array of distance sets for training
      */
@@ -431,7 +432,16 @@ public class GameBoardCube implements GameBoard {
 	   
 	@Override
 	public String getSubDir() {
-		return null;
+		String substr="";
+		switch (CubeConfig.cubeType) {
+		case POCKET: substr = "2x2x2"; break;
+		case RUBIKS: substr = "3x3x3"; break;
+		}
+		switch (CubeConfig.boardVecType) {
+		case CUBESTATE: substr += "_CSTATE";
+		case CUBEPLUSACTION: substr += "_CPLUS";
+		}
+		return substr;
 	}
 	
     @Override

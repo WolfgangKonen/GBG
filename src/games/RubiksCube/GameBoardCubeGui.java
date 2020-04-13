@@ -19,6 +19,7 @@ import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -57,6 +58,9 @@ public class GameBoardCubeGui extends JFrame {
 	private JPanel ButtonPanel;
 	private JLabel leftInfo=new JLabel("");
 	private JLabel rightInfo=new JLabel(""); 
+	private JLabel pLabel;
+	private JComboBox pChoice;
+	static String[] pChoiceList = {"1","2","3","4","5","6","RANDOM"};
 	/**
 	 * The representation of the cube in the GUI. The 24 active panels in the 6*8 field
 	 * represent the cubie faces of the flattened cube.
@@ -130,6 +134,9 @@ public class GameBoardCubeGui extends JFrame {
 		Button		= new JButton[3][3];
 		ButtonPanel = InitButton();
 		VTable		= new double[3][3];
+		pLabel 		= new JLabel("Scrambling Twists: ");
+		pChoice		= new JComboBox(pChoiceList);
+		pChoice.setSelectedItem("4");
 
 		Font font=new Font("Arial",1,Types.GUI_TITLEFONTSIZE);			
 //		JPanel titlePanel = new JPanel();
@@ -142,6 +149,10 @@ public class GameBoardCubeGui extends JFrame {
 		JLabel Blank=new JLabel("   ");		// a little bit of space
 		Blank.setPreferredSize(new Dimension(2*labSize,labSize)); // controls the space between panels
 		
+		JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		northPanel.add(pLabel);
+		northPanel.add(pChoice);
+
 		JPanel boardPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		boardPanel.add(BoardPanel);
 		boardPanel.add(Blank); 		// a little bit of space
@@ -158,7 +169,8 @@ public class GameBoardCubeGui extends JFrame {
 		infoPanel.setSize(100,10);
 		
 		setLayout(new BorderLayout(10,00));
-		//add(titlePanel,BorderLayout.NORTH);				
+		//add(titlePanel,BorderLayout.NORTH);
+		add(northPanel,BorderLayout.NORTH);
 		add(boardPanel,BorderLayout.CENTER);
 		add(infoPanel,BorderLayout.SOUTH);
 		pack();
@@ -437,6 +449,10 @@ public class GameBoardCubeGui extends JFrame {
 //		}
 	}
 
+	public String getScramblingTwists() {
+		return (String)pChoice.getSelectedItem();
+	}
+	
 	/**
 	 * This class is needed for each ActionListener of {@code Board[i][j]} in 
 	 * {@link #InitBoard()}

@@ -1,6 +1,32 @@
 package games.RubiksCube;
 
 public class CubeConfig {
+	
+	public static enum CubeType {POCKET,RUBIKS};
+	
+	public static CubeType cubeType = CubeType.POCKET;
+	
+	/**
+	 * What does a board vector state in {@link StateObserverCube} represent?. The possible options are
+	 * <ul>
+	 * <li> <b>CUBESTATE</b>: only the cube state (what {@link CubeState#fcol} holds)
+	 * <li> <b>CUBEPLUSACTION</b>: the cube state plus the action which led to this state 		
+	 * </ul>
+	 */
+	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION};
+	
+	/**
+	 * {@link BoardVecType} {@code boardVecType} holds the board vector type for all {@link CubeState} objects and 
+	 * is used in {@link CubeState#getBoardVector()} and in {@link XNTupleFuncsCube}.
+	 */
+	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;
+//	public static BoardVecType boardVecType = BoardVecType.CUBEPLUSACTION;
+
+	/**
+	 * Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} is filled.
+	 */
+	public final static int pMax = 6;			// 3,4,5,6,7
+	
 	/**
 	 * theoCov[p] is the known maximum size of distance set D[p] (theoretical coverage)
 	 */
@@ -33,11 +59,6 @@ public class CubeConfig {
 	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
 	
 	/**
-	 * Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} is filled.
-	 */
-	public final static int pMax = 4;			// 3,4,5,6,7
-	
-	/**
 	 * Selector array for {@link GameBoardCube#chooseStartState(controllers.PlayAgent)}.
 	 * <p> 
 	 * Set X=Xper[{@link CubeConfig#pMax}]. 
@@ -52,14 +73,4 @@ public class CubeConfig {
 				,{0,0.0125,0.025,0.05,0.125,0.25,0.5,1.0}	//,[7]
 			};
 
-	/**
-	 * What does a state in {@link StateObserverCube} represent? <ul>
-	 * <li> <b>CUBESTATE</b>: only the cube state (what {@link CubeState#fcol} holds)
-	 * <li> <b>CUBEPLUSACTION</b>: the cube state plus the action which led to this state 		
-	 * </ul>
-	 */
-	public enum StateType {CUBESTATE, CUBEPLUSACTION};
-	
-	final static StateType stateCube = StateType.CUBESTATE;
-//	final static StateType stateCube = StateType.CUBEPLUSACTION;
 }

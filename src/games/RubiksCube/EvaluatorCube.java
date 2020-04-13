@@ -21,7 +21,7 @@ import games.TStats.TAggreg;
 import gui.MessageBox;
 import games.XArenaFuncs;
 import games.RubiksCube.CSArrayList.TupleInt;
-import games.RubiksCube.CubeConfig.StateType;
+import games.RubiksCube.CubeConfig.BoardVecType;
 import tools.Types;
 
 /**
@@ -143,7 +143,7 @@ public class EvaluatorCube extends Evaluator {
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>=0) {
 			TStats.printTAggregList(taggList);
-			//System.out.println((CubeConfig.stateCube==StateType.CUBESTATE) ? "CUBESTATE" : "CUBEPLUSACTION");
+			//System.out.println((CubeConfig.boardVecType==BoardVecType.CUBESTATE) ? "CUBESTATE" : "CUBEPLUSACTION");
 		}
 		return lastResult;
 	}

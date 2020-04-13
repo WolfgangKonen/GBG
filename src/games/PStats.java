@@ -22,7 +22,8 @@ import tools.Types.ACTIONS_VT;
  *  When playing one or multiple games, an object {@code ArrayList<PStats> psList} is 
  *  created and finally written with
  *  {@link PStats#printPlayStats(ArrayList, StateObservation, PlayAgent[], Arena)} <br>
- *  to file {@code playStats.csv}. <p>
+ *  to file {@link Types#PLAYSTATS_FILENAME}. <br>
+ *  This happens only if {@link Types#PLAYSTATS_WRITING}{@code==true}.<p>
  *  
  *  This class is currently in part specific to game 2048 (it records for example the number of 
  *  empty tiles). This is the reason why it is needed in addition to the information stored
@@ -98,7 +99,7 @@ public class PStats {
 	/**
 	 * Print the results from playing one or multiple episodes to
 	 * file <br>
-	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/playStats.csv} <br>
+	 *    {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/}{@link Types#PLAYSTATS_FILENAME} <br>
 	 * where the optional {@code subdir} is for games with different flavors (like Hex: board size). 
 	 * The directory of the file is created, if it does not exist.   
 	 * 
@@ -108,6 +109,9 @@ public class PStats {
 	 * @param ar		needed for accessing {@code gameName} and the (optional) {@code subDir}
 	 */
 	public static void printPlayStats(ArrayList<PStats> psList, StateObservation startSO, PlayAgent[] paVector, Arena ar){
+		if (!Types.PLAYSTATS_WRITING) 
+			return;
+		
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+ar.getGameName();
 		String subDir = ar.getGameBoard().getSubDir();
 		if (subDir != null){
@@ -121,13 +125,13 @@ public class PStats {
 		BufferedReader bufIn=new BufferedReader(new InputStreamReader(System.in));
 		while (retry) {
 			try {
-				mtWriter = new PrintWriter(new FileWriter(strDir+"/"+"playStats.csv",false));
+				mtWriter = new PrintWriter(new FileWriter(strDir+"/"+Types.PLAYSTATS_FILENAME,false));
 				retry = false;
 			} catch (IOException e) {
 				try {
-					// We may get here if playStats.csv is open in another application (e.g. Excel).
+					// We may get here if Types.PLAYSTATS_FILENAME is open in another application (e.g. Excel).
 					// Here we give the user the chance to close the file in the other application:
-				    System.out.print("*** Warning *** Could not open "+strDir+"/"+"playStats.csv. Retry? (y/n): ");
+				    System.out.print("*** Warning *** Could not open "+strDir+"/"+Types.PLAYSTATS_FILENAME+". Retry? (y/n): ");
 				    String s = bufIn.readLine();
 				    retry = (s.contains("y")) ? true : false;
 				} catch (IOException e2) {
@@ -151,7 +155,7 @@ public class PStats {
 
 		    mtWriter.close();			
 		} else {
-			System.out.print("*** Warning *** Could not write "+strDir+"/"+"playStats.csv.");
+			System.out.print("*** Warning *** Could not write "+strDir+"/"+Types.PLAYSTATS_FILENAME+".");
 		}
 	}
 
