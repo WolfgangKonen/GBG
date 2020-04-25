@@ -3,6 +3,7 @@ package games.ZweiTausendAchtundVierzig;
 import java.io.Serializable;
 import java.util.HashSet;
 
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -97,7 +98,7 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 	 * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
 	 */
 	@Override
-	public int[] getBoardVector(StateObservation so) {
+	public BoardVector getBoardVector(StateObservation so) {
 		if (so instanceof StateObserver2048) {
 			return ((StateObserver2048) so).getBoardVector();
 		} else {
@@ -117,9 +118,9 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 	 * @return boardArray
 	 */
 	@Override
-	public int[][] symmetryVectors(int[] boardVector) {
-		int[][] symmetries = new int[8][];
-		int[] mirroredBoardVector = mirrorBoardVector(boardVector);
+	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
+		BoardVector[] symmetries = new BoardVector[8];
+		BoardVector mirroredBoardVector = mirrorBoardVector(boardVector.bvec);
 
 		for(int i = 0; i < 8; i+=2) {
 			symmetries[i] = boardVector;
@@ -127,8 +128,8 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 
 			if (i==6) break; // a little speedup
 			
-			mirroredBoardVector = rotateBoardVector(mirroredBoardVector);
-			boardVector = rotateBoardVector(boardVector);
+			mirroredBoardVector = rotateBoardVector(mirroredBoardVector.bvec);
+			boardVector = rotateBoardVector(boardVector.bvec);
 		}
 		return symmetries;
 	}
@@ -264,7 +265,7 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 	 * @param array
 	 * @return
 	 */
-	private int[] rotateBoardVector(int[] array) {
+	private BoardVector rotateBoardVector(int[] array) {
 		int[] rotatedArray = new int[16];
 		rotatedArray[0] = array[12];
 		rotatedArray[1] = array[8];
@@ -282,7 +283,7 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 		rotatedArray[13] = array[11];
 		rotatedArray[14] = array[7];
 		rotatedArray[15] = array[3];
-		return rotatedArray;
+		return new BoardVector(rotatedArray);
 	}
 
 	/**
@@ -293,7 +294,7 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 	 * @param array
 	 * @return
 	 */
-	private int[] mirrorBoardVector(int[] array) {
+	private BoardVector mirrorBoardVector(int[] array) {
 		int[] mirroredArray = new int[16];
 		mirroredArray[0] = array[12];
 		mirroredArray[1] = array[13];
@@ -311,7 +312,7 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 		mirroredArray[13] = array[1];
 		mirroredArray[14] = array[2];
 		mirroredArray[15] = array[3];
-		return mirroredArray;
+		return new BoardVector(mirroredArray);
 	}
 
 	/**

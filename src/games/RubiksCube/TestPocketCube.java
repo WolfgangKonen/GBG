@@ -3,9 +3,13 @@ package games.RubiksCube;
 import games.RubiksCube.CubeState.Type;
 import games.RubiksCube.CubeState.Twist;
 import games.RubiksCube.CubeStateMap.CsMapType;
+import tools.Types.ACTIONS;
 import games.RubiksCube.CSArrayList.TupleInt;
+import games.BoardVector;
 import games.RubiksCube.CSArrayList.CSAListType;
 import games.RubiksCube.ColorTrafoMap.ColMapType;
+import games.RubiksCube.CubeConfig.BoardVecType;
+
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -17,17 +21,19 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * A simple main program to calculate the number of states in the game of NIM.
+ * A main program to test various aspects of the Pocket cube. 
+ * <p>
+ * This program needs VM argument "-ea" (enable assertions) to work correctly.
  *  
- * @author Wolfgang Konen, TH Koeln , Jan'18
+ * @author Wolfgang Konen, TH Koeln , 2018 - 2020
  */
 public class TestPocketCube {
-
-	public int nHeap = 10;
-	public int nPiece = 5;
-	public int gCount1 = 0, gCount2=0;
-	private static final long serialVersionUID = 1L;
 	
+	ArenaTrainCube ar = new ArenaTrainCube("",false);
+	GameBoardCube gb = new GameBoardCube(ar);		// needed for chooseStartState()
+	
+	protected Random rand = new Random(System.currentTimeMillis());	
+
 	/**
 	 * @param args
 	 * @throws IOException 
@@ -40,21 +46,39 @@ public class TestPocketCube {
 			throw new RuntimeException("[TestPocketCube.main] args="+args+" not allowed.");
 		}
 
+		CubeState.generateInverseTs();
+		CubeState.generateForwardTs();
 		TestPocketCube tpock = new TestPocketCube();
 		
 		XNTupleFuncsCube xnf = new XNTupleFuncsCube();
-		xnf.adjacencySet(5);
+		CubeConfig.boardVecType = BoardVecType.CUBESTATE;
+		String h5 = xnf.adjacencySet(5).toString();
+		assert(h5.equals("[3, 4, 6, 22]")) : "adjacency set 1 not as excpected!";
+		System.out.println(h5+" --> OK");		// should be [3, 4, 6, 22]
+		CubeConfig.boardVecType = BoardVecType.STICKERS;
+		h5 = xnf.adjacencySet(5).toString();
+		assert(h5.equals("[7, 8, 9, 10, 11, 13]")) : "adjacency set 2 not as excpected!";
+		System.out.println(h5+" --> OK");		// should be  (all from 7...13 except 5+7=12
 
-		tpock.simpleTests01();
-		tpock.simpleTests02();
-		tpock.generatorTests();
+		tpock.simpleTests01();			// test whole-cube rotations and twists
+		//tpock.colorMapTests();		// test maps and color symmetries
+		//tpock.generatorTests(5);			// tests on distance set generation
 		
 		System.out.println("*** All done ***");
 
 	}
 	
+	/**
+	 * 1) Test that 4x 90° whole-cube rotations u,l,f  on default cube lead to default cube again. <br>
+	 * 2) Test that 4x 90° twists UTw,LTw,FTw  on default cube lead to default cube again. <br>
+	 * 3) Test that rep x FTw.UTw.LTw followed by rep x the inverse leads to default cube again, where rep is a random int. <br>
+	 * 4) Test that a transformation from CubeState to STICKERS board vector and back to CubeState results in the 
+	 *    original CubeState again. Select several randomly twisted CubeStates for this test.
+	 */
 	private void simpleTests01() {
+		int runs; 
 		
+		// Tests 1) and 2) 
 		CubeState def = new CubeState();
 		CubeState rot = new CubeState(def);
 		for (int k=1; k<=4; k++) {
@@ -92,7 +116,42 @@ public class TestPocketCube {
 			rot.FTw(1); //.print();
 		}
 		assert (def.isEqual(rot)) : "def and rot differ after 4x FTwist!";
+		
+		// Test 3)
+		runs = 3;
+		for (int r=0; r<runs; r++) {
+			int rep = 1+rand.nextInt(5);
+			for (int k=0; k<rep; k++) rot.FTw(1).UTw(1).LTw(1);
+			for (int k=0; k<rep; k++) rot.LTw(3).UTw(3).FTw(3);
+			assert (def.isEqual(rot)) : "def and rot differ after rep x FTw.UTw.LTw!";
+		}
 
+		// Test 4)
+		CubeConfig.boardVecType = BoardVecType.STICKERS;
+		CubeConfig.pMax=15;
+		runs = 3;
+		for (int r=0; r<runs; r++) {
+			StateObserverCube so = (StateObserverCube) gb.chooseStartState();
+			//StateObserverCube so = new StateObserverCube(); so.advance(new ACTIONS(3));
+			int[] bvec = so.getCubeState().getBoardVector().bvec;
+			int[][] board = new int[7][7];
+			for (int rb=0,k=0; rb<7; rb++)
+				for (int cb=0; cb<7; cb++,k++) {
+					board[rb][cb] = bvec[k];
+				}
+			StateObserverCube sb = new StateObserverCube(new BoardVector(bvec));
+			assert(sb.getCubeState().equals(so.getCubeState())) : "so and sb differ after STICKERS trafo!";
+		}
+		System.out.println("Transformation CubeState --> STICKERS --> CubeState: OK");
+
+		
+	}
+	
+	/**
+	 * (Older) CubeStateMap- and ColorTrafoMap-tests and color symmetry tests
+	 */
+	private void colorMapTests() {
+		
 		// this is just to check the correctness of CubeStateMap::countDifferentStates()
 //		CubeStateMap hmTest = new CubeStateMap();
 //		rot.FTw();
@@ -103,25 +162,22 @@ public class TestPocketCube {
 //		System.out.println("num states = "+hmTest.countDifferentStates() + ", " + hmTest.size());  	// should be 2, 3
 //		hmTest.put(4, new CubeState(rot));
 //		System.out.println("num states = "+hmTest.countDifferentStates() + ", " + hmTest.size());	// should be 2, 4
-	}
-	
-	private void simpleTests02() {
-		
+
 		System.out.println("\nTesting CubeStateMap::allWholeCubeRotTrafos()");
 		// Create the map with all whole-cube rotation transformations. 
 		// This should give 24 *distinct* transformations.
 		CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
 		//hmRots.print();
-		System.out.println("num states = "+hmRots.countDifferentStates() + ", " + hmRots.size());
 		assert (hmRots.countDifferentStates()==hmRots.size()) : "there are duplicate elements in hmRots!";
+		System.out.println("num states = "+hmRots.countDifferentStates() + ", " + hmRots.size() + " --> OK");
 		
 		System.out.println("\nTesting ColorMap::allColorTrafos()");
 		// Create the map with all color transformations. 
 		// This should give 24 *distinct* transformations.
 		ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);
 		//hmCols.print();
-		System.out.println("num states = "+hmCols.countDifferentStates() + ", " + hmCols.size());
 		assert (hmCols.countDifferentStates()==hmCols.size()) : "there are duplicate elements in hmRots!";
+		System.out.println("num states = "+hmCols.countDifferentStates() + ", " + hmCols.size() + " --> OK");
 		
 		System.out.println("\nTesting ColorMap::applyColSymm(cS,hmRots)");
 		// Given the maps hmRots and hmCols created in the previous steps, take a solved cube and
@@ -202,11 +258,18 @@ public class TestPocketCube {
         } 	
 	}
 	
-	private void generatorTests() {
-		// Generate the distance sets D[p] and calculate the number of prevs, currents and twins
-		// while generating them. If all works out correctly, the relation
-		//		D[p+1].size() = 6*D[p].size() - N_p - N_c - N_t 
-		// should hold
+	/**
+	 * Generate the distance sets D[p] and calculate the number of prevs, currents and twins
+	 * while generating them. If all works out correctly, the relation
+	 * <pre>
+	 *       D[p+1].size() = 6*D[p].size() - N_p - N_c - N_t     </pre>
+	 * should hold.
+	 * <p>
+	 * <b>WARNING</b>: This tests take <b>VERY</b> long for pmax &ge; 6 !<br>
+	 * Since distance sets are now deprecated, this test method is deprecated as well.
+	 */
+	@Deprecated
+	private void generatorTests(int pmax) {
 		
 		System.out.println("\nTesting CSArrayList [GenerateNext]");
 		//            0          4                   8
@@ -226,7 +289,7 @@ public class TestPocketCube {
 		D[0] = new CSArrayList(CSAListType.GenerateD0);
 		D[1] = new CSArrayList(CSAListType.GenerateD1);
 		D[1].assertTwistSeqInArrayList();
-		for (int p=2; p<12; p++) {
+		for (int p=2; p<=pmax; p++) {
 			if (p>3) silent=true;
 			if (p>5) doAssert=false;
 			tintList[p] = new ArrayList();

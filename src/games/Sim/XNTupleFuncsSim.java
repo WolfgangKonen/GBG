@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.math3.exception.OutOfRangeException;
 
 import agentIO.LoadSaveGBG;
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -23,7 +24,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	transient ArrayList<Link[]> arrLink;
 	
 	int [][] actions;
-	int [][] symVec;
+	BoardVector[] symVec;
 	int nCells, nPositionValues, nPlayers;
 	
     /**
@@ -116,14 +117,14 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	private void setActions()
 	{
 		int [] vec = initVector();
-		symVec = symmetryVectors(vec);
+		symVec = symmetryVectors(new BoardVector(vec),0);
 		actions = new int[symVec.length][];
 		
 		for (int i = 0; i < actions.length; i++) 
 		{
     		actions[i] = new int[vec.length];
     		for (int j = 0; j < vec.length; j++)
-    			actions[i][j] = whereHas(symVec[i],j);
+    			actions[i][j] = whereHas(symVec[i].bvec,j);
     	}
 		
 	}
@@ -154,7 +155,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	}
 
 	@Override
-	public int[] getBoardVector(StateObservation so) 
+	public BoardVector getBoardVector(StateObservation so) 
 	{
 		StateObserverSim sim = (StateObserverSim) so;
 		int [] board = new int[ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2]; 
@@ -169,27 +170,28 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 			}
 		}
 		
-		return board;
+		return new BoardVector(board);
 	}
 
 	@Override
-	public int[][] symmetryVectors(int[] boardVector) {
-		int [][] symmetricVectors = new int [list.size()][];
+	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
+		BoardVector[] symmetricVectors = new BoardVector[list.size()];
 		//symmetricVectors.length
 		for(int i = 0; i < symmetricVectors.length; i++)
 			symmetricVectors[i] = getSymVector(boardVector,list.get(i));
 		return symmetricVectors;
 	}
-	// crate a symetric vector for given permutation of nodes
-	private int [] getSymVector(int [] boardVector,int [] permutation)
+	// crate a symmetric vector for given permutation of nodes
+	private BoardVector getSymVector(BoardVector bv,int [] permutation)
 	{
+		int[] boardVector = bv.bvec;
 		int [][] splittedBoardVec = splitVector(boardVector);
 		int [][] splittedSymVec = new int[ConfigSim.NUM_NODES-1][];
 		
 		for(int i = 0; i < ConfigSim.NUM_NODES-1; i++)
 				splittedSymVec[i] = getValuesSameNode(i,splittedBoardVec,permutation);
 		
-		return mergeVector(splittedSymVec);
+		return new BoardVector(mergeVector(splittedSymVec));
 	}
 	
 	private int [][] splitVector(int [] boardVector)

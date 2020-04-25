@@ -45,26 +45,36 @@ public class GameBoardCube implements GameBoard {
 	 * {@link #Board} position.
 	 */
 	protected StateObserverCube m_so;
+	private boolean arenaActReq=false;
+
+	//
+	// all members following below are concerned with distance sets D[p]. The concept of distance sets is now 
+	// considered to be infeasible, because for large p it takes too long on startup and the distance sets 
+	// tend to be incomplete (too much time & too much memory needed)
+	//
+	
 	/**
-	 * the array of distance sets for training
+	 * the array of distance sets for training. (Distance set D[p] contains all states where the minimum number of twists 
+	 * to reach the solved state is p.)
 	 */
 	private CSArrayList[] D;		
 	/**
 	 * the array of distance sets for testing (= evaluation)
 	 */
 	private CSArrayList[] T;		
-	private CSArrayList[] D2=null;
-	private boolean arenaActReq=false;
-	private int[][] realPMat;
+	private CSArrayList[] D2=null;	// D2 is (besides D2[0] and D2[1]) only filled by repeated calls to selectByTwists2
+	private int[][] realPMat;		// see incRealPMat(...)
 	
 	/**
 	 * If true, select in {@link #chooseStartState(PlayAgent)} from distance set {@link #D}.
-	 * If false, use {@link #selectByTwists1(int)}. 
+	 * If false, use {@link #selectByTwists1(int)}. <br>
+	 * Recommended value: false.
 	 */
 	private boolean SELECT_FROM_D = false;  
 	/**
 	 * If true, select in {@link #chooseStartState()} from distance set {@link #T}.
-	 * If false, use {@link #selectByTwists1(int)}. 
+	 * If false, use {@link #selectByTwists1(int)}. <br>
+	 * Recommended value: false.
 	 */
 	private boolean SELECT_FROM_T = false;  
 	/**
@@ -90,23 +100,39 @@ public class GameBoardCube implements GameBoard {
         rand 		= new Random(System.currentTimeMillis());	
         rand2 		= new Random(2*System.currentTimeMillis());	
 		m_so		= new StateObserverCube();	// empty table
-		realPMat 	= new int[CubeConfig.pMax+1][CubeConfig.pMax+2];			
+		
+        if (m_Arena.hasGUI()) {
+        	m_gameGui = new GameBoardCubeGui(this);
+        }
+        
+        // this part below only for distance sets:
+		realPMat 	= new int[CubeConfig.pMax+1][CubeConfig.pMax+2];		// see incRealPMat(...)	
     	D2 		= new CSArrayList[12];
 		D2[0] 	= new CSArrayList(CSAListType.GenerateD0);
 		D2[1] 	= new CSArrayList(CSAListType.GenerateD1);	
 		if (this.SELECT_FROM_T) {
-			this.T = generateDistanceSets(rand2);
+			this.T = generateDistanceSets(rand2);	
 		}
 		if (this.SELECT_FROM_D) {
 			this.D = generateDistanceSets(rand);
 			this.checkIntersects();   // print out the intersection sizes of D and T 
 		} 
-		
-        if (m_Arena.hasGUI()) {
-        	m_gameGui = new GameBoardCubeGui(this);
-       }
 	}
 	
+	/**
+	 * Generate the distance sets up to {@link CubeConfig#pMax}. Since it may be very time consuming to generate the 
+	 * complete distance set D[p] for larger p, we generate only {@link CubeConfig#Narr}{@code [p]} elements in each 
+	 * distance set.
+	 * <p>
+	 * <b>Caveat:</b> If the {@code Narr} numbers are smaller than the theoretical size of D[p], the whole method is 
+	 * questionable: If a distance set is not complete, its usage may lead to wrong conclusions. 
+	 * And if the two distance sets preceding D[p] are not complete, the method does not guarantee that 
+	 * the inserted states are really in D[p]. That is why this method is now deprecated. 
+	 * 
+	 * @param rand
+	 * @return a list of distance sets
+	 */
+	@Deprecated
 	public CSArrayList[] generateDistanceSets(Random rand) {
 		
 		System.out.println("\nGenerating distance sets ..");
@@ -313,7 +339,6 @@ public class GameBoardCube implements GameBoard {
 		}
 		if (SELECT_FROM_D) {
 			int index = rand.nextInt(D[p].size());
-//			D[p].remove(cS);	// remove elements already picked -- currently NOT used
 			m_so = new StateObserverCube(D[p].get(index));
 		} else {
 			m_so = selectByTwists1(p);
@@ -339,15 +364,15 @@ public class GameBoardCube implements GameBoard {
 	}
 	
 	/** 
-	 * alternative: selectByTwists2 ---
-	 * 
-	 * Experimental method to select a start state by doing p random twist on the default cube. 
+	 * Method to select a start state by doing p random twist on the default cube. 
 	 * This may be the only way to select a start state being p=8,9,... twists away from the 
 	 * solved cube (where the distance D[p] becomes to big). 
 	 * <p>
 	 * But it has the caveat that p random twists do not guarantee to produce a state in D[p]. 
 	 * Due to twins etc. the resulting state may be actually in D[p-1], D[p-2] and below.
 	 * However, it works for arbitrary p.
+	 * 
+	 * @see #selectByTwists2(int)
 	 */
 	private StateObserverCubeCleared selectByTwists1(int p) {
 		StateObserverCubeCleared d_so;
@@ -369,29 +394,35 @@ public class GameBoardCube implements GameBoard {
 	}
 	
 	/** 
-	 * Method to select a start state in distance set D[p] by random twists and maintaining 
+	 * Select a state in distance set D[p] by random twists and maintain
 	 * a list D2[k], k=0,...,p, of all already visited states. 
-	 * A new state in D[p] is created by randomly selecting a state from D2[p-1], advancing it 
-	 * and - if it happens to be in D2[p-1] or D2[p-2] - advancing again (and again) .
+	 * Create it by selecting a random state from D2[p-1], advance it with a random twist
+	 * and - if it happens to be in D2[p-1] or D2[p-2] - advance it again (and again). <br>
+	 * Disadvantages: For large p, the list D2[p-1] and D2[p-2] become too big to be maintained in memory. And if they 
+	 * are not complete, the returned state may be not in D[p]. That is why this method is now deprecated.<br>
+	 * Advantage: If they are complete, we return a state which is truly in D[p].
 	 * <p>
-	 * <b>Details</b>:
-	 * This method is guaranteed to return a state in the true D[p] if and only if
-	 * D2[p-1], D2[p-2], ... are complete. If they are not, <ul>
-	 * <li> certain elements from D[p] may be missed
-	 *      (since its predecessor in D2[p-1] is not there)    -- or -- 
-	 * <li> an element may claim to be in D[p], but truly it belongs to D[p-1] or D[p-2]
-	 *      (not detected, since this element is not present in D2[p-1] or D2[p-2]).
-	 * </ul><p>
-	 * But nevertheless, in the limit of a large number of calls for every p-1, p-2, ..., this
-	 * method will produce with high probability every element from D[p] and only from D[p].
+	 * Side effect: The returned object -- assumed to be a cube state p twists away from the solved cube -- is 
+	 * added to D2[p].
+	 * <p>
+	 * In the limit of a large number of calls for every p-1, p-2, ..., this
+	 * method will produce with high probability an element truly from D[p].
+	 * 
+	 * @see #selectByTwists1(int)
 	 */
+//	 * <b>Details</b>:
+//	 * This method is guaranteed to return a state in the true D[p] if and only if
+//	 * D2[p-1], D2[p-2], ... are complete. If they are not, <ul>
+//	 * <li> certain elements from D[p] may be missed
+//	 *      (since its predecessor in D2[p-1] is not there)    -- or -- 
+//	 * <li> an element may claim to be in D[p], but truly it belongs to D[p-1] or D[p-2]
+//	 *      (not detected, since this element is not present in D2[p-1] or D2[p-2]).
+//	 * </ul><p>
+	@Deprecated
 	private StateObserverCubeCleared selectByTwists2(int p) {
 		StateObserverCube d_so;
-		StateObserverCubeCleared d_soC;
 		CubeState cS;
 		int index;
-//			d_so = new StateObserverCube(); // default cube
-//			for (int k=1; k<=p; k++)  {
 			index = rand.nextInt(D2[p-1].size());
 			d_so =new StateObserverCube(D2[p-1].get(index)); // pick randomly cube from D2[p-1]
 			for (int k=p; k<=p; k++)  {
@@ -407,7 +438,7 @@ public class GameBoardCube implements GameBoard {
 			}	
 			// StateObserverCubeCleared is VERY important, so that no actions are 'forgotten' when 
 			// trying to solve m_so (!!)
-			d_soC = new StateObserverCubeCleared(d_so,p);
+			StateObserverCubeCleared d_soC = new StateObserverCubeCleared(d_so,p);
 			if (D2[p]==null) D2[p]=new CSArrayList(); 
 			if (!D2[p].contains(d_soC.getCubeState())) D2[p].add(d_soC.getCubeState());
 		
@@ -438,8 +469,13 @@ public class GameBoardCube implements GameBoard {
 		case RUBIKS: substr = "3x3x3"; break;
 		}
 		switch (CubeConfig.boardVecType) {
-		case CUBESTATE: substr += "_CSTATE";
-		case CUBEPLUSACTION: substr += "_CPLUS";
+		case CUBESTATE: substr += "_CSTATE"; break;
+		case CUBEPLUSACTION: substr += "_CPLUS"; break;
+		case STICKERS: substr += "_STICK"; break;
+		}
+		switch (CubeConfig.twistType) {
+		case ALLTWISTS: substr += "_AT"; break;
+		case QUARTERTWISTS: substr += "_QT"; break;
 		}
 		return substr;
 	}
@@ -465,9 +501,13 @@ public class GameBoardCube implements GameBoard {
     
     /**
      * Find the real pR for state d_so which claims to be in T[p] and increment realPMat 
-     * accordingly.
-     * The real pR is only guaranteed to be found, if T[p] is complete.
+     * accordingly. realPMat is a (pMax+1) x (pMax+2) matrix with pMax = {@link CubeConfig#pMax}. If a state d_so
+     * which claims to be p twists away from the solved state is found to be pR in reality, then realPMat[p][pR] is 
+     * incremented. If it is not found in any T[p] ('pR not known'), then realPMat[p][pMax+1] is incremented.
+     * <p>
+     * The real pR is only guaranteed to be found, if T[p] is complete. That is why this method is deprecated.
      */
+    @Deprecated
     void incrRealPMat(StateObserverCube d_so, int p) {
 		boolean found=false;
 		for (int pR=0; pR<=CubeConfig.pMax; pR++) {
@@ -485,6 +525,7 @@ public class GameBoardCube implements GameBoard {
 		// the distance set of pR, but it is not found in T[pR].
 	}
 
+    @Deprecated
 	public void printRealPMat() {
 		DecimalFormat df = new DecimalFormat("  00000");
 		for (int i=0; i<realPMat.length; i++) {

@@ -1,5 +1,6 @@
 package games.Hex;
 
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -20,7 +21,7 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
     private static final long serialVersionUID = -2631312361401190002L;
     
     private int[] actionVector;
-    private int[][] newplace;
+    private BoardVector[] newplace;
     private int[][] actionArray;
 
     public XNTupleFuncsHex() {
@@ -29,12 +30,12 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
     	// calculate actionArray[][]: for a given action with key j, the element
     	// actionArray[i][j] holds the equivalent action when the state is transformed to 
     	// equiv[i] = symmetryVectors(int[] boardVector)[i]
-    	newplace = symmetryVectors(actionVector);
+    	newplace = symmetryVectors(new BoardVector(actionVector),0);
     	actionArray = new int[newplace.length][];
     	for (int i=0; i<actionArray.length; i++) {
     		actionArray[i] = new int[this.getNumCells()];
     		for (int j=0; j<this.getNumCells(); j++)
-    			actionArray[i][j] = whereHas(newplace[i],j);
+    			actionArray[i][j] = whereHas(newplace[i].bvec,j);
     	}
     }
     
@@ -61,7 +62,7 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
     }
 
     @Override
-    public int[] getBoardVector(StateObservation so) {
+    public BoardVector getBoardVector(StateObservation so) {
         int[] bmap = {0, 1, 2};  // bmap is just for debug check (no effect if bmap={0,1,2}
         // and any other permutation should lead after re-training to
         // identical results as well.
@@ -73,12 +74,12 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
             boardVectorInt[i] = bmap[boardVectorTiles[i].getPlayer() + 1];
         }
 
-        return boardVectorInt;
+        return new BoardVector(boardVectorInt);
     }
 
     @Override
-    public int[][] symmetryVectors(int[] boardVector) {
-        int[][] symmetries = new int[2][];
+    public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
+        BoardVector[] symmetries = new BoardVector[2];
         symmetries[0] = boardVector;
         symmetries[1] = rotateBoard2(boardVector); // a bit faster than rotateBoard()
 //        int[] check = rotateBoard(boardVector);
@@ -298,17 +299,18 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
      * @param boardVector game board vector
      * @return rotated board vector
      */
-    private int[] rotateBoard2(int[] boardVector) {
-        int[] rotatedBoard = boardVector.clone();
-        int L = boardVector.length;
+    private BoardVector rotateBoard2(BoardVector boardVector) {
+    	int[] bvec = boardVector.bvec;
+        int[] rotatedBoard = bvec.clone();
+        int L = bvec.length;
 
         //Rotating by 180 degrees is the same as mirroring by both axes
         //Rotating by 90 or 270 degrees would not be an equivalent board in Hex
         for (int i=0,j=L-1; i<L; i++,j--) {
-        	rotatedBoard[i]=boardVector[j];
+        	rotatedBoard[i]=bvec[j];
         }
 
-        return rotatedBoard;
+        return new BoardVector(rotatedBoard);
     }
 
     private enum Axis {

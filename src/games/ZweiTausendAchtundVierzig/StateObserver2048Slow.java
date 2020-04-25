@@ -642,7 +642,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
         String s="";
         int codeA = +'A';		// normally 65
         XNTupleFuncs2048 xnf = new XNTupleFuncs2048();
-        int[] bvec = xnf.getBoardVector(this);
+        int[] bvec = xnf.getBoardVector(this).bvec;
         for(int row = 0, n = 0; row < ConfigGame.ROWS; row++) {
             for(int column = 0; column < ConfigGame.COLUMNS; column++,n++) {
             	if (bvec[n]>=10) {
@@ -663,7 +663,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     public String toHexString() {
         String s="";
         XNTupleFuncs2048 xnf = new XNTupleFuncs2048();
-        int[] bvec = xnf.getBoardVector(this);
+        int[] bvec = xnf.getBoardVector(this).bvec;
         for(int row = 0, n = 0; row < ConfigGame.ROWS; row++) {
             for(int column = 0; column < ConfigGame.COLUMNS; column++,n++) {
             	s = s+Integer.toHexString(bvec[n]);

@@ -148,27 +148,6 @@ public class EvaluatorCube extends Evaluator {
 		return lastResult;
 	}
 
- 	// --- implemented by Evaluator ---
-// 	@Override
-// 	public double getLastResult() { 
-// 		return lastResult; 
-// 	}
- 	
- 	// --- implemented by Evaluator ---
-// 	@Override
-// 	public String getMsg() { 
-// 		return m_msg; 
-// 	} 
- 	
- 	// --- implemented by Evaluator ---
-//	@Override
-// 	public boolean isAvailableMode(int mode) {
-//		for (int i : AVAILABLE_MODES) {
-//			if (mode==i) return true;
-//		}
-//		return false;
-// 	}
- 	
  	@Override
  	public int[] getAvailableModes() {
  		return AVAILABLE_MODES;
@@ -187,10 +166,6 @@ public class EvaluatorCube extends Evaluator {
 	{
 		return 0;
 	}
-//	public int getMultiTrainEvalMode() 
-//	{
-//		return 0;
-//	}
 
 	@Override
 	public String getPrintString() {

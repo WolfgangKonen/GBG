@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -37,6 +38,8 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 			return 24;
 		case CUBEPLUSACTION:
 			return 26;
+		case STICKERS: 
+			return 49;
 		default: 
 			throw new RuntimeException("Unallowed value in switch boardVecType");
 		}
@@ -48,7 +51,15 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int getNumPositionValues() {
-		return 6; 
+		switch(CubeConfig.boardVecType) {
+		case CUBESTATE: 
+		case CUBEPLUSACTION:
+			return 6; 
+		case STICKERS: 
+			return 4;
+		default: 
+			throw new RuntimeException("Unallowed value in switch boardVecType");
+		}
 	}
 	
 	/**
@@ -67,7 +78,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * position value with 0:w, 1:b, 2:o, 3:y, 4:g, 5:r.
 	 */
 	@Override
-	public int[] getBoardVector(StateObservation so) {
+	public BoardVector getBoardVector(StateObservation so) {
 		assert (so instanceof StateObserverCube);
 		return ((StateObserverCube) so).getCubeState().getBoardVector();
 	}
@@ -85,11 +96,11 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * @return boardArray
 	 */
 	@Override
-	public int[][] symmetryVectors(int[] boardVector) {
+	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
 		int i=0;
 		boolean doAssert=true;
-		int[][] equiv = null;
-		CubeState cS1 = new CubeState(boardVector); 
+		BoardVector[] equiv = null;
+		CubeState cS1 = new CubeState(boardVector); // problem: not every board vector can be transformed to CubeState (STICKERS)
 		HashSet set = new HashSet();
 		//
 		// calculate all color-symmetric states for cS1, collect
@@ -105,7 +116,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	    
 	    // once we have the truly different CubeStates in 'set', 
 	    // create and fill 'equiv' accordingly:
-		equiv = new int[set.size()][];
+		equiv = new BoardVector[set.size()];
 		it1 = set.iterator();
 	    while (it1.hasNext()) {
 		    CubeState cs  = (CubeState)it1.next();
@@ -178,63 +189,100 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 
 
 	/**
-	 * Return all neighbors of {@code iCell}. See {@link CubeState}  
-	 * for board coding. 4-point-neighborhoods on the cube with wrap-around
+	 * Return all neighbors of cell {@code iCell} in the board vector. 
+	 */
+	public HashSet adjacencySet(int iCell) {
+		switch (CubeConfig.cubeType) {
+		case POCKET: return adjacencySet2x2(iCell);
+		case RUBIKS: throw new RuntimeException("Not yet done!");
+		default: throw new RuntimeException("CubeConfig.cubeType = "+CubeConfig.cubeType+" not known!");
+		}
+	}
+	
+	/**
+	 * Return all neighbors of {@code iCell} for the 2x2x2 pocket cube. 
+	 * <p>
+	 * If {@link CubeConfig#boardVecType}{@code  =CUBESTATE, CUBEPLUSACTION}:  See {@link CubeState}  
+	 * for board coding. 4-point-neighborhoods on the cube with wrap-around.
+	 * <p>
+	 * If {@link CubeConfig#boardVecType}{@code  =STICKERS}: Adjacency set on the 7x7 stickers board: 
+	 * All cells from the next row, except the cell in the same column as {@code iCell}, are in the adjacency set. 
+	 * See {@link CubeState#getBoardVector()} for the stickers board coding.
 	 * 
-	 * @param iCell
+	 * @param iCell	the board cell for which we want the set of adjacent cells
 	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
 	 * 		a board vector) 
 	 */
-	public HashSet adjacencySet(int iCell) {
-		final int[][] aList = {						// 4-point neighborhoods
-				{1,3,4,8},		//0
-				{0,2,18,11},		
-				{1,3,23,17},
-				{0,2,22,5},
-				{0,5,7,8},		//4
-				{3,4,6,22},
-				{5,7,15,21},
-				{4,6,9,14},
-				{0,4,9,11},		//8
-				{7,8,10,14},
-				{9,11,13,19},
-				{1,8,10,18},
-				{13,15,16,20},	//12
-				{10,14,12,19},
-				{7,9,13,15},
-				{6,14,12,21},
-				{12,17,19,20},	//16
-				{2,18,16,23},
-				{1,11,19,17},
-				{10,13,16,18},
-				{12,16,23,21},	//20
-				{6,15,20,22},
-				{3,5,21,23},
-				{2,17,20,22},
-//				{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23},	// OLD, is inferior
-//				{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23}		//
-				{0,1,2,3,4,5},
-				{0,1,2,3,4,5}
-				};
-		
-		// just a one-time debug test, if we wrote up aList correctly:
-//		int[] counter = new int[24];
-//		for (int i=0; i<24; i++) 
-//			for (int j=0; j<4; j++) 
-//				counter[aList[i][j]]++;
-//		for (int i=0; i<24; i++) assert(counter[i]==4) : "Oops, counter["+i+"] is not 4";
-		
+	public HashSet adjacencySet2x2(int iCell) {
+		int i,j;
 		HashSet adjSet = new HashSet();
-		for (int i=0; i<4; i++) adjSet.add(aList[iCell][i]);
-		
-		// If the board vector includes lastAction, we follow the model that the first 6 fcol-cells have
-		// cell 24 + 25 (coding lastAction) as neighbors:
-//		if (CubeConfig.boardVecType==BoardVecType.CUBEPLUSACTION) {	// OLD: all cells, is inferior
-		if (CubeConfig.boardVecType==BoardVecType.CUBEPLUSACTION && iCell<6) {
-			adjSet.add(24);
-			adjSet.add(25);
-		}
-		
+		switch (CubeConfig.boardVecType) {
+		case CUBESTATE:
+		case CUBEPLUSACTION:
+			final int[][] aList = {						// 4-point neighborhoods
+					{1,3,4,8},		//0
+					{0,2,18,11},		
+					{1,3,23,17},
+					{0,2,22,5},
+					{0,5,7,8},		//4
+					{3,4,6,22},
+					{5,7,15,21},
+					{4,6,9,14},
+					{0,4,9,11},		//8
+					{7,8,10,14},
+					{9,11,13,19},
+					{1,8,10,18},
+					{13,15,16,20},	//12
+					{10,14,12,19},
+					{7,9,13,15},
+					{6,14,12,21},
+					{12,17,19,20},	//16
+					{2,18,16,23},
+					{1,11,19,17},
+					{10,13,16,18},
+					{12,16,23,21},	//20
+					{6,15,20,22},
+					{3,5,21,23},
+					{2,17,20,22},
+//					{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23},	// OLD, is inferior
+//					{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23}		//
+					{0,1,2,3,4,5},
+					{0,1,2,3,4,5}
+					};
+			// just a one-time debug test, if we wrote up aList correctly:
+//			int[] counter = new int[24];
+//			for (i=0; i<24; i++) 
+//				for (j=0; j<4; j++) 
+//					counter[aList[i][j]]++;
+//			for (i=0; i<24; i++) assert(counter[i]==4) : "Oops, counter["+i+"] is not 4";
+			
+			for (i=0; i<4; i++) adjSet.add(aList[iCell][i]);
+			
+			// If the board vector includes lastAction, we follow the model that the first 6 fcol-cells have
+			// cell 24 + 25 (coding lastAction) as neighbors:
+//			if (CubeConfig.boardVecType==BoardVecType.CUBEPLUSACTION) {	// OLD: all cells, is inferior
+			if (CubeConfig.boardVecType==BoardVecType.CUBEPLUSACTION && iCell<6) {
+				adjSet.add(24);
+				adjSet.add(25);
+			}
+			break;
+		case STICKERS:
+			j = iCell % 7;	// column index
+			i = iCell - j;	// row index
+			boolean ROWWISE = true;
+			if (ROWWISE) {
+				int newi = (i+1)%7;	// next row (cyclically)
+				for (int k=0; k<7; k++) {
+					if (k!=j) adjSet.add(newi*7+k);	// add a cell from next row being NOT in column j
+				}				
+			} else {
+				int newj = (i+1)%7;	// next column (cyclically)
+				for (int k=0; k<7; k++) {
+					if (k!=i) adjSet.add(k*7+newj);	// add a cell from next column being NOT in row i
+				}
+			}
+		} // switch
+				
 		return adjSet;
 	}
 

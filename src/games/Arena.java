@@ -337,8 +337,8 @@ abstract public class Arena implements Runnable {
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
 					XNTupleFuncs xnf = this.makeXNTupleFuncs();
-					int[] bvec = xnf.getBoardVector(soh); // look at bvec in debugger to see
-														  // the board representation
+					int[] bvec = xnf.getBoardVector(soh).bvec; 	// look at bvec in debugger to see
+																// the board representation
 					// int Index = this.getHexIndex(soh.getBoard());
 					// System.out.println("Index: "+Index);
 					System.out.println("[" + soh.stringDescr() + "]");

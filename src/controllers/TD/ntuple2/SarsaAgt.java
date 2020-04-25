@@ -271,7 +271,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
     			// TODO: currently we cannot mirror in Q-learning the afterstate logic 
     			// that we have optionally in TDNTuple2Agt
     			
-    			int[] bvec = m_Net.xnf.getBoardVector(so);
+    			int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
             	qValue = m_Net.getQFunc(bvec,so.getPlayer(),acts.get(i));
             	
             	// It is a bit funny, that the decision is made based only on qValue, not 
@@ -332,7 +332,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 * @return the agent's estimate of the future score for that after state
 	 */
 	public double getScore(StateObservation so) {
-		int[] bvec = m_Net.xnf.getBoardVector(so);
+		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
 		double score = m_Net.getScoreI(bvec,so.getPlayer());
 		return score;
 	}
@@ -394,7 +394,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		} else {
 			a_next = getNextAction2(s_next,true,true);
 //			int[] nextBoard = m_Net.xnf.getBoardVector(s_after);
-			int[] nextBoard = m_Net.xnf.getBoardVector(s_next);	// WK: NEW: next state instead of afterstate
+			int[] nextBoard = m_Net.xnf.getBoardVector(s_next).bvec;	// WK: NEW: next state instead of afterstate
         	qValue = m_Net.getQFunc(nextBoard,nextPlayer,a_next);
 		}
 		
@@ -411,7 +411,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			
         	// note that curBoard is NOT the board vector of state ns.getSO(), but of state
         	// sLast[curPlayer] (one round earlier!)
-			curBoard = m_Net.xnf.getBoardVector(sLast[nextPlayer]); 
+			curBoard = m_Net.xnf.getBoardVector(sLast[nextPlayer]).bvec; 
         	qLast = m_Net.getQFunc(curBoard,nextPlayer,aLast[nextPlayer]);
         	
         	// if last action of nextPlayer was a random move: 
@@ -477,7 +477,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 					target = R.scTup[n] - rLast.scTup[n]; 		// delta reward
 			        // TODO: think whether the subtraction rlast.scTup[n] is right for every n
 					//		 (or whether we need to correct rLast before calling finalAdaptAgents)
-					curBoard = m_Net.xnf.getBoardVector(sLast[n]); 
+					curBoard = m_Net.xnf.getBoardVector(sLast[n]).bvec; 
 		        	qLast = m_Net.getQFunc(curBoard,n,aLast[n]);
 		        	
 	    			m_Net.updateWeightsQ(curBoard, n, aLast[n], qLast,

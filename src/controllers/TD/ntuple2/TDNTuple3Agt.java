@@ -389,7 +389,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 */
 	public double getScore(StateObservation so, StateObservation refer) {
 		double score;
-		int[] bvec = m_Net.xnf.getBoardVector(so);
+		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
 		score = m_Net.getScoreI(bvec,refer.getPlayer());
     	return score;
 	}
@@ -409,7 +409,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 		ScoreTuple sc = new ScoreTuple(so);
-		int[] bvec = m_Net.xnf.getBoardVector(so);
+		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
 		switch (so.getNumPlayers()) {
 		case 1: 
 			sc.scTup[0] = m_Net.getScoreI(bvec,so.getPlayer());
@@ -517,7 +517,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		if (s_next.isGameOver()) {
 			v_next = 0.0;
 		} else {
-			int[] nextBoard = m_Net.xnf.getBoardVector(s_after);
+			int[] nextBoard = m_Net.xnf.getBoardVector(s_after).bvec;
         	v_next = m_Net.getScoreI(nextBoard,curPlayer);
 		}
 		
@@ -538,7 +538,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         	
         	// note that curBoard is NOT the board vector of state ns.getSO(), but of state
         	// sLast[curPlayer] (one round earlier!)
-			curBoard = m_Net.xnf.getBoardVector(sLast[curPlayer]); 
+			curBoard = m_Net.xnf.getBoardVector(sLast[curPlayer]).bvec; 
         	vLast = m_Net.getScoreI(curBoard,curPlayer);
         	
 //    		if (randLast[curPlayer] && !learnFromRM && !s_next.isGameOver()) {
@@ -625,7 +625,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				// 
 				if (sLast[n]!=null ) { 
 					target = R.scTup[n] - rLast.scTup[n]; 		// delta reward
-					curBoard = m_Net.xnf.getBoardVector(sLast[n]); 
+					curBoard = m_Net.xnf.getBoardVector(sLast[n]).bvec; 
 		        	vLast = m_Net.getScoreI(curBoard,n);
 		        	
 	    			m_Net.updateWeightsTD(curBoard, n, vLast, target, R.scTup[n], ns.getSO());
@@ -661,7 +661,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 					// curPlayer observed after he did his final move. Adapt it towards 
 					// target 0. (This is only relevant for TERNARY==false, since 
 					// only then the value of this afterstate is used in getNextAction2.)
-					curBoard = m_Net.xnf.getBoardVector(s_after); 	// WK/04/2019: NEW use afterstate, *not* next state
+					curBoard = m_Net.xnf.getBoardVector(s_after).bvec; 	// WK/04/2019: NEW use afterstate, *not* next state
 		        	vLast = m_Net.getScoreI(curBoard,curPlayer);
 		        	
 	    			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);					

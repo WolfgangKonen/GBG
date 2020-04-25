@@ -11,6 +11,7 @@ import org.apache.commons.math3.exception.OutOfRangeException;
 
 import controllers.TD.ntuple2.NTupleFactory;
 import games.Arena;
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -34,17 +35,17 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
     private static final long serialVersionUID = 42L;
     
 	private int[] actionVector = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8 , 9, 10, 11, 12, 13, 14, 15 , 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 , 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 , 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};	
-	private int[][] symmetryActions; //Gives a 2D representation of all SymmetryVectors
+	private BoardVector[] symmetryActions; //Gives a 2D representation of all SymmetryVectors
 	private int[][] actionPositions; //Given an action key, it gives all symmetric actions
 
 	public XNTupleFuncsOthello() {
-		symmetryActions = symmetryVectors(actionVector);
+		symmetryActions = symmetryVectors(new BoardVector(actionVector),0);
 		actionPositions = new int[actionVector.length][symmetryActions.length];
 		for (int i = 0; i < actionPositions.length; i++) 
 		{
 			for(int j = 0; j < symmetryActions.length; j++)
 			{
-				actionPositions[i][j] = indexOf(symmetryActions[j], i);
+				actionPositions[i][j] = indexOf(symmetryActions[j].bvec, i);
 			}
 		}
 	}
@@ -114,7 +115,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	 * position value with 0 = BLACK , 1 = WHITE, 2 = EMPTY.
 	 */
 	@Override
-	public int[] getBoardVector(StateObservation so) {
+	public BoardVector getBoardVector(StateObservation so) {
 		assert ( so instanceof StateObserverOthello);
 		int[][] gameState = ((StateObserverOthello) so).getCurrentGameState();
 		int[] retVal = new int[getNumCells()];
@@ -128,7 +129,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
             	retVal[availActs.get(i).toInt()] = 3;
             }
 		}
-		return retVal;
+		return new BoardVector(retVal);
 	}
 	
 	/**
@@ -144,10 +145,10 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	 * @return boardArray
 	 */
 	@Override
-	public int[][] symmetryVectors(int[] boardVector) {
+	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
 		//int s = 16; // Read the comment above!
 		int s = 8;
-		int[][] symmetryVectors = new int[s][boardVector.length];
+		BoardVector[] symmetryVectors = new BoardVector[s];
 		symmetryVectors[0] = boardVector;
 
 		for(int i = 1; i < 4; i++) {
@@ -180,12 +181,13 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	 * @param boardVector
 	 * @return rotatedBoard
 	 */
-	private int[] rotate(int[] boardVector)
+	private BoardVector rotate(BoardVector boardVector)
 	{	    
+		int[] bvec = boardVector.bvec;
 		//		int[] rotationIndex = new int[] { 56, 48, 40, 32, 24, 16, 8, 0, 57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18, 10, 2, 59, 51, 43, 35, 27, 19, 11, 03, 
 		//			60, 52, 44, 36, 28, 20, 12, 4, 61, 53, 45, 37, 29, 21, 13, 5, 62, 54, 46, 38, 30, 22, 14, 6, 63, 55, 47, 39, 31, 23, 15, 7 };
 
-		int[] result = new int[boardVector.length];
+		int[] result = new int[bvec.length];
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
 		{
 			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
@@ -193,7 +195,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 				int oldPosition = i * ConfigOthello.BOARD_SIZE + j;
 				int newPosition = (ConfigOthello.BOARD_SIZE * ConfigOthello.BOARD_SIZE - ConfigOthello.BOARD_SIZE) + i - (j * ConfigOthello.BOARD_SIZE);
 
-				result[newPosition] = boardVector[oldPosition];
+				result[newPosition] = bvec[oldPosition];
 			}	
 		}
 		for(int i = 0; i < result.length / 2; i++)
@@ -203,7 +205,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 			result[result.length - 1 - i] = temp;
 		}
 
-		return result;
+		return new BoardVector(result);
 
 	}
 
@@ -264,10 +266,10 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	 * @param boardVector
 	 * @return
 	 */
-	public int[] mirrorHorizontally(int[] boardVector)		// WK this is the new, correct version
+	public BoardVector mirrorHorizontally(BoardVector boardVector)		// WK this is the new, correct version
 	{
 		int BS = ConfigOthello.BOARD_SIZE;
-		int[] result = boardVector.clone();
+		int[] result = boardVector.bvec.clone();
 		int offset = BS*BS;
 		for(int i = 0; i < result.length / 2; i++)
 		{
@@ -277,7 +279,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 			result[i] = result[newI];
 			result[newI] = temp;
 		}
-		return result;
+		return new BoardVector(result);
 	}
 
 //	public int[] mirrorHorizontallyOLD(int[] boardVector)		// WK this is the old, buggy version
@@ -502,17 +504,17 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	//
 	public static void main(String[] args) {
 		XNTupleFuncsOthello xnf = new XNTupleFuncsOthello();
-		int[] bv2 = xnf.makeBoardVectorEachCellDifferent();
-		int[][] sv2 = xnf.symmetryVectors(bv2);
+		BoardVector bv2 = xnf.makeBoardVectorEachCellDifferent();
+		BoardVector[] sv2 = xnf.symmetryVectors(bv2,0);
 		for (int i = 0;  i < ConfigOthello.BOARD_SIZE; i++) {
 			System.out.println("* i="+i+" *");
-			prettyPrintBoardVector(sv2[i]);
+			prettyPrintBoardVector(sv2[i].bvec);
 		}
 		int dummy =1;
 		System.out.println("\nCheck mirrorHorizontally\n  * Original *");
-		prettyPrintBoardVector(bv2);
+		prettyPrintBoardVector(bv2.bvec);
 		System.out.println("  * Mirrored *");
-		prettyPrintBoardVector(xnf.rotate(bv2));
+		prettyPrintBoardVector(xnf.rotate(bv2).bvec);
 	
 	
 	}

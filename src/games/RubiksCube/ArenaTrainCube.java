@@ -13,6 +13,7 @@ import games.GameBoard;
 import games.XNTupleFuncs;
 import games.RubiksCube.CubeConfig.BoardVecType;
 import games.RubiksCube.CubeConfig.CubeType;
+import games.RubiksCube.CubeConfig.TwistType;
 import games.Sim.ConfigSim;
 import games.ArenaTrain;
 
@@ -35,7 +36,9 @@ import games.ArenaTrain;
 public class ArenaTrainCube extends ArenaTrain   {
 	
 	public ArenaTrainCube(String title, boolean withUI) {
-		super(title,withUI);		
+		super(title,withUI);	
+		CubeState.generateInverseTs();
+		CubeState.generateForwardTs();
 	}
 	
 	/**
@@ -102,7 +105,19 @@ public class ArenaTrainCube extends ArenaTrain   {
     	switch(bvType) {
     	case "CSTATE": CubeConfig.boardVecType = BoardVecType.CUBESTATE; break;
     	case "CPLUS": CubeConfig.boardVecType = BoardVecType.CUBEPLUSACTION; break;
+    	case "STICK": CubeConfig.boardVecType = BoardVecType.STICKERS; break;
     	default: throw new RuntimeException("Board vector type "+bvType+" is not known.");
+    	}
+    }
+
+    /**
+     * set the twist type (ALLTWISTS or QUARTERTWISTS) for Rubik's Cube
+     */
+    public static void setTwistType(String tCube) {
+    	switch(tCube) {
+    	case "ALL": CubeConfig.twistType = TwistType.ALLTWISTS; break;
+    	case "QUARTER": CubeConfig.twistType = TwistType.QUARTERTWISTS; break;
+    	default: throw new RuntimeException("Twist type "+tCube+" is not known.");
     	}
     }
 

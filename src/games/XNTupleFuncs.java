@@ -52,15 +52,15 @@ public interface XNTupleFuncs {
 	
 	/**
 	 * @param so the state
-	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
+	 * @return an object with member bvec, a vector of length {@link #getNumCells()}, holding for each board cell its 
 	 * position value 0, 1, 2,..., P-1 in state {@code so}.
 	 */
-	public int[] getBoardVector(StateObservation so);
+	public BoardVector getBoardVector(StateObservation so);
 
 	/**
 	 * @return a board vector where each cell has a different int 
 	 */
-	public int[] makeBoardVectorEachCellDifferent();
+	public BoardVector makeBoardVectorEachCellDifferent();
 	
 	/**
 	 * Given a board vector and given that the game has s symmetries,  
@@ -80,9 +80,13 @@ public interface XNTupleFuncs {
 	 * </pre>
 	 * 
 	 * @param boardVector e.g. from {@link #getBoardVector(StateObservation)}
-	 * @return a (s x length(boardVector))-matrix 
+	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
+	 * @return a vector of BoardVectors 
 	 */
-	public int[][] symmetryVectors(int[] boardVector);
+	/**
+	 * 
+	 */
+	public BoardVector[] symmetryVectors(BoardVector boardVector, int n);
 	
 	/**
 	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 

@@ -3,6 +3,7 @@ package games.Nim;
 import java.io.Serializable;
 import java.util.HashSet;
 
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -64,10 +65,10 @@ public class XNTupleFuncsNim extends XNTupleBase implements XNTupleFuncs, Serial
 	 * position value (0,1,2,...,HEAP_SIZE items on the heap).
 	 */
 	@Override
-	public int[] getBoardVector(StateObservation so) {
+	public BoardVector getBoardVector(StateObservation so) {
 		assert (so instanceof StateObserverNim);
 
-		return ((StateObserverNim) so).getHeaps();   
+		return new BoardVector(((StateObserverNim) so).getHeaps());   
 	}
 	
 	/**
@@ -87,11 +88,11 @@ public class XNTupleFuncsNim extends XNTupleBase implements XNTupleFuncs, Serial
 	 * @return boardArray
 	 */
 	@Override
-	public int[][] symmetryVectors(int[] boardVector) {
+	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
 		int i;
-		int[][] equiv = null;
-		equiv = new int[1][];
-		equiv[0] = boardVector.clone();
+		BoardVector[] equiv = null;
+		equiv = new BoardVector[1];
+		equiv[0] = new BoardVector(boardVector.bvec);
 		
 		return equiv;
 	}
