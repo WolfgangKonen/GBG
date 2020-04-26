@@ -2074,7 +2074,7 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @param sameLength
 	 *            If sameLength = true, then always a moveList with 8 elements
 	 *            is returned, where a value of -1 indicates the end of the
-	 *            list-
+	 *            list.
 	 * @return List of possible moves for the current state.
 	 */
 	public int[] generateMoves(boolean sameLength) {

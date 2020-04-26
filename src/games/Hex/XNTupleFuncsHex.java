@@ -21,7 +21,7 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
     private static final long serialVersionUID = -2631312361401190002L;
     
     private int[] actionVector;
-    private BoardVector[] newplace;
+    private transient BoardVector[] newplace;
     private int[][] actionArray;
 
     public XNTupleFuncsHex() {
@@ -281,15 +281,15 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
      * @return Rotated board
      */
     @Deprecated
-    private int[] rotateBoard(int[] boardVector) {
-        int[] rotatedBoard = boardVector.clone();
+    private BoardVector rotateBoard(BoardVector boardVector) {
+        int[] rotatedBoard = boardVector.bvec.clone();
 
         //Rotating by 180 degrees is the same as mirroring by both axes
         //Rotating by 90 or 270 degrees would not be an equivalent board in Hex
         rotatedBoard = mirrorBoard(rotatedBoard, Axis.HORIZONTAL);
         rotatedBoard = mirrorBoard(rotatedBoard, Axis.VERTICAL);
 
-        return rotatedBoard;
+        return new BoardVector(rotatedBoard);
     }
 
     /**

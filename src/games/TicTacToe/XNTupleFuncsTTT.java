@@ -100,15 +100,16 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	/**
 	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
-	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
-	 * <li> the first row {@code boardArray[0]} is the board vector itself
-	 * <li> the other rows are the board vectors when transforming {@code boardVector}
+	 * game has s symmetries, return an array which holds at most s symmetric board vectors: <ul>
+	 * <li> the first element {@code vecOfBvecs[0]} is the board vector itself
+	 * <li> the other elements are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
 	 * In the case of TicTacToe we have s=8 symmetries (4 board rotations * 2 board flips)
 	 * 
 	 * @param boardVector
-	 * @return boardArray
+	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
+	 * @return vecOfBvecs
 	 */
 	@Override
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
@@ -130,7 +131,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * and a certain action to be taken in <b>{@code so}</b>, generate the array of equivalent 
 	 * action keys {@code equivAction} for the symmetric states.
 	 * <p>
-	 * This method is needed only for Q-learning and Sarsa.
+	 * This method is needed for Q-learning and Sarsa only.
 	 * 
 	 * @param actionKey
 	 * 				the key of the action to be taken in <b>{@code so}</b> 
@@ -138,7 +139,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
 	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(BoardVector, int)}[i]
 	 */
 	public int[] symmetryActions(int actionKey) {
 		int numEquiv = actionArray.length;

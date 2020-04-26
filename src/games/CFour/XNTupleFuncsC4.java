@@ -127,7 +127,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * and a certain action to be taken in <b>{@code so}</b>, 
 	 * generate the array of equivalent action keys {@code equivAction} for the symmetric states.
 	 * <p>
-	 * This method is needed for Q-learning and Sarsa.
+	 * This method is needed for Q-learning and Sarsa only.
 	 * 
 	 * @param actionKey
 	 * 				the key of the action to be taken in <b>{@code so}</b> 
@@ -315,8 +315,8 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 		int[] board = boardVector.bvec;
 		//mirror ConnectFour board (vertical flip)
 		int[] newBoard = new int[C4Base.ROWCOUNT*C4Base.COLCOUNT];
-		for (int i = C4Base.COLCOUNT-1, k=0; i>=0; i--)
-			for (int j =0; j < C4Base.ROWCOUNT; j++) 
+		for (int i = C4Base.COLCOUNT-1, k=0; i>=0; i--)			// i: col index {0,..,7}, counting down
+			for (int j =0; j < C4Base.ROWCOUNT; j++) 			// j: row index {0,..,6}
 				newBoard[k++] = board[i*C4Base.ROWCOUNT + j];
 		
 		return new BoardVector(newBoard);

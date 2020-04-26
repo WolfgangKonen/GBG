@@ -21,7 +21,6 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
     private static final long serialVersionUID = -4486168568704181430L;
 
     private int[] actionVector = {0,1,2,3};
-//    private int[][] newplace;
     private int[][] actionArray;
 
 	/**

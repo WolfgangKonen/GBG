@@ -918,7 +918,7 @@ public class XArenaFuncs {
 	 * {@code competeNum} episodes, starting from StateObservation
 	 * {@code startSO}.
 	 * 
-	 * @param paVector
+	 * @param paVector a vector with N agents for an N-player game
 	 * @param startSO
 	 *            the start board position for the game
 	 * @param competeNum
@@ -1029,7 +1029,7 @@ public class XArenaFuncs {
 	 * plays cyclically each role: the 1st, 2nd, ... {@code N}th player. The
 	 * results are mapped back to the score tuple of the 1st role
 	 * 
-	 * @param paVector
+	 * @param paVector a vector with N agents for an N-player game
 	 * @param startSO
 	 *            the start board position for the game
 	 * @param competeNum
@@ -1118,21 +1118,11 @@ public class XArenaFuncs {
 			} else {
 				double[] res;
 				if (swap) {
-					// res =
-					// compete(qaVector[1],qaVector[0],startSO,competeNum,verbose,
-					// null);
-					// System.out.println(Arrays.toString(res));
-					// double retVal = res[2] - res[0];
 					ScoreTuple sc = competeNPlayer(new PlayAgtVector(qaVector[1], qaVector[0]), startSO, competeNum,
 							verbose, null);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
 					return sc.scTup[1];
 				} else {
-					// res =
-					// compete(qaVector[0],qaVector[1],startSO,competeNum,verbose,
-					// null);
-					// System.out.println(Arrays.toString(res));
-					// double retVal = res[0] - res[2];
 					ScoreTuple sc = competeNPlayer(new PlayAgtVector(qaVector), startSO, competeNum, verbose, null);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
 					return sc.scTup[0];
