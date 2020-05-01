@@ -337,8 +337,8 @@ abstract public class Arena implements Runnable {
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
 					XNTupleFuncs xnf = this.makeXNTupleFuncs();
-					int[] bvec = xnf.getBoardVector(soh); // look at bvec in debugger to see
-														  // the board representation
+					int[] bvec = xnf.getBoardVector(soh).bvec; 	// look at bvec in debugger to see
+																// the board representation
 					// int Index = this.getHexIndex(soh.getBoard());
 					// System.out.println("Index: "+Index);
 					System.out.println("[" + soh.stringDescr() + "]");
@@ -953,7 +953,7 @@ abstract public class Arena implements Runnable {
 	/**
 	 * @param index   number of the player (agent)
 	 */
-	boolean saveAgent(int index, String savePath) {
+	public boolean saveAgent(int index, String savePath) {
 		int numPlayers = getGameBoard().getStateObs().getNumPlayers();
 		boolean bstatus = false;
 		try {
@@ -996,7 +996,7 @@ abstract public class Arena implements Runnable {
 	 * @param filePath with ending {@code .agt.zip}
 	 * @return true on success, false else
 	 */
-	boolean loadAgent(int n, String filePath) {
+	public boolean loadAgent(int n, String filePath) {
 		int numPlayers = this.getGameBoard().getStateObs().getNumPlayers();
 		String str="";
 		PlayAgent td=null;

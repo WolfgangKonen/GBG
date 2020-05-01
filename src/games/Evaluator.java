@@ -209,6 +209,10 @@ abstract public class Evaluator {
 
 	}
 	
+	public int getMode() {
+		return m_mode;
+	}
+	
 	/**
 	 * If not overridden by derived class, {@link #getDefaultEvalMode()} returns 0.
 	 * 

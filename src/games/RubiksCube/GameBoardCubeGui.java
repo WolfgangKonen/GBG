@@ -60,7 +60,7 @@ public class GameBoardCubeGui extends JFrame {
 	private JLabel rightInfo=new JLabel(""); 
 	private JLabel pLabel;
 	private JComboBox pChoice;
-	static String[] pChoiceList = {"1","2","3","4","5","6","RANDOM"};
+	static String[] pChoiceList = {"1","2","3","4","5","6","8","10","RANDOM"};
 	/**
 	 * The representation of the cube in the GUI. The 24 active panels in the 6*8 field
 	 * represent the cubie faces of the flattened cube.
@@ -79,38 +79,9 @@ public class GameBoardCubeGui extends JFrame {
 	private GameBoardCube m_gb=null;
 	
 	/**
-	 * The representation of the state corresponding to the current 
-	 * {@link #Board} position.
+	 * A table for the stored values of each action
 	 */
-//	private StateObserverCube m_so;
 	private double[][] VTable;
-	/**
-	 * the array of distance sets for training
-	 */
-	private CSArrayList[] D;		
-	/**
-	 * the array of distance sets for testing (= evaluation)
-	 */
-	private CSArrayList[] T;		
-	private CSArrayList[] D2=null;
-	private boolean arenaActReq=false;
-	private int[][] realPMat;
-	
-	/**
-	 * If true, select in {@link #chooseStartState(PlayAgent)} from distance set {@link #D}.
-	 * If false, use {@link #selectByTwists2(int)}. 
-	 */
-	private boolean SELECT_FROM_D = true;  
-	/**
-	 * If true, increment the matrix realPMat, which measures the real p of each start state.  
-	 * Make a debug printout of realPMat every 10000 training games.
-	 * 
-	 * @see #chooseStartState(PlayAgent) chooseStartState(PlayAgent) and its helpers selectByTwists1 or selectByTwists2
-	 * @see #incrRealPMat(StateObserverCube, int)
-	 * @see #printRealPMat()
-	 */
-	private boolean DBG_REALPMAT=false;
-
 	
 	// the colors of the TH Koeln logo (used for button coloring):
 	private Color colTHK1 = new Color(183,29,13);
@@ -348,7 +319,7 @@ public class GameBoardCubeGui extends JFrame {
 
 	/**
 	 * Update the play board and the associated action values (raw score*100) for the state 
-	 * {@code this.m_so}.
+	 * {@code m_gb.m_so}.
 	 * <p>
 	 * Color coding for the action buttons, if {@code showValueOnGameBoard==true}:<br>
 	 * color green = good move, high value, color red = bad move, low value 
@@ -488,61 +459,13 @@ public class GameBoardCubeGui extends JFrame {
 
     @Override
 	public void toFront() {
-   	super.setState(Frame.NORMAL);	// if window is iconified, display it normally
+    	super.setState(Frame.NORMAL);	// if window is iconified, display it normally
 		super.toFront();
 	}
    
     public void destroy() {
-	   this.setVisible(false);
-	   this.dispose();
+    	this.setVisible(false);
+    	this.dispose();
     }
 
-    /* ---- METHODS BELOW ARE ONLY FOR DEBUG --- */
-
-    private void checkIntersects() {
-    	for (int p=1; p<=CubeConfig.pMax; p++) {
-    	    Iterator itD = D[p].iterator();
-    	    int intersectCount = 0;
-    	    while (itD.hasNext()) {
-    		    CubeState twin = (CubeState)itD.next();
-    		    if (T[p].contains(twin)) intersectCount++;
-            } 
-    		System.out.println("checkIntersects: p="+p+", intersect(D[p],T[p])="+intersectCount+", D[p].size="+D[p].size());
-    	}   	
-    }
-    
-    /**
-     * Find the real pR for state d_so which claims to be in T[p] and increment realPMat 
-     * accordingly.
-     * The real pR is only guaranteed to be found, if T[p] is complete.
-     */
-    void incrRealPMat(StateObserverCube d_so, int p) {
-		boolean found=false;
-		for (int pR=0; pR<=CubeConfig.pMax; pR++) {
-			if (T[pR].contains(d_so.getCubeState())) {
-				// the real p is pR
-				realPMat[p][pR]++;
-				found = true;
-				break;
-			}
-		}
-		
-		if (!found) realPMat[p][CubeConfig.pMax+1]++;
-		// A count in realPMat[X][pMax+1] means: the real p is not known for p=X.
-		// This can happen if T[pR] is not the complete set: Then d_so might be truly in 
-		// the distance set of pR, but it is not found in T[pR].
-	}
-
-	public void printRealPMat() {
-		DecimalFormat df = new DecimalFormat("  00000");
-		for (int i=0; i<realPMat.length; i++) {
-			for (int j=0; j<realPMat[i].length; j++) {
-				System.out.print(df.format(realPMat[i][j]));
-			}
-			System.out.println("");
-		}
-		
-	}
-	
-   
 }

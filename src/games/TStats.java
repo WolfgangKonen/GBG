@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import games.RubiksCube.CubeConfig;
+
 /**
  *  {@link TStats} is a class to store a tuple of int's with diagnostic information
  *  about the last training episode: <ul>
@@ -13,7 +15,7 @@ import java.util.Iterator;
  *  <li> <b>epiLength</b>	the maximum allowed episode length
  *  </ul>
  *  
- *  This class is mainly useful for game RubiksCube, but may not be completely useless
+ *  This class is mainly useful for game <b>RubiksCube</b>, but may not be completely useless
  *  for other (puzzle) games as well.
  */
 public class TStats {
@@ -55,7 +57,7 @@ public class TStats {
 	 *  <li> <b>epiLength</b>	the percentage of episodes with maximum episode length
 	 *  </ul>
 	 *  
-	 *  This class is mainly useful for game RubiksCube, but may not be completely useless
+	 *  This class is mainly useful for game <b>RubiksCube</b>, but may not be completely useless
 	 *  for other (puzzle) games as well.
 	 */
 	public static class TAggreg {
@@ -76,9 +78,11 @@ public class TStats {
 			    if (cs.p==p) {
 			    	size++;
 				    this.p = cs.p;
-				    if (cs.moveNum==cs.p) nSolved++;
-				    if (cs.p<cs.moveNum && cs.moveNum<cs.epiLength) nLonger++;
-				    if (cs.moveNum==cs.epiLength) nNot++;			    	
+				    if (cs.moveNum<=cs.p) nSolved++;	// completed in p moves or less (Why 'or less'? - Although a 
+				    				// scrambled cube may be created with p twist, it may happen, that it belongs
+				    				// to distance set D[p-1] or lower and can be solved with p-1 twists or less.
+				    if (cs.p<cs.moveNum && cs.moveNum<cs.epiLength) nLonger++;	// completed in p+1,...,epiLength-1 moves
+				    if (cs.moveNum>=cs.epiLength) nNot++;	// did not complete after epiLength moves		    	
 			    }
 	        } 
 		    this.size = size;
@@ -91,11 +95,13 @@ public class TStats {
 	
 	public static void printTAggregList(ArrayList<TAggreg> taList) {
 		DecimalFormat form = new DecimalFormat("000");
-		DecimalFormat fper = new DecimalFormat("0.0%"); 
+		DecimalFormat form2 = new DecimalFormat("0000");
+		DecimalFormat fper = new DecimalFormat("000.0%"); 
+		System.out.println("  p,  num: %solved, %longe, %unsolved");
 		Iterator it = taList.iterator();
 	    while (it.hasNext()) {
 			TAggreg tint = (TAggreg)it.next();
-		    System.out.println(form.format(tint.p) + ", " + form.format(tint.size) + ": "
+		    System.out.println(form.format(tint.p) + ", " + form2.format(tint.size) + ":  "
 		    		+ fper.format(tint.percSolved) + ", "
 		    		+ fper.format(tint.percLonger) + ", "
 		    		+ fper.format(tint.percNotSol) );
@@ -117,13 +123,14 @@ public class TStats {
 	}
 
 	/**
-	 * @param taList
-	 * @param weight the weights w, each entry in taList gets the relative weight w[p]/sum(w[p])
+	 * @param taList a list of length {@link CubeConfig#pMax} with aggregated training results
+	 * @param w a weight vector of length {@link CubeConfig#pMax}. Each entry in {@code taList} gets the 
+	 * 			relative weight w[p]/sum(w[p])
 	 * @param mode =0: percent solved within minimal twists, =1: percent solved below epiLength
-	 * @return the weighted average of 'solved' percentages in taList
+	 * @return the weighted average of 'solved' percentages in {@code taList}
 	 */
-	public static double weightedAvgResTAggregList(ArrayList<TAggreg> taList, int[] weight, int mode) {
-		assert (weight.length >= taList.size());
+	public static double weightedAvgResTAggregList(ArrayList<TAggreg> taList, int[] w, int mode) {
+		assert (w.length >= taList.size());
 		Iterator it = taList.iterator();
 		double res=0;
 		double wghtSum = 0.0;
@@ -132,8 +139,8 @@ public class TStats {
 	    while (it.hasNext()) {
 			TAggreg tagg = (TAggreg)it.next();
 			val = (mode==0) ? tagg.percSolved : (1-tagg.percNotSol);
-			wghtSum += weight[count];
-			res += val * weight[count++];
+			wghtSum += w[count];
+			res += val * w[count++];
         } 		
 		return res/wghtSum;
 	}

@@ -319,6 +319,9 @@ public class ParNT implements Serializable {
 				this.setTc(true);
 				this.setRandomness(false);
 				break;
+			case "RubiksCube":
+				this.setUSESYMMETRY(false);
+				break;
 			}
 			break;
 		}

@@ -71,7 +71,7 @@ public class GameBoardNim implements GameBoard {
 		m_so		= new StateObserverNim();	// heaps according to NimConfig
 		m_Arena		= nimGame;
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.hasGUI()) {
+        if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardNimGui(this);
         }
 	}

@@ -2,6 +2,7 @@ package games.ZweiTausendAchtundVierzig;
 
 import games.StateObservation;
 import games.CFour.C4Base;
+import games.BoardVector;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
@@ -616,14 +617,14 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
      * @return a vector of length 16, holding for each board cell its
      * position value 0:empty, 1: tile 2^1, 2: tile 2^2,..., P-1: tile 2^(P-1).
      */
-    public int[] getBoardVector() {
+    public BoardVector getBoardVector() {
         int[] bvec = new int[16];
         long b2 = boardB;
         for (int n=15; n>=0; n--) {
             bvec[n] = (int)(b2 & 0x000000000000000fL);
             b2 = b2 >> 4;
         }
-        return bvec;
+        return new BoardVector(bvec);
     }
 
     public void advance(ACTIONS action) {

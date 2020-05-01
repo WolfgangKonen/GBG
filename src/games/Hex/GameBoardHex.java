@@ -40,7 +40,7 @@ public class GameBoardHex implements GameBoard {
         m_so = new StateObserverHex();
         rand = new Random(System.currentTimeMillis());
 
-        if (m_Arena.hasGUI()) {
+        if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardHexGui(this);
         }
     }

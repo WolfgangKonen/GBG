@@ -19,6 +19,7 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.NTupleAgt.EligType;
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -201,7 +202,7 @@ public class NTuple2ValueFunc implements Serializable {
 		int i, j;
 		int o = act.toInt();
 		double score = 0.0; 
-		int[][] equiv = null;
+		BoardVector[] equiv = null;
 		int[] equivAction;
 
 		// Get equivalent boards (including self)
@@ -218,7 +219,7 @@ public class NTuple2ValueFunc implements Serializable {
 		
 		for (i = 0; i < numTuples; i++) {
 			for (j = 0; j < equiv.length; j++) {
-				score += nTuples[equivAction[j]][player][i].getScore(equiv[j]);
+				score += nTuples[equivAction[j]][player][i].getScore(equiv[j].bvec);
 			}
 		}
 
@@ -237,7 +238,7 @@ public class NTuple2ValueFunc implements Serializable {
 	public double getScoreI(int[] board, int player) {
 		int i, j;
 		double score = 0.0; 
-		int[][] equiv = null;
+		BoardVector[] equiv = null;
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(board, getUSESYMMETRY());
@@ -246,7 +247,7 @@ public class NTuple2ValueFunc implements Serializable {
 		for (i = 0; i < numTuples; i++) {
 			for (j = 0; j < equiv.length; j++) {
 //				System.out.print("g(i,j)=("+i+","+j+"):  ");		//debug
-				score += nTuples[0][player][i].getScore(equiv[j]);
+				score += nTuples[0][player][i].getScore(equiv[j].bvec);
 			}
 		}
 		//if (getUSESYMMETRY()) score /= equiv.length; // DON'T, at least for TTT clearly inferior
@@ -267,15 +268,15 @@ public class NTuple2ValueFunc implements Serializable {
 	 * 			(the board itself in int[0][])
 	 * @return the equivalent board vectors
 	 */
-	private int[][] getSymBoards2(int[] board, boolean useSymmetry) {
+	private BoardVector[] getSymBoards2(int[] board, boolean useSymmetry) {
 		int i;
-		int[][] equiv = null;
+		BoardVector[] equiv = null;
 		if (useSymmetry) {
-			equiv = xnf.symmetryVectors(board);
+			equiv = xnf.symmetryVectors(new BoardVector(board),0);
 
 		} else {
-			equiv = new int[1][];
-			equiv[0] = board.clone();			
+			equiv = new BoardVector[1];
+			equiv[0] = new BoardVector(board);			
 		}
 		
 		return equiv;
@@ -530,7 +531,7 @@ public class NTuple2ValueFunc implements Serializable {
 		double alphaM, sigDeriv, lamFactor;
 
 		// Get equivalent boards (including self) and corresponding actions
-		int[][] equiv = getSymBoards2(board,getUSESYMMETRY());
+		BoardVector[] equiv = getSymBoards2(board,getUSESYMMETRY());
 		int[] equivAction = (QMODE ? getSymActions(output, getUSESYMMETRY()) : null); 
 		// equivAction only needed for QMODE==true
 
@@ -566,7 +567,7 @@ public class NTuple2ValueFunc implements Serializable {
 					
 					out = (QMODE ? equivAction[j] : output);
 //					System.out.print("(i,j)=("+i+","+j+"):  ");		//debug
-					nTuples[out][player][i].updateNew(equiv[j], alphaM, delta, e);
+					nTuples[out][player][i].updateNew(equiv[j].bvec, alphaM, delta, e);
 				}
 			}
 			lamFactor *= getLambda(); 
@@ -691,11 +692,11 @@ public class NTuple2ValueFunc implements Serializable {
 	
 	// class EligStates is needed in update(int[],int,int,double,double,boolean)
 	private class EligStates implements Serializable {
-		int[][] equiv;
+		BoardVector[] equiv;
 		int[] equivAction;
 		double sigDeriv;
 		
-		EligStates(int[][] equiv, int[] equivAction, double sigDeriv) {
+		EligStates(BoardVector[] equiv, int[] equivAction, double sigDeriv) {
 			this.equiv=equiv.clone();
 			this.equivAction=(equivAction==null ? null : equivAction.clone());
 			this.sigDeriv=sigDeriv;

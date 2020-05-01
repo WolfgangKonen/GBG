@@ -21,7 +21,7 @@ public class Feature2048 implements Feature{
         switch (featMode){
             case 0:
                 //ToDo: what is a Feat Vector and is this correct?
-                return intArrayToDoubleArray(so.getBoardVector());
+                return intArrayToDoubleArray(so.getBoardVector().bvec);
             default:
                 throw new RuntimeException("Unknown featmode: " + featMode);
         }

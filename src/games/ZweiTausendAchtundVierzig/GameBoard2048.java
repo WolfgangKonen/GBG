@@ -36,7 +36,7 @@ public class GameBoard2048 implements GameBoard {
     private void initGameBoard(Arena ztavGame) {
         m_Arena = ztavGame;
         m_so = new StateObserver2048();
-        if (m_Arena.hasGUI()) {
+        if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoard2048Gui(this);
         }
        

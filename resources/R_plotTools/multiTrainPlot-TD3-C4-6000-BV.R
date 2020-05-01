@@ -1,10 +1,11 @@
 #
-# **** These are new results with TDNTuple3Agt from February 2020 ****
-# **** same as multiTrainPlot-TD3-C4.R, but for runs with 6.000.000 training games
+# **** These are new results with TDNTuple3Agt from April 2020 ****
+# **** same as multiTrainPlot-TD3-C4-6000.R, but for runs with different JARs
 #
 # This script shows results for ConnectFour in the TCL-case with various TD-settings:
 #   
-# It compares the FARL version with the no-FARL version (see below)
+# It compares different branches of the GBG software in different JARs. Just as check, the results should be 
+# statistically the same if everything is correct. 
 # 
 library(ggplot2)
 library(grid)
@@ -12,7 +13,7 @@ source("summarySE.R")
 
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
 USEGAMESK=T       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
-USEEVALT=T        # if =T: use evalT measure; if =F: use evalQ measure
+USEEVALT=F        # if =T: use evalT measure; if =F: use evalQ measure for y-label
 MAPWINRATE=T      # if =T: map y-axis to win rate (range [0,1]); if =F: range [-1,1]
 
 wfac = ifelse(USEGAMESK,1000,1);
@@ -20,26 +21,14 @@ gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
 #evalVar = ifelse(USEEVALT,"evalT","evalQ")
 evalStr = ifelse(USEEVALT,"eval AlphaBeta","eval MCTS")
 evalStr = ifelse(MAPWINRATE,"win rate", evalStr)
-path <- "../../agents/ConnectFour/csv/"; 
+path <- "../../agents/ConnectFour/csv/BV-check.d/"; 
 Ylimits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=300000/wfac;
 Xlimits=c(400,5100); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c(#"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm.csv"
-           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-DLm-noFA.csv"
-            "multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm.csv"
-           ,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm-noFA.csv"
-           #,"multiTrain_TCL-EXP-NT3-al37-lam000-6000k-epsfin0-ALm-noFA2.csv"
-           #,".csv"
-           #,".csv"
+filenames=c("multiTrain-OLD.csv",  # GBGBatch-OLD.jar,branch master as of 2020-03-10
+            "multiTrain.csv",      # GBGBatch.jar,    branch master as of 2020-03-29
+            "multiTrain-BV.csv"    # GBGBatch-BV.jar, new branch BoardVector 2020-04-27
            )
-# suffix -DLm: evalQ is MCTS (0), evalT is AB with Distant Losses DL (5),
-# suffix -ALm: both evaluators AB, 1st one w/o DL (3), 2nd one with DL (5),
-# in both cases the evaluators MCTS or AlphaBeta (AB) play 2nd --> ideal winrate is 1.0
-# in both cases the 'm' means that runs were performed on maanbs05.
-# suffix -noFA: no final adaptation RL (FARL) step (both FARL steps inhibited).
-# suffix -noFA2: no final adaptation RL (FARL) step (only 2nd FARL step inhibited).
-#
-# The 1st selected file should be FARL, the 2nd a -noFA (or -noFA2) file.
 #
 # other pars: alpha = 3.7->3.7, eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, 
 # NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=T, fixed ntuple mode 1: 70 8-tuples. 
@@ -67,13 +56,14 @@ for (k in 1:length(filenames)) {
   }
   
   algoCol = switch(k
-                   ,rep("FARL",nrow(df))   
-                   ,rep("no FARL",nrow(df))   
+                   ,rep("OLD",nrow(df))   
+                   ,rep("Std",nrow(df))   
+                   ,rep(" BV",nrow(df))   
   )
   targetModeCol = switch(k
                          ,rep("TD",nrow(df))
                          ,rep("TD",nrow(df))
-                         #,rep("TERNA",nrow(df))
+                         ,rep("TERNA",nrow(df))
                         )
   #browser()
   dfBoth <- rbind(dfBoth,cbind(df,algo=algoCol,targetMode=targetModeCol))
@@ -93,7 +83,7 @@ tgc <- data.frame()
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
 # its mean, sd, se (standard dev of the mean), ci (conf.interval) and count N.
 tgc1 <- summarySE(dfBoth, measurevar="evalQ", groupvars=c(gamesVar,"algo","targetMode"))
-qeval <- ifelse(length(grep("-ALm",filename)==1),"AB","MCTS")
+qeval <- "AB"   #ifelse(length(grep("-ALm",filename)==1),"AB","MCTS")
 tgc1 <- cbind(tgc1,evalMode=rep(qeval,nrow(tgc1)))
 names(tgc1)[5] <- "eval"  # rename "evalQ"
 tgc2 <- summarySE(dfBoth, measurevar="evalT", groupvars=c(gamesVar,"algo","targetMode"))

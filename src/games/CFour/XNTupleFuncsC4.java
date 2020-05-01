@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 import controllers.TD.ntuple2.NTupleFactory;
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -72,7 +73,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * piece directly below. 
 	 */
 	@Override
-	public int[] getBoardVector(StateObservation so) {
+	public BoardVector getBoardVector(StateObservation so) {
 		assert (so instanceof StateObserverC4);
 		int[][] board = ((StateObserverC4) so).getBoard();
 		int[] bvec = new int[getNumCells()]; 
@@ -97,7 +98,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 			
 		}
 
-		return bvec;   
+		return new BoardVector(bvec);   
 	}
 	
 	/**
@@ -113,10 +114,10 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * @return boardArray
 	 */
 	@Override
-	public int[][] symmetryVectors(int[] boardVector) {
-		int[][] equiv = new int[2][];
-		equiv[0] = boardVector.clone();
-		equiv[1] = (flip(boardVector)).clone();
+	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
+		BoardVector[] equiv = new BoardVector[2];
+		equiv[0] = new BoardVector(boardVector.bvec);
+		equiv[1] = flip(boardVector);
 
 		return equiv;
 	}
@@ -126,7 +127,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * and a certain action to be taken in <b>{@code so}</b>, 
 	 * generate the array of equivalent action keys {@code equivAction} for the symmetric states.
 	 * <p>
-	 * This method is needed for Q-learning and Sarsa.
+	 * This method is needed for Q-learning and Sarsa only.
 	 * 
 	 * @param actionKey
 	 * 				the key of the action to be taken in <b>{@code so}</b> 
@@ -310,14 +311,15 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * @param board
 	 * @return the mirrored board
 	 */
-	private int[] flip(int[] board) {
+	private BoardVector flip(BoardVector boardVector) {
+		int[] board = boardVector.bvec;
 		//mirror ConnectFour board (vertical flip)
 		int[] newBoard = new int[C4Base.ROWCOUNT*C4Base.COLCOUNT];
-		for (int i = C4Base.COLCOUNT-1, k=0; i>=0; i--)
-			for (int j =0; j < C4Base.ROWCOUNT; j++) 
+		for (int i = C4Base.COLCOUNT-1, k=0; i>=0; i--)			// i: col index {0,..,7}, counting down
+			for (int j =0; j < C4Base.ROWCOUNT; j++) 			// j: row index {0,..,6}
 				newBoard[k++] = board[i*C4Base.ROWCOUNT + j];
 		
-		return newBoard;
+		return new BoardVector(newBoard);
 	}
 
 }

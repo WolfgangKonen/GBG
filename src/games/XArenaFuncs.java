@@ -235,7 +235,7 @@ public class XArenaFuncs {
 	 * @see #fetchAgents(XArenaButtons)
 	 * @see #constructAgent(int, String, XArenaButtons)
 	 */
-	private PlayAgent fetchAgent(int n, String sAgent, XArenaButtons m_xab) {
+	public PlayAgent fetchAgent(int n, String sAgent, XArenaButtons m_xab) {
 		PlayAgent pa = null;
 		int maxGameNum = m_xab.getGameNumber();
 		
@@ -366,7 +366,7 @@ public class XArenaFuncs {
 	 * @see #constructAgent(int, String, XArenaButtons)
 	 * @see #fetchAgent(int, String, XArenaButtons)
 	 */
-	protected PlayAgent[] fetchAgents(XArenaButtons m_xab) throws RuntimeException {
+	public PlayAgent[] fetchAgents(XArenaButtons m_xab) throws RuntimeException {
 		if (m_PlayAgents == null)
 			m_PlayAgents = new PlayAgent[numPlayers];
 		PlayAgent pa = null;
@@ -404,7 +404,7 @@ public class XArenaFuncs {
 	 * @see MaxNWrapper
 	 * @see ExpectimaxWrapper
 	 */
-	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so)
+	public PlayAgent[] wrapAgents(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so)
 	{
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n = 0; n < numPlayers; n++) {
@@ -472,7 +472,8 @@ public class XArenaFuncs {
 
 		maxGameNum = xab.getGameNumber();
 
-		boolean doTrainStatistics = true;
+		boolean doTrainStatistics;		// doTrainStatistics is mainly useful for RubiksCube, but can be activated for other games as well, if needed
+		doTrainStatistics = (m_Arena.getGameName()=="RubiksCube") ? true : false;
 		ArrayList tsList = new ArrayList<TStats>();
 		ArrayList taggList = new ArrayList<TAggreg>();
 
@@ -669,6 +670,7 @@ public class XArenaFuncs {
 		int p = so.getMinEpisodeLength();
 		int moveNum = pa.getMoveCounter();
 		int epiLength = pa.getParOther().getEpisodeLength();
+		if (epiLength==-1) epiLength=Integer.MAX_VALUE;
 		TStats tstats = new TStats(n, p, moveNum, epiLength);
 		tsList.add(tstats);
 	}
@@ -918,7 +920,7 @@ public class XArenaFuncs {
 	 * {@code competeNum} episodes, starting from StateObservation
 	 * {@code startSO}.
 	 * 
-	 * @param paVector
+	 * @param paVector a vector with N agents for an N-player game
 	 * @param startSO
 	 *            the start board position for the game
 	 * @param competeNum
@@ -1029,7 +1031,7 @@ public class XArenaFuncs {
 	 * plays cyclically each role: the 1st, 2nd, ... {@code N}th player. The
 	 * results are mapped back to the score tuple of the 1st role
 	 * 
-	 * @param paVector
+	 * @param paVector a vector with N agents for an N-player game
 	 * @param startSO
 	 *            the start board position for the game
 	 * @param competeNum
@@ -1118,21 +1120,11 @@ public class XArenaFuncs {
 			} else {
 				double[] res;
 				if (swap) {
-					// res =
-					// compete(qaVector[1],qaVector[0],startSO,competeNum,verbose,
-					// null);
-					// System.out.println(Arrays.toString(res));
-					// double retVal = res[2] - res[0];
 					ScoreTuple sc = competeNPlayer(new PlayAgtVector(qaVector[1], qaVector[0]), startSO, competeNum,
 							verbose, null);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
 					return sc.scTup[1];
 				} else {
-					// res =
-					// compete(qaVector[0],qaVector[1],startSO,competeNum,verbose,
-					// null);
-					// System.out.println(Arrays.toString(res));
-					// double retVal = res[0] - res[2];
 					ScoreTuple sc = competeNPlayer(new PlayAgtVector(qaVector), startSO, competeNum, verbose, null);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
 					return sc.scTup[0];
