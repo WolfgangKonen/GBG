@@ -66,7 +66,7 @@ public class GameBoardSim implements GameBoard {
         rand 		= new Random(System.currentTimeMillis());	
 		arenaActReq = false;
 		
-        if (m_Arena.hasGUI()) {
+        if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardSimGui(this);
         }
 	}

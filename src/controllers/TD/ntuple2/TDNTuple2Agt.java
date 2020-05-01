@@ -553,7 +553,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * @return the agent's estimate of the future score for that after state
 	 */
 	public double getScore(StateObservation so) {
-		int[] bvec = m_Net.xnf.getBoardVector(so);
+		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
 		double score = m_Net.getScoreI(bvec,so.getPlayer());
 		return score;
 	}
@@ -573,7 +573,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	public double getScore(StateObservation so, StateObservation refer) {
 		double score;
     	if (VER_3P) {
-    		int[] bvec = m_Net.xnf.getBoardVector(so);
+    		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
     		score = m_Net.getScoreI(bvec,refer.getPlayer());
     		//score = getScore(so,refer.getPlayer());	
     	} else {
@@ -593,7 +593,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 		ScoreTuple sc = new ScoreTuple(so);
-		int[] bvec = m_Net.xnf.getBoardVector(so);
+		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
 		switch (so.getNumPlayers()) {
 		case 1: 
 			sc.scTup[0] = m_Net.getScoreI(bvec,so.getPlayer());
@@ -690,7 +690,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 
 
 		afterSO = so.getPrecedingAfterstate();
-    	curBoard = (afterSO==null) ? null : m_Net.xnf.getBoardVector(afterSO);
+    	curBoard = (afterSO==null) ? null : m_Net.xnf.getBoardVector(afterSO).bvec;
 
 		//System.out.println("Random test: "+ rand.nextDouble());
 		//System.out.println("Random test: "+ rand.nextDouble());
@@ -728,7 +728,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	        }
 	        
 	        if (DBG_NEW_3P && !m_randomMove) {
-	        	nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState());
+	        	nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;
 	        	Z = - getGamma() * m_Net.getScoreI(nextBoard,nextPlayer);
 	        	ZZ = - getGamma() * getScore(ns.getAfterState(),ns.getAfterState());
 	        }
@@ -779,7 +779,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 
 			/* prepare for next pass through while-loop or for terminal update */ 
 			so = ns.getNextSO();	// Only together with trainNewTargetLogic2	or trainNewTargetNEW_3P		
-			curBoard = m_Net.xnf.getBoardVector(ns.getAfterState());  
+			curBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;  
 			curPlayer= nextPlayer;
 			if (VER_3P && UPDATE==UpdateType.MULTI_UPDATE) {
 				oldRewardTuple.scTup = rewardTuple.scTup.clone();
@@ -878,7 +878,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	{
 		StateObservation thisSO=ns.getSO();
 		StateObservation nextSO=ns.getNextSO();
-		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState());
+		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;
 		int thisPlayer= thisSO.getPlayer();
 		int nextPlayer= nextSO.getPlayer();
 		ScoreTuple rewardTuple;
@@ -953,7 +953,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		
 		StateObservation thisSO=ns.getSO();
 		StateObservation nextSO=ns.getNextSO();
-		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState());
+		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;
 		int thisPlayer= thisSO.getPlayer();
 		int nextPlayer= nextSO.getPlayer();
 		
@@ -1005,7 +1005,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		
 		StateObservation thisSO=ns.getSO();
 		StateObservation nextSO=ns.getNextSO();
-		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState());
+		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;
 		int thisPlayer= thisSO.getPlayer();
 		int nextPlayer= nextSO.getPlayer();
 		

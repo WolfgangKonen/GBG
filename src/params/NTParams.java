@@ -565,63 +565,63 @@ public class NTParams extends Frame implements Serializable {
 		enableRandomPart();
 	}
 
-	/**
-	 * DEPRECATED: use {@link ParNT#setParamDefaults(String, String)} instead.
-	 * <p>
-	 * Set sensible parameters for a specific agent and specific game. By "sensible
-	 * parameters" we mean parameter producing good results.
-	 * 
-	 * @param agentName currently only "TD-Ntuple-2","TD-Ntuple-3","Sarsa"
-	 * 				all other strings are without any effect
-	 * @param gameName the string from {@link games.StateObservation#getName()}
-	 */
-	@Deprecated
-	public void setParamDefaults(String agentName, String gameName) {
-		switch (agentName) {
-		case "TD-Ntuple-2": 
-		case "TD-Ntuple-3": 
-		case "Sarsa":
-			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
-			tcInitT.setText("0.0001");
-			setTcImmediate(tcFactorString[0]);	// "Immediate"
-			tcIntervalT.setText("2");
-			setTcTransfer(tcTransferString[1]);	// "TC EXP"
-			tcBetaT.setText("2.7");
-			setTcAccumul(tcAccumulString[1]);	// "rec wght change"
-			RandomnessC.setSelected(true);		// consequence: enable TupleType, nTupleNumT, nTupleMaxT
-			NTupleTypeCo.setSelectedIndex(0);
-			NTupleNumT.setText("10");
-			NTupleSizeT.setText("6");	
-			NTupleFixCo.setSelectedItem(""+1);
-			UseSymmetryC.setSelected(true);
-			AfterStateC.setSelected(false);		// disable AFTERSTATE for all deterministic games
-			enableAfterState(false);
-			switch (gameName) {
-			case "TicTacToe": 
-				NTupleNumT.setText("1");
-				NTupleSizeT.setText("9");	
-				break;
-			case "Nim": 
-				NTupleNumT.setText("1");
-				NTupleSizeT.setText(ArenaNim.getNumberHeaps()+"");	
-				RandomnessC.setSelected(false);	// use fixed n-tuples, mode==1
-				break;
-			case "2048": 
-				NTupleSizeT.setText("3");
-				AfterStateC.setSelected(true);
-				enableAfterState(true);
-				break;
-			case "ConnectFour":
-				TempCoC.setSelected(true);
-				RandomnessC.setSelected(false);
-				break;
-			}
-			enableTcTransferPart();
-			enableTcPart();
-			enableRandomPart();
-			break;
-		}
-		
-	}
+//	/**
+//	 * DEPRECATED: use {@link ParNT#setParamDefaults(String, String)} instead.
+//	 * <p>
+//	 * Set sensible parameters for a specific agent and specific game. By "sensible
+//	 * parameters" we mean parameter producing good results.
+//	 * 
+//	 * @param agentName currently only "TD-Ntuple-2","TD-Ntuple-3","Sarsa"
+//	 * 				all other strings are without any effect
+//	 * @param gameName the string from {@link games.StateObservation#getName()}
+//	 */
+//	@Deprecated
+//	public void setParamDefaults(String agentName, String gameName) {
+//		switch (agentName) {
+//		case "TD-Ntuple-2": 
+//		case "TD-Ntuple-3": 
+//		case "Sarsa":
+//			TempCoC.setSelected(false);			// consequence: disable InitT, tcIntervalT
+//			tcInitT.setText("0.0001");
+//			setTcImmediate(tcFactorString[0]);	// "Immediate"
+//			tcIntervalT.setText("2");
+//			setTcTransfer(tcTransferString[1]);	// "TC EXP"
+//			tcBetaT.setText("2.7");
+//			setTcAccumul(tcAccumulString[1]);	// "rec wght change"
+//			RandomnessC.setSelected(true);		// consequence: enable TupleType, nTupleNumT, nTupleMaxT
+//			NTupleTypeCo.setSelectedIndex(0);
+//			NTupleNumT.setText("10");
+//			NTupleSizeT.setText("6");	
+//			NTupleFixCo.setSelectedItem(""+1);
+//			UseSymmetryC.setSelected(true);
+//			AfterStateC.setSelected(false);		// disable AFTERSTATE for all deterministic games
+//			enableAfterState(false);
+//			switch (gameName) {
+//			case "TicTacToe": 
+//				NTupleNumT.setText("1");
+//				NTupleSizeT.setText("9");	
+//				break;
+//			case "Nim": 
+//				NTupleNumT.setText("1");
+//				NTupleSizeT.setText(ArenaNim.getNumberHeaps()+"");	
+//				RandomnessC.setSelected(false);	// use fixed n-tuples, mode==1
+//				break;
+//			case "2048": 
+//				NTupleSizeT.setText("3");
+//				AfterStateC.setSelected(true);
+//				enableAfterState(true);
+//				break;
+//			case "ConnectFour":
+//				TempCoC.setSelected(true);
+//				RandomnessC.setSelected(false);
+//				break;
+//			}
+//			enableTcTransferPart();
+//			enableTcPart();
+//			enableRandomPart();
+//			break;
+//		}
+//		
+//	}
 	
 }

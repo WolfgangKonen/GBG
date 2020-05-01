@@ -40,13 +40,13 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 	 * 
 	 * @see ValidateAgent
 	 */
-	public int[] makeBoardVectorEachCellDifferent() {
+	public BoardVector makeBoardVectorEachCellDifferent() {
 		int nc = this.getNumCells();
 		int[] boardVec = new int[nc];
 		for(int i = 0;  i < nc; i++) {
 			boardVec[i] = i;
 		}
-		return boardVec;		
+		return new BoardVector(boardVec);		
 	}
 	
 	@Override
@@ -59,10 +59,10 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 	abstract public int getNumPlayers();
 
 	@Override
-	abstract public int[] getBoardVector(StateObservation so);
+	abstract public BoardVector getBoardVector(StateObservation so);
 
 	@Override
-	abstract public int[][] symmetryVectors(int[] boardVector);
+	abstract public BoardVector[] symmetryVectors(BoardVector boardVector, int n);
 
 	@Override
 	abstract public int[] symmetryActions(int actionKey);

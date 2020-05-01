@@ -337,38 +337,38 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		enableUCTPart();
 	}
 
-	/**
-	 * Set sensible parameters for a specific agent and specific game. By "sensible
-	 * parameters" we mean parameter producing good results. Likewise, some parameter
-	 * choices may be enabled or disabled.
-	 * 
-	 * @param agentName currently only "MCTSE" 
-	 * @param gameName the string from {@link games.StateObservation#getName()}
-	 * @param numPlayers
-	 */
-	@Deprecated
-	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
-		switch (agentName) {
-		case "MCTS Expectimax": 
-			switch (gameName) {
-			case "Nim": 
-				numIter_T.setText("10000");		
-				kUCT_T.setText("1.414");
-				break;
-			}
-			this.setAlternateVersion(false);
-			switch (numPlayers) {
-			case 1: 
-				normalize.setSelected(true);
-				break;
-			default:
-				normalize.setSelected(true);
-				break;
-			}
-			break;
-		}
-		choiceSelector.setEnabled(true);
-		enableUCTPart();		
-	}	
+//	/**
+//	 * Set sensible parameters for a specific agent and specific game. By "sensible
+//	 * parameters" we mean parameter producing good results. Likewise, some parameter
+//	 * choices may be enabled or disabled.
+//	 * 
+//	 * @param agentName currently only "MCTSE" 
+//	 * @param gameName the string from {@link games.StateObservation#getName()}
+//	 * @param numPlayers
+//	 */
+//	@Deprecated
+//	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
+//		switch (agentName) {
+//		case "MCTS Expectimax": 
+//			switch (gameName) {
+//			case "Nim": 
+//				numIter_T.setText("10000");		
+//				kUCT_T.setText("1.414");
+//				break;
+//			}
+//			this.setAlternateVersion(false);
+//			switch (numPlayers) {
+//			case 1: 
+//				normalize.setSelected(true);
+//				break;
+//			default:
+//				normalize.setSelected(true);
+//				break;
+//			}
+//			break;
+//		}
+//		choiceSelector.setEnabled(true);
+//		enableUCTPart();		
+//	}	
 
 }

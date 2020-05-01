@@ -2,6 +2,15 @@ package games.RubiksCube;
 
 public class CubeConfig {
 	
+	/**
+	 * What type of cube is it?
+	 * <ul>
+	 * <li> <b>POCKET</b>: 2x2x2 pocket cube
+	 * <li> <b>RUBIKS</b>: 3x3x3 Rubik's cube 		
+	 * </ul>
+	 * @see ArenaTrainCube#setCubeType(String)
+	 * 
+	 */
 	public static enum CubeType {POCKET,RUBIKS};
 	
 	public static CubeType cubeType = CubeType.POCKET;
@@ -10,10 +19,12 @@ public class CubeConfig {
 	 * What does a board vector state in {@link StateObserverCube} represent?. The possible options are
 	 * <ul>
 	 * <li> <b>CUBESTATE</b>: only the cube state (what {@link CubeState#fcol} holds)
-	 * <li> <b>CUBEPLUSACTION</b>: the cube state plus the action which led to this state 		
+	 * <li> <b>CUBEPLUSACTION</b>: the cube state plus the action which led to this state 
+	 * <li> <b>STICKERS</b>: 		
 	 * </ul>
+	 * @see ArenaTrainCube#setBoardVecType(String)
 	 */
-	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION};
+	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION, STICKERS};
 	
 	/**
 	 * {@link BoardVecType} {@code boardVecType} holds the board vector type for all {@link CubeState} objects and 
@@ -23,9 +34,42 @@ public class CubeConfig {
 //	public static BoardVecType boardVecType = BoardVecType.CUBEPLUSACTION;
 
 	/**
-	 * Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} is filled.
+	 * What type of twists are allowed?
+	 * <ul>
+	 * <li> <b>ALLTWISTS</b>: all twists, quarter and half twists (i.e. U1, U2, U3)
+	 * <li> <b>QUARTERTWISTS</b>: only quarter twists (i.e. U1, U3) 		
+	 * </ul>
+	 * @see ArenaTrainCube#setTwistType(String)
 	 */
-	public final static int pMax = 6;			// 3,4,5,6,7
+	public enum TwistType {ALLTWISTS, QUARTERTWISTS};
+	public static TwistType twistType = TwistType.ALLTWISTS;
+	
+	/**
+	 * <b>{@code pMax}</b> serves several purposes:
+	 * <ul>
+	 * <li> Maximum number of scrambling twists in {@link GameBoardCube#chooseStartState()}
+	 * <li> Maximum number of scrambling twists in {@link EvaluatorCube}
+	 * <li> Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} is filled (deprecated).
+	 * </ul>
+	 */
+	public static int pMax = 6;			// 3,4,5,6,7
+	
+	/**
+	 * This influences the behavior in {@link GameBoardCube#selectByTwists1(int) GameBoardCube.selectByTwists1(p)} 
+	 * when forming the twist sequence:
+	 * <ul>
+	 * <li> <b>true</b>: the selected twists can come in any sequence, e.g. "...U1U2..." is allowed. This requires however 
+	 * 		not really two twists because the <b>doublet</b> "U1U2" can be realized as well by one twist "U3". As a 
+	 * 		consequence, the twist sequence in this case can be solved often with much less twists than p.
+	 * <li> <b>false</b>: doublets are not allowed in the twist sequence. As a consequence, the twist sequence in this 
+	 * 		case is likely to require at least p (or p-1) twists to be solved.
+	 * </ul>
+	 * Detail: In case {@link #twistType}=={@link TwistType}<b>{@code .ALLTWISTS}</b>, the forbidden doublets are 
+	 * 		U*U*, L*L*, F*F* with *=1,2,3. <br>
+	 * 		In case {@link #twistType}=={@link TwistType}<b>{@code .QUARTERTWISTS}</b>, the forbidden doublets are 
+	 * 		U1U3, U3U1, L1L3, L3L1, F1F3, F3F1.
+	 */
+	final static boolean TWIST_DOUBLETS = false;
 	
 	/**
 	 * theoCov[p] is the known maximum size of distance set D[p] (theoretical coverage)
@@ -49,8 +93,8 @@ public class CubeConfig {
 	/**
 	 * EvalNmax: how many states to pick randomly from each distance set T[p]
 	 */
-	final static int[] EvalNmax = {0,10,50,300,  300, 300,2000,2000, 2000,2000,2000,2000};
-//		                           0            4                    8
+	final static int[] EvalNmax = {0,10,50,300, 300, 300, 300, 500, 500,2000,2000,2000};
+//		                           0            4                   8
 
 	/**
 	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br> 

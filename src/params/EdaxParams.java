@@ -133,25 +133,26 @@ public class EdaxParams extends Frame {
 		this.setMoveTime(ep.getMoveTime());
 	}
 
-	/**
-	 * Set sensible parameters for a specific agent and specific game. By "sensible
-	 * parameters" we mean parameter producing good results. Likewise, some parameter
-	 * choices may be enabled or disabled.
-	 * 
-	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "TDS" (for {@link TDAgent})
-	 * @param gameName the string from {@link games.StateObservation#getName()}
-	 */
-	public void setParamDefaults(String agentName, String gameName) {
-		switch (gameName) {
-		default:	//  all other
-			break;
-		}
-		switch (agentName) {
-		default: 
-			this.setDepth(21);
-			this.setMoveTime(10.0);
-			break;
-		}
-	}
+//	/**
+//	 * Set sensible parameters for a specific agent and specific game. By "sensible
+//	 * parameters" we mean parameter producing good results. Likewise, some parameter
+//	 * choices may be enabled or disabled.
+//	 * 
+//	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "TDS" (for {@link TDAgent})
+//	 * @param gameName the string from {@link games.StateObservation#getName()}
+//	 */
+//	@Deprecated
+//	public void setParamDefaults(String agentName, String gameName) {
+//		switch (gameName) {
+//		default:	//  all other
+//			break;
+//		}
+//		switch (agentName) {
+//		default: 
+//			this.setDepth(21);
+//			this.setMoveTime(10.0);
+//			break;
+//		}
+//	}
 	
 } // class EdaxParams

@@ -328,35 +328,35 @@ public class OtherParams extends Frame {
 		this.rewardIsGameScore.setState(op.getRewardIsGameScore());
 	}
 
-	/**
-	 * Set sensible parameters for a specific agent and specific game. By "sensible
-	 * parameters" we mean parameter producing good results. Likewise, some parameter
-	 * choices may be enabled or disabled.
-	 * 
-	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "Sarsa" (for {@link SarsaAgt})
-	 * @param gameName the string from {@link games.StateObservation#getName()}
-	 */
-	@Deprecated
-	public void setParamDefaults(String agentName, String gameName) {
-		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
-		switch (gameName) {
-		case "RubiksCube": 
-			chooseS01.setState(true);		// always select a non-solved cube as start state
-			enableChoosePart(false);
-			epiLeng_T.setText("50"); 		// the maximum episode length (when playing a game)
-			break;
-		default:	//  all other
-			break;
-		}
-		switch (agentName) {
-		case "Sarsa":
-		case "TD-NTuple-3":
-			learnRM.setState(true);
-			break;
-		default: 
-			learnRM.setState(false);
-			break;
-		}
-	}
+//	/**
+//	 * Set sensible parameters for a specific agent and specific game. By "sensible
+//	 * parameters" we mean parameter producing good results. Likewise, some parameter
+//	 * choices may be enabled or disabled.
+//	 * 
+//	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "Sarsa" (for {@link SarsaAgt})
+//	 * @param gameName the string from {@link games.StateObservation#getName()}
+//	 */
+//	@Deprecated
+//	public void setParamDefaults(String agentName, String gameName) {
+//		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
+//		switch (gameName) {
+//		case "RubiksCube": 
+//			chooseS01.setState(true);		// always select a non-solved cube as start state
+//			enableChoosePart(false);
+//			epiLeng_T.setText("50"); 		// the maximum episode length (when playing a game)
+//			break;
+//		default:	//  all other
+//			break;
+//		}
+//		switch (agentName) {
+//		case "Sarsa":
+//		case "TD-NTuple-3":
+//			learnRM.setState(true);
+//			break;
+//		default: 
+//			learnRM.setState(false);
+//			break;
+//		}
+//	}
 	
 } // class OtherParams

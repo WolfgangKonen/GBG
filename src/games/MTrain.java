@@ -54,7 +54,7 @@ import tools.Types;
  *  @see XArenaFuncs#multiTrain(String, XArenaButtons, GameBoard)
  *  @see games.PStats
  */
-class MTrain {
+public class MTrain {
 	public int i;				// number of training runs during multiTrain
 	public int gameNum;			// number of training games (episodes) during a run
 	public double evalQ;		// quick eval score
@@ -78,7 +78,7 @@ class MTrain {
 		this.trnMoveNum=trnMoveNum;
 	}
 	
-	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/ 
+	public MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/ 
 			long actionNum, long trnMoveNum, double totalTrainSec, double movesSecond,
 			double userValue1, double userValue2) {
 		this.i=i;

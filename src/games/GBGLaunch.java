@@ -205,6 +205,7 @@ public class GBGLaunch {
 			// the Arena buttons are constructed 
 			ArenaTrainCube.setCubeType(scaPar[0]);
 			ArenaTrainCube.setBoardVecType(scaPar[1]);
+			ArenaTrainCube.setTwistType(scaPar[2]);
 			t_Game = new ArenaTrainCube(title,withUI);
 			break;
 		case "Sim": 
@@ -444,7 +445,7 @@ public class GBGLaunch {
 		case "RubiksCube": 
 			scaPar[0]="2x2x2";		 	
 			scaPar[1]="CUBESTATE";			
-			scaPar[2]="None";			
+			scaPar[2]="ALL";			
 		case "2048": 
 		case "ConnectFour": 
 		case "Othello": 
@@ -504,9 +505,10 @@ public class GBGLaunch {
 		case "RubiksCube": 
 			scaPar0_L.setText("Cube Type");
 			scaPar1_L.setText("Board Vec");
-			scaPar2_L.setText("");
+			scaPar2_L.setText("Twist Type");
 			scaPar0_L.setToolTipText("Pocket Cube or Rubik's Cube");
 			scaPar1_L.setToolTipText("Type of board vectors (only n-tuple agents)");
+			scaPar2_L.setToolTipText("Type of twists (all or only quarter)");
 			setScaPar0List(new int[]{});
 			setScaPar1List(new int[]{});
 			setScaPar2List(new int[]{});
@@ -514,7 +516,11 @@ public class GBGLaunch {
 			//choiceScaPar0.addItem("3x3x3");
 			choiceScaPar1.addItem("CSTATE");
 			choiceScaPar1.addItem("CPLUS");
+			choiceScaPar1.addItem("STICK");
 			choiceScaPar1.setSelectedItem("CSTATE");		// the initial (recommended) value	
+			choiceScaPar2.addItem("ALL");
+			choiceScaPar2.addItem("QUARTER");
+			choiceScaPar2.setSelectedItem("ALL");			// the initial (recommended) value	
 			break;
 		case "2048": 
 		case "ConnectFour": 

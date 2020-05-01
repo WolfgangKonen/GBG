@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import org.apache.commons.math3.exception.OutOfRangeException;
 
+import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -22,19 +23,19 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
     private static final long serialVersionUID = 7556763505414386566L;
     
     private int[] actionVector = {0,1,2,3,4,5,6,7,8};
-    private int[][] newplace;
+    private transient BoardVector[] newplace;
     private int[][] actionArray;
 
     public XNTupleFuncsTTT() {
     	// calculate actionArray[][]: for a given action with key j, the element
     	// actionArray[i][j] holds the equivalent action when the state is transformed to 
     	// equiv[i] = symmetryVectors(int[] boardVector)[i]
-    	newplace = symmetryVectors(actionVector);
+    	newplace = symmetryVectors(new BoardVector(actionVector),0);
     	actionArray = new int[8][];
     	for (int i=0; i<actionArray.length; i++) {
     		actionArray[i] = new int[9];
     		for (int j=0; j<9; j++)
-    			actionArray[i][j] = whereHas(newplace[i],j);
+    			actionArray[i][j] = whereHas(newplace[i].bvec,j);
     	}
 
     }
@@ -86,7 +87,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * position value with 0:"O", 1=empty, 2="X".
 	 */
 	@Override
-	public int[] getBoardVector(StateObservation so) {
+	public BoardVector getBoardVector(StateObservation so) {
 		assert (so instanceof StateObserverTTT) : "Oops, not StateObserverTTT";
 		int[][] table = ((StateObserverTTT) so).getTable();
 		int[] bvec = new int[getNumCells()]; 
@@ -94,26 +95,27 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 			for (int j=0;j<3;j++, n++) 
             	bvec[n]=table[i][j]+1;                					
 
-		return bvec;   
+		return new BoardVector(bvec);   
 	}
 	
 	/**
 	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
-	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
-	 * <li> the first row {@code boardArray[0]} is the board vector itself
-	 * <li> the other rows are the board vectors when transforming {@code boardVector}
+	 * game has s symmetries, return an array which holds at most s symmetric board vectors: <ul>
+	 * <li> the first element {@code vecOfBvecs[0]} is the board vector itself
+	 * <li> the other elements are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
 	 * In the case of TicTacToe we have s=8 symmetries (4 board rotations * 2 board flips)
 	 * 
 	 * @param boardVector
-	 * @return boardArray
+	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
+	 * @return vecOfBvecs
 	 */
 	@Override
-	public int[][] symmetryVectors(int[] boardVector) {
+	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
 		int i;
-		int[][] equiv = null;
-		equiv = new int[8][];
+		BoardVector[] equiv = null;
+		equiv = new BoardVector[8];
 		equiv[0] = boardVector;
 		for (i = 1; i < 4; i++)
 			equiv[i] = rotate(equiv[i - 1]);
@@ -129,7 +131,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * and a certain action to be taken in <b>{@code so}</b>, generate the array of equivalent 
 	 * action keys {@code equivAction} for the symmetric states.
 	 * <p>
-	 * This method is needed only for Q-learning and Sarsa.
+	 * This method is needed for Q-learning and Sarsa only.
 	 * 
 	 * @param actionKey
 	 * 				the key of the action to be taken in <b>{@code so}</b> 
@@ -137,7 +139,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
 	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(BoardVector, int)}[i]
 	 */
 	public int[] symmetryActions(int actionKey) {
 		int numEquiv = actionArray.length;
@@ -260,7 +262,8 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * @param board
 	 * @return the rotated board
 	 */
-	private int[] rotate(int[] board) {
+	private BoardVector rotate(BoardVector boardVector) {
+		int[] board = boardVector.bvec;
 		//rotate TicTacToe board
 		int[] newBoard = new int[9];
 //		for (int i = 2, k = 0; i >= 0; i--)
@@ -268,7 +271,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 //				newBoard[k++] = board[i + j];
 		int[] ri = {6,3,0,7,4,1,8,5,2};
 		for (int k=0; k<9; k++) newBoard[k] =board[ri[k]];
-		return newBoard;
+		return new BoardVector(newBoard);
 	}
 
 	/**
@@ -285,7 +288,8 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * @param board
 	 * @return the mirrored board
 	 */
-	private int[] flip(int[] board) {
+	private BoardVector flip(BoardVector boardVector) {
+		int[] board = boardVector.bvec;
 		//mirror TicTacToe board (horizontal flip)
 		int[] newBoard = new int[9];
 //		for (int i = 2, k = 0; i >= 0; i--)
@@ -293,7 +297,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 //				newBoard[k++] = board[i * 3 + j];
 		int[] ri = {6,7,8,3,4,5,0,1,2};
 		for (int k=0; k<9; k++) newBoard[k] =board[ri[k]];
-		return newBoard;
+		return new BoardVector(newBoard);
 	}
 
 }

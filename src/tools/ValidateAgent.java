@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
+import games.BoardVector;
 import games.XArenaFuncs;
 import games.XNTupleFuncs;
 import games.StateObservation;
@@ -88,8 +89,8 @@ public class ValidateAgent {
 		// vector returned by  xnf.symmetryVectors(bv) is different from all the others.
 		// 
 		XNTupleFuncs xnf = ar.makeXNTupleFuncs();
-		int[] bv = xnf.makeBoardVectorEachCellDifferent();
-		int[][] sym = xnf.symmetryVectors(bv);
+		BoardVector bv = xnf.makeBoardVectorEachCellDifferent();
+		BoardVector[] sym = xnf.symmetryVectors(bv,0);
 		boolean testPassed=true;
 		for (int i=0; i<(sym.length-1); i++) {
 			for (int j=i+1; j<sym.length; j++) {
@@ -108,9 +109,9 @@ public class ValidateAgent {
 		return true;
 	}
 	
-	private boolean assertBvDifferent(int[] bv1, int[] bv2) {
-		for (int i=0; i<bv1.length; i++) 
-			if (bv1[i]!=bv2[i]) return true;
+	private boolean assertBvDifferent(BoardVector bv1, BoardVector bv2) {
+		for (int i=0; i<bv1.bvec.length; i++) 
+			if (bv1.bvec[i]!=bv2.bvec[i]) return true;
 		
 		return false;
 	}
