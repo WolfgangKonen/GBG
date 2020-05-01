@@ -953,7 +953,7 @@ abstract public class Arena implements Runnable {
 	/**
 	 * @param index   number of the player (agent)
 	 */
-	boolean saveAgent(int index, String savePath) {
+	public boolean saveAgent(int index, String savePath) {
 		int numPlayers = getGameBoard().getStateObs().getNumPlayers();
 		boolean bstatus = false;
 		try {
@@ -996,7 +996,7 @@ abstract public class Arena implements Runnable {
 	 * @param filePath with ending {@code .agt.zip}
 	 * @return true on success, false else
 	 */
-	boolean loadAgent(int n, String filePath) {
+	public boolean loadAgent(int n, String filePath) {
 		int numPlayers = this.getGameBoard().getStateObs().getNumPlayers();
 		String str="";
 		PlayAgent td=null;

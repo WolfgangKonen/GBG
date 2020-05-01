@@ -29,10 +29,13 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * the action which led to m_state (9 if not known)
 	 */
 	private ACTIONS m_action; 		
-	private static CubeState def = new CubeState(); // a solved cube as reference
+	private static CubeState def = CubeState.makeCubeState(); // a solved cube as reference
     private static final double REWARD_POSITIVE =  1.0;
+    private static final double REWARD_NEGATIVE = -1.0;
 	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
     
+//	private double prevReward = 0.0;
+	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
@@ -41,7 +44,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverCube() {
-		m_state = new CubeState(); 		// default (solved) cube of type POCKET
+		m_state = CubeState.makeCubeState(); 		// default (solved) cube of type POCKET
 		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
@@ -51,21 +54,21 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * @param fcol is an array with face colors, see {@link CubeState}.
 	 */
 	public StateObserverCube(BoardVector boardVector) {
-		m_state = new CubeState(boardVector);
+		m_state = CubeState.makeCubeState(boardVector);
 		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
 	
 	// NOTE: this is NOT the copy constructor. See next method for copy constructor.
 	public StateObserverCube(CubeState other) {
-		m_state = new CubeState(other);
+		m_state = CubeState.makeCubeState(other);
 		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
 	
 	public StateObserverCube(StateObserverCube other) {
 		super(other);		// copy members m_counter and stored*
-		m_state = new CubeState(other.m_state);
+		m_state = CubeState.makeCubeState(other.m_state);
 		m_action = new ACTIONS(other.m_action);
 		setAvailableActions();
 	}
@@ -126,8 +129,10 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * 			For Rubik's Cube only the game-over state (solved cube) has a non-zero game score. 
 	 */
 	public double getGameScore(StateObservation refer) {
-        if(isGameOver()) return REWARD_POSITIVE;
-        return 0; 
+		if(isGameOver()) return REWARD_POSITIVE;
+		return 0; 
+//		if(isGameOver()) return prevReward+0;
+//		return prevReward+REWARD_NEGATIVE; 
 	}
 
 	public double getMinGameScore() { return 0; }
@@ -142,6 +147,9 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 */
 	@Override
 	public void advance(ACTIONS action) {
+//		prevReward = this.getGameScore(this);		// prior to advance() we set prevReward to the game score of 
+//													// the current state. In this way, the cumuluative game score 
+//													// returned by getGameScore can accumulate the cost-to-go.
 		int iAction = action.toInt();
 		assert (0<=iAction && iAction<9) : "iAction is not in 0,1,...,8.";
 		int j=iAction%3;
@@ -211,9 +219,13 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 				acts.add(Types.ACTIONS.fromInt(7));  // F2
 				acts.add(Types.ACTIONS.fromInt(8));  // F3
 			}		
+//			for (int i=0; i<9; i++) {
+//				acts.add(Types.ACTIONS.fromInt(i));  				
+//			}
 		} else {   // the QUARTERTWISTS case: add all actions
-			for (int i=0; i<9; i++) {
-				acts.add(Types.ACTIONS.fromInt(i));  				
+			int[] quarteracts = {0,2,3,5,6,8};
+			for (int i=0; i<quarteracts.length; i++) {
+				acts.add(Types.ACTIONS.fromInt(quarteracts[i]));  				
 			}
 		}
 	}

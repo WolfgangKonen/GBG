@@ -59,7 +59,7 @@ public class GameBoardC4 implements GameBoard {
 		m_Arena		= arGame;
 		m_so		= new StateObserverC4();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.hasGUI()) {
+        if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardC4Gui(this);
         }
 

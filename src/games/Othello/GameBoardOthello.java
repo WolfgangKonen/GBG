@@ -62,7 +62,7 @@ public class GameBoardOthello implements GameBoard {
 		m_Arena = arena;
 		m_so = new StateObserverOthello();
 		rand = new Random();
-        if (m_Arena.hasGUI()) {
+        if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardOthelloGui(this);
         }
 	}

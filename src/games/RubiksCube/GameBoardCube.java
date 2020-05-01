@@ -101,7 +101,7 @@ public class GameBoardCube implements GameBoard {
         rand2 		= new Random(2*System.currentTimeMillis());	
 		m_so		= new StateObserverCube();	// empty table
 		
-        if (m_Arena.hasGUI()) {
+        if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardCubeGui(this);
         }
         
@@ -276,19 +276,25 @@ public class GameBoardCube implements GameBoard {
 	/**
 	 * Choose a random start state when playing a game.
 	 * 
-	 * @return a random start state which is p twists away from the solved cube. 
-	 *         p from {1,...,{@link CubeConfig#pMax}} is picked randomly.
+	 * @return a random start state by twisting the solved cube p times. 
+	 *         If the game is played with GUI, p is set according to selector "Scrambling twists" of the game board.
+	 *         If this selector is set to "RANDOM" or if the game is played w/o GUI, p from {1,...,{@link CubeConfig#pMax}} 
+	 *         is picked randomly.
 	 *      
 	 * @see Arena#PlayGame()
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		clearBoard(true, true);			// m_so is in default start state 
 		int p = 1+rand.nextInt(CubeConfig.pMax);		// random p \in {1,2,...,pMax}
 		if (m_gameGui!=null) {
 			String str=m_gameGui.getScramblingTwists();
 			if (str!="RANDOM") p = Integer.valueOf(str).intValue();
 		}
+		return chooseStartState(p);
+	}
+	
+	public StateObservation chooseStartState(int p) {		
+		clearBoard(true, true);			// m_so is in default start state 
 		if (SELECT_FROM_T) {
 			int index = rand.nextInt(T[p].size());
 			CubeState cS = (CubeState)T[p].get(index);
@@ -301,7 +307,7 @@ public class GameBoardCube implements GameBoard {
 		// trying to solve m_so (!!). It also resets moveCounter
 		m_so = new StateObserverCubeCleared(m_so,p);
 		
-		System.out.println("p = "+p+",  "+m_so.getCubeState().twistSeq);
+		//System.out.println("p = "+p+",  "+m_so.getCubeState().twistSeq);
 		return m_so;
 	}
 
@@ -309,17 +315,17 @@ public class GameBoardCube implements GameBoard {
 	/**
 	 * Choose a random start state when training for an episode. Return a start state depending 
 	 * on {@code pa}'s {@link PlayAgent#getGameNum()} and {@link PlayAgent#getMaxGameNum()} 
-	 * by randomly selecting from the distance sets D[p]. 
+	 * by randomly twisting the default cube p times (deprecated: by selecting from the distance sets D[p]). 
 	 * <p>
-	 * In more detail: Set X={@link CubeConfig#Xper}[{@link CubeConfig#pMax}]. 
-	 * If the proportion of training games is in the first X[1] percent, select from D[1], 
-	 * if it is between X[1] and X[2] percent, select from D[2], and so on.  In this 
+	 * Which p to take? - Set X={@link CubeConfig#Xper}[{@link CubeConfig#pMax}]. 
+	 * If the proportion of training games is in the first X[1] percent, set p=1, 
+	 * if it is between X[1] and X[2] percent, set p=2, and so on.  In this 
 	 * way we realize <b>time-reverse learning</b> (from the cube's end-game to the more complex
 	 * cube states) during the training process. The cumulative percentage X is currently 
 	 * hard-coded in {@link CubeConfig#Xper}.
 	 * <p>
-	 * If {@link #SELECT_FROM_D}==true, then select from {@code this.D} (distance sets created at program startup).<br>
-	 * If {@link #SELECT_FROM_D}==false, then use {@link #selectByTwists2(int)}.
+	 * If {@link #SELECT_FROM_D}==false, then use {@link #selectByTwists1(int)}.<br>
+	 * If {@link #SELECT_FROM_D}==true (deprecated), then select from distance set D[p]. Distance sets created at program startup).<br>
 	 * 
 	 * @param 	pa the agent to be trained, we need it here only for its {@link PlayAgent#getGameNum()} 
 	 * 			and {@link PlayAgent#getMaxGameNum()}
@@ -333,10 +339,13 @@ public class GameBoardCube implements GameBoard {
 		int p;
 		clearBoard(true, true);			// m_so is in default start state 
 		double[] X = CubeConfig.Xper[CubeConfig.pMax];
+		
+		// which p to take?
 		double x = ((double)pa.getGameNum())/pa.getMaxGameNum() + 1e-10;
 		for (p=1; p<=CubeConfig.pMax; p++) {
 			if (X[p-1]<x && x<X[p]) break;
 		}
+		
 		if (SELECT_FROM_D) {
 			int index = rand.nextInt(D[p].size());
 			m_so = new StateObserverCube(D[p].get(index));
@@ -366,27 +375,50 @@ public class GameBoardCube implements GameBoard {
 	/** 
 	 * Method to select a start state by doing p random twist on the default cube. 
 	 * This may be the only way to select a start state being p=8,9,... twists away from the 
-	 * solved cube (where the distance D[p] becomes to big). 
+	 * solved cube (where the distance set D[p] becomes to big). 
 	 * <p>
 	 * But it has the caveat that p random twists do not guarantee to produce a state in D[p]. 
 	 * Due to twins etc. the resulting state may be actually in D[p-1], D[p-2] and below.
-	 * However, it works for arbitrary p.
+	 * However, it works quickly for arbitrary p.
 	 * 
 	 * @see #selectByTwists2(int)
 	 */
-	private StateObserverCubeCleared selectByTwists1(int p) {
+	protected StateObserverCubeCleared selectByTwists1(int p) {
 		StateObserverCubeCleared d_so;
 		CubeState cS;
 		int index;
-		d_so = new StateObserverCubeCleared(); // default cube
+		boolean cond;
+		StateObserverCube so = new StateObserverCube(); // default cube
 		// make p twists and hope that we land in 
 		// distance set D[p] (which is often not true for p>5)
 		int twists = (int)(p);
-		for (int k=0; k<twists; k++)  {
-			index = rand.nextInt(d_so.getAvailableActions().size());
-			d_so.advance(d_so.getAction(index));  				
+		switch (CubeConfig.twistType) {
+		case ALLTWISTS:
+			for (int k=0; k<twists; k++)  {
+				do {
+					index = rand.nextInt(so.getAvailableActions().size());
+					cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
+					// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
+					// the same twist type (e.g. U) as lastTwist. This is because doublet U1U1 can be reached as well in one twist U2. 
+				} while (cond);
+				so.advance(so.getAction(index));  				
+			}
+			break;
+		case QUARTERTWISTS:
+			for (int k=0; k<twists; k++)  {
+				do {
+					index = rand.nextInt(so.getAvailableActions().size());
+					cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
+																  (index%3+1) != so.getCubeState().lastTimes);
+					// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
+					// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3  
+					// are possible here). This is because doublet U1U3 would leave the cube unchanged
+				} while (cond);
+				so.advance(so.getAction(index));  				
+			}
+			break;
 		}
-		d_so = new StateObserverCubeCleared(d_so,p);
+		d_so = new StateObserverCubeCleared(so,p);
 		
 		if (DBG_REALPMAT) incrRealPMat(d_so, p);	// increment realPMat		
 		
@@ -397,7 +429,8 @@ public class GameBoardCube implements GameBoard {
 	 * Select a state in distance set D[p] by random twists and maintain
 	 * a list D2[k], k=0,...,p, of all already visited states. 
 	 * Create it by selecting a random state from D2[p-1], advance it with a random twist
-	 * and - if it happens to be in D2[p-1] or D2[p-2] - advance it again (and again). <br>
+	 * and - if it happens to be in D2[p-1] or D2[p-2] - advance it again (and again). 
+	 * <p>
 	 * Disadvantages: For large p, the list D2[p-1] and D2[p-2] become too big to be maintained in memory. And if they 
 	 * are not complete, the returned state may be not in D[p]. That is why this method is now deprecated.<br>
 	 * Advantage: If they are complete, we return a state which is truly in D[p].

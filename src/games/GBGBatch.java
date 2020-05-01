@@ -54,9 +54,9 @@ import tools.Types;
 /**
  * This class is used to start GBG for batch runs. See {@link #main(String[])} for details on the command line arguments
  * <p>
- * This program should normally not require any GUI facilities, so it should run on machines without graphical
+ * This program should normally not require any GUI facilities, so it should run on machines having no graphical
  * user interface system like X11 or Win. <br>
- * If there should be any X11 incompatibilities, the program can be run anyhow on Ubuntu consoles having no X11 
+ * If there should be any X11 incompatibilities, the program can be run anyhow on Ubuntu consoles w/o X11 
  * if you use the command
  * <pre>
  *    xvfb-run java -jar GBGBatch.jar ...
@@ -97,7 +97,7 @@ public class GBGBatch {
 	 *              (multiTrainAlphaSweep) or {@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3} 
 	 *              (multiTrainLambdaSweep)<br>
 	 *          [2] {@code agentFile}: e.g. "tdntuple3.agt.zip". This agent is loaded from
-	 *          	{@code agents/}{@link Types#GUI_DEFAULT_DIR_AGENT} (+ a suitable subdir, if 
+	 *          	{@code agents/}{@link Types#GUI_DEFAULT_DIR_AGENT}{@code /gameName/}  (+ a suitable subdir, if 
 	 *          	applicable). It specifies the agent type and all its parameters for multi-training 
 	 *          	in {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1},
 	 *          	{@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}  or 
@@ -165,9 +165,8 @@ public class GBGBatch {
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+t_Game.getGameName();
 		String subDir = t_Game.getGameBoard().getSubDir();
-		if (subDir != null){
-			strDir += "/"+subDir;
-		}
+		if (subDir != null) strDir += "/"+subDir;
+		
 		filePath = strDir + "/" +args[2]; //+ "tdntuple3.agt.zip";
 
 		try {
@@ -410,7 +409,7 @@ public class GBGBatch {
 				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
-				gb.getArena().showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
+                e.printStackTrace(System.err);
 				return pa;			
 			} 
 
@@ -581,7 +580,7 @@ public class GBGBatch {
 				if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);				
 			}  catch(RuntimeException e) 
 			{
-				gb.getArena().showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
+                e.printStackTrace(System.err);
 				return pa;			
 			} 
 

@@ -10,4 +10,9 @@ public class BoardVector {
 		this.bvec = bvec.clone();
 	}
 
+	public BoardVector(int[] bvec, int[] aux) {
+		this.bvec = bvec.clone();
+		this.aux = aux.clone();
+	}
+
 }

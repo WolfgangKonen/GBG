@@ -16,6 +16,7 @@ import games.Evaluator;
 //import games.TicTacToe.Evaluator9;
 import games.GameBoard;
 import games.PStats;
+import games.StateObservation;
 import games.TStats;
 import games.TStats.TAggreg;
 import gui.MessageBox;
@@ -25,11 +26,12 @@ import games.RubiksCube.CubeConfig.BoardVecType;
 import tools.Types;
 
 /**
- * Evaluator for RubiksCube. For p in {1, ..., {@link CubeConfig#pMax}}: Test with Nmax[p] cube states 
- * randomly picked from test distance set {@link GameBoardCube#getT()}:
+ * Evaluator for RubiksCube. For p in {1, ..., {@link CubeConfig#pMax}}: Test with {@link CubeConfig#EvalNmax}{@code [p]} 
+ * cube states randomly picked via  {@link GameBoardCube#chooseStartState(int) GameBoardCube#chooseStartState(p)}
+ * (deprecated: from test distance set {@link GameBoardCube#T}):
  * <ul>
- * <li> If mode=0: how many percent of the states are solved with the minimal amount of twists? 
- * <li> If mode=1: how many percent of the states are solved in an episode not longer than 2*p? 
+ * <li> If mode=0: how many percent of the states are solved within &le; p twists? 
+ * <li> If mode=1: how many percent of the states are solved within {@link CubeConfig#EVAL_EPILENGTH} twists? 
  * </ul>  
  * The value of mode is set in the constructor. 
  */
@@ -98,10 +100,62 @@ public class EvaluatorCube extends Evaluator {
 	}
 	
 	/**	
-	 * @param pa 
- 	 * @return average success on array D of distance sets
+	 * For each p up to {@link CubeConfig#pMax}: Generate {@link CubeConfig#EvalNmax}{@code [p]} scrambled cubes 
+	 * via {@link GameBoardCube#chooseStartState(int) GameBoardCube#chooseStartState(p)}. Measure the success rate with
+	 * which the agent can solve them: 
+	 * <ul>
+	 * <li> {@link Evaluator#m_mode m_mode}{@code =0}:  percent solved within &le; p twists
+	 * <li> {@link Evaluator#m_mode m_mode}{@code =1}:  percent solved within {@link CubeConfig#EVAL_EPILENGTH} twists
+	 * </ul> 
+	 * @param pa the agent to evaluate
+ 	 * @return the weighted average success on different sets of scrambled cubes
 	 */
  	private double evaluateAgent0(PlayAgent pa) {
+		ArrayList tsList = new ArrayList<TStats>();
+		ArrayList taggList = new ArrayList<TAggreg>();
+		TStats tstats;
+		TAggreg tagg;
+		StateObservation so;
+ 		countStates=0;
+		for (int p=1; p<=CubeConfig.pMax; p++) {
+			int epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
+ 			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
+ 				so = ((GameBoardCube) m_gb).chooseStartState(p);	// uses selectByTwist1(p)
+ 				so.resetMoveCounter();
+ 				
+                while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
+ 	                 so.advance(pa.getNextAction2(so, false, true));
+                }
+                int moveNum = so.getMoveCounter();
+                tstats = new TStats(n,p,moveNum,epiLength);
+    			tsList.add(tstats);
+
+                if(verbose > 1) {
+                    System.out.print("Finished game " + n + " with moveNum " + moveNum + " twists.\n");
+                }
+			} // for (n)
+			countStates += CubeConfig.EvalNmax[p];
+ 			tagg = new TAggreg(tsList,p);
+ 			taggList.add(tagg);
+ 		} // for (p)
+		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
+		m_msg = pa.getName()+": "+getPrintString() + lastResult;
+		if (this.verbose>=0) {
+			TStats.printTAggregList(taggList);
+			//System.out.println((CubeConfig.boardVecType==BoardVecType.CUBESTATE) ? "CUBESTATE" : "CUBEPLUSACTION");
+		}
+		return lastResult;
+	}
+
+	/**	
+	 * This method only works if GameBoardCube.SELECT_FROM_T==true. Therefore, since T is hard to calculate
+	 * for larger values of p, it is now deprecated.
+	 * 
+	 * @param pa 
+ 	 * @return average success on array T of distance sets
+	 */
+ 	@Deprecated
+ 	private double evaluateAgent0_OLD(PlayAgent pa) {
 		ArrayList tsList = new ArrayList<TStats>();
 		ArrayList taggList = new ArrayList<TAggreg>();
 		TStats tstats;
@@ -109,6 +163,7 @@ public class EvaluatorCube extends Evaluator {
  		countStates=0;
 		for (int p=1; p<=CubeConfig.pMax; p++) {
 			int epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
+			if (T==null) throw new RuntimeException("[evalAgent0_OLD] T is null! Consider to adjust GameBoardCube.SELECT_FROM_T");
 			if (T[p]!=null) {
 	 			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
  	 				int index = rand.nextInt(T[p].size());

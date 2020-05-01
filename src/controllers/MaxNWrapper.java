@@ -28,6 +28,7 @@ public class MaxNWrapper extends MaxNAgent implements Serializable {
 	// and useHashMap-flag from ParMaxN mPar
 	public MaxNWrapper(PlayAgent pa, ParMaxN mPar, ParOther oPar) {
 		super("MaxNWrapper", mPar, oPar);
+		this.m_oPar.setWrapperNPly(oPar.getWrapperNPly());
 		this.wrapped_pa = pa;
 		this.m_useHashMap = false;		// bug fix 2019-03-13: no HashMap in MaxNWrapper!
 	}

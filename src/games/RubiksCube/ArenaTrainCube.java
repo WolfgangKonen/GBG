@@ -57,6 +57,8 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 */
 	@Override
 	public GameBoard makeGameBoard() {
+		CubeState.generateInverseTs();		// since makeGameBoard is called via super --> Arena 
+		CubeState.generateForwardTs();		// prior to finishing ArenaTrainCube(String,boolean)
 		gb = new GameBoardCube(this);	
 		return gb;
 	}

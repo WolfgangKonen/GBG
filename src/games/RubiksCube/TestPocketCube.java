@@ -46,41 +46,33 @@ public class TestPocketCube {
 			throw new RuntimeException("[TestPocketCube.main] args="+args+" not allowed.");
 		}
 
+		assert (CubeConfig.cubeType == CubeConfig.CubeType.POCKET) : "CubeConfig.cubeType is not POCKET!";
+		
 		CubeState.generateInverseTs();
 		CubeState.generateForwardTs();
 		TestPocketCube tpock = new TestPocketCube();
 		
-		XNTupleFuncsCube xnf = new XNTupleFuncsCube();
-		CubeConfig.boardVecType = BoardVecType.CUBESTATE;
-		String h5 = xnf.adjacencySet(5).toString();
-		assert(h5.equals("[3, 4, 6, 22]")) : "adjacency set 1 not as excpected!";
-		System.out.println(h5+" --> OK");		// should be [3, 4, 6, 22]
-		CubeConfig.boardVecType = BoardVecType.STICKERS;
-		h5 = xnf.adjacencySet(5).toString();
-		assert(h5.equals("[7, 8, 9, 10, 11, 13]")) : "adjacency set 2 not as excpected!";
-		System.out.println(h5+" --> OK");		// should be  (all from 7...13 except 5+7=12
-
 		tpock.simpleTests01();			// test whole-cube rotations and twists
+		tpock.simpleTests02();
 		//tpock.colorMapTests();		// test maps and color symmetries
-		//tpock.generatorTests(5);			// tests on distance set generation
+		//tpock.generatorTests(5);		// tests on distance set generation
 		
 		System.out.println("*** All done ***");
 
 	}
 	
 	/**
+	 * Whole-cube rotation- and twist-test:
+	 * 
 	 * 1) Test that 4x 90° whole-cube rotations u,l,f  on default cube lead to default cube again. <br>
 	 * 2) Test that 4x 90° twists UTw,LTw,FTw  on default cube lead to default cube again. <br>
 	 * 3) Test that rep x FTw.UTw.LTw followed by rep x the inverse leads to default cube again, where rep is a random int. <br>
-	 * 4) Test that a transformation from CubeState to STICKERS board vector and back to CubeState results in the 
-	 *    original CubeState again. Select several randomly twisted CubeStates for this test.
 	 */
 	private void simpleTests01() {
-		int runs; 
 		
 		// Tests 1) and 2) 
-		CubeState def = new CubeState();
-		CubeState rot = new CubeState(def);
+		CubeState def = CubeState.makeCubeState();
+		CubeState rot = CubeState.makeCubeState(def);
 		for (int k=1; k<=4; k++) {
 			//System.out.println(k+"x u-rotation");
 			rot.uTr(1);  //.print();
@@ -118,7 +110,7 @@ public class TestPocketCube {
 		assert (def.isEqual(rot)) : "def and rot differ after 4x FTwist!";
 		
 		// Test 3)
-		runs = 3;
+		int runs = 3;
 		for (int r=0; r<runs; r++) {
 			int rep = 1+rand.nextInt(5);
 			for (int k=0; k<rep; k++) rot.FTw(1).UTw(1).LTw(1);
@@ -126,13 +118,32 @@ public class TestPocketCube {
 			assert (def.isEqual(rot)) : "def and rot differ after rep x FTw.UTw.LTw!";
 		}
 
-		// Test 4)
+	}
+	
+	/**
+	 * 1) Test some adjacency sets if they are as expected.
+	 * 2) Test for several randomly twisted CubeStates: Does a transformation from CubeState to STICKERS board vector 
+	 *    and back to CubeState result in the original CubeState again? 
+	 */
+	private void simpleTests02() {
+		// Test 01
+		XNTupleFuncsCube xnf = new XNTupleFuncsCube();
+		CubeConfig.boardVecType = BoardVecType.CUBESTATE;
+		String h5 = xnf.adjacencySet(5).toString();
+		assert(h5.equals("[3, 4, 6, 22]")) : "adjacency set 1 not as excpected!";
+		System.out.println(h5+" --> OK");		// should be [3, 4, 6, 22]
+		CubeConfig.boardVecType = BoardVecType.STICKERS;
+		h5 = xnf.adjacencySet(5).toString();
+		assert(h5.equals("[7, 8, 9, 10, 11, 13]")) : "adjacency set 2 not as excpected!";
+		System.out.println(h5+" --> OK");		// should be  (all from 7...13 except 5+7=12
+
+		// Test 2)
 		CubeConfig.boardVecType = BoardVecType.STICKERS;
 		CubeConfig.pMax=15;
-		runs = 3;
+		int runs = 3;
 		for (int r=0; r<runs; r++) {
 			StateObserverCube so = (StateObserverCube) gb.chooseStartState();
-			//StateObserverCube so = new StateObserverCube(); so.advance(new ACTIONS(3));
+			//StateObserverCube so = new StateObserverCube(); so.advance(new ACTIONS(3));  // a specific state (debug)
 			int[] bvec = so.getCubeState().getBoardVector().bvec;
 			int[][] board = new int[7][7];
 			for (int rb=0,k=0; rb<7; rb++)
@@ -142,8 +153,7 @@ public class TestPocketCube {
 			StateObserverCube sb = new StateObserverCube(new BoardVector(bvec));
 			assert(sb.getCubeState().equals(so.getCubeState())) : "so and sb differ after STICKERS trafo!";
 		}
-		System.out.println("Transformation CubeState --> STICKERS --> CubeState: OK");
-
+		System.out.println("Transformation CubeState --> STICKERS --> CubeState: OK");	
 		
 	}
 	
@@ -155,12 +165,12 @@ public class TestPocketCube {
 		// this is just to check the correctness of CubeStateMap::countDifferentStates()
 //		CubeStateMap hmTest = new CubeStateMap();
 //		rot.FTw();
-//		CubeState def2 = new CubeState(def);
+//		CubeState def2 = CubeState.makeCubeState(def);
 //		hmTest.put(1, def);
 //		hmTest.put(2, def2);  	// Are two different CubeState objects with the same content correctly counted as one?
 //		hmTest.put(3, rot);
 //		System.out.println("num states = "+hmTest.countDifferentStates() + ", " + hmTest.size());  	// should be 2, 3
-//		hmTest.put(4, new CubeState(rot));
+//		hmTest.put(4, CubeState.makeCubeState(rot));
 //		System.out.println("num states = "+hmTest.countDifferentStates() + ", " + hmTest.size());	// should be 2, 4
 
 		System.out.println("\nTesting CubeStateMap::allWholeCubeRotTrafos()");
@@ -196,7 +206,7 @@ public class TestPocketCube {
 		HashSet set = new HashSet();
 		int[] totalCoverage = {1, 9, 54, 321}; // see https://en.wikipedia.org/wiki/Pocket_Cube 
 		for (int act1=0; act1<3; act1++) {
-			CubeState cS1 = new CubeState();
+			CubeState cS1 = CubeState.makeCubeState();
 			switch(act1) {
 			case 0: cS1.UTw(1); break;
 			case 1: cS1.LTw(2); break;
@@ -208,7 +218,7 @@ public class TestPocketCube {
 				innerApplyColSymmTest(cS1, act1,act2,act3, hmCols, hmRots, set);
 			} else if (DISTANCE>=2) {
 				for (int act2=0; act2<3; act2++) {
-					CubeState cS2 = new CubeState(cS1);
+					CubeState cS2 = CubeState.makeCubeState(cS1);
 					switch(act2) {
 					// the ternary operators ensure that the twists done in the second step
 					// (act2) are different twists than the act1 actions (otherwise both actions
@@ -222,7 +232,7 @@ public class TestPocketCube {
 						innerApplyColSymmTest(cS2, act1,act2,act3, hmCols, hmRots, set);						
 					} else if (DISTANCE==3) {
 						for (int act3=0; act3<3; act3++) {
-							CubeState cS3 = new CubeState(cS2);
+							CubeState cS3 = CubeState.makeCubeState(cS2);
 							switch(act3) {
 							// the ternary operators ensure that the twists done in the second step
 							// (act2) are different twists than the act1 actions (otherwise both actions

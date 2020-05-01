@@ -7,12 +7,18 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
+import games.MTrain;
 import games.Arena;
 import games.PStats;
 import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
 import tools.Types;
 import tools.Types.ACTIONS_VT;
 
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -24,9 +30,10 @@ import java.util.concurrent.Executors;
  * Base evaluator for 2048: average score from playing 50 episodes.
  * <p>
  * Note that the mode-selection for 2048 evaluators is done in 
- * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}.
+ * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}. <br>
+ * This class {@link Evaluator2048} is only called for {@code m_mode==-1} (just return true) and {@code m_mode==0}.
  * <p>
- * Created by Johannes Kutsch, TH Koeln, 2016-12.
+ * Created by Johannes Kutsch, TH Koeln, 2016. Adapted by Wolfgang Konen, 2018-2020.
  * 
  * @see Evaluator2048_BoardPositions
  * @see Evaluator2048_EA
@@ -39,7 +46,10 @@ public class Evaluator2048 extends Evaluator {
     private int maxScore = Integer.MIN_VALUE;
     private List<Integer> scores = new ArrayList<>();
     private double standarddeviation;
-    private double averageRolloutDepth;
+    private long duration;
+    private long avgGameDur;
+    private double avgMovPerGame;
+    private double movesPerSec;
     private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
 //	private int m_mode;			// now in Evaluator
@@ -47,6 +57,9 @@ public class Evaluator2048 extends Evaluator {
     private long stopTime;
     private int verbose;
     private Arena ar;		// needed in eval_agent, if PStats.printPlayStats(psList, m_PlayAgent,ar) is called
+    						// and needed in printEResultList
+    
+    public EResult eResult; // holds 2048 evaluation results in one object. EResult is a nested class of this.
 
 
     public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose, Arena ar) {
@@ -222,7 +235,7 @@ public class Evaluator2048 extends Evaluator {
         } // else
 
         //evaluate games
-        //Min/Max/Average Score
+        //Average Score
         for(StateObserver2048 so : stateObservers) {
             Integer value = tiles.get(so.getHighestTileValue());
             if (value == null) {
@@ -234,26 +247,22 @@ public class Evaluator2048 extends Evaluator {
             scores.add(so.score);
 
             lastResult += so.score;
-            if (so.score < minScore) {
-                minScore = so.score;
-            }
-            if (so.score > maxScore) {
-                maxScore = so.score;
-            }
 
             moves += so.getMoveCounter();
-        }
+        } // for (so)
 
         lastResult/= ConfigEvaluator.NUMBEREVALUATIONS;
 
-        //Standard deviation
+        //Standard deviation of avgScore  
+        //[Standard deviation of the scores is bigger by factor 1/sqrt(NUMBEREVALUATIONS).]
         for(int score : scores) {
             standarddeviation += (score-lastResult)*(score-lastResult);
         }
-        standarddeviation/= ConfigEvaluator.NUMBEREVALUATIONS;
+        standarddeviation/= (ConfigEvaluator.NUMBEREVALUATIONS-1);
         standarddeviation = Math.sqrt(standarddeviation);
+        standarddeviation /= Math.sqrt(ConfigEvaluator.NUMBEREVALUATIONS);
 
-        //Median Score
+        //Median, Min and Max Score
         Collections.sort(scores);
         int mid = (int) (scores.size()/2);
         if (scores.size()%2==0) {
@@ -261,15 +270,24 @@ public class Evaluator2048 extends Evaluator {
         } else {
         	medianScore = scores.get(mid);
         }
-
-        averageRolloutDepth/=moves;
+        minScore = scores.get(0);
+        maxScore = scores.get(scores.size()-1);
 
         stopTime = System.currentTimeMillis();
 
         //System.out.print("\n");
         if (verbose==1) System.out.println("Finished evaluation of "+ConfigEvaluator.NUMBEREVALUATIONS+" games with average score "
-        		+ Math.round(lastResult) + " +- " + Math.round(standarddeviation/Math.sqrt(ConfigEvaluator.NUMBEREVALUATIONS)));
-
+        		+ Math.round(lastResult) + " +- " + Math.round(standarddeviation));
+        
+        int nPly = pa.getParOther().getWrapperNPly();
+        duration = (stopTime - startTime);
+        avgGameDur = Math.round((double)duration / (double)ConfigEvaluator.NUMBEREVALUATIONS);
+        avgMovPerGame =  Math.round((double)moves / (double)ConfigEvaluator.NUMBEREVALUATIONS);
+        movesPerSec = Math.round(moves/((double)duration/(double)1000));
+        
+        this.eResult = new EResult(nPly, ConfigEvaluator.NUMBEREVALUATIONS, (double)minScore, (double)maxScore, lastResult, (double)medianScore, 
+        		standarddeviation, avgGameDur, avgMovPerGame, movesPerSec, tiles);
+        
         return lastResult > ConfigEvaluator.MINPOINTS;
     }
 
@@ -330,17 +348,125 @@ public class Evaluator2048 extends Evaluator {
                 "\n" +
                 "\nResults:" +
                 "\nLowest score is: " + minScore +
-                "\nAverage score is: " + Math.round(lastResult) + 
-                " +- " + Math.round(standarddeviation/Math.sqrt(ConfigEvaluator.NUMBEREVALUATIONS)) +
+                "\nAverage score is: " + Math.round(lastResult) + " +- " + Math.round(standarddeviation) +
                 "\nMedian score is: " + Math.round(medianScore) +
                 "\nHighest score is: " + maxScore +
-                "\nAverage game duration: " +  Math.round((double)duration / (double)ConfigEvaluator.NUMBEREVALUATIONS) + "ms" +
+                "\nAverage game duration: " +  avgGameDur + "ms" +
 //              "\nDuration of evaluation: " + Math.round((double)duration/(double)1000) + "s" +
-                "\nMoves per second: " + Math.round(moves/((double)duration/(double)1000)) +
+				"\nAverage moves per game: " +  avgMovPerGame + 
+                "\nMoves per second: " + movesPerSec +
                 "\n" +
                 "\nHighest tiles: " +
                 tilesString +
                 "\n\n";
+    }
+    
+    /**
+     * This class collects 2048 evaluation results in one object. Such objects may be combined in ArrayList<EResult> from 
+     * several runs, for later inspection and printout
+     *
+     */
+    public class EResult {
+    	public int nPly;			// nPly
+    	public int numEval;			// number of evaluation games (episodes) for this nPly
+    	public double lowScore;		// lowest score
+    	public double higScore;		// highest score
+    	public double avgScore;		// average score
+    	public double medScore;		// median score
+    	public double stdDevScore;	// standard deviation of the scores
+    	public long avgGameDur;		// average game duration in ms
+    	public double avgMovPerGame;// average number of moves per game
+    	public double movesPerSec;	// average number of moves second 
+    	public double t16384_Perc;  // percentage of evaluation runs where tile 16384 is highest tile
+    	public TreeMap<Integer, Integer> tiles;
+    	String sep = ", ";
+    	
+    	public EResult(int nPly, int numEval, double lowScore, double higScore, double avgScore, double medScore, 
+    			double stdDevScore, long avgGameDur, double avgMovPerGame, double movesPerSec,  TreeMap<Integer, Integer> tiles) {
+    		this.nPly=nPly;
+    		this.numEval = numEval;
+    		this.lowScore = lowScore;
+    		this.higScore = higScore; 
+    		this.avgScore = avgScore;
+    		this.medScore = medScore; 
+    		this.stdDevScore = stdDevScore;
+    		this.avgGameDur = avgGameDur;
+    		this.avgMovPerGame = avgMovPerGame;
+    		this.movesPerSec = movesPerSec;
+    		this.tiles = tiles;
+    		this.t16384_Perc = 0.0;
+    		
+            for (Map.Entry tile : tiles.entrySet()) {
+            	if (((Integer)tile.getKey()).intValue()==16384) {
+            		t16384_Perc = ((Integer)tile.getValue()).doubleValue()/ConfigEvaluator.NUMBEREVALUATIONS;
+            	}
+            }
+
+
+    	}
+    	
+    	public void print(PrintWriter mtWriter)  {
+    		DecimalFormat frm0 = new DecimalFormat("#0000");
+    		DecimalFormat frm1 = new DecimalFormat("#0000.0");  // drawback: decimal separator is "," 
+    		DecimalFormat df = new DecimalFormat(), df2 = new DecimalFormat();				
+    		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+    		df.applyPattern("#0000.0");  // now numbers formatted by df  appear with a decimal *point*
+    		df2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+    		df2.applyPattern("#0.000");  // now numbers formatted by df2 appear with a decimal *point*
+
+    		mtWriter.print(nPly + sep + numEval + sep);
+    		mtWriter.println(frm0.format(lowScore) + sep + frm0.format(avgScore) + sep + frm0.format(stdDevScore)
+    				+ sep + frm0.format(medScore) + sep + frm0.format(higScore) + sep + avgGameDur 
+    				+ sep + df.format(avgMovPerGame) + sep + frm0.format(movesPerSec) + sep + df2.format(t16384_Perc));
+    	}
+
+    	public void printEResultList(String csvName, ArrayList<EResult> erList, PlayAgent pa, Arena ar,
+    			String userTitle1, String userTitle2){
+    		PrintWriter erWriter = null;
+    		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+ar.getGameName();
+    		String subDir = ar.getGameBoard().getSubDir();
+    		if (subDir != null){
+    			strDir += "/"+subDir;
+    		}
+    		strDir += "/csv";
+    		tools.Utils.checkAndCreateFolder(strDir);
+
+    		boolean retry=true;
+    		BufferedReader bufIn=new BufferedReader(new InputStreamReader(System.in));
+    		while (retry) {
+    			try {
+    				erWriter = new PrintWriter(new FileWriter(strDir+"/"+csvName,false));
+    				retry = false;
+    			} catch (IOException e) {
+    				try {
+    					// We may get here if file csvName is open in another application (e.g. Excel).
+    					// Here we give the user the chance to close the file in the other application:
+    				    System.out.print("*** Warning *** Could not open "+strDir+"/"+csvName+". Retry? (y/n): ");
+    				    String s = bufIn.readLine();
+    				    retry = (s.contains("y")) ? true : false;
+    				} catch (IOException e2) {
+    					e2.printStackTrace();					
+    				}
+    			}			
+    		}
+    		
+    		if (erWriter!=null) {
+    			erWriter.println(pa.stringDescr());		
+    			erWriter.println(pa.stringDescr2());
+    			
+    			erWriter.println("nPly"+sep+"numEval"+sep+"lowScore"+sep+"avgScore"+sep+"stdDevScore"+sep
+    					+"medScore"+sep+"higScore"+sep
+    					+"avgGameDur"+sep+"avgMovPerGame"+sep+"movesPerSec"+sep+"tile16kPerc");
+    			ListIterator<EResult> iter = erList.listIterator();		
+    			while(iter.hasNext()) {
+    				(iter.next()).print(erWriter);
+    			}
+
+    		    erWriter.close();
+    		} else {
+    			System.out.print("*** Warning *** Could not write "+strDir+"/"+csvName+".");
+    		}
+    	}
     }
     
     @Override
@@ -376,11 +502,6 @@ public class Evaluator2048 extends Evaluator {
     public int getTrainEvalMode() {
         return 0;
     }
-
-//    @Override
-//    public int getMultiTrainEvalMode() {
-//        return 0;
-//    }
 
     @Override
     public String getPrintString() {

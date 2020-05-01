@@ -19,8 +19,8 @@ import games.RubiksCube.CubieTriple.Orientation;
 /**
  * Class CubeState represents a certain cube state. It comes in four different types (member {@code type}):
  * <ul>
- * <li> <b>POCKET</b>: color representation of a 2x2x2 pocket cube
- * <li> <b>RUBIKS</b>: color representation of a 3x3x3 Rubik's cube
+ * <li> <b>COLOR_P</b>: color representation of a 2x2x2 pocket cube
+ * <li> <b>COLOR_R</b>: color representation of a 3x3x3 Rubik's cube
  * <li> <b>TRAFO_P</b>: transformation representation for pocket cube
  * <li> <b>TRAFO_R</b>: transformation representation for Rubik's cube
  * </ul>
@@ -28,6 +28,10 @@ import games.RubiksCube.CubieTriple.Orientation;
  * It stores in the case of a <b>color representation</b> type in {@code fcol[i]} the face color of 
  * cubie face i. The color is one out of {0,1,2,3,4,5} for colors {w,b,o,y,g,r} = 
  * {white,blue,orange,yellow,green,red}. For transformation representation type TRAFO_* see below.
+ * <p>
+ * Its member {@link #sloc} has 24 or 48 elements for pocket and Rubik's cube, resp. 
+ * It stores the sticker location: {@code sloc[i]} holds the location of the sticker which is at 
+ * face {@code i} for the solved cube.
  * <p>
  * Its member {@code lastTwist} stores the last twist action (U,L,F) performed on this cube
  * (ID if none or not known).
@@ -70,29 +74,28 @@ import games.RubiksCube.CubieTriple.Orientation;
  */
 public class CubeState implements Serializable {
 	
-	public static enum Type {POCKET,RUBIKS,TRAFO_P,TRAFO_R};
+	public static enum Type {COLOR_P,COLOR_R,TRAFO_P,TRAFO_R};
 	public static enum Twist {ID,U,L,F};
 	private static enum Cor {a,b,c,d,e,f,g,h};
 	
 	/**
-	 * {@code fcol} is the face color array with 24 (<b>POCKET</b>) or 48 (<b>RUBIKS</b>) elements. <br> 
-	 * {@code fcol[i]} holds the face color for cubie face (sticker) with number {@code i} (<b>POCKET</b>, <b>RUBIKS</b>).<br>
-	 * {@code fcol[i]} holds the parent location for cubie face (sticker) with number {@code i} (<b>TRAFO_P</b>, <b>TRAFO_R</b>).
-	 *  
+	 * {@code fcol} is the face color array with 24 (<b>COLOR_P</b>) or 48 (<b>COLOR_R</b>) elements. <br> 
+	 * {@code fcol[i]} holds the face color for cubie face (sticker) with number {@code i} (<b>COLOR_*</b>).<br>
+	 * {@code fcol[i]} holds the parent location for cubie face (sticker) with number {@code i} (<b>TRAFO_*</b>).
 	 */
 	public int[] fcol; 
 	
 	/**
-	 * {@code sloc} is the sticker location, an array with 24 (<b>POCKET</b>) or 48 (<b>RUBIKS</b>) elements. <br>
+	 * {@code sloc} is the sticker location, an array with 24 (<b>COLOR_P</b>) or 48 (<b>COLOR_R</b>) elements. <br>
 	 * {@code sloc[i]} holds the location of the sticker which is at face {@code i} for the solved cube.  
 	 */
 	public int[] sloc;
 
-	Type type = Type.POCKET;
+	Type type = Type.COLOR_P;
 	Twist lastTwist = Twist.ID;
 	int lastTimes = 0;
 	String twistSeq = "";   // e.g. "L2U1" means that 
-							//		(new CubeState()).LTw(2).UTw(1) 
+							//		(CubeState.makeCubeState()).LTw(2).UTw(1) 
 							// produces this. ("": not known).
 	int minTwists = -1;		// minimum number of twists needed to solve this state (-1: not known)
 	
@@ -163,23 +166,16 @@ public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * default (solved) cube of type POCKET
-	 */
-	public CubeState() {
-		this(Type.POCKET);
-	}
-	
-	/**
 	 * Construct a new cube of Type {@code type} in default (solved) state
 	 * @param type
 	 */
 	public CubeState(Type type) {
 		this.type = type;
 		switch(type) {
-		case POCKET: 
+		case COLOR_P: 
 			this.fcol = new int[] {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5};
 			break;
-		case RUBIKS:
+		case COLOR_R:
 			this.fcol = new int[] {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,
 								   3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5};
 			break;
@@ -209,29 +205,29 @@ public class CubeState implements Serializable {
 		int[] bvec = boardVector.bvec;
 		switch(bvec.length) {
 		case 24: 	// boardvecType == CUBESTATE, 2x2x2
-			this.type = Type.POCKET;
-			this.fcol = bvec.clone();		
-			// TODO: Can we reconstruct scol[i] ??
+			this.type = Type.COLOR_P;
+			this.fcol = bvec.clone();	
+			this.sloc = boardVector.aux.clone();
 			break;
 		case 26: 	// boardvecType == CUBEPLUSACTION, 2x2x2
-			this.type = Type.POCKET;
+			this.type = Type.COLOR_P;
 			this.fcol = new int[24];
 			for (int i=0; i<24; i++) this.fcol[i] = bvec[i];	
-			// TODO: Can we reconstruct scol[i] ??
+			this.sloc = boardVector.aux.clone();
 			break;
 		case 49: 	// boardvecType == STICKERS, 2x2x2
-			CubeState def = new CubeState(Type.POCKET);
-			this.type = Type.POCKET;
+			this.type = Type.COLOR_P;
 			this.sloc = slocFromSTICKERS(bvec);	
+			CubeState def = makeCubeState(Type.COLOR_P);
 			this.fcol = new int[def.fcol.length];
 			for (int i=0; i<24; i++) this.fcol[sloc[i]] = def.fcol[i];		
 			break;
 		case 48:	// boardvecType == CUBESTATE, 3x3x3
-			this.type = Type.RUBIKS;
+			this.type = Type.COLOR_R;
 			this.fcol = bvec.clone();
 			break;
 		case 50: 	// boardvecType == CUBEPLUSACTION, 3x3x3
-			this.type = Type.POCKET;
+			this.type = Type.COLOR_R;
 			this.fcol = new int[48];
 			for (int i=0; i<48; i++) this.fcol[i] = bvec[i];		
 			break;
@@ -241,15 +237,50 @@ public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * Given a board vector in STICKERS representation, reconstruct member sloc
-	 * @param bvec
+	 * Copy constructor
+	 * @param cs
+	 */
+	public CubeState(CubeState cs) {
+		this.type = cs.type;
+		this.lastTwist = cs.lastTwist;
+		this.lastTimes = cs.lastTimes;
+		this.twistSeq = cs.twistSeq;
+		this.minTwists = cs.minTwists;
+		this.fcol = cs.fcol.clone();
+		this.sloc = cs.sloc.clone();
+	}
+	
+	//
+	// factory methods: they allow to delegate the CubeState object construction to the derived classes:
+	//
+	
+	public static CubeState makeCubeState() {
+		return new CubeState(CubeState.Type.COLOR_P);
+	}
+	
+	public static CubeState makeCubeState(Type type) {
+		return new CubeState(type);
+	}
+	
+	public static CubeState makeCubeState(BoardVector boardVector) {
+		return new CubeState(boardVector);
+	}
+	
+	public static CubeState makeCubeState(CubeState other) {
+		return new CubeState(other);
+	}
+	
+	/**
+	 * Helper for CubeState(BoardVector): 
+	 * Given a board vector in STICKERS representation, reconstruct member {@code sloc}.
+	 * @param bvec	the board vector
 	 * @return <b>int[] sloc</b>. sloc[i] holds the new location of sticker i which is at location i in the default cube.
 	 */
 	private int[] slocFromSTICKERS(int[] bvec) {
 		int[] sloc = new int[24];
 		final 							// this array is found with the help of Table 3 in notes-WK-RubiksCube.docx:
 		int[][] C = {{ 0,  4,  8},		// 1st row: the locations for a1,a2,a3
-					 { 1, 11, 18},		// 2nd row: the locations for b1,b2,b
+					 { 1, 11, 18},		// 2nd row: the locations for b1,b2,b3
 					 { 2, 17, 23},		// and so on ...
 					 { 3, 22,  5},
 					 {12, 16, 20},
@@ -269,16 +300,17 @@ public class CubeState implements Serializable {
 	}
 	
 	/**
+	 * Helper for slocFromSTICKERS:
 	 * Given the index z of a tracker sticker, return from {@code bvec} (the board vector in the STICKERS representation) 
 	 * the corner and face where this sticker z is found.
 	 * 
 	 * @param z index from {0,...,7} of a tracked sticker
 	 * @param bvec the board vector
-	 * @return <b>int[2]</b> with first element being the corner index {0,...,7} of the corner a,...,h and second element 
-	 * 		being the face index {0,1,2} for the face values {1,2,3} found in bvec.
+	 * @return <b>int[2]</b> with the first element being the corner index {0,...,7} of the corner a,...,h and  the
+	 * 		second element being the face index {0,1,2} for the face values {1,2,3} found in bvec.
 	 * <p>
 	 * Details: We need a little index arithmetic to account for the fact that {@code bvec} represents a 7x7 array, but 
-	 * the index z is for all 8 stickers (including the ever-constant 4th sticker on the ygr-cubie (corner e)).
+	 * the index z is for all 8 stickers (including the ever-constant 4th sticker of the ygr-cubie (corner e)).
 	 */
 	private int[] getCornerAndFace(int z, int[] bvec) {
 		int[] corfac = {4,0};	// the values for sticker z=4 (ygr-cubie, which stays always in place)
@@ -286,8 +318,8 @@ public class CubeState implements Serializable {
 		
 		// index arithmetic, part one
 		if (z<4) column=z;
-		else if (z==4) return corfac;		// the ygr-cubie case
-		else column=z-1;		// cases z=5,6,7 address column 4,5,6 of the STICKERS board
+		else if (z==4) return corfac;	// the ygr-cubie case
+		else column=z-1;				// cases z=5,6,7 address column 4,5,6 of the STICKERS board
 		
 		// find (row number, value) of the only non-zero element in 'column': 
 		int nonzero = 0;
@@ -300,23 +332,9 @@ public class CubeState implements Serializable {
 				corfac[1] = rv - 1;
 			}
 		}
-		assert (nonzero==1) : "Oops, there are "+nonzero+" elements non-zero in column "+z+", but it should be 1!";
+		assert (nonzero==1) : "Oops, there are "+nonzero+" elements non-zero in column "+z+", but there should be exactly 1!";
 		
 		return corfac;
-	}
-	
-	/**
-	 * Copy constructor
-	 * @param cs
-	 */
-	public CubeState(CubeState cs) {
-		this.type = cs.type;
-		this.lastTwist = cs.lastTwist;
-		this.lastTimes = cs.lastTimes;
-		this.twistSeq = cs.twistSeq;
-		this.minTwists = cs.minTwists;
-		this.fcol = cs.fcol.clone();
-		this.sloc = cs.sloc.clone();
 	}
 	
 	// 
@@ -325,7 +343,7 @@ public class CubeState implements Serializable {
 	//
 	
 	// TODO: The whole cube rotations need later to be extended to transform also this.sloc. But for the moment 
-	// this is not needed, becaus whole-cube rotations come only into play if we use color symmetries.
+	// this is not needed, because whole-cube rotations come only into play if we use color symmetries.
 	
 	/**
 	 * Whole-cube rotation counter-clockwise around the u-face
@@ -476,12 +494,12 @@ public class CubeState implements Serializable {
 	
 	/**
 	 * Apply color transformation cT to {@code this}. {@code this} has to be of 
-	 * type POCKET or RUBIKS. 
+	 * type COLOR_P or COLOR_R. 
 	 * @param cT
 	 * @return
 	 */
 	public CubeState applyCT(ColorTrafo cT) {
-		assert(this.type==Type.POCKET || this.type==Type.RUBIKS) : "Wrong type in apply(cT) !";
+		assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type in apply(cT) !";
 		int[] tmp = this.fcol.clone();
 		for (int i=0; i<fcol.length; i++) this.fcol[i] = cT.fcol[tmp[i]];
 		return this;		
@@ -489,14 +507,14 @@ public class CubeState implements Serializable {
 	
 	/**
 	 * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}. 
-	 * {@code this} has to be of type POCKET or RUBIKS.
+	 * {@code this} has to be of type COLOR_P or COLOR_R.
 	 * @param tri
 	 * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with 
 	 * 		   the colors of {@code tri}.
 	 */
 	public CubieTriple locate(CubieTriple tri) {
 		CubieTriple where = new CubieTriple(tri);
-		assert(this.type==Type.POCKET || this.type==Type.RUBIKS) : "Wrong type in apply() !";
+		assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type in apply() !";
 		//            0           4          8          12         16          20 
 		int[] left = {4,11,17,22, 8,3,21,14, 0,7,13,18, 20,19,9,6, 12,23,1,10, 16,15,5,2};
 		int[] right= {8,18,23,5, 0,22,15,9, 4,14,19,1, 16,10,7,21, 20,2,11,13, 12,6,3,17};
@@ -582,7 +600,7 @@ public class CubeState implements Serializable {
 		default: 
 			throw new RuntimeException("Unallowed value in switch boardVecType");
 		}
-		return new BoardVector(bvec);   
+		return new BoardVector(bvec,sloc);   // return a BoardVector with aux = sloc (needed to reconstruct CubeState from BoardVector)
 	}
 	
 	public CubeState clearLast() {
@@ -622,13 +640,14 @@ public class CubeState implements Serializable {
 	}
 	
 	/**
+	 * Check that {@code this.twistSeq} matches with {@code this.fcol}.
 	 * 
 	 * @return true, if applying {@code this.twistSeq} to the solved cube yields the  
 	 * same cube state as stored in {@code this.fcol}.<br>
 	 * If {@code this.twistSeq=""} (not known), then return always true. 
 	 */
 	public boolean assertTwistSequence() {
-		CubeState tst = new CubeState();
+		CubeState tst = CubeState.makeCubeState();
 		Twist T=Twist.ID;
 		int times;
 		String tw = this.twistSeq;

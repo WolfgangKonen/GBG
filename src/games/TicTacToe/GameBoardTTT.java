@@ -65,7 +65,7 @@ public class GameBoardTTT implements GameBoard {
 		m_Arena		= arGame;
 		m_so		= new StateObserverTTT();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.hasGUI()) {
+        if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardTTTGui(this);
         }
 

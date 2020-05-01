@@ -100,7 +100,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		int i=0;
 		boolean doAssert=true;
 		BoardVector[] equiv = null;
-		CubeState cS1 = new CubeState(boardVector); // problem: not every board vector can be transformed to CubeState (STICKERS)
+		CubeState cS1 = CubeState.makeCubeState(boardVector); 
 		HashSet set = new HashSet();
 		//
 		// calculate all color-symmetric states for cS1, collect
