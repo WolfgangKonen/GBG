@@ -311,8 +311,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		}
 		
 		setNTParams(ntPar);
-		
 		setTDParams(tdPar, maxGameNum);
+		m_Net.setHorizon();
 		
 		setAgentState(AgentState.INIT);
 	}

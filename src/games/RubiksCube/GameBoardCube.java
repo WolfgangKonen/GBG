@@ -54,15 +54,19 @@ public class GameBoardCube implements GameBoard {
 	//
 	
 	/**
-	 * the array of distance sets for training. (Distance set D[p] contains all states where the minimum number of twists 
-	 * to reach the solved state is p.)
+	 * The array of distance sets for training. (Distance set D[p] contains all states where the minimum number of twists 
+	 * to reach the solved state is p. D[p] is deprecated for practical use, since it is difficult to obtain if p 
+	 * becomes larger. Therefore we use it merely as a theoretical concept to characterize the set of all states being
+	 * truly p twists away from the solved cube.)
 	 */
+	@Deprecated
 	private CSArrayList[] D;		
 	/**
-	 * the array of distance sets for testing (= evaluation)
+	 * The array of distance sets for testing (= evaluation)
 	 */
-	private CSArrayList[] T;		
-	private CSArrayList[] D2=null;	// D2 is (besides D2[0] and D2[1]) only filled by repeated calls to selectByTwists2
+	@Deprecated
+	private CSArrayList[] T,		
+						  D2=null;	// D2 is (besides D2[0] and D2[1]) only filled by repeated calls to selectByTwists2
 	private int[][] realPMat;		// see incRealPMat(...)
 	
 	/**
@@ -70,13 +74,14 @@ public class GameBoardCube implements GameBoard {
 	 * If false, use {@link #selectByTwists1(int)}. <br>
 	 * Recommended value: false.
 	 */
-	private boolean SELECT_FROM_D = false;  
+	boolean SELECT_FROM_D = false;  
 	/**
 	 * If true, select in {@link #chooseStartState()} from distance set {@link #T}.
 	 * If false, use {@link #selectByTwists1(int)}. <br>
 	 * Recommended value: false.
 	 */
-	private boolean SELECT_FROM_T = false;  
+	boolean SELECT_FROM_T = false;  
+	
 	/**
 	 * If true, increment the matrix realPMat, which measures the real p of each start state.  
 	 * Make a debug printout of realPMat every 10000 training games.
@@ -94,6 +99,9 @@ public class GameBoardCube implements GameBoard {
 		
 	}
 	
+	/**
+	 * called by constructor and prior to each training run
+	 */
 	public void initialize() {
 //		long seed = 999;
 //		rand 		= new Random(seed);
@@ -104,6 +112,7 @@ public class GameBoardCube implements GameBoard {
         if (m_Arena.hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardCubeGui(this);
         }
+        getPMax();		// actualize CubeConfig.pMax, if GUI present
         
         // this part below only for distance sets:
 		realPMat 	= new int[CubeConfig.pMax+1][CubeConfig.pMax+2];		// see incRealPMat(...)	
@@ -119,6 +128,14 @@ public class GameBoardCube implements GameBoard {
 		} 
 	}
 	
+	public int getPMax() {
+        if (m_gameGui!=null) {
+        	// fetch CubeConfig.pMax setting from GUI
+        	String str = m_gameGui.getPMax();
+        	CubeConfig.pMax = Integer.valueOf(str).intValue();
+        }
+        return CubeConfig.pMax;
+	}
 	/**
 	 * Generate the distance sets up to {@link CubeConfig#pMax}. Since it may be very time consuming to generate the 
 	 * complete distance set D[p] for larger p, we generate only {@link CubeConfig#Narr}{@code [p]} elements in each 
@@ -293,9 +310,14 @@ public class GameBoardCube implements GameBoard {
 		return chooseStartState(p);
 	}
 	
+	/**
+	 * Choose a start state by scrambling the default cube via {@link #selectByTwists1(int) selectByTwists1(p)}.
+	 * @param p
+	 * @return	a scrambled cube
+	 */
 	public StateObservation chooseStartState(int p) {		
 		clearBoard(true, true);			// m_so is in default start state 
-		if (SELECT_FROM_T) {
+		if (SELECT_FROM_T) {	// this is now deprecated
 			int index = rand.nextInt(T[p].size());
 			CubeState cS = (CubeState)T[p].get(index);
 			m_so = new StateObserverCube(cS);
@@ -317,15 +339,17 @@ public class GameBoardCube implements GameBoard {
 	 * on {@code pa}'s {@link PlayAgent#getGameNum()} and {@link PlayAgent#getMaxGameNum()} 
 	 * by randomly twisting the default cube p times (deprecated: by selecting from the distance sets D[p]). 
 	 * <p>
+	 * If {@link #SELECT_FROM_D}==false, then use {@link #selectByTwists1(int)}.<br>
+	 * Which p to take? - Select randomly p from 1,2,...,{@link CubeConfig#pMax}.
+	 * <p>
+	 * If {@link #SELECT_FROM_D}==true (<b>deprecated</b>), then select from distance set D[p]. 
+	 * Distance sets are created at program startup).<br>
 	 * Which p to take? - Set X={@link CubeConfig#Xper}[{@link CubeConfig#pMax}]. 
 	 * If the proportion of training games is in the first X[1] percent, set p=1, 
 	 * if it is between X[1] and X[2] percent, set p=2, and so on.  In this 
 	 * way we realize <b>time-reverse learning</b> (from the cube's end-game to the more complex
 	 * cube states) during the training process. The cumulative percentage X is currently 
 	 * hard-coded in {@link CubeConfig#Xper}.
-	 * <p>
-	 * If {@link #SELECT_FROM_D}==false, then use {@link #selectByTwists1(int)}.<br>
-	 * If {@link #SELECT_FROM_D}==true (deprecated), then select from distance set D[p]. Distance sets created at program startup).<br>
 	 * 
 	 * @param 	pa the agent to be trained, we need it here only for its {@link PlayAgent#getGameNum()} 
 	 * 			and {@link PlayAgent#getMaxGameNum()}
@@ -338,18 +362,18 @@ public class GameBoardCube implements GameBoard {
 	public StateObservation chooseStartState(PlayAgent pa) {
 		int p;
 		clearBoard(true, true);			// m_so is in default start state 
-		double[] X = CubeConfig.Xper[CubeConfig.pMax];
-		
-		// which p to take?
-		double x = ((double)pa.getGameNum())/pa.getMaxGameNum() + 1e-10;
-		for (p=1; p<=CubeConfig.pMax; p++) {
-			if (X[p-1]<x && x<X[p]) break;
-		}
-		
 		if (SELECT_FROM_D) {
+			double[] X = CubeConfig.Xper[CubeConfig.pMax];
+			
+			// which p to take?
+			double x = ((double)pa.getGameNum())/pa.getMaxGameNum() + 1e-10;
+			for (p=1; p<=CubeConfig.pMax; p++) {
+				if (X[p-1]<x && x<X[p]) break;
+			}			
 			int index = rand.nextInt(D[p].size());
 			m_so = new StateObserverCube(D[p].get(index));
 		} else {
+			p = 1+rand.nextInt(CubeConfig.pMax);
 			m_so = selectByTwists1(p);
 //			m_so = selectByTwists2(p);
 			
@@ -388,24 +412,25 @@ public class GameBoardCube implements GameBoard {
 		CubeState cS;
 		int index;
 		boolean cond;
+		//System.out.println("selectByTwists1: p="+p);
 		StateObserverCube so = new StateObserverCube(); // default cube
 		// make p twists and hope that we land in 
 		// distance set D[p] (which is often not true for p>5)
-		int twists = (int)(p);
 		switch (CubeConfig.twistType) {
 		case ALLTWISTS:
-			for (int k=0; k<twists; k++)  {
+			for (int k=0; k<p; k++)  {
 				do {
 					index = rand.nextInt(so.getAvailableActions().size());
 					cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
-					// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
-					// the same twist type (e.g. U) as lastTwist. This is because doublet U1U1 can be reached as well in one twist U2. 
+					// If doublets are forbidden (i.e. TWIST_DOUBLETS==false), then boolean cond stays true as long as 
+					// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because 
+					// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists. 
 				} while (cond);
 				so.advance(so.getAction(index));  				
 			}
 			break;
 		case QUARTERTWISTS:
-			for (int k=0; k<twists; k++)  {
+			for (int k=0; k<p; k++)  {
 				do {
 					index = rand.nextInt(so.getAvailableActions().size());
 					cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
@@ -419,6 +444,7 @@ public class GameBoardCube implements GameBoard {
 			break;
 		}
 		d_so = new StateObserverCubeCleared(so,p);
+		//System.out.println(d_so.getCubeState().twistSeq);
 		
 		if (DBG_REALPMAT) incrRealPMat(d_so, p);	// increment realPMat		
 		
@@ -504,7 +530,7 @@ public class GameBoardCube implements GameBoard {
 		switch (CubeConfig.boardVecType) {
 		case CUBESTATE: substr += "_CSTATE"; break;
 		case CUBEPLUSACTION: substr += "_CPLUS"; break;
-		case STICKERS: substr += "_STICK"; break;
+		case STICKER: substr += "_STICKER"; break;
 		}
 		switch (CubeConfig.twistType) {
 		case ALLTWISTS: substr += "_AT"; break;

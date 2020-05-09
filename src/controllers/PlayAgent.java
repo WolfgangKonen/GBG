@@ -123,7 +123,7 @@ public interface PlayAgent {
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)
-	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)	 
 	 */
 	public boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/);
 	
@@ -225,6 +225,7 @@ public interface PlayAgent {
 	 */
 	public int getNumEval();
 	public void setNumEval(int num);	
+	public void setStopEval(int num);
 	
 	public AgentState getAgentState(); 
 	public void setAgentState(AgentState aState);

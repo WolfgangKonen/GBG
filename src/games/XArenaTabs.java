@@ -119,6 +119,9 @@ public class XArenaTabs extends JFrame
 		if (selectedAgent.equals("Random")) tp[n].setSelectedIndex(opIndex);	// OtherParams
 		if (selectedAgent.equals("Human")) tp[n].setSelectedIndex(opIndex);		// OtherParams
 		if (selectedAgent.equals("AlphaBeta")) tp[n].setSelectedIndex(opIndex);	// OtherParams
+		if (selectedAgent.equals("DAVI")) tp[n].setSelectedIndex(opIndex);	// OtherParams
+		if (selectedAgent.equals("DAVI2")) tp[n].setSelectedIndex(opIndex);	// OtherParams
+		if (selectedAgent.equals("DAVI3")) tp[n].setSelectedIndex(1);	// TDParams
 		//if (selectedAgent.equals("Edax")) tp[n].setSelectedIndex(6);		// EdaxParams
 		if (selectedAgent.equals("Edax2")) tp[n].setSelectedIndex(6);		// EdaxParams		
 	}

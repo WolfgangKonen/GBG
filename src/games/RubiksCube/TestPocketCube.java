@@ -122,7 +122,7 @@ public class TestPocketCube {
 	
 	/**
 	 * 1) Test some adjacency sets if they are as expected.
-	 * 2) Test for several randomly twisted CubeStates: Does a transformation from CubeState to STICKERS board vector 
+	 * 2) Test for several randomly twisted CubeStates: Does a transformation from CubeState to STICKER board vector 
 	 *    and back to CubeState result in the original CubeState again? 
 	 */
 	private void simpleTests02() {
@@ -132,13 +132,13 @@ public class TestPocketCube {
 		String h5 = xnf.adjacencySet(5).toString();
 		assert(h5.equals("[3, 4, 6, 22]")) : "adjacency set 1 not as excpected!";
 		System.out.println(h5+" --> OK");		// should be [3, 4, 6, 22]
-		CubeConfig.boardVecType = BoardVecType.STICKERS;
+		CubeConfig.boardVecType = BoardVecType.STICKER;
 		h5 = xnf.adjacencySet(5).toString();
 		assert(h5.equals("[7, 8, 9, 10, 11, 13]")) : "adjacency set 2 not as excpected!";
 		System.out.println(h5+" --> OK");		// should be  (all from 7...13 except 5+7=12
 
 		// Test 2)
-		CubeConfig.boardVecType = BoardVecType.STICKERS;
+		CubeConfig.boardVecType = BoardVecType.STICKER;
 		CubeConfig.pMax=15;
 		int runs = 3;
 		for (int r=0; r<runs; r++) {
@@ -151,9 +151,9 @@ public class TestPocketCube {
 					board[rb][cb] = bvec[k];
 				}
 			StateObserverCube sb = new StateObserverCube(new BoardVector(bvec));
-			assert(sb.getCubeState().equals(so.getCubeState())) : "so and sb differ after STICKERS trafo!";
+			assert(sb.getCubeState().equals(so.getCubeState())) : "so and sb differ after STICKER trafo!";
 		}
-		System.out.println("Transformation CubeState --> STICKERS --> CubeState: OK");	
+		System.out.println("Transformation CubeState --> STICKER --> CubeState: OK");	
 		
 	}
 	

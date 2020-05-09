@@ -296,6 +296,11 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
     @Override
+	public void setStopEval(int num) {
+		m_oPar.setStopEval(num);
+	}
+
+    @Override
 	public ParOther getParOther() {
 		return m_oPar;
 	}

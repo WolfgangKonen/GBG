@@ -112,6 +112,7 @@ public class GBGLaunch {
 
 		if (withLauncherUI) {
 			t_Launch = new GBGLaunch();
+			t_Launch.adjustScaParGuiPart();
 			while(true) {
 				switch(t_Launch.launcherState) {
 				case STARTSELECTOR:
@@ -365,8 +366,8 @@ public class GBGLaunch {
 		launcherUI.add(Exit);
 		launcherUI.addWindowListener(new WindowClosingAdapter());
 
-		launcherUI.setSize(200,300);
-		launcherUI.setBounds(400,300,200,300);		// x,y,width,height
+		launcherUI.setSize(250,300);
+		launcherUI.setBounds(400,300,250,300);		// x,y,width,height
 		launcherUI.pack();
 		launcherUI.setVisible(true);
 		
@@ -444,7 +445,7 @@ public class GBGLaunch {
 			break;
 		case "RubiksCube": 
 			scaPar[0]="2x2x2";		 	
-			scaPar[1]="CUBESTATE";			
+			scaPar[1]="CSTATE";			
 			scaPar[2]="ALL";			
 		case "2048": 
 		case "ConnectFour": 
@@ -516,7 +517,7 @@ public class GBGLaunch {
 			//choiceScaPar0.addItem("3x3x3");
 			choiceScaPar1.addItem("CSTATE");
 			choiceScaPar1.addItem("CPLUS");
-			choiceScaPar1.addItem("STICK");
+			choiceScaPar1.addItem("STICKER");
 			choiceScaPar1.setSelectedItem("CSTATE");		// the initial (recommended) value	
 			choiceScaPar2.addItem("ALL");
 			choiceScaPar2.addItem("QUARTER");
@@ -526,6 +527,9 @@ public class GBGLaunch {
 		case "ConnectFour": 
 		case "Othello": 
 		case "TicTacToe": 
+			//
+			// games with no scalable parameters
+			//
 			scaPar0_L.setText("");
 			scaPar1_L.setText("");
 			scaPar2_L.setText("");

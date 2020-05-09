@@ -107,7 +107,7 @@ public class ArenaTrainCube extends ArenaTrain   {
     	switch(bvType) {
     	case "CSTATE": CubeConfig.boardVecType = BoardVecType.CUBESTATE; break;
     	case "CPLUS": CubeConfig.boardVecType = BoardVecType.CUBEPLUSACTION; break;
-    	case "STICK": CubeConfig.boardVecType = BoardVecType.STICKERS; break;
+    	case "STICKER": CubeConfig.boardVecType = BoardVecType.STICKER; break;
     	default: throw new RuntimeException("Board vector type "+bvType+" is not known.");
     	}
     }

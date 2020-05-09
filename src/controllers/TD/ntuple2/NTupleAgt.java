@@ -9,7 +9,7 @@ import tools.ScoreTuple;
  * Interface NTupleAgt is needed to make {@link NTuple2ValueFunc} and {@link NextState} usable for 
  * all agents {@link TDNTuple2Agt},  {@link TDNTuple3Agt} and {@link SarsaAgt}. 
  */
-abstract interface NTupleAgt {
+abstract public interface NTupleAgt {
 	
 	/**
 	 * EligType characterizes the eligibility trace mode: <ul>

@@ -204,24 +204,24 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public void setAvailableActions() {
 		acts.clear();
 		if (CubeConfig.twistType==CubeConfig.TwistType.ALLTWISTS) {
-			if (m_state.lastTwist!=Twist.U) {
-				acts.add(Types.ACTIONS.fromInt(0));  // U1
-				acts.add(Types.ACTIONS.fromInt(1));  // U2
-				acts.add(Types.ACTIONS.fromInt(2));  // U3
-			}
-			if (m_state.lastTwist!=Twist.L) {
-				acts.add(Types.ACTIONS.fromInt(3));  // L1
-				acts.add(Types.ACTIONS.fromInt(4));  // L2
-				acts.add(Types.ACTIONS.fromInt(5));  // L3
-			}		
-			if (m_state.lastTwist!=Twist.F) {
-				acts.add(Types.ACTIONS.fromInt(6));  // F1
-				acts.add(Types.ACTIONS.fromInt(7));  // F2
-				acts.add(Types.ACTIONS.fromInt(8));  // F3
-			}		
-//			for (int i=0; i<9; i++) {
-//				acts.add(Types.ACTIONS.fromInt(i));  				
+//			if (m_state.lastTwist!=Twist.U) {
+//				acts.add(Types.ACTIONS.fromInt(0));  // U1
+//				acts.add(Types.ACTIONS.fromInt(1));  // U2
+//				acts.add(Types.ACTIONS.fromInt(2));  // U3
 //			}
+//			if (m_state.lastTwist!=Twist.L) {
+//				acts.add(Types.ACTIONS.fromInt(3));  // L1
+//				acts.add(Types.ACTIONS.fromInt(4));  // L2
+//				acts.add(Types.ACTIONS.fromInt(5));  // L3
+//			}		
+//			if (m_state.lastTwist!=Twist.F) {
+//				acts.add(Types.ACTIONS.fromInt(6));  // F1
+//				acts.add(Types.ACTIONS.fromInt(7));  // F2
+//				acts.add(Types.ACTIONS.fromInt(8));  // F3
+//			}		
+			for (int i=0; i<9; i++) {
+				acts.add(Types.ACTIONS.fromInt(i));  				
+			}
 		} else {   // the QUARTERTWISTS case: add all actions
 			int[] quarteracts = {0,2,3,5,6,8};
 			for (int i=0; i<quarteracts.length; i++) {
@@ -246,4 +246,42 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     	return false;
     }
 
+	/**
+	 * Checks whether elements of members fcol, sloc and type are the same in {@code this} and {@code other}.
+	 * (This differs from {@link Object#equals(Object)}, since the latter tests, whether 
+	 * the objects are the same, not their content.)
+	 */
+	public boolean isEqual(StateObserverCube other) {
+		return this.m_state.isEqual(other.m_state);
+	}
+	
+	/**
+	 * It is important that {@link Object#equals(Object)} is overwritten here, so that objects
+	 * of class StateObserverCube which have the same m_state are considered as
+	 * equal. The operation equals is the one that HashSet::add() relies on
+	 * 
+	 * @see #hashCode()
+	 */
+	@Override
+	public boolean equals(Object other) {
+		assert (other instanceof StateObserverCube) : "Object other is not of class StateObserverCube";
+		return isEqual((StateObserverCube) other);
+	}
+	
+	/**
+	 * Like with {@link StateObserverCube#equals(Object)}, it is equally important that {@link Object#hashCode()} is overwritten here in such a way
+	 * that it returns the same hash code for objects with the same content (in m_state). 
+	 * Since the equality check for inserting an object into a Set (HashSet) is based on 
+	 * sameness of equals() AND hashCode() (!!)  
+	 * <p> 
+	 * See <a href="https://stackoverflow.com/questions/6187294/java-set-collection-override-equals-method/11577351">
+	 *     https://stackoverflow.com/questions/6187294/java-set-collection-override-equals-method/11577351</a>
+	 *     
+	 * @see Object#hashCode()    
+	 * @see #equals(Object)    
+	 */
+	@Override
+	public int hashCode() {
+		return this.m_state.toString().hashCode();
+	}
 }

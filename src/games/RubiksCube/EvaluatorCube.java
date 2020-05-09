@@ -31,9 +31,10 @@ import tools.Types;
  * (deprecated: from test distance set {@link GameBoardCube#T}):
  * <ul>
  * <li> If mode=0: how many percent of the states are solved within &le; p twists? 
- * <li> If mode=1: how many percent of the states are solved within {@link CubeConfig#EVAL_EPILENGTH} twists? 
+ * <li> If mode=1: how many percent of the states are solved within {@code epiLength} twists? 
  * </ul>  
- * The value of mode is set in the constructor. 
+ * The value of mode is set in the constructor. <br>
+ * The value of {@code epiLength} is set from the agent's {@code getParOther().getStopEval()}.
  */
 public class EvaluatorCube extends Evaluator {
  	private static final int[] AVAILABLE_MODES = new int[]{-1,0,1};
@@ -41,6 +42,7 @@ public class EvaluatorCube extends Evaluator {
 //	private int m_mode;			// now in Evaluator
 	private CSArrayList[] T;		// the array of distance sets
 	private	int countStates=0;
+	private int epiLength=10;
 
 	/**
 	 * threshold for each value of m_mode
@@ -72,10 +74,9 @@ public class EvaluatorCube extends Evaluator {
 //		m_mode = mode;
 		if (gb != null) {
 			assert (gb instanceof GameBoardCube);	
-			T = ((GameBoardCube)gb).getT();			
-			//T = ((GameBoardCube)gb).generateDistanceSets(rand);		
-			//--- this takes too much time (each time an Evaluator is constructed), so we do it 
-			//--- once in GameBoardCube
+			((GameBoardCube)gb).getPMax();			// actualize CubeConfig.pMax, if GUI present
+			
+			T = ((GameBoardCube)gb).getT();		// needed only for evaluateAgent0_OLD (deprecated)	
 		}
 	}
 	
@@ -105,7 +106,7 @@ public class EvaluatorCube extends Evaluator {
 	 * which the agent can solve them: 
 	 * <ul>
 	 * <li> {@link Evaluator#m_mode m_mode}{@code =0}:  percent solved within &le; p twists
-	 * <li> {@link Evaluator#m_mode m_mode}{@code =1}:  percent solved within {@link CubeConfig#EVAL_EPILENGTH} twists
+	 * <li> {@link Evaluator#m_mode m_mode}{@code =1}:  percent solved within {@code epiLength} twists
 	 * </ul> 
 	 * @param pa the agent to evaluate
  	 * @return the weighted average success on different sets of scrambled cubes
@@ -118,7 +119,8 @@ public class EvaluatorCube extends Evaluator {
 		StateObservation so;
  		countStates=0;
 		for (int p=1; p<=CubeConfig.pMax; p++) {
-			int epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
+//			epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
+			epiLength = pa.getParOther().getStopEval();
  			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
  				so = ((GameBoardCube) m_gb).chooseStartState(p);	// uses selectByTwist1(p)
  				so.resetMoveCounter();
@@ -138,7 +140,8 @@ public class EvaluatorCube extends Evaluator {
  			tagg = new TAggreg(tsList,p);
  			taggList.add(tagg);
  		} // for (p)
-		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
+		//lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
+		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.constWght, m_mode);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>=0) {
 			TStats.printTAggregList(taggList);
@@ -162,7 +165,8 @@ public class EvaluatorCube extends Evaluator {
 		TAggreg tagg;
  		countStates=0;
 		for (int p=1; p<=CubeConfig.pMax; p++) {
-			int epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
+			//epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
+			epiLength = pa.getParOther().getStopEval();
 			if (T==null) throw new RuntimeException("[evalAgent0_OLD] T is null! Consider to adjust GameBoardCube.SELECT_FROM_T");
 			if (T[p]!=null) {
 	 			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
@@ -194,7 +198,8 @@ public class EvaluatorCube extends Evaluator {
  			tagg = new TAggreg(tsList,p);
  			taggList.add(tagg);
  		} // for (p)
-		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
+		//lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
+		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.constWght, m_mode);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>=0) {
 			TStats.printTAggregList(taggList);
@@ -226,7 +231,7 @@ public class EvaluatorCube extends Evaluator {
 	public String getPrintString() {
 		switch (m_mode) {
 		case 0:  return countStates+" cubes: % solved with minimal twists (best is 1.0): ";
-		case 1:  return countStates+" cubes: % solved below epiLength="+ CubeConfig.EVAL_EPILENGTH +" (best is 1.0): ";
+		case 1:  return countStates+" cubes: % solved within epiLength="+ epiLength +" (best is 1.0): ";
 		default: return null;
 		}
 	}
@@ -236,7 +241,7 @@ public class EvaluatorCube extends Evaluator {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
 				+ "0: % solved with min. twists, best is 1.0<br>"
-				+ "1: % solved below epiLength, best is 1.0"
+				+ "1: % solved within EpiLength Eval, best is 1.0"
 				+ "</html>";
 	}
 

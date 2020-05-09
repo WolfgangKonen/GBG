@@ -37,6 +37,7 @@ import games.GameBoard;
 import games.StateObservation;
 import games.StateObsNondeterministic;
 import games.XNTupleFuncs;
+import games.RubiksCube.StateObserverCube;
 import games.Sim.StateObserverSim;
 import games.XArenaMenu;
 
@@ -179,8 +180,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				RANDINITWEIGHTS,ntPar,numCells,1);
 		
 		setNTParams(ntPar);
-		
 		setTDParams(tdPar, maxGameNum);
+		m_Net.setHorizon();
 		
 		setAgentState(AgentState.INIT);
 	}
@@ -524,6 +525,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		if (sLast[curPlayer]!=null) {
 			// delta reward from curPlayer's perspective when moving into s_next
 			double r_next = R.scTup[curPlayer] - rLast.scTup[curPlayer];  
+//			if (s_next instanceof StateObserverCube) r_next += 1;			// fudge factor 'cost-to-go' RubiksCube
         	if (TERNARY) {
         		target = s_next.isGameOver() ? r_next : getGamma()*v_next;
         	} else {
@@ -625,6 +627,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				// 
 				if (sLast[n]!=null ) { 
 					target = R.scTup[n] - rLast.scTup[n]; 		// delta reward
+//					if (s_next instanceof StateObserverCube) target += 1;			// fudge factor 'cost-to-go' RubiksCube
 					curBoard = m_Net.xnf.getBoardVector(sLast[n]).bvec; 
 		        	vLast = m_Net.getScoreI(curBoard,n);
 		        	

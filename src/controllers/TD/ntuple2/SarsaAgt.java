@@ -200,8 +200,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 				RANDINITWEIGHTS,ntPar,numCells,numOutputs);
 		
 		setNTParams(ntPar);
-		
 		setTDParams(tdPar, maxGameNum);
+		m_Net.setHorizon();
 		
 		setAgentState(AgentState.INIT);
 	}

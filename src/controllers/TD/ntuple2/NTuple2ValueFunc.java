@@ -108,8 +108,8 @@ public class NTuple2ValueFunc implements Serializable {
 	 * Constructor using a set of n-tuples that are predefined.
 	 * 
 	 * @param parent
-	 * 			The TDNTuple2Agt object where {@code this} is part of. Used to access
-	 * 			parameters like withSigmoid, USESYMMETRY and so on.
+	 * 			  The agent object where {@code this} is part of. Used to access
+	 * 			  m_tdPar, m_ntPar and their parameters like withSigmoid, USESYMMETRY and so on.
 	 * @param nTuplesI
 	 *            The set of n-tuples as an {@code int} array. For each {@code nTuplesI[i]}
 	 *            the constructor will construct k {@link NTuple2} objects of the same form,
@@ -117,10 +117,10 @@ public class NTuple2ValueFunc implements Serializable {
 	 *            for the sampling points of an n-tuple: 0,..,numCells.
 	 * @param xnf
 	 * @param posVals
-	 *            Possible values/field of the board (TicTacToe: 3)
+	 *            number of possible values per board cell (TicTacToe: 3)
 	 * @param randInitWeights
 	 *            true, if all weights of all n-Tuples shall be initialized
-	 *            randomly
+	 *            randomly. Otherwise they are initialized with 0 (which allows to count the active weigths) 
 	 * @param tcPar
 	 * @param numCells
 	 * 			  the number of cells on the board (used to check validity of {@code nTuplesI})
@@ -544,6 +544,7 @@ public class NTuple2ValueFunc implements Serializable {
 		int ie = (ELIST_PP ? player : 0);
 		EligStates elem = new EligStates(equiv,equivAction,e);
 		eList[ie].addFirst(elem);
+		assert (horizon>0) : "[NTuple2ValueFunc.update] Error: horizon is 0 !";
 		if (eList[ie].size()>horizon) eList[ie].pollLast();
 		
 		// iterate over all list elements in horizon  (at most h+1 elements from t down to t_0):
@@ -925,6 +926,37 @@ public class NTuple2ValueFunc implements Serializable {
 			e.printStackTrace();
 		}
 		
+		return res;
+	}
+
+	/**
+	 * @return  res[0]: number of weights, res[1]: number of active weights
+	 */
+	public int[] activeWeights() {
+		int count = 0;
+		NTuple2[] ntuples = this.getNTuples();
+		double[] lut;
+		int i, pos;
+		
+		for (i=0; i<ntuples.length; i++) {
+			count += ntuples[i].getLutLength();
+		}
+		
+		for (i=0,pos=0; i<ntuples.length; i++) {
+			lut = ntuples[i].getWeights();
+			for (int j=0; j<lut.length; j++) {
+				if (lut[j]!=0) {
+					pos++;
+				}
+			}
+		}
+		int nActive=pos;
+		int pActive = (int) Math.round(((double)nActive)/count*100);
+		  
+		System.out.println("[NTuple2ValueFunc.activeWeights] " + tdAgt.getClass().getSimpleName() + " ("
+				+count+" weights, "+nActive+" active ("+pActive+"%)): ");
+		
+		int[] res = {count,nActive}; //new int[2];
 		return res;
 	}
 

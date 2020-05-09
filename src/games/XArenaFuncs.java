@@ -21,6 +21,9 @@ import games.Nim.BoutonAgent;
 import games.Othello.StateObserverOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
+import games.RubiksCube.DAVI2Agent;
+import games.RubiksCube.DAVI3Agent;
+import games.RubiksCube.DAVIAgent;
 import games.Sim.StateObserverSim;
 import games.TStats.TAggreg;
 import gui.DeviationWeightsChart;
@@ -174,33 +177,49 @@ public class XArenaFuncs {
 				pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("MC-N")) {
 				pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
-			} else if (sAgent.equals("AlphaBeta")) { // CFour only, see
-														// gui_agent_list in
-														// XArenaButtons
+			} else if (sAgent.equals("AlphaBeta")) {// CFour only, see
+													// gui_agent_list in
+													// XArenaButtonsGui
 //				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
 				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
 				alphaBetaStd.instantiateAfterLoading();
 				pa = alphaBetaStd;
-			} else if (sAgent.equals("Bouton")) { // Nim only, see
+			} else if (sAgent.equals("Bouton")) { 	// Nim only, see
 													// gui_agent_list in
-													// XArenaButtons
+													// XArenaButtonsGui
 				pa = new BoutonAgent(sAgent);
 			} else if (sAgent.equals("HeurPlayer")) { // Othello only, see
-														// gui_agent_list in
-														// XArenaButtons
+													  // gui_agent_list in
+													  // XArenaButtonsGui
 				pa = new BenchMarkPlayer("HeurPlayer", 0);
 			} else if (sAgent.equals("BenchPlayer")) { // Othello only, see
-														// gui_agent_list in
-														// XArenaButtons
+													   // gui_agent_list in
+													   // XArenaButtonsGui
 				pa = new BenchMarkPlayer("BenchPlayer", 1);
 //			} else if (sAgent.equals("Edax")) { // Othello only, see
 //												// gui_agent_list in
-//												// XArenaButtons
+//												// XArenaButtonsGui
 //				pa = new Edax();
-			} else if (sAgent.equals("Edax2")) { // Othello only, see
-													// gui_agent_list in
-													// XArenaButtons
+			} else if (sAgent.equals("Edax2")) {// Othello only, see
+												// gui_agent_list in
+												// XArenaButtonsGui
 				pa = new Edax2(sAgent, m_xab.edPar[n]);
+			} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
+												// gui_agent_list in
+												// XArenaButtonsGui
+				pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
+			} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see
+												 // gui_agent_list in
+												 // XArenaButtonsGui
+				pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
+			} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see
+				 								 // gui_agent_list in
+				 								 // XArenaButtonsGui
+				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+				NTupleFactory ntupfac = new NTupleFactory();
+				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+				pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+						m_xab.oPar[n], nTuples, xnf, maxGameNum);
 			}
 		} catch (Exception e) {
 			m_Arena.showMessage(e.getClass().getName() + ": " + e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -267,26 +286,26 @@ public class XArenaFuncs {
 			pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("AlphaBeta")) { // CFour only, see
 													// gui_agent_list in
-													// XArenaButtons
+													// XArenaButtonsGui
 //			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
 			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
 			alphaBetaStd.instantiateAfterLoading();
 			pa = alphaBetaStd;
-		} else if (sAgent.equals("Bouton")) { // Nim only, see gui_agent_list in
-												// XArenaButtons
+		} else if (sAgent.equals("Bouton")) { 	// Nim only, see gui_agent_list in
+												// XArenaButtonsGui
 			pa = new BoutonAgent(sAgent);
-		} else if (sAgent.equals("HeurPlayer")) { // Othello only, see
+		} else if (sAgent.equals("HeurPlayer")) { 	// Othello only, see
 													// gui_agent_list in
-													// XArenaButtons
+													// XArenaButtonsGui
 			pa = new BenchMarkPlayer("HeurPlayer", 0);
-		} else if (sAgent.equals("BenchPlayer")) { // Othello only, see
+		} else if (sAgent.equals("BenchPlayer")) { 	// Othello only, see
 													// gui_agent_list in
-													// XArenaButtons
+													// XArenaButtonsGui
 			pa = new BenchMarkPlayer("BenchPlayer", 1);
 //		} else if (sAgent.equals("Edax")) { // Othello only, see gui_agent_list
 //											// in XArenaButtons
 //			pa = new Edax();
-		} else if (sAgent.equals("Edax2")) { // Othello only, see gui_agent_list
+		} else if (sAgent.equals("Edax2")) { 	// Othello only, see gui_agent_list
 												// in XArenaButtons
 			pa = new Edax2(sAgent, m_xab.edPar[n]);
 		} else { // all the trainable agents:
@@ -331,6 +350,28 @@ public class XArenaFuncs {
 								m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning Sarsa", JOptionPane.WARNING_MESSAGE);
+						// e.printStackTrace();
+						pa = null;
+					}
+				} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
+													// gui_agent_list in
+													// XArenaButtonsGui
+					pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
+				} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see
+													 // gui_agent_list in
+													 // XArenaButtonsGui
+					pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
+				} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see
+					 								 // gui_agent_list in
+													 // XArenaButtonsGui
+					try {
+						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+						NTupleFactory ntupfac = new NTupleFactory();
+						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+						pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+								m_xab.oPar[n], nTuples, xnf, maxGameNum);
+					} catch (Exception e) {
+						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 						// e.printStackTrace();
 						pa = null;
 					}

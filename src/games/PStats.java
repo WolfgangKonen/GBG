@@ -21,7 +21,7 @@ import tools.Types.ACTIONS_VT;
  *  Class PStats holds the results from one move during game play.
  *  When playing one or multiple games, an object {@code ArrayList<PStats> psList} is 
  *  created and finally written with
- *  {@link PStats#printPlayStats(ArrayList, StateObservation, PlayAgent[], Arena)} <br>
+ *  {@link PStats#printPlayStats(ArrayList, StateObservation, PlayAgent[], Arena) PStats#printPlayStats} 
  *  to file {@link Types#PLAYSTATS_FILENAME}. <br>
  *  This happens only if {@link Types#PLAYSTATS_WRITING}{@code==true}.<p>
  *  

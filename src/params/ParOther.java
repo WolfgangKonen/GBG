@@ -31,7 +31,7 @@ public class ParOther implements Serializable {
     private int numEval = DEFAULT_NUM_EVAL;
     private int episodeLength = DEFAULT_EPISODE_LENGTH;
 	private int stopTest = DEFAULT_STOP_TEST;
-    private int stopEval = DEFAULT_STOP_EVAL; 
+    private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval
     private int wrapperNply = DEFAULT_WRAPPER_NPLY; 
     private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
@@ -204,6 +204,12 @@ public class ParOther implements Serializable {
 			otparams.setEpisodeLength(epilen);
 	}
 
+	public void setStopEval(int epilen) {
+		this.stopEval = epilen;
+		if (otparams!=null)
+			otparams.setStopEval(epilen);
+	}
+
 	public void setWrapperNPly(int nply) {
 		this.wrapperNply=nply;
 		if (otparams!=null)
@@ -243,10 +249,14 @@ public class ParOther implements Serializable {
 		case "RubiksCube": 
 			this.setChooseStart01(true);		// always select a non-solved cube as start state
 			enableChoosePart(false);
-			this.setEpisodeLength(50);
+			this.setEpisodeLength(10);
+			this.setStopEval(12);
+			this.setTrainEvalMode(-1);	
+			this.setNumEval(1000);	
 			break;
 		default:								//  all other
 			this.setEpisodeLength(-1);
+			this.setStopEval(-1);
 			break;
 		}
 		switch (agentName) {

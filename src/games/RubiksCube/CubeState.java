@@ -215,9 +215,9 @@ public class CubeState implements Serializable {
 			for (int i=0; i<24; i++) this.fcol[i] = bvec[i];	
 			this.sloc = boardVector.aux.clone();
 			break;
-		case 49: 	// boardvecType == STICKERS, 2x2x2
+		case 49: 	// boardvecType == STICKER, 2x2x2
 			this.type = Type.COLOR_P;
-			this.sloc = slocFromSTICKERS(bvec);	
+			this.sloc = slocFromSTICKER(bvec);	
 			CubeState def = makeCubeState(Type.COLOR_P);
 			this.fcol = new int[def.fcol.length];
 			for (int i=0; i<24; i++) this.fcol[sloc[i]] = def.fcol[i];		
@@ -272,11 +272,11 @@ public class CubeState implements Serializable {
 	
 	/**
 	 * Helper for CubeState(BoardVector): 
-	 * Given a board vector in STICKERS representation, reconstruct member {@code sloc}.
+	 * Given a board vector in STICKER representation, reconstruct member {@code sloc}.
 	 * @param bvec	the board vector
 	 * @return <b>int[] sloc</b>. sloc[i] holds the new location of sticker i which is at location i in the default cube.
 	 */
-	private int[] slocFromSTICKERS(int[] bvec) {
+	private int[] slocFromSTICKER(int[] bvec) {
 		int[] sloc = new int[24];
 		final 							// this array is found with the help of Table 3 in notes-WK-RubiksCube.docx:
 		int[][] C = {{ 0,  4,  8},		// 1st row: the locations for a1,a2,a3
@@ -301,7 +301,7 @@ public class CubeState implements Serializable {
 	
 	/**
 	 * Helper for slocFromSTICKERS:
-	 * Given the index z of a tracker sticker, return from {@code bvec} (the board vector in the STICKERS representation) 
+	 * Given the index z of a tracker sticker, return from {@code bvec} (the board vector in the STICKER representation) 
 	 * the corner and face where this sticker z is found.
 	 * 
 	 * @param z index from {0,...,7} of a tracked sticker
@@ -319,7 +319,7 @@ public class CubeState implements Serializable {
 		// index arithmetic, part one
 		if (z<4) column=z;
 		else if (z==4) return corfac;	// the ygr-cubie case
-		else column=z-1;				// cases z=5,6,7 address column 4,5,6 of the STICKERS board
+		else column=z-1;				// cases z=5,6,7 address column 4,5,6 of the STICKER board
 		
 		// find (row number, value) of the only non-zero element in 'column': 
 		int nonzero = 0;
@@ -548,9 +548,9 @@ public class CubeState implements Serializable {
 	 * <li> <b>CUBESTATE</b>: the face color array of the cube, i.e. member {@link #fcol}
 	 * <li> <b>CUBEPLUSACTION</b>: like CUBESTATE, but with two more int values added: the ordinal of the last twist and 
 	 * 		the number of quarter turns in this twist
-	 * <li> <b>STICKERS</b>: 
+	 * <li> <b>STICKER</b>: 
 	 * </ul>
-	 * Detail STICKERS: The coding (cell numbering) of the 7x7 stickers field: 
+	 * Detail STICKER: The coding (cell numbering) of the 7x7 stickers field: 
 	 * <pre>
 	 *           0  1  2  3  4  5  6
 	 *       a  00 01 02 03 04 05 06
@@ -576,7 +576,7 @@ public class CubeState implements Serializable {
 			bvec[fcol.length] = this.lastTwist.ordinal();
 			bvec[fcol.length+1] = this.lastTimes;
 			break;
-		case STICKERS:
+		case STICKER:
 			int[] orig = {0,1,2,3,13,14,15}; 	// the original locations of the tracked stickers
 			Cor cor[] = {Cor.a,Cor.b,Cor.c,Cor.d,Cor.a,Cor.d,Cor.h,Cor.g,Cor.a,Cor.g,Cor.f,Cor.b,Cor.e,Cor.f,Cor.g,Cor.h,Cor.e,Cor.c,Cor.b,Cor.f,Cor.e,Cor.h,Cor.d,Cor.c};
 			int[] face = {1,1,1,1,2,3,2,3,3,2,3,2,1,1,1,1,2,2,3,2,3,3,2,3};
@@ -591,7 +591,7 @@ public class CubeState implements Serializable {
 				board[column][i] = face[sloc[orig[i]]]; 
 			}
 			
-			// copy to linear bvec according to STICKERS coding specified above
+			// copy to linear bvec according to STICKER coding specified above
 			bvec = new int[7*7];
 			for (int j=0, k=0; j<7; j++)
 				for (int i=0; i<7; i++,k++)

@@ -63,6 +63,8 @@ agents/Othello/TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.agt.zip
 # (the only Othello agent we have in repos is TCL3-fixed6_250k-lam05_P4_H001-FAm.agt.zip)
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)
+agents/RubiksCube/2x2x2_CSTATE_AT/*test.agt.zip
+agents/RubiksCube/2x2x2_STICKER_AT/*test.agt.zip
 agents/TicTacToe/test.agt.zip
 
 agents/theNtuple.txt

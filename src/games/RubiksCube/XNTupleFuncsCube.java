@@ -38,7 +38,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 			return 24;
 		case CUBEPLUSACTION:
 			return 26;
-		case STICKERS: 
+		case STICKER: 
 			return 49;
 		default: 
 			throw new RuntimeException("Unallowed value in switch boardVecType");
@@ -55,7 +55,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		case CUBESTATE: 
 		case CUBEPLUSACTION:
 			return 6; 
-		case STICKERS: 
+		case STICKER: 
 			return 4;
 		default: 
 			throw new RuntimeException("Unallowed value in switch boardVecType");
@@ -205,7 +205,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * If {@link CubeConfig#boardVecType}{@code  =CUBESTATE, CUBEPLUSACTION}:  See {@link CubeState}  
 	 * for board coding. 4-point-neighborhoods on the cube with wrap-around.
 	 * <p>
-	 * If {@link CubeConfig#boardVecType}{@code  =STICKERS}: Adjacency set on the 7x7 stickers board: 
+	 * If {@link CubeConfig#boardVecType}{@code  =STICKER}: Adjacency set on the 7x7 stickers board: 
 	 * All cells from the next row, except the cell in the same column as {@code iCell}, are in the adjacency set. 
 	 * See {@link CubeState#getBoardVector()} for the stickers board coding.
 	 * 
@@ -266,7 +266,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 				adjSet.add(25);
 			}
 			break;
-		case STICKERS:
+		case STICKER:
 			j = iCell % 7;	// column index
 			i = iCell - j;	// row index
 			boolean ROWWISE = true;

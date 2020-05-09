@@ -34,11 +34,13 @@ import games.Feature;
  * <li><b>Train Eval Mode</b>: additional evaluation mode used during training
  * <li><b>numEval</b>: [100] During training: Call the evaluators every NumEval
  * episodes
+ * <li><b>Episode length</b>: During training: Maximum number of moves in an episode. 
+ * If reached, this episode terminates prematurely. -1: never terminate.
+ * <li><b>EpiLength Eval</b>: During evaluation: Maximum number of moves in an episode. 
+ * If reached, this episode terminates prematurely. -1: never terminate.
  * <li><b>stopTest</b>: [ 0] whether to perform the stop test during training.
  * If {@literal> 0}, then m_evaluator2 is checked during training whether its
  * goal is reached
- * <li><b>stopEval</b>: [100] During training: How many successful evaluator
- * calls are needed to stop training prematurely?
  * <li><b>Wrapper nPly</b>: [0] if &gt; 0, wrap the agent in an (Expecti)Max-N wrapper with
  * n plies of look-ahead. CAUTION: n &gt; 5 can dramatically slow down computation. 
  * <li><b>Choose Start 01</b>: [false] During training: Whether to start always from default
@@ -51,6 +53,9 @@ import games.Feature;
  * @see TDNTuple3Agt
  * @see games.XArenaButtons
  */
+// Deprecated meaning of stopEval:
+// <li><b>stopEval</b>: [100] During training: How many successful evaluator
+// calls are needed to stop training prematurely?
 public class OtherParams extends Frame {
 	private static final long serialVersionUID = 1L;
 
@@ -63,13 +68,10 @@ public class OtherParams extends Frame {
 	JLabel epiLeng_L;
 	JLabel stopTest_L;
 	JLabel stopEval_L;
-	// JLabel batchL;
 	JLabel chooseS01L;
 	JLabel learnRM_L;
 	JLabel rgs_L;
 	JLabel wNply_L;
-	// JLabel miniDepth_L;
-	// JLabel miniUseHm_L;
 	public JTextField numEval_T;
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
@@ -94,13 +96,12 @@ public class OtherParams extends Frame {
 		numEval_T = new JTextField("500"); //
 		epiLeng_T = new JTextField("-1"); //
 		stopTest_T = new JTextField("0"); //
-		stopEval_T = new JTextField("100"); // the defaults
-		// miniDepth_T = new JTextField("10"); //
+		stopEval_T = new JTextField("-1"); // the defaults
 		wNply_T = new JTextField("0"); //
 		numEval_L = new JLabel("numEval");
 		epiLeng_L = new JLabel("Episode Length");
 		stopTest_L = new JLabel("stopTest");
-		stopEval_L = new JLabel("stopEval");
+		stopEval_L = new JLabel("EpiLength Eval");
 		chooseS01L = new JLabel("Choose Start 01");
 		learnRM_L = new JLabel("Learn from RM");
 		rgs_L = new JLabel("Reward = Score");
@@ -123,7 +124,7 @@ public class OtherParams extends Frame {
 				"During training: Maximum number of moves in an episode. If reached, game terminates prematurely. -1: never terminate.");
 		stopTest_L.setToolTipText("During training: If >0 then perform stop test");
 		stopEval_L.setToolTipText(
-				"During training: How many successfull evaluator calls are needed to stop training prematurely?");
+				"During evaluation: Maximum number of moves in an episode. If reached, game terminates prematurely. -1: never terminate.");
 		chooseS01L.setToolTipText("Choose start state in training: 50% default, 50% random 1-ply");
 		learnRM_L.setToolTipText("Learn from random moves during training");
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
@@ -192,15 +193,15 @@ public class OtherParams extends Frame {
 	public int getQuickEvalMode() {
 		String s = (String) choiceEvalQ.getSelectedItem();
 		if (s == null)
-			return 0; // return a dummy, if choiceEvalQ is empty (happens in
-						// case of 'new OtherParams()')
+			return 0; 	// return a dummy, if choiceEvalQ is empty (happens in
+					  	// case of 'new OtherParams()')
 		return Integer.valueOf(s).intValue();
 	}
 
 	public int getTrainEvalMode() {
 		String s = (String) choiceEvalT.getSelectedItem();
 		if (s == null)
-			return 0; // return a dummy, if choiceEvalT is empty (happens in
+			return 0; 	// return a dummy, if choiceEvalT is empty (happens in
 						// case of 'new OtherParams()')
 		return Integer.valueOf(s).intValue();
 	}
@@ -336,7 +337,7 @@ public class OtherParams extends Frame {
 //	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "Sarsa" (for {@link SarsaAgt})
 //	 * @param gameName the string from {@link games.StateObservation#getName()}
 //	 */
-//	@Deprecated
+//	@Deprecated  --> Use ParOther.setParamDefaults
 //	public void setParamDefaults(String agentName, String gameName) {
 //		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
 //		switch (gameName) {

@@ -59,8 +59,11 @@ public class GameBoardCubeGui extends JFrame {
 	private JLabel leftInfo=new JLabel("");
 	private JLabel rightInfo=new JLabel(""); 
 	private JLabel pLabel;
+	private JLabel pMaxLabel;
 	private JComboBox pChoice;
+	private JComboBox pMaxChoice;
 	static String[] pChoiceList = {"1","2","3","4","5","6","8","10","RANDOM"};
+	static String[] pMaxChoiceList = {"1","2","3","4","5","6","7","8","9","10","11","12","13"};
 	/**
 	 * The representation of the cube in the GUI. The 24 active panels in the 6*8 field
 	 * represent the cubie faces of the flattened cube.
@@ -106,8 +109,11 @@ public class GameBoardCubeGui extends JFrame {
 		ButtonPanel = InitButton();
 		VTable		= new double[3][3];
 		pLabel 		= new JLabel("Scrambling Twists: ");
+		pMaxLabel 	= new JLabel("pMax: ");
 		pChoice		= new JComboBox(pChoiceList);
+		pMaxChoice 	= new JComboBox(pMaxChoiceList);
 		pChoice.setSelectedItem("4");
+		pMaxChoice.setSelectedItem("6");
 
 		Font font=new Font("Arial",1,Types.GUI_TITLEFONTSIZE);			
 //		JPanel titlePanel = new JPanel();
@@ -121,6 +127,9 @@ public class GameBoardCubeGui extends JFrame {
 		Blank.setPreferredSize(new Dimension(2*labSize,labSize)); // controls the space between panels
 		
 		JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		northPanel.add(pMaxLabel);
+		northPanel.add(pMaxChoice);
+		northPanel.add(new JLabel("    "));
 		northPanel.add(pLabel);
 		northPanel.add(pChoice);
 
@@ -422,6 +431,10 @@ public class GameBoardCubeGui extends JFrame {
 
 	public String getScramblingTwists() {
 		return (String)pChoice.getSelectedItem();
+	}
+	
+	public String getPMax() {
+		return (String)pMaxChoice.getSelectedItem();
 	}
 	
 	/**

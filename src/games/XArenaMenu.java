@@ -663,7 +663,10 @@ public class XArenaMenu extends JMenuBar {
 //	        System.out.println("Moves/second for "+ pa.getName() + ": "+form.format(movesPerSecond));
 	        
 			try {
+				System.out.println(pa.stringDescr2());
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
+				int epiLength = m_arena.m_xab.oPar[index].getStopEval();
+				pa.setStopEval(epiLength);
 				int verb = 0;
 				Evaluator qEvaluator = m_arena.m_xab.m_arena.makeEvaluator(pa,m_arena.gb,0,qem,verb);
 		        qEvaluator.eval(pa);
