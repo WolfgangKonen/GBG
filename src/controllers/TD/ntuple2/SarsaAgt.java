@@ -24,7 +24,7 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
-import controllers.MaxNWrapper;
+import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
@@ -339,7 +339,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
 	 * @param so	the state s_t for which the value is desired
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 

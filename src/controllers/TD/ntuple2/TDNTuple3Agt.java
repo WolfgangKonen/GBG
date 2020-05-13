@@ -25,7 +25,7 @@ import tools.Types.ACTIONS_VT;
 import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxNAgent;
-import controllers.MaxNWrapper;
+import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
@@ -340,8 +340,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				System.out.println(pl[so.getPlayer()]);
 			}
 		}	
-		
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestValue);
+
+		double[] res = {bestValue};
+        ScoreTuple scBest = new ScoreTuple(res);
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestValue,scBest);
 		return actBestVT;
 	}	
 	
@@ -397,7 +399,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
 	 * @param so			the state s_t for which the value is desired
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
@@ -456,7 +458,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. <br>
-	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
 	 * Is called when training an agent in multi-update mode AND the maximum episode length
 	 * is reached. 
 	 * 
@@ -472,6 +474,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
 		return this.getScoreTuple(sob, prevTuple);
+		
+		// old version (2019), not recommended:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
 //		ScoreTuple sc = new ScoreTuple(sob);
 //		for (int i=0; i<sob.getNumPlayers(); i++) 

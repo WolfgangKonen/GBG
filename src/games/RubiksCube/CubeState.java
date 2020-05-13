@@ -548,7 +548,8 @@ public class CubeState implements Serializable {
 	 * <li> <b>CUBESTATE</b>: the face color array of the cube, i.e. member {@link #fcol}
 	 * <li> <b>CUBEPLUSACTION</b>: like CUBESTATE, but with two more int values added: the ordinal of the last twist and 
 	 * 		the number of quarter turns in this twist
-	 * <li> <b>STICKER</b>: 
+	 * <li> <b>STICKER</b>: similar to the coding suggested by [McAleer2018], we track the location of eight stickers 
+	 * 		(one face of each cubie) when the cube is twisted away from its original position
 	 * </ul>
 	 * Detail STICKER: The coding (cell numbering) of the 7x7 stickers field: 
 	 * <pre>
@@ -577,17 +578,17 @@ public class CubeState implements Serializable {
 			bvec[fcol.length+1] = this.lastTimes;
 			break;
 		case STICKER:
-			int[] orig = {0,1,2,3,13,14,15}; 	// the original locations of the tracked stickers
-			Cor cor[] = {Cor.a,Cor.b,Cor.c,Cor.d,Cor.a,Cor.d,Cor.h,Cor.g,Cor.a,Cor.g,Cor.f,Cor.b,Cor.e,Cor.f,Cor.g,Cor.h,Cor.e,Cor.c,Cor.b,Cor.f,Cor.e,Cor.h,Cor.d,Cor.c};
-			int[] face = {1,1,1,1,2,3,2,3,3,2,3,2,1,1,1,1,2,2,3,2,3,3,2,3};
+			final int[] orig = {0,1,2,3,13,14,15}; 	// the original locations of the tracked stickers
+			final Cor cor[] = {Cor.a,Cor.b,Cor.c,Cor.d,Cor.a,Cor.d,Cor.h,Cor.g,Cor.a,Cor.g,Cor.f,Cor.b,Cor.e,Cor.f,Cor.g,Cor.h,Cor.e,Cor.c,Cor.b,Cor.f,Cor.e,Cor.h,Cor.d,Cor.c};
+			final int[] face = {1,1,1,1,2,3,2,3,3,2,3,2,1,1,1,1,2,2,3,2,3,3,2,3};
 			int[][] board = new int[7][7];
 			int column;
 			for (int i=0; i<7; i++) {		// set in every column i (sticker) the row cell specified by 'cor' 
 											// to the appropriate face value:
 				column = cor[sloc[orig[i]]].ordinal();
-				assert column!=4;
+				//assert column!=4;	// should not be the ygr-cubie
 				if (column>4) column = column-1;
-				assert column<7;
+				//assert column<7;
 				board[column][i] = face[sloc[orig[i]]]; 
 			}
 			
@@ -637,6 +638,10 @@ public class CubeState implements Serializable {
 		}
 		s = s + "|";  
 		return s;	
+	}
+	
+	public String getTwistSeq() {
+		return this.twistSeq;
 	}
 	
 	/**

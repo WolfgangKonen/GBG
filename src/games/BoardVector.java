@@ -1,10 +1,20 @@
 package games;
 
+import games.Othello.XNTupleFuncsOthello;
+
+/**
+ * This class holds an {@code int[]} representation of a {@link StateObservation} object in its public member 
+ * {@link #bvec}. It may hold additional information in auxiliary variables to allow the reconstruction of the 
+ * generating {@link StateObservation} object from {@code this}.
+ * 
+ * @see XNTupleFuncs#getBoardVector(StateObservation)
+ * @see XNTupleFuncsOthello#getBoardVector(StateObservation)
+ */
 public class BoardVector {
-	
+
 	public int[] bvec = null;		// the board vector
 	public int[] aux = null; 		// auxiliary vector, needed in some cases (RubiksCube) to reconstruct from BoardVector 
-									// back the generating StateObservation
+									// back the generating StateObservation object
 	
 	public BoardVector(int[] bvec) {
 		this.bvec = bvec.clone();

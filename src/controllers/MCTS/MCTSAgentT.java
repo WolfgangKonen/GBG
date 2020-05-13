@@ -2,7 +2,7 @@ package controllers.MCTS;
 
 import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
-import controllers.MaxNWrapper;
+import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.Arena;
@@ -295,7 +295,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxNWrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
 	 * @param so	the state s_t for which the value is desired
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
@@ -321,7 +321,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 			
 			// this is only partially correct, because for non-game-over states 'so' the tuple value for 
 			// other players than so.getPlayer() will be zero (at least for final-reward games). But 
-			// most methods that use getScoreTuple (like MaxNWrapper.estimateGameValueTuple) need only 
+			// most methods that use getScoreTuple (like MaxN2Wrapper.estimateGameValueTuple) need only 
 			// the correct value for so.getPlayer(), which will be inserted into sc in the 3rd line:
 			sc = so.getRewardTuple(rgs);
 			if (!so.isGameOver())

@@ -663,6 +663,8 @@ public class XArenaMenu extends JMenuBar {
 //	        System.out.println("Moves/second for "+ pa.getName() + ": "+form.format(movesPerSecond));
 	        
 			try {
+				long startTime = System.currentTimeMillis();
+
 				System.out.println(pa.stringDescr2());
 				int qem = m_arena.m_xab.oPar[index].getQuickEvalMode();
 				int epiLength = m_arena.m_xab.oPar[index].getStopEval();
@@ -673,6 +675,10 @@ public class XArenaMenu extends JMenuBar {
 				str = qEvaluator.getMsg();
 				System.out.println(str);
 				printStatus(qEvaluator.getShortMsg());		
+
+				long elapsedMs = (System.currentTimeMillis() - startTime);
+				double elapsedTime = (double) elapsedMs / 1000.0;
+				System.out.println("Quick eval runtime:  " + elapsedTime + " sec");
 			} catch (RuntimeException e) {
 				m_arena.showMessage( e.getMessage(), 
 						"Error", JOptionPane.ERROR_MESSAGE);

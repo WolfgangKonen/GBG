@@ -70,6 +70,11 @@ public class ParMaxN implements Serializable {
 			mnparams.setFrom(this);
 	}
 	
+	public void enableHashmapPart(boolean enable) {
+		if (mnparams!=null)
+			mnparams.enableHashmapPart(enable);
+	}
+	
 	/**
 	 * Call this from XArenaFuncs constructAgent or fetchAgent to get the latest changes from GUI
 	 */
@@ -121,6 +126,15 @@ public class ParMaxN implements Serializable {
 			case "Sim": 
 				this.setMaxNDepth(15);		
 				this.setMaxNUseHashmap(true);
+				break;
+			case "RubiksCube": 
+				this.setMaxNDepth(3);
+				this.setMaxNUseHashmap(false);
+				this.enableHashmapPart(false);
+				break;
+			default: 
+				this.setMaxNDepth(DEFAULT_MAXN_TREE_DEPTH);		
+				this.setMaxNUseHashmap(DEFAULT_MAXN_USE_HASHMAP);
 				break;
 			}
 			break;

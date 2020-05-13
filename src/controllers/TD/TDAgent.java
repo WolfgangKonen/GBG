@@ -584,7 +584,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			}
 			counter++;
 			if (counter==epiLength) {
-				reward=estimateGameValue(so);
+				reward=estimateGameValueTuple(so, null).scTup[so.getPlayer()];
 				//epiCount++;
 				finished = true; 
 			}

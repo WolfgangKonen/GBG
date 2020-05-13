@@ -527,11 +527,12 @@ abstract public class Arena implements Runnable {
 			//gb.clearBoard(true, true); // reset game board to default start state
 			so = gb.getDefaultStartState();
 			//if (m_xab.oPar[0].getChooseStart01()) {
-					// this is not recommended: an innocent start of Play with chooseStart01 set (by a previous training)
-					// will let the first agent make (silently) an unfortunate 1st move in half of the played games
+					// this is not recommended: an innocent start of Play where chooseStart01 in ParOther remains set 
+					// from a previous training will let the first agent make (silently) an unfortunate 1st move in
+					//  half of the played games
 			if (gb.getArena().getGameName()=="RubiksCube") {
-				// this is mandatory for the game RubiksCube (but may be a possible
-				// option also for other games, if clearly announced):
+				// On the other hand, chooseStartState is mandatory for the game RubiksCube (but may be a possible
+				// option also for other games as well):
 				// do not start from the default start state (solved cube), but
 				// choose randomly a different one:
 				so = gb.chooseStartState();

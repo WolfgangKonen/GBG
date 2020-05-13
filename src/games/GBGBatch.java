@@ -20,7 +20,8 @@ import org.jfree.data.xy.XYSeries;
 
 import controllers.ExpectimaxWrapper;
 import controllers.HumanPlayer;
-import controllers.MaxNWrapper;
+import controllers.MaxN2Wrapper;
+import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
@@ -703,8 +704,9 @@ public class GBGBatch {
 		mPar.setMaxNDepth(nply);
 		if (nply>0 && !(pa instanceof HumanPlayer)) {
 			if (so.isDeterministicGame()) {
-				qa = new MaxNWrapper(pa,mPar,oPar);		// mPar has useMaxNHashMap
-//				qa = new MaxNWrapper(pa,nply);			// always maxNHashMap==false
+				qa = new MaxN2Wrapper(pa,nply,oPar);	// oPar has other params
+//				qa = new MaxNWrapper(pa,mPar,oPar);		// mPar has useMaxNHashMap
+//				qa = new MaxNWrapper(pa,nply);			// always maxNHashMap==false    // OLD
 			} else {
 				qa = new ExpectimaxWrapper(pa,nply);
 			}

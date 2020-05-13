@@ -55,9 +55,9 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
 		int i,j;
 		StateObserverCube newSO;
-        ArrayList<ACTIONS> acts = so.getAvailableActions();
         ACTIONS actBest = null;
-        List<Types.ACTIONS> bestActions = new ArrayList<>();
+        ArrayList<ACTIONS> acts = so.getAvailableActions();
+        ArrayList<ACTIONS> bestActions = new ArrayList<>();
 		double[] vTable = new double[acts.size()+1];  
         double maxValue = -Double.MAX_VALUE;
         double value;
@@ -94,7 +94,9 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 
         vTable[acts.size()] = maxValue;
         
-        return new ACTIONS_VT(actBest.toInt(), false, vTable);
+        double[] res = {maxValue};
+        ScoreTuple scBest = new ScoreTuple(res);
+        return new ACTIONS_VT(actBest.toInt(), false, vTable,maxValue,scBest);
 	}
 
 	/**
@@ -106,10 +108,11 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	 */
 	public double daviValue(StateObserverCube so) {
 		Double dvalue = null;
-		if (so.isEqual(def)) return 0;
+		if (so.isEqual(def)) return 0; // - LOW_V;
 		String stringRep = so.stringDescr();
 		dvalue = vm.get(stringRep); 		// returns null if not in jm
-		return (dvalue==null) ? LOW_V : dvalue;
+		double x = (dvalue==null) ? LOW_V : dvalue;
+		return x; // - LOW_V;
 	}
 	
     /**
@@ -156,25 +159,25 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	@Override
 	public double getScore(StateObservation so) {
         assert (so instanceof StateObserverCube) : "Not a StateObserverCube object";
-		StateObserverCube soC = (StateObserverCube) so;
-		return daviValue(soC);
+		return daviValue((StateObserverCube) so);
 	}
 
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-		ScoreTuple sTuple = new ScoreTuple(1);
-		sTuple.scTup[0] = this.getScore(so);
-		return sTuple;
-	}
-
-	@Override
-	public double estimateGameValue(StateObservation so) {
-		return so.getGameScore(so.getPlayer());
+		double[] d = {daviValue((StateObserverCube)so)};
+		return new ScoreTuple(d);
 	}
 
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
-		return so.getRewardTuple(true);  //getScoreTuple(so, null);
+		double[] d = {daviValue((StateObserverCube)so)};
+		return new ScoreTuple(d);
+
+		// this variant is another possibility, it adds one more ply, should be more accurate, but it is slower
+//		double[] zero = {0.0};
+//		if (so.equals(def)) return new ScoreTuple(zero);			// important bug fix! /WK/2020/05
+//		ACTIONS_VT a_t = this.getNextAction2(so, false, true);
+//		return a_t.getScoreTuple();
 	}
 
 	@Override

@@ -94,6 +94,11 @@ public class MaxNParams extends Frame
 		return mPanel;
 	}
 
+	public void enableHashmapPart(boolean enable) {
+		maxnUseHm_L.setEnabled(enable);
+		maxnUseHmTrue.setEnabled(enable);
+	}
+	
 	public int getMaxNDepth() {
 		return Integer.valueOf(maxnDepth_T.getText()).intValue();
 	}

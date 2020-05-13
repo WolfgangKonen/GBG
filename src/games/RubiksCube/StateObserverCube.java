@@ -3,6 +3,7 @@ package games.RubiksCube;
 import java.util.ArrayList;
 
 import controllers.PlayAgent;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.BoardVector;
 import games.ObserverBase;
 import games.StateObservation;
@@ -30,10 +31,16 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 */
 	private ACTIONS m_action; 		
 	private static CubeState def = CubeState.makeCubeState(); // a solved cube as reference
-    private static final double REWARD_POSITIVE =  1.0;
+	/**
+	 * The reward for the solved cube is 1.5. It is higher than the usual game-won reward 1.0, because some agents (e.g.
+	 * {@link TDNTuple3Agt}) produce game values a bit higher than 1.0 for non-solved cube states. REWARD_POSITIVE should 
+	 * be well higher than this, so that even with the {@code m_counter}-subtraction in {@link #getGameScore(StateObservation) 
+	 * getGameScore} there remains a game score higher than for any non-solved cube state.
+	 */
+    private static final double REWARD_POSITIVE =  1.5;
     private static final double REWARD_NEGATIVE = -1.0;
 	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
-    
+   
 //	private double prevReward = 0.0;
 	
 	/**
@@ -117,6 +124,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	@Override
     public String stringDescr() {
  		return m_state.toString();
+//		return m_state.getTwistSeq();	// this would be necessary for hash map in MaxNAgent, but is problematic in other cases
 	}
 	
 	public CubeState getCubeState() {
@@ -124,12 +132,22 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 	
 	/**
+	 * The game score of state {@code this}, seen from the perspective of {@code refer}'s player. 
+	 * For Rubik's Cube only the game-over state (solved cube) has a non-zero game score
+	 * <pre>
+	 *       REWARD_POSITIVE - m_counter*0.01   </pre> 
+	 * The 2nd term ensure that if there are two paths to the solved cube, the one with the lower number of twists 
+	 * {@code m_counter} has the higher reward. This is important for tree-based agents, which may completely fail if 
+	 * they always select the ones with the longer path and never come to an end!
+	 * <p>
+	 * 
 	 * @param refer only needed for the interface, not relevant in this 1-person game
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
-	 * 			For Rubik's Cube only the game-over state (solved cube) has a non-zero game score. 
+	 * 	
+	 * @see #REWARD_POSITIVE		
 	 */
 	public double getGameScore(StateObservation refer) {
-		if(isGameOver()) return REWARD_POSITIVE;
+		if(isGameOver()) return REWARD_POSITIVE - this.m_counter*0.01;
 		return 0; 
 //		if(isGameOver()) return prevReward+0;
 //		return prevReward+REWARD_NEGATIVE; 
@@ -222,7 +240,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 			for (int i=0; i<9; i++) {
 				acts.add(Types.ACTIONS.fromInt(i));  				
 			}
-		} else {   // the QUARTERTWISTS case: add all actions
+		} else {   // the QUARTERTWISTS case: add all allowed quarter twist actions
 			int[] quarteracts = {0,2,3,5,6,8};
 			for (int i=0; i<quarteracts.length; i++) {
 				acts.add(Types.ACTIONS.fromInt(quarteracts[i]));  				

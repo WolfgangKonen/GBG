@@ -21,7 +21,7 @@ import org.jfree.data.xy.XYSeries;
 import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
 import controllers.HumanPlayer;
-import controllers.MaxNWrapper;
+import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;

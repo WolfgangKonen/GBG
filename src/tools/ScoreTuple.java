@@ -36,6 +36,10 @@ public class ScoreTuple {
 	public ScoreTuple(StateObservation sob) {
 		this.scTup = new double[sob.getNumPlayers()];
 	}
+	public ScoreTuple(StateObservation sob,boolean lowest) {
+		this.scTup = new double[sob.getNumPlayers()];
+		for (int i=0; i<scTup.length; i++) scTup[i]=-Double.MAX_VALUE;
+	}
 	public ScoreTuple(double [] res) {
 		this.scTup = res.clone();
 	}

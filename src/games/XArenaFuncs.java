@@ -442,7 +442,7 @@ public class XArenaFuncs {
 	 * @return a vector of agents ({@code paVector} itself if {@code nply==0};
 	 *         wrapped agents if {@code nply>0})
 	 * 
-	 * @see MaxNWrapper
+	 * @see MaxN2Wrapper
 	 * @see ExpectimaxWrapper
 	 */
 	public PlayAgent[] wrapAgents(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so)
@@ -471,8 +471,9 @@ public class XArenaFuncs {
 		wrap_mPar.setMaxNUseHashmap(mPar.getMaxNUseHashmap());
 		if (nply > 0 && !(pa instanceof HumanPlayer)) {
 			if (so.isDeterministicGame()) {
-				qa = new MaxNWrapper(pa, wrap_mPar, oPar); // wrap_mPar has useMaxNHashMap
-				// qa = new MaxNWrapper(pa,nply); // always maxNHashMap==false
+				qa = new MaxN2Wrapper(pa, nply, oPar); // oPar has other params
+				// qa = new MaxNWrapper(pa, wrap_mPar, oPar); // wrap_mPar has useMaxNHashMap
+				// qa = new MaxNWrapper(pa,nply); // always maxNHashMap==false  // OLD
 			} else {
 				qa = new ExpectimaxWrapper(pa, nply);
 			}
