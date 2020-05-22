@@ -1,7 +1,5 @@
 package games.Sim.Gui;
 
-import games.Sim.Point;
-
 public class Point2 {
 	
 	private Point p1,p2;

@@ -1,10 +1,10 @@
 package games.Sim;
 
-public class Edge {
+public class Edge_OLD {
 	
 	private int node1, node2, player;
 	
-	public Edge(int n1, int n2)
+	public Edge_OLD(int n1, int n2)
 	{
 		node1 = n1;
 		node2 = n2;

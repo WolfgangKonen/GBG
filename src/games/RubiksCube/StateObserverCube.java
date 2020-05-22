@@ -56,10 +56,6 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		setAvailableActions();
 	}
 
-	/**
-	 * 
-	 * @param fcol is an array with face colors, see {@link CubeState}.
-	 */
 	public StateObserverCube(BoardVector boardVector) {
 		m_state = CubeState.makeCubeState(boardVector);
 		m_action = new ACTIONS(9);		// 9 codes 'not known'

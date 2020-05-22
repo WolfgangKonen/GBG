@@ -13,19 +13,19 @@ public class Node implements Serializable
 	/**
 	 * Each node carries a number {@code num} \in [{@code 1,...,size}] and has {@code size - 1} links to other nodes.
 	 */
-	public Node(int size, int num)
+	public Node(int numberOfNodes, int num)
 	{
 		number = num;
-		links = new Link [size-1];	// each node has size-1 links to all other nodes
-		setupLinks(size);
+		links = new Link [numberOfNodes-1];	// each node has size-1 links to all other nodes
+		setupLinks(numberOfNodes);
 	}
 
-	private void setupLinks(int size)
+	private void setupLinks(int numberOfNodes)
 	{
 		int n = number + 1;
 		int k = 0;
 		for(int nod=1; nod<number; nod++) 
-			k += (size-nod);
+			k += (numberOfNodes-nod);
 		// now k carries the link number of the first link starting from node 'number'
 		
 		for(int i = 0; i < links.length; i++)

@@ -85,6 +85,13 @@ public class XNTupleFuncs2048 extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 	
 	/**
+	 * @return the maximum number of symmetries in this game
+	 */
+	public int getNumSymmetries() {
+		return 8;
+	}
+	
+	/**
 	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
 	 * cell of the board. In the case of 2048 the mapping is
 	 * <pre>

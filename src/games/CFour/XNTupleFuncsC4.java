@@ -52,6 +52,13 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	}
 	
 	/**
+	 * @return the maximum number of symmetries in this game
+	 */
+	public int getNumSymmetries() {
+		return 2;
+	}
+	
+	/**
 	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
 	 * cell of the board. In the case of ConnectFour with 7 columns and 6 rows the mapping is
 	 * <pre>

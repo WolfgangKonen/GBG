@@ -9,6 +9,11 @@ import games.Othello.ConfigOthello;
 import games.Othello.StateObserverOthello;
 import tools.ValidateAgent;
 
+/**
+ *  This class just provides a default implementation for methods {@link #instantiateAfterLoading()} and
+ *  {@link #makeBoardVectorEachCellDifferent()} from the interface {@link XNTupleFuncs}. All other methods 
+ *  are left as abstract methods.
+ */
 abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 
     /**
@@ -57,6 +62,9 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 
 	@Override
 	abstract public int getNumPlayers();
+
+	@Override
+	abstract public int getNumSymmetries();
 
 	@Override
 	abstract public BoardVector getBoardVector(StateObservation so);

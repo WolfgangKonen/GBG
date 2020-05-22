@@ -82,52 +82,30 @@ public class FeatureSim implements Feature{
 	private double [] feature0Vector(StateObserverSim som)
 	{
 		if(ConfigSim.NUM_PLAYERS > 2)
-			return intToDoubleArray3Player(som.getNodes(), som.getPlayer());
+			return intToDoubleArray3Player(som, som.getPlayer());
 		else
-			return intToDoubleArray2Player(som.getNodes());
+			return intToDoubleArray2Player(som);
 	}
 	
-	private double[] intToDoubleArray3Player(Node [] nodes, int player)
+	private double[] intToDoubleArray3Player(StateObserverSim som, int player)
 	{
 		double input[] = new double[getInputSize(featMode)];
-		int k = 0;
+		double valArr_kp0[] = {0.0, 1.0, 0.0, 0.0};
+		double valArr_kp1[] = {0.0, 0.0, 1.0, 0.0};
+		double valArr_kp2[] = {0.0, 0.0, 0.0, 1.0};
 		int pl = 0;
 		
 		input[player] = 1.0;
 		input[(player+1)%3] = 0.0;
 		input[(player+2)%3] = 0.0;
-		for(int i = 0; i < nodes.length -1 ; i++)
-		{
-			for(int j = 0; j < nodes.length - 1 - i; j++)
-			{
-				pl = nodes[i].getLinkPlayerPos(j);
-				switch(pl)
-				{
-				case 0:
-					input[k] = 0.0;
-					input[k + 1] = 0.0;
-					input[k + 2] = 0.0;
-					k+=3;
-					break;
-				case 1:
-					input[k] = 1.0;
-					input[k + 1] = 0.0;
-					input[k + 2] = 0.0;
-					k+=3;
-					break;
-				case 2:
-					input[k] = 0.0;
-					input[k + 1] = 1.0;
-					input[k + 2] = 0.0;
-					k+=3;
-					break;
-				case 3:
-					input[k] = 0.0;
-					input[k + 1] = 0.0;
-					input[k + 2] = 1.0;
-					k+=3;
-					break;
-				}
+		int k = 3;
+		for(int i=0; i < som.getNumNodes() -1 ; i++) {
+			for(int j = i+1; j < som.getNumNodes(); j++) {
+				pl = som.getLinkFromTo(i, j);		// pl is either 0,1,2 or 3
+				input[k+0] = valArr_kp0[pl];
+				input[k+1] = valArr_kp1[pl];
+				input[k+2] = valArr_kp2[pl];
+				k += 3;
 			}
 		}
 		
@@ -135,30 +113,15 @@ public class FeatureSim implements Feature{
 	}
 	
 	
-	private double[] intToDoubleArray2Player(Node [] nodes)
+	private double[] intToDoubleArray2Player(StateObserverSim som)
 	{
 		double input[] = new double[getInputSize(featMode)];
-		int k = 0,pl = 0;
-		for(int i = 0; i < nodes.length -1 ; i++)
-		{
-			for(int j = 0; j < nodes.length - 1 - i; j++)
-			{
-				pl = nodes[i].getLinkPlayerPos(j);
-				switch(pl)
-				{
-				case 0:
-					input[k] = 0.0;
-					k++;
-					break;
-				case 1:
-					input[k] = 1.0;
-					k++;
-					break;
-				case 2:
-					input[k] = -1.0;
-					k++;
-					break;
-				}
+		double valArr[] = {0.0, 1.0, -1.0};
+		int pl = 0;
+		for(int i=0, k=0; i < som.getNumNodes() -1 ; i++) {
+			for(int j = i+1; j < som.getNumNodes(); j++) {
+				pl = som.getLinkFromTo(i, j);		// pl is either 0,1 or 2
+				input[k++] = valArr[pl];
 			}
 		}
 		

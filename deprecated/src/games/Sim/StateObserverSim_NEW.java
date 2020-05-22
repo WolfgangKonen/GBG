@@ -18,8 +18,8 @@ import tools.ValidateStateObserver;
 
 /**
  * This class holds any valid Sim game state. It is coded
- * as array {@link Link2}{@code [] lFrom}, where {@code lFrom[i]} carries all links from node {@code i} 
- * to all nodes with higher index than {@code i}. Each link can be 
+ * as array {@link Link2}{@code [] lFrom}, where {@code lFrom[i]} carries the links to all nodes with higher
+ * index. Each link can be 
  * <ul>
  * <li>= 0 for an empty link,
  * <li>= 1 for a P0 link,
@@ -32,7 +32,7 @@ import tools.ValidateStateObserver;
  * <p>
  * The available actions are the (empty) links, which are numbered consecutively: If we have K nodes
  * in total, then node i=0,...,K-1 has K-1-i links (to node i+1,...,K-1). For example, in the case
- * K=6 we have K*(K-1)/2=15 actions (the links from node i to node j) which are numbered as: 
+ * K=6 we have K*(K-1)/2=15 actions which are numbered as: 
  * <pre>
  *      j  0   1   2   3   4   5  
  *                                 i
@@ -41,17 +41,11 @@ import tools.ValidateStateObserver;
  *                     09  10  11  2
  *                         12  13  3
  *                             14  4
- *                                 5    </pre>
+ *                                 5
+ *  </pre>
  *  The {@code lines} in {@link BoardPanel} are numbered exactly the same way as the actions.
- *  <p>
- *  This class is a completely rewritten version of the former StateObsererSim (by P. Wuensch, now in 
- *  deprecated/.../StateObserverSim_OLD.java). The new version has code easier to maintain and can be better 
- *  extended to the case of using only a few symmetries.
- *  
- *  @author Wolfgang Konen, TH Koeln, 2020
- *
  */
-public class StateObserverSim extends ObserverBase implements StateObservation {
+public class StateObserverSim_NEW extends ObserverBase implements StateObservation {
 	private int numNodes;
 	private int numPlayers;
 	private int player;			// 0,1 in 2-player variant;   0,1,2 in 3-player variant
@@ -72,16 +66,16 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	 * (needed in {@link BoardPanel} to color this triangle).
 	 */
 	private int[] lastNodes = {-1,-1,-1};
-	
-	private static final long serialVersionUID = 12L;	//Serial number
+	//Serial number
+	private static final long serialVersionUID = 12L;
 	private FinalSim finalSim;
 
-	StateObserverSim() 
+	StateObserverSim_NEW() 
 	{
 		config(ConfigSim.NUM_PLAYERS, ConfigSim.NUM_NODES);
 	}
 		
-	StateObserverSim(StateObserverSim other)
+	StateObserverSim_NEW(StateObserverSim_NEW other)
 	{
 		super(other);		// copy members m_counter and stored*
 		this.numNodes = other.numNodes;
@@ -113,9 +107,9 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	}
 	
 	@Override
-	public StateObserverSim copy() 
+	public StateObserverSim_NEW copy() 
 	{
-		StateObserverSim sos = new StateObserverSim(this);		// includes via 'super(other)' the copying of stored*-members in ObserverBase
+		StateObserverSim_NEW sos = new StateObserverSim_NEW(this);		// includes via 'super(other)' the copying of stored*-members in ObserverBase
 
 		return sos;
 	}
@@ -183,8 +177,27 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return true;
 	}
 
+//	private void assertNodeSymmetry() {
+//		// this code just asserts that the link from node a to node b has always 
+//		// the same player as the link from node b to node a
+//		int p1,p2,n1,n2;
+//		for(int i = 0; i < nodes.length -1 ; i++)
+//		{
+//			for(int j = 0; j < nodes.length - 1 - i; j++)
+//			{
+//				n1 = nodes[i].getNumber();
+//				p1 = nodes[i].getLinkPlayerPos(j);
+//				n2 = nodes[i].getLinkNodePos(j);
+//				p2 = nodes[n2-1].getLinkPlayer(i+1);
+//				assert (p1==p2) : "Node symmetry in Sim violated between nodes "+n1+" and "+n2;
+//			}
+//		}
+//		
+//	}
+	
 	@Override
 	public boolean isLegalState() {
+//		assertNodeSymmetry();
 		return (numPlayers > 2) ? isLegalState3Player() : isLegalState2Player();
 	}
 
@@ -340,6 +353,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		}
 	}
 
+	
 	@Override
 	public ACTIONS getAction(int i) {
 		return availableActions.get(i);
@@ -507,7 +521,11 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return lFrom[i].getPlayer(j);
 	}
 	
-	public int getNumNodes()
+//	public Node [] getNodes() {
+//		return nodes;
+//	}
+
+	public int getNodesLength()
 	{
 		return numNodes;
 	}
@@ -667,7 +685,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		PlayAgent p = new RandomAgent("");
 		
 		for (int i=0; i<R; i++) {
-			StateObserverSim sob = (StateObserverSim) ar.getGameBoard().getDefaultStartState();
+			StateObserverSim_NEW sob = (StateObserverSim_NEW) ar.getGameBoard().getDefaultStartState();
 			while (!sob.isGameOver()) 
 				sob.advance(p.getNextAction2(sob, true, true));
 			

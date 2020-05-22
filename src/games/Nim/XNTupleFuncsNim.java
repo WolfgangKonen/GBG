@@ -58,6 +58,13 @@ public class XNTupleFuncsNim extends XNTupleBase implements XNTupleFuncs, Serial
 	}
 	
 	/**
+	 * @return the maximum number of symmetries in this game
+	 */
+	public int getNumSymmetries() {
+		return 1;
+	}
+	
+	/**
 	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
 	 * heap.
 	 * 

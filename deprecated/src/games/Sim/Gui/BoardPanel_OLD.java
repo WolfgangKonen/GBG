@@ -6,11 +6,16 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+//import java.awt.Image;
+//import java.io.File;
+//import java.io.IOException;
+//import javax.imageio.ImageIO;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import games.Sim.GameBoardSim;
+import games.Sim.Node;
 import tools.Types;
 
 /**
@@ -18,10 +23,11 @@ import tools.Types;
  * 
  * @author Percy Wuensch, Wolfgang Konen, TH Koeln, 2019-2020
  */
-public class BoardPanel extends JPanel {
+public class BoardPanel_OLD extends JPanel {
 	
 	Point[] circles;
 	Point2[] lines;
+	private Node[] nodes;			// do we really need a copy of the nodes in here?
 	private int inputNode1, inputNode2;
 	/**
 	 * the nodes of a losing triangle (values in [1,...,K]). All -1 if no loosing triangle yet.
@@ -35,20 +41,28 @@ public class BoardPanel extends JPanel {
 	private Color colTHK3 = new Color(162,0,162);	// dark magenta
 	private Color colLightGray = new Color(200,200,200);
 	
-	BoardPanel(GameBoardSim gb)
+	BoardPanel_OLD(Node [] nodes, GameBoardSim gb)
 	{
 		this.setBounds(0, 0, 600, 400);
 		this.setBackground(Color.gray);
 		this.m_gb = gb;
 		
-		setupCircles(m_gb.m_so.getNumNodes());
-		setupLines(m_gb.m_so.getNumNodes());
+		setupNodes(nodes.length);
+		setupCircles(nodes.length);
+		setupLines(nodes.length);
 		inputNode1 = -1;
 		inputNode2 = -1;
 	}
 	
 	public void clearLastNodes() {
 		for (int i=0; i<lastNodes.length; i++) lastNodes[i]=-1; 
+	}
+	
+	private void setupNodes(int size)
+	{
+		nodes = new Node[size];
+		for(int i = 0; i < nodes.length; i++)
+			nodes[i] = new Node(size, i+1);
 	}
 	
 	private int calculateCirclePositionX(int radius, int degree, int posX, int posY)
@@ -176,12 +190,36 @@ public class BoardPanel extends JPanel {
 				}		
 			}
 		
-		for(int i = 0, k = 0; i < m_gb.m_so.getNumNodes() -1 ; i++) {
-			for(int j = i+1; j <  m_gb.m_so.getNumNodes(); j++,k++) {
+//		int v = 0;
+		for(int i = 0, k = 0; i < nodes.length -1 ; i++)
+		{
+			for(int j = 0; j < nodes.length - 1 - i; j++,k++)
+			{
+				// This code is not exactly what we want, because in case PLAY
+				// we have also an actionValue for the last move just taken by the player.
+				// Its coloring would be missing.
+//				if(nodes[i].getLinkPlayerPos(j) == 0)
+//				{
+//					if(actionValues != null && v < actionValues.length)
+//					{
+//						//g2d.setColor(getColor(actionValues[v]));
+//						g2d.setColor(calculateLinkColor(actionValues[v]));
+//						v++;
+//					}
+//						
+//					else
+//						g2d.setColor(colTHK2);
+//			
+//				}
 				
-				int link = m_gb.m_so.getLinkFromTo(i,j);
-				if(link > 0) {		// if line is occupied by one of the players
-					g2d.setColor(Types.GUI_PLAYER_COLOR[link-1]);
+				if(nodes[i].getLinkPlayerPos(j) > 0) {		// if line is occupied by one of the players
+					if(nodes[i].getLinkPlayerPos(j) == 1)
+						g2d.setColor(Types.GUI_PLAYER_COLOR[0]);
+					else if(nodes[i].getLinkPlayerPos(j) == 2)
+						g2d.setColor(Types.GUI_PLAYER_COLOR[1]);
+					else if(nodes[i].getLinkPlayerPos(j) == 3)
+						g2d.setColor(Types.GUI_PLAYER_COLOR[2]);
+
 					drawLine(g2d,k);
 				}
 			}
@@ -251,6 +289,12 @@ public class BoardPanel extends JPanel {
 		super.setVisible(true);
 	}
 
+	public void setNodesCopy(Node [] nodes) 
+	{
+		for(int i = 0; i < nodes.length; i++)
+			this.nodes[i].setLinksCopy(nodes[i].getLinks());
+	}
+	
 	public void setInputNode1(int i)
 	{
 		inputNode1 = i;

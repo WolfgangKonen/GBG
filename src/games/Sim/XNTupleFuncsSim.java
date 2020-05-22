@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.math3.exception.OutOfRangeException;
 
@@ -12,21 +13,29 @@ import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
+import tools.PermutationIterable;
+import tools.PermutationIterator;
 
 public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serializable {
 
 	List<int[]> list = new ArrayList<int[]>();
 	transient AllPermutation perm; // /WK/ 'perm' is only needed to build 'list'. 'perm' could be local to setPermutations()
 	
-	/**
-	 * {@link #arrLink}{@code .get(i)} holds all links emerging from node {@code i}.
-	 */
-	transient ArrayList<Link[]> arrLink;
+	transient PermutationIterable <Integer> pi;
+//	/**
+//	 * {@link #arrLink}{@code .get(i)} holds all links emerging from node {@code i}.
+//	 */
+//	transient ArrayList<Link[]> arrLink;
 	
 	int [][] actions;
 	BoardVector[] symVec;
 	int nCells, nPositionValues, nPlayers;
 	
+    transient private Random rand = new Random ();
+    
+    transient private StateObserverSim configSO = ConfigSim.SO;
+
+
     /**
      * Provide a version UID here. Change the version UID for serialization only if a newer version is no 
      * longer compatible with an older one (older .gamelog or .agt.zip containing this object will
@@ -40,8 +49,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		nPositionValues = val;
 		nPlayers = pl;
 		
-//		setPermutations();			// fills 'list' with all permutations of nodes 
-		setArrLink();
+//		if (ConfigSim.NUM_NODES<5) 
+			setPermutations();			// prepare permutation iterator
+//		setArrLink();
 		setActions();
 		
     }
@@ -62,8 +72,9 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 			this.nPositionValues = ConfigSim.NUM_PLAYERS+1;
 			this.nPlayers = ConfigSim.NUM_PLAYERS;
 		}
-//		setPermutations();			// fills 'list' with all permutations of nodes 
-		setArrLink();
+//		if (ConfigSim.NUM_NODES<5) 
+			setPermutations();			// prepare permutation iterator 
+//		setArrLink();
 		setActions();		
 		return true; 
 	}
@@ -79,31 +90,39 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private void setPermutations()
 	{
-		int [] nodes = getNodes();		
-		
-		perm = new AllPermutation(nodes);
-		
-		list.add(perm.GetFirst());
-		
-		while (perm.HasNext()) 
-		{ 
-			list.add(perm.GetNext());
-		}
+		// this is the new attempt which should also work for large node number, 
+		// because it only creates the list of nodes 'il' and on top of this a 
+		// PermutationIterable 'pi'
+		//
+        List <Integer> il = new ArrayList <Integer> ();
+        for (int i = 0; i < ConfigSim.NUM_NODES; i++) il.add(Integer.valueOf(i));
+        pi = new PermutationIterable <Integer> (il);
+
+        // this is the old version by Percy Wünsch. It explicitly creates all 
+        // permutations in perm and therefore crashes (mem exhausted) if the 
+        // number of nodes is larger
+//		int [] nodes = getNodes();		
+//		perm = new AllPermutation(nodes);
+//		list.add(perm.GetFirst());
+//		while (perm.HasNext()) 
+//		{ 
+//			list.add(perm.GetNext());
+//		}
 	}
 	
-	/**
-	 * Build member {@link #arrLink} which is needed by {@link #findLink(int, int)}.<br>
-	 * {@link #arrLink}{@code .get(i)} holds all links emerging from node {@code i}.
-	 */
-	private void setArrLink() {
-		// we build an ArrayList of all links emerging from node no=1,...,ConfigSim.GRAPH_SIZE 
-		arrLink = new ArrayList<Link[]>(ConfigSim.NUM_NODES+1);
-		arrLink.add(new Link[1]); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
-		StateObserverSim so = ConfigSim.SO;
-		for (Node node : so.getNodes()) {
-			arrLink.add(node.getNumber(), node.getLinks());
-		}		
-	}
+//	/**
+//	 * Build member {@link #arrLink} which is needed by {@link #findLink(int, int)}.<br>
+//	 * {@link #arrLink}{@code .get(i)} holds all links emerging from node {@code i}.
+//	 */
+//	private void setArrLink() {
+//		// we build an ArrayList of all links emerging from node no=1,...,ConfigSim.GRAPH_SIZE 
+//		arrLink = new ArrayList<Link[]>(ConfigSim.NUM_NODES+1);
+//		arrLink.add(new Link[1]); 	// Insert 0th element as dummy. Only now we may call arrLink.add(1,...)
+//		StateObserverSim so = ConfigSim.SO;
+//		for (Node node : so.getNodes()) {
+//			arrLink.add(node.getNumber(), node.getLinks());
+//		}		
+//	}
 	
 	private int [] initVector()
 	{
@@ -116,16 +135,16 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
 	private void setActions()
 	{
-		int [] vec = initVector();
-		symVec = symmetryVectors(new BoardVector(vec),0);
-		actions = new int[symVec.length][];
-		
-		for (int i = 0; i < actions.length; i++) 
-		{
-    		actions[i] = new int[vec.length];
-    		for (int j = 0; j < vec.length; j++)
-    			actions[i][j] = whereHas(symVec[i].bvec,j);
-    	}
+//		int [] vec = initVector();
+//		symVec = symmetryVectors(new BoardVectorSim(vec,new StateObserverSim()),0);
+//		actions = new int[symVec.length][];
+//		
+//		for (int i = 0; i < actions.length; i++) 
+//		{
+//    		actions[i] = new int[vec.length];
+//    		for (int j = 0; j < vec.length; j++)
+//    			actions[i][j] = whereHas(symVec[i].bvec,j);
+//    	}
 		
 	}
 	
@@ -154,33 +173,83 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		return nPlayers;
 	}
 
+	/**
+	 * Sim has an astonishing large number of K! symmetries (K={@link ConfigSim#NUM_NODES}).
+	 * 
+	 * @return the maximum number of symmetries in this game
+	 */
+	public int getNumSymmetries() {
+		int nSym=1;
+		for (int i=1; i<= ConfigSim.NUM_NODES; i++) nSym *= i;
+		return nSym;
+	}
+	
 	@Override
 	public BoardVector getBoardVector(StateObservation so) 
 	{
-		StateObserverSim sim = (StateObserverSim) so;
-		int [] board = new int[ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2]; 
-		int k = 0;
-		
-		for(int i = 0; i < sim.getNodes().length -1 ; i++)
-		{
-			for(int j = 0; j < sim.getNodes().length - 1 - i; j++)
-			{
-				board[k] = sim.getNodes()[i].getLinkPlayerPos(j);
-				k++;
+		if (so instanceof StateObserverSim) {
+			StateObserverSim sim = (StateObserverSim) so;
+			int [] board = new int[ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2]; 
+			
+			for(int i=0, k=0; i < sim.getNumNodes() -1 ; i++) {
+				for(int j = i+1; j <  sim.getNumNodes(); j++) {
+					board[k++] = sim.getLinkFromTo(i,j);
+				}
 			}
+			
+			return new BoardVectorSim(board,sim);			
+		} 
+		throw new RuntimeException("StateObservation so is not StateObserverSim");
+	}
+
+	// should return a symmetry permuted BoardVector, but does not yet work
+	//
+	private BoardVector getBoardVector(StateObservation so, List<Integer> rli) 
+	{
+		if (so instanceof StateObserverSim) {
+			StateObserverSim sim = (StateObserverSim) so;
+			int [] board = new int[ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2]; 
+			int k = 0;
+			
+			for(int i = 0; i < sim.getNumNodes() -1 ; i++) {
+				for(int j = i+1; j < sim.getNumNodes(); j++) {
+					board[k++] = sim.getLinkFromTo(rli.get(i),rli.get(j));
+				}
+			}
+			
+			return new BoardVectorSim(board,sim);
 		}
-		
-		return new BoardVector(board);
+		throw new RuntimeException("StateObservation so is not StateObserverSim");
 	}
 
 	@Override
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
+		
+		// Problem: this method is called from NTuple2ValueFunc.getSymboards2 and can only pass in a 
+		// BoardVector not a BoardVectorSim
+//		assert boardVector instanceof BoardVectorSim : "Oops, boardVector is not of class BoardVectorSim!";
+//		StateObservation so = ((BoardVectorSim)boardVector).sim;
+//		
+//		// TODO
+//		n = 10; // DBG
+//		BoardVector[] symmetricVectors = new BoardVector[n];
+//        PermutationIterator <Integer> pitor = (PermutationIterator  <Integer>) pi.iterator ();
+//        for (int i = 0; i < n; ++i)
+//        {
+//            int rnd = rand.nextInt ((int) pitor.last); 
+//            List <Integer> rli = pitor.get (rnd);
+//            symmetricVectors[i] = getBoardVector(so,rli); 		
+//            System.out.println(symmetricVectors[i].toString());
+//            int dummy = 1; 
+//        }
+
 		BoardVector[] symmetricVectors = new BoardVector[list.size()];
-		//symmetricVectors.length
-		for(int i = 0; i < symmetricVectors.length; i++)
-			symmetricVectors[i] = getSymVector(boardVector,list.get(i));
+//		for(int i = 0; i < symmetricVectors.length; i++)
+//			symmetricVectors[i] = getSymVector(boardVector,list.get(i));
+
 		return symmetricVectors;
 	}
+	
 	// crate a symmetric vector for given permutation of nodes
 	private BoardVector getSymVector(BoardVector bv,int [] permutation)
 	{
@@ -248,11 +317,13 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	@Override
 	public int[] symmetryActions(int actionKey) 
 	{
-		int[] equivAction = new int[actions.length];
-		for (int i = 0; i < actions.length; i++) 
-			equivAction[i] = actions[i][actionKey];
-
-		return equivAction;
+		// TODO!!
+		return null;
+//		int[] equivAction = new int[actions.length];
+//		for (int i = 0; i < actions.length; i++) 
+//			equivAction[i] = actions[i][actionKey];
+//
+//		return equivAction;
 	}
 	
 	/**
@@ -264,22 +335,24 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	private int[][] allTriangleTuples() {
 		int K = ConfigSim.NUM_NODES;
-		Link[] link = new Link[3];
+		int[] link = new int[3];
 		int Z = 1; 
 		for (int i=K; i>K-3; i--) Z = Z*i;
 		Z /= 6;		// 6 = 3!
 		int[][] A = new int[Z][3]; 
 		
-		// we loop over all nodes that are corners of a triangle
-		for (int i=1,m=0; i<K-1; i++) 
-			for (int j=i+1; j<K; j++)
-				for (int k=j+1; k<=K; k++,m++) {
+		// We loop over all nodes that are corners of a triangle:
+		// i is the lowest-numbered node, j the 2nd-lowest-numbered node and k is the highest numbered node.
+		// m is the number of the triangle in 0,...,Z-1.
+		for (int i=0,m=0; i<K-2; i++) 
+			for (int j=i+1; j<K-1; j++)
+				for (int k=j+1; k<K; k++,m++) {
 					// find the links connecting those nodes and add them to A[m][]
-					link[0] = findLink(i,j);
-					link[1] = findLink(j,k);
-					link[2] = findLink(i,k);
+					link[0] = configSO.inputToActionInt(i,j);
+					link[1] = configSO.inputToActionInt(j,k);
+					link[2] = configSO.inputToActionInt(i,k);
 					for (int n=0; n<3; n++)
-						A[m][n] = link[n].getNum();
+						A[m][n] = link[n];
 				}
 		return A;
 	}
@@ -297,7 +370,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	private int[][] allQuadrupleTuples() {
 		int K = ConfigSim.NUM_NODES;
-		Link[] link = new Link[4];
+		int[] link = new int[4];
 		int Z = 1; 
 		for (int i=K; i>K-4; i--) Z = Z*i;
 		Z /= 24;	// 24 = 4!
@@ -314,27 +387,29 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 //		}
 		
 		//  we loop over all nodes that are corners of a quadruple
-		for (int i=1,m=0; i<K-2; i++) 
-			for (int j=i+1; j<K-1; j++)
-				for (int k=j+1; k<K; k++) 
-					for (int l=k+1; l<=K; l++)
+		// i is the lowest-numbered node, j the 2nd-lowest-numbered node ... and l is the highest numbered node.
+		// m is the number of the quadruple in 0,...,Z-1.
+		for (int i=0,m=0; i<K-3; i++) 
+			for (int j=i+1; j<K-2; j++)
+				for (int k=j+1; k<K-1; k++) 
+					for (int l=k+1; l<K; l++)
 					{
 						// find the links connecting those nodes and add them to A[m][]
 						// 1st path:
-						link[0] = findLink(i,j);
-						link[1] = findLink(j,k);
-						link[2] = findLink(k,l);
-						link[3] = findLink(i,l);
+						link[0] = configSO.inputToActionInt(i,j);
+						link[1] = configSO.inputToActionInt(j,k);
+						link[2] = configSO.inputToActionInt(k,l);
+						link[3] = configSO.inputToActionInt(i,l);
 						for (int n=0; n<4; n++)
-							A[m][n] = link[n].getNum();
+							A[m][n] = link[n];
 						m++;
 						// 2nd path:
-						link[0] = findLink(i,k);
-						link[1] = findLink(k,l);
-						link[2] = findLink(j,l);
-						link[3] = findLink(i,j);
+						link[0] = configSO.inputToActionInt(i,k);
+						link[1] = configSO.inputToActionInt(k,l);
+						link[2] = configSO.inputToActionInt(j,l);
+						link[3] = configSO.inputToActionInt(i,j);
 						for (int n=0; n<4; n++)
-							A[m][n] = link[n].getNum();
+							A[m][n] = link[n];
 						m++;
 					}
 		return A;
@@ -352,7 +427,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
 	private int[][] all4CliqueTuples() {
 		int K = ConfigSim.NUM_NODES;
-		Link[] link = new Link[6];
+		int[] link = new int[6];
 		int Z = 1; 		
 		for (int i=K; i>K-4; i--) Z = Z*i;
 		Z /= 24;	// 24 = 4!		
@@ -368,34 +443,36 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 //		}
 		
 		// we loop over all nodes that are elements of a 4-clique
-		for (int i=1,m=0; i<K-2; i++) 
-			for (int j=i+1; j<K-1; j++)
-				for (int k=j+1; k<K; k++) 
-					for (int l=k+1; l<=K; l++,m++)
+		// i is the lowest-numbered node, j the 2nd-lowest-numbered node ... and l is the highest numbered node.
+		// m is the number of the 4-clique in 0,...,Z-1.
+		for (int i=0,m=0; i<K-3; i++) 
+			for (int j=i+1; j<K-2; j++)
+				for (int k=j+1; k<K-1; k++) 
+					for (int l=k+1; l<K; l++,m++)
 					{
 						// find the links connecting those nodes and add them to A[m][]
-						link[0] = findLink(i,j);
-						link[1] = findLink(i,k);
-						link[2] = findLink(i,l);
-						link[3] = findLink(j,k);
-						link[4] = findLink(j,l);
-						link[5] = findLink(k,l);
+						link[0] = configSO.inputToActionInt(i,j);
+						link[1] = configSO.inputToActionInt(i,k);
+						link[2] = configSO.inputToActionInt(i,l);
+						link[3] = configSO.inputToActionInt(j,k);
+						link[4] = configSO.inputToActionInt(j,l);
+						link[5] = configSO.inputToActionInt(k,l);
 						for (int n=0; n<6; n++)
-							A[m][n] = link[n].getNum();
+							A[m][n] = link[n];
 					}
 		return A;
 	}
 	
-	// Helper function for allTriangleTuples, allQuadrupleTuples & all4CliqueTuples:
-	// Find the link that connects node i with node j. 
-	// Condition: i<j (!)
-	private Link findLink(int i, int j) {
-		for (Link lnk : arrLink.get(i)) 	// arrLink.get(i) holds the links of node i
-			if (lnk.getNode()==j) {
-				return lnk;
-			}
-		throw new RuntimeException("findLink: Link ("+i+","+j+") not found!");
-	}
+//	// Helper function for allTriangleTuples, allQuadrupleTuples & all4CliqueTuples:
+//	// Find the link that connects node i with node j. 
+//	// Condition: i<j (!)
+//	private Link findLink(int i, int j) {
+//		for (Link lnk : arrLink.get(i)) 	// arrLink.get(i) holds the links of node i
+//			if (lnk.getNode()==j) {
+//				return lnk;
+//			}
+//		throw new RuntimeException("findLink: Link ("+i+","+j+") not found!");
+//	}
 
 	private int[][] merge(int[][] A, int[][] B) {
 		int[][] C = new int[A.length+B.length][];

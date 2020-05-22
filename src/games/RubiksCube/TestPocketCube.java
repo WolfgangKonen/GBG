@@ -1,14 +1,14 @@
 package games.RubiksCube;
 
+import games.BoardVector;
 import games.RubiksCube.CubeState.Type;
 import games.RubiksCube.CubeState.Twist;
 import games.RubiksCube.CubeStateMap.CsMapType;
-import tools.Types.ACTIONS;
 import games.RubiksCube.CSArrayList.TupleInt;
-import games.BoardVector;
 import games.RubiksCube.CSArrayList.CSAListType;
 import games.RubiksCube.ColorTrafoMap.ColMapType;
 import games.RubiksCube.CubeConfig.BoardVecType;
+import tools.Types.ACTIONS;
 
 import java.io.IOException;
 import java.text.DecimalFormat;

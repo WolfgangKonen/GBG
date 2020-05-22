@@ -17,7 +17,6 @@ import games.GameBoard;
 import games.StateObservation;
 import games.Hex.StateObserverHex;
 import games.Sim.GameBoardSim;
-import games.Sim.Point;
 import games.Sim.StateObserverSim;
 import games.Sim.Gui.GameStatsSim;
 import tools.ScoreTuple;
@@ -68,7 +67,7 @@ public class GameBoardSimGui {
 		frame.setLocation(550, 0);
 		 
 		gameStats = new GameStatsSim();
-		board = new BoardPanel(m_gb.m_so.getNodes(),m_gb);
+		board = new BoardPanel(m_gb);
 		board.addMouseListener(new Mouse());
 		gameInfo = new GameInfoSim();
 		frame.add(gameStats, BorderLayout.NORTH);
@@ -87,7 +86,7 @@ public class GameBoardSimGui {
 			
 			board.setShowValueOnGameBoard(showValueOnGameboard);
 			
-			board.setNodesCopy(m_gb.m_so.getNodes());		// we could use soS instead of m_gb.m_so
+//			board.setNodesCopy(m_gb.m_so.getNodes());		// we could use soS instead of m_gb.m_so
 			
 			if (soS.hasLost(soS.getCreatingPlayer())) {
 				board.markLosingTriangle(soS.getLastNodes());
@@ -99,8 +98,7 @@ public class GameBoardSimGui {
 			if (soS.isGameOver()) {
 				ScoreTuple sc = soS.getGameScoreTuple();
 				int winner = sc.argmax();
-				if (sc.max()==0.0) winner = -2;	// tie indicator
-				if(winner < 0)
+				if (sc.max()==0.0)
 					gameInfo.changeMessage("Tie");
 				else
 					gameInfo.changeMessage(Types.GUI_PLAYER_COLOR_NAME[winner]  + " has won");
@@ -135,7 +133,7 @@ public class GameBoardSimGui {
 		
 		public Mouse()
 		{
-			node = 0;
+			node = -1;
 		}
 
 		private int calculateCirclePositionX(int radius, int degree, int posX, int posY)
@@ -160,7 +158,7 @@ public class GameBoardSimGui {
 			int x = e.getX();
 			int y = e.getY();
 			
-			for(int i = 0; i < m_gb.m_so.getNodesLength(); i++)
+			for(int i = 0; i < m_gb.m_so.getNumNodes(); i++)
 				if(board.isInsideCircle(i, x, y))
 					setInput(i);
 		}
@@ -168,23 +166,23 @@ public class GameBoardSimGui {
 		/**
 		 * Mark a link by clicking at its two nodes: 
 		 * <ul>
-		 * <li> If {@code node}==0, the click is to the first node and {@code node} is set to i+1
-		 * <li> If {@code node}==i+1, this is a resetting click: {@code node} is reset to 0
+		 * <li> If {@code node}==-1, the click is to the first node and {@code node} is set to i
+		 * <li> If {@code node}==i, this is a resetting click: {@code node} is reset to -1
 		 * <li> Else, the link (and its associated action) is set from the two clicked nodes.
 		 * </ul>
 		 * @param i	the circle index \in [0,...,K-1] where K is the number of nodes
 		 */
 		private void setInput(int i)
 		{
-			if(node == 0)
+			if(node == -1)
 			{
-				node = i + 1;
+				node = i;
 				board.setInputNode1(i);
 				board.setInputNode2(-1);
 			}
-			else if(node == i + 1)
+			else if(node == i)
 			{
-				node = 0;
+				node = -1;
 				board.setInputNode1(-1);
 				frame.repaint();
 				return;
@@ -195,26 +193,26 @@ public class GameBoardSimGui {
 //				board.setInputNode2(i);
 			}
 			
-			board.setNodesCopy(m_gb.m_so.getNodes());		// copy the new action link
+//			board.setNodesCopy(m_gb.m_so.getNodes());		// copy the new action link
 			frame.repaint();
 		}
 		
 		private void setAction(int i)
 		{
-			Types.ACTIONS act = Types.ACTIONS.fromInt(m_gb.m_so.inputToActionInt(node, i+1));
+			Types.ACTIONS act = Types.ACTIONS.fromInt(m_gb.m_so.inputToActionInt(node, i));
 			if(m_gb.m_so.isLegalAction(act))
 			{
 				m_gb.m_so.advance(act);
 				
 				m_gb.setActionReq(true);
 				gameInfo.changeMessage("");
-				node = 0;
+				node = -1;
 			}
 			else
 			{
 				//System.out.println("action is not legal!");
 				gameInfo.changeMessage("Not a legal move!");
-				node = 0;
+				node = -1;
 			}
 		}
 		

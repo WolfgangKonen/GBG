@@ -97,7 +97,15 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	public int getNumPlayers() {
 		return 2;
 	}
+	
 	/**
+	 * @return the maximum number of symmetries in this game
+	 */
+	public int getNumSymmetries() {
+		return 8;
+	}
+	
+/**
 	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
 	 * cell of the board. In the case of Othello the mapping is
 	 * <pre>

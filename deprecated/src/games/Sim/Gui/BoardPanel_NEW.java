@@ -6,11 +6,16 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+//import java.awt.Image;
+//import java.io.File;
+//import java.io.IOException;
+//import javax.imageio.ImageIO;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import games.Sim.GameBoardSim;
+import games.Sim.Node;
 import tools.Types;
 
 /**
@@ -18,10 +23,11 @@ import tools.Types;
  * 
  * @author Percy Wuensch, Wolfgang Konen, TH Koeln, 2019-2020
  */
-public class BoardPanel extends JPanel {
+public class BoardPanel_NEW extends JPanel {
 	
 	Point[] circles;
 	Point2[] lines;
+//	private Node[] nodes;			// do we really need a copy of the nodes in here?
 	private int inputNode1, inputNode2;
 	/**
 	 * the nodes of a losing triangle (values in [1,...,K]). All -1 if no loosing triangle yet.
@@ -35,12 +41,13 @@ public class BoardPanel extends JPanel {
 	private Color colTHK3 = new Color(162,0,162);	// dark magenta
 	private Color colLightGray = new Color(200,200,200);
 	
-	BoardPanel(GameBoardSim gb)
+	BoardPanel_NEW(GameBoardSim gb)
 	{
 		this.setBounds(0, 0, 600, 400);
 		this.setBackground(Color.gray);
 		this.m_gb = gb;
 		
+//		setupNodes(nodes.length);
 		setupCircles(m_gb.m_so.getNumNodes());
 		setupLines(m_gb.m_so.getNumNodes());
 		inputNode1 = -1;
@@ -50,6 +57,13 @@ public class BoardPanel extends JPanel {
 	public void clearLastNodes() {
 		for (int i=0; i<lastNodes.length; i++) lastNodes[i]=-1; 
 	}
+	
+//	private void setupNodes(int size)
+//	{
+//		nodes = new Node[size];
+//		for(int i = 0; i < nodes.length; i++)
+//			nodes[i] = new Node(size, i+1);
+//	}
 	
 	private int calculateCirclePositionX(int radius, int degree, int posX, int posY)
 	{
@@ -251,6 +265,12 @@ public class BoardPanel extends JPanel {
 		super.setVisible(true);
 	}
 
+//	public void setNodesCopy(Node [] nodes) 
+//	{
+//		for(int i = 0; i < nodes.length; i++)
+//			this.nodes[i].setLinksCopy(nodes[i].getLinks());
+//	}
+	
 	public void setInputNode1(int i)
 	{
 		inputNode1 = i;

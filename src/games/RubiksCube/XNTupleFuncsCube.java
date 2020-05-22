@@ -71,6 +71,13 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 	
 	/**
+	 * @return the maximum number of symmetries in this game
+	 */
+	public int getNumSymmetries() {
+		return 24;
+	}
+	
+	/**
 	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
 	 * cell of the board. See {@link CubeState} for the concrete mapping
 	 * 

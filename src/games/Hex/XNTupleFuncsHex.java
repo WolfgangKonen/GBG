@@ -61,6 +61,13 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
         return 2;
     }
 
+	/**
+	 * @return the maximum number of symmetries in this game
+	 */
+	public int getNumSymmetries() {
+		return 2;
+	}
+	
     @Override
     public BoardVector getBoardVector(StateObservation so) {
         int[] bmap = {0, 1, 2};  // bmap is just for debug check (no effect if bmap={0,1,2}

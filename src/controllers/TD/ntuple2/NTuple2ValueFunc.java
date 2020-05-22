@@ -204,9 +204,10 @@ public class NTuple2ValueFunc implements Serializable {
 		double score = 0.0; 
 		BoardVector[] equiv = null;
 		int[] equivAction;
+		int nSym = 0;			// may later hold the number of symmetries to use
 
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board, getUSESYMMETRY());
+		equiv = getSymBoards2(board, getUSESYMMETRY(), nSym);
 		equivAction = xnf.symmetryActions(act.toInt());
 
 		for (i=0; i<equivAction.length; i++) {
@@ -239,9 +240,10 @@ public class NTuple2ValueFunc implements Serializable {
 		int i, j;
 		double score = 0.0; 
 		BoardVector[] equiv = null;
+		int nSym = 0;			// may later hold the number of symmetries to use
 
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board, getUSESYMMETRY());
+		equiv = getSymBoards2(board, getUSESYMMETRY(), nSym);
 		//equiv = getSymBoards2(board, false);    // DON'T, at least for TTT clearly inferior
 
 		for (i = 0; i < numTuples; i++) {
@@ -264,16 +266,26 @@ public class NTuple2ValueFunc implements Serializable {
 	 * 
 	 * @param board
 	 *            board as 1D-integer vector (position value for each board cell) 
-	 * @param useSymmetry if false, return a 2D array with only one row 
-	 * 			(the board itself in int[0][])
+	 * @param useSymmetry if false, return a vector of BoardVectors with only one element
+	 * 			(the board itself in BoardVector[0])
+	 * @param nSym the number of symmetry vectors to use (if = 0, use all symmetries)
 	 * @return the equivalent board vectors
 	 */
-	private BoardVector[] getSymBoards2(int[] board, boolean useSymmetry) {
+	private BoardVector[] getSymBoards2(int[] board, boolean useSymmetry, int nSym) {
 		int i;
 		BoardVector[] equiv = null;
+		
+		assert nSym >= 0 : "Ooops, nSym is negative!";
+		assert nSym <= xnf.getNumSymmetries() : "Oops, nSym is larger than xnf.getNumSymmetries()!";
+		
 		if (useSymmetry) {
-			equiv = xnf.symmetryVectors(new BoardVector(board),0);
+			if (tdAgt instanceof SarsaAgt && 0 < nSym && nSym < xnf.getNumSymmetries())
+				// in the SarsaAgt case we can only handle the case n=0 (use all symmetries). This
+				// is because symmetryActions currently assumes that all symmetries are taken.
+				// (symmetryActions is ONLY needed by SarsaAgt - and perhaps later by QLearnAgt)
+				throw new RuntimeException("[NTuple2ValueFunc] Sorry, cannot handle case SarsaAgt and 0 < nSym < s (symmetryActions not yet adapted).");
 
+			equiv = xnf.symmetryVectors(new BoardVector(board),nSym);
 		} else {
 			equiv = new BoardVector[1];
 			equiv[0] = new BoardVector(board);			
@@ -529,9 +541,10 @@ public class NTuple2ValueFunc implements Serializable {
 						boolean QMODE, boolean ELIST_PP) {
 		int i, j, out;
 		double alphaM, sigDeriv, lamFactor;
+		int nSym = 0;			// may later hold the number of symmetries to use
 
 		// Get equivalent boards (including self) and corresponding actions
-		BoardVector[] equiv = getSymBoards2(board,getUSESYMMETRY());
+		BoardVector[] equiv = getSymBoards2(board,getUSESYMMETRY(),nSym);
 		int[] equivAction = (QMODE ? getSymActions(output, getUSESYMMETRY()) : null); 
 		// equivAction only needed for QMODE==true
 

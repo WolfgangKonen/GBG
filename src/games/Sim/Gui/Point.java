@@ -1,4 +1,4 @@
-package games.Sim;
+package games.Sim.Gui;
 
 public class Point {
 
