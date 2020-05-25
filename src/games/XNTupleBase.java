@@ -70,6 +70,11 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 	abstract public BoardVector getBoardVector(StateObservation so);
 
 	@Override
+	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n) {
+		return symmetryVectors(curSOWB.getBoardVector(),n);
+	}
+	
+	@Override
 	abstract public BoardVector[] symmetryVectors(BoardVector boardVector, int n);
 
 	@Override

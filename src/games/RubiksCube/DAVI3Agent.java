@@ -15,6 +15,8 @@ import controllers.TD.ntuple2.TDNTuple3Agt;
 import controllers.TD.ntuple2.NTupleAgt.EligType;
 import controllers.TD.ntuple2.NTupleBase;
 import controllers.TD.ntuple2.NextState;
+import games.BoardVector;
+import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import params.ParNT;
@@ -169,8 +171,8 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	public double daviValue(StateObserverCube so) {
 		double score;
 		if (so.isEqual(def)) return 0;
-		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
-		score = m_Net.getScoreI(bvec,so.getPlayer());
+		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
+		score = m_Net.getScoreI(curSOWB,so.getPlayer());
 		return score;
 	}
 	
@@ -185,7 +187,6 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		Types.ACTIONS_VT  a_t;
 		StateObservation s_t = so.copy();
 		int epiLength = m_oPar.getEpisodeLength();
-		int[] curBoard;
 		int curPlayer;
 		double vLast,target;
 		assert (epiLength != -1) : "trainAgent: Rubik's Cube should not be run with epiLength==-1 !";
@@ -202,10 +203,10 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 
 	        // update the network's response to current state s_t: Let it move towards the desired target:
 			target = a_t.getVBest();        		
-			curBoard = m_Net.xnf.getBoardVector(s_t).bvec; 
+    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_t, m_Net.xnf);
 			curPlayer = s_t.getPlayer();
-        	vLast = m_Net.getScoreI(curBoard,curPlayer);
-			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, target,stepReward,s_t);
+        	vLast = m_Net.getScoreI(curSOWB,curPlayer);
+			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,stepReward,s_t);
 			
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        

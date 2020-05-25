@@ -30,10 +30,12 @@ import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.ZValueMulti;
 import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
+import games.BoardVector;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
 import games.StateObsNondeterministic;
+import games.StateObsWithBoardVector;
 import games.XNTupleFuncs;
 import games.XArenaMenu;
 
@@ -271,8 +273,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
     			// TODO: currently we cannot mirror in Q-learning the afterstate logic 
     			// that we have optionally in TDNTuple2Agt
     			
-    			int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
-            	qValue = m_Net.getQFunc(bvec,so.getPlayer(),acts.get(i));
+        		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so, m_Net.xnf);
+            	qValue = m_Net.getQFunc(curSOWB,so.getPlayer(),acts.get(i));
             	
             	// It is a bit funny, that the decision is made based only on qValue, not 
             	// on the reward we might receive for action a=acts.get(i). So an action leading to 
@@ -332,8 +334,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 * @return the agent's estimate of the future score for that after state
 	 */
 	public double getScore(StateObservation so) {
-		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
-		double score = m_Net.getScoreI(bvec,so.getPlayer());
+		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
+		double score = m_Net.getScoreI(curSOWB,so.getPlayer());
 		return score;
 	}
 
@@ -394,8 +396,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		} else {
 			a_next = getNextAction2(s_next,true,true);
 //			int[] nextBoard = m_Net.xnf.getBoardVector(s_after);
-			int[] nextBoard = m_Net.xnf.getBoardVector(s_next).bvec;	// WK: NEW: next state instead of afterstate
-        	qValue = m_Net.getQFunc(nextBoard,nextPlayer,a_next);
+			StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(s_next,m_Net.xnf);	// WK: NEW: next state instead of afterstate
+        	qValue = m_Net.getQFunc(nextSOWB,nextPlayer,a_next);
 		}
 		
 		if (sLast[nextPlayer]!=null) {
@@ -411,8 +413,9 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			
         	// note that curBoard is NOT the board vector of state ns.getSO(), but of state
         	// sLast[curPlayer] (one round earlier!)
-			curBoard = m_Net.xnf.getBoardVector(sLast[nextPlayer]).bvec; 
-        	qLast = m_Net.getQFunc(curBoard,nextPlayer,aLast[nextPlayer]);
+    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[nextPlayer], m_Net.xnf);
+			curBoard = curSOWB.getBoardVector().bvec; 
+        	qLast = m_Net.getQFunc(curSOWB,nextPlayer,aLast[nextPlayer]);
         	
         	// if last action of nextPlayer was a random move: 
     		if (randLast[nextPlayer] && !learnFromRM && !s_next.isGameOver()) {
@@ -423,20 +426,20 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
     				
     		} else {
 //            	nextBoard = m_Net.xnf.getBoardVector(s_after);
-    			m_Net.updateWeightsQ(curBoard, nextPlayer, aLast[nextPlayer], qLast,
+    			m_Net.updateWeightsQ(curSOWB, nextPlayer, aLast[nextPlayer], qLast,
     					r_next,target,ns.getSO());
     		}
     		
     		//debug only:
 			if (m_DEBG) {
 	    		if (s_next.isGameOver()) {
-	            	qLastNew = m_Net.getQFunc(curBoard,nextPlayer,aLast[nextPlayer]);
+	            	qLastNew = m_Net.getQFunc(curSOWB,nextPlayer,aLast[nextPlayer]);
 	            	int dummy=1;
 	    		}
 	    		String s1 = sLast[nextPlayer].stringDescr();
 	    		String s2 = s_next.stringDescr();
 	    		if (target<0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
-	            	qLastNew = m_Net.getQFunc(curBoard,nextPlayer,aLast[nextPlayer]);
+	            	qLastNew = m_Net.getQFunc(curSOWB,nextPlayer,aLast[nextPlayer]);
 	            	int actionKey = aLast[nextPlayer].toInt();
 	            	System.out.println(s1+" "+s2+","+qLast+"->"+qLastNew+" target="+target
 	            			+" player="+(nextPlayer==0 ? "X" : "o")+" aLast="+actionKey);
@@ -477,22 +480,23 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 					target = R.scTup[n] - rLast.scTup[n]; 		// delta reward
 			        // TODO: think whether the subtraction rlast.scTup[n] is right for every n
 					//		 (or whether we need to correct rLast before calling finalAdaptAgents)
-					curBoard = m_Net.xnf.getBoardVector(sLast[n]).bvec; 
-		        	qLast = m_Net.getQFunc(curBoard,n,aLast[n]);
+		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
+					curBoard = curSOWB.getBoardVector().bvec; 
+		        	qLast = m_Net.getQFunc(curSOWB,n,aLast[n]);
 		        	
-	    			m_Net.updateWeightsQ(curBoard, n, aLast[n], qLast,
+	    			m_Net.updateWeightsQ(curSOWB, n, aLast[n], qLast,
 	    					R.scTup[n],target,ns.getSO());
 
 	    			//debug only:
 	    			if (m_DEBG) {
 		        		if (s_next.isGameOver()) {
-		                	qLastNew = m_Net.getQFunc(curBoard,n,aLast[n]);
+		                	qLastNew = m_Net.getQFunc(curSOWB,n,aLast[n]);
 		                	int dummy=1;
 		        		}
 		        		String s1 = sLast[n].stringDescr();
 		        		String s2 = s_next.stringDescr();
 		        		if (target!=0.0) {//(target==-1.0) { 
-		                	qLastNew = m_Net.getQFunc(curBoard,n,aLast[n]);
+		                	qLastNew = m_Net.getQFunc(curSOWB,n,aLast[n]);
 		                	int actionKey = aLast[n].toInt();
 		                	System.out.println(s1+" "+s2+","+qLast+"->"+qLastNew+" target="+target
 		                			+" player="+(n==0 ? "X" : "o")+" aLast="+actionKey);

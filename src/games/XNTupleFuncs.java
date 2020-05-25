@@ -79,18 +79,24 @@ public interface XNTupleFuncs {
 	 * next actions. For example, TicTacToe has 8 symmetries: 4 rotations (0°, 90°, 180°, 270°)
 	 * times 2 mirror reflections.
 	 * <p>
-	 * If a game has no symmetries, this method should return an  array {@code BoardVector[] boardArray} with
+	 * If a game has no symmetries, this method should return a lenght-1 array {@code BoardVector[] boardArray} with
 	 * <pre>
 	 * 		boardArray[0] = boardVector </pre>
 	 * <p>
 	 * If n=0 or n=s, all s symmetry vectors are returned. If {@literal 0 < n < s} then 
-	 * only n (randomly picked) symmetry vectors are returned.
+	 * the boardVector itself and n-1 (randomly picked) symmetry vectors are returned.
 	 * 
 	 * @param boardVector e.g. from {@link #getBoardVector(StateObservation)}
 	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
-	 * @return a vector of BoardVectors 
+	 * @return a vector of n BoardVectors 
 	 */
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n);
+	/**
+	 * Same as {@link #symmetryVectors(BoardVector, int)}, but with parameter {@link StateObsWithBoardVector} 
+	 * instead of {@link BoardVector}. (Some games need the {@link BoardVector}-creating {@link StateObservation} 
+	 * object in order to construct the symmetric board vectors.)
+	 */
+	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n);
 	
 	/**
 	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 
@@ -105,8 +111,9 @@ public interface XNTupleFuncs {
 	 * @return <b>equivAction</b>
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
-	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 * equivAction[i] is the key of the action in the i'th equivalent board vector equiv[i], 
+	 * which is equivalent to actionKey in equiv[0]. <br>
+	 * Here, equiv[i] = {@link #symmetryVectors(BoardVector, int)}{@code [i]}.
 	 */
 	public int[] symmetryActions(int actionKey);
 	

@@ -43,6 +43,7 @@ public class ParNT implements Serializable {
     private int maxTupleLen = DEFAULT_NTUPLE_LEN;
     private int fixedNtupleMode= DEFAULT_FIXED_NTUPLE;
     private boolean useSymmetry = true;
+    private int nSym= 0;							// 0: use all symmetries, if useSymmetry==true
     private boolean afterState = false;
     
     /**
@@ -87,6 +88,7 @@ public class ParNT implements Serializable {
 		this.maxTupleLen = nt.getNtupleMax();
 		this.fixedNtupleMode = nt.getFixedNtupleMode();
 		this.useSymmetry = nt.getUSESYMMETRY();
+		this.nSym = nt.getNSym();
 		this.afterState = nt.getAFTERSTATE();
 
 		if (ntparams!=null)
@@ -107,6 +109,7 @@ public class ParNT implements Serializable {
 		this.maxTupleLen = nt.getNtupleMax();
 		this.fixedNtupleMode = nt.getFixedNtupleMode();
 		this.useSymmetry = nt.getUSESYMMETRY();
+		this.nSym = nt.getNSym();
 		this.afterState = nt.getAFTERSTATE();
 
 		if (ntparams!=null)
@@ -187,6 +190,11 @@ public class ParNT implements Serializable {
 	public boolean getUSESYMMETRY() {
 		return useSymmetry;
 	}
+	
+	public int getNSym() {
+		return nSym;
+	}
+
 	public boolean getAFTERSTATE() {
 		return afterState;
 	}
@@ -270,6 +278,10 @@ public class ParNT implements Serializable {
 		this.useSymmetry = useSymmetry;
 	}
 
+	public void setNSym(int nSym) {
+		this.nSym = nSym;
+	}
+
 	public void setAFTERSTATE(boolean afterState) {
 		this.afterState = afterState;
 	}
@@ -302,15 +314,6 @@ public class ParNT implements Serializable {
 			this.setUSESYMMETRY(true);
 			this.setAFTERSTATE(false);		// disable AFTERSTATE for all deterministic games
 			switch (gameName) {
-			case "TicTacToe": 
-				this.setNumTuple(1);
-				this.setMaxTupleLen(9);	
-				break;
-			case "Nim": 
-				this.setNumTuple(1);
-				this.setMaxTupleLen(ArenaNim.getNumberHeaps());	
-				this.setRandomness(false);	// use fixed n-tuples, mode==1
-				break;
 			case "2048": 
 				this.setNumTuple(3);
 				this.setAFTERSTATE(true);
@@ -319,8 +322,21 @@ public class ParNT implements Serializable {
 				this.setTc(true);
 				this.setRandomness(false);
 				break;
+			case "Nim": 
+				this.setNumTuple(1);
+				this.setMaxTupleLen(ArenaNim.getNumberHeaps());	
+				this.setRandomness(false);	// use fixed n-tuples, mode==1
+				break;
 			case "RubiksCube":
 				this.setUSESYMMETRY(false);
+				break;
+			case "Sim":
+				this.setUSESYMMETRY(false);
+				this.setNSym(10);
+				break;
+			case "TicTacToe": 
+				this.setNumTuple(1);
+				this.setMaxTupleLen(9);	
 				break;
 			}
 			break;

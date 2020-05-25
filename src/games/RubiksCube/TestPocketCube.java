@@ -137,7 +137,9 @@ public class TestPocketCube {
 		assert(h5.equals("[7, 8, 9, 10, 11, 13]")) : "adjacency set 2 not as excpected!";
 		System.out.println(h5+" --> OK");		// should be  (all from 7...13 except 5+7=12
 
-		// Test 2)
+		// Test 2) [This test is not really necessary any more since with new class StateObsWithBoardVector
+		//          we do not need any longer to re-construct a StateObserverCube from BoardVector. 
+		//	        But we keep it for the moment to have a check on the correctness of BoardVector.]
 		CubeConfig.boardVecType = BoardVecType.STICKER;
 		CubeConfig.pMax=15;
 		int runs = 3;

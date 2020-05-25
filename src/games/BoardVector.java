@@ -17,12 +17,12 @@ public class BoardVector {
 									// back the generating StateObservation object
 	
 	public BoardVector(int[] bvec) {
-		this.bvec = bvec.clone();
+		if (bvec!=null) this.bvec = bvec.clone();
 	}
 
 	public BoardVector(int[] bvec, int[] aux) {
-		this.bvec = bvec.clone();
-		this.aux = aux.clone();
+		if (bvec!=null) this.bvec = bvec.clone();
+		if ( aux!=null) this.aux = aux.clone();
 	}
 
 }

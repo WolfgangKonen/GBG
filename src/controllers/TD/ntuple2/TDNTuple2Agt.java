@@ -33,10 +33,12 @@ import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.ZValueMulti;
 import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
 import games.Arena;
+import games.BoardVector;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
 import games.StateObsNondeterministic;
+import games.StateObsWithBoardVector;
 import games.XNTupleFuncs;
 import games.CFour.StateObserverC4;
 import games.RubiksCube.StateObserverCube;
@@ -553,8 +555,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * @return the agent's estimate of the future score for that after state
 	 */
 	public double getScore(StateObservation so) {
-		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
-		double score = m_Net.getScoreI(bvec,so.getPlayer());
+		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
+		double score = m_Net.getScoreI(curSOWB,so.getPlayer());
 		return score;
 	}
 
@@ -573,8 +575,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	public double getScore(StateObservation so, StateObservation refer) {
 		double score;
     	if (VER_3P) {
-    		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
-    		score = m_Net.getScoreI(bvec,refer.getPlayer());
+    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
+    		score = m_Net.getScoreI(curSOWB,refer.getPlayer());
     		//score = getScore(so,refer.getPlayer());	
     	} else {
     		score = getScore(so);			        		
@@ -593,21 +595,21 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 		ScoreTuple sc = new ScoreTuple(so);
-		int[] bvec = m_Net.xnf.getBoardVector(so).bvec;
+		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		switch (so.getNumPlayers()) {
 		case 1: 
-			sc.scTup[0] = m_Net.getScoreI(bvec,so.getPlayer());
+			sc.scTup[0] = m_Net.getScoreI(curSOWB,so.getPlayer());
 			break;
 		case 2:
 			int player = so.getPlayer();
 			int opponent = (player==0) ? 1 : 0;
-			sc.scTup[player] = m_Net.getScoreI(bvec,player);
+			sc.scTup[player] = m_Net.getScoreI(curSOWB,player);
 			sc.scTup[opponent] = -sc.scTup[player];
 			break;
 		default: 
 	    	if (VER_3P) {
 	    		for (int i=0; i<so.getNumPlayers(); i++) 
-	    			sc.scTup[i] = m_Net.getScoreI(bvec,i);
+	    			sc.scTup[i] = m_Net.getScoreI(curSOWB,i);
 	    			// CAUTION: This might not work for all i, if n-tuples were not trained
 	    			// for all i in this state 'so' (MODE_3P==1). 
 	    			// It should work however in the cases MODE_3P==0 and MODE_3P==2.
@@ -678,6 +680,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		int[] nextBoard = null;
 		int   nextPlayer;
 		NextState ns = null;
+		StateObsWithBoardVector curSOWB;
 
 		boolean learnFromRM = m_oPar.getLearnFromRM();
 		int epiLength = m_oPar.getEpisodeLength();
@@ -691,6 +694,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 
 		afterSO = so.getPrecedingAfterstate();
     	curBoard = (afterSO==null) ? null : m_Net.xnf.getBoardVector(afterSO).bvec;
+    	curSOWB = new StateObsWithBoardVector(afterSO,new BoardVector(curBoard));
 
 		//System.out.println("Random test: "+ rand.nextDouble());
 		//System.out.println("Random test: "+ rand.nextDouble());
@@ -728,8 +732,8 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	        }
 	        
 	        if (DBG_NEW_3P && !m_randomMove) {
-	        	nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;
-	        	Z = - getGamma() * m_Net.getScoreI(nextBoard,nextPlayer);
+	    		StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(ns.getAfterState(),m_Net.xnf);
+	        	Z = - getGamma() * m_Net.getScoreI(nextSOWB,nextPlayer);
 	        	ZZ = - getGamma() * getScore(ns.getAfterState(),ns.getAfterState());
 	        }
 	        
@@ -743,7 +747,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	        	case MULTI_UPDATE:
 	    			// do one training step (NEW target) for all players' value functions (VER_3P)
 		        	int refPlayer=ns.getSO().getPlayer();
-		        	rewardTuple=trainMultiUpdate_3P(ns,curBoard,learnFromRM,epiLength,oldRewardTuple);
+		        	rewardTuple=trainMultiUpdate_3P(ns,curSOWB,learnFromRM,epiLength,oldRewardTuple);
 		        	reward=rewardTuple.scTup[refPlayer];
 //		        	if (DBG_OLD_3P) {
 //		        		double reward3=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward,m_Net3);
@@ -757,14 +761,14 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	        	case SINGLE_UPDATE:
 	    			// do one training step (NEW target) only for current player
 	        		Z_nply = actBest.getVBest();
-	        		reward=trainSingleUpdate_3P(ns,Z_nply,curBoard,learnFromRM,epiLength,oldReward,m_Net);
-	        		if (DBG_NEW_3P) dbg_Z_NEW_3P(ns,curBoard,learnFromRM,epiLength,reward,oldReward,Z,ZZ,Z_nply);
+	        		reward=trainSingleUpdate_3P(ns,Z_nply,curSOWB,learnFromRM,epiLength,oldReward,m_Net);
+	        		if (DBG_NEW_3P) dbg_Z_NEW_3P(ns,curSOWB,learnFromRM,epiLength,reward,oldReward,Z,ZZ,Z_nply);
 	        		break;	// out of switch
 	        	} // switch
 	        } 
 	        else // i.e. VER_3P==false:
 	        { 
-				reward=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward,m_Net);
+				reward=trainNewTargetLogic2(ns,curSOWB,learnFromRM,epiLength,oldReward,m_Net);
 	        }
 	        
 			if (DBG2_TARGET) {
@@ -807,10 +811,10 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
         	case MULTI_UPDATE:
     			// do one training step (NEW target) for all players' value functions (VER_3P)
     			for (int i=0; i<so.getNumPlayers(); i++) {
-    					m_Net.updateWeightsNewTerminal(curBoard, i,so, true);
+    					m_Net.updateWeightsNewTerminal(curSOWB, i,so, true);
     			}			
             	if (DBG_OLD_3P || DBG_NEW_3P) {
-            		m_Net3.updateWeightsNewTerminal(curBoard, curPlayer, so, false);
+            		m_Net3.updateWeightsNewTerminal(curSOWB, curPlayer, so, false);
             	}
             	break;
         	case SINGLE_UPDATE:
@@ -819,7 +823,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
         			// [Note: curPlayer is the player who generated curBoard, the afterstate preceding the 
         			// terminal state. This is because we reach the current point after a *break* out of the 
         			// while-loop, *before* curPlayer is updated to nextPlayer.] 
-        			m_Net.updateWeightsNewTerminal(curBoard, curPlayer, so, false);
+        			m_Net.updateWeightsNewTerminal(curSOWB, curPlayer, so, false);
         		}
         		break;
         	} // switch
@@ -827,7 +831,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
         else // i.e. VER_3P==false:
         { 
 			// do one training step (NEW target) for current player 
-			m_Net.updateWeightsNewTerminal(curBoard, curPlayer, so, false);
+			m_Net.updateWeightsNewTerminal(curSOWB, curPlayer, so, false);
 		}
 		
 		try {
@@ -872,13 +876,14 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * @return rewardTuple the tuple of rewards r(s_t+1, p_i) of {@code ns} for each player p_i
 	 */
 	private ScoreTuple trainMultiUpdate_3P(NextState ns,
-			int[] curBoard, 
+			StateObsWithBoardVector curSOWB, 
 			boolean learnFromRM, int epiLength,  
 			ScoreTuple oldRewardTuple) 
 	{
 		StateObservation thisSO=ns.getSO();
 		StateObservation nextSO=ns.getNextSO();
-		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;
+		StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(ns.getAfterState(),m_Net.xnf);
+		int[] nextBoard = nextSOWB.getBoardVector().bvec;
 		int thisPlayer= thisSO.getPlayer();
 		int nextPlayer= nextSO.getPlayer();
 		ScoreTuple rewardTuple;
@@ -905,16 +910,16 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 		} else {
 			// do one training step (NEW target) for all players' value functions (VER_3P)
 			for (int i=0; i<thisSO.getNumPlayers(); i++) {
-				if (curBoard!=null) {
+				if (curSOWB.hasBoardVector()) {
 					double rw = rewardTuple.scTup[i]-oldRewardTuple.scTup[i];
 					// target is (reward + GAMMA * value of the after-state) for non-final states
 					double target;
 					if (TERNARY) {
-						target = (m_finished) ? rw : getGamma() * m_Net.getScoreI(nextBoard,i);
+						target = (m_finished) ? rw : getGamma() * m_Net.getScoreI(nextSOWB,i);
 					} else {
-						target = rw + getGamma() * m_Net.getScoreI(nextBoard,i);
+						target = rw + getGamma() * m_Net.getScoreI(nextSOWB,i);
 					}
-					m_Net.updateWeightsNew(curBoard, i /*thisPlayer*/, nextBoard, i /*nextPlayer*/,
+					m_Net.updateWeightsNew(curSOWB, i /*thisPlayer*/, nextSOWB, i /*nextPlayer*/,
 							rw,target,thisSO);
 				}
 			}
@@ -945,15 +950,17 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * @return reward, which is {@code ns.getNextReward()}
 	 */
 	private double trainSingleUpdate_3P(NextState ns, double target,
-			int[] curBoard, 
+			StateObsWithBoardVector curSOWB, 
 			boolean learnFromRM, int epiLength,  
 			double oldReward, NTuple2ValueFunc my_Net) 
 	{
+		int[] curBoard = curSOWB.getBoardVector().bvec;
 		double reward;
 		
 		StateObservation thisSO=ns.getSO();
 		StateObservation nextSO=ns.getNextSO();
-		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;
+		StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(ns.getAfterState(),m_Net.xnf);
+		int[] nextBoard = nextSOWB.getBoardVector().bvec;
 		int thisPlayer= thisSO.getPlayer();
 		int nextPlayer= nextSO.getPlayer();
 		
@@ -982,7 +989,7 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 			// do one training step (NEW target)
 			// target is passed as argument from ZValueSingleNPly  (n-ply look-ahead)
 			if (curBoard!=null) {
-				my_Net.updateWeightsNew(curBoard, thisPlayer, nextBoard, nextPlayer,
+				my_Net.updateWeightsNew(curSOWB, thisPlayer, nextSOWB, nextPlayer,
 						reward-oldReward,target,thisSO);
 			}
 		}
@@ -997,15 +1004,17 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	 * @return reward
 	 */
 	private double trainNewTargetLogic2(NextState ns,
-			int[] curBoard, 
+			StateObsWithBoardVector curSOWB, 
 			boolean learnFromRM, int epiLength,  
 			double oldReward, NTuple2ValueFunc my_Net) 
 	{
+		int[] curBoard = curSOWB.getBoardVector().bvec;
 		double reward;
 		
 		StateObservation thisSO=ns.getSO();
 		StateObservation nextSO=ns.getNextSO();
-		int[] nextBoard = m_Net.xnf.getBoardVector(ns.getAfterState()).bvec;
+		StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(ns.getAfterState(),m_Net.xnf);
+		int[] nextBoard = nextSOWB.getBoardVector().bvec;
 		int thisPlayer= thisSO.getPlayer();
 		int nextPlayer= nextSO.getPlayer();
 		
@@ -1030,13 +1039,13 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 				
 		} else {
 			// do one training step (NEW target)
-			if (curBoard!=null) {
+			if (curSOWB.hasBoardVector()) {
 				double target;
 				int sign=1;
 				if (NEW_2P==true) sign=-1;
 				// target is (reward + GAMMA * value of the after-state) for non-final states
-				target = reward-oldReward + sign*getGamma() * my_Net.getScoreI(nextBoard,nextPlayer);
-				my_Net.updateWeightsNew(curBoard, thisPlayer, nextBoard, nextPlayer,
+				target = reward-oldReward + sign*getGamma() * my_Net.getScoreI(nextSOWB,nextPlayer);
+				my_Net.updateWeightsNew(curSOWB, thisPlayer, nextSOWB, nextPlayer,
 						reward-oldReward,target,thisSO);
 				if (DBG_NEW_3P) ZScore_NTL2=target;
 			}
@@ -1393,11 +1402,12 @@ public class TDNTuple2Agt extends AgentBase implements PlayAgent,NTupleAgt,Seria
 	    }
 	}
 	
-	private void dbg_Z_NEW_3P(NextState ns, int[] curBoard,boolean learnFromRM, int epiLength, 
+	private void dbg_Z_NEW_3P(NextState ns, StateObsWithBoardVector curSOWB, boolean learnFromRM, int epiLength, 
 							  double reward, double oldReward,double Z, double ZZ, double Z_nply) 
 	{
+		int[] curBoard = curSOWB.getBoardVector().bvec; 
 		double reward2=0.0;
-		reward2=trainNewTargetLogic2(ns,curBoard,learnFromRM,epiLength,oldReward,m_Net3);	 
+		reward2=trainNewTargetLogic2(ns,curSOWB,learnFromRM,epiLength,oldReward,m_Net3);	 
 		//System.out.println("reward,reward2: "+reward+",  "+reward2);
 		if (!m_randomMove) {
 			//System.out.println("Z_nply, ZScore_3: "+Z_nply+",  "+ZScore_NTL2);

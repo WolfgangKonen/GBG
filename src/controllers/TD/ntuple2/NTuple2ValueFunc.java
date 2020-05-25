@@ -20,6 +20,7 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.NTupleAgt.EligType;
 import games.BoardVector;
+import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -198,16 +199,15 @@ public class NTuple2ValueFunc implements Serializable {
 	 *            the action to perform on {@code board}
 	 * @return
 	 */
-	public double getQFunc(int[] board, int player, Types.ACTIONS act) {
+	public double getQFunc(StateObsWithBoardVector curSOWB, int player, Types.ACTIONS act) {
 		int i, j;
 		int o = act.toInt();
 		double score = 0.0; 
 		BoardVector[] equiv = null;
 		int[] equivAction;
-		int nSym = 0;			// may later hold the number of symmetries to use
 
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board, getUSESYMMETRY(), nSym);
+		equiv = getSymBoards2(curSOWB, getUSESYMMETRY(), getNSym());
 		equivAction = xnf.symmetryActions(act.toInt());
 
 		for (i=0; i<equivAction.length; i++) {
@@ -236,14 +236,13 @@ public class NTuple2ValueFunc implements Serializable {
 	 *            the player who has to move on {@code board} (0,...,N-1)
 	 * @return
 	 */
-	public double getScoreI(int[] board, int player) {
+	public double getScoreI(StateObsWithBoardVector curSOWB, int player) {
 		int i, j;
 		double score = 0.0; 
 		BoardVector[] equiv = null;
-		int nSym = 0;			// may later hold the number of symmetries to use
 
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(board, getUSESYMMETRY(), nSym);
+		equiv = getSymBoards2(curSOWB, getUSESYMMETRY(), getNSym());
 		//equiv = getSymBoards2(board, false);    // DON'T, at least for TTT clearly inferior
 
 		for (i = 0; i < numTuples; i++) {
@@ -271,24 +270,27 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param nSym the number of symmetry vectors to use (if = 0, use all symmetries)
 	 * @return the equivalent board vectors
 	 */
-	private BoardVector[] getSymBoards2(int[] board, boolean useSymmetry, int nSym) {
+	private BoardVector[] getSymBoards2(StateObsWithBoardVector curSOWB, boolean useSymmetry, int nSym) {
 		int i;
 		BoardVector[] equiv = null;
 		
-		assert nSym >= 0 : "Ooops, nSym is negative!";
-		assert nSym <= xnf.getNumSymmetries() : "Oops, nSym is larger than xnf.getNumSymmetries()!";
+		assert nSym >= 0 : "Ooops, nSym="+nSym+" is negative!";
+		assert nSym <= xnf.getNumSymmetries() 
+				: "Oops, nSym="+nSym+" is larger than xnf.getNumSymmetries()="+xnf.getNumSymmetries()+"!";
+		
 		
 		if (useSymmetry) {
-			if (tdAgt instanceof SarsaAgt && 0 < nSym && nSym < xnf.getNumSymmetries())
-				// in the SarsaAgt case we can only handle the case n=0 (use all symmetries). This
-				// is because symmetryActions currently assumes that all symmetries are taken.
+			if (nSym==0) nSym=xnf.getNumSymmetries();
+			if (tdAgt instanceof SarsaAgt && nSym < xnf.getNumSymmetries())
+				// in the SarsaAgt case we can only handle the case n=getNumSymmetries() (use all symmetries). 
+				// This is because symmetryActions currently assumes that all symmetries are taken.
 				// (symmetryActions is ONLY needed by SarsaAgt - and perhaps later by QLearnAgt)
 				throw new RuntimeException("[NTuple2ValueFunc] Sorry, cannot handle case SarsaAgt and 0 < nSym < s (symmetryActions not yet adapted).");
 
-			equiv = xnf.symmetryVectors(new BoardVector(board),nSym);
+			equiv = xnf.symmetryVectors(curSOWB,nSym);
 		} else {
 			equiv = new BoardVector[1];
-			equiv[0] = new BoardVector(board);			
+			equiv[0] = curSOWB.getBoardVector();			
 		}
 		
 		return equiv;
@@ -362,19 +364,22 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param thisSO
 	 * 			  only for debug info: access to the current state's stringDescr()
 	 */
-	public void updateWeightsNew(int[] curBoard, int curPlayer, int[] nextBoard, int nextPlayer,
+	public void updateWeightsNew(StateObsWithBoardVector curSOWB, int curPlayer, 
+			StateObsWithBoardVector nextSOWB, int nextPlayer,
 			double reward, double target, /*boolean upTC,*/ StateObservation thisSO) {
-		double v_old = getScoreI(curBoard,curPlayer); // old value
+		int[] curBoard = curSOWB.getBoardVector().bvec;
+		int[] nextBoard = nextSOWB.getBoardVector().bvec;
+		double v_old = getScoreI(curSOWB,curPlayer); // old value
 		// delta is the error signal:
 		double delta = (target - v_old);
 		// derivative of tanh ( if hasSigmoid()==true):
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
-		update(curBoard, curPlayer, 0, delta, e, false, false);
+		update(curSOWB, curPlayer, 0, delta, e, false, false);
 		
 		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
-			double v_new = getScoreI(curBoard,curPlayer);
+			double v_new = getScoreI(curSOWB,curPlayer);
 			if (curPlayer==nextPlayer) {
 				System.out.println("updateWeightsNew[p="+curPlayer+", "+thisSO.stringDescr()
 				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
@@ -418,18 +423,19 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param thisSO
 	 * 			  only for debug info: access to the current state's stringDescr()
 	 */
-	public void updateWeightsTD(int[] curBoard, int curPlayer, 
+	public void updateWeightsTD(StateObsWithBoardVector curSOWB, int curPlayer, 
 			double vLast, double target, double reward, StateObservation thisSO) {
+		int[] curBoard = curSOWB.getBoardVector().bvec;
 		// delta is the error signal:
 		double delta = (target - vLast);
 		// derivative of tanh ( if hasSigmoid()==true):
 		double e = (hasSigmoid() ? (1.0 - vLast * vLast) : 1.0);
 
-		update(curBoard, curPlayer, 0, delta, e, false, true);
+		update(curSOWB, curPlayer, 0, delta, e, false, true);
 		
 		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
-			double v_new = getScoreI(curBoard,curPlayer);
+			double v_new = getScoreI(curSOWB,curPlayer);
 			System.out.println("updateWeightsTD[p="+curPlayer+", "+thisSO.stringDescr()
 			+"] qLast,v_new:"+vLast*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
 			dbg3PArr[curPlayer]=v_new*MAXSCORE;
@@ -456,19 +462,20 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param thisSO
 	 * 			  only for debug info: access to the current state's stringDescr()
 	 */
-	public void updateWeightsQ(int[] lastBoard, int lastPlayer, Types.ACTIONS lastAction,
+	public void updateWeightsQ(StateObsWithBoardVector lastSOWB, int lastPlayer, Types.ACTIONS lastAction,
 			double qLast, double reward, double target, StateObservation thisSO) {
+		int[] lastBoard = lastSOWB.getBoardVector().bvec;
 		// delta is the error signal:
 		double delta = (target - qLast);
 		// derivative of tanh ( if hasSigmoid()==true):
 		double e = (hasSigmoid() ? (1.0 - qLast * qLast) : 1.0);
 
 		int o = lastAction.toInt();
-		update(lastBoard, lastPlayer, o, delta, e, true, true);
+		update(lastSOWB, lastPlayer, o, delta, e, true, true);
 		
 		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
-			double v_new = getQFunc(lastBoard,lastPlayer,lastAction);
+			double v_new = getQFunc(lastSOWB,lastPlayer,lastAction);
 			System.out.println("updateWeightsNew[p="+lastPlayer+", "+thisSO.stringDescr()
 			+"] qLast,v_new:"+qLast*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
 			dbg3PArr[lastPlayer]=v_new*MAXSCORE;
@@ -483,18 +490,19 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param thisSO	only needed when debugging
 	 * @param isNEW_3P	only needed when debugging
 	 */
-	public void updateWeightsNewTerminal(int[] curBoard, int curPlayer,StateObservation thisSO, boolean isNEW_3P) {
-		double v_old = getScoreI(curBoard,curPlayer); // old value
+	public void updateWeightsNewTerminal(StateObsWithBoardVector curSOWB, int curPlayer,StateObservation thisSO, boolean isNEW_3P) {
+		int[] curBoard = curSOWB.getBoardVector().bvec;
+		double v_old = getScoreI(curSOWB,curPlayer); // old value
 		// delta is the error signal (here with target signal = 0.0):
 		double delta = (0.0 - v_old);
 		// derivative of tanh ( if hasSigmoid()==true)
 		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
 
-		update(curBoard, curPlayer, 0, delta, e, false, false);
+		update(curSOWB, curPlayer, 0, delta, e, false, false);
 
 		if (TDNTuple2Agt.DBGF_TARGET || TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
-			double v_new = getScoreI(curBoard,curPlayer);
+			double v_new = getScoreI(curSOWB,curPlayer);
 			if (isNEW_3P) {
 				System.out.println("updateWeights(***finalSO)[p="+curPlayer+", "+thisSO.stringDescr()
 				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE);
@@ -537,14 +545,14 @@ public class NTuple2ValueFunc implements Serializable {
 	 * 			  {@code true}, if called from 'new' TD-learning {@link SarsaAgt} or {@link TDNTuple3Agt};<br> 
 	 * 			  {@code false}, if called from 'old' TD-learning (via {@link TDNTuple2Agt})	
 	 */
-	private void update(int[] board, int player, int output, double delta, double e, 
+	private void update(StateObsWithBoardVector curSOWB, int player, int output, double delta, double e, 
 						boolean QMODE, boolean ELIST_PP) {
+		int[] board = curSOWB.getBoardVector().bvec;
 		int i, j, out;
 		double alphaM, sigDeriv, lamFactor;
-		int nSym = 0;			// may later hold the number of symmetries to use
 
 		// Get equivalent boards (including self) and corresponding actions
-		BoardVector[] equiv = getSymBoards2(board,getUSESYMMETRY(),nSym);
+		BoardVector[] equiv = getSymBoards2(curSOWB, getUSESYMMETRY(), getNSym());
 		int[] equivAction = (QMODE ? getSymActions(output, getUSESYMMETRY()) : null); 
 		// equivAction only needed for QMODE==true
 
@@ -652,6 +660,10 @@ public class NTuple2ValueFunc implements Serializable {
 
 	public boolean getUSESYMMETRY() {
 		return tdAgt.getParNT().getUSESYMMETRY();
+	}
+
+	public int getNSym() {
+		return tdAgt.getParNT().getNSym();
 	}
 
 	public boolean hasSigmoid() {

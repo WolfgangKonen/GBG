@@ -10,6 +10,7 @@ import org.apache.commons.math3.exception.OutOfRangeException;
 
 import agentIO.LoadSaveGBG;
 import games.BoardVector;
+import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -33,7 +34,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 	
     transient private Random rand = new Random ();
     
-    transient private StateObserverSim configSO = ConfigSim.SO;
+//    transient private StateObserverSim configSO = ConfigSim.SO;
 
 
     /**
@@ -197,7 +198,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 				}
 			}
 			
-			return new BoardVectorSim(board,sim);			
+			return new BoardVector(board);			
 		} 
 		throw new RuntimeException("StateObservation so is not StateObserverSim");
 	}
@@ -217,16 +218,42 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 				}
 			}
 			
-			return new BoardVectorSim(board,sim);
+			return new BoardVector(board);
 		}
 		throw new RuntimeException("StateObservation so is not StateObserverSim");
 	}
 
 	@Override
+	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n) {
+		BoardVector boardVector = curSOWB.getBoardVector();
+		StateObservation so = curSOWB.getStateObservation();
+		assert so instanceof StateObserverSim : "Ooops, so is not of class StateObserverSim";
+		StateObserverSim sim = (StateObserverSim) so;
+		
+		//TODO: This does not yet guarantee that all n symmetric states are different!!
+		//      Way out: make a set with exactly n-1 different numbers (if K! is large)
+		//		or make a permutation of (0,1,...,K!-1) and pick only the first n elements (if K! is small)
+		BoardVector[] symmetricVectors = new BoardVector[n];
+		symmetricVectors[0] = boardVector;
+        PermutationIterator <Integer> pitor = (PermutationIterator  <Integer>) pi.iterator ();
+        for (int i = 1; i < n; ++i)
+        {
+            int rnd = rand.nextInt ((int) pitor.last); 
+            List <Integer> rli = pitor.get (rnd);
+            symmetricVectors[i] = getBoardVector(so,rli); 		
+//            System.out.println(symmetricVectors[i].toString());
+//            int dummy = 1; 
+        }
+		return symmetricVectors;
+	}
+	
+	@Override
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
 		
-		// Problem: this method is called from NTuple2ValueFunc.getSymboards2 and can only pass in a 
-		// BoardVector not a BoardVectorSim
+		throw new RuntimeException("symmetryVectors(BoardVector,int) is not implemented for XNTupleFuncsSim!");
+		// Problem: this method cannot construct symmetric states if the underlying StateObserverSim is unknown.
+		// Way out: Use other method symmetryVectors(StateObsWithBoardVector curSOWB, int n). 
+		
 //		assert boardVector instanceof BoardVectorSim : "Oops, boardVector is not of class BoardVectorSim!";
 //		StateObservation so = ((BoardVectorSim)boardVector).sim;
 //		
@@ -243,77 +270,81 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 //            int dummy = 1; 
 //        }
 
-		BoardVector[] symmetricVectors = new BoardVector[list.size()];
 //		for(int i = 0; i < symmetricVectors.length; i++)
 //			symmetricVectors[i] = getSymVector(boardVector,list.get(i));
 
-		return symmetricVectors;
+//		return symmetricVectors;
 	}
 	
+	// --- old version (P. Wünsch), now obsolete
 	// crate a symmetric vector for given permutation of nodes
-	private BoardVector getSymVector(BoardVector bv,int [] permutation)
-	{
-		int[] boardVector = bv.bvec;
-		int [][] splittedBoardVec = splitVector(boardVector);
-		int [][] splittedSymVec = new int[ConfigSim.NUM_NODES-1][];
-		
-		for(int i = 0; i < ConfigSim.NUM_NODES-1; i++)
-				splittedSymVec[i] = getValuesSameNode(i,splittedBoardVec,permutation);
-		
-		return new BoardVector(mergeVector(splittedSymVec));
-	}
+//	private BoardVector getSymVector(BoardVector bv,int [] permutation)
+//	{
+//		int[] boardVector = bv.bvec;
+//		int [][] splittedBoardVec = splitVector(boardVector);
+//		int [][] splittedSymVec = new int[ConfigSim.NUM_NODES-1][];
+//		
+//		for(int i = 0; i < ConfigSim.NUM_NODES-1; i++)
+//				splittedSymVec[i] = getValuesSameNode(i,splittedBoardVec,permutation);
+//		
+//		return new BoardVector(mergeVector(splittedSymVec));
+//	}
 	
-	private int [][] splitVector(int [] boardVector)
-	{
-		int [][] vec = new int [ConfigSim.NUM_NODES - 1][];
-		int index = 0;
-		for(int i = 0; i < ConfigSim.NUM_NODES - 1; i++)
-		{
-			vec [i] = new int[ConfigSim.NUM_NODES - 1 - i];
-			for(int j = 0; j < vec.length - i; j++)
-			{
-				vec[i][j] = boardVector[index];
-				index++;
-			}
-		}
-		
-		return vec;
-	}
+	// --- old version (P. Wünsch), now obsolete
+//	private int [][] splitVector(int [] boardVector)
+//	{
+//		int [][] vec = new int [ConfigSim.NUM_NODES - 1][];
+//		int index = 0;
+//		for(int i = 0; i < ConfigSim.NUM_NODES - 1; i++)
+//		{
+//			vec [i] = new int[ConfigSim.NUM_NODES - 1 - i];
+//			for(int j = 0; j < vec.length - i; j++)
+//			{
+//				vec[i][j] = boardVector[index];
+//				index++;
+//			}
+//		}
+//		
+//		return vec;
+//	}
 	
-	private int[] getValuesSameNode(int pos,int [][] boardVec, int [] permutation)
-	{
-		int[] vec = new int[ConfigSim.NUM_NODES - 1 - pos];
-		int index = 0;
-		for(int i = pos + 1; i < ConfigSim.NUM_NODES; i++)
-		{
-			if(permutation[i] < permutation[pos])
-			{
-				vec[index] = boardVec[permutation[i] - 1][permutation[pos] - (permutation[i] + 1)];
-			}
-			else
-			{
-				vec[index] = boardVec[permutation[pos] - 1][permutation[i] - (permutation[pos] + 1)];
-			}
-			index++;
-		}
-				
-		return vec;
-	}
+	// --- old version (P. Wünsch), now obsolete
+//	private int[] getValuesSameNode(int pos,int [][] boardVec, int [] permutation)
+//	{
+//		int[] vec = new int[ConfigSim.NUM_NODES - 1 - pos];
+//		int index = 0;
+//		for(int i = pos + 1; i < ConfigSim.NUM_NODES; i++)
+//		{
+//			if(permutation[i] < permutation[pos])
+//			{
+//				vec[index] = boardVec[permutation[i] - 1][permutation[pos] - (permutation[i] + 1)];
+//			}
+//			else
+//			{
+//				vec[index] = boardVec[permutation[pos] - 1][permutation[i] - (permutation[pos] + 1)];
+//			}
+//			index++;
+//		}
+//				
+//		return vec;
+//	}
 	
 
-	private int [] mergeVector(int [][] splittedVec)
-	{
-		int[]  vec = new int[ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2];
-		int index = 0;
-		
-		for(int i = 0; i < splittedVec.length; i++)
-			for(int j = 0; j < splittedVec[i].length; j++)
-			{
-				vec[index] = splittedVec[i][j];
-				index++;
-			}
-		return vec;
-	}
+	// --- old version (P. Wünsch), now obsolete
+//	private int [] mergeVector(int [][] splittedVec)
+//	{
+//		int[]  vec = new int[ConfigSim.NUM_NODES*(ConfigSim.NUM_NODES-1)/2];
+//		int index = 0;
+//		
+//		for(int i = 0; i < splittedVec.length; i++)
+//			for(int j = 0; j < splittedVec[i].length; j++)
+//			{
+//				vec[index] = splittedVec[i][j];
+//				index++;
+//			}
+//		return vec;
+//	}
+	
 	@Override
 	public int[] symmetryActions(int actionKey) 
 	{
@@ -340,6 +371,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		for (int i=K; i>K-3; i--) Z = Z*i;
 		Z /= 6;		// 6 = 3!
 		int[][] A = new int[Z][3]; 
+		StateObserverSim configSO = new StateObserverSim();
 		
 		// We loop over all nodes that are corners of a triangle:
 		// i is the lowest-numbered node, j the 2nd-lowest-numbered node and k is the highest numbered node.
@@ -376,6 +408,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		Z /= 24;	// 24 = 4!
 		Z *= 2;
 		int[][] A = new int[Z][4]; 
+		StateObserverSim configSO = new StateObserverSim();
 		
 		// --- now done in constructor ---
 //		// first we build an ArrayList of all links emerging from node no=1,...,K 
@@ -432,6 +465,7 @@ public class XNTupleFuncsSim extends XNTupleBase implements XNTupleFuncs, Serial
 		for (int i=K; i>K-4; i--) Z = Z*i;
 		Z /= 24;	// 24 = 4!		
 		int[][] A = new int[Z][6]; 
+		StateObserverSim configSO = new StateObserverSim();
 		
 		// --- now done in constructor ---
 //		// first we build an ArrayList of all links emerging from node no=1,...,K 

@@ -77,7 +77,7 @@ public class GameBoardSimGui {
 	
 	
 	public void clearBoard(boolean boardClear, boolean vClear) {
-		board.clearLastNodes();
+		if (boardClear) board.clearLastNodes();
 	    frame.repaint();
 	}
 

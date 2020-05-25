@@ -9,6 +9,7 @@ import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.BoardVector;
+import games.StateObsWithBoardVector;
 import games.XArenaFuncs;
 import games.XNTupleFuncs;
 import games.StateObservation;
@@ -90,7 +91,8 @@ public class ValidateAgent {
 		// 
 		XNTupleFuncs xnf = ar.makeXNTupleFuncs();
 		BoardVector bv = xnf.makeBoardVectorEachCellDifferent();
-		BoardVector[] sym = xnf.symmetryVectors(bv,0);
+		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sob,bv);
+		BoardVector[] sym = xnf.symmetryVectors(curSOWB,0);
 		boolean testPassed=true;
 		for (int i=0; i<(sym.length-1); i++) {
 			for (int j=i+1; j<sym.length; j++) {
