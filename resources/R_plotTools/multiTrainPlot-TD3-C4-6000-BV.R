@@ -25,10 +25,11 @@ path <- "../../agents/ConnectFour/csv/BV-check.d/";
 Ylimits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0); errWidth=300000/wfac;
 Xlimits=c(400,5100); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c("multiTrain-OLD.csv",  # GBGBatch-OLD.jar,branch master as of 2020-03-10
-            "multiTrain.csv",      # GBGBatch.jar,    branch master as of 2020-03-29
-            "multiTrain-BV.csv"    # GBGBatch-BV.jar, new branch BoardVector 2020-04-27
-           )
+filenames=c(#"multiTrain-OLD.csv"  # GBGBatch-OLD.jar,branch master as of 2020-03-10
+             "multiTrain.csv"      # GBGBatch.jar,    branch master as of 2020-03-29
+            ,"multiTrain-BV.csv"    # GBGBatch-BV.jar, new branch BoardVector 2020-04-27
+            ,"multiTrain-SOWB.csv"    # GBGBatch-BV.jar, new branch BoardVector 2020-04-27
+)
 #
 # other pars: alpha = 3.7->3.7, eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, 
 # NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=T, fixed ntuple mode 1: 70 8-tuples. 
@@ -56,15 +57,17 @@ for (k in 1:length(filenames)) {
   }
   
   algoCol = switch(k
-                   ,rep("OLD",nrow(df))   
+                   #,rep("OLD",nrow(df))   
                    ,rep("Std",nrow(df))   
                    ,rep(" BV",nrow(df))   
+                   ,rep("SOWB",nrow(df))   
   )
   targetModeCol = switch(k
                          ,rep("TD",nrow(df))
                          ,rep("TD",nrow(df))
                          ,rep("TERNA",nrow(df))
-                        )
+                         ,rep("TERNA",nrow(df))
+  )
   #browser()
   dfBoth <- rbind(dfBoth,cbind(df,algo=algoCol,targetMode=targetModeCol))
 }

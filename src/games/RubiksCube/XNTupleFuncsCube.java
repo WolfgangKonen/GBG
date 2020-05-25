@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import games.BoardVector;
+import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
@@ -100,9 +101,55 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * In the case of the cube we have s=24 color symmetries (6 places 1st color * 4 places 2nd color)
 	 * 
 	 * @param boardVector
+	 * @return cuSOWB
+	 */
+	@Override
+	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n) {
+		BoardVector boardVector = curSOWB.getBoardVector();
+		StateObserverCube so = (StateObserverCube) curSOWB.getStateObservation();
+		CubeState cS1 = so.getCubeState(); 
+		int i=0; 
+		boolean doAssert=true;
+		BoardVector[] equiv = null;
+		HashSet set = new HashSet();
+		//
+		// calculate all color-symmetric states for cS1, collect
+		// in 'set' only the truly different CubeStates  
+		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
+		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) : 
+			"not all color-symmetric states have ygr 'home'!";
+		Iterator it1 = mapColSymm.entrySet().iterator(); 
+	    while (it1.hasNext()) {
+		    Map.Entry entry = (Map.Entry)it1.next();
+		    set.add((CubeState)entry.getValue());	
+        } 	
+	    
+	    // once we have the truly different CubeStates in 'set', 
+	    // create and fill 'equiv' accordingly:
+		equiv = new BoardVector[set.size()];
+		it1 = set.iterator();
+	    while (it1.hasNext()) {
+		    CubeState cs  = (CubeState)it1.next();
+		    equiv[i++] = cs.getBoardVector();	
+        } 
+
+		return equiv;
+	}
+	
+	/**
+	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
+	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * <li> the first row {@code boardArray[0]} is the board vector itself
+	 * <li> the other rows are the board vectors when transforming {@code boardVector}
+	 * 		according to the s-1 other symmetries.
+	 * </ul>
+	 * In the case of the cube we have s=24 color symmetries (6 places 1st color * 4 places 2nd color)
+	 * 
+	 * @param boardVector
 	 * @return boardArray
 	 */
 	@Override
+	@Deprecated
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
 		int i=0;
 		boolean doAssert=true;

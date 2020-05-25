@@ -344,7 +344,7 @@ abstract public class Arena implements Runnable {
 					System.out.println("[" + soh.stringDescr() + "]");
 					int dummy = 1;
 				}
-				boolean DBG_SIM=true;
+				boolean DBG_SIM=false;
 				if (DBG_SIM && so instanceof StateObserverSim) {
 					StateObserverSim sos = (StateObserverSim) so;
 					System.out.println(sos.stringDescr2());

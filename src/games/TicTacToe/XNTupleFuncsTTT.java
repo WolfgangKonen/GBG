@@ -145,8 +145,9 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * @return <b>equivAction</b>
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
-	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(BoardVector, int)}[i]
+	 * equivAction[i] is the key of the action in the i'th equivalent board vector equiv[i], 
+	 * which is equivalent to actionKey in equiv[0]. <br>
+	 * Here, equiv[i] = {@link #symmetryVectors(BoardVector, int)}{@code [i]}.
 	 */
 	public int[] symmetryActions(int actionKey) {
 		int numEquiv = actionArray.length;

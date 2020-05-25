@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
+import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import params.ParNT;
@@ -233,7 +234,7 @@ public class NTuple2 implements Serializable {
 	 *            carrying 0 ("O"), 1 (empty) or 2 ("X"))
 	 * @return the LUT weight for this game board
 	 * 
-	 * @see NTuple2ValueFunc#getScoreI(int[],int)
+	 * @see NTuple2ValueFunc#getScoreI(StateObsWithBoardVector,int)
 	 */
 	public double getScore(int[] board) {
 		int Index = getIndex(board);

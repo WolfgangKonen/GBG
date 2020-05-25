@@ -262,6 +262,7 @@ public class CubeState implements Serializable {
 		return new CubeState(type);
 	}
 	
+	@Deprecated
 	public static CubeState makeCubeState(BoardVector boardVector) {
 		return new CubeState(boardVector);
 	}

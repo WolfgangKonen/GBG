@@ -191,7 +191,7 @@ public class BoardPanel extends JPanel {
 		for(int i = 0; i < circles.length; i++)
 		{
 			// note that lastNodes values are \in [1,..,K] while i \in [0,K-1] (!)
-			if(i == lastNodes[0]-1 || i == lastNodes[1]-1 || i == lastNodes[2]-1) {
+			if(i == lastNodes[0] || i == lastNodes[1] || i == lastNodes[2]) {
 				// mark the circle borders of a losing triangle in dark red:
 				g2d.setStroke(new BasicStroke(8));
 				g2d.setColor(colTHK1);		// dark red

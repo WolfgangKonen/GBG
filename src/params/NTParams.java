@@ -45,6 +45,7 @@ public class NTParams extends Frame implements Serializable {
 	private static final String TIPNTUPLESIZEL = "maxTupleLen: Every generated n-tuple has a size 2,...,maxTupleLen";
 	private static final String TIPUSESYMMETRY = "If checked, use symmetries when training n-tuple agent";
 	private static final String TIPAFTERSTATE = "If checked, use afterstate logic [Jaskowski16] when training n-tuple agent";
+	private static final String TIPNSYMMETRY = "number of symmetries to use (0: all symmetries)";
 
 	private static String[] tcFactorString = { "Immediate", "Accumulating" };
 	private static String[] tcTransferString = { "id", "TC EXP" };
@@ -74,6 +75,7 @@ public class NTParams extends Frame implements Serializable {
 	JLabel NTupleTypeL;
 	JLabel PlotWghtL;
 	JLabel UseSymmetryL;
+	JLabel NSymL;
 	JLabel AfterStateL;
 
 	public JTextField tcInitT;
@@ -81,6 +83,7 @@ public class NTParams extends Frame implements Serializable {
 	public JTextField tcBetaT;
 	public JTextField NTupleNumT;
 	public JTextField NTupleSizeT;
+	public JTextField NSymT;
 
 	public JCheckBox TempCoC;
 	public JCheckBox RandomnessC;
@@ -128,6 +131,8 @@ public class NTParams extends Frame implements Serializable {
 		UseSymmetryL.setToolTipText(TIPUSESYMMETRY);
 		AfterStateL = new JLabel("AFTERSTATE");
 		AfterStateL.setToolTipText(TIPAFTERSTATE);
+		NSymL = new JLabel("nSym");
+		NSymL.setToolTipText(TIPNSYMMETRY);
 		
 		// These are the initial defaults 
 		// (Other game- and agent-specific defaults are in setParamDefaults, which is called
@@ -163,6 +168,14 @@ public class NTParams extends Frame implements Serializable {
 		});
 
 		UseSymmetryC = new JCheckBox();
+		UseSymmetryC.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				enableSymmetryPart();
+			}
+		});
+		NSymT = new JTextField(0+"");
+		NSymT.setEnabled(false);
 		AfterStateC = new JCheckBox();
 		
 		tcFactorType = new JComboBox(tcFactorString);
@@ -213,39 +226,43 @@ public class NTParams extends Frame implements Serializable {
 		ntPanel.add(tcBetaL);
 		ntPanel.add(tcBetaT);
 
+		// third row
 		ntPanel.add(tcAccumulL);
 		ntPanel.add(tcAccumulType);
-		ntPanel.add(new Canvas());
-		ntPanel.add(new Canvas());
+		ntPanel.add(AfterStateL);
+		ntPanel.add(AfterStateC);
 		
-		// third row
+		//forth row
 		ntPanel.add(RandomnessL);
 		ntPanel.add(RandomnessC);
 		ntPanel.add(NTupleFixL);
 		ntPanel.add(NTupleFixCo);
 		
-		//forth row
+		//fifth row
 		ntPanel.add(NTupleTypeL);
 		ntPanel.add(NTupleTypeCo);
 		ntPanel.add(PlotWghtL);
 		ntPanel.add(PlotWghtCo);
 		
-		// fifth row
+		// sixth row
 		ntPanel.add(NTupleNumL);
 		ntPanel.add(NTupleNumT);
 		ntPanel.add(UseSymmetryL);
 		ntPanel.add(UseSymmetryC);
 
-		// sixth row
+		// seventh row
 		ntPanel.add(NTupleSizeL);
 		ntPanel.add(NTupleSizeT);
-		ntPanel.add(AfterStateL);
-		ntPanel.add(AfterStateC);
+		ntPanel.add(NSymL);
+		ntPanel.add(NSymT);
+//		ntPanel.add(new Canvas());
+//		ntPanel.add(new Canvas());
 		
 		add(ntPanel,BorderLayout.CENTER);
 	
 		enableTcPart();
 		enableRandomPart();
+		enableSymmetryPart();
 		pack();
 		setVisible(false);
 	} // constructor NTParams()
@@ -272,6 +289,8 @@ public class NTParams extends Frame implements Serializable {
 		
 		PlotWghtCo.setEnabled(enable);
 		UseSymmetryC.setEnabled(enable);
+		NSymL.setEnabled(enable);
+		NSymT.setEnabled(enable);
 		AfterStateC.setEnabled(enable);
 		AfterStateL.setEnabled(true);
 
@@ -350,6 +369,16 @@ public class NTParams extends Frame implements Serializable {
 		}
 	}
 
+	private void enableSymmetryPart() {
+		if(getUSESYMMETRY()==true){
+			NSymL.setEnabled(true);
+			NSymT.setEnabled(true);
+		} else {
+			NSymL.setEnabled(false);
+			NSymT.setEnabled(false);
+		}					
+	}
+	
 	private void enableAfterState(boolean enable) {
 		AfterStateL.setEnabled(enable);
 		AfterStateC.setEnabled(enable);
@@ -418,6 +447,11 @@ public class NTParams extends Frame implements Serializable {
 	public boolean getUSESYMMETRY() {
 		return UseSymmetryC.isSelected();
 	}
+	
+	public int getNSym() {
+		int nsym = Integer.parseInt(NSymT.getText());
+		return nsym;		
+	}
 	public boolean getAFTERSTATE() {
 		return AfterStateC.isSelected();
 	}
@@ -485,7 +519,13 @@ public class NTParams extends Frame implements Serializable {
 	
 	public void setUSESYMMETRY(boolean useSymmetry) {
 		UseSymmetryC.setSelected(useSymmetry);
+		this.enableSymmetryPart();
 	}
+
+	public void setNSym(int nSym) {
+		NSymT.setText(""+nSym);
+	}
+
 	public void setAFTERSTATE(boolean useAfterstate) {
 		AfterStateC.setSelected(useAfterstate);
 	}
@@ -557,6 +597,7 @@ public class NTParams extends Frame implements Serializable {
 		setNtupleMax(nt.getNtupleMax());
 		setFixedNtupleMode(nt.getFixedNtupleMode());
 		setUSESYMMETRY(nt.getUSESYMMETRY());
+		setNSym(nt.getNSym());
 		setAFTERSTATE(nt.getAFTERSTATE());
 		
 		enableAfterState(nt.getAFTERSTATE());
