@@ -315,11 +315,17 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		// winning position. This means that only the *remainder* of x and y in excess of multiples
 		// of K (i.e. x%K) is relevant to compute the nim-sum and find the winning move.
 		//
+		// It is an important bug fix (05/2020) to do %K on array 'remain' BEFORE reduce and NOT within the XOR:
+		// If we did (wrongly) (x%K)^(y%K), then it might happen that the XOR produces a K and the modulo 
+		// would replace this with 0. Example: K=6, x=3, y=5
+		//
 		// Why reduce(startValue,...)? - Because reduce(int,...) directly returns an int as well.
 		//
 		int startValue=0;
 		int K = NimConfig.MAX_MINUS+1;
-		int nim_sum = Arrays.stream(heaps).reduce(startValue, (x,y) -> (x%K) ^ (y%K));
+		int[] remain = new int[heaps.length];
+		for (int i=0; i<heaps.length; i++) remain[i] = heaps[i]%K;
+		int nim_sum = Arrays.stream(remain).reduce(startValue, (x,y) -> x ^ y);
 		if ( nim_sum==0 ) 
 			return new int[] {0,1};		// we will loose with any move --> return dummy move
 
@@ -358,8 +364,11 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	public double boutonValue(int[] heaps) {
 		int startValue=0;
 		int K = NimConfig.MAX_MINUS+1;
-		// see same line in method bouton(int[] heaps) for an explanation of the following statement:
-		int nim_sum = Arrays.stream(heaps).reduce(startValue, (x,y) -> (x%K) ^ (y%K));
+		
+		// see same lines in method bouton(int[] heaps) for an explanation of the following statements:
+		int[] remain = new int[heaps.length];
+		for (int i=0; i<heaps.length; i++) remain[i] = heaps[i]%K;
+		int nim_sum = Arrays.stream(remain).reduce(startValue, (x,y) -> x ^ y);
 		// if nim_sum==0, heaps is a winning configuration for the player who created it, else not:
 		return (nim_sum==0) ? +1.0 : -1.0;
 	}

@@ -12,9 +12,6 @@ import controllers.RandomAgent;
 import games.Evaluator;
 import games.GameBoard;
 import games.XArenaFuncs;
-import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
-import gui.MessageBox;
 import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
@@ -26,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,10 +47,17 @@ public class EvaluatorHex extends Evaluator {
     private double trainingThreshold = 0.8;
     private PlayAgent playAgent;
     private int numStartStates = 1;
+    private DecimalFormat frm = new DecimalFormat("+0.0000;-0.0000");
     
-//  private int m_mode = 0;					// now in Evaluator
-//  private GameBoard m_gb;					// now in Evaluator
-//	private AgentLoader agtLoader = null;	// now in Evaluator
+	/**
+	 * A list of all Hex states which are 0 or 1 ply away from the default start state.
+	 * For B={@link HexConfig#BOARD_SIZE}=(4,5,6) these are (10,15,21)+1 states (B*(B+1)/2+1 in general). <br>
+	 * <p>
+	 * This list is a static member, so that it needs to be constructed only once. <br>
+	 * This list is used in evaluation mode 10 and 20 
+	 */
+	protected static ArrayList<StateObserverHex> diffStartList = null;
+	
     /**
      * logResults toggles logging of training progress to a csv file located in {@link #logDir}
      */
@@ -83,6 +88,26 @@ public class EvaluatorHex extends Evaluator {
     	maxNAgent = new MaxNAgent("Max-N", parM, new ParOther());
     }
 
+    /**
+     * Add all 1-ply start states plus the default start state to diffStartList
+     * @param diffStartList
+     * @return diffStartList, filled with states
+     */
+	private ArrayList<StateObserverHex> 
+	addAll1PlyStates(ArrayList<StateObserverHex> diffStartList) {
+    	StateObserverHex s = (StateObserverHex) m_gb.getDefaultStartState();
+		for (int i=0; i<HexConfig.BOARD_SIZE; i++) {
+			for (int j=0; j<=i; j++) {
+				ACTIONS a = new ACTIONS(i*HexConfig.BOARD_SIZE+j);
+	        	StateObserverHex s_copy = s.copy();
+	        	s_copy.advance(a);
+	        	diffStartList.add(s_copy);
+			}
+		}	
+		diffStartList.add(s);		// add the default start state as well
+		return diffStartList;
+	}
+	
     @Override
     protected boolean evalAgent(PlayAgent pa) {
     	this.playAgent = pa;
@@ -91,6 +116,13 @@ public class EvaluatorHex extends Evaluator {
 			m_msg = "no evaluation done ";
 			lastResult = Double.NaN;
             return false;
+        }
+
+        // when evalAgent is called for the first time, construct diffStartList once for all 
+        // EvaluatorHex objects (will not change during runtime)
+        if (diffStartList==null) {
+        	diffStartList = new  ArrayList<StateObserverHex>(); 
+        	diffStartList = addAll1PlyStates(diffStartList);        	
         }
 
         //Disable logging for the final evaluation after training
@@ -125,6 +157,7 @@ public class EvaluatorHex extends Evaluator {
             case 2:
                 result = competeAgainstMaxN(playAgent, m_gb, numEpisodes);
                 break;
+            case 20:
             case 10:
             	if (playAgent instanceof TDNTuple2Agt || playAgent instanceof NTupleBase) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
@@ -132,14 +165,16 @@ public class EvaluatorHex extends Evaluator {
             		// (the latter two are children of NTupleBase).
             		// Also we have to construct MCTS opponent inside the callables, otherwise
             		// we are not thread-safe as well:
-                    result = competeAgainstMCTS_diffStates_PAR(playAgent, m_gb, numEpisodes);
+                    if (m_mode==20)    result = competeAgainstMCTS_diffStates_PAR(playAgent, m_gb, numEpisodes);
+                    else /*m_mode==10*/ result = competeAgainstMCTS_diffWinStates_PAR(playAgent, m_gb, numEpisodes);
             	} else {
                     ParMCTS params = new ParMCTS();
                     int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
                     params.setNumIter((int) Math.pow(10, numIterExp));
                     mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
-            		result = competeAgainstOpponent_diffStates(playAgent, mctsAgent, m_gb, numEpisodes);
+                    if (m_mode==20)    result = competeAgainstOpponent_diffStates(playAgent, mctsAgent, m_gb, numEpisodes);
+                    else /*m_mode==10*/ result = competeAgainstOpponent_diffWinStates(playAgent, mctsAgent, m_gb, numEpisodes);
             	}
                 break;
             case 11:
@@ -179,9 +214,6 @@ public class EvaluatorHex extends Evaluator {
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
-        //double success = XArenaFuncs.competeBoth(playAgent, randomAgent, 10, gameBoard);
-//      double[] res = XArenaFuncs.compete(playAgent, randomAgent, new StateObserverHex(), 100, verbose, null);
-//      lastResult = res[0]-res[2];
 		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, randomAgent), new StateObserverHex(), 100, verbose, null);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
@@ -199,29 +231,22 @@ public class EvaluatorHex extends Evaluator {
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstMaxN(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
-//      double[] res = XArenaFuncs.compete(playAgent, maxNAgent, new StateObserverHex(), numEpisodes, verbose, null);
-//      lastResult = res[0]-res[2];
 		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, maxNAgent), new StateObserverHex(), numEpisodes, verbose, null);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult + "  (#="+numEpisodes+")";
         if (this.verbose > 0) System.out.println(m_msg);
         return lastResult;
     }
-// --- This text is no longer valid: ---
-//  * Since the Max-N agent is a static object, the game tree is cached between evaluations. This also means that
-//  * a restart of the program is required to change Max-N params and to free memory used by the game tree.
-//  * Plays a high number of games for accurate measurements, since performance is high once tree is built.
-
 
     /**
      * Evaluates an agent's performance using enough iterations to play (near-) perfectly on boards
      * up to and including 5x5. No guarantees for 6x6 board or higher. Tends to require a lot of
-     * memory for 7x7 and up. Only one game per evaluation because of the high runtime of the MCTS agent.
+     * memory for 7x7 and up. 
      *
      * @param playAgent agent to be evaluated
      * @param gameBoard Game board the evaluation game is played on
      * @param numEpisodes number of episodes played during evaluation
-     * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
+     * @return a value in range [-1,1], depending on the rate of evaluation games won by the agent
      */
     private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
         ParMCTS params = new ParMCTS();
@@ -229,8 +254,6 @@ public class EvaluatorHex extends Evaluator {
         params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
-//      double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverHex(), numEpisodes, 0, null);
-//      lastResult = res[0]-res[2];        	
 		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent), new StateObserverHex(), numEpisodes, 0, null);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
@@ -242,9 +265,8 @@ public class EvaluatorHex extends Evaluator {
     /**
      * Similar to {@link EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)}, but:
      * <ul> 
-     * <li>It does not only play evaluation games from the default start state (empty board) but 
-     * also games where the first player (Black) has made a losing move and the agent as second
-     * player (White) will win, if it plays perfect (see {@link HexConfig#EVAL_START_ACTIONS}). 
+     * <li>It uses <b>every</b> 0-ply and 1-ply start state, plays an episode in both roles and 
+     * averages the results. 
      * <li>It allows a different opponent than MCTS to be passed in as 2nd argument
      * </ul>
      *
@@ -252,7 +274,7 @@ public class EvaluatorHex extends Evaluator {
      * @param opponent 	agent against which {@code playAgent} plays
      * @param gb 		Game board the evaluation game is played on
      * @param numEpisodes number of episodes played during evaluation
-     * @return a value between 0 or 1, depending on the rate of evaluation games won by the agent
+     * @return a value in range [-1,1], depending on the rate of evaluation games won by the agent
      * 
      * @see EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)
      * @see HexConfig#EVAL_START_ACTIONS
@@ -260,6 +282,58 @@ public class EvaluatorHex extends Evaluator {
     private double competeAgainstOpponent_diffStates(PlayAgent playAgent, PlayAgent opponent, GameBoard gb, int numEpisodes) {
         double[] res;
         double success = 0;
+        double averageSuccess = 0; 
+        
+		if (opponent == null) {
+			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
+			return Double.NaN;
+		} 
+
+        numStartStates = diffStartList.size();
+        
+        // evaluate each start state in turn and return average success rate: 
+        int i=0;
+        for (StateObserverHex so : diffStartList) {
+            long gameStartTime = System.currentTimeMillis();
+    		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0);
+    		success = sc.scTup[0];
+    		averageSuccess += success;
+        	long duration = System.currentTimeMillis() - gameStartTime;
+            System.out.println("Finished evaluation " + i + " after " + duration + "ms, success="+success);
+            i++;
+        }
+        averageSuccess /= numStartStates;
+        double winrate = (averageSuccess+1)/2;
+
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + frm.format(averageSuccess)
+        			+ " (winrate="+ frm.format(winrate) +")";
+//      if (this.verbose > 0) 
+        	System.out.println(m_msg);
+        lastResult = averageSuccess;
+        return averageSuccess;
+    }
+
+    /**
+     * Similar to {@link EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)}, but:
+     * <ul> 
+     * <li>It uses <b>every</b> 0-ply and 1-ply start state, plays an episode in both roles and 
+     * averages the results. 
+     * <li>It allows a different opponent than MCTS to be passed in as 2nd argument
+     * </ul>
+     *
+     * @param playAgent agent to be evaluated (it plays both 1st and 2nd)
+     * @param opponent 	agent against which {@code playAgent} plays
+     * @param gb 		Game board the evaluation game is played on
+     * @param numEpisodes number of episodes played during evaluation
+     * @return a value in range [-1,1], depending on the rate of evaluation games won by the agent
+     * 
+     * @see EvaluatorHex#competeAgainstMCTS(PlayAgent, GameBoard, int)
+     * @see HexConfig#EVAL_START_ACTIONS
+     */
+    private double competeAgainstOpponent_diffWinStates(PlayAgent playAgent, PlayAgent opponent, GameBoard gb, int numEpisodes) {
+        double[] res;
+        double success = 0;
+        double averageSuccess = 0; 
         
 		if (opponent == null) {
 			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
@@ -286,25 +360,28 @@ public class EvaluatorHex extends Evaluator {
         // evaluate each start state in turn and return average success rate: 
         for (int i=0; i<startAction.length; i++) {
         	StateObserverHex so = new StateObserverHex();
+            long gameStartTime = System.currentTimeMillis();
         	if (startAction[i] == -1) {
-//        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0, null);
-//              success += res[0]-res[2];        	
         		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null);
         		success = sc.scTup[0];
         	} else {
         		so.advance(new ACTIONS(startAction[i]));
-//        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0, null);
-//              success += res[2]-res[0];        	
         		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(opponent, playAgent), so, numEpisodes, 0, null);
         		success = sc.scTup[1];
         	}
+    		averageSuccess += success;
+        	long duration = System.currentTimeMillis() - gameStartTime;
+            System.out.println("Finished evaluation " + i + " after " + duration + "ms, success="+success);
         }
-        success /= startAction.length;
-        m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
-//        if (this.verbose > 0) 
+        averageSuccess /= numStartStates;
+        double winrate = (averageSuccess+1)/2;
+
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + frm.format(averageSuccess)
+        			+ " (winrate="+ frm.format(winrate) +")";
+//      if (this.verbose > 0) 
         	System.out.println(m_msg);
-        lastResult = success;
-        return success;
+        lastResult = averageSuccess;
+        return averageSuccess;
     }
 
     /**
@@ -325,14 +402,101 @@ public class EvaluatorHex extends Evaluator {
      * @param playAgent
      * @param gameBoard
      * @param numEpisodes
-     * @return
+     * @return a value in range [-1,1], depending on the rate of evaluation games won by the agent
      */
     private double competeAgainstMCTS_diffStates_PAR(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
         ExecutorService executorService = Executors.newFixedThreadPool(6);
         ParMCTS params = new ParMCTS();
         int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
         params.setNumIter((int) Math.pow(10, numIterExp));
-        //mctsAgent = new MCTSAgentT(Types.GUI_AGENT_LIST[3], new StateObserverHex(), params);
+
+        numStartStates = diffStartList.size();
+        
+        List<Double> successObservers = new ArrayList<>();
+        List<Callable<Double>> callables = new ArrayList<>();
+
+        // evaluate each start state in turn and return average success rate: 
+        int i=0;
+        for (StateObserverHex so : diffStartList) {
+            int gameNumber = i;
+            callables.add(() -> {
+                double[] res;
+                double success = 0;
+                long gameStartTime = System.currentTimeMillis();
+                StateObserverHex so2 = so.copy();
+                
+                // important: mctsAgent2 has to be constructed inside the 'callables' function, 
+                // otherwise all parallel calls would operate on the same agent and would produce
+                // garbage.
+                MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverHex(), params);
+
+        		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, mctsAgent2), so2, numEpisodes, 0);
+        		success = sc.scTup[0];
+        		
+                if(verbose == 0) {
+                	long duration = System.currentTimeMillis() - gameStartTime;
+                    System.out.println("Finished evaluation " + gameNumber + " after " + duration + "ms, success="+success);
+                }
+            	return Double.valueOf(success);
+            });
+            i++;
+        }
+   
+        // invoke all callables and store results on List successObservers
+        try {
+            executorService.invokeAll(callables).stream().map(future -> {
+                try {
+                    return future.get();
+                }
+                catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }).forEach(successObservers::add);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // reduce results (here: calculate average success)
+        double averageSuccess = 0; 
+        for(Double suc : successObservers) {
+            averageSuccess += suc.doubleValue();
+        }
+        averageSuccess/= numStartStates;
+        double winrate = (averageSuccess+1)/2;
+
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + frm.format(averageSuccess)
+        			+ " (winrate="+ frm.format(winrate) +")";
+//      if (this.verbose > 0) 
+        	System.out.println(m_msg);
+        lastResult = averageSuccess;
+        return averageSuccess;
+    }
+
+    /**
+     * Does the same as {@code competeAgainstMCTS_diffStates}, but with 6 parallel cores, 
+     * so it is 6 times faster. 
+     * <p>
+     * NOTES: <ul>
+     * <li> The memory consumption grows when this function is repeatedly called (by about 60 kB
+     * for each call, but there seems to be an effective limit for the Java process at 4.3 GB -- 
+     * beyond the garbage collector seems to do its work effectively)
+     * <li> The call to compete may not alter anything in {@code playAgent}. So the function 
+     * getNextAction2 invoked by compete should be thread-safe. This is valid, if getNextAction2 
+     * does not modify members in playAgent. Possible for TD-n-Tuple-agents, if we do not write 
+     * on class-global members (e.g. do not use BestScore, but use local variable BestScore2). 
+     * Parallel threads are not possible when playAgent is MCTSAgentT or MaxNAgent.
+     * </ul>
+     * 
+     * @param playAgent
+     * @param gameBoard
+     * @param numEpisodes
+     * @return a value in range [-1,1], depending on the rate of evaluation games won by the agent
+     */
+    private double competeAgainstMCTS_diffWinStates_PAR(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+        ExecutorService executorService = Executors.newFixedThreadPool(6);
+        ParMCTS params = new ParMCTS();
+        int numIterExp =  (Math.min(HexConfig.BOARD_SIZE,5) - 1);
+        params.setNumIter((int) Math.pow(10, numIterExp));
 
         // find the start states to evaluate:
         int [] startAction = {-1};
@@ -357,7 +521,7 @@ public class EvaluatorHex extends Evaluator {
 
         // evaluate each start state in turn and return average success rate: 
         for (int i=0; i<startAction.length; i++) {
-            int gameNumber = i+1;
+        	final int gameNumber=i;
             final int i2 = i;
             callables.add(() -> {
                 double[] res;
@@ -371,19 +535,16 @@ public class EvaluatorHex extends Evaluator {
                 MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
             	if (startAction2[i2] == -1) {
-//            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0, null);
-//                  success = res[0]-res[2];        	
             		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent2), so, numEpisodes, 0, null);
             		success = sc.scTup[0];
             	} else {
             		so.advance(new ACTIONS(startAction2[i2]));
-//            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0, null);
-//                  success = res[2]-res[0];        	
             		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(mctsAgent2, playAgent), so, numEpisodes, 0, null);
             		success = sc.scTup[1];
             	}
                 if(verbose == 0) {
-                    System.out.println("Finished evaluation " + gameNumber + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. ");
+                	long duration = System.currentTimeMillis() - gameStartTime;
+                    System.out.println("Finished evaluation " + gameNumber + " after " + duration + "ms, success="+success);
                 }
             	return Double.valueOf(success);
             });
@@ -409,36 +570,19 @@ public class EvaluatorHex extends Evaluator {
             averageSuccess += suc.doubleValue();
         }
         averageSuccess/= startAction.length;
+        double winrate = (averageSuccess+1)/2;
 
-        m_msg = playAgent.getName() + ": " + this.getPrintString() + averageSuccess;
-//        if (this.verbose > 0) 
+        m_msg = playAgent.getName() + ": " + this.getPrintString() + frm.format(averageSuccess)
+        			+ " (winrate="+ frm.format(winrate) +")";
+//      if (this.verbose > 0) 
         	System.out.println(m_msg);
         lastResult = averageSuccess;
         return averageSuccess;
     }
-
- 	// --- implemented by Evaluator ---
-//    @Override
-//    public double getLastResult() {
-//        return lastResult;
-//    }
-
- 	// --- implemented by Evaluator ---
-//    @Override
-//    public boolean isAvailableMode(int mode) {
-//        int[] availableModes = getAvailableModes();
-//        for (int availableMode : availableModes) {
-//            if (mode == availableMode) {
-//                return true;
-//            }
-//        }
-//
-//        return false;
-//    }
-
+    
     @Override
     public int[] getAvailableModes() {
-        return new int[]{-1, 0, 1, 2, 10, 11};
+        return new int[]{-1, 0, 1, 2, 10, 11, 20};
     }
 
     @Override
@@ -451,11 +595,6 @@ public class EvaluatorHex extends Evaluator {
         return -1;
     }
 
-//    @Override
-//    public int getMultiTrainEvalMode() {
-//        return 0; //getAvailableModes()[0];
-//    }
-
     @Override
     public String getPrintString() {
         switch (m_mode) {
@@ -463,8 +602,9 @@ public class EvaluatorHex extends Evaluator {
             case 0:  return "success against MCTS (best is 1.0): ";
             case 1:  return "success against Random (best is 1.0): ";
             case 2:  return "success against Max-N (best is 1.0): ";
-            case 10: return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
-            case 11: return "success against TDReferee (" + numStartStates + " diff. start states, best is 1.0): ";
+            case 10: return "success against MCTS (" + numStartStates + " diff. win start states, range [-1,1]): ";
+            case 20: return "success against MCTS (" + numStartStates + " diff. start states, range [-1,1]): ";
+            case 11: return "success against TDReferee (" + numStartStates + " diff. start states, range [-1,1]): ";
             default: return null;
         }
     }
@@ -476,7 +616,8 @@ public class EvaluatorHex extends Evaluator {
 				+ "0: against MCTS, best is 1.0<br>"
 				+ "1: against Random, best is 1.0<br>"
 				+ "2: against Max-N, best is 1.0<br>"
-				+ "10: against MCTS, different starts, best is 1.0<br>"
+				+ "10: against MCTS, different win starts, best is 1.0<br>"
+				+ "20: against MCTS, different starts, range [-1,1]<br>"
 				+ "11: against TDReferee.agt.zip, different starts"
 				+ "</html>";
 	}
@@ -488,16 +629,11 @@ public class EvaluatorHex extends Evaluator {
             case 1:  return "success against Random";
             case 2:  return "success against Max-N";
             case 10: return "success against MCTS";
+            case 20: return "success against MCTS";
             case 11: return "success against TDReferee";
             default: return null;
         }
     }
-
- 	// --- implemented by Evaluator ---
-//    @Override
-//    public String getMsg() {
-//        return m_msg;
-//    }
 
     /**
      * generates String containing the current timestamp

@@ -30,7 +30,7 @@ import params.ParNT;
 import tools.Types;
 
 /**
- *         Implementation of a learning value-function using n-tuple systems.
+ *         Implementation of a trainable value-function using n-tuple systems.
  *         A set of n-tuples is generated randomly or by user precept. Random
  *         n-tuples can be just a set of random points or a random walk on the
  *         board. The value-function uses symmetries of the board to allow a

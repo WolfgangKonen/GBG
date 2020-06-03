@@ -35,7 +35,7 @@ import static games.Hex.HexConfig.*;
  *                  [0,3]
  * </pre>
  * Player 0 (Black) has the first move. The white borders are below the first and above the 
- * last row. The black borders are along the columns.
+ * last row (rows = cells with the same 1st index). The black borders are from lowest to highest row.
  * 
  */
 public class StateObserverHex extends ObserverBase implements StateObservation {

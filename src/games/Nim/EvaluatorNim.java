@@ -134,7 +134,7 @@ public class EvaluatorNim extends Evaluator {
  	 * competeBoth against opponent, from default start state	
  	 * @param pa
  	 * @param opponent
-	 * @param gb		needed to get a default start state (competeBoth)
+	 * @param gb		needed to get default start state (competeBoth)
  	 * @return
 	 */
  	private double evaluateAgent1(PlayAgent pa, PlayAgent opponent, GameBoard gb) {
@@ -145,7 +145,7 @@ public class EvaluatorNim extends Evaluator {
 			return lastResult;
 		}
 //		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 1, 0);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 10, 0);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -162,7 +162,9 @@ public class EvaluatorNim extends Evaluator {
  	private double evaluateAgent2(PlayAgent pa, PlayAgent opponent, GameBoard gb) {
 		int competeNum=1;
 		double[] res;
-		double resX, resO;
+//		double resX, resO;
+        double success = 0;
+        double averageSuccess = 0; 
 		
 		if (opponent == null) {
 			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
@@ -188,9 +190,11 @@ public class EvaluatorNim extends Evaluator {
 //											// +1 is best for pa, -1 worst for pa.
 //			lastResult += (resX+resO)/2.0;
 			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), startSO, competeNum, 0);
-			lastResult = sc.scTup[0];
+    		success = sc.scTup[0];
+    		averageSuccess += success;
 		}
-		lastResult=lastResult/numK;
+        averageSuccess /= numK;
+		lastResult=averageSuccess;
 		
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);		// this.verbose is def'd in Evaluator
@@ -236,11 +240,6 @@ public class EvaluatorNim extends Evaluator {
 	{
 		return 3;
 	}
-//	public int getMultiTrainEvalMode() 
-//	{
-//		return 0;
-//	}
-
 	private String getBestResultString(int mode) {
 		DecimalFormat df = new DecimalFormat();				
 		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		

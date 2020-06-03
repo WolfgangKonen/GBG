@@ -32,19 +32,19 @@ filenames=c(#"TCL3-fixed6_250k-lam05_P4_H001-FAm.csv"
             #,"TCL3-fixed6_250k-lam05_P4_H001-noFAm.csv"
             #"TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.csv"
            #,"TCL3-fixed6_250k-lam05_P4_H001-diff1-noFAm.csv"  
-            "TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm"
+            "TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm.csv"
            ,"TCL3-fixed6_250k-lam05_P4_H001-diff2-noFAm.csv"
            )
-# suffix -DLm: evalQ is MCTS (0), evalT is AB with Distant Losses DL (5),
-# suffix -ALm: both evaluators AB, 1st one w/o DL (3), 2nd one with DL (5),
-# in both cases the evaluators MCTS or AlphaBeta (AB) play 2nd --> ideal winrate is 1.0
-# in both cases the 'm' means that runs were performed on maanbs05.
+# evalQ is Bench (19), evalT is TDRef (21) = Edax-d1,
+# in both cases the agents play in both roles --> winrate against much weaker agent is 1.0, ideal win rate
+# against equally strong agent is 0.5.
+# suffix 'm' means that runs were performed on maanbs05.
 # suffix -noFA: no final adaptation RL (FARL) step.
 #
-# other pars: alpha = 3.7->3.7m eps = 0.1->0.0, gamma = 1.0, ChooseStart01=F, 
-# NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=T, fixed ntuple mode 1: 70 8-tuples. 
+# other pars: alpha = 0.2->0.2, eps = 0.2->0.2, gamma = 1.0, lambda=0.5, ChooseStart01=T, 
+# NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=F, fixed ntuple mode 6: 50 6-tuples. 
 # TC_INIT=1e-4, TC_EXP with TC beta =2.7, rec.weight-change accumulation. 
-# 6.000.000 training games, 10 runs.
+# 250.000 training games, 10 runs.
 
   
 dfBoth = data.frame()

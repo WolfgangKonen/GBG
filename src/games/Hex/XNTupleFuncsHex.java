@@ -126,55 +126,93 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
 	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.
 	 * 
-	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()}
+	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()}: <br>
+	 * 		=1 for all straight row- and column-n-tuples (where n= @link {@link HexConfig#BOARD_SIZE}) 
+	 * 			plus the middle vertical line.<br>
+	 * 		=2 for a fixed set of 25 6-tuples (generated randomly, gave good results). Only valid for 
+	 * 			6x6 Hex board, all other board sizes throw an exception.
+	 * 	
 	 * @return nTuples[numTuples][]
 	 */
     @Override
     public int[][] fixedNTuples(int mode) {
-        int[][] tuples = new int[(HexConfig.BOARD_SIZE * 2) + 1][HexConfig.BOARD_SIZE];
+        int[][] tuples = null;
 
-        int[][] fixedTuples6x6 = {			// a tuple config which gave good results
-    			{4, 5, 9, 10, 11, 15},
-    			{18, 6, 7, 8, 12, 13},
-    			{19, 20, 8, 24, 13, 14},
-    			{16, 17, 21, 22, 23, 11},
-    			{16, 4, 5, 9, 10, 11},
-    			{18, 24, 12, 13, 30, 31},
-    			{32, 33, 21, 22, 26, 27},
-    			{19, 20, 9, 13, 14, 15},
-    			{32, 16, 33, 21, 22, 27},
-    			{18, 19, 24, 25, 26, 30},
-    			{18, 19, 7, 8, 12, 13},
-    			{16, 20, 21, 25, 10, 27},
-    			{0, 1, 2, 3, 6, 7},
-    			{2, 7, 8, 12, 14, 15},
-    			{1, 2, 3, 6, 7, 8},
-    			{32, 33, 25, 26, 27, 31},
-    			{34, 35, 23, 27, 28, 29},
-    			{0, 1, 2, 3, 4, 7},
-    			{0, 1, 2, 3, 6, 12},
-    			{23, 26, 27, 28, 29, 31},
-    			{32, 20, 25, 26, 27, 31},
-    			{18, 19, 20, 21, 25, 30},
-    			{1, 2, 6, 7, 8, 13},
-    			{32, 34, 35, 27, 28, 29},
-    			{32, 33, 25, 26, 27, 31} };
+        int[][] fixedTuples6x6 = 
+        			{				// a tuple config (25 6-tuples) which gave good results (2020-05)
+        			  {20, 21, 22, 9, 26, 15},
+        			  {16, 17, 21, 22, 23, 29},
+        			  {20, 4, 9, 13, 14, 15},
+        			  {1, 2, 3, 7, 12, 13},
+        			  {18, 19, 24, 25, 26, 30},
+        			  {32, 33, 20, 25, 26, 27},
+        			  {32, 20, 25, 26, 27, 28},
+        			  {33, 34, 35, 23, 28, 29},
+        			  {19, 20, 25, 30, 31, 15},
+        			  {19, 24, 25, 26, 30, 31},
+        			  {2, 3, 8, 9, 10, 14},
+        			  {18, 19, 8, 12, 13, 14},
+        			  {1, 18, 7, 8, 12, 13},
+        			  {17, 22, 23, 27, 28, 29},
+        			  {34, 21, 22, 25, 26, 28},
+        			  {0, 1, 6, 7, 8, 12},
+        			  {32, 33, 23, 27, 28, 31},
+        			  {16, 17, 22, 10, 11, 28},
+        			  {33, 34, 35, 23, 28, 29},
+        			  {3, 7, 8, 9, 10, 14},
+        			  {16, 4, 5, 21, 10, 11},
+        			  {16, 33, 21, 22, 27, 28},
+        			  {2, 3, 4, 5, 8, 9},
+        			  {0, 1, 2, 6, 7, 13},
+        			  {16, 17, 21, 22, 27, 28}
+        			};
+
+//        	{			// a tuple config (25 6-tuples) which gave good results (2019)
+//    			{4, 5, 9, 10, 11, 15},
+//    			{18, 6, 7, 8, 12, 13},
+//    			{19, 20, 8, 24, 13, 14},
+//    			{16, 17, 21, 22, 23, 11},
+//    			{16, 4, 5, 9, 10, 11},
+//    			{18, 24, 12, 13, 30, 31},
+//    			{32, 33, 21, 22, 26, 27},
+//    			{19, 20, 9, 13, 14, 15},
+//    			{32, 16, 33, 21, 22, 27},
+//    			{18, 19, 24, 25, 26, 30},
+//    			{18, 19, 7, 8, 12, 13},
+//    			{16, 20, 21, 25, 10, 27},
+//    			{0, 1, 2, 3, 6, 7},
+//    			{2, 7, 8, 12, 14, 15},
+//    			{1, 2, 3, 6, 7, 8},
+//    			{32, 33, 25, 26, 27, 31},
+//    			{34, 35, 23, 27, 28, 29},
+//    			{0, 1, 2, 3, 4, 7},
+//    			{0, 1, 2, 3, 6, 12},
+//    			{23, 26, 27, 28, 29, 31},
+//    			{32, 20, 25, 26, 27, 31},
+//    			{18, 19, 20, 21, 25, 30},
+//    			{1, 2, 6, 7, 8, 13},
+//    			{32, 34, 35, 27, 28, 29},
+//    			{32, 33, 25, 26, 27, 31} };
         
         switch (mode) {
         case 1:
-            //All diagonal lines
+        	tuples = new int[(HexConfig.BOARD_SIZE * 2) + 1][HexConfig.BOARD_SIZE];
+        	
+            // All diagonal lines, meaning all rows and columns according to the nomenclature 
+        	// in StateObserverHex
             for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
                 for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                     int actionInt = i * HexConfig.BOARD_SIZE + j;
-                    tuples[i][j] = actionInt;
+                    tuples[i][j] = actionInt;						// tuples[i]: ith row
 
                     actionInt = j * HexConfig.BOARD_SIZE + i;
-                    tuples[i + HexConfig.BOARD_SIZE][j] = actionInt;
+                    tuples[i + HexConfig.BOARD_SIZE][j] = actionInt;// tuples[i+SIZE]: ith column
                 }
             }
 
-            //The straight line in the center of the board
-            //(0, n); (1, n-1); ... (n-1, 1); (n, 0);
+            // The straight vertical line from south corner to north corner
+            //      (0, n); (1, n-1); ... (n-1, 1); (n, 0);
+            // see StateObserverHex for cell coding
             for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
                 int j = HexConfig.BOARD_SIZE - i;
                 int actionInt = i * HexConfig.BOARD_SIZE + j;
@@ -201,7 +239,8 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
 	public String fixedTooltipString() {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>"
-				+ "1: TODO"
+				+ "1: all diagonals + longest vertical line <br>"
+				+ "2: 25 6-tuples (only for 6x6)"
 				+ "</html>";
 	}
 

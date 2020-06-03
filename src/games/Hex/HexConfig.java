@@ -37,7 +37,7 @@ public class HexConfig {
      * Number of episodes to play when evaluating an agent
      * @see EvaluatorHex
      */
-    final static int EVAL_NUMEPISODES = 10;
+    final static int EVAL_NUMEPISODES = 3; // 5; //10;
 
     /**
      * the int's in EVAL_START_ACTIONS[N][] code the start boards for evaluation mode 10

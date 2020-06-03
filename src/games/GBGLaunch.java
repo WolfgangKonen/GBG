@@ -431,7 +431,7 @@ public class GBGLaunch {
 		String[] scaPar = new String[3];
 		switch(selectedGame) {
 		case "Hex": 
-			scaPar[0]="5";		// the initial (recommended) value	
+			scaPar[0]="6";		// the initial (recommended) value	
 			break;
 		case "Nim": 
 			scaPar[0]="3";		// 	
@@ -474,7 +474,7 @@ public class GBGLaunch {
 			setScaPar0List(new int[]{2,3,4,5,6,7,8});
 			setScaPar1List(new int[]{});
 			setScaPar2List(new int[]{});
-			choiceScaPar0.setSelectedItem("5");		// the initial (recommended) value	
+			choiceScaPar0.setSelectedItem("6");		// the initial (recommended) value	
 			break;
 		case "Nim": 
 			scaPar0_L.setText("Heaps");

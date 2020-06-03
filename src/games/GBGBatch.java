@@ -35,10 +35,13 @@ import games.StateObservation;
 import games.XArenaButtons;
 import games.XArenaFuncs;
 import games.CFour.ArenaTrainC4;
+import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
+import games.Nim.ArenaNim;
 import games.Nim.ArenaTrainNim;
 import games.Othello.ArenaTrainOthello;
 import games.RubiksCube.ArenaTrainCube;
+import games.Sim.ArenaSim;
 import games.Sim.ArenaTrainSim;
 import games.TicTacToe.ArenaTrainTTT;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
@@ -53,7 +56,8 @@ import tools.ScoreTuple;
 import tools.Types;
 
 /**
- * This class is used to start GBG for batch runs. See {@link #main(String[])} for details on the command line arguments
+ * This class is used to start GBG for batch runs. 
+ * See {@link #main(String[])} for details on the command line arguments.
  * <p>
  * This program should normally not require any GUI facilities, so it should run on machines having no graphical
  * user interface system like X11 or Win. <br>
@@ -89,7 +93,13 @@ public class GBGBatch {
 	/**
 	 * Syntax:
 	 * <pre>
-	 * GBGBatch gameName n agentFile [ trainNum maxGameNum csvFile ] </pre>
+	 * GBGBatch gameName n agentFile [ trainNum maxGameNum csvFile scaPar0 scaPar1 scaPar2 ] </pre>
+	 * <p>
+	 * Examples:
+	 * <pre>
+	 * GBGBatch Hex 1 td3new_10-6.agt.zip 1 50000 multiTest.csv 4
+	 * GBGBatch ConnectFour 1 TCL-EXP-NT3-al37-lam000-6000k-epsfin0.stub.agt.zip 10 6000000 multiTrain-noFA.csv
+	 * </pre>         	
 	 * @param args <br>
 	 * 			[0] {@code gameName}: name of the game, suitable as subdirectory name in the 
 	 *         		{@code agents} directory <br>
@@ -106,16 +116,24 @@ public class GBGBatch {
 	 *          [3] (optional) trainNum: how many agents to train (default -1). <br>
 	 *          [4] (optional) maxGameNum: maximum number of training episodes (default -1) <br>
 	 *          [5] (optional) csvFile: filename for CSV results (defaults: "multiTrain.csv" or 
-	 *          	"multiTrainAlphaSweep.csv" or "multiTrainLambdaSweep.csv", see {@link #csvNameDef})<p>
+	 *          	"multiTrainAlphaSweep.csv" or "multiTrainLambdaSweep.csv", see {@link #csvNameDef}) <br>
+	 *          [6] (optional) scaPar0: scalable parameter 0 <br>
+	 *          [7] (optional) scaPar1: scalable parameter 1 <br>
+	 *          [8] (optional) scaPar2: scalable parameter 2 <br>
+	 *          <p>
 	 *          
-	 * If trainNum or maxGameNum are -1, their respective values stored in {@code agentFile} are taken.<br>
+	 * If <b>trainNum</b> or <b>maxGameNum</b> are -1, their respective values stored in {@code agentFile} are taken.
+	 * <p>
 	 * Side effect: the last trained agent is stored to {@code<csvName>.agt.zip}, where 
-	 * {@code <csvname>} is the 5th argument w/o {@code .csv}
-	 *          	
+	 * {@code <csvname>} is {@code args[5]} w/o {@code .csv}
+	 * <p>
+	 * <b>scaPar0,1,2</b> contain the scalable parameters of a game (if a game supports such parameters). Example: The game 
+	 * Hex has the board size (4,5,6,...) as scalable parameter scaPar0. If no scalable parameters are given as 
+	 * command arguments, the defaults from {@link #setDefaultScaPars(String)} apply.
+	 * 
 	 * @throws IOException if s.th. goes wrong when loading the agent or saving the csv file.
 	 */
 	public static void main(String[] args) throws IOException {
-//		GBGBatch t_Frame = new GBGBatch("General Board Game Playing");
 		t_Batch = new GBGBatch("General Board Game Playing");
 		int trainNum = -1;
 		int maxGameNum = -1;
@@ -126,36 +144,6 @@ public class GBGBatch {
 			System.exit(1);
 		}
 
-		switch(args[0]) {
-		case "ConnectFour": 
-			t_Game = new ArenaTrainC4("",false);
-			break;
-		case "Hex": 
-			t_Game = new ArenaTrainHex("",false);
-			break;
-		case "Nim": 
-			t_Game = new ArenaTrainNim("",false);
-			break;
-		case "Othello": 
-			t_Game = new ArenaTrainOthello("",false);
-			break;
-		case "RubiksCube": 
-			t_Game = new ArenaTrainCube("",false);
-			break;
-		case "Sim": 
-			t_Game = new ArenaTrainSim("",false);
-			break;
-		case "TicTacToe": 
-			t_Game = new ArenaTrainTTT("",false);
-			break;
-		case "2048": 
-			t_Game = new ArenaTrain2048("",false);
-			break;
-		default: 
-			System.err.println("[GBGBatch.main] args[0]="+args[0]+": This game is unknown.");
-			System.exit(1);
-		}
-
 		try {
 			csvName = csvNameDef[Integer.parseInt(args[1])-1];
 		} catch(NumberFormatException e) {
@@ -163,12 +151,6 @@ public class GBGBatch {
 			System.err.println("[GBGBatch.main]: args[1]='"+args[1]+"' is not a number!");
 			System.exit(1);
 		}
-
-		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+t_Game.getGameName();
-		String subDir = t_Game.getGameBoard().getSubDir();
-		if (subDir != null) strDir += "/"+subDir;
-		
-		filePath = strDir + "/" +args[2]; //+ "tdntuple3.agt.zip";
 
 		try {
 			if (args.length>=4) trainNum = Integer.parseInt(args[3]);
@@ -186,10 +168,73 @@ public class GBGBatch {
 		}
 		if (args.length>=6) csvName = args[5];
 
+		String selectedGame = args[0];
+		String[] scaPar = setDefaultScaPars(selectedGame);
+		for (int i=0; i<3; i++)
+			if (args.length>=i+7) scaPar[i] = args[i+6];
+
+		switch(selectedGame) {
+		case "2048": 
+			t_Game = new ArenaTrain2048("",false);
+			break;
+		case "ConnectFour": 
+			t_Game = new ArenaTrainC4("",false);
+			break;
+		case "Hex": 
+			// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaTrainHex, 
+			// which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
+			t_Game = new ArenaTrainHex("",false);
+			break;
+		case "Nim": 
+			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
+			// ArenaTrainNim, which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaNim.setNumHeaps(Integer.parseInt(scaPar[0]));
+			ArenaNim.setHeapSize(Integer.parseInt(scaPar[1]));
+			ArenaNim.setMaxMinus(Integer.parseInt(scaPar[2]));
+			t_Game = new ArenaTrainNim("",false);
+			break;
+		case "Othello": 
+			t_Game = new ArenaTrainOthello("",false);
+			break;
+		case "RubiksCube": 
+			// Set CubeConfig.{cubeType,boardVecType,twistType} *prior* to calling constructor  
+			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaTrainCube.setCubeType(scaPar[0]);
+			ArenaTrainCube.setBoardVecType(scaPar[1]);
+			ArenaTrainCube.setTwistType(scaPar[2]);
+			t_Game = new ArenaTrainCube("",false);
+			break;
+		case "Sim": 
+			// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaTrainSim, 
+			// which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
+			ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
+			ArenaSim.setCoalition(scaPar[2]);
+			t_Game = new ArenaTrainSim("",false);
+			break;
+		case "TicTacToe": 
+			t_Game = new ArenaTrainTTT("",false);
+			break;
+		default: 
+			System.err.println("[GBGBatch.main] args[0]="+args[0]+": This game is unknown.");
+			System.exit(1);
+		}
+
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+t_Game.getGameName();
+		String subDir = t_Game.getGameBoard().getSubDir();
+		if (subDir != null) strDir += "/"+subDir;
+		
+		filePath = strDir + "/" +args[2]; //+ "tdntuple3.agt.zip";
+
 		savePath = args[5].replaceAll("csv", "agt.zip");
 		savePath = strDir + "/" +savePath;
 
-		// start a batch run without any window
+		// start a batch run without any windows
 		switch(args[1]) {
 		case "1":
 			t_Batch.batch1(trainNum,maxGameNum,filePath,
@@ -198,12 +243,10 @@ public class GBGBatch {
 		case "2":
 			t_Batch.batch2(trainNum,maxGameNum,filePath,
 					t_Batch.t_Game.m_xab,t_Batch.t_Game.getGameBoard(),csvName);
-//					t_Frame.t_Game.m_xab,t_Frame.t_Game.getGameBoard(),csvName); 
 			break;
 		case "3":
 			t_Batch.batch3(trainNum,maxGameNum,filePath,
 					t_Batch.t_Game.m_xab,t_Batch.t_Game.getGameBoard(),csvName);
-//					t_Frame.t_Game.m_xab,t_Frame.t_Game.getGameBoard(),csvName); 
 			break;
 		default:
 			System.err.println("[GBGBatch.main] args[1]="+args[1]+" not allowed.");
@@ -212,6 +255,47 @@ public class GBGBatch {
 
 		System.exit(0);
 	}
+
+	/**
+	 * Set default values for the scalable parameters.
+	 * <p>
+	 * This is for the case where GBGBatch is started without {@code args[6], args[7], args[8]}. See {@link #main(String[])}.
+	 */
+	public static String[] setDefaultScaPars(String selectedGame) {
+		String[] scaPar = new String[3];
+		switch(selectedGame) {
+		case "Hex": 
+			scaPar[0]="5";		// the initial (recommended) value	
+			break;
+		case "Nim": 
+			scaPar[0]="3";		// 	
+			scaPar[1]="5";		// the initial (recommended) values	
+			scaPar[2]="3";		// 
+			break;
+		case "Sim": 
+			scaPar[0]="2";		 	
+			scaPar[1]="6";			
+			scaPar[2]="None";			
+			break;
+		case "RubiksCube": 
+			scaPar[0]="2x2x2";		 	
+			scaPar[1]="CSTATE";			
+			scaPar[2]="ALL";			
+		case "2048": 
+		case "ConnectFour": 
+		case "Othello": 
+		case "TicTacToe": 
+			//
+			// games with no scalable parameters
+			//
+			break;
+		default: 
+			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
+			System.exit(1);
+		}
+		return scaPar;
+	}
+	
 
 	public GBGBatch(String title) {
 //		super(title);

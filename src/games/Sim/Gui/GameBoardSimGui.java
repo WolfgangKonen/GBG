@@ -78,6 +78,10 @@ public class GameBoardSimGui {
 	
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) board.clearLastNodes();
+		// Why 'if (boardClear)'? - When a game is over in INSPECTV, then we call clearBoard(false,true) in order
+		// to clear the value display. But we do not want to clear lastNodes, because we want that frame.repaint
+		// marks the losing triangle.
+		
 	    frame.repaint();
 	}
 

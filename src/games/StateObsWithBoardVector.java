@@ -1,9 +1,12 @@
 package games;
 
+import controllers.TD.ntuple2.NTuple2ValueFunc;
+
 /**
  * 	This container class just bundles a {@link BoardVector} with its creating {@link StateObservation} object.
  * 
  *  @see XNTupleFuncs#symmetryVectors(StateObsWithBoardVector, int)
+ *  @see NTuple2ValueFunc
  */
 public class StateObsWithBoardVector {
 	private StateObservation so;

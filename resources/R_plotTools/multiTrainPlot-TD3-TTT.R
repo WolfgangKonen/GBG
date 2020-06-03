@@ -4,15 +4,19 @@ source("summarySE.R")
 
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
 USEGAMESK=T       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
+MAPWINRATE=T      # if =T: map y-axis to win rate (range [0,1]); if =F: range [-1,1]
 
 wfac = ifelse(USEGAMESK,1000,1);
 gamesVar = ifelse(USEGAMESK,"gamesK","gameNum")
-path <- "../../agents/TicTacToe/csv/"; limits=c(-1.0,0.1); errWidth=300/wfac;
+Ylimits=c(ifelse(MAPWINRATE,0.0,-1.0),1.0);
+errWidth=300/wfac;
+path <- "../../agents/TicTacToe/csv/"; 
 
-filenames=c("multiTrainTD3.csv"
-           ,"multiTrainTD3NoLearnRM.csv"
-           ,"multiTrainTD3NoFinalAdapt.csv"
-           #,"multiTrain_TCL-EXP-al10-lam06-500k-eps0025.csv"
+filenames=c(#"multiTrainTD3.csv"
+            #,"multiTrainTD3NoLearnRM.csv"
+            #,"multiTrainTD3NoFinalAdapt.csv"
+              "multiTest.csv"
+            , "multiTest-noFA.csv"  
            )
 # other pars: alpha=1.0 .. 0.5, eps=0.1 ... 0.0, ChooseStart01=F
 # lambda=0.0, learnFromRM=true, NORM=F, sigmoid=tanh. One 9-tuple.
@@ -36,7 +40,7 @@ for (k in 1:length(filenames)) {
   
   algoCol = switch(k
                     ,rep("TD-FARL",nrow(df))
-                    ,rep("no learnRM",nrow(df))
+                    #,rep("no learnRM",nrow(df))
                     ,rep("no FARL",nrow(df))   # no finalAdaptAgents
                     #,rep("al50",nrow(df))
                     #,rep("eps0.025",nrow(df))
@@ -75,6 +79,9 @@ tgc <- tgc1
 tgc$algorithm <- as.factor(tgc$algorithm)
 tgc$evalMode <- as.factor(tgc$evalMode)
 
+if (MAPWINRATE) tgc$eval = (tgc$eval+1)/2   # map y-axis to win rate (range [0,1])
+
+
 # The errorbars may overlap, so use position_dodge to move them horizontally
 pd <- position_dodge(3/wfac) # move them 3000 to the left and right
 
@@ -86,7 +93,7 @@ if (USEGAMESK) {
 }
 q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=errWidth) #, position=pd)
 q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
-q <- q+scale_y_continuous(limits=limits) 
+q <- q+scale_y_continuous(limits=Ylimits) 
 #q <- q+guides(colour = guide_legend(reverse = TRUE))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 
 q <- q+theme(axis.text = element_text(size = rel(1.5)))     # bigger tick mark text  

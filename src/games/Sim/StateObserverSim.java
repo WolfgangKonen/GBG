@@ -469,11 +469,11 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		}
 	}
 
-	private boolean isLegal(int iAction)
+	public boolean isLegalAction(ACTIONS act)
 	{
-		int k = 0;
+		int iAction = act.toInt();
 		
-		for(int i = 0; i < lFrom.length -1 ; i++) {
+		for(int i=0, k=0; i < lFrom.length -1 ; i++) {
 			for(int j = lFrom[i].getNode()+1; j < lFrom.length; j++,k++) {
 				if(k == iAction && lFrom[i].getPlayer(j) == 0)
 					return true;
@@ -481,11 +481,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		}
 		
 		return false;
-	}
-	
-	public boolean isLegalAction(ACTIONS act)
-	{
-		return isLegal(act.toInt()); 
 	}
 	
 	public int inputToActionInt(int n1, int n2)
@@ -499,7 +494,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			}
 		}
 		
-		return -1;
+		throw new RuntimeException("No action fits to n1="+n1+", n2="+n2+" !");
+//		return -1;
 	}
 
 	public int getLinkFromTo(int i, int j) {
