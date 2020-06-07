@@ -737,6 +737,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        ns = new NextState(this,s_t,a_t);	
 	        curPlayer = ns.getSO().getPlayer();
 	        nextPlayer = ns.getNextSO().getPlayer();
+	        assert curPlayer<randLast.length : "Oops, randLast too small!";
 	        randLast[curPlayer] = a_t.isRandomAction(); // /WK/ bug fix: has to come before adaptAgentV (!)
 	        	// Remark: This line was missing before 2019-09-02, it was only done 4 lines later, after
 	        	// adaptAgentV(). As a result, in the old version randLast[curPlayer] would be false, even

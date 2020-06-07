@@ -187,6 +187,7 @@ public class ParMCTS implements Serializable {
 		case "MCTS": 
 			switch (gameName) {
 			case "Nim": 
+			case "Nim3P": 
 				this.setNumIter(10000);		
 				this.setK_UCT(1.414);
 				break;

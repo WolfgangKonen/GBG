@@ -15,7 +15,7 @@ import games.Sim.ConfigSim;
 import games.ArenaTrain;
 
 /**
- * {@link Arena} for Nim. It borrows all functionality
+ * {@link Arena} for Nim (2 players). It borrows all functionality
  * from the general class {@link Arena}. It only overrides 
  * the abstract methods <ul>
  * <li> {@link Arena#makeGameBoard()}, 
@@ -23,20 +23,20 @@ import games.ArenaTrain;
  * <li> {@link Arena#makeFeatureClass(int)}, 
  * <li> {@link Arena#makeXNTupleFuncs()}, 
  * </ul> 
- * such that these factory methods return objects of class {@link GameBoardNim}, 
- * {@link EvaluatorNim}, {@link FeatureNim}, and {@link XNTupleFuncsNim}, respectively.
+ * such that these factory methods return objects of class {@link GameBoardNim2P}, 
+ * {@link EvaluatorNim2P}, {@link FeatureNim}, and {@link XNTupleFuncsNim2P}, respectively.
  * <p>
- * {@link ArenaNim} has a short {@link #main(String[])} for launching the non-trainable 
+ * {@link ArenaNim2P} has a short {@link #main(String[])} for launching the non-trainable 
  * version of GBG. 
  * 
- * @see GameBoardNim
- * @see EvaluatorNim
+ * @see GameBoardNim2P
+ * @see EvaluatorNim2P
  * 
  * @author Wolfgang Konen, TH Koeln, Dec'18
  */
-public class ArenaNim extends Arena   {
+public class ArenaNim2P extends Arena   {
 	
-	public ArenaNim(String title, boolean withUI) {
+	public ArenaNim2P(String title, boolean withUI) {
 		super(title,withUI);		
 	}
 	
@@ -98,7 +98,7 @@ public class ArenaNim extends Arena   {
 	 * @return	the game board
 	 */
 	public GameBoard makeGameBoard() {
-		gb = new GameBoardNim(this);	
+		gb = new GameBoardNim2P(this);	
 		return gb;
 	}
 	/**
@@ -115,7 +115,7 @@ public class ArenaNim extends Arena   {
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
 //		if (mode==-1) mode=EvaluatorNim.getDefaultEvalMode();
-		return new EvaluatorNim(pa,gb,stopEval,mode,verbose);
+		return new EvaluatorNim2P(pa,gb,stopEval,mode,verbose);
 	}
 	
 	public Feature makeFeatureClass(int featmode) {
@@ -123,7 +123,7 @@ public class ArenaNim extends Arena   {
 	}
 	
 	public XNTupleFuncs makeXNTupleFuncs() {
-		return new XNTupleFuncsNim();
+		return new XNTupleFuncsNim2P();
 	}	
 
 	public void performArenaDerivedTasks() {  }
@@ -137,7 +137,7 @@ public class ArenaNim extends Arena   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaNim t_Frame = new ArenaNim("General Board Game Playing",true);
+		ArenaNim2P t_Frame = new ArenaNim2P("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();

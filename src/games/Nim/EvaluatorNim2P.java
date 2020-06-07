@@ -29,7 +29,7 @@ import tools.ScoreTuple;
 import tools.Types;
 
 /**
- * Evaluator for the game Nim. Depending on the value of parameter {@code mode} in constructor:
+ * Evaluator for the game Nim (2 players). Depending on the value of parameter {@code mode} in constructor:
  * <ul>
  * <li> -1: no evaluation
  * <li>  0: compete against Random, best is 0.9
@@ -41,7 +41,7 @@ import tools.Types;
  * </ul>  
  * All competitions are COMPETE_BOTH. 
  */
-public class EvaluatorNim extends Evaluator {
+public class EvaluatorNim2P extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {-1,0,1,2,3,4,11};
 	private RandomAgent random_agent = new RandomAgent("Random");
 	private MaxNAgent maxNAgent = null;
@@ -52,17 +52,17 @@ public class EvaluatorNim extends Evaluator {
 //	private AgentLoader agtLoader = null;	// now in Evaluator
 //	private GameBoard m_gb;					// now in Evaluator
 	
-	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
+	public EvaluatorNim2P(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, gb, 1, stopEval);
 		initEvaluator(gb);
 	}
 
-	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
+	public EvaluatorNim2P(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
 		super(e_PlayAgent, gb, mode, stopEval);
 		initEvaluator(gb);
 	}
 
-	public EvaluatorNim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
+	public EvaluatorNim2P(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, gb, mode, stopEval, verbose);
 		initEvaluator(gb);
 	}
@@ -169,7 +169,7 @@ public class EvaluatorNim extends Evaluator {
 		if (opponent == null) {
 			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
 			lastResult = Double.NaN;
-			m_msg = "EvaluatorTTT: opponent is null!";
+			m_msg = "EvaluatorNim: opponent is null!";
 			return lastResult;
 		} 
 

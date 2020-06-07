@@ -11,7 +11,7 @@ library(grid)
 source("summarySE.R")
 
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
-USEGAMESK=T       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
+USEGAMESK=F       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
 USEEVALT=F        # if =T: use evalT measure; if =F: use evalQ measure for y-label
 MAPWINRATE=T      # if =T: map y-axis to win rate (range [0,1]); if =F: range [-1,1]
 
@@ -27,18 +27,19 @@ Xlimits=c(0,310); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 filenames=c(#"multiTrain-OLD.csv"  # GBGBatch-OLD.jar,branch master as of 2020-03-10
             # "multiTest-25-6-TCLid-FA-10m.csv"      # GBGBatch.jar
             #,"multiTest-25-6-TCLid-noFA-10m.csv"    # GBGBatch-noFA.jar
-             "multiTest-20.csv"      # GBGBatch.jar
-            ,"multiTest-noFA-20.csv"    # GBGBatch-noFA.jar
+             "multiTest-25-6-TCLid-FA-20m.csv"      # GBGBatch.jar
+            ,"multiTest-25-6-TCLid-noFA-20m.csv"    # GBGBatch-noFA.jar
 )
-# evalQ is MCTS (0), evalT is MCTS with diff. starts (10),
+# in the '-10m' case: evalQ is MCTS (0), evalT is MCTS with 7 diff. win starts (10),
+# in the '-20m' case: evalQ is MCTS with 22 diff. starts (20), evalT is -1 ,
 # in both cases TD starts from positions which are theoretical wins --> ideal winrate is 1.0.
 # suffix 'm' means that runs were performed on maanbs05.
 # suffix -noFA: no final adaptation RL (FARL) step.
 #
 # other pars: alpha = 1.0->0.5, eps = 0.2->0.2, lambda=0.0, gamma = 1.0, ChooseStart01=T, 
 # NORMALIZE=F, SIGMOID=tanh, LEARNFROMRM=T, random ntuples: 25 6-tuples. 
-# TC_INIT=1e-4, TC_id, rec.weight-change accumulation. 
-# 300.000 training games, 10 runs.
+# TC_INIT=1e-4, TC_id, rec.weight-change accumulation, USESYMMETRY. 
+# 300.000 training episodes, eval every 50.000 episodes, 10 runs.
 
   
 dfBoth = data.frame()
@@ -113,10 +114,10 @@ if (USEGAMESK) {
 } else {
   q <- ggplot(tgc,aes(x=gameNum,y=eval,colour=algo,linetype=algo))
 }
-q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=errWidth, position=pd)
+q <- q+geom_errorbar(aes(ymin=eval-se, ymax=eval+se), width=errWidth) #, position=pd)
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+geom_line(size=1.0) + geom_point(size=2.0)
-q <- q+scale_y_continuous(limits=Ylimits) 
+q <- q+scale_y_continuous(limits=Ylimits) + ylab(evalStr)
 q <- q+guides(colour = guide_legend(reverse = FALSE))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 
 q <- q+theme(axis.text = element_text(size = rel(1.5)))     # bigger tick mark text  

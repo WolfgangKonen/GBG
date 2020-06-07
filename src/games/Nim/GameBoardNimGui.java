@@ -61,9 +61,9 @@ public class GameBoardNimGui extends JFrame {
 	private double[][] OptTable;
 
 	/**
-	 * a reference to the 'parent' {@link GameBoardNim} object
+	 * a reference to the 'parent' {@link GameBoardNim2P} object
 	 */
-	private GameBoardNim m_gb=null;
+	private GameBoardNimBase m_gb=null;
 	private int iBest,jBest;
 	private double vWorst;
 	
@@ -72,8 +72,8 @@ public class GameBoardNimGui extends JFrame {
 	private Color colTHK2 = new Color(255,137,0);
 	private Color colTHK3 = new Color(162,0,162);
 	
-	public GameBoardNimGui(GameBoardNim gb) {
-		super("Nim");
+	public GameBoardNimGui(GameBoardNimBase gb) {
+		super(gb.getStateObs().getName());	// "Nim" or "Nim3P"
 		m_gb = gb;
 		initGui("");
 //		clearBoard(true,true);
@@ -134,7 +134,7 @@ public class GameBoardNimGui extends JFrame {
 			Font hFont=new Font("Arial",Font.BOLD,4*Types.GUI_HELPFONTSIZE);
 			Heap[i] = new JLabel(" ");
 			Heap[i].setFont(hFont);
-			Heap[i].setText(m_gb.m_so.getHeaps()[i]+"");
+			Heap[i].setText(m_gb.getHeaps()[i]+"");
 			Heap[i].setHorizontalAlignment(SwingConstants.CENTER);
 			hPanel.add(Heap[i],BorderLayout.CENTER);
 			JPanel bPanel=new JPanel();
@@ -155,7 +155,7 @@ public class GameBoardNimGui extends JFrame {
 						{
 							public void actionPerformed(ActionEvent e)
 							{
-								Arena.Task aTaskState = m_gb.m_Arena.taskState;
+								Arena.Task aTaskState = m_gb.getArena().taskState;
 								if (aTaskState == Arena.Task.PLAY)
 								{
 									m_gb.HGameMove(x,y);	// i.e. make human move (i,j), if Board[i][j] is clicked								
@@ -202,7 +202,7 @@ public class GameBoardNimGui extends JFrame {
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
 			for(int i=0;i<NimConfig.NUMBER_HEAPS;i++){
-				Heap[i].setText(m_gb.m_so.getHeaps()[i]+"");
+				Heap[i].setText(m_gb.getHeaps()[i]+"");
 				for(int j=0;j<NimConfig.MAX_MINUS;j++){
 			        Board[i][j].setText((j+1)+"");
 					Board[i][j].setBackground(colTHK2);
@@ -210,7 +210,7 @@ public class GameBoardNimGui extends JFrame {
 					Board[i][j].setEnabled(false);
 				}
 			}
-			ArrayList<Types.ACTIONS> acts = m_gb.m_so.getAvailableActions();
+			ArrayList<Types.ACTIONS> acts = m_gb.getStateObs().getAvailableActions();
 			for (int k=0; k<acts.size(); k++) {
 				int iAction = acts.get(k).toInt();
 				int j=iAction%NimConfig.MAX_MINUS;
@@ -240,27 +240,32 @@ public class GameBoardNimGui extends JFrame {
 	public void updateBoard(StateObserverNim soN, 
 							boolean withReset, boolean showValueOnGameboard) {
 		int i,j;
-		boolean isTaskPlay = (m_gb.m_Arena.taskState == Arena.Task.PLAY);
-		boolean isTaskInspectV = (m_gb.m_Arena.taskState == Arena.Task.INSPECTV);
+		boolean isTaskPlay = (m_gb.getArena().taskState == Arena.Task.PLAY);
+		boolean isTaskInspectV = (m_gb.getArena().taskState == Arena.Task.INSPECTV);
 		if (soN!=null) {
-			int Player=Types.PLAYER_PM[m_gb.m_so.getPlayer()];
-			switch(Player) {
-			case(+1): 
-				leftInfo.setText("X to move   "); break;
-			case(-1):
-				leftInfo.setText("O to move   "); break;
-			}
+//			int Player=Types.PLAYER_PM[m_gb.getSOPlayer()];
+			String[] playerNames2P = {"X","O","-"};
+			String[] playerNames3P = {"P0","P1","P2"};
+			String[] playerNames = (m_gb instanceof GameBoardNim2P) ? playerNames2P : playerNames3P; 
+//			switch(m_gb.getSOPlayer()) {
+//			case(0): 
+//				leftInfo.setText("X to move   "); break;
+//			case(1):
+//				leftInfo.setText("O to move   "); break;
+//			}
+			leftInfo.setText(playerNames[m_gb.getStateObs().getPlayer()]+" to move   ");
 			if (soN.isGameOver()) {
 				ScoreTuple sc = soN.getGameScoreTuple();
 				int winner = sc.argmax();
 				if (sc.max()==0.0) winner = -2;	// tie indicator
 				switch(winner) {
 				case( 0): 
-					leftInfo.setText("X has won   "); break;
 				case( 1):
-					leftInfo.setText("O has won   "); break;
+				case( 2):
+					leftInfo.setText(playerNames[m_gb.getStateObs().getPlayer()]+" has won   "); break;
 				case(-2):
-					leftInfo.setText("Tie         "); break;
+					//leftInfo.setText("Tie         "); break;
+					throw new RuntimeException("No tie for Nim!");
 				}
 				rightInfo.setText("");
 				
@@ -308,13 +313,23 @@ public class GameBoardNimGui extends JFrame {
 						heaps[i] += (j+1);
 					}	
 					
-					String splus = isTaskInspectV ? "X" : "O";
-					String sminus= isTaskInspectV ? "O" : "X";
-					switch(Player) {
-					case(+1): 
-						rightInfo.setText("    Score for " + splus); break;
-					case(-1):
-						rightInfo.setText("    Score for " + sminus); break;
+					String s_0,s_1,s_2;
+					if (m_gb instanceof GameBoardNim2P) {
+						s_0 = isTaskInspectV ? "X" : "O";
+						s_1 = isTaskInspectV ? "O" : "X";
+						s_2 = "";
+					} else {
+						s_0 = isTaskInspectV ? "P0" : "P1";
+						s_1 = isTaskInspectV ? "P1" : "P2";
+						s_2 = isTaskInspectV ? "P2" : "P0";	
+					}
+					switch(m_gb.getStateObs().getPlayer()) {
+					case(0): 
+						rightInfo.setText("    Score for " + s_0); break;
+					case(1):
+						rightInfo.setText("    Score for " + s_1); break;
+					case(2):
+						rightInfo.setText("    Score for " + s_2); break;
 					}					
 					
 				}
@@ -341,7 +356,7 @@ public class GameBoardNimGui extends JFrame {
 		double value, maxvalue=Double.NEGATIVE_INFINITY;
 		int imax=0,jmax=0;
 		for(int i=0;i<NimConfig.NUMBER_HEAPS;i++){
-			Heap[i].setText(m_gb.m_so.getHeaps()[i]+"");
+			Heap[i].setText(m_gb.getHeaps()[i]+"");
 		}
 		for(int i=0;i<NimConfig.NUMBER_HEAPS;i++){
 			for(int j=0;j<NimConfig.MAX_MINUS;j++){
@@ -365,7 +380,7 @@ public class GameBoardNimGui extends JFrame {
 		
 
 		// for all viable actions: enable the associated action button
-		for (ACTIONS action : m_gb.m_so.getAvailableActions()) {
+		for (ACTIONS action : m_gb.getStateObs().getAvailableActions()) {
 			int iAction = action.toInt();
 			int j=iAction%NimConfig.MAX_MINUS;		// j+1: number of items to take
 			int i=(iAction-j)/NimConfig.MAX_MINUS;	// i  : heap number	

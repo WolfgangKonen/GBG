@@ -274,6 +274,7 @@ public class ParMCTSE implements Serializable
 		case "MCTS Expectimax": 
 			switch (gameName) {
 			case "Nim": 
+			case "Nim3P": 
 				this.setNumIter(10000);		
 				this.setK_UCT(1.414);
 				break;

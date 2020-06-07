@@ -10,26 +10,28 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * Class StateObservation observes the current state of the game, it has utility functions for
+ * Class StateObserverNim observes the current state of the game Nim <b>for 2 players</b> and it is the 
+ * superclass for {@link StateObserverNim3P}. It has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
  * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
+ * See {@link GameBoardNim2P} for game rules.
  */
 public class StateObserverNim extends ObserverBase implements StateObservation {
-	private int[] m_heap;		// has for each heap the count of items in it
-	private int m_player;		// player who makes the next move (0 or 1)
-	private ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
-	private boolean SORT_IT = false;		// experimental
+	protected int[] m_heap;		// has for each heap the count of items in it
+	protected int m_player;		// player who makes the next move (0 or 1)
+	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
+	protected boolean SORT_IT = false;		// experimental
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
-	private static final long serialVersionUID = 12L;
+	protected static final long serialVersionUID = 12L;
 
 	/**
 	 * Construct an object with {@link NimConfig#NUMBER_HEAPS} heaps. Each heap starts with
@@ -43,14 +45,6 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		setAvailableActions();
 	}
 
-	// obsolete now:
-//	public StateObserverNim(int[] heaps, int player) {
-//		assert heaps.length==NimConfig.NUMBER_HEAPS;
-//		m_heap = heaps.clone();
-//		m_player = player;
-//		setAvailableActions();
-//	}
-	
 	public StateObserverNim(StateObserverNim other) {
 		super(other);		// copy members m_counter and stored*
 		this.m_heap = other.m_heap.clone();
@@ -65,12 +59,6 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	
 	public StateObserverNim copy() {
 		StateObserverNim so = new StateObserverNim(this);
-		// obsolete, this is now done via super(other) in copy constructor:
-//		so.m_counter = this.m_counter;
-//		so.storedActBest = this.storedActBest;
-//		so.storedMaxScore = this.storedMaxScore;
-//		if (this.storedActions!=null) so.storedActions = this.storedActions.clone();
-//		if (this.storedValues!=null) so.storedValues = this.storedValues.clone();
 		return so;
 	}
 
@@ -132,14 +120,6 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		return isGameOver();
 	}
 	
-
-//	public Types.WINNER getGameWinner() {
-//		assert isGameOver() : "Game is not yet over!";
-//		if (win())							  // advance() has changed m_player (although game is over): 
-//			return Types.WINNER.PLAYER_LOSES; // the player, who would have to move, looses.
-//		return null;
-//	}
-
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 			For Nim only game-over states have a non-zero game score. 
@@ -151,19 +131,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
         	// if the game is over, it is a win for the player who made the action towards this
         	// --> it is a loss for the player to move in this.
         	// [There is no tie in game Nim.]
-        	return -sign;
-        	
-//          Types.WINNER win = this.getGameWinner();
-//        	switch(win) {
-//        	case PLAYER_LOSES:
-//                return sign*NimConfig.REWARD_NEGATIVE;
-//        	case TIE:
-//                return 0;
-//        	case PLAYER_WINS:
-//                return sign*NimConfig.REWARD_POSITIVE;
-//            default:
-//            	throw new RuntimeException("Wrong enum for Types.WINNER win !");
-//        	}
+        	return -sign;        	
         }
         
         return 0; 

@@ -116,6 +116,7 @@ abstract public class ArenaTrain extends Arena
 					e2.printStackTrace();
 				} catch (RuntimeException e) {
 					String s = e.getMessage();
+					e.printStackTrace();
 					if (s==null) s=e.getClass().getName();
 					this.showMessage(s,"Error", JOptionPane.ERROR_MESSAGE);
 					enableButtons(true);

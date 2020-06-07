@@ -20,7 +20,7 @@ import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
 import games.StateObservation;
-import games.Nim.GameBoardNim;
+import games.Nim.GameBoardNim2P;
 import games.Othello.ConfigOthello;
 import games.Othello.GameBoardOthello;
 import games.Othello.StateObserverOthello;

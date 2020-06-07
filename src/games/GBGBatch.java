@@ -37,8 +37,10 @@ import games.XArenaFuncs;
 import games.CFour.ArenaTrainC4;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
-import games.Nim.ArenaNim;
-import games.Nim.ArenaTrainNim;
+import games.Nim.ArenaNim2P;
+import games.Nim.ArenaNim3P;
+import games.Nim.ArenaTrainNim2P;
+import games.Nim.ArenaTrainNim3P;
 import games.Othello.ArenaTrainOthello;
 import games.RubiksCube.ArenaTrainCube;
 import games.Sim.ArenaSim;
@@ -188,13 +190,18 @@ public class GBGBatch {
 			t_Game = new ArenaTrainHex("",false);
 			break;
 		case "Nim": 
+		case "Nim3P":
 			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
 			// ArenaTrainNim, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
-			ArenaNim.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim.setMaxMinus(Integer.parseInt(scaPar[2]));
-			t_Game = new ArenaTrainNim("",false);
+			ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
+			ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
+			ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
+			if (selectedGame=="Nim") {
+				t_Game = new ArenaTrainNim2P("",false);				
+			} else {
+				t_Game = new ArenaTrainNim3P("",false);				
+			}
 			break;
 		case "Othello": 
 			t_Game = new ArenaTrainOthello("",false);
@@ -268,6 +275,7 @@ public class GBGBatch {
 			scaPar[0]="5";		// the initial (recommended) value	
 			break;
 		case "Nim": 
+		case "Nim3P":
 			scaPar[0]="3";		// 	
 			scaPar[1]="5";		// the initial (recommended) values	
 			scaPar[2]="3";		// 

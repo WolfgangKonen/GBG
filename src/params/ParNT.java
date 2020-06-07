@@ -8,7 +8,7 @@ import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
-import games.Nim.ArenaNim;
+import games.Nim.ArenaNim2P;
 import games.Nim.NimConfig;
 
 /**
@@ -323,8 +323,9 @@ public class ParNT implements Serializable {
 				this.setRandomness(false);
 				break;
 			case "Nim": 
+			case "Nim3P": 
 				this.setNumTuple(1);
-				this.setMaxTupleLen(ArenaNim.getNumberHeaps());	
+				this.setMaxTupleLen(ArenaNim2P.getNumberHeaps());	
 				this.setRandomness(false);	// use fixed n-tuples, mode==1
 				break;
 			case "RubiksCube":

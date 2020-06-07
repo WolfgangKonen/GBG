@@ -20,7 +20,7 @@ import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
-import games.Nim.ArenaNim;
+import games.Nim.ArenaNim2P;
 import games.Nim.NimConfig;
 
 /**

@@ -9,7 +9,7 @@ import games.XNTupleBase;
 import games.XNTupleFuncs;
 import controllers.TD.ntuple2.NTupleFactory;
 
-public class XNTupleFuncsNim extends XNTupleBase implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsNim2P extends XNTupleBase implements XNTupleFuncs, Serializable {
 
     /**
      * change the version ID for serialization only if a newer version is no longer
@@ -21,7 +21,7 @@ public class XNTupleFuncsNim extends XNTupleBase implements XNTupleFuncs, Serial
     private int[] actionVector;
     private int[][] actionArray;
 
-    public XNTupleFuncsNim() {
+    public XNTupleFuncsNim2P() {
     	// calculate actionArray[][]: for a given action with key j, the element
     	// actionArray[i][j] holds the equivalent action when the state is transformed to 
     	// equiv[i] = symmetryVectors(int[] boardVector)[i]

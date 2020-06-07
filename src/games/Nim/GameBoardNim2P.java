@@ -32,7 +32,7 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * The game Nim is a quite simple game:
+ * The game Nim (2 players) is a quite simple game:
  * <p>
  * There are {@link NimConfig#NUMBER_HEAPS} heaps, each having initially {@link NimConfig#HEAP_SIZE}
  * items. There are two players and each player removes between 1 and {@link NimConfig#MAX_MINUS} 
@@ -49,7 +49,7 @@ import tools.Types.ACTIONS;
  * 
  * @author Wolfgang Konen, TH Koeln, 2016-2020
  */
-public class GameBoardNim implements GameBoard {
+public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 
 	protected StateObserverNim m_so;
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
@@ -58,10 +58,13 @@ public class GameBoardNim implements GameBoard {
 	private transient GameBoardNimGui m_gameGui = null;
 	private boolean arenaActReq=false;
 	
-	public GameBoardNim(Arena nimGame) {
+	public GameBoardNim2P(Arena nimGame) {
 		initGameBoard(nimGame);
 //		clearBoard(true,true);
 	}
+	
+	public int[] getHeaps() { return m_so.getHeaps(); }
+
 	
     @Override
     public void initialize() {}
@@ -158,6 +161,7 @@ public class GameBoardNim implements GameBoard {
 		arenaActReq = true;		
 	}
 	
+	@Override
 	public StateObservation getStateObs() {
 		return m_so;
 	}

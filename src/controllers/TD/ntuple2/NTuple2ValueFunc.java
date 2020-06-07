@@ -247,7 +247,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 		for (i = 0; i < numTuples; i++) {
 			for (j = 0; j < equiv.length; j++) {
-//				System.out.print("g(i,j)=("+i+","+j+"):  ");		//debug
+				//System.out.println("g(i,j)=("+i+","+j+"):  ");		//debug
 				score += nTuples[0][player][i].getScore(equiv[j].bvec);
 			}
 		}
