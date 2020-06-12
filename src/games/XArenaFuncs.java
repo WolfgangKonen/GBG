@@ -18,6 +18,7 @@ import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
 import games.Nim.BoutonAgent;
+import games.Nim.DaviNimAgent;
 import games.Othello.StateObserverOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
@@ -188,6 +189,10 @@ public class XArenaFuncs {
 													// gui_agent_list in
 													// XArenaButtonsGui
 				pa = new BoutonAgent(sAgent);
+			} else if (sAgent.equals("DaviNim")) { 	// Nim3P only, see
+													// gui_agent_list in
+													// XArenaButtonsGui
+				pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
 			} else if (sAgent.equals("HeurPlayer")) { // Othello only, see
 													  // gui_agent_list in
 													  // XArenaButtonsGui
@@ -353,6 +358,10 @@ public class XArenaFuncs {
 						// e.printStackTrace();
 						pa = null;
 					}
+				} else if (sAgent.equals("DaviNim")) { 	// Nim3P only, see
+														// gui_agent_list in
+														// XArenaButtonsGui
+					pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
 				} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
 													// gui_agent_list in
 													// XArenaButtonsGui
@@ -975,7 +984,7 @@ public class XArenaFuncs {
 	 *            {@code nextTimes} is not null, some extra info for the
 	 *            tournament log is printed to {@code System.out}.
 	 * @return a score tuple which holds in the kth position the average score
-	 *         for the kth agent from all {@code competeNum} episodes.
+	 *         of the kth agent from all {@code competeNum} episodes.
 	 */
 	public static ScoreTuple competeNPlayer(PlayAgtVector paVector, StateObservation startSO, int competeNum,
 			int verbose, TSTimeStorage[] nextTimes) {
@@ -997,8 +1006,8 @@ public class XArenaFuncs {
 		case (1):
 			sMsg = "Competition, " + competeNum + " episodes: \n" + pa_string[0];
 		case (2):
-			sMsg = "Competition, " + competeNum + " episodes: \n" + "      X: " + pa_string[0] + " \n" + "   vs O: "
-					+ pa_string[1];
+			sMsg = "Competition, " + competeNum + " episodes: \n" + 
+				   "      X: " + pa_string[0] + " \n" + "   vs O: " + pa_string[1];
 			break;
 		default:
 			sMsg = "Competition, " + competeNum + " episodes: \n";
@@ -1153,9 +1162,6 @@ public class XArenaFuncs {
 			int verbose = 1;
 
 			if (allRoles) {
-				// double d=0;
-				// if (numPlayers==2) d =
-				// competeBoth(qaVector[0],qaVector[1],startSO,competeNum,verbose,gb);
 				ScoreTuple sc = this.competeNPlayerAllRoles(new PlayAgtVector(qaVector), startSO, competeNum, verbose);
 				System.out.println("Avg score for all players: " + sc.toStringFrm());
 				return sc.scTup[0];
@@ -1240,12 +1246,6 @@ public class XArenaFuncs {
 					AgentBase.validTrainedAgents(paVector, numPlayers); // may
 																		// throw
 																		// RuntimeException
-					// OtherParams[] hddPar = new OtherParams[2];
-					// hddPar[0] = new OtherParams();
-					// hddPar[0].setWrapperNPly(paVector[0].getParOther().getWrapperNPly());
-					// hddPar[1] = new OtherParams();
-					// hddPar[1].setWrapperNPly(paVector[1].getParOther().getWrapperNPly());
-					// qaVector = wrapAgents(paVector,hddPar,startSO);
 					qaVector = wrapAgents(paVector, startSO, xab);
 				} else {
 					paVector = fetchAgents(xab);
@@ -1261,16 +1261,7 @@ public class XArenaFuncs {
 					qaVector = wrapAgents(paVector, xab, startSO);
 				}
 
-				// c = competeTS(qaVector[0], qaVector[1], startSO, competeNum,
-				// 0, dataTS.nextTimes /*, dataTS.rndmStartMoves*/);
-				// c = competeTS(qaVector[0], qaVector[1], dataTS.startSO,
-				// competeNum, 0, dataTS.nextTimes /*, dataTS.rndmStartMoves*/);
-				// c = compete(qaVector[0], qaVector[1], dataTS.startSO,
-				// competeNum, 0, dataTS.nextTimes /*, dataTS.rndmStartMoves*/);
-				// System.out.println(Arrays.toString(c));
 				sc = competeNPlayer(new PlayAgtVector(qaVector), dataTS.startSO, competeNum, 0, dataTS.nextTimes);
-				// System.out.println("Avg score for all players:
-				// "+sc.toStringFrm());
 
 				xab.disableTournamentRemoteData();
 			}
@@ -1281,12 +1272,6 @@ public class XArenaFuncs {
 			return 43;
 		}
 
-		// if (c[0]-c[2]>0.0) // X wins (more often)
-		// return 0;
-		// if (c[0]-c[2]==0.0) // tie or equal number of X and O wins
-		// return 1;
-		// if (c[0]-c[2]<1.0) // O wins (more often)
-		// return 2;
 		if (sc.scTup[0] > sc.scTup[1]) // X wins (more often)
 			return 0;
 		if (sc.scTup[0] == sc.scTup[1]) // tie or equal number of X and O wins
@@ -1295,7 +1280,7 @@ public class XArenaFuncs {
 			return 2;
 
 		// we should never arrive here
-		return 42;
+		throw new RuntimeException("Ooops! in competeDispatcherTS");
 	} // competeDispatcherTS
 
 	public String getLastMsg() {

@@ -73,12 +73,9 @@ public class EvaluatorNim3P extends Evaluator {
 	}
 	
 	private void initEvaluator(GameBoard gb) {
-		// --- this is now in Evaluator ---
-//		if (!isAvailableMode(mode)) 
-//			throw new RuntimeException("EvaluatorNim: Value mode = "+mode+" is not allowed!");
 		m_gb = gb;		
         ParMCTS params = new ParMCTS();
-        params.setNumIter(1000);
+        params.setNumIter(10000);
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverNim3P(), params);
         mctsAgent2 = new MCTSAgentT("MCTS2", new StateObserverNim3P(), params);
 	}
@@ -103,9 +100,10 @@ public class EvaluatorNim3P extends Evaluator {
 				System.out.println("Warning: Max-N depth = "+depth+" is smaller than required: heap sum ="+heapsum+" !");
 		}
 		
+		int competeNum=10;
 		switch(m_mode) {
 		case 0:  
-			break;
+			competeNum=100; break;
 		case 1:  
 		case 2:  
 			secondAgent=maxNAgent; thirdAgent=maxNAgent2; break;
@@ -117,14 +115,27 @@ public class EvaluatorNim3P extends Evaluator {
 			secondAgent=getTDReferee(); thirdAgent=getTDReferee(); break;
 		}		
 		paVector = new PlayAgtVector(m_PlayAgent,secondAgent,thirdAgent);
-		
+		if (m_mode==4) competeNum=3;
+
+		int numPlayers = paVector.getNumPlayers();
+		String[] pa_string = new String[numPlayers];
+		for (int i = 0; i < numPlayers; i++)
+			pa_string[i] = paVector.pavec[i].stringDescr();
+		String sMsg = "QuickEval, " + competeNum + " episodes: \n";
+		for (int n = 0; n < numPlayers; n++) {
+			sMsg = sMsg + "    P" + n + ": " + pa_string[n];
+			if (n < numPlayers - 1)
+				sMsg = sMsg + ", \n";
+		}
+		System.out.println(sMsg);
+
 		switch(m_mode) {
-		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
-		case 1:  return evaluateAgent1(paVector,m_gb)>m_thresh[1];
-		case 2:  return evaluateAgent2(paVector,m_gb)>m_thresh[2];
-		case 3:  return evaluateAgent1(paVector,m_gb)>m_thresh[1];
-		case 4:  return evaluateAgent2(paVector,m_gb)>m_thresh[2];
-		case 11: return evaluateAgent2(paVector,m_gb)>m_thresh[2];
+		case 0:  return evaluateAgent0(m_PlayAgent,m_gb,competeNum)>m_thresh[0];
+		case 1:  return evaluateAgent1(paVector,m_gb,competeNum)>m_thresh[1];
+		case 2:  return evaluateAgent2(paVector,m_gb,competeNum)>m_thresh[2];
+		case 3:  return evaluateAgent1(paVector,m_gb,competeNum)>m_thresh[1];
+		case 4:  return evaluateAgent2(paVector,m_gb,competeNum)>m_thresh[2];
+		case 11: return evaluateAgent2(paVector,m_gb,competeNum)>m_thresh[2];
 		default: return false;
 		}
 	}
@@ -135,10 +146,10 @@ public class EvaluatorNim3P extends Evaluator {
 	 * @param gb		needed to get a default start state (competeBoth)
  	 * @return
 	 */
- 	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
+ 	private double evaluateAgent0(PlayAgent pa, GameBoard gb, int competeNum) {
  		StateObservation so = gb.getDefaultStartState();
 //		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,randomAgent,randomAgent2), so, 100, 0);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,randomAgent,randomAgent2), so, competeNum, 0);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -152,9 +163,9 @@ public class EvaluatorNim3P extends Evaluator {
 	 * @param gb		needed to get default start state (competeBoth)
  	 * @return
 	 */
- 	private double evaluateAgent1(PlayAgtVector paVector, GameBoard gb) {
+ 	private double evaluateAgent1(PlayAgtVector paVector, GameBoard gb, int competeNum) {
  		StateObservation so = gb.getDefaultStartState();
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, 10, 0);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, competeNum, 0);
 		lastResult = sc.scTup[0];
 		m_msg = paVector.pavec[0].getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -168,8 +179,7 @@ public class EvaluatorNim3P extends Evaluator {
 	 * @param gb		needed to get the start states 
  	 * @return
  	 */
- 	private double evaluateAgent2(PlayAgtVector paVector, GameBoard gb) {
-		int competeNum=1;
+ 	private double evaluateAgent2(PlayAgtVector paVector, GameBoard gb, int competeNum) {
 		double[] res;
 //		double resX, resO;
         double success = 0;
@@ -209,39 +219,23 @@ public class EvaluatorNim3P extends Evaluator {
 	{
 		return 1;
 	}
+	
 	public int getTrainEvalMode() 
 	{
 		return 3;
 	}
+	
 	private String getBestResultString(int mode) {
 		DecimalFormat df = new DecimalFormat();				
 		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
 		df.applyPattern("0.00");  
 		switch (mode) {
-		case 0:  				// random agent, competeBoth
-			// a rough estimate of the probability that RandomAgent wins: in one half of the 
-			// competeBoth games, RandomAgent will always loose, in the other half it may 
-			// win if it chooses by accident always a correct move: If there are exactly MAX_MINUS+1
-			// items left on 1 heap and the other agent moves, the probability for RandomAgent
-			// to win is pLastMoveWin=(1/mx)*(1/mx+...+1/1), averaging over 1,2,..,mx=MAX_MINUS items  
-			// taken by the other agent. nMoves is the number
-			// of moves that RandomAgent has to make to reach MAX_MINUS+1. The probability
-			// to guess the correct move is in each case (1/MAX_MINUS). So the total probability that 
-			// the *other* agent wins is
-			//		1 - (1/MAX_MINUS)^nMoves * pLastMoveWin / 2.0
-			int nItems = NimConfig.NUMBER_HEAPS*NimConfig.HEAP_SIZE;		// # of items on all heaps
-			int mx = NimConfig.MAX_MINUS;
-			int nMoves = (int) Math.floor((nItems-1e-6)/(mx+1));	// approx. # of moves of one agent
-			double pLastMoveWin = 0.0;
-			for (int i=1; i<=mx; i++) pLastMoveWin += (1.0/i);
-			pLastMoveWin /= mx;
-			double sr = 1.0 - Math.pow(1.0/mx, nMoves)*pLastMoveWin/2.0;
-			return df.format(sr);
-		case 1:  return "0.0"; // MaxN, competeBoth
-		case 2:  return "0.0"; // MaxN, diff. starts, competeBoth
-		case 3:  return "0.0"; // MCTS, competeBoth
-		case 4:  return "0.0"; // MCTS, diff. starts, competeBoth
-		case 11: return "0.0"; // TDReferee (if perfect), different starts, competeBoth 
+		case 0:  return "0.9"; // random agent, competeAllRoles
+		case 1:  return "0.333"; // MaxN, competeAllRoles
+		case 2:  return "0.333"; // MaxN, diff. starts, competeAllRoles
+		case 3:  return "0.333"; // MCTS, competeAllRoles
+		case 4:  return "0.333"; // MCTS, diff. starts, competeAllRoles
+		case 11: return "0.333"; // TDReferee (if perfect), different starts, competeAllRoles 
 		default: return null;
 		}
 	}
@@ -251,11 +245,11 @@ public class EvaluatorNim3P extends Evaluator {
 		String strBest = getBestResultString(m_mode);
 		switch (m_mode) {
 		case 0:  return "success rate (randomAgent, best is "+strBest+"): ";
-		case 1:  return "success rate (Max-N, best is "+strBest+"): ";
-		case 2:  return "success rate (Max-N, different starts, best is "+strBest+"): ";
-		case 3:  return "success rate (MCTS, best is "+strBest+"): ";	
-		case 4:  return "success rate (MCTS, different starts, best is "+strBest+"): ";	
-		case 11: return "success rate (TDReferee, different starts, best is "+strBest+"): ";
+		case 1:  return "success rate (Max-N, expec is "+strBest+"): ";
+		case 2:  return "success rate (Max-N, different starts, expec is "+strBest+"): ";
+		case 3:  return "success rate (MCTS, expec is "+strBest+"): ";	
+		case 4:  return "success rate (MCTS, different starts, expec is "+strBest+"): ";	
+		case 11: return "success rate (TDReferee, different starts, expec is "+strBest+"): ";
 		default: return null;
 		}
 	}
@@ -265,10 +259,10 @@ public class EvaluatorNim3P extends Evaluator {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
 				+ "0: against Random, best is "+getBestResultString(0)+"<br>"
-				+ "1: against Max-N, best is "+getBestResultString(1)+"<br>"
-				+ "2: against Max-N, different starts, best is "+getBestResultString(2)+"<br>"
-				+ "3: against MCTS, best is "+getBestResultString(3)+"<br>"
-				+ "4: against MCTS, different starts, best is "+getBestResultString(4)+"<br>"
+				+ "1: against Max-N, expec is "+getBestResultString(1)+"<br>"
+				+ "2: against Max-N, different starts, expec is "+getBestResultString(2)+"<br>"
+				+ "3: against MCTS, expec is "+getBestResultString(3)+"<br>"
+				+ "4: against MCTS, different starts, expec is "+getBestResultString(4)+"<br>"
 				+ "11: against TDReferee.agt.zip, different starts"
 				+ "</html>";
 	}

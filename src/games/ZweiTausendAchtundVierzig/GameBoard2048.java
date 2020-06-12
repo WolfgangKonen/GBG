@@ -47,7 +47,8 @@ public class GameBoard2048 implements GameBoard {
         if (boardClear) {
             m_so = new StateObserver2048();
         }
-		if (m_gameGui!=null)
+        					// considerable speed-up during training (!)
+        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
     }
 

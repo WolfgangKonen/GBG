@@ -31,8 +31,9 @@ import tools.Types.ACTIONS_VT;
 /**
  *  Implements DAVI algorithm (Deep Approximate Value Iteration) for Rubiks Cube [Agnostelli2019].
  *  <p>
- *  It implements DAVI by using an n-tuple network as the neural net. It simplifies DAVI by updating 
- *  the net in each step only with the actual (target,state) pair. 
+ *  It simplifies DAVI by replacing the deep neural net with a (shallow but wide) n-tuple network. 
+ *  It simplifies DAVI by updating the net in each step only with the actual (target,state) pair instead of maintaining
+ *  a replay buffer and training the net in batches sampled from this replay buffer. <br>
  *  It <b>maximizes</b> the (non-positive) value V(s) where each step (twist) adds a negative step reward to V(s).  
  *  Only the solved cube s* has V(s*)=0.
  *

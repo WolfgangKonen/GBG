@@ -308,7 +308,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				m_arena.taskState = Arena.Task.ALLCMP;
-				String str = "[Start Competition Both]";
+				String str = "[Start Competition All Roles]";
 				printStatus(str);
 			}
 		});

@@ -84,7 +84,8 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 		if (boardClear) {
 			m_so = new StateObserverNim();			// heaps according to NimConfig
 		}
-		if (m_gameGui!=null)
+							// considerable speed-up during training (!)
+		if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
 	}
 

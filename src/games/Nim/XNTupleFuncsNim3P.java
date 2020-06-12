@@ -141,10 +141,12 @@ public class XNTupleFuncsNim3P extends XNTupleBase implements XNTupleFuncs, Seri
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		int nTuple[][]=new int[1][NimConfig.NUMBER_HEAPS];	
+		int nTuple[][]=new int[mode][NimConfig.NUMBER_HEAPS];	
 		
 		for (int i=0; i<nTuple[0].length; i++) nTuple[0][i] = i;
 								// i.e. one n-tuple {0,1,...,NUMBER_HEAPS-1} (covers all heaps)
+		if (mode==2)
+			for (int i=0; i<nTuple[0].length; i++) nTuple[1][i] = i;
 		return nTuple;				
 	}
 
@@ -153,13 +155,14 @@ public class XNTupleFuncsNim3P extends XNTupleBase implements XNTupleFuncs, Seri
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>"
 				+ "1: one n-tuple with length NUMBER_HEAPS"
+				+ "2: two n-tuple with length NUMBER_HEAPS"
 				+ "</html>";
 	}
 
 	/**
 	 * 1: one n-tuple with length {@link NimConfig#NUMBER_HEAPS}
 	 */
-    private static int[] fixedModes = {1};		
+    private static int[] fixedModes = {1,2};		
     
 	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;

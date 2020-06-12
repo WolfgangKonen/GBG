@@ -32,15 +32,17 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * The game Nim for 3 player is a quite simple game:
+ * This class implements the game board for the game Nim3P = Nim <b>for 3 players</b>:
  * <p>
  * There are {@link NimConfig#NUMBER_HEAPS} heaps, each having initially {@link NimConfig#HEAP_SIZE}
- * items. There are <b>three</b> players and each player removes between 1 and {@link NimConfig#MAX_MINUS} 
+ * items. There are <b>three</b> players and each player removes between 1 and {@link NimConfig#HEAP_SIZE} 
  * items from one heap in each move. <br>
  * <b>Special 3-player rule</b> [Luckhardt86]: The player <b>who comes after</b> the player removing the last item 
- * is the player who wins. He/she gets reward 1, the other two get reward 0. 
+ * is the player who wins. He/she gets reward 1, the other two get reward 0. <br>
+ * Optional <b>extra rule</b>, if {@link NimConfig#EXTRA_RULE} is {@code true}: The player who cames after the winning
+ * player gets an extra reward of 0.2. (This helps to make some indifferent states decidable.)
  * <p>
- * This class implements the GameBoard interface for Nim.
+ * This class implements the GameBoard interface for Nim3P.
  * Its member {@link GameBoardNimGui} {@code m_gameGui} has the game board GUI. 
  * {@code m_gameGui} may be {@code null} in batch runs. 
  * <p>
@@ -85,7 +87,8 @@ public class GameBoardNim3P extends GameBoardNimBase implements GameBoard {
 		if (boardClear) {
 			m_so = new StateObserverNim3P();			// heaps according to NimConfig
 		}
-		if (m_gameGui!=null)
+							// considerable speed-up during training (!)
+		if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
 	}
 
@@ -205,7 +208,7 @@ public class GameBoardNim3P extends GameBoardNimBase implements GameBoard {
 		DecimalFormat form = new DecimalFormat("00");
 		return  "N"+form.format(NimConfig.NUMBER_HEAPS)+
 				"-S"+form.format(NimConfig.HEAP_SIZE)+
-				"-M"+form.format(NimConfig.MAX_MINUS);
+				"-Extra"+(NimConfig.EXTRA_RULE ? "Yes" : "No");
 	}
 	
     @Override

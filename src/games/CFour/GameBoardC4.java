@@ -84,7 +84,8 @@ public class GameBoardC4 implements GameBoard {
 		if (boardClear) {
 			m_so = new StateObserverC4();			// empty Table
 		}
-		if (m_gameGui!=null)
+							// considerable speed-up during training (!)
+        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear, m_so);
 	}
 

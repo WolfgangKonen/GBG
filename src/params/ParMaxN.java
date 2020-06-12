@@ -123,6 +123,8 @@ public class ParMaxN implements Serializable {
 		case "MaxN": 
 		case "Max-N": 
 			switch (gameName) {
+			case "Nim": 
+			case "Nim3P": 
 			case "Sim": 
 				this.setMaxNDepth(15);		
 				this.setMaxNUseHashmap(true);

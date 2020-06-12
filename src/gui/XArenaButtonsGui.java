@@ -150,8 +150,10 @@ public class XArenaButtonsGui extends JPanel {
 		for (int i=0; i<Types.GUI_AGENT_LIST.length; i++) gui_agent_list[i] = Types.GUI_AGENT_LIST[i];
 		if (gName=="ConnectFour") {
 			gui_agent_list[gui_agent_list.length-1] = "AlphaBeta";
-		} else if (gName=="Nim" || gName=="Nim3P") {
+		} else if (gName=="Nim") {
 			gui_agent_list[gui_agent_list.length-1] = "Bouton";
+		} else if (gName=="Nim3P") {
+			gui_agent_list[gui_agent_list.length-1] = "DaviNim";
 		} else if (gName=="RubiksCube") {
 			gui_agent_list[gui_agent_list.length-3] = "DAVI";
 			gui_agent_list[gui_agent_list.length-2] = "DAVI2";

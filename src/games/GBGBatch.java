@@ -130,8 +130,8 @@ public class GBGBatch {
 	 * {@code <csvname>} is {@code args[5]} w/o {@code .csv}
 	 * <p>
 	 * <b>scaPar0,1,2</b> contain the scalable parameters of a game (if a game supports such parameters). Example: The game 
-	 * Hex has the board size (4,5,6,...) as scalable parameter scaPar0. If no scalable parameters are given as 
-	 * command arguments, the defaults from {@link #setDefaultScaPars(String)} apply.
+	 * Hex has the board size (4,5,6,...) as scalable parameter scaPar0. If no scalable parameter is given as 
+	 * command line argument, the defaults from {@link #setDefaultScaPars(String)} apply.
 	 * 
 	 * @throws IOException if s.th. goes wrong when loading the agent or saving the csv file.
 	 */
@@ -171,6 +171,7 @@ public class GBGBatch {
 		if (args.length>=6) csvName = args[5];
 
 		String selectedGame = args[0];
+		
 		String[] scaPar = setDefaultScaPars(selectedGame);
 		for (int i=0; i<3; i++)
 			if (args.length>=i+7) scaPar[i] = args[i+6];
@@ -190,18 +191,23 @@ public class GBGBatch {
 			t_Game = new ArenaTrainHex("",false);
 			break;
 		case "Nim": 
-		case "Nim3P":
 			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
 			// ArenaTrainNim, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
 			ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
 			ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
 			ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
-			if (selectedGame=="Nim") {
-				t_Game = new ArenaTrainNim2P("",false);				
-			} else {
-				t_Game = new ArenaTrainNim3P("",false);				
-			}
+			t_Game = new ArenaTrainNim2P("",false);				
+			break;
+		case "Nim3P":
+			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor  
+			// ArenaNimTrainNim3P, which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
+			ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
+			ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));	// Nim3P: always MaxMinus == HeapSize (!)
+			ArenaNim3P.setExtraRule(Boolean.parseBoolean(scaPar[2]));
+			t_Game = new ArenaTrainNim3P("",false);				
 			break;
 		case "Othello": 
 			t_Game = new ArenaTrainOthello("",false);
@@ -275,10 +281,14 @@ public class GBGBatch {
 			scaPar[0]="5";		// the initial (recommended) value	
 			break;
 		case "Nim": 
+			scaPar[0]="3";		// 	
+			scaPar[1]="5";		// the initial (recommended) values	
+			scaPar[2]="5";		// 
+			break;
 		case "Nim3P":
 			scaPar[0]="3";		// 	
 			scaPar[1]="5";		// the initial (recommended) values	
-			scaPar[2]="3";		// 
+			scaPar[2]="true";	// 
 			break;
 		case "Sim": 
 			scaPar[0]="2";		 	

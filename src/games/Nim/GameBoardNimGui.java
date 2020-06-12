@@ -19,6 +19,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import controllers.AgentBase;
+import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import games.GameBoard;
 import games.StateObservation;
@@ -67,6 +69,12 @@ public class GameBoardNimGui extends JFrame {
 	private int iBest,jBest;
 	private double vWorst;
 	
+	/**
+	 * the last row in the 'Show Values' bar is calculated with the help of this agent
+	 * (Bouton for 2 players, MaxN for 3 players)
+	 */
+	private AgentBase optimAgent;
+	
 	// the colors of the TH Koeln logo (used for button coloring):
 	private Color colTHK1 = new Color(183,29,13);
 	private Color colTHK2 = new Color(255,137,0);
@@ -75,6 +83,13 @@ public class GameBoardNimGui extends JFrame {
 	public GameBoardNimGui(GameBoardNimBase gb) {
 		super(gb.getStateObs().getName());	// "Nim" or "Nim3P"
 		m_gb = gb;
+		switch (m_gb.getStateObs().getNumPlayers()) {
+		case 2:
+			optimAgent = new BoutonAgent("Bouton"); break;
+		default:	// usually N==3
+			optimAgent = new MaxNAgent("MaxN",15,true);		// 15 is OK for heaps(5,5,5), but might be t0o small for larger heaps
+		}
+		
 		initGui("");
 //		clearBoard(true,true);
 	}
@@ -230,7 +245,7 @@ public class GameBoardNimGui extends JFrame {
 	}
 
 	/**
-	 * Update the play board and the associated values (labels) to the new state {@code so}.
+	 * Update the play board and the associated values (labels) to the new state {@code soN}.
 	 * 
 	 * @param soN	the game state. If {@code null}, call only {@link #guiUpdateBoard(boolean)}.
 	 * @param withReset  if true, reset the board prior to updating it to state {@code so}
@@ -243,33 +258,8 @@ public class GameBoardNimGui extends JFrame {
 		boolean isTaskPlay = (m_gb.getArena().taskState == Arena.Task.PLAY);
 		boolean isTaskInspectV = (m_gb.getArena().taskState == Arena.Task.INSPECTV);
 		if (soN!=null) {
-//			int Player=Types.PLAYER_PM[m_gb.getSOPlayer()];
-			String[] playerNames2P = {"X","O","-"};
-			String[] playerNames3P = {"P0","P1","P2"};
-			String[] playerNames = (m_gb instanceof GameBoardNim2P) ? playerNames2P : playerNames3P; 
-//			switch(m_gb.getSOPlayer()) {
-//			case(0): 
-//				leftInfo.setText("X to move   "); break;
-//			case(1):
-//				leftInfo.setText("O to move   "); break;
-//			}
-			leftInfo.setText(playerNames[m_gb.getStateObs().getPlayer()]+" to move   ");
-			if (soN.isGameOver()) {
-				ScoreTuple sc = soN.getGameScoreTuple();
-				int winner = sc.argmax();
-				if (sc.max()==0.0) winner = -2;	// tie indicator
-				switch(winner) {
-				case( 0): 
-				case( 1):
-				case( 2):
-					leftInfo.setText(playerNames[m_gb.getStateObs().getPlayer()]+" has won   "); break;
-				case(-2):
-					//leftInfo.setText("Tie         "); break;
-					throw new RuntimeException("No tie for Nim!");
-				}
-				rightInfo.setText("");
-				
-			}
+			
+			setInfoText(soN, isTaskInspectV);
 			
 			if (showValueOnGameboard && soN.getStoredValues()!=null) {
 				for(i=0;i<NimConfig.NUMBER_HEAPS;i++)
@@ -281,8 +271,11 @@ public class GameBoardNimGui extends JFrame {
 				if (soN.isGameOver()) {
 					rightInfo.setText("");
 				} else {
+					// optState is the state for which we want to calculate the optimal values (based on Bouton
+					// or MaxN agent) which are shown in the last row of the GUI
+					StateObserverNim optState = (soN instanceof StateObserverNim3P) ?
+							new StateObserverNim3P((StateObserverNim3P)soN) : new StateObserverNim(soN);
 					int[] heaps = soN.getHeaps().clone();
-					vWorst = Double.MAX_VALUE;
 					if (isTaskPlay) {
 						// if called from 'Play', then reverse the action actBest in heaps
 						// (because we want to store in OptTable the optimal values
@@ -292,7 +285,27 @@ public class GameBoardNimGui extends JFrame {
 						j=iAction%NimConfig.MAX_MINUS;		// j+1: number of items taken
 						i=(iAction-j)/NimConfig.MAX_MINUS;	// i  : heap number	
 						heaps[i] += (j+1);
+						int N = soN.getNumPlayers();
+						int prevPlayer = (soN.getPlayer()-1+N)%N;
+						optState = (soN instanceof StateObserverNim3P) ?
+								new StateObserverNim3P(heaps,prevPlayer) : new StateObserverNim(heaps,prevPlayer);
 					}
+					
+					// Calculate the optimal value of this action according 
+					// to Bouton's theory. The values OptTable[i][j] are shown 
+					// in GUI (last row) if showValueOnGameboard is true.
+					Types.ACTIONS_VT optActions = optimAgent.getNextAction2(optState, false, true);
+			        ArrayList<ACTIONS> acts = optState.getAvailableActions();
+					for (int k=0; k<acts.size(); k++) {
+						int iAction = acts.get(k).toInt();
+						j=iAction%NimConfig.MAX_MINUS;		// j+1: number of items to take
+						i=(iAction-j)/NimConfig.MAX_MINUS;	// i  : heap number		
+						OptTable[i][j] = optActions.getVTable()[k];
+					}
+
+					// Show the stored VTable values in the second-last row of the GUI 
+					// if showValueOnGameboard is true.
+					vWorst = Double.MAX_VALUE;
 					for (int k=0; k<soN.getStoredValues().length; k++) {
 						Types.ACTIONS action = soN.getStoredAction(k);
 						int iAction = action.toInt();
@@ -303,34 +316,8 @@ public class GameBoardNimGui extends JFrame {
 							iBest=i;
 							jBest=j; 
 						}
-						if (VTable[i][j]<vWorst) vWorst=VTable[i][j];
-						
-						// Calculate the optimal value of this action according 
-						// to Bouton's theory. The values OptTable[i][j] are shown 
-						// in GUI (last row) if showValueOnGameboard is true.
-						heaps[i] -= (j+1);
-						OptTable[i][j]=soN.boutonValue(heaps);
-						heaps[i] += (j+1);
+						if (VTable[i][j]<vWorst) vWorst=VTable[i][j];						
 					}	
-					
-					String s_0,s_1,s_2;
-					if (m_gb instanceof GameBoardNim2P) {
-						s_0 = isTaskInspectV ? "X" : "O";
-						s_1 = isTaskInspectV ? "O" : "X";
-						s_2 = "";
-					} else {
-						s_0 = isTaskInspectV ? "P0" : "P1";
-						s_1 = isTaskInspectV ? "P1" : "P2";
-						s_2 = isTaskInspectV ? "P2" : "P0";	
-					}
-					switch(m_gb.getStateObs().getPlayer()) {
-					case(0): 
-						rightInfo.setText("    Score for " + s_0); break;
-					case(1):
-						rightInfo.setText("    Score for " + s_1); break;
-					case(2):
-						rightInfo.setText("    Score for " + s_2); break;
-					}					
 					
 				}
 			} 
@@ -342,6 +329,52 @@ public class GameBoardNimGui extends JFrame {
 		guiUpdateBoard(showValueOnGameboard);
 	}
 
+	/**
+	 * helper for {@link #updateBoard(StateObserverNim, boolean, boolean)}
+	 */
+	private void setInfoText(StateObserverNim soN, boolean isTaskInspectV) {
+		String[] playerNames2P = {"X","O","-"};
+		String[] playerNames3P = {"P0","P1","P2"};
+		String[] playerNames = (m_gb instanceof GameBoardNim2P) ? playerNames2P : playerNames3P; 
+		String actualPlayer = playerNames[m_gb.getStateObs().getPlayer()];
+		leftInfo.setText(actualPlayer+" to move   ");
+		if (soN.isGameOver()) {
+			ScoreTuple sc = soN.getGameScoreTuple();
+			int winner = sc.argmax();
+			if (sc.max()==0.0) winner = -2;	// tie indicator
+			switch(winner) {
+			case( 0): 
+			case( 1):
+			case( 2):
+				leftInfo.setText(actualPlayer+" has won   "); break;
+			case(-2):
+				//leftInfo.setText("Tie         "); break;
+				throw new RuntimeException("No tie for Nim!");
+			}
+			rightInfo.setText("");				
+		} else {
+			
+			String s_0,s_1,s_2;
+			if (m_gb instanceof GameBoardNim2P) {
+				s_0 = isTaskInspectV ? "X" : "O";
+				s_1 = isTaskInspectV ? "O" : "X";
+				s_2 = "";
+			} else {
+				s_0 = isTaskInspectV ? "P0" : "P2";
+				s_1 = isTaskInspectV ? "P1" : "P0";
+				s_2 = isTaskInspectV ? "P2" : "P1";	
+			}
+			switch(m_gb.getStateObs().getPlayer()) {
+			case(0): 
+				rightInfo.setText("    Score for " + s_0); break;
+			case(1):
+				rightInfo.setText("    Score for " + s_1); break;
+			case(2):
+				rightInfo.setText("    Score for " + s_2); break;
+			}					
+		} // else
+	}
+	
 	/**
 	 * Update the play board and the associated values (labels) to the state in m_so.
 	 * The labels contain the values (scores) for each unoccupied board position (raw score*100).  
@@ -378,7 +411,6 @@ public class GameBoardNimGui extends JFrame {
 		// just debug:
 //		int [] idealMove = m_so.bouton(); 
 		
-
 		// for all viable actions: enable the associated action button
 		for (ACTIONS action : m_gb.getStateObs().getAvailableActions()) {
 			int iAction = action.toInt();
@@ -407,7 +439,8 @@ public class GameBoardNimGui extends JFrame {
 					boolean showValueOnGameboard, Color color) {
 		String valueTxt;
 		Color col;
-		if (Double.isNaN(value)) {
+								// delete written values if coming from InspectV and showValueOnGameboard is false
+		if (Double.isNaN(value) || !showValueOnGameboard) {
 			valueTxt = "   ";
 		} else {
 			valueTxt = " "+Math.round(value*100);
@@ -415,9 +448,9 @@ public class GameBoardNimGui extends JFrame {
 			col = (color==null) ? calculateXBoardColor(value) : color;
 			XBoard[i][j].setForeground(col);
 		}
-		if (showValueOnGameboard) {
+//		if (showValueOnGameboard) {
 			XBoard[i][j].setText(valueTxt);
-		}
+//		} 
 
 	}
 	

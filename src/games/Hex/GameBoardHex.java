@@ -55,8 +55,9 @@ public class GameBoardHex implements GameBoard {
         } else if (vClear) {
             m_so.clearTileValues();
         }
-		if (m_gameGui!=null)
-			m_gameGui.clearBoard(boardClear, vClear);
+							// considerable speed-up during training (!)
+        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+        	m_gameGui.clearBoard(boardClear, vClear);
     }
 
 

@@ -45,6 +45,12 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		setAvailableActions();
 	}
 
+	public StateObserverNim(int[] heaps, int player) {
+		m_heap = heaps.clone(); 
+		m_player = player;
+		setAvailableActions();
+	}
+
 	public StateObserverNim(StateObserverNim other) {
 		super(other);		// copy members m_counter and stored*
 		this.m_heap = other.m_heap.clone();

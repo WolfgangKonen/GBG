@@ -1,7 +1,8 @@
 package games.Nim;
 
 /**
- * The game Nim is a quite simple game, mostly used for debugging purposes:
+ * Configurations for the games Nim and Nim3P. <br>
+ * The game Nim is a quite simple game, mostly used for debugging purposes.
  * <p>
  * There are {@link #NUMBER_HEAPS} heaps, each having initially {@link #HEAP_SIZE} items. There
  * are two players and each player removes between 1 and {@link #MAX_MINUS} items from one heap 
@@ -28,4 +29,9 @@ public class NimConfig {
      */
     protected static int MAX_MINUS = 3;
 
+	/**
+	 * Only for Nim3P: If true, activate this optional extra rule: In addition to the winner, who gets reward 1: 
+	 * The player who is the successor of the winner, gets the extra reward 0.2 (instead of 0).
+	 */
+	protected static boolean EXTRA_RULE = true;
 }

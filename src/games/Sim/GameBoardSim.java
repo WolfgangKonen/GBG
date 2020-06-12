@@ -79,7 +79,8 @@ public class GameBoardSim implements GameBoard {
 		if(boardClear) {
             m_so = new StateObserverSim();
 		}
-		if (m_gameGui!=null)
+							// considerable speed-up during training (!)
+        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
 	}
 

@@ -191,18 +191,23 @@ public class GBGLaunch {
 			t_Game = new ArenaTrainHex(title,withUI);
 			break;
 		case "Nim": 
-		case "Nim3P":
 			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
-			// ArenaTrainNim, which will directly call Arena's constructor where the game board and
+			// ArenaTrainNim2P, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
 			ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
 			ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
 			ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
-			if (selectedGame=="Nim") {
-				t_Game = new ArenaTrainNim2P(title,withUI);
-			} else {
-				t_Game = new ArenaTrainNim3P(title,withUI);
-			}
+			t_Game = new ArenaTrainNim2P(title,withUI);
+			break;
+		case "Nim3P":
+			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor  
+			// ArenaNimTrainNim3P, which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
+			ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
+			ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));	// Nim3P: always MaxMinus == HeapSize (!)
+			ArenaNim3P.setExtraRule(Boolean.parseBoolean(scaPar[2]));
+			t_Game = new ArenaTrainNim3P(title,withUI);				
 			break;
 		case "Othello": 
 			t_Game = new ArenaTrainOthello(title,withUI);
@@ -268,18 +273,23 @@ public class GBGLaunch {
 			t_Game = new ArenaHex(title,withUI);
 			break;
 		case "Nim": 
-		case "Nim3P":
 			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
-			// ArenaNim, which will directly call Arena's constructor where the game board and
+			// ArenaNim2P, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
 			ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
 			ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
 			ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
-			if (selectedGame=="Nim") {
-				t_Game = new ArenaNim2P(title,withUI);				
-			} else {
-				t_Game = new ArenaNim3P(title,withUI);				
-			}
+			t_Game = new ArenaNim2P(title,withUI);				
+			break;
+		case "Nim3P":
+			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor  
+			// ArenaNim2P, which will directly call Arena's constructor where the game board and
+			// the Arena buttons are constructed 
+			ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
+			ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
+			ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));	// Nim3P: always MaxMinus == HeapSize (!)
+			ArenaNim3P.setExtraRule(Boolean.parseBoolean(scaPar[2]));
+			t_Game = new ArenaNim3P(title,withUI);				
 			break;
 		case "Othello": 
 			t_Game = new ArenaOthello(title,withUI);
@@ -421,7 +431,7 @@ public class GBGLaunch {
 					public void actionPerformed(ActionEvent e)
 					{	
 						selectedGame = (String)choiceGame.getSelectedItem();
-						if (selectedGame=="Nim" || selectedGame=="Nim3P") {
+						if (selectedGame=="Nim") {
 							String heapSize = (String)choiceScaPar1.getSelectedItem();
 							int iHeapSize = Integer.parseInt(heapSize);
 							choiceScaPar2.removeAllItems();
@@ -451,10 +461,14 @@ public class GBGLaunch {
 			scaPar[0]="6";		// the initial (recommended) value	
 			break;
 		case "Nim": 
+			scaPar[0]="3";		// 	
+			scaPar[1]="5";		// the initial (recommended) values	
+			scaPar[2]="5";		// 
+			break;
 		case "Nim3P":
 			scaPar[0]="3";		// 	
-			scaPar[1]="3";		// the initial (recommended) values	
-			scaPar[2]="3";		// 
+			scaPar[1]="5";		// the initial (recommended) values	
+			scaPar[2]="true";	// 
 			break;
 		case "Sim": 
 			scaPar[0]="2";		 	
@@ -501,10 +515,17 @@ public class GBGLaunch {
 			scaPar2_L.setText("Max Minus");
 			setScaPar0List(new int[]{2,3,4,5});				// int values are converted to 
 			setScaPar1List(new int[]{3,5,6,7,8,9,10,20,50});// Strings in ChoiceBoxes 
-			setScaPar2List(new int[]{2,3,4,5});				//
 			choiceScaPar0.setSelectedItem("3");		// 
-			choiceScaPar1.setSelectedItem("3");		// the initial (recommended) values
-			choiceScaPar2.setSelectedItem("3");		//
+			choiceScaPar1.setSelectedItem("5");		// the initial (recommended) values
+			if (selectedGame=="Nim") {
+				setScaPar2List(new int[]{2,3,4,5});			
+				choiceScaPar2.setSelectedItem("5");					
+			} else { // i.e. "Nim3P"
+				scaPar2_L.setText("Extra Rule");
+				choiceScaPar2.addItem("true");
+				choiceScaPar2.addItem("false");				
+				choiceScaPar2.setSelectedItem("true");					
+			}
 			break;
 		case "Sim": 
 			scaPar0_L.setText("Players");

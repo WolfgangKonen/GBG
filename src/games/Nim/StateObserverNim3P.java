@@ -17,15 +17,12 @@ import tools.Types.ACTIONS;
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
- * See {@link GameBoardNim3P} for game rules.
+ * See {@link GameBoardNim3P} for game rules: The player <b>who comes after</b> the player removing the last item 
+ * is the player who wins. He/she gets reward 1, the other two get reward 0. See also {@link #EXTRA_RULE}.
  */
 public class StateObserverNim3P extends StateObserverNim implements StateObservation {
-	// all in StateObserverNim
-//	protected int[] m_heap;		// has for each heap the count of items in it
-//	protected int m_player;		// player who makes the next move (0 or 1)
-//	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
-//	protected boolean SORT_IT = false;		// experimental
     
+	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
@@ -38,11 +35,15 @@ public class StateObserverNim3P extends StateObserverNim implements StateObserva
 	 * {@link NimConfig#HEAP_SIZE} items. Player 0 is the starting player.
 	 */
 	public StateObserverNim3P() {
-		super();			// initialize all members in superclass StateObserverNim
+		super();				// initialize all members in superclass StateObserverNim
+	}
+
+	public StateObserverNim3P(int[] heaps, int player) {
+		super(heaps,player);	// initialize all members in superclass StateObserverNim
 	}
 
 	public StateObserverNim3P(StateObserverNim3P other) {
-		super(other);		// copy all members in superclass StateObserverNim
+		super(other);			// copy all members in superclass StateObserverNim
 	}
 	
 	public StateObserverNim3P copy() {
@@ -65,17 +66,21 @@ public class StateObserverNim3P extends StateObserverNim implements StateObserva
 	
 	/**
 	 * The game score, seen from the perspective of player {@code player}.  
-	 * The rule for 3-player Nim is [Luckhardt86]: If the player just before me has taken the last piece, then I win.
-	 * This happens if {@code this} is a game-over state and I am the player 'to move next'.
+	 * The rule for 3-player Nim is acc. to [Luckhardt86]: If the player just before me has taken the last piece, 
+	 * then I win. This happens if {@code this} is a game-over state and I am the player 'to move next'.
 	 * 
 	 * @param player the player whose perspective is taken, a number in 0,1,...,N.
-	 * @return  If the game is over and {@code player} and {@code this.player} are the same, then return 1. 
-	 * 			Otherwise return 0.
+	 * @return  If the game is over and {@code player} and {@code this.player} are the same, then return 1 
+	 * 			({@code player} is the <b>winner</b>). 
+	 * 			Otherwise return 0. Additional, if {@link NimConfig#EXTRA_RULE} is set: If {@code player} is the <b>successor
+	 * 			of the winner</b>, then add a reward of 0.2 for this {@code player}.
 	 */
 	@Override
 	public double getGameScore(int player) {
         if(isGameOver()) {
-        	return (this.getPlayer() == player ? 1 : 0);
+        	double secondReward=0.0;
+        	if (NimConfig.EXTRA_RULE && player==(this.getPlayer()+1)%this.getNumPlayers()) secondReward = 0.2;
+        	return (this.getPlayer() == player ? 1 : secondReward);
         }      
         return 0; 
 	}
@@ -93,10 +98,13 @@ public class StateObserverNim3P extends StateObserverNim implements StateObserva
 	@Override
 	public double getGameScore(StateObservation refer) {
         if(isGameOver()) {
-        	// if the game is over, it is a win for the player to move in this.
-        	// (and a loss for both other players).
+        	// If the game is over, it is a win for the player to move in this, and he/she gets reward 1.
+        	// If EXTRA_RULE==false, both other players lose and get reward 0.0, 
+        	// If EXTRA_RULE==true, then the player following the winner gets reward 0.2.
         	// [There is no tie in game Nim3P.]
-        	return (refer.getPlayer()==this.getPlayer()) ? 1 : 0;
+        	double secondReward=0.0;
+        	if (NimConfig.EXTRA_RULE && refer.getPlayer()==(this.getPlayer()+1)%this.getNumPlayers()) secondReward = 0.2;
+        	return (refer.getPlayer()==this.getPlayer()) ? 1 : secondReward;
         	
         }       
         return 0; 

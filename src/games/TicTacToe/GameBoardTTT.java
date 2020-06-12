@@ -76,7 +76,8 @@ public class GameBoardTTT implements GameBoard {
 		if (boardClear) {
 			m_so = new StateObserverTTT();			// empty Table
 		}
-		if (m_gameGui!=null)
+							// considerable speed-up during training (!)
+        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
 	}
 

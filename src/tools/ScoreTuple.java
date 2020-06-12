@@ -1,19 +1,23 @@
 package tools;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 
 import controllers.ExpectimaxNAgent;
 import controllers.MaxNAgent;
+import games.LogManager;
 import games.StateObservation;
 import games.Nim.BoutonAgent;
 
 /**
  *	ScoreTuple: a tuple with scores (game values) for all players.
+ *  <p>
+ *  ScoreTuple implements the {@link Serializable} interface, because this is needed for {@link LogManager}.
  * 
  *	@see MaxNAgent
  *	@see BoutonAgent
  */
-public class ScoreTuple {
+public class ScoreTuple implements Serializable {
 	public enum CombineOP {AVG,MIN,MAX,DIFF};
 	/**
 	 * the tuple values

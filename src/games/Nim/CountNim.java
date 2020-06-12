@@ -14,10 +14,10 @@ import java.text.DecimalFormat;
  * <p>
  * This class counts the <b>unordered</b> heap configurations which are simply
  * <pre>    (nPiece+1)^nHeap  </pre>
- * and the <b>ordered</b> heap configurations where after each moves the heaps are sorted in decreasing 
+ * and the <b>ordered</b> heap configurations where after each move the heaps are sorted in decreasing 
  * order.
  *  
- * @author Wolfgang Konen, TH Koeln , Jan'18 - Jan'19
+ * @author Wolfgang Konen, TH Koeln , 2018-2019
  */
 public class CountNim {
 

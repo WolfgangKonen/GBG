@@ -93,6 +93,14 @@ public class ArenaNim3P extends Arena   {
     	NimConfig.MAX_MINUS = val;
     }
 
+    /**
+     * set the maximum number of items to subtract ('minus') from a heap in one move.
+     * May not be bigger than {@link #getHeapSize()}. 
+     */
+    public static void setExtraRule(boolean val) {
+    	NimConfig.EXTRA_RULE = val;
+    }
+
 	/**
 	 * Factory pattern method: make a new GameBoard 
 	 * @return	the game board
