@@ -127,10 +127,12 @@ public class OptionsComp extends JFrame {
 		return cbswapPlayers.isSelected();
 	}
 
+	// currently unused
 	public boolean useCurBoard() {
 		return cbUseCurBoard.isSelected();
 	}
 
+	// currently unused
 	public boolean logValues() {
 		return cbLogValues.isSelected();
 	}
@@ -143,10 +145,12 @@ public class OptionsComp extends JFrame {
 		tNumGames.setText(""+competeNumber);
 	}
 	
+	// currently unused
 	public int getFirstPlayer() {
 		return cFirstPlayer.getSelectedIndex();
 	}
 	
+	// currently unused
 	public int getSecondPlayer() {
 		return cSecondPlayer.getSelectedIndex();
 	}

@@ -184,7 +184,6 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 	@Override
 	public StateObservation chooseStartState() {
 		getDefaultStartState();			// m_so is in default start state 
-//		clearBoard(true, true);			// m_so is in default start state 
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply

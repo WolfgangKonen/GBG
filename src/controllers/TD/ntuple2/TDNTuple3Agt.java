@@ -743,7 +743,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        	// adaptAgentV(). As a result, in the old version randLast[curPlayer] would be false, even
 	        	// if a_t was a random action. (Only in the next round, when a_t might be greedy again,
 	        	// randLast[curPlayer] would be true.). This was the wrong behavior, which is now fixed.
-	        R = ns.getNextRewardTupleCheckFinished(epiLength);	// this sets m_finished
+	        R = ns.getNextRewardTupleCheckFinished(epiLength);	// this may set m_finished
 	        
 	        adaptAgentV(curPlayer, R, ns);
 	        
@@ -752,13 +752,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        // we advance. 
 	        // (for deterministic games, ns.getAfterState() and ns.getNextSO() are the same)
 	        sLast[curPlayer] = ns.getAfterState();
-//	        randLast[curPlayer] = a_t.isRandomAction(); // /WK/ bug fix: has to come before adaptAgentV (!)
 	        rLast.scTup[curPlayer] = R.scTup[curPlayer];
 	        s_t = ns.getNextSO();
 			t++;
 			
-//			if (m_finished) break; 		// out of while  (/WK/bug fix 2019-05-21)
-//		} while(!s_t.isGameOver());
 		} while(!m_finished);			// simplification: m_finished is set by ns.getNextRewardTupleCheckFinished
 		
 		if (FINALADAPTAGENTS) 

@@ -57,6 +57,7 @@ agents/ConnectFour/TCL-EXP-NT3-al50-lam025*.agt.zip
 agents/ConnectFour/TCL-*noFA.agt.zip
 agents/ConnectFour/mtLambda.agt.zip
 # (the only ConnectFour agent we have in repos is TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip)
+agents/Nim3P/N03-S05-ExtraYes/multiTest*.agt.zip
 agents/Othello/AAREADME.txt
 agents/Othello/TCL3-*noFA*.agt.zip
 agents/Othello/TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.agt.zip

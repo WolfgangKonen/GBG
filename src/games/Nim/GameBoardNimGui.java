@@ -36,10 +36,9 @@ import tools.Types.ACTIONS;
 /**
  * Class GameBoardNimGui has the board game GUI. 
  * <p>
- * It shows board game states, optionally the values of possible next actions,
- * and allows user interactions with the board to enter legal moves during 
- * game play or to enter board positions for which the agent reaction is 
- * inspected. 
+ * It shows board game states, optionally the values of possible next actions, and (last row) the optimal values of 
+ * the possible next actions, and allows user interactions with the board to enter legal moves during 
+ * game play or to enter board positions for which the agent reaction is inspected. 
  * 
  * @author Wolfgang Konen, TH Koeln, 2016-2020
  */
@@ -86,8 +85,9 @@ public class GameBoardNimGui extends JFrame {
 		switch (m_gb.getStateObs().getNumPlayers()) {
 		case 2:
 			optimAgent = new BoutonAgent("Bouton"); break;
-		default:	// usually N==3
-			optimAgent = new MaxNAgent("MaxN",15,true);		// 15 is OK for heaps(5,5,5), but might be t0o small for larger heaps
+		default:	// i.e. N==3
+			int maxDepth=NimConfig.NUMBER_HEAPS*NimConfig.HEAP_SIZE; // maxDepth = max number of possible moves
+			optimAgent = new MaxNAgent("MaxN",maxDepth,true);		
 		}
 		
 		initGui("");
@@ -115,14 +115,11 @@ public class GameBoardNimGui extends JFrame {
 		
 		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		infoPanel.setBackground(Types.GUI_BGCOLOR);
-//		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
 		Font font=new Font("Arial",0,(int)(1.2*Types.GUI_HELPFONTSIZE));			
 		leftInfo.setFont(font);	
 		rightInfo.setFont(font);	
-//		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
 		infoPanel.add(leftInfo);
 		infoPanel.add(rightInfo);
-//		infoPanel.setSize(100,10);
 		
 		setLayout(new BorderLayout(10,0));
 		add(titlePanel,BorderLayout.NORTH);				
@@ -137,7 +134,6 @@ public class GameBoardNimGui extends JFrame {
 	private JPanel InitBoard()
 	{
 		JPanel panel=new JPanel();
-		//JButton b = new JButton();
 		panel.setLayout(new GridLayout(1,NimConfig.NUMBER_HEAPS,15,15));
 		panel.setBackground(Types.GUI_BGCOLOR);
 		int buSize = (int)(30*Types.GUI_SCALING_FACTOR_X);
@@ -292,7 +288,7 @@ public class GameBoardNimGui extends JFrame {
 					}
 					
 					// Calculate the optimal value of this action according 
-					// to Bouton's theory. The values OptTable[i][j] are shown 
+					// to Bouton's theory (N=2) or to MaxN. The values OptTable[i][j] are shown 
 					// in GUI (last row) if showValueOnGameboard is true.
 					Types.ACTIONS_VT optActions = optimAgent.getNextAction2(optState, false, true);
 			        ArrayList<ACTIONS> acts = optState.getAvailableActions();
@@ -341,12 +337,12 @@ public class GameBoardNimGui extends JFrame {
 		if (soN.isGameOver()) {
 			ScoreTuple sc = soN.getGameScoreTuple();
 			int winner = sc.argmax();
-			if (sc.max()==0.0) winner = -2;	// tie indicator
+			if (sc.max()==0.0) winner = -2;	// tie indicator (should not happen for Nim & Nim3P)
 			switch(winner) {
 			case( 0): 
 			case( 1):
 			case( 2):
-				leftInfo.setText(actualPlayer+" has won   "); break;
+				leftInfo.setText(playerNames[winner]+" has won   "); break;
 			case(-2):
 				//leftInfo.setText("Tie         "); break;
 				throw new RuntimeException("No tie for Nim!");
@@ -407,9 +403,6 @@ public class GameBoardNimGui extends JFrame {
 			setValueBoard(VBoard,iBest,jBest,VTable[iBest][jBest],
 					showValueOnGameboard,new Color(0,(int)(255/1.5),0));
 		}
-		
-		// just debug:
-//		int [] idealMove = m_so.bouton(); 
 		
 		// for all viable actions: enable the associated action button
 		for (ACTIONS action : m_gb.getStateObs().getAvailableActions()) {
@@ -520,8 +513,10 @@ public class GameBoardNimGui extends JFrame {
 			if (nimGame.m_ArenaFrame!=null) {
 				x = nimGame.m_ArenaFrame.getX();
 				y = nimGame.m_ArenaFrame.getY() + nimGame.m_ArenaFrame.getHeight() +1;
-				this.setSize(nimGame.m_ArenaFrame.getWidth(),
-							 (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
+				int aframeWidth = nimGame.m_ArenaFrame.getWidth();
+				int nimWidth = 32 * NimConfig.HEAP_SIZE*NimConfig.NUMBER_HEAPS;		// sufficiently wide to cover all butttons
+				int width = (aframeWidth>nimWidth) ? aframeWidth : nimWidth;
+				this.setSize(width, (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
 			}
 			this.setLocation(x,y);	
 		}		

@@ -1,7 +1,7 @@
 <xml xmlns:o="urn:schemas-microsoft-com:office:office">
  <o:MainFile HRef="../GameRules-GBG.htm"/>
- <o:File HRef="item0025.xml"/>
- <o:File HRef="props026.xml"/>
+ <o:File HRef="item0029.xml"/>
+ <o:File HRef="props030.xml"/>
  <o:File HRef="themedata.thmx"/>
  <o:File HRef="colorschememapping.xml"/>
  <o:File HRef="image001.png"/>
@@ -14,14 +14,18 @@
  <o:File HRef="image008.jpg"/>
  <o:File HRef="image009.png"/>
  <o:File HRef="image010.jpg"/>
- <o:File HRef="image016.png"/>
- <o:File HRef="image018.gif"/>
+ <o:File HRef="image018.png"/>
+ <o:File HRef="image019.gif"/>
  <o:File HRef="image020.png"/>
  <o:File HRef="image021.gif"/>
+ <o:File HRef="image022.png"/>
+ <o:File HRef="image023.gif"/>
+ <o:File HRef="image024.png"/>
+ <o:File HRef="image025.gif"/>
  <o:File HRef="image015.png"/>
- <o:File HRef="image022.jpg"/>
+ <o:File HRef="image026.jpg"/>
  <o:File HRef="image017.png"/>
- <o:File HRef="image023.jpg"/>
+ <o:File HRef="image027.jpg"/>
  <o:File HRef="header.htm"/>
  <o:File HRef="filelist.xml"/>
 </xml>
