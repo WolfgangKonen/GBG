@@ -1,13 +1,12 @@
 package games.Othello;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
+
+import java.util.ArrayList;
 /**
  * This class holds any valid Othello game state. It is coded
  * in a two dimensional int[8][8] array, where each index represents either 
@@ -58,7 +57,7 @@ public class StateObserverOthello extends ObserverBase{
 	public static final long serialVersionUID = 12L;
 	private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
 	
-	private int[][] currentGameState;
+	protected int[][] currentGameState;
 	private int playerNextMove, countBlack, countWhite;
 	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
 	private ArrayList<Integer> lastMoves;
