@@ -35,15 +35,17 @@ public final class AsStateObserverOthelloTest {
 
     private static AsStateObserverOthello initializedAsStateObs(final List<Integer> initialGbgMoves) {
         return new AsStateObserverOthello(
-            LudiiContext.fromMoves(
-                initialGbgMoves
-                    .stream()
-                    .map(m ->
-                        new GbgBoardIndex(
-                            new Types.ACTIONS(m)
-                        ).toLudiiIndex().toInt()
-                    )
-                    .collect(Collectors.toList())
+            new GbgStateFromLudiiContext(
+                LudiiContext.fromMoves(
+                    initialGbgMoves
+                        .stream()
+                        .map(m ->
+                            new GbgBoardIndex(
+                                new Types.ACTIONS(m)
+                            ).toLudiiIndex().toInt()
+                        )
+                        .collect(Collectors.toList())
+                )
             )
         );
     }
@@ -98,7 +100,9 @@ public final class AsStateObserverOthelloTest {
                     .stream()
                     .map(Types.ACTIONS::new)
                     .toArray(),
-                new AsStateObserverOthello(LudiiContext.forNewGame())
+                new AsStateObserverOthello(
+                    new GbgStateFromLudiiContext(
+                        LudiiContext.forNewGame()))
                     .getAllAvailableActions()
                     .stream()
                     .sorted()

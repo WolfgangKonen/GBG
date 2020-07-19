@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-final class GbgStateFromLudiiContext implements GbgState {
+public final class GbgStateFromLudiiContext implements GbgState {
     private final Set<Integer> _startFields = Set.of(27, 28, 35, 36);
 
     private final Context _ludiiContext;
