@@ -1,4 +1,4 @@
-package ludiiInterface.othello.gateway;
+package ludiiInterface.gateway;
 
 import controllers.PlayAgent;
 import game.Game;
