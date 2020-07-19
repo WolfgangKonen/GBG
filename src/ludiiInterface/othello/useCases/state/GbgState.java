@@ -10,6 +10,8 @@ interface GbgState {
 
     int[][] toArray2D();
 
+    ArrayList<Types.ACTIONS> allAvailableActions();
+
     ArrayList<Types.ACTIONS> availableActions();
 
     GbgState copy();
