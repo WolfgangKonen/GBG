@@ -10,9 +10,14 @@ import util.Context;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 final class GbgStateFromLudiiContext implements GbgState {
+    private final Set<Integer> _startFields = Set.of(27, 28, 35, 36);
+
     private final Context _ludiiContext;
 
     public GbgStateFromLudiiContext(final Context ludiiContext) {
@@ -46,6 +51,21 @@ final class GbgStateFromLudiiContext implements GbgState {
             Arrays.copyOfRange(state, 48, 56),
             Arrays.copyOfRange(state, 56, 64)
         };
+    }
+
+    @Override
+    public ArrayList<Types.ACTIONS> allAvailableActions() {
+        return new ArrayList<>(
+            Collections.unmodifiableSet(
+                Set.of(
+                    IntStream
+                        .range(0, 64)
+                        .filter(i -> !_startFields.contains(i))
+                        .mapToObj(Types.ACTIONS::new)
+                        .toArray(Types.ACTIONS[]::new)
+                )
+            )
+        );
     }
 
     @Override

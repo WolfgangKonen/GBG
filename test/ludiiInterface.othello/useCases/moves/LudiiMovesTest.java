@@ -112,8 +112,8 @@ public final class LudiiMovesTest {
             );
         }
 
-        public static final class Method_availableMoveBy_only_returns_a_value_if_there {
-            public static final class Is_an_available_move_in_this_round_that_corresponds_to_the_passed {
+        public static final class Method_availableMoveBy_returns {
+            public static final class A_value_if_there_is_an_available_move_in_this_round_that_corresponds_to_the_passed {
                 @Test
                 public void gbgAction() {
                     assertTrue(
@@ -148,7 +148,7 @@ public final class LudiiMovesTest {
                 }
             }
 
-            public static final class Is_not_an_available_move_in_this_round_that_corresponds_to_the_passed {
+            public static final class No_value_if_there_is_not_an_available_move_in_this_round_that_corresponds_to_the_passed {
                 @Test
                 public void gbgAction() {
                     assertFalse(
