@@ -16,6 +16,10 @@ public final class GbgAsLudiiAgent extends AI {
 //    private final String gbgAgentPath = "C:\\Users\\wolfgang\\Documents\\GitHub\\GBG\\agents\\Othello\\TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm.agt.zip";
     private PlayAgent gbgAgent;
 
+    public GbgAsLudiiAgent() {
+        friendlyName = getClass().getSimpleName();
+    }
+
     @Override
     public void initAI(final Game game, final int playerID) {
         try {
