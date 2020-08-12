@@ -395,6 +395,12 @@ public class XArenaFuncs {
 							+ " but selector for player " + n + " requires " + sAgent + ".");
 				pa = m_PlayAgents[n]; // take the n'th current agent, which
 										// is *assumed* to be trained (!)
+				
+				// Wrapper nPly is the ONLY parameter from tab 'Other pars' which may be changed by the user AFTER 
+				// training an agent. (All the other opar parameters may be only set/changed BEFORE training a 
+				// trainable agent.) The following line of code was missing before 2020-08-11 and caused the bug 
+				// that a Wrapper nPly set for a trained agent was not saved to disk. Now it will be saved:
+				pa.setWrapperNPly(m_xab.oPar[n].getWrapperNPly());
 			}
 		}
 		if (pa == null)

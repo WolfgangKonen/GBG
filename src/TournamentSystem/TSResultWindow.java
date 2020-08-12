@@ -450,7 +450,7 @@ public class TSResultWindow extends JFrame {
         scatterPlotASvT.setPreferredSize(new Dimension(width, height)); // plot size
         scatterPlotJPanel.add(scatterPlotASvT);
         final JLabel label3 = new JLabel();
-        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. RoundTime</strong><br>\nAgent WTL score vs Median Episode Time</body></html>\n");
+        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. CalculationTime</strong><br>\nAgent WTL score vs Median Episode Time</body></html>\n");
         scatterHeadJPanel.add(label3);
         scatterHeadJPanel.add(logarithmicXAxisCheckbox);
         pack();
@@ -503,7 +503,7 @@ public class TSResultWindow extends JFrame {
         mJPanel.setLayout(new GridBagLayout());
         tableWTLLabel = new JLabel();
         tableWTLLabel.setText("<html><body><strong>Table with Win, Tie, Loss (WTL) Results</strong><br>"
-        		+ "\nRow agent (1st) plays against the column agent (2nd)<br>"
+        		+ "\nRow agent (1st) plays against column agent (2nd)<br>"
         		+ "\nWin and loss are from the row agent's perspective</body></html>");
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
@@ -519,14 +519,14 @@ public class TSResultWindow extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(tableSCRLabel, gbc);
         heatmapH1JL = new JLabel();
-        heatmapH1JL.setText("<html><body><strong>Heatmap visualisation of game scores</strong><br>\nwhite = worst | black = best score<br>\nblue = agent against itself<br>\ngreen = game was not played in specific tournament mode<br>\nrow agent (1st) plays against the column agent (2nd)</body></html>");
+        heatmapH1JL.setText("<html><body><strong>Heatmap visualisation of game scores</strong><br>\nwhite = worst | black = best score<br>\nblue = agent against itself<br>\ngreen = game was not played in specific tournament mode<br>\nRow agent (1st) plays against column agent (2nd)</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 8;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(heatmapH1JL, gbc);
         final JLabel label1 = new JLabel();
-        label1.setText("<html><body><strong>Ranking of Agents by overall Wins, Ties, Losses</strong></body></html>\n");
+        label1.setText("<html><body><strong>Ranking of agents by overall WTL (Win, Tie, Loss)</strong></body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 14;
@@ -636,7 +636,7 @@ public class TSResultWindow extends JFrame {
         gbc.insets = new Insets(0, 0, 0, 10);
         mJPanel.add(spacer5, gbc);
 //        final JLabel label3 = new JLabel();
-//        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. RoundTime</strong><br>\nagent WinTieLoss score vs median roundtime</body></html>\n");
+//        label3.setText("<html><body><strong>ScatterPlot AgentScore vs. CalculationTime</strong><br>\nagent WinTieLoss score vs median roundtime</body></html>\n");
         scatterHeadJPanel = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
@@ -804,7 +804,7 @@ public class TSResultWindow extends JFrame {
         heatmapJLadv2.setText("heatmapJLadv2");
         jspHMadv2.setViewportView(heatmapJLadv2);
         heatmapJLadv2Title = new JLabel();
-        heatmapJLadv2Title.setText("<html><body><strong>Heatmap Is W<sub>ab</sub> = 1-W<sub>ba</sub> true?</strong><br>\ngreen = yes | light grey = almost | black = NO<br>\nblue = agent against itself<br>\nrow agent (1st) plays against the column agent (2nd)</body></html>");
+        heatmapJLadv2Title.setText("<html><body><strong>Heatmap Is W<sub>ab</sub> = 1-W<sub>ba</sub> true?</strong><br>\ngreen = yes | light grey = almost | black = NO<br>\nblue = agent against itself<br>\nrow agent (1st) plays against column agent (2nd)</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
         gbc.gridy = 11;
@@ -820,7 +820,7 @@ public class TSResultWindow extends JFrame {
         heatmapJLadv3.setText("heatmapJLadv3");
         jspHMadv3.setViewportView(heatmapJLadv3);
         heatmapJLadv3Title = new JLabel();
-        heatmapJLadv3Title.setText("<html><body><strong>Heatmap Is W<sub>ab</sub> = W<sub>ba</sub> AND W<sub>ab</sub> = 1-W<sub>ba</sub> true?</strong><br>\ngreen = yes | red = NO<br>\nblue = agent against itself<br>\nrow agent (1st) plays against the column agent (2nd)</body></html>");
+        heatmapJLadv3Title.setText("<html><body><strong>Heatmap Is W<sub>ab</sub> = W<sub>ba</sub> AND W<sub>ab</sub> = 1-W<sub>ba</sub> true?</strong><br>\ngreen = yes | red = NO<br>\nblue = agent against itself<br>\nrow agent (1st) plays against column agent (2nd)</body></html>");
         gbc = new GridBagConstraints();
         gbc.gridx = 4;
         gbc.gridy = 11;

@@ -113,7 +113,7 @@ public class TSAgentManager {
 
     /**
      * set number of episodes (rounds) to be played per match. 
-     * A match is a pair of agents in the game plan 
+     * A match is a pair of agents in the gamePlan 
      * @param num number of episodes per match
      */
     public void setNumberOfEpisodes(int num) {
@@ -264,7 +264,7 @@ public class TSAgentManager {
     }
 
     /**
-     * get the gameplan with all agent pairs playing against each other with their names in a string array
+     * get the gamePlan with all agent pairs playing against each other with their names in a string array
      * @return string array with the names of agents playing against each other
      */
     public String[][] getGamePlan(boolean doubleRoundRobin) {
@@ -297,9 +297,9 @@ public class TSAgentManager {
     }
 
     /**
-     * generates the gameplan and playing pairs of agents identified by the ID (position in mAgent Arraylist)
+     * generates the gamePlan and playing pairs of agents identified by the ID (position in mAgent Arraylist)
      * @param doubleRoundRobin is the tournament mode double round robin?
-     * @return gameplan with agent IDs
+     * @return gamePlan with agent IDs
      */
     private int[][] generateGamePlanInternal(boolean doubleRoundRobin) {
         int selectedAgents[] = getIDAgentsSelected();
@@ -317,25 +317,25 @@ public class TSAgentManager {
                     }
                 }
                 if (userGameNumLimitDRR > 0) {
-                    // ... remove games from gameplan as set by user
+                    // ... remove games from gamePlan as set by user
                     final int numGamesToPlay = userGameNumLimitDRR;
                     final int numGamesToRemove = gamePlan.length - userGameNumLimitDRR;
                     final int numGamesMinimum = (getNumAgentsSelected() / 2) + 1;
 
-                    // matches which have to be played to make sure every agent played once
-                    // this saves the position of the matches in the original double roun robin gameplan
-                    // if the number of players is uneven the last agent plays against the first
+                    // matches which have to be played to make sure that every agent plays once
+                    // this saves the position of the matches in the original double round robin gamePlan
+                    // if the number of players is uneven, the last agent plays against the first
                     int[] safeMatches = new int[numGamesMinimum];
 
                     for (int i=0; i<selectedAgents.length; i+=2) {
                         if (i+1 == selectedAgents.length) {
-                            safeMatches[i/2] = getPosGamePlan(selectedAgents[i],selectedAgents[0], gamePlan); // position of game in gameplan
+                            safeMatches[i/2] = getPosGamePlan(selectedAgents[i],selectedAgents[0], gamePlan); // position of game in gamePlan
                         } else {
-                            safeMatches[i/2] = getPosGamePlan(selectedAgents[i],selectedAgents[i+1], gamePlan); // position of game in gameplan
+                            safeMatches[i/2] = getPosGamePlan(selectedAgents[i],selectedAgents[i+1], gamePlan); // position of game in gamePlan
                         }
                     }
 
-                    // this holds the gameplan positions of matches to be deleted, randomly chosen
+                    // this holds the gamePlan positions of matches to be deleted, randomly chosen
                     int[] matchesToDelete = getNRandomInts(0, gamePlan.length-1, numGamesToRemove, safeMatches);
 
                     int newGamePlan[][] = new int[numGamesToPlay][2];
@@ -350,7 +350,7 @@ public class TSAgentManager {
                             }
                         }
 
-                        if (!skip) { // if not then copy match to new gameplan
+                        if (!skip) { // if not then copy match to new gamePlan
                             newGamePlan[pos][0] = gamePlan[i][0];
                             newGamePlan[pos][1] = gamePlan[i][1];
                             pos++;
@@ -431,7 +431,7 @@ public class TSAgentManager {
     }
 
     /**
-     * print the gameplan with agent names to the console
+     * print the gamePlan with agent names to the console
      */
     public void printGamePlan() {
         String gamePlan[][] = getGamePlan(playDoubleRoundRobin);
@@ -474,7 +474,7 @@ public class TSAgentManager {
 
     /**
      * lock the tournament system to prevent data from changes.
-     * also the game plan is calculated and measurements are prepared.
+     * also the gamePlan is calculated and measurements are prepared.
      */
     public void lockToCompete(GameBoard gb) {
         if (results.numberOfEpisodes == -1) {
@@ -532,7 +532,7 @@ public class TSAgentManager {
     }
 
     /**
-     * get the agent and measurement data for the next playing agents according to the gameplan.
+     * get the agent and measurement data for the next playing agents according to the gamePlan.
      * <p>
      * you also need to get {@link TSAgentManager#getNextCompetitionTimeStorage()} to save the time measurements
      * @return TSAgent instances of the next playing agents
@@ -553,7 +553,7 @@ public class TSAgentManager {
     }
 
     /**
-     * get the time measurement data for the next playing agents according to the gameplan
+     * get the time measurement data for the next playing agents according to the gamePlan
      * @return time storage instance for the next game
      */
     public TSTimeStorage[] getNextCompetitionTimeStorage() {
@@ -562,7 +562,7 @@ public class TSAgentManager {
 
     /**
      * after two agents played their match, use this method to save the game result.
-     * this also prepares the time storage for the next game and updates the gameplan<p>
+     * this also prepares the time storage for the next game and updates the gamePlan<p>
      * 0 : agent 1 wins<p>
      * 1 : tie<p>
      * 2 : agent 2 wins
@@ -616,7 +616,7 @@ public class TSAgentManager {
     }
 
     /**
-     * returns if a next game is available according ot the gameplan
+     * returns if a next game is available according ot the gamePlan
      * @return boolean if a next game is available
      */
     public boolean hasNextGame() {
@@ -724,8 +724,8 @@ public class TSAgentManager {
                 +" | Random Start Moves: "+results.numberOfRandomStartMoves/*
                 +" | Duration: "+numberFormat000.format(results.getTSTotalPlayTimeS())+"[s] = "
                 +numberFormat00.format(results.getTSTotalPlayTimeS()/60.0)+"[min]";*/
-                +" | Duration: "+numberFormat000.format(results.durationTSMS/1000.0)+"[s] = "
-                +numberFormat00.format(results.durationTSMS/60000.0)+"[min]";
+                +" | Duration: "+numberFormat000.format(results.durationTSMS/1000.0)+" sec = "
+                +numberFormat00.format(results.durationTSMS/60000.0)+" min";
         boolean singlePlayerGame = false;
         if (numPlayers==1)
             singlePlayerGame = true;
@@ -742,7 +742,7 @@ public class TSAgentManager {
             // headers for the table
             String agents[] = getNamesAgentsSelected();
             String[] columnNames1 = new String[agents.length + 1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
-            columnNames1[0] = "Y vs X";
+            columnNames1[0] = ""; //"Y vs X";
             System.arraycopy(agents, 0, columnNames1, 1, agents.length);
 
             final String empty = "null";
@@ -759,7 +759,7 @@ public class TSAgentManager {
                         rowData3[i][j + 1] = empty;
                         rowDataHM[i][j] = HeatChart.COLOR_DIAGONALE; // diagonale
                     } else {
-                        int gameNum = getPosGamePlan(getIDAgentsSelected()[i],getIDAgentsSelected()[j], results.gamePlan); // position of game in gameplan
+                        int gameNum = getPosGamePlan(getIDAgentsSelected()[i],getIDAgentsSelected()[j], results.gamePlan); // position of game in gamePlan
                         if (gameNum == -1) { // game not available
                             rowData1[i][j + 1] = noGame;
                             rowData3[i][j + 1] = noGame;
@@ -1147,7 +1147,7 @@ public class TSAgentManager {
         for (int i=0; i<results.gameResult.length; i++) {
             for (int j=0; j<numAgentsPerMatch; j++) {
                 TSSimpleTimeTableHelper timeHelper = null;
-                for (TSSimpleTimeTableHelper tss : simpleTimes) { // find matching timehelper for agent in gameplan
+                for (TSSimpleTimeTableHelper tss : simpleTimes) { // find matching timehelper for agent in gamePlan
                     if (tss.agentID == results.gamePlan[i][j]) {
                         timeHelper = tss;
                     }
@@ -1278,11 +1278,11 @@ public class TSAgentManager {
     }
 
     /**
-     * get position of selected agent's game in the gameplan. returns -1 if not found!
+     * get position of selected agent's game in the gamePlan. returns -1 if not found!
      * @param agentAID ID of first agent
      * @param agentBID ID of second agent
-     * @param gamePlan the tournament gameplan
-     * @return positiom of of game in gameplan or -1 if not found
+     * @param gamePlan the tournament gamePlan
+     * @return positiom of of game in gamePlan or -1 if not found
      */
     private int getPosGamePlan(int agentAID, int agentBID, int[][] gamePlan) {
         for (int i=0; i<gamePlan.length; i++) {
@@ -1294,10 +1294,10 @@ public class TSAgentManager {
     }
 
     /**
-     * same as {@link TSAgentManager#getPosGamePlan(int, int, int[][])} but uses full double round robin gameplan
+     * same as {@link TSAgentManager#getPosGamePlan(int, int, int[][])} but uses full double round robin gamePlan
      * @param agentAID ID of first agent
      * @param agentBID ID of second agent
-     * @return positiom of of game in gameplan or -1 if not found
+     * @return positiom of of game in gamePlan or -1 if not found
      */
     /*
     private int getPosFullGamePlan(int agentAID, int agentBID) {

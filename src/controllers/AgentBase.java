@@ -296,6 +296,11 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
     @Override
+	public void setWrapperNPly(int num) {
+		m_oPar.setWrapperNPly(num);
+	}
+
+    @Override
 	public ParOther getParOther() {
 		return m_oPar;
 	}

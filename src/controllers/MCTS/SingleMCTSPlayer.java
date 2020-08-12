@@ -49,7 +49,10 @@ public class SingleMCTSPlayer implements Serializable
 	/**
 	 * Member {@link #m_parent} is only needed for access to {@link MCTSAgenT#getParOther()}
 	 */
-    private transient MCTSAgentT m_parent;		//  
+    // a bug before 2020-08-11 was that m_parent was transient. This is not o.k. since when loading an MCTS agent 
+    // from disk (e.g. in tournament), it would result in m_parent being null, which leads to a runtime exception
+    // when getParOther is called. Now fixed, we removed 'transient'.
+    private MCTSAgentT m_parent;		
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -176,6 +179,7 @@ public class SingleMCTSPlayer implements Serializable
 	}
 
     public ParOther getParOther() {
+		assert m_parent != null : "[SingleMCTSPlayer] m_parent is null!";
 		return m_parent.getParOther();
 	}
 }

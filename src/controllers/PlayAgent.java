@@ -229,6 +229,7 @@ public interface PlayAgent {
 	public int getNumEval();
 	public void setNumEval(int num);	
 	public void setStopEval(int num);
+	public void setWrapperNPly(int num);
 	
 	public AgentState getAgentState(); 
 	public void setAgentState(AgentState aState);

@@ -968,6 +968,7 @@ abstract public class Arena implements Runnable {
 			// are all taken (!)
 			m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
 			AgentBase.validTrainedAgents(m_xfun.m_PlayAgents,numPlayers);
+
 		} catch (RuntimeException e) {
 			this.showMessage( e.getMessage(), 
 					"Error", JOptionPane.ERROR_MESSAGE);

@@ -2,6 +2,10 @@ package TournamentSystem.tools;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.jfree.chart.ChartFactory;
@@ -9,6 +13,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -20,7 +25,7 @@ import tools.Types;
 import tools.Utils;
 
 /**
- * Class with two static methods to create the scatter plot "AgentScore vs Time". 
+ * Class with three static methods to create the scatter plot "AgentScore vs Time". 
  * <p>
  * This class was separated from TSAgentManager to make the dependencies in the code clearer.
  */
@@ -90,6 +95,19 @@ public class TSScatterPlot  {
         XYPlot plot = (XYPlot)scatterPlot.getPlot();
         plot.setBackgroundPaint(new Color(180, 180, 180));
         Font font = new Font("Arial", Font.BOLD, (int)(1.2*Types.GUI_HELPFONTSIZE));
+        
+        // Code for larger shapes (markers), adapted from http://www.jfree.org/forum/viewtopic.php?t=16014 
+        // and http://www.jfree.org/forum/viewtopic.php?t=29751 :
+        //
+        int isize = 12;		// *** adjust this one parameter isize to change the size of all markers. ***
+        					//     isize should be even (!)
+        Shape[] shapes = createStandardSeriesShapes(isize);
+        XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+        for (int i=0; i<shapes.length; i++) {
+        	renderer.setSeriesShapesVisible( i, true );
+            renderer.setSeriesShape( i, shapes[i] );        	
+        }
+
         if (hasLogarithmicX) {
         	final NumberAxis domainAxis = new LogarithmicAxis(scXAxis);
         	domainAxis.setLabelFont(font);
@@ -107,4 +125,65 @@ public class TSScatterPlot  {
         
         return scatterPlot;	
 	}
+    
+    /**
+     * Creates an array of standard shapes to display for the items in series on charts.
+     * <p>
+     * Adapted from  <a href="http://www.jfree.org/forum/viewtopic.php?t=16014">
+     * 					http://www.jfree.org/forum/viewtopic.php?t=16014</a>.
+     * 
+     * @param isize a common size parameter for all shapes. Should be even for best results.
+     * @return The array of shapes.
+     */
+    public static Shape[] createStandardSeriesShapes(int isize) {
+
+        Shape[] result = new Shape[10];
+
+        double size = (double) isize;
+        double delta = size / 2.0;
+        int idelta = (int) delta; 
+        Polygon po;
+
+        // square
+        result[0] = new Rectangle2D.Double(-delta, -delta, size, size);
+        
+        // circle
+        result[1] = new Ellipse2D.Double(-delta, -delta, size, size);
+
+        // up-pointing triangle
+        po = new Polygon();
+        po.addPoint(0, -idelta); po.addPoint(idelta, idelta); po.addPoint(-idelta, idelta);
+        result[2] = po;
+
+        // diamond
+        po = new Polygon();
+        po.addPoint(0, -idelta); po.addPoint(idelta, 0); po.addPoint(0, idelta); po.addPoint(-idelta, 0);
+        result[3] = po;
+
+        // horizontal rectangle
+        result[4] = new Rectangle2D.Double(-delta, -delta / 2, size, size / 2);
+
+        // down-pointing triangle
+        po = new Polygon();
+        po.addPoint(-idelta, -idelta); po.addPoint(idelta, -idelta); po.addPoint(0, idelta); 
+        result[5] = po;
+
+        // horizontal ellipse
+        result[6] = new Ellipse2D.Double(-delta, -delta / 2, size, size / 2);
+
+        // right-pointing triangle
+        po = new Polygon();
+        po.addPoint(-idelta, -idelta); po.addPoint(idelta, 0); po.addPoint(-idelta, idelta); 
+        result[7] = po;
+
+        // vertical rectangle
+        result[8] = new Rectangle2D.Double(-delta / 2, -delta, size / 2, size);
+
+        // left-pointing triangle
+        po = new Polygon();
+        po.addPoint(-idelta, 0); po.addPoint(idelta, -idelta); po.addPoint(idelta, idelta); 
+        result[9] = po;
+
+        return result;
+    }    
 }

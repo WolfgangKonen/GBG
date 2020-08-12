@@ -94,7 +94,7 @@ public class Stuff {
         // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
         //headers for the table
         String[] columns = new String[] {
-                "Y vs X", "Agent#1", "Agent#2", "Agent#3"
+                "", /*"Y vs X",*/ "Agent#1", "Agent#2", "Agent#3"
         };
 
         //actual data for the table in a 2d array
