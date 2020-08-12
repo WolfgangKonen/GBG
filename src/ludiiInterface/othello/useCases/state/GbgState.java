@@ -5,10 +5,12 @@ import tools.Types;
 
 import java.util.ArrayList;
 
-interface GbgState {
+public interface GbgState {
     void advance(final Types.ACTIONS action);
 
     int[][] toArray2D();
+
+    ArrayList<Types.ACTIONS> allAvailableActions();
 
     ArrayList<Types.ACTIONS> availableActions();
 

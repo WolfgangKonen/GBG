@@ -1,10 +1,11 @@
-package ludiiInterface.othello.gateway;
+package ludiiInterface.gateway;
 
 import controllers.PlayAgent;
 import game.Game;
 import games.Othello.ArenaTrainOthello;
 import ludiiInterface.othello.useCases.moves.LudiiMoves;
 import ludiiInterface.othello.useCases.state.AsStateObserverOthello;
+import ludiiInterface.othello.useCases.state.GbgStateFromLudiiContext;
 import tools.Types;
 import util.AI;
 import util.Context;
@@ -43,7 +44,9 @@ public final class GbgAsLudiiAgent extends AI {
     private Types.ACTIONS gbgAction(final Context ludiiContext) {
         return gbgAgent
             .getNextAction2(
-                new AsStateObserverOthello(ludiiContext),
+                new AsStateObserverOthello(
+                    new GbgStateFromLudiiContext(ludiiContext)
+                ),
                 false,
                 false
             );
