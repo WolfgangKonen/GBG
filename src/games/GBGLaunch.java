@@ -512,12 +512,12 @@ public class GBGLaunch {
 		case "Nim3P":
 			scaPar0_L.setText("Heaps");
 			scaPar1_L.setText("Heap Size");
-			scaPar2_L.setText("Max Minus");
 			setScaPar0List(new int[]{2,3,4,5});				// int values are converted to 
 			setScaPar1List(new int[]{3,5,6,7,8,9,10,20,50});// Strings in ChoiceBoxes 
 			choiceScaPar0.setSelectedItem("3");		// 
 			choiceScaPar1.setSelectedItem("5");		// the initial (recommended) values
 			if (selectedGame=="Nim") {
+				scaPar2_L.setText("Max Minus");
 				setScaPar2List(new int[]{2,3,4,5});			
 				choiceScaPar2.setSelectedItem("5");					
 			} else { // i.e. "Nim3P"
@@ -591,7 +591,14 @@ public class GBGLaunch {
 	}
 
 	public void setScaPar1List(int[] modeList) {
-		choiceScaPar1.removeAllItems();
+		try {
+			choiceScaPar1.removeAllItems();
+		} catch (NumberFormatException e) {
+			// this avoids a strange bug: When selecting game Sim, and then game Nim, a NumberFormatException fires
+			// when removeAllItems is executed, unclear why. Strange enough, this happens ONLY for game Nim not for 
+			// the nearly identically Nim3P or any other game. We cure this bug, which is internal to JComboBox, by
+			// catching the NumberFormatException silently.
+		}
 		for (int i : modeList)
 			choiceScaPar1.addItem(Integer.toString(i));
 	}

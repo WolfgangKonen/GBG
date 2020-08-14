@@ -61,7 +61,7 @@ public class TSSettingsGUI2 extends JFrame {
     final int numPlayers;
 
     public TSSettingsGUI2(Arena mArena) {
-        super("TSSettingsGUI2");
+        super("Tournament System Launcher");   //("TSSettingsGUI2");
         $$$setupUI$$$();
         JScrollPane scroll = new JScrollPane(mJPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         //setContentPane(mJPanel);
@@ -161,6 +161,17 @@ public class TSSettingsGUI2 extends JFrame {
             maxNCheckBox.setVisible(false);
             MCTSCheckBox.setVisible(false);
         }
+
+        // /WK/ Status 2020-08-14: 
+        // We disable all Standard Agents. It is simpler and it is more safe: Save every agent to be used in TS 
+        // to disk, then load it as Disk Agent. Because then we know precisely which agent with which parameter 
+        // settings is meant.
+        randomCheckBox.setVisible(false);
+        MCNCheckBox.setVisible(false);
+        MCTSCheckBox.setVisible(false);
+        maxNCheckBox.setVisible(false);
+        expectimaxNCheckBox.setVisible(false);
+        MCTSExpectimaxCheckBox.setVisible(false);
 
         if (numPlayers == 1) {
             singleRoundRobinRadioButton.setEnabled(false);
@@ -356,7 +367,8 @@ public class TSSettingsGUI2 extends JFrame {
             System.out.println(TAG + "INFO :: loading from Disk successful for agent: " + agentName + " with AgentState: " + playAgent.getAgentState() + " and type: " + agentType);
 
             // add agent to gui
-            JCheckBox newAgent = new JCheckBox("HDD " + agentName);
+            String hddPrefix = "";  // was before: "HDD ", but we do not need this anymore, because we have no other agents than HDD
+            JCheckBox newAgent = new JCheckBox(hddPrefix + agentName);
             newAgent.setSelected(true); // set checkbox of new agent to selected
             newAgent.addChangeListener(new ChangeListener() {
                 @Override
@@ -370,7 +382,7 @@ public class TSSettingsGUI2 extends JFrame {
             //checkBoxScrollPane.add(newAgent);
 
             // add to mTSAgentManager
-            mTSAgentManager.addAgent("HDD " + agentName, "HDD " + agentType, newAgent, true, playAgent);
+            mTSAgentManager.addAgent(hddPrefix + agentName, hddPrefix + agentType, newAgent, true, playAgent);
         } // for
 
         System.out.println(TAG + "Number of disk agents loaded into TS: " + mTSAgentManager.getNumDiskAgents());
@@ -502,7 +514,8 @@ public class TSSettingsGUI2 extends JFrame {
         mJPanel = new JPanel();
         mJPanel.setLayout(new GridBagLayout());
         final JLabel label1 = new JLabel();
-        label1.setText("Select Standard Agents to play:");
+        label1.setText("Select Disk Agents to play:"); //("Select Standard Agents to play:");
+        label1.setVisible(false);
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -707,7 +720,8 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.insets = new Insets(0, 0, 5, 0);
         mJPanel.add(spacer8, gbc);
         final JLabel label4 = new JLabel();
-        label4.setText("<html><body>Your can choose Standard and Disk Agents.<br>\nTo load Disk Agents use the Button below</body></html>\n");
+        label4.setText("<html><body>"//You can choose Standard and Disk Agents.<br>"
+        		+ "\nLoad and select the Disk Agents to play:</body></html>\n");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 12;
@@ -742,14 +756,14 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(label5, gbc);
         selectAllHDDAgentsButton = new JButton();
-        selectAllHDDAgentsButton.setText("select All HDD Agents");
+        selectAllHDDAgentsButton.setText("Select All Agents");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 17;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         mJPanel.add(selectAllHDDAgentsButton, gbc);
         unselectAllHDDAgentsButton = new JButton();
-        unselectAllHDDAgentsButton.setText("unselect All HDD Agents");
+        unselectAllHDDAgentsButton.setText("Unselect All Agents");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 19;
@@ -757,7 +771,7 @@ public class TSSettingsGUI2 extends JFrame {
         mJPanel.add(unselectAllHDDAgentsButton, gbc);
         deleteSelectedHDDAgentsButton = new JButton();
         deleteSelectedHDDAgentsButton.setForeground(new Color(-65536));
-        deleteSelectedHDDAgentsButton.setText("remove selected HDD Agents from TS");
+        deleteSelectedHDDAgentsButton.setText("Remove Selected Agents from TS");
         deleteSelectedHDDAgentsButton.setToolTipText("Selected Agents are just removed from the tournament, this will not affect/alter the saved agent file on disk!");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -800,7 +814,7 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.insets = new Insets(0, 0, 20, 0);
         mJPanel.add(spacer15, gbc);
         final JLabel label6 = new JLabel();
-        label6.setText("Tournament Style (MultiPlayer):");
+        label6.setText("Tournament Style:");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 23;
@@ -829,7 +843,7 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(doubleRoundRobinRadioButton, gbc);
         variableDoubleRoundRobinRadioButton = new JRadioButton();
-        variableDoubleRoundRobinRadioButton.setText("variable Double Round Robin");
+        variableDoubleRoundRobinRadioButton.setText("Variable Double Round Robin");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 26;
