@@ -11,9 +11,11 @@ import util.AI;
 import util.Context;
 import util.Move;
 
+import javax.swing.*;
+
+import static ludiiInterface.Util.loadFileFromDialog;
+
 public final class GbgAsLudiiAgent extends AI {
-    private final String gbgAgentPath = "D:\\GitHub Repositories\\GBG\\agents\\Othello\\TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm.agt.zip";
-//    private final String gbgAgentPath = "C:\\Users\\wolfgang\\Documents\\GitHub\\GBG\\agents\\Othello\\TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm.agt.zip";
     private PlayAgent gbgAgent;
 
     public GbgAsLudiiAgent() {
@@ -26,7 +28,9 @@ public final class GbgAsLudiiAgent extends AI {
             gbgAgent = new ArenaTrainOthello(
                 "GBG vs. Ludii - Othello Arena",
                 false
-            ).tdAgentIO.loadGBGAgent(gbgAgentPath);
+            ).tdAgentIO.loadGBGAgent(
+                loadFileFromDialog("GBG Agenten auswählen")
+            );
         } catch (final Exception e) {
             e.printStackTrace();
         }
