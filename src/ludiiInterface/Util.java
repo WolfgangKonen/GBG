@@ -1,6 +1,8 @@
 package ludiiInterface;
 
 import javax.swing.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public final class Util {
     public static String loadFileFromDialog(String dialogTitle) {
@@ -15,5 +17,20 @@ public final class Util {
         return result == JFileChooser.APPROVE_OPTION
             ? dialog.getSelectedFile().getAbsolutePath()
             : null;
+    }
+
+    public static void errorDialog(final Exception e) {
+        final StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        errorDialog(sw.toString());
+    }
+
+    public static void errorDialog(final String message) {
+        JOptionPane.showMessageDialog(
+            new JFrame(),
+            message,
+            "An error occurred.",
+            JOptionPane.ERROR_MESSAGE
+        );
     }
 }

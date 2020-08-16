@@ -11,8 +11,7 @@ import util.AI;
 import util.Context;
 import util.Move;
 
-import javax.swing.*;
-
+import static ludiiInterface.Util.errorDialog;
 import static ludiiInterface.Util.loadFileFromDialog;
 
 public final class GbgAsLudiiAgent extends AI {
@@ -44,10 +43,15 @@ public final class GbgAsLudiiAgent extends AI {
         final int maxIterations,
         final int maxDepth
     ) {
-        return new LudiiMoves(context)
-            .availableMoveBy(
-                gbgAction(context))
-            .get();
+        try {
+            return new LudiiMoves(context)
+                .availableMoveBy(
+                    gbgAction(context))
+                .get();
+        } catch (final RuntimeException e) {
+            errorDialog(e);
+            throw e;
+        }
     }
 
     private Types.ACTIONS gbgAction(final Context ludiiContext) {
