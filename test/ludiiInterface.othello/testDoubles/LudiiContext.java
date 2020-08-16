@@ -1,9 +1,10 @@
 package ludiiInterface.othello.testDoubles;
 
+import game.types.board.SiteType;
 import ludiiInterface.othello.transform.boardIndices.LudiiBoardIndex;
 import ludiiInterface.othello.useCases.moves.LudiiMoves;
-import player.utils.loading.GameLoader;
 import util.Context;
+import util.GameLoader;
 import util.Move;
 import util.Trial;
 import util.action.move.ActionMove;
@@ -43,7 +44,7 @@ public final class LudiiContext {
     private static Optional<Move> moveToIndex(final Context context, final int toIndex) {
         return new LudiiMoves(context)
             .availableMoveBy(
-                new LudiiBoardIndex(new ActionMove(toIndex, toIndex))
+                new LudiiBoardIndex(new ActionMove(SiteType.Cell, -1, -1, SiteType.Cell, toIndex, -1, -1, -1, false))
             );
     }
 }

@@ -1,6 +1,7 @@
 package ludiiInterface.othello.useCases.moves;
 
 import com.nitorcreations.junit.runners.NestedRunner;
+import game.types.board.SiteType;
 import ludiiInterface.othello.testDoubles.LudiiContext;
 import ludiiInterface.othello.transform.boardIndices.GbgBoardIndex;
 import ludiiInterface.othello.transform.boardIndices.LudiiBoardIndex;
@@ -141,7 +142,7 @@ public final class LudiiMovesTest {
                     assertTrue(
                         new LudiiMoves(LudiiContext.forNewGame())
                             .availableMoveBy(
-                                new LudiiBoardIndex(new ActionMove(43, 43))
+                                new LudiiBoardIndex(new ActionMove(SiteType.Cell, -1, -1, SiteType.Cell, 43, -1, -1, -1, false))
                             )
                             .isPresent()
                     );
@@ -176,7 +177,7 @@ public final class LudiiMovesTest {
                     assertFalse(
                         new LudiiMoves(LudiiContext.forNewGame())
                             .availableMoveBy(
-                                new LudiiBoardIndex(new ActionMove(51, 51))
+                                new LudiiBoardIndex(new ActionMove(SiteType.Cell, -1, -1, SiteType.Cell, 51, -1, -1, -1, false))
                             )
                             .isPresent()
                     );

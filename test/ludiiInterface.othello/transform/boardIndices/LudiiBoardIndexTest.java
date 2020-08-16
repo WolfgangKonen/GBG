@@ -1,6 +1,7 @@
 package ludiiInterface.othello.transform.boardIndices;
 
 import com.nitorcreations.junit.runners.NestedRunner;
+import game.types.board.SiteType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import tools.Types;
@@ -14,7 +15,7 @@ public final class LudiiBoardIndexTest {
         @Test
         public void has_the_same_corresponding_index_like_the_LudiiAction() {
             for (int i = 0; i <= 63; i++) {
-                final var ludiiIndex = new LudiiBoardIndex(new ActionMove(i, i));
+                final var ludiiIndex = new LudiiBoardIndex(new ActionMove(SiteType.Cell, -1, -1, SiteType.Cell, i, -1, -1, -1, false));
                 assertEquals(ludiiIndex.toInt(), i);
             }
         }
@@ -44,7 +45,7 @@ public final class LudiiBoardIndexTest {
             @Test
             public void transformed_to_a_GbgBoardIndex() {
                 for (int i = 0; i <= 63; i++) {
-                    final var ludiiIndex = new LudiiBoardIndex(new ActionMove(i, i));
+                    final var ludiiIndex = new LudiiBoardIndex(new ActionMove(SiteType.Cell, -1, -1, SiteType.Cell, i, -1, -1, -1, false));
                     assertEquals(ludiiIndex.toGbgIndex().toInt(), ludiiIndices[i]);
                 }
             }
