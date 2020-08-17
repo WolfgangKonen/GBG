@@ -11,18 +11,21 @@ import util.AI;
 import util.Context;
 import util.Move;
 
+import static ludiiInterface.Util.errorDialog;
+import static ludiiInterface.Util.loadFileFromDialog;
+
 public final class GbgAsLudiiAgent extends AI {
-    private final String gbgAgentPath = "D:\\GitHub Repositories\\GBG\\agents\\Othello\\TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm.agt.zip";
-//    private final String gbgAgentPath = "C:\\Users\\wolfgang\\Documents\\GitHub\\GBG\\agents\\Othello\\TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm.agt.zip";
     private PlayAgent gbgAgent;
 
-    @Override
-    public void initAI(final Game game, final int playerID) {
+    public GbgAsLudiiAgent() {
+        friendlyName = getClass().getSimpleName();
         try {
             gbgAgent = new ArenaTrainOthello(
                 "GBG vs. Ludii - Othello Arena",
                 false
-            ).tdAgentIO.loadGBGAgent(gbgAgentPath);
+            ).tdAgentIO.loadGBGAgent(
+                loadFileFromDialog("GBG Agenten auswählen")
+            );
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -36,10 +39,15 @@ public final class GbgAsLudiiAgent extends AI {
         final int maxIterations,
         final int maxDepth
     ) {
-        return new LudiiMoves(context)
-            .availableMoveBy(
-                gbgAction(context))
-            .get();
+        try {
+            return new LudiiMoves(context)
+                .availableMoveBy(
+                    gbgAction(context))
+                .get();
+        } catch (final RuntimeException e) {
+            errorDialog(e);
+            throw e;
+        }
     }
 
     private Types.ACTIONS gbgAction(final Context ludiiContext) {

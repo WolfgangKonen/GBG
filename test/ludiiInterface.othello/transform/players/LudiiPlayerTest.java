@@ -20,7 +20,7 @@ public final class LudiiPlayerTest {
             assertEquals(
                 1,
                 new LudiiPlayer(
-                    new ActionSetState(0, 1, SiteType.Cell)
+                    new ActionSetState(SiteType.Cell, 0, 1)
                 ).toInt()
             );
         }
@@ -30,7 +30,7 @@ public final class LudiiPlayerTest {
             assertEquals(
                 2,
                 new LudiiPlayer(
-                    new ActionSetState(0, 2, SiteType.Cell)
+                    new ActionSetState(SiteType.Cell, 0, 2)
                 ).toInt()
             );
         }

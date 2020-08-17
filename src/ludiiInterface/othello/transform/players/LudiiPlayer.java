@@ -7,7 +7,7 @@ public final class LudiiPlayer {
     private final int _playerIndex;
 
     public LudiiPlayer(final Action ludiiAction) {
-        _playerIndex = ludiiAction.state().get(0);
+        _playerIndex = ludiiAction.state();
     }
 
     public LudiiPlayer(final Context ludiiContext) {

@@ -6,7 +6,7 @@ public final class LudiiBoardIndex extends BoardIndex {
     private final int _boardIndex;
 
     public LudiiBoardIndex(final Action ludiiAction) {
-        _boardIndex = ludiiAction.locnB().get(0);
+        _boardIndex = ludiiAction.to();
     }
 
     public LudiiBoardIndex(final GbgBoardIndex gbgIndex) {
