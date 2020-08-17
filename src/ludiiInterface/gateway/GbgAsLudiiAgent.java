@@ -44,6 +44,9 @@ public final class GbgAsLudiiAgent extends AI {
         final int maxIterations,
         final int maxDepth
     ) {
+        if (game.moves(context).moves().isEmpty())
+            return Game.createPassMove(context);
+
         try {
             return new LudiiMoves(context)
                 .availableMoveBy(
