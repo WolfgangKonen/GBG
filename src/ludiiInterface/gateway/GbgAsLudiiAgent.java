@@ -19,10 +19,6 @@ public final class GbgAsLudiiAgent extends AI {
 
     public GbgAsLudiiAgent() {
         friendlyName = getClass().getSimpleName();
-    }
-
-    @Override
-    public void initAI(final Game game, final int playerID) {
         try {
             gbgAgent = new ArenaTrainOthello(
                 "GBG vs. Ludii - Othello Arena",
