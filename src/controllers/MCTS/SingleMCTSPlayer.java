@@ -5,6 +5,7 @@ import params.ParMCTS;
 import params.ParOther;
 import tools.ElapsedCpuTimer;
 import tools.Types;
+import tools.ElapsedCpuTimer.TimerType;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -73,6 +74,12 @@ public class SingleMCTSPlayer implements Serializable
         m_root = new SingleTreeNode(m_rnd,this);
 	}
 
+	public boolean instantiateAfterLoading() {
+        m_rnd = new Random();
+        m_root = new SingleTreeNode(m_rnd,this);
+        return true;
+	}
+	
 	/**
      * Creates the MCTS player. 
      * @param a_rnd 	random number generator object.

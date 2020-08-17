@@ -120,7 +120,7 @@ public interface PlayAgent {
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple);
 	
 	/**
-	 * Train the Agent for one complete game episode. <p>
+	 * Train the agent for one complete game episode. <p>
 	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
 	 * parameters (weights and so on).
 	 * @param so		the state from which the episode is played (usually the
@@ -160,7 +160,7 @@ public interface PlayAgent {
 	
 	/**
 	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
-	 * of transient members), put the relevant code in here.
+	 * of transient members), override this method and put the relevant code in there.
 	 * @return true on success
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent

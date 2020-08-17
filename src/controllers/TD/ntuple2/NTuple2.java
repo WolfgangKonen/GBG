@@ -145,6 +145,26 @@ public class NTuple2 implements Serializable {
 //			trainCounter = new int[lut.length];
 	}
 
+	public boolean instantiateAfterLoading() {
+		indexList = new LinkedList();
+		if (TC) {
+			tcN = new double[lut.length]; // matrix N in TC
+			tcA = new double[lut.length]; // matrix A in TC
+			tcFactorArray = new double[lut.length]; // tcFactor=|N|/A
+			//tcDampArray = new double[lut.length]; // /WK/ for NEW_WK
+			//dWArray = new double[lut.length];	// for accumulating TC (tcImm==false)
+			
+			// initializing N and A matrices and tcFactor=|N|/A
+			for (int i = 0; i < lut.length; i++) {
+				tcN[i] = INIT;
+				tcA[i] = INIT;
+				tcFactorArray[i] = 1.0;
+				//tcDampArray[i] = 1.0;			
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * Get the LUT index for a certain game board.
 	 * 

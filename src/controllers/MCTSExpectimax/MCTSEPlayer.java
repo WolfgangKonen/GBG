@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Random;
 
 import controllers.MCTS.SingleMCTSPlayer;
+import controllers.MCTS.SingleTreeNode;
 
 /**
  * This is adapted from {@link SingleMCTSPlayer} for the <b>non-deterministic</b> case.
@@ -35,7 +36,14 @@ public class MCTSEPlayer
 	 * (to restore the agent with all its parameter settings)
 	 */
 	private ParMCTSE mctsExpectimaxParams;
-    private transient MCTSExpectimaxAgt m_parent;	// to get access to m_oPar
+	
+	/**
+	 * Member {@link #m_parent} is only needed for access to {@link MCTSExpectimaxAgt#getParOther()}
+	 */
+    // a bug before 2020-08-11 was that m_parent was transient. This is not o.k. since when loading an MCTS agent 
+    // from disk (e.g. in tournament), it would result in m_parent being null, which leads to a runtime exception
+    // when getParOther is called. Now fixed, we removed 'transient'.
+    private MCTSExpectimaxAgt m_parent;	
 
 	/**
      * Creates the MCTSExpectimax player.

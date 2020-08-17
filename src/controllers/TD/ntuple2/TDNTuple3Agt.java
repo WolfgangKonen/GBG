@@ -199,12 +199,19 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		this.m_Net.xnf.instantiateAfterLoading();
 		assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
 		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
+		
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
 		// get the loaded values)
 		this.setTDParams(this.getParTD(), this.getMaxGameNum());
 		this.setNTParams(this.getParNT());
 		this.weightAnalysis(null);
+		
+		// initialize transient members (in case a further training should take place --> see ValidateAgent) 
+		this.sLast = new StateObservation[numPlayers];
+		this.randLast = new boolean[numPlayers];
+		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples
+		
 		return true;
 	}
 	
@@ -237,6 +244,11 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		double[] VTable;		
 		
         otilde = so.getReward(so,rgs);
+        
+        // just debug:
+//        if (so.isGameOver()) {
+//        	System.out.println("Game over: "+so.getRewardTuple(true));
+//        }
         
     	boolean randomSelect;		// true signals: the next action is a random selected one
     	randomSelect = false;

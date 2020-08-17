@@ -170,6 +170,19 @@ public class NTuple2ValueFunc implements Serializable {
 		}
 	}
 
+	public boolean instantiateAfterLoading() {
+		this.eList = new LinkedList[this.numPlayers];
+		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList();
+		for (int i = 0; i < numTuples; i++) {
+			for (int o=0; o<numOutputs; o++) {
+				for (int k=0; k<numPlayers; k++) {
+					this.nTuples[o][k][i].instantiateAfterLoading();
+				}				
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * @return The list of n-Tuples
 	 */

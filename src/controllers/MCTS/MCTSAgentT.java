@@ -39,16 +39,6 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 { 
     private transient ElapsedCpuTimer m_Timer;
     
-//    @Deprecated 
-//    // should use this.getParMCTS() instead 
-//	//private MCTSParams params;
-//    private ParMCTS pmcts; 
-    
-    // --- now we use always getNextAction2 ---
-//	// if NEW_GNA==true: use the new functions getNextAction2... in getNextAction;
-//	// if NEW_GNA==false: use the old functions getNextAction1... in getNextAction;
-//	private static boolean NEW_GNA=true;	
-
     /**
      * The MCTS-UCT implementation
      */
@@ -111,7 +101,13 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
         setAgentState(AgentState.TRAINED);
     }
 
-    
+	public boolean instantiateAfterLoading() {
+        m_Timer = new ElapsedCpuTimer(TimerType.CPU_TIME);
+        m_Timer.setMaxTimeMillis(40);
+        mctsPlayer.instantiateAfterLoading();
+        return true;
+	}
+	
 	/**
 	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
 	 * settings of this agent

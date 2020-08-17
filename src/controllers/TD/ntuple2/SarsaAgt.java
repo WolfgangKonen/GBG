@@ -219,12 +219,20 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		// set horizon cut for older agents (where horCut was not part of ParTD):
 		if (this.getParTD().getHorizonCut()==0.0) 
 			this.getParTD().setHorizonCut(0.1);
+		
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
 		// get the loaded values)
 		this.setTDParams(this.getParTD(), this.getMaxGameNum());
 		this.setNTParams(this.getParNT());
 		this.weightAnalysis(null);
+		
+		// initialize transient members (in case a further training should take place --> see ValidateAgent) 
+		this.sLast = new StateObservation[numPlayers];
+		this.aLast = new Types.ACTIONS[numPlayers];
+		this.randLast = new boolean[numPlayers];
+		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples
+		
 		return true;
 	}
 	

@@ -16,6 +16,10 @@ import static ludiiInterface.Util.loadFileFromDialog;
 
 public final class GbgAsLudiiAgent extends AI {
     private PlayAgent gbgAgent;
+    
+    // /WK/ just during debugging:
+//    private final String gbgAgentPath = "D:\\GitHub Repositories\\GBG\\agents\\Othello\\TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm.agt.zip";
+    private final String gbgAgentPath = "C:\\Users\\wolfgang\\Documents\\GitHub\\GBG\\agents\\Othello\\TCL3-fixed6_250k-lam05_P4_H001-diff2-FAm.agt.zip";
 
     public GbgAsLudiiAgent() {
         friendlyName = getClass().getSimpleName();
@@ -23,8 +27,9 @@ public final class GbgAsLudiiAgent extends AI {
             gbgAgent = new ArenaTrainOthello(
                 "GBG vs. Ludii - Othello Arena",
                 false
-            ).tdAgentIO.loadGBGAgent(
-                loadFileFromDialog("GBG Agenten auswählen")
+            ).tdAgentIO.loadGBGAgent(gbgAgentPath			// /WK/ just during debugging
+//            ).tdAgentIO.loadGBGAgent(
+//                loadFileFromDialog("GBG Agenten auswählen")
             );
         } catch (final Exception e) {
             e.printStackTrace();

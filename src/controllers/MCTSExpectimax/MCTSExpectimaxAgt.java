@@ -12,7 +12,9 @@ import games.XArenaMenu;
 import params.ParMCTS;
 import params.ParMCTSE;
 import params.ParOther;
+import tools.ElapsedCpuTimer;
 import tools.Types;
+import tools.ElapsedCpuTimer.TimerType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +74,10 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 		setAgentState(AgentState.TRAINED);
     }
 
+//	public boolean instantiateAfterLoading() {
+//        return true;
+//	}
+	
 	/**
 	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
 	 * settings of this agent

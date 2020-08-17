@@ -70,5 +70,18 @@ public final class AsStateObserverOthello extends StateObserverOthello {
 
     private void updateCurrentGameState() {
         currentGameState = _gbgState.toArray2D();
+        setPlayer(_gbgState.player().toInt());  // /WK/ needed to set playerNextMove 
+        										// (used in many places in StateObserverOthello) !
+        
+        // /WK/ updateCurrentGameState() is the surrogate for the missing StateObserverOthello-call. 
+        //      What is with the other members lastMoves and availableActions of StateObserverOthello? 
+        //		Are they properly set by advance()?
+        //		(lastMoves is probably relevant only for the GBG-Othello GUI, which is not needed here, so we may skip it)
+        //		But with availableActions, I see a problem, since AsStateObserverOthello::advance does not touch it!
+        // 		Or is it guaranteed that it is never needed in the context of AsStateObserverOthello?
+        //		
+        // 		Also note that the current implementation calls BaseOthello.possibleActions, which is a costly operation,
+        //		quite often (12-30 times per move). As long as we do not train with this interface it is perhaps not 
+        //		a big problem, I just wanted to note it.
     }
 }

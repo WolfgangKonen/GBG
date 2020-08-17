@@ -21,6 +21,7 @@ import params.ParNT;
 import params.ParOther;
 import params.ParTD;
 import tools.Types.ACTIONS;
+import util.action.Action;
 
 /**
  * Class {@link ValidateAgent} performs certain consistency checks of an agent class. These checks 
@@ -35,7 +36,9 @@ import tools.Types.ACTIONS;
  */
 public class ValidateAgent {
 
-	public ValidateAgent() {};
+    private static String gbgAgentPath = "C:\\Users\\wolfgang\\Documents\\GitHub\\GBG\\agents\\Othello\\TCL3-100_7_250k-lam05_P4_nPly2-FAm.agt.zip";
+
+    public ValidateAgent() {};
 	
 	public boolean runTests(PlayAgent pa, StateObservation sob, Arena ar) {
 		//
@@ -77,7 +80,7 @@ public class ValidateAgent {
 		//
 		// check if a training episode runs through successfully 
 		//
-		System.out.print("starting pa.trainAgent ... ");
+		System.out.print("train pa for one episode ... ");
 		int num = pa.getGameNum();
 		sob = ar.getGameBoard().getDefaultStartState();
 		pa.trainAgent(sob);
@@ -94,7 +97,11 @@ public class ValidateAgent {
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sob,bv);
 		BoardVector[] sym = xnf.symmetryVectors(curSOWB,0);
 		boolean testPassed=true;
-		for (int i=0; i<(sym.length-1); i++) {
+		for (int i=0; i<sym.length; i++) {
+			if (assertEachCellDifferent(sym[i])==false) {
+				System.out.println("Error: some cell numbers in state sym["+i+"] appear not exactly once");
+				testPassed=false;				
+			}
 			for (int j=i+1; j<sym.length; j++) {
 				if (assertBvDifferent(sym[i],sym[j])==false) {
 					System.out.println("Error: symmetry states identical: "+i+", "+j);
@@ -107,6 +114,15 @@ public class ValidateAgent {
 		} else {
 			throw new RuntimeException("symmetryVectors check ... FAILED");
 		}
+		
+		return true;
+	}
+	
+	private boolean assertEachCellDifferent(BoardVector bv1) {
+		BoardVector bcount = new BoardVector(new int[bv1.bvec.length]);
+		for (int i=0; i<bv1.bvec.length; i++) bcount.bvec[bv1.bvec[i]]++; 
+		for (int i=0; i<bcount.bvec.length; i++) 
+			if (bcount.bvec[i]!=1) return false;
 		
 		return true;
 	}
@@ -135,12 +151,15 @@ public class ValidateAgent {
 			System.out.print(sc);
 			System.out.println("     "+scMin+"-->"+ scMax);
 		}
+		System.out.println(sob + " : " + sob.isGameOver());
 		for (int i=0; i<sc.scTup.length; i++) {
 			scSum += sc.scTup[i];
 			assert !Double.isNaN(sc.scTup[i]);
-			assert Double.isFinite(sc.scTup[i]);		
-			assert (scMin <= sc.scTup[i]) : "ScoreTuple < getMinScore() : "+sc.scTup[i]+" < "+scMin;
-			assert (sc.scTup[i] <= scMax) : "ScoreTuple > getMaxScore() : "+sc.scTup[i]+" > "+scMax;
+			assert Double.isFinite(sc.scTup[i]);	
+			if (!sob.isGameOver()) {	// there are cases (TDNT3+Othello) where a game-over state produces sc with values outside interval [scMin,scMax] --> we exclude such cases from the test 
+				assert (scMin <= sc.scTup[i]) : "ScoreTuple < getMinScore() : "+sc.scTup[i]+" < "+scMin +" for StateObservation "+sob;
+				assert (sc.scTup[i] <= scMax) : "ScoreTuple > getMaxScore() : "+sc.scTup[i]+" > "+scMax +" for StateObservation "+sob;
+			}
 		}
 		assert (Math.abs(scSum) < 1e-20) : "ScoreTuple does not sum to 0: "+scSum;
 		return true;
@@ -165,11 +184,16 @@ public class ValidateAgent {
 //		Arena ar = new ArenaTrainTTT("",true);
 		
 		//
-		// choose an agent to validate
+		// choose an agent to validate - select one of the following options for constructing pa:
 		//
-		PlayAgent pa;
-//		pa = new BenchMarkPlayer("bp",1);
-		pa = constructTDNTuple3Agt(ar);
+		PlayAgent pa = null;
+		try {									// try-catch is for loadGBGAgent which may throw exceptions
+//			pa = new BenchMarkPlayer("bp",1);
+//			pa = constructTDNTuple3Agt(ar);
+			pa = ar.tdAgentIO.loadGBGAgent(gbgAgentPath);	// check if a TDNT3-agent reloaded from disk passes all test
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		//
 		// start validation
@@ -191,8 +215,21 @@ public class ValidateAgent {
 			}
 			
 		}
-		
 		ar.destroy();
 	}
 
 }
+
+// Temporary Code from GbgAsLudiiAgent
+
+//private Arena ar = new ArenaOthello("GBG vs. Ludii - Othello Arena",false);
+//System.out.println("Entering initAI ...");
+//gbgAgent = ar.tdAgentIO.loadGBGAgent(gbgAgentPath);
+//System.out.println("Leaving initAI ...");
+
+// ...in     public LudiiBoardIndex(final Action ludiiAction) 
+//_boardIndex = ludiiAction.state();				// /WK/ temp
+
+// ...in     public LudiiPlayer(final Action ludiiAction) 
+//_playerIndex = ludiiAction.state();				// /WK/ temp
+

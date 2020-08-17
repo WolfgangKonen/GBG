@@ -58,7 +58,8 @@ public class StateObserverOthello extends ObserverBase{
 	private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
 	
 	protected int[][] currentGameState;
-	private int playerNextMove, countBlack, countWhite;
+	private int playerNextMove; 
+	private int countBlack, countWhite;	// probably never really needed
 	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
 	private ArrayList<Integer> lastMoves;
 	private int turn;
@@ -188,14 +189,19 @@ public class StateObserverOthello extends ObserverBase{
 	public WINNER winStatus() {
 		assert isGameOver() :"Game isn't over";
 		int countPlayer = 0, countOpponent = 0;
+//		int countOpponent2 = 0;
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
 		{
 			for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
 			{
 				if(currentGameState[i][j] == this.getPlayer()) countPlayer++;
-				if(currentGameState[i][j] == (this.getOpponent(playerNextMove))) countOpponent++;
+				if(currentGameState[i][j] == (this.getOpponent(this.getPlayer()))) countOpponent++;
+//				if(currentGameState[i][j] == (this.getOpponent(playerNextMove))) countOpponent2++;
 			}
 		}
+//		System.err.println(this.getPlayer() + " | " + this.playerNextMove + " " + playerNextMove);
+//		System.err.println(countPlayer + ", " +countOpponent+", "+countOpponent2);
+		assert this.getPlayer()==this.playerNextMove : "Oops, this.getPlayer() differs from playerNextMove!";
 		if(countPlayer > countOpponent) return WINNER.PLAYER_WINS;
 		else if(countPlayer == countOpponent) return WINNER.TIE;
 		return WINNER.PLAYER_LOSES;
@@ -281,21 +287,22 @@ public class StateObserverOthello extends ObserverBase{
 		int prevPlayer = playerNextMove;
 		
 		// Set playerNextMove.
-		// The normal case: if the opponent of playerNextMove (the player who just advanced) has possible
-		// actions, then playerNextMove will become this opponent. If however the opponent has no possible
+		// The normal case: if the opponent of playerNextMove (playerNextMove is the player who just advanced) has 
+		// possible actions, then playerNextMove will become this opponent. If however the opponent has no possible
 		// moves, he has to pass, and playerNextMove will stay at the value it has (and the next advance
 		// will be done by the same playerNextMove):
 		availableActions = BaseOthello.possibleActions(currentGameState, this.getOpponent(playerNextMove));
 		if(availableActions.size() > 0 ) {
-			playerNextMove = getOpponent(playerNextMove); 
+			playerNextMove = getOpponent(playerNextMove);  // the normal case
 		} else {
-			//int dummy=1;
+			// nothing to do
 		}
 		
 		if (playerNextMove==prevPlayer)
 			setAvailableActions();	// yes, we have to call possibleActions (inside setAvailableActions) a 2nd time
 									// in the rare cases where playerNextMove is identical prevPlayer (there was no 
-									// possible next move for opponent).
+									// possible next move for opponent AND the possible actions for prevPlayer have
+									// changed).
 									// In all other cases we can skip setAvailableActions: the member availableActions
 									// calculated above is valid!
 		lastMoves.add(action.toInt());
@@ -390,7 +397,7 @@ public class StateObserverOthello extends ObserverBase{
 		return currentGameState[i][j] == 0 ? "Empty" : currentGameState[i][j]  == 1 ? "White" : "Black";
 	}
 	
-	// WK obsolete (never used) and probably dangerous (may create invalid game states) 
+	// WK now needed to get the right playerNextMove for AsStateObserverOthello (!) 
 	public void setPlayer(int p) {
 		this.playerNextMove = p;
 	}
