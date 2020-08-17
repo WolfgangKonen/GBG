@@ -52,7 +52,7 @@ public final class RunCustomMatch {
             logFinishedGame(
                 logFile,
                 context,
-                ais.get(context.trial().status().winner() - 1).friendlyName // -1 because Ludii players are not 0-based indexed
+                ais.get(context.trial().status().winner()).friendlyName
             );
         }
     }
