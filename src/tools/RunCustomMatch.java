@@ -99,6 +99,7 @@ public class RunCustomMatch
 			System.out.println("Outcome = " + context.trial().status());
 		}
 		System.out.println("RunCustomMatch finished.");
+		System.exit(0);
 	}
 
 	//-------------------------------------------------------------------------

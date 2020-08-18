@@ -19,49 +19,49 @@ public final class AsStateObserverOthello extends StateObserverOthello {
         return _gbgState.allAvailableActions();
     }
 
-    @Override
-    public ArrayList<Types.ACTIONS> getAvailableActions() {
-        return _gbgState.availableActions();
-    }
+//    @Override
+//    public ArrayList<Types.ACTIONS> getAvailableActions() {
+//        return _gbgState.availableActions();
+//    }
+//
+//    @Override
+//    public int getNumAvailableActions() {
+//        return getAvailableActions().size();
+//    }
+//
+//    @Override
+//    public void setAvailableActions() { }
+//
+//    @Override
+//    public Types.ACTIONS getAction(final int i) {
+//        return getAvailableActions().get(i);
+//    }
 
-    @Override
-    public int getNumAvailableActions() {
-        return getAvailableActions().size();
-    }
-
-    @Override
-    public void setAvailableActions() { }
-
-    @Override
-    public Types.ACTIONS getAction(final int i) {
-        return getAvailableActions().get(i);
-    }
-
-    @Override
-    public void advance(final Types.ACTIONS action) {
-        _gbgState.advance(action);
-        updateCurrentGameState();
-    }
-
-    @Override
-    public int getPlayer() {
-        return _gbgState.player().toInt();
-    }
+//    @Override
+//    public void advance(final Types.ACTIONS action) {
+//        _gbgState.advance(action);
+//        updateCurrentGameState();
+//    }
+//
+//    @Override
+//    public int getPlayer() {
+//        return _gbgState.player().toInt();
+//    }
 
     @Override
     public AsStateObserverOthello copy() {
         return new AsStateObserverOthello(_gbgState.copy());
     }
 
-    @Override
-    public boolean isGameOver() {
-        if (getNumAvailableActions() == 0)
-            return BaseOthello.possibleActions(
-                currentGameState,
-                getOpponent(getPlayer())
-            ).size() == 0;
-        return false;
-    }
+//    @Override
+//    public boolean isGameOver() {
+//        if (getNumAvailableActions() == 0)
+//            return BaseOthello.possibleActions(
+//                currentGameState,
+//                getOpponent(getPlayer())
+//            ).size() == 0;
+//        return false;
+//    }
 
     @Override
     public String stringDescr() {
@@ -72,6 +72,7 @@ public final class AsStateObserverOthello extends StateObserverOthello {
         currentGameState = _gbgState.toArray2D();
         setPlayer(_gbgState.player().toInt());  // /WK/ needed to set playerNextMove 
         										// (used in many places in StateObserverOthello) !
+        setAvailableActions();		// /WK/ needed to fix the availableActions-bug !
         
         // /WK/ updateCurrentGameState() is the surrogate for the missing StateObserverOthello-call. 
         //      What is with the other members lastMoves and availableActions of StateObserverOthello? 

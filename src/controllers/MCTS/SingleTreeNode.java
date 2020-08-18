@@ -538,6 +538,9 @@ public class SingleTreeNode implements Serializable
 													// and the initial m_state has also its available actions set. 
 													// Calling setAvailableActions without need slows down,
 													// especially for Othello (factor 3-4).
+			if (rollerState.getNumAvailableActions()==0) {
+				throw new RuntimeException("Oops, there are no available actions for current player!");
+			}
 			int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
 			rollerState.advance(rollerState.getAction(action));
 			thisDepth++;
@@ -545,7 +548,7 @@ public class SingleTreeNode implements Serializable
 		if (rollerState.isGameOver())
 			m_player.nRolloutFinished++;
 		double[] delta = value(rollerState);
-		// // /WK/ not really clear what these normalizations are for.
+		// // /WK/ not really clear what the following normalizations are for.
 		// // Is it part of MCTS or part of the special GVGP implementation?
 		// if(delta < curBounds[0]) curBounds[0] = delta;
 		// if(delta > curBounds[1]) curBounds[1] = delta;

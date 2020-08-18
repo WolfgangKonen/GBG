@@ -115,6 +115,7 @@ public class BaseOthello implements Serializable
 	 */
 	public static ArrayList<ACTIONS> possibleActions(int[][] currentGameState, int player)
 	{
+//		System.out.println("Call to possibleActions");
 		ArrayList<ACTIONS> retVal = new ArrayList<ACTIONS>();
 		for(int i = 0, n = 0; i < currentGameState.length; i++) {
 			for(int j = 0; j < currentGameState[0].length; j++, n++)
