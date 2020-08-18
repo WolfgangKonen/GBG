@@ -27,9 +27,9 @@ public final class GbgAsLudiiAgent extends AI {
             gbgAgent = new ArenaTrainOthello(
                 "GBG vs. Ludii - Othello Arena",
                 false
-            ).tdAgentIO.loadGBGAgent(gbgAgentPath			// /WK/ just during debugging
-//            ).tdAgentIO.loadGBGAgent(
-//                loadFileFromDialog("GBG Agenten auswählen")
+//            ).tdAgentIO.loadGBGAgent(gbgAgentPath			// /WK/ just during debugging
+            ).tdAgentIO.loadGBGAgent(
+                loadFileFromDialog("GBG Agenten auswählen")
             );
         } catch (final Exception e) {
             e.printStackTrace();

@@ -1,0 +1,1 @@
+"C:\\Program Files\\Java\\jdk-11.0.6\\bin\\java" -jar Ludii-1.0.2.jar
