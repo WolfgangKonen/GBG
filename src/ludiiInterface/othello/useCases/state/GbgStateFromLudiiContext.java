@@ -89,8 +89,8 @@ public final class GbgStateFromLudiiContext implements GbgState {
     public String stringRepresentation() {
         return Arrays.stream(state())
             .mapToObj(
-                i -> i == ConfigOthello.BLACK
-                    ? "O"
+                i -> i == ConfigOthello.BLACK		// /WK/ I think it should be the other way around:
+                    ? "O"							//      BLACK = "X", WHITE="O"
                     : (i == ConfigOthello.WHITE
                     ? "X"
                     : "-")

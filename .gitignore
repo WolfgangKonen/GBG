@@ -17,12 +17,10 @@ out/*
 games/Logs/*
 logs/*
 agents/temp/*
-GBGLaunch.jar
-GBGLaunch2.jar
-GBGBatch.jar
-GBGBatch-noFA.jar
-GBGBatch-BV.jar
-GBGBatch2048.jar
+
+# all JAR files (GBGBatch.jar,...) now moved to jartools/:
+jartools/*
+
 
 
 

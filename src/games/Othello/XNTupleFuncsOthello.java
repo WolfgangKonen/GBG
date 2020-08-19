@@ -458,7 +458,9 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 			  {21, 22, 39, 30, 46, 31}
 		};
 		
-		default: throw new OutOfRangeException(mode, 0, 5);
+		default: 
+			//throw new OutOfRangeException(mode, 0, 6);
+			throw new RuntimeException("mode = "+mode+" is not supported");
 		}
 	}
 

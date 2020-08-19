@@ -23,14 +23,20 @@ public final class GbgAsLudiiAgent extends AI {
 
     public GbgAsLudiiAgent() {
         friendlyName = getClass().getSimpleName();
+    }
+
+    @Override
+    public void initAI(final Game game, final int playerID)
+    {
         try {
             gbgAgent = new ArenaTrainOthello(
-                "GBG vs. Ludii - Othello Arena",
-                false
+                    "GBG vs. Ludii - Othello Arena",
+                    false
 //            ).tdAgentIO.loadGBGAgent(gbgAgentPath			// /WK/ just during debugging
             ).tdAgentIO.loadGBGAgent(
-                loadFileFromDialog("GBG Agenten auswählen")
+                    loadFileFromDialog("GBG Agenten auswählen")
             );
+            friendlyName = "GBG "+ gbgAgent.getName();
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -68,4 +74,5 @@ public final class GbgAsLudiiAgent extends AI {
                 false
             );
     }
+
 }

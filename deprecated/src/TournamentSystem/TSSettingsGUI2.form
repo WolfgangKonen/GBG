@@ -31,6 +31,78 @@
           <text value="Random"/>
         </properties>
       </component>
+      <component id="8dc39" class="javax.swing.JCheckBox" binding="minimaxCheckBox" default-binding="true">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="Minimax"/>
+        </properties>
+      </component>
+      <component id="782e3" class="javax.swing.JCheckBox" binding="maxNCheckBox" default-binding="true">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="Max-N"/>
+        </properties>
+      </component>
+      <component id="7a3bf" class="javax.swing.JCheckBox" binding="expectimaxNCheckBox" default-binding="true">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="Expectimax-N"/>
+        </properties>
+      </component>
+      <component id="25015" class="javax.swing.JCheckBox" binding="MCNCheckBox" default-binding="true">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="MC-N"/>
+        </properties>
+      </component>
+      <component id="16c88" class="javax.swing.JCheckBox" binding="MCTSCheckBox" default-binding="true">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="MCTS"/>
+        </properties>
+      </component>
+      <component id="8881b" class="javax.swing.JCheckBox" binding="MCTSExpectimaxCheckBox" default-binding="true">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="MCTS Expectimax"/>
+        </properties>
+      </component>
+      <component id="865fc" class="javax.swing.JCheckBox" binding="TDNtuple2CheckBox" default-binding="true">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="TD-Ntuple-2"/>
+        </properties>
+      </component>
+      <component id="6a7ad" class="javax.swing.JCheckBox" binding="TDSCheckBox" default-binding="true">
+        <constraints>
+          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="TDS"/>
+        </properties>
+      </component>
       <component id="1645c" class="javax.swing.JButton" binding="startButton" default-binding="true">
         <constraints>
           <grid row="39" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -48,6 +120,17 @@
         </constraints>
         <properties>
           <text value="Games per Match"/>
+        </properties>
+      </component>
+      <component id="7eb34" class="javax.swing.JTextField" binding="gameNumTextField">
+        <constraints>
+          <grid row="31" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="1"/>
         </properties>
       </component>
       <hspacer id="54e80">
