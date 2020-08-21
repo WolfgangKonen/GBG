@@ -3,23 +3,15 @@ package tools;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.BoardVector;
 import games.StateObsWithBoardVector;
-import games.XArenaFuncs;
 import games.XNTupleFuncs;
 import games.StateObservation;
-import games.Othello.ArenaOthello;
 import games.Othello.ArenaTrainOthello;
-import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.TicTacToe.ArenaTrainTTT;
-import params.ParNT;
-import params.ParOther;
-import params.ParTD;
 import tools.Types.ACTIONS;
 import util.action.Action;
 
@@ -33,7 +25,10 @@ import util.action.Action;
  * {@link #runTests(PlayAgent, StateObservation, Arena)}.
  * <p>
  * IMPORTANT: Run {@link #main(String[])} with VM argument {@code -ea} (enable assertions).
+ *
+ * This class is now DEPRECATED, use ValidateAgentTest and ValidateAgentOthelloTest
  */
+@Deprecated
 public class ValidateAgent {
 
     private static String gbgAgentPath = "C:\\Users\\wolfgang\\Documents\\GitHub\\GBG\\agents\\Othello\\TCL3-100_7_250k-lam05_P4_nPly2-FAm.agt.zip";
@@ -219,17 +214,4 @@ public class ValidateAgent {
 	}
 
 }
-
-// Temporary Code from GbgAsLudiiAgent
-
-//private Arena ar = new ArenaOthello("GBG vs. Ludii - Othello Arena",false);
-//System.out.println("Entering initAI ...");
-//gbgAgent = ar.tdAgentIO.loadGBGAgent(gbgAgentPath);
-//System.out.println("Leaving initAI ...");
-
-// ...in     public LudiiBoardIndex(final Action ludiiAction) 
-//_boardIndex = ludiiAction.state();				// /WK/ temp
-
-// ...in     public LudiiPlayer(final Action ludiiAction) 
-//_playerIndex = ludiiAction.state();				// /WK/ temp
 

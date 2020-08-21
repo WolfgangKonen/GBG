@@ -1,7 +1,6 @@
 package controllers.MCTS;
 
 import games.StateObservation;
-import games.Sim.StateObserverSim;
 import tools.ElapsedCpuTimer;
 import tools.ScoreTuple;
 import tools.Types;
@@ -11,7 +10,6 @@ import java.text.DecimalFormat;
 import java.util.Random;
 
 //import controllers.MCTS0.SingleTreeNode0;
-import controllers.MCTSExpectimax.MCTSETreeNode;
 
 /**
  * This is adapted from Diego Perez MCTS reference implementation<br>

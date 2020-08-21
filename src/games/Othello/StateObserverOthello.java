@@ -188,25 +188,34 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	public WINNER winStatus() {
 		assert isGameOver() :"Game isn't over";
+		assert this.getPlayer()==this.playerNextMove : "Oops, this.getPlayer() differs from playerNextMove!";
 		int countPlayer = 0, countOpponent = 0;
-//		int countOpponent2 = 0;
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
 		{
 			for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
 			{
 				if(currentGameState[i][j] == this.getPlayer()) countPlayer++;
 				if(currentGameState[i][j] == (this.getOpponent(this.getPlayer()))) countOpponent++;
-//				if(currentGameState[i][j] == (this.getOpponent(playerNextMove))) countOpponent2++;
 			}
 		}
-//		System.err.println(this.getPlayer() + " | " + this.playerNextMove + " " + playerNextMove);
-//		System.err.println(countPlayer + ", " +countOpponent+", "+countOpponent2);
-		assert this.getPlayer()==this.playerNextMove : "Oops, this.getPlayer() differs from playerNextMove!";
 		if(countPlayer > countOpponent) return WINNER.PLAYER_WINS;
 		else if(countPlayer == countOpponent) return WINNER.TIE;
 		return WINNER.PLAYER_LOSES;
 	}
 
+	public void setPieceCounters() {
+		this.countBlack=0;
+		this.countWhite=0;
+		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
+		{
+			for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
+			{
+				if(currentGameState[i][j] == 0) this.countBlack++;
+				if(currentGameState[i][j] == 1) this.countWhite++;
+			}
+		}
+	}
+	
 	@Override
 	public double getMinGameScore() {
 		return -1;			// WK the right choice

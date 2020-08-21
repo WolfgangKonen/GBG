@@ -1,10 +1,6 @@
 package controllers.TD.ntuple2;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -29,17 +25,14 @@ import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import controllers.RandomAgent;
 import controllers.PlayAgent.AgentState;
-import controllers.TD.ntuple2.ZValueMulti;
-import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
 import games.Arena;
 import games.BoardVector;
 import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
-import games.StateObsNondeterministic;
 import games.StateObsWithBoardVector;
 import games.XNTupleFuncs;
-import games.RubiksCube.StateObserverCube;
+//import games.RubiksCube.StateObserverCube;
 import games.Sim.StateObserverSim;
 import games.XArenaMenu;
 
@@ -163,8 +156,6 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * @param ntPar			n-tuples and temporal coherence parameter
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
-	 * @param numOutputs	the number of outputs of the n-tuple network (=number of all
-	 * 						available actions)
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */

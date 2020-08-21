@@ -71,7 +71,7 @@ public final class GbgAsLudiiAgent extends AI {
                     new GbgStateFromLudiiContext(ludiiContext)
                 ),
                 false,
-                false
+                true
             );
     }
 

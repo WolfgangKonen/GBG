@@ -121,8 +121,8 @@ public class ValidateStateObserver {
 		//
 		// choose an Arena (a game) to validate
 		//
-		ar = new ArenaSim("",true);
-//		ar = new ArenaOthello("",true);
+//		ar = new ArenaSim("",true);
+		ar = new ArenaOthello("",true);
 		
 		
 		//

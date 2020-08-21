@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import game.Game;
+import games.Othello.StateObserverOthello;
 import ludiiInterface.gateway.GbgAsLudiiAgent;
+import ludiiInterface.othello.useCases.state.AsStateObserverOthello;
+import ludiiInterface.othello.useCases.state.GbgStateFromLudiiContext;
 import random.RandomAI;
 import search.mcts.MCTS;
 import util.AI;
@@ -12,6 +15,7 @@ import util.Context;
 import util.GameLoader;
 import util.Trial;
 import util.model.Model;
+import utils.LudiiAI;
 
 /**
  * An example of a custom implementation of a match between different AIs,
@@ -43,7 +47,7 @@ public class RunCustomMatch
 	static final String GAME_NAME = "Reversi.lud";
 	
 	/** Number of games to play */
-	static final int NUM_GAMES = 2;
+	static final int NUM_GAMES = 10; //2;
 
 	//-------------------------------------------------------------------------
 
@@ -67,27 +71,29 @@ public class RunCustomMatch
 		final Context context = new Context(game, trial);
 		final List<AI> ais = new ArrayList<AI>();
 		ais.add(null);
-		ais.add(new RandomAI());
+//		ais.add(new RandomAI());
+//		ais.add(MCTS.createUCT());	// Note: built-in Ludii UCT! Not Example UCT.
+		ais.add(new LudiiAI());
 //		ais.add(new RandomAI());
 		ais.add(new GbgAsLudiiAgent());
-//		ais.add(MCTS.createUCT());	// Note: built-in Ludii UCT! Not Example UCT.
+		
+		// in this example, we're still using agents that extend Ludii's
+		// abstract AI class, and therefore we call initAI() and 
+		// selectAction() on them
+		//
+		// note that it is also possible to use different kinds of
+		// agents which do not extend this class, and call whatever methods
+		// you like on them
+		for (int p = 1; p < ais.size(); ++p)
+		{
+			ais.get(p).initAI(game, p);
+		}
 		
 		for (int gameCounter = 0; gameCounter < NUM_GAMES; ++gameCounter)
 		{
 			// play a game
 			game.start(context);
-			
-			// in this example, we're still using agents that extend Ludii's
-			// abstract AI class, and therefore we call initAI() and 
-			// selectAction() on them
-			//
-			// note that it is also possible to use different kinds of
-			// agents which do not extend this class, and call whatever methods
-			// you like on them
-			for (int p = 1; p < ais.size(); ++p)
-			{
-				ais.get(p).initAI(game, p);
-			}
+			System.out.print(ais.get(1).friendlyName + " vs. " + ais.get(2).friendlyName + " ... ");
 			
 			final Model model = context.model();
 			
@@ -95,8 +101,13 @@ public class RunCustomMatch
 			{
 				model.startNewStep(context, ais, 1.0);
 			}
-			
-			System.out.println("Outcome = " + context.trial().status());
+			String pieces2 = "";
+			if (ais.get(2) instanceof GbgAsLudiiAgent) {
+				StateObserverOthello so = new AsStateObserverOthello(new GbgStateFromLudiiContext(context));
+	            so.setPieceCounters();
+				pieces2 = " (2-stones = "+so.getCountWhite()+"/64)";
+			}
+			System.out.println("Outcome = " + context.trial().status() + pieces2);
 		}
 		System.out.println("RunCustomMatch finished.");
 		System.exit(0);
