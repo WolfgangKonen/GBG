@@ -37,12 +37,12 @@ public final class AsStateObserverOthello extends StateObserverOthello {
 //        return getAvailableActions().get(i);
 //    }
 
-//    @Override
-//    public void advance(final Types.ACTIONS action) {
-//        _gbgState.advance(action);
-//        updateCurrentGameState();
-//    }
-//
+    @Override
+    public void advance(final Types.ACTIONS action) {
+        _gbgState.advance(action);
+        super.advance(action);
+    }
+
 //    @Override
 //    public int getPlayer() {
 //        return _gbgState.player().toInt();
