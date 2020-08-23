@@ -1,5 +1,6 @@
 package games.Sim;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import controllers.PlayAgent;
@@ -531,7 +532,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	 *  It uses from the surrounding class: numPlayers, player, hasLost(player)
 	 *
 	 */
-	class FinalSim {
+	class FinalSim implements Serializable {
 		private int winner;				// starts with -2; gets -1 on draw, otherwise i=0,1,2 on game over where i is the winning player
 		private int loser;				// starts with -1; gets i=0,1,2, if player i has just lost (note that game 
 										// needs not to be over in the 3-player case!)

@@ -1,10 +1,7 @@
-package testWK.tools;
+package tools;
 
 import controllers.PlayAgent;
 import games.*;
-import tools.ScoreTuple;
-import tools.Types;
-import testWK.tools.ValidateAgentOthelloTest;
 
 import java.util.ArrayList;
 
@@ -13,6 +10,7 @@ import java.util.ArrayList;
  * Provide tests to validate an agent. These tests are generally admitted for any agent in any game.
  * <p>
  * The class does not contain test cases itself, it is used by test cases from other classes.
+ *
  * @ee ValidateAgentOthelloTest
  */
 public class ValidateAgentTest {

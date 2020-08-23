@@ -14,14 +14,17 @@ import games.Sim.ArenaSim;
 import tools.Types.ACTIONS;
 
 /**
- * Class {@link ValidateAgent} performs certain consistency checks of a state observer class. These checks 
+ * This class performs certain consistency checks of a state observer class. These checks
  * test whether certain methods run through successfully, produce the expected results and so on.
  * <p>
  * Run these checks by constructing in {@link #main(String[])} a certain {@link Arena} {@code ar} object, 
  * a {@link StateObservation} {@code sob} object  and a {@link PlayAgent} {@code p} object of the agent 
  * class you want to validate. Then perform the checks by calling 
  * {@link #ValidateStateObserver(StateObservation, PlayAgent)}.
+ *
+ * This class is now DEPRECATED, use ValidateStateObserverTest and ValidateStateObsOthelloTest
  */
+@Deprecated
 public class ValidateStateObserver {
 	StateObservation sob;
 	PlayAgent pa;

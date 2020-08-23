@@ -1,7 +1,6 @@
 package tools;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,18 +11,20 @@ import java.util.ListIterator;
  *  a set of Items whether it contains an item which is the same as a certain Item.
  *  The sameness shall be user-defined (in this case: equality of keys)
  *  
- *  Optional: Test a linked list (function testLinkedList)
+ *  Test a linked list (function testLinkedList)
  *
+ *  This class is now DEPRECATED, use CompareItemsTest
  */
+@Deprecated
 public class TestCompare {
 	
 	public class Items  {
 		public int key;
 		public int value;
 
-		public Items(int i, int j) {
-			key=i;
-			value=j;
+		public Items(int key, int value) {
+			this.key=key;
+			this.value=value;
 		}
 
 		public boolean isEqualTo(Object arg0) {
@@ -33,7 +34,7 @@ public class TestCompare {
 			return (this.key == aItem.key);
 		}
 		
-		// override dos not work for Set.contains(), for unclear reasons.
+		// overriding method equals dos not work for Set.contains(), for unclear reasons.
 		// But it works for our method containsState2().
 		@Override
 		public boolean equals(Object arg0) {
@@ -63,7 +64,8 @@ public class TestCompare {
 	    return false;		
 	}
 	
-	public void operate() {
+	public void testContains() {
+		String str;
 	    Items it1 = new Items(1,10);
 	    Items it2 = new Items(2,20);
 	    Items it3 = new Items(3,30);
@@ -82,62 +84,68 @@ public class TestCompare {
 		//
 		// this does *not* work, since contains() does not operate with compareTo() but 
 		// instead with equals() from class Object. Therefore the second 'contains(it6)' 
-		// will return false, although the key 4 of it6 is in tupleSet. 
+		// will return false, although the key 4 of it6 is in tupleSet (but not the element it6 itself.
 		//
 		// For unclear reason it does not help to override equals() from class Object (see above).
 		// It works however (see containsState2 below), if we call equals() directly. So it 
 		// must be that contains() does not call the same equals(), for some unclear reason.
 		//
-		if (itemSet.contains(it1)) 
-			System.out.println("contains element with key 1");
-		if (itemSet.contains(it6)) 
-			System.out.println("contains element with key 4");
-		if (!itemSet.contains(it5))
-			System.out.println("does not contain element with key 5");
-		
+		str = ((itemSet.contains(it1))  ? "contains " : "DOES NOT contain ") + "element with key "+it1.key;
+		System.out.println(str);
+		str = ((itemSet.contains(it6))  ? "contains " : "DOES NOT contain ") + "element with key "+it6.key;
+		System.out.println(str);
+		str = ((itemSet.contains(it5))  ? "contains " : "DOES NOT contain ") + "element with key "+it5.key;
+		System.out.println(str);
+
 		// 
 		// this instead works: we call our own method containsState to check for containment
 		// and in this method we call our own method isEqualTo which exclusively looks 
 		// to the key.
 		//
 		System.out.println();
-		if (containsState(itemSet,it1)) 
-			System.out.println("containsState: has element with key 1");
-		if (containsState(itemSet,it6)) 
-			System.out.println("containsState: has element with key 4");
-		if (!containsState(itemSet,it5))
-			System.out.println("containsState: does not have element with key 5");
-		
+		str = "containState: "+ ((containsState(itemSet,it1))  ? "has " : "DOES NOT have ") + "element with key "+it1.key;
+		System.out.println(str);
+		str = "containState: "+ ((containsState(itemSet,it6))  ? "has " : "DOES NOT have ") + "element with key "+it6.key;
+		System.out.println(str);
+		str = "containState: "+ ((containsState(itemSet,it5))  ? "has " : "DOES NOT have ") + "element with key "+it5.key;
+		System.out.println(str);
+		assert containsState(itemSet,it1);
+		assert containsState(itemSet,it6);
+		assert !containsState(itemSet,it5);
+
 		// 
 		// this instead works as well: we call our own method containsState2 to check for containment
 		// and in this method we call equals(Object arg0) explicitly, which is our overriding  
 		// method which exclusively looks to the key.
 		//
 		System.out.println();
-		if (containsState2(itemSet,it1)) 
-			System.out.println("containsState2: has element with key 1");
-		if (containsState2(itemSet,it6)) 
-			System.out.println("containsState2: has element with key 4");
-		if (!containsState2(itemSet,it5))
-			System.out.println("containsState2: does not have element with key 5");
-		
+		str = "containState2: "+ ((containsState2(itemSet,it1))  ? "has " : "DOES NOT have ") + "element with key "+it1.key;
+		System.out.println(str);
+		str = "containState2: "+ ((containsState2(itemSet,it6))  ? "has " : "DOES NOT have ") + "element with key "+it6.key;
+		System.out.println(str);
+		str = "containState2: "+ ((containsState2(itemSet,it5))  ? "has " : "DOES NOT have ") + "element with key "+it5.key;
+		System.out.println(str);
+		assert containsState2(itemSet,it1);
+		assert containsState2(itemSet,it6);
+		assert !containsState2(itemSet,it5);
+
 	}
     
     // this is just a test function for the LinkedList part in NTuple2ValueFunc
     private static void testLinkedList() {
     	
-    	int h=2;
+    	int horizon=2;
     	LinkedList sList = new LinkedList();
     	sList.clear();
     	Integer elem;	// Integer object is just a surrogate for the afterstate object s'_t 
     	
-    	
+    	System.out.println();
     	for (int t=1; t<5; t++) {
     		// add element t at head of list and remove the element 
     		// 'beyond horizon' t_0 = t-h (if any)
-    		elem = new Integer(t);
+    		elem = Integer.valueOf(t);
     		sList.addFirst(elem);
-    		if (sList.size()>(h+1)) sList.pollLast();
+    		if (sList.size()>(horizon+1)) sList.pollLast();
     		
     		// iterate and print all elements in horizon: h+1 elements from t down to t_0
     		ListIterator<Integer> iter = sList.listIterator();
@@ -145,7 +153,9 @@ public class TestCompare {
     			elem=iter.next();
     			System.out.print(elem+" ");
     		}
-    		System.out.println("");
+    		System.out.println(" last="+sList.getLast());
+    		int valueOfLast = Math.max(t-horizon,1);
+    		assert (Integer)sList.getLast() == valueOfLast;
     		
     	}
     	
@@ -155,8 +165,9 @@ public class TestCompare {
     public static void main(String[] args) throws IOException
     {
     	TestCompare tc = new TestCompare();
-    	tc.operate();
-    	
+    	tc.testContains();
+		testLinkedList();
+
 //    	int k=5;
 //    	DecimalFormat form = new DecimalFormat("00");
 //    	String s = "k = "+ form.format(k);

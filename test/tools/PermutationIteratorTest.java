@@ -1,25 +1,25 @@
-package testWK.tools;
+package tools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import tools.PermutationIterable;
 import tools.PermutationIterator;
 
-class PermutationIteratorTest {
+public class PermutationIteratorTest {
 
     private List <Integer> il = genList (0, 1, 2);
-    
+
     private PermutationIterable <Integer> pi = new PermutationIterable <Integer> (il);
 
     public static List <Integer> genList (int... a) {
         List <Integer> li = new ArrayList <Integer> ();
-        for (int i: a) 
+        for (int i: a)
             li.add (i);
         return li;
     }
@@ -31,10 +31,10 @@ class PermutationIteratorTest {
         System.out.println (")");
     }
 
-	@Test
-	void testPermutationIterableInvers() {
+    @Test
+    public void testPermutationIterableInvers() {
         // test pi.invers(), that is, that it finds the right index (in the iterable) of all permutations of List il:
-       System.out.println ("PermutationIterable for list il = "+il.toString());
+        System.out.println ("PermutationIterable for list il = "+il.toString());
         PermutationIterator <Integer> pitor = (PermutationIterator  <Integer>) pi.iterator ();
         for (int i=0; i<(int)pitor.last; i++) {
             List <Integer> li = pitor.get(i);
@@ -48,19 +48,19 @@ class PermutationIteratorTest {
         assert (pi.invers (genList (1,2,0)) == 3); System.out.println ("(1,2,0) is the 3rd element of pi");
         assert (pi.invers (genList (2,0,1)) == 4); System.out.println ("(2,0,1) is the 4th element of pi");
         assert (pi.invers (genList (2,1,0)) == 5); System.out.println ("(2,1,0) is the 5th element of pi");
-	}
-	
-	@Test
-	public void testPermutationIterator() {
+    }
+
+    @Test
+    public void testPermutationIterator() {
         // pick randomly some (10) permutations from:
         Random r = new Random ();
         PermutationIterator <Integer> pitor = (PermutationIterator  <Integer>) pi.iterator ();
         for (int i = 0; i < 10; ++i)
         {
-            int rnd = r.nextInt ((int) pitor.last); 
+            int rnd = r.nextInt ((int) pitor.last);
             List <Integer> rli = pitor.get (rnd);
             System.out.println("random pick no. "+rnd+": "+rli.toString());
         }
-	}
+    }
 
 }
