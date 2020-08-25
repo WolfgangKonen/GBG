@@ -1,5 +1,7 @@
 package games.RubiksCube;
 
+import java.util.Random;
+
 public class CubeConfig {
 	
 	/**
@@ -47,7 +49,7 @@ public class CubeConfig {
 	 * <b>{@code pMax}</b> serves several purposes:
 	 * <ul>
 	 * <li> Maximum number of scrambling twists in {@link GameBoardCube#chooseStartState()} and 
-	 * 		{@link GameBoardCube#chooseStartState(PlayAgent)} (when training an agent).
+	 * 		{@link GameBoardCube#chooseStartState(controllers.PlayAgent)} (when training an agent).
 	 * <li> Maximum number of scrambling twists in {@link EvaluatorCube}
 	 * <li> (Deprecated) Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} are filled.
 	 * </ul>
@@ -113,7 +115,6 @@ public class CubeConfig {
 //	final static int[] Narr = {0,0,9,20, 100, 300, 900,1800, 9900,50,50,50}; // for GenerateNext
 //	final static int[] Narr = {0,0,9,50, 150,600,3000,15000, 50,50,50,50};  // for GenerateNextColSymm
 //		                       0         4                   8
-
 
 	/**
 	 * Selector array for {@link GameBoardCube#chooseStartState(controllers.PlayAgent)}.<br>

@@ -15,7 +15,7 @@ import games.TicTacToe.TicTDBase;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
 import tools.Types;
-import tools.ValidateStateObserver;
+import tools.ValidateStateObsTest;
 
 /**
  * This class holds any valid Sim game state. It is coded

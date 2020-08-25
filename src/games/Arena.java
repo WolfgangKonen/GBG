@@ -8,6 +8,7 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.PlayAgent;
 import games.Arena.Task;
+import games.CFour.StateObserverC4;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Sim.StateObserverSim;
@@ -742,8 +743,13 @@ abstract public class Arena implements Runnable {
 	 * @param spDT			needed only in the tournament-case
 	 * @return
 	 */
-	protected String gameOverString(StateObservation so, String[] agentVec, TSGameDataTransfer spDT) {
-		ScoreTuple sc = so.getGameScoreTuple(); 
+	public String gameOverString(StateObservation so, String[] agentVec, TSGameDataTransfer spDT) {
+		ScoreTuple sc = so.getGameScoreTuple();
+
+		// just debug C4:
+//		System.out.println("[gameOverString] "+sc);
+//		System.out.println("[gameOverString] isWin:"+((StateObserverC4)so).win());
+
 		int numPlayers = so.getNumPlayers();
 		String goStr="";
 		int winner = 0;

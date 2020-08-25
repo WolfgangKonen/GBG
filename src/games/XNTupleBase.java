@@ -7,7 +7,7 @@ import java.util.HashSet;
 import agentIO.LoadSaveGBG;
 import games.Othello.ConfigOthello;
 import games.Othello.StateObserverOthello;
-import tools.ValidateAgent;
+import tools.ValidateAgentTest;
 
 /**
  *  This class just provides a default implementation for methods {@link #instantiateAfterLoading()} and

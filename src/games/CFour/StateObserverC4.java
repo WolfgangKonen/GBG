@@ -16,6 +16,7 @@ import tools.Types.ACTIONS;
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
+ * See class {@link C4Base} for details of state coding.
  */
 public class StateObserverC4 extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
@@ -24,13 +25,8 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	private C4Base m_C4;
 	private ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
 	private boolean gameOver = false;
+	private boolean isWin = false;
     
-    // --- this is now in ObserverBase ---
-//    public Types.ACTIONS[] storedActions = null;
-//    public Types.ACTIONS storedActBest = null;
-//    public double[] storedValues = null;
-//    public double storedMaxScore; 
-	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
@@ -45,19 +41,28 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		setAvailableActions();
 	}
 
-	// obsolete now: 
-//	public StateObserverC4(int[][] board) {
-//		m_C4 = new C4Base(board);
-//		m_counter = m_C4.countPieces();
-//		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
-//		setAvailableActions();		
-//	}
+
+	/**
+	 * Note that setting a state by this constructor may fail to detect that this state is already a win for either
+	 * player. Wins are only detected if they are reached by {@link #advance(ACTIONS)}.
+	 *
+	 * @param board array [COLCOUNT][ROWCOUNT], i.e. [7][6]
+	 */
+	// needed only for testing:
+	public StateObserverC4(int[][] board) {
+		m_C4 = new C4Base(board);
+		m_counter = m_C4.countPieces();
+		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
+		setAvailableActions();
+		assert this.isLegalState();
+	}
 	
 	public StateObserverC4(StateObserverC4 other) {
 		super(other);		// copy members m_counter and stored*
 		this.m_C4 = new C4Base(other.getBoard());
 		this.m_Player = other.m_Player;
 		this.gameOver = other.gameOver;
+		this.isWin = other.isWin;	// bug fix (!) 2020-08-25
 		if (other.availableActions!=null)	// this check is needed when loading older logs
 			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
@@ -66,12 +71,6 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	}
 	
 	public StateObserverC4 copy() {
-//		StateObserverC4 sot = new StateObserverC4(m_C4.getBoard());
-//		sot.m_counter = this.m_counter;
-//		sot.m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1;
-//		sot.gameOver = this.gameOver;
-//		//sot.setAvailableActions();		// too slow
-//		sot.availableActions = (ArrayList<ACTIONS>) this.availableActions.clone();
 		StateObserverC4 sot = new StateObserverC4(this);
 		return sot;
 	}
@@ -142,19 +141,13 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	 */
 	public boolean win()
 	{
-		return (isGameOver() && !m_C4.isDraw());
+		return isWin;
+
+		// this former statement (before 2020-08-23) was buggy: if the last piece which completely fills the board
+		// is a win for either player, this would be undetected, because m_C4.isDraw checks only on board full:
+//		return (isGameOver() && !m_C4.isDraw());
 	}
 	
-
-//	public Types.WINNER getGameWinner() {
-//		assert isGameOver() : "Game is not yet over!";
-//		if (m_C4.isDraw()) 
-//			return Types.WINNER.TIE;
-//		
-//		// if we arrive here, the game is over and it is a win for the other player: 
-//		return Types.WINNER.PLAYER_LOSES;
-//		// (the player who is to move is not the winner if game is over)
-//	}
 
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
@@ -164,24 +157,20 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	public double getGameScore(StateObservation refer) {
 		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
         if(isGameOver()) {
-        	if (m_C4.isDraw())
-        		return 0;
-        	// if the game is over, it is a win for the player who made the action towards state 'this'
-        	// --> it is a loss for this.getPlayer().
-        	return -sign;
+        	if (isWin) 
+            	// if the game is over and a win for the player who made the action towards state 'this'
+            	// --> it is a loss for this.getPlayer().
+        		return -sign;
+        	assert m_C4.isDraw(); // if game is over, but not a win, it must be a draw
+        	return 0;
         	
-        	// old code, more complicated and it uses getGameWinner() which we want to become obsolete
-//            Types.WINNER win = this.getGameWinner();
-//        	switch(win) {
-//        	case PLAYER_LOSES:
-//                return sign*REWARD_NEGATIVE;
-//        	case TIE:
-//                return 0;
-//        	case PLAYER_WINS:
-//                return sign*REWARD_POSITIVE;
-//            default:
-//            	throw new RuntimeException("Wrong enum for Types.WINNER win !");
-//        	}
+    		// this former code (before 2020-08-23) was buggy: if the last piece which completely fills the board
+    		// is a win for either player, this would be undetected, because m_C4.isDraw checks only on board full.
+//        	if (m_C4.isDraw())
+//        		return 0;
+//        	// if the game is over, it is a win for the player who made the action towards state 'this'
+//        	// --> it is a loss for this.getPlayer().
+//        	return -sign;        	
         }
         
         return 0; 
@@ -198,34 +187,24 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	 */
 	public void advance(ACTIONS action) {
 		int iAction = action.toInt();
-		
+
 		assert (0<=iAction && iAction<C4Base.COLCOUNT) : "iAction is not in 0,1,...,"+C4Base.COLCOUNT+".";
 		assert (m_C4.getColHeight(iAction)<C4Base.ROWCOUNT) : "desired move colum "+iAction+" is full!";
-		
+
+		// only debug
 //		System.out.println(iAction+", "+m_C4.getColHeight(iAction)+ ", "+ C4Base.ROWCOUNT);
 //		m_C4.printBoard();
-
-		gameOver = m_C4.canWin(iAction);
-//		System.out.println("can win: "+ gameOver);
-		
-//		if (gameOver) {
-//			try {
-//				Thread.sleep(250);
-//				// strange, but we need a certain waiting time here, otherwise
-//				// the state will not be the right one during PLAY (??)
-//				// --- the strange effect is gone after we replace gameOver in 
-//				// --- C4GameGui with isGameOver(), which returns 
-//				// --- gameBoardC4.getStateObs().isGameOver()
-//			} catch (Exception e) {
-//				System.out.println("Thread 1");
-//			}
+//		if (m_C4.fieldP1==1815308846730L && m_C4.fieldP2==2582620223861L) {
+//			int dummy=1;
 //		}
+
+		gameOver = isWin = m_C4.canWin(iAction);
+
 		m_C4.putPiece(iAction);
 		if(!gameOver) gameOver = m_C4.isDraw();	// if game is not a win, test on draw
 		
     	setAvailableActions(); 			// IMPORTANT: adjust the available actions 
-    	
-    	
+
 		super.incrementMoveCounter();   // increment m_counter
 		// NOTE: Be aware that m_counter is not always the same as m_C4.countPieces() (!)
 		// m_counter counts the moves *after* the start board, i.e. if the start board has 
@@ -276,34 +255,6 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		return availableActions.get(i);
 	}
 
-    // --- this is now in ObserverBase ---
-//	/**
-//	 * Given the current state, store some info useful for inspecting the  
-//	 * action actBest and double[] vtable returned by a call to <br>
-//	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
-//	 *  
-//	 * @param actBest	the best action
-//	 * @param vtable	one double for each action in this.getAvailableActions():
-//	 * 					it stores the value of that action (as given by the double[] 
-//	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
-//	 */
-//	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
-//        ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
-//        storedActions = new Types.ACTIONS[acts.size()];
-//        storedValues = new double[acts.size()];
-//        for(int i = 0; i < storedActions.length; ++i)
-//        {
-//        	storedActions[i] = acts.get(i);
-//        	storedValues[i] = vtable[i];
-//        }
-//        storedActBest = actBest;
-//        if (actBest instanceof Types.ACTIONS_VT) {
-//        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
-//        } else {
-//            storedMaxScore = vtable[acts.size()];        	
-//        }
-//	}
-
 	public int[][] getBoard() {
 		return m_C4.getBoard();
 	}
@@ -316,9 +267,6 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		return m_Player;
 	}
 	
-	public int getNumPlayers() {
-		return 2;				// TicTacToe is a 2-player game
-	}
-
+	public int getNumPlayers() { return 2; }
 
 }

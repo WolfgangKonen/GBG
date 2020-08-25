@@ -26,6 +26,7 @@ import tools.Types.ACTIONS_VT;
  *      01  07  13  19  25  31  37
  *      00  06  12  18  24  30  36
  * </pre>
+ * Each cell may contain 0: empty, 1: player X, 2: player O.
  * 
  * @author Markus Thill
  * 
@@ -188,7 +189,7 @@ public class C4Base extends AgentBase implements Serializable {
 
 	/**
 	 * Copy-Constructor for {@link C4Base}. Only use, if necessary. Make sure, that
-	 * the {@link colHeight} array contains the correct heights for each column,
+	 * the {@link this.colHeight} array contains the correct heights for each column,
 	 * otherwise you will get severe problems!!!
 	 * 
 	 * @param fieldP1
@@ -454,8 +455,12 @@ public class C4Base extends AgentBase implements Serializable {
 	}
 
 	/**
-	 * Check, if the array contains a legal connect4-board
-	 * 
+	 * Check, if the array contains a legal Connect Four board:
+	 * <ul>
+	 * <li> Is the gravitational law fulfilled?
+	 * <li> Has each cell one of the allowed values 0: empty, 1: player X, 2: player O?
+	 * </ul>
+	 *
 	 * @param field
 	 *            7x6 array
 	 * @return true, if board is legal, false else
@@ -464,17 +469,17 @@ public class C4Base extends AgentBase implements Serializable {
 
 		boolean lastPiece;
 
-		// Ist das Gesetz der Gravitation erfüllt???
 		for (int i = 0; i < COLCOUNT; i++) {
 			lastPiece = false;
 			for (int j = 0; j < ROWCOUNT; j++) {
+				// Is the gravitational law fulfilled?
 				if (lastPiece && field[i][j] != 0) {
 					return false;
 				}
 				if (field[i][j] == 0) {
 					lastPiece = true;
 				}
-				// Ein Feld hat nur drei gültige Werte
+				// Has each cell one of the three valid entries 0,1,2?
 				if (field[i][j] != 0 && field[i][j] != 1 && field[i][j] != 2) {
 					return false;
 				}

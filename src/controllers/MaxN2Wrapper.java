@@ -79,7 +79,8 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	 * 
 	 */	
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so_in, boolean random, boolean silent) {
+		StateObservation so = so_in.copy(); // just for safety
         List<ACTIONS> actions = so.getAvailableActions();
 		
 		// this is just a runtime check whether the wrapped agent implements estimateGameValueTuple
