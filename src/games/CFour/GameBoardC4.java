@@ -1,31 +1,12 @@
 package games.CFour;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 import controllers.PlayAgent;
 import games.GameBoard;
 import games.StateObservation;
 import games.Arena;
-import games.Arena.Task;
-import games.ArenaTrain;
-import tools.ScoreTuple;
 import tools.Types;
 
 /**
@@ -100,7 +81,6 @@ public class GameBoardC4 implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		int i,j;
 		StateObserverC4 soT = null;
 		
 		if (so!=null) {
@@ -136,8 +116,7 @@ public class GameBoardC4 implements GameBoard {
 
 	protected void HGameMove(int x, int y)
 	{
-		int iAction = x;
-		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
+		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 //		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		if (m_so.isLegalAction(act)) {
 			m_so.advance(act);			// perform action (optionally add random elements from game 
@@ -192,7 +171,7 @@ public class GameBoardC4 implements GameBoard {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
-			int i = (int) (rand.nextInt(acts.size()));
+			int i = rand.nextInt(acts.size());
 			m_so.advance(acts.get(i));
 		}
 		return m_so;

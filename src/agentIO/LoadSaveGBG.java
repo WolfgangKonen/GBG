@@ -3,19 +3,8 @@ package agentIO;
 import TournamentSystem.tools.TSDiskAgentDataTransfer;
 import TournamentSystem.TSResultStorage;
 import controllers.*;
-import controllers.MC.MCAgent;
-import controllers.MC.MCAgentN;
-import controllers.MCTS.MCTSAgentT;
-import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.SarsaAgt;
-import controllers.TD.ntuple2.TDNTuple2Agt;
-import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.XArenaButtons;
-import games.CFour.AlphaBetaAgent;
-import games.Nim.BoutonAgent;
-import games.Othello.Edax.Edax2;
-import gui.MessageBox;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -60,12 +49,12 @@ public class LoadSaveGBG {
 		}
 	}
 
-	public JDialog createProgressDialog(final IGetProgress streamProgress,
-			final String msg) {
-		return null;
-		// It seems that the progess bar dialog and its later disposal cause from time to 
-		// time the 'GUI hangs' problem --> therefore we disable it in the following and return just null
-		//
+	// It seems that the progress bar dialog and its later disposal cause from time to
+	// time the 'GUI hangs' problem --> therefore we disable it in the following and comment it usages out
+	//
+//	public JDialog createProgressDialog(final IGetProgress streamProgress,
+//			final String msg) {
+//		return null;
 //		// ------------------------------------------------------------
 //		// setup progress-bar dialog
 //		final JDialog dlg = new JDialog(arenaFrame, msg, true);
@@ -101,15 +90,15 @@ public class LoadSaveGBG {
 //		});
 //		return dlg; // dialog has to be closed, if not needed anymore with
 //					// dlg.setVisible(false)
-	}
+//	}
 
-	public void disposeProgressDialog(JDialog dlg) {
-		if (dlg!=null) {
-			dlg.setVisible(false);
-			dlg.dispose();
-			dlg=null;
-		}		
-	}
+//	public void disposeProgressDialog(JDialog dlg) {
+//		if (dlg!=null) {
+//			dlg.setVisible(false);
+//			dlg.dispose();
+//			dlg=null;
+//		}
+//	}
 	
 	// ==============================================================
 	// Menu: Save Agent
@@ -194,7 +183,7 @@ public class LoadSaveGBG {
 		}
 
 //		disposeProgressDialog(dlg);
-		arenaGame.setProgress(null);
+//		arenaGame.setProgress(null);
 		arenaGame.setStatusMessage("Done.");
 	}
 
@@ -334,7 +323,7 @@ public class LoadSaveGBG {
 				return;
 			}
 
-			final JDialog dlg = createProgressDialog(ptos, "Saving...");
+//			final JDialog dlg = createProgressDialog(ptos, "Saving...");
 
 			try {
 				/*
@@ -355,7 +344,7 @@ public class LoadSaveGBG {
 				if (tsr != null)
 					oos.writeObject(tsr);
 			} catch (IOException e) {
-				disposeProgressDialog(dlg);
+//				disposeProgressDialog(dlg);
 				if (e instanceof NotSerializableException) {
 					if (pa != null)
 						arenaGame.showMessage("ERROR: Object pa of class "+pa.getClass().getName()
@@ -374,12 +363,12 @@ public class LoadSaveGBG {
 				fos.close();
 			} catch (IOException e) {
 				arenaGame.setStatusMessage("[ERROR: Could not complete Save-Process]");
-				disposeProgressDialog(dlg);
+//				disposeProgressDialog(dlg);
 				throw new IOException("ERROR: Could not complete Save-Process ["+e.getClass().getName()+"]");
 			}
 
-			disposeProgressDialog(dlg);
-			arenaGame.setProgress(null);
+//			disposeProgressDialog(dlg);
+//			arenaGame.setProgress(null);
 			arenaGame.setStatusMessage("Done.");
 
 		} else {
@@ -489,11 +478,11 @@ public class LoadSaveGBG {
 				throw e1;
 			}
 
-			final JDialog dlg = createProgressDialog(ptis, "Loading...");
+//			final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
-			pa = transformObjectToPlayAgent(ois, fis, filePath, dlg);
+			pa = transformObjectToPlayAgent(ois, fis, filePath, null);
 			
-			disposeProgressDialog(dlg);
+//			disposeProgressDialog(dlg);
 
 		} 
 		
@@ -575,7 +564,7 @@ public class LoadSaveGBG {
 				throw e1;
 			}
 
-			final JDialog dlg = createProgressDialog(ptis, "Loading...");
+//			final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
 			try {
 				// ois = new ObjectInputStream(gs);
@@ -583,24 +572,24 @@ public class LoadSaveGBG {
 				if (obj instanceof TSResultStorage) {
 					tsr = (TSResultStorage) obj;
 				} else {
-					disposeProgressDialog(dlg);
+//					disposeProgressDialog(dlg);
 					arenaGame.showMessage("ERROR: TSR class "+obj.getClass().getName()+" loaded from "
 							+ filePath + " not processable", "Unknown TS Class", JOptionPane.ERROR_MESSAGE);
 					arenaGame.setStatusMessage("[ERROR: Could not load TSR from "+ filePath + "!]");
 					throw new ClassNotFoundException("ERROR: Unknown TSR class");
 				}
-				disposeProgressDialog(dlg);
-				arenaGame.setProgress(null);
+//				disposeProgressDialog(dlg);
+//				arenaGame.setProgress(null);
 				arenaGame.setStatusMessage("Done.");
 			} catch (IOException e) {
-				disposeProgressDialog(dlg);
+//				disposeProgressDialog(dlg);
 				arenaGame.showMessage("ERROR: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 				//e.printStackTrace();
 				//throw e;
 			} catch (ClassNotFoundException e) {
-				disposeProgressDialog(dlg);
+//				disposeProgressDialog(dlg);
 				arenaGame.showMessage("ERROR: Class not found: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
@@ -728,7 +717,7 @@ public class LoadSaveGBG {
 				pa.instantiateAfterLoading();	// special treatment of agents after loading (if necessary)
 				// [instantiateAfterLoading replaces completely the long and complicated switch statement we had here before (!)]
 			} else {
-				disposeProgressDialog(dlg);
+//				disposeProgressDialog(dlg);
 				arenaGame.showMessage("ERROR: Agent class "+obj.getClass().getName()+" loaded from "
 						+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
 				arenaGame.setStatusMessage("[ERROR: Could not load agent from "
@@ -742,24 +731,24 @@ public class LoadSaveGBG {
 				((AgentBase) pa).setDefaultParOther();
 			}						
 
-			disposeProgressDialog(dlg);
-			arenaGame.setProgress(null);
+//			disposeProgressDialog(dlg);
+//			arenaGame.setProgress(null);
 			arenaGame.setStatusMessage("Done.");
 		} catch (IOException e) {
-			disposeProgressDialog(dlg);
+//			disposeProgressDialog(dlg);
 			arenaGame.showMessage("ERROR: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 			//e.printStackTrace();
 			pa=null;
 		} catch (ClassNotFoundException e) {
-			disposeProgressDialog(dlg);
+//			disposeProgressDialog(dlg);
 			arenaGame.showMessage("ERROR: Class not found: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			//e.printStackTrace();
 			pa=null;
 		} catch (AssertionError e) {
-			disposeProgressDialog(dlg);
+//			disposeProgressDialog(dlg);
 			arenaGame.showMessage("Instantiation failed: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			//e.printStackTrace();
@@ -799,8 +788,7 @@ public class LoadSaveGBG {
 			} catch (IOException e2) {
 				e2.printStackTrace();
 			}
-			final JDialog dlg = createProgressDialog(ptis, "Loading "
-					+ zipArchiveEntry.getName() + "...");
+//			final JDialog dlg = createProgressDialog(ptis, "Loading " + zipArchiveEntry.getName() + "...");
 
 			InputStreamReader isr = new InputStreamReader(ptis);
 			StringBuilder sb = new StringBuilder();
@@ -822,7 +810,7 @@ public class LoadSaveGBG {
 				}
 
 			}
-			disposeProgressDialog(dlg);
+//			disposeProgressDialog(dlg);
 			txtFileContent = sb.toString();
 			try {
 				br.close();

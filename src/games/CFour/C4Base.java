@@ -508,8 +508,8 @@ public class C4Base extends AgentBase implements Serializable {
 	/**
 	 * Make a move for one player in a column
 	 * 
-	 * @param player
-	 * @param col
+	 * @param player  PLAYER1 (1) or PLAYER2 (2)
+	 * @param col     the column (0,...,COLCOUNT-1)
 	 */
 	public void putPiece(int player, int col) {
 		assert isLegalMove(col) : "Illegal move in C4Base::putPiece(player,co)";

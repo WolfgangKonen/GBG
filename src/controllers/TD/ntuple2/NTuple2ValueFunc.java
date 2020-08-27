@@ -950,18 +950,22 @@ public class NTuple2ValueFunc implements Serializable {
 		df.applyPattern("+0.0000000;-0.0000000");  
 		System.out.println("[NTuple2ValueFunc.weightAnalysis] " + tdAgt.getClass().getSimpleName() + " ("
 				+count+" weights, "+nActive+" active ("+pActive+"%)): ");
-		if (tcf==null) System.out.println("WARNING: tcFactorArray is null");
-		System.out.println("             per       LUT     / tcFactor");
+		//if (tcf==null) System.out.println("WARNING: tcFactorArray is null");
+		System.out.print("             per       LUT    ");
+		System.out.println((tcf==null) ? "" : " / tcFactor");
 		for (i=0; i<per.length; i++) {
-			System.out.println("   Quantile [" + form.format(per[i]) + "] = "	
-					+df.format(res[1][i]) + " / " + ((tcf==null)?"NA":df.format(res[2][i])) );			
+			System.out.print("   Quantile [" + form.format(per[i]) + "] = "	
+					+df.format(res[1][i]) );			
+			System.out.println((tcf==null) ? "" : " / " +df.format(res[2][i]));
 		}
 
 		// print the n-tuple layout to file
-		try {
-			this.printNTuples();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (PRINTNTUPLES) {
+			try {
+				this.printNTuples();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}			
 		}
 		
 		return res;

@@ -110,6 +110,7 @@ public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> implements Seri
 	 * @return	a map with all states which are color-symmetric equivalent to cS
 	 */
 	public CubeStateMap applyColSymm(CubeState cS, CubeStateMap hmRots) {
+		CubeStateFactory csFactory = new CubeStateFactory();
 		assert(cS.type==Type.COLOR_P || cS.type==Type.COLOR_R) : "Wrong cS.type in applyColSymm(cS) !";
 		int[] loc = new int[3];
 		CubieTriple cub = new CubieTriple();
@@ -122,7 +123,7 @@ public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> implements Seri
 		    Map.Entry entry = (Map.Entry)it.next();	    	
 	    	Integer key = (Integer)entry.getKey();
 	    	ColorTrafo cT = (ColorTrafo)entry.getValue();
-	    	CubeState dS = CubeState.makeCubeState(cS);
+	    	CubeState dS = csFactory.makeCubeState(cS);
 	    	dS.applyCT(cT);							// apply color trafo to dS
 	    	//
 	    	// it is (currently) difficult to give the right values for 

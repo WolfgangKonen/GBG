@@ -24,7 +24,8 @@ public class CSArrayList extends ArrayList<CubeState> {
 	public CSArrayList() {
 		super();
 	}
-	
+	private CubeStateFactory csFactory = new CubeStateFactory();
+
 	/**
 	 * Generate either distance set D0 or D1
 	 * 
@@ -34,13 +35,13 @@ public class CSArrayList extends ArrayList<CubeState> {
 		super();
 		switch(csaType) {
 		case GenerateD0:
-			CubeState cS0 = CubeState.makeCubeState();
+			CubeState cS0 = csFactory.makeCubeState();
 			this.add(cS0);
 			break;
 		case GenerateD1:
 			for (int i=1; i<=3; i++) {
 				for (int act1=0; act1<3; act1++) {
-					CubeState cS1 = CubeState.makeCubeState();
+					CubeState cS1 = csFactory.makeCubeState();
 					switch(act1) {
 					case 0: cS1.UTw(i); break;
 					case 1: cS1.LTw(i); break;
@@ -118,7 +119,7 @@ public class CSArrayList extends ArrayList<CubeState> {
 					// instead we have cS0.lastTwist==ID for 'not known'. Then we run through 
 					// all 3 twists.)
 					if (twist[act1]!=cS0.lastTwist) {
-						CubeState cS1 = CubeState.makeCubeState(cS0);
+						CubeState cS1 = csFactory.makeCubeState(cS0);
 						switch(twist[act1]) {
 						case U: cS1.UTw(i); break;
 						case L: cS1.LTw(i); break;

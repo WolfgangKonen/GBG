@@ -58,7 +58,7 @@ public class StateObserverC4Test {
     @Test
     public void testWin() {
         // test for specific states, if they are detected as win or not
-     //   runTestWin("1 ",board1,bprev1,sb1,sp1);
+        runTestWin("1 ",board1,bprev1,sb1,sp1);
         runTestWin("2 ",board2,bprev2,sb2,sp2);
     }
     public void runTestWin(String prefix, int[][] board, int[][] bprev, String sb, String sp) {
@@ -87,7 +87,7 @@ public class StateObserverC4Test {
         System.out.println(prefix+ ar.gameOverString(sprev,players,null));
     }
 
-    private ValidateStateObsTest vat = new ValidateStateObsTest();
+    private final ValidateStateObsTest vat = new ValidateStateObsTest();
     private final static String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/ConnectFour/";
     private final static String gbgAgentPath = strDir + "TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip";
     private static final Arena ar = new ArenaTrainC4("", false);

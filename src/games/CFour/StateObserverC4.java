@@ -1,5 +1,6 @@
 package games.CFour;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import controllers.PlayAgent;
@@ -17,6 +18,11 @@ import tools.Types.ACTIONS;
  * <li> signaling end, score and winner of the game
  * </ul>
  * See class {@link C4Base} for details of state coding.
+ *
+ * Note: If a state is a win (draw) can only be detected when this state was formed via advance. This is because
+ * only when an action is made (via advance) then it is detected whether the piece set by this action generates a
+ * 4-in-a-row or whether it completes the board (without any 4-in-a-row) and thus is a draw. It is assumed that
+ * the pre-advance state was not a game-over state.
  */
 public class StateObserverC4 extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
@@ -26,6 +32,9 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	private ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
 	private boolean gameOver = false;
 	private boolean isWin = false;
+
+	private LastCell lastCell = new LastCell();
+	private LastCell prevCell = new LastCell();
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -44,11 +53,11 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 
 	/**
 	 * Note that setting a state by this constructor may fail to detect that this state is already a win for either
-	 * player. Wins are only detected if they are reached by {@link #advance(ACTIONS)}.
+	 * player. Wins are only detected if they are reached via {@link #advance(ACTIONS)}.
 	 *
 	 * @param board array [COLCOUNT][ROWCOUNT], i.e. [7][6]
 	 */
-	// needed only for testing:
+	// needed for testing:
 	public StateObserverC4(int[][] board) {
 		m_C4 = new C4Base(board);
 		m_counter = m_C4.countPieces();
@@ -63,6 +72,10 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		this.m_Player = other.m_Player;
 		this.gameOver = other.gameOver;
 		this.isWin = other.isWin;	// bug fix (!) 2020-08-25
+		if (other.lastCell!=null) 			// this check is needed when loading older logs
+			lastCell = new LastCell(other.lastCell);
+		if (other.prevCell!=null) 			// this check is needed when loading older logs
+			prevCell = new LastCell(other.prevCell);
 		if (other.availableActions!=null)	// this check is needed when loading older logs
 			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
@@ -115,7 +128,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	 * </pre>
 	 * where the first |Xo----| is a representation of column_0, from row 0 up to row 
 	 * {@link C4Base#ROWCOUNT}, and so on, for all {@link C4Base#COLCOUNT} columns. <br>
-	 * "X" is player 1, "o" is player 2 and "-" is empty.
+	 * "X" is first player, "o" is second player and "-" is empty.
 	 */
 	@Override
     public String stringDescr() {
@@ -210,8 +223,12 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		// m_counter counts the moves *after* the start board, i.e. if the start board has 
 		// one piece already set, it has m_counter=0, but m_C4.countPieces()=1.
 		// CONSEQUENCE: do not infer m_Player from m_counter, but only from m_C4.countPieces().
-		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1; 
-		
+		m_Player = (m_C4.countPieces() % 2 == 0) ? 0 : 1; // player to move in this
+
+		this.prevCell = this.lastCell;
+		int lastPlayer = (m_Player==0) ? 1 : 0; // player who acted in this advance()
+		this.lastCell = new LastCell(iAction, m_C4.getColHeight(iAction)-1, lastPlayer);
+
 //			System.out.println("player="+this.getPlayer()+", moveCounter="+this.getMoveCounter());
 	}
 
@@ -268,5 +285,31 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	}
 	
 	public int getNumPlayers() { return 2; }
+
+	public LastCell getLastCell() { return lastCell; }
+	public LastCell getPrevCell() { return prevCell; }
+
+	public class LastCell implements Serializable {
+		public int c;
+		public int r;
+		public int p;
+		private boolean valid;
+		public LastCell() {
+			valid=false;
+		}
+		public LastCell(int col, int row, int player) {
+			c=col;
+			r=row;
+			p=player;
+			valid=true;
+		}
+		public LastCell(LastCell other) {
+			this.c = other.c;
+			this.r = other.r;
+			this.p = other.p;
+			this.valid = other.valid;
+		}
+		public boolean isValid() {  return valid; }
+	}
 
 }

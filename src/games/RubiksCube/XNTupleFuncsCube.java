@@ -151,10 +151,11 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	@Override
 	@Deprecated
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
+		CubeStateFactory csFactory = new CubeStateFactory();
 		int i=0;
 		boolean doAssert=true;
 		BoardVector[] equiv = null;
-		CubeState cS1 = CubeState.makeCubeState(boardVector); 
+		CubeState cS1 = csFactory.makeCubeState(boardVector);
 		HashSet set = new HashSet();
 		//
 		// calculate all color-symmetric states for cS1, collect

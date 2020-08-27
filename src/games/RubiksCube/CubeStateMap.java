@@ -6,14 +6,9 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
-
-import games.RubiksCube.CubieTriple.Orientation;
-import games.RubiksCube.ColorTrafoMap.ColMapType;
-import games.RubiksCube.CubeState.Twist;
 
 public class CubeStateMap extends Hashtable<Integer,CubeState> {
-	public enum CsMapType {AllWholeCubeRotTrafos};
+	public enum CsMapType {AllWholeCubeRotTrafos}
 	
 	public CubeStateMap() {
 		super();
@@ -28,10 +23,11 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 	}
 	
 	private void allWholeCubeRotTrafos() {
+		CubeStateFactory csFactory = new CubeStateFactory();
 		int[] loc = new int[3];
 		CubieTriple ygrCubie = new CubieTriple();
 		for (int i=0; i<6; i++) {
-			CubeState rot = CubeState.makeCubeState(CubeState.Type.TRAFO_P);
+			CubeState rot = csFactory.makeCubeState(CubeState.Type.TRAFO_P);
 			switch(i) {
 			case 0: 
 				break;
@@ -57,7 +53,7 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 				// each whole-cube rotation is uniquely defined by the location of the 
 				// y-face of the ygr-cubie:
 				Integer key = rot.fcol[ygrCubie.loc[0]];
-				CubeState tS = CubeState.makeCubeState(rot);	// IMPORTANT: We have to make a copy of rot, so that
+				CubeState tS = csFactory.makeCubeState(rot);	// IMPORTANT: We have to make a copy of rot, so that
 							// each this.put(key,tS) below really stores a different value!! (Otherwise 
 							// just a reference to the (mutable) object rot is stored in the HashMap.)
 				this.put(key, tS);	// put (key,value) = (Integer, CubeState) into HashMap

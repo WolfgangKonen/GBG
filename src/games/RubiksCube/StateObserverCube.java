@@ -29,8 +29,9 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * the action which led to m_state (9 if not known)
 	 */
-	private ACTIONS m_action; 		
-	private static CubeState def = CubeState.makeCubeState(); // a solved cube as reference
+	private ACTIONS m_action;
+	private static CubeStateFactory csFactory = new CubeStateFactory();
+	private static CubeState def = csFactory.makeCubeState(); // a solved cube as reference
 	/**
 	 * The reward for the solved cube is 1.5. It is higher than the usual game-won reward 1.0, because some agents (e.g.
 	 * {@link TDNTuple3Agt}) produce game values a bit higher than 1.0 for non-solved cube states. REWARD_POSITIVE should 
@@ -51,28 +52,28 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverCube() {
-		m_state = CubeState.makeCubeState(); 		// default (solved) cube of type POCKET
+		m_state = csFactory.makeCubeState(); 		// default (solved) cube of type POCKET
 		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
 
 	@Deprecated
 	public StateObserverCube(BoardVector boardVector) {
-		m_state = CubeState.makeCubeState(boardVector);
+		m_state = csFactory.makeCubeState(boardVector);
 		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
 	
 	// NOTE: this is NOT the copy constructor. See next method for copy constructor.
 	public StateObserverCube(CubeState other) {
-		m_state = CubeState.makeCubeState(other);
+		m_state = csFactory.makeCubeState(other);
 		m_action = new ACTIONS(9);		// 9 codes 'not known'
 		setAvailableActions();
 	}
 	
 	public StateObserverCube(StateObserverCube other) {
 		super(other);		// copy members m_counter and stored*
-		m_state = CubeState.makeCubeState(other.m_state);
+		m_state = csFactory.makeCubeState(other.m_state);
 		m_action = new ACTIONS(other.m_action);
 		setAvailableActions();
 	}

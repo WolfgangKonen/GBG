@@ -7,17 +7,12 @@ import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.PlayAgent;
-import games.Arena.Task;
-import games.CFour.StateObserverC4;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Sim.StateObserverSim;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
-import gui.StatusBar;
-import params.ParMCTS;
-import params.ParOther;
 import tools.Progress;
 import tools.ScoreTuple;
 import tools.Types;
@@ -30,8 +25,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
 
@@ -50,7 +43,7 @@ abstract public class Arena implements Runnable {
 		PARAM, TRAIN, MULTTRN, PLAY, INSPECTV
 		// , INSPECTNTUP 
 		, COMPETE, SWAPCMP, ALLCMP, TRNEMNT, IDLE
-	};
+	}
 
 	public XArenaFuncs m_xfun;
 	public GBGLaunch m_LauncherObj = null;
@@ -529,6 +522,7 @@ abstract public class Arena implements Runnable {
 			// if taskBefore==INSPECTV, start from the board left by InspectV
 			pa = qaVector[0];
 			so = gb.getStateObs();
+			gb.updateBoard(so, true, showValue);
 		} else {
 			// if taskBefore!=INSPECTV, select here the start state:
 			//gb.clearBoard(true, true); // reset game board to default start state
@@ -544,11 +538,11 @@ abstract public class Arena implements Runnable {
 				// choose randomly a different one:
 				so = gb.chooseStartState();
 			}
+			gb.updateBoard(so, false, showValue);
 		}
 		taskBefore = Task.IDLE;
 
 		System.out.println("StartState: "+so.stringDescr());
-		gb.updateBoard(so, false, showValue);
 		gb.setActionReq(true);
 		gb.enableInteraction(true); // needed for CFour
 		so.resetMoveCounter();
@@ -861,10 +855,10 @@ abstract public class Arena implements Runnable {
 				tournamentAgentManager.enterGameResultWinner(roundWinningAgent); // 0=winAgent1 | 1=tie | 2=winAgent2
 				//System.gc(); // call to keep system memory usage low but creates MASSIVE time delays every episode
 
-				// progress bar
-				int[] progress = tournamentAgentManager.getTSProgress();
-				tsProgressBar.setValue(progress[0]);
-				System.out.println(TAG+"TS Progress "+ Arrays.toString(progress));
+				// iprogress bar
+				int[] iprogress = tournamentAgentManager.getTSProgress();
+				tsProgressBar.setValue(iprogress[0]);
+				System.out.println(TAG+"TS Progress "+ Arrays.toString(iprogress));
 			}
 		}
 

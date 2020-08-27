@@ -305,12 +305,40 @@ public class C4GameGui extends JPanel implements ListOperation {
 	}
 
 	/**
-	 * Set and mark the piece of {@code player} in column i, row j. 
+	 * Set and mark the piece of {@code player} in column i, row j.
 	 * Marking is done by adding small white corners in the cell.
 	 * Unmark the previously marked cell, if any.
-	 * 
-	 * @param i			the column (0,...,COLCOUNT-1) 
-	 * @param j			the row
+	 * <p>
+	 * NEW version, using LastCell lastCell and prevCell from soT
+	 *
+	 * @param soT		needed for access to lastCell, prevCell
+	 */
+	protected void setPiece3(StateObserverC4 soT) {
+		StateObserverC4.LastCell lc = soT.getLastCell();
+		if (lc.isValid()) {
+			int i = lc.c;
+			int j = lc.r;
+			int player = lc.p;
+			if (c4.getColHeight(i) == j) {
+				// if, e.g., j is 1, we want to add a piece for the 2nd row. If colHeight is 1,
+				// we have to put this piece. (We do nothing if colHeight!=1, since repeated calls to
+				// c4.putPiece would corrupt c4.)
+				c4.putPiece(player + 1, i);
+			}
+			markMove(i, j, player);
+			StateObserverC4.LastCell pc = soT.getPrevCell();
+			if (pc.isValid())
+				unMarkMove(pc.c, pc.r, pc.p);
+		}
+	}
+
+	/**
+	 * Set and mark the piece of {@code player} in column i, row j.
+	 * Marking is done by adding small white corners in the cell.
+	 * Unmark the previously marked cell, if any.
+	 *
+	 * @param i			the column (0,...,COLCOUNT-1)
+	 * @param j			the row (0,...,ROWCOUNT-1)
 	 * @param player	0 or 1
 	 */
 	protected void setPiece(int i, int j, int player) {

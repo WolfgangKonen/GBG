@@ -13,7 +13,6 @@ import java.util.Set;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import params.ParNT;
-//import params.NTParams;
 
 /**
  * This class generates n-tuple sets (fixed for a specific game, by random walk or by 
@@ -26,10 +25,8 @@ import params.ParNT;
 public class NTupleFactory {
 	private boolean PRINTNTUPLES = false;	// /WK/ control the file printout of n-tuples
 
-	// Needed for generating random n-Tuples
-	//private Random rand = new Random(); //new Random(42);
+	// needed for generating random n-Tuples
 	private Random rand = new Random(System.currentTimeMillis());	
-
 
 	/**
 	 * 
@@ -57,15 +54,12 @@ public class NTupleFactory {
 						+"the number of board cells ("+numCells+")");
 			
 			if(randWalk==true){
-				//random walk
 				nTuplesI = generateRandomWalkNTuples(maxTupleLen,numTuple,POSVALUES,xnf);
 			}else{
-				//random point
 				nTuplesI = generateRandomPointNTuples(maxTupleLen,numTuple,POSVALUES,numCells);
 			}
 			
-		}else{
-			//given ntuples
+		} else {
 			nTuplesI = xnf.fixedNTuples(fixedNtupleMode);
 			
 			checkNtuples(nTuplesI,numCells);

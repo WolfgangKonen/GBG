@@ -32,7 +32,8 @@ public class TestPocketCube {
 	ArenaTrainCube ar = new ArenaTrainCube("",false);
 	GameBoardCube gb = new GameBoardCube(ar);		// needed for chooseStartState()
 	
-	protected Random rand = new Random(System.currentTimeMillis());	
+	protected Random rand = new Random(System.currentTimeMillis());
+	private CubeStateFactory csFactory = new CubeStateFactory();
 
 	/**
 	 * @param args
@@ -71,8 +72,8 @@ public class TestPocketCube {
 	private void simpleTests01() {
 		
 		// Tests 1) and 2) 
-		CubeState def = CubeState.makeCubeState();
-		CubeState rot = CubeState.makeCubeState(def);
+		CubeState def = csFactory.makeCubeState();
+		CubeState rot = csFactory.makeCubeState(def);
 		for (int k=1; k<=4; k++) {
 			//System.out.println(k+"x u-rotation");
 			rot.uTr(1);  //.print();
@@ -208,7 +209,7 @@ public class TestPocketCube {
 		HashSet set = new HashSet();
 		int[] totalCoverage = {1, 9, 54, 321}; // see https://en.wikipedia.org/wiki/Pocket_Cube 
 		for (int act1=0; act1<3; act1++) {
-			CubeState cS1 = CubeState.makeCubeState();
+			CubeState cS1 = csFactory.makeCubeState();
 			switch(act1) {
 			case 0: cS1.UTw(1); break;
 			case 1: cS1.LTw(2); break;
@@ -220,7 +221,7 @@ public class TestPocketCube {
 				innerApplyColSymmTest(cS1, act1,act2,act3, hmCols, hmRots, set);
 			} else if (DISTANCE>=2) {
 				for (int act2=0; act2<3; act2++) {
-					CubeState cS2 = CubeState.makeCubeState(cS1);
+					CubeState cS2 = csFactory.makeCubeState(cS1);
 					switch(act2) {
 					// the ternary operators ensure that the twists done in the second step
 					// (act2) are different twists than the act1 actions (otherwise both actions
@@ -234,7 +235,7 @@ public class TestPocketCube {
 						innerApplyColSymmTest(cS2, act1,act2,act3, hmCols, hmRots, set);						
 					} else if (DISTANCE==3) {
 						for (int act3=0; act3<3; act3++) {
-							CubeState cS3 = CubeState.makeCubeState(cS2);
+							CubeState cS3 = csFactory.makeCubeState(cS2);
 							switch(act3) {
 							// the ternary operators ensure that the twists done in the second step
 							// (act2) are different twists than the act1 actions (otherwise both actions

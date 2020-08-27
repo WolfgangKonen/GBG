@@ -11,15 +11,15 @@ import java.util.ArrayList;
  * This class holds any valid Othello game state. It is coded
  * in a two dimensional int[8][8] array, where each index represents either 
  * <ul>
- * <li>a  Black cell = 0,
- * <li>a  White cell = 1,
+ * <li>a  Black cell ("O") = 0,
+ * <li>a  White cell ("X") = 1,
  * <li>an empty cell = 2,
  * <li>a  reachable empty cell = 3.
  * </ul>
  * This last case "3" is for {@link XNTupleFuncsOthello#getNumPositionValues()}{@code =4}: Every empty 
  * cell which can be taken by the player to move is coded with "3" instead of "2".
  * <p>
- * Black starts the game.<br>
+ * Black ("O") starts the game.<br>
  * For example the starting state is coded in case {@link XNTupleFuncsOthello#getNumPositionValues()}{@code =4} as:
  * <pre>
  *                                            row
@@ -272,12 +272,12 @@ public class StateObserverOthello extends ObserverBase{
 	/**
 	 * Check for legal Action if the requested Actions is available 
 	 * to the current game state.
-	 * @param act
-	 * @return boolean
+	 * @param act		the action to test
+	 * @return boolean  whether it is legal
 	 */
 	public boolean isLegalAction(ACTIONS act)
 	{
-		return availableActions.contains(act) ? true : false;
+		return availableActions.contains(act);
 	}
 	
 	/**
@@ -303,9 +303,10 @@ public class StateObserverOthello extends ObserverBase{
 		availableActions = BaseOthello.possibleActions(currentGameState, this.getOpponent(playerNextMove));
 		if(availableActions.size() > 0 ) {
 			playerNextMove = getOpponent(playerNextMove);  // the normal case
-		} else {
-			// nothing to do
 		}
+//		else {
+//			// nothing to do
+//		}
 		
 		if (playerNextMove==prevPlayer)
 			setAvailableActions();	// yes, we have to call possibleActions (inside setAvailableActions) a 2nd time
@@ -374,9 +375,9 @@ public class StateObserverOthello extends ObserverBase{
 	public void toString2() {
 		
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++) {
-			System.out.println("");
+			System.out.println();
 			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++) {
-				System.out.printf( Integer.toString(currentGameState[i][j]) +" ");
+				System.out.printf( currentGameState[i][j] +" ");
 			}
 		}
 	}

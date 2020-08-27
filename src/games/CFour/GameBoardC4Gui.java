@@ -1,11 +1,9 @@
 package games.CFour;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 
 import javax.swing.JFrame;
@@ -31,12 +29,12 @@ import tools.Types;
  *
  */
 public class GameBoardC4Gui extends JFrame {
-	private int C4GAMEHEIGHT=512;
+	private final int C4GAMEHEIGHT=512;
 	private int[][] m_board;		
-	private int[][] last_board;		
+//	private int[][] last_board;		//was only needed for now deprecated guiUpdateBoard2
 	private double[] VTable;
-	private JLabel leftInfo=new JLabel("");
-	private JLabel rightInfo=new JLabel(""); 
+	private final JLabel leftInfo=new JLabel("");
+	private final JLabel rightInfo=new JLabel("");
 //	// the colors of the TH Koeln logo (currently not used):
 //	private Color colTHK1 = new Color(183,29,13);
 //	private Color colTHK2 = new Color(255,137,0);
@@ -78,7 +76,7 @@ public class GameBoardC4Gui extends JFrame {
 	private void initGui(String title) {
     	c4GameBoard	= new C4GameGui(m_gb);
 		m_board 	= ((StateObserverC4) m_gb.getStateObs()).getBoard();
-		last_board	= ((StateObserverC4) m_gb.getStateObs()).getBoard();
+//		last_board	= ((StateObserverC4) m_gb.getStateObs()).getBoard();
 		VTable		= new double[C4Base.COLCOUNT];
 
     	JPanel titlePanel = new JPanel();
@@ -93,7 +91,7 @@ public class GameBoardC4Gui extends JFrame {
 		JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		infoPanel.setBackground(Types.GUI_BGCOLOR);
 //		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
-		Font font=new Font("Arial",0,(int)(1.2*Types.GUI_HELPFONTSIZE));			
+		Font font=new Font("Arial",Font.PLAIN,(int)(1.2*Types.GUI_HELPFONTSIZE));
 		leftInfo.setFont(font);	
 		rightInfo.setFont(font);	
 //		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
@@ -114,7 +112,7 @@ public class GameBoardC4Gui extends JFrame {
 	public void clearBoard(boolean boardClear, boolean vClear, StateObserverC4 m_so) {
 		if (boardClear) {
 			c4GameBoard.setInitialBoard();
-			last_board = m_so.getBoard();
+//			last_board = m_so.getBoard();
 		}
 		if (vClear) {
 			//VTable		= new double[C4Base.COLCOUNT];
@@ -142,7 +140,7 @@ public class GameBoardC4Gui extends JFrame {
 			m_board = soT.getBoard();
 			int Player=Types.PLAYER_PM[soT.getPlayer()];
 			switch(Player) {
-			case(+1): 
+			case(+1):
 				leftInfo.setText("X to move   "); break;
 			case(-1):
 				leftInfo.setText("O to move   "); break;
@@ -182,45 +180,28 @@ public class GameBoardC4Gui extends JFrame {
 					Types.ACTIONS action = soT.getStoredAction(k);
 					int iAction = action.toInt();
 					VTable[iAction] = soT.getStoredValues()[k];					
-				}	
-				
-				if (showValueOnGameboard) {
-					String splus = (taskState == Arena.Task.INSPECTV) ? "X" : "O";
-					String sminus= (taskState == Arena.Task.INSPECTV) ? "O" : "X";
-					switch(Player) {
-					case(+1): 
+				}
+
+				String splus = (taskState == Arena.Task.INSPECTV) ? "X" : "O";
+				String sminus= (taskState == Arena.Task.INSPECTV) ? "O" : "X";
+				switch(Player) {
+					case(+1):
 						rightInfo.setText("    Score for " + splus); break;
 					case(-1):
 						rightInfo.setText("    Score for " + sminus); break;
-					}					
-				} else {
-					rightInfo.setText("");					
 				}
-			} 
+			}
+			if (!showValueOnGameboard) {
+				rightInfo.setText("");
+			}
+
 		} // if(soT!=null)
 
 		if (withReset) guiUpdateBoard1(m_board);
-		else guiUpdateBoard2(m_board);
+		else guiUpdateBoard3(soT);
+//		else guiUpdateBoard2(m_board);
 		
 		if (showValueOnGameboard) {
-//			double[] value = new double[C4Base.COLCOUNT];
-//			String[] valueTxt = new String[C4Base.COLCOUNT];
-//			for(int i=0;i<C4Base.COLCOUNT;i++){
-//				if (VTable==null) { 
-//					// HumanPlayer and MCTSAgentT do not have a VTable (!)
-//					value[i] = Double.NaN;
-//				} else {
-//					value[i] = VTable[i];					
-//				}
-//				
-//				if (Double.isNaN(value[i])) {
-//					valueTxt[i] = "   ";
-//				} else {
-//					valueTxt[i] = " "+(int)(value[i]*100);
-//					if (value[i]<0) valueTxt[i] = ""+(int)(value[i]*100);
-//				}
-//			}
-//			c4GameBoard.printValueBar(null, value, null);
 			c4GameBoard.printValueBar(null, VTable, null);
 		}
 		this.repaint();
@@ -243,28 +224,44 @@ public class GameBoardC4Gui extends JFrame {
 			}
 		}		
 	}
-	
-	private void guiUpdateBoard2(int[][] m_board) {
-		// --- this alternative updates only the last move and has the last move 
-		// --- marked. It is faster, but does not work for the LogManager (does not allow to 
+
+	// this method is deprecated, because it does not work correctly if doing "Inspect V" for a few moves and then
+	// starting "Play". Use guiUpdateBoard3 instead.
+	@Deprecated
+//	private void guiUpdateBoard2(int[][] m_board) {
+//		// --- this alternative updates only the last move and has the last move
+//		// --- marked. It is faster, but does not work for the LogManager (does not allow to
+//		// --- move back & requires the board to be already in the previous position).
+//		for(int j=0;j<C4Base.ROWCOUNT;j++){
+//			for(int i=0;i<C4Base.COLCOUNT;i++){
+//				if(m_board[i][j]!=last_board[i][j]) {
+//					c4GameBoard.setPiece(i,j, (m_board[i][j]-1));
+//					last_board[i][j] = m_board[i][j];
+//				}
+//			}
+//		}
+//	}
+
+	private void guiUpdateBoard3(StateObserverC4 soT) {
+		// --- this alternative updates only the last move and has the last move
+		// --- marked. It is faster, but does not work for the LogManager (does not allow to
 		// --- move back & requires the board to be already in the previous position).
-		for(int j=0;j<C4Base.ROWCOUNT;j++){
-			for(int i=0;i<C4Base.COLCOUNT;i++){
-				if(m_board[i][j]!=last_board[i][j]) {
-					c4GameBoard.setPiece(i,j, (m_board[i][j]-1));
-					last_board[i][j] = m_board[i][j];
-				}
-			}
-		}		
+		//
+		// This NEW method works with LastCell lastCell, prevCell stored in soT. It is simpler to maintain than
+		// guiUpdateBoard2 and solves the InspectV-Play-bug (the former guiUpdateBoard2 displayed wrong moves when doing
+		// several "Inspect V" moves and then starting "Play")
+		if (soT!=null)
+			c4GameBoard.setPiece3(soT);
 	}
-	
+
 	public void enableInteraction(boolean enable) {
 		c4GameBoard.enableInteraction(enable);
 		if (enable) {
 	        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		} else {
-//	        this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		}
+//		else {
+//	        this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+//		}
 	}
 
 	public void showGameBoard(Arena ticGame, boolean alignToMain) {

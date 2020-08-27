@@ -193,7 +193,6 @@ public class CubeState implements Serializable {
 	 * @param boardVector	the board vector, see {@link #getBoardVector()} for the different types
 	 */
 	public CubeState(BoardVector boardVector) {
-		CubeStateFactory csFactory = new CubeStateFactory();
 		int[] bvec = boardVector.bvec;
 		switch(bvec.length) {
 		case 24: 	// boardvecType == CUBESTATE, 2x2x2
@@ -210,7 +209,7 @@ public class CubeState implements Serializable {
 		case 49: 	// boardvecType == STICKER, 2x2x2
 			this.type = Type.COLOR_P;
 			this.sloc = slocFromSTICKER(bvec);	
-			CubeState def = csFactory.makeCubeState(Type.COLOR_P);
+			CubeState def = makeCubeState(Type.COLOR_P);
 			this.fcol = new int[def.fcol.length];
 			for (int i=0; i<24; i++) this.fcol[sloc[i]] = def.fcol[i];		
 			break;
@@ -240,18 +239,27 @@ public class CubeState implements Serializable {
 		this.fcol = cs.fcol.clone();
 		this.sloc = cs.sloc.clone();
 	}
-
+	
 	//
-	// factory methods are now in CubeStateFactory
+	// factory methods: they allow to delegate the CubeState object construction to the derived classes:
 	//
-//	abstract public CubeState makeCubeState();
-//
-//	abstract public CubeState makeCubeState(Type type);
-//
-//	@Deprecated
-//	abstract public CubeState makeCubeState(BoardVector boardVector);
-//
-//	abstract public CubeState makeCubeState(CubeState other);
+	
+	public static CubeState makeCubeState() {
+		return new CubeState(CubeState.Type.COLOR_P);
+	}
+	
+	public static CubeState makeCubeState(Type type) {
+		return new CubeState(type);
+	}
+	
+	@Deprecated
+	public static CubeState makeCubeState(BoardVector boardVector) {
+		return new CubeState(boardVector);
+	}
+	
+	public static CubeState makeCubeState(CubeState other) {
+		return new CubeState(other);
+	}
 	
 	/**
 	 * Helper for CubeState(BoardVector): 
@@ -547,8 +555,6 @@ public class CubeState implements Serializable {
 	 * </pre>
 	 * 
 	 * @return an int[] vector representing the 'board' state (= cube state)
-	 *
-	 * NOTE: Currently, the implementation is only valid for 2x2x2 cube
 	 */
 	public BoardVector getBoardVector() {
 		int[] bvec;
@@ -637,8 +643,7 @@ public class CubeState implements Serializable {
 	 * If {@code this.twistSeq=""} (not known), then return always true. 
 	 */
 	public boolean assertTwistSequence() {
-		CubeStateFactory csFactory = new CubeStateFactory();
-		CubeState tst = csFactory.makeCubeState();
+		CubeState tst = CubeState.makeCubeState();
 		Twist T=Twist.ID;
 		int times;
 		String tw = this.twistSeq;
