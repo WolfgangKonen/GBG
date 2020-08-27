@@ -136,6 +136,7 @@ public class XNTupleFuncsNim3P extends XNTupleBase implements XNTupleFuncs, Seri
 	 * 
 	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()} <br>
 	 * 			   1: one n-tuple with length {@link NimConfig#NUMBER_HEAPS}
+	 * 			   2: two n-tuple with length {@link NimConfig#NUMBER_HEAPS}
 	 * @return nTuples[numTuples][], where {@code nTuples[i]} describes the {@code i}'th 
 	 * n-tuple as an int-array, with {@code i=0,...,numTuples-1}
 	 */
@@ -146,6 +147,7 @@ public class XNTupleFuncsNim3P extends XNTupleBase implements XNTupleFuncs, Seri
 		for (int i=0; i<nTuple[0].length; i++) nTuple[0][i] = i;
 								// i.e. one n-tuple {0,1,...,NUMBER_HEAPS-1} (covers all heaps)
 		if (mode==2)
+								// i.e. two n-tuples {0,1,...,NUMBER_HEAPS-1} (cover all heaps)
 			for (int i=0; i<nTuple[0].length; i++) nTuple[1][i] = i;
 		return nTuple;				
 	}
