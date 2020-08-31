@@ -48,8 +48,8 @@ public class TestPocketCube {
 		}
 
 		assert (CubeConfig.cubeType == CubeConfig.CubeType.POCKET) : "CubeConfig.cubeType is not POCKET!";
-		
-		CubeState.generateInverseTs();
+
+		CubeStateFactory.generateInverseTs();
 		CubeState.generateForwardTs();
 		TestPocketCube tpock = new TestPocketCube();
 		

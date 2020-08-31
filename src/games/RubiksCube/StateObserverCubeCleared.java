@@ -1,6 +1,7 @@
 package games.RubiksCube;
 
 import games.StateObservation;
+import tools.Types;
 
 /**
  * A class derived from {@link StateObserverCube}. It ensures that whenever an 
@@ -39,9 +40,9 @@ public class StateObserverCubeCleared extends StateObserverCube implements State
 
 	/**
 	 * Clear {@link CubeState} members lastTwist and lastTimes (which we do not know 
-	 * for the initial state in an episode). Then set the available actions, which causes all
-	 * 9 actions to be added to {@code this.acts}. We need to test all 9 actions when looking 
-	 * for the best next action on {@code this}.
+	 * for the initial state in an episode). Likewise, set member m_action to 9 (not known).
+	 * Then set the available actions, which causes all 9 actions to be added to {@code this.acts}.
+	 * We need to test all 9 actions when looking for the best next action on {@code this}.
 	 * <p>
 	 * (If instead lastTwist were set, 3 actions would be excluded. This we do not want for a 
 	 * start state.)
@@ -49,7 +50,8 @@ public class StateObserverCubeCleared extends StateObserverCube implements State
 	 * @return
 	 */
 	public StateObserverCubeCleared clearLast(int p) {
-		this.getCubeState().minTwists = p; 
+		this.getCubeState().minTwists = p;
+		this.m_action=new Types.ACTIONS(9); // set m_action to 'not known'
 		this.getCubeState().clearLast(); 	// clear lastTwist and lastTimes (which we do not know 
 											// for the initial state in an episode)	
 		this.setAvailableActions();	// then set the available actions which causes all

@@ -1,21 +1,14 @@
 package games.RubiksCube;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -23,22 +16,10 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 
-import controllers.PlayAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
-import controllers.TD.ntuple2.TDNTuple3Agt;
-import games.GameBoard;
-import games.StateObservation;
 import games.Arena;
-import games.Arena.Task;
-import games.RubiksCube.CSArrayList.CSAListType;
-import games.RubiksCube.CSArrayList.TupleInt;
-import games.RubiksCube.CubeState.Twist;
-import games.ArenaTrain;
 import tools.Types;
-import tools.Types.ACTIONS;
 
 /**
  * Class GameBoardCube implements interface GameBoard for RubiksCube.
@@ -57,13 +38,12 @@ public class GameBoardCubeGui extends JFrame {
 	private JPanel BoardPanel;
 	private JPanel ButtonPanel;
 	private JLabel leftInfo=new JLabel("");
-	private JLabel rightInfo=new JLabel(""); 
-	private JLabel pLabel;
+	private JLabel rightInfo=new JLabel("");
 	private JLabel pMaxLabel;
-	private JComboBox pChoice;
-	private JComboBox pMaxChoice;
-	static String[] pChoiceList = {"1","2","3","4","5","6","8","10","RANDOM"};
-	static String[] pMaxChoiceList = {"1","2","3","4","5","6","7","8","9","10","11","12","13"};
+	private JLabel pMaxValue;
+	private JLabel scrTwists_L;
+	private JComboBox scrTwists_T;
+	static String[] scrTwistsList = {"1","2","3","4","5","6","7","8","9","10","11","12","13","RANDOM"};
 	/**
 	 * The representation of the cube in the GUI. The 24 active panels in the 6*8 field
 	 * represent the cubie faces of the flattened cube.
@@ -108,12 +88,12 @@ public class GameBoardCubeGui extends JFrame {
 		Button		= new JButton[3][3];
 		ButtonPanel = InitButton();
 		VTable		= new double[3][3];
-		pLabel 		= new JLabel("Scrambling Twists: ");
-		pMaxLabel 	= new JLabel("pMax: ");
-		pChoice		= new JComboBox(pChoiceList);
-		pMaxChoice 	= new JComboBox(pMaxChoiceList);
-		pChoice.setSelectedItem("4");
-		pMaxChoice.setSelectedItem("6");
+		pMaxLabel 	= new JLabel("[Other pars] pMax: ");
+		pMaxValue 	= new JLabel("");
+		scrTwists_L 		= new JLabel("Scrambling Twists: ");
+		scrTwists_T		= new JComboBox(scrTwistsList);
+		scrTwists_T.setSelectedItem("4");
+		scrTwists_L.setToolTipText("During play: How many initial twists before start. If RANDOM: 1,...,pMax.");
 
 		Font font=new Font("Arial",1,Types.GUI_TITLEFONTSIZE);			
 //		JPanel titlePanel = new JPanel();
@@ -128,10 +108,10 @@ public class GameBoardCubeGui extends JFrame {
 		
 		JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		northPanel.add(pMaxLabel);
-		northPanel.add(pMaxChoice);
+		northPanel.add(pMaxValue);
 		northPanel.add(new JLabel("    "));
-		northPanel.add(pLabel);
-		northPanel.add(pChoice);
+		northPanel.add(scrTwists_L);
+		northPanel.add(scrTwists_T);
 
 		JPanel boardPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		boardPanel.add(BoardPanel);
@@ -276,7 +256,7 @@ public class GameBoardCubeGui extends JFrame {
 	/**
 	 * Update the play board and the associated VBoard.
 	 * 
-	 * @param so	the game state
+	 * @param soN	the game state
 	 * @param withReset  if true, reset the board prior to updating it to state so
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
 	 * 				(only if they are stored in state {@code so}).
@@ -430,11 +410,11 @@ public class GameBoardCubeGui extends JFrame {
 	}
 
 	public String getScramblingTwists() {
-		return (String)pChoice.getSelectedItem();
+		return (String)scrTwists_T.getSelectedItem();
 	}
 	
-	public String getPMax() {
-		return (String)pMaxChoice.getSelectedItem();
+	public void setPMax(int pMax) {
+		pMaxValue.setText(pMax+"");
 	}
 	
 	/**

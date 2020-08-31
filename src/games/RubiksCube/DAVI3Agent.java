@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
@@ -49,8 +50,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 
 	private static StateObserverCube def = new StateObserverCube();   // default (solved) cube
 	
-	private static double LOW_V = -9.0;		// a low V-value for all states not present in HashMap
-	private static double stepReward = -0.01;
+	private static double stepReward = -0.1; //-0.01;
 	
 	private Random rand;
 
@@ -84,14 +84,13 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	 * 
 	 * @param tdPar			temporal difference parameters
 	 * @param ntPar			n-tuples and temporal coherence parameter
+	 * @param oPar
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
-	 * @param numOutputs	the number of outputs of the n-tuple network (=number of all
-	 * 						available actions)
 	 * @param maxGameNum	maximum number of training games
 	 * @throws IOException
 	 */
-	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,  
+	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,
 			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
 		m_tdPar = new ParTD(tdPar);			// m_tdPar is in NTupleBase
 		m_ntPar = new ParNT(ntPar);			// m_ntPar is in NTupleBase
@@ -112,6 +111,41 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		setAgentState(AgentState.INIT);
 	}
 
+	/**
+	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * of transient members), put the relevant code in here.
+	 * 
+	 * @see LoadSaveGBG#transformObjectToPlayAgent
+	 */
+	public boolean instantiateAfterLoading() {
+		this.m_Net.xnf.instantiateAfterLoading();
+		assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
+		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
+		
+		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
+		// (they would stay otherwise at their default values, would not 
+		// get the loaded values)
+		this.setTDParams(this.getParTD(), this.getMaxGameNum());
+		this.setNTParams(this.getParNT());
+		this.weightAnalysis(null);
+		
+		// initialize transient members (in case a further training should take place --> see ValidateAgentTest) 
+		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples
+		
+		return true;
+	}
+
+	/**
+	 * Get the best next action and return it
+	 *
+	 * @param so			current game state (is returned unchanged)
+	 * @param random		irrelevant here
+	 * @param silent		if false, print best action
+	 * @return actBest,		the best action. If several actions have the same
+	 * 						score, break ties by selecting one of them at random.
+	 * actBest has also the members vTable and vBest to store the V-value for each available
+	 * action nd the V-value for the best action actBest, resp.
+	 */
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
 		int i,j;
@@ -128,27 +162,34 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 // try {       
         for(i = 0; i < acts.size(); ++i)
         {
-        	newSO = ((StateObserverCube) so).copy();
-        	newSO.advance(acts.get(i));
-        	
-        	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
-        	value = vTable[i] = stepReward + daviValue(newSO);
-    		assert (!Double.isNaN(value)) : "Oops, daviValue returned NaN! Decrease alpha!";
-        	// Always *maximize* 'value' 
-        	if (value==maxValue) bestActions.add(acts.get(i));
-        	if (value>maxValue) {
-        		maxValue = value;
-        		bestActions.clear();
-        		bestActions.add(acts.get(i));
-        	}
+        	ACTIONS thisAct = acts.get(i);
+        	ACTIONS inverseAct = inverseAction(((StateObserverCube) so).getLastAction());
+        	if (!thisAct.equals(inverseAct)) {
+        		// we skip the action which is the inverse of the last action;
+				// this is to avoid cycles of 2
+
+				newSO = ((StateObserverCube) so).copy();
+				newSO.advance(acts.get(i));
+
+				// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
+				value = vTable[i] = stepReward + daviValue(newSO);
+				assert (!Double.isNaN(value)) : "Oops, daviValue returned NaN! Decrease alpha!";
+				// Always *maximize* 'value'
+				if (value==maxValue) bestActions.add(acts.get(i));
+				if (value>maxValue) {
+					maxValue = value;
+					bestActions.clear();
+					bestActions.add(acts.get(i));
+				}
+			}
         } // for
         
         assert bestActions.size() > 0 : "Oops, no element in bestActions! ";
-        // There might be one or more than one action with minValue. 
+        // There might be one or more than one action with maxValue.
         // Break ties by selecting one of them randomly:
         actBest = bestActions.get(rand.nextInt(bestActions.size()));
 
-        // optional: print the best action
+        // optional: print the best action's after state newSO and its V(newSO) = stepReward + daviValue(newSO)
         if (!silent) {
         	newSO = ((StateObserverCube) so).copy();
         	newSO.advance(actBest);
@@ -162,12 +203,16 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
         return new ACTIONS_VT(actBest.toInt(), false, vTable);
 	}
 
+	private ACTIONS inverseAction(ACTIONS act) {
+		int[] inverseActs = {2,1,0, 5,4,3, 8,7,6, 9};	// '9' codes 'not known' --> we return 'not known'
+		int iAction = act.toInt();
+		return new ACTIONS(inverseActs[iAction]);
+	}
+
 	/**
-	 * This is the simple version: maintain a full hash table for all visited states. This is only viable for cubes 
-	 * with not too large state spaces.
+	 * This is the NN version: Ask the neural net (here: an ntuple network) to predict the value of {@code so}
 	 * @param so
-	 * @return 0, if {@code so} is the solved state, LOW_V if {@code so} is unknown in the HashMap. In all
-	 * 		   other cases, return the HashMap value of {@code so}.
+	 * @return 0, if {@code so} is the solved state. In all other cases, return the prediction of {@link #m_Net}.
 	 */
 	public double daviValue(StateObserverCube so) {
 		double score;
@@ -200,7 +245,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t, true, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t, false, true);	// choose action a_t (agent-specific behavior)
 
 	        // update the network's response to current state s_t: Let it move towards the desired target:
 			target = a_t.getVBest();        		
@@ -214,7 +259,12 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 			s_t.advance(a_t);		// advance the state 
 
 			if (s_t.isGameOver()) m_finished = true;
-			if (s_t.getMoveCounter()>=epiLength) m_finished=true;
+			if (s_t.getMoveCounter()>=epiLength) {
+				m_finished=true;
+//				vLast = m_Net.getScoreI(curSOWB,curPlayer);
+//				target=((StateObserverCube) s_t).getMinGameScore();
+//				m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,stepReward,s_t);
+			}
 
 		} while(!m_finished);			
 		//System.out.println("Final state: "+s_t.stringDescr()+", "+a_t.getVBest());

@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import javax.swing.JPanel;
 
-import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.Arena;
 
 /**
  *  Other parameters for all agents 
@@ -25,6 +25,7 @@ public class ParOther implements Serializable {
     public static int DEFAULT_STOP_TEST = 0;
     public static int DEFAULT_STOP_EVAL = 100;
     public static int DEFAULT_WRAPPER_NPLY = 0;
+    public static int DEFAULT_PMAX_RUBIKS = 6;
 
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
     private int trainEvalMode = DEFAULT_TRAIN_EVAL_MODE;
@@ -33,12 +34,14 @@ public class ParOther implements Serializable {
 	private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval
     private int wrapperNply = DEFAULT_WRAPPER_NPLY; 
-    private boolean chooseStart01 = false;
+    private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
+	private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
     private boolean rewardIsGameScore = true;
     
     /**
-     * This member is only constructed when the constructor {@link #ParOther(boolean) ParOther(boolean withUI)} 
+     * This member is only constructed when the constructor 
+     * {@link #ParOther(boolean,Arena) ParOther(boolean withUI,Arena)}
      * called with {@code withUI=true}. It holds the GUI for {@link ParOther}.
      */
     private transient OtherParams otparams = null;
@@ -52,9 +55,9 @@ public class ParOther implements Serializable {
 	
 	public ParOther() {	}
     
-	public ParOther(boolean withUI) {
+	public ParOther(boolean withUI, Arena m_arena) {
 		if (withUI)
-			otparams = new OtherParams();
+			otparams = new OtherParams(m_arena);
 	}
 	
 	public ParOther(ParOther op) {
@@ -73,6 +76,7 @@ public class ParOther implements Serializable {
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
+		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
@@ -89,6 +93,7 @@ public class ParOther implements Serializable {
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
+		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
@@ -145,6 +150,10 @@ public class ParOther implements Serializable {
 
 	public int getWrapperNPly() {
 		return wrapperNply;
+	}
+
+    public int getpMaxRubiks() {
+		return pMaxRubiks;
 	}
 
 	public boolean getChooseStart01() {
@@ -216,6 +225,12 @@ public class ParOther implements Serializable {
 			otparams.setWrapperNPly(nply);
 	}
 	
+	public void setpMaxRubiks(int pMaxRubiks) {
+		this.pMaxRubiks = pMaxRubiks;
+		if (otparams!=null)
+			otparams.setpMaxRubiks(pMaxRubiks);
+	}
+
 	public void setChooseStart01(boolean bChooseStart01) {
 		this.chooseStart01=bChooseStart01;
 		if (otparams!=null)
@@ -251,6 +266,7 @@ public class ParOther implements Serializable {
 			enableChoosePart(false);
 			this.setEpisodeLength(10);
 			this.setStopEval(12);
+			this.setpMaxRubiks(6);
 			this.setTrainEvalMode(-1);	
 			this.setNumEval(1000);	
 			break;

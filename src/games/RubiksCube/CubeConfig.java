@@ -1,6 +1,7 @@
 package games.RubiksCube;
 
 import java.util.Random;
+import params.ParOther;
 
 public class CubeConfig {
 	
@@ -13,8 +14,11 @@ public class CubeConfig {
 	 * @see ArenaTrainCube#setCubeType(String)
 	 * 
 	 */
-	public static enum CubeType {POCKET,RUBIKS};
-	
+	public static enum CubeType {POCKET,RUBIKS}
+
+	/**
+	 * @see ArenaTrainCube#setCubeType(String) 
+	 */
 	public static CubeType cubeType = CubeType.POCKET;
 	
 	/**
@@ -26,11 +30,13 @@ public class CubeConfig {
 	 * </ul>
 	 * @see ArenaTrainCube#setBoardVecType(String)
 	 */
-	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION, STICKER};
+	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION, STICKER}
 	
 	/**
 	 * {@link BoardVecType} {@code boardVecType} holds the board vector type for all {@link CubeState} objects and 
 	 * is used in {@link CubeState#getBoardVector()} and in {@link XNTupleFuncsCube}.
+	 * 
+	 * @see ArenaTrainCube#setBoardVecType(String) 
 	 */
 	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;		// CUBESTATE, CUBEPLUSACTION, STICKER
 
@@ -42,19 +48,19 @@ public class CubeConfig {
 	 * </ul>
 	 * @see ArenaTrainCube#setTwistType(String)
 	 */
-	public enum TwistType {ALLTWISTS, QUARTERTWISTS};
+	public enum TwistType {ALLTWISTS, QUARTERTWISTS}
 	public static TwistType twistType = TwistType.ALLTWISTS;
 	
 	/**
 	 * <b>{@code pMax}</b> serves several purposes:
 	 * <ul>
-	 * <li> Maximum number of scrambling twists in {@link GameBoardCube#chooseStartState()} and 
+	 * <li> Maximum number of scrambling twists in {@link GameBoardCube#chooseStartState()} (when playing) and 
 	 * 		{@link GameBoardCube#chooseStartState(controllers.PlayAgent)} (when training an agent).
 	 * <li> Maximum number of scrambling twists in {@link EvaluatorCube}
 	 * <li> (Deprecated) Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} are filled.
 	 * </ul>
 	 * In case that {@link GameBoardCubeGui} is present, the value of  <b>{@code pMax}</b> will be updated from 
-	 * {@code ChoiceBox pMaxChoice} each time a train or evaluation process is started. This allows to switch  
+	 * {@link ParOther} {@code opar.pMax} each time a train or evaluation process is started. This allows to switch  
 	 * <b>{@code pMax}</b> at runtime.
 	 */
 	public static int pMax = 10;			// 3,4,5,6,7,8,9,10,11

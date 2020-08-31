@@ -198,7 +198,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		this.setNTParams(this.getParNT());
 		this.weightAnalysis(null);
 		
-		// initialize transient members (in case a further training should take place --> see ValidateAgent) 
+		// initialize transient members (in case a further training should take place --> see ValidateAgentTest) 
 		this.sLast = new StateObservation[numPlayers];
 		this.randLast = new boolean[numPlayers];
 		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples

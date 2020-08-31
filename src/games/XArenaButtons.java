@@ -1,17 +1,7 @@
 package games;
 
 import java.awt.*;
-import java.awt.event.*;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import TournamentSystem.TSAgent;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
-import controllers.TD.ntuple2.TDNTuple3Agt;
-import gui.HtmlDisplay;
-import gui.SolidBorder;
 import gui.XArenaButtonsGui;
 import params.*;
 import tools.Types;
@@ -32,7 +22,6 @@ public class XArenaButtons //extends JPanel
 	int gameNumber = 10000;
 	int competeNumber = 3;
 
-	private static final long serialVersionUID = 1L;
 	XArenaFuncs 		m_xfun;
 	public Arena	 	m_arena;	// a reference to the Arena object passed in with the constructor
 	public OptionsComp 	winCompOptions = null; 
@@ -43,7 +32,7 @@ public class XArenaButtons //extends JPanel
 
 	// with changedViaLoad[n]=true we inhibit that a change in item state of
 	// m_arena.m_xab.choiceAgent[n] due to agent loading will trigger from the associated
-	// ItemStateListener an agent-parameter-default-setting (we want the parameters
+	// ItemListenerHandler an agent-parameter-default-setting (we want the parameters
 	// from the agent just loaded to survive in m_arena.m_xab)
 	public boolean[] changedViaLoad = null;
 
@@ -97,7 +86,7 @@ public class XArenaButtons //extends JPanel
 			
 			tdPar[n] = new ParTD(m_arena.hasGUI());
 			ntPar[n] = new ParNT(m_arena.hasGUI());
-			oPar[n] = new ParOther(m_arena.hasGUI());
+			oPar[n] = new ParOther(m_arena.hasGUI(),m_arena);
 			maxnPar[n] = new ParMaxN(m_arena.hasGUI());
 			mctsPar[n] = new ParMCTS(m_arena.hasGUI());
 			mcPar[n] = new ParMC(m_arena.hasGUI());

@@ -108,7 +108,7 @@ public class EvaluatorCube extends Evaluator {
 	 * <li> {@link Evaluator#m_mode m_mode}{@code =0}:  percent solved within &le; p twists
 	 * <li> {@link Evaluator#m_mode m_mode}{@code =1}:  percent solved within {@code epiLength} twists
 	 * </ul> 
-	 * @param pa the agent to evaluate
+	 * @param pa the agent to evaluate. Use {@link PlayAgent#getParOther()#getStopEval()} to infer {@code epiLength}
  	 * @return the weighted average success on different sets of scrambled cubes
 	 */
  	private double evaluateAgent0(PlayAgent pa) {

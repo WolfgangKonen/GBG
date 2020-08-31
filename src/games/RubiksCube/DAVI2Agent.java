@@ -8,6 +8,7 @@ import java.util.Random;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
+import games.Arena;
 import games.StateObservation;
 import params.ParOther;
 import tools.ScoreTuple;
@@ -49,6 +50,19 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		setAgentState(AgentState.INIT);
         rand = new Random(System.currentTimeMillis());
 		vm = new HashMap<String, Double>();
+	}
+	
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 * 
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 * 
+	 * @see Arena#loadAgent
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
 	}
 	
 	@Override
