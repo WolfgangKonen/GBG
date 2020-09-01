@@ -117,6 +117,9 @@ public class EvaluatorCube extends Evaluator {
 		TStats tstats;
 		TAggreg tagg;
 		StateObservation so;
+		double[] constWght = new double[CubeConfig.pMax];  	// weights for each p-level, see weightedAvgResTAggregList
+		for (int p=1; p<=CubeConfig.pMax; p++) { constWght[p]=1.0; }
+
  		countStates=0;
 		for (int p=1; p<=CubeConfig.pMax; p++) {
 //			epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
@@ -141,7 +144,7 @@ public class EvaluatorCube extends Evaluator {
  			taggList.add(tagg);
  		} // for (p)
 		//lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
-		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.constWght, m_mode);
+		lastResult = TStats.weightedAvgResTAggregList(taggList, constWght, m_mode);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>=0) {
 			TStats.printTAggregList(taggList);
@@ -163,6 +166,9 @@ public class EvaluatorCube extends Evaluator {
 		ArrayList taggList = new ArrayList<TAggreg>();
 		TStats tstats;
 		TAggreg tagg;
+		double[] constWght = new double[CubeConfig.pMax];	// weights for each p-level, see weightedAvgResTAggregList
+		for (int p=1; p<=CubeConfig.pMax; p++) { constWght[p]=1.0; }
+
  		countStates=0;
 		for (int p=1; p<=CubeConfig.pMax; p++) {
 			//epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
@@ -199,7 +205,7 @@ public class EvaluatorCube extends Evaluator {
  			taggList.add(tagg);
  		} // for (p)
 		//lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
-		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.constWght, m_mode);
+		lastResult = TStats.weightedAvgResTAggregList(taggList, constWght, m_mode);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>=0) {
 			TStats.printTAggregList(taggList);

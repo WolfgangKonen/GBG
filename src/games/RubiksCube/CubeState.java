@@ -122,7 +122,11 @@ abstract public class CubeState implements Serializable {
 	private static int[] tforF = null,
 						 tforL = null,
 						 tforU = null;
-	
+
+	public CubeState() {
+		// empty, just a stub for  derived classes
+	}
+
 	/**
 	 * Construct a new cube of Type {@code type} in default (solved) state
 	 * @param type	the cube type
@@ -157,14 +161,6 @@ abstract public class CubeState implements Serializable {
 		// sloc[i], the location of each face i, is in any case the default sequence 0,...,n where n=fcol.length
 		this.sloc = new int[this.fcol.length];
 		for (int i=0; i<sloc.length; i++) this.sloc[i] = i;
-	}
-	
-	/**
-	 * Construct a new cube of <b>color representation</b> type from a board vector {@code bvec}
-	 * @param boardVector	the board vector, see {@link #getBoardVector()} for the different types
-	 */
-	public CubeState(BoardVector boardVector) {
-		// empty, is implemented by derived classes
 	}
 	
 	/**

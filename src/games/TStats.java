@@ -129,7 +129,7 @@ public class TStats {
 	 * @param mode =0: percent solved within minimal twists, =1: percent solved below epiLength
 	 * @return the weighted average of 'solved' percentages in {@code taList}
 	 */
-	public static double weightedAvgResTAggregList(ArrayList<TAggreg> taList, int[] w, int mode) {
+	public static double weightedAvgResTAggregList(ArrayList<TAggreg> taList, double[] w, int mode) {
 		assert (w.length >= taList.size());
 		Iterator it = taList.iterator();
 		double res=0;

@@ -49,9 +49,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	private static final long serialVersionUID = 12L;
 
 	private static StateObserverCube def = new StateObserverCube();   // default (solved) cube
-	
-	private static double stepReward = -0.1; //-0.01;
-	
+
 	private Random rand;
 
 	private NTupleAgt.EligType m_elig;
@@ -172,7 +170,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 				newSO.advance(acts.get(i));
 
 				// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
-				value = vTable[i] = stepReward + daviValue(newSO);
+				value = vTable[i] = CubeConfig.stepReward + daviValue(newSO);
 				assert (!Double.isNaN(value)) : "Oops, daviValue returned NaN! Decrease alpha!";
 				// Always *maximize* 'value'
 				if (value==maxValue) bestActions.add(acts.get(i));
@@ -252,7 +250,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
     		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_t, m_Net.xnf);
 			curPlayer = s_t.getPlayer();
         	vLast = m_Net.getScoreI(curSOWB,curPlayer);
-			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,stepReward,s_t);
+			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,CubeConfig.stepReward,s_t);
 			
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
@@ -263,7 +261,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 				m_finished=true;
 //				vLast = m_Net.getScoreI(curSOWB,curPlayer);
 //				target=((StateObserverCube) s_t).getMinGameScore();
-//				m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,stepReward,s_t);
+//				m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,CubeConfig.stepReward,s_t);
 			}
 
 		} while(!m_finished);			

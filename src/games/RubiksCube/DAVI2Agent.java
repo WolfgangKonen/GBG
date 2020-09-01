@@ -34,8 +34,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	private static StateObserverCube def = new StateObserverCube();   // default (solved) cube
 	
 	private static double LOW_V = -9.0;		// a low V-value for all states not present in HashMap
-	private static double stepReward = -0.01;
-	
+
 	/**
 	 * HashMap for the V-values V(s)
 	 */
@@ -85,7 +84,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         	newSO.advance(acts.get(i));
         	
         	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
-        	value = vTable[i] = stepReward + daviValue(newSO);
+        	value = vTable[i] = CubeConfig.stepReward + daviValue(newSO);
         	// Always *maximize* 'value' 
         	if (value==maxValue) bestActions.add(acts.get(i));
         	if (value>maxValue) {
@@ -152,7 +151,9 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	        
 			a_t = getNextAction2(s_t, true, true);	// choose action a_t (agent-specific behavior)
 	        // put the best V-table value for state s_t into the HashMap
-	        vm.put(s_t.stringDescr(), a_t.getVBest());
+			if (a_t.getVBest()>CubeConfig.stepReward+LOW_V)
+				// if V(s) <= c+L, there is no need to store it --> results in a factor 6 smaller hash map.
+	        	vm.put(s_t.stringDescr(), a_t.getVBest());
 	        
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
@@ -165,7 +166,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		//System.out.println("Final state: "+s_t.stringDescr()+", "+a_t.getVBest());
 				
 		incrementGameNum();
-		if (this.getGameNum() % 500 == 0) System.out.println("gameNum: "+this.getGameNum());
+		if (this.getGameNum() % 2000 == 0) System.out.println("gameNum: "+this.getGameNum());
 		
 		return false;		
 	} 

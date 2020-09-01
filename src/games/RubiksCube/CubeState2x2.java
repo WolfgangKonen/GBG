@@ -25,7 +25,7 @@ public class CubeState2x2 extends CubeState {
      * @param boardVector	the board vector, see {@link #getBoardVector()} for the different types
      */
     public CubeState2x2(BoardVector boardVector) {
-        super(boardVector);
+        super();    // would be called silently otherwise
         assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
         CubeStateFactory csFactory = new CubeStateFactory();
         int[] bvec = boardVector.bvec;

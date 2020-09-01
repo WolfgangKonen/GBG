@@ -25,8 +25,8 @@ public class CubeState3x3 extends CubeState {
      * @param boardVector	the board vector, see {@link #getBoardVector()} for the different types
      */
     public CubeState3x3(BoardVector boardVector) {
-        super(boardVector);
-        CubeStateFactory csFactory = new CubeStateFactory();
+        super();    // would be called silently otherwise
+        //CubeStateFactory csFactory = new CubeStateFactory();  // may be needed later
         int[] bvec = boardVector.bvec;
         switch(bvec.length) {
             case 48:	// boardvecType == CUBESTATE, 3x3x3

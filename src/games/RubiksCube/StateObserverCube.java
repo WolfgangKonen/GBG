@@ -137,8 +137,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * The game score of state {@code this}, seen from the perspective of {@code refer}'s player. 
 	 * For Rubik's Cube only the game-over state (solved cube) has a non-zero game score
 	 * <pre>
-	 *       REWARD_POSITIVE - m_counter*0.01   </pre> 
-	 * The 2nd term ensure that if there are two paths to the solved cube, the one with the lower number of twists 
+	 *       REWARD_POSITIVE - m_counter * CubeConfig.stepReward   </pre>
+	 * The 2nd term ensures that if there are two paths to the solved cube, the one with the lower number of twists
 	 * {@code m_counter} has the higher reward. This is important for tree-based agents, which may completely fail if 
 	 * they always select the ones with the longer path and never come to an end!
 	 * <p>
@@ -149,7 +149,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * @see #REWARD_POSITIVE		
 	 */
 	public double getGameScore(StateObservation refer) {
-		if(isGameOver()) return REWARD_POSITIVE - this.m_counter*0.01;
+		if(isGameOver()) return REWARD_POSITIVE + this.m_counter * CubeConfig.stepReward;
 		return REWARD_NEGATIVE;
 //		if(isGameOver()) return prevReward+0;
 //		return prevReward+REWARD_NEGATIVE; 
