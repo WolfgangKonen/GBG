@@ -14,7 +14,6 @@ import tools.Types;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -32,14 +31,14 @@ public class LoadSaveGBG {
 	private final FileFilter tdTSRExt = new ExtensionFilter("tsr.zip", "Tournament-Result");
 	private final FileFilter txtExt = new ExtensionFilter(".txt.zip", "Compressed Text-Files (.txt.zip)");
 	private final Arena arenaGame;
-	private final XArenaButtons arenaButtons;
 	private final JFrame arenaFrame;
-	private String tdstr="";
 	private final String TAG = "[LoadSaveGBG] ";
+//	private final XArenaButtons arenaButtons;
+//	private String tdstr="";
 
 	public LoadSaveGBG(Arena areGame, XArenaButtons areButtons, JFrame areFrame) {
 		this.arenaGame = areGame;
-		this.arenaButtons = areButtons;
+//		this.arenaButtons = areButtons;
 		this.arenaFrame = areFrame;
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
@@ -106,8 +105,8 @@ public class LoadSaveGBG {
 	/**
 	 * Save agent to disk without file chooser dialog
 	 * 
-	 * @param pa
-	 * @param filePath
+	 * @param pa	the agent
+	 * @param filePath the location on disk
 	 * @throws IOException
 	 */
 	public void saveGBGAgent(PlayAgent pa, String filePath) throws IOException {
@@ -148,12 +147,12 @@ public class LoadSaveGBG {
 		final agentIO.IOProgress p = new agentIO.IOProgress(bytes);
 		final ProgressTrackingOutputStream ptos = new ProgressTrackingOutputStream(gz, p);
 
-		ObjectOutputStream oos=null;
+		ObjectOutputStream oos;
 		try {
 			oos = new ObjectOutputStream(ptos);
 		} catch (IOException e) {
 			arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
-			oos.close();
+//			oos.close();
 			return;
 		}
 
@@ -289,7 +288,7 @@ public class LoadSaveGBG {
 				return;
 			}
 
-			GZIPOutputStream gz=null;
+			GZIPOutputStream gz;
 			try {
 				gz = new GZIPOutputStream(fos) {
 					{
@@ -298,8 +297,8 @@ public class LoadSaveGBG {
 				};
 
 			} catch (IOException e1) {
-				gz.close();
 				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for" + filePath + " !]");
+//				gz.close();
 				throw e1;
 			}
 
@@ -314,12 +313,12 @@ public class LoadSaveGBG {
 			final agentIO.IOProgress p = new agentIO.IOProgress(bytes);
 			final ProgressTrackingOutputStream ptos = new ProgressTrackingOutputStream(gz, p);
 
-			ObjectOutputStream oos=null;
+			ObjectOutputStream oos;
 			try {
 				oos = new ObjectOutputStream(ptos);
 			} catch (IOException e) {
 				arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
-				oos.close();
+//				oos.close();
 				return;
 			}
 
@@ -409,9 +408,8 @@ public class LoadSaveGBG {
 	 * 						qualified file with suffix .agt.zip.
 	 * @return				the agent loaded
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public PlayAgent loadGBGAgent(String filePath) throws IOException, ClassNotFoundException {
+	public PlayAgent loadGBGAgent(String filePath) throws IOException {
 		ObjectInputStream ois = null;
 		FileInputStream fis = null;
 		File file = null;
@@ -467,7 +465,7 @@ public class LoadSaveGBG {
 				throw e1;
 			}
 
-			long fileLength = (long) (estimateGZIPLength(file));
+			long fileLength = estimateGZIPLength(file);
 			final ProgressTrackingObjectInputStream ptis = new ProgressTrackingObjectInputStream(
 					gs, new agentIO.IOProgress(fileLength));
 			try {
@@ -480,7 +478,7 @@ public class LoadSaveGBG {
 
 //			final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
-			pa = transformObjectToPlayAgent(ois, fis, filePath, null);
+			pa = transformObjectToPlayAgent(ois, fis, filePath);
 			
 //			disposeProgressDialog(dlg);
 
@@ -553,7 +551,7 @@ public class LoadSaveGBG {
 				throw e1;
 			}
 
-			long fileLength = (long) (estimateGZIPLength(file));
+			long fileLength = estimateGZIPLength(file);
 			final ProgressTrackingObjectInputStream ptis = new ProgressTrackingObjectInputStream(
 					gs, new agentIO.IOProgress(fileLength));
 			try {
@@ -595,13 +593,13 @@ public class LoadSaveGBG {
 				e.printStackTrace();
 				//throw e;
 			} finally {
-				if (ois != null)
+//				if (ois != null)		// is always true
 					try {
 						ois.close();
 					} catch (IOException e) {
 						//...
 					}
-				if (fis != null)
+//				if (fis != null)		// is always true
 					try {
 						fis.close();
 					} catch (IOException e) {
@@ -619,9 +617,8 @@ public class LoadSaveGBG {
 	 * 
 	 * @return object to transfer the loaded agents and their filenames
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public TSDiskAgentDataTransfer loadMultipleGBGAgent() throws IOException, ClassNotFoundException {
+	public TSDiskAgentDataTransfer loadMultipleGBGAgent() throws IOException {
 		TSDiskAgentDataTransfer output = null;
 		String filePath = null;
 		ObjectInputStream ois;
@@ -656,7 +653,7 @@ public class LoadSaveGBG {
 			for(int i = 0; i<files.length; i++)
 			{
 				System.out.println("Selected file: " + files[i].getAbsolutePath());
-				PlayAgent pa = null;
+				PlayAgent pa;
 				File file = files[i];
 
 				try {
@@ -675,7 +672,7 @@ public class LoadSaveGBG {
 					throw e1;
 				}
 
-				long fileLength = (long) (estimateGZIPLength(file));
+				long fileLength = estimateGZIPLength(file);
 				final ProgressTrackingObjectInputStream ptis = new ProgressTrackingObjectInputStream(
 						gs, new agentIO.IOProgress(fileLength));
 				try {
@@ -688,7 +685,7 @@ public class LoadSaveGBG {
 
 				//final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
-				pa = transformObjectToPlayAgent(ois, fis, filePath, null);
+				pa = transformObjectToPlayAgent(ois, fis, filePath);
 				
 				//output[i][0] = pa;
 				Path p = Paths.get(filePath);
@@ -706,11 +703,19 @@ public class LoadSaveGBG {
 		return output;
 	}
 
-	private PlayAgent transformObjectToPlayAgent(ObjectInputStream ois, FileInputStream fis, String filePath, 
-										 JDialog dlg) throws IOException, ClassNotFoundException {
-		PlayAgent pa=null; 
+	/**
+	 *
+	 * @param ois	from where to read
+	 * @param fis	just needed to close everything in case of exception
+	 * @param filePath	for diagnostic messages
+	 * @return	the agent read and instantiated
+	 *
+	 * This method is public only to make its Javadoc accessible from other classes
+	 */
+	public PlayAgent transformObjectToPlayAgent(ObjectInputStream ois, FileInputStream fis, String filePath/*,JDialog dlg*/)
+	{
+		PlayAgent pa;
 		try {
-			// ois = new ObjectInputStream(gs);
 			Object obj = ois.readObject();
 			if (obj instanceof PlayAgent) {
 				pa = (PlayAgent) obj;
@@ -780,7 +785,7 @@ public class LoadSaveGBG {
 		}
 		ZipArchiveInputStream zis = new ZipArchiveInputStream(is);
 		if (zis.canReadEntryData(zipArchiveEntry)) {
-			long fileLength = (long) zipArchiveEntry.getSize();
+			long fileLength = zipArchiveEntry.getSize();
 			ProgressTrackingInputStream ptis = null;
 			try {
 				ptis = new ProgressTrackingInputStream(is,

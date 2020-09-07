@@ -20,6 +20,7 @@ agents/temp/*
 
 # all JAR files (GBGBatch.jar,...) now moved to jartools/:
 jartools/*
+GBGLaunch_BACKUP.jar
 
 
 

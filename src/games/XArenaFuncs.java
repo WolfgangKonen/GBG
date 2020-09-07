@@ -25,6 +25,7 @@ import games.Othello.Edax.Edax2;
 import games.RubiksCube.DAVI2Agent;
 import games.RubiksCube.DAVI3Agent;
 import games.RubiksCube.DAVIAgent;
+import games.RubiksCube.GameBoardCube;
 import games.Sim.StateObserverSim;
 import games.TStats.TAggreg;
 import gui.DeviationWeightsChart;
@@ -102,6 +103,29 @@ public class XArenaFuncs {
 		if (wChart != null)	wChart.destroy();
 	}
 
+	// Helper for constructAgent and fetchAgent
+	private void updateParams(int n, XArenaButtons m_xab) {
+
+		// If there is a GUI: be sure to get the latest changes from the GUI's param tabs (!)
+		m_xab.tdPar[n].pushFromTDParams();
+		m_xab.ntPar[n].pushFromNTParams();
+		m_xab.oPar[n].pushFromOTParams();
+		m_xab.maxnPar[n].pushFromMaxNParams();
+		m_xab.mcPar[n].pushFromMCParams();
+		m_xab.mctsPar[n].pushFromMCTSParams();
+		m_xab.mctsePar[n].pushFromMCTSEParams();
+		m_xab.edPar[n].pushFromEdaxParams();
+
+		// update element pMaxValue in GameBoardCubeGUI, if present:
+		if (m_xab.m_arena.getGameBoard() instanceof GameBoardCube) {
+			((GameBoardCube)m_xab.m_arena.getGameBoard()).setPMax(
+					((GameBoardCube)m_xab.m_arena.getGameBoard()).getPMax()			// this sets also CubeConfig.pMax
+			);
+		}
+
+	}
+
+
 	/**
 	 * Construct and return a new {@link PlayAgent}, based on the settings in
 	 * {@code sAgent} and {@code m_xab}.
@@ -127,15 +151,8 @@ public class XArenaFuncs {
 		int maxGameNum = m_xab.getGameNumber();
 		int featmode = m_xab.tdPar[n].getFeatmode();
 
-		// If there is a GUI: be sure to get the latest changes from the GUI's param tabs (!)
-		m_xab.tdPar[n].pushFromTDParams();
-		m_xab.ntPar[n].pushFromNTParams();
-		m_xab.oPar[n].pushFromOTParams();
-		m_xab.maxnPar[n].pushFromMaxNParams();
-		m_xab.mcPar[n].pushFromMCParams();
-		m_xab.mctsPar[n].pushFromMCTSParams();
-		m_xab.mctsePar[n].pushFromMCTSEParams();
-		m_xab.edPar[n].pushFromEdaxParams();
+		// push the params from Param Tabs onto the relevant ParXX in m_xab:
+		updateParams(n,m_xab);
 
 		try {
 			if (sAgent.equals("TDS")) {
@@ -262,16 +279,8 @@ public class XArenaFuncs {
 	public PlayAgent fetchAgent(int n, String sAgent, XArenaButtons m_xab) {
 		PlayAgent pa = null;
 		int maxGameNum = m_xab.getGameNumber();
-		
-		// If there is a GUI: be sure to get the latest changes from the GUI's param tabs (!)
-		m_xab.tdPar[n].pushFromTDParams();
-		m_xab.ntPar[n].pushFromNTParams();
-		m_xab.oPar[n].pushFromOTParams();
-		m_xab.maxnPar[n].pushFromMaxNParams();
-		m_xab.mcPar[n].pushFromMCParams();
-		m_xab.mctsPar[n].pushFromMCTSParams();
-		m_xab.mctsePar[n].pushFromMCTSEParams();
-		m_xab.edPar[n].pushFromEdaxParams();
+
+		updateParams(n,m_xab);
 
 		if (sAgent.equals("Max-N")) {
 			pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);

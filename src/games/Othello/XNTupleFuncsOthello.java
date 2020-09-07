@@ -3,24 +3,17 @@ package games.Othello;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 
-import org.apache.commons.math3.exception.OutOfRangeException;
+import games.*;
 
 import controllers.TD.ntuple2.NTupleFactory;
-import games.Arena;
-import games.BoardVector;
-import games.StateObservation;
-import games.XNTupleBase;
-import games.XNTupleFuncs;
 import tools.Types.ACTIONS;
 
 
 public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Serializable {
 
-	private static int[] fixedModes = {0, 1, 2, 3, 4, 5, 6};
+	private final static int[] fixedModes = {0, 1, 2, 3, 4, 5, 6};
 
 //	private int numPositionValues = 3;  // either P=3, with 0="X" (BLACK), 1="O" (WHITE), 2=empty
 	private int numPositionValues = 4;  // or     P=4, with 0="X" (BLACK), 1="O" (WHITE), 2=non-reachable-empty, 3=reachable-empty
@@ -34,9 +27,9 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
      */
     private static final long serialVersionUID = 42L;
     
-	private int[] actionVector = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8 , 9, 10, 11, 12, 13, 14, 15 , 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 , 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 , 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};	
+	private final int[] actionVector = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8 , 9, 10, 11, 12, 13, 14, 15 , 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 , 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 , 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 	private transient BoardVector[] bv_symmetryActions; //Gives a 2D representation of all SymmetryVectors
-	private int[][] actionPositions; //Given an action key, it gives all symmetric actions
+	private final int[][] actionPositions; //Given an action key, it gives all symmetric actions
 
 	public XNTupleFuncsOthello() {
 		bv_symmetryActions = symmetryVectors(new BoardVector(actionVector),0);
@@ -172,7 +165,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	}
 
 	/**
-	 * Helper function for  {@link #symmetryVectors(int[])}: 
+	 * Helper function for  {@link #symmetryVectors(BoardVector, int)} :
 	 * Rotates the given boardVector 90 degrees clockwise
 	 * 
 	 * <pre>
@@ -257,7 +250,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 //	}
 	
 	/**
-	 * Helper function for  {@link #symmetryVectors(int[])}: 
+	 * Helper function for  {@link #symmetryVectors(BoardVector, int)} :
 	 * Mirrors the board along its horizontal central axis
 	 * 
 	 * <pre>
@@ -316,7 +309,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	 * @return <b>equivAction</b> array of the equivalent actions' keys. 
 	 * <p>
 	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(BoardVector, int)}[i]
 	 */
 	@Override
 	public int[] symmetryActions(int actionKey) 
@@ -483,7 +476,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 	}
 
 	@Override
-	public HashSet adjacencySet(int iCell) 
+	public HashSet<Integer> adjacencySet(int iCell)
 	{
 		HashSet<Integer> neighbours = new HashSet<Integer>();
 		int cellX = iCell / ConfigOthello.BOARD_SIZE;
@@ -537,7 +530,7 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 			for(int j = 0; j < BS; j++,n++) {
 				System.out.print(" "+dform.format(bv[n]));
 			}	
-			System.out.println("");
+			System.out.println();
 		}	
 	}
 

@@ -11,22 +11,15 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Locale;
-import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.rank.Min;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
-import controllers.AgentBase;
-import controllers.PlayAgent;
-import controllers.TD.ntuple2.NTupleAgt.EligType;
 import games.BoardVector;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import params.ParNT;
-//import params.NTParams;
-//import params.TDParams;
 import tools.Types;
 
 /**
@@ -70,33 +63,33 @@ public class NTuple2ValueFunc implements Serializable {
 //	private boolean useSymmetry = false;	// use now getUSESYMMETRY() - don't store/maintain value twice
 
 	// number of outputs (TD-learning: only 1 output, Q-Learning + Sarsa: multiple outputs)
-	private int numOutputs = 1; 
+	private final int numOutputs;
 	
 	// number of players
-	private int numPlayers; 
+	private final int numPlayers;
 	
 	// number of n-tuples
-	private int numTuples = 0;
+	private final int numTuples;
 
-	private static double[][] dbgScoreArr = new double[100][2];
+	private final static double[][] dbgScoreArr = new double[100][2];
 	
 	NTupleAgt tdAgt;		// the 'parent' - used to access the parameters in m_tdPar, m_ntPar
 	
 	// The generated n-tuples [numOutputs][numPlayers][numTuples]
 	private NTuple2 nTuples[][][];
 	
-	public XNTupleFuncs xnf=null; 
+	public XNTupleFuncs xnf;
 	
 	// elements needed for TD(lambda)-update with finite horizon, 
 	// see update(int[],int,double,double):
 	private int horizon=0;
-	private transient LinkedList[] eList;		
+	private transient LinkedList<EligStates>[] eList;
 
-	private boolean PRINTNTUPLES = false;	// /WK/ control the file printout of n-tuples
-	private DecimalFormat frmS = new DecimalFormat("+0.00000;-0.00000");
+	private final boolean PRINTNTUPLES = false;	// /WK/ control the file printout of n-tuples (when loading agents)
+	private final DecimalFormat frmS = new DecimalFormat("+0.00000;-0.00000");
 	
-	private static double[] dbg3PArr = new double[3];
-	private static double[] dbg3PTer = new double[3];
+	private final static double[] dbg3PArr = new double[3];
+	private final static double[] dbg3PTer = new double[3];
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -137,7 +130,7 @@ public class NTuple2ValueFunc implements Serializable {
 		this.numPlayers = xnf.getNumPlayers();
 		this.numOutputs = numOutputs;
 		this.eList = new LinkedList[this.numPlayers];
-		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList();
+		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList<EligStates>();
 		this.tdAgt = parent;
 		
 		if (nTuplesI!=null) {
@@ -172,7 +165,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 	public boolean instantiateAfterLoading() {
 		this.eList = new LinkedList[this.numPlayers];
-		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList();
+		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList<EligStates>();
 		for (int i = 0; i < numTuples; i++) {
 			for (int o=0; o<numOutputs; o++) {
 				for (int k=0; k<numPlayers; k++) {
@@ -204,7 +197,7 @@ public class NTuple2ValueFunc implements Serializable {
 	 * int[]-representation. {@code act} determines which output cell {@code o} of the 
 	 * network is used. 
 	 * 
-	 * @param board 
+	 * @param curSOWB
 	 * 			  the state as 1D-integer vector (position value for each board cell) 
 	 * @param player
 	 *            the player who has to move on {@code board} (0,...,N-1)
@@ -214,9 +207,8 @@ public class NTuple2ValueFunc implements Serializable {
 	 */
 	public double getQFunc(StateObsWithBoardVector curSOWB, int player, Types.ACTIONS act) {
 		int i, j;
-		int o = act.toInt();
-		double score = 0.0; 
-		BoardVector[] equiv = null;
+		double score = 0.0;
+		BoardVector[] equiv;
 		int[] equivAction;
 
 		// Get equivalent boards (including self)
@@ -243,7 +235,7 @@ public class NTuple2ValueFunc implements Serializable {
 	/**
 	 * Get the value for this state in int[]-representation
 	 * 
-	 * @param board 
+	 * @param curSOWB
 	 * 			  the state as 1D-integer vector (position value for each board cell) 
 	 * @param player
 	 *            the player who has to move on {@code board} (0,...,N-1)
@@ -252,7 +244,7 @@ public class NTuple2ValueFunc implements Serializable {
 	public double getScoreI(StateObsWithBoardVector curSOWB, int player) {
 		int i, j;
 		double score = 0.0; 
-		BoardVector[] equiv = null;
+		BoardVector[] equiv;
 
 		// Get equivalent boards (including self)
 		equiv = getSymBoards2(curSOWB, getUSESYMMETRY(), getNSym());
@@ -276,7 +268,7 @@ public class NTuple2ValueFunc implements Serializable {
 	 * with mirroring and rotation (depending on the game, see 
 	 * {@code xnf.symmetryVectors(board)}).
 	 * 
-	 * @param board
+	 * @param curSOWB
 	 *            board as 1D-integer vector (position value for each board cell) 
 	 * @param useSymmetry if false, return a vector of BoardVectors with only one element
 	 * 			(the board itself in BoardVector[0])
@@ -284,8 +276,7 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @return the equivalent board vectors
 	 */
 	private BoardVector[] getSymBoards2(StateObsWithBoardVector curSOWB, boolean useSymmetry, int nSym) {
-		int i;
-		BoardVector[] equiv = null;
+		BoardVector[] equiv;
 		
 		assert nSym >= 0 : "Ooops, nSym="+nSym+" is negative!";
 		assert nSym <= xnf.getNumSymmetries() 
@@ -360,11 +351,11 @@ public class NTuple2ValueFunc implements Serializable {
 	 * The value function estimated by {@code this} has a different meaning: it 
 	 * estimates the sum of future rewards.
 	 * 
-	 * @param curBoard
+	 * @param curSOWB
 	 *            the current board
 	 * @param curPlayer
 	 *            the player whose value function is updated (the p in V(s_t|p) )
-	 * @param nextBoard
+	 * @param nextSOWB
 	 *            the following board (not really needed)
 	 * @param nextPlayer
 	 *            the player on next board (only needed for debug)
@@ -380,8 +371,6 @@ public class NTuple2ValueFunc implements Serializable {
 	public void updateWeightsNew(StateObsWithBoardVector curSOWB, int curPlayer, 
 			StateObsWithBoardVector nextSOWB, int nextPlayer,
 			double reward, double target, /*boolean upTC,*/ StateObservation thisSO) {
-		int[] curBoard = curSOWB.getBoardVector().bvec;
-		int[] nextBoard = nextSOWB.getBoardVector().bvec;
 		double v_old = getScoreI(curSOWB,curPlayer); // old value
 		// delta is the error signal:
 		double delta = (target - v_old);
@@ -421,7 +410,7 @@ public class NTuple2ValueFunc implements Serializable {
 	/**
 	 * Update the weights of the n-tuple system in case of *new* TD-learning ({@link TDNTuple3Agt}). 
 	 * 
-	 * @param curBoard
+	 * @param curSOWB
 	 *            the board for which the NN is to be adapted. This is in case of {@link TDNTuple3Agt} the 
 	 *            afterstate generated by curPlayer <b>one round earlier</b>, i.e. {@code sLast[curPlayer]}
 	 * @param curPlayer
@@ -438,7 +427,6 @@ public class NTuple2ValueFunc implements Serializable {
 	 */
 	public void updateWeightsTD(StateObsWithBoardVector curSOWB, int curPlayer, 
 			double vLast, double target, double reward, StateObservation thisSO) {
-		int[] curBoard = curSOWB.getBoardVector().bvec;
 		// delta is the error signal:
 		double delta = (target - vLast);
 		// derivative of tanh ( if hasSigmoid()==true):
@@ -458,7 +446,7 @@ public class NTuple2ValueFunc implements Serializable {
 	/**
 	 * Update the weights of the n-tuple system in case of Q-learning ({@link SarsaAgt} or QLearnAgt). 
 	 * 
-	 * @param lastBoard
+	 * @param lastSOWB
 	 *            the board for which the NN is to be adapted. This is in case of {@link SarsaAgt} the 
 	 *            state of lastPlayer <b>one round earlier</b>, i.e. {@code sLast[lastPlayer]}
 	 * @param lastPlayer
@@ -477,7 +465,6 @@ public class NTuple2ValueFunc implements Serializable {
 	 */
 	public void updateWeightsQ(StateObsWithBoardVector lastSOWB, int lastPlayer, Types.ACTIONS lastAction,
 			double qLast, double reward, double target, StateObservation thisSO) {
-		int[] lastBoard = lastSOWB.getBoardVector().bvec;
 		// delta is the error signal:
 		double delta = (target - qLast);
 		// derivative of tanh ( if hasSigmoid()==true):
@@ -498,13 +485,12 @@ public class NTuple2ValueFunc implements Serializable {
 	/**
 	 * Update the weights of the n-Tuple-system in case of {@link TDNTuple2Agt} for a terminal state towards target 0.
 	 * 
-	 * @param curBoard 	the current board
+	 * @param curSOWB 	the current board
 	 * @param curPlayer the player whose value function is updated (the p in V(s_t|p) )
 	 * @param thisSO	only needed when debugging
 	 * @param isNEW_3P	only needed when debugging
 	 */
 	public void updateWeightsNewTerminal(StateObsWithBoardVector curSOWB, int curPlayer,StateObservation thisSO, boolean isNEW_3P) {
-		int[] curBoard = curSOWB.getBoardVector().bvec;
 		double v_old = getScoreI(curSOWB,curPlayer); // old value
 		// delta is the error signal (here with target signal = 0.0):
 		double delta = (0.0 - v_old);
@@ -539,7 +525,7 @@ public class NTuple2ValueFunc implements Serializable {
 	 * <p>
 	 * The value added to all active weights is alphaM*delta*e   (in case LAMBDA==0)
 	 * 
-	 * @param board
+	 * @param curSOWB
 	 *            board, for which the weights shall be updated,
 	 *            as 1D-integer vector (position value for each board cell) 
 	 * @param player
@@ -560,9 +546,8 @@ public class NTuple2ValueFunc implements Serializable {
 	 */
 	private void update(StateObsWithBoardVector curSOWB, int player, int output, double delta, double e, 
 						boolean QMODE, boolean ELIST_PP) {
-		int[] board = curSOWB.getBoardVector().bvec;
 		int i, j, out;
-		double alphaM, sigDeriv, lamFactor;
+		double alphaM, lamFactor;
 
 		// Get equivalent boards (including self) and corresponding actions
 		BoardVector[] equiv = getSymBoards2(curSOWB, getUSESYMMETRY(), getNSym());
@@ -764,7 +749,7 @@ public class NTuple2ValueFunc implements Serializable {
 				pstream.print("LUT hash sum player "+p+": ");
 				for (int j = 0; j < nTuples[p].length; j++)
 					pstream.print(" " + (nTuples[o][p][j].lutHashSum()) + "|");
-				pstream.println("");
+				pstream.println();
 			}		
 		}
 	}
@@ -776,13 +761,13 @@ public class NTuple2ValueFunc implements Serializable {
 				pstream.print("LUT sum player "+p+": ");
 				for (int j = 0; j < nTuples[p].length; j++)
 					pstream.print(frmS.format(nTuples[o][p][j].lutSum())+"|");
-				pstream.println("");
+				pstream.println();
 			}
 			for (int p=0; p<nTuples.length; p++) {
 				pstream.print("LUT ABS player "+p+": ");
 				for (int j = 0; j < nTuples[p].length; j++)
 					pstream.print(frmS.format(nTuples[o][p][j].lutSumAbs())+"|");
-				pstream.println("");
+				pstream.println();
 			}
 		}
 		
@@ -796,7 +781,7 @@ public class NTuple2ValueFunc implements Serializable {
 			for (k=0,m=0; m<3; m++) {
 				for (n=0; n<3; n++,k++) 
 					System.out.print(symb[equiv[j][k]]);
-				System.out.println("");
+				System.out.println();
 			}
 			System.out.println("Action = "+equivAction[j]);
 		}

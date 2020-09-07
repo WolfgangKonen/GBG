@@ -335,7 +335,7 @@ public class NTuple2 implements Serializable {
 	 * @param delta  target minus V(s_t)
 	 * @param e		 derivative of sigmoid (1 if no sigmoid) * LAMBDA^(t-k)
 	 * 
-	 * @see NTuple2ValueFunc#update(int[], int, int, double, double, boolean, boolean)
+	 * @see NTuple2ValueFunc#update(StateObsWithBoardVector, int, int, double, double, boolean, boolean)
 	 */
 	public void updateNew(int[] board, double alphaM, double delta, double e /*, double LAMBDA*/) {
 		int index = getIndex(board);

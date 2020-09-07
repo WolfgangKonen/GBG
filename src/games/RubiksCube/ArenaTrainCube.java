@@ -36,8 +36,8 @@ import games.ArenaTrain;
 public class ArenaTrainCube extends ArenaTrain   {
 	
 	public ArenaTrainCube(String title, boolean withUI) {
-		super(title,withUI);	
-		CubeState.generateInverseTs();
+		super(title,withUI);
+		CubeStateFactory.generateInverseTs();
 		CubeState.generateForwardTs();
 	}
 	
@@ -57,7 +57,7 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 */
 	@Override
 	public GameBoard makeGameBoard() {
-		CubeState.generateInverseTs();		// since makeGameBoard is called via super --> Arena 
+		CubeStateFactory.generateInverseTs();		// since makeGameBoard is called via super --> Arena
 		CubeState.generateForwardTs();		// prior to finishing ArenaTrainCube(String,boolean)
 		gb = new GameBoardCube(this);	
 		return gb;

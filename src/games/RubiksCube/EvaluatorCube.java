@@ -1,34 +1,16 @@
 package games.RubiksCube;
 
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
 import controllers.PlayAgent;
-import controllers.RandomAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
-import games.ArenaTrain;
 import games.Evaluator;
-//import games.TicTacToe.Evaluator9;
 import games.GameBoard;
-import games.PStats;
 import games.StateObservation;
 import games.TStats;
 import games.TStats.TAggreg;
-import gui.MessageBox;
-import games.XArenaFuncs;
-import games.RubiksCube.CSArrayList.TupleInt;
-import games.RubiksCube.CubeConfig.BoardVecType;
-import tools.Types;
 
 /**
  * Evaluator for RubiksCube. For p in {1, ..., {@link CubeConfig#pMax}}: Test with {@link CubeConfig#EvalNmax}{@code [p]} 
  * cube states randomly picked via  {@link GameBoardCube#chooseStartState(int) GameBoardCube#chooseStartState(p)}
- * (deprecated: from test distance set {@link GameBoardCube#T}):
  * <ul>
  * <li> If mode=0: how many percent of the states are solved within &le; p twists? 
  * <li> If mode=1: how many percent of the states are solved within {@code epiLength} twists? 
@@ -38,9 +20,7 @@ import tools.Types;
  */
 public class EvaluatorCube extends Evaluator {
  	private static final int[] AVAILABLE_MODES = new int[]{-1,0,1};
-	private Random rand;
 //	private int m_mode;			// now in Evaluator
-	private CSArrayList[] T;		// the array of distance sets
 	private	int countStates=0;
 	private int epiLength=10;
 
@@ -51,32 +31,23 @@ public class EvaluatorCube extends Evaluator {
 	
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, gb, 0, stopEval);
-		initEvaluator(gb,0);
+		initEvaluator(gb);
 	}
 
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
 		super(e_PlayAgent, gb, mode, stopEval);
-		initEvaluator(gb,mode);
+		initEvaluator(gb);
 	}
 
 	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, gb, mode, stopEval, verbose);
-		initEvaluator(gb,mode);
+		initEvaluator(gb);
 	}
 	
-	private void initEvaluator(GameBoard gb, int mode) {
-//		long seed = 999;
-//		rand 		= new Random(seed);
-	    rand 		= new Random(System.currentTimeMillis());	
-		// --- this is now in Evaluator ---
-//		if (!isAvailableMode(mode)) 
-//			throw new RuntimeException("EvaluatorCube: Value mode = "+mode+" is not allowed!");
-//		m_mode = mode;
+	private void initEvaluator(GameBoard gb) {
 		if (gb != null) {
 			assert (gb instanceof GameBoardCube);	
 			((GameBoardCube)gb).getPMax();			// actualize CubeConfig.pMax, if GUI present
-			
-			T = ((GameBoardCube)gb).getT();		// needed only for evaluateAgent0_OLD (deprecated)	
 		}
 	}
 	
@@ -108,19 +79,29 @@ public class EvaluatorCube extends Evaluator {
 	 * <li> {@link Evaluator#m_mode m_mode}{@code =0}:  percent solved within &le; p twists
 	 * <li> {@link Evaluator#m_mode m_mode}{@code =1}:  percent solved within {@code epiLength} twists
 	 * </ul> 
-	 * @param pa the agent to evaluate
+	 * @param pa the agent to evaluate. Use {@link PlayAgent#getParOther()#getStopEval()} to infer {@code epiLength}
  	 * @return the weighted average success on different sets of scrambled cubes
 	 */
  	private double evaluateAgent0(PlayAgent pa) {
-		ArrayList tsList = new ArrayList<TStats>();
-		ArrayList taggList = new ArrayList<TAggreg>();
+		ArrayList<TStats> tsList = new ArrayList<TStats>();
+		ArrayList<TAggreg> taggList = new ArrayList<TAggreg>();
 		TStats tstats;
 		TAggreg tagg;
 		StateObservation so;
+		double[] constWght = new double[CubeConfig.pMax];  	// weights for each p-level, see weightedAvgResTAggregList
+		for (int p=0; p<CubeConfig.pMax; p++) { constWght[p]=1.0; }
+//		epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
+		epiLength = pa.getParOther().getStopEval();
+		if (epiLength<=CubeConfig.pMax) {
+			System.err.println("WARNING: epiLength="+epiLength+" has to be larger than pMax="+CubeConfig.pMax+"!");
+			System.err.println("         Setting epiLength to "+(CubeConfig.pMax+1));
+			epiLength=CubeConfig.pMax+1;
+			// if epiLength were not larger than pMax, the calculation in TAggreg would go wrong
+			// (such that percentages would sum to something >1)
+		}
+
  		countStates=0;
 		for (int p=1; p<=CubeConfig.pMax; p++) {
-//			epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
-			epiLength = pa.getParOther().getStopEval();
  			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
  				so = ((GameBoardCube) m_gb).chooseStartState(p);	// uses selectByTwist1(p)
  				so.resetMoveCounter();
@@ -141,65 +122,7 @@ public class EvaluatorCube extends Evaluator {
  			taggList.add(tagg);
  		} // for (p)
 		//lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
-		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.constWght, m_mode);
-		m_msg = pa.getName()+": "+getPrintString() + lastResult;
-		if (this.verbose>=0) {
-			TStats.printTAggregList(taggList);
-			//System.out.println((CubeConfig.boardVecType==BoardVecType.CUBESTATE) ? "CUBESTATE" : "CUBEPLUSACTION");
-		}
-		return lastResult;
-	}
-
-	/**	
-	 * This method only works if GameBoardCube.SELECT_FROM_T==true. Therefore, since T is hard to calculate
-	 * for larger values of p, it is now deprecated.
-	 * 
-	 * @param pa 
- 	 * @return average success on array T of distance sets
-	 */
- 	@Deprecated
- 	private double evaluateAgent0_OLD(PlayAgent pa) {
-		ArrayList tsList = new ArrayList<TStats>();
-		ArrayList taggList = new ArrayList<TAggreg>();
-		TStats tstats;
-		TAggreg tagg;
- 		countStates=0;
-		for (int p=1; p<=CubeConfig.pMax; p++) {
-			//epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
-			epiLength = pa.getParOther().getStopEval();
-			if (T==null) throw new RuntimeException("[evalAgent0_OLD] T is null! Consider to adjust GameBoardCube.SELECT_FROM_T");
-			if (T[p]!=null) {
-	 			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
- 	 				int index = rand.nextInt(T[p].size());
- 	 				CubeState cS = (CubeState)T[p].get(index);
- 	 				cS.clearLast();
- 	 				StateObserverCube so = new StateObserverCube(cS);
- 	 				so.resetMoveCounter();
- 	 				
- 	                while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
- 	                	// --- the if-branch is just for speedup (definitely no symmetries during eval) ---
- 	                	// --- but it is no longer really needed since we abandon symmetries also in training ---
- 	                	if (pa instanceof TDNTuple2Agt) {
- 	 	                    so.advance(((TDNTuple2Agt) pa).getNextAction2SYM(so, false, true, false)); 	                		
- 	                	} else {
- 	 	                    so.advance(pa.getNextAction2(so, false, true));
- 	                	}
- 	                }
- 	                int moveNum = so.getMoveCounter();
- 	                tstats = new TStats(n,p,moveNum,epiLength);
- 	    			tsList.add(tstats);
-
- 	                if(verbose > 1) {
- 	                    System.out.print("Finished game " + n + " with moveNum " + moveNum + " twists.\n");
- 	                }
- 				} // for (n)
-				countStates += CubeConfig.EvalNmax[p];
- 			} // if
- 			tagg = new TAggreg(tsList,p);
- 			taggList.add(tagg);
- 		} // for (p)
-		//lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
-		lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.constWght, m_mode);
+		lastResult = TStats.weightedAvgResTAggregList(taggList, constWght, m_mode);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>=0) {
 			TStats.printTAggregList(taggList);

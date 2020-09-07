@@ -1,6 +1,7 @@
 package games.RubiksCube;
 
 import java.util.Random;
+import params.ParOther;
 
 public class CubeConfig {
 	
@@ -13,8 +14,11 @@ public class CubeConfig {
 	 * @see ArenaTrainCube#setCubeType(String)
 	 * 
 	 */
-	public static enum CubeType {POCKET,RUBIKS};
-	
+	public static enum CubeType {POCKET,RUBIKS}
+
+	/**
+	 * @see ArenaTrainCube#setCubeType(String) 
+	 */
 	public static CubeType cubeType = CubeType.POCKET;
 	
 	/**
@@ -26,11 +30,13 @@ public class CubeConfig {
 	 * </ul>
 	 * @see ArenaTrainCube#setBoardVecType(String)
 	 */
-	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION, STICKER};
+	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION, STICKER}
 	
 	/**
 	 * {@link BoardVecType} {@code boardVecType} holds the board vector type for all {@link CubeState} objects and 
 	 * is used in {@link CubeState#getBoardVector()} and in {@link XNTupleFuncsCube}.
+	 * 
+	 * @see ArenaTrainCube#setBoardVecType(String) 
 	 */
 	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;		// CUBESTATE, CUBEPLUSACTION, STICKER
 
@@ -42,23 +48,32 @@ public class CubeConfig {
 	 * </ul>
 	 * @see ArenaTrainCube#setTwistType(String)
 	 */
-	public enum TwistType {ALLTWISTS, QUARTERTWISTS};
+	public enum TwistType {ALLTWISTS, QUARTERTWISTS}
 	public static TwistType twistType = TwistType.ALLTWISTS;
 	
 	/**
 	 * <b>{@code pMax}</b> serves several purposes:
 	 * <ul>
-	 * <li> Maximum number of scrambling twists in {@link GameBoardCube#chooseStartState()} and 
+	 * <li> Maximum number of scrambling twists in {@link GameBoardCube#chooseStartState()} (when playing) and 
 	 * 		{@link GameBoardCube#chooseStartState(controllers.PlayAgent)} (when training an agent).
 	 * <li> Maximum number of scrambling twists in {@link EvaluatorCube}
 	 * <li> (Deprecated) Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} are filled.
 	 * </ul>
 	 * In case that {@link GameBoardCubeGui} is present, the value of  <b>{@code pMax}</b> will be updated from 
-	 * {@code ChoiceBox pMaxChoice} each time a train or evaluation process is started. This allows to switch  
+	 * {@link ParOther} {@code opar.pMax} each time a train or evaluation process is started. This allows to switch  
 	 * <b>{@code pMax}</b> at runtime.
 	 */
-	public static int pMax = 10;			// 3,4,5,6,7,8,9,10,11
-	
+	public static int pMax = 10;			// 1,2,3,4,5,6,7,8,9,10,11,12,13,14   for 2x2x2 cube
+
+	/**
+	 * whether a replay buffer with certain capacity and batch size is used or not
+	 */
+	public static boolean REPLAYBUFFER = true;  // false;true; //
+
+	public static int replayBufferCapacity = 500;
+	public static int batchSize = 50;
+
+
 	/**
 	 * This influences the behavior in {@link GameBoardCube#selectByTwists1(int) GameBoardCube.selectByTwists1(p)} 
 	 * when forming the twist sequence:
@@ -86,8 +101,7 @@ public class CubeConfig {
 			870072,1887748,623800,	// ... and D[8],D[9],D[10],D[7],
 			2644					// ... and D[11]
 	};
-	final static int[] constWght = {1,1,1,1,1,1,1,1,1,1,1};
-	
+
 	/**
 	 * EvalNmax: how many states to pick randomly for each p during evaluation
 	 */
@@ -99,7 +113,8 @@ public class CubeConfig {
 	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br> 
 	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e. g. during training).  	
 	 */
-	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
+//	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
+	// is now replaced with ParOther.stopEval
 	
 	//
 	// Elements below are only for now deprecated cases:
@@ -132,5 +147,11 @@ public class CubeConfig {
 				,{0,0.025,0.05,0.10,0.25,0.5,1.0}			//,[6]
 				,{0,0.0125,0.025,0.05,0.125,0.25,0.5,1.0}	//,[7]
 			};
+
+	/**
+	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
+	 * DAVI2Agent, DAVI3Agent and StateObserverCube.
+	 */
+	public static double stepReward = -0.1; //-0.01;
 
 }

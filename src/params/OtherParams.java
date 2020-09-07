@@ -4,14 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Canvas;
 import java.awt.Checkbox;
-import java.awt.CheckboxGroup;
-import java.awt.Choice;
-import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -19,12 +17,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
-import games.Feature;
+import games.Arena;
+import games.RubiksCube.GameBoardCube;
 
 /**
- * This class realizes other parameter settings for board games. Most parameter
+ * This class realizes other parameter settings for board games. Most parameters
  * are only relevant for trainable agents (like {@link TDAgent}, {@link TDNTuple3Agt}), 
  * but <b>Quick Eval Mode</b> and <b>Wrapper nPly</b> are relevant for all agents
  * <p>
@@ -72,32 +70,40 @@ public class OtherParams extends Frame {
 	JLabel learnRM_L;
 	JLabel rgs_L;
 	JLabel wNply_L;
+	JLabel pMax_L;
+	JLabel rBuf_L;
 	public JTextField numEval_T;
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
 	public JTextField wNply_T;
+	public JTextField pMax_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
+	public Checkbox replayBuf;
 	public Checkbox rewardIsGameScore;
 
 	Button ok;
 	JPanel oPanel;
 	OtherParams m_par;
+	Arena m_arena;
 
-	public OtherParams(/* int batchMax */) {
+	public OtherParams(Arena m_arena) {
 		super("Other Parameter");
+
+		this.m_arena = m_arena;
 
 		evalQ_L = new JLabel("Quick Eval Mode");
 		this.choiceEvalQ = new JComboBox();
 		evalT_L = new JLabel("Train Eval Mode");
 		this.choiceEvalT = new JComboBox();
 
-		numEval_T = new JTextField("500"); //
-		epiLeng_T = new JTextField("-1"); //
-		stopTest_T = new JTextField("0"); //
-		stopEval_T = new JTextField("-1"); // the defaults
-		wNply_T = new JTextField("0"); //
+		numEval_T = new JTextField("500"); 	//
+		epiLeng_T = new JTextField("-1"); 	//
+		stopTest_T = new JTextField("0"); 	//
+		stopEval_T = new JTextField("-1"); 	// the defaults
+		wNply_T = new JTextField("0"); 		//
+		pMax_T = new JTextField("6");		//	
 		numEval_L = new JLabel("numEval");
 		epiLeng_L = new JLabel("Episode Length");
 		stopTest_L = new JLabel("stopTest");
@@ -106,8 +112,11 @@ public class OtherParams extends Frame {
 		learnRM_L = new JLabel("Learn from RM");
 		rgs_L = new JLabel("Reward = Score");
 		wNply_L = new JLabel("Wrapper nPly");
+		pMax_L = new JLabel("pMax");
+		rBuf_L = new JLabel("Replay buffer");
 		chooseS01 = new Checkbox("", false);
 		learnRM = new Checkbox("", false);
+		replayBuf = new Checkbox("", false);
 		rewardIsGameScore = new Checkbox("", true);
 		ok = new Button("OK");
 		m_par = this;
@@ -130,15 +139,43 @@ public class OtherParams extends Frame {
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		wNply_L.setToolTipText(
 				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
+		pMax_L.setToolTipText(
+				"RubiksCube: number of initial twists (during traing and eval)");
+		rBuf_L.setToolTipText(
+				"RubiksCube: use replay buffer during training");
 
 		// this.setQuickEvalMode(0);
 		// this.setTrainEvalMode(0);
 
-		ok.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				m_par.setVisible(false);
-			}
-		});
+		ok.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e) {
+					m_par.setVisible(false);
+				}
+			});
+
+		// only for RubiksCube:
+		pMax_T.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{	
+						//if pMax is changed by user, set the corresponding element in GameBoardCubeGUI
+						if (m_arena.getGameBoard() instanceof GameBoardCube) {
+							((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
+						}
+					}
+				}
+		);
+
+		replayBuf.addItemListener(new ItemListener()
+								 {
+									 public void itemStateChanged(ItemEvent e)
+									 {
+										 //if replayBuf is changed by user, set the corresponding element in CubeConfig
+										 // TODO
+									 }
+								 }
+		);
 
 		setLayout(new BorderLayout(10, 0)); // rows,columns,hgap,vgap
 		oPanel.setLayout(new GridLayout(0, 4, 10, 10));
@@ -163,10 +200,17 @@ public class OtherParams extends Frame {
 		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
 
-		oPanel.add(chooseS01L);
-		oPanel.add(chooseS01);
-		oPanel.add(learnRM_L);
-		oPanel.add(learnRM);
+		if (m_arena.getGameName().equals("RubiksCube")) {
+			oPanel.add(pMax_L);
+			oPanel.add(pMax_T);
+			oPanel.add(rBuf_L);
+			oPanel.add(replayBuf);
+		} else {
+			oPanel.add(chooseS01L);
+			oPanel.add(chooseS01);
+			oPanel.add(learnRM_L);
+			oPanel.add(learnRM);
+		}
 
 		oPanel.add(rgs_L);
 		oPanel.add(rewardIsGameScore);
@@ -220,6 +264,19 @@ public class OtherParams extends Frame {
 
 	public int getWrapperNPly() {
 		return Integer.valueOf(wNply_T.getText()).intValue();
+	}
+
+	public int getpMaxRubiks() {
+		return Integer.valueOf(pMax_T.getText()).intValue();
+	}
+
+	public boolean getReplayBuffer() {
+		return replayBuf.getState();
+	}
+
+	public double getIncAmount() {
+		// dummy stub
+		return 0.0;
 	}
 
 	public int getEpisodeLength() {
@@ -292,6 +349,10 @@ public class OtherParams extends Frame {
 		wNply_T.setText(value + "");
 	}
 
+	public void setpMaxRubiks(int value) {
+		pMax_T.setText(value + "");
+	}
+
 	public void setEpisodeLength(int value) {
 		if (value == Integer.MAX_VALUE) value=-1;
 		epiLeng_T.setText(value + "");
@@ -303,6 +364,10 @@ public class OtherParams extends Frame {
 
 	public void setLearnFromRM(boolean bLearnFromRM) {
 		learnRM.setState(bLearnFromRM);
+	}
+
+	public void setReplayBuffer(boolean bReplayBuf) {
+		replayBuf.setState(bReplayBuf);
 	}
 
 	public void setRewardIsGameScore(boolean bRGS) {
@@ -324,40 +389,18 @@ public class OtherParams extends Frame {
 		this.setStopTest(op.getStopTest());
 		this.setStopEval(op.getStopEval());
 		this.setWrapperNPly(op.getWrapperNPly());
+		this.setpMaxRubiks(op.getpMaxRubiks());
 		this.chooseS01.setState(op.getChooseStart01());
 		this.learnRM.setState(op.getLearnFromRM());
+		this.replayBuf.setState(op.getReplayBuffer());
 		this.rewardIsGameScore.setState(op.getRewardIsGameScore());
-	}
 
-//	/**
-//	 * Set sensible parameters for a specific agent and specific game. By "sensible
-//	 * parameters" we mean parameter producing good results. Likewise, some parameter
-//	 * choices may be enabled or disabled.
-//	 * 
-//	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "Sarsa" (for {@link SarsaAgt})
-//	 * @param gameName the string from {@link games.StateObservation#getName()}
-//	 */
-//	@Deprecated  --> Use ParOther.setParamDefaults
-//	public void setParamDefaults(String agentName, String gameName) {
-//		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
-//		switch (gameName) {
-//		case "RubiksCube": 
-//			chooseS01.setState(true);		// always select a non-solved cube as start state
-//			enableChoosePart(false);
-//			epiLeng_T.setText("50"); 		// the maximum episode length (when playing a game)
-//			break;
-//		default:	//  all other
-//			break;
-//		}
-//		switch (agentName) {
-//		case "Sarsa":
-//		case "TD-NTuple-3":
-//			learnRM.setState(true);
-//			break;
-//		default: 
-//			learnRM.setState(false);
-//			break;
-//		}
-//	}
+		// only for RubiksCube:
+		// if pMax is changed via fillParamTabsAfterLoading, set also the corresponding element in GameBoardCubeGUI
+		if (m_arena.getGameBoard() instanceof GameBoardCube) {
+			((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
+		}
+
+	}
 	
 } // class OtherParams

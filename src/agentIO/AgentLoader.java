@@ -48,8 +48,6 @@ public class AgentLoader {
 			tdreferee = m_Arena.tdAgentIO.loadGBGAgent(filePath);			
 		} catch(IOException e) {
 			loadMsg = e.getMessage();			
-		} catch(ClassNotFoundException e) {
-			loadMsg = e.getMessage();			
 		} catch(Exception e) {
 			loadMsg = e.getMessage();
 		}

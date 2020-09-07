@@ -29,7 +29,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * the action which led to m_state (9 if not known)
 	 */
-	private ACTIONS m_action;
+	protected ACTIONS m_action;
 	private static CubeStateFactory csFactory = new CubeStateFactory();
 	private static CubeState def = csFactory.makeCubeState(); // a solved cube as reference
 	/**
@@ -38,8 +38,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * be well higher than this, so that even with the {@code m_counter}-subtraction in {@link #getGameScore(StateObservation) 
 	 * getGameScore} there remains a game score higher than for any non-solved cube state.
 	 */
-    private static final double REWARD_POSITIVE =  1.5;
-    private static final double REWARD_NEGATIVE = -1.0;
+    public static final double REWARD_POSITIVE =  1.0; //see daviValue. Earlier it was 1.5;
+	/**
+	 * The game score as long as the solved cube is not found
+	 */
+    public static final double REWARD_NEGATIVE = -1.0; // never used at the moment
 	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
    
 //	private double prevReward = 0.0;
@@ -128,13 +131,17 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public CubeState getCubeState() {
 		return m_state;
 	}
-	
+
+	public ACTIONS getLastAction() {
+		return m_action;
+	}
+
 	/**
 	 * The game score of state {@code this}, seen from the perspective of {@code refer}'s player. 
 	 * For Rubik's Cube only the game-over state (solved cube) has a non-zero game score
 	 * <pre>
-	 *       REWARD_POSITIVE - m_counter*0.01   </pre> 
-	 * The 2nd term ensure that if there are two paths to the solved cube, the one with the lower number of twists 
+	 *       REWARD_POSITIVE - m_counter * CubeConfig.stepReward   </pre>
+	 * The 2nd term ensures that if there are two paths to the solved cube, the one with the lower number of twists
 	 * {@code m_counter} has the higher reward. This is important for tree-based agents, which may completely fail if 
 	 * they always select the ones with the longer path and never come to an end!
 	 * <p>
@@ -145,13 +152,13 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * @see #REWARD_POSITIVE		
 	 */
 	public double getGameScore(StateObservation refer) {
-		if(isGameOver()) return REWARD_POSITIVE - this.m_counter*0.01;
-		return 0; 
+		if(isGameOver()) return REWARD_POSITIVE + this.m_counter * CubeConfig.stepReward;
+		return REWARD_NEGATIVE;
 //		if(isGameOver()) return prevReward+0;
 //		return prevReward+REWARD_NEGATIVE; 
 	}
 
-	public double getMinGameScore() { return 0; }
+	public double getMinGameScore() { return REWARD_NEGATIVE; }
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
 	public String getName() { return "RubiksCube";	}	// should be a valid directory name
@@ -166,6 +173,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 //		prevReward = this.getGameScore(this);		// prior to advance() we set prevReward to the game score of 
 //													// the current state. In this way, the cumuluative game score 
 //													// returned by getGameScore can accumulate the cost-to-go.
+		m_action = action;
 		int iAction = action.toInt();
 		assert (0<=iAction && iAction<9) : "iAction is not in 0,1,...,8.";
 		int j=iAction%3;
@@ -239,7 +247,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 				acts.add(Types.ACTIONS.fromInt(i));  				
 			}
 		} else {   // the QUARTERTWISTS case: add all allowed quarter twist actions
-			int[] quarteracts = {0,2,3,5,6,8};
+			int[] quarteracts = {0,2,3,5,6,8};  // {U1,U3,L1,L3,F1,F3}
 			for (int i=0; i<quarteracts.length; i++) {
 				acts.add(Types.ACTIONS.fromInt(quarteracts[i]));  				
 			}

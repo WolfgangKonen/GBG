@@ -6,19 +6,13 @@ import java.util.Iterator;
 import java.util.Random;
 
 import controllers.PlayAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.GameBoard;
 import games.StateObservation;
 import games.Arena;
-import games.Arena.Task;
-import games.Nim.GameBoardNimGui;
 import games.RubiksCube.CSArrayList.CSAListType;
 import games.RubiksCube.CSArrayList.TupleInt;
-import games.RubiksCube.CubeState.Twist;
-import games.ArenaTrain;
 import tools.Types;
-import tools.Types.ACTIONS;
 
 /**
  * This class implements the GameBoard interface for RubiksCube.
@@ -42,7 +36,7 @@ public class GameBoardCube implements GameBoard {
 	protected Random rand2;
 	/**
 	 * The representation of the state corresponding to the current 
-	 * {@link #Board} position.
+	 * board position.
 	 */
 	protected StateObserverCube m_so;
 	private boolean arenaActReq=false;
@@ -129,13 +123,20 @@ public class GameBoardCube implements GameBoard {
 	}
 	
 	public int getPMax() {
-        if (m_gameGui!=null) {
-        	// fetch CubeConfig.pMax setting from GUI
-        	String str = m_gameGui.getPMax();
-        	CubeConfig.pMax = Integer.valueOf(str).intValue();
-        }
+		if (m_Arena.m_xab!=null) {
+			// fetch the most actual value from tab "Other Pars"
+			CubeConfig.pMax = m_Arena.m_xab.oPar[0].getpMaxRubiks();
+			CubeConfig.REPLAYBUFFER = m_Arena.m_xab.oPar[0].getReplayBuffer();
+		}
         return CubeConfig.pMax;
 	}
+	
+	public void setPMax(int pMax) {
+        if (m_gameGui!=null) {
+        	m_gameGui.setPMax(pMax);
+        }
+	}
+	
 	/**
 	 * Generate the distance sets up to {@link CubeConfig#pMax}. Since it may be very time consuming to generate the 
 	 * complete distance set D[p] for larger p, we generate only {@link CubeConfig#Narr}{@code [p]} elements in each 
@@ -214,8 +215,10 @@ public class GameBoardCube implements GameBoard {
 			m_so = soN.copy();
 		} 
 		
-		if (m_gameGui!=null)
+		if (m_gameGui!=null) {
+			this.setPMax(m_Arena.m_xab.oPar[0].getpMaxRubiks());  		// update pMax from oPar
 			m_gameGui.updateBoard(soN, withReset, showValueOnGameboard);
+		}
 
 		
 	}
@@ -306,7 +309,7 @@ public class GameBoardCube implements GameBoard {
 		int p = 1+rand.nextInt(CubeConfig.pMax);		// random p \in {1,2,...,pMax}
 		if (m_gameGui!=null) {
 			String str=m_gameGui.getScramblingTwists();
-			if (str!="RANDOM") p = Integer.valueOf(str).intValue();
+			if (!str.equals("RANDOM")) p = Integer.valueOf(str).intValue();
 		}
 		return chooseStartState(p);
 	}
@@ -415,34 +418,36 @@ public class GameBoardCube implements GameBoard {
 		boolean cond;
 		//System.out.println("selectByTwists1: p="+p);
 		StateObserverCube so = new StateObserverCube(); // default cube
-		// make p twists and hope that we land in 
-		// distance set D[p] (which is often not true for p>5)
-		switch (CubeConfig.twistType) {
-		case ALLTWISTS:
-			for (int k=0; k<p; k++)  {
-				do {
-					index = rand.nextInt(so.getAvailableActions().size());
-					cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
-					// If doublets are forbidden (i.e. TWIST_DOUBLETS==false), then boolean cond stays true as long as 
-					// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because 
-					// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists. 
-				} while (cond);
-				so.advance(so.getAction(index));  				
+		while (so.isEqual(new StateObserverCube())) {		// do another round, if so is after twisting still default state
+			// make p twists and hope that we land in
+			// distance set D[p] (which is often not true for p>5)
+			switch (CubeConfig.twistType) {
+				case ALLTWISTS:
+					for (int k=0; k<p; k++)  {
+						do {
+							index = rand.nextInt(so.getAvailableActions().size());
+							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
+							// If doublets are forbidden (i.e. TWIST_DOUBLETS==false), then boolean cond stays true as long as
+							// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because
+							// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists.
+						} while (cond);
+						so.advance(so.getAction(index));
+					}
+					break;
+				case QUARTERTWISTS:
+					for (int k=0; k<p; k++)  {
+						do {
+							index = rand.nextInt(so.getAvailableActions().size());
+							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
+									(index%3+1) != so.getCubeState().lastTimes);
+							// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
+							// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3
+							// are possible here). This is because doublet U1U3 would leave the cube unchanged
+						} while (cond);
+						so.advance(so.getAction(index));
+					}
+					break;
 			}
-			break;
-		case QUARTERTWISTS:
-			for (int k=0; k<p; k++)  {
-				do {
-					index = rand.nextInt(so.getAvailableActions().size());
-					cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
-																  (index%3+1) != so.getCubeState().lastTimes);
-					// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
-					// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3  
-					// are possible here). This is because doublet U1U3 would leave the cube unchanged
-				} while (cond);
-				so.advance(so.getAction(index));  				
-			}
-			break;
 		}
 		d_so = new StateObserverCubeCleared(so,p);
 		//System.out.println(d_so.getCubeState().twistSeq);
@@ -592,7 +597,7 @@ public class GameBoardCube implements GameBoard {
 			for (int j=0; j<realPMat[i].length; j++) {
 				System.out.print(df.format(realPMat[i][j]));
 			}
-			System.out.println("");
+			System.out.println();
 		}
 		
 	}

@@ -1030,7 +1030,7 @@ abstract public class Arena implements Runnable {
 			this.m_xab.setParamDefaults(n, td.getName(), this.getGameName());
 			// with changedViaLoad[n]=true we inhibit that a possible change in item state of 
 			// this.m_xab.choiceAgent[n] will trigger from the associated 
-			// ItemStateListener an agent-parameter-default-setting (we want the parameters
+			// ItemListenerHandler an agent-parameter-default-setting (we want the parameters
 			// from the agent just loaded to survive in this.m_xab):
 			this.m_xab.changedViaLoad[n] = true;
 			

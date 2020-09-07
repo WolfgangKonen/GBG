@@ -350,7 +350,7 @@ public class TSSettingsGUI2 extends JFrame {
             System.out.println(TAG + "ERROR :: No agent loaded from disk");
             //e.printStackTrace();
             return;
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             System.out.println(TAG + "ERROR :: No agent loaded from disk");
             //e.printStackTrace();
             return;
