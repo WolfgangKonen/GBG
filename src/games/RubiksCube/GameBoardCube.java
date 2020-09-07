@@ -123,9 +123,11 @@ public class GameBoardCube implements GameBoard {
 	}
 	
 	public int getPMax() {
-		if (m_Arena.m_xab!=null)
+		if (m_Arena.m_xab!=null) {
 			// fetch the most actual value from tab "Other Pars"
-			CubeConfig.pMax=m_Arena.m_xab.oPar[0].getpMaxRubiks();
+			CubeConfig.pMax = m_Arena.m_xab.oPar[0].getpMaxRubiks();
+			CubeConfig.REPLAYBUFFER = m_Arena.m_xab.oPar[0].getReplayBuffer();
+		}
         return CubeConfig.pMax;
 	}
 	
@@ -416,34 +418,36 @@ public class GameBoardCube implements GameBoard {
 		boolean cond;
 		//System.out.println("selectByTwists1: p="+p);
 		StateObserverCube so = new StateObserverCube(); // default cube
-		// make p twists and hope that we land in 
-		// distance set D[p] (which is often not true for p>5)
-		switch (CubeConfig.twistType) {
-		case ALLTWISTS:
-			for (int k=0; k<p; k++)  {
-				do {
-					index = rand.nextInt(so.getAvailableActions().size());
-					cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
-					// If doublets are forbidden (i.e. TWIST_DOUBLETS==false), then boolean cond stays true as long as 
-					// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because 
-					// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists. 
-				} while (cond);
-				so.advance(so.getAction(index));  				
+		while (so.isEqual(new StateObserverCube())) {		// do another round, if so is after twisting still default state
+			// make p twists and hope that we land in
+			// distance set D[p] (which is often not true for p>5)
+			switch (CubeConfig.twistType) {
+				case ALLTWISTS:
+					for (int k=0; k<p; k++)  {
+						do {
+							index = rand.nextInt(so.getAvailableActions().size());
+							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
+							// If doublets are forbidden (i.e. TWIST_DOUBLETS==false), then boolean cond stays true as long as
+							// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because
+							// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists.
+						} while (cond);
+						so.advance(so.getAction(index));
+					}
+					break;
+				case QUARTERTWISTS:
+					for (int k=0; k<p; k++)  {
+						do {
+							index = rand.nextInt(so.getAvailableActions().size());
+							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
+									(index%3+1) != so.getCubeState().lastTimes);
+							// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
+							// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3
+							// are possible here). This is because doublet U1U3 would leave the cube unchanged
+						} while (cond);
+						so.advance(so.getAction(index));
+					}
+					break;
 			}
-			break;
-		case QUARTERTWISTS:
-			for (int k=0; k<p; k++)  {
-				do {
-					index = rand.nextInt(so.getAvailableActions().size());
-					cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
-																  (index%3+1) != so.getCubeState().lastTimes);
-					// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
-					// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3  
-					// are possible here). This is because doublet U1U3 would leave the cube unchanged
-				} while (cond);
-				so.advance(so.getAction(index));  				
-			}
-			break;
 		}
 		d_so = new StateObserverCubeCleared(so,p);
 		//System.out.println(d_so.getCubeState().twistSeq);

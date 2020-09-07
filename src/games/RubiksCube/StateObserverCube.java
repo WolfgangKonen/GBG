@@ -38,7 +38,10 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * be well higher than this, so that even with the {@code m_counter}-subtraction in {@link #getGameScore(StateObservation) 
 	 * getGameScore} there remains a game score higher than for any non-solved cube state.
 	 */
-    public static final double REWARD_POSITIVE =  0.0; //see daviValue. Earlier it was 1.5;
+    public static final double REWARD_POSITIVE =  1.0; //see daviValue. Earlier it was 1.5;
+	/**
+	 * The game score as long as the solved cube is not found
+	 */
     public static final double REWARD_NEGATIVE = -1.0; // never used at the moment
 	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
    

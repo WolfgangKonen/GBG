@@ -8,6 +8,8 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -69,6 +71,7 @@ public class OtherParams extends Frame {
 	JLabel rgs_L;
 	JLabel wNply_L;
 	JLabel pMax_L;
+	JLabel rBuf_L;
 	public JTextField numEval_T;
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
@@ -77,6 +80,7 @@ public class OtherParams extends Frame {
 	public JTextField pMax_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
+	public Checkbox replayBuf;
 	public Checkbox rewardIsGameScore;
 
 	Button ok;
@@ -109,8 +113,10 @@ public class OtherParams extends Frame {
 		rgs_L = new JLabel("Reward = Score");
 		wNply_L = new JLabel("Wrapper nPly");
 		pMax_L = new JLabel("pMax");
+		rBuf_L = new JLabel("Replay buffer");
 		chooseS01 = new Checkbox("", false);
 		learnRM = new Checkbox("", false);
+		replayBuf = new Checkbox("", false);
 		rewardIsGameScore = new Checkbox("", true);
 		ok = new Button("OK");
 		m_par = this;
@@ -135,6 +141,8 @@ public class OtherParams extends Frame {
 				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
 		pMax_L.setToolTipText(
 				"RubiksCube: number of initial twists (during traing and eval)");
+		rBuf_L.setToolTipText(
+				"RubiksCube: use replay buffer during training");
 
 		// this.setQuickEvalMode(0);
 		// this.setTrainEvalMode(0);
@@ -157,6 +165,16 @@ public class OtherParams extends Frame {
 						}
 					}
 				}
+		);
+
+		replayBuf.addItemListener(new ItemListener()
+								 {
+									 public void itemStateChanged(ItemEvent e)
+									 {
+										 //if replayBuf is changed by user, set the corresponding element in CubeConfig
+										 // TODO
+									 }
+								 }
 		);
 
 		setLayout(new BorderLayout(10, 0)); // rows,columns,hgap,vgap
@@ -185,12 +203,14 @@ public class OtherParams extends Frame {
 		if (m_arena.getGameName().equals("RubiksCube")) {
 			oPanel.add(pMax_L);
 			oPanel.add(pMax_T);
+			oPanel.add(rBuf_L);
+			oPanel.add(replayBuf);
 		} else {
 			oPanel.add(chooseS01L);
 			oPanel.add(chooseS01);
+			oPanel.add(learnRM_L);
+			oPanel.add(learnRM);
 		}
-		oPanel.add(learnRM_L);
-		oPanel.add(learnRM);
 
 		oPanel.add(rgs_L);
 		oPanel.add(rewardIsGameScore);
@@ -248,6 +268,15 @@ public class OtherParams extends Frame {
 
 	public int getpMaxRubiks() {
 		return Integer.valueOf(pMax_T.getText()).intValue();
+	}
+
+	public boolean getReplayBuffer() {
+		return replayBuf.getState();
+	}
+
+	public double getIncAmount() {
+		// dummy stub
+		return 0.0;
 	}
 
 	public int getEpisodeLength() {
@@ -337,6 +366,10 @@ public class OtherParams extends Frame {
 		learnRM.setState(bLearnFromRM);
 	}
 
+	public void setReplayBuffer(boolean bReplayBuf) {
+		replayBuf.setState(bReplayBuf);
+	}
+
 	public void setRewardIsGameScore(boolean bRGS) {
 		rewardIsGameScore.setState(bRGS);
 	}
@@ -359,6 +392,7 @@ public class OtherParams extends Frame {
 		this.setpMaxRubiks(op.getpMaxRubiks());
 		this.chooseS01.setState(op.getChooseStart01());
 		this.learnRM.setState(op.getLearnFromRM());
+		this.replayBuf.setState(op.getReplayBuffer());
 		this.rewardIsGameScore.setState(op.getRewardIsGameScore());
 
 		// only for RubiksCube:

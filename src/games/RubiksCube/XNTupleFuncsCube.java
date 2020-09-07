@@ -16,10 +16,10 @@ import games.RubiksCube.CubeStateMap.CsMapType;
 
 public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Serializable {
 
-	private CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
-	private ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);
-	
-    /**
+	private final CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
+	private final ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);
+
+	/**
      * change the version ID for serialization only if a newer version is no longer
      * compatible with an older one (older .gamelog or .agt.zip containing this object will
      * become unreadable or you have to provide a special version transformation)
@@ -100,17 +100,16 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * </ul>
 	 * In the case of the cube we have s=24 color symmetries (6 places 1st color * 4 places 2nd color)
 	 * 
-	 * @param boardVector
-	 * @return cuSOWB
+	 * @param curSOWB a state with its board vector
+	 * @return a vector of board vectors
 	 */
 	@Override
 	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n) {
-		BoardVector boardVector = curSOWB.getBoardVector();
 		StateObserverCube so = (StateObserverCube) curSOWB.getStateObservation();
 		CubeState cS1 = so.getCubeState(); 
 		int i=0; 
 		boolean doAssert=true;
-		BoardVector[] equiv = null;
+		BoardVector[] equiv;
 		HashSet set = new HashSet();
 		//
 		// calculate all color-symmetric states for cS1, collect
@@ -118,10 +117,10 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
 		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) : 
 			"not all color-symmetric states have ygr 'home'!";
-		Iterator it1 = mapColSymm.entrySet().iterator(); 
+		Iterator<Map.Entry<Integer, CubeState>> it1 = mapColSymm.entrySet().iterator();
 	    while (it1.hasNext()) {
-		    Map.Entry entry = (Map.Entry)it1.next();
-		    set.add((CubeState)entry.getValue());	
+		    Map.Entry<Integer, CubeState> entry = it1.next();
+		    set.add(entry.getValue());
         } 	
 	    
 	    // once we have the truly different CubeStates in 'set', 
@@ -154,7 +153,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		CubeStateFactory csFactory = new CubeStateFactory();
 		int i=0;
 		boolean doAssert=true;
-		BoardVector[] equiv = null;
+		BoardVector[] equiv;
 		CubeState cS1 = csFactory.makeCubeState(boardVector);
 		HashSet set = new HashSet();
 		//
@@ -163,10 +162,10 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
 		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) : 
 			"not all color-symmetric states have ygr 'home'!";
-		Iterator it1 = mapColSymm.entrySet().iterator(); 
+		Iterator<Map.Entry<Integer, CubeState>> it1 = mapColSymm.entrySet().iterator();
 	    while (it1.hasNext()) {
-		    Map.Entry entry = (Map.Entry)it1.next();
-		    set.add((CubeState)entry.getValue());	
+		    Map.Entry<Integer, CubeState> entry = it1.next();
+		    set.add(entry.getValue());
         } 	
 	    
 	    // once we have the truly different CubeStates in 'set', 
@@ -194,7 +193,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
 	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(StateObsWithBoardVector, int)}[i]
 	 */
 	public int[] symmetryActions(int actionKey) {
 		/* TODO */
@@ -213,17 +212,116 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	public int[][] fixedNTuples(int mode) {
 		// Examples for some n-tuples for Rubik's PocketCube:
 		switch (mode) {
-		case 1: 
-			switch(CubeConfig.boardVecType) {
-			case CUBESTATE: 
-				// the 4 "ring" 8-tuples:
-				return new int[][]{ {15,14,9,8,0,3,22,21} ,{12,13,10,11,1,2,23,20},
-									{5,4,8,11,18,17,23,22},{ 6,7,9,10,19,16,20,21} };
-			case CUBEPLUSACTION:
-				// the 4 "ring" 8-tuples + the 2 lastAction-cells:
-				return new int[][]{ {15,14,9,8,0,3,22,21,24,25} ,{12,13,10,11,1,2,23,20,24,25},
-									{5,4,8,11,18,17,23,22,24,25},{ 6,7,9,10,19,16,20,21,24,25} };
-			}
+			case 0:
+				switch(CubeConfig.boardVecType) {
+					case CUBESTATE:
+						// the 4 "ring" 8-tuples:
+						return new int[][]{ {15,14,9,8,0,3,22,21} ,{12,13,10,11,1,2,23,20},
+								{5,4,8,11,18,17,23,22},{ 6,7,9,10,19,16,20,21} };
+					case CUBEPLUSACTION:
+						// the 4 "ring" 8-tuples + the 2 lastAction-cells:
+						return new int[][]{ {15,14,9,8,0,3,22,21,24,25} ,{12,13,10,11,1,2,23,20,24,25},
+								{5,4,8,11,18,17,23,22,24,25},{ 6,7,9,10,19,16,20,21,24,25} };
+				}
+			case 1:
+				// 30 random, but fixed 7-tuples from theNtuple.txt
+				return new int[][] {
+						{17, 2, 20, 21, 22, 23, 12},
+						{0, 3, 4, 5, 6, 22, 7},
+						{16, 19, 20, 10, 12, 13, 14},
+						{0, 1, 2, 3, 5, 22, 23},
+						{0, 1, 17, 18, 3, 8, 9},
+						{16, 17, 1, 18, 19, 8, 11},
+						{1, 17, 18, 19, 10, 11, 13},
+						{0, 21, 6, 7, 8, 9, 15},
+						{3, 4, 20, 21, 5, 22, 6},
+						{0, 2, 3, 5, 21, 22, 23},
+						{0, 3, 4, 6, 7, 8, 9},
+						{16, 19, 6, 12, 13, 14, 15},
+						{16, 18, 19, 9, 10, 11, 13},
+						{4, 6, 7, 8, 9, 14, 15},
+						{16, 6, 7, 9, 10, 12, 15},
+						{16, 17, 19, 12, 13, 14, 15},
+						{19, 7, 10, 12, 13, 14, 15},
+						{4, 5, 6, 22, 7, 8, 9},
+						{0, 4, 21, 5, 6, 22, 8},
+						{16, 17, 2, 18, 19, 3, 23},
+						{16, 17, 2, 3, 21, 22, 23},
+						{0, 3, 21, 5, 22, 23, 8},
+						{4, 21, 6, 22, 7, 9, 15},
+						{20, 21, 10, 12, 13, 14, 15},
+						{4, 7, 8, 9, 13, 14, 15},
+						{18, 19, 9, 10, 11, 13, 14},
+						{16, 17, 1, 2, 18, 3, 23},
+						{16, 19, 20, 10, 12, 13, 14},
+						{2, 20, 5, 22, 6, 23, 12},
+						{16, 17, 19, 20, 23, 12, 13}
+				};
+			case 2:
+				// 60 random, but fixed 7-tuples from theNtuple.txt
+				return new int[][] {
+						{0, 3, 4, 5, 22, 23, 8},
+						{0, 4, 5, 7, 8, 9, 11},
+						{16, 21, 5, 22, 6, 12, 15},
+						{0, 4, 20, 21, 5, 22, 6},
+						{16, 1, 18, 19, 9, 10, 11},
+						{19, 20, 7, 10, 12, 13, 14},
+						{2, 3, 20, 5, 22, 6, 23},
+						{21, 5, 6, 7, 12, 14, 15},
+						{4, 7, 9, 12, 13, 14, 15},
+						{16, 17, 19, 20, 21, 23, 12},
+						{16, 17, 1, 2, 18, 23, 12},
+						{16, 17, 18, 19, 23, 10, 12},
+						{16, 17, 18, 19, 23, 12, 13},
+						{3, 4, 21, 5, 6, 22, 15},
+						{19, 21, 6, 12, 13, 14, 15},
+						{16, 1, 17, 2, 18, 19, 11},
+						{0, 1, 17, 2, 18, 4, 8},
+						{3, 21, 5, 22, 6, 23, 7},
+						{3, 21, 5, 6, 22, 7, 15},
+						{4, 20, 21, 6, 7, 9, 15},
+						{2, 3, 20, 21, 22, 23, 12},
+						{6, 7, 8, 9, 13, 14, 15},
+						{16, 20, 21, 22, 23, 12, 15},
+						{17, 2, 18, 3, 20, 5, 23},
+						{1, 18, 19, 4, 7, 8, 11},
+						{1, 17, 2, 20, 21, 22, 23},
+						{16, 1, 17, 18, 19, 10, 11},
+						{0, 1, 4, 7, 8, 11, 14},
+						{17, 1, 2, 20, 23, 11, 12},
+						{16, 1, 17, 2, 18, 19, 11},
+						{17, 2, 18, 3, 20, 22, 23},
+						{1, 18, 2, 8, 9, 10, 11},
+						{20, 21, 5, 6, 7, 14, 15},
+						{4, 20, 5, 21, 6, 22, 7},
+						{1, 19, 9, 10, 11, 14, 15},
+						{16, 19, 20, 21, 12, 13, 15},
+						{16, 17, 18, 19, 20, 10, 12},
+						{2, 20, 21, 6, 22, 23, 15},
+						{0, 4, 21, 6, 7, 14, 15},
+						{20, 21, 5, 6, 7, 12, 15},
+						{0, 18, 7, 8, 9, 11, 14},
+						{3, 4, 5, 6, 12, 14, 15},
+						{0, 4, 7, 8, 9, 10, 11},
+						{0, 7, 8, 9, 10, 14, 15},
+						{4, 7, 8, 9, 10, 11, 14},
+						{7, 9, 10, 12, 13, 14, 15},
+						{16, 17, 18, 20, 23, 12, 15},
+						{16, 6, 9, 12, 13, 14, 15},
+						{0, 1, 18, 2, 3, 8, 11},
+						{0, 3, 4, 5, 6, 22, 23},
+						{0, 4, 5, 8, 9, 10, 11},
+						{16, 17, 2, 19, 20, 23, 12},
+						{4, 5, 6, 22, 7, 14, 15},
+						{3, 4, 5, 7, 8, 9, 14},
+						{0, 1, 18, 3, 4, 5, 8},
+						{16, 17, 2, 18, 20, 22, 23},
+						{16, 17, 18, 19, 10, 11, 13},
+						{16, 17, 9, 10, 12, 13, 14},
+						{16, 1, 17, 2, 18, 23, 11},
+						{16, 19, 8, 9, 10, 11, 13}
+				};
+
 		}
 		throw new RuntimeException("Unsupported value mode="+mode+" in XNTupleFuncs::fixedNTuples(int)");
 	}
@@ -232,11 +330,12 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	public String fixedTooltipString() {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>"
-				+ "1: TODO"
+				+ "0: 4 'ring' 8-tuples<br>"
+				+ "1: 30 7-tuples"
 				+ "</html>";
 	}
 
-    private static int[] fixedModes = {1};
+    private final static int[] fixedModes = {0,1,2};
     
 	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;

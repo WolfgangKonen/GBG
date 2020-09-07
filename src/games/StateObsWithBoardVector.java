@@ -4,6 +4,8 @@ import controllers.TD.ntuple2.NTuple2ValueFunc;
 
 /**
  * 	This container class just bundles a {@link BoardVector} with its creating {@link StateObservation} object.
+ * 	<p>
+ * 	Note: It copies the bundled elements just by reference.
  * 
  *  @see XNTupleFuncs#symmetryVectors(StateObsWithBoardVector, int)
  *  @see NTuple2ValueFunc

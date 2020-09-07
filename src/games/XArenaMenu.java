@@ -381,7 +381,7 @@ public class XArenaMenu extends JMenuBar {
 		add(menu);
 	}
 
-	private void generateTournamentMenu() {
+	public void generateTournamentMenu() {
 		JMenu menu;
 		JMenuItem menuItem;
 

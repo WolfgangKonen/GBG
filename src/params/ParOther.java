@@ -37,6 +37,8 @@ public class ParOther implements Serializable {
     private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
 	private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
+	private boolean bReplayBuf = false;	// only relevant for RubiksCube: whether to use a replay buffer or not
+	private double incAmount = 0;		// only relevant for RubiksCube in case bReplayBuf==true
     private boolean rewardIsGameScore = true;
     
     /**
@@ -79,6 +81,8 @@ public class ParOther implements Serializable {
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
+		this.bReplayBuf = op.getReplayBuffer();
+		this.incAmount = op.getIncAmount();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
 		
 		if (otparams!=null)
@@ -96,6 +100,8 @@ public class ParOther implements Serializable {
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
+		this.bReplayBuf = op.getReplayBuffer();
+		this.incAmount = op.getIncAmount();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
 		
 		if (otparams!=null)
@@ -152,9 +158,9 @@ public class ParOther implements Serializable {
 		return wrapperNply;
 	}
 
-    public int getpMaxRubiks() {
-		return pMaxRubiks;
-	}
+    public int getpMaxRubiks() { return pMaxRubiks;	}
+
+	public double getIncAmount() { return incAmount; }
 
 	public boolean getChooseStart01() {
 		return chooseStart01;
@@ -162,6 +168,10 @@ public class ParOther implements Serializable {
 
 	public boolean getLearnFromRM() {
 		return learnFromRM;
+	}
+
+	public boolean getReplayBuffer() {
+		return bReplayBuf;
 	}
 
 	public boolean getRewardIsGameScore() {
@@ -242,7 +252,17 @@ public class ParOther implements Serializable {
 		if (otparams!=null)
 			otparams.setLearnFromRM(bLearnFromRM);
 	}
-	
+
+	public void setReplayBuffer(boolean bReplayBuf) {
+		this.bReplayBuf =bReplayBuf;
+		if (otparams!=null)
+			otparams.setLearnFromRM(bReplayBuf);
+	}
+
+	public void setIncAmount(double incAmount) {
+		this.incAmount = incAmount;
+	}
+
 	public void setRewardIsGameScore(boolean bRGS) {
 		this.rewardIsGameScore=bRGS;
 		if (otparams!=null)
@@ -267,7 +287,8 @@ public class ParOther implements Serializable {
 			this.setEpisodeLength(10);
 			this.setStopEval(12);
 			this.setpMaxRubiks(6);
-			this.setTrainEvalMode(-1);	
+			this.setReplayBuffer(false);
+			this.setTrainEvalMode(-1);
 			this.setNumEval(1000);	
 			break;
 		default:								//  all other

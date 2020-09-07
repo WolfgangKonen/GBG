@@ -2,12 +2,8 @@ package controllers.TD.ntuple2;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
 import agentIO.LoadSaveGBG;
@@ -16,25 +12,17 @@ import params.ParOther;
 import params.ParTD;
 import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxNAgent;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
-import controllers.RandomAgent;
-import controllers.PlayAgent.AgentState;
-import games.Arena;
-import games.BoardVector;
-import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
 import games.StateObsWithBoardVector;
 import games.XNTupleFuncs;
-//import games.RubiksCube.StateObserverCube;
 import games.Sim.StateObserverSim;
-import games.XArenaMenu;
 
 /**
  * The alternative TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning)
@@ -103,19 +91,19 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	transient private boolean[] randLast;		// whether last action of player p was a random action
 	transient private ScoreTuple rLast;
 
-	private boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
+	private final boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
 
-	private boolean m_DEBG = false; //false;true;
+	private final boolean m_DEBG = false; //false;true;
 	// debug printout in collectReward:
 	public static boolean DBG_REWARD=false;
 	
 	// variable TERNARY is normally false. If true, use ternary target in update rule:
 	private boolean TERNARY=false;		// In this case it remains true only for final-reward-games (see getNextAction2)	
 	// variable FINALADAPTAGENTS is normally true (use finalAdaptAgents). Set only to false if you want to test how agents behave otherwise:
-	private boolean FINALADAPTAGENTS=true; //false;
+	private final boolean FINALADAPTAGENTS=true; //false;
 	// variable FINALADAPT_PART2 is normally true. Set only to false if you want to test how agents behave otherwise.
 	// If false, do not run through part 'adapt value(s_final) towards 0'. Only relevant, if FINALADAPTAGENTS==true.
-	private boolean FINALADAPT_PART2=true; //false;
+	private final boolean FINALADAPT_PART2=true; //false;
 	
 	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
 	
@@ -222,15 +210,15 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 */
 	@Override
 	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
-		int i, j;
+		int i;
 		double bestValue;
-        double value=0;			// the quantity to be maximized
+        double value;			// the quantity to be maximized
         double otilde, rtilde;
 		boolean rgs = this.getParOther().getRewardIsGameScore();
 		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we use TD target r + gamma*V
 		StateObservation NewSO;
-        Types.ACTIONS actBest = null;
-        Types.ACTIONS_VT actBestVT = null;
+        Types.ACTIONS actBest;
+        Types.ACTIONS_VT actBestVT;
     	bestValue = -Double.MAX_VALUE;
 		double[] VTable;		
 		
@@ -367,7 +355,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
 	 * {@link #getScore(StateObservation, StateObservation)}.
 	 * <p> 
-	 * Method {@link #getScore(StateObservation)}is only implemented here to satisfy {@link PlayAgent}'s interface. If called, 
+	 * This method is only implemented here to satisfy {@link PlayAgent}'s interface. If called,
 	 * it throws an exception.
 	 * 
 	 * @param so		   the (after-)state for which the value is desired
@@ -519,7 +507,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	private void adaptAgentV(int curPlayer, ScoreTuple R, NextState ns) {
 		StateObservation s_after = ns.getAfterState();
 		StateObservation s_next = ns.getNextSO();
-		int[] curBoard;
+//		int[] curBoard;
 		double v_next,vLast,vLastNew,target;
 		boolean learnFromRM = m_oPar.getLearnFromRM();
 		
@@ -551,7 +539,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         	// note that curBoard is NOT the board vector of state ns.getSO(), but of state
         	// sLast[curPlayer] (one round earlier!)
     		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[curPlayer], m_Net.xnf);
-			curBoard = curSOWB.getBoardVector().bvec; 
+//			curBoard = curSOWB.getBoardVector().bvec;
         	vLast = m_Net.getScoreI(curSOWB,curPlayer);
         	
 //    		if (randLast[curPlayer] && !learnFromRM && !s_next.isGameOver()) {
@@ -577,12 +565,12 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     		//debug only:
 			if (m_DEBG) {
 	    		if (s_next.isGameOver()) {
-	            	vLastNew = m_Net.getScoreI(curSOWB,curPlayer);
+	            	//vLastNew = m_Net.getScoreI(curSOWB,curPlayer);
 	            	int dummy=1;
 	    		}
 	    		assertStateForSim(s_next, sLast[curPlayer]);	// this is only for debugging Sim
-            	ScoreTuple sc1 = s_next.getGameScoreTuple();
-            	ScoreTuple sc2 = this.getScoreTuple(s_next, null);
+//            	ScoreTuple sc1 = s_next.getGameScoreTuple();
+//           	ScoreTuple sc2 = this.getScoreTuple(s_next, null);
 	    		String s1 = sLast[curPlayer].stringDescr();
 	    		String s2 = s_next.stringDescr();
 	    		if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
@@ -626,7 +614,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 */
 	private void finalAdaptAgents(int curPlayer, ScoreTuple R, NextState ns) {
 		double target,vLast,vLastNew;
-		int[] curBoard, nextBoard;
+//		int[] curBoard, nextBoard;
 		StateObservation s_after = ns.getAfterState();
 		StateObservation s_next = ns.getNextSO(); 
 		
@@ -640,7 +628,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 					target = R.scTup[n] - rLast.scTup[n]; 		// delta reward
 //					if (s_next instanceof StateObserverCube) target += 1;			// fudge factor 'cost-to-go' RubiksCube
 		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
-					curBoard = curSOWB.getBoardVector().bvec; 
+//					curBoard = curSOWB.getBoardVector().bvec;
 		        	vLast = m_Net.getScoreI(curSOWB,n);
 		        	
 	    			m_Net.updateWeightsTD(curSOWB, n, vLast, target, R.scTup[n], ns.getSO());
@@ -650,8 +638,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	    				assert s_next.isLegalState() : "s_next is not legal";
 	    	    		if (s_next.isGameOver()) {
 	    	            	vLastNew = m_Net.getScoreI(curSOWB,n);
-	    	            	ScoreTuple sc1 = s_next.getGameScoreTuple();
-	    	            	ScoreTuple sc2 = this.getScoreTuple(s_next, null);
+//	    	            	ScoreTuple sc1 = s_next.getGameScoreTuple();
+//	    	            	ScoreTuple sc2 = this.getScoreTuple(s_next, null);
 	    	            	int dummy=1;
 	    	    		}
 	    	    		String s1 = sLast[n].stringDescr();
@@ -678,7 +666,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 					// only then the value of this afterstate is used in getNextAction2.)
 																// WK/04/2019: NEW use afterstate, *not* next state
 		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_after, m_Net.xnf);
-					curBoard = curSOWB.getBoardVector().bvec; 
+//					curBoard = curSOWB.getBoardVector().bvec;
 		        	vLast = m_Net.getScoreI(curSOWB,curPlayer);
 		        	
 	    			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);					
@@ -704,11 +692,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		Types.ACTIONS_VT actBest;
 		Types.ACTIONS a_next, a_t;
 		int   nextPlayer, curPlayer=so.getPlayer();
-		NextState ns = null;
+		NextState ns;
 		ScoreTuple R = new ScoreTuple(so);
 		rLast = new ScoreTuple(so);
 
-		boolean learnFromRM = m_oPar.getLearnFromRM();
 		int epiLength = m_oPar.getEpisodeLength();
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 				
@@ -782,6 +769,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	} // trainAgent
 
 
+	@Override
 	public String stringDescr() {
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
@@ -795,7 +783,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 						+ ", learnFromRM: " + (m_oPar.getLearnFromRM()?"true":"false");
 		return str;
 	}
-		
+
+	@Override
 	public String stringDescr2() {
 		String cs = getClass().getSimpleName();
 		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()

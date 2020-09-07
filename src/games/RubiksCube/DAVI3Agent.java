@@ -1,22 +1,13 @@
 package games.RubiksCube;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.io.Serializable;
+import java.util.*;
 
 import agentIO.LoadSaveGBG;
-import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.NTuple2ValueFunc;
-import controllers.TD.ntuple2.NTupleAgt;
-import controllers.TD.ntuple2.TDNTuple3Agt;
-import controllers.TD.ntuple2.NTupleAgt.EligType;
 import controllers.TD.ntuple2.NTupleBase;
 import controllers.TD.ntuple2.NextState;
-import games.BoardVector;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
@@ -26,39 +17,43 @@ import params.ParTD;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
 /**
- *  Implements DAVI algorithm (Deep Approximate Value Iteration) for Rubiks Cube [Agnostelli2019].
+ *  Implements the DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agnostelli2019].
  *  <p>
- *  It simplifies DAVI by replacing the deep neural net with a (shallow but wide) n-tuple network. 
- *  It simplifies DAVI by updating the net in each step only with the actual (target,state) pair instead of maintaining
- *  a replay buffer and training the net in batches sampled from this replay buffer. <br>
- *  It <b>maximizes</b> the (non-positive) value V(s) where each step (twist) adds a negative step reward to V(s).  
+ *  It simplifies DAVI by replacing the deep neural net with a (shallow but wide) n-tuple network.
+ *  <ul>
+ *      <li> If {@link CubeConfig#REPLAYBUFFER} is true, simplify DAVI further by updating the net in each step only with
+ *      the actual (state, target) pair </li>
+ *      <li> If {@link CubeConfig#REPLAYBUFFER} is false, maintain a replay buffer of {@link TrainingItem}s and train the net
+ *      in batches sampled from this replay buffer. </li>
+ *  </ul>
+ *  It <b>maximizes</b> the (non-positive) value V(s) where each step (twist) adds a negative step reward to V(s).
  *  Only the solved cube s* has V(s*)=0.
  *
  */
 public class DAVI3Agent extends NTupleBase implements PlayAgent {
 
-	/**
-	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
-	 * to provide a special version transformation)
-	 */
-	private static final long serialVersionUID = 12L;
-
 	private static StateObserverCube def = new StateObserverCube();   // default (solved) cube
 
 	private Random rand;
 
-	private NTupleAgt.EligType m_elig;
-	
-	private int numPlayers;
+	private transient LinkedList replayBuffer;
 
-	private boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
+//	private NTupleAgt.EligType m_elig;
+//	private int numPlayers;
 
-	private boolean m_DEBG = false; //false;true;
+	private final boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
+
+	private final boolean m_DEBG = false; //false;true;
+
+	/**
+	 * change the version ID for serialization only if a newer version is no longer
+	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * to provide a special version transformation)
+	 */
+	private static final long serialVersionUID = 12L;
 
 	/**
 	 * Create a new {@link DAVI3Agent}
@@ -69,12 +64,11 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
 	 * @param maxGameNum	maximum number of training games
-	 * @throws IOException
 	 */
 	public DAVI3Agent(String name, ParTD tdPar, ParNT ntPar, ParOther oPar, 
-			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
+			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) {
 		super(name);
-		this.numPlayers = xnf.getNumPlayers();
+//		this.numPlayers = xnf.getNumPlayers();
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);			
 	}
 
@@ -82,18 +76,17 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	 * 
 	 * @param tdPar			temporal difference parameters
 	 * @param ntPar			n-tuples and temporal coherence parameter
-	 * @param oPar
+	 * @param oPar			other params
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
 	 * @param maxGameNum	maximum number of training games
-	 * @throws IOException
 	 */
 	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,
-			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) throws IOException {
+			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) {
 		m_tdPar = new ParTD(tdPar);			// m_tdPar is in NTupleBase
 		m_ntPar = new ParNT(ntPar);			// m_ntPar is in NTupleBase
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
-		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
+//		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
 		rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42); 
 		
 		int posVals = xnf.getNumPositionValues();
@@ -105,7 +98,9 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		setNTParams(ntPar);
 		setTDParams(tdPar, maxGameNum);
 		m_Net.setHorizon();
-		
+
+		replayBuffer  = new LinkedList();
+
 		setAgentState(AgentState.INIT);
 	}
 
@@ -129,7 +124,9 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		
 		// initialize transient members (in case a further training should take place --> see ValidateAgentTest) 
 		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples
-		
+
+		replayBuffer  = new LinkedList();
+
 		return true;
 	}
 
@@ -146,7 +143,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	 */
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
-		int i,j;
+		int i;
 		StateObserverCube newSO;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
         ACTIONS actBest = null;
@@ -209,12 +206,12 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 
 	/**
 	 * This is the NN version: Ask the neural net (here: an ntuple network) to predict the value of {@code so}
-	 * @param so
-	 * @return 0, if {@code so} is the solved state. In all other cases, return the prediction of {@link #m_Net}.
+	 * @param so	the state
+	 * @return REWARD_POSITIVE, if {@code so} is the solved state. In all other cases, return the prediction of {@link #m_Net}.
 	 */
 	public double daviValue(StateObserverCube so) {
 		double score;
-		if (so.isEqual(def)) return 0;
+		if (so.isEqual(def)) return StateObserverCube.REWARD_POSITIVE;
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		score = m_Net.getScoreI(curSOWB,so.getPlayer());
 		return score;
@@ -228,6 +225,10 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
      */
     @Override
 	public boolean trainAgent(StateObservation so) {
+		return (CubeConfig.REPLAYBUFFER) ? trainAgent_replayBuffer(so) : trainAgent_baseline(so);
+	}
+
+	public boolean trainAgent_baseline(StateObservation so) {
 		Types.ACTIONS_VT  a_t;
 		StateObservation s_t = so.copy();
 		int epiLength = m_oPar.getEpisodeLength();
@@ -268,10 +269,100 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		//System.out.println("Final state: "+s_t.stringDescr()+", "+a_t.getVBest());
 				
 		incrementGameNum();
-		if (this.getGameNum() % 500 == 0) System.out.println("gameNum: "+this.getGameNum());
+		if (this.getGameNum() % 2000 == 0) System.out.println("gameNum: "+this.getGameNum());
 		
 		return false;		
-	} 
+	}
+
+	public boolean trainAgent_replayBuffer(StateObservation so) {
+		Types.ACTIONS_VT  a_t;
+		StateObservation s_t = so.copy();
+		int epiLength = m_oPar.getEpisodeLength();
+		LinkedList episodeList = new LinkedList();
+		TrainingItem item;
+		int index;
+
+		int curPlayer;
+		double vLast;
+		assert (epiLength != -1) : "trainAgent: Rubik's Cube should not be run with epiLength==-1 !";
+		if (so.equals(def)) {
+			System.err.println("trainAgent: cube should NOT be the default (solved) cube!");
+			return false;
+		}
+		boolean m_finished = false;
+
+		do {
+			m_numTrnMoves++;		// number of train moves
+
+			a_t = getNextAction2(s_t, false, true);	// choose action a_t (agent-specific behavior)
+
+			// add a new TrainingElem to episodeList
+			TrainingItem trainItem = new TrainingItem(
+					new StateObsWithBoardVector(s_t.copy(), m_Net.xnf),
+					a_t.getVBest(),
+					this.getGameNum()
+			);
+			episodeList.addFirst(trainItem);
+			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
+
+			s_t.advance(a_t);		// advance the state
+
+			if (s_t.isGameOver()) {
+				m_finished = true;
+
+				// successful episode --> put all episodeList elements into replayBuffer
+				ListIterator<DAVI3Agent.TrainingItem> iter = episodeList.listIterator();
+				while(iter.hasNext()) {
+					replayBuffer.addFirst(iter.next());
+					if (replayBuffer.size() > CubeConfig.replayBufferCapacity) replayBuffer.pollLast();
+				}
+
+			}
+			if (s_t.getMoveCounter()>=epiLength) {
+				m_finished=true;
+
+				// unsuccessful episode --> reduce the target of all elements in episodeList by 'amount'
+				// and put them then into replayBuffer
+				double amount = m_oPar.getIncAmount(); //-0.03;
+				ListIterator<DAVI3Agent.TrainingItem> iter = episodeList.listIterator();
+				while(iter.hasNext()) {
+//					TrainingItem ti = iter.next();
+//					ti.reduceTarget(amount);
+					replayBuffer.addFirst(iter.next().increaseTarget(amount));
+					if (replayBuffer.size() > CubeConfig.replayBufferCapacity) replayBuffer.pollLast();
+				}
+
+			}
+
+		} while(!m_finished);
+		//System.out.println("Final state: "+s_t.stringDescr()+", "+a_t.getVBest());
+
+		// train network from replayBuffer ...
+		if (replayBuffer.size() < CubeConfig.batchSize) {
+			// ... with all samples in replayBuffer
+			ListIterator<TrainingItem> iter = replayBuffer.listIterator();
+			while(iter.hasNext()) {
+				item = iter.next();
+				curPlayer = item.sowb.getStateObservation().getPlayer();
+				vLast = m_Net.getScoreI(item.sowb,curPlayer);
+				m_Net.updateWeightsTD(item.sowb, curPlayer, vLast, item.target,CubeConfig.stepReward,item.sowb.getStateObservation());
+			}
+		} else {
+			// ... with batchSize random samples
+			for (int i=0; i<CubeConfig.batchSize; i++) {
+				index = rand.nextInt(replayBuffer.size());
+				item = (TrainingItem)replayBuffer.get(index);
+				s_t = item.sowb.getStateObservation();
+				vLast = m_Net.getScoreI(item.sowb,s_t.getPlayer());
+				m_Net.updateWeightsTD(item.sowb, s_t.getPlayer(), vLast, item.target,CubeConfig.stepReward,s_t);
+			}
+		}
+
+		incrementGameNum();
+		if (this.getGameNum() % 2000 == 0) System.out.println("gameNum: "+this.getGameNum());
+
+		return false;
+	}
 
 	@Override
 	public double getScore(StateObservation so) {
@@ -308,7 +399,24 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		return getClass().getSimpleName()+": pMax="+CubeConfig.pMax + ", active weights="+res[1]; 
 	}
 
-    @Override
+	@Override
+	public String stringDescr() {
+		m_Net.setHorizon();
+		String cs = getClass().getSimpleName();
+		String str = cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
+				+ ", P:" + (m_Net.getXnf().getNumPositionValues())
+				+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
+				+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
+				+ ", alpha:" + m_Net.getAlpha()
+				+ ", pMax:" + m_oPar.getpMaxRubiks()
+				+ ", EE:" + m_oPar.getStopEval()		// Eval EpiLength
+				+ ", qMode:" + m_oPar.getQuickEvalMode()
+				+ ", incAmount:" + m_oPar.getIncAmount()
+				;
+		return str;
+	}
+
+	@Override
 	public String stringDescr2() {
 		m_Net.setHorizon();
 		int[] res = m_Net.activeWeights();
@@ -321,4 +429,23 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	public void collectReward(NextState ns) {
 	}
 
+	// class TrainingItem is needed for replayBuffer (see trainAgent_replayBuffer(so))
+	private class TrainingItem implements Serializable {
+		StateObsWithBoardVector sowb;
+		double target;
+		int numEpisode;
+
+		TrainingItem(StateObsWithBoardVector sowb, double target, int numEpisode) {
+			this.sowb = sowb;
+			this.target = target;
+			this.numEpisode = numEpisode;
+		}
+
+		TrainingItem increaseTarget(double amount) {
+			this.target += amount;
+			return this;
+		}
+	}
+
 }
+

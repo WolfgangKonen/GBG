@@ -64,7 +64,16 @@ public class CubeConfig {
 	 * <b>{@code pMax}</b> at runtime.
 	 */
 	public static int pMax = 10;			// 1,2,3,4,5,6,7,8,9,10,11,12,13,14   for 2x2x2 cube
-	
+
+	/**
+	 * whether a replay buffer with certain capacity and batch size is used or not
+	 */
+	public static boolean REPLAYBUFFER = true;  // false;true; //
+
+	public static int replayBufferCapacity = 500;
+	public static int batchSize = 50;
+
+
 	/**
 	 * This influences the behavior in {@link GameBoardCube#selectByTwists1(int) GameBoardCube.selectByTwists1(p)} 
 	 * when forming the twist sequence:
@@ -104,7 +113,8 @@ public class CubeConfig {
 	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br> 
 	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e. g. during training).  	
 	 */
-	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
+//	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
+	// is now replaced with ParOther.stopEval
 	
 	//
 	// Elements below are only for now deprecated cases:
