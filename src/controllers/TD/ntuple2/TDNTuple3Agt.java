@@ -335,8 +335,9 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			}
 		}	
 
-		double[] res = {bestValue};
-        ScoreTuple scBest = new ScoreTuple(res);
+		ScoreTuple scBest = new ScoreTuple(so);
+		scBest.scTup[so.getPlayer()] = bestValue;
+
 		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestValue,scBest);
 		return actBestVT;
 	}	

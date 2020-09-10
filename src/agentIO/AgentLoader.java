@@ -1,6 +1,5 @@
 package agentIO;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import controllers.PlayAgent;
@@ -15,10 +14,10 @@ import tools.Types;
  *
  */
 public class AgentLoader {
-	private PlayAgent pa = null;
+	private final PlayAgent pa;
+	private final Arena m_Arena;
 	private String loadMsg = "";
-	private Arena m_Arena;
-	
+
 	/**
 	 * 
 	 * @param arena		the game arena, needed to access game-specific settings

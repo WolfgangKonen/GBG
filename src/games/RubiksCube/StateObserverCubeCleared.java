@@ -32,6 +32,11 @@ public class StateObserverCubeCleared extends StateObserverCube implements State
 		this.clearLast(this.getCubeState().minTwists);
 	}
 
+	/**
+	 *
+	 * @param other
+	 * @param p     the minimal number of twists (-1 if not known)
+	 */
 	public StateObserverCubeCleared(StateObserverCube other, int p) {
 		super(other);
 		this.resetMoveCounter();
@@ -46,7 +51,7 @@ public class StateObserverCubeCleared extends StateObserverCube implements State
 	 * <p>
 	 * (If instead lastTwist were set, 3 actions would be excluded. This we do not want for a 
 	 * start state.)
-	 * @param p
+	 * @param p		the minimal number of twists (-1 if not known)
 	 * @return
 	 */
 	public StateObserverCubeCleared clearLast(int p) {

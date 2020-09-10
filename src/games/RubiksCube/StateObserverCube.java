@@ -42,7 +42,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * The game score as long as the solved cube is not found
 	 */
-    public static final double REWARD_NEGATIVE = -1.0; // never used at the moment
+    public static final double REWARD_NEGATIVE = -1.0;
 	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
    
 //	private double prevReward = 0.0;
@@ -85,7 +85,12 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		return new StateObserverCube(this);
 	}
 
-    @Override
+	@Override
+	public StateObservation clearedCopy() {
+		return new StateObserverCubeCleared(this,this.getMinEpisodeLength());
+	}
+
+	@Override
 	public int getMinEpisodeLength() {
 		return m_state.minTwists;
 	}

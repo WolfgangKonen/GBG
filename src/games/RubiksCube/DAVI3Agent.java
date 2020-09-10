@@ -24,13 +24,13 @@ import tools.Types.ACTIONS_VT;
  *  <p>
  *  It simplifies DAVI by replacing the deep neural net with a (shallow but wide) n-tuple network.
  *  <ul>
- *      <li> If {@link CubeConfig#REPLAYBUFFER} is true, simplify DAVI further by updating the net in each step only with
+ *      <li> If {@link CubeConfig#REPLAYBUFFER} is false, simplify DAVI further by updating the net in each step only with
  *      the actual (state, target) pair </li>
- *      <li> If {@link CubeConfig#REPLAYBUFFER} is false, maintain a replay buffer of {@link TrainingItem}s and train the net
+ *      <li> If {@link CubeConfig#REPLAYBUFFER} is true, maintain a replay buffer of {@link TrainingItem}s and train the net
  *      in batches sampled from this replay buffer. </li>
  *  </ul>
- *  It <b>maximizes</b> the (non-positive) value V(s) where each step (twist) adds a negative step reward to V(s).
- *  Only the solved cube s* has V(s*)=0.
+ *  It <b>maximizes</b> the value V(s) where each step (twist) adds a negative step reward to V(s).
+ *  Only the solved cube s* has V(s*)={@link StateObserverCube#REWARD_POSITIVE}.
  *
  */
 public class DAVI3Agent extends NTupleBase implements PlayAgent {
@@ -99,7 +99,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		setTDParams(tdPar, maxGameNum);
 		m_Net.setHorizon();
 
-		replayBuffer  = new LinkedList();
+		replayBuffer  = new LinkedList<>();
 
 		setAgentState(AgentState.INIT);
 	}
@@ -125,7 +125,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		// initialize transient members (in case a further training should take place --> see ValidateAgentTest) 
 		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples
 
-		replayBuffer  = new LinkedList();
+		replayBuffer  = new LinkedList<>();
 
 		return true;
 	}
@@ -160,8 +160,10 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
         	ACTIONS thisAct = acts.get(i);
         	ACTIONS inverseAct = inverseAction(((StateObserverCube) so).getLastAction());
         	if (!thisAct.equals(inverseAct)) {
-        		// we skip the action which is the inverse of the last action;
-				// this is to avoid cycles of 2
+        		// We skip the action which is the inverse of the last action;
+				// this is to avoid cycles of 2 --> beneficial when searching for the solved cube in play & train.
+				// If you do not want to skip any action - e.g. when inspecting states - then enter this method with
+				// a 'cleared' state {@link StateObserverCubeCleared} so
 
 				newSO = ((StateObserverCube) so).copy();
 				newSO.advance(acts.get(i));
@@ -176,7 +178,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 					bestActions.clear();
 					bestActions.add(acts.get(i));
 				}
-			}
+			}  // if (!thisAct.equals(inverseAct))
         } // for
         
         assert bestActions.size() > 0 : "Oops, no element in bestActions! ";
@@ -195,7 +197,10 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 // } catch (Exception e) {
 //	 e.printStackTrace();
 // }
-        return new ACTIONS_VT(actBest.toInt(), false, vTable);
+		double[] res = {maxValue};
+		ScoreTuple scBest = new ScoreTuple(res);
+
+		return new ACTIONS_VT(actBest.toInt(), false, vTable, maxValue, scBest);
 	}
 
 	private ACTIONS inverseAction(ACTIONS act) {
@@ -228,6 +233,9 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		return (CubeConfig.REPLAYBUFFER) ? trainAgent_replayBuffer(so) : trainAgent_baseline(so);
 	}
 
+	/**
+	 * baseline training: train once with every action during an episode, as in normal TD learning
+	 */
 	public boolean trainAgent_baseline(StateObservation so) {
 		Types.ACTIONS_VT  a_t;
 		StateObservation s_t = so.copy();
@@ -274,11 +282,17 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		return false;		
 	}
 
+	/**
+	 * replay buffer training: maintain a replay buffer of recent training experience with capacity
+	 * {@link CubeConfig#replayBufferCapacity}. First play a whole episode and add it (conditionally) to
+	 * the replay buffer. Then perform a training where a batch of samples is drawn randomly from the replay buffer.
+	 * Batch size is {@link CubeConfig#batchSize}.
+	 */
 	public boolean trainAgent_replayBuffer(StateObservation so) {
 		Types.ACTIONS_VT  a_t;
 		StateObservation s_t = so.copy();
 		int epiLength = m_oPar.getEpisodeLength();
-		LinkedList episodeList = new LinkedList();
+		LinkedList<TrainingItem> episodeList = new LinkedList<>();
 		TrainingItem item;
 		int index;
 
@@ -385,7 +399,10 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
-		return so.getRewardTuple(true);  //getScoreTuple(so, null);
+		double[] d = {CubeConfig.stepReward + daviValue((StateObserverCube)so)};
+		return new ScoreTuple(d);
+
+//		return so.getRewardTuple(true);  //getScoreTuple(so, null);
 	}
 
 	@Override

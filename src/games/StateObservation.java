@@ -3,7 +3,6 @@ package games;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.*;
 import tools.ScoreTuple;
@@ -31,6 +30,17 @@ public interface StateObservation extends Serializable{
 	
 	public StateObservation copy();
 
+	/**
+	 * Some classes implementing StateObservation store information about the history that led to this state.
+	 * This is useful in some situations (e.g. Rubik's Cube, when searching the twist sequence to the solved cube
+	 * then it is useful to avoid the inverse twist of the last twist taken). But in some other situations,
+	 * history information should be cleared, i.e. a cleared copy is needed.
+	 * <p>
+	 * ObserverBase provides a default implementation which just returns a copy of {@code this}.
+	 * @return
+	 */
+	public StateObservation clearedCopy();
+
 	public boolean isGameOver();
 
 	public boolean isDeterministicGame();
@@ -41,7 +51,11 @@ public interface StateObservation extends Serializable{
 	public boolean isFinalRewardGame();
 
 	public boolean isLegalState();
-	
+
+	/**
+	 * @return true, if inspection is stopped on game over (the normal case), false if not (e.g. the Rubik's Cube case,
+	 * because here we start inspection with the solved cube)
+	 */
 	public boolean stopInspectOnGameOver();
 	
 //	/**
@@ -73,24 +87,12 @@ public interface StateObservation extends Serializable{
 	 */
 	public String stringActionDescr(ACTIONS act);
 
-//	/**
-//	 * This method should be only called if game is over. The player is 
-//	 * the player who would be next in turn (if the game were not over)
-//	 * <p>
-//	 * WINNER::key() returns the number of the player who has won.
-//	 * 
-//	 * @return PLAYER_LOSES(-1), TIE(0), PLAYER_WINS(1)
-//	 */
-//	public Types.WINNER getGameWinner();
-//	// Do we need this method really?
-	
-	
 	/**
 	 * The game score, seen from the perspective of {@code referingState}'s player. This 
-	 * relativeness is usually only relevant for games with more than one player.
+	 * perspective is only relevant for games with more than one player.
 	 * <p>
 	 * The keyword abstract signals that derived classes will be either abstract or implement
-	 * {@link #getGameScore(StateObservation)}, as required by the interface {@link StateObservation} as well.
+	 * this method, as required by the interface {@link StateObservation} as well.
 	 * 
 	 * @param referringState see below
 	 * @return  The game score, seen from the perspective of {@code referingState}'s player.<br> 
@@ -179,7 +181,7 @@ public interface StateObservation extends Serializable{
     /**
      * Advance the current afterstate to a new state (do the nondeterministic part of advance).<p>
      * 
-     * (This method is not really necessary for deterministic games - it does just nothing - but we
+     * (This method is not really necessary for deterministic games - then it does just nothing - but we
      * have it here to allow the same syntax in {@link TDNTuple3Agt} when making an action for
      * any StateObservation, deterministic or nondeterministic.)
      */

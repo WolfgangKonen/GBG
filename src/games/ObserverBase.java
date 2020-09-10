@@ -29,18 +29,22 @@ abstract public class ObserverBase implements StateObservation {
     protected double[] storedValues = null;
     protected double storedMaxScore; 
     
-    private String sWarn = "WARNING getReward: Case rgs==false is not handled in Observerbase!";
-	
+
     public ObserverBase() {    }
     
     public ObserverBase(ObserverBase other) {
 		this.m_counter = other.m_counter;
 		this.storedMaxScore = other.storedMaxScore;
 		this.storedActBest = other.storedActBest;
+		this.creatingPlayer = other.creatingPlayer;
 		if (other.storedActions!=null) this.storedActions = other.storedActions.clone();
 		if (other.storedValues!=null) this.storedValues = other.storedValues.clone();
     }
-	
+
+	public StateObservation clearedCopy() {
+    	return this.copy();
+	}
+
 	/**
 	 * Given the current state, store some useful information for inspecting the  
 	 * action actBest and double[] vtable returned by a call to <br>
@@ -151,7 +155,7 @@ abstract public class ObserverBase implements StateObservation {
 	 * relativeness is usually only relevant for games with more than one player.
 	 * <p>
 	 * The keyword abstract signals that derived classes will be either abstract or implement
-	 * {@link #getGameScore(StateObservation)}, as required by the interface {@link StateObservation} as well.
+	 * this method, as required by the interface {@link StateObservation} as well.
 	 * 
 	 * @param referringState see below
 	 * @return  The game score, seen from the perspective of {@code referingState}'s player.<br> 
@@ -202,6 +206,7 @@ abstract public class ObserverBase implements StateObservation {
 	 * @return the cumulative reward 
 	 */
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+		String sWarn = "WARNING getReward: Case rgs==false is not handled in Observerbase!";
 		if (rewardIsGameScore==false) {
 			System.out.println(sWarn);
 //			throw new RuntimeException(sWarn);

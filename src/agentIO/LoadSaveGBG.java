@@ -4,7 +4,6 @@ import TournamentSystem.tools.TSDiskAgentDataTransfer;
 import TournamentSystem.TSResultStorage;
 import controllers.*;
 import games.Arena;
-import games.XArenaButtons;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -33,12 +32,9 @@ public class LoadSaveGBG {
 	private final Arena arenaGame;
 	private final JFrame arenaFrame;
 	private final String TAG = "[LoadSaveGBG] ";
-//	private final XArenaButtons arenaButtons;
-//	private String tdstr="";
 
-	public LoadSaveGBG(Arena areGame, XArenaButtons areButtons, JFrame areFrame) {
+	public LoadSaveGBG(Arena areGame, JFrame areFrame) {
 		this.arenaGame = areGame;
-//		this.arenaButtons = areButtons;
 		this.arenaFrame = areFrame;
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();

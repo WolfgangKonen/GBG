@@ -42,8 +42,8 @@ import javax.swing.filechooser.*;
  */
 public class ExtensionFilter extends FileFilter {
 
-	private String acceptExtension;
-	private String description;
+	private final String acceptExtension;
+	private final String description;
 
 	public ExtensionFilter(String extension, String description) {
 		this.acceptExtension = extension;

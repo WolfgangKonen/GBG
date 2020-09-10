@@ -9,6 +9,8 @@ import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.PlayAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
+import games.RubiksCube.StateObserverCube;
+import games.RubiksCube.StateObserverCubeCleared;
 import games.Sim.StateObserverSim;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
@@ -106,7 +108,7 @@ abstract public class Arena implements Runnable {
 
 		m_xfun = new XArenaFuncs(this);
 		m_xab = new XArenaButtons(m_xfun, this); // needs a constructed 'gb'
-		tdAgentIO = new LoadSaveGBG(this, m_xab, m_ArenaFrame);
+		tdAgentIO = new LoadSaveGBG(this, m_ArenaFrame);
 
 		logManager = new LogManager();
 		logManager.setSubDir(gb.getSubDir());
@@ -326,7 +328,12 @@ abstract public class Arena implements Runnable {
 		while (taskState == Task.INSPECTV) {
 			if (gb.isActionReq()) {
 				gb.setActionReq(false);
-				so = gb.getStateObs();
+				so = gb.getStateObs().clearedCopy();
+				// clearedCopy realizes a special treatment needed for RubiksCube: getNextAction2, which is called
+				// below, skips from the available actions the inverse of the last action to avoid cycles of 2.
+				// This boosts performance when playing or evaluating RubiksCube. But it is wrong on InspectV,
+				// here we want to cover *ALL* available actions. By clearing the cube state we clear the last action
+				// (set it to unknown). For all other games, clearedCopy is identical to copy.
 
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
