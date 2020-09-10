@@ -165,10 +165,10 @@ public class EvaluatorOthello extends Evaluator {
 				for (StateObservation sd : diffStartList) {
 					sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, competeNum, 0);			
 					scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
-					//count++;
+					count++;
 				}
 			}	
-			//System.out.println("count = "+ count);
+			System.out.println("count = "+ count);
 		} 
 		else 		// start always from default start state
 		{

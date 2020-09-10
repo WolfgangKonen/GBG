@@ -296,52 +296,56 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         // if several actions have the same best value, select one of them randomly
 
         assert actBest != null : "Oops, no best action actBest";
-		if (!silent) {
-            NewSO = so.copy();
-            NewSO.advance(actBest);
-			System.out.println("---Best Move: "+NewSO.stringDescr()+", "+(bestValue));
-			
-			boolean DBG_SIM = false;		// set to true only for K6 (!!)
-			if (DBG_SIM && so instanceof StateObserverSim) {
-				String []pl = new String[so.getNumPlayers()];
-				if(so.getNumPlayers() > 2)
-				{
-					pl[0] = "(P0)";
-					pl[1] = "(P1)";
-					pl[2] = "(P2)";
-				}
-				else
-				{
-					pl[0] = "(X)";
-					pl[1] = "(O)";
-				}
-				MaxNAgent maxNAgent = new MaxNAgent("Max-N",15,true);
-				// if there are 12 moves to go, MaxNAgent(...,12,false) will take 1-2 minutes,
-				// but MaxNAgent(...,12,true) only 2 seconds. If there are 15 moves to go, then
-				// MaxNAgent(...,15,true) will still take only a few seconds. 
-				// So: activating the hash map is important for MaxN-speed!
-				ACTIONS_VT actMax = maxNAgent.getNextAction2(so, false,true);
-				double[] VTableMax = actMax.getVTable();
-				System.out.print("MaxN : ");
-				for (i=0; i<VTableMax.length-1; i++) 
-					System.out.print(String.format("% .4f; ", VTableMax[i]));
-					// "% .4f" means: a space before positive numbers, so that negative numbers
-					// (with an additional minus sign) are printed aligned
-				System.out.println(pl[so.getPlayer()]);
-				System.out.print("TDNT3: ");
-				for (i=0; i<VTable.length; i++) 
-					System.out.print(String.format("% .4f; ", VTable[i]));
-				System.out.println(pl[so.getPlayer()]);
-			}
-		}	
+		NewSO = so.copy();
+		NewSO.advance(actBest);
+		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
+		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
+//
+//		double[] res = {bestValue};  				// old and wrong - the reason it was undetected was only that
+//		ScoreTuple scBest = new ScoreTuple(res);	// scBest was never really used before MaxN2Wrapper change 2020-09-09
 
-		ScoreTuple scBest = new ScoreTuple(so);
-		scBest.scTup[so.getPlayer()] = bestValue;
+		if (!silent) {
+			printDebugInfo(so,NewSO,bestValue,VTable);
+		}
 
 		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestValue,scBest);
 		return actBestVT;
-	}	
-	
+	}
+
+	// helper for getNextAction2
+	private void printDebugInfo(StateObservation so, StateObservation NewSO, double bestValue, double[] VTable){
+		System.out.println("---Best Move: " + NewSO.stringDescr() + ", " + (bestValue));
+
+		boolean DBG_SIM = false;        // set to true only for K6 (!!)
+		if (DBG_SIM && so instanceof StateObserverSim) {
+			String[] pl = new String[so.getNumPlayers()];
+			if (so.getNumPlayers() > 2) {
+				pl[0] = "(P0)";
+				pl[1] = "(P1)";
+				pl[2] = "(P2)";
+			} else {
+				pl[0] = "(X)";
+				pl[1] = "(O)";
+			}
+			MaxNAgent maxNAgent = new MaxNAgent("Max-N", 15, true);
+			// if there are 12 moves to go, MaxNAgent(...,12,false) will take 1-2 minutes,
+			// but MaxNAgent(...,12,true) only 2 seconds. If there are 15 moves to go, then
+			// MaxNAgent(...,15,true) will still take only a few seconds.
+			// So: activating the hash map is important for MaxN-speed!
+			ACTIONS_VT actMax = maxNAgent.getNextAction2(so, false, true);
+			double[] VTableMax = actMax.getVTable();
+			System.out.print("MaxN : ");
+			for (int i = 0; i < VTableMax.length - 1; i++)
+				System.out.print(String.format("% .4f; ", VTableMax[i]));
+			// "% .4f" means: a space before positive numbers, so that negative numbers
+			// (with an additional minus sign) are printed aligned
+			System.out.println(pl[so.getPlayer()]);
+			System.out.print("TDNT3: ");
+			for (int i = 0; i < VTable.length; i++)
+				System.out.print(String.format("% .4f; ", VTable[i]));
+			System.out.println(pl[so.getPlayer()]);
+		}
+	}
 
 		
 	/**
