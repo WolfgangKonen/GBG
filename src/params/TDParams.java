@@ -1,18 +1,10 @@
 package params;
 
-import java.awt.BorderLayout;
-import java.awt.Canvas;
-import java.awt.Checkbox;
-import java.awt.CheckboxGroup;
-import java.awt.Choice;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.Label;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -21,7 +13,6 @@ import javax.swing.JTextField;
 
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.SarsaAgt;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 
@@ -56,9 +47,9 @@ public class TDParams extends Frame implements Serializable
 	private static final String TIPELIGTYPE = "Eligibility trace type: normal or reset on random move";
 	
 	
-	private static String[] lrnTypeString = { "backprop","RPROP" };
-	private static String[] neuralNetString = { "linear","neural net" };
-	private static String[] eligModeString = { "ET","RESET"}; // ,"REPLACE","RES+REP" };
+	private final static String[] lrnTypeString = { "backprop","RPROP" };
+	private final static String[] neuralNetString = { "linear","neural net" };
+	private final static String[] eligModeString = { "ET","RESET"}; // ,"REPLACE","RES+REP" };
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -75,8 +66,8 @@ public class TDParams extends Frame implements Serializable
 	JLabel horcutL;
 	JLabel gammaL;
 	JLabel epochL;
-	JLabel tNplyL;
-	JLabel mode3P_L;
+//	JLabel tNplyL;
+//	JLabel mode3P_L;
 	JPanel tdPanel;
 	private JTextField alphaT;
 	private JTextField alfinT;
@@ -86,8 +77,8 @@ public class TDParams extends Frame implements Serializable
 	private JTextField horcutT;
 	private JTextField gammaT;
 	private JTextField epochT;
-	private JTextField tNply_T;
-	private JTextField mode3P_T;
+//	private JTextField tNply_T;
+//	private JTextField mode3P_T;
 	
 	JLabel SigTypeL;
 	JLabel NormalizeL;
@@ -118,8 +109,8 @@ public class TDParams extends Frame implements Serializable
 		horcutT = new JTextField(ParTD.DEFAULT_HORIZONCUT+"");		//
 		gammaT = new JTextField(ParTD.DEFAULT_GAMMA+"");			//
 		epochT = new JTextField(ParTD.DEFAULT_EPOCHS+"");			//
-		tNply_T = new JTextField(ParTD.DEFAULT_NPLY+"");			//
-		mode3P_T = new JTextField(ParTD.DEFAULT_MODE_3P+"");		//
+//		tNply_T = new JTextField(ParTD.DEFAULT_NPLY+"");			//
+//		mode3P_T = new JTextField(ParTD.DEFAULT_MODE_3P+"");		//
 		alphaL = new JLabel("Alpha init");
 		alfinL = new JLabel("Alpha final");
 		epsilL = new JLabel("Epsilon init");
@@ -128,9 +119,9 @@ public class TDParams extends Frame implements Serializable
 		horcutL = new JLabel("Horizon cut");
 		gammaL = new JLabel("Gamma");
 		epochL = new JLabel("Epochs");
-		tNplyL = new JLabel("Train nPly");		// only TD-Ntuple-2, currently not shown
 		FeatTDS_L = new JLabel("Feature set");
-		mode3P_L = new JLabel("MODE_3P");
+//		tNplyL = new JLabel("Train nPly");		// only TD-Ntuple-2, currently not shown
+//		mode3P_L = new JLabel("MODE_3P");
 		alphaL.setToolTipText(TIPALPHA1L);
 		alfinL.setToolTipText(TIPALPHA2L);
 		lambdaL.setToolTipText(TIPLAMBDAL);
@@ -139,9 +130,9 @@ public class TDParams extends Frame implements Serializable
 		epfinL.setToolTipText(TIPEPSIL2L);
 		gammaL.setToolTipText(TIPGAMMAL);
 		epochL.setToolTipText(TIPEPOCHL);
-		tNplyL.setToolTipText("Only TD-Ntuple-2: Train n-ply look ahead");
 		FeatTDS_L.setToolTipText("Only TDS: select feature mode");
-		mode3P_L.setToolTipText("Only TD-Ntuple-2: mode 0: multi, 1: single, 2: mixed");
+//		tNplyL.setToolTipText("Only TD-Ntuple-2: Train n-ply look ahead");
+//		mode3P_L.setToolTipText("Only TD-Ntuple-2: mode 0: multi, 1: single, 2: mixed");
 		
 		withSigType = new JCheckBox();
 		normalize = new JCheckBox();
@@ -201,16 +192,16 @@ public class TDParams extends Frame implements Serializable
 //		tdPanel.add(choiceLrnType);
 		tdPanel.add(eligTypeL);
 		tdPanel.add(eligModeType);		
-		tdPanel.add(mode3P_L);
-		tdPanel.add(mode3P_T);
+//		tdPanel.add(mode3P_L);
+//		tdPanel.add(mode3P_T);
+		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
+		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
 
 		tdPanel.add(NetTypeL);
 		tdPanel.add(choiceNetType);
 		tdPanel.add(SigTypeL);
 		tdPanel.add(withSigType);
-//		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
-//		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
-		
+
 		tdPanel.add(FeatTDS_L);
 		tdPanel.add(choiceFeatTDS);
 		tdPanel.add(NormalizeL);
@@ -221,9 +212,9 @@ public class TDParams extends Frame implements Serializable
 		pack();
 		setVisible(false);
 		
-		boolean enabMode3P =  (TDNTuple2Agt.VER_3P); 
-		this.enableNPly(enabMode3P);
-		this.enableMode3P(enabMode3P);
+//		boolean enabMode3P =  (TDNTuple2Agt.VER_3P);
+//		this.enableNPly(enabMode3P);
+//		this.enableMode3P(enabMode3P);
 		
 	} // constructor TDParams()	
 	
@@ -247,7 +238,7 @@ public class TDParams extends Frame implements Serializable
 		this.horcutT.setEnabled(enable);
 		this.gammaT.setEnabled(enable);
 		this.epochT.setEnabled(enable);
-		this.mode3P_T.setEnabled(enable);
+//		this.mode3P_T.setEnabled(enable);
 		this.choiceNetType.setEnabled(enable);
 		this.normalize.setEnabled(enable);
 		this.normalize.setEnabled(enable);
@@ -256,11 +247,11 @@ public class TDParams extends Frame implements Serializable
 	}
 	
 	private void enableAgentPart(String agentName) {
-		boolean mode3PEnable= ((agentName=="TD-Ntuple-2" && TDNTuple2Agt.VER_3P )? true : false);
 		boolean featureEnable= (agentName=="TDS" ? true : false);
-		boolean netTypeEnable= (agentName=="TDS" ? true : false);		
-		mode3P_L.setEnabled(mode3PEnable);
-		mode3P_T.setEnabled(mode3PEnable);
+		boolean netTypeEnable= (agentName=="TDS" ? true : false);
+//		boolean mode3PEnable= ((agentName=="TD-Ntuple-2" && TDNTuple2Agt.VER_3P )? true : false);
+//		mode3P_L.setEnabled(mode3PEnable);
+//		mode3P_T.setEnabled(mode3PEnable);
 		FeatTDS_L.setEnabled(featureEnable);
 		choiceFeatTDS.setEnabled(featureEnable);		
 		epochL.setEnabled(netTypeEnable);			// epochs currently only for TDS
@@ -340,10 +331,10 @@ public class TDParams extends Frame implements Serializable
 		return false;
 	}
 	public int getNPly() {
-		return Integer.valueOf(tNply_T.getText()).intValue();
+		return 0; //Integer.valueOf(tNply_T.getText()).intValue();
 	}
 	public int getMode3P() {
-		return Integer.valueOf(mode3P_T.getText()).intValue();
+		return 0; //Integer.valueOf(mode3P_T.getText()).intValue();
 	}
 	public int getEligMode() {
 		return this.eligModeType.getSelectedIndex();
@@ -395,25 +386,25 @@ public class TDParams extends Frame implements Serializable
 	public void setRprop(boolean state) {
 		choiceLrnType.setSelectedItem(state ? 1 : 0);
 	}
-	public void setNPly(int value) {
-		tNply_T.setText(value+"");
-	}
-	public void setMode3P(int value) {
-		mode3P_T.setText(value+"");
-	}
 	public void setEligMode(int value) {
 		this.eligModeType.setSelectedIndex(value);
 	}
-	
-	@Deprecated
-	public void enableNPly(boolean enable) {
-		tNplyL.setEnabled(enable);
-		tNply_T.setEnabled(enable);
-	}
-	public void enableMode3P(boolean enable) {
-		mode3P_L.setEnabled(enable);
-		mode3P_T.setEnabled(enable);
-	}
+//	public void setNPly(int value) {
+//		tNply_T.setText(value+"");
+//	}
+//	public void setMode3P(int value) {
+//		mode3P_T.setText(value+"");
+//	}
+
+//	@Deprecated
+//	public void enableNPly(boolean enable) {
+//		tNplyL.setEnabled(enable);
+//		tNply_T.setEnabled(enable);
+//	}
+//	public void enableMode3P(boolean enable) {
+//		mode3P_L.setEnabled(enable);
+//		mode3P_T.setEnabled(enable);
+//	}
 	
 //	/**
 //	 * Needed to restore the param tab with the parameters from a re-loaded agent
@@ -460,14 +451,14 @@ public class TDParams extends Frame implements Serializable
 		setLambda(tp.getLambda());
 		setHorizonCut(tp.getHorizonCut());
 		setEpochs(tp.getEpochs());
-		setNPly(tp.getNPly());
 		setSigmoid(tp.hasSigmoid());
 		setNormalize(tp.getNormalize());
 		setEligMode(tp.getEligMode());
 		setFeatmode(tp.getFeatmode());
 		setLinearNet(tp.hasLinearNet());
 		setRprop(tp.hasRpropLrn());
-		setMode3P(tp.getMode3P());
+//		setNPly(tp.getNPly());
+//		setMode3P(tp.getMode3P());
 		
 		enableLambdaPart();
 		if (agentName!=null) 
@@ -481,8 +472,8 @@ public class TDParams extends Frame implements Serializable
 	 * parameters" we mean parameters producing good results. Likewise, some parameter
 	 * choices may be enabled or disabled.
 	 * 
-	 * @param agentName one out of "TD-Ntuple-2" ({@link TDNTuple2Agt}), 
-	 * 			"TD-Ntuple-3" ({@link TDNTuple2Agt}), 
+	 * @param agentName one out of "
+	 * 			"TD-Ntuple-3" ({@link TDNTuple3Agt}),
 	 * 			"Sarsa" ({@link SarsaAgt}) or "TDS" ({@link TDAgent})
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */

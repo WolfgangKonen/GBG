@@ -1,21 +1,17 @@
 package games.ZweiTausendAchtundVierzig;
 
+import controllers.TD.ntuple2.NTupleBase;
 import games.StateObservation;
-import games.CFour.C4Base;
 import games.BoardVector;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_VT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-
-import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
  * Class {@link StateObserver2048} holds a 2048 game state.
@@ -79,7 +75,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	private static final long serialVersionUID = 12L;
 
     public StateObserver2048() {
-        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) {
+        if (NTupleBase.DBG2_FIXEDSEQUENCE) {
             long seed=42L;					// DEBUG only
             random = new Random(seed);		//
         }

@@ -1,13 +1,10 @@
 package games.ZweiTausendAchtundVierzig;
 
-import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
-import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
-import games.MTrain;
 import games.Arena;
 import games.PStats;
 import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
@@ -39,24 +36,24 @@ import java.util.concurrent.Executors;
  * @see Evaluator2048_EA
  */
 public class Evaluator2048 extends Evaluator {
-    private ExecutorService executorService = Executors.newFixedThreadPool(6);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(6);
 
     private double medianScore;
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = Integer.MIN_VALUE;
-    private List<Integer> scores = new ArrayList<>();
     private double standarddeviation;
     private long duration;
     private long avgGameDur;
     private double avgMovPerGame;
     private double movesPerSec;
-    private TreeMap<Integer, Integer> tiles = new TreeMap<Integer, Integer>();
     private int moves = 0;
 //	private int m_mode;			// now in Evaluator
     private long startTime;
     private long stopTime;
-    private int verbose;
-    private Arena ar;		// needed in eval_agent, if PStats.printPlayStats(psList, m_PlayAgent,ar) is called
+    private final List<Integer> scores = new ArrayList<>();
+    private final TreeMap<Integer, Integer> tiles = new TreeMap<>();
+    private final int verbose;
+    private final Arena ar;		// needed in eval_agent, if PStats.printPlayStats(psList, m_PlayAgent,ar) is called
     						// and needed in printEResultList
     
     public EResult eResult; // holds 2048 evaluation results in one object. EResult is a nested class of this.
@@ -75,13 +72,8 @@ public class Evaluator2048 extends Evaluator {
         if (m_mode == -1) {
             return true;
         }
-		int cumEmpty=0;
-		// --- this part now in makePStats ---
-//		int nEmpty = 0;
-//		int moveNum=0;
-//		double gameScore=0.0;
-//		PStats pstats;
-		ArrayList<PStats> psList = new ArrayList<PStats>();
+		int cumEmpty;
+		ArrayList<PStats> psList = new ArrayList<>();
         startTime = System.currentTimeMillis();
         if(verbose == 0) {
             System.out.println("Starting evaluation of " + ConfigEvaluator.NUMBEREVALUATIONS 
@@ -200,7 +192,6 @@ public class Evaluator2048 extends Evaluator {
         		psList.add(makePStats2048(i, so2048, null, cumEmpty));
 
                 while (!so2048.isGameOver()) {
-                    long gameMoveTime = System.currentTimeMillis();
                     actBest = m_PlayAgent.getNextAction2(so2048, false, true);
                     so2048.advance(actBest);
 //                  System.out.print("Finished move " + (so.moves) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameMoveTime) + "ms.\n");
@@ -285,7 +276,7 @@ public class Evaluator2048 extends Evaluator {
         avgMovPerGame =  Math.round((double)moves / (double)ConfigEvaluator.NUMBEREVALUATIONS);
         movesPerSec = Math.round(moves/((double)duration/(double)1000));
         
-        this.eResult = new EResult(nPly, ConfigEvaluator.NUMBEREVALUATIONS, (double)minScore, (double)maxScore, lastResult, (double)medianScore, 
+        this.eResult = new EResult(nPly, ConfigEvaluator.NUMBEREVALUATIONS, minScore, maxScore, lastResult, medianScore,
         		standarddeviation, avgGameDur, avgMovPerGame, movesPerSec, tiles);
         
         return lastResult > ConfigEvaluator.MINPOINTS;
@@ -304,7 +295,7 @@ public class Evaluator2048 extends Evaluator {
     	double gameScore = so2048.getGameScore(so2048)*so2048.MAXSCORE;
     	cumEmpty += nEmpty;
     	int highestTile = so2048.getHighestTileValue();
-		PStats pstats = new PStats(i, moveNum, so2048.getPlayer(), actNum, gameScore, (double) nEmpty, (double) cumEmpty, highestTile);
+		PStats pstats = new PStats(i, moveNum, so2048.getPlayer(), actNum, gameScore, nEmpty, cumEmpty, highestTile);
 		return pstats;
     }
 
@@ -329,7 +320,7 @@ public class Evaluator2048 extends Evaluator {
 
         String agentSettings = "";
 
-        if(m_PlayAgent.getName() == "MC") {
+        if(m_PlayAgent.getName().equals("MC")) {
             MCAgentN mcAgent = (MCAgentN)m_PlayAgent;
             agentSettings = "\nROLLOUTDEPTH: " + mcAgent.getParMC().getRolloutDepth() +
                     "\nITERATIONS: " + mcAgent.getParMC().getNumIter() +
@@ -407,8 +398,7 @@ public class Evaluator2048 extends Evaluator {
     	
     	public void print(PrintWriter mtWriter)  {
     		DecimalFormat frm0 = new DecimalFormat("#0000");
-    		DecimalFormat frm1 = new DecimalFormat("#0000.0");  // drawback: decimal separator is "," 
-    		DecimalFormat df = new DecimalFormat(), df2 = new DecimalFormat();				
+    		DecimalFormat df, df2;
     		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
     		df.applyPattern("#0000.0");  // now numbers formatted by df  appear with a decimal *point*
     		df2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
@@ -443,7 +433,7 @@ public class Evaluator2048 extends Evaluator {
     					// Here we give the user the chance to close the file in the other application:
     				    System.out.print("*** Warning *** Could not open "+strDir+"/"+csvName+". Retry? (y/n): ");
     				    String s = bufIn.readLine();
-    				    retry = (s.contains("y")) ? true : false;
+    				    retry = (s.contains("y"));
     				} catch (IOException e2) {
     					e2.printStackTrace();					
     				}

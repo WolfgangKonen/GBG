@@ -26,18 +26,10 @@ import controllers.AgentBase;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
-import controllers.RandomAgent;
-import controllers.PlayAgent.AgentState;
-import controllers.TD.ntuple2.ZValueMulti;
-import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
-import games.BoardVector;
-import games.Feature;
 import games.GameBoard;
 import games.StateObservation;
-import games.StateObsNondeterministic;
 import games.StateObsWithBoardVector;
 import games.XNTupleFuncs;
-import games.XArenaMenu;
 
 /**
  * The SARSA {@link PlayAgent} <b>with n-tuples</b>. 
@@ -319,13 +311,15 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
         // if several actions have the same best Q value, select one of them randomly
 
         assert actBest != null : "Oops, no best action actBest";
+		NewSO = so.copy();
+		NewSO.advance(actBest);
+		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
+		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
 		if (!silent) {
-            NewSO = so.copy();
-            NewSO.advance(actBest);
 			System.out.println("---Best Move: "+NewSO.stringDescr()+", "+(bestQValue));
-		}	
-		
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestQValue);
+		}
+
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestQValue,scBest);
 		return actBestVT;
 	}	
 	

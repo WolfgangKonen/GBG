@@ -3,7 +3,6 @@ package games.CFour;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.ntuple2.NTupleBase;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
@@ -166,7 +165,7 @@ public class EvaluatorC4 extends Evaluator {
                 result = competeAgainstAlphaBetaDistantLoss(playAgent, m_gb, numEpisodes);
                 break;
             case 10:
-            	if (playAgent instanceof TDNTuple2Agt || playAgent instanceof NTupleBase) {
+            	if (/*playAgent instanceof TDNTuple2Agt ||*/ playAgent instanceof NTupleBase) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
             		// thread-safe, which is the case for TDNTuple2Agt, TDNTuple3Agt and SarsaAgt. 
             		// Also we have to construct MCTS opponent inside the callables, otherwise

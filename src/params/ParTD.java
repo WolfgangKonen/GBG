@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTuple2ValueFunc;
 import controllers.TD.ntuple2.SarsaAgt;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 
 /**
@@ -133,15 +132,15 @@ public class ParTD implements Serializable {
 		if (tdparams!=null)
 			tdparams.enableAll(enable);
 	}
-	public void enableMode3P(boolean enable) {
-		if (tdparams!=null)
-			tdparams.enableMode3P(enable);
-	}
-	@Deprecated
-	public void enableNPly(boolean enable) {
-		if (tdparams!=null)
-			tdparams.enableNPly(enable);
-	}
+//	public void enableMode3P(boolean enable) {
+//		if (tdparams!=null)
+//			tdparams.enableMode3P(enable);
+//	}
+//	@Deprecated
+//	public void enableNPly(boolean enable) {
+//		if (tdparams!=null)
+//			tdparams.enableNPly(enable);
+//	}
 	
 	public JPanel getPanel() {
 		if (tdparams!=null)		
@@ -278,17 +277,17 @@ public class ParTD implements Serializable {
 			tdparams.setHorizonCut(horCut);
 	}
 
-	public void setNPly(int nply) {
-		this.nply=nply;
-		if (tdparams!=null)
-			tdparams.setNPly(nply);
-	}
+//	public void setNPly(int nply) {
+//		this.nply=nply;
+//		if (tdparams!=null)
+//			tdparams.setNPly(nply);
+//	}
 	
-	public void setMode3P(int mode3P) {
-		this.mode3P=mode3P;
-		if (tdparams!=null)
-			tdparams.setMode3P(mode3P);
-	}
+//	public void setMode3P(int mode3P) {
+//		this.mode3P=mode3P;
+//		if (tdparams!=null)
+//			tdparams.setMode3P(mode3P);
+//	}
 	
 	public void setEligMode(int eligMode) {
 		this.eligMode=eligMode;
@@ -341,8 +340,8 @@ public class ParTD implements Serializable {
 	 * parameters" we mean parameters producing good results. If withUI, some parameter
 	 * choices may be enabled or disabled.
 	 * 
-	 * @param agentName one out of "TD-Ntuple-2" ({@link TDNTuple2Agt}), 
-	 * 			"TD-Ntuple-3" ({@link TDNTuple2Agt}), 
+	 * @param agentName one out of
+	 * 			"TD-Ntuple-3" ({@link TDNTuple3Agt}),
 	 * 			"Sarsa" ({@link SarsaAgt}) or "TDS" ({@link TDAgent})
 	 * @param gameName the string from {@link games.StateObservation#getName()}
 	 */

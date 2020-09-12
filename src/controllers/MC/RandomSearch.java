@@ -6,7 +6,7 @@ import java.util.Random;
 import games.StateObservation;
 
 /**
- * Perform a random rollout for {@link MCAgent} and {@link MCAgentN}
+ * Perform a random rollout for {@link MCAgentN}
  */
 public class RandomSearch{
     private Random random = new Random();

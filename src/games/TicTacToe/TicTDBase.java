@@ -15,9 +15,6 @@ import java.util.Random;
 import controllers.PlayAgent;
 import controllers.AgentBase;
 import controllers.MCTS.MCTSAgentT;
-import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
-import tools.Types;
 import tools.Types.ACTIONS;
 
 
@@ -60,8 +57,9 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	//private boolean MakeMove;		// true, if an agent move is requested 
 	protected transient MCTSAgentT referee;
 	/**
-	 * @deprecated (use {@link TDNTuple2Agt} instead)
+	 * deprecated (use {@link TDNTuple3Agt} instead)
 	 */
+	@Deprecated
 	private int nTuple[][] = {{0,1,2},{3,4,5},{0,4,8}
 							 ,{0,3,6,7,8},{0,4,8,2,6} 
 	 						 };

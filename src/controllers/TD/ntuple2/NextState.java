@@ -1,6 +1,5 @@
 package controllers.TD.ntuple2;
 
-import controllers.TD.ntuple2.TDNTuple2Agt.UpdateType;
 import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;

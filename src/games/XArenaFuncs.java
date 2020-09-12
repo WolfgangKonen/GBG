@@ -3,30 +3,23 @@ package games;
 import TournamentSystem.TSTimeStorage;
 import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.*;
-import controllers.MC.MCAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
-//import controllers.MCTS0.MCTSAgentT0;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
-import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
-//import controllers.TD.ntuple2.Sarsa2Agt;
 import controllers.TD.ntuple2.SarsaAgt;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
 import games.Nim.BoutonAgent;
 import games.Nim.DaviNimAgent;
-import games.Othello.StateObserverOthello;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
 import games.RubiksCube.DAVI2Agent;
 import games.RubiksCube.DAVI3Agent;
 import games.RubiksCube.DAVIAgent;
 import games.RubiksCube.GameBoardCube;
-import games.Sim.StateObserverSim;
 import games.TStats.TAggreg;
 import gui.DeviationWeightsChart;
 import gui.LineChartSuccess;
@@ -35,10 +28,7 @@ import tools.*;
 import tools.Types.ACTIONS;
 
 import javax.swing.*;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,7 +59,7 @@ import java.util.*;
  */
 public class XArenaFuncs {
 	public PlayAgent[] m_PlayAgents;
-	private Arena m_Arena;
+	private final Arena m_Arena;
 	protected Evaluator m_evaluatorQ = null;
 	protected Evaluator m_evaluatorT = null;
 	protected String lastMsg = "";
@@ -142,14 +132,13 @@ public class XArenaFuncs {
 	 * @param m_xab
 	 *            used only for reading parameter values from GUI members
 	 * @return a new {@link PlayAgent} (initialized, but not yet trained)
-	 * @throws IOException
-	 * 
+	 *
 	 * @see #fetchAgents(XArenaButtons)
 	 */
-	public PlayAgent constructAgent(int n, String sAgent, XArenaButtons m_xab) throws IOException {
+	public PlayAgent constructAgent(int n, String sAgent, XArenaButtons m_xab) {
 		PlayAgent pa = null;
 		int maxGameNum = m_xab.getGameNumber();
-		int featmode = m_xab.tdPar[n].getFeatmode();
+//		int featmode = m_xab.tdPar[n].getFeatmode();
 
 		// push the params from Param Tabs onto the relevant ParXX in m_xab:
 		updateParams(n,m_xab);
@@ -158,12 +147,12 @@ public class XArenaFuncs {
 			if (sAgent.equals("TDS")) {
 				Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
 				pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
-			} else if (sAgent.equals("TD-Ntuple-2")) {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTupleFactory ntupfac = new NTupleFactory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum);
+//			} else if (sAgent.equals("TD-Ntuple-2")) {
+//				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+//				NTupleFactory ntupfac = new NTupleFactory();
+//				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+//				pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+//						m_xab.oPar[n], nTuples, xnf, maxGameNum);
 			} else if (sAgent.equals("TD-Ntuple-3")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
@@ -191,8 +180,8 @@ public class XArenaFuncs {
 				pa = new MCTSExpectimaxAgt(sAgent, m_xab.mctsePar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("Human")) {
 				pa = new HumanPlayer(sAgent);
-			} else if (sAgent.equals("MC")) {
-				pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
+//			} else if (sAgent.equals("MC")) {
+//				pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("MC-N")) {
 				pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("AlphaBeta")) {// CFour only, see
@@ -294,8 +283,8 @@ public class XArenaFuncs {
 			pa = new MCTSExpectimaxAgt(sAgent, m_xab.mctsePar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("Human")) {
 			pa = new HumanPlayer(sAgent);
-		} else if (sAgent.equals("MC")) {
-			pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
+//		} else if (sAgent.equals("MC")) {
+//			pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("MC-N")) {
 			pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("AlphaBeta")) { // CFour only, see
@@ -327,18 +316,18 @@ public class XArenaFuncs {
 				if (sAgent.equals("TDS")) {
 					Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
 					pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
-				} else if (sAgent.equals("TD-Ntuple-2")) {
-					try {
-						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-						NTupleFactory ntupfac = new NTupleFactory();
-						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-						pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-								m_xab.oPar[n], nTuples, xnf, maxGameNum);
-					} catch (Exception e) {
-						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-						// e.printStackTrace();
-						pa = null;
-					}
+//				} else if (sAgent.equals("TD-Ntuple-2")) {
+//					try {
+//						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+//						NTupleFactory ntupfac = new NTupleFactory();
+//						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+//						pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+//								m_xab.oPar[n], nTuples, xnf, maxGameNum);
+//					} catch (Exception e) {
+//						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+//						// e.printStackTrace();
+//						pa = null;
+//					}
 				} else if (sAgent.equals("TD-Ntuple-3")) {
 					try {
 						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
@@ -397,7 +386,7 @@ public class XArenaFuncs {
 			} else { // i.e. if m_PlayAgents[n]!=null
 				// --- questionable, the code concerned with wrapper!! ---
 				PlayAgent inner_pa = m_PlayAgents[n];
-				if (m_PlayAgents[n].getName() == "ExpectimaxWrapper")
+				if (m_PlayAgents[n].getName().equals("ExpectimaxWrapper"))
 					inner_pa = ((ExpectimaxWrapper) inner_pa).getWrappedPlayAgent();
 				if (!sAgent.equals(inner_pa.getName()))
 					throw new RuntimeException("Current agent for player " + n + " is " + m_PlayAgents[n].getName()
@@ -434,7 +423,7 @@ public class XArenaFuncs {
 	public PlayAgent[] fetchAgents(XArenaButtons m_xab) throws RuntimeException {
 		if (m_PlayAgents == null)
 			m_PlayAgents = new PlayAgent[numPlayers];
-		PlayAgent pa = null;
+		PlayAgent pa;
 		for (int n = 0; n < numPlayers; n++) {
 			String sAgent = m_xab.getSelectedAgent(n);
 			pa = fetchAgent(n, sAgent, m_xab);
@@ -539,11 +528,10 @@ public class XArenaFuncs {
 		maxGameNum = xab.getGameNumber();
 
 		boolean doTrainStatistics;		// doTrainStatistics is mainly useful for RubiksCube, but can be activated for other games as well, if needed
-		doTrainStatistics = (m_Arena.getGameName()=="RubiksCube") ? true : false;
-		ArrayList tsList = new ArrayList<TStats>();
-		ArrayList taggList = new ArrayList<TAggreg>();
+		doTrainStatistics = (m_Arena.getGameName().equals("RubiksCube"));
+		ArrayList<TStats> tsList = new ArrayList<>();
+		ArrayList<TAggreg> taggList = new ArrayList<>();
 
-		DecimalFormat frm = new DecimalFormat("#0.0000");
 		PlayAgent pa = null;
 		PlayAgent qa = null;
 
@@ -554,7 +542,7 @@ public class XArenaFuncs {
 
 		} catch (RuntimeException e) {
 			m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-			return pa;
+			return null;
 		}
 
 		// bug fix: numEval needs to be set *after* constructAgent (which contains xab.oPar[n].pushFromOTParams)
@@ -742,7 +730,7 @@ public class XArenaFuncs {
 	}
 
 	private ArrayList<TAggreg> aggregateTrainStats(ArrayList<TStats> tsList) {
-		ArrayList taggList = new ArrayList<TAggreg>();
+		ArrayList<TAggreg> taggList = new ArrayList<>();
 		TStats tstats;
 		TAggreg tagg;
 		HashSet pvalues = new HashSet();
@@ -811,7 +799,7 @@ public class XArenaFuncs {
 		Measure oT = new Measure(); // train eval measure
 		MTrain mTrain;
 		double evalQ = 0.0, evalT = 0.0;
-		ArrayList<MTrain> mtList = new ArrayList<MTrain>();
+		ArrayList<MTrain> mtList = new ArrayList<>();
 
 		for (int i = 0; i < trainNum; i++) {
 			int player;
@@ -819,7 +807,7 @@ public class XArenaFuncs {
 			long actionNum, trnMoveNum;
 			double totalTrainSec = 0.0, elapsedTime, movesSecond;
 
-			xab.setTrainNumberText(trainNum, Integer.toString(i + 1) + "/" + Integer.toString(trainNum));
+			xab.setTrainNumberText(trainNum, (i + 1) + "/" + trainNum);
 
 			// --- DON'T use this anymore! Use instead GBGBatch.multiTrainAlphaSweep or 
 			// --- GBGBatch.multiTrainLambdaSweep.
@@ -1008,7 +996,7 @@ public class XArenaFuncs {
 		double sWeight = 1 / (double) competeNum;
 		double moveCount = 0.0;
 		DecimalFormat frm = new DecimalFormat("#0.000");
-		boolean nextMoveSilent = (verbose < 2 ? true : false);
+		boolean nextMoveSilent = (verbose < 2);
 		StateObservation so;
 		Types.ACTIONS actBest;
 		String sMsg;
@@ -1181,7 +1169,6 @@ public class XArenaFuncs {
 				System.out.println("Avg score for all players: " + sc.toStringFrm());
 				return sc.scTup[0];
 			} else {
-				double[] res;
 				if (swap) {
 					ScoreTuple sc = competeNPlayer(new PlayAgtVector(qaVector[1], qaVector[0]), startSO, competeNum,
 							verbose, null);

@@ -24,7 +24,7 @@ import params.ParTD;
  *	@see TDNTuple3Agt
  */
 abstract public class NTupleBase extends AgentBase implements NTupleAgt, Serializable {
-	public Random rand; // generate random Numbers 
+	public Random rand; // generate random Numbers
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -78,6 +78,21 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	protected int tieCounter = 0;
 	protected int winXCounter = 0;
 	protected int winOCounter = 0;
+
+	/**
+	 * Old debug switches from TDNTuple2Agt, may be occasionally useful for NTuple2ValueFunc
+	 */
+	// debug printout in updateWeightsNew, ZValueMulti, NextState:
+	public static boolean DBG_REWARD=false;
+	// debug: repeat always the same sequence in one episode (to check a trivial convergence)
+	public static boolean DBG2_FIXEDSEQUENCE=false;
+	// debug VER_3P=true, MODE_3P=0: m_Net3 is updated in parallel to m_Net (compare 2P and 3P),
+	// extra printout v_old,v_new in NTuple2ValueFunc::updateWeightsNew,updateWeightsNewTerminal
+	public static boolean DBG_OLD_3P=false;
+	// debug VER_3P=true, MODE_3P=1:
+	public static boolean DBG_NEW_3P=false;
+	// debug printout in updateWeightsNewTerminal:
+	public static boolean DBGF_TARGET=false;
 
 	public NTupleBase() {
 		super();

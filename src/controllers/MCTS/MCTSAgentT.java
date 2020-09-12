@@ -7,9 +7,6 @@ import controllers.PlayAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.Arena;
 import games.StateObservation;
-import games.XArenaMenu;
-//import params.MCTSParams;
-//import params.OtherParams;
 import params.ParMCTS;
 import params.ParOther;
 import tools.ElapsedCpuTimer;
@@ -218,8 +215,8 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
      */
     public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
 		
-        Types.ACTIONS actBest = null;
-        Types.ACTIONS_VT actBestVT = null;
+        Types.ACTIONS actBest;
+        Types.ACTIONS_VT actBestVT;
         List<Types.ACTIONS> actions = so.getAvailableActions();
 		double[] VTable, vtable;
         vtable = new double[actions.size()];  
@@ -237,7 +234,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		actBest = act(so,m_Timer,VTable);
 		
 		double bestScore = VTable[actions.size()];
-		for (int i=0; i<vtable.length; i++) vtable[i]=VTable[i];
+		System.arraycopy(VTable, 0, vtable, 0, vtable.length);
 		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), false, vtable, bestScore);
         return actBestVT;
 	}
@@ -275,17 +272,9 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
         } else {
         	
     		// Ask MCTS for the best action ...
-    		Types.ACTIONS actBest = act(so,m_Timer,vtable);
+    		act(so,m_Timer,vtable);
 
-//            double nextActionScore = Double.NEGATIVE_INFINITY;
-//            for (int i = 0; i < so.getNumAvailableActions(); i++) {
-//                if (nextActionScore <= vtable[i]) {
-//                    nextActionScore = vtable[i];
-//                }
-//            }
-            double nextActionScore = vtable[nAct];
-
-            return nextActionScore;
+            return vtable[nAct];
         }
 	}
 

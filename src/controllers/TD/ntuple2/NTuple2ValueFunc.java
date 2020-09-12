@@ -379,7 +379,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 		update(curSOWB, curPlayer, 0, delta, e, false, false);
 		
-		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
+		if (NTupleBase.DBG_REWARD || NTupleBase.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
 			double v_new = getScoreI(curSOWB,curPlayer);
 			if (curPlayer==nextPlayer) {
@@ -434,7 +434,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 		update(curSOWB, curPlayer, 0, delta, e, false, true);
 		
-		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
+		if (NTupleBase.DBG_REWARD || NTupleBase.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
 			double v_new = getScoreI(curSOWB,curPlayer);
 			System.out.println("updateWeightsTD[p="+curPlayer+", "+thisSO.stringDescr()
@@ -473,7 +473,7 @@ public class NTuple2ValueFunc implements Serializable {
 		int o = lastAction.toInt();
 		update(lastSOWB, lastPlayer, o, delta, e, true, true);
 		
-		if (TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
+		if (NTupleBase.DBG_REWARD || NTupleBase.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
 			double v_new = getQFunc(lastSOWB,lastPlayer,lastAction);
 			System.out.println("updateWeightsNew[p="+lastPlayer+", "+thisSO.stringDescr()
@@ -499,7 +499,7 @@ public class NTuple2ValueFunc implements Serializable {
 
 		update(curSOWB, curPlayer, 0, delta, e, false, false);
 
-		if (TDNTuple2Agt.DBGF_TARGET || TDNTuple2Agt.DBG_REWARD || TDNTuple2Agt.DBG_OLD_3P) {
+		if (NTupleBase.DBGF_TARGET || NTupleBase.DBG_REWARD || NTupleBase.DBG_OLD_3P) {
 			final double MAXSCORE = 1; // 1; 3932156;
 			double v_new = getScoreI(curSOWB,curPlayer);
 			if (isNEW_3P) {

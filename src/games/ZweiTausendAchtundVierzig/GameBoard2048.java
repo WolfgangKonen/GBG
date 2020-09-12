@@ -6,7 +6,6 @@ import games.StateObservation;
 import tools.Types;
 
 import controllers.PlayAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
  * This class implements the GameBoard interface for 2048.

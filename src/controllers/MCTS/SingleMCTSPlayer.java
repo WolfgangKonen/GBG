@@ -5,7 +5,6 @@ import params.ParMCTS;
 import params.ParOther;
 import tools.ElapsedCpuTimer;
 import tools.Types;
-import tools.ElapsedCpuTimer.TimerType;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,17 +42,17 @@ public class SingleMCTSPlayer implements Serializable
     int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 	
 	/**
-	 * Member {@link #m_parMCTS} is only needed for saving and loading the agent
+	 * Member {@code m_parMCTS} is only needed for saving and loading the agent
 	 * (to restore the agent with all its parameter settings)
 	 */
-	private ParMCTS m_parMCTS;
+	private final ParMCTS m_parMCTS;
 	/**
-	 * Member {@link #m_parent} is only needed for access to {@link MCTSAgenT#getParOther()}
+	 * Member {@code m_parent} is only needed for access to {@link MCTSAgentT#getParOther()}
 	 */
     // a bug before 2020-08-11 was that m_parent was transient. This is not o.k. since when loading an MCTS agent 
     // from disk (e.g. in tournament), it would result in m_parent being null, which leads to a runtime exception
     // when getParOther is called. Now fixed, we removed 'transient'.
-    private MCTSAgentT m_parent;		
+    private final MCTSAgentT m_parent;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -96,8 +95,8 @@ public class SingleMCTSPlayer implements Serializable
 
     /**
      * Set the available actions for state {@code so}.
-     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer, double[])}.
-     * @param so
+     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer)}.
+     * @param so the state
      */
     public void initActions(StateObservation so) {
         //Get the actions into an array.
@@ -112,7 +111,7 @@ public class SingleMCTSPlayer implements Serializable
 
     /**
      * Initializes the tree with the new observation state in the root.
-     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer, double[])}.
+     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer)}.
      * @param so current state of the game.
      */
     public void init(StateObservation so)

@@ -17,7 +17,6 @@ import org.jfree.data.xy.YIntervalSeriesCollection;
 import org.jfree.ui.RectangleInsets;
 
 import controllers.PlayAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import games.Evaluator;
 import games.XArenaButtons;
 
@@ -38,7 +37,10 @@ import games.XArenaButtons;
  *		double x,y;
  *		series.add(x,y);
  *		wChart.plot;
- * 
+ * <p>
+ * NOTE: seems to have been used only in connection with TDNTuple2Agt and its method weightAnalysis (see commented
+ * code) --> disfunctional at the moment
+ *
  * @author Wolfgang Konen /06/2018
  *
  */
@@ -101,26 +103,26 @@ public class DeviationWeightsChart extends YIntervalSeriesCollection
 	
 	public void initializeChartPlot(XArenaButtons xab, PlayAgent pa, int plotWeightMode) {
 		this.plotwMode = plotWeightMode;
-		if (plotwMode>0 && (pa instanceof TDNTuple2Agt)) {
-			chart.setTitle(PLOTWTITLE[plotwMode-1]);
-			//chart.setSubtitles(List("s.th. with per")); // TODO
-			this.clearAndSetXY(xab);
-			// "YI0" is the key of the series object, accessible as wChart.getSeries(0):
-			this.addSeries(new YIntervalSeries("YI0"));
-			// "YI1" is the key of the series object, accessible as wChart.getSeries(1):
-			this.addSeries(new YIntervalSeries("YI1"));
-		} else {
+//		if (plotwMode>0 && (pa instanceof TDNTuple2Agt)) {
+//			chart.setTitle(PLOTWTITLE[plotwMode-1]);
+//			//chart.setSubtitles(List("s.th. with per")); // TODO
+//			this.clearAndSetXY(xab);
+//			// "YI0" is the key of the series object, accessible as wChart.getSeries(0):
+//			this.addSeries(new YIntervalSeries("YI0"));
+//			// "YI1" is the key of the series object, accessible as wChart.getSeries(1):
+//			this.addSeries(new YIntervalSeries("YI1"));
+//		} else {
 			frame.setVisible(false);
-		}
+//		}
 	}
 
 	public void updateChartPlot(int gameNum, PlayAgent pa, double[] per) {
-		if (plotwMode>0 && (pa instanceof TDNTuple2Agt)) {
-			double[][] res = ((TDNTuple2Agt) pa).weightAnalysis(per);
-			this.getSeries(0).add(gameNum, res[plotwMode][2], res[plotwMode][1], res[plotwMode][3]);
-			this.getSeries(1).add(gameNum, res[plotwMode][2], res[plotwMode][0], res[plotwMode][4]);
-			this.plot();
-		}
+//		if (plotwMode>0 && (pa instanceof TDNTuple2Agt)) {
+//			double[][] res = ((TDNTuple2Agt) pa).weightAnalysis(per);
+//			this.getSeries(0).add(gameNum, res[plotwMode][2], res[plotwMode][1], res[plotwMode][3]);
+//			this.getSeries(1).add(gameNum, res[plotwMode][2], res[plotwMode][0], res[plotwMode][4]);
+//			this.plot();
+//		}
 	}
 	
 	/**

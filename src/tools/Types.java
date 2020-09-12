@@ -5,20 +5,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.util.ArrayList;
 
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 
 import controllers.MaxNAgent;
-import controllers.PlayAgent;
-import controllers.PlayAgtVector;
-import controllers.TD.ntuple2.NTuple2ValueFunc;
 import games.Arena;
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
-import tools.ScoreTuple;
 
-import java.awt.event.KeyEvent;
 import java.io.Serializable;
 
 /**
@@ -119,14 +112,14 @@ public class Types {
     }
     
 	/**
-	 *  Class ACTIONS_VT (= ACTIONS + VTable) is derived from ACTIONS. 
+	 *  Class ACTIONS_VT (= ACTIONS + VTable + ScoreTuple) is derived from ACTIONS.
 	 *  It has the additional members 
 	 *  <ul>
 	 *  <li> double[] vTable: the game values for all other available actions when this action
 	 *  	 is created via PlayAgent.getNextAction2(so,...) 
 	 *  <li> double   vBest: the game value for the best action returned from 
 	 *  	 PlayAgent.getNextAction2(so,...)
-	 *  <li> ScoreTuple scBest
+	 *  <li> ScoreTuple scBest: score tuple for {@code this} action
 	 *  </ul>
 	 *  
 	 *  @see ACTIONS
@@ -229,7 +222,7 @@ public class Types {
      */
     public static final String[] GUI_AGENT_LIST 	 
     	= {"Random", "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", /*"MCTS0",*/ 
-    	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple",*/ "TD-Ntuple-2", "TD-Ntuple-3", 
+    	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple", "TD-Ntuple-2",*/ "TD-Ntuple-3",
     	   "Sarsa", /*"Sarsa-2",*/ "TDS"};
     /**
      * initial agent choice for P0, P1, ... (for up to 5 players) 

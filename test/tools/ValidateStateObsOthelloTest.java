@@ -42,7 +42,7 @@ public class ValidateStateObsOthelloTest {
         PlayAgent p;
         try {
             p = ar.m_xfun.constructAgent(0, "TD-Ntuple-3", ar.m_xab);
-        } catch (IOException e1) {
+        } catch (Exception e1) {
             e1.printStackTrace();
             p = null;
         }

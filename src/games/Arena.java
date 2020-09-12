@@ -5,7 +5,6 @@ import controllers.AgentBase;
 import controllers.HumanPlayer;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.PlayAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
@@ -1051,20 +1050,12 @@ abstract public class Arena implements Runnable {
 				this.m_xab.setGameNumber(td.getMaxGameNum());
 				this.m_xab.oPar[n].setNumEval(td.getNumEval());
 			}
-			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
-				this.m_xab.tdPar[n].enableMode3P(true);
-				this.m_xab.tdPar[n].enableNPly(false);
-				// if it is one of the older agents (before nply was added to tdPar), it will
-				// have nply=0. Then set nply=1: 
-				// [NOTE: This is not the wrapperNply of ParOther, but an nply internal to 
-				// the next-action logic of TDNTuple2Agt. It defaults to 1.]
-				if (this.m_xab.tdPar[n].getNPly()==0) {
-					this.m_xab.tdPar[n].setNPly(1);
-					((TDNTuple2Agt) td).getParTD().setNPly(1);
-				}
-			} else {
-				this.m_xab.tdPar[n].enableNPly(false);
-			}
+//			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
+//				this.m_xab.tdPar[n].enableMode3P(true);
+//				this.m_xab.tdPar[n].enableNPly(false);
+//			} else {
+//				this.m_xab.tdPar[n].enableNPly(false);
+//			}
 			
 			// if called via Arena, then disable all actionable elements in all param tabs
 			// "TD pars" and "NT par" (allow only viewing of parameters)

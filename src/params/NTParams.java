@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import controllers.TD.ntuple2.SarsaAgt;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.Nim.ArenaNim2P;

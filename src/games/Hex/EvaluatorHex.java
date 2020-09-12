@@ -1,10 +1,7 @@
 package games.Hex;
 
 import controllers.MCTS.MCTSAgentT;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.ntuple2.NTupleBase;
-import controllers.TD.ntuple2.SarsaAgt;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
@@ -16,12 +13,10 @@ import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -159,7 +154,7 @@ public class EvaluatorHex extends Evaluator {
                 break;
             case 20:
             case 10:
-            	if (playAgent instanceof TDNTuple2Agt || playAgent instanceof NTupleBase) {
+            	if (/*playAgent instanceof TDNTuple2Agt ||*/ playAgent instanceof NTupleBase) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
             		// thread-safe, which is the case for TDNTuple2Agt, TDNTuple3Agt or SarsaAgt
             		// (the latter two are children of NTupleBase).

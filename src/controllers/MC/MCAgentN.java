@@ -23,14 +23,9 @@ import java.util.concurrent.Executors;
 /**
  * Monte Carlo (MC) agent for N-player games.
  * <p>
- * Similar to {@link MCAgent}, but it operates on {@link ScoreTuple} and is thus general for 
- * N-player games with arbitrary N. It might be a bit slower than {@link MCAgent}.
+ * Similar to former {@code MCAgent}, but it operates on {@link ScoreTuple} and is thus general for
+ * N-player games with arbitrary N. It might be a bit slower than {@code MCAgent}.
  * <p>
- * (Note: {@link MCAgent} can operate for N-player games, but it cannot return a {@link ScoreTuple}
- * for N &gt; 2. Returning a {@link ScoreTuple} is however needed for wrapping {@link MCAgent} in 
- * {@link MaxN2Wrapper} or {@link ExpectimaxWrapper}.)
- * 
- * @see MCAgent
  * @see MCAgentConfig
  * @see RandomSearch
  * @see ParMC
@@ -651,6 +646,18 @@ public class MCAgentN extends AgentBase implements PlayAgent {
     }
     
 } // class MCAgentN
+
+class ResultContainer {
+    public int firstAction;
+    public StateObservation sob;
+    public double rolloutDepth;
+
+    public ResultContainer(int firstAction, StateObservation sob, double rolloutDepth) {
+        this.firstAction = firstAction;
+        this.sob = sob;
+        this.rolloutDepth = rolloutDepth;
+    }
+}
 
 class ResultContainerN {
     public int firstAction;

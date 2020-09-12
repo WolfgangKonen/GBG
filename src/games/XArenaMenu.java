@@ -5,11 +5,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 
 import javax.swing.JMenu;
-import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -19,22 +16,10 @@ import TournamentSystem.TSAgentManager;
 import TournamentSystem.TSResultStorage;
 import TournamentSystem.TSSettingsGUI2;
 import controllers.AgentBase;
-import controllers.ExpectimaxNAgent;
 import controllers.HumanPlayer;
-import controllers.MaxNAgent;
 import controllers.PlayAgent;
-import controllers.MC.MCAgent;
-import controllers.MC.MCAgentN;
-import controllers.MCTS.MCTSAgentT;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
-import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.SarsaAgt;
-import controllers.TD.ntuple2.TDNTuple2Agt;
-import controllers.TD.ntuple2.TDNTuple3Agt;
-import gui.MessageBox;
 import tools.ShowBrowser;
 import tools.Types;
-import tools.Types.ACTIONS;
 
 /**
  * Main menu for {@link Arena} and {@link ArenaTrain}.

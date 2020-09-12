@@ -21,8 +21,6 @@ import javax.swing.JTextField;
 
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
-import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
 
 /**
  * This class realizes the parameter settings (GUI tab) for MCTS (Monte Carlo Tree Search) 

@@ -19,9 +19,6 @@ import javax.swing.JTextField;
 
 import controllers.ExpectimaxNAgent;
 import controllers.MaxNAgent;
-import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.TDNTuple2Agt;
-import games.Feature;
 
 /**
  * This class realizes the parameter settings (GUI tab) for  

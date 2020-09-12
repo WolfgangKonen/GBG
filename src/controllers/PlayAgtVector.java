@@ -7,7 +7,7 @@ package controllers;
 public class PlayAgtVector {
 
 	public PlayAgent[] pavec;
-	private int nPlayer;
+	private final int nPlayer;
 	
 	public PlayAgtVector(int N) {
 		pavec = new PlayAgent[N];
