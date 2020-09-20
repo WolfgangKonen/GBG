@@ -229,7 +229,12 @@ public class OtherParams extends Frame {
 		chooseS01.setEnabled(enable);
 		chooseS01L.setEnabled(enable);
 	}
-	
+
+	public void enableRgsPart(boolean enable) {
+		rgs_L.setEnabled(enable);
+		rewardIsGameScore.setEnabled(enable);
+	}
+
 	public JPanel getPanel() {
 		return oPanel;
 	}

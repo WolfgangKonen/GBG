@@ -292,6 +292,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		return getAllScores(sob,sob,0, null);
 	}
+
 	private ScoreTuple getAllScores(StateObservation sob, StateObservation refer, int depth, ScoreTuple prevTuple) {
         ACTIONS_VT act_vt = null;
 
@@ -310,21 +311,21 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}
 
-	/**
-	 * When the recursion tree has reached its maximal depth m_depth, then return
-	 * an estimate of the game score. This function may be overridden in a game-
-	 * specific way by classes derived from {@link MaxNAgent}. 
-	 * <p>
-	 * This  stub method just returns {@link StateObservation#getReward(StateObservation, boolean)},
-	 * which might be too simplistic for not-yet finished games, because the current reward does   
-	 * not reflect future rewards.
-	 * @param sob	the state observation
-	 * @return		the estimated score
-	 */
-	@Override
-	public double estimateGameValue(StateObservation sob) {
-		return sob.getReward(sob,true);
-	}
+//	/**
+//	 * When the recursion tree has reached its maximal depth m_depth, then return
+//	 * an estimate of the game score. This function may be overridden in a game-
+//	 * specific way by classes derived from {@link MaxNAgent}.
+//	 * <p>
+//	 * This  stub method just returns {@link StateObservation#getReward(StateObservation, boolean)},
+//	 * which might be too simplistic for not-yet finished games, because the current reward does
+//	 * not reflect future rewards.
+//	 * @param sob	the state observation
+//	 * @return		the estimated score
+//	 */
+//	@Override
+//	public double estimateGameValue(StateObservation sob) {
+//		return sob.getReward(sob,true);
+//	}
 
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return

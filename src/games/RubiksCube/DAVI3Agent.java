@@ -154,7 +154,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 
         assert so.isLegalState() : "Not a legal state"; 
         assert so instanceof StateObserverCube : "Not a StateObserverCube object";
-// try {       
+
         for(i = 0; i < acts.size(); ++i)
         {
         	ACTIONS thisAct = acts.get(i);
@@ -163,13 +163,17 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
         		// We skip the action which is the inverse of the last action;
 				// this is to avoid cycles of 2 --> beneficial when searching for the solved cube in play & train.
 				// If you do not want to skip any action - e.g. when inspecting states - then enter this method with
-				// a 'cleared' state {@link StateObserverCubeCleared} so
+				// a 'cleared' state {@link StateObserverCubeCleared} {@code so} (lastAction==9)
 
 				newSO = ((StateObserverCube) so).copy();
 				newSO.advance(acts.get(i));
 
-				// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
-				value = vTable[i] = CubeConfig.stepReward + daviValue(newSO);
+				// value is the r + V(s) for taking action i in state s='so'. Action i leads to state newSO.
+				value = vTable[i] = newSO.getDeltaRewardTuple(false).scTup[0] + daviValue(newSO);
+				                    // this is a bit complicated for saying "stepReward
+				                    // ( + REWARD_POSITIVE, if it's the solved cube)' but
+				                    // in this way we have a common interface valid for all games:
+				                    //    vTabel = deltaReward + V(s) [expected future rewards]
 				assert (!Double.isNaN(value)) : "Oops, daviValue returned NaN! Decrease alpha!";
 				// Always *maximize* 'value'
 				if (value==maxValue) bestActions.add(acts.get(i));
@@ -186,7 +190,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
         // Break ties by selecting one of them randomly:
         actBest = bestActions.get(rand.nextInt(bestActions.size()));
 
-        // optional: print the best action's after state newSO and its V(newSO) = stepReward + daviValue(newSO)
+        // optional: print the best action's after state newSO and its V(newSO) = delta reward + daviValue(newSO)
         if (!silent) {
         	newSO = ((StateObserverCube) so).copy();
         	newSO.advance(actBest);
@@ -194,11 +198,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
         }			
 
         vTable[acts.size()] = maxValue;
-// } catch (Exception e) {
-//	 e.printStackTrace();
-// }
-		double[] res = {maxValue};
-		ScoreTuple scBest = new ScoreTuple(res);
+		ScoreTuple scBest = new ScoreTuple(new double[]{maxValue});
 
 		return new ACTIONS_VT(actBest.toInt(), false, vTable, maxValue, scBest);
 	}
@@ -212,11 +212,13 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	/**
 	 * This is the NN version: Ask the neural net (here: an ntuple network) to predict the value of {@code so}
 	 * @param so	the state
-	 * @return REWARD_POSITIVE, if {@code so} is the solved state. In all other cases, return the prediction of {@link #m_Net}.
+	 * @return 0.0, if {@code so} is the solved state (no expected future rewards).
+	 *         In all other cases, return the prediction of {@link #m_Net}.
 	 */
 	public double daviValue(StateObserverCube so) {
 		double score;
-		if (so.isEqual(def)) return StateObserverCube.REWARD_POSITIVE;
+		if (so.isEqual(def)) return 0.0; // no future rewards in game-over states; the former
+		 								 // StateObserverCube.REWARD_POSITIVE is now in getDeltaRewardTuple
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		score = m_Net.getScoreI(curSOWB,so.getPlayer());
 		return score;
@@ -259,7 +261,8 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
     		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_t, m_Net.xnf);
 			curPlayer = s_t.getPlayer();
         	vLast = m_Net.getScoreI(curSOWB,curPlayer);
-			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,CubeConfig.stepReward,s_t);
+			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
+					s_t.getDeltaRewardTuple(false).scTup[0],s_t);
 			
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
@@ -270,7 +273,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 				m_finished=true;
 //				vLast = m_Net.getScoreI(curSOWB,curPlayer);
 //				target=((StateObserverCube) s_t).getMinGameScore();
-//				m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,CubeConfig.stepReward,s_t);
+//				m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,s_t.getDeltaRewardTuple(false).scTup[0],s_t);
 			}
 
 		} while(!m_finished);			
@@ -359,7 +362,8 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 				item = iter.next();
 				curPlayer = item.sowb.getStateObservation().getPlayer();
 				vLast = m_Net.getScoreI(item.sowb,curPlayer);
-				m_Net.updateWeightsTD(item.sowb, curPlayer, vLast, item.target,CubeConfig.stepReward,item.sowb.getStateObservation());
+				m_Net.updateWeightsTD(item.sowb, curPlayer, vLast, item.target,
+						s_t.getDeltaRewardTuple(false).scTup[0], item.sowb.getStateObservation());
 			}
 		} else {
 			// ... with batchSize random samples
@@ -368,7 +372,8 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 				item = (TrainingItem)replayBuffer.get(index);
 				s_t = item.sowb.getStateObservation();
 				vLast = m_Net.getScoreI(item.sowb,s_t.getPlayer());
-				m_Net.updateWeightsTD(item.sowb, s_t.getPlayer(), vLast, item.target,CubeConfig.stepReward,s_t);
+				m_Net.updateWeightsTD(item.sowb, s_t.getPlayer(), vLast, item.target,
+						s_t.getDeltaRewardTuple(false).scTup[0], s_t);
 			}
 		}
 
@@ -392,14 +397,14 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		return sTuple;
 	}
 
-	@Override
-	public double estimateGameValue(StateObservation so) {
-		return so.getGameScore(so.getPlayer());
-	}
+//	@Override
+//	public double estimateGameValue(StateObservation so) {
+//		return so.getGameScore(so.getPlayer());
+//	}
 
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
-		double[] d = {CubeConfig.stepReward + daviValue((StateObserverCube)so)};
+		double[] d = {so.getDeltaRewardTuple(false).scTup[0] + daviValue((StateObserverCube)so)};
 		return new ScoreTuple(d);
 
 //		return so.getRewardTuple(true);  //getScoreTuple(so, null);

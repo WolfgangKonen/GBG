@@ -18,7 +18,6 @@ import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
 import games.RubiksCube.DAVI2Agent;
 import games.RubiksCube.DAVI3Agent;
-import games.RubiksCube.DAVIAgent;
 import games.RubiksCube.GameBoardCube;
 import games.TStats.TAggreg;
 import gui.DeviationWeightsChart;
@@ -215,10 +214,10 @@ public class XArenaFuncs {
 												// gui_agent_list in
 												// XArenaButtonsGui
 				pa = new Edax2(sAgent, m_xab.edPar[n]);
-			} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
-												// gui_agent_list in
-												// XArenaButtonsGui
-				pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
+//			} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
+//												// gui_agent_list in
+//												// XArenaButtonsGui
+//				pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
 			} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see
 												 // gui_agent_list in
 												 // XArenaButtonsGui
@@ -360,10 +359,10 @@ public class XArenaFuncs {
 														// gui_agent_list in
 														// XArenaButtonsGui
 					pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
-				} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
-													// gui_agent_list in
-													// XArenaButtonsGui
-					pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
+//				} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
+//													// gui_agent_list in
+//													// XArenaButtonsGui
+//					pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
 				} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see
 													 // gui_agent_list in
 													 // XArenaButtonsGui

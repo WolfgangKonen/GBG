@@ -488,11 +488,11 @@ public class TDParams extends Frame implements Serializable
 		// TicTacToe, =2 for Hex, and =0 for all others)
 		horcutT.setText("0.1"); 			//
 		switch (agentName) {
-		case "TD-Ntuple-2": 
+//		case "TD-Ntuple-2":
 		case "TD-Ntuple-3": 
 		case "Sarsa":
 			switch (agentName) {
-			case "TD-Ntuple-2": 
+//			case "TD-Ntuple-2":
 			case "TD-Ntuple-3": 
 				switch (gameName) {
 				case "ConnectFour":

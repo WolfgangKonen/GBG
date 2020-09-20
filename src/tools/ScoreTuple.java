@@ -18,7 +18,7 @@ import games.Nim.BoutonAgent;
  *	@see BoutonAgent
  */
 public class ScoreTuple implements Serializable {
-	public enum CombineOP {AVG,MIN,MAX,DIFF};
+	public enum CombineOP {AVG,MIN,MAX,DIFF,SUM};
 	/**
 	 * the tuple values
 	 */
@@ -129,6 +129,8 @@ public class ScoreTuple implements Serializable {
 	 * 		maximal value in {@code scTup[playNum]}, the score for player {@code playNum}
 	 * <li> <b>DIFF</b>: subtract from {@code this} all values in the other {@link ScoreTuple}  
 	 * 		{@code tuple2nd}.
+	 * <li> <b>SUM</b>: add to {@code this} all values in the other {@link ScoreTuple}
+	 * 		{@code tuple2nd}.
 	 * </ul>
 	 * The resulting information is returned in {@code this} {@link ScoreTuple}. 
 	 * 
@@ -165,6 +167,9 @@ public class ScoreTuple implements Serializable {
 		case DIFF: 
     		for (int i=0; i<scTup.length; i++) scTup[i] = scTup[i] - tuple2nd.scTup[i];
     		break;
+		case SUM:
+			for (int i=0; i<scTup.length; i++) scTup[i] = scTup[i] + tuple2nd.scTup[i];
+			break;
 		}
 	}
 } // ScoreTuple

@@ -87,21 +87,21 @@ public interface PlayAgent {
 	 */
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple);
 	
-	/**
-	 * Return the agent's estimate of the final game value (final reward). Is called when
-	 * maximum episode length (TD) or maximum tree depth for certain agents ({@link MaxNAgent}, 
-	 * {@link ExpectimaxNAgent}) is reached.
-	 * 
-	 * This method is deprecated, use estimateGameValueTuple instead.
-	 * 
-	 * @param sob			the current game state;
-	 * @return				the agent's estimate of the final reward. This may be 
-	 * 						the same as {@link #getScore(StateObservation)} (as 
-	 * 						implemented in {@link AgentBase}). But it may as well be 
-	 * 						overridden by derived classes.
-	 */
-	@Deprecated
-	public double estimateGameValue(StateObservation sob);
+//	/**
+//	 * Return the agent's estimate of the final game value (final reward). Is called when
+//	 * maximum episode length (TD) or maximum tree depth for certain agents ({@link MaxNAgent},
+//	 * {@link ExpectimaxNAgent}) is reached.
+//	 *
+//	 * This method is deprecated, use estimateGameValueTuple instead.
+//	 *
+//	 * @param sob			the current game state;
+//	 * @return				the agent's estimate of the final reward. This may be
+//	 * 						the same as {@link #getScore(StateObservation)} (as
+//	 * 						implemented in {@link AgentBase}). But it may as well be
+//	 * 						overridden by derived classes.
+//	 */
+//	@Deprecated
+//	public double estimateGameValue(StateObservation sob);
 	
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 

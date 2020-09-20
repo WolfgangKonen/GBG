@@ -8,13 +8,10 @@ import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
-import games.RubiksCube.StateObserverCube;
-import games.RubiksCube.StateObserverCubeCleared;
 import games.Sim.StateObserverSim;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
-import tools.Progress;
 import tools.ScoreTuple;
 import tools.Types;
 import TournamentSystem.TSAgent;
@@ -51,7 +48,7 @@ abstract public class Arena implements Runnable {
 	public XArenaTabs m_tabs = null;
 	public XArenaButtons m_xab; // the game buttons and text fields
 	private Thread playThread = null;
-	private Progress progress = null; // progress for some functions
+//	private Progress progress = null; // progress for some functions
 	protected GameBoard gb;
 	public LoadSaveGBG tdAgentIO; // saving/loading of agents
 	public Task taskState = Task.IDLE;
@@ -129,7 +126,6 @@ abstract public class Arena implements Runnable {
 		int n;
 		int numPlayers = gb.getStateObs().getNumPlayers();
 		double firstScore;
-		double [] allWinScores;
 		String firstPlayer = (numPlayers==2) ? "X" : "P0";
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		gb.showGameBoard(this, true);
@@ -310,7 +306,6 @@ abstract public class Arena implements Runnable {
 			return;
 		}
 
-		String pa_string = paX.getClass().getName();
 		String sMsg = "Inspecting the value function of "+ agentX +" (X) ...";
 		setStatusMessage(sMsg);
 		System.out.println("[InspectGame] " + sMsg);
@@ -336,9 +331,6 @@ abstract public class Arena implements Runnable {
 
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
-					XNTupleFuncs xnf = this.makeXNTupleFuncs();
-					int[] bvec = xnf.getBoardVector(soh).bvec; 	// look at bvec in debugger to see
-																// the board representation
 					// int Index = this.getHexIndex(soh.getBoard());
 					// System.out.println("Index: "+Index);
 					System.out.println("[" + soh.stringDescr() + "]");
@@ -444,11 +436,10 @@ abstract public class Arena implements Runnable {
 	 * each agent and the results are recorded. <br>
 	 * [In both cases we have {@code this.taskState == Task.PLAY}.]
 	 * 
-	 * @param spDT if {@code null} then {@link #PlayGame(TSGameDataTransfer)} was called via 
+	 * @param spDT if {@code null} then {@code #PlayGame(TSGameDataTransfer)} was called via
 	 * Play button, if not, it was called from the Tournament System.
 	 */
 	public void PlayGame(TSGameDataTransfer spDT) {
-		int Player;
 		final int numPlayers = gb.getStateObs().getNumPlayers();
 		StateObservation so, startSO;
 		Types.ACTIONS_VT actBest = null;
@@ -461,7 +452,7 @@ abstract public class Arena implements Runnable {
 		int nEmpty = 0, cumEmpty = 0, highestTile=0;
 		double gameScore = 0.0;
 		PStats pstats;
-		ArrayList<PStats> psList = new ArrayList<PStats>();
+		ArrayList<PStats> psList = new ArrayList<>();
 
 		boolean showValue = m_xab.getShowValueOnGameBoard();
 
@@ -537,7 +528,7 @@ abstract public class Arena implements Runnable {
 					// this is not recommended: an innocent start of Play where chooseStart01 in ParOther remains set 
 					// from a previous training will let the first agent make (silently) an unfortunate 1st move in
 					//  half of the played games
-			if (gb.getArena().getGameName()=="RubiksCube") {
+			if (gb.getArena().getGameName().equals("RubiksCube")) {
 				// On the other hand, chooseStartState is mandatory for the game RubiksCube (but may be a possible
 				// option also for other games as well):
 				// do not start from the default start state (solved cube), but
@@ -553,7 +544,7 @@ abstract public class Arena implements Runnable {
 		gb.enableInteraction(true); // needed for CFour
 		so.resetMoveCounter();
 		startSO = so.copy();
-		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, (double) nEmpty, (double) cumEmpty, highestTile);
+		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, nEmpty, cumEmpty, highestTile);
 		psList.add(pstats);
 
 		if (spDT!=null) { // set random start moves for TS
@@ -591,11 +582,10 @@ abstract public class Arena implements Runnable {
 							int N_EMPTY = 4;
 							actBest = getNextAction_DEBG(so, pa, p2, N_EMPTY);
 						} else {
-							long startT = System.currentTimeMillis();
+							//long startT = System.currentTimeMillis();
 							long startTNano = System.nanoTime();
-//							actBest = pa.getNextAction2(so, false, true); /** command to get agents next move */
-							actBest = pa.getNextAction2(so, false, false); /** command to get agents next move */
-							long endT = System.currentTimeMillis();
+							actBest = pa.getNextAction2(so, false, false);
+							//long endT = System.currentTimeMillis();
 							long endTNano = System.nanoTime();
 							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
 							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
@@ -636,7 +626,8 @@ abstract public class Arena implements Runnable {
 						} else {
 							gameScore = so.getGameScore(so);
 						}
-						pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), actBest.toInt(), gameScore, (double) nEmpty, (double) cumEmpty, highestTile);
+						pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), actBest.toInt(), gameScore,
+								nEmpty, cumEmpty, highestTile);
 						psList.add(pstats);
 						gb.enableInteraction(true);
 
@@ -704,7 +695,6 @@ abstract public class Arena implements Runnable {
 
 				if (so.getMoveCounter() > m_xab.oPar[0].getEpisodeLength()) {
 					double gScore = so.getGameScore(so);
-					int epiLength = m_xab.oPar[0].getEpisodeLength();
 					if (so instanceof StateObserver2048)
 						gScore *= StateObserver2048.MAXSCORE;
 					showMessage("Game stopped (epiLength) with score " + gScore, "Game Over",
@@ -837,9 +827,9 @@ abstract public class Arena implements Runnable {
 		long start = System.currentTimeMillis();
 
 		while (tournamentAgentManager.hasNextGame()) {
-			TSAgent nextTeam[] = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
+			TSAgent[] nextTeam = tournamentAgentManager.getNextCompetitionTeam(); // get next Agents
 			//System.out.println("DEBUG: "+nextTeam[0].getAgentType() + " vs. "+nextTeam[1].getAgentType());
-			TSTimeStorage nextTimes[] = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
+			TSTimeStorage[] nextTimes = tournamentAgentManager.getNextCompetitionTimeStorage(); // get timestorage for next game
 			int rndmStartMoves = tournamentAgentManager.results.numberOfRandomStartMoves;
 			StateObservation startSo = tournamentAgentManager.getNextStartState();
             TSGameDataTransfer data = new TSGameDataTransfer(nextTeam, nextTimes, rndmStartMoves, startSo);
@@ -1131,10 +1121,10 @@ abstract public class Arena implements Runnable {
 		return Types.GUI_ARENA_HEIGHT;
 	}
 	
-	// @Override
-	public void setProgress(tools.Progress p) {
-		this.progress = p;
-	}
+//	// @Override
+//	public void setProgress(tools.Progress p) {
+//		this.progress = p;
+//	}
 
 	public void enableButtons(boolean state) {
 		m_xab.enableButtons(state, state, state);
@@ -1183,7 +1173,7 @@ abstract public class Arena implements Runnable {
 	 * require a game-tailored FeatureXYZ.)
 	 * <p>
 	 * 
-	 * If the derived class does not override {@link #makeFeatureClass(int)},
+	 * If the derived class does not override {@code #makeFeatureClass(int)},
 	 * the default behavior is to throw a {@link RuntimeException}.
 	 * 
 	 * @param featmode
@@ -1201,7 +1191,7 @@ abstract public class Arena implements Runnable {
 	 * require a game-tailored XNTupleFuncsXYZ.)
 	 * <p>
 	 * 
-	 * If the derived class does not override {@link #makeXNTupleFuncs()}, the
+	 * If the derived class does not override {@code #makeXNTupleFuncs()}, the
 	 * default behavior is to throw a {@link RuntimeException}.
 	 * 
 	 * @return an object implementing {@link XNTupleFuncs}

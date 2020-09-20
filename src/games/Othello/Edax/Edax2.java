@@ -107,8 +107,9 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 			if (availActions.get(i).toInt()==actInteger) vTable[i]=1.0;
 		}
 		vTable[availActions.size()]=1.0;
-		
-		ACTIONS_VT action = new ACTIONS_VT(actInteger, false, vTable);
+		ScoreTuple scBest = new ScoreTuple(new double[]{1.0});
+
+		ACTIONS_VT action = new ACTIONS_VT(actInteger, false, vTable, 1.0, scBest);
 
 		if(!so.getAvailableActions().contains(action))
 		{

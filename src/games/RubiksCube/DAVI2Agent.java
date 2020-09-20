@@ -18,11 +18,11 @@ import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
 /**
- *  Implements DAVI algorithm (Deep Approximate Value Iteration) for Rubiks Cube [Agnostelli2019].
+ *  Implements DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agnostelli2019].
  *  <p>
  *  It simplifies DAVI by replacing the neural net with state-based value iteration. It maintains a table or  
  *  {@link HashMap} of the value of all seen states. Thus, it is probably only viable 
- *  for smaller systems and cannot generalize to unseen states).<br>
+ *  for smaller systems and cannot generalize to unseen states.<br>
  *  It <b>maximizes</b> the (non-positive) value V(s) where each step (twist) adds a negative step reward to V(s).  
  *  Only the solved cube s* has V(s*)=0.
  *
@@ -85,7 +85,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         	newSO.advance(acts.get(i));
         	
         	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
-        	value = vTable[i] = CubeConfig.stepReward + daviValue(newSO);
+        	value = vTable[i] = newSO.getDeltaRewardTuple(false).scTup[0] + daviValue(newSO);
         	// Always *maximize* 'value' 
         	if (value==maxValue) bestActions.add(acts.get(i));
         	if (value>maxValue) {
@@ -121,12 +121,14 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	 * 		   other cases, return the HashMap value of {@code so}.
 	 */
 	public double daviValue(StateObserverCube so) {
-		Double dvalue = null;
-		if (so.isEqual(def)) return 0; // - LOW_V;
+		if (so.isEqual(def)) return 0;			// Do not return LOW_V, but return 0 if the solved cube is found.
+												// Thus the values stored in vm are 0.9, 0.8, 0.7, ...
+												// Otherwise the solved cube would get a total value of -8.1 =
+												// -9.1 + REWARD_POSITIVE, which is unpleasently negative for InspectV
 		String stringRep = so.stringDescr();
-		dvalue = vm.get(stringRep); 		// returns null if not in jm
+		Double dvalue = vm.get(stringRep); 		// returns null if not in vm
 		double x = (dvalue==null) ? LOW_V : dvalue;
-		return x; // - LOW_V;
+		return x;
 	}
 	
     /**
@@ -142,7 +144,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		int epiLength = m_oPar.getEpisodeLength();
 		assert (epiLength != -1) : "trainAgent: Rubik's Cube should not be run with epiLength==-1 !";
 		if (so.equals(def)) {
-			System.err.println("trainAgent: cube should NOT be the default (solved) cube!");
+			System.err.println("[DAVI2.trainAgent] cube should NOT be the default (solved) cube!");
 			return false;
 		}
 		boolean m_finished = false;

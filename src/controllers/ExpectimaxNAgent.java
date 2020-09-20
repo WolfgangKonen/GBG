@@ -276,22 +276,22 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		return getAllScores(soND,sob,true,0);
 	}
 	
-	/**
-	 * When the recursion tree has reached its maximal depth m_depth, then return
-	 * an estimate of the game score. This function may be overridden in a game-
-	 * specific way by classes derived from {@link ExpectimaxNAgent}. 
-	 * <p>
-	 * This  stub method just returns {@link StateObservation#getReward(StateObservation, boolean)},
-	 * which might be too simplistic for not-yet finished games, because the current reward does   
-	 * not reflect future rewards.
-	 * @param sob	the state observation
-	 * @return		the estimated score
-	 */
-	@Override
-	public double estimateGameValue(StateObservation sob) {
-		boolean rgs = m_oPar.getRewardIsGameScore();
-		return sob.getReward(sob,rgs);
-	}
+//	/**
+//	 * When the recursion tree has reached its maximal depth m_depth, then return
+//	 * an estimate of the game score. This function may be overridden in a game-
+//	 * specific way by classes derived from {@link ExpectimaxNAgent}.
+//	 * <p>
+//	 * This  stub method just returns {@link StateObservation#getReward(StateObservation, boolean)},
+//	 * which might be too simplistic for not-yet finished games, because the current reward does
+//	 * not reflect future rewards.
+//	 * @param sob	the state observation
+//	 * @return		the estimated score
+//	 */
+//	@Override
+//	public double estimateGameValue(StateObservation sob) {
+//		boolean rgs = m_oPar.getRewardIsGameScore();
+//		return sob.getReward(sob,rgs);
+//	}
 
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return

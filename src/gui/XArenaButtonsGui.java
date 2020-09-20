@@ -145,7 +145,7 @@ public class XArenaButtonsGui extends JPanel {
 		// add game-specific agent names for certain games (currently ConnectFour, Nim and Othello)
 		String gName = m_arena.getGameName();
 		int offset = (gName=="ConnectFour" || gName=="Nim" || gName=="Nim3P") ? 1 : (gName=="Othello") ? 3: 0;
-		if (gName=="RubiksCube") offset = 3;
+		if (gName=="RubiksCube") offset = 2;
 		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
 		for (int i=0; i<Types.GUI_AGENT_LIST.length; i++) gui_agent_list[i] = Types.GUI_AGENT_LIST[i];
 		if (gName=="ConnectFour") {
@@ -155,7 +155,7 @@ public class XArenaButtonsGui extends JPanel {
 		} else if (gName=="Nim3P") {
 			gui_agent_list[gui_agent_list.length-1] = "DaviNim";
 		} else if (gName=="RubiksCube") {
-			gui_agent_list[gui_agent_list.length-3] = "DAVI";
+//			gui_agent_list[gui_agent_list.length-3] = "DAVI";
 			gui_agent_list[gui_agent_list.length-2] = "DAVI2";
 			gui_agent_list[gui_agent_list.length-1] = "DAVI3";
 		} else if (gName=="Othello") {
@@ -606,7 +606,7 @@ public class XArenaButtonsGui extends JPanel {
 	
 	public void setGuiParamDefaults(int n, String agentName, String gameName) {		
 		switch (agentName) {
-		case "TD-Ntuple-2": 
+//		case "TD-Ntuple-2":
 		case "TD-Ntuple-3": 
 		case "Sarsa":
 			NTupShowB.setEnabled(true);	// enable this button only if agentName is an n-tuple agent

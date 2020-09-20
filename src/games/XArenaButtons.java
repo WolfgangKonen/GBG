@@ -166,7 +166,7 @@ public class XArenaButtons //extends JPanel
 
 		switch (agentName) {
 		case "TDS":
-		case "TD-Ntuple-2": 
+//		case "TD-Ntuple-2":
 		case "TD-Ntuple-3": 
 			setGameNumber(10000);				
 			break;

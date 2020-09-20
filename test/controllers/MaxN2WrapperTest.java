@@ -15,7 +15,8 @@ public class MaxN2WrapperTest extends GBGBatch {
 
     /**
      * Calling MaxN2Wrapper with nPly=0 should result in the same best values as calling the wrapped agent directly.
-     * Check this on nStates random start states for RubiksCube and for certain DAVI2 and DAVI3 agents.
+     * Check this on nStates random start states for RubiksCube and for all agents in {@code agtFile} (currently certain
+     * DAVI2 and DAVI3 agents).
      */
     @Test
     public void nPlyEqualsZeroTest() {

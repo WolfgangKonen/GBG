@@ -72,6 +72,7 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	//
 	protected int m_counter = 0;				// episode move counter (trainAgent)
 	protected boolean m_finished = false;		// whether a training game is finished
+	protected boolean epiLengthStop = false;	// whether a training game finished due to epiLength condition
 	protected RandomAgent randomAgent = new RandomAgent("Random");
 	
 	// info only:
@@ -221,6 +222,10 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 
 	public void setFinished(boolean m) {
 		this.m_finished=m;
+	}
+
+	public void setEpiLengthStop(boolean m) {
+		this.epiLengthStop=m;
 	}
 
 	public double getAlpha() {

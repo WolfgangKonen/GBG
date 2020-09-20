@@ -152,6 +152,6 @@ public class CubeConfig {
 	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
 	 * DAVI2Agent, DAVI3Agent and StateObserverCube.
 	 */
-	public static double stepReward = -0.1; //-0.01;
+	public static double stepReward = -0.04; // -0.1; //-0.01;
 
 }

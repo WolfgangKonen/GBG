@@ -331,7 +331,8 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>"
 				+ "0: 4 'ring' 8-tuples<br>"
-				+ "1: 30 7-tuples"
+				+ "1: 30 7-tuples<br>"
+				+ "2: 60 7-tuples"
 				+ "</html>";
 	}
 

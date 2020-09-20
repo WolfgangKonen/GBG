@@ -149,7 +149,7 @@ abstract public class ObserverBase implements StateObservation {
 	protected void incrementMoveCounter() {
 		m_counter++;
 	}
-	
+
 	/**
 	 * The game score, seen from the perspective of {@code referingState}'s player. This 
 	 * relativeness is usually only relevant for games with more than one player.
@@ -246,6 +246,28 @@ abstract public class ObserverBase implements StateObservation {
 		for (int i=0; i<N; i++)
 			sc.scTup[i] = this.getReward(i,rewardIsGameScore);
 		return sc;		
+	}
+
+	/**
+	 * The tuple of delta rewards given by the game environment.<br>
+	 * The delta reward is for transition into state {@code this} from a previous state.
+	 * <p>
+	 * NOTE: Currently the delta reward does NOT include the final reward, which is given by
+	 * {@link this#getRewardTuple(boolean)}. On the long run this should be included in the delta reward and make
+	 * {@link this#getRewardTuple(boolean)} (the cumulative reward) obsolete.
+	 * <p>
+	 * This is the default implementation for all classes implementing {@link StateObservation}, unless
+	 * they override this method.
+	 *
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
+	 * 		  game-specific reward
+	 * @return	a score tuple with all zeros
+	 */
+	public ScoreTuple getDeltaRewardTuple(boolean rewardIsGameScore) {
+		int N = this.getNumPlayers();
+		ScoreTuple sc = new ScoreTuple(N);
+		for (int i=0; i<N; i++) sc.scTup[i] = 0.0;
+		return sc;
 	}
 
 

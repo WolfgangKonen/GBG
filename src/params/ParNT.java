@@ -295,7 +295,7 @@ public class ParNT implements Serializable {
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
 		switch (agentName) {
-		case "TD-Ntuple-2": 
+//		case "TD-Ntuple-2":
 		case "TD-Ntuple-3": 
 		case "Sarsa":
 			this.setTc(false);			// consequence: disable InitT, tcIntervalT

@@ -163,7 +163,8 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	}
 	
 	/**
-	 * Helper function for {@link BenchMarkPlayer#evaluateState(StateObservation, ACTIONS, boolean)} to map the {@link Types.WINNER} to {@link ConfigOthello#OPPONENT} and {@link ConfigOthello#PLAYER}.
+	 * Helper function for {@link BenchMarkPlayer#evaluateState(StateObservation, ACTIONS, boolean)} to map the
+	 * {@link Types.WINNER} to {@link StateObserverOthello#getOpponent(int)} and {@link StateObserverOthello#getPlayer()}.
 	 * @param so
 	 * @return	Integer representing the player
 	 */
@@ -191,10 +192,10 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		return sTuple;
 	}
 
-	@Override
-	public double estimateGameValue(StateObservation so) {
-		return so.getGameScore(so.getPlayer());     //getScore(so);
-	}
+//	@Override
+//	public double estimateGameValue(StateObservation so) {
+//		return so.getGameScore(so.getPlayer());     //getScore(so);
+//	}
 
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {

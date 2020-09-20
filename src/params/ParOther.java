@@ -38,7 +38,7 @@ public class ParOther implements Serializable {
 	private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
 	private boolean bReplayBuf = false;	// only relevant for RubiksCube: whether to use a replay buffer or not
-	private double incAmount = 0;		// only relevant for RubiksCube in case bReplayBuf==true
+	private double incAmount = 0;		// only relevant for RubiksCube in case bReplayBuf==true, see DAVI3Agent
     private boolean rewardIsGameScore = true;
     
     /**
@@ -126,7 +126,12 @@ public class ParOther implements Serializable {
 		if (otparams!=null)
 			otparams.enableChoosePart(enable);
 	}
-	
+
+	public void enableRgsPart(boolean enable) {
+		if (otparams!=null)
+			otparams.enableRgsPart(enable);
+	}
+
 	public int getQuickEvalMode() {
 		return quickEvalMode;
 	}
@@ -284,12 +289,15 @@ public class ParOther implements Serializable {
 		case "RubiksCube": 
 			this.setChooseStart01(true);		// always select a non-solved cube as start state
 			enableChoosePart(false);
-			this.setEpisodeLength(10);
-			this.setStopEval(12);
-			this.setpMaxRubiks(6);
+			enableRgsPart(false);
+			this.setEpisodeLength(12);
+			this.setStopEval(50);
+			this.setpMaxRubiks(9);
 			this.setReplayBuffer(false);
+			this.setQuickEvalMode(1);
 			this.setTrainEvalMode(-1);
-			this.setNumEval(1000);	
+			this.setNumEval(10000);
+			this.setRewardIsGameScore(false);
 			break;
 		default:								//  all other
 			this.setEpisodeLength(-1);

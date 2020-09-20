@@ -79,20 +79,20 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	public ACTIONS_VT getNextAction2(StateObservation so_in, boolean random, boolean silent) {
 		StateObservation so = so_in.copy(); // just for safety
 
-		// this is just a runtime check whether the wrapped agent implements estimateGameValueTuple
-        try {
-        	this.estimateGameValueTuple(so, null);
-        } catch (RuntimeException e) {
-        	if (e.getMessage().equals(AgentBase.EGV_EXCEPTION_TEXT)) {
-            	String str = "MaxN2Wrapper: The wrapped agent does not implement estimateGameValueTuple "
-            			+ "\n --> set Other pars: Wrapper nPly to 0";
-    			MessageBox.show(null,str,
-    					"MaxNAgent", JOptionPane.ERROR_MESSAGE);      
-    			return null;
-        	} else {
-        		throw e;	// other exceptions: rethrow
-        	}
-        }
+//		// this is just a runtime check whether the wrapped agent implements estimateGameValueTuple
+//        try {
+//        	this.estimateGameValueTuple(so, null);
+//        } catch (RuntimeException e) {
+//        	if (e.getMessage().equals(AgentBase.EGV_EXCEPTION_TEXT)) {
+//            	String str = "MaxN2Wrapper: The wrapped agent does not implement estimateGameValueTuple "
+//            			+ "\n --> set Other pars: Wrapper nPly to 0";
+//    			MessageBox.show(null,str,
+//    					"MaxNAgent", JOptionPane.ERROR_MESSAGE);
+//    			return null;
+//        	} else {
+//        		throw e;	// other exceptions: rethrow
+//        	}
+//        }
 
         assert so.isLegalState() : "Not a legal state"; 
         
@@ -132,8 +132,8 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 //		assert so.isLegalState() : "Not a legal state"; 		// only debug
 
 		if (depth>=this.m_depth) {
-			// this terminates the recursion
-			return this.getWrappedPlayAgent().getNextAction2(so/*.clearedCopy()*/, random, silent);
+			// this terminates the recursion. It returns the right ScoreTuple based on r(s)+gamma*V(s).
+			return this.getWrappedPlayAgent().getNextAction2(so/*.clearedCopy()*/, random, true);
 		}
 
 		ArrayList<ACTIONS> acts = so.getAvailableActions();
@@ -149,6 +149,8 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
     		{
     			boolean rgs = m_oPar.getRewardIsGameScore();
     			currScoreTuple = NewSO.getRewardTuple(rgs);
+    			// TODO: On the long run, when for all games the final rewards are subsumed in getDeltaRewardTuple,
+				// we should return 0.0 here and let NewSO.getDeltaRewardTuple (being called below) add the final reward
     		} else {
 				if (this.getWrappedPlayAgent() instanceof TDNTuple3Agt)
 					prevTuple = estimateGameValueTuple(NewSO, prevTuple);
@@ -157,14 +159,21 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 				// then unknown value for that player.
 
 				// here is the recursion: call this method again with depth+1:
-				currScoreTuple = getBestAction(NewSO/*.clearedCopy()*/, random, silent, depth+1, prevTuple).getScoreTuple();
+				act_vt = getBestAction(NewSO/*.clearedCopy()*/, random, silent, depth+1, prevTuple);
+				currScoreTuple = act_vt.getScoreTuple();
 
-				if (so instanceof StateObserverCube)
-					currScoreTuple.scTup[P] += CubeConfig.stepReward;
+				currScoreTuple.combine(NewSO.getDeltaRewardTuple(false), ScoreTuple.CombineOP.SUM,0,0);
+				// NewSO.getDeltaRewardTuple returns 0.0, except for Rubik's Cube, where it returns CubeConfig.stepReward.
 				// The increment by stepReward is very important for Rubik's Cube, because there every depth level means
-				// an additional twist, thus additional costs (stepReward is negative). Otherwise it won't work. -
-				// [TODO: It is not so nice SW design, because we have to clutter the generic MaxN2Wrapper code with
+				// an additional twist, thus additional costs (stepReward is negative). Otherwise MaxN2Wrapper won't work.
+				// The former implementation of the above line:
+//				     if (so instanceof StateObserverCube)
+//		  		          currScoreTuple.scTup[P] += CubeConfig.stepReward;
+				// was not so nice SW design, because we had to clutter the generic MaxN2Wrapper code with
 				// cube-specific code.]
+				// TODO: On the long run, when all games have their rewards present in getDeltaRewardTuple we should
+				// make the corresponding change to getDeltaRewardTuple also in the if (NewSO.isGameOver())
+				// branch above
 			}
 
 			// only debug for RubiksCube:
@@ -176,7 +185,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
         	if (value==maxValue) bestActions.add(acts.get(i));
         	if (value>maxValue) {
         		maxValue = value;
-        		scBest = new ScoreTuple(currScoreTuple);
+        		scBest = new ScoreTuple(currScoreTuple);	// make a copy
         		bestActions.clear();
         		bestActions.add(acts.get(i));
         	}
@@ -206,7 +215,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	// use the wrapped agent's method getNextAction2 (see getBestAction above), which really has an effect already
 	// for nPly=1 (and which passes the test MaxN2WrapperTest.nPlyEqualsZeroTest, that nPly=0 does the same as using the
 	// wrapped agent directly).
-	// The second thing wrong was the missing increment by CubeConfig.stepReward when going one recursion level deeper.
+	// The second thing wrong was the missing increment by getDeltaRewardTuple when returning from a recursion level.
 //	/**
 //	 * Loop over all actions available for {@code so} to find in a recursive tree search
 //	 * the action with the best game value (best score for {@code so}'s player).
@@ -295,23 +304,22 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 //		return act_vt;
 //	} // getBestAction_OLD
 
-	/**
-	 * DEPRECATED, use {@link #estimateGameValueTuple(StateObservation, ScoreTuple)} instead.
-	 * <p>
-	 * When the recursion tree has reached its maximal depth m_depth, then return
-	 * an estimate of the game score.  
-	 * <p>
-	 * Here we use the wrapped {@link PlayAgent} to return a game value.
-	 * 
-	 * @param sob	the state observation
-	 * @return		the estimated score 
-	 */
-	@Override
-	@Deprecated
-	public double estimateGameValue(StateObservation sob) {	
-//		return wrapped_pa.getScore(sob);
-		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
-	}
+//	/**
+//	 * DEPRECATED, use {@link #estimateGameValueTuple(StateObservation, ScoreTuple)} instead.
+//	 * <p>
+//	 * When the recursion tree has reached its maximal depth m_depth, then return
+//	 * an estimate of the game score.
+//	 * <p>
+//	 * Here we use the wrapped {@link PlayAgent} to return a game value.
+//	 *
+//	 * @param sob	the state observation
+//	 * @return		the estimated score
+//	 */
+//	@Override
+//	@Deprecated
+//	public double estimateGameValue(StateObservation sob) {
+//		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
+//	}
 
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
@@ -324,7 +332,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return wrapped_pa.estimateGameValueTuple(sob, prevTuple);
+		return wrapped_pa.getScoreTuple(sob, prevTuple);
 	}
 	
 	/**

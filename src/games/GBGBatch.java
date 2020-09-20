@@ -625,13 +625,13 @@ public class GBGBatch {
 	} // multiTrainLambdaSweep
 
 	/**
-	 * Perform {@code trainNum * lambdaArr.length} cycles of training and evaluation for PlayAgent, and perform
-	 * each self-play training with maxGameNum training games.
+	 * Perform {@code trainNum * incAmountArr.length} cycles of training and evaluation for PlayAgent, and perform
+	 * each self-play training with maxGameNum training games. Currently only sensible for game RubiksCube, replayBuffer.
 	 * Both trainNum and maxGameNum are inferred from {@code xab}. <br>
 	 * Write results to {@code csvName}, see below.
 	 *
 	 * @param n			index of agent to train (usually n=0)
-	 * @param incAmountArr	lambda values to sweep over
+	 * @param incAmountArr	incAmount values to sweep over
 	 * @param xab		used for reading parameter values from members *_par and for fetching the name
 	 * 					of agent <b>n</b>
 	 * @param gb		the game board, needed for evaluators and start state selection
@@ -658,7 +658,7 @@ public class GBGBatch {
 		int maxGameNum=xab.getGameNumber();
 		PlayAgent pa = null;
 
-		System.out.println("*** Starting multiTrain with trainNum = "+trainNum+" ***");
+		System.out.println("*** Starting multiTrainIncAmount with trainNum = "+trainNum+" ***");
 
 		mtList = new ArrayList<MTrain>();
 		oQ = new Measure();			// quick eval measure
@@ -706,7 +706,7 @@ public class GBGBatch {
 	} // multiTrainIncAmountSweep
 
 	//
-	// helper functions for multiTrainAlphaSweep & multiTrainLambdaSweep
+	// helper functions for multiTrainAlphaSweep & multiTrainLambdaSweep & multiTrainIncAmountSweep
 	//
 
 	private PlayAgent doSingleTraining(int n, int i, PlayAgent pa,XArenaButtons xab,

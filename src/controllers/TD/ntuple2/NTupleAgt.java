@@ -7,7 +7,7 @@ import tools.ScoreTuple;
 
 /**
  * Interface NTupleAgt is needed to make {@link NTuple2ValueFunc} and {@link NextState} usable for 
- * all agents {@link TDNTuple2Agt},  {@link TDNTuple3Agt} and {@link SarsaAgt}. 
+ * all agents {@link TDNTuple3Agt} and {@link SarsaAgt}.
  */
 abstract public interface NTupleAgt {
 	
@@ -27,13 +27,14 @@ abstract public interface NTupleAgt {
 	
 	// methods needed in class NextState:
 	public boolean getAFTERSTATE();
-	public double estimateGameValue(StateObservation sob);
+	//public double estimateGameValue(StateObservation sob);
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple);
 	public int getMoveCounter();
 	// the compiler requires that the following four methods are public, although
-	// they should be used only from class NextState (and not by anybody):
+	// they should be used only from class NextState (and not by anybody else):
 	public void incrementMoveCounter(); 
 	public void incrementWinCounters(double reward, NextState ns);
 	public void collectReward(NextState ns);
-	public void setFinished(boolean f);	
+	public void setFinished(boolean f);
+	public void setEpiLengthStop(boolean f);
 }

@@ -6,7 +6,7 @@ import tools.Types;
 
 /**
  * Class NextState bundles the different states in state advancing and two different modes of 
- * state advancing. Helper class for {@link TDNTuple2Agt}, {@link TDNTuple3Agt} and {@link SarsaAgt}, all 
+ * state advancing. Helper class for {@link TDNTuple3Agt} and {@link SarsaAgt}, all
  * three implementing interface {@link NTupleAgt}.
  * <p>
  * If {@link NTupleAgt#getAFTERSTATE()}==false, then {@code ns=new NextState(so,actBest)}  
@@ -27,8 +27,6 @@ import tools.Types;
  * {@code getAFTERSTATE()==false}: ns.getAfterState() and ns.getNextSO() return the same  
  * next state so.advance(actBest).
  * 
- * @see TDNTuple2Agt#getAFTERSTATE()
- * @see TDNTuple2Agt#trainAgent(StateObservation)
  * @see TDNTuple3Agt#trainAgent(StateObservation)
  * @see SarsaAgt#trainAgent(StateObservation)
  */
@@ -58,7 +56,6 @@ public class NextState {
 		NextState(NTupleAgt parent, StateObservation so, Types.ACTIONS actBest) {
 			this.tdAgt = parent;
 			refer = so.copy();
-			int nPlayers= refer.getNumPlayers();
 	        if (tdAgt.getAFTERSTATE()) {   // if checkbox "AFTERSTATE" is checked
 	        	
             	// implement it in such a way that StateObservation so is *not* changed -> that is why 
@@ -120,8 +117,8 @@ public class NextState {
 
 			tdAgt.incrementMoveCounter();
 			if (tdAgt.getMoveCounter()==epiLength) {
-				reward=tdAgt.estimateGameValue(nextSO);
-				tdAgt.setFinished(true); 
+				reward=tdAgt.estimateGameValueTuple(nextSO, null).scTup[nextSO.getPlayer()];
+				tdAgt.setFinished(true);
 			}
 			
 			return reward;
@@ -147,7 +144,8 @@ public class NextState {
 			tdAgt.incrementMoveCounter();
 			if (tdAgt.getMoveCounter()>=epiLength) {
 				rewardTuple=tdAgt.estimateGameValueTuple(nextSO, null);
-				tdAgt.setFinished(true); 
+				tdAgt.setFinished(true);
+				tdAgt.setEpiLengthStop(true);
 			}
 			
 			return rewardTuple;

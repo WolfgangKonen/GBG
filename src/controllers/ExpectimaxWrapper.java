@@ -9,7 +9,7 @@ import tools.ScoreTuple;
 /**
  * Wrapper based on {@link ExpectimaxNAgent} for n-ply look-ahead in nondeterministic games.
  * Wrap agent {@code pa} into an {@link ExpectimaxNAgent} with {@code nply} plies look-ahead.
- * Override {@link #estimateGameValue(StateObservation)} such that it returns the score tuple
+ * Override {@link #estimateGameValueTuple(StateObservation, ScoreTuple)} such that it returns the score tuple
  * of the wrapped agent {@code pa}.
  * 
  * @author Wolfgang Konen, TH Koeln, 2017
@@ -25,21 +25,20 @@ public class ExpectimaxWrapper extends ExpectimaxNAgent implements Serializable 
 		this.wrapped_pa = pa;
 	}
 	
-	/**
-	 * When the recursion tree has reached its maximal depth m_depth, then return
-	 * an estimate of the game score.  
-	 * <p>
-	 * Here we use the wrapped {@link PlayAgent} to return a game value.
-	 * 
-	 * @param sob	the state observation
-	 * @return		the estimated score 
-	 */
-	@Override
-	@Deprecated
-	public double estimateGameValue(StateObservation sob) {	
-//		return wrapped_pa.getScore(sob);
-		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
-	}
+//	/**
+//	 * When the recursion tree has reached its maximal depth m_depth, then return
+//	 * an estimate of the game score.
+//	 * <p>
+//	 * Here we use the wrapped {@link PlayAgent} to return a game value.
+//	 *
+//	 * @param sob	the state observation
+//	 * @return		the estimated score
+//	 */
+//	@Override
+//	@Deprecated
+//	public double estimateGameValue(StateObservation sob) {
+//		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
+//	}
 
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
@@ -52,7 +51,7 @@ public class ExpectimaxWrapper extends ExpectimaxNAgent implements Serializable 
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return wrapped_pa.estimateGameValueTuple(sob, null);
+		return wrapped_pa.getScoreTuple(sob, prevTuple);
 	}
 	
 	public PlayAgent getWrappedPlayAgent() {

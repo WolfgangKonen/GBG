@@ -46,7 +46,7 @@ public interface StateObservation extends Serializable{
 	public boolean isDeterministicGame();
 	
 	/**
-	 * @return true, if the game emits rewards only in the final game position
+	 * @return true, if the game emits rewards only in a game-over game position
 	 */
 	public boolean isFinalRewardGame();
 
@@ -134,13 +134,28 @@ public interface StateObservation extends Serializable{
 	public double getReward(int player, boolean rewardIsGameScore);
 
 	/**
+	 * The tuple of cumulative rewards.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return	a score tuple which has as {@code i}th value  
 	 * 			{@link #getReward(int, boolean)} with {@code i} as first argument
 	 */
 	public ScoreTuple getRewardTuple(boolean rewardIsGameScore);
-	
+
+	/**
+	 * The tuple of delta rewards given by the game environment.<br>
+	 * The delta reward is for transition into state {@code this} from a previous state.
+	 * <p>
+	 * NOTE: Currently the delta reward does NOT include the final reward, which is given by
+	 * {@link this#getRewardTuple(boolean)}. On the long run this should be included in the delta reward and make
+	 * {@link this#getRewardTuple(boolean)} (the cumulative reward) obsolete.
+	 *
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
+	 * 		  game-specific reward
+	 * @return	a score tuple
+	 */
+	public ScoreTuple getDeltaRewardTuple(boolean rewardIsGameScore);
+
 	public double getMinGameScore();
 	public double getMaxGameScore();
 	

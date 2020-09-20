@@ -8,6 +8,7 @@ import games.BoardVector;
 import games.ObserverBase;
 import games.StateObservation;
 import games.RubiksCube.CubeState.Twist;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -104,7 +105,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		return pred;
 	}
 
-    @Override
+	@Override
 	public boolean isDeterministicGame() {
 		return true;
 	}
@@ -157,14 +158,30 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * @see #REWARD_POSITIVE		
 	 */
 	public double getGameScore(StateObservation refer) {
-		if(isGameOver()) return REWARD_POSITIVE + this.m_counter * CubeConfig.stepReward;
-		return REWARD_NEGATIVE;
-//		if(isGameOver()) return prevReward+0;
-//		return prevReward+REWARD_NEGATIVE; 
+		if(isGameOver()) return REWARD_POSITIVE; // + this.m_counter * CubeConfig.stepReward;
+//		return this.m_counter * CubeConfig.stepReward; // after 2020-09-15
+		return  0; //REWARD_NEGATIVE;		// earlier version
 	}
 
 	public double getMinGameScore() { return REWARD_NEGATIVE; }
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
+
+	/**
+	 * The tuple of delta rewards given by the game environment.<br>
+	 * The delta reward is for transition into state {@code this} from a previous state.
+	 * <p>
+	 *
+	 * @param rewardIsGameScore if true, use delta game score as delta reward; if false, use a different,
+	 * 		  game-specific delta reward
+	 * @return	a score tuple
+	 */
+	public ScoreTuple getDeltaRewardTuple(boolean rewardIsGameScore) {
+		double val = CubeConfig.stepReward;
+		if (this.getCubeState().isEqual(def))
+			val += REWARD_POSITIVE;
+		ScoreTuple sc = new ScoreTuple(new double[]{val});
+		return sc;
+	}
 
 	public String getName() { return "RubiksCube";	}	// should be a valid directory name
 

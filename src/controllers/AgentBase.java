@@ -1,18 +1,13 @@
 package controllers;
 
-import java.awt.Component;
 import java.io.Serializable;
 
 import javax.swing.JOptionPane;
 
-import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.StateObservation;
-import games.XArenaMenu;
-import gui.MessageBox;
 import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
@@ -88,31 +83,30 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		throw new RuntimeException("Agents derived from AgentBase have to implement this method: getScoreTuple");
 	}
 
-	/**
-	 * Return the estimated game value for {@link StateObservation} sob. The
-	 * default behavior is to return {@link #getScore(StateObservation)}.
-	 * <p>
-	 * 
-	 * This method is deprecated, use estimateGameValueTuple instead.
-	 * 
-	 * @param sob
-	 *            the state observation object
-	 * @return {@link #getScore(StateObservation)}, that is whatever the derived
-	 *         class implements for {@link #getScore(StateObservation)}.
-	 */
-	@Deprecated
-	public double estimateGameValue(StateObservation sob) {
-//		return getScore(sob);
-		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
-	};
+//	/**
+//	 * Return the estimated game value for {@link StateObservation} sob. The
+//	 * default behavior is to return {@link #getScore(StateObservation)}.
+//	 * <p>
+//	 *
+//	 * This method is deprecated, use estimateGameValueTuple instead.
+//	 *
+//	 * @param sob
+//	 *            the state observation object
+//	 * @return {@link #getScore(StateObservation)}, that is whatever the derived
+//	 *         class implements for {@link #getScore(StateObservation)}.
+//	 */
+//	@Deprecated
+//	public double estimateGameValue(StateObservation sob) {
+//		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
+//	};
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final
 	 * reward) <b>for all players</b>. Is called when maximum episode length
 	 * (TD) or maximum tree depth for certain agents (Max-N) is reached.
 	 * 
-	 * <b>Important note</b>: Derived classes that use
-	 * {@link #estimateGameValueTuple} inside {@link #getScore(StateObservation)}
+	 * <b>Important note</b>: Derived classes that use this method
+	 * inside {@link #getScore(StateObservation)}
 	 * (e.g. Max-N, MC or MCTS when reaching the predefined rollout depth)
 	 * have to <b>override</b> this function with a function <b>not</b> using
 	 * {@link #getScore(StateObservation)}, otherwise an infinite loop would
@@ -176,7 +170,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * self-play episode (with the agent-specififc {@code getNextAction2} and game-specific {@code advance}) to let the caller of this
 	 * method measure how long that takes.
 	 * <p>
-	 * Truly adaptable agents (like {@link TDNTuple3Agt}) should override this method and program their 
+	 * Truly adaptable agents (like {@link TDNTuple3Agt}) should override this method and program their own
 	 * adaptation behavior.
 	 * 
 	 * @param so		the state from which the episode is played 
@@ -385,10 +379,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
     @Override
-	public String stringDescr() {
-		String cs = getClass().getSimpleName();
-		return cs;
-	}
+	public String stringDescr() { return getClass().getSimpleName(); }
 	
     @Override
 	public String stringDescr2() {
