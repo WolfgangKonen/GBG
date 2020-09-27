@@ -133,7 +133,7 @@ public class Evaluator2048 extends Evaluator {
                 e.printStackTrace();
             }
 
-        } else if (	m_PlayAgent.getName().equals("ExpectimaxWrapper") ) {
+        } else if (	m_PlayAgent.getName().equals("ExpectimaxWrapper") || m_PlayAgent.getName().equals("Expectimax2Wrapper") ) {
             //async for wrapper agents (ExpectiMaxN or MaxN tree nply)
             List<Callable<StateObserver2048>> callables = new ArrayList<>();
 
@@ -502,7 +502,7 @@ public class Evaluator2048 extends Evaluator {
 	public String getTooltipString() {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
-				+ "0: avg score from 50 games<br>"
+				+ "0: avg score from 250 games<br>"
 				+ "1: Evaluator2048_BoardPositions<br>"
 				+ "2: Evaluator2048_EA<br>"
 				+ "</html>";

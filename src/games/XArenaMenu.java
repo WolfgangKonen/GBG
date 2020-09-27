@@ -663,7 +663,7 @@ public class XArenaMenu extends JMenuBar {
 
 				long elapsedMs = (System.currentTimeMillis() - startTime);
 				double elapsedTime = (double) elapsedMs / 1000.0;
-				System.out.println("Quick eval runtime:  " + elapsedTime + " sec");
+				System.out.println("Quick eval runtime:  " + elapsedTime + " sec,     lastResult="+qEvaluator.getLastResult());
 			} catch (RuntimeException e) {
 				m_arena.showMessage( e.getMessage(), 
 						"Error", JOptionPane.ERROR_MESSAGE);

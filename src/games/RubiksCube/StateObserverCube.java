@@ -2,12 +2,10 @@ package games.RubiksCube;
 
 import java.util.ArrayList;
 
-import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.BoardVector;
 import games.ObserverBase;
 import games.StateObservation;
-import games.RubiksCube.CubeState.Twist;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -26,13 +24,13 @@ import tools.Types.ACTIONS;
  * @see StateObserverCubeCleared
  */
 public class StateObserverCube extends ObserverBase implements StateObservation {
-	private CubeState m_state;
+	private final CubeState m_state;
 	/**
 	 * the action which led to m_state (9 if not known)
 	 */
 	protected ACTIONS m_action;
-	private static CubeStateFactory csFactory = new CubeStateFactory();
-	private static CubeState def = csFactory.makeCubeState(); // a solved cube as reference
+	private static final CubeStateFactory csFactory = new CubeStateFactory();
+	private static final CubeState def = csFactory.makeCubeState(); // a solved cube as reference
 	/**
 	 * The reward for the solved cube is 1.5. It is higher than the usual game-won reward 1.0, because some agents (e.g.
 	 * {@link TDNTuple3Agt}) produce game values a bit higher than 1.0 for non-solved cube states. REWARD_POSITIVE should 
@@ -44,7 +42,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * The game score as long as the solved cube is not found
 	 */
     public static final double REWARD_NEGATIVE = -1.0;
-	private ArrayList<ACTIONS> acts = new ArrayList();	// holds all available actions
+	private final ArrayList<ACTIONS> acts = new ArrayList<>();	// holds all available actions
    
 //	private double prevReward = 0.0;
 	
@@ -146,10 +144,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * The game score of state {@code this}, seen from the perspective of {@code refer}'s player. 
 	 * For Rubik's Cube only the game-over state (solved cube) has a non-zero game score
 	 * <pre>
-	 *       REWARD_POSITIVE - m_counter * CubeConfig.stepReward   </pre>
-	 * The 2nd term ensures that if there are two paths to the solved cube, the one with the lower number of twists
-	 * {@code m_counter} has the higher reward. This is important for tree-based agents, which may completely fail if 
-	 * they always select the ones with the longer path and never come to an end!
+	 *       REWARD_POSITIVE </pre>
 	 * <p>
 	 * 
 	 * @param refer only needed for the interface, not relevant in this 1-person game
@@ -167,18 +162,32 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
 	/**
-	 * The tuple of delta rewards given by the game environment.<br>
-	 * The delta reward is for transition into state {@code this} from a previous state.
+	 * The tuple of step rewards given by the game environment.<br>
+	 * The step reward is for transition into state {@code this} from a previous state.
 	 * <p>
+	 * The step reward ensures that if there are two paths to the solved cube, the one with the lower number of twists
+	 * (fewer step rewards) has the higher reward. This is important for tree-based agents, which may completely fail if
+	 * they always select the ones with the longer path and never come to an end!
 	 *
-	 * @param rewardIsGameScore if true, use delta game score as delta reward; if false, use a different,
-	 * 		  game-specific delta reward
+	 *
 	 * @return	a score tuple
 	 */
-	public ScoreTuple getDeltaRewardTuple(boolean rewardIsGameScore) {
+	public ScoreTuple getStepRewardTuple() {
 		double val = CubeConfig.stepReward;
-		if (this.getCubeState().isEqual(def))
-			val += REWARD_POSITIVE;
+//		if (this.getCubeState().isEqual(def))
+//			val += REWARD_POSITIVE;
+		ScoreTuple sc = new ScoreTuple(new double[]{val});
+		return sc;
+	}
+
+	/**
+	 * The tuple of rewards given by the game environment (excluding step reward).<br>
+	 *
+	 * @param rewardIsGameScore just for the interface, not relevant here
+	 * @return	a score tuple of rewards (excluding step reward)
+	 */
+	public ScoreTuple getRewardTuple(boolean rewardIsGameScore) {
+		double val = (this.getCubeState().isEqual(def)) ?  REWARD_POSITIVE : 0.0;
 		ScoreTuple sc = new ScoreTuple(new double[]{val});
 		return sc;
 	}
@@ -221,7 +230,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
     @Override
 	public ArrayList<ACTIONS> getAllAvailableActions() {
-        ArrayList allActions = new ArrayList<>();
+        ArrayList<ACTIONS> allActions = new ArrayList<>();
         for (int j = 0; j < 9; j++) 
         	allActions.add(Types.ACTIONS.fromInt(j));
         
@@ -250,6 +259,9 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public void setAvailableActions() {
 		acts.clear();
 		if (CubeConfig.twistType==CubeConfig.TwistType.ALLTWISTS) {
+			// we change the former behavior and allow all actions, because it is cumbersome in the search to omit actions
+			// (which might be the right ones due to earlier errors). Instead we forbid now only in DAVI3.getNextAction2
+			// the inverse of the last action m_action in order to avoid cycles of 2.
 //			if (m_state.lastTwist!=Twist.U) {
 //				acts.add(Types.ACTIONS.fromInt(0));  // U1
 //				acts.add(Types.ACTIONS.fromInt(1));  // U2

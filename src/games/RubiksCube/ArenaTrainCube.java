@@ -31,7 +31,7 @@ import games.ArenaTrain;
  * @see GameBoardCube
  * @see EvaluatorCube
  * 
- * @author Wolfgang Konen, TH Koeln, Feb'18
+ * @author Wolfgang Konen, TH Koeln, 2018-2020
  */
 public class ArenaTrainCube extends ArenaTrain   {
 	
@@ -57,8 +57,8 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 */
 	@Override
 	public GameBoard makeGameBoard() {
-		CubeStateFactory.generateInverseTs();		// since makeGameBoard is called via super --> Arena
-		CubeState.generateForwardTs();		// prior to finishing ArenaTrainCube(String,boolean)
+		CubeStateFactory.generateInverseTs();	// since makeGameBoard is called via super --> Arena
+		CubeState.generateForwardTs();			// prior to finishing ArenaTrainCube(String,boolean)
 		gb = new GameBoardCube(this);	
 		return gb;
 	}
@@ -66,9 +66,8 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 * Factory pattern method: make a new Evaluator
 	 * @param pa		the agent to evaluate
 	 * @param gb		the game board
-	 * @param stopEval	the number of successful evaluations needed to reach the 
-	 * 					evaluator goal (may be used to stop training prematurely)
-	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
+	 * @param stopEval	maximum episode length {@code epiLength} during evaluation
+	 * @param mode		which evaluator mode: -1,0,1. Throws a runtime exception
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
 	 * @param verbose	how verbose or silent the evaluator is
 	 * @return

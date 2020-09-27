@@ -1,67 +1,188 @@
 package controllers.TD.ntuple2;
 
+import controllers.Expectimax2Wrapper;
+import controllers.ExpectimaxWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.GBGBatch;
-import games.RubiksCube.GameBoardCube;
+import games.GameBoard;
 import games.StateObservation;
 import org.junit.Test;
-import tools.Types;
+import tools.Measure;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
 
 public class TDNTuple3AgtTest extends GBGBatch {
-    String selectedGame = "RubiksCube";
-    String[] agtFile = {"TCL3-p11-2000k-120-7t.agt.zip","davi3-p11-2000k-120-7t-BASE.agt.zip"};
-    String[] agtType = {"TDNT3", "DAVI3"};
-    double[][] evalThresh = {{0.75, 0.85}, {0.74, 0.84}};
     String csvFile = "test.csv";
-    String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
+
+    // settings for RubiksCube
+    String[] agtFileA = {"TCL3-p06-1000k-60-7t-TEST.agt.zip","davi3-p06-500k-60-7t.agt.zip"};
+                    // lower thresholds for quickEvalTest and ...
+    double[][] evalThreshA = {{0.97, 0.99},      // ... TCL3
+                              {0.98, 0.99}};     // ... DAVI3
+                    // nPly =   0     1
+    String[] agtFileB = {"TCL3-p13-3000k-120-7t.agt.zip","davi3-p11-2000k-120-7t-BASE.agt.zip"};  //
+                    // lower thresholds for quickEvalTest and ...
+    double[][] evalThreshB = {{0.87, 0.88, 0.985},      // ... TCL3
+                              {0.85, 0.91, 0.985}};     // ... DAVI3
+                    // nPly =   0     1     2
+
+    // settings for Othello
+    String[] agtFileC = {"TCL3-fixed6_250k-lam05_P4_nPly2-FAm.agt.zip","TCL3-100_7_250k-lam05_P4_nPly2-FAm.agt.zip"};
+                    // lower thresholds for quickEvalTest and ...
+    double[][] evalThreshC = {{0.87, 0.92, 0.98},      // ... TCL3
+                              {0.89, 0.94, 0.99}};     // ... TCL3
+                    // nPly =   0     1     2
+
+    // settings for 6x6 Hex
+    String[] agtFileD = {"TDNT3-TCLid-25_6-300k-eps02.agt.zip","TDNT3-TCLid-25_6-300k-eps02-eval10.agt.zip"};
+                    // lower thresholds for quickEvalTest and ...
+    double[][] evalThreshD = {{1.00, 1.00, 1.00},      // ... TCL3
+                              {0.80, 0.80, 0.95}};     // ... TCL3
+                    // nPly =   0     1     2
+
+    // settings for TicTacToe
+    String[] agtFileE = {"tdntuple3.agt.zip"};
+                    // lower thresholds for quickEvalTest and ...
+    double[][] evalThreshE = {{0.00, 0.00, 0.00}};     // ... TCL3
+                    // nPly =   0     1     2
+
+    // settings for 2048
+    String[] agtFileF = {"TC-NT3_fixed_4_6-Tupels_200k-FA.agt.zip"};
+                    // lower thresholds for quickEvalTest and ...
+    double[][] evalThreshF = {{130000, 130000, 180000}};      // ... TCL3
+                    // nPly =   0        1        2
 
     /**
-     * Calling MaxN2Wrapper with nPly=0 should result in the same best values as calling the wrapped agent directly.
-     * Check this on nStates random start states for RubiksCube and for all agents in {@code agtFile} (currently certain
-     * DAVI2 and DAVI3 agents).
+     * Test that the agents loaded from agtFile*[k] achieve a certain performance when quick-evaluated with nPly =
+     * 0,1,...,nplyMax. The performance is measured by comparing the QuickEval result with evalThresh*[k][nPly].
+     * Repeat each eval nRuns times. (* = A, B, C or D)
      */
     @Test
     public void quickEvalTest() {
+        String selectedGame = "RubiksCube";
+        //quickEval(selectedGame, agtFileA, evalThreshA,1);   // 5 sec
+        //quickEval(selectedGame, agtFileB, evalThreshB,1);   // 30 sec
+        //quickEval(selectedGame, agtFileB, evalThreshB,2);   // 3 min
+        selectedGame = "Othello";
+        quickEval(selectedGame, agtFileC, evalThreshC,1);   // 1 min
+        //quickEval(selectedGame, agtFileC, evalThreshC,2);   // 8 min
+        selectedGame = "Hex";
+        //quickEval(selectedGame, agtFileD, evalThreshD,2);   // 5 min
+        selectedGame = "2048";
+        quickEval(selectedGame, agtFileF, evalThreshF,2);   // 2 min
+    }
+
+    /**
+     * Test that the agents loaded from agtFile*[k] and trained anew achieve a certain performance when quick-evaluated
+     * with a) nPly=0 and b) nPly=1. The performance is measured by comparing the QuickEval result with evalThresh*[k][nPly].
+     * Repeat each eval nRuns times. (* = A, B, C, D)
+     */
+    @Test
+    public void retrainAndEvalTest() {
+        String selectedGame = "RubiksCube";
+        //retrainAndEval(selectedGame, agtFileA, evalThreshA, 500000);          // 2 min runtime
+        //retrainAndEval(selectedGame, agtFileB, evalThreshB,-1);        // 23 min runtime
+        selectedGame = "Hex";
+        //retrainAndEval(selectedGame, agtFileD, evalThreshD,-1);        // 14 min runtime
+        selectedGame = "TicTacToe";
+        retrainAndEval(selectedGame, agtFileE, evalThreshE,-1);        // 4 sec runtime
+    }
+
+    /**
+     *
+     * @param selectedGame  name of the game
+     * @param agtFile       vector of agent files
+     * @param evalThresh    eval threshold for each agent file and nPly
+     * @param nplyMax       tests for 0,1,...,nplyMax
+     */
+    public void quickEval(String selectedGame, String[] agtFile, double[][] evalThresh, int nplyMax) {
         PlayAgent pa;
-        PlayAgent qa;
-        StateObservation so;
-        int nplyMax=1;
-        int nStates=2;
-        double evalQ;
-        int stopEval=50;
-        Types.ACTIONS_VT act_pa, act_qa;
 
+        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardCube gb = new GameBoardCube(t_Game);		// needed for chooseStartState()
+        GameBoard gb = t_Game.makeGameBoard();		// needed for chooseStartState()
 
-        for (int k=0; k< agtType.length; k++) {
+        assert evalThresh[0].length>nplyMax : "evalThresh[0] too small for nplyMax = "+nplyMax;
+
+        for (int k=0; k< agtFile.length; k++) {
+            setupPaths(agtFile[k],csvFile);     // builds filePath
+
+            boolean res = t_Game.loadAgent(0, filePath);
+            assert res : "\n[TDNTuple3AgtTest] Aborted: agtFile = "+ agtFile[k] + " not found!";
+
+            String sAgent = t_Game.m_xab.getSelectedAgent(0);
+            pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
+
+            innerQuickEval(pa, k, nplyMax, agtFile, evalThresh, gb, 0);
+
+            System.out.println("[quickEvalTest,"+agtFile[k]+"] all eval runs above evalThresh");
+        } // for (k)
+    }
+
+    /**
+     *
+     * @param selectedGame  name of the game
+     * @param agtFile       vector of agent files
+     * @param evalThresh    eval threshold for each agent file and nPly
+     * @param maxGameNum    number of episodes to train (if -1, infer the this number from m_xab.getGameNumber())
+     */
+    public void retrainAndEval(String selectedGame, String[] agtFile, double[][] evalThresh, int maxGameNum) {
+        PlayAgent pa;
+        int nplyMax=1;
+
+        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
+        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        GameBoard gb = t_Game.makeGameBoard();		// needed for chooseStartState()
+
+        mtList = new ArrayList<>();         // needed for doSingleTraining
+        oQ = new Measure();			        //
+        oT = new Measure();			        //
+
+        for (int k=0; k< agtFile.length; k++) {
             setupPaths(agtFile[k],csvFile);     // builds filePath
 
             boolean res = t_Game.loadAgent(0, filePath);
             assert res : "\n[TDNTuple3AgtTest] Aborted: agtFile = "+agtFile[k] + " not found!";
 
+            if (maxGameNum==-1) maxGameNum=t_Game.m_xab.getGameNumber();
+            t_Game.m_xab.oPar[0].setNumEval(maxGameNum/2);
             String sAgent = t_Game.m_xab.getSelectedAgent(0);
             pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
-            for (int nply=0; nply<=nplyMax; nply++) {
-                qa = new MaxN2Wrapper(pa, nply, pa.getParOther());
 
-                int qem = t_Game.m_xab.oPar[0].getQuickEvalMode();
-                m_evaluatorQ = t_Game.m_xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,-1);
+            pa = doSingleTraining(0,0,pa,t_Game.m_xab,gb,maxGameNum,0.0,0.0);
 
-                for (int i=0; i<nStates; i++) {
-                    m_evaluatorQ.eval(qa);
-                    evalQ = m_evaluatorQ.getLastResult();
-                    System.out.println("nply="+nply+", "+i+ ": evalQ="+evalQ+"    "+evalThresh[k][nply]);
-                    assert evalQ > evalThresh[k][nply] : "k="+k+", nply="+nply+": did not pass evalThresh test";
+            innerQuickEval(pa,k,nplyMax, agtFile, evalThresh, gb, -1);
 
-                }
-
-            }
-            System.out.println("[quickEvalTest,"+agtType[k]+"] all eval runs above evalThresh");
+            System.out.println("[retrainAndEvalTest] "+agtFile[k]+": all eval runs above evalThresh");
         } // for (k)
+    }
+
+    private void innerQuickEval(PlayAgent pa,int k, int nplyMax, String[] agtFile, double[][] evalThresh,
+                                GameBoard gb, int verbose) {
+        PlayAgent qa;
+        double evalQ;
+        int nRuns=2;
+        int stopEval=50;
+        StateObservation so = gb.getDefaultStartState();
+
+        for (int nply=0; nply<=nplyMax; nply++) {
+            //if (nply==0) qa = pa; // this was necessary before bug fix in MaxN2Wrapper.getNextAction2 (.clearedCopy()
+            //else                  // commented out). clearedCopy leads to inferior MaxN2Wrapper[nply=0] results (!)
+                    qa = so.isDeterministicGame() ?
+                            new MaxN2Wrapper(pa, nply, pa.getParOther()) :
+                            new ExpectimaxWrapper(pa, nply);
+
+            int qem = t_Game.m_xab.oPar[0].getQuickEvalMode();
+            m_evaluatorQ = t_Game.m_xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,-1);
+
+            for (int i=0; i<nRuns; i++) {
+                m_evaluatorQ.eval(qa);
+                evalQ = m_evaluatorQ.getLastResult();
+                System.out.println("nply="+nply+", "+i+ ": evalQ="+evalQ+"    "+evalThresh[k][nply]);
+                assert evalQ >= evalThresh[k][nply] : "["+agtFile[k]+"] nply="+nply+": did not pass evalThresh test";
+            }
+        }
     }
 
 }

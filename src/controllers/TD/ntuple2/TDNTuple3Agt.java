@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 import agentIO.LoadSaveGBG;
+import games.RubiksCube.DAVI3Agent;
 import games.RubiksCube.StateObserverCube;
 import params.ParNT;
 import params.ParOther;
@@ -216,6 +217,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		boolean rgs = this.getParOther().getRewardIsGameScore();
 		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we use TD target r + gamma*V
 		StateObservation NewSO;
+		Types.ACTIONS thisAct;
         Types.ACTIONS actBest;
         Types.ACTIONS_VT actBestVT;
     	bestValue = -Double.MAX_VALUE;
@@ -242,6 +244,19 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         assert acts.size()>0 : "Oops, no available action";
         for(i = 0; i < acts.size(); ++i)
         {
+			thisAct = acts.get(i);
+
+			// this is just relevant for game RubiksCube: If an action is the inverse of the last action, it would
+			// lead to the previous state again, resulting in a cycle of 2. We avoid such cycles and continue with
+			// next pass through for-loop --> beneficial when searching for the solved cube in play & train.
+			// If you do not want to skip any action - e.g. when inspecting states - then enter this method with
+			// a 'cleared' state {@link StateObserverCubeCleared} {@code so} (lastAction==9).
+			//
+			// For all other games, usually no return to the previous state is possible. For those games
+			// isEqualToInverseOfLastAction returns always false.
+			if (thisAct.isEqualToInverseOfLastAction(so))
+				continue;	// with next for-pass
+
         	NewSO = so.copy();
 
     		if (randomSelect) {
@@ -250,7 +265,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	        if (this.getAFTERSTATE()) {
     	        	// if parameter "AFTERSTATE" is checked in ParNT, i.e. we use afterstate logic:
     	        	//
-    	        	NewSO.advanceDeterministic(acts.get(i)); 	// generate the afterstate
+    	        	NewSO.advanceDeterministic(thisAct); 	// generate the afterstate
     	        	value = this.getScore(NewSO,so); // this is V(s') from so-perspective
     	            NewSO.advanceNondeterministic(); 
     	        } else { 
@@ -261,14 +276,9 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	        }
     	        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
     	        // but they usually differ for nondeterministic games.
-            	
-				if (NewSO instanceof StateObserverCube)
-					rtilde = NewSO.getDeltaRewardTuple(false).scTup[0];
-				else
-					rtilde = NewSO.getReward(so,rgs)-otilde;
-				// TODO: test if we can replace this with a common formulation for all games (needs probably transition
-				// to getDeltaRewardTuple instead of getRewardTuple for all games)
 
+				rtilde  = (NewSO.getReward(so,rgs)-otilde)
+						+ so.getStepRewardTuple().scTup[so.getPlayer()];
             	if (TERNARY) {
             		value = NewSO.isGameOver() ? rtilde : getGamma()*value;
             	} else {
@@ -305,7 +315,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		NewSO.advance(actBest);
 		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
 		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
-		if (so instanceof StateObserverCube)
+		//if (so instanceof StateObserverCube)
 			scBest.scTup[so.getPlayer()]=bestValue;
 			// this is necessary for RubiksCube. TODO: Test if we can generalize it for all games
 			// (i.e. generalize this.getScoreTuple to "r + gamma * V" for all games)
@@ -400,10 +410,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 */
 	public double getScore(StateObservation so, StateObservation refer) {
 		double score;
-		if (so instanceof StateObserverCube)
+		//if (so instanceof StateObserverCube)
 			if (so.isGameOver())
-				return 0.0;		// special for RubiksCube
-								// TODO: Check if OK also for other games /WK/
+				return 0.0;		// This is very needed for RubiksCube (no expected future rewards for game-over states).
+								// We assume from now on (09/2020) that it is at least not harmful for all other games.
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		score = m_Net.getScoreI(curSOWB,refer.getPlayer());
     	return score;
@@ -541,13 +551,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		if (sLast[curPlayer]!=null) {
 			// delta reward from curPlayer's perspective when moving into s_next
 			double r_next;
-			if (s_next instanceof StateObserverCube) {
-				// TODO: currently only for RubiksCube, but should become the general case if the transition to
-				// getDeltaRewardTuple is complete
-				r_next = s_next.getDeltaRewardTuple(false).scTup[0];
-			} else {
-				r_next = R.scTup[curPlayer] - rLast.scTup[curPlayer];		// this does not work for RubiksCube
-			}
+			r_next  = (R.scTup[curPlayer] - rLast.scTup[curPlayer])
+					+ s_next.getStepRewardTuple().scTup[curPlayer];
         	if (TERNARY) {
         		target = s_next.isGameOver() ? r_next : getGamma()*v_next;
         	} else {
@@ -650,13 +655,9 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				// towards the reward received when curPlayer did his terminal move. 
 				//
 				if (sLast[n]!=null ) {
-					if (s_next instanceof StateObserverCube) {
-						target = s_next.getDeltaRewardTuple(false).scTup[0];
-					} else {
-						target = R.scTup[n] - rLast.scTup[n]; 		// delta reward
-					}
+					target  = (R.scTup[n] - rLast.scTup[n]) 		// delta reward
+							+ s_next.getStepRewardTuple().scTup[n];
 		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
-//					curBoard = curSOWB.getBoardVector().bvec;
 		        	vLast = m_Net.getScoreI(curSOWB,n);
 		        	
 	    			m_Net.updateWeightsTD(curSOWB, n, vLast, target, R.scTup[n], ns.getSO());

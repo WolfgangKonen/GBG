@@ -16,7 +16,8 @@ import games.TStats.TAggreg;
  * <li> If mode=1: how many percent of the states are solved within {@code epiLength} twists? 
  * </ul>  
  * The value of mode is set in the constructor. <br>
- * The value of {@code epiLength} is set from the agent's {@code getParOther().getStopEval()}.
+ * The value of {@code epiLength} is set from the agent's {@code getParOther().getStopEval()}.<br>
+ * The value of {@link CubeConfig#pMax} is set from {@link params.OtherParams} element {@code pMax}.
  */
 public class EvaluatorCube extends Evaluator {
  	private static final int[] AVAILABLE_MODES = new int[]{-1,0,1};
@@ -79,8 +80,10 @@ public class EvaluatorCube extends Evaluator {
 	 * <li> {@link Evaluator#m_mode m_mode}{@code =0}:  percent solved within &le; p twists
 	 * <li> {@link Evaluator#m_mode m_mode}{@code =1}:  percent solved within {@code epiLength} twists
 	 * </ul> 
-	 * @param pa the agent to evaluate. Use {@link PlayAgent#getParOther()#getStopEval()} to infer {@code epiLength}
- 	 * @return the weighted average success on different sets of scrambled cubes
+	 * @param pa the agent to evaluate. Use {@code pa}'s {@link PlayAgent#getParOther()#getStopEval()} to infer {@code epiLength}
+	 *           ('EpiLength Eval' in OtherParams)
+ 	 * @return the weighted average success on different sets of scrambled cubes. Currently, constant weights are
+	 * 			 hard-wired in source code.
 	 */
  	private double evaluateAgent0(PlayAgent pa) {
 		ArrayList<TStats> tsList = new ArrayList<TStats>();
@@ -110,7 +113,7 @@ public class EvaluatorCube extends Evaluator {
  	                 so.advance(pa.getNextAction2(so, false, true));
                 }
                 int moveNum = so.getMoveCounter();
-                tstats = new TStats(n,p,moveNum,epiLength);
+                tstats = new TStats(n,p,moveNum,epiLength);	// both p and epiLength are later used in TAggreg(tsList,p) to form counters
     			tsList.add(tstats);
 
                 if(verbose > 1) {
@@ -121,7 +124,8 @@ public class EvaluatorCube extends Evaluator {
  			tagg = new TAggreg(tsList,p);
  			taggList.add(tagg);
  		} // for (p)
-		//lastResult = TStats.weightedAvgResTAggregList(taggList, CubeConfig.theoCov, m_mode);
+
+		//the distinction between mode==0 and mode==1 happens in TStats.weightedAvgResTAggregList (!):
 		lastResult = TStats.weightedAvgResTAggregList(taggList, constWght, m_mode);
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>=0) {
@@ -136,7 +140,7 @@ public class EvaluatorCube extends Evaluator {
  		return AVAILABLE_MODES;
  	}
  	
- 	//@Override
+ 	@Override
  	public int getDefaultEvalMode() {
 		return 0;		
 	}

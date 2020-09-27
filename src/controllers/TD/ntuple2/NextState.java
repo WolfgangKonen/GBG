@@ -1,5 +1,6 @@
 package controllers.TD.ntuple2;
 
+import games.RubiksCube.StateObserverCube;
 import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;
@@ -143,7 +144,14 @@ public class NextState {
 
 			tdAgt.incrementMoveCounter();
 			if (tdAgt.getMoveCounter()>=epiLength) {
-				rewardTuple=tdAgt.estimateGameValueTuple(nextSO, null);
+//				if (!(nextSO instanceof StateObserverCube)) {
+//					// for RubiksCube it would be wrong to return estimateGameValueTuple on a failed episode, we just
+//					// return this.getNextRewardTuple() (usually the 0-tuple).
+//					//
+//					// We comment it out for other games as well, since no other game works with a maximum epi length
+//					// so we will never arrive here
+//					rewardTuple = tdAgt.estimateGameValueTuple(nextSO, null);
+//				}
 				tdAgt.setFinished(true);
 				tdAgt.setEpiLengthStop(true);
 			}

@@ -8,8 +8,8 @@ import tools.Types;
 
 public class MaxN2WrapperTest extends GBGBatch {
     String selectedGame = "RubiksCube";
-    String[] agtFile = {"davi2-p11-2000k.agt.zip","davi3-p11-2000k-120-7t-BASE.agt.zip"};
-    String[] agtType = {"DAVI2", "DAVI3"};
+    String[] agtFile = {"davi2-p11-2000k.agt.zip","davi3-p11-2000k-120-7t-BASE.agt.zip","TCL3-p13-3000k-120-7t.agt.zip"};
+    String[] agtType = {"DAVI2", "DAVI3","TDNT3"};
     String csvFile = "test.csv";
     String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
 
@@ -24,7 +24,7 @@ public class MaxN2WrapperTest extends GBGBatch {
         PlayAgent qa;
         StateObservation so;
         int nply=0;
-        int nStates=10;
+        int nStates=100;
         Types.ACTIONS_VT act_pa, act_qa;
 
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object

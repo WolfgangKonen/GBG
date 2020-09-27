@@ -2,19 +2,16 @@ package games.RubiksCube;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import games.Arena;
 import games.StateObservation;
 import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
 /**
@@ -31,16 +28,16 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 
 	private static final long serialVersionUID = 12L;
 
-	private static StateObserverCube def = new StateObserverCube();   // default (solved) cube
+	private final static StateObserverCube def = new StateObserverCube();   // default (solved) cube
 	
-	private static double LOW_V = -9.0;		// a low V-value for all states not present in HashMap
+	private final static double LOW_V = -9.0;		// a low V-value for all states not present in HashMap
 
 	/**
 	 * HashMap for the V-values V(s)
 	 */
-	private HashMap<String,Double> vm;
+	private final HashMap<String,Double> vm;
 
-	private Random rand;
+	private final Random rand;
 
 	public DAVI2Agent(String name, ParOther oPar) {
 		super(name, oPar);
@@ -67,9 +64,9 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
-		int i,j;
+		int i;
 		StateObserverCube newSO;
-        ACTIONS actBest = null;
+        ACTIONS actBest;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
         ArrayList<ACTIONS> bestActions = new ArrayList<>();
 		double[] vTable = new double[acts.size()+1];  
@@ -85,7 +82,8 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         	newSO.advance(acts.get(i));
         	
         	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
-        	value = vTable[i] = newSO.getDeltaRewardTuple(false).scTup[0] + daviValue(newSO);
+        	value = vTable[i] = newSO.getRewardTuple(false).scTup[0] +
+								newSO.getStepRewardTuple().scTup[0] + daviValue(newSO);
         	// Always *maximize* 'value' 
         	if (value==maxValue) bestActions.add(acts.get(i));
         	if (value>maxValue) {

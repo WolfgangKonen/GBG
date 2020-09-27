@@ -248,7 +248,7 @@ public class GBGBatch {
 		String[] scaPar = new String[3];
 		switch(selectedGame) {
 		case "Hex": 
-			scaPar[0]="5";		// the initial (recommended) value	
+			scaPar[0]="6";		// the initial (recommended) value
 			break;
 		case "Nim": 
 			scaPar[0]="3";		// 	
@@ -709,8 +709,8 @@ public class GBGBatch {
 	// helper functions for multiTrainAlphaSweep & multiTrainLambdaSweep & multiTrainIncAmountSweep
 	//
 
-	private PlayAgent doSingleTraining(int n, int i, PlayAgent pa,XArenaButtons xab,
-								  GameBoard gb, int maxGameNum, double userValue1, double userValue2 ) throws IOException  {
+	protected PlayAgent doSingleTraining(int n, int i, PlayAgent pa,XArenaButtons xab,
+								  GameBoard gb, int maxGameNum, double userValue1, double userValue2 ) { //throws IOException  {
 		int numEval = xab.oPar[n].getNumEval();
 		int gameNum;
 		long actionNum, trnMoveNum;

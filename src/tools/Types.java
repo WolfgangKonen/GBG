@@ -11,6 +11,10 @@ import javax.swing.plaf.FontUIResource;
 
 import controllers.MaxNAgent;
 import games.Arena;
+import games.RubiksCube.CubeState2x2;
+import games.RubiksCube.DAVI3Agent;
+import games.RubiksCube.StateObserverCube;
+import games.StateObservation;
 
 import java.io.Serializable;
 
@@ -94,7 +98,34 @@ public class Types {
 		public void setRandomSelect(boolean randomSelect) {
 			this.randomSelect = randomSelect;
 		}
-    } // class ACTIONS
+
+		// the following two methods are only relevant for actions in game RubiksCube:
+
+		public boolean isEqualToInverseOfLastAction(StateObservation so) {
+			if (so instanceof StateObserverCube) {
+				Types.ACTIONS inverseAct = inverseAction(((StateObserverCube) so).getLastAction(),so);
+				if (this.equals(inverseAct))
+					return true;
+			}
+			return false; 	// for all games other than RubiksCube
+		}
+
+		private ACTIONS inverseAction(ACTIONS act, StateObservation so) {
+        	if (so instanceof StateObserverCube) {
+        		if (((StateObserverCube) so).getCubeState() instanceof CubeState2x2) {
+					int[] inverseActs = {2,1,0, 5,4,3, 8,7,6, 9};	// '9' codes 'not known' --> we return 'not known'
+					int iAction = act.toInt();
+					return new ACTIONS(inverseActs[iAction]);
+				} else { // CubeState3x3 case
+					// TODO
+					throw new RuntimeException("[ACTIONS.inverseAction] not yet implemented for CubeState3x3!");
+				}
+			}
+        	throw new RuntimeException("No inverseAction known for object so of class "+so.getClass().getSimpleName());
+		}
+
+
+	} // class ACTIONS
 
     /**
      *  ACTIONS_ST = ACTIONS + ScoreTuple (for best action)
@@ -109,6 +140,10 @@ public class Types {
     		super(oa);
     		m_st = new ScoreTuple(st); 
     	}
+    	public ACTIONS_ST(Types.ACTIONS_VT oav) {
+    		super(oav);
+    		m_st = oav.getScoreTuple();
+		}
     }
     
 	/**
