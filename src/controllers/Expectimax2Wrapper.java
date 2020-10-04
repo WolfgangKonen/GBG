@@ -76,7 +76,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 	/**
 	 * Get the best next action and return it
 	 * @param so			current game state (not changed on return), has to be an 
-	 * 						object of class StateObservationNondet
+	 * 						object of class {@link StateObsNondeterministic}
 	 * @param random		allow epsilon-greedy random action selection	
 	 * @param silent
 	 * @return actBest		the best action 

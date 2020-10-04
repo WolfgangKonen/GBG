@@ -1,7 +1,6 @@
 package games.CFour;
 
 import controllers.MCTS.MCTSAgentT;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.TD.ntuple2.NTupleBase;
 import controllers.MaxNAgent;
 import controllers.PlayAgent;
@@ -11,22 +10,15 @@ import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
-//import games.TicTacToe.Evaluator9;
-import games.TicTacToe.EvaluatorTTT;
-import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
-import gui.MessageBox;
 import games.CFour.openingBook.BookSum;
 import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,8 +52,7 @@ public class EvaluatorC4 extends Evaluator {
     private final String logDir = "logs/ConnectFour/train";
     protected int verbose = 0;
     private MCTSAgentT mctsAgent = null;
-    private RandomAgent randomAgent = new RandomAgent("Random");
-    private double trainingThreshold = 0.8;
+    private final RandomAgent randomAgent = new RandomAgent("Random");
     private PlayAgent playAgent;
     private int numStartStates = 1;
     
@@ -113,7 +104,8 @@ public class EvaluatorC4 extends Evaluator {
 
     @Override
     protected boolean evalAgent(PlayAgent pa) {
-    	this.playAgent = pa;
+        double trainingThreshold = 0.8;
+        this.playAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {
             return true;
@@ -145,24 +137,24 @@ public class EvaluatorC4 extends Evaluator {
         				// since MCTS results otherwise have such a large fluctuation
         switch (m_mode) {
             case 0:
-                result = competeAgainstMCTS(playAgent, m_gb, mctsF*numEpisodes);
+                result = competeAgainstMCTS(playAgent, mctsF*numEpisodes);
                 break;
             case 1:
-                result = competeAgainstRandom(playAgent, m_gb);
+                result = competeAgainstRandom(playAgent);
                 break;
             case 2:
-                result = competeAgainstMaxN(playAgent, m_gb, numEpisodes);
+                result = competeAgainstMaxN(playAgent, numEpisodes);
                 break;
             case 3:
             	numEpisodes=20;
-                result = competeAgainstAlphaBeta(playAgent, m_gb, numEpisodes);
+                result = competeAgainstAlphaBeta(playAgent, numEpisodes);
                 break;
             case 4:
                 result = competeAgainstOpponent_diffStates(playAgent, alphaBetaStd, m_gb, numEpisodes);
                 break;
             case 5:
             	numEpisodes=20;
-                result = competeAgainstAlphaBetaDistantLoss(playAgent, m_gb, numEpisodes);
+                result = competeAgainstAlphaBetaDistantLoss(playAgent, numEpisodes);
                 break;
             case 10:
             	if (/*playAgent instanceof TDNTuple2Agt ||*/ playAgent instanceof NTupleBase) {
@@ -170,7 +162,7 @@ public class EvaluatorC4 extends Evaluator {
             		// thread-safe, which is the case for TDNTuple2Agt, TDNTuple3Agt and SarsaAgt. 
             		// Also we have to construct MCTS opponent inside the callables, otherwise
             		// we are not thread-safe as well:
-                    result = competeAgainstMCTS_diffStates_PAR(playAgent, m_gb, numEpisodes);
+                    result = competeAgainstMCTS_diffStates_PAR(playAgent, numEpisodes);
             	} else {
                     ParMCTS params = new ParMCTS();
                     int numIterExp =  (Math.min(C4Base.CELLCOUNT,5) - 1);
@@ -217,12 +209,9 @@ public class EvaluatorC4 extends Evaluator {
      * Scales poorly with board size, requires lots of GB and time for increased tree depth.
      *
      * @param playAgent Agent to be evaluated
-     * @param gameBoard	game board for the evaluation episodes
      * @return Percentage of games won on a scale of [0, 1] as double
      */
-    private double competeAgainstMaxN(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
-//        double[] res = XArenaFuncs.compete(playAgent, maxnAgent, new StateObserverC4(), numEpisodes, verbose, null);
-//        lastResult = res[0] - res[2];
+    private double competeAgainstMaxN(PlayAgent playAgent, int numEpisodes) {
 		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, maxnAgent), new StateObserverC4(), numEpisodes, verbose, null);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
@@ -237,21 +226,13 @@ public class EvaluatorC4 extends Evaluator {
      * win for {@link AlphaBetaAgent}.
      *
      * @param playAgent Agent to be evaluated
-     * @param gameBoard	game board for the evaluation episodes
      * @param numEpisodes	actually 2*numEpisodes single-compete games are played (to be
      * 						comparable with the number of both-compete games in other funcs) 
      * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
      * 		or opponent.
      */
-    private double competeAgainstAlphaBeta(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+    private double competeAgainstAlphaBeta(PlayAgent playAgent, int numEpisodes) {
 //    	verbose=1;
-    	// only as debug test: if AlphaBetaAgent is implemented correctly and playing perfect,  
-    	// it should win every game when starting from the empty board, for each playAgent.
-    	// (This is indeed the case.)
-//        double[] res = XArenaFuncs.compete(alphaBetaStd, playAgent, new StateObserverC4(), 2*numEpisodes, verbose);
-//        double success = res[2] - res[0];
-//        double[] res = XArenaFuncs.compete(playAgent, alphaBetaStd, new StateObserverC4(), 2*numEpisodes, verbose, null);
-//        lastResult = res[0] - res[2];
 		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, alphaBetaStd), new StateObserverC4(), 2*numEpisodes, verbose, null);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
@@ -269,14 +250,15 @@ public class EvaluatorC4 extends Evaluator {
      * set of losing moves always that move that postpones the loss as far in the future as possible.
      *
      * @param playAgent Agent to be evaluated
-     * @param gameBoard	game board for the evaluation episodes
      * @param numEpisodes	actually 2*numEpisodes single-compete games are played (to be
      * 						comparable with the number of both-compete games in other funcs) 
      * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
-     * 		or opponent.
+     * 		or opponent. Results may vary somewhat since AlphaBeta-DistantLosses selects randomly one of the possible
+     * 		best moves if there is more than one.
      */
-    private double competeAgainstAlphaBetaDistantLoss(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+    private double competeAgainstAlphaBetaDistantLoss(PlayAgent playAgent, int numEpisodes) {
 		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, alphaBeta_DL), new StateObserverC4(), 2*numEpisodes, verbose, null);
+//        ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, alphaBeta_DL), new StateObserverC4(), 2*numEpisodes, verbose);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
        	System.out.println(m_msg);
@@ -288,36 +270,29 @@ public class EvaluatorC4 extends Evaluator {
      * Plays {@code numEpisodes} episodes as 1st player (those episodes that {@code playAgent} can win).
      *
      * @param playAgent agent to be evaluated
-     * @param gameBoard game board for the evaluation episodes
      * @param numEpisodes number of episodes played during evaluation
      * @return a value between +1 and -1, depending on the rate of episodes won by the agent 
      * 		or opponent. Best for {@code playAgent} is +1, worst is -1. 
      */
-    private double competeAgainstMCTS(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+    private double competeAgainstMCTS(PlayAgent playAgent, int numEpisodes) {
         ParMCTS params = new ParMCTS();
         int numIterExp =  (Math.min(C4Base.CELLCOUNT,5) - 2);
         params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
-//        // this version plays only games that playAgent can win (same as against AlphaBetaAgent):
-//        double[] res = XArenaFuncs.compete(playAgent, mctsAgent, new StateObserverC4(), 2*numEpisodes, 0, null);
-//        lastResult = res[0] - res[2];        	
-//        // this version, if you want to test both directions:
-////      lastResult = XArenaFuncs.competeBoth(playAgent, mctsAgent,  new StateObserverC4(), numEpisodes, 0, gameBoard);
-        
         // this version plays only games that playAgent can win (same as against AlphaBetaAgent):
 		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent), new StateObserverC4(), 2*numEpisodes, verbose, null);
-		lastResult = sc.scTup[0];
         // this version, if you want to test both directions:
 //		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, mctsAgent), new StateObserverC4(), 2*numEpisodes, verbose);
-//		lastResult = sc.scTup[0];
+
+		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
        	System.out.println(m_msg);
         return lastResult;
     }
 
     /**
-     * Similar to {@link EvaluatorC4#competeAgainstMCTS(PlayAgent, GameBoard, int)}, but:
+     * Similar to {@link EvaluatorC4#competeAgainstMCTS(PlayAgent, int)}, but:
      * <ul> 
      * <li>It does not only play evaluation games from the default start state (empty board) but 
      * also games where the first player (Yellow) has made a losing move and the agent as second
@@ -326,17 +301,18 @@ public class EvaluatorC4 extends Evaluator {
      * <li>It plays all episodes in both roles, 
      * </ul>
      *
-     * @param playAgent agent to be evaluated (it plays both 1st and 2nd)
-     * @param opponent 	agent against which {@code playAgent} plays
+     * @param playAgent agent to be evaluated
+     * @param opponent 	agent against which {@code playAgent} plays.
      * @param gameBoard game board for the evaluation episodes
      * @param numEpisodes number of episodes played during evaluation
-     * @return a value between -1 and 1, with 0 as expected result, if opponent is strong and playAgent is strong
+     * @return a value between -1 and 1, with 1.0 as best possible result. If opponent is AlphaBeta, results may vary
+     *      somewhat since AlphaBeta selects randomly one of the possible best moves if there is more than one.
      * 
-     * @see EvaluatorC4#competeAgainstMCTS(PlayAgent, GameBoard, int)
-     * @see HexConfig#EVAL_START_ACTIONS
+     * @see EvaluatorC4#competeAgainstMCTS(PlayAgent, int)
      */
     private double competeAgainstOpponent_diffStates(PlayAgent playAgent, PlayAgent opponent, GameBoard gameBoard, int numEpisodes) {
-//        double[] res;
+        double sumResult = 0.0;
+        double singleResult;
         lastResult = 0;
         
 		if (opponent == null) {
@@ -356,26 +332,24 @@ public class EvaluatorC4 extends Evaluator {
         //  in case 11 in eval_Agent that the winning start actions are -1,0,1,5,6. (3 is a loosing
         //  action and 2 and 4 are a Tie.)]
        numStartStates = startAction.length;
-        
+
         // evaluate each start state in turn and return average success rate: 
         for (int i=0; i<startAction.length; i++) {
         	StateObserverC4 so = new StateObserverC4();
         	if (startAction[i] == -1) {
-//        		res = XArenaFuncs.compete(playAgent, opponent, so, numEpisodes, 0, null);
-//        		//System.out.println("start "+startAction[i]+": "+res[0]+". Tie="+res[1]);
-//        		lastResult += res[0];        	
         		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null);
-        		lastResult = sc.scTup[0];
-       	} else {
+//                ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0);
+        		singleResult = sc.scTup[0];
+       	    } else {
         		so.advance(new ACTIONS(startAction[i]));
-//        		res = XArenaFuncs.compete(opponent, playAgent, so, numEpisodes, 0, null);
-//        		//System.out.println("start "+startAction[i]+": "+res[2]+". Tie="+res[1]);
-//        		lastResult += res[2];        	
         		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(opponent, playAgent), so, numEpisodes, 0, null);
-        		lastResult = sc.scTup[1];
+//                ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(opponent, playAgent), so, numEpisodes, 0);
+        		singleResult = sc.scTup[1];
         	}
+        	//System.out.println(startAction[i]+": "+singleResult);
+        	sumResult += singleResult;
         }
-        lastResult /= startAction.length;
+        lastResult = sumResult/startAction.length;
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
 //        if (this.verbose > 0) 
         	System.out.println(m_msg);
@@ -397,12 +371,11 @@ public class EvaluatorC4 extends Evaluator {
      * Parallel threads are not possible when playAgent is MCTSAgentT or MaxNAgent.
      * </ul>
      * 
-     * @param playAgent
-     * @param gameBoard		game board for the evaluation episodes
-     * @param numEpisodes
-     * @return
+     * @param playAgent agent to be evaluated
+     * @param numEpisodes number of episodes played during evaluation
+     * @return a value between -1 and 1, with 1.0 as best possible result.
      */
-    private double competeAgainstMCTS_diffStates_PAR(PlayAgent playAgent, GameBoard gameBoard, int numEpisodes) {
+    private double competeAgainstMCTS_diffStates_PAR(PlayAgent playAgent, int numEpisodes) {
         ExecutorService executorService = Executors.newFixedThreadPool(6);
         ParMCTS params = new ParMCTS();
         int numIterExp =  (Math.min(C4Base.CELLCOUNT,5) - 1);
@@ -426,8 +399,7 @@ public class EvaluatorC4 extends Evaluator {
             int gameNumber = i+1;
             final int i2 = i;
             callables.add(() -> {
-//              double[] res;
-                double success = 0;
+                double success;
                 long gameStartTime = System.currentTimeMillis();
                 StateObserverC4 so = new StateObserverC4();
                 
@@ -437,14 +409,10 @@ public class EvaluatorC4 extends Evaluator {
                 MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
             	if (startAction2[i2] == -1) {
-//            		res = XArenaFuncs.compete(playAgent, mctsAgent2, so, numEpisodes, 0, null);
-//                  success = res[0];        	
             		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent2), so, numEpisodes, 0, null);
             		success = sc.scTup[0];
             	} else {
             		so.advance(new ACTIONS(startAction2[i2]));
-//            		res = XArenaFuncs.compete(mctsAgent2, playAgent, so, numEpisodes, 0, null);
-//                  success = res[2];        	
             		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(mctsAgent2, playAgent), so, numEpisodes, 0, null);
             		success = sc.scTup[1];
             	}
@@ -489,14 +457,10 @@ public class EvaluatorC4 extends Evaluator {
      * Getting a high win rate against this evaluator does not guarantee good performance of the evaluated agent.
      *
      * @param playAgent Agent to be evaluated
-     * @param gameBoard	game board for the evaluation episodes
      * @return Percentage of games won on a scale of [0, 1] as double
      */
-    private double competeAgainstRandom(PlayAgent playAgent, GameBoard gameBoard) {
+    private double competeAgainstRandom(PlayAgent playAgent) {
     	StateObservation so = new StateObserverC4();
-        //double success = XArenaFuncs.competeBoth(playAgent, randomAgent,  so, 50, 0, gameBoard);
-        //double[] res = XArenaFuncs.compete(playAgent, randomAgent, so, 100, verbose);
-        //double success = res[0];
 		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,randomAgent), so, 50, 0);
 		double success = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;

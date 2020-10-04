@@ -558,7 +558,8 @@ public class GBGLaunch {
 			choiceScaPar1.addItem("CSTATE");
 			choiceScaPar1.addItem("CPLUS");
 			choiceScaPar1.addItem("STICKER");
-			choiceScaPar1.setSelectedItem("CSTATE");		// the initial (recommended) value	
+			choiceScaPar1.addItem("STICKER2");
+			choiceScaPar1.setSelectedItem("CSTATE");		// the initial (recommended) value
 			choiceScaPar2.addItem("ALL");
 			choiceScaPar2.addItem("QUARTER");
 			choiceScaPar2.setSelectedItem("ALL");			// the initial (recommended) value	

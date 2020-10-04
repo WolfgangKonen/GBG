@@ -544,7 +544,7 @@ public class NTuple2ValueFunc implements Serializable {
 	 * 			  {@code true}, if called from 'new' TD-learning {@link SarsaAgt} or {@link TDNTuple3Agt};<br> 
 	 * 			  {@code false}, if called from 'old' TD-learning (via {@link TDNTuple2Agt})	
 	 */
-	private void update(StateObsWithBoardVector curSOWB, int player, int output, double delta, double e, 
+	protected void update(StateObsWithBoardVector curSOWB, int player, int output, double delta, double e,
 						boolean QMODE, boolean ELIST_PP) {
 		int i, j, out;
 		double alphaM, lamFactor;

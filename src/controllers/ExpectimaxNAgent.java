@@ -89,27 +89,26 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	
 	/**
 	 * Get the best next action and return it
-	 * @param so			current game state (not changed on return), has to be an 
-	 * 						object of class StateObservationNondet
+	 * @param so			current game state (not changed on return), has to implement
+	 * 						interface {@link StateObsNondeterministic}
 	 * @param random		allow epsilon-greedy random action selection	
 	 * @param silent
 	 * @return actBest		the best action 
-	 * @throws RuntimeException if {@code so} is not of class {@link StateObsNondeterministic}
+	 * @throws RuntimeException if {@code so} is not implementing {@link StateObsNondeterministic}
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).<br>
 	 * actBest has also the members vTable and vBest to store the value for each available
 	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
-	 * 
 	 */	
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
         List<ACTIONS> actions = so.getAvailableActions();
 		double[] VTable = new double[actions.size()+1];  
-//		silent=false;
-		
-		if (!(so instanceof StateObsNondeterministic)) 
-			throw new RuntimeException("Error, Expectimax-N only usable for nondeterministic games");
+
+		if (!(so instanceof StateObsNondeterministic))
+			throw new RuntimeException(" Error in "
+					+"ExpectimaxNAgent.getNextAction2(so,...): param so has to implement StateObsNondeterministic");
 		StateObsNondeterministic soND = (StateObsNondeterministic) so;
 		
 		ACTIONS_ST act_best = getBestAction(soND, so,  random,  VTable,  silent, 1);

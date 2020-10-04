@@ -12,9 +12,7 @@ import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
-import games.Hex.StateObserverHex;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
-import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
@@ -62,21 +60,21 @@ public class EvaluatorOthello extends Evaluator {
 	
     public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
 		super(e_PlayAgent, gb, 1, stopEval);		// default mode: 1
-		initEvaluator(gb);
+		initEvaluator();
 	}
     
     public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
 		super(e_PlayAgent, gb, mode, stopEval);
-		initEvaluator(gb);
+		initEvaluator();
 	}
     
     
 	public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, gb, mode, stopEval, verbose);
-		initEvaluator(gb);
+		initEvaluator();
 	}
 	
-	public void initEvaluator(GameBoard gb){
+	public void initEvaluator(){
 		ParMaxN params = new ParMaxN();
         int maxNDepth =  4; // set to 4 otherwise it will take too long
         params.setMaxNDepth(maxNDepth);
@@ -104,16 +102,16 @@ public class EvaluatorOthello extends Evaluator {
 	
 	public boolean evalAgent(PlayAgent playAgent){
 		boolean diffStarts = true;
-		int competeNum = (m_mode>11) ?  1 : 10;			// number of episodes in evaluation competition.
-				// We take in the diffStarts-modes 19,20,21 only competeNum=1, since we have there 244 different
+		int numEpisodes = (m_mode>11) ?  1 : 10;			// number of episodes in evaluation competition.
+				// We take in the diffStarts-modes 19,20,21 only numEpisodes=1, since we have there 244 different
 				// start states in diffStartList (at least for NPLY_DS=4).
         
         // when evalAgent is called for the first time, construct diffStartList once for all 
         // EvaluatorOthello objects (will not change during runtime)
         if (diffStartList==null) {
         	StateObserverOthello so = (StateObserverOthello) m_gb.getDefaultStartState();
-        	diffStartList = new  ArrayList<StateObserverOthello>(); 
-        	diffStartList = addAllNPlyStates(diffStartList,so,0);        	
+        	diffStartList = new  ArrayList<>();
+        	diffStartList = addAllNPlyStates(diffStartList,so,0);
         }
 
 		m_PlayAgent = playAgent;
@@ -122,48 +120,48 @@ public class EvaluatorOthello extends Evaluator {
 			m_msg = "no evaluation done ";
 			lastResult = 0.0;
 			return false;
-		case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, competeNum) > 0.0;	
-		case 1:	return evaluateAgainstOpponent(m_PlayAgent,   maxNAgent, false, competeNum) > 0.0;	
-		case 2:	return evaluateAgainstOpponent(m_PlayAgent,   mctsAgent, false, competeNum) > 0.0;	
-		case 9:	return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, false, competeNum) > 0.0;	
-		case 10:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, false, competeNum) > 0.0;	
+		case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, numEpisodes) > 0.0;
+		case 1:	return evaluateAgainstOpponent(m_PlayAgent,   maxNAgent, false, numEpisodes) > 0.0;
+		case 2:	return evaluateAgainstOpponent(m_PlayAgent,   mctsAgent, false, numEpisodes) > 0.0;
+		case 9:	return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, false, numEpisodes) > 0.0;
+		case 10:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, false, numEpisodes) > 0.0;
 		case 11: 
 			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
-			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), false, competeNum) > 0.0;	
-		case 19:return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, diffStarts, competeNum) > 0.0;	
-		case 20:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, diffStarts, competeNum) > 0.0;	
+			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), false, numEpisodes) > 0.0;
+		case 19:return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, diffStarts, numEpisodes) > 0.0;
+		case 20:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, diffStarts, numEpisodes) > 0.0;
 		case 21: 
 			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
-			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), diffStarts, competeNum) > 0.0;	
+			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), diffStarts, numEpisodes) > 0.0;
 		default: return false;
 		}		
 	}
 	
 	/**
 	 * Evaluate {@link PlayAgent} {@code playAgent} vs. {@code opponent}, both playing in <b>both roles</b>.
-	 * Perform {@code competeNum} such competitions and average results. 
+	 * Perform {@code numEpisodes} such competitions and average results.
 	 * 
-	 * @param playAgent
-	 * @param opponent
-	 * @param diffStarts	If true, select in each of the {@code competeNum} competitions <b>every</b> 
+	 * @param playAgent agent to be evaluated
+	 * @param opponent agent against which {@code playAgent} plays.
+	 * @param diffStarts	If true, select in each of the {@code numEpisodes} competitions <b>every</b>
 	 * 						element from {@link #diffStartList} and play two episodes: 
 	 * 						{@code playAgent} vs. {@code opponent} and {@code opponent} vs. {@code playAgent}.
 	 * 						If false, start always from default start state and play in both roles.  
-	 * @param competeNum
+	 * @param numEpisodes number of episodes played during evaluation
 	 * @return a {@link ScoreTuple} with two elements, holding the average score for {@code playAgent} and {@code opponent}. 
 	 */
-	private double evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int competeNum) {
+	private double evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes) {
 		StateObservation so = m_gb.getDefaultStartState();
 		int N = so.getNumPlayers();
 		ScoreTuple scMean = new ScoreTuple(N);
 		if (diffStarts) 	// start from all start states in diffStartList
 		{
-			double sWeight = 1 / (double) (competeNum * diffStartList.size());
+			double sWeight = 1 / (double) (numEpisodes * diffStartList.size());
 			int count=0;
-			ScoreTuple sc = null;
-			for (int c=0; c<competeNum; c++) {
+			ScoreTuple sc;
+			for (int c=0; c<numEpisodes; c++) {
 				for (StateObservation sd : diffStartList) {
-					sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, competeNum, 0);			
+					sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, numEpisodes, 0);
 					scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
 					count++;
 				}
@@ -172,7 +170,7 @@ public class EvaluatorOthello extends Evaluator {
 		} 
 		else 		// start always from default start state
 		{
-			scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, competeNum, 0);						
+			scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0);
 		}
 		lastResult = scMean.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult; 
@@ -184,25 +182,25 @@ public class EvaluatorOthello extends Evaluator {
 	 * {@link #evaluateAgainstOpponent(PlayAgent, PlayAgent, boolean, int) evaluateAgainstOpponent}.
 	 * <p>
 	 * Evaluate {@link PlayAgent} {@code playAgent} vs. {@code opponent}, both playing in both roles.
-	 * Perform {@code competeNum} such competitions and average results. 
-	 * 
-	 * @param playAgent
-	 * @param opponent
-	 * @param diffStarts	If false, start from default start state. If true, select in each of the {@code competeNum} 
+	 * Perform {@code numEpisodes} such competitions and average results.
+	 *
+	 * @param playAgent agent to be evaluated
+	 * @param opponent agent against which {@code playAgent} plays.
+	 * @param diffStarts	If false, start from default start state. If true, select in each of the {@code numEpisodes}
 	 * 						competitions a random start state according to {@link GameBoardOthello#chooseStartState()}.
-	 * @param competeNum
+	 * @param numEpisodes number of episodes played during evaluation
 	 * @return a {@link ScoreTuple} with two elements, holding the average score for {@code playAgent} and {@code opponent}. 
 	 */
 	@Deprecated
-	private double evaluateAgainstOpponent_OLD(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int competeNum) {
+	private double evaluateAgainstOpponent_OLD(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes) {
 		StateObservation so = m_gb.getDefaultStartState();
 		int N = so.getNumPlayers();
-		ScoreTuple sc = null;
+		ScoreTuple sc;
 		ScoreTuple scMean = new ScoreTuple(N);
-		double sWeight = 1 / (double) competeNum;
-		for (int c=0; c<competeNum; c++) {
+		double sWeight = 1 / (double) numEpisodes;
+		for (int c=0; c<numEpisodes; c++) {
 			if (diffStarts) so = m_gb.chooseStartState();	// choose a different start state in each pass
-			sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, competeNum, 0);			
+			sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0);
 			scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
 		}
 		lastResult = scMean.scTup[0];

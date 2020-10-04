@@ -8,12 +8,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
+import controllers.TD.ntuple4.NTuple4;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import params.ParNT;
-//import params.NTParams;
-//import params.TDParams;
 
 /**
  * Realization of a single n-tuple for games.
@@ -25,13 +24,14 @@ import params.ParNT;
  * Each {@link NTuple2} has a lookup table (LUT) containing for each combination of
  * values a corresponding weight. The length of the LUT is {@code posVals} ^
  * {@link NTuple2#getLength()}.<p>
- * 
- * Game states are transformed to {@code int[]} board vectors with 
- * {@link XNTupleFuncs#getBoardVector(StateObservation)} before they are passed to 
+ *
+ * Game states are transformed to objects of class {@link games.BoardVector} with
+ * {@link XNTupleFuncs#getBoardVector(StateObservation)} before they are passed to
  * {@link NTuple2} methods. 
  * 
- * @author Markus Thill, Samineh Bagheri, Wolfgang Konen, TH Koeln, Sep'18
- * 
+ * @author Markus Thill, Samineh Bagheri, Wolfgang Konen, TH Koeln, 2018-2020
+ *
+ * @see NTuple4
  */
 public class NTuple2 implements Serializable {
 
@@ -498,7 +498,7 @@ public class NTuple2 implements Serializable {
 	/**
 	 * Is called only in case {@code (TC && !tcImm)}, but {@code !tcImm} is not recommended
 	 * 
-	 * @see TDNTuple2Agt#trainAgent(StateObservation)
+	 * @see TDNTuple3Agt#trainAgent(StateObservation)
 	 */
 	@Deprecated
 	public void updateTC() {

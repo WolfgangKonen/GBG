@@ -84,7 +84,7 @@ public class GameBoardCube implements GameBoard {
 	 * @see #incrRealPMat(StateObserverCube, int)
 	 * @see #printRealPMat()
 	 */
-	private boolean DBG_REALPMAT=false;
+	private final boolean DBG_REALPMAT=false;
 
 	
 	public GameBoardCube(Arena arena) {
@@ -158,7 +158,7 @@ public class GameBoardCube implements GameBoard {
 		boolean doAssert=true;
 //		CSAListType csaType = CSAListType.GenerateNextColSymm;
 		CSAListType csaType = CSAListType.GenerateNext;
-		ArrayList<TupleInt>[] tintList = new ArrayList[12];
+		ArrayList[] tintList = new ArrayList[12];
     	CSArrayList[] gD 	= new CSArrayList[12];
 		gD[0] = new CSArrayList(CSAListType.GenerateD0);
 		gD[1] = new CSArrayList(CSAListType.GenerateD1);
@@ -166,7 +166,7 @@ public class GameBoardCube implements GameBoard {
 		for (int p=2; p<=CubeConfig.pMax; p++) {			// a preliminary set up to pMax - later we need it up to p=11
 			if (p>1) silent=true;
 			if (p>3) doAssert=false;
-			tintList[p] = new ArrayList();
+			tintList[p] = new ArrayList<TupleInt>();
 			//System.out.print("Generating distance set for p="+p+" ..");
 			long startTime = System.currentTimeMillis();
 			
@@ -413,7 +413,6 @@ public class GameBoardCube implements GameBoard {
 	 */
 	protected StateObserverCubeCleared selectByTwists1(int p) {
 		StateObserverCubeCleared d_so;
-		CubeState cS;
 		int index;
 		boolean cond;
 		//System.out.println("selectByTwists1: p="+p);
@@ -486,7 +485,6 @@ public class GameBoardCube implements GameBoard {
 	@Deprecated
 	private StateObserverCubeCleared selectByTwists2(int p) {
 		StateObserverCube d_so;
-		CubeState cS;
 		int index;
 			index = rand.nextInt(D2[p-1].size());
 			d_so =new StateObserverCube(D2[p-1].get(index)); // pick randomly cube from D2[p-1]
@@ -537,6 +535,7 @@ public class GameBoardCube implements GameBoard {
 		case CUBESTATE: substr += "_CSTATE"; break;
 		case CUBEPLUSACTION: substr += "_CPLUS"; break;
 		case STICKER: substr += "_STICKER"; break;
+		case STICKER2: substr += "_STICKER2"; break;
 		}
 		switch (CubeConfig.twistType) {
 		case ALLTWISTS: substr += "_AT"; break;

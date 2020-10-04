@@ -3,7 +3,6 @@ package games.CFour;
 import java.io.Serializable;
 import java.util.HashSet;
 
-import controllers.TD.ntuple2.NTupleFactory;
 import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
@@ -117,7 +116,8 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * </ul>
 	 * In the case of ConnectFour we have s=2 symmetries (the board itself + 1 vertical mirror flip)
 	 * 
-	 * @param boardVector
+	 * @param boardVector the board vector
+	 * @param n  here irrelevant. In other games used to constrain the number of returned vectors to n.
 	 * @return boardArray
 	 */
 	@Override
@@ -142,7 +142,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
 	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(BoardVector, int)}[i]
 	 */
 	public int[] symmetryActions(int actionKey) {
 		int[] equivAction = new int[2];
@@ -169,7 +169,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 		// 2 8 14 20 26 32 38
 		// 1 7 13 19 25 31 37
 		// 0 6 12 18 24 30 36
-		int nTuple[][] =  { //
+		int[][] nTuple =  { //
 				{ 0, 6, 7, 12, 13, 14, 19, 21 }, //
 				{ 13, 18, 19, 20, 21, 26, 27, 33 }, //
 				{ 1, 3, 4, 6, 7, 8, 9, 10 }, //
@@ -254,7 +254,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	}
 
 
-    private static int[] fixedModes = {1};
+    private static final int[] fixedModes = {1};
     
 	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
@@ -265,7 +265,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
 	 * for board coding.
 	 * 
-	 * @param iCell
+	 * @param iCell the cell for which the neighbors are wanted
 	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
 	 * 		a board vector) 
 	 * 
@@ -302,7 +302,7 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	}
 
 	/**
-	 * Helper for {@link #symmetryVectors(int[])}: 
+	 * Helper for {@link #symmetryVectors(BoardVector, int)}:
 	 * Flip the board around the center column. <p>
 	 * 
 	 * The board is represented as a COLCOUNT*ROWCOUNT-element int vector:
@@ -315,8 +315,8 @@ public class XNTupleFuncsC4 extends XNTupleBase implements XNTupleFuncs, Seriali
 	 *      00  06  12  18  24  30  36          36  30  24  18  12  06  00
 	 * </pre>
 	 * 
-	 * @param board
-	 * @return the mirrored board
+	 * @param boardVector the board vector
+	 * @return the mirrored board vector
 	 */
 	private BoardVector flip(BoardVector boardVector) {
 		int[] board = boardVector.bvec;

@@ -2,7 +2,17 @@ package games.RubiksCube;
 
 import games.BoardVector;
 
+/**
+ * See {@link CubeState} for class description
+ */
 public class CubeState2x2 extends CubeState {
+
+    /**
+     * change the version ID for serialization only if a newer version is no longer
+     * compatible with an older one (older .agt.zip will become unreadable or you have
+     * to provide a special version transformation)
+     */
+    private static final long  serialVersionUID = -4066880431436899009L;
 
     public CubeState2x2() {
         super(Type.COLOR_P);
@@ -51,6 +61,104 @@ public class CubeState2x2 extends CubeState {
             default:
                 throw new RuntimeException("Case bvec.length = "+bvec.length+" not yet implemented.");
         }
+    }
+
+    /**
+     * There are four possible board vector types, depending on {@link CubeConfig#boardVecType}
+     * <ul>
+     * <li> <b>CUBESTATE</b>: the face color array of the cube, i.e. member {@link #fcol}
+     * <li> <b>CUBEPLUSACTION</b>: like CUBESTATE, but with two more int values added: the ordinal of the last twist and
+     * 		the number of quarter turns in this twist
+     * <li> <b>STICKER</b>: similar to the coding suggested by [McAleer2018], we track the location of S=7 stickers
+     * 		(one face of each cubie, except the ygr-cubie) when the cube is twisted away from its original position. We
+     * 		represent it as a 7x7 field (one-hot encoding).
+     * <li> <b>STICKER2</b>: similar to STICKER, we track the location of S=7 stickers (one face of each cubie,
+     * 		except the ygr-cubie). We represent it as a 2x7 field (more compact).
+     * </ul>
+     * Detail STICKER: The coding (cell numbering) of the 7x7 stickers field:
+     * <pre>
+     *           0  1  2  3  4  5  6
+     *       a  00 01 02 03 04 05 06
+     *       b  07 08 09 10 11 12 13
+     *       c  14 15 16 17 18 19 20
+     *       d  21 22 23 24 25 26 27
+     *       e  28 29 30 31 32 33 34
+     *       f  35 36 37 38 39 40 41
+     *       g  42 43 44 45 46 47 48
+     * </pre>
+     * <p>
+     * Detail STICKER2: If we have a sticker vector [d2 b1 c1 h3   f1 a3 g2], we code it as
+     * <pre>
+     *           0  1  2  3  4  5  6
+     *     cor   d  b  c  h  f  a  g
+     *    face   2  1  1  3  1  3  2
+     * </pre>
+     * The cell numbering of the 2x7 stickers field:
+     * <pre>
+     *           0  1  2  3  4  5  6
+     *     cor  00 01 02 03 04 05 06
+     *    face  07 08 09 10 11 12 13
+     * </pre>
+     *
+     * @return an int[] vector representing the 'board' state (= cube state)
+     *
+     * NOTE: Currently, the implementation is only valid for 2x2x2 cube
+     */
+    public BoardVector getBoardVector() {
+        // needed for STICKER and STICKER2
+        final int[] orig = {0,1,2,3,13,14,15}; 	// the original locations of the tracked stickers
+        final Cor cor[] = {Cor.a,Cor.b,Cor.c,Cor.d,Cor.a,Cor.d,Cor.h,Cor.g,Cor.a,Cor.g,Cor.f,Cor.b,Cor.e,Cor.f,Cor.g,Cor.h,Cor.e,Cor.c,Cor.b,Cor.f,Cor.e,Cor.h,Cor.d,Cor.c};
+        final int[] face = {1,1,1,1,2,3,2,3,3,2,3,2,1,1,1,1,2,2,3,2,3,3,2,3};
+        int column;
+        int[] bvec;
+
+        switch (CubeConfig.boardVecType) {
+            case CUBESTATE:
+                bvec = fcol.clone();
+                break;
+            case CUBEPLUSACTION:
+                bvec = new int[fcol.length+2];
+                System.arraycopy(this.fcol, 0, bvec, 0, fcol.length);
+                bvec[fcol.length] = this.lastTwist.ordinal();
+                bvec[fcol.length+1] = this.lastTimes;
+                break;
+            case STICKER:
+                int[][] board = new int[7][7];
+                for (int i=0; i<7; i++) {		// set in every column i (sticker) the row cell specified by 'cor'
+                    // to the appropriate face value:
+                    column = cor[sloc[orig[i]]].ordinal();
+                    //assert column!=4;	// should not be the ygr-cubie
+                    if (column>4) column = column-1;
+                    //assert column<7;
+                    board[column][i] = face[sloc[orig[i]]];
+                }
+
+                // copy to linear bvec according to STICKER coding specified above
+                bvec = new int[7*7];
+                for (int j=0, k=0; j<7; j++)
+                    for (int i=0; i<7; i++,k++)
+                        bvec[k] = board[j][i];
+                break;
+            case STICKER2:
+                int[][] board2 = new int[2][7];
+                for (int i=0; i<7; i++) {		// set in every column i (sticker) the row cell specified by 'cor'
+                    column = cor[sloc[orig[i]]].ordinal();
+                    //assert column!=4;	// should not be the ygr-cubie
+                    if (column>4) column = column-1;
+                    board2[0][i] = column;
+                    board2[1][i] = face[sloc[orig[i]]]-1;       // map faces 1,2,3 to 0,1,2
+                }
+
+                // copy to linear bvec according to STICKER2 coding specified above
+                bvec = new int[7*2];
+                for (int j=0, k=0; j<2; j++)
+                    for (int i=0; i<7; i++,k++)
+                        bvec[k] = board2[j][i];
+                break;
+            default:
+                throw new RuntimeException("Illegal value in switch boardVecType");
+        }
+        return new BoardVector(bvec,sloc);   // return a BoardVector with aux = sloc (needed to reconstruct CubeState from BoardVector)
     }
 
     /**

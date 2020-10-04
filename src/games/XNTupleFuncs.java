@@ -7,17 +7,20 @@ import controllers.TD.ntuple2.SarsaAgt;
 import java.util.HashSet;
 
 import agentIO.LoadSaveGBG;
+import controllers.TD.ntuple2.TDNTuple3Agt;
+import controllers.TD.ntuple4.Sarsa4Agt;
+import controllers.TD.ntuple4.TDNTuple4Agt;
 
 
 /**
- * Interface for the n-tuple implementation in {@link TDNTuple3Agt}, {@link SarsaAgt} and 
- * {@link NTuple2ValueFunc}. Specifies game-specific functions for producing a 
- * board vector, symmetric board vectors (if any) and a fixed n-tuple set. <p>
+ * Interface for the n-tuple implementation in {@link TDNTuple3Agt}, {@link TDNTuple4Agt}, {@link SarsaAgt},
+ * {@link Sarsa4Agt} and {@link NTuple2ValueFunc}. Specifies game-specific functions for producing
+ * board vectors, symmetric board vectors (if any) and a fixed n-tuple set. <p>
  * 
  * Note: The methods available in this interface are only required for the 
  * n-tuple interface. 
  * If an implementing game does not need that part (i. e. if it does not plan to 
- * use {@link TDNTuple3Agt} or {@link SarsaAgt}), it may just code stubs returning 0, {@code null}, 
+ * use {@link TDNTuple3Agt}, ...), it may just code stubs returning 0, {@code null},
  * or throwing a {@link RuntimeException}.
  *
  * @author Wolfgang Konen, TH Koeln, 2017 -2020
@@ -30,41 +33,49 @@ public interface XNTupleFuncs {
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
-	public boolean instantiateAfterLoading();
+	boolean instantiateAfterLoading();
 	
 	/**
 	 * @return the number of board cells
 	 */
-	public int getNumCells();
+	int getNumCells();
 	
 	/**
 	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
 	 * can have (e. g. P=3 for TicTacToe with 0:"O", 1=empty, 2="X") 
 	 */
-	public int getNumPositionValues();
-	
+	int getNumPositionValues();
+
+	/**
+	 * [This method is only needed for agents {@link TDNTuple4Agt} and {@link Sarsa4Agt}.]
+	 *
+	 * @return 	a vector of length {@link #getNumCells()} that has in its {@code i}th element the number
+	 * 			P of position values 0, 1, 2,..., P-1 that board cell {@code i} can have
+	 */
+	int[] getPositionValuesVector();
+
 	/**
 	 * @return the number of players in this game 
 	 */
-	public int getNumPlayers();
+	int getNumPlayers();
 	
 	/**
 	 * @return the maximum number of symmetries in this game
 	 */
-	public int getNumSymmetries();
+	int getNumSymmetries();
 	
 	/**
 	 * @param so the state
-	 * @return an object with member {@code bvec}. {@code bvec} is a vector of length {@link #getNumCells()}, 
+	 * @return an object with member {@code int[] bvec}. {@code bvec} is a vector of length {@link #getNumCells()},
 	 * holding for each board cell its position value 0, 1, 2,..., P-1 in state {@code so}.<br>
 	 * P = {@link #getNumPositionValues()}.
 	 */
-	public BoardVector getBoardVector(StateObservation so);
+	BoardVector getBoardVector(StateObservation so);
 
 	/**
 	 * @return a board vector where each cell has a different {@code int} 
 	 */
-	public BoardVector makeBoardVectorEachCellDifferent();
+	BoardVector makeBoardVectorEachCellDifferent();
 	
 	/**
 	 * Given a board vector and given that the game has s symmetries,  
@@ -78,7 +89,7 @@ public interface XNTupleFuncs {
 	 * next actions. For example, TicTacToe has 8 symmetries: 4 rotations (0�, 90�, 180�, 270�)
 	 * times 2 mirror reflections.
 	 * <p>
-	 * If a game has no symmetries, this method should return a lenght-1 array {@code BoardVector[] boardArray} with
+	 * If a game has no symmetries, this method should return a length-1 array {@code BoardVector[] boardArray} with
 	 * <pre>
 	 * 		boardArray[0] = boardVector </pre>
 	 * <p>
@@ -89,13 +100,13 @@ public interface XNTupleFuncs {
 	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
 	 * @return a vector of n BoardVectors 
 	 */
-	public BoardVector[] symmetryVectors(BoardVector boardVector, int n);
+	BoardVector[] symmetryVectors(BoardVector boardVector, int n);
 	/**
 	 * Same as {@link #symmetryVectors(BoardVector, int)}, but with parameter {@link StateObsWithBoardVector} 
 	 * instead of {@link BoardVector}. (Some games need the {@link BoardVector}-creating {@link StateObservation} 
 	 * object in order to construct the symmetric board vectors.)
 	 */
-	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n);
+	BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n);
 	
 	/**
 	 * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b> 
@@ -114,7 +125,7 @@ public interface XNTupleFuncs {
 	 * which is equivalent to actionKey in equiv[0]. <br>
 	 * Here, equiv[i] = {@link #symmetryVectors(BoardVector, int)}{@code [i]}.
 	 */
-	public int[] symmetryActions(int actionKey);
+	int[] symmetryActions(int actionKey);
 	
 	/** 
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
@@ -129,21 +140,21 @@ public interface XNTupleFuncs {
 	 * 
 	 * @see NTupleFactory#makeNTupleSet(params.ParNT, XNTupleFuncs)
 	 */
-	public int[][] fixedNTuples(int mode);
+	int[][] fixedNTuples(int mode);
 	
 	/**
 	 * @return a tooltip string describing the different mode options of {@link #fixedNTuples(int)}
 	 */
-	public String fixedTooltipString();
+	String fixedTooltipString();
 	
-	public int[] fixedNTupleModesAvailable();
+	int[] fixedNTupleModesAvailable();
 
 	/**
 	 * Return all neighbors of {@code iCell}
 	 * 
-	 * @param iCell
+	 * @param iCell the cell
 	 * @return a list of all cells adjacent to {@code iCell} (referring to the coding in 
 	 * 		a board vector) 
 	 */
-	public HashSet adjacencySet(int iCell);
+	HashSet adjacencySet(int iCell);
 }

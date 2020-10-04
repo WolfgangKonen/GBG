@@ -26,11 +26,12 @@ public class CubeConfig {
 	 * <ul>
 	 * <li> <b>CUBESTATE</b>: only the cube state (what {@link CubeState#fcol} holds)
 	 * <li> <b>CUBEPLUSACTION</b>: the cube state plus the action which led to this state 
-	 * <li> <b>STICKER</b>: 		
+	 * <li> <b>STICKER</b>: the sticker representation in one-hot encoding (7*7 cells for 2x2x2)
+	 * <li> <b>STICKER2</b>: the sticker representation in compact encoding (7*2 cells for 2x2x2)
 	 * </ul>
 	 * @see ArenaTrainCube#setBoardVecType(String)
 	 */
-	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION, STICKER}
+	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION, STICKER, STICKER2}
 	
 	/**
 	 * {@link BoardVecType} {@code boardVecType} holds the board vector type for all {@link CubeState} objects and 
@@ -66,6 +67,12 @@ public class CubeConfig {
 	public static int pMax = 10;			// 1,2,3,4,5,6,7,8,9,10,11,12,13,14   for 2x2x2 cube
 
 	/**
+	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
+	 * DAVI2Agent, DAVI3Agent, TDNTuple3Agt and StateObserverCube.
+	 */
+	public static double stepReward = -0.04; // -0.1; //-0.01;
+
+	/**
 	 * whether a replay buffer with certain capacity and batch size is used or not
 	 */
 	public static boolean REPLAYBUFFER = true;  // false;true; //
@@ -92,34 +99,24 @@ public class CubeConfig {
 	final static boolean TWIST_DOUBLETS = false;
 	
 	/**
-	 * theoCov[p] is the known maximum size of distance set D[p] (theoretical coverage, 2x2x2 cube, see
-	 *  <a href="https://en.wikipedia.org/wiki/Pocket_Cube">https://en.wikipedia.org/wiki/Pocket_Cube</a>.
-	 */
-	final static 
-	int[] theoCov = {1,9,54,321,  	// the known maximum sizes (ALLTWIST case) for D[0],D[1],D[2],D[3] ...
-			1847,9992,50136,227536,	// ... and D[4],D[5],D[6],D[7],
-			870072,1887748,623800,	// ... and D[8],D[9],D[10],D[7],
-			2644					// ... and D[11]
-	};
-
-	/**
 	 * EvalNmax: how many states to pick randomly for each p during evaluation
 	 */
 //	final static int[] EvalNmax = {0,10,50,50, 300, 300, 300, 500, 500,2000,2000,2000};
 	final static int[] EvalNmax = {0,200,200,200, 200, 200, 200, 200, 200,200,200,200, 200,200,200,200};
 //		                           0              4                   8                12 
 
-	/**
-	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br> 
-	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e. g. during training).  	
-	 */
-//	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
-	// is now replaced with ParOther.stopEval
-	
+
 	//
 	// Elements below are only for now deprecated cases:
 	//
-	
+
+	/**
+	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br>
+	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e. g. during training).
+	 */
+//	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
+	// is now replaced with ParOther.stopEval
+
 	/**
 	 * Size array for {@link GameBoardCube#generateDistanceSets(Random)}:
 	 * Narr[p] is the number of elements to pick from D[p] when generating D[p+1]. So the size
@@ -149,9 +146,14 @@ public class CubeConfig {
 			};
 
 	/**
-	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
-	 * DAVI2Agent, DAVI3Agent and StateObserverCube.
+	 * theoCov[p] is the known maximum size of distance set D[p] (theoretical coverage, 2x2x2 cube, see
+	 *  <a href="https://en.wikipedia.org/wiki/Pocket_Cube">https://en.wikipedia.org/wiki/Pocket_Cube</a>.
 	 */
-	public static double stepReward = -0.04; // -0.1; //-0.01;
+	final static
+	int[] theoCov = {1,9,54,321,  	// the known maximum sizes (ALLTWIST case) for D[0],D[1],D[2],D[3] ...
+			1847,9992,50136,227536,	// ... and D[4],D[5],D[6],D[7],
+			870072,1887748,623800,	// ... and D[8],D[9],D[10],D[7],
+			2644					// ... and D[11]
+	};
 
 }

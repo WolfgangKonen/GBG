@@ -10,6 +10,8 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import controllers.TD.ntuple4.NTuple4Factory;
+import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
 import games.Nim.BoutonAgent;
@@ -27,7 +29,6 @@ import tools.*;
 import tools.Types.ACTIONS;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -158,6 +159,12 @@ public class XArenaFuncs {
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new TDNTuple3Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n], nTuples, xnf, maxGameNum);
+			} else if (sAgent.equals("TD-Ntuple-4")) {
+				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+				NTuple4Factory ntupfac = new NTuple4Factory();
+				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+						m_xab.oPar[n], nTuples, xnf, maxGameNum);
 			} else if (sAgent.equals("Sarsa")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
@@ -259,7 +266,7 @@ public class XArenaFuncs {
 	 * @param m_xab
 	 *            used only for reading parameter values from GUI members
 	 * @return the {@link PlayAgent} for the {@code n}th player
-	 * @throws RuntimeException
+	 * @throws RuntimeException if agent cannot be fetched
 	 * 
 	 * @see #fetchAgents(XArenaButtons)
 	 * @see #constructAgent(int, String, XArenaButtons)
@@ -333,6 +340,18 @@ public class XArenaFuncs {
 						NTupleFactory ntupfac = new NTupleFactory();
 						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 						pa = new TDNTuple3Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+								m_xab.oPar[n], nTuples, xnf, maxGameNum);
+					} catch (Exception e) {
+						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+						// e.printStackTrace();
+						pa = null;
+					}
+				} else if (sAgent.equals("TD-Ntuple-4")) {
+					try {
+						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+						NTuple4Factory ntupfac = new NTuple4Factory();
+						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+						pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 								m_xab.oPar[n], nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -414,7 +433,7 @@ public class XArenaFuncs {
 	 * @param m_xab
 	 *            where to read the settings from
 	 * @return the vector {@code m_PlayAgents} of all agents in the arena
-	 * @throws RuntimeException
+	 * @throws RuntimeException if agents cannot be fetched
 	 * 
 	 * @see #constructAgent(int, String, XArenaButtons)
 	 * @see #fetchAgent(int, String, XArenaButtons)
@@ -509,9 +528,8 @@ public class XArenaFuncs {
 	 * @param gb
 	 *            the game board
 	 * @return the trained PlayAgent
-	 * @throws IOException
 	 */
-	public PlayAgent train(int n, String sAgent, XArenaButtons xab, GameBoard gb) throws IOException {
+	public PlayAgent train(int n, String sAgent, XArenaButtons xab, GameBoard gb)  {
 		int stopTest; // 0: do not call Evaluator during training;
 						// >0: call Evaluator after every stopTest training
 						// games
@@ -519,20 +537,18 @@ public class XArenaFuncs {
 						// >0: stop, if Evaluator stays true for stopEval games
 		int maxGameNum; // maximum number of training games
 		int numEval; // evaluate the trained agent every numEval games
-		boolean learnFromRM; // if true, learn from random moves during training
-		long elapsedMs = 0L;
+		long elapsedMs;
 		int gameNum = 0;
-		int verbose = 2;
 
 		maxGameNum = xab.getGameNumber();
 
 		boolean doTrainStatistics;		// doTrainStatistics is mainly useful for RubiksCube, but can be activated for other games as well, if needed
 		doTrainStatistics = (m_Arena.getGameName().equals("RubiksCube"));
 		ArrayList<TStats> tsList = new ArrayList<>();
-		ArrayList<TAggreg> taggList = new ArrayList<>();
+		ArrayList<TAggreg> taggList;
 
-		PlayAgent pa = null;
-		PlayAgent qa = null;
+		PlayAgent pa;
+		PlayAgent qa;
 
 		try {
 			pa = this.constructAgent(n, sAgent, xab);
@@ -571,7 +587,6 @@ public class XArenaFuncs {
 
 		stopTest = xab.oPar[n].getStopTest();
 		stopEval = xab.oPar[n].getStopEval();
-		learnFromRM = xab.oPar[n].getLearnFromRM();
 		int qem = xab.oPar[n].getQuickEvalMode();
 		m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, stopEval, qem, 1);
 		int tem = xab.oPar[n].getTrainEvalMode();
@@ -760,9 +775,6 @@ public class XArenaFuncs {
 	 * @param gb        the game board, needed for evaluators and start state selection
 	 * @param csvName   results are written to this filename
 	 * @return          the (last) trained agent
-	 * 
-	 * @throws IOException
-	 *             if something goes wrong with {@code csvName}, see below
 	 * <p>
 	 * Side effect: writes results of multi-training to 
 	 * <b>{@code agents/<gameDir>/csv/<csvName>}</b>. This file has the columns: <br>
@@ -775,22 +787,20 @@ public class XArenaFuncs {
 	 * @see MTrain
 	 */
 	public PlayAgent multiTrain(int n, String sAgent, XArenaButtons xab, GameBoard gb, String csvName)
-			throws IOException {
+	{
 		DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		DecimalFormat frm2 = new DecimalFormat("+0.00;-0.00");
 		DecimalFormat frm1 = new DecimalFormat("#0.00");
 		String userTitle1 = "", userTitle2 = "";
 		double userValue1 = 0., userValue2 = 0.0;
-		long elapsedMs = 0L;
-		int verbose = 1;
+		long elapsedMs;
 		int stopEval = 0;
 		boolean doTrainEvaluation = false;
 
 		int trainNum = xab.getTrainNumber();
 		int maxGameNum = xab.getGameNumber();
-		boolean learnFromRM = xab.oPar[n].getLearnFromRM();
-		PlayAgent pa = null, qa = null;
+		PlayAgent pa = null, qa;
 
 		System.out.println("*** Starting multiTrain with trainNum = " + trainNum + " ***");
 
@@ -801,10 +811,9 @@ public class XArenaFuncs {
 		ArrayList<MTrain> mtList = new ArrayList<>();
 
 		for (int i = 0; i < trainNum; i++) {
-			int player;
 			int gameNum;
 			long actionNum, trnMoveNum;
-			double totalTrainSec = 0.0, elapsedTime, movesSecond;
+			double totalTrainSec, elapsedTime, movesSecond;
 
 			xab.setTrainNumberText(trainNum, (i + 1) + "/" + trainNum);
 
@@ -848,7 +857,6 @@ public class XArenaFuncs {
 				m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, stopEval, tem, 1);
 
 			// if (i==0) {
-			String pa_string = pa.getClass().getName();
 			System.out.println(pa.stringDescr());
 			System.out.println(pa.stringDescr2());
 			// }
@@ -973,7 +981,7 @@ public class XArenaFuncs {
 	 * {@code competeNum} episodes, starting from StateObservation
 	 * {@code startSO}.
 	 * 
-	 * @param paVector a vector with N agents for an N-player game
+	 * @param paVector a vector with N agents for an N-player game. This vector is NOT shifted.
 	 * @param startSO
 	 *            the start board position for the game
 	 * @param competeNum
@@ -987,6 +995,8 @@ public class XArenaFuncs {
 	 *            tournament log is printed to {@code System.out}.
 	 * @return a score tuple which holds in the kth position the average score
 	 *         of the kth agent from all {@code competeNum} episodes.
+	 *
+	 * @see #competeNPlayerAllRoles(PlayAgtVector, StateObservation, int, int)
 	 */
 	public static ScoreTuple competeNPlayer(PlayAgtVector paVector, StateObservation startSO, int competeNum,
 			int verbose, TSTimeStorage[] nextTimes) {
@@ -1093,6 +1103,8 @@ public class XArenaFuncs {
 	 *            0: silent, 1,2: more print-out
 	 * @return a score tuple which holds in the kth position the average score
 	 *         for the kth agent from all {@code competeNum}*{@code N} episodes.
+	 *
+	 * @see #competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])
 	 */
 	public static ScoreTuple competeNPlayerAllRoles(PlayAgtVector paVector, StateObservation startSO, int competeNum,
 			int verbose) {
@@ -1146,8 +1158,6 @@ public class XArenaFuncs {
 		int numPlayers = startSO.getNumPlayers();
 
 		try {
-			String AgentX = xab.getSelectedAgent(0);
-			String AgentO = xab.getSelectedAgent(1);
 			for (int i = 0; i < numPlayers; i++)
 				if (xab.getSelectedAgent(i).equals("Human")) {
 					m_Arena.showMessage("No compete for agent Human", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1164,7 +1174,7 @@ public class XArenaFuncs {
 			int verbose = 1;
 
 			if (allRoles) {
-				ScoreTuple sc = this.competeNPlayerAllRoles(new PlayAgtVector(qaVector), startSO, competeNum, verbose);
+				ScoreTuple sc = competeNPlayerAllRoles(new PlayAgtVector(qaVector), startSO, competeNum, verbose);
 				System.out.println("Avg score for all players: " + sc.toStringFrm());
 				return sc.scTup[0];
 			} else {

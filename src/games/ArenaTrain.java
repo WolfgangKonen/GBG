@@ -112,8 +112,6 @@ abstract public class ArenaTrain extends Arena
 					
 					m_xfun.m_PlayAgents[n] = m_xfun.train(n,agentN, m_xab, gb);
 					
-				} catch (IOException e2) {
-					e2.printStackTrace();
 				} catch (RuntimeException e) {
 					String s = e.getMessage();
 					e.printStackTrace();
@@ -150,10 +148,6 @@ abstract public class ArenaTrain extends Arena
 				
 				m_xfun.m_PlayAgents[0] = m_xfun.multiTrain(0, m_xab.getSelectedAgent(0), m_xab, gb, "multiTrain.csv");
 			
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
 			} catch (RuntimeException e) {
 				this.showMessage(e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
 				enableButtons(true);

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 import agentIO.LoadSaveGBG;
+import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.RubiksCube.DAVI3Agent;
 import games.RubiksCube.StateObserverCube;
 import params.ParNT;
@@ -27,8 +28,8 @@ import games.XNTupleFuncs;
 import games.Sim.StateObserverSim;
 
 /**
- * The alternative TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning)
- * <b>with n-tuples</b>. 
+ * TD-Learning {@link PlayAgent} (Temporal Difference reinforcement learning) <b>with n-tuples</b>.
+ * <p>
  * It has a one-layer (perceptron-like) neural network with or without output-nonlinearity  
  * {@code tanh} to model the Q-function. 
  * The net follows closely the (pseudo-)code by [SuttonBarto98]. 
@@ -70,6 +71,7 @@ import games.Sim.StateObserverSim;
  * @see PlayAgent
  * @see AgentBase
  * @see NTupleBase
+ * @see TDNTuple4Agt
  * 
  * @author Wolfgang Konen, TH Koeln, 2018-2020
  */
@@ -223,7 +225,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	bestValue = -Double.MAX_VALUE;
 		double[] VTable;		
 		
-        otilde = so.getReward(so,rgs);
+        otilde = so.getRewardTuple(rgs).scTup[so.getPlayer()];
         
         // just debug:
 //        if (so.isGameOver()) {
@@ -277,7 +279,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
     	        // but they usually differ for nondeterministic games.
 
-				rtilde  = (NewSO.getReward(so,rgs)-otilde)
+				rtilde  = (NewSO.getRewardTuple(rgs).scTup[so.getPlayer()]-otilde)
 						+ so.getStepRewardTuple().scTup[so.getPlayer()];
             	if (TERNARY) {
             		value = NewSO.isGameOver() ? rtilde : getGamma()*value;
@@ -473,8 +475,9 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		// In any case: add the reward obtained so far, since the net predicts
 		// with getScoreI only the expected future reward.
 		boolean rgs = m_oPar.getRewardIsGameScore();
-		for (int i=0; i<so.getNumPlayers(); i++) 
-			sc.scTup[i] += so.getReward(i, rgs);
+//		for (int i=0; i<so.getNumPlayers(); i++)
+//			sc.scTup[i] += so.getReward(i, rgs);
+		sc.combine(so.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
     	return sc;
 	}
 

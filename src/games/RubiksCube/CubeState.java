@@ -75,7 +75,7 @@ abstract public class CubeState implements Serializable {
 	
 	public static enum Type {COLOR_P,COLOR_R,TRAFO_P,TRAFO_R}
 	public static enum Twist {ID,U,L,F}
-	private static enum Cor {a,b,c,d,e,f,g,h}
+	public static enum Cor {a,b,c,d,e,f,g,h}
 	
 	/**
 	 * {@code fcol} is the face color array with 24 (<b>COLOR_P</b>) or 48 (<b>COLOR_R</b>) elements. <br> 
@@ -391,68 +391,20 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * There are three possible board vector types, depending on {@link CubeConfig#boardVecType} 
+	 * There are four possible board vector types, depending on {@link CubeConfig#boardVecType}
 	 * <ul> 
 	 * <li> <b>CUBESTATE</b>: the face color array of the cube, i.e. member {@link #fcol}
 	 * <li> <b>CUBEPLUSACTION</b>: like CUBESTATE, but with two more int values added: the ordinal of the last twist and 
 	 * 		the number of quarter turns in this twist
-	 * <li> <b>STICKER</b>: similar to the coding suggested by [McAleer2018], we track the location of eight stickers 
-	 * 		(one face of each cubie) when the cube is twisted away from its original position
+	 * <li> <b>STICKER</b>: similar to the coding suggested by [McAleer2018], we track the location of S stickers when
+	 * 		the cube is twisted away from its original position. We represent it as a SxS field (one-hot encoding).
+	 * <li> <b>STICKER2</b>: similar to STICKER, we track the location of S stickers. We represent it as a 2xS field.
 	 * </ul>
-	 * Detail STICKER: The coding (cell numbering) of the 7x7 stickers field: 
-	 * <pre>
-	 *           0  1  2  3  4  5  6
-	 *       a  00 01 02 03 04 05 06
-	 *       b  07 08 09 10 11 12 13
-	 *       c  14 15 16 17 18 19 20
-	 *       d  21 22 23 24 25 26 27
-	 *       e  28 29 30 31 32 33 34
-	 *       f  35 36 37 38 39 40 41
-	 *       g  42 43 44 45 46 47 48    
-	 * </pre>
-	 * 
-	 * @return an int[] vector representing the 'board' state (= cube state)
+	 * For details see the implementations in {@link CubeState2x2} and {@link CubeState3x3}
 	 *
-	 * NOTE: Currently, the implementation is only valid for 2x2x2 cube
+	 * @return an int[] vector representing the 'board' state (= cube state)
 	 */
-	public BoardVector getBoardVector() {
-		int[] bvec;
-		switch (CubeConfig.boardVecType) {
-		case CUBESTATE: 
-			bvec = fcol.clone();
-			break;
-		case CUBEPLUSACTION:
-			bvec = new int[fcol.length+2];
-			System.arraycopy(this.fcol, 0, bvec, 0, fcol.length);
-			bvec[fcol.length] = this.lastTwist.ordinal();
-			bvec[fcol.length+1] = this.lastTimes;
-			break;
-		case STICKER:
-			final int[] orig = {0,1,2,3,13,14,15}; 	// the original locations of the tracked stickers
-			final Cor cor[] = {Cor.a,Cor.b,Cor.c,Cor.d,Cor.a,Cor.d,Cor.h,Cor.g,Cor.a,Cor.g,Cor.f,Cor.b,Cor.e,Cor.f,Cor.g,Cor.h,Cor.e,Cor.c,Cor.b,Cor.f,Cor.e,Cor.h,Cor.d,Cor.c};
-			final int[] face = {1,1,1,1,2,3,2,3,3,2,3,2,1,1,1,1,2,2,3,2,3,3,2,3};
-			int[][] board = new int[7][7];
-			int column;
-			for (int i=0; i<7; i++) {		// set in every column i (sticker) the row cell specified by 'cor' 
-											// to the appropriate face value:
-				column = cor[sloc[orig[i]]].ordinal();
-				//assert column!=4;	// should not be the ygr-cubie
-				if (column>4) column = column-1;
-				//assert column<7;
-				board[column][i] = face[sloc[orig[i]]]; 
-			}
-			
-			// copy to linear bvec according to STICKER coding specified above
-			bvec = new int[7*7];
-			for (int j=0, k=0; j<7; j++)
-				for (int i=0; i<7; i++,k++)
-					bvec[k] = board[j][i];
-			break;
-		default: 
-			throw new RuntimeException("Unallowed value in switch boardVecType");
-		}
-		return new BoardVector(bvec,sloc);   // return a BoardVector with aux = sloc (needed to reconstruct CubeState from BoardVector)
-	}
+	abstract public BoardVector getBoardVector();
 	
 	public CubeState clearLast() {
 		this.lastTwist = Twist.ID;

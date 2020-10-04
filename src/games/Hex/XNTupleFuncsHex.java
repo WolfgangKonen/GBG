@@ -20,9 +20,9 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
      */
     private static final long serialVersionUID = -2631312361401190002L;
     
-    private int[] actionVector;
-    private transient BoardVector[] newplace;
-    private int[][] actionArray;
+    private final int[] actionVector;
+    private final transient BoardVector[] newplace;
+    private final int[][] actionArray;
 
     public XNTupleFuncsHex() {
     	actionVector = new int[getNumCells()];
@@ -108,7 +108,7 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
 	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(BoardVector, int)}[i]
 	 */
 	public int[] symmetryActions(int actionKey) {
 		int i;
@@ -136,7 +136,7 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
 	 */
     @Override
     public int[][] fixedNTuples(int mode) {
-        int[][] tuples = null;
+        int[][] tuples;
 
         int[][] fixedTuples6x6 = 
         			{				// a tuple config (25 6-tuples) which gave good results (2020-05)
@@ -244,7 +244,7 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
 				+ "</html>";
 	}
 
-    private static int[] fixedModes = {1,2};
+    private static final int[] fixedModes = {1,2};
     
 	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
@@ -276,67 +276,71 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
         return adjacencySet;
     }
 
-    /**
-     * Mirrors the board along the given axis.
-     * Not actually useful - Mirrored boards in Hex are not equivalent.
-     *
-     * @param boardVector Game board vector
-     * @param axis        Axis along which to mirror
-     * @return Mirrored board
-     */
-    @Deprecated
-    private int[] mirrorBoard(int[] boardVector, Axis axis) {
-        int[] mirroredVector = boardVector.clone();
+//    private enum Axis {
+//        HORIZONTAL, VERTICAL
+//    }
+//
+//    /**
+//     * Mirrors the board along the given axis.
+//     * Not actually useful - Mirrored boards in Hex are not equivalent.
+//     *
+//     * @param boardVector Game board vector
+//     * @param axis        Axis along which to mirror
+//     * @return Mirrored board
+//     */
+//    @Deprecated
+//    private int[] mirrorBoard(int[] boardVector, Axis axis) {
+//        int[] mirroredVector = boardVector.clone();
+//
+//        if (axis == Axis.VERTICAL) {
+//            //Subdivide into chunks of BOARD_SIZE elements and reverse each
+//            //Example for BOARD_SIZE=3:
+//            //Before: 1,2,3, 4,5,6, 7,8,9
+//            //After:  3,2,1, 6,5,4, 9,8,7
+//            for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
+//                int[] tmp = new int[HexConfig.BOARD_SIZE];
+//                for (int j = 0; j < ((HexConfig.BOARD_SIZE + 1) / 2); j++) {
+//                    tmp[j] = mirroredVector[i * HexConfig.BOARD_SIZE + j];
+//                    mirroredVector[i * HexConfig.BOARD_SIZE + j] = mirroredVector[i * HexConfig.BOARD_SIZE + HexConfig.BOARD_SIZE - j - 1];
+//                    mirroredVector[i * HexConfig.BOARD_SIZE + HexConfig.BOARD_SIZE - j - 1] = tmp[j];
+//                }
+//            }
+//        } else if (axis == Axis.HORIZONTAL) {
+//            //Swap the places of chunks of BOARD_SIZE elements from front and end until center is reached
+//            //Example for BOARD_SIZE=3:
+//            //Before: 1,2,3, 4,5,6, 7,8,9
+//            //After:  7,8,9, 4,5,6, 1,2,3
+//            for (int i = 0; i < ((HexConfig.BOARD_SIZE + 1) / 2); i++) {
+//                int[] tmp = new int[HexConfig.BOARD_SIZE];
+//                for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
+//                    tmp[j] = mirroredVector[i * HexConfig.BOARD_SIZE + j];
+//                    mirroredVector[i * HexConfig.BOARD_SIZE + j] = mirroredVector[(HexConfig.BOARD_SIZE - i - 1) * HexConfig.BOARD_SIZE + j];
+//                    mirroredVector[(HexConfig.BOARD_SIZE - i - 1) * HexConfig.BOARD_SIZE + j] = tmp[j];
+//                }
+//            }
+//        }
+//
+//        return mirroredVector;
+//    }
 
-        if (axis == Axis.VERTICAL) {
-            //Subdivide into chunks of BOARD_SIZE elements and reverse each
-            //Example for BOARD_SIZE=3:
-            //Before: 1,2,3, 4,5,6, 7,8,9
-            //After:  3,2,1, 6,5,4, 9,8,7
-            for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
-                int[] tmp = new int[HexConfig.BOARD_SIZE];
-                for (int j = 0; j < ((HexConfig.BOARD_SIZE + 1) / 2); j++) {
-                    tmp[j] = mirroredVector[i * HexConfig.BOARD_SIZE + j];
-                    mirroredVector[i * HexConfig.BOARD_SIZE + j] = mirroredVector[i * HexConfig.BOARD_SIZE + HexConfig.BOARD_SIZE - j - 1];
-                    mirroredVector[i * HexConfig.BOARD_SIZE + HexConfig.BOARD_SIZE - j - 1] = tmp[j];
-                }
-            }
-        } else if (axis == Axis.HORIZONTAL) {
-            //Swap the places of chunks of BOARD_SIZE elements from front and end until center is reached
-            //Example for BOARD_SIZE=3:
-            //Before: 1,2,3, 4,5,6, 7,8,9
-            //After:  7,8,9, 4,5,6, 1,2,3
-            for (int i = 0; i < ((HexConfig.BOARD_SIZE + 1) / 2); i++) {
-                int[] tmp = new int[HexConfig.BOARD_SIZE];
-                for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
-                    tmp[j] = mirroredVector[i * HexConfig.BOARD_SIZE + j];
-                    mirroredVector[i * HexConfig.BOARD_SIZE + j] = mirroredVector[(HexConfig.BOARD_SIZE - i - 1) * HexConfig.BOARD_SIZE + j];
-                    mirroredVector[(HexConfig.BOARD_SIZE - i - 1) * HexConfig.BOARD_SIZE + j] = tmp[j];
-                }
-            }
-        }
-
-        return mirroredVector;
-    }
-
-    /**
-     * Rotates the board by 180° degrees by mirroring along both axes.
-     * Hex has rotational symmetry if rotated by 180°. Slower than {@link #rotateBoard2(int[])}.
-     *
-     * @param boardVector Game board vector
-     * @return Rotated board
-     */
-    @Deprecated
-    private BoardVector rotateBoard(BoardVector boardVector) {
-        int[] rotatedBoard = boardVector.bvec.clone();
-
-        //Rotating by 180 degrees is the same as mirroring by both axes
-        //Rotating by 90 or 270 degrees would not be an equivalent board in Hex
-        rotatedBoard = mirrorBoard(rotatedBoard, Axis.HORIZONTAL);
-        rotatedBoard = mirrorBoard(rotatedBoard, Axis.VERTICAL);
-
-        return new BoardVector(rotatedBoard);
-    }
+//    /**
+//     * Rotates the board by 180° degrees by mirroring along both axes.
+//     * Hex has rotational symmetry if rotated by 180°. Slower than {@link #rotateBoard2(BoardVector)}.
+//     *
+//     * @param boardVector Game board vector
+//     * @return Rotated board
+//     */
+//    @Deprecated
+//    private BoardVector rotateBoard(BoardVector boardVector) {
+//        int[] rotatedBoard = boardVector.bvec.clone();
+//
+//        //Rotating by 180 degrees is the same as mirroring by both axes
+//        //Rotating by 90 or 270 degrees would not be an equivalent board in Hex
+//        rotatedBoard = mirrorBoard(rotatedBoard, Axis.HORIZONTAL);
+//        rotatedBoard = mirrorBoard(rotatedBoard, Axis.VERTICAL);
+//
+//        return new BoardVector(rotatedBoard);
+//    }
 
     /**
      * Rotates the board by 180° degrees by mirroring along both axes.
@@ -359,7 +363,4 @@ public class XNTupleFuncsHex extends XNTupleBase implements XNTupleFuncs, Serial
         return new BoardVector(rotatedBoard);
     }
 
-    private enum Axis {
-        HORIZONTAL, VERTICAL
-    }
 }

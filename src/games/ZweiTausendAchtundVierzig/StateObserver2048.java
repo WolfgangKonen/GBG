@@ -43,8 +43,8 @@ import java.util.Random;
 public class StateObserver2048 extends ObserverBase implements StateObsNondeterministic {
 	public static final String[] ACTIONSTRING = {" left", "   up", "right", " down"};
     private Random random = new Random();
-    protected ArrayList<Integer> emptyTiles = new ArrayList();
-    protected ArrayList<Integer> availableMoves = new ArrayList();   // 0: left, 1: up, 2: right, 3: down
+    protected ArrayList<Integer> emptyTiles = new ArrayList<>();
+    protected ArrayList<Integer> availableMoves = new ArrayList<>();   // 0: left, 1: up, 2: right, 3: down
     protected ACTIONS[] actions;
 
     private long boardB;
@@ -146,7 +146,6 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         this.score = other.score;
         this.cumulEmptyTiles = other.cumulEmptyTiles; 
         this.winState = other.winState;
-        this.winState = other.winState;
         this.highestTileValue = other.highestTileValue;
 		this.actions = other.actions.clone();
 		if (other.availableMoves!=null)	// this check is needed when loading older logs
@@ -184,12 +183,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
     
     public boolean isGameOver() {
-        if(availableMoves.size() == 0) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return (availableMoves.size() == 0);
     }
 
     public boolean isLegalState() {
@@ -276,6 +270,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
             //evaluate right row
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2, rowEvaluationMethod, 1);
+            assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
@@ -283,6 +278,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
             //evaluate bottom row
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3, rowEvaluationMethod, 1);
+            assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
@@ -300,12 +296,14 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0, rowEvaluationMethod, 1);
+            assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 3, 3, 1, 3, rowEvaluationMethod, -1);
+            assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
@@ -322,12 +320,14 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1, rowEvaluationMethod, 1);
+            assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 2, rowEvaluationMethod, -1);
+            assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
@@ -343,12 +343,14 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 0, rowEvaluationMethod, -1);
+            assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 1, rowEvaluationMethod, -1);
+            assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
                 rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
@@ -646,7 +648,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
     @Override
 	public ArrayList<ACTIONS> getAllAvailableActions() {
-        ArrayList allActions = new ArrayList<>();
+        ArrayList<ACTIONS> allActions = new ArrayList<>();
         for (int j = 0; j < 4; j++) 
         	allActions.add(Types.ACTIONS.fromInt(j));
         
@@ -887,7 +889,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
     /**
      *
-     * @param winState {@literal-1  > lost, 0 > running, 1 > won}
+     * @param winState -1: lost, 0: running, 1: won
      */
     private void setWinState(int winState) {
         //if(this.winState == 0) {
@@ -1135,7 +1137,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
      */
     @Override
     public boolean equals(Object arg0) {
-        StateObserver2048 aItem = null;
+        StateObserver2048 aItem;
         if (arg0 instanceof StateObserver2048) {
             aItem = (StateObserver2048) arg0;
         } else {
@@ -1170,9 +1172,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
  * Likewise, static transposition tables {@code scoreLeft} and {@code scoreRight} are filled 
  * which contain for each possible row value the resulting score. <p>
  * 
- * This speeds up the calculation in {@link StateObs2048BitShift#advance(Action)} by a 
- * factor of 10 as compared to {@link StateObserver2048Slow#advance(Action)}
- * (see {@link StateObs2048BitShift#main(String[])}).
+ * This speeds up the calculation in {@link StateObserver2048#advance(ACTIONS)} by a
+ * factor of 10 as compared to {@link StateObserver2048Slow#advance(ACTIONS)}.
  *
  * @author Wolfgang Konen, THK
  */
@@ -1190,6 +1191,7 @@ class RowBitShift {
 	
 	public RowBitShift(RowBitShift rbs) {
 		this.rowB = rbs.rowB;
+		this.score = rbs.score;
 	}
 	
 	/**

@@ -162,6 +162,36 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
 	/**
+	 * The cumulative reward, seen from the perspective of {@code referingState}'s player. This
+	 * relativeness is usually only relevant for games with more than one player.
+	 * <p>
+	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
+	 *
+	 * @param referringState
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
+	 * 		  game-specific reward
+	 * @return the cumulative reward
+	 */
+	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+		return (this.getCubeState().isEqual(def)) ?  REWARD_POSITIVE : 0.0;
+	}
+
+	/**
+	 * Same as {@link #getReward(StateObservation,boolean)}, but with the player of referringState.
+	 * <p>
+	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
+	 *  It is only valid for N &le; 2. Games with N &gt; 2 have to override this method.
+	 *
+	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
+	 * 		  game-specific reward
+	 * @return  the cumulative reward
+	 */
+	public double getReward(int player, boolean rewardIsGameScore) {
+		return (this.getCubeState().isEqual(def)) ?  REWARD_POSITIVE : 0.0;
+	}
+
+	/**
 	 * The tuple of step rewards given by the game environment.<br>
 	 * The step reward is for transition into state {@code this} from a previous state.
 	 * <p>
