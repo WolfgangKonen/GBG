@@ -45,11 +45,25 @@ public class CubeState3x3 extends CubeState {
                 this.fcol = new int[48];
                 System.arraycopy(bvec, 0, this.fcol, 0, 48);
                 break;
-            case 147: // = 7*21, see notes-WK-RubiksCube.docx
+            case 147: // = 7*21, see notes-WK-RubiksCube.docx, boardvecType == STICKER
                 // TODO: STICKER implementation for 3x3x3
+                throw new RuntimeException("Case STICKER for 3x3x3 cube not yet implemented");
             default:
                 throw new RuntimeException("Case bvec.length = "+bvec.length+" not yet implemented.");
         }
+    }
+
+    /**
+     * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}.
+     * {@code this} has to be of type COLOR_P or COLOR_R.<br>
+     * [This method is only needed if we want to use color symmetries.]
+     *
+     * @param tri
+     * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with
+     * 		   the colors of {@code tri}.
+     */
+    public CubieTriple locate(CubieTriple tri) {
+        throw new RuntimeException("[CubeState.locate] is not yet implemented for 3x3x3 RubiksCube!");
     }
 
 
@@ -96,7 +110,7 @@ public class CubeState3x3 extends CubeState {
      */
     public BoardVector getBoardVector() {
         if (true)
-            throw new RuntimeException("getBoardVector not yet adapted to 3x3x !");
+            throw new RuntimeException("getBoardVector not yet adapted to 3x3x3!");
 
         // needed for STICKER and STICKER2
         final int[] orig = {0,1,2,3,13,14,15}; 	// the original locations of the tracked stickers
@@ -115,23 +129,8 @@ public class CubeState3x3 extends CubeState {
                 bvec[fcol.length+1] = this.lastTimes;
                 break;
             case STICKER:
-                int[][] board = new int[7][7];
-                int column;
-                for (int i=0; i<7; i++) {		// set in every column i (sticker) the row cell specified by 'cor'
-                    // to the appropriate face value:
-                    column = cor[sloc[orig[i]]].ordinal();
-                    //assert column!=4;	// should not be the ygr-cubie
-                    if (column>4) column = column-1;
-                    //assert column<7;
-                    board[column][i] = face[sloc[orig[i]]];
-                }
-
-                // copy to linear bvec according to STICKER coding specified above
-                bvec = new int[7*7];
-                for (int j=0, k=0; j<7; j++)
-                    for (int i=0; i<7; i++,k++)
-                        bvec[k] = board[j][i];
-                break;
+                // TODO: STICKER implementation for 3x3x3
+                throw new RuntimeException("Case STICKER for 3x3x3 cube not yet implemented");
             case STICKER2:
                 int[][] board2 = new int[2][7];
                 for (int i=0; i<7; i++) {		// set in every column i (sticker) the row cell specified by 'cor'
@@ -154,9 +153,9 @@ public class CubeState3x3 extends CubeState {
     //
     // --- TODO: this has to be adapted to 3x3x3 ! ---
     //                                		0          4         8            12           16           20
-//    private static final int[] 	invF_2x2 = {18,19,2,3,  1, 5,6,0, 11, 8, 9,10, 12, 7, 4,15, 16,17,13,14, 20,21,22,23},
-//            invL_2x2 = { 9, 1,2,8,  7, 4,5,6, 14,15,10,11, 12,13,21,22, 16,17,18,19, 20, 3, 0,23},
-//            invU_2x2 = { 3, 0,1,2, 22,23,6,7,  5, 9,10, 4, 12,13,14,15, 16,11, 8,19, 20,21,17,18};
+    private static final int[] 	invF_2x2 = {18,19,2,3,  1, 5,6,0, 11, 8, 9,10, 12, 7, 4,15, 16,17,13,14, 20,21,22,23},
+            invL_2x2 = { 9, 1,2,8,  7, 4,5,6, 14,15,10,11, 12,13,21,22, 16,17,18,19, 20, 3, 0,23},
+            invU_2x2 = { 3, 0,1,2, 22,23,6,7,  5, 9,10, 4, 12,13,14,15, 16,11, 8,19, 20,21,17,18};
 //    //
 //    // use the following line once on a default TRAFO_P CubeState t_cs to generate int[] invL above:
 //    //			return t_cs.uTr().FTw().uTr().uTr().uTr();   	// L(x) = u^3(F(u(x)))
@@ -167,10 +166,10 @@ public class CubeState3x3 extends CubeState {
 //     * generate the <b>inverse</b> transformations {@link #invF}, {@link #invL} and {@link #invU}.
 //     */
     public static void generateInverseTs() {
-//        assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
-//        invF = invF_2x2;
-//        invL = invL_2x2;
-//        invU = invU_2x2;
+        assert (CubeConfig.cubeType== CubeConfig.CubeType.RUBIKS);
+        invF = invF_2x2;
+        invL = invL_2x2;
+        invU = invU_2x2;
     }
 
     // TODO: needs to be adapted to 3x3x3

@@ -398,11 +398,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
             }
         }
 
-        if(mergeValue0 > mergeValue1) {
-            mergeValue = mergeValue0;
-        } else {
-            mergeValue = mergeValue1;
-        }
+        mergeValue = Math.max(mergeValue0, mergeValue1);
     }
 
     /**
@@ -556,8 +552,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	}
 	
 	/**
-	 * The cumulative reward, seen from the perspective of {@code referingState}'s player. This 
-	 * relativeness is usually only relevant for games with more than one player.
+	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. This
+	 * player dependence is only relevant for games with more than one player.
 	 * @param referringState
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
@@ -880,7 +876,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         emptyTiles.clear();
         long b = boardB;
         for (int j=0; j<16; j++) {
-            if ((b & 0x0fL)==0) emptyTiles.add(Integer.valueOf(j));
+            if ((b & 0x0fL)==0) emptyTiles.add(j);
             b = b >> 4;                // shift down by one hex digit
         }
         cumulEmptyTiles += emptyTiles.size() - 1;  
@@ -913,9 +909,9 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return newBoard;
     }
 
-    // updateAvaliableMoves is package-visible (for StateObserver2048Slow::assertSameAdvance)
+    // updateAvailableMoves is package-visible (for StateObserver2048Slow::assertSameAdvance)
     /**
-	 * Update class memeber {@code List<Integer> availableMoves}:<br>
+	 * Update class member {@code List<Integer> availableMoves}:<br>
 	 * The possible actions are: 0: left, 1: up, 2: right, 3: down.
      */
     void updateAvailableMoves() {
@@ -985,7 +981,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
     private void addRandomTile () {
         if(emptyTiles.size() > 0) {
-            int position = emptyTiles.get(random.nextInt(emptyTiles.size())).intValue();
+            int position = emptyTiles.get(random.nextInt(emptyTiles.size()));
             int value = ConfigGame.STARTINGVALUES[random.nextInt(ConfigGame.STARTINGVALUES.length)] >> 1;
             addTile(position, value);
         }
@@ -1186,13 +1182,14 @@ class RowBitShift {
 	static int[] scoreLeft = null; 
 	
 	public RowBitShift(int row) {
-		this.rowB = row;
+	    this.rowB = row;
 	}
-	
-	public RowBitShift(RowBitShift rbs) {
-		this.rowB = rbs.rowB;
-		this.score = rbs.score;
-	}
+
+	// never used
+//	public RowBitShift(RowBitShift rbs) {
+//		this.rowB = rbs.rowB;
+//		this.score = rbs.score;
+//	}
 	
 	/**
 	 * Extract the k-th hexadecimal digit

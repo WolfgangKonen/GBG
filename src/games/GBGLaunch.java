@@ -522,8 +522,7 @@ public class GBGLaunch {
 				choiceScaPar2.setSelectedItem("5");					
 			} else { // i.e. "Nim3P"
 				scaPar2_L.setText("Extra Rule");
-				choiceScaPar2.addItem("true");
-				choiceScaPar2.addItem("false");				
+				setScaPar2List(new String[]{"true","false"});
 				choiceScaPar2.setSelectedItem("true");					
 			}
 			break;
@@ -536,9 +535,7 @@ public class GBGLaunch {
 			scaPar2_L.setToolTipText("'1-2': coalition of player 1+2 against player 0 (only 3-player)");
 			setScaPar0List(new int[]{2,3});
 			setScaPar1List(new int[]{4,5,6,7,8,9,10,12,15,20});
-			setScaPar2List(new int[]{});
-			choiceScaPar2.addItem("None");
-			choiceScaPar2.addItem("1-2");
+			setScaPar2List(new String[]{"None","1-2"});
 			choiceScaPar0.setSelectedItem("2");		// 
 			choiceScaPar1.setSelectedItem("6");		// the initial (recommended) values 
 			choiceScaPar2.setSelectedItem("None");	// 
@@ -550,19 +547,16 @@ public class GBGLaunch {
 			scaPar0_L.setToolTipText("Pocket Cube or Rubik's Cube");
 			scaPar1_L.setToolTipText("Type of board vectors (only n-tuple agents)");
 			scaPar2_L.setToolTipText("Type of twists (all or only quarter)");
-			setScaPar0List(new int[]{});
-			setScaPar1List(new int[]{});
-			setScaPar2List(new int[]{});
-			choiceScaPar0.addItem("2x2x2");					// currently we allow only 2x2x2
+			//setScaPar0List(new int[]{});
+			//setScaPar1List(new int[]{});
+			//setScaPar2List(new int[]{});
+			setScaPar0List(new String[]{"2x2x2","3x3x3"});
+			setScaPar1List(new String[]{"CSTATE","CPLUS","STICKER","STICKER2"});
+			setScaPar2List(new String[]{"ALL","QUARTER"});
 			//choiceScaPar0.addItem("3x3x3");
-			choiceScaPar1.addItem("CSTATE");
-			choiceScaPar1.addItem("CPLUS");
-			choiceScaPar1.addItem("STICKER");
-			choiceScaPar1.addItem("STICKER2");
-			choiceScaPar1.setSelectedItem("CSTATE");		// the initial (recommended) value
-			choiceScaPar2.addItem("ALL");
-			choiceScaPar2.addItem("QUARTER");
-			choiceScaPar2.setSelectedItem("ALL");			// the initial (recommended) value	
+			choiceScaPar0.setSelectedItem("3x3x3");			//
+			choiceScaPar1.setSelectedItem("CSTATE");		// the initial (recommended) values
+			choiceScaPar2.setSelectedItem("ALL");			//
 			break;
 		case "2048": 
 		case "ConnectFour": 
@@ -608,6 +602,24 @@ public class GBGLaunch {
 		choiceScaPar2.removeAllItems();
 		for (int i : modeList)
 			choiceScaPar2.addItem(Integer.toString(i));
+	}
+
+	public void setScaPar0List(String[] modeList) {
+		choiceScaPar0.removeAllItems();
+		for (String s : modeList)
+			choiceScaPar0.addItem(s);
+	}
+
+	public void setScaPar1List(String[] modeList) {
+		choiceScaPar1.removeAllItems();
+		for (String s : modeList)
+			choiceScaPar1.addItem(s);
+	}
+
+	public void setScaPar2List(String[] modeList) {
+		choiceScaPar2.removeAllItems();
+		for (String s : modeList)
+			choiceScaPar2.addItem(s);
 	}
 
 	public void setScaPar1Tooltip(String str) {

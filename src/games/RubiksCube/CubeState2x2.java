@@ -64,6 +64,45 @@ public class CubeState2x2 extends CubeState {
     }
 
     /**
+     * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}.
+     * {@code this} has to be of type COLOR_P or COLOR_R.<br>
+     * [This method is only needed if we want to use color symmetries.]
+     *
+     * @param tri
+     * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with
+     * 		   the colors of {@code tri}.
+     */
+    public CubieTriple locate(CubieTriple tri) {
+        CubieTriple where = new CubieTriple(tri);
+        assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type in apply() !";
+        //            0           4          8          12         16          20
+        int[] left = {4,11,17,22, 8,3,21,14, 0,7,13,18, 20,19,9,6, 12,23,1,10, 16,15,5,2};
+        int[] right= {8,18,23,5, 0,22,15,9, 4,14,19,1, 16,10,7,21, 20,2,11,13, 12,6,3,17};
+        int rig;
+        switch(tri.ori) {
+            case CLOCK:
+                for (int i=0; i<fcol.length; i++) {
+                    if (fcol[i]==tri.col[0]) {
+                        where.loc[0]=i;
+                        rig = right[i];
+                        if (fcol[rig]==tri.col[1]) {
+                            where.loc[1]=rig;
+                            rig = right[rig];
+                            if (fcol[rig]==tri.col[2]) {
+                                where.loc[2]=rig;
+                                return where;
+                            }
+                        }
+                    }
+                }
+                break;
+            case COUNTER:
+                throw new RuntimeException("Case COUNTER not yet implemented");
+        }
+        throw new RuntimeException("Invalid cube, we should not arrive here!");
+    }
+
+    /**
      * There are four possible board vector types, depending on {@link CubeConfig#boardVecType}
      * <ul>
      * <li> <b>CUBESTATE</b>: the face color array of the cube, i.e. member {@link #fcol}
@@ -231,8 +270,8 @@ public class CubeState2x2 extends CubeState {
 
     //                                		0          4         8            12           16           20
     private static final int[] 	invF_2x2 = {18,19,2,3,  1, 5,6,0, 11, 8, 9,10, 12, 7, 4,15, 16,17,13,14, 20,21,22,23},
-            invL_2x2 = { 9, 1,2,8,  7, 4,5,6, 14,15,10,11, 12,13,21,22, 16,17,18,19, 20, 3, 0,23},
-            invU_2x2 = { 3, 0,1,2, 22,23,6,7,  5, 9,10, 4, 12,13,14,15, 16,11, 8,19, 20,21,17,18};
+                                invL_2x2 = { 9, 1,2,8,  7, 4,5,6, 14,15,10,11, 12,13,21,22, 16,17,18,19, 20, 3, 0,23},
+                                invU_2x2 = { 3, 0,1,2, 22,23,6,7,  5, 9,10, 4, 12,13,14,15, 16,11, 8,19, 20,21,17,18};
     //
     // use the following line once on a default TRAFO_P CubeState t_cs to generate int[] invL above:
     //			return t_cs.uTr().FTw().uTr().uTr().uTr();   	// L(x) = u^3(F(u(x)))

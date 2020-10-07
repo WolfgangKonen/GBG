@@ -355,40 +355,14 @@ abstract public class CubeState implements Serializable {
 	
 	/**
 	 * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}. 
-	 * {@code this} has to be of type COLOR_P or COLOR_R.
+	 * {@code this} has to be of type COLOR_P or COLOR_R.<br>
+	 * [This method is only needed if we want to use color symmetries.]
+	 *
 	 * @param tri
 	 * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with 
 	 * 		   the colors of {@code tri}.
 	 */
-	public CubieTriple locate(CubieTriple tri) {
-		CubieTriple where = new CubieTriple(tri);
-		assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type in apply() !";
-		//            0           4          8          12         16          20 
-		int[] left = {4,11,17,22, 8,3,21,14, 0,7,13,18, 20,19,9,6, 12,23,1,10, 16,15,5,2};
-		int[] right= {8,18,23,5, 0,22,15,9, 4,14,19,1, 16,10,7,21, 20,2,11,13, 12,6,3,17};
-		int rig;
-		switch(tri.ori) {
-		case CLOCK: 
-			for (int i=0; i<fcol.length; i++) {
-				if (fcol[i]==tri.col[0]) {
-					where.loc[0]=i;
-					rig = right[i];
-					if (fcol[rig]==tri.col[1]) {
-						where.loc[1]=rig;
-						rig = right[rig];
-						if (fcol[rig]==tri.col[2]) {
-							where.loc[2]=rig;
-							return where; 
-						}
-					}
-				}
-			}
-			break;
-		case COUNTER:
-			throw new RuntimeException("Case COUNTER not yet implemented");
-		}
-		throw new RuntimeException("Invalid cube, we should not arrive here!");
-	}
+	abstract public CubieTriple locate(CubieTriple tri);
 
 	/**
 	 * There are four possible board vector types, depending on {@link CubeConfig#boardVecType}
@@ -422,6 +396,7 @@ abstract public class CubeState implements Serializable {
 	 * 
 	 */
 	public String toString() {
+		int isep = (this.type==Type.COLOR_P) ? 4 : 8;
 		DecimalFormat form = new DecimalFormat("00");
 		String s = "";
 		switch(this.type) {
@@ -433,7 +408,7 @@ abstract public class CubeState implements Serializable {
     		break;
 		default:
     		for (int i=0; i<fcol.length; i++) {
-    			if (i%4==0) s = s + "|";
+    			if (i%isep==0) s = s + "|";
     			s = s + fcol[i];
     		}
     		break;

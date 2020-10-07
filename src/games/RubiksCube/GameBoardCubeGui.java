@@ -28,81 +28,76 @@ import tools.Types;
  * and allows user interactions with the board to enter legal moves during 
  * game play or to enter board positions for which the agent reaction is 
  * inspected. 
- * 
+ * <p>
+ * The size of the GUI window is set in {@link #showGameBoard(Arena, boolean)}.
+ *
  * @author Wolfgang Konen, TH Koeln, 2018-2020
+ *
+ * @see GameBoardCubeGui2x2
+ * @see GameBoardCubeGui3x3
  */
-public class GameBoardCubeGui extends JFrame {
+abstract public class GameBoardCubeGui extends JFrame {
 
-	private int TICGAMEHEIGHT=280;
-	private int labSize = (int)(20*Types.GUI_SCALING_FACTOR_X);
-	private JPanel BoardPanel;
-	private JPanel ButtonPanel;
-	private JLabel leftInfo=new JLabel("");
-	private JLabel rightInfo=new JLabel("");
-	private JLabel pMaxLabel;
-	private JLabel pMaxValue;
-	private JLabel scrTwists_L;
-	private JComboBox scrTwists_T;
+	protected final int labSize = (int)(20*Types.GUI_SCALING_FACTOR_X);
+	protected JPanel BoardPanel;
+	protected JPanel ButtonPanel;
+	protected final JLabel leftInfo=new JLabel("");
+	protected final JLabel rightInfo=new JLabel("");
+	protected JLabel pMaxLabel;
+	protected JLabel pMaxValue;
+	protected JLabel scrTwists_L;
+	protected JComboBox scrTwists_T;
 	static String[] scrTwistsList = {"1","2","3","4","5","6","7","8","9","10","11","12","13","RANDOM"};
 	/**
-	 * The representation of the cube in the GUI. The 24 active panels in the 6*8 field
-	 * represent the cubie faces of the flattened cube.
+	 * The representation of the cube in the GUI. The [24|48] active panels in the [6*8 | 9*12] field
+	 * represent the cubie faces of the flattened [Pocket | Rubik's] cube.
 	 */
 	protected JPanel[][] Board;
 	protected JButton[][] Button;
-	//
-	// for guiUpdateBoard: which is the row index iarr and the column index jarr
-	// for each of the cubie faces in CubeState.fcol[i], i=0,...,23
-	private int[] iarr = {1,1,0,0, 2,2,3,3, 2,3,3,2, 5,4,4,5, 3,2,2,3, 3,3,2,2};
-	private int[] jarr = {2,3,3,2, 1,0,0,1, 2,2,3,3, 3,3,2,2, 5,5,4,4, 6,7,7,6};
 
 	/**
 	 * a reference to the 'parent' {@link GameBoardCube} object
 	 */
-	private GameBoardCube m_gb=null;
+	protected final GameBoardCube m_gb;
 	
 	/**
 	 * A table for the stored values of each action
 	 */
-	private double[][] VTable;
+	protected double[][] VTable;
 	
-	// the colors of the TH Koeln logo (used for button coloring):
-	private Color colTHK1 = new Color(183,29,13);
-	private Color colTHK2 = new Color(255,137,0);
-	private Color colTHK3 = new Color(162,0,162);
-	
-	public GameBoardCubeGui(GameBoardCube gb) {
+	// the colors of the TH Koeln logo and other colors used for cube coloring:
+	protected final Color colTHK1 = new Color(183,29,13);	// the red cube color
+	protected final Color colTHK2 = new Color(255,137,0);	// the orange cube color
+	//protected final Color colTHK3 = new Color(162,0,162);
+	protected final Color colOrang = colTHK2;
+	protected final Color colGreen = new Color(0,184,0);
+	protected final Color colYellow = new Color(255,250,40);
+	protected final Color colBlue = new Color(0,0,184);
+	protected final Color colRed = colTHK1;
+
+	protected int boardX,boardY;
+	protected int buttonX, buttonY;
+
+	GameBoardCubeGui(GameBoardCube gb) {
 		super("Rubiks Cube");
 		m_gb = gb;
-		initGameBoard("");
-		
-		// ensure that ButtonBoard is already visible in the beginning, 
-		// if updateBoard() is configured in this way:
-		this.updateBoard((StateObserverCube)m_gb.getDefaultStartState(), true, true);	
 	}
 	
-	private void initGameBoard(String title) 
+	protected void initGameBoard()
 	{
-		Board       = new JPanel[6][8];
+		Board       = new JPanel[boardY][boardX];
 		BoardPanel	= InitBoard();
-		Button		= new JButton[3][3];
+		Button		= new JButton[buttonY][buttonX];
 		ButtonPanel = InitButton();
-		VTable		= new double[3][3];
+		VTable		= new double[buttonY][buttonX];
 		pMaxLabel 	= new JLabel("[Other pars] pMax: ");
 		pMaxValue 	= new JLabel("");
-		scrTwists_L 		= new JLabel("Scrambling Twists: ");
-		scrTwists_T		= new JComboBox(scrTwistsList);
+		scrTwists_L = new JLabel("Scrambling Twists: ");
+		scrTwists_T	= new JComboBox(scrTwistsList);
 		scrTwists_T.setSelectedItem("4");
 		scrTwists_L.setToolTipText("During play: How many initial twists before start. If RANDOM: 1,...,pMax.");
 
 		Font font=new Font("Arial",1,Types.GUI_TITLEFONTSIZE);			
-//		JPanel titlePanel = new JPanel();
-//		titlePanel.setBackground(Types.GUI_BGCOLOR);
-//		JLabel Title=new JLabel("   ",SwingConstants.CENTER);  // no title, it appears sometimes in the wrong place
-//		Title.setForeground(Color.black);	
-//		Title.setFont(font);	
-//		titlePanel.add(Blank);
-//		titlePanel.add(Title);
 		JLabel Blank=new JLabel("   ");		// a little bit of space
 		Blank.setPreferredSize(new Dimension(2*labSize,labSize)); // controls the space between panels
 		
@@ -128,7 +123,7 @@ public class GameBoardCubeGui extends JFrame {
 		infoPanel.add(rightInfo);
 		infoPanel.setSize(100,10);
 		
-		setLayout(new BorderLayout(10,00));
+		setLayout(new BorderLayout(10,0));
 		//add(titlePanel,BorderLayout.NORTH);
 		add(northPanel,BorderLayout.NORTH);
 		add(boardPanel,BorderLayout.CENTER);
@@ -137,42 +132,19 @@ public class GameBoardCubeGui extends JFrame {
 		setVisible(false);
 	}
 
-	private JPanel InitBoard()
+	abstract protected JPanel InitBoard();
+
+	protected JPanel InitButton()
 	{
-		JPanel panel=new JPanel();
-		panel.setLayout(new GridLayout(6,8,1,1));
-		panel.setBackground(Types.GUI_BGCOLOR);
-		int buSize = (int)(25*Types.GUI_SCALING_FACTOR_X);
-		Dimension minimumSize = new Dimension(buSize,buSize); //controls the cube face sizes
-		for(int i=0;i<6;i++){
-			for(int j=0;j<8;j++){
-				Board[i][j] = new JPanel();
-				Board[i][j].setBackground(colTHK2);
-				Board[i][j].setForeground(Color.white);
-				Font font=new Font("Arial",Font.BOLD,Types.GUI_HELPFONTSIZE);
-		        Board[i][j].setFont(font);
-				Board[i][j].setPreferredSize(minimumSize); 
-				boolean v = (i==2 || i==3 || j==2 || j==3);
-				Board[i][j].setVisible(v);
-				panel.add(Board[i][j]);
-			}
-		}
-		return panel;
-	}
-	
-	private JPanel InitButton()
-	{
-		//JPanel outerPanel=new JPanel(new BorderLayout(0,10));
-		//JLabel Blank=new JLabel("  ");		// a little bit of space
-		//Blank.setBackground(Types.GUI_BGCOLOR);  
 		Font bfont=new Font("Arial",Font.BOLD,Types.GUI_DIALOGFONTSIZE);
 		Font lfont=new Font("Arial",Font.BOLD,Types.GUI_HELPFONTSIZE);
-		String[] twiStr = {"U","L","F"};
+		String[] twiStr = {"U","L","F","D","R","B"};	// Up, Left, Front, Down, Right, Back
 		JPanel panel=new JPanel();
-		panel.setLayout(new GridLayout(5,4,4,4));
+		panel.setLayout(new GridLayout(buttonY+2,buttonX+1,4,4));
 		panel.setBackground(Types.GUI_BGCOLOR);
 		int buSize = (int)(35*Types.GUI_SCALING_FACTOR_X);
 		Dimension minimumSize = new Dimension(buSize,buSize); //controls the button sizes
+		// set the column heads (twists "1","2","3"):
 		for (int j=0; j<3; j++) {
 			JLabel jlab = new JLabel();
 			jlab.setFont(lfont);
@@ -187,18 +159,18 @@ public class GameBoardCubeGui extends JFrame {
 		elab.setText("");
 		elab.setPreferredSize(new Dimension(labSize,labSize)); // controls the label size
 		panel.add(elab);
-		for(int i=0;i<3;i++){
-			for(int j=0;j<3;j++){
+		for(int i=0;i<buttonY;i++){
+			for(int j=0;j<buttonX;j++){
 				Button[i][j] = new JButton();
 				Button[i][j].setBackground(Color.GRAY);  //(colTHK3);
 				Button[i][j].setForeground(Color.white);
-		        Button[i][j].setFont(bfont);
-				Button[i][j].setPreferredSize(minimumSize); 
+				Button[i][j].setFont(bfont);
+				Button[i][j].setPreferredSize(minimumSize);
 				Button[i][j].setVisible(true);
 				Button[i][j].setEnabled(true);
 				Button[i][j].setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 				//.createEtchedBorder(), .createLoweredSoftBevelBorder()
-				Button[i][j].addActionListener(					
+				Button[i][j].addActionListener(
 						new ActionHandler(i,j)  // constructor copies (i,j) to members (x,y)
 						{
 							public void actionPerformed(ActionEvent e)
@@ -206,25 +178,29 @@ public class GameBoardCubeGui extends JFrame {
 								Arena.Task aTaskState = m_gb.m_Arena.taskState;
 								if (aTaskState == Arena.Task.PLAY)
 								{
-									m_gb.HGameMove(x,y);		// i.e. make human move (i,j), if Button[i][j] is clicked								
+									m_gb.HGameMove(x,y);		// i.e. make human move (i,j), if Button[i][j] is clicked
 								}
 								if (aTaskState == Arena.Task.INSPECTV)
 								{
-									m_gb.InspectMove(x,y);	// i.e. update inspection, if Button[i][j] is clicked								
-								}	
+									m_gb.InspectMove(x,y);	// i.e. update inspection, if Button[i][j] is clicked
+								}
 								int dummy=1;
 							}
 						}
 				);
 				panel.add(Button[i][j]);
 			} // for (j)
+
+			// set the row labels (faces "U","L","F",...)
 			JLabel jlab = new JLabel();
 			jlab.setFont(lfont);
 			jlab.setText(twiStr[i]);
 			jlab.setPreferredSize(new Dimension(labSize,labSize)); // controls the label size
 			panel.add(jlab);
 		} // for (i)
-		for (int j=0; j<3; j++) {
+
+		// optional: set the column heads again at bottom (twists "1","2","3"):
+		for (int j=0; j<buttonX; j++) {
 			JLabel jlab = new JLabel();
 			jlab.setFont(lfont);
 			jlab.setText(""+(j+1));
@@ -233,20 +209,17 @@ public class GameBoardCubeGui extends JFrame {
 			jlab.setVerticalAlignment(JLabel.TOP);
 			panel.add(jlab);
 		}
-		//outerPanel.add(Blank,BorderLayout.NORTH);
-		//outerPanel.add(Blank,BorderLayout.CENTER);
-		//outerPanel.add(panel,BorderLayout.CENTER);
 		return panel;
 	}
-	
+
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
 			leftInfo.setText("  ");
 		}
 		if (vClear) {
-			if (VTable==null) VTable		= new double[3][3];
-			for(int i=0;i<3;i++){
-				for(int j=0;j<3;j++){
+			if (VTable==null) VTable		= new double[buttonY][buttonX];
+			for(int i=0;i<buttonY;i++){
+				for(int j=0;j<buttonX;j++){
 					VTable[i][j] = Double.NaN;
 				}
 			}
@@ -280,23 +253,25 @@ public class GameBoardCubeGui extends JFrame {
 				leftInfo.setText("Solved in "+soN.getMoveCounter() +" twists! (p=" 
 						+soN.getCubeState().minTwists+")"); 				
 			} else {
-				if (soN.getMoveCounter() > m_gb.m_Arena.m_xab.getEpisodeLength(0)) {
-					leftInfo.setText("NOT solved in "+soN.getMoveCounter() +" twists! (p=" 
-							+soN.getCubeState().minTwists+")"); 				
-					
-				}				
+				if (m_gb.m_Arena.m_xab!=null) {
+					if (soN.getMoveCounter() > m_gb.m_Arena.m_xab.getEpisodeLength(0)) {
+						leftInfo.setText("NOT solved in "+soN.getMoveCounter() +" twists! (p="
+								+soN.getCubeState().minTwists+")");
+
+					}
+				}
 			}
 			
 			if (showValueOnGameboard && soN.getStoredValues()!=null) {
-				for(i=0;i<3;i++)
-					for(j=0;j<3;j++) 
+				for(i=0;i<buttonY;i++)
+					for(j=0;j<buttonX;j++)
 						VTable[i][j]=Double.NaN;	
 				
 				for (int k=0; k<soN.getStoredValues().length; k++) {
 					Types.ACTIONS action = soN.getStoredAction(k);
 					int iAction = action.toInt();
-					j=iAction%3;
-					i=(iAction-j)/3;
+					j=iAction%buttonX;
+					i=(iAction-j)/buttonX;
 					VTable[i][j] = soN.getStoredValues()[k];					
 				}	
 				rightInfo.setText("");					
@@ -317,23 +292,16 @@ public class GameBoardCubeGui extends JFrame {
 	 * 				 will be set into enabled state <code>enable</code>. 
 	 * @param showValueOnGameboard if true, show the values on the action buttons. If false, 
 	 * 				 clear any previous values.
-	 */ 
-	private void guiUpdateBoard(boolean enable, boolean showValueOnGameboard)
-	{		
-		int i,j;
+	 */
+	abstract protected void guiUpdateBoard(boolean enable, boolean showValueOnGameboard);
+
+	// called from guiUpdateBoard
+	protected void guiUpdateButton(boolean enable, boolean showValueOnGameboard) {
+		int i, j;
 		double value;
 		String valueTxt;
-		int imax=0,jmax=0;
-		int[] fcol = m_gb.m_so.getCubeState().fcol;
-		Color[] colors = {Color.white, Color.blue, colTHK2, Color.yellow, Color.green, colTHK1};		//{w,b,o,y,g,r}
-		for(i=0;i<fcol.length;i++){			
-			Board[iarr[i]][jarr[i]].setEnabled(enable);
-			Board[iarr[i]][jarr[i]].setBackground(colors[fcol[i]]);
-			Board[iarr[i]][jarr[i]].setForeground(Color.white);
-		}
-		
-		for(i=0;i<3;i++)
-			for(j=0;j<3;j++) {
+		for(i=0;i<buttonY;i++)
+			for(j=0;j<buttonX;j++) {
 				value = VTable[i][j]; 				
 				if (Double.isNaN(value)) {
 					valueTxt = "   ";
@@ -364,7 +332,7 @@ public class GameBoardCubeGui extends JFrame {
      * @param tileValue Value of the tile
      * @return Color the tile is supposed to be drawn in
      */
-    private Color calculateTileColor(double tileValue) {
+    protected Color calculateTileColor(double tileValue) {
         float percentage = (float) Math.abs(tileValue);
         float inverse_percentage = 1 - percentage;
 
@@ -372,15 +340,6 @@ public class GameBoardCubeGui extends JFrame {
         Color colorHigh;
         Color colorNeutral = Color.YELLOW;
         int red, blue, green;
-
-//        double vLow=0.0, vMid=0.5, vHigh=1.0;
-//        if (tileValue < vMid) {
-//            colorLow = Color.RED;
-//            colorHigh = colorNeutral;
-//        } else {
-//            colorLow = colorNeutral;
-//            colorHigh = Color.GREEN;
-//        }
 
         if (tileValue < 0) {
             colorLow = Color.RED;
@@ -400,7 +359,7 @@ public class GameBoardCubeGui extends JFrame {
         return new Color(red, green, blue, 255);
     }
 
-	// --- currently not used ---
+	// --- currently no action required ---
 	public void enableInteraction(boolean enable) {
 //		for(int i=0;i<3;i++){
 //			for(int j=0;j<3;j++){
@@ -433,22 +392,8 @@ public class GameBoardCubeGui extends JFrame {
 		}
 		public void actionPerformed(ActionEvent e){}			
 	}
-	
-	public void showGameBoard(Arena ticGame, boolean alignToMain) {
-		this.setVisible(true);
-		if (alignToMain) {
-			// place window with game board below the main window
-			int x = ticGame.m_xab.getX() + ticGame.m_xab.getWidth() + 8;
-			int y = ticGame.m_xab.getLocation().y;
-			if (ticGame.m_ArenaFrame!=null) {
-				x = ticGame.m_ArenaFrame.getX();
-				y = ticGame.m_ArenaFrame.getY() + ticGame.m_ArenaFrame.getHeight() +1;
-				this.setSize(ticGame.m_ArenaFrame.getWidth(),
-						 (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
-			}
-			this.setLocation(x,y);	
-		}		
-	}
+
+	abstract public void showGameBoard(Arena ticGame, boolean alignToMain);
 
     @Override
 	public void toFront() {

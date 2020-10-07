@@ -104,7 +104,15 @@ public class GameBoardCube implements GameBoard {
 		m_so		= new StateObserverCube();	// empty table
 		
         if (m_Arena.hasGUI() && m_gameGui==null) {
-        	m_gameGui = new GameBoardCubeGui(this);
+        	switch(CubeConfig.cubeType) {
+				case POCKET:
+					m_gameGui = new GameBoardCubeGui2x2(this);
+					break;
+				case RUBIKS:
+					m_gameGui = new GameBoardCubeGui3x3(this);
+					break;
+			}
+
         }
         getPMax();		// actualize CubeConfig.pMax, if GUI present
         

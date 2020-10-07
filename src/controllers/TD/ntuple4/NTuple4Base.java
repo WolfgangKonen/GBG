@@ -12,6 +12,7 @@ import java.util.Random;
 import controllers.AgentBase;
 import controllers.RandomAgent;
 import games.Arena;
+import games.StateObsWithBoardVector;
 import games.StateObservation;
 import params.ParNT;
 import params.ParTD;
@@ -119,7 +120,7 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	
 	/**
 	 * 
-	 * @param score
+	 * @param score the game score to normalize
 	 * @param so	needed for accessing getMinGameScore(), getMaxGameScore()
 	 * @return normalized score to [-1,+1] (the appropriate range for tanh-sigmoid) if 
 	 * 		switch {@link #m_tdPar}{@code .getNormalize()} is set.
@@ -164,7 +165,7 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	
 	public String printTrainStatus() {
 		DecimalFormat frm = new DecimalFormat("#0.0000");
-		DecimalFormat frme= new DecimalFormat();
+		DecimalFormat frme;
 		frme = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
 		frme.applyPattern("0.0E00");  
 
@@ -240,7 +241,7 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	}
 	
 	/**
-	 * the number of calls to {@link NTuple4ValueFunc#update(int[], int, int, double, double, boolean, boolean)}
+	 * the number of calls to {@link NTuple4ValueFunc#update(StateObsWithBoardVector, int, int, double, double, boolean, boolean)}
 	 */
 	@Override
 	public long getNumLrnActions() {

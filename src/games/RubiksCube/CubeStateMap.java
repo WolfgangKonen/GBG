@@ -34,7 +34,9 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 		int[] loc = new int[3];
 		CubieTriple ygrCubie = new CubieTriple();
 		for (int i=0; i<6; i++) {
-			CubeState rot = csFactory.makeCubeState(CubeState.Type.TRAFO_P);
+			CubeState.Type type = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET)
+					            ? CubeState.Type.TRAFO_P : CubeState.Type.TRAFO_R;
+			CubeState rot = csFactory.makeCubeState(type);
 			switch(i) {
 			case 0: 
 				break;

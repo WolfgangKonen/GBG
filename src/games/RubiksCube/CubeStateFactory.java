@@ -10,7 +10,7 @@ public class CubeStateFactory {
     public CubeState makeCubeState() {
         switch (CubeConfig.cubeType) {
             case POCKET: return new CubeState2x2(CubeState.Type.COLOR_P); 
-            case RUBIKS: return new CubeState3x3(CubeState.Type.COLOR_P); 
+            case RUBIKS: return new CubeState3x3(CubeState.Type.COLOR_R);
         }
         throw new RuntimeException("we should not arrive here");
     }
@@ -45,8 +45,12 @@ public class CubeStateFactory {
      */
     public static void generateInverseTs() {
         switch (CubeConfig.cubeType) {
-            case POCKET: CubeState2x2.generateInverseTs();
-            case RUBIKS: CubeState3x3.generateInverseTs();
+            case POCKET:
+                CubeState2x2.generateInverseTs();
+                break;
+            case RUBIKS:
+                CubeState3x3.generateInverseTs();
+                break;
         }
     }
 
