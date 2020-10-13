@@ -187,6 +187,7 @@ public class NTuple4 implements Serializable {
 		int index = 0;
 		int Q=1; 		// Q = posVals[P[0]]*...*posVals[P[i]] in i-loop below
 		for (int i = 0; i < nTuple.length; i++) {
+			assert (board[nTuple[i]]<posVals[nTuple[i]]) : "Assert failed for cell "+nTuple[i]+": "+board[nTuple[i]]+">="+posVals[nTuple[i]];
 			index += Q * board[nTuple[i]];
 			Q = Q * posVals[nTuple[i]];
 		}

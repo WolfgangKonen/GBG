@@ -7,28 +7,28 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * GUI of the 2x2x2 Pocket Cube in the 'flattened cube' representation .
+ * GUI of the 2x2x2 Pocket Cube in the 'flattened cube' representation.
  * <p>
  * The numbering in {@link CubeState#fcol} runs around the cube faces in the following order: U, L, F, D, R, B.
  * Within the first three faces, we start at the wbo-cubie; within the last three faces we start
  * at the ygr-cubie. Within each face we march around in counter-clockwise
  * orientation. This gives for the 2x2x2 pocket cube the following numbering:
  * <pre>
- *       3  2
- *       0  1
- * 5  4  8 11 18 17 23 22
- * 6  7  9 10 19 16 20 21
- *      14 13
- *      15 12
+ *         3  2
+ *         0  1
+ *   5  4  8 11 18 17 23 22
+ *   6  7  9 10 19 16 20 21
+ *        14 13
+ *        15 12
  * </pre>
  */
 public class GameBoardCubeGui2x2 extends GameBoardCubeGui {
-    //
-    // for guiUpdateBoard: which is the row index iarr and the column index jarr in the boardY * boardX JPanel[][] Board
-    // for each of the cubie faces in CubeState.fcol[i], i=0,...,fcol.length-1
-    // [These arrays will be set in constructor GameBoardCubeGui2x2 and GameBoardCubeGui3x3.]
-    protected final int[] iarr;
-    protected final int[] jarr;
+    /**
+     * For guiUpdateBoard: Which is the row index iarr and the column index jarr in the boardY * boardX JPanel[][] Board
+     * for each of the cubie faces in CubeState.fcol[i], i=0,...,fcol.length-1.<br>
+     * [These arrays will be set in constructor GameBoardCubeGui2x2.]
+     */
+    protected final int[] iarr,jarr;
 
     protected final int TICGAMEHEIGHT=280;
 

@@ -285,8 +285,8 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 
 	/**
-	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell
-	 * can have. If different cells have different P, return max(P).
+	 * @return the maximum number P of position values 0, 1, 2,..., P-1 that a board cell
+	 * can have.
 	 */
 	private int getNumPositionValues2x2() {
 		switch(CubeConfig.boardVecType) {
@@ -554,23 +554,21 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 
 	/**
-	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell
-	 * can have. If different cells have different P, return max(P).
+	 * @return the maximum number P of position values 0, 1, 2,..., P-1 that a board cell
+	 * can have.
 	 */
 	private int getNumPositionValues3x3() {
-		// TODO: may be different for 3x3x3 Rubiks Cube
-		throw new RuntimeException("[getNumPositionValues] Not yet implemented for 3x3x3 cube!");
-//		switch(CubeConfig.boardVecType) {
-//			case CUBESTATE:
-//			case CUBEPLUSACTION:
-//				return 6;
-//			case STICKER:
-//				return 4;
-//			case STICKER2:
-//				return 7;
-//			default:
-//				throw new RuntimeException("[getNumPositionValues] Illegal value in switch boardVecType");
-//		}
+		switch(CubeConfig.boardVecType) {
+			case CUBESTATE:
+			case CUBEPLUSACTION:
+				return 6;
+			case STICKER:
+				return 4;
+			case STICKER2:
+				return 12;
+			default:
+				throw new RuntimeException("[getNumPositionValues] Illegal value in switch boardVecType");
+		}
 	}
 
 	/**
@@ -580,16 +578,13 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * 			P of position values 0, 1, 2,..., P-1 that board cell {@code i} can have
 	 */
 	public int[] getPositionValuesVector3x3() {
-		// TODO: may be different for 3x3x3 Rubiks Cube
-		throw new RuntimeException("[getNumPositionValues] Not yet implemented for 3x3x3 cube!");
-//		int[] posValVec = new int[getNumCells()];
-//		for (int i=0; i<posValVec.length; i++) posValVec[i] = getNumPositionValues();
-//
-//		if (CubeConfig.boardVecType==BoardVecType.STICKER2) {
-//			// the max is P=7, but some cells have only P = 3
-//			// TODO
-//		}
-//		return posValVec;
+		int[] posValVec = {
+			8,8,8,8,8,8,8,8,
+			3,3,3,3,3,3,3,3,
+			12,12,12,12,12,12,12,12,12,12,12,12,
+			 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+
+		return posValVec;
 	}
 
 	private int[][] fixedNTuples3x3(int mode) {
@@ -598,7 +593,23 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 
 	private HashSet<Integer> adjacencySet3x3(int iCell) {
-		// TODO:
-		throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3] Not yet implemented!");
+		int i,j;
+		HashSet<Integer> adjSet = new HashSet<>();
+		switch (CubeConfig.boardVecType) {
+			case CUBESTATE:
+			case CUBEPLUSACTION:
+				// TODO:
+				throw new RuntimeException("[adjacencySet3x3] Case CUBESTATE Not yet implemented!");
+			case STICKER:
+				// TODO:
+				throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3] Not yet implemented!");
+			case STICKER2:
+				for (int k=0; k<getNumCells(); k++) {
+					if (k!=iCell) adjSet.add(k);
+				}
+				break;
+		} // switch
+
+		return adjSet;
 	}
 }

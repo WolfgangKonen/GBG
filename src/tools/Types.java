@@ -117,8 +117,10 @@ public class Types {
 					int iAction = act.toInt();
 					return new ACTIONS(inverseActs[iAction]);
 				} else { // CubeState3x3 case
-					// TODO
-					throw new RuntimeException("[ACTIONS.inverseAction] not yet implemented for CubeState3x3!");
+					int[] inverseActs = { 2, 1,0,   5, 4, 3,   8, 7, 6,
+							             11,10,9,  14,13,12,  17,16,15,  18};	// '18' codes 'not known' --> we return 'not known'
+					int iAction = act.toInt();
+					return new ACTIONS(inverseActs[iAction]);
 				}
 			}
         	throw new RuntimeException("No inverseAction known for object so of class "+so.getClass().getSimpleName());

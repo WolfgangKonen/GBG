@@ -17,21 +17,23 @@ import java.util.Random;
 
 /**
  * A main program to test various aspects of the Pocket cube.
- * <p>
- * This program needs VM argument "-ea" (enable assertions) to work correctly.
  *
- * @author Wolfgang Konen, TH Koeln , 2018 - 2020
+ * @author Wolfgang Konen, TH Koeln , 2020
+ *
+ * @see RubiksCubeTest
  */
 public class PocketCubeTest {
 
     ArenaTrainCube ar = new ArenaTrainCube("",false);
-    GameBoardCube gb = new GameBoardCube(ar);		// needed for chooseStartState()
+    GameBoardCube gb;		// needed for chooseStartState()
 
     protected Random rand = new Random(System.currentTimeMillis());
     private final CubeStateFactory csFactory = new CubeStateFactory();
 
-    private void init() {
+    protected void init() {
         CubeConfig.cubeType = CubeConfig.CubeType.POCKET;
+
+        gb = new GameBoardCube(ar);
 
         CubeStateFactory.generateInverseTs();
         CubeState.generateForwardTs();

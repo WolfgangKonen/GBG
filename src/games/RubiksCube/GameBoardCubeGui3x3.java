@@ -7,7 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * GUI of the 3x3x3 Rubik's Cube in the 'flattened cube' representation .
+ * GUI of the 3x3x3 Rubik's Cube in the 'flattened cube' representation.
  * <p>
  * The numbering in {@link CubeState#fcol} runs around the cube faces in the following order: U, L, F, D, R, B.
  * Within the first three faces, we start at the wbo-cubie; within the last three faces we start
@@ -15,25 +15,29 @@ import java.awt.*;
  * orientation. This gives for the 3x3x3 Rubik's Cube the following numbering:
  * <pre>
  *              6  5  4
- *              7     3
+ *              7  U  3
  *              0  1  2
  *   10  9  8  16 23 22  36 35 34  46 45 44
- *   11	   15  17    21  37    33  47    43
+ *   11	 L 15  17  F 21  37  R 33  47  B 43
  *   12 13 14  18 19 20  38 39 32  40 41 42
  *             28 27 26
- *             29    25
+ *             29  D 25
  *             30 31 24
  * </pre>
  */
 public class GameBoardCubeGui3x3 extends GameBoardCubeGui {
-    //
-    // for guiUpdateBoard: which is the row index iarr and the column index jarr in the boardY * boardX JPanel[][] Board
-    // for each of the cubie faces in CubeState.fcol[i], i=0,...,fcol.length-1
-    // [These arrays will be set in constructor GameBoardCubeGui2x2 and GameBoardCubeGui3x3.]
-    protected final int[] iarr;
-    protected final int[] jarr;
-    protected final int[] icen = {1,4,4,7,4, 4};
-    protected final int[] jcen = {4,1,4,4,7,10};
+    /**
+     * For guiUpdateBoard: Which is the row index iarr and the column index jarr in the boardY * boardX JPanel[][] Board
+     * for each of the cubie faces in CubeState.fcol[i], i=0,...,fcol.length-1.<br>
+     * [These arrays will be set in constructor GameBoardCubeGui3x3.]
+     */
+    protected final int[] iarr, jarr;
+    /**
+     * Similar to {@link #iarr} and {@link #iarr}, {@code icen} and {@code jcen} have the row and column indices
+     * of the 6 center cubies.
+     */
+    protected final int[] icen = {1,4,4,7,4, 4},
+                          jcen = {4,1,4,4,7,10};
 
     protected final int TICGAMEHEIGHT=400;
     protected final int TICGAMEWIDTH=600;

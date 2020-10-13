@@ -1,10 +1,5 @@
 package games.RubiksCube;
 
-import java.io.IOException;
-
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-
 import controllers.PlayAgent;
 import games.Arena;
 import games.Evaluator;
@@ -14,7 +9,6 @@ import games.XNTupleFuncs;
 import games.RubiksCube.CubeConfig.BoardVecType;
 import games.RubiksCube.CubeConfig.CubeType;
 import games.RubiksCube.CubeConfig.TwistType;
-import games.Sim.ConfigSim;
 import games.ArenaTrain;
 
 /**
@@ -34,7 +28,7 @@ import games.ArenaTrain;
  * @author Wolfgang Konen, TH Koeln, 2018-2020
  */
 public class ArenaTrainCube extends ArenaTrain   {
-	
+
 	public ArenaTrainCube(String title, boolean withUI) {
 		super(title,withUI);
 		CubeStateFactory.generateInverseTs();
@@ -59,9 +53,15 @@ public class ArenaTrainCube extends ArenaTrain   {
 	public GameBoard makeGameBoard() {
 		CubeStateFactory.generateInverseTs();	// since makeGameBoard is called via super --> Arena
 		CubeState.generateForwardTs();			// prior to finishing ArenaTrainCube(String,boolean)
-		gb = new GameBoardCube(this);	
+		gb = new GameBoardCube(this);
+
+		// optional, to print out invU and invL, given invF:
+		CubeStateFactory csfactory = new CubeStateFactory();
+		csfactory.makeCubeState().show_invF_invL_invU();		// once to print out the arrays needed for invL and invU (see CubeState3x3)
+
 		return gb;
 	}
+
 	/**
 	 * Factory pattern method: make a new Evaluator
 	 * @param pa		the agent to evaluate
@@ -92,44 +92,43 @@ public class ArenaTrainCube extends ArenaTrain   {
      * set the cube type (POCKET or RUBIKS) for Rubik's Cube
      */
     public static void setCubeType(String sCube) {
-    	switch(sCube) {
-    	case "2x2x2": CubeConfig.cubeType = CubeType.POCKET; break;
-    	case "3x3x3": CubeConfig.cubeType = CubeType.RUBIKS; break;
-    	default: throw new RuntimeException("Cube type "+sCube+" is not known.");
-    	}
+		switch (sCube) {
+			case "2x2x2" -> CubeConfig.cubeType = CubeType.POCKET;
+			case "3x3x3" -> CubeConfig.cubeType = CubeType.RUBIKS;
+			default -> throw new RuntimeException("Cube type " + sCube + " is not known.");
+		}
     }
 
     /**
      * set the board vector type for Rubik's Cube
      */
     public static void setBoardVecType(String bvType) {
-    	switch(bvType) {
-    	case "CSTATE": CubeConfig.boardVecType = BoardVecType.CUBESTATE; break;
-    	case "CPLUS": CubeConfig.boardVecType = BoardVecType.CUBEPLUSACTION; break;
-    	case "STICKER": CubeConfig.boardVecType = BoardVecType.STICKER; break;
-    	case "STICKER2": CubeConfig.boardVecType = BoardVecType.STICKER2; break;
-    	default: throw new RuntimeException("Board vector type "+bvType+" is not known.");
-    	}
+		switch (bvType) {
+			case "CSTATE" -> CubeConfig.boardVecType = BoardVecType.CUBESTATE;
+			case "CPLUS" -> CubeConfig.boardVecType = BoardVecType.CUBEPLUSACTION;
+			case "STICKER" -> CubeConfig.boardVecType = BoardVecType.STICKER;
+			case "STICKER2" -> CubeConfig.boardVecType = BoardVecType.STICKER2;
+			default -> throw new RuntimeException("Board vector type " + bvType + " is not known.");
+		}
     }
 
     /**
      * set the twist type (ALLTWISTS or QUARTERTWISTS) for Rubik's Cube
      */
     public static void setTwistType(String tCube) {
-    	switch(tCube) {
-    	case "ALL": CubeConfig.twistType = TwistType.ALLTWISTS; break;
-    	case "QUARTER": CubeConfig.twistType = TwistType.QUARTERTWISTS; break;
-    	default: throw new RuntimeException("Twist type "+tCube+" is not known.");
-    	}
+		switch (tCube) {
+			case "ALL" -> CubeConfig.twistType = TwistType.ALLTWISTS;
+			case "QUARTER" -> CubeConfig.twistType = TwistType.QUARTERTWISTS;
+			default -> throw new RuntimeException("Twist type " + tCube + " is not known.");
+		}
     }
 
 	/**
 	 * Start GBG for Rubik's Cube (trainable version)
 	 * 
 	 * @param args
-	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws IOException 
+	public static void main(String[] args)
 	{
 		ArenaTrainCube t_Frame = new ArenaTrainCube("General Board Game Playing",true);
 

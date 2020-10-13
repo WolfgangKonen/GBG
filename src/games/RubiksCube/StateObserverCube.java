@@ -26,7 +26,7 @@ import tools.Types.ACTIONS;
 public class StateObserverCube extends ObserverBase implements StateObservation {
 	private final CubeState m_state;
 	/**
-	 * the action which led to m_state (9 if not known)
+	 * the action which led to m_state (numAllActions (9 or 18) if not known)
 	 */
 	protected ACTIONS m_action;
 	private static final CubeStateFactory csFactory = new CubeStateFactory();
@@ -43,6 +43,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 */
     public static final double REWARD_NEGATIVE = -1.0;
 	private final ArrayList<ACTIONS> acts = new ArrayList<>();	// holds all available actions
+
+	public int numAllActions;
    
 //	private double prevReward = 0.0;
 	
@@ -54,29 +56,33 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverCube() {
-		m_state = csFactory.makeCubeState(); 		// default (solved) cube of type POCKET
-		m_action = new ACTIONS(9);		// 9 codes 'not known'
+		m_state = csFactory.makeCubeState(); 		// default (solved) cube of type CubeConfig.cubeType
+		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
+		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
 		setAvailableActions();
 	}
 
 	@Deprecated
 	public StateObserverCube(BoardVector boardVector) {
 		m_state = csFactory.makeCubeState(boardVector);
-		m_action = new ACTIONS(9);		// 9 codes 'not known'
+		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
+		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
 		setAvailableActions();
 	}
 	
 	// NOTE: this is NOT the copy constructor. See next method for copy constructor.
 	public StateObserverCube(CubeState other) {
 		m_state = csFactory.makeCubeState(other);
-		m_action = new ACTIONS(9);		// 9 codes 'not known'
+		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
+		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
 		setAvailableActions();
 	}
 	
 	public StateObserverCube(StateObserverCube other) {
 		super(other);		// copy members m_counter and stored*
 		m_state = csFactory.makeCubeState(other.m_state);
-		m_action = new ACTIONS(other.m_action);
+		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
+		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
 		setAvailableActions();
 	}
 	
@@ -122,8 +128,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 	
 	public boolean isLegalAction(ACTIONS act) {
-		return (0<=act.toInt() && act.toInt()<9); 
-		
+		return (0<=act.toInt() && act.toInt()<this.numAllActions);
 	}
 
 	@Override
@@ -236,7 +241,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 //													// returned by getGameScore can accumulate the cost-to-go.
 		m_action = action;
 		int iAction = action.toInt();
-		assert (0<=iAction && iAction<9) : "iAction is not in 0,1,...,8.";
+		assert (0<=iAction && iAction<numAllActions) : "iAction is not in 0,1,...,"+numAllActions;
 		int j=iAction%3;
 		int i=(iAction-j)/3;		// reverse: iAction = 3*i + j
 		
@@ -244,6 +249,9 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		case 0: m_state.UTw(j+1); break;
 		case 1: m_state.LTw(j+1); break;
 		case 2: m_state.FTw(j+1); break;
+		case 3: m_state.DTw(j+1); break;
+		case 4: m_state.RTw(j+1); break;
+		case 5: m_state.BTw(j+1); break;
 		}
 		this.setAvailableActions();
 		super.incrementMoveCounter();
@@ -261,7 +269,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     @Override
 	public ArrayList<ACTIONS> getAllAvailableActions() {
         ArrayList<ACTIONS> allActions = new ArrayList<>();
-        for (int j = 0; j < 9; j++) 
+        for (int j = 0; j < numAllActions; j++)
         	allActions.add(Types.ACTIONS.fromInt(j));
         
         return allActions;
@@ -307,11 +315,13 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 //				acts.add(Types.ACTIONS.fromInt(7));  // F2
 //				acts.add(Types.ACTIONS.fromInt(8));  // F3
 //			}		
-			for (int i=0; i<9; i++) {
+			for (int i=0; i<this.numAllActions; i++) {
 				acts.add(Types.ACTIONS.fromInt(i));  				
 			}
 		} else {   // the QUARTERTWISTS case: add all allowed quarter twist actions
-			int[] quarteracts = {0,2,3,5,6,8};  // {U1,U3,L1,L3,F1,F3}
+			int[] quarteracts = {0,2,3,5,6,8};  						//  {U1,U3,L1,L3,F1,F3}
+			if (CubeConfig.cubeType== CubeConfig.CubeType.RUBIKS)
+				quarteracts = new int[]{0,2,3,5,6,8,9,11,12,14,15,17};	//+ {D1,D3,R1,R3,B1,B3}
 			for (int i=0; i<quarteracts.length; i++) {
 				acts.add(Types.ACTIONS.fromInt(quarteracts[i]));  				
 			}

@@ -252,7 +252,7 @@ public class GameBoardCube implements GameBoard {
 
 	protected void HGameMove(int x, int y)
 	{
-		String[] twiStr = {"U","L","F"};
+		String[] twiStr = {"U","L","F","D","R","B"};
 		System.out.println(twiStr[x]+(y+1));
 		int iAction = 3*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
@@ -266,7 +266,7 @@ public class GameBoardCube implements GameBoard {
 	
 	protected void InspectMove(int x, int y)
 	{
-		String[] twiStr = {"U","L","F"};
+		String[] twiStr = {"U","L","F","D","R","B"};
 		System.out.println(twiStr[x]+(y+1));
 		int iAction = 3*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
@@ -281,8 +281,8 @@ public class GameBoardCube implements GameBoard {
 									// environment - not necessary in RubiksCube)
 		m_so.getCubeState().clearLast();		// clear lastTwist and lastTimes of the CubeState,
 		m_so.setAvailableActions();				// then set the available actions which causes all
-												// 9 actions to be added to m_so.acts. We need this
-												// to see the values for all 9 actions.
+												// numAllActions actions to be added to m_so.acts. We need this
+												// to see the values for all numAllActions actions.
 												// (If lastTwist were set, 3 actions would be excluded
 												// which we do not want during INSPECTV.) 
 		updateBoard(null,false,false);
@@ -317,7 +317,7 @@ public class GameBoardCube implements GameBoard {
 		int p = 1+rand.nextInt(CubeConfig.pMax);		// random p \in {1,2,...,pMax}
 		if (m_gameGui!=null) {
 			String str=m_gameGui.getScramblingTwists();
-			if (!str.equals("RANDOM")) p = Integer.valueOf(str).intValue();
+			if (!str.equals("RANDOM")) p = Integer.valueOf(str);
 		}
 		return chooseStartState(p);
 	}
@@ -629,8 +629,8 @@ public class GameBoardCube implements GameBoard {
 
 	@Override
 	public void destroy() {
-			if (m_gameGui!=null)
-				m_gameGui.destroy();
+    	if (m_gameGui!=null)
+    		m_gameGui.destroy();
 	}
 
   

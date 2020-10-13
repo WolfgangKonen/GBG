@@ -45,12 +45,8 @@ public class CubeStateFactory {
      */
     public static void generateInverseTs() {
         switch (CubeConfig.cubeType) {
-            case POCKET:
-                CubeState2x2.generateInverseTs();
-                break;
-            case RUBIKS:
-                CubeState3x3.generateInverseTs();
-                break;
+            case POCKET -> CubeState2x2.generateInverseTs();
+            case RUBIKS -> CubeState3x3.generateInverseTs();
         }
     }
 

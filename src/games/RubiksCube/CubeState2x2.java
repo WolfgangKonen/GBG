@@ -54,13 +54,27 @@ public class CubeState2x2 extends CubeState {
             case 49: 	// boardvecType == STICKER, 2x2x2
                 this.type = Type.COLOR_P;
                 this.sloc = slocFromSTICKER(bvec);
-                CubeState def = csFactory.makeCubeState(Type.COLOR_P);
+                CubeState def = csFactory.makeCubeState(this.type);
                 this.fcol = new int[def.fcol.length];
-                for (int i=0; i<24; i++) this.fcol[sloc[i]] = def.fcol[i];
+                for (int i=0; i<fcol.length; i++) this.fcol[sloc[i]] = def.fcol[i];
                 break;
+            case 14: 	// boardvecType == STICKER2, 2x2x2
+                throw new RuntimeException("Case bvec.length = "+bvec.length+" (STICKER2) not yet implemented.");
             default:
                 throw new RuntimeException("Case bvec.length = "+bvec.length+" not yet implemented.");
         }
+    }
+
+    protected void show_invF_invL_invU() {
+        CubeState2x2 t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
+        t_cs.FTw();											// invF
+        System.out.println(t_cs);
+        t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
+        t_cs.uTr().FTw().uTr().uTr().uTr();					// invL
+        System.out.println(t_cs);
+        t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
+        t_cs.lTr().lTr().lTr().FTw().lTr();					// invU
+        System.out.println(t_cs);
     }
 
     /**
@@ -141,12 +155,15 @@ public class CubeState2x2 extends CubeState {
      *
      * @return an int[] vector representing the 'board' state (= cube state)
      *
-     * NOTE: Currently, the implementation is only valid for 2x2x2 cube
      */
     public BoardVector getBoardVector() {
         // needed for STICKER and STICKER2
         final int[] orig = {0,1,2,3,13,14,15}; 	// the original locations of the tracked stickers
-        final Cor cor[] = {Cor.a,Cor.b,Cor.c,Cor.d,Cor.a,Cor.d,Cor.h,Cor.g,Cor.a,Cor.g,Cor.f,Cor.b,Cor.e,Cor.f,Cor.g,Cor.h,Cor.e,Cor.c,Cor.b,Cor.f,Cor.e,Cor.h,Cor.d,Cor.c};
+        // cor[i]: For face location i (out  of 24): to which corner-cubie does it belong?
+        //                 00                       04                       08
+        final Cor cor[] = {Cor.a,Cor.b,Cor.c,Cor.d, Cor.a,Cor.d,Cor.h,Cor.g, Cor.a,Cor.g,Cor.f,Cor.b,
+        //                 12                       16                       20
+                           Cor.e,Cor.f,Cor.g,Cor.h, Cor.e,Cor.c,Cor.b,Cor.f, Cor.e,Cor.h,Cor.d,Cor.c};
         final int[] face = {1,1,1,1,2,3,2,3,3,2,3,2,1,1,1,1,2,2,3,2,3,3,2,3};
         int column;
         int[] bvec;
@@ -180,7 +197,7 @@ public class CubeState2x2 extends CubeState {
                 break;
             case STICKER2:
                 int[][] board2 = new int[2][7];
-                for (int i=0; i<7; i++) {		// set in every column i (sticker) the row cell specified by 'cor'
+                for (int i=0; i<7; i++) {		// set in every column i (sticker) the location specified by {cor,face}
                     column = cor[sloc[orig[i]]].ordinal();
                     //assert column!=4;	// should not be the ygr-cubie
                     if (column>4) column = column-1;
@@ -210,13 +227,13 @@ public class CubeState2x2 extends CubeState {
         int[] sloc = new int[24];
         final 							// this array is found with the help of Table 3 in notes-WK-RubiksCube.docx:
         int[][] C = {{ 0,  4,  8},		// 1st row: the locations for a1,a2,a3
-                { 1, 11, 18},		// 2nd row: the locations for b1,b2,b3
-                { 2, 17, 23},		// and so on ...
-                { 3, 22,  5},
-                {12, 16, 20},
-                {13, 19, 10},
-                {14,  9,  7},
-                {15,  6, 21}};
+                     { 1, 11, 18},		// 2nd row: the locations for b1,b2,b3
+                     { 2, 17, 23},		// and so on ...
+                     { 3, 22,  5},
+                     {12, 16, 20},
+                     {13, 19, 10},
+                     {14,  9,  7},
+                     {15,  6, 21}};
         int cor,fac;
         for (int z=0; z<8; z++) {
             int[] corfac = getCornerAndFace(z,bvec);
@@ -267,7 +284,7 @@ public class CubeState2x2 extends CubeState {
         return corfac;
     }
 
-
+    // invF_2x2[i] is the sticker location which moves under an F-twist to location i. E.g. sticker 18 moves to location 0.
     //                                		0          4         8            12           16           20
     private static final int[] 	invF_2x2 = {18,19,2,3,  1, 5,6,0, 11, 8, 9,10, 12, 7, 4,15, 16,17,13,14, 20,21,22,23},
                                 invL_2x2 = { 9, 1,2,8,  7, 4,5,6, 14,15,10,11, 12,13,21,22, 16,17,18,19, 20, 3, 0,23},
@@ -278,14 +295,23 @@ public class CubeState2x2 extends CubeState {
     // use the following line once on a default TRAFO_P CubeState t_cs to generate int[] invU above:
     //			return t_cs.lTr().lTr().lTr().FTw().lTr();   	// U(x) = l(F(l^3(x)))
 
+    // invD|R|B_2x2 are just dummies, we do not need these twists for 2x2x2, but we need the variables to be present to
+    // get everything compiled
+    private static final int[] 	invD_2x2 = {18,19,2,3,  1, 5,6,0, 11, 8, 9,10, 12, 7, 4,15, 16,17,13,14, 20,21,22,23},
+            invR_2x2 = { 9, 1,2,8,  7, 4,5,6, 14,15,10,11, 12,13,21,22, 16,17,18,19, 20, 3, 0,23},
+            invB_2x2 = { 3, 0,1,2, 22,23,6,7,  5, 9,10, 4, 12,13,14,15, 16,11, 8,19, 20,21,17,18};
+
     /**
      * generate the <b>inverse</b> transformations {@link #invF}, {@link #invL} and {@link #invU}.
      */
     public static void generateInverseTs() {
         assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
-        invF = invF_2x2;
-        invL = invL_2x2;
         invU = invU_2x2;
+        invL = invL_2x2;
+        invF = invF_2x2;
+        invD = invD_2x2;
+        invR = invR_2x2;
+        invB = invB_2x2;
     }
 
     /**
@@ -296,7 +322,6 @@ public class CubeState2x2 extends CubeState {
         // fcol(invT[i]) is the color which cubie face i gets after transformation:
         int[] invT = {3,0,1,2,22,23,20,21,5,6,7,4,13,14,15,12,10,11,8,9,19,16,17,18};
         int[] tmp = this.fcol.clone();
-        //for (i=0; i<invT.length; i++) tmp[i] = this.fcol[invT[i]];
         for (i=0; i<invT.length; i++) this.fcol[i] = tmp[invT[i]];
         return this;
     }
@@ -309,7 +334,6 @@ public class CubeState2x2 extends CubeState {
         // fcol(invT[i]) is the color which cubie face i gets after transformation:
         int[] invT = {18,19,16,17,1,2,3,0,11,8,9,10,6,7,4,5,15,12,13,14,21,22,23,20};
         int[] tmp = this.fcol.clone();
-        //for (i=0; i<invT.length; i++) tmp[i] = this.fcol[invT[i]];
         for (i=0; i<invT.length; i++) this.fcol[i] = tmp[invT[i]];
         return this;
     }
