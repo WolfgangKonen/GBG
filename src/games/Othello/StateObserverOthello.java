@@ -61,7 +61,7 @@ public class StateObserverOthello extends ObserverBase{
 	private int playerNextMove; 
 	private int countBlack, countWhite;	// probably never really needed
 	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
-	private ArrayList<Integer> lastMoves;
+	public ArrayList<Integer> lastMoves;
 	private int turn;
 	
 	public StateObserverOthello()

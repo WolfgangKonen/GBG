@@ -25,6 +25,7 @@ public class ParOther implements Serializable {
     public static int DEFAULT_STOP_TEST = 0;
     public static int DEFAULT_STOP_EVAL = 100;
     public static int DEFAULT_WRAPPER_NPLY = 0;
+    public static int DEFAULT_WRAPPER_MCTS_ITERATIONS = 0;
     public static int DEFAULT_PMAX_RUBIKS = 6;
 
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
@@ -33,8 +34,9 @@ public class ParOther implements Serializable {
     private int episodeLength = DEFAULT_EPISODE_LENGTH;
 	private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval
-    private int wrapperNply = DEFAULT_WRAPPER_NPLY; 
-    private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
+    private int wrapperNply = DEFAULT_WRAPPER_NPLY;
+	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
+	private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
 	private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
 	private boolean bReplayBuf = false;	// only relevant for RubiksCube: whether to use a replay buffer or not
@@ -78,6 +80,7 @@ public class ParOther implements Serializable {
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
+		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
@@ -97,6 +100,7 @@ public class ParOther implements Serializable {
 		this.stopTest = op.getStopTest();
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
+		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
@@ -161,6 +165,10 @@ public class ParOther implements Serializable {
 
 	public int getWrapperNPly() {
 		return wrapperNply;
+	}
+	
+	public int getWrapperMCTSIterations() {
+		return wrapperMCTSIterations;
 	}
 
     public int getpMaxRubiks() { return pMaxRubiks;	}
@@ -238,6 +246,12 @@ public class ParOther implements Serializable {
 		this.wrapperNply=nply;
 		if (otparams!=null)
 			otparams.setWrapperNPly(nply);
+	}
+
+	public void setWrapperMCTSIterations(final int iterations) {
+		this.wrapperMCTSIterations =iterations;
+		if (otparams!=null)
+			otparams.setWrapperMCTSIterations(iterations);
 	}
 	
 	public void setpMaxRubiks(int pMaxRubiks) {
