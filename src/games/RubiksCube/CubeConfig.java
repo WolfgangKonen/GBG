@@ -70,7 +70,7 @@ public class CubeConfig {
 	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
 	 * DAVI2Agent, DAVI3Agent, TDNTuple3Agt and StateObserverCube.
 	 */
-	public static double stepReward = -0.04; // -0.1; //-0.01;
+	public static double stepReward = (CubeConfig.cubeType==CubeType.POCKET) ? -0.04 : -0.1;  //-0.01;
 
 	/**
 	 * whether a replay buffer with certain capacity and batch size is used or not

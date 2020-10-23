@@ -1,6 +1,7 @@
 package games.RubiksCube;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -541,13 +542,13 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		// TODO: may be different for 3x3x3 Rubiks Cube
 		switch(CubeConfig.boardVecType) {
 			case CUBESTATE:
-				return 24;
+				return 54;
 			case CUBEPLUSACTION:
-				return 26;
+				return 56;
 			case STICKER:
-				return 49;
+				return 480;
 			case STICKER2:
-				return 14;
+				return 40;
 			default:
 				throw new RuntimeException("[getNumCells] Illegal value in switch boardVecType");
 		}
@@ -563,7 +564,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 			case CUBEPLUSACTION:
 				return 6;
 			case STICKER:
-				return 4;
+				return 2;
 			case STICKER2:
 				return 12;
 			default:
@@ -578,13 +579,25 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * 			P of position values 0, 1, 2,..., P-1 that board cell {@code i} can have
 	 */
 	public int[] getPositionValuesVector3x3() {
-		int[] posValVec = {
-			8,8,8,8,8,8,8,8,
-			3,3,3,3,3,3,3,3,
-			12,12,12,12,12,12,12,12,12,12,12,12,
-			 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-
-		return posValVec;
+		int[] posValVec = new int[getNumCells()];
+		switch (CubeConfig.boardVecType) {
+			case CUBESTATE:
+			case CUBEPLUSACTION:
+				Arrays.fill(posValVec, 6);
+				return posValVec;
+			case STICKER:
+				Arrays.fill(posValVec, 2);
+				return posValVec;
+			case STICKER2:
+				int[] posValVec2 = {
+						8,8,8,8,8,8,8,8,
+						3,3,3,3,3,3,3,3,
+						12,12,12,12,12,12,12,12,12,12,12,12,
+						2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+				return posValVec2;
+			default:
+				throw new RuntimeException("We should not arrive here!");
+		} // switch
 	}
 
 	private int[][] fixedNTuples3x3(int mode) {
@@ -593,7 +606,6 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 
 	private HashSet<Integer> adjacencySet3x3(int iCell) {
-		int i,j;
 		HashSet<Integer> adjSet = new HashSet<>();
 		switch (CubeConfig.boardVecType) {
 			case CUBESTATE:
@@ -604,8 +616,14 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 				// TODO:
 				throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3] Not yet implemented!");
 			case STICKER2:
-				for (int k=0; k<getNumCells(); k++) {
-					if (k!=iCell) adjSet.add(k);
+				if (iCell<16) {
+					for (int k=0; k<16; k++) {
+						if (k!=iCell) adjSet.add(k);
+					}
+				} else {
+					for (int k=16; k<getNumCells(); k++) {
+						if (k!=iCell) adjSet.add(k);
+					}
 				}
 				break;
 		} // switch

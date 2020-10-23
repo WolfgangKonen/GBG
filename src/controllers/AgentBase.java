@@ -322,9 +322,9 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		String nStr;
 		for (int n = 0; n < paVector.length; n++) {
 			pa = paVector[n];
-			nStr = Types.GUI_PLAYER_NAME[n];
-			if (numPlayers == 2)
-				nStr = Types.GUI_2PLAYER_NAME[n];
+			nStr = (numPlayers == 2)
+				 ?  Types.GUI_2PLAYER_NAME[n]
+				 :	Types.GUI_PLAYER_NAME[n];
 			if (pa == null) {
 				throw new RuntimeException("Cannot execute command. Agent for player " + nStr + " is null!");
 			}
@@ -342,9 +342,8 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * 
 	 * @param pa
 	 * @param agentName
-	 * @param Player
-	 *            needed for message forming
-	 * @param arena
+	 * @param Player		needed for message forming
+	 * @param arena			where to show message
 	 * @return
 	 */
 	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, Arena arena) {
@@ -359,11 +358,10 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 			return false;
 		}
 
-		String s_p = (Player == +1 ? "X" : "O");
 		String pa_string = pa.getClass().getName();
 		if (agentName.equals("TDS") & !(pa instanceof TDAgent)) {
 			arena.showMessage(
-					"Cannot execute command. " + "Current " + s_p + " agent is not a TDSPlayer: " + pa_string + ".",
+					"Cannot execute command. " + "Current player " + Player + " is not a TDAgent: " + pa_string + ".",
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}

@@ -56,8 +56,8 @@ public class ArenaTrainCube extends ArenaTrain   {
 		gb = new GameBoardCube(this);
 
 		// optional, to print out invU and invL, given invF:
-		CubeStateFactory csfactory = new CubeStateFactory();
-		csfactory.makeCubeState().show_invF_invL_invU();		// once to print out the arrays needed for invL and invU (see CubeState3x3)
+//		CubeStateFactory csfactory = new CubeStateFactory();
+//		csfactory.makeCubeState().show_invF_invL_invU();		// once to print out the arrays needed for invL and invU (see CubeState3x3)
 
 		return gb;
 	}

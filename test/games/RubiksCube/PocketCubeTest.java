@@ -28,7 +28,7 @@ public class PocketCubeTest {
     GameBoardCube gb;		// needed for chooseStartState()
 
     protected Random rand = new Random(System.currentTimeMillis());
-    private final CubeStateFactory csFactory = new CubeStateFactory();
+    protected final CubeStateFactory csFactory = new CubeStateFactory();
 
     protected void init() {
         CubeConfig.cubeType = CubeConfig.CubeType.POCKET;
@@ -96,7 +96,7 @@ public class PocketCubeTest {
      * Test that rep x FTw.UTw.LTw followed by rep x the inverse leads to default cube again, where rep is a random int. <br>
      */
     @Test
-    public void test_FTw_UTw_LTw() {
+    public void test_UTw_LTw_FTw() {
 
         init();
 
@@ -106,20 +106,19 @@ public class PocketCubeTest {
         int runs = 3;
         for (int r=0; r<runs; r++) {
             int rep = 1+rand.nextInt(5);
-            for (int k=0; k<rep; k++) rot.FTw(1).UTw(1).LTw(1);
-            for (int k=0; k<rep; k++) rot.LTw(3).UTw(3).FTw(3);
+            for (int k=0; k<rep; k++) rot.UTw(1).LTw(1).FTw(1);
+            for (int k=0; k<rep; k++) rot.FTw(3).LTw(3).UTw(3);
             assert (def.isEqual(rot)) : "def and rot differ after rep x FTw.UTw.LTw!";
         }
 
     }
 
     /**
-     * Test that some adjacency sets are as expected.
+     * Test that some adjacency sets in representation CUBESTATE and STICKER are as expected.
      */
     @Test
     public void testAdjacencySets() {
         init();
-        // Test 01
         XNTupleFuncsCube xnf = new XNTupleFuncsCube();
         CubeConfig.boardVecType = BoardVecType.CUBESTATE;
         String h5 = xnf.adjacencySet(5).toString();

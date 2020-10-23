@@ -1,13 +1,10 @@
 package games;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -16,12 +13,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import games.Arena.Task;
 import games.CFour.ArenaC4;
 import games.CFour.ArenaTrainC4;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
-import games.Hex.HexConfig;
 import games.Nim.ArenaNim2P;
 import games.Nim.ArenaNim3P;
 import games.Nim.ArenaTrainNim2P;
@@ -31,7 +26,6 @@ import games.Othello.ArenaTrainOthello;
 import games.RubiksCube.ArenaTrainCube;
 import games.Sim.ArenaSim;
 import games.Sim.ArenaTrainSim;
-import games.Sim.ConfigSim;
 import games.TicTacToe.ArenaTTT;
 import games.TicTacToe.ArenaTrainTTT;
 import games.ZweiTausendAchtundVierzig.Arena2048;
@@ -62,20 +56,20 @@ public class GBGLaunch {
 	
 	enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
-	};
+	}
 	LaunchTask launcherState = LaunchTask.SELECTGAME;	// also used in Arena.destroy()
 	
 	private static final long serialVersionUID = 1L;
 	public static Arena t_Game;
-	private JFrame launcherUI = null;
+	private final JFrame launcherUI;
 	private static String selectedGame = "TicTacToe";
 
-	private JLabel scaPar0_L;
-	private JLabel scaPar1_L;
-	private JLabel scaPar2_L;
-	private JComboBox choiceScaPar0;
-	private JComboBox choiceScaPar1;
-	private JComboBox choiceScaPar2;
+	private final JLabel scaPar0_L;
+	private final JLabel scaPar1_L;
+	private final JLabel scaPar2_L;
+	private final JComboBox<String> choiceScaPar0;
+	private final JComboBox<String> choiceScaPar1;
+	private final JComboBox<String> choiceScaPar2;
 
 	/**
 	 * Starts the  general launcher for GBG. The user may select via launcher UI or predefine  
@@ -121,13 +115,6 @@ public class GBGLaunch {
 					t_Launch.launcherUI.setVisible(true);
 					t_Launch.launcherState = LaunchTask.SELECTGAME;
 					break;
-				case SELECTGAME:
-					// this state is left when button StartG ('Start Game') in launcher is hit
-					try {
-						Thread.sleep(100);
-					} catch (Exception e) {
-					}
-					break;
 				case STARTGAME:
 					t_Launch.launcherUI.setVisible(false);
 					if (withTrainRights) {
@@ -143,12 +130,13 @@ public class GBGLaunch {
 					System.exit(0);
 					break;
 				case IDLE:
-				default: 
-					// this state is left when the GBG Arena finishes, it then
-					// sets the state to STARTSELECTOR
+				case SELECTGAME:
+				default:
+					// this state is left when button StartG ('Start Game') in launcher is hit
 					try {
 						Thread.sleep(100);
 					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 				
@@ -162,12 +150,13 @@ public class GBGLaunch {
 
 	/**
 	 * Start a game with train rights 
-	 * @param selectedGame
-	 * @param t_Launch
+	 * @param selectedGame	the game
+	 * @param t_Launch		the launcher
 	 */
 	private static void startGBGameTrain(String selectedGame, GBGLaunch t_Launch) {
 		String title = "General Board Game Playing";
 		String[] scaPar = new String[3];
+		for (int i=0; i<3; i++) scaPar[i]="";
 		if (t_Launch==null) {
 			scaPar = setDefaultScaPars();
 		} else {
@@ -175,7 +164,7 @@ public class GBGLaunch {
 			scaPar[1] = (String) t_Launch.choiceScaPar1.getSelectedItem();
 			scaPar[2] = (String) t_Launch.choiceScaPar2.getSelectedItem();			
 		}
-		boolean withUI = true;
+		final boolean withUI = true;
 		switch(selectedGame) {
 		case "2048": 
 			t_Game = new ArenaTrain2048(title,withUI);
@@ -187,6 +176,7 @@ public class GBGLaunch {
 			// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaTrainHex, 
 			// which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
+			assert scaPar[0] != null;
 			ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
 			t_Game = new ArenaTrainHex(title,withUI);
 			break;
@@ -249,7 +239,8 @@ public class GBGLaunch {
 	 */
 	private static void startGBGamePlay(String selectedGame, GBGLaunch t_Launch) {
 		String title = "General Board Game Playing";
-		String[] scaPar = new String[3];
+		String[] scaPar = {"","",""};
+		for (int i=0; i<3; i++) scaPar[i]="";
 		if (t_Launch==null) {
 			scaPar = setDefaultScaPars();
 		} else {
@@ -257,7 +248,7 @@ public class GBGLaunch {
 			scaPar[1] = (String) t_Launch.choiceScaPar1.getSelectedItem();
 			scaPar[2] = (String) t_Launch.choiceScaPar2.getSelectedItem();			
 		}
-		boolean withUI = true;
+		final boolean withUI = true;
 		switch(selectedGame) {
 		case "2048": 
 			t_Game = new Arena2048(title,withUI);
@@ -343,15 +334,15 @@ public class GBGLaunch {
 		titlePanel.add(Blank);
 		titlePanel.add(m_title);
 		
-		JComboBox choiceGame = new JComboBox(game_list);
+		JComboBox<String> choiceGame = new JComboBox<>(game_list);
 		choiceGame.setSelectedItem(selectedGame);
 		
 		scaPar0_L = new JLabel("");
-		choiceScaPar0 = new JComboBox();
+		choiceScaPar0 = new JComboBox<>();
 		scaPar1_L = new JLabel("");
-		choiceScaPar1 = new JComboBox();
+		choiceScaPar1 = new JComboBox<>();
 		scaPar2_L = new JLabel("");
-		choiceScaPar2 = new JComboBox();
+		choiceScaPar2 = new JComboBox<>();
 		JPanel scaPar0Panel = new JPanel();
 		scaPar0Panel.setLayout(new GridLayout(1,0,2,2));		// rows,columns,hgap,vgap
 		scaPar0Panel.add(scaPar0_L);
@@ -388,20 +379,20 @@ public class GBGLaunch {
 		launcherUI.add(Exit);
 		launcherUI.addWindowListener(new WindowClosingAdapter());
 
-		launcherUI.setSize(250,300);
-		launcherUI.setBounds(400,300,250,300);		// x,y,width,height
-		launcherUI.pack();
+		launcherUI.setSize(300,300);
+		launcherUI.setBounds(400,300,300,300);		// x,y,width,height
+		//launcherUI.pack();
 		launcherUI.setVisible(true);
 		
 		StartG.addActionListener(
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
-					{	
+					{
 						selectedGame = (String)choiceGame.getSelectedItem();
-						launcherState = LaunchTask.STARTGAME;						
+						launcherState = LaunchTask.STARTGAME;
 					}
-				}	
+				}
 		);
 
 		Exit.addActionListener(
@@ -431,7 +422,7 @@ public class GBGLaunch {
 					public void actionPerformed(ActionEvent e)
 					{	
 						selectedGame = (String)choiceGame.getSelectedItem();
-						if (selectedGame=="Nim") {
+						if (selectedGame.equals("Nim")) {
 							String heapSize = (String)choiceScaPar1.getSelectedItem();
 							int iHeapSize = Integer.parseInt(heapSize);
 							choiceScaPar2.removeAllItems();
@@ -477,7 +468,7 @@ public class GBGLaunch {
 			break;
 		case "RubiksCube": 
 			scaPar[0]="2x2x2";		 	
-			scaPar[1]="CSTATE";			
+			scaPar[1]="STICKER2";
 			scaPar[2]="ALL";			
 		case "2048": 
 		case "ConnectFour": 
@@ -486,6 +477,7 @@ public class GBGLaunch {
 			//
 			// games with no scalable parameters
 			//
+			scaPar[0]=scaPar[1]=scaPar[2]="";
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
@@ -516,7 +508,7 @@ public class GBGLaunch {
 			setScaPar1List(new int[]{3,5,6,7,8,9,10,20,50});// Strings in ChoiceBoxes 
 			choiceScaPar0.setSelectedItem("3");		// 
 			choiceScaPar1.setSelectedItem("5");		// the initial (recommended) values
-			if (selectedGame=="Nim") {
+			if (selectedGame.equals("Nim")) {
 				scaPar2_L.setText("Max Minus");
 				setScaPar2List(new int[]{2,3,4,5});			
 				choiceScaPar2.setSelectedItem("5");					
@@ -555,7 +547,7 @@ public class GBGLaunch {
 			setScaPar2List(new String[]{"ALL","QUARTER"});
 			//choiceScaPar0.addItem("3x3x3");
 			choiceScaPar0.setSelectedItem("3x3x3");			//
-			choiceScaPar1.setSelectedItem("CSTATE");		// the initial (recommended) values
+			choiceScaPar1.setSelectedItem("STICKER2");		// the initial (recommended) values
 			choiceScaPar2.setSelectedItem("ALL");			//
 			break;
 		case "2048": 

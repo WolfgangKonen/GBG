@@ -56,7 +56,7 @@ public class CubeState3x3 extends CubeState {
                 this.fcol = new int[48];
                 System.arraycopy(bvec, 0, this.fcol, 0, 48);
                 break;
-            case 147: // = 7*21, see notes-WK-RubiksCube.docx, boardvecType == STICKER, 3x3x3
+            case 147: // = 20*24, see notes-WK-RubiksCube.docx, boardvecType == STICKER, 3x3x3
                 // TODO: STICKER implementation for 3x3x3
                 throw new RuntimeException("Case STICKER for 3x3x3 cube not yet implemented");
             case 40:  // = 2*8+2*12, see notes-WK-RubiksCube.docx, boardvecType == STICKER2, 3x3x3

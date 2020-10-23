@@ -1,6 +1,5 @@
 package controllers.TD.ntuple4;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +85,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	/**
 	 * Default constructor for {@link TDNTuple4Agt}, needed for loading a serialized version
 	 */
-	public TDNTuple4Agt() throws IOException {
+	public TDNTuple4Agt() {
 		super();
 		ParTD tdPar = new ParTD();
 		ParNT ntPar = new ParNT();
@@ -641,10 +640,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	    			//debug only:
 	    			if (m_DEBG) {
 	    				assert s_next.isLegalState() : "s_next is not legal";
-	    	    		if (s_next.isGameOver()) {
-	    	            	vLastNew = m_Net.getScoreI(curSOWB,n);
+//	    	    		if (s_next.isGameOver()) {
+//	    	            	vLastNew = m_Net.getScoreI(curSOWB,n);
 //	    	            	int dummy=1;
-	    	    		}
+//	    	    		}
 	    	    		String s1 = sLast[n].stringDescr();
 	    	    		String s2 = s_next.stringDescr();
 	    	    		if (target!=0.0) { //(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
@@ -695,9 +694,9 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 */
 	public boolean trainAgent(StateObservation so) {
 		Types.ACTIONS a_t;
-		int   curPlayer=so.getPlayer();
+		int   curPlayer;
 		NextState4 ns;
-		ScoreTuple R = new ScoreTuple(so);
+		ScoreTuple R;
 		rLast = new ScoreTuple(so);
 
 		int epiLength = m_oPar.getEpisodeLength();

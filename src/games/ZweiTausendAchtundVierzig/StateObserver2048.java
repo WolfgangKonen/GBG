@@ -9,7 +9,6 @@ import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import tools.Types;
 import tools.Types.ACTIONS;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -53,7 +52,6 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     public int score = 0;				// up-,down-,left-,rightAction add to this score
     private int highestTileValue = Integer.MIN_VALUE;
     private boolean highestTileInCorner = false;
-    private int rowLength = 0;
     private int rowValue = 0;
     private int mergeValue = 0;
     private long cumulEmptyTiles = 0;
@@ -91,8 +89,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 
     /**
      * 
-     * @param board
-     * @param score
+     * @param board     the game board
+     * @param score     the score
      * @param winState
      * @param cumulEmptyTiles
      * @param isNextActionDeterministic
@@ -252,15 +250,16 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
 
     private void evaluateBoard(int rowEvaluationMethod) {
+//        int rowLength = 0;        // is assigned, but not used
         //reset old Values
         highestTileInCorner = false;
         rowValue = 0;
-        rowLength = 0;
         mergeValue = 0;
 
         RowInformationContainer rowInformationContainer;
 
-        boolean foundHighestTileInCorner = false;           //this is to prevent Situations where multiple Tiles with the same highest Value in different Corners trigger the Heuristic
+        boolean foundHighestTileInCorner = false;           //this is to prevent situations where multiple tiles with the
+                                                            //same highest value in different corners trigger the heuristic
 
         //evaluate topleft corner
         if(getTileValue(0) == highestTileValue) {
@@ -272,7 +271,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2, rowEvaluationMethod, 1);
             assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
+//                rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
@@ -280,7 +279,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3, rowEvaluationMethod, 1);
             assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
+//                rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
         }
@@ -291,21 +290,21 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
                 highestTileInCorner = true;
                 foundHighestTileInCorner = true;
             } else {
-                //there are multiple tiles with the same value in differen Corners
+                //there are multiple tiles with the same value in different corners
                 highestTileInCorner = false;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0, rowEvaluationMethod, 1);
             assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
+//                rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 3, 3, 1, 3, rowEvaluationMethod, -1);
             assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
+//                rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
         }
@@ -316,20 +315,21 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
                 highestTileInCorner = true;
                 foundHighestTileInCorner = true;
             } else {
+                //there are multiple tiles with the same value in different corners
                 highestTileInCorner = false;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1, rowEvaluationMethod, 1);
             assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
+//                rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 2, rowEvaluationMethod, -1);
             assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
+//                rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
         }
@@ -339,20 +339,21 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
             if(!foundHighestTileInCorner) {
                 highestTileInCorner = true;
             } else {
+                //there are multiple tiles with the same value in different corners
                 highestTileInCorner = false;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 0, rowEvaluationMethod, -1);
             assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
+//                rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
 
             rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 3, 1, 1, rowEvaluationMethod, -1);
             assert rowInformationContainer!=null : "Ooops, rowInformationContainer is null!";
             if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
+//                rowLength = rowInformationContainer.rowLength;
                 rowValue = rowInformationContainer.rowValue;
             }
         }
@@ -621,18 +622,6 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return new BoardVector(bvec);
     }
 
-    public void advance(ACTIONS action) {
-        int iAction = action.toInt();
-        assert (availableMoves.contains(iAction)) : "iAction is not viable.";
-        move(iAction);				// deterministic part, contains super.incrementMoveCounter()
-        updateEmptyTiles();
-        addRandomTile();			// non-deterministic part
-        updateAvailableMoves();
-        isNextActionDeterministic = true;
-        nextNondeterministicAction = null;
-//		super.incrementMoveCounter();		
-    }
-
     @Override
     public ArrayList<ACTIONS> getAvailableActions() {
         ArrayList<ACTIONS> availAct = new ArrayList<>();
@@ -679,6 +668,17 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         return actions[i];
     }
 
+    public void advance(ACTIONS action) {
+        int iAction = action.toInt();
+        assert (availableMoves.contains(iAction)) : "iAction is not viable.";
+        move(iAction);				// deterministic part, contains super.incrementMoveCounter()
+        updateEmptyTiles();
+        addRandomTile();			// non-deterministic part
+        updateAvailableMoves();
+        isNextActionDeterministic = true;
+        nextNondeterministicAction = null;
+    }
+
     public void advanceDeterministic(ACTIONS action) {
         if(!isNextActionDeterministic) {
             throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");
@@ -690,7 +690,6 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         updateEmptyTiles();
 
         isNextActionDeterministic = false;
-//		super.incrementMoveCounter();
     }
 
     public void advanceNondeterministic(ACTIONS action) {
@@ -711,8 +710,6 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
-//		super.incrementMoveCounter();
-   	
     }
     
     public void advanceNondeterministic() {
@@ -721,7 +718,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
 
     /**
-     * Selects an empty tile and the new value of the tile and saves it in an action:<br>
+     * Select a random next nondeterministic action: Select an empty tile and the new value of the tile
+     * and translate this into an action:<br>
      * 0 = first tile, value 2 <br>
      * 1 = first tile, value 4 <br>
      * 2 = second tile, value 2 <br>
@@ -735,11 +733,12 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
             return;
         }
 
-        //select a Tile
+        //select a tile
         int action = random.nextInt(emptyTiles.size()) * 2;
 
-        //select the new tile value (90% no change in action --> tile value 2, 10% (if nextInt(10)==9) 
-        //incrementing action by 1 --> tile value 4 
+        //select the new tile value:
+        // 90% no change in action --> tile value 2,
+        // 10% (if nextInt(10)==9) incrementing action by 1 --> tile value 4
         if(random.nextInt(10) == 9) {
             action += 1;
         }
@@ -1153,238 +1152,5 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
 	
 } // class StateObserver2048
 
-/**
- * RowBitShift represents an row of the 2048 board in the four lowest hex digits of 
- * {@code int rowB}. Digit 3 is the leftmost tile, digit 0 the rightmost tile.  <br>
- * (RowBitShift represents as well columns of the 2048 board, then digit 3 is the highest tile, 
- * digit 0 is the lowest tile of a column.) <p>
- * 
- * The hex value for each digit is {@code exp} in tile {@code 2^exp}. <p>
- * 
- * RowBitShift has methods {@link RowBitShift#lAction()} and {@link RowBitShift#rAction()} 
- * for left and right move action according to the rules of 2048. On first pass through 
- * these methods, static transposition tables {@code tabLeft} and {@code tabRight} are filled 
- * which contain for each possible row value the resulting row. <br>
- * Likewise, static transposition tables {@code scoreLeft} and {@code scoreRight} are filled 
- * which contain for each possible row value the resulting score. <p>
- * 
- * This speeds up the calculation in {@link StateObserver2048#advance(ACTIONS)} by a
- * factor of 10 as compared to {@link StateObserver2048Slow#advance(ACTIONS)}.
- *
- * @author Wolfgang Konen, THK
- */
-class RowBitShift {
-	int rowB;	// the four lowest hex digits (16 bit) of this 32-bit int are used 
-	int score=0;
-	static int[] tabRight = null;
-	static int[] tabLeft = null; 
-	static int[] scoreRight = null;
-	static int[] scoreLeft = null; 
-	
-	public RowBitShift(int row) {
-	    this.rowB = row;
-	}
-
-	// never used
-//	public RowBitShift(RowBitShift rbs) {
-//		this.rowB = rbs.rowB;
-//		this.score = rbs.score;
-//	}
-	
-	/**
-	 * Extract the k-th hexadecimal digit
-	 * @param k	one out of {3,2,1,0}, where 3 is the highest digit
-	 * @return an int holding the k-th hexadecimal digit
-	 */
-	public int d(int k) {
-		if (k>3 || k<0) throw new RuntimeException("k"+k+" is not in allowed range {0,1,2,3}");
-		return (rowB >> (k*4)) & 0x0F;
-	}
-	
-	/**
-	 * Shift digits from 3 to {@code lower} by one hex digit (4 bit) to the right, 
-	 * but leave the digits below {@code lower} untouched.
-	 * 
-	 * @param lower one out of {3,2,1,0}, where 3 is the highest digit
-	 * @return the shifted row
-	 */
-	public RowBitShift rShift(int lower) {
-		if (lower>3 || lower<0) throw new RuntimeException("lower"+lower+" is not in allowed range {0,1,2,3}");
-		int[] andS = {0xffff, 0xfff0, 0xff00, 0xf000};
-		int[] andR = {0x0000, 0x000f, 0x00ff, 0x0fff};
-		int shift = (rowB >> 4)  & andS[lower];
-		rowB = shift + (rowB & andR[lower]);
-		
-		return this;
-	}
-	
-	/**
-	 * Shift digits from 0 to {@code higher} by one hex digit (4 bit) to the left, 
-	 * but leave the digits above {@code higher} untouched.
-	 * 
-	 * @param higher one out of {3,2,1,0}, where 3 is the highest digit
-	 * @return the shifted row
-	 */
-	public RowBitShift lShift(int higher) {
-		if (higher>3 || higher<0) throw new RuntimeException("higher"+higher+" is not in allowed range {0,1,2,3}");
-		int[] andS = {0x000f, 0x00ff, 0x0fff, 0xffff};
-		int[] andR = {0xfff0, 0xff00, 0xf000, 0x0000};
-		int shift = (rowB << 4)  & andS[higher];
-		rowB = shift + (rowB & andR[higher]);
-		
-		return this;
-	}
-	
-	/**
-	 * Merge hex digits {@code r+1} and {@code r} on digit {@code r} (right merge),  
-	 * assuming that they both contain the same, non-zero value. 
-	 * Shift digits above {@code r} accordingly.
-	 * Leave digits below {@code r} untouched.
-	 * 
-	 * @param r one out of {2,1,0}
-	 * @return the merged row
-	 */
-	public RowBitShift rMerge(int r) {
-		if (r>2 || r<0) throw new RuntimeException("r="+r+" is not in allowed range {0,1,2}");
-		int exp = this.d(r);
-		if (exp!=this.d(r+1)) throw new RuntimeException("Digits "+(r+1)+" and "+r+" are not the same"); 
-		if (exp==0) throw new RuntimeException("Digit "+r+" must be greater than zero"); 
-
-		// andR is a bit mask which lets all digits pass except the two to-be-merged digits:
-		int[] andR = {0xff00, 0xf00f, 0x00ff};   
-									
-		// since each digit holds the exponent exp of tile 2^exp, merging two tiles (doubling) 
-		// is the same as adding 1 to the exponent:
-		int newd = exp+1;	
-		
-		// the score delta is 2^newd:
-		this.score += (1 << newd);
- 
-		// shift the merged result back to digit r and add the 'passed' digits:
-		rowB = (newd << (4*r)) + (rowB & andR[r]); 
-
-		this.rShift(r+1);
-		return this;
-	}
-	
-	/**
-	 * Merge hex digits {@code r} and {@code r-1} on digit {@code r} (left merge),  
-	 * assuming that they both contain the same, non-zero value. 
-	 * Shift digits below {@code r} accordingly.
-	 * Leave digits above {@code r} untouched.
-	 * 
-	 * @param r one out of {3,2,1}
-	 * @return the merged row
-	 */
-	public RowBitShift lMerge(int r) {
-		if (r>3 || r<1) throw new RuntimeException("r="+r+" is not in allowed range {1,2,3}");
-		int exp = this.d(r);
-		if (exp!=this.d(r-1)) throw new RuntimeException("Digits "+r+" and "+(r-1)+" are not the same"); 
-		if (exp==0) throw new RuntimeException("Digit "+r+" must be greater than zero"); 
-
-		// andR is a bit mask which lets all digits pass except the two to-be-merged digits:
-		int[] andR = {0x0000, 0xff00, 0xf00f, 0x00ff};   
-									
-		// since each digit holds the exponent exp of tile 2^exp, merging two tiles (doubling) 
-		// is the same as adding 1 to the exponent:
-		int newd = exp+1;		
-		
-		// the score delta is 2^newd:
-		this.score += (1 << newd);
- 
-		// shift the merged result back to digit r and add the 'passed' digits:
-		rowB = (newd << (4*r)) + (rowB & andR[r]); 
-
-		this.lShift(r-1);
-		return this;
-	}
-	
-	/**
-	 * Perform a "right" action. <br>
-	 * Use the static transposition table {@code tabRight} to do the job fast. An equivalent
-	 * but slow version (w/o {@code tabRight}) is in {@link RowBitShift#rActionSlow()}. 
-	 * @return the resulting row object
-	 */
-	public RowBitShift rAction( ) {
-		if (tabRight==null) calcTabRight();
-		this.score = scoreRight[rowB];
-		this.rowB = tabRight[rowB];
-		return this;
-	}
-	private void calcTabRight() {
-		int sz = (1 << 16);
-		tabRight = new int[sz];
-		scoreRight = new int[sz];
-		RowBitShift rbs = new RowBitShift(0);
-		for (int i=0; i<sz; i++) {
-			rbs.rowB=i;
-			rbs.score=0;
-			tabRight[i]=rbs.rActionSlow().getRow();
-			scoreRight[i]=rbs.score;
-		}
-	}
-	private RowBitShift rActionSlow( ) {
-		// remove the 'holes' (0-tiles) from left to right:
-		for (int k=2; k>=0; k--) 
-			if (this.d(k)==0) this.rShift(k);
-		
-		// merge adjacent same-value tiles from right to left:
-		for (int r=0; r<3; r++)
-			if (this.d(r+1)==this.d(r) && this.d(r)>0) this.rMerge(r);
-		
-		return this;
-	}
-	
-	/**
-	 * Perform a "left" action. <br>
-	 * Use the static transposition table {@code tabLeft} to do the job fast. An equivalent
-	 * but slow version (w/o {@code tabLeft}) is in {@link RowBitShift#lActionSlow()}. 
-	 * @return the resulting row object
-	 */
-	public RowBitShift lAction( ) {
-		if (tabLeft==null) calcTabLeft();
-		this.score = scoreLeft[rowB];
-		this.rowB = tabLeft[rowB];
-		return this;
-	}
-	private void calcTabLeft() {
-		int sz = (1 << 16);
-		tabLeft = new int[sz];
-		scoreLeft = new int[sz];
-		RowBitShift rbs = new RowBitShift(0);
-		for (int i=0; i<sz; i++) {
-			rbs.rowB=i;
-			rbs.score=0;
-			tabLeft[i]=rbs.lActionSlow().getRow();
-			scoreLeft[i]=rbs.score;
-		}
-	}
-	private RowBitShift lActionSlow( ) {
-		// remove the 'holes' (0-tiles) from right to left:
-		for (int k=1; k<4; k++)
-			if (this.d(k)==0) this.lShift(k);
-		
-		// merge adjacent same-value tiles from left to right:
-		for (int r=3; r>0; r--)
-			if (this.d(r-1)==this.d(r) && this.d(r)>0) this.lMerge(r);
-		
-		return this;
-	}
-	
-	
-	public int getRow() {
-		return rowB;
-	}
-}
-
-class RowInformationContainer implements Serializable {
-    int rowLength;
-    int rowValue;
-
-    public RowInformationContainer(int rowLength, int rowValue) {
-        this.rowLength = rowLength;
-        this.rowValue = rowValue;
-    }
-}
 
 

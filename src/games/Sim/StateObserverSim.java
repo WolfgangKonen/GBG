@@ -8,14 +8,9 @@ import controllers.RandomAgent;
 import games.Arena;
 import games.ObserverBase;
 import games.StateObservation;
-import games.Othello.ArenaOthello;
-import games.Othello.XNTupleFuncsOthello;
 import games.Sim.Gui.BoardPanel;
-import games.TicTacToe.TicTDBase;
 import tools.Types.ACTIONS;
-import tools.Types.WINNER;
 import tools.Types;
-import tools.ValidateStateObsTest;
 
 /**
  * This class holds any valid Sim game state. It is coded
@@ -60,7 +55,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	/**
 	 * The list of available actions
 	 */
-	private ArrayList<Types.ACTIONS> availableActions = new ArrayList();
+	private ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();
 	/**
 	 * The list of last moves in an episode. Each move is stored as {@link Integer} {@code iAction}.
 	 */
@@ -110,7 +105,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		
 		setupLinks(numberOfNodes);
 		setAvailableActions();
-		this.lastMoves = new ArrayList<Integer>();
+		this.lastMoves = new ArrayList<>();
 	}
 	
 	@Override
@@ -138,9 +133,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	{
 		if (lastNodes[0] != lastNodes[1]) {		// if action 'grab the link between these two nodes' is taken
 			for(int i = 0; i < lFrom.length; i++)
-				if(i == lastNodes[0] || i == lastNodes[1])
-					continue;
-				else
+				if(!(i == lastNodes[0] || i == lastNodes[1]))
 				{
 					if(getLinkFromTo(i,lastNodes[0]) == player + 1 && 
 					   getLinkFromTo(i,lastNodes[1]) == player + 1) {
@@ -275,7 +268,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		case 2:
 			players[0] = 0;
 			players[1] = 1;
-			break;		
+			break;
 		}
 		return players;
 	}
@@ -349,7 +342,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
     @Override
 	public ArrayList<ACTIONS> getAllAvailableActions() {
 		int action = 0;
-        ArrayList allActions = new ArrayList<>();
+        ArrayList<ACTIONS> allActions = new ArrayList<>();
 		for(int i = 0; i < lFrom.length -1 ; i++) {
 			for(int j = lFrom[i].getNode()+1; j < lFrom.length; j++) {
 				allActions.add(Types.ACTIONS.fromInt(action));
@@ -419,40 +412,40 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	}
 	
 	public void resetLastMoves() {
-		this.lastMoves = new ArrayList<Integer>();		
+		this.lastMoves = new ArrayList<>();
 	}
 	
 	@Override
 	public String stringDescr() {
-		String sout = "";
-		String str[] = new String[4]; 
+		StringBuilder sout = new StringBuilder();
+		String[] str = new String[4];
 		str[0] = "_"; str[1]="0"; str[2]="1";str[3]="2" ;
 		
 		for(int i = 0; i < lFrom.length -1 ; i++) {
 			for(int j = lFrom[i].getNode()+1; j < lFrom.length; j++) {
-				sout = sout + str[lFrom[i].getPlayer(j)];
+				sout.append(str[lFrom[i].getPlayer(j)]);
 			}
 		}
 		
- 		return sout;
+ 		return sout.toString();
 	}
 
 	public String stringDescr2() {
-		String sout = "";
-		String str[] = new String[4]; 
+		StringBuilder sout = new StringBuilder();
+		String[] str = new String[4];
 		str[0] = "-"; str[1]="0"; str[2]="1";str[3]="2" ;
 		
 		for(int i = 0; i < lFrom.length -1 ; i++) {
 			for(int j = 0; j < lFrom.length; j++) {
 				if (j <= lFrom[i].getNode()) {
-					sout = sout + " ";
+					sout.append(" ");
 				} else {
-					sout = sout + str[lFrom[i].getPlayer(j)];
+					sout.append(str[lFrom[i].getPlayer(j)]);
 				}
 			}
-			sout = sout + "\n";
+			sout.append("\n");
 		}
- 		return sout;
+ 		return sout.toString();
 	}
 
 	void setAction(int action)
@@ -548,11 +541,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			this.loser = other.loser;
 			this.allRewards = other.allRewards.clone();			
 		}
-		public boolean isGameOver() {		
-			if(winner != -2)
-				return true;
-			else
-				return false;
+		public boolean isGameOver() {
+			return (winner != -2);
 		}
 		public void checkIfPlayerLost() {
 			if(numPlayers > 2)
