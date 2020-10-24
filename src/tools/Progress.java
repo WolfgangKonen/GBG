@@ -11,7 +11,7 @@ public interface Progress {
 	/**
 	 * @return Progress of the current action in percent (0-100)
 	 */
-	public int getProgress();
+	int getProgress();
 
-	public String getStatusMessage();
+	String getStatusMessage();
 }

@@ -232,15 +232,6 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 //			System.out.println("player="+this.getPlayer()+", moveCounter="+this.getMoveCounter());
 	}
 
-    /**
-     * Return the afterstate preceding {@code this}. 
-     */
-    @Override
-    public StateObservation getPrecedingAfterstate() {
-    	// for deterministic games, this state and its preceding afterstate are the same
-    	return this;
-    }
-
 	public ArrayList<ACTIONS> getAvailableActions() {
 		return availableActions;
 	}

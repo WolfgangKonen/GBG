@@ -285,15 +285,6 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
         return availableActions;
     }
     
-    /**
-     * Return the afterstate preceding {@code this}. 
-     */
-    @Override
-    public StateObservation getPrecedingAfterstate() {
-    	// for deterministic games this state and the preceding afterstate are the same
-    	return this;
-    }
-
     @Override
     public int getNumAvailableActions() {
         return availableActions.size();

@@ -257,15 +257,6 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		super.incrementMoveCounter();
 	}
 
-    /**
-     * Return the afterstate preceding {@code this}. 
-     */
-    @Override
-    public StateObservation getPrecedingAfterstate() {
-    	// for deterministic games, this state and its preceding afterstate are the same
-    	return this;
-    }
-
     @Override
 	public ArrayList<ACTIONS> getAllAvailableActions() {
         ArrayList<ACTIONS> allActions = new ArrayList<>();

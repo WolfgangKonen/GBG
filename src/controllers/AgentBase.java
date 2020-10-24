@@ -186,7 +186,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t, true, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
 			s_t.advance(a_t);		// advance the state (game-specific behavior)
 				        
 		} while(!s_t.isGameOver());			

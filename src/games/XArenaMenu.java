@@ -636,7 +636,7 @@ public class XArenaMenu extends JMenuBar {
 //	        	so.advance((ACTIONS) actList.get(4)); // if 'so' is not the default start state (otherwise
 //	        }										  // all children are null and an assertion fires)	
 //	        while (elapsedTime<upperTime) {
-//	        	pa.getNextAction2(so, false, true);
+//	        	pa.getNextAction2(so.partialState(), false, true);
 //	        	newSO = so.copy();							// just for comparable time measurement: 
 //	        	newSO.advance((ACTIONS) actList.get(0)); 	// do a dummy advance
 //	        	moveCount++;

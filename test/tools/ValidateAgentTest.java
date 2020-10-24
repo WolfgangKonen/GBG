@@ -82,7 +82,7 @@ public class ValidateAgentTest {
         //
         while (!sob.isGameOver()) {
             ArrayList<Types.ACTIONS> arr = sob.getAvailableActions();
-            Types.ACTIONS a = pa.getNextAction2(sob, false, true);
+            Types.ACTIONS a = pa.getNextAction2(sob.partialState(), false, true);
             sob.advance(a);
         }
         sc = pa.getScoreTuple(sob, null);

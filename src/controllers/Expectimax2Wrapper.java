@@ -131,7 +131,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 
 		if (depth>=this.m_depth) {
 			// this terminates the recursion. It returns the right ScoreTuple based on r(s)+gamma*V(s).
-			ACTIONS_VT act_vt = this.getWrappedPlayAgent().getNextAction2(soND, random, true);
+			ACTIONS_VT act_vt = this.getWrappedPlayAgent().getNextAction2(soND.partialState(), random, true);
 			return new ACTIONS_ST(act_vt);
 		}
 

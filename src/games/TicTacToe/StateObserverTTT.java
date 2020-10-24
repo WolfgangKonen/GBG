@@ -201,15 +201,6 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		super.incrementMoveCounter();
 	}
 
-    /**
-     * Return the afterstate preceding {@code this}. 
-     */
-    @Override
-    public StateObservation getPrecedingAfterstate() {
-    	// for deterministic games, this state and its preceding afterstate are the same
-    	return this;
-    }
-
     @Override
     public ArrayList<Types.ACTIONS> getAllAvailableActions() {
         ArrayList allActions = new ArrayList<>();

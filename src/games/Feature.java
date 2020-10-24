@@ -15,9 +15,9 @@ package games;
  * @author Wolfgang Konen, TH Koeln, Feb'16
  */
 public interface Feature {
-	public double[] prepareFeatVector(StateObservation so);
-	public String stringRepr(double[] featVec);
-	public int getFeatmode();
-	public int[] getAvailFeatmode();
-	public int getInputSize(int featmode);
+	double[] prepareFeatVector(StateObservation so);
+	String stringRepr(double[] featVec);
+	int getFeatmode();
+	int[] getAvailFeatmode();
+	int getInputSize(int featmode);
 }

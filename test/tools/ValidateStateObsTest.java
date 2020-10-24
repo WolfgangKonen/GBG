@@ -35,7 +35,7 @@ public class ValidateStateObsTest {
             sc = newSob.getGameScoreTuple();
             if (n++ > 4) verbose = false;
             checkScoreTuple(sc, newSob, verbose);
-            a = pa.getNextAction2(newSob, random, silent);
+            a = pa.getNextAction2(newSob.partialState(), random, silent);
             newSob.advance(a);
         }
         System.out.println("getGameScoreTuple check ... OK");

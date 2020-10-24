@@ -153,7 +153,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		//We want the maximal score after the agents turn end.
 			if(!newSO.isGameOver()) {
 				if(newSO.getPlayer() == player) {
-					ACTIONS_VT actionVT = getNextAction2(newSO, false, silent);
+					ACTIONS_VT actionVT = getNextAction2(newSO.partialState(), false, silent);
 					return actionVT.getVBest();
 				}
 			}

@@ -344,7 +344,7 @@ abstract public class Arena implements Runnable {
 				}
 
 				if (so.isLegalState() && !so.isGameOver()) {
-					actBest = paX.getNextAction2(so, false, true);						
+					actBest = paX.getNextAction2(so.partialState(), false, true);
 					if (actBest != null) 	// a HumanAgent will return
 											// actBest=null
 						so.storeBestActionInfo(actBest, actBest.getVTable());
@@ -584,11 +584,11 @@ abstract public class Arena implements Runnable {
 						} else {
 							//long startT = System.currentTimeMillis();
 							long startTNano = System.nanoTime();
-							actBest = pa.getNextAction2(so, false, false);
+							actBest = pa.getNextAction2(so.partialState(), false, false);
 							//long endT = System.currentTimeMillis();
 							long endTNano = System.nanoTime();
-							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endT-startT)+"ms");
-							//System.out.println("pa.getNextAction2(so, false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
+							//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endT-startT)+"ms");
+							//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
 							if (spDT!=null)
 								spDT.nextTimes[0].addNewTimeNS(endTNano-startTNano);
 						}
@@ -653,16 +653,6 @@ abstract public class Arena implements Runnable {
 				//
 				so = gb.getStateObs();
 				if (so.isGameOver()) {
-//					try {
-//						Thread.sleep(250);
-//						// strange, but we need in CFour a certain waiting time here, otherwise
-//						// the state will not be the right one (??)
-//						// --- the strange effect is gone after we replace gameOver in
-//						// --- C4GameGui with isGameOver(), which returns
-//						// --- gameBoardC4.getStateObs().isGameOver()
-//					} catch (Exception e) {
-//						System.out.println("Thread 3");
-//					}
 
 					// for (agentVec[0]=="Human")-case: ensure to show the "Solved
 					// in..." text in leftInfo:
@@ -690,7 +680,7 @@ abstract public class Arena implements Runnable {
 						throw new RuntimeException("Case numPlayers = "+numPlayers+" not handled!");
 					}
 
-					break; // this is the final break out of the while loop
+					break; // this is the final break out of the while loop (1st condition)
 				} // if isGameOver
 
 				if (so.getMoveCounter() > m_xab.oPar[0].getEpisodeLength()) {
@@ -699,7 +689,7 @@ abstract public class Arena implements Runnable {
 						gScore *= StateObserver2048.MAXSCORE;
 					showMessage("Game stopped (epiLength) with score " + gScore, "Game Over",
 							JOptionPane.INFORMATION_MESSAGE);
-					break; // this is the final break out of while loop
+					break; // this is the final break out of while loop (2nd condition)
 				} // if (so.getMoveCounter()...)
 
 			} 	// while(taskState == Task.PLAY) [will be left only by one
@@ -904,13 +894,13 @@ abstract public class Arena implements Runnable {
 		if (so instanceof StateObserver2048) {
 			nEmpty = ((StateObserver2048) so).getNumEmptyTiles();
 		} else {
-			return pa.getNextAction2(so, false, true);
+			return pa.getNextAction2(so.partialState(), false, true);
 		}
 		if (nEmpty >= N_EMPTY)
-			return pa.getNextAction2(so, false, true);
+			return pa.getNextAction2(so.partialState(), false, true);
 
 		for (int k = 0; k < 3; k++) {
-			actBest = p2.getNextAction2(so, false, true);
+			actBest = p2.getNextAction2(so.partialState(), false, true);
 			vtable = actBest.getVTable();
 			System.out.print("p2 [" + p2.getName() + "]: ");
 			double vbest = -Double.MAX_VALUE;
@@ -927,7 +917,7 @@ abstract public class Arena implements Runnable {
 			System.out.println(";  Best = " + ibest + ", Finished=" + nRolloutFinished + "/" + nIterations);
 		}
 		for (int k = 0; k < 2; k++) {
-			actBest = pa.getNextAction2(so, false, true);
+			actBest = pa.getNextAction2(so.partialState(), false, true);
 			vtable = actBest.getVTable();
 			System.out.print("pa [" + pa.getName() + "]: ");
 			double vbest = -Double.MAX_VALUE;

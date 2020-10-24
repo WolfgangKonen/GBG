@@ -325,7 +325,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			// but MaxNAgent(...,12,true) only 2 seconds. If there are 15 moves to go, then
 			// MaxNAgent(...,15,true) will still take only a few seconds.
 			// So: activating the hash map is important for MaxN-speed!
-			ACTIONS_VT actMax = maxNAgent.getNextAction2(so, false, true);
+			ACTIONS_VT actMax = maxNAgent.getNextAction2(so.partialState(), false, true);
 			double[] VTableMax = actMax.getVTable();
 			System.out.print("MaxN : ");
 			for (int i = 0; i < VTableMax.length - 1; i++)
@@ -707,7 +707,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			sLast[n] = null;
 		}
 		int kk= (so.getPlayer()-1+numPlayers)%numPlayers;	// p=0,N=1 --> kk=0; p=0,N=2 --> kk=1
-		sLast[kk] = so.getPrecedingAfterstate();
+		sLast[kk] = so.precedingAfterstate();
 		// The player kk who generated 'so' gets so's preceding afterstate as its sLast.
 		// (This is important for RubiksCube, in order to learn from the first move on in 
 		// this deterministic single-player game: The player who generated 'so' is so.getPlayer()
@@ -719,7 +719,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	        
 	        // choose action a_t, using epsilon-greedy policy based on V
-			a_t = getNextAction2(s_t, true, true);
+			a_t = getNextAction2(s_t.partialState(), true, true);
 			// only for debug:
 //			if (a_t.isRandomAction() && s_t.getPlayer()==1) {
 //				int dummy = 1;

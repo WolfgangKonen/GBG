@@ -538,7 +538,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		int counter=0;		// count the number of moves
 		while (true) {
 //			VTable = new double[so.getNumAvailableActions()+1];
-			actBest = this.getNextAction2(so, true, true);
+			actBest = this.getNextAction2(so.partialState(), true, true);
 			randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
@@ -672,7 +672,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 					firstRound = false;
 			}
 			
-			actBest = this.getNextAction2(so, true, true);
+			actBest = this.getNextAction2(so.partialState(), true, true);
 			randomMove = actBest.isRandomAction();
 			so.advance(actBest);
 			

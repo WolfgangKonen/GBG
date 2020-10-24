@@ -173,7 +173,7 @@ public class DaviNimAgent extends AgentBase implements PlayAgent {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t, true, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
 	        // put the best V-table value for state s_t into the HashMap
 			if (a_t.getScoreTuple().scTup[0]!=-9.0)
 				vm.put(s_t.stringDescr(), a_t.getScoreTuple());

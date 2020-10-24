@@ -251,7 +251,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t, false, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
 
 	        // update the network's response to current state s_t: Let it move towards the desired target:
 			target = a_t.getVBest();        		
@@ -308,7 +308,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		do {
 			m_numTrnMoves++;		// number of train moves
 
-			a_t = getNextAction2(s_t, false, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
 
 			// add a new TrainingElem to episodeList
 			TrainingItem trainItem = new TrainingItem(

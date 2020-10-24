@@ -28,7 +28,7 @@ import tools.Types.ACTIONS;
 public interface StateObservation extends Serializable{
     //Types.ACTIONS[] actions=null;
 	
-	public StateObservation copy();
+	StateObservation copy();
 
 	/**
 	 * Some classes implementing StateObservation store information about the history that led to this state.
@@ -37,26 +37,26 @@ public interface StateObservation extends Serializable{
 	 * history information should be cleared, i.e. a cleared copy is needed.
 	 * <p>
 	 * ObserverBase provides a default implementation which just returns a copy of {@code this}.
-	 * @return
+	 * @return a cleared copy of {@code this}
 	 */
-	public StateObservation clearedCopy();
+	StateObservation clearedCopy();
 
-	public boolean isGameOver();
+	boolean isGameOver();
 
-	public boolean isDeterministicGame();
+	boolean isDeterministicGame();
 	
 	/**
 	 * @return true, if the game emits rewards only in a game-over game position
 	 */
-	public boolean isFinalRewardGame();
+	boolean isFinalRewardGame();
 
-	public boolean isLegalState();
+	boolean isLegalState();
 
 	/**
 	 * @return true, if inspection is stopped on game over (the normal case), false if not (e.g. the Rubik's Cube case,
 	 * because here we start inspection with the solved cube)
 	 */
-	public boolean stopInspectOnGameOver();
+	boolean stopInspectOnGameOver();
 	
 //	/**
 //	 * @return this predicate is true only for 2-player games where the reward of player 0
@@ -73,32 +73,32 @@ public interface StateObservation extends Serializable{
 	// Why? - Because java.Object has already a default for toString() and thus it can
 	// go unnoticed if a class implementing StateObservation does not implement toString().
 	// Better use stringDescr()
-	public String toString();
+	String toString();
 
 	/**
 	 * 
 	 * @return a string representation of the current state
 	 */
-	public String stringDescr();
+	String stringDescr();
 
 	/**
 	 * 
 	 * @return a string representation of action {@code act}
 	 */
-	public String stringActionDescr(ACTIONS act);
+	String stringActionDescr(ACTIONS act);
 
 	/**
-	 * The game score, seen from the perspective of {@code referingState}'s player. This 
-	 * perspective is only relevant for games with more than one player.
+	 * The game score, seen from the perspective of player {@code player}. The
+	 * perspective shift is only relevant for games with more than one player.
 	 * <p>
 	 * The keyword abstract signals that derived classes will be either abstract or implement
 	 * this method, as required by the interface {@link StateObservation} as well.
 	 * 
-	 * @param referringState see below
-	 * @return  The game score, seen from the perspective of {@code referingState}'s player.<br> 
+	 * @param referringState gives the perspective
+	 * @return  The game score, seen from the perspective of {@code referringState}'s player.<br>
 	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1). 
 	 */
-	public double getGameScore(StateObservation referringState);
+	double getGameScore(StateObservation referringState);
 	
 	/**
 	 * Same as {@link #getGameScore(StateObservation refer)}, but with the player of state refer. 
@@ -106,23 +106,23 @@ public interface StateObservation extends Serializable{
 	 * @return  If {@code player} and {@code this.player} are the same, then it is getGameScore().<br> 
 	 * 			If they are different, then it is getGameScore()*(-1). 
 	 */
-	public double getGameScore(int player);
+	double getGameScore(int player);
 	
 	/**
 	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int)} 
 	 * 			with {@code i} as argument
 	 */
-	public ScoreTuple getGameScoreTuple();
+	ScoreTuple getGameScoreTuple();
 
 	/**
-	 * The cumulative reward, seen from the perspective of {@code referingState}'s player. This 
-	 * relativeness is usually only relevant for games with more than one player.
+	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. The
+	 * perspective shift is only relevant for games with more than one player.
 	 * @param referringState	see {@link #getGameScore(StateObservation)}
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return  the cumulative reward 
 	 */
-	public double getReward(StateObservation referringState, boolean rewardIsGameScore);
+	double getReward(StateObservation referringState, boolean rewardIsGameScore);
 
 	/**
 	 * Same as {@link #getReward(StateObservation,boolean)}, but with the player of referringState. 
@@ -131,7 +131,7 @@ public interface StateObservation extends Serializable{
 	 * 		  game-specific reward
 	 * @return  the cumulative reward 
 	 */
-	public double getReward(int player, boolean rewardIsGameScore);
+	double getReward(int player, boolean rewardIsGameScore);
 
 	/**
 	 * The tuple of cumulative rewards.
@@ -140,7 +140,7 @@ public interface StateObservation extends Serializable{
 	 * @return	a score tuple which has as {@code i}th value  
 	 * 			{@link #getReward(int, boolean)} with {@code i} as first argument
 	 */
-	public ScoreTuple getRewardTuple(boolean rewardIsGameScore);
+	ScoreTuple getRewardTuple(boolean rewardIsGameScore);
 
 	/**
 	 * The tuple of step rewards given by the game environment.<br>
@@ -152,32 +152,32 @@ public interface StateObservation extends Serializable{
 	 *
 	 * @return	a score tuple
 	 */
-	public ScoreTuple getStepRewardTuple();
+	ScoreTuple getStepRewardTuple();
 
-	public double getMinGameScore();
-	public double getMaxGameScore();
+	double getMinGameScore();
+	double getMaxGameScore();
 	
-	public int getMinEpisodeLength();
+	int getMinEpisodeLength();
 
 	/**
 	 * @return number of moves in the episode where {@code this} is part of.
 	 */
-	public int getMoveCounter();
+	int getMoveCounter();
 
-	public void resetMoveCounter();
+	void resetMoveCounter();
 	
 	/**
 	 *
 	 * @return the name of the Game (should be a valid directory name)
 	 */
-	public String getName();
+	String getName();
 
 	/**
 	 * Advance the current state with {@code action} to a new state
 	 * 
 	 * @param action the action
 	 */
-	public void advance(ACTIONS action);
+	void advance(ACTIONS action);
 
     /**
      * Advance the current state to a new afterstate (do the deterministic part of advance).<p>
@@ -189,7 +189,7 @@ public interface StateObservation extends Serializable{
      * 
      * @param action the action
      */
-    public void advanceDeterministic(ACTIONS action);
+	void advanceDeterministic(ACTIONS action);
 
     /**
      * Advance the current afterstate to a new state (do the nondeterministic part of advance).<p>
@@ -198,7 +198,7 @@ public interface StateObservation extends Serializable{
      * have it here to allow the same syntax in {@link TDNTuple3Agt} when making an action for
      * any StateObservation, deterministic or nondeterministic.)
      */
-    public void advanceNondeterministic();
+	void advanceNondeterministic();
     
     /**
      * Return the afterstate preceding {@code this}. The afterstate is the state resulting 
@@ -212,29 +212,38 @@ public interface StateObservation extends Serializable{
      * if we know only the current state {@code this}. For Backgammon it is the preceding 
      * board position (if known) without the nondeterministic dice part. 
      */
-    public StateObservation getPrecedingAfterstate();
+    StateObservation precedingAfterstate();
+
+	/**
+	 * For imperfect information games: return a state with all the partial information that
+	 * the player who moves in this state is allowed to have.
+	 * For perfect information games, the partial state is identical to {@code this}).
+	 *
+	 * @return the partial information state
+	 */
+	StateObservation partialState();
 
     /**
      * Return all available actions (all actions that can ever become possible in this game)
      * @return {@code ArrayList<ACTIONS>}
      */
-	public ArrayList<ACTIONS> getAllAvailableActions();
+	ArrayList<ACTIONS> getAllAvailableActions();
 
 	/**
 	 * Return the actions available in this specific state
 	 * @return {@code ArrayList<ACTIONS>}
 	 */
-	public ArrayList<ACTIONS> getAvailableActions();
+	ArrayList<ACTIONS> getAvailableActions();
 
-	public int getNumAvailableActions();
+	int getNumAvailableActions();
 
 	/**
 	 * Given the current state, what are the available actions? 
 	 * Set them in member ACTIONS[] actions.
 	 */
-	public void setAvailableActions();
+	void setAvailableActions();
 	
-	public Types.ACTIONS getAction(int i);
+	Types.ACTIONS getAction(int i);
 	
 	/**
 	 * Given the current state, store some info useful for inspecting the  
@@ -246,17 +255,17 @@ public interface StateObservation extends Serializable{
 	 * 					it stores the value of that action (as given by the double[] 
 	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
 	 */
-	public void storeBestActionInfo(ACTIONS actBest, double[] vtable); 
+	void storeBestActionInfo(ACTIONS actBest, double[] vtable);
 	
 	/**
 	 * @return  {0,1,...,n-1} for an n-player game: <b>who moves in this state</b>
 	 */
-	public int getPlayer();
+	int getPlayer();
 	
 	/**
 	 * @return the player who created this state
 	 */
-	public int getCreatingPlayer();
+	int getCreatingPlayer();
 
 //	/**
 //	 * @return  1 for a 1-player game (e.g. 2048),  
@@ -270,6 +279,6 @@ public interface StateObservation extends Serializable{
 	 * @return  1 for a 1-player game (e.g. 2048), 2 for a 2-player game
 	 * 			(e.g. TicTacToe) and so on
 	 */
-	public int getNumPlayers();
+	int getNumPlayers();
 	
 }

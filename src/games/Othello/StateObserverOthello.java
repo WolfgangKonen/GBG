@@ -231,15 +231,6 @@ public class StateObserverOthello extends ObserverBase{
 		return "Othello";
 	}
 
-	/**
-	 *
-	 * @return the afterState for deterministic games is the same.
-	 */
-	@Override
-	public StateObservation getPrecedingAfterstate() {
-			return this;
-	}
-
 	@Override
 	public int getNumAvailableActions() {
 		return availableActions.size();

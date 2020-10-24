@@ -111,7 +111,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 
 		if (depth>=this.m_depth) {
 			// this terminates the recursion. It returns the right ScoreTuple based on r(s)+gamma*V(s).
-			return this.getWrappedPlayAgent().getNextAction2(so/*.clearedCopy()*/, random, true);
+			return this.getWrappedPlayAgent().getNextAction2(so.partialState()/*.clearedCopy()*/, random, true);
 		}
 
 		ArrayList<ACTIONS> acts = so.getAvailableActions();

@@ -290,7 +290,7 @@ public class GameBoardNimGui extends JFrame {
 					// Calculate the optimal value of this action according 
 					// to Bouton's theory (N=2) or to MaxN. The values OptTable[i][j] are shown 
 					// in GUI (last row) if showValueOnGameboard is true.
-					Types.ACTIONS_VT optActions = optimAgent.getNextAction2(optState, false, true);
+					Types.ACTIONS_VT optActions = optimAgent.getNextAction2(optState.partialState(), false, true);
 			        ArrayList<ACTIONS> acts = optState.getAvailableActions();
 					for (int k=0; k<acts.size(); k++) {
 						int iAction = acts.get(k).toInt();

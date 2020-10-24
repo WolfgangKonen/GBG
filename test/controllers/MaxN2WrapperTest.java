@@ -43,8 +43,8 @@ public class MaxN2WrapperTest extends GBGBatch {
 
             for (int i=0; i<nStates; i++) {
                 so = gb.chooseStartState(11);
-                act_pa = pa.getNextAction2(so,false,true);
-                act_qa = qa.getNextAction2(so,false,true);
+                act_pa = pa.getNextAction2(so.partialState(),false,true);
+                act_qa = qa.getNextAction2(so.partialState(),false,true);
                 assert act_pa.getVBest() == act_qa.getVBest() : "The actions have different vBest!";
                 if (act_pa.toInt() != act_qa.toInt()) {
                     System.out.println(i+": The actions differ, but vBest = "+act_pa.getVBest()+" is the same");

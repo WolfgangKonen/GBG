@@ -598,7 +598,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     }
 
     @Override
-    public StateObservation getPrecedingAfterstate() {
+    public StateObservation precedingAfterstate() {
     	// for 2048, the preceding afterstate is not known
     	return null;
     }

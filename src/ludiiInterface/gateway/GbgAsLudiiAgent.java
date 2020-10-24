@@ -69,7 +69,7 @@ public final class GbgAsLudiiAgent extends AI {
             .getNextAction2(
                 new AsStateObserverOthello(
                     new GbgStateFromLudiiContext(ludiiContext)
-                ),
+                ).partialState(),
                 false,
                 true
             );

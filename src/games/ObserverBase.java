@@ -124,6 +124,25 @@ abstract public class ObserverBase implements StateObservation {
     	// nothing to do here, since ObserverBase is for a deterministic game    	
     }
 
+	/**
+	 * Default implementation for deterministic games: the state and its preceding afterstate are the same,
+	 * thus return just {@code this}. <br>
+	 * Nondeterministic games have to override this method.
+	 *
+	 * @return the afterstate preceding {@code this}.
+	 */
+	@Override
+	public StateObservation precedingAfterstate() { return this; }
+
+	/**
+	 * Default implementation for perfect information games: the partial state that the player-to-move observes is
+	 * identical to {@code this}. <br>
+	 * Games with imperfect information have to override this method.
+	 *
+	 * @return the partial information state (here: identical to {@code this})
+	 */
+	public StateObservation partialState() { return this; }
+
 	abstract public int getPlayer();
 	abstract public int getNumPlayers();
 	
@@ -151,14 +170,14 @@ abstract public class ObserverBase implements StateObservation {
 	}
 
 	/**
-	 * The game score, seen from the perspective of {@code referingState}'s player. This 
-	 * relativeness is usually only relevant for games with more than one player.
+	 * The game score, seen from the perspective of {@code referringState}'s player. The
+	 * perspective is only relevant for games with more than one player.
 	 * <p>
 	 * The keyword abstract signals that derived classes will be either abstract or implement
 	 * this method, as required by the interface {@link StateObservation} as well.
 	 * 
 	 * @param referringState see below
-	 * @return  The game score, seen from the perspective of {@code referingState}'s player.<br> 
+	 * @return  The game score, seen from the perspective of {@code referringState}'s player.<br>
 	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1). 
 	 */
     abstract public double getGameScore(StateObservation referringState);
@@ -195,19 +214,19 @@ abstract public class ObserverBase implements StateObservation {
 	}
 
 	/**
-	 * The cumulative reward, seen from the perspective of {@code referingState}'s player. This 
-	 * relativeness is usually only relevant for games with more than one player.
+	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. The
+	 * perspective is only relevant for games with more than one player.
 	 * <p> 
 	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
 	 * 
-	 * @param referringState
+	 * @param referringState	gives the perspective
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return the cumulative reward 
 	 */
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
-		String sWarn = "WARNING getReward: Case rgs==false is not handled in Observerbase!";
-		if (rewardIsGameScore==false) {
+		String sWarn = "WARNING getReward: Case rgs==false is not handled in ObserverBase!";
+		if (!rewardIsGameScore) {
 			System.out.println(sWarn);
 //			throw new RuntimeException(sWarn);
 		}

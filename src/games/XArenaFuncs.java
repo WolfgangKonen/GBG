@@ -1052,7 +1052,7 @@ public class XArenaFuncs {
 
 			while (true) {
 				long startTNano = System.nanoTime();
-				actBest = paVector.pavec[player].getNextAction2(so, false, nextMoveSilent);
+				actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, nextMoveSilent);
 				long endTNano = System.nanoTime();
 				if (nextTimes != null)
 					nextTimes[player].addNewTimeNS(endTNano - startTNano);

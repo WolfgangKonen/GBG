@@ -1,8 +1,6 @@
 package games;
 
-import games.StateObservation;
 import controllers.PlayAgent;
-import games.Arena;
 import games.RubiksCube.CubeConfig;
 import games.RubiksCube.GameBoardCube;
 
@@ -25,17 +23,18 @@ public interface GameBoard {
 	/**
 	 * things to be initialized prior to starting a training 
 	 */
-	public void initialize();
+	void initialize();
 	/**
 	 * Set {@link GameBoard}'s state to the default start state and clear the game board
-	 * @param boardClear
-	 * @param vClear
+	 * @param boardClear	whether to clear the board
+	 * @param vClear		whether to clear the value table
 	 */
-	public void clearBoard(boolean boardClear, boolean vClear);
+	void clearBoard(boolean boardClear, boolean vClear);
+
 	/**
 	 * things to be done when disposing a GameBoard object
 	 */
-	public void destroy();
+	void destroy();
 	
 	/**
 	 * Update the play board and the associated values (labels).
@@ -45,18 +44,18 @@ public interface GameBoard {
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
 	 * 				(only if they are stored in state {@code so}).
 	 */
-	public void updateBoard(StateObservation so, boolean withReset
+	void updateBoard(StateObservation so, boolean withReset
 			, boolean showValueOnGameboard);
-	public void showGameBoard(Arena arena,boolean alignToMain);
-	public void toFront();
+	void showGameBoard(Arena arena, boolean alignToMain);
+	void toFront();
 	/**
 	 * Is an action requested from Arena (i.e. was human interaction done)?
 	 * @return true if action from Arena is requested 
 	 */
-	public boolean isActionReq();
-	public void setActionReq(boolean actionReq);
-	public void enableInteraction(boolean enable);
-	public StateObservation getStateObs();
+	boolean isActionReq();
+	void setActionReq(boolean actionReq);
+	void enableInteraction(boolean enable);
+	StateObservation getStateObs();
 	
 	/**
 	 * If logs and agents should be placed in a subdirectory (e.g. Hex: BoardSize), then
@@ -64,14 +63,14 @@ public interface GameBoard {
 	 * agents are placed in the {@code gameName} directory directly. 
 	 * @return subdir string
 	 */
-	public String getSubDir();
+	String getSubDir();
 	
-	public Arena getArena();
+	Arena getArena();
 	
 	/**
 	 * @return the 'empty-board' start state
 	 */
-	public StateObservation getDefaultStartState();
+	StateObservation getDefaultStartState();
 	
 	/**
 	 * Choose a random start state. Used when training an agent via self-play.
@@ -88,7 +87,7 @@ public interface GameBoard {
 	 * @see #chooseStartState()     
 	 * @see GameBoardCube    
 	 */
-	public StateObservation chooseStartState(PlayAgent pa);
+	StateObservation chooseStartState(PlayAgent pa);
 
 	/**
 	 * Choose a random start state when playing a game.
@@ -100,5 +99,5 @@ public interface GameBoard {
 	 *      
 	 * @see Arena#PlayGame()
 	 */
-	public StateObservation chooseStartState();
+	StateObservation chooseStartState();
 }

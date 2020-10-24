@@ -163,7 +163,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 //		if (!NEW_GNA) {
 //	        return getNextAction1(so, vtable, silent);
 //		} else {
-//			Types.ACTIONS_VT actBestVT = getNextAction2(so, random, silent);
+//			Types.ACTIONS_VT actBestVT = getNextAction2(so.partialState(), random, silent);
 //			double[] VTable = actBestVT.getVTable();
 //			for (int i=0; i<VTable.length; i++) vtable[i] = VTable[i];
 //			vtable[VTable.length] = actBestVT.getVBest();

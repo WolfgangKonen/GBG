@@ -509,7 +509,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         if (sob.isGameOver()) {
         	return sob.getGameScore(sob);
         } else {       	
-            Types.ACTIONS_VT actBestVT = getNextAction2(sob, false, true);
+            Types.ACTIONS_VT actBestVT = getNextAction2(sob.partialState(), false, true);
             return actBestVT.getVBest();
         }
 
@@ -546,7 +546,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	        	return so.getGameScoreTuple();
 	        } else {
 	        	
-	            Types.ACTIONS_VT actBestVT = getNextAction2(so, false, true);
+	            Types.ACTIONS_VT actBestVT = getNextAction2(so.partialState(), false, true);
 
 	            return actBestVT.getScoreTuple();
 	        }

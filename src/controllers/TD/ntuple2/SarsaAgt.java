@@ -396,7 +396,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			a_next = null;
 			qValue = 0.0;
 		} else {
-			a_next = getNextAction2(s_next,true,true);
+			a_next = getNextAction2(s_next.partialState(),true,true);
 //			int[] nextBoard = m_Net.xnf.getBoardVector(s_after);
 			StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(s_next,m_Net.xnf);	// WK: NEW: next state instead of afterstate
         	qValue = m_Net.getQFunc(nextSOWB,nextPlayer,a_next);
@@ -538,7 +538,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 				
 		int t=0;
 		StateObservation s_t = so.copy();
-		Types.ACTIONS a_t = getNextAction2(s_t, true, true);
+		Types.ACTIONS a_t = getNextAction2(s_t.partialState(), true, true);
 		for (int n=0; n<numPlayers; n++) {
 			sLast[n] = (n==nextPlayer ? s_t : null);	// nextPlayer is X=so.getPlayer()
 			aLast[n] = (n==nextPlayer ? a_t : null);	// sLast[X]=so is the state on which X has to act 

@@ -150,7 +150,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t, true, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
 	        // put the best V-table value for state s_t into the HashMap
 			if (a_t.getVBest()>CubeConfig.stepReward+LOW_V)
 				// if V(s) <= c+L, there is no need to store it --> results in a factor 6 smaller hash map.
@@ -192,7 +192,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		// this variant is another possibility, it adds one more ply, should be more accurate, but it is slower
 //		double[] zero = {0.0};
 //		if (so.equals(def)) return new ScoreTuple(zero);			// important bug fix! /WK/2020/05
-//		ACTIONS_VT a_t = this.getNextAction2(so, false, true);
+//		ACTIONS_VT a_t = this.getNextAction2(so.partialState(), false, true);
 //		return a_t.getScoreTuple();
 	}
 

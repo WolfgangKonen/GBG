@@ -763,7 +763,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
 
     @Override
-    public StateObservation getPrecedingAfterstate() {
+    public StateObservation precedingAfterstate() {
     	// for 2048, the preceding afterstate is not known
     	return null;
     }

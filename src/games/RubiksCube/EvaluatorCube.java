@@ -110,7 +110,7 @@ public class EvaluatorCube extends Evaluator {
  				so.resetMoveCounter();
  				
                 while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
- 	                 so.advance(pa.getNextAction2(so, false, true));
+ 	                 so.advance(pa.getNextAction2(so.partialState(), false, true));
                 }
                 int moveNum = so.getMoveCounter();
                 tstats = new TStats(n,p,moveNum,epiLength);	// both p and epiLength are later used in TAggreg(tsList,p) to form counters
