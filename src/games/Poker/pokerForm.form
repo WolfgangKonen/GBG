@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="src.games.Poker.pokerForm">
+  <grid id="27dc6" binding="gameBoardPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="793" height="510"/>
+    </constraints>
+    <properties>
+      <background color="-1777425"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <grid id="17d92" binding="actionPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints border-constraint="South"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="ecac8" class="javax.swing.JButton" binding="checkButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="&amp;check"/>
+            </properties>
+          </component>
+          <component id="6dcc1" class="javax.swing.JButton" binding="betButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="&amp;bet"/>
+            </properties>
+          </component>
+          <component id="825e2" class="javax.swing.JButton" binding="callButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="c&amp;all"/>
+            </properties>
+          </component>
+          <component id="b266d" class="javax.swing.JButton" binding="raiseButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="&amp;raise"/>
+            </properties>
+          </component>
+          <component id="f72b2" class="javax.swing.JButton" binding="foldButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="&amp;fold"/>
+            </properties>
+          </component>
+          <component id="90f09" class="javax.swing.JButton" binding="allInButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="all &amp;in"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="154ad" binding="rightInfo" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints border-constraint="East"/>
+        <properties>
+          <minimumSize width="400" height="400"/>
+          <preferredSize width="400" height="400"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="993ae" class="javax.swing.JLabel" binding="holeCard1">
+            <constraints/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="a8ddb" class="javax.swing.JLabel" binding="holeCard2">
+            <constraints/>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="13f1f" binding="topInfo" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints border-constraint="North"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="71092" class="javax.swing.JLabel" binding="chipsLabel">
+            <constraints/>
+            <properties>
+              <text value="Pot:"/>
+            </properties>
+          </component>
+          <component id="f8e73" class="javax.swing.JLabel" binding="pot">
+            <constraints/>
+            <properties>
+              <text value="1000"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="4f13b" binding="sharedPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <grid id="1d804" binding="flopPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+            <constraints/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="9ccb1" class="javax.swing.JLabel" binding="flopCard1">
+                <constraints/>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="e8cdd" class="javax.swing.JLabel" binding="flopCard2">
+                <constraints/>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="4792a" class="javax.swing.JLabel" binding="flopCard3">
+                <constraints/>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="ed134" binding="turnPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+            <constraints/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="fc8a1" class="javax.swing.JLabel" binding="turnCard">
+                <constraints/>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="5e028" binding="riverPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+            <constraints/>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="e9510" class="javax.swing.JLabel" binding="riverCard">
+                <constraints/>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <grid id="9806" binding="leftInfo" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints border-constraint="West"/>
+        <properties>
+          <alignmentX value="0.0"/>
+          <alignmentY value="1.0"/>
+        </properties>
+        <border type="none"/>
+        <children/>
+      </grid>
+    </children>
+  </grid>
+</form>
