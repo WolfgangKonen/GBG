@@ -2,6 +2,7 @@ package controllers.MCTSWrapper;
 
 import controllers.AgentBase;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
+import controllers.MCTSWrapper.passStates.PassAction;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
 import games.Othello.StateObserverOthello;
 import games.StateObservation;
@@ -89,6 +90,11 @@ public final class MCTSWrapperAgent extends AgentBase {
         ).orElseThrow().getKey();
         // Caches the child node belonging to the previously selected action.
         lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
+
+        // Pass states should not be cached.
+        while (lastSelectedNode != null && lastSelectedNode.gameState.lazyMustPass.value()) {
+            lastSelectedNode = lastSelectedNode.childNodes.get(new PassAction().getId());
+        }
 
         return new Types.ACTIONS_VT(
             lastSelectedAction,
