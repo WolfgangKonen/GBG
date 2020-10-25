@@ -20,7 +20,7 @@ public final class GameStateIncludingPass {
      * Lazy initialized property that indicates whether
      * the player whose turn it is in this state must pass.
      */
-    private final Lazy<Boolean> lazyMustPass;
+    public final Lazy<Boolean> lazyMustPass;
     /**
      * Lazy initialized collection of applyable actions possible from this game state.
      * If the player has to pass, the collection only contains a pass action.
