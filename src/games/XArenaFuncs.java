@@ -6,6 +6,8 @@ import controllers.*;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
+import controllers.MCTSWrapper.MCTSWrapperAgent;
+import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.SarsaAgt;
@@ -511,6 +513,17 @@ public class XArenaFuncs {
 		} else {
 			qa = pa;
 		}
+
+		// Wrap the agent with MCTS lookahead if the mcts wrapper iterations count ist greater then zero.
+		if(oPar.getWrapperMCTSIterations() > 0){
+			qa = new MCTSWrapperAgent(
+				oPar.getWrapperMCTSIterations(),
+				1,
+				new PlayAgentApproximator(qa),
+				"MCTS-Wrapped "+qa.getName()
+            );
+		}
+
 		return qa;
 	}
 
