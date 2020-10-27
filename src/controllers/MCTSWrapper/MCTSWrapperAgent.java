@@ -4,6 +4,7 @@ import controllers.AgentBase;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.passStates.PassAction;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
+import games.ObserverBase;
 import games.Othello.StateObserverOthello;
 import games.StateObservation;
 import tools.Types;
@@ -59,7 +60,8 @@ public final class MCTSWrapperAgent extends AgentBase {
 
             // In the following, the moves made since the last cache of the search tree are reconstructed
             // on the last saved mcts node. This should result in the mcts node belonging to the current state of the game.
-            final var pastActions = ((StateObserverOthello) sob).lastMoves;
+            final var pastActions = ((ObserverBase) sob).getLastMoves();
+//            final var pastActions = ((StateObserverOthello) sob).lastMoves;
 
             var node = lastSelectedNode;
             for (int i = 1 + pastActions.indexOf(lastSelectedAction); i < pastActions.size(); i++) {

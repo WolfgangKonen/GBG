@@ -119,6 +119,8 @@ public final class GameStateIncludingPass {
 
         final var valueAndPolicy = approximator.predict(swappedState.state);
 
+        assert(state.getNumPlayers()==2) : "Error in GameStateIncludingPass: Tuple creation is only valid for 2-player games!";
+
         return new Tuple<>(
             -valueAndPolicy.element1, // negated evaluation from the opposing player's point of view
             new double[]{1.0} // 100% probability of a pass action, since a pass action is the single remaining possible action

@@ -244,7 +244,13 @@ public interface StateObservation extends Serializable{
 	void setAvailableActions();
 	
 	Types.ACTIONS getAction(int i);
-	
+
+	/**
+	 * If the current player cannot move (or decides not to move), this method passes the state to the next allowed
+	 * player.
+	 */
+	void passToNextPlayer();
+
 	/**
 	 * Given the current state, store some info useful for inspecting the  
 	 * action actBest and double[] vtable returned by a call to <br>

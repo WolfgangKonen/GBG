@@ -34,6 +34,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverTTT() {
+		super();
 		m_Table = new int[3][3]; 
 		m_Player = 1;
 		setAvailableActions();
@@ -53,6 +54,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 //	}
 	
 	public StateObserverTTT(int[][] Table, int Player) {
+		super();
 		m_Table = new int[3][3];
 		TicTDBase.copyTable(Table,m_Table); 
 		m_Player = Player;
@@ -61,7 +63,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	
 	public StateObserverTTT(StateObserverTTT other)
 	{
-		super(other);		// copy members m_counter and stored*
+		super(other);		// copy members m_counter, lastMoves and stored*
 		this.m_Table = new int[3][3];
 		TicTDBase.copyTable(other.m_Table,m_Table); 
 		m_Player = other.m_Player;
@@ -73,8 +75,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	}
 	
 	public StateObserverTTT copy() {
-		StateObserverTTT sot = new StateObserverTTT(this);
-		return sot;
+		return new StateObserverTTT(this);
 	}
 
     @Override
@@ -197,7 +198,8 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     	setAvailableActions(); 		// IMPORTANT: adjust the available actions (have reduced by one)
     	
 		m_Player = m_Player*(-1);    // 2-player games: 1,-1,1,-1,...
-    		
+
+		super.addToLastMoves(action);
 		super.incrementMoveCounter();
 	}
 

@@ -61,12 +61,12 @@ public class StateObserverOthello extends ObserverBase{
 	private int playerNextMove; 
 	private int countBlack, countWhite;	// probably never really needed
 	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
-	public ArrayList<Integer> lastMoves;
+//	public ArrayList<Integer> lastMoves;		// this is now in ObserverBase
 	private int turn;
 	
 	public StateObserverOthello()
 	{
-		lastMoves = new ArrayList<Integer>();
+		super();
 		currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		for(int i = 0; i < 8; i++) {
 			for(int j = 0; j < 8; j++)
@@ -89,8 +89,7 @@ public class StateObserverOthello extends ObserverBase{
 	
 	public StateObserverOthello(StateObserverOthello other)
 	{
-		super(other);		// copy members m_counter and stored*
-		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();		// WK: bug fix, added missing .clone() 
+		super(other);		// copy members m_counter, lastMoves and stored*
 		this.currentGameState= new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 		BaseOthello.deepCopyGameState(other.currentGameState, currentGameState);
 		// /WK/ wouldn't "this.currentGameState = other.currentGameState.clone();" do the same as the preceding two lines? 
@@ -283,7 +282,6 @@ public class StateObserverOthello extends ObserverBase{
 		int i = (iAction-j) / ConfigOthello.BOARD_SIZE;
 		BaseOthello.flip(currentGameState, i, j, playerNextMove);
 		currentGameState[i][j] = playerNextMove;
-		super.incrementMoveCounter();
 		int prevPlayer = playerNextMove;
 		
 		// Set playerNextMove.
@@ -306,7 +304,8 @@ public class StateObserverOthello extends ObserverBase{
 									// changed).
 									// In all other cases we can skip setAvailableActions: the member availableActions
 									// calculated above is valid!
-		lastMoves.add(action.toInt());
+		super.addToLastMoves(action);
+		super.incrementMoveCounter();
 		turn++;
 	}
 
@@ -320,16 +319,7 @@ public class StateObserverOthello extends ObserverBase{
 		return 2;
 	}
 
-	public int getLastMove() {
-		if (lastMoves.size() == 0) return -1;
-		return lastMoves.get(lastMoves.size()-1);
-	}
-	
-	public void resetLastMoves() {
-		this.lastMoves = new ArrayList<Integer>();		
-	}
-	
-	
+
 	/**
 	 * Used to calculate the score for the current game state
 	 */
@@ -398,7 +388,8 @@ public class StateObserverOthello extends ObserverBase{
 		return currentGameState[i][j] == 0 ? "Empty" : currentGameState[i][j]  == 1 ? "White" : "Black";
 	}
 	
-	// WK now needed to get the right playerNextMove for AsStateObserverOthello (!) 
+	// WK now needed to get the right playerNextMove for AsStateObserverOthello (!)
+	// 	  Also needed by passToNextPlayer() in ObserverBase
 	public void setPlayer(int p) {
 		this.playerNextMove = p;
 	}

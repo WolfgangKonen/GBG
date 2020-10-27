@@ -31,7 +31,7 @@ public final class PlayAgentApproximator implements Approximator {
      */
     @Override
     public Tuple<Double, double[]> predict(final StateObservation stateObservation) {
-        final var actions_vt = agent.getNextAction2(stateObservation, false, false);
+        final var actions_vt = agent.getNextAction2(stateObservation, false, true);
         return new Tuple<>(
             actions_vt.getVBest(),
             moveProbabilitiesForVTable(actions_vt.getVTable(), stateObservation)
