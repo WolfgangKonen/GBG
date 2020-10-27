@@ -23,7 +23,7 @@ public final class MCTSNode {
     public final Map<Integer, MCTSNode> childNodes;
     public final Map<Integer, Double> moveProbabilities;
     public final Map<Integer, Double> meanValues;
-    public final Map<Integer, Double> visitCounts;
+    public final Map<Integer, Integer> visitCounts;
 
     private boolean expanded;
 
@@ -89,16 +89,16 @@ public final class MCTSNode {
         return new Tuple<>(bestAction, child);
     }
 
-    private static double sum(final Collection<Double> values) {
-        return values.stream().mapToDouble(it -> it).sum();
+    private static double sum(final Collection<Integer> values) {
+        return values.stream().mapToInt(it -> it).sum();
     }
 
     double getQ(final ApplyableAction action) {
         return meanValues.getOrDefault(action.getId(), 0.0);
     }
 
-    double getN(final ApplyableAction action) {
-        return visitCounts.getOrDefault(action.getId(), 0.0);
+    int getN(final ApplyableAction action) {
+        return visitCounts.getOrDefault(action.getId(), 0);
     }
 
     double getP(final ApplyableAction action) {
