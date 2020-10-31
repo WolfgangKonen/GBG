@@ -51,7 +51,7 @@ public final class MCTSWrapperAgent extends AgentBase {
     ) {
         final MCTSNode mctsNode;
 
-        if (lastSelectedNode == null) {
+        if (lastSelectedNode == null || !ConfigWrapper.USELASTMCTS) {
             // There is no search tree yet.
             // So a new mcts node is created from the given game state sob.
             mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
@@ -60,7 +60,7 @@ public final class MCTSWrapperAgent extends AgentBase {
 
             // In the following, the moves made since the last cache of the search tree are reconstructed
             // on the last saved mcts node. This should result in the mcts node belonging to the current state of the game.
-            final var pastActions = ((ObserverBase) sob).getLastMoves();
+            final var pastActions = ((ObserverBase) sob).getLastMoves();    // /WK/
 //            final var pastActions = ((StateObserverOthello) sob).lastMoves;
 
             var node = lastSelectedNode;
@@ -109,4 +109,5 @@ public final class MCTSWrapperAgent extends AgentBase {
     public double getScore(final StateObservation sob) {
         return approximator.getScore(sob);
     }
+    // /WK/ getScore is needed to make the interface happy, it is probably never really used
 }

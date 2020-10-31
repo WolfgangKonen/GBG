@@ -86,6 +86,8 @@ public final class GameStateIncludingPass {
         return state.getGameScore(state);
     }
 
+    public int getNumPlayers() { return state.getNumPlayers(); }
+
     /**
      * Delegates the approximation of the values v and p necessary for a Monte Carlo Tree Search to a given approximator.
      * <p>
