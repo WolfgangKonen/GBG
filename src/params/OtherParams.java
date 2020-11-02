@@ -70,6 +70,7 @@ public class OtherParams extends Frame {
 	JLabel learnRM_L;
 	JLabel rgs_L;
 	JLabel wNply_L;
+	JLabel wMCTS_L;
 	JLabel pMax_L;
 	JLabel rBuf_L;
 	public JTextField numEval_T;
@@ -77,6 +78,7 @@ public class OtherParams extends Frame {
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
 	public JTextField wNply_T;
+	public JTextField wMCTS_T;
 	public JTextField pMax_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
@@ -103,7 +105,8 @@ public class OtherParams extends Frame {
 		stopTest_T = new JTextField("0"); 	//
 		stopEval_T = new JTextField("-1"); 	// the defaults
 		wNply_T = new JTextField("0"); 		//
-		pMax_T = new JTextField("6");		//	
+		wMCTS_T = new JTextField("0"); 		//
+		pMax_T = new JTextField("6");		//
 		numEval_L = new JLabel("numEval");
 		epiLeng_L = new JLabel("Episode Length");
 		stopTest_L = new JLabel("stopTest");
@@ -112,6 +115,7 @@ public class OtherParams extends Frame {
 		learnRM_L = new JLabel("Learn from RM");
 		rgs_L = new JLabel("Reward = Score");
 		wNply_L = new JLabel("Wrapper nPly");
+		wMCTS_L = new JLabel("Wrapper MCTS");
 		pMax_L = new JLabel("pMax");
 		rBuf_L = new JLabel("Replay buffer");
 		chooseS01 = new Checkbox("", false);
@@ -139,6 +143,8 @@ public class OtherParams extends Frame {
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		wNply_L.setToolTipText(
 				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
+		wMCTS_L.setToolTipText(
+				"Wrapper MCTS look ahead (for play, compete, eval).");
 		pMax_L.setToolTipText(
 				"RubiksCube: number of initial twists (during traing and eval)");
 		rBuf_L.setToolTipText(
@@ -197,6 +203,10 @@ public class OtherParams extends Frame {
 
 		oPanel.add(wNply_L);
 		oPanel.add(wNply_T);
+
+		oPanel.add(wMCTS_L);
+		oPanel.add(wMCTS_T);
+
 		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
 
@@ -269,6 +279,10 @@ public class OtherParams extends Frame {
 
 	public int getWrapperNPly() {
 		return Integer.valueOf(wNply_T.getText()).intValue();
+	}
+
+	public int getWrapperMCTSIterations() {
+		return Integer.parseInt(wMCTS_T.getText());
 	}
 
 	public int getpMaxRubiks() {
@@ -354,6 +368,10 @@ public class OtherParams extends Frame {
 		wNply_T.setText(value + "");
 	}
 
+	public void setWrapperMCTSIterations(final int value) {
+		wMCTS_T.setText(value + "");
+	}
+
 	public void setpMaxRubiks(int value) {
 		pMax_T.setText(value + "");
 	}
@@ -394,6 +412,7 @@ public class OtherParams extends Frame {
 		this.setStopTest(op.getStopTest());
 		this.setStopEval(op.getStopEval());
 		this.setWrapperNPly(op.getWrapperNPly());
+		this.setWrapperMCTSIterations(op.getWrapperMCTSIterations());
 		this.setpMaxRubiks(op.getpMaxRubiks());
 		this.chooseS01.setState(op.getChooseStart01());
 		this.learnRM.setState(op.getLearnFromRM());
