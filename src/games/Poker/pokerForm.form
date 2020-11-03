@@ -60,18 +60,31 @@
         </properties>
         <border type="none"/>
         <children>
-          <component id="993ae" class="javax.swing.JLabel" binding="holeCard1">
+          <component id="cd05d" class="javax.swing.JLabel" binding="activePlayerRight">
             <constraints/>
             <properties>
               <text value=""/>
             </properties>
           </component>
-          <component id="a8ddb" class="javax.swing.JLabel" binding="holeCard2">
+          <grid id="7106f" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
             <constraints/>
-            <properties>
-              <text value=""/>
-            </properties>
-          </component>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="993ae" class="javax.swing.JLabel" binding="holeCard1">
+                <constraints/>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="a8ddb" class="javax.swing.JLabel" binding="holeCard2">
+                <constraints/>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
+            </children>
+          </grid>
         </children>
       </grid>
       <grid id="13f1f" binding="topInfo" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
@@ -88,7 +101,7 @@
           <component id="f8e73" class="javax.swing.JLabel" binding="pot">
             <constraints/>
             <properties>
-              <text value="1000"/>
+              <text value=""/>
             </properties>
           </component>
         </children>

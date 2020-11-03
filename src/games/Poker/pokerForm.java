@@ -32,6 +32,7 @@ public class pokerForm {
     private JLabel riverCard;
     private JPanel leftInfo;
     private JButton allInButton;
+    private JLabel activePlayerRight;
 
     private final GameBoardPoker m_gb;
 
@@ -110,6 +111,10 @@ public class pokerForm {
 
     public void updatePot(int x){
         pot.setText(Integer.toString(x));
+    }
+
+    public void updateActivePlayer(String txt){
+        activePlayerRight.setText(txt);
     }
 
     public void updateHoleCards(PlayingCard[] cards){

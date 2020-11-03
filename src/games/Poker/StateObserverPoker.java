@@ -73,7 +73,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverPoker() {
-		////PokerLog.gameLog.log(Level.WARNING," brand new!");
 
 		GAMEOVER = false;
 		dealer = 0;
@@ -147,8 +146,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	}
 
 	public void initRound(){
-
-
 		m_deck = new CardDeck();
 		m_phase = 0;
 		// everybody with chips plays again
@@ -341,7 +338,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
 		return Math.random();
 	}
-
 
 	public double getMinGameScore() { return REWARD_NEGATIVE; }
 
@@ -917,6 +913,14 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return activePlayers;
 	}
 
+	public boolean[] getFoldedPlayers(){
+		return foldedPlayers;
+	}
+
+	public boolean[] getPlayingPlayers(){
+		return playingPlayers;
+	}
+
 	public int getPot(){
 		return pots.getSize();
 	}
@@ -959,5 +963,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return null;
 	}
 
+	public double getOpenPlayer(int player){
+		return pots.getOpenPlayer(player);
+	}
 
 }

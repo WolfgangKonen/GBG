@@ -4,6 +4,7 @@ import games.Arena;
 import tools.Types;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -14,11 +15,60 @@ public class GameBoardPokerGui extends JFrame {
 
 	private JLabel[] playerChips;
 	private JLabel[] playerActive;
+	private JPanel[] playerNamePanel;
+	private JLabel[] playerCall;
+	private JPanel[] playerPanel;
 
 	public GameBoardPokerGui(GameBoardPoker gb) {
 		super("Poker");
 		m_gb = gb;
 		initGui();
+	}
+
+	private String getPlayerName(int i){
+		return Types.GUI_PLAYER_NAME[i];
+	}
+
+	private void initPlayerGUI2(){
+		playerChips = new JLabel[StateObserverPoker.NUM_PLAYER];
+		playerNamePanel = new JPanel[StateObserverPoker.NUM_PLAYER];
+		playerCall = new JLabel[StateObserverPoker.NUM_PLAYER];
+		playerPanel = new JPanel[StateObserverPoker.NUM_PLAYER];
+
+		for(int i = 0 ; i < StateObserverPoker.NUM_PLAYER ; i++){
+			// Define JPanel for name
+			JPanel nameBox = new JPanel();
+			nameBox.setLayout(new GridLayout(1,1));
+			JLabel name = new JLabel(getPlayerName(i), SwingConstants.CENTER);
+			nameBox.setAlignmentY(Component.CENTER_ALIGNMENT);
+			nameBox.setBorder(BorderFactory.createLineBorder(Color.black));
+			nameBox.add(name);
+			nameBox.setPreferredSize(new Dimension(50, 50));
+			nameBox.setMaximumSize(new Dimension(50, 50));
+
+			playerNamePanel[i] = nameBox;
+
+			playerCall[i] = new JLabel("To Call: 0");
+			playerChips[i] = new JLabel("Chips: 0");
+
+			JPanel chipsData = new JPanel();
+			chipsData.setLayout(new GridLayout(2,1));
+			chipsData.setBorder(BorderFactory.createLineBorder(Color.black));
+			chipsData.setMaximumSize(new Dimension(1000, 50));
+			chipsData.add(playerCall[i]);
+			chipsData.add(playerChips[i]);
+
+			JPanel playerData = new JPanel();
+			playerData.add(nameBox);
+			playerData.add(chipsData);
+
+			playerData.setLayout(new BoxLayout(playerData,BoxLayout.LINE_AXIS));
+			playerData.setMaximumSize(new Dimension(1000, 50));
+			playerPanel[i] = playerData;
+			pf.addPlayerData(playerData);
+		}
+		updatePlayerInfo();
+
 	}
 
 	private void initPlayerGUI(){
@@ -29,19 +79,19 @@ public class GameBoardPokerGui extends JFrame {
 		JPanel[] playerData = new JPanel[StateObserverPoker.NUM_PLAYER];
 
 		for(int i = 0 ; i < StateObserverPoker.NUM_PLAYER ; i++){
-			playerNames[i] = new JLabel("Player "+Types.GUI_PLAYER_NAME[i]+": ");
+			playerNames[i] = new JLabel(getPlayerName(i));
 			playerActive[i] = new JLabel();
 			playerCall[i] = new JLabel();
 			playerChips[i] = new JLabel();
 
 			playerData[i] = new JPanel();
 
-			playerData[i].add(playerNames[i]);
-			playerData[i].add(playerActive[i]);
-			playerData[i].add(playerCall[i]);
-			playerData[i].add(playerChips[i]);
+				playerData[i].add(playerNames[i]);
+				playerData[i].add(playerActive[i]);
+				playerData[i].add(playerCall[i]);
+				playerData[i].add(playerChips[i]);
 
-			playerData[i].setLayout(new GridLayout(2,2));
+				playerData[i].setLayout(new GridLayout(2,2));
 			pf.addPlayerData(playerData[i]);
 		}
 		updatePlayerInfo();
@@ -51,7 +101,7 @@ public class GameBoardPokerGui extends JFrame {
     private void initGui()
 	{
 		pf = new pokerForm(m_gb,StateObserverPoker.NUM_PLAYER);
-		initPlayerGUI();
+		initPlayerGUI2();
 		add(pf.gameBoardPanel);
 		pack();
 		setVisible(false);		// note that the true size of this component is set in 
@@ -61,9 +111,26 @@ public class GameBoardPokerGui extends JFrame {
 	public void updatePlayerInfo(){
 		double[] chips = m_gb.m_so.getChips();
 		boolean[] active = m_gb.m_so.getActivePlayers();
+		boolean[] playing = m_gb.m_so.getPlayingPlayers();
+		boolean[] folded = m_gb.m_so.getFoldedPlayers();
+
 		for(int i = 0 ; i < StateObserverPoker.NUM_PLAYER ; i++){
-			playerChips[i].setText(Double.toString(chips[i]));
-			playerActive[i].setText(Boolean.toString(active[i]));
+			playerChips[i].setText("Chips: "+ chips[i]);
+			playerCall[i].setText("To call: "+m_gb.m_so.getOpenPlayer(i));
+			playerNamePanel[i].setBackground(new Color(98, 255, 0));
+			if(m_gb.m_so.getOpenPlayer(i)>0){
+				playerNamePanel[i].setBackground(new Color(255, 221, 0));
+			}
+			if(!active[i]&&!folded[i]){
+				playerNamePanel[i].setBackground(new Color(61, 167, 239));
+			}
+			if(folded[i]){
+				playerNamePanel[i].setBackground(new Color(239, 61, 61));
+			}
+			if(!playing[i]){
+				playerNamePanel[i].setBackground(new Color(128, 128, 128));
+			}
+			//playerActive[i].setText(Boolean.toString(active[i]));
 		}
 	}
 
@@ -89,6 +156,7 @@ public class GameBoardPokerGui extends JFrame {
 
 		updatePlayerInfo();
 		pf.updatePot(soT.getPot());
+		pf.updateActivePlayer(getPlayerName(soT.getPlayer()));
 		pf.updateHoleCards(soT.getHoleCards());
 		pf.updateCommunityCards(soT.getCommunityCards());
 		pf.disableButtons();
