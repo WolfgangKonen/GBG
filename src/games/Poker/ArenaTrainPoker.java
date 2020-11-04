@@ -47,11 +47,6 @@ public class ArenaTrainPoker extends ArenaTrain   {
 		PokerLog.setup();
 		ArenaTrainPoker t_Frame = new ArenaTrainPoker("General Board Game Playing",true);
 
-// ---  just for analysis: compute the state space & game tree complexity ---		
-//		System.out.println("Rough approximation for nStates = "+(int) Math.pow(3, 9)+ " = (3^9)");
-//		TicTDBase.countStates2(false);
-//		TicTDBase.countStates2(true);
-		
 		if (args.length==0) {
 			t_Frame.init();
 		} else {

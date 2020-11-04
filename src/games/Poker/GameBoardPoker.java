@@ -59,10 +59,10 @@ public class GameBoardPoker implements GameBoard {
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
 		StateObserverPoker soT = (StateObserverPoker) so;
-		if (so!=null) {
+		/*if (so!=null) {
 			m_so = soT.copy();
-		}
-		
+		}*/
+
 		if (m_gameGui!=null)
 			m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
 	}
@@ -92,8 +92,7 @@ public class GameBoardPoker implements GameBoard {
 	{
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);			// perform action (optionally add random elements from game 
-									// environment - not necessary in TicTacToe)
+		m_so.advance(act);
 		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 		arenaActReq = true;			// ask Arena for next action
 	}

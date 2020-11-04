@@ -4,7 +4,6 @@ import games.Arena;
 import tools.Types;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -19,10 +18,24 @@ public class GameBoardPokerGui extends JFrame {
 	private JLabel[] playerCall;
 	private JPanel[] playerPanel;
 
+	private JTextArea log;
+
 	public GameBoardPokerGui(GameBoardPoker gb) {
 		super("Poker");
 		m_gb = gb;
 		initGui();
+		initLog();
+	}
+
+	private void initLog(){
+		JFrame logWindow = new JFrame();
+
+		log = new JTextArea(30, 20);
+		log.setEditable(false);
+		logWindow.add(new JScrollPane(log));
+
+		logWindow.setSize(280,500);
+		logWindow.setVisible(true);
 	}
 
 	private String getPlayerName(int i){
@@ -97,7 +110,6 @@ public class GameBoardPokerGui extends JFrame {
 		updatePlayerInfo();
 	}
 
-
     private void initGui()
 	{
 		pf = new pokerForm(m_gb,StateObserverPoker.NUM_PLAYER);
@@ -113,12 +125,16 @@ public class GameBoardPokerGui extends JFrame {
 		boolean[] active = m_gb.m_so.getActivePlayers();
 		boolean[] playing = m_gb.m_so.getPlayingPlayers();
 		boolean[] folded = m_gb.m_so.getFoldedPlayers();
+		boolean[] open = m_gb.m_so.getOpenPlayers();
 
 		for(int i = 0 ; i < StateObserverPoker.NUM_PLAYER ; i++){
 			playerChips[i].setText("Chips: "+ chips[i]);
 			playerCall[i].setText("To call: "+m_gb.m_so.getOpenPlayer(i));
 			playerNamePanel[i].setBackground(new Color(98, 255, 0));
-			if(m_gb.m_so.getOpenPlayer(i)>0){
+			if(i == m_gb.m_so.getPlayer()) {
+				playerNamePanel[i].setBackground(new Color(255, 111, 0));
+			}
+			if(open[i]){
 				playerNamePanel[i].setBackground(new Color(255, 221, 0));
 			}
 			if(!active[i]&&!folded[i]){
@@ -144,6 +160,8 @@ public class GameBoardPokerGui extends JFrame {
 	 */
 	public void updateBoard(StateObserverPoker soT,
                             boolean withReset, boolean showValueOnGameboard) {
+		System.out.println("Update Board by: "+soT.getPlayer());
+
 		if(withReset)
 			System.out.println("with reset");
 		else
@@ -154,13 +172,20 @@ public class GameBoardPokerGui extends JFrame {
 		else
 			System.out.println("don't show value on gameboard");
 
+
+		//Update Log
+		if(soT.getLastActions()!=null)
+			for(String entry:soT.getLastActions())
+				log.append(entry+"\r\n");
+		soT.resetLog();
+
 		updatePlayerInfo();
-		pf.updatePot(soT.getPot());
+		pf.updatePot(soT.getPotSize());
 		pf.updateActivePlayer(getPlayerName(soT.getPlayer()));
 		pf.updateHoleCards(soT.getHoleCards());
 		pf.updateCommunityCards(soT.getCommunityCards());
 		pf.disableButtons();
-		ArrayList<Types.ACTIONS> actions =soT.getAvailableActions();
+		ArrayList<Types.ACTIONS> actions = soT.getAvailableActions();
 		for (Types.ACTIONS action : actions) {
 			switch (action.toInt()) {
 				// FOLD
@@ -179,8 +204,6 @@ public class GameBoardPokerGui extends JFrame {
 		}
 		repaint();
 	}
-
-
 
 	public void enableInteraction(boolean enable) {
 		if(enable)
