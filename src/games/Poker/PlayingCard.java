@@ -1,5 +1,7 @@
 package src.games.Poker;
 
+import java.util.Arrays;
+
 public class PlayingCard {
 
     private final int rank;
@@ -16,11 +18,19 @@ public class PlayingCard {
         return suits[suit];
     }
 
-    PlayingCard(int suit, int rank)
-    {
+    PlayingCard(int suit, int rank){
         this.rank = rank;
         this.suit = suit;
     }
+
+    public PlayingCard(String txt){
+        this.suit = Arrays.asList(suits).indexOf(""+txt.charAt(0));
+        if(txt.length()<3)
+            this.rank = Arrays.asList(ranks).indexOf(""+txt.charAt(1));
+        else
+            this.rank = Arrays.asList(ranks).indexOf(""+txt.charAt(1)+txt.charAt(2));
+    }
+
 
     public @Override String toString()
     {
@@ -37,5 +47,9 @@ public class PlayingCard {
 
     public PlayingCard copy(){
         return new PlayingCard(this.suit,this.rank);
+    }
+
+    public int getId(){
+        return (rank+1)+suit*13;
     }
 }

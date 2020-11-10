@@ -42,9 +42,6 @@ public class GameBoardPoker implements GameBoard {
 		if (boardClear) {
 			m_so = new StateObserverPoker();			// empty Table
 		}
-							// considerable speed-up during training (!)
-        //if (m_gameGui!=null && m_Arena.taskState!= Task.TRAIN)
-		//	m_gameGui.clearBoard(boardClear, vClear);
 	}
 
 	/**
@@ -59,10 +56,6 @@ public class GameBoardPoker implements GameBoard {
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
 		StateObserverPoker soT = (StateObserverPoker) so;
-		/*if (so!=null) {
-			m_so = soT.copy();
-		}*/
-
 		if (m_gameGui!=null)
 			m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
 	}

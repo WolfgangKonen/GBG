@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public class EvaluatorPoker extends Evaluator {
 
-	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
+	protected double[] m_thresh={0}; // threshold for each value of m_mode
 
 	protected static ArrayList<StateObserverPoker> diffStartList = null;
 
@@ -25,7 +25,6 @@ public class EvaluatorPoker extends Evaluator {
 		gb.getArena();
 	}
 
-
 	@Override
 	public boolean evalAgent(PlayAgent playAgent) {
 		return false;
@@ -34,20 +33,22 @@ public class EvaluatorPoker extends Evaluator {
 
  	@Override
  	public int[] getAvailableModes() {
- 		return null;
+		int[] modes;
+		modes = new int[]{0};
+		return modes;
  	}
  	
  	@Override
  	public int getDefaultEvalMode() {
-		return 2;
+		return 0;
 	}
 	public int getQuickEvalMode()
 	{
-		return 2;
+		return 0;
 	}
 	public int getTrainEvalMode()
 	{
-		return 9;
+		return 0;
 	}
 
 	@Override
@@ -55,9 +56,6 @@ public class EvaluatorPoker extends Evaluator {
 		return switch (m_mode) {
 			case -1 -> "no evaluation done ";
 			case 0 -> "success rate (against randomAgent, best is 0.9): ";
-			case 1 -> "success rate (against Max-N, best is 0.0): ";
-			case 2 -> "success rate (against Max-N, different starts, best is 0.0): ";
-			case 11 -> "success rate (against TDReferee, different starts, best is ?): ";
 			default -> null;
 		};
 	}
@@ -72,9 +70,7 @@ public class EvaluatorPoker extends Evaluator {
 	public String getPlotTitle() {
 		return switch (m_mode) {
 			case 0 -> "success vs Random";
-			case 1 -> "success vs Max-N";
-			case 2 -> "success vs Max-N, diff.Start";
-			case 11 -> "success vs TDReferee";
+			case 1 -> "palceholder";
 			default -> null;
 		};
 	}

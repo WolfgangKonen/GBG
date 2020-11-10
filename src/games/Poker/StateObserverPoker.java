@@ -1,5 +1,6 @@
 package src.games.Poker;
 
+import game.rules.play.Play;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
@@ -19,6 +20,10 @@ import java.util.*;
  *
  */
 public class StateObserverPoker extends ObserverBase implements StateObsNondeterministic {
+
+	//<editor-fold desc="variables">
+	//debug
+	public boolean debug = false;
 
 	// Housekeeping
 	public static final int ROYAL_FLUSH = 0;
@@ -52,9 +57,13 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 	private short m_phase;
 
+	// active players are those making game actions (i.e. playing & not folded & not all-in)
 	private final boolean[] activePlayers;
+	// playing players are those still having chips and participating in the game
 	private final boolean[] playingPlayers;
+	// folded players are those folded in a game round
 	private final boolean[] foldedPlayers;
+	// open players are those who still need to make game actions for the game to move into the next "phase"
 	private Queue<Integer> openPlayers;
 
 	private boolean isNextActionDeterministic;
@@ -68,12 +77,15 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	private Pots pots;
 
 	/**
-	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .gamelog containing this object will become 
+	 * change the version ID for serialization only if a newer version is no longer
+	 * compatible with an older one (older .gamelog containing this object will become
 	 * unreadable or you have to provide a special version transformation)
 	 */
 	private static final long serialVersionUID = 12L;
 
+	//</editor-fold>
+
+	//<editor-fold desc="constructor">
 	public StateObserverPoker() {
 		lastActions = new ArrayList<>();
 		GAMEOVER = false;
@@ -99,12 +111,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		isNextActionDeterministic = true;
 	}
 
-	public void addToLog(String log){
-			lastActions.add(log);
-	}
-
 	public StateObserverPoker(StateObserverPoker other)	{
 		////PokerLog.gameLog.log(Level.WARNING," brand after blueprint!");
+		debug = other.debug;
 		lastActions = new ArrayList<>();
 		for(String entry:other.lastActions){
 			addToLog(entry);
@@ -130,6 +139,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		this.m_deck = other.m_deck.copy();
 		this.m_phase = other.m_phase;
 
+
 		openPlayers = new LinkedList<>(other.openPlayers);
 
 		chips =  new double[NUM_PLAYER];
@@ -151,10 +161,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 		setAvailableActions();
 	}
-	
-	public StateObserverPoker copy() {
-		return new StateObserverPoker(this);
-	}
+	//</editor-fold>
+
+	//<editor-fold desc="helper">
 
 	public void initRound(){
 		addToLog("-----------New Round----------");
@@ -169,7 +178,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			if(chips[i]<=0) {
 				playingPlayers[i] = false;
 				activePlayers[i] = false;
-				foldedPlayers[i] = true;
+				foldedPlayers[i] = false;
 			}else{
 				activePlayers[i] = true;
 				foldedPlayers[i] = false;
@@ -253,155 +262,64 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		dealer = (dealer+1)%NUM_PLAYER;
 	}
 
-	@Override
-	public boolean isGameOver() {
-		return GAMEOVER;
-	}
-
-    @Override
-	public boolean isDeterministicGame() {
-		return false;
-	}
-	
-    @Override
-	public boolean isFinalRewardGame() {
-		return true;
-	}
-
-    @Override
-	public boolean isLegalState() {
-		return true;
-	}
-	
-	public boolean isLegalAction(ACTIONS act) {
-		return true;
-	}
-
-	@Deprecated
-    public String toString() {
-    	return stringDescr();
-    }
-	
-	@Override
-    public String stringDescr() {
-		return "";
-	}
-
-	public boolean isNextActionDeterministic() {
-		return isNextActionDeterministic;
-	}
-
-	public ACTIONS getNextNondeterministicAction() {
-		setNextNondeterministicAction();
-		return nextNondeterministicAction;
-	}
-
-	private void setNextNondeterministicAction() {
-		if(isNextActionDeterministic) {
-			throw new RuntimeException("next Action is Deterministic");
-		} else if(nextNondeterministicAction != null) {
-			return;
-		}
-		System.out.print("setNextNondeterministicAction");
-	}
-
-	//TODO: implement correct randoms.
-	public ArrayList<ACTIONS> getAvailableRandoms() {
-		ArrayList<ACTIONS> availRan = new ArrayList<>();
-		for(int viableMove : availableRandoms) {
-			availRan.add(ACTIONS.fromInt(viableMove));
-		}
-		return availRan;
-
-	}
-
-	public int getNumAvailableRandoms() {
-		return availableRandoms.size();
-	}
-
-	public double getProbability(ACTIONS action) {
-		int iAction = action.toInt();
-		int numEmptyTiles = iAction/2;
-		double prob = (iAction%2==0) ? 0.9 : 0.1;
-		return prob/numEmptyTiles;
+	/**
+	 * function to reset the "log" (text version of what happened in GUI) of the game.
+	 */
+	public void resetLog(){
+		lastActions = new ArrayList<>();
 	}
 
 	/**
-	 * 
-	 * @return true, if the current position is a win (for either player)
-	 */
-	public boolean win() {
-		return GAMEOVER;
+	 * function to add entry to log (text version of what happened in GUI)
+	 * */
+	public void addToLog(String log){
+		lastActions.add(log);
 	}
-
-
-	/**
-	 * @return 	the game score, i.e. the sum of rewards for the current state. 
-	 * 			For TTT only game-over states have a non-zero game score. 
-	 * 			It is the reward from the perspective of {@code refer}.
-	 */
-	public double getGameScore(StateObservation refer) {
-		//return Math.random();
-		StateObserverPoker sop = (StateObserverPoker)refer;
-		return sop.getPotSize();
-	}
-
-
-	@Override
-	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
-		return Math.random();
-	}
-
-	public double getMinGameScore() { return REWARD_NEGATIVE; }
-
-	public double getMaxGameScore() { return REWARD_POSITIVE; }
-
-	public String getName() { return "Poker";	}
 
 	public void dealCards(){
-
-		// shuffling the deck to make sure we have a random deck
-		m_deck.shuffle();
-		if(this.m_phase==0){
-			// set small blind
-			// set big blind
-			// deal holecards
-			if(m_deck.getTotalCards()<52){
-				//PokerLog.gameLog.severe("SOMETHINGS WRONG!");
-				throw new RuntimeException("round starts with less than 52 cards");
+		if(!debug) {
+			// shuffling the deck to make sure we have a random deck
+			m_deck.shuffle();
+			if (this.m_phase == 0) {
+				// set small blind
+				// set big blind
+				// deal holecards
+				if (m_deck.getTotalCards() < 52) {
+					//PokerLog.gameLog.severe("SOMETHINGS WRONG!");
+					throw new RuntimeException("round starts with less than 52 cards");
+				}
+				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Deal Holecards.");
+				for (int i = 0; i < NUM_PLAYER; i++) {
+					this.holeCards[i][0] = this.m_deck.draw();
+					this.holeCards[i][1] = this.m_deck.draw();
+					//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Player ["+ Types.GUI_PLAYER_NAME[i]+"] - "+this.holeCards[i][0].toString() +"/"+this.holeCards[i][1]);
+				}
 			}
-			//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Deal Holecards.");
-			for(int i = 0;i<NUM_PLAYER;i++){
-				this.holeCards[i][0] = this.m_deck.draw();
-				this.holeCards[i][1] = this.m_deck.draw();
-				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Player ["+ Types.GUI_PLAYER_NAME[i]+"] - "+this.holeCards[i][0].toString() +"/"+this.holeCards[i][1]);
+
+			if (m_phase == 1) {
+				// deal flop
+				this.communityCards[0] = this.m_deck.draw();
+				this.communityCards[1] = this.m_deck.draw();
+				this.communityCards[2] = this.m_deck.draw();
+				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Deal Flop in "+Integer.toString(System.identityHashCode(this))+" : "+this.communityCards[0]+"/"+this.communityCards[1]+"/"+this.communityCards[2]) ;
+				addToLog("Deal Flop : " + this.communityCards[0] + "/" + this.communityCards[1] + "/" + this.communityCards[2]);
+			}
+
+			if (m_phase == 2) {
+				// deal turn
+				this.communityCards[3] = this.m_deck.draw();
+				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Deal Turn in "+Integer.toString(System.identityHashCode(this))+" : "+this.communityCards[3]);
+				addToLog("Deal Turn : " + this.communityCards[3]);
+
+			}
+
+			if (m_phase == 3) {
+				// deal river
+				this.communityCards[4] = this.m_deck.draw();
+				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Deal River in "+Integer.toString(System.identityHashCode(this))+" : "+this.communityCards[4]);
+				addToLog("Deal River : " + this.communityCards[4]);
 			}
 		}
-
-		if(m_phase == 1){
-			// deal flop
-			this.communityCards[0] = this.m_deck.draw();
-			this.communityCards[1] = this.m_deck.draw();
-			this.communityCards[2] = this.m_deck.draw();
-			//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Deal Flop in "+Integer.toString(System.identityHashCode(this))+" : "+this.communityCards[0]+"/"+this.communityCards[1]+"/"+this.communityCards[2]) ;
-			addToLog("Deal Flop : "+this.communityCards[0]+"/"+this.communityCards[1]+"/"+this.communityCards[2]);
-		}
-
-		if(m_phase == 2){
-			// deal turn
-			this.communityCards[3] = this.m_deck.draw();
-			//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Deal Turn in "+Integer.toString(System.identityHashCode(this))+" : "+this.communityCards[3]);
-			addToLog("Deal Turn : "+this.communityCards[3]);
-
-		}
-
-		if(m_phase == 3){
-			// deal river
-			this.communityCards[4] = this.m_deck.draw();
-			//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Deal River in "+Integer.toString(System.identityHashCode(this))+" : "+this.communityCards[4]);
-			addToLog("Deal River : "+this.communityCards[4]);
-		}
-
 		if(m_phase > 3){
 			//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Showdown - finding the winner...");
 			addToLog("Showdown - finding the winner...");
@@ -422,11 +340,13 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 				int numWinners = winners.size();
 				for(int winner:winners){
 					//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Integer.toString(winner)+" has won Pot ("+Integer.toString(p)+") with "+Integer.toString(pots.getPotSize(p)/numWinners) +" chips");
-					addToLog(Integer.toString(winner)+" has won Pot ("+Integer.toString(p)+") with "+Double.toString(pots.getPotSize(p)/numWinners) +" chips");
+					addToLog(winner +" has won Pot ("+ p +") with "+ pots.getPotSize(p) / numWinners +" chips");
 					chips[winner] += pots.getPotSize(p)/numWinners;
 				}
 			}
 			addToLog("-----------End Round----------");
+			for(int i = 0 ; i <getNumPlayers() ; i++)
+				addToLog("Chips "+Types.GUI_PLAYER_NAME[i]+": "+chips[i] +" " +playingPlayers[i]);
 			initRound();
 			setAvailableActions();
 		}else {
@@ -438,7 +358,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		ArrayList<PlayingCard> hand;
 		long[] scoreOfHand = new long[NUM_PLAYER];
 		for(int i = 0; i < NUM_PLAYER;i++){
-			if(!foldedPlayers[i]){
+			if(!foldedPlayers[i]&&playingPlayers[i]){
 				hand = new ArrayList<>();
 				hand.add(holeCards[i][0]);
 				hand.add(holeCards[i][1]);
@@ -452,7 +372,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 				int[] bestHand = findBestHand(hand);
 				scoreOfHand[i] = findMaxScore(bestHand);
 				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[i]+" has a score of "+Long.toString(scoreOfHand[i]));
-				addToLog(Types.GUI_PLAYER_NAME[i]+" has a score of "+Long.toString(scoreOfHand[i]));
+				addToLog(Types.GUI_PLAYER_NAME[i]+" has a score of "+ scoreOfHand[i]);
 			}else{
 				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[i]+" has folded.");
 				scoreOfHand[i] = -1;
@@ -461,7 +381,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return scoreOfHand;
 	}
 
-	/*
+	private long findMaxScore(int[] scores){
+		/*
 		ROYAL_FLUSH     = {0-1}   [2]   13^12
 		STRAIGHT_FLUSH  = {5-12}  [8]   13^11
 		FOUR_OF_A_KIND  = {0-12}  [13]  13^10
@@ -474,7 +395,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		HIGH_CARD       = {0-12}  [13]; 13^1
 		KICKER          = {0-12}  [13]; 13^0
 	 */
-	private long findMaxScore(int[] scores){
 		int[] exponent = { 12, 11, 10, 8, 7, 6, 5, 3, 2, 1, 0};
 		for(int i=0;i<scores.length;i++){
 			if(scores[i]>0) {
@@ -660,91 +580,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		}
 		return multiples;
 	}
+	//</editor-fold>
 
-	public void fold(){
-		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": 'FOLD'");
-		activePlayers[m_Player] = false;
-		foldedPlayers[m_Player] = true;
-		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'fold'");
-	}
-
-	public void check(){
-		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": 'CHECK'");
-		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'check'");
-	}
-
-	public void allIn(){
-		double sizeOfBet = chips[m_Player];
-		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": ALL IN ("+Integer.toString(sizeOfBet)+")");
-		boolean raise = sizeOfBet > pots.getOpenPlayer(m_Player);
-
-		pots.add(sizeOfBet, m_Player,true);
-		chips[m_Player] = 0;
-
-		if(raise){
-			openPlayers.clear();
-			for (int i = m_Player + 1; i < NUM_PLAYER; i++)
-				if (playingPlayers[i]&&activePlayers[i])
-					openPlayers.add(i);
-
-			for (int i = 0; i < m_Player; i++)
-				if (playingPlayers[i]&&activePlayers[i])
-					openPlayers.add(i);
-		}
-		activePlayers[m_Player] = false;
-		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'all in' ("+sizeOfBet+")");
-	}
-
-	public void bet(){
-		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": BET ("+Integer.toString(BIGBLIND)+")");
-		betSub(BIGBLIND);
-		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'bet' ("+BIGBLIND+")");
-	}
-
-	public void raise(){
-		int raise = pots.getOpenPlayer(m_Player)+BIGBLIND;
-		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": 'RAISE' ("+Integer.toString(raise)+")");
-		betSub(raise);
-		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'raise' ("+raise+")");
-	}
-
-	public void betSub(double sizeOfBet){
-
-		pots.add(sizeOfBet, m_Player);
-		chips[m_Player] -= sizeOfBet;
-
-		//add all but the active player to open players
-		openPlayers.clear();
-		for (int i = m_Player + 1; i < NUM_PLAYER; i++)
-			if (playingPlayers[i]&&activePlayers[i])
-				openPlayers.add(i);
-
-		for (int i = 0; i < m_Player; i++)
-			if (playingPlayers[i]&&activePlayers[i])
-				openPlayers.add(i);
-
-	}
-
-	public void call(){
-		double toCall = pots.getOpenPlayer(m_Player);
-		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": CALL ("+Integer.toString(toCall)+")");
-
-		// shouldn't happen - action is only available if player has more chips.
-		if(toCall > chips[m_Player]){
-			//PokerLog.gameLog.severe("Player calls with not enough chips.");
-			toCall = chips[m_Player];
-		}
-		pots.add(toCall,m_Player);
-		chips[m_Player] -= toCall;
-
-		if(chips[m_Player]==0) {
-			activePlayers[m_Player] = false;
-			addToLog(Types.GUI_PLAYER_NAME[m_Player]+": call ("+toCall+") - ALL IN");
-		}else{
-			addToLog(Types.GUI_PLAYER_NAME[m_Player]+": call ("+toCall+")");
-		}
-	}
-
+	//<editor-fold desc="advance">
 	/**
 	 * Advance the current state with 'action' to a new state
 	 * Actions:
@@ -776,7 +614,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 				dealCards();
 			dealCards();
 		}else {
-			if(getNumPlayingPlayers()- getNumFoldedPlayers()==1&&openPlayers.size()==1){
+			if(getNumPlayingPlayers() - getNumFoldedPlayers()==1&&openPlayers.size()==1){
 				while(m_phase<4)
 					dealCards();
 				dealCards();
@@ -796,8 +634,13 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			}
 		}
 		if(!GAMEOVER) {
-			// next player becomes the active one
-			m_Player = openPlayers.remove();
+			try {
+				// next player becomes the active one
+				m_Player = openPlayers.remove();
+			}catch(Exception e){
+				System.out.println("WHAT?!");
+				throw e;
+			}
 			setAvailableActions();
 		}
 	}
@@ -865,32 +708,28 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		}
 		isNextActionDeterministic = true;
 	}
+	//</editor-fold>
 
-    /**
-     * Return the afterstate preceding {@code this}.
-     */
-    public StateObservation getPrecedingAfterstate() {
-    	return this;
-    }
+	//<editor-fold desc="GBG">
 
-    @Override
-    public ArrayList<ACTIONS> getAllAvailableActions() {
-        ArrayList<ACTIONS> allActions = new ArrayList<>();
+	public StateObserverPoker copy() {
+		return new StateObserverPoker(this);
+	}
+
+	@Override
+	public ArrayList<ACTIONS> getAllAvailableActions() {
+		ArrayList<ACTIONS> allActions = new ArrayList<>();
 		allActions.add(ACTIONS.fromInt(0)); // FOLD
 		allActions.add(ACTIONS.fromInt(1)); // CHECK
 		allActions.add(ACTIONS.fromInt(2)); // BET
 		allActions.add(ACTIONS.fromInt(3)); // CALL
 		allActions.add(ACTIONS.fromInt(4)); // RAISE
 		allActions.add(ACTIONS.fromInt(5)); // ALL-IN
-        return allActions;
-    }
-    
+		return allActions;
+	}
+
 	public ArrayList<ACTIONS> getAvailableActions() {
 		return availableActions;
-	}
-	
-	public int getNumAvailableActions() {
-		return availableActions.size();
 	}
 
 	/**
@@ -919,48 +758,220 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			availableActions.add(ACTIONS.fromInt(4)); // RAISE
 
 		// You always have the option to go All In.
-				availableActions.add(ACTIONS.fromInt(5)); // All In
-	}
-	
-	public ACTIONS getAction(int i) {
-		return availableActions.get(i);
+		availableActions.add(ACTIONS.fromInt(5)); // All In
 	}
 
-	public int[][] getTable() {
-		return new int[1][1];
+	public int getNumAvailableActions() {
+		return availableActions.size();
 	}
 
 	/**
-	 * @return the id of the active player.
+	 * Return the afterstate preceding {@code this}.
 	 */
-	public int getPlayer() {
-		return m_Player;
-	}
-	
-	public int getNumPlayers() {
-		return NUM_PLAYER;
+	public StateObservation getPrecedingAfterstate() {
+		return this;
 	}
 
-	public double[] getChips(){
-		return chips;
+	//TODO: implement correct randoms.
+	public ArrayList<ACTIONS> getAvailableRandoms() {
+		ArrayList<ACTIONS> availRan = new ArrayList<>();
+		for(int viableMove : availableRandoms) {
+			availRan.add(ACTIONS.fromInt(viableMove));
+		}
+		return availRan;
+
 	}
 
-	public boolean[] getActivePlayers(){
-		return activePlayers;
+	public int getNumAvailableRandoms() {
+		return availableRandoms.size();
 	}
 
-	public boolean[] getFoldedPlayers(){
-		return foldedPlayers;
+	public double getProbability(ACTIONS action) {
+		int iAction = action.toInt();
+		int numEmptyTiles = iAction/2;
+		double prob = (iAction%2==0) ? 0.9 : 0.1;
+		return prob/numEmptyTiles;
 	}
 
-	public boolean[] getPlayingPlayers(){
-		return playingPlayers;
+	/**
+	 *
+	 * @return true, if the current position is a win (for either player)
+	 */
+	public boolean win() {
+		return GAMEOVER;
 	}
 
-	public int getPotSize(){
-		return pots.getSize();
+
+	/**
+	 * @return 	returns the sum of rewards in state so, seen from the perspective of the player to move in state refer. {@code refer}.
+	 */
+	public double getGameScore(StateObservation refer) {
+		StateObserverPoker sop = (StateObserverPoker)refer;
+		if(isGameOver()) {
+			if(chips[refer.getPlayer()]>0)
+				return 1;
+			return -1;
+		}
+		return 0;
 	}
 
+	@Override
+	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
+		return Math.random();
+	}
+
+	public double getMinGameScore() {
+		return REWARD_NEGATIVE;
+	}
+
+	public double getMaxGameScore() {
+		return REWARD_POSITIVE;
+	}
+
+	@Override
+	public boolean isGameOver() {
+		return GAMEOVER;
+	}
+
+	@Override
+	public boolean isDeterministicGame() {
+		return false;
+	}
+
+	@Override
+	public boolean isFinalRewardGame() {
+		return true;
+	}
+
+	@Override
+	public boolean isLegalState() {
+		return true;
+	}
+
+	public boolean isLegalAction(ACTIONS act) {
+		return true;
+	}
+
+	@Deprecated
+	public String toString() {
+		return stringDescr();
+	}
+
+	@Override
+	public String stringDescr() {
+		return "";
+	}
+
+	public String getName() { return "Poker";	}
+
+	public boolean isNextActionDeterministic() {
+		return isNextActionDeterministic;
+	}
+
+	public ACTIONS getNextNondeterministicAction() {
+		setNextNondeterministicAction();
+		return nextNondeterministicAction;
+	}
+
+	private void setNextNondeterministicAction() {
+		if(isNextActionDeterministic) {
+			throw new RuntimeException("next Action is Deterministic");
+		} else if(nextNondeterministicAction != null) {
+			return;
+		}
+		System.out.print("setNextNondeterministicAction");
+	}
+
+
+	//</editor-fold>
+
+	//<editor-fold desc="actions">
+	public void fold(){
+		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": 'FOLD'");
+		activePlayers[m_Player] = false;
+		foldedPlayers[m_Player] = true;
+		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'fold'");
+	}
+
+	public void check(){
+		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": 'CHECK'");
+		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'check'");
+	}
+
+	public void allIn(){
+		double sizeOfBet = chips[m_Player];
+		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": ALL IN ("+Integer.toString(sizeOfBet)+")");
+		boolean raise = sizeOfBet > pots.getOpenPlayer(m_Player);
+
+		pots.add(sizeOfBet, m_Player,true);
+		chips[m_Player] = 0;
+
+		if(raise){
+			openPlayers.clear();
+			for (int i = m_Player + 1; i < NUM_PLAYER; i++)
+				if (playingPlayers[i]&&activePlayers[i])
+					openPlayers.add(i);
+
+			for (int i = 0; i < m_Player; i++)
+				if (playingPlayers[i]&&activePlayers[i])
+					openPlayers.add(i);
+		}
+		activePlayers[m_Player] = false;
+		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'all in' ("+sizeOfBet+")");
+	}
+
+	public void bet(){
+		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": BET ("+Integer.toString(BIGBLIND)+")");
+		betSub(BIGBLIND);
+		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'bet' ("+BIGBLIND+")");
+	}
+
+	public void raise(){
+		int raise = pots.getOpenPlayer(m_Player)+BIGBLIND;
+		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": 'RAISE' ("+Integer.toString(raise)+")");
+		betSub(raise);
+		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'raise' ("+raise+")");
+	}
+
+	public void call(){
+		double toCall = pots.getOpenPlayer(m_Player);
+		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": CALL ("+Integer.toString(toCall)+")");
+
+		// shouldn't happen - action is only available if player has more chips.
+		if(toCall > chips[m_Player]){
+			//PokerLog.gameLog.severe("Player calls with not enough chips.");
+			toCall = chips[m_Player];
+		}
+		pots.add(toCall,m_Player);
+		chips[m_Player] -= toCall;
+
+		if(chips[m_Player]==0) {
+			activePlayers[m_Player] = false;
+			addToLog(Types.GUI_PLAYER_NAME[m_Player]+": call ("+toCall+") - ALL IN");
+		}else{
+			addToLog(Types.GUI_PLAYER_NAME[m_Player]+": call ("+toCall+")");
+		}
+	}
+
+	public void betSub(double sizeOfBet){
+
+		pots.add(sizeOfBet, m_Player);
+		chips[m_Player] -= sizeOfBet;
+
+		//add all but the active player to open players
+		openPlayers.clear();
+		for (int i = m_Player + 1; i < NUM_PLAYER; i++)
+			if (playingPlayers[i]&&activePlayers[i])
+				openPlayers.add(i);
+
+		for (int i = 0; i < m_Player; i++)
+			if (playingPlayers[i]&&activePlayers[i])
+				openPlayers.add(i);
+
+	}
+	//</editor-fold>
+
+	//<editor-fold desc="get">
 	public int getNumActivePlayers(){
 		int p = 0;
 		for (boolean activePlayer : activePlayers)
@@ -1003,15 +1014,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return pots.getOpenPlayer(player);
 	}
 
-	public boolean[] getOpenPlayers(){
-		Object[] tmp = openPlayers.toArray();
-		boolean[] openPlayersArray = new boolean[NUM_PLAYER];
-		for(Object x : tmp) {
-			openPlayersArray[(int)x] = true;
-		}
-		return openPlayersArray;
-	}
-
 	public String getLastAction(){
 		if(lastActions.size()>0)
 			return lastActions.get(lastActions.size()-1)+"\r\n";
@@ -1023,7 +1025,69 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return lastActions;
 	}
 
-	public void resetLog(){
-		lastActions = new ArrayList<>();
+	public ACTIONS getAction(int i) {
+		return availableActions.get(i);
+	}
+
+	/**
+	 * @return the id of the active player.
+	 */
+	public int getPlayer() {
+		return m_Player;
+	}
+
+	public int getNumPlayers() {
+		return NUM_PLAYER;
+	}
+
+	public double[] getChips(){
+		return chips;
+	}
+
+	public boolean[] getActivePlayers(){
+		return activePlayers;
+	}
+
+	public boolean[] getFoldedPlayers(){
+		return foldedPlayers;
+	}
+
+	public boolean[] getPlayingPlayers(){
+		return playingPlayers;
+	}
+
+	public boolean[] getOpenPlayers(){
+		Object[] tmp = openPlayers.toArray();
+		boolean[] openPlayersArray = new boolean[NUM_PLAYER];
+		for(Object x : tmp) {
+			openPlayersArray[(int)x] = true;
+		}
+		return openPlayersArray;
+	}
+
+	public double getPlayerSate(int m_Player){
+		if(!playingPlayers[m_Player])
+			return 1;
+		if(foldedPlayers[m_Player])
+			return 2;
+		if(getOpenPlayers()[m_Player])
+			return 3;
+		return 4;
+	}
+
+	public int getPotSize(){
+		return pots.getSize();
+	}
+	//</editor-fold>
+
+	public void setHoleCards(int player, PlayingCard first, PlayingCard sec){
+		holeCards[player][0] = first;
+		holeCards[player][1] = sec;
+	}
+
+	public void setCommunityCards(PlayingCard[] oCommunityCards){
+		int tmp = 0;
+		for(PlayingCard card:oCommunityCards)
+			communityCards[tmp++] = card;
 	}
 }
