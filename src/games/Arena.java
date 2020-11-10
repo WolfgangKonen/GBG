@@ -674,8 +674,10 @@ abstract public class Arena implements Runnable {
 						break; 
 					case 3:
 						showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-	
-						break; 
+						break;
+					case 4:
+						showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+						break;
 					default:
 						throw new RuntimeException("Case numPlayers = "+numPlayers+" not handled!");
 					}
