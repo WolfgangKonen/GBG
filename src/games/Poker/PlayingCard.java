@@ -113,7 +113,7 @@ public class PlayingCard {
     }
 
     /**
-     * checks if two Playing Cards are qual.
+     * checks if two Playing Cards are equal.
      * @param o object to compare two
      * @return true if equal else false
      */

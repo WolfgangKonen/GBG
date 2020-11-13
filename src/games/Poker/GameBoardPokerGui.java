@@ -13,10 +13,8 @@ public class GameBoardPokerGui extends JFrame {
 	private pokerForm pf;
 
 	private JLabel[] playerChips;
-	private JLabel[] playerActive;
 	private JPanel[] playerNamePanel;
 	private JLabel[] playerCall;
-	private JPanel[] playerPanel;
 
 	private JTextArea log;
 
@@ -42,11 +40,11 @@ public class GameBoardPokerGui extends JFrame {
 		return Types.GUI_PLAYER_NAME[i];
 	}
 
-	private void initPlayerGUI2(){
+	private void initPlayerGUI(){
 		playerChips = new JLabel[StateObserverPoker.NUM_PLAYER];
 		playerNamePanel = new JPanel[StateObserverPoker.NUM_PLAYER];
 		playerCall = new JLabel[StateObserverPoker.NUM_PLAYER];
-		playerPanel = new JPanel[StateObserverPoker.NUM_PLAYER];
+		//JPanel[] playerPanel = new JPanel[StateObserverPoker.NUM_PLAYER];
 
 		for(int i = 0 ; i < StateObserverPoker.NUM_PLAYER ; i++){
 			// Define JPanel for name
@@ -77,43 +75,17 @@ public class GameBoardPokerGui extends JFrame {
 
 			playerData.setLayout(new BoxLayout(playerData,BoxLayout.LINE_AXIS));
 			playerData.setMaximumSize(new Dimension(1000, 50));
-			playerPanel[i] = playerData;
+			//playerPanel[i] = playerData;
 			pf.addPlayerData(playerData);
 		}
 		updatePlayerInfo();
 
 	}
 
-	private void initPlayerGUI(){
-		JLabel[] playerNames = new JLabel[StateObserverPoker.NUM_PLAYER];
-		playerChips = new JLabel[StateObserverPoker.NUM_PLAYER];
-		playerActive = new JLabel[StateObserverPoker.NUM_PLAYER];
-		JLabel[] playerCall = new JLabel[StateObserverPoker.NUM_PLAYER];
-		JPanel[] playerData = new JPanel[StateObserverPoker.NUM_PLAYER];
-
-		for(int i = 0 ; i < StateObserverPoker.NUM_PLAYER ; i++){
-			playerNames[i] = new JLabel(getPlayerName(i));
-			playerActive[i] = new JLabel();
-			playerCall[i] = new JLabel();
-			playerChips[i] = new JLabel();
-
-			playerData[i] = new JPanel();
-
-				playerData[i].add(playerNames[i]);
-				playerData[i].add(playerActive[i]);
-				playerData[i].add(playerCall[i]);
-				playerData[i].add(playerChips[i]);
-
-				playerData[i].setLayout(new GridLayout(2,2));
-			pf.addPlayerData(playerData[i]);
-		}
-		updatePlayerInfo();
-	}
-
     private void initGui()
 	{
 		pf = new pokerForm(m_gb,StateObserverPoker.NUM_PLAYER);
-		initPlayerGUI2();
+		initPlayerGUI();
 		add(pf.gameBoardPanel);
 		pack();
 		setVisible(false);		// note that the true size of this component is set in 

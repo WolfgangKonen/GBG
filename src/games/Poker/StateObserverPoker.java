@@ -75,7 +75,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	private boolean GAMEOVER;
 
 	private Pots pots;
-	private Random rand;
+	private final Random rand;
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
 	 * compatible with an older one (older .gamelog containing this object will become
@@ -857,7 +857,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	 * @return 	returns the sum of rewards in state so, seen from the perspective of the player to move in state refer. {@code refer}.
 	 */
 	public double getGameScore(StateObservation refer) {
-		StateObserverPoker sop = (StateObserverPoker)refer;
 		if(isGameOver()) {
 			if(chips[refer.getPlayer()]>0)
 				return 1;
@@ -905,9 +904,12 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return true;
 	}
 
+
+	@SuppressWarnings("unused")
 	public boolean isLegalAction(ACTIONS act) {
 		return true;
 	}
+
 
 	@Deprecated
 	public String toString() {

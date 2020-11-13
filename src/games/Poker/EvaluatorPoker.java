@@ -6,21 +6,19 @@ import controllers.RandomAgent;
 import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
-import games.TicTacToe.StateObserverTTT;
 import games.XArenaFuncs;
 import tools.ScoreTuple;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Evaluator for Poker
  */
 public class EvaluatorPoker extends Evaluator {
 
-	private RandomAgent randomAgent = new RandomAgent("Random");
-	private RandomAgent randomAgent2 = new RandomAgent("Random");
-	private RandomAgent randomAgent3 = new RandomAgent("Random");
+	private final RandomAgent randomAgent = new RandomAgent("Random");
+	private final RandomAgent randomAgent2 = new RandomAgent("Random");
+	private final RandomAgent randomAgent3 = new RandomAgent("Random");
 
 	protected double[] m_thresh={0.8}; // threshold for each value of m_mode
 
