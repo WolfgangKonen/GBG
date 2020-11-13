@@ -1,17 +1,28 @@
 package src.games.Poker;
 
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
+import controllers.RandomAgent;
 import games.Evaluator;
 import games.GameBoard;
+import games.StateObservation;
+import games.TicTacToe.StateObserverTTT;
+import games.XArenaFuncs;
+import tools.ScoreTuple;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Evaluator for Poker
  */
 public class EvaluatorPoker extends Evaluator {
 
-	protected double[] m_thresh={0}; // threshold for each value of m_mode
+	private RandomAgent randomAgent = new RandomAgent("Random");
+	private RandomAgent randomAgent2 = new RandomAgent("Random");
+	private RandomAgent randomAgent3 = new RandomAgent("Random");
+
+	protected double[] m_thresh={0.8}; // threshold for each value of m_mode
 
 	protected static ArrayList<StateObserverPoker> diffStartList = null;
 
@@ -27,7 +38,24 @@ public class EvaluatorPoker extends Evaluator {
 
 	@Override
 	public boolean evalAgent(PlayAgent playAgent) {
-		return false;
+		m_PlayAgent = playAgent;
+		switch(m_mode) {
+			case -1:
+				m_msg = "no evaluation done ";
+				lastResult = Double.NaN;
+				return false;
+			case 0:  return evalAgent1(m_PlayAgent,randomAgent,randomAgent2,randomAgent3,m_gb)>m_thresh[0];
+			default: return false;
+		}
+	}
+
+	public double evalAgent1(PlayAgent playAgent, PlayAgent opponent,PlayAgent opponent2,PlayAgent opponent3, GameBoard gb) {
+		StateObservation so = gb.getDefaultStartState();
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent,opponent2,opponent3), so, 1, 0);
+		lastResult = sc.scTup[0];
+		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
+		if (this.verbose>0) System.out.println(m_msg);
+		return lastResult;
 	}
 	
 
@@ -70,7 +98,7 @@ public class EvaluatorPoker extends Evaluator {
 	public String getPlotTitle() {
 		return switch (m_mode) {
 			case 0 -> "success vs Random";
-			case 1 -> "palceholder";
+			case 1 -> "placeholder";
 			default -> null;
 		};
 	}

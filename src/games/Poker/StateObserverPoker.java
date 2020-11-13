@@ -1,6 +1,5 @@
 package src.games.Poker;
 
-import game.rules.play.Play;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
@@ -54,6 +53,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	private PlayingCard[][] holeCards; //[player][card]
 	private PlayingCard[] communityCards;
 	private int dealer;
+	private int dealtCards;
 
 	private short m_phase;
 
@@ -75,7 +75,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	private boolean GAMEOVER;
 
 	private Pots pots;
-
+	private Random rand;
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
 	 * compatible with an older one (older .gamelog containing this object will become
@@ -87,6 +87,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 	//<editor-fold desc="constructor">
 	public StateObserverPoker() {
+		rand = new Random(System.currentTimeMillis());
+		dealtCards = 0;
 		lastActions = new ArrayList<>();
 		GAMEOVER = false;
 		dealer = 0;
@@ -106,12 +108,13 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 		initRound();
 
-		m_Player = openPlayers.remove();
-		setAvailableActions();
+
 		isNextActionDeterministic = true;
 	}
 
 	public StateObserverPoker(StateObserverPoker other)	{
+		rand = new Random(System.currentTimeMillis());
+		dealtCards = other.dealtCards;
 		////PokerLog.gameLog.log(Level.WARNING," brand after blueprint!");
 		debug = other.debug;
 		lastActions = new ArrayList<>();
@@ -169,10 +172,20 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		addToLog("-----------New Round----------");
 
 		m_deck = new CardDeck();
+		m_deck.shuffle();
 		m_phase = 0;
-		// everybody with chips plays again
+		dealtCards = 0;
 
-		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": InitRound()");
+
+		// cards
+		holeCards = new PlayingCard[NUM_PLAYER][2];
+		communityCards = new PlayingCard[5];
+
+		openPlayers = new LinkedList<>();
+
+		pots = new Pots();
+
+		// everybody with chips plays again
 
 		for(int i = 0;i<NUM_PLAYER;i++){
 			if(chips[i]<=0) {
@@ -182,13 +195,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			}else{
 				activePlayers[i] = true;
 				foldedPlayers[i] = false;
+				holeCards[i][0] = m_deck.draw();
+				holeCards[i][1] = m_deck.draw();
 			}
-			//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) +
-			//		": Player ["+Types.GUI_PLAYER_NAME[i]+"]" +
-			//		" Playing["+playingPlayers[i]+"]"+
-			//		" Active[" + activePlayers[i] +"]"+
-			//		" Chips[" + chips[i] +"]"
-			//		);
 		}
 
 		if(getNumPlayingPlayers()==1){
@@ -196,13 +205,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			return;
 		}
 
-		// cards
-		holeCards = new PlayingCard[NUM_PLAYER][2];
-		communityCards = new PlayingCard[5];
-
-		openPlayers = new LinkedList<>();
-
-		pots = new Pots();
 
 		// turn order
 
@@ -257,9 +259,12 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 
 		//small & big blind
-		dealCards();
+		//dealCards();
 
 		dealer = (dealer+1)%NUM_PLAYER;
+		m_Player = openPlayers.remove();
+		setAvailableActions();
+		setAvailableRandoms();
 	}
 
 	/**
@@ -276,10 +281,26 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		lastActions.add(log);
 	}
 
+	public void dealCertainCard(int id) {
+		if(!m_deck.removeCard(id)){
+			System.out.println("something went wrong!!");
+		}
+		this.communityCards[dealtCards++] = new PlayingCard(id);
+		if(dealtCards == 3) {
+			addToLog("Deal Flop : " + this.communityCards[0] + "/" + this.communityCards[1] + "/" + this.communityCards[2]);
+		} else if(dealtCards == 4) {
+			addToLog("Deal Turn : " + this.communityCards[3]);
+		} else if(dealtCards == 5) {
+			addToLog("Deal River : " + this.communityCards[4]);
+		}
+	}
+
 	public void dealCards(){
 		if(!debug) {
 			// shuffling the deck to make sure we have a random deck
 			m_deck.shuffle();
+			/*
+			//has been moved to initRound
 			if (this.m_phase == 0) {
 				// set small blind
 				// set big blind
@@ -295,6 +316,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 					//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Player ["+ Types.GUI_PLAYER_NAME[i]+"] - "+this.holeCards[i][0].toString() +"/"+this.holeCards[i][1]);
 				}
 			}
+			*/
 
 			if (m_phase == 1) {
 				// deal flop
@@ -583,6 +605,27 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	//</editor-fold>
 
 	//<editor-fold desc="advance">
+
+	/**
+	 * Advance the current state with 'action' to a new state combining the deterministic and the non-deterministic actions in one method.
+	 * Actions:
+	 * - 0 -> FOLD	: give up the current round
+	 * - 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
+	 * - 2 -> BET	: bet the "Big Blind"
+	 * - 3 -> CALL	: bet the same amount as the previous player bet
+	 * - 4 -> RAISE	: raise the last bet by the "Big Blind"
+	 * - 5 -> ALL IN: bet all remaining chips
+	 * @param action to advance the state of the game
+	 */
+	public void advance(ACTIONS action){
+		if(isNextActionDeterministic){
+			advanceDeterministic(action);
+		}
+		while(!isNextActionDeterministic){
+			advanceNondeterministic();
+		}
+	}
+
 	/**
 	 * Advance the current state with 'action' to a new state
 	 * Actions:
@@ -594,57 +637,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	 * - 5 -> ALL IN: bet all remaining chips
 	 * @param action to advance the state of the game
 	 */
-	public void advance(ACTIONS action) {
-
-		int iAction = action.toInt();
-
-		switch (iAction) {
-			case 0 -> fold();
-			case 1 -> check();
-			case 2 -> bet();
-			case 3 -> call();
-			case 4 -> raise();
-			case 5 -> allIn();
-		}
-
-
-		// only one active player left and game can progress to showdown
-		if(getNumActivePlayers()<2&&openPlayers.size()==0){
-			while(m_phase<4)
-				dealCards();
-			dealCards();
-		}else {
-			if(getNumPlayingPlayers() - getNumFoldedPlayers()==1&&openPlayers.size()==1){
-				while(m_phase<4)
-					dealCards();
-				dealCards();
-			}else {
-				// If there are no persons left with an open action the dealer will reveal the next card(s)
-				if (openPlayers.size() == 0) {
-					// next player from the last action will have the next action if it's not a showdown
-					m_Player = (m_Player + 1) % NUM_PLAYER;
-					for (int i = m_Player; i < NUM_PLAYER; i++)
-						if (playingPlayers[i] && activePlayers[i])
-							openPlayers.add(i);
-					for (int i = 0; i < m_Player; i++)
-						if (playingPlayers[i] && activePlayers[i])
-							openPlayers.add(i);
-					dealCards();
-				}
-			}
-		}
-		if(!GAMEOVER) {
-			try {
-				// next player becomes the active one
-				m_Player = openPlayers.remove();
-			}catch(Exception e){
-				System.out.println("WHAT?!");
-				throw e;
-			}
-			setAvailableActions();
-		}
-	}
-
 	public void advanceDeterministic(ACTIONS action) {
 		if(!isNextActionDeterministic) {
 			throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");
@@ -664,32 +656,44 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		if(getNumActivePlayers() <2 && openPlayers.size() == 0){
 			isNextActionDeterministic = false;
 		}else {
-			isNextActionDeterministic = !((openPlayers.size() == 0 || getNumPlayingPlayers() - getNumFoldedPlayers() == 1&& openPlayers.size() == 1));
+			//
+			// getNumPlayingPlayers() - getNumFoldedPlayers() == 1 && openPlayers.size() == 1 => everybody except one player has folded
+			// openPlayers.size() == 0 => no player has to make a move
+			isNextActionDeterministic = !((openPlayers.size() == 0 || getNumPlayingPlayers() - getNumFoldedPlayers() == 1 && openPlayers.size() == 1));
 		}
-		if(!GAMEOVER) {
+		if(!GAMEOVER && openPlayers.size() > 0) {
 			// next player becomes the active one
 			m_Player = openPlayers.remove();
 			setAvailableActions();
 		}
 	}
 
-	public void advanceNondeterministic(ACTIONS action) {
-		advanceNondeterministic();
-	}
-
-	public void advanceNondeterministic() {
-		if(isNextActionDeterministic) {
+	/**
+	 * Advance the current state with 'action' to a new state
+	 * Actions:
+	 * - 1-52: deal the card with ID
+	 * 	- 1 -> ♥ 2
+	 * 	- 2 -> ♥ 3
+	 * 	...
+	 * - 53 -> determine winner of the round
+	 * - 53 -> determine winner of the round
+	 * @param randAction to advance the state of the game
+	 */
+	public void advanceNondeterministic(ACTIONS randAction) {
+		if (isNextActionDeterministic) {
 			throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
 		}
-		// only one active player left and game can progress to showdown
-		if(getNumActivePlayers()<2&&openPlayers.size()==0){
-			while(m_phase<4)
-				dealCards();
-			dealCards();
-		}else {
-			// If there are no persons left with an open action the dealer will reveal the next card(s)
-			if (openPlayers.size() == 0) {
-
+		int action = randAction.toInt();
+		isNextActionDeterministic = true;
+		if (action < 53){
+			dealCertainCard(action);
+			// only one active player left and game can progress to showdown
+			// OR
+			// only two cards have been dealt
+			if (getNumActivePlayers() < 2 || dealtCards < 3) {
+				isNextActionDeterministic = false;
+			}
+			if(!GAMEOVER&&isNextActionDeterministic) {
 				// next player from the last action will have the next action if it's not a showdown
 				m_Player = (m_Player + 1) % NUM_PLAYER;
 				for (int i = m_Player; i < NUM_PLAYER; i++)
@@ -698,16 +702,53 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 				for (int i = 0; i < m_Player; i++)
 					if (playingPlayers[i] && activePlayers[i])
 						openPlayers.add(i);
-				dealCards();
+
+				if(openPlayers.size()==0)
+					throw new RuntimeException();
+
+				// next player becomes the active one
+				m_Player = openPlayers.remove();
+				setAvailableActions();
 			}
+		}else{
+			//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Showdown - finding the winner...");
+			addToLog("Showdown - finding the winner...");
+			long[] scores = determineWinner();
+			boolean[][] claims = pots.getClaims();
+			for(int p = 0;p<claims.length;p++){
+				long maxScore = 0;
+				ArrayList<Integer> winners = new ArrayList<>();
+				for(int i = 0;i<scores.length;i++) {
+					if(maxScore == scores[i])
+						winners.add(i);
+					if(claims[p][i]&&maxScore<scores[i]){
+						maxScore = scores[i];
+						winners.clear();
+						winners.add(i);
+					}
+				}
+				int numWinners = winners.size();
+				for(int winner:winners){
+					//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Integer.toString(winner)+" has won Pot ("+Integer.toString(p)+") with "+Integer.toString(pots.getPotSize(p)/numWinners) +" chips");
+					addToLog(winner +" has won Pot ("+ p +") with "+ pots.getPotSize(p) / numWinners +" chips");
+					chips[winner] += pots.getPotSize(p)/numWinners;
+				}
+			}
+			addToLog("-----------End Round----------");
+			for(int i = 0 ; i <getNumPlayers() ; i++)
+				addToLog("Chips "+Types.GUI_PLAYER_NAME[i]+": "+chips[i] +" " +playingPlayers[i]);
+			initRound();
+			//moved to initRound
+			//setAvailableActions();
 		}
-		if(!GAMEOVER) {
-			// next player becomes the active one
-			m_Player = openPlayers.remove();
-			setAvailableActions();
-		}
-		isNextActionDeterministic = true;
+		setAvailableRandoms();
 	}
+
+	public void advanceNondeterministic() {
+		ArrayList<ACTIONS> possibleRandoms = getAvailableRandoms();
+		advanceNondeterministic(possibleRandoms.get(rand.nextInt(possibleRandoms.size())));
+	}
+
 	//</editor-fold>
 
 	//<editor-fold desc="GBG">
@@ -779,7 +820,17 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			availRan.add(ACTIONS.fromInt(viableMove));
 		}
 		return availRan;
+	}
 
+	public void setAvailableRandoms(){
+		ArrayList<Integer> availRan = new ArrayList<>();
+		if (dealtCards < 5){
+			for (int card : m_deck.toIdArray())
+				availRan.add(card);
+		}else{
+			availRan.add(53);
+		}
+		availableRandoms =  availRan;
 	}
 
 	public int getNumAvailableRandoms() {
@@ -817,6 +868,12 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 	@Override
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
+		return Math.random();
+	}
+
+
+	@Override
+	public double getReward(int player, boolean rewardIsGameScore){
 		return Math.random();
 	}
 
@@ -927,7 +984,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	}
 
 	public void raise(){
-		int raise = pots.getOpenPlayer(m_Player)+BIGBLIND;
+		double raise = pots.getOpenPlayer(m_Player)+BIGBLIND;
 		//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[m_Player]+": 'RAISE' ("+Integer.toString(raise)+")");
 		betSub(raise);
 		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'raise' ("+raise+")");

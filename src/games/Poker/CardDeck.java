@@ -1,5 +1,7 @@
 package src.games.Poker;
 
+import game.rules.play.Play;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -74,4 +76,25 @@ public class CardDeck {
      * @return number of cards in the deck
      */
     public int getTotalCards(){return cards.size();}
+
+    public PlayingCard[] toArray(){
+        //return cards.stream().toArray(n -> new PlayingCard[n]);
+        return cards.toArray(PlayingCard[]::new);
+    }
+
+    public int[] toIdArray(){
+        int[] idArray = new int[getTotalCards()];
+        int tmp = 0;
+        for(PlayingCard card:cards)
+            idArray[tmp++] = card.getId();
+        return idArray;
+    }
+
+    public boolean removeCard(PlayingCard card){
+        return cards.remove(card);
+    }
+
+    public boolean removeCard(int id){
+        return cards.remove(new PlayingCard(id));
+    }
 }
