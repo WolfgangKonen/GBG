@@ -32,6 +32,10 @@ public final class RegularAction implements ApplyableAction {
         final var stateCopy = so.copy();
         stateCopy.advance(action);
 
+        if (so.getNumPlayers()==1)  return stateCopy;
+        // WK: fix for all 1-player games. If we don't return here, the app will run into swapCurrentPlayer and then
+        // stop with a RuntimeException because the 1-player game does not override setPlayer(int) [why should it?]
+
         return stateCopy.getPlayer() == so.getPlayer() // If it is still the same player's turn after the action has been performed,
                                                        // a passing situation has occurred that has been skipped.
             ? StateObservationExtensions.swapCurrentPlayer(stateCopy)

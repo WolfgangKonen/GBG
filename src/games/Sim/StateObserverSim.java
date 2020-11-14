@@ -56,10 +56,9 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	 * The list of available actions
 	 */
 	private ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();
-	/**
-	 * The list of last moves in an episode. Each move is stored as {@link Integer} {@code iAction}.
-	 */
-	private ArrayList<Integer> lastMoves;
+
+//	private ArrayList<Integer> lastMoves;		// this is now in ObserverBase
+
 	/**
 	 * This array holds the nodes involved in the last action taken. More precisely, 
 	 * {@code lastNodes[0]} and {@code lastNodes[1]} hold the node numbers connected by 
@@ -74,12 +73,13 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	StateObserverSim() 
 	{
+		super();
 		config(ConfigSim.NUM_PLAYERS, ConfigSim.NUM_NODES);
 	}
 		
 	StateObserverSim(StateObserverSim other)
 	{
-		super(other);		// copy members m_counter and stored*
+		super(other);		// copy members m_counter, lastMoves and stored*
 		this.numNodes = other.numNodes;
 		this.numPlayers = other.numPlayers;
 		this.player = other.player;
@@ -88,7 +88,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		setupLinks(other.numNodes);
 		copyLinks(other.lFrom);
 		
-		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();
 		if (other.availableActions!=null)	// this check is needed when loading older logs
 			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
@@ -105,7 +104,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		
 		setupLinks(numberOfNodes);
 		setAvailableActions();
-		this.lastMoves = new ArrayList<>();
 	}
 	
 	@Override
@@ -363,8 +361,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		finalSim.checkIfPlayerLost();
 		
 		player = getNextPlayer();	// 2-player games: 0,1,0,1,...;   3-player games: 0,1,2,0,1,...
-		super.incrementMoveCounter();		
-		lastMoves.add(action.toInt());
+		super.incrementMoveCounter();
+		super.addToLastMoves(action);
 //		System.out.println("lastMove: "+action.toInt());
 //		System.out.println(this.stringDescr());		// only debug
 	}
@@ -399,15 +397,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	public double getReward(int player, boolean rewardIsGameScore) {
 		// currently, getReward and getGameScore are the same in Sim.  
 		return getGameScore(player);
-	}
-	
-	public int getLastMove() {
-		if (lastMoves.size() == 0) return -1;
-		return lastMoves.get(lastMoves.size()-1);
-	}
-	
-	public void resetLastMoves() {
-		this.lastMoves = new ArrayList<>();
 	}
 	
 	@Override
@@ -497,7 +486,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return numNodes;
 	}
 	
-	private int getNextPlayer()
+	protected int getNextPlayer()
 	{
 		int nextPlayer = (player+1)%numPlayers;
 		

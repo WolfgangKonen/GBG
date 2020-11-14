@@ -56,6 +56,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverCube() {
+		super();
 		m_state = csFactory.makeCubeState(); 		// default (solved) cube of type CubeConfig.cubeType
 		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
 		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
@@ -64,6 +65,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
 	@Deprecated
 	public StateObserverCube(BoardVector boardVector) {
+		super();
 		m_state = csFactory.makeCubeState(boardVector);
 		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
 		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
@@ -72,6 +74,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	
 	// NOTE: this is NOT the copy constructor. See next method for copy constructor.
 	public StateObserverCube(CubeState other) {
+		super();
 		m_state = csFactory.makeCubeState(other);
 		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
 		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
@@ -79,7 +82,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 	
 	public StateObserverCube(StateObserverCube other) {
-		super(other);		// copy members m_counter and stored*
+		super(other);		// copy members m_counter, lastMoves and stored*
 		m_state = csFactory.makeCubeState(other.m_state);
 		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
 		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
@@ -150,8 +153,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * For Rubik's Cube only the game-over state (solved cube) has a non-zero game score
 	 * <pre>
 	 *       REWARD_POSITIVE </pre>
-	 * <p>
-	 * 
+	 * all other states have game score 0.
+	 *
 	 * @param refer only needed for the interface, not relevant in this 1-person game
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 	
@@ -254,6 +257,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		case 5: m_state.BTw(j+1); break;
 		}
 		this.setAvailableActions();
+		super.addToLastMoves(action);
 		super.incrementMoveCounter();
 	}
 
@@ -326,6 +330,12 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     public int getPlayer() {
         return 0;
     }
+
+	// When activating "Wrapper MCTS" then we need setPlayer to avoid an exception caused by execution of a pass-branch.
+	// But we should not get with RubiksCube in a pass-branch at all!! --> Clarify! /WK/
+//	public void setPlayer(int p) {
+//		// dummy, needed for testing MCTSWrapperAgent
+//	}
 
 	public int getNumPlayers() {
 		return 1;				// the Cube is a one-player puzzle

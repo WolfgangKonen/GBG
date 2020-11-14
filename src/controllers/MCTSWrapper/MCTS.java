@@ -11,38 +11,51 @@ import controllers.MCTSWrapper.stateApproximation.Approximator;
 public final class MCTS {
     private final double c_puct;
     private final Approximator approximator;
+    private final int maxDepth;
 
     /**
      * @param approximator A component that approximates the value of a given game state.
      * @param c_puct A PUCT parameter that controls the importance of
      *               exploring new nodes instead of exploiting known ones.
+     * @param maxDepth Return from search, if depth==maxDepth. Set to -1, if search should not return because
+     *                 of depth. (-1 will be transformed to Integer.MAX_VALUE.)
      */
-    public MCTS(final Approximator approximator, final double c_puct) {
+    public MCTS(final Approximator approximator, final double c_puct, final int maxDepth) {
         this.approximator = approximator;
         this.c_puct = c_puct;
+        this.maxDepth = (maxDepth==-1) ? Integer.MAX_VALUE : maxDepth;
     }
 
     /**
-     * Recursive monte carlo tree search that is applyable to 2-player games
+     * Recursive monte carlo tree search that is applicable to 1- and 2-player games
      * which have separate states for situations where a player has to pass.
      * <p>
-     * Values are negated because they are viewed from the previous player's perspective.
+     * Values are negated in 2-player games because they are viewed from the previous player's perspective.
+     * <p>
+     *     ATTENTION: This method is not yet viable for N>2 players (!!)
      *
      * @param node Node where the tree search starts.
-     * @return The evaluation of a reached leaf node's game state negated on each recursion level.
+     * @return The evaluation of a reached leaf node's game state (negated on each recursion level for 2-player games).
      */
-    public double search(final MCTSNode node) {
-        // If a terminating game state is reached, return its negated value.
-        if (node.gameState.isFinalGameState())
-            return -node.gameState.getFinalGameScore();
+    public double search(final MCTSNode node, final int depth) {
+        final int sign = node.gameState.getNumPlayers()==1 ? (+1) : (-1);   // /WK/ extension for 1-player games
 
-        // If a non expanded node is reached, return its negated value
+        // If a terminating game state is reached, return its negated value (2-player game) or its value (1-player game)
+        if (node.gameState.isFinalGameState())
+            return sign * node.gameState.getFinalGameScore();       // /WK/ sign
+
+        if (depth > this.maxDepth) {       // /WK/ testing for RubiksCube
+            System.out.println("maxDepth="+this.maxDepth+" reached. Returning");
+            return 0;           // return with reward 0. Alternative choice would be REWARD_NEGATIVE.
+        }
+
+        // If a non expanded node is reached, return its negated value (2-player game) or its value (1-player game)
         // after it got expanded and its move probabilities were set.
         if (!node.isExpanded()) {
             final var valueAndMoveProbabilities = node.gameState.getApproximatedValueAndMoveProbabilities(approximator);
             node.setMoveProbabilities(valueAndMoveProbabilities.element2);
             node.setExpanded();
-            return -valueAndMoveProbabilities.element1;
+            return sign * valueAndMoveProbabilities.element1;       // /WK/ sign
         }
 
         // Here the node is already expanded and doesn't contain a terminating game state.
@@ -54,7 +67,7 @@ public final class MCTS {
         final var selectedAction = selected.element1;
         final var selectedNode = selected.element2;
 
-        final var childValue = search(selectedNode); // Recursive call of the tree search for the child node
+        final var childValue = search(selectedNode, depth+1); // Recursive call of the tree search for the child node
 
         // Update the nodes mean value (Q) with the childValue.
         final var visitCount = node.getN(selectedAction);
@@ -67,6 +80,6 @@ public final class MCTS {
         // Increment the nodes visit count (N).
         node.incrementVisitCount(selectedAction);
 
-        return -childValue;
+        return sign * childValue;                   // /WK/ sign
     }
 }

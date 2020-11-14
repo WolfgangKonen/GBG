@@ -86,6 +86,11 @@ public final class GameStateIncludingPass {
         return state.getGameScore(state);
     }
 
+    public int getNumPlayers() { return state.getNumPlayers(); }
+
+    public int getMoveCounter() { return state.getMoveCounter(); }
+    public String stringDescr() { return state.stringDescr(); }
+
     /**
      * Delegates the approximation of the values v and p necessary for a Monte Carlo Tree Search to a given approximator.
      * <p>
@@ -118,6 +123,8 @@ public final class GameStateIncludingPass {
         );
 
         final var valueAndPolicy = approximator.predict(swappedState.state);
+
+        assert(state.getNumPlayers()==2) : "Error in GameStateIncludingPass: Tuple creation is only valid for 2-player games!";
 
         return new Tuple<>(
             -valueAndPolicy.element1, // negated evaluation from the opposing player's point of view

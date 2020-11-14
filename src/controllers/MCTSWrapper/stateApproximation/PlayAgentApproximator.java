@@ -1,5 +1,6 @@
 package controllers.MCTSWrapper.stateApproximation;
 
+import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.MCTSWrapper.utils.Tuple;
 import controllers.PlayAgent;
 import games.StateObservation;
@@ -22,7 +23,12 @@ public final class PlayAgentApproximator implements Approximator {
      */
     public double getScore(final StateObservation sob) {
         return agent.getScore(sob);
+//        int P = sob.getPlayer();        // suggestion WK - but probably not needed yet
+//        return sob.isGameOver() ? sob.getRewardTuple(true).scTup[P]
+//                                : agent.getScore(sob) + sob.getStepRewardTuple().scTup[P];
     }
+    // /WK/ If the method were really used (currently it is not), it would be perhaps necessary to include the reward
+    //      and step reward as indicated in the now commented lines
 
     /**
      * Predicts the value v and the move probabilities p of a given StateObservation.
@@ -31,7 +37,7 @@ public final class PlayAgentApproximator implements Approximator {
      */
     @Override
     public Tuple<Double, double[]> predict(final StateObservation stateObservation) {
-        final var actions_vt = agent.getNextAction2(stateObservation, false, false);
+        final var actions_vt = agent.getNextAction2(stateObservation, false, true);
         return new Tuple<>(
             actions_vt.getVBest(),
             moveProbabilitiesForVTable(actions_vt.getVTable(), stateObservation)
@@ -39,12 +45,16 @@ public final class PlayAgentApproximator implements Approximator {
     }
 
     private static double[] moveProbabilitiesForVTable(final double[] vTable, final StateObservation stateObservation) {
-        return softmax(
+        return optSoftmax(
             vTable.length > stateObservation.getNumAvailableActions() // For historical reasons the vTable is sometimes
                                                                       // larger by 1 than the number of available actions.
                 ? Arrays.copyOfRange(vTable, 0, stateObservation.getNumAvailableActions())
                 : vTable
         );
+    }
+
+    private static double[] optSoftmax(final double[] values) {
+        return (ConfigWrapper.USESOFTMAX) ? softmax(values) : values;
     }
 
     private static double[] softmax(final double[] values) {

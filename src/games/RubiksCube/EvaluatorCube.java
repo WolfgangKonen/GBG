@@ -108,7 +108,7 @@ public class EvaluatorCube extends Evaluator {
  			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
  				so = ((GameBoardCube) m_gb).chooseStartState(p);	// uses selectByTwist1(p)
  				so.resetMoveCounter();
- 				
+
                 while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
  	                 so.advance(pa.getNextAction2(so.partialState(), false, true));
                 }
@@ -117,7 +117,7 @@ public class EvaluatorCube extends Evaluator {
     			tsList.add(tstats);
 
                 if(verbose > 1) {
-                    System.out.print("Finished game " + n + " with moveNum " + moveNum + " twists.\n");
+                    System.out.print("Finished game " +p+","+ n + " with moveNum " + moveNum + " twists.\n");
                 }
 			} // for (n)
 			countStates += CubeConfig.EvalNmax[p];

@@ -170,7 +170,7 @@ public class TD_Lin implements TD_func, Serializable {
 		int i,k;
 
     	// assert ev[0][0]==0.0 : "ev[0][0] is not 0";
-		// This assertion is only for TicTacToe diagnostics and first n-Tuple = {0,1,2} or similar:
+		// This assertion is only for TicTacToe diagnostics and first nTuple = {0,1,2} or similar:
 		// in this case ev[0][0] corresponds to the weight for "OOO" which is a final 
 		// state and as such should never be trained.
 
