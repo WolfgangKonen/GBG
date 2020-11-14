@@ -14,7 +14,7 @@ public class ConfigWrapper {
 
     /**
      * A switch for {@link MCTSWrapperAgent}:
-     *  If false (recommended setting for ConnectFour), force tree re-build in every call.
+     *  If false (recommended setting for ConnectFour, RubiksCube), force tree re-build in every call.
      *  If true (recommended setting for Othello), re-use the tree (i.e. as in JS's master code).
      */
     public static boolean USELASTMCTS = true;

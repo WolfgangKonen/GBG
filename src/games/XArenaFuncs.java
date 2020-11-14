@@ -520,7 +520,8 @@ public class XArenaFuncs {
 				oPar.getWrapperMCTSIterations(),
 				1,
 				new PlayAgentApproximator(qa),
-				"MCTS-Wrapped "+qa.getName()
+				"MCTS-Wrapped "+qa.getName(),
+					oPar.getStopEval()
             );
 		}
 

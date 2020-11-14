@@ -153,8 +153,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * For Rubik's Cube only the game-over state (solved cube) has a non-zero game score
 	 * <pre>
 	 *       REWARD_POSITIVE </pre>
-	 * <p>
-	 * 
+	 * all other states have game score 0.
+	 *
 	 * @param refer only needed for the interface, not relevant in this 1-person game
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 	
