@@ -518,7 +518,7 @@ public class XArenaFuncs {
 		if(oPar.getWrapperMCTSIterations() > 0){
 			qa = new MCTSWrapperAgent(
 				oPar.getWrapperMCTSIterations(),
-				1,
+				oPar.getWrapperMCTS_PUCT(),
 				new PlayAgentApproximator(qa),
 				"MCTS-Wrapped "+qa.getName(),
 					oPar.getStopEval()

@@ -71,6 +71,7 @@ public class OtherParams extends Frame {
 	JLabel rgs_L;
 	JLabel wNply_L;
 	JLabel wMCTS_L;
+	JLabel wMCTSpUCT_L;
 	JLabel pMax_L;
 	JLabel rBuf_L;
 	public JTextField numEval_T;
@@ -79,6 +80,7 @@ public class OtherParams extends Frame {
 	public JTextField stopEval_T;
 	public JTextField wNply_T;
 	public JTextField wMCTS_T;
+	public JTextField wMCTSpUCT_T;
 	public JTextField pMax_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
@@ -106,6 +108,7 @@ public class OtherParams extends Frame {
 		stopEval_T = new JTextField("-1"); 	// the defaults
 		wNply_T = new JTextField("0"); 		//
 		wMCTS_T = new JTextField("0"); 		//
+		wMCTSpUCT_T = new JTextField("1"); 		//
 		pMax_T = new JTextField("6");		//
 		numEval_L = new JLabel("numEval");
 		epiLeng_L = new JLabel("Episode Length");
@@ -116,6 +119,7 @@ public class OtherParams extends Frame {
 		rgs_L = new JLabel("Reward = Score");
 		wNply_L = new JLabel("Wrapper nPly");
 		wMCTS_L = new JLabel("Wrapper MCTS");
+		wMCTSpUCT_L = new JLabel("PUCT for Wrapper MCTS");
 		pMax_L = new JLabel("pMax");
 		rBuf_L = new JLabel("Replay buffer");
 		chooseS01 = new Checkbox("", false);
@@ -145,6 +149,7 @@ public class OtherParams extends Frame {
 				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
 		wMCTS_L.setToolTipText(
 				"Wrapper MCTS look ahead (for play, compete, eval).");
+		wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper.");
 		pMax_L.setToolTipText(
 				"RubiksCube: number of initial twists (during traing and eval)");
 		rBuf_L.setToolTipText(
@@ -201,11 +206,14 @@ public class OtherParams extends Frame {
 		oPanel.add(stopEval_L);
 		oPanel.add(stopEval_T);
 
-		oPanel.add(wNply_L);
-		oPanel.add(wNply_T);
-
 		oPanel.add(wMCTS_L);
 		oPanel.add(wMCTS_T);
+
+		oPanel.add(wMCTSpUCT_L);
+		oPanel.add(wMCTSpUCT_T);
+
+		oPanel.add(wNply_L);
+		oPanel.add(wNply_T);
 
 		oPanel.add(new Canvas());
 		oPanel.add(new Canvas());
@@ -283,6 +291,10 @@ public class OtherParams extends Frame {
 
 	public int getWrapperMCTSIterations() {
 		return Integer.parseInt(wMCTS_T.getText());
+	}
+
+	public double getWrapperMCTS_PUCT() {
+		return Double.parseDouble(wMCTSpUCT_T.getText());
 	}
 
 	public int getpMaxRubiks() {
@@ -370,6 +382,10 @@ public class OtherParams extends Frame {
 
 	public void setWrapperMCTSIterations(final int value) {
 		wMCTS_T.setText(value + "");
+	}
+
+	public void setWrapperMCTS_PUCT(final double value) {
+		wMCTSpUCT_T.setText(value + "");
 	}
 
 	public void setpMaxRubiks(int value) {
