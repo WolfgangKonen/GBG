@@ -9,6 +9,7 @@ import games.Othello.StateObserverOthello;
 import games.StateObservation;
 import tools.Types;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -134,8 +135,25 @@ public final class MCTSWrapperAgent extends AgentBase {
         return new Types.ACTIONS_VT(
             lastSelectedAction,
             false,
-            mctsNode.moveProbabilities.values().stream().mapToDouble(v -> v).toArray()
+            getVTableFor(mctsNode)
         );
+    }
+
+    private double[] getVTableFor(final MCTSNode mctsNode) {
+        return getDistributionOver(
+            Arrays
+                .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
+                .mapToDouble(action -> mctsNode.visitCounts.getOrDefault(action.getId(), 0))
+                .toArray()
+        );
+    }
+
+    private double[] getDistributionOver(final double[] values) {
+        final var sum = Arrays.stream(values).sum();
+
+        return Arrays.stream(values)
+            .map(v -> v / sum)
+            .toArray();
     }
 
     @Override
