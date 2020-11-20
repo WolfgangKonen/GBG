@@ -26,6 +26,7 @@ public class ParOther implements Serializable {
     public static int DEFAULT_STOP_EVAL = 100;
     public static int DEFAULT_WRAPPER_NPLY = 0;
     public static int DEFAULT_WRAPPER_MCTS_ITERATIONS = 0;
+    public static double DEFAULT_WRAPPER_MCTS_PUCT = 1;
     public static int DEFAULT_PMAX_RUBIKS = 6;
 
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
@@ -36,6 +37,7 @@ public class ParOther implements Serializable {
     private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval
     private int wrapperNply = DEFAULT_WRAPPER_NPLY;
 	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
+	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
 	private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
 	private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
@@ -81,6 +83,7 @@ public class ParOther implements Serializable {
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
 		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
+		this.wrapperMCTS_PUCT = op.getWrapperMCTS_PUCT();
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
@@ -101,6 +104,7 @@ public class ParOther implements Serializable {
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
 		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
+		this.wrapperMCTS_PUCT = op.getWrapperMCTS_PUCT();
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
@@ -169,6 +173,10 @@ public class ParOther implements Serializable {
 	
 	public int getWrapperMCTSIterations() {
 		return wrapperMCTSIterations;
+	}
+
+	public double getWrapperMCTS_PUCT() {
+		return wrapperMCTS_PUCT;
 	}
 
     public int getpMaxRubiks() { return pMaxRubiks;	}
@@ -252,6 +260,12 @@ public class ParOther implements Serializable {
 		this.wrapperMCTSIterations =iterations;
 		if (otparams!=null)
 			otparams.setWrapperMCTSIterations(iterations);
+	}
+
+	public void setWrapperMCTS_PUCT(final double puct) {
+		this.wrapperMCTS_PUCT =puct;
+		if (otparams!=null)
+			otparams.setWrapperMCTS_PUCT(puct);
 	}
 	
 	public void setpMaxRubiks(int pMaxRubiks) {
