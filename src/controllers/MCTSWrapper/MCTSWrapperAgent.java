@@ -75,8 +75,8 @@ public final class MCTSWrapperAgent extends AgentBase {
                             +",  pastActions.size:"+pastActions.size());
                 }
             }
-            for (int i = 1 + pastActions.indexOf(lastSelectedAction); i < pastActions.size(); i++) {
-                node = node.childNodes.get(pastActions.get(i));
+            for (int i = 1 + pastActions.lastIndexOf(lastSelectedAction); i < pastActions.size(); i++) {
+                node = node.childNodes.getOrDefault(pastActions.get(i), null);
                 if (node!=null) {
                     if (node.gameState.isFinalGameState()) {        // /WK/ debug
                         System.err.println("*** Unexpected final state in child node!");
