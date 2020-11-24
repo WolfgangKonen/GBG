@@ -4,7 +4,10 @@ import controllers.MCTSWrapper.stateApproximation.Approximator;
 import controllers.MCTSWrapper.utils.Lazy;
 import controllers.MCTSWrapper.utils.StateObservationExtensions;
 import controllers.MCTSWrapper.utils.Tuple;
+import games.ObserverBase;
 import games.StateObservation;
+
+import java.util.ArrayList;
 
 /**
  * Represents a game state where pass states are not skipped.
@@ -90,6 +93,7 @@ public final class GameStateIncludingPass {
 
     public int getMoveCounter() { return state.getMoveCounter(); }
     public String stringDescr() { return state.stringDescr(); }
+    public ArrayList<Integer> getLastMoves() { return ((ObserverBase) state).getLastMoves(); }
 
     /**
      * Delegates the approximation of the values v and p necessary for a Monte Carlo Tree Search to a given approximator.
