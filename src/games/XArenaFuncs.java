@@ -1060,6 +1060,8 @@ public class XArenaFuncs {
 		}
 
 		for (int k = 0; k < competeNum; k++) {
+			for (int i = 0; i < numPlayers; i++)
+				paVector.pavec[i].resetAgent();
 
 			int player = startSO.getPlayer();
 			so = startSO.copy();
@@ -1145,7 +1147,7 @@ public class XArenaFuncs {
 	 * in the indicated places. 'Swap Compete' (only 2-player games) performs
 	 * competeNum competitions AgentX as O vs. AgentO as X. 'Compete All Roles'
 	 * lets each agent play in each place or role 0,1,...,N. The results are
-	 * shifted back to the agents' first place.
+	 * shifted back to the agents' initial placement.
 	 * <p>
 	 * The agents are fetched from {@code xab} and are assumed to be trained
 	 * (!). The parameters for the agents are fetched from the param tabs. The
@@ -1154,7 +1156,7 @@ public class XArenaFuncs {
 	 * 
 	 * @param swap
 	 *            {@code false} for 'Compete' and {@code true} for 'Swap
-	 *            Compete'
+	 *            Compete' (only 2-player games)
 	 * @param allRoles
 	 *            {@code true} for 'Compete All Roles' ({@code swap} is then
 	 *            irrelevant)

@@ -104,8 +104,9 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	abstract public ArrayList<ACTIONS> getAvailableActions();
 	
-	protected void advanceBase() {
+	protected void advanceBase(ACTIONS action) {
 		this.creatingPlayer = this.getPlayer();
+		this.addToLastMoves(action);
 	}
 
 	/**

@@ -3,7 +3,9 @@ package controllers.MCTSWrapper;
 import controllers.MCTSWrapper.passStates.ApplyableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.utils.Tuple;
+import games.ObserverBase;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,10 +107,13 @@ public final class MCTSNode {
         return moveProbabilities.getOrDefault(action.getId(), 0.0);
     }
 
+    public ArrayList<Integer> getLastMoves() { return gameState.getLastMoves(); }
+
     void incrementVisitCount(final ApplyableAction action) {
         visitCounts.put(
             action.getId(),
             getN(action) + 1
         );
     }
+
 }

@@ -129,6 +129,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public void setAgentState(AgentState aState) {
 		m_agentState = aState;
 	}
+	public void resetAgent() { ; }
 
 	public String getName() {
 		return m_name;

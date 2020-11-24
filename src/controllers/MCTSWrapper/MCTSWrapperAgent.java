@@ -1,14 +1,17 @@
 package controllers.MCTSWrapper;
 
+import TournamentSystem.TSTimeStorage;
 import controllers.AgentBase;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.passStates.PassAction;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
+import controllers.PlayAgtVector;
 import games.ObserverBase;
 import games.Othello.StateObserverOthello;
 import games.StateObservation;
 import tools.Types;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
@@ -47,6 +50,18 @@ public final class MCTSWrapperAgent extends AgentBase {
     private int lastSelectedAction = Integer.MIN_VALUE;
     private MCTSNode lastSelectedNode;
 
+    /**
+     * reset agent when starting a new episode
+     * (needed when re-using an agent, e.g. in competeNum episodes during a competition
+     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])})
+     *
+     */
+    @Override
+    public void resetAgent() {
+        this.lastSelectedNode = null;
+        this.lastSelectedAction = Integer.MIN_VALUE;
+    }
+
     @Override
     public Types.ACTIONS_VT getNextAction2(
         final StateObservation sob,
@@ -64,24 +79,40 @@ public final class MCTSWrapperAgent extends AgentBase {
 
             // In the following, the moves made since the last cache of the search tree are reconstructed
             // on the last saved mcts node. This should result in the mcts node belonging to the current state of the game.
-            final var pastActions = ((ObserverBase) sob).getLastMoves();    // /WK/
-//            final var pastActions = ((StateObserverOthello) sob).lastMoves;
+            final var pastActions = ((ObserverBase) sob).getLastMoves();    // /WK/ new
 
             var node = lastSelectedNode;
-            if (node!=null) {                       // /WK/ debug
-                if (node.gameState.isFinalGameState()) {
-                    System.err.println("Unexpected final state via lastSelectedNode!");
-                    System.err.println("pastActions index: "+pastActions.indexOf(lastSelectedAction)
-                            +",  pastActions.size:"+pastActions.size());
-                }
-            }
-            for (int i = 1 + pastActions.indexOf(lastSelectedAction); i < pastActions.size(); i++) {
+//            if (node!=null) {                       // /WK/ debug
+//                if (node.gameState.isFinalGameState()) {
+//                    System.err.println("Unexpected final state via lastSelectedNode!");
+//                    System.err.println("pastActions index: "+pastActions.indexOf(lastSelectedAction)
+//                            +",  pastActions.size:"+pastActions.size());
+//                }
+//            }
+
+            // The former for-loop statement
+            //     for (int i = 1 + pastActions.indexOf(lastSelectedAction); i < pastActions.size(); i++) { ...
+            // was correct for Othello but WRONG for games with recurring actions (like ConnectFour, RubiksCube, ...).
+            // Because if pastActions contains an action (e.g. 'take column 3' in ConnectFour) several times, indexOf()
+            // might select the wrong one. Even lastIndexOf() will not help, we mean to grab the last action of
+            // MCTSWrapperAgent, but the opponent might have taken the same action afterwords.
+            //
+            // We follow another solution: We get with sz the size of lastMoves at lastSelectedAction-time and start
+            // with i=sz in the pastActions-loop (pastActions = lastMoves of sob):
+            int sz=lastSelectedNode.getLastMoves().size();
+            // assert (sz==1 + pastActions.indexOf(lastSelectedAction)) : "Oops, sz mismatch!";
+            // The above assertion is only correct for each-action-only-once games like Othello (!). It was used in the
+            // Othello-case to check that the sz-logic is correct.
+            assert (pastActions.get(sz-1)==lastSelectedAction) : "Oops, action mismatch!";  // /WK/ general check
+            for (int i = sz; i < pastActions.size(); i++) {
                 node = node.childNodes.get(pastActions.get(i));
-                if (node!=null) {
-                    if (node.gameState.isFinalGameState()) {        // /WK/ debug
-                        System.err.println("*** Unexpected final state in child node!");
-                    }
-                }
+                //node = node.childNodes.getOrDefault(pastActions.get(i), null);   // alternative suggestion from JS
+
+//              if (node!=null) {
+//                  if (node.gameState.isFinalGameState()) {        // /WK/ debug
+//                      System.err.println("*** Unexpected final state in child node!");
+//                  }
+//              }
 
                 if (node == null) {
                     // In this case the current game state is not present in the previously expanded search tree,
@@ -93,22 +124,27 @@ public final class MCTSWrapperAgent extends AgentBase {
                     }
                     break;
                 }
-                if (node.gameState.isFinalGameState()) {            // /WK/ debug, new if-branch for RubiksCube
-                    node = new MCTSNode(new GameStateIncludingPass(sob));
-                    if (node.gameState.isFinalGameState()) {
-                        System.err.println("Unexpected final state in final-state-branch!");
-                    }
-                    break;
-                }
+//              if (node.gameState.isFinalGameState()) {            // /WK/ debug, new if-branch for RubiksCube
+//                    node = new MCTSNode(new GameStateIncludingPass(sob));
+//                    if (node.gameState.isFinalGameState()) {
+//                        System.err.println("Unexpected final state in final-state-branch!");
+//                    }
+//                    break;
+//              }
             }
             mctsNode = node;
             if (mctsNode.gameState.isFinalGameState()) {        // WK, fix for RubiksCube
-                System.err.println("Unexpected final state for mctsNode! --> Replacing");
-                mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
+//                System.err.println("Unexpected final state for mctsNode! --> Replacing");
+//                mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
+                System.err.println("Unexpected final state for mctsNode! --> NOT Replacing");
             }
         }
 
         // At this point mctsNode represents the current game state's node in the monte carlo search tree.
+
+        // /WK/ a possible assertion, which turns out to be violated from time to time in RubiksCube.
+        //      It seems always true in the Othello case --> TODO: Clarify the RubiksCube case!
+        //assert (mctsNode.gameState.stringDescr().equals(sob.stringDescr())) : "Oops, state mismatch!";
 
         // Performs the given number of mcts iterations.
         for (int i = 0; i < iterations; i++) {

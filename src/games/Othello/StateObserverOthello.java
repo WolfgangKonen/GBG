@@ -8,8 +8,8 @@ import tools.Types.WINNER;
 
 import java.util.ArrayList;
 /**
- * This class holds any valid Othello game state. It is coded
- * in a two dimensional int[8][8] array, where each index represents either 
+ * This class holds valid Othello game state objects. It is coded
+ * as a two dimensional int[8][8] array, where each index represents either
  * <ul>
  * <li>a  Black cell ("O") = 0,
  * <li>a  White cell ("X") = 1,
@@ -58,7 +58,7 @@ public class StateObserverOthello extends ObserverBase{
 	private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
 	
 	protected int[][] currentGameState;
-	private int playerNextMove; 
+	private int playerNextMove; 	// the player to move in the current state
 	private int countBlack, countWhite;	// probably never really needed
 	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
 //	public ArrayList<Integer> lastMoves;		// this is now in ObserverBase
@@ -187,7 +187,7 @@ public class StateObserverOthello extends ObserverBase{
 	 */
 	public WINNER winStatus() {
 		assert isGameOver() :"Game isn't over";
-		assert this.getPlayer()==this.playerNextMove : "Oops, this.getPlayer() differs from playerNextMove!";
+		//assert this.getPlayer()==this.playerNextMove : "Oops, this.getPlayer() differs from playerNextMove!";
 		int countPlayer = 0, countOpponent = 0;
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
 		{
@@ -293,10 +293,7 @@ public class StateObserverOthello extends ObserverBase{
 		if(availableActions.size() > 0 ) {
 			playerNextMove = getOpponent(playerNextMove);  // the normal case
 		}
-//		else {
-//			// nothing to do
-//		}
-		
+
 		if (playerNextMove==prevPlayer)
 			setAvailableActions();	// yes, we have to call possibleActions (inside setAvailableActions) a 2nd time
 									// in the rare cases where playerNextMove is identical prevPlayer (there was no 
@@ -307,6 +304,8 @@ public class StateObserverOthello extends ObserverBase{
 		super.addToLastMoves(action);
 		super.incrementMoveCounter();
 		turn++;
+		// /WK/ If the following assertion never fires, we can abandon turn in favor of ObserverBase::moveCounter:
+		assert (turn==this.getMoveCounter()) : "Oops, turn="+turn+" and moveCounter="+this.getMoveCounter()+" differ!";
 	}
 
 	@Override
@@ -328,16 +327,11 @@ public class StateObserverOthello extends ObserverBase{
 		int sign = (referringState.getPlayer() == this.playerNextMove) ? 1 :(-1); 
 		if(this.isGameOver()) {		// 	Working correctly now	
 			Types.WINNER win = this.winStatus();
-			switch(win) {
-			case PLAYER_LOSES:
-				return sign * REWARD_NEGATIVE;
-			case PLAYER_WINS:
-				return sign * REWARD_POSITIVE;
-			case TIE:
-				return 0.0;
-			default:
-				throw new RuntimeException("Wrong enum");
-			}
+			return switch (win) {
+				case PLAYER_LOSES, PLAYER_DISQ -> sign * REWARD_NEGATIVE;
+				case PLAYER_WINS -> sign * REWARD_POSITIVE;
+				case TIE -> 0.0;
+			};
 		}
 		return 0.0;
 	}

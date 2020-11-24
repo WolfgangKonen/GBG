@@ -352,7 +352,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	@Override
 	public void advance(ACTIONS action) {
-		super.advanceBase();
+		super.advanceBase(action);
 		int iAction = action.toInt();
 		
 		setAction(iAction);

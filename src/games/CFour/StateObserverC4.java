@@ -199,17 +199,11 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	 * @param action
 	 */
 	public void advance(ACTIONS action) {
+		super.advanceBase(action);
 		int iAction = action.toInt();
 
 		assert (0<=iAction && iAction<C4Base.COLCOUNT) : "iAction is not in 0,1,...,"+C4Base.COLCOUNT+".";
 		assert (m_C4.getColHeight(iAction)<C4Base.ROWCOUNT) : "desired move colum "+iAction+" is full!";
-
-		// only debug
-//		System.out.println(iAction+", "+m_C4.getColHeight(iAction)+ ", "+ C4Base.ROWCOUNT);
-//		m_C4.printBoard();
-//		if (m_C4.fieldP1==1815308846730L && m_C4.fieldP2==2582620223861L) {
-//			int dummy=1;
-//		}
 
 		gameOver = isWin = m_C4.canWin(iAction);
 
