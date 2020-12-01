@@ -464,20 +464,6 @@ public class Evaluator2048 extends Evaluator {
         return "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(lastResult);    	
     }
 
- 	// --- implemented by Evaluator ---
-//    @Override
-//    public boolean isAvailableMode(int mode) {
-//        switch (mode) {
-//        	case -1: 
-//        	case  0:
-//            case  1:
-//            case  2:
-//                return true;
-//            default:
-//                return false;
-//        }
-//    }
-
     @Override
     public int[] getAvailableModes() {
         return new int[]{-1,0, 1, 2};

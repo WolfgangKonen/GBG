@@ -67,11 +67,26 @@ public final class MCTSNode {
     public Tuple<ApplyableAction, MCTSNode> selectChild(final double c_puct) {
         final var availableActions = gameState.getAvailableActionsIncludingPassActions();
 
+//        // /WK/ debug check
+//        if (visitCounts.size()==0) {
+//            System.err.println("[selectChild] *** Warning: visitCounts.size==0 ! ***");
+//            System.err.println("sumVC="+sum(visitCounts.values())+", Q(a_0)="+getQ(availableActions[0])); // should be both 0
+//        }
+//        if (meanValues.size()==0) {
+//            System.err.println("[selectChild] *** Warning: meanValues.size==0 ! ***");
+//        }
+
         var bestValue = Double.NEGATIVE_INFINITY;
         ApplyableAction bestAction = null;
 
         for (final var a : availableActions) {
-            final var value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())) / (1 + getN(a));
+            // In case visitCounts.size()==0 && EPS>0 we select bestAction = argmax(getP(a)).
+            // This is currently suboptimal for Othello. Why?
+            var value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ConfigWrapper.EPS) / (1 + getN(a));
+            // In case visitCounts.size()==0 && EPS==0 we select the 1st action (this was the original JS-case)
+            // In case visitCounts.size()==0 && EPS <0 we select a random action
+            if (ConfigWrapper.EPS<0)
+                if (visitCounts.size()==0) value = Math.random(); // only a test: is it on average as good as (EPS==0)-solution?
             if (value > bestValue) {
                 bestValue = value;
                 bestAction = a;

@@ -4,18 +4,26 @@ import controllers.Expectimax2Wrapper;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
-import games.GBGBatch;
-import games.GameBoard;
-import games.StateObservation;
+import games.*;
 import org.junit.Test;
 import tools.Measure;
 
 import java.util.ArrayList;
 
+/**
+ * The JUnit tests in this class are not exact, because most agent performances fluctuate a bit due to random variations
+ * in both training and evaluation. But the tests really go for subtle details, since they test if the performance of
+ * numerous agents for numerous games remains if not the same but at least similar after software changes.
+ * The lower thresholds given below are with some safety margin towards the average performance, so the JUnit tests
+ * should be passed with high probability (although not with certainty).
+ *
+ * Running all JUnit test contained in this file will require a decent amount of computation time. So, for quick checks
+ * you will usually only comment out some of the lines tagged with time comments.
+ */
 public class TDNTuple3AgtTest extends GBGBatch {
     String csvFile = "test.csv";
 
-    // settings for RubiksCube
+    // settings for RubiksCube with default scalable parameters {"2x2x2","CSTATE","ALL"}, see GBGBatch::setDefaultScaPars
     String[] agtFileA = {"TCL3-p06-1000k-60-7t-TEST.agt.zip","davi3-p06-500k-60-7t.agt.zip"};
                     // lower thresholds for quickEvalTest and ...
     double[][] evalThreshA = {{0.97, 0.99},      // ... TCL3
@@ -30,7 +38,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
     // settings for Othello
     String[] agtFileC = {"TCL3-fixed6_250k-lam05_P4_nPly2-FAm.agt.zip","TCL3-100_7_250k-lam05_P4_nPly2-FAm.agt.zip"};
                     // lower thresholds for quickEvalTest and ...
-    double[][] evalThreshC = {{0.87, 0.92, 0.98},      // ... TCL3
+    double[][] evalThreshC = {{0.87, 0.92, 0.96},      // ... TCL3 (nPly=2 had 0.98 before)
                               {0.89, 0.94, 0.99}};     // ... TCL3
                     // nPly =   0     1     2
 
@@ -65,12 +73,12 @@ public class TDNTuple3AgtTest extends GBGBatch {
         //quickEval(selectedGame, agtFileB, evalThreshB,1);   // 30 sec
         //quickEval(selectedGame, agtFileB, evalThreshB,2);   // 3 min
         selectedGame = "Othello";
-        quickEval(selectedGame, agtFileC, evalThreshC,1);   // 1 min
-        //quickEval(selectedGame, agtFileC, evalThreshC,2);   // 8 min
+        //quickEval(selectedGame, agtFileC, evalThreshC,1);   // 1 min
+        quickEval(selectedGame, agtFileC, evalThreshC,2);   // 8 min
         selectedGame = "Hex";
         //quickEval(selectedGame, agtFileD, evalThreshD,2);   // 5 min
         selectedGame = "2048";
-        quickEval(selectedGame, agtFileF, evalThreshF,2);   // 2 min
+        //quickEval(selectedGame, agtFileF, evalThreshF,2);   // 2 min
     }
 
     /**
@@ -81,12 +89,12 @@ public class TDNTuple3AgtTest extends GBGBatch {
     @Test
     public void retrainAndEvalTest() {
         String selectedGame = "RubiksCube";
-        //retrainAndEval(selectedGame, agtFileA, evalThreshA, 500000);          // 2 min runtime
+        retrainAndEval(selectedGame, agtFileA, evalThreshA, 500000);          // 2 min runtime
         //retrainAndEval(selectedGame, agtFileB, evalThreshB,-1);        // 23 min runtime
         selectedGame = "Hex";
         //retrainAndEval(selectedGame, agtFileD, evalThreshD,-1);        // 14 min runtime
         selectedGame = "TicTacToe";
-        retrainAndEval(selectedGame, agtFileE, evalThreshE,-1);        // 4 sec runtime
+        //retrainAndEval(selectedGame, agtFileE, evalThreshE,-1);        // 4 sec runtime
     }
 
     /**
@@ -135,9 +143,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
         GameBoard gb = t_Game.makeGameBoard();		// needed for chooseStartState()
 
-        mtList = new ArrayList<>();         // needed for doSingleTraining
-        oQ = new Measure();			        //
-        oT = new Measure();			        //
+        MTrainSweep mTrainSweep = new MTrainSweep();
 
         for (int k=0; k< agtFile.length; k++) {
             setupPaths(agtFile[k],csvFile);     // builds filePath
@@ -150,7 +156,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
             String sAgent = t_Game.m_xab.getSelectedAgent(0);
             pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
 
-            pa = doSingleTraining(0,0,pa,t_Game.m_xab,gb,maxGameNum,0.0,0.0);
+            pa = mTrainSweep.doSingleTraining(0,0,pa,t_Game,t_Game.m_xab,gb,maxGameNum,0.0,0.0);
 
             innerQuickEval(pa,k,nplyMax, agtFile, evalThresh, gb, -1);
 
@@ -161,14 +167,17 @@ public class TDNTuple3AgtTest extends GBGBatch {
     private void innerQuickEval(PlayAgent pa,int k, int nplyMax, String[] agtFile, double[][] evalThresh,
                                 GameBoard gb, int verbose) {
         PlayAgent qa;
+        Evaluator m_evaluatorQ;
         double evalQ;
         int nRuns=2;
         int stopEval=50;
         StateObservation so = gb.getDefaultStartState();
 
         for (int nply=0; nply<=nplyMax; nply++) {
-            //if (nply==0) qa = pa; // this was necessary before bug fix in MaxN2Wrapper.getNextAction2 (.clearedCopy()
-            //else                  // commented out). clearedCopy leads to inferior MaxN2Wrapper[nply=0] results (!)
+            if (nply==0) qa = pa; // this was necessary before bug fix in MaxN2Wrapper.getNextAction2 (.clearedCopy()
+            else                  // commented out). clearedCopy leads to inferior MaxN2Wrapper[nply=0] results (!). But
+                                  // now we found that it is still needed for the RubiksCube(2x2x2,CSTATE) test on agent
+                                  // "TCL3-p13-3000k-120-7t.agt.zip", see agtFileB
                     qa = so.isDeterministicGame() ?
                             new MaxN2Wrapper(pa, nply, pa.getParOther()) :
                             new ExpectimaxWrapper(pa, nply);

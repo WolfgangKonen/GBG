@@ -1,51 +1,13 @@
 package games.ZweiTausendAchtundVierzig;
 
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Random;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-
-import org.jfree.data.xy.XYSeries;
-
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
-import controllers.HumanPlayer;
-import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
-import controllers.PlayAgtVector;
-import controllers.RandomAgent;
-import controllers.PlayAgent.AgentState;
-import controllers.TD.TDAgent;
-import games.Arena;
 import games.ArenaTrain;
 import games.Evaluator;
-import games.Feature;
-import games.GameBoard;
-import games.MTrain;
-import games.StateObservation;
 import games.XArenaButtons;
 import games.XArenaFuncs;
-import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import games.ZweiTausendAchtundVierzig.Evaluator2048.EResult;
-import gui.LineChartSuccess;
-import gui.MessageBox;
-import params.ParMaxN;
-//import params.OtherParams;
-import params.ParOther;
-import params.ParTD;
-import tools.Measure;
-import tools.ScoreTuple;
 import tools.Types;
 
 /**
@@ -62,7 +24,7 @@ import tools.Types;
  *  
  * @author Wolfgang Konen, TH Koeln, 2020
  * 
- * @see GBGLaunch
+ * @see games.GBGLaunch
  * @see ArenaTrain
  * @see XArenaFuncs
  *  
@@ -77,8 +39,6 @@ public class GBGBatch2048 {
 	public static String[] csvNameDef = {"eResult.csv","test1.csv","test2.csv"};
 	public static ArenaTrain t_Game;
 	private static GBGBatch2048 t_Batch = null;
-	private static String filePath = null;
-	private static String savePath = null;
 
 	protected Evaluator m_evaluatorQ = null;
 	protected Evaluator m_evaluatorT = null;
@@ -99,9 +59,8 @@ public class GBGBatch2048 {
 	 *          [2] (optional) {@code nPlyMax}: upper value for nPly (default 2). <br>
 	 *          	
 	 * @see Evaluator2048         
-	 * @throws IOException if s.th. goes wrong when loading the agent or saving the csv file.
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args)  {
 		t_Batch = new GBGBatch2048("General Board Game Playing");
 		
 		if (args.length<1) {
@@ -114,7 +73,7 @@ public class GBGBatch2048 {
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+t_Game.getGameName();
 		String subDir = t_Game.getGameBoard().getSubDir();
 		if (subDir != null) strDir += "/"+subDir;
-		filePath = strDir + "/" +args[0]; //+ "tdntuple3.agt.zip";
+		String filePath = strDir + "/" +args[0]; //+ "tdntuple3.agt.zip";
 
 		String csvName = "eResult.csv";
 		if (args.length>=2) csvName = args[1];
@@ -146,13 +105,13 @@ public class GBGBatch2048 {
 	 * @param csvName		filename for CSV results
 	 * @param upper			upper value for nPly
 	 */
-	public void batch1(String filePath, XArenaButtons xab,	String csvName, int upper) throws IOException {
+	public void batch1(String filePath, XArenaButtons xab,	String csvName, int upper) {
 		// load an agent to fill xab with the appropriate parameter settings
 		PlayAgent pa = null;
 		PlayAgent[] paVector;
 		Evaluator2048 qEvaluator = null;
 		EResult eResult;
-		ArrayList<EResult> erList = new ArrayList<EResult>();
+		ArrayList<EResult> erList = new ArrayList<>();
 		String str;
 		boolean res = this.t_Game.loadAgent(0, filePath);		
 		if (!res) {
@@ -160,40 +119,37 @@ public class GBGBatch2048 {
 			return;
 		}
 		
-		int nPly;
 		int[] nPlyArr = new int[upper+1];
 		for (int i=0; i<nPlyArr.length; i++ ) nPlyArr[i]=i;
-		
-		for (int n=0; n<nPlyArr.length; n++) {
-			nPly = nPlyArr[n];
-			
+
+		for (int nPly : nPlyArr) {
+
 			xab.oPar[0].setWrapperNPly(nPly);
-			String sAgent = xab.getSelectedAgent(0); 
+			String sAgent = xab.getSelectedAgent(0);
 			xab.m_arena.m_xfun.m_PlayAgents = xab.m_arena.m_xfun.fetchAgents(xab);
-			AgentBase.validTrainedAgents(xab.m_arena.m_xfun.m_PlayAgents,1);
-			paVector = xab.m_arena.m_xfun.wrapAgents(xab.m_arena.m_xfun.m_PlayAgents, 
+			AgentBase.validTrainedAgents(xab.m_arena.m_xfun.m_PlayAgents, 1);
+			paVector = xab.m_arena.m_xfun.wrapAgents(xab.m_arena.m_xfun.m_PlayAgents,
 					xab, xab.m_arena.getGameBoard().getStateObs());
 			pa = paVector[0];
-			if (pa==null) throw new RuntimeException("Could not fetch Agent 0 = " + sAgent);				
-			
+			if (pa == null) throw new RuntimeException("Could not fetch Agent 0 = " + sAgent);
+
 			// run Quick Evaluation
 			try {
 				int nPly1 = xab.oPar[0].getWrapperNPly();
 				int nPly2 = pa.getParOther().getWrapperNPly();
-				assert nPly  == nPly1 : "Ooops, nPly  and nPly1 differ! " + nPly  + " != " +nPly1;
-				assert nPly1 == nPly2 : "Ooops, nPly1 and nPly2 differ! " + nPly1 + " != " +nPly2;
-				System.out.println("nPly: "+nPly1);
+				assert nPly == nPly1 : "Ooops, nPly  and nPly1 differ! " + nPly + " != " + nPly1;
+				assert nPly1 == nPly2 : "Ooops, nPly1 and nPly2 differ! " + nPly1 + " != " + nPly2;
+				System.out.println("nPly: " + nPly1);
 				int qem = xab.oPar[0].getQuickEvalMode();
 				int verb = 0;
-				qEvaluator = (Evaluator2048) xab.m_arena.makeEvaluator(pa,xab.m_arena.getGameBoard(),0,qem,verb);
-		        qEvaluator.eval(pa);
+				qEvaluator = (Evaluator2048) xab.m_arena.makeEvaluator(pa, xab.m_arena.getGameBoard(), 0, qem, verb);
+				qEvaluator.eval(pa);
 				eResult = qEvaluator.eResult;
 				erList.add(eResult);
 				str = qEvaluator.getMsg();
 				System.out.println(str);
-				int dummy = 1;
 			} catch (RuntimeException e) {
-                e.printStackTrace(System.err);
+				e.printStackTrace(System.err);
 				return;
 			}
 		}

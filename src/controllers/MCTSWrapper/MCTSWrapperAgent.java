@@ -2,6 +2,7 @@ package controllers.MCTSWrapper;
 
 import TournamentSystem.TSTimeStorage;
 import controllers.AgentBase;
+import controllers.MCTSWrapper.passStates.ApplyableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.passStates.PassAction;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
@@ -17,8 +18,8 @@ import java.util.Comparator;
 import java.util.Map;
 
 /**
- * PlayAgent that performs a monte carlo tree search to calculate the next action to be selected.
- * This agent also wraps an approximator, which is used to evaluate game states in monte carlo simulations.
+ * PlayAgent that performs a Monte Carlo Tree Search (MCTS) to calculate the next action to be selected.
+ * This agent wraps an approximator, which is used to evaluate game states in MCTS simulations.
  */
 public final class MCTSWrapperAgent extends AgentBase {
     private final int iterations;
@@ -47,12 +48,18 @@ public final class MCTSWrapperAgent extends AgentBase {
         setAgentState(AgentState.TRAINED);
     }
 
+    /**
+     * the action MCTSWrapper took the last time it was called
+     */
     private int lastSelectedAction = Integer.MIN_VALUE;
+    /**
+     * the tree node (state) that MCTSWrapper reached with {@link #lastSelectedNode} the last time it was called
+     */
     private MCTSNode lastSelectedNode;
 
     /**
-     * reset agent when starting a new episode
-     * (needed when re-using an agent, e.g. in competeNum episodes during a competition
+     * reset agent: when starting a new episode, a new tree should be built --> set {@link #lastSelectedNode}{@code =null}
+     * (needed when re-using an existing agent, e.g. in competeNum episodes during a competition
      * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])})
      *
      */
@@ -75,7 +82,7 @@ public final class MCTSWrapperAgent extends AgentBase {
             // So a new mcts node is created from the given game state sob.
             mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
         } else {
-            // There already exists a search-tree, which was built in the game's past mcts iterations.
+            // There already exists a search-tree, which was built in a previous call to MCTSWrapper in this episode.
 
             // In the following, the moves made since the last cache of the search tree are reconstructed
             // on the last saved mcts node. This should result in the mcts node belonging to the current state of the game.
@@ -97,12 +104,13 @@ public final class MCTSWrapperAgent extends AgentBase {
             // might select the wrong one. Even lastIndexOf() will not help, we mean to grab the last action of
             // MCTSWrapperAgent, but the opponent might have taken the same action afterwords.
             //
-            // We follow another solution: We get with sz the size of lastMoves at lastSelectedAction-time and start
-            // with i=sz in the pastActions-loop (pastActions = lastMoves of sob):
+            // We follow thus another solution: We store in sz the size of lastMoves at lastSelectedAction-time and
+            // start with i=sz in the pastActions-loop (pastActions = lastMoves of sob):
             int sz=lastSelectedNode.getLastMoves().size();
             // assert (sz==1 + pastActions.indexOf(lastSelectedAction)) : "Oops, sz mismatch!";
-            // The above assertion is only correct for each-action-only-once games like Othello (!). It was used in the
-            // Othello-case to check that the sz-logic is correct.
+            // The above assertion is only correct for games like Othello, where each action appears only once (!).
+            // It was used in the Othello-case to check that the sz-logic is correct.
+            assert (sz>0) : "Wrongly sz=lastMoves.size()==0. [Probably advance does not call super.addToLastMoves.]";
             assert (pastActions.get(sz-1)==lastSelectedAction) : "Oops, action mismatch!";  // /WK/ general check
             for (int i = sz; i < pastActions.size(); i++) {
                 node = node.childNodes.get(pastActions.get(i));
@@ -116,12 +124,12 @@ public final class MCTSWrapperAgent extends AgentBase {
 
                 if (node == null) {
                     // In this case the current game state is not present in the previously expanded search tree,
-                    // because it was not relevant enough in the mcts to be expanded.
-                    // In this case a new monte carlo search tree is created based on this node.
+                    // because it was not relevant enough in the MCTS to be expanded.
+                    // In this case a new Monte Carlo search tree is created based on sob.
                     node = new MCTSNode(new GameStateIncludingPass(sob));
-                    if (node.gameState.isFinalGameState()) {        // /WK/ debug
-                        System.err.println("*** Unexpected final state in (node==null)-branch!");
-                    }
+//                  if (node.gameState.isFinalGameState()) {        // /WK/ debug
+//                        System.err.println("*** Unexpected final state in (node==null)-branch!");
+//                  }
                     break;
                 }
 //              if (node.gameState.isFinalGameState()) {            // /WK/ debug, new if-branch for RubiksCube
@@ -145,6 +153,11 @@ public final class MCTSWrapperAgent extends AgentBase {
         // /WK/ a possible assertion, which turns out to be violated from time to time in RubiksCube.
         //      It seems always true in the Othello case --> TODO: Clarify the RubiksCube case!
         //assert (mctsNode.gameState.stringDescr().equals(sob.stringDescr())) : "Oops, state mismatch!";
+        if (!mctsNode.gameState.stringDescr().equals(sob.stringDescr())) {
+            System.err.println("Oops, state mismatch!");
+            int dummy = 1;
+        }
+
 
         // Performs the given number of mcts iterations.
         for (int i = 0; i < iterations; i++) {
@@ -154,8 +167,11 @@ public final class MCTSWrapperAgent extends AgentBase {
         // Selects the int value of the action that leads to the child node that maximizes the visit count.
         // This value is also cached for further calls.
         if (mctsNode.visitCounts.size()==0) {
+            // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
+            // but we leave it in as debug check for the moment
             System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
             System.err.println(mctsNode.gameState.stringDescr());
+            return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()]);
         }
         lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
             Comparator.comparingDouble(Map.Entry::getValue)
@@ -173,6 +189,21 @@ public final class MCTSWrapperAgent extends AgentBase {
             false,
             getVTableFor(mctsNode)
         );
+    }
+
+    // just a check whether this is faster than getVTableFor
+    private double[] getVTable2For(final MCTSNode mctsNode) {
+        ApplyableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
+        double[] vTab = new double[arrAction.length];
+        double v, sum = 0;
+        int i=0;
+        for (var action : arrAction) {
+            v = mctsNode.visitCounts.getOrDefault(action.getId(), 0);
+            sum += v;
+            vTab[i++] = v;
+        }
+        for (int j=0; j<vTab.length; j++) vTab[j] /= sum;
+        return vTab;
     }
 
     private double[] getVTableFor(final MCTSNode mctsNode) {

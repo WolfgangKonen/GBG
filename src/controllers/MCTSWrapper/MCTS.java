@@ -27,7 +27,7 @@ public final class MCTS {
     }
 
     /**
-     * Recursive monte carlo tree search that is applicable to 1- and 2-player games
+     * Recursive Monte Carlo tree search that is applicable to 1- and 2-player games
      * which have separate states for situations where a player has to pass.
      * <p>
      * Values are negated in 2-player games because they are viewed from the previous player's perspective.
