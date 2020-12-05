@@ -1,4 +1,4 @@
-package src.games.Poker;
+package games.Poker;
 
 import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.PlayAgent;

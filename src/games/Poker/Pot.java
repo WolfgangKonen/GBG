@@ -1,4 +1,4 @@
-package src.games.Poker;
+package games.Poker;
 
 public class Pot {
     private double size;

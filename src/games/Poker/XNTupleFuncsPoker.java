@@ -1,4 +1,4 @@
-package src.games.Poker;
+package games.Poker;
 
 import games.BoardVector;
 import games.StateObservation;
