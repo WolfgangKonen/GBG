@@ -1,23 +1,26 @@
 package games;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.ListIterator;
 
+import controllers.ExpectimaxWrapper;
+import controllers.HumanPlayer;
+import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
-import games.XArenaFuncs;
+import params.ParMaxN;
+import params.ParOther;
+import tools.Measure;
 import tools.Types;
 
 /**
  *  This class holds the results from {@code numEval} episodes during multi-training.
  *  When starting multiTrain, an object {@code ArrayList<MTrain> mtList} is created and 
- *  finally written with {@link MTrain#printMultiTrainList(ArrayList, PlayAgent)}
+ *  finally written with {@link MTrain#printMultiTrainList(String, ArrayList, PlayAgent, Arena, String, String)}
  *  to file <b>{@code agents/<gameDir>/csv/<csvName>}</b> (usually {@code multiTrain.csv}).
  *  
  *  The columns in {@code multiTrain.csv} are: <br>
@@ -51,32 +54,33 @@ import tools.Types;
  *   =  (   2696       -    1800      ) / (    1.916          -       1.294       )    =   1440.5 
  *  </pre>
  *    
- *  @see XArenaFuncs#multiTrain(String, XArenaButtons, GameBoard)
+ *  @see XArenaFuncs#multiTrain(int, String, XArenaButtons, GameBoard, String)
  *  @see games.PStats
  */
 public class MTrain {
-	public int i;				// number of training runs during multiTrain
+	public int i;				// number of training run during multiTrain
 	public int gameNum;			// number of training games (episodes) during a run
 	public double evalQ;		// quick eval score
 	public double evalT;		// train eval score
 	public long actionNum;		// number of learning actions (excluding random moves)
 	public long trnMoveNum;		// number of train moves (including random moves)
-	public double totalTrainSec=0.0;
-	public double movesSecond=0.0;
-	public double userValue1=0.0;
-	public double userValue2=0.0;
+	public double totalTrainSec;
+	public double movesSecond;
+	public double userValue1;
+	public double userValue2;
 	//DecimalFormat frm1 = new DecimalFormat("#0.0000");
 	static String sep = ", ";
-	
-	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/ 
-			long actionNum, long trnMoveNum) {
-		this.i=i;
-		this.gameNum=gameNum;
-		this.evalQ=evalQ;
-		this.evalT=evalT;
-		this.actionNum=actionNum;
-		this.trnMoveNum=trnMoveNum;
-	}
+
+	// --- never used ---
+//	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/
+//			long actionNum, long trnMoveNum) {
+//		this.i=i;
+//		this.gameNum=gameNum;
+//		this.evalQ=evalQ;
+//		this.evalT=evalT;
+//		this.actionNum=actionNum;
+//		this.trnMoveNum=trnMoveNum;
+//	}
 	
 	public MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/ 
 			long actionNum, long trnMoveNum, double totalTrainSec, double movesSecond,
@@ -101,7 +105,7 @@ public class MTrain {
 	}
 	
 	/**
-	 * Print the results from {@link XArenaFuncs#multiTrain(int, String, XArenaButtons, GameBoard) XArenaFuncs.multiTrain} to
+	 * Print the results from {@link XArenaFuncs#multiTrain(int, String, XArenaButtons, GameBoard, String)} XArenaFuncs.multiTrain} to
 	 * file <br>
 	 * 
 	 * <pre>  {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/<csvName>} </pre> 
@@ -139,7 +143,7 @@ public class MTrain {
 					// Here we give the user the chance to close the file in the other application:
 				    System.out.print("*** Warning *** Could not open "+strDir+"/"+csvName+". Retry? (y/n): ");
 				    String s = bufIn.readLine();
-				    retry = (s.contains("y")) ? true : false;
+				    retry = s.contains("y");
 				} catch (IOException e2) {
 					e2.printStackTrace();					
 				}
@@ -152,9 +156,8 @@ public class MTrain {
 			
 			mtWriter.println("run"+sep+"gameNum"+sep+"evalQ"+sep+"evalT"+sep+"actionNum"+sep
 					+"trnMoves"+sep+"totalTrainSec"+sep+"movesSecond"+sep+userTitle1+sep+userTitle2);
-			ListIterator<MTrain> iter = mtList.listIterator();		
-			while(iter.hasNext()) {
-				(iter.next()).print(mtWriter);
+			for (MTrain mTrain : mtList) {
+				mTrain.print(mtWriter);
 			}
 
 		    mtWriter.close();

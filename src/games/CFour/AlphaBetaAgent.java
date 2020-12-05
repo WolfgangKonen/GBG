@@ -4342,9 +4342,9 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
 		int i,j,sign;
         int iBest;
-		int count = 1; // counts the moves with same iMaxScore
+		int count = 1; // counts the moves with same vBest
 		double CurrentScore;
-		double iMaxScore = -Double.MAX_VALUE;
+		double vBest = -Double.MAX_VALUE;
 		assert (sob instanceof StateObserverC4);
 		StateObserverC4 sc = (StateObserverC4) sob; 
 		StateObserverC4 newsc;
@@ -4352,8 +4352,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
         List<Types.ACTIONS> actions = sob.getAvailableActions();
-		double[] vtable;
-        vtable = new double[actions.size()+1];  
+		double[] vtable = new double[actions.size()];
         double[] vtable7 = this.getNextVTable(sc.getBoard(), true);		// if sigfac=1: give up early, if loss 
         																// if sigfac=1000: seeking for distant loss
 //        double[] vtable7 = this.getNextVTable(sc.getBoard(), false); 	// seeking for distant loss
@@ -4368,22 +4367,22 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 //        	CurrentScore = this.getScore(newsc)*sign;
         	CurrentScore = vtable7[actions.get(i).toInt()]*sign;
         	vtable[i] = CurrentScore;
-        	if (iMaxScore < CurrentScore) {
-        		iMaxScore = CurrentScore;
+        	if (vBest < CurrentScore) {
+        		vBest = CurrentScore;
         		actBest = actions.get(i);
         		iBest  = i; 
         		count = 1;
         	} else  {
-        		if (iMaxScore == CurrentScore) count++;	        
+        		if (vBest == CurrentScore) count++;
         	}
         }
         
-        if (count>1) {  // more than one action with iMaxScore: 
+        if (count>1) {  // more than one action with vBest:
         	// break ties by selecting one of them randomly
         	int selectJ = (int)(rand.nextDouble()*count);
         	for (i=0, j=0; i < actions.size(); ++i) 
         	{
-        		if (vtable[i]==iMaxScore) {
+        		if (vtable[i]==vBest) {
         			if (j==selectJ) actBest = actions.get(i);
         			j++;
         		}
@@ -4396,12 +4395,10 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
         if (!silent) {
         	newsc = sc.copy();
         	newsc.advance(actBest);
-        	System.out.println("---Best Move: "+newsc.stringDescr()+"   "+iMaxScore);
+        	System.out.println("---Best Move: "+newsc.stringDescr()+"   "+vBest);
         }			
 
-        vtable[actions.size()] = iMaxScore;
-      
-        return new Types.ACTIONS_VT(actBest.toInt(), actBest.isRandomAction(), vtable);
+        return new Types.ACTIONS_VT(actBest.toInt(), actBest.isRandomAction(), vtable, vBest);
 	}
 
 	@Override

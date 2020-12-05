@@ -413,19 +413,20 @@ public class XArenaFuncs {
 							+ " but selector for player " + n + " requires " + sAgent + ".");
 				pa = m_PlayAgents[n]; // take the n'th current agent, which
 										// is *assumed* to be trained (!)
-				
-				// Wrapper nPly is the ONLY parameter from tab 'Other pars' which may be changed by the user AFTER 
-				// training an agent. (All the other opar parameters may be only set/changed BEFORE training a 
-				// trainable agent.) The following line of code was missing before 2020-08-11 and caused the bug 
-				// that a Wrapper nPly set for a trained agent was not saved to disk. Now it will be saved:
-				pa.setWrapperNPly(m_xab.oPar[n].getWrapperNPly());
+
+				// Wrapper nPly, Wrapper MCTS and PUCT for Wrapper MCTS are the ONLY parameters from tab 'Other pars'
+				// which may be changed by the user AFTER training an agent. (All the other opar parameters may be only
+				// set/changed BEFORE training a trainable agent.) The following line of code was missing before 2020-08-11
+				// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
+				// Now it will be saved:
+				pa.setWrapperParams(m_xab.oPar[n]);
 			}
 		}
 		if (pa == null)
 			throw new RuntimeException("Could not construct/fetch agent = " + sAgent);
 
 		return pa;
-	}
+	} // fetchAgent
 
 	/**
 	 * Fetch the vector of all {@link PlayAgent}s from {@link Arena}. See
@@ -518,9 +519,10 @@ public class XArenaFuncs {
 		if(oPar.getWrapperMCTSIterations() > 0){
 			qa = new MCTSWrapperAgent(
 				oPar.getWrapperMCTSIterations(),
-				1,
+				oPar.getWrapperMCTS_PUCT(),
 				new PlayAgentApproximator(qa),
-				"MCTS-Wrapped "+qa.getName()
+				"MCTS-Wrapped "+qa.getName(),
+					oPar.getStopEval()
             );
 		}
 
@@ -760,16 +762,14 @@ public class XArenaFuncs {
 		ArrayList<TAggreg> taggList = new ArrayList<>();
 		TStats tstats;
 		TAggreg tagg;
-		HashSet pvalues = new HashSet();
-		Iterator it = tsList.iterator();
-		while (it.hasNext()) {
-			tstats = (TStats) it.next();
+		HashSet<Integer> pvalues = new HashSet<>();
+		for (TStats tStats : tsList) {
+			tstats = tStats;
 			pvalues.add(tstats.p);
 		}
-		Iterator itp = pvalues.iterator();
-		while (itp.hasNext()) {
-			int p = (int) itp.next();
-			tagg = new TAggreg(tsList, p);
+		for (Integer pvalue : pvalues) {
+			//int p = (int) pvalue;
+			tagg = new TAggreg(tsList, pvalue);
 			taggList.add(tagg);
 		}
 		return taggList;
@@ -1059,6 +1059,8 @@ public class XArenaFuncs {
 		}
 
 		for (int k = 0; k < competeNum; k++) {
+			for (int i = 0; i < numPlayers; i++)
+				paVector.pavec[i].resetAgent();
 
 			int player = startSO.getPlayer();
 			so = startSO.copy();
@@ -1144,7 +1146,7 @@ public class XArenaFuncs {
 	 * in the indicated places. 'Swap Compete' (only 2-player games) performs
 	 * competeNum competitions AgentX as O vs. AgentO as X. 'Compete All Roles'
 	 * lets each agent play in each place or role 0,1,...,N. The results are
-	 * shifted back to the agents' first place.
+	 * shifted back to the agents' initial placement.
 	 * <p>
 	 * The agents are fetched from {@code xab} and are assumed to be trained
 	 * (!). The parameters for the agents are fetched from the param tabs. The
@@ -1153,7 +1155,7 @@ public class XArenaFuncs {
 	 * 
 	 * @param swap
 	 *            {@code false} for 'Compete' and {@code true} for 'Swap
-	 *            Compete'
+	 *            Compete' (only 2-player games)
 	 * @param allRoles
 	 *            {@code true} for 'Compete All Roles' ({@code swap} is then
 	 *            irrelevant)

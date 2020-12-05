@@ -206,10 +206,11 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
      * Called by calcCertainty and getNextAction.
      * 
      * @param so			current game state (not changed on return)
+	 * @param random		currently not used (we act always as if random were false)
+	 * @param silent		currently not used
      * @return actBest		the next action
 	 * <p>						
-	 * actBest has predicate isRandomAction()  (true: if action was selected 
-	 * at random, false: if action was selected by agent).<br>
+	 * actBest has predicate isRandomAction() which is always false.<br>
 	 * actBest has also the members vTable and vBest to store the value for each available
 	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
      */
@@ -220,7 +221,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
         List<Types.ACTIONS> actions = so.getAvailableActions();
 		double[] VTable, vtable;
         vtable = new double[actions.size()];  
-        VTable = new double[actions.size()+1];  
+        VTable = new double[actions.size()+1];  // only for inner communication into method act()
 	
 		assert so.isLegalState() 
 			: "Not a legal state"; // e.g. player to move does not fit to Table
@@ -236,22 +237,9 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		double bestScore = VTable[actions.size()];
 		System.arraycopy(VTable, 0, vtable, 0, vtable.length);
 		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), false, vtable, bestScore);
+		// we return with actBestVT an object whose vtable has length N = actions.size();
         return actBestVT;
 	}
-
-
-//	/**
-//	 * 
-//	 * @return	returns true/false, whether the action suggested by last call 
-//	 * 			to getNextAction() was a random action. 
-//	 * 			Always false in the case of MCTS based on SingleTreeNode.uct().
-//	 * <p>
-//	 * Use now {@link Types.ACTIONS#isRandomAction()}
-//	 */
-//	@Deprecated
-//	public boolean wasRandomAction() {
-//		return false;
-//	}
 
 
 	@Override
@@ -289,9 +277,9 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 		ScoreTuple sc = new ScoreTuple(so);
-		int player; 
+		int player;
 		switch (so.getNumPlayers()) {
-		case 1: 
+		case 1:
 			sc.scTup[0] = this.getScore(so);
 			break;
 		case 2:
@@ -300,17 +288,17 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 			sc.scTup[player] = this.getScore(so);
 			sc.scTup[opponent] = -sc.scTup[player];
 			break;
-		default: 
+		default:
 			boolean rgs = mctsPlayer.getParOther().getRewardIsGameScore();
 			player = so.getPlayer();
-			
-			// this is only partially correct, because for non-game-over states 'so' the tuple value for 
-			// other players than so.getPlayer() will be zero (at least for final-reward games). But 
-			// most methods that use getScoreTuple (like MaxN2Wrapper.estimateGameValueTuple) need only 
+
+			// this is only partially correct, because for non-game-over states 'so' the tuple value for
+			// other players than so.getPlayer() will be zero (at least for final-reward games). But
+			// most methods that use getScoreTuple (like MaxN2Wrapper.estimateGameValueTuple) need only
 			// the correct value for so.getPlayer(), which will be inserted into sc in the 3rd line:
 			sc = so.getRewardTuple(rgs);
 			if (!so.isGameOver())
-				sc.scTup[player] = this.getScore(so);	
+				sc.scTup[player] = this.getScore(so);
 				// return MCTS' estimate of the value of so for the player to move in so
 		}
     	return sc;
@@ -324,11 +312,10 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	@Override
 	public String stringDescr() {
 		String cs = getClass().getName();
-		String str = cs + ": iterations:" + getParMCTS().getNumIter() 
+		return cs + ": iterations:" + getParMCTS().getNumIter()
 				+ ", rollout depth:" + getParMCTS().getRolloutDepth()
 				+ ", K_UCT:"+ getParMCTS().getK_UCT()
 				+ ", tree depth:" + getParMCTS().getTreeDepth();
-		return str;
 	}
 
 	public ParMCTS getParMCTS() {

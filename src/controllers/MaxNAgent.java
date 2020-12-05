@@ -154,7 +154,6 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 * @param so		current game state (not changed on return)
 	 * @param refer		(not used currently) referring game state (=so on initial call)	
 	 * @param random	(not used currently) allow epsilon-greedy random action selection	
-	 * @param VTable	size so.getAvailableActions()+1
 	 * @param silent
 	 * @param depth		tree depth
 	 * @param prevTuple TODO
@@ -180,7 +179,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         
         double value, maxValue = -Double.MAX_VALUE;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
-        double[] VTable =  new double[acts.size()+1];
+        double[] VTable =  new double[acts.size()];
         boolean lowest = true;
     	currScoreTuple = (prevTuple==null) ? new ScoreTuple(so,lowest) : prevTuple;
         int P = so.getPlayer();
@@ -259,8 +258,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxValue);
         }			
 
-        VTable[acts.size()] = maxValue;
-        act_vt = new ACTIONS_VT(actBest.toInt(), false, VTable, maxValue, scBest); 
+        act_vt = new ACTIONS_VT(actBest.toInt(), false, VTable, maxValue, scBest);
         return act_vt;         
 	}
 

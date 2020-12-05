@@ -74,7 +74,7 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 		double[] vtable = new double[acts.size()];  
 		
 		int i,j;
-		double MaxScore = -Double.MAX_VALUE;
+		double maxScore = -Double.MAX_VALUE;
 		double CurrentScore = 0; 	// the quantity to be maximized
 		
 		assert so.isLegalState() : "Not a legal state";
@@ -85,11 +85,11 @@ public class RandomAgent extends AgentBase implements PlayAgent {
         {
         	CurrentScore = rand.nextDouble();
         	vtable[i] = CurrentScore;
-        	if (MaxScore < CurrentScore) {
-        		MaxScore = CurrentScore;
+        	if (maxScore < CurrentScore) {
+        		maxScore = CurrentScore;
                 bestActions.clear();
                 bestActions.add(acts.get(i));
-        	} else if (MaxScore == CurrentScore) {
+        	} else if (maxScore == CurrentScore) {
                 bestActions.add(acts.get(i));
         	}
         } // for
@@ -101,11 +101,11 @@ public class RandomAgent extends AgentBase implements PlayAgent {
         if (!silent) {
         	StateObservation NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+MaxScore);
+        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxScore);
         }			
 		actBest.setRandomSelect(true);		// the action was a random move
 	
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, MaxScore);
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, maxScore);
         return actBestVT;
 	}
 

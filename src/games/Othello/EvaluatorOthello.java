@@ -161,7 +161,7 @@ public class EvaluatorOthello extends Evaluator {
 			ScoreTuple sc;
 			for (int c=0; c<numEpisodes; c++) {
 				for (StateObservation sd : diffStartList) {
-					sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, numEpisodes, 0);
+					sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 1, 0);
 					scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
 					count++;
 				}
@@ -200,7 +200,7 @@ public class EvaluatorOthello extends Evaluator {
 		double sWeight = 1 / (double) numEpisodes;
 		for (int c=0; c<numEpisodes; c++) {
 			if (diffStarts) so = m_gb.chooseStartState();	// choose a different start state in each pass
-			sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0);
+			sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, 1, 0);
 			scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
 		}
 		lastResult = scMean.scTup[0];

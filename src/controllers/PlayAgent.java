@@ -1,5 +1,6 @@
 package controllers;
 
+import TournamentSystem.TSTimeStorage;
 import games.StateObservation;
 import params.ParOther;
 import agentIO.LoadSaveGBG;
@@ -228,10 +229,17 @@ public interface PlayAgent {
 	int getNumEval();
 	void setNumEval(int num);
 	void setStopEval(int num);
-	void setWrapperNPly(int num);
+	void setWrapperParams(ParOther otherPar);
 	
 	AgentState getAgentState();
 	void setAgentState(AgentState aState);
+
+	/**
+	 * reset agent when starting a new episode
+	 * (needed when re-using an agent, e.g. in competeNum episodes during a competition
+	 * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])})
+	 */
+	void resetAgent();
 
 	String getName();
 	void setName(String name);

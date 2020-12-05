@@ -6,13 +6,10 @@ import java.util.Random;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import games.StateObservation;
-import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
 /**
@@ -40,7 +37,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
 		int i,j;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
-		double[] VTable = new double[acts.size()+1];  
+		double[] VTable = new double[acts.size()];
 		StateObserverNim NewSO;
         ACTIONS actBest = null;
         List<Types.ACTIONS> bestActions = new ArrayList<>();
@@ -77,9 +74,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxValue);
         }			
 
-        VTable[acts.size()] = maxValue;
-        
-        return new ACTIONS_VT(actBest.toInt(), false, VTable);
+        return new ACTIONS_VT(actBest.toInt(), false, VTable, maxValue);
 	}
 
 	@Override

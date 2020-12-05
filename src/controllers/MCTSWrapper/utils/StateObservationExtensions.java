@@ -18,7 +18,8 @@ public final class StateObservationExtensions {
      */
     public static StateObservation swapCurrentPlayer(final StateObservation so) {
         final var stateCopy = so.copy();
-        ((StateObserverOthello) stateCopy).setPlayer(BaseOthello.getOpponent(stateCopy.getPlayer()));
+        stateCopy.passToNextPlayer();
+//        ((StateObserverOthello) stateCopy).setPlayer(BaseOthello.getOpponent(stateCopy.getPlayer()));
         stateCopy.setAvailableActions();
         return stateCopy;
     }

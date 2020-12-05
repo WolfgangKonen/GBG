@@ -27,13 +27,21 @@ abstract public class ObserverBase implements StateObservation {
     protected Types.ACTIONS[] storedActions = null;
     protected Types.ACTIONS storedActBest = null;
     protected double[] storedValues = null;
-    protected double storedMaxScore; 
-    
+    protected double storedMaxScore;
 
-    public ObserverBase() {    }
+	/**
+	 * The list of last moves in an episode. Each move is stored as {@link Integer} {@code iAction}.
+	 */
+	public transient ArrayList<Integer> lastMoves;
+
+
+	public ObserverBase() {
+		lastMoves = new ArrayList<Integer>();
+	}
     
     public ObserverBase(ObserverBase other) {
 		this.m_counter = other.m_counter;
+		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();		// WK: bug fix, added missing .clone()
 		this.storedMaxScore = other.storedMaxScore;
 		this.storedActBest = other.storedActBest;
 		this.creatingPlayer = other.creatingPlayer;
@@ -96,8 +104,9 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	abstract public ArrayList<ACTIONS> getAvailableActions();
 	
-	protected void advanceBase() {
+	protected void advanceBase(ACTIONS action) {
 		this.creatingPlayer = this.getPlayer();
+		this.addToLastMoves(action);
 	}
 
 	/**
@@ -145,10 +154,61 @@ abstract public class ObserverBase implements StateObservation {
 
 	abstract public int getPlayer();
 	abstract public int getNumPlayers();
+
+	/**
+	 * If the current player cannot move (or decides not to move), this method passes the state to the next allowed
+	 * player.
+	 */
+	public void passToNextPlayer() {
+		setPlayer( getNextPlayer() );
+	}
+
+	/**
+	 * This method implements the simple version to get the next player in cyclic order, assuming that all players are
+	 * in until game-over. Other games (see e.g. 3-player Sim) may have more advanced schemes (one player loses early),
+	 * they have to override this method.
+	 * @return the next player
+	 */
+	protected int getNextPlayer() {
+		return ((getPlayer()+1) % getNumPlayers());
+	}
+
+	/**
+	 * This method is only needed for games that allow the 'pass-to-next-player'-option (e.g. Othello). It is only
+	 * called when passToNextPlayer() is called. It then has to be overridden in the derived class
+	 *
+	 * We provide a default implementation here that throws a RuntimeException. Why do we not declare it abstract? -
+	 * We want GBG to compile even if derived classes that have NO pass-option do not implement setPlayer.
+	 * (This results in safer software: Users cannot call unwantedly a dummy implementation of setPlayer().
+	 * And they get an Exception if they call passToNextPlayer() on a game that has no pass option.)
+	 *
+	 * @param p 	the next player
+	 */
+	public void setPlayer(int p) {
+		throw new RuntimeException("setPlayer(int) needs to be overridden by specific game class");
+	}
 	
 	public int getCreatingPlayer() {
 		return this.creatingPlayer;
 	}
+
+	public void addToLastMoves(ACTIONS act) {
+		lastMoves.add(act.toInt());
+	}
+
+	public int getLastMove() {
+		if (lastMoves.size() == 0) return -1;
+		return lastMoves.get(lastMoves.size()-1);
+	}
+
+	public ArrayList<Integer> getLastMoves() {
+		return lastMoves;
+	}
+
+	// never used:
+//	public void resetLastMoves() {
+//		this.lastMoves = new ArrayList<>();
+//	}
 
 	public int getMinEpisodeLength() {
 		return 1;
@@ -181,7 +241,6 @@ abstract public class ObserverBase implements StateObservation {
 	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1). 
 	 */
     abstract public double getGameScore(StateObservation referringState);
-	
 
 	/**
 	 * The game score, seen from the perspective of player {@code player}. The 

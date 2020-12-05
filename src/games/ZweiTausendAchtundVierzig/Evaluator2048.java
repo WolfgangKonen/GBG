@@ -42,14 +42,11 @@ public class Evaluator2048 extends Evaluator {
     private int minScore = Integer.MAX_VALUE;
     private int maxScore = Integer.MIN_VALUE;
     private double standarddeviation;
-    private long duration;
     private long avgGameDur;
+    private double duration;
     private double avgMovPerGame;
     private double movesPerSec;
     private int moves = 0;
-//	private int m_mode;			// now in Evaluator
-    private long startTime;
-    private long stopTime;
     private final List<Integer> scores = new ArrayList<>();
     private final TreeMap<Integer, Integer> tiles = new TreeMap<>();
     private final int verbose;
@@ -74,7 +71,8 @@ public class Evaluator2048 extends Evaluator {
         }
 		int cumEmpty;
 		ArrayList<PStats> psList = new ArrayList<>();
-        startTime = System.currentTimeMillis();
+        //	private int m_mode;			// now in Evaluator
+        long startTime = System.currentTimeMillis();
         if(verbose == 0) {
             System.out.println("Starting evaluation of " + ConfigEvaluator.NUMBEREVALUATIONS 
             		+ " games, this may take a while...");
@@ -228,12 +226,7 @@ public class Evaluator2048 extends Evaluator {
         //evaluate games
         //Average Score
         for(StateObserver2048 so : stateObservers) {
-            Integer value = tiles.get(so.getHighestTileValue());
-            if (value == null) {
-                tiles.put(so.getHighestTileValue(), 1);
-            } else {
-                tiles.put(so.getHighestTileValue(), value + 1);
-            }
+            tiles.merge(so.getHighestTileValue(), 1, Integer::sum);
 
             scores.add(so.score);
 
@@ -255,26 +248,27 @@ public class Evaluator2048 extends Evaluator {
 
         //Median, Min and Max Score
         Collections.sort(scores);
-        int mid = (int) (scores.size()/2);
+        int mid = scores.size()/2;
         if (scores.size()%2==0) {
-        	medianScore = (scores.get(mid-1)+scores.get(mid))/2;        	
+        	medianScore = (double)(scores.get(mid-1)+scores.get(mid))/2;
         } else {
         	medianScore = scores.get(mid);
         }
         minScore = scores.get(0);
         maxScore = scores.get(scores.size()-1);
 
-        stopTime = System.currentTimeMillis();
+        long stopTime = System.currentTimeMillis();
+        duration = (double)(stopTime - startTime)/1000.0;
 
         //System.out.print("\n");
         if (verbose==1) System.out.println("Finished evaluation of "+ConfigEvaluator.NUMBEREVALUATIONS+" games with average score "
         		+ Math.round(lastResult) + " +- " + Math.round(standarddeviation));
         
         int nPly = pa.getParOther().getWrapperNPly();
-        duration = (stopTime - startTime);
-        avgGameDur = Math.round((double)duration / (double)ConfigEvaluator.NUMBEREVALUATIONS);
+        long duration = (stopTime - startTime);
+        avgGameDur = Math.round((double) duration / (double)ConfigEvaluator.NUMBEREVALUATIONS);
         avgMovPerGame =  Math.round((double)moves / (double)ConfigEvaluator.NUMBEREVALUATIONS);
-        movesPerSec = Math.round(moves/((double)duration/(double)1000));
+        movesPerSec = Math.round(moves/((double) duration /(double)1000));
         
         this.eResult = new EResult(nPly, ConfigEvaluator.NUMBEREVALUATIONS, minScore, maxScore, lastResult, medianScore,
         		standarddeviation, avgGameDur, avgMovPerGame, movesPerSec, tiles);
@@ -292,11 +286,10 @@ public class Evaluator2048 extends Evaluator {
     	int moveNum = so2048.getMoveCounter();
     	int actNum = (actBest==null) ? (-1) : actBest.toInt();
      	int nEmpty = so2048.getNumEmptyTiles();  
-    	double gameScore = so2048.getGameScore(so2048)*so2048.MAXSCORE;
+    	double gameScore = so2048.getGameScore(so2048)*StateObserver2048.MAXSCORE;
     	cumEmpty += nEmpty;
     	int highestTile = so2048.getHighestTileValue();
-		PStats pstats = new PStats(i, moveNum, so2048.getPlayer(), actNum, gameScore, nEmpty, cumEmpty, highestTile);
-		return pstats;
+        return  new PStats(i, moveNum, so2048.getPlayer(), actNum, gameScore, nEmpty, cumEmpty, highestTile);
     }
 
     @Override
@@ -313,11 +306,6 @@ public class Evaluator2048 extends Evaluator {
             	+ "  ("+ frm2.format(((Integer)tile.getValue()).doubleValue()/ConfigEvaluator.NUMBEREVALUATIONS)+")";
         }
 
-        long duration = (stopTime - startTime);
-        if(duration == 0) {
-            duration = 1;
-        }
-
         String agentSettings = "";
 
         if(m_PlayAgent.getName().equals("MC")) {
@@ -325,7 +313,7 @@ public class Evaluator2048 extends Evaluator {
             agentSettings = "\nROLLOUTDEPTH: " + mcAgent.getParMC().getRolloutDepth() +
                     "\nITERATIONS: " + mcAgent.getParMC().getNumIter() +
                     "\nNUMBERAGENTS: " + mcAgent.getParMC().getNumAgents();
-        } else if(m_PlayAgent.getName() == "MCTS Expectimax") {
+        } else if(m_PlayAgent.getName().equals("MCTS Expectimax")) {
             MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
             agentSettings = "\nROLLOUTDEPTH: " + mctsExpectimaxAgt.params.getRolloutDepth() +
                     "\nITERATIONS: " + mctsExpectimaxAgt.params.getNumIter() +
@@ -343,7 +331,7 @@ public class Evaluator2048 extends Evaluator {
                 "\nMedian score is: " + Math.round(medianScore) +
                 "\nHighest score is: " + maxScore +
                 "\nAverage game duration: " +  avgGameDur + "ms" +
-//              "\nDuration of evaluation: " + Math.round((double)duration/(double)1000) + "s" +
+                "\nDuration of evaluation: " + Math.round(duration) + "s" +
 				"\nAverage moves per game: " +  avgMovPerGame + 
                 "\nMoves per second: " + movesPerSec +
                 "\n" +
@@ -447,10 +435,9 @@ public class Evaluator2048 extends Evaluator {
     			erWriter.println("nPly"+sep+"numEval"+sep+"lowScore"+sep+"avgScore"+sep+"stdDevScore"+sep
     					+"medScore"+sep+"higScore"+sep
     					+"avgGameDur"+sep+"avgMovPerGame"+sep+"movesPerSec"+sep+"tile16kPerc");
-    			ListIterator<EResult> iter = erList.listIterator();		
-    			while(iter.hasNext()) {
-    				(iter.next()).print(erWriter);
-    			}
+                for (EResult result : erList) {
+                    result.print(erWriter);
+                }
 
     		    erWriter.close();
     		} else {
@@ -463,20 +450,6 @@ public class Evaluator2048 extends Evaluator {
     public String getShortMsg() {
         return "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(lastResult);    	
     }
-
- 	// --- implemented by Evaluator ---
-//    @Override
-//    public boolean isAvailableMode(int mode) {
-//        switch (mode) {
-//        	case -1: 
-//        	case  0:
-//            case  1:
-//            case  2:
-//                return true;
-//            default:
-//                return false;
-//        }
-//    }
 
     @Override
     public int[] getAvailableModes() {

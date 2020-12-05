@@ -195,8 +195,9 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 		actBest = act(so,VTable);
 		
 		double bestScore = VTable[actions.size()];
-		for (int i=0; i<vtable.length; i++) vtable[i]=VTable[i];
+		System.arraycopy(VTable, 0, vtable, 0, vtable.length);
 		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), false, vtable, bestScore);
+		// we return with actBestVT an object whose vtable has length N = actions.size();
         return actBestVT;
 	}
 

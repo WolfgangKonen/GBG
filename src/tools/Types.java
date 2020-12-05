@@ -152,7 +152,7 @@ public class Types {
 	 *  Class ACTIONS_VT (= ACTIONS + VTable + ScoreTuple) is derived from ACTIONS.
 	 *  It has the additional members 
 	 *  <ul>
-	 *  <li> double[] vTable: the game values for all other available actions when this action
+	 *  <li> double[] vTable: the game values for all available actions when this action
 	 *  	 is created via PlayAgent.getNextAction2(so,...) 
 	 *  <li> double   vBest: the game value for the best action returned from 
 	 *  	 PlayAgent.getNextAction2(so,...)
@@ -182,20 +182,21 @@ public class Types {
             super(numVal,random);
         }
 
-        /**
-         * 
-         * @param numVal	action code
-         * @param random	flag for random move	
-         * @param vtable	game values for all K available actions (+1)
-         * <p>
-         * It is assumed that {@code vtable} has K+1 elements and vtable[K] is the game value
-         * for {@code this} action. 
-         */
-        public ACTIONS_VT(int numVal, boolean random, double [] vtable) {			
-            super(numVal,random);
-            this.vTable = vtable.clone();
-            this.vBest = vtable[vtable.length-1];
-        }
+        // --- obsolete, use ACTIONS_VT(int , boolean , double [] , double , ScoreTuple scBest) instead ---
+//        /**
+//         *
+//         * @param numVal	action code
+//         * @param random	flag for random move
+//         * @param vtable	game values for all K available actions (+1)
+//         * <p>
+//         * It is assumed that {@code vtable} has K+1 elements and vtable[K] is the game value
+//         * for {@code this} action.
+//         */
+//        public ACTIONS_VT(int numVal, boolean random, double [] vtable) {
+//            super(numVal,random);
+//            this.vTable = vtable.clone();
+//            this.vBest = vtable[vtable.length-1];
+//        }
 
         /**
          * @param numVal	action code
