@@ -69,7 +69,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         ACTIONS actBest;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
         ArrayList<ACTIONS> bestActions = new ArrayList<>();
-		double[] vTable = new double[acts.size()+1];  
+		double[] vTable = new double[acts.size()];
         double maxValue = -Double.MAX_VALUE;
         double value;
 
@@ -104,8 +104,6 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         	System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
         }			
 
-        vTable[acts.size()] = maxValue;
-        
         double[] res = {maxValue};
         ScoreTuple scBest = new ScoreTuple(res);
         return new ACTIONS_VT(actBest.toInt(), false, vTable,maxValue,scBest);

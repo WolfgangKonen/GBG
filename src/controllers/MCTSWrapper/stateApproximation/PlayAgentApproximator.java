@@ -45,12 +45,14 @@ public final class PlayAgentApproximator implements Approximator {
     }
 
     private static double[] moveProbabilitiesForVTable(final double[] vTable, final StateObservation stateObservation) {
-        return optSoftmax(
-            vTable.length > stateObservation.getNumAvailableActions() // For historical reasons the vTable is sometimes
-                                                                      // larger by 1 than the number of available actions.
-                ? Arrays.copyOfRange(vTable, 0, stateObservation.getNumAvailableActions())
-                : vTable
-        );
+        assert (vTable.length == stateObservation.getNumAvailableActions()) : "Ooops, wrong size for vTable!";
+        return optSoftmax(vTable);
+//        return optSoftmax(
+//            vTable.length > stateObservation.getNumAvailableActions() // For historical reasons the vTable is sometimes
+//                                                                      // larger by 1 than the number of available actions.
+//                ? Arrays.copyOfRange(vTable, 0, stateObservation.getNumAvailableActions())
+//                : vTable
+//        );
     }
 
     private static double[] optSoftmax(final double[] values) {

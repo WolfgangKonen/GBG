@@ -102,11 +102,10 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 		lastEdaxMove = commandLineInteractor.sendAndAwait("go");  // force Edax to play now			
 		
 		int actInteger = EdaxMoveConverter.converteEdaxToInt(lastEdaxMove);
-		double[] vTable = new double[availActions.size()+1];
+		double[] vTable = new double[availActions.size()];
 		for (int i=0; i<availActions.size(); i++) {
 			if (availActions.get(i).toInt()==actInteger) vTable[i]=1.0;
 		}
-		vTable[availActions.size()]=1.0;
 		ScoreTuple scBest = new ScoreTuple(new double[]{1.0});
 
 		ACTIONS_VT action = new ACTIONS_VT(actInteger, false, vTable, 1.0, scBest);

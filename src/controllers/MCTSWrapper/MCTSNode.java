@@ -76,17 +76,26 @@ public final class MCTSNode {
 //            System.err.println("[selectChild] *** Warning: meanValues.size==0 ! ***");
 //        }
 
+        var vsz = visitCounts.size();       // how often this node been has visited
         var bestValue = Double.NEGATIVE_INFINITY;
         ApplyableAction bestAction = null;
+        ApplyableAction bestP_act = null;
+        if (vsz==0 && ConfigWrapper.EPS<0) bestP_act = selectBestFromP(availableActions);
 
         for (final var a : availableActions) {
-            // In case visitCounts.size()==0 && EPS>0 we select bestAction = argmax(getP(a)).
-            // This is currently suboptimal for Othello. Why?
+            // In case visitCounst.size()>0 && EPS>=0, select according to the normal PUCT formula (because EPS << 1)
+            // In case visitCounts.size()==0 && EPS>0, select bestAction = argmax(getP(a)).
+            // This is the solution from Surag Nair, however, it is suboptimal for Othello. Why?
             var value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ConfigWrapper.EPS) / (1 + getN(a));
-            // In case visitCounts.size()==0 && EPS==0 we select the 1st action (this was the original JS-case)
-            // In case visitCounts.size()==0 && EPS <0 we select a random action
-            if (ConfigWrapper.EPS<0)
-                if (visitCounts.size()==0) value = Math.random(); // only a test: is it on average as good as (EPS==0)-solution?
+            // In case visitCounts.size()==0 && EPS==0, select the 1st action. This is the case originally
+            // provided by JS, and it is better in the Othello-case.
+
+            // In case visitCounts.size()==0 && EPS <0, select a random action that is NOT argmax(getP(a)).
+            if (vsz==0 && ConfigWrapper.EPS<0) {    // is EPS<0 on average as good as (EPS==0)-solution?
+                value = Math.random();
+                if (a.getId()==bestP_act.getId()) value = -1;   // avoid the action argmax(getP(a))
+            }
+
             if (value > bestValue) {
                 bestValue = value;
                 bestAction = a;
@@ -94,6 +103,31 @@ public final class MCTSNode {
         }
 
         assert bestAction != null;
+
+//        // /WK/ debug check only
+//        var bestValue2 = Double.NEGATIVE_INFINITY;
+//        ApplyableAction bestAction2 = null;
+//        if (ConfigWrapper.EPS>0) {
+//            for (final var a : availableActions) {
+//                double value;
+//                // this variant is more closely to the Surag-Nair code. It should give exactly the same actions
+//                if (getN(a)==0) {
+//                    value = c_puct * getP(a) * Math.sqrt(sum(visitCounts.values()) + ConfigWrapper.EPS) ;
+//                } else {
+//                    value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ ConfigWrapper.EPS) / (1 + getN(a));
+//                }
+//                if (value > bestValue2) {
+//                    bestValue2 = value;
+//                    bestAction2 = a;
+//                }
+//            }
+//            if (bestAction.getId()!=bestAction2.getId()) {
+//                int dummy = 1;
+//            }
+//            assert (bestAction.getId()==bestAction2.getId()) : "Check bestAction2 failed!";
+//            if (vsz==0)
+//                assert (bestAction.getId()==selectBestFromP(availableActions).getId()) : "Check selectBestFromP failed!";
+//        }
 
         final MCTSNode child;
         if (childNodes.containsKey(bestAction.getId())) {
@@ -104,6 +138,23 @@ public final class MCTSNode {
         }
 
         return new Tuple<>(bestAction, child);
+    }
+
+    /**
+     * @param availableActions
+     * @return the action argmax(getP(a)) (the first maximizing action, if there are more than one with the same max)
+     */
+    private ApplyableAction selectBestFromP(ApplyableAction[] availableActions) {
+        var bestValue = Double.NEGATIVE_INFINITY;
+        ApplyableAction bestAction = null;
+        for (final var a : availableActions) {
+            var value = getP(a);
+            if (value > bestValue) {
+                bestValue = value;
+                bestAction = a;
+            }
+        }
+        return bestAction;
     }
 
     private static double sum(final Collection<Integer> values) {

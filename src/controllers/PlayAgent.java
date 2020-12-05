@@ -229,7 +229,7 @@ public interface PlayAgent {
 	int getNumEval();
 	void setNumEval(int num);
 	void setStopEval(int num);
-	void setWrapperNPly(int num);
+	void setWrapperParams(ParOther otherPar);
 	
 	AgentState getAgentState();
 	void setAgentState(AgentState aState);

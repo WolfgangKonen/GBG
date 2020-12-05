@@ -104,16 +104,16 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
         List<ACTIONS> actions = so.getAvailableActions();
-		double[] VTable = new double[actions.size()+1];  
+		double[] vTable = new double[actions.size()];
 
 		if (!(so instanceof StateObsNondeterministic))
 			throw new RuntimeException(" Error in "
 					+"ExpectimaxNAgent.getNextAction2(so,...): param so has to implement StateObsNondeterministic");
 		StateObsNondeterministic soND = (StateObsNondeterministic) so;
 		
-		ACTIONS_ST act_best = getBestAction(soND, so,  random,  VTable,  silent, 1);
+		ACTIONS_VT act_best = getBestAction(soND, so,  random,  vTable,  silent, 1);
 		
-        return new ACTIONS_VT(act_best.toInt(), act_best.isRandomAction(), VTable);
+        return act_best;
 	}
 
 	/**
@@ -123,20 +123,21 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @param soND		current game state (not changed on return)
 	 * @param refer		referring game state (=soND on initial call)	
 	 * @param random	allow epsilon-greedy random action selection	
-	 * @param VTable	size soND.getAvailableActions()+1
+	 * @param vTable	size soND.getAvailableActions()
 	 * @param silent
 	 * @param depth		tree depth
-	 * @return		best action + score tuple
+	 * @return		best action + V-table + vBest + score tuple. Note that best action, V-table and vBest
+	 * 				are only relevant if {@code soND.isNextActionDeterministic}
 	 */
-	private ACTIONS_ST getBestAction(StateObsNondeterministic soND, StateObservation refer, boolean random, 
-			double[] VTable, boolean silent, int depth) 
+	private ACTIONS_VT getBestAction(StateObsNondeterministic soND, StateObservation refer, boolean random,
+			double[] vTable, boolean silent, int depth)
 	{
 		int i,j;
+		double vBest;
 		ScoreTuple currScoreTuple=null;
         ScoreTuple sc, scBest=null;
 		StateObsNondeterministic NewSO;
         ACTIONS actBest = null;
-        ACTIONS_ST act_st = null;
 
         assert soND.isLegalState() : "Not a legal state"; 
 
@@ -166,7 +167,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
     				// the score tuple of the wrapped agent. 
     			}
             	if (!silent && depth<3) printAfterstate(soND,actions[i],currScoreTuple,depth);
-            	VTable[i] = currScoreTuple.scTup[player];
+            	vTable[i] = currScoreTuple.scTup[player];
             	
     			// always *maximize* P's element in the tuple currScoreTuple, 
     			// where P is the player to move in state soND:
@@ -179,13 +180,13 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
         	double pMaxScore = scBest.scTup[player];
         	int selectJ = (int)(rand.nextDouble()*scBest.count);
         	for (i=0, j=0; i < actions.length; ++i) {
-        		if (VTable[i]==pMaxScore) {
+        		if (vTable[i]==pMaxScore) {
         			if ((j++)==selectJ) actBest = new ACTIONS(actions[i]);
         		}
         	}
-            
-            VTable[actions.length] = pMaxScore;
-            if (!silent && depth<3) printBestAfterstate(soND,actBest,pMaxScore,depth);
+
+        	vBest = pMaxScore;
+            //if (!silent && depth<3) printBestAfterstate(soND,actBest,pMaxScore,depth);
 
         } // if (isNextActionDeterministic)
         else 
@@ -218,22 +219,21 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				// if cOP==MIN, expecScoreTuple will contain the worst ScoreTuple for 
 				// player (this considers the environment as an adversarial player)
 				expecScoreTuple.combine(currScoreTuple, cOP, player, currProbab);
-            }
+           }
             assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
-        	if (!silent) printNondet(soND,expecScoreTuple,sumProbab,depth);
+        	//if (!silent) printNondet(soND,expecScoreTuple,sumProbab,depth);
             scBest = expecScoreTuple;	
-            actBest = rans.get(0); 		// this is just a dummy 
+            actBest = rans.get(0); 		// this is just a dummy
+			vBest = 0.0;				// this is just a dummy
         } // else (isNextActionDeterministic)
 
         assert actBest != null : "Oops, no best action actBest";
 
-        actBest.setRandomSelect(false);
-        act_st = new ACTIONS_ST(actBest, scBest);
-        return act_st;         
+		ACTIONS_VT act_vt = new ACTIONS_VT(actBest.toInt(), false, vTable, vBest, scBest);
+        return act_vt;
 	}
 
 	private ScoreTuple getAllScores(StateObsNondeterministic sob, StateObservation refer, boolean silent, int depth) {
-        ACTIONS_ST act_st = null;
 		if (sob.isGameOver())
 		{
 			boolean rgs = m_oPar.getRewardIsGameScore();
@@ -244,12 +244,12 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		}
 				
 		int n=sob.getNumAvailableActions();
-		double[] vtable	= new double[n+1];
+		double[] vTable	= new double[n];
 		
 		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
-		act_st = getBestAction(sob, refer, false,  vtable,  silent, depth);  // sets vtable[n]=iMaxScore
+		ACTIONS_VT act_vt = getBestAction(sob, refer, false,  vTable,  silent, depth);
 		
-		return act_st.m_st;		// return ScoreTuple for best action
+		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}
 
 	/**

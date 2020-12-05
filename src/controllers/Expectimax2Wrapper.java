@@ -91,16 +91,16 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
         List<ACTIONS> actions = so.getAvailableActions();
-		double[] VTable = new double[actions.size()+1];  
+		double[] vTable = new double[actions.size()];
 //		silent=false;
 		
 		if (!(so instanceof StateObsNondeterministic)) 
 			throw new RuntimeException("Error, Expectimax-N only usable for nondeterministic games");
 		StateObsNondeterministic soND = (StateObsNondeterministic) so;
 		
-		ACTIONS_ST act_best = getBestAction(soND, so,  random,  VTable,  silent, 1);
-		
-        return new ACTIONS_VT(act_best.toInt(), act_best.isRandomAction(), VTable);
+		ACTIONS_VT act_best = getBestAction(soND, so,  random,  vTable,  silent, 1);
+
+        return act_best;
 	}
 
 	/**
@@ -110,15 +110,17 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 	 * @param soND		current game state (not changed on return)
 	 * @param refer		referring game state (=soND on initial call)	
 	 * @param random	allow epsilon-greedy random action selection	
-	 * @param VTable	size soND.getAvailableActions()+1
+	 * @param vTable	size soND.getAvailableActions()+1
 	 * @param silent
 	 * @param depth		tree depth
-	 * @return		best action + score tuple
+	 * @return best action + V-table + vBest + score tuple. Note that best action, V-table and vBest
+	 *		   are only relevant if {@code soND.isNextActionDeterministic}
 	 */
-	private ACTIONS_ST getBestAction(StateObsNondeterministic soND, StateObservation refer, boolean random, 
-			double[] VTable, boolean silent, int depth) 
+	private ACTIONS_VT getBestAction(StateObsNondeterministic soND, StateObservation refer, boolean random,
+			double[] vTable, boolean silent, int depth)
 	{
 		int i,j;
+		double vBest;
 		ScoreTuple currScoreTuple=null;
         ScoreTuple sc, scBest=null;
 		StateObsNondeterministic NewSO;
@@ -132,7 +134,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 		if (depth>=this.m_depth) {
 			// this terminates the recursion. It returns the right ScoreTuple based on r(s)+gamma*V(s).
 			ACTIONS_VT act_vt = this.getWrappedPlayAgent().getNextAction2(soND.partialState(), random, true);
-			return new ACTIONS_ST(act_vt);
+			return act_vt;
 		}
 
 		if (soND.isNextActionDeterministic()) {
@@ -159,7 +161,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 //    				// the score tuple of the wrapped agent.
 //    			}
             	if (!silent && depth<3) printAfterstate(soND,actions[i],currScoreTuple,depth);
-            	VTable[i] = currScoreTuple.scTup[player];
+            	vTable[i] = currScoreTuple.scTup[player];
             	
     			// always *maximize* P's element in the tuple currScoreTuple, 
     			// where P is the player to move in state soND:
@@ -172,13 +174,13 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
         	double pMaxScore = scBest.scTup[player];
         	int selectJ = (int)(rand.nextDouble()*scBest.count);
         	for (i=0, j=0; i < actions.length; ++i) {
-        		if (VTable[i]==pMaxScore) {
+        		if (vTable[i]==pMaxScore) {
         			if ((j++)==selectJ) actBest = new ACTIONS(actions[i]);
         		}
         	}
             
-            VTable[actions.length] = pMaxScore;
-            if (!silent && depth<3) printBestAfterstate(soND,actBest,pMaxScore,depth);
+            vBest = pMaxScore;
+            //if (!silent && depth<3) printBestAfterstate(soND,actBest,pMaxScore,depth);
 
         } // if (isNextActionDeterministic)
         else 
@@ -205,7 +207,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);		
 				
 				currProbab = soND.getProbability(actions[i]);
-            	if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
+            	//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
 				sumProbab += currProbab;
 				// if cOP==AVG, expecScoreTuple will contain the average ScoreTuple
 				// if cOP==MIN, expecScoreTuple will contain the worst ScoreTuple for 
@@ -213,20 +215,20 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 				expecScoreTuple.combine(currScoreTuple, cOP, player, currProbab);
             }
             assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
-        	if (!silent) printNondet(soND,expecScoreTuple,sumProbab,depth);
-            scBest = expecScoreTuple;	
-            actBest = rans.get(0); 		// this is just a dummy 
+        	//if (!silent) printNondet(soND,expecScoreTuple,sumProbab,depth);
+			scBest = expecScoreTuple;
+			actBest = rans.get(0); 		// this is just a dummy
+			vBest = 0.0;				// this is just a dummy
         } // else (isNextActionDeterministic)
 
         assert actBest != null : "Oops, no best action actBest";
 
         actBest.setRandomSelect(false);
-        act_st = new ACTIONS_ST(actBest, scBest);
-        return act_st;         
+		ACTIONS_VT act_vt = new ACTIONS_VT(actBest.toInt(), false, vTable, vBest, scBest);
+        return act_vt;
 	}
 
 	private ScoreTuple getAllScores(StateObsNondeterministic sob, StateObservation refer, boolean silent, int depth) {
-        ACTIONS_ST act_st = null;
 		if (sob.isGameOver())
 		{
 			boolean rgs = m_oPar.getRewardIsGameScore();
@@ -234,12 +236,12 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 		}
 				
 		int n=sob.getNumAvailableActions();
-		double[] vtable	= new double[n+1];
+		double[] vTable	= new double[n];
 		
 		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
-		act_st = getBestAction(sob, refer, false,  vtable,  silent, depth);  // sets vtable[n]=iMaxScore
-		
-		return act_st.m_st;		// return ScoreTuple for best action
+		ACTIONS_VT act_vt = getBestAction(sob, refer, false,  vTable,  silent, depth);
+
+		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}
 
 	/**

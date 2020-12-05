@@ -68,17 +68,21 @@ public class TDNTuple3AgtTest extends GBGBatch {
      */
     @Test
     public void quickEvalTest() {
+        long startTime = System.currentTimeMillis();
         String selectedGame = "RubiksCube";
-        //quickEval(selectedGame, agtFileA, evalThreshA,1);   // 5 sec
+        quickEval(selectedGame, agtFileA, evalThreshA,1);   // 5 sec
         //quickEval(selectedGame, agtFileB, evalThreshB,1);   // 30 sec
         //quickEval(selectedGame, agtFileB, evalThreshB,2);   // 3 min
         selectedGame = "Othello";
         //quickEval(selectedGame, agtFileC, evalThreshC,1);   // 1 min
-        quickEval(selectedGame, agtFileC, evalThreshC,2);   // 8 min
+        //quickEval(selectedGame, agtFileC, evalThreshC,2);   // 8 min
         selectedGame = "Hex";
         //quickEval(selectedGame, agtFileD, evalThreshD,2);   // 5 min
         selectedGame = "2048";
-        //quickEval(selectedGame, agtFileF, evalThreshF,2);   // 2 min
+        //quickEval(selectedGame, agtFileF, evalThreshF,2);   // 2.5 min
+
+        double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+        System.out.println("quickEvalTest finished in "+elapsedTime+" sec.");
     }
 
     /**

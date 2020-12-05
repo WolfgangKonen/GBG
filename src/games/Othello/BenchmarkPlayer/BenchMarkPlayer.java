@@ -120,7 +120,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 			}
 			//if (count>1) System.out.println("more than one best action");
 		}
-		ACTIONS_VT x = new ACTIONS_VT(bestAction.toInt(), false, vTable);
+		ACTIONS_VT x = new ACTIONS_VT(bestAction.toInt(), false, vTable, bestScore);
 		return x;
 		
 	}

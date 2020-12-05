@@ -12,6 +12,7 @@ public final class MCTS {
     private final double c_puct;
     private final Approximator approximator;
     private final int maxDepth;
+    public int largestDepth;    // the largest tree depth encountered during MCTS.search iterations
 
     /**
      * @param approximator A component that approximates the value of a given game state.
@@ -45,9 +46,11 @@ public final class MCTS {
             return sign * node.gameState.getFinalGameScore();       // /WK/ sign
 
         if (depth > this.maxDepth) {       // /WK/ testing for RubiksCube
-            System.out.println("maxDepth="+this.maxDepth+" reached. Returning");
-            return 0;           // return with reward 0. Alternative choice would be REWARD_NEGATIVE.
+            //System.out.println("maxDepth="+this.maxDepth+" reached. Returning");
+            //return 0;           // return with reward 0. Alternative choice would be REWARD_NEGATIVE.
+            return -1;
         }
+        if (depth > largestDepth) largestDepth=depth;
 
         // If a non expanded node is reached, return its negated value (2-player game) or its value (1-player game)
         // after it got expanded and its move probabilities were set.

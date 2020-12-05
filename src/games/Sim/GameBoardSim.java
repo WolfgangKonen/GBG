@@ -1,27 +1,13 @@
 package games.Sim;
 
-import javax.swing.*;
-import javax.swing.border.Border;
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Random;
 
 import controllers.PlayAgent;
 import games.GameBoard;
 import games.StateObservation;
-import games.Hex.StateObserverHex;
-import games.Othello.StateObserverOthello;
 import games.Othello.Gui.GameBoardOthelloGui;
 import games.Sim.Gui.GameBoardSimGui;
-import games.Sim.Gui.Point;
-import games.TicTacToe.StateObserverTTT;
-import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 import games.Arena;
@@ -54,7 +40,7 @@ public class GameBoardSim implements GameBoard {
 	protected Random rand;
 
 	// debug: start with simpler start states in getDefaultStartState()
-	private boolean m_DEBG = false; // false; true;
+	private final boolean m_DEBG = false; // false; true;
 	
 	private transient GameBoardSimGui m_gameGui = null;
 	
@@ -206,7 +192,7 @@ public class GameBoardSim implements GameBoard {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
-			int i = (int) (rand.nextInt(acts.size()));
+			int i = rand.nextInt(acts.size());
 			m_so.advance(acts.get(i));
 		}
 		return m_so;

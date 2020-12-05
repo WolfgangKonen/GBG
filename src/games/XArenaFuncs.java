@@ -413,19 +413,20 @@ public class XArenaFuncs {
 							+ " but selector for player " + n + " requires " + sAgent + ".");
 				pa = m_PlayAgents[n]; // take the n'th current agent, which
 										// is *assumed* to be trained (!)
-				
-				// Wrapper nPly is the ONLY parameter from tab 'Other pars' which may be changed by the user AFTER 
-				// training an agent. (All the other opar parameters may be only set/changed BEFORE training a 
-				// trainable agent.) The following line of code was missing before 2020-08-11 and caused the bug 
-				// that a Wrapper nPly set for a trained agent was not saved to disk. Now it will be saved:
-				pa.setWrapperNPly(m_xab.oPar[n].getWrapperNPly());
+
+				// Wrapper nPly, Wrapper MCTS and PUCT for Wrapper MCTS are the ONLY parameters from tab 'Other pars'
+				// which may be changed by the user AFTER training an agent. (All the other opar parameters may be only
+				// set/changed BEFORE training a trainable agent.) The following line of code was missing before 2020-08-11
+				// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
+				// Now it will be saved:
+				pa.setWrapperParams(m_xab.oPar[n]);
 			}
 		}
 		if (pa == null)
 			throw new RuntimeException("Could not construct/fetch agent = " + sAgent);
 
 		return pa;
-	}
+	} // fetchAgent
 
 	/**
 	 * Fetch the vector of all {@link PlayAgent}s from {@link Arena}. See
@@ -761,16 +762,14 @@ public class XArenaFuncs {
 		ArrayList<TAggreg> taggList = new ArrayList<>();
 		TStats tstats;
 		TAggreg tagg;
-		HashSet pvalues = new HashSet();
-		Iterator it = tsList.iterator();
-		while (it.hasNext()) {
-			tstats = (TStats) it.next();
+		HashSet<Integer> pvalues = new HashSet<>();
+		for (TStats tStats : tsList) {
+			tstats = tStats;
 			pvalues.add(tstats.p);
 		}
-		Iterator itp = pvalues.iterator();
-		while (itp.hasNext()) {
-			int p = (int) itp.next();
-			tagg = new TAggreg(tsList, p);
+		for (Integer pvalue : pvalues) {
+			//int p = (int) pvalue;
+			tagg = new TAggreg(tsList, pvalue);
 			taggList.add(tagg);
 		}
 		return taggList;

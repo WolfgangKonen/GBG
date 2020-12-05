@@ -148,7 +148,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
         ArrayList<ACTIONS> acts = so.getAvailableActions();
         ACTIONS actBest = null;
         List<Types.ACTIONS> bestActions = new ArrayList<>();
-		double[] vTable = new double[acts.size()+1];  
+		double[] vTable = new double[acts.size()];
         double maxValue = -Double.MAX_VALUE;
         double value;
         boolean rgs=false;
@@ -200,7 +200,6 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
         	System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
         }			
 
-        vTable[acts.size()] = maxValue;
 		ScoreTuple scBest = new ScoreTuple(new double[]{maxValue});
 
 		return new ACTIONS_VT(actBest.toInt(), false, vTable, maxValue, scBest);

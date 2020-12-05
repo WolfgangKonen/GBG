@@ -115,7 +115,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 		}
 
 		ArrayList<ACTIONS> acts = so.getAvailableActions();
-        double[] VTable =  new double[acts.size()+1];
+        double[] VTable =  new double[acts.size()];
         int P = so.getPlayer();
 
         for(i = 0; i < acts.size(); ++i)
@@ -177,8 +177,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
         		System.out.println("--- "+depth+": Best Move: "+NewSO.stringDescr()+"   "+maxValue);
         }			
 
-        VTable[acts.size()] = maxValue;
-        act_vt = new ACTIONS_VT(actBest.toInt(), false, VTable, maxValue, scBest); 
+        act_vt = new ACTIONS_VT(actBest.toInt(), false, VTable, maxValue, scBest);
         return act_vt;         
 	} // getBestAction
 

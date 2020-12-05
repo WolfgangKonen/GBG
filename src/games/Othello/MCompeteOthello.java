@@ -173,10 +173,10 @@ public class MCompeteOthello {
     public static PlayAgent multiCompeteSweep(PlayAgent pa, int iterMCTS, Arena t_Game,
                                        GameBoard gb, String csvName) {
         int[] depthArr = {1,2,3,4,5,6,7,8,9};
-        double[] epsArr = {1e-8, 0.0, -1.0};
+        double[] epsArr = {1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1.0};
+        double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         String userTitle1 = "user1", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
-        double c_puct = 1.0;
         double winrate;
         int numEpisodes;
 
@@ -191,31 +191,33 @@ public class MCompeteOthello {
             Edax2 edaxAgent = new Edax2("Edax",parEdax);
             System.out.println("*** Starting multiCompete with Edax depth = "+edaxAgent.getParEdax().getDepth()+" ***");
 
-            for (double EPS : epsArr) {
-                ConfigWrapper.EPS = EPS;
-                numEpisodes = (EPS<0) ? 10 : 1;
-                if (iterMCTS == 0) qa = pa;
-                else qa = new MCTSWrapperAgent(iterMCTS, c_puct,
-                        new PlayAgentApproximator(pa),
-                        "MCTS-Wrapped " + pa.getName(),
-                        -1);
+            for (double c_puct : cpuctArr) {
+                for (double EPS : epsArr) {
+                    ConfigWrapper.EPS = EPS;
+                    numEpisodes = (EPS<0) ? 10 : 1;
+                    if (iterMCTS == 0) qa = pa;
+                    else qa = new MCTSWrapperAgent(iterMCTS, c_puct,
+                            new PlayAgentApproximator(pa),
+                            "MCTS-Wrapped " + pa.getName(),
+                            -1);
 
-                StateObservation so = gb.getDefaultStartState();
-                ScoreTuple sc;
-                PlayAgtVector paVector = new PlayAgtVector(qa, edaxAgent);
-                for (int p_MCTS : new int[]{0, 1})
-                {     // p_MCTS: whether MCTSWrapper is player 0 or player 1
-                    sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MCTS), so, numEpisodes, 0, null);
-                    winrate = (sc.scTup[p_MCTS] + 1) / 2;
-                    mCompete = new MCompeteOthello(0, numEpisodes, d, iterMCTS,
-                            EPS, p_MCTS, c_puct, winrate,
-                            userValue1, userValue2);
-                    mcList.add(mCompete);
-                } // for (p_MCTS)
-            } // for (EPS)
+                    StateObservation so = gb.getDefaultStartState();
+                    ScoreTuple sc;
+                    PlayAgtVector paVector = new PlayAgtVector(qa, edaxAgent);
+                    for (int p_MCTS : new int[]{0, 1})
+                    {     // p_MCTS: whether MCTSWrapper is player 0 or player 1
+                        sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MCTS), so, numEpisodes, 0, null);
+                        winrate = (sc.scTup[p_MCTS] + 1) / 2;
+                        mCompete = new MCompeteOthello(0, numEpisodes, d, iterMCTS,
+                                EPS, p_MCTS, c_puct, winrate,
+                                userValue1, userValue2);
+                        mcList.add(mCompete);
+                    } // for (p_MCTS)
+                } // for (EPS)
+            } // for (c_puct)
 
-            // print the full list mcList after finishing each pair (p_MCTS,EPS)
-            // (overwrites the file written from previous (p_MCTS,EPS))
+            // print the full list mcList after finishing each triple (p_MCTS,EPS,c_puct)
+            // (overwrites the file written from previous (p_MCTS,EPS,c_puct))
             MCompeteOthello.printMultiCompeteList(csvName,mcList, pa, t_Game, userTitle1, userTitle2);
         } // for (d)
 

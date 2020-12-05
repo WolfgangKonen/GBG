@@ -158,7 +158,7 @@ public final class MCTSWrapperAgent extends AgentBase {
             int dummy = 1;
         }
 
-
+        mcts.largestDepth=0;
         // Performs the given number of mcts iterations.
         for (int i = 0; i < iterations; i++) {
             mcts.search(mctsNode,0);
@@ -171,7 +171,7 @@ public final class MCTSWrapperAgent extends AgentBase {
             // but we leave it in as debug check for the moment
             System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
             System.err.println(mctsNode.gameState.stringDescr());
-            return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()]);
+            return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()],0.0);
         }
         lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
             Comparator.comparingDouble(Map.Entry::getValue)
@@ -184,15 +184,21 @@ public final class MCTSWrapperAgent extends AgentBase {
             lastSelectedNode = lastSelectedNode.childNodes.get(new PassAction().getId());
         }
 
+        System.out.println("largestDepth = "+mcts.largestDepth);
+
+        final var vTable = getVTableFor(mctsNode);
+        final var vBest = Arrays.stream(vTable).max().orElse(Double.NaN);
         return new Types.ACTIONS_VT(
             lastSelectedAction,
             false,
-            getVTableFor(mctsNode)
+            vTable,
+            vBest
         );
-    }
+    }   // getNextAction2
 
-    // just a check whether this is faster than getVTableFor
-    private double[] getVTable2For(final MCTSNode mctsNode) {
+    // just a check whether this is faster than getVTableFor --> see MCTSWrapperAgentTest::getVTableForTest.
+    // getVTable2For is 5x faster than getVTableFor, but it requires only negligible resources.
+    public double[] getVTable2For(final MCTSNode mctsNode) {
         ApplyableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
         double[] vTab = new double[arrAction.length];
         double v, sum = 0;
@@ -206,7 +212,7 @@ public final class MCTSWrapperAgent extends AgentBase {
         return vTab;
     }
 
-    private double[] getVTableFor(final MCTSNode mctsNode) {
+    public double[] getVTableFor(final MCTSNode mctsNode) {
         return getDistributionOver(
             Arrays
                 .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
