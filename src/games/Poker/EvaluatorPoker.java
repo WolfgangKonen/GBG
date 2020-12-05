@@ -49,7 +49,9 @@ public class EvaluatorPoker extends Evaluator {
 
 	public double evalAgent1(PlayAgent playAgent, PlayAgent opponent,PlayAgent opponent2,PlayAgent opponent3, GameBoard gb) {
 		StateObservation so = gb.getDefaultStartState();
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent,opponent2,opponent3), so, 1, 0);
+		PlayAgent[] pavec = new PlayAgent[] {playAgent,opponent,opponent2,opponent3};
+
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 1, 0);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
