@@ -2,10 +2,10 @@ package games;
 
 import controllers.PlayAgent;
 import org.junit.Test;
+import starters.GBGBatch;
+import starters.MTrainSweep;
 
 import java.io.IOException;
-
-import static org.junit.Assert.*;
 
 public class GBGBatchTest extends GBGBatch {
     String selectedGame = "TicTacToe";

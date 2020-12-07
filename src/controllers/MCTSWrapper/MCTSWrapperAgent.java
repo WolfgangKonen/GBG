@@ -184,7 +184,8 @@ public final class MCTSWrapperAgent extends AgentBase {
             lastSelectedNode = lastSelectedNode.childNodes.get(new PassAction().getId());
         }
 
-        System.out.println("largestDepth = "+mcts.largestDepth);
+        // --- debug info RubiksCube ---
+        //System.out.println("largestDepth = "+mcts.largestDepth);
 
         final var vTable = getVTableFor(mctsNode);
         final var vBest = Arrays.stream(vTable).max().orElse(Double.NaN);

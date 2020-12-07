@@ -8,6 +8,7 @@ import games.Evaluator;
 import games.XArenaButtons;
 import games.XArenaFuncs;
 import games.ZweiTausendAchtundVierzig.Evaluator2048.EResult;
+import starters.GBGLaunch;
 import tools.Types;
 
 /**
@@ -24,7 +25,7 @@ import tools.Types;
  *  
  * @author Wolfgang Konen, TH Koeln, 2020
  * 
- * @see games.GBGLaunch
+ * @see GBGLaunch
  * @see ArenaTrain
  * @see XArenaFuncs
  *  

@@ -1,4 +1,4 @@
-package games;
+package starters;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import games.Arena;
 import games.CFour.ArenaC4;
 import games.CFour.ArenaTrainC4;
 import games.Hex.ArenaHex;
@@ -54,10 +55,10 @@ public class GBGLaunch {
 	 */
 	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe"};
 	
-	enum LaunchTask {
+	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
 	}
-	LaunchTask launcherState = LaunchTask.SELECTGAME;	// also used in Arena.destroy()
+	public LaunchTask launcherState = LaunchTask.SELECTGAME;	// also used in Arena.destroy()
 	
 	private static final long serialVersionUID = 1L;
 	public static Arena t_Game;

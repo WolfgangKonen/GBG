@@ -1,20 +1,17 @@
-package games;
+package starters;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import controllers.ExpectimaxWrapper;
-import controllers.HumanPlayer;
-import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
-import params.ParMaxN;
-import params.ParOther;
-import tools.Measure;
+import games.Arena;
+import games.GameBoard;
+import games.XArenaButtons;
+import games.XArenaFuncs;
 import tools.Types;
 
 /**

@@ -8,8 +8,6 @@ import games.Othello.StateObserverOthello;
 import ludiiInterface.gateway.GbgAsLudiiAgent;
 import ludiiInterface.othello.useCases.state.AsStateObserverOthello;
 import ludiiInterface.othello.useCases.state.GbgStateFromLudiiContext;
-import random.RandomAI;
-import search.mcts.MCTS;
 import util.AI;
 import util.Context;
 import util.GameLoader;

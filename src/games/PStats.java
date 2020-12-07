@@ -1,7 +1,6 @@
 package games;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,9 +12,8 @@ import java.util.ListIterator;
 import java.util.Locale;
 
 import controllers.PlayAgent;
-import games.Arena;
+import starters.MTrain;
 import tools.Types;
-import tools.Types.ACTIONS_VT;
 
 /**
  *  Class PStats holds the results from one move during game play.
@@ -34,7 +32,7 @@ import tools.Types.ACTIONS_VT;
  *  
  *  @see Arena#PlayGame()
  *  @see games.ZweiTausendAchtundVierzig.Evaluator2048#evalAgent(PlayAgent)
- *  @see games.MTrain
+ *  @see MTrain
  */
 public class PStats {
 	public int i;				// episode number (if needed)

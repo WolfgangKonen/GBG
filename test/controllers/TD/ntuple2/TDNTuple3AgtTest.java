@@ -1,14 +1,12 @@
 package controllers.TD.ntuple2;
 
-import controllers.Expectimax2Wrapper;
 import controllers.ExpectimaxWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.*;
 import org.junit.Test;
-import tools.Measure;
-
-import java.util.ArrayList;
+import starters.GBGBatch;
+import starters.MTrainSweep;
 
 /**
  * The JUnit tests in this class are not exact, because most agent performances fluctuate a bit due to random variations

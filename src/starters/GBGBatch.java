@@ -1,12 +1,11 @@
-package games;
+package starters;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 
 
 import controllers.*;
 import controllers.PlayAgent.AgentState;
+import games.*;
 import games.CFour.ArenaTrainC4;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
@@ -15,15 +14,11 @@ import games.Nim.ArenaNim3P;
 import games.Nim.ArenaTrainNim2P;
 import games.Nim.ArenaTrainNim3P;
 import games.Othello.ArenaTrainOthello;
-import games.Othello.MCompeteOthello;
 import games.RubiksCube.ArenaTrainCube;
 import games.Sim.ArenaSim;
 import games.Sim.ArenaTrainSim;
 import games.TicTacToe.ArenaTrainTTT;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
-import params.ParMaxN;
-import params.ParOther;
-import tools.Measure;
 import tools.Types;
 
 /**
@@ -468,7 +463,7 @@ public class GBGBatch {
 		}
 		PlayAgent pa = t_Game.m_xfun.m_PlayAgents[0];
 
-		MCompeteOthello.multiCompeteSweep(pa,iterMCTS,t_Game,gb,csvName);
+		MCompeteMWrap.multiCompeteSweep(pa,iterMCTS,t_Game,gb,csvName);
 
 		long elapsedMs = (System.currentTimeMillis() - startTime);
 		double elapsedTime = (double)elapsedMs/1000.0;

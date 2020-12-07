@@ -1,6 +1,6 @@
 package controllers;
 
-import games.GBGBatch;
+import starters.GBGBatch;
 import games.RubiksCube.GameBoardCube;
 import games.StateObservation;
 import org.junit.Test;

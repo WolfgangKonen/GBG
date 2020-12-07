@@ -1,9 +1,10 @@
-package games;
+package starters;
 
 import controllers.ExpectimaxWrapper;
 import controllers.HumanPlayer;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
+import games.*;
 import params.ParMaxN;
 import params.ParOther;
 import tools.Measure;
@@ -92,12 +93,12 @@ public class MTrainSweep {
             } // for (k)
         } // for (i)
 
-        if (m_evaluatorQ.m_mode!=(-1))
+        if (m_evaluatorQ.getMode()!=(-1))
         // m_mode=-1 signals: 'no evaluation done' --> oC did not receive evaluation results
         {
             System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
         }
-        if (doTrainEvaluation && m_evaluatorT.m_mode!=(-1))
+        if (doTrainEvaluation && m_evaluatorT.getMode()!=(-1))
         // m_mode=-1 signals: 'no evaluation done' --> oT did not receive evaluation results
         {
             System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
@@ -170,12 +171,12 @@ public class MTrainSweep {
             } // for (k)
         } // for (i)
 
-        if (m_evaluatorQ.m_mode!=(-1))
+        if (m_evaluatorQ.getMode()!=(-1))
         // m_mode=-1 signals: 'no evaluation done' --> oC did not receive evaluation results
         {
             System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
         }
-        if (doTrainEvaluation && m_evaluatorT.m_mode!=(-1))
+        if (doTrainEvaluation && m_evaluatorT.getMode()!=(-1))
         // m_mode=-1 signals: 'no evaluation done' --> oT did not receive evaluation results
         {
             System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
@@ -248,12 +249,12 @@ public class MTrainSweep {
             } // for (k)
         } // for (i)
 
-        if (m_evaluatorQ.m_mode!=(-1))
+        if (m_evaluatorQ.getMode()!=(-1))
         // m_mode=-1 signals: 'no evaluation done' --> oC did not receive evaluation results
         {
             System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
         }
-        if (doTrainEvaluation && m_evaluatorT.m_mode!=(-1))
+        if (doTrainEvaluation && m_evaluatorT.getMode()!=(-1))
         // m_mode=-1 signals: 'no evaluation done' --> oT did not receive evaluation results
         {
             System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
