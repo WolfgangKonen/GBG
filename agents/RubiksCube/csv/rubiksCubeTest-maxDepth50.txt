@@ -1,0 +1,64 @@
+*** Running rubiksCubeTest for TCL4-p9-2000k-120-7t.agt.zip ***
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  046,5%, 003,0%, 050,5%
+008, 0200:  022,5%, 000,5%, 077,0%
+009, 0200:  010,5%, 001,5%, 088,0%
+TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.2816666666666667
+... for EPS=1.0E-8, iter=0, 1.2 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  055,0%, 003,5%, 041,5%
+008, 0200:  024,5%, 003,5%, 072,0%
+009, 0200:  015,0%, 002,5%, 082,5%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.3466666666666667
+... for EPS=1.0E-8, iter=100, 86.114 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  072,0%, 008,0%, 020,0%
+008, 0200:  048,0%, 005,0%, 047,0%
+009, 0200:  032,0%, 006,5%, 061,5%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.5716666666666667
+... for EPS=1.0E-8, iter=200, 118.696 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  086,5%, 004,0%, 009,5%
+008, 0200:  064,5%, 007,5%, 028,0%
+009, 0200:  033,0%, 005,5%, 061,5%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.6699999999999999
+... for EPS=1.0E-8, iter=500, 267.318 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  085,5%, 007,0%, 007,5%
+008, 0200:  068,5%, 005,5%, 026,0%
+009, 0200:  040,0%, 006,0%, 054,0%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.7083333333333334
+... for EPS=1.0E-8, iter=1000, 553.903 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  044,0%, 001,0%, 055,0%
+008, 0200:  014,5%, 002,5%, 083,0%
+009, 0200:  011,5%, 000,0%, 088,5%
+TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.245
+... for EPS=0.0, iter=0, 0.834 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  000,0%, 000,0%, 100,0%
+008, 0200:  000,0%, 000,0%, 100,0%
+009, 0200:  000,0%, 000,0%, 100,0%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.0
+... for EPS=0.0, iter=100, 116.008 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  000,0%, 001,5%, 098,5%
+008, 0200:  000,0%, 000,0%, 100,0%
+009, 0200:  000,0%, 000,0%, 100,0%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.0050000000000000044
+... for EPS=0.0, iter=200, 266.03 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  003,0%, 015,0%, 082,0%
+008, 0200:  001,5%, 007,5%, 091,0%
+009, 0200:  002,5%, 003,0%, 094,5%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.10833333333333335
+... for EPS=0.0, iter=500, 933.981 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  021,0%, 034,0%, 045,0%
+008, 0200:  020,0%, 015,0%, 065,0%
+009, 0200:  008,0%, 007,0%, 085,0%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.35000000000000003
+... for EPS=0.0, iter=1000, 1539.883 sec
+[rubiksCubeTest] 3883.9669999999996 sec.
+
+Process finished with exit code 0

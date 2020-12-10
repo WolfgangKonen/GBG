@@ -101,9 +101,9 @@ public class CubeConfig {
 	/**
 	 * EvalNmax: how many states to pick randomly for each p during evaluation
 	 */
-//	final static int[] EvalNmax = {0,10,50,50, 300, 300, 300, 500, 500,2000,2000,2000};
-	final static int[] EvalNmax = {0,200,200,200, 200, 200, 200, 200, 200,200,200,200, 200,200,200,200};
-//		                           0              4                   8                12 
+//		                           0           4                   8
+//	public final static int[] EvalNmax = {0,10,50,50, 300, 300, 300, 500, 500,2000,2000,2000};
+	public final static int EvalNmax = 200;
 
 
 	//

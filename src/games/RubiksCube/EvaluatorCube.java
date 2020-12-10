@@ -9,7 +9,7 @@ import games.TStats;
 import games.TStats.TAggreg;
 
 /**
- * Evaluator for RubiksCube. For p in {1, ..., {@link CubeConfig#pMax}}: Test with {@link CubeConfig#EvalNmax}{@code [p]} 
+ * Evaluator for RubiksCube. For p = {pMin, ..., pMax}: Test with {@code ecp.EvalNmax}
  * cube states randomly picked via  {@link GameBoardCube#chooseStartState(int) GameBoardCube#chooseStartState(p)}
  * <ul>
  * <li> If mode=0: how many percent of the states are solved within &le; p twists? 
@@ -23,28 +23,38 @@ public class EvaluatorCube extends Evaluator {
  	private static final int[] AVAILABLE_MODES = new int[]{-1,0,1};
 //	private int m_mode;			// now in Evaluator
 	private	int countStates=0;
-	private int epiLength=10;
+	private EvalCubeParams ecp;
 
 	/**
 	 * threshold for each value of m_mode
 	 */
 	protected double[] m_thresh={0.0,0.85,0.9}; // 
 	
-	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, gb, 0, stopEval);
-		initEvaluator(gb);
+	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval) {
+		super(pa, gb, 0, stopEval);
+		initEvaluator(gb);			// might change CubeConfig.pMax
+		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
 	}
 
-	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, gb, mode, stopEval);
-		initEvaluator(gb);
+	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode) {
+		super(pa, gb, mode, stopEval);
+		initEvaluator(gb);			// might change CubeConfig.pMax
+		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
 	}
 
-	public EvaluatorCube(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
-		initEvaluator(gb);
+	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
+		super(pa, gb, mode, stopEval, verbose);
+		initEvaluator(gb);			// might change CubeConfig.pMax
+		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
 	}
-	
+
+	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose,
+						 EvalCubeParams evalCubePar) {
+		super(pa, gb, mode, stopEval, verbose);
+		initEvaluator(gb);
+		this.ecp = new EvalCubeParams(evalCubePar);
+	}
+
 	private void initEvaluator(GameBoard gb) {
 		if (gb != null) {
 			assert (gb instanceof GameBoardCube);	
@@ -73,7 +83,7 @@ public class EvaluatorCube extends Evaluator {
 	}
 	
 	/**	
-	 * For each p up to {@link CubeConfig#pMax}: Generate {@link CubeConfig#EvalNmax}{@code [p]} scrambled cubes 
+	 * For each p = {@code ecp.pMin} ... {@code ecp.pMax}: Generate {@code ecp.evalNmax} scrambled cubes
 	 * via {@link GameBoardCube#chooseStartState(int) GameBoardCube#chooseStartState(p)}. Measure the success rate with
 	 * which the agent can solve them: 
 	 * <ul>
@@ -86,43 +96,41 @@ public class EvaluatorCube extends Evaluator {
 	 * 			 hard-wired in source code.
 	 */
  	private double evaluateAgent0(PlayAgent pa) {
-		ArrayList<TStats> tsList = new ArrayList<TStats>();
-		ArrayList<TAggreg> taggList = new ArrayList<TAggreg>();
+		ArrayList<TStats> tsList = new ArrayList<>();
+		ArrayList<TAggreg> taggList = new ArrayList<>();
 		TStats tstats;
 		TAggreg tagg;
 		StateObservation so;
-		double[] constWght = new double[CubeConfig.pMax];  	// weights for each p-level, see weightedAvgResTAggregList
-		for (int p=0; p<CubeConfig.pMax; p++) { constWght[p]=1.0; }
-//		epiLength = CubeConfig.EVAL_EPILENGTH; //50, 2*p; //(2*p>10) ? 2*p : 10;
-		epiLength = pa.getParOther().getStopEval();
-		if (epiLength<=CubeConfig.pMax) {
-			System.err.println("WARNING: epiLength="+epiLength+" has to be larger than pMax="+CubeConfig.pMax+"!");
-			System.err.println("         Setting epiLength to "+(CubeConfig.pMax+1));
-			epiLength=CubeConfig.pMax+1;
-			// if epiLength were not larger than pMax, the calculation in TAggreg would go wrong
+		double[] constWght = new double[ecp.pMax];  	// weights for each p-level, see weightedAvgResTAggregList
+		for (int p=0; p<ecp.pMax; p++) { constWght[p]=1.0; }
+		if (ecp.epiLength<=ecp.pMax) {
+			System.err.println("WARNING: epiLength="+ecp.epiLength+" has to be larger than pMax="+ecp.pMax+"!");
+			System.err.println("         Setting epiLength to "+(ecp.pMax+1));
+			ecp.epiLength=ecp.pMax+1;
+			// if epiLength were not larger than ecp.pMax, the calculation in TAggreg would go wrong
 			// (such that percentages would sum to something >1)
 		}
 
  		countStates=0;
-		for (int p=1; p<=CubeConfig.pMax; p++) {
- 			for (int n=0; n<CubeConfig.EvalNmax[p]; n++) {
+		for (int p=ecp.pMin; p<=ecp.pMax; p++) {
+ 			for (int n=0; n<ecp.evalNmax; n++) {
 				so = ((GameBoardCube) m_gb).chooseStartState(p);	// uses selectByTwist1(p)
  				so.resetMoveCounter();
 
 				pa.resetAgent();			// needed if pa is MCTSWrapperAgent
 
-				while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
+				while (!so.isGameOver() && so.getMoveCounter()<ecp.epiLength) {
  	                 so.advance(pa.getNextAction2(so.partialState(), false, true));
                 }
                 int moveNum = so.getMoveCounter();
-                tstats = new TStats(n,p,moveNum,epiLength);	// both p and epiLength are later used in TAggreg(tsList,p) to form counters
+                tstats = new TStats(n,p,moveNum,ecp.epiLength);	// both p and epiLength are later used in TAggreg(tsList,p) to form counters
     			tsList.add(tstats);
 
                 if(verbose > 1) {
                     System.out.print("Finished game " +p+","+ n + " with moveNum " + moveNum + " twists.\n");
                 }
 			} // for (n)
-			countStates += CubeConfig.EvalNmax[p];
+			countStates += ecp.evalNmax;
  			tagg = new TAggreg(tsList,p);
  			taggList.add(tagg);
  		} // for (p)
@@ -158,11 +166,11 @@ public class EvaluatorCube extends Evaluator {
 
 	@Override
 	public String getPrintString() {
-		switch (m_mode) {
-		case 0:  return countStates+" cubes: % solved with minimal twists (best is 1.0): ";
-		case 1:  return countStates+" cubes: % solved within epiLength="+ epiLength +" (best is 1.0): ";
-		default: return null;
-		}
+		return switch (m_mode) {
+			case 0 -> countStates + " cubes: % solved with minimal twists (best is 1.0): ";
+			case 1 -> countStates + " cubes: % solved within epiLength=" + ecp.epiLength + " (best is 1.0): ";
+			default -> null;
+		};
 	}
 
 	@Override
@@ -176,11 +184,11 @@ public class EvaluatorCube extends Evaluator {
 
 	@Override
 	public String getPlotTitle() {
-		switch (m_mode) {
-		case 0:  return "% solved with minimal twists";
-		case 1:  return "% solved below epiLength";
-		default: return null;
-		}
+		return switch (m_mode) {
+			case 0 -> "% solved with minimal twists";
+			case 1 -> "% solved below epiLength";
+			default -> null;
+		};
 	}
 
 

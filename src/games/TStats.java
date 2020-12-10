@@ -33,12 +33,10 @@ public class TStats {
 
 	public static void printTStatsList(ArrayList<TStats> csList) {
 		DecimalFormat form = new DecimalFormat("000");
-		Iterator it = csList.iterator();
-	    while (it.hasNext()) {
-		    TStats tint = (TStats)it.next();
-		    System.out.println(form.format(tint.n) + ", " + form.format(tint.p) + ", "+ tint.moveNum 
-		    		+ ", epiLength="+tint.epiLength);
-        } 		
+		for (TStats tint : csList) {
+			System.out.println(form.format(tint.n) + ", " + form.format(tint.p) + ", " + tint.moveNum
+					+ ", epiLength=" + tint.epiLength);
+		}
 	}
 
 	public static void printLastTStats(ArrayList<TStats> csList) {
@@ -68,13 +66,13 @@ public class TStats {
 		double percNotSol;
 		
 		public TAggreg(ArrayList<TStats> tsList, int p) {
-			Iterator it = tsList.iterator();
+			Iterator<TStats> it = tsList.iterator();
 			int nSolved=0;
 			int nLonger=0;
 			int nNot=0;
 			int size=0;
 		    while (it.hasNext()) {
-			    TStats cs = (TStats)it.next();
+			    TStats cs = it.next();
 			    if (cs.p==p) {
 			    	size++;
 				    this.p = cs.p;
@@ -98,32 +96,28 @@ public class TStats {
 		DecimalFormat form2 = new DecimalFormat("0000");
 		DecimalFormat fper = new DecimalFormat("000.0%"); 
 		System.out.println("  p,  num: %solved, %longe, %unsolved");
-		Iterator it = taList.iterator();
-	    while (it.hasNext()) {
-			TAggreg tint = (TAggreg)it.next();
-		    System.out.println(form.format(tint.p) + ", " + form2.format(tint.size) + ":  "
-		    		+ fper.format(tint.percSolved) + ", "
-		    		+ fper.format(tint.percLonger) + ", "
-		    		+ fper.format(tint.percNotSol) );
-        } 		
+		for (TAggreg tint : taList) {
+			System.out.println(form.format(tint.p) + ", " + form2.format(tint.size) + ":  "
+					+ fper.format(tint.percSolved) + ", "
+					+ fper.format(tint.percLonger) + ", "
+					+ fper.format(tint.percNotSol));
+		}
 	}
 	
 	/**
-	 * @param taList
+	 * @param taList a list of TAggreg objects
 	 * @return the average 'solved' percentage of taList
 	 */
 	public static double avgResTAggregList(ArrayList<TAggreg> taList) {
-		Iterator it = taList.iterator();
 		double res=0;
-	    while (it.hasNext()) {
-			TAggreg tagg = (TAggreg)it.next();
+		for (TAggreg tagg : taList) {
 			res += tagg.percSolved;
-        } 		
+		}
 		return res/taList.size();
 	}
 
 	/**
-	 * @param taList a list of length {@link CubeConfig#pMax} with aggregated training results
+	 * @param taList a list of size {@link CubeConfig#pMax} with aggregated training results
 	 * @param w a weight vector of length {@link CubeConfig#pMax}. Each entry in {@code taList} gets the 
 	 * 			relative weight w[p]/sum(w[p])
 	 * @param mode =0: percent solved within minimal twists, =1: percent solved below epiLength
@@ -131,17 +125,15 @@ public class TStats {
 	 */
 	public static double weightedAvgResTAggregList(ArrayList<TAggreg> taList, double[] w, int mode) {
 		assert (w.length >= taList.size());
-		Iterator it = taList.iterator();
 		double res=0;
 		double wghtSum = 0.0;
 		double val;
 		int count=0;
-	    while (it.hasNext()) {
-			TAggreg tagg = (TAggreg)it.next();
-			val = (mode==0) ? tagg.percSolved : (1-tagg.percNotSol);
+		for (TAggreg tagg : taList) {
+			val = (mode == 0) ? tagg.percSolved : (1 - tagg.percNotSol);
 			wghtSum += w[count];
 			res += val * w[count++];
-        } 		
+		}
 		return res/wghtSum;
 	}
 
