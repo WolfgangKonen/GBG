@@ -42,8 +42,11 @@ public class CardDeck {
      */
     public CardDeck(CardDeck other_card_deck){
         cards = new ArrayList<>();
-        for(PlayingCard card:other_card_deck.cards)
-            this.cards.add(card.copy());
+        for(PlayingCard card:other_card_deck.cards) {
+            // For some reason this
+            //if(card!=null)
+                this.cards.add(card.copy());
+        }
     }
 
     /**
@@ -74,6 +77,10 @@ public class CardDeck {
      * @return number of cards in the deck
      */
     public int getTotalCards(){return cards.size();}
+
+    public void addCard(PlayingCard cardToAdd){
+        this.cards.add(cardToAdd);
+    }
 
     public PlayingCard[] toArray(){
         //return cards.stream().toArray(n -> new PlayingCard[n]);
