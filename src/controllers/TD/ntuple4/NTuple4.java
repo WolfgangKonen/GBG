@@ -83,17 +83,17 @@ public class NTuple4 implements Serializable {
 	// is realized by remembering the already visited indices in indexList.
 	// It ensures that an update with ALPHA=1.0 changes the LUT in such a way that a subsequent
 	// call getScoreI() returns a value identical to the target of that update.
-	private transient LinkedList indexList = new LinkedList();
+	private transient LinkedList<Integer> indexList = new LinkedList<>();
 
 	// /WK/
 	private transient double[] dWArray=null;		// recommended weight changes
-	private transient double[] dWOld=null;			// previous recommended weight changes
-	private transient int[] countP=null;			// # of weight changes with same direction as previous
-	private transient int[] countM=null;			// # of weight changes with opposite direction
-	private final boolean DW_DBG=false;		// /WK/ accumulate countP, countM with help of dWOld
+//	private transient double[] dWOld=null;			// previous recommended weight changes
+//	private transient int[] countP=null;			// # of weight changes with same direction as previous
+//	private transient int[] countM=null;			// # of weight changes with opposite direction
+//	private final boolean DW_DBG=false;		// /WK/ accumulate countP, countM with help of dWOld
 
-	private final double muDampen=0.99;		// dampening for N and A, so that tcFactor slowly returns to 1
-											// --- TODO, not yet implemented ---
+//	private final double muDampen=0.99;		// dampening for N and A, so that tcFactor slowly returns to 1
+//											// --- TODO, not yet implemented ---
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -127,7 +127,7 @@ public class NTuple4 implements Serializable {
 		this.nTuple = nTuple.clone();
 		this.posVals = posVals.clone();
 		int L=1;
-		for (int i=0; i<nTuple.length; i++) L *= posVals[nTuple[i]];
+		for (int j : nTuple) L *= posVals[j];
 		lut = new double[L];
 		if (TC) {
 			tcN = new double[lut.length]; // matrix N in TC
@@ -145,18 +145,18 @@ public class NTuple4 implements Serializable {
 			}
 		}
 		
-		if (DW_DBG) {
-			dWOld = new double[lut.length];
-			countP = new int[lut.length];
-			countM = new int[lut.length];
-		}
+//		if (DW_DBG) {
+//			dWOld = new double[lut.length];
+//			countP = new int[lut.length];
+//			countM = new int[lut.length];
+//		}
 
 //		if (useIndexList==false)
 //			trainCounter = new int[lut.length];
 	}
 
 	public boolean instantiateAfterLoading() {
-		indexList = new LinkedList();
+		indexList = new LinkedList<>();
 		if (TC) {
 			tcN = new double[lut.length]; // matrix N in TC
 			tcA = new double[lut.length]; // matrix A in TC
@@ -186,10 +186,10 @@ public class NTuple4 implements Serializable {
 	private int getIndex(int[] board) {
 		int index = 0;
 		int Q=1; 		// Q = posVals[P[0]]*...*posVals[P[i]] in i-loop below
-		for (int i = 0; i < nTuple.length; i++) {
-			assert (board[nTuple[i]]<posVals[nTuple[i]]) : "Assert failed for cell "+nTuple[i]+": "+board[nTuple[i]]+">="+posVals[nTuple[i]];
-			index += Q * board[nTuple[i]];
-			Q = Q * posVals[nTuple[i]];
+		for (int n_i : nTuple) {
+			assert (board[n_i] < posVals[n_i]) : "Assert failed for cell " + n_i + ": " + board[n_i] + ">=" + posVals[n_i];
+			index += Q * board[n_i];
+			Q = Q * posVals[n_i];
 		}
 		return index;
 	}
@@ -246,7 +246,7 @@ public class NTuple4 implements Serializable {
 	 */
 	public void updateNew(int[] board, double alphaM, double delta, double e /*, double LAMBDA*/) {
 		int index = getIndex(board);
-		Integer indexI = new Integer(index);
+//		Integer indexI = index;
 
 		double tcFactor = getTcFactor(index);	// returns 1 if (!TC)
 				
@@ -263,10 +263,10 @@ public class NTuple4 implements Serializable {
 
 //		if (useIndexList) {		// useIndexList==true is the recommended choice
 			if (!TC || (TC && tcImm)) {
-				if (!indexList.contains(indexI)) 
+				if (!indexList.contains(index))
 					lut[index] += dW;				
 			}		
-			indexList.add(indexI);
+			indexList.add(index);
 //		} 
 
 //		if (TC)
@@ -274,14 +274,13 @@ public class NTuple4 implements Serializable {
 	}
 
 	/**
-	 * If TC, update the accumumlators tcN and tcA with accum, then set tcFactorArray[index]
+	 * If TC, update the accumulators tcN and tcA with accum, then set tcFactorArray[index]
 	 * according to the TC transfer type (for next weight update)
 	 * 
 	 * @param index
 	 * @param accum
-	 * @return
 	 */
-	private double setTcFactor(int index, double accum) {
+	private void setTcFactor(int index, double accum) {
 		if (TC) {
 			tcN[index] += accum;
 			tcA[index] += Math.abs(accum);
@@ -293,9 +292,6 @@ public class NTuple4 implements Serializable {
 				}
 				tcFactorArray[index] = arg;
 			} 
-			return tcFactorArray[index];
-		} else {
-			return 1;
 		}
 	}
 	
@@ -340,17 +336,17 @@ public class NTuple4 implements Serializable {
 		indexList.clear();
 	}
 
-	public int getCountP(int k) {
-		if (!DW_DBG) return 0;
-		assert (k >= 0 && k < lut.length) : " k is not a valid LUT index";
-		return countP[k];
-	}
-
-	public int getCountM(int k) {
-		if (!DW_DBG) return 0;
-		assert (k >= 0 && k < lut.length) : " k is not a valid LUT index";
-		return countM[k];
-	}
+//	public int getCountP(int k) {
+//		if (!DW_DBG) return 0;
+//		assert (k >= 0 && k < lut.length) : " k is not a valid LUT index";
+//		return countP[k];
+//	}
+//
+//	public int getCountM(int k) {
+//		if (!DW_DBG) return 0;
+//		assert (k >= 0 && k < lut.length) : " k is not a valid LUT index";
+//		return countM[k];
+//	}
 
 	public int getPosition(int i) {
 		assert (i >= 0 && i < nTuple.length) : " i is not a valid N-tuple position";
@@ -414,17 +410,21 @@ public class NTuple4 implements Serializable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		tableN.println("" +Arrays.toString(tcN));
-	    tableN.close();
+		if (tableN!=null) {
+			tableN.println("" +Arrays.toString(tcN));
+			tableN.close();
+		}
 
-		tableA.println("" +Arrays.toString(tcA));
-		tableA.close();
-		
+		if (tableA!=null) {
+			tableA.println("" +Arrays.toString(tcA));
+			tableA.close();
+		}
+
 	}
 	
 	static public void print(int[][] equiv) {
-		for (int i1=0; i1<equiv.length; i1++) {
-			System.out.println(stringRep(equiv[i1])); 
+		for (int[] ints : equiv) {
+			System.out.println(stringRep(ints));
 		}
 		System.out.println("***end***");			
 	}
@@ -432,12 +432,12 @@ public class NTuple4 implements Serializable {
 	// only valid for TicTacToe!
 	static public String stringRep(int[] board) {
 		String[] a = {"O","-","X"};
-		String s = "";
+		StringBuilder s = new StringBuilder();
 			for (int j=0; j<board.length; j++) {
-				if (j%3==0 && j>0) s = s + ("|");
-				s = s + (a[board[j]+1]);
+				if (j%3==0 && j>0) s.append("|");
+				s.append(a[board[j] + 1]);
 			}
-		return s;
+		return s.toString();
 	}
 
 	public int lutHashSum() {
@@ -446,13 +446,13 @@ public class NTuple4 implements Serializable {
 		return (hs%100);
 	}
 	public double lutSum() {
-		double ls=0; 
-		for (int i=0; i<lut.length; i++) ls += lut[i];
+		double ls=0;
+		for (double lut_i : lut) ls += lut_i;
 		return ls;
 	}
 	public double lutSumAbs() {
-		double ls=0; 
-		for (int i=0; i<lut.length; i++) ls += Math.abs(lut[i]);
+		double ls=0;
+		for (double lut_i : lut) ls += Math.abs(lut_i);
 		return ls;
 	}
 }

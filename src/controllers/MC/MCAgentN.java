@@ -5,9 +5,7 @@ import controllers.ExpectimaxWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.Arena;
-import games.GameBoard;
 import games.StateObservation;
-import games.XArenaMenu;
 import params.ParMC;
 import params.ParOther;
 import tools.ScoreTuple;
@@ -31,14 +29,16 @@ import java.util.concurrent.Executors;
  * @see ParMC
  */
 public class MCAgentN extends AgentBase implements PlayAgent {
-    private Random random = new Random();
+    private final Random random = new Random();
     private transient ExecutorService executorService = Executors.newWorkStealingPool();
 
-    private int totalRolloutDepth = 0;  // saves the average rollout depth for the mc Agent
-    private int nRolloutFinished = 0; 	// counts the number of rollouts ending with isGameOver==true
     private int nIterations = 0; 		// counts the total number of iterations
+    private int totalRolloutDepth = 0;  // sum of all rollout depths during a getNextAction call.
+                                        // (totalRolloutDepth/nIterations = average rollout depth)
+    private int nRolloutFinished = 0; 	// counts how many rollouts end with isGameOver==true, given the rollout depth
+                                        // prescribed in m_mcPar.getRolloutDepth()
 
-    public ParMC m_mcPar = new ParMC();
+    public ParMC m_mcPar;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -79,7 +79,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * 
 	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent
+	 * @param silent        no output
 	 * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
@@ -135,13 +135,12 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         // all available actions for state sob:
         List<Types.ACTIONS> actions = sob.getAvailableActions();
 
-        Types.ACTIONS actBest = null;
-        Types.ACTIONS_VT actBestVT = null;
+        Types.ACTIONS actBest = actions.get(0);
+        Types.ACTIONS_VT actBestVT;
 		double[] vtable;
         vtable = new double[actions.size()];  
 		double currProbab = 1.0/iterations;
 		int sobPlayer = sob.getPlayer();
-		ScoreTuple.CombineOP cOP1 = ScoreTuple.CombineOP.AVG;
 		ScoreTuple bestActionScoreTuple = null;
 		ScoreTuple[] nextActionScoreTuple = new ScoreTuple[actions.size()];
     	RandomSearch agent= new RandomSearch();
@@ -191,7 +190,12 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                     //construct Random Agent and let it simulate a (random) rollout until game over:
                     agent.startAgent(newSob, depth);			// contains BUG1 fix
                     
-                    avgScoreTuple.combine(newSob.getGameScoreTuple(), cOP1, sobPlayer, currProbab);
+                    avgScoreTuple.combine(
+                            newSob.getGameScoreTuple(),
+                            ScoreTuple.CombineOP.AVG,
+                            sobPlayer,
+                            currProbab
+                    );
                     rolloutDepth += agent.getRolloutDepth();
                     if(newSob.isGameOver()) nRolloutFinished++;
                     
@@ -238,7 +242,6 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         }
 
         //find the best next action:
-        Types.ACTIONS bestAction = null;
         double bestActionScore = Double.NEGATIVE_INFINITY;
 
         for (int i = 0; i < sob.getNumAvailableActions(); i++) {
@@ -285,8 +288,8 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         // all available actions for state sob:
         List<Types.ACTIONS> actions = sob.getAvailableActions();
 
-        Types.ACTIONS actBest = null;
-        Types.ACTIONS_VT actBestVT = null;
+        Types.ACTIONS actBest = actions.get(0);
+        Types.ACTIONS_VT actBestVT;
 		double[] vtable;
         vtable = new double[actions.size()];  
 		double currProbab = 1.0/iterations;
@@ -378,7 +381,6 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         }
 
         //find the best next action:
-        Types.ACTIONS bestAction = null;
         double bestActionScore = Double.NEGATIVE_INFINITY;
 
         for (int i = 0; i < sob.getNumAvailableActions(); i++) {
@@ -420,15 +422,13 @@ public class MCAgentN extends AgentBase implements PlayAgent {
      */
     private Types.ACTIONS_VT getNextAction2MultipleAgents(StateObservation sob, 
     		int iterations, int numberAgents, int depth) {
-        Types.ACTIONS actBest = null;
-        Types.ACTIONS_VT actBestVT = null;
+        Types.ACTIONS actBest;
+        Types.ACTIONS_VT actBestVT;
         List<Types.ACTIONS> actions = sob.getAvailableActions();
 		double[] vtable;
         vtable = new double[actions.size()];  
 		double currProbab = 1.0/iterations;
 		int sobPlayer = sob.getPlayer();
-		ScoreTuple.CombineOP cOP1 = ScoreTuple.CombineOP.AVG;
-		ScoreTuple.CombineOP cOP2 = ScoreTuple.CombineOP.MAX;
 		ScoreTuple[] nextActionScoreTuple = new ScoreTuple[actions.size()];
 		ScoreTuple bestActionScoreTuple = null;
 
@@ -452,8 +452,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
             double nextActionScore = Double.NEGATIVE_INFINITY;
 
             for (int j = 0; j < sob.getNumAvailableActions(); j++) {
-                double averageScore = 0;
-                ScoreTuple avgScoreTuple = new ScoreTuple(sob);;
+                ScoreTuple avgScoreTuple = new ScoreTuple(sob);
 
                 for (int k = 0; k < iterations; k++) {
                     StateObservation newSob = sob.copy();
@@ -463,16 +462,26 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                     RandomSearch agent = new RandomSearch();
                     agent.startAgent(newSob, depth);			// contains BUG1 fix
 
-                    avgScoreTuple.combine(newSob.getGameScoreTuple(), cOP1, sobPlayer, currProbab);
+                    avgScoreTuple.combine(
+                            newSob.getGameScoreTuple(),
+                            ScoreTuple.CombineOP.AVG,
+                            sobPlayer,
+                            currProbab
+                    );
                     if (newSob.isGameOver()) nRolloutFinished++;
                     totalRolloutDepth += agent.getRolloutDepth();
                 }
 
-                averageScore = avgScoreTuple.scTup[sobPlayer];
+                double averageScore = avgScoreTuple.scTup[sobPlayer];
                 if (nextActionScore <= averageScore) {
                     nextAction = j;
                     nextActionScore = averageScore;
-                    nextActionScoreTuple[j].combine(avgScoreTuple, cOP2, sobPlayer, 0.0);
+                    nextActionScoreTuple[j].combine(
+                            avgScoreTuple,
+                            ScoreTuple.CombineOP.MAX,
+                            sobPlayer,
+                            0.0
+                    );
                 }
             }
             //store in vtable[k] how many of the multiple agents did select action k 
@@ -530,28 +539,26 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-		ScoreTuple sc = new ScoreTuple(so);
-		switch (so.getNumPlayers()) {
-		case 1: 
-			sc.scTup[0] = this.getScore(so);
-			break;
-		case 2:
-			int player = so.getPlayer();
-			int opponent = (player==0) ? 1 : 0;
-			sc.scTup[player] = this.getScore(so);
-			sc.scTup[opponent] = -sc.scTup[player];
-			break;
-		default: 
+//		ScoreTuple sc = new ScoreTuple(so);
+//		switch (so.getNumPlayers()) {
+//		case 1:
+//			sc.scTup[0] = this.getScore(so);
+//			break;
+//		case 2:
+//			int player = so.getPlayer();
+//			int opponent = (player==0) ? 1 : 0;
+//			sc.scTup[player] = this.getScore(so);
+//			sc.scTup[opponent] = -sc.scTup[player];
+//			break;
+//		default:
 	        if (so.isGameOver()) {
 	        	return so.getGameScoreTuple();
 	        } else {
-	        	
 	            Types.ACTIONS_VT actBestVT = getNextAction2(so.partialState(), false, true);
-
 	            return actBestVT.getScoreTuple();
 	        }
-		}
-    	return sc;
+//		}
+//    	return sc;
 	}
 
 	/**
@@ -582,7 +589,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
      * @param sob			the game state
      * @param numberAgents	= 1: use getNextAction2 (parallel version) <br>
      *                      &gt; 1: use getNextActionMultipleAgents with NUMBERAGENTS=numberAgents
-     * @param silent
+     * @param silent        no output
      * @param NC			number of repeats for next-action calculation
      * @param iterations    rollout repeats (for each available action)
      * @param depth			rollout depth
@@ -607,22 +614,21 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         	}
             wtable[nextAction]++;
         }
-        if (numberAgents!=1 & !silent) System.out.println("");
+        if (numberAgents!=1 & !silent) System.out.println();
 
         highestBin = Double.NEGATIVE_INFINITY;
 
-        for (int i = 0; i < wtable.length; i++) {
-            if (highestBin < wtable[i]) {
-                highestBin = wtable[i];
-            } 
+        for (double v : wtable) {
+            if (highestBin < v) {
+                highestBin = v;
+            }
         }
-        double cert = highestBin/NC;
-        
-    	return cert;
+
+    	return highestBin/NC;
     }
 
     public double getAverageRolloutDepth() {
-        return totalRolloutDepth/nIterations;
+        return totalRolloutDepth/(double)nIterations;
     }
 
     public int getNRolloutFinished() {
@@ -639,10 +645,10 @@ public class MCAgentN extends AgentBase implements PlayAgent {
     @Override
     public String stringDescr() {
         String cs = getClass().getName();
-		String str = cs + ": iterations:" + m_mcPar.getNumIter() 
+		    cs += ": iterations:" + m_mcPar.getNumIter()
 				+ ", rollout depth:" + m_mcPar.getRolloutDepth()
 				+ ", # agents:"+ m_mcPar.getNumAgents();
-		return str;
+		return cs;
     }
     
 } // class MCAgentN

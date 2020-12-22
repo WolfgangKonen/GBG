@@ -48,7 +48,7 @@ public final class MCTS {
         if (depth > this.maxDepth) {       // /WK/ testing for RubiksCube
             //System.out.println("maxDepth="+this.maxDepth+" reached. Returning");
             //return 0;           // return with reward 0. Alternative choice would be REWARD_NEGATIVE.
-            return -1;
+            return -1;  // 0,-1,-2,-10
         }
         if (depth > largestDepth) largestDepth=depth;
 

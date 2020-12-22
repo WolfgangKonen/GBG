@@ -16,6 +16,7 @@ out/*
 *.gamelog
 games/Logs/*
 logs/*
+Pokerlogs/*
 agents/temp/*
 
 # all JAR files (GBGBatch.jar,...) now moved to jartools/:

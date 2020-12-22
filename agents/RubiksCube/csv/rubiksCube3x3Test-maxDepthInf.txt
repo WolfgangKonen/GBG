@@ -47,3 +47,15 @@ MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0):
 009, 0200:  000,0%, 000,0%, 100,0%
 MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.0
 ... for EPS=0.0, iter=200, 347.93 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  056,5%, 005,0%, 038,5%
+008, 0200:  033,5%, 004,0%, 062,5%
+009, 0200:  022,0%, 001,5%, 076,5%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.4083333333333334
+... for EPS=0.0, iter=500, 1266.745 sec
+  p,  num: %solved, %longe, %unsolved
+007, 0200:  074,5%, 002,5%, 023,0%
+008, 0200:  051,0%, 000,5%, 048,5%
+009, 0200:  030,5%, 000,5%, 069,0%
+MCTS-Wrapped TD-Ntuple-4: 600 cubes: % solved within epiLength=20 (best is 1.0): 0.5316666666666667
+... for EPS=0.0, iter=1000, 2944.065 sec

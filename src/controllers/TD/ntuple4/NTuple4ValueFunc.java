@@ -53,7 +53,6 @@ public class NTuple4ValueFunc implements Serializable {
 //	protected double LAMBDA = 0.0;			// use now getLambda() - don't store/maintain value twice
 	protected double m_AlphaChangeRatio = 0.9998; // 0.998
 	protected int epochMax=1;
-    protected boolean  rpropLrn=false;
     private transient long numLearnActions = 0L; 		// count the number of calls to update() (learn actions in [Jaskowski16])
 
 //  protected boolean withSigmoid=true; 	// use now hasSigmoid() - don't store/maintain value twice
@@ -70,12 +69,10 @@ public class NTuple4ValueFunc implements Serializable {
 	// number of n-tuples
 	private final int numTuples;
 
-	private final static double[][] dbgScoreArr = new double[100][2];
-	
 	NTuple4Agt tdAgt;		// the 'parent' - used to access the parameters in m_tdPar, m_ntPar
 	
 	// The generated n-tuples [numOutputs][numPlayers][numTuples]
-	private NTuple4 nTuples[][][];
+	private NTuple4[][][] nTuples;
 	
 	public XNTupleFuncs xnf;
 	
@@ -114,14 +111,14 @@ public class NTuple4ValueFunc implements Serializable {
 	 * @param randInitWeights
 	 *            true, if all weights of all n-Tuples shall be initialized
 	 *            randomly. Otherwise they are initialized with 0 (which allows to count the active weigths) 
-	 * @param tcPar
+	 * @param tcPar	temporal coherence and n-tuple parameters
 	 * @param numCells
 	 * 			  the number of cells on the board (used to check validity of {@code nTuplesI})
 	 * @param numOutputs
 	 * 			  the number of outputs for the network (1 in TD-learning, numActions in SARSA)
 	 * @throws RuntimeException
 	 */
-	public NTuple4ValueFunc(NTuple4Agt parent, int nTuplesI[][], XNTupleFuncs xnf, int[] posVals,
+	public NTuple4ValueFunc(NTuple4Agt parent, int[][] nTuplesI, XNTupleFuncs xnf, int[] posVals,
 							boolean randInitWeights, ParNT tcPar, int numCells, int numOutputs)
 					throws RuntimeException {
 //		this.useSymmetry = useSymmetry;
@@ -129,7 +126,7 @@ public class NTuple4ValueFunc implements Serializable {
 		this.numPlayers = xnf.getNumPlayers();
 		this.numOutputs = numOutputs;
 		this.eList = new LinkedList[this.numPlayers];
-		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList<EligStates>();
+		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList<>();
 		this.tdAgt = parent;
 		
 		if (nTuplesI!=null) {
@@ -164,7 +161,7 @@ public class NTuple4ValueFunc implements Serializable {
 
 	public boolean instantiateAfterLoading() {
 		this.eList = new LinkedList[this.numPlayers];
-		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList<EligStates>();
+		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList<>();
 		for (int i = 0; i < numTuples; i++) {
 			for (int o=0; o<numOutputs; o++) {
 				for (int k=0; k<numPlayers; k++) {
@@ -179,7 +176,7 @@ public class NTuple4ValueFunc implements Serializable {
 	 * @return The list of n-Tuples
 	 */
 	public NTuple4[] getNTuples() {
-		NTuple4 list[] = new NTuple4[numOutputs * numPlayers * numTuples];
+		NTuple4[] list = new NTuple4[numOutputs * numPlayers * numTuples];
 		for (int j = 0, k = 0; j < nTuples[0][0].length; j++)
 			for (int i = 0; i < nTuples[0].length; i++)
 				for (int o = 0; o < nTuples.length; o++)
@@ -202,7 +199,7 @@ public class NTuple4ValueFunc implements Serializable {
 	 *            the player who has to move on {@code board} (0,...,N-1)
 	 * @param act
 	 *            the action to perform on {@code board}
-	 * @return
+	 * @return	Q
 	 */
 	public double getQFunc(StateObsWithBoardVector curSOWB, int player, Types.ACTIONS act) {
 		int i, j;
@@ -238,7 +235,7 @@ public class NTuple4ValueFunc implements Serializable {
 	 * 			  the state as 1D-integer vector (position value for each board cell) 
 	 * @param player
 	 *            the player who has to move on {@code board} (0,...,N-1)
-	 * @return
+	 * @return	V
 	 */
 	public double getScoreI(StateObsWithBoardVector curSOWB, int player) {
 		int i, j;
@@ -343,6 +340,7 @@ public class NTuple4ValueFunc implements Serializable {
 //		
 //	}
 
+	// --- seems to be never used ---
 	/**
 	 * Update the weights of the n-tuple system in case of {@link TDNTuple4Agt}. The difference
 	 * to former {@code updateWeights} is that the target is now: reward + GAMMA*valueFunction(next), irrespective of the 
@@ -390,19 +388,19 @@ public class NTuple4ValueFunc implements Serializable {
 				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);				
 				dbg3PArr[2]=v_new*MAXSCORE;				
 			}
-			if (Math.abs(reward)>0.5) {
-				int dummy=1;
-			}
-			if (dbg3PArr[2]!=0.0) {
-				if (Math.abs(dbg3PArr[0]-dbg3PArr[2])>1e-6) {
-					int dummy=1;
-				}
-				if (Math.abs(dbg3PArr[0]+dbg3PArr[1])>1e-6) {
-					int dummy=1;
-				}
-				dbg3PArr[2]=0.0;
-			}
-			int dummy=1;
+//			if (Math.abs(reward)>0.5) {
+//				int dummy=1;
+//			}
+//			if (dbg3PArr[2]!=0.0) {
+//				if (Math.abs(dbg3PArr[0]-dbg3PArr[2])>1e-6) {
+//					int dummy=1;
+//				}
+//				if (Math.abs(dbg3PArr[0]+dbg3PArr[1])>1e-6) {
+//					int dummy=1;
+//				}
+//				dbg3PArr[2]=0.0;
+//			}
+//			int dummy=1;
 		}
 	}
 
@@ -481,6 +479,7 @@ public class NTuple4ValueFunc implements Serializable {
 		}
 	}
 
+	// ---- seems to be never used ----
 	/**
 	 * Update the weights of the n-Tuple-system in case of {@link TDNTuple4Agt} for a terminal state towards target 0.
 	 * 
@@ -510,10 +509,10 @@ public class NTuple4ValueFunc implements Serializable {
 				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE);
 				dbg3PTer[2]=v_new*MAXSCORE;				
 			}
-			if (!isNEW_3P) {
-				int dummy=1;				
-			}
-			int dummy=1;
+//			if (!isNEW_3P) {
+//				int dummy=1;
+//			}
+//			int dummy=1;
 		}
 	}
 
@@ -697,8 +696,8 @@ public class NTuple4ValueFunc implements Serializable {
 
 
 	public void clearEligList() {
-		for (int ie=0; ie<eList.length; ie++)
-			eList[ie].clear();
+		for (LinkedList<EligStates> eligStates : eList)
+			eligStates.clear();
 	}
 	
 	public void clearEligList(NTuple4Agt.EligType m_elig) {
@@ -858,8 +857,8 @@ public class NTuple4ValueFunc implements Serializable {
 		
 		int count = 0;
 		NTuple4[] ntuples = this.getNTuples();
-		for (int i=0; i<ntuples.length; i++) {
-			count += ntuples[i].getLutLength();
+		for (NTuple4 ntuple : ntuples) {
+			count += ntuple.getLutLength();
 		}
 		
 		// data is an array big enough to hold all LUT data. It will be filled below with all 
@@ -929,7 +928,7 @@ public class NTuple4ValueFunc implements Serializable {
 		}
 
 		DecimalFormat form = new DecimalFormat("000");
-		DecimalFormat df = new DecimalFormat();				
+		DecimalFormat df;
 		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
 		df.applyPattern("+0.0000000;-0.0000000");  
 		System.out.println("[NTuple4ValueFunc.weightAnalysis] " + tdAgt.getClass().getSimpleName() + " ("
@@ -982,8 +981,7 @@ public class NTuple4ValueFunc implements Serializable {
 		System.out.println("[NTuple4ValueFunc.activeWeights] " + tdAgt.getClass().getSimpleName() + " ("
 				+count+" weights, "+nActive+" active ("+pActive+"%)): ");
 		
-		int[] res = {count,nActive}; //new int[2];
-		return res;
+		return new int[]{count,nActive};
 	}
 
 	

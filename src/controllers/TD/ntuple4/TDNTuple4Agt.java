@@ -173,7 +173,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * 
 	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent
+	 * @param silent		no output
 	 * @return actBest,		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
@@ -334,8 +334,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			// (with an additional minus sign) are printed aligned
 			System.out.println(pl[so.getPlayer()]);
 			System.out.print("TDNT3: ");
-			for (int i = 0; i < VTable.length; i++)
-				System.out.printf("% .4f; ", VTable[i]);
+			for (double v : VTable) System.out.printf("% .4f; ", v);
 			System.out.println(pl[so.getPlayer()]);
 		}
 	}
@@ -361,7 +360,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 */
 	@Deprecated
 	public double getScore(StateObservation so) {
-		throw new RuntimeException("getScore(so) is not valid for TDNTuple3Agt --> use getScore(so,PreSO) instead");
+		throw new RuntimeException("getScore(so) is not valid for TDNTuple4Agt --> use getScore(so,PreSO) instead");
 //		int[] bvec = m_Net.xnf.getBoardVector(so);
 //		double score = m_Net.getScoreI(bvec,so.getPlayer());
 //		return score;
@@ -410,37 +409,36 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		ScoreTuple sc = new ScoreTuple(so);
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		switch (so.getNumPlayers()) {
-		case 1: 
-			sc.scTup[0] = m_Net.getScoreI(curSOWB,so.getPlayer());
-			break;
-		case 2:
-			int player = so.getPlayer();
-			int opponent = (player==0) ? 1 : 0;
-//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
-//			sc.scTup[opponent] = -sc.scTup[player];
-			// 
-			// This is an important bug fix (2019-03-10) for TDNTuple3Agt: 
-			// If we want to get the score tuple for state 'so' where 
-			// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player), 
-			// because the net did never learn this, it was trained on getScore(so,refer), where
-			// refer is the player who *created* 'so' (the opponent). We construct the score 
-			// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has 
-			// for opponent, and infer from this the player's value by negation:
-			// 
-			sc.scTup[opponent] = m_Net.getScoreI(curSOWB,opponent);  
-			sc.scTup[player] = 	-sc.scTup[opponent];
-			break;
-		default: 	
-			//
-			// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
-			// prevTuple, fill in the game value for the player for which TDNTuple3Agt has learned the value:
-			// This is the player who *created* so. (We do not know the game values from the perspective 
-			// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
-			//
-			if (prevTuple!=null) sc = new ScoreTuple(prevTuple);
-			int cp = so.getCreatingPlayer();
-			if (cp!=-1) {
-				sc.scTup[cp] = m_Net.getScoreI(curSOWB,cp);  
+			case 1 -> sc.scTup[0] = m_Net.getScoreI(curSOWB,so.getPlayer());
+			case 2 -> {
+				int player = so.getPlayer();
+				int opponent = (player == 0) ? 1 : 0;
+	//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
+	//			sc.scTup[opponent] = -sc.scTup[player];
+				//
+				// This is an important bug fix (2019-03-10) for TDNTuple4Agt:
+				// If we want to get the score tuple for state 'so' where
+				// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player),
+				// because the net did never learn this, it was trained on getScore(so,refer), where
+				// refer is the player who *created* 'so' (the opponent). We construct the score
+				// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has
+				// for opponent, and infer from this the player's value by negation:
+				//
+				sc.scTup[opponent] = m_Net.getScoreI(curSOWB, opponent);
+				sc.scTup[player] = -sc.scTup[opponent];
+			}
+			default -> {
+				//
+				// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
+				// prevTuple, fill in the game value for the player for which TDNTuple4Agt has learned the value:
+				// This is the player who *created* so. (We do not know the game values from the perspective
+				// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
+				//
+				if (prevTuple != null) sc = new ScoreTuple(prevTuple);
+				int cp = so.getCreatingPlayer();
+				if (cp != -1) {
+					sc.scTup[cp] = m_Net.getScoreI(curSOWB, cp);
+				}
 			}
 		}
 		
@@ -773,7 +771,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	public String stringDescr() {
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
-		String str = cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
+		return       cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", P:" + (m_Net.getXnf().getNumPositionValues())
 						+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
@@ -781,24 +779,22 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 						+ ", horizon:" + m_Net.getHorizon()
 						+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
 						+ ", learnFromRM: " + (m_oPar.getLearnFromRM()?"true":"false");
-		return str;
 	}
 
 	@Override
 	public String stringDescr2() {
 		String cs = getClass().getSimpleName();
-		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
+		return       cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
 						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
 						+ ", gamma: " + m_tdPar.getGamma()
 						+ ", "+stringDescrNTuple()		// see NTupleBase
 						+ ", evalQ: " + m_oPar.getQuickEvalMode() + ", evalT: " + m_oPar.getTrainEvalMode();
-		return str;
 	}
 		
-	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
-	// It sets various elements of NextState ns (nextReward, nextRewardTuple).
-	// It is part of TDNTuple3Agt (and not part of NextState), because it uses various elements
-	// private to TDNTuple3Agt (DBG_REWARD, referringState, normalize2)
+	// Callback function from constructor NextState4(NTupleAgt,StateObservation,ACTIONS).
+	// It sets various elements of NextState4 ns (nextReward, nextRewardTuple).
+	// It is part of TDNTuple4Agt (and not part of NextState4), because it uses various elements
+	// private to TDNTuple4Agt (DBG_REWARD, referringState, normalize2)
 	public void collectReward(NextState4 ns) {
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		ns.nextRewardTuple = new ScoreTuple(ns.refer);
@@ -806,7 +802,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			ns.nextRewardTuple.scTup[i] = normalize2(ns.nextSO.getReward(i,rgs),ns.nextSO);
 		}
 
-		// for completeness, ns.nextReward is not really needed in TDNTuple3Agt
+		// for completeness, ns.nextReward is not really needed in TDNTuple4Agt
 		ns.nextReward = normalize2(ns.nextSO.getReward(ns.nextSO,rgs),ns.refer);
 
 		if (DBG_REWARD && ns.nextSO.isGameOver()) {

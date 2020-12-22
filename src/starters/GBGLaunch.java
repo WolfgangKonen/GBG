@@ -24,6 +24,8 @@ import games.Nim.ArenaTrainNim2P;
 import games.Nim.ArenaTrainNim3P;
 import games.Othello.ArenaOthello;
 import games.Othello.ArenaTrainOthello;
+import games.Poker.ArenaPoker;
+import games.Poker.ArenaTrainPoker;
 import games.RubiksCube.ArenaTrainCube;
 import games.Sim.ArenaSim;
 import games.Sim.ArenaTrainSim;
@@ -53,7 +55,7 @@ public class GBGLaunch {
 	/**
 	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe"} 
 	 */
-	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe"};
+	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
@@ -203,7 +205,10 @@ public class GBGLaunch {
 		case "Othello": 
 			t_Game = new ArenaTrainOthello(title,withUI);
 			break;
-		case "RubiksCube": 
+		case "Poker":
+			t_Game = new ArenaTrainPoker(title,withUI);
+			break;
+		case "RubiksCube":
 			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
 			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
@@ -286,7 +291,10 @@ public class GBGLaunch {
 		case "Othello": 
 			t_Game = new ArenaOthello(title,withUI);
 			break;
-		case "RubiksCube": 
+		case "Poker":
+			t_Game = new ArenaPoker(title,withUI);
+			break;
+		case "RubiksCube":
 			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
 			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
@@ -473,7 +481,8 @@ public class GBGLaunch {
 			scaPar[2]="ALL";			
 		case "2048": 
 		case "ConnectFour": 
-		case "Othello": 
+		case "Othello":
+		case "Poker":
 		case "TicTacToe": 
 			//
 			// games with no scalable parameters
@@ -553,7 +562,8 @@ public class GBGLaunch {
 			break;
 		case "2048": 
 		case "ConnectFour": 
-		case "Othello": 
+		case "Othello":
+		case "Poker":
 		case "TicTacToe": 
 			//
 			// games with no scalable parameters

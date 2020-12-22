@@ -1,6 +1,5 @@
 package controllers.TD.ntuple4;
 
-import games.RubiksCube.StateObserverCube;
 import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;

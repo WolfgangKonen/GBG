@@ -23,7 +23,8 @@ import tools.Types.ACTIONS;
 abstract public class ObserverBase implements StateObservation {
 	protected int m_counter = 0;		// move counter
 	protected int creatingPlayer = -1;
-	
+	protected boolean m_partialState = false;
+
     protected Types.ACTIONS[] storedActions = null;
     protected Types.ACTIONS storedActBest = null;
     protected double[] storedValues = null;
@@ -152,6 +153,17 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	public StateObservation partialState() { return this; }
 
+	/**
+	 * Default implementation for  perfect information games: there is nothing to do, the perfect-information state
+	 * is already complete.
+	 *
+	 * @return the state {@code this}, it is the completed state
+	 */
+	public StateObservation randomCompletion() { return this; }
+
+	public boolean isPartialState() { return m_partialState; }
+	public void setPartialState(boolean p) { m_partialState = p; }
+
 	abstract public int getPlayer();
 	abstract public int getNumPlayers();
 
@@ -164,9 +176,10 @@ abstract public class ObserverBase implements StateObservation {
 	}
 
 	/**
-	 * This method implements the simple version to get the next player in cyclic order, assuming that all players are
-	 * in until game-over. Other games (see e.g. 3-player Sim) may have more advanced schemes (one player loses early),
-	 * they have to override this method.
+	 * This method implements the simple version to get the next player in cyclic order, assuming that all players stay
+	 * in the game until game-over. Other games which have more advanced schemes (e.g. 3-player Sim, where one player
+	 * can lose early) have to override this method.
+	 *
 	 * @return the next player
 	 */
 	protected int getNextPlayer() {

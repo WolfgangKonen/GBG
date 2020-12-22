@@ -88,7 +88,7 @@ public interface StateObservation extends Serializable{
 	String stringActionDescr(ACTIONS act);
 
 	/**
-	 * The game score, seen from the perspective of player {@code player}. The
+	 * The game score, seen from the perspective of {@code referringState}'s player. The
 	 * perspective shift is only relevant for games with more than one player.
 	 * <p>
 	 * The keyword abstract signals that derived classes will be either abstract or implement
@@ -215,13 +215,25 @@ public interface StateObservation extends Serializable{
     StateObservation precedingAfterstate();
 
 	/**
-	 * For imperfect information games: return a state with all the partial information that
+	 * For imperfect information games: return a state with only the partial information that
 	 * the player who moves in this state is allowed to have.
 	 * For perfect information games, the partial state is identical to {@code this}).
+	 * For Blackjack, the partial state omits (replaces by null) the hole card of the dealer.
+	 * For Poker, the partial state omits (replaces by null) the hole cards of all other players.
 	 *
 	 * @return the partial information state
 	 */
 	StateObservation partialState();
+
+	/**
+	 * For imperfect information games: if {@code this} is a partial state, complete the hidden elements with a
+	 * random fill-in method
+	 * @return the randomly completed state
+	 */
+	StateObservation randomCompletion();
+
+	boolean isPartialState();
+	void setPartialState(boolean p);
 
     /**
      * Return all available actions (all actions that can ever become possible in this game)
