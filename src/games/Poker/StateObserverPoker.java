@@ -437,18 +437,19 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	}
 
 	private long findMaxScore(int[] scores){
-		/*
-		ROYAL_FLUSH     = {0-1}   [2]   13^12
-		STRAIGHT_FLUSH  = {5-12}  [8]   13^11
-		FOUR_OF_A_KIND  = {0-12}  [13]  13^10
-		FULL_HOUSE      = {0-181} [182] 13^8
-		FLUSH           = {0-3}   [4];  13^7
-		STRAIGHT        = {5-12}  [8];  13^6
-		THREE_OF_A_KIND = {0-12}  [13]; 13^5
-		TWO_PAIR        = {0-181} [182];13^3
-		ONE_PAIR        = {0-12}  [13]; 13^2
-		HIGH_CARD       = {0-12}  [13]; 13^1
-		KICKER          = {0-12}  [13]; 13^0
+	/*
+		Name:			Possible Values:		Numberspace:
+		ROYAL_FLUSH     [4]   					14^12
+		STRAIGHT_FLUSH  [8]   					14^11
+		FOUR_OF_A_KIND  [13]  					14^10
+		FULL_HOUSE      [13*12] 				14^8
+		FLUSH           [8] 					14^7
+		STRAIGHT        [8] 					14^6
+		THREE_OF_A_KIND [13]					14^5
+		TWO_PAIR        [13*12]					14^3
+		ONE_PAIR        [13]					14^2
+		HIGH_CARD       [13]					14^1
+		KICKER          [13]					14^0
 	 */
 		int[] exponent = { 12, 11, 10, 8, 7, 6, 5, 3, 2, 1, 0};
 		for(int i=0;i<scores.length;i++){
@@ -1204,7 +1205,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	public StateObserverPoker partialState(){
 		StateObserverPoker partialState = this.copy();
 		int player = partialState.getPlayer();
-		partialState.isPartialState = true;
+		partialState.setPartialState(true);
 
 			for (int i = 0; i < partialState.holeCards.length; i++) {
 				if(i==player)
@@ -1219,6 +1220,15 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return partialState;
 	}
 
+	@Override
+	public boolean isPartialState(){
+		return isPartialState;
+	}
+
+	@Override
+	public void setPartialState(boolean partialState) {
+		isPartialState = partialState;
+	}
 
 	public int getMoveCounter() {
 		//return m_counter;
