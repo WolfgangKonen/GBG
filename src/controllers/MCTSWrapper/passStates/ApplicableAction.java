@@ -6,7 +6,7 @@ import games.StateObservation;
 /**
  * Represents an identifiable action that can be applied to a game state.
  */
-public interface ApplyableAction extends Identifiable {
+public interface ApplicableAction extends Identifiable {
     /**
      * Applies the action to a passed StateObservation.
      *

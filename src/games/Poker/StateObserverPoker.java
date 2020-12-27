@@ -672,6 +672,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	 * @param action to advance the state of the game
 	 */
 	public void advanceDeterministic(ACTIONS action) {
+		super.advanceBase(action);		//		includes addToLastMoves(action)
 		incrementMoveCounter();
 		if(!isNextActionDeterministic) {
 			throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");

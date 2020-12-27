@@ -2,17 +2,15 @@ package controllers.MCTSWrapper;
 
 import TournamentSystem.TSTimeStorage;
 import controllers.AgentBase;
-import controllers.MCTSWrapper.passStates.ApplyableAction;
+import controllers.MCTSWrapper.passStates.ApplicableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.passStates.PassAction;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
 import controllers.PlayAgtVector;
 import games.ObserverBase;
-import games.Othello.StateObserverOthello;
 import games.StateObservation;
 import tools.Types;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
@@ -200,7 +198,7 @@ public final class MCTSWrapperAgent extends AgentBase {
     // just a check whether this is faster than getVTableFor --> see MCTSWrapperAgentTest::getVTableForTest.
     // getVTable2For is 5x faster than getVTableFor, but it requires only negligible resources.
     public double[] getVTable2For(final MCTSNode mctsNode) {
-        ApplyableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
+        ApplicableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
         double[] vTab = new double[arrAction.length];
         double v, sum = 0;
         int i=0;

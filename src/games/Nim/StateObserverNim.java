@@ -3,7 +3,6 @@ package games.Nim;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import controllers.PlayAgent;
 import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
@@ -23,7 +22,7 @@ import tools.Types.ACTIONS;
 public class StateObserverNim extends ObserverBase implements StateObservation {
 	protected int[] m_heap;		// has for each heap the count of items in it
 	protected int m_player;		// player who makes the next move (0 or 1)
-	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
+	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
 	protected boolean SORT_IT = false;		// experimental
     
 	/**
@@ -64,8 +63,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	}
 	
 	public StateObserverNim copy() {
-		StateObserverNim so = new StateObserverNim(this);
-		return so;
+		return new StateObserverNim(this);
 	}
 
     @Override
@@ -106,15 +104,15 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 
 	@Override
     public String stringDescr() {
-		String sout = "";
+		StringBuilder sout = new StringBuilder();
 		String[] play = {"X","O"};
 	
-		sout = sout + play[m_player]+"("+this.m_heap[0];
+		sout.append(play[m_player]).append("(").append(this.m_heap[0]);
 		for (int i=1;i<NimConfig.NUMBER_HEAPS;i++) 
-			sout = sout + "," + this.m_heap[i];
-		sout = sout + ")";
+			sout.append(",").append(this.m_heap[i]);
+		sout.append(")");
 		
- 		return sout;
+ 		return sout.toString();
 	}
 	
 	/**
@@ -158,6 +156,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 * Subtract {@code j+1} items from heap no {@code i}. 
 	 */
 	public void advance(ACTIONS action) {
+		super.advanceBase(action);		//		includes addToLastMoves(action)
 		int iAction = action.toInt();
 		int j=iAction%NimConfig.MAX_MINUS;
 		int heap=(iAction-j)/NimConfig.MAX_MINUS;		// from which heap to subtract
@@ -183,7 +182,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 
     @Override
     public ArrayList<Types.ACTIONS> getAllAvailableActions() {
-        ArrayList allActions = new ArrayList<>();
+        ArrayList<Types.ACTIONS> allActions = new ArrayList<>();
         for (int i = 0; i < NimConfig.NUMBER_HEAPS*NimConfig.MAX_MINUS; i++) 
             	allActions.add(Types.ACTIONS.fromInt(i));
         

@@ -352,7 +352,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	@Override
 	public void advance(ACTIONS action) {
-		super.advanceBase(action);
+		super.advanceBase(action);		//		includes addToLastMoves(action)
 		int iAction = action.toInt();
 		
 		setAction(iAction);
@@ -362,7 +362,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		
 		player = getNextPlayer();	// 2-player games: 0,1,0,1,...;   3-player games: 0,1,2,0,1,...
 		super.incrementMoveCounter();
-		super.addToLastMoves(action);
 //		System.out.println("lastMove: "+action.toInt());
 //		System.out.println(this.stringDescr());		// only debug
 	}

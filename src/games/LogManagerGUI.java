@@ -1,7 +1,5 @@
 package games;
 
-import org.jfree.io.FileUtilities;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -19,29 +17,29 @@ import java.io.ObjectInputStream;
  * @see LogManager
  */
 public class LogManagerGUI {
-    private LogManager logManager;
-    private GameBoard gameBoard;
+    private final LogManager logManager;
+    private final GameBoard gameBoard;
 
-    private boolean verbose = true;
+    private final boolean verbose = true;
 
-    private JFrame jFMain = new JFrame("Log Manager");
+    private final JFrame jFMain = new JFrame("Log Manager");
 
-    private JMenuBar jMBMain = new JMenuBar();
-    private JMenu jMOptions = new JMenu("Options");
+    private final JMenuBar jMBMain = new JMenuBar();
+    private final JMenu jMOptions = new JMenu("Options");
     private JCheckBoxMenuItem jCBMILoggingEnabled;
     private JCheckBoxMenuItem jCBMIAdvancedLogging;
     private JCheckBoxMenuItem jCBMIVerbose;
-    private JMenuItem jMICompile = new JMenuItem("Compile temporary Gamelog");
-    private JMenuItem jMIClear = new JMenuItem("Delete all temporary Gamelogs");
-    private JMenu jMLoad = new JMenu("Load");
-    private JMenuItem jMILoad = new JMenuItem("Load Gamelog");
+    private final JMenuItem jMICompile = new JMenuItem("Compile temporary Gamelog");
+    private final JMenuItem jMIClear = new JMenuItem("Delete all temporary Gamelogs");
+    private final JMenu jMLoad = new JMenu("Load");
+    private final JMenuItem jMILoad = new JMenuItem("Load Gamelog");
 
-    private JPanel jPMain = new JPanel();
-    private JTextField jTFNextAction = new JTextField("0");
-    private JLabel jLNumberActions = new JLabel("/ 0");
-    private JButton jBJump = new JButton("Jump to Move");
-    private JButton jBNextAction = new JButton("no next action");
-    private JButton jBPreviousAction = new JButton("no previous action");
+    private final JPanel jPMain = new JPanel();
+    private final JTextField jTFNextAction = new JTextField("0");
+    private final JLabel jLNumberActions = new JLabel("/ 0");
+    private final JButton jBJump = new JButton("Jump to Move");
+    private final JButton jBNextAction = new JButton("no next action");
+    private final JButton jBPreviousAction = new JButton("no previous action");
 
     private LogSessionContainer currentLog;
     private int counter;
@@ -93,9 +91,7 @@ public class LogManagerGUI {
 
         jCBMIVerbose= new JCheckBoxMenuItem("Verbose", logManager.verbose);
         jCBMIVerbose.addActionListener((e) ->
-        {
-            logManager.verbose = jCBMIVerbose.isSelected();
-        });
+                logManager.verbose = jCBMIVerbose.isSelected());
 
         jMICompile.addActionListener((e) ->
         {
@@ -184,10 +180,10 @@ public class LogManagerGUI {
                     jTFNextAction.setEnabled(true);
                     jLNumberActions.setText("/ " + (currentLog.stateObservations.size()));
                     jBJump.setEnabled(true);
-                } catch (IOException | ClassNotFoundException ignore) {
+                } catch (IOException | ClassNotFoundException io_gnore) {
                     if(verbose) {
                         System.out.println("LogManager: something went wrong, cant load the log.");
-                        ignore.printStackTrace();
+                        io_gnore.printStackTrace();
                     }
                 }
             }
@@ -222,20 +218,13 @@ public class LogManagerGUI {
         jBPreviousAction.setForeground(Color.black);
         jBPreviousAction.setBackground(Color.orange);
         jBPreviousAction.addActionListener((e) ->
-                {
-                    loadBoard(counter - 1);
-
-
-                });
+                loadBoard(counter - 1));
 
         jBNextAction.setEnabled(false);
         jBNextAction.setForeground(Color.black);
         jBNextAction.setBackground(Color.orange);
         jBNextAction.addActionListener((e) ->
-        {
-            loadBoard(counter + 1);
-
-        });
+                loadBoard(counter + 1));
 
         JPanel JPAction = new JPanel();
         JPAction.setLayout(new GridLayout(1, 2, 10, 10));

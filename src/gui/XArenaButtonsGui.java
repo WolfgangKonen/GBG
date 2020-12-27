@@ -29,10 +29,10 @@ import tools.Types;
 
 public class XArenaButtonsGui extends JPanel {
 
-	private Arena m_arena = null;
+	private final Arena m_arena;
 	int numPlayers;
 	boolean isNTupShowEnabled = false;
-	boolean htmlDisplayActive = false;
+	//boolean htmlDisplayActive = false;
 
 	JButton[] mParam;
 	JButton[] mTrain;
@@ -88,28 +88,28 @@ public class XArenaButtonsGui extends JPanel {
 	
 	public XArenaButtonsGui(Arena arena) {
 		m_arena = arena;
-		initGui("");
+		initGui();
 	}
 
 	public XArenaButtonsGui(Arena arena, LayoutManager arg0) {
 		super(arg0);
 		m_arena = arena;
-		initGui("");
+		initGui();
 	}
 
 	public XArenaButtonsGui(Arena arena, boolean arg0) {
 		super(arg0);
 		m_arena = arena;
-		initGui("");
+		initGui();
 	}
 
 	public XArenaButtonsGui(Arena arena, LayoutManager arg0, boolean arg1) {
 		super(arg0, arg1);
 		m_arena = arena;
-		initGui("");
+		initGui();
 	}
 
-	private void initGui(String title) {
+	private void initGui() {
 		// 
 		// initial settings for the GUI
 		//
@@ -144,25 +144,24 @@ public class XArenaButtonsGui extends JPanel {
 
 		// add game-specific agent names for certain games (currently ConnectFour, Nim and Othello)
 		String gName = m_arena.getGameName();
-		int offset = (gName=="ConnectFour" || gName=="Nim" || gName=="Nim3P") ? 1 : (gName=="Othello") ? 3: 0;
-		if (gName=="RubiksCube") offset = 2;
+		int offset = (gName.equals("ConnectFour") || gName.equals("Nim") || gName.equals("Nim3P"))
+				? 1 : (gName.equals("Othello")) ? 3: 0;
+		if (gName.equals("RubiksCube")) offset = 2;
 		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
-		for (int i=0; i<Types.GUI_AGENT_LIST.length; i++) gui_agent_list[i] = Types.GUI_AGENT_LIST[i];
-		if (gName=="ConnectFour") {
-			gui_agent_list[gui_agent_list.length-1] = "AlphaBeta";
-		} else if (gName=="Nim") {
-			gui_agent_list[gui_agent_list.length-1] = "Bouton";
-		} else if (gName=="Nim3P") {
-			gui_agent_list[gui_agent_list.length-1] = "DaviNim";
-		} else if (gName=="RubiksCube") {
-//			gui_agent_list[gui_agent_list.length-3] = "DAVI";
-			gui_agent_list[gui_agent_list.length-2] = "DAVI2";
-			gui_agent_list[gui_agent_list.length-1] = "DAVI3";
-		} else if (gName=="Othello") {
-			gui_agent_list[gui_agent_list.length-3] = "HeurPlayer";
-			gui_agent_list[gui_agent_list.length-2] = "BenchPlayer";
-			//gui_agent_list[gui_agent_list.length-2] = "Edax";
-			gui_agent_list[gui_agent_list.length-1] = "Edax2";
+		System.arraycopy(Types.GUI_AGENT_LIST, 0, gui_agent_list, 0, Types.GUI_AGENT_LIST.length);
+		switch (gName) {
+			case "ConnectFour" -> gui_agent_list[gui_agent_list.length - 1] = "AlphaBeta";
+			case "Nim" -> gui_agent_list[gui_agent_list.length - 1] = "Bouton";
+			case "Nim3P" -> gui_agent_list[gui_agent_list.length - 1] = "DaviNim";
+			case "RubiksCube" -> {
+				gui_agent_list[gui_agent_list.length - 2] = "DAVI2";
+				gui_agent_list[gui_agent_list.length - 1] = "DAVI3";
+			}
+			case "Othello" -> {
+				gui_agent_list[gui_agent_list.length - 3] = "HeurPlayer";
+				gui_agent_list[gui_agent_list.length - 2] = "BenchPlayer";
+				gui_agent_list[gui_agent_list.length - 1] = "Edax2";
+			}
 		}
 		
 		for (int n=numPlayers-1; n>=0; n--) {
@@ -566,16 +565,17 @@ public class XArenaButtonsGui extends JPanel {
 		showValOnGB.setEnabled(state);		// /WK/03/2020: added
 	}
 
-	public void helpFunction() {
-		if (htmlDisplay==null) {
-			htmlDisplay =new HtmlDisplay("HelpGUI-Arena-GBG.htm");
-			htmlDisplay.setTitle("Help for Arena in GBG");
-			htmlDisplay.setSize(800,600);
-			htmlDisplay.setLocation(466, 0);
-		}
-		htmlDisplayActive = !htmlDisplayActive;
-		htmlDisplay.setVisible(htmlDisplayActive);	
-	}
+	// --- never used ---
+//	public void helpFunction() {
+//		if (htmlDisplay==null) {
+//			htmlDisplay =new HtmlDisplay("HelpGUI-Arena-GBG.htm");
+//			htmlDisplay.setTitle("Help for Arena in GBG");
+//			htmlDisplay.setSize(800,600);
+//			htmlDisplay.setLocation(466, 0);
+//		}
+//		htmlDisplayActive = !htmlDisplayActive;
+//		htmlDisplay.setVisible(htmlDisplayActive);
+//	}
 	
 	public void destroy() {
 		if (logManagerGUI!=null) logManagerGUI.close();
@@ -604,15 +604,10 @@ public class XArenaButtonsGui extends JPanel {
 		GameNumT.setText(""+gameNumber);
 	}
 	
-	public void setGuiParamDefaults(int n, String agentName, String gameName) {		
+	public void setGuiParamDefaults(String agentName) {
 		switch (agentName) {
-//		case "TD-Ntuple-2":
-		case "TD-Ntuple-3": 
-		case "Sarsa":
-			NTupShowB.setEnabled(true);	// enable this button only if agentName is an n-tuple agent
-			break;
-		default:
-			NTupShowB.setEnabled(false);			
+			case "TD-Ntuple-3", "Sarsa" -> NTupShowB.setEnabled(true);    // enable this button only if agentName is an n-tuple agent
+			default -> NTupShowB.setEnabled(false);
 		}
 	}
 	

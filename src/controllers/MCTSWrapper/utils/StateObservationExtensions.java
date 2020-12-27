@@ -16,7 +16,7 @@ public final class StateObservationExtensions {
      * @param so Affected game state.
      * @return A new game state where it is the next player's turn.
      */
-    public static StateObservation swapCurrentPlayer(final StateObservation so) {
+    public static StateObservation passToNextPlayer(final StateObservation so) {
         final var stateCopy = so.copy();
         stateCopy.passToNextPlayer();
 //        ((StateObserverOthello) stateCopy).setPlayer(BaseOthello.getOpponent(stateCopy.getPlayer()));

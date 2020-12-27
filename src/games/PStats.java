@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.ListIterator;
 import java.util.Locale;
 
 import controllers.PlayAgent;
@@ -21,7 +20,7 @@ import tools.Types;
  *  created and finally written with
  *  {@link PStats#printPlayStats(ArrayList, StateObservation, PlayAgent[], Arena) PStats#printPlayStats} 
  *  to file {@link Types#PLAYSTATS_FILENAME}. <br>
- *  This happens only if {@link Types#PLAYSTATS_WRITING}{@code==true}.<p>
+ *  This happens only if {@link Types#PLAYSTATS_WRITING}{@code ==true}.<p>
  *  
  *  This class is currently in part specific to game 2048 (it records for example the number of 
  *  empty tiles). This is the reason why it is needed in addition to the information stored
@@ -43,24 +42,25 @@ public class PStats {
 	public double nEmptyTile; 	// actual number of empty tiles (specific to 2048)
 	public double cumEmptyTl; 	// cumulative number of empty tiles (specific to 2048)
 	public int highestTile;		// highest tile on board (specific to 2048)
-	
-	/**
-	 * 
-	 * @param i	run number
-	 * @param moveNum move number
-	 * @param gScore game score (cumulative reward, from perspective of 'player')
-	 * @param nEmptyTile actual number of empty tiles (specific to 2048)
-	 * @param cumEmptyTiles cumulative number of empty tiles (specific to 2048)
-	 */
-	public PStats(int i, int moveNum, double gScore, double nEmptyTile, double cumEmptyTiles) {
-		this.i=i;
-		this.moveNum=moveNum;
-		this.gScore=gScore;
-		this.nEmptyTile=nEmptyTile;
-		this.cumEmptyTl=cumEmptyTiles;
-		this.player = 0;
-		this.action = -1; 
-	}
+
+	// --- never used ---
+//	/**
+//	 *
+//	 * @param i	run number
+//	 * @param moveNum move number
+//	 * @param gScore game score (cumulative reward, from perspective of 'player')
+//	 * @param nEmptyTile actual number of empty tiles (specific to 2048)
+//	 * @param cumEmptyTiles cumulative number of empty tiles (specific to 2048)
+//	 */
+//	public PStats(int i, int moveNum, double gScore, double nEmptyTile, double cumEmptyTiles) {
+//		this.i=i;
+//		this.moveNum=moveNum;
+//		this.gScore=gScore;
+//		this.nEmptyTile=nEmptyTile;
+//		this.cumEmptyTl=cumEmptyTiles;
+//		this.player = 0;
+//		this.action = -1;
+//	}
 	
 	/**
 	 * 
@@ -85,10 +85,10 @@ public class PStats {
 	}
 	
 	public void print(PrintWriter mtWriter)  {
-		DecimalFormat df = new DecimalFormat();				
+		DecimalFormat df;
 		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
 		df.applyPattern("+0.00;-0.00");  
-		DecimalFormat form = new DecimalFormat("+0.00;-0.00");
+		//DecimalFormat form = new DecimalFormat("+0.00;-0.00");
 		String sep = ", ";
 		mtWriter.print(i + sep + moveNum + sep + player + sep + action + sep);
 		mtWriter.println(df.format(gScore) + sep + (int)(nEmptyTile+0.5) + sep + (int)(cumEmptyTl+0.5) + sep + highestTile);
@@ -131,7 +131,7 @@ public class PStats {
 					// Here we give the user the chance to close the file in the other application:
 				    System.out.print("*** Warning *** Could not open "+strDir+"/"+Types.PLAYSTATS_FILENAME+". Retry? (y/n): ");
 				    String s = bufIn.readLine();
-				    retry = (s.contains("y")) ? true : false;
+				    retry = s.contains("y");
 				} catch (IOException e2) {
 					e2.printStackTrace();					
 				}
@@ -146,9 +146,8 @@ public class PStats {
 			if (startSO!=null) mtWriter.println("Start state = "+startSO.stringDescr());
 			
 			mtWriter.println("run, moveNum, player, action, gameScore, nEmptyTile, cumEmptyTl, highestTile");
-			ListIterator<PStats> iter = psList.listIterator();		
-			while(iter.hasNext()) {
-				(iter.next()).print(mtWriter);
+			for (PStats pStats : psList) {
+				pStats.print(mtWriter);
 			}
 
 		    mtWriter.close();			
@@ -198,7 +197,7 @@ public class PStats {
 					// Here we give the user the chance to close the file in the other application:
 				    System.out.print("*** Warning *** Could not open "+strDir+"/"+"highTileStats.csv. Retry? (y/n): ");
 				    String s = bufIn.readLine();
-				    retry = (s.contains("y")) ? true : false;
+				    retry = s.contains("y");
 				} catch (IOException e2) {
 					e2.printStackTrace();					
 				}
@@ -213,10 +212,9 @@ public class PStats {
 			if (startSO!=null) mtWriter.println("Start state = "+startSO.stringDescr());
 			
 			mtWriter.println("run, moveNum, player, action, gameScore, nEmptyTile, cumEmptyTl, highestTile");
-			ListIterator<PStats> iter = psList.listIterator();		
-			while(iter.hasNext()) {
-				ps = iter.next();
-				if (ps.highestTile!=prevHighestTile) {	// print only if highest tile has changed
+			for (PStats pStats : psList) {
+				ps = pStats;
+				if (ps.highestTile != prevHighestTile) {    // print only if highest tile has changed
 					prevHighestTile = ps.highestTile;
 					ps.print(mtWriter);
 				}

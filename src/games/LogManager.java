@@ -24,8 +24,8 @@ public class LogManager {
     public String tempPath = "logs\\temp";
     private String subDir = null;
 
-    private HashMap<Integer, Integer> counter = new HashMap<>(); //saves a counter for each sessionid
-    private HashMap<Integer, List<LogContainer>> simpleLoggingContainers = new HashMap<>();
+    private final HashMap<Integer, Integer> counter = new HashMap<>(); //saves a counter for each sessionid
+    private final HashMap<Integer, List<LogContainer>> simpleLoggingContainers = new HashMap<>();
 
     /**
      * use this constructor when you only run one instance of LogManager
@@ -82,8 +82,8 @@ public class LogManager {
                     fos.close();
                     oos.close();
                     counter.put(sessionid, counter.get(sessionid) + 1);
-                } catch (IOException ignore) {
-                    ignore.printStackTrace();
+                } catch (IOException io_ignore) {
+                    io_ignore.printStackTrace();
                 }
             } else {
                 if(!simpleLoggingContainers.containsKey(sessionid)) {
@@ -138,8 +138,8 @@ public class LogManager {
                     fos.close();
                     oos.close();
                     counter.put(sessionid, counter.get(sessionid) + 1);
-                } catch (IOException ignore) {
-                    ignore.printStackTrace();
+                } catch (IOException io_ignore) {
+                    io_ignore.printStackTrace();
                 }
             } else {
                 simpleLoggingContainers.put(sessionid, new ArrayList<>());
@@ -210,8 +210,8 @@ public class LogManager {
                     ois.close();
                     logSessionContainer.addLogEntry(logContainer);
                     new File(path +  "\\" + i + ".temp").delete();
-                } catch (IOException | ClassNotFoundException ignore) {
-                    ignore.printStackTrace();
+                } catch (IOException | ClassNotFoundException io_ignore) {
+                    io_ignore.printStackTrace();
                 }
             }
             sessionFolder.delete();
@@ -254,8 +254,8 @@ public class LogManager {
                 oos.writeObject(logSessionContainer);
                 fos.close();
                 oos.close();
-            } catch (IOException ignore) {
-                ignore.printStackTrace();
+            } catch (IOException io_ignore) {
+                io_ignore.printStackTrace();
             }
         } else {
             System.out.println("LogManager: Log not saved because it is empty");
@@ -270,8 +270,7 @@ public class LogManager {
     private static String getCurrentTimeStamp() {
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");//-SSS
         Date now = new Date();
-        String strDate = sdfDate.format(now);
-        return strDate;
+        return sdfDate.format(now);
     }
 
 //    /**

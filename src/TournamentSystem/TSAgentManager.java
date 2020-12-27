@@ -1336,8 +1336,8 @@ public class TSAgentManager {
         String res = "";
 
         while (hasNextGame()) {
-            TSAgent nextTeam[] = getNextCompetitionTeam(); // get next Agents
-            TSTimeStorage nextTimes[] = getNextCompetitionTimeStorage(); // get timestorage for next game
+            TSAgent[] nextTeam = getNextCompetitionTeam(); // get next Agents
+            TSTimeStorage[] nextTimes = getNextCompetitionTimeStorage(); // get timestorage for next game
             StateObservation startSo = getNextStartState();
             TSGameDataTransfer spDT = new TSGameDataTransfer(nextTeam, nextTimes, results.numberOfRandomStartMoves, startSo);
             mArena.m_xab.enableTournamentRemoteData(nextTeam);

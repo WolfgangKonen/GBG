@@ -5,10 +5,10 @@ import games.StateObservation;
 import tools.Types;
 
 /**
- * Represents a real action that is applyable to a game state.
+ * Represents a real action that is applicable to a game state.
  * For this use case an action of the type Types.ACTIONS is wrapped.
  */
-public final class RegularAction implements ApplyableAction {
+public final class RegularAction implements ApplicableAction {
     private final Types.ACTIONS action;
 
     public RegularAction(final Types.ACTIONS action) {
@@ -38,7 +38,7 @@ public final class RegularAction implements ApplyableAction {
 
         return stateCopy.getPlayer() == so.getPlayer() // If it is still the same player's turn after the action has been performed,
                                                        // a passing situation has occurred that has been skipped.
-            ? StateObservationExtensions.swapCurrentPlayer(stateCopy)
+            ? StateObservationExtensions.passToNextPlayer(stateCopy)
             : stateCopy;
     }
 

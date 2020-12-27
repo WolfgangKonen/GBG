@@ -11,8 +11,8 @@ import controllers.TD.ntuple2.NTuple2ValueFunc;
  *  @see NTuple2ValueFunc
  */
 public class StateObsWithBoardVector {
-	private StateObservation so;
-	private BoardVector boardV;
+	private final StateObservation so;
+	private final BoardVector boardV;
 	
 	public StateObsWithBoardVector(StateObservation so, BoardVector boardV) {
 		this.so = so;
@@ -29,9 +29,10 @@ public class StateObsWithBoardVector {
 	public BoardVector getBoardVector() {
 		return boardV;
 	}
-	
-	public boolean hasBoardVector() {
-		return (boardV.bvec!=null);
-	}
+
+	// --- never used ---
+//	public boolean hasBoardVector() {
+//		return (boardV.bvec!=null);
+//	}
 
 }

@@ -1,9 +1,8 @@
 package controllers.MCTSWrapper;
 
-import controllers.MCTSWrapper.passStates.ApplyableAction;
+import controllers.MCTSWrapper.passStates.ApplicableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.utils.Tuple;
-import games.ObserverBase;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,7 +63,7 @@ public final class MCTSNode {
     }
 
 
-    public Tuple<ApplyableAction, MCTSNode> selectChild(final double c_puct) {
+    public Tuple<ApplicableAction, MCTSNode> selectChild(final double c_puct) {
         final var availableActions = gameState.getAvailableActionsIncludingPassActions();
 
 //        // /WK/ debug check
@@ -78,8 +77,8 @@ public final class MCTSNode {
 
         var vsz = visitCounts.size();       // how often this node been has visited
         var bestValue = Double.NEGATIVE_INFINITY;
-        ApplyableAction bestAction = null;
-        ApplyableAction bestP_act = null;
+        ApplicableAction bestAction = null;
+        ApplicableAction bestP_act = null;
         if (vsz==0 && ConfigWrapper.EPS<0) bestP_act = selectBestFromP(availableActions);
 
         for (final var a : availableActions) {
@@ -144,9 +143,9 @@ public final class MCTSNode {
      * @param availableActions
      * @return the action argmax(getP(a)) (the first maximizing action, if there are more than one with the same max)
      */
-    private ApplyableAction selectBestFromP(ApplyableAction[] availableActions) {
+    private ApplicableAction selectBestFromP(ApplicableAction[] availableActions) {
         var bestValue = Double.NEGATIVE_INFINITY;
-        ApplyableAction bestAction = null;
+        ApplicableAction bestAction = null;
         for (final var a : availableActions) {
             var value = getP(a);
             if (value > bestValue) {
@@ -161,21 +160,21 @@ public final class MCTSNode {
         return values.stream().mapToInt(it -> it).sum();
     }
 
-    double getQ(final ApplyableAction action) {
+    double getQ(final ApplicableAction action) {
         return meanValues.getOrDefault(action.getId(), 0.0);
     }
 
-    int getN(final ApplyableAction action) {
+    int getN(final ApplicableAction action) {
         return visitCounts.getOrDefault(action.getId(), 0);
     }
 
-    double getP(final ApplyableAction action) {
+    double getP(final ApplicableAction action) {
         return moveProbabilities.getOrDefault(action.getId(), 0.0);
     }
 
     public ArrayList<Integer> getLastMoves() { return gameState.getLastMoves(); }
 
-    void incrementVisitCount(final ApplyableAction action) {
+    void incrementVisitCount(final ApplicableAction action) {
         visitCounts.put(
             action.getId(),
             getN(action) + 1

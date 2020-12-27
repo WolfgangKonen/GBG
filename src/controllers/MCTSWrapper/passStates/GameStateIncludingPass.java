@@ -25,10 +25,10 @@ public final class GameStateIncludingPass {
      */
     public final Lazy<Boolean> lazyMustPass;
     /**
-     * Lazy initialized collection of applyable actions possible from this game state.
+     * Lazy initialized collection of applicable actions possible from this game state.
      * If the player has to pass, the collection only contains a pass action.
      */
-    private final Lazy<ApplyableAction[]> lazyAvailableActions;
+    private final Lazy<ApplicableAction[]> lazyAvailableActions;
 
     /**
      * Initializes the GameStateWithPasses instance based on a given StateObservation.
@@ -46,23 +46,23 @@ public final class GameStateIncludingPass {
     /**
      * Calculates the actions available from the current game state including pass actions.
      *
-     * @return A collection of applyable actions possible from this game state.
+     * @return A collection of applicable actions possible from this game state.
      * If no actions are possible the collection contains a pass action.
      */
-    private ApplyableAction[] availableActionsIncludingPassActions() {
+    private ApplicableAction[] availableActionsIncludingPassActions() {
         return lazyMustPass.value()
-            ? new ApplyableAction[]{new PassAction()}
-            : state.getAvailableActions().stream().map(RegularAction::new).toArray(ApplyableAction[]::new);
+            ? new ApplicableAction[]{new PassAction()}
+            : state.getAvailableActions().stream().map(RegularAction::new).toArray(ApplicableAction[]::new);
     }
 
     /**
-     * Applies an applyable action to the current game state.
+     * Applies an applicable action to the current game state.
      * This behavior is polymorphic, since a given action can be both a regular action and a pass action.
      *
      * @param action Action to be applied.
      * @return A new GameStateWithPasses instance.
      */
-    public GameStateIncludingPass advance(final ApplyableAction action) {
+    public GameStateIncludingPass advance(final ApplicableAction action) {
         return new GameStateIncludingPass(
             action.applyTo(state)
         );
@@ -71,7 +71,7 @@ public final class GameStateIncludingPass {
     /**
      * @return Actions available from the current game state including pass actions.
      */
-    public ApplyableAction[] getAvailableActionsIncludingPassActions() {
+    public ApplicableAction[] getAvailableActionsIncludingPassActions() {
         return lazyAvailableActions.value();
     }
 
@@ -123,7 +123,7 @@ public final class GameStateIncludingPass {
      */
     private Tuple<Double, double[]> approximateValueAndMoveProbabilitiesForPassingState(final Approximator approximator) {
         final var swappedState = new GameStateIncludingPass(
-            StateObservationExtensions.swapCurrentPlayer(state)
+            StateObservationExtensions.passToNextPlayer(state)
         );
 
         final var valueAndPolicy = approximator.predict(swappedState.state);

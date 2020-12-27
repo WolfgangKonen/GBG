@@ -3,7 +3,6 @@ package games.CFour;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import controllers.PlayAgent;
 import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
@@ -28,8 +27,8 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 	private int m_Player;			// Player who makes the next move (0 or 1)
-	private C4Base m_C4;
-	private ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
+	private final C4Base m_C4;
+	private ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
 	private boolean gameOver = false;
 	private boolean isWin = false;
 
@@ -84,8 +83,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	}
 	
 	public StateObserverC4 copy() {
-		StateObserverC4 sot = new StateObserverC4(this);
-		return sot;
+		return new StateObserverC4(this);
 	}
 
 	public int countPieces() {
@@ -132,20 +130,21 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	 */
 	@Override
     public String stringDescr() {
-		String sout = "";
-		String str[] = new String[3]; 
-		str[0] = "-"; str[1]="X"; str[2]="o";
+		StringBuilder sout = new StringBuilder();
+		String[] str = new String[] {"-","X","o"};
+//		String[] str = new String[3];
+//		str[0] = "-"; str[1]="X"; str[2]="o";
 		
 		int[][] board = m_C4.getBoard();
 		for (int i=0;i<C4Base.COLCOUNT;i++) {
-			sout = sout + "|";
+			sout.append("|");
 			for (int j=0;j<C4Base.ROWCOUNT;j++) {
-				sout = sout + (str[board[i][j]]);
+				sout.append(str[board[i][j]]);
 			}
 		}
-		sout = sout + "|";
+		sout.append("|");
 		
- 		return sout;
+ 		return sout.toString();
 	}
 	
 	/**
@@ -196,10 +195,10 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 
 	/**
 	 * Advance the current state with 'action' to a new state
-	 * @param action
+	 * @param action the action to take
 	 */
 	public void advance(ACTIONS action) {
-		super.advanceBase(action);
+		super.advanceBase(action);		//		includes addToLastMoves(action)
 		int iAction = action.toInt();
 
 		assert (0<=iAction && iAction<C4Base.COLCOUNT) : "iAction is not in 0,1,...,"+C4Base.COLCOUNT+".";
@@ -231,7 +230,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	}
 	
 	public ArrayList<ACTIONS> getAllAvailableActions() {
-        ArrayList allActions = new ArrayList<>();
+        ArrayList<ACTIONS> allActions = new ArrayList<>();
         for (int j = 0; j < C4Base.COLCOUNT; j++) 
         	allActions.add(Types.ACTIONS.fromInt(j));
         
@@ -249,8 +248,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	public void setAvailableActions() {
 		availableActions.clear();
 		int[] moves = m_C4.generateMoves(false);
-		for (int j=0; j<moves.length; j++)
-			availableActions.add(Types.ACTIONS.fromInt(moves[j]));
+		for (int move : moves) availableActions.add(ACTIONS.fromInt(move));
 	}
 	
 	public Types.ACTIONS getAction(int i) {
@@ -278,7 +276,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		public int c;
 		public int r;
 		public int p;
-		private boolean valid;
+		private final boolean valid;
 		public LastCell() {
 			valid=false;
 		}

@@ -7,7 +7,7 @@ import games.StateObservation;
  * Represents a pseudo action that must be performed
  * by a player when no real moves are possible.
  */
-public final class PassAction implements ApplyableAction {
+public final class PassAction implements ApplicableAction {
     /**
      * Applies the pass action to a passed StateObservation.
      * <p>
@@ -23,7 +23,7 @@ public final class PassAction implements ApplyableAction {
      */
     @Override
     public StateObservation applyTo(final StateObservation so) {
-        return StateObservationExtensions.swapCurrentPlayer(so);
+        return StateObservationExtensions.passToNextPlayer(so);
     }
 
     @Override

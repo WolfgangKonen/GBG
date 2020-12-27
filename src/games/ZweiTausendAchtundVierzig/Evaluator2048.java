@@ -63,7 +63,7 @@ public class Evaluator2048 extends Evaluator {
     }
 
     @Override
-    protected boolean evalAgent(PlayAgent pa) {
+    public boolean evalAgent(PlayAgent pa) {
     	m_PlayAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {
@@ -294,16 +294,16 @@ public class Evaluator2048 extends Evaluator {
 
     @Override
     public String getMsg() {
-        String tilesString = "";
+        StringBuilder tilesString = new StringBuilder();
 		DecimalFormat frm = new DecimalFormat("00000");
 		DecimalFormat frm1 = new DecimalFormat("000");
 		DecimalFormat frm2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
 		frm2.applyPattern("#0.0%");  
 
-        for (Map.Entry tile : tiles.entrySet()) {
-            tilesString += "\n" + frm.format(((Integer)tile.getKey()).longValue()) 
-            	+ ", " + frm1.format(((Integer)tile.getValue()).longValue())
-            	+ "  ("+ frm2.format(((Integer)tile.getValue()).doubleValue()/ConfigEvaluator.NUMBEREVALUATIONS)+")";
+        for (Map.Entry<Integer, Integer> tile : tiles.entrySet()) {
+            tilesString.append("\n").append(frm.format(tile.getKey().longValue()))
+                    .append(", ").append(frm1.format(tile.getValue().longValue()))
+                    .append("  (").append(frm2.format(tile.getValue().doubleValue() / ConfigEvaluator.NUMBEREVALUATIONS)).append(")");
         }
 
         String agentSettings = "";
@@ -375,9 +375,9 @@ public class Evaluator2048 extends Evaluator {
     		this.tiles = tiles;
     		this.t16384_Perc = 0.0;
     		
-            for (Map.Entry tile : tiles.entrySet()) {
-            	if (((Integer)tile.getKey()).intValue()==16384) {
-            		t16384_Perc = ((Integer)tile.getValue()).doubleValue()/ConfigEvaluator.NUMBEREVALUATIONS;
+            for (Map.Entry<Integer,Integer> tile : tiles.entrySet()) {
+            	if (tile.getKey()==16384) {
+            		t16384_Perc = tile.getValue().doubleValue()/ConfigEvaluator.NUMBEREVALUATIONS;
             	}
             }
 

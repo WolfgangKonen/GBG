@@ -34,7 +34,7 @@ public class XArenaButtons //extends JPanel
 	// m_arena.m_xab.choiceAgent[n] due to agent loading will trigger from the associated
 	// ItemListenerHandler an agent-parameter-default-setting (we want the parameters
 	// from the agent just loaded to survive in m_arena.m_xab)
-	public boolean[] changedViaLoad = null;
+	public boolean[] changedViaLoad;
 
 	public ParTD[] tdPar;
 	public ParNT[] ntPar;
@@ -48,13 +48,11 @@ public class XArenaButtons //extends JPanel
 
 	// tournament system remote data input
 	private boolean tournamentRemoteDataEnabled = false;
-	private String selectedAgentTypes[] = null;
+	private String[] selectedAgentTypes = null;
 
 	public XArenaButtons(XArenaFuncs game, Arena arena)
 	{
-		String AgentX;
-		String AgentO;
-		
+
 		m_xfun = game;
 		m_arena = arena;
 		
@@ -76,8 +74,6 @@ public class XArenaButtons //extends JPanel
 		mctsePar = new ParMCTSE[numPlayers];
 		edPar = new ParEdax[numPlayers];
 		selectedAgents = new String[numPlayers];
-		AgentX = null;
-		AgentO = null;
 
 		// for-loop over *decrementing* n so that we set on the last pass (n=0) with the call 
 		// to setParamDefaults the initial GameNumT for the Player at position 0 (which is the usual one to train)
@@ -119,8 +115,8 @@ public class XArenaButtons //extends JPanel
 				oPar[n].setTrainEvalMode(dummyEvaluator.getTrainEvalMode());
 				oPar[n].setQuickEvalTooltip(dummyEvaluator.getTooltipString());
 				oPar[n].setTrainEvalTooltip(dummyEvaluator.getTooltipString());
-			} catch (RuntimeException ignored){ 
-				System.out.println(ignored.getMessage());				
+			} catch (RuntimeException e){
+				System.out.println(e.getMessage());
 			}
 
 		} // for
@@ -128,7 +124,7 @@ public class XArenaButtons //extends JPanel
 		if (m_arena.hasGUI()) {
 			m_XAB_gui.configureGui();
 			
-			if (m_arena.getGameName()=="ConnectFour") {
+			if (m_arena.getGameName().equals("ConnectFour")) {
 		    	Color[] colPlayer= new Color[2];
 				colPlayer[0] = new Color(238,208,26);	// dark yellow as in resources/yellow.png
 				colPlayer[1] = new Color(204,0,0);		// dark red as in resources/red.png    		
@@ -171,12 +167,10 @@ public class XArenaButtons //extends JPanel
 			setGameNumber(10000);				
 			break;
 		case "Sarsa":
-			switch (gameName) {
-			case "Nim": 
-				setGameNumber(10000);		
-				break;
-			default:
-				setGameNumber(30000);		
+			if ("Nim".equals(gameName)) {
+				setGameNumber(10000);
+			} else {
+				setGameNumber(30000);
 			}
 			break;
 		default:
@@ -185,13 +179,14 @@ public class XArenaButtons //extends JPanel
 		setTrainNumber(25);
 
 		if (m_XAB_gui!=null)
-			m_XAB_gui.setGuiParamDefaults(n, agentName, gameName);
+			m_XAB_gui.setGuiParamDefaults(agentName);
 	}
-	
-	public void helpFunction() {
-		if (m_XAB_gui != null)
-			m_XAB_gui.helpFunction();
-	}
+
+	// --- never used ---
+//	public void helpFunction() {
+//		if (m_XAB_gui != null)
+//			m_XAB_gui.helpFunction();
+//	}
 
 	// Known caller outside XArenaButtons: Arena.run()
 	void enableButtons(boolean state, boolean playEnabled, boolean inspectVEnabled) {
@@ -259,7 +254,7 @@ public class XArenaButtons //extends JPanel
 	 * externally set playing agents
 	 * @param team standard agents chosen by user
 	 */
-	public void enableTournamentRemoteData(TSAgent team[]) {
+	public void enableTournamentRemoteData(TSAgent[] team) {
 		tournamentRemoteDataEnabled = true;
 
 		String[] types;
@@ -354,18 +349,19 @@ public class XArenaButtons //extends JPanel
 		if (m_XAB_gui!=null)
 			m_XAB_gui.setGameNumber(gameNumber);
 	}
-	
-	public int getCompeteNumber() {
-		if (winCompOptions!=null)
-			competeNumber = winCompOptions.getNumGames(); // be sure to get latest change from GUI (!)
-		return competeNumber;
-	}
-	
-	public void setCompeteNumber(int competeNumber) {
-		competeNumber = competeNumber;
-		if (winCompOptions!=null)
-			winCompOptions.setNumGames(competeNumber);
-	}
+
+	// --- never used ---
+//	public int getCompeteNumber() {
+//		if (winCompOptions!=null)
+//			competeNumber = winCompOptions.getNumGames(); // be sure to get latest change from GUI (!)
+//		return competeNumber;
+//	}
+//
+//	public void setCompeteNumber(int competeNumber) {
+//		competeNumber = competeNumber;
+//		if (winCompOptions!=null)
+//			winCompOptions.setNumGames(competeNumber);
+//	}
 	
 	//
 	// setter functions to make the param members accessible from PlayAgent.fillParamTabsAfterLoading

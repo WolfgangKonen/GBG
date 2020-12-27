@@ -49,8 +49,7 @@ abstract public class Arena implements Runnable {
 	public GBGLaunch m_LauncherObj = null;
 	public XArenaTabs m_tabs = null;
 	public XArenaButtons m_xab; // the game buttons and text fields
-	private Thread playThread = null;
-//	private Progress progress = null; // progress for some functions
+	//	private Progress progress = null; // progress for some functions
 	protected GameBoard gb;
 	public LoadSaveGBG tdAgentIO; // saving/loading of agents
 	public Task taskState = Task.IDLE;
@@ -64,7 +63,7 @@ abstract public class Arena implements Runnable {
 	public int currentSleepDuration = 0;
 	public LogManager logManager;
 	private int logSessionid;
-	private boolean withUI=true;	// whether to start GUI or not
+	private final boolean withUI;	// whether to start GUI or not
 
 	// TS variables
 	private final String TAG = "[Arena] ";
@@ -119,7 +118,7 @@ abstract public class Arena implements Runnable {
 
 	public void init() {
 		// this causes Arena.run() to be executed as a separate thread
-		playThread = new Thread(this, "Arena playThread");
+		Thread playThread = new Thread(this, "Arena playThread");
 		playThread.start();
 	}
 
@@ -339,13 +338,11 @@ abstract public class Arena implements Runnable {
 					// int Index = this.getHexIndex(soh.getBoard());
 					// System.out.println("Index: "+Index);
 					System.out.println("[" + soh.stringDescr() + "]");
-					int dummy = 1;
 				}
 				boolean DBG_SIM=false;
 				if (DBG_SIM && so instanceof StateObserverSim) {
 					StateObserverSim sos = (StateObserverSim) so;
 					System.out.println(sos.stringDescr2());
-					int dummy =1;
 				}
 
 				if (so.isLegalState() && !so.isGameOver()) {
@@ -449,7 +446,7 @@ abstract public class Arena implements Runnable {
 	public void PlayGame(TSGameDataTransfer spDT) {
 		final int numPlayers = gb.getStateObs().getNumPlayers();
 		StateObservation so, startSO;
-		Types.ACTIONS_VT actBest = null;
+		Types.ACTIONS_VT actBest;
 		MCTSAgentT p2 = null;
 		boolean DEBG = false; // false;true;
 		if (DEBG) p2= new MCTSAgentT("MCTS", null, m_xab.mctsPar[0], m_xab.oPar[0]); // only
@@ -489,37 +486,37 @@ abstract public class Arena implements Runnable {
 		}
 
 		String[] agentVec = new String[numPlayers];
-		String sMsg = "";
+		StringBuilder sMsg;
 
 		if (spDT==null)
 			gb.toFront();
 
 		switch (numPlayers) {
-		case (1):
-			agentVec[0] = m_xab.getSelectedAgent(0);
-			sMsg = "Playing a game ... [ " + agentVec[0] + " ]";
-			int wrappedNPly = m_xab.oPar[0].getWrapperNPly();
-			if (wrappedNPly > 0)
-				sMsg = "Playing a game ... [ " + agentVec[0] + ", nPly=" + wrappedNPly + " ]";
-			break;
-		case (2):
-			agentVec[0] = qaVector[0].getName();
-			agentVec[1] = qaVector[1].getName();
-			sMsg = "Playing a game ... [" + agentVec[0] + " (X) vs. " + agentVec[1] + " (O)]";
-			break;
-		default:
-			sMsg = "Playing a game ... [";
-			for (int n = 0; n < numPlayers; n++) {
-				agentVec[n] = qaVector[n].getName();
-				sMsg = sMsg + agentVec[n] + "(" + n + ")";
-				if (n < numPlayers - 1)
-					sMsg = sMsg + ", ";
+			case (1) -> {
+				agentVec[0] = m_xab.getSelectedAgent(0);
+				sMsg = new StringBuilder("Playing a game ... [ " + agentVec[0] + " ]");
+				int wrappedNPly = m_xab.oPar[0].getWrapperNPly();
+				if (wrappedNPly > 0)
+					sMsg = new StringBuilder("Playing a game ... [ " + agentVec[0] + ", nPly=" + wrappedNPly + " ]");
 			}
-			sMsg = sMsg + "]";
-			break;
+			case (2) -> {
+				agentVec[0] = qaVector[0].getName();
+				agentVec[1] = qaVector[1].getName();
+				sMsg = new StringBuilder("Playing a game ... [" + agentVec[0] + " (X) vs. " + agentVec[1] + " (O)]");
+			}
+			default -> {
+				sMsg = new StringBuilder("Playing a game ... [");
+				for (int n = 0; n < numPlayers; n++) {
+					agentVec[n] = qaVector[n].getName();
+					sMsg.append(agentVec[n]).append("(").append(n).append(")");
+					if (n < numPlayers - 1)
+						sMsg.append(", ");
+				}
+				sMsg.append("]");
+			}
 		}
 
-		setStatusMessage(sMsg);
+		setStatusMessage(sMsg.toString());
 		System.out.println(sMsg);
 
 		if (taskBefore == Task.INSPECTV) {
@@ -730,7 +727,7 @@ abstract public class Arena implements Runnable {
 	 * @param so			the game-over state 
 	 * @param agentVec		the names of all agents
 	 * @param spDT			needed only in the tournament-case
-	 * @return
+	 * @return	the game-over string
 	 */
 	public String gameOverString(StateObservation so, String[] agentVec, TSGameDataTransfer spDT) {
 		ScoreTuple sc = so.getGameScoreTuple();
@@ -743,67 +740,60 @@ abstract public class Arena implements Runnable {
 		String goStr="";
 		int winner = 0;
 		switch (numPlayers) {
-		case 1:
-			double gScore = so.getGameScore(so);
-			if (so instanceof StateObserver2048)
-				gScore *= StateObserver2048.MAXSCORE;
-			goStr = "Game over: Score " + gScore;
-			if (spDT!=null)
-				spDT.nextTeam[0].addSinglePlayScore(gScore);
-			break; 
-		case 2:
-			winner = sc.argmax();
-			switch (winner) {
-			case  (0):
-				goStr = "X (" + agentVec[0] + ") wins";
-				break; // out of inner switch(winner)
-			case (1):
-				goStr = "O (" + agentVec[1] + ") wins";
-				break; // out of inner switch(winner)
-			} // switch(winner)
-			if (sc.max()==0.0) 
-				goStr = "Tie";
-
-			break; 
-		case 3:
-			// There are 4 possible game-over classes for 3 players:
-			// 1) a single player wins			--> goStr = "Px (agtName) wins"
-			// 2) a coalition of 2 player wins	--> goStr = "Px & Py win"
-			// 3) a tie between two players, the remaining player has lost.
-			//									--> goStr = "Tie between Px & Py"
-			// 4) a tie between all players		--> goStr = "Tie
-
-			System.out.println(sc.toString());		// just debug info
-
-			// count the winners: 
-			int numWinners=0;
-			for (int i=0; i<sc.scTup.length; i++) {
-				if (sc.scTup[i]==1) {
-					if (numWinners==0) goStr += "P" + i;
-					else goStr += " & P" + i;
-					winner = i;
-					numWinners++;
-				}
+			case 1 -> {
+				double gScore = so.getGameScore(so);
+				if (so instanceof StateObserver2048)
+					gScore *= StateObserver2048.MAXSCORE;
+				goStr = "Game over: Score " + gScore;
+				if (spDT != null)
+					spDT.nextTeam[0].addSinglePlayScore(gScore);
 			}
-			goStr += (numWinners==1) ? " (" + agentVec[winner] + ") wins" : " win";
-			
-			// count the ties:
-			if (sc.max()==0.0) {         
-				goStr = "Tie between ";
-				int numTies=0;
-				for (int i=0; i<sc.scTup.length; i++) {
-					if (sc.scTup[i]==0) {
-						if (numTies==0) goStr += "P" + i;
+			case 2 -> {
+				winner = sc.argmax();
+				goStr = switch (winner) {
+					case (0) -> "X (" + agentVec[0] + ") wins";
+					case (1) -> "O (" + agentVec[1] + ") wins";
+					default -> goStr;
+				};
+				if (sc.max() == 0.0)
+					goStr = "Tie";
+			}
+			case 3 -> {
+				// There are 4 possible game-over cases for 3 players:
+				// 1) a single player wins			--> goStr = "Px (agtName) wins"
+				// 2) a coalition of 2 player wins	--> goStr = "Px & Py win"
+				// 3) a tie between two players, the remaining player has lost.
+				//									--> goStr = "Tie between Px & Py"
+				// 4) a tie between all players		--> goStr = "Tie
+				System.out.println(sc.toString());        // just debug info
+
+				// count the winners:
+				int numWinners = 0;
+				for (int i = 0; i < sc.scTup.length; i++) {
+					if (sc.scTup[i] == 1) {
+						if (numWinners == 0) goStr += "P" + i;
 						else goStr += " & P" + i;
-						numTies++;
+						winner = i;
+						numWinners++;
 					}
 				}
-				if (numTies==3) goStr = "Tie";	// it's an all-player tie
-			} // if
+				goStr += (numWinners == 1) ? " (" + agentVec[winner] + ") wins" : " win";
 
-			break; 
-		default:
-			throw new RuntimeException("Case numPlayers = "+numPlayers+" in gameOverString() not handled!");
+				// count the ties:
+				if (sc.max() == 0.0) {
+					goStr = "Tie between ";
+					int numTies = 0;
+					for (int i = 0; i < sc.scTup.length; i++) {
+						if (sc.scTup[i] == 0) {
+							if (numTies == 0) goStr += "P" + i;
+							else goStr += " & P" + i;
+							numTies++;
+						}
+					}
+					if (numTies == 3) goStr = "Tie";    // it's an all-player tie
+				} // if
+			}
+			default -> throw new RuntimeException("Case numPlayers = " + numPlayers + " in gameOverString() not handled!");
 		}
 		
 		return goStr;
@@ -887,16 +877,15 @@ abstract public class Arena implements Runnable {
 	 * Currently this function is only for StateObserver2048 so. Otherwise it
 	 * returns the 'normal' pa.getNextAction2().
 	 * 
-	 * @param so
-	 * @param pa
-	 * @param p2
-	 * @param N_EMPTY
-	 *            return the 'normal' pa.getNextAction2(), if number of empty
-	 *            cells is greater or equal to N_EMPTY
+	 * @param so		StateObserver2048 state
+	 * @param pa		the 1st agent
+	 * @param p2		the 2nd agent
+	 * @param N_EMPTY	threshold for number of empty tiles: return the 'normal' pa.getNextAction2(),
+	 *                  if number of empty tiles is greater or equal to N_EMPTY
 	 * @return the chosen action from the last call of pa.getNextAction2()
 	 */
 	Types.ACTIONS_VT getNextAction_DEBG(StateObservation so, PlayAgent pa, MCTSAgentT p2, int N_EMPTY) {
-		Types.ACTIONS_VT actBest = null;
+		Types.ACTIONS_VT actBest=null;
 		double MAXSCORE = 3932156;
 		double[] vtable;
 		int nEmpty;
@@ -972,7 +961,7 @@ abstract public class Arena implements Runnable {
 		}
 
 		PlayAgent td = this.m_xfun.m_PlayAgents[index];
-		String str = "";
+		String str;
 		try {
 			if (savePath==null) {
 				this.tdAgentIO.saveGBGAgent(td);		// open file chooser dialog
@@ -1003,7 +992,7 @@ abstract public class Arena implements Runnable {
 		int numPlayers = this.getGameBoard().getStateObs().getNumPlayers();
 		String str="";
 		PlayAgent td=null;
-		boolean res = false;
+		boolean res;
 		try {
 			td = this.tdAgentIO.loadGBGAgent(filePath);			
 		} catch(Exception e) {
@@ -1078,8 +1067,8 @@ abstract public class Arena implements Runnable {
 	 */
 	public boolean hasHumanAgent() {
 		PlayAgent[] paVector = m_xfun.fetchAgents(m_xab);
-		for (int i = 0; i < paVector.length; i++) {
-			if (paVector[i].getName().equals("Human"))
+		for (PlayAgent playAgent : paVector) {
+			if (playAgent.getName().equals("Human"))
 				return true;
 		}
 		return false;
@@ -1129,9 +1118,9 @@ abstract public class Arena implements Runnable {
 		m_xab.enableButtons(state, state, state);
 	}
 
-	public void enableButtons(boolean state, boolean playEnabled) {
-		m_xab.enableButtons(state, playEnabled, state);
-	}
+//	public void enableButtons(boolean state, boolean playEnabled) {
+//		m_xab.enableButtons(state, playEnabled, state);
+//	}
 
 	public void enableButtons(boolean state, boolean playEnabled, boolean inspectVEnabled) {
 		m_xab.enableButtons(state, playEnabled, inspectVEnabled);

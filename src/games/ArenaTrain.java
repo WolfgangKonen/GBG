@@ -1,25 +1,11 @@
 package games;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Calendar;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.SwingConstants;
 
-import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
-import games.Arena.Task;
-import gui.MessageBox;
-import gui.StatusBar;
 import tools.Types;
 
 
@@ -42,7 +28,6 @@ import tools.Types;
 abstract public class ArenaTrain extends Arena  
 {
 	private static final long serialVersionUID = 1L;
-	private Thread playThreadAT = null;
 
 	// --- never used ---
 //	// launch ArenaTrain with UI

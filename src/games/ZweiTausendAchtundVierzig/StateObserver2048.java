@@ -669,6 +669,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
 
     public void advance(ACTIONS action) {
+        super.advanceBase(action);		//		includes addToLastMoves(action)
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
         move(iAction);				// deterministic part, contains super.incrementMoveCounter()
@@ -680,6 +681,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
 
     public void advanceDeterministic(ACTIONS action) {
+        super.advanceBase(action);		//		includes addToLastMoves(action)
         if(!isNextActionDeterministic) {
             throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");
         }

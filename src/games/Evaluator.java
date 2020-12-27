@@ -23,7 +23,7 @@ import controllers.PlayAgent;
  * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 abstract public class Evaluator {
-	private boolean prevEval;
+	//private boolean prevEval;
 	private boolean thisEval;
 	private int gnumTrue;
 	private int m_stopEval;
@@ -36,13 +36,13 @@ abstract public class Evaluator {
 	protected int verbose=1;
 	/**
 	 * Derived classes write the result (average success rate) of the last call to method 
-	 * {@link #evalAgent(PlayAgent)} to this variable {@link #lastResult}
+	 * {@link #evalAgent(PlayAgent)} to this variable {@code #lastResult}
 	 * @see #getLastResult()
 	 */
 	protected double lastResult=0.0;
 	/**
 	 * Derived classes write an info string of the last call to method 
-	 * {@link #evalAgent(PlayAgent)} to this variable {@link #m_msg}
+	 * {@link #evalAgent(PlayAgent)} to this variable {@code #m_msg}
 	 * @see #getMsg()
 	 */
 	protected String m_msg="";
@@ -81,7 +81,7 @@ abstract public class Evaluator {
 		if (!isAvailableMode(mode)) 
 			throw new RuntimeException(this.getClass().getSimpleName()+": Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
-		prevEval = false;
+		//prevEval = false;
 		thisEval = false;
 		m_stopEval=stopEval;
 		m_counter=0;
@@ -158,7 +158,7 @@ abstract public class Evaluator {
 	 */
  	public double getLastResult(){ 
  		return lastResult; 
- 	};
+ 	}
 
 	/**
 	 * @return long message of evaluator result (may be multi-line) for {@code System.out}
@@ -168,7 +168,7 @@ abstract public class Evaluator {
  	}  
 	
 	/**
-	 * If not overridden by derived class, {@link #getShortMsg()} returns {@link #getMsg()}.
+	 * If not overridden by derived class, this method returns {@link #getMsg()}.
 	 * 
 	 * @return short message of evaluator result (one line) for status window 
 	 */
@@ -214,7 +214,7 @@ abstract public class Evaluator {
 	}
 	
 	/**
-	 * If not overridden by derived class, {@link #getDefaultEvalMode()} returns 0.
+	 * If not overridden by derived class, this method returns 0.
 	 * 
 	 * @return the default evaluation mode for this {@link Evaluator} 
 	 */

@@ -46,7 +46,7 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
      */
     private static final long serialVersionUID = 12L;
     private int currentPlayer;
-    private HexTile[][] board;
+    private final HexTile[][] board;
     private HexTile lastUpdatedTile;
     private ArrayList<Types.ACTIONS> availableActions;
 
@@ -195,14 +195,9 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 //            }
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 switch (board[i][j].getPlayer()) {
-                    case HexConfig.PLAYER_ONE:
-                        sb.append('B');
-                        break;
-                    case PLAYER_TWO:
-                        sb.append('W');
-                        break;
-                    default:
-                        sb.append('-');
+                    case HexConfig.PLAYER_ONE -> sb.append('B');
+                    case PLAYER_TWO -> sb.append('W');
+                    default -> sb.append('-');
                 }
             }
 //            sb.append("\n");
@@ -212,13 +207,13 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
         return sb.toString();
     }
 
+    /**
+     * @return 	the game score, i.e. the sum of rewards for the current state.
+     * 			For Hex only game-over states have a non-zero game score.
+     * 			It is the reward from the perspective of {@code refer}.
+     */
     @Override
-	/**
-	 * @return 	the game score, i.e. the sum of rewards for the current state. 
-	 * 			For Hex only game-over states have a non-zero game score. 
-	 * 			It is the reward from the perspective of {@code refer}.
-	 */
-    public double getGameScore(StateObservation refer) {
+	public double getGameScore(StateObservation refer) {
 		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
         int winner = determineWinner();
         if (winner == PLAYER_NONE) {
@@ -245,6 +240,7 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 
     @Override
     public void advance(Types.ACTIONS action) {
+        super.advanceBase(action);		//		includes addToLastMoves(action)
         if (action == null) {
             System.out.println("HEX ERROR: null given as action in advance()");
             return;
@@ -270,7 +266,7 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 
     @Override
     public ArrayList<Types.ACTIONS> getAllAvailableActions() {
-        ArrayList allActions = new ArrayList<>();
+        ArrayList<Types.ACTIONS> allActions = new ArrayList<>();
         for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                     int actionInt = i * HexConfig.BOARD_SIZE + j;
