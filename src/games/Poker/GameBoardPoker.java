@@ -17,7 +17,6 @@ public class GameBoardPoker implements GameBoard {
 	//private transient GameBoardPokerGui m_gameGui = null;
 	private transient GameBoardPokerGui m_gameGui = null;
 
-
 	protected StateObserverPoker m_so;
 	private boolean arenaActReq=false;
 
@@ -34,7 +33,6 @@ public class GameBoardPoker implements GameBoard {
 		m_so		= new StateObserverPoker();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
         if (m_Arena.hasGUI() && m_gameGui==null) {
-        	//m_gameGui = new GameBoardPokerGui(this);
 			m_gameGui = new GameBoardPokerGui(this);
         }
 
@@ -44,6 +42,7 @@ public class GameBoardPoker implements GameBoard {
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
 			m_so = new StateObserverPoker();			// empty Table
+			m_gameGui.resetLog();
 		}
 	}
 
@@ -59,7 +58,6 @@ public class GameBoardPoker implements GameBoard {
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
 		StateObserverPoker soT = (StateObserverPoker) so;
-		System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhh board got updated!!");
 		if (m_gameGui!=null)
 			m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
 	}

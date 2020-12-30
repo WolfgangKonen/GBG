@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class GameBoardPokerGui extends JFrame {
+
     // GB
     private final GameBoardPoker m_gb;
 
@@ -384,12 +385,12 @@ public class GameBoardPokerGui extends JFrame {
         //repaint();
     }
 
-    private void updateLog(StateObserverPoker sop){
-
-        // reset log if it's a new game
-        if(sop.getGameround()==1&&log.getLineCount()>10){
+    public void resetLog(){
+        if(log!=null){
             log.setText("");
         }
+    }
+    private void updateLog(StateObserverPoker sop){
 
         // update log
         if(sop.getLastActions()!=null)

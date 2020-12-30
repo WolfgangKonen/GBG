@@ -79,6 +79,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 	private Pots pots;
 	private final Random rand;
+
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
 	 * compatible with an older one (older .gamelog containing this object will become
@@ -215,8 +216,12 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			}else{
 				activePlayers[i] = true;
 				foldedPlayers[i] = false;
-				holeCards[i][0] = m_deck.draw();
-				holeCards[i][1] = m_deck.draw();
+				// is it necessary in a new round of a partial state to hide information again?
+				// probably not because it's a random playout anyway?
+			//	if(!isPartialState||i==partialPlayer){
+					holeCards[i][0] = m_deck.draw();
+					holeCards[i][1] = m_deck.draw();
+			//	}
 			}
 		}
 
@@ -427,7 +432,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 				int[] bestHand = findBestHand(hand);
 				scoreOfHand[i] = findMaxScore(bestHand);
 				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[i]+" has a score of "+Long.toString(scoreOfHand[i]));
-				addToLog(Types.GUI_PLAYER_NAME[i]+" has a score of "+ scoreOfHand[i]);
+
+				//addToLog(Types.GUI_PLAYER_NAME[i]+" has a score of "+ scoreOfHand[i]);
 			}else{
 				//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + Types.GUI_PLAYER_NAME[i]+" has folded.");
 				scoreOfHand[i] = -1;
@@ -499,6 +505,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		}
 
 		// Checking for "Flush"
+		//TODO: adjust flush logic! 
 		int flush = -1;
 		for(int i = 0 ; i < suits.length ; i++) {
 			if(suits[i]>4){
@@ -652,11 +659,10 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	 * @param action to advance the state of the game
 	 */
 	public void advance(ACTIONS action){
-		if(isNextActionDeterministic){
+		if(isNextActionDeterministic()){
 			advanceDeterministic(action);
-
 		}
-		while(!isNextActionDeterministic){
+		while(!isNextActionDeterministic()){
 			advanceNondeterministic();
 		}
 	}
@@ -693,10 +699,14 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		if(getNumActivePlayers() <2 && openPlayers.size() == 0){
 			isNextActionDeterministic = false;
 		}else {
-			//
 			// getNumPlayingPlayers() - getNumFoldedPlayers() == 1 && openPlayers.size() == 1 => everybody except one player has folded
 			// openPlayers.size() == 0 => no player has to make a move
-			isNextActionDeterministic = !((openPlayers.size() == 0 || getNumPlayingPlayers() - getNumFoldedPlayers() == 1 && openPlayers.size() == 1));
+			isNextActionDeterministic = !(
+					openPlayers.size() == 0 ||
+					(getNumPlayingPlayers() - getNumFoldedPlayers() == 1 &&
+					openPlayers.size() == 1)
+			);
+
 		}
 		if(!GAMEOVER && openPlayers.size() > 0) {
 			// next player becomes the active one
@@ -750,6 +760,15 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		}else{
 			//PokerLog.gameLog.info(Integer.toString(System.identityHashCode(this)) + ": " + "Showdown - finding the winner...");
 			addToLog("Showdown - finding the winner...");
+
+
+			//printing community cards:
+			StringBuilder cc = new StringBuilder();
+			for (PlayingCard card: communityCards) {
+				cc.append(card.toString());
+			}
+			addToLog(cc.toString());
+
 			long[] scores = determineWinner();
 			boolean[][] claims = pots.getClaims();
 			for(int p = 0;p<claims.length;p++){
@@ -771,8 +790,10 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 					chips[winner] += pots.getPotSize(p)/numWinners;
 				}
 			}
+
 			//update scores
 			gamescores = chips;
+
 			addToLog("-----------End Round("+gameround+")--------");
 			for(int i = 0 ; i <getNumPlayers() ; i++)
 				addToLog("Chips "+Types.GUI_PLAYER_NAME[i]+": "+chips[i] +" " +playingPlayers[i]);
@@ -1207,7 +1228,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		StateObserverPoker partialState = this.copy();
 		int player = partialState.getPlayer();
 		partialState.setPartialState(true);
-
 			for (int i = 0; i < partialState.holeCards.length; i++) {
 				if(i==player)
 					continue;
@@ -1232,7 +1252,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	}
 
 	public int getMoveCounter() {
-		//return m_counter;
-		return getGameround();
+		return m_counter;
+		//return getGameround();
 	}
+
 }
