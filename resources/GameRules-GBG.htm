@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
  <o:DocumentProperties>
   <o:Author>Wolfgang Konen</o:Author>
   <o:LastAuthor>Tim Zeh</o:LastAuthor>
-  <o:Revision>11</o:Revision>
+  <o:Revision>12</o:Revision>
   <o:LastPrinted>2020-12-17T19:28:00Z</o:LastPrinted>
   <o:Created>2020-03-25T11:03:00Z</o:Created>
-  <o:LastSaved>2020-12-17T19:33:00Z</o:LastSaved>
+  <o:LastSaved>2020-12-30T22:36:00Z</o:LastSaved>
   <o:Pages>8</o:Pages>
-  <o:Words>1741</o:Words>
-  <o:Characters>10974</o:Characters>
-  <o:Lines>91</o:Lines>
+  <o:Words>1776</o:Words>
+  <o:Characters>11196</o:Characters>
+  <o:Lines>93</o:Lines>
   <o:Paragraphs>25</o:Paragraphs>
-  <o:CharactersWithSpaces>12690</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>12947</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
@@ -44,8 +44,9 @@ target="GameRules-GBG-Dateien/props030.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
   <w:View>Print</w:View>
-  <w:Zoom>120</w:Zoom>
+  <w:Zoom>140</w:Zoom>
   <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:HyphenationZone>21</w:HyphenationZone>
@@ -290,6 +291,8 @@ target="GameRules-GBG-Dateien/props030.xml">
   <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
    Name="HTML Variable"/>
   <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal Table"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
    Name="annotation subject"/>
   <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
    Name="No List"/>
@@ -382,8 +385,12 @@ target="GameRules-GBG-Dateien/props030.xml">
   <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
    Name="Table Web 2"/>
   <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
    Name="Balloon Text"/>
   <w:LsdException Locked="false" Priority="39" Name="Table Grid"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Theme"/>
   <w:LsdException Locked="false" SemiHidden="true" Name="Placeholder Text"/>
   <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
   <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
@@ -685,21 +692,7 @@ target="GameRules-GBG-Dateien/props030.xml">
 	mso-font-charset:0;
 	mso-generic-font-family:swiss;
 	mso-font-pitch:variable;
-	mso-font-signature:-536859905 1073786111 1 0 511 0;}
-@font-face
-	{font-family:Cambria;
-	panose-1:2 4 5 3 5 4 6 3 2 4;
-	mso-font-charset:0;
-	mso-generic-font-family:roman;
-	mso-font-pitch:variable;
-	mso-font-signature:-1610611985 1073741899 0 0 415 0;}
-@font-face
-	{font-family:Consolas;
-	panose-1:2 11 6 9 2 2 4 3 2 4;
-	mso-font-charset:0;
-	mso-generic-font-family:modern;
-	mso-font-pitch:fixed;
-	mso-font-signature:-536869121 64767 1 0 415 0;}
+	mso-font-signature:-469750017 -1073732485 9 0 511 0;}
 @font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;
@@ -714,6 +707,20 @@ target="GameRules-GBG-Dateien/props030.xml">
 	mso-generic-font-family:swiss;
 	mso-font-pitch:variable;
 	mso-font-signature:-469750017 -1073683329 9 0 511 0;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-536869121 64767 1 0 415 0;}
+@font-face
+	{font-family:Cambria;
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-pitch:variable;
+	mso-font-signature:-536869121 1107305727 33554432 0 415 0;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{mso-style-unhide:no;
@@ -784,7 +791,8 @@ h2
 	color:#4F81BD;
 	font-weight:bold;}
 h3
-	{mso-style-priority:9;
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
 	mso-style-qformat:yes;
 	mso-style-link:"Heading 3 Char";
 	mso-style-next:Standard;
@@ -807,7 +815,8 @@ h3
 	mso-themecolor:accent1;
 	font-weight:bold;}
 h4
-	{mso-style-priority:9;
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
 	mso-style-qformat:yes;
 	mso-style-link:"Heading 4 Char";
 	mso-style-next:Standard;
@@ -1128,6 +1137,7 @@ p.MsoIndex9, li.MsoIndex9, div.MsoIndex9
 	mso-bidi-font-family:Calibri;}
 p.MsoToc1, li.MsoToc1, div.MsoToc1
 	{mso-style-update:auto;
+	mso-style-noshow:yes;
 	mso-style-priority:39;
 	mso-style-next:Standard;
 	margin-top:0cm;
@@ -1143,6 +1153,7 @@ p.MsoToc1, li.MsoToc1, div.MsoToc1
 	mso-bidi-font-family:Calibri;}
 p.MsoToc2, li.MsoToc2, div.MsoToc2
 	{mso-style-update:auto;
+	mso-style-noshow:yes;
 	mso-style-priority:39;
 	mso-style-next:Standard;
 	margin-top:0cm;
@@ -1158,6 +1169,7 @@ p.MsoToc2, li.MsoToc2, div.MsoToc2
 	mso-bidi-font-family:Calibri;}
 p.MsoToc3, li.MsoToc3, div.MsoToc3
 	{mso-style-update:auto;
+	mso-style-noshow:yes;
 	mso-style-priority:39;
 	mso-style-next:Standard;
 	margin-top:0cm;
@@ -3273,7 +3285,8 @@ p.MsoBlockText, li.MsoBlockText, div.MsoBlockText
 	mso-themecolor:accent1;
 	font-style:italic;}
 a:link, span.MsoHyperlink
-	{mso-style-priority:99;
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
 	color:blue;
 	text-decoration:underline;
 	text-underline:single;}
@@ -3406,7 +3419,8 @@ p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
 	mso-fareast-theme-font:minor-fareast;
 	mso-bidi-font-family:Calibri;}
 p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
-	{mso-style-priority:34;
+	{mso-style-noshow:yes;
+	mso-style-priority:34;
 	mso-style-unhide:no;
 	mso-style-qformat:yes;
 	margin-top:0cm;
@@ -3488,7 +3502,8 @@ p.MsoBibliography, li.MsoBibliography, div.MsoBibliography
 	mso-fareast-theme-font:minor-fareast;
 	mso-bidi-font-family:Calibri;}
 p.MsoTocHeading, li.MsoTocHeading, div.MsoTocHeading
-	{mso-style-priority:39;
+	{mso-style-noshow:yes;
+	mso-style-priority:39;
 	mso-style-qformat:yes;
 	mso-style-parent:"Überschrift 1";
 	mso-style-next:Standard;
@@ -3526,9 +3541,12 @@ span.HTMLAddressChar
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;
 	font-style:italic;}
 p.Standard, li.Standard, div.Standard
 	{mso-style-name:Standard;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
 	margin-top:0cm;
 	margin-right:0cm;
@@ -3583,6 +3601,7 @@ span.Heading2Char
 	mso-themeshade:191;}
 span.Heading3Char
 	{mso-style-name:"Heading 3 Char";
+	mso-style-noshow:yes;
 	mso-style-priority:9;
 	mso-style-unhide:no;
 	mso-style-locked:yes;
@@ -3603,6 +3622,7 @@ span.Heading3Char
 	mso-themeshade:127;}
 span.Heading4Char
 	{mso-style-name:"Heading 4 Char";
+	mso-style-noshow:yes;
 	mso-style-priority:9;
 	mso-style-unhide:no;
 	mso-style-locked:yes;
@@ -3767,7 +3787,8 @@ span.FootnoteTextChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.CommentTextChar
 	{mso-style-name:"Comment Text Char";
 	mso-style-noshow:yes;
@@ -3779,7 +3800,8 @@ span.CommentTextChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.HeaderChar
 	{mso-style-name:"Header Char";
 	mso-style-noshow:yes;
@@ -3793,7 +3815,8 @@ span.HeaderChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.FooterChar
 	{mso-style-name:"Footer Char";
 	mso-style-noshow:yes;
@@ -3807,7 +3830,8 @@ span.FooterChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.EndnoteTextChar
 	{mso-style-name:"Endnote Text Char";
 	mso-style-noshow:yes;
@@ -3819,7 +3843,8 @@ span.EndnoteTextChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.MacroTextChar
 	{mso-style-name:"Macro Text Char";
 	mso-style-noshow:yes;
@@ -3864,7 +3889,8 @@ span.ClosingChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.SignatureChar
 	{mso-style-name:"Signature Char";
 	mso-style-noshow:yes;
@@ -3878,7 +3904,8 @@ span.SignatureChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.BodyTextChar
 	{mso-style-name:"Body Text Char";
 	mso-style-noshow:yes;
@@ -3892,7 +3919,8 @@ span.BodyTextChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.BodyTextIndentChar
 	{mso-style-name:"Body Text Indent Char";
 	mso-style-noshow:yes;
@@ -3906,7 +3934,8 @@ span.BodyTextIndentChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.MessageHeaderChar
 	{mso-style-name:"Message Header Char";
 	mso-style-noshow:yes;
@@ -3962,7 +3991,8 @@ span.SalutationChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.DateChar
 	{mso-style-name:"Date Char";
 	mso-style-noshow:yes;
@@ -3976,7 +4006,8 @@ span.DateChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.NoteHeadingChar
 	{mso-style-name:"Note Heading Char";
 	mso-style-noshow:yes;
@@ -3990,7 +4021,8 @@ span.NoteHeadingChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.BodyText2Char
 	{mso-style-name:"Body Text 2 Char";
 	mso-style-noshow:yes;
@@ -4004,7 +4036,8 @@ span.BodyText2Char
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.BodyText3Char
 	{mso-style-name:"Body Text 3 Char";
 	mso-style-noshow:yes;
@@ -4018,7 +4051,8 @@ span.BodyText3Char
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.BodyTextIndent2Char
 	{mso-style-name:"Body Text Indent 2 Char";
 	mso-style-noshow:yes;
@@ -4032,7 +4066,8 @@ span.BodyTextIndent2Char
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.BodyTextIndent3Char
 	{mso-style-name:"Body Text Indent 3 Char";
 	mso-style-noshow:yes;
@@ -4046,7 +4081,8 @@ span.BodyTextIndent3Char
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.DocumentMapChar
 	{mso-style-name:"Document Map Char";
 	mso-style-noshow:yes;
@@ -4089,7 +4125,8 @@ span.E-mailSignatureChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.BalloonTextChar
 	{mso-style-name:"Balloon Text Char";
 	mso-style-noshow:yes;
@@ -4118,6 +4155,7 @@ span.QuoteChar
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;
 	color:#404040;
 	mso-themecolor:text1;
 	mso-themetint:191;
@@ -4135,6 +4173,7 @@ span.IntenseQuoteChar
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;
 	color:#4F81BD;
 	mso-themecolor:accent1;
 	font-style:italic;}
@@ -4217,21 +4256,6 @@ p.msopapdefault, li.msopapdefault, div.msopapdefault
 	font-family:"Times New Roman",serif;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;}
-p.HTMLAdresse, li.HTMLAdresse, div.HTMLAdresse
-	{mso-style-name:"HTML Adresse";
-	mso-style-unhide:no;
-	mso-style-link:"HTML Adresse Zchn";
-	margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:10.0pt;
-	margin-left:0cm;
-	line-height:115%;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	font-family:"Helvetica",sans-serif;
-	mso-fareast-font-family:"Times New Roman";
-	mso-fareast-theme-font:minor-fareast;
-	mso-bidi-font-family:Calibri;}
 span.HTMLAdresseZchn
 	{mso-style-name:"HTML Adresse Zchn";
 	mso-style-noshow:yes;
@@ -4248,10 +4272,12 @@ span.HTMLAdresseZchn
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;
 	font-style:italic;}
-p.berschrift1, li.berschrift1, div.berschrift1
-	{mso-style-name:"Überschrift 1";
+p.HTMLAdresse, li.HTMLAdresse, div.HTMLAdresse
+	{mso-style-name:"HTML Adresse";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 1 Zchn";
+	mso-style-link:"HTML Adresse Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4287,10 +4313,12 @@ span.berschrift1Zchn
 	mso-bidi-font-weight:normal;
 	text-decoration:underline;
 	text-underline:double;}
-p.berschrift2, li.berschrift2, div.berschrift2
-	{mso-style-name:"Überschrift 2";
+p.berschrift1, li.berschrift1, div.berschrift1
+	{mso-style-name:"Überschrift 1";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 2 Zchn";
+	mso-style-link:"Überschrift 1 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4314,10 +4342,12 @@ span.berschrift2Zchn
 	mso-hansi-font-family:Cambria;
 	color:#4F81BD;
 	font-weight:bold;}
-p.berschrift3, li.berschrift3, div.berschrift3
-	{mso-style-name:"Überschrift 3";
+p.berschrift2, li.berschrift2, div.berschrift2
+	{mso-style-name:"Überschrift 2";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 3 Zchn";
+	mso-style-link:"Überschrift 2 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4348,10 +4378,12 @@ span.berschrift3Zchn
 	color:#4F81BD;
 	mso-themecolor:accent1;
 	font-weight:bold;}
-p.berschrift4, li.berschrift4, div.berschrift4
-	{mso-style-name:"Überschrift 4";
+p.berschrift3, li.berschrift3, div.berschrift3
+	{mso-style-name:"Überschrift 3";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 4 Zchn";
+	mso-style-link:"Überschrift 3 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4385,10 +4417,12 @@ span.berschrift4Zchn
 	mso-themecolor:accent1;
 	mso-themeshade:191;
 	font-style:italic;}
-p.berschrift5, li.berschrift5, div.berschrift5
-	{mso-style-name:"Überschrift 5";
+p.berschrift4, li.berschrift4, div.berschrift4
+	{mso-style-name:"Überschrift 4";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 5 Zchn";
+	mso-style-link:"Überschrift 4 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4421,10 +4455,12 @@ span.berschrift5Zchn
 	color:#365F91;
 	mso-themecolor:accent1;
 	mso-themeshade:191;}
-p.berschrift6, li.berschrift6, div.berschrift6
-	{mso-style-name:"Überschrift 6";
+p.berschrift5, li.berschrift5, div.berschrift5
+	{mso-style-name:"Überschrift 5";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 6 Zchn";
+	mso-style-link:"Überschrift 5 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4457,10 +4493,12 @@ span.berschrift6Zchn
 	color:#243F60;
 	mso-themecolor:accent1;
 	mso-themeshade:127;}
-p.HTMLVorformatiert, li.HTMLVorformatiert, div.HTMLVorformatiert
-	{mso-style-name:"HTML Vorformatiert";
+p.berschrift6, li.berschrift6, div.berschrift6
+	{mso-style-name:"Überschrift 6";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"HTML Vorformatiert Zchn";
+	mso-style-link:"Überschrift 6 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4484,10 +4522,12 @@ span.HTMLVorformatiertZchn
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Consolas;}
-p.berschrift7, li.berschrift7, div.berschrift7
-	{mso-style-name:"Überschrift 7";
+p.HTMLVorformatiert, li.HTMLVorformatiert, div.HTMLVorformatiert
+	{mso-style-name:"HTML Vorformatiert";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 7 Zchn";
+	mso-style-link:"HTML Vorformatiert Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4521,10 +4561,12 @@ span.berschrift7Zchn
 	mso-themecolor:accent1;
 	mso-themeshade:127;
 	font-style:italic;}
-p.berschrift8, li.berschrift8, div.berschrift8
-	{mso-style-name:"Überschrift 8";
+p.berschrift7, li.berschrift7, div.berschrift7
+	{mso-style-name:"Überschrift 7";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 8 Zchn";
+	mso-style-link:"Überschrift 7 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4557,10 +4599,12 @@ span.berschrift8Zchn
 	color:#272727;
 	mso-themecolor:text1;
 	mso-themetint:216;}
-p.berschrift9, li.berschrift9, div.berschrift9
-	{mso-style-name:"Überschrift 9";
+p.berschrift8, li.berschrift8, div.berschrift8
+	{mso-style-name:"Überschrift 8";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Überschrift 9 Zchn";
+	mso-style-link:"Überschrift 8 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4594,10 +4638,12 @@ span.berschrift9Zchn
 	mso-themecolor:text1;
 	mso-themetint:216;
 	font-style:italic;}
-p.Funotentext, li.Funotentext, div.Funotentext
-	{mso-style-name:Fußnotentext;
+p.berschrift9, li.berschrift9, div.berschrift9
+	{mso-style-name:"Überschrift 9";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Fußnotentext Zchn";
+	mso-style-link:"Überschrift 9 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4622,10 +4668,12 @@ span.FunotentextZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Kommentartext, li.Kommentartext, div.Kommentartext
-	{mso-style-name:Kommentartext;
+p.Funotentext, li.Funotentext, div.Funotentext
+	{mso-style-name:Fußnotentext;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Kommentartext Zchn";
+	mso-style-link:"Fußnotentext Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4650,10 +4698,12 @@ span.KommentartextZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Kopfzeile, li.Kopfzeile, div.Kopfzeile
-	{mso-style-name:Kopfzeile;
+p.Kommentartext, li.Kommentartext, div.Kommentartext
+	{mso-style-name:Kommentartext;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Kopfzeile Zchn";
+	mso-style-link:"Kommentartext Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4680,10 +4730,12 @@ span.KopfzeileZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Fuzeile, li.Fuzeile, div.Fuzeile
-	{mso-style-name:Fußzeile;
+p.Kopfzeile, li.Kopfzeile, div.Kopfzeile
+	{mso-style-name:Kopfzeile;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Fußzeile Zchn";
+	mso-style-link:"Kopfzeile Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4710,10 +4762,12 @@ span.FuzeileZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Endnotentext, li.Endnotentext, div.Endnotentext
-	{mso-style-name:Endnotentext;
+p.Fuzeile, li.Fuzeile, div.Fuzeile
+	{mso-style-name:Fußzeile;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Endnotentext Zchn";
+	mso-style-link:"Fußzeile Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4738,10 +4792,12 @@ span.EndnotentextZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Makrotext, li.Makrotext, div.Makrotext
-	{mso-style-name:Makrotext;
+p.Endnotentext, li.Endnotentext, div.Endnotentext
+	{mso-style-name:Endnotentext;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Makrotext Zchn";
+	mso-style-link:"Endnotentext Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4765,10 +4821,12 @@ span.MakrotextZchn
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Consolas;}
-p.Titel, li.Titel, div.Titel
-	{mso-style-name:Titel;
+p.Makrotext, li.Makrotext, div.Makrotext
+	{mso-style-name:Makrotext;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Titel Zchn";
+	mso-style-link:"Makrotext Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4799,10 +4857,12 @@ span.TitelZchn
 	mso-bidi-theme-font:major-bidi;
 	letter-spacing:-.5pt;
 	mso-font-kerning:14.0pt;}
-p.Gruformel, li.Gruformel, div.Gruformel
-	{mso-style-name:Grußformel;
+p.Titel, li.Titel, div.Titel
+	{mso-style-name:Titel;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Grußformel Zchn";
+	mso-style-link:"Titel Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4829,10 +4889,12 @@ span.GruformelZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Unterschrift, li.Unterschrift, div.Unterschrift
-	{mso-style-name:Unterschrift;
+p.Gruformel, li.Gruformel, div.Gruformel
+	{mso-style-name:Grußformel;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Unterschrift Zchn";
+	mso-style-link:"Grußformel Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4859,10 +4921,12 @@ span.UnterschriftZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Textkrper, li.Textkrper, div.Textkrper
-	{mso-style-name:Textkörper;
+p.Unterschrift, li.Unterschrift, div.Unterschrift
+	{mso-style-name:Unterschrift;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Textkörper Zchn";
+	mso-style-link:"Unterschrift Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4889,10 +4953,12 @@ span.TextkrperZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Textkrper-Zeileneinzug, li.Textkrper-Zeileneinzug, div.Textkrper-Zeileneinzug
-	{mso-style-name:Textkörper-Zeileneinzug;
+p.Textkrper, li.Textkrper, div.Textkrper
+	{mso-style-name:Textkörper;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Textkörper-Zeileneinzug Zchn";
+	mso-style-link:"Textkörper Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4919,10 +4985,12 @@ span.Textkrper-ZeileneinzugZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Nachrichtenkopf, li.Nachrichtenkopf, div.Nachrichtenkopf
-	{mso-style-name:Nachrichtenkopf;
+p.Textkrper-Zeileneinzug, li.Textkrper-Zeileneinzug, div.Textkrper-Zeileneinzug
+	{mso-style-name:Textkörper-Zeileneinzug;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Nachrichtenkopf Zchn";
+	mso-style-link:"Textkörper-Zeileneinzug Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4955,10 +5023,12 @@ span.NachrichtenkopfZchn
 	background:#CCCCCC;
 	mso-shading:windowtext;
 	mso-pattern:gray-20 auto;}
-p.Untertitel, li.Untertitel, div.Untertitel
-	{mso-style-name:Untertitel;
+p.Nachrichtenkopf, li.Nachrichtenkopf, div.Nachrichtenkopf
+	{mso-style-name:Nachrichtenkopf;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Untertitel Zchn";
+	mso-style-link:"Nachrichtenkopf Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -4991,10 +5061,12 @@ span.UntertitelZchn
 	mso-themecolor:text1;
 	mso-themetint:165;
 	letter-spacing:.75pt;}
-p.Anrede, li.Anrede, div.Anrede
-	{mso-style-name:Anrede;
+p.Untertitel, li.Untertitel, div.Untertitel
+	{mso-style-name:Untertitel;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Anrede Zchn";
+	mso-style-link:"Untertitel Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5021,10 +5093,12 @@ span.AnredeZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Datum, li.Datum, div.Datum
-	{mso-style-name:Datum;
+p.Anrede, li.Anrede, div.Anrede
+	{mso-style-name:Anrede;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Datum Zchn";
+	mso-style-link:"Anrede Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5051,10 +5125,12 @@ span.DatumZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Textkrper-Erstzeileneinzug, li.Textkrper-Erstzeileneinzug, div.Textkrper-Erstzeileneinzug
-	{mso-style-name:Textkörper-Erstzeileneinzug;
+p.Datum, li.Datum, div.Datum
+	{mso-style-name:Datum;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Textkörper-Erstzeileneinzug Zchn";
+	mso-style-link:"Datum Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5082,10 +5158,12 @@ span.Textkrper-ErstzeileneinzugZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Textkrper-Erstzeileneinzug2, li.Textkrper-Erstzeileneinzug2, div.Textkrper-Erstzeileneinzug2
-	{mso-style-name:"Textkörper-Erstzeileneinzug 2";
+p.Textkrper-Erstzeileneinzug, li.Textkrper-Erstzeileneinzug, div.Textkrper-Erstzeileneinzug
+	{mso-style-name:Textkörper-Erstzeileneinzug;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Textkörper-Erstzeileneinzug 2 Zchn";
+	mso-style-link:"Textkörper-Erstzeileneinzug Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5113,10 +5191,12 @@ span.Textkrper-Erstzeileneinzug2Zchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Fu-Endnotenberschrift, li.Fu-Endnotenberschrift, div.Fu-Endnotenberschrift
-	{mso-style-name:"Fuß\/-Endnotenüberschrift";
+p.Textkrper-Erstzeileneinzug2, li.Textkrper-Erstzeileneinzug2, div.Textkrper-Erstzeileneinzug2
+	{mso-style-name:"Textkörper-Erstzeileneinzug 2";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Fuß\/-Endnotenüberschrift Zchn";
+	mso-style-link:"Textkörper-Erstzeileneinzug 2 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5143,10 +5223,12 @@ span.Fu-EndnotenberschriftZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Textkrper2, li.Textkrper2, div.Textkrper2
-	{mso-style-name:"Textkörper 2";
+p.Fu-Endnotenberschrift, li.Fu-Endnotenberschrift, div.Fu-Endnotenberschrift
+	{mso-style-name:"Fuß\/-Endnotenüberschrift";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Textkörper 2 Zchn";
+	mso-style-link:"Fuß\/-Endnotenüberschrift Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5173,10 +5255,12 @@ span.Textkrper2Zchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Textkrper3, li.Textkrper3, div.Textkrper3
-	{mso-style-name:"Textkörper 3";
+p.Textkrper2, li.Textkrper2, div.Textkrper2
+	{mso-style-name:"Textkörper 2";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Textkörper 3 Zchn";
+	mso-style-link:"Textkörper 2 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5203,10 +5287,12 @@ span.Textkrper3Zchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Textkrper-Einzug2, li.Textkrper-Einzug2, div.Textkrper-Einzug2
-	{mso-style-name:"Textkörper-Einzug 2";
+p.Textkrper3, li.Textkrper3, div.Textkrper3
+	{mso-style-name:"Textkörper 3";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Textkörper-Einzug 2 Zchn";
+	mso-style-link:"Textkörper 3 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5233,10 +5319,12 @@ span.Textkrper-Einzug2Zchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Textkrper-Einzug3, li.Textkrper-Einzug3, div.Textkrper-Einzug3
-	{mso-style-name:"Textkörper-Einzug 3";
+p.Textkrper-Einzug2, li.Textkrper-Einzug2, div.Textkrper-Einzug2
+	{mso-style-name:"Textkörper-Einzug 2";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Textkörper-Einzug 3 Zchn";
+	mso-style-link:"Textkörper-Einzug 2 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5263,10 +5351,12 @@ span.Textkrper-Einzug3Zchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Dokumentstruktur, li.Dokumentstruktur, div.Dokumentstruktur
-	{mso-style-name:Dokumentstruktur;
+p.Textkrper-Einzug3, li.Textkrper-Einzug3, div.Textkrper-Einzug3
+	{mso-style-name:"Textkörper-Einzug 3";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Dokumentstruktur Zchn";
+	mso-style-link:"Textkörper-Einzug 3 Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5293,10 +5383,12 @@ span.DokumentstrukturZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:"Segoe UI";
 	mso-bidi-font-family:"Segoe UI";}
-p.NurText, li.NurText, div.NurText
-	{mso-style-name:"Nur Text";
+p.Dokumentstruktur, li.Dokumentstruktur, div.Dokumentstruktur
+	{mso-style-name:Dokumentstruktur;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Nur Text Zchn";
+	mso-style-link:"Dokumentstruktur Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5322,10 +5414,12 @@ span.NurTextZchn
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Consolas;}
-p.E-Mail-Signatur, li.E-Mail-Signatur, div.E-Mail-Signatur
-	{mso-style-name:E-Mail-Signatur;
+p.NurText, li.NurText, div.NurText
+	{mso-style-name:"Nur Text";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"E-Mail-Signatur Zchn";
+	mso-style-link:"Nur Text Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5352,10 +5446,12 @@ span.E-Mail-SignaturZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;}
-p.Kommentarthema, li.Kommentarthema, div.Kommentarthema
-	{mso-style-name:Kommentarthema;
+p.E-Mail-Signatur, li.E-Mail-Signatur, div.E-Mail-Signatur
+	{mso-style-name:E-Mail-Signatur;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Kommentarthema Zchn";
+	mso-style-link:"E-Mail-Signatur Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5382,10 +5478,12 @@ span.KommentarthemaZchn
 	mso-hansi-font-family:Helvetica;
 	mso-bidi-font-family:Helvetica;
 	font-weight:bold;}
-p.Sprechblasentext, li.Sprechblasentext, div.Sprechblasentext
-	{mso-style-name:Sprechblasentext;
+p.Kommentarthema, li.Kommentarthema, div.Kommentarthema
+	{mso-style-name:Kommentarthema;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Sprechblasentext Zchn";
+	mso-style-link:"Kommentarthema Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5412,10 +5510,12 @@ span.SprechblasentextZchn
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Tahoma;
 	mso-bidi-font-family:Tahoma;}
-p.Zitat, li.Zitat, div.Zitat
-	{mso-style-name:Zitat;
+p.Sprechblasentext, li.Sprechblasentext, div.Sprechblasentext
+	{mso-style-name:Sprechblasentext;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Zitat Zchn";
+	mso-style-link:"Sprechblasentext Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5445,10 +5545,12 @@ span.ZitatZchn
 	mso-themecolor:text1;
 	mso-themetint:191;
 	font-style:italic;}
-p.IntensivesZitat, li.IntensivesZitat, div.IntensivesZitat
-	{mso-style-name:"Intensives Zitat";
+p.Zitat, li.Zitat, div.Zitat
+	{mso-style-name:Zitat;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
 	mso-style-unhide:no;
-	mso-style-link:"Intensives Zitat Zchn";
+	mso-style-link:"Zitat Zchn";
 	margin-top:0cm;
 	margin-right:0cm;
 	margin-bottom:10.0pt;
@@ -5477,6 +5579,23 @@ span.IntensivesZitatZchn
 	color:#4F81BD;
 	mso-themecolor:accent1;
 	font-style:italic;}
+p.IntensivesZitat, li.IntensivesZitat, div.IntensivesZitat
+	{mso-style-name:"Intensives Zitat";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-link:"Intensives Zitat Zchn";
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:10.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Helvetica",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;}
 span.BodyTextFirstIndentChar
 	{mso-style-name:"Body Text First Indent Char";
 	mso-style-noshow:yes;
@@ -5491,7 +5610,8 @@ span.BodyTextFirstIndentChar
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.BodyTextFirstIndent2Char
 	{mso-style-name:"Body Text First Indent 2 Char";
 	mso-style-noshow:yes;
@@ -5506,7 +5626,8 @@ span.BodyTextFirstIndent2Char
 	mso-ascii-font-family:Helvetica;
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
-	mso-hansi-font-family:Helvetica;}
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
 span.CommentSubjectChar
 	{mso-style-name:"Comment Subject Char";
 	mso-style-noshow:yes;
@@ -5520,10 +5641,40 @@ span.CommentSubjectChar
 	mso-fareast-font-family:"Times New Roman";
 	mso-fareast-theme-font:minor-fareast;
 	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;
 	font-weight:bold;}
+span.FootnoteTextChar1
+	{mso-style-name:"Footnote Text Char1";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	font-family:"Helvetica",sans-serif;
+	mso-ascii-font-family:Helvetica;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:Helvetica;
+	mso-bidi-font-family:Helvetica;}
+p.Heading21, li.Heading21, div.Heading21
+	{mso-style-name:"Heading 21";
+	mso-style-unhide:no;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:10.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Helvetica",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;}
 span.SpellE
 	{mso-style-name:"";
 	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
 .MsoChpDefault
 	{mso-style-type:export-only;
 	mso-default-props:yes;
@@ -5934,8 +6085,8 @@ mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></p>
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US'><span
-style='mso-spacerun:yes'> </span>TOC \o &quot;1-2&quot; \h \z \u <span
-style='mso-element:field-separator'></span></span></span><![endif]--><span
+style='mso-spacerun:yes'> </span>TOC \o &quot;1-2&quot; \h \z \u </span><span
+style='mso-element:field-separator'></span></span><![endif]--><span
 style='mso-bookmark:_Toc42432777'></span><a href="#_Toc59129642"><span
 style='mso-bookmark:_Toc42432777'><span lang=EN-US style='mso-fareast-font-family:
 "Times New Roman";mso-ansi-language:EN-US;mso-no-proof:yes'>2048</span></span><span
@@ -5944,17 +6095,18 @@ mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'><span
 style='mso-tab-count:1 dotted'>. </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129642 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>1<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129642 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>1</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600340032000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129643"><span style='mso-bookmark:_Toc42432777'><span
@@ -5965,17 +6117,18 @@ mso-no-proof:yes;text-decoration:none;text-underline:none'><span
 style='mso-tab-count:1 dotted'> </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129643 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>2<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129643 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>2</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600340033000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129644"><span style='mso-bookmark:_Toc42432777'><span
@@ -5985,17 +6138,18 @@ style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
 text-decoration:none;text-underline:none'><span style='mso-tab-count:1 dotted'>. </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129644 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>2<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129644 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>2</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600340034000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129645"><span style='mso-bookmark:_Toc42432777'><span
@@ -6005,17 +6159,18 @@ style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
 text-decoration:none;text-underline:none'><span style='mso-tab-count:1 dotted'>.. </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129645 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>3<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129645 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>3</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600340035000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129646"><span style='mso-bookmark:_Toc42432777'><span
@@ -6025,17 +6180,18 @@ style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
 text-decoration:none;text-underline:none'><span style='mso-tab-count:1 dotted'>.. </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129646 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>3<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129646 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>3</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600340036000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129647"><span style='mso-bookmark:_Toc42432777'><span
@@ -6046,17 +6202,18 @@ mso-no-proof:yes;text-decoration:none;text-underline:none'><span
 style='mso-tab-count:1 dotted'> </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129647 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>4<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129647 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>4</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600340037000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129648"><span style='mso-bookmark:_Toc42432777'><span
@@ -6067,17 +6224,18 @@ mso-no-proof:yes;text-decoration:none;text-underline:none'><span
 style='mso-tab-count:1 dotted'>. </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129648 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>4<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129648 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>4</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600340038000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129649"><span style='mso-bookmark:_Toc42432777'><span
@@ -6087,17 +6245,18 @@ style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
 text-decoration:none;text-underline:none'><span style='mso-tab-count:1 dotted'>.. </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129649 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>5<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129649 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>5</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600340039000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129650"><span style='mso-bookmark:_Toc42432777'><span
@@ -6108,17 +6267,18 @@ mso-no-proof:yes;text-decoration:none;text-underline:none'><span
 style='mso-tab-count:1 dotted'>. </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129650 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>5<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129650 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>5</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600350030000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <p class=MsoToc2 style='tab-stops:right dotted 453.1pt'><span style='mso-bookmark:
 _Toc42432777'></span><a href="#_Toc59129651"><span style='mso-bookmark:_Toc42432777'><span
@@ -6128,34 +6288,36 @@ mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'><span
 style='mso-tab-count:1 dotted'> </span></span></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-begin'></span><span
 style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'> PAGEREF
-_Toc59129651 \h <span style='mso-element:field-separator'></span></span></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'><span style='color:windowtext;display:none;
-mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>6<!--[if gte mso 9]><xml>
+mso-hide:screen;mso-no-proof:yes;text-decoration:none;text-underline:none'>
+PAGEREF _Toc59129651 \h </span><span style='mso-element:field-separator'></span></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'><span
+style='color:windowtext;display:none;mso-hide:screen;mso-no-proof:yes;
+text-decoration:none;text-underline:none'>6</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F0054006F006300350039003100320039003600350031000000</w:data>
-</xml><![endif]--></span></span><!--[if supportFields]><span style='mso-bookmark:
-_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
-style='mso-bookmark:_Toc42432777'></span></a><span style='mso-bookmark:_Toc42432777'><span
-style='font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;
-mso-hansi-theme-font:minor-latin;mso-bidi-font-family:"Times New Roman";
-mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
+</xml><![endif]--></span><!--[if supportFields]><span style='mso-bookmark:_Toc42432777'></span><span
+style='mso-element:field-end'></span><![endif]--><span style='mso-bookmark:
+_Toc42432777'></span><span style='mso-bookmark:_Toc42432777'></span></a><span
+style='mso-bookmark:_Toc42432777'><span style='font-family:"Calibri",sans-serif;
+mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-font-family:
+"Times New Roman";mso-bidi-theme-font:minor-bidi;mso-no-proof:yes'><o:p></o:p></span></span></p>
 
 <h2><span style='mso-bookmark:_Toc42432777'></span><!--[if supportFields]><span
 style='mso-bookmark:_Toc42432777'></span><span style='mso-element:field-end'></span><![endif]--><span
+style='mso-bookmark:_Toc42432777'></span><a name="_Toc59129642"><span
 style='mso-bookmark:_Toc42432777'><span lang=EN-US style='mso-fareast-font-family:
-"Times New Roman";mso-ansi-language:EN-US'><a name="_Toc59129642">2048</a></span></span><span
+"Times New Roman";mso-ansi-language:EN-US'>2048</span></span></a><span
 lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
 EN-US'><o:p></o:p></span></h2>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>1-player
 game.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The game starts
-with game score 0 and two tiles with value ‘2’ or<span
-style='mso-spacerun:yes'>  </span>‘4’ placed randomly on the otherwise empty
-4x4 game board. Whenever the player makes an action, the environment adds a
-random tile ‘2’ (90%) or ‘4’ (10%) in one of the cells being empty after the player’s
-action. <o:p></o:p></span></p>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The game
+starts with game score 0 and two tiles with value ‘2’ <span class=GramE>or<span
+style='mso-spacerun:yes'>  </span>‘</span>4’ placed randomly on the otherwise
+empty 4x4 game board. Whenever the player makes an action, the environment adds
+a random tile ‘2’ (90%) or ‘4’ (10%) in one of the cells being empty after the
+player’s action. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The player
 has at most these four actions: LEFT, UP, RIGHT, DOWN. An action is only <b
@@ -6174,7 +6336,7 @@ yes'>1</span><!--[if gte mso 9]><xml>
 style='mso-ansi-language:EN-US'><span style='mso-element:field-end'></span></span><![endif]--><span
 lang=EN-US style='mso-ansi-language:EN-US'>, if a LEFT action is triggered, the
 1<sup>st</sup> row gets the two leftmost ‘8’s merged into one ‘16’. In the 2<sup>nd</sup>
-row the two ‘2’s are merged into one ‘4’. <o:p></o:p></span></p>
+row the two ‘2’s <span class=GramE>are</span> merged into one ‘4’. <o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Whenever
 two tiles are merged, the merged value is added to the <b style='mso-bidi-font-weight:
@@ -6206,7 +6368,7 @@ yes'><!--[if gte vml 1]><v:shapetype id="_x0000_t75" coordsize="21600,21600"
  mso-wrap-style:square'>
  <v:imagedata src="GameRules-GBG-Dateien/image001.png" o:title="P19#yIS1"/>
 </v:shape><![endif]--><![if !vml]><img width=244 height=228
-src="GameRules-GBG-Dateien/image011.jpg" alt="P19#yIS1" v:shapes="Grafik_x0020_7"><![endif]></span><span
+src="GameRules-GBG-Dateien/image002.jpg" alt="P19#yIS1" v:shapes="Grafik_x0020_7"><![endif]></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoCaption><a name="_Ref36108922"><span lang=EN-US style='mso-ansi-language:
@@ -6256,10 +6418,10 @@ reaches this and no moves are left, it is a tie.<o:p></o:p></span></p>
 <p class=MsoNormal style='page-break-after:avoid'><span lang=EN-US
 style='mso-ansi-language:EN-US;mso-no-proof:yes'><!--[if gte vml 1]><v:shape
  id="Grafik_x0020_1" o:spid="_x0000_i1030" type="#_x0000_t75" alt="P28#yIS1"
- style='width:194.25pt;height:198.75pt;visibility:visible;mso-wrap-style:square'>
+ style='width:194.25pt;height:199.5pt;visibility:visible;mso-wrap-style:square'>
  <v:imagedata src="GameRules-GBG-Dateien/image003.png" o:title="P28#yIS1"/>
-</v:shape><![endif]--><![if !vml]><img width=259 height=265
-src="GameRules-GBG-Dateien/image012.jpg" alt="P28#yIS1" v:shapes="Grafik_x0020_1"><![endif]></span><span
+</v:shape><![endif]--><![if !vml]><img width=259 height=266
+src="GameRules-GBG-Dateien/image004.jpg" alt="P28#yIS1" v:shapes="Grafik_x0020_1"><![endif]></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoCaption><span lang=EN-US style='mso-ansi-language:EN-US'>Figure </span><!--[if supportFields]><span
@@ -6283,10 +6445,10 @@ game.<o:p></o:p></span></p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Scalable
 game with scalable parameter N = side length of board.<o:p></o:p></span></p>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The game
-board is a diamond with side length N of hexagonal cells. Two adjacent rims of
-the diamond are colored black, the other two white. Each player in turn places
-a piece of his/her color on a free cell. <br>
+<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The game board
+is a diamond with side length N of hexagonal cells. Two adjacent rims of the
+diamond are colored black, the other two white. Each player in turn places a
+piece of his/her color on a free cell. <br>
 Black (X) starts.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The player
@@ -6300,7 +6462,7 @@ style='mso-ansi-language:EN-US;mso-no-proof:yes'><!--[if gte vml 1]><v:shape
  style='width:212.25pt;height:155.25pt;visibility:visible;mso-wrap-style:square'>
  <v:imagedata src="GameRules-GBG-Dateien/image005.png" o:title="P36#yIS1"/>
 </v:shape><![endif]--><![if !vml]><img width=283 height=207
-src="GameRules-GBG-Dateien/image013.jpg" alt="P36#yIS1" v:shapes="Grafik_x0020_10"><![endif]></span><span
+src="GameRules-GBG-Dateien/image006.jpg" alt="P36#yIS1" v:shapes="Grafik_x0020_10"><![endif]></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoCaption><span lang=EN-US style='mso-ansi-language:EN-US'>Figure </span><!--[if supportFields]><span
@@ -6313,11 +6475,11 @@ lang=EN-US style='mso-ansi-language:EN-US'>: White wins in 5x5 Hex<o:p></o:p></s
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
 
-<h2><a name="_Toc42432780"></a><a name="_Toc59129645"></a><a name="_Nim"></a><span
-class=SpellE><span style='mso-bookmark:_Toc42432780'><span style='mso-bookmark:
-_Toc59129645'><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
+<h2><a name="_Toc59129645"></a><a name="_Toc42432780"></a><a name="_Nim"></a><span
+class=SpellE><span style='mso-bookmark:_Toc59129645'><span style='mso-bookmark:
+_Toc42432780'><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Nim</span></span></span></span><span style='mso-bookmark:
-_Toc59129645'></span><span style='mso-bookmark:_Toc42432780'></span><span
+_Toc42432780'></span><span style='mso-bookmark:_Toc59129645'></span><span
 lang=EN-US style='mso-fareast-font-family:"Times New Roman";mso-ansi-language:
 EN-US'><o:p></o:p></span></h2>
 
@@ -6330,8 +6492,9 @@ heap S (number of items), (c) maximum number of items to take in one move (“Max
 Minus”) M.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The game
-starts with N heaps of size S. Each player in turn takes away 1,2,…,M items
-from <b style='mso-bidi-font-weight:normal'>one</b> heap. Black (X) starts.<o:p></o:p></span></p>
+starts with N heaps of size S. Each player in turn takes away <span
+class=GramE>1,2,…</span>,M items from <b style='mso-bidi-font-weight:normal'>one</b>
+heap. Black (X) starts.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The player
 who takes away the last item <b style='mso-bidi-font-weight:normal'>wins</b>
@@ -6347,7 +6510,7 @@ style='mso-ansi-language:EN-US;mso-no-proof:yes'><!--[if gte vml 1]><v:shape
  style='width:208.5pt;height:126pt;visibility:visible;mso-wrap-style:square'>
  <v:imagedata src="GameRules-GBG-Dateien/image007.png" o:title="P45#yIS1"/>
 </v:shape><![endif]--><![if !vml]><img width=278 height=168
-src="GameRules-GBG-Dateien/image014.jpg" alt="P45#yIS1" v:shapes="Grafik_x0020_5"><![endif]></span><span
+src="GameRules-GBG-Dateien/image008.jpg" alt="P45#yIS1" v:shapes="Grafik_x0020_5"><![endif]></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoCaption><a name="_Ref42432264"><span lang=EN-US style='mso-ansi-language:
@@ -6423,11 +6586,12 @@ EN-US'><o:p></o:p></span></h2>
 game.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>This game
-is played on a 8x8 board. The start position has two white pieces and two black
-pieces in the center. Each player in turn places a piece of his/her color on
-the 8x8 board. Placement can be only made in those empty cells that enclose –
-with a help of another piece of the player – one or more opponent pieces (see </span><!--[if supportFields]><span
-lang=EN-US style='mso-ansi-language:EN-US'><span style='mso-element:field-begin;
+is played on <span class=GramE>a</span> 8x8 board. The start position has two
+white pieces and two black pieces in the center. Each player in turn places a
+piece of his/her color on the 8x8 board. Placement can be only made in those
+empty cells that enclose – with a help of another piece of the player – one or
+more opponent pieces (see </span><!--[if supportFields]><span lang=EN-US
+style='mso-ansi-language:EN-US'><span style='mso-element:field-begin;
 mso-field-lock:yes'></span><span style='mso-spacerun:yes'> </span>REF
 _Ref36106880 \h <span style='mso-element:field-separator'></span></span><![endif]--><span
 lang=EN-US style='mso-ansi-language:EN-US'>Figure <span style='mso-no-proof:
@@ -6435,17 +6599,17 @@ yes'>4</span><!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000D0000005F00520065006600330036003100300036003800380030000000</w:data>
 </xml><![endif]--></span><!--[if supportFields]><span lang=EN-US
 style='mso-ansi-language:EN-US'><span style='mso-element:field-end'></span></span><![endif]--><span
-lang=EN-US style='mso-ansi-language:EN-US'>: the green rectangles mark the legal
-moves). All enclosed opponent pieces have their color reversed to the player’s
-color. Black (X) starts. <o:p></o:p></span></p>
+lang=EN-US style='mso-ansi-language:EN-US'>: the green rectangles mark the
+legal moves). All enclosed opponent pieces have their color reversed to the
+player’s color. Black (X) starts. <o:p></o:p></span></p>
 
 <p class=MsoNormal style='page-break-after:avoid'><span lang=EN-US
 style='mso-ansi-language:EN-US;mso-no-proof:yes'><!--[if gte vml 1]><v:shape
  id="Grafik_x0020_6" o:spid="_x0000_i1027" type="#_x0000_t75" alt="P57#yIS1"
- style='width:223.5pt;height:226.5pt;visibility:visible;mso-wrap-style:square'>
+ style='width:223.5pt;height:225.75pt;visibility:visible;mso-wrap-style:square'>
  <v:imagedata src="GameRules-GBG-Dateien/image016.png" o:title="P57#yIS1"/>
-</v:shape><![endif]--><![if !vml]><img border=0 width=298 height=302
-src="GameRules-GBG-Dateien/image018.jpg" alt="P57#yIS1" v:shapes="Grafik_x0020_6"><![endif]></span><span
+</v:shape><![endif]--><![if !vml]><img border=0 width=298 height=301
+src="GameRules-GBG-Dateien/image009.jpg" alt="P57#yIS1" v:shapes="Grafik_x0020_6"><![endif]></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoCaption><a name="_Ref36106880"><span lang=EN-US style='mso-ansi-language:
@@ -6525,9 +6689,9 @@ mso-fareast-font-family:"Times New Roman";mso-fareast-theme-font:minor-fareast;
 mso-bidi-font-family:Calibri;position:relative;top:4.5pt;mso-text-raise:-4.5pt;
 mso-ansi-language:DE;mso-fareast-language:DE;mso-bidi-language:AR-SA'><!--[if gte vml 1]><v:shape
  id="_x0000_i1025" type="#_x0000_t75" style='width:34.5pt;height:15pt'>
- <v:imagedata src="GameRules-GBG-Dateien/image019.png" o:title="" chromakey="white"/>
+ <v:imagedata src="GameRules-GBG-Dateien/image010.png" o:title="" chromakey="white"/>
 </v:shape><![endif]--><![if !vml]><img width=46 height=20
-src="GameRules-GBG-Dateien/image020.gif" v:shapes="_x0000_i1025"><![endif]></span><![endif]><span
+src="GameRules-GBG-Dateien/image019.gif" v:shapes="_x0000_i1025"><![endif]></span><![endif]><span
 lang=EN-US style='mso-ansi-language:EN-US'><span style='mso-spacerun:yes'> 
 </span>with </span><!--[if gte msEquation 12]><m:oMath><m:sSub><m:sSubPr><span
    style='font-family:"Cambria Math",serif;mso-ascii-font-family:"Cambria Math";
@@ -6544,9 +6708,9 @@ mso-fareast-font-family:"Times New Roman";mso-fareast-theme-font:minor-fareast;
 mso-bidi-font-family:Calibri;position:relative;top:4.5pt;mso-text-raise:-4.5pt;
 mso-ansi-language:DE;mso-fareast-language:DE;mso-bidi-language:AR-SA'><!--[if gte vml 1]><v:shape
  id="_x0000_i1025" type="#_x0000_t75" style='width:32.25pt;height:15pt'>
- <v:imagedata src="GameRules-GBG-Dateien/image021.png" o:title="" chromakey="white"/>
+ <v:imagedata src="GameRules-GBG-Dateien/image020.png" o:title="" chromakey="white"/>
 </v:shape><![endif]--><![if !vml]><img width=43 height=20
-src="GameRules-GBG-Dateien/image022.gif" v:shapes="_x0000_i1025"><![endif]></span><![endif]><span
+src="GameRules-GBG-Dateien/image021.gif" v:shapes="_x0000_i1025"><![endif]></span><![endif]><span
 lang=EN-US style='mso-ansi-language:EN-US'><span
 style='mso-spacerun:yes'> </span>(2 player) and </span><!--[if gte msEquation 12]><m:oMath><m:sSub><m:sSubPr><span
    style='font-family:"Cambria Math",serif;mso-ascii-font-family:"Cambria Math";
@@ -6564,9 +6728,9 @@ mso-fareast-font-family:"Times New Roman";mso-fareast-theme-font:minor-fareast;
 mso-bidi-font-family:Calibri;position:relative;top:4.5pt;mso-text-raise:-4.5pt;
 mso-ansi-language:DE;mso-fareast-language:DE;mso-bidi-language:AR-SA'><!--[if gte vml 1]><v:shape
  id="_x0000_i1025" type="#_x0000_t75" style='width:38.25pt;height:15pt'>
- <v:imagedata src="GameRules-GBG-Dateien/image023.png" o:title="" chromakey="white"/>
+ <v:imagedata src="GameRules-GBG-Dateien/image022.png" o:title="" chromakey="white"/>
 </v:shape><![endif]--><![if !vml]><img width=51 height=20
-src="GameRules-GBG-Dateien/image024.gif" v:shapes="_x0000_i1025"><![endif]></span><![endif]><span
+src="GameRules-GBG-Dateien/image023.gif" v:shapes="_x0000_i1025"><![endif]></span><![endif]><span
 lang=EN-US style='mso-ansi-language:EN-US'><span
 style='mso-spacerun:yes'> </span>(3 player) the game <b style='mso-bidi-font-weight:
 normal'>cannot</b> end in an all-player tie. But for smaller </span><!--[if gte msEquation 12]><m:oMath><i
@@ -6584,9 +6748,9 @@ mso-fareast-font-family:"Times New Roman";mso-fareast-theme-font:minor-fareast;
 mso-bidi-font-family:Calibri;position:relative;top:4.5pt;mso-text-raise:-4.5pt;
 mso-ansi-language:DE;mso-fareast-language:DE;mso-bidi-language:AR-SA'><!--[if gte vml 1]><v:shape
  id="_x0000_i1025" type="#_x0000_t75" style='width:34.5pt;height:15pt'>
- <v:imagedata src="GameRules-GBG-Dateien/image025.png" o:title="" chromakey="white"/>
+ <v:imagedata src="GameRules-GBG-Dateien/image024.png" o:title="" chromakey="white"/>
 </v:shape><![endif]--><![if !vml]><img width=46 height=20
-src="GameRules-GBG-Dateien/image028.gif" v:shapes="_x0000_i1025"><![endif]></span><![endif]><span
+src="GameRules-GBG-Dateien/image025.gif" v:shapes="_x0000_i1025"><![endif]></span><![endif]><span
 lang=EN-US style='mso-ansi-language:EN-US'><span
 style='mso-spacerun:yes'> </span>the game is likely to end in a tie.<o:p></o:p></span></p>
 
@@ -6597,7 +6761,7 @@ style='mso-ansi-language:EN-US;mso-no-proof:yes'><!--[if gte vml 1]><v:shape
  <v:imagedata src="GameRules-GBG-Dateien/image015.png" o:title="P71#yIS1"
   croptop="1849f" cropleft="2918f" cropright="2945f"/>
 </v:shape><![endif]--><![if !vml]><img border=0 width=224 height=196
-src="GameRules-GBG-Dateien/image029.jpg" alt="P71#yIS1" v:shapes="Grafik_x0020_11"><![endif]></span><span
+src="GameRules-GBG-Dateien/image026.jpg" alt="P71#yIS1" v:shapes="Grafik_x0020_11"><![endif]></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoCaption><span lang=EN-US style='mso-ansi-language:EN-US'>Figure </span><!--[if supportFields]><span
@@ -6656,7 +6820,7 @@ style='mso-ansi-language:EN-US;mso-no-proof:yes'><!--[if gte vml 1]><v:shape
  style='width:130.5pt;height:124.5pt;visibility:visible;mso-wrap-style:square'>
  <v:imagedata src="GameRules-GBG-Dateien/image017.png" o:title="P80#yIS1"/>
 </v:shape><![endif]--><![if !vml]><img border=0 width=174 height=166
-src="GameRules-GBG-Dateien/image030.jpg" alt="P80#yIS1" v:shapes="Grafik_x0020_9"><![endif]></span><span
+src="GameRules-GBG-Dateien/image027.jpg" alt="P80#yIS1" v:shapes="Grafik_x0020_9"><![endif]></span><span
 lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></p>
 
 <p class=MsoCaption><span lang=EN-US style='mso-ansi-language:EN-US'>Figure </span><!--[if supportFields]><span
@@ -6670,51 +6834,54 @@ lang=EN-US style='mso-ansi-language:EN-US'>: Black (X) wins in Tic Tac Toe.<o:p>
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
 
 <h2><a name="_Toc59129651"><span lang=EN-US style='mso-ansi-language:EN-US'>Poker</span></a><span
-lang=EN-US style='mso-ansi-language:EN-US'><o:p></o:p></span></h2>
+style='mso-bookmark:_Toc59129651'></span><span lang=EN-US style='mso-ansi-language:
+EN-US;font-weight:normal'><o:p></o:p></span></h2>
 
 <p class=MsoNormal style='text-align:justify'><span lang=EN-US
 style='mso-ansi-language:EN-US'>Poker is a game with a high number of different
-variants (e.g. five-card draw, community card poker, …) and different house
-rules specifying the detailed parameters of the game. Because of this the
-following paragraphs won’t cover all possible options but will focus on the
-implemented game mechanics. <o:p></o:p></span></p>
+variants (<span class=GramE>e.g.</span> five-card draw, community card poker,
+…) and different house rules specifying the detailed parameters of the game.
+Because of this, the following paragraphs won’t cover all possible options but
+will focus on the implemented game mechanics. <o:p></o:p></span></p>
 
 <h3><span lang=EN-US style='mso-ansi-language:EN-US'>How many players are part
-of the game?<o:p></o:p></span></h3>
+of the game?</span><span lang=EN-US style='mso-ansi-language:EN-US;font-weight:
+normal'><o:p></o:p></span></h3>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Poker is a
 multiplayer for 2-10 players depending on the chosen variant. <o:p></o:p></span></p>
 
-<h3><span lang=EN-US style='mso-ansi-language:EN-US'>How to win the game? <o:p></o:p></span></h3>
+<h3><span lang=EN-US style='mso-ansi-language:EN-US'>How to win the game? </span><span
+lang=EN-US style='mso-ansi-language:EN-US;font-weight:normal'><o:p></o:p></span></h3>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>Anyone who
 has lost all of their chips is knocked out of the game. The last remaining
 person is the winner. <o:p></o:p></span></p>
 
-<h3><span lang=EN-US style='mso-ansi-language:EN-US'>How is the game played? <o:p></o:p></span></h3>
+<h3><span lang=EN-US style='mso-ansi-language:EN-US'>How is the game played? </span><span
+lang=EN-US style='mso-ansi-language:EN-US;font-weight:normal'><o:p></o:p></span></h3>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The game is
 played with a deck of 52 cards. Every player gets the same amount of chips. The
 dealer is the first player of the group. After the initial setups there are as
-many rounds played till there is only one remaining player. <o:p></o:p></span></p>
+many rounds played until there is only one remaining player. <o:p></o:p></span></p>
 
-<h3><span lang=EN-US style='mso-ansi-language:EN-US'>How does a game round is
-structured? <o:p></o:p></span></h3>
+<h3><span lang=EN-US style='mso-ansi-language:EN-US'>How is a game round structured?
+</span><span lang=EN-US style='mso-ansi-language:EN-US;font-weight:normal'><o:p></o:p></span></h3>
 
 <p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>A game
-round can be structured in six different phases:<o:p></o:p></span></p>
+round can be structured into six different phases:<o:p></o:p></span></p>
 
-<p class=MsoListParagraph style='margin-bottom:8.0pt;margin-top:0cm;mso-margin-bottom-alt:
-10.0pt;mso-margin-top-alt:0cm;mso-add-space:auto;text-align:justify;text-indent:
--18.0pt;line-height:107%;mso-list:l11 level1 lfo12'><![if !supportLists]><span
+<p class=MsoListParagraph style='text-align:justify;text-indent:-18.0pt;
+line-height:106%;mso-list:l11 level1 lfo14'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Setup: </span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'>The first player next to the dealer is placing
-the <i style='mso-bidi-font-style:normal'>small blind</i> and the player after that
-placing the <i style='mso-bidi-font-style:normal'>big blind</i>. These are
+the <i style='mso-bidi-font-style:normal'>small blind</i> and the player after
+that placing the <i style='mso-bidi-font-style:normal'>big blind</i>. These are
 forced bets and the players do not have the option to pass or fold at this
 step. The <i style='mso-bidi-font-style:normal'>big blind</i>&nbsp;is equal to
 the minimum bet and the <i style='mso-bidi-font-style:normal'>small blind</i>
@@ -6732,74 +6899,71 @@ normal'><i style='mso-bidi-font-style:normal'><o:p></o:p></i></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:0cm;
 margin-top:0cm;mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:
-auto;text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l11 level1 lfo12'><![if !supportLists]><span
+auto;text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l11 level1 lfo14'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Pre-Flop: </span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'>After the hole cards dealt there
-first betting round. <b style='mso-bidi-font-weight:normal'><i
+lang=EN-US style='mso-ansi-language:EN-US'>After the hole cards are dealt there
+is a first betting round. <b style='mso-bidi-font-weight:normal'><i
 style='mso-bidi-font-style:normal'><o:p></o:p></i></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:0cm;
 margin-top:0cm;mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:
-auto;text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l11 level1 lfo12'><![if !supportLists]><span
+auto;text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l11 level1 lfo14'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Flop:<i style='mso-bidi-font-style:
 normal'> </i></span></b><span lang=EN-US style='mso-ansi-language:EN-US'>Three
-community cards referred to as the flop and available to each player are
-revealed. After this new information there is a second betting round.<b
-style='mso-bidi-font-weight:normal'><i style='mso-bidi-font-style:normal'><o:p></o:p></i></b></span></p>
+community cards referred to as the <i style='mso-bidi-font-style:normal'>flop</i>
+and available to each player are revealed. After this new information there is
+a second betting round.<b style='mso-bidi-font-weight:normal'><i
+style='mso-bidi-font-style:normal'><o:p></o:p></i></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:0cm;
 margin-top:0cm;mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:
-auto;text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l11 level1 lfo12'><![if !supportLists]><span
+auto;text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l11 level1 lfo14'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Turn:<i style='mso-bidi-font-style:
 normal'> </i></span></b><span lang=EN-US style='mso-ansi-language:EN-US'>Another
-community card referred to as the turn and available to each player is
-revealed. After this new information there is a third betting round.<b
-style='mso-bidi-font-weight:normal'><i style='mso-bidi-font-style:normal'><o:p></o:p></i></b></span></p>
+community card referred to as the <i style='mso-bidi-font-style:normal'>turn</i>
+and available to each player is revealed. After this new information there is a
+third betting round.<b style='mso-bidi-font-weight:normal'><i style='mso-bidi-font-style:
+normal'><o:p></o:p></i></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:0cm;
 margin-top:0cm;mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:
-auto;text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l11 level1 lfo12'><![if !supportLists]><span
+auto;text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l11 level1 lfo14'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>River:<i style='mso-bidi-font-style:
 normal'> </i></span></b><span lang=EN-US style='mso-ansi-language:EN-US'>Another
-community card referred to as the river and available to each player is
-revealed. After this new information there is a fourth betting round.<b
-style='mso-bidi-font-weight:normal'><i style='mso-bidi-font-style:normal'><o:p></o:p></i></b></span></p>
+community card referred to as the <i style='mso-bidi-font-style:normal'>river</i>
+and available to each player is revealed. After this new information there is a
+fourth betting round.<b style='mso-bidi-font-weight:normal'><i
+style='mso-bidi-font-style:normal'><o:p></o:p></i></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:10.0pt;
 mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:auto;
-text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l11 level1 lfo12'><![if !supportLists]><span
+text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l11 level1 lfo14'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Showdown: </span></b><span
 lang=EN-US style='mso-ansi-language:EN-US'>During the showdown the winning hand
-is determined and the pots are awarded to the respective winners.</span><span
-lang=EN-US style='font-size:10.0pt;line-height:107%;mso-ansi-language:EN-US'> </span><b
+is determined and the pots are awarded to the respective winner(s).</span><span
+lang=EN-US style='font-size:10.0pt;line-height:106%;mso-ansi-language:EN-US'> </span><b
 style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
 EN-US'><o:p></o:p></span></b></p>
-
-<p class=MsoNormal style='text-align:justify'><b style='mso-bidi-font-weight:
-normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Betting round: </span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'>Each player chooses an <i
-style='mso-bidi-font-style:normal'>Action</i> until every player has either
-matched the placed bets or folded.<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
 
 <p class=MsoNormal style='text-align:justify'><span lang=EN-US
 style='mso-ansi-language:EN-US'>After the showdown a new game round starts and
@@ -6808,28 +6972,34 @@ class=Heading2Char><span lang=EN-US style='font-size:13.0pt;line-height:115%;
 font-family:"Calibri",sans-serif;mso-ascii-theme-font:minor-latin;mso-fareast-font-family:
 Calibri;mso-fareast-theme-font:minor-latin;mso-hansi-theme-font:minor-latin;
 mso-bidi-font-family:"Times New Roman";mso-bidi-theme-font:minor-bidi;
-color:windowtext;mso-ansi-language:EN-US'><o:p></o:p></span></span></p>
+mso-ansi-language:EN-US'><o:p></o:p></span></span></p>
 
-<h4><span lang=EN-US style='mso-ansi-language:EN-US'>Actions<o:p></o:p></span></h4>
+<p class=MsoNormal style='text-align:justify'><b style='mso-bidi-font-weight:
+normal'><span lang=EN-US style='mso-ansi-language:EN-US'>Betting round: </span></b><span
+lang=EN-US style='mso-ansi-language:EN-US'>Each player chooses an <i
+style='mso-bidi-font-style:normal'>Action</i> until every player has either
+matched the placed bets or folded.<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
 
-<p class=MsoListParagraph style='margin-bottom:8.0pt;margin-top:0cm;mso-margin-bottom-alt:
-10.0pt;mso-margin-top-alt:0cm;mso-add-space:auto;text-align:justify;text-indent:
--18.0pt;line-height:107%;mso-list:l10 level1 lfo13'><![if !supportLists]><span
+<h4><span lang=EN-US style='mso-ansi-language:EN-US'>Actions</span><span
+style='font-style:normal'><o:p></o:p></span></h4>
+
+<p class=MsoListParagraph style='text-align:justify;text-indent:-18.0pt;
+line-height:106%;mso-list:l10 level1 lfo15'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Check: </span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'>If there are no bets placed in the current
-round the active player has the option to <i style='mso-bidi-font-style:normal'>check</i>.
+round, the active player has the option to <i style='mso-bidi-font-style:normal'>check</i>.
 With this he declines to makes a bet but still remains in the game. If all
-players are <i style='mso-bidi-font-style:normal'>checking</i> the betting
-round may end without a bet and the game will move to the next stage. <b
+players are <i style='mso-bidi-font-style:normal'>checking</i> the betting round
+may end without a bet and the game will move to the next stage. <b
 style='mso-bidi-font-weight:normal'><o:p></o:p></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:0cm;
 margin-top:0cm;mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:
-auto;text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l10 level1 lfo13'><![if !supportLists]><span
+auto;text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l10 level1 lfo15'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -6839,14 +7009,13 @@ style='mso-ansi-language:EN-US'>If there are no bets placed in the current
 round the active player has the option to make a bet. In the implemented
 version the size of the bet is predefined as the minimum bet. If the active
 player has not a sufficient amount of chips to place a bet he will be forced to
-go <i style='mso-bidi-font-style:normal'>all in </i>if chosen to bet. With this
-the size of the bet is equal to the amount of chips the player has
-available.<span style='mso-spacerun:yes'>  </span><b style='mso-bidi-font-weight:
-normal'><o:p></o:p></b></span></p>
+go <i style='mso-bidi-font-style:normal'>all in </i>if he chooses to bet. With
+this the size of the bet is equal to the amount of chips the player has
+available.<b style='mso-bidi-font-weight:normal'><o:p></o:p></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:0cm;
 margin-top:0cm;mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:
-auto;text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l10 level1 lfo13'><![if !supportLists]><span
+auto;text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l10 level1 lfo15'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -6854,70 +7023,69 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 lang=EN-US style='mso-ansi-language:EN-US'>Fold: </span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'>A player has always the option to <i
 style='mso-bidi-font-style:normal'>fold</i>. With this the </span><span
-lang=EN-US style='font-size:10.0pt;line-height:107%;mso-ansi-language:EN-US'>active
+lang=EN-US style='font-size:10.0pt;line-height:106%;mso-ansi-language:EN-US'>active
 </span><span lang=EN-US style='mso-ansi-language:EN-US'>player drops out of the
-current game round and <span class=SpellE>can not</span> make any further
-actions. <b style='mso-bidi-font-weight:normal'><o:p></o:p></b></span></p>
+current game round and cannot make any further actions.<b style='mso-bidi-font-weight:
+normal'><o:p></o:p></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:0cm;
 margin-top:0cm;mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:
-auto;text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l10 level1 lfo13'><![if !supportLists]><span
+auto;text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l10 level1 lfo15'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Call: </span></b><span lang=EN-US
-style='mso-ansi-language:EN-US'>If there<b style='mso-bidi-font-weight:normal'>
-</b></span><span lang=EN-US style='font-size:10.0pt;line-height:107%;
-mso-ansi-language:EN-US'>has been a bet placed the active player has the option
-to <i style='mso-bidi-font-style:normal'>call </i>the existing bet. With this
-he places the same amount of chips as the size of the bet. </span><b
-style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
-EN-US'><o:p></o:p></span></b></p>
+style='mso-ansi-language:EN-US'>If a bet has been placed, the active player has
+the option to <i style='mso-bidi-font-style:normal'>call </i>the existing bet.
+With this he places the same amount of chips as the size of the bet.<b
+style='mso-bidi-font-weight:normal'><o:p></o:p></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:0cm;
 margin-top:0cm;mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:
-auto;text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l10 level1 lfo13'><![if !supportLists]><span
+auto;text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l10 level1 lfo15'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>Raise: </span></b><span lang=EN-US
-style='mso-ansi-language:EN-US'>If there has been a bet placed the active
-player has the option to <i style='mso-bidi-font-style:normal'>raise </i>the
-existing bet. With this he increases the betted amount by the minimum bet.<span
-style='mso-spacerun:yes'>  </span><b style='mso-bidi-font-weight:normal'><o:p></o:p></b></span></p>
+style='mso-ansi-language:EN-US'>If a bet has been placed, the active player has
+the option to <i style='mso-bidi-font-style:normal'>raise </i>the existing bet.
+With this he increases the betted amount by the minimum bet.<b
+style='mso-bidi-font-weight:normal'><o:p></o:p></b></span></p>
 
 <p class=MsoListParagraph style='margin-bottom:0cm;margin-bottom:10.0pt;
 mso-margin-bottom-alt:10.0pt;mso-margin-top-alt:0cm;mso-add-space:auto;
-text-align:justify;text-indent:-18.0pt;line-height:107%;mso-list:l10 level1 lfo13'><![if !supportLists]><span
+text-align:justify;text-indent:-18.0pt;line-height:106%;mso-list:l10 level1 lfo15'><![if !supportLists]><span
 lang=EN-US style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol;mso-ansi-language:EN-US'><span style='mso-list:Ignore'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><b style='mso-bidi-font-weight:normal'><span
 lang=EN-US style='mso-ansi-language:EN-US'>All In: </span></b><span lang=EN-US
 style='mso-ansi-language:EN-US'>If<b style='mso-bidi-font-weight:normal'> </b>a
-player goes all in all remaining chips of the active players are bet. If a
-player is all in, he cannot make another action during this game round. This
+player goes <i style='mso-bidi-font-style:normal'>all in</i>, all remaining
+chips of the active players are bet. If a player is <i style='mso-bidi-font-style:
+normal'>all in</i>, he cannot make another action during this game round. This
 might result into a <i style='mso-bidi-font-style:normal'>split pot </i>because
 the active player might not be eligible for the complete Pot. For example:
-Player A and Player B are betting 100 Chips each resulting in a pot of 200.
-Player C has only 50 Chips left and goes all in. Resulting in Pot<sub>1</sub>:
-150 Chips where Player A, B and C are eligible and Pot<sub>2</sub> where only
-Player A and B are eligible because C didn’t have sufficient chips. <b
+Player A and Player B are betting 100 chips each, resulting in a pot of 200.
+Player C has only 50 chips left and goes all in. Resulting in Pot<sub>1</sub>:
+150 chips where Player A, B and C are eligible and Pot<sub>2</sub>: 100 chips where
+only Player A and B are eligible because C didn’t have sufficient chips. <b
 style='mso-bidi-font-weight:normal'><o:p></o:p></b></span></p>
 
-<h3><span lang=EN-US style='mso-ansi-language:EN-US'>Determine the winning Hand<o:p></o:p></span></h3>
+<h3><span lang=EN-US style='mso-ansi-language:EN-US'>Determine the winning hand</span><span
+lang=EN-US style='mso-ansi-language:EN-US;font-weight:normal'><o:p></o:p></span></h3>
 
 <p class=MsoNormal style='text-align:justify'><span lang=EN-US
 style='mso-ansi-language:EN-US'>During the showdown the best five cards, out of
 the given seven (two hole-cards and the five community cards) are chosen. If
-there are two players with the same hand there is the option to break the tie.
-If there is no options to break the tie the spot will be shared.<o:p></o:p></span></p>
+there are two players with the same hand there are options to break the tie. If
+there are no options left to break the tie, the pot will be shared.<o:p></o:p></span></p>
 
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;
- mso-yfti-tbllook:1184;mso-padding-alt:0cm 5.4pt 0cm 5.4pt'>
+<table class=TableGrid1 border=1 cellspacing=0 cellpadding=0 style='border-collapse:
+ collapse;border:none;mso-border-alt:solid windowtext .5pt;mso-yfti-tbllook:
+ 1184;mso-padding-alt:0cm 5.4pt 0cm 5.4pt'>
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
   <td width=113 valign=top style='width:84.8pt;border:solid windowtext 1.0pt;
   mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
@@ -7023,7 +7191,7 @@ If there is no options to break the tie the spot will be shared.<o:p></o:p></spa
   <p class=MsoNormal><span lang=EN-US style='mso-bidi-font-family:"Times New Roman";
   mso-bidi-theme-font:minor-bidi;mso-ansi-language:EN-US;mso-fareast-language:
   EN-US'>The highest rank of the four of a kind breaks the tie. <br>
-  If it is still a tie the highest fifth card breaks the tie. <o:p></o:p></span></p>
+  If it is still a tie, the highest fifth card breaks the tie. <o:p></o:p></span></p>
   </td>
  </tr>
  <tr style='mso-yfti-irow:4'>
@@ -7051,7 +7219,7 @@ If there is no options to break the tie the spot will be shared.<o:p></o:p></spa
   <p class=MsoNormal><span lang=EN-US style='mso-bidi-font-family:"Times New Roman";
   mso-bidi-theme-font:minor-bidi;mso-ansi-language:EN-US;mso-fareast-language:
   EN-US'>The rank of the three of a kind breaks the tie.<br>
-  If it is still a tie the highest pair breaks the tie. <o:p></o:p></span></p>
+  If it is still a tie, the highest pair breaks the tie. <o:p></o:p></span></p>
   </td>
  </tr>
  <tr style='mso-yfti-irow:5'>
@@ -7079,7 +7247,7 @@ If there is no options to break the tie the spot will be shared.<o:p></o:p></spa
   <p class=MsoNormal><span lang=EN-US style='mso-bidi-font-family:"Times New Roman";
   mso-bidi-theme-font:minor-bidi;mso-ansi-language:EN-US;mso-fareast-language:
   EN-US'>The highest rank in the flush breaks the tie. <br>
-  If it is still a tie the second highest rank breaks the tie …<o:p></o:p></span></p>
+  If it is still a tie, the second highest rank breaks the tie.<o:p></o:p></span></p>
   </td>
  </tr>
  <tr style='mso-yfti-irow:6'>
@@ -7097,8 +7265,11 @@ If there is no options to break the tie the spot will be shared.<o:p></o:p></spa
   mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal style='text-align:justify'><span lang=EN-US
   style='mso-bidi-font-family:"Times New Roman";mso-bidi-theme-font:minor-bidi;
-  mso-ansi-language:EN-US;mso-fareast-language:EN-US'>All five cards in a continuous
-  sequence<o:p></o:p></span></p>
+  mso-ansi-language:EN-US;mso-fareast-language:EN-US'>All five cards in a
+  continuous sequence. As a special case the ace can take the place of the
+  lowest rank in a straight from ace to 5 as well as the highest rank in a
+  straight from 10 to ace. A straight “around the corner” e.g., Q-K-A-2-3 is
+  not possible.<o:p></o:p></span></p>
   </td>
   <td width=293 valign=top style='width:219.45pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -7133,7 +7304,7 @@ If there is no options to break the tie the spot will be shared.<o:p></o:p></spa
   mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal><span lang=EN-US style='mso-bidi-font-family:"Times New Roman";
   mso-bidi-theme-font:minor-bidi;mso-ansi-language:EN-US;mso-fareast-language:
-  EN-US'>The rank of the three of a kind breaks the tie. If it is still a tie
+  EN-US'>The rank of the three of a kind breaks the tie. If it is still a tie,
   the highest card breaks the tie. If it is still a tie the second highest card
   breaks the tie.<o:p></o:p></span></p>
   </td>
@@ -7161,9 +7332,9 @@ If there is no options to break the tie the spot will be shared.<o:p></o:p></spa
   mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
   <p class=MsoNormal><span lang=EN-US style='mso-bidi-font-family:"Times New Roman";
   mso-bidi-theme-font:minor-bidi;mso-ansi-language:EN-US;mso-fareast-language:
-  EN-US'>The highest rank of the pairs breaks the tie. If it is still a tie the
-  second pair breaks the tie. If it is still a tie the highest card breaks the
-  tie.<o:p></o:p></span></p>
+  EN-US'>The highest rank of the pairs breaks the tie. If it is still a tie,
+  the second pair breaks the tie. If it is still a tie the highest card breaks
+  the tie.<o:p></o:p></span></p>
   </td>
  </tr>
  <tr style='mso-yfti-irow:9'>
@@ -7191,7 +7362,7 @@ If there is no options to break the tie the spot will be shared.<o:p></o:p></spa
   <p class=MsoNormal><span lang=EN-US style='mso-bidi-font-family:"Times New Roman";
   mso-bidi-theme-font:minor-bidi;mso-ansi-language:EN-US;mso-fareast-language:
   EN-US'>The rank of the pair breaks the tie. <br>
-  If it is still a tie the highest card breaks the tie. If it is still a tie
+  If it is still a tie, the highest card breaks the tie. If it is still a tie,
   the second highest card breaks the tie …<o:p></o:p></span></p>
   </td>
  </tr>
@@ -7219,7 +7390,7 @@ If there is no options to break the tie the spot will be shared.<o:p></o:p></spa
   <p class=MsoNormal><span lang=EN-US style='mso-bidi-font-family:"Times New Roman";
   mso-bidi-theme-font:minor-bidi;mso-ansi-language:EN-US;mso-fareast-language:
   EN-US'>The rank of the highest card breaks the tie. <br>
-  If it is still a tie the second highest card breaks the tie …<o:p></o:p></span></p>
+  If it is still a tie, the second highest card breaks the tie …<o:p></o:p></span></p>
   </td>
  </tr>
 </table>
@@ -7250,8 +7421,7 @@ EN-US;mso-fareast-language:DE;mso-bidi-language:AR-SA'>[1]</span></span><![endif
 lang=EN-US style='mso-ansi-language:EN-US'> In many tournament settings the <i
 style='mso-bidi-font-style:normal'>small</i> and <i style='mso-bidi-font-style:
 normal'>big blind</i> are increasing over time to create more action in the
-game. In this game it is not considered yet.<span style='mso-spacerun:yes'> 
-</span><o:p></o:p></span></p>
+game. In this implementation, small and big blind stay constant over time.<o:p></o:p></span></p>
 
 </div>
 
