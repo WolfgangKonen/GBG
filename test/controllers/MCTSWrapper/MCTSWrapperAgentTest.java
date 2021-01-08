@@ -190,10 +190,10 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         PlayAgent pa;
         PlayAgent qa;
         PlayAgent opponent;
-        //double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         String userTitle1 = "user1", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
         double winrate;     // the win rate of MCTSWrapperAgent
+        //double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         double c_puct = 1.0;
 
         MCompeteMWrap mCompete;

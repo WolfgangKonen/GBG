@@ -196,7 +196,8 @@ public final class MCTSWrapperAgent extends AgentBase {
     }   // getNextAction2
 
     // just a check whether this is faster than getVTableFor --> see MCTSWrapperAgentTest::getVTableForTest.
-    // getVTable2For is 5x faster than getVTableFor, but it requires only negligible resources.
+    // getVTable2For is 5x faster than getVTableFor, but it it has only negligible effect on overall performance since
+    // it is called seldom.
     public double[] getVTable2For(final MCTSNode mctsNode) {
         ApplicableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
         double[] vTab = new double[arrAction.length];
