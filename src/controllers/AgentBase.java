@@ -175,7 +175,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * adaptation behavior.
 	 * 
 	 * @param so		the state from which the episode is played 
-	 * @return			 	 
+	 * @return			true, if agent raised a stop condition (only CMAPlayer)
 	 */
     @Override
 	public boolean trainAgent(StateObservation so) {
@@ -343,11 +343,11 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * Check whether pa is a valid (non-null) and trained agent, of the same
 	 * type as requested by agentName
 	 * 
-	 * @param pa
-	 * @param agentName
+	 * @param pa			the agent to validate
+	 * @param agentName		the agent's name
 	 * @param Player		needed for message forming
 	 * @param arena			where to show message
-	 * @return
+	 * @return				false, if any check fails, otherwise true
 	 */
 	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, Arena arena) {
 		if (pa == null) {

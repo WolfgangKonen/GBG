@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * <p>
  * The class does not contain test cases itself, it is used by test cases from other classes.
  *
- * @ee ValidateAgentOthelloTest
+ * @see ValidateAgentOthelloTest
  */
 public class ValidateAgentTest {
 

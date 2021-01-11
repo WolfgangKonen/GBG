@@ -12,6 +12,7 @@ import java.util.Random;
 import controllers.AgentBase;
 import controllers.RandomAgent;
 import games.Arena;
+import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XArenaMenu;
 import params.ParNT;
@@ -241,7 +242,7 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	}
 	
 	/**
-	 * the number of calls to {@link NTuple2ValueFunc#update(int[], int, int, double, double, boolean, boolean)}
+	 * the number of calls to {@link NTuple2ValueFunc#update(StateObsWithBoardVector, int, int, double, double, boolean, boolean)}
 	 */
 	@Override
 	public long getNumLrnActions() {

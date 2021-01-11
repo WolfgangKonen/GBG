@@ -445,7 +445,7 @@ public class GBGBatch {
 	 * Perform Othello multi-competition with MCTSWrapperAgent wrapped around agent in filePath against
 	 * Edax2 with different depth levels. <br>
 	 * Write results to file {@code csvName}.
-	 * @param iterMCTS		how many iterations in MCTSWrapperAgent. If < 2, clip iterMCTS to 2.
+	 * @param iterMCTS		how many iterations in MCTSWrapperAgent. If &lt; 2, clip iterMCTS to 2.
 	 * @param filePath		full path of the agent file
 	 * @param gb			game board object, needed by multiCompeteSweep for start state selection
 	 * @param csvName		filename for CSV results

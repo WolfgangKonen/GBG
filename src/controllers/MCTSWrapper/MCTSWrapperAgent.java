@@ -56,9 +56,11 @@ public final class MCTSWrapperAgent extends AgentBase {
     private MCTSNode lastSelectedNode;
 
     /**
-     * reset agent: when starting a new episode, a new tree should be built --> set {@link #lastSelectedNode}{@code =null}
-     * (needed when re-using an existing agent, e.g. in competeNum episodes during a competition
-     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])})
+     * reset agent: when starting a new episode, a new tree should be built. Therefore, set
+     * {@link #lastSelectedNode}{@code =null}
+     * (needed when re-using an existing agent, e.g. in competeNum episodes during a competition, see
+     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])
+     * XArenaFuncs.competeNPlayer})
      *
      */
     @Override

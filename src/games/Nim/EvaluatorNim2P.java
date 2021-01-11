@@ -86,7 +86,7 @@ public class EvaluatorNim2P extends Evaluator {
 	 * 
 	 * @return true if evaluateAgentX is above m_thresh.<br>
 	 * The choice for X=0, 1 or 2 is made with 4th parameter mode in 
-	 * {@link #EvaluatorNim(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
+	 * {@link #EvaluatorNim2P(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
 	 * 
 	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
 	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)

@@ -117,7 +117,7 @@ public class XNTupleFuncsNim3P extends XNTupleBase implements XNTupleFuncs, Seri
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
 	 * equivAction[i] is the key of the action equivalent to actionKey in the
-	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(int[])}[i]
+	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(BoardVector, int)}[i]
 	 */
 	public int[] symmetryActions(int actionKey) {
 		int numEquiv = 1; //actionArray.length;   

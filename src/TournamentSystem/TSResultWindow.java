@@ -828,9 +828,9 @@ public class TSResultWindow extends JFrame {
         mJPanel.add(heatmapJLadv3Title, gbc);
     }
 
-    /**
-     * @noinspection ALL
-     */
+//  /**
+//   * @noinspection ALL
+//   */
     public JComponent $$$getRootComponent$$$() {
         return mJPanel;
     }

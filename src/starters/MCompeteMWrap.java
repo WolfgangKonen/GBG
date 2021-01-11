@@ -44,9 +44,9 @@ import tools.Types;
  *  @see MTrain
  */
 public class MCompeteMWrap {
-    public int i;				// number of training run during multiTrain
+    public int i;				// number of trial (if nTrial>1)
     public int competeNum;		// number of competition games (episodes) during a run
-    public int dEdax;		    // (only relevant in multiCompeteSweep)
+    public int dEdax;		    // (only relevant for Othello, see multiCompeteSweep)
     public int iterMWrap;	    // how many iterations in MCTSWrapperAgent
     public int p_MWrap;		    // which player is MCTSWrapperAgent
     public double EPS;
@@ -141,7 +141,7 @@ public class MCompeteMWrap {
     }
 
     /**
-     * Perform multi-competition with MCTSWrapperAgent wrapped around agent {@code pa} against Edax2 with
+     * Perform Othello multi-competition with MCTSWrapperAgent wrapped around agent {@code pa} vs. Edax2 with
      * different depth levels. The Edax depth values to sweep are coded in
      * array {@code depthArr} in this method. <br>
      * Write results to file {@code csvName}.
@@ -160,7 +160,7 @@ public class MCompeteMWrap {
     public static PlayAgent multiCompeteSweep(PlayAgent pa, int iterMWrap, Arena t_Game,
                                        GameBoard gb, String csvName) {
         int[] depthArr = {1,2,3,4,5,6,7,8,9};
-        double[] epsArr = {1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1.0};
+        double[] epsArr = {1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
         double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         String userTitle1 = "user1", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
@@ -198,6 +198,7 @@ public class MCompeteMWrap {
                         mCompete = new MCompeteMWrap(0, numEpisodes, d, iterMWrap,
                                 EPS, p_MWrap, c_puct, winrate,
                                 userValue1, userValue2);
+                        System.out.println("iter="+iterMWrap+", dEdax="+d+", p="+p_MWrap+", winrate="+winrate);
                         mcList.add(mCompete);
                     } // for (p_MWrap)
                 } // for (EPS)

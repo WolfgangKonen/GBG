@@ -41,8 +41,9 @@ import javax.imageio.stream.FileImageOutputStream;
  * <li>Configure the visual settings.</li>
  * <li>A call to either <code>getChartImage()</code> or <code>saveToFile(String)</code>.</li>
  * </ol>
- * 
- * <h3>Instantiation</h3>
+ *
+ * <p>
+ * <b>Instantiation</b>
  * <p>
  * Construction of a new <code>HeatChart</code> instance is through its one
  * constructor which takes a 2-dimensional array of {@code doubles} which 
@@ -362,8 +363,8 @@ public class HeatChart { // based on JHeatChart v0.6
 	 * an equal number of elements that matches the number of x-values. Use this
 	 * method where the minimum and maximum values possible are not contained
 	 * within the dataset.
-	 * 
-	 * <h2>Example</h2>
+	 * <p></p>
+	 * <b>Example</b>
 	 * 
 	 * <pre>
 	 * new double[][]{

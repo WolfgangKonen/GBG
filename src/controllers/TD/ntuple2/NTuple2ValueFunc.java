@@ -33,7 +33,6 @@ import tools.Types;
  *         from a start value at the beginning of the training to an end value after a 
  *         certain amount of games.
  * 
- * @see TDNTuple2Agt
  * @see TDNTuple3Agt
  * @see SarsaAgt
  * 
@@ -345,7 +344,7 @@ public class NTuple2ValueFunc implements Serializable {
 //	}
 
 	/**
-	 * Update the weights of the n-tuple system in case of {@link TDNTuple2Agt}. The difference 
+	 * Update the weights of the n-tuple system in case of {@link TDNTuple3Agt}. The difference
 	 * to former {@code updateWeights} is that the target is now: reward + GAMMA*valueFunction(next), irrespective of the 
 	 * former parameter {@code finished}.
 	 * The value function estimated by {@code this} has a different meaning: it 
@@ -483,7 +482,7 @@ public class NTuple2ValueFunc implements Serializable {
 	}
 
 	/**
-	 * Update the weights of the n-Tuple-system in case of {@link TDNTuple2Agt} for a terminal state towards target 0.
+	 * Update the weights of the n-Tuple-system in case of {@link TDNTuple3Agt} for a terminal state towards target 0.
 	 * 
 	 * @param curSOWB 	the current board
 	 * @param curPlayer the player whose value function is updated (the p in V(s_t|p) )
@@ -538,11 +537,11 @@ public class NTuple2ValueFunc implements Serializable {
 	 * @param e   derivative of tanh (if hasSigmoid()==true)
 	 * @param QMODE :<br>  
 	 * 			  {@code true}, if called via {@code updateWeightsQ} (Q-learning via {@link SarsaAgt});<br> 
-	 * 			  {@code false}, if called from TD-learning (via  {@code updateWeightsNew*}, {@link TDNTuple2Agt},
+	 * 			  {@code false}, if called from TD-learning (via  {@code updateWeightsNew*}, {@link TDNTuple3Agt},
 	 * 			  or via {@code updateWeightsTD}, {@link TDNTuple3Agt})	
 	 * @param ELIST_PP (eList-per-player, whether to keep separate eligibility lists per player):<br>   
 	 * 			  {@code true}, if called from 'new' TD-learning {@link SarsaAgt} or {@link TDNTuple3Agt};<br> 
-	 * 			  {@code false}, if called from 'old' TD-learning (via {@link TDNTuple2Agt})	
+	 * 			  {@code false}, if called from 'old' TD-learning (via {@link TDNTuple3Agt})
 	 */
 	protected void update(StateObsWithBoardVector curSOWB, int player, int output, double delta, double e,
 						boolean QMODE, boolean ELIST_PP) {
@@ -599,7 +598,7 @@ public class NTuple2ValueFunc implements Serializable {
 	/**
 	 * Is called only in case {@code (TC && !tcImm)}, but {@code !tcImm} is not recommended
 	 * 
-	 * @see TDNTuple2Agt#trainAgent(StateObservation)
+	 * @see TDNTuple3Agt#trainAgent(StateObservation)
 	 */
 	@Deprecated
 	public void updateTC() {

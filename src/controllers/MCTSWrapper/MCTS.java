@@ -33,7 +33,7 @@ public final class MCTS {
      * <p>
      * Values are negated in 2-player games because they are viewed from the previous player's perspective.
      * <p>
-     *     ATTENTION: This method is not yet viable for N>2 players (!!)
+     *     ATTENTION: This method is not yet viable for N &gt; 2 players (!!)
      *
      * @param node Node where the tree search starts.
      * @return The evaluation of a reached leaf node's game state (negated on each recursion level for 2-player games).

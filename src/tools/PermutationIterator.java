@@ -9,7 +9,6 @@ import java.util.*;
  * from Community's answer in
  * https://stackoverflow.com/questions/2799078/permutation-algorithm-without-recursion-java/10117424#10117424
  *
- * @param <T>
  */
 public class PermutationIterator <T> implements Iterator <List <T>> {
 

@@ -341,8 +341,8 @@ public class Evaluator2048 extends Evaluator {
     }
     
     /**
-     * This class collects 2048 evaluation results in one object. Such objects may be combined in ArrayList<EResult> from 
-     * several runs, for later inspection and printout
+     * This class collects 2048 evaluation results in one object. Such objects may be combined in
+     * {@code ArrayList<EResult>} from several runs, for later inspection and printout
      *
      */
     public class EResult {

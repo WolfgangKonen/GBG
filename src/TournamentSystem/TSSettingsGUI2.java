@@ -873,9 +873,9 @@ public class TSSettingsGUI2 extends JFrame {
         buttonGroup.add(variableDoubleRoundRobinRadioButton);
     }
 
-    /**
-     * @noinspection ALL
-     */
+//  /**
+//   * @noinspection ALL
+//   */
     public JComponent $$$getRootComponent$$$() {
         return mJPanel;
     }

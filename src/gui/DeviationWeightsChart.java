@@ -39,7 +39,7 @@ import games.XArenaButtons;
  *		wChart.plot;
  * <p>
  * NOTE: seems to have been used only in connection with TDNTuple2Agt and its method weightAnalysis (see commented
- * code) --> disfunctional at the moment
+ * code), i.e. disfunctional at the moment
  *
  * @author Wolfgang Konen /06/2018
  *

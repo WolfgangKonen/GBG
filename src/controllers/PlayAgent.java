@@ -170,7 +170,8 @@ public interface PlayAgent {
 	/**
 	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
 	 * settings of this agent
-	 * 
+	 *
+	 * @param n			use the param tabs of the {@code n}'th player
 	 * @param m_arena	member {@code m_xab} has the param tabs
 	 * 
 	 * @see Arena#loadAgent

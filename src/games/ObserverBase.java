@@ -344,7 +344,7 @@ abstract public class ObserverBase implements StateObservation {
 	 * The step reward is for transition into state {@code this} from a previous state.
 	 * <p>
 	 * NOTE: Currently the step reward does NOT include the final reward, which is given by
-	 * {@link this#getRewardTuple(boolean)}. It is non-null only for StateObserverCube. It is a separate
+	 * {@link #getRewardTuple(boolean)}. It is non-null only for StateObserverCube. It is a separate
 	 * method, because MaxN2Wrapper needs the separate step reward when returning from recursion
 	 * <p>
 	 * This is the default implementation for all classes implementing {@link StateObservation}, unless
