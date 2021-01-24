@@ -70,11 +70,10 @@ public class ArenaTrainCube extends ArenaTrain   {
 	 * @param mode		which evaluator mode: -1,0,1. Throws a runtime exception
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
 	 * @param verbose	how verbose or silent the evaluator is
-	 * @return
+	 * @return			the new evaluator
 	 */
 	@Override
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-//		if (mode==-1) mode=EvaluatorCube.getDefaultEvalMode();
 		return new EvaluatorCube(pa,gb,stopEval,mode,verbose);
 	}
 
@@ -123,20 +122,21 @@ public class ArenaTrainCube extends ArenaTrain   {
 		}
     }
 
-	/**
-	 * Start GBG for Rubik's Cube (trainable version)
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args)
-	{
-		ArenaTrainCube t_Frame = new ArenaTrainCube("General Board Game Playing",true);
-
-		if (args.length==0) {
-			t_Frame.init();
-		} else {
-			throw new RuntimeException("[ArenaTrainCube.main] args="+args+" not allowed. Use batch facility.");
-		}
-	}
+    // *** ArenaTrainCube is now started via GBGLaunch or GBGBatch
+//	/**
+//	 * Start GBG for Rubik's Cube (trainable version)
+//	 *
+//	 * @param args
+//	 */
+//	public static void main(String[] args)
+//	{
+//		ArenaTrainCube t_Frame = new ArenaTrainCube("General Board Game Playing",true);
+//
+//		if (args.length==0) {
+//			t_Frame.init();
+//		} else {
+//			throw new RuntimeException("[ArenaTrainCube.main] args="+args+" not allowed. Use batch facility.");
+//		}
+//	}
 	
 }

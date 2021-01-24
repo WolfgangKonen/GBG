@@ -236,4 +236,25 @@ public final class MCTSWrapperAgent extends AgentBase {
         return approximator.getScore(sob);
     }
     // /WK/ getScore is needed to make the interface happy, it is probably never really used
+
+    @Override
+    public String stringDescr() {
+        String cs = approximator.getName();
+        cs = cs + "[iter="+this.iterations+"]";
+        return cs;
+    }
+
+    @Override
+    public String stringDescr2() {
+        return getClass().getSimpleName()+"["+approximator.getName()+  ", iter="+this.iterations+"]" ;
+    }
+
+    // override AgentBase::getName()
+    @Override
+    public String getName() {
+        String cs = super.getName();
+        cs = cs + "["+approximator.getName()+","+this.iterations+"]";
+        return cs;
+    }
+
 }

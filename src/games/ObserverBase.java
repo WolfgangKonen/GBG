@@ -24,6 +24,7 @@ abstract public class ObserverBase implements StateObservation {
 	protected int m_counter = 0;		// move counter
 	protected int creatingPlayer = -1;
 	protected boolean m_partialState = false;
+	protected boolean m_roundOver=false;
 
     protected Types.ACTIONS[] storedActions = null;
     protected Types.ACTIONS storedActBest = null;
@@ -153,16 +154,29 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	public StateObservation partialState() { return this; }
 
+	public boolean isPartialState() { return m_partialState; }
+	public void setPartialState(boolean p) { m_partialState = p; }
+
+	public boolean isImperfectInformationGame() { return false; }
+
 	/**
 	 * Default implementation for  perfect information games: there is nothing to do, the perfect-information state
 	 * is already complete.
 	 *
 	 * @return the state {@code this}, it is the completed state
 	 */
-	public StateObservation randomCompletion() { return this; }
+	public StateObservation randomCompletion() {
+		if (isImperfectInformationGame())
+			throw new RuntimeException("ObserverBase.randomCompletion is NOT valid for imperfect-information games!");
+		return this;
+	}
 
-	public boolean isPartialState() { return m_partialState; }
-	public void setPartialState(boolean p) { m_partialState = p; }
+	public boolean isRoundOver() { return m_roundOver; }
+	public void setRoundOver(boolean p) { m_roundOver=p; }
+
+	public void initRound() {
+		throw new RuntimeException("Games that call initRound should override it!");
+	}
 
 	abstract public int getPlayer();
 	abstract public int getNumPlayers();

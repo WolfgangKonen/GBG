@@ -1,32 +1,36 @@
 #
-# **** These are new results with TDNTuple3Agt from June 2020 ****
-# **** same as before, but for runs with different JARs
+# **** These are new results with MCTSWrapper[TCL4-EXP] from Jan 2021 ****
 #
-# This script shows results for Nim3P with extra rule in the TCL-case:
-#   
-# It compares mainly FARL with no-FARL. 
+# **** see TDNTupleAgt.docx, Sec 'MCTSWrapper Results', 'Rubik's Cube'.
 # 
 library(ggplot2)
 library(grid)
 source("summarySE.R")
 
 PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
+CUBEW=3
 
+cubeww =paste0( CUBEW,"x",CUBEW)
+cubewww=paste0(cubeww,"x",CUBEW)
 wfac = 1;
 errWidth=20/wfac;
-titleStr = "RubiksCube 2x2 with MCTSWrap(TCL), no SoftMax";
+titleStr = paste("RubiksCube ",cubeww," with MCTSWrap(TCL), no SoftMax",sep="");
 evalStr = "perc solved"
-path <- "../../agents/RubiksCube/2x2x2_STICKER2_AT/csv/"; 
-Ylimits=c(0.0,1.01); 
+path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_AT/csv/",sep=""); 
+Ylimits=c(-0.01,1.01); 
 #Xlimits=c(0,100000); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c(#"mRubiks2x2-MWrap-SoftMax.csv"    # MCTSWrapperAgentTest.rubiksCube2x2Test
-            #"mRubiks2x2-MWrap-noSoftMax.csv" # MCTSWrapperAgentTest.rubiksCube2x2Test
-            "mRubiks2x2-MWrap-noSoftMax-noLast.csv" # MCTSWrapperAgentTest.rubiksCube2x2Test
-)
-# w/o suffix: only the relevant cases EPS=1e-8, 0.0
-# with suffix "-allEPS": EPS=[-1e-8,0,1e-8]. Are cases -1e-8 and 0 statistically equivalent? - Yes.
-# with suffix "-allEPS-R": in reverse order [1e-8,0,-1e-8]. Are results statistically the same? - Yes.
+# files generated via MCTSWrapperAgentTest.rubiksCube2x2Test or rubiksCube3x3Test:
+filenames=c(paste0("mRubiks",cubeww,"-MWrap-noSoftMax.csv")
+            #paste0("mRubiks",cubeww,"-MWrap-noSoftMax-noLast.csv") 
+            #paste0("mRubiks",cubeww,"-MWrap-SoftMax.csv")    
+)           
+# -noSoftMax/-SoftMax: with USESOFTMAX=false/true in ConfigWrapper.
+# -noLast: with USELASTMCTS=false in ConfigWrapper.
+# other settings: maxDepth=50, c_puct=1.0, STICKER2, all twists
+# agtFile: 
+#   2x2: "TCL4-p13-3000k-60-7t.agt.zip"
+#   3x3: "TCL4-p9-2000k-120-7t.agt.zip"
 
   
 dfBoth = data.frame()

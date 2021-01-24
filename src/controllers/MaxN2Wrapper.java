@@ -337,7 +337,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 
     @Override
 	public String stringDescr2() {
-		return getClass().getName()+"["+wrapped_pa.getClass().getSimpleName()+"]" + ":" + "(nPly="+m_depth+")";
+		return getClass().getSimpleName()+"["+wrapped_pa.getClass().getSimpleName()+"]" + ", nPly="+m_depth+"]";
 	}
     
 	// override AgentBase::getName()

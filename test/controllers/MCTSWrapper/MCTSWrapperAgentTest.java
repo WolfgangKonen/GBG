@@ -57,14 +57,15 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     public void rubiksCube3x3Test() {
         scaPar=new String[]{"3x3x3", "STICKER2", "ALL"};
         agtFiles = new String[]{"TCL4-p9-2000k-120-7t.agt.zip"};
-        int[] iterMCTSWrapArr = {0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
+        int[] iterMCTSWrapArr = {200}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
+        int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
-        hm.put(   0,0.23);                              // Other values: EPS=1e-8, maxDepth=50, c_puct=1.0
-        hm.put( 100,0.23);
-        hm.put( 200,0.44);
-        hm.put( 500,0.65);
-        hm.put(1000,0.65);
+        hm.put(   0,fact*0.23);                         // Other values: EPS=1e-8, maxDepth=50, c_puct=1.0
+        hm.put( 100,fact*0.23);
+        hm.put( 200,fact*0.44);
+        hm.put( 500,fact*0.65);
+        hm.put(1000,fact*0.65);
         int nTrial = 1;
         String csvFile = "mRubiks3x3.csv";
 
@@ -83,14 +84,15 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         agtFiles = new String[]{"TCL4-p13-3000k-60-7t.agt.zip"};
         int[] iterMCTSWrapArr={0,50,100,200,300}; // {0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
+        int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
-        hm.put(   0,0.70);                              // Other values: EPS=1e-8, maxDepth=50, c_puct=1.0
-        hm.put(  50,0.80);
-        hm.put( 100,0.98);
-        hm.put( 200,0.99);
-        hm.put( 300,0.99);
-        hm.put( 500,0.99);
-        hm.put(1000,0.99);
+        hm.put(   0,fact*0.70);                         // Other values: EPS=1e-8, maxDepth=50, c_puct=1.0
+        hm.put(  50,fact*0.80);
+        hm.put( 100,fact*0.98);
+        hm.put( 200,fact*0.99);
+        hm.put( 300,fact*0.99);
+        hm.put( 500,fact*0.99);
+        hm.put(1000,fact*0.99);
         int nTrial = 4;
         String csvFile = "mRubiks2x2.csv";
 
@@ -157,14 +159,16 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
                         startTime = System.currentTimeMillis();
 
+                        // NOTE: these tests are run with epiLength=20 (!)
                         EvalCubeParams ecp = new EvalCubeParams(pMin, pMax, 20, CubeConfig.EvalNmax);
-                        EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 50, 1, 0, ecp);
+                        EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 0, 1, 0, ecp);
                         m_eval.evalAgent(qa);
                         percSolved = m_eval.getLastResult();
                         System.out.println(m_eval.getMsg());
                         if (EPS == 1e-8 && c_puct == 1.0)       // test thresholds currently only available for this setting
                             assert percSolved > hm.get(iterMCTSWrap) :
-                                    "Test failed for iterMCTSWrap = " + iterMCTSWrap + ": % solved=" + percSolved;
+                                    "Test failed for iterMCTSWrap = " + iterMCTSWrap +
+                                    ": % solved=" + percSolved + ", but threshol";
                         mCompete = new MCompeteMWrap(run, 1, 0, iterMCTSWrap,
                                 EPS, 0, c_puct, percSolved,
                                 userValue1, userValue2);
@@ -207,9 +211,10 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         int[] iterMCTSWrapArr={0,50,100,200,300,500,600,800,1000};
         double[] epsArr = { 1e-8, 0.0,-1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
         String csvFile = "mCompeteMCTS-vs-MWrap.csv";
+        boolean doAssert = false;
         startTime = System.currentTimeMillis();
 
-        innerC4Test(numEpisodes,nTrial,iterMCTSWrapArr,epsArr,"MCTS",csvFile);
+        innerC4Test(numEpisodes,nTrial,iterMCTSWrapArr,epsArr,"MCTS",csvFile,doAssert);
 
         elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
         System.out.println("[C4_vs_MCTS_Test] "+elapsedTime+" sec.");
@@ -239,11 +244,12 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
         int numEpisodes=50;
         int nTrial=4;
-        int[] iterMCTSWrapArr={0,50,100,200,300,500,600,800,1000};
+        int[] iterMCTSWrapArr={0}; //,50,100,200,300,500,600,800,1000};
         double[] epsArr = { 1e-8,0.0,-1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
+        boolean doAssert = false;
         startTime = System.currentTimeMillis();
 
-        innerC4Test(numEpisodes,nTrial,iterMCTSWrapArr,epsArr,"AlphaBetaDL",csvFile);
+        innerC4Test(numEpisodes,nTrial,iterMCTSWrapArr,epsArr,"AlphaBetaDL",csvFile,doAssert);
 
         elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
         System.out.println("[C4_vs_ABDL_Test] "+elapsedTime+" sec.");
@@ -253,7 +259,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                             int[] iterMCTSWrapArr,
                             double[] epsArr,
                             String opponentName,
-                            String csvFile)
+                            String csvFile,
+                            boolean doAssert)
     {
         selectedGame = "ConnectFour";
         scaPar = GBGBatch.setDefaultScaPars(selectedGame);
@@ -316,6 +323,19 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         //qa = new AlphaBetaAgent(new BookSum(),1000);	// search for distant losses
                         //qa.instantiateAfterLoading();
 
+                        // *** another sub-test: How good would MaxNWrapper be in place of MCTSWrapperAgent
+                        int nPly=0;                 // if nPly>0, test this together with iterMCTSWrapArr={0}
+                        if (nPly > 0)
+                        {
+                            ParOther oPar = pa.getParOther();
+                            oPar.setWrapperNPly(nPly);
+                            pa.setWrapperParams(oPar);
+                            System.out.println("oPar nPly = " + nPly);
+                            qa = new MaxN2Wrapper(pa, nPly, oPar);
+                        }
+
+
+
                         ScoreTuple sc;
                         PlayAgtVector paVector = new PlayAgtVector(qa, opponent);
                         for (int p_MWrap : new int[]{playerMWrap})       // {0,1}
@@ -328,16 +348,16 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                                     EPS, p_MWrap, c_puct, winrate,
                                     userValue1, userValue2);
                             mcList.add(mCompete);
-                            if (opponent instanceof MCTSAgentT) {
+                            if (opponent instanceof MCTSAgentT && doAssert) {
                                 if (p_MWrap == 1 && iterMCTSWrap == 0)
-                                    assert (winrate <= 1.96) : "winrate is not <=0.6 for iter==0!";
+                                    assert (winrate <= 0.6) : "winrate is not <=0.6 for iter==0!";
                                 if (p_MWrap == 1 && iterMCTSWrap >= 500)
-                                    assert (winrate >= 0.05) : "winrate is not >=0.95 for iter>=500!";
-                            } else if (opponent instanceof AlphaBetaAgent) {
+                                    assert (winrate >= 0.95) : "winrate is not >=0.95 for iter>=500!";
+                            } else if (opponent instanceof AlphaBetaAgent && doAssert) {
                                 if (p_MWrap == 0 && iterMCTSWrap == 0)
-                                    assert (winrate <= 0.999) : "winrate is not <=0.95 for iter==0!";
+                                    assert (winrate <= 0.95) : "winrate is not <=0.95 for iter==0!";
                                 if (p_MWrap == 0 && iterMCTSWrap >= 500)
-                                    assert (winrate >= 0.05) : "winrate is not >=0.95 for iter>=500!";
+                                    assert (winrate >= 0.95) : "winrate is not >=0.95 for iter>=500!";
                             }
                         } // for (p_MWrap)
 

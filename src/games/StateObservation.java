@@ -44,6 +44,7 @@ public interface StateObservation extends Serializable{
 	boolean isGameOver();
 
 	boolean isDeterministicGame();
+	boolean isImperfectInformationGame();
 	
 	/**
 	 * @return true, if the game emits rewards only in a game-over game position
@@ -215,25 +216,49 @@ public interface StateObservation extends Serializable{
     StateObservation precedingAfterstate();
 
 	/**
+	 * For perfect information games, the partial state is identical to {@code this}).
 	 * For imperfect information games: return a state with only the partial information that
 	 * the player who moves in this state is allowed to have.
-	 * For perfect information games, the partial state is identical to {@code this}).
-	 * For Blackjack, the partial state omits (replaces by null) the hole card of the dealer.
+	 * <p>
+	 * E.g., for Blackjack, the partial state omits (replaces by null) the hole card of the dealer.
 	 * For Poker, the partial state omits (replaces by null) the hole cards of all other players.
 	 *
-	 * @return the partial information state
+	 * @return <ul>
+	 *     <li> For perfect-information games: just {@code this}, and the partial state flag remains false;
+	 *     <li> for imperfect-information games: a <b>copy</b> of {@code this} with only partial information
+	 *     		(and with partial state flag = true)
+	 * </ul>
+	 *
 	 */
 	StateObservation partialState();
 
+	boolean isPartialState();
+	void setPartialState(boolean p);
+
 	/**
-	 * For imperfect information games: if {@code this} is a partial state, complete the hidden elements with a
-	 * random fill-in method
+	 * <ul>
+	 *   <li> For perfect-information games: return just {@code this} (see {@link ObserverBase}).
+	 *   <li> For imperfect-information games: if {@code this} is a partial state, complete the hidden elements with a
+	 * random fill-in method. Imperfect-information games have to <b>override</b> the default implementation in
+	 * {@link ObserverBase}.
+	 * </ul> <p>
+	 * Note that the randomly completed state is in general <b>NOT</b> (!) identical to the full state from which the
+	 * partial state was derived. It is - given the observable elements in the partial state -
+	 * <b>one</b> of the possibilities that the player has to take into account.
 	 * @return the randomly completed state
 	 */
 	StateObservation randomCompletion();
 
-	boolean isPartialState();
-	void setPartialState(boolean p);
+	boolean isRoundOver();
+	void setRoundOver(boolean p);
+
+	/**
+	 * For games with rounds: If we have a round-over state, it holds the final state of a round (just for display
+	 * purposes). With initRound we advance such a state to the initial state of a new round.
+	 * <p>
+	 * For games w/o rounds, this method should be never called.
+	 */
+	void initRound();
 
     /**
      * Return all available actions (all actions that can ever become possible in this game)

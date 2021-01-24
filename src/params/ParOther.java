@@ -27,6 +27,7 @@ public class ParOther implements Serializable {
     public static int DEFAULT_WRAPPER_NPLY = 0;
     public static int DEFAULT_WRAPPER_MCTS_ITERATIONS = 0;
     public static double DEFAULT_WRAPPER_MCTS_PUCT = 1;
+	public static int DEFAULT_PMIN_RUBIKS = 1;
     public static int DEFAULT_PMAX_RUBIKS = 6;
 
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
@@ -38,6 +39,7 @@ public class ParOther implements Serializable {
     private int wrapperNply = DEFAULT_WRAPPER_NPLY;
 	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
 	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
+	private int pMinRubiks = DEFAULT_PMIN_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMin
 	private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
 	private boolean chooseStart01 = false;
     private boolean learnFromRM = false;
@@ -84,6 +86,7 @@ public class ParOther implements Serializable {
 		this.wrapperNply = op.getWrapperNPly();
 		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
 		this.wrapperMCTS_PUCT = op.getWrapperMCTS_PUCT();
+		this.pMinRubiks = op.getpMinRubiks();
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
@@ -105,6 +108,7 @@ public class ParOther implements Serializable {
 		this.wrapperNply = op.getWrapperNPly();
 		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
 		this.wrapperMCTS_PUCT = op.getWrapperMCTS_PUCT();
+		this.pMinRubiks = op.getpMinRubiks();
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
 		this.learnFromRM = op.getLearnFromRM();
@@ -179,7 +183,9 @@ public class ParOther implements Serializable {
 		return wrapperMCTS_PUCT;
 	}
 
-    public int getpMaxRubiks() { return pMaxRubiks;	}
+	public int getpMinRubiks() { return pMinRubiks;	}
+
+	public int getpMaxRubiks() { return pMaxRubiks;	}
 
 	public double getIncAmount() { return incAmount; }
 
@@ -267,7 +273,13 @@ public class ParOther implements Serializable {
 		if (otparams!=null)
 			otparams.setWrapperMCTS_PUCT(puct);
 	}
-	
+
+	public void setpMinRubiks(int pMinRubiks) {
+		this.pMinRubiks = pMinRubiks;
+		if (otparams!=null)
+			otparams.setpMinRubiks(pMinRubiks);
+	}
+
 	public void setpMaxRubiks(int pMaxRubiks) {
 		this.pMaxRubiks = pMaxRubiks;
 		if (otparams!=null)
@@ -320,6 +332,7 @@ public class ParOther implements Serializable {
 			enableRgsPart(false);
 			this.setEpisodeLength(12);
 			this.setStopEval(50);
+			this.setpMinRubiks(1);
 			this.setpMaxRubiks(9);
 			this.setReplayBuffer(false);
 			this.setQuickEvalMode(1);

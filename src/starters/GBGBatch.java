@@ -453,6 +453,7 @@ public class GBGBatch {
 	public void batch5(int iterMCTS, String filePath,
 					   GameBoard gb, String csvName) throws IOException {
 		if (iterMCTS<2) iterMCTS=2;
+		iterMCTS=0;
 		long startTime = System.currentTimeMillis();
 
 		// load an agent to fill xab with the appropriate parameter settings

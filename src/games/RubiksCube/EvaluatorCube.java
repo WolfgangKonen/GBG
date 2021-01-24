@@ -29,43 +29,44 @@ public class EvaluatorCube extends Evaluator {
 	 * threshold for each value of m_mode
 	 */
 	protected double[] m_thresh={0.0,0.85,0.9}; // 
-	
-	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval) {
-		super(pa, gb, 0, stopEval);
-		initEvaluator(gb);			// might change CubeConfig.pMax
-		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
-	}
 
-	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode) {
-		super(pa, gb, mode, stopEval);
-		initEvaluator(gb);			// might change CubeConfig.pMax
-		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
-	}
+	// --- never used ---
+//	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval) {
+//		super(pa, gb, 0, stopEval);
+//		initEvaluator(gb);			// might change CubeConfig.pMax
+//		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
+//	}
+//
+//	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode) {
+//		super(pa, gb, mode, stopEval);
+//		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
+//		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
+//	}
 
 	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(pa, gb, mode, stopEval, verbose);
-		initEvaluator(gb);			// might change CubeConfig.pMax
+		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
 		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
 	}
 
 	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose,
 						 EvalCubeParams evalCubePar) {
 		super(pa, gb, mode, stopEval, verbose);
-		initEvaluator(gb);
+		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
 		this.ecp = new EvalCubeParams(evalCubePar);
 	}
 
 	private void initEvaluator(GameBoard gb) {
 		if (gb != null) {
 			assert (gb instanceof GameBoardCube);	
-			((GameBoardCube)gb).getPMax();			// actualize CubeConfig.pMax, if GUI present
+			((GameBoardCube)gb).getPMax();			// actualize CubeConfig.pMin and .pMax, if GUI present
 		}
 	}
 	
 	/**
 	 * @return true if evaluateAgentX is above {@link #m_thresh}.
 	 * The choice for {@link #m_thresh} is made with 4th parameter mode in 
-	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int)} [default: mode=0].
+	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int, int)} [default: mode=0].
 	 */
 	@Override
 	public boolean evalAgent(PlayAgent playAgent) {

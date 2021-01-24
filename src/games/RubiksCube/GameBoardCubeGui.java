@@ -43,10 +43,12 @@ abstract public class GameBoardCubeGui extends JFrame {
 	protected JPanel ButtonPanel;
 	protected final JLabel leftInfo=new JLabel("");
 	protected final JLabel rightInfo=new JLabel("");
+	protected JLabel pMinLabel;
+	protected JLabel pMinValue;
 	protected JLabel pMaxLabel;
 	protected JLabel pMaxValue;
 	protected JLabel scrTwists_L;
-	protected JComboBox scrTwists_T;
+	protected JComboBox<String> scrTwists_T;
 	static String[] scrTwistsList = {"1","2","3","4","5","6","7","8","9","10","11","12","13","RANDOM"};
 	/**
 	 * The representation of the cube in the GUI. The [24|48] active panels in the [6*8 | 9*12] field
@@ -90,18 +92,22 @@ abstract public class GameBoardCubeGui extends JFrame {
 		Button		= new JButton[buttonY][buttonX];
 		ButtonPanel = InitButton();
 		VTable		= new double[buttonY][buttonX];
-		pMaxLabel 	= new JLabel("[Other pars] pMax: ");
+		pMinLabel 	= new JLabel("[Other pars] pMin:");
+		pMinValue 	= new JLabel("");
+		pMaxLabel 	= new JLabel("... pMax:");
 		pMaxValue 	= new JLabel("");
-		scrTwists_L = new JLabel("Scrambling Twists: ");
-		scrTwists_T	= new JComboBox(scrTwistsList);
+		scrTwists_L = new JLabel("    Scrambling Twists: ");
+		scrTwists_T	= new JComboBox<>(scrTwistsList);
 		scrTwists_T.setSelectedItem("4");
-		scrTwists_L.setToolTipText("During play: How many initial twists before start. If RANDOM: 1,...,pMax.");
+		scrTwists_L.setToolTipText("During play: How many initial twists before start. If RANDOM: pMin,...,pMax.");
 
-		Font font=new Font("Arial",1,Types.GUI_TITLEFONTSIZE);			
+		Font font=new Font("Arial", Font.BOLD,Types.GUI_TITLEFONTSIZE);
 		JLabel Blank=new JLabel("   ");		// a little bit of space
 		Blank.setPreferredSize(new Dimension(2*labSize,labSize)); // controls the space between panels
 		
 		JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		northPanel.add(pMinLabel);
+		northPanel.add(pMinValue);
 		northPanel.add(pMaxLabel);
 		northPanel.add(pMaxValue);
 		northPanel.add(new JLabel("    "));
@@ -184,7 +190,6 @@ abstract public class GameBoardCubeGui extends JFrame {
 								{
 									m_gb.InspectMove(x,y);	// i.e. update inspection, if Button[i][j] is clicked
 								}
-								int dummy=1;
 							}
 						}
 				);
@@ -239,10 +244,10 @@ abstract public class GameBoardCubeGui extends JFrame {
 		int i,j;
 		
 		// show ButtonPanel only if it is needed (for showing action values or for entering actions) 
-		switch(m_gb.m_Arena.taskState) {
-		case INSPECTV: { ButtonPanel.setVisible(true); break; }
-		case PLAY:     { ButtonPanel.setVisible(m_gb.m_Arena.hasHumanAgent()||showValueOnGameboard); break; }
-		default: 	   { ButtonPanel.setVisible(false); break; }  
+		switch (m_gb.m_Arena.taskState) {
+			case INSPECTV -> ButtonPanel.setVisible(true);
+			case PLAY -> ButtonPanel.setVisible(m_gb.m_Arena.hasHumanAgent() || showValueOnGameboard);
+			default -> ButtonPanel.setVisible(false);
 		}
 		
 		// the other choice: have the button panel always visible
@@ -371,7 +376,11 @@ abstract public class GameBoardCubeGui extends JFrame {
 	public String getScramblingTwists() {
 		return (String)scrTwists_T.getSelectedItem();
 	}
-	
+
+	public void setPMin(int pMin) {
+		pMinValue.setText(pMin+"");
+	}
+
 	public void setPMax(int pMax) {
 		pMaxValue.setText(pMax+"");
 	}

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
+import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import games.Arena;
@@ -18,6 +19,7 @@ import games.Othello.Edax.Edax2;
 import games.StateObservation;
 import games.XArenaFuncs;
 import params.ParEdax;
+import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -146,11 +148,12 @@ public class MCompeteMWrap {
      * array {@code depthArr} in this method. <br>
      * Write results to file {@code csvName}.
      *
-     * @param pa		index of agent to train (usually n=0)
-     * @param iterMWrap	alpha final values to sweep over
-     * @param gb		the game board, needed for evaluators and start state selection
+     * @param pa		agent to wrap
+     * @param iterMWrap	number of MCTS wrapper iterations
+     * @param t_Game    Arena object
+     * @param gb		the game board, needed for start state selection
      * @param csvName	results are written to this filename
-     * @return the (last) trained agent
+     * @return the wrapped agent
      * <p>
      * Side effect: writes results of multi-training to <b>{@code agents/<gameDir>/csv/<csvName>}</b>.
      * This file has the columns: <br>
@@ -187,6 +190,16 @@ public class MCompeteMWrap {
                             new PlayAgentApproximator(pa),
                             "MCTS-Wrapped " + pa.getName(),
                             -1);
+
+                    int nPly=0;                 // if >0 together with iterMCTSWrapArr={0}: test MaxNWrapper
+                    if (nPly > 0)               // instead of MCTSWrapperAgent
+                    {
+                        ParOther oPar = pa.getParOther();
+                        oPar.setWrapperNPly(nPly);
+                        pa.setWrapperParams(oPar);
+                        System.out.println("oPar nPly = " + nPly);
+                        qa = new MaxN2Wrapper(pa, nPly, oPar);
+                    }
 
                     StateObservation so = gb.getDefaultStartState();
                     ScoreTuple sc;
