@@ -39,6 +39,8 @@ public class ArenaBlackJack extends Arena {
         return new XNTupleFuncsBlackJack();
     }
 
+    public static Deck deck = new Deck();
+    
     public static void main(String[] args) throws IOException {
         ArenaBlackJack t_Frame = new ArenaBlackJack("General Board Game Playing", true);
 

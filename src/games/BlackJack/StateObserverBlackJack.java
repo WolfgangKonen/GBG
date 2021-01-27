@@ -11,6 +11,7 @@ import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types.ACTIONS;
 import tools.Types;
+import static games.BlackJack.BlackJackConfig.*;
 
 public class StateObserverBlackJack extends ObserverBase implements StateObsNondeterministic {
 
@@ -19,12 +20,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     StateObserverBlackJack test = this;
     private static final long serialVersionUID = 1L;
-    private final int NUM_PLAYERS = 2;
     private ArrayList<Types.ACTIONS> availableActions = new ArrayList<Types.ACTIONS>();
     private Player currentPlayer;
     private boolean isNextActionDeterministic = true;
     private ArrayList<Integer> availableRandoms = new ArrayList<Integer>();
-    private Deck deck = new Deck();
     private Dealer dealer;
     private Player players[] = new Player[NUM_PLAYERS];
     private int playersTurn;
@@ -157,7 +156,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     @Override
     public boolean isGameOver() {
         for (Player p : players){
-            if(p.getChips() > 0) {
+            if(p.getChips() > 0 || p.betOnActiveHand() > 0) {
                 return false;
             }
         }
@@ -341,6 +340,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             }
         } else if (gPhase.equals(gamePhase.PLAYERONACTION)) {
             // insurance
+            if(currentPlayer.getActiveHand() == null){
+                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+            }
             if (dealer.getActiveHand().getCards().get(0).rank.equals(Card.Rank.ACE)
                     && currentPlayer.insuranceAmount() == 0) {
                 availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.INSURANCE.getAction()));
@@ -383,12 +385,20 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     // param availableBets: represents how many bets are Available from enum
     // BlackJackActionDet from low to high
     public void setAvailableBettingActions(int availableBets) throws Exception {
-        if (availableBets == 0 || availableBets > BlackJackActionDet.values().length)
-            throw new Exception("");
+        if (availableBets == 0 || availableBets > BlackJackActionDet.values().length){
+            //availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+            //skip the player
+            if(!isGameOver()) {
+                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+            }
+        }
+            //throw new Exception("Player has not enough chips");
         for (int i = 0; i < availableBets; i++) {
             availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.values()[i].getAction()));
         }
     }
+
+
 
     @Override
     public ACTIONS getAction(int i) {
@@ -562,7 +572,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     case DEALPHASE:
                         // in dealphase the cards get dealt 1 by 1
                         if (everyPlayerActed()) { // if true dealer gets a card
-                            dealer.addCardToActiveHand(deck.draw());
+                            dealer.addCardToActiveHand(ArenaBlackJack.deck.draw());
                             playerActedInPhase = new boolean[NUM_PLAYERS];
                             if (dealer.getActiveHand().size() == 2) { // if dealer has 2 cards dealing is over advance
                                                                       // into next phase (next action det)
@@ -570,7 +580,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                                 isNextActionDeterministic = true;
                             }
                         } else { // every player gets one card
-                            currentPlayer.addCardToActiveHand(deck.draw());
+                            if(currentPlayer.betOnActiveHand() > 0) {
+                                currentPlayer.addCardToActiveHand(ArenaBlackJack.deck.draw());
+                            }
                             passToNextPlayer();
                             isNextActionDeterministic = false;
                         }
@@ -585,7 +597,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                         BlackJackActionDet lastAction = BlackJackActionDet.values()[i.toInt()];
                         // every NonDeterministicAdvance triggered by a players action is about getting
                         // a card dealt
-                        Card newCard = deck.draw();
+                        Card newCard = ArenaBlackJack.deck.draw();
                         log.add(currentPlayer.name + " gets a card dealt: " + newCard);
                         currentHand.addCard(newCard);
 
@@ -628,7 +640,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     // The dealer will always hit under 17 and will always stay on 17 or higher,
                     // even if the opponent got 18, dealer got 17 and there is only this one
                     // opponent
-                    Card newCard = deck.draw();
+                    Card newCard = ArenaBlackJack.deck.draw();
                     log.add("Dealer gets a card dealt: " + newCard);
                     dealer.activeHand.addCard(newCard);
 
@@ -695,7 +707,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                         }
                     }
                 }
-                log.add("-------------New Round---------------");
+
 
                 if(currentSleepDuration > 0) {
                     bjGui.update(this, false, false);
@@ -706,18 +718,25 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     });
                 }
 
-                // Setup new Round
-                for (Player p : players) {
-                    p.clearHand();
-                }
-                dealer.clearHand();
-                advancePhase();
-                isNextActionDeterministic = true;
-                setAvailableActions();
+                initRound();
                 break;
         }
         if (isNextActionDeterministic)
             setAvailableActions();
+    }
+
+    @Override
+    public void initRound(){
+        // Setup new Round
+        setRoundOver(false);
+        log.add("-------------New Round---------------");
+        for (Player p : players) {
+            p.clearHand();
+        }
+        dealer.clearHand();
+        advancePhase();
+        isNextActionDeterministic = true;
+        setAvailableActions();
     }
 
     @Override

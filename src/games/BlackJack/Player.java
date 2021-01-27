@@ -1,11 +1,12 @@
 package games.BlackJack;
 
 import java.util.ArrayList;
+import static games.BlackJack.BlackJackConfig.START_CHIPS;
 
 public class Player {
     ArrayList<Hand> hands = new ArrayList<Hand>();
     Hand activeHand = null;
-    private double chips = 1500;
+    private double chips = START_CHIPS;
     private double betThisRound[] = new double[24];
     private boolean splitHand = false;
     private int activeHandIndex = 0;

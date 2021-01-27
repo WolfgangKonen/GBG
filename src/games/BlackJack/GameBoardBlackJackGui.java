@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.FlowLayout;
 
 import java.awt.event.ActionEvent;
@@ -18,6 +19,7 @@ import games.Arena;
 import games.BlackJack.StateObserverBlackJack.BlackJackActionDet;
 import params.GridLayout2;
 import tools.Types;
+import java.awt.EventQueue;
 
 public class GameBoardBlackJackGui extends JFrame {
 
@@ -58,17 +60,17 @@ public class GameBoardBlackJackGui extends JFrame {
         window.setLayout(spr);
 
         dealerZone = new JPanel();
-        dealerZone.setBorder(BorderFactory.createLineBorder(Color.orange, 1));
+        dealerZone.setBorder(BorderFactory.createTitledBorder("Dealer and GameLog"));
         playerZone = new JPanel();
-        playerZone.setBorder(BorderFactory.createLineBorder(Color.orange, 1));
+        playerZone.setBorder(BorderFactory.createTitledBorder("Players"));
         actionZone = new JPanel();
-        actionZone.setBorder(BorderFactory.createLineBorder(Color.orange, 1));
+        actionZone.setBorder(BorderFactory.createTitledBorder("Actions"));
 
         // Set West and East bounds
         spr.putConstraint(SpringLayout.EAST, dealerZone, 0, SpringLayout.EAST, window);
         spr.putConstraint(SpringLayout.WEST, actionZone, 0, SpringLayout.WEST, window);
         spr.putConstraint(SpringLayout.EAST, playerZone, 0, SpringLayout.WEST, dealerZone);
-        spr.putConstraint(SpringLayout.WEST, playerZone, 0, SpringLayout.EAST, actionZone);
+        spr.putConstraint(SpringLayout.EAST, actionZone, 0, SpringLayout.WEST, playerZone);
 
         // Set South bounds
         spr.putConstraint(SpringLayout.SOUTH, actionZone, 0, SpringLayout.SOUTH, window);
@@ -80,24 +82,20 @@ public class GameBoardBlackJackGui extends JFrame {
         spr.putConstraint(SpringLayout.NORTH, dealerZone, 0, SpringLayout.NORTH, window);
         spr.putConstraint(SpringLayout.NORTH, actionZone, 0, SpringLayout.NORTH, window);
 
-        dealerZone.setBackground(new Color(70, 1, 1));
-        playerZone.setBackground(new Color(1, 70, 1));
-        actionZone.setBackground(new Color(1, 79, 160));
+        //dealerZone.setBackground(new Color(70, 1, 1));
+        // playerZone.setBackground(new Color(1, 70, 1));
+        // actionZone.setBackground(new Color(1, 79, 160));
 
         window.add(actionZone);
         window.add(playerZone);
         window.add(dealerZone);
 
-
-
-
-
-        playerZone.setPreferredSize(new Dimension(450, 800));
-        actionZone.setPreferredSize(new Dimension(600, 800));
+        playerZone.setPreferredSize(new Dimension(550, 800));
+        actionZone.setPreferredSize(new Dimension(200, 800));
         dealerZone.setPreferredSize(new Dimension(450, 800));
 
         m_so = (StateObserverBlackJack) m_gb.getStateObs();
-        actionZone.setLayout(new GridLayout(2, 1));
+        actionZone.setLayout(new GridLayout(1, 1));
 
         this.add(window);
         this.setVisible(true);
@@ -113,13 +111,11 @@ public class GameBoardBlackJackGui extends JFrame {
         m_so = so;
         playerZone.setLayout(new GridLayout(so.getNumPlayers(), 1));
         actionZone.add(getActionZone(so));
-        actionZone.add(handHistoryPanel(so));
-
         for (Player p : so.getPlayers()) {
             playerZone.add(playerPanel(p));
         }
         dealerZone.add(dealerPanel(so.getDealer()));
-
+        dealerZone.add(handHistoryPanel(so));
         toggleButtons(so);
         this.revalidate();
         repaint();
@@ -247,10 +243,13 @@ public class GameBoardBlackJackGui extends JFrame {
 
     public JPanel dealerPanel(Dealer dealer) {
         JPanel dealerPanel = new JPanel();
-        dealerPanel.setLayout(new BoxLayout(dealerPanel, BoxLayout.Y_AXIS));
-        dealerPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+        dealerPanel.setPreferredSize(new Dimension(440, 150));
+        dealerPanel.setLayout(new BoxLayout(dealerPanel, BoxLayout.PAGE_AXIS));
+        dealerPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         if (m_so.dealersTurn()) {
             dealerPanel.setBorder(BorderFactory.createLineBorder(new Color(0, 250, 0), 4));
+        }else{
+            dealerPanel.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0), 1));
         }
         dealerPanel.add(createLabel("Dealer"));
         if (dealer.getActiveHand() != null) {
@@ -268,7 +267,8 @@ public class GameBoardBlackJackGui extends JFrame {
             if (arena.m_ArenaFrame != null) {
                 x = arena.m_ArenaFrame.getX();
                 y = arena.m_ArenaFrame.getY() + arena.m_ArenaFrame.getHeight() + 1;
-                this.setSize(1500, 800);
+                this.setSize(1200, 600);
+                this.setMinimumSize(new Dimension(1050, 580));
             }
             this.setLocation(x, y);
         }
@@ -277,7 +277,8 @@ public class GameBoardBlackJackGui extends JFrame {
     public JLabel createLabel(String content) {
         JLabel result = new JLabel(content);
         result.setAlignmentX(Component.CENTER_ALIGNMENT);
-        result.setPreferredSize(new Dimension(400, 35));
+        result.setAlignmentY(Component.TOP_ALIGNMENT);
+        result.setPreferredSize(new Dimension(450, 35));
         result.setFont(result.getFont().deriveFont((float) (((float)Types.GUI_HELPFONTSIZE) * 1.2)));
         return result;
     }
@@ -296,8 +297,8 @@ public class GameBoardBlackJackGui extends JFrame {
         this.addComponentListener(new ComponentListener() {
             @Override
             public void componentResized(ComponentEvent e) {
-                playerZone.setPreferredSize(new Dimension(450, f.getHeight()));
-                actionZone.setPreferredSize(new Dimension(600, f.getHeight()));
+                playerZone.setPreferredSize(new Dimension(600, f.getHeight()));
+                actionZone.setPreferredSize(new Dimension(250, f.getHeight()));
                 dealerZone.setPreferredSize(new Dimension(450, f.getHeight()));
             }
 
