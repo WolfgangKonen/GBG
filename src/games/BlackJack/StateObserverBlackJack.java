@@ -339,10 +339,12 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                 e.printStackTrace();
             }
         } else if (gPhase.equals(gamePhase.PLAYERONACTION)) {
-            // insurance
+            //Skips player who has 0 Chips but still sits at the "table"
             if(currentPlayer.getActiveHand() == null){
                 advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+                return;
             }
+            // insurance
             if (dealer.getActiveHand().getCards().get(0).rank.equals(Card.Rank.ACE)
                     && currentPlayer.insuranceAmount() == 0) {
                 availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.INSURANCE.getAction()));
@@ -386,13 +388,11 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     // BlackJackActionDet from low to high
     public void setAvailableBettingActions(int availableBets) throws Exception {
         if (availableBets == 0 || availableBets > BlackJackActionDet.values().length){
-            //availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
             //skip the player
             if(!isGameOver()) {
                 advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
             }
         }
-            //throw new Exception("Player has not enough chips");
         for (int i = 0; i < availableBets; i++) {
             availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.values()[i].getAction()));
         }
