@@ -717,7 +717,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                         bjGui.repaint();
                     });
                 }
-
+                //setRoundOver(true);
                 initRound();
                 break;
         }

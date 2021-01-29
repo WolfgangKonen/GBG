@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.FlowLayout;
 
 import java.awt.event.ActionEvent;
@@ -19,6 +18,7 @@ import games.Arena;
 import games.BlackJack.StateObserverBlackJack.BlackJackActionDet;
 import params.GridLayout2;
 import tools.Types;
+
 import java.awt.EventQueue;
 
 public class GameBoardBlackJackGui extends JFrame {
@@ -26,6 +26,9 @@ public class GameBoardBlackJackGui extends JFrame {
     JScrollPane scrollPaneLog;
     int verticalScrollBarMaximumValue;
     ArrayList<JButton> currentButtons = new ArrayList<>();
+    boolean hold_flag = false;
+
+
 
     class ActionHandler implements ActionListener {
         int action;
@@ -106,8 +109,9 @@ public class GameBoardBlackJackGui extends JFrame {
     }
 
     public void update(StateObserverBlackJack so, boolean withReset, boolean showValueOnGameboard) {
-        clear();
 
+        //SwingUtilities.invokeLater(() -> {
+        clear();
         m_so = so;
         playerZone.setLayout(new GridLayout(so.getNumPlayers(), 1));
         actionZone.add(getActionZone(so));
@@ -117,9 +121,29 @@ public class GameBoardBlackJackGui extends JFrame {
         dealerZone.add(dealerPanel(so.getDealer()));
         dealerZone.add(handHistoryPanel(so));
         toggleButtons(so);
-        this.revalidate();
+        revalidate();
         repaint();
+        //});
 
+        if(so.isRoundOver()) {
+            stopAfterUpdate();
+        }
+    }
+
+
+    public void stopAfterUpdate(){
+        hold_flag = true;
+        while (true) {
+            if (!hold_flag) {
+                break;
+            } else{
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    System.out.println("Error while halting the game with Thread.sleep()");
+                }
+            }
+        }
     }
 
     public void updateWithSleep(StateObserverBlackJack so, long millSeconds) {
@@ -144,6 +168,10 @@ public class GameBoardBlackJackGui extends JFrame {
         }
         for(JButton b : currentButtons){
             b.setEnabled(tmp.contains(b.getText()));
+            if(b.getText().equals("Continue")){
+                b.setEnabled(so.isRoundOver());
+                //b.setEnabled(true);
+            }
         }
     }
 
@@ -161,7 +189,7 @@ public class GameBoardBlackJackGui extends JFrame {
 
     public JPanel getActionZone(StateObserverBlackJack so) {
         JPanel p = new JPanel();
-        p.setLayout(new GridLayout2(BlackJackActionDet.values().length, 1));
+        p.setLayout(new GridLayout2(BlackJackActionDet.values().length+1, 1));
         for (BlackJackActionDet a: BlackJackActionDet.values()) {
             String nameOfAction = a.name();
             JButton buttonToAdd = new JButton(nameOfAction);
@@ -175,7 +203,21 @@ public class GameBoardBlackJackGui extends JFrame {
             buttonToAdd.setEnabled(false);
             p.add(buttonToAdd);
         }
+        p.add(getContinueButton());
         return p;
+    }
+
+    public JButton getContinueButton(){
+        JButton result = new JButton("Continue");
+        result.addActionListener(new ActionHandler(0) {
+            public void actionPerformed(ActionEvent e) {
+                hold_flag = false;
+                System.out.println("continue pressed");
+            }
+        });
+        result.setEnabled(false);
+        currentButtons.add(result);
+        return result;
     }
 
     public JPanel handHistoryPanel(StateObserverBlackJack so) {
