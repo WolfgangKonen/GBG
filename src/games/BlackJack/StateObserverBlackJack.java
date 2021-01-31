@@ -32,6 +32,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     private ArrayList<String> log = new ArrayList<String>();
     private transient GameBoardBlackJackGui bjGui;
     private int currentSleepDuration = 0;
+    private int episode = 0;
 
     public StateObserverBlackJack(GameBoardBlackJackGui bjGui) {
         // defaultState
@@ -44,6 +45,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         playersTurn = 0;
         currentPlayer = getCurrentPlayer();
         setAvailableActions();
+        log.add(logHeadEntry());
     }
 
 
@@ -63,6 +65,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         this.log = new ArrayList<>(other.log);
         this.bjGui = other.bjGui;
         this.currentSleepDuration = other.currentSleepDuration;
+        this.episode = other.episode;
     }
 
     // mapping Deterministic actions to ENUMS to get more readable code
@@ -155,8 +158,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public boolean isGameOver() {
+        if(episode > episodeLength)
+            return true;
         for (Player p : players){
-            if(p.getChips() > 0 || p.betOnActiveHand() > 0) {
+            if(p.getChips() >= 1 || p.betOnActiveHand() > 0) {
                 return false;
             }
         }
@@ -190,15 +195,15 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public String stringDescr() {
-        String result = "";
+        String result = "\n";
         for (Player p : players) {
-            result += p;
+            result += "( " + p + " ) ";
         }
-        result += "player to move: " + players[getPlayer()].name + "\nhis available actions :\n";
-        for (Types.ACTIONS a : getAllAvailableActions()) {
+        result += "\nplayer to move: " + players[getPlayer()].name + "\nhis available actions : ";
+        for (Types.ACTIONS a : getAvailableActions()) {
             result += BlackJackActionDet.values()[a.toInt()].name() + " - ";
         }
-        result = "dealer : " + dealer.getActiveHand();
+        result += "\ndealer | hand : " + dealer.getActiveHand();
         return result;
     }
 
@@ -207,19 +212,19 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         return BlackJackActionDet.values()[act.toInt()].name();
     }
 
+    // provisionally TODO: refactor
     @Override
     public double getGameScore(StateObservation referringState) {
-        return 0;
+        return getGameScore(referringState.getPlayer());
     }
 
+    // provisionally TODO: refactor
     @Override
     public double getGameScore(int player) {
-        return 0;
-    }
-
-    @Override
-    public ScoreTuple getGameScoreTuple() {
-        return null;
+        if(players[player].hasLost()){
+            return getMinGameScore();
+        }
+        return players[player].getChips();
     }
 
     @Override
@@ -244,7 +249,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public double getMinGameScore() {
-        return 0;
+        return -1;
     }
 
     @Override
@@ -254,7 +259,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public int getMinEpisodeLength() {
-        return 50;
+        return 0;
     }
 
     @Override
@@ -346,7 +351,8 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             }
             // insurance
             if (dealer.getActiveHand().getCards().get(0).rank.equals(Card.Rank.ACE)
-                    && currentPlayer.insuranceAmount() == 0) {
+                    && currentPlayer.insuranceAmount() == 0
+                    && currentPlayer.betOnActiveHand() < currentPlayer.getChips()) {
                 availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.INSURANCE.getAction()));
             }
             if (!currentPlayer.getActiveHand().isHandFinished()) {
@@ -386,7 +392,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     // param availableBets: represents how many bets are Available from enum
     // BlackJackActionDet from low to high
-    public void setAvailableBettingActions(int availableBets) throws Exception {
+    public void setAvailableBettingActions(int availableBets){
         if (availableBets == 0 || availableBets > BlackJackActionDet.values().length){
             //skip the player
             if(!isGameOver()) {
@@ -403,11 +409,6 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     @Override
     public ACTIONS getAction(int i) {
         return ACTIONS.fromInt(i);
-    }
-
-    @Override
-    public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
-
     }
 
     @Override
@@ -437,7 +438,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         BlackJackActionDet a = BlackJackActionDet.values()[action.toInt()];
         // store as last move
         addToLastMoves(action);
-        log.add(currentPlayer.name + " chose action : " + a);
+        if(!currentPlayer.hasLost()) {
+            log.add(currentPlayer.name + " chose action : " + a);
+        }
         isNextActionDeterministic = true;
 
         // this switch only changes player attributes caused by the action
@@ -542,15 +545,11 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         gPhase = gPhase.getNext();
         playerActedInPhase = new boolean[NUM_PLAYERS];
         setPlayer(0);
+        if(gPhase.equals(gamePhase.BETPHASE)){
+            episode++;
+        }
     }
 
-    public boolean isDealPhase() { // deprecated?
-        // dealers handsize < 2 ?
-        if (!dealer.hasHand()) {
-            return true;
-        }
-        return dealer.getActiveHand().size() < 2;
-    }
 
     @Override
     public void advanceNondeterministic() {
@@ -651,22 +650,30 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
             case PAYPLAYERS:
                 for (Player p : players) {
-
+                double roundPayOff = 0;
                     if (p.hasSurrender()) { // if the player surrendered the payout already happened
                         log.add(p.name + " " + results.SURRENDER + " vs dealer: " + dealer.getActiveHand()
-                                + " handvalue: " + dealer.getActiveHand().getHandValue());
+                                + " handvalue: " + dealer.getActiveHand().getHandValue() +
+                                " | payoff: " + ((p.betOnActiveHand()/2) -p.betOnActiveHand())
+                                + " chips");
+                        roundPayOff += ((p.betOnActiveHand()/2) -p.betOnActiveHand());
                     } else {
+
+                        if(p.insuranceAmount() > 0) {
+                            if (dealer.getActiveHand().checkForBlackJack()) {
+                                p.collect(p.insuranceAmount() * 2);
+                            }
+                            log.add(p.name + " insurancePayoff: " +
+                                    (dealer.getActiveHand().checkForBlackJack() ? 1 : -1) * p.insuranceAmount());
+                            roundPayOff +=  (dealer.getActiveHand().checkForBlackJack() ? 1 : -1) * p.insuranceAmount();
+                        }
+
                         for (Hand h : p.getHands()) {
                             // case blackjack
                             results r = results.LOSS;
                             double amountToCollect = 0;
                             double bet = p.getBetAmountForHand(h);
-                            if (dealer.getActiveHand().checkForBlackJack()) {
-                                if(p.insuranceAmount() > 0) {
-                                    log.add(p.name + " gets paid insurance collected: " + p.insuranceAmount() * 2);
-                                    p.collect(p.insuranceAmount() * 2);
-                                }
-                            }
+
                             if (h.checkForBlackJack() && !p.hasSplitHand()) { // player has blackjack, if player got a
                                                                               // blackjack in a split hand it does not
                                                                               // count
@@ -700,23 +707,29 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                             }
 
                             p.collect(amountToCollect);
-                            log.add(p.name + " hand: " + h + " val=" + h.getHandValue() + " " + r + " vs. dealer: "
+                            log.add(p.name + " -> hand: " + h + " val=" + h.getHandValue() + " " + r + " vs. dealer: "
                                     + dealer.getActiveHand() + " val=" + dealer.getActiveHand().getHandValue()
-                                    + " collected: " + amountToCollect + " chips");
+                                    + " | payoff: " + (amountToCollect - p.getBetAmountForHand(h)) + " chips");
+                            roundPayOff += (amountToCollect - p.getBetAmountForHand(h));
 
                         }
+
+                    }
+                    if(!p.hasLost() && p.hasSplitHand() || p.insuranceAmount() > 0){
+                        log.add(p.name + " summed payoff this round: " + roundPayOff);
                     }
                 }
-
-
-                if(currentSleepDuration > 0) {
+               /* depricated
+               if(currentSleepDuration > 0) {
                     bjGui.update(this, false, false);
                     SwingUtilities.invokeLater(() -> {
                         bjGui.updateWithSleep((StateObserverBlackJack) test.partialState(PartialStateMode.THIS_PLAYER), currentSleepDuration);
                         bjGui.revalidate();
                         bjGui.repaint();
                     });
-                }
+                }*/
+
+
                 //setRoundOver(true);
                 initRound();
                 break;
@@ -728,11 +741,12 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     @Override
     public void initRound(){
         // Setup new Round
-        setRoundOver(false);
+        //setRoundOver(false);
         log.add("-------------New Round---------------");
         for (Player p : players) {
             p.clearHand();
         }
+        log.add(logHeadEntry());
         dealer.clearHand();
         advancePhase();
         isNextActionDeterministic = true;
@@ -761,8 +775,8 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public int getNumAvailableRandoms() {
-        // 52cards*6decks
-        return 52 * 6;
+        // 52cards
+        return 52;
     }
 
     @Override
@@ -817,6 +831,16 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     public ArrayList<String> getHandHistory() {
         return log;
+    }
+
+    private String logHeadEntry(){
+        String logHead ="";
+        for(Player p: players){
+            if(!p.hasLost()) {
+                logHead += "( " + p + " ) ";
+            }
+        }
+        return logHead;
     }
 
 }

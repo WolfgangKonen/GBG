@@ -1,7 +1,8 @@
 package games.BlackJack;
+import static games.BlackJack.BlackJackConfig.CARDS_AS_UNICODE;
 
 public class Card {
-    private final boolean useUnicodeForReprentation = false;
+
     enum Suit {
         HEART, DIAMOND, CLUB, SPADE, X;
     }
@@ -31,7 +32,56 @@ public class Card {
         this.Id = Id;
     }
 
-    public String toString() {
+    public String getImagePath(){
+        if(rank.value < 1){
+            return "2B.png";
+        }
+        return rankSubString() + suitSubString() +".png";
+    }
+
+    public String suitSubString(){
+        String suitStr="";
+        switch (suit) {
+            case HEART:
+                suitStr = "H";
+                break;
+            case DIAMOND:
+                suitStr = "D";
+                break;
+            case CLUB:
+                suitStr = "C";
+                break;
+            case SPADE:
+                suitStr = "S";
+                break;
+            default:
+                break;
+        }
+        return suitStr;
+    }
+
+    public String suitSubStringUnicode(){
+        String suitStr = "";
+        switch (suit) {
+            case HEART:
+                suitStr = "♥";
+                break;
+            case DIAMOND:
+                suitStr = "♦";
+                break;
+            case CLUB:
+                suitStr = "♣";
+                break;
+            case SPADE:
+                suitStr = "♠";
+                break;
+            default:
+                break;
+        }
+        return suitStr;
+    }
+
+    public String rankSubString(){
         String rankStr = "";
         if (rank.value < 1) {
             return "X";
@@ -41,43 +91,11 @@ public class Card {
         } else {
             rankStr = rank.name().substring(0, 1);
         }
-        String suitStr = "";
-        if(useUnicodeForReprentation){
-            switch (suit) {
-                case HEART:
-                    suitStr = "♥";
-                    break;
-                case DIAMOND:
-                    suitStr = "♦";
-                    break;
-                case CLUB:
-                    suitStr = "♣";
-                    break;
-                case SPADE:
-                    suitStr = "♠";
-                    break;
-                default:
-                    break;
-            }
-        }
-        else {
-            switch (suit) {
-                case HEART:
-                    suitStr = "h";
-                    break;
-                case DIAMOND:
-                    suitStr = "d";
-                    break;
-                case CLUB:
-                    suitStr = "c";
-                    break;
-                case SPADE:
-                    suitStr = "s";
-                    break;
-                default:
-                    break;
-            }
-        }
-        return rankStr + suitStr;
-        }
+        return rankStr;
+    }
+
+
+    public String toString() {
+        return rankSubString() + (CARDS_AS_UNICODE ? suitSubStringUnicode() : suitSubString());
+    }
 }

@@ -131,10 +131,14 @@ public class Player {
         return surrender;
     }
 
+    public boolean hasLost(){
+        return chips < 1 && betOnActiveHand() == 0;
+    }
+
     public String toString() {
-        String result = name + " chips" + chips;
+        String result = name + " | chips: " + chips;
         for (Hand h : hands) {
-            result += "\nhand : " + h;
+            result += " | hand : " + h;
         }
         return result;
     }

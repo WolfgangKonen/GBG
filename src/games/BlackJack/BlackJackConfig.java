@@ -12,6 +12,15 @@ public class BlackJackConfig {
      */
     final static int START_CHIPS = 200;
 
+    /**
+     * Toggle Unicode representation (in Gamelog)
+     */
+    final static boolean CARDS_AS_UNICODE = false;
+
+    /**
+     * How many rounds will be played
+     */
+    final static int episodeLength = 50;
 
 
 }

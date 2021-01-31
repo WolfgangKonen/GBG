@@ -7,6 +7,7 @@ import games.Arena;
 import games.Evaluator;
 import games.GameBoard;
 import games.XNTupleFuncs;
+import java.util.ArrayList;
 
 public class ArenaBlackJack extends Arena {
 
@@ -40,6 +41,7 @@ public class ArenaBlackJack extends Arena {
     }
 
     public static Deck deck = new Deck();
+    public static ArrayList<String> gameLog = new ArrayList<String>();
     
     public static void main(String[] args) throws IOException {
         ArenaBlackJack t_Frame = new ArenaBlackJack("General Board Game Playing", true);
