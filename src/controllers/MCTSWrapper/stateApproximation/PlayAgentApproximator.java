@@ -70,4 +70,6 @@ public final class PlayAgentApproximator implements Approximator {
             v -> v / sum
         ).toArray();
     }
+
+    public String getName() { return agent.getName(); }
 }

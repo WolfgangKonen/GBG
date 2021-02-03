@@ -189,7 +189,7 @@ public class C4Base extends AgentBase implements Serializable {
 
 	/**
 	 * Copy-Constructor for {@link C4Base}. Only use, if necessary. Make sure, that
-	 * the {@link this.colHeight} array contains the correct heights for each column,
+	 * the {@link #colHeight} array contains the correct heights for each column,
 	 * otherwise you will get severe problems!!!
 	 * 
 	 * @param fieldP1

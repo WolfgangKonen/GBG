@@ -80,7 +80,7 @@ public class Types {
 		/**
 		 *
 		 * @param action	the action to compare with
-		 * @return -1 if this.key < action.key, 0 if equal, +1 if this.key > action.key
+		 * @return -1 if this.key &lt; action.key, 0 if equal, +1 if this.key &gt; action.key
 		 */
 		@Override
         public int compareTo(ACTIONS action) {

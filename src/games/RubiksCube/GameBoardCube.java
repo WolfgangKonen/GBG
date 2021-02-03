@@ -104,17 +104,13 @@ public class GameBoardCube implements GameBoard {
 		m_so		= new StateObserverCube();	// empty table
 		
         if (m_Arena.hasGUI() && m_gameGui==null) {
-        	switch(CubeConfig.cubeType) {
-				case POCKET:
-					m_gameGui = new GameBoardCubeGui2x2(this);
-					break;
-				case RUBIKS:
-					m_gameGui = new GameBoardCubeGui3x3(this);
-					break;
+			switch (CubeConfig.cubeType) {
+				case POCKET -> m_gameGui = new GameBoardCubeGui2x2(this);
+				case RUBIKS -> m_gameGui = new GameBoardCubeGui3x3(this);
 			}
 
         }
-        getPMax();		// actualize CubeConfig.pMax, if GUI present
+        getPMax();		// actualize CubeConfig.pMin and CubeConfig.pMax, if GUI present
         
         // this part below only for distance sets:
 		realPMat 	= new int[CubeConfig.pMax+1][CubeConfig.pMax+2];		// see incRealPMat(...)	
@@ -132,13 +128,20 @@ public class GameBoardCube implements GameBoard {
 	
 	public int getPMax() {
 		if (m_Arena.m_xab!=null) {
-			// fetch the most actual value from tab "Other Pars"
+			// fetch the most actual values from tab "Other Pars"
+			CubeConfig.pMin = m_Arena.m_xab.oPar[0].getpMinRubiks();
 			CubeConfig.pMax = m_Arena.m_xab.oPar[0].getpMaxRubiks();
 			CubeConfig.REPLAYBUFFER = m_Arena.m_xab.oPar[0].getReplayBuffer();
 		}
         return CubeConfig.pMax;
 	}
-	
+
+	public void setPMin(int pMin) {
+		if (m_gameGui!=null) {
+			m_gameGui.setPMin(pMin);
+		}
+	}
+
 	public void setPMax(int pMax) {
         if (m_gameGui!=null) {
         	m_gameGui.setPMax(pMax);
@@ -155,7 +158,7 @@ public class GameBoardCube implements GameBoard {
 	 * And if the two distance sets preceding D[p] are not complete, the method does not guarantee that 
 	 * the inserted states are really in D[p]. That is why this method is now deprecated. 
 	 * 
-	 * @param rand
+	 * @param rand	RNG
 	 * @return a list of distance sets
 	 */
 	@Deprecated
@@ -188,7 +191,6 @@ public class GameBoardCube implements GameBoard {
 					+"    Time="+elapsedTime+" sec");
 			//CSArrayList.printTupleIntList(tintList[p]);
 			//CSArrayList.printLastTupleInt(tintList[p]);
-			int dummy=1;
 		}
 			
 		return gD;
@@ -224,6 +226,7 @@ public class GameBoardCube implements GameBoard {
 		} 
 		
 		if (m_gameGui!=null) {
+			this.setPMin(m_Arena.m_xab.oPar[0].getpMinRubiks());  		// update pMin from oPar
 			this.setPMax(m_Arena.m_xab.oPar[0].getpMaxRubiks());  		// update pMax from oPar
 			m_gameGui.updateBoard(soN, withReset, showValueOnGameboard);
 		}
@@ -307,31 +310,31 @@ public class GameBoardCube implements GameBoard {
 	 * 
 	 * @return a random start state by twisting the solved cube p times. 
 	 *         If the game is played with GUI, p is set according to selector "Scrambling twists" of the game board.
-	 *         If this selector is set to "RANDOM" or if the game is played w/o GUI, p from {1,...,{@link CubeConfig#pMax}} 
-	 *         is picked randomly.
+	 *         If this selector is set to "RANDOM" or if the game is played w/o GUI, p from
+	 *         { {@link CubeConfig#pMin}, ..., {@link CubeConfig#pMax} } is picked randomly.
 	 *      
 	 * @see Arena#PlayGame()
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		int p = 1+rand.nextInt(CubeConfig.pMax);		// random p \in {1,2,...,pMax}
+		int p = CubeConfig.pMin+rand.nextInt(CubeConfig.pMax-CubeConfig.pMin+1);	// random p \in {pMin,...,pMax}
 		if (m_gameGui!=null) {
 			String str=m_gameGui.getScramblingTwists();
-			if (!str.equals("RANDOM")) p = Integer.valueOf(str);
+			if (!str.equals("RANDOM")) p = Integer.parseInt(str);
 		}
 		return chooseStartState(p);
 	}
 	
 	/**
 	 * Choose a start state by scrambling the default cube via {@link #selectByTwists1(int) selectByTwists1(p)}.
-	 * @param p
+	 * @param p		number of twists
 	 * @return	a scrambled cube
 	 */
 	public StateObservation chooseStartState(int p) {		
 		clearBoard(true, true);			// m_so is in default start state 
 		if (SELECT_FROM_T) {	// this is now deprecated
 			int index = rand.nextInt(T[p].size());
-			CubeState cS = (CubeState)T[p].get(index);
+			CubeState cS = T[p].get(index);
 			m_so = new StateObserverCube(cS);
 		} else {
 			m_so = selectByTwists1(p);
@@ -393,11 +396,9 @@ public class GameBoardCube implements GameBoard {
 			if (DBG_REALPMAT) {
 				if (pa.getGameNum() % 10000 == 0 ) {
 					this.printRealPMat(); 
-					int dummy=1;
 				}
 				if (pa.getGameNum()==(pa.getMaxGameNum()-1)) {
 					this.printRealPMat();				
-					int dummy=1;
 				}
 			}
 		}
@@ -534,20 +535,19 @@ public class GameBoardCube implements GameBoard {
 	   
 	@Override
 	public String getSubDir() {
-		String substr="";
-		switch (CubeConfig.cubeType) {
-		case POCKET: substr = "2x2x2"; break;
-		case RUBIKS: substr = "3x3x3"; break;
-		}
+		String substr = switch (CubeConfig.cubeType) {
+			case POCKET -> "2x2x2";
+			case RUBIKS -> "3x3x3";
+		};
 		switch (CubeConfig.boardVecType) {
-		case CUBESTATE: substr += "_CSTATE"; break;
-		case CUBEPLUSACTION: substr += "_CPLUS"; break;
-		case STICKER: substr += "_STICKER"; break;
-		case STICKER2: substr += "_STICKER2"; break;
+			case CUBESTATE -> substr += "_CSTATE";
+			case CUBEPLUSACTION -> substr += "_CPLUS";
+			case STICKER -> substr += "_STICKER";
+			case STICKER2 -> substr += "_STICKER2";
 		}
 		switch (CubeConfig.twistType) {
-		case ALLTWISTS: substr += "_AT"; break;
-		case QUARTERTWISTS: substr += "_QT"; break;
+			case ALLTWISTS -> substr += "_AT";
+			case QUARTERTWISTS -> substr += "_QT";
 		}
 		return substr;
 	}
@@ -561,10 +561,10 @@ public class GameBoardCube implements GameBoard {
 
     private void checkIntersects() {
     	for (int p=1; p<=CubeConfig.pMax; p++) {
-    	    Iterator itD = D[p].iterator();
+    	    Iterator<CubeState> itD = D[p].iterator();
     	    int intersectCount = 0;
     	    while (itD.hasNext()) {
-    		    CubeState twin = (CubeState)itD.next();
+    		    CubeState twin = itD.next();
     		    if (T[p].contains(twin)) intersectCount++;
             } 
     		System.out.println("checkIntersects: p="+p+", intersect(D[p],T[p])="+intersectCount+", D[p].size="+D[p].size());
@@ -600,9 +600,9 @@ public class GameBoardCube implements GameBoard {
     @Deprecated
 	public void printRealPMat() {
 		DecimalFormat df = new DecimalFormat("  00000");
-		for (int i=0; i<realPMat.length; i++) {
-			for (int j=0; j<realPMat[i].length; j++) {
-				System.out.print(df.format(realPMat[i][j]));
+		for (int[] pRow : realPMat) {
+			for (int elem : pRow) {
+				System.out.print(df.format(elem));
 			}
 			System.out.println();
 		}

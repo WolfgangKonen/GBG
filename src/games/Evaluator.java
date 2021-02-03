@@ -23,7 +23,6 @@ import controllers.PlayAgent;
  * @author Wolfgang Konen, TH Koeln, Nov'16
  */
 abstract public class Evaluator {
-	//private boolean prevEval;
 	private boolean thisEval;
 	private int gnumTrue;
 	private int m_stopEval;
@@ -81,7 +80,6 @@ abstract public class Evaluator {
 		if (!isAvailableMode(mode)) 
 			throw new RuntimeException(this.getClass().getSimpleName()+": Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
-		//prevEval = false;
 		thisEval = false;
 		m_stopEval=stopEval;
 		m_counter=0;
@@ -127,18 +125,16 @@ abstract public class Evaluator {
 	 * @return true if Evaluator stays true for {@code stopEval} calls, false else
 	 */
 	public boolean goalReached(int gameNum) {			
-//		if (thisEval && !prevEval) gnumTrue=gameNum;
-//		if (!thisEval) gnumTrue=-1;
-//		prevEval = thisEval;
-//		if (gnumTrue>0 && gameNum>gnumTrue+m_stopEval-1) {
 		if (m_counter>=m_stopEval) {
 			gnumTrue=gameNum;
 			return true;
 		}
 		return false;
 	}
-	public boolean setState(boolean stateE) { thisEval = stateE; return stateE; }
-	public boolean getState() { return thisEval; }
+
+	// *** never used ***
+//	public boolean setState(boolean stateE) { thisEval = stateE; return stateE; }
+//	public boolean getState() { return thisEval; }
 	
 	/**
 	 * 

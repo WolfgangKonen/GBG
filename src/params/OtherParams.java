@@ -72,6 +72,7 @@ public class OtherParams extends Frame {
 	JLabel wNply_L;
 	JLabel wMCTS_L;
 	JLabel wMCTSpUCT_L;
+	JLabel pMin_L;
 	JLabel pMax_L;
 	JLabel rBuf_L;
 	public JTextField numEval_T;
@@ -81,6 +82,7 @@ public class OtherParams extends Frame {
 	public JTextField wNply_T;
 	public JTextField wMCTS_T;
 	public JTextField wMCTSpUCT_T;
+	public JTextField pMin_T;
 	public JTextField pMax_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
@@ -109,6 +111,7 @@ public class OtherParams extends Frame {
 		wNply_T = new JTextField("0"); 		//
 		wMCTS_T = new JTextField("0"); 		//
 		wMCTSpUCT_T = new JTextField("1"); 		//
+		pMin_T = new JTextField("1");		//
 		pMax_T = new JTextField("6");		//
 		numEval_L = new JLabel("numEval");
 		epiLeng_L = new JLabel("Episode Length");
@@ -120,6 +123,7 @@ public class OtherParams extends Frame {
 		wNply_L = new JLabel("Wrapper nPly");
 		wMCTS_L = new JLabel("Wrapper MCTS");
 		wMCTSpUCT_L = new JLabel("PUCT for Wrapper MCTS");
+		pMin_L = new JLabel("pMin");
 		pMax_L = new JLabel("pMax");
 		rBuf_L = new JLabel("Replay buffer");
 		chooseS01 = new Checkbox("", false);
@@ -150,8 +154,10 @@ public class OtherParams extends Frame {
 		wMCTS_L.setToolTipText(
 				"Wrapper MCTS look ahead (for play, compete, eval).");
 		wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper.");
+		pMin_L.setToolTipText(
+				"RubiksCube: min. number of initial twists (during traing and eval)");
 		pMax_L.setToolTipText(
-				"RubiksCube: number of initial twists (during traing and eval)");
+				"RubiksCube: max. number of initial twists (during traing and eval)");
 		rBuf_L.setToolTipText(
 				"RubiksCube: use replay buffer during training");
 
@@ -166,6 +172,17 @@ public class OtherParams extends Frame {
 			});
 
 		// only for RubiksCube:
+		pMin_T.addActionListener(new ActionListener()
+				 {
+					 public void actionPerformed(ActionEvent e)
+					 {
+						 //if pMin is changed by user, set the corresponding element in GameBoardCubeGUI
+						 if (m_arena.getGameBoard() instanceof GameBoardCube) {
+							 ((GameBoardCube)m_arena.getGameBoard()).setPMin(getpMinRubiks());
+						 }
+					 }
+				 }
+		);
 		pMax_T.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -179,13 +196,13 @@ public class OtherParams extends Frame {
 		);
 
 		replayBuf.addItemListener(new ItemListener()
-								 {
-									 public void itemStateChanged(ItemEvent e)
-									 {
-										 //if replayBuf is changed by user, set the corresponding element in CubeConfig
-										 // TODO
-									 }
-								 }
+				{
+					  public void itemStateChanged(ItemEvent e)
+					  {
+						  //if replayBuf is changed by user, set the corresponding element in CubeConfig
+						  // TODO
+					  }
+				 }
 		);
 
 		setLayout(new BorderLayout(10, 0)); // rows,columns,hgap,vgap
@@ -219,10 +236,10 @@ public class OtherParams extends Frame {
 		oPanel.add(new Canvas());
 
 		if (m_arena.getGameName().equals("RubiksCube")) {
+			oPanel.add(pMin_L);
+			oPanel.add(pMin_T);
 			oPanel.add(pMax_L);
 			oPanel.add(pMax_T);
-			oPanel.add(rBuf_L);
-			oPanel.add(replayBuf);
 		} else {
 			oPanel.add(chooseS01L);
 			oPanel.add(chooseS01);
@@ -232,8 +249,13 @@ public class OtherParams extends Frame {
 
 		oPanel.add(rgs_L);
 		oPanel.add(rewardIsGameScore);
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
+		if (m_arena.getGameName().equals("RubiksCube")) {
+			oPanel.add(rBuf_L);
+			oPanel.add(replayBuf);
+		} else {
+			oPanel.add(new Canvas());
+			oPanel.add(new Canvas());
+		}
 
 		add(oPanel, BorderLayout.CENTER);
 		add(ok, BorderLayout.SOUTH);
@@ -295,6 +317,10 @@ public class OtherParams extends Frame {
 
 	public double getWrapperMCTS_PUCT() {
 		return Double.parseDouble(wMCTSpUCT_T.getText());
+	}
+
+	public int getpMinRubiks() {
+		return Integer.valueOf(pMin_T.getText()).intValue();
 	}
 
 	public int getpMaxRubiks() {
@@ -388,6 +414,10 @@ public class OtherParams extends Frame {
 		wMCTSpUCT_T.setText(value + "");
 	}
 
+	public void setpMinRubiks(int value) {
+		pMin_T.setText(value + "");
+	}
+
 	public void setpMaxRubiks(int value) {
 		pMax_T.setText(value + "");
 	}
@@ -429,6 +459,7 @@ public class OtherParams extends Frame {
 		this.setStopEval(op.getStopEval());
 		this.setWrapperNPly(op.getWrapperNPly());
 		this.setWrapperMCTSIterations(op.getWrapperMCTSIterations());
+		this.setpMinRubiks(op.getpMinRubiks());
 		this.setpMaxRubiks(op.getpMaxRubiks());
 		this.chooseS01.setState(op.getChooseStart01());
 		this.learnRM.setState(op.getLearnFromRM());
@@ -438,6 +469,7 @@ public class OtherParams extends Frame {
 		// only for RubiksCube:
 		// if pMax is changed via fillParamTabsAfterLoading, set also the corresponding element in GameBoardCubeGUI
 		if (m_arena.getGameBoard() instanceof GameBoardCube) {
+			((GameBoardCube)m_arena.getGameBoard()).setPMin(getpMinRubiks());
 			((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
 		}
 

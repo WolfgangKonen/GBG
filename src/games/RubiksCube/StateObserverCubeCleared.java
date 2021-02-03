@@ -3,6 +3,8 @@ package games.RubiksCube;
 import games.StateObservation;
 import tools.Types;
 
+import java.io.Serial;
+
 /**
  * A class derived from {@link StateObserverCube}. It ensures that whenever an 
  * object of type StateObserverCubeCleared is created, its {@link CubeState} members lastTwist
@@ -18,23 +20,25 @@ public class StateObserverCubeCleared extends StateObserverCube implements State
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
-	
-	public StateObserverCubeCleared() {
-		super();
-		this.resetMoveCounter();
-		this.clearLast(0);
-	}
 
-	public StateObserverCubeCleared(StateObserverCubeCleared other) {
-		super(other);
-		this.resetMoveCounter();
-		this.clearLast(this.getCubeState().minTwists);
-	}
+	// *** never used ***
+//	public StateObserverCubeCleared() {
+//		super();
+//		this.resetMoveCounter();
+//		this.clearLast(0);
+//	}
+//
+//	public StateObserverCubeCleared(StateObserverCubeCleared other) {
+//		super(other);
+//		this.resetMoveCounter();
+//		this.clearLast(this.getCubeState().minTwists);
+//	}
 
 	/**
 	 *
-	 * @param other
+	 * @param other the object to copy from
 	 * @param p     the minimal number of twists (-1 if not known)
 	 */
 	public StateObserverCubeCleared(StateObserverCube other, int p) {
@@ -52,7 +56,7 @@ public class StateObserverCubeCleared extends StateObserverCube implements State
 	 * (If instead lastTwist were set, 3 actions would be excluded. This is what we do not want for a
 	 * start state.)
 	 * @param p		the minimal number of twists (-1 if not known)
-	 * @return
+	 * @return		{@code this}
 	 */
 	public StateObserverCubeCleared clearLast(int p) {
 		this.getCubeState().minTwists = p;

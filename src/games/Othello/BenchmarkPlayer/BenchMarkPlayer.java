@@ -129,9 +129,9 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	 * Used to advance the game state with given action. Including game winning move. <br>
 	 * Using {@link BenchMarkPlayer#getNextAction2(StateObservation, boolean, boolean)} for recursive part. <br>
 	 * Using helper method: {@linkplain BenchMarkPlayer#finalMove(StateObserverOthello)} for game winning move.
-	 * @param sob
+	 * @param sob	the state
 	 * @param action which is used to advance the game state
-	 * @param silent
+	 * @param silent whether to print or not
 	 * @return score for the an advanced game state.
 	 */
 	public double evaluateState(StateObservation sob, ACTIONS action,boolean silent) {

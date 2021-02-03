@@ -31,20 +31,19 @@ import params.ParNT;
  * {@link XNTupleFuncs#getBoardVector(StateObservation)} before they are passed to 
  * {@link NTuple4} methods.
  * <p>
- *     Example 2x2x2 RubiksCube, STICKER2 representation: There are 7 stickers with 3 faces each. The board vector
+ *     <b>Example:</b><br> 2x2x2 RubiksCube, STICKER2 representation: There are 7 stickers with 3 faces each. The board vector
  *     is of length 14, where the first 7 cells have 7 possible values (the stickers) and the second 7 cells 3.
  *     If a 4-tuple covers the positions
  *     <pre>
  *       P[i] = [0,8,2,10], </pre>
  *     we have <pre>
  *       posVals[P[i]] = [7,3,7,3]
- *       --> lut.length = 7*3*7*3 = 441  </pre>
- *     and any board vector <pre>
+ *       lut.length = 7*3*7*3 = 441  </pre>
+ *     and any board vector with these values <pre>
  *       [6 * 6 * * * *
  *        * 2 * 2 * * *] </pre>
- *     activates the highest LUT entry.
- * </p>
- * 
+ *     in positions 0, 8, 2 and 10 activates the highest LUT entry.
+ *
  * @author Wolfgang Konen, TH Koeln, 2020
  *
  * @see NTuple2

@@ -20,6 +20,7 @@ import games.Nim.BoutonAgent;
 import games.Nim.DaviNimAgent;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
+import games.RubiksCube.CubeConfig;
 import games.RubiksCube.DAVI2Agent;
 import games.RubiksCube.DAVI3Agent;
 import games.RubiksCube.GameBoardCube;
@@ -111,6 +112,7 @@ public class XArenaFuncs {
 
 		// update element pMaxValue in GameBoardCubeGUI, if present:
 		if (m_xab.m_arena.getGameBoard() instanceof GameBoardCube) {
+			((GameBoardCube)m_xab.m_arena.getGameBoard()).setPMin(CubeConfig.pMin);
 			((GameBoardCube)m_xab.m_arena.getGameBoard()).setPMax(
 					((GameBoardCube)m_xab.m_arena.getGameBoard()).getPMax()			// this sets also CubeConfig.pMax
 			);
@@ -196,7 +198,10 @@ public class XArenaFuncs {
 			} else if (sAgent.equals("AlphaBeta")) {// CFour only, see
 													// gui_agent_list in
 													// XArenaButtonsGui
-//				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
+				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
+				alphaBetaStd.instantiateAfterLoading();
+				pa = alphaBetaStd;
+			} else if (sAgent.equals("AlphaBeta-DL")) {
 				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
 				alphaBetaStd.instantiateAfterLoading();
 				pa = alphaBetaStd;
@@ -296,10 +301,13 @@ public class XArenaFuncs {
 //			pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("MC-N")) {
 			pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("AlphaBeta")) { // CFour only, see
-													// gui_agent_list in
-													// XArenaButtonsGui
-//			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
+		} else if (sAgent.equals("AlphaBeta")) {// CFour only, see
+												// gui_agent_list in
+												// XArenaButtonsGui
+			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
+			alphaBetaStd.instantiateAfterLoading();
+			pa = alphaBetaStd;
+		} else if (sAgent.equals("AlphaBeta-DL")) {
 			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
 			alphaBetaStd.instantiateAfterLoading();
 			pa = alphaBetaStd;

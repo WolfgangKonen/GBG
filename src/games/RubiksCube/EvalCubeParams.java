@@ -3,7 +3,7 @@ package games.RubiksCube;
 import controllers.PlayAgent;
 
 public class EvalCubeParams {
-    public int pMin=1;
+    public int pMin=CubeConfig.pMin; //1;
     public int pMax=CubeConfig.pMax;
     public int epiLength=10;
     public int evalNmax=CubeConfig.EvalNmax;

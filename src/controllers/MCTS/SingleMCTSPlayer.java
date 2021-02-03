@@ -95,7 +95,7 @@ public class SingleMCTSPlayer implements Serializable
 
     /**
      * Set the available actions for state {@code so}.
-     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer)}.
+     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer, double[])}.
      * @param so the state
      */
     public void initActions(StateObservation so) {
@@ -111,7 +111,7 @@ public class SingleMCTSPlayer implements Serializable
 
     /**
      * Initializes the tree with the new observation state in the root.
-     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer)}.
+     * Called from {@link MCTSAgentT#act(StateObservation, ElapsedCpuTimer, double[])}.
      * @param so current state of the game.
      */
     public void init(StateObservation so)

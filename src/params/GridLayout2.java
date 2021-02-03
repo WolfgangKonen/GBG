@@ -11,8 +11,6 @@ import java.awt.Insets;
  *         have the same size. <br> from http://www.javaworld.com
  * 
  * @see OptionsComp
- * @author
- *    
  */
 public class GridLayout2 extends GridLayout {
 

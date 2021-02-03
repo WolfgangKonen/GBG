@@ -41,20 +41,20 @@ import games.XNTupleFuncs;
  * {@link AgentBase} (gameNum, maxGameNum, AgentState, ...) and
  * {@link NTupleBase} (finishUpdateWeights, increment*Counters, isTrainable, normalize2, ...)
  * <p>
- * {@link SarsaAgt} is an alternative to {@link TDNTuple2Agt}. 
- * The differences between {@link SarsaAgt} and {@link TDNTuple2Agt} are:
+ * {@link SarsaAgt} is an alternative to {@link TDNTuple3Agt}.
+ * The differences between {@link SarsaAgt} and {@link TDNTuple3Agt} are:
  * <ul>
  * <li> {@link SarsaAgt} updates the value of a state for a player based on the value/reward
  * 		that the <b>same</b> player achieves in his next turn. It is in this way more similar to 
- * 		{@link TDNTuple3Agt}. (Note that the updates of {@link TDNTuple2Agt} are based on the value/reward of 
+ * 		{@link TDNTuple3Agt}. (Note that the updates of {@link TDNTuple3Agt} are based on the value/reward of
  * 		the <b>next state</b>. This may require sign change, depending on the number of players.)
  * 		Thus {@link SarsaAgt} is much simpler to generalize to 1-, 2-, 3-, ..., N-player games
- * 		than {@link TDNTuple2Agt}.
+ * 		than {@link TDNTuple3Agt}.
  * <li> Eligible states: {@link SarsaAgt} updates with ELIST_PP=true, i.e. it has a separate 
  * 		{@code eList[p]} per player p. {@link SarsaAgt} uses only one common {@code eList[0]}. 
  * 		Only relevant for LAMBDA &gt; 0. 
  * </ul>
- * The similarities of {@link SarsaAgt} and {@link TDNTuple2Agt} are:
+ * The similarities of {@link SarsaAgt} and {@link TDNTuple3Agt} are:
  * <ul>
  * <li> No eligibility traces, instead LAMBDA-horizon mechanism of [Jaskowski16] (faster and less
  * 		memory consumptive).
@@ -271,7 +271,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
     		} else {
     			//
     			// TODO: currently we cannot mirror in Q-learning the afterstate logic 
-    			// that we have optionally in TDNTuple2Agt
+    			// that we have optionally in TDNTuple3Agt
     			
         		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so, m_Net.xnf);
             	qValue = m_Net.getQFunc(curSOWB,so.getPlayer(),acts.get(i));

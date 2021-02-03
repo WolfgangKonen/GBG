@@ -1,0 +1,6 @@
+TDNTuple4Agt: USESYM:false, P:12, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false
+TDNTuple4Agt: alpha_init->final:0.25->0.25, epsilon_init->final:0.0->0.0, gamma: 1.0, random 120 7-tuple, evalQ: 1, evalT: -1
+run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, user1, user2
+0, 1, 0, 200, 1.0E-8, 0, 1.0, 0.5583333333333335, 0.0, 0.0
+0, 1, 0, 200, 0.0, 0, 1.0, 0.003333333333333336, 0.0, 0.0
+0, 1, 0, 200, -1.0E-8, 0, 1.0, 0.0, 0.0, 0.0

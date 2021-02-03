@@ -61,10 +61,20 @@ public class CubeConfig {
 	 * <li> (Deprecated) Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} are filled.
 	 * </ul>
 	 * In case that {@link GameBoardCubeGui} is present, the value of  <b>{@code pMax}</b> will be updated from 
-	 * {@link ParOther} {@code opar.pMax} each time a train or evaluation process is started. This allows to switch  
-	 * <b>{@code pMax}</b> at runtime.
+	 * {@link ParOther}'s {@code pMax} each time a train, play or evaluation process is started. This allows to
+	 * switch <b>{@code pMax}</b> at runtime.
 	 */
 	public static int pMax = 10;			// 1,2,3,4,5,6,7,8,9,10,11,12,13,14   for 2x2x2 cube
+
+	/**
+	 * Minimum number of scrambling twists in {@link EvaluatorCube} and in
+	 * {@link GameBoardCube#chooseStartState()} (when playing a game).
+	 * <p>
+	 * In case that {@link GameBoardCubeGui} is present, the value of  <b>{@code pMin}</b> will be updated from
+	 * {@link ParOther}'s {@code pMin} each time a play or evaluation process is started. This allows to
+	 * switch <b>{@code pMin}</b> at runtime.
+	 */
+	public static int pMin = 7;
 
 	/**
 	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in

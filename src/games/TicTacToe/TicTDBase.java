@@ -56,13 +56,13 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	protected Random rand;			// needed by derived class TDSNPlayer
 	//private boolean MakeMove;		// true, if an agent move is requested 
 	protected transient MCTSAgentT referee;
-	/**
-	 * deprecated (use {@link TDNTuple3Agt} instead)
-	 */
-	@Deprecated
-	private int nTuple[][] = {{0,1,2},{3,4,5},{0,4,8}
-							 ,{0,3,6,7,8},{0,4,8,2,6} 
-	 						 };
+//	/**
+//	 * deprecated (use {@link TDNTuple3Agt} instead)
+//	 */
+//	@Deprecated
+//	private int nTuple[][] = {{0,1,2},{3,4,5},{0,4,8}
+//							 ,{0,3,6,7,8},{0,4,8,2,6}
+//	 						 };
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip will become unreadable or you have

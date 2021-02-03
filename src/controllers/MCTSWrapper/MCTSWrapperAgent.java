@@ -56,9 +56,11 @@ public final class MCTSWrapperAgent extends AgentBase {
     private MCTSNode lastSelectedNode;
 
     /**
-     * reset agent: when starting a new episode, a new tree should be built --> set {@link #lastSelectedNode}{@code =null}
-     * (needed when re-using an existing agent, e.g. in competeNum episodes during a competition
-     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])})
+     * reset agent: when starting a new episode, a new tree should be built. Therefore, set
+     * {@link #lastSelectedNode}{@code =null}
+     * (needed when re-using an existing agent, e.g. in competeNum episodes during a competition, see
+     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])
+     * XArenaFuncs.competeNPlayer})
      *
      */
     @Override
@@ -196,7 +198,8 @@ public final class MCTSWrapperAgent extends AgentBase {
     }   // getNextAction2
 
     // just a check whether this is faster than getVTableFor --> see MCTSWrapperAgentTest::getVTableForTest.
-    // getVTable2For is 5x faster than getVTableFor, but it requires only negligible resources.
+    // getVTable2For is 5x faster than getVTableFor, but it it has only negligible effect on overall performance since
+    // it is called seldom.
     public double[] getVTable2For(final MCTSNode mctsNode) {
         ApplicableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
         double[] vTab = new double[arrAction.length];
@@ -233,4 +236,25 @@ public final class MCTSWrapperAgent extends AgentBase {
         return approximator.getScore(sob);
     }
     // /WK/ getScore is needed to make the interface happy, it is probably never really used
+
+    @Override
+    public String stringDescr() {
+        String cs = approximator.getName();
+        cs = cs + "[iter="+this.iterations+"]";
+        return cs;
+    }
+
+    @Override
+    public String stringDescr2() {
+        return getClass().getSimpleName()+"["+approximator.getName()+  ", iter="+this.iterations+"]" ;
+    }
+
+    // override AgentBase::getName()
+    @Override
+    public String getName() {
+        String cs = super.getName();
+        cs = cs + "["+approximator.getName()+","+this.iterations+"]";
+        return cs;
+    }
+
 }

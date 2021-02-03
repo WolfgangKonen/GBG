@@ -1,5 +1,6 @@
 package games.RubiksCube;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * compatible with an older one (older .gamelog or .agt.zip containing this object will
 	 * become unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	//
@@ -42,11 +44,10 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int getNumCells() {
-		switch(CubeConfig.cubeType) {
-			case POCKET: return this.getNumCells2x2();
-			case RUBIKS: return this.getNumCells3x3();
-		}
-		throw new RuntimeException("[getNumCells] Illegal value in switch cubeType");
+		return switch (CubeConfig.cubeType) {
+			case POCKET -> this.getNumCells2x2();
+			case RUBIKS -> this.getNumCells3x3();
+		};
 	}
 
 	/**
@@ -59,11 +60,10 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int getNumPositionValues() {
-		switch(CubeConfig.cubeType) {
-			case POCKET: return this.getNumPositionValues2x2();
-			case RUBIKS: return this.getNumPositionValues3x3();
-		}
-		throw new RuntimeException("[getNumPositionValues] Illegal value in switch cubeType");
+		return switch (CubeConfig.cubeType) {
+			case POCKET -> this.getNumPositionValues2x2();
+			case RUBIKS -> this.getNumPositionValues3x3();
+		};
 	}
 
 	/**
@@ -74,11 +74,10 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int[] getPositionValuesVector(){
-		switch(CubeConfig.cubeType) {
-			case POCKET: return this.getPositionValuesVector2x2();
-			case RUBIKS: return this.getPositionValuesVector3x3();
-		}
-		throw new RuntimeException("[getPositionValuesVector] Illegal value in switch cubeType");
+		return switch (CubeConfig.cubeType) {
+			case POCKET -> this.getPositionValuesVector2x2();
+			case RUBIKS -> this.getPositionValuesVector3x3();
+		};
 	}
 
 	/**
@@ -135,18 +134,14 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
 		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
 				"not all color-symmetric states have ygr 'home'!";
-		Iterator<Map.Entry<Integer, CubeState>> it1 = mapColSymm.entrySet().iterator();
-		while (it1.hasNext()) {
-			Map.Entry<Integer, CubeState> entry = it1.next();
+		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
 			set.add(entry.getValue());
 		}
 
 		// once we have the truly different CubeStates in 'set',
 		// create and fill 'equiv' accordingly:
 		equiv = new BoardVector[set.size()];
-		Iterator<CubeState> it2 = set.iterator();
-		while (it2.hasNext()) {
-			CubeState cs  = it2.next();
+		for (CubeState cs : set) {
 			equiv[i++] = cs.getBoardVector();
 		}
 
@@ -180,18 +175,14 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
 		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
 				"not all color-symmetric states have ygr 'home'!";
-		Iterator<Map.Entry<Integer, CubeState>> it1 = mapColSymm.entrySet().iterator();
-		while (it1.hasNext()) {
-			Map.Entry<Integer, CubeState> entry = it1.next();
+		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
 			set.add(entry.getValue());
 		}
 
 		// once we have the truly different CubeStates in 'set',
 		// create and fill 'equiv' accordingly:
 		equiv = new BoardVector[set.size()];
-		Iterator<CubeState> it2 = set.iterator();
-		while (it2.hasNext()) {
-			CubeState cs  = it2.next();
+		for (CubeState cs : set) {
 			equiv[i++] = cs.getBoardVector();
 		}
 
@@ -228,11 +219,10 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		switch(CubeConfig.cubeType) {
-			case POCKET: return this.fixedNTuples2x2(mode);
-			case RUBIKS: return this.fixedNTuples3x3(mode);
-		}
-		throw new RuntimeException("[fixedNTuples] Illegal value in switch cubeType");
+		return switch (CubeConfig.cubeType) {
+			case POCKET -> this.fixedNTuples2x2(mode);
+			case RUBIKS -> this.fixedNTuples3x3(mode);
+		};
 	}
 
 	@Override
@@ -255,11 +245,10 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * Return all neighbors of cell {@code iCell} in the board vector.
 	 */
 	public HashSet<Integer> adjacencySet(int iCell) {
-		switch (CubeConfig.cubeType) {
-			case POCKET: return adjacencySet2x2(iCell);
-			case RUBIKS: return adjacencySet3x3(iCell);
-		}
-		throw new RuntimeException("[adjacencySet] CubeConfig.cubeType = "+CubeConfig.cubeType+" not known!");
+		return switch (CubeConfig.cubeType) {
+			case POCKET -> adjacencySet2x2(iCell);
+			case RUBIKS -> adjacencySet3x3(iCell);
+		};
 	}
 
 
@@ -271,18 +260,12 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * @return the number of board cells
 	 */
 	private int getNumCells2x2() {
-		switch(CubeConfig.boardVecType) {
-			case CUBESTATE:
-				return 24;
-			case CUBEPLUSACTION:
-				return 26;
-			case STICKER:
-				return 49;
-			case STICKER2:
-				return 14;
-			default:
-				throw new RuntimeException("[getNumCells] Illegal value in switch boardVecType");
-		}
+		return switch (CubeConfig.boardVecType) {
+			case CUBESTATE -> 24;
+			case CUBEPLUSACTION -> 26;
+			case STICKER -> 49;
+			case STICKER2 -> 14;
+		};
 	}
 
 	/**
@@ -290,17 +273,11 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * can have.
 	 */
 	private int getNumPositionValues2x2() {
-		switch(CubeConfig.boardVecType) {
-			case CUBESTATE:
-			case CUBEPLUSACTION:
-				return 6;
-			case STICKER:
-				return 4;
-			case STICKER2:
-				return 7;
-			default:
-				throw new RuntimeException("[getNumPositionValues] Illegal value in switch boardVecType");
-		}
+		return switch (CubeConfig.boardVecType) {
+			case CUBESTATE, CUBEPLUSACTION -> 6;
+			case STICKER -> 4;
+			case STICKER2 -> 7;
+		};
 	}
 
 	/**
@@ -540,18 +517,12 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	private int getNumCells3x3() {
 		// TODO: may be different for 3x3x3 Rubiks Cube
-		switch(CubeConfig.boardVecType) {
-			case CUBESTATE:
-				return 54;
-			case CUBEPLUSACTION:
-				return 56;
-			case STICKER:
-				return 480;
-			case STICKER2:
-				return 40;
-			default:
-				throw new RuntimeException("[getNumCells] Illegal value in switch boardVecType");
-		}
+		return switch (CubeConfig.boardVecType) {
+			case CUBESTATE -> 54;
+			case CUBEPLUSACTION -> 56;
+			case STICKER -> 480;
+			case STICKER2 -> 40;
+		};
 	}
 
 	/**
@@ -559,17 +530,11 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * can have.
 	 */
 	private int getNumPositionValues3x3() {
-		switch(CubeConfig.boardVecType) {
-			case CUBESTATE:
-			case CUBEPLUSACTION:
-				return 6;
-			case STICKER:
-				return 2;
-			case STICKER2:
-				return 12;
-			default:
-				throw new RuntimeException("[getNumPositionValues] Illegal value in switch boardVecType");
-		}
+		return switch (CubeConfig.boardVecType) {
+			case CUBESTATE, CUBEPLUSACTION -> 6;
+			case STICKER -> 2;
+			case STICKER2 -> 12;
+		};
 	}
 
 	/**
@@ -581,22 +546,22 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	public int[] getPositionValuesVector3x3() {
 		int[] posValVec = new int[getNumCells()];
 		switch (CubeConfig.boardVecType) {
-			case CUBESTATE:
-			case CUBEPLUSACTION:
+			case CUBESTATE, CUBEPLUSACTION -> {
 				Arrays.fill(posValVec, 6);
 				return posValVec;
-			case STICKER:
+			}
+			case STICKER -> {
 				Arrays.fill(posValVec, 2);
 				return posValVec;
-			case STICKER2:
-				int[] posValVec2 = {
-						8,8,8,8,8,8,8,8,
-						3,3,3,3,3,3,3,3,
-						12,12,12,12,12,12,12,12,12,12,12,12,
+			}
+			case STICKER2 -> {
+				return new int[]{
+						8, 8, 8, 8, 8, 8, 8, 8,
+						3, 3, 3, 3, 3, 3, 3, 3,
+						12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
 						2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-				return posValVec2;
-			default:
-				throw new RuntimeException("We should not arrive here!");
+			}
+			default -> throw new RuntimeException("We should not arrive here!");
 		} // switch
 	}
 
