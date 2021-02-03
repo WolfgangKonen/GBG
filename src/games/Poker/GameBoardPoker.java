@@ -42,7 +42,9 @@ public class GameBoardPoker implements GameBoard {
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
 			m_so = new StateObserverPoker();			// empty Table
-			m_gameGui.resetLog();
+			if (m_Arena.hasGUI() && m_gameGui!=null) {
+				m_gameGui.resetLog();
+			}
 		}
 	}
 

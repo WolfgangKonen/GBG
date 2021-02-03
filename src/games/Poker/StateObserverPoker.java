@@ -6,7 +6,6 @@ import games.StateObservation;
 import tools.Types;
 import tools.Types.ACTIONS;
 
-import javax.swing.*;
 import java.util.*;
 
 /**
@@ -78,7 +77,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	protected ArrayList<String> lastActions;
 
 	private boolean GAMEOVER;
-	private boolean ROUNDOVER;
+	private boolean m_roundOver;
 	boolean isPartialState;
 
 	private Pots pots;
@@ -103,7 +102,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		dealtCards = 0;
 		lastActions = new ArrayList<>();
 		GAMEOVER = false;
-		ROUNDOVER = false;
+		m_roundOver = false;
 		dealer = 0;
 
 		// information about the player:
@@ -136,7 +135,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		dealtCards = 0;
 		lastActions = new ArrayList<>();
 		GAMEOVER = false;
-		ROUNDOVER = false;
+		m_roundOver = false;
 		dealer = 0;
 
 		// information about the player:
@@ -189,7 +188,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		}
 
 		GAMEOVER = other.GAMEOVER;
-		ROUNDOVER = other.ROUNDOVER;
+		m_roundOver = other.m_roundOver;
 		this.dealer = other.dealer;
 
 		m_Player = other.m_Player;
@@ -371,8 +370,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		long[] scoreOfHand = new long[NUM_PLAYER];
 
 		if(isPartialState){
-			ROUNDOVER = true;
-
 			for(int i = 0; i < NUM_PLAYER;i++){
 				if(holeCards[i][0]==null){
 					holeCards[i][0] = new PlayingCard(dealCard());
@@ -417,6 +414,19 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		ONE_PAIR        [13]					14^2
 		HIGH_CARD       [13]					14^1
 		KICKER          [13]					14^0
+
+
+		ROYAL_FLUSH     14^12
+		STRAIGHT_FLUSH  14^11
+		FOUR_OF_A_KIND  14^10
+		FULL_HOUSE      14^8
+		FLUSH           14^7
+		STRAIGHT        14^6
+		THREE_OF_A_KIND 14^5
+		TWO_PAIR        14^3
+		ONE_PAIR        14^2
+		HIGH_CARD       14^1
+		KICKER          14^0
 	 */
 		int[] exponent = { 12, 11, 10, 8, 7, 6, 5, 3, 2, 1, 0};
 		for(int i=0;i<scores.length;i++){
@@ -641,6 +651,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	 */
 	public void advanceDeterministic(ACTIONS action) {
 		super.advanceBase(action);		//		includes addToLastMoves(action)
+		if(isRoundOver())
+			return;
+
 		incrementMoveCounter();
 		if(!isNextActionDeterministic) {
 			throw new RuntimeException("Next action is nondeterministic but called advanceDeterministic()");
@@ -688,6 +701,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	 * @param randAction to advance the state of the game
 	 */
 	public void advanceNondeterministic(ACTIONS randAction) {
+		if(isRoundOver())
+			return;
 		if (isNextActionDeterministic) {
 			throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
 		}
@@ -757,7 +772,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			addToLog("-----------End Round("+gameround+")--------");
 			for(int i = 0 ; i <getNumPlayers() ; i++)
 				addToLog("Chips "+Types.GUI_PLAYER_NAME[i]+": "+chips[i] +" " +playingPlayers[i]);
-			initRound();
+
+			setRoundOver();
 		}
 	}
 
@@ -899,7 +915,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return GAMEOVER;
 	}
 
-	public boolean isRoundOver() { return ROUNDOVER; }
+	public boolean isRoundOver() { return m_roundOver; }
 
 	@Override
 	public boolean isDeterministicGame() {
@@ -1175,7 +1191,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		StateObserverPoker partialState = this.copy();
 		int player = partialState.getPlayer();
 		partialState.setPartialState(true);
-		ROUNDOVER = false;
+		m_roundOver = false;
 			for (int i = 0; i < partialState.holeCards.length; i++) {
 				if(i==player)
 					continue;
@@ -1209,4 +1225,12 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return m_counter;
 	}
 
+
+	private void setRoundOver() {
+		m_roundOver = true;
+	}
+
+	private void setRoundOver(boolean roundOver) {
+		m_roundOver = roundOver;
+	}
 }

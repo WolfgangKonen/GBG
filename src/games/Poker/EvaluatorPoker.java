@@ -47,11 +47,20 @@ public class EvaluatorPoker extends Evaluator {
 		}
 	}
 
+	public void evalAgentSpecificState(PlayAgent playAgent,StateObserverPoker so) {
+		m_PlayAgent = playAgent;
+		PlayAgent[] pavec = new PlayAgent[] {playAgent,randomAgent,randomAgent2,randomAgent3};
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(pavec), so, 100000, 2, null);
+		lastResult = sc.scTup[0];
+		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
+		System.out.println(m_msg);
+	}
+
 	public double evalAgent1(PlayAgent playAgent, PlayAgent opponent,PlayAgent opponent2,PlayAgent opponent3, GameBoard gb) {
 		StateObservation so = gb.getDefaultStartState();
 		PlayAgent[] pavec = new PlayAgent[] {playAgent,opponent,opponent2,opponent3};
 
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 1000, 1);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 10000, 2);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);

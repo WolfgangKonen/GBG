@@ -33,6 +33,7 @@ public class GameBoardPokerGui extends JFrame {
     private JButton raiseButton;
     private JButton foldButton;
     private JButton allInButton;
+    private JButton continueButton;
 
     private JLabel currentPlayerChipsLabel;
 
@@ -44,6 +45,8 @@ public class GameBoardPokerGui extends JFrame {
     JPanel[] playerNamePanel;
     JLabel[] playerCall;
 
+    // Pause workaround
+    boolean pause;
 
     // color scheme
     Color foldedColor = new Color(246, 81, 29);
@@ -94,6 +97,7 @@ public class GameBoardPokerGui extends JFrame {
         raiseButton     = new JButton("raise");
         foldButton      = new JButton("fold");
         allInButton     = new JButton("all in");
+        continueButton  = new JButton("continue");
 
         checkButton.addActionListener( e -> {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
@@ -120,6 +124,10 @@ public class GameBoardPokerGui extends JFrame {
                 m_gb.HGameMove(5);
         });
 
+        continueButton.addActionListener(e -> {
+            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+                continueWithTheGame();
+        });
 
         currentPlayerChipsLabel = new JLabel("Chips: ");
 
@@ -131,6 +139,7 @@ public class GameBoardPokerGui extends JFrame {
         actionPanel.add(raiseButton);
         actionPanel.add(foldButton );
         actionPanel.add(allInButton);
+        actionPanel.add(continueButton);
         return actionPanel;
 
     }
@@ -151,7 +160,6 @@ public class GameBoardPokerGui extends JFrame {
         for(int i = 0;i<2;i++) {
             holeCardsPanels[i] = new CardPanel(150);
         }
-
 
         //FLOP
         Panel flopPanel = new Panel();
@@ -235,8 +243,6 @@ public class GameBoardPokerGui extends JFrame {
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         logPanel.add(scrollPaneLog);
-        //logPanel.setMinimumSize(new Dimension(log.getPreferredSize().width+10,log.getPreferredSize().height));
-        //logPanel.setPreferredSize(new Dimension(log.getPreferredSize().width+10,log.getPreferredSize().height));
 
         return logPanel;
     }
@@ -332,32 +338,54 @@ public class GameBoardPokerGui extends JFrame {
     }
 
     private void updateActions(StateObserverPoker SoP){
-        ArrayList<Types.ACTIONS> allActions = SoP.getAllAvailableActions();
-        for (Types.ACTIONS action : allActions) {
-                switch (action.toInt()) {
-                    // FOLD
-                    case 0 -> foldButton.setEnabled(SoP.getAvailableActions().contains(action));
-                    // CHECK
-                    case 1 -> checkButton.setEnabled(SoP.getAvailableActions().contains(action));
-                    // BET
-                    case 2 -> betButton.setEnabled(SoP.getAvailableActions().contains(action));
-                    // CALL
-                    case 3 -> callButton.setEnabled(SoP.getAvailableActions().contains(action));
-                    // RAISE
-                    case 4 -> raiseButton.setEnabled(SoP.getAvailableActions().contains(action));
-                    // ALL IN
-                    case 5 -> allInButton.setEnabled(SoP.getAvailableActions().contains(action));
+        if(SoP.isRoundOver()){
+            pause = true;
+            continueButton.setEnabled(true);
+            foldButton.setEnabled(false);
+            checkButton.setEnabled(false);
+            betButton.setEnabled(false);
+            callButton.setEnabled(false);
+            raiseButton.setEnabled(false);
+            allInButton.setEnabled(false);
+
+            while(pause){
+                try {
+                    Thread.sleep(500);
+                } catch (Exception e){
+
                 }
+            }
+
+        }else{
+            ArrayList<Types.ACTIONS> allActions = SoP.getAllAvailableActions();
+            for (Types.ACTIONS action : allActions) {
+                    switch (action.toInt()) {
+                        // FOLD
+                        case 0 -> foldButton.setEnabled(SoP.getAvailableActions().contains(action));
+                        // CHECK
+                        case 1 -> checkButton.setEnabled(SoP.getAvailableActions().contains(action));
+                        // BET
+                        case 2 -> betButton.setEnabled(SoP.getAvailableActions().contains(action));
+                        // CALL
+                        case 3 -> callButton.setEnabled(SoP.getAvailableActions().contains(action));
+                        // RAISE
+                        case 4 -> raiseButton.setEnabled(SoP.getAvailableActions().contains(action));
+                        // ALL IN
+                        case 5 -> allInButton.setEnabled(SoP.getAvailableActions().contains(action));
+                    }
+            }
+            currentPlayerChipsLabel.setText("Chips: "+SoP.getChips()[SoP.getPlayer()]);
+            if(betButton.isEnabled())
+                betButton.setText("bet ("+SoP.getBigblind()+")");
+            if(raiseButton.isEnabled())
+                raiseButton.setText("raise ("+(SoP.getOpenPlayer(SoP.getPlayer())+SoP.getBigblind())+")");
+            if(callButton.isEnabled())
+                callButton.setText("call ("+SoP.getOpenPlayer(SoP.getPlayer())+")");
+            if(allInButton.isEnabled())
+                allInButton.setText("all in ("+SoP.getChips()[SoP.getPlayer()]+")");
+            continueButton.setEnabled(false);
         }
-        currentPlayerChipsLabel.setText("Chips: "+SoP.getChips()[SoP.getPlayer()]);
-        if(betButton.isEnabled())
-            betButton.setText("bet ("+SoP.getBigblind()+")");
-        if(raiseButton.isEnabled())
-            raiseButton.setText("raise ("+(SoP.getOpenPlayer(SoP.getPlayer())+SoP.getBigblind())+")");
-        if(callButton.isEnabled())
-            callButton.setText("call ("+SoP.getOpenPlayer(SoP.getPlayer())+")");
-        if(allInButton.isEnabled())
-            allInButton.setText("all in ("+SoP.getChips()[SoP.getPlayer()]+")");
+
     }
 
     public void addToLog(String line){
@@ -502,4 +530,7 @@ public class GameBoardPokerGui extends JFrame {
             System.out.println("enable interaction!");
     }
 
+    private void continueWithTheGame(){
+        pause = false;
+    }
 }
