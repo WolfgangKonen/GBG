@@ -31,6 +31,10 @@ public class CardPanel extends JPanel {
         setCard("2B.png");
     }
 
+    public void inactive(){
+        setCard("1B.png");
+    }
+
     public void paint(Graphics g) {
         g.drawImage(img, 0, 0, this);
     }

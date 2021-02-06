@@ -1,14 +1,17 @@
 package games.Poker;
 
 import games.Arena;
+import games.Othello.Gui.Legend;
 import tools.Types;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class GameBoardPokerGui extends JFrame {
+public class GameBoardPokerGuiOld extends JFrame {
 
     // GB
     private final GameBoardPoker m_gb;
@@ -56,7 +59,7 @@ public class GameBoardPokerGui extends JFrame {
 
     boolean check = true;
 
-    GameBoardPokerGui(GameBoardPoker gb){
+    GameBoardPokerGuiOld(GameBoardPoker gb){
         super("Poker");
 
         m_gb = gb;
@@ -153,9 +156,8 @@ public class GameBoardPokerGui extends JFrame {
             communityCardsPanels[i] = new CardPanel(150);
         }
 
-        int numPlayers = m_gb.getNumPlayers();
-        holeCardsPanels = new CardPanel[numPlayers*2];
-        for(int i = 0;i<numPlayers*2;i++) {
+        holeCardsPanels = new CardPanel[5];
+        for(int i = 0;i<2;i++) {
             holeCardsPanels[i] = new CardPanel(150);
         }
 
@@ -204,28 +206,13 @@ public class GameBoardPokerGui extends JFrame {
         Panel holePanel = new Panel();
         holePanel.setLayout(new BoxLayout(holePanel,BoxLayout.PAGE_AXIS));
 
-        JPanel holeCardsPanel = new JPanel();
-        holeCardsPanel.setLayout(new BoxLayout(holeCardsPanel,BoxLayout.X_AXIS));
-        for(int i = 0;i<numPlayers;i++) {
-            JPanel outerHoleCard = new JPanel();
-            outerHoleCard.setLayout(new BoxLayout(outerHoleCard,BoxLayout.PAGE_AXIS));
-            JPanel holeCard = new JPanel();
-            holeCard.setLayout(new BoxLayout(holeCard,BoxLayout.X_AXIS));
-            holeCard.add(holeCardsPanels[i*2]);
-            holeCard.add(holeCardsPanels[i*2+1]);
+        Panel holeCards = new Panel();
+        holeCards.add(holeCardsPanels[0]);
+        holeCards.add(holeCardsPanels[1]);
 
-            JLabel playerLabel = new JLabel("Player: "+i);
-            playerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            outerHoleCard.add(holeCard);
-            outerHoleCard.add(playerLabel);
-
-
-            outerHoleCard.setBorder(BorderFactory.createLineBorder(Color.black));
-            holeCardsPanel.add(outerHoleCard);
-        }
         JLabel holeLabel = new JLabel("Hole Cards");
         holeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        holePanel.add(holeCardsPanel);
+        holePanel.add(holeCards);
         holePanel.add(holeLabel);
 
         centerPanelBottom.add(holePanel);
@@ -361,16 +348,6 @@ public class GameBoardPokerGui extends JFrame {
             raiseButton.setEnabled(false);
             allInButton.setEnabled(false);
 
-            for(int i = 0;i<SoP.getNumPlayers();i++) {
-                if(!SoP.getFoldedPlayers()[i]&&SoP.getPlayingPlayers()[i]){
-                    holeCardsPanels[i*2].setCard(SoP.getHoleCards(i)[0].getImagePath());
-                    holeCardsPanels[i*2+1].setCard(SoP.getHoleCards(i)[1].getImagePath());
-                }else{
-                    holeCardsPanels[i*2].inactive();
-                    holeCardsPanels[i*2+1].inactive();
-                }
-            }
-
             while(pause){
                 try {
                     Thread.sleep(500);
@@ -466,18 +443,11 @@ public class GameBoardPokerGui extends JFrame {
         }
 
         PlayingCard[] holeCards = sop.getHoleCards();
-        for(int i = 0;i<sop.getNumPlayers();i++){
-            if(sop.getPlayer()==i){
-                holeCardsPanels[sop.getPlayer()*2].setCard(holeCards[0].getImagePath());
-                holeCardsPanels[sop.getPlayer()*2+1].setCard(holeCards[1].getImagePath());
+        for(int i = 0;i<holeCards.length;i++){
+            if(holeCards[i]!=null){
+                holeCardsPanels[i].setCard(holeCards[i].getImagePath());
             }else{
-                if(sop.getFoldedPlayers()[i]||!sop.getPlayingPlayers()[i]){
-                    holeCardsPanels[i*2].inactive();
-                    holeCardsPanels[i*2+1].inactive();
-                }else {
-                    holeCardsPanels[i * 2].reset();
-                    holeCardsPanels[i * 2 + 1].reset();
-                }
+                communityCardsPanels[i].reset();
             }
         }
     }

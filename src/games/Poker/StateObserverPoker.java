@@ -77,7 +77,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	protected ArrayList<String> lastActions;
 
 	private boolean GAMEOVER;
-	//private boolean m_roundOver;		// /WK/ use ObserverBase.m_roundOver
 	boolean isPartialState;
 
 	private Pots pots;
@@ -101,9 +100,10 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		isPartialState = false;
 		rand = new Random(System.currentTimeMillis());
 		dealtCards = 0;
+		setRoundOver(false);
 		lastActions = new ArrayList<>();
 		GAMEOVER = false;
-		m_roundOver = false;
+
 		dealer = 0;
 
 		// information about the player:
@@ -136,7 +136,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		dealtCards = 0;
 		lastActions = new ArrayList<>();
 		GAMEOVER = false;
-		m_roundOver = false;
+		setRoundOver(false);
 		dealer = 0;
 
 		// information about the player:
@@ -190,7 +190,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		}
 
 		GAMEOVER = other.GAMEOVER;
-		//m_roundOver = other.m_roundOver;  // /WK/ this is done by ObserverBase's copy constructor
 		this.dealer = other.dealer;
 
 		m_Player = other.m_Player;
@@ -918,9 +917,6 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return GAMEOVER;
 	}
 
-	// *** already implemented in ObserverBase
-//	public boolean isRoundOver() { return m_roundOver; }
-
 	@Override
 	public boolean isDeterministicGame() {
 		return false;
@@ -1229,14 +1225,4 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return m_counter;
 	}
 
-
-	// *** never used ***
-//	private void setRoundOver() {
-//		m_roundOver = true;
-//	}
-
-	// *** use ObserverBase.setRoundOver(boolean)
-//	public void setRoundOver(boolean roundOver) {
-//		m_roundOver = roundOver;
-//	}
 }
