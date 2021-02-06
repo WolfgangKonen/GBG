@@ -29,6 +29,7 @@ public class GameBoardBlackJackGui extends JFrame {
     Color red = new Color(70, 1, 1);
     Color green = new Color(1, 70, 1);
     Color blue = new Color(1, 79, 160);
+    private JButton continueButton;
 
 
 
@@ -140,6 +141,10 @@ public class GameBoardBlackJackGui extends JFrame {
     }
 
     public void stopAfterUpdate(){
+        for(JButton b : currentButtons) {
+            b.setEnabled(false);
+        }
+        continueButton.setEnabled(true);
         hold_flag = true;
         while (true) {
             if (!hold_flag) {
@@ -212,7 +217,8 @@ public class GameBoardBlackJackGui extends JFrame {
             buttonToAdd.setEnabled(false);
             p.add(buttonToAdd);
         }
-        p.add(getContinueButton());
+        continueButton = getContinueButton();
+        p.add(continueButton);
         return p;
     }
 

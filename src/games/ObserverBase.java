@@ -43,10 +43,12 @@ abstract public class ObserverBase implements StateObservation {
     
     public ObserverBase(ObserverBase other) {
 		this.m_counter = other.m_counter;
+		this.creatingPlayer = other.creatingPlayer;
+		this.m_partialState = other.m_partialState;
+		this.m_roundOver = other.m_roundOver;
 		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();		// WK: bug fix, added missing .clone()
 		this.storedMaxScore = other.storedMaxScore;
 		this.storedActBest = other.storedActBest;
-		this.creatingPlayer = other.creatingPlayer;
 		if (other.storedActions!=null) this.storedActions = other.storedActions.clone();
 		if (other.storedValues!=null) this.storedValues = other.storedValues.clone();
     }

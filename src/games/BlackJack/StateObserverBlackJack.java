@@ -285,7 +285,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             advanceDeterministic(action);
         }
         // and NonDeterministic
-        while (!isNextActionDeterministic()) {
+        while (!isNextActionDeterministic() && !isRoundOver()) {
             advanceNondeterministic();
         }
     }
@@ -719,7 +719,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                         log.add(p.name + " summed payoff this round: " + roundPayOff);
                     }
                 }
-               /* depricated
+               /* deprecated
                if(currentSleepDuration > 0) {
                     bjGui.update(this, false, false);
                     SwingUtilities.invokeLater(() -> {
@@ -730,8 +730,8 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                 }*/
 
 
-                //setRoundOver(true);
-                initRound();
+                setRoundOver(true);
+                //initRound();
                 break;
         }
         if (isNextActionDeterministic)
@@ -741,7 +741,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     @Override
     public void initRound(){
         // Setup new Round
-        //setRoundOver(false);
+        setRoundOver(false);
         log.add("-------------New Round---------------");
         for (Player p : players) {
             p.clearHand();

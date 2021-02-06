@@ -77,7 +77,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	protected ArrayList<String> lastActions;
 
 	private boolean GAMEOVER;
-	private boolean m_roundOver;
+	//private boolean m_roundOver;		// /WK/ use ObserverBase.m_roundOver
 	boolean isPartialState;
 
 	private Pots pots;
@@ -95,6 +95,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	//</editor-fold>
 
 	//<editor-fold desc="constructor">
+	// *** never used *** /WK/
 	public void restart(){
 		gameround = 0;
 		isPartialState = false;
@@ -160,6 +161,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	}
 
 	public StateObserverPoker(StateObserverPoker other)	{
+		super(other);
 		if(other.setStartChips!=null){
 			setStartChips = new double[other.setStartChips.length];
 			for(int i = 0;i<other.setStartChips.length;i++)
@@ -188,7 +190,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		}
 
 		GAMEOVER = other.GAMEOVER;
-		m_roundOver = other.m_roundOver;
+		//m_roundOver = other.m_roundOver;  // /WK/ this is done by ObserverBase's copy constructor
 		this.dealer = other.dealer;
 
 		m_Player = other.m_Player;
@@ -269,6 +271,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		addToLog("----------New Round ("+gameround+")---------");
 
 		initCardDeck();
+		setRoundOver(false);
 
 		m_phase = 0;
 		dealtCards = 0;
@@ -773,7 +776,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			for(int i = 0 ; i <getNumPlayers() ; i++)
 				addToLog("Chips "+Types.GUI_PLAYER_NAME[i]+": "+chips[i] +" " +playingPlayers[i]);
 
-			setRoundOver();
+			setRoundOver(true);
 		}
 	}
 
@@ -915,7 +918,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return GAMEOVER;
 	}
 
-	public boolean isRoundOver() { return m_roundOver; }
+	// *** already implemented in ObserverBase
+//	public boolean isRoundOver() { return m_roundOver; }
 
 	@Override
 	public boolean isDeterministicGame() {
@@ -1226,11 +1230,13 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	}
 
 
-	private void setRoundOver() {
-		m_roundOver = true;
-	}
+	// *** never used ***
+//	private void setRoundOver() {
+//		m_roundOver = true;
+//	}
 
-	private void setRoundOver(boolean roundOver) {
-		m_roundOver = roundOver;
-	}
+	// *** use ObserverBase.setRoundOver(boolean)
+//	public void setRoundOver(boolean roundOver) {
+//		m_roundOver = roundOver;
+//	}
 }

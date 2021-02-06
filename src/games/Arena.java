@@ -656,6 +656,7 @@ abstract public class Arena implements Runnable {
 				// test two conditions to break out of the while-loop
 				//
 				so = gb.getStateObs();
+				if (so.isRoundOver() && !so.isGameOver()) so.initRound();
 				if (so.isGameOver()) {
 
 					// for (agentVec[0]=="Human")-case: ensure to show the "Solved
