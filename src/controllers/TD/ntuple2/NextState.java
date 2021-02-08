@@ -58,13 +58,16 @@ public class NextState {
 			this.tdAgt = parent;
 			refer = so.copy();
 	        if (tdAgt.getAFTERSTATE()) {   // if checkbox "AFTERSTATE" is checked
-	        	
-            	// implement it in such a way that StateObservation so is *not* changed -> that is why 
-            	// we copy *first* to afterState, then advance:
-                afterState = so.copy();
-                afterState.advanceDeterministic(actBest);
-                nextSO = afterState.copy();
-                nextSO.advanceNondeterministic(); 
+
+				// implement it in such a way that StateObservation so is *not* changed -> that is why
+				// we copy *first* to afterState, then advance:
+				afterState = so.copy();
+				afterState.advanceDeterministic(actBest);
+				nextSO = afterState.copy();
+				// /WK/ commented out since isNextActionDeterministic() is not yet part of the general interface
+				//while(!nextSO.isNextActionDeterministic() && !isRoundOver()) {
+					nextSO.advanceNondeterministic();
+				//}
 	        	
 	        } else {
                 nextSO = so.copy();
@@ -74,7 +77,8 @@ public class NextState {
 	        
 	        // callback function to set this.nextReward and this.nextRewardTuple 
 	        tdAgt.collectReward(this);
-	        
+
+			if (nextSO.isRoundOver() && !nextSO.isGameOver()) nextSO.initRound();
 		}
 
 		/**

@@ -459,6 +459,7 @@ abstract public class Arena implements Runnable {
 		ArrayList<PStats> psList = new ArrayList<>();
 
 		boolean showValue = m_xab.getShowValueOnGameBoard();
+		boolean showValue_U = false;
 
 		// fetch the agents in a way general for 1-, 2- and N-player games
 		try {
@@ -576,9 +577,9 @@ abstract public class Arena implements Runnable {
 					pa = qaVector[so.getPlayer()];
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
-						gb.updateBoard(so, false, showValue);
-						// leave the previously shown values if it is
-						// HumanPlayer
+						showValue_U = showValue;
+						//gb.updateBoard(so, false, showValue);
+						// leave the previously shown values if it is HumanPlayer
 					} else {
 						gb.enableInteraction(false);
 
@@ -614,9 +615,11 @@ abstract public class Arena implements Runnable {
 							} catch (Exception e) {
 								System.out.println("Thread 1");
 							}
-							gb.updateBoard(so, false, showValue);
+							showValue_U = showValue;
+							//gb.updateBoard(so, false, showValue);
 						} else {				// the TS-play case (single-player games):
-							gb.updateBoard(so, false, false);
+							showValue_U = false;
+							//gb.updateBoard(so, false, false);
 						}
 
 						// gather information for later printout to agents/gameName/csv/playStats.csv.
@@ -636,7 +639,7 @@ abstract public class Arena implements Runnable {
 						gb.enableInteraction(true);
 
 					} // else (pa instanceof ...)
-					
+					gb.updateBoard(so, false, showValue_U);
 				} // if(gb.isActionReq())
 				else {
 					try {

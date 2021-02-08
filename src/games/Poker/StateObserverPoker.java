@@ -635,7 +635,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		if(isNextActionDeterministic()){
 			advanceDeterministic(action);
 		}
-		while(!isNextActionDeterministic()){
+		while(!isNextActionDeterministic() && !isRoundOver()){
 			advanceNondeterministic();
 		}
 	}

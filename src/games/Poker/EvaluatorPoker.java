@@ -31,7 +31,8 @@ public class EvaluatorPoker extends Evaluator {
 	}
 	
 	private void initEvaluator(GameBoard gb) {
-		gb.getArena();
+		if (gb!=null)			// /WK/ added to avoid NullPointerException
+			gb.getArena();
 	}
 
 	@Override

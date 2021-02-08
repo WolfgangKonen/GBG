@@ -63,17 +63,21 @@ public class NextState4 {
                 afterState = so.copy();
                 afterState.advanceDeterministic(actBest);
                 nextSO = afterState.copy();
-                nextSO.advanceNondeterministic(); 
+				// /WK/ commented out since isNextActionDeterministic() is not yet part of the general interface
+				//while(!nextSO.isNextActionDeterministic() && !isRoundOver()) {
+					nextSO.advanceNondeterministic();
+				//}
 	        	
 	        } else {
                 nextSO = so.copy();
                 nextSO.advance(actBest);
 				afterState = nextSO.copy();
 	        }
-	        
+
 	        // callback function to set this.nextReward and this.nextRewardTuple 
 	        tdAgt.collectReward(this);
-	        
+
+			if (nextSO.isRoundOver() && !nextSO.isGameOver()) nextSO.initRound();
 		}
 
 		/**
