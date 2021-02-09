@@ -578,7 +578,6 @@ abstract public class Arena implements Runnable {
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
 						showValue_U = showValue;
-						//gb.updateBoard(so, false, showValue);
 						// leave the previously shown values if it is HumanPlayer
 					} else {
 						gb.enableInteraction(false);
@@ -616,10 +615,8 @@ abstract public class Arena implements Runnable {
 								System.out.println("Thread 1");
 							}
 							showValue_U = showValue;
-							//gb.updateBoard(so, false, showValue);
 						} else {				// the TS-play case (single-player games):
 							showValue_U = false;
-							//gb.updateBoard(so, false, false);
 						}
 
 						// gather information for later printout to agents/gameName/csv/playStats.csv.
@@ -637,9 +634,9 @@ abstract public class Arena implements Runnable {
 								nEmpty, cumEmpty, highestTile);
 						psList.add(pstats);
 						gb.enableInteraction(true);
-
 					} // else (pa instanceof ...)
-					gb.updateBoard(so, false, showValue_U);
+
+					if (!so.isRoundOver()) gb.updateBoard(so, false, showValue_U);
 				} // if(gb.isActionReq())
 				else {
 					try {
@@ -653,13 +650,20 @@ abstract public class Arena implements Runnable {
 						System.out.println("Thread 3");
 					}
 				}
-				//pa = qaVector[so.getPlayer()];		// /WK/ not needed
-				
+				so = gb.getStateObs();
+				if (so.isRoundOver()) {
+					// this updateBoard on round-over is needed to fix the issue in Poker, where a human player ending
+					// a round would miss the 'continue' button (because it comes from the else-branch (!gb.isActionReq())
+					// above. With this updateBoard-call we are sure to pause in GameBoardGUI until 'continue' is pressed.
+					// (To avoid calling updateBoard twice, we tag the call above with 'if (!so.isRoundOver()).)
+					gb.updateBoard(so, false, showValue_U);
+
+					if (!so.isGameOver()) so.initRound();
+				}
+
 				//
 				// test two conditions to break out of the while-loop
 				//
-				so = gb.getStateObs();
-				if (so.isRoundOver() && !so.isGameOver()) so.initRound();
 				if (so.isGameOver()) {
 
 					// for (agentVec[0]=="Human")-case: ensure to show the "Solved
