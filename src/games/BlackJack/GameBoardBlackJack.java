@@ -58,11 +58,15 @@ public class GameBoardBlackJack implements GameBoard {
         StateObserverBlackJack soT = (StateObserverBlackJack) so;
         soT.updateCurrentSleepDuration(getArena().currentSleepDuration);
 
-        if (so != null) {
-            assert (so instanceof StateObserverBlackJack)
-                    : "StateObservation 'so' is not an instance of StateObserverBlackJack";
-            m_so = (StateObserverBlackJack) soT.copy();
-        }
+        // /WK/ this was problematic, because Arena.PlayGame relies on working always with the same object
+        //      so = gb.getStateObs()
+        // because only in this way the information is passed around properly.
+        // So DO NOT make a copy of m_so while being in-game!
+//        if (so != null) {
+//            assert (so instanceof StateObserverBlackJack)
+//                    : "StateObservation 'so' is not an instance of StateObserverBlackJack";
+//            m_so = (StateObserverBlackJack) soT.copy();
+//        }
 
         if (m_gameGui != null)
             m_gameGui.update(
