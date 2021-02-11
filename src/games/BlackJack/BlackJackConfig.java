@@ -20,7 +20,7 @@ public class BlackJackConfig {
     /**
      * How many rounds will be played
      */
-    final static int episodeLength = 50;
+    final static int episodeLength = 15;
 
 
 }
