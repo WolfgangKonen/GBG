@@ -1081,7 +1081,7 @@ public class XArenaFuncs {
 				if (nextTimes != null)
 					nextTimes[player].addNewTimeNS(endTNano - startTNano);
 				so.advance(actBest);
-				player = so.getPlayer();
+
 
 				if (so.isGameOver()) {
 					sc = so.getGameScoreTuple();
@@ -1093,6 +1093,9 @@ public class XArenaFuncs {
 					break; // out of while
 
 				} // if (so.isGameOver())
+				if(so.isRoundOver()&&!so.isGameOver()) so.initRound();
+
+				player = so.getPlayer();
 			} // while(true)
 
 		} // for (k)
