@@ -13,6 +13,7 @@ import games.Sim.StateObserverSim;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
+import params.ParOther;
 import starters.GBGLaunch;
 import tools.ScoreTuple;
 import tools.Types;
@@ -67,6 +68,7 @@ abstract public class Arena implements Runnable {
 
 	// TS variables
 	private final String TAG = "[Arena] ";
+	private TSGameDataTransfer m_spDT = null;
 	public TSAgentManager tournamentAgentManager = null;
 	public boolean singlePlayerTSRunning = false;
 
@@ -444,6 +446,7 @@ abstract public class Arena implements Runnable {
 	 * Play button, if not, it was called from the Tournament System.
 	 */
 	public void PlayGame(TSGameDataTransfer spDT) {
+		m_spDT = spDT;
 		final int numPlayers = gb.getStateObs().getNumPlayers();
 		StateObservation so, startSO;
 		Types.ACTIONS_VT actBest;
@@ -463,11 +466,11 @@ abstract public class Arena implements Runnable {
 
 		// fetch the agents in a way general for 1-, 2- and N-player games
 		try {
-			if (spDT==null) { // regular non TS game
+			if (spDT==null) { 	// regular non-TS game
 				paVector = m_xfun.fetchAgents(m_xab);
 				AgentBase.validTrainedAgents(paVector, numPlayers);
 				qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
-			} else { // TS game
+			} else { 			// TS game
 				if (spDT.standardAgentSelected) {
 					// GBG standard agent
 					paVector = m_xfun.fetchAgents(m_xab);
@@ -476,7 +479,7 @@ abstract public class Arena implements Runnable {
 				} else {
 					// HDD agent
 					paVector = spDT.getPlayAgents();
-					qaVector = m_xfun.wrapAgents(paVector, gb.getStateObs(), m_xab);
+					qaVector = m_xfun.wrapAgents_TS(paVector, m_xab, gb.getStateObs());
 				}
 			}
 		} catch (RuntimeException e) {
@@ -486,80 +489,14 @@ abstract public class Arena implements Runnable {
 			return;
 		}
 
-		String[] agentVec = new String[numPlayers];
-		StringBuilder sMsg;
+		String[] agentVec = buildPlayMessages(qaVector,numPlayers);
 
-		if (spDT==null)
-			gb.toFront();
+		so = selectPlayStartState(showValue);
 
-		switch (numPlayers) {
-			case (1) -> {
-				agentVec[0] = m_xab.getSelectedAgent(0);
-				sMsg = new StringBuilder("Playing a game ... [ " + agentVec[0] + " ]");
-				int wrappedNPly = m_xab.oPar[0].getWrapperNPly();
-				if (wrappedNPly > 0)
-					sMsg = new StringBuilder("Playing a game ... [ " + agentVec[0] + ", nPly=" + wrappedNPly + " ]");
-			}
-			case (2) -> {
-				agentVec[0] = qaVector[0].getName();
-				agentVec[1] = qaVector[1].getName();
-				sMsg = new StringBuilder("Playing a game ... [" + agentVec[0] + " (X) vs. " + agentVec[1] + " (O)]");
-			}
-			default -> {
-				sMsg = new StringBuilder("Playing a game ... [");
-				for (int n = 0; n < numPlayers; n++) {
-					agentVec[n] = qaVector[n].getName();
-					sMsg.append(agentVec[n]).append("(").append(n).append(")");
-					if (n < numPlayers - 1)
-						sMsg.append(", ");
-				}
-				sMsg.append("]");
-			}
-		}
-
-		setStatusMessage(sMsg.toString());
-		System.out.println(sMsg);
-
-		if (taskBefore == Task.INSPECTV) {
-			// if taskBefore==INSPECTV, start from the board left by InspectV
-			pa = qaVector[0];
-			so = gb.getStateObs();
-			gb.updateBoard(so, true, showValue);
-		} else {
-			// if taskBefore!=INSPECTV, select here the start state:
-			//gb.clearBoard(true, true); // reset game board to default start state
-			so = gb.getDefaultStartState();
-			//if (m_xab.oPar[0].getChooseStart01()) {
-					// this is not recommended: an innocent start of Play where chooseStart01 in ParOther remains set 
-					// from a previous training will let the first agent make (silently) an unfortunate 1st move in
-					//  half of the played games
-			if (gb.getArena().getGameName().equals("RubiksCube")) {
-				// On the other hand, chooseStartState is mandatory for the game RubiksCube (but may be a possible
-				// option also for other games as well):
-				// do not start from the default start state (solved cube), but
-				// choose randomly a different one:
-				so = gb.chooseStartState();
-			}
-			gb.updateBoard(so, false, showValue);
-		}
-		taskBefore = Task.IDLE;
-
-		System.out.println("StartState: "+so.stringDescr());
-		gb.setActionReq(true);
-		gb.enableInteraction(true); // needed for CFour
-		so.resetMoveCounter();
+		assert qaVector.length == so.getNumPlayers() : "Number of agents does not match so.getNumPlayers()!";
 		startSO = so.copy();
 		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, nEmpty, cumEmpty, highestTile);
 		psList.add(pstats);
-
-		if (spDT!=null) { // set random start moves for TS
-			if (spDT.rndmStartMoves>0) {
-				so = spDT.startSO;
-				System.out.println(TAG+"RandomStartState set: "+so);
-			}
-		}
-
-		assert qaVector.length == so.getNumPlayers() : "Number of agents does not match so.getNumPlayers()!";
 
 		logSessionid = logManager.newLoggingSession(so);
 
@@ -572,8 +509,8 @@ abstract public class Arena implements Runnable {
 			{
 				if (gb.isActionReq()) {
 					so = gb.getStateObs();
-					if (!(so instanceof StateObserverSim))	// /WK/ test whether the following updateBoard is obsolete for Sim
-						gb.updateBoard(so, false, showValue);
+					//if (!(so instanceof StateObserverSim))	// /WK/ test whether the following updateBoard is obsolete
+					//	gb.updateBoard(so, false, showValue);
 					pa = qaVector[so.getPlayer()];
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
@@ -665,34 +602,8 @@ abstract public class Arena implements Runnable {
 				// test two conditions to break out of the while-loop
 				//
 				if (so.isGameOver()) {
-
-					// for (agentVec[0]=="Human")-case: ensure to show the "Solved
-					// in..." text in leftInfo:
-					gb.updateBoard(so, false, showValue);
-//					this.enableButtons(true);
-					
-					String gostr = this.gameOverString(so,agentVec,spDT);
-					switch (numPlayers) {
-					case 1:
-						if (!singlePlayerTSRunning)
-							showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-						break; 
-					case 2:
-						gb.updateBoard(so, false, showValue);				// /WK/ really needed?
-						showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-
-						gb.updateBoard(so, false, showValue);		// /WK/ really needed?
-						if (withUI) m_ArenaFrame.repaint();			// /WK/ really needed?
-						break; 
-					case 3:
-						showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-						break;
-					case 4:
-						showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-						break;
-					default:
-						throw new RuntimeException("Case numPlayers = "+numPlayers+" not handled!");
-					}
+					String gostr = this.gameOverString(so,agentVec);
+					this.gameOverMessages(so,numPlayers,gostr,showValue);
 
 					break; // this is the final break out of the while loop (1st condition)
 				} // if isGameOver
@@ -703,6 +614,7 @@ abstract public class Arena implements Runnable {
 						gScore *= StateObserver2048.MAXSCORE;
 					showMessage("Game stopped (epiLength) with score " + gScore, "Game Over",
 							JOptionPane.INFORMATION_MESSAGE);
+
 					break; // this is the final break out of while loop (2nd condition)
 				} // if (so.getMoveCounter()...)
 
@@ -727,6 +639,119 @@ abstract public class Arena implements Runnable {
 		setStatusMessage("Done.");
 	} // PlayGame(TSGameDataTransfer spDT)
 
+	// Build the messages shown at start of game play (helper for PlayGame(...))
+	// Returns the string vector of all agent names.
+	private String[] buildPlayMessages(PlayAgent[] qaVector, int numPlayers){
+		String[] agentVec = new String[numPlayers];
+		StringBuilder sMsg;
+
+		if (m_spDT == null)
+			gb.toFront();
+
+		switch (numPlayers) {
+			case (1) -> {
+				agentVec[0] = m_xab.getSelectedAgent(0);
+				sMsg = new StringBuilder("Playing a game ... [ " + agentVec[0] + " ]");
+				int wrappedNPly = m_xab.oPar[0].getWrapperNPly();
+				if (wrappedNPly > 0)
+					sMsg = new StringBuilder("Playing a game ... [ " + agentVec[0] + ", nPly=" + wrappedNPly + " ]");
+			}
+			case (2) -> {
+				agentVec[0] = qaVector[0].getName();
+				agentVec[1] = qaVector[1].getName();
+				sMsg = new StringBuilder("Playing a game ... [" + agentVec[0] + " (X) vs. " + agentVec[1] + " (O)]");
+			}
+			default -> {
+				sMsg = new StringBuilder("Playing a game ... [");
+				for (int n = 0; n < numPlayers; n++) {
+					agentVec[n] = qaVector[n].getName();
+					sMsg.append(agentVec[n]).append("(").append(n).append(")");
+					if (n < numPlayers - 1)
+						sMsg.append(", ");
+				}
+				sMsg.append("]");
+			}
+		}
+		setStatusMessage(sMsg.toString());
+		System.out.println(sMsg);
+
+		return agentVec;
+	}
+
+	// Select the start state (helper for PlayGame(...))
+	// The call to the gb methods causes gb.m_so to be set to the same state.
+	private StateObservation selectPlayStartState(boolean showValue) {
+		StateObservation so;
+		boolean withReset;
+		if (taskBefore == Task.INSPECTV) {
+			// if taskBefore==INSPECTV, start from the board left by InspectV
+			so = gb.getStateObs();
+			withReset=true;
+		} else {
+			// if taskBefore!=INSPECTV, select here the start state:
+			//gb.clearBoard(true, true); // reset game board to default start state
+			so = gb.getDefaultStartState();
+			//if (m_xab.oPar[0].getChooseStart01()) {
+			// this is not recommended: an innocent start of Play where chooseStart01 in ParOther remains set
+			// from a previous training will let the first agent make (silently) an unfortunate 1st move in
+			//  half of the played games
+			if (gb.getArena().getGameName().equals("RubiksCube")) {
+				// On the other hand, chooseStartState is mandatory for the game RubiksCube (but may be a possible
+				// option also for other games as well):
+				// do not start from the default start state (solved cube), but
+				// choose randomly a different one:
+				so = gb.chooseStartState();
+			}
+			withReset=false;
+		}
+		gb.updateBoard(so, withReset, showValue);
+		taskBefore = Task.IDLE;
+		System.out.println("StartState: "+so.stringDescr());
+		gb.setActionReq(true);
+		gb.enableInteraction(true); // needed for CFour
+		so.resetMoveCounter();
+
+		if (m_spDT!=null) { // set random start moves for TS
+			if (m_spDT.rndmStartMoves>0) {
+				so = m_spDT.startSO;
+				System.out.println(TAG+"RandomStartState set: "+so);
+			}
+		}
+
+		return so;
+	}
+
+	// Display the game-over messages (helper for PlayGame(...))
+	// and do a final call to gb.updateBoard(...).
+	private void gameOverMessages(StateObservation so, int numPlayers, String gostr, boolean showValue){
+		// for (agentVec[0]=="Human")-case: ensure to show the "Solved
+		// in..." text in leftInfo:
+		gb.updateBoard(so, false, showValue);
+//					this.enableButtons(true);
+
+		switch (numPlayers) {
+			case 1:
+				if (!singlePlayerTSRunning)
+					showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+				break;
+			case 2:
+				gb.updateBoard(so, false, showValue);                // /WK/ really needed?
+				showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+
+				gb.updateBoard(so, false, showValue);        // /WK/ really needed?
+				if (withUI) m_ArenaFrame.repaint();            // /WK/ really needed?
+				break;
+			case 3:
+				showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+				break;
+			case 4:
+				showMessage(gostr, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+				break;
+			default:
+				throw new RuntimeException("Case numPlayers = " + numPlayers + " not handled!");
+		}
+	}
+
 	/**
 	 * Build the game-over string (helper for {@link #PlayGame()}, to be shown in MessageBox).
 	 * <p>
@@ -734,10 +759,9 @@ abstract public class Arena implements Runnable {
 	 * 
 	 * @param so			the game-over state 
 	 * @param agentVec		the names of all agents
-	 * @param spDT			needed only in the tournament-case
 	 * @return	the game-over string
 	 */
-	public String gameOverString(StateObservation so, String[] agentVec, TSGameDataTransfer spDT) {
+	public String gameOverString(StateObservation so, String[] agentVec) {
 		ScoreTuple sc = so.getGameScoreTuple();
 
 		// just debug C4:
@@ -745,26 +769,26 @@ abstract public class Arena implements Runnable {
 //		System.out.println("[gameOverString] isWin:"+((StateObserverC4)so).win());
 
 		int numPlayers = so.getNumPlayers();
-		String goStr="";
+		StringBuilder goStr= new StringBuilder();
 		int winner = 0;
 		switch (numPlayers) {
 			case 1 -> {
 				double gScore = so.getGameScore(so);
 				if (so instanceof StateObserver2048)
 					gScore *= StateObserver2048.MAXSCORE;
-				goStr = "Game over: Score " + gScore;
-				if (spDT != null)
-					spDT.nextTeam[0].addSinglePlayScore(gScore);
+				goStr = new StringBuilder("Game over: Score " + gScore);
+				if (m_spDT != null)
+					m_spDT.nextTeam[0].addSinglePlayScore(gScore);
 			}
 			case 2 -> {
 				winner = sc.argmax();
-				goStr = switch (winner) {
+				goStr = new StringBuilder(switch (winner) {
 					case (0) -> "X (" + agentVec[0] + ") wins";
 					case (1) -> "O (" + agentVec[1] + ") wins";
-					default -> goStr;
-				};
+					default -> goStr.toString();
+				});
 				if (sc.max() == 0.0)
-					goStr = "Tie";
+					goStr = new StringBuilder("Tie");
 			}
 			case 3 -> {
 				// There are 4 possible game-over cases for 3 players:
@@ -779,32 +803,32 @@ abstract public class Arena implements Runnable {
 				int numWinners = 0;
 				for (int i = 0; i < sc.scTup.length; i++) {
 					if (sc.scTup[i] == 1) {
-						if (numWinners == 0) goStr += "P" + i;
-						else goStr += " & P" + i;
+						if (numWinners == 0) goStr.append("P").append(i);
+						else goStr.append(" & P").append(i);
 						winner = i;
 						numWinners++;
 					}
 				}
-				goStr += (numWinners == 1) ? " (" + agentVec[winner] + ") wins" : " win";
+				goStr.append((numWinners == 1) ? " (" + agentVec[winner] + ") wins" : " win");
 
 				// count the ties:
 				if (sc.max() == 0.0) {
-					goStr = "Tie between ";
+					goStr = new StringBuilder("Tie between ");
 					int numTies = 0;
 					for (int i = 0; i < sc.scTup.length; i++) {
 						if (sc.scTup[i] == 0) {
-							if (numTies == 0) goStr += "P" + i;
-							else goStr += " & P" + i;
+							if (numTies == 0) goStr.append("P").append(i);
+							else goStr.append(" & P").append(i);
 							numTies++;
 						}
 					}
-					if (numTies == 3) goStr = "Tie";    // it's an all-player tie
+					if (numTies == 3) goStr = new StringBuilder("Tie");    // it's an all-player tie
 				} // if
 			}
 			default -> throw new RuntimeException("Case numPlayers = " + numPlayers + " in gameOverString() not handled!");
 		}
 		
-		return goStr;
+		return goStr.toString();
 	}
 	
 	void RunTournament() {

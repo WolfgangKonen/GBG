@@ -31,10 +31,10 @@ import tools.Types;
 public class GameBoardC4Gui extends JFrame {
 	private final int C4GAMEHEIGHT=512;
 	private int[][] m_board;		
-//	private int[][] last_board;		//was only needed for now deprecated guiUpdateBoard2
 	private double[] VTable;
 	private final JLabel leftInfo=new JLabel("");
 	private final JLabel rightInfo=new JLabel("");
+//	private int[][] last_board;		//was only needed for now deprecated guiUpdateBoard2
 //	// the colors of the TH Koeln logo (currently not used):
 //	private Color colTHK1 = new Color(183,29,13);
 //	private Color colTHK2 = new Color(255,137,0);
@@ -43,7 +43,7 @@ public class GameBoardC4Gui extends JFrame {
 	/**
 	 * a reference to the 'parent' {@link GameBoardC4} object
 	 */
-	private GameBoardC4 m_gb=null;
+	private final GameBoardC4 m_gb;
 	/**
 	 * The clickable representation of the board in the GUI. The buttons of {@link #m_board} will 
 	 * be enabled only when "Play" or "Inspect V" are clicked. During "Play" and "Inspect V"  
@@ -55,25 +55,10 @@ public class GameBoardC4Gui extends JFrame {
 	public GameBoardC4Gui(GameBoardC4 gb) throws HeadlessException {
 		super("Connect Four");
 		m_gb = gb;
-		initGui("");
+		initGui();
 	}
 
-//	public GameBoardC4Gui(GraphicsConfiguration arg0) {
-//		super(arg0);
-//		// TODO Auto-generated constructor stub
-//	}
-//
-//	public GameBoardC4Gui(String arg0) throws HeadlessException {
-//		super(arg0);
-//		// TODO Auto-generated constructor stub
-//	}
-//
-//	public GameBoardC4Gui(String arg0, GraphicsConfiguration arg1) {
-//		super(arg0, arg1);
-//		// TODO Auto-generated constructor stub
-//	}
-	
-	private void initGui(String title) {
+	private void initGui() {
     	c4GameBoard	= new C4GameGui(m_gb);
 		m_board 	= ((StateObserverC4) m_gb.getStateObs()).getBoard();
 //		last_board	= ((StateObserverC4) m_gb.getStateObs()).getBoard();
@@ -139,36 +124,20 @@ public class GameBoardC4Gui extends JFrame {
 		if (soT!=null) {
 			m_board = soT.getBoard();
 			int Player=Types.PLAYER_PM[soT.getPlayer()];
-			switch(Player) {
-			case(+1):
-				leftInfo.setText("X to move   "); break;
-			case(-1):
-				leftInfo.setText("O to move   "); break;
+			switch (Player) {
+				case (+1) -> leftInfo.setText("X to move   ");
+				case (-1) -> leftInfo.setText("O to move   ");
 			}
 			if (soT.isGameOver()) {
 				ScoreTuple sc = soT.getGameScoreTuple();
 				int winner = sc.argmax();
 				if (sc.max()==0.0) winner = -2;	// tie indicator
-				switch(winner) {
-				case( 0): 
-					leftInfo.setText("X has won   "); break;
-				case( 1):
-					leftInfo.setText("O has won   "); break;
-				case(-2):
-					leftInfo.setText("Tie         "); break;
+				switch (winner) {
+					case (0) -> leftInfo.setText("X has won   ");
+					case (1) -> leftInfo.setText("O has won   ");
+					case (-2) -> leftInfo.setText("Tie         ");
 				}
-				// old code, we want to make getGameWinner obsolete
-//				int win = so.getGameWinner().toInt();
-//				int check = Player*win;
-//				switch(check) {
-//				case(+1): 
-//					leftInfo.setText("X has won   "); break;
-//				case(-1):
-//					leftInfo.setText("O has won   "); break;
-//				case(0):
-//					leftInfo.setText("Tie         "); break;
-//				}
-				
+
 			}
 			
 			if (showValueOnGameboard && soT.getStoredValues()!=null) {
@@ -184,11 +153,9 @@ public class GameBoardC4Gui extends JFrame {
 
 				String splus = (taskState == Arena.Task.INSPECTV) ? "X" : "O";
 				String sminus= (taskState == Arena.Task.INSPECTV) ? "O" : "X";
-				switch(Player) {
-					case(+1):
-						rightInfo.setText("    Score for " + splus); break;
-					case(-1):
-						rightInfo.setText("    Score for " + sminus); break;
+				switch (Player) {
+					case (+1) -> rightInfo.setText("    Score for " + splus);
+					case (-1) -> rightInfo.setText("    Score for " + sminus);
 				}
 			}
 			if (!showValueOnGameboard) {
@@ -225,23 +192,6 @@ public class GameBoardC4Gui extends JFrame {
 		}		
 	}
 
-	// this method is deprecated, because it does not work correctly if doing "Inspect V" for a few moves and then
-	// starting "Play". Use guiUpdateBoard3 instead.
-	@Deprecated
-//	private void guiUpdateBoard2(int[][] m_board) {
-//		// --- this alternative updates only the last move and has the last move
-//		// --- marked. It is faster, but does not work for the LogManager (does not allow to
-//		// --- move back & requires the board to be already in the previous position).
-//		for(int j=0;j<C4Base.ROWCOUNT;j++){
-//			for(int i=0;i<C4Base.COLCOUNT;i++){
-//				if(m_board[i][j]!=last_board[i][j]) {
-//					c4GameBoard.setPiece(i,j, (m_board[i][j]-1));
-//					last_board[i][j] = m_board[i][j];
-//				}
-//			}
-//		}
-//	}
-
 	private void guiUpdateBoard3(StateObserverC4 soT) {
 		// --- this alternative updates only the last move and has the last move
 		// --- marked. It is faster, but does not work for the LogManager (does not allow to
@@ -259,9 +209,6 @@ public class GameBoardC4Gui extends JFrame {
 		if (enable) {
 	        this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
-//		else {
-//	        this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-//		}
 	}
 
 	public void showGameBoard(Arena ticGame, boolean alignToMain) {

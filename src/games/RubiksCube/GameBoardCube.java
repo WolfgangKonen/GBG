@@ -222,7 +222,7 @@ public class GameBoardCube implements GameBoard {
 	        assert (so instanceof StateObserverCube)
 			: "StateObservation 'so' is not an instance of StateObserverCube";
 	        soN = (StateObserverCube) so;
-			m_so = soN.copy();
+			m_so = soN;//.copy();
 		} 
 		
 		if (m_gameGui!=null) {

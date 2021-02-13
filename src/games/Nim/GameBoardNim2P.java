@@ -1,35 +1,14 @@
 package games.Nim;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 import controllers.PlayAgent;
 import games.GameBoard;
 import games.StateObservation;
 import games.Arena;
-import games.Arena.Task;
-import games.TicTacToe.GameBoardTTTGui;
-import games.TicTacToe.StateObserverTTT;
-import games.ArenaTrain;
-import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ACTIONS;
 
 /**
  * The game Nim (2 players) is a quite simple game:
@@ -92,7 +71,7 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 	/**
 	 * Update the play board and the associated values (labels) to the new state {@code so}.
 	 * 
-	 * @param so	the game state. If {@code null}, call only {@link GameBoardNimGui#guiUpdateBoard(boolean)}.
+	 * @param so	the game state.
 	 * @param withReset  if true, reset the board prior to updating it to state {@code so}
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
 	 * 				(only if they are stored in state {@code so}).
@@ -105,7 +84,7 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 	        assert (so instanceof StateObserverNim)
 			: "StateObservation 'so' is not an instance of StateObserverNim";
 	        soN = (StateObserverNim) so;
-			m_so = soN.copy();
+			m_so = soN;//.copy();
 		} 
 		
 		if (m_gameGui!=null)
@@ -188,7 +167,7 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
-			int i = (int) (rand.nextInt(acts.size()));
+			int i = rand.nextInt(acts.size());
 			m_so.advance(acts.get(i));
 		}
 		return m_so;
