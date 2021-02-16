@@ -4401,27 +4401,31 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
         return new Types.ACTIONS_VT(actBest.toInt(), actBest.isRandomAction(), vtable, vBest);
 	}
 
-	@Override
-	public double getScore(StateObservation so) {
-		assert (so instanceof StateObserverC4);
-		StateObserverC4 sc = (StateObserverC4) so; 
-		this.setBoard(sc.getBoard());
-		return getScore(sc.getBoard(),false);
-	}
+//	@Override
+//	public double getScore(StateObservation so) {
+//		assert (so instanceof StateObserverC4);
+//		StateObserverC4 sc = (StateObserverC4) so;
+//		this.setBoard(sc.getBoard());
+//		return getScore(sc.getBoard(),false);
+//	}
 
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
+		assert (so instanceof StateObserverC4);
+		StateObserverC4 sc = (StateObserverC4) so;
+		this.setBoard(sc.getBoard());
+
         int player = so.getPlayer();
         int opponent = (player==0) ? 1 : 0;
 		ScoreTuple sTuple = new ScoreTuple(2);
-		sTuple.scTup[player] = getScore(so);
+		sTuple.scTup[player] = getScore(sc.getBoard(),false);
 		sTuple.scTup[opponent] = -sTuple.scTup[player];
 		return sTuple;
 	}
 
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
-		return getScoreTuple(so, null);
+		return getScoreTuple(so, prevTuple);
 	}
 
 	@Override

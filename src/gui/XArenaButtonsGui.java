@@ -335,17 +335,13 @@ public class XArenaButtonsGui extends JPanel {
 							m_arena.taskBefore=ArenaTrain.Task.INSPECTV;
 						}
 						
-						// toggle m_arena.state between PLAY and IDLE
+						// toggle m_arena.taskState between PLAY and IDLE
 						if (m_arena.taskState!=ArenaTrain.Task.PLAY) {
 							m_arena.taskState = ArenaTrain.Task.PLAY;
 							m_arena.setStatusMessage("Playing a game ...");
-							// this is now donw in Arena.run again ...
-//							enableButtons(false);		// disable all buttons ...
-//							Play.setEnabled(true);		// ... but the Play button
 						} else {
 							m_arena.taskState = ArenaTrain.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
-//							enableButtons(true);
 						}
 						
 					}
@@ -361,14 +357,9 @@ public class XArenaButtonsGui extends JPanel {
 						if (m_arena.taskState!=ArenaTrain.Task.INSPECTV) {
 							m_arena.taskState = ArenaTrain.Task.INSPECTV;
 							m_arena.setStatusMessage("Inspecting the value function ...");
-							// this is now done in Arena.run again ...
-//							enableButtons(false);			// disable all buttons ...
-//							InspectV.setEnabled(true);		// ... but the InspectV button
-//							Play.setEnabled(true);			// ... and the Play button
 						} else {
 							m_arena.taskState = ArenaTrain.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
-//							enableButtons(true);
 						}
 					}
 				}	

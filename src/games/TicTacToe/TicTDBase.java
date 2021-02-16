@@ -41,9 +41,6 @@ import tools.Types.ACTIONS;
  * <li>4: extended = thick + extra features (13 features)
  * <li>9: raw = only board position (9 features)
  * </ul> <p>
- * Class {@link TicTDBase} is an abstract class because it does not implement 
- * {@link AgentBase#getScore(games.StateObservation)}. This is left for the derived 
- * classes. <p>
  * Known classes having {@link TicTDBase} as super class: {@link FeatureTTT}
  * 
  * @author Wolfgang Konen, TH Koeln, 2016
