@@ -38,6 +38,12 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public static String EGV_EXCEPTION_TEXT = "Agents derived from AgentBase have to implement this method: estimateGameValueTuple";
 
 	/**
+	 * TODO: Add explanation for stochastic policies
+	 */
+
+	private boolean stochasticPolicy = false;
+
+	/**
 	 * change the version ID for serialization only if a newer version is no
 	 * longer compatible with an older one (older .agt.zip will become
 	 * unreadable or you have to provide a special version transformation)
@@ -387,4 +393,13 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return getClass().getName() + ":";
 	}
 
+	@Override
+	public boolean isStochastic() {
+		return stochasticPolicy;
+	}
+
+	@Override
+	public void setStochastic(boolean hasStochasticPolicy) {
+		stochasticPolicy = hasStochasticPolicy;
+	}
 }

@@ -244,5 +244,8 @@ public interface PlayAgent {
 
 	String getName();
 	void setName(String name);
-	
+
+	boolean isStochastic();
+	void setStochastic(boolean hasStochasticPolicy);
+
 }
