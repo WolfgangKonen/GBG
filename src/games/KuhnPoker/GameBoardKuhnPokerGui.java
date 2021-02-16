@@ -5,6 +5,7 @@ import tools.Types;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -28,6 +29,8 @@ public class GameBoardKuhnPokerGui extends JFrame {
     private JButton callButton;
     private JButton foldButton;
     private JButton continueButton;
+
+    private JCheckBox waitCheck;
 
     private JLabel currentPlayerChipsLabel;
 
@@ -91,6 +94,9 @@ public class GameBoardKuhnPokerGui extends JFrame {
         foldButton      = new JButton("fold");
         continueButton  = new JButton("continue");
 
+        waitCheck  = new JCheckBox("wait");
+        waitCheck.setSelected(false);
+
         checkButton.addActionListener( e -> {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(1);
@@ -126,6 +132,7 @@ public class GameBoardKuhnPokerGui extends JFrame {
         actionPanel.add(callButton );
         actionPanel.add(foldButton );
         actionPanel.add(continueButton);
+        actionPanel.add(waitCheck);
         return actionPanel;
 
     }
@@ -177,6 +184,11 @@ public class GameBoardKuhnPokerGui extends JFrame {
         Panel logPanel = new Panel();
         log = new JTextArea(20, 30);
         log.setEditable(false);
+
+        DefaultCaret caret = (DefaultCaret)log.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
+
         scrollPaneLog = new JScrollPane(log,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -276,7 +288,7 @@ public class GameBoardKuhnPokerGui extends JFrame {
     }
 
     private void updateActions(StateObserverKuhnPoker SoP){
-        if(SoP.isRoundOver()){
+        if(SoP.isRoundOver()&&waitCheck.isSelected()){
 
             pause = true;
             continueButton.setEnabled(true);
@@ -363,10 +375,6 @@ public class GameBoardKuhnPokerGui extends JFrame {
                 addToLog(entry);
         sop.resetLog();
 
-        // scoll to the end of the log
-        scrollPaneLog.getVerticalScrollBar().setValue(
-                scrollPaneLog.getVerticalScrollBar().getMaximum()
-        );
     }
 
     private void updateCards(StateObserverKuhnPoker sop){
