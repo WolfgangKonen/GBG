@@ -11,6 +11,7 @@ import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -45,7 +46,8 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * compatible with an older one (older .agt.zip will become unreadable or you have
 	 * to provide a special version transformation)
 	 */
-	private static final long  serialVersionUID = 12L;
+	@Serial
+    private static final long  serialVersionUID = 12L;
 
     public MCAgentN(ParMC mcParams){
         this("MC", mcParams, new ParOther());    	

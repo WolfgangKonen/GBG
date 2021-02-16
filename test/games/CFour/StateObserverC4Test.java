@@ -84,10 +84,10 @@ public class StateObserverC4Test {
         System.out.println(prefix+"sprev sc: "+sprev.getGameScoreTuple());
         assert sprev.win();
         assert sprev.getGameScoreTuple().toString().equals("(-1.0, 1.0)");
-        System.out.println(prefix+ ar.gameOverString(sprev,players,null));
+        System.out.println(prefix+ ar.gameOverString(sprev,players));
     }
 
-    private final ValidateStateObsTest vat = new ValidateStateObsTest();
+    private final tools.ValidateStateObsTest vat = new tools.ValidateStateObsTest();
     private final static String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/ConnectFour/";
     private final static String gbgAgentPath = strDir + "TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip";
     private static final Arena ar = new ArenaTrainC4("", false);

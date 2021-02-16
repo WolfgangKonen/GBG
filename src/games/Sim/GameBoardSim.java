@@ -77,7 +77,7 @@ public class GameBoardSim implements GameBoard {
 	        assert (so instanceof StateObserverSim)
 			: "StateObservation 'so' is not an instance of StateObserverSim";
 	        soS = (StateObserverSim) so;
-			m_so = soS.copy();
+			m_so = soS; //.copy();
 	
 			// --- this is now all done in m_gameGui.updateBoard ---
 //			if (so.isGameOver()) {				

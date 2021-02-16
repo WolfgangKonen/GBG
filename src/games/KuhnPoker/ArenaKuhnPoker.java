@@ -50,7 +50,7 @@ public class ArenaKuhnPoker extends Arena   {
 
 
 	@Override
-	public String gameOverString(StateObservation so, String[] agentVec, TSGameDataTransfer spDT) {
+	public String gameOverString(StateObservation so, String[] agentVec) {
 		String goStr="";
 		StateObserverKuhnPoker sop = (StateObserverKuhnPoker) so;
 		for(int i = 0;i<so.getNumPlayers();i++){

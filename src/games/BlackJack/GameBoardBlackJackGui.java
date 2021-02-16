@@ -30,6 +30,7 @@ public class GameBoardBlackJackGui extends JFrame {
     Color green = new Color(1, 70, 1);
     Color blue = new Color(1, 79, 160);
     private JButton continueButton;
+    private JCheckBox autoContinue = new JCheckBox("autoContinue", true);
 
 
 
@@ -112,8 +113,6 @@ public class GameBoardBlackJackGui extends JFrame {
     }
 
     public void update(StateObserverBlackJack so, boolean withReset, boolean showValueOnGameboard) {
-
-        //SwingUtilities.invokeLater(() -> {
         clear();
         m_so = so;
         playerZone.setLayout(new GridLayout(so.getNumPlayers(), 1));
@@ -126,9 +125,8 @@ public class GameBoardBlackJackGui extends JFrame {
         toggleButtons(so);
         revalidate();
         repaint();
-        //});
 
-        if(so.isRoundOver()) {
+        if(so.isRoundOver() && !autoContinue.isSelected()) {
             stopAfterUpdate();
         }
     }
@@ -181,10 +179,6 @@ public class GameBoardBlackJackGui extends JFrame {
         }
         for(JButton b : currentButtons){
             b.setEnabled(tmp.contains(b.getText()));
-            if(b.getText().equals("Continue")){
-                b.setEnabled(so.isRoundOver());
-                //b.setEnabled(true);
-            }
         }
     }
 
@@ -217,8 +211,13 @@ public class GameBoardBlackJackGui extends JFrame {
             buttonToAdd.setEnabled(false);
             p.add(buttonToAdd);
         }
+        JPanel continueHelper = new JPanel();
+        continueHelper.setLayout(new GridLayout(1,2));
+
         continueButton = getContinueButton();
-        p.add(continueButton);
+        continueHelper.add(continueButton);
+        continueHelper.add(autoContinue);
+        p.add(continueHelper);
         return p;
     }
 

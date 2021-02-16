@@ -498,7 +498,7 @@ public class XArenaFuncs {
 	}
 
 	// a similar function, just needed by TS
-	protected PlayAgent[] wrapAgents(PlayAgent[] paVector, StateObservation so, XArenaButtons m_xab) {
+	public PlayAgent[] wrapAgents_TS(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so) {
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n = 0; n < numPlayers; n++) {
 			qaVector[n] = wrapAgent(n, paVector[n], paVector[n].getParOther(), m_xab.maxnPar[n], so);
@@ -1284,7 +1284,7 @@ public class XArenaFuncs {
 					AgentBase.validTrainedAgents(paVector, numPlayers); // may
 																		// throw
 																		// RuntimeException
-					qaVector = wrapAgents(paVector, startSO, xab);
+					qaVector = wrapAgents_TS(paVector, xab, startSO);
 				} else {
 					paVector = fetchAgents(xab);
 					if (dataTS.nextTeam[0].isHddAgent()) {

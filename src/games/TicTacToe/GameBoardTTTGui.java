@@ -9,23 +9,13 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
-import controllers.PlayAgent;
-import games.GameBoard;
-import games.StateObservation;
 import games.Arena;
-import games.Arena.Task;
-import games.CFour.GameBoardC4;
-import games.CFour.StateObserverC4;
-import games.ArenaTrain;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -42,60 +32,55 @@ import tools.Types;
  */
 public class GameBoardTTTGui extends JFrame {
 
-	private int TICGAMEHEIGHT=280;
-	private JPanel BoardPanel;
-	private JLabel leftInfo=new JLabel("");
-	private JLabel rightInfo=new JLabel(""); 
-//	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
+	private final int TICGAMEHEIGHT=280;
+	private final JLabel leftInfo=new JLabel("");
+	private final JLabel rightInfo=new JLabel("");
+//	private JPanel BoardPanel;
+//	protected Arena  m_Arena;		// a reference to the Arena object, needed to
 									// infer the current taskState
 	protected Random rand;
 	/**
-	 * The clickable representation of the board in the GUI. The buttons of {@link #Board} will 
+	 * The clickable representation of the board in the GUI. The buttons of {@code Board} will
 	 * be enabled only when "Play" or "Inspect V" are clicked. During "Play" and "Inspect V"  
-	 * only unoccupied fields are enabled. The value function of each {@link #Board} position
+	 * only unoccupied fields are enabled. The value function of each {@code Board} position
 	 * is displayed as its label.
 	 */
 	protected JButton[][] Board;
-//	private StateObserverTTT m_so;
-	private int[][] Table;			// =1: position occupied by "X" player
+//	private int[][] Table;			// =1: position occupied by "X" player
 									//=-1: position occupied by "O" player
 	private double[][] VTable;
 	
 	/**
 	 * a reference to the 'parent' {@link GameBoardTTT} object
 	 */
-	private GameBoardTTT m_gb=null;
+	private final GameBoardTTT m_gb;
 	
 	// the colors of the TH Koeln logo (used for button coloring):
-	private Color colTHK1 = new Color(183,29,13);
-	private Color colTHK2 = new Color(255,137,0);
-	private Color colTHK3 = new Color(162,0,162);
+	private final Color colTHK1 = new Color(183,29,13);
+	private final Color colTHK2 = new Color(255,137,0);
+	private final Color colTHK3 = new Color(162,0,162);
 	
 	public GameBoardTTTGui(GameBoardTTT gb) {
 		super("Tic Tac Toe");
 		m_gb = gb;
-		initGui("");
+		initGui();
 	}
 	
-    private void initGui(String title) 
+    private void initGui()
 	{
+		JPanel BoardPanel;
+
 		Board       = new JButton[3][3];
 		BoardPanel	= InitBoard();
-		Table       = new int[3][3];
+//		Table       = new int[3][3];
 		VTable		= new double[3][3];
-//		m_so		= new StateObserverTTT();	// empty table
-        rand 		= new Random(System.currentTimeMillis());	
+        rand 		= new Random(System.currentTimeMillis());
 
 		JPanel titlePanel = new JPanel();
 		titlePanel.setBackground(Types.GUI_BGCOLOR);
 		JLabel Blank=new JLabel(" ");		// a little bit of space
-		//JLabel Title=new JLabel("Tic Tac Toe",SwingConstants.CENTER);
-//		JLabel Title=new JLabel("   ",SwingConstants.CENTER);  // no title, it appears sometimes in the wrong place
-//		Title.setForeground(Color.black);	
-//		Title.setFont(font);	
 		titlePanel.add(Blank);
-//		titlePanel.add(Title);
-		
+
 		JPanel boardPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		boardPanel.add(BoardPanel);
 		boardPanel.setBackground(Types.GUI_BGCOLOR);
@@ -154,7 +139,6 @@ public class GameBoardTTTGui extends JFrame {
 								{
 									m_gb.InspectMove(x,y);	// i.e. update inspection, if Board[i][j] is clicked								
 								}	
-								int dummy=1;
 							}
 						}
 				);
@@ -166,7 +150,6 @@ public class GameBoardTTTGui extends JFrame {
 	
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
-//			m_so = new StateObserverTTT();			// empty Table
 			for(int i=0;i<3;i++){
 				for(int j=0;j<3;j++){
 					Board[i][j].setText("  ");
@@ -200,36 +183,19 @@ public class GameBoardTTTGui extends JFrame {
 		if (soT!=null) {
 			//Table = soT.getTable();
 			int Player=Types.PLAYER_PM[soT.getPlayer()];
-			switch(Player) {
-			case(+1): 
-				leftInfo.setText("X to move   "); break;
-			case(-1):
-				leftInfo.setText("O to move   "); break;
+			switch (Player) {
+				case (+1) -> leftInfo.setText("X to move   ");
+				case (-1) -> leftInfo.setText("O to move   ");
 			}
 			if (soT.isGameOver()) {
 				ScoreTuple sc = soT.getGameScoreTuple();
 				int winner = sc.argmax();
 				if (sc.max()==0.0) winner = -2;	// tie indicator
-				switch(winner) {
-				case( 0): 
-					leftInfo.setText("X has won   "); break;
-				case( 1):
-					leftInfo.setText("O has won   "); break;
-				case(-2):
-					leftInfo.setText("Tie         "); break;
+				switch (winner) {
+					case (0) -> leftInfo.setText("X has won   ");
+					case (1) -> leftInfo.setText("O has won   ");
+					case (-2) -> leftInfo.setText("Tie         ");
 				}
-				// old code, we want to make getGameWinner obsolete
-//				int win = so.getGameWinner().toInt();
-//				int check = Player*win;
-//				switch(check) {
-//				case(+1): 
-//					leftInfo.setText("X has won   "); break;
-//				case(-1):
-//					leftInfo.setText("O has won   "); break;
-//				case(0):
-//					leftInfo.setText("Tie         "); break;
-//				}
-				
 			}
 			
 			if (showValueOnGameboard) {
@@ -249,12 +215,10 @@ public class GameBoardTTTGui extends JFrame {
 
 				String splus = (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
 				String sminus= (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "O" : "X";
-				switch(Player) {
-				case(+1): 
-					rightInfo.setText("    Score for " + splus); break;
-				case(-1):
-					rightInfo.setText("    Score for " + sminus); break;
-				}					
+				switch (Player) {
+					case (+1) -> rightInfo.setText("    Score for " + splus);
+					case (-1) -> rightInfo.setText("    Score for " + sminus);
+				}
 			} else {
 				rightInfo.setText("");					
 			}
@@ -264,7 +228,7 @@ public class GameBoardTTTGui extends JFrame {
 	}
 
 	/**
-	 * Update the play board and the associated values (labels) to the state in m_so.
+	 * Update the play board and the associated values (labels) to the state in {@code m_gb.m_so}.
 	 * The labels contain the values (scores) for each unoccupied board position (raw score*100).  
 	 * Occupied board positions have black/white background color, unoccupied positions are orange.
 	 * 
@@ -276,7 +240,6 @@ public class GameBoardTTTGui extends JFrame {
 	{		
 		double value, maxvalue=Double.NEGATIVE_INFINITY;
 		String valueTxt;
-		int imax=0,jmax=0;
 		int[][] table = m_gb.m_so.getTable();
 		for(int i=0;i<3;i++){
 			for(int j=0;j<3;j++){
@@ -294,8 +257,6 @@ public class GameBoardTTTGui extends JFrame {
 					if (value<0) valueTxt = ""+(int)(value*100);
 					if (value>maxvalue) {
 						maxvalue=value;
-						imax=i;
-						jmax=j;
 					}
 				}
 				if(table[i][j]==1)

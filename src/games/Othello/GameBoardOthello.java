@@ -90,7 +90,7 @@ public class GameBoardOthello implements GameBoard {
 	        assert (so instanceof StateObserverOthello)
 			: "StateObservation 'so' is not an instance of StateObserverOthello";
 	        soN = (StateObserverOthello) so;
-			m_so = soN.copy();
+			m_so = soN; //.copy();
 		} 
 		
 		if (m_gameGui!=null)

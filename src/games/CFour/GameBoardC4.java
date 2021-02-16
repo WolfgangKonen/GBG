@@ -87,7 +87,10 @@ public class GameBoardC4 implements GameBoard {
 	        assert (so instanceof StateObserverC4)
 			: "StateObservation 'so' is not an instance of StateObserverC4";
 			soT = (StateObserverC4) so;
-			m_so = soT.copy();
+			m_so = soT;//.copy();		// we do not need a copy here (!)
+			// unclear why, but it leads to wrong behavior if we code
+			//		m_so = (StateObserverC4) so;
+			// (the GameBoard stays empty!)
 			
 		} // if(so!=null)
 		
