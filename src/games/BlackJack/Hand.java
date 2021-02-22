@@ -61,6 +61,26 @@ public class Hand {
         return result;
     }
 
+    public boolean isSoft(){
+        int result = 0;
+        int aces = 0;
+        for (Card c : hand) {
+            if (c.rank.equals(Card.Rank.ACE)) {
+                aces++;
+            }
+            result += c.rank.getValue();
+        }
+        if(aces == 0) {
+            return false;
+        }
+        result -= aces*10;
+        return result != getHandValue();
+    }
+
+    public boolean isPair(){
+        return hand.size() == 2 && hand.get(0).rank.equals(hand.get(1).rank);
+    }
+
     public boolean isBust() {
         return getHandValue() > 21;
     }
