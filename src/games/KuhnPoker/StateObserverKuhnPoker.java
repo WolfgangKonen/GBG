@@ -221,7 +221,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	}
 
 	/**
-	 * function to reset the "log" (text version of whStateObserverPokerat happened in GUI) of the game.
+	 * function to reset the "log" (text version of what happened in GUI) of the game.
 	 */
 	public void resetLog(){
 		lastActions = new ArrayList<>();

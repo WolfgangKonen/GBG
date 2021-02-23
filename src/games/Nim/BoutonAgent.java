@@ -77,22 +77,29 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         return new ACTIONS_VT(actBest.toInt(), false, VTable, maxValue);
 	}
 
-	@Override
-	public double getScore(StateObservation so) {
-        assert (so instanceof StateObserverNim) : "Not a StateObserverNim object";
-		StateObserverNim soN = (StateObserverNim) so;
-		return -soN.boutonValue(soN.getHeaps());
-		// Why "-"? - boutonValue returns the value of soN for the player who generated
-		// soN, but getScore() returns the value of soN for the player who has to move on soN.
-		// This value is just the opposite of boutonValue.
-	}
+//	@Override
+//	public double getScore(StateObservation so) {
+//        assert (so instanceof StateObserverNim) : "Not a StateObserverNim object";
+//		StateObserverNim soN = (StateObserverNim) so;
+//		return -soN.boutonValue(soN.getHeaps());
+//		// Why "-"? - boutonValue returns the value of soN for the player who generated
+//		// soN, but getScore() returns the value of soN for the player who has to move on soN.
+//		// This value is just the opposite of boutonValue.
+//	}
 
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-        int player = so.getPlayer();
+		assert (so instanceof StateObserverNim) : "Not a StateObserverNim object";
+		StateObserverNim soN = (StateObserverNim) so;
+		double score =  -soN.boutonValue(soN.getHeaps());
+		// Why "-"? - boutonValue returns the value of soN for the player who generated
+		// soN, but getScore() returns the value of soN for the player who has to move on soN.
+		// This value is just the opposite of boutonValue.
+
+		int player = so.getPlayer();
         int opponent = (player==0) ? 1 : 0;
 		ScoreTuple sTuple = new ScoreTuple(2);
-		sTuple.scTup[player] = this.getScore(so);
+		sTuple.scTup[player] = score;
 		sTuple.scTup[opponent] = -sTuple.scTup[player];
 		return sTuple;
 	}

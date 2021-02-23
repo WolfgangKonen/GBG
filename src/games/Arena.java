@@ -55,6 +55,8 @@ abstract public class Arena implements Runnable {
 	public LoadSaveGBG tdAgentIO; // saving/loading of agents
 	public Task taskState = Task.IDLE;
 	public Task taskBefore = Task.IDLE;
+	// taskBefore is set to INSPECTV if Play button is hit while being in task INSPECTV
+	// (see XArenaButtonsGui)
 
 //	public JFrame m_ArenaFrame = null;
 	public ArenaGui m_ArenaFrame = null;
@@ -71,17 +73,6 @@ abstract public class Arena implements Runnable {
 	private TSGameDataTransfer m_spDT = null;
 	public TSAgentManager tournamentAgentManager = null;
 	public boolean singlePlayerTSRunning = false;
-
-	// --- never used ---
-//	// launch Arena with UI
-//	public Arena() {
-//		initGame(""); 
-//	}
-//
-//	// launch Arena with UI
-//	public Arena(String title) {
-//		initGame(title);
-//	}
 
 	// decide via withUI whether wit UI or not
 	public Arena(String title, boolean withUI) {
@@ -333,7 +324,8 @@ abstract public class Arena implements Runnable {
 				// below, skips from the available actions the inverse of the last action to avoid cycles of 2.
 				// This boosts performance when playing or evaluating RubiksCube. But it is wrong on InspectV,
 				// here we want to cover *ALL* available actions. By clearing the cube state we clear the last action
-				// (set it to unknown). For all other games, clearedCopy is identical to copy.
+				// (set it to unknown).
+				// For all other games, clearedCopy is identical to copy.
 
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
@@ -354,7 +346,11 @@ abstract public class Arena implements Runnable {
 						so.storeBestActionInfo(actBest, actBest.getVTable());
 
 					gb.updateBoard(so, true, true);
-				} else {
+					if (so.isRoundOver()) {
+						so.initRound();
+						assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
+					}
+ 				} else {
 					if (so.stopInspectOnGameOver()) {
 						gb.updateBoard(so, true, true);
 						// not a valid play position >> show the board settings,
@@ -365,11 +361,9 @@ abstract public class Arena implements Runnable {
 				
 						break; // out of while, i.e. finish INSPECTV
 					} else {
-						// we get here e.g. in case RubiksCube where the initial
-						// state
-						// in INSPECTV is usually the default (game-over,
-						// solved-cube) state:
-						// In this case we only clear the action values, but
+						// we get here e.g. in case RubiksCube where the initial state
+						// in INSPECTV is usually the default (game-over, solved-cube)
+						// state: In this case we only clear the action values, but
 						// stay in INSPECTV
 						gb.clearBoard(false, true);
 					}
@@ -455,39 +449,16 @@ abstract public class Arena implements Runnable {
 		if (DEBG) p2= new MCTSAgentT("MCTS", null, m_xab.mctsPar[0], m_xab.oPar[0]); // only
 																														// DEBG
 		PlayAgent pa;
-		PlayAgent[] paVector, qaVector;
 		int nEmpty = 0, cumEmpty = 0, highestTile=0;
 		double gameScore = 0.0;
 		PStats pstats;
 		ArrayList<PStats> psList = new ArrayList<>();
 
 		boolean showValue = m_xab.getShowValueOnGameBoard();
-		boolean showValue_U = false;
+		boolean showValue_U = false;		// showValue for gb.updateBoard
 
-		// fetch the agents in a way general for 1-, 2- and N-player games
-		try {
-			if (spDT==null) { 	// regular non-TS game
-				paVector = m_xfun.fetchAgents(m_xab);
-				AgentBase.validTrainedAgents(paVector, numPlayers);
-				qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
-			} else { 			// TS game
-				if (spDT.standardAgentSelected) {
-					// GBG standard agent
-					paVector = m_xfun.fetchAgents(m_xab);
-					AgentBase.validTrainedAgents(paVector, numPlayers);
-					qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
-				} else {
-					// HDD agent
-					paVector = spDT.getPlayAgents();
-					qaVector = m_xfun.wrapAgents_TS(paVector, m_xab, gb.getStateObs());
-				}
-			}
-		} catch (RuntimeException e) {
-			showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-			taskState = Task.IDLE;
-			setStatusMessage("Done.");
-			return;
-		}
+		PlayAgent[] qaVector = fetchPlayAgents(numPlayers);
+		if (qaVector==null) return;
 
 		String[] agentVec = buildPlayMessages(qaVector,numPlayers);
 
@@ -514,14 +485,13 @@ abstract public class Arena implements Runnable {
 					pa = qaVector[so.getPlayer()];
 					if (pa instanceof controllers.HumanPlayer) {
 						gb.setActionReq(false);
-						showValue_U = showValue;
-						// leave the previously shown values if it is HumanPlayer
+						showValue_U = showValue;	// leave the previously shown values if it is HumanPlayer
 					} else {
 						gb.enableInteraction(false);
 
 						if (DEBG) {
 							int N_EMPTY = 4;
-							actBest = getNextAction_DEBG(so, pa, p2, N_EMPTY);
+							actBest = getNextAction_DEBG(so.partialState(), pa, p2, N_EMPTY);
 						} else {
 							//long startT = System.currentTimeMillis();
 							long startTNano = System.nanoTime();
@@ -529,12 +499,12 @@ abstract public class Arena implements Runnable {
 							//long endT = System.currentTimeMillis();
 							long endTNano = System.nanoTime();
 							//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endT-startT)+"ms");
-							//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms (aus ns)");
-							if (spDT!=null)
-								spDT.nextTimes[0].addNewTimeNS(endTNano-startTNano);
+							//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms");
+							if (m_spDT!=null)
+								m_spDT.nextTimes[0].addNewTimeNS(endTNano-startTNano);
 						}
 						if (actBest==null) {
-							// an exception occurred and was catched:
+							// an exception occurred and was caught:
 							System.out.println("Cannot play a game with "+pa.getName());
 							taskState = Task.IDLE;
 							setStatusMessage("Done.");
@@ -544,7 +514,7 @@ abstract public class Arena implements Runnable {
 						so.storeBestActionInfo(actBest, actBest.getVTable());
 						so.advance(actBest);
 						logManager.addLogEntry(actBest, so, logSessionid);
-						if (spDT==null) {		// the normal play (non-TS, i.e. no tournament)
+						if (m_spDT==null) {		// the normal play (non-TS, i.e. no tournament)
 							try {
 								Thread.sleep(currentSleepDuration);
 								// waiting time between agent-agent actions
@@ -587,6 +557,7 @@ abstract public class Arena implements Runnable {
 						System.out.println("Thread 3");
 					}
 				}
+				//if (gb.isActionReq()) gb.updateBoard(so, false, showValue_U);
 				so = gb.getStateObs();
 				if (so.isRoundOver()) {
 					// this updateBoard on round-over is needed to fix the issue in Poker, where a human player ending
@@ -595,7 +566,10 @@ abstract public class Arena implements Runnable {
 					// (To avoid calling updateBoard twice, we tag the call above with 'if (!so.isRoundOver()).)
 					gb.updateBoard(so, false, showValue_U);
 
-					if (!so.isGameOver()) so.initRound();
+					if (!so.isGameOver()) {
+						so.initRound();
+						assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
+					}
 				}
 
 				//
@@ -605,7 +579,7 @@ abstract public class Arena implements Runnable {
 					String gostr = this.gameOverString(so,agentVec);
 					this.gameOverMessages(so,numPlayers,gostr,showValue);
 
-					break; // this is the final break out of the while loop (1st condition)
+					break; // this is the 1st condition to break out of while loop
 				} // if isGameOver
 
 				if (so.getMoveCounter() > m_xab.oPar[0].getEpisodeLength()) {
@@ -615,7 +589,7 @@ abstract public class Arena implements Runnable {
 					showMessage("Game stopped (epiLength) with score " + gScore, "Game Over",
 							JOptionPane.INFORMATION_MESSAGE);
 
-					break; // this is the final break out of while loop (2nd condition)
+					break; // this is the 2nd condition to break out of while loop
 				} // if (so.getMoveCounter()...)
 
 			} 	// while(taskState == Task.PLAY) [will be left only by one
@@ -632,12 +606,42 @@ abstract public class Arena implements Runnable {
 		}
 
 		// game over - leave the Task.PLAY task:
-		PStats.printPlayStats(psList, startSO, paVector, this);
-//		PStats.printHighTileStats(psList, startSO, paVector, this);
+		PStats.printPlayStats(psList, startSO, qaVector, this);
+//		PStats.printHighTileStats(psList, startSO, qaVector, this);
 		logManager.endLoggingSession(logSessionid);
 		taskState = Task.IDLE;
 		setStatusMessage("Done.");
 	} // PlayGame(TSGameDataTransfer spDT)
+
+	// fetch the agents in a way general for 1-, 2- and N-player games
+	private PlayAgent[] fetchPlayAgents(int numPlayers) {
+		PlayAgent[] paVector, qaVector;
+		try {
+			if (m_spDT == null) {    // regular non-TS game
+				paVector = m_xfun.fetchAgents(m_xab);
+				AgentBase.validTrainedAgents(paVector, numPlayers);
+				qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
+			} else {            // TS game
+				if (m_spDT.standardAgentSelected) {
+					// GBG standard agent
+					paVector = m_xfun.fetchAgents(m_xab);
+					AgentBase.validTrainedAgents(paVector, numPlayers);
+					qaVector = m_xfun.wrapAgents(paVector, m_xab, gb.getStateObs());
+				} else {
+					// HDD agent
+					paVector = m_spDT.getPlayAgents();
+					qaVector = m_xfun.wrapAgents_TS(paVector, m_xab, gb.getStateObs());
+				}
+			}
+		} catch (RuntimeException e) {
+			showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+			taskState = Task.IDLE;
+			setStatusMessage("Done.");
+			return null;
+		}
+		return qaVector;
+	}
+
 
 	// Build the messages shown at start of game play (helper for PlayGame(...))
 	// Returns the string vector of all agent names.
@@ -1098,8 +1102,8 @@ abstract public class Arena implements Runnable {
 	 * @return true, if there is at least one human agent in the game
 	 */
 	public boolean hasHumanAgent() {
-		PlayAgent[] paVector = m_xfun.fetchAgents(m_xab);
-		for (PlayAgent playAgent : paVector) {
+		PlayAgent[] paVector2 = m_xfun.fetchAgents(m_xab);
+		for (PlayAgent playAgent : paVector2) {
 			if (playAgent.getName().equals("Human"))
 				return true;
 		}

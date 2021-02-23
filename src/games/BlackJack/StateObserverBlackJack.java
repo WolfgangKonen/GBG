@@ -86,7 +86,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     // mapping NonDeterministic actions to ENUMS
     enum BlackJackActionNonDet {
-        DEALCARD(0), DEALERPLAYS(1), PAYPLAYERS(2);
+        DEALCARD(0), DEALERPLAYS(1), PAYPLAYERS(2), PEEKFORBLACKJACK(3);
 
         private int action;
 
@@ -106,7 +106,8 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     // DEALERONACTION -> Dealer Plays his hand (nondetermenistic)
     // PAYOUT -> Determin which players won against the dealer and paying them
     enum gamePhase {
-        BETPHASE(0), DEALPHASE(1), PLAYERONACTION(2), DEALERONACTION(3), PAYOUT(4);
+        BETPHASE(0), DEALPHASE(1), ASKFORINSURANCE(2) ,PEEKFORBLACKJACK(3),
+        PLAYERONACTION(4), DEALERONACTION(5), PAYOUT(6);
 
         private int phase;
 
@@ -343,17 +344,21 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        } else if (gPhase.equals(gamePhase.PLAYERONACTION)) {
+        } else if(gPhase.equals(gamePhase.ASKFORINSURANCE)){
+            if(currentPlayer.insuranceAmount() == 0
+                    && currentPlayer.betOnActiveHand() < currentPlayer.getChips()){
+                availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.INSURANCE.getAction()));
+                availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+            }else{
+                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+                return;
+            }
+
+        }else if (gPhase.equals(gamePhase.PLAYERONACTION)) {
             //Skips player who has 0 Chips but still sits at the "table"
             if(currentPlayer.getActiveHand() == null){
                 advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
                 return;
-            }
-            // insurance
-            if (dealer.getActiveHand().getCards().get(0).rank.equals(Card.Rank.ACE)
-                    && currentPlayer.insuranceAmount() == 0
-                    && currentPlayer.betOnActiveHand() < currentPlayer.getChips()) {
-                availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.INSURANCE.getAction()));
             }
             if (!currentPlayer.getActiveHand().isHandFinished()) {
                 // enters after Player has placed his bet
@@ -489,6 +494,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             case BET50:
             case BET100:
             case STAND:
+            case INSURANCE:
             case SURRENDER:
                 if (currentPlayer.setNextHandActive() != null) { // has player more hands? only important in case stand
                     isNextActionDeterministic = false; // if yes the next hand is active now, Split hands always have
@@ -510,8 +516,6 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             case SPLIT:
                 isNextActionDeterministic = false;
                 break;
-            case INSURANCE:
-                isNextActionDeterministic = true;
             default:
                 break;
         }
@@ -535,6 +539,8 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             case PAYOUT:
                 availableRandoms.add(BlackJackActionNonDet.PAYPLAYERS.getAction());
                 break;
+            case PEEKFORBLACKJACK:
+                availableRandoms.add(BlackJackActionNonDet.PEEKFORBLACKJACK.getAction());
             default:
                 break;
         }
@@ -575,8 +581,19 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                             playerActedInPhase = new boolean[NUM_PLAYERS];
                             if (dealer.getActiveHand().size() == 2) { // if dealer has 2 cards dealing is over advance
                                                                       // into next phase (next action det)
-                                advancePhase();
+                                advancePhase(); //next phase = askforinsurance
                                 isNextActionDeterministic = true;
+                                if(!dealer.getActiveHand().getCards().get(0).rank.equals(Card.Rank.ACE)){
+                                    //if the dealer's faceup card is not an Ace we can skip asking for insurance
+                                    advancePhase(); //next phase = peekforblackJack
+                                    isNextActionDeterministic = false;
+                                    if(dealer.getActiveHand().getCards().get(0).rank.getValue() < 10){
+                                        //if dealers Hand does not contain 10, J, K Q, A we dont need to peek for Blackjack
+                                        advancePhase(); //next phase = playersonaction
+                                        isNextActionDeterministic = true;
+                                    }
+                                }
+
                             }
                         } else { // every player gets one card
                             if(currentPlayer.betOnActiveHand() > 0) {
@@ -633,6 +650,21 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                 }
                 break;
 
+            case PEEKFORBLACKJACK:
+                String logEntry = "Dealer peeks for Blackjack -> ";
+                if(dealer.getActiveHand().checkForBlackJack()){
+                    // dealer has a blackjack, players cant act anymore
+                    logEntry += "Blackjack!";
+                    gPhase = gamePhase.DEALERONACTION;
+                    isNextActionDeterministic = false;
+                }else{
+                    advancePhase(); // next phase = playersonaction
+                    isNextActionDeterministic = true;
+                    logEntry += "no Blackjack";
+                }
+                log.add(logEntry);
+                break;
+
             case DEALERPLAYS:
                 log.add("Dealer reaveals card " + dealer.getActiveHand().getCards().get(1));
                 while (dealer.getActiveHand().getHandValue() < 17) {
@@ -661,11 +693,11 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
                         if(p.insuranceAmount() > 0) {
                             if (dealer.getActiveHand().checkForBlackJack()) {
-                                p.collect(p.insuranceAmount() * 2);
+                                p.collect(p.insuranceAmount() * 3);
                             }
                             log.add(p.name + " insurancePayoff: " +
-                                    (dealer.getActiveHand().checkForBlackJack() ? 1 : -1) * p.insuranceAmount());
-                            roundPayOff +=  (dealer.getActiveHand().checkForBlackJack() ? 1 : -1) * p.insuranceAmount();
+                                    (dealer.getActiveHand().checkForBlackJack() ? 2 : -1) * p.insuranceAmount());
+                            roundPayOff +=  (dealer.getActiveHand().checkForBlackJack() ? 2 : -1) * p.insuranceAmount();
                         }
 
                         for (Hand h : p.getHands()) {

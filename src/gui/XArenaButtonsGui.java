@@ -144,7 +144,7 @@ public class XArenaButtonsGui extends JPanel {
 
 		// add game-specific agent names for certain games (currently ConnectFour, Nim and Othello)
 		String gName = m_arena.getGameName();
-		int offset = (gName.equals("Nim") || gName.equals("Nim3P"))
+		int offset = (gName.equals("Nim") || gName.equals("Nim3P")) || gName.equals("BlackJack")
 				   ? 1 : (gName.equals("ConnectFour") || gName.equals("RubiksCube"))
 				   ? 2 : (gName.equals("Othello")) ? 3: 0;
 		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
@@ -164,6 +164,9 @@ public class XArenaButtonsGui extends JPanel {
 				gui_agent_list[gui_agent_list.length - 3] = "HeurPlayer";
 				gui_agent_list[gui_agent_list.length - 2] = "BenchPlayer";
 				gui_agent_list[gui_agent_list.length - 1] = "Edax2";
+			}
+			case "BlackJack" -> {
+				gui_agent_list[gui_agent_list.length - 1] = "BSBJA";
 			}
 		}
 		
@@ -335,17 +338,13 @@ public class XArenaButtonsGui extends JPanel {
 							m_arena.taskBefore=ArenaTrain.Task.INSPECTV;
 						}
 						
-						// toggle m_arena.state between PLAY and IDLE
+						// toggle m_arena.taskState between PLAY and IDLE
 						if (m_arena.taskState!=ArenaTrain.Task.PLAY) {
 							m_arena.taskState = ArenaTrain.Task.PLAY;
 							m_arena.setStatusMessage("Playing a game ...");
-							// this is now donw in Arena.run again ...
-//							enableButtons(false);		// disable all buttons ...
-//							Play.setEnabled(true);		// ... but the Play button
 						} else {
 							m_arena.taskState = ArenaTrain.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
-//							enableButtons(true);
 						}
 						
 					}
@@ -361,14 +360,9 @@ public class XArenaButtonsGui extends JPanel {
 						if (m_arena.taskState!=ArenaTrain.Task.INSPECTV) {
 							m_arena.taskState = ArenaTrain.Task.INSPECTV;
 							m_arena.setStatusMessage("Inspecting the value function ...");
-							// this is now done in Arena.run again ...
-//							enableButtons(false);			// disable all buttons ...
-//							InspectV.setEnabled(true);		// ... but the InspectV button
-//							Play.setEnabled(true);			// ... and the Play button
 						} else {
 							m_arena.taskState = ArenaTrain.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
-//							enableButtons(true);
 						}
 					}
 				}	

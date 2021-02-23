@@ -145,7 +145,7 @@ public class GBGBatch {
 
 		t_Game = setupSelectedGame(selectedGame, scaPar);
 
-		setupPaths(args[2],args[5]);
+		setupPaths(args[2],csvName);
 
 		if (args[1].equals("5")) assert(selectedGame.equals("Othello")) : "batch5 only allowed for game Othello (uses Edax2)";
 

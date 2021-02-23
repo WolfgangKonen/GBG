@@ -77,7 +77,10 @@ public class NextState4 {
 	        // callback function to set this.nextReward and this.nextRewardTuple 
 	        tdAgt.collectReward(this);
 
-			if (nextSO.isRoundOver() && !nextSO.isGameOver()) nextSO.initRound();
+			if (nextSO.isRoundOver() && !nextSO.isGameOver()) {
+				nextSO.initRound();
+				assert !nextSO.isRoundOver() : "Error: initRound() did not reset round-over-flag";
+			}
 		}
 
 		/**

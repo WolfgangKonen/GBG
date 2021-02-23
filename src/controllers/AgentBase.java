@@ -75,15 +75,17 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 abstract public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
 
 	/**
-	 * This is just to signal that derived classes will be either abstract or
-	 * implement getScore(), as required by the interface {@link PlayAgent} as
-	 * well. 
-	 * 
+	 * On the long run, {@link PlayAgent#getScore(StateObservation)} should become deprecated (in favor of
+	 * getScoreTuple). But for the moment, we leave a default implementation in AgentBase, which should
+	 * however be overridden by derived classes. The base implementation just throws an exception.
+	 *
 	 * @param sob
 	 *            the state observation object
 	 * @return the agent's estimate of the game value function
 	 */
-	abstract public double getScore(StateObservation sob);
+	public double getScore(StateObservation sob) {
+		throw new RuntimeException("AgentBase.getScore has to be overridden by derived classes!");
+	}
 
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		throw new RuntimeException("Agents derived from AgentBase have to implement this method: getScoreTuple");
@@ -112,12 +114,12 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * (TD) or maximum tree depth for certain agents (Max-N) is reached.
 	 * 
 	 * <b>Important note</b>: Derived classes that use this method
-	 * inside {@link #getScore(StateObservation)}
+	 * inside {@code getScore(so)} or {@code getScoreTuple(so,...)}
 	 * (e.g. Max-N, MC or MCTS when reaching the predefined rollout depth)
 	 * have to <b>override</b> this function with a function <b>not</b> using
-	 * {@link #getScore(StateObservation)}, otherwise an infinite loop would
-	 * result.
-	 * 
+	 * {@code getScore(so)} or {@code getScoreTuple(so,...)}, otherwise an
+	 * infinite loop would result.
+	 *
 	 * @param sob
 	 *            the current game state
 	 * @return the agent's estimate of the final reward <b>for all players</b>.

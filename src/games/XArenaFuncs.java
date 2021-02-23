@@ -14,6 +14,7 @@ import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import controllers.TD.ntuple4.NTuple4Factory;
 import controllers.TD.ntuple4.TDNTuple4Agt;
+import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
 import games.Nim.BoutonAgent;
@@ -245,6 +246,10 @@ public class XArenaFuncs {
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n], nTuples, xnf, maxGameNum);
+			} else if(sAgent.equals("BSBJA")) { // Black Jack only, see
+												// gui_agent_list in
+												// XArenaButtonsGui
+				pa = new BasicStrategyBlackJackAgent();
 			}
 		} catch (Exception e) {
 			m_Arena.showMessage(e.getClass().getName() + ": " + e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -328,7 +333,11 @@ public class XArenaFuncs {
 		} else if (sAgent.equals("Edax2")) { 	// Othello only, see gui_agent_list
 												// in XArenaButtons
 			pa = new Edax2(sAgent, m_xab.edPar[n]);
-		} else { // all the trainable agents:
+		} else if(sAgent.equals("BSBJA")) { // Black Jack only, see
+											// gui_agent_list in
+											// XArenaButtonsGui
+			pa = new BasicStrategyBlackJackAgent();
+		}else { // all the trainable agents:
 			if (m_PlayAgents[n] == null) {
 				if (sAgent.equals("TDS")) {
 					Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
@@ -1093,7 +1102,10 @@ public class XArenaFuncs {
 					break; // out of while
 
 				} // if (so.isGameOver())
-				if(so.isRoundOver()&&!so.isGameOver()) so.initRound();
+				if(so.isRoundOver()&&!so.isGameOver()) {
+					so.initRound();
+					assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
+				}
 
 				player = so.getPlayer();
 			} // while(true)

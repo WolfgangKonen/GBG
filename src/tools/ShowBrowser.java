@@ -42,7 +42,7 @@ public class ShowBrowser {
        String osName = System.getProperty("os.name");
        String suffix = ".htm";
        
-       if (url.startsWith("rsrc")) {
+       if (url.startsWith("rsrc") || url.startsWith("jar:")) {
     	   // This happens if the main program is a JAR (not a Java application), then URL is a resource within the 
     	   // JAR file and starts with "rsrc:".
     	   // The browser cannot display it directly, instead we have to copy the content of URL to a local temp file.
