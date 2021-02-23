@@ -1102,7 +1102,10 @@ public class XArenaFuncs {
 					break; // out of while
 
 				} // if (so.isGameOver())
-				if(so.isRoundOver()&&!so.isGameOver()) so.initRound();
+				if(so.isRoundOver()&&!so.isGameOver()) {
+					so.initRound();
+					assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
+				}
 
 				player = so.getPlayer();
 			} // while(true)

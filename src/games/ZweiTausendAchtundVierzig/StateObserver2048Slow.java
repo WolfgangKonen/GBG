@@ -5,9 +5,8 @@ import games.ObserverBase;
 import games.StateObsNondeterministic;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_VT;
 
-import java.io.Serializable;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,17 +15,18 @@ import java.util.Random;
  * Class <strong> StateObs2048Slow </strong> holds a 2048 game state.
  * The game state is coded in a matrix of tiles {@code Tile[][] gameBoard}. The code for 
  * merging tiles is better understandable, but also slower than in {@link StateObserver2048}.<p>
- * 
- * This is just an alternate class for {@link StateObserver2048}. It is only used if 
- * {@link StateObserver2048Slow} is copied to {@link StateObserver2048}. 
+ * <p>
+ * This is just an alternate class for {@link StateObserver2048} (for testing purposes). It is only used if
+ * class {@link StateObserver2048} is renamed to {@code StateObserverNEW} and then
+ * class {@link StateObserver2048Slow} is renamed to {@code StateObserver}.
  * 
  * @author Johannes Kutsch, 2016
  */
 public class StateObserver2048Slow extends ObserverBase implements StateObsNondeterministic {
-    private Random random = new Random();
-    protected List<Tile> emptyTiles = new ArrayList();
+    private final Random random = new Random();
+    protected List<Tile> emptyTiles = new ArrayList<>();
     protected List<Integer> availableMoves;
-    protected List<Integer> availableRandoms = new ArrayList();
+    protected List<Integer> availableRandoms = new ArrayList<>();
     private Tile[][] gameBoard;
 	protected ACTIONS[] actions;
 
@@ -34,12 +34,12 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     private int winState;
     public int score;
     public int highestTileValue = Integer.MIN_VALUE;
-    public boolean highestTileInCorner = false;
-    public int rowLength = 0;
-    public int rowValue = 0;
-    public int mergeValue = 0;
+//    public boolean highestTileInCorner = false;
+//    public int rowLength = 0;
+//    public int rowValue = 0;
+//    public int mergeValue = 0;
     public int moves = 0;
-    private boolean ASSERTSAME = false; // if true, run through assertSameAdvance
+    private final boolean ASSERTSAME = false; // if true, run through assertSameAdvance
     private boolean isNextActionDeterministic;
 
     // --- this is now in ObserverBase ---
@@ -51,7 +51,6 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     private ACTIONS nextNondeterministicAction;
 
     public final static double MAXSCORE = 3932156;
-    public final static double MINSCORE = 0;
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 
@@ -60,11 +59,13 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
-	private static final long serialVersionUID = 12L;
+	@Serial
+    private static final long serialVersionUID = 12L;
 
-    public StateObserver2048Slow() {
-        newBoard();
-    }
+	// never used
+//  public StateObserver2048Slow() {
+//      newBoard();
+//  }
 
     public StateObserver2048Slow(int[][] values, int score, int winState) {
         gameBoard = new Tile[ConfigGame.ROWS][ConfigGame.COLUMNS];
@@ -103,7 +104,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
      * <li> the same empty tile positions (note that the lists {@code emptyTiles} contain different
      * 		things in both classes)
      * </ul>
-     * @param iAction
+     * @param iAction the action to advance
      * @return {@code true} if all assertions are passed, {@code false} else
      */
     private boolean assertSameAdvance(int iAction) {
@@ -148,12 +149,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 
     @Override
     public boolean isGameOver() {
-        if(availableMoves.size() == 0) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return availableMoves.size() == 0;
     }
 
     @Override
@@ -174,151 +170,153 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 //        }
 //    }
 
-    public double getGameScore1() {
-        if (isGameOver()) {
-            double penalisation = ConfigGame.PENALISATION;
+    // never used
+//    public double getGameScore1() {
+//        if (isGameOver()) {
+//            double penalisation = ConfigGame.PENALISATION;
+//
+//            if(ConfigGame.ADDSCORE) {
+//                penalisation += (score / MAXSCORE);
+//            }
+//            return penalisation;
+//        }
+//        else {
+//            double realScore = score;
+//
+//            //Row Heuristik
+//            evaluateBoard();
+//            realScore += rowValue * ConfigGame.ROWMULTIPLIER;
+//
+//            //Highest Tile In Corner Heuristik
+//            if (highestTileInCorner) {
+//                //realScore *= ConfigGame.HIGHESTTILEINCORENERMULTIPLIER+1;
+//                realScore += highestTileValue * ConfigGame.HIGHESTTILEINCORENERMULTIPLIER;
+//            }
+//
+//            //Empty Tiles Heuristik
+//            //realScore *= Math.pow(ConfigGame.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
+//            //realScore += highestTileValue*emptyTiles.size()*(ConfigGame.EMPTYTILEMULTIPLIER);
+//            realScore += score * emptyTiles.size() * ConfigGame.EMPTYTILEMULTIPLIER;
+//
+//            //Merge Heuristik
+//            realScore += mergeValue * ConfigGame.MERGEMULTIPLIER;
+//
+//
+//            if (realScore == 0) {
+//                return 0;
+//            } else {
+//                realScore /= MAXSCORE;
+//                return realScore;
+//            }
+//        }
+//    }
 
-            if(ConfigGame.ADDSCORE) {
-                penalisation += (score / MAXSCORE);
-            }
-            return penalisation;
-        }
-        else {
-            double realScore = score;
-
-            //Row Heuristik
-            evaluateBoard();
-            realScore += rowValue * ConfigGame.ROWMULTIPLIER;
-
-            //Highest Tile In Corner Heuristik
-            if (highestTileInCorner) {
-                //realScore *= ConfigGame.HIGHESTTILEINCORENERMULTIPLIER+1;
-                realScore += highestTileValue * ConfigGame.HIGHESTTILEINCORENERMULTIPLIER;
-            }
-
-            //Empty Tiles Heuristik
-            //realScore *= Math.pow(ConfigGame.EMPTYTILEMULTIPLIER+1, emptyTiles.size());
-            //realScore += highestTileValue*emptyTiles.size()*(ConfigGame.EMPTYTILEMULTIPLIER);
-            realScore += score * emptyTiles.size() * ConfigGame.EMPTYTILEMULTIPLIER;
-
-            //Merge Heuristik
-            realScore += mergeValue * ConfigGame.MERGEMULTIPLIER;
-
-
-            if (realScore == 0) {
-                return 0;
-            } else {
-                realScore /= MAXSCORE;
-                return realScore;
-            }
-        }
-    }
-
-   private void evaluateBoard() {
-        RowInformationContainer rowInformationContainer;
-        highestTileInCorner = false;
-        rowValue = 0;
-        rowLength = 0;
-        mergeValue = 0;
-
-        if (gameBoard[0][0].getValue() == highestTileValue) {
-            highestTileInCorner = true;
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-        }
-
-        if (gameBoard[ConfigGame.ROWS - 1][0].getValue() == highestTileValue) {
-            highestTileInCorner = true;
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-        }
-
-        if (gameBoard[0][ConfigGame.COLUMNS - 1].getValue() == highestTileValue) {
-            highestTileInCorner = true;
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-        }
-
-        if (gameBoard[ConfigGame.ROWS - 1][ConfigGame.COLUMNS - 1].getValue() == highestTileValue) {
-            highestTileInCorner = true;
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-
-            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1);
-            if (rowInformationContainer.rowValue > rowValue) {
-                rowLength = rowInformationContainer.rowLength;
-                rowValue = rowInformationContainer.rowValue;
-            }
-        }
-
-        for(int row = 0; row < ConfigGame.ROWS-1; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
-                int currentValue = gameBoard[row][column].getValue();
-                if(currentValue != 0) {
-                    for (int position = row+1; position < ConfigGame.ROWS; position++) {
-                        int newValue = gameBoard[position][column].getValue();
-                        if(newValue != 0) {
-                            if (currentValue == newValue) {
-                                mergeValue += currentValue;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        for(int row = 0; row < ConfigGame.ROWS; row++) {
-            for (int column = 0; column < ConfigGame.COLUMNS-1; column++) {
-                int currentValue = gameBoard[row][column].getValue();
-                if(currentValue != 0) {
-                    for (int position = column+1; position < ConfigGame.COLUMNS; position++) {
-                        int newValue = gameBoard[row][position].getValue();
-                        if(newValue != 0) {
-                            if (currentValue == newValue) {
-                                mergeValue += currentValue;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // never used
+//   private void evaluateBoard() {
+//        RowInformationContainer rowInformationContainer;
+//        highestTileInCorner = false;
+//        rowValue = 0;
+//        rowLength = 0;
+//        mergeValue = 0;
+//
+//        if (gameBoard[0][0].getValue() == highestTileValue) {
+//            highestTileInCorner = true;
+//
+//            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
+//            if (rowInformationContainer.rowValue > rowValue) {
+//                rowLength = rowInformationContainer.rowLength;
+//                rowValue = rowInformationContainer.rowValue;
+//            }
+//
+//            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3);
+//            if (rowInformationContainer.rowValue > rowValue) {
+//                rowLength = rowInformationContainer.rowLength;
+//                rowValue = rowInformationContainer.rowValue;
+//            }
+//        }
+//
+//        if (gameBoard[ConfigGame.ROWS - 1][0].getValue() == highestTileValue) {
+//            highestTileInCorner = true;
+//
+//            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 2);
+//            if (rowInformationContainer.rowValue > rowValue) {
+//                rowLength = rowInformationContainer.rowLength;
+//                rowValue = rowInformationContainer.rowValue;
+//            }
+//
+//            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1);
+//            if (rowInformationContainer.rowValue > rowValue) {
+//                rowLength = rowInformationContainer.rowLength;
+//                rowValue = rowInformationContainer.rowValue;
+//            }
+//        }
+//
+//        if (gameBoard[0][ConfigGame.COLUMNS - 1].getValue() == highestTileValue) {
+//            highestTileInCorner = true;
+//
+//            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
+//            if (rowInformationContainer.rowValue > rowValue) {
+//                rowLength = rowInformationContainer.rowLength;
+//                rowValue = rowInformationContainer.rowValue;
+//            }
+//
+//            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 3);
+//            if (rowInformationContainer.rowValue > rowValue) {
+//                rowLength = rowInformationContainer.rowLength;
+//                rowValue = rowInformationContainer.rowValue;
+//            }
+//        }
+//
+//        if (gameBoard[ConfigGame.ROWS - 1][ConfigGame.COLUMNS - 1].getValue() == highestTileValue) {
+//            highestTileInCorner = true;
+//
+//            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 0);
+//            if (rowInformationContainer.rowValue > rowValue) {
+//                rowLength = rowInformationContainer.rowLength;
+//                rowValue = rowInformationContainer.rowValue;
+//            }
+//
+//            rowInformationContainer = evaluateRow(highestTileValue, 0, 0, 0, 1, 1);
+//            if (rowInformationContainer.rowValue > rowValue) {
+//                rowLength = rowInformationContainer.rowLength;
+//                rowValue = rowInformationContainer.rowValue;
+//            }
+//        }
+//
+//        for(int row = 0; row < ConfigGame.ROWS-1; row++) {
+//            for (int column = 0; column < ConfigGame.COLUMNS; column++) {
+//                int currentValue = gameBoard[row][column].getValue();
+//                if(currentValue != 0) {
+//                    for (int position = row+1; position < ConfigGame.ROWS; position++) {
+//                        int newValue = gameBoard[position][column].getValue();
+//                        if(newValue != 0) {
+//                            if (currentValue == newValue) {
+//                                mergeValue += currentValue;
+//                            }
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        for(int row = 0; row < ConfigGame.ROWS; row++) {
+//            for (int column = 0; column < ConfigGame.COLUMNS-1; column++) {
+//                int currentValue = gameBoard[row][column].getValue();
+//                if(currentValue != 0) {
+//                    for (int position = column+1; position < ConfigGame.COLUMNS; position++) {
+//                        int newValue = gameBoard[row][position].getValue();
+//                        if(newValue != 0) {
+//                            if (currentValue == newValue) {
+//                                mergeValue += currentValue;
+//                            }
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private RowInformationContainer evaluateRow(int currentTileValue, int currentRowLength, int currentRowValue, int position, int offset, int direction) {
         switch (direction) {
@@ -382,8 +380,10 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 
     @Override
     public double getGameScore(StateObservation referingState) {
-        assert (referingState instanceof StateObserver2048Slow) : "referingState is not of class StateObserver2048Slow";
-        return this.getGameScore(this);
+        return score / MAXSCORE;
+        // OLD and wrong (endless recursion?):
+//        assert (referingState instanceof StateObserver2048Slow) : "referingState is not of class StateObserver2048Slow";
+//        return this.getGameScore(this);
     }
 
 	/**
