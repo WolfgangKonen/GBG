@@ -54,6 +54,10 @@ public class GameBoardKuhnPokerGui extends JFrame {
     Color openColor = new Color(255, 180, 0);
     Color allInColor = new Color(98, 143, 0);
 
+
+    String[] actionTexts = {"fold","check","bet","call"};
+
+
     boolean check = true;
 
     GameBoardKuhnPokerGui(GameBoardKuhnPoker gb){
@@ -101,20 +105,32 @@ public class GameBoardKuhnPokerGui extends JFrame {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(1);
             }
+            if (m_gb.m_Arena.taskState == Arena.Task.INSPECTV){
+                m_gb.inspectMove(1);
+            }
         });
         betButton.addActionListener(e -> {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(2);
+            }
+            if (m_gb.m_Arena.taskState == Arena.Task.INSPECTV){
+                m_gb.inspectMove(2);
             }
         });
         callButton.addActionListener(e -> {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(3);
             }
+            if (m_gb.m_Arena.taskState == Arena.Task.INSPECTV){
+                m_gb.inspectMove(3);
+            }
         });
         foldButton.addActionListener(e -> {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(0);
+            }
+            if (m_gb.m_Arena.taskState == Arena.Task.INSPECTV){
+                m_gb.inspectMove(0);
             }
         });
 
@@ -122,6 +138,8 @@ public class GameBoardKuhnPokerGui extends JFrame {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
                 continueWithTheGame();
         });
+
+        continueButton.setEnabled(false);
 
         currentPlayerChipsLabel = new JLabel("Chips: ");
 
@@ -185,9 +203,9 @@ public class GameBoardKuhnPokerGui extends JFrame {
         log = new JTextArea(20, 30);
         log.setEditable(false);
 
+        // set auto-scrolling for log panel
         DefaultCaret caret = (DefaultCaret)log.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-
 
         scrollPaneLog = new JScrollPane(log,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -287,7 +305,7 @@ public class GameBoardKuhnPokerGui extends JFrame {
         return Types.GUI_PLAYER_NAME[i];
     }
 
-    private void updateActions(StateObserverKuhnPoker SoP){
+    private void updateActions(StateObserverKuhnPoker SoP, boolean showValueOnGameboard){
         if(SoP.isRoundOver()&&waitCheck.isSelected()){
 
             pause = true;
@@ -299,8 +317,6 @@ public class GameBoardKuhnPokerGui extends JFrame {
 
             holeCardsPanels[0].setCard(SoP.getHoleCards(0)[0].getImagePath());
             holeCardsPanels[1].setCard(SoP.getHoleCards(1)[0].getImagePath());
-
-            //m_gb.m_Arena.roundOverWait = true;
 
             if(!m_gb.getWaitAtEndOfRound())
                 continueWithTheGame();
@@ -314,6 +330,9 @@ public class GameBoardKuhnPokerGui extends JFrame {
             }
 
         }else{
+
+            JButton[] actionButtons = {foldButton,checkButton,betButton,callButton};
+
             ArrayList<Types.ACTIONS> allActions = SoP.getAllAvailableActions();
             for (Types.ACTIONS action : allActions) {
                     switch (action.toInt()) {
@@ -327,11 +346,14 @@ public class GameBoardKuhnPokerGui extends JFrame {
                         case 3 -> callButton.setEnabled(SoP.getAvailableActions().contains(action));
                     }
             }
-            currentPlayerChipsLabel.setText("Chips: "+(int)SoP.getChips()[SoP.getPlayer()]);
-            if(betButton.isEnabled())
-                betButton.setText("bet ("+SoP.getBigblind()+")");
-            if(callButton.isEnabled())
-                callButton.setText("call ("+(int)SoP.getOpenPlayer(SoP.getPlayer())+")");
+            int chips = (int)SoP.getChips()[SoP.getPlayer()];
+            currentPlayerChipsLabel.setText("Chips: "+chips);
+
+            if(showValueOnGameboard&& SoP.getStoredActions()!=null )
+                for(int i = 0;i<SoP.getStoredActions().length;i++){
+                    int act = SoP.getStoredActions()[i].toInt();
+                    actionButtons[act].setText(actionTexts[act]+" ["+(Math.round((SoP.getStoredValues()[i]-chips)*100))/100.0+"] ");
+                }
             continueButton.setEnabled(false);
         }
 
@@ -344,20 +366,26 @@ public class GameBoardKuhnPokerGui extends JFrame {
     public void updateBoard(StateObserverKuhnPoker soT,
                             boolean withReset, boolean showValueOnGameboard) {
 
+        if(soT==null)
+            return;
+
+
         if(withReset) {
             System.out.println("with reset is called");
         }
 
-        if(showValueOnGameboard)
-            System.out.println("show value on gameboard");
-        else
-            System.out.println("don't show value on gameboard");
+
 
         updateLog(soT);
         updateCards(soT);
         updatePotValue(soT.getPotSize());
         //updatePlayerInfo(soT);
-        updateActions(soT);
+        updateActions(soT, showValueOnGameboard);
+
+        if(showValueOnGameboard)
+            System.out.println("show value on gameboard");
+        else
+            System.out.println("don't show value on gameboard");
 
         //repaint();
     }

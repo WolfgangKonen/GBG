@@ -5,6 +5,7 @@ import tools.Types;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -31,6 +32,8 @@ public class GameBoardPokerGui extends JFrame {
     private JButton foldButton;
     private JButton allInButton;
     private JButton continueButton;
+
+    private JCheckBox waitCheck;
 
     private JLabel currentPlayerChipsLabel;
 
@@ -96,6 +99,9 @@ public class GameBoardPokerGui extends JFrame {
         allInButton     = new JButton("all in");
         continueButton  = new JButton("continue");
 
+        waitCheck  = new JCheckBox("wait");
+        waitCheck.setSelected(false);
+
         checkButton.addActionListener( e -> {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
                 m_gb.HGameMove(1);
@@ -137,6 +143,7 @@ public class GameBoardPokerGui extends JFrame {
         actionPanel.add(foldButton );
         actionPanel.add(allInButton);
         actionPanel.add(continueButton);
+        actionPanel.add(waitCheck);
         return actionPanel;
 
     }
@@ -252,6 +259,11 @@ public class GameBoardPokerGui extends JFrame {
         Panel logPanel = new Panel();
         log = new JTextArea(30, 20);
         log.setEditable(false);
+
+        // set auto-scrolling for log panel
+        DefaultCaret caret = (DefaultCaret)log.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
         scrollPaneLog = new JScrollPane(log,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -351,7 +363,7 @@ public class GameBoardPokerGui extends JFrame {
     }
 
     private void updateActions(StateObserverPoker SoP){
-        if(SoP.isRoundOver()){
+        if(SoP.isRoundOver()&&waitCheck.isSelected()){
             pause = true;
             continueButton.setEnabled(true);
             foldButton.setEnabled(false);
@@ -449,10 +461,10 @@ public class GameBoardPokerGui extends JFrame {
                 addToLog(entry);
         sop.resetLog();
 
-        // scoll to the end of the log
-        scrollPaneLog.getVerticalScrollBar().setValue(
-                scrollPaneLog.getVerticalScrollBar().getMaximum()
-        );
+       // // scoll to the end of the log
+       // scrollPaneLog.getVerticalScrollBar().setValue(
+       //         scrollPaneLog.getVerticalScrollBar().getMaximum()
+       // );
     }
 
     private void updateCards(StateObserverPoker sop){

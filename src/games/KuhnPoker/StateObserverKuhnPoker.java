@@ -170,7 +170,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		cards = new ArrayList<>();
 		availableRandomActions = new ArrayList<>();
 
-		for(int i=1;i<4;i++){
+		for(int i=10;i<13;i++){
 			cards.add(i);
 			availableRandomActions.add(ACTIONS.fromInt(i));
 		}
@@ -323,9 +323,9 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 					}
 					winner = holeCards[0][0].getRank()>holeCards[1][0].getRank() ? 0:1;
 					if(winner==0){
-						addToLog("Player 0 wins the round with "+holeCards[0][0]+" over "+holeCards[1][0]+".");
+						addToLog("Player 0 wins the round with "+holeCards[0][0].getLongRank()+" over "+holeCards[1][0].getLongRank()+".");
 					}else {
-						addToLog("Player 1 wins the round with "+holeCards[1][0]+" over "+holeCards[0][0]+".");
+						addToLog("Player 1 wins the round with "+holeCards[1][0].getLongRank()+" over "+holeCards[0][0].getLongRank()+".");
 					}
 				}
 			}
@@ -660,6 +660,10 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	public int getMoveCounter() {
 		return m_counter;
+	}
+
+	public Types.ACTIONS[] getStoredActions(){
+		return storedActions;
 	}
 
 }

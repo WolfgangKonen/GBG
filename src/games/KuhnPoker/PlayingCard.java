@@ -10,7 +10,7 @@ public class PlayingCard {
     static String[] pathSuits = { "H", "S", "D", "C" };
     static String[] suits = pathSuits;
     static String[] ranks = { "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A" };
-
+    static String[] longRanks = {"Two","Three", "Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King","Ace"};
     /**
      * String representation of a rank
      * @return String representation of a rank
@@ -129,5 +129,10 @@ public class PlayingCard {
 
     public String getImagePath(){
         return ranks[rank] + pathSuits[suit] +".png";
+    }
+
+
+    public String getLongRank(){
+        return longRanks[rank];
     }
 }

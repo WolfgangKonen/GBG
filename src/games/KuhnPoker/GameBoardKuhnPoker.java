@@ -32,7 +32,7 @@ public class GameBoardKuhnPoker implements GameBoard {
     private void initGameBoard(Arena arGame) 
 	{
 		m_Arena		= arGame;
-		m_so		= new StateObserverKuhnPoker();	// empty table
+		m_so		= new StateObserverKuhnPoker();
         rand 		= new Random(System.currentTimeMillis());	
         if (m_Arena.hasGUI() && m_gameGui==null) {
 			m_gameGui = new GameBoardKuhnPokerGui(this);
@@ -43,7 +43,7 @@ public class GameBoardKuhnPoker implements GameBoard {
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
-			m_so = new StateObserverKuhnPoker();			// empty Table
+			m_so = new StateObserverKuhnPoker();
 			if (m_Arena.hasGUI() && m_gameGui!=null) {
 				m_gameGui.resetLog();
 			}
@@ -61,9 +61,13 @@ public class GameBoardKuhnPoker implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		StateObserverKuhnPoker soT = (StateObserverKuhnPoker) so;
-		if (m_gameGui!=null)
-			m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
+		if(so!=null) {
+			StateObserverKuhnPoker soT = (StateObserverKuhnPoker) so;
+			this.m_so = soT;
+			if (m_gameGui != null)
+				m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
+
+		}
 	}
 
 	/**
@@ -85,6 +89,13 @@ public class GameBoardKuhnPoker implements GameBoard {
 		arenaActReq=actReq;
 	}
 
+
+	protected void inspectMove(int x){
+		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
+		assert m_so.isLegalAction(act) : "Desired action is not legal";
+		m_so.advance(act);
+		arenaActReq = true;
+	}
 
 	// Human Game Move
 	protected void HGameMove(int x)

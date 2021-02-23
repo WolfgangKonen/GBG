@@ -59,9 +59,12 @@ public class GameBoardPoker implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		StateObserverPoker soT = (StateObserverPoker) so;
-		if (m_gameGui!=null)
-			m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
+		if(so!=null) {
+			StateObserverPoker soT = (StateObserverPoker) so;
+			m_so = soT;
+			if (m_gameGui != null)
+				m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
+		}
 	}
 
 	/**
