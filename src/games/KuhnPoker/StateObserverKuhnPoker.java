@@ -666,4 +666,9 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		return storedActions;
 	}
 
+
+	@Override
+	public boolean isRoundBasedGame(){
+		return true;
+	}
 }
