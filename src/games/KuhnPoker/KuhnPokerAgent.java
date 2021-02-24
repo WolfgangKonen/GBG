@@ -22,6 +22,10 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
     private double[][] m_deltaTable = null;
     private double alpha = 1.0/3;
 
+    private int low = 9;
+    private int mid = 10;
+    private int high = 11;
+
     /**
      * change the version ID for serialization only if a newer version is no longer
      * compatible with an older one (older .agt.zip will become unreadable or you have
@@ -77,7 +81,7 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
             // STARTING PLAYER
             if(sop.lastAction == null){
 
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==0){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==low){
                     // low
                     // betting with the propability of alpha;
                     if(rand.nextDouble()<alpha) {
@@ -88,12 +92,12 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                         actBest = Types.ACTIONS.fromInt(1);
                     }
                 }
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==1){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==mid){
                     //mid
                     //CHECK
                     actBest = Types.ACTIONS.fromInt(1);
                 }
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==2){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==high){
                     if(rand.nextDouble()<3*alpha) {
                         // BET
                         actBest = Types.ACTIONS.fromInt(2);
@@ -105,11 +109,11 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
             }else{
                 if(sop.lastAction.toInt() == 2) {
                     // BET
-                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==0){
+                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==low){
                         // LOW -> FOLD
                         actBest = Types.ACTIONS.fromInt(0);
                     }
-                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==1){
+                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==mid){
                         // Mid -> 1/3 + alpha = Bet
                         if(rand.nextDouble()<1.0/3+alpha) {
                             // BET
@@ -119,7 +123,7 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                             actBest = Types.ACTIONS.fromInt(0);
                         }
                     }
-                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==2){
+                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==high){
                         actBest = Types.ACTIONS.fromInt(2);
                     }
                 }else{
@@ -130,7 +134,7 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
             //SECOND PLAYER
             if(sop.lastAction.toInt() == 1) {
                 // CHECK
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==0){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==low){
                     // LOW -> 1/3 BET;2/3 FOLD
                     if(rand.nextDouble()<1.0/3) {
                         // BET
@@ -140,22 +144,22 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                         actBest = Types.ACTIONS.fromInt(0);
                     }
                 }
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==1){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==mid){
                     // Mid -> CHECK
                     actBest = Types.ACTIONS.fromInt(1);
                 }
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==2){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==high){
                     // High -> BET
                     actBest = Types.ACTIONS.fromInt(2);
                 }
             }
             if(sop.lastAction.toInt() == 2) {
                 // BET
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==0){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==low){
                     // LOW -> FOLD
                     actBest = Types.ACTIONS.fromInt(0);
                 }
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==1){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==mid){
                     // Mid -> 1/3 = Bet
                     if(rand.nextDouble()<1.0/3) {
                         // BET
@@ -165,7 +169,7 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                         actBest = Types.ACTIONS.fromInt(0);
                     }
                 }
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==2){
+                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==high){
                     actBest = Types.ACTIONS.fromInt(2);
                 }
             }
