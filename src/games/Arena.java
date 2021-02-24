@@ -320,6 +320,9 @@ abstract public class Arena implements Runnable {
 			if (gb.isActionReq()) {
 				gb.setActionReq(false);
 				so = gb.getStateObs().clearedCopy();
+				//so = gb.getStateObs();
+				if (!so.isGameOver()&&so.isRoundOver()) so.initRound();
+
 				// clearedCopy realizes a special treatment needed for RubiksCube: getNextAction2, which is called
 				// below, skips from the available actions the inverse of the last action to avoid cycles of 2.
 				// This boosts performance when playing or evaluating RubiksCube. But it is wrong on InspectV,
@@ -338,6 +341,7 @@ abstract public class Arena implements Runnable {
 					StateObserverSim sos = (StateObserverSim) so;
 					System.out.println(sos.stringDescr2());
 				}
+
 
 				if (so.isLegalState() && !so.isGameOver()) {
 					actBest = paX.getNextAction2(so.partialState(), false, true);
@@ -367,7 +371,6 @@ abstract public class Arena implements Runnable {
 						// stay in INSPECTV
 						gb.clearBoard(false, true);
 					}
-
 				}
 			} else {
 				try {
