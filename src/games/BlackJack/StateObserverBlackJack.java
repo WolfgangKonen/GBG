@@ -30,14 +30,12 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     private gamePhase gPhase = gamePhase.BETPHASE;
     private boolean playerActedInPhase[] = new boolean[NUM_PLAYERS];
     private ArrayList<String> log = new ArrayList<String>();
-    private transient GameBoardBlackJackGui bjGui;
     private int currentSleepDuration = 0;
     private int episode = 0;
 
-    public StateObserverBlackJack(GameBoardBlackJackGui bjGui) {
+    public StateObserverBlackJack() {
         // defaultState
         // adding dealer and player/s
-        this.bjGui = bjGui;
         dealer = new Dealer("dealer");
         for (int i = 0; i < players.length; i++) {
             this.players[i] = new Player("p" + i);
@@ -63,15 +61,14 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         this.gPhase = other.gPhase;
         this.playerActedInPhase = other.playerActedInPhase.clone();
         this.log = new ArrayList<>(other.log);
-        this.bjGui = other.bjGui;
         this.currentSleepDuration = other.currentSleepDuration;
         this.episode = other.episode;
     }
 
     // mapping Deterministic actions to ENUMS to get more readable code
     enum BlackJackActionDet {
-        BET1(0), BET5(1), BET10(2), BET25(3), BET50(4), BET100(5), HIT(6), STAND(7), DOUBLEDOWN(8), SPLIT(9),
-        SURRENDER(10), INSURANCE(11);
+        BET10(0), HIT(1), STAND(2), DOUBLEDOWN(3), SPLIT(4),
+        SURRENDER(5), INSURANCE(6);
 
         private int action;
 
@@ -109,24 +106,28 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         BETPHASE(0), DEALPHASE(1), ASKFORINSURANCE(2) ,PEEKFORBLACKJACK(3),
         PLAYERONACTION(4), DEALERONACTION(5), PAYOUT(6);
 
-        private int phase;
+        private int value;
 
-        private gamePhase(int phase) {
-            this.phase = phase;
+        private gamePhase(int value) {
+            this.value = value;
         }
 
-        public int getPhase() {
-            return this.phase;
+        public int getValue() {
+            return this.value;
         }
 
         public gamePhase getNext() {
-            return gamePhase.values()[(phase + 1) % gamePhase.values().length];
+            return gamePhase.values()[(value + 1) % gamePhase.values().length];
         }
     }
 
     enum results {
         WIN, PUSH, LOSS, SURRENDER, BLACKJACK;
     }
+
+
+    @Override
+    public boolean isImperfectInformationGame() { return true; }
 
     enum PartialStateMode {
         THIS_PLAYER, WHATS_ON_TABLE, FULL;
@@ -137,8 +138,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             case THIS_PLAYER:
             case WHATS_ON_TABLE:
                 if (gPhase != gamePhase.DEALERONACTION && gPhase != gamePhase.PAYOUT) {
+                    setPartialState(true);
                     StateObserverBlackJack p_so = new StateObserverBlackJack(this);
-                    if (dealer.hasHand() && dealer.getActiveHand().size() == 2) {
+                    if (dealer.hasHand() && dealer.getActiveHand().size() > 1) {
                         p_so.dealer.activeHand.getCards().remove(1);
                         p_so.dealer.activeHand.getCards().add(new Card(Card.Rank.X, Card.Suit.X, 999));
                     }
@@ -153,6 +155,55 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     }
 
     @Override
+    public StateObservation randomCompletion(){
+        setPartialState(false); // maybe not needed. maybe we should introduce a flag completed
+        // if the dealer has no hand there is nothing to complete
+        if(dealer.getActiveHand() == null){
+            return this;
+        }
+        // if the second card of the dealer is unknown we need completion
+        if(dealer.getActiveHand().getCards().get(1).rank == Card.Rank.X){
+            if(gPhase.getValue() < gamePhase.PLAYERONACTION.getValue()){
+                //check for Black did not happen. We can complete with any Card.
+                return completeRandom();
+            }else{
+                /** in this case the dealer peeked already for a BlackJack. If the dealer had a Black Jack
+                 * the round would have ended already. So in this Case the completion cant result in a
+                 * Black Jack for the dealer, this would be an illegal Game State.
+                 * We need to restrict the completion if the upcard of the dealer
+                 * is an A, K, Q, J, or a Ten.
+                 */
+                if(dealer.getActiveHand().getCards().get(0).rank.getValue() >= 10){
+                    return completeRestricted();
+                }
+                return completeRandom();
+            }
+
+        }
+        return this;
+
+    }
+
+    private StateObservation completeRandom(){
+        dealer.getActiveHand().getCards().remove(1);
+        dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
+        return this;
+    }
+
+    private StateObservation completeRestricted(){
+        dealer.getActiveHand().getCards().remove(1);
+        do{
+            dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
+        }while(dealer.getActiveHand().checkForBlackJack());
+        return this;
+    }
+
+    @Override
+    public StateObservation partialState() {
+        return partialState(PartialStateMode.THIS_PLAYER);
+    }
+
+    @Override
     public StateObservation clearedCopy() {
         return null;
     }
@@ -162,7 +213,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         if(episode > episodeLength)
             return true;
         for (Player p : players){
-            if(p.getChips() >= 1 || p.betOnActiveHand() > 0) {
+            if(p.getChips() >= 10 || p.betOnActiveHand() > 0) {
                 return false;
             }
         }
@@ -324,26 +375,14 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             // sets the available betting options, u always bet before get dealt a hand.
             // Checks
             // the highest possible betamount first. Actions are mapped to Enums.
-            int availableBetCount = 0;
-            if (currentPlayer.getChips() >= 100) {
-                availableBetCount = 6;
-            } else if (currentPlayer.getChips() >= 50) {
-                availableBetCount = 5;
-            } else if (currentPlayer.getChips() >= 25) {
-                availableBetCount = 4;
-            } else if (currentPlayer.getChips() >= 10) {
-                availableBetCount = 3;
-            } else if (currentPlayer.getChips() >= 5) {
-                availableBetCount = 2;
-            } else if (currentPlayer.getChips() >= 1) {
-                availableBetCount = 1;
+            if(currentPlayer.getChips() >= 10){
+                availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.BET10.getAction()));
             }
-            try {
-                setAvailableBettingActions(availableBetCount);
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            else if(!isGameOver()){
+                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+                return;
             }
+
         } else if(gPhase.equals(gamePhase.ASKFORINSURANCE)){
             if(currentPlayer.insuranceAmount() == 0
                     && currentPlayer.betOnActiveHand() < currentPlayer.getChips()){
@@ -395,21 +434,6 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     }
 
-    // param availableBets: represents how many bets are Available from enum
-    // BlackJackActionDet from low to high
-    public void setAvailableBettingActions(int availableBets){
-        if (availableBets == 0 || availableBets > BlackJackActionDet.values().length){
-            //skip the player
-            if(!isGameOver()) {
-                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
-            }
-        }
-        for (int i = 0; i < availableBets; i++) {
-            availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.values()[i].getAction()));
-        }
-    }
-
-
 
     @Override
     public ACTIONS getAction(int i) {
@@ -450,23 +474,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
         // this switch only changes player attributes caused by the action
         switch (a) {
-            case BET1:
-                currentPlayer.bet(1);
-                break;
-            case BET5:
-                currentPlayer.bet(5);
-                break;
+
             case BET10:
                 currentPlayer.bet(10);
-                break;
-            case BET25:
-                currentPlayer.bet(25);
-                break;
-            case BET50:
-                currentPlayer.bet(50);
-                break;
-            case BET100:
-                currentPlayer.bet(100);
                 break;
             case DOUBLEDOWN:
                 currentPlayer.bet(currentPlayer.betOnActiveHand());
@@ -487,12 +497,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         // this switch determins if the next action is determinisic or nondeterministic,
         // if it is the next players turn and if the gamePhase advences
         switch (a) {
-            case BET1:
-            case BET5:
             case BET10:
-            case BET25:
-            case BET50:
-            case BET100:
             case STAND:
             case INSURANCE:
             case SURRENDER:
@@ -751,15 +756,6 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                         log.add(p.name + " summed payoff this round: " + roundPayOff);
                     }
                 }
-               /* deprecated
-               if(currentSleepDuration > 0) {
-                    bjGui.update(this, false, false);
-                    SwingUtilities.invokeLater(() -> {
-                        bjGui.updateWithSleep((StateObserverBlackJack) test.partialState(PartialStateMode.THIS_PLAYER), currentSleepDuration);
-                        bjGui.revalidate();
-                        bjGui.repaint();
-                    });
-                }*/
 
 
                 setRoundOver(true);
