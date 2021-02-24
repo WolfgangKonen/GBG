@@ -132,7 +132,7 @@ public class Player {
     }
 
     public boolean hasLost(){
-        return chips < 1 && betOnActiveHand() == 0;
+        return chips < 10 && betOnActiveHand() == 0;
     }
 
     public String toString() {

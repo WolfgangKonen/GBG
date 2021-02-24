@@ -25,7 +25,7 @@ public class GameBoardBlackJack implements GameBoard {
         if (m_Arena.hasGUI() && m_gameGui == null) {
             m_gameGui = new GameBoardBlackJackGui(this);
         }
-        m_so = new StateObserverBlackJack(m_gameGui);
+        m_so = new StateObserverBlackJack();
 
     }
 
@@ -38,7 +38,7 @@ public class GameBoardBlackJack implements GameBoard {
     @Override
     public void clearBoard(boolean boardClear, boolean vClear) {
         if (boardClear) {
-            m_so = new StateObserverBlackJack(m_gameGui);
+            m_so = new StateObserverBlackJack();
         }
 
         if (m_gameGui != null && m_Arena.taskState != Arena.Task.TRAIN)

@@ -27,7 +27,6 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         StateObserverBlackJack m_so;
         int actVal = -1;
 
-
         if(sob instanceof StateObserverBlackJack) {
             m_so = (StateObserverBlackJack) sob;
         }else{
