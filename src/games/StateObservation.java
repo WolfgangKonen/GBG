@@ -45,6 +45,7 @@ public interface StateObservation extends Serializable{
 
 	boolean isDeterministicGame();
 	boolean isImperfectInformationGame();
+	boolean isRoundBasedGame();
 	
 	/**
 	 * @return true, if the game emits rewards only in a game-over game position

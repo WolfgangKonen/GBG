@@ -398,5 +398,7 @@ abstract public class ObserverBase implements StateObservation {
     public boolean stopInspectOnGameOver() {
     	return true;
     }
-    
+
+    public boolean isRoundBasedGame(){return false;}
+
 }
