@@ -98,14 +98,15 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         int iterations = m_mcPar.getNumIter();
         int numberAgents = m_mcPar.getNumAgents();
         int depth = m_mcPar.getRolloutDepth();
+        boolean stopOnRoundOver = m_mcPar.getStopOnRoundOver();
         
         if(numberAgents > 1) {
             //more than one agent (majority vote)
-        	return getNextAction2MultipleAgents(so, iterations, numberAgents, depth);
+        	return getNextAction2MultipleAgents(so, iterations, numberAgents, depth, stopOnRoundOver);
         } else {
             //only one agent: select one of the following lines:
-        	return getNextAction_PAR(so, iterations, depth);
-        	//return getNextAction_MassivePAR(so, iterations, depth);
+        	return getNextAction_PAR(so, iterations, depth, stopOnRoundOver);
+        	//return getNextAction_MassivePAR(so, iterations, depth, stopOnRoundOver);
         }
 	}
 
@@ -129,7 +130,10 @@ public class MCAgentN extends AgentBase implements PlayAgent {
      * The parallelization is done over the available actions. It is NOT done over the rollout
      * iterations (as well), this would be too fine-grained (at least for games like Hex). 
      */
-    private Types.ACTIONS_VT getNextAction_PAR(StateObservation sob, int iterations, int depth) {
+    private Types.ACTIONS_VT getNextAction_PAR(StateObservation sob,
+                                               int iterations,
+                                               int depth,
+                                               boolean stopOnRoundOver) {
     	//the functions which are to be distributed on the cores: 
         List<Callable<ResultContainerN>> callables = new ArrayList<>();
         //the results of these functions:
@@ -145,7 +149,6 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 		int sobPlayer = sob.getPlayer();
 		ScoreTuple bestActionScoreTuple = null;
 		ScoreTuple[] nextActionScoreTuple = new ScoreTuple[actions.size()];
-    	RandomSearch agent= new RandomSearch();
 
 		for (int i=0; i<actions.size(); i++) {
 			nextActionScoreTuple[i] = new ScoreTuple(sob);
@@ -166,6 +169,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         //build the functions to be distributed on the cores.
         //For each available action a function is built:
         for (int i = 0; i < sob.getNumAvailableActions(); i++) {
+            RandomSearch agent= new RandomSearch();
 
             //the actual action i has to be saved on a new variable, since
             //the  for-loop value i is not accessible at the time of
@@ -190,7 +194,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                     newSob.advance(actions.get(firstActionIdentifier));
 
                     //construct Random Agent and let it simulate a (random) rollout until game over:
-                    agent.startAgent(newSob, depth);			// contains BUG1 fix
+                    agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
                     
                     avgScoreTuple.combine(
                             newSob.getGameScoreTuple(),
@@ -282,7 +286,10 @@ public class MCAgentN extends AgentBase implements PlayAgent {
      * up to 4 actions. If you want to activate this function, you have to change the source
      * code in {@link #getNextAction2(StateObservation, boolean, boolean).} 
      */
-    private Types.ACTIONS_VT getNextAction_MassivePAR(StateObservation sob, int iterations, int depth) {
+    private Types.ACTIONS_VT getNextAction_MassivePAR(StateObservation sob,
+                                                      int iterations,
+                                                      int depth,
+                                                      boolean stopOnRoundOver) {
     	//the functions which are to be distributed on the cores: 
         List<Callable<ResultContainer>> callables = new ArrayList<>();
         //the results of these functions:
@@ -341,7 +348,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 
                     //construct Random Agent and let it simulate a (random) rollout:
                     RandomSearch agent = new RandomSearch();
-                    agent.startAgent(newSob, depth);			// contains BUG1 fix
+                    agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
 
                     //return result of simulation in an object of class ResultContainer:
                     return new ResultContainer(firstActionIdentifier, newSob, agent.getRolloutDepth());
@@ -422,8 +429,11 @@ public class MCAgentN extends AgentBase implements PlayAgent {
      * {@code actBest.getScoreTuple()} returns the {@link ScoreTuple} connected with this
      * selected action.
      */
-    private Types.ACTIONS_VT getNextAction2MultipleAgents(StateObservation sob, 
-    		int iterations, int numberAgents, int depth) {
+    private Types.ACTIONS_VT getNextAction2MultipleAgents(StateObservation sob,
+                                                          int iterations,
+                                                          int numberAgents,
+                                                          int depth,
+                                                          boolean stopOnRoundOver) {
         Types.ACTIONS actBest;
         Types.ACTIONS_VT actBestVT;
         List<Types.ACTIONS> actions = sob.getAvailableActions();
@@ -462,7 +472,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                     newSob.advance(actions.get(j));
 
                     RandomSearch agent = new RandomSearch();
-                    agent.startAgent(newSob, depth);			// contains BUG1 fix
+                    agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
 
                     avgScoreTuple.combine(
                             newSob.getGameScoreTuple(),
@@ -609,9 +619,9 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 
         for (int i = 0; i < NC; i++) {
         	if (numberAgents==1) {
-        		nextAction = getNextAction_PAR(sob,iterations, depth).toInt();
+        		nextAction = getNextAction_PAR(sob,iterations, depth,false).toInt();
         	} else {
-        		nextAction = getNextAction2MultipleAgents(sob,iterations,numberAgents, depth).toInt();
+        		nextAction = getNextAction2MultipleAgents(sob,iterations,numberAgents, depth, false).toInt();
         		if (!silent) System.out.print(".");
         	}
             wtable[nextAction]++;

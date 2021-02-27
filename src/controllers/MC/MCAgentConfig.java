@@ -8,4 +8,5 @@ public class MCAgentConfig {
     public static final int DEFAULT_ROLLOUTDEPTH = 20; //Number of times advance() is called for every Iteration
     public static final int DEFAULT_NUMBERAGENTS = 1; //Number of Agents for Majority Vote
     public static boolean DOCALCCERTAINTY = false; // if true, calculate several certainty measures at the
+    public static boolean STOPONROUNDOVER = true;   // if true, rollout stops if a round is complete
 }

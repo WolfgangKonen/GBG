@@ -793,6 +793,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             return null;
         }
         setAvailableRandoms();
+        if (availableRandoms.size()==0) {
+            System.err.println("/WK/ Something is wrong: availableRandoms has size==0");
+            return null;  // /WK/ added this to avoid exception in next line, but not sure whether the right thing to do
+        }
         return Types.ACTIONS.fromInt(availableRandoms.remove(0));
     }
 

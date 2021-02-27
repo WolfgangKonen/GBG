@@ -1,6 +1,7 @@
 package params;
 
 import java.awt.*;
+import java.io.Serial;
 import java.io.Serializable;
 
 import javax.swing.*;
@@ -29,10 +30,12 @@ public class MCParams extends Frame implements Serializable
     JLabel LIterations;
     JLabel LRolloutdepth;
     JLabel LNumberAgents;
+    JLabel LStopOnRoundOver;
     public JTextField TIterations;
     public JTextField TRolloutdepth;
     public JTextField TNumberAgents;
     public JCheckBox CBCalcCertainty;
+    public JCheckBox CBStopOnRoundOver;
     JPanel mPanel;
 
 	/**
@@ -40,17 +43,20 @@ public class MCParams extends Frame implements Serializable
 	 * compatible with an older one (older .agt.zip containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 1L;
 
    public MCParams() {
         super("MC Parameter");
         LIterations = new JLabel("Iterations");
         LRolloutdepth = new JLabel("Rollout Depth");
         LNumberAgents = new JLabel("Number Agents");
+        LStopOnRoundOver = new JLabel("StopOnRoundOver");
         TIterations = new JTextField(""+MCAgentConfig.DEFAULT_ITERATIONS);
         TRolloutdepth = new JTextField(""+MCAgentConfig.DEFAULT_ROLLOUTDEPTH);
         TNumberAgents = new JTextField(""+MCAgentConfig.DEFAULT_NUMBERAGENTS);
         CBCalcCertainty = new JCheckBox("Calc Certainty", MCAgentConfig.DOCALCCERTAINTY);
+        CBStopOnRoundOver = new JCheckBox("StopOnRoundOver", MCAgentConfig.STOPONROUNDOVER);
         mPanel = new JPanel();
 
         LIterations.setToolTipText("Number of iterations during MC search");
@@ -58,30 +64,30 @@ public class MCParams extends Frame implements Serializable
         LNumberAgents.setToolTipText("Number of agents for majority vote");
 
         setLayout(new BorderLayout(10,0));
-        mPanel.setLayout(new GridLayout(0,4,10,10));
+        mPanel.setLayout(new GridLayout(0,2,10,10));
 
-        mPanel.add(LIterations);
-        mPanel.add(TIterations);
-        mPanel.add(LRolloutdepth);
-        mPanel.add(TRolloutdepth);
+        JPanel iterPanel = new JPanel(new GridLayout(0,2,10,10));
+        iterPanel.add(LIterations);
+        iterPanel.add(TIterations);
+        mPanel.add(iterPanel);
+        JPanel rollPanel = new JPanel(new GridLayout(0,2,10,10));
+        rollPanel.add(LRolloutdepth);
+        rollPanel.add(TRolloutdepth);
+        mPanel.add(rollPanel);
 
-        mPanel.add(LNumberAgents);
-        mPanel.add(TNumberAgents);
-        mPanel.add(new Canvas());
-        mPanel.add(new Canvas());
-
-        mPanel.add(new Canvas());
-       // mPanel.add(CBCalcCertainty);
-        mPanel.add(new Canvas());
-        mPanel.add(new Canvas());
-
-        mPanel.add(new Canvas());
-        mPanel.add(new Canvas());
-        mPanel.add(new Canvas());
+        JPanel numbPanel = new JPanel(new GridLayout(0,2,10,10));
+        numbPanel.add(LNumberAgents);
+        numbPanel.add(TNumberAgents);
+        mPanel.add(numbPanel);
         mPanel.add(new Canvas());
 
+        mPanel.add(CBStopOnRoundOver);
+        // mPanel.add(CBCalcCertainty);
+        mPanel.add(new Canvas());
+
         mPanel.add(new Canvas());
         mPanel.add(new Canvas());
+
         mPanel.add(new Canvas());
         mPanel.add(new Canvas());
 
@@ -95,18 +101,21 @@ public class MCParams extends Frame implements Serializable
         return mPanel;
     }
     public int getNumIter() {
-        return Integer.valueOf(TIterations.getText()).intValue();
+        return Integer.parseInt(TIterations.getText());
     }
     public int getRolloutDepth() {
         return Double.valueOf(TRolloutdepth.getText()).intValue();
     }
     public int getNumAgents() {
-        return Integer.valueOf(TNumberAgents.getText()).intValue();
+        return Integer.parseInt(TNumberAgents.getText());
     }
     public boolean getCalcCertainty() {
         return CBCalcCertainty.isSelected();
     }
-    
+    public boolean getStopOnRoundOver() {
+        return CBStopOnRoundOver.isSelected();
+    }
+
     public void setNumIter(int value) {
         TIterations.setText(value+"");
     }
@@ -119,6 +128,9 @@ public class MCParams extends Frame implements Serializable
     public void setCalcCertainty(boolean value) {
         CBCalcCertainty.setSelected(value);
     }
+    public void setStopOnRoundOver(boolean value) {
+        CBStopOnRoundOver.setSelected(value);
+    }
 
     /**
      * Needed to restore the param tab with the parameters from a re-loaded agent
@@ -129,6 +141,7 @@ public class MCParams extends Frame implements Serializable
         setRolloutDepth(tp.getRolloutDepth());
         setNumAgents(tp.getNumAgents());
         setCalcCertainty(tp.getCalcCertainty());
+        setStopOnRoundOver(tp.getStopOnRoundOver());
     }
     /**
      * Needed to restore the param tab with the parameters from a re-loaded agent
@@ -139,5 +152,6 @@ public class MCParams extends Frame implements Serializable
         setRolloutDepth(tp.getRolloutDepth());
         setNumAgents(tp.getNumAgents());
         setCalcCertainty(tp.getCalcCertainty());
+        setStopOnRoundOver(tp.getStopOnRoundOver());
     }
 }

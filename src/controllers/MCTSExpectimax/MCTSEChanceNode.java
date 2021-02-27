@@ -403,6 +403,9 @@ public class MCTSEChanceNode
         											// and the initial 'so' has also its available actions set. 
 													// Calling setAvailableActions without need slows down,
 													// especially for Othello (factor 3-4).
+            if (rollerState.getNumAvailableActions()==0) {
+                System.err.println("/WK/ Something is wrong: rollerState has no available actions!!");
+            }
             int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
             rollerState.advance(rollerState.getAction(action));
             thisDepth++;
