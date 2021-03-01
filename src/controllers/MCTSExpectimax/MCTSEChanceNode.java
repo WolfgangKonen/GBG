@@ -1,8 +1,6 @@
 package controllers.MCTSExpectimax;
 
 import games.StateObservation;
-import games.ZweiTausendAchtundVierzig.ConfigGame;
-import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import params.ParMCTSE;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.Types;
@@ -11,8 +9,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import controllers.MCTS.SingleTreeNode;
 
 /**
  * This is adapted from Diego Perez MCTS reference implementation
@@ -395,20 +391,42 @@ public class MCTSEChanceNode
      * @see StateObservation#getReward(StateObservation, boolean)
      */
     public double rollOut() {
+        boolean stopConditionMet;
         StateObservation rollerState = so.copy();
-        int thisDepth = this.depth;
+        int maxDepth = this.m_player.getROLLOUT_DEPTH();
+        int rolloutDepth;
 
-        while (!finishRollout(rollerState, thisDepth)) {
-			//rollerState.setAvailableActions();	// /WK/ commented out since every advance() includes setAvailableActions()
-        											// and the initial 'so' has also its available actions set. 
-													// Calling setAvailableActions without need slows down,
-													// especially for Othello (factor 3-4).
-            if (rollerState.getNumAvailableActions()==0) {
-                System.err.println("/WK/ Something is wrong: rollerState has no available actions!!");
+        //for(int i = this.depth; i < maxDepth; i++) {  // this alternative was implemented before 03/2021, but we think
+                                                        // it might lead to wrong results for small maxDepth
+        for(int i = 0; i < maxDepth; i++) {
+            stopConditionMet = isRolloutFinished(rollerState, i);
+            if (!stopConditionMet) {
+                if (rollerState.isRoundOver()) rollerState.initRound();         // NEW/03/2021: for round-based games
+                //rollerState.setAvailableActions();	// /WK/ commented out since every advance() includes setAvailableActions()
+                                                        // and the initial 'so' has also its available actions set.
+                                                        // Calling setAvailableActions without need slows down,
+                                                        // especially for Othello (factor 3-4).
+                if (rollerState.getNumAvailableActions() > 0) {
+                    int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
+                    rollerState.advance(rollerState.getAction(action));
+                }
+                else {
+                    //System.err.println("/WK/ Something is wrong: rollerState has no available actions!!");
+
+                    // If the current player has no available action: we have a pass situation
+                    // (like in Othello): We should pass over to the next player and just continue (!)
+                    rollerState.passToNextPlayer();
+                }
+                // --- only for debug ---
+                //System.err.println("[MCTSE] " + rollerState.stringDescr());
+
+            } else {
+                // /WK/ **BUG1** fix: check every sob (including the first!) whether the stop condition is
+                // already met. If this is the case, return sob without advance and set
+                // rolloutDepth to i (being 0 in the first iteration).
+                rolloutDepth = i;
+                break; // out of for
             }
-            int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
-            rollerState.advance(rollerState.getAction(action));
-            thisDepth++;
         }
 
         if (rollerState.isGameOver()) {
@@ -420,22 +438,44 @@ public class MCTSEChanceNode
     }
 
     /**
-     * Starting from this leaf node a game with random actions will be played until the game 
-     * is over or the maximum rollout depth is reached.
      * This rollout variant works only for 2048 and returns the non-normalized raw score.
+     *
+     * Starting from this leaf node a game with random actions will be played until the game
+     * is over or the maximum rollout depth is reached.
      *
      * @return the 2048-raw-score after the rollout is finished
      */
     public double rollOut1() {
+        boolean stopConditionMet;
         assert so instanceof StateObserver2048: "so is not instanceof StateObserver2048, use rollOut() instead off rollOut1()";
         StateObserver2048 rollerState = (StateObserver2048)so.copy();
-        int thisDepth = this.depth;
+        int maxDepth = this.m_player.getROLLOUT_DEPTH();
+        int rolloutDepth;
 
-        while (!finishRollout(rollerState, thisDepth)) {
-            rollerState.setAvailableActions();
-            int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
-            rollerState.advance(rollerState.getAction(action));
-            thisDepth++;
+        //for(int i = this.depth; i < maxDepth; i++) {  // this alternative was implemented before 03/2021, but we think
+                                                        // it might lead to wrong results for small maxDepth
+        for(int i = 0; i < maxDepth; i++) {
+            stopConditionMet = isRolloutFinished(rollerState, i);
+            if (!stopConditionMet) {
+                if (rollerState.isRoundOver()) rollerState.initRound();         // NEW/03/2021: for round-based games
+                //rollerState.setAvailableActions();	// /WK/ commented out since every advance() includes setAvailableActions()
+                                                        // and the initial 'so' has also its available actions set.
+                                                        // Calling setAvailableActions without need slows down,
+                                                        // especially for Othello (factor 3-4).
+                if (rollerState.getNumAvailableActions() > 0) {
+                    int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
+                    rollerState.advance(rollerState.getAction(action));
+                }
+                else {
+                    // If the current player has no available action: we have a pass situation
+                    // (like in Othello): We should pass over to the next player and just continue (!)
+                    rollerState.passToNextPlayer();
+                }
+
+            } else {
+                rolloutDepth = i;
+                break; // out of for
+            }
         }
 
         if (rollerState.isGameOver()) {
@@ -493,12 +533,17 @@ public class MCTSEChanceNode
      * @param depth the current rollout depth
      * @return true if the rollout is finished, false if not
      */
-    public boolean finishRollout(StateObservation rollerState, int depth) {
-        if (depth >= m_player.getROLLOUT_DEPTH()) {
-            return true;
-        }
+    public boolean isRolloutFinished(StateObservation rollerState, int depth) {
+        boolean stopOnRoundOver = true;
+        // *** this is now done in the for-loops of rollout and rollout1 ***
+        //if (depth >= m_player.getROLLOUT_DEPTH()) {
+        //    return true;
+        //}
 
         if (rollerState.isGameOver()) {
+            return true;
+        }
+        if (rollerState.isRoundOver() && stopOnRoundOver) {         // /WK/ NEW/03/2021
             return true;
         }
 

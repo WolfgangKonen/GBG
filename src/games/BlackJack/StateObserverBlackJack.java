@@ -462,6 +462,12 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public void advanceDeterministic(ACTIONS action) {
+        if (this.isGameOver()) {    // /WK/ sanity check (should usually not fire )
+            System.err.println("Error [StateObsBJ]: advanceDet for a game-over state!!");
+        }
+        if (this.isRoundOver()) {
+            System.err.println("Error [StateObsBJ]: advanceDet for a round-over state!!");
+        }
         currentPlayer = getCurrentPlayer();
         // convert action to enum
         BlackJackActionDet a = BlackJackActionDet.values()[action.toInt()];
@@ -572,6 +578,13 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         if (isNextActionDeterministic) {
             throw new RuntimeException("Next action should be deterministic");
         }
+        if (this.isGameOver()) {        // /WK/ sanity check (should usually not fire)
+            System.err.println("Error [StateObsBJ]: advanceNondet for a game-over state!!");
+        }
+        if (this.isRoundOver()) {
+            System.err.println("Error [StateObsBJ]: advanceNondet for a round-over state!!");
+        }
+
         BlackJackActionNonDet a = BlackJackActionNonDet.values()[action.toInt()];
 
         switch (a) {

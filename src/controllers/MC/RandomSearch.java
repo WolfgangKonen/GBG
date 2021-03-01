@@ -24,6 +24,7 @@ public class RandomSearch{
         for(int i = 0; i < depth; i++) {
             stopConditionMet = sob.isGameOver() || (stopOnRoundOver && sob.isRoundOver());
         	if (!stopConditionMet) {
+                if (sob.isRoundOver()) sob.initRound();     // NEW/03/21: for round-based games
                 if (sob.getNumAvailableActions() > 0) {
                     sob.advance(sob.getAvailableActions().get(random.nextInt(sob.getNumAvailableActions())));
                 }
@@ -34,8 +35,7 @@ public class RandomSearch{
                                                 // (like in Othello) :
                     sob.passToNextPlayer();     // We should pass over to the next player and just continue (!)
                 }
-                if (sob.isRoundOver()) sob.initRound();     // NEW/03/21: for round-based games
-        	} else {					
+        	} else {
                 // /WK/ **BUG1** fix: check every sob (including the first!) whether the stop condition is
         		// already met. If this is the case, return sob without advance and set
         		// rolloutDepth to i (being 0 in the first iteration).

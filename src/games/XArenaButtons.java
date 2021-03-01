@@ -109,12 +109,14 @@ public class XArenaButtons //extends JPanel
 				// which modes are available, what the tooltip string is and so on. But it is 'dummy'
 				// w.r.t. mode, which is here set to 0. Once a mode is selected and an evaluation 
 				// process is started, a new Evaluator with the selected mode will be constructed.
-				oPar[n].setQuickEvalList(dummyEvaluator.getAvailableModes());
-				oPar[n].setTrainEvalList(dummyEvaluator.getAvailableModes());
-				oPar[n].setQuickEvalMode(dummyEvaluator.getQuickEvalMode());
-				oPar[n].setTrainEvalMode(dummyEvaluator.getTrainEvalMode());
-				oPar[n].setQuickEvalTooltip(dummyEvaluator.getTooltipString());
-				oPar[n].setTrainEvalTooltip(dummyEvaluator.getTooltipString());
+				if (dummyEvaluator!=null) {
+					oPar[n].setQuickEvalList(dummyEvaluator.getAvailableModes());
+					oPar[n].setTrainEvalList(dummyEvaluator.getAvailableModes());
+					oPar[n].setQuickEvalMode(dummyEvaluator.getQuickEvalMode());
+					oPar[n].setTrainEvalMode(dummyEvaluator.getTrainEvalMode());
+					oPar[n].setQuickEvalTooltip(dummyEvaluator.getTooltipString());
+					oPar[n].setTrainEvalTooltip(dummyEvaluator.getTooltipString());
+				}
 			} catch (RuntimeException e){
 				System.out.println(e.getMessage());
 			}
