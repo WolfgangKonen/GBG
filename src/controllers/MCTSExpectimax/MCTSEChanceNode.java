@@ -3,6 +3,7 @@ package controllers.MCTSExpectimax;
 import games.StateObservation;
 import params.ParMCTSE;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.text.DecimalFormat;
@@ -28,7 +29,7 @@ public class MCTSEChanceNode
      */
     public StateObservation so = null;
     /**
-     * (It seems that this member {@link #action} is never really needed)
+     * member {@code #action} is only used for printout in {@link #printChildInfo(int, boolean)}
      */
     public Types.ACTIONS action = null;
     private MCTSETreeNode parentNode = null;
@@ -92,7 +93,7 @@ public class MCTSEChanceNode
      *      depth is not yet reached)
      * <li> make a {@link #rollOut()} starting from this leaf node (a game
      *      with random actions until game is over or until the maximum rollout depth is reached)
-     * <li> {@link #backUp(double)} the resulting score {@code score} and
+     * <li> {@link #backUp(double[])} the resulting score {@code score} and
      *      the number of visits for all nodes on {@code value} and {@code visits}.
      * <li> Do this for all nodes on the path from the leaf up to the root.
      * </ul>
@@ -111,23 +112,24 @@ public class MCTSEChanceNode
             //select a child node
             MCTSEChanceNode selected = treePolicy();
 
-            double score;
+            double[] score;
 
             if(selected.so instanceof StateObserver2048 && m_player.getParMCTSE().getEnableHeuristics()) {
                 // only for game 2048: use special heuristic and add non-normalized score:
                 // a) get Heuristic bonus
-                score = ((StateObserver2048)selected.so).getHeuristicBonus(m_player.getHeuristicSettings2048());
+                score = new double[1];
+                score[0] = ((StateObserver2048)selected.so).getHeuristicBonus(m_player.getHeuristicSettings2048());
                 if(m_player.getHeuristicSettings2048().enableRollout) {
                     // b) add rollout bonus (non-normalized score)
-                    score += selected.rollOut1() * m_player.getHeuristicSettings2048().rolloutWeighting;
+                    score[0] += selected.rollOut1() * m_player.getHeuristicSettings2048().rolloutWeighting;
                 }
             } else {
                 //get "normal" MCTSE score
                 score = selected.rollOut();
             }
 
-            // --- this is now done in value(): directly ---
-//            //set maxRolloutScore in root node (needed in value())
+            // --- this is now done in valueFnc(): directly ---
+//            //set maxRolloutScore in root node (needed in valueFnc())
 //            double s = m_player.getRootNode().scoreNonNormalized;
 //            if(m_player.getRootNode().maxRolloutScore < s) {
 //                m_player.getRootNode().maxRolloutScore = s;
@@ -189,7 +191,7 @@ public class MCTSEChanceNode
 			switch(m_player.getParMCTSE().getSelectMode()) {
 			case 0: 
 //	            return uctNormalised().treePolicy().treePolicy();	
-				// uctNormalised() is obsolete now. We do the optional normalization via value(),
+				// uctNormalised() is obsolete now. We do the optional normalization via valueFnc(),
 				// which is called by rollOut(). (The initial estimate for root's maxRolloutScore
 				// is now calculated in MCTSEPlayer::init().) Given this optional normalization, 
 				// we can use always normal uct() here: 
@@ -198,7 +200,7 @@ public class MCTSEChanceNode
 	            // and uct().treePolicy returns a MCTSEChanceNode. If we would stop here we would 
 	            // have no recursion, we would just select a chance node 2 layers down. With 
 	            // the second .treePolicy() we ensure that a complete recursion is done (until a 
-	            // terminal state or the prescribe tree depth is reached).
+	            // terminal state or the prescribed tree depth is reached).
 			case 1: 
 	            return egreedy().treePolicy().treePolicy();
 			case 2: 
@@ -241,7 +243,7 @@ public class MCTSEChanceNode
     @Deprecated
     private MCTSETreeNode uctNormalised() {
     	// we do this now differently with an extra short mctseSearch in MCTSEPlayer::init()
-    	// and with the proper normalization done in this.value():
+    	// and with the proper normalization done in this.valueFnc():
         if(m_player.getRootNode().iterations < 100) { 
             return uct();			// run the first 100 iterations w/o normalization to establish
             						// a rough estimate of maxRolloutScore
@@ -385,16 +387,18 @@ public class MCTSEChanceNode
      * Starting from this leaf node a game with random actions will be played until the game 
      * is over or the maximum rollout depth is reached.
      *
-     * @return 	the {@link StateObservation#getReward(StateObservation, boolean) reward} 
-     * 			after the rollout is finished
-     * 
+     * @return 	a vector of length N, where the {@code i}th element holds q(reward[{@code i}]), the reward
+     * 			for the {@code i}th player in state {@code so} after the rollout is finished.<br>
+     * 			q() normalizes the rewards to [0,1] if flag 'Normalize' is checked. Otherwise it is the identity function.
+     *
      * @see StateObservation#getReward(StateObservation, boolean)
      */
-    public double rollOut() {
+    public double[] rollOut() {
         boolean stopConditionMet;
         StateObservation rollerState = so.copy();
         int maxDepth = this.m_player.getROLLOUT_DEPTH();
         int rolloutDepth;
+
 
         //for(int i = this.depth; i < maxDepth; i++) {  // this alternative was implemented before 03/2021, but we think
                                                         // it might lead to wrong results for small maxDepth
@@ -434,7 +438,7 @@ public class MCTSEChanceNode
         }
 
 //        return rollerState.getReward(so,m_player.rgs);
-        return value(rollerState,so);
+        return valueFnc(rollerState,so);  			// NEW version: N-player tuple
     }
 
     /**
@@ -494,12 +498,15 @@ public class MCTSEChanceNode
 	 * @param so
 	 *            the final state
 	 * @param referingState
-	 *            the state where the rollout (playout) started
+	 *            the state where the rollout (playout) started [** now perhaps obsolete **]
 	 * 
-	 * @return q(reward), the reward or game score for {@code so} (relative to {@code referingState})
+     * @return 	a vector of length N, where the {@code i}th element holds q(reward[{@code i}]), the reward
+     * 			for the {@code i}th player in state {@code so}.<br>
+     * 			q() normalizes the rewards to [0,1] if flag 'Normalize' is checked. Otherwise it is the identity function.
 	 */
-	public double value(StateObservation so, StateObservation referingState) {
-		double v = so.getReward(referingState, m_player.rgs);
+	public double[] valueFnc(StateObservation so, StateObservation referingState) {
+		ScoreTuple tup = so.getRewardTuple(m_player.rgs);
+        double[] v = tup.scTup.clone();
 //		m_player.getRootNode().scoreNonNormalized=v;
 		double maxScore;
 		if (m_player.getNormalize()) {
@@ -513,15 +520,17 @@ public class MCTSEChanceNode
 				// when tile 2^16 is reached, which does not happen in a 'normal' rollout.
 				// Using this MAXSCORE would result in too small child values (no exploitation).]
 	            maxScore = m_player.getRootNode().maxRolloutScore;
-	            if (v>maxScore)
-	            	maxScore = m_player.getRootNode().maxRolloutScore = v;
+	            if (v[0]>maxScore)
+	            	maxScore = m_player.getRootNode().maxRolloutScore = v[0];
 	            //assert maxScore != 0 : "Error: maxRolloutScore is 0.0";
 			} else {
 				maxScore = so.getMaxGameScore();
 			}
 			// /WK/ map v to [0,1] (this is q(reward) in notes_MCTS.docx)
-			v = (v - so.getMinGameScore()) / (maxScore - so.getMinGameScore());
-			assert ((v >= 0) && (v <= 1)) : "Error: value v is not in range [0,1]";
+            for(int i = 0; i < v.length; i++) {
+                v[i] = (v[i] - so.getMinGameScore()) / (maxScore - so.getMinGameScore());
+                assert ((v[i] >= 0) && (v[i] <= 1)) : "Error: value v is not in range [0,1]";
+            }
 		}
 		return v;
 	}
@@ -554,26 +563,39 @@ public class MCTSEChanceNode
      * Backup the score through all parent nodes, until the root node is reached
      * calls itself recursively in each parent node
      *
-     * @param score the score that we want to backup
+     * @param delta the reward vector returned from {@link #rollOut()}
      */
-    public void backUp(double score) {
-        backUpSum(score);
+    public void backUp(double[] delta) {
+        backUpSum(delta);
     }
 
     /**
      * The value of a node is the sum of all it child nodes
      *
-     * @param score the value of the new child node
+     * @param delta the reward vector returned from {@link #rollOut()}
      */
-    private void backUpSum(double score) {
-    	// note that the score-negation necessary for 2-player games is done in 
-    	// MCTSETreeNode::backUp...()
+    private void backUpSum(double[] delta) {
         visits++;
-        value += score;
 
         if (parentNode != null) {
-            parentNode.backUp(score);
+            // Why do we test on parentNode here? - Because we need parentNode to know the player
+            // preceding n's player. But isn't this incomplete because we then never accumulate the root node's
+            // value? - No, it is not incomplete, because a node's value is only needed
+            // for nodes n being *children* of some other nodes (see bestAction() and uct()). And the root
+            // node is not the child of anyone.
+            // [Note that uct() needs mroot.visits, that's why we increment visits for all n.]
+            int pPlayer = parentNode.getParentNode().so.getPlayer();	// pPlayer: the player of the preceding CHANCE node
+            value += delta[pPlayer];	// backup delta for pPlayer
+
+            parentNode.backUp(delta);
         }
+        // Why pPlayer? - This is for the same reason why we call in backUp2Player() negate *before* the
+        // first '+=' to the node's value is made: If the result of a random roll-out for a leaf n is a loss
+        // for n, this does not really count. What counts is the result for pPlayer, the player who
+        // *created* n. Why? Because pPlayer looks for the best action among its children, and if child
+        // n is advantageous for pPlayer, it should have a high totValue. So we have to accumulate in
+        // n.value the rewards achievable from the perspective of pPlayer.
+
     }
 
     /**
@@ -582,18 +604,19 @@ public class MCTSEChanceNode
      *
      * @param score the value of the new child node
      */
-    private void backUpMin(double score) {
-    	// note that the score-negation necessary for 2-player games is done in 
-    	// MCTSETreeNode::backUp...()
-        visits++;
-        if(score < value || value == 0) {
-            value = score;
-        }
-
-        if (parentNode != null) {
-            parentNode.backUp(score);
-        }
-    }
+//    @Deprecated
+//    private void backUpMin(double score) {
+//    	// note that the score-negation necessary for 2-player games is done in
+//    	// MCTSETreeNode::backUp...()
+//        visits++;
+//        if(score < value || value == 0) {
+//            value = score;
+//        }
+//
+//        if (parentNode != null) {
+//            parentNode.backUp(score);
+//        }
+//    }
 
     /**
      * Selects the best Action of an expanded tree

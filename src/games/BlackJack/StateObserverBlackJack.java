@@ -289,9 +289,14 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         return 0;
     }
 
+    // /WK/ added this. getGameScore(i) needs still to be reshaped.
     @Override
     public ScoreTuple getRewardTuple(boolean rewardIsGameScore) {
-        return null;
+        ScoreTuple sc = new ScoreTuple(this);
+        for (int i=0; i<this.getNumPlayers(); i++) {
+            sc.scTup[i]=this.getGameScore(i);
+        }
+        return sc;
     }
 
     @Override
