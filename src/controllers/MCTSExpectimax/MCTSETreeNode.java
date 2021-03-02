@@ -64,6 +64,10 @@ public class MCTSETreeNode {
         player.getRootNode().numberTreeNodes++;
     }
 
+    MCTSEChanceNode getParentNode() {
+    	return parentNode;
+	}
+
     /**
      * Select the next {@link MCTSEChanceNode} that should be evaluated.
      * <p>
@@ -92,13 +96,24 @@ public class MCTSETreeNode {
         childSo.advance(action);
     	
         for (MCTSEChanceNode childrenNode : childrenNodes) {
-            if (childrenNode.so.equals(childSo)) {
+//          if (childrenNode.so.equals(childSo)) {		// OLD (before 03/2021) AND WRONG !!
+			if (childrenNode.so.stringDescr().equals(childSo.stringDescr())) {
                 //a child node representing this state already exists
                 return childrenNode;
             }
         }
 
-        //create a new child node
+        // *** this code shows why the old childrenNode.so.equals(childSo) above was wrong ***
+//		String s1 = "aaa";
+//		String s2 = "aaa";
+//		String s3 = s1;
+//		System.out.println("s1 s2 "+ s1.equals(s2));
+//		System.out.println("s1 s3 "+ s1.equals(s3));
+//		System.out.println("so childSo direct "+ so.equals(childSo));
+//		System.out.println("so childSo strings "+ so.stringDescr().equals(childSo.stringDescr()));
+
+
+		//create a new child node
         MCTSEChanceNode child = new MCTSEChanceNode(childSo, null, this, random, m_player);
         childrenNodes.add(child);
 
@@ -109,27 +124,38 @@ public class MCTSETreeNode {
      * Backup the score through all parent nodes, until the root node is reached
      * calls itself recursively in each parent node
      *
-     * @param score the score that we want to backup
+	 * @param delta the reward vector returned from {@link MCTSEChanceNode#rollOut()}
      */
-    public void backUp(double score) {
-        backUpSum(score);
+    public void backUp(double[] delta) {
+        backUpSum(delta);
     }
 
     /**
      * The value of a node is the sum of all it child nodes
      *
-     * @param score the value of the new child node
+	 * @param delta the reward vector returned from {@link MCTSEChanceNode#rollOut()}
      */
-    private void backUpSum(double score) {
-    	score = baUpNegateScore(score);
-		
+    private void backUpSum(double[] delta) {
         visits++;
-        value += score;
+		if (parentNode != null) {
+			// Why do we test on parentNode here? - Because we need parentNode to know the player
+			// preceding n's player. But isn't this incomplete because we then never accumulate the root node's
+			// value? - No, it is not incomplete, because a node's value is only needed
+			// for nodes n being *children* of some other nodes (see bestAction() and uct()). And the root
+			// node is not the child of anyone.
+			// [Note that uct() needs mroot.visits, that's why we increment visits for all n.]
+			int pPlayer = parentNode.so.getPlayer();	// pPlayer: the player of the preceding CHANCE node
+			value += delta[pPlayer];	// backup delta for pPlayer
 
-        if (parentNode != null) {
-            parentNode.backUp(score);
-        }
-    }
+			parentNode.backUp(delta);
+		}
+		// Why pPlayer? - This is for the same reason why we call in backUp2Player() negate *before* the
+		// first '+=' to the node's value is made: If the result of a random roll-out for a leaf n is a loss
+		// for n, this does not really count. What counts is the result for pPlayer, the player who
+		// *created* n. Why? Because pPlayer looks for the best action among its children, and if child
+		// n is advantageous for pPlayer, it should have a high totValue. So we have to accumulate in
+		// n.value the rewards achievable from the perspective of pPlayer.
+	}
 
     /**
      * The value of a node is the value of the lowest child node
@@ -137,50 +163,53 @@ public class MCTSETreeNode {
      *
      * @param score the value of the new child node
      */
-    private void backUpMin(double score) {
-    	score = baUpNegateScore(score);		
+//    @Deprecated
+//    private void backUpMin(double score) {
+//    	score = baUpNegateScore(score);
+//
+//        visits++;
+//        if(score < value || value == 0) {
+//            value = score;
+//        }
+//
+//        if (parentNode != null) {
+//            parentNode.backUp(score);
+//        }
+//    }
 
-        visits++;
-        if(score < value || value == 0) {
-            value = score;
-        }
+	// --- never used anymore ---
+//    /**
+//     * Optionally negate the score (in case of 2-player games) before backing it up
+//     */
+//	private double baUpNegateScore(double score) {
+//		switch (so.getNumPlayers()) {
+//		case (1):
+//			break;
+//		case (2):	// negamax variant for 2-player tree
+//			// Why do we call 'negate' *before* the first change ('+=') to this.value is made? -
+//			// If the score of 'selected' is a loss for the player who has to move on
+//			// 'selected', then it is a win for the player who created 'selected'
+//			// (negamax principle)
+//			score = negate(score);
+//			break;
+//		default: // i.e. n-player, n>2
+//			throw new RuntimeException("MCTSE's backUp is not yet implemented for (n>2)-player games (n>2).");
+//		}
+//		return score;
+//	}
 
-        if (parentNode != null) {
-            parentNode.backUp(score);
-        }
-    }
-    
-    /**
-     * Optionally negate the score (in case of 2-player games) before backing it up
-     */
-	private double baUpNegateScore(double score) {		
-		switch (so.getNumPlayers()) {
-		case (1):
-			break;
-		case (2):	// negamax variant for 2-player tree
-			// Why do we call 'negate' *before* the first change ('+=') to this.value is made? - 
-			// If the score of 'selected' is a loss for the player who has to move on 
-			// 'selected', then it is a win for the player who created 'selected'  
-			// (negamax principle)
-			score = negate(score);
-			break;
-		default: // i.e. n-player, n>2
-			throw new RuntimeException("MCTSE's backUp is not yet implemented for (n>2)-player games (n>2).");
-		}
-		return score;
-	}
-
-	private double negate(double delta) {
-		if (m_player.getNormalize()) {
-			// map a normalized delta \in [0,1] again to [0,1], but reverse the order.
-			// /WK/ "1-" is the bug fix 2019-02-09 needed to achieve always child.totValue>=0
-			return 1-delta; 
-		} else {
-			// reverse the delta-order for arbitrarily distributed delta;
-			// maps from interval [a,b] to [-b,-a] (this can be problematic for UCT-rule)
-			return -delta;
-		}
-	}
+	// --- never used anymore ---
+//	private double negate(double delta) {
+//		if (m_player.getNormalize()) {
+//			// map a normalized delta \in [0,1] again to [0,1], but reverse the order.
+//			// /WK/ "1-" is the bug fix 2019-02-09 needed to achieve always child.totValue>=0
+//			return 1-delta;
+//		} else {
+//			// reverse the delta-order for arbitrarily distributed delta;
+//			// maps from interval [a,b] to [-b,-a] (this can be problematic for UCT-rule)
+//			return -delta;
+//		}
+//	}
 	
 	/**
 	 * just for diagnostics:
