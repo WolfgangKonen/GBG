@@ -437,7 +437,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public ACTIONS getAction(int i) {
-        return ACTIONS.fromInt(i);
+        return getAvailableActions().get(i);
     }
 
     @Override
