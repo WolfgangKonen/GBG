@@ -94,7 +94,9 @@ public class MCTSETreeNode {
 //        StateObserver2048 childSo = (StateObserver2048) so.copy();		// /WK/ can be done w/o using StateObserver2048:
         StateObservation childSo = so.copy();
         childSo.advance(action);
-    	
+    	if(childSo.isRoundOver())
+    		childSo.initRound();
+
         for (MCTSEChanceNode childrenNode : childrenNodes) {
 //          if (childrenNode.so.equals(childSo)) {		// OLD (before 03/2021) AND WRONG !!
 			if (childrenNode.so.stringDescr().equals(childSo.stringDescr())) {
