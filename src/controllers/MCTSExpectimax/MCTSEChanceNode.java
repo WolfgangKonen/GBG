@@ -173,7 +173,7 @@ public class MCTSEChanceNode
      * @return the {@link MCTSEChanceNode} that should be evaluated
      */
     private MCTSEChanceNode treePolicy() {
-        if(so.isGameOver() || depth >= m_player.getTREE_DEPTH()) {
+        if(so.isGameOver() || so.isRoundOver() || depth >= m_player.getTREE_DEPTH()) {
             return this;
 
         } else if(notExpandedActions.size() != 0) {
