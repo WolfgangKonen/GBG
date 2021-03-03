@@ -1,5 +1,6 @@
 package params;
 
+import controllers.MC.MCAgentConfig;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTS.SingleMCTSPlayer;
 import controllers.MCTSExpectimax.MCTSEChanceNode;
@@ -43,6 +44,7 @@ public class ParMCTSE implements Serializable
     public static final boolean DEFAULT_ALTERNATEVERSION = false;      //Use AltChanceNode instead of MCTSEChanceNode
     public static final boolean DEFAULT_ENABLEHEURISTICS = false;
     public static final boolean DEFAULT_NORMALIZE = true;
+	public static final boolean DEFAULT_STOPONROUNDOVER = true;
     public static final int DEFAULT_NUMAGENTS = 1;                      //number Agents for majority vote
     public static final int DEFAULT_SELECT_MODE = 0;	// 0:[UCT], 1:[eps-greedy], 2:[roulette wheel]
     private int numIters = DEFAULT_ITERATIONS;
@@ -57,12 +59,13 @@ public class ParMCTSE implements Serializable
     private int numAgents = DEFAULT_NUMAGENTS;
     private boolean alternateVersion = DEFAULT_ALTERNATEVERSION;
     private boolean enableHeuristics = DEFAULT_ENABLEHEURISTICS;
+	private boolean stopOnRoundOver = DEFAULT_STOPONROUNDOVER;
 
 	private HeuristicSettings2048 heuristicSettings2048;
 
     /**
-     * This member is only constructed when the constructor {@link #ParMC(boolean) ParMC(boolean withUI)} 
-     * called with {@code withUI=true}. It holds the GUI for {@link ParMC}.
+     * This member is only constructed when the constructor {@link #ParMCTSE(boolean) ParMCTSE(boolean withUI)}
+     * is called with {@code withUI=true}. It holds the GUI for {@link ParMCTSE}.
      */
     private transient MCTSExpectimaxParams meparams = null;
 
@@ -112,7 +115,8 @@ public class ParMCTSE implements Serializable
 		setHeuristicSettings2048(tp.getHeuristicSettings2048());
 		this.setSelectMode(tp.getSelectMode());
 		this.useNormalize = tp.getNormalize();
-		
+		this.stopOnRoundOver = tp.getStopOnRoundOver();
+
 		if (meparams!=null)
 			meparams.setFrom(this);
 	}
@@ -135,7 +139,8 @@ public class ParMCTSE implements Serializable
 		setHeuristicSettings2048(tp.getHeuristicSettings2048());
 		this.setSelectMode(tp.getSelectMode());
 		this.useNormalize = tp.getNormalize();
-		
+		this.stopOnRoundOver = tp.getStopOnRoundOver();
+
 		if (meparams!=null)
 			meparams.setFrom(this);
 	}
@@ -193,7 +198,10 @@ public class ParMCTSE implements Serializable
 	public int getVerbosity() {
 		return this.verbosity;
 	}
-	
+	public boolean getStopOnRoundOver() {
+		return stopOnRoundOver;
+	}
+
 	public void setNumIter(int value) {
 		numIters = value;
 		if (meparams!=null)
@@ -259,7 +267,12 @@ public class ParMCTSE implements Serializable
 		if (meparams!=null)
 			meparams.setVerbosity(verbosity);
 	}
-	
+
+	public void setStopOnRoundOver(boolean stopOnRoundOver) {
+		this.stopOnRoundOver = stopOnRoundOver;
+		if (meparams!=null)
+			meparams.setStopOnRoundOver(stopOnRoundOver);
+	}
 	/**
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
 	 * parameters" we mean parameter producing good results. If with UI, some parameter

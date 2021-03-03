@@ -12,20 +12,20 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * This is adapted from Diego Perez MCTS reference implementation
- * 		http://gvgai.net/cont.php
- * (with a bug fix concerning the number of available actions and an 
- *  extension for 1- and 2-player games, adjusted for nondeterministic
- *  games and the return of VTable information.)
+ * This class represents a MCTS Expectimax (MCTSE) Chance node.
+ * Each Chance node has multiple {@link MCTSETreeNode} children and one {@link MCTSETreeNode} parent.
+ * The MCTSE tree starts with a Chance node and has Chance nodes at all leaves.
  *
- *  @author Johannes Kutsch
+ * A Chance node is reached after nondeterministic (environment) action(s). The next action is a deterministic
+ * one calculated by the agent.
+ *
+ * @author Johannes Kutsch, 2017, adapted by Wolfgang Konen, 2021
  */
-
 public class MCTSEChanceNode
 {
-    public static double epsilon = 1e-6;		                                // tiebreaker
+    public static final double epsilon = 1e-6;		                                // tiebreaker
     /**
-     * the state of the node
+     * the state observation associated with this node
      */
     public StateObservation so = null;
     /**
@@ -39,7 +39,7 @@ public class MCTSEChanceNode
     public List<Types.ACTIONS> notExpandedActions = new ArrayList<>();         // Actions that are not represented by a node
     public double value = 0;   				// total value
     public int visits = 0; 					// total number of visits
-    public static Random m_rnd;
+    public Random m_rnd;    // do we need it separately in each node or could it be once in MCTSEPlayer ??
     public int depth;
 
     public int iterations = 0;
@@ -47,7 +47,6 @@ public class MCTSEChanceNode
     public int numberChanceNodes = 1;
 
     public double maxRolloutScore = 0;  	//The max score that was reached during a rollout
-//    public double scoreNonNormalized = 0;
 
     /**
      * This Class represents a MCTS Expectimax Chance Node.
@@ -173,7 +172,8 @@ public class MCTSEChanceNode
      * @return the {@link MCTSEChanceNode} that should be evaluated
      */
     private MCTSEChanceNode treePolicy() {
-        if(so.isGameOver() || so.isRoundOver() || depth >= m_player.getTREE_DEPTH()) {
+        boolean stopOnRoundOver = m_player.getParMCTSE().getStopOnRoundOver();
+        if(so.isGameOver() || (stopOnRoundOver && so.isRoundOver()) || depth >= m_player.getTREE_DEPTH()) {
             return this;
 
         } else if(notExpandedActions.size() != 0) {
@@ -263,7 +263,7 @@ public class MCTSEChanceNode
 
             for (MCTSETreeNode child : childrenNodes) {
                 double uctValue = child.value * multiplier / child.visits 
-                		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + this.epsilon)) 
+                		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + MCTSEChanceNode.epsilon))
                 		+ m_rnd.nextDouble() * epsilon; 
                 		// small random numbers: break ties in unexpanded node
 

@@ -15,11 +15,12 @@ import java.util.TreeMap;
 /**
  * This class represents a MCTS Expectimax Tree Node. (Min/Max Node).
  * <p>
- * Each {@link MCTSETreeNode} has multiple {@link MCTSEChanceNode} children and one {@link MCTSEChanceNode} parent.
- * <p>
- * This version MCTSETreeNode  implements the {@link StateObservation} interface. 
- * 
- * @author Johannes Kutsch, 03.06.2017.
+ * Each {@code MCTSETreeNode} has multiple {@link MCTSEChanceNode} children and one {@link MCTSEChanceNode} parent.
+ *
+ * An Expectimax Tree node is reached after a deterministic action. The next action(s) are nondeterministic (environment)
+ * actions.
+ *
+ * @author Johannes Kutsch, 03.06.2017, adapted by Wolfgang Konen 2021
  * 
  * @see AltTreeNode
  */

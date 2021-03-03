@@ -1,9 +1,5 @@
 package params;
 
-import controllers.MC.MCAgentN;
-import controllers.MCTS.MCTSAgentT;
-import controllers.MCTS.SingleMCTSPlayer;
-import controllers.MCTSExpectimax.MCTSEChanceNode;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 
@@ -72,6 +68,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	private JCheckBox enableHeuristics_CB;
 	private JComboBox choiceSelector;
 	private JPanel mPanel;
+	public JCheckBox CBStopOnRoundOver;
 
 	private HeuristicSettings2048 heuristicSettings2048;
 
@@ -118,6 +115,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		numAgents_T = new JTextField(ParMCTSE.DEFAULT_NUMAGENTS+ "");
 		verbose_T = new JTextField(ParMCTSE.DEFAULT_VERBOSITY+"");		 
 		normalize = new JCheckBox();
+		CBStopOnRoundOver = new JCheckBox("StopOnRoundOver", ParMCTSE.DEFAULT_STOPONROUNDOVER);
 		mPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
 									// can be handed over to a tab of a JTabbedPane 
 									// (see class XArenaTabs)
@@ -191,7 +189,10 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 //		mPanel.add(new Canvas());
 		
 		mPanel.add(alternateVersion_CB);
-		mPanel.add(enableHeuristics_CB);	
+		mPanel.add(enableHeuristics_CB);
+
+		mPanel.add(CBStopOnRoundOver);
+		mPanel.add(new Canvas());
 
 		add(mPanel,BorderLayout.CENTER);
 				
@@ -253,6 +254,9 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	public boolean getEnableHeuristics() {
 		return enableHeuristics_CB.isSelected();
 	}
+	public boolean getStopOnRoundOver() {
+		return CBStopOnRoundOver.isSelected();
+	}
 	public HeuristicSettings2048 getHeuristicSettings2048() {
 		return heuristicSettings2048;
 	}
@@ -292,6 +296,9 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	public void setEnableHeuristics(boolean value) {
 		enableHeuristics_CB.setSelected(value);
 	}
+	public void setStopOnRoundOver(boolean value) {
+		CBStopOnRoundOver.setSelected(value);
+	}
 	public void setHeuristicSettings2048(HeuristicSettings2048 heuristicSettings2048) {
 		this.heuristicSettings2048 = heuristicSettings2048;
 	}
@@ -313,7 +320,8 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		setAlternateVersion(tp.getAlternateVersion());	
 		setEnableHeuristics(tp.getEnableHeuristics());
 		setSelectMode(tp.getSelectMode());
-		
+		setStopOnRoundOver(tp.getStopOnRoundOver());
+
 		enableUCTPart();
 	}
 	/**
@@ -333,7 +341,8 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		setAlternateVersion(tp.getAlternateVersion());	
 		setEnableHeuristics(tp.getEnableHeuristics());
 		setSelectMode(tp.getSelectMode());
-		
+		setStopOnRoundOver(tp.getStopOnRoundOver());
+
 		enableUCTPart();
 	}
 

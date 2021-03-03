@@ -33,7 +33,7 @@ public class ParMC implements Serializable {
 
     /**
      * This member is only constructed when the constructor {@link #ParMC(boolean) ParMC(boolean withUI)} 
-     * called with {@code withUI=true}. It holds the GUI for {@link ParMC}.
+     * is called with {@code withUI=true}. It holds the GUI for {@link ParMC}.
      */
     private transient MCParams mcparams = null;
 
