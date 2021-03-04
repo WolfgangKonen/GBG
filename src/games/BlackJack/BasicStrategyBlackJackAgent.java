@@ -4,8 +4,11 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
 import tools.Types;
+
+import java.util.ArrayList;
 import java.util.Random;
 
+import javax.swing.*;
 import javax.swing.plaf.nimbus.State;
 
 public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent {
@@ -43,19 +46,19 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
          *  Basic Strategy does not give any intell on how much players should bet.
          *  Betsize will be random
          */
-        if(m_so.getCurrentPhase().equals(StateObserverBlackJack.gamePhase.BETPHASE)){
+        if(m_so.getCurrentPhase() == StateObserverBlackJack.gamePhase.BETPHASE){
             Random r = new Random();
             actVal = r.ints(0, m_so.getAvailableActions().size()).findFirst().getAsInt();
-            //vtable[actVal] = 100;
+            vtable = setBestMoveInVtable(m_so, vtable, actVal);
             return new Types.ACTIONS_VT(actVal, true, vtable, 100);
         }
 
         /**
          *  Players should never take insurance
          */
-        if(m_so.getCurrentPhase().equals(StateObserverBlackJack.gamePhase.ASKFORINSURANCE)){
-            actVal = StateObserverBlackJack.BlackJackActionDet.STAND.getAction();
-            //vtable[actVal] = 100;
+        if(m_so.getCurrentPhase() == StateObserverBlackJack.gamePhase.ASKFORINSURANCE){
+            actVal = StateObserverBlackJack.BlackJackActionDet.NOINSURANCE.getAction();
+            vtable = setBestMoveInVtable(m_so, vtable, actVal);
             return new Types.ACTIONS_VT(actVal, false, vtable, 100);
         }
 
@@ -63,20 +66,31 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         Player me = m_so.getCurrentPlayer();
         if(me.getActiveHand().isPair()){
             actVal = lookUpBestMovePair(m_so);
-            //vtable[actVal] = 100;
+            vtable = setBestMoveInVtable(m_so, vtable, actVal);
             return new Types.ACTIONS_VT(actVal, false, vtable, 100);
         }
         else if(me.getActiveHand().isSoft()){
             actVal = lookUpBestMoveSoft(m_so);
-            //vtable[actVal] = 100;
+            vtable = setBestMoveInVtable(m_so, vtable, actVal);
             return new Types.ACTIONS_VT(actVal, false, vtable, 100);
         }
         else{//hard
             actVal = lookUpBestMoveHard(m_so);
-            //vtable[actVal] = 100;
+            vtable = setBestMoveInVtable(m_so, vtable, actVal);
             return new Types.ACTIONS_VT(actVal, false, vtable, 100);
         }
 
+    }
+
+    public double[] setBestMoveInVtable(StateObserverBlackJack so, double vTable[], int actionVal){
+        ArrayList<Types.ACTIONS> availableActions = so.getAvailableActions();
+        for(int i = 0; i<availableActions.size(); i++){
+            if(availableActions.get(i).toInt() == actionVal) {
+                vTable[i] = 100;
+                break;
+            }
+        }
+        return vTable;
     }
 
     public int lookUpBestMoveSoft(StateObserverBlackJack so){
@@ -105,7 +119,7 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         if(!so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SPLIT.getAction()))){
             // rare case hand = 2 , 2 not enough chips for a split
             // we can not pass this to the hard hand chart because we substract 5 from the handvalue
-            if(myHand.getCards().get(0).equals(Card.Rank.TWO)){
+            if(myHand.getCards().get(0).rank == Card.Rank.TWO){
                 return StateObserverBlackJack.BlackJackActionDet.HIT.getAction();
             }
             lookUpBestMoveHard(so);
