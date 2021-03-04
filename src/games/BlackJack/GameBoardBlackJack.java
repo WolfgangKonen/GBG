@@ -56,7 +56,7 @@ public class GameBoardBlackJack implements GameBoard {
     @Override
     public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
         StateObserverBlackJack soT = (StateObserverBlackJack) so;
-        soT.updateCurrentSleepDuration(getArena().currentSleepDuration);
+        
 
         // /WK/ this was problematic, because Arena.PlayGame relies on working always with the same object
         //      so = gb.getStateObs()

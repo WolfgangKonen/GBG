@@ -1,30 +1,25 @@
 package games.BlackJack;
 
-import java.awt.*;
-import java.awt.event.ComponentListener;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import games.Arena;
 import games.BlackJack.StateObserverBlackJack.BlackJackActionDet;
 import params.GridLayout2;
 import tools.Types;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class GameBoardBlackJackGui extends JFrame {
 
     JScrollPane scrollPaneLog;
     int verticalScrollBarMaximumValue;
-    ArrayList<JButton> currentButtons = new ArrayList<>();
+    ArrayList<ActionButton> currentButtons = new ArrayList<>();
     boolean hold_flag = false;
     Color red = new Color(70, 1, 1);
     Color green = new Color(1, 70, 1);
@@ -123,6 +118,8 @@ public class GameBoardBlackJackGui extends JFrame {
         dealerZone.add(dealerPanel(so.getDealer()));
         dealerZone.add(handHistoryPanel(so));
         toggleButtons(so);
+        if(showValueOnGameboard)
+            showValueOnButtons(so);
         revalidate();
         repaint();
 
@@ -173,12 +170,37 @@ public class GameBoardBlackJackGui extends JFrame {
     }
 
     public void toggleButtons(StateObserverBlackJack so){
+        ArrayList<Types.ACTIONS> availableActions = so.getAvailableActions();
         ArrayList<String> tmp = new ArrayList<String>();
         for(Types.ACTIONS a : so.getAvailableActions()){
             tmp.add(BlackJackActionDet.values()[a.toInt()].name());
         }
         for(JButton b : currentButtons){
             b.setEnabled(tmp.contains(b.getText()));
+        }
+    }
+
+    public void showValueOnButtons(StateObserverBlackJack so){
+        if (so.getStoredValues() != null) {
+            int counter = 0;
+            double vTable[] = so.getStoredValues();
+            for(int i = 0; i < vTable.length; i++){
+                for(int j = 0; j < currentButtons.size(); j++){
+                    ActionButton currentButton = currentButtons.get(j);
+                    if(currentButton.getiAction() == so.getStoredAction(i).toInt()){
+                        currentButton.setActionValue(vTable[i]);
+                        currentButton.setText(currentButton.getText() + " | " + (Math.round(vTable[i]*100.0)/100.0));
+                        break;
+                    }
+                }
+            }
+
+            for(double d: vTable){
+                System.out.print("value "+d + " ");
+                System.out.print(so.getStoredAction(counter)+ " ");
+                System.out.println(BlackJackActionDet.values()[so.getStoredAction(counter++).toInt()].name());
+            }
+
         }
     }
 
@@ -197,10 +219,11 @@ public class GameBoardBlackJackGui extends JFrame {
 
     public JPanel getActionZone(StateObserverBlackJack so) {
         JPanel p = new JPanel();
+        currentButtons.clear();
         p.setLayout(new GridLayout2(BlackJackActionDet.values().length+1, 1));
         for (BlackJackActionDet a: BlackJackActionDet.values()) {
             String nameOfAction = a.name();
-            JButton buttonToAdd = new JButton(nameOfAction);
+            ActionButton buttonToAdd = new ActionButton(nameOfAction, a.getAction());
             buttonToAdd.addActionListener(new ActionHandler(a.getAction()) {
                 public void actionPerformed(ActionEvent e) {
                     if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
@@ -210,6 +233,7 @@ public class GameBoardBlackJackGui extends JFrame {
             currentButtons.add(buttonToAdd);
             buttonToAdd.setEnabled(false);
             p.add(buttonToAdd);
+
         }
         JPanel continueHelper = new JPanel();
         continueHelper.setLayout(new GridLayout(1,2));
@@ -222,7 +246,7 @@ public class GameBoardBlackJackGui extends JFrame {
     }
 
     public JButton getContinueButton(){
-        JButton result = new JButton("Continue");
+        ActionButton result = new ActionButton("Continue", -1);
         result.addActionListener(new ActionHandler(0) {
             public void actionPerformed(ActionEvent e) {
                 hold_flag = false;

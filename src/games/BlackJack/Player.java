@@ -12,6 +12,7 @@ public class Player {
     private int activeHandIndex = 0;
     private double insurance = 0;
     private boolean surrender = false;
+    private double roundPayoff = 0;
 
     String name;
 
@@ -38,6 +39,7 @@ public class Player {
         this.splitHand = other.splitHand;
         this.activeHandIndex = other.activeHandIndex;
         this.betThisRound = other.betThisRound.clone();
+        this.roundPayoff = other.roundPayoff;
     }
 
     public Hand getActiveHand() {
@@ -77,6 +79,7 @@ public class Player {
         insurance = 0;
         splitHand = false;
         surrender = false;
+        roundPayoff = 0;
 
     }
 
@@ -117,6 +120,14 @@ public class Player {
     public void insurance() {
         chips -= betThisRound[0];
         insurance = betThisRound[0];
+    }
+
+    public double addPayOff(double payOff){
+        return roundPayoff += payOff;
+    }
+
+    public double getRoundPayoff(){
+        return roundPayoff;
     }
 
     public double insuranceAmount() {
