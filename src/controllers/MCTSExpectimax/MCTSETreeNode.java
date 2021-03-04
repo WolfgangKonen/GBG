@@ -55,7 +55,7 @@ public class MCTSETreeNode {
      * @param player     a reference to the one {@link MCTSEPlayer} where {@code this} is part of (needed to access several parameters of the MCTS agent)
      */
     public MCTSETreeNode(StateObservation so, Types.ACTIONS action, MCTSEChanceNode parentNode, Random random, MCTSEPlayer player) {
-        this.so = so;
+        this.so = so;   //.copy();	// /WK/03/2021/ added .copy()		// removed again
         this.action = action;
         this.parentNode = parentNode;
         this.m_player = player;

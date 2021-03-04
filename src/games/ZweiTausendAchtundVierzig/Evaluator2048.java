@@ -36,7 +36,7 @@ import java.util.concurrent.Executors;
  * @see Evaluator2048_EA
  */
 public class Evaluator2048 extends Evaluator {
-    private final ExecutorService executorService = Executors.newFixedThreadPool(6);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     private double medianScore;
     private int minScore = Integer.MAX_VALUE;
@@ -99,8 +99,8 @@ public class Evaluator2048 extends Evaluator {
 
                     // we need a new agent for every eval thread, since MCTSExpectimaxAgt is
                     // not thread-safe in its method getNextAction2:
-                    playAgent = new MCTSExpectimaxAgt("MCTS Expectimax", mctsExpectimaxAgt.params);
- 
+                    playAgent = new MCTSExpectimaxAgt("MCTS Expectimax", mctsExpectimaxAgt.params, pa.getParOther());
+
                     while (!so.isGameOver()) {
                         Types.ACTIONS action = playAgent.getNextAction2(so.partialState(), false, true);
                         so.advance(action);

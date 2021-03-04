@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -43,31 +44,30 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 			+ "</html>";
 	// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 
-	private static String[] selTypeString = { "UCT","eps-greedy","roulette wheel" };
+	private static final String[] selTypeString = { "UCT","eps-greedy","roulette wheel" };
 
-	private JLabel numIter_L;
+	private final JLabel numIter_L;
 	JLabel selector_L;
-	private JLabel kUCT_L;
-	private JLabel epsGreedy_L;
-	private JLabel normalize_L;
-	private JLabel treedep_L;
-	private JLabel rollout_L;
-	private JLabel maxNodes_L;
-	private JLabel numAgents_L;
-	private JLabel verbose_L;
-	private JTextField numIter_T;
-	private JTextField kUCT_T;
-	private JTextField epsGreedy_T;
-	private JCheckBox normalize;
-	private JTextField treedep_T;
-	private JTextField rollout_T;
-	private JTextField maxNodes_T;
-	private JTextField numAgents_T;
-	private JTextField verbose_T;
-	private JCheckBox alternateVersion_CB;
-	private JCheckBox enableHeuristics_CB;
-	private JComboBox choiceSelector;
-	private JPanel mPanel;
+	private final JLabel kUCT_L;
+	private final JLabel epsGreedy_L;
+	private final JLabel treedep_L;
+	private final JLabel rollout_L;
+	private final JLabel maxNodes_L;
+	private final JLabel numAgents_L;
+	private final JLabel verbose_L;
+	private final JTextField numIter_T;
+	private final JTextField kUCT_T;
+	private final JTextField epsGreedy_T;
+	private final JCheckBox normalize;
+	private final JTextField treedep_T;
+	private final JTextField rollout_T;
+	private final JTextField maxNodes_T;
+	private final JTextField numAgents_T;
+	private final JTextField verbose_T;
+	private final JCheckBox alternateVersion_CB;
+	private final JCheckBox enableHeuristics_CB;
+	private final JComboBox<String> choiceSelector;
+	private final JPanel mPanel;
 	public JCheckBox CBStopOnRoundOver;
 
 	private HeuristicSettings2048 heuristicSettings2048;
@@ -77,6 +77,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	 * compatible with an older one (older .agt.zip containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 
@@ -92,8 +93,8 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		selector_L = new JLabel("Selector: ");
 		kUCT_L = new JLabel("K (UCT)");
 		epsGreedy_L = new JLabel("epsilon (greedy)");
-		normalize_L = new JLabel("Normalize: ");
-		choiceSelector = new JComboBox(selTypeString);
+		JLabel normalize_L = new JLabel("Normalize: ");
+		choiceSelector = new JComboBox<>(selTypeString);
 		choiceSelector.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -101,7 +102,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 			}
 		});
 		choiceSelector.setEnabled(true);
-		
+
 		maxNodes_L = new JLabel("Max Nodes");
 		numAgents_L = new JLabel("Number Agents");
 		alternateVersion_CB = new JCheckBox("alternate Version (~4% faster)", ParMCTSE.DEFAULT_ALTERNATEVERSION);
@@ -216,7 +217,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		return mPanel;
 	}
 	public int getNumIter() {
-		return Integer.valueOf(numIter_T.getText());
+		return Integer.parseInt(numIter_T.getText());
 	}
 	/**
 	 * @return 0: "UCT", 1: "eps-greedy", 2: "roulette wheel" 
@@ -225,28 +226,28 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		return this.choiceSelector.getSelectedIndex();
 	}
 	public double getK_UCT() {
-		return Double.valueOf(kUCT_T.getText());
+		return Double.parseDouble(kUCT_T.getText());
 	}
 	public boolean getNormalize() {
 		return normalize.isSelected();
 	}
 	public double getEpsGreedy() {
-		return Double.valueOf(epsGreedy_T.getText()).doubleValue();	
+		return Double.parseDouble(epsGreedy_T.getText());
 	}
 	public int getTreeDepth() {
-		return Integer.valueOf(treedep_T.getText());
+		return Integer.parseInt(treedep_T.getText());
 	}
 	public int getRolloutDepth() {
-		return Integer.valueOf(rollout_T.getText());
+		return Integer.parseInt(rollout_T.getText());
 	}
 	public int getMaxNodes() {
-		return Integer.valueOf(maxNodes_T.getText());
+		return Integer.parseInt(maxNodes_T.getText());
 	}
 	public int getNumAgents()  {
-		return Integer.valueOf(numAgents_T.getText());
+		return Integer.parseInt(numAgents_T.getText());
 	}
 	public int getVerbosity() {
-		return Integer.valueOf(verbose_T.getText()).intValue();
+		return Integer.parseInt(verbose_T.getText());
 	}
 	public boolean getAlternateVersion() {
 		return alternateVersion_CB.isSelected();

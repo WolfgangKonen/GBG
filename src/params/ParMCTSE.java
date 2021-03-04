@@ -1,14 +1,10 @@
 package params;
 
-import controllers.MC.MCAgentConfig;
-import controllers.MCTS.MCTSAgentT;
-import controllers.MCTS.SingleMCTSPlayer;
-import controllers.MCTSExpectimax.MCTSEChanceNode;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 
 import javax.swing.*;
-import java.awt.*;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -33,7 +29,7 @@ public class ParMCTSE implements Serializable
     public static final int DEFAULT_ITERATIONS = 3500;                  //Number of games played for all available actions
     public static final int DEFAULT_ROLLOUTDEPTH = 150;                 //Number of times advance() is called for every random rollout
     public static final int DEFAULT_TREEDEPTH = 10;
-    public static final double DEFAULT_K = Math.round(1000*Math.sqrt(2))/1000.0;;
+    public static final double DEFAULT_K = Math.round(1000*Math.sqrt(2))/1000.0;
 	/**
 	 * epsGreedy = probability that a random action is taken (instead of a 
 	 * greedy action). This is *only* relevant, if function egreedy() is used in
@@ -74,6 +70,7 @@ public class ParMCTSE implements Serializable
 	 * compatible with an older one (older .agt.zip containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 
@@ -280,28 +277,22 @@ public class ParMCTSE implements Serializable
 	 * 
 	 * @param agentName currently only "MCTSE" 
 	 * @param gameName the string from {@link games.StateObservation#getName()}
-	 * @param numPlayers
+	 * @param numPlayers	number of players in this game
 	 */
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
-		switch (agentName) {
-		case "MCTS Expectimax": 
+		if ("MCTS Expectimax".equals(agentName)) {
 			switch (gameName) {
-			case "Nim": 
-			case "Nim3P": 
-				this.setNumIter(10000);		
-				this.setK_UCT(1.414);
-				break;
+				case "Nim", "Nim3P" -> {
+					this.setNumIter(10000);
+					this.setK_UCT(1.414);
+				}
 			}
 			this.setAlternateVersion(false);
-			switch (numPlayers) {
-			case 1: 
+			if (numPlayers == 1) {
 				this.setNormalize(true);
-				break;
-			default:
+			} else {
 				this.setNormalize(true);
-				break;
 			}
-			break;
 		}
 		if (meparams!=null)
 			meparams.setFrom(this);

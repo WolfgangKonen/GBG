@@ -11,7 +11,7 @@ public class ConfigEvaluator {
 
 
     //Evaluator2048 Settings
-    public static final int NUMBEREVALUATIONS = 250; //50;
+    public static final int NUMBEREVALUATIONS = 10; //250; //50;
     public static final int MINPOINTS = 10000;
     public static final boolean PLAYSTATS_CSV = false;	// if true, print out playing statistics
     // to agents/gameName/csv/playStats.csv (it is recommended to reduce NUMBEREVALUATIONS

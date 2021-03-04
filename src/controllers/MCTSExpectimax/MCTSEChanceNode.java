@@ -59,13 +59,13 @@ public class MCTSEChanceNode
      * @param player        a reference to the one MCTS agent where {@code this} is part of (needed to access several parameters of the MCTS agent)
      */
     public MCTSEChanceNode(StateObservation so, Types.ACTIONS action, MCTSETreeNode parentNode, Random random, MCTSEPlayer player) {
-        this.so = so;
+        this.so = so;  //.copy();        // /WK/03/2021/ added .copy() // removed again
         this.action = action;
         this.parentNode = parentNode;
         this.m_player = player;
         this.m_rnd = random;
 
-        notExpandedActions = so.getAvailableActions();
+        notExpandedActions = (List<Types.ACTIONS>) so.getAvailableActions().clone();
 
         if(player.getRootNode() != null) {
             player.getRootNode().numberChanceNodes++;
@@ -147,8 +147,10 @@ public class MCTSEChanceNode
                     vTable[i] = child.value / child.visits;
                 }
             }
-            if (m_player.getNormalize()) 
-            	vTable[i] = vTable[i]*m_player.getRootNode().maxRolloutScore;
+            if (m_player.getNormalize()) {
+                double maxScore = (so.getName()=="2048") ? m_player.getRootNode().maxRolloutScore : so.getMaxGameScore();
+                vTable[i] = vTable[i]*maxScore;
+            }
         }
         
 		// /WK/ some diagnostic checks (not required for normal operation)
@@ -415,8 +417,6 @@ public class MCTSEChanceNode
                     rollerState.advance(rollerState.getAction(action));
                 }
                 else {
-                    //System.err.println("/WK/ Something is wrong: rollerState has no available actions!!");
-
                     // If the current player has no available action: we have a pass situation
                     // (like in Othello): We should pass over to the next player and just continue (!)
                     rollerState.passToNextPlayer();
@@ -443,6 +443,7 @@ public class MCTSEChanceNode
 
     /**
      * This rollout variant works only for 2048 and returns the non-normalized raw score.
+     * It gets only called if EnableHeuristics is activated.
      *
      * Starting from this leaf node a game with random actions will be played until the game
      * is over or the maximum rollout depth is reached.
