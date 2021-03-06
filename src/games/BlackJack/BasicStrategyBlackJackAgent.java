@@ -115,14 +115,14 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
     public int lookUpBestMovePair(StateObserverBlackJack so){
         Hand myHand = so.getCurrentPlayer().getActiveHand();
         Hand dealersHand = so.getDealer().getActiveHand();
-        //if split is not possible (not enough chips) we can treat it as a normal hand
+        //if split is not possible (not enough chips or max 3 splits reached) we can treat it as a normal hand
         if(!so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SPLIT.getAction()))){
             // rare case hand = 2 , 2 not enough chips for a split
             // we can not pass this to the hard hand chart because we substract 5 from the handvalue
             if(myHand.getCards().get(0).rank == Card.Rank.TWO){
                 return StateObserverBlackJack.BlackJackActionDet.HIT.getAction();
             }
-            lookUpBestMoveHard(so);
+            return lookUpBestMoveHard(so);
         }
 
         BasicStrategyChart.Move move = BasicStrategyChart.pairHand[myHand.getCards().get(0).rank.getValue()-2][dealersHand.getCards().get(0).rank.getValue() - 2];
