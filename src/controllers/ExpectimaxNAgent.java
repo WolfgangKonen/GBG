@@ -1,22 +1,17 @@
 package controllers;
 
-import controllers.PlayAgent;
 import games.StateObservation;
-import games.XArenaMenu;
 import games.Arena;
 import games.StateObsNondeterministic;
-import params.MaxNParams;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -37,7 +32,8 @@ import java.util.Random;
  */
 public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
-	private Random rand;
+	private final Random rand;
+	protected ParMaxN m_mpar;
 	protected int m_depth=10;
 //	protected boolean m_rgs=true;  // use now AgentBase::m_oPar.getRewardIsGameScore()
 	//private boolean m_useHashMap=true;		// don't use HashMap in ExpectimaxNAgent!
@@ -48,6 +44,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * compatible with an older one (older .agt.zip will become unreadable or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 12L;
 		
 	public ExpectimaxNAgent(String name)
@@ -56,6 +53,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		super.setMaxGameNum(1000);		
 		super.setGameNum(0);
         rand = new Random(System.currentTimeMillis());
+        m_mpar = new ParMaxN();
 		//hm = new HashMap<String, ScoreTuple>();
 		setAgentState(AgentState.TRAINED);
 	}
@@ -64,6 +62,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	{
 		this(name);
 		m_depth = mpar.getMaxNDepth();
+		m_mpar = mpar;
 		m_oPar = opar;		// AgentBase::m_oPar
 	}
 	
@@ -71,6 +70,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	{
 		this(name);
 		m_depth = nply;
+		m_mpar = new ParMaxN();
 	}
 		
 	/**
@@ -92,7 +92,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @param so			current game state (not changed on return), has to implement
 	 * 						interface {@link StateObsNondeterministic}
 	 * @param random		allow epsilon-greedy random action selection	
-	 * @param silent
+	 * @param silent		operate w/o printouts
 	 * @return actBest		the best action 
 	 * @throws RuntimeException if {@code so} is not implementing {@link StateObsNondeterministic}
 	 * <p>						
@@ -124,7 +124,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @param refer		referring game state (=soND on initial call)	
 	 * @param random	allow epsilon-greedy random action selection	
 	 * @param vTable	size soND.getAvailableActions()
-	 * @param silent
+	 * @param silent	operate w/o printouts
 	 * @param depth		tree depth
 	 * @return		best action + V-table + vBest + score tuple. Note that best action, V-table and vBest
 	 * 				are only relevant if {@code soND.isNextActionDeterministic}
@@ -134,8 +134,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	{
 		int i,j;
 		double vBest;
-		ScoreTuple currScoreTuple=null;
-        ScoreTuple sc, scBest=null;
+		ScoreTuple currScoreTuple;
+        ScoreTuple scBest;
 		StateObsNondeterministic NewSO;
         ACTIONS actBest = null;
 
@@ -208,12 +208,16 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
             	actions[i] = rans.get(i);
             	NewSO = soND.copy();
             	NewSO.advanceNondeterministic(actions[i]);
-            	
+				while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
+					NewSO.advanceNondeterministic();
+				}
+
+
 				// here is the recursion: getAllScores may call getBestAction back:
 				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);		
 				
 				currProbab = soND.getProbability(actions[i]);
-            	if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
+            	//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
 				sumProbab += currProbab;
 				// if cOP==AVG, expecScoreTuple will contain the average ScoreTuple
 				// if cOP==MIN, expecScoreTuple will contain the worst ScoreTuple for 
@@ -221,7 +225,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				expecScoreTuple.combine(currScoreTuple, cOP, player, currProbab);
            }
             assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
-        	//if (!silent) printNondet(soND,expecScoreTuple,sumProbab,depth);
+        	if (!silent && depth<3) printNondet(soND,expecScoreTuple,sumProbab,depth);
             scBest = expecScoreTuple;	
             actBest = rans.get(0); 		// this is just a dummy
 			vBest = 0.0;				// this is just a dummy
@@ -234,13 +238,12 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	}
 
 	private ScoreTuple getAllScores(StateObsNondeterministic sob, StateObservation refer, boolean silent, int depth) {
-		if (sob.isGameOver())
+		boolean stopOnRoundOver= m_mpar.getStopOnRoundOver(); 		// /WK/03/2021: NEW
+		boolean stopConditionMet = sob.isGameOver() || (stopOnRoundOver && sob.isRoundOver());
+		if (stopConditionMet)
 		{
 			boolean rgs = m_oPar.getRewardIsGameScore();
 			return sob.getRewardTuple(rgs);
-//			double[] res = new double[sob.getNumPlayers()];
-//			for (int i=0; i<sob.getNumPlayers(); i++) res[i] = sob.getReward(i, rgs);
-//			return new ScoreTuple(res); 	
 		}
 				
 		int n=sob.getNumAvailableActions();

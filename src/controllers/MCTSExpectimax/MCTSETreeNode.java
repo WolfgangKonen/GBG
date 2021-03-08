@@ -86,13 +86,12 @@ public class MCTSETreeNode {
      * <p>
      * More precisely: take the parent node's state {@link #so} and advance it by {@link #action}.
      * This advance contains the deterministic and the non-deterministic part, so it can end up 
-     * in various child nodes. See if such a child node already exists in {@link #childrenNodes}, 
+     * in various CHANCE child nodes. See if such a child node already exists in {@link #childrenNodes},
      * if so, return it. If not, create and return a new one and add it to {@link #childrenNodes}.
      * 
      * @return the selected child node
      */
     public MCTSEChanceNode expand() {
-//        StateObserver2048 childSo = (StateObserver2048) so.copy();		// /WK/ can be done w/o using StateObserver2048:
         StateObservation childSo = so.copy();
         childSo.advance(action);
     	if(childSo.isRoundOver())
@@ -101,20 +100,19 @@ public class MCTSETreeNode {
         for (MCTSEChanceNode childrenNode : childrenNodes) {
 //          if (childrenNode.so.equals(childSo)) {		// OLD (before 03/2021) AND WRONG !!
 			if (childrenNode.so.stringDescr().equals(childSo.stringDescr())) {
-                //a child node representing this state already exists
-                return childrenNode;
+                return childrenNode;	//a child node representing this state already exists
             }
         }
 
-        // *** this code shows why the old childrenNode.so.equals(childSo) above was wrong ***
+        // *** this code shows why the old childrenNode.so.equals(childSo) above was WRONG ***
 //		String s1 = "aaa";
 //		String s2 = "aaa";
 //		String s3 = s1;
 //		System.out.println("s1 s2 "+ s1.equals(s2));
 //		System.out.println("s1 s3 "+ s1.equals(s3));
-//		System.out.println("so childSo direct "+ so.equals(childSo));
-//		System.out.println("so childSo strings "+ so.stringDescr().equals(childSo.stringDescr()));
-
+//		childSo = so.copy();
+//		System.out.println("so childSo direct "+ so.equals(childSo));   // returns false
+//		System.out.println("so childSo strings "+ so.stringDescr().equals(childSo.stringDescr()));   // returns true
 
 		//create a new child node
         MCTSEChanceNode child = new MCTSEChanceNode(childSo, null, this, random, m_player);
