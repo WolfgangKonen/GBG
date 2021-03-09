@@ -1,16 +1,10 @@
 package params;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Canvas;
-import java.awt.Checkbox;
-import java.awt.CheckboxGroup;
-import java.awt.Choice;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.Serial;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -34,12 +28,14 @@ import controllers.MaxNAgent;
  */
 public class MaxNParams extends Frame 
 {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	JLabel maxnDepth_L;
 	JLabel maxnUseHm_L;
 	public JTextField maxnDepth_T;
 	public JCheckBox maxnUseHmTrue;
+	public JCheckBox CBStopOnRoundOver;
 
 	JPanel mPanel;
 	
@@ -50,6 +46,7 @@ public class MaxNParams extends Frame
 		maxnDepth_T = new JTextField(ParMaxN.DEFAULT_MAXN_TREE_DEPTH+"");				// 
 		maxnUseHm_L = new JLabel("MaxN Hashmap ");
 		maxnUseHmTrue = new JCheckBox("use hashmap",ParMaxN.DEFAULT_MAXN_USE_HASHMAP);
+		CBStopOnRoundOver = new JCheckBox("StopOnRoundOver", ParMaxN.DEFAULT_STOPONROUNDOVER);
 		mPanel = new JPanel();		// put the inner buttons into panel mPanel. This panel
 									// can be handed over to a tab of a JTabbedPane object
 									// (see class XArenaTabs)
@@ -58,25 +55,23 @@ public class MaxNParams extends Frame
 		maxnUseHm_L.setToolTipText("MaxN: use hashmap to save values of visited states");
 		
 		setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
-		mPanel.setLayout(new GridLayout(0,4,10,10));		
-		
-		mPanel.add(maxnDepth_L);
-		mPanel.add(maxnDepth_T);
-		mPanel.add(new Canvas());
+		mPanel.setLayout(new GridLayout(0,2,10,10));
+
+		JPanel iterPanel = new JPanel(new GridLayout(0,2,10,10));
+		iterPanel.add(maxnDepth_L);
+		iterPanel.add(maxnDepth_T);
+		mPanel.add(iterPanel);
 		mPanel.add(new Canvas());
 
-		mPanel.add(maxnUseHm_L);
-		mPanel.add(maxnUseHmTrue);
-		mPanel.add(new Canvas());
-		mPanel.add(new Canvas());
-
-		mPanel.add(new Canvas());
-		mPanel.add(new Canvas());
-		mPanel.add(new Canvas());
+		JPanel numbPanel = new JPanel(new GridLayout(0,2,10,10));
+		numbPanel.add(maxnUseHm_L);
+		numbPanel.add(maxnUseHmTrue);
+		mPanel.add(numbPanel);
 		mPanel.add(new Canvas());
 
+		mPanel.add(CBStopOnRoundOver);
 		mPanel.add(new Canvas());
-		mPanel.add(new Canvas());
+
 		mPanel.add(new Canvas());
 		mPanel.add(new Canvas());
 
@@ -97,21 +92,35 @@ public class MaxNParams extends Frame
 	}
 	
 	public int getMaxNDepth() {
-		return Integer.valueOf(maxnDepth_T.getText()).intValue();
+		return Integer.parseInt(maxnDepth_T.getText());
 	}
-
 	public boolean getMaxNUseHashmap() {
 		return maxnUseHmTrue.isSelected();
 	}
-	
+	public boolean getStopOnRoundOver() {
+		return CBStopOnRoundOver.isSelected();
+	}
+
 	public void setMaxNDepth(int value) {
 		maxnDepth_T.setText(value+"");
 	}
-	
 	public void setMaxNUseHashmap(boolean bval) {
 		maxnUseHmTrue.setSelected(bval);
 	}
-	
+	public void setStopOnRoundOver(boolean value) {
+		CBStopOnRoundOver.setSelected(value);
+	}
+
+	/**
+	 * Needed to restore the param tab with the parameters from a re-loaded agent
+	 * @param mp  ParMaxN of the re-loaded agent
+	 */
+	public void setFrom(MaxNParams mp) {
+		this.setMaxNDepth(mp.getMaxNDepth());
+		this.setMaxNUseHashmap(mp.getMaxNUseHashmap());
+		this.setStopOnRoundOver(mp.getStopOnRoundOver());
+	}
+
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
 	 * @param mp  ParMaxN of the re-loaded agent
@@ -119,37 +128,39 @@ public class MaxNParams extends Frame
 	public void setFrom(ParMaxN mp) {
 		this.setMaxNDepth(mp.getMaxNDepth());
 		this.setMaxNUseHashmap(mp.getMaxNUseHashmap());
+		setStopOnRoundOver(mp.getStopOnRoundOver());
 	}
-	
-	/**
-	 * Set sensible parameters for a specific agent and specific game. By "sensible
-	 * parameters" we mean parameter producing good results. Likewise, some parameter
-	 * choices may be enabled or disabled.
-	 * 
-	 * @param agentName currently only "MaxN" 
-	 * @param gameName the string from {@link games.StateObservation#getName()}
-	 * @param numPlayers
-	 */
-	@Deprecated
-	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
-		switch (agentName) {
-		case "MaxN": 
-		case "Max-N": 
-			switch (gameName) {
-			case "Sim": 
-				maxnDepth_T.setText("15");		
-				maxnUseHmTrue.setSelected(true);
-				break;
-			}
-			break;
-		}
-	}	
 
-	/**
-	 * @return	the {@link ParMaxN} representation of {@code this}
-	 */
-	public ParMaxN getParMaxN() {
-		return new ParMaxN(this);
-	}
+	// --- not needed anymore, we have ParMaxN.setParamDefaults ---
+//	/**
+//	 * Set sensible parameters for a specific agent and specific game. By "sensible
+//	 * parameters" we mean parameter producing good results. Likewise, some parameter
+//	 * choices may be enabled or disabled.
+//	 *
+//	 * @param agentName currently only "MaxN"
+//	 * @param gameName the string from {@link games.StateObservation#getName()}
+//	 * @param numPlayers number of players
+//	 */
+//	@Deprecated
+//	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
+//		switch (agentName) {
+//		case "MaxN":
+//		case "Max-N":
+//			switch (gameName) {
+//			case "Sim":
+//				maxnDepth_T.setText("15");
+//				maxnUseHmTrue.setSelected(true);
+//				break;
+//			}
+//			break;
+//		}
+//	}
+
+//	/**
+//	 * @return	the {@link ParMaxN} representation of {@code this}
+//	 */
+//	public ParMaxN getParMaxN() {
+//		return new ParMaxN(this);
+//	}
 
 } // class MaxNParams

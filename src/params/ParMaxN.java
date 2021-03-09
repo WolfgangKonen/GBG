@@ -1,5 +1,6 @@
 package params;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import javax.swing.JPanel;
@@ -22,13 +23,15 @@ public class ParMaxN implements Serializable {
 
     public static int DEFAULT_MAXN_TREE_DEPTH = 10;
     public static boolean DEFAULT_MAXN_USE_HASHMAP = true;
-    
+	public static boolean DEFAULT_STOPONROUNDOVER = true;
+
     private int maxNTreeDepth = DEFAULT_MAXN_TREE_DEPTH;
     private boolean maxNUseHashmap = DEFAULT_MAXN_USE_HASHMAP;
+	private boolean stopOnRoundOver = DEFAULT_STOPONROUNDOVER;
 
     /**
-     * This member is only constructed when the constructor {@link #ParTD(boolean) ParTD(boolean withUI)} 
-     * called with {@code withUI=true}. It holds the GUI for {@link ParTD}.
+     * This member is only constructed when the constructor {@link #ParMaxN(boolean) ParMaxN(boolean withUI)}
+     * called with {@code withUI=true}. It holds the GUI for {@link ParMaxN}.
      */
     private transient MaxNParams mnparams = null;
 
@@ -37,6 +40,7 @@ public class ParMaxN implements Serializable {
 	 * compatible with an older one (older .agt.zip containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public ParMaxN() {	}
@@ -56,16 +60,18 @@ public class ParMaxN implements Serializable {
     
 	public void setFrom(ParMaxN op) {
 		this.maxNTreeDepth = op.getMaxNDepth();
-		this.maxNUseHashmap = op.getMaxNUseHashmap();	
-		
+		this.maxNUseHashmap = op.getMaxNUseHashmap();
+		this.stopOnRoundOver = op.getStopOnRoundOver();
+
 		if (mnparams!=null)
 			mnparams.setFrom(this);
 	}
 	
 	public void setFrom(MaxNParams op) {
 		this.maxNTreeDepth = op.getMaxNDepth();
-		this.maxNUseHashmap = op.getMaxNUseHashmap();	
-		
+		this.maxNUseHashmap = op.getMaxNUseHashmap();
+		this.stopOnRoundOver = op.getStopOnRoundOver();
+
 		if (mnparams!=null)
 			mnparams.setFrom(this);
 	}
@@ -92,9 +98,11 @@ public class ParMaxN implements Serializable {
 	public int getMaxNDepth() {
 		return maxNTreeDepth;
 	}
-
 	public boolean getMaxNUseHashmap() {
 		return maxNUseHashmap;
+	}
+	public boolean getStopOnRoundOver() {
+		return stopOnRoundOver;
 	}
 
 	public void setMaxNDepth(int treeDepth) {
@@ -109,35 +117,44 @@ public class ParMaxN implements Serializable {
 			mnparams.setMaxNUseHashmap(useHM);
 	}
 
+	public void setStopOnRoundOver(boolean stopOnRoundOver) {
+		this.stopOnRoundOver = stopOnRoundOver;
+		if (mnparams!=null)
+			mnparams.setStopOnRoundOver(stopOnRoundOver);
+	}
+
 	/**
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
 	 * parameters" we mean parameter producing good results. If withUI, some parameter
 	 * choices may be enabled or disabled.
 	 * 
-	 * @param agentName currently only "MaxN" 
+	 * @param agentName "Max-N" or "Expectimax-N" (see Types.GUI_AGENT_LIST)
 	 * @param gameName the string from {@link games.StateObservation#getName()}
-	 * @param numPlayers
+	 * @param numPlayers currently not used
 	 */
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {
 		switch (agentName) {
 		case "MaxN": 
-		case "Max-N": 
+		case "Max-N":
+		case "Expectimax-N":
 			switch (gameName) {
-			case "Nim": 
-			case "Nim3P": 
-			case "Sim": 
-				this.setMaxNDepth(15);		
-				this.setMaxNUseHashmap(true);
-				break;
-			case "RubiksCube": 
-				this.setMaxNDepth(3);
-				this.setMaxNUseHashmap(false);
-				this.enableHashmapPart(false);
-				break;
-			default: 
-				this.setMaxNDepth(DEFAULT_MAXN_TREE_DEPTH);		
-				this.setMaxNUseHashmap(DEFAULT_MAXN_USE_HASHMAP);
-				break;
+				case "Nim", "Nim3P", "Sim" -> {
+					this.setMaxNDepth(15);
+					this.setMaxNUseHashmap(true);
+				}
+				case "RubiksCube" -> {
+					this.setMaxNDepth(3);
+					this.setMaxNUseHashmap(false);
+					this.enableHashmapPart(false);
+				}
+				case "Poker","BlackJack" -> {
+					this.setMaxNDepth(5);
+					this.setMaxNUseHashmap(true);
+				}
+				default -> {
+					this.setMaxNDepth(DEFAULT_MAXN_TREE_DEPTH);
+					this.setMaxNUseHashmap(DEFAULT_MAXN_USE_HASHMAP);
+				}
 			}
 			break;
 		}
