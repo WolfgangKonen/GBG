@@ -352,7 +352,7 @@ public class GameBoardKuhnPokerGui extends JFrame {
             if(showValueOnGameboard&& SoP.getStoredActions()!=null )
                 for(int i = 0;i<SoP.getStoredActions().length;i++){
                     int act = SoP.getStoredActions()[i].toInt();
-                    actionButtons[act].setText(actionTexts[act]+" ["+(Math.round((SoP.getStoredValues()[i]-chips)*100))/100.0+"] ");
+                    actionButtons[act].setText(actionTexts[act]+" ["+(Math.round((SoP.getStoredValues()[i])*100))/100.0+"] ");
                 }
             continueButton.setEnabled(false);
         }

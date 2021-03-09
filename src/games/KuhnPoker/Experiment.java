@@ -7,6 +7,7 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
+import distance.Score;
 import games.StateObservation;
 import games.XArenaFuncs;
 import params.MCParams;
@@ -32,13 +33,322 @@ public class Experiment {
 
     public static void main(String[] args) throws IOException {
         Experiment ex = new Experiment();
-        ex.experiment8();
+        ex.expecti_experiment_static();
+        ex.MC_experiment_static();
+        ex.MCTS_experiment_static();
     }
 
     public Experiment(){
         tools.Utils.checkAndCreateFolder(directory);
         m_arena = new ArenaKuhnPoker("Kuhn",false);
         m_gb = new GameBoardKuhnPoker(m_arena);
+    }
+
+    private void random_experiment_static(){
+        try{
+            RandomAgent ra = new RandomAgent("random");
+            KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
+            PlayAgent[] pavec = new PlayAgent[] {ra,kuhnAgent};
+
+            String experimentName = "RandomAgent_Kuhn_static";
+            doExperimentStuff(experimentName,pavec,1000000);
+        }catch (Exception e){
+
+        }
+    }
+
+    private void expecti_experiment_static(){
+        try{
+            ExpectimaxNAgent expecti = new ExpectimaxNAgent("ExpectimaxN");
+            KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
+            PlayAgent[] pavec = new PlayAgent[] {expecti,kuhnAgent};
+
+            String experimentName = "Expectimax_Kuhn_static";
+            doExperimentStuff(experimentName,pavec,1000000);
+        }catch (Exception e){
+
+        }
+    }
+
+    private void MC_experiment_static(){
+        try{
+
+            ParMC mcpar = new ParMC();
+            mcpar.setIterations(1000);
+            mcpar.setRolloutDepth(5);
+
+            MCAgentN mc = new MCAgentN(mcpar);
+            System.out.println("Comment: Changed MC to only simulate till round over.");
+            KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
+            PlayAgent[] pavec = new PlayAgent[] {mc,kuhnAgent};
+
+            String experimentName = "MC_Kuhn_static";
+            doExperimentStuff(experimentName,pavec,100000);
+        }catch (Exception e){
+
+        }
+    }
+
+    private void MCTS_experiment_static(){
+        try{
+
+            MCTSExpectimaxAgt mctsex = new MCTSExpectimaxAgt("MCTSEX",new ParMCTSE());
+            KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
+
+            PlayAgent[] pavec = new PlayAgent[] {mctsex,kuhnAgent};
+
+            String experimentName = "MCTS_Kuhn_static";
+            doExperimentStuff(experimentName,pavec,1000);
+        }catch (Exception e){
+
+        }
+    }
+
+
+    private void doExperimentStuff(String experimentName,PlayAgent[] pavec, int games) throws IOException {
+
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+        LocalDateTime now = LocalDateTime.now();
+
+        String folder = directory+"/"+experimentName+"/"+dtf.format(now);
+        tools.Utils.checkAndCreateFolder(folder);
+        PrintStream fileOut = new PrintStream(folder+"/output.log");
+        System.setOut(fileOut);
+
+        FileWriter resultsFile = new FileWriter(folder+"/results.csv");
+
+        System.out.println(dtf.format(now) + ": Start");
+        long start = System.currentTimeMillis();
+
+
+        PlayAgent[] players = pavec;
+
+        for (PlayAgent player : players) {
+            resultsFile.append(player.getName()+"\t");
+        }
+        resultsFile.append("Rounds\r\n");
+
+        String rs = "";
+        for(int i = 0;i<games;i++){
+            resultTuple rt = mySingleCompete(new PlayAgtVector(pavec), m_gb.m_so);
+            for(int p = 0;p<players.length;p++){
+                rs += df.format(rt.st.scTup[p])+"\t";
+            }
+            rs += df.format(rt.mc)+"\r\n";
+        }
+        resultsFile.append(rs);
+        resultsFile.close();
+
+        long end = System.currentTimeMillis();
+        System.out.println(dtf.format(LocalDateTime.now()) + ": Done");
+        printTimeDiff(end, start);
+
+    }
+
+
+    // How many games must be played to achieve
+    private void experiment11() throws IOException {
+        ParMCTSE pars = new ParMCTSE();
+        MCTSExpectimaxAgt mctsexp = new MCTSExpectimaxAgt("mctsexpectimax",pars);
+
+        KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
+        PlayAgent[] pavec = new PlayAgent[] {mctsexp,kuhnAgent};
+
+        String experimentName = "experiment11";
+
+        String filename = setOutput(experimentName);
+
+        FileWriter resultsFile = new FileWriter(filename+"/results.csv");
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        System.out.println(dtf.format(LocalDateTime.now()) + ": Start");
+        long start = System.currentTimeMillis();
+
+        int iterations = 100;
+        int rounds = 10;
+
+        double[] variance = new double[m_gb.getNumPlayers()];
+        double[] average = new double[m_gb.getNumPlayers()];
+        resultTuple[] results = new resultTuple[rounds];
+        double sWeight = 1 / (double) rounds;
+        ScoreTuple scMean = new ScoreTuple(m_gb.getNumPlayers());
+
+
+        System.out.println(df.format(rounds)+" competitions with each "+df.format(iterations) +" iterations.");
+        resultsFile.append("Player0\tPlayer1\tRounds\r\n");
+        for(int i = 0;i<rounds;i++){
+            resultTuple st = myCompeteNPlayer(new PlayAgtVector(pavec), m_gb.m_so, iterations, 0, null);
+            ScoreTuple sc = st.st;
+            scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
+            results[i] = st;
+            resultsFile.append(df.format(sc.scTup[0])+"\t"+df.format(sc.scTup[1])+"\t"+df.format(st.mc)+"\r\n");
+        }
+        resultsFile.close();
+        double mcavg = 0;
+        for(int i=0;i<results.length;i++){
+            for(int p=0;p<m_gb.getNumPlayers();p++){
+                variance[p] += Math.pow(scMean.scTup[p]-results[i].st.scTup[p],2);
+            }
+            mcavg += results[i].mc;
+        }
+        mcavg /= rounds;
+        for(int p=0;p<m_gb.getNumPlayers();p++){
+            variance[p] /= rounds-1;
+        }
+        System.out.println("Averages:{");
+        System.out.println("\tAverage[0] = "+df.format(scMean.scTup[0])+";");
+        System.out.println("\tAverage[1] = "+df.format(scMean.scTup[1])+";");
+        System.out.println("}");
+
+        System.out.println("Variance:{");
+        System.out.println("\tVariance[0] = "+df.format(variance[0])+";");
+        System.out.println("\tVariance[1] = "+df.format(variance[1])+";");
+        System.out.println("}");
+
+        System.out.println("Rounds:" + df.format(mcavg));
+
+        System.out.print("\n");
+        long end = System.currentTimeMillis();
+        System.out.println(dtf.format(LocalDateTime.now()) + ": Done");
+        printTimeDiff(end, start);
+    }
+
+    // How many games must be played to achieve
+    private void experiment10() throws IOException {
+        ExpectimaxNAgent expecti = new ExpectimaxNAgent("ExpectimaxN");
+        KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
+        PlayAgent[] pavec = new PlayAgent[] {expecti,kuhnAgent};
+
+        String experimentName = "experiment10";
+
+        String filename = setOutput(experimentName);
+
+        FileWriter resultsFile = new FileWriter(filename+"/results.csv");
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        System.out.println(dtf.format(LocalDateTime.now()) + ": Start");
+        long start = System.currentTimeMillis();
+
+        int iterations = 10000;
+        int rounds = 500;
+
+        double[] variance = new double[m_gb.getNumPlayers()];
+        double[] average = new double[m_gb.getNumPlayers()];
+        resultTuple[] results = new resultTuple[rounds];
+        double sWeight = 1 / (double) rounds;
+        ScoreTuple scMean = new ScoreTuple(m_gb.getNumPlayers());
+
+
+        System.out.println(df.format(rounds)+" competitions with each "+df.format(iterations) +" iterations.");
+        resultsFile.append("Player0\tPlayer1\tRounds\r\n");
+        for(int i = 0;i<rounds;i++){
+            resultTuple st = myCompeteNPlayer(new PlayAgtVector(pavec), m_gb.m_so, iterations, 0, null);
+            ScoreTuple sc = st.st;
+            scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
+            results[i] = st;
+            resultsFile.append(df.format(sc.scTup[0])+"\t"+df.format(sc.scTup[1])+"\t"+df.format(st.mc)+"\r\n");
+        }
+        resultsFile.close();
+        double mcavg = 0;
+        for(int i=0;i<results.length;i++){
+            for(int p=0;p<m_gb.getNumPlayers();p++){
+                variance[p] += Math.pow(scMean.scTup[p]-results[i].st.scTup[p],2);
+            }
+            mcavg += results[i].mc;
+        }
+        mcavg /= rounds;
+        for(int p=0;p<m_gb.getNumPlayers();p++){
+            variance[p] /= rounds-1;
+        }
+        System.out.println("Averages:{");
+        System.out.println("\tAverage[0] = "+df.format(scMean.scTup[0])+";");
+        System.out.println("\tAverage[1] = "+df.format(scMean.scTup[1])+";");
+        System.out.println("}");
+
+        System.out.println("Variance:{");
+        System.out.println("\tVariance[0] = "+df.format(variance[0])+";");
+        System.out.println("\tVariance[1] = "+df.format(variance[1])+";");
+        System.out.println("}");
+
+        System.out.println("Rounds:" + df.format(mcavg));
+
+        System.out.print("\n");
+        long end = System.currentTimeMillis();
+        System.out.println(dtf.format(LocalDateTime.now()) + ": Done");
+        printTimeDiff(end, start);
+    }
+
+
+
+    // How many games must be played to achieve
+    private void experiment9() throws IOException {
+        ParMC mcpar = new ParMC();
+        mcpar.setIterations(1000);
+        mcpar.setRolloutDepth(5);
+
+        MCAgentN mc = new MCAgentN(mcpar);
+        System.out.println("Comment: Changed MC to only simulate till round over.");
+        KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
+        PlayAgent[] pavec = new PlayAgent[] {mc,kuhnAgent};
+
+        String experimentName = "experiment9";
+
+        String filename = setOutput(experimentName);
+
+        FileWriter resultsFile = new FileWriter(filename+"/results.csv");
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        System.out.println(dtf.format(LocalDateTime.now()) + ": Start");
+        long start = System.currentTimeMillis();
+
+        int iterations = 2000;
+        int rounds = 100;
+
+        double[] variance = new double[m_gb.getNumPlayers()];
+        double[] average = new double[m_gb.getNumPlayers()];
+        resultTuple[] results = new resultTuple[rounds];
+        double sWeight = 1 / (double) rounds;
+        ScoreTuple scMean = new ScoreTuple(m_gb.getNumPlayers());
+
+
+        System.out.println(df.format(rounds)+" competitions with each "+df.format(iterations) +" iterations.");
+        resultsFile.append("Player0\tPlayer1\tRounds\r\n");
+        for(int i = 0;i<rounds;i++){
+            resultTuple st = myCompeteNPlayer(new PlayAgtVector(pavec), m_gb.m_so, iterations, 0, null);
+            ScoreTuple sc = st.st;
+            scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
+            results[i] = st;
+            resultsFile.append(df.format(sc.scTup[0])+"\t"+df.format(sc.scTup[1])+"\t"+df.format(st.mc)+"\r\n");
+        }
+        resultsFile.close();
+        double mcavg = 0;
+        for(int i=0;i<results.length;i++){
+            for(int p=0;p<m_gb.getNumPlayers();p++){
+                variance[p] += Math.pow(scMean.scTup[p]-results[i].st.scTup[p],2);
+            }
+            mcavg += results[i].mc;
+        }
+        mcavg /= rounds;
+        for(int p=0;p<m_gb.getNumPlayers();p++){
+            variance[p] /= rounds-1;
+        }
+        System.out.println("Averages:{");
+        System.out.println("\tAverage[0] = "+df.format(scMean.scTup[0])+";");
+        System.out.println("\tAverage[1] = "+df.format(scMean.scTup[1])+";");
+        System.out.println("}");
+
+        System.out.println("Variance:{");
+        System.out.println("\tVariance[0] = "+df.format(variance[0])+";");
+        System.out.println("\tVariance[1] = "+df.format(variance[1])+";");
+        System.out.println("}");
+
+        System.out.println("Rounds:" + df.format(mcavg));
+
+        System.out.print("\n");
+        long end = System.currentTimeMillis();
+        System.out.println(dtf.format(LocalDateTime.now()) + ": Done");
+        printTimeDiff(end, start);
     }
 
 
@@ -58,30 +368,34 @@ public class Experiment {
         System.out.println(dtf.format(LocalDateTime.now()) + ": Start");
         long start = System.currentTimeMillis();
 
-        int iterations = 1000;
-        int rounds = 5000;
+        int iterations = 1000000;
+        int rounds = 100;
 
         double[] variance = new double[m_gb.getNumPlayers()];
         double[] average = new double[m_gb.getNumPlayers()];
-        ScoreTuple[] results = new ScoreTuple[rounds];
+        resultTuple[] results = new resultTuple[rounds];
         double sWeight = 1 / (double) rounds;
         ScoreTuple scMean = new ScoreTuple(m_gb.getNumPlayers());
 
 
-        System.out.println(rounds+" competitions with each "+iterations +" iterations.");
-        resultsFile.append("Player0\tPlayer1");
+        System.out.println(df.format(rounds)+" competitions with each "+df.format(iterations) +" iterations.");
+        resultsFile.append("Player0\tPlayer1\tRounds\r\n");
         for(int i = 0;i<rounds;i++){
-            ScoreTuple sc = myCompeteNPlayer(new PlayAgtVector(pavec), m_gb.m_so, iterations, 0, null);
+            resultTuple st = myCompeteNPlayer(new PlayAgtVector(pavec), m_gb.m_so, iterations, 0, null);
+            ScoreTuple sc = st.st;
             scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
-            results[i] = sc;
-            resultsFile.append(df.format(sc.scTup[0])+"\t"+df.format(sc.scTup[1])+"\r\n");
+            results[i] = st;
+            resultsFile.append(df.format(sc.scTup[0])+"\t"+df.format(sc.scTup[1])+"\t"+df.format(st.mc)+"\r\n");
         }
         resultsFile.close();
+        double mcavg = 0;
         for(int i=0;i<results.length;i++){
             for(int p=0;p<m_gb.getNumPlayers();p++){
-                variance[p] += Math.pow(scMean.scTup[p]-results[i].scTup[p],2);
+                variance[p] += Math.pow(scMean.scTup[p]-results[i].st.scTup[p],2);
             }
+            mcavg += results[i].mc;
         }
+        mcavg /= rounds;
         for(int p=0;p<m_gb.getNumPlayers();p++){
             variance[p] /= rounds-1;
         }
@@ -94,6 +408,8 @@ public class Experiment {
         System.out.println("\tVariance[0] = "+df.format(variance[0])+";");
         System.out.println("\tVariance[1] = "+df.format(variance[1])+";");
         System.out.println("}");
+
+        System.out.println("Rounds:" + df.format(mcavg));
 
         System.out.print("\n");
         long end = System.currentTimeMillis();
@@ -146,7 +462,7 @@ public class Experiment {
         MCTSExpectimaxAgt mctsex = new MCTSExpectimaxAgt("MCTSEX",new ParMCTSE());
         KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
 
-        experimentFramework(mctsex,kuhnAgent,"experiment3",1000);
+        experimentFramework(mctsex,kuhnAgent,"experiment3",1);
     }
 
     private void experiment7() throws FileNotFoundException{
@@ -166,7 +482,7 @@ public class Experiment {
 
         PlayAgent[] pavec = new PlayAgent[] {toBeTested,evaluator};
 
-        ScoreTuple sc = myCompeteNPlayer(new PlayAgtVector(pavec), m_gb.m_so, iterations, 1, null);
+        ScoreTuple sc = myCompeteNPlayer(new PlayAgtVector(pavec), m_gb.m_so, iterations, 1, null).st;
 
         System.out.println("\n"+pavec[0].getName()+": "+sc.scTup[0]);
         System.out.println(pavec[1].getName() +": "+sc.scTup[1]);
@@ -215,10 +531,10 @@ public class Experiment {
         System.out.printf("\nElapsed time: %02d:%02d:%02d%n ",h,m,s);
     }
 
-    public String setOutput(String experiment) throws FileNotFoundException {
+    public String setOutput(String folder) throws FileNotFoundException {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
         LocalDateTime now = LocalDateTime.now();
-        String filename = directory+"/"+experiment+"/"+dtf.format(now);
+        String filename = directory+"/"+folder+"/"+dtf.format(now);
         tools.Utils.checkAndCreateFolder(filename);
         PrintStream fileOut = new PrintStream(filename+"/output.log");
         System.setOut(fileOut);
@@ -330,7 +646,18 @@ public class Experiment {
         return scMean;
     }
 
-    public static ScoreTuple myCompeteNPlayer(PlayAgtVector paVector, StateObservation startSO, int competeNum,
+    class resultTuple {
+        ScoreTuple st;
+        double mc;
+        resultTuple(ScoreTuple scoreTuple, double movecount){
+            this.st  = scoreTuple;
+            this.mc = movecount;
+        }
+    }
+
+
+
+    public resultTuple myCompeteNPlayer(PlayAgtVector paVector, StateObservation startSO, int competeNum,
                                             int verbose, TSTimeStorage[] nextTimes) {
         int numPlayers = paVector.getNumPlayers();
         ScoreTuple sc, scMean = new ScoreTuple(numPlayers);
@@ -410,7 +737,65 @@ public class Experiment {
             }
             System.out.println("Avg # moves in " + String.format("%,d", competeNum) + " episodes = " + frm.format(moveCount));
         }
+        resultTuple res = new resultTuple(scMean,moveCount);
+        return res;
+    }
 
-        return scMean;
+
+    public resultTuple mySingleCompeteNPlayerAllRoles(PlayAgtVector paVector, StateObservation startSO, int competeNum,
+                                                    int verbose) {
+        int N = startSO.getNumPlayers();
+        double sWeight = 1 / (double) N;
+        ScoreTuple  shiftedTuple, scMean = new ScoreTuple(N);
+        resultTuple rt;
+        PlayAgtVector qaVector;
+        double rounds = 0.0;
+        for (int k = 0; k < N; k++) {
+            qaVector = paVector.shift(k);
+            // Play the Round
+
+            rt = mySingleCompete(qaVector, startSO);
+
+            shiftedTuple = rt.st.shift(N - k);
+            scMean.combine(shiftedTuple, ScoreTuple.CombineOP.AVG, 0, sWeight);
+            rounds += rt.mc/N;
+        }
+        return new resultTuple(scMean,rounds);
+    }
+
+    public resultTuple mySingleCompete(PlayAgtVector paVector, StateObservation startSO) {
+
+        int numPlayers = paVector.getNumPlayers();
+        ScoreTuple sc;
+        double moveCount = 0.0;
+        StateObservation so;
+        Types.ACTIONS actBest;
+
+        for (int i = 0; i < numPlayers; i++)
+            paVector.pavec[i].resetAgent();
+
+        int player = startSO.getPlayer();
+        so = startSO.copy();
+
+        while (true) {
+            actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, true);
+            so.advance(actBest);
+
+            if (so.isGameOver()) {
+                sc = so.getGameScoreTuple();
+                moveCount += so.getMoveCounter();
+                break; // out of while
+            }
+
+            if(so.isRoundOver()&&!so.isGameOver()) {
+                so.initRound();
+                assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
+            }
+
+            player = so.getPlayer();
+        } // while(true)
+
+        resultTuple res = new resultTuple(sc,moveCount);
+        return res;
     }
 }

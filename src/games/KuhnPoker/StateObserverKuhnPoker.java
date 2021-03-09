@@ -31,18 +31,12 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	private static final int START_CHIPS = 10;
 	private static final int BIGBLIND = 1;
 
-	private static final double REWARD_NEGATIVE = 0;
-	private static final double REWARD_POSITIVE =  START_CHIPS*NUM_PLAYER;
-
     private int m_Player;			// player who makes the next move
 	protected ArrayList<ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
 	private ArrayList<ACTIONS> availableRandomActions;
 	public ACTIONS lastAction;
 
-
-	private double[] chips;
 	private PlayingCard[][] holeCards; //[player][card]
-	private PlayingCard[] communityCards;
 
 	private ArrayList<Integer> cards;
 
@@ -54,6 +48,8 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	private Boolean[] checkedPlayer;
 
 	private double[] gamescores;
+	private double[] chips;
+	private double[] rewards;
 
 	private boolean isNextActionDeterministic;
 	private ACTIONS nextNondeterministicAction;
@@ -96,6 +92,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		// information about the player:
 		chips =  new double[NUM_PLAYER];
 		gamescores = new double[NUM_PLAYER];
+		rewards = new double[NUM_PLAYER];
 
 		for(int i = 0;i<NUM_PLAYER;i++){
 			chips[i] = START_CHIPS;
@@ -146,12 +143,15 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 		chips =  new double[NUM_PLAYER];
 		gamescores = new double[NUM_PLAYER];
+		rewards = new double[NUM_PLAYER];
+
 		for(int i = 0;i<NUM_PLAYER;i++){
 			if(other.holeCards[i][0]!=null) {
 				this.holeCards[i][0] = other.holeCards[i][0].copy();
 			}
 			this.chips[i] = other.chips[i];
 			this.gamescores[i] = other.gamescores[i];
+			this.rewards[i] = other.rewards[i];
 		}
 
 		checkedPlayer = new Boolean[2];
@@ -185,39 +185,40 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	public void initRound(){
 		gameround++;
 		addToLog("------------------New Round ("+gameround+")------------------");
+		if(!GAMEOVER) {
+			initCardDeck();
+			setRoundOver(false);
 
-		initCardDeck();
-		setRoundOver(false);
+			// cards
+			holeCards = new PlayingCard[NUM_PLAYER][1];
 
-		// cards
-		holeCards = new PlayingCard[NUM_PLAYER][1];
+			pots = new Pots();
 
-		pots = new Pots();
+			//next player becomes the active one
+			start_player = (start_player + 1) % 2;
+			m_Player = start_player;
 
-		//next player becomes the active one
-		start_player = (start_player+1)%2;
-		m_Player = start_player;
+			//Add Ante
+			pots.add(1, 0);
+			pots.add(1, 1);
 
-		//Add Ante
-		pots.add(1,0);
-		pots.add(1,1);
+			chips[0] -= 1;
+			chips[1] -= 1;
 
-		chips[0] -= 1;
-		chips[1] -= 1;
+			//Deal Card
+			holeCards[0][0] = new PlayingCard(dealCard());
+			holeCards[1][0] = new PlayingCard(dealCard());
 
-		//Deal Card
-		holeCards[0][0] = new PlayingCard(dealCard());
-		holeCards[1][0] = new PlayingCard(dealCard());
+			checkedPlayer[0] = null;
+			checkedPlayer[1] = null;
 
-		checkedPlayer[0] = null;
-		checkedPlayer[1] = null;
+			foldedPlayers[0] = false;
+			foldedPlayers[1] = false;
 
-		foldedPlayers[0] = false;
-		foldedPlayers[1] = false;
+			lastAction = null;
 
-		lastAction = null;
-
-		setAvailableActions();
+			setAvailableActions();
+		}
 	}
 
 	/**
@@ -334,7 +335,9 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		}
 
 		//update scores
-		gamescores = chips;
+		for(int i=0;i<rewards.length;i++)
+			rewards[i] = chips[i] - gamescores[i];
+		System.arraycopy(chips,0,gamescores,0,gamescores.length);
 
 		addToLog("-----------------End Round("+gameround+")------------------");
 		for(int i = 0 ; i <getNumPlayers() ; i++)
@@ -380,24 +383,21 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	public void setAvailableActions() {
 		availableActions.clear();
 
-		// Options Player 1:
+		// You can only fold if there is a bet in place
+		if(pots.getOpenPlayer(m_Player)>0)
+			availableActions.add(ACTIONS.fromInt(0)); // FOLD
 
-			// You can only fold if there is a bet in place
-			if(pots.getOpenPlayer(m_Player)>0)
-				availableActions.add(ACTIONS.fromInt(0)); // FOLD
+		// You can only call if somebody has bet before
+		if(pots.getOpenPlayer(m_Player)>0&&chips[m_Player]>=pots.getOpenPlayer(m_Player))
+			availableActions.add(ACTIONS.fromInt(3)); // CALL
 
-			// You can only call if somebody has bet before
-			if(pots.getOpenPlayer(m_Player)>0&&chips[m_Player]>=pots.getOpenPlayer(m_Player))
-				availableActions.add(ACTIONS.fromInt(3)); // CALL
+		// You can only check if nobody has bet before
+		if(pots.getOpenPlayer(m_Player)==0)
+			availableActions.add(ACTIONS.fromInt(1)); // CHECK
 
-		// Options Player 0:
-			// You can only check if nobody has bet before
-			if(pots.getOpenPlayer(m_Player)==0)
-				availableActions.add(ACTIONS.fromInt(1)); // CHECK
-
-			// You can only bet if nobody has bet before
-			if(pots.getOpenPlayer(m_Player)==0&&chips[m_Player]>=BIGBLIND)
-				availableActions.add(ACTIONS.fromInt(2)); // BET
+		// You can only bet if nobody has bet before
+		if(pots.getOpenPlayer(m_Player)==0&&chips[m_Player]>=BIGBLIND)
+			availableActions.add(ACTIONS.fromInt(2)); // BET
 
 	}
 
@@ -422,6 +422,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	}
 
 	public double getProbability(ACTIONS action) {
+		// each random action (card drawn) has the same propability.
 		return 1.0/getNumAvailableRandoms();
 	}
 
@@ -447,21 +448,20 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	@Override
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
-		return gamescores[referringState.getPlayer()];
+		return rewards[referringState.getPlayer()];
 	}
-
 
 	@Override
 	public double getReward(int player, boolean rewardIsGameScore){
-		return gamescores[player];
+		return rewards[player];
 	}
 
 	public double getMinGameScore() {
-		return REWARD_NEGATIVE;
+		return 0;
 	}
 
 	public double getMaxGameScore() {
-		return REWARD_POSITIVE;
+		return START_CHIPS*NUM_PLAYER;
 	}
 
 	@Override
@@ -476,7 +476,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	@Override
 	public boolean isFinalRewardGame() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -536,8 +536,8 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	}
 
 	public void bet(){
-		betSub(BIGBLIND);
 		addToLog(""+Types.GUI_PLAYER_NAME[m_Player]+": 'bet' ("+BIGBLIND+")");
+		betSub(BIGBLIND);
 		checkedPlayer[m_Player]=false;
 	}
 

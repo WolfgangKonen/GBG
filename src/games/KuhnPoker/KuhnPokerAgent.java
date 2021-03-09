@@ -107,24 +107,28 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                     }
                 }
             }else{
-                if(sop.lastAction.toInt() == 2) {
-                    // BET
-                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==low){
-                        // LOW -> FOLD
-                        actBest = Types.ACTIONS.fromInt(0);
-                    }
-                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==mid){
-                        // Mid -> 1/3 + alpha = Bet
-                        if(rand.nextDouble()<1.0/3+alpha) {
-                            // BET
-                            actBest = Types.ACTIONS.fromInt(2);
-                        }else{
-                            // FOLD
+                if(sop.lastAction.toInt() == 2 ) {
+                    if(sop.getChips()[sop.getPlayer()]>0) {
+                        // BET
+                        if (sop.getHoleCards(sop.getPlayer())[0].getRank() == low) {
+                            // LOW -> FOLD
                             actBest = Types.ACTIONS.fromInt(0);
                         }
-                    }
-                    if(sop.getHoleCards(sop.getPlayer())[0].getRank()==high){
-                        actBest = Types.ACTIONS.fromInt(2);
+                        if (sop.getHoleCards(sop.getPlayer())[0].getRank() == mid) {
+                            // Mid -> 1/3 + alpha = Bet
+                            if (rand.nextDouble() < 1.0 / 3 + alpha) {
+                                // BET
+                                actBest = Types.ACTIONS.fromInt(2);
+                            } else {
+                                // FOLD
+                                actBest = Types.ACTIONS.fromInt(0);
+                            }
+                        }
+                        if (sop.getHoleCards(sop.getPlayer())[0].getRank() == high) {
+                            actBest = Types.ACTIONS.fromInt(2);
+                        }
+                    }else{
+                        actBest = Types.ACTIONS.fromInt(0);
                     }
                 }else{
                     throw new RuntimeException("If the Agent is the starting player the only last action should have been a bet");
@@ -154,23 +158,27 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                 }
             }
             if(sop.lastAction.toInt() == 2) {
-                // BET
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==low){
-                    // LOW -> FOLD
-                    actBest = Types.ACTIONS.fromInt(0);
-                }
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==mid){
-                    // Mid -> 1/3 = Bet
-                    if(rand.nextDouble()<1.0/3) {
-                        // BET
-                        actBest = Types.ACTIONS.fromInt(2);
-                    }else{
-                        // FOLD
+                if(sop.getChips()[sop.getPlayer()]>0) {
+                    // BET
+                    if (sop.getHoleCards(sop.getPlayer())[0].getRank() == low) {
+                        // LOW -> FOLD
                         actBest = Types.ACTIONS.fromInt(0);
                     }
-                }
-                if(sop.getHoleCards(sop.getPlayer())[0].getRank()==high){
-                    actBest = Types.ACTIONS.fromInt(2);
+                    if (sop.getHoleCards(sop.getPlayer())[0].getRank() == mid) {
+                        // Mid -> 1/3 = Bet
+                        if (rand.nextDouble() < 1.0 / 3) {
+                            // BET
+                            actBest = Types.ACTIONS.fromInt(2);
+                        } else {
+                            // FOLD
+                            actBest = Types.ACTIONS.fromInt(0);
+                        }
+                    }
+                    if (sop.getHoleCards(sop.getPlayer())[0].getRank() == high) {
+                        actBest = Types.ACTIONS.fromInt(2);
+                    }
+                }else{
+                    actBest = Types.ACTIONS.fromInt(0);
                 }
             }
         }
@@ -201,7 +209,10 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
         }
         actBest.setRandomSelect(true);		// the action was a random move
 */
-        actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, maxScore);
+        if(sop.getChips()[sop.getPlayer()]<1){
+            actBest = Types.ACTIONS.fromInt(0);
+        }
+        actBestVT = new Types.ACTIONS_VT(actBest.toInt(), false, vtable, maxScore);
         return actBestVT;
     }
 
