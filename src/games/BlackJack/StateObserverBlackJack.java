@@ -26,15 +26,17 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     private int currentSleepDuration = 0;
     private int episode = 0;
     private final double maximumBetSize = 10;
+    private int epiLength;
 
     public StateObserverBlackJack() {
-        this(NUM_PLAYERS);
+        this(NUM_PLAYERS, episodeLength);
     }
 
 
-    public StateObserverBlackJack(int num_players){
+    public StateObserverBlackJack(int num_players, int epiLength){
         players = new Player[num_players];
         playerActedInPhase = new boolean[num_players];
+        this.epiLength = epiLength;
         // defaultState
         // adding dealer and player/s
         dealer = new Dealer("dealer");
@@ -66,6 +68,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         this.log = new ArrayList<>(other.log);
         this.currentSleepDuration = other.currentSleepDuration;
         this.episode = other.episode;
+        this.epiLength = other.epiLength;
     }
 
 
@@ -142,26 +145,31 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             case THIS_PLAYER:
             case WHATS_ON_TABLE:
                 if (gPhase != gamePhase.DEALERONACTION && gPhase != gamePhase.PAYOUT) {
-                    setPartialState(true);
+
                     StateObserverBlackJack p_so = new StateObserverBlackJack(this);
+                    p_so.setPartialState(true);
                     if (dealer.hasHand() && dealer.getActiveHand().size() > 1) {
                         p_so.dealer.activeHand.getCards().remove(1);
                         p_so.dealer.activeHand.getCards().add(new Card(Card.Rank.X, Card.Suit.X, 999));
                     }
                     return p_so;
                 } else {
-                    return this;
+                    return new StateObserverBlackJack(this);
                 }
             case FULL:
-                return this;
+                return new StateObserverBlackJack(this);
         }
-        return this;
+        return new StateObserverBlackJack(this);
     }
 
     @Override
     public StateObservation randomCompletion(){
-        setPartialState(false); // maybe not needed. maybe we should introduce a flag completed
+        //setPartialState(false); // maybe not needed. maybe we should introduce a flag completed
         // if the dealer has no hand there is nothing to complete
+        if(!this.isPartialState()){
+            throw new RuntimeException("A state that is not a partial State should not be completed");
+        }
+
         if(dealer.getActiveHand() == null){
             return this;
         }
@@ -211,7 +219,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public boolean isGameOver() {
-        if(episode > episodeLength)
+        if(episode > epiLength)
             return true;
         for (Player p : players){
             if(p.getChips() >= 10 || p.betOnActiveHand() > 0) {
@@ -668,9 +676,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     advancePhase(); // next phase = playersonaction
                     isNextActionDeterministic = true;
                     logEntry += "no Blackjack";
-                    dealer.getActiveHand().getCards().remove(1);
-                    dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
-                    this.setPartialState(true);
+                    if(this.isPartialState()) {
+                        dealer.getActiveHand().getCards().remove(1);
+                        dealer.getActiveHand().addCard(new Card(Card.Rank.X, Card.Suit.X, 999));
+                    }
                 }
                 log.add(logEntry);
                 break;
@@ -786,6 +795,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         advancePhase();
         isNextActionDeterministic = true;
         setAvailableActions();
+        //temporal change for large simulations
+        if(log.size() > 100)
+            log.clear();
+        lastMoves.clear();
     }
 
     @Override
