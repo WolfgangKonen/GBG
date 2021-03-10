@@ -6,6 +6,7 @@ import controllers.PlayAgent;
 import games.ArenaTrain;
 import games.Evaluator;
 import games.GameBoard;
+import games.XNTupleFuncs;
 
 public class ArenaBlackJackTrain extends ArenaTrain {
 
@@ -25,7 +26,12 @@ public class ArenaBlackJackTrain extends ArenaTrain {
 
     @Override
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-        return null;
+        return new EvaluatorBlackJack(pa, gb, stopEval, mode, verbose);
+    }
+
+    @Override
+    public XNTupleFuncs makeXNTupleFuncs() {
+        return new XNTupleFuncsBlackJack();
     }
 
     public static void main(String[] args) throws IOException {

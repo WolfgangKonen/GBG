@@ -11,7 +11,7 @@ public class BasicStrategyChartTest {
     public static final int NUM_ITERATIONS = 100000;
 
     public StateObserverBlackJack initSo(Card firstCardPlayer, Card secondCardPlayer, Card upCardDealer){
-        StateObserverBlackJack so = new StateObserverBlackJack(1);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITERATIONS);
         so.getCurrentPlayer().bet(10);
         // Handvalue 12
         so.getCurrentPlayer().addCardToActiveHand(firstCardPlayer);

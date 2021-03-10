@@ -123,8 +123,7 @@ public class GameBoardBlackJack implements GameBoard {
 
     @Override
     public StateObservation getDefaultStartState() {
-        clearBoard(true, true);
-        return m_so;
+        return new StateObserverBlackJack();
     }
 
     @Override
