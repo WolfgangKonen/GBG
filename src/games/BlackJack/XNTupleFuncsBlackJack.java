@@ -17,25 +17,24 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
 
     @Override
     public int getNumCells() {
-        return 2;
+        return 11;
     }
 
     @Override
     public int getNumPositionValues() {
-        // TODO Auto-generated method stub
         return 52;
     }
 
     @Override
     public int getNumPlayers() {
         // TODO Auto-generated method stub
-        return 1;
+        return BlackJackConfig.NUM_PLAYERS;
     }
 
     @Override
     public int getNumSymmetries() {
         // TODO Auto-generated method stub
-        return 5;
+        return 0;
     }
 
     @Override

@@ -16,6 +16,10 @@ public class Player {
 
     String name;
 
+    public void setChips(double chips) {
+        this.chips = chips;
+    }
+
     public Player(String name) {
         this.name = name;
     }
