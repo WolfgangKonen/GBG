@@ -414,11 +414,16 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	}
 
 	public ArrayList<ACTIONS> getAvailableRandoms() {
-		return availableRandomActions;
+		// Kuhn Poker doesn't really need random actions because no further cards are reveiled during the game.
+		// 99 as a dummy int
+		ArrayList<ACTIONS> randoms = new ArrayList<>();
+		randoms.add(ACTIONS.fromInt(99));
+
+		return randoms;
 	}
 
 	public int getNumAvailableRandoms() {
-		return cards.size();
+		return 1;
 	}
 
 	public double getProbability(ACTIONS action) {
