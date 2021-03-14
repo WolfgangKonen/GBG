@@ -705,7 +705,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             case PAYPLAYERS:
                 for (Player p : players) {
                     if (p.hasSurrender()) { // if the player surrendered the payout already happened
-                        log.add(p.name + " " + results.SURRENDER + " vs dealer: " + dealer.getActiveHand()
+                        log.add(p.name + " " + results.SURRENDER + " with hand: " + p.getActiveHand() + " vs dealer: " + dealer.getActiveHand()
                                 + " handvalue: " + dealer.getActiveHand().getHandValue() +
                                 " | payoff: " + ((p.betOnActiveHand()/2) -p.betOnActiveHand())
                                 + " chips");
@@ -762,7 +762,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                             p.collect(amountToCollect);
                             log.add(p.name + " -> hand: " + h + " val=" + h.getHandValue() + " " + r + " vs. dealer: "
                                     + dealer.getActiveHand() + " val=" + dealer.getActiveHand().getHandValue()
-                                    + " | payoff: " + (amountToCollect - p.getBetAmountForHand(h)) + " chips");
+                                    + " | handPayoff: " + (amountToCollect - p.getBetAmountForHand(h)) + " chips");
                             p.addPayOff((amountToCollect - p.getBetAmountForHand(h)));
 
                         }

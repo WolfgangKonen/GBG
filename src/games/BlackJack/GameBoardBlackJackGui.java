@@ -20,6 +20,7 @@ public class GameBoardBlackJackGui extends JFrame {
     JScrollPane scrollPaneLog;
     int verticalScrollBarMaximumValue;
     ArrayList<ActionButton> currentButtons = new ArrayList<>();
+    ArrayList<ButtonValueJPanel> currentButtonPanels = new ArrayList<>();
     boolean hold_flag = false;
     Color red = new Color(70, 1, 1);
     Color green = new Color(1, 70, 1);
@@ -171,12 +172,8 @@ public class GameBoardBlackJackGui extends JFrame {
 
     public void toggleButtons(StateObserverBlackJack so){
         ArrayList<Types.ACTIONS> availableActions = so.getAvailableActions();
-        ArrayList<String> tmp = new ArrayList<String>();
-        for(Types.ACTIONS a : so.getAvailableActions()){
-            tmp.add(BlackJackActionDet.values()[a.toInt()].name());
-        }
-        for(JButton b : currentButtons){
-            b.setEnabled(tmp.contains(b.getText()));
+        for(ActionButton b : currentButtons){
+            b.setEnabled(availableActions.contains(Types.ACTIONS.fromInt(b.getiAction())));
         }
     }
 
@@ -189,7 +186,10 @@ public class GameBoardBlackJackGui extends JFrame {
                     ActionButton currentButton = currentButtons.get(j);
                     if(currentButton.getiAction() == so.getStoredAction(i).toInt()){
                         currentButton.setActionValue(vTable[i]);
-                        currentButton.setText(currentButton.getText() + " | " + (Math.round(vTable[i]*100.0)/100.0));
+                        JPanel p = new JPanel();
+                        p.add(new JLabel(""+(Math.round(vTable[i]*100.0)/100.0)));
+                        currentButtonPanels.get(j).setValuePanel(p);
+                        currentButtonPanels.get(j).update();
                         break;
                     }
                 }
@@ -220,9 +220,12 @@ public class GameBoardBlackJackGui extends JFrame {
     public JPanel getActionZone(StateObserverBlackJack so) {
         JPanel p = new JPanel();
         currentButtons.clear();
+        currentButtonPanels.clear();
         p.setLayout(new GridLayout2(BlackJackActionDet.values().length+1, 1));
         for (BlackJackActionDet a: BlackJackActionDet.values()) {
             String nameOfAction = a.name();
+            if(nameOfAction.equals("NOINSURANCE"))
+                nameOfAction = "NO INSURANCE";
             ActionButton buttonToAdd = new ActionButton(nameOfAction, a.getAction());
             buttonToAdd.addActionListener(new ActionHandler(a.getAction()) {
                 public void actionPerformed(ActionEvent e) {
@@ -232,7 +235,9 @@ public class GameBoardBlackJackGui extends JFrame {
             });
             currentButtons.add(buttonToAdd);
             buttonToAdd.setEnabled(false);
-            p.add(buttonToAdd);
+            ButtonValueJPanel bvPanel = new ButtonValueJPanel(buttonToAdd);
+            p.add(bvPanel);
+            currentButtonPanels.add(bvPanel);
 
         }
         JPanel continueHelper = new JPanel();
