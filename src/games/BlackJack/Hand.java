@@ -1,6 +1,7 @@
 package games.BlackJack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Hand {
     ArrayList<Card> hand = new ArrayList<Card>();
@@ -17,6 +18,10 @@ public class Hand {
 
     public void addCard(Card c) {
         hand.add(c);
+    }
+
+    public void sortHand(){
+        Collections.sort(hand);
     }
 
     public int size() {

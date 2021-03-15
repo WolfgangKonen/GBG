@@ -150,7 +150,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     p_so.setPartialState(true);
                     if (dealer.hasHand() && dealer.getActiveHand().size() > 1) {
                         p_so.dealer.activeHand.getCards().remove(1);
-                        p_so.dealer.activeHand.getCards().add(new Card(Card.Rank.X, Card.Suit.X, 999));
+                        p_so.dealer.activeHand.getCards().add(new Card(Card.Rank.X, Card.Suit.X));
                     }
                     return p_so;
                 } else {
@@ -282,7 +282,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     // provisionally TODO: refactor
     @Override
     public double getGameScore(int player) {
-        return players[player].getRoundPayoff();
+        return players[player].getChips();
     }
 
 
@@ -298,27 +298,20 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
 
     /**
-     *  Min pay-off is 70
-     *  Min pay-off can be reached if a player splits a Hand 3 times and
-     *  doubledowns every hand -> 3*10*2 this will grant him a pay-off of -60 if he loses every hand
-     *  on top he can lose his insurance bet which will result in a payoff of -10
-     *
+     * GameScore = chips
+     * minimum chips is 0
      *  */
     @Override
     public double getMinGameScore() {
-        return (maximumBetSize * 2  * 3 + maximumBetSize)*(-1);
+        return 0;
     }
 
     /**
-     *  Max pay-off is 60
-     *  max pay-off can be reached if a player splits a Hand 3 times and
-     *  doubledowns every hand -> 3*20 this will grant him a pay-off of 60 if he wins every hand
-     *  players can not win insurance and win multiple hands at the same time
-     *
+     *  GameScore = chips
      *  */
     @Override
     public double getMaxGameScore() {
-        return maximumBetSize * 2  * 3;
+        return START_CHIPS*2;
     }
 
 
@@ -678,7 +671,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     logEntry += "no Blackjack";
                     if(this.isPartialState()) {
                         dealer.getActiveHand().getCards().remove(1);
-                        dealer.getActiveHand().addCard(new Card(Card.Rank.X, Card.Suit.X, 999));
+                        dealer.getActiveHand().addCard(new Card(Card.Rank.X, Card.Suit.X));
                     }
                 }
                 log.add(logEntry);

@@ -8,7 +8,8 @@ public class DeckTest {
         int num_iterations = 100000000;
         int [] counts = new int[52];
         for(int i = 0; i < num_iterations; i++) {
-            counts[ArenaBlackJack.deck.draw().Id]++;
+            Card card = ArenaBlackJack.deck.draw();
+            counts[(card.suit.getValue()*13) + card.rank.getSortValue()]++;
         }
 
         for(int i = 0; i < counts.length; i++) {

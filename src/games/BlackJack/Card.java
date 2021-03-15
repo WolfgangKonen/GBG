@@ -1,35 +1,49 @@
 package games.BlackJack;
 import static games.BlackJack.BlackJackConfig.CARDS_AS_UNICODE;
 
-public class Card {
+public class Card implements Comparable<Card>{
 
-    enum Suit {
-        HEART, DIAMOND, CLUB, SPADE, X;
+
+    @Override
+    public int compareTo(Card o) {
+        return (int) Math.signum(this.rank.sortValue - o.rank.sortValue);
     }
 
-    enum Rank {
-        TWO(2), THREE(3), FOUR(4), FIVE(5), SIX(6), SEVEN(7), EIGHT(8), NINE(9), TEN(10), JACK(10), QUEEN(10), KING(10),
-        ACE(11), X(0);
-
+    enum Suit {
+        HEART(0), DIAMOND(1), CLUB(2), SPADE(3), X(4);
         private int value;
 
-        Rank(int value) {
+        Suit(int value) {
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
+        public int getValue() { return value; }
+    }
+
+    enum Rank {
+        TWO(2, 0), THREE(3, 1), FOUR(4 , 2), FIVE(5, 3),
+        SIX(6, 4), SEVEN(7, 5), EIGHT(8, 6), NINE(9, 7),
+        TEN(10, 8), JACK(10, 9), QUEEN(10, 10), KING(10, 11),
+        ACE(11, 12), X(0, 13);
+
+        private int value;
+        private int sortValue;
+
+        Rank(int value, int sortValue) {
+            this.value = value;
+            this.sortValue = sortValue;
         }
+
+        public int getValue() { return value; }
+        public int getSortValue(){ return sortValue; }
     }
 
     Rank rank;
     Suit suit;
-    int Id;
 
-    public Card(Rank rank, Suit suit, int Id) {
+    public Card(Rank rank, Suit suit) {
         this.rank = rank;
         this.suit = suit;
-        this.Id = Id;
     }
 
     public String getImagePath(){

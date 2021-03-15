@@ -68,11 +68,12 @@ public class GameBoardBlackJack implements GameBoard {
 //            m_so = (StateObserverBlackJack) soT.copy();
 //        }
 
-        if (m_gameGui != null)
-            m_gameGui.update(
-                    (StateObserverBlackJack) soT.partialState(StateObserverBlackJack.PartialStateMode.THIS_PLAYER),
-                    withReset, showValueOnGameboard);
-
+        if(so != null) {
+            if (m_gameGui != null)
+                m_gameGui.update(
+                        (StateObserverBlackJack) soT.partialState(StateObserverBlackJack.PartialStateMode.THIS_PLAYER),
+                        withReset, showValueOnGameboard);
+        }
     }
 
     @Override

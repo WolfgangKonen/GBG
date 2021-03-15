@@ -13,13 +13,12 @@ public class BasicStrategyChartTest {
     public StateObserverBlackJack initSo(Card firstCardPlayer, Card secondCardPlayer, Card upCardDealer){
         StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITERATIONS);
         so.getCurrentPlayer().bet(10);
-        // Handvalue 12
         so.getCurrentPlayer().addCardToActiveHand(firstCardPlayer);
         so.getCurrentPlayer().addCardToActiveHand(secondCardPlayer);
         // Players Turn
         so.setgPhase(StateObserverBlackJack.gamePhase.PLAYERONACTION);
         so.getDealer().addCardToActiveHand(upCardDealer);
-        so.getDealer().addCardToActiveHand(new Card(Card.Rank.X, Card.Suit.X, 999));
+        so.getDealer().addCardToActiveHand(new Card(Card.Rank.X, Card.Suit.X));
         so.setPartialState(true);
         so.setAvailableActions();
         return so;
@@ -29,8 +28,8 @@ public class BasicStrategyChartTest {
     @Test
     public void testHardTwelveAgainstDealersFive(){
 
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999), new Card(Card.Rank.SEVEN, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.FIVE, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
+                new Card(Card.Rank.FIVE, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -56,8 +55,8 @@ public class BasicStrategyChartTest {
     @Test
     public void testHardTwelveAgainstDealersSix(){
 
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999), new Card(Card.Rank.SEVEN, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.SIX, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
+                new Card(Card.Rank.SIX, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -82,8 +81,8 @@ public class BasicStrategyChartTest {
     //expected best move Hit
     @Test
     public void testHardTwelveAgainstDealersSeven(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999), new Card(Card.Rank.SEVEN, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.SEVEN, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
+                new Card(Card.Rank.SEVEN, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -107,8 +106,8 @@ public class BasicStrategyChartTest {
     //expected best move Surrender
     @Test
     public void testHardSixteenAgainstDealersNine(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.TEN, Card.Suit.SPADE, 999), new Card(Card.Rank.SIX, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.NINE, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.TEN, Card.Suit.SPADE), new Card(Card.Rank.SIX, Card.Suit.SPADE),
+                new Card(Card.Rank.NINE, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -131,8 +130,8 @@ public class BasicStrategyChartTest {
     //expected best move DoubleDown
     @Test
     public void testHardNineAgainstDealersSix(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.FOUR, Card.Suit.SPADE, 999), new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.SIX, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.FOUR, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                new Card(Card.Rank.SIX, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -156,8 +155,8 @@ public class BasicStrategyChartTest {
     //expected best move Hit
     @Test
     public void testHardNineAgainstDealersSeven(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.FOUR, Card.Suit.SPADE, 999), new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.SEVEN, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.FOUR, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                new Card(Card.Rank.SEVEN, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -182,8 +181,8 @@ public class BasicStrategyChartTest {
     //expected best move DoubleDown
     @Test
     public void testSoftSixteenAgainstDealersFive(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE, 999), new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.FIVE, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                new Card(Card.Rank.FIVE, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -206,8 +205,8 @@ public class BasicStrategyChartTest {
     //expected best move DoubleDown
     @Test
     public void testSoftSixteenAgainstDealersSix(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE, 999), new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.SIX, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                new Card(Card.Rank.SIX, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -230,8 +229,8 @@ public class BasicStrategyChartTest {
     //expected best move Hit
     @Test
     public void testSoftSixteenAgainstDealersSeven(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE, 999), new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.SEVEN, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                new Card(Card.Rank.SEVEN, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -254,8 +253,8 @@ public class BasicStrategyChartTest {
     //expected best move Stand
     @Test
     public void testSoftEighteenAgainstDealersEight(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE, 999), new Card(Card.Rank.SEVEN, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.EIGHT, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
+                new Card(Card.Rank.EIGHT, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -278,8 +277,8 @@ public class BasicStrategyChartTest {
     //expected best move Hit
     @Test
     public void testSoftEighteenAgainstDealersNine(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE, 999), new Card(Card.Rank.SEVEN, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.NINE, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
+                new Card(Card.Rank.NINE, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -302,8 +301,8 @@ public class BasicStrategyChartTest {
     //expected best move Split
     @Test
     public void testPairOfThreesAgainstDealersSeven(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.THREE, Card.Suit.SPADE, 999), new Card(Card.Rank.THREE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.SEVEN, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.THREE, Card.Suit.SPADE), new Card(Card.Rank.THREE, Card.Suit.SPADE),
+                new Card(Card.Rank.SEVEN, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 5) : "AvailableActions.size should return 5";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -332,8 +331,8 @@ public class BasicStrategyChartTest {
     //this case sometimes fails with NUM_ITERATIONS around 100.000 This Test will pass for NUM_ITERATIONS around 1.000.000
     @Test
     public void testPairOfThreesAgainstDealersEight(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.THREE, Card.Suit.SPADE, 999), new Card(Card.Rank.THREE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.EIGHT, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.THREE, Card.Suit.SPADE), new Card(Card.Rank.THREE, Card.Suit.SPADE),
+                new Card(Card.Rank.EIGHT, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 5) : "AvailableActions.size should return 5";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -361,8 +360,8 @@ public class BasicStrategyChartTest {
     //expected best move DoubleDown
     @Test
     public void testPairOfFivesAgainstDealersNine(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999), new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.NINE, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                new Card(Card.Rank.NINE, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 5) : "AvailableActions.size should return 5";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -390,8 +389,8 @@ public class BasicStrategyChartTest {
     //expected best move Hit
     @Test
     public void testPairOfFivesAgainstDealersTen(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999), new Card(Card.Rank.FIVE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.TEN, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                new Card(Card.Rank.TEN, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 5) : "AvailableActions.size should return 5";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -416,11 +415,40 @@ public class BasicStrategyChartTest {
         assert (values[3] > values[4]): "avgPayOffHit should be greater than avgPayOffSplit";
     }
 
+    //expected best move Hit
+    @Test
+    public void testPairOfEightsAgainstDealersAce(){
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.EIGHT, Card.Suit.SPADE), new Card(Card.Rank.EIGHT, Card.Suit.SPADE),
+                new Card(Card.Rank.ACE, Card.Suit.CLUB));
+
+        assert (so.getAvailableActions().size() == 5) : "AvailableActions.size should return 5";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SURRENDER.getAction()))): "Surrender should be in Available Actions";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.DOUBLEDOWN.getAction()))): "DoubleDown should be in Available Actions";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.HIT.getAction()))): "HIT should be in Available Actions";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SPLIT.getAction()))): "SPLIT should be in Available Actions";
+
+        double []values = simulationWithSplit(so);
+
+        System.out.println("Stand: " + values[0]);
+        System.out.println("Sur: " + values[1]);
+        System.out.println("dd: " + values[2]);
+        System.out.println("Hit: " + values[3]);
+        System.out.println("Split: " + values[4]);
+
+
+
+        assert (values[4] > values[0]): "avgPayOffSplit should be greater than avgPayOffStand";
+        assert (values[4] > values[1]): "avgPayOffSplit should be greater than avgPayOffSurrender";
+        assert (values[4] > values[2]): "avgPayOffSplit should be greater than avgPayOffDoubleDown";
+        assert (values[4] > values[3]): "avgPayOffSplit should be greater than avgPayOffHit";
+    }
+
     //expected best move Stand
     @Test
     public void testPairOfNinesAgainstDealersSeven(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.NINE, Card.Suit.SPADE, 999), new Card(Card.Rank.NINE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.SEVEN, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.NINE, Card.Suit.SPADE), new Card(Card.Rank.NINE, Card.Suit.SPADE),
+                new Card(Card.Rank.SEVEN, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 5) : "AvailableActions.size should return 5";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
@@ -448,8 +476,8 @@ public class BasicStrategyChartTest {
     //expected best move Stand
     @Test
     public void testPairOfNinesAgainstDealersEight(){
-        StateObserverBlackJack so = initSo(new Card(Card.Rank.NINE, Card.Suit.SPADE, 999), new Card(Card.Rank.NINE, Card.Suit.SPADE, 999),
-                new Card(Card.Rank.EIGHT, Card.Suit.CLUB, 999));
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.NINE, Card.Suit.SPADE), new Card(Card.Rank.NINE, Card.Suit.SPADE),
+                new Card(Card.Rank.EIGHT, Card.Suit.CLUB));
 
         assert (so.getAvailableActions().size() == 5) : "AvailableActions.size should return 5";
         assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
