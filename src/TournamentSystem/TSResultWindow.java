@@ -132,7 +132,8 @@ public class TSResultWindow extends JFrame {
     public TSResultWindow(String startDate, boolean singlePlayerGame) {
         super("Tournament Results");
 
-        $$$setupUI$$$();
+//        $$$setupUI$$$();          // /WK/03/2021: The original version with $$$setupUI$$$ would not run through
+        setupUI();                  // this method and therefore would not instantiate all variables properly
 
         showHideTableTimeTableButton.setVisible(false);
         showHideTableWTLButton.setVisible(false);
@@ -498,7 +499,8 @@ public class TSResultWindow extends JFrame {
      *
      * @noinspection ALL
      */
-    private void $$$setupUI$$$() {
+//    private void $$$setupUI$$$() {
+    private void setupUI() {
         mJPanel = new JPanel();
         mJPanel.setLayout(new GridBagLayout());
         tableWTLLabel = new JLabel();

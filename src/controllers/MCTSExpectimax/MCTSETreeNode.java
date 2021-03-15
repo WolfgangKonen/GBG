@@ -3,6 +3,7 @@ package controllers.MCTSExpectimax;
 import games.StateObsNondeterministic;
 import games.StateObservation;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.text.DecimalFormat;
@@ -127,7 +128,7 @@ public class MCTSETreeNode {
      *
 	 * @param delta the reward vector returned from {@link MCTSEChanceNode#rollOut()}
      */
-    public void backUp(double[] delta) {
+    public void backUp(ScoreTuple delta) {
         backUpSum(delta);
     }
 
@@ -136,7 +137,7 @@ public class MCTSETreeNode {
      *
 	 * @param delta the reward vector returned from {@link MCTSEChanceNode#rollOut()}
      */
-    private void backUpSum(double[] delta) {
+    private void backUpSum(ScoreTuple delta) {
         visits++;
 		if (parentNode != null) {
 			// Why do we test on parentNode here? - Because we need parentNode to know the player
@@ -146,7 +147,7 @@ public class MCTSETreeNode {
 			// node is not the child of anyone.
 			// [Note that uct() needs mroot.visits, that's why we increment visits for all n.]
 			int pPlayer = parentNode.so.getPlayer();	// pPlayer: the player of the preceding CHANCE node
-			value += delta[pPlayer];	// backup delta for pPlayer
+			value += delta.scTup[pPlayer];	// backup delta for pPlayer
 
 			parentNode.backUp(delta);
 		}

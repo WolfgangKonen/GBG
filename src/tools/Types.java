@@ -381,6 +381,8 @@ public class Types {
 		
 	}
 
+	// if PLAYSTATS_WRITING==true, print out playing statistics
+	// to agents/gameName/csv/<PLAYSTATS_FILENAME>
 	public static boolean PLAYSTATS_WRITING= false;
 	public static String PLAYSTATS_FILENAME= "playStats.csv";
 }

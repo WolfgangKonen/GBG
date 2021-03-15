@@ -195,7 +195,7 @@ public class Evaluator2048 extends Evaluator {
 //                  System.out.print("Finished move " + (so.moves) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameMoveTime) + "ms.\n");
                     
                     // gather information for later printout to agents/gameName/csv/playStats.csv:
-                    if (ConfigEvaluator.PLAYSTATS_CSV) {
+                    if (Types.PLAYSTATS_WRITING) {   // OLD: ConfigEvaluator.PLAYSTATS_CSV) {
 //                        moveNum++;
 //                    	nEmpty = so2048.getNumEmptyTiles();  
 //                    	gameScore = so2048.getGameScore(so2048)*so2048.MAXSCORE;
@@ -214,7 +214,7 @@ public class Evaluator2048 extends Evaluator {
                 stateObservers.add(so2048);
                 
             }
-            if (ConfigEvaluator.PLAYSTATS_CSV) {
+            if (Types.PLAYSTATS_WRITING) {   // OLD: ConfigEvaluator.PLAYSTATS_CSV) {
             	PlayAgent[] paVector = {m_PlayAgent};
         		PStats.printPlayStats(psList, null, paVector,this.ar);
         									//we do not hand over a startSO, since psList may have many runs, 

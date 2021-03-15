@@ -1,5 +1,6 @@
 package controllers.MCTSExpectimax;
 
+import distance.Score;
 import games.StateObservation;
 import params.ParMCTSE;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -92,7 +93,7 @@ public class MCTSEChanceNode
      *      depth is not yet reached)
      * <li> make a {@link #rollOut()} starting from this leaf node (a game
      *      with random actions until game is over or until the maximum rollout depth is reached)
-     * <li> {@link #backUp(double[])} the resulting score {@code score} and
+     * <li> {@link #backUp(ScoreTuple)} the resulting score {@code score} and
      *      the number of visits for all nodes on {@code value} and {@code visits}.
      * <li> Do this for all nodes on the path from the leaf up to the root.
      * </ul>
@@ -112,6 +113,7 @@ public class MCTSEChanceNode
             MCTSEChanceNode selected = treePolicy();
 
             double[] score;
+            ScoreTuple scTuple;
 
             if(selected.so instanceof StateObserver2048 && m_player.getParMCTSE().getEnableHeuristics()) {
                 // only for game 2048: use special heuristic and add non-normalized score:
@@ -122,10 +124,24 @@ public class MCTSEChanceNode
                     // b) add rollout bonus (non-normalized score)
                     score[0] += selected.rollOut1() * m_player.getHeuristicSettings2048().rolloutWeighting;
                 }
+                scTuple = new ScoreTuple(score);
             } else {
                 //get "normal" MCTSE score
-                score = selected.rollOut();
+                scTuple = selected.rollOut();
             }
+
+            //
+            // TODO: this is to be tested: Do we get better performance if we calculate the delta reward, i.e. if we
+            // subtract the score tuple of the root node?
+            //
+            boolean DELTA_REWARD=true;
+            if (DELTA_REWARD)
+                scTuple.combine(
+                    m_player.getRootNode().so.getRewardTuple(m_player.rgs),
+                    ScoreTuple.CombineOP.DIFF,
+                    0,0.0
+                );
+
 
             // --- this is now done in valueFnc(): directly ---
 //            //set maxRolloutScore in root node (needed in valueFnc())
@@ -135,7 +151,7 @@ public class MCTSEChanceNode
 //            }
 
             //backup the score
-            selected.backUp(score);
+            selected.backUp(scTuple);
 
             iterations++;
         }
@@ -395,7 +411,7 @@ public class MCTSEChanceNode
      *
      * @see StateObservation#getReward(StateObservation, boolean)
      */
-    public double[] rollOut() {
+    public ScoreTuple rollOut() {
         boolean stopConditionMet;
         StateObservation rollerState = so.copy();
         int maxDepth = this.m_player.getROLLOUT_DEPTH();
@@ -505,12 +521,12 @@ public class MCTSEChanceNode
      * 			for the {@code i}th player in state {@code so}.<br>
      * 			q() normalizes the rewards to [0,1] if flag 'Normalize' is checked. Otherwise it is the identity function.
 	 */
-	public double[] valueFnc(StateObservation so, StateObservation referingState) {
+	public ScoreTuple valueFnc(StateObservation so, StateObservation referingState) {
 		ScoreTuple tup = so.getRewardTuple(m_player.rgs);
         double[] v = tup.scTup.clone();
-//		m_player.getRootNode().scoreNonNormalized=v;
-		double maxScore;
 		if (m_player.getNormalize()) {
+            double maxScore;
+            double minScore=so.getMinGameScore();
 			if (so.getName()=="2048") {
 				// A special normalization for 2048: maxRolloutScore is an estimate of the maximum
 				// expected rollout score from the current root node (estimated initially in 
@@ -529,11 +545,13 @@ public class MCTSEChanceNode
 			}
 			// /WK/ map v to [0,1] (this is q(reward) in notes_MCTS.docx)
             for(int i = 0; i < v.length; i++) {
-                v[i] = (v[i] - so.getMinGameScore()) / (maxScore - so.getMinGameScore());
-                assert ((v[i] >= 0) && (v[i] <= 1)) : "Error: value v is not in range [0,1]";
+                v[i] = (v[i] - minScore) / (maxScore - minScore);
+                //assert ((v[i] >= 0) && (v[i] <= 1)) : "Error: value v is not in range [0,1]";
+                //--- there might be games where maxScore is only approximate and thus the assertion may be
+                //--- occasionally violated
             }
 		}
-		return v;
+		return new ScoreTuple(v);
 	}
 
     /**
@@ -566,7 +584,7 @@ public class MCTSEChanceNode
      *
      * @param delta the reward vector returned from {@link #rollOut()}
      */
-    public void backUp(double[] delta) {
+    public void backUp(ScoreTuple delta) {
         backUpSum(delta);
     }
 
@@ -575,7 +593,7 @@ public class MCTSEChanceNode
      *
      * @param delta the reward vector returned from {@link #rollOut()}
      */
-    private void backUpSum(double[] delta) {
+    private void backUpSum(ScoreTuple delta) {
         visits++;
 
         if (parentNode != null) {
@@ -586,7 +604,7 @@ public class MCTSEChanceNode
             // node is not the child of anyone.
             // [Note that uct() needs mroot.visits, that's why we increment visits for all n.]
             int pPlayer = parentNode.getParentNode().so.getPlayer();	// pPlayer: the player of the preceding CHANCE node
-            value += delta[pPlayer];	// backup delta for pPlayer
+            value += delta.scTup[pPlayer];	// backup delta for pPlayer
 
             parentNode.backUp(delta);
         }

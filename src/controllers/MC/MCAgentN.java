@@ -195,7 +195,14 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 
                     //construct Random Agent and let it simulate a (random) rollout until game over:
                     agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
-                    
+
+                    // since newSob now has the *cumulative* reward in its GameScoreTuple, we subtract the cumulative
+                    // reward at rollout start, since this delta is the utility of the rollout. /WK/03/2021/
+                    newSob.getGameScoreTuple().combine(
+                            sob.getGameScoreTuple(),
+                            ScoreTuple.CombineOP.DIFF,0,0
+                    );
+
                     avgScoreTuple.combine(
                             newSob.getGameScoreTuple(),
                             ScoreTuple.CombineOP.AVG,
@@ -350,6 +357,13 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                     RandomSearch agent = new RandomSearch();
                     agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
 
+                    // since newSob now has the *cumulative* reward in its GameScoreTuple, we subtract the cumulative
+                    // reward at rollout start, since this delta is the utility of the rollout. /WK/03/2021/
+                    newSob.getGameScoreTuple().combine(
+                            sob.getGameScoreTuple(),
+                            ScoreTuple.CombineOP.DIFF,0,0
+                    );
+
                     //return result of simulation in an object of class ResultContainer:
                     return new ResultContainer(firstActionIdentifier, newSob, agent.getRolloutDepth());
                 });
@@ -473,6 +487,13 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 
                     RandomSearch agent = new RandomSearch();
                     agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
+
+                    // since newSob now has the *cumulative* reward in its GameScoreTuple, we subtract the cumulative
+                    // reward at rollout start, since this delta is the utility of the rollout. /WK/03/2021/
+                    newSob.getGameScoreTuple().combine(
+                            sob.getGameScoreTuple(),
+                            ScoreTuple.CombineOP.DIFF,0,0
+                    );
 
                     avgScoreTuple.combine(
                             newSob.getGameScoreTuple(),

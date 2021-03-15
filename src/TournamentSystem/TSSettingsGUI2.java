@@ -5,7 +5,6 @@ import controllers.*;
 import games.Arena;
 import games.ArenaTrain;
 import games.XArenaMenu;
-import tools.Types;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -53,16 +52,17 @@ public class TSSettingsGUI2 extends JFrame {
     private JRadioButton variableDoubleRoundRobinRadioButton;
     private JSlider variableDRoundRobinSlider;
     private JLabel variableDRRInfoLabel;
-    private JScrollPane checkBoxScrollPane;
+    //private JScrollPane checkBoxScrollPane;
 
-    private Arena mArena;
-    private TSAgentManager mTSAgentManager;
+    private final Arena mArena;
+    private final TSAgentManager mTSAgentManager;
     private final String TAG = "[TSSettingsGUI2] ";
     final int numPlayers;
 
     public TSSettingsGUI2(Arena mArena) {
         super("Tournament System Launcher");   //("TSSettingsGUI2");
-        $$$setupUI$$$();
+//        $$$setupUI$$$();
+        setupUI();
         JScrollPane scroll = new JScrollPane(mJPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         //setContentPane(mJPanel);
         setContentPane(scroll);
@@ -303,7 +303,7 @@ public class TSSettingsGUI2 extends JFrame {
         // this lets the component not stretch over the Windows task bar
  		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int height = (int)(screenSize.getHeight()*0.95);
-		height = (height>this.getHeight()) ? this.getHeight() : height;
+		height = Math.min(height, this.getHeight());
 		setSize(this.getWidth(), height);
 		setBounds(0,0,this.getWidth(), height);
     }
@@ -346,10 +346,6 @@ public class TSSettingsGUI2 extends JFrame {
         try {
             //playAgent = mArena.tdAgentIO.loadGBGAgent(null); // opens file dialog to locate single agent
             agentsAndFileNames = mArena.tdAgentIO.loadMultipleGBGAgent(); // opens file dialog to locate multiple agents
-        } catch (IOException e) {
-            System.out.println(TAG + "ERROR :: No agent loaded from disk");
-            //e.printStackTrace();
-            return;
         } catch (Exception e) {
             System.out.println(TAG + "ERROR :: No agent loaded from disk");
             //e.printStackTrace();
@@ -507,10 +503,13 @@ public class TSSettingsGUI2 extends JFrame {
      * >>> IMPORTANT!! <<<
      * DO NOT edit this method OR call it in your code!
      *
-     * @noinspection ALL
      */
-    private void $$$setupUI$$$() {
-        createUIComponents();
+    private void setupUI() {
+//  private void $$$setupUI$$$() {        // /WK/03/2021: The original version with $$$setupUI$$$ and createUIComponents
+//      createUIComponents();             // would somehow not run through (in IntelliJ), even not in debugger
+        checkBoxJPanel = new JPanel();
+        checkBoxJPanel.setLayout(new BoxLayout(checkBoxJPanel, BoxLayout.Y_AXIS));
+
         mJPanel = new JPanel();
         mJPanel.setLayout(new GridBagLayout());
         final JLabel label1 = new JLabel();
@@ -536,13 +535,6 @@ public class TSSettingsGUI2 extends JFrame {
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
         mJPanel.add(randomCheckBox, gbc);
-//        minimaxCheckBox = new JCheckBox();
-//        minimaxCheckBox.setText("Minimax");
-//        gbc = new GridBagConstraints();
-//        gbc.gridx = 1;
-//        gbc.gridy = 3;
-//        gbc.anchor = GridBagConstraints.WEST;
-//        mJPanel.add(minimaxCheckBox, gbc);
         maxNCheckBox = new JCheckBox();
         maxNCheckBox.setText("Max-N");
         gbc = new GridBagConstraints();
