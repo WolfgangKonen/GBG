@@ -182,6 +182,14 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		return randomCard;
 	}
 
+	public int dealCard(int id) {
+
+		// remove from cards and available random actions
+		cards.remove(Integer.valueOf(id));
+		availableRandomActions.remove(ACTIONS.fromInt(id));
+		return id;
+	}
+
 	public void initRound(){
 		gameround++;
 		addToLog("------------------New Round ("+gameround+")------------------");
@@ -317,9 +325,11 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 				}else{
 					if(isPartialState){
 						if(holeCards[0][0]==null){
-							holeCards[0][0] = new PlayingCard(dealCard());
+							//holeCards[0][0] = new PlayingCard(dealCard());
+							holeCards[0][0] = new PlayingCard(dealCard(randAction.toInt()));
 						}else{
-							holeCards[1][0] = new PlayingCard(dealCard());
+							//holeCards[1][0] = new PlayingCard(dealCard());
+							holeCards[1][0] = new PlayingCard(dealCard(randAction.toInt()));
 						}
 					}
 					winner = holeCards[0][0].getRank()>holeCards[1][0].getRank() ? 0:1;
@@ -414,16 +424,18 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	}
 
 	public ArrayList<ACTIONS> getAvailableRandoms() {
-		// Kuhn Poker doesn't really need random actions because no further cards are reveiled during the game.
+		/* // Kuhn Poker doesn't really need random actions because no further cards are reveiled during the game.
 		// 99 as a dummy int
 		ArrayList<ACTIONS> randoms = new ArrayList<>();
 		randoms.add(ACTIONS.fromInt(99));
 
-		return randoms;
+		Expectimax does need to go through all states to calculate the value
+*/
+		return availableRandomActions;
 	}
 
 	public int getNumAvailableRandoms() {
-		return 1;
+		return cards.size();
 	}
 
 	public double getProbability(ACTIONS action) {
@@ -453,12 +465,18 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	@Override
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
-		return rewards[referringState.getPlayer()];
+		if(rewardIsGameScore)
+			return gamescores[referringState.getPlayer()];
+		return gamescores[referringState.getPlayer()];
+		//return rewards[referringState.getPlayer()];
 	}
 
 	@Override
 	public double getReward(int player, boolean rewardIsGameScore){
-		return rewards[player];
+		if(rewardIsGameScore)
+			return gamescores[player];
+		return gamescores[player];
+		//return rewards[player];
 	}
 
 	public double getMinGameScore() {
