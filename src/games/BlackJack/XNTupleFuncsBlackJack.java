@@ -1,6 +1,7 @@
 package games.BlackJack;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import controllers.TD.ntuple2.NTupleFactory;
@@ -16,31 +17,29 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
      *
      */
     private static final long serialVersionUID = 1L;
-    private final int maxHandSize = 11; //is 11 really needed?
+    private final int maxHandSize = 6;
 
-    //assuming a hand in Blackjack has at most 6 cards, 3 splits allowed, plus dealers hand
-    // possible biggest hand A + A + A + A + A + A + A + A + A + A + A = 11 cards
+    //assuming a hand in Blackjack has not more than 6 cards most of the time, 3 splits allowed, plus dealers hand
+
     @Override
     public int getNumCells() {
-        return getNumPlayers()*3*maxHandSize+maxHandSize;
+        return getNumPlayers()*3*maxHandSize+1;
     }
 
-    // all card values Two...A = 13 cards + uknown card + no card = 15 possible values
+    // all card values Two...A = 13 cards + no card = 14 possible values
     @Override
     public int getNumPositionValues() {
-        return (52/4)+1+1; // = 15
+        return (52/4)+1; // = 14
     }
 
     @Override
     public int getNumPlayers() {
-        // TODO Auto-generated method stub
-        return BlackJackConfig.NUM_PLAYERS;
+        return 1;
     }
 
     @Override
     public int getNumSymmetries() {
-        // TODO Auto-generated method stub
-        return 0;
+        return 1;
     }
 
     @Override
@@ -48,46 +47,30 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
         // TODO Auto-generated method stub
         StateObserverBlackJack m_so = (StateObserverBlackJack) so.copy().partialState();
         int[] bvec = new int[getNumCells()];
-        //sort hand of players and dealer to reduce symmetries to zero
-        for(Player p : m_so.getPlayers()){
-            for(Hand h : p.getHands()){
+        Arrays.fill(bvec, 13);
+
+        if (m_so.getCurrentPlayer().hasHand()) {
+            //sort hand of players and dealer to reduce symmetries to one
+
+            for (Hand h : m_so.getCurrentPlayer().getHands()) {
                 h.sortHand();
             }
-        }
-        if(m_so.getDealer().hasHand())
-            m_so.getDealer().getActiveHand().sortHand();
 
-        for(int i = 0; i < m_so.getNumPlayers(); i++){
-            for(int j = 0; j < 3; j++){
-                int offSet = i * 3 * maxHandSize + j*maxHandSize;
-                for(int f = 0; f < maxHandSize; f++){
-                    if(j < m_so.getPlayers()[i].getHands().size()) {
-                        if (f < m_so.getPlayers()[i].getHands().get(j).getCards().size()) {
-                            bvec [offSet + f] = m_so.getPlayers()[i].getHands().get(j).getCards().get(f).rank.getSortValue();
+            for (int j = 0; j < 3; j++) {
+                int offSet = j * (maxHandSize);
+                for (int f = 0; f < maxHandSize; f++) {
+                    if (j < m_so.getCurrentPlayer().getHands().size()) {
+                        if (f < m_so.getCurrentPlayer().getHands().get(j).getCards().size()) {
+                            bvec[offSet + f] = m_so.getCurrentPlayer().getHands().get(j).getCards().get(f).rank.getSortValue();
                         }
-                        else{
-                            bvec [offSet + f] = 14;
-                        }
-                    }else{
-                        bvec [offSet + f] = 14;
                     }
                 }
             }
+            int offSet = (maxHandSize * 3);
+            bvec[offSet] = m_so.getDealer().getActiveHand().getCards().get(0).rank.getSortValue();
+
         }
-        int offSet = (getNumPlayers()*maxHandSize*3);
-        for(int i = 0; i < maxHandSize; i++){
-            if(m_so.getDealer().hasHand()){
-                if(i < m_so.getDealer().getActiveHand().size()){
-                    bvec [offSet + i] = m_so.getDealer().getActiveHand().getCards().get(i).rank.getSortValue();
-                }
-                else {
-                    bvec [offSet + i] = 14;
-                }
-            }
-            else{
-                bvec [offSet + i] = 14;
-            }
-        }
+
         return new BoardVector(bvec);
     }
 
@@ -122,15 +105,31 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
 
     @SuppressWarnings("rawtypes")
     public HashSet adjacencySet(int iCell) {
+         //         Hand1        Hand2          Hand3       Dealers upcard
+        // bvev = _ _ _ _ _ _ | _ _ _ _ _ _ | _ _ _ _ _ _ | _
+        //        0 1 2 3 4 5   6 7 8 9 . . . ...
         HashSet<Integer> adjacencySet = new HashSet<>();
-        int x1 = iCell -1;
-        int x2 = iCell +1;
-        if(x1 >= 0 && x1 <= getNumCells() && iCell/maxHandSize == x1/maxHandSize){
-            adjacencySet.add(x1);
+        //icell = dealers upcard
+        if(iCell == maxHandSize*3) {
+            //probebly not needed but if every cell got dealers upcard as neighbour, dealers upcard should have every
+            //cell as neighbour
+            for(int i = 0; i < maxHandSize*3 ; i++){
+                adjacencySet.add(i);
+            }
+            return adjacencySet;
+
         }
-        if(x2 >= 0 && x2 <= getNumCells() && iCell/maxHandSize == x2/maxHandSize){
-            adjacencySet.add(x2);
+
+        //any cell will have the other cells that build that hand as neighbour + dealers upcard
+        int offSet = (iCell/maxHandSize) * maxHandSize;
+        for (int i = offSet; i < offSet + maxHandSize; i++){
+            if(i != iCell){
+                adjacencySet.add(i);
+            }
         }
+        //add dealers upcard
+        adjacencySet.add(maxHandSize*3);
+
         return adjacencySet;
     }
 

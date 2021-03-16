@@ -297,7 +297,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[] {0, 1, 2, 3};
+        return new int[] {-1, 0, 1, 2, 3};
     }
 
     @Override
