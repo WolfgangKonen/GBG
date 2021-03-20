@@ -142,7 +142,7 @@ public class EvaluatorBlackJack extends Evaluator {
             if (nextActAgent == nextActionByBasicStrategy)
                 movesFromBasicStrategy++;
             else{
-                m_msg += " missed move on " + so.getCurrentPlayer().getActiveHand() + " vs dealer "
+                m_msg += "missed move on " + so.getCurrentPlayer().getActiveHand() + " vs dealer "
                         + so.getDealer().getActiveHand() + " -> best Move: " +
                         bestMove + " agents choice : " + chosenMove + "\n";
             }
@@ -323,9 +323,9 @@ public class EvaluatorBlackJack extends Evaluator {
             directory.mkdir();
         }
         if(!(Files.exists(Path.of(directory.getPath() , playAgent.getName()+".csv")))) {
-            sb.append("agent");
+            sb.append("agent ");
             sb.append(',');
-            sb.append("num_iteration");
+            sb.append("num-iteration");
             sb.append(',');
             sb.append("eval-mode");
             sb.append(',');
@@ -334,8 +334,8 @@ public class EvaluatorBlackJack extends Evaluator {
             sb.append("date");
             sb.append(',');
             sb.append(getParStringHeaders(playAgent));
-            sb.append(',');
-            sb.append("eval-msg");
+            //sb.append(',');
+            //sb.append("eval-msg");
             sb.append('\n');
         }
 
@@ -352,8 +352,8 @@ public class EvaluatorBlackJack extends Evaluator {
             sb.append(getCurrentTimeStamp());
             sb.append(',');
             sb.append(getParValueString(playAgent));
-            sb.append(',');
-            sb.append(fixString(m_msg));
+            //sb.append(',');
+            //sb.append(fixString(m_msg));
             sb.append('\n');
         }
         sb.append('\n');
@@ -456,7 +456,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
     //fixes multiline-String for .csv output
     public String fixString(String data) {
-        String fix = data.replaceAll("\\R", "|");
+        String fix = data.replaceAll("\\R", "_");
         if (data.contains(",") || data.contains("\"") || data.contains("'")) {
             data = data.replace("\"", "\"\"");
             fix = "\"" + data + "\"";
