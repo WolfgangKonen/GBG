@@ -1,11 +1,21 @@
 package games.BlackJack;
 
+import controllers.MC.MCAgentN;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Evaluator;
 import games.GameBoard;
 import tools.Types;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import java.util.ArrayList;
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public class EvaluatorBlackJack extends Evaluator {
     /**
@@ -30,6 +40,8 @@ public class EvaluatorBlackJack extends Evaluator {
     int movesFromBasicStrategy = 0;
     int playerBlackJack = 0;
     int dealerBlackJack = 0;
+    private final String dir = "src/games/BlackJack/Stats";
+
 
     public EvaluatorBlackJack(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval, int verbose) {
         super(e_PlayAgent, gb, mode, stopEval, verbose);
@@ -66,6 +78,8 @@ public class EvaluatorBlackJack extends Evaluator {
     public double simulateFixedMovesFromBasicStrategy(PlayAgent playAgent){
 
         StateObserverBlackJack []sos = {
+                initSpecificSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.FOUR, Card.Suit.SPADE),
+                        new Card(Card.Rank.SEVEN, Card.Suit.CLUB)), //bestmove hit
                 initSpecificSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
                         new Card(Card.Rank.FIVE, Card.Suit.CLUB)), //bestmove STAND
                 initSpecificSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
@@ -90,6 +104,8 @@ public class EvaluatorBlackJack extends Evaluator {
                         new Card(Card.Rank.NINE, Card.Suit.CLUB)), //bestmove HIT
                 initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.FOUR, Card.Suit.SPADE),
                         new Card(Card.Rank.FIVE, Card.Suit.CLUB)), //bestmove DOUBLEDOWN
+                initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.TWO, Card.Suit.SPADE),
+                        new Card(Card.Rank.TWO, Card.Suit.CLUB)), //bestmove HHIT
                 initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
                         new Card(Card.Rank.TEN, Card.Suit.CLUB)), //bestmove HIT
                 initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.NINE, Card.Suit.SPADE),
@@ -117,6 +133,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
         String chosenMove;
         String bestMove;
+        m_msg = "";
         for(StateObserverBlackJack so: sos){
             int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
             int nextActionByBasicStrategy = bsbja.getNextAction2(so.partialState(), false, true).toInt();
@@ -125,7 +142,7 @@ public class EvaluatorBlackJack extends Evaluator {
             if (nextActAgent == nextActionByBasicStrategy)
                 movesFromBasicStrategy++;
             else{
-                m_msg += "missed move on " + so.getCurrentPlayer().getActiveHand() + " vs dealer "
+                m_msg += " missed move on " + so.getCurrentPlayer().getActiveHand() + " vs dealer "
                         + so.getDealer().getActiveHand() + " -> best Move: " +
                         bestMove + " agents choice : " + chosenMove + "\n";
             }
@@ -246,8 +263,8 @@ public class EvaluatorBlackJack extends Evaluator {
     public double evalAgentAvgPayoff(PlayAgent playAgent){
         lastResult = simulateAvgPayOff(playAgent);
         m_msg += "Agent has an average Pay-Off of : " + lastResult;
-        m_msg += "\n he also had : " + playerBlackJack + " Black Jacks ";
-        m_msg += "\nthe dealer had : " + dealerBlackJack + "Black Jacks ";
+        m_msg += "\nAgent had : " + playerBlackJack + " Black Jacks ";
+        m_msg += "\nthe dealer had : " + dealerBlackJack + " Black Jacks ";
         return lastResult;
     }
 
@@ -288,6 +305,10 @@ public class EvaluatorBlackJack extends Evaluator {
                 return evalAgentRandomMovesFromBasicStrategy(playAgent) > 0.9;
             case 3:
                 return evalAgentInsurance(playAgent) > 0.9;
+            case 10:
+                //create statistics
+                logStatistics(playAgent);
+                break;
             default:
                 m_msg = "no evaluation done";
                 break;
@@ -295,9 +316,92 @@ public class EvaluatorBlackJack extends Evaluator {
         return false;
     }
 
+    public void logStatistics(PlayAgent playAgent){
+        StringBuilder sb = new StringBuilder();
+        File directory = new File(dir);
+        if (!directory.exists()){
+            directory.mkdir();
+        }
+        if(!(Files.exists(Path.of(directory.getPath() , playAgent.getName()+".csv")))) {
+            sb.append("agent");
+            sb.append(',');
+            sb.append("num_iteration");
+            sb.append(',');
+            sb.append("eval-mode");
+            sb.append(',');
+            sb.append("eval-result");
+            sb.append(',');
+            sb.append("date");
+            sb.append(',');
+            sb.append(getParStringHeaders(playAgent));
+            sb.append(',');
+            sb.append("eval-msg");
+            sb.append('\n');
+        }
+
+        // ten evaluations
+        for(int i = 0; i < 10; i++ ){
+            sb.append(playAgent.getName());
+            sb.append(',');
+            sb.append(i);
+            sb.append(',');
+            sb.append("0");
+            sb.append(',');
+            sb.append(evalAgentFixedMovesFromBasicStrategy(playAgent));
+            sb.append(',');
+            sb.append(getCurrentTimeStamp());
+            sb.append(',');
+            sb.append(getParValueString(playAgent));
+            sb.append(',');
+            sb.append(fixString(m_msg));
+            sb.append('\n');
+        }
+        sb.append('\n');
+        try {
+            this.write(sb.toString(), playAgent.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public String getParStringHeaders(PlayAgent playAgent){
+
+        if(playAgent instanceof MCAgentN){
+            return "iterations,rollout-depth,number-agents,stop-on-round-over";
+        }
+        if(playAgent instanceof MCTSExpectimaxAgt){
+            return "iterations,tree-depth,rollout-depth,stop-on-round-over";
+        }
+        if(playAgent instanceof TDNTuple3Agt){
+            return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lamda";
+        }
+
+        return "";
+    }
+
+    public String getParValueString(PlayAgent playAgent){
+        if(playAgent instanceof MCAgentN){
+            MCAgentN agent = (MCAgentN) playAgent;
+            return "" + agent.m_mcPar.getNumIter() + "," + agent.m_mcPar.getRolloutDepth() + "," + agent.m_mcPar.getNumAgents()
+                    +","+ agent.m_mcPar.getStopOnRoundOver();
+        }
+        if(playAgent instanceof MCTSExpectimaxAgt){
+            MCTSExpectimaxAgt agent = (MCTSExpectimaxAgt) playAgent;
+            return "" + agent.getParMCTSE().getNumIter() + "," + agent.getParMCTSE().getTreeDepth() + "," +
+                    agent.getParMCTSE().getRolloutDepth()
+                    +","+ agent.getParMCTSE().getStopOnRoundOver();
+
+        }
+        if(playAgent instanceof TDNTuple3Agt){
+            return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lamda";
+        }
+        return "";
+    }
+
     @Override
     public int[] getAvailableModes() {
-        return new int[] {-1, 0, 1, 2, 3};
+        return new int[] {-1, 0, 1, 2, 3, 10};
     }
 
     @Override
@@ -341,5 +445,30 @@ public class EvaluatorBlackJack extends Evaluator {
             case 3: return "Insurance";
             default: return "no evaluation done ";
         }
+    }
+
+    private static String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
+    }
+
+    //fixes multiline-String for .csv output
+    public String fixString(String data) {
+        String fix = data.replaceAll("\\R", "|");
+        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+            data = data.replace("\"", "\"\"");
+            fix = "\"" + data + "\"";
+        }
+        return fix;
+    }
+
+    //writes into .csv
+    private void write(final String s, String agentName) throws IOException {
+            Files.writeString(
+                    Path.of(dir, agentName + ".csv"), s,
+                    CREATE, APPEND
+            );
     }
 }
