@@ -36,6 +36,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	private static final String TIPROLLOUTL = "maximum rollout depth (random moves from a leaf)";
 	private static final String TIPNORMALIZEL = "<html>Normalize rollout value q(reward) to range [0,1]<br>"
 			+ "(special online normalization for 2048)</html>";
+	private static final String TIPSTOPONROUNDL = "stop policy/rollout on round over";
 	private static final String TIPSELECTORL = "Which selector to use in tree policy";
 	private static final String TIPVERBOSET = "<html>0: print nothing,<br>"
 			+ "1: one line per MCTS call, <br>"
@@ -68,7 +69,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 	private final JCheckBox enableHeuristics_CB;
 	private final JComboBox<String> choiceSelector;
 	private final JPanel mPanel;
-	public JCheckBox CBStopOnRoundOver;
+	public JCheckBox cbStopOnRoundOver;
 
 	private HeuristicSettings2048 heuristicSettings2048;
 
@@ -116,7 +117,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		numAgents_T = new JTextField(ParMCTSE.DEFAULT_NUMAGENTS+ "");
 		verbose_T = new JTextField(ParMCTSE.DEFAULT_VERBOSITY+"");		 
 		normalize = new JCheckBox();
-		CBStopOnRoundOver = new JCheckBox("StopOnRoundOver", ParMCTSE.DEFAULT_STOPONROUNDOVER);
+		cbStopOnRoundOver = new JCheckBox("StopOnRoundOver", ParMCTSE.DEFAULT_STOPONROUNDOVER);
 		mPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
 									// can be handed over to a tab of a JTabbedPane 
 									// (see class XArenaTabs)
@@ -130,6 +131,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		kUCT_L.setToolTipText(TIPKUCTL);
 		epsGreedy_L.setToolTipText(TIPEPSILONGREEDY);
 		normalize_L.setToolTipText(TIPNORMALIZEL);
+		cbStopOnRoundOver.setToolTipText(TIPSTOPONROUNDL);
 		maxNodes_L.setToolTipText("Max number of tree nodes");
 		numAgents_L.setToolTipText("Number of agents for majority Vote");
 
@@ -192,7 +194,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		mPanel.add(alternateVersion_CB);
 		mPanel.add(enableHeuristics_CB);
 
-		mPanel.add(CBStopOnRoundOver);
+		mPanel.add(cbStopOnRoundOver);
 		mPanel.add(new Canvas());
 
 		add(mPanel,BorderLayout.CENTER);
@@ -256,7 +258,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		return enableHeuristics_CB.isSelected();
 	}
 	public boolean getStopOnRoundOver() {
-		return CBStopOnRoundOver.isSelected();
+		return cbStopOnRoundOver.isSelected();
 	}
 	public HeuristicSettings2048 getHeuristicSettings2048() {
 		return heuristicSettings2048;
@@ -298,7 +300,7 @@ public class MCTSExpectimaxParams extends Frame implements Serializable
 		enableHeuristics_CB.setSelected(value);
 	}
 	public void setStopOnRoundOver(boolean value) {
-		CBStopOnRoundOver.setSelected(value);
+		cbStopOnRoundOver.setSelected(value);
 	}
 	public void setHeuristicSettings2048(HeuristicSettings2048 heuristicSettings2048) {
 		this.heuristicSettings2048 = heuristicSettings2048;

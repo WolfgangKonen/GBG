@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.*;
+import controllers.TD.ntuple4.*;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -198,12 +199,21 @@ public interface StateObservation extends Serializable{
      * Advance the current afterstate to a new state (do the nondeterministic part of advance).<p>
      * 
      * (This method is not really necessary for deterministic games - then it does just nothing - but we
-     * have it here to allow the same syntax in {@link TDNTuple3Agt} when making an action for
+     * have it here to allow the same syntax in {@link TDNTuple3Agt} and {@link TDNTuple4Agt} when making an action for
      * any StateObservation, deterministic or nondeterministic.)
      */
 	void advanceNondeterministic();
-    
-    /**
+
+	/**
+	 * Return true if the next action is deterministic.<p>
+	 *
+	 * (This method is not really necessary for deterministic games - then it returns always true - but we
+	 * have it here to allow the same syntax in {@link TDNTuple3Agt} and {@link TDNTuple4Agt} when making an action for
+	 * any StateObservation, deterministic or nondeterministic.)
+	 */
+	boolean isNextActionDeterministic();
+
+	/**
      * Return the afterstate preceding {@code this}. The afterstate is the state resulting 
      * after the deterministic part of the preceding action. Return {@code null}, if this
      * afterstate is not known.

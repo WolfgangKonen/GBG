@@ -241,8 +241,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
     	        	//
     	        	NewSO.advanceDeterministic(thisAct); 	// generate the afterstate
     	        	value = this.getScore(NewSO,so); // this is V(s') from so-perspective
-    	            NewSO.advanceNondeterministic(); 
-    	        } else { 
+					while (!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()) {	// /WK/ NEW/03/2021
+						NewSO.advanceNondeterministic();
+					}
+    	        } else {
     	        	// the non-afterstate logic for the case of single moves:
     	        	//System.out.println("NewSO: "+NewSO.stringDescr()+", act: "+act.toInt()); // DEBUG
     	            NewSO.advance(acts.get(i));
@@ -743,6 +745,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	        sLast[curPlayer] = ns.getAfterState();
 	        rLast.scTup[curPlayer] = R.scTup[curPlayer];
 	        s_t = ns.getNextSO();
+
+	        if (s_t.isRoundOver() && !getParTD().hasStopOnRoundOver()) {	// /WK/ NEW 03/2021
+	        	s_t.initRound();
+			}
 
 		} while(!m_finished);			// simplification: m_finished is set by ns.getNextRewardTupleCheckFinished
 		

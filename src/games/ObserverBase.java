@@ -138,6 +138,14 @@ abstract public class ObserverBase implements StateObservation {
     }
 
 	/**
+	 * Default implementation for deterministic games, returns always true
+	 */
+	@Override
+	public boolean isNextActionDeterministic() {
+		return true;
+	}
+
+	/**
 	 * Default implementation for deterministic games: the state and its preceding afterstate are the same,
 	 * thus return just {@code this}. <br>
 	 * Nondeterministic games have to override this method.
