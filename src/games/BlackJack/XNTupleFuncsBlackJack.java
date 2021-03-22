@@ -23,7 +23,7 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
 
     @Override
     public int getNumCells() {
-        return getNumPlayers()*3*maxHandSize+1;
+        return 3*maxHandSize+1;
     }
 
     // all card values Two...A = 13 cards + no card = 14 possible values
@@ -34,7 +34,7 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
 
     @Override
     public int getNumPlayers() {
-        return 1;
+        return BlackJackConfig.NUM_PLAYERS;
     }
 
     @Override
@@ -87,7 +87,24 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
 
     @Override
     public int[][] fixedNTuples(int mode) {
-        // TODO Auto-generated method stub
+        switch (mode) {
+            //         Hand1        Hand2          Hand3       Dealers upcard
+            // bvev = _ _ _ _ _ _ | _ _ _ _ _ _ | _ _ _ _ _ _ | _
+            //        0 1 2 3 4 5   6 7 8 9 . .  12 ...   .... 18
+            case 1:
+                return new int[][]{
+                        {1, 2, 18}, {6, 7, 18}, {12, 13, 18}
+                };
+            case 2:
+                return new int[][]{
+                        {1, 2, 3, 18}, {6, 7, 8, 18}, {12, 13, 14, 18}
+                };
+            case 3:
+                return new int[][]{
+                        {1, 2, 3, 4, 18}, {6, 7, 8, 9 ,18}, {12, 13, 14, 15, 18}
+                };
+
+        }
         return null;
     }
 
@@ -97,7 +114,7 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
         return "<html>" + "1: 40 best chosen 4-tuples" + "<br>" + "2: all the straight 3-tuples" + "</html>";
     }
 
-    private static final int[] fixedModes = { 1 };
+    private static final int[] fixedModes = { 1, 2, 3};
 
     public int[] fixedNTupleModesAvailable() {
         return fixedModes;
