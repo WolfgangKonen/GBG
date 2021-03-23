@@ -9,9 +9,9 @@ import games.XNTupleFuncs;
 
 public class XNTupleFuncsBlackJackOneHand extends XNTupleBase implements XNTupleFuncs, Serializable {
 
-    /**
-     *
-     */
+    public XNTupleFuncsBlackJackOneHand() {
+    }
+
     private static final long serialVersionUID = 1L;
 
 
@@ -20,17 +20,17 @@ public class XNTupleFuncsBlackJackOneHand extends XNTupleBase implements XNTuple
         return 3;
     }
 
-    // no hand = 0 | handvalue from 4 to 21 = 1 to 18 | handvalues > 21 = 19
+    // no hand = 0 | handvalue from 4 to 21 = 1 to 18
     @Override
     public int getNumPositionValues() {
-        return 20;
+        return 19;
     }
 
 
     @Override
     public int[] getPositionValuesVector() {
         return new int[]{
-                20, 2, 12
+                19, 2, 11
         };
     }
 
@@ -55,12 +55,7 @@ public class XNTupleFuncsBlackJackOneHand extends XNTupleBase implements XNTuple
         Player currentPlayer = m_so.getCurrentPlayer();
         if (currentPlayer.getActiveHand() != null) {
             //sort hand of players and dealer to reduce symmetries to one
-            if (currentPlayer.getActiveHand().getHandValue() > 21) {
-                //why does this even occur?
-                System.out.println("HIOIIII");
-                bvec[0] = 19;
-            }
-            else {
+            if (currentPlayer.getActiveHand().getHandValue() <= 21) {
                 bvec[0] = currentPlayer.getActiveHand().getHandValue() - 3;
                 bvec[1] = currentPlayer.getActiveHand().isSoft() ? 1 : 0;
             }

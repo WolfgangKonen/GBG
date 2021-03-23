@@ -9,9 +9,10 @@ import games.XNTupleFuncs;
 
 public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleFuncs, Serializable {
 
-    /**
-     *
-     */
+
+    public XNTupleFuncsBlackJackSimple() {
+    }
+
     private static final long serialVersionUID = 1L;
 
 
@@ -20,7 +21,7 @@ public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleF
         return 7;
     }
 
-    // no hand = 0 | handvalue from 4 to 21 = 1 to 18 | handvalues > 21 = 19
+    // no hand = 0 | handvalue from 4 to 21 = 1 to 18
     @Override
     public int getNumPositionValues() {
         return 19;
@@ -30,7 +31,7 @@ public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleF
     @Override
     public int[] getPositionValuesVector() {
        return new int[]{
-               19, 2, 19, 2, 19, 2, 12
+               19, 2, 19, 2, 19, 2, 11
        };
     }
 
@@ -59,11 +60,7 @@ public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleF
             for (int j = 0; j < 6; j = j + 2) {
                 if(j/2 < currentPlayer.getHands().size()) {
                     Hand currentHand = currentPlayer.getHands().get(j / 2);
-                    if (currentHand.getHandValue() > 21) {
-                        //why does this even occur?
-                        bvec[j] = 19;
-                    }
-                    else {
+                    if (currentHand.getHandValue() <= 21) {
                         bvec[j] = currentHand.getHandValue() - 3;
                         if (currentHand.isSoft())
                             bvec[j + 1] = 1;
