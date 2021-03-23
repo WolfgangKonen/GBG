@@ -31,7 +31,7 @@ public class ArenaBlackJackTrain extends ArenaTrain {
 
     @Override
     public XNTupleFuncs makeXNTupleFuncs() {
-        return new XNTupleFuncsBlackJack();
+        return new XNTupleFuncsBlackJackSimple();
     }
 
     public static void main(String[] args) throws IOException {

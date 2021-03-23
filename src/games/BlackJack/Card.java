@@ -24,7 +24,7 @@ public class Card implements Comparable<Card>{
         TWO(2, 0), THREE(3, 1), FOUR(4 , 2), FIVE(5, 3),
         SIX(6, 4), SEVEN(7, 5), EIGHT(8, 6), NINE(9, 7),
         TEN(10, 8), JACK(10, 9), QUEEN(10, 10), KING(10, 11),
-        ACE(11, 12), X(0, 13);
+        ACE(1, 12), X(0, 13);
 
         private int value;
         private int sortValue;
@@ -100,7 +100,7 @@ public class Card implements Comparable<Card>{
         if (rank.value < 1) {
             return "X";
         }
-        if (rank.value < 10) {
+        if (rank.value > 1 && rank.value < 10) {
             rankStr = String.valueOf(rank.value);
         } else {
             rankStr = rank.name().substring(0, 1);

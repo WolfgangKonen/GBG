@@ -29,7 +29,7 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
     // all card values Two...A = 13 cards + no card = 14 possible values
     @Override
     public int getNumPositionValues() {
-        return (52/4)+1; // = 14
+        return 11; // = 14
     }
 
     @Override
@@ -45,9 +45,8 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
     @Override
     public BoardVector getBoardVector(StateObservation so) {
         // TODO Auto-generated method stub
-        StateObserverBlackJack m_so = (StateObserverBlackJack) so.copy().partialState();
+        StateObserverBlackJack m_so = (StateObserverBlackJack) so.copy();
         int[] bvec = new int[getNumCells()];
-        Arrays.fill(bvec, 13);
 
         if (m_so.getCurrentPlayer().hasHand()) {
             //sort hand of players and dealer to reduce symmetries to one
@@ -61,13 +60,13 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
                 for (int f = 0; f < maxHandSize; f++) {
                     if (j < m_so.getCurrentPlayer().getHands().size()) {
                         if (f < m_so.getCurrentPlayer().getHands().get(j).getCards().size()) {
-                            bvec[offSet + f] = m_so.getCurrentPlayer().getHands().get(j).getCards().get(f).rank.getSortValue();
+                            bvec[offSet + f] = m_so.getCurrentPlayer().getHands().get(j).getCards().get(f).rank.getValue();
                         }
                     }
                 }
             }
             int offSet = (maxHandSize * 3);
-            bvec[offSet] = m_so.getDealer().getActiveHand().getCards().get(0).rank.getSortValue();
+            bvec[offSet] = m_so.getDealer().getActiveHand().getCards().get(0).rank.getValue();
 
         }
 

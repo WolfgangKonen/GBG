@@ -54,8 +54,9 @@ public class EvaluatorBlackJack extends Evaluator {
      */
 
     public StateObserverBlackJack initSpecificSo(Card firstCardPlayer, Card secondCardPlayer, Card upCardDealer){
-        StateObserverBlackJack so = new StateObserverBlackJack(1, 15);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER + 30);
         so.getCurrentPlayer().bet(10);
+        so.getCurrentPlayer().setChips((NUM_ITER+30)*10);
         so.getCurrentPlayer().addCardToActiveHand(firstCardPlayer);
         so.getCurrentPlayer().addCardToActiveHand(secondCardPlayer);
         // Players Turn
@@ -165,8 +166,8 @@ public class EvaluatorBlackJack extends Evaluator {
         countInsuranceTaken = 0; possibleInsuranceWins = 0;
         countNoInsuranceTaken = 0; insurenceSuccess = 0;
         noInsurenceButBlackJack = 0;
-        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER);
-        so.getCurrentPlayer().setChips(1000000);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER+30);
+        so.getCurrentPlayer().setChips((NUM_ITER+30) * 10);
 
         for(int i = 0; i < NUM_ITER; i++) {
 
@@ -203,8 +204,8 @@ public class EvaluatorBlackJack extends Evaluator {
      * Never taking the move suggested by basic strategy results in a score of 0 (worst)
      */
     public double simulateRandomMovesFromBasicStrategy(PlayAgent playAgent){
-        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER);
-        so.getCurrentPlayer().setChips(1000000);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER+30);
+        so.getCurrentPlayer().setChips((NUM_ITER+30) *10);
         PlayAgent bsbja = new BasicStrategyBlackJackAgent();
 
         moves = 0;
@@ -237,14 +238,13 @@ public class EvaluatorBlackJack extends Evaluator {
      * RandomAgent should achieve the worst score
      */
     public double simulateAvgPayOff(PlayAgent playAgent){
-        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER);
-        so.getCurrentPlayer().setChips(1000000);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER + 30);
+        so.getCurrentPlayer().setChips((NUM_ITER+30)*10);
         avgPayOff = 0;
         playerBlackJack = 0;
         dealerBlackJack = 0;
 
         for(int i = 0; i < NUM_ITER; i++) {
-            System.out.println("iteration : " +i);
             while (!so.isRoundOver()) {
                 int act = playAgent.getNextAction2(so.partialState(), false, true).toInt();
                 so.advance(Types.ACTIONS.fromInt(act));
@@ -262,7 +262,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
     public double evalAgentAvgPayoff(PlayAgent playAgent){
         lastResult = simulateAvgPayOff(playAgent);
-        m_msg += "Agent has an average Pay-Off of : " + lastResult;
+        m_msg = "\nAgent has an average Pay-Off of : " + lastResult;
         m_msg += "\nAgent had : " + playerBlackJack + " Black Jacks ";
         m_msg += "\nthe dealer had : " + dealerBlackJack + " Black Jacks ";
         return lastResult;
@@ -270,15 +270,15 @@ public class EvaluatorBlackJack extends Evaluator {
 
     public double evalAgentRandomMovesFromBasicStrategy(PlayAgent playAgent){
         lastResult = simulateRandomMovesFromBasicStrategy(playAgent);
-        m_msg += "number of moves :" + moves;
-        m_msg += "number of moves suggested by Basic Strategy : " + movesFromBasicStrategy;
+        m_msg = "\nnumber of moves : " + moves;
+        m_msg += "\nnumber of moves suggested by Basic Strategy : " + movesFromBasicStrategy;
 
         return lastResult;
     }
 
     public double evalAgentFixedMovesFromBasicStrategy(PlayAgent playAgent){
         lastResult = simulateFixedMovesFromBasicStrategy(playAgent);
-        m_msg += "number of moves :" + moves;
+        m_msg += "\nnumber of moves :" + moves;
         m_msg += "\nnumber of moves took suggested by Basic Strategy : " + movesFromBasicStrategy;
 
         return lastResult;
@@ -298,13 +298,13 @@ public class EvaluatorBlackJack extends Evaluator {
     protected boolean evalAgent(PlayAgent playAgent) {
         switch (m_mode){
             case 0:
-                return evalAgentFixedMovesFromBasicStrategy(playAgent) > 0.9;
+                return evalAgentFixedMovesFromBasicStrategy(playAgent) > 0.8;
             case 1:
-                return evalAgentAvgPayoff(playAgent) > -0.2;
+                return evalAgentAvgPayoff(playAgent) > 0.5;
             case 2:
-                return evalAgentRandomMovesFromBasicStrategy(playAgent) > 0.9;
+                return evalAgentRandomMovesFromBasicStrategy(playAgent) > 0.8;
             case 3:
-                return evalAgentInsurance(playAgent) > 0.9;
+                return evalAgentInsurance(playAgent) > 0.8;
             case 10:
                 //create statistics
                 logStatistics(playAgent);
@@ -317,6 +317,8 @@ public class EvaluatorBlackJack extends Evaluator {
     }
 
     public void logStatistics(PlayAgent playAgent){
+        //TODO: generalize more
+
         StringBuilder sb = new StringBuilder();
         File directory = new File(dir);
         if (!directory.exists()){
@@ -345,9 +347,9 @@ public class EvaluatorBlackJack extends Evaluator {
             sb.append(',');
             sb.append(i);
             sb.append(',');
-            sb.append("0");
+            sb.append("2");
             sb.append(',');
-            sb.append(evalAgentFixedMovesFromBasicStrategy(playAgent));
+            sb.append(evalAgentRandomMovesFromBasicStrategy(playAgent));
             sb.append(',');
             sb.append(getCurrentTimeStamp());
             sb.append(',');
@@ -394,6 +396,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
         }
         if(playAgent instanceof TDNTuple3Agt){
+            //TODO: get params from config
             return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lamda";
         }
         return "";
@@ -411,7 +414,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
     @Override
     public int getTrainEvalMode() {
-        return 0;
+        return 2;
     }
 
 

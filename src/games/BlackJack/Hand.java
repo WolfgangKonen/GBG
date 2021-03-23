@@ -37,11 +37,11 @@ public class Hand {
     }
 
     public boolean isHandFinished() {
-        return isHandFinished || checkForBlackJack() || getHandValue() > 20;
+        return isHandFinished || getHandValue() > 20;
     }
 
     public boolean checkForBlackJack() {
-        return hand.get(0).rank.getValue() + hand.get(1).rank.getValue() == 21 && hand.size() == 2;
+        return getHandValue() == 21 && hand.size() == 2;
     }
 
     // returns new Hand
@@ -51,39 +51,34 @@ public class Hand {
 
     public int getHandValue() {
         int result = 0;
-        int aces = 0;
+        boolean ace = false;
         for (Card c : hand) {
-            if (c.rank.equals(Card.Rank.ACE)) {
-                aces++;
+            if (c.rank == Card.Rank.ACE) {
+                ace = true;
             }
             result += c.rank.getValue();
         }
-        for (int i = 0; i < aces; i++) {
-            if (result > 21) {
-                result -= 10;
-            }
-        }
+        if(ace && ((result+10) <= 21))
+            result += 10;
         return result;
     }
 
     public boolean isSoft(){
         int result = 0;
-        int aces = 0;
+        boolean ace = false;
         for (Card c : hand) {
-            if (c.rank.equals(Card.Rank.ACE)) {
-                aces++;
+            if (c.rank == Card.Rank.ACE) {
+                ace = true;
             }
             result += c.rank.getValue();
         }
-        if(aces == 0) {
+        if(!ace)
             return false;
-        }
-        result -= aces*10;
-        return result != getHandValue();
+        return ace && (result + 10) < 21;
     }
 
     public boolean isPair(){
-        return hand.size() == 2 && hand.get(0).rank.equals(hand.get(1).rank);
+        return hand.size() == 2 && hand.get(0).rank == hand.get(1).rank;
     }
 
     public boolean isBust() {
