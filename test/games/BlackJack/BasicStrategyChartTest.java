@@ -1,6 +1,8 @@
 package games.BlackJack;
 
 
+import games.BoardVector;
+import games.XNTupleFuncs;
 import org.junit.Test;
 import tools.Types;
 
@@ -22,6 +24,19 @@ public class BasicStrategyChartTest {
         so.setPartialState(true);
         so.setAvailableActions();
         return so;
+    }
+
+    // just a little check: look with debugger at the constructed BoardVector bv if it is as expected
+    @Test
+    public void testBoardVector() {
+        StateObserverBlackJack so = initSo( new Card(Card.Rank.ACE, Card.Suit.SPADE),
+                                            new Card(Card.Rank.QUEEN, Card.Suit.SPADE),
+                new Card(Card.Rank.FIVE, Card.Suit.CLUB));
+        ArenaBlackJackTrain ar = new ArenaBlackJackTrain("tit",false);
+        XNTupleFuncs xf = ar.makeXNTupleFuncs();
+        BoardVector bv = xf.getBoardVector(so);
+        System.out.println(so.stringDescr());
+        int dummy = 1;
     }
 
     //expected best move Stand

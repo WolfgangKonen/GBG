@@ -93,11 +93,13 @@ public class XNTupleFuncsBlackJack extends XNTupleBase implements XNTupleFuncs, 
             //        0 1 2 3 4 5   6 7 8 9 . .  12 ...   .... 18
             case 1:
                 return new int[][]{
-                        {1, 2, 18}, {6, 7, 18}, {12, 13, 18}
+//                        {1, 2, 18}, {6, 7, 18}, {12, 13, 18}
+                        {0, 1, 18}, {6, 7, 18}, {12, 13, 18}                // /WK/
                 };
             case 2:
                 return new int[][]{
-                        {1, 2, 3, 18}, {6, 7, 8, 18}, {12, 13, 14, 18}
+//                        {1, 2, 3, 18}, {6, 7, 8, 18}, {12, 13, 14, 18}
+                        {0, 1, 2, 18}, {6, 7, 8, 18}, {12, 13, 14, 18}      // /WK/
                 };
             case 3:
                 return new int[][]{
