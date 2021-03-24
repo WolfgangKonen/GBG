@@ -33,9 +33,16 @@ public class Card implements Comparable<Card>{
             this.value = value;
             this.sortValue = sortValue;
         }
-
+        
         public int getValue() { return value; }
         public int getSortValue(){ return sortValue; }
+        public static Rank getRankFromValue(int v){
+            for(Rank r : Rank.values()){
+                if(v == r.value)
+                    return r;
+            }
+            return null;
+        }
     }
 
     Rank rank;

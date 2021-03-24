@@ -315,7 +315,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
      *  */
     @Override
     public double getMaxGameScore() {
-        return START_CHIPS*2;
+        return START_CHIPS*10;
     }
 
 
