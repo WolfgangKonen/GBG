@@ -553,9 +553,6 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         gPhase = gPhase.getNext();
         playerActedInPhase = new boolean[players.length];
         setPlayer(0);
-        if(gPhase == gamePhase.BETPHASE){
-            episode++;
-        }
     }
 
 
@@ -775,7 +772,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     }
                 }
 
-
+                this.episode++;
                 setRoundOver(true);
                 //initRound();
                 break;
