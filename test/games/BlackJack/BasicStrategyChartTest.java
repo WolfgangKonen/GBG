@@ -26,11 +26,27 @@ public class BasicStrategyChartTest {
         return so;
     }
 
+    public StateObserverBlackJack init3So(Card first, Card second, Card third, Card upCardDealer){
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITERATIONS);
+        so.getCurrentPlayer().bet(10);
+        so.getCurrentPlayer().addCardToActiveHand(first);
+        so.getCurrentPlayer().addCardToActiveHand(second);
+        so.getCurrentPlayer().addCardToActiveHand(third);
+        // Players Turn
+        so.setgPhase(StateObserverBlackJack.gamePhase.PLAYERONACTION);
+        so.getDealer().addCardToActiveHand(upCardDealer);
+        so.getDealer().addCardToActiveHand(new Card(Card.Rank.X, Card.Suit.X));
+        so.setPartialState(true);
+        so.setAvailableActions();
+        return so;
+    }
+
     // just a little check: look with debugger at the constructed BoardVector bv if it is as expected
     @Test
     public void testBoardVector() {
-        StateObserverBlackJack so = initSo( new Card(Card.Rank.ACE, Card.Suit.SPADE),
+        StateObserverBlackJack so = init3So( new Card(Card.Rank.TEN, Card.Suit.SPADE),
                                             new Card(Card.Rank.QUEEN, Card.Suit.SPADE),
+                                            new Card(Card.Rank.SEVEN, Card.Suit.HEART),
                 new Card(Card.Rank.FIVE, Card.Suit.CLUB));
         ArenaBlackJackTrain ar = new ArenaBlackJackTrain("tit",false);
         XNTupleFuncs xf = ar.makeXNTupleFuncs();

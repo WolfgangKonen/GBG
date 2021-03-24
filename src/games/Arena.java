@@ -315,10 +315,12 @@ abstract public class Arena implements Runnable {
 
 		boolean stored_USELASTMCTS = ConfigWrapper.USELASTMCTS;
 		ConfigWrapper.USELASTMCTS = false;
+		so = gb.getStateObs().clearedCopy();
 
 		while (taskState == Task.INSPECTV) {
 			if (gb.isActionReq()) {
 				gb.setActionReq(false);
+				gb.enableInteraction(false);
 				so = gb.getStateObs().clearedCopy();
 				//so = gb.getStateObs();
 				if (!so.isGameOver()&&so.isRoundOver()) so.initRound();
@@ -350,10 +352,10 @@ abstract public class Arena implements Runnable {
 						so.storeBestActionInfo(actBest, actBest.getVTable());
 
 					gb.updateBoard(so, true, true);
-					if (so.isRoundOver()) {
-						so.initRound();
-						assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
-					}
+//					if (so.isRoundOver()) {
+//						so.initRound();
+//						assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
+//					}
  				} else {
 					if (so.stopInspectOnGameOver()) {
 						gb.updateBoard(so, true, true);
@@ -372,6 +374,7 @@ abstract public class Arena implements Runnable {
 						gb.clearBoard(false, true);
 					}
 				}
+				gb.enableInteraction(true);
 			} else {
 				try {
 					Thread.sleep(100);
@@ -382,6 +385,11 @@ abstract public class Arena implements Runnable {
 					// again.
 				} catch (Exception e) {
 				}
+			}
+			if (so.isRoundOver()) {
+				gb.updateBoard(so, true, true);
+				if (!so.isGameOver()) so.initRound();
+				assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
 			}
 
 		} // while(taskState == Task.INSPECTV) [will be left only by the break

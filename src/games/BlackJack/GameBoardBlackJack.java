@@ -146,4 +146,10 @@ public class GameBoardBlackJack implements GameBoard {
         arenaActReq = true;
     }
 
+    public void inspectMove(int a) {
+        Types.ACTIONS act = Types.ACTIONS.fromInt(a);
+        m_Arena.setStatusMessage("Inspecting the value function ...");
+        m_so.advance(act);
+        arenaActReq = true;
+    }
 }
