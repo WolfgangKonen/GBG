@@ -29,7 +29,7 @@ public class EvaluatorBlackJack extends Evaluator {
      *
      */
 
-    public final int NUM_ITER = 100;
+    public final int NUM_ITER = 50;
     double avgPayOff = 0;
     int countInsuranceTaken = 0;
     int possibleInsuranceWins = 0;
@@ -151,6 +151,93 @@ public class EvaluatorBlackJack extends Evaluator {
         return (double)movesFromBasicStrategy/(double)moves;
 
     }
+
+
+    /**
+     * Agent will play 40 most simple preconstructed States. In every case Hit should be the obvious choice.
+     * This should represent the most basic understanding of BlackJack
+     */
+    public double simulateVerySimpleSituationsHit(PlayAgent playAgent){
+        StateObserverBlackJack []sos = new StateObserverBlackJack[40];
+        int index = 0;
+        //------------------------ handvalue 5 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.TWO, Card.Suit.SPADE), new Card(Card.Rank.THREE, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //--------------------------handvalue 6 vs any dealerupcard (not splitable)-------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.TWO, Card.Suit.SPADE), new Card(Card.Rank.FOUR, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //--------------------------handvalue 7 vs any dealerupcard (not splitable)------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.THREE, Card.Suit.SPADE), new Card(Card.Rank.FOUR, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //--------------------------handvalue 8 vs any dealerupcard (not splitable)------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.THREE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+
+        int agentChoseHit = 0;
+        for(StateObserverBlackJack so: sos){
+            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
+            if (nextActAgent == StateObserverBlackJack.BlackJackActionDet.HIT.getAction())
+                agentChoseHit++;
+        }
+        return (double)agentChoseHit/(double)sos.length;
+    }
+
+    /**
+     * Agent will play 60 most simple preconstructed States. In every case STAND should be the obvious choice.
+     * This should represent the most basic understanding of BlackJack
+     */
+    public double simulateVerySimpleSituationsStand(PlayAgent playAgent){
+        StateObserverBlackJack []sos = new StateObserverBlackJack[60];
+        int index = 0;
+        //------------------------ handvalue 17 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.KING, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue 18 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.KING, Card.Suit.SPADE), new Card(Card.Rank.EIGHT, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue 19 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.KING, Card.Suit.SPADE), new Card(Card.Rank.NINE, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue 20 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.KING, Card.Suit.SPADE), new Card(Card.Rank.QUEEN, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue soft 19 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.EIGHT, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue soft 20 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.NINE, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+
+        int agentChoseStand = 0;
+        for(StateObserverBlackJack so: sos){
+            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
+            if (nextActAgent == StateObserverBlackJack.BlackJackActionDet.STAND.getAction())
+                agentChoseStand++;
+        }
+        return (double)agentChoseStand/(double)sos.length;
+    }
+
+
 
     /**
      * Agent will play NUM_ITER hands (between 1000 and 10000 Hands)
@@ -294,6 +381,16 @@ public class EvaluatorBlackJack extends Evaluator {
         return lastResult;
     }
 
+    public double evalAgentSimpleHitMoves(PlayAgent playAgent){
+        lastResult = simulateVerySimpleSituationsHit(playAgent);
+        return lastResult;
+    }
+
+    public double evalAgentSimpleStandMoves(PlayAgent playAgent){
+        lastResult = simulateVerySimpleSituationsStand(playAgent);
+        return lastResult;
+    }
+
     @Override
     protected boolean evalAgent(PlayAgent playAgent) {
         switch (m_mode){
@@ -305,6 +402,10 @@ public class EvaluatorBlackJack extends Evaluator {
                 return evalAgentRandomMovesFromBasicStrategy(playAgent) > 0.8;
             case 3:
                 return evalAgentInsurance(playAgent) > 0.8;
+            case 4:
+                return evalAgentSimpleHitMoves(playAgent) > .9;
+            case 5:
+                return evalAgentSimpleStandMoves(playAgent) > .9;
             case 10:
                 //create statistics
                 logStatistics(playAgent);
@@ -404,17 +505,17 @@ public class EvaluatorBlackJack extends Evaluator {
 
     @Override
     public int[] getAvailableModes() {
-        return new int[] {-1, 0, 1, 2, 3, 10};
+        return new int[] {-1, 0, 1, 2, 3, 4, 5, 10};
     }
 
     @Override
     public int getQuickEvalMode() {
-        return 0;
+        return 4;
     }
 
     @Override
     public int getTrainEvalMode() {
-        return 2;
+        return 5;
     }
 
 
@@ -425,6 +526,8 @@ public class EvaluatorBlackJack extends Evaluator {
             case 1: return "average payoff of agent (the higher the better): ";
             case 2: return "percentage of moves took suggested by Basic-Strategy in random States(best = 1.0): ";
             case 3: return "percentage of times where agent did not chose insurance (best = 1.0): ";
+            case 4: return "percentage of times where agent did chose HIT (40 simple preconstructed situations) (best = 1.0): ";
+            case 5: return "percentage of times where agent did chose STAND (60 simple preconstructed situations) (best = 1.0):";
             default: return "no evaluation done ";
         }
     }
@@ -436,6 +539,8 @@ public class EvaluatorBlackJack extends Evaluator {
                 + "1 : average payoff of agent (the higher the better)<br>"
                 + "2 : percentage of moves took suggested by Basic-Strategy in random States(best = 1.0)<br>"
                 + "3 : percentage of times where agent did not chose insurance (best = 1.0)<br>"
+                + "4 : percentage of times where agent did chose HIT (40 simple preconstructed situations) (best = 1.0)<br>"
+                + "5 : percentage of times where agent did chose STAND (60 simple preconstructed situations) (best = 1.0)<br>"
                 + "</html>";
     }
 
@@ -446,6 +551,8 @@ public class EvaluatorBlackJack extends Evaluator {
             case 1: return "Average payoff";
             case 2: return "moves from Basic Strategy random ";
             case 3: return "Insurance";
+            case 4: return "simple HIT moves";
+            case 5: return "simple STAND moves";
             default: return "no evaluation done ";
         }
     }
