@@ -489,6 +489,9 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		return true;
 	}
 
+	public ArrayList<Integer> getLastMoves() {
+		return lastMoves;
+	}
 
 	@SuppressWarnings("unused")
 	public boolean isLegalAction(ACTIONS act) {

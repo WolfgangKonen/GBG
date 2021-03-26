@@ -60,6 +60,7 @@ public class EvaluatorKuhnPoker extends Evaluator {
 		StateObservation so = gb.getDefaultStartState();
 		PlayAgent[] pavec = new PlayAgent[] {playAgent,opponent};
 
+
 		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 10000, 0);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
@@ -67,6 +68,13 @@ public class EvaluatorKuhnPoker extends Evaluator {
 		return lastResult;
 	}
 
+	public double specificState(){
+		// Setup SO
+		// GETAction
+		// Check if Action is stupid
+
+		return 0;
+	}
 
  	@Override
  	public int[] getAvailableModes() {

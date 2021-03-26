@@ -1,6 +1,5 @@
 package games.KuhnPoker;
 
-import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.PlayAgent;
 import games.*;
 import tools.Types;
@@ -43,7 +42,7 @@ public class ArenaKuhnPoker extends Arena   {
 	}
 	
 	public XNTupleFuncs makeXNTupleFuncs() {
-		return new XNTupleFuncsPoker();
+		return new XNTupleFuncsKuhnPoker();
 	}
 
 	public void performArenaDerivedTasks() {  }

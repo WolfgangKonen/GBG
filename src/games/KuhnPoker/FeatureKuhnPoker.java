@@ -3,6 +3,8 @@ package games.KuhnPoker;
 import games.Feature;
 import games.StateObservation;
 
+import java.io.Serializable;
+
 
 /**
  * Implementation of {@link Feature} for game Poker.<p>
@@ -15,53 +17,43 @@ import games.StateObservation;
  * @author Tim Zeh, TH Koeln, Nov'20
  */
 
-public class FeatureKuhnPoker implements Feature{
+public class FeatureKuhnPoker implements Feature, Serializable {
 	int featMode;
 
 	public FeatureKuhnPoker(int featMode) {
 		this.featMode = featMode;
 	}
 
-
 	/*
-		Features of a Poker game:
-			player
-				states = {not playing, folded, active, open}
-				chips = #
-				toCall = #
+		Features of a Kuhn Poker game:
 
+			wholecard {11,12,13}
+			moves {-1;0;1;2;3}
+
+		Considered but not used:
 			pot
-				size = #
+			chips
 
-			cards
-				activePlayer = ids
-				community = ids
 
-			ActivePlayer
 	 */
 	@Override
 	public double[] prepareFeatVector(StateObservation sob) {
-		assert sob instanceof StateObserverKuhnPoker : "Input 'so' is not of class StateObserverPoker";
+		assert sob instanceof StateObserverKuhnPoker : "Input 'so' is not of class StateObserverKuhnPoker";
 		StateObserverKuhnPoker so = (StateObserverKuhnPoker) sob;
 
-		// Pot
-		// Cards
 		switch (featMode) {
 			case 0 -> {
-				int numPlayers = so.getNumPlayers();
-				double[] featureVector = new double[getInputSize(featMode)];
-				for (int i = 0; i < numPlayers; i++) {
+				double[] featureVector = new double[3];
 
-					featureVector[i + numPlayers] = so.getChips()[i];
-					//TODO: inconsistent why do I use here no array? Should be standardized.
-					featureVector[i + numPlayers] = so.getOpenPlayer(i);
-				}
-				int tmp = numPlayers * 3;
-				featureVector[tmp++] = so.getPotSize();
-				PlayingCard tmpCard;
-				featureVector[tmp++] = ((tmpCard = so.getHoleCards()[0]) != null) ? tmpCard.getId() : 0;
-				featureVector[tmp++] = ((tmpCard = so.getHoleCards()[1]) != null) ? tmpCard.getId() : 0;
-				featureVector[tmp] = so.getPlayer();
+				//wholecard
+				featureVector[0] = so.getPlayer();
+
+				//moves
+				featureVector[1]=-1;
+				featureVector[2]=-1;
+				for(int i = 0;i<so.getLastMoves().toArray().length;i++)
+					featureVector[i+1] = so.getLastMoves().get(i)==null?-1:so.getLastMoves().get(i);
+
 				return featureVector;
 			}
 			case 1 -> throw new RuntimeException("Placeholder");

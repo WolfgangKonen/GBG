@@ -15,6 +15,7 @@ import params.ParMC;
 import params.ParMCTSE;
 import tools.ScoreTuple;
 import tools.Types;
+import tools.Utils;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -33,9 +34,117 @@ public class Experiment {
 
     public static void main(String[] args) throws IOException {
         Experiment ex = new Experiment();
-        ex.expecti_experiment_static();
-        ex.MC_experiment_static();
-        ex.MCTS_experiment_static();
+        //ex.expecti_experiment_static();
+        //ex.MC_experiment_static();
+        //ex.MCTS_experiment_static();
+        ex.oneRoundChallenge();
+    }
+
+    /**
+     * To determine the quality of an agent it might not be the best way to playout a complete game.
+     * The results are difficult to compare and it might make things easier to play only one round.
+     */
+    public void oneRoundChallenge() throws IOException {
+        //Utils.checkAndCreateFolder(directory);
+        //m_arena = new ArenaKuhnPoker("Kuhn",false);
+        //m_gb = new GameBoardKuhnPoker(m_arena);
+        StateObserverKuhnPoker stateTest = new StateObserverKuhnPoker();
+
+        int playRounds = 10000000;
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+        LocalDateTime now = LocalDateTime.now();
+
+        String experimentName = "newapproach";
+
+        String folder = directory+"/"+experimentName+"/"+dtf.format(now);
+        tools.Utils.checkAndCreateFolder(folder);
+
+        Writer resultsFile = new FileWriter(folder+"/results.csv");
+
+        String line = "position\tcard\tmoves\tresult\r\n";
+        resultsFile.append(line);
+
+        // setup agents
+        // todo: make those a parameter of the function call
+        RandomAgent ra = new RandomAgent("random");
+        KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("kuhn");
+        PlayAgent[] pavec = new PlayAgent[] {ra,kuhnAgent};
+        PlayAgtVector paVector = new PlayAgtVector(pavec);
+        int numPlayers = paVector.getNumPlayers();
+        ScoreTuple  shiftedTuple, scMean = new ScoreTuple(numPlayers);
+        double sWeight = 1.0/playRounds;
+        ScoreTuple scStart;
+
+        // define startSO
+//        StateObservation startSO = m_gb.m_so;
+        StateObserverKuhnPoker startSO;
+        startSO = stateTest;
+
+        //StateObservation so;
+        StateObserverKuhnPoker so;
+
+        ScoreTuple sc;
+        Types.ACTIONS actBest;
+
+        scStart=startSO.getGameScoreTuple();
+
+        int observedPlayer = 0;
+
+        PlayAgtVector qaVector;
+        // play the rounds
+        for(int z = 0;z<numPlayers;z++){
+
+            qaVector = paVector.shift(z);
+            observedPlayer = z;
+
+            for (int k = 0; k < playRounds; k++) {
+                for (int i = 0; i < numPlayers; i++)
+                    qaVector.pavec[i].resetAgent();
+
+                int player = startSO.getPlayer();
+                //initilizing a new (random) state
+                so = new StateObserverKuhnPoker();
+
+                while (true) {
+                    long startTNano = System.nanoTime();
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
+                    so.advance(actBest);
+                    if (so.isRoundOver()) {
+                        sc = so.getGameScoreTuple();
+                        // calculate "reward"
+                        sc.combine(scStart, ScoreTuple.CombineOP.DIFF, observedPlayer, 0);
+                        scMean.combine(sc, ScoreTuple.CombineOP.AVG, observedPlayer, sWeight);
+
+                        // Information:
+                        // P1 : Hand
+                        // P2 : Hand - ist das relevant?
+                        // Aktionen SO:LastMoves
+                        line = "";
+
+                        line += "" + observedPlayer;
+                        line += "\t" + so.getHoleCards(observedPlayer)[0].getRank();
+                        line += "\t";
+
+                        for (Integer move: so.getLastMoves()) {
+                            line += move + "-";
+                        }
+
+                        line += "\t" + sc.scTup[observedPlayer];
+
+                        line+="\r\n";
+                        resultsFile.append(line);
+                        break;
+                    }
+                    player = so.getPlayer();
+                } // while(true)
+
+            } // for (k)
+            //shiftedTuple = sc.shift(numPlayers - z);
+
+        }
+        resultsFile.close();
+        System.out.println(scMean);
     }
 
     public Experiment(){
