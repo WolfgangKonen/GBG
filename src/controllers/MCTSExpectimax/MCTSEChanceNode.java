@@ -1,6 +1,5 @@
 package controllers.MCTSExpectimax;
 
-import distance.Score;
 import games.StateObservation;
 import params.ParMCTSE;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -28,16 +27,16 @@ public class MCTSEChanceNode
     /**
      * the state observation associated with this node
      */
-    public StateObservation so = null;
+    public StateObservation so;
     /**
      * member {@code #action} is only used for printout in {@link #printChildInfo(int, boolean)}
      */
-    public Types.ACTIONS action = null;
-    private MCTSETreeNode parentNode = null;
+    public Types.ACTIONS action;
+    private MCTSETreeNode parentNode;
     public List<MCTSETreeNode> childrenNodes = new ArrayList<>();
-    public MCTSEPlayer m_player = null;
+    public MCTSEPlayer m_player;
 
-    public List<Types.ACTIONS> notExpandedActions = new ArrayList<>();         // Actions that are not represented by a node
+    public List<Types.ACTIONS> notExpandedActions;         // Actions that are not represented by a node
     public double value = 0;   				// total value
     public int visits = 0; 					// total number of visits
     public Random m_rnd;    // do we need it separately in each node or could it be once in MCTSEPlayer ??
@@ -112,19 +111,19 @@ public class MCTSEChanceNode
             //select a child node
             MCTSEChanceNode selected = treePolicy();
 
-            double[] score;
+            //double[] score;
             ScoreTuple scTuple;
 
             if(selected.so instanceof StateObserver2048 && m_player.getParMCTSE().getEnableHeuristics()) {
                 // only for game 2048: use special heuristic and add non-normalized score:
                 // a) get Heuristic bonus
-                score = new double[1];
-                score[0] = ((StateObserver2048)selected.so).getHeuristicBonus(m_player.getHeuristicSettings2048());
+                scTuple = new ScoreTuple(1);
+                //score = new double[1];
+                scTuple.scTup[0] = ((StateObserver2048)selected.so).getHeuristicBonus(m_player.getHeuristicSettings2048());
                 if(m_player.getHeuristicSettings2048().enableRollout) {
                     // b) add rollout bonus (non-normalized score)
-                    score[0] += selected.rollOut1() * m_player.getHeuristicSettings2048().rolloutWeighting;
+                    scTuple.scTup[0] += selected.rollOut1() * m_player.getHeuristicSettings2048().rolloutWeighting;
                 }
-                scTuple = new ScoreTuple(score);
             } else {
                 //get "normal" MCTSE score
                 scTuple = selected.rollOut();
@@ -132,7 +131,7 @@ public class MCTSEChanceNode
 
             //
             // TODO: this is to be tested: Do we get better performance if we calculate the delta reward, i.e. if we
-            // subtract the score tuple of the root node?
+            // subtract root node's score tuple?
             //
             boolean DELTA_REWARD=true;
             if (DELTA_REWARD)
@@ -164,7 +163,7 @@ public class MCTSEChanceNode
                 }
             }
             if (m_player.getNormalize()) {
-                double maxScore = (so.getName()=="2048") ? m_player.getRootNode().maxRolloutScore : so.getMaxGameScore();
+                double maxScore = (so.getName().equals("2048")) ? m_player.getRootNode().maxRolloutScore : so.getMaxGameScore();
                 vTable[i] = vTable[i]*maxScore;
             }
         }
@@ -245,7 +244,7 @@ public class MCTSEChanceNode
         for (MCTSETreeNode child : childrenNodes)
         {
             double uctValue = child.value / child.visits 
-            		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + this.epsilon)) 
+            		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + MCTSEChanceNode.epsilon))
             		+ m_rnd.nextDouble() * epsilon; 
             		// small random numbers: break ties in unexpanded node
 
@@ -258,54 +257,39 @@ public class MCTSEChanceNode
         return selected;
     }
 
-    @Deprecated
-    private MCTSETreeNode uctNormalised() {
-    	// we do this now differently with an extra short mctseSearch in MCTSEPlayer::init()
-    	// and with the proper normalization done in this.valueFnc():
-        if(m_player.getRootNode().iterations < 100) { 
-            return uct();			// run the first 100 iterations w/o normalization to establish
-            						// a rough estimate of maxRolloutScore
-        } else {
-            double multiplier = m_player.getRootNode().maxRolloutScore;
-            assert multiplier != 0 : "Error: maxRolloutScore is 0.0";
-            multiplier = 1/multiplier;
-
-//            if(m_player.getRootNode().maxRolloutScore == 0.0d) {
-//                multiplier = 1;
-//            } else {
-//                multiplier = 1/m_player.getRootNode().maxRolloutScore;
+    // --- never used ---
+//    @Deprecated
+//    private MCTSETreeNode uctNormalised() {
+//    	// we do this now differently with an extra short mctseSearch in MCTSEPlayer::init()
+//    	// and with the proper normalization done in this.valueFnc():
+//        if(m_player.getRootNode().iterations < 100) {
+//            return uct();			// run the first 100 iterations w/o normalization to establish
+//            						// a rough estimate of maxRolloutScore
+//        } else {
+//            double multiplier = m_player.getRootNode().maxRolloutScore;
+//            assert multiplier != 0 : "Error: maxRolloutScore is 0.0";
+//            multiplier = 1/multiplier;
+//
+//            MCTSETreeNode selected = null;
+//            double selectedValue = -Double.MAX_VALUE;
+//
+//            for (MCTSETreeNode child : childrenNodes) {
+//                double uctValue = child.value * multiplier / child.visits
+//                		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + MCTSEChanceNode.epsilon))
+//                		+ m_rnd.nextDouble() * epsilon;
+//                		// small random numbers: break ties in unexpanded node
+//
+//                if (uctValue > selectedValue) {
+//                    selected = child;
+//                    selectedValue = uctValue;
+//                }
 //            }
-
-            MCTSETreeNode selected = null;
-            double selectedValue = -Double.MAX_VALUE;
-
-            for (MCTSETreeNode child : childrenNodes) {
-                double uctValue = child.value * multiplier / child.visits 
-                		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + MCTSEChanceNode.epsilon))
-                		+ m_rnd.nextDouble() * epsilon; 
-                		// small random numbers: break ties in unexpanded node
-
-                if (uctValue > selectedValue) {
-                    selected = child;
-                    selectedValue = uctValue;
-                }
-            }
-
-            assert selected != null : "Error: No tree node selected!";
-            
-            // just debug info for 2048:
-//            double selVal = selected.value/selected.visits*StateObserver2048.MAXSCORE;
-//            double selVal2 = selected.value/selected.visits*multiplier;
-//            double maxVal = m_player.getRootNode().maxRolloutScore*StateObserver2048.MAXSCORE;
-//            int selAct = selected.action.toInt();
-//            int dummy=1;
-//            if(selected == null) {
-//                System.out.println("2: " + childrenNodes.size());
-//            }
-
-            return selected;
-        }
-    }
+//
+//            assert selected != null : "Error: No tree node selected!";
+//
+//            return selected;
+//        }
+//    }
 
     /**
      * Epsilon-Greedy, a variant to UCT
@@ -355,9 +339,8 @@ public class MCTSEChanceNode
     	// TODO: implement one-move wins and one-move losses acc. to [Swiechowski15]
         double rnd = m_rnd.nextDouble();
         double vTotal = 0.0;
-        double vMin = 0.0;
+        double vMin;
         double cumProb = 0.0;		// cumulative probability of all children up to current child
-        MCTSETreeNode selected = null;
 
         // We assign each child a probability which is the softmax of its utility U(child):
         // 		p(i)  =  U(child) / vTotal  =  U(child) / sum_j U(child_j)
@@ -421,7 +404,7 @@ public class MCTSEChanceNode
         //for(int i = this.depth; i < maxDepth; i++) {  // this alternative was implemented before 03/2021, but we think
                                                         // it might lead to wrong results for small maxDepth
         for(int i = 0; i < maxDepth; i++) {
-            stopConditionMet = isRolloutFinished(rollerState, i);
+            stopConditionMet = isRolloutFinished(rollerState);
             if (!stopConditionMet) {
                 if (rollerState.isRoundOver()) rollerState.initRound();         // NEW/03/2021: for round-based games
                 //rollerState.setAvailableActions();	// /WK/ commented out since every advance() includes setAvailableActions()
@@ -476,7 +459,7 @@ public class MCTSEChanceNode
         //for(int i = this.depth; i < maxDepth; i++) {  // this alternative was implemented before 03/2021, but we think
                                                         // it might lead to wrong results for small maxDepth
         for(int i = 0; i < maxDepth; i++) {
-            stopConditionMet = isRolloutFinished(rollerState, i);
+            stopConditionMet = isRolloutFinished(rollerState);
             if (!stopConditionMet) {
                 if (rollerState.isRoundOver()) rollerState.initRound();         // NEW/03/2021: for round-based games
                 //rollerState.setAvailableActions();	// /WK/ commented out since every advance() includes setAvailableActions()
@@ -527,7 +510,7 @@ public class MCTSEChanceNode
 		if (m_player.getNormalize()) {
             double maxScore;
             double minScore=so.getMinGameScore();
-			if (so.getName()=="2048") {
+			if (so.getName().equals("2048")) {
 				// A special normalization for 2048: maxRolloutScore is an estimate of the maximum
 				// expected rollout score from the current root node (estimated initially in 
 				// MCTSEPlayer::init() by a quick 100-iterations mctseScearch() and then updated 
@@ -558,15 +541,10 @@ public class MCTSEChanceNode
      * checks if a rollout is finished
      *
      * @param rollerState the current game state
-     * @param depth the current rollout depth
      * @return true if the rollout is finished, false if not
      */
-    public boolean isRolloutFinished(StateObservation rollerState, int depth) {
-        boolean stopOnRoundOver = true;
-        // *** this is now done in the for-loops of rollout and rollout1 ***
-        //if (depth >= m_player.getROLLOUT_DEPTH()) {
-        //    return true;
-        //}
+    public boolean isRolloutFinished(StateObservation rollerState) {
+        boolean stopOnRoundOver = m_player.getParMCTSE().getStopOnRoundOver();
 
         if (rollerState.isGameOver()) {
             return true;
@@ -617,12 +595,12 @@ public class MCTSEChanceNode
 
     }
 
-    /**
-     * The value of a node is the value of the lowest child node<br>
-     * (This method is currently not used)
-     *
-     * @param score the value of the new child node
-     */
+//    /**
+//     * The value of a node is the value of the lowest child node<br>
+//     * (This method is currently not used)
+//     *
+//     * @param score the value of the new child node
+//     */
 //    @Deprecated
 //    private void backUpMin(double score) {
 //    	// note that the score-negation necessary for 2-player games is done in
@@ -689,7 +667,7 @@ public class MCTSEChanceNode
 		DecimalFormat form = new DecimalFormat("0.0000");
 		DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
 		DecimalFormat ifor = new DecimalFormat("0000");
-        double multiplier = 1/(m_player.getRootNode().maxRolloutScore+ this.epsilon);
+        double multiplier = 1/(m_player.getRootNode().maxRolloutScore+ MCTSEChanceNode.epsilon);
 		int cVisits = 0;
 		int verbose = m_player.getVerbosity();
 		String indention = "";
@@ -700,9 +678,9 @@ public class MCTSEChanceNode
 			if (c != null) {
 				cVisits += c.visits;
 				if (verbose > 1) { 	// =2: print direct child info
-					double uct_exploit = c.value * multiplier / (c.visits + this.epsilon);
+					double uct_exploit = c.value * multiplier / (c.visits + MCTSEChanceNode.epsilon);
 					double uct_explore = m_player.getK()
-							* Math.sqrt(Math.log(this.visits + 1) / (c.visits + this.epsilon));
+							* Math.sqrt(Math.log(this.visits + 1) / (c.visits + MCTSEChanceNode.epsilon));
 					// System.out.println(c.m_state.stringDescr() + ": " +
 					// c.nVisits + ", " +
 					// form.format(c.totValue*3932156/c.nVisits)); // for 2048

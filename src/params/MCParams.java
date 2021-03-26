@@ -34,8 +34,8 @@ public class MCParams extends Frame implements Serializable
     public JTextField TIterations;
     public JTextField TRolloutdepth;
     public JTextField TNumberAgents;
-    public JCheckBox CBCalcCertainty;
-    public JCheckBox CBStopOnRoundOver;
+    public JCheckBox cbCalcCertainty;
+    public JCheckBox cbStopOnRoundOver;
     JPanel mPanel;
 
 	/**
@@ -55,8 +55,8 @@ public class MCParams extends Frame implements Serializable
         TIterations = new JTextField(""+MCAgentConfig.DEFAULT_ITERATIONS);
         TRolloutdepth = new JTextField(""+MCAgentConfig.DEFAULT_ROLLOUTDEPTH);
         TNumberAgents = new JTextField(""+MCAgentConfig.DEFAULT_NUMBERAGENTS);
-        CBCalcCertainty = new JCheckBox("Calc Certainty", MCAgentConfig.DOCALCCERTAINTY);
-        CBStopOnRoundOver = new JCheckBox("StopOnRoundOver", MCAgentConfig.STOPONROUNDOVER);
+        cbCalcCertainty = new JCheckBox("Calc Certainty", MCAgentConfig.DOCALCCERTAINTY);
+        cbStopOnRoundOver = new JCheckBox("StopOnRoundOver", MCAgentConfig.STOPONROUNDOVER);
         mPanel = new JPanel();
 
         LIterations.setToolTipText("Number of iterations during MC search");
@@ -81,7 +81,7 @@ public class MCParams extends Frame implements Serializable
         mPanel.add(numbPanel);
         mPanel.add(new Canvas());
 
-        mPanel.add(CBStopOnRoundOver);
+        mPanel.add(cbStopOnRoundOver);
         // mPanel.add(CBCalcCertainty);
         mPanel.add(new Canvas());
 
@@ -110,10 +110,10 @@ public class MCParams extends Frame implements Serializable
         return Integer.parseInt(TNumberAgents.getText());
     }
     public boolean getCalcCertainty() {
-        return CBCalcCertainty.isSelected();
+        return cbCalcCertainty.isSelected();
     }
     public boolean getStopOnRoundOver() {
-        return CBStopOnRoundOver.isSelected();
+        return cbStopOnRoundOver.isSelected();
     }
 
     public void setNumIter(int value) {
@@ -126,10 +126,10 @@ public class MCParams extends Frame implements Serializable
         TNumberAgents.setText(value+"");
     }
     public void setCalcCertainty(boolean value) {
-        CBCalcCertainty.setSelected(value);
+        cbCalcCertainty.setSelected(value);
     }
     public void setStopOnRoundOver(boolean value) {
-        CBStopOnRoundOver.setSelected(value);
+        cbStopOnRoundOver.setSelected(value);
     }
 
     /**

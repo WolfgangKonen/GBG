@@ -93,9 +93,10 @@ public class MCTSETreeNode {
      * @return the selected child node
      */
     public MCTSEChanceNode expand() {
+		boolean stopOnRoundOver = m_player.getParMCTSE().getStopOnRoundOver();
         StateObservation childSo = so.copy();
         childSo.advance(action);
-    	if(childSo.isRoundOver())
+    	if(childSo.isRoundOver() && !stopOnRoundOver)	// /WK/03/2021 Bug fix '&& !stopOnRoundOver' as suggested by TZ
     		childSo.initRound();
 
         for (MCTSEChanceNode childrenNode : childrenNodes) {

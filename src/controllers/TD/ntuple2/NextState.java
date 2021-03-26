@@ -140,6 +140,7 @@ public class NextState {
 		}
 
 		public ScoreTuple getNextRewardTupleCheckFinished(int epiLength) {
+			boolean stopOnRoundOver = tdAgt.getParTD().hasStopOnRoundOver();
 			ScoreTuple rewardTuple = this.getNextRewardTuple();
 			
 			if (nextSO.isGameOver()) {
@@ -148,6 +149,10 @@ public class NextState {
 				// only info
 				tdAgt.incrementWinCounters(rewardTuple.scTup[nextSO.getPlayer()],this);
 			}
+			if (nextSO.isRoundOver() && stopOnRoundOver) {		// /WK/ NEW 03/2021
+				tdAgt.setFinished(true);
+			}
+
 
 			tdAgt.incrementMoveCounter();
 			if (tdAgt.getMoveCounter()>=epiLength) {

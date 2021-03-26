@@ -1,5 +1,6 @@
 package params;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import javax.swing.JPanel;
@@ -39,7 +40,7 @@ public class ParTD implements Serializable {
     private double lambda= DEFAULT_LAMBDA; 		// eligibility trace decay parameter (should be <= GAMMA)
     private double horCut= DEFAULT_HORIZONCUT;	// horizon cut for TD eligibility trace
     private int nply = DEFAULT_NPLY; 
-    private int mode3P = DEFAULT_MODE_3P; 
+//    private int mode3P = DEFAULT_MODE_3P;
     private int eligMode = DEFAULT_ELIG_MODE;
     private int epochs = DEFAULT_EPOCHS; 
     private int featmode = 0;
@@ -47,7 +48,8 @@ public class ParTD implements Serializable {
     private boolean hasLinNet = true;
     private boolean hasRprop = false;
     private boolean hasSigmoid = false;
-    
+	private boolean hasStopOnRoundOver = false;
+
     /**
      * This member is only constructed when the constructor {@link #ParTD(boolean) ParTD(boolean withUI)} 
      * called with {@code withUI=true}. It holds the GUI for {@link ParTD}.
@@ -59,6 +61,7 @@ public class ParTD implements Serializable {
 	 * compatible with an older one (older .agt.zip containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public ParTD() { 	}
@@ -87,12 +90,13 @@ public class ParTD implements Serializable {
 		this.epochs = tp.getEpochs();
 		this.nply = tp.getNPly();
 		this.hasSigmoid = tp.hasSigmoid();
+		this.hasStopOnRoundOver = tp.hasStopOnRoundOver();
 		this.useNormalize = tp.getNormalize();
 		this.eligMode = tp.getEligMode();
 		this.featmode = tp.getFeatmode();
 		this.hasLinNet = tp.hasLinearNet();
 		this.hasRprop = tp.hasRpropLrn();
-		this.mode3P = tp.getMode3P();
+//		this.mode3P = tp.getMode3P();
 		
 		if (tdparams!=null)
 			tdparams.setFrom(this);
@@ -109,12 +113,13 @@ public class ParTD implements Serializable {
 		this.epochs = tp.getEpochs();
 		this.nply = tp.getNPly();
 		this.hasSigmoid = tp.hasSigmoid();
+		this.hasStopOnRoundOver = tp.hasStopOnRoundOver();
 		this.useNormalize = tp.getNormalize();
 		this.eligMode = tp.getEligMode();
 		this.featmode = tp.getFeatmode();
 		this.hasLinNet = tp.hasLinearNet();
 		this.hasRprop = tp.hasRpropLrn();
-		this.mode3P = tp.getMode3P();
+//		this.mode3P = tp.getMode3P();
 		
 		if (tdparams!=null)
 			tdparams.setFrom(this);
@@ -208,9 +213,9 @@ public class ParTD implements Serializable {
 		return nply;
 	}
 
-	public int getMode3P() {
-		return mode3P;
-	}
+//	public int getMode3P() {
+//		return mode3P;
+//	}
 
 	public int getEligMode() {
 		return eligMode;
@@ -226,6 +231,10 @@ public class ParTD implements Serializable {
 
 	public boolean hasSigmoid() {
 		return hasSigmoid;
+	}
+
+	public boolean hasStopOnRoundOver() {
+		return hasStopOnRoundOver;
 	}
 
 	public void setAlpha(double alpha) {
@@ -333,6 +342,12 @@ public class ParTD implements Serializable {
 		this.hasSigmoid = hasSigmoid;
 		if (tdparams!=null)
 			tdparams.setSigmoid(hasSigmoid);
+	}
+
+	public void setStopOnRoundOver(boolean hasStopOnRound) {
+		this.hasStopOnRoundOver = hasStopOnRound;
+		if (tdparams!=null)
+			tdparams.setStopOnRoundOver(hasStopOnRound);
 	}
 
 	/**

@@ -8,7 +8,15 @@ import games.XNTupleFuncs;
 import java.io.Serializable;
 import java.util.HashSet;
 
-public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsKuhnPoker extends XNTupleBase implements XNTupleFuncs, Serializable {
+
+	/**
+	 * How to structure the Boardstate for this?
+	 *
+	 * What are the areas we have in Kuhn-Poker?
+	 * 
+	 */
+
 
     /**
      * change the version ID for serialization only if a newer version is no longer
@@ -20,7 +28,7 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
      */
     private static final long serialVersionUID = 7556763505414386566L;
 
-	public XNTupleFuncsPoker() {
+	public XNTupleFuncsKuhnPoker() {
 
     }
 

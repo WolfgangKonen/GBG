@@ -185,7 +185,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                  * We need to restrict the completion if the upcard of the dealer
                  * is an A, K, Q, J, or a Ten.
                  */
-                if(dealer.getActiveHand().getCards().get(0).rank.getValue() >= 10){
+                if(dealer.getActiveHand().getCards().get(0).rank.getValue() == 10 || dealer.getActiveHand().getCards().get(0).rank.getValue() == 1){
                     return completeRestricted();
                 }
                 return completeRandom();
@@ -199,6 +199,8 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     private StateObservation completeRandom(){
         dealer.getActiveHand().getCards().remove(1);
         dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
+        if(dealer.getActiveHand().size() != 2)
+            throw new RuntimeException("Dealers handsize must be 2 after completion!");
         return this;
     }
 
@@ -208,6 +210,8 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             dealer.getActiveHand().getCards().remove(1);
             dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
         }while(dealer.getActiveHand().checkForBlackJack());
+        if(dealer.getActiveHand().size() != 2)
+            throw new RuntimeException("Dealers handsize must be 2 after completion!");
         return this;
     }
 
@@ -311,7 +315,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
      *  */
     @Override
     public double getMaxGameScore() {
-        return START_CHIPS*2;
+        return START_CHIPS*10;
     }
 
 
@@ -549,9 +553,6 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         gPhase = gPhase.getNext();
         playerActedInPhase = new boolean[players.length];
         setPlayer(0);
-        if(gPhase == gamePhase.BETPHASE){
-            episode++;
-        }
     }
 
 
@@ -582,17 +583,22 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     case DEALPHASE:
                         // in dealphase the cards get dealt 1 by 1
                         if (everyPlayerActed()) { // if true dealer gets a card
-                            dealer.addCardToActiveHand(ArenaBlackJack.deck.draw());
+                            if(this.isPartialState() && dealer.getActiveHand() != null){
+                                dealer.addCardToActiveHand(new Card(Card.Rank.X, Card.Suit.X));
+                            }else{
+                                dealer.addCardToActiveHand(ArenaBlackJack.deck.draw());
+                            }
+
                             playerActedInPhase = new boolean[players.length];
                             if (dealer.getActiveHand().size() == 2) { // if dealer has 2 cards dealing is over advance
                                                                       // into next phase (next action det)
                                 advancePhase(); //next phase = askforinsurance
                                 isNextActionDeterministic = true;
-                                if(!(dealer.getActiveHand().getCards().get(0).rank == Card.Rank.ACE)){
+                                if(dealer.getActiveHand().getCards().get(0).rank != Card.Rank.ACE){
                                     //if the dealer's faceup card is not an Ace we can skip asking for insurance
                                     advancePhase(); //next phase = peekforblackJack
                                     isNextActionDeterministic = false;
-                                    if(dealer.getActiveHand().getCards().get(0).rank.getValue() < 10){
+                                    if(dealer.getActiveHand().getCards().get(0).rank.getValue() != 10){
                                         //if dealers Hand does not contain 10, J, K Q, A we dont need to peek for Blackjack
                                         advancePhase(); //next phase = playersonaction
                                         isNextActionDeterministic = true;
@@ -663,7 +669,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                 if(dealer.getActiveHand().checkForBlackJack()){
                     // dealer has a blackjack, players cant act anymore
                     logEntry += "Blackjack!";
-                    gPhase = gamePhase.DEALERONACTION;
+                    gPhase = gamePhase.PAYOUT;
                     isNextActionDeterministic = false;
                 }else{
                     advancePhase(); // next phase = playersonaction
@@ -766,7 +772,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                     }
                 }
 
-
+                this.episode++;
                 setRoundOver(true);
                 //initRound();
                 break;

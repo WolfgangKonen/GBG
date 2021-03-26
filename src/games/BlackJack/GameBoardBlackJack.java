@@ -69,6 +69,7 @@ public class GameBoardBlackJack implements GameBoard {
 //        }
 
         if(so != null) {
+            m_so = soT;
             if (m_gameGui != null)
                 m_gameGui.update(
                         (StateObserverBlackJack) soT.partialState(StateObserverBlackJack.PartialStateMode.THIS_PLAYER),
@@ -124,7 +125,8 @@ public class GameBoardBlackJack implements GameBoard {
 
     @Override
     public StateObservation getDefaultStartState() {
-        return new StateObserverBlackJack();
+        clearBoard(true, true);
+        return m_so;
     }
 
     @Override
@@ -145,4 +147,10 @@ public class GameBoardBlackJack implements GameBoard {
         arenaActReq = true;
     }
 
+    public void inspectMove(int a) {
+        Types.ACTIONS act = Types.ACTIONS.fromInt(a);
+        m_Arena.setStatusMessage("Inspecting the value function ...");
+        m_so.advance(act);
+        arenaActReq = true;
+    }
 }

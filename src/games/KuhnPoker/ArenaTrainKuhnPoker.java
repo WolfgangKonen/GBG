@@ -1,6 +1,5 @@
 package games.KuhnPoker;
 
-import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.PlayAgent;
 import games.*;
 import tools.Types;
@@ -39,7 +38,7 @@ public class ArenaTrainKuhnPoker extends ArenaTrain   {
 	}
 
 	public XNTupleFuncs makeXNTupleFuncs() {
-		return new XNTupleFuncsPoker();
+		return new XNTupleFuncsKuhnPoker();
 	}
 
 	public static void main(String[] args) throws IOException 

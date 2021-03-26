@@ -820,7 +820,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		String cs = getClass().getName();
 		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
 						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
-						+ ", gamma: " + m_tdPar.getGamma() +", MODE_3P: "+ m_tdPar.getMode3P();
+						+ ", gamma: " + m_tdPar.getGamma(); // +", MODE_3P: "+ m_tdPar.getMode3P();
 		return str;
 	}
 		

@@ -1,11 +1,21 @@
 package games.BlackJack;
 
+import controllers.MC.MCAgentN;
+import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
+import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Evaluator;
 import games.GameBoard;
 import tools.Types;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import java.util.ArrayList;
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public class EvaluatorBlackJack extends Evaluator {
     /**
@@ -19,7 +29,7 @@ public class EvaluatorBlackJack extends Evaluator {
      *
      */
 
-    public final int NUM_ITER = 100;
+    public final int NUM_ITER = 50;
     double avgPayOff = 0;
     int countInsuranceTaken = 0;
     int possibleInsuranceWins = 0;
@@ -30,6 +40,8 @@ public class EvaluatorBlackJack extends Evaluator {
     int movesFromBasicStrategy = 0;
     int playerBlackJack = 0;
     int dealerBlackJack = 0;
+    private final String dir = "src/games/BlackJack/Stats";
+
 
     public EvaluatorBlackJack(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval, int verbose) {
         super(e_PlayAgent, gb, mode, stopEval, verbose);
@@ -42,8 +54,9 @@ public class EvaluatorBlackJack extends Evaluator {
      */
 
     public StateObserverBlackJack initSpecificSo(Card firstCardPlayer, Card secondCardPlayer, Card upCardDealer){
-        StateObserverBlackJack so = new StateObserverBlackJack(1, 15);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER + 30);
         so.getCurrentPlayer().bet(10);
+        so.getCurrentPlayer().setChips((NUM_ITER+30)*10);
         so.getCurrentPlayer().addCardToActiveHand(firstCardPlayer);
         so.getCurrentPlayer().addCardToActiveHand(secondCardPlayer);
         // Players Turn
@@ -66,6 +79,8 @@ public class EvaluatorBlackJack extends Evaluator {
     public double simulateFixedMovesFromBasicStrategy(PlayAgent playAgent){
 
         StateObserverBlackJack []sos = {
+                initSpecificSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.FOUR, Card.Suit.SPADE),
+                        new Card(Card.Rank.SEVEN, Card.Suit.CLUB)), //bestmove hit
                 initSpecificSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
                         new Card(Card.Rank.FIVE, Card.Suit.CLUB)), //bestmove STAND
                 initSpecificSo(new Card(Card.Rank.FIVE, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
@@ -90,6 +105,8 @@ public class EvaluatorBlackJack extends Evaluator {
                         new Card(Card.Rank.NINE, Card.Suit.CLUB)), //bestmove HIT
                 initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.FOUR, Card.Suit.SPADE),
                         new Card(Card.Rank.FIVE, Card.Suit.CLUB)), //bestmove DOUBLEDOWN
+                initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.TWO, Card.Suit.SPADE),
+                        new Card(Card.Rank.TWO, Card.Suit.CLUB)), //bestmove HHIT
                 initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
                         new Card(Card.Rank.TEN, Card.Suit.CLUB)), //bestmove HIT
                 initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.NINE, Card.Suit.SPADE),
@@ -117,6 +134,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
         String chosenMove;
         String bestMove;
+        m_msg = "";
         for(StateObserverBlackJack so: sos){
             int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
             int nextActionByBasicStrategy = bsbja.getNextAction2(so.partialState(), false, true).toInt();
@@ -134,6 +152,93 @@ public class EvaluatorBlackJack extends Evaluator {
 
     }
 
+
+    /**
+     * Agent will play 40 most simple preconstructed States. In every case Hit should be the obvious choice.
+     * This should represent the most basic understanding of BlackJack
+     */
+    public double simulateVerySimpleSituationsHit(PlayAgent playAgent){
+        StateObserverBlackJack []sos = new StateObserverBlackJack[40];
+        int index = 0;
+        //------------------------ handvalue 5 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.TWO, Card.Suit.SPADE), new Card(Card.Rank.THREE, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //--------------------------handvalue 6 vs any dealerupcard (not splitable)-------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.TWO, Card.Suit.SPADE), new Card(Card.Rank.FOUR, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //--------------------------handvalue 7 vs any dealerupcard (not splitable)------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.THREE, Card.Suit.SPADE), new Card(Card.Rank.FOUR, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //--------------------------handvalue 8 vs any dealerupcard (not splitable)------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.THREE, Card.Suit.SPADE), new Card(Card.Rank.FIVE, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+
+        int agentChoseHit = 0;
+        for(StateObserverBlackJack so: sos){
+            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
+            if (nextActAgent == StateObserverBlackJack.BlackJackActionDet.HIT.getAction())
+                agentChoseHit++;
+        }
+        return (double)agentChoseHit/(double)sos.length;
+    }
+
+    /**
+     * Agent will play 60 most simple preconstructed States. In every case STAND should be the obvious choice.
+     * This should represent the most basic understanding of BlackJack
+     */
+    public double simulateVerySimpleSituationsStand(PlayAgent playAgent){
+        StateObserverBlackJack []sos = new StateObserverBlackJack[60];
+        int index = 0;
+        //------------------------ handvalue 17 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.KING, Card.Suit.SPADE), new Card(Card.Rank.SEVEN, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue 18 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.KING, Card.Suit.SPADE), new Card(Card.Rank.EIGHT, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue 19 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.KING, Card.Suit.SPADE), new Card(Card.Rank.NINE, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue 20 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.KING, Card.Suit.SPADE), new Card(Card.Rank.QUEEN, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue soft 19 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.EIGHT, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+        //------------------------ handvalue soft 20 vs any Dealer upcard ---------------------------------------
+        for(int i = 1; i < 11; i++){
+            sos[index++] = initSpecificSo(new Card(Card.Rank.ACE, Card.Suit.SPADE), new Card(Card.Rank.NINE, Card.Suit.SPADE),
+                    new Card(Card.Rank.getRankFromValue(i), Card.Suit.CLUB));
+        }
+
+        int agentChoseStand = 0;
+        for(StateObserverBlackJack so: sos){
+            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
+            if (nextActAgent == StateObserverBlackJack.BlackJackActionDet.STAND.getAction())
+                agentChoseStand++;
+        }
+        return (double)agentChoseStand/(double)sos.length;
+    }
+
+
+
     /**
      * Agent will play NUM_ITER hands (between 1000 and 10000 Hands)
      * evaluation result is the percentage of how many times an agent took insurance when he had
@@ -148,8 +253,8 @@ public class EvaluatorBlackJack extends Evaluator {
         countInsuranceTaken = 0; possibleInsuranceWins = 0;
         countNoInsuranceTaken = 0; insurenceSuccess = 0;
         noInsurenceButBlackJack = 0;
-        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER);
-        so.getCurrentPlayer().setChips(1000000);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER+30);
+        so.getCurrentPlayer().setChips((NUM_ITER+30) * 10);
 
         for(int i = 0; i < NUM_ITER; i++) {
 
@@ -186,8 +291,8 @@ public class EvaluatorBlackJack extends Evaluator {
      * Never taking the move suggested by basic strategy results in a score of 0 (worst)
      */
     public double simulateRandomMovesFromBasicStrategy(PlayAgent playAgent){
-        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER);
-        so.getCurrentPlayer().setChips(1000000);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER+30);
+        so.getCurrentPlayer().setChips((NUM_ITER+30) *10);
         PlayAgent bsbja = new BasicStrategyBlackJackAgent();
 
         moves = 0;
@@ -220,14 +325,13 @@ public class EvaluatorBlackJack extends Evaluator {
      * RandomAgent should achieve the worst score
      */
     public double simulateAvgPayOff(PlayAgent playAgent){
-        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER);
-        so.getCurrentPlayer().setChips(1000000);
+        StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER + 30);
+        so.getCurrentPlayer().setChips((NUM_ITER+30)*10);
         avgPayOff = 0;
         playerBlackJack = 0;
         dealerBlackJack = 0;
 
         for(int i = 0; i < NUM_ITER; i++) {
-            System.out.println("iteration : " +i);
             while (!so.isRoundOver()) {
                 int act = playAgent.getNextAction2(so.partialState(), false, true).toInt();
                 so.advance(Types.ACTIONS.fromInt(act));
@@ -245,23 +349,23 @@ public class EvaluatorBlackJack extends Evaluator {
 
     public double evalAgentAvgPayoff(PlayAgent playAgent){
         lastResult = simulateAvgPayOff(playAgent);
-        m_msg += "Agent has an average Pay-Off of : " + lastResult;
-        m_msg += "\n he also had : " + playerBlackJack + " Black Jacks ";
-        m_msg += "\nthe dealer had : " + dealerBlackJack + "Black Jacks ";
+        m_msg = "\nAgent has an average Pay-Off of : " + lastResult;
+        m_msg += "\nAgent had : " + playerBlackJack + " Black Jacks ";
+        m_msg += "\nthe dealer had : " + dealerBlackJack + " Black Jacks ";
         return lastResult;
     }
 
     public double evalAgentRandomMovesFromBasicStrategy(PlayAgent playAgent){
         lastResult = simulateRandomMovesFromBasicStrategy(playAgent);
-        m_msg += "number of moves :" + moves;
-        m_msg += "number of moves suggested by Basic Strategy : " + movesFromBasicStrategy;
+        m_msg = "\nnumber of moves : " + moves;
+        m_msg += "\nnumber of moves suggested by Basic Strategy : " + movesFromBasicStrategy;
 
         return lastResult;
     }
 
     public double evalAgentFixedMovesFromBasicStrategy(PlayAgent playAgent){
         lastResult = simulateFixedMovesFromBasicStrategy(playAgent);
-        m_msg += "number of moves :" + moves;
+        m_msg += "\nnumber of moves :" + moves;
         m_msg += "\nnumber of moves took suggested by Basic Strategy : " + movesFromBasicStrategy;
 
         return lastResult;
@@ -277,17 +381,35 @@ public class EvaluatorBlackJack extends Evaluator {
         return lastResult;
     }
 
+    public double evalAgentSimpleHitMoves(PlayAgent playAgent){
+        lastResult = simulateVerySimpleSituationsHit(playAgent);
+        return lastResult;
+    }
+
+    public double evalAgentSimpleStandMoves(PlayAgent playAgent){
+        lastResult = simulateVerySimpleSituationsStand(playAgent);
+        return lastResult;
+    }
+
     @Override
     protected boolean evalAgent(PlayAgent playAgent) {
         switch (m_mode){
             case 0:
-                return evalAgentFixedMovesFromBasicStrategy(playAgent) > 0.9;
+                return evalAgentFixedMovesFromBasicStrategy(playAgent) > 0.8;
             case 1:
-                return evalAgentAvgPayoff(playAgent) > -0.2;
+                return evalAgentAvgPayoff(playAgent) > 0.5;
             case 2:
-                return evalAgentRandomMovesFromBasicStrategy(playAgent) > 0.9;
+                return evalAgentRandomMovesFromBasicStrategy(playAgent) > 0.8;
             case 3:
-                return evalAgentInsurance(playAgent) > 0.9;
+                return evalAgentInsurance(playAgent) > 0.8;
+            case 4:
+                return evalAgentSimpleHitMoves(playAgent) > .9;
+            case 5:
+                return evalAgentSimpleStandMoves(playAgent) > .9;
+            case 10:
+                //create statistics
+                logStatistics(playAgent);
+                break;
             default:
                 m_msg = "no evaluation done";
                 break;
@@ -295,19 +417,105 @@ public class EvaluatorBlackJack extends Evaluator {
         return false;
     }
 
+    public void logStatistics(PlayAgent playAgent){
+        //TODO: generalize more
+
+        StringBuilder sb = new StringBuilder();
+        File directory = new File(dir);
+        if (!directory.exists()){
+            directory.mkdir();
+        }
+        if(!(Files.exists(Path.of(directory.getPath() , playAgent.getName()+".csv")))) {
+            sb.append("agent ");
+            sb.append(',');
+            sb.append("num-iteration");
+            sb.append(',');
+            sb.append("eval-mode");
+            sb.append(',');
+            sb.append("eval-result");
+            sb.append(',');
+            sb.append("date");
+            sb.append(',');
+            sb.append(getParStringHeaders(playAgent));
+            //sb.append(',');
+            //sb.append("eval-msg");
+            sb.append('\n');
+        }
+
+        // ten evaluations
+        for(int i = 0; i < 10; i++ ){
+            sb.append(playAgent.getName());
+            sb.append(',');
+            sb.append(i);
+            sb.append(',');
+            sb.append("2");
+            sb.append(',');
+            sb.append(evalAgentRandomMovesFromBasicStrategy(playAgent));
+            sb.append(',');
+            sb.append(getCurrentTimeStamp());
+            sb.append(',');
+            sb.append(getParValueString(playAgent));
+            //sb.append(',');
+            //sb.append(fixString(m_msg));
+            sb.append('\n');
+        }
+        sb.append('\n');
+        try {
+            this.write(sb.toString(), playAgent.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public String getParStringHeaders(PlayAgent playAgent){
+
+        if(playAgent instanceof MCAgentN){
+            return "iterations,rollout-depth,number-agents,stop-on-round-over";
+        }
+        if(playAgent instanceof MCTSExpectimaxAgt){
+            return "iterations,tree-depth,rollout-depth,stop-on-round-over";
+        }
+        if(playAgent instanceof TDNTuple3Agt){
+            return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lamda";
+        }
+
+        return "";
+    }
+
+    public String getParValueString(PlayAgent playAgent){
+        if(playAgent instanceof MCAgentN){
+            MCAgentN agent = (MCAgentN) playAgent;
+            return "" + agent.m_mcPar.getNumIter() + "," + agent.m_mcPar.getRolloutDepth() + "," + agent.m_mcPar.getNumAgents()
+                    +","+ agent.m_mcPar.getStopOnRoundOver();
+        }
+        if(playAgent instanceof MCTSExpectimaxAgt){
+            MCTSExpectimaxAgt agent = (MCTSExpectimaxAgt) playAgent;
+            return "" + agent.getParMCTSE().getNumIter() + "," + agent.getParMCTSE().getTreeDepth() + "," +
+                    agent.getParMCTSE().getRolloutDepth()
+                    +","+ agent.getParMCTSE().getStopOnRoundOver();
+
+        }
+        if(playAgent instanceof TDNTuple3Agt){
+            //TODO: get params from config
+            return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lamda";
+        }
+        return "";
+    }
+
     @Override
     public int[] getAvailableModes() {
-        return new int[] {0, 1, 2, 3};
+        return new int[] {-1, 0, 1, 2, 3, 4, 5, 10};
     }
 
     @Override
     public int getQuickEvalMode() {
-        return 0;
+        return 4;
     }
 
     @Override
     public int getTrainEvalMode() {
-        return 0;
+        return 5;
     }
 
 
@@ -318,6 +526,8 @@ public class EvaluatorBlackJack extends Evaluator {
             case 1: return "average payoff of agent (the higher the better): ";
             case 2: return "percentage of moves took suggested by Basic-Strategy in random States(best = 1.0): ";
             case 3: return "percentage of times where agent did not chose insurance (best = 1.0): ";
+            case 4: return "percentage of times where agent did chose HIT (40 simple preconstructed situations) (best = 1.0): ";
+            case 5: return "percentage of times where agent did chose STAND (60 simple preconstructed situations) (best = 1.0):";
             default: return "no evaluation done ";
         }
     }
@@ -329,6 +539,8 @@ public class EvaluatorBlackJack extends Evaluator {
                 + "1 : average payoff of agent (the higher the better)<br>"
                 + "2 : percentage of moves took suggested by Basic-Strategy in random States(best = 1.0)<br>"
                 + "3 : percentage of times where agent did not chose insurance (best = 1.0)<br>"
+                + "4 : percentage of times where agent did chose HIT (40 simple preconstructed situations) (best = 1.0)<br>"
+                + "5 : percentage of times where agent did chose STAND (60 simple preconstructed situations) (best = 1.0)<br>"
                 + "</html>";
     }
 
@@ -339,7 +551,34 @@ public class EvaluatorBlackJack extends Evaluator {
             case 1: return "Average payoff";
             case 2: return "moves from Basic Strategy random ";
             case 3: return "Insurance";
+            case 4: return "simple HIT moves";
+            case 5: return "simple STAND moves";
             default: return "no evaluation done ";
         }
+    }
+
+    private static String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
+    }
+
+    //fixes multiline-String for .csv output
+    public String fixString(String data) {
+        String fix = data.replaceAll("\\R", "_");
+        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+            data = data.replace("\"", "\"\"");
+            fix = "\"" + data + "\"";
+        }
+        return fix;
+    }
+
+    //writes into .csv
+    private void write(final String s, String agentName) throws IOException {
+            Files.writeString(
+                    Path.of(dir, agentName + ".csv"), s,
+                    CREATE, APPEND
+            );
     }
 }

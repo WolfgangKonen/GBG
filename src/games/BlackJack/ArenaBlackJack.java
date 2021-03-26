@@ -28,7 +28,7 @@ public class ArenaBlackJack extends Arena {
 
     @Override
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-        return new EvaluatorBlackJack( pa, gb, stopEval, mode, verbose);
+        return new EvaluatorBlackJack(pa, gb, mode, stopEval, verbose);
     }
 
     @Override

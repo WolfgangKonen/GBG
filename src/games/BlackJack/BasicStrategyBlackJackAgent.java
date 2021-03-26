@@ -36,6 +36,7 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
             throw new RuntimeException("Agent can only play BlackJack");
         }
 
+
         double vtable[] = new double[m_so.getNumAvailableActions()];
 
         for(int i = 0; i < vtable.length; i++){
@@ -99,8 +100,11 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         if(myHand.getHandValue() < 13){
             return lookUpBestMoveHard(so);
         }
+        //Ace should count as 11. We dont use getHandValue because if we do we need to ensure that there is only one known
+        // card in his hand. If we would use a non-Partial state getHandValue would lead to a wrong result.
+        final int dealersHandValue = dealersHand.getCards().get(0).rank == Card.Rank.ACE ? 11 : dealersHand.getCards().get(0).rank.getValue();
         //read from chart, 2 dimensional Array starts at i = 0 j = 0 so indicies need a substraction
-        BasicStrategyChart.Move move = BasicStrategyChart.softHand[myHand.getHandValue() - 13][dealersHand.getCards().get(0).rank.getValue() - 2];
+        BasicStrategyChart.Move move = BasicStrategyChart.softHand[myHand.getHandValue() - 13][dealersHandValue - 2];
         return getLegalAction(so, move);
     }
 
@@ -108,7 +112,8 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         Hand myHand = so.getCurrentPlayer().getActiveHand();
         Hand dealersHand = so.getDealer().getActiveHand();
 
-        BasicStrategyChart.Move move = BasicStrategyChart.hardHand[myHand.getHandValue() - 5][dealersHand.getCards().get(0).rank.getValue() - 2];
+        final int dealersHandValue = dealersHand.getCards().get(0).rank == Card.Rank.ACE ? 11 : dealersHand.getCards().get(0).rank.getValue();
+        BasicStrategyChart.Move move = BasicStrategyChart.hardHand[myHand.getHandValue() - 5][dealersHandValue - 2];
         return getLegalAction(so, move);
     }
 
@@ -124,8 +129,9 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
             }
             return lookUpBestMoveHard(so);
         }
-
-        BasicStrategyChart.Move move = BasicStrategyChart.pairHand[myHand.getCards().get(0).rank.getValue()-2][dealersHand.getCards().get(0).rank.getValue() - 2];
+        final int dealersHandValue =   dealersHand.getCards().get(0).rank == Card.Rank.ACE ? 11 : dealersHand.getCards().get(0).rank.getValue();
+        final int playersHandValue =   myHand.getCards().get(0).rank == Card.Rank.ACE ? 11 : myHand.getCards().get(0).rank.getValue();
+        BasicStrategyChart.Move move = BasicStrategyChart.pairHand[playersHandValue-2][dealersHandValue - 2];
         return getLegalAction(so, move);
     }
 
