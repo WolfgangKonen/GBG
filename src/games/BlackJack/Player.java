@@ -7,7 +7,7 @@ public class Player {
     ArrayList<Hand> hands = new ArrayList<Hand>();
     Hand activeHand = null;
     private double chips = START_CHIPS;
-    private double betThisRound[] = new double[24];
+    private double betThisRound[] = new double[3];
     private boolean splitHand = false;
     private int activeHandIndex = 0;
     private double insurance = 0;
@@ -78,13 +78,12 @@ public class Player {
     public void clearHand() {
         activeHand = null;
         hands.clear();
-        betThisRound = new double[24];
+        betThisRound = new double[3];
         activeHandIndex = 0;
         insurance = 0;
         splitHand = false;
         surrender = false;
         roundPayoff = 0;
-
     }
 
 
@@ -148,6 +147,11 @@ public class Player {
 
     public boolean hasLost(){
         return chips < 10 && betOnActiveHand() == 0;
+    }
+
+    public double getSumAllBets(){
+        return betThisRound[0] + betThisRound[1] + betThisRound[2] + insurance;
+
     }
 
     public String toString() {

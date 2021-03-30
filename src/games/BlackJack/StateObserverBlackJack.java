@@ -286,7 +286,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     // provisionally TODO: refactor
     @Override
     public double getGameScore(int player) {
-        return players[player].getChips();
+        if(gPhase == gamePhase.PAYOUT)
+            return players[player].getChips();
+        return players[player].getChips() + players[player].getSumAllBets();
     }
 
 
@@ -482,7 +484,6 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                 break;
             case SURRENDER:
                 currentPlayer.surrender();
-                currentPlayer.collect(currentPlayer.getBetAmountForHand(currentPlayer.getActiveHand()) / 2);
                 break;
             case INSURANCE:
                 currentPlayer.insurance();
@@ -708,6 +709,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                                 + " handvalue: " + dealer.getActiveHand().getHandValue() +
                                 " | payoff: " + ((p.betOnActiveHand()/2) -p.betOnActiveHand())
                                 + " chips");
+                        p.collect(p.getBetAmountForHand(p.getActiveHand()) / 2);
                         p.addPayOff((p.betOnActiveHand()/2) -p.betOnActiveHand());
                     } else {
 
