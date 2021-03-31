@@ -234,6 +234,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     }
 
     @Override
+    public StateObservation precedingAfterstate() { return null; }
+
+    @Override
     public boolean isDeterministicGame() {
         return false;
     }
@@ -264,9 +267,12 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         for (Player p : players) {
             result += "( " + p + " ) ";
         }
-        result += "\nplayer to move: " + players[getPlayer()].name + "\nhis available actions : ";
-        for (Types.ACTIONS a : getAvailableActions()) {
-            result += BlackJackActionDet.values()[a.toInt()].name() + " - ";
+        result += "\ngamePhase: " + gPhase.name();
+        if(gPhase == gamePhase.BETPHASE || gPhase == gamePhase.ASKFORINSURANCE || gPhase == gamePhase.PLAYERONACTION ) {
+            result += " player to move: " + players[getPlayer()].name + "\nhis available actions : ";
+            for (Types.ACTIONS a : getAvailableActions()) {
+                result += BlackJackActionDet.values()[a.toInt()].name() + " - ";
+            }
         }
         result += "\ndealer | hand : " + dealer.getActiveHand();
         return result;
@@ -302,6 +308,13 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         return sc;
     }
 
+    public ScoreTuple getStepRewardTuple() {
+        ScoreTuple sc = new ScoreTuple(this);
+        for (int i=0; i<this.getNumPlayers(); i++) {
+            sc.scTup[i]=players[i].getRoundPayoff();
+        }
+        return sc;
+    }
 
     /**
      * GameScore = chips

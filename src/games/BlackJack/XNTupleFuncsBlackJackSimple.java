@@ -24,14 +24,14 @@ public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleF
     // no hand = 0 | handvalue from 4 to 21 = 1 to 18 | handvalue > 21 = 19
     @Override
     public int getNumPositionValues() {
-        return 20;
+        return 22;
     }
 
 
     @Override
     public int[] getPositionValuesVector() {
        return new int[]{
-               20, 2, 2, 20, 2, 2, 20, 2, 2, 11
+               22, 2, 2, 22, 2, 2, 22, 2, 2, 22
        };
     }
 
@@ -50,7 +50,7 @@ public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleF
         StateObserverBlackJack m_so = (StateObserverBlackJack) so.copy();
         int[] bvec = new int[getNumCells()];
         //                Hand1                        Hand2                  Hand3
-        //       Handvalue  isSoft  Split  Hanvalue  isSoft  Split     Handvalue  isSoft  Split      Dealers upcard
+        //       Handvalue  isSoft  Split  Hanvalue  isSoft  Split     Handvalue  isSoft  Split      Dealers handvalue
         // bvev =    _        _       _   |   _        _       _   |        _       _       _   |       _
         //           0        1       2       3        4       5            6       7       8           9
         Player currentPlayer = m_so.getCurrentPlayer();
@@ -61,7 +61,10 @@ public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleF
                 if(j/2 < currentPlayer.getHands().size()) {
                     Hand currentHand = currentPlayer.getHands().get(j / 3);
                     if (currentHand.getHandValue() <= 21) {
-                        bvec[j] = currentHand.getHandValue() - 3;
+                        //smallest handvalue for a player with 2 cards is 4
+                        //however if a hand gets split the 2nd hand has only one card until it gets played
+                        //so the smallest hand for a player can be 2. We substract 1 from the handvalue
+                        bvec[j] = currentHand.getHandValue() - 1;
                         if(currentHand.isSoft())
                             bvec[j + 1] = 1;
                         if(currentHand.isPair() && currentPlayer.getHands().size() < 3 &&
@@ -69,13 +72,17 @@ public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleF
                             bvec[j + 2] = 1;
                     }
                     else{
-                        bvec[j] = 19;
+                        bvec[j] = 21;
                     }
 
                 }
             }
-            bvec[9] = m_so.getDealer().getActiveHand().getCards().get(0).rank.getValue();
 
+            //smallest handvalue for dealer is 2 when he has one unknown card so we only substract 1
+            bvec[9] = 21;
+            if(m_so.getDealer().getActiveHand().getHandValue() <= 21) {
+                bvec[9] = m_so.getDealer().getActiveHand().getHandValue() - 1;
+            }
         }
 
         return new BoardVector(bvec);
