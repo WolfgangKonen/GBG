@@ -25,4 +25,12 @@ public class BoardVector {
 		if ( aux!=null) this.aux = aux.clone();
 	}
 
+	public String toString() {
+		String result = "("+bvec[0];
+		for (int i=1; i<bvec.length; i++) {
+			result += ","+bvec[i];
+		}
+		return result +")";
+	}
+
 }

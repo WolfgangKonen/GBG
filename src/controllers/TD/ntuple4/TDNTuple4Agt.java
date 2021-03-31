@@ -8,6 +8,8 @@ import java.util.Random;
 import agentIO.LoadSaveGBG;
 import controllers.TD.ntuple2.NTuple2;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.BlackJack.BasicStrategyBlackJackAgent;
+import games.BlackJack.StateObserverBlackJack;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
@@ -71,7 +73,8 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	private final boolean m_DEBG = false; //false;true;
 	// debug printout in collectReward:
 	public static boolean DBG_REWARD=false;
-	
+	public static boolean DBG_BJ=true;		// debugging for Blackjack
+
 	// variable TERNARY is normally false. If true, use ternary target in update rule:
 	private boolean TERNARY=false;		// If true, it remains true only for final-reward-games (see getNextAction2)
 	// variable FINALADAPTAGENTS is normally true (use finalAdaptAgents). Set only to false if you want to test how agents behave otherwise:
@@ -214,7 +217,12 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
         List<Types.ACTIONS> bestActions = new ArrayList<>();
         
         VTable = new double[acts.size()];  
-        
+
+        if (DBG_BJ) {
+        	System.out.println("so "+ so.stringDescr());
+			System.out.println("so reward:" + so.getRewardTuple(true));
+		}
+
         assert acts.size()>0 : "Oops, no available action";
         for(i = 0; i < acts.size(); ++i)
         {
@@ -260,8 +268,17 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
             	} else {
         	        value = rtilde + getGamma()*value;
             	}
-    	        
-    		}
+
+				if (DBG_BJ) {
+					System.out.println("NewSO "+i+" "+StateObserverBlackJack.BlackJackActionDet.values()[thisAct.toInt()].name() + ", "
+							+ NewSO.stringDescr());
+					System.out.println("NewSO reward:" + NewSO.getRewardTuple(true)
+							+ ", value: "+ this.getScore(NewSO,so)
+							+ ", gPhase="+((StateObserverBlackJack)NewSO).getgPhase()
+							+ ", board vec=" + m_Net.getXnf().getBoardVector(NewSO));
+				}
+
+			}
        	
 			// just a debug check:
 			if (Double.isInfinite(value)) System.out.println("value(NewSO) is infinite!");
@@ -287,6 +304,14 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
         // if several actions have the same best value, select one of them randomly
 
         assert actBest != null : "Oops, no best action actBest";
+
+		if (DBG_BJ) {
+			BasicStrategyBlackJackAgent bsbja = new BasicStrategyBlackJackAgent();
+			Types.ACTIONS actBsbja = bsbja.getNextAction2(so,false,true);
+			System.out.print("getNextAction2:  "+StateObserverBlackJack.BlackJackActionDet.values()[actBest.toInt()].name() );
+			System.out.println("  [BSBJA: "+ StateObserverBlackJack.BlackJackActionDet.values()[actBsbja.toInt()].name()+" ]");
+		}
+
 		NewSO = so.copy();
 		NewSO.advance(actBest);
 		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3

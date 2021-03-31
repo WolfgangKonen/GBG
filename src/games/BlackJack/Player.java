@@ -157,7 +157,7 @@ public class Player {
     public String toString() {
         String result = name + " | chips: " + chips;
         for (Hand h : hands) {
-            result += " | hand : " + h;
+            result += " | hand : " + h + " = "+ h.getHandValue();
         }
         return result;
     }

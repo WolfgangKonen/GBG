@@ -73,7 +73,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
 
     // mapping Deterministic actions to ENUMS to get more readable code
-    enum BlackJackActionDet {
+    public enum BlackJackActionDet {
         BET10(0), HIT(1), STAND(2), DOUBLEDOWN(3), SPLIT(4),
         SURRENDER(5), INSURANCE(6), NOINSURANCE(7);
 
@@ -263,6 +263,16 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public String stringDescr() {
+        String result = "";
+        for (Player p : players) {
+            result += "( " + p + " ) ";
+        }
+        Hand dhand = dealer.getActiveHand();
+        String str = (dhand==null) ? " (dealer | hand : " + dhand + " )"
+                : " (dealer | hand : " + dhand + " = "+ dhand.getHandValue() + " ) ";
+        return result+str;
+    }
+    public String stringDescrSM() {
         String result = "\n";
         for (Player p : players) {
             result += "( " + p + " ) ";
@@ -463,6 +473,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     public void setgPhase(gamePhase gPhase) {
         this.gPhase = gPhase;
+    }
+
+    public gamePhase getgPhase() {
+        return gPhase;
     }
 
     @Override
