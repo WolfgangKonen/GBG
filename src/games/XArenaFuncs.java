@@ -13,6 +13,7 @@ import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import controllers.TD.ntuple4.NTuple4Factory;
+import controllers.TD.ntuple4.Sarsa4Agt;
 import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.CFour.AlphaBetaAgent;
@@ -179,6 +180,13 @@ public class XArenaFuncs {
 				// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
 				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
 				pa = new SarsaAgt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
+			} else if (sAgent.equals("Sarsa-4")) {
+				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+				NTuple4Factory ntupfac = new NTuple4Factory();
+				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
+				pa = new Sarsa4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
 			} else if (sAgent.equals("Max-N")) {
 				pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
@@ -391,6 +399,20 @@ public class XArenaFuncs {
 								m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning Sarsa", JOptionPane.WARNING_MESSAGE);
+						// e.printStackTrace();
+						pa = null;
+					}
+				} else if (sAgent.equals("Sarsa-4")) {
+					try {
+						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+						NTuple4Factory ntupfac = new NTuple4Factory();
+						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+						ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
+								.getAllAvailableActions();
+						pa = new Sarsa4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+								m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
+					} catch (Exception e) {
+						m_Arena.showMessage(e.getMessage(), "Warning Sarsa-4", JOptionPane.WARNING_MESSAGE);
 						// e.printStackTrace();
 						pa = null;
 					}

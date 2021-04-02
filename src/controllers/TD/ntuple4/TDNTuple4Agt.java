@@ -1,6 +1,7 @@
 package controllers.TD.ntuple4;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -73,7 +74,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	private final boolean m_DEBG = false; //false;true;
 	// debug printout in collectReward:
 	public static boolean DBG_REWARD=false;
-	public static boolean DBG_BJ=true;		// debugging for Blackjack
+	public static boolean DBG_BJ=false;		// debugging for Blackjack
 
 	// variable TERNARY is normally false. If true, use ternary target in update rule:
 	private boolean TERNARY=false;		// If true, it remains true only for final-reward-games (see getNextAction2)
@@ -220,7 +221,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
         if (DBG_BJ) {
         	System.out.println("so "+ so.stringDescr());
-			System.out.println("so reward:" + so.getRewardTuple(true));
+			System.out.println("so reward:" + so.getRewardTuple(rgs));
 		}
 
         assert acts.size()>0 : "Oops, no available action";
@@ -270,10 +271,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
             	}
 
 				if (DBG_BJ) {
+					DecimalFormat form = new DecimalFormat("#0.000");
 					System.out.println("NewSO "+i+" "+StateObserverBlackJack.BlackJackActionDet.values()[thisAct.toInt()].name() + ", "
 							+ NewSO.stringDescr());
-					System.out.println("NewSO reward:" + NewSO.getRewardTuple(true)
-							+ ", value: "+ this.getScore(NewSO,so)
+					System.out.println("NewSO reward:" + NewSO.getRewardTuple(rgs)
+							+ ", deltaR: "+form.format(rtilde)+", value: "+ this.getScore(NewSO,so)
 							+ ", gPhase="+((StateObserverBlackJack)NewSO).getgPhase()
 							+ ", board vec=" + m_Net.getXnf().getBoardVector(NewSO));
 				}

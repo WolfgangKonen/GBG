@@ -306,7 +306,8 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		NewSO = so.copy();
 		NewSO.advance(actBest);
 		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
-		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
+		// /WK/ a quick hack for Blackjack, should be replaced later by s.th. more general !!!
+		ScoreTuple scBest = new ScoreTuple(1); //this.getScoreTuple(NewSO, prevTuple);
 		if (!silent) {
 			System.out.println("---Best Move: "+NewSO.stringDescr()+", "+(bestQValue));
 		}

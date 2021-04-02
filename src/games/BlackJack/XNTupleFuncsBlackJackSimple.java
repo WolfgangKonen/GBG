@@ -95,8 +95,7 @@ public class XNTupleFuncsBlackJackSimple extends XNTupleBase implements XNTupleF
 
     @Override
     public int[] symmetryActions(int actionKey) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("symmetryAction not implemented");
+        return new int[] {actionKey};       // /WK/ default implementation for 'no symmetries' (except self)
     }
 
     @Override

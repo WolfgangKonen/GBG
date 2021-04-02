@@ -27,6 +27,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     private int episode = 0;
     private final double maximumBetSize = 10;
     private int epiLength;
+    private int MAXDELTASCORE = 100;
 
     public StateObserverBlackJack() {
         this(NUM_PLAYERS, episodeLength);
@@ -312,19 +313,33 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     @Override
     public ScoreTuple getRewardTuple(boolean rewardIsGameScore) {
         ScoreTuple sc = new ScoreTuple(this);
+        double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
         for (int i=0; i<this.getNumPlayers(); i++) {
-            sc.scTup[i]=this.getGameScore(i);
+            sc.scTup[i]=this.getGameScore(i)/denom;
         }
         return sc;
     }
 
-    public ScoreTuple getStepRewardTuple() {
-        ScoreTuple sc = new ScoreTuple(this);
-        for (int i=0; i<this.getNumPlayers(); i++) {
-            sc.scTup[i]=players[i].getRoundPayoff();
-        }
-        return sc;
+    // /WK/ BUG FIX 2021-04-02 this method was missing
+    @Override
+    public double getReward(int player, boolean rewardIsGameScore) {
+        double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
+        return this.getGameScore(player)/denom;
     }
+    @Override
+    public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+        double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
+        return this.getGameScore(referringState)/denom;
+    }
+
+// /WK/ questionable: stepReward is only if each step should get a reward
+//    public ScoreTuple getStepRewardTuple() {
+//        ScoreTuple sc = new ScoreTuple(this);
+//        for (int i=0; i<this.getNumPlayers(); i++) {
+//            sc.scTup[i]=players[i].getRoundPayoff();
+//        }
+//        return sc;
+//    }
 
     /**
      * GameScore = chips
