@@ -370,24 +370,29 @@ public class ParTD implements Serializable {
 		// TicTacToe, =2 for Hex, and =0 for all others)
 		this.setHorizonCut(0.1); 			
 		switch (agentName) {
-//		case "TD-Ntuple-2":
-		case "TD-Ntuple-3": 
+		case "TD-Ntuple-3":
+		case "TD-Ntuple-4":
 		case "Sarsa":
+		case "Sarsa-4":
 			switch (agentName) {
-//			case "TD-Ntuple-2":
-			case "TD-Ntuple-3": 
+			case "TD-Ntuple-3":
+			case "TD-Ntuple-4":
 				switch (gameName) {
 				case "ConnectFour":
 					this.setAlpha(5.0);
 					this.setAlphaFinal(5.0);
 					this.setHorizonCut(0.01);
 					break;
+				case "BlackJack":
+					this.setEpsilon(0.0);
+					break;
 				default: 
 					this.setAlpha(0.2);
 					this.setAlphaFinal(0.2);				
 				}
 				break;
-			case "Sarsa": 
+			case "Sarsa":
+			case "Sarsa-4":
 				this.setAlpha(1.0);
 				this.setAlphaFinal(0.5);
 				this.setEpsilon(0.1);

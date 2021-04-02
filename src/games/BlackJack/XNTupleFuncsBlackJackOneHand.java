@@ -23,14 +23,14 @@ public class XNTupleFuncsBlackJackOneHand extends XNTupleBase implements XNTuple
     // no hand = 0 | handvalue from 4 to 21 = 1 to 18
     @Override
     public int getNumPositionValues() {
-        return 19;
+        return 22;
     }
 
 
     @Override
     public int[] getPositionValuesVector() {
         return new int[]{
-                19, 2, 11
+                22, 2, 22
         };
     }
 
@@ -49,17 +49,21 @@ public class XNTupleFuncsBlackJackOneHand extends XNTupleBase implements XNTuple
         StateObserverBlackJack m_so = (StateObserverBlackJack) so.copy();
         int[] bvec = new int[getNumCells()];
         //                activehand
-        //       Handvalue     isSoft     Dealers upcard
+        //       Handvalue     isSoft     Dealers handvalue
         // bvev =    _          _     |        _
         //           0          1              2
         Player currentPlayer = m_so.getCurrentPlayer();
         if (currentPlayer.getActiveHand() != null) {
             //sort hand of players and dealer to reduce symmetries to one
+            bvec[0] = 21;
             if (currentPlayer.getActiveHand().getHandValue() <= 21) {
-                bvec[0] = currentPlayer.getActiveHand().getHandValue() - 3;
+                bvec[0] = currentPlayer.getActiveHand().getHandValue() - 1;
                 bvec[1] = currentPlayer.getActiveHand().isSoft() ? 1 : 0;
             }
-            bvec[2] = m_so.getDealer().getActiveHand().getCards().get(0).rank.getValue();
+            bvec[2] = 21;
+           if(m_so.getDealer().getActiveHand().getHandValue() <= 21) {
+               bvec[2] = m_so.getDealer().getActiveHand().getHandValue() - 1;
+           }
 
         }
 
@@ -73,8 +77,7 @@ public class XNTupleFuncsBlackJackOneHand extends XNTupleBase implements XNTuple
 
     @Override
     public int[] symmetryActions(int actionKey) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("symmetryAction not implemented");
+        return new int[]{actionKey};
     }
 
     @Override

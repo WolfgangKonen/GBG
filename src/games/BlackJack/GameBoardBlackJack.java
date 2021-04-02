@@ -131,14 +131,12 @@ public class GameBoardBlackJack implements GameBoard {
 
     @Override
     public StateObservation chooseStartState(PlayAgent pa) {
-        // TODO Auto-generated method stub
-        return null;
+        return getDefaultStartState();
     }
 
     @Override
     public StateObservation chooseStartState() {
-        // TODO Auto-generated method stub
-        return null;
+        return getDefaultStartState();
     }
 
     public void humanMove(int a) {

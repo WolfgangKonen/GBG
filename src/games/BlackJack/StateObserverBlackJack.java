@@ -27,6 +27,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     private int episode = 0;
     private final double maximumBetSize = 10;
     private int epiLength;
+    private int MAXDELTASCORE = 100;
 
     public StateObserverBlackJack() {
         this(NUM_PLAYERS, episodeLength);
@@ -73,7 +74,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
 
     // mapping Deterministic actions to ENUMS to get more readable code
-    enum BlackJackActionDet {
+    public enum BlackJackActionDet {
         BET10(0), HIT(1), STAND(2), DOUBLEDOWN(3), SPLIT(4),
         SURRENDER(5), INSURANCE(6), NOINSURANCE(7);
 
@@ -234,6 +235,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     }
 
     @Override
+    public StateObservation precedingAfterstate() { return null; }
+
+    @Override
     public boolean isDeterministicGame() {
         return false;
     }
@@ -260,13 +264,26 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public String stringDescr() {
+        String result = "";
+        for (Player p : players) {
+            result += "( " + p + " ) ";
+        }
+        Hand dhand = dealer.getActiveHand();
+        String str = (dhand==null) ? " (dealer | hand : " + dhand + " )"
+                : " (dealer | hand : " + dhand + " = "+ dhand.getHandValue() + " ) ";
+        return result+str;
+    }
+    public String stringDescrSM() {
         String result = "\n";
         for (Player p : players) {
             result += "( " + p + " ) ";
         }
-        result += "\nplayer to move: " + players[getPlayer()].name + "\nhis available actions : ";
-        for (Types.ACTIONS a : getAvailableActions()) {
-            result += BlackJackActionDet.values()[a.toInt()].name() + " - ";
+        result += "\ngamePhase: " + gPhase.name();
+        if(gPhase == gamePhase.BETPHASE || gPhase == gamePhase.ASKFORINSURANCE || gPhase == gamePhase.PLAYERONACTION ) {
+            result += " player to move: " + players[getPlayer()].name + "\nhis available actions : ";
+            for (Types.ACTIONS a : getAvailableActions()) {
+                result += BlackJackActionDet.values()[a.toInt()].name() + " - ";
+            }
         }
         result += "\ndealer | hand : " + dealer.getActiveHand();
         return result;
@@ -286,7 +303,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     // provisionally TODO: refactor
     @Override
     public double getGameScore(int player) {
-        return players[player].getChips();
+        if(gPhase == gamePhase.PAYOUT)
+            return players[player].getChips();
+        return players[player].getChips() + players[player].getSumAllBets();
     }
 
 
@@ -294,12 +313,33 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     @Override
     public ScoreTuple getRewardTuple(boolean rewardIsGameScore) {
         ScoreTuple sc = new ScoreTuple(this);
+        double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
         for (int i=0; i<this.getNumPlayers(); i++) {
-            sc.scTup[i]=this.getGameScore(i);
+            sc.scTup[i]=this.getGameScore(i)/denom;
         }
         return sc;
     }
 
+    // /WK/ BUG FIX 2021-04-02 this method was missing
+    @Override
+    public double getReward(int player, boolean rewardIsGameScore) {
+        double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
+        return this.getGameScore(player)/denom;
+    }
+    @Override
+    public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+        double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
+        return this.getGameScore(referringState)/denom;
+    }
+
+// /WK/ questionable: stepReward is only if each step should get a reward
+//    public ScoreTuple getStepRewardTuple() {
+//        ScoreTuple sc = new ScoreTuple(this);
+//        for (int i=0; i<this.getNumPlayers(); i++) {
+//            sc.scTup[i]=players[i].getRoundPayoff();
+//        }
+//        return sc;
+//    }
 
     /**
      * GameScore = chips
@@ -450,6 +490,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         this.gPhase = gPhase;
     }
 
+    public gamePhase getgPhase() {
+        return gPhase;
+    }
+
     @Override
     public void advanceDeterministic(ACTIONS action) {
         if (this.isGameOver()) {    // /WK/ sanity check (should usually not fire )
@@ -482,7 +526,6 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                 break;
             case SURRENDER:
                 currentPlayer.surrender();
-                currentPlayer.collect(currentPlayer.getBetAmountForHand(currentPlayer.getActiveHand()) / 2);
                 break;
             case INSURANCE:
                 currentPlayer.insurance();
@@ -708,6 +751,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                                 + " handvalue: " + dealer.getActiveHand().getHandValue() +
                                 " | payoff: " + ((p.betOnActiveHand()/2) -p.betOnActiveHand())
                                 + " chips");
+                        p.collect(p.getBetAmountForHand(p.getActiveHand()) / 2);
                         p.addPayOff((p.betOnActiveHand()/2) -p.betOnActiveHand());
                     } else {
 

@@ -1,5 +1,6 @@
 package games.BlackJack;
 
+import games.StateObservation;
 import org.junit.Test;
 
 import java.util.Random;
@@ -29,5 +30,28 @@ public class StateObserverBlackJackTest {
         System.out.println("askForInsuranceCounter:  "  + askForInsuranceCounter);
         System.out.println("dealerHoldsAceCounter:  "  + dealerHoldsAce);
         assert askForInsuranceCounter == dealerHoldsAce: "must be same";
+    }
+
+    @Test
+    public void testGameScore(){
+        Random m_rnd = new Random();
+        StateObserverBlackJack so = new StateObserverBlackJack(1, 1000);
+        so.getPlayers()[0].setChips(10000);
+        for(int i = 0; i < 1000; i++){
+            while(!so.isRoundOver()){
+                int randomAction = m_rnd.nextInt(so.getNumAvailableActions());
+                so.advance(so.getAction(randomAction));
+            }
+            assert so.getGameScoreTuple().scTup.length == 1: "scoretuple should have length 1";
+            double scoreOnRoundOver = so.getGameScoreTuple().scTup[0];
+            so.initRound();
+            double scoreAfterInitRound = so.getGameScoreTuple().scTup[0];
+            assert so.getGameScoreTuple().scTup.length == 1: "scoretuple should have length 1";
+            assert scoreOnRoundOver == scoreAfterInitRound: "scores at roundover and score after init round should be equal";
+            StateObservation aCopy = so.copy();
+            assert so.getGameScoreTuple().scTup[0] == so.getGameScoreTuple().scTup[0]: "a copy should have the same gamescore";
+
+        }
+
     }
 }

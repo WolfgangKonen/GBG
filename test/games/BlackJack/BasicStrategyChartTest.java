@@ -52,6 +52,7 @@ public class BasicStrategyChartTest {
         XNTupleFuncs xf = ar.makeXNTupleFuncs();
         BoardVector bv = xf.getBoardVector(so);
         System.out.println(so.stringDescr());
+        System.out.println(so.getRewardTuple(true));
         int dummy = 1;
     }
 

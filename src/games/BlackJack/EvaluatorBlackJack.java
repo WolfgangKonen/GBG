@@ -11,8 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -41,7 +44,7 @@ public class EvaluatorBlackJack extends Evaluator {
     int playerBlackJack = 0;
     int dealerBlackJack = 0;
     private final String dir = "src/games/BlackJack/Stats";
-
+    private DecimalFormat frm = new DecimalFormat("#0.0000");
 
     public EvaluatorBlackJack(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval, int verbose) {
         super(e_PlayAgent, gb, mode, stopEval, verbose);
@@ -279,7 +282,9 @@ public class EvaluatorBlackJack extends Evaluator {
             avgPayOff += so.getCurrentPlayer().getRoundPayoff();
             so.initRound();
         }
-        return  ((double)countNoInsuranceTaken/((double)countInsuranceTaken+(double)countNoInsuranceTaken));
+        if((countInsuranceTaken+countNoInsuranceTaken) != 0)
+            return  ((double)countNoInsuranceTaken/((double)countInsuranceTaken+(double)countNoInsuranceTaken));
+        return 1;
     }
 
     /**
@@ -378,6 +383,7 @@ public class EvaluatorBlackJack extends Evaluator {
         m_msg += "\nPossible insurance-wins : " + possibleInsuranceWins + " times";
         m_msg += "\nAgent took no insurance but dealer showed Black Jack : " + noInsurenceButBlackJack + " times";
         m_msg += "\nAgent took insurance and dealer showed Black Jack : " + insurenceSuccess + " times -> this payed back : " + insurenceSuccess +  " * 30  = " + (insurenceSuccess*30);
+        System.out.println("last-Result" + lastResult);
         return lastResult;
     }
 
@@ -437,29 +443,34 @@ public class EvaluatorBlackJack extends Evaluator {
             sb.append("date");
             sb.append(',');
             sb.append(getParStringHeaders(playAgent));
-            //sb.append(',');
-            //sb.append("eval-msg");
             sb.append('\n');
         }
 
-        // ten evaluations
-        for(int i = 0; i < 10; i++ ){
-            sb.append(playAgent.getName());
-            sb.append(',');
-            sb.append(i);
-            sb.append(',');
-            sb.append("2");
-            sb.append(',');
-            sb.append(evalAgentRandomMovesFromBasicStrategy(playAgent));
-            sb.append(',');
-            sb.append(getCurrentTimeStamp());
-            sb.append(',');
-            sb.append(getParValueString(playAgent));
-            //sb.append(',');
-            //sb.append(fixString(m_msg));
+        for(int j = 4; j < 6; j++) {
+            // ten evaluations
+            for (int i = 0; i < 10; i++) {
+                sb.append(playAgent.getName());
+                sb.append(',');
+                sb.append(i);
+                sb.append(',');
+                sb.append(j);
+                sb.append(',');
+                switch (j) {
+                    case 0: sb.append(frm.format(evalAgentFixedMovesFromBasicStrategy(playAgent))); break;
+                    case 1: sb.append(frm.format(evalAgentAvgPayoff(playAgent))); break;
+                    case 2: sb.append(frm.format(evalAgentRandomMovesFromBasicStrategy(playAgent))); break;
+                    case 3: sb.append(frm.format(evalAgentInsurance(playAgent))); break;
+                    case 4: sb.append(frm.format(evalAgentSimpleHitMoves(playAgent))); break;
+                    case 5: sb.append(frm.format(evalAgentSimpleStandMoves(playAgent))); break;
+                }
+                sb.append(',');
+                sb.append(getCurrentTimeStamp());
+                sb.append(',');
+                sb.append(getParValueString(playAgent));
+                sb.append('\n');
+            }
             sb.append('\n');
         }
-        sb.append('\n');
         try {
             this.write(sb.toString(), playAgent.getName());
         } catch (IOException e) {
