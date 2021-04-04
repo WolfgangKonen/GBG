@@ -10,6 +10,7 @@ import controllers.PlayAgent;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Sim.StateObserverSim;
+import games.SimpleGame.StateObserverSG;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
@@ -356,6 +357,16 @@ abstract public class Arena implements Runnable {
 //						so.initRound();
 //						assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
 //					}
+					if (so instanceof StateObserverSG) {
+						DecimalFormat form = new DecimalFormat("0.0000");
+						double[] optimHit = {4.888888889,4.666666667,4.333333333,3.888888889,
+								3.333333333,2.666666667,1.888888889,1,0 };
+						System.out.println("StartState: "+so.stringDescr());
+						System.out.println("optim HIT: "+form.format(optimHit[((StateObserverSG)so).get_sum()-1]));
+						System.out.println("agent HIT: "+form.format(actBest.getVTable()[0])
+											+", STAND: "+form.format(actBest.getVTable()[1]));
+						break; // out of while, i.e. finish INSPECTV
+					}
  				} else {
 					if (so.stopInspectOnGameOver()) {
 						gb.updateBoard(so, true, true);

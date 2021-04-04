@@ -374,6 +374,7 @@ public class ParTD implements Serializable {
 		case "TD-Ntuple-4":
 		case "Sarsa":
 		case "Sarsa-4":
+		case "Qlearn-4":
 			switch (agentName) {
 			case "TD-Ntuple-3":
 			case "TD-Ntuple-4":
@@ -393,6 +394,7 @@ public class ParTD implements Serializable {
 				break;
 			case "Sarsa":
 			case "Sarsa-4":
+			case "Qlearn-4":
 				this.setAlpha(1.0);
 				this.setAlphaFinal(0.5);
 				this.setEpsilon(0.1);

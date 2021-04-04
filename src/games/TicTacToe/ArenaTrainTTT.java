@@ -1,12 +1,6 @@
 package games.TicTacToe;
 
-import java.awt.BorderLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
-
-import javax.swing.JComponent;
-import javax.swing.JFrame;
 
 import controllers.PlayAgent;
 import games.Arena;
@@ -15,7 +9,6 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import tools.Types;
 
 /**
  * {@link ArenaTrain} for TicTacToe. It borrows all functionality
@@ -26,7 +19,7 @@ import tools.Types;
  * <li> {@link Arena#makeFeatureClass(int)}, 
  * <li> {@link Arena#makeXNTupleFuncs()}, 
  * </ul> 
- * such that these factory methods return objects of class {@link GameBoardTTT}, 
+ * such that these factory methods return objects of class {@link GameBoardTTT},
  * {@link EvaluatorTTT}, {@link FeatureTTT}, and {@link XNTupleFuncsTTT}, respectively.
  * 
  * @see GameBoardTTT
@@ -53,7 +46,7 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 * @return	the game board
 	 */
 	public GameBoard makeGameBoard() {
-		gb = new GameBoardTTT(this);	
+		gb = new GameBoardTTT(this);
 		return gb;
 	}
 	

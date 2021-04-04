@@ -32,7 +32,7 @@ public class EvaluatorBlackJack extends Evaluator {
      *
      */
 
-    public final int NUM_ITER = 50;
+    public final int NUM_ITER = 500;
     double avgPayOff = 0;
     int countInsuranceTaken = 0;
     int possibleInsuranceWins = 0;

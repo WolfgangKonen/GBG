@@ -1,13 +1,9 @@
-package games.TicTacToe;
-
-import java.io.IOException;
+package games.SimpleGame;
 
 import controllers.PlayAgent;
-import games.Arena;
-import games.Evaluator;
-import games.Feature;
-import games.GameBoard;
-import games.XNTupleFuncs;
+import games.*;
+
+import java.io.IOException;
 
 /**
  * {@link Arena} for TicTacToe. It borrows all functionality
@@ -18,20 +14,20 @@ import games.XNTupleFuncs;
  * <li> {@link Arena#makeFeatureClass(int)}, 
  * <li> {@link Arena#makeXNTupleFuncs()}, 
  * </ul> 
- * such that these factory methods return objects of class {@link GameBoardTTT},
- * {@link EvaluatorTTT}, {@link FeatureTTT}, and {@link XNTupleFuncsTTT}, respectively.
+ * such that these factory methods return objects of class {@link GameBoardSG},
+ * {@link EvaluatorSG}, {@link FeatureSG}, and {@link XNTupleFuncsSG}, respectively.
  * <p>
- * {@link ArenaTTT} has a short {@link #main(String[])} for launching the non-trainable 
+ * {@link ArenaSG} has a short {@link #main(String[])} for launching the non-trainable
  * version of GBG. 
  * 
- * @see GameBoardTTT
- * @see EvaluatorTTT
+ * @see GameBoardSG
+ * @see EvaluatorSG
  * 
  * @author Wolfgang Konen, TH Koeln, Nov'16
  */
-public class ArenaTTT extends Arena   {
+public class ArenaSG extends Arena   {
 	
-	public ArenaTTT(String title, boolean withUI) {
+	public ArenaSG(String title, boolean withUI) {
 		super(title,withUI);		
 	}
 	
@@ -40,7 +36,7 @@ public class ArenaTTT extends Arena   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "TicTacToe";
+		return "SimpleGame";
 	}
 	
 	/**
@@ -48,7 +44,7 @@ public class ArenaTTT extends Arena   {
 	 * @return	the game board
 	 */
 	public GameBoard makeGameBoard() {
-		gb = new GameBoardTTT(this);
+		gb = new GameBoardSG(this);
 		return gb;
 	}
 	/**
@@ -64,15 +60,15 @@ public class ArenaTTT extends Arena   {
 	 * @return
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
+		return new EvaluatorSG(pa,gb,stopEval,mode,verbose);
 	}
 	
 	public Feature makeFeatureClass(int featmode) {
-		return new FeatureTTT(featmode);
+		return new FeatureSG(featmode);
 	}
 	
 	public XNTupleFuncs makeXNTupleFuncs() {
-		return new XNTupleFuncsTTT();
+		return new XNTupleFuncsSG();
 	}
 
 	public void performArenaDerivedTasks() {  }
@@ -86,12 +82,12 @@ public class ArenaTTT extends Arena   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTTT t_Frame = new ArenaTTT("General Board Game Playing",true);
+		ArenaSG t_Frame = new ArenaSG("General Board Game Playing",true);
 
 		if (args.length==0) {
 			t_Frame.init();
 		} else {
-			throw new RuntimeException("[Arena.main] args="+args+" not allowed. Use TicTacToeBatch.");
+			throw new RuntimeException("[Arena.main] args="+args+" not allowed. Use GBGBatch.");
 		}
 	}
 	

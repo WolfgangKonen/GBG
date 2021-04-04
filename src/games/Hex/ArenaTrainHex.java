@@ -7,14 +7,8 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import games.TicTacToe.EvaluatorTTT;
-import games.TicTacToe.FeatureTTT;
-import games.TicTacToe.GameBoardTTT;
-import games.TicTacToe.XNTupleFuncsTTT;
 
 import java.io.IOException;
-
-import javax.swing.*;
 
 /**
  * {@link ArenaTrain} for Hex. It borrows all functionality
