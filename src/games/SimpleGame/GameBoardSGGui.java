@@ -1,7 +1,6 @@
 package games.SimpleGame;
 
 import games.Arena;
-import tools.ScoreTuple;
 import tools.Types;
 
 import javax.swing.*;
@@ -23,11 +22,8 @@ import java.util.Random;
  */
 public class GameBoardSGGui extends JFrame {
 
-	private final int TICGAMEHEIGHT=280;
 	private final JLabel leftInfo=new JLabel("");
 	private final JLabel rightInfo=new JLabel("");
-//	private JPanel BoardPanel;
-//	protected Arena  m_Arena;		// use m_gb.m_Arena instead
 	protected Random rand;
 	/**
 	 * The clickable representation of the board in the GUI. The buttons of {@code Board} will
@@ -36,8 +32,6 @@ public class GameBoardSGGui extends JFrame {
 	 * is displayed as its label.
 	 */
 	protected JButton[][] Board;
-//	private int[][] Table;			// =1: position occupied by "X" player
-									//=-1: position occupied by "O" player
 	private double[][] VTable;
 
 	/**
@@ -167,7 +161,6 @@ public class GameBoardSGGui extends JFrame {
                             boolean withReset, boolean showValueOnGameboard) {
 		int i,j;
 		if (sg!=null) {
-			//Table = sg.getTable();
 			int Player=Types.PLAYER_PM[sg.getPlayer()];
 			switch (Player) {
 				case (+1) -> leftInfo.setText("X to move   ");
@@ -206,66 +199,6 @@ public class GameBoardSGGui extends JFrame {
 		//guiUpdateBoard(false,showValueOnGameboard);
 	}
 
-	/**
-	 * Update the play board and the associated values (labels) to the state in {@code m_gb.m_so}.
-	 * The labels contain the values (scores) for each unoccupied board position (raw score*100).  
-	 * Occupied board positions have black/white background color, unoccupied positions are orange.
-	 * 
-	 * @param enable As a side effect the buttons Board[i][j] which are occupied by either "X" or "O"
-	 * will be set into enabled state <code>enable</code>. (All unoccupied positions will get state 
-	 * <code>true</code>.)
-	 */ 
-	private void guiUpdateBoard(boolean enable, boolean showValueOnGameboard)
-	{		
-		double value, maxvalue=Double.NEGATIVE_INFINITY;
-		String valueTxt;
-		int[][] table = m_gb.m_so.getTable();
-		for(int i=0;i<3;i++){
-			for(int j=0;j<3;j++){
-				if (VTable==null) { 
-					// HumanPlayer and MCTSAgentT do not have a VTable (!)
-					value = Double.NaN;
-				} else {
-					value = VTable[i][j];					
-				}
-				
-				if (Double.isNaN(value)) {
-					valueTxt = "   ";
-				} else {
-					valueTxt = " "+(int)(value*100);
-					if (value<0) valueTxt = ""+(int)(value*100);
-					if (value>maxvalue) {
-						maxvalue=value;
-					}
-				}
-				if(table[i][j]==1)
-				{
-					Board[i][j].setText("X");				
-					Board[i][j].setEnabled(enable);
-					Board[i][j].setBackground(Color.black);
-					Board[i][j].setForeground(Color.white);
-				}					
-				else if(table[i][j]==-1)
-				{
-					Board[i][j].setText("O");				
-					Board[i][j].setEnabled(enable);
-					Board[i][j].setBackground(Color.white);
-					Board[i][j].setForeground(Color.black);
-				}
-				else
-				{
-					Board[i][j].setText("  ");
-					Board[i][j].setEnabled(true);
-					Board[i][j].setForeground(Color.black);
-					Board[i][j].setBackground(colTHK2);
-				}
-				if (showValueOnGameboard) Board[i][j].setText(valueTxt);
-			}
-		}
-		this.repaint();
-//		paint(this.getGraphics());   // this sometimes leave one of the buttons un-painted
-	}		
-
 	public void enableInteraction(boolean enable) {
 
 	}
@@ -296,13 +229,12 @@ public class GameBoardSGGui extends JFrame {
 			if (arena.m_ArenaFrame!=null) {
 				x = arena.m_ArenaFrame.getX();
 				y = arena.m_ArenaFrame.getY() + arena.m_ArenaFrame.getHeight() +1;
+				int TICGAMEHEIGHT = 280;
 				this.setSize(arena.m_ArenaFrame.getWidth(),
-							 (int)(Types.GUI_SCALING_FACTOR_Y*TICGAMEHEIGHT));	
+							 (int)(Types.GUI_SCALING_FACTOR_Y* TICGAMEHEIGHT));
 			}
 			this.setLocation(x,y);	
 		}		
-//		System.out.println("GameBoardSG size = " +super.getWidth() + " * " + super.getHeight());
-//		System.out.println("Arena size = " +ticGame.m_ArenaFrame.getWidth() + " * " + ticGame.m_ArenaFrame.getHeight());
 
 	}
 

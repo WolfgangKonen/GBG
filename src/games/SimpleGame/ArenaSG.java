@@ -57,7 +57,7 @@ public class ArenaSG extends Arena   {
 	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
 	 * @param verbose	how verbose or silent the evaluator is
-	 * @return
+	 * @return			the evaluator
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
 		return new EvaluatorSG(pa,gb,stopEval,mode,verbose);

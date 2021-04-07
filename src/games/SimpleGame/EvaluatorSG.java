@@ -1,19 +1,10 @@
 package games.SimpleGame;
 
-import controllers.MaxNAgent;
 import controllers.PlayAgent;
-import controllers.PlayAgtVector;
-import controllers.RandomAgent;
 import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
-import games.XArenaFuncs;
-import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ACTIONS;
-
-import javax.swing.*;
-import java.util.ArrayList;
 
 /**
  * Evaluator for SimpleGame:
@@ -26,16 +17,6 @@ import java.util.ArrayList;
 public class EvaluatorSG extends Evaluator {
 	private final int NUMEPISODES=10000;
 	protected double[] m_thresh={5.0, 0.9}; // threshold for each value of m_mode
-
-	public EvaluatorSG(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, gb, 1, stopEval);
-		initEvaluator(gb);
-	}
-
-	public EvaluatorSG(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, gb, mode, stopEval);
-		initEvaluator(gb);
-	}
 
 	public EvaluatorSG(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, gb, mode, stopEval, verbose);
@@ -51,7 +32,7 @@ public class EvaluatorSG extends Evaluator {
 	 * 
 	 * @return true if evaluateAgentX is above m_thresh.<br>
 	 * The choice for X=1 or 2 is made with 3rd parameter mode in 
-	 * {@link #EvaluatorSG(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
+	 * {@link #EvaluatorSG(PlayAgent, GameBoard, int, int, int)} [default mode=1].<p>
 	 * 
 	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
 	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
@@ -73,7 +54,7 @@ public class EvaluatorSG extends Evaluator {
 	
  	/**	
  	 * Calculate average reward from {@link #NUMEPISODES} episodes. Optimum is 5.87654.
- 	 * @param pa
+ 	 * @param pa		agent to evaluate
 	 * @param gb		needed to get a default start state (competeBoth)
  	 * @return average reward
 	 */
@@ -93,7 +74,7 @@ public class EvaluatorSG extends Evaluator {
 
 	/**
 	 * Calculate percent correct decisions from {@link #NUMEPISODES} episodes. Optimum is 1.
-	 * @param pa
+	 * @param pa		agent to evaluate
 	 * @param gb		needed to get a default start state (competeBoth)
 	 * @return percent correct decisions
 	 */
@@ -105,14 +86,10 @@ public class EvaluatorSG extends Evaluator {
 			if (so.get_sum() < 4)
 				if (actBest.toInt() == 0) {
 					percCorrect += 1;        // correct HIT
-				} else {
-					int dummy = 1;
 				}
 			if (so.get_sum()>=4)
 				if (actBest.toInt()==1) {
 					percCorrect += 1;	// correct STAND
-				} else {
-					int dummy=1;
 				}
 		}
 		lastResult = percCorrect/NUMEPISODES;
@@ -124,8 +101,7 @@ public class EvaluatorSG extends Evaluator {
 
  	@Override
  	public int[] getAvailableModes() {
- 		int[] availModes = {-1,0,1};
- 		return availModes;
+ 		return new int[]{-1,0,1};
  	}
  	
  	//@Override
@@ -144,12 +120,12 @@ public class EvaluatorSG extends Evaluator {
 
 	@Override
 	public String getPrintString() {
-		switch (m_mode) {
-		case -1: return "no evaluation done ";
-		case 0:  return "average reward, best is 5.87654: ";
-		case 1:  return "perc correct decisions, best is 1.0: ";
-		default: return null;
-		}
+		return switch (m_mode) {
+			case -1 -> "no evaluation done ";
+			case 0 -> "average reward, best is 5.87654: ";
+			case 1 -> "perc correct decisions, best is 1.0: ";
+			default -> null;
+		};
 	}
 	
 	/**
@@ -170,11 +146,11 @@ public class EvaluatorSG extends Evaluator {
 
 	@Override
 	public String getPlotTitle() {
-		switch (m_mode) {
-		case 0:  return "avg reward";
-		case 1:  return "perc correct";
-		default: return null;
-		}
+		return switch (m_mode) {
+			case 0 -> "avg reward";
+			case 1 -> "perc correct";
+			default -> null;
+		};
 	}
 	
 

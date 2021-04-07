@@ -5,56 +5,41 @@ import games.StateObsNondeterministic;
 import games.StateObservation;
 import tools.Types.ACTIONS;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * Class StateObservation observes the current state of the game, it has utility functions for
+ * This class observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
  * <li> advancing the state of the game with a specific action ({@link #advance(ACTIONS)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
- *
  */
 public class StateObserverSG extends ObserverBase implements StateObsNondeterministic {
 	public static final int UPPER = 9;
 	public static final double REWARD_NEGATIVE = 0;
 	public static final double REWARD_POSITIVE = UPPER;
-	private static Random rand = new Random();
+	private static final Random rand = new Random();
 
-	private int[][] m_Table;		// current board position
 	private int m_sum;				// current sum
-	private int m_Player;			// player who makes the next move (+1 or -1)
 	private boolean m_gameOver=false;
-	protected ArrayList<ACTIONS> availableActions = new ArrayList();	// holds all available actions: 0: HIT, 1: STAND
+	private ACTIONS m_action = null;
+	protected ArrayList<ACTIONS> availableActions = new ArrayList<>();	// holds all available actions: 0: HIT, 1: STAND
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverSG() {
 		super();
-		m_Table = new int[3][3]; 
-		m_Player = 1;
 		m_sum = (int)(rand.nextDouble() * UPPER)+1;		// a random number from 1,2,...,UPPER
-		setAvailableActions();
-	}
-
-	public StateObserverSG(int[][] Table, int Player) {
-		super();
-		m_Table = new int[3][3];
-		m_Player = Player;
-		setAvailableActions();
-	}
-
-	public StateObserverSG(int sum) {
-		super();
-		m_sum = sum;
 		setAvailableActions();
 	}
 
@@ -62,12 +47,10 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 	{
 		super(other);		// copy members m_counter, lastMoves and stored*
 		m_sum = other.m_sum;
-		m_Player = other.m_Player;
+		m_gameOver = other.isGameOver();
+		m_action = other.m_action;
 		if (other.availableActions!=null)	// this check is needed when loading older logs
 			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
-				// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
-				// just copied by reference. However, these ACTIONS are never altered, so it is o.k.
-//		setAvailableActions();		// this would be a bit slower
 	}
 	
 	public StateObserverSG copy() {
@@ -133,28 +116,32 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 
 	/**
 	 * Advance the current state with 'action' to a new state
-	 * @param action
+	 * @param action	0: HIT or 1: STAND
 	 */
 	public void advance(ACTIONS action) {
+		m_action = action;
+		advanceNondeterministic();
+	}
 
-		if (action.toInt()==0) {    // HIT
+	@Override
+	public void advanceDeterministic(ACTIONS action) {
+		m_action = action;
+	}
+
+	@Override
+	public void advanceNondeterministic() {
+		if (m_action.toInt()==0) {    // HIT
 			int iCard = (int)(rand.nextDouble() * UPPER)+1;		// a random number from 1,2,...,UPPER
 			m_sum += iCard;
-		} else {
-			// nothing to do in action STAND
 		}
 		m_gameOver=true;	// the game is always finished after one advance
-
-		super.addToLastMoves(action);
+		super.addToLastMoves(m_action);
 		super.incrementMoveCounter();
 	}
 
 	@Override
-	public void advanceNondeterministic(ACTIONS action) {
-		if (action.toInt()==0) {    // HIT
-			int iCard = (int)(rand.nextDouble() * UPPER)+1;		// a random number from 1,2,...,UPPER
-			m_sum += iCard;
-		}
+	public void advanceNondeterministic(ACTIONS randAction) {
+		advanceNondeterministic();
 	}
 
 	@Override
@@ -164,7 +151,7 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 
 	@Override
 	public ArrayList<ACTIONS> getAvailableRandoms() {
-		ArrayList availRandoms = new ArrayList<>();
+		ArrayList<ACTIONS> availRandoms = new ArrayList<>();
 		for (int i=0; i<UPPER; i++)
 			availRandoms.add(ACTIONS.fromInt(i));
 		return availRandoms;
@@ -176,22 +163,19 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 	}
 
 	/**
-	 * @param action  the nondeterministic action
-	 * @return the probability that the random {@code action} is selected by a
+	 * @param randAction  the nondeterministic action
+	 * @return the probability that the random {@code randAction} is selected by a
 	 *         nondeterministic advance.
 	 */
 	@Override
-	public double getProbability(ACTIONS action) {
+	public double getProbability(ACTIONS randAction) {
 		return 1.0/UPPER;
 	}
 
 	@Override
     public ArrayList<ACTIONS> getAllAvailableActions() {
-        ArrayList allActions = new ArrayList<>();
-		for (int i=0; i<2; i++)
-			allActions.add(ACTIONS.fromInt(i));
-        
-        return allActions;
+		setAvailableActions();
+		return availableActions;
     }
     
 	public ArrayList<ACTIONS> getAvailableActions() {
@@ -215,10 +199,6 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 		return availableActions.get(i);
 	}
 
-	public int[][] getTable() {
-		return m_Table;
-	}
-
 	public int get_sum() {
 		return m_sum;
 	}
@@ -230,6 +210,4 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 	public int getNumPlayers() {
 		return 1;				// SimpleGame is a 1-player game
 	}
-
-
 }

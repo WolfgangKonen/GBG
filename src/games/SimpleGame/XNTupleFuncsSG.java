@@ -6,6 +6,7 @@ import games.XNTupleBase;
 import games.XNTupleFuncs;
 import org.apache.commons.math3.exception.OutOfRangeException;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 
@@ -16,7 +17,8 @@ public class XNTupleFuncsSG extends XNTupleBase implements XNTupleFuncs, Seriali
      * compatible with an older one (older .gamelog or .agt.zip containing this object will
      * become unreadable or you have to provide a special version transformation)
      */
-    private static final long serialVersionUID = 12L;
+    @Serial
+	private static final long serialVersionUID = 12L;
     
     public XNTupleFuncsSG() {  }
     
@@ -138,7 +140,7 @@ public class XNTupleFuncsSG extends XNTupleBase implements XNTupleFuncs, Seriali
 				+ "</html>";
 	}
 
-    private static int[] fixedModes = {1};
+    private final static int[] fixedModes = {1};
     
 	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
@@ -149,12 +151,12 @@ public class XNTupleFuncsSG extends XNTupleBase implements XNTupleFuncs, Seriali
 	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
 	 * for board coding.
 	 * 
-	 * @param iCell
+	 * @param iCell cell 0 or 1
 	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
 	 * 		a board vector) 
 	 */
-	public HashSet adjacencySet(int iCell) {
-		HashSet adjSet = new HashSet();
+	public HashSet<Integer> adjacencySet(int iCell) {
+		HashSet<Integer> adjSet = new HashSet<>();
 		adjSet.add(1-iCell);
 		return adjSet;
 	}

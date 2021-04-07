@@ -55,7 +55,7 @@ public class ArenaTrainSG extends ArenaTrain   {
 	 * @param mode		which evaluator mode. Throws a runtime exception 
 	 * 					if {@code mode} is not in the set {@link EvaluatorSG#getAvailableModes()}.
 	 * @param verbose	how verbose or silent the evaluator is
-	 * @return
+	 * @return			the evaluator
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
 		return new EvaluatorSG(pa,gb,stopEval,mode,verbose);

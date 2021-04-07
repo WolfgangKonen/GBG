@@ -27,9 +27,9 @@ public interface StateObsNondeterministic extends StateObservation {
 
     /**
      * Advance the current afterstate to a new state (with a specific nondeterministic action)
-     * @param action   the nondeterministic action
+     * @param randAction   the nondeterministic action
      */
-    void advanceNondeterministic(ACTIONS action);
+    void advanceNondeterministic(ACTIONS randAction);
     
     boolean isNextActionDeterministic();
     

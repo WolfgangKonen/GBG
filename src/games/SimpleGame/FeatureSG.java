@@ -43,12 +43,6 @@ public class FeatureSG implements Feature, Serializable {
 	
 	@Override
 	public double[] prepareFeatVector(StateObservation sob) {
-		assert (sob instanceof StateObserverSG) : "Input 'sob' is not of class StateObserverTTT";
-		StateObserverSG so = (StateObserverSG) sob;
-		int[][] table = so.getTable();
-		int player = Types.PLAYER_PM[so.getPlayer()];
-		// note that TicTDBase.prepareInputVector requires the player who
-		// **made** the last move, therefore '-player':
 		double[] input = new double[3]; // dummy
 		return input;
 	}

@@ -4,13 +4,14 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 import agentIO.LoadSaveGBG;
+import controllers.TD.ntuple4.QLearn4Agt;
 import controllers.TD.ntuple4.Sarsa4Agt;
 import controllers.TD.ntuple4.TDNTuple4Agt;
 
 /**
- *  This class just provides a default implementation for methods {@link #instantiateAfterLoading()} and
- *  {@link #makeBoardVectorEachCellDifferent()} from the interface {@link XNTupleFuncs}. All other methods 
- *  are left as abstract methods.
+ *  This class just provides a default implementation for methods {@link #getPositionValuesVector()},
+ *  {@link #instantiateAfterLoading()} and {@link #makeBoardVectorEachCellDifferent()} from the
+ *  interface {@link XNTupleFuncs}. All other methods are left as abstract methods.
  */
 abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 
@@ -60,7 +61,7 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 	/**
 	 * The default implementation for all games where the number of position values is the
 	 * same for each board vector cell. <br>
-	 * [This method is only needed for agents {@link TDNTuple4Agt} and {@link Sarsa4Agt}.]
+	 * [This method is only needed for agents {@link TDNTuple4Agt},{@link QLearn4Agt} and {@link Sarsa4Agt}.]
 	 *
 	 * @return 	a vector that has in its {@code i}th element the number P of position values 0, 1, 2,..., P-1
 	 * 			that board cell {@code i} can have
