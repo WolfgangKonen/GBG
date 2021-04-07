@@ -605,7 +605,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     }
 
     @Override
-    public void advanceNondeterministic(ACTIONS action) {
+    public void advanceNondeterministic(ACTIONS randAction) {
         if (isNextActionDeterministic) {
             throw new RuntimeException("Next action should be deterministic");
         }
@@ -616,7 +616,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             System.err.println("Error [StateObsBJ]: advanceNondet for a round-over state!!");
         }
 
-        BlackJackActionNonDet a = BlackJackActionNonDet.values()[action.toInt()];
+        BlackJackActionNonDet a = BlackJackActionNonDet.values()[randAction.toInt()];
 
         switch (a) {
             case DEALCARD: // a card gets dealt

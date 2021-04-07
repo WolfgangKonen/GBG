@@ -1,14 +1,9 @@
-package games.TicTacToe;
-
-import java.io.IOException;
+package games.SimpleGame;
 
 import controllers.PlayAgent;
-import games.Arena;
-import games.ArenaTrain;
-import games.Evaluator;
-import games.Feature;
-import games.GameBoard;
-import games.XNTupleFuncs;
+import games.*;
+
+import java.io.IOException;
 
 /**
  * {@link ArenaTrain} for TicTacToe. It borrows all functionality
@@ -19,17 +14,17 @@ import games.XNTupleFuncs;
  * <li> {@link Arena#makeFeatureClass(int)}, 
  * <li> {@link Arena#makeXNTupleFuncs()}, 
  * </ul> 
- * such that these factory methods return objects of class {@link GameBoardTTT},
- * {@link EvaluatorTTT}, {@link FeatureTTT}, and {@link XNTupleFuncsTTT}, respectively.
+ * such that these factory methods return objects of class {@link GameBoardSG},
+ * {@link EvaluatorSG}, {@link FeatureSG}, and {@link XNTupleFuncsSG}, respectively.
  * 
- * @see GameBoardTTT
- * @see EvaluatorTTT
+ * @see GameBoardSG
+ * @see EvaluatorSG
  * 
  * @author Wolfgang Konen, TH Koeln, 2016-2020
  */
-public class ArenaTrainTTT extends ArenaTrain   {
+public class ArenaTrainSG extends ArenaTrain   {
 	
-	public ArenaTrainTTT(String title, boolean withUI) {
+	public ArenaTrainSG(String title, boolean withUI) {
 		super(title,withUI);		
 	}
 	
@@ -38,7 +33,7 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "TicTacToe";
+		return "SimpleGame";
 	}
 	
 	/**
@@ -46,7 +41,7 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 * @return	the game board
 	 */
 	public GameBoard makeGameBoard() {
-		gb = new GameBoardTTT(this);
+		gb = new GameBoardSG(this);
 		return gb;
 	}
 	
@@ -58,20 +53,20 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 * 					evaluator goal (may be used during training to stop it 
 	 * 					prematurely)
 	 * @param mode		which evaluator mode. Throws a runtime exception 
-	 * 					if {@code mode} is not in the set {@link EvaluatorTTT#getAvailableModes()}.
+	 * 					if {@code mode} is not in the set {@link EvaluatorSG#getAvailableModes()}.
 	 * @param verbose	how verbose or silent the evaluator is
-	 * @return
+	 * @return			the evaluator
 	 */
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		return new EvaluatorTTT(pa,gb,stopEval,mode,verbose);
+		return new EvaluatorSG(pa,gb,stopEval,mode,verbose);
 	}
 
 	public Feature makeFeatureClass(int featmode) {
-		return new FeatureTTT(featmode);
+		return new FeatureSG(featmode);
 	}
 
 	public XNTupleFuncs makeXNTupleFuncs() {
-		return new XNTupleFuncsTTT();
+		return new XNTupleFuncsSG();
 	}
 
 	/**
@@ -82,17 +77,12 @@ public class ArenaTrainTTT extends ArenaTrain   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaTrainTTT t_Frame = new ArenaTrainTTT("General Board Game Playing",true);
+		ArenaTrainSG t_Frame = new ArenaTrainSG("General Board Game Playing",true);
 
-// ---  just for analysis: compute the state space & game tree complexity ---		
-//		System.out.println("Rough approximation for nStates = "+(int) Math.pow(3, 9)+ " = (3^9)");
-//		TicTDBase.countStates2(false);
-//		TicTDBase.countStates2(true);
-		
 		if (args.length==0) {
 			t_Frame.init();
 		} else {
-			throw new RuntimeException("[ArenaTrainTTT.main] args="+args+" not allowed. Use TicTacToeBatch.");
+			throw new RuntimeException("[ArenaTrainSG.main] args="+args+" not allowed. Use GBGBatch.");
 		}
 	}
 	

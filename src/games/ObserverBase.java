@@ -138,6 +138,13 @@ abstract public class ObserverBase implements StateObservation {
     }
 
 	/**
+	 * Advance the current afterstate to a new state (do the nondeterministic part of advance)
+	 */
+	public void advanceNondeterministic(ACTIONS randAction) {
+		// nothing to do here, since ObserverBase is for a deterministic game
+	}
+
+	/**
 	 * Default implementation for deterministic games, returns always true
 	 */
 	@Override

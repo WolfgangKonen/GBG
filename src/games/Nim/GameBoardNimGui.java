@@ -9,9 +9,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -21,14 +19,7 @@ import javax.swing.SwingConstants;
 
 import controllers.AgentBase;
 import controllers.MaxNAgent;
-import controllers.PlayAgent;
-import games.GameBoard;
-import games.StateObservation;
 import games.Arena;
-import games.Arena.Task;
-import games.TicTacToe.GameBoardTTT;
-import games.TicTacToe.GameBoardTTTGui;
-import games.ArenaTrain;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
