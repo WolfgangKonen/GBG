@@ -20,18 +20,21 @@ public class EvaluatorKuhnPoker extends Evaluator {
 	private final KuhnPokerAgent kuhnAgent = new KuhnPokerAgent("Kuhn");
 
 
-	protected double[] m_thresh={0.1}; // threshold for each value of m_mode
+	protected double[] m_thresh={
+			10, // random
+			5 // kuhn
+	}; // threshold for each value of m_mode
 
 	protected static ArrayList<StateObserverKuhnPoker> diffStartList = null;
 
 
 	public EvaluatorKuhnPoker(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, gb, mode, stopEval, verbose);
-		initEvaluator(gb);
+		//initEvaluator(gb);
 	}
 	
 	private void initEvaluator(GameBoard gb) {
-		gb.getArena();
+		//gb.getArena();
 	}
 
 	@Override
@@ -42,7 +45,8 @@ public class EvaluatorKuhnPoker extends Evaluator {
 				m_msg = "no evaluation done ";
 				lastResult = Double.NaN;
 				return false;
-			case 0:  return evalAgent1(m_PlayAgent,kuhnAgent,m_gb)>m_thresh[0];
+			case 0:  return evalAgent1(m_PlayAgent,randomAgent,m_gb)>m_thresh[0];
+			case 1:  return evalAgent1(m_PlayAgent,kuhnAgent,m_gb)>m_thresh[0];
 			default: return false;
 		}
 	}
@@ -59,9 +63,7 @@ public class EvaluatorKuhnPoker extends Evaluator {
 	public double evalAgent1(PlayAgent playAgent, PlayAgent opponent, GameBoard gb) {
 		StateObservation so = gb.getDefaultStartState();
 		PlayAgent[] pavec = new PlayAgent[] {playAgent,opponent};
-
-
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 10000, 0);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 1000, 0);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -79,7 +81,7 @@ public class EvaluatorKuhnPoker extends Evaluator {
  	@Override
  	public int[] getAvailableModes() {
 		int[] modes;
-		modes = new int[]{0};
+		modes = new int[]{-1,0,1};
 		return modes;
  	}
  	
@@ -100,7 +102,8 @@ public class EvaluatorKuhnPoker extends Evaluator {
 	public String getPrintString() {
 		return switch (m_mode) {
 			case -1 -> "no evaluation done ";
-			case 0 -> "success rate (against Kuhn): ";
+			case 0 -> "success rate (against random): ";
+			case 1 -> "success rate (against Kuhn): ";
 			default -> null;
 		};
 	}
@@ -114,8 +117,8 @@ public class EvaluatorKuhnPoker extends Evaluator {
 	@Override
 	public String getPlotTitle() {
 		return switch (m_mode) {
-			case 0 -> "success vs Random";
-			case 1 -> "placeholder";
+			case 0 -> "average chips vs Random";
+			case 1 -> "average chips vs Kuhn";
 			default -> null;
 		};
 	}

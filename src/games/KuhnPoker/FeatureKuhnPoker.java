@@ -20,6 +20,8 @@ import java.io.Serializable;
 public class FeatureKuhnPoker implements Feature, Serializable {
 	int featMode;
 
+	private int vectorSize0 = 4;
+
 	public FeatureKuhnPoker(int featMode) {
 		this.featMode = featMode;
 	}
@@ -28,12 +30,7 @@ public class FeatureKuhnPoker implements Feature, Serializable {
 		Features of a Kuhn Poker game:
 
 			wholecard {11,12,13}
-			moves {-1;0;1;2;3}
-
-		Considered but not used:
-			pot
-			chips
-
+			previous moves {-1;0;1;2;3}
 
 	 */
 	@Override
@@ -43,20 +40,21 @@ public class FeatureKuhnPoker implements Feature, Serializable {
 
 		switch (featMode) {
 			case 0 -> {
-				double[] featureVector = new double[3];
+				double[] featureVector = new double[vectorSize0];
 
 				//wholecard
-				featureVector[0] = so.getPlayer();
+				PlayingCard pc = so.getHoleCards(so.getPlayer())[0];
+
+				featureVector[0] = pc==null?-1:pc.getRank();
 
 				//moves
 				featureVector[1]=-1;
 				featureVector[2]=-1;
-				for(int i = 0;i<so.getLastMoves().toArray().length;i++)
-					featureVector[i+1] = so.getLastMoves().get(i)==null?-1:so.getLastMoves().get(i);
-
+				featureVector[3]=-1;
+				for(int i = 0;i<so.getLastRoundMoves().toArray().length;i++)
+					featureVector[i+1] = so.getLastRoundMoves().get(i)==null?-1:so.getLastRoundMoves().get(i);
 				return featureVector;
 			}
-			case 1 -> throw new RuntimeException("Placeholder");
 			default -> throw new RuntimeException("Unknown featmode: " + featMode);
 		}
 	}
@@ -86,10 +84,8 @@ public class FeatureKuhnPoker implements Feature, Serializable {
 	public int getInputSize(int featmode) {
 		switch (featmode) {
 			case 0 -> {
-				int numPlayers = 4;
-				return numPlayers * 3 + 1 + 2 + 5;
+				return vectorSize0	;
 			}
-			case 1 -> throw new RuntimeException("Placeholder");
 			default -> throw new RuntimeException("Unknown featmode: " + featmode);
 		}
 	}

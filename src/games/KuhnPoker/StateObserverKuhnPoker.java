@@ -7,9 +7,8 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Class StateObservation observes the current state of the game, it has utility functions for
@@ -64,6 +63,8 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	private boolean newRound;
 
+	private ArrayList<Integer> lastRoundMoves;
+
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
 	 * compatible with an older one (older .gamelog containing this object will become
@@ -85,7 +86,8 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		gameround = 0;
 		newRound = true;
 		lastActions = new ArrayList<>();
-		rand = new Random(System.currentTimeMillis());
+		//rand = new Random(System.currentTimeMillis());
+		rand = new Random(ThreadLocalRandom.current().nextInt());
 		GAMEOVER = false;
 		setRoundOver(false);
 		availableRandomActions = new ArrayList<>();
@@ -115,7 +117,8 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		newRound = other.newRound;
 		gameround = other.gameround;
 		isPartialState = other.isPartialState;
-		rand = new Random(System.currentTimeMillis());
+		//rand = new Random(System.currentTimeMillis());
+		rand = new Random(ThreadLocalRandom.current().nextInt());
 
 		isNextActionDeterministic = other.isNextActionDeterministic;
 		nextNondeterministicAction = other.nextNondeterministicAction;
@@ -160,6 +163,9 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		checkedPlayer[1] = other.checkedPlayer[1];
 		foldedPlayers[0] = other.foldedPlayers[0];
 		foldedPlayers[1] = other.foldedPlayers[1];
+
+		this.lastRoundMoves = (ArrayList<Integer>) other.lastRoundMoves.clone();
+
 		setAvailableActions();
 	}
 	//</editor-fold>
@@ -177,7 +183,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	}
 
 	private int dealCard(){
-		int randomCard = cards.remove(rand.nextInt(cards.size()));
+		int randomCard = cards.remove(ThreadLocalRandom.current().nextInt(cards.size()));
 		availableRandomActions.remove(ACTIONS.fromInt(randomCard));
 		return randomCard;
 	}
@@ -190,9 +196,14 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		return id;
 	}
 
+	private void resetLastRoundMoves(){
+		lastRoundMoves = new ArrayList<>();
+	}
+
 	public void initRound(){
 		gameround++;
 		addToLog("------------------New Round ("+gameround+")------------------");
+		resetLastRoundMoves();
 		if(!GAMEOVER) {
 			initCardDeck();
 			setRoundOver(false);
@@ -276,6 +287,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	 */
 	public void advanceDeterministic(ACTIONS action) {
 		super.advanceBase(action);		//		includes addToLastMoves(action)
+		lastRoundMoves.add(action.toInt());
 		if(isRoundOver())
 			return;
 
@@ -294,7 +306,10 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 			case 3 -> call();
 		}
 
-		if(foldedPlayers[(m_Player)]||(checkedPlayer[0]!=null&&checkedPlayer[1]!=null&&checkedPlayer[0].equals(checkedPlayer[1]))) {
+		if(foldedPlayers[(m_Player)] ||
+				(checkedPlayer[0]!=null&&checkedPlayer[1]!=null&&checkedPlayer[0].equals(checkedPlayer[1]))
+				//|| pots.getOpenPlayer(0) == 0 && pots.getOpenPlayer(1) == 0 && checkedPlayer[0]!=null&&checkedPlayer[1]!=null && checkedPlayer[0] == false && checkedPlayer[1] == false
+		) {
 			isNextActionDeterministic = false;
 		}else{
 			isNextActionDeterministic=true;
@@ -324,6 +339,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 					addToLog("Player 1 has folded therefore player 0 wins the round.");
 				}else{
 					if(isPartialState){
+						rand = new Random(ThreadLocalRandom.current().nextInt());
 						if(holeCards[0][0]==null){
 							//holeCards[0][0] = new PlayingCard(dealCard());
 							holeCards[0][0] = new PlayingCard(dealCard(randAction.toInt()));
@@ -362,7 +378,8 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	public void advanceNondeterministic() {
 		ArrayList<ACTIONS> possibleRandoms = getAvailableRandoms();
-		advanceNondeterministic(possibleRandoms.get(rand.nextInt(possibleRandoms.size())));
+
+		advanceNondeterministic(possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size())));
 	}
 
 	//</editor-fold>
@@ -524,7 +541,26 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	@Override
 	public String stringDescr() {
-		return "";
+		// IMPORTANT FOR MCTSE!
+		String desc = "";
+		desc += "Player 0:\r\nScore: "+getGameScore(0)+" Holecard: ";
+		if(getHoleCards(0)[0]==null)
+			desc +="???";
+		else
+			desc += getHoleCards(0)[0].toString();
+
+		desc+="\r\n";
+		desc += "Player 1: \r\nScore: "+getGameScore(1)+" Holecard: ";
+		if(getHoleCards(1)[0]==null)
+			desc +="???";
+		else
+			desc += getHoleCards(1)[0].toString();
+		desc+="\r\nmoves:";
+		for (int move:getLastRoundMoves()
+			 ) {
+			desc+=move+"-";
+		}
+		return desc;
 	}
 
 	public String getName() { return "Poker";	}
@@ -696,5 +732,10 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	@Override
 	public boolean isRoundBasedGame(){
 		return true;
+	}
+
+
+	public ArrayList<Integer> getLastRoundMoves() {
+		return lastRoundMoves;
 	}
 }

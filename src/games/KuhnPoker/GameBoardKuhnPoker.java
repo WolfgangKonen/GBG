@@ -25,6 +25,10 @@ public class GameBoardKuhnPoker implements GameBoard {
 	public GameBoardKuhnPoker(Arena pokerGame) {
 		initGameBoard(pokerGame);
 	}
+
+	public GameBoardKuhnPoker() {
+		initGameBoard(null);
+	}
 	
     @Override
     public void initialize() {}
@@ -34,7 +38,7 @@ public class GameBoardKuhnPoker implements GameBoard {
 		m_Arena		= arGame;
 		m_so		= new StateObserverKuhnPoker();
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui==null) {
 			m_gameGui = new GameBoardKuhnPokerGui(this);
         }
 
@@ -44,7 +48,7 @@ public class GameBoardKuhnPoker implements GameBoard {
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
 			m_so = new StateObserverKuhnPoker();
-			if (m_Arena.hasGUI() && m_gameGui!=null) {
+			if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui!=null) {
 				m_gameGui.resetLog();
 			}
 		}
@@ -106,7 +110,8 @@ public class GameBoardKuhnPoker implements GameBoard {
 		m_so.advance(act);
 		//m_Arena.roundOverWait = m_so.isRoundOver();
 
-		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+		if(m_Arena!=null)
+			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 
 		//arenaActReq = !m_so.isRoundOver();
 		arenaActReq = true;

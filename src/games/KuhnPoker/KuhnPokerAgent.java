@@ -20,7 +20,7 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
     private Random rand;
     private int[][] m_trainTable = null;
     private double[][] m_deltaTable = null;
-    private double alpha = 1.0/3;
+    private double alpha = 0.2;
 
     private int low = 9;
     private int mid = 10;
@@ -32,6 +32,10 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
      * to provide a special version transformation)
      */
     private static final long  serialVersionUID = 12L;
+
+    public double getAlpha(){
+        return alpha;
+    }
 
     public KuhnPokerAgent(String name) {
         super(name);
@@ -80,7 +84,6 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
         if(sop.start_player == sop.getPlayer()){
             // STARTING PLAYER
             if(sop.lastAction == null){
-
                 if(sop.getHoleCards(sop.getPlayer())[0].getRank()==low){
                     // low
                     // betting with the propability of alpha;
@@ -115,17 +118,18 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                             actBest = Types.ACTIONS.fromInt(0);
                         }
                         if (sop.getHoleCards(sop.getPlayer())[0].getRank() == mid) {
-                            // Mid -> 1/3 + alpha = Bet
+                            // Mid -> 1/3 + alpha = CALL
                             if (rand.nextDouble() < 1.0 / 3 + alpha) {
-                                // BET
-                                actBest = Types.ACTIONS.fromInt(2);
+                                // CALL
+                                actBest = Types.ACTIONS.fromInt(3);
                             } else {
                                 // FOLD
                                 actBest = Types.ACTIONS.fromInt(0);
                             }
                         }
                         if (sop.getHoleCards(sop.getPlayer())[0].getRank() == high) {
-                            actBest = Types.ACTIONS.fromInt(2);
+                            // CALL
+                            actBest = Types.ACTIONS.fromInt(3);
                         }
                     }else{
                         actBest = Types.ACTIONS.fromInt(0);
@@ -145,7 +149,7 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                         actBest = Types.ACTIONS.fromInt(2);
                     }else{
                         // FOLD
-                        actBest = Types.ACTIONS.fromInt(0);
+                        actBest = Types.ACTIONS.fromInt(1);
                     }
                 }
                 if(sop.getHoleCards(sop.getPlayer())[0].getRank()==mid){
@@ -168,14 +172,14 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
                         // Mid -> 1/3 = Bet
                         if (rand.nextDouble() < 1.0 / 3) {
                             // BET
-                            actBest = Types.ACTIONS.fromInt(2);
+                            actBest = Types.ACTIONS.fromInt(3);
                         } else {
                             // FOLD
                             actBest = Types.ACTIONS.fromInt(0);
                         }
                     }
                     if (sop.getHoleCards(sop.getPlayer())[0].getRank() == high) {
-                        actBest = Types.ACTIONS.fromInt(2);
+                        actBest = Types.ACTIONS.fromInt(3);
                     }
                 }else{
                     actBest = Types.ACTIONS.fromInt(0);
@@ -183,32 +187,6 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
             }
         }
 
-/*
-
-        for(i = 0; i < acts.size(); ++i)
-        {
-            CurrentScore = rand.nextDouble();
-            vtable[i] = CurrentScore;
-            if (maxScore < CurrentScore) {
-                maxScore = CurrentScore;
-                bestActions.clear();
-                bestActions.add(acts.get(i));
-            } else if (maxScore == CurrentScore) {
-                bestActions.add(acts.get(i));
-            }
-        } // for
-        actBest = bestActions.get(rand.nextInt(bestActions.size()));
-        // if several actions have the same best score, select one of them randomly
-
-        // optional: show the best action
-        assert actBest != null : "Oops, no best action actBest";
-        if (!silent) {
-            StateObservation NewSO = so.copy();
-            NewSO.advance(actBest);
-            System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxScore);
-        }
-        actBest.setRandomSelect(true);		// the action was a random move
-*/
         if(sop.getChips()[sop.getPlayer()]<1){
             actBest = Types.ACTIONS.fromInt(0);
         }
