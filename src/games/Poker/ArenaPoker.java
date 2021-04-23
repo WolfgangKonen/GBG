@@ -33,7 +33,7 @@ public class ArenaPoker extends Arena   {
 
 
 	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		return new EvaluatorPoker(pa,gb,stopEval,mode,verbose);
+		return new EvaluatorPoker(pa,gb,stopEval,mode,0);
 	}
 	
 	public Feature makeFeatureClass(int featmode) {

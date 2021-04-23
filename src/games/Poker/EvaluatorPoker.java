@@ -43,7 +43,7 @@ public class EvaluatorPoker extends Evaluator {
 				m_msg = "no evaluation done ";
 				lastResult = Double.NaN;
 				return false;
-			case 0:  return evalAgent1(m_PlayAgent,randomAgent,randomAgent2,randomAgent3,m_gb)>m_thresh[0];
+			case 0:  return evalAgent1(m_PlayAgent,new PlayAgent[] {randomAgent},m_gb)>m_thresh[0];
 			default: return false;
 		}
 	}
@@ -51,17 +51,25 @@ public class EvaluatorPoker extends Evaluator {
 	public void evalAgentSpecificState(PlayAgent playAgent,StateObserverPoker so) {
 		m_PlayAgent = playAgent;
 		PlayAgent[] pavec = new PlayAgent[] {playAgent,randomAgent,randomAgent2,randomAgent3};
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(pavec), so, 100000, 2, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(pavec), so, 100, 2, null);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
 		System.out.println(m_msg);
 	}
 
 	public double evalAgent1(PlayAgent playAgent, PlayAgent opponent,PlayAgent opponent2,PlayAgent opponent3, GameBoard gb) {
+		PlayAgent[] pavec = new PlayAgent[] {opponent,opponent2,opponent3};
+		return evalAgent1(playAgent, pavec,  gb);
+	}
+	public double evalAgent1(PlayAgent playAgent, PlayAgent[] opponents, GameBoard gb) {
 		StateObservation so = gb.getDefaultStartState();
-		PlayAgent[] pavec = new PlayAgent[] {playAgent,opponent,opponent2,opponent3};
-
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 10000, 2);
+		PlayAgent[] pavec = new PlayAgent[opponents.length+1];
+		int i = 0;
+		pavec[i++] = playAgent;
+		for (PlayAgent opponent: opponents) {
+			pavec[i++] = opponent;
+		}
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 1000, 2, true);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -111,6 +119,24 @@ public class EvaluatorPoker extends Evaluator {
 			case 1 -> "placeholder";
 			default -> null;
 		};
+	}
+
+	/*
+	like competeNPlayerAllRoles but with random states
+	 */
+	public static ScoreTuple competeNPlayerAllRoles(PlayAgtVector paVector, StateObservation startSO, int competeNum,
+													int verbose) {
+		int N = startSO.getNumPlayers();
+		double sWeight = 1 / (double) N;
+		ScoreTuple sc, shiftedTuple, scMean = new ScoreTuple(N);
+		PlayAgtVector qaVector;
+		for (int k = 0; k < N; k++) {
+			qaVector = paVector.shift(k);
+			sc = XArenaFuncs.competeNPlayer(qaVector, startSO, competeNum, verbose, null,true);
+			shiftedTuple = sc.shift(N - k);
+			scMean.combine(shiftedTuple, ScoreTuple.CombineOP.AVG, 0, sWeight);
+		}
+		return scMean;
 	}
 
 }

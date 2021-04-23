@@ -33,6 +33,9 @@ public class GameBoardPokerGui extends JFrame {
     private JButton allInButton;
     private JButton continueButton;
 
+    private JButton[] actionButtons;
+    String[] actionTexts = {"fold","check","bet","call","raise","all in"};
+
     private JCheckBox waitCheck;
 
     private JLabel currentPlayerChipsLabel;
@@ -103,32 +106,32 @@ public class GameBoardPokerGui extends JFrame {
         waitCheck.setSelected(false);
 
         checkButton.addActionListener( e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(1);
         });
         betButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(2);
         });
         callButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(3);
         });
         raiseButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(4);
         });
         foldButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(0);
         });
         allInButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(5);
         });
 
         continueButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
                 continueWithTheGame();
         });
 
@@ -144,6 +147,10 @@ public class GameBoardPokerGui extends JFrame {
         actionPanel.add(allInButton);
         actionPanel.add(continueButton);
         actionPanel.add(waitCheck);
+
+        JButton[] tempActionButtons = {foldButton,checkButton,betButton,callButton,raiseButton,allInButton};
+        actionButtons = tempActionButtons;
+
         return actionPanel;
 
     }
@@ -362,10 +369,12 @@ public class GameBoardPokerGui extends JFrame {
         return Types.GUI_PLAYER_NAME[i];
     }
 
-    private void updateActions(StateObserverPoker SoP){
+    private void updateActions(StateObserverPoker SoP, boolean showValueOnGameboard){
         if(SoP.isRoundOver()&&waitCheck.isSelected()){
             pause = true;
             continueButton.setEnabled(true);
+
+            // disabling all buttons while waiting for the game to continue
             foldButton.setEnabled(false);
             checkButton.setEnabled(false);
             betButton.setEnabled(false);
@@ -373,6 +382,8 @@ public class GameBoardPokerGui extends JFrame {
             raiseButton.setEnabled(false);
             allInButton.setEnabled(false);
 
+            // showing the cards of the active players
+            // setting the cards of the inactive player to inactive
             for(int i = 0;i<SoP.getNumPlayers();i++) {
                 if(!SoP.getFoldedPlayers()[i]&&SoP.getPlayingPlayers()[i]){
                     holeCardsPanels[i*2].setCard(SoP.getHoleCards(i)[0].getImagePath());
@@ -391,34 +402,54 @@ public class GameBoardPokerGui extends JFrame {
                 }
             }
 
-        }else{
+        }else {
             ArrayList<Types.ACTIONS> allActions = SoP.getAllAvailableActions();
             for (Types.ACTIONS action : allActions) {
-                    switch (action.toInt()) {
-                        // FOLD
-                        case 0 -> foldButton.setEnabled(SoP.getAvailableActions().contains(action));
-                        // CHECK
-                        case 1 -> checkButton.setEnabled(SoP.getAvailableActions().contains(action));
-                        // BET
-                        case 2 -> betButton.setEnabled(SoP.getAvailableActions().contains(action));
-                        // CALL
-                        case 3 -> callButton.setEnabled(SoP.getAvailableActions().contains(action));
-                        // RAISE
-                        case 4 -> raiseButton.setEnabled(SoP.getAvailableActions().contains(action));
-                        // ALL IN
-                        case 5 -> allInButton.setEnabled(SoP.getAvailableActions().contains(action));
+                switch (action.toInt()) {
+                    // FOLD
+                    case 0 -> foldButton.setEnabled(SoP.getAvailableActions().contains(action));
+                    // CHECK
+                    case 1 -> checkButton.setEnabled(SoP.getAvailableActions().contains(action));
+                    // BET
+                    case 2 -> betButton.setEnabled(SoP.getAvailableActions().contains(action));
+                    // CALL
+                    case 3 -> callButton.setEnabled(SoP.getAvailableActions().contains(action));
+                    // RAISE
+                    case 4 -> raiseButton.setEnabled(SoP.getAvailableActions().contains(action));
+                    // ALL IN
+                    case 5 -> allInButton.setEnabled(SoP.getAvailableActions().contains(action));
+                }
+            }
+            // resetting the texts to default
+            for(int i = 0;i<actionTexts.length;i++)
+                actionButtons[i].setText(actionTexts[i]);
+            currentPlayerChipsLabel.setText("Chips: " + SoP.getChips()[SoP.getPlayer()]);
+
+
+            if (betButton.isEnabled()){
+                betButton.setText("bet (" + SoP.getBigblind() + ")");
+            }
+            if(raiseButton.isEnabled()) {
+                raiseButton.setText("raise (" + (SoP.getOpenPlayer(SoP.getPlayer()) + SoP.getBigblind()) + ")");
+            }
+            if(callButton.isEnabled()) {
+                callButton.setText("call (" + SoP.getOpenPlayer(SoP.getPlayer()) + ")");
+            }
+            if(allInButton.isEnabled()) {
+                allInButton.setText("all in (" + SoP.getChips()[SoP.getPlayer()] + ")");
+            }
+            continueButton.setEnabled(false);
+
+            if(showValueOnGameboard){
+
+                if(showValueOnGameboard&& SoP.getStoredActions()!=null )
+                    for(int i = 0;i<SoP.getStoredActions().length;i++){
+                        int act = SoP.getStoredActions()[i].toInt();
+                        // showing the expected reward of the stored action on the button
+                        actionButtons[act].setText(actionButtons[act].getText() +" ["+(Math.round((SoP.getStoredValues()[i])*100))/100.0+"] ");
                     }
             }
-            currentPlayerChipsLabel.setText("Chips: "+SoP.getChips()[SoP.getPlayer()]);
-            if(betButton.isEnabled())
-                betButton.setText("bet ("+SoP.getBigblind()+")");
-            if(raiseButton.isEnabled())
-                raiseButton.setText("raise ("+(SoP.getOpenPlayer(SoP.getPlayer())+SoP.getBigblind())+")");
-            if(callButton.isEnabled())
-                callButton.setText("call ("+SoP.getOpenPlayer(SoP.getPlayer())+")");
-            if(allInButton.isEnabled())
-                allInButton.setText("all in ("+SoP.getChips()[SoP.getPlayer()]+")");
-            continueButton.setEnabled(false);
+
         }
 
     }
@@ -429,6 +460,11 @@ public class GameBoardPokerGui extends JFrame {
 
     public void updateBoard(StateObserverPoker soT,
                             boolean withReset, boolean showValueOnGameboard) {
+
+        if(soT.isGameOver()) {
+            // todo: make sure that there is a meaningful game over message.
+            return;
+        }
 
         if(withReset) {
             System.out.println("with reset is called");
@@ -443,7 +479,7 @@ public class GameBoardPokerGui extends JFrame {
         updateCards(soT);
         updatePotValue(soT.getPotSize());
         updatePlayerInfo(soT);
-        updateActions(soT);
+        updateActions(soT, showValueOnGameboard);
 
         //repaint();
     }

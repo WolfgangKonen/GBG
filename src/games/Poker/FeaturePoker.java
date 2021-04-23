@@ -3,6 +3,8 @@ package games.Poker;
 import games.Feature;
 import games.StateObservation;
 
+import java.io.Serializable;
+
 
 /**
  * Implementation of {@link Feature} for game Poker.<p>
@@ -15,8 +17,9 @@ import games.StateObservation;
  * @author Tim Zeh, TH Koeln, Nov'20
  */
 
-public class FeaturePoker implements Feature{
+public class FeaturePoker implements Feature, Serializable {
 	int featMode;
+	int numPlayers = 4;
 
 	public FeaturePoker(int featMode) {
 		this.featMode = featMode;
@@ -27,7 +30,6 @@ public class FeaturePoker implements Feature{
 		Features of a Poker game:
 			player
 				states = {not playing, folded, active, open}
-				chips = #
 				toCall = #
 
 			pot
@@ -36,8 +38,6 @@ public class FeaturePoker implements Feature{
 			cards
 				activePlayer = ids
 				community = ids
-
-			ActivePlayer
 	 */
 	@Override
 	public double[] prepareFeatVector(StateObservation sob) {
@@ -48,16 +48,26 @@ public class FeaturePoker implements Feature{
 		// Cards
 		switch (featMode) {
 			case 0 -> {
+
 				int numPlayers = so.getNumPlayers();
+
 				double[] featureVector = new double[getInputSize(featMode)];
-				for (int i = 0; i < numPlayers; i++) {
-					featureVector[i] = so.getPlayerSate(i);
-					featureVector[i + numPlayers] = so.getChips()[i];
-					//TODO: inconsistent why do I use here no array? Should be standardized.
-					featureVector[i + numPlayers] = so.getOpenPlayer(i);
-				}
-				int tmp = numPlayers * 3;
+
+				// I think it makes sense to normalize the Feature Vector so that the active player is always at #0
+
+				// 0 => amount to call
+				// 1 => chips
+				// 2 => potsize
+				// 3,4 => hand cards in ascending order
+				// 5,6,7 => community cards in ascending order
+				// 8 ... 8+(n-2) => status of opponents
+
+				int tmp = 0;
+				featureVector[tmp++] = so.getOpenPlayer(so.getPlayer());
+				featureVector[tmp++] = so.getChips()[so.getPlayer()];
 				featureVector[tmp++] = so.getPotSize();
+
+				//todo "sort" cards in order
 				PlayingCard tmpCard;
 				featureVector[tmp++] = ((tmpCard = so.getHoleCards()[0]) != null) ? tmpCard.getId() : 0;
 				featureVector[tmp++] = ((tmpCard = so.getHoleCards()[1]) != null) ? tmpCard.getId() : 0;
@@ -66,7 +76,12 @@ public class FeaturePoker implements Feature{
 				featureVector[tmp++] = ((tmpCard = so.getCommunityCards()[2]) != null) ? tmpCard.getId() : 0;
 				featureVector[tmp++] = ((tmpCard = so.getCommunityCards()[3]) != null) ? tmpCard.getId() : 0;
 				featureVector[tmp++] = ((tmpCard = so.getCommunityCards()[4]) != null) ? tmpCard.getId() : 0;
-				featureVector[tmp] = so.getPlayer();
+
+				for (int i = 0; i < numPlayers; i++) {
+					if(i != so.getPlayer())
+						featureVector[tmp++] = so.getPlayerSate(i);
+				}
+
 				return featureVector;
 			}
 			case 1 -> throw new RuntimeException("Placeholder");
@@ -99,8 +114,7 @@ public class FeaturePoker implements Feature{
 	public int getInputSize(int featmode) {
 		switch (featmode) {
 			case 0 -> {
-				int numPlayers = 4;
-				return numPlayers * 3 + 1 + 2 + 5;
+				return 8 + numPlayers - 1;
 			}
 			case 1 -> throw new RuntimeException("Placeholder");
 			default -> throw new RuntimeException("Unknown featmode: " + featmode);

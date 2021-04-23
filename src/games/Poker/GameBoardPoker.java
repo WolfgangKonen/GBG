@@ -23,6 +23,10 @@ public class GameBoardPoker implements GameBoard {
 	public GameBoardPoker(Arena pokerGame) {
 		initGameBoard(pokerGame);
 	}
+
+	public GameBoardPoker() {
+		initGameBoard(null);
+	}
 	
     @Override
     public void initialize() {}
@@ -32,7 +36,7 @@ public class GameBoardPoker implements GameBoard {
 		m_Arena		= arGame;
 		m_so		= new StateObserverPoker();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui==null) {
 			m_gameGui = new GameBoardPokerGui(this);
         }
 
@@ -42,7 +46,7 @@ public class GameBoardPoker implements GameBoard {
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {
 			m_so = new StateObserverPoker();			// empty Table
-			if (m_Arena.hasGUI() && m_gameGui!=null) {
+			if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui!=null) {
 				m_gameGui.resetLog();
 			}
 		}
@@ -93,7 +97,8 @@ public class GameBoardPoker implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		m_so.advance(act);
-		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+		if(m_Arena!=null)
+			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 		arenaActReq = true;			// ask Arena for next action
 	}
 

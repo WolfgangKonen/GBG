@@ -1,5 +1,6 @@
 package games.Poker;
 
+import games.KuhnPoker.KuhnPokerConfig;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
@@ -7,6 +8,7 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Class StateObservation observes the current state of the game, it has utility functions for
@@ -37,9 +39,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	public static final int HIGH_CARD = 9;
 	public static final int KICKER = 10;
 
-	public static final int NUM_PLAYER = 4;
-	private static final int START_CHIPS = 100;
-	private static final int SMALLBLIND = 5;
+	public static final int NUM_PLAYER = PokerConfig.NUM_PLAYERS;
+	private static final int START_CHIPS = PokerConfig.START_CHIPS;
+	private static final int SMALLBLIND = PokerConfig.SMALLBLIND;
 	private static final int BIGBLIND = 2*SMALLBLIND;
 
 	private static final double REWARD_NEGATIVE = 0;
@@ -98,7 +100,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	public void restart(){
 		gameround = 0;
 		isPartialState = false;
-		rand = new Random(System.currentTimeMillis());
+		//rand = new Random(System.currentTimeMillis());
+		rand = new Random(ThreadLocalRandom.current().nextInt());
 		dealtCards = 0;
 		setRoundOver(false);
 		lastActions = new ArrayList<>();
@@ -132,7 +135,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	public StateObserverPoker() {
 		gameround = 0;
 		isPartialState = false;
-		rand = new Random(System.currentTimeMillis());
+		//rand = new Random(System.currentTimeMillis());
+		rand = new Random(ThreadLocalRandom.current().nextInt());
 		dealtCards = 0;
 		lastActions = new ArrayList<>();
 		GAMEOVER = false;
@@ -170,7 +174,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 		gameround = other.gameround;
 		isPartialState = other.isPartialState;
-		rand = new Random(System.currentTimeMillis());
+		//rand = new Random(System.currentTimeMillis());
+		rand = new Random(ThreadLocalRandom.current().nextInt());
+
 		dealtCards = other.dealtCards;
 		////PokerLog.gameLog.log(Level.WARNING," brand after blueprint!");
 		debug = other.debug;
@@ -251,16 +257,21 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 		this.communityCards[dealtCards++] = new PlayingCard(id);
 		if(dealtCards == 3) {
+			m_phase = 1;
 			addToLog("Deal Flop : " + this.communityCards[0] + "/" + this.communityCards[1] + "/" + this.communityCards[2]);
 		} else if(dealtCards == 4) {
+			m_phase = 2;
 			addToLog("Deal Turn : " + this.communityCards[3]);
 		} else if(dealtCards == 5) {
+			m_phase = 3;
 			addToLog("Deal River : " + this.communityCards[4]);
 		}
 	}
 
 	private int dealCard(){
-		int randomCard = cards.remove(rand.nextInt(cards.size()));
+		//int randomCard = cards.remove(rand.nextInt(cards.size()));
+		int randomCard = cards.remove(ThreadLocalRandom.current().nextInt(cards.size()));
+
 		availableRandomActions.remove(ACTIONS.fromInt(randomCard));
 		return randomCard;
 	}
@@ -781,7 +792,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 	public void advanceNondeterministic() {
 		ArrayList<ACTIONS> possibleRandoms = getAvailableRandoms();
-		advanceNondeterministic(possibleRandoms.get(rand.nextInt(possibleRandoms.size())));
+		//advanceNondeterministic(possibleRandoms.get(rand.nextInt(possibleRandoms.size())));
+		// above doesn't provide sufficiently random results
+		advanceNondeterministic(possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size())));
 	}
 
 	//</editor-fold>
@@ -1101,6 +1114,11 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		return pots.getOpenPlayer(player);
 	}
 
+	public double getOpen(){
+		return getOpenPlayer(m_Player);
+	}
+
+
 	public String getLastAction(){
 		if(lastActions.size()>0)
 			return lastActions.get(lastActions.size()-1)+"\r\n";
@@ -1223,6 +1241,40 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 	public int getMoveCounter() {
 		return m_counter;
+	}
+
+
+	public Types.ACTIONS[] getStoredActions(){
+		return storedActions;
+	}
+
+	public void resetCards(){
+		//reset card deck
+		initCardDeck();
+
+		// reset cards
+		holeCards = new PlayingCard[NUM_PLAYER][2];
+		communityCards = new PlayingCard[5];
+
+		// everybody with chips plays again
+
+		for(int i = 0;i<NUM_PLAYER;i++){
+			if(chips[i]<=0) {
+
+			}else{
+				//deal new hole cards
+				holeCards[i][0] = new PlayingCard(dealCard());
+				holeCards[i][1] = new PlayingCard(dealCard());
+			}
+		}
+	}
+
+	public void randomizeState(){
+		resetCards();
+	}
+
+	public int getPhase(){
+		return m_phase;
 	}
 
 }

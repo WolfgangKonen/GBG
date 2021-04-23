@@ -1,5 +1,9 @@
 package games.Poker;
 
+import games.BlackJack.BlackJackConfig;
+import games.BlackJack.Hand;
+import games.BlackJack.Player;
+import games.BlackJack.StateObserverBlackJack;
 import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
@@ -20,112 +24,145 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
      */
     private static final long serialVersionUID = 7556763505414386566L;
 
+    private final int numPlayers = PokerConfig.NUM_PLAYERS;
+	private final int startChips = PokerConfig.START_CHIPS;
 	public XNTupleFuncsPoker() {
 
     }
 
-    
-    //
-	// The following five functions are only needed for the n-tuple interface:
-	//
-	/**
-	 * @return the number of board cells
-	 */
 	@Override
 	public int getNumCells() {
-		return 9;
+		return 7 + numPlayers - 1;
 	}
-	
-	/**
-	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
-	 * can have. For TicTacToe: P=3, with 0:"O", 1=empty, 2="X") 
-	 */
+
+
 	@Override
 	public int getNumPositionValues() {
-		return 3; 
+		return startChips*numPlayers;
 	}
-	
-	/**
-	 * @return the number of players in this game 
-	 */
+
+
+	@Override
+	public int[] getPositionValuesVector() {
+		// I think it makes sense to normalize the Feature Vector so that the active player is always at #0
+
+		// 0 => amount to call // leave out
+		// 1 => chips // leave out
+		// 2 => potsize // leave out
+		// 3,4 => hand cards in ascending order
+		// 5,6,7,8,9 => community cards in ascending order
+		// 10 ... 10+(n-2) => status of opponents
+		int[] positionValues = new int[getNumCells()];
+		int i = 0;
+		//positionValues[i++] = startChips*numPlayers;
+		//positionValues[i++] = startChips*numPlayers;
+		//positionValues[i++] = startChips*numPlayers;
+		positionValues[i++] = 52;
+		positionValues[i++] = 52;
+		positionValues[i++] = 52;
+		positionValues[i++] = 52;
+		positionValues[i++] = 52;
+		positionValues[i++] = 52;
+		positionValues[i++] = 52;
+
+		for (int x = 0; x < numPlayers-1; x++) {
+				positionValues[i++] = 4;
+		}
+		return positionValues;
+	}
+
 	@Override
 	public int getNumPlayers() {
-		return 2;
+		return PokerConfig.NUM_PLAYERS;
 	}
-	
-	/**
-	 * @return the maximum number of symmetries in this game
-	 */
+
+	@Override
 	public int getNumSymmetries() {
-		return 8;
+		return 1;
 	}
-	
-	/**
-	 * The board vector is an {@code int[]} vector where each entry corresponds to one 
-	 * cell of the board. In the case of TicTacToe the mapping is
-	 * <pre>
-	 *    0 1 2
-	 *    3 4 5
-	 *    6 7 8
-	 * </pre>
-	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
-	 * position value with 0:"O", 1=empty, 2="X".
-	 */
+
 	@Override
 	public BoardVector getBoardVector(StateObservation so) {
-		return null;
+		StateObserverPoker m_so = (StateObserverPoker) so.copy();
+		int[] bvec = new int[getNumCells()];
+
+
+		int player = m_so.getPlayer();
+
+		int tmp = 0;
+		//bvec[tmp++] = (int) m_so.getOpenPlayer(so.getPlayer());
+		//bvec[tmp++] = (int) m_so.getChips()[so.getPlayer()];
+		//bvec[tmp++] = m_so.getPotSize();
+
+		//todo "sort" cards in order
+		PlayingCard tmpCard;
+		bvec[tmp++] = ((tmpCard = m_so.getHoleCards()[0]) != null) ? tmpCard.getId() : 0;
+		bvec[tmp++] = ((tmpCard = m_so.getHoleCards()[1]) != null) ? tmpCard.getId() : 0;
+		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[0]) != null) ? tmpCard.getId() : 0;
+		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[1]) != null) ? tmpCard.getId() : 0;
+		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[2]) != null) ? tmpCard.getId() : 0;
+		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[3]) != null) ? tmpCard.getId() : 0;
+		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[4]) != null) ? tmpCard.getId() : 0;
+
+		for (int i = 0; i < numPlayers; i++) {
+			if(i != so.getPlayer())
+				bvec[tmp++] = (int) m_so.getPlayerSate(i);
+		}
+
+		return new BoardVector(bvec);
 	}
-	
-	/**
-		TODO
-	 */
+
 	@Override
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
-		return null;
+		return new BoardVector[] {boardVector};
 	}
-	
-	/**
-	 	TODO
-	 */
+
 	@Override
 	public int[] symmetryActions(int actionKey) {
-		return null;
+		return new int[] {actionKey};       // /WK/ default implementation for 'no symmetries' (except self)
 	}
-	
-	/** 
-	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
-	 * Different n-tuples may have different length. An n-tuple {0,1,4} means a 3-tuple 
-	 * containing the cells 0, 1, and 4.
-	 * 
-	 * @param mode one of the values from {@link #fixedNTupleModesAvailable()}
-	 * @return nTuples[numTuples][]
-	 */
+
 	@Override
 	public int[][] fixedNTuples(int mode) {
+		int[] all = new int[getNumCells()];
+		for(int x=0;x<all.length;x++)
+			all[x]=x;
+
+		switch (mode) {
+			// 0 => amount to call
+			// 1 => chips
+			// 2 => potsize
+			// 3,4 => hand cards in ascending order
+			// 5,6,7 => community cards in ascending order
+			// 8 ... 8+(n-2) => status of opponents
+
+			case 1:
+				return new int[][]{
+						all
+				};
+		}
 		return null;
 	}
 
 	@Override
 	public String fixedTooltipString() {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
-		return "<html>"
-				+ "1: 40 best chosen 4-tuples"+"<br>" 
-				+ "2: all the straight 3-tuples" 
-				+ "</html>";
+		return "<html>" + "1: 40 best chosen 4-tuples" + "<br>" + "2: all the straight 3-tuples" + "</html>";
 	}
 
-    private static final int[] fixedModes = {1,2};
-    
+	private static final int[] fixedModes = {1};
+
 	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
 	}
 
-
-	@SuppressWarnings("rawtypes")
+	@Override
 	public HashSet adjacencySet(int iCell) {
-		return null;
+		HashSet<Integer> adjacencySet = new HashSet<>();
+		for(int x=0;x<getNumCells();x++)
+			adjacencySet.add(x);
+		return adjacencySet;
 	}
-
 
 
 }
