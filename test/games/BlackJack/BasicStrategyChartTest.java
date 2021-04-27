@@ -6,6 +6,8 @@ import games.XNTupleFuncs;
 import org.junit.Test;
 import tools.Types;
 
+import java.util.Random;
+
 // Tests the validity of Basic Strategy
 public class BasicStrategyChartTest {
 
@@ -106,8 +108,38 @@ public class BasicStrategyChartTest {
         assert (values[0] > values[1]): "avgPayOffStand should be greater than avgPayOffSurrender";
         assert (values[0] > values[2]): "avgPayOffStand should be greater than avgPayOffDoubleDown";
         assert (values[0] > values[3]): "avgPayOffStand should be greater than avgPayOffHit";
+    }
 
+    //expected best move Hit
+    @Test
+    public void testHardFiveAgainstDealersSix(){
 
+        StateObserverBlackJack so = initSo(new Card(Card.Rank.TWO, Card.Suit.SPADE), new Card(Card.Rank.THREE, Card.Suit.SPADE),
+                new Card(Card.Rank.SIX, Card.Suit.CLUB));
+
+        assert (so.getAvailableActions().size() == 4) : "AvailableActions.size should return 4";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()))): "Stand should be in Available Actions";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SURRENDER.getAction()))): "Surrender should be in Available Actions";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.DOUBLEDOWN.getAction()))): "DoubleDown should be in Available Actions";
+        assert (so.getAvailableActions().contains(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.HIT.getAction()))): "HIT should be in Available Actions";
+
+        double []values = simulation(so);
+        System.out.println("BA example {2,3} against dealer 6");
+        System.out.println("Stand: " + values[0]);
+        System.out.println("Sur: " + values[1]);
+        System.out.println("dd: " + values[2]);
+        System.out.println("Hit: " + values[3]);
+        System.out.println("Hit with random moves: " + simulationHitWithRandomMove(so));
+        System.out.println("Hit with random rollout fixed depth 10 : " + simulationWithRandomMovesFixedRollout(so, Types.ACTIONS.fromInt(
+                StateObserverBlackJack.BlackJackActionDet.HIT.getAction()
+        )));
+        System.out.println("Stand with random rollout fixed depth 10 : " + simulationWithRandomMovesFixedRollout(so, Types.ACTIONS.fromInt(
+                StateObserverBlackJack.BlackJackActionDet.STAND.getAction()
+        )));
+
+        assert (values[3] > values[1]): "avgPayOffStand should be greater than avgPayOffSurrender";
+        assert (values[3] > values[2]): "avgPayOffStand should be greater than avgPayOffDoubleDown";
+        assert (values[3] > values[0]): "avgPayOffStand should be greater than avgPayOffStand";
     }
 
     //expected best move Hit
@@ -569,6 +601,42 @@ public class BasicStrategyChartTest {
 
     }
 
+    public double simulationHitWithRandomMove(StateObserverBlackJack  so){
+        Random r = new Random();
+        double avgPayOffHit = 0;
+        for(int i = 0; i < NUM_ITERATIONS; i++){
+            StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
+            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.HIT.getAction()));
+            while(!newSo.isRoundOver()){
+                int action = r.nextInt(newSo.getNumAvailableActions());
+                newSo.advance(newSo.getAction(action));
+            }
+            avgPayOffHit += newSo.getCurrentPlayer().getRoundPayoff();
+        }
+        avgPayOffHit /= NUM_ITERATIONS;
+
+        return avgPayOffHit;
+    }
+
+    public double simulationWithRandomMovesFixedRollout(StateObserverBlackJack  so, Types.ACTIONS a){
+        Random r = new Random();
+        double avgFinalReward = 0;
+        for(int i = 0; i < NUM_ITERATIONS; i++){
+            StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
+            newSo.advance(a);
+            if(newSo.isRoundOver())
+                newSo.initRound();
+            for(int f = 0; f < 5; f++){
+                newSo.advance(newSo.getAction(r.nextInt(newSo.getNumAvailableActions())));
+                if(newSo.isRoundOver())
+                    newSo.initRound();
+            }
+            avgFinalReward += newSo.getGameScore(0);
+        }
+        avgFinalReward /= NUM_ITERATIONS;
+
+        return avgFinalReward-200;
+    }
 
 
     public double[] simulation(StateObserverBlackJack  so){
