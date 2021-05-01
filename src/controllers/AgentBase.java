@@ -197,7 +197,9 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	        
 			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
 			s_t.advance(a_t);		// advance the state (game-specific behavior)
-				        
+
+			if(s_t.isRoundOver()&&!s_t.isGameOver()&&s_t.isRoundBasedGame())
+				s_t.initRound();
 		} while(!s_t.isGameOver());			
 				
 		incrementGameNum();
