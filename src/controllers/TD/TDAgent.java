@@ -388,11 +388,11 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		NewSO = so.copy();
 		NewSO.advance(act);
 
-		//
 		// the recursive part (only for deterministic games) is for the case of 
 		// multi-moves: the player who just moved gets from StateObservation 
 		// the signal for one (or more) additional move(s)
-		if (so.isDeterministicGame() && so.getNumPlayers()>1 && !NewSO.isGameOver()) 
+		// todo: are there round-based games that are deterministic?
+		if (so.isDeterministicGame() && so.getNumPlayers()>1 && !NewSO.isGameOver())
 		{
 			int newPlayer =  Types.PLAYER_PM[NewSO.getPlayer()];
 			if (newPlayer==player) 
@@ -404,7 +404,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			}
 		}
 
-		if (NewSO.isGameOver()) 
+		if (NewSO.isGameOver()||NewSO.isRoundOver()&&NewSO.isRoundBasedGame())
 		{
 			CurrentScore = NewSO.getGameScore(so);
 		} 
@@ -453,7 +453,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 //        }
 //        
         //very inefficient, change later
-		if (NewSO.isGameOver()) 
+		if (NewSO.isGameOver()||NewSO.isRoundOver()&&NewSO.isRoundBasedGame())
 			CurrentScore = NewSO.getGameScore(so);
 		else 
 			CurrentScore = getGamma()* m_Net.getScore(m_feature.prepareFeatVector(so));;
@@ -543,7 +543,11 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			oldSO = so.copy();
 			so.advance(actBest);
 
-			if (so.isGameOver()) {
+			//couldn't we just train till round over?
+			//if(so.isRoundOver()&&!so.isGameOver()){
+			//	so.initRound();
+			//}
+			if (so.isGameOver()||so.isRoundOver()&&so.isRoundBasedGame()) {
 				// Fetch a reward and normalize it to the range [0,1], since 
 				// TD_NNet may build a value function with a sigmoid function
 				// mapping to [0,1]. Then it can use only rewards in [0,1].
@@ -680,8 +684,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			if (counter==epiLength) {
 				break;
 			}
-			
-			if (randomMove && !so.isGameOver() && !learnFromRM) 
+
+			if (randomMove && !so.isGameOver() && !learnFromRM && (!so.isRoundOver()&&so.isRoundBasedGame()))
 			{
 				// no training, go to next move
 				lastInput[player] = m_feature.prepareFeatVector(so);
@@ -706,11 +710,11 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				if (eMax==0) {
 					wghtChange=true;
 				} else {
-					if (so.isGameOver()) numFinishedGames++;
-					wghtChange = (so.isGameOver() && (numFinishedGames % eMax) == 0);
+					if (so.isGameOver()||so.isRoundOver()&&so.isRoundBasedGame()) numFinishedGames++;
+					wghtChange = ((so.isGameOver()||so.isRoundOver()&&so.isRoundBasedGame()) && (numFinishedGames % eMax) == 0);
 				}
 				
-				if(so.isGameOver())
+				if(so.isGameOver()||so.isRoundOver()&&so.isRoundBasedGame())
 				{
 					double rew;
 					for(int i = 0; i < 3; i++)
@@ -718,14 +722,14 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 						rew = so.getGameScore(i);
 						rew = normalize2(rew,so);
 						//input = m_feature.prepareFeatVector(so);
-						m_Net.updateWeights(rew, lastInput[i], so.isGameOver(), wghtChange);
+						m_Net.updateWeights(rew, lastInput[i], so.isGameOver()||so.isRoundOver()&&so.isRoundBasedGame(), wghtChange);
 					}
 					break;
 				}
 				else
 				{
 					//input = m_feature.prepareFeatVector(so);
-					m_Net.updateWeights(0.0, lastInput[player], so.isGameOver(), wghtChange);
+					m_Net.updateWeights(0.0, lastInput[player], so.isGameOver()||so.isRoundOver()&&so.isRoundBasedGame(), wghtChange);
 					lastInput[player] = m_feature.prepareFeatVector(so);
 				}
 			}
