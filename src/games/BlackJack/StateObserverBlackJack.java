@@ -224,7 +224,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     @Override
     public boolean isGameOver() {
-        if(episode > epiLength)
+        if(episode >= epiLength)
             return true;
         for (Player p : players){
             if(p.getChips() >= 10 || p.betOnActiveHand() > 0) {
