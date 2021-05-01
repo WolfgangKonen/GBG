@@ -1090,20 +1090,20 @@ public class XArenaFuncs {
 			pa_string[i] = paVector.pavec[i].stringDescr();
 
 		switch (numPlayers) {
-		case (1):
-			sMsg = "Competition, " + competeNum + " episodes: \n" + pa_string[0];
-		case (2):
-			sMsg = "Competition, " + competeNum + " episodes: \n" + 
-				   "      X: " + pa_string[0] + " \n" + "   vs O: " + pa_string[1];
-			break;
-		default:
-			sMsg = "Competition, " + competeNum + " episodes: \n";
-			for (int n = 0; n < numPlayers; n++) {
-				sMsg = sMsg + "    P" + n + ": " + pa_string[n];
-				if (n < numPlayers - 1)
-					sMsg = sMsg + ", \n";
-			}
-			break;
+			case (1):
+				sMsg = "Competition, " + competeNum + " episodes: \n" + pa_string[0];
+			case (2):
+				sMsg = "Competition, " + competeNum + " episodes: \n" +
+						"      X: " + pa_string[0] + " \n" + "   vs O: " + pa_string[1];
+				break;
+			default:
+				sMsg = "Competition, " + competeNum + " episodes: \n";
+				for (int n = 0; n < numPlayers; n++) {
+					sMsg = sMsg + "    P" + n + ": " + pa_string[n];
+					if (n < numPlayers - 1)
+						sMsg = sMsg + ", \n";
+				}
+				break;
 		}
 		if (verbose > 0)
 			System.out.println(sMsg);
@@ -1112,9 +1112,9 @@ public class XArenaFuncs {
 			// some diagnostic info to print when called via tournament system:
 			System.out.println("Competition: " + competeNum + " episodes " + pa_string[0] + " vs "
 					+ pa_string[1]/*
-									 * +" with "+rndmStartMoves+
-									 * " random startmoves"
-									 */);
+			 * +" with "+rndmStartMoves+
+			 * " random startmoves"
+			 */);
 			String currDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd--HH.mm.ss"));
 			System.out.println("Episode Start @ " + currDateTime);
 			System.out.println("start state: " + startSO);
@@ -1126,6 +1126,11 @@ public class XArenaFuncs {
 
 			int player = startSO.getPlayer();
 			so = startSO.copy();
+
+			if(so.needsRandomization()) {
+				// Randomizing the start state in case a game already is initalized with a state to make sure there is a fair competition.
+				so.randomizeStartState();
+			}
 
 			while (true) {
 				long startTNano = System.nanoTime();
@@ -1203,7 +1208,6 @@ public class XArenaFuncs {
 		}
 		return scMean;
 	}
-
 	/**
 	 * Does the main work for menu items 'Single Compete', 'Swap Compete' and
 	 * 'Compete All Roles'. These menu items set enum {@link Arena#taskState} to

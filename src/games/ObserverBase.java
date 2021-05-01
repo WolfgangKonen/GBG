@@ -416,4 +416,8 @@ abstract public class ObserverBase implements StateObservation {
 
     public boolean isRoundBasedGame(){return false;}
 
+	public void randomizeStartState(){}
+
+	public boolean needsRandomization(){return false;}
+
 }

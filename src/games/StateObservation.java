@@ -335,5 +335,8 @@ public interface StateObservation extends Serializable{
 	 * 			(e.g. TicTacToe) and so on
 	 */
 	int getNumPlayers();
-	
+
+	void randomizeStartState();
+
+	boolean needsRandomization();
 }

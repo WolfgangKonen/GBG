@@ -1273,6 +1273,10 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		resetCards();
 	}
 
+	public boolean needsRandomization(){
+		return true;
+	}
+
 	public int getPhase(){
 		return m_phase;
 	}
