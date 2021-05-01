@@ -2,17 +2,26 @@ package games.BlackJack;
 
 import java.util.ArrayList;
 
+
+/**
+ * Wraps an action and a button. This simplifies the assignement of an evaluation value made from an agent for this action.
+ */
 public class Dealer {
-    ArrayList<Card> hand = new ArrayList<Card>();
+
 
     public Dealer(String name) {
         this.name = name;
     }
-
-    ArrayList<Hand> hands = new ArrayList<Hand>();
+    /**
+     * Hand of the dealer
+     */
     Hand activeHand = null;
     String name;
 
+    /**
+     * Copyconstructor
+     * @param other dealer
+     */
     public Dealer(Dealer other) {
         if (other.activeHand != null) {
             this.activeHand = new Hand(other.activeHand);

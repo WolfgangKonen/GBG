@@ -15,7 +15,9 @@ public class BasicStrategyChart {
         H, S, P, Dh, Ds, Rh;
     }
 
-    // chart for hard hands
+    /**
+     * chart for hard hands
+     */
     public static final Move hardHand[][] = {
             /*dealers upcard
                    :  2        3        4        5         6        7        8        9       10       Ace */
@@ -39,7 +41,9 @@ public class BasicStrategyChart {
             {/*21*/	Move.S	,Move.S	 ,Move.S  ,Move.S	,Move.S	 ,Move.S  ,Move.S  ,Move.S	,Move.S	 ,Move.S},
     } ;
 
-    // chart for soft hands
+    /**
+     * chart for soft hands
+     */
     public static final Move softHand[][] = {
 
             /*dealers upcard
@@ -56,7 +60,9 @@ public class BasicStrategyChart {
             {/*21*/	Move.S	,Move.S	 ,Move.S  ,Move.S	,Move.S	 ,Move.S  ,Move.S  ,Move.S	,Move.S	 ,Move.S},
     } ;
 
-    // chart for pairs
+    /**
+     * chart for pairs
+     */
     public static final Move pairHand[][] = {
 
             /*dealers upcard

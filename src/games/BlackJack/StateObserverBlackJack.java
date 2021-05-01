@@ -34,6 +34,12 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     }
 
 
+    /**
+     * used to create StateObservers for test cases.
+     * the default constructor will call this and set the params from BlackJackConfig
+     * @param num_players number of players participating
+     * @param epiLength episode length (number of rounds played until the game is over)
+     */
     public StateObserverBlackJack(int num_players, int epiLength){
         players = new Player[num_players];
         playerActedInPhase = new boolean[num_players];
@@ -51,6 +57,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     }
 
 
+    /**
+     * copy-constructor
+     * @param other StateObserverBlackJack
+     */
     public StateObserverBlackJack(StateObserverBlackJack other) {
         super(other);
         this.players = new Player[other.players.length];
@@ -73,7 +83,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     }
 
 
-    // mapping Deterministic actions to ENUMS to get more readable code
+    /**
+     * mapping Deterministic actions to ENUMS to get better readable code
+     */
     public enum BlackJackActionDet {
         BET10(0), HIT(1), STAND(2), DOUBLEDOWN(3), SPLIT(4),
         SURRENDER(5), INSURANCE(6), NOINSURANCE(7);
@@ -89,7 +101,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         }
     }
 
-    // mapping NonDeterministic actions to ENUMS
+    /**
+     *  mapping NonDeterministic actions to ENUMS
+     */
     enum BlackJackActionNonDet {
         DEALCARD(0), DEALERPLAYS(1), PAYPLAYERS(2), PEEKFORBLACKJACK(3);
 
@@ -104,12 +118,18 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         }
     }
 
-    // Enum Gamephases to keep track of the phase the game is in
-    // BPHASE -> Players need to place a bet before they get cards
-    // DEALPHASE -> Players and Dealer get dealt 2 cards
-    // PLAYERONACTION -> Players play their hand(s)
-    // DEALERONACTION -> Dealer Plays his hand (nondetermenistic)
-    // PAYOUT -> Determin which players won against the dealer and paying them
+
+
+    /**
+     * Enum Gamephases to keep track of the phase the game is in
+     * <ul>
+     * <li>BPHASE -> Players need to place a bet before they get cards</li>
+     * <li>DEALPHASE -> Players and Dealer get dealt 2 cards</li>
+     * <li>PLAYERONACTION -> Players play their hand(s)</li>
+     * <li>DEALERONACTION -> Dealer Plays his hand (nondetermenistic)</li>
+     * <li>PAYOUT -> Determin which players won against the dealer and paying them</li>
+     * </ul>
+     */
     enum gamePhase {
         BETPHASE(0), DEALPHASE(1), ASKFORINSURANCE(2) ,PEEKFORBLACKJACK(3),
         PLAYERONACTION(4), DEALERONACTION(5), PAYOUT(6);
@@ -141,6 +161,13 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         THIS_PLAYER, WHATS_ON_TABLE, FULL;
     }
 
+    /**
+     * returns a partial state
+     * possible modes THIS_PLAYER (what the current player would see), WHATS_ON_TABLE (what an observer would see),
+     * FULL (every information in game can be accesed)
+     * @param mode
+     * @return resulting partial state
+     */
     public StateObservation partialState(PartialStateMode mode) {
         switch (mode) {
             case THIS_PLAYER:
@@ -163,6 +190,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         return new StateObserverBlackJack(this);
     }
 
+    /**
+     * completes face-down-card of the dealer depending on the phase the gamestate is in
+     * @return resulting GameState (never used)
+     */
     @Override
     public StateObservation randomCompletion(){
         //setPartialState(false); // maybe not needed. maybe we should introduce a flag completed
@@ -197,6 +228,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     }
 
+    /**
+     * completes this gamestate randomly by: dealers face-down-card
+     * @return resulting GameState (never used)
+     */
     private StateObservation completeRandom(){
         dealer.getActiveHand().getCards().remove(1);
         dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
@@ -205,6 +240,11 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         return this;
     }
 
+    /**
+     * completes this gamestate restricted by: dealers face-down-card.
+     * this completion cannot result in a Natural-Blackjack for the dealer.
+     * @return resulting GameState (never used)
+     */
     private StateObservation completeRestricted(){
 
         do{
@@ -570,8 +610,11 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     }
 
-    public void setAvailableRandoms() { // the gamephase determins which nondeterministic action is triggered
-                                        // problem because it is not randomly chosen??????
+    /**
+     * sets the next nonDeterministic action
+     */
+    public void setAvailableRandoms() { // the gamephase determines which nondeterministic action is triggered
+
         availableRandoms.clear();
         switch (gPhase) {
             case DEALPHASE:
@@ -592,6 +635,9 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     }
 
+    /**
+     * helper method to advance the gPhase (circular)
+     */
     public void advancePhase() {
         gPhase = gPhase.getNext();
         playerActedInPhase = new boolean[players.length];
@@ -825,6 +871,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             setAvailableActions();
     }
 
+
+    /**
+     * inits a new round after a roundOver situation is reached
+     */
     @Override
     public void initRound(){
         // Setup new Round
@@ -839,7 +889,8 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         isNextActionDeterministic = true;
         setAvailableActions();
         //temporal change for large simulations
-        if(log.size() > 100)
+        //increasing ArrayList size will slow down the copy speed
+        if(log.size() > 300)
             log.clear();
         lastMoves.clear();
     }
@@ -905,10 +956,16 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         setPlayer(getNextPlayer());
     }
 
+    /**
+     * @return current phase the game is in
+     */
     public StateObserverBlackJack.gamePhase getCurrentPhase() {
         return gPhase;
     }
 
+    /**
+     * @return if every player acted in the current phase
+     */
     public boolean everyPlayerActed() {
         for (boolean a : playerActedInPhase) {
             if (!a) {
@@ -926,6 +983,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     public ArrayList<String> getHandHistory() {
         return log;
     }
+
 
     private String logHeadEntry(){
         String logHead ="";
