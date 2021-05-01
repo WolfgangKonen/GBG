@@ -33,6 +33,9 @@ public class LoadSaveGBG {
 	private final JFrame arenaFrame;
 	private final String TAG = "[LoadSaveGBG] ";
 
+	private String subDirDef;
+	private String strDirDef;
+
 	public LoadSaveGBG(Arena areGame, JFrame areFrame) {
 		this.arenaGame = areGame;
 		this.arenaFrame = areFrame;
@@ -42,6 +45,14 @@ public class LoadSaveGBG {
 			fc = new JFileChooserApprove();
 			fc.setCurrentDirectory(new File(strDir));			
 		}
+	}
+
+	public LoadSaveGBG(String directory, String subDirectory) {
+		subDirDef = subDirectory;
+		strDirDef = directory;
+		arenaGame = null;
+		arenaFrame = null;
+
 	}
 
 	// It seems that the progress bar dialog and its later disposal cause from time to
@@ -115,9 +126,11 @@ public class LoadSaveGBG {
 		try {
 			fos = new FileOutputStream(filePath);
 		} catch (FileNotFoundException e2) {
-			arenaGame.showMessage("ERROR: Could not save TDAgent to " + filePath,
-					"LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
-			arenaGame.setStatusMessage("[ERROR: Could not save to file " + filePath + " !]");
+			if(arenaGame!=null) {
+				arenaGame.showMessage("ERROR: Could not save TDAgent to " + filePath,
+						"LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
+				arenaGame.setStatusMessage("[ERROR: Could not save to file " + filePath + " !]");
+			}
 			return;
 		}
 
@@ -130,7 +143,8 @@ public class LoadSaveGBG {
 			};
 
 		} catch (IOException e1) {
-			arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for" + filePath + " !]");
+			if(arenaGame!=null)
+				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for" + filePath + " !]");
 			throw e1;
 		}
 
@@ -147,7 +161,8 @@ public class LoadSaveGBG {
 		try {
 			oos = new ObjectOutputStream(ptos);
 		} catch (IOException e) {
-			arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
+			if(arenaGame!=null)
+				arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
 //			oos.close();
 			return;
 		}
@@ -159,10 +174,12 @@ public class LoadSaveGBG {
 		} catch (IOException e) {
 //			disposeProgressDialog(dlg);
 			if (e instanceof NotSerializableException) {
-				arenaGame.showMessage("ERROR: Object pa of class "+pa.getClass().getName()
-					+" is not serializable", "LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
+				if(arenaGame!=null)
+					arenaGame.showMessage("ERROR: Object pa of class "+pa.getClass().getName()
+						+" is not serializable", "LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
 			}
-			arenaGame.setStatusMessage("[ERROR: Could not write to file " + filePath + " !]");
+			if(arenaGame!=null)
+				arenaGame.setStatusMessage("[ERROR: Could not write to file " + filePath + " !]");
 			oos.close();
 			throw new IOException("ERROR: Could not write object to file! ["+e.getClass().getName()+"]");
 		}
@@ -172,14 +189,16 @@ public class LoadSaveGBG {
 			oos.close();
 			fos.close();
 		} catch (IOException e) {
-			arenaGame.setStatusMessage("[ERROR: Could not complete save process]");
+			if(arenaGame!=null)
+				arenaGame.setStatusMessage("[ERROR: Could not complete save process]");
 //			disposeProgressDialog(dlg);
 			throw new IOException("ERROR: Could not complete save process ["+e.getClass().getName()+"]");
 		}
 
 //		disposeProgressDialog(dlg);
 //		arenaGame.setProgress(null);
-		arenaGame.setStatusMessage("Done.");
+		if(arenaGame!=null)
+			arenaGame.setStatusMessage("Done.");
 	}
 
 	// 
@@ -217,8 +236,15 @@ public class LoadSaveGBG {
 			System.out.println(TAG+"ERROR :: saveGBGHelper - pa and tsr handed over, just give one, aborting save");
 			return;
 		}
-		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
-		String subDir = arenaGame.getGameBoard().getSubDir();
+		String strDir;
+		String subDir;
+		if(arenaGame!=null) {
+			strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + this.arenaGame.getGameName();
+			subDir = arenaGame.getGameBoard().getSubDir();
+		}else{
+			strDir = this.strDirDef;
+			subDir  = this.subDirDef;
+		}
 		if (subDir != null){
 			strDir += "/"+subDir;
 		}
@@ -275,12 +301,15 @@ public class LoadSaveGBG {
 				fos = new FileOutputStream(filePath);
 			} catch (FileNotFoundException e2) {
 				if (pa != null)
-					arenaGame.showMessage("ERROR: Could not save TDAgent to " + filePath,
-						"LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
-				if (tsr != null)
-					arenaGame.showMessage("ERROR: Could not save TSResultStorage to " + filePath,
+					if(arenaGame!=null)
+						arenaGame.showMessage("ERROR: Could not save TDAgent to " + filePath,
 							"LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
-				arenaGame.setStatusMessage("[ERROR: Could not save to file " + filePath + " !]");
+				if (tsr != null)
+					if(arenaGame!=null)
+						arenaGame.showMessage("ERROR: Could not save TSResultStorage to " + filePath,
+								"LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not save to file " + filePath + " !]");
 				return;
 			}
 
@@ -293,7 +322,8 @@ public class LoadSaveGBG {
 				};
 
 			} catch (IOException e1) {
-				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for" + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not create ZIP-OutputStream for" + filePath + " !]");
 //				gz.close();
 				throw e1;
 			}
@@ -313,7 +343,8 @@ public class LoadSaveGBG {
 			try {
 				oos = new ObjectOutputStream(ptos);
 			} catch (IOException e) {
-				arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not create Object-OutputStream for" + filePath + " !]");
 //				oos.close();
 				return;
 			}
@@ -342,13 +373,16 @@ public class LoadSaveGBG {
 //				disposeProgressDialog(dlg);
 				if (e instanceof NotSerializableException) {
 					if (pa != null)
-						arenaGame.showMessage("ERROR: Object pa of class "+pa.getClass().getName()
-							+" is not serializable", "LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
-					if (tsr != null)
-						arenaGame.showMessage("ERROR: Object tsr of class "+tsr.getClass().getName()
+						if(arenaGame!=null)
+							arenaGame.showMessage("ERROR: Object pa of class "+pa.getClass().getName()
 								+" is not serializable", "LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
+					if (tsr != null)
+						if(arenaGame!=null)
+							arenaGame.showMessage("ERROR: Object tsr of class "+tsr.getClass().getName()
+									+" is not serializable", "LoadSaveGBG", JOptionPane.ERROR_MESSAGE);
 				}
-				arenaGame.setStatusMessage("[ERROR: Could not write to file " + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not write to file " + filePath + " !]");
 				throw new IOException("ERROR: Could not write object to file! ["+e.getClass().getName()+"]");
 			}
 
@@ -357,20 +391,24 @@ public class LoadSaveGBG {
 				oos.close();
 				fos.close();
 			} catch (IOException e) {
-				arenaGame.setStatusMessage("[ERROR: Could not complete Save-Process]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not complete Save-Process]");
 //				disposeProgressDialog(dlg);
 				throw new IOException("ERROR: Could not complete Save-Process ["+e.getClass().getName()+"]");
 			}
 
 //			disposeProgressDialog(dlg);
 //			arenaGame.setProgress(null);
-			arenaGame.setStatusMessage("Done.");
+			if(arenaGame!=null)
+				arenaGame.setStatusMessage("Done.");
 
 		} else {
 			if (pa != null)
-				arenaGame.setStatusMessage("[Save Agent: Aborted by User]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[Save Agent: Aborted by User]");
 			if (tsr != null)
-				arenaGame.setStatusMessage("[Save TS-Result: Aborted by User]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[Save TS-Result: Aborted by User]");
 		}
 
 		// Rescan current directory, hope it helps
@@ -412,8 +450,16 @@ public class LoadSaveGBG {
 		PlayAgent pa = null;
 
 		if (filePath==null) {
-			String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
-			String subDir = arenaGame.getGameBoard().getSubDir();
+			String strDir;
+			String subDir;
+			if(arenaGame!=null) {
+				strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
+				subDir = arenaGame.getGameBoard().getSubDir();
+			}else{
+				strDir = this.strDirDef;
+				subDir  = this.subDirDef;
+			}
+
 			if (subDir != null){
 				strDir += "/"+subDir;
 			}
@@ -434,19 +480,22 @@ public class LoadSaveGBG {
 					filePath = file.getPath();
 					fis = new FileInputStream(filePath);
 				} catch (IOException e) {
-					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+					if(arenaGame!=null)
+						arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 					//e.printStackTrace();
 					throw e;
 				}
 			} else {
-				arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
 			}
 		} else {	// i.e. if filePath is not null
 			try {
 				file = new File(filePath);
 				fis = new FileInputStream(filePath);
 			} catch (IOException e) {
-				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 				//e.printStackTrace();
 				throw e;
 			}
@@ -457,7 +506,8 @@ public class LoadSaveGBG {
 			try {
 				gs = new GZIPInputStream(fis);
 			} catch (IOException e1) {
-				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
 				throw e1;
 			}
 
@@ -468,7 +518,8 @@ public class LoadSaveGBG {
 				ois = new ObjectInputStream(ptis);
 			} catch (IOException e1) {
 				ptis.close();
-				arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
 				throw e1;
 			}
 
@@ -497,8 +548,15 @@ public class LoadSaveGBG {
 		TSResultStorage tsr = null;
 
 		if (filePath==null) {
-			String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
-			String subDir = arenaGame.getGameBoard().getSubDir();
+			String strDir;
+			String subDir;
+			if(arenaGame!=null) {
+				strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
+				subDir = arenaGame.getGameBoard().getSubDir();
+			}else{
+				strDir = this.strDirDef;
+				subDir  = this.subDirDef;
+			}
 			if (subDir != null){
 				strDir += "/"+subDir;
 			}
@@ -520,19 +578,22 @@ public class LoadSaveGBG {
 					filePath = file.getPath();
 					fis = new FileInputStream(filePath);
 				} catch (IOException e) {
-					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+					if(arenaGame!=null)
+						arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 					//e.printStackTrace();
 					throw e;
 				}
 			} else {
-				arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
 			}
 		} else {	// i.e. if filePath is not null
 			try {
 				file = new File(filePath);
 				fis = new FileInputStream(filePath);
 			} catch (IOException e) {
-				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 				//e.printStackTrace();
 				throw e;
 			}
@@ -543,7 +604,8 @@ public class LoadSaveGBG {
 			try {
 				gs = new GZIPInputStream(fis);
 			} catch (IOException e1) {
-				arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
 				throw e1;
 			}
 
@@ -554,7 +616,8 @@ public class LoadSaveGBG {
 				ois = new ObjectInputStream(ptis);
 			} catch (IOException e1) {
 				ptis.close();
-				arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
 				throw e1;
 			}
 
@@ -567,24 +630,31 @@ public class LoadSaveGBG {
 					tsr = (TSResultStorage) obj;
 				} else {
 //					disposeProgressDialog(dlg);
-					arenaGame.showMessage("ERROR: TSR class "+obj.getClass().getName()+" loaded from "
-							+ filePath + " not processable", "Unknown TS Class", JOptionPane.ERROR_MESSAGE);
-					arenaGame.setStatusMessage("[ERROR: Could not load TSR from "+ filePath + "!]");
+					if (arenaGame != null){
+						arenaGame.showMessage("ERROR: TSR class " + obj.getClass().getName() + " loaded from "
+								+ filePath + " not processable", "Unknown TS Class", JOptionPane.ERROR_MESSAGE);
+						arenaGame.setStatusMessage("[ERROR: Could not load TSR from " + filePath + "!]");
+					}
 					throw new ClassNotFoundException("ERROR: Unknown TSR class");
 				}
 //				disposeProgressDialog(dlg);
 //				arenaGame.setProgress(null);
-				arenaGame.setStatusMessage("Done.");
+
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("Done.");
 			} catch (IOException e) {
 //				disposeProgressDialog(dlg);
-				arenaGame.showMessage("ERROR: " + e.getMessage(),
-						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
-				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+				if(arenaGame!=null) {
+					arenaGame.showMessage("ERROR: " + e.getMessage(),
+							e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
+					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+				}
 				//e.printStackTrace();
 				//throw e;
 			} catch (ClassNotFoundException e) {
 //				disposeProgressDialog(dlg);
-				arenaGame.showMessage("ERROR: Class not found: " + e.getMessage(),
+				if(arenaGame!=null)
+					arenaGame.showMessage("ERROR: Class not found: " + e.getMessage(),
 						e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
 				//throw e;
@@ -619,9 +689,16 @@ public class LoadSaveGBG {
 		String filePath = null;
 		ObjectInputStream ois;
 		FileInputStream fis;
+		String strDir;
+		String subDir;
+		if(arenaGame!=null) {
+			strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
+			subDir = arenaGame.getGameBoard().getSubDir();
+		}else{
+			strDir = this.strDirDef;
+			subDir  = this.subDirDef;
+		}
 
-		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+this.arenaGame.getGameName();
-		String subDir = arenaGame.getGameBoard().getSubDir();
 		if (subDir != null){
 			strDir += "/"+subDir;
 		}
@@ -656,7 +733,8 @@ public class LoadSaveGBG {
 					filePath = file.getPath();
 					fis = new FileInputStream(filePath);
 				} catch (IOException e) {
-					arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+					if(arenaGame!=null)
+						arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 					throw e;
 				}
 
@@ -664,7 +742,8 @@ public class LoadSaveGBG {
 				try {
 					gs = new GZIPInputStream(fis);
 				} catch (IOException e1) {
-					arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
+					if(arenaGame!=null)
+						arenaGame.setStatusMessage("[ERROR: Could not create ZIP-InputStream for" + filePath + " !]");
 					throw e1;
 				}
 
@@ -675,7 +754,8 @@ public class LoadSaveGBG {
 					ois = new ObjectInputStream(ptis);
 				} catch (IOException e1) {
 					ptis.close();
-					arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
+					if(arenaGame!=null)
+						arenaGame.setStatusMessage("[ERROR: Could not create ObjectInputStream for" + filePath + " !]");
 					throw e1;
 				}
 
@@ -693,7 +773,8 @@ public class LoadSaveGBG {
 			} // for(int i = 0; i<files.length; i++)
 		} // if (returnVal == JFileChooser.APPROVE_OPTION)
 		else {
-			arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
+			if(arenaGame!=null)
+				arenaGame.setStatusMessage("[ERROR: File choose dialog not approved.]");
 		}
 
 		return output;
@@ -719,9 +800,11 @@ public class LoadSaveGBG {
 				// [instantiateAfterLoading replaces completely the long and complicated switch statement we had here before (!)]
 			} else {
 //				disposeProgressDialog(dlg);
-				arenaGame.showMessage("ERROR: Agent class "+obj.getClass().getName()+" loaded from "
+				if(arenaGame!=null)
+					arenaGame.showMessage("ERROR: Agent class "+obj.getClass().getName()+" loaded from "
 						+ filePath + " not processable", "Unknown Agent Class", JOptionPane.ERROR_MESSAGE);
-				arenaGame.setStatusMessage("[ERROR: Could not load agent from "
+				if(arenaGame!=null)
+					arenaGame.setStatusMessage("[ERROR: Could not load agent from "
 								+ filePath + "!]");
 				throw new ClassNotFoundException("ERROR: Unknown agent class");
 			}
@@ -734,23 +817,28 @@ public class LoadSaveGBG {
 
 //			disposeProgressDialog(dlg);
 //			arenaGame.setProgress(null);
-			arenaGame.setStatusMessage("Done.");
+			if(arenaGame!=null)
+				arenaGame.setStatusMessage("Done.");
 		} catch (IOException e) {
 //			disposeProgressDialog(dlg);
-			arenaGame.showMessage("ERROR: " + e.getMessage(),
+			if(arenaGame!=null)
+				arenaGame.showMessage("ERROR: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
-			arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
+			if(arenaGame!=null)
+				arenaGame.setStatusMessage("[ERROR: Could not open file " + filePath + " !]");
 			//e.printStackTrace();
 			pa=null;
 		} catch (ClassNotFoundException e) {
 //			disposeProgressDialog(dlg);
-			arenaGame.showMessage("ERROR: Class not found: " + e.getMessage(),
+			if(arenaGame!=null)
+				arenaGame.showMessage("ERROR: Class not found: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			//e.printStackTrace();
 			pa=null;
 		} catch (AssertionError e) {
 //			disposeProgressDialog(dlg);
-			arenaGame.showMessage("Instantiation failed: " + e.getMessage(),
+			if(arenaGame!=null)
+				arenaGame.showMessage("Instantiation failed: " + e.getMessage(),
 					e.getClass().getName(), JOptionPane.ERROR_MESSAGE);
 			//e.printStackTrace();
 			pa=null;
