@@ -21,18 +21,15 @@ public class Deck {
        // }
     }
 
-    public Deck(Deck other) {
-        this.deck = new ArrayList<>(other.deck);
-    }
-
-    public Deck(ArrayList<Card> deck) {
-        this.deck = deck;
-    }
-
+    //should always return 52
     public int size() {
         return deck.size();
     }
 
+    /**
+     * draws a card from the infinite deck
+     * @return a (randomly) drawn card
+     */
     public Card draw() {
         Random r = new Random();
         // returns random card between zero and decksize

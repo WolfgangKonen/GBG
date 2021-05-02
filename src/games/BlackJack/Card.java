@@ -3,12 +3,20 @@ import static games.BlackJack.BlackJackConfig.CARDS_AS_UNICODE;
 
 public class Card implements Comparable<Card>{
 
-
+    /**
+     * Compares this card with the specified card for order. Returns a negative integer, zero,
+     * or a positive integer as this card is less than, equal to, or greater than the specified object.
+     * @param other card
+     * @return int -1 or 0 or 1
+     */
     @Override
     public int compareTo(Card o) {
         return (int) Math.signum(this.rank.sortValue - o.rank.sortValue);
     }
 
+    /**
+     * Represents the suit of a card as enum
+     */
     enum Suit {
         HEART(0), DIAMOND(1), CLUB(2), SPADE(3), X(4);
         private int value;
@@ -20,6 +28,9 @@ public class Card implements Comparable<Card>{
         public int getValue() { return value; }
     }
 
+    /**
+     * Represents the rank of a card as enum
+     */
     enum Rank {
         TWO(2, 0), THREE(3, 1), FOUR(4 , 2), FIVE(5, 3),
         SIX(6, 4), SEVEN(7, 5), EIGHT(8, 6), NINE(9, 7),
@@ -53,6 +64,9 @@ public class Card implements Comparable<Card>{
         this.suit = suit;
     }
 
+    /**
+     * @return imagePath to corresponding image representation of the card
+     */
     public String getImagePath(){
         if(rank.value < 1){
             return "2B.png";
@@ -60,6 +74,9 @@ public class Card implements Comparable<Card>{
         return rankSubString() + suitSubString() +".png";
     }
 
+    /**
+     * @return suit of the card as String
+     */
     public String suitSubString(){
         String suitStr="";
         switch (suit) {
@@ -81,6 +98,9 @@ public class Card implements Comparable<Card>{
         return suitStr;
     }
 
+    /**
+     * @return suit of the card as unicode String
+     */
     public String suitSubStringUnicode(){
         String suitStr = "";
         switch (suit) {
@@ -102,6 +122,9 @@ public class Card implements Comparable<Card>{
         return suitStr;
     }
 
+    /**
+     * @return rank of the card as unicode String
+     */
     public String rankSubString(){
         String rankStr = "";
         if (rank.value < 1) {

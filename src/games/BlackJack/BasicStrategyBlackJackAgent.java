@@ -1,8 +1,13 @@
 package games.BlackJack;
 
 import controllers.AgentBase;
+import controllers.MC.MCAgentConfig;
+import controllers.MC.RandomSearch;
 import controllers.PlayAgent;
+import games.Evaluator;
 import games.StateObservation;
+import params.ParMC;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -14,6 +19,16 @@ import javax.swing.plaf.nimbus.State;
 public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent {
 
 
+    /**
+     * Basic Strategy Black Jack Agent.
+     * <p>
+     * A gamespecific Black Jack agent using the Basic Strategy {@link BasicStrategyChart}
+     * to chose his actions, therefore playing "perfect".
+     * <p>
+     * @see MCAgentConfig
+     * @see RandomSearch
+     * @see ParMC
+     */
     public BasicStrategyBlackJackAgent(){
         super("BSBJA");
         setAgentState(AgentState.TRAINED);
@@ -25,6 +40,17 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         return false;
     }
 
+
+    /**
+     * Get the best next action and return it
+     * (NEW version: returns ACTIONS_VT)
+     *
+     * @param sob			current game state (is returned unchanged)
+     * @param random		not used
+     * @param silent        no output
+     * @return actBest		the best action according to Basic Strategy.
+     *
+     */
     @Override
     public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
         StateObserverBlackJack m_so;
@@ -44,8 +70,7 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         }
 
         /**
-         *  Basic Strategy does not give any intell on how much players should bet.
-         *  Betsize will be random
+         * Betsize is now fixed to 10 so the random choice is depricated.
          */
         if(m_so.getCurrentPhase() == StateObserverBlackJack.gamePhase.BETPHASE){
             Random r = new Random();
@@ -55,7 +80,7 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         }
 
         /**
-         *  Players should never take insurance
+         *  According to Basic Strategy players should never take insurance
          */
         if(m_so.getCurrentPhase() == StateObserverBlackJack.gamePhase.ASKFORINSURANCE){
             actVal = StateObserverBlackJack.BlackJackActionDet.NOINSURANCE.getAction();
@@ -83,6 +108,15 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
 
     }
 
+    /**
+     * Fills the vTable. The best action will get a score of 100. Every other action will get a score of 0.
+     *
+     * @param so			current game state (is returned unchanged)
+     * @param vTable        array of scores
+     * @param actionVal     best action as integer
+     * @return vTable 		array of scores.
+     *
+     */
     public double[] setBestMoveInVtable(StateObserverBlackJack so, double vTable[], int actionVal){
         ArrayList<Types.ACTIONS> availableActions = so.getAvailableActions();
         for(int i = 0; i<availableActions.size(); i++){
@@ -94,6 +128,11 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         return vTable;
     }
 
+    /**
+     * Finds the best move for a soft hand.
+     * @param so			current game state (is returned unchanged)
+     * @return              best actions as int.
+     */
     public int lookUpBestMoveSoft(StateObserverBlackJack so){
         Hand myHand = so.getCurrentPlayer().getActiveHand();
         Hand dealersHand = so.getDealer().getActiveHand();
@@ -108,6 +147,11 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         return getLegalAction(so, move);
     }
 
+    /**
+     * Finds the best move for a hard hand.
+     * @param so			current game state (is returned unchanged)
+     * @return              best actions as int.
+     */
     public int lookUpBestMoveHard(StateObserverBlackJack so){
         Hand myHand = so.getCurrentPlayer().getActiveHand();
         Hand dealersHand = so.getDealer().getActiveHand();
@@ -117,6 +161,11 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         return getLegalAction(so, move);
     }
 
+    /**
+     * Finds the best move for a paired hand.
+     * @param so			current game state (is returned unchanged)
+     * @return              best actions as int.
+     */
     public int lookUpBestMovePair(StateObserverBlackJack so){
         Hand myHand = so.getCurrentPlayer().getActiveHand();
         Hand dealersHand = so.getDealer().getActiveHand();
@@ -135,6 +184,16 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
         return getLegalAction(so, move);
     }
 
+    /**
+     * <p>
+     * Returns the legal action according to the suggestion made by the Basic Strategy.
+     * Not everytime the top suggestion is available as legal action (e.g. Dh -> Double Down if possible, otherwise Hit)
+     * Double Down could be illegal in this example.
+     * <p>
+     * @param so			current game state (is returned unchanged)
+     * @param move          suggestion by Basic Strategy
+     * @return              best legal action as int
+     */
     public int getLegalAction(StateObserverBlackJack so, BasicStrategyChart.Move move){
          /*
             H	Hit

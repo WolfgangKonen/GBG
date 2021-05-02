@@ -28,6 +28,8 @@ public class EvaluatorBlackJack extends Evaluator {
      * <li>  1: average payoff of agent
      * <li>  2: number of times agent chooses move from Basic-Strategy on a random game state
      * <li>  3: how many times agent is not choosing insurance
+     * <li>  4: percentage of times where agent did chose HIT (40 simple preconstructed situations) (best = 1.0)
+     * <li>  5: percentage of times where agent did chose STAND (60 simple preconstructed situations) (best = 1.0)
      * </ul>
      *
      */
@@ -52,8 +54,11 @@ public class EvaluatorBlackJack extends Evaluator {
 
 
     /**
-     * params both cards of player and upcard of dealer
-     * returns a specific StateObserver
+     * Creates a specific game state (mid round scenario).
+     * @param firstCardPlayer first card of the players hand
+     * @param secondCardPlayer second card of the players hand
+     * @param upCardDealer dealers upcard
+     * @return the specific game state
      */
 
     public StateObserverBlackJack initSpecificSo(Card firstCardPlayer, Card secondCardPlayer, Card upCardDealer){
@@ -72,12 +77,16 @@ public class EvaluatorBlackJack extends Evaluator {
     }
 
     /**
+     * <p>
      * This method is used for quick-evaluation.
      * Agent gets 20 preconstructed gamestates and needs to choose the next best action.
      * Result of this evaluation is the percentage of how many times an agent
      * chooses an action suggested by basic strategy.
      * Taking the move suggested by basic strategy everytime results a perfect score of 1 (best)
      * Never taking the move suggested by basic strategy results in a score of 0 (worst)
+     * <p>
+     * @param playAgent agent that gets evaluated
+     * @return evaluation score
      */
     public double simulateFixedMovesFromBasicStrategy(PlayAgent playAgent){
 
@@ -159,6 +168,8 @@ public class EvaluatorBlackJack extends Evaluator {
     /**
      * Agent will play 40 most simple preconstructed States. In every case Hit should be the obvious choice.
      * This should represent the most basic understanding of BlackJack
+     * @param playAgent agent that gets evaluated
+     * @return evaluation score
      */
     public double simulateVerySimpleSituationsHit(PlayAgent playAgent){
         StateObserverBlackJack []sos = new StateObserverBlackJack[40];
@@ -196,6 +207,8 @@ public class EvaluatorBlackJack extends Evaluator {
     /**
      * Agent will play 60 most simple preconstructed States. In every case STAND should be the obvious choice.
      * This should represent the most basic understanding of BlackJack
+     * @param playAgent agent that gets evaluated
+     * @return evaluation score
      */
     public double simulateVerySimpleSituationsStand(PlayAgent playAgent){
         StateObserverBlackJack []sos = new StateObserverBlackJack[60];
@@ -243,12 +256,14 @@ public class EvaluatorBlackJack extends Evaluator {
 
 
     /**
-     * Agent will play NUM_ITER hands (between 1000 and 10000 Hands)
+     * Agent will play NUM_ITER hands
      * evaluation result is the percentage of how many times an agent took insurance when he had
      * the chance to do so. Since taking insurance is a losing bet long term, the evaluation result gets better the
      * less often an Agent took insurance.
      * Not taking insurance ever results in a score of 1 (best)
      * Taking insurance every time results in a score of 0 (worst)
+     * @param playAgent agent that gets evaluated
+     * @return evaluation score
      */
 
     public double simulateInsurance(PlayAgent playAgent){
@@ -288,12 +303,14 @@ public class EvaluatorBlackJack extends Evaluator {
     }
 
     /**
-     * Agent will play NUM_ITER hands (between 1000 and 10000 Hands)
+     * Agent will play NUM_ITER hands
      * each action the Agent takes in phase (ASKFORINSURANCE and PLAYERONACTION) gets compared to what
      * the basic strategy suggests. Result of this evaluation is the percentage of how many times an agent
      * chooses an action suggested by basic strategy in a random gamestate.
      * Taking the move suggested by basic strategy everytime results a perfect score of 1 (best)
      * Never taking the move suggested by basic strategy results in a score of 0 (worst)
+     * @param playAgent agent that gets evaluated
+     * @return evaluation score
      */
     public double simulateRandomMovesFromBasicStrategy(PlayAgent playAgent){
         StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER+30);
@@ -323,11 +340,13 @@ public class EvaluatorBlackJack extends Evaluator {
     }
 
     /**
-     * Agent will play NUM_ITER hands (between 1000 and 10000 Hands)
+     * Agent will play NUM_ITER hands
      * the result of this evaluation is the average payoff the agent achieves
      * there are no best and worst results yet. However the higher the better.
      * BasicStrategyBlackJackAgent should achieve the best score
      * RandomAgent should achieve the worst score
+     * @param playAgent agent that gets evaluated
+     * @return evaluation score
      */
     public double simulateAvgPayOff(PlayAgent playAgent){
         StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER + 30);
@@ -423,6 +442,12 @@ public class EvaluatorBlackJack extends Evaluator {
         return false;
     }
 
+
+    /**
+     * Writes multiple evaluations into .csv
+     * @param playAgent that gets evaluated
+     * output will written to ./Stats
+     */
     public void logStatistics(PlayAgent playAgent){
         //TODO: generalize more
 
@@ -479,6 +504,11 @@ public class EvaluatorBlackJack extends Evaluator {
 
     }
 
+    /**
+     * Helperfunction to get agent-settings-headlines as String. (used to write them in .csv)
+     * @param playAgent that gets evaluated
+     * @return Agent-settings-headlines as String
+     */
     public String getParStringHeaders(PlayAgent playAgent){
 
         if(playAgent instanceof MCAgentN){
@@ -494,6 +524,11 @@ public class EvaluatorBlackJack extends Evaluator {
         return "";
     }
 
+    /**
+     * Helperfunction to get agent-settings as String. (used to write them in .csv)
+     * @param playAgent that gets evaluated
+     * @return Agent-settings as String
+     */
     public String getParValueString(PlayAgent playAgent){
         if(playAgent instanceof MCAgentN){
             MCAgentN agent = (MCAgentN) playAgent;
@@ -543,6 +578,7 @@ public class EvaluatorBlackJack extends Evaluator {
         }
     }
 
+
     @Override
     public String getTooltipString() {
         return  "<html>"
@@ -575,7 +611,11 @@ public class EvaluatorBlackJack extends Evaluator {
         return strDate;
     }
 
-    //fixes multiline-String for .csv output
+    /**
+     * fixes multiline-String for .csv output
+     * @params data string that needs to get fixed
+     * @return fixed data String
+     */
     public String fixString(String data) {
         String fix = data.replaceAll("\\R", "_");
         if (data.contains(",") || data.contains("\"") || data.contains("'")) {
@@ -585,7 +625,11 @@ public class EvaluatorBlackJack extends Evaluator {
         return fix;
     }
 
-    //writes into .csv
+    /**
+     * writes an evaluation to agentName.csv
+     * @param s evaluationdata
+     * @param agentName name of agent that got evaluated
+     */
     private void write(final String s, String agentName) throws IOException {
             Files.writeString(
                     Path.of(dir, agentName + ".csv"), s,

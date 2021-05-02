@@ -8,6 +8,10 @@ public class ButtonValueJPanel extends JPanel {
     ActionButton button;
     JPanel valuePanel;
 
+    /**
+     * Displays an ActionButton next to his evaluation score.
+     * @param button the ActionButton (contains the assigned score)
+     */
     public ButtonValueJPanel(ActionButton button){
         super();
         this.setLayout(new GridBagLayout());
@@ -15,6 +19,9 @@ public class ButtonValueJPanel extends JPanel {
         update();
     }
 
+    /**
+     * Updates the button/score panel.
+     */
     public void update(){
         this.removeAll();
         GridBagConstraints c1 = new GridBagConstraints();

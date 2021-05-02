@@ -16,18 +16,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class GameBoardBlackJackGui extends JFrame {
-
+    //scrollpane for GameLog
     JScrollPane scrollPaneLog;
     int verticalScrollBarMaximumValue;
+
+    // actionButtons and panels that get displayed in actionZone
     ArrayList<ActionButton> currentButtons = new ArrayList<>();
     ArrayList<ButtonValueJPanel> currentButtonPanels = new ArrayList<>();
-    boolean hold_flag = false;
+
+
+    //Colors
     Color red = new Color(70, 1, 1);
     Color green = new Color(1, 70, 1);
     Color blue = new Color(1, 79, 160);
+
+    //autoContinue Button
     private JButton continueButton;
     private JCheckBox autoContinue = new JCheckBox("autoContinue", true);
-
+    boolean hold_flag = false;
 
 
     class ActionHandler implements ActionListener {
@@ -41,9 +47,6 @@ public class GameBoardBlackJackGui extends JFrame {
         }
     }
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
     GameBoardBlackJack m_gb = null;
     StateObserverBlackJack m_so = null;
@@ -56,6 +59,9 @@ public class GameBoardBlackJackGui extends JFrame {
 
     JPanel actionZone, dealerZone, playerZone;
 
+    /**
+     * inits BlackJack GUI
+     */
     public void initGui() {
 
         JPanel window = new JPanel();
@@ -108,6 +114,13 @@ public class GameBoardBlackJackGui extends JFrame {
 
     }
 
+    /**
+     * updates BlackJack GUI
+     * @param so updated StateObserver
+     * @param withReset never used
+     * @param showValueOnGameboard boolean, if true, show the game values for the available actions
+     * (only if they are stored in state {@code so}).
+     */
     public void update(StateObserverBlackJack so, boolean withReset, boolean showValueOnGameboard) {
         clear();
         m_so = so;
@@ -136,6 +149,9 @@ public class GameBoardBlackJackGui extends JFrame {
         return b1;
     }
 
+    /**
+     * displays the Game-State at roundOver situation
+     */
     public void stopAfterUpdate(){
         for(JButton b : currentButtons) {
             b.setEnabled(false);
@@ -155,21 +171,20 @@ public class GameBoardBlackJackGui extends JFrame {
         }
     }
 
-    public void updateWithSleep(StateObserverBlackJack so, long millSeconds) {
-        update(so, false, false);
-        try {
-            Thread.sleep(millSeconds);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * clears the 3 main-panels
+     */
     public void clear() {
         dealerZone.removeAll();
         playerZone.removeAll();
         actionZone.removeAll();
     }
 
+
+    /**
+     * enables buttons corresponding to available actions from
+     * @param so corresponding gamestate
+     */
     public void toggleButtons(StateObserverBlackJack so){
         ArrayList<Types.ACTIONS> availableActions = so.getAvailableActions();
         for(ActionButton b : currentButtons){
@@ -177,6 +192,10 @@ public class GameBoardBlackJackGui extends JFrame {
         }
     }
 
+    /**
+     *  show the game values for the available actions
+     *  (only if they are stored in state {@code so}).
+     */
     public void showValueOnButtons(StateObserverBlackJack so){
         if (so.getStoredValues() != null) {
             int counter = 0;
@@ -204,6 +223,11 @@ public class GameBoardBlackJackGui extends JFrame {
         }
     }
 
+    /**
+     * Factory method: creates JLabel containing a card
+     * @param c card
+     * @return JLable containing the card
+     */
     public JLabel getCard(Card c) {
         BufferedImage cardPicture = null;
         //setPreferredSize(new Dimension(75, 105));
@@ -217,6 +241,10 @@ public class GameBoardBlackJackGui extends JFrame {
         return card;
     }
 
+    /**
+     * Factory method: creates the actionZone. All available actions and the continue button will get grouped into it
+     * @return JPanel containing all actionButtons
+     */
     public JPanel getActionZone(StateObserverBlackJack so) {
         JPanel p = new JPanel();
         currentButtons.clear();
@@ -266,6 +294,12 @@ public class GameBoardBlackJackGui extends JFrame {
         return result;
     }
 
+
+    /**
+     * Factory method: creates the handHistoryPanel (Gamelog).
+     * @param so Game State
+     * @return JPanel containing the gamelog
+     */
     public JPanel handHistoryPanel(StateObserverBlackJack so) {
         JPanel p = new JPanel();
         JTextArea log = new JTextArea(22,33);
@@ -291,6 +325,12 @@ public class GameBoardBlackJackGui extends JFrame {
         return p;
     }
 
+    /**
+     * Factory method: creates the handPanel.
+     * @param h hand
+     * @param backgroundColor
+     * @return JPanel containing cardlabels representing a hand
+     */
     public JPanel getHandPanel(Hand h, Color backgroundColor) {
         JPanel handPanel = new JPanel();
         handPanel.setBackground(backgroundColor);
@@ -313,6 +353,10 @@ public class GameBoardBlackJackGui extends JFrame {
 
 
 
+    /**
+     * Factory method: creates the playerPanel.
+     * @return JPanel containing infos about the player and 0, 1, 2, or 3 handPanels
+     */
     public JPanel playerPanel(Player p) {
         JPanel playerPanel = new JPanel();
 
@@ -339,6 +383,10 @@ public class GameBoardBlackJackGui extends JFrame {
         return playerPanel;
     }
 
+    /**
+     * Factory method: creates the dealerPanel.
+     * @return JPanel containing infos about the deaker and 0 or 1 handPanel
+     */
     public JPanel dealerPanel(Dealer dealer) {
         JPanel dealerPanel = new JPanel();
         dealerPanel.setBackground(red);
@@ -373,6 +421,13 @@ public class GameBoardBlackJackGui extends JFrame {
         }
     }
 
+
+    /**
+     * Factory method: creates a "headline JLabel" used to display player- and dealer- names.
+     * @param content of the label
+     * @param c foreground color
+     * @return JLabel
+     */
     public JLabel createLabel(String content, Color c) {
         JLabel result = new JLabel(content);
         result.setForeground(c);
