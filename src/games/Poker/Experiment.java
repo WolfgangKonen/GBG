@@ -34,8 +34,8 @@ public class Experiment {
 
     private final String directory = "PokerExperiments";
 
-    GameBoardKuhnPoker m_gb;
-    ArenaKuhnPoker m_arena;
+    GameBoardPoker m_gb;
+    ArenaPoker m_arena;
     DecimalFormat df = new DecimalFormat("###.###");
 
     private static final String TD_NTUPLE_3 = "TD-Ntuple-3";
@@ -54,7 +54,8 @@ public class Experiment {
     public static void main(String[] args) throws Exception {
         Experiment ex = new Experiment();
         //ex.oneRoundChallenge(POKER,RANDOM, "AlphaPoker");
-        ex.oneRoundChallenge(POKER,MC, "AlphaPoker");
+        ex.oneRoundChallenge(TD_NTUPLE_3,RANDOM, "AlphaPoker",1000);
+        //ex.oneRoundChallenge(POKER,RANDOM, "AlphaPoker");
         //ex.oneRoundChallenge(MCTSE, RANDOM, "AlphaPoker");
         //ex.oneRoundChallenge(MC, RANDOM, "AlphaPoker");
         //ex.oneRoundChallenge(TDS, RANDOM, "AlphaPoker");
@@ -90,11 +91,11 @@ public class Experiment {
     public PlayAgent setupTDNTuple3Agent(String dir) throws Exception {
         String agentName = TD_NTUPLE_3;
 
-        GameBoardKuhnPoker gb = new GameBoardKuhnPoker();
+        GameBoardPoker gb = new GameBoardPoker();
         String savePath = dir;
         savePath+="/agent";
 
-        XNTupleFuncs xnf = new XNTupleFuncsKuhnPoker();
+        XNTupleFuncs xnf = new XNTupleFuncsPoker();
 
         ParNT ntPar = new ParNT();
         ntPar.setNumTuple(4);
@@ -118,11 +119,11 @@ public class Experiment {
 
     public PlayAgent setupTDNTuple4Agent(String dir) throws Exception {
         String agentName = TD_NTUPLE_4;
-        GameBoardKuhnPoker gb = new GameBoardKuhnPoker();
+        GameBoardPoker gb = new GameBoardPoker();
         String savePath = dir;
         savePath+="/agent";
 
-        XNTupleFuncs xnf = new XNTupleFuncsKuhnPoker();
+        XNTupleFuncs xnf = new XNTupleFuncsPoker();
 
         ParNT ntPar = new ParNT();
         ntPar.setNumTuple(4);
@@ -146,11 +147,11 @@ public class Experiment {
 
     public PlayAgent setupSarsaAgent(String dir) throws Exception {
         String agentName = SARSA;
-        GameBoardKuhnPoker gb = new GameBoardKuhnPoker();
+        GameBoardPoker gb = new GameBoardPoker();
         String savePath = dir;
         savePath+="/agent";
 
-        XNTupleFuncs xnf = new XNTupleFuncsKuhnPoker();
+        XNTupleFuncs xnf = new XNTupleFuncsPoker();
 
         ParNT ntPar = new ParNT();
         ntPar.setNumTuple(4);
@@ -179,11 +180,11 @@ public class Experiment {
 
     public PlayAgent setupSarsa4Agent(String dir) throws Exception {
         String agentName = SARSA_4;
-        GameBoardKuhnPoker gb = new GameBoardKuhnPoker();
+        GameBoardPoker gb = new GameBoardPoker();
         String savePath = dir;
         savePath+="/agent";
 
-        XNTupleFuncs xnf = new XNTupleFuncsKuhnPoker();
+        XNTupleFuncs xnf = new XNTupleFuncsPoker();
 
         ParNT ntPar = new ParNT();
         ntPar.setNumTuple(4);
@@ -210,11 +211,11 @@ public class Experiment {
     public PlayAgent setupQLearn4Agent(String dir) throws Exception {
         String agentName = QLEARN_4;
 
-        GameBoardKuhnPoker gb = new GameBoardKuhnPoker();
+        GameBoardPoker gb = new GameBoardPoker();
         String savePath = dir;
         savePath+="/agent";
 
-        XNTupleFuncs xnf = new XNTupleFuncsKuhnPoker();
+        XNTupleFuncs xnf = new XNTupleFuncsPoker();
 
         ParNT ntPar = new ParNT();
         ntPar.setNumTuple(4);
@@ -345,12 +346,16 @@ public class Experiment {
      * The results are difficult to compare and it might make things easier to play only one round.
      */
     public void oneRoundChallenge(String p0, String p1, String experiment) throws Exception {
+        oneRoundChallenge(p0,p1,experiment,1000000);
+    }
+
+    public void oneRoundChallenge(String p0, String p1, String experiment, int playRounds) throws Exception {
 
         // the experitment name will be the foldername in /experiments
         String experimentName = experiment;
 
         // number of rounds played for evaluation for each position
-        int playRounds = 1000000;
+ //       int playRounds = 1000000;
 
         PlayAgent observedAgent;
         PlayAgent benchmarkAgent;
@@ -644,7 +649,7 @@ public class Experiment {
         //Utils.checkAndCreateFolder(directory);
         //m_arena = new ArenaKuhnPoker("Kuhn",false);
         //m_gb = new GameBoardKuhnPoker(m_arena);
-        StateObserverKuhnPoker stateTest = new StateObserverKuhnPoker();
+        StateObserverPoker stateTest = new StateObserverPoker();
 
         PlayAgent observedAgent;
         int playRounds = 1000;
@@ -682,7 +687,7 @@ public class Experiment {
 
 
         MCAgentN mcStochastic = new MCAgentN(mcpar);
-        mcStochastic.setUseStochastic(true);
+        //mcStochastic.setUseStochastic(true);
 
         //PlayAgent tds = setupTDSAgent(folder);
 
@@ -710,11 +715,11 @@ public class Experiment {
 
         // define startSO
 //        StateObservation startSO = m_gb.m_so;
-        StateObserverKuhnPoker startSO;
+        StateObserverPoker startSO;
         startSO = stateTest;
 
         //StateObservation so;
-        StateObserverKuhnPoker so;
+        StateObserverPoker so;
 
         ScoreTuple sc;
         Types.ACTIONS actBest;
@@ -736,7 +741,7 @@ public class Experiment {
 
                 int player = startSO.getPlayer();
                 //initilizing a new (random) state
-                so = new StateObserverKuhnPoker();
+                so = new StateObserverPoker();
 
                 while (true) {
                     long startTNano = System.nanoTime();

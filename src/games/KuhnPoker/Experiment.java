@@ -55,12 +55,12 @@ public class Experiment {
         ex.oneRoundChallenge(TD_NTUPLE_4, KUHN, "CompleteRun");
         ex.oneRoundChallenge(SARSA_4, KUHN, "CompleteRun");
         ex.oneRoundChallenge(QLEARN_4, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(EXPECTIMAX, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(MCTSE, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(KUHN, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(RANDOM, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(MC, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(TDS, KUHN, "CompleteRun");
+        //ex.oneRoundChallenge(EXPECTIMAX, KUHN, "CompleteRun");
+        //ex.oneRoundChallenge(MCTSE, KUHN, "CompleteRun");
+        //ex.oneRoundChallenge(KUHN, KUHN, "CompleteRun");
+        //ex.oneRoundChallenge(RANDOM, KUHN, "CompleteRun");
+        //ex.oneRoundChallenge(MC, KUHN, "CompleteRun");
+        //ex.oneRoundChallenge(TDS, KUHN, "CompleteRun");
 
     }
 
@@ -726,7 +726,7 @@ public class Experiment {
 
 
         MCAgentN mcStochastic = new MCAgentN(mcpar);
-        mcStochastic.setUseStochastic(true);
+        //mcStochastic.setUseStochastic(true);
 
         //PlayAgent tds = setupTDSAgent(folder);
 
