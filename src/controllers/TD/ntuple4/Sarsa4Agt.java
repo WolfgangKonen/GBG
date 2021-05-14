@@ -134,6 +134,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		this.sLast = new StateObservation[numPlayers];
 		this.aLast = new Types.ACTIONS[numPlayers];
 		this.randLast = new boolean[numPlayers];
+		this.setMaxGameNum(maxGameNum);
 		processAvailActions(allAvailActions);		// calc members actionIndexMin, actionIndexMax, numOutputs
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, numOutputs, maxGameNum);			
 	}
