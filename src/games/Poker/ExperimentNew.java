@@ -237,19 +237,21 @@ public class ExperimentNew {
         String resultLine = "trainedGames\tbenchmarkGames\tp0\tp1\r\n";
         resultsFile.append(resultLine);
 
-        // setup agents
-        PlayAgent observedAgent = setupAgent(agent);
-        PlayAgent benchmarkAgent = setupAgent(POKER);
 
         ScoreTuple[] scores = new ScoreTuple[0];
 
-        if(!observedAgent.isTrainable())
-            throw new RuntimeException("Agent: '"+agent+"' can't be trained");
 
         numberOfTrainingGames = 4000000;
         int numberOfRuns = 100;
 
         double avgTime = 0;
+
+        // setup agents
+        PlayAgent observedAgent = setupAgent(agent);
+        PlayAgent benchmarkAgent = setupAgent(POKER);
+
+        if(!observedAgent.isTrainable())
+            throw new RuntimeException("Agent: '"+agent+"' can't be trained");
 
         LocalDateTime now;
         now = LocalDateTime.now();
@@ -276,11 +278,10 @@ public class ExperimentNew {
 
                 resultsFile.append(resultLine);
 
-
-                    avgTime = avgTime / (i + 1) * (i) + ChronoUnit.MILLIS.between(now, LocalDateTime.now()) / (i + 1);
-                    System.out.println(LocalDateTime.now() + ": just finished training round - " + i + " of "+numberOfRuns+
-                            " expected time left: "+getTimeDifferrence((long)(avgTime/i*(numberOfRuns-i)))+ " ("+avgTime*1.0/1000 +"s per iteration)");
-                    now = LocalDateTime.now();
+                avgTime = avgTime / (i + 1) * (i) + ChronoUnit.MILLIS.between(now, LocalDateTime.now()) / (i + 1);
+                System.out.println(LocalDateTime.now() + ": just finished training round - " + i + " of "+numberOfRuns+
+                        " expected time left: "+getTimeDifferrence((long)(avgTime/i*(numberOfRuns-i)))+ " ("+avgTime*1.0/1000 +"s per iteration)");
+                now = LocalDateTime.now();
             }
         }
         LocalDateTime endTime = LocalDateTime.now();
@@ -790,5 +791,50 @@ public class ExperimentNew {
         return par;
     }
     //endregion
+
+    public void howManyGamesForMCN() throws Exception {
+        LocalDateTime startTime = LocalDateTime.now();
+
+        // define and create new directory for the experiment
+        String experimentDir = directory + "/howManyGamesForMCN/" + dtf.format(startTime) + "/";
+        tools.Utils.checkAndCreateFolder(experimentDir);
+
+        // define resultfile and structure
+        Writer resultsFile = new FileWriter(experimentDir + "/results.csv");
+        String resultLine = "mcIterations\tgames\ttime\tp0\tp1\r\n";
+        resultsFile.append(resultLine);
+
+
+        int toEvaluate = 100000;
+        int steps = toEvaluate/4;
+
+        mcPar.setIterations(1000);
+
+        PlayAgent benchmarkAgent = setupAgent(POKER);
+        PlayAgent observedAgent = setupAgent(MC);
+
+        double avgTime = 0;
+        double avgScoreP0 = 0;
+        double avgScoreP1 = 0;
+        ScoreTuple[] scores = new ScoreTuple[0];
+
+        LocalDateTime now = LocalDateTime.now();
+        for(int i = 0 ; i < toEvaluate ; i+=steps){
+            scores = evaluateAgent(observedAgent,benchmarkAgent,steps);
+            avgTime = avgTime / (i + 1) * (i) + ChronoUnit.MILLIS.between(now, LocalDateTime.now()) / (i + 1);
+            avgScoreP0 = avgScoreP0 / (i + 1) * (i) + scores[0].scTup[0] / (i + 1);
+            avgScoreP1 = avgScoreP1 / (i + 1) * (i) + scores[1].scTup[1] / (i + 1);
+
+            resultLine = mcPar.getNumIter() + "\t" +
+                    steps*(i+1) + "\t" +
+                    avgScoreP0 + "\t" +
+                    avgScoreP1 + "\r\n";
+
+            resultsFile.append(resultLine);
+        }
+
+        resultsFile.close();
+
+    }
 
 }
