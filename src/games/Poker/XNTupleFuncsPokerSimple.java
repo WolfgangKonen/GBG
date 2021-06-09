@@ -6,10 +6,9 @@ import games.XNTupleBase;
 import games.XNTupleFuncs;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 
-public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsPokerSimple extends XNTuplePoker implements XNTupleFuncs, Serializable {
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
@@ -23,44 +22,39 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 
 	private final int numPlayers = PokerConfig.NUM_PLAYERS;
 
+
 	@Override
 	public int getNumCells() {
-		return 7 + numPlayers - 1;
+		return 7;
 	}
-
 
 	@Override
 	public int getNumPositionValues() {
-		return 5;
+		return 52;
 	}
-
 
 	@Override
 	public int[] getPositionValuesVector() {
-		// I think it makes sense to normalize the Feature Vector so that the active player is always at #0
 
-		// 0 => amount to call // leave out
-		// 1 => chips // leave out
-		// 2 => potsize // leave out
-		// 3,4 => hand cards in ascending order
-		// 5,6,7,8,9 => community cards in ascending order
-		// 10 ... 10+(n-2) => status of opponents
 		int[] positionValues = new int[getNumCells()];
+
 		int i = 0;
-		//positionValues[i++] = startChips*numPlayers;
-		//positionValues[i++] = startChips*numPlayers;
-		//positionValues[i++] = startChips*numPlayers;
+
+		// Whole Cards
 		positionValues[i++] = 52;
 		positionValues[i++] = 52;
-		positionValues[i++] = 52;
-		positionValues[i++] = 52;
+
+		// Blind
 		positionValues[i++] = 52;
 		positionValues[i++] = 52;
 		positionValues[i++] = 52;
 
-		for (int x = 0; x < numPlayers-1; x++) {
-			positionValues[i++] = 4;
-		}
+		// River
+		positionValues[i++] = 52;
+
+		// Turn
+		positionValues[i++] = 52;
+
 		return positionValues;
 	}
 
@@ -76,57 +70,31 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 
 	@Override
 	public BoardVector getBoardVector(StateObservation so) {
+
 		StateObserverPoker m_so = (StateObserverPoker) so.copy();
+
 		int[] bvec = new int[getNumCells()];
 
-
-		int player = m_so.getPlayer();
-
-		int[] suits = new int[4];
-		int[] ranks = new int[13];
+		int tmp = 0;
 
 		for(PlayingCard c : m_so.getHoleCards()){
-			if(c == null)
-				break;
-			suits[c.getSuit()]++;
-			ranks[c.getRank()]++;
+			if(c == null) {
+				bvec[tmp++] = 0;
+			} else {
+				bvec[tmp++] = c.getRank();
+			}
 		}
 
 		for(PlayingCard c : m_so.getCommunityCards()){
-			if(c == null)
-				break;
-			suits[c.getSuit()]++;
-			ranks[c.getRank()]++;
-		}
-
-		int tmp = 0;
-		//bvec[tmp++] = (int) m_so.getOpenPlayer(so.getPlayer());
-		//bvec[tmp++] = (int) m_so.getChips()[so.getPlayer()];
-		//bvec[tmp++] = m_so.getPotSize();
-
-		//todo "sort" cards in order
-		PlayingCard tmpCard;
-		bvec[tmp++] = ((tmpCard = m_so.getHoleCards()[0]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getHoleCards()[1]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[0]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[1]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[2]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[3]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[4]) != null) ? tmpCard.getId() : 0;
-
-		// Ranks - Position 7 - 19
-		for(int i = 0;i<ranks.length;i++)
-			bvec[tmp++] = ranks[i];
-
-		for (int i = 0; i < numPlayers; i++) {
-			if(i != so.getPlayer())
-				bvec[tmp++] = (int) m_so.getPlayerSate(i);
+			if(c == null) {
+				bvec[tmp++] = 0;
+			} else {
+				bvec[tmp++] = c.getRank();
+			}
 		}
 
 		return new BoardVector(bvec);
 	}
-
-
 
 	@Override
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
@@ -140,25 +108,13 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		int[] all = new int[getNumCells()];
-		for(int x=0;x<all.length;x++)
-			all[x]=x;
-
 		int[][] slim = new int[][]{
 				{0,1},
-				{5,6},
 				{2,3,4},
-				{7,8,9,10,11,12,13,14,15,16,17,18,19}
+				{5,6}
 		};
 
 		switch (mode) {
-			// 0 => amount to call
-			// 1 => chips
-			// 2 => potsize
-			// 3,4 => hand cards in ascending order
-			// 5,6,7 => community cards in ascending order
-			// 8 ... 8+(n-2) => status of opponents
-
 			case 1:    return slim;
 		}
 		return null;
@@ -184,5 +140,12 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 		return adjacencySet;
 	}
 
-
+	@Override
+	public String getDescription(){
+		return "Three tuples with: " +
+				"{ Wholecards }," +
+				"{ River }," +
+				"{ Blind + Turn }" +
+				"";
+	}
 }

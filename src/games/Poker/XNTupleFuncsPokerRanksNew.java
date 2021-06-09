@@ -1,5 +1,9 @@
 package games.Poker;
 
+import games.BlackJack.BlackJackConfig;
+import games.BlackJack.Hand;
+import games.BlackJack.Player;
+import games.BlackJack.StateObserverBlackJack;
 import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
@@ -9,7 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Serializable {
+public class XNTupleFuncsPokerRanksNew extends XNTupleBase implements XNTupleFuncs, Serializable {
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
@@ -22,10 +26,114 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 	private static final long serialVersionUID = 7556763505414386566L;
 
 	private final int numPlayers = PokerConfig.NUM_PLAYERS;
+	private final int startChips = PokerConfig.START_CHIPS;
+
+	private Hand hand;
+
+	private class Hand {
+
+		int high;
+		int suited;
+		int connected;
+		ArrayList<Integer> pairs;
+		ArrayList<Integer> triples;
+		ArrayList<Integer> four;
+
+		boolean fullHouse;
+		boolean flush;
+		boolean straight;
+
+		Hand(){
+
+		}
+	}
+
+	private void updateHand(PlayingCard[] cards){
+		int[] suits = new int[4];
+		int[] ranks = new int[13];
+
+		int max = 0;
+
+		for(PlayingCard c : cards){
+			if(c == null)
+				break;
+			suits[c.getSuit()]++;
+			ranks[c.getRank()]++;
+
+			if(c.getRank()>max)
+				max = c.getRank();
+		}
+
+		hand.high = max;
+
+		// update amount of cards with the same suit
+		int maxSuits = 0;
+		for(int val:suits){
+			if(maxSuits<val)
+				maxSuits=val;
+		}
+		hand.suited = maxSuits;
+
+		// update amount of conneceted cards;
+		int connected = 0;
+		int maxConnected = 0;
+		if(ranks[12]>0)
+			connected++;
+		for(int i = 0;i<13;i++){
+			if(ranks[i]>0) {
+				connected++;
+				if(maxConnected<connected)
+					maxConnected = connected;
+			} else {
+				connected = 0;
+			}
+		}
+		hand.connected = maxConnected;
+
+		// check for pairs
+		ArrayList[] multiples = checkForMultiples(ranks);
+		hand.pairs = multiples[0];
+		hand.triples = multiples[1];
+		hand.four = multiples[2];
+
+		hand.straight = connected > 4;
+		hand.flush = maxSuits > 4;
+		if(hand.triples.size()>0) {
+			hand.pairs.remove(Integer.valueOf(hand.triples.get(0)));
+			if (hand.pairs.size()>0){
+				hand.fullHouse = true;
+			}
+			hand.pairs.add(hand.triples.get(0));
+		}
+	}
+
+	private ArrayList<Integer>[] checkForMultiples(int[] ranks){
+		ArrayList<Integer>[] multiples = new ArrayList[3];
+		multiples[0] = new ArrayList<>(); // pairs
+		multiples[1] = new ArrayList<>(); // three of a kind
+		multiples[2] = new ArrayList<>(); // four  of a kind
+
+		for(int i = 12;i>=0;i--){
+			if(ranks[i]>=2){
+				multiples[0].add(i);
+				if(ranks[i]>=3){
+					multiples[1].add(i);
+					if(ranks[i]>=3){
+						multiples[2].add(i);
+					}
+				}
+			}
+		}
+		return multiples;
+	}
+
+	public XNTupleFuncsPokerRanksNew() {
+
+	}
 
 	@Override
 	public int getNumCells() {
-		return 7 + numPlayers - 1;
+		return 13 + numPlayers - 1;
 	}
 
 
@@ -37,26 +145,23 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 
 	@Override
 	public int[] getPositionValuesVector() {
-		// I think it makes sense to normalize the Feature Vector so that the active player is always at #0
 
-		// 0 => amount to call // leave out
-		// 1 => chips // leave out
-		// 2 => potsize // leave out
-		// 3,4 => hand cards in ascending order
-		// 5,6,7,8,9 => community cards in ascending order
-		// 10 ... 10+(n-2) => status of opponents
 		int[] positionValues = new int[getNumCells()];
 		int i = 0;
-		//positionValues[i++] = startChips*numPlayers;
-		//positionValues[i++] = startChips*numPlayers;
-		//positionValues[i++] = startChips*numPlayers;
-		positionValues[i++] = 52;
-		positionValues[i++] = 52;
-		positionValues[i++] = 52;
-		positionValues[i++] = 52;
-		positionValues[i++] = 52;
-		positionValues[i++] = 52;
-		positionValues[i++] = 52;
+
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
+		positionValues[i++] = 5;
 
 		for (int x = 0; x < numPlayers-1; x++) {
 			positionValues[i++] = 4;
@@ -80,8 +185,6 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 		int[] bvec = new int[getNumCells()];
 
 
-		int player = m_so.getPlayer();
-
 		int[] suits = new int[4];
 		int[] ranks = new int[13];
 
@@ -100,21 +203,8 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 		}
 
 		int tmp = 0;
-		//bvec[tmp++] = (int) m_so.getOpenPlayer(so.getPlayer());
-		//bvec[tmp++] = (int) m_so.getChips()[so.getPlayer()];
-		//bvec[tmp++] = m_so.getPotSize();
 
-		//todo "sort" cards in order
-		PlayingCard tmpCard;
-		bvec[tmp++] = ((tmpCard = m_so.getHoleCards()[0]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getHoleCards()[1]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[0]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[1]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[2]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[3]) != null) ? tmpCard.getId() : 0;
-		bvec[tmp++] = ((tmpCard = m_so.getCommunityCards()[4]) != null) ? tmpCard.getId() : 0;
-
-		// Ranks - Position 7 - 19
+		// Ranks
 		for(int i = 0;i<ranks.length;i++)
 			bvec[tmp++] = ranks[i];
 
@@ -145,10 +235,9 @@ public class XNTupleFuncsPoker extends XNTupleBase implements XNTupleFuncs, Seri
 			all[x]=x;
 
 		int[][] slim = new int[][]{
-				{0,1},
-				{5,6},
-				{2,3,4},
-				{7,8,9,10,11,12,13,14,15,16,17,18,19}
+				//{0,1,2,3,4},
+				//{5,6,7,8,9},
+				{2,3,4,5,6,7,8,9,10,11,12,13}
 		};
 
 		switch (mode) {
