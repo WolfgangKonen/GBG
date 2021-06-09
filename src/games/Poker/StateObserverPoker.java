@@ -44,8 +44,11 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	private static final int SMALLBLIND = PokerConfig.SMALLBLIND;
 	private static final int BIGBLIND = 2*SMALLBLIND;
 
-	private static final double REWARD_NEGATIVE = 0;
-	private static final double REWARD_POSITIVE =  START_CHIPS*NUM_PLAYER;
+	//private static final double REWARD_NEGATIVE = 0;
+	//private static final double REWARD_POSITIVE =  START_CHIPS*NUM_PLAYER;
+	private static final double REWARD_NEGATIVE = -START_CHIPS;
+	private static final double REWARD_POSITIVE =  START_CHIPS*(NUM_PLAYER-1);
+
 
     private int m_Player;			// player who makes the next move
 	protected ArrayList<ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
@@ -92,6 +95,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	private static final long serialVersionUID = 12L;
 
 	private int gameround;
+	private int turns;
 
 	//</editor-fold>
 
@@ -99,6 +103,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	// *** never used *** /WK/
 	public void restart(){
 		gameround = 0;
+		turns = 0;
 		isPartialState = false;
 		//rand = new Random(System.currentTimeMillis());
 		rand = new Random(ThreadLocalRandom.current().nextInt());
@@ -134,6 +139,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 	public StateObserverPoker() {
 		gameround = 0;
+		turns = 0;
 		isPartialState = false;
 		//rand = new Random(System.currentTimeMillis());
 		rand = new Random(ThreadLocalRandom.current().nextInt());
@@ -156,7 +162,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			activePlayers[i] = true;
 			playingPlayers[i] = true;
 			foldedPlayers[i] = false;
-			gamescores[i] = START_CHIPS;
+			//gamescores[i] = START_CHIPS;
+			gamescores[i] = 0;
 		}
 
 		initRound();
@@ -173,6 +180,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		}
 
 		gameround = other.gameround;
+		turns = other.turns;
 		isPartialState = other.isPartialState;
 		//rand = new Random(System.currentTimeMillis());
 		rand = new Random(ThreadLocalRandom.current().nextInt());
@@ -277,6 +285,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	}
 
 	public void initRound(){
+		turns = 0;
 		gameround++;
 		addToLog("----------New Round ("+gameround+")---------");
 
@@ -693,13 +702,14 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 					(getNumPlayingPlayers() - getNumFoldedPlayers() == 1 &&
 					openPlayers.size() == 1)
 			);
-
 		}
 		if(!GAMEOVER && openPlayers.size() > 0) {
 			// next player becomes the active one
 			m_Player = openPlayers.remove();
 			setAvailableActions();
 		}
+		if(!isNextActionDeterministic)
+			turns++;
 	}
 
 	/**
@@ -780,7 +790,8 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			}
 
 			//update scores
-			gamescores = chips;
+			updateGamescores();
+			//gamescores = chips;
 
 			addToLog("-----------End Round("+gameround+")--------");
 			for(int i = 0 ; i <getNumPlayers() ; i++)
@@ -788,6 +799,11 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 			setRoundOver(true);
 		}
+	}
+
+	private void updateGamescores(){
+		for(int i = 0;i< chips.length;i++)
+			gamescores[i] = chips[i]-START_CHIPS;
 	}
 
 	public void advanceNondeterministic() {
@@ -1196,6 +1212,14 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 		holeCards[player][1] = sec;
 	}
 
+	public boolean isRoundOver(){
+		return m_roundOver;
+	}
+
+	@Override
+	public boolean isRoundBasedGame() {
+		return true;
+	}
 
 	@SuppressWarnings("unused")
 	public void setCommunityCards(PlayingCard[] oCommunityCards){
@@ -1279,6 +1303,10 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 	public int getPhase(){
 		return m_phase;
+	}
+
+	public int getTurns(){
+		return turns;
 	}
 
 }
