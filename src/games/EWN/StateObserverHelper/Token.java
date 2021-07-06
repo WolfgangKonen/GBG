@@ -1,6 +1,5 @@
-package games.EWS.StateObserverHelper;
+package games.EWN.StateObserverHelper;
 
-import game.util.moves.To;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -38,7 +37,8 @@ public class Token {
             if(newPos % size == 0 && index % size == size-1) continue;
             if(newPos % size == size-1 && index % size == 0) continue;
             Types.ACTIONS a = Helper.parseAction(index,newPos,size);
-            availableActions.add(a);
+            if(a != null) availableActions.add(a);
+            else System.out.println("index: " + index + " value " + value + " Player: " + player);
         }
     }
 

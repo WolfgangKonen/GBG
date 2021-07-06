@@ -851,6 +851,46 @@ abstract public class Arena implements Runnable {
 					if (numTies == 3) goStr = new StringBuilder("Tie");    // it's an all-player tie
 				} // if
 			}
+			case 4 -> {
+				// There are 4 possible game-over cases for 3 players:
+				// 1) a single player wins			--> goStr = "Px (agtName) wins"
+				// 2) a coalition of 2 player wins	--> goStr = "Px & Py win"
+				// 3) a tie between two players, the remaining player has lost.
+				//									--> goStr = "Tie between Px & Py"
+				// 4) a tie between all players		--> goStr = "Tie
+
+
+				// 1) a single player wins 			--> gotStr = "Px (agtName) wins"
+				// 2) a coalition of 2 player wins
+				// 3) a coalition of 3 player wins
+				// 4) a tie between two players, the two remaining player have lost
+				// 5) a tie between three players, the remaining player has lost
+				// 6) a tie between all players
+				// Selecting the number of winners
+				int numWinners = 0;
+				for (int i = 0; i < sc.scTup.length; i++) {
+					if (sc.scTup[i] == 1) {
+						if (numWinners == 0) goStr.append("P").append(i);
+						else goStr.append(" & P").append(i);
+						winner = i;
+						numWinners++;
+					}
+				}
+				goStr.append((numWinners == 1) ? " (" + agentVec[winner] + ") wins" : " win");
+				if (sc.max() == 0.0) {
+					goStr = new StringBuilder("Tie between ");
+					int numTies = 0;
+					for (int i = 0; i < sc.scTup.length; i++) {
+						if (sc.scTup[i] == 0) {
+							if (numTies == 0) goStr.append("P").append(i);
+							else goStr.append(" & P").append(i);
+							numTies++;
+						}
+					}
+					if (numTies == 4) goStr = new StringBuilder("Tie");    // it's an all-player tie
+				}
+
+			}
 			default -> throw new RuntimeException("Case numPlayers = " + numPlayers + " in gameOverString() not handled!");
 		}
 		

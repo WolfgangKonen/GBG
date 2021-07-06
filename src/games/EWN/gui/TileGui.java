@@ -1,15 +1,18 @@
-package games.EWS.gui;
+package games.EWN.gui;
 
-import games.EWS.GameBoardEWS;
-import games.EWS.StateObserverHelper.Token;
-import metadata.graphics.board.Board;
+import games.Arena;
+import games.EWN.GameBoardEWN;
+import games.EWN.StateObserverHelper.Token;
+import games.EWN.constants.ConfigEWN;
 import tools.Types;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 public class TileGui extends JPanel{
 
@@ -26,15 +29,15 @@ public class TileGui extends JPanel{
         this.token = new JLabel("",SwingConstants.CENTER);
         this.add(token, BorderLayout.CENTER);
         north = new JLabel("", SwingConstants.CENTER);
-        token.setOpaque(true);
         east = new JLabel("");
         south = new JLabel("",SwingConstants.CENTER);
         west = new JLabel("");
+        token.setOpaque(true);
         this.add(north, BorderLayout.NORTH);
         this.add(east, BorderLayout.EAST);
         this.add(south, BorderLayout.SOUTH);
-        add(west, BorderLayout.WEST);
-        this.addMouseListener(new Listener());
+        this.add(west, BorderLayout.WEST);
+        addListener();
         updateTile(t);
         this.setVisible(true);
     }
@@ -62,21 +65,32 @@ public class TileGui extends JPanel{
         }
     }
 
-    private class Listener extends MouseAdapter {
 
-        public void mouseClicked(MouseEvent e) {
-            int index = ((TileGui) e.getSource()).getToken().getIndex();
-            int from = ((TileGui) e.getSource()).getBoardGui().getFrom();
-            if(from == -1){
-                ((TileGui) e.getSource()).getBoardGui().setFrom(index);
-            }else{
-                ((TileGui) e.getSource()).getBoardGui().getGameBoardEWS().hGameMove(from,index);
-                ((TileGui) e.getSource()).getBoardGui().setFrom(-1);
-            }
 
-        }
-
+    public void markAsSelected(){
+        this.setBorder(BorderFactory.createLineBorder(Color.YELLOW,10));
     }
+
+    public void unmarkAsSelected(){
+        this.setBorder(BorderFactory.createEmptyBorder());
+    }
+    private void addListener(){
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                GameBoardEWN gb = m_bg.getM_gb();
+                Arena.Task aTaskState = gb.m_Arena.taskState;
+                int index = ((TileGui) e.getSource()).getToken().getIndex();
+                if(aTaskState == Arena.Task.PLAY) {
+                    gb.hGameMove(index); // Human play
+                }else if( aTaskState == Arena.Task.INSPECTV) {
+                   // gb.inspectMove(index); // Inspect
+                }
+
+            }
+        });
+    }
+
 
 
 }

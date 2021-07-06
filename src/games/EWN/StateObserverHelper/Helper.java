@@ -1,4 +1,4 @@
-package games.EWS.StateObserverHelper;
+package games.EWN.StateObserverHelper;
 
 import tools.Types;
 

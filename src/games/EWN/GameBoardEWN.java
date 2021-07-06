@@ -1,9 +1,10 @@
-package games.EWS;
+package games.EWN;
 
 import controllers.PlayAgent;
 import games.Arena;
-import games.EWS.StateObserverHelper.Helper;
-import games.EWS.gui.GameBoardGuiEWS;
+import games.EWN.StateObserverHelper.Helper;
+import games.EWN.constants.ConfigEWN;
+import games.EWN.gui.GameBoardGuiEWN;
 import games.GameBoard;
 import games.Othello.ConfigOthello;
 import games.StateObservation;
@@ -19,7 +20,7 @@ import java.util.Random;
  *      TileGui:
  *      TokenGui:
  */
-public class GameBoardEWS implements GameBoard {
+public class GameBoardEWN implements GameBoard {
 
     /**
      * Serialnumber
@@ -30,23 +31,23 @@ public class GameBoardEWS implements GameBoard {
      * Gameboard Attributes
      */
     public Arena m_Arena;
-    private int size;
-    private int playerNum;
-    private StateObserverEWS m_so;
+    private StateObserverEWN m_so;
     protected Random rand;
     private boolean arenaActReq = false;
-    private transient GameBoardGuiEWS m_gameGui;
+    private transient GameBoardGuiEWN m_gameGui;
+    private int selectedTokenPosition;
+    private boolean selecting;
 
 
-    public GameBoardEWS(Arena arena, int size, int playerNum){
+    public GameBoardEWN(Arena arena, int size, int playerNum){
         super();
         m_Arena = arena;
-        this.size = size;
-        this.playerNum = playerNum;
-        m_so = new StateObserverEWS(size,playerNum);
+        m_so = new StateObserverEWN(size,playerNum);
         rand = new Random();
+        selecting = true;
+        selectedTokenPosition = -1;
         if(m_Arena.hasGUI()){
-            m_gameGui = new GameBoardGuiEWS(this);
+            m_gameGui = new GameBoardGuiEWN(this);
         }
     }
 
@@ -71,10 +72,10 @@ public class GameBoardEWS implements GameBoard {
 
     @Override
     public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
-        StateObserverEWS soN = null;
+        StateObserverEWN soN = null;
         if(so!=null){
-            assert( so instanceof StateObserverEWS):"StateObservation 'so' is not an instance of StateObserverEWS";
-            soN = (StateObserverEWS) so;
+            assert( so instanceof StateObserverEWN):"StateObservation 'so' is not an instance of StateObserverEWS";
+            soN = (StateObserverEWN) so;
             m_so = soN;
         }
         if(m_gameGui != null){
@@ -82,8 +83,34 @@ public class GameBoardEWS implements GameBoard {
         }
     }
 
-    public void hGameMove(int x, int y) {
-        Types.ACTIONS act = Helper.parseAction(x,y, m_so.getSize());
+    public void hGameMove(int index) {
+        if(!(m_Arena.taskState == Arena.Task.PLAY)) return;
+        if(selecting){
+            if(selectedTokenPosition > -1) {
+                m_gameGui.unSelect();
+                selectedTokenPosition = -1;
+            }
+            selectedTokenPosition = m_gameGui.hGameSelecting(index);
+            selecting = false;
+        }else {
+            if(selectedTokenPosition == index){
+                m_gameGui.unSelect();
+                selecting = true;
+            }else{
+                Types.ACTIONS act = Helper.parseAction(selectedTokenPosition,index, ConfigEWN.BOARD_SIZE);
+                if( m_so.isLegalAction(act)) {
+                    m_so.advance(act);
+                    (m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+                    m_gameGui.unSelect();
+                    arenaActReq = true;
+                    selecting = true;
+                    selectedTokenPosition = -1;
+
+                }
+            }
+        }
+        /**
+        Types.ACTIONS act = Helper.parseAction(x,y, ConfigEWN.BOARD_SIZE);
         if( m_so.isLegalAction(act)) {
             m_so.advance(act);
             (m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
@@ -92,18 +119,12 @@ public class GameBoardEWS implements GameBoard {
         else {
             System.out.println("Not Allowed: illegal Action");
         }
+         **/
     }
 
-    public void inspectMove(int x, int y)
-    {
-        int iAction = ConfigOthello.BOARD_SIZE * x + y;
-        Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
-        if(m_so.isLegalAction(act)) {
-            m_Arena.setStatusMessage("Inspecting the value function ...");
-            m_so.advance(act);
-        }else {m_Arena.setStatusMessage("Desired Action is not legal");}
-        arenaActReq = true;
-    }
+
+
+
 
     @Override
     public boolean isActionReq() {
@@ -148,7 +169,11 @@ public class GameBoardEWS implements GameBoard {
 
     @Override
     public String getSubDir() {
-        return null;
+        int numPlayer = ConfigEWN.NUM_PLAYERS;
+        int boardSize = ConfigEWN.BOARD_SIZE;
+        int cellCoding = ConfigEWN.CEll_CODING;
+        return boardSize+"x"+boardSize+" "+numPlayer+"P" + (cellCoding == 0 ? " N+1 Position Values" : " N*2+1 Position Values");
+
     }
 
     @Override

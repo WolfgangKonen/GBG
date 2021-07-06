@@ -1,6 +1,6 @@
-package games.EWS.constants;
+package games.EWN.constants;
 
-public class ConfigEWS {
+public class ConfigEWN {
 
     /**
      * Number of players
@@ -14,6 +14,7 @@ public class ConfigEWS {
      */
     public static int BOARD_SIZE = 3;
 
+    public static int CEll_CODING = 1;
 
     public static boolean DBG = true;
 }

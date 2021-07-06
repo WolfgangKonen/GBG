@@ -1,13 +1,14 @@
-package games.EWS;
+package games.EWN;
 
-import games.EWS.StateObserverHelper.Helper;
-import games.EWS.StateObserverHelper.Player;
-import games.EWS.StateObserverHelper.Token;
-import games.EWS.constants.ConfigEWS;
-import games.EWS.constants.StartingPositions;
+import games.EWN.StateObserverHelper.Helper;
+import games.EWN.StateObserverHelper.Player;
+import games.EWN.StateObserverHelper.Token;
+import games.EWN.constants.ConfigEWN;
+import games.EWN.constants.StartingPositions;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
+import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -16,12 +17,13 @@ import java.util.Random;
 
 import static tools.Types.WINNER.*;
 
-public class StateObserverEWS extends ObserverBase implements  StateObsNondeterministic {
+public class StateObserverEWN extends ObserverBase implements  StateObsNondeterministic {
 
     public static final long serialVersionUID = 12L;
     private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
-    private Random random;
+    public Random random;
     private int numPlayers;
+    public int count;
     private int player;
     private int size;
     public int turn = 0 ;
@@ -34,18 +36,22 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
     private ArrayList<ACTIONS> availableRandomActions;
     private int playerWin;      // Representing the winning player for faster evaluation
     private int playerLooses;   // Representing the loosing player for faster evaluation
+    private ScoreTuple m_scoreTuple;
 
-    public StateObserverEWS(){
+
+    public StateObserverEWN(){
         this(3,2);
     }
 
-    public StateObserverEWS(int size, int numPlayers){
+    public StateObserverEWN(int size, int numPlayers){
         super();
         this.player =  0;
         this.rolledDice = null;
         this.numPlayers = numPlayers;
         this.size = size;
+        m_scoreTuple = new ScoreTuple(numPlayers);
         playerWin = -1;
+        count = 0;
         playerLooses = -1;
         this.nextNondeterministicAction=null;
         this.isNextActionDeterministic=false;
@@ -72,26 +78,25 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
             }
         }
         // Init empty board:
-
-
-
-
         advanceNondeterministic(); // setActions when we start a new state
     }
 
 
-    public StateObserverEWS(StateObserverEWS other){
+
+    public StateObserverEWN(StateObserverEWN other){
 
         this.player = other.getPlayer();
         this.numPlayers = other.getNumPlayers();
         this.size = other.getSize();
+        count = other.count;
         this.random = new Random();
         this.players = new ArrayList<>();
         this.nextNondeterministicAction = other.getNextNondeterministicAction();
         this.isNextActionDeterministic = other.isNextActionDeterministic();
         this.playerLooses = other.getPlayerLooses();
         this.playerWin = other.getPlayerWin();
-        this.availableActions = new ArrayList<>();
+        this.m_scoreTuple = other.getM_scoreTuple();
+        this.availableActions = new ArrayList<ACTIONS>();
         this.availableRandomActions = other.getAvailableRandoms();
         this.gameState = new Token[size][size];
         this.turn = other.turn;
@@ -121,7 +126,14 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
      */
     @Override
     public void advance(ACTIONS action) {
-        if(isNextActionDeterministic) advanceDeterministic(action);
+        if(isNextActionDeterministic) {
+            // Hotfix seems to work Dive into action generation
+            if(action != null) {
+                count = 0;
+                advanceDeterministic(action);
+            }
+            else isNextActionDeterministic = false;
+        }
         if(!isNextActionDeterministic) advanceNondeterministic();
     }
 
@@ -140,12 +152,6 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
      * @param action    the action
      */
     public void advanceDeterministic(ACTIONS action){
-        if(!isNextActionDeterministic){
-            throw new RuntimeException("ACTION IS NOT NONDETERMINISTIC");
-        }
-        if(this.isGameOver()){
-            throw new RuntimeException("Game is already over"); // Cannot advance a finished game.
-        }
         int[] convertedAction = Helper.getIntsFromAction(action); // [from, to] int array
         int to_x = convertedAction[1] % size;
         int to_y = (convertedAction[1] - to_x) / size;
@@ -161,11 +167,13 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
         players.get(player).updateToken(from_token, to_token);
         gameState[from_y][from_x] = new Token(from_y, from_x, size, -1, -1); // Remove old token
         turn++;
-        if(!this.isGameOver()){
+        boolean isOver = this.isGameOver();
+        if(!isOver){
             this.player = (this.player + 1) % numPlayers; //next player
-            isNextActionDeterministic=false;
             availableActions.clear();
+            isNextActionDeterministic=false;
         }
+
     }
 
     @Override
@@ -173,8 +181,11 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
         if(isNextActionDeterministic){
             throw new RuntimeException("ACTION IS DETERMINISTIC must be NON");
         }
-        advanceNondeterministic(availableRandomActions.get(random.nextInt(availableRandomActions.size())));
+        int actIndex = random.nextInt(availableRandomActions.size());
+        advanceNondeterministic(availableRandomActions.get(actIndex));
     }
+
+
 
     @Override
     public void advanceNondeterministic(ACTIONS action) {
@@ -210,8 +221,8 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
      * This method will reuse the size and num players to reload the same starting position.
      * @return new StateObserverEWS(size, numPlayers);
      */
-    public StateObserverEWS reset(){
-        return new StateObserverEWS(this.getSize(), this.getNumPlayers());
+    public StateObserverEWN reset(){
+        return new StateObserverEWN(this.getSize(), this.getNumPlayers());
     }
 
 
@@ -250,11 +261,16 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
         p.setAvailableActions(nextNondeterministicAction.toInt());
         this.availableActions = p.getAvailableActions();
         if(availableActions.size() == 0){
-            System.out.println("Player is " + player + " turn: " + turn+ " TokenSize: " + players.get(player).getTokens().size());
-            passToNextPlayer();
-            this.player = (player+1) % numPlayers;
-            this.isNextActionDeterministic = false;
-            advanceNondeterministic();
+            count++;
+            if(count > 3){
+                isGameOver();
+            }else {
+
+                this.player = (player + 1) % numPlayers;
+                this.isNextActionDeterministic = false;
+                advanceNondeterministic();
+            }
+
         }else {
             isNextActionDeterministic = true;
         }
@@ -277,9 +293,8 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
         return numPlayers;
     }
 
-    private Types.WINNER getWinner(){
+    private Types.WINNER getWinner(int player){
 
-        if(!isGameOver()) throw new RuntimeException("Sorry game is not over!");
         if(numPlayers == 2) {
             if(playerWin >= 0) {
                 return playerWin == player ? PLAYER_WINS : PLAYER_LOSES;
@@ -288,6 +303,9 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
             }
         } else if(numPlayers == 3){
             // Can only be the single player
+            if (playerWin >= 0){
+                return player ==  2 ? PLAYER_WINS : PLAYER_LOSES;
+            }
             if(playerLooses >= 0){
                 if(playerLooses == 0 || playerLooses == 1){
                     return (player == 0 || player == 1) ? PLAYER_LOSES : PLAYER_WINS;
@@ -295,42 +313,96 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
                 return player == 2 ? PLAYER_LOSES : PLAYER_WINS;
             }
 
-            if(player == playerWin) return PLAYER_WINS;
-            else return PLAYER_LOSES;
+
 
         }
         else {
-            // 4 Player
-            if(playerLooses == 0 || playerLooses == 2){
-                if(playerLooses == 0 || playerLooses == 1){
-                    return (player == 0 || player == 1) ? PLAYER_LOSES : PLAYER_WINS;
-                }
-                return player == 2 ? PLAYER_LOSES : PLAYER_WINS;
-            }
+            // Teams [0,2] vs. [1,3]
 
-            if(player == playerWin) return PLAYER_WINS;
-            else return PLAYER_LOSES;
+            if(playerWin >= 0){
+                // Check if the player is the winner
+                if((playerWin == 0 || playerWin == 2) && (player == 0 || player == 2)){
+                    return PLAYER_WINS;
+                }
+                if((playerWin == 1 || playerWin == 3) && (player == 1 || player == 3))
+                {
+                    return PLAYER_WINS;
+                }
+                return PLAYER_LOSES;
+            }
+            if(playerLooses >= 0){
+
+                if((playerLooses == 0 || playerLooses == 2) && (player == 0 || player == 2)){
+                    return PLAYER_LOSES;
+                }
+                if((playerLooses == 1 || playerLooses == 3) && (player == 1 || player == 3))
+                {
+                    return PLAYER_LOSES;
+                }
+                return PLAYER_WINS;
+            }
         }
 
         throw new RuntimeException("Game is no over yet.");
     }
 
+
+    @Override
+    public ScoreTuple getGameScoreTuple() {
+        for(int i = 0; i < ConfigEWN.NUM_PLAYERS; i++){
+            m_scoreTuple.scTup[i] = getGameScore(i);
+        }
+        return m_scoreTuple;
+    }
+
+
     @Override
     public double getGameScore(StateObservation referringState) {
+        if(!isGameOver()) return 0.0;
+        int refPlayer = referringState.getPlayer();
+        switch (ConfigEWN.NUM_PLAYERS){
+            case 2:{
+                return refPlayer== this.player ? getGameScore(refPlayer) : (-1.0)*getGameScore(refPlayer);
+            }
+            case 3:{
+                // Teams [0,1] vs [2]
+                if(refPlayer == 2 && this.player == 2){
+                    return getGameScore(refPlayer);
+                }
+                return (-1.0) * getGameScore(refPlayer);
+            }
+            case 4:{
+                // Teams [0,2] vs. [1,3]
+                if((this.player == 0 || this.player == 2) && (refPlayer == 0 || refPlayer == 2)){
+                    return getGameScore(refPlayer);
+                }
+                return (-1.0)*getGameScore(refPlayer);
+            }
+            default: throw new RuntimeException("Only Num_Players 2,3 and 4 are implemented [getGameScore]");
+        }
+    }
+
+    @Override
+    public double getGameScore(int player) {
         if(this.isGameOver()){
-            int sign = (referringState.getPlayer() == this.player) ? 1 :(-1);
-            Types.WINNER win = getWinner();
-            switch (win){
+            Types.WINNER winState = getWinner(player);
+            switch (winState){
                 case PLAYER_LOSES:
-                     return sign* REWARD_NEGATIVE;
+                    return REWARD_NEGATIVE;
                 case PLAYER_WINS:
-                     return sign* REWARD_POSITIVE;
+                    return REWARD_POSITIVE;
                 case TIE:  throw new RuntimeException("invalid outcome of the game [wrong getGameScore]");
             };
         }
+
         return 0.0;
     }
 
+    @Override
+    public double getReward(int player, boolean rewardIsGameScore) {
+        // Check for the player
+        return getGameScore(player);
+    }
 
     @Override
     public double getMinGameScore() {
@@ -397,7 +469,7 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
 
     @Override
     public StateObsNondeterministic copy() {
-        return new StateObserverEWS(this);
+        return new StateObserverEWN(this);
     }
 
 
@@ -426,12 +498,15 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
        }
     }
 
+
+
     private boolean gameOverFourPlayer(){
             int[] winningPositions = {size*size-1, 0,size-1,(size*size)-size};
             //Check for winning position
             for(Player p : players){
+                int winPosition = winningPositions[p.getPlayer()]; // get the corresponding item of the array
                 for(Token t: p.getTokens()){
-                    if(t.getIndex() == winningPositions[p.getPlayer()]){
+                    if(t.getIndex() == winPosition){
                         playerWin = p.getPlayer();
                         return true;
                     }
@@ -447,19 +522,26 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
         }
 
     private boolean gameOverThreePlayer(){
+        if(availableActions.size() == 0) {
+            playerWin = 2;
+            return true;
+        }
         for(Player p : players){
             if(p.getTokens().size() == 0) {
                 playerLooses = p.getPlayer();
                 return true;
             };
-        }
-        int winPosition = size-1;
-        for(Token t : players.get(numPlayers-1).getTokens()){
-            if(t.getIndex() == winPosition){
-                playerWin = numPlayers-1; // can only be the 3rd player
-                return true;
+            int winPosition = ConfigEWN.BOARD_SIZE-1;
+            if(p.getPlayer() == 2){
+                for(Token t : p.getTokens()){
+                    if(t.getIndex() == winPosition){
+                        playerWin = 2;
+                        return true;
+                    }
+                }
             }
         }
+
         return false;
     }
 
@@ -519,4 +601,7 @@ public class StateObserverEWS extends ObserverBase implements  StateObsNondeterm
         return playerLooses;
     }
 
+    public ScoreTuple getM_scoreTuple(){
+        return this.m_scoreTuple;
+    }
 }

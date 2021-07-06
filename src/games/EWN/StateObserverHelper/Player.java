@@ -1,6 +1,5 @@
-package games.EWS.StateObserverHelper;
+package games.EWN.StateObserverHelper;
 
-import games.EWS.constants.ConfigEWS;
 import tools.Types;
 
 import java.util.ArrayList;

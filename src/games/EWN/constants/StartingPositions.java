@@ -1,4 +1,4 @@
-package games.EWS.constants;
+package games.EWN.constants;
 
 /**
  * Each entry contains the value of the Token and the player number

@@ -1,4 +1,4 @@
-package games.EWS.gui;
+package games.EWN.gui;
 
 import tools.Types;
 

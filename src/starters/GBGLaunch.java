@@ -16,8 +16,8 @@ import javax.swing.SwingConstants;
 import games.Arena;
 import games.CFour.ArenaC4;
 import games.CFour.ArenaTrainC4;
-import games.EWS.ArenaEWS;
-import games.EWS.ArenaTrainEWS;
+import games.EWN.ArenaEWN;
+import games.EWN.ArenaTrainEWN;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
 import games.Nim.ArenaNim2P;
@@ -57,7 +57,7 @@ public class GBGLaunch {
 	/**
 	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe"} 
 	 */
-	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe","EWS"};
+	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe","EWN"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
@@ -231,9 +231,11 @@ public class GBGLaunch {
 		case "TicTacToe": 
 			t_Game = new ArenaTrainTTT(title,withUI);
 			break;
-		case "EWS":
-			ArenaTrainEWS.setConfig(scaPar[0]);
-			t_Game = new ArenaTrainEWS(title, withUI);
+		case "EWN":
+			ArenaTrainEWN.setConfig(scaPar[0]);
+			ArenaTrainEWN.setCellCoding(scaPar[1]);
+
+			t_Game = new ArenaTrainEWN(title, withUI);
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
@@ -320,9 +322,11 @@ public class GBGLaunch {
 		case "TicTacToe": 
 			t_Game = new ArenaTTT(title,withUI);
 			break;
-		case "EWS":
-			ArenaEWS.setConfig(scaPar[0]);
-			t_Game = new ArenaEWS(title, withUI);
+		case "EWN":
+			ArenaEWN.setConfig(scaPar[0]);
+			ArenaEWN.setCellCoding(scaPar[1]);
+
+			t_Game = new ArenaEWN(title, withUI);
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
 			System.exit(1);
@@ -488,8 +492,9 @@ public class GBGLaunch {
 			scaPar[0]="2x2x2";		 	
 			scaPar[1]="STICKER2";
 			scaPar[2]="ALL";
-		case "EWS":
+		case "EWN":
 			scaPar[0] = "3x3 2-Player";
+			scaPar[1] = "N-Player + 1";
 		case "2048":
 		case "ConnectFour": 
 		case "Othello":
@@ -571,10 +576,12 @@ public class GBGLaunch {
 			choiceScaPar1.setSelectedItem("STICKER2");		// the initial (recommended) values
 			choiceScaPar2.setSelectedItem("ALL");			//
 			break;
-		case "EWS":
+		case "EWN":
 			scaPar0_L.setText("Setting");
 			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
+			setScaPar1List(new String[]{"N-Player + 1", "Upper-Lower"});
+			choiceScaPar1.setSelectedItem("N-Player + 1");
 			break;
 		case "2048": 
 		case "ConnectFour": 

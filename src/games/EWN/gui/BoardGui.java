@@ -1,21 +1,12 @@
-package games.EWS.gui;
+package games.EWN.gui;
 
-import games.EWS.GameBoardEWS;
-import games.EWS.StateObserverEWS;
-import games.EWS.StateObserverHelper.Helper;
-import games.EWS.StateObserverHelper.Token;
-import games.Othello.Gui.Tile;
-import games.RubiksCube.CubeState;
+import games.EWN.GameBoardEWN;
+import games.EWN.StateObserverEWN;
 import games.StateObservation;
 import tools.Types;
 
 import javax.swing.*;
-import javax.swing.plaf.nimbus.State;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 
 /**
  * Simple panel which contains the board
@@ -23,15 +14,15 @@ import java.awt.event.MouseMotionListener;
 public class BoardGui extends JPanel {
 
 
-    private StateObserverEWS m_so = null;
+    private StateObserverEWN m_so = null;
     private int size;
     private TileGui[][] board;
     private double[][] vGameState;
     private boolean drag;
     private int from = -1;
-    private GameBoardEWS m_gb;
+    private GameBoardEWN m_gb;
 
-    public BoardGui(GameBoardEWS gb,StateObserverEWS so){
+    public BoardGui(GameBoardEWN gb, StateObserverEWN so){
         super();
         m_gb = gb;
         drag=false;
@@ -55,8 +46,12 @@ public class BoardGui extends JPanel {
         }
     }
 
+    public TileGui[][] getBoard(){
+        return board;
+    }
 
-    public GameBoardEWS getGameBoardEWS(){
+
+    public GameBoardEWN getGameBoardEWS(){
         return this.m_gb;
     }
 
@@ -64,11 +59,23 @@ public class BoardGui extends JPanel {
         if(vClear) emptyVGameState();
     }
 
+    public void selectToken(int x, int y){
+        board[x][y].markAsSelected();
+    }
+
+    public void unSelectToken(){
+        for(TileGui[] trow: board){
+            for(TileGui t: trow){
+                t.unmarkAsSelected();
+            }
+        }
+    }
+
 
 
     public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard){
     if(so != null){
-        StateObserverEWS soT = (StateObserverEWS) so;
+        StateObserverEWN soT = (StateObserverEWN) so;
         // Update legend
 
         if(showValueOnGameboard && soT.getStoredValues() != null){
@@ -83,7 +90,7 @@ public class BoardGui extends JPanel {
    }
 
 
-   public void updateComponents(StateObserverEWS so, boolean showValueOnGameboard){
+   public void updateComponents(StateObserverEWN so, boolean showValueOnGameboard){
         for(int i = 0; i < size; i++){
             for(int k = 0; k<size; k++){
                 // Update Token
@@ -109,6 +116,8 @@ public class BoardGui extends JPanel {
         this.from = u;
    }
 
-
+    public GameBoardEWN getM_gb(){
+        return m_gb;
+    }
 }
 
