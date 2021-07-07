@@ -577,9 +577,11 @@ public class GBGLaunch {
 			choiceScaPar2.setSelectedItem("ALL");			//
 			break;
 		case "EWN":
-			scaPar0_L.setText("Setting");
+			scaPar0_L.setText("Settings:");
 			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
+			scaPar1_L.setText("Tuple amount:");
+
 			setScaPar1List(new String[]{"N-Player + 1", "Upper-Lower"});
 			choiceScaPar1.setSelectedItem("N-Player + 1");
 			break;
