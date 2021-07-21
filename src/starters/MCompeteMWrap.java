@@ -155,7 +155,7 @@ public class MCompeteMWrap {
      * @param csvName	results are written to this filename
      * @return the wrapped agent
      * <p>
-     * Side effect: writes results of multi-training to <b>{@code agents/<gameDir>/csv/<csvName>}</b>.
+     * Side effect: writes results of multi-competition to <b>{@code agents/<gameDir>/csv/<csvName>}</b>.
      * This file has the columns: <br>
      * {@code run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, userValue1, userValue2}. <br>
      * The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
@@ -163,7 +163,7 @@ public class MCompeteMWrap {
     public static PlayAgent multiCompeteSweep(PlayAgent pa, int iterMWrap, Arena t_Game,
                                        GameBoard gb, String csvName) {
         int[] depthArr = {1,2,3,4,5,6,7,8,9};
-        double[] epsArr = {1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
+        double[] epsArr =  {-1e-8}; //  1e-8, 0.0};  //  {1e-8, 0.0, -1e-8}; //
         double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         String userTitle1 = "user1", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
@@ -184,7 +184,7 @@ public class MCompeteMWrap {
             for (double c_puct : cpuctArr) {
                 for (double EPS : epsArr) {
                     ConfigWrapper.EPS = EPS;
-                    numEpisodes = (EPS<0) ? 10 : 1;
+                    numEpisodes = (EPS<0) ? 5 : 1;
                     if (iterMWrap == 0) qa = pa;
                     else qa = new MCTSWrapperAgent(iterMWrap, c_puct,
                             new PlayAgentApproximator(pa),
@@ -211,7 +211,7 @@ public class MCompeteMWrap {
                         mCompete = new MCompeteMWrap(0, numEpisodes, d, iterMWrap,
                                 EPS, p_MWrap, c_puct, winrate,
                                 userValue1, userValue2);
-                        System.out.println("iter="+iterMWrap+", dEdax="+d+", p="+p_MWrap+", winrate="+winrate);
+                        System.out.println("EPS="+EPS+", iter="+iterMWrap+", dEdax="+d+", p="+p_MWrap+", winrate="+winrate);
                         mcList.add(mCompete);
                     } // for (p_MWrap)
                 } // for (EPS)

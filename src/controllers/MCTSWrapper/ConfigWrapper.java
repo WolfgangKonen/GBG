@@ -8,7 +8,7 @@ public class ConfigWrapper {
      * A switch for {@link PlayAgentApproximator}:
      * <ul>
      *  <li> If false (recommended setting for RubiksCube), do not use softmax squashing for move probabilities.
-     *  <li> If true (recommended setting for Othello), use softmax squashing.
+     *  <li> If true (recommended setting for Othello, ConnectFour), use softmax squashing.
      * </ul>
      */
     public static boolean USESOFTMAX=true;
@@ -40,7 +40,7 @@ public class ConfigWrapper {
      * <p>
      * Recommendations:
      * <ul>
-     *  <li> Use EPS = 1e-8 (Case A) for RubiksCube, much better results.
+     *  <li> Use EPS = 1e-8 (Case A) for ConnectFour and RubiksCube, much better results.
      *  <li> Use EPS = 0.0  (Case B) for Othello, better results.
      * </ul>
      */

@@ -78,12 +78,15 @@ public final class MCTSNode {
         var vsz = visitCounts.size();       // how often this node been has visited
         var bestValue = Double.NEGATIVE_INFINITY;
         ApplicableAction bestAction = null;
-        ApplicableAction bestP_act = null;
-        if (vsz==0 && ConfigWrapper.EPS<0) bestP_act = selectBestFromP(availableActions);
+
+        // only needed for the experimental code below (search for bestP_act)
+        //ApplicableAction bestP_act = null;
+        //if (vsz==0 && ConfigWrapper.EPS<0) bestP_act = selectBestFromP(availableActions);
 
         for (final var a : availableActions) {
             // In case visitCounst.size()>0, select according to the normal PUCT formula (EPS negligible, because |EPS| << 1)
             // In case visitCounts.size()==0 && EPS>0, select bestAction = argmax(getP(a)).
+            // [This is because a non-visited node has getQ(a) = getN(a) = 0.]
             // This is the solution from Surag Nair, however, it is suboptimal for Othello. Why?
             var value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ConfigWrapper.EPS) / (1 + getN(a));
             // In case visitCounts.size()==0 && EPS==0, select the 1st action. This is the case originally
@@ -106,7 +109,7 @@ public final class MCTSNode {
 
 //        // /WK/ debug check only
 //        var bestValue2 = Double.NEGATIVE_INFINITY;
-//        ApplyableAction bestAction2 = null;
+//        ApplicableAction bestAction2 = null;
 //        if (ConfigWrapper.EPS>0) {
 //            for (final var a : availableActions) {
 //                double value;

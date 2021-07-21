@@ -1,10 +1,12 @@
 #
-# **** These are new results with TDNTuple3Agt from June 2020 ****
-# **** same as before, but for runs with different JARs
+# **** These are Jan'2021 results with TDNTuple3Agt on C4. The wrapped agent is  ****
+#         TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip
+#      with MCTSWrapper and different #iterations
+# ****
 #
-# This script shows results for Nim3P with extra rule in the TCL-case:
+# This script shows results from a competition where MCTS_10000 (1st) vs. MCTSWrapper[TCL3] (2nd)
 #   
-# It compares mainly FARL with no-FARL. 
+# [If MCTSWrapper[TCL3] plays first, it always wins, this is uninteresting.]
 # 
 library(ggplot2)
 library(grid)
@@ -19,13 +21,8 @@ path <- "../../agents/ConnectFour/csv/";
 Ylimits=c(0.0,1.15); 
 #Xlimits=c(0,100000); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c(#"mCompete50-MWrap-vs-ABDL.csv"       # MCTSWrapperAgentTest.C4_vs_ABDL_Test
-            #"mCompete50-MWrap-vs-ABDL-allEPS.csv" # MCTSWrapperAgentTest.C4_vs_ABDL_Test
-            "mCompete10-MCTS-vs-MWrap.csv" # MCTSWrapperAgentTest.C4_vs_ABDL_Test
+filenames=c("mCompete10-MCTS-vs-MWrap.csv"          # MCTSWrapperAgentTest.C4_vs_MCTS_Test
 )
-# w/o suffix: only the relevant cases EPS=1e-8, 0.0
-# with suffix "-allEPS": EPS=[-1e-8,0,1e-8]. Are cases -1e-8 and 0 statistically equivalent? - Yes.
-# with suffix "-allEPS-R": in reverse order [1e-8,0,-1e-8]. Are results statistically the same? - Yes.
 
   
 dfBoth = data.frame()
