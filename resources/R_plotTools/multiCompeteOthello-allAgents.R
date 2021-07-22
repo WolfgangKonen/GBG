@@ -51,14 +51,14 @@ tgc <- tgc[tgc$EPS==1e-8,]
 #tgc <- tgc[tgc$EPS==0,]
 #tgc <- tgc[tgc$EPS==-1e-8,]
 
-tgc$se[tgc$agentGroup!="TCL-wrap"] <- 0  
-# agents TCL-wrap and TCL4-i0 are deterministic --> no errorbars
+#tgc$se[tgc$agentGroup=="MCTS-i10k"] <- 0  
+# agent MCTS-i10k: currently only one run --> no errorbars
 
 # The errorbars may overlap, so use position_dodge to move them horizontally
 #pd <- position_dodge(1000/wfac) # move them 1000/wfac to the left and right
 
 
-q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup,linetype=EPS))
+q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup)) #,linetype=agentGroup))
 q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
 q <- q+labs(title="MCTSWrap(TCL) vs. Edax")
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 

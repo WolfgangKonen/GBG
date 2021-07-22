@@ -162,13 +162,14 @@ public class MCompeteMWrap {
      */
     public static PlayAgent multiCompeteSweep(PlayAgent pa, int iterMWrap, Arena t_Game,
                                        GameBoard gb, String csvName) {
+        int NRUNS=10;       // difference between NRUNS and numEpisodes: with NRUNS we make a print-line to csv
+        int numEpisodes;    // for every run so that we later can calculate stdev
         int[] depthArr = {1,2,3,4,5,6,7,8,9};
-        double[] epsArr =  {-1e-8}; //  1e-8, 0.0};  //  {1e-8, 0.0, -1e-8}; //
+        double[] epsArr =  {1e-8}; //  1e-8, 0.0};  //  {1e-8, 0.0, -1e-8}; //
         double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         String userTitle1 = "user1", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
         double winrate;
-        int numEpisodes;
 
         PlayAgent qa = null;
         ParEdax parEdax = new ParEdax();
@@ -176,51 +177,52 @@ public class MCompeteMWrap {
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        for (int d : depthArr) {
-            parEdax.setDepth(d);
-            Edax2 edaxAgent = new Edax2("Edax",parEdax);
-            System.out.println("*** Starting multiCompete with Edax depth = "+edaxAgent.getParEdax().getDepth()+" ***");
+        for (int i=0; i<NRUNS; i++) {
+            for (int d : depthArr) {
+                parEdax.setDepth(d);
+                Edax2 edaxAgent = new Edax2("Edax", parEdax);
+                System.out.println("*** Starting run "+i+" multiCompete with Edax depth = " + edaxAgent.getParEdax().getDepth() + " ***");
 
-            for (double c_puct : cpuctArr) {
-                for (double EPS : epsArr) {
-                    ConfigWrapper.EPS = EPS;
-                    numEpisodes = (EPS<0) ? 5 : 1;
-                    if (iterMWrap == 0) qa = pa;
-                    else qa = new MCTSWrapperAgent(iterMWrap, c_puct,
-                            new PlayAgentApproximator(pa),
-                            "MCTS-Wrapped " + pa.getName(),
-                            -1);
+                for (double c_puct : cpuctArr) {
+                    for (double EPS : epsArr) {
+                        ConfigWrapper.EPS = EPS;
+                        numEpisodes = (EPS < 0) ? 5 : 1;
+                        if (iterMWrap == 0) qa = pa;
+                        else qa = new MCTSWrapperAgent(iterMWrap, c_puct,
+                                new PlayAgentApproximator(pa),
+                                "MCTS-Wrapped " + pa.getName(),
+                                -1);
 
-                    int nPly=0;                 // if >0 together with iterMCTSWrapArr={0}: test MaxNWrapper
-                    if (nPly > 0)               // instead of MCTSWrapperAgent
-                    {
-                        ParOther oPar = pa.getParOther();
-                        oPar.setWrapperNPly(nPly);
-                        pa.setWrapperParams(oPar);
-                        System.out.println("oPar nPly = " + nPly);
-                        qa = new MaxN2Wrapper(pa, nPly, oPar);
-                    }
+                        int nPly = 0;                 // if >0 together with iterMCTSWrapArr={0}: test MaxNWrapper
+                        if (nPly > 0)               // instead of MCTSWrapperAgent
+                        {
+                            ParOther oPar = pa.getParOther();
+                            oPar.setWrapperNPly(nPly);
+                            pa.setWrapperParams(oPar);
+                            System.out.println("oPar nPly = " + nPly);
+                            qa = new MaxN2Wrapper(pa, nPly, oPar);
+                        }
 
-                    StateObservation so = gb.getDefaultStartState();
-                    ScoreTuple sc;
-                    PlayAgtVector paVector = new PlayAgtVector(qa, edaxAgent);
-                    for (int p_MWrap : new int[]{0, 1})
-                    {     // p_MWrap: whether MCTSWrapper is player 0 or player 1
-                        sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), so, numEpisodes, 0, null);
-                        winrate = (sc.scTup[p_MWrap] + 1) / 2;
-                        mCompete = new MCompeteMWrap(0, numEpisodes, d, iterMWrap,
-                                EPS, p_MWrap, c_puct, winrate,
-                                userValue1, userValue2);
-                        System.out.println("EPS="+EPS+", iter="+iterMWrap+", dEdax="+d+", p="+p_MWrap+", winrate="+winrate);
-                        mcList.add(mCompete);
-                    } // for (p_MWrap)
-                } // for (EPS)
-            } // for (c_puct)
+                        StateObservation so = gb.getDefaultStartState();
+                        ScoreTuple sc;
+                        PlayAgtVector paVector = new PlayAgtVector(qa, edaxAgent);
+                        for (int p_MWrap : new int[]{0, 1}) {     // p_MWrap: whether MCTSWrapper is player 0 or player 1
+                            sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), so, numEpisodes, 0, null);
+                            winrate = (sc.scTup[p_MWrap] + 1) / 2;
+                            mCompete = new MCompeteMWrap(i, numEpisodes, d, iterMWrap,
+                                    EPS, p_MWrap, c_puct, winrate,
+                                    userValue1, userValue2);
+                            System.out.println("EPS=" + EPS + ", iter=" + iterMWrap + ", dEdax=" + d + ", p=" + p_MWrap + ", winrate=" + winrate);
+                            mcList.add(mCompete);
+                        } // for (p_MWrap)
+                    } // for (EPS)
+                } // for (c_puct)
 
-            // print the full list mcList after finishing each triple (p_MCTS,EPS,c_puct)
-            // (overwrites the file written from previous (p_MCTS,EPS,c_puct))
-            MCompeteMWrap.printMultiCompeteList(csvName,mcList, pa, t_Game, userTitle1, userTitle2);
-        } // for (d)
+                // print the full list mcList after finishing each triple (p_MCTS,EPS,c_puct)
+                // (overwrites the file written from previous (p_MCTS,EPS,c_puct))
+                MCompeteMWrap.printMultiCompeteList(csvName, mcList, pa, t_Game, userTitle1, userTitle2);
+            } // for (d)
+        } // for (i)
 
         return qa;
     } // multiCompeteSweep
