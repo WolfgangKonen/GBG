@@ -31,6 +31,8 @@ abstract public class ObserverBase implements StateObservation {
     protected double[] storedValues = null;
     protected double storedMaxScore;
 
+	public static final long serialVersionUID = 12L;
+
 	/**
 	 * The list of last moves in an episode. Each move is stored as {@link Integer} {@code iAction}.
 	 */
