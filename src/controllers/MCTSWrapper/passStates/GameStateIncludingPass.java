@@ -86,7 +86,7 @@ public final class GameStateIncludingPass {
      * @return The final game result of a terminating game state.
      */
     public double getFinalGameScore() {
-        return state.getGameScore(state);
+        return state.getGameScore(state.getPlayer());
     }
 
     public int getNumPlayers() { return state.getNumPlayers(); }

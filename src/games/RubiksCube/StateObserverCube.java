@@ -34,7 +34,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * The reward for the solved cube is 1.5. It is higher than the usual game-won reward 1.0, because some agents (e.g.
 	 * {@link TDNTuple3Agt}) produce game values a bit higher than 1.0 for non-solved cube states. REWARD_POSITIVE should 
-	 * be well higher than this, so that even with the {@code m_counter}-subtraction in {@link #getGameScore(StateObservation) 
+	 * be well higher than this, so that even with the {@code m_counter}-subtraction in {@link #getGameScore(int)
 	 * getGameScore} there remains a game score higher than for any non-solved cube state.
 	 */
     public static final double REWARD_POSITIVE =  1.0; //see daviValue. Earlier it was 1.5;
@@ -155,12 +155,12 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 *       REWARD_POSITIVE </pre>
 	 * all other states have game score 0.
 	 *
-	 * @param refer only needed for the interface, not relevant in this 1-person game
+	 * @param player only needed for the interface, not relevant in this 1-person game
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 	
 	 * @see #REWARD_POSITIVE		
 	 */
-	public double getGameScore(StateObservation refer) {
+	public double getGameScore(int player) {
 		if(isGameOver()) return REWARD_POSITIVE; // + this.m_counter * CubeConfig.stepReward;
 //		return this.m_counter * CubeConfig.stepReward; // after 2020-09-15
 		return  0; //REWARD_NEGATIVE;		// earlier version

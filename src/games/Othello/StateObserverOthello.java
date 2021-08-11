@@ -320,11 +320,13 @@ public class StateObserverOthello extends ObserverBase{
 
 
 	/**
-	 * Used to calculate the score for the current game state
+	 * @return 	the game score, i.e. the sum of rewards for the current state.
+	 * 			For Othello only game-over states have a non-zero game score.
+	 * 			It is the reward from the perspective of {@code player}.
 	 */
 	@Override
-	public double getGameScore(StateObservation referringState) {
-		int sign = (referringState.getPlayer() == this.playerNextMove) ? 1 :(-1); 
+	public double getGameScore(int player) {
+		int sign = (player == this.playerNextMove) ? 1 :(-1);
 		if(this.isGameOver()) {		// 	Working correctly now	
 			Types.WINNER win = this.winStatus();
 			return switch (win) {

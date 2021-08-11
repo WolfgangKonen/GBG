@@ -98,11 +98,10 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 	}
 	
 	/**
-	 * @return 	the game score, i.e. the sum of rewards for the current state. 
-	 * 			For TTT only game-over states have a non-zero game score. 
-	 * 			It is the reward from the perspective of {@code refer}.
+	 * @param player only needed for the interface, not relevant in this 1-person game
+	 * @return 	the game score, i.e. the sum of rewards for the current state.
 	 */
-	public double getGameScore(StateObservation refer) {
+	public double getGameScore(int player) {
         if(isGameOver()) {
         	return (m_sum>UPPER)?0:m_sum;
         }

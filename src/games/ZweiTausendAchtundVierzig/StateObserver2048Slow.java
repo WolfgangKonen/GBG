@@ -379,7 +379,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
     }
 
     @Override
-    public double getGameScore(StateObservation referingState) {
+    public double getGameScore(int player) {
         return score / MAXSCORE;
         // OLD and wrong (endless recursion?):
 //        assert (referingState instanceof StateObserver2048Slow) : "referingState is not of class StateObserver2048Slow";
@@ -395,7 +395,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 	 */
     @Override
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
-		return getGameScore(referringState);
+		return getGameScore(referringState.getPlayer());
 	}
 
 	/**
@@ -406,7 +406,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 	 * @return  the cumulative reward 
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
-        return this.getGameScore(this);
+        return this.getGameScore(this.getPlayer());
 	}
 
     @Override

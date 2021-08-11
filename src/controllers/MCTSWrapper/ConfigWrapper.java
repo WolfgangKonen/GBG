@@ -35,14 +35,15 @@ public class ConfigWrapper {
      * </ul>
      * While Case A) is a more exploiting start, Cases B) and C) give the node a more exploring start.
      * Case A) should be from theory the best choice in general.
-     * For N(s) &gt; 0, EPS is negligible, if condition  <code>|EPS| << 1</code> is fulfilled: Thus all cases are the
+     * If N(s) &gt; 0, then EPS is negligible (if condition  <code>|EPS| << 1</code> is fulfilled): Thus, all cases are the
      * same, they use the PUCT formula for selection.
      * <p>
-     * Recommendations:
+     * Recommendation:
      * <ul>
-     *  <li> Use EPS = 1e-8 (Case A) for ConnectFour and RubiksCube, much better results.
-     *  <li> Use EPS = 0.0  (Case B) for Othello, better results.
+     *  <li> Use EPS = 1e-8 (Case A) throughout.
      * </ul>
+     * [EPS = 0.0  (Case B) had in one configuration better results for Othello, but when averaging over several random
+     * configurations it was superseeded by EPS = 1e-8 (Case A).]
      */
     public static double EPS = 1e-8;  //1e-8; 0.0; -1e-8
 }

@@ -369,7 +369,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     @Override
     public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
         double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
-        return this.getGameScore(referringState)/denom;
+        return this.getGameScore(referringState.getPlayer())/denom;
     }
 
 // /WK/ questionable: stepReward is only if each step should get a reward

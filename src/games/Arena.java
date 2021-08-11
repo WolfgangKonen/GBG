@@ -555,9 +555,9 @@ abstract public class Arena implements Runnable {
 							nEmpty = so2048.getNumEmptyTiles();
 							cumEmpty += nEmpty;
 							highestTile = so2048.getHighestTileValue();
-							gameScore = so2048.getGameScore(so2048) * so2048.MAXSCORE;
+							gameScore = so2048.getGameScore(so2048.getPlayer()) * so2048.MAXSCORE;
 						} else {
-							gameScore = so.getGameScore(so);
+							gameScore = so.getGameScore(so.getPlayer());
 						}
 						pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), actBest.toInt(), gameScore,
 								nEmpty, cumEmpty, highestTile);
@@ -605,7 +605,7 @@ abstract public class Arena implements Runnable {
 				} // if isGameOver
 
 				if (so.getMoveCounter() > m_xab.oPar[0].getEpisodeLength()) {
-					double gScore = so.getGameScore(so);
+					double gScore = so.getGameScore(so.getPlayer());
 					if (so instanceof StateObserver2048)
 						gScore *= StateObserver2048.MAXSCORE;
 					showMessage("Game stopped (epiLength) with score " + gScore, "Game Over",
@@ -799,7 +799,7 @@ abstract public class Arena implements Runnable {
 		int winner = 0;
 		switch (numPlayers) {
 			case 1 -> {
-				double gScore = so.getGameScore(so);
+				double gScore = so.getGameScore(so.getPlayer());
 				if (so instanceof StateObserver2048)
 					gScore *= StateObserver2048.MAXSCORE;
 				goStr = new StringBuilder("Game over: Score " + gScore);

@@ -255,7 +255,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		// Now we fix this by returning so.getReward(so,rgs):
         if (so.isGameOver()) {
     		boolean rgs = this.getParOther().getRewardIsGameScore();
-    		return so.getReward(so, rgs);
+    		return so.getReward(so.getPlayer(), rgs);
 //        	return so.getGameScore(so);
         } else {
         	

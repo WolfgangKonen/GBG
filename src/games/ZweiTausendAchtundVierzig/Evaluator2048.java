@@ -286,7 +286,7 @@ public class Evaluator2048 extends Evaluator {
     	int moveNum = so2048.getMoveCounter();
     	int actNum = (actBest==null) ? (-1) : actBest.toInt();
      	int nEmpty = so2048.getNumEmptyTiles();  
-    	double gameScore = so2048.getGameScore(so2048)*StateObserver2048.MAXSCORE;
+    	double gameScore = so2048.getGameScore(so2048.getPlayer())*StateObserver2048.MAXSCORE;
     	cumEmpty += nEmpty;
     	int highestTile = so2048.getHighestTileValue();
         return  new PStats(i, moveNum, so2048.getPlayer(), actNum, gameScore, nEmpty, cumEmpty, highestTile);

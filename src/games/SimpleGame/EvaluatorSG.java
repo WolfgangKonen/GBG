@@ -64,7 +64,7 @@ public class EvaluatorSG extends Evaluator {
 			StateObservation so = gb.getDefaultStartState();
 			Types.ACTIONS_VT actBest = pa.getNextAction2(so.partialState(), false, true);
 			so.advance(actBest);
-			avgReward += so.getGameScore(so);
+			avgReward += so.getGameScore(so.getPlayer());
 		}
 		lastResult = avgReward/NUMEPISODES;
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;

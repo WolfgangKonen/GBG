@@ -25,10 +25,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -43,8 +40,8 @@ public class TSAgentManager {
     public JTextField gameNumJTF, numOfMovesJTF;
     public JCheckBox nRandomJCB, autoSaveAfterTSJCB;
     public JRadioButton singleRR, doubleRR;
-    private Glicko2RatingCalculator glicko2RatingSystem;
-    private Glicko2RatingPeriodResults glicko2Results;
+    private final Glicko2RatingCalculator glicko2RatingSystem;
+    private final Glicko2RatingPeriodResults glicko2Results;
     private int episodesPlayed;
     private boolean autoSaveAfterTS;
     private final int numPlayers;
@@ -60,7 +57,7 @@ public class TSAgentManager {
         results = new TSResultStorage();
         results.mAgents = new ArrayList<>();
 
-        glicko2RatingSystem = new Glicko2RatingCalculator(0.06, 0.5); // todo values?
+        glicko2RatingSystem = new Glicko2RatingCalculator(0.06, 0.5);
         glicko2Results = new Glicko2RatingPeriodResults();
 
         episodesPlayed = 0;
@@ -85,12 +82,8 @@ public class TSAgentManager {
      */
     public void setTournamentMode(int mode, int numGames) {
         switch (mode) {
-            case 0: 
-            	playDoubleRoundRobin = false; break;
-            case 1: 
-            case 2: 
-            default: 
-            	playDoubleRoundRobin = true; break;
+            case 0 -> playDoubleRoundRobin = false;
+            default -> playDoubleRoundRobin = true;
         }
         userGameNumLimitDRR = numGames;
     }
@@ -206,15 +199,15 @@ public class TSAgentManager {
      * @return string array with ID names "Agent 0", "Agent 1", ... of selected agents
      */
     public String[] getNamesAgentsSelected() {
-        String selectedAGents[] = new String[getNumAgentsSelected()]; // just selected agents
+        String[] selectedAgents = new String[getNumAgentsSelected()]; // just selected agents
 //        int i = 0;
         int ID = 0;
         for (TSAgent agent : results.mAgents) {
             if (agent.guiCheckBox.isSelected()) {
-                selectedAGents[ID] = "Agent #"+ID++;
+                selectedAgents[ID] = "Agent #"+ID++;
             }
         }
-        return selectedAGents;
+        return selectedAgents;
     }
 
     /**
@@ -222,14 +215,14 @@ public class TSAgentManager {
      * @return string array with filenames of selected agents
      */
     public String[] getFileNamesAgentsSelected() {
-        String selectedAGents[] = new String[getNumAgentsSelected()]; // just selected agents
+        String[] selectedAgents = new String[getNumAgentsSelected()]; // just selected agents
         int i = 0;
         for (TSAgent agent : results.mAgents) {
             if (agent.guiCheckBox.isSelected()) {
-                selectedAGents[i++] = agent.getName();
+                selectedAgents[i++] = agent.getName();
             }
         }
-        return selectedAGents;
+        return selectedAgents;
     }
 
     /**
@@ -268,8 +261,8 @@ public class TSAgentManager {
      * @return string array with the names of agents playing against each other
      */
     public String[][] getGamePlan(boolean doubleRoundRobin) {
-        int internalGamePlan[][] = generateGamePlanInternal(doubleRoundRobin);
-        String gamePlan[][] = new String[internalGamePlan.length][2]; // games to be played
+        int[][] internalGamePlan = generateGamePlanInternal(doubleRoundRobin);
+        String[][] gamePlan = new String[internalGamePlan.length][2]; // games to be played
 
         for (int i=0; i<internalGamePlan.length; i++) {
             gamePlan[i][0] = results.mAgents.get(internalGamePlan[i][0]).getName();
@@ -286,7 +279,7 @@ public class TSAgentManager {
      * @return arraylist positions of selected agents in {@code TSResultStorage.mAgents}
      */
     public int[] getIDAgentsSelected() {
-        int selectedAgents[] = new int[getNumAgentsSelected()]; // just selected agents
+        int[] selectedAgents = new int[getNumAgentsSelected()]; // just selected agents
         int k = 0;
         for (int i=0; i<results.mAgents.size(); i++) {
             if (results.mAgents.get(i).guiCheckBox.isSelected()) {
@@ -302,8 +295,8 @@ public class TSAgentManager {
      * @return gamePlan with agent IDs
      */
     private int[][] generateGamePlanInternal(boolean doubleRoundRobin) {
-        int selectedAgents[] = getIDAgentsSelected();
-        int gamePlan[][] = null;
+        int[] selectedAgents = getIDAgentsSelected();
+        int[][] gamePlan = null;
         if (numPlayers == 2) {
             int tmpGame = 0;
             if (doubleRoundRobin) {
@@ -338,7 +331,7 @@ public class TSAgentManager {
                     // this holds the gamePlan positions of matches to be deleted, randomly chosen
                     int[] matchesToDelete = getNRandomInts(0, gamePlan.length-1, numGamesToRemove, safeMatches);
 
-                    int newGamePlan[][] = new int[numGamesToPlay][2];
+                    int[][] newGamePlan = new int[numGamesToPlay][2];
                     int pos = 0;
 
                     for (int i=0; i<gamePlan.length; i++) {
@@ -434,11 +427,11 @@ public class TSAgentManager {
      * print the gamePlan with agent names to the console
      */
     public void printGamePlan() {
-        String gamePlan[][] = getGamePlan(playDoubleRoundRobin);
+        String[][] gamePlan = getGamePlan(playDoubleRoundRobin);
         System.out.println(TAG+"+ GamePlan Info: +");
         System.out.println(TAG+"Matches to play: "+gamePlan.length);
         System.out.println(TAG+"each Match is run "+results.numberOfEpisodes+" time(s)");
-        for (String round[] : gamePlan)
+        for (String[] round : gamePlan)
             System.out.println(TAG+"["+round[0]+"] vs ["+round[1]+"]");
         System.out.println(TAG+"+ End Info +");
     }
@@ -484,7 +477,7 @@ public class TSAgentManager {
         results.gamePlan = generateGamePlanInternal(playDoubleRoundRobin);
         results.gameResult = new int[results.gamePlan.length][3]; // is initialized with all zeros by JDK (primitive datatyp)
         results.timeStorage = new TSTimeStorage[results.gamePlan.length][numPlayers];
-        for (TSTimeStorage t[] : results.timeStorage) { // initialize all positions
+        for (TSTimeStorage[] t : results.timeStorage) { // initialize all positions
             for (int p=0; p<numPlayers; p++)
                 t[p] = new TSTimeStorage();
         }
@@ -538,7 +531,7 @@ public class TSAgentManager {
      * @return TSAgent instances of the next playing agents
      */
     public TSAgent[] getNextCompetitionTeam() {
-        TSAgent out[] = null;
+        TSAgent[] out = null;
         if (numPlayers == 2) {
             out = new TSAgent[2];
             out[0] = results.mAgents.get(results.gamePlan[results.nextGame][0]);
@@ -580,7 +573,7 @@ public class TSAgentManager {
         else {
             results.gameResult[results.nextGame][type] = results.gameResult[results.nextGame][type] + 1;
 
-            TSAgent teamPlayed[] = getNextCompetitionTeam(); // save individual win or loss to the tsagent objects in magents list
+            TSAgent[] teamPlayed = getNextCompetitionTeam(); // save individual win or loss to the tsagent objects in magents list
             if (type == 0){
                 teamPlayed[0].addWonGame();
                 teamPlayed[1].addLostGame();
@@ -698,9 +691,9 @@ public class TSAgentManager {
         return results.tournamentDone;
     }
 
-    /** +++++++++++++++++
-     *  +++ STATISTIK +++
-     *  +++++++++++++++++
+    /*  ++++++++++++++++++
+     *  +++ STATISTICS +++
+     *  ++++++++++++++++++
      */
 
     /**
@@ -713,10 +706,10 @@ public class TSAgentManager {
             return;
         }
 
-        NumberFormat numberFormat0 = new DecimalFormat("#0.0");
+        //NumberFormat numberFormat0 = new DecimalFormat("#0.0");
         NumberFormat numberFormat00 = new DecimalFormat("#0.00");
         NumberFormat numberFormat000 = new DecimalFormat("#0.000");
-        NumberFormat numberFormat0000 = new DecimalFormat("#0.0000");
+        //NumberFormat numberFormat0000 = new DecimalFormat("#0.0000");
         NumberFormat numberFormat00000 = new DecimalFormat("#0.00000");
 
         String startDate = results.startDate+" | Matches: "+results.gamePlan.length
@@ -736,11 +729,11 @@ public class TSAgentManager {
 
         if (numPlayers>1) {
             // http://www.codejava.net/java-se/swing/a-simple-jtable-example-for-display
-            /**
+            /*
              * Table | WTL and Score
              */
             // headers for the table
-            String agents[] = getNamesAgentsSelected();
+            String[] agents = getFileNamesAgentsSelected();    // /WK/ file names as column heads
             String[] columnNames1 = new String[agents.length + 1]; //{ "Y vs X"//, "Agent#1", "Agent#2", "Agent#3" };
             columnNames1[0] = ""; //"Y vs X";
             System.arraycopy(agents, 0, columnNames1, 1, agents.length);
@@ -751,8 +744,8 @@ public class TSAgentManager {
             Object[][] rowData3 = new Object[getNumAgentsSelected()][getNumAgentsSelected() + 1];
             rowDataHM = new double[getNumAgentsSelected()][getNumAgentsSelected()];
             for (int i = 0; i < getNumAgentsSelected(); i++) {
-                rowData1[i][0] = getNamesAgentsSelected()[i];
-                rowData3[i][0] = getNamesAgentsSelected()[i];
+                rowData1[i][0] = getFileNamesAgentsSelected()[i];   // /WK/ file names as row heads
+                rowData3[i][0] = getFileNamesAgentsSelected()[i];   // /WK/ file names as row heads
                 for (int j = 0; j < getNumAgentsSelected(); j++) {
                     if (i == j) { // main axis of agents playing against itself
                         rowData1[i][j + 1] = empty;
@@ -786,18 +779,11 @@ public class TSAgentManager {
             DefaultTableModel defTableMatrixSCR = new DefaultTableModel(rowData3, columnNames1);
             tsResultWindow.setTableMatrixSCR(defTableMatrixSCR);
 
-            /**
+            /*
              * Score Heatmap
              */
             // create Score HeatMap
             HeatChart map = new HeatChart(rowDataHM, 0, HeatChart.max(rowDataHM), true);
-            //map.setTitle("white = worst | black = best");
-            //map.setXAxisLabel("X Axis");
-            //map.setYAxisLabel("Y Axis");
-            //Object[] tmpX = {"Agent1","Agent2","Agent3","Agent4","Agent5","Agent6"};
-            //map.setXValues(tmpX);
-            //Object[] tmpY = {"Agent1","Agent2","Agent3","Agent4"};
-            //map.setYValues(tmpY);
             Object[] agentNames = getNamesAgentsSelected();
             map.setXValues(agentNames);
             map.setYValues(agentNames);
@@ -807,7 +793,7 @@ public class TSAgentManager {
             //tsResultWindow.setHeatMap(new ImageIcon(hm));
             mTSHeatmapDataTransfer.scoreHeatmap = new ImageIcon(hm);
 
-            /**
+            /*
              * Score Heatmap Analysis
              */
             // copy score heatmap data into seperate array
@@ -836,11 +822,6 @@ public class TSAgentManager {
                     }
                 }
             }
-            /*
-            System.out.println("agentScoreHMData data normalized:");
-            for (double[] d:agentScoreHMData)
-                System.out.println(Arrays.toString(d));
-                */
 
             double[][] dataHMAnalysis1 = new double[agentScoreHMData.length][agentScoreHMData[0].length];
             double[][] dataHMAnalysis2 = new double[agentScoreHMData.length][agentScoreHMData[0].length];
@@ -909,7 +890,7 @@ public class TSAgentManager {
             //tsResultWindow.setHeatMap(mTSHeatmapDataTransfer); // moved below after creation of sorted heatmap
         }
 
-        /**
+        /*
          * Table | Agent Score
          */
         String[] columnNames4 = {
@@ -966,19 +947,11 @@ public class TSAgentManager {
         */
         if (!singlePlayerGame) { // multiplayer game
             Arrays.sort(rankAgents, (entry1, entry2) -> { // same as above
-                if (entry1.agent.getAgentScore() > entry2.agent.getAgentScore())
-                    return -1;
-                if (entry1.agent.getAgentScore() < entry2.agent.getAgentScore())
-                    return +1;
-                return 0;
+                return Float.compare(entry2.agent.getAgentScore(), entry1.agent.getAgentScore());
             });
         } else { // singleplayer game
             Arrays.sort(rankAgents, (entry1, entry2) -> { // same as above
-                if (entry1.agent.getMedianSinglePlayerScore() > entry2.agent.getMedianSinglePlayerScore())
-                    return -1;
-                if (entry1.agent.getMedianSinglePlayerScore() < entry2.agent.getMedianSinglePlayerScore())
-                    return +1;
-                return 0;
+                return Double.compare(entry2.agent.getMedianSinglePlayerScore(), entry1.agent.getMedianSinglePlayerScore());
             });
         }
 
@@ -1033,7 +1006,7 @@ public class TSAgentManager {
         tsResultWindow.setTableAgentScore(defTableAgentScore);
 
         if (numPlayers>1) {
-            /**
+            /*
              * HeatMap2 | Agent Scores sorted by AgentScores
              */
             // create Score HeatMap
@@ -1047,13 +1020,7 @@ public class TSAgentManager {
                 dataHM2[i] = rankAgents[i].hmScoreValues;
             }
             // sort agents horizontally
-            /*
-            for (int i=0; i<dataHM2.length; i++){
-                System.out.println("i:"+i+" "+Arrays.toString(dataHM2[i])+" agentX: "+agentNamesX[i]);
-            }
-            System.out.println("UnSorted:");
-            */
-            //altes array durchgehen und daten rausziehen
+            // step through old array and extract data
             TSHM2DataStorage[] dataHM2UnSorted = new TSHM2DataStorage[dataHM2.length];
             for (int x=0; x<dataHM2[0].length; x++) {
                 double[] column = new double[dataHM2.length];
@@ -1061,40 +1028,25 @@ public class TSAgentManager {
                    column[y] = dataHM2[y][x];
                 }
                 //System.out.println(Arrays.toString(column));
-                dataHM2UnSorted[x] = new TSHM2DataStorage((String)agentNamesX[x], column);
+                dataHM2UnSorted[x] = new TSHM2DataStorage((String) agentNamesX[x], column);
                 //System.out.println(Arrays.toString(column)+" sum: "+dataHM2UnSorted[x].columnSum+" agentX: "+dataHM2UnSorted[x].agentName);
             }
-            //System.out.println("Sorted:");
-            //sortieren nach namen
+            //sort by names
             TSHM2DataStorage[] dataHM2Sorted = new TSHM2DataStorage[dataHM2UnSorted.length];
             for (int i=0; i<agentNamesY.length; i++) {
-                for (int j=0; j<dataHM2UnSorted.length; j++) {
-                    if (agentNamesY[i].equals(dataHM2UnSorted[j].agentName)) {
-                        dataHM2Sorted[i] = dataHM2UnSorted[j];
+                for (TSHM2DataStorage tshm2DataStorage : dataHM2UnSorted) {
+                    if (agentNamesY[i].equals(tshm2DataStorage.agentName)) {
+                        dataHM2Sorted[i] = tshm2DataStorage;
                         break;
                     }
                 }
             }
-            /*
-            for (TSHM2DataStorage t : dataHM2Sorted)
-                System.out.println(t);
-
-            System.out.println("NewOrigArray:");
-            */
-            //wieder auslesen und in altes array zurückgeben
             for (int x=0; x<dataHM2[0].length; x++) {
                 for (int y=0; y<dataHM2.length; y++) {
                     dataHM2[y][x] = dataHM2Sorted[x].verticalScoreValues[y];
                 }
                 agentNamesX[x] = dataHM2Sorted[x].agentName;
             }
-            /*
-            for (int i=0; i<dataHM2.length; i++){
-                System.out.println("i:"+i+" "+Arrays.toString(dataHM2[i])+" agentX: "+agentNamesX[i]);
-            }
-            System.out.println("agentNamesX: "+Arrays.toString(agentNamesX));
-            System.out.println("agentNamesY: "+Arrays.toString(agentNamesY));
-            */
 
             HeatChart map2 = new HeatChart(dataHM2, 0, HeatChart.max(dataHM2), true);
             map2.setXValues(agentNamesX);
@@ -1106,7 +1058,7 @@ public class TSAgentManager {
             tsResultWindow.setHeatMap(mTSHeatmapDataTransfer);
         }
 
-        /**
+        /*
          * Scatterplot | AgentScore vs Time
          */
         // Create dataset
@@ -1116,7 +1068,7 @@ public class TSAgentManager {
         JFreeChart scatterPlot = TSScatterPlot.createScatterPlot(dataset, hasLogarithmicX, numPlayers);
         tsResultWindow.setScatterPlotASvT(scatterPlot);
 
-        /**
+        /*
          * Table | Times (detailed and simplified)
          */
         // headers for detailed time table
@@ -1163,31 +1115,31 @@ public class TSAgentManager {
                 z = results.timeStorage[i][j].getMinTimeForGameMS();
                 rowDataTimeDetail[pos][3] = numberFormat00000.format(z);
                 if (z>0) // just store value if >0 := proper measurement is available
-                    timeHelper.minTimeForGameMS.add(z);
+                    Objects.requireNonNull(timeHelper).minTimeForGameMS.add(z);
                 // "Slowest Move":
                 z = results.timeStorage[i][j].getMaxTimeForGameMS();
                 rowDataTimeDetail[pos][4] = numberFormat00000.format(z);
-                if (z>0) timeHelper.maxTimeForGameMS.add(z);
+                if (z>0) Objects.requireNonNull(timeHelper).maxTimeForGameMS.add(z);
                 // "Average Move":
                 z = results.timeStorage[i][j].getAverageTimeForGameMS();
                 rowDataTimeDetail[pos][5] = numberFormat00000.format(z);
-                if (z>0) timeHelper.averageTimeForGameMS.add(z);
+                if (z>0) Objects.requireNonNull(timeHelper).averageTimeForGameMS.add(z);
                 // "Median Move":
                 z = results.timeStorage[i][j].getMedianTimeForGameMS();
                 rowDataTimeDetail[pos][6] = numberFormat00000.format(z);
-                if (z>0) timeHelper.medianTimeForGameMS.add(z);
+                if (z>0) Objects.requireNonNull(timeHelper).medianTimeForGameMS.add(z);
                 // "Average Episode":
                 z = results.timeStorage[i][j].getAverageRoundTimeMS();
                 rowDataTimeDetail[pos][7] = numberFormat00000.format(z);
-                if (z>0) timeHelper.averageRoundTimeMS.add(z);
+                if (z>0) Objects.requireNonNull(timeHelper).averageRoundTimeMS.add(z);
                 // "Median Episode":
                 z = results.timeStorage[i][j].getMedianRoundTimeMS();
                 rowDataTimeDetail[pos][8] = numberFormat00000.format(z);
-                if (z>0) timeHelper.medianRoundTimeMS.add(z);
+                if (z>0) Objects.requireNonNull(timeHelper).medianRoundTimeMS.add(z);
                 // "Total Time":
                 z = results.timeStorage[i][j].getTotalTimeMS();
                 rowDataTimeDetail[pos][9] = numberFormat00000.format(z);
-                timeHelper.totalPlayTimeMS += z;
+                Objects.requireNonNull(timeHelper).totalPlayTimeMS += z;
                 // "Average Move Count":
                 rowDataTimeDetail[pos][10] = results.timeStorage[i][j].getAverageCountOfMovesPerEpisode();
                 // "Median Move Count":
@@ -1273,8 +1225,7 @@ public class TSAgentManager {
      * @return [ episodes (rounds) played , total number of rounds ]
      */
     public int[] getTSProgress() {
-        int[] i = {episodesPlayed, results.gamePlan.length*results.numberOfEpisodes };
-        return i;
+        return new int[]{episodesPlayed, results.gamePlan.length*results.numberOfEpisodes };
     }
 
     /**
@@ -1293,7 +1244,7 @@ public class TSAgentManager {
         return -1;
     }
 
-    /**
+    /*
      * same as {@link TSAgentManager#getPosGamePlan(int, int, int[][])} but uses full double round robin gamePlan
      * @param agentAID ID of first agent
      * @param agentBID ID of second agent
@@ -1413,7 +1364,7 @@ public class TSAgentManager {
      * helping class to create the sorted heatmap. this saves an agent and his score data
      * in the heatmap to keep them together while sorting by score.
      */
-    public class TSHMDataStorage{
+    public static class TSHMDataStorage{
         public String name;
         public TSAgent agent;
         public double[] hmScoreValues;
@@ -1423,7 +1374,7 @@ public class TSAgentManager {
      * helping class to create the sorted heatmap. This saves the agent name and the column scores
      * after the rows are sorted.
      */
-    public class TSHM2DataStorage{
+    public static class TSHM2DataStorage{
         public String agentName;
         public double[] verticalScoreValues;
 
@@ -1445,7 +1396,7 @@ public class TSAgentManager {
     /**
      * helping class to create the simplified time measurement table
      */
-    public class TSSimpleTimeTableHelper{
+    public static class TSSimpleTimeTableHelper{
         public int agentID;
         public ArrayList<Double> minTimeForGameMS = new ArrayList<>();
         public ArrayList<Double> maxTimeForGameMS = new ArrayList<>();

@@ -164,10 +164,10 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 			For C4 only game-over states have a non-zero game score. 
-	 * 			It is the reward from the perspective of {@code refer}.
+	 * 			It is the reward from the perspective of {@code player}.
 	 */
-	public double getGameScore(StateObservation refer) {
-		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
+	public double getGameScore(int player) {
+		int sign = (player==this.getPlayer()) ? 1 : (-1);
         if(isGameOver()) {
         	if (isWin) 
             	// if the game is over and a win for the player who made the action towards state 'this'
@@ -175,14 +175,6 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
         		return -sign;
         	assert m_C4.isDraw(); // if game is over, but not a win, it must be a draw
         	return 0;
-        	
-    		// this former code (before 2020-08-23) was buggy: if the last piece which completely fills the board
-    		// is a win for either player, this would be undetected, because m_C4.isDraw checks only on board full.
-//        	if (m_C4.isDraw())
-//        		return 0;
-//        	// if the game is over, it is a win for the player who made the action towards state 'this'
-//        	// --> it is a loss for this.getPlayer().
-//        	return -sign;        	
         }
         
         return 0; 

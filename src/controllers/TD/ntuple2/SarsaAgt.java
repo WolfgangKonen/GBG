@@ -625,13 +625,13 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		}
 
 		// for completeness, ns.nextReward is not really needed in SarsaAgt
-		ns.nextReward = normalize2(ns.nextSO.getReward(ns.nextSO,rgs),ns.refer);
+		ns.nextReward = normalize2(ns.nextSO.getReward(ns.nextSO.getPlayer(),rgs),ns.refer);
 
 		if (DBG_REWARD && ns.nextSO.isGameOver()) {
 			System.out.print("Rewards: ");
 			System.out.print(ns.nextRewardTuple.toString());
 //			System.out.print("Reward: "+ns.nextReward);
-			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore(ns.nextSO) 
+			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore(ns.nextSO.getPlayer())
 							 + " for player " + ns.nextSO.getPlayer());
 		}
 	}

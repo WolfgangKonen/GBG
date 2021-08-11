@@ -92,6 +92,8 @@ public interface StateObservation extends Serializable{
 	String stringActionDescr(ACTIONS act);
 
 	/**
+	 * *** This method is deprecated, use instead getGameScore(referringState.getPlayer()) ***
+	 * <p>
 	 * The game score, seen from the perspective of {@code referringState}'s player. The
 	 * perspective shift is only relevant for games with more than one player.
 	 * <p>
@@ -102,13 +104,16 @@ public interface StateObservation extends Serializable{
 	 * @return  The game score, seen from the perspective of {@code referringState}'s player.<br>
 	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1). 
 	 */
+	@Deprecated
 	double getGameScore(StateObservation referringState);
 	
 	/**
-	 * Same as {@link #getGameScore(StateObservation refer)}, but with the player of state refer. 
-	 * @param player the player whose perspective is taken, a number in 0,1,...,N.
-	 * @return  If {@code player} and {@code this.player} are the same, then it is getGameScore().<br> 
-	 * 			If they are different, then it is getGameScore()*(-1). 
+	 * The game score, seen from the perspective of {@code player}. The
+	 * perspective shift is only relevant for games with more than one player.
+	 * <p>
+	 * @param player the player whose perspective is taken, a number in 0, 1,..., N={@link #getNumPlayers()}.
+	 * @return  The game score, seen from the perspective of {@code player}.<br>
+	 * 			For 2-player games we have usually {@code getGameScore(0) = -getGameScore(1)}.
 	 */
 	double getGameScore(int player);
 	
@@ -119,18 +124,23 @@ public interface StateObservation extends Serializable{
 	ScoreTuple getGameScoreTuple();
 
 	/**
+	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
+	 * <p>
 	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. The
 	 * perspective shift is only relevant for games with more than one player.
-	 * @param referringState	see {@link #getGameScore(StateObservation)}
+	 * @param referringState	gives the perspective
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return  the cumulative reward 
 	 */
+	@Deprecated
 	double getReward(StateObservation referringState, boolean rewardIsGameScore);
 
 	/**
-	 * Same as {@link #getReward(StateObservation,boolean)}, but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * The cumulative reward, seen from the perspective of {@code player}. The
+	 * perspective shift is only relevant for games with more than one player.
+	 *
+	 * @param player the player of referringState, a number in 0, 1,..., N={@link #getNumPlayers()}.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return  the cumulative reward 

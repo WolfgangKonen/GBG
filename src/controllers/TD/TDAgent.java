@@ -406,7 +406,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 		if (NewSO.isGameOver()||NewSO.isRoundOver()&&NewSO.isRoundBasedGame())
 		{
-			CurrentScore = NewSO.getGameScore(so);
+			CurrentScore = NewSO.getGameScore(so.getPlayer());
 		} 
 		else 
 		{
@@ -454,7 +454,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 //        
         //very inefficient, change later
 		if (NewSO.isGameOver()||NewSO.isRoundOver()&&NewSO.isRoundBasedGame())
-			CurrentScore = NewSO.getGameScore(so);
+			CurrentScore = NewSO.getGameScore(so.getPlayer());
 		else 
 			CurrentScore = getGamma()* m_Net.getScore(m_feature.prepareFeatVector(so));;
 									   // here we ask this agent for its score estimate on NewSO
@@ -574,7 +574,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				// referingState is 'oldSO', the state before so. [This should be  
 				// extensible to 3- or 4-player games (!) as well, if we put the 
 				// proper logic into method getGameScore(referingState).]  
-				reward = player*so.getGameScore(oldSO);
+				reward = player*so.getGameScore(oldSO.getPlayer());
 				
 				reward = normalize2(reward,so);
 

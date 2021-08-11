@@ -395,7 +395,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         int r_i;
         for(ResultContainer resultContainer : resultContainers) {
         	r_i = resultContainer.firstAction;
-        	vtable[r_i] += resultContainer.sob.getGameScore(sob);
+        	vtable[r_i] += resultContainer.sob.getGameScore(sob.getPlayer());
         	nextActionScoreTuple[r_i].combine(resultContainer.sob.getGameScoreTuple(), cOP1, sobPlayer, currProbab);
             totalRolloutDepth += resultContainer.rolloutDepth;
             if(resultContainer.sob.isGameOver()) {
@@ -549,7 +549,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 		// this could result in wrong scores.
 		// Now we fix this by returning sob.getGameScore(sob) on a game-over situation:
         if (sob.isGameOver()) {
-        	return sob.getGameScore(sob);
+        	return sob.getGameScore(sob.getPlayer());
         } else {       	
             Types.ACTIONS_VT actBestVT = getNextAction2(sob.partialState(), false, true);
             return actBestVT.getVBest();

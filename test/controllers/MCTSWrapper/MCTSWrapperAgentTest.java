@@ -206,11 +206,11 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         long startTime;
         double elapsedTime;
 
-        int numEpisodes=10;
-        int nTrial=1;
-        int[] iterMCTSWrapArr={0,50,100,200,300,500,600,800,1000};
-        double[] epsArr = { 1e-8, 0.0,-1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
-        String csvFile = "mCompeteMCTS-vs-MWrap.csv";
+        int numEpisodes=100;
+        int nTrial=4;
+        int[] iterMCTSWrapArr={0,1000}; //={0,50,100,200,300,500,600,800,1000};
+        double[] epsArr = { 1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
+        String csvFile = "mCompeteMCTS-vs-MWrap-100runs.csv";
         boolean doAssert = false;
         startTime = System.currentTimeMillis();
 
@@ -264,7 +264,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     {
         selectedGame = "ConnectFour";
         scaPar = GBGBatch.setDefaultScaPars(selectedGame);
-        String[] agtFiles = {"TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip"};
+        String[] agtFiles = {"2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip"};
         PlayAgent pa;
         PlayAgent qa;
         PlayAgent opponent;

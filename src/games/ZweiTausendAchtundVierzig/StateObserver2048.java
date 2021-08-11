@@ -544,12 +544,11 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     }
 
 	/**
-	 * Same as {@link #getGameScore(StateObservation referringState)}, but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
+     * @param player only needed for the interface, not relevant in 1-person game 2048
 	 * @return  the game score
 	 */
 	public double getGameScore(int player) {
-		return this.getGameScore(this);		// there is only one player in 2048
+        return score / MAXSCORE;
 	}
 	
 	/**
@@ -563,7 +562,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
     @Override
 	public double getReward(StateObservation referringState,boolean rewardIsGameScore) {
     	if (rewardIsGameScore) {
-    		return getGameScore(referringState);    		
+    		return getGameScore(referringState.getPlayer());
     	} else {
     		return this.getCumulEmptyTiles();
     	}

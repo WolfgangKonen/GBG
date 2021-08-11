@@ -127,10 +127,10 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 			For Nim only game-over states have a non-zero game score. 
-	 * 			It is the reward from the perspective of {@code refer}.
+	 * 			It is the reward from the perspective of {@code player}.
 	 */
-	public double getGameScore(StateObservation refer) {
-		int sign = (refer.getPlayer()==this.getPlayer()) ? 1 : (-1);
+	public double getGameScore(int player) {
+		int sign = (player==this.getPlayer()) ? 1 : (-1);
         if(isGameOver()) {
         	// if the game is over, it is a win for the player who made the action towards this
         	// --> it is a loss for the player to move in this.

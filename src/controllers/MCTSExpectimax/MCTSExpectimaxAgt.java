@@ -215,7 +215,7 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
         double nextActionScore = Double.NEGATIVE_INFINITY;
 
         if (so.isGameOver()) {
-        	return so.getGameScore(so);
+        	return so.getGameScore(so.getPlayer());
         } else {
     		act(so,vtable);
 

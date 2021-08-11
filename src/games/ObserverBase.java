@@ -276,6 +276,8 @@ abstract public class ObserverBase implements StateObservation {
 	}
 
 	/**
+	 * *** This method is deprecated, use instead getGameScore(referringState.getPlayer()) ***
+	 * <p>
 	 * The game score, seen from the perspective of {@code referringState}'s player. The
 	 * perspective is only relevant for games with more than one player.
 	 * <p>
@@ -286,22 +288,24 @@ abstract public class ObserverBase implements StateObservation {
 	 * @return  The game score, seen from the perspective of {@code referringState}'s player.<br>
 	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1). 
 	 */
-    abstract public double getGameScore(StateObservation referringState);
+	@Deprecated
+    public double getGameScore(StateObservation referringState) {
+		return getGameScore(referringState.getPlayer());
+	}
 
 	/**
 	 * The game score, seen from the perspective of player {@code player}. The 
 	 * perspective shift is usually only relevant for games with more than one player.
-	 * <p>
-	 * This implementation in {@link ObserverBase} is only valid for 1- or 2-player games.
-	 * 
-	 * @param player the player whose perspective is taken, a number in 0,1,...,N.
+	 *
+	 * @param player the player of referringState, a number in 0, 1,..., N={@link #getNumPlayers()}.
 	 * @return  If {@code player} and {@code this.player} are the same, then it is getGameScore().<br> 
 	 * 			If they are different, then it is getGameScore()*(-1). 
 	 */
-	public double getGameScore(int player) {
-    	assert (this.getNumPlayers()<=2) : "ObserverBase's implementation of getGameScore(int) is not valid for current class";
-		return (this.getPlayer() == player ? this.getGameScore(this) : (-1)*this.getGameScore(this) );
-	}
+	abstract public double getGameScore(int player);
+//	public double getGameScore(int player) {
+//    	assert (this.getNumPlayers()<=2) : "ObserverBase's implementation of getGameScore(int) is not valid for current class";
+//		return (this.getPlayer() == player ? this.getGameScore(this) : (-1)*this.getGameScore(this) );
+//	}
 	
 	/**
 	 * This implementation is valid for all classes implementing {@link StateObservation}, once
@@ -319,6 +323,8 @@ abstract public class ObserverBase implements StateObservation {
 	}
 
 	/**
+	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
+	 * <p>
 	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. The
 	 * perspective is only relevant for games with more than one player.
 	 * <p> 
@@ -329,30 +335,34 @@ abstract public class ObserverBase implements StateObservation {
 	 * 		  game-specific reward
 	 * @return the cumulative reward 
 	 */
+	@Deprecated
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
 		String sWarn = "WARNING getReward: Case rgs==false is not handled in ObserverBase!";
 		if (!rewardIsGameScore) {
 			System.out.println(sWarn);
 //			throw new RuntimeException(sWarn);
 		}
-		return getGameScore(referringState);
+		return getGameScore(referringState.getPlayer());
 	}
 
 	/**
-	 * Same as {@link #getReward(StateObservation,boolean)}, but with the player of referringState.
+	 * The cumulative reward, seen from the perspective of {@code player}. The
+	 * perspective shift is only relevant for games with more than one player.
 	 * <p>
 	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
-	 *  It is only valid for N &le; 2. Games with N &gt; 2 have to override this method.
-	 *  
-	 * @param player the player of referringState, a number in 0,1,...,N.
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
+	 *
+	 * @param player the player of referringState, a number in 0, 1,..., N={@link #getNumPlayers()}.
+	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
 	 * 		  game-specific reward
 	 * @return  the cumulative reward 
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
-    	assert (this.getNumPlayers()<=2) : "ObserverBase's implementation of getReward(int,boolean) is not valid for current class";
-		return (this.getPlayer() == player ? this.getReward(this,rewardIsGameScore) 
-									  : (-1)*this.getReward(this,rewardIsGameScore) );
+		String sWarn = "WARNING getReward: Case rgs==false is not handled in ObserverBase!";
+		if (!rewardIsGameScore) {
+			System.out.println(sWarn);
+//			throw new RuntimeException(sWarn);
+		}
+		return getGameScore(player);
 	}
 	
 	/**
@@ -408,6 +418,7 @@ abstract public class ObserverBase implements StateObservation {
 		return ""+act.toInt();
 	}
 
+	@Deprecated     // see StateObservation for reason. Better use stringDescr() directly.
     public String toString() {
         return stringDescr();
     }
