@@ -178,7 +178,12 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		this.m_Net.xnf.instantiateAfterLoading();
 		assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
 		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
-		
+
+		// older agents may not have the wrapper depth parameter, so it is 0. Set it in this case to -1:
+		if (this.getParOther().getWrapperMCTS_depth()==0) this.getParOther().setWrapperMCTS_depth(-1);
+		// older agents may not have the wrapper p_UCT parameter, so it is 0. Set it in this case to 1.0:
+		if (this.getParOther().getWrapperMCTS_PUCT()==0) this.getParOther().setWrapperMCTS_PUCT(1.0);
+
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
 		// get the loaded values)
@@ -471,7 +476,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				sc.scTup[cp] = m_Net.getScoreI(curSOWB,cp);  
 			}
 		}
-		
+
+		// *** /WK/ 08/2021: (!!?!) Very questionable to add the reward here since the reward is usually added as
+		// *** a separate term r in 'target = r + gamma * V'
+		//
 		// In any case: add the reward obtained so far, since the net predicts
 		// with getScoreI only the expected future reward.
 		boolean rgs = m_oPar.getRewardIsGameScore();

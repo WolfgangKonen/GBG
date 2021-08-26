@@ -2,7 +2,9 @@ package games;
 
 import java.util.ArrayList;
 
+import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -36,8 +38,11 @@ abstract public class ObserverBase implements StateObservation {
 	/**
 	 * The list of last moves in an episode. Each move is stored as {@link Integer} {@code iAction}.
 	 */
-	public transient ArrayList<Integer> lastMoves;
-
+	public ArrayList<Integer> lastMoves;
+	//public transient ArrayList<Integer> lastMoves;
+	// /WK/2021-08-15 removed the former 'transient' because the Log facility will not work properly if lastMoves is transient
+	// (cannot access lastMoves in getLastMove when re-playing a certain move from the log).
+	// The consequence is a larger mem size of StateObservation objects, but we have to live with this.
 
 	public ObserverBase() {
 		lastMoves = new ArrayList<Integer>();
@@ -393,7 +398,7 @@ abstract public class ObserverBase implements StateObservation {
 	 * This is the default implementation for all classes implementing {@link StateObservation}, unless
 	 * they override this method.
 	 *
-	 * @return	a score tuple with all zeros
+	 * @return	a score tuple with 0.0 for all elements
 	 */
 	public ScoreTuple getStepRewardTuple() {
 		int N = this.getNumPlayers();
@@ -429,8 +434,18 @@ abstract public class ObserverBase implements StateObservation {
 
     public boolean isRoundBasedGame(){return false;}
 
-	public void randomizeStartState(){}
-
+	/**
+	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 * whether the start state needs randomization when doing such a competition.
+	 *
+	 * @return true or false
+	 */
 	public boolean needsRandomization(){return false;}
+
+	/**
+	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 *  if {@link #needsRandomization()} returns true
+	 */
+	public void randomizeStartState() { }
 
 }

@@ -72,6 +72,7 @@ public class OtherParams extends Frame {
 	JLabel wNply_L;
 	JLabel wMCTS_L;
 	JLabel wMCTSpUCT_L;
+	JLabel wMCTSdepth_L;
 	JLabel pMin_L;
 	JLabel pMax_L;
 	JLabel rBuf_L;
@@ -82,6 +83,7 @@ public class OtherParams extends Frame {
 	public JTextField wNply_T;
 	public JTextField wMCTS_T;
 	public JTextField wMCTSpUCT_T;
+	public JTextField wMCTSdepth_T;
 	public JTextField pMin_T;
 	public JTextField pMax_T;
 	public Checkbox chooseS01;
@@ -111,6 +113,7 @@ public class OtherParams extends Frame {
 		wNply_T = new JTextField("0"); 		//
 		wMCTS_T = new JTextField("0"); 		//
 		wMCTSpUCT_T = new JTextField("1"); 		//
+		wMCTSdepth_T = new JTextField("-1"); 		//
 		pMin_T = new JTextField("1");		//
 		pMax_T = new JTextField("6");		//
 		numEval_L = new JLabel("numEval");
@@ -122,7 +125,8 @@ public class OtherParams extends Frame {
 		rgs_L = new JLabel("Reward = Score");
 		wNply_L = new JLabel("Wrapper nPly");
 		wMCTS_L = new JLabel("Wrapper MCTS");
-		wMCTSpUCT_L = new JLabel("PUCT for Wrapper MCTS");
+		wMCTSpUCT_L = new JLabel("PUCT for WrapM");
+		wMCTSdepth_L = new JLabel("Depth for WrapM");
 		pMin_L = new JLabel("pMin");
 		pMax_L = new JLabel("pMax");
 		rBuf_L = new JLabel("Replay buffer");
@@ -152,8 +156,9 @@ public class OtherParams extends Frame {
 		wNply_L.setToolTipText(
 				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
 		wMCTS_L.setToolTipText(
-				"Wrapper MCTS look ahead (for play, compete, eval).");
-		wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper.");
+				"Wrapper MCTS look ahead (for play, compete, eval)");
+		wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper");
+		wMCTSdepth_L.setToolTipText("max depth value for MCTS Wrapper. -1: no max depth");
 		pMin_L.setToolTipText(
 				"RubiksCube: min. number of initial twists (during traing and eval)");
 		pMax_L.setToolTipText(
@@ -170,6 +175,15 @@ public class OtherParams extends Frame {
 					m_par.setVisible(false);
 				}
 			});
+
+		wMCTS_T.addActionListener(new ActionListener()
+				 {
+					 public void actionPerformed(ActionEvent e)
+					 {
+						 enableWrapMCTSPart();
+					 }
+				 }
+		);
 
 		// only for RubiksCube:
 		pMin_T.addActionListener(new ActionListener()
@@ -232,8 +246,11 @@ public class OtherParams extends Frame {
 		oPanel.add(wNply_L);
 		oPanel.add(wNply_T);
 
-		oPanel.add(new Canvas());
-		oPanel.add(new Canvas());
+		oPanel.add(wMCTSdepth_L);
+		oPanel.add(wMCTSdepth_T);
+
+//		oPanel.add(new Canvas());
+//		oPanel.add(new Canvas());
 
 		if (m_arena.getGameName().equals("RubiksCube")) {
 			oPanel.add(pMin_L);
@@ -263,6 +280,9 @@ public class OtherParams extends Frame {
 		pack();
 		setVisible(false);
 
+		enableWrapMCTSPart();
+		enableStopTest(false);			// stop test is now deprecated
+
 	} // constructor OtherParams()
 
 	public void enableChoosePart(boolean enable) {
@@ -274,6 +294,27 @@ public class OtherParams extends Frame {
 		rgs_L.setEnabled(enable);
 		rewardIsGameScore.setEnabled(enable);
 	}
+
+	public void enableStopTest(boolean enable) {
+		stopTest_T.setEnabled(enable);
+		stopTest_L.setEnabled(enable);
+	}
+
+	private void enableWrapMCTSPart() {
+		if(this.getWrapperMCTSIterations()>0){
+			wMCTSdepth_L.setEnabled(true);
+			wMCTSdepth_T.setEnabled(true);
+			wMCTSpUCT_L.setEnabled(true);
+			wMCTSpUCT_T.setEnabled(true);
+		} else {
+			wMCTSdepth_L.setEnabled(false);
+			wMCTSdepth_T.setEnabled(false);
+			wMCTSpUCT_L.setEnabled(false);
+			wMCTSpUCT_T.setEnabled(false);
+		}
+	}
+
+
 
 	public JPanel getPanel() {
 		return oPanel;
@@ -317,6 +358,10 @@ public class OtherParams extends Frame {
 
 	public double getWrapperMCTS_PUCT() {
 		return Double.parseDouble(wMCTSpUCT_T.getText());
+	}
+
+	public int getWrapperMCTS_depth() {
+		return Integer.valueOf(wMCTSdepth_T.getText());
 	}
 
 	public int getpMinRubiks() {
@@ -414,6 +459,10 @@ public class OtherParams extends Frame {
 		wMCTSpUCT_T.setText(value + "");
 	}
 
+	public void setWrapperMCTS_depth(final int value) {
+		wMCTSdepth_T.setText(value + "");
+	}
+
 	public void setpMinRubiks(int value) {
 		pMin_T.setText(value + "");
 	}
@@ -459,6 +508,8 @@ public class OtherParams extends Frame {
 		this.setStopEval(op.getStopEval());
 		this.setWrapperNPly(op.getWrapperNPly());
 		this.setWrapperMCTSIterations(op.getWrapperMCTSIterations());
+		this.setWrapperMCTS_PUCT(op.getWrapperMCTS_PUCT());
+		this.setWrapperMCTS_depth(op.getWrapperMCTS_depth());
 		this.setpMinRubiks(op.getpMinRubiks());
 		this.setpMaxRubiks(op.getpMaxRubiks());
 		this.chooseS01.setState(op.getChooseStart01());
@@ -472,6 +523,8 @@ public class OtherParams extends Frame {
 			((GameBoardCube)m_arena.getGameBoard()).setPMin(getpMinRubiks());
 			((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
 		}
+
+		enableWrapMCTSPart();
 
 	}
 	

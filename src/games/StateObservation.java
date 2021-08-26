@@ -3,7 +3,9 @@ package games;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import controllers.TD.ntuple2.*;
 import controllers.TD.ntuple4.*;
 import tools.ScoreTuple;
@@ -346,7 +348,22 @@ public interface StateObservation extends Serializable{
 	 */
 	int getNumPlayers();
 
+	/**
+	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 * whether the start state needs randomization when doing such a competition.
+	 * <p>
+	 * Currently only used by {@link games.Poker.StateObserverPoker}
+	 *
+	 * @return true or false
+	 */
+	boolean needsRandomization();
+
+	/**
+	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 *  if {@link #needsRandomization()} returns true
+	 * <p>
+	 * Currently only used by {@link games.Poker.StateObserverPoker}
+	 */
 	void randomizeStartState();
 
-	boolean needsRandomization();
 }

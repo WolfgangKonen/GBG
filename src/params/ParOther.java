@@ -27,6 +27,7 @@ public class ParOther implements Serializable {
     public static int DEFAULT_WRAPPER_NPLY = 0;
     public static int DEFAULT_WRAPPER_MCTS_ITERATIONS = 0;
     public static double DEFAULT_WRAPPER_MCTS_PUCT = 1;
+	public static int DEFAULT_WRAPPER_MCTS_DEPTH = 100;
 	public static int DEFAULT_PMIN_RUBIKS = 1;
     public static int DEFAULT_PMAX_RUBIKS = 6;
 
@@ -39,6 +40,7 @@ public class ParOther implements Serializable {
     private int wrapperNply = DEFAULT_WRAPPER_NPLY;
 	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
 	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
+	private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
 	private int pMinRubiks = DEFAULT_PMIN_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMin
 	private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
 	private boolean chooseStart01 = false;
@@ -86,6 +88,7 @@ public class ParOther implements Serializable {
 		this.wrapperNply = op.getWrapperNPly();
 		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
 		this.wrapperMCTS_PUCT = op.getWrapperMCTS_PUCT();
+		this.wrapperMCTS_depth = op.getWrapperMCTS_depth();
 		this.pMinRubiks = op.getpMinRubiks();
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
@@ -108,6 +111,7 @@ public class ParOther implements Serializable {
 		this.wrapperNply = op.getWrapperNPly();
 		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
 		this.wrapperMCTS_PUCT = op.getWrapperMCTS_PUCT();
+		this.wrapperMCTS_depth = op.getWrapperMCTS_depth();
 		this.pMinRubiks = op.getpMinRubiks();
 		this.pMaxRubiks = op.getpMaxRubiks();
 		this.chooseStart01 = op.getChooseStart01();
@@ -143,6 +147,7 @@ public class ParOther implements Serializable {
 		if (otparams!=null)
 			otparams.enableRgsPart(enable);
 	}
+
 
 	public int getQuickEvalMode() {
 		return quickEvalMode;
@@ -182,6 +187,8 @@ public class ParOther implements Serializable {
 	public double getWrapperMCTS_PUCT() {
 		return wrapperMCTS_PUCT;
 	}
+
+	public int getWrapperMCTS_depth() { return wrapperMCTS_depth; }
 
 	public int getpMinRubiks() { return pMinRubiks;	}
 
@@ -272,6 +279,12 @@ public class ParOther implements Serializable {
 		this.wrapperMCTS_PUCT =puct;
 		if (otparams!=null)
 			otparams.setWrapperMCTS_PUCT(puct);
+	}
+
+	public void setWrapperMCTS_depth(final int depth) {
+		this.wrapperMCTS_depth =depth;
+		if (otparams!=null)
+			otparams.setWrapperMCTS_depth(depth);
 	}
 
 	public void setpMinRubiks(int pMinRubiks) {

@@ -197,7 +197,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
      * The win rates for agtFile="TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip" are tested against these expectations:
      *     1) If iterMCTSWrap==0, then winrate[MCTSWrapper] &le; 0.4 (not strict, sometimes only &le; 0.6), for both EPS
      *     2) If iterMCTSWrap &ge; 300, then winrate[MCTSWrapper] &ge; 0.95, for both EPS
-     *  Results are written to mCompeteMCTS-vs-MWrap.csv for inspection.
+     *  Results are written to {@code csvFile} for inspection.
      *  Computation time &lt; 400 sec for 8 iterMWrap values, 2 EPS values and 1 trial with 10 episodes for each
      *  parameter setting.
      */
@@ -206,11 +206,11 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         long startTime;
         double elapsedTime;
 
-        int numEpisodes=100;
-        int nTrial=4;
-        int[] iterMCTSWrapArr={0,1000}; //={0,50,100,200,300,500,600,800,1000};
+        int numEpisodes=25;
+        int nTrial=5;
+        int[] iterMCTSWrapArr={0,50,100,200,300,500,750,1000};  // ={0,1000}; //
         double[] epsArr = { 1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
-        String csvFile = "mCompeteMCTS-vs-MWrap-100runs.csv";
+        String csvFile = "mCompeteMCTS-vs-MWrap-25runs-normF.csv";
         boolean doAssert = false;
         startTime = System.currentTimeMillis();
 
@@ -285,11 +285,21 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         switch(opponentName) {
             case "MCTS" -> {
                 playerMWrap = 1;
-                ParMCTS parMCTS = new ParMCTS();
-                parMCTS.setNumIter(10000);
-                parMCTS.setTreeDepth(40);
-                ParOther oPar = new ParOther();
-                opponent = new MCTSAgentT("MCTS",so, parMCTS, oPar);
+                boolean CONSTRUCT_MCTS_ANEW = true;
+                if (CONSTRUCT_MCTS_ANEW) {
+                    ParMCTS parMCTS = new ParMCTS();
+                    parMCTS.setNumIter(10000);
+                    parMCTS.setTreeDepth(40);
+                    parMCTS.setNormalize(false);        // was missing prior to 2021-08-11, makes MCTS stronger as 1st player
+                    ParOther oPar = new ParOther();
+                    opponent = new MCTSAgentT("MCTS",so, parMCTS, oPar);
+                } else {        // load MCTS from file, just for debugging
+                    String mctsFile = "3-MCTS10000-40.agt.zip";
+                    setupPaths(mctsFile, csvFile);     // builds filePath
+                    boolean res = t_Game.loadAgent(1, filePath);
+                    assert res : "\n[MCTSWrapperAgentTest] Aborted: mctsFile = " + mctsFile + " not found!";
+                    opponent = t_Game.m_xfun.fetchAgent(1, "MCTS", t_Game.m_xab);
+                }
             }
             case "AlphaBetaDL" -> {
                 playerMWrap = 0;
@@ -317,7 +327,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         else qa = new MCTSWrapperAgent(iterMCTSWrap, c_puct,
                                 new PlayAgentApproximator(pa),
                                 "MCTS-Wrapped " + pa.getName(),
-                                -1);
+                                100); // -1);
 
                         // *** only a sub-test: How good would AB-DL be in place of MCTSWrap(TCL-EXP)? ***
                         //qa = new AlphaBetaAgent(new BookSum(),1000);	// search for distant losses

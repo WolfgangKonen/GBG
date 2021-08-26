@@ -1,7 +1,8 @@
 #
 # **** These are Jan'2021 results with TDNTuple3Agt on C4. The wrapped agent is  ****
 #         TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip
-#      with MCTSWrapper and different #iterations
+#      with MCTSWrapper and different #iterations.
+#      MCTS params: 10.000 iterations, tree depth 40, useNormalize=true (weaker MCTS)
 # ****
 #
 # This script shows results from a competition where MCTS_10000 (1st) vs. MCTSWrapper[TCL3] (2nd)
@@ -18,10 +19,10 @@ wfac = 1;
 errWidth=20/wfac;
 evalStr = "win rate"
 path <- "../../agents/ConnectFour/csv/"; 
-Ylimits=c(0.0,1.15); 
+Ylimits=c(0.0,1.25); 
 #Xlimits=c(0,100000); # c(400,6100) (-/+100 to grab position-dodge-moved points)
 
-filenames=c("mCompete10-MCTS-vs-MWrap.csv"          # MCTSWrapperAgentTest.C4_vs_MCTS_Test
+filenames=c("mCompete10-MCTS-vs-MWrap.csv"            # MCTSWrapperAgentTest.C4_vs_MCTS_Test, Jan'2021
 )
 
   

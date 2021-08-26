@@ -476,7 +476,7 @@ public class XArenaFuncs {
 				pa = m_PlayAgents[n]; // take the n'th current agent, which
 										// is *assumed* to be trained (!)
 
-				// Wrapper nPly, Wrapper MCTS and PUCT for Wrapper MCTS are the ONLY parameters from tab 'Other pars'
+				// Wrapper MaxN: { nPly} and Wrapper MCTS: {iterations, PUCT, depth} are the ONLY parameters from tab 'Other pars'
 				// which may be changed by the user AFTER training an agent. (All the other opar parameters may be only
 				// set/changed BEFORE training a trainable agent.) The following line of code was missing before 2020-08-11
 				// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
@@ -584,7 +584,7 @@ public class XArenaFuncs {
 				oPar.getWrapperMCTS_PUCT(),
 				new PlayAgentApproximator(qa),
 				"MCTS-Wrapped "+qa.getName(),
-					oPar.getStopEval()
+				oPar.getWrapperMCTS_depth()
             );
 		}
 
@@ -1128,7 +1128,7 @@ public class XArenaFuncs {
 			so = startSO.copy();
 
 			if(so.needsRandomization()) {
-				// Randomizing the start state in case a game already is initalized with a state to make sure there is a fair competition.
+				// Randomizing the start state in case a game already is initialized with a state to make sure there is a fair competition.
 				so.randomizeStartState();
 			}
 

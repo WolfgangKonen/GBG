@@ -41,7 +41,7 @@ import games.Sim.StateObserverSim;
  * <p>
  * {@link TDNTuple4Agt} is very similar to {@link TDNTuple3Agt}. The only difference is that {@link TDNTuple4Agt}
  * uses {@link NTuple4} n-tuples while {@link TDNTuple3Agt} uses {@link NTuple2}. <br>
- * This results in less memory consumption for game RubiksCube.
+ * This results in less memory consumption.
  *
  * @see PlayAgent
  * @see AgentBase
@@ -156,7 +156,12 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		for (int i=0; i<m_Net.xnf.getPositionValuesVector().length; i++)
 			assert (m_Net.getNTuples()[0].getPosVals(i)==m_Net.xnf.getPositionValuesVector()[i]) : "Error getPosVals("+i+")";
 		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
-		
+
+		// older agents may not have the wrapper depth parameter, so it is 0. Set it in this case to -1:
+		if (this.getParOther().getWrapperMCTS_depth()==0) this.getParOther().setWrapperMCTS_depth(-1);
+		// older agents may not have the wrapper p_UCT parameter, so it is 0. Set it in this case to 1.0:
+		if (this.getParOther().getWrapperMCTS_PUCT()==0) this.getParOther().setWrapperMCTS_PUCT(1.0);
+
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
 		// get the loaded values)
@@ -470,7 +475,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				}
 			}
 		}
-		
+
+		// *** /WK/ 08/2021: (!!?!) Very questionable to add the reward here since the reward is usually added as
+		// *** a separate term r in 'target = r + gamma * V'
+		//
 		// In any case: add the reward obtained so far, since the net predicts
 		// with getScoreI only the expected future reward.
 		boolean rgs = m_oPar.getRewardIsGameScore();
