@@ -48,7 +48,7 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
     public int getNumPositionValues() {
         switch(ConfigEWN.CEll_CODING){
             case 0: return ConfigEWN.NUM_PLAYERS +1;
-            case 1: return ConfigEWN.NUM_PLAYERS * 2 + 1;
+            case 1: return ConfigEWN.NUM_PLAYERS * 3 + 1;
             default: throw new RuntimeException("Cell_Coding only implements 0 and 1");
         }
 
@@ -127,8 +127,8 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
                                 //player 1 => [2,3]
                                 //player 3 => [4,5]
                                 //player 4 => [6,7]
-                                int offset =(value > 2 ? 1 : 0);
-                                vector[n] = player * 2 + offset;
+                                int offset =(value > 3 ? 2 : value > 1 ? 1 : 0);
+                                vector[n] = player * 3 + offset;
                             }
                         }else{
                             if(player < 0){
