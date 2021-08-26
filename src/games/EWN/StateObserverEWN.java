@@ -299,7 +299,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             if(playerWin >= 0) {
                 return playerWin == player ? PLAYER_WINS : PLAYER_LOSES;
             }else if(playerLooses >= 0){
-                return playerWin == player ? PLAYER_LOSES : PLAYER_WINS;
+                return playerLooses == player ? PLAYER_LOSES : PLAYER_WINS;
             }
         } else if(numPlayers == 3){
             // Can only be the single player
@@ -353,33 +353,6 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             m_scoreTuple.scTup[i] = getGameScore(i);
         }
         return m_scoreTuple;
-    }
-
-
-    @Override
-    public double getGameScore(StateObservation referringState) {
-        if(!isGameOver()) return 0.0;
-        int refPlayer = referringState.getPlayer();
-        switch (ConfigEWN.NUM_PLAYERS){
-            case 2:{
-                return refPlayer== this.player ? getGameScore(refPlayer) : (-1.0)*getGameScore(refPlayer);
-            }
-            case 3:{
-                // Teams [0,1] vs [2]
-                if(refPlayer == 2 && this.player == 2){
-                    return getGameScore(refPlayer);
-                }
-                return (-1.0) * getGameScore(refPlayer);
-            }
-            case 4:{
-                // Teams [0,2] vs. [1,3]
-                if((this.player == 0 || this.player == 2) && (refPlayer == 0 || refPlayer == 2)){
-                    return getGameScore(refPlayer);
-                }
-                return (-1.0)*getGameScore(refPlayer);
-            }
-            default: throw new RuntimeException("Only Num_Players 2,3 and 4 are implemented [getGameScore]");
-        }
     }
 
     @Override
