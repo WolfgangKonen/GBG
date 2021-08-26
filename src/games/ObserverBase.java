@@ -244,7 +244,8 @@ abstract public class ObserverBase implements StateObservation {
 	}
 
 	public void addToLastMoves(ACTIONS act) {
-		lastMoves.add(act.toInt());
+		if (act!=null)
+			lastMoves.add(act.toInt());
 	}
 
 	public int getLastMove() {

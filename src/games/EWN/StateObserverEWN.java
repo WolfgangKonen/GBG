@@ -126,6 +126,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
      */
     @Override
     public void advance(ACTIONS action) {
+        super.advanceBase(action);		//		includes addToLastMoves(action)
         if(isNextActionDeterministic) {
             // Hotfix seems to work Dive into action generation
             if(action != null) {
@@ -135,6 +136,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             else isNextActionDeterministic = false;
         }
         if(!isNextActionDeterministic) advanceNondeterministic();
+        super.incrementMoveCounter();   // increment m_counter
     }
 
     /**
@@ -174,6 +176,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             isNextActionDeterministic=false;
         }
 
+        isNextActionDeterministic = false;      // /WK/ this was missing, I think
     }
 
     @Override
@@ -183,6 +186,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         }
         int actIndex = random.nextInt(availableRandomActions.size());
         advanceNondeterministic(availableRandomActions.get(actIndex));
+
     }
 
 
@@ -190,8 +194,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     @Override
     public void advanceNondeterministic(ACTIONS action) {
         nextNondeterministicAction = action;
-        this.setAvailableActions();
-
+        this.setAvailableActions();             // this sets also isNextActionDeterministic
 
     }
 
@@ -432,7 +435,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
 
     @Override
     public double getProbability(ACTIONS action) {
-        return 1/availableRandomActions.size();
+        return 1.0/availableRandomActions.size();
     }
 
     @Override

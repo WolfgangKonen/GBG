@@ -155,6 +155,10 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
             	actions[i] = acts.get(i);
             	NewSO = soND.copy();
             	NewSO.advanceDeterministic(actions[i]);
+
+            	/////// debug only:
+            	//System.out.print(NewSO);
+            	//System.out.println("depth="+depth);
             	
             	if (depth<this.m_depth) {
     				// here is the recursion: getAllScores may call getBestAction back:
@@ -164,9 +168,11 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
     				// (after finishing the for-loop for every element of acts)
     				currScoreTuple = estimateGameValueTuple(NewSO, null);
     				// For derived class ExpectimaxWrapper, estimateGameValueTuple returns
-    				// the score tuple of the wrapped agent. 
+    				// the score tuple of the wrapped agent.
+					///// debug only:
+					//System.out.println("maxDepth reached, but episode not yet over! ");
     			}
-            	if (!silent && depth<3) printAfterstate(soND,actions[i],currScoreTuple,depth);
+            	if (!silent && depth<0) printAfterstate(soND,actions[i],currScoreTuple,depth);
             	vTable[i] = currScoreTuple.scTup[player];
             	
     			// always *maximize* P's element in the tuple currScoreTuple, 
@@ -214,7 +220,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 
 				// here is the recursion: getAllScores may call getBestAction back:
-				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);		
+				currScoreTuple = getAllScores(NewSO,refer,silent,depth);
+							// was before called with depth+1, but we now increase depth only on deterministic moves (!)
 				
 				currProbab = soND.getProbability(actions[i]);
             	//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
@@ -225,7 +232,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				expecScoreTuple.combine(currScoreTuple, cOP, player, currProbab);
            }
             assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
-        	if (!silent && depth<3) printNondet(soND,expecScoreTuple,sumProbab,depth);
+        	if (!silent && depth<0) printNondet(soND,expecScoreTuple,sumProbab,depth);
             scBest = expecScoreTuple;	
             actBest = rans.get(0); 		// this is just a dummy
 			vBest = 0.0;				// this is just a dummy
