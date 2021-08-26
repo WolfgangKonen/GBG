@@ -123,11 +123,8 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
                                 vector[n] = numPlayer;
 
                             }else { // position is occupied by a player
-                                //player 0 => [0,1]
-                                //player 1 => [2,3]
-                                //player 3 => [4,5]
-                                //player 4 => [6,7]
-                                int offset =(value > 3 ? 2 : value > 1 ? 1 : 0);
+
+                                int offset =(value < 3 ? 0 : value < 4 ? 1 : 2);
                                 vector[n] = player * 3 + offset;
                             }
                         }else{
