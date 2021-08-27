@@ -346,7 +346,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             }
         }
 
-        throw new RuntimeException("Game is no over yet.");
+        throw new RuntimeException("Game is not over yet.");
     }
 
 

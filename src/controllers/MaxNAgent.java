@@ -1,19 +1,12 @@
 package controllers;
 
-import controllers.PlayAgent;
-import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.StateObservation;
-import games.XArenaMenu;
-import games.RubiksCube.StateObserverCube;
-import gui.MessageBox;
 import params.MaxNParams;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
 import java.io.Serializable;
@@ -21,8 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-
-import javax.swing.JOptionPane;
 
 /**
  * The Max-N agent implements the Max-N algorithm [Korf91] via interface {@link PlayAgent}. 
@@ -123,23 +114,6 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 */	
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
-        List<ACTIONS> actions = so.getAvailableActions();
-	
-        // --- obsolete now, we do not use MaxNWrapper anymore, but MaxN2Wrapper
-//        try {
-//		    // this is just a runtime check in case MaxNWrapper whether the wrapped agent implements estimateGameValueTuple
-//        	this.estimateGameValueTuple(so, null);
-//        } catch (RuntimeException e) {
-//        	if (e.getMessage()==AgentBase.EGV_EXCEPTION_TEXT) {
-//            	String str = "MaxNWrapper: The wrapped agent does not implement estimateGameValueTuple "
-//            			+ "\n --> set Other pars: Wrapper nPly to 0";
-//    			MessageBox.show(null,str,
-//    					"MaxNAgent", JOptionPane.ERROR_MESSAGE);      
-//    			return null;
-//        	} else {
-//        		throw e;	// other exceptions: rethrow
-//        	}
-//        }
 
         // this starts the recursion:
 		ACTIONS_VT act_vt = getBestAction(so, so,  random,  silent, 0, null);
@@ -162,13 +136,13 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	private ACTIONS_VT getBestAction(StateObservation so, StateObservation refer, boolean random, 
 			boolean silent, int depth, ScoreTuple prevTuple) 
 	{
-		int i,j;
-		ScoreTuple currScoreTuple=null;
+		int i;
+		ScoreTuple currScoreTuple;
         ScoreTuple sc;
 		StateObservation NewSO;
 		ScoreTuple scBest = null;
-        ACTIONS actBest = null;
-        ACTIONS_VT act_vt = null;
+        ACTIONS actBest;
+        ACTIONS_VT act_vt;
         ArrayList<ACTIONS> bestActions = new ArrayList<>();
         String stringRep ="";
 
@@ -180,8 +154,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         double value, maxValue = -Double.MAX_VALUE;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
         double[] VTable =  new double[acts.size()];
-        boolean lowest = true;
-    	currScoreTuple = (prevTuple==null) ? new ScoreTuple(so,lowest) : prevTuple;
+    	currScoreTuple = (prevTuple==null) ? new ScoreTuple(so,true) : prevTuple;
         int P = so.getPlayer();
         
         for(i = 0; i < acts.size(); ++i)
@@ -292,38 +265,13 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	}
 
 	private ScoreTuple getAllScores(StateObservation sob, StateObservation refer, int depth, ScoreTuple prevTuple) {
-        ACTIONS_VT act_vt = null;
+        ACTIONS_VT act_vt;
 
-        // --- obsolete now since MaxNWrapper has been removed in favor of MaxN2Wrapper
-//		if (this instanceof MaxNWrapper) {
-//			if (((MaxNWrapper)this).getWrappedPlayAgent() instanceof TDNTuple3Agt)
-//				prevTuple = estimateGameValueTuple(sob, prevTuple);
-//				// this is for wrappedAgent==TDNTuple3Agt and the case (N>=3): fill in the game value estimate
-//				// for the player who created sob. Will be used by subsequent states as a surrogate for the 
-//				// then unknown value for that player. 
-//		}
-		
 		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
 		act_vt = getBestAction(sob, refer, false, true, depth, prevTuple);  
 		
 		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}
-
-//	/**
-//	 * When the recursion tree has reached its maximal depth m_depth, then return
-//	 * an estimate of the game score. This function may be overridden in a game-
-//	 * specific way by classes derived from {@link MaxNAgent}.
-//	 * <p>
-//	 * This  stub method just returns {@link StateObservation#getReward(StateObservation, boolean)},
-//	 * which might be too simplistic for not-yet finished games, because the current reward does
-//	 * not reflect future rewards.
-//	 * @param sob	the state observation
-//	 * @return		the estimated score
-//	 */
-//	@Override
-//	public double estimateGameValue(StateObservation sob) {
-//		return sob.getReward(sob,true);
-//	}
 
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
