@@ -1,6 +1,6 @@
 package controllers.TD.ntuple2;
 
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.*;
@@ -182,7 +182,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
                                   // "TCL3-p13-3000k-120-7t.agt.zip", see agtFileB
                     qa = so.isDeterministicGame() ?
                             new MaxN2Wrapper(pa, nply, pa.getParOther()) :
-                            new ExpectimaxWrapper(pa, nply);
+                            new ExpectimaxNWrapper(pa, nply);
 
             int qem = t_Game.m_xab.oPar[0].getQuickEvalMode();
             m_evaluatorQ = t_Game.m_xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,-1);

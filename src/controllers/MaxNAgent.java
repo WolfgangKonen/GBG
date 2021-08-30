@@ -12,7 +12,6 @@ import tools.Types.ACTIONS_VT;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -37,10 +36,10 @@ import java.util.Random;
  */
 public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
-	private Random rand;
 	protected int m_depth=10;
 	protected boolean m_useHashMap=false; //true;
-	private HashMap<String,ScoreTuple> hm;
+	private final Random rand;
+	private final HashMap<String,ScoreTuple> hm;
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -102,13 +101,13 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	/**
 	 * Get the best next action and return it
 	 * @param so			current game state (not changed on return)
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param silent
+	 * @param random		allow epsilon-greedy random action selection (not relevant in MaxNAgent)
+	 * @param silent		true: no print-out
 	 * @return actBest		the best action 
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).<br>
-	 * actBest has also the members vTable and vBest to store the value for each available
+	 * actBest has also the members vTable and bestValue to store the value for each available
 	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
 	 * 
 	 */	
@@ -116,7 +115,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
 
         // this starts the recursion:
-		ACTIONS_VT act_vt = getBestAction(so, so,  random,  silent, 0, null);
+		ACTIONS_VT act_vt = getBestAction(so, so,  silent, 0, null);
 		
 		return act_vt;
 	}
@@ -127,15 +126,16 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 * 
 	 * @param so		current game state (not changed on return)
 	 * @param refer		(not used currently) referring game state (=so on initial call)	
-	 * @param random	(not used currently) allow epsilon-greedy random action selection	
-	 * @param silent
+	 * @param silent	true: no print-out
 	 * @param depth		tree depth
 	 * @param prevTuple TODO
 	 * @return		best action + score tuple
 	 */
-	private ACTIONS_VT getBestAction(StateObservation so, StateObservation refer, boolean random, 
+	private ACTIONS_VT getBestAction(StateObservation so, StateObservation refer,
 			boolean silent, int depth, ScoreTuple prevTuple) 
 	{
+		assert so.isLegalState() : "Not a legal state";
+
 		int i;
 		ScoreTuple currScoreTuple;
         ScoreTuple sc;
@@ -143,18 +143,15 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 		ScoreTuple scBest = null;
         ACTIONS actBest;
         ACTIONS_VT act_vt;
-        ArrayList<ACTIONS> bestActions = new ArrayList<>();
-        String stringRep ="";
+        String stringRep;
 
-        assert so.isLegalState() : "Not a legal state"; 
-        
-//        if (this instanceof MaxNWrapper) 
-//        	System.out.println("MaxN: depth="+depth+"  "+so.stringDescr());
-        
-        double value, maxValue = -Double.MAX_VALUE;
+        double value, bestValue = -Double.MAX_VALUE;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
-        double[] VTable =  new double[acts.size()];
-    	currScoreTuple = (prevTuple==null) ? new ScoreTuple(so,true) : prevTuple;
+		ArrayList<ACTIONS> bestActions = new ArrayList<>();
+        double[] vTable =  new double[acts.size()];
+
+        // TODO: this is not yet the right way to utilize info from prevTuple (!):
+    	currScoreTuple = (prevTuple==null) ? new ScoreTuple(so,true) : new ScoreTuple(prevTuple);
         int P = so.getPlayer();
         
         for(i = 0; i < acts.size(); ++i)
@@ -173,7 +170,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     	        	sc = retrieveFromHashMap(m_useHashMap,stringRep);
     				if (sc==null) {
     					// here is the recursion: getAllScores may call getBestAction back:
-    					currScoreTuple = getAllScores(NewSO,refer,depth+1, currScoreTuple);	
+    					currScoreTuple = getAllScores(NewSO,refer,depth+1, prevTuple);
     					
     					if (m_useHashMap) {
     						hm.put(stringRep, currScoreTuple);
@@ -186,10 +183,8 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     			} else {
     				// this terminates the recursion:
     				// (after finishing the for-loop for every element of acts)
-    				currScoreTuple = estimateGameValueTuple(NewSO, currScoreTuple);
-    				// For derived class MaxNWrapper, estimateGameValueTuple returns
-    				// the score tuple of the wrapped agent. 
-    			}    			
+    				currScoreTuple = estimateGameValueTuple(NewSO, prevTuple);
+    			}
     		}
 //			if (m_useHashMap && !found) {
 //				stringRep = NewSO.stringDescr();
@@ -205,17 +200,17 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     			throw new RuntimeException( "Ooops, scTup too short");    			
     		}
     		
-			VTable[i] = currScoreTuple.scTup[P];
+			vTable[i] = value = currScoreTuple.scTup[P];
 			
-			value = VTable[i] = currScoreTuple.scTup[P];
-			// always *maximize* P's element in the tuple currScoreTuple, 
+			// always *maximize* P's element in the tuple currScoreTuple,
 			// where P is the player to move in state so:
-        	if (value==maxValue) bestActions.add(acts.get(i));
-        	if (value>maxValue) {
-        		maxValue = value;
-        		scBest = new ScoreTuple(currScoreTuple);
+        	if (value == bestValue) {
+        		bestActions.add(acts.get(i));
+			} else if (bestValue < value) {
+        		bestValue = value;
         		bestActions.clear();
         		bestActions.add(acts.get(i));
+				scBest = new ScoreTuple(currScoreTuple);
         	}
         } // for
         
@@ -228,10 +223,10 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         if (!silent) {
         	NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxValue);
+        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+bestValue);
         }			
 
-        act_vt = new ACTIONS_VT(actBest.toInt(), false, VTable, maxValue, scBest);
+        act_vt = new ACTIONS_VT(actBest.toInt(), false, vTable, bestValue, scBest);
         return act_vt;         
 	}
 
@@ -268,7 +263,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         ACTIONS_VT act_vt;
 
 		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
-		act_vt = getBestAction(sob, refer, false, true, depth, prevTuple);  
+		act_vt = getBestAction(sob, refer, true, depth, prevTuple);
 		
 		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}

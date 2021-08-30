@@ -1,6 +1,6 @@
 package starters;
 
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.HumanPlayer;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
@@ -396,7 +396,7 @@ public class MTrainSweep {
 //				qa = new MaxNWrapper(pa,mPar,oPar);		// mPar has useMaxNHashMap
 //				qa = new MaxNWrapper(pa,nply);			// always maxNHashMap==false    // OLD
             } else {
-                qa = new ExpectimaxWrapper(pa,nply);
+                qa = new ExpectimaxNWrapper(pa,nply);
             }
         } else {
             qa=pa;

@@ -11,6 +11,7 @@ import tools.Types.ACTIONS_VT;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -27,7 +28,7 @@ import java.util.Random;
  * 
  * @see ScoreTuple
  * @see MaxNAgent
- * @see ExpectimaxWrapper
+ * @see ExpectimaxNWrapper
  */
 public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
@@ -38,8 +39,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	//	protected boolean m_rgs=true;  // use now AgentBase::m_oPar.getRewardIsGameScore()
 	//private boolean m_useHashMap=true;		// don't use HashMap in ExpectimaxNAgent!
 	//private HashMap<String,ScoreTuple> hm;
-	int countTerminal;
-	int countMaxDepth;
+	protected int countTerminal;		// # of terminal node visits in getNextAction2
+	protected int countMaxDepth;		// # of premature returns due to maxDepth in getNextAction2
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -119,6 +120,11 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		if (random)
 			System.out.println("WARNING: ExpectimaxNAgent does not support random==true");
 
+		if (!silent) {
+			System.out.println(this.getShortName()+" called for: ");
+			System.out.print(soND);
+		}
+
 		int i;
 		double bestValue= -Double.MAX_VALUE;
 		double value;			// the quantity to be maximized
@@ -172,12 +178,21 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		assert actBest != null : "Oops, no best action actBest";
 
 		if (!silent) {
-			System.out.println("EA afterstate: ");
-			NewSO = soND.copy();
-			NewSO.advanceDeterministic(actBest);
-			System.out.print(NewSO);
-			System.out.println("bestValue="+bestValue+", countTerminal="+getCountTerminal()
-													 +", countMaxDepth="+getCountMaxDepth());
+			DecimalFormat frmAct = new DecimalFormat("0000");
+			DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
+			System.out.println(
+					 "so.diceVal="+soND.getNextNondeterministicAction().toInt()
+					+", bestValue["+soND.getPlayer()+"]="+frmVal.format(bestValue)
+					+", bestAction="+frmAct.format(actBest.toInt())
+					+", countTerminal="+getCountTerminal()
+					+", countMaxDepth="+getCountMaxDepth());
+			// We better do NOT print NewSO here, but print soND at start of getNextAction2.
+			// Because: the dice value of NewSO is not necessarily the dice value of soND in next call
+//			System.out.println(this.getShortName()+" afterstate: ");
+//			NewSO = soND.copy();
+//			NewSO.advanceDeterministic(actBest);
+//			NewSO.setAvailableActions();
+//			System.out.print(NewSO);
 		}
 
 		ACTIONS_VT actBestVT = new ACTIONS_VT(actBest.toInt(), false, vTable, bestValue, scBest);
@@ -195,12 +210,12 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @return			score tuple for state {@code soND} as calculated by ExpectimaxNAgent (EA)
 	 */
 	private ScoreTuple getEAScoreTuple(StateObsNondeterministic soND, boolean silent, int depth) {
+		boolean rgs = m_oPar.getRewardIsGameScore();
 		boolean stopOnRoundOver= m_mpar.getStopOnRoundOver(); 		// /WK/03/2021: NEW
 		boolean stopConditionMet = soND.isGameOver() || (stopOnRoundOver && soND.isRoundOver());
 		if (stopConditionMet)
 		{
 			countTerminal++;
-			boolean rgs = m_oPar.getRewardIsGameScore();
 			return soND.getRewardTuple(rgs);
 		}
 
@@ -235,10 +250,18 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
     			} else {
     				// this terminates the recursion:
     				// (after finishing the for-loop for every element of acts)
-					countMaxDepth++;
-    				currScoreTuple = estimateGameValueTuple(NewSO, null);
-					///// debug only:
-					//System.out.println("maxDepth reached, but episode not yet over! ");
+					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
+					// this check on stopConditionMet is needed when using this method from
+					// ExpectimaxNWrapper: If NewSO is a game-over state, we do not need to call the estimator
+					// (i.e. wrapped agent), we just take the final reward
+					if (stopConditionMet)
+					{
+						countTerminal++;
+						currScoreTuple =  NewSO.getRewardTuple(rgs);
+					} else {
+						countMaxDepth++;
+						currScoreTuple = estimateGameValueTuple(NewSO, null);
+					}
     			}
             	if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
 
@@ -321,7 +344,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score (tuple for all players). This function may be overridden 
 	 * in a agent-specific way by classes derived from {@link ExpectimaxNAgent}. For example, 
-	 * {@link ExpectimaxWrapper} will override it to return the score tuple of the wrapped 
+	 * {@link ExpectimaxNWrapper} will override it to return the score tuple of the wrapped
 	 * agent.
 	 * <p>
 	 * This  stub method just returns {@link StateObservation#getReward(int,boolean)} for all 
@@ -330,7 +353,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @param sob	the state observation
 	 * @return		the estimated score tuple
 	 * 
-	 * @see ExpectimaxWrapper
+	 * @see ExpectimaxNWrapper
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
@@ -346,6 +369,10 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		String cs = getClass().getName();
 		cs = cs + ", depth:"+m_depth;
 		return cs;
+	}
+
+	public String getShortName() {
+		return "EA";
 	}
 
 	public int getDepth() {

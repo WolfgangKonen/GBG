@@ -1,7 +1,7 @@
 package controllers.MC;
 
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.Arena;
@@ -560,7 +560,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	/**
 	 * Return a tuple with the agent's estimate of {@code sob}'s final game value (final reward) 
 	 * <b>for all players</b>. <br>
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * @param so	the state s_t for which the value is desired
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 

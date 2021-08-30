@@ -7,6 +7,7 @@ import controllers.*;
 import controllers.PlayAgent.AgentState;
 import games.*;
 import games.CFour.ArenaTrainC4;
+import games.EWN.ArenaTrainEWN;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
 import games.Nim.ArenaNim2P;
@@ -215,6 +216,8 @@ public class GBGBatch {
 				return new ArenaTrainSim("", false);
 			case "TicTacToe":
 				return new ArenaTrainTTT("", false);
+			case "EWN":
+				return new ArenaTrainEWN("", false);
 			default:
 				System.err.println("[GBGBatch.main] args[0]=" + selectedGame + ": This game is unknown.");
 				System.exit(1);
@@ -251,8 +254,12 @@ public class GBGBatch {
 		case "RubiksCube": 
 			scaPar[0]="2x2x2";		 	
 			scaPar[1]="CSTATE";			
-			scaPar[2]="ALL";			
-		case "2048": 
+			scaPar[2]="ALL";
+		case "EWN":
+			scaPar[0]="3x3 2-Player";
+			scaPar[1]="N-Player + 1";
+			scaPar[2]="None";
+		case "2048":
 		case "ConnectFour": 
 		case "Othello": 
 		case "TicTacToe": 

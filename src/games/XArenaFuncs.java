@@ -469,7 +469,7 @@ public class XArenaFuncs {
 				// --- questionable, the code concerned with wrapper!! ---
 				PlayAgent inner_pa = m_PlayAgents[n];
 				if (m_PlayAgents[n].getName().equals("ExpectimaxWrapper"))
-					inner_pa = ((ExpectimaxWrapper) inner_pa).getWrappedPlayAgent();
+					inner_pa = ((ExpectimaxNWrapper) inner_pa).getWrappedPlayAgent();
 				if (!sAgent.equals(inner_pa.getName()))
 					throw new RuntimeException("Current agent for player " + n + " is " + m_PlayAgents[n].getName()
 							+ " but selector for player " + n + " requires " + sAgent + ".");
@@ -539,7 +539,7 @@ public class XArenaFuncs {
 	 *         wrapped agents if {@code nply>0})
 	 * 
 	 * @see MaxN2Wrapper
-	 * @see ExpectimaxWrapper
+	 * @see ExpectimaxNWrapper
 	 */
 	public PlayAgent[] wrapAgents(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so)
 	{
@@ -571,7 +571,7 @@ public class XArenaFuncs {
 				// qa = new MaxNWrapper(pa, wrap_mPar, oPar); // wrap_mPar has useMaxNHashMap
 				// qa = new MaxNWrapper(pa,nply); // always maxNHashMap==false  // OLD
 			} else {
-				qa = new ExpectimaxWrapper(pa, nply);
+				qa = new ExpectimaxNWrapper(pa, nply);
 			}
 		} else {
 			qa = pa;

@@ -1,18 +1,10 @@
 package controllers.TD.ntuple2;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Locale;
 import java.util.Random;
 
 import agentIO.LoadSaveGBG;
@@ -23,7 +15,7 @@ import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.GameBoard;
@@ -343,7 +335,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * @param so	the state s_t for which the value is desired
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 

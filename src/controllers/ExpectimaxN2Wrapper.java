@@ -3,31 +3,34 @@ package controllers;
 import games.Arena;
 import games.StateObsNondeterministic;
 import games.StateObservation;
-import params.ParMaxN;
-import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * An alternative to {@link ExpectimaxWrapper}, which uses wrapped_pa.getNextAction2 at end of recursion,
- * similar to {@link MaxN2Wrapper}. But it does not work yet.
+ * An alternative to {@link ExpectimaxNWrapper}, which uses wrapped_pa.getNextAction2 at end of recursion,
+ * similar to {@link MaxN2Wrapper}.
+ * <p>
+ * *** But it does not work yet. Use instead {@link ExpectimaxNWrapper} ***
  *
  * @author Wolfgang Konen, TH Koeln, 2020
  * 
- * @see ExpectimaxWrapper
+ * @see ExpectimaxNWrapper
  */
-public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializable
+public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Serializable
 {
 	private Random rand;
 	protected int m_depth=10;
 	private PlayAgent wrapped_pa;
+	int countTerminal;		// # of terminal node visits in getNextAction2
+	int countMaxDepth;		// # of premature returns due to maxDepth in getNextAction2
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
@@ -36,14 +39,14 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 	 */
 	private static final long  serialVersionUID = 12L;
 
-	public Expectimax2Wrapper(PlayAgent pa, int nply) {
+	public ExpectimaxN2Wrapper(PlayAgent pa, int nply) {
 		super("Expectimax2Wrapper");
 		this.m_oPar.setWrapperNPly(nply);
 		m_depth = nply;
 		this.wrapped_pa = pa;
 	}
 
-	public Expectimax2Wrapper(String name)
+	public ExpectimaxN2Wrapper(String name)
 	{
 		super(name);
 		super.setMaxGameNum(1000);
@@ -53,7 +56,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 		setAgentState(AgentState.TRAINED);
 	}
 
-	public Expectimax2Wrapper(String name, int nply)
+	public ExpectimaxN2Wrapper(String name, int nply)
 	{
 		this(name);
 		m_depth = nply;
@@ -97,10 +100,27 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 		if (!(so instanceof StateObsNondeterministic)) 
 			throw new RuntimeException("Error, Expectimax-N only usable for nondeterministic games");
 		StateObsNondeterministic soND = (StateObsNondeterministic) so;
-		
-		ACTIONS_VT act_best = getBestAction(soND, so,  random,  vTable,  silent, 1);
+		countMaxDepth = countTerminal = 0;
 
-        return act_best;
+		if (!silent) {
+			System.out.println("EW called for: ");
+			System.out.print(soND);
+		}
+
+		ACTIONS_VT actBest = getBestAction(soND, so,  random,  vTable,  silent, 1);
+
+		if (!silent) {
+			DecimalFormat frmAct = new DecimalFormat("0000");
+			DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
+			System.out.println(
+					"so.diceVal="+soND.getNextNondeterministicAction().toInt()
+							+", bestValue["+soND.getPlayer()+"]="+frmVal.format(actBest.getVBest())
+							+", bestAction="+frmAct.format(actBest.toInt())
+							+", countTerminal="+getCountTerminal()
+							+", countMaxDepth="+getCountMaxDepth());
+		}
+
+		return actBest;
 	}
 
 	/**
@@ -132,6 +152,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
         int player = soND.getPlayer();
 
 		if (depth>=this.m_depth) {
+			countMaxDepth++;
 			// this terminates the recursion. It returns the right ScoreTuple based on r(s)+gamma*V(s).
 			ACTIONS_VT act_vt = this.getWrappedPlayAgent().getNextAction2(soND.partialState(), random, true);
 			return act_vt;
@@ -160,7 +181,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 //    				// For derived class ExpectimaxWrapper, estimateGameValueTuple returns
 //    				// the score tuple of the wrapped agent.
 //    			}
-            	if (!silent && depth<3) printAfterstate(soND,actions[i],currScoreTuple,depth);
+            	//if (!silent && depth<3) printAfterstate(soND,actions[i],currScoreTuple,depth);
             	vTable[i] = currScoreTuple.scTup[player];
             	
     			// always *maximize* P's element in the tuple currScoreTuple, 
@@ -231,6 +252,7 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 	private ScoreTuple getAllScores(StateObsNondeterministic sob, StateObservation refer, boolean silent, int depth) {
 		if (sob.isGameOver())
 		{
+			countTerminal++;
 			boolean rgs = m_oPar.getRewardIsGameScore();
 			return sob.getRewardTuple(rgs);
 		}
@@ -294,17 +316,26 @@ public class Expectimax2Wrapper extends AgentBase implements PlayAgent, Serializ
 
 	// getName: use method ObserverBase::getName()
 
-	public String getFullName() {
-		String cs = wrapped_pa.getClass().getSimpleName();
-		cs = cs + "[nPly="+m_depth+"]";
-		return cs;
-	}
+	// --- never used ---
+//	public String getFullName() {
+//		String cs = wrapped_pa.getClass().getSimpleName();
+//		cs = cs + "[nPly="+m_depth+"]";
+//		return cs;
+//	}
 
 	public int getDepth() {
 		return m_depth;
 	}
 
-    private void printAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
+	public int getCountTerminal() {
+		return countTerminal;
+	}
+
+	public int getCountMaxDepth() {
+		return countMaxDepth;
+	}
+
+	private void printAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
     		ScoreTuple scTuple, int depth)
     {
 		StateObsNondeterministic NewSO = soND.copy();

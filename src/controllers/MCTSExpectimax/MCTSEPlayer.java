@@ -24,10 +24,10 @@ import controllers.MCTS.SingleTreeNode;
  */
 public class MCTSEPlayer
 {
-    private transient MCTSEChanceNode rootNode;
+    protected transient MCTSEChanceNode rootNode;
     public transient List<Types.ACTIONS> actions = new ArrayList<>();
 	boolean rgs;		// rewardIsGameScore, package-wide visible
-    private Random random;
+    protected Random random;
 
     public int nRolloutFinished = 0;		// counts the number of rollouts ending with isGameOver==true
 
@@ -35,7 +35,7 @@ public class MCTSEPlayer
 	 * Member {@link #mctsExpectimaxParams} is only needed for saving and loading the agent
 	 * (to restore the agent with all its parameter settings)
 	 */
-	private ParMCTSE mctsExpectimaxParams;
+	protected ParMCTSE mctsExpectimaxParams;
 	
 	/**
 	 * Member {@link #m_parent} is only needed for access to {@link MCTSExpectimaxAgt#getParOther()}
@@ -43,7 +43,7 @@ public class MCTSEPlayer
     // a bug before 2020-08-11 was that m_parent was transient. This is not o.k. since when loading an MCTS agent 
     // from disk (e.g. in tournament), it would result in m_parent being null, which leads to a runtime exception
     // when getParOther is called. Now fixed, we removed 'transient'.
-    private MCTSExpectimaxAgt m_parent;	
+    protected MCTSExpectimaxAgt m_parent;
 
 	/**
      * Creates the MCTSExpectimax player.
