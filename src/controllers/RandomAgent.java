@@ -2,6 +2,7 @@ package controllers;
 
 import games.StateObservation;
 import params.ParOther;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -113,6 +114,18 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 	@Override
 	public double getScore(StateObservation sob) {
 		return rand.nextDouble();
+	}
+
+	/**
+	 * Return a tuple with the agent's estimate of {@code sob}'s final game value (final reward)
+	 * <b>for all players</b>. <br>
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
+	 */
+	@Override
+	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
+		ScoreTuple st = new ScoreTuple(so.getNumPlayers());
+		for (int i=0; i<st.scTup.length; i++) st.scTup[i]=this.getScore(so);
+    	return st;
 	}
 
 }

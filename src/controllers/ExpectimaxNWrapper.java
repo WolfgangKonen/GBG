@@ -30,8 +30,9 @@ public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable
 	 * <p>
 	 * Here we use the wrapped {@link PlayAgent} to return a tuple of game values.
 	 * 
-	 * @param sob	the state observation
-	 * @return		the tuple of estimated score 
+	 * @param sob		the state observation
+	 * @param prevTuple	the previous score tuple
+	 * @return			the tuple of estimated scores
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {

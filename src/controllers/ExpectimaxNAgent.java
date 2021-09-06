@@ -215,6 +215,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		boolean stopConditionMet = soND.isGameOver() || (stopOnRoundOver && soND.isRoundOver());
 		if (stopConditionMet)
 		{
+			// this is the 1st place to terminate the recursion:
 			countTerminal++;
 			return soND.getRewardTuple(rgs);
 		}
@@ -245,10 +246,10 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
             	//System.out.println("depth="+depth);
             	
             	if (depth<this.m_depth) {
-    				// here is the recursion: getAllScores may call getBestAction back:
+    				// here is the recursion:
     				currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
     			} else {
-    				// this terminates the recursion:
+    				// this is the 2nd place to terminate the recursion:
     				// (after finishing the for-loop for every element of acts)
 					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
 					// this check on stopConditionMet is needed when using this method from
@@ -260,6 +261,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 						currScoreTuple =  NewSO.getRewardTuple(rgs);
 					} else {
 						countMaxDepth++;
+						NewSO.setAvailableActions();		// if a wrapped agent is called by estimateGameValueTuple,
+															// it might need the available actions (i.e. MC-N)
 						currScoreTuple = estimateGameValueTuple(NewSO, null);
 					}
     			}
@@ -280,7 +283,6 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
         	//
             ArrayList<ACTIONS> rans = soND.getAvailableRandoms();
             assert (rans.size()>0) : "Error: getAvailableRandoms returns no actions";
-            ACTIONS[] actions = new ACTIONS[rans.size()];
     		ScoreTuple expecScoreTuple=new ScoreTuple(soND);	// a 0-ScoreTuple
     		// select one of the following two lines:
 			ScoreTuple.CombineOP cOpND = ScoreTuple.CombineOP.AVG;
@@ -289,19 +291,17 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 			double sumProbab=0.0;
             for(i = 0; i < rans.size(); ++i)
             {
-            	actions[i] = rans.get(i);
             	NewSO = soND.copy();
-            	NewSO.advanceNondeterministic(actions[i]);
+            	NewSO.advanceNondeterministic(rans.get(i));
 				while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
 					NewSO.advanceNondeterministic();
 				}
 
-
-				// here is the recursion: getAllScores may call getBestAction back:
+				// here is the recursion:
 				currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
 							// was before called with depth+1, but we now increase depth only on deterministic moves (!)
 				
-				currProbab = soND.getProbability(actions[i]);
+				currProbab = soND.getProbability(rans.get(i));
             	//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
 				sumProbab += currProbab;
 				// if cOpND==AVG, expecScoreTuple will contain the average ScoreTuple
