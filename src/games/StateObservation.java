@@ -214,7 +214,7 @@ public interface StateObservation extends Serializable{
      * have it here to allow the same syntax in {@link TDNTuple3Agt} and {@link TDNTuple4Agt} when making an action for
      * any StateObservation, deterministic or nondeterministic.)
      */
-	void advanceNondeterministic();
+	Types.ACTIONS advanceNondeterministic();
 
 	/**
 	 * Return true if the next action is deterministic.<p>

@@ -128,7 +128,7 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 	}
 
 	@Override
-	public void advanceNondeterministic() {
+	public ACTIONS advanceNondeterministic() {
 		if (m_action.toInt()==0) {    // HIT
 			int iCard = (int)(rand.nextDouble() * UPPER)+1;		// a random number from 1,2,...,UPPER
 			m_sum += iCard;
@@ -136,11 +136,13 @@ public class StateObserverSG extends ObserverBase implements StateObsNondetermin
 		m_gameOver=true;	// the game is always finished after one advance
 		super.addToLastMoves(m_action);
 		super.incrementMoveCounter();
+		return m_action;
 	}
 
 	@Override
-	public void advanceNondeterministic(ACTIONS randAction) {
+	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
 		advanceNondeterministic();
+		return randAction;
 	}
 
 	@Override

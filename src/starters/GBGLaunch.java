@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import games.Arena;
+import games.BlackJack.ArenaBlackJack;
+import games.BlackJack.ArenaBlackJackTrain;
 import games.CFour.ArenaC4;
 import games.CFour.ArenaTrainC4;
 import games.EWN.ArenaEWN;
@@ -57,7 +59,7 @@ public class GBGLaunch {
 	/**
 	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe"} 
 	 */
-	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe","EWN"};
+	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
@@ -174,7 +176,10 @@ public class GBGLaunch {
 		case "2048": 
 			t_Game = new ArenaTrain2048(title,withUI);
 			break;
-		case "ConnectFour": 
+		case "Blackjack":
+				t_Game = new ArenaBlackJackTrain(title,withUI);
+				break;
+		case "ConnectFour":
 			t_Game = new ArenaTrainC4(title,withUI);
 			break;
 		case "Hex": 
@@ -267,7 +272,10 @@ public class GBGLaunch {
 		case "2048": 
 			t_Game = new Arena2048(title,withUI);
 			break;
-		case "ConnectFour": 
+		case "Blackjack":
+			t_Game = new ArenaBlackJack(title,withUI);
+			break;
+		case "ConnectFour":
 			t_Game = new ArenaC4(title,withUI);
 			break;
 		case "Hex": 
@@ -496,7 +504,8 @@ public class GBGLaunch {
 			scaPar[0] = "3x3 2-Player";
 			scaPar[1] = "N-Player + 1";
 		case "2048":
-		case "ConnectFour": 
+		case "Blackjack":
+		case "ConnectFour":
 		case "Othello":
 		case "Poker":
 		case "TicTacToe":
@@ -585,8 +594,9 @@ public class GBGLaunch {
 			setScaPar1List(new String[]{"N-Player + 1", "Upper-Lower"});
 			choiceScaPar1.setSelectedItem("N-Player + 1");
 			break;
-		case "2048": 
-		case "ConnectFour": 
+		case "2048":
+		case "Blackjack":
+		case "ConnectFour":
 		case "Othello":
 		case "Poker":
 		case "TicTacToe": 

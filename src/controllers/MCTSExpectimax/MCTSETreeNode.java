@@ -1,20 +1,17 @@
 package controllers.MCTSExpectimax;
 
+import controllers.MCTSWrapper.utils.Tuple;
 import games.StateObsNondeterministic;
 import games.StateObservation;
-import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.ScoreTuple;
 import tools.Types;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 
 /**
- * This class represents a MCTS Expectimax Tree Node. (Min/Max Node).
+ * This class represents an MCTS Expectimax Tree Node. (Min/Max Node).
  * <p>
  * Each {@code MCTSETreeNode} has multiple {@link MCTSEChanceNode} children and one {@link MCTSEChanceNode} parent.
  *
@@ -30,14 +27,18 @@ public class MCTSETreeNode {
     /**
      * the parent node's state
      */
-    StateObservation so = null;
+    StateObservation so;
     /**
      * the action which leads from parent node's state to this state
      */
-    public Types.ACTIONS action = null;		                
-    private MCTSEChanceNode parentNode = null;
-    private HashSet<MCTSEChanceNode> childrenNodes = new HashSet<>();
-    public MCTSEPlayer m_player = null;
+    public Types.ACTIONS action;
+    private final MCTSEChanceNode parentNode;
+	/**
+	 * The set of CHANCE child tuples, where each tuple carries the child node
+	 * in element1 and the probability of selecting this child node in element2
+	 */
+	private final HashSet<Tuple<MCTSEChanceNode,Double>> childrenNodes = new HashSet<>();
+    public MCTSEPlayer m_player;
     public double value = 0;                                   // total value
     public int visits = 0;                                     // total number of visits
     public Random random;
@@ -70,6 +71,46 @@ public class MCTSETreeNode {
     	return parentNode;
 	}
 
+	/**
+	 * The value Q(e) of Expectimax node e (={@code this}) is formed by calculating the weighted average of (Q_c/N_c) for all
+	 * child nodes c, where the weight for node c is the probability of the nondeterministic action that leads from e to c.
+	 * Finally, the weighted average is multiplied by N, the number of visits to e, because the PUCT formula calculates Q(e)/N.
+	 * <p>
+	 * [Earlier we used instead {@code this.value}, which is formed by accumulating the backups during search. In the limit of
+	 * large N, both approaches yield very similar values, although not identical. But if node e is not visited very
+	 * often (e.g. deeper down the tree), the formula calculated here should be more precise, since it puts rare events
+	 * directly in the right context.]
+	 *
+	 * @return the value of this Expectimax node
+	 */
+	double getQ() {
+    	// return this.value; 		// this was effective before 09/2021
+		// the following is a bit longer, but more precise in the case of fewer visits to this:
+    	double qValue=0.0;
+		for (Tuple<MCTSEChanceNode,Double> childTuple : childrenNodes) {
+			MCTSEChanceNode childNode = childTuple.element1;
+			Double prob = childTuple.element2;
+			qValue += prob * (childNode.value/ childNode.visits);
+		}
+		qValue *= this.visits;
+
+		// only debug & comparison with this.value:
+		boolean DBG_GETQ=false;
+		if (DBG_GETQ) {
+			if (depth==0) {
+				StateObsNondeterministic thisSO = (StateObsNondeterministic) this.so.copy();
+				thisSO.advanceDeterministic(this.action);
+				int nrands = thisSO.getAvailableRandoms().size();
+				int nchilds = this.childrenNodes.size();
+				DecimalFormat frm = new DecimalFormat("0.0000");
+				System.out.println("d="+depth+", value="+frm.format(value)+", qValue="+frm.format(qValue)
+						+", v/qV="+frm.format(value/qValue)
+						+", nrand="+nrands+","+nchilds+", nVisits="+visits);
+			}
+		}
+
+    	return qValue;
+	}
     /**
      * Select the next {@link MCTSEChanceNode} that should be evaluated.
      * <p>
@@ -94,15 +135,19 @@ public class MCTSETreeNode {
      */
     public MCTSEChanceNode expand() {
 		boolean stopOnRoundOver = m_player.getParMCTSE().getStopOnRoundOver();
-        StateObservation childSo = so.copy();
-        childSo.advance(action);
+		StateObsNondeterministic childSo = (StateObsNondeterministic) so.copy();
+        childSo.advanceDeterministic(action);
+		Types.ACTIONS randAct = childSo.advanceNondeterministic();
+		Double dprob = childSo.getProbability(randAct);	// the probability that environment selects this random action
+
     	if(childSo.isRoundOver() && !stopOnRoundOver)	// /WK/03/2021 Bug fix '&& !stopOnRoundOver' as suggested by TZ
     		childSo.initRound();
 
-        for (MCTSEChanceNode childrenNode : childrenNodes) {
-//          if (childrenNode.so.equals(childSo)) {		// OLD (before 03/2021) AND WRONG !!
-			if (childrenNode.so.stringDescr().equals(childSo.stringDescr())) {
-                return childrenNode;	//a child node representing this state already exists
+        for (Tuple<MCTSEChanceNode,Double> childTuple : childrenNodes) {
+			MCTSEChanceNode childNode = childTuple.element1;
+//          if (childNode.so.equals(childSo)) {		// OLD (before 03/2021) AND WRONG !!
+			if (childNode.so.stringDescr().equals(childSo.stringDescr())) {
+                return childNode;	//a child node representing this state already exists
             }
         }
 
@@ -118,7 +163,7 @@ public class MCTSETreeNode {
 
 		//create a new child node
         MCTSEChanceNode child = new MCTSEChanceNode(childSo, null, this, random, m_player);
-        childrenNodes.add(child);
+        childrenNodes.add(new Tuple<>(child,dprob));
 
         return child;
     }
@@ -134,7 +179,7 @@ public class MCTSETreeNode {
     }
 
     /**
-     * The value of a node is the sum of all it child nodes
+     * The value of a node is the sum of all its child nodes
      *
 	 * @param delta the reward vector returned from {@link MCTSEChanceNode#rollOut()}
      */
@@ -160,60 +205,6 @@ public class MCTSETreeNode {
 		// n.value the rewards achievable from the perspective of pPlayer.
 	}
 
-    /**
-     * The value of a node is the value of the lowest child node
-     * (This method is currently not used)
-     *
-     * @param score the value of the new child node
-     */
-//    @Deprecated
-//    private void backUpMin(double score) {
-//    	score = baUpNegateScore(score);
-//
-//        visits++;
-//        if(score < value || value == 0) {
-//            value = score;
-//        }
-//
-//        if (parentNode != null) {
-//            parentNode.backUp(score);
-//        }
-//    }
-
-	// --- never used anymore ---
-//    /**
-//     * Optionally negate the score (in case of 2-player games) before backing it up
-//     */
-//	private double baUpNegateScore(double score) {
-//		switch (so.getNumPlayers()) {
-//		case (1):
-//			break;
-//		case (2):	// negamax variant for 2-player tree
-//			// Why do we call 'negate' *before* the first change ('+=') to this.value is made? -
-//			// If the score of 'selected' is a loss for the player who has to move on
-//			// 'selected', then it is a win for the player who created 'selected'
-//			// (negamax principle)
-//			score = negate(score);
-//			break;
-//		default: // i.e. n-player, n>2
-//			throw new RuntimeException("MCTSE's backUp is not yet implemented for (n>2)-player games (n>2).");
-//		}
-//		return score;
-//	}
-
-	// --- never used anymore ---
-//	private double negate(double delta) {
-//		if (m_player.getNormalize()) {
-//			// map a normalized delta \in [0,1] again to [0,1], but reverse the order.
-//			// /WK/ "1-" is the bug fix 2019-02-09 needed to achieve always child.totValue>=0
-//			return 1-delta;
-//		} else {
-//			// reverse the delta-order for arbitrarily distributed delta;
-//			// maps from interval [a,b] to [-b,-a] (this can be problematic for UCT-rule)
-//			return -delta;
-//		}
-//	}
-	
 	/**
 	 * just for diagnostics:
 	 * 
@@ -221,14 +212,12 @@ public class MCTSETreeNode {
 	 */
 	public int numDescendants(int depth) {
 		int N = 1; // include this
-		Iterator<MCTSEChanceNode> it = childrenNodes.iterator();
-		while (it.hasNext()) {
-			MCTSEChanceNode c = it.next();
+		for (Tuple<MCTSEChanceNode,Double> childTuple : childrenNodes) {
+			MCTSEChanceNode c = childTuple.element1;
 			if (c != null)
-				N += c.numDescendants(depth+1);
+				N += c.numDescendants(depth + 1);
 //			if (depth==1) {
 //				System.out.println("   "+N);
-//				int dummy=1;
 //			}
 		}
 		return N;
@@ -244,20 +233,21 @@ public class MCTSETreeNode {
 		DecimalFormat form = new DecimalFormat("0.0000");
 		DecimalFormat for2 = new DecimalFormat("+0.0000;-0.0000");
 		DecimalFormat ifor = new DecimalFormat("0000");
-        double multiplier = 1/(m_player.getRootNode().maxRolloutScore+ this.epsilon);
+        double multiplier = 1/(m_player.getRootNode().maxRolloutScore+ MCTSETreeNode.epsilon);
 		int cVisits = 0;
 		int verbose = m_player.getVerbosity();
 		String indention = "";
 		for (int n = 0; n < nIndention; n++)
 			indention += "  ";
 
-		for (MCTSEChanceNode c : this.childrenNodes) {
+		for (Tuple<MCTSEChanceNode,Double> childTuple : childrenNodes) {
+			MCTSEChanceNode c = childTuple.element1;
 			if (c != null) {
 				cVisits += c.visits;
 				if (verbose > 1) { 	// =2: print direct child info
-					double uct_exploit = c.value * multiplier / (c.visits + this.epsilon);
+					double uct_exploit = c.value * multiplier / (c.visits + MCTSETreeNode.epsilon);
 					double uct_explore = m_player.getK()
-							* Math.sqrt(Math.log(this.visits + 1) / (c.visits + this.epsilon));
+							* Math.sqrt(Math.log(this.visits + 1) / (c.visits + MCTSETreeNode.epsilon));
 					// System.out.println(c.m_state.stringDescr() + ": " +
 					// c.nVisits + ", " +
 					// form.format(c.totValue*3932156/c.nVisits)); // for 2048

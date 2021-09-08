@@ -181,21 +181,23 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     }
 
     @Override
-    public void advanceNondeterministic(){
+    public ACTIONS advanceNondeterministic(){
         if(isNextActionDeterministic){
             throw new RuntimeException("ACTION IS DETERMINISTIC must be NON");
         }
         int actIndex = random.nextInt(availableRandomActions.size());
         advanceNondeterministic(availableRandomActions.get(actIndex));
 
+        return nextNondeterministicAction;
     }
 
 
 
     @Override
-    public void advanceNondeterministic(ACTIONS action) {
+    public ACTIONS advanceNondeterministic(ACTIONS action) {
         nextNondeterministicAction = action;
         this.setAvailableActions();             // this sets also isNextActionDeterministic
+        return action;
 
     }
 

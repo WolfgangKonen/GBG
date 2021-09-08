@@ -4,8 +4,6 @@ import games.StateObservation;
 import games.StateObsNondeterministic;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
-//import params.MCTSExpectimaxParams;
-//import params.MCTSParams;
 import params.ParMCTSE;
 import params.ParOther;
 import tools.Types;
@@ -15,7 +13,6 @@ import java.util.List;
 import java.util.Random;
 
 import controllers.MCTS.SingleMCTSPlayer;
-import controllers.MCTS.SingleTreeNode;
 
 /**
  * This is adapted from {@link SingleMCTSPlayer} for the <b>non-deterministic</b> case.

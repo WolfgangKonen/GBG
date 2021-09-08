@@ -148,7 +148,8 @@ public class GBGBatch {
 
 		setupPaths(args[2],csvName);
 
-		if (args[1].equals("5")) assert(selectedGame.equals("Othello")) : "batch5 only allowed for game Othello (uses Edax2)";
+		if (args[1].equals("5"))
+			assert(selectedGame.equals("Othello")) : "batch5 only allowed for game Othello (uses Edax2)";
 
 		// start a batch run without any windows
 		switch (args[1]) {
@@ -255,10 +256,12 @@ public class GBGBatch {
 			scaPar[0]="2x2x2";		 	
 			scaPar[1]="CSTATE";			
 			scaPar[2]="ALL";
+			break;
 		case "EWN":
 			scaPar[0]="3x3 2-Player";
 			scaPar[1]="N-Player + 1";
 			scaPar[2]="None";
+			break;
 		case "2048":
 		case "ConnectFour": 
 		case "Othello": 
@@ -301,7 +304,7 @@ public class GBGBatch {
 	 * If trainNum or maxGameNum are -1, the values stored in {@code xab} are taken.
 	 */
 	public void batch1(int trainNum, int maxGameNum, String filePath,
-					   XArenaButtons xab,	GameBoard gb, String csvName) throws IOException {
+					   XArenaButtons xab,	GameBoard gb, String csvName) {
 		// load an agent to fill xab with the appropriate parameter settings
 		boolean res = t_Game.loadAgent(0, filePath);
 		if (!res) {
@@ -458,7 +461,7 @@ public class GBGBatch {
 	 * @param csvName		filename for CSV results
 	 */
 	public void batch5(int iterMCTS, String filePath,
-					   GameBoard gb, String csvName) throws IOException {
+					   GameBoard gb, String csvName) {
 		//if (iterMCTS<2) iterMCTS=2;
 		//iterMCTS=0;
 		long startTime = System.currentTimeMillis();

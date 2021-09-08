@@ -136,7 +136,7 @@ public final class MCTSNode {
         if (childNodes.containsKey(bestAction.getId())) {
             child = childNodes.get(bestAction.getId());
         } else {
-            child = new MCTSNode(gameState.advance(bestAction));
+            child = new MCTSNode(gameState.advance(bestAction));    // a new, non-expanded node
             childNodes.put(bestAction.getId(), child);
         }
 

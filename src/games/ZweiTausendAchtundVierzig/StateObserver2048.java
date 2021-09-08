@@ -693,7 +693,7 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         isNextActionDeterministic = false;
     }
 
-    public void advanceNondeterministic(ACTIONS randAction) {
+    public ACTIONS advanceNondeterministic(ACTIONS randAction) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
@@ -711,11 +711,12 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
+        return randAction;
     }
     
-    public void advanceNondeterministic() {
+    public ACTIONS advanceNondeterministic() {
         setNextNondeterministicAction();
-        advanceNondeterministic(nextNondeterministicAction);
+        return advanceNondeterministic(nextNondeterministicAction);
     }
 
     /**
