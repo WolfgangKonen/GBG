@@ -37,8 +37,15 @@ public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
+		return newEstimateGameValueTuple(sob,prevTuple);
+
+//		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
+	}
+
+	private ScoreTuple newEstimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
 		// this is just for safety: if sob needs a nondeterministic next move, take a random one from the environment
 		if (!sob.isNextActionDeterministic()) {
+			System.err.println("WARNING: estimateGameVauleTuple called with an sob that has next action = non-deterministic!");
 			sob.advanceNondeterministic();
 			while(!sob.isNextActionDeterministic() && !sob.isRoundOver()){		// /WK/03/2021 NEW
 				sob.advanceNondeterministic();
@@ -48,9 +55,9 @@ public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable
 
 		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false,true);
 		return actBest.getScoreTuple();
-//		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
+
 	}
-	
+
 	public PlayAgent getWrappedPlayAgent() {
 		return wrapped_pa;
 	}

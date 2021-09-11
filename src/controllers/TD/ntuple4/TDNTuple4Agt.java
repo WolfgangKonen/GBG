@@ -446,55 +446,61 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		// has to be called beforehand
 		// --> dangerous design!
 		// --> should we do these calls in here, to be on the safe side??
-		return so.getStoredActBest().getScoreTuple();
+		return so.getStoredBestScoreTuple();	// WARNING: might return an all-zeros ScoreTuple
 
 		// --- the old and flawed version before 2021-09-10 ---
-//		ScoreTuple sc = new ScoreTuple(so);
-//		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
-//		switch (so.getNumPlayers()) {
-//			case 1 -> sc.scTup[0] = m_Net.getScoreI(curSOWB,so.getPlayer());
-//			case 2 -> {
-//				int player = so.getPlayer();
-//				int opponent = (player == 0) ? 1 : 0;
-//	//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
-//	//			sc.scTup[opponent] = -sc.scTup[player];
-//				//
-//				// This is an important bug fix (2019-03-10) for TDNTuple4Agt:
-//				// If we want to get the score tuple for state 'so' where
-//				// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player),
-//				// because the net did never learn this, it was trained on getScore(so,refer), where
-//				// refer is the player who *created* 'so' (the opponent). We construct the score
-//				// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has
-//				// for opponent, and infer from this the player's value by negation:
-//				//
-//				sc.scTup[opponent] = m_Net.getScoreI(curSOWB, opponent);
-//				sc.scTup[player] = -sc.scTup[opponent];
-//			}
-//			default -> {
-//				//
-//				// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
-//				// prevTuple, fill in the game value for the player for which TDNTuple4Agt has learned the value:
-//				// This is the player who *created* so. (We do not know the game values from the perspective
-//				// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
-//				//
-//				if (prevTuple != null) sc = new ScoreTuple(prevTuple);
-//				int cp = so.getCreatingPlayer();
-//				if (cp != -1) {
-//					sc.scTup[cp] = m_Net.getScoreI(curSOWB, cp);
-//				}
-//			}
-//		}
-//
-//		// *** /WK/ 08/2021: (!!?!) Very questionable to add the reward here since the reward is usually added as
-//		// *** a separate term r in 'target = r + gamma * V'
-//		//
-//		// In any case: add the reward obtained so far, since the net predicts
-//		// with getScoreI only the expected future reward.
-//		boolean rgs = m_oPar.getRewardIsGameScore();
-////		for (int i=0; i<so.getNumPlayers(); i++)
-////			sc.scTup[i] += so.getReward(i, rgs);
-//		sc.combine(so.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
-//    	return sc;
+//		return oldGetScoreTuple(so,prevTuple);
+	}
+
+	private ScoreTuple oldGetScoreTuple(StateObservation so, ScoreTuple prevTuple) {
+
+		// --- the old and flawed version before 2021-09-10 ---
+		ScoreTuple sc = new ScoreTuple(so);
+		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
+		switch (so.getNumPlayers()) {
+			case 1 -> sc.scTup[0] = m_Net.getScoreI(curSOWB,so.getPlayer());
+			case 2 -> {
+				int player = so.getPlayer();
+				int opponent = (player == 0) ? 1 : 0;
+	//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
+	//			sc.scTup[opponent] = -sc.scTup[player];
+				//
+				// This is an important bug fix (2019-03-10) for TDNTuple4Agt:
+				// If we want to get the score tuple for state 'so' where
+				// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player),
+				// because the net did never learn this, it was trained on getScore(so,refer), where
+				// refer is the player who *created* 'so' (the opponent). We construct the score
+				// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has
+				// for opponent, and infer from this the player's value by negation:
+				//
+				sc.scTup[opponent] = m_Net.getScoreI(curSOWB, opponent);
+				sc.scTup[player] = -sc.scTup[opponent];
+			}
+			default -> {
+				//
+				// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
+				// prevTuple, fill in the game value for the player for which TDNTuple4Agt has learned the value:
+				// This is the player who *created* so. (We do not know the game values from the perspective
+				// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
+				//
+				if (prevTuple != null) sc = new ScoreTuple(prevTuple);
+				int cp = so.getCreatingPlayer();
+				if (cp != -1) {
+					sc.scTup[cp] = m_Net.getScoreI(curSOWB, cp);
+				}
+			}
+		}
+
+		// *** /WK/ 08/2021: (!!?!) Very questionable to add the reward here since the reward is usually added as
+		// *** a separate term r in 'target = r + gamma * V'
+		//
+		// In any case: add the reward obtained so far, since the net predicts
+		// with getScoreI only the expected future reward.
+		boolean rgs = m_oPar.getRewardIsGameScore();
+//		for (int i=0; i<so.getNumPlayers(); i++)
+//			sc.scTup[i] += so.getReward(i, rgs);
+		sc.combine(so.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
+    	return sc;
 	}
 
 	/**

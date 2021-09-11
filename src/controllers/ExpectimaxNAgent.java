@@ -1,5 +1,6 @@
 package controllers;
 
+import games.EWN.StateObserverEWN;
 import games.StateObservation;
 import games.Arena;
 import games.StateObsNondeterministic;
@@ -120,10 +121,10 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		if (random)
 			System.out.println("WARNING: ExpectimaxNAgent does not support random==true");
 
-		if (!silent) {
-			System.out.println(this.getShortName()+" called for: ");
-			System.out.print(soND);
-		}
+//		if (!silent) {
+//			System.out.println(this.getShortName()+" called for: ");
+//			System.out.print(soND);
+//		}
 
 		int i;
 		double bestValue= -Double.MAX_VALUE;
@@ -177,8 +178,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		actBest = bestActions.get(rand.nextInt(bestActions.size()));
 		assert actBest != null : "Oops, no best action actBest";
 
-		boolean DBG_EWN = false;
-		if (DBG_EWN && !silent) {
+		if ((so instanceof StateObserverEWN) && !silent) {
 			DecimalFormat frmAct = new DecimalFormat("0000");
 			DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
 			System.out.println(
@@ -216,7 +216,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		boolean stopConditionMet = soND.isGameOver() || (stopOnRoundOver && soND.isRoundOver());
 		if (stopConditionMet)
 		{
-			// this is the 1st place to terminate the recursion:
+			// this is the 1st place to terminate the recursion with a final game state:
 			countTerminal++;
 			return soND.getRewardTuple(rgs);
 		}
@@ -307,11 +307,19 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 					currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
 					// was before called with depth+1, but we now increase depth only on deterministic moves (!)
 				} else {
-					countMaxDepth++;
 					NewSO.setAvailableActions();		// if a wrapped agent is called by estimateGameValueTuple,
 														// it might need the available actions (i.e. MC-N)
-					if (NewSO.isGameOver()) return NewSO.getGameScoreTuple();
-					currScoreTuple = estimateGameValueTuple(NewSO, null);
+					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
+					if (stopConditionMet)
+					{
+						// this is the 2nd place to terminate the recursion with a final game state:
+						countTerminal++;
+						currScoreTuple =  NewSO.getRewardTuple(rgs);
+					} else {
+						// terminat the recursion with an in-game estimated ScoreTuple
+						countMaxDepth++;
+						currScoreTuple = estimateGameValueTuple(NewSO, null);
+					}
 				}
 
 				currProbab = soND.getProbability(rans.get(i));
@@ -322,7 +330,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				// player (this considers the environment as an adversarial player)
 				expecScoreTuple.combine(currScoreTuple, cOpND, player, currProbab);
             }
-			assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
+			assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilities is not 1.0";
 			if (!silent && depth<0) printNondet(soND,expecScoreTuple,sumProbab,depth);
 
             return expecScoreTuple;
