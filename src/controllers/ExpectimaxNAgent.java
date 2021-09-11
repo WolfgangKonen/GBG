@@ -120,10 +120,10 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		if (random)
 			System.out.println("WARNING: ExpectimaxNAgent does not support random==true");
 
-		if (!silent) {
-			System.out.println(this.getShortName()+" called for: ");
-			System.out.print(soND);
-		}
+//		if (!silent) {
+//			System.out.println(this.getShortName()+" called for: ");
+//			System.out.print(soND);
+//		}
 
 		int i;
 		double bestValue= -Double.MAX_VALUE;
@@ -177,22 +177,25 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		actBest = bestActions.get(rand.nextInt(bestActions.size()));
 		assert actBest != null : "Oops, no best action actBest";
 
-		if (!silent) {
-			DecimalFormat frmAct = new DecimalFormat("0000");
-			DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
-			System.out.println(
-					 "so.diceVal="+soND.getNextNondeterministicAction().toInt()
-					+", bestValue["+soND.getPlayer()+"]="+frmVal.format(bestValue)
-					+", bestAction="+frmAct.format(actBest.toInt())
-					+", countTerminal="+getCountTerminal()
-					+", countMaxDepth="+getCountMaxDepth());
-			// We better do NOT print NewSO here, but print soND at start of getNextAction2.
-			// Because: the dice value of NewSO is not necessarily the dice value of soND in next call
+		boolean DBG_EWN = false;
+		if (DBG_EWN) {
+			if (!silent) {
+				DecimalFormat frmAct = new DecimalFormat("0000");
+				DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
+				System.out.println(
+						"so.diceVal="+soND.getNextNondeterministicAction().toInt()
+								+", bestValue["+soND.getPlayer()+"]="+frmVal.format(bestValue)
+								+", bestAction="+frmAct.format(actBest.toInt())
+								+", countTerminal="+getCountTerminal()
+								+", countMaxDepth="+getCountMaxDepth());
+				// We better do NOT print NewSO here, but print soND at start of getNextAction2.
+				// Because: the dice value of NewSO is not necessarily the dice value of soND in next call
 //			System.out.println(this.getShortName()+" afterstate: ");
 //			NewSO = soND.copy();
 //			NewSO.advanceDeterministic(actBest);
 //			NewSO.setAvailableActions();
 //			System.out.print(NewSO);
+			}
 		}
 
 		ACTIONS_VT actBestVT = new ACTIONS_VT(actBest.toInt(), false, vTable, bestValue, scBest);
