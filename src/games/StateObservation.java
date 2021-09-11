@@ -318,12 +318,17 @@ public interface StateObservation extends Serializable{
 	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
 	 *  
 	 * @param actBest	the best action
-	 * @param vtable	one double for each action in {@link #getAvailableActions()}:
-	 * 					it stores the value of that action (as given by the double[] 
-	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
 	 */
-	void storeBestActionInfo(ACTIONS actBest, double[] vtable);
-	
+// -- this is obsolete now:
+//	 		* @param vtable	one double for each action in {@link #getAvailableActions()}:
+//			* 					it stores the value of that action (as given by  <br>
+//			* 					{@code double[]} {@link Types.ACTIONS_VT#getVTable()})
+	void storeBestActionInfo(Types.ACTIONS_VT actBest); //, double[] vtable);
+
+	Types.ACTIONS_VT getStoredActBest();
+
+	ScoreTuple getStoredBestScoreTuple();
+
 	/**
 	 * @return  {0,1,...,n-1} for an n-player game: <b>who moves in this state</b>
 	 */

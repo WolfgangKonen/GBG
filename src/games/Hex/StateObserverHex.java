@@ -305,7 +305,8 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
     }
 
     @Override
-    public void storeBestActionInfo(Types.ACTIONS bestAction, double[] valueTable) {
+    public void storeBestActionInfo(Types.ACTIONS_VT bestAction) {  //, double[] valueTable) {
+        double[] valueTable = bestAction.getVTable();
         for (int i = 0; i < HexConfig.BOARD_SIZE; i++) {
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 board[i][j].setValue(Double.NaN);

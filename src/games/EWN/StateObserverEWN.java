@@ -85,7 +85,8 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
 
 
     public StateObserverEWN(StateObserverEWN other){
-
+        super(other);		// copy members m_counter, lastMoves and stored*
+                            // /WK/ ! was missing before 2021-09-10
         this.player = other.getPlayer();
         this.numPlayers = other.getNumPlayers();
         this.size = other.getSize();

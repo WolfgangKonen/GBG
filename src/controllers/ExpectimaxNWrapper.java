@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import games.StateObservation;
 import tools.ScoreTuple;
+import tools.Types;
 
 /**
  * Wrapper based on {@link ExpectimaxNAgent} for n-ply look-ahead in nondeterministic games.
@@ -36,7 +37,18 @@ public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return wrapped_pa.getScoreTuple(sob, prevTuple);
+		// this is just for safety: if sob needs a nondeterministic next move, take a random one from the environment
+		if (!sob.isNextActionDeterministic()) {
+			sob.advanceNondeterministic();
+			while(!sob.isNextActionDeterministic() && !sob.isRoundOver()){		// /WK/03/2021 NEW
+				sob.advanceNondeterministic();
+			}
+			if (sob.isGameOver()) return sob.getGameScoreTuple();
+		}
+
+		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false,true);
+		return actBest.getScoreTuple();
+//		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
 	}
 	
 	public PlayAgent getWrappedPlayAgent() {

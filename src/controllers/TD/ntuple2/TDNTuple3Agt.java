@@ -246,7 +246,11 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         
         VTable = new double[acts.size()];  
         
-        assert acts.size()>0 : "Oops, no available action";
+//        assert acts.size()>0 : "Oops, no available action";
+		if (acts.size()==0) {
+			System.err.println("Oops, no available action");
+			if (so.isGameOver()) System.err.println("so: game over!");
+		}
         for(i = 0; i < acts.size(); ++i)
         {
 			thisAct = acts.get(i);
@@ -320,13 +324,23 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         assert actBest != null : "Oops, no best action actBest";
 		NewSO = so.copy();
 		NewSO.advance(actBest);
-		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
-		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
-		//if (so instanceof StateObserverCube)
-			scBest.scTup[so.getPlayer()]=bestValue;
-			// this is necessary for RubiksCube. TODO: Test if we can generalize it for all games
-			// (i.e. generalize this.getScoreTuple to "r + gamma * V" for all games)
-//
+
+		ScoreTuple scBest = so.getStoredBestScoreTuple();
+				// This is the previous tuple, only relevant in case N>=3. If so.getStoredBestScoreTuple() encounters
+				// null pointers, it returns an all-zeros-tuple with length so.getNumPlayers().
+		scBest.scTup[so.getPlayer()] = bestValue;
+		if (so.getNumPlayers()==2) {			// the following holds for 2-player, zero-sum games:
+			int opponent = 1-so.getPlayer();
+			scBest.scTup[opponent] = -bestValue;
+		}
+		// --- old version, before 2021-09-10 ---
+//		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
+//		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
+//		//if (so instanceof StateObserverCube)
+//			scBest.scTup[so.getPlayer()]=bestValue;
+//			// this is necessary for RubiksCube. TODO: Test if we can generalize it for all games
+//			// (i.e. generalize this.getScoreTuple to "r + gamma * V" for all games)
+
 //		double[] res = {bestValue};  				// old and wrong - the reason it was undetected was only that
 //		ScoreTuple scBest = new ScoreTuple(res);	// scBest was never really used before MaxN2Wrapper change 2020-09-09
 
@@ -729,7 +743,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
 	public boolean trainAgent(StateObservation so) {
-		Types.ACTIONS a_t;
+		Types.ACTIONS_VT a_t;
 		int   curPlayer=so.getPlayer();
 		NextState ns;
 		ScoreTuple R = new ScoreTuple(so);

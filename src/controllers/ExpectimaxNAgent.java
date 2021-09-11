@@ -177,7 +177,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		actBest = bestActions.get(rand.nextInt(bestActions.size()));
 		assert actBest != null : "Oops, no best action actBest";
 
-		if (!silent) {
+		boolean DBG_EWN = false;
+		if (DBG_EWN && !silent) {
 			DecimalFormat frmAct = new DecimalFormat("0000");
 			DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
 			System.out.println(
@@ -244,28 +245,32 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
             	/////// debug only:
             	//System.out.print(NewSO);
             	//System.out.println("depth="+depth);
-            	
-            	if (depth<this.m_depth) {
-    				// here is the recursion:
-    				currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
-    			} else {
-    				// this is the 2nd place to terminate the recursion:
-    				// (after finishing the for-loop for every element of acts)
-					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
-					// this check on stopConditionMet is needed when using this method from
-					// ExpectimaxNWrapper: If NewSO is a game-over state, we do not need to call the estimator
-					// (i.e. wrapped agent), we just take the final reward
-					if (stopConditionMet)
-					{
-						countTerminal++;
-						currScoreTuple =  NewSO.getRewardTuple(rgs);
-					} else {
-						countMaxDepth++;
-						NewSO.setAvailableActions();		// if a wrapped agent is called by estimateGameValueTuple,
-															// it might need the available actions (i.e. MC-N)
-						currScoreTuple = estimateGameValueTuple(NewSO, null);
-					}
-    			}
+
+				currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
+
+				// this code before 2021-09-10 had the disadvantage that estimateGameValueTuple would be called
+				// with nextActionNondeterministic states (!)
+//            	if (depth<this.m_depth) {
+//    				// here is the recursion:
+//    				currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
+//    			} else {
+//    				// this is the 2nd place to terminate the recursion:
+//    				// (after finishing the for-loop for every element of acts)
+//					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
+//					// this check on stopConditionMet is needed when using this method from
+//					// ExpectimaxNWrapper: If NewSO is a game-over state, we do not need to call the estimator
+//					// (i.e. wrapped agent), we just take the final reward
+//					if (stopConditionMet)
+//					{
+//						countTerminal++;
+//						currScoreTuple =  NewSO.getRewardTuple(rgs);
+//					} else {
+//						countMaxDepth++;
+//						NewSO.setAvailableActions();		// if a wrapped agent is called by estimateGameValueTuple,
+//															// it might need the available actions (i.e. MC-N)
+//						currScoreTuple = estimateGameValueTuple(NewSO, null);
+//					}
+//    			}
             	if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
 
     			// always *maximize* P's element in the tuple currScoreTuple, 
@@ -297,10 +302,18 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 					NewSO.advanceNondeterministic();
 				}
 
-				// here is the recursion:
-				currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
-							// was before called with depth+1, but we now increase depth only on deterministic moves (!)
-				
+				if (depth<this.m_depth) {
+					// here is the recursion:
+					currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
+					// was before called with depth+1, but we now increase depth only on deterministic moves (!)
+				} else {
+					countMaxDepth++;
+					NewSO.setAvailableActions();		// if a wrapped agent is called by estimateGameValueTuple,
+														// it might need the available actions (i.e. MC-N)
+					if (NewSO.isGameOver()) return NewSO.getGameScoreTuple();
+					currScoreTuple = estimateGameValueTuple(NewSO, null);
+				}
+
 				currProbab = soND.getProbability(rans.get(i));
             	//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
 				sumProbab += currProbab;

@@ -349,7 +349,7 @@ abstract public class Arena implements Runnable {
 					actBest = paX.getNextAction2(so.partialState(), false, true);
 					if (actBest != null) 	// a HumanAgent will return
 											// actBest=null
-						so.storeBestActionInfo(actBest, actBest.getVTable());
+						so.storeBestActionInfo(actBest);
 
 					gb.updateBoard(so, true, true);
 //					if (so.isRoundOver()) {
@@ -532,7 +532,7 @@ abstract public class Arena implements Runnable {
 							return;
 						}
 
-						so.storeBestActionInfo(actBest, actBest.getVTable());
+						so.storeBestActionInfo(actBest);
 						so.advance(actBest);
 						logManager.addLogEntry(actBest, so, logSessionid);
 						if (m_spDT==null) {		// the normal play (non-TS, i.e. no tournament)

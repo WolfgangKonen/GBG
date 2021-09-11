@@ -55,7 +55,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
 	private static final long  serialVersionUID = 13L;
@@ -146,7 +146,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	}
 
 	/**
-	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * If agents need a special treatment after being loaded from disk (e.g. instantiation
 	 * of transient members), put the relevant code in here.
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
@@ -186,7 +186,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * @return actBest,		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
-	 * actBest has predicate isRandomAction()  (true: if action was selected 
+	 * actBest has the predicate isRandomAction()  (true: if action was selected
 	 * at random, false: if action was selected by agent).<br>
 	 * actBest has also the members vTable and vBest to store the Q-value for each available
 	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action actBest, resp.
@@ -213,7 +213,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 //        	System.out.println("Game over: "+so.getRewardTuple(true));
 //        }
         
-    	boolean randomSelect;		// true signals: the next action is a random selected one
+    	boolean randomSelect;		// true signals: the next action is a randomly selected one
     	randomSelect = false;
 		if (random) {
 			randomSelect = (rand.nextDouble() < m_epsilon);
@@ -321,21 +321,23 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 		NewSO = so.copy();
 		NewSO.advance(actBest);
-		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
-		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
-		//if (so instanceof StateObserverCube)
-			scBest.scTup[so.getPlayer()]=bestValue;
-			// this is necessary for RubiksCube. TODO: Test if we can generalize it for all games
-			// (i.e. generalize this.getScoreTuple to "r + gamma * V" for all games)
-//
-//		double[] res = {bestValue};  				// old and wrong - the reason it was undetected was only that
-//		ScoreTuple scBest = new ScoreTuple(res);	// scBest was never really used before MaxN2Wrapper change 2020-09-09
+		ScoreTuple scBest = so.getStoredBestScoreTuple();
+				// This is the previous tuple, only relevant in case N>=3. If so.getStoredBestScoreTuple() encounters
+				// null pointers, it returns an all-zeros-tuple with length so.getNumPlayers().
+		scBest.scTup[so.getPlayer()] = bestValue;
+		if (so.getNumPlayers()==2) {			// the following holds for 2-player, zero-sum games:
+			int opponent = 1-so.getPlayer();
+			scBest.scTup[opponent] = -bestValue;
+		}
+
+//		double[] res = {bestValue};  				// old (before 2020-09-09) and wrong - the reason it was undetected was
+//		ScoreTuple scBest = new ScoreTuple(res);	// only that scBest was never really used before MaxN2Wrapper change 2020-09-09
 
 		if (!silent) {
 			printDebugInfo(so,NewSO,bestValue,VTable);
 		}
 
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestValue,scBest);
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestValue, scBest);
 		return actBestVT;
 	}
 
@@ -432,7 +434,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * @param so			the state s_t for which the value is desired
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
@@ -440,52 +442,59 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-		ScoreTuple sc = new ScoreTuple(so);
-		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
-		switch (so.getNumPlayers()) {
-			case 1 -> sc.scTup[0] = m_Net.getScoreI(curSOWB,so.getPlayer());
-			case 2 -> {
-				int player = so.getPlayer();
-				int opponent = (player == 0) ? 1 : 0;
-	//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
-	//			sc.scTup[opponent] = -sc.scTup[player];
-				//
-				// This is an important bug fix (2019-03-10) for TDNTuple4Agt:
-				// If we want to get the score tuple for state 'so' where
-				// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player),
-				// because the net did never learn this, it was trained on getScore(so,refer), where
-				// refer is the player who *created* 'so' (the opponent). We construct the score
-				// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has
-				// for opponent, and infer from this the player's value by negation:
-				//
-				sc.scTup[opponent] = m_Net.getScoreI(curSOWB, opponent);
-				sc.scTup[player] = -sc.scTup[opponent];
-			}
-			default -> {
-				//
-				// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
-				// prevTuple, fill in the game value for the player for which TDNTuple4Agt has learned the value:
-				// This is the player who *created* so. (We do not know the game values from the perspective
-				// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
-				//
-				if (prevTuple != null) sc = new ScoreTuple(prevTuple);
-				int cp = so.getCreatingPlayer();
-				if (cp != -1) {
-					sc.scTup[cp] = m_Net.getScoreI(curSOWB, cp);
-				}
-			}
-		}
+		// for this to work, actBest=getNextAction2(so,...); so.storeBestActionInfo(actBest);
+		// has to be called beforehand
+		// --> dangerous design!
+		// --> should we do these calls in here, to be on the safe side??
+		return so.getStoredActBest().getScoreTuple();
 
-		// *** /WK/ 08/2021: (!!?!) Very questionable to add the reward here since the reward is usually added as
-		// *** a separate term r in 'target = r + gamma * V'
-		//
-		// In any case: add the reward obtained so far, since the net predicts
-		// with getScoreI only the expected future reward.
-		boolean rgs = m_oPar.getRewardIsGameScore();
-//		for (int i=0; i<so.getNumPlayers(); i++)
-//			sc.scTup[i] += so.getReward(i, rgs);
-		sc.combine(so.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
-    	return sc;
+		// --- the old and flawed version before 2021-09-10 ---
+//		ScoreTuple sc = new ScoreTuple(so);
+//		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
+//		switch (so.getNumPlayers()) {
+//			case 1 -> sc.scTup[0] = m_Net.getScoreI(curSOWB,so.getPlayer());
+//			case 2 -> {
+//				int player = so.getPlayer();
+//				int opponent = (player == 0) ? 1 : 0;
+//	//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
+//	//			sc.scTup[opponent] = -sc.scTup[player];
+//				//
+//				// This is an important bug fix (2019-03-10) for TDNTuple4Agt:
+//				// If we want to get the score tuple for state 'so' where
+//				// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player),
+//				// because the net did never learn this, it was trained on getScore(so,refer), where
+//				// refer is the player who *created* 'so' (the opponent). We construct the score
+//				// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has
+//				// for opponent, and infer from this the player's value by negation:
+//				//
+//				sc.scTup[opponent] = m_Net.getScoreI(curSOWB, opponent);
+//				sc.scTup[player] = -sc.scTup[opponent];
+//			}
+//			default -> {
+//				//
+//				// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
+//				// prevTuple, fill in the game value for the player for which TDNTuple4Agt has learned the value:
+//				// This is the player who *created* so. (We do not know the game values from the perspective
+//				// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
+//				//
+//				if (prevTuple != null) sc = new ScoreTuple(prevTuple);
+//				int cp = so.getCreatingPlayer();
+//				if (cp != -1) {
+//					sc.scTup[cp] = m_Net.getScoreI(curSOWB, cp);
+//				}
+//			}
+//		}
+//
+//		// *** /WK/ 08/2021: (!!?!) Very questionable to add the reward here since the reward is usually added as
+//		// *** a separate term r in 'target = r + gamma * V'
+//		//
+//		// In any case: add the reward obtained so far, since the net predicts
+//		// with getScoreI only the expected future reward.
+//		boolean rgs = m_oPar.getRewardIsGameScore();
+////		for (int i=0; i<so.getNumPlayers(); i++)
+////			sc.scTup[i] += so.getReward(i, rgs);
+//		sc.combine(so.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
+//    	return sc;
 	}
 
 	/**
@@ -497,7 +506,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * @param sob			the current game state
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}.  
 	 * @return				the agent's estimate of the final game value <b>for all players</b>. 
 	 * 						The return value is a tuple containing  
@@ -728,7 +737,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
 	public boolean trainAgent(StateObservation so) {
-		Types.ACTIONS a_t;
+		Types.ACTIONS_VT a_t;
 		int   curPlayer;
 		NextState4 ns;
 		ScoreTuple R;

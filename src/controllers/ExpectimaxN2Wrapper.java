@@ -4,6 +4,7 @@ import games.Arena;
 import games.StateObsNondeterministic;
 import games.StateObservation;
 import tools.ScoreTuple;
+import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
@@ -300,7 +301,9 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return wrapped_pa.getScoreTuple(sob, prevTuple);
+		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false,true);
+		return actBest.getScoreTuple();
+//		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
 	}
 
 	public PlayAgent getWrappedPlayAgent() {

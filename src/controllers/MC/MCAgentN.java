@@ -99,15 +99,23 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         int numberAgents = m_mcPar.getNumAgents();
         int depth = m_mcPar.getRolloutDepth();
         boolean stopOnRoundOver = m_mcPar.getStopOnRoundOver();
-        
+
+        Types.ACTIONS_VT actBest;
         if(numberAgents > 1) {
             //more than one agent (majority vote)
-        	return getNextAction2MultipleAgents(so, iterations, numberAgents, depth, stopOnRoundOver);
+        	actBest = getNextAction2MultipleAgents(so, iterations, numberAgents, depth, stopOnRoundOver);
         } else {
             //only one agent: select one of the following lines:
-        	return getNextAction_PAR(so, iterations, depth, stopOnRoundOver);
-        	//return getNextAction_MassivePAR(so, iterations, depth, stopOnRoundOver);
+        	actBest =  getNextAction_PAR(so, iterations, depth, stopOnRoundOver);
+        	//actBest = getNextAction_MassivePAR(so, iterations, depth, stopOnRoundOver);
         }
+
+        // TODO (when ObserverBase's storedActBest is ACTIONS_VT)
+        //      But perhaps the update storeBestActionInfo is done outside in Arena
+        // Check if the update of the stored ScoreTuple in so is the same as in actBest:
+        //assert actBest.getScoreTuple().equals(so.getStoredActBest().getScoreTuple())
+
+        return actBest;
 	}
 
     /**

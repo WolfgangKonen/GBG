@@ -54,7 +54,7 @@ public class NextState {
 		 * <p>
 		 * Collect the reward(s) for taking action {@code actBest} in state {@code so}.
 		 */
-		NextState(NTupleAgt parent, StateObservation so, Types.ACTIONS actBest) {
+		NextState(NTupleAgt parent, StateObservation so, Types.ACTIONS_VT actBest) {
 			this.tdAgt = parent;
 			refer = so.copy();
 	        if (tdAgt.getAFTERSTATE()) {   // if checkbox "AFTERSTATE" is checked
@@ -74,7 +74,8 @@ public class NextState {
                 nextSO.advance(actBest);
 				afterState = nextSO.copy();
 	        }
-	        
+			nextSO.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
+
 	        // callback function to set this.nextReward and this.nextRewardTuple 
 	        tdAgt.collectReward(this);
 
