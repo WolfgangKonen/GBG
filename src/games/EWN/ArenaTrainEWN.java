@@ -19,7 +19,7 @@ public class ArenaTrainEWN extends ArenaTrain {
 
     @Override
     public GameBoard makeGameBoard() {
-        gb = new GameBoardEWN(this, ConfigEWN.BOARD_SIZE, ConfigEWN.NUM_PLAYERS);
+        gb = new GameBoardEWN(this);
         return  gb;
     }
 
@@ -77,6 +77,16 @@ public class ArenaTrainEWN extends ArenaTrain {
         }
     }
 
+
+    public static void setRandomStartingPosition(String str){
+        System.out.println(str);
+        switch (str){
+            case "True":ConfigEWN.RANDOM_POSITION = true;
+                break;
+            case "False":ConfigEWN.RANDOM_POSITION = false;
+                break;
+        }
+    }
 
 
 

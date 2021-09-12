@@ -39,16 +39,13 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     private ScoreTuple m_scoreTuple;
 
 
-    public StateObserverEWN(){
-        this(3,2);
-    }
 
-    public StateObserverEWN(int size, int numPlayers){
+    public StateObserverEWN(){
         super();
         this.player =  0;
         this.rolledDice = null;
-        this.numPlayers = numPlayers;
-        this.size = size;
+        this.numPlayers = ConfigEWN.NUM_PLAYERS;
+        this.size = ConfigEWN.BOARD_SIZE;
         m_scoreTuple = new ScoreTuple(numPlayers);
         playerWin = -1;
         count = 0;
@@ -66,17 +63,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         for(int i = 0; i < numPlayers; i++){
             players.add(new Player(i,size));
         }
-        int[][][] startingPosition = getStartingsPosition(size,numPlayers);
-        for(int i = 0;i < startingPosition.length; i++){
-            for(int k = 0; k < startingPosition[i].length; k++){
-                int[] startPosEntry = startingPosition[i][k];
-                Token token = new Token(i,k,size,startPosEntry[0],startPosEntry[1]);
-                gameState[i][k] = token;
-                if(startPosEntry[1] >= 0){
-                    players.get(startPosEntry[1]).addToken(token);
-                }
-            }
-        }
+        getFixedStartingPosition();
         // Init empty board:
         advanceNondeterministic(); // setActions when we start a new state
     }
@@ -116,9 +103,86 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             }
         }
         if(this.availableActions == null) throw new RuntimeException("AvailActions cannot be null");
-       setAvailableActions();
+        setAvailableActions();
     }
 
+    private void getFixedStartingPosition(){
+        int[][][] startingPosition = getStartingsPosition(size,numPlayers);
+        for(int i = 0;i < startingPosition.length; i++){
+            for(int k = 0; k < startingPosition[i].length; k++){
+                int[] startPosEntry = startingPosition[i][k];
+                Token token = new Token(i,k,startPosEntry[0],startPosEntry[1]);
+                gameState[i][k] = token;
+                if(startPosEntry[1] >= 0){
+                    players.get(startPosEntry[1]).addToken(token);
+                }
+            }
+        }
+    }
+
+    public void getRandomStartingPosition(){
+        // Init empty field
+        for(int x = 0; x < ConfigEWN.BOARD_SIZE; x++)
+            for(int y = 0; y < ConfigEWN.BOARD_SIZE; y++)
+                gameState[x][y] = new Token(x,y,-1,-1);
+
+        //init player tokens and mirror for the opponent
+        int[] values = getValues();
+        int[] randomPositionIndex = getRandomPositionindices();
+        for(int player = 0; player < ConfigEWN.NUM_PLAYERS; player++){
+            for(int index = 0; index < values.length;index++){
+                int position = mirror(randomPositionIndex[index],player);
+                int j = position % ConfigEWN.BOARD_SIZE;
+                int i = (position-j)/ConfigEWN.BOARD_SIZE;
+                Token t = new Token(i,j,values[index],player);
+                players.get(player).addToken(t);
+                gameState[i][j]=t;
+            }
+        }
+    }
+
+    private int mirror(int index, int player){
+        int n = ConfigEWN.BOARD_SIZE * ConfigEWN.BOARD_SIZE-1;
+        switch(player){
+            case 0: return index;
+            case 1: return n-index;
+            default:throw new RuntimeException("Swap not implemented");
+        }
+    }
+
+
+    private int[] getRandomPositionindices(){
+        int[] randomIndices = getNormalPositionIndices();
+        return shuffle(randomIndices);
+    }
+
+    private int[] shuffle(int[] array){
+        int index;
+        for(int i = array.length-1; i > 0; i--){
+            index = random.nextInt(i+1);
+            if(index != i){
+                array[index] ^= array[i];
+                array[i] ^= array[index];
+                array[index] ^= array[i];
+            }
+        }
+        return array;
+    }
+
+    private int[] getNormalPositionIndices(){
+        switch (ConfigEWN.BOARD_SIZE){
+            case 3:return new int[]{0,1,3};
+            case 4:return new int[]{0,1,4};
+            case 5:return new int[]{0,1,2,5,6,10};
+            case 6:return new int[]{0,1,2,6,7,12};
+            default: throw new RuntimeException("Illegal board size");
+        }
+    }
+
+    private int[] getValues(){
+       if(ConfigEWN.BOARD_SIZE > 4) return StartingPositions.TOKENS_SIX;
+       else return StartingPositions.TOKENS_THREE;
+    }
 
     /**
      * Splitting the advancing step to deterministic and non-deterministic
@@ -165,7 +229,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         }
         gameState[to_y][to_x] = from_token; // Setting token to new index;
         players.get(player).updateToken(from_token, to_token);
-        gameState[from_y][from_x] = new Token(from_y, from_x, size, -1, -1); // Remove old token
+        gameState[from_y][from_x] = new Token(from_y, from_x, -1, -1); // Remove old token
         turn++;
         boolean isOver = this.isGameOver();
         if(!isOver){
@@ -216,13 +280,11 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
 
 
     /**
-     * Used to reset the state to an empty state
-     * Due to the multiple modes, which can be chosen from
-     * This method will reuse the size and num players to reload the same starting position.
-     * @return new StateObserverEWS(size, numPlayers);
+     * Returns a new Object, with the same params as this one.
+     * @return new StateObserverEWS();
      */
     public StateObserverEWN reset(){
-        return new StateObserverEWN(this.getSize(), this.getNumPlayers());
+        return new StateObserverEWN();
     }
 
 
@@ -232,8 +294,8 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         ArrayList<ACTIONS> ar = new ArrayList<>();
         for(int i = 0; i <size; i++){
             for(int k = 0; k < size; k++){
-                ar.add(Helper.parseAction(i,k, size));
-                ar.add(Helper.parseAction(k,i, size));
+                ar.add(Helper.parseAction(i,k));
+                ar.add(Helper.parseAction(k,i));
             }
             ar.add(new ACTIONS(i));
         }
@@ -258,6 +320,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     @Override
     public void setAvailableActions() {
         Player p = players.get(player);
+
         p.setAvailableActions(nextNondeterministicAction.toInt());
         this.availableActions = p.getAvailableActions();
         if(availableActions.size() == 0){
@@ -265,12 +328,11 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             if(count > 3){
                 isGameOver();
             }else {
-
                 this.player = (player + 1) % numPlayers;
                 this.isNextActionDeterministic = false;
+                count = 0;
                 advanceNondeterministic();
             }
-
         }else {
             isNextActionDeterministic = true;
         }
@@ -312,9 +374,6 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
                 }
                 return player == 2 ? PLAYER_LOSES : PLAYER_WINS;
             }
-
-
-
         }
         else {
             // Teams [0,2] vs. [1,3]
@@ -357,19 +416,18 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
 
     @Override
     public double getGameScore(int player) {
-        if(this.isGameOver()){
-            Types.WINNER winState = getWinner(player);
-            switch (winState){
-                case PLAYER_LOSES:
-                    return REWARD_NEGATIVE;
-                case PLAYER_WINS:
-                    return REWARD_POSITIVE;
-                case TIE:  throw new RuntimeException("invalid outcome of the game [wrong getGameScore]");
+        if(!isGameOver()) return 0.0;
+        Types.WINNER winState = getWinner(player);
+        switch (winState){
+            case PLAYER_LOSES:
+                return REWARD_NEGATIVE;
+            case PLAYER_WINS:
+                return REWARD_POSITIVE;
+            case TIE:  throw new RuntimeException("invalid outcome of the game [wrong getGameScore]");
             };
-        }
-
         return 0.0;
     }
+
 
     @Override
     public double getReward(int player, boolean rewardIsGameScore) {

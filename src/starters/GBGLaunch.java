@@ -234,7 +234,7 @@ public class GBGLaunch {
 		case "EWN":
 			ArenaTrainEWN.setConfig(scaPar[0]);
 			ArenaTrainEWN.setCellCoding(scaPar[1]);
-
+			ArenaTrainEWN.setRandomStartingPosition(scaPar[2]);
 			t_Game = new ArenaTrainEWN(title, withUI);
 			break;
 		default: 
@@ -325,6 +325,7 @@ public class GBGLaunch {
 		case "EWN":
 			ArenaEWN.setConfig(scaPar[0]);
 			ArenaEWN.setCellCoding(scaPar[1]);
+			ArenaEWN.setRandomStartingPosition(scaPar[2]);
 
 			t_Game = new ArenaEWN(title, withUI);
 		default: 
@@ -581,9 +582,11 @@ public class GBGLaunch {
 			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
 			scaPar1_L.setText("Tuple amount:");
-
-			setScaPar1List(new String[]{"N-Player + 1", "Upper-Lower"});
-			choiceScaPar1.setSelectedItem("N-Player + 1");
+			setScaPar1List(new String[]{"Normal", "Grouping"});
+			choiceScaPar1.setSelectedItem("Normal");
+			scaPar2_L.setText("Random starting position:");
+			setScaPar2List(new String[]{"True", "False"});
+			choiceScaPar2.setSelectedItem("False");
 			break;
 		case "2048": 
 		case "ConnectFour": 

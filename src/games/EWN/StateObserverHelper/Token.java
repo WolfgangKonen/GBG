@@ -1,5 +1,6 @@
 package games.EWN.StateObserverHelper;
 
+import games.EWN.constants.ConfigEWN;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -8,20 +9,17 @@ public class Token {
     private ArrayList<Types.ACTIONS> availableActions;
     private int index;
     private int value;
-    private int size;
     private int player;
 
 
-    public Token(int x, int y,  int size,int value, int player){
-        this.size = size;
+    public Token(int x, int y,int value, int player){
         this.player = player;
-        this.index = x * size + y;
+        this.index = x * ConfigEWN.BOARD_SIZE + y;
         this.value = value;
         availableActions = new ArrayList<>();
     }
 
     public Token(Token other){
-        this.size = other.getSize();
         this.player = other.getPlayer();
         this.value = other.getValue();
         this.index = other.getIndex();
@@ -30,15 +28,15 @@ public class Token {
 
     public void setAvailableActions(){
         availableActions.clear();
-        int[] directions = Helper.getMoveDirection(size,player);
+        int[] directions = Helper.getMoveDirection(player);
         for(int dir: directions){
             int newPos = index + dir;
-            if(newPos < 0  || newPos > size*size-1) continue; // Bounds check for [0,...,size²-1]
-            if(newPos % size == 0 && index % size == size-1) continue;
-            if(newPos % size == size-1 && index % size == 0) continue;
-            Types.ACTIONS a = Helper.parseAction(index,newPos,size);
+            if(newPos < 0  || newPos > ConfigEWN.BOARD_SIZE*ConfigEWN.BOARD_SIZE-1) continue; // Bounds check for [0,...,size²-1]
+            if(newPos % ConfigEWN.BOARD_SIZE == 0 && index % ConfigEWN.BOARD_SIZE == ConfigEWN.BOARD_SIZE-1) continue;
+            if(newPos % ConfigEWN.BOARD_SIZE == ConfigEWN.BOARD_SIZE-1 && index % ConfigEWN.BOARD_SIZE == 0) continue;
+            Types.ACTIONS a = Helper.parseAction(index,newPos);
             if(a != null) availableActions.add(a);
-            else System.out.println("index: " + index + " value " + value + " Player: " + player);
+            else throw new RuntimeException("setAvailableActions in token for index: " + index + " value " + value + " Player: " + player);
         }
     }
 
@@ -47,7 +45,7 @@ public class Token {
     }
 
     public int getSize(){
-        return size;
+        return ConfigEWN.BOARD_SIZE;
     }
 
     public int getIndex(){
@@ -63,7 +61,7 @@ public class Token {
     }
 
     public void setIndex(int i, int k) {
-        this.index = i * size + k;
+        this.index = i * ConfigEWN.BOARD_SIZE + k;
     }
 
     public void setIndex(int i){
