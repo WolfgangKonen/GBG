@@ -1,28 +1,18 @@
 package controllers;
 
-import controllers.PlayAgent;
-import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.StateObservation;
-import games.XArenaMenu;
-import games.RubiksCube.StateObserverCube;
-import gui.MessageBox;
 import params.MaxNParams;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
-
-import javax.swing.JOptionPane;
 
 /**
  * The Max-N agent implements the Max-N algorithm [Korf91] via interface {@link PlayAgent}. 
@@ -46,10 +36,10 @@ import javax.swing.JOptionPane;
  */
 public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
-	private Random rand;
 	protected int m_depth=10;
 	protected boolean m_useHashMap=false; //true;
-	private HashMap<String,ScoreTuple> hm;
+	private final Random rand;
+	private final HashMap<String,ScoreTuple> hm;
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -111,38 +101,21 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	/**
 	 * Get the best next action and return it
 	 * @param so			current game state (not changed on return)
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param silent
+	 * @param random		allow epsilon-greedy random action selection (not relevant in MaxNAgent)
+	 * @param silent		true: no print-out
 	 * @return actBest		the best action 
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).<br>
-	 * actBest has also the members vTable and vBest to store the value for each available
+	 * actBest has also the members vTable and bestValue to store the value for each available
 	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
 	 * 
 	 */	
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
-        List<ACTIONS> actions = so.getAvailableActions();
-	
-        // --- obsolete now, we do not use MaxNWrapper anymore, but MaxN2Wrapper
-//        try {
-//		    // this is just a runtime check in case MaxNWrapper whether the wrapped agent implements estimateGameValueTuple
-//        	this.estimateGameValueTuple(so, null);
-//        } catch (RuntimeException e) {
-//        	if (e.getMessage()==AgentBase.EGV_EXCEPTION_TEXT) {
-//            	String str = "MaxNWrapper: The wrapped agent does not implement estimateGameValueTuple "
-//            			+ "\n --> set Other pars: Wrapper nPly to 0";
-//    			MessageBox.show(null,str,
-//    					"MaxNAgent", JOptionPane.ERROR_MESSAGE);      
-//    			return null;
-//        	} else {
-//        		throw e;	// other exceptions: rethrow
-//        	}
-//        }
 
         // this starts the recursion:
-		ACTIONS_VT act_vt = getBestAction(so, so,  random,  silent, 0, null);
+		ACTIONS_VT act_vt = getBestAction(so, so,  silent, 0, null);
 		
 		return act_vt;
 	}
@@ -153,35 +126,32 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 * 
 	 * @param so		current game state (not changed on return)
 	 * @param refer		(not used currently) referring game state (=so on initial call)	
-	 * @param random	(not used currently) allow epsilon-greedy random action selection	
-	 * @param silent
+	 * @param silent	true: no print-out
 	 * @param depth		tree depth
 	 * @param prevTuple TODO
 	 * @return		best action + score tuple
 	 */
-	private ACTIONS_VT getBestAction(StateObservation so, StateObservation refer, boolean random, 
+	private ACTIONS_VT getBestAction(StateObservation so, StateObservation refer,
 			boolean silent, int depth, ScoreTuple prevTuple) 
 	{
-		int i,j;
-		ScoreTuple currScoreTuple=null;
+		assert so.isLegalState() : "Not a legal state";
+
+		int i;
+		ScoreTuple currScoreTuple;
         ScoreTuple sc;
 		StateObservation NewSO;
 		ScoreTuple scBest = null;
-        ACTIONS actBest = null;
-        ACTIONS_VT act_vt = null;
-        ArrayList<ACTIONS> bestActions = new ArrayList<>();
-        String stringRep ="";
+        ACTIONS actBest;
+        ACTIONS_VT act_vt;
+        String stringRep;
 
-        assert so.isLegalState() : "Not a legal state"; 
-        
-//        if (this instanceof MaxNWrapper) 
-//        	System.out.println("MaxN: depth="+depth+"  "+so.stringDescr());
-        
-        double value, maxValue = -Double.MAX_VALUE;
+        double value, bestValue = -Double.MAX_VALUE;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
-        double[] VTable =  new double[acts.size()];
-        boolean lowest = true;
-    	currScoreTuple = (prevTuple==null) ? new ScoreTuple(so,lowest) : prevTuple;
+		ArrayList<ACTIONS> bestActions = new ArrayList<>();
+        double[] vTable =  new double[acts.size()];
+
+        // TODO: this is not yet the right way to utilize info from prevTuple (!):
+    	currScoreTuple = (prevTuple==null) ? new ScoreTuple(so,true) : new ScoreTuple(prevTuple);
         int P = so.getPlayer();
         
         for(i = 0; i < acts.size(); ++i)
@@ -200,7 +170,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     	        	sc = retrieveFromHashMap(m_useHashMap,stringRep);
     				if (sc==null) {
     					// here is the recursion: getAllScores may call getBestAction back:
-    					currScoreTuple = getAllScores(NewSO,refer,depth+1, currScoreTuple);	
+    					currScoreTuple = getAllScores(NewSO,refer,depth+1, prevTuple);
     					
     					if (m_useHashMap) {
     						hm.put(stringRep, currScoreTuple);
@@ -213,10 +183,8 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     			} else {
     				// this terminates the recursion:
     				// (after finishing the for-loop for every element of acts)
-    				currScoreTuple = estimateGameValueTuple(NewSO, currScoreTuple);
-    				// For derived class MaxNWrapper, estimateGameValueTuple returns
-    				// the score tuple of the wrapped agent. 
-    			}    			
+    				currScoreTuple = estimateGameValueTuple(NewSO, prevTuple);
+    			}
     		}
 //			if (m_useHashMap && !found) {
 //				stringRep = NewSO.stringDescr();
@@ -232,17 +200,17 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     			throw new RuntimeException( "Ooops, scTup too short");    			
     		}
     		
-			VTable[i] = currScoreTuple.scTup[P];
+			vTable[i] = value = currScoreTuple.scTup[P];
 			
-			value = VTable[i] = currScoreTuple.scTup[P];
-			// always *maximize* P's element in the tuple currScoreTuple, 
+			// always *maximize* P's element in the tuple currScoreTuple,
 			// where P is the player to move in state so:
-        	if (value==maxValue) bestActions.add(acts.get(i));
-        	if (value>maxValue) {
-        		maxValue = value;
-        		scBest = new ScoreTuple(currScoreTuple);
+        	if (value == bestValue) {
+        		bestActions.add(acts.get(i));
+			} else if (bestValue < value) {
+        		bestValue = value;
         		bestActions.clear();
         		bestActions.add(acts.get(i));
+				scBest = new ScoreTuple(currScoreTuple);
         	}
         } // for
         
@@ -255,10 +223,10 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
         if (!silent) {
         	NewSO = so.copy();
         	NewSO.advance(actBest);
-        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxValue);
+        	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+bestValue);
         }			
 
-        act_vt = new ACTIONS_VT(actBest.toInt(), false, VTable, maxValue, scBest);
+        act_vt = new ACTIONS_VT(actBest.toInt(), false, vTable, bestValue, scBest);
         return act_vt;         
 	}
 
@@ -292,38 +260,13 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	}
 
 	private ScoreTuple getAllScores(StateObservation sob, StateObservation refer, int depth, ScoreTuple prevTuple) {
-        ACTIONS_VT act_vt = null;
+        ACTIONS_VT act_vt;
 
-        // --- obsolete now since MaxNWrapper has been removed in favor of MaxN2Wrapper
-//		if (this instanceof MaxNWrapper) {
-//			if (((MaxNWrapper)this).getWrappedPlayAgent() instanceof TDNTuple3Agt)
-//				prevTuple = estimateGameValueTuple(sob, prevTuple);
-//				// this is for wrappedAgent==TDNTuple3Agt and the case (N>=3): fill in the game value estimate
-//				// for the player who created sob. Will be used by subsequent states as a surrogate for the 
-//				// then unknown value for that player. 
-//		}
-		
 		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
-		act_vt = getBestAction(sob, refer, false, true, depth, prevTuple);  
+		act_vt = getBestAction(sob, refer, true, depth, prevTuple);
 		
 		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}
-
-//	/**
-//	 * When the recursion tree has reached its maximal depth m_depth, then return
-//	 * an estimate of the game score. This function may be overridden in a game-
-//	 * specific way by classes derived from {@link MaxNAgent}.
-//	 * <p>
-//	 * This  stub method just returns {@link StateObservation#getReward(StateObservation, boolean)},
-//	 * which might be too simplistic for not-yet finished games, because the current reward does
-//	 * not reflect future rewards.
-//	 * @param sob	the state observation
-//	 * @return		the estimated score
-//	 */
-//	@Override
-//	public double estimateGameValue(StateObservation sob) {
-//		return sob.getReward(sob,true);
-//	}
 
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return

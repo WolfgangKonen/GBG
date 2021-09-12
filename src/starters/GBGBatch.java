@@ -7,6 +7,7 @@ import controllers.*;
 import controllers.PlayAgent.AgentState;
 import games.*;
 import games.CFour.ArenaTrainC4;
+import games.EWN.ArenaTrainEWN;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
 import games.Nim.ArenaNim2P;
@@ -147,7 +148,8 @@ public class GBGBatch {
 
 		setupPaths(args[2],csvName);
 
-		if (args[1].equals("5")) assert(selectedGame.equals("Othello")) : "batch5 only allowed for game Othello (uses Edax2)";
+		if (args[1].equals("5"))
+			assert(selectedGame.equals("Othello")) : "batch5 only allowed for game Othello (uses Edax2)";
 
 		// start a batch run without any windows
 		switch (args[1]) {
@@ -215,6 +217,8 @@ public class GBGBatch {
 				return new ArenaTrainSim("", false);
 			case "TicTacToe":
 				return new ArenaTrainTTT("", false);
+			case "EWN":
+				return new ArenaTrainEWN("", false);
 			default:
 				System.err.println("[GBGBatch.main] args[0]=" + selectedGame + ": This game is unknown.");
 				System.exit(1);
@@ -251,8 +255,14 @@ public class GBGBatch {
 		case "RubiksCube": 
 			scaPar[0]="2x2x2";		 	
 			scaPar[1]="CSTATE";			
-			scaPar[2]="ALL";			
-		case "2048": 
+			scaPar[2]="ALL";
+			break;
+		case "EWN":
+			scaPar[0]="3x3 2-Player";
+			scaPar[1]="N-Player + 1";
+			scaPar[2]="None";
+			break;
+		case "2048":
 		case "ConnectFour": 
 		case "Othello": 
 		case "TicTacToe": 
@@ -294,7 +304,7 @@ public class GBGBatch {
 	 * If trainNum or maxGameNum are -1, the values stored in {@code xab} are taken.
 	 */
 	public void batch1(int trainNum, int maxGameNum, String filePath,
-					   XArenaButtons xab,	GameBoard gb, String csvName) throws IOException {
+					   XArenaButtons xab,	GameBoard gb, String csvName) {
 		// load an agent to fill xab with the appropriate parameter settings
 		boolean res = t_Game.loadAgent(0, filePath);
 		if (!res) {
@@ -451,7 +461,7 @@ public class GBGBatch {
 	 * @param csvName		filename for CSV results
 	 */
 	public void batch5(int iterMCTS, String filePath,
-					   GameBoard gb, String csvName) throws IOException {
+					   GameBoard gb, String csvName) {
 		//if (iterMCTS<2) iterMCTS=2;
 		//iterMCTS=0;
 		long startTime = System.currentTimeMillis();

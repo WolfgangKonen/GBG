@@ -15,7 +15,7 @@ import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS_VT;
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.MaxNAgent;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
@@ -428,7 +428,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * @param so			the state s_t for which the value is desired
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
@@ -491,7 +491,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. <br>
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * Is called when training an agent in multi-update mode AND the maximum episode length
 	 * is reached. 
 	 * 

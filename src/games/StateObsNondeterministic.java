@@ -2,6 +2,7 @@ package games;
 
 import java.util.ArrayList;
 
+import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
@@ -18,18 +19,18 @@ public interface StateObsNondeterministic extends StateObservation {
      *
      * @param action    the action
      */
-    void advanceDeterministic(ACTIONS action);
+	void advanceDeterministic(ACTIONS action);
 
     /**
      * Advance the current afterstate to a new state (do the nondeterministic part of advance)
      */
-    void advanceNondeterministic();
+	Types.ACTIONS advanceNondeterministic();
 
     /**
      * Advance the current afterstate to a new state (with a specific nondeterministic action)
      * @param randAction   the nondeterministic action
      */
-    void advanceNondeterministic(ACTIONS randAction);
+	Types.ACTIONS advanceNondeterministic(ACTIONS randAction);
     
     boolean isNextActionDeterministic();
     

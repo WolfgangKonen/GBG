@@ -723,9 +723,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	 * - 53 -> determine winner of the round
 	 * @param randAction to advance the state of the game
 	 */
-	public void advanceNondeterministic(ACTIONS randAction) {
+	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
 		if(isRoundOver())
-			return;
+			return randAction;
 		if (isNextActionDeterministic) {
 			throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
 		}
@@ -799,6 +799,7 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 
 			setRoundOver(true);
 		}
+		return randAction;
 	}
 
 	private void updateGamescores(){
@@ -806,11 +807,14 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 			gamescores[i] = chips[i]-START_CHIPS;
 	}
 
-	public void advanceNondeterministic() {
+	public ACTIONS advanceNondeterministic() {
 		ArrayList<ACTIONS> possibleRandoms = getAvailableRandoms();
 		//advanceNondeterministic(possibleRandoms.get(rand.nextInt(possibleRandoms.size())));
 		// above doesn't provide sufficiently random results
-		advanceNondeterministic(possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size())));
+		ACTIONS act = possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size()));
+		advanceNondeterministic(act);
+
+		return act;
 	}
 
 	//</editor-fold>

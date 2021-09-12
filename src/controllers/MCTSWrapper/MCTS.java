@@ -45,14 +45,16 @@ public final class MCTS {
         if (node.gameState.isFinalGameState())
             return sign * node.gameState.getFinalGameScore();       // /WK/ sign
 
+        // normally, maxDepth==Integer.MAX_VALUE, so the following if-branch will remain inactive:
         if (depth > this.maxDepth) {       // /WK/ testing for RubiksCube
             //System.out.println("maxDepth="+this.maxDepth+" reached. Returning");
             //return 0;           // return with reward 0. Alternative choice would be REWARD_NEGATIVE.
             return -1;  // 0,-1,-2,-10
         }
+        // just info: what is the largest depth encountered?
         if (depth > largestDepth) largestDepth=depth;
 
-        // If a non expanded node is reached, return its negated value (2-player game) or its value (1-player game)
+        // If a non-expanded node is reached, return its negated value (2-player game) or its value (1-player game)
         // after it got expanded and its move probabilities were set.
         if (!node.isExpanded()) {
             final var valueAndMoveProbabilities = node.gameState.getApproximatedValueAndMoveProbabilities(approximator);

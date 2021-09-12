@@ -140,15 +140,17 @@ abstract public class ObserverBase implements StateObservation {
     /**
      * Advance the current afterstate to a new state (do the nondeterministic part of advance)
      */
-    public void advanceNondeterministic() {
-    	// nothing to do here, since ObserverBase is for a deterministic game    	
+    public ACTIONS advanceNondeterministic() {
+    	// nothing to do here, since ObserverBase is for a deterministic game
+		return null;
     }
 
 	/**
 	 * Advance the current afterstate to a new state (do the nondeterministic part of advance)
 	 */
-	public void advanceNondeterministic(ACTIONS randAction) {
+	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
 		// nothing to do here, since ObserverBase is for a deterministic game
+		return null;
 	}
 
 	/**
@@ -244,7 +246,8 @@ abstract public class ObserverBase implements StateObservation {
 	}
 
 	public void addToLastMoves(ACTIONS act) {
-		lastMoves.add(act.toInt());
+		if (act!=null)
+			lastMoves.add(act.toInt());
 	}
 
 	public int getLastMove() {

@@ -2,7 +2,7 @@ package controllers.TD.ntuple4;
 
 import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.GameBoard;
@@ -340,7 +340,7 @@ public class QLearn4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Ser
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * @param so	the state s_t for which the value is desired
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 

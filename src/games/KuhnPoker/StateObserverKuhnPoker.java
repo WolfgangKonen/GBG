@@ -319,9 +319,9 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		setAvailableActions();
 	}
 
-	public void advanceNondeterministic(ACTIONS randAction) {
+	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
 		if(isRoundOver())
-			return;
+			return randAction;
 		if (isNextActionDeterministic) {
 			throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
 		}
@@ -374,12 +374,15 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		if(chips[0]<1||chips[1]<1)
 			GAMEOVER = true;
 
+		return randAction;
 	}
 
-	public void advanceNondeterministic() {
+	public ACTIONS advanceNondeterministic() {
 		ArrayList<ACTIONS> possibleRandoms = getAvailableRandoms();
+		ACTIONS act = possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size()));
+		advanceNondeterministic(act);
 
-		advanceNondeterministic(possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size())));
+		return act;
 	}
 
 	//</editor-fold>

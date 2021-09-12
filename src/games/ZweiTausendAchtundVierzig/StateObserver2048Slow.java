@@ -529,7 +529,7 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
 		super.incrementMoveCounter();
    }
 
-    public void advanceNondeterministic(ACTIONS randAction) {
+    public ACTIONS advanceNondeterministic(ACTIONS randAction) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
@@ -545,12 +545,14 @@ public class StateObserver2048Slow extends ObserverBase implements StateObsNonde
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
 		super.incrementMoveCounter();
-   	
+
+        return randAction;
     }
     
-    public void advanceNondeterministic() {
+    public ACTIONS advanceNondeterministic() {
         setNextNondeterministicAction();
-        advanceNondeterministic(nextNondeterministicAction);
+
+        return advanceNondeterministic(nextNondeterministicAction);
     }
 
     /**

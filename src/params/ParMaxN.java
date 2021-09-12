@@ -9,7 +9,7 @@ import controllers.ExpectimaxNAgent;
 import controllers.MaxNAgent;
 
 /**
- * Parameters for {@link MaxNAgent}, {@link ExpectimaxNAgent}
+ * Parameters for {@link MaxNAgent} and {@link ExpectimaxNAgent}
  * <ul>
  * <li> <b> Tree Depth</b>: [10] depth of search tree
  * <li> <b> Max-N Hashmap</b>: [true] (only MaxN) whether to hash already visited states or not
@@ -150,6 +150,10 @@ public class ParMaxN implements Serializable {
 				case "Poker","BlackJack" -> {
 					this.setMaxNDepth(5);
 					this.setMaxNUseHashmap(true);
+				}
+				case "EWN","EWS" -> {
+					this.setMaxNUseHashmap(false);
+					this.enableHashmapPart(false);
 				}
 				default -> {
 					this.setMaxNDepth(DEFAULT_MAXN_TREE_DEPTH);

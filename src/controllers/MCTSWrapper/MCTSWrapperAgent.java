@@ -77,8 +77,8 @@ public final class MCTSWrapperAgent extends AgentBase {
     ) {
         MCTSNode mctsNode;
 
-        if (lastSelectedNode == null || !ConfigWrapper.USELASTMCTS) {
-            // There is no search tree yet.
+        if (lastSelectedNode == null || !ConfigWrapper.USELASTMCTS || !sob.isDeterministicGame()) {
+            // There is no search tree yet or it is not valid for the current situation.
             // So a new mcts node is created from the given game state sob.
             mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
         } else {
@@ -146,9 +146,9 @@ public final class MCTSWrapperAgent extends AgentBase {
 //                mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
                 System.err.println("Unexpected final state for mctsNode! --> NOT Replacing");
             }
-        }
+        }  // else (lastSelectedNode...)
 
-        // At this point mctsNode represents the current game state's node in the monte carlo search tree.
+        // At this point mctsNode represents the current game state's node in the Monte Carlo search tree.
 
         // /WK/ a possible assertion, which turns out to be violated from time to time in RubiksCube.
         //      It seems always true in the Othello case --> TODO: Clarify the RubiksCube case!

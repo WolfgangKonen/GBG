@@ -3,9 +3,10 @@ package games.EWN.StateObserverHelper;
 import games.EWN.constants.ConfigEWN;
 import tools.Types;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Token {
+public class Token implements Serializable {
     private ArrayList<Types.ACTIONS> availableActions;
     private int index;
     private int value;

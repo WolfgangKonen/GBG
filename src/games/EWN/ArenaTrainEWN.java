@@ -14,7 +14,7 @@ public class ArenaTrainEWN extends ArenaTrain {
 
     @Override
     public String getGameName() {
-        return "Einstein Wuerfelt Nicht";
+        return "EWN";  //"Einstein Wuerfelt Nicht";
     }
 
     @Override

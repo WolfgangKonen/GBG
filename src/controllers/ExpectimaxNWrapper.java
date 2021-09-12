@@ -3,7 +3,6 @@ package controllers;
 import java.io.Serializable;
 
 import games.StateObservation;
-import params.ParOther;
 import tools.ScoreTuple;
 
 /**
@@ -16,38 +15,24 @@ import tools.ScoreTuple;
  * 
  * @see ExpectimaxNAgent
  */
-public class ExpectimaxWrapper extends ExpectimaxNAgent implements Serializable {
-	private PlayAgent wrapped_pa;
+public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable {
+	private final PlayAgent wrapped_pa;
 	
-	public ExpectimaxWrapper(PlayAgent pa, int nply) {
+	public ExpectimaxNWrapper(PlayAgent pa, int nply) {
 		super("ExpectimaxWrapper", nply);
 		this.m_oPar.setWrapperNPly(nply);
 		this.wrapped_pa = pa;
 	}
 	
-//	/**
-//	 * When the recursion tree has reached its maximal depth m_depth, then return
-//	 * an estimate of the game score.
-//	 * <p>
-//	 * Here we use the wrapped {@link PlayAgent} to return a game value.
-//	 *
-//	 * @param sob	the state observation
-//	 * @return		the estimated score
-//	 */
-//	@Override
-//	@Deprecated
-//	public double estimateGameValue(StateObservation sob) {
-//		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
-//	}
-
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score (tuple for all players).  
 	 * <p>
 	 * Here we use the wrapped {@link PlayAgent} to return a tuple of game values.
 	 * 
-	 * @param sob	the state observation
-	 * @return		the tuple of estimated score 
+	 * @param sob		the state observation
+	 * @param prevTuple	the previous score tuple
+	 * @return			the tuple of estimated scores
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
@@ -65,12 +50,17 @@ public class ExpectimaxWrapper extends ExpectimaxNAgent implements Serializable 
 		return cs;
 	}
 
-	// getName: use method ObserverBase::getName()
-	
-	public String getFullName() {
-		String cs = wrapped_pa.getClass().getSimpleName();
-		cs = cs + "[nPly="+m_depth+"]";
-		return cs;
+	public String getShortName() {
+		return "EW";
 	}
+
+	// getName: use method ObserverBase::getName()
+
+	// --- never used ---
+//	public String getFullName() {
+//		String cs = wrapped_pa.getClass().getSimpleName();
+//		cs = cs + "[nPly="+m_depth+"]";
+//		return cs;
+//	}
 
 }
