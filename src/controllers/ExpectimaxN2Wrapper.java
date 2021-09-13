@@ -236,7 +236,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 				// player (this considers the environment as an adversarial player)
 				expecScoreTuple.combine(currScoreTuple, cOP, player, currProbab);
             }
-            assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
+            assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilities is not 1.0";
         	//if (!silent) printNondet(soND,expecScoreTuple,sumProbab,depth);
 			scBest = expecScoreTuple;
 			actBest = rans.get(0); 		// this is just a dummy

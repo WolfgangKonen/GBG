@@ -355,7 +355,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-		throw new RuntimeException("getScoreTuple(StateObservation so) not available for SarsaAgt");			        		
+		throw new RuntimeException("getScoreTuple(StateObservation so) not available for "+this.getName());
 	}
 
 	/**

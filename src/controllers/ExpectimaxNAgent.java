@@ -1,6 +1,5 @@
 package controllers;
 
-import games.EWN.StateObserverEWN;
 import games.StateObservation;
 import games.Arena;
 import games.StateObsNondeterministic;
@@ -178,22 +177,25 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		actBest = bestActions.get(rand.nextInt(bestActions.size()));
 		assert actBest != null : "Oops, no best action actBest";
 
-		if ((so instanceof StateObserverEWN) && !silent) {
-			DecimalFormat frmAct = new DecimalFormat("0000");
-			DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
-			System.out.println(
-					 "so.diceVal="+soND.getNextNondeterministicAction().toInt()
-					+", bestValue["+soND.getPlayer()+"]="+frmVal.format(bestValue)
-					+", bestAction="+frmAct.format(actBest.toInt())
-					+", countTerminal="+getCountTerminal()
-					+", countMaxDepth="+getCountMaxDepth());
-			// We better do NOT print NewSO here, but print soND at start of getNextAction2.
-			// Because: the dice value of NewSO is not necessarily the dice value of soND in next call
+		boolean DBG_EWN = false;
+		if (DBG_EWN) {
+			if (!silent) {
+				DecimalFormat frmAct = new DecimalFormat("0000");
+				DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
+				System.out.println(
+						"so.diceVal="+soND.getNextNondeterministicAction().toInt()
+								+", bestValue["+soND.getPlayer()+"]="+frmVal.format(bestValue)
+								+", bestAction="+frmAct.format(actBest.toInt())
+								+", countTerminal="+getCountTerminal()
+								+", countMaxDepth="+getCountMaxDepth());
+				// We better do NOT print NewSO here, but print soND at start of getNextAction2.
+				// Because: the dice value of NewSO is not necessarily the dice value of soND in next call
 //			System.out.println(this.getShortName()+" afterstate: ");
 //			NewSO = soND.copy();
 //			NewSO.advanceDeterministic(actBest);
 //			NewSO.setAvailableActions();
 //			System.out.print(NewSO);
+			}
 		}
 
 		ACTIONS_VT actBestVT = new ACTIONS_VT(actBest.toInt(), false, vTable, bestValue, scBest);
@@ -216,7 +218,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		boolean stopConditionMet = soND.isGameOver() || (stopOnRoundOver && soND.isRoundOver());
 		if (stopConditionMet)
 		{
-			// this is the 1st place to terminate the recursion with a final game state:
+			// this is the 1st place to terminate the recursion:
 			countTerminal++;
 			return soND.getRewardTuple(rgs);
 		}
@@ -245,32 +247,29 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
             	/////// debug only:
             	//System.out.print(NewSO);
             	//System.out.println("depth="+depth);
-
-				currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
-
-				// this code before 2021-09-10 had the disadvantage that estimateGameValueTuple would be called
-				// with nextActionNondeterministic states (!)
-//            	if (depth<this.m_depth) {
-//    				// here is the recursion:
-//    				currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
-//    			} else {
-//    				// this is the 2nd place to terminate the recursion:
-//    				// (after finishing the for-loop for every element of acts)
-//					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
-//					// this check on stopConditionMet is needed when using this method from
-//					// ExpectimaxNWrapper: If NewSO is a game-over state, we do not need to call the estimator
-//					// (i.e. wrapped agent), we just take the final reward
-//					if (stopConditionMet)
-//					{
-//						countTerminal++;
-//						currScoreTuple =  NewSO.getRewardTuple(rgs);
-//					} else {
-//						countMaxDepth++;
-//						NewSO.setAvailableActions();		// if a wrapped agent is called by estimateGameValueTuple,
-//															// it might need the available actions (i.e. MC-N)
-//						currScoreTuple = estimateGameValueTuple(NewSO, null);
-//					}
-//    			}
+            	
+            	if (depth<this.m_depth) {
+    				// here is the recursion:
+    				currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
+    			} else {
+    				// this is the 2nd place to terminate the recursion:
+    				// (after finishing the for-loop for every element of acts)
+					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
+					// this check on stopConditionMet is needed when using this method from
+					// ExpectimaxNWrapper: If NewSO is a game-over state, we do not need to call the estimator
+					// (i.e. wrapped agent), we just take the final reward
+					if (stopConditionMet)
+					{
+						countTerminal++;
+						currScoreTuple =  NewSO.getRewardTuple(rgs);
+					} else {
+						countMaxDepth++;
+						// not needed anymore (and leads for EWN to a wrong isNextActionDeterministic==false):
+//						NewSO.setAvailableActions();		// The former problematic MC-N, which could not handle an
+												// incoming NewSO with next-action-nondeterministic does now handle it
+						currScoreTuple = estimateGameValueTuple(NewSO, null);
+					}
+    			}
             	if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
 
     			// always *maximize* P's element in the tuple currScoreTuple, 
@@ -302,26 +301,10 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 					NewSO.advanceNondeterministic();
 				}
 
-				if (depth<this.m_depth) {
-					// here is the recursion:
-					currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
-					// was before called with depth+1, but we now increase depth only on deterministic moves (!)
-				} else {
-					NewSO.setAvailableActions();		// if a wrapped agent is called by estimateGameValueTuple,
-														// it might need the available actions (i.e. MC-N)
-					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
-					if (stopConditionMet)
-					{
-						// this is the 2nd place to terminate the recursion with a final game state:
-						countTerminal++;
-						currScoreTuple =  NewSO.getRewardTuple(rgs);
-					} else {
-						// terminat the recursion with an in-game estimated ScoreTuple
-						countMaxDepth++;
-						currScoreTuple = estimateGameValueTuple(NewSO, null);
-					}
-				}
-
+				// here is the recursion:
+				currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
+							// was before called with depth+1, but we now increase depth only on deterministic moves (!)
+				
 				currProbab = soND.getProbability(rans.get(i));
             	//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
 				sumProbab += currProbab;

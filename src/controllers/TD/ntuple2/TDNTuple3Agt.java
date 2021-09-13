@@ -441,16 +441,16 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	}
 
 	/**
-	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
+	 * Return the agent's estimate of {@code sob}'s score-to-come  (future reward) <b>for all players</b>.
+	 * Is called by {@link #estimateGameValueTuple(StateObservation, ScoreTuple)}.
 	 * @param so			the state s_t for which the value is desired
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
-	 * 				the future score for s_t from the perspective of player i
+	 * 				the **future** score for s_t from the perspective of player i.
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
@@ -491,15 +491,6 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			}
 		}
 
-		// *** /WK/ 08/2021: (!!?!) Very questionable to add the reward here since the reward is usually added as
-		// *** a separate term r in 'target = r + gamma * V'
-		//
-		// In any case: add the reward obtained so far, since the net predicts
-		// with getScoreI only the expected future reward.
-		boolean rgs = m_oPar.getRewardIsGameScore();
-//		for (int i=0; i<so.getNumPlayers(); i++)
-//			sc.scTup[i] += so.getReward(i, rgs);
-		sc.combine(so.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
     	return sc;
 	}
 
@@ -512,16 +503,22 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * @param sob			the current game state
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}.  
-	 * @return				the agent's estimate of the final game value <b>for all players</b>. 
-	 * 						The return value is a tuple containing  
+	 * @return				the agent's estimate of the final game value (score-so-far plus score-to-come)
+	 * 						<b>for all players</b>. The return value is a tuple containing
 	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return this.getScoreTuple(sob, prevTuple);
-		
+		// getScoreTuple(sob,...): the reward-to-come, as estimated by this agent
+		ScoreTuple sc = this.getScoreTuple(sob, prevTuple);
+		boolean rgs = m_oPar.getRewardIsGameScore();
+		// sob.getRewardTuple(rgs): the reward obtained so far, since the net predicts
+		// with getScoreI only the expected future reward.
+		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
+		sc.combine(sob.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
+
 		// old version (2019), not recommended:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
 //		ScoreTuple sc = new ScoreTuple(sob);
@@ -529,7 +526,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 //			sc.scTup[i] = sob.getReward(i, rgs);
 //			// this is valid, but it may be a bad estimate in games where the reward is only 
 //			// meaningful for game-over-states.
-//		return sc;
+
+		return sc;
 	}
 
 	private void assertStateForSim(StateObservation s_next, StateObservation s_last) {

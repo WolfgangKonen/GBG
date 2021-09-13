@@ -43,16 +43,12 @@ public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable
 	}
 
 	private ScoreTuple newEstimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		// this is just for safety: if sob needs a nondeterministic next move, take a random one from the environment
 		if (!sob.isNextActionDeterministic()) {
-			System.err.println("WARNING: estimateGameVauleTuple called with an sob that has next action = non-deterministic!");
-			sob.advanceNondeterministic();
-			while(!sob.isNextActionDeterministic() && !sob.isRoundOver()){		// /WK/03/2021 NEW
-				sob.advanceNondeterministic();
-			}
-			if (sob.isGameOver()) return sob.getGameScoreTuple();
+			return wrapped_pa.getScoreTuple(sob,null);
 		}
-
+		// this is just for safety: if sob needs a deterministic next move, return the ScoreTuple of actBest.
+		// But it may contain the wrong score in relation to the game's final score, so a warning is issued:
+		System.err.println("[estimateGameValueTuple] WARNING: we should not get here in the getNextAction2-branch!");
 		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false,true);
 		return actBest.getScoreTuple();
 

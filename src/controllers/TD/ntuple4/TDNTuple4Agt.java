@@ -442,19 +442,18 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-		// for this to work, actBest=getNextAction2(so,...); so.storeBestActionInfo(actBest);
-		// has to be called beforehand
-		// --> dangerous design!
-		// --> should we do these calls in here, to be on the safe side??
-		return so.getStoredBestScoreTuple();	// WARNING: might return an all-zeros ScoreTuple
+//		// for this to work, actBest=getNextAction2(so,...); so.storeBestActionInfo(actBest);
+//		// has to be called beforehand
+//		// --> dangerous design!
+//		// --> should we do these calls in here, to be on the safe side??
+//		return so.getStoredBestScoreTuple();	// WARNING: might return an all-zeros ScoreTuple
 
-		// --- the old and flawed version before 2021-09-10 ---
-//		return oldGetScoreTuple(so,prevTuple);
+		return oldGetScoreTuple(so,prevTuple);
 	}
 
 	private ScoreTuple oldGetScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 
-		// --- the old and flawed version before 2021-09-10 ---
+		// --- the old version before 2021-09-10 ---
 		ScoreTuple sc = new ScoreTuple(so);
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		switch (so.getNumPlayers()) {
@@ -491,15 +490,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			}
 		}
 
-		// *** /WK/ 08/2021: (!!?!) Very questionable to add the reward here since the reward is usually added as
-		// *** a separate term r in 'target = r + gamma * V'
-		//
-		// In any case: add the reward obtained so far, since the net predicts
-		// with getScoreI only the expected future reward.
-		boolean rgs = m_oPar.getRewardIsGameScore();
-//		for (int i=0; i<so.getNumPlayers(); i++)
-//			sc.scTup[i] += so.getReward(i, rgs);
-		sc.combine(so.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
     	return sc;
 	}
 
@@ -514,13 +504,19 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
 	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}.  
-	 * @return				the agent's estimate of the final game value <b>for all players</b>. 
-	 * 						The return value is a tuple containing  
-	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
+	 * @return				the agent's estimate of the final game value (score-so-far plus score-to-come)
+	 * 						<b>for all players</b>. The return value is a tuple containing
+	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s.
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return this.getScoreTuple(sob, prevTuple);
+		// first call getScoreTuple(sob,...): the reward-to-come, as estimated by this agent
+		ScoreTuple sc = getScoreTuple(sob, prevTuple);
+		boolean rgs = m_oPar.getRewardIsGameScore();
+		// then add sob.getRewardTuple(rgs): the reward obtained so far, since the net predicts
+		// with getScoreI only the expected future reward.
+		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
+		sc.combine(sob.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
 		
 		// old version (2019), not recommended:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
@@ -529,7 +525,8 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 //			sc.scTup[i] = sob.getReward(i, rgs);
 //			// this is valid, but it may be a bad estimate in games where the reward is only 
 //			// meaningful for game-over-states.
-//		return sc;
+
+		return sc;
 	}
 
 	private void assertStateForSim(StateObservation s_next, StateObservation s_last) {
