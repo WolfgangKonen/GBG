@@ -77,7 +77,7 @@ public interface PlayAgent {
 	/**
 	 * Return the agent's estimate of {@code sob}'s score-to-come  (future reward) <b>for all players</b>.
 	 * Is called by {@link #estimateGameValueTuple(StateObservation, ScoreTuple)}.
-	 * @param so			the state s_t for which the value is desired
+	 * @param sob			the state s_t for which the value is desired
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
 	 * 						passing in such other players' value from previous states, which may serve

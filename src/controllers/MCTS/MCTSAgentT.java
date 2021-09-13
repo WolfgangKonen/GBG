@@ -242,6 +242,9 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	}
 
 
+	/**
+	 * Used by {@link #getScoreTuple(StateObservation, ScoreTuple)}
+	 */
 	@Override
 	public double getScore(StateObservation so) {
 		int nAct = so.getNumAvailableActions();
@@ -299,7 +302,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 			sc = so.getRewardTuple(rgs);
 			if (!so.isGameOver())
 				sc.scTup[player] = this.getScore(so);
-				// return MCTS' estimate of the value of so for the player to move in so
+				// return MCTS' estimate of the so's value for the player to move in so
 		}
     	return sc;
 	}
