@@ -61,7 +61,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
     @Test
     public void expectimaxTree3Test() {
         PlayAgent pa;
-        int nDepth=8;
+        int nDepth=9;
         boolean silent = false;
 
         String selectedGame = "EWN";
@@ -78,13 +78,14 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
         for (Types.ACTIONS startR : startRandoms) {
-            startSO.advanceNondeterministic(startR);
+            so = (StateObserverEWN) startSO.copy();
+            so.advanceNondeterministic(startR);
 
+            //if (startR.toInt()==0) continue;
 
             System.out.println("\n*** Episode with dice value "+startR.toInt()+ " starts ***");
-            System.out.print(startSO);
+            System.out.print(so);
 
-            so = (StateObserverEWN) startSO.copy();
 
             innerETreeTest(pa,so,silent,"dice value="+startR.toInt());
 
@@ -108,8 +109,8 @@ public class ExpectimaxNAgentTest extends GBGBatch {
     @Test
     public void expectimaxTree9Test() {
         PlayAgent pa;
-        int nDepth=8;
-        boolean silent = true;
+        int nDepth=13;
+        boolean silent = false;  // passed on to getNextAction2
 
         String selectedGame = "EWN";
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
@@ -149,7 +150,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         Types.ACTIONS_VT act_pa = pa.getNextAction2(so.partialState(),false,silent);
         double vA = act_pa.getVBest();
         afterstate = (StateObserverEWN) so.copy();
-        afterstate.advance(act_pa);
+        afterstate.advanceDeterministic(act_pa);
 
         ArrayList<Types.ACTIONS> nextRandoms = afterstate.getAvailableRandoms();
         double vNew=0.0;

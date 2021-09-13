@@ -264,8 +264,9 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 						currScoreTuple =  NewSO.getRewardTuple(rgs);
 					} else {
 						countMaxDepth++;
-						NewSO.setAvailableActions();		// if a wrapped agent is called by estimateGameValueTuple,
-															// it might need the available actions (i.e. MC-N)
+						// not needed anymore (and leads for EWN to a wrong isNextActionDeterministic==false):
+//						NewSO.setAvailableActions();		// The former problematic MC-N, which could not handle an
+												// incoming NewSO with next-action-nondeterministic does now handle it
 						currScoreTuple = estimateGameValueTuple(NewSO, null);
 					}
     			}
@@ -312,7 +313,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				// player (this considers the environment as an adversarial player)
 				expecScoreTuple.combine(currScoreTuple, cOpND, player, currProbab);
             }
-			assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
+			assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilities is not 1.0";
 			if (!silent && depth<0) printNondet(soND,expecScoreTuple,sumProbab,depth);
 
             return expecScoreTuple;

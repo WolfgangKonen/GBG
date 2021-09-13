@@ -4,6 +4,7 @@ import games.Arena;
 import games.StateObsNondeterministic;
 import games.StateObservation;
 import tools.ScoreTuple;
+import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
@@ -235,7 +236,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 				// player (this considers the environment as an adversarial player)
 				expecScoreTuple.combine(currScoreTuple, cOP, player, currProbab);
             }
-            assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilites is not 1.0";
+            assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilities is not 1.0";
         	//if (!silent) printNondet(soND,expecScoreTuple,sumProbab,depth);
 			scBest = expecScoreTuple;
 			actBest = rans.get(0); 		// this is just a dummy
@@ -300,7 +301,9 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return wrapped_pa.getScoreTuple(sob, prevTuple);
+		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false,true);
+		return actBest.getScoreTuple();
+//		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
 	}
 
 	public PlayAgent getWrappedPlayAgent() {

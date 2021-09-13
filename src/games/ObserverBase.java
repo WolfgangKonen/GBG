@@ -29,7 +29,7 @@ abstract public class ObserverBase implements StateObservation {
 	protected boolean m_roundOver=false;
 
     protected Types.ACTIONS[] storedActions = null;
-    protected Types.ACTIONS storedActBest = null;
+    protected Types.ACTIONS_VT storedActBest = null;
     protected double[] storedValues = null;
     protected double storedMaxScore;
 
@@ -55,7 +55,7 @@ abstract public class ObserverBase implements StateObservation {
 		this.m_roundOver = other.m_roundOver;
 		this.lastMoves = (ArrayList<Integer>) other.lastMoves.clone();		// WK: bug fix, added missing .clone()
 		this.storedMaxScore = other.storedMaxScore;
-		this.storedActBest = other.storedActBest;
+		if (other.storedActBest!=null) this.storedActBest = new Types.ACTIONS_VT(other.storedActBest); // bug fix: deep copy
 		if (other.storedActions!=null) this.storedActions = other.storedActions.clone();
 		if (other.storedValues!=null) this.storedValues = other.storedValues.clone();
     }
@@ -70,35 +70,40 @@ abstract public class ObserverBase implements StateObservation {
 	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
 	 *  
 	 * @param actBest	the best action
-	 * @param vtable	one double for each action in {@link #getAvailableActions()}:
-	 * 					it stores the value of that action (as given by  <br>
-	 * 					{@code double[]} {@link Types.ACTIONS_VT#getVTable()}) 
 	 */
-	public void storeBestActionInfo(ACTIONS actBest, double[] vtable) {
+// -- this is obsolete now:
+//	 		* @param vtable	one double for each action in {@link #getAvailableActions()}:
+//			* 					it stores the value of that action (as given by  <br>
+//			* 					{@code double[]} {@link Types.ACTIONS_VT#getVTable()})
+	public void storeBestActionInfo(Types.ACTIONS_VT actBest) {
         ArrayList<Types.ACTIONS> acts = this.getAvailableActions();
         storedActions = new Types.ACTIONS[acts.size()];
-        storedValues = new double[acts.size()];
         for(int i = 0; i < storedActions.length; ++i)
-        {
         	storedActions[i] = acts.get(i);
-        	storedValues[i] = vtable[i];
-        }
-        storedActBest = actBest;
-        if (actBest instanceof Types.ACTIONS_VT) {
-        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
-        } else {
-            storedMaxScore = vtable[acts.size()];        	
-        }
+		storedValues = actBest.getVTable().clone();
+        storedActBest = new Types.ACTIONS_VT(actBest);	// deep copy
+		storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
+//        if (actBest instanceof Types.ACTIONS_VT) {
+//        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
+//        } else {
+//            storedMaxScore = vtable[acts.size()];
+//        }
 	}
 
 	public Types.ACTIONS getStoredAction(int k) {
 		return storedActions[k];
 	}
 	
-	public Types.ACTIONS getStoredActBest() {
+	public Types.ACTIONS_VT getStoredActBest() {
 		return storedActBest;
 	}
-	
+
+	public ScoreTuple getStoredBestScoreTuple() {
+		if (storedActBest==null) return new ScoreTuple(this);
+		if (storedActBest.getScoreTuple()==null) return new ScoreTuple(this);
+		return storedActBest.getScoreTuple();
+	}
+
 	public double[] getStoredValues() {
 		return storedValues;
 	}
