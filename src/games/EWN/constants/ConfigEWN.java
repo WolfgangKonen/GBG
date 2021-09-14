@@ -16,5 +16,8 @@ public class ConfigEWN {
 
     public static int CEll_CODING = 1;
 
-    public static boolean DBG = true;
+    public static String[] CELL_CODE_NAMING = {"[0]", "[0],[1],[2]"};
+
+    public static boolean RANDOM_POSITION = false;
+
 }

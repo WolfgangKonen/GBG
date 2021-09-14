@@ -72,9 +72,9 @@ public class ArenaEWN extends Arena {
 
     public static void setCellCoding(String str){
         switch(str){
-            case "Normal": ConfigEWN.CEll_CODING = 0;
+            case "[0,..,n]": ConfigEWN.CEll_CODING = 0;
                 break;
-            case "Grouping": ConfigEWN.CEll_CODING = 1;
+            case "[0,1],[2,3],[3,4]": ConfigEWN.CEll_CODING = 1;
                 break;
         }
     }

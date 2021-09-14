@@ -1,5 +1,6 @@
 package games.EWN.StateObserverHelper;
 
+import games.EWN.constants.ConfigEWN;
 import tools.Types;
 
 public class Helper {
@@ -9,10 +10,9 @@ public class Helper {
      * where [1][04] is the string;
      * @param from  index of board
      * @param to index of board
-     * @param size  board size
      * @return  ACTiON
      */
-    public static Types.ACTIONS parseAction(int from, int to, int size){
+    public static Types.ACTIONS parseAction(int from, int to){
         from *= 100; // 0 => 0   [1,...9] => x00  [10,...25] => xx00
         return new Types.ACTIONS(from + to);
     }
@@ -28,7 +28,8 @@ public class Helper {
         return new int[]{from,to};
     }
 
-    public static int[] getMoveDirection(int size, int player){
+    public static int[] getMoveDirection(int player){
+        int size = ConfigEWN.BOARD_SIZE;
         switch(player){
             case 0: return new int[]{1,size,size+1};
             case 1: return new int[]{-1,-size,-size+(-1)};

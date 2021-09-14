@@ -590,10 +590,10 @@ public class GBGLaunch {
 			scaPar0_L.setText("Settings:");
 			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
-			scaPar1_L.setText("Tuple amount:");
-			setScaPar1List(new String[]{"Normal", "Grouping"});
-			choiceScaPar1.setSelectedItem("Normal");
-			scaPar2_L.setText("Random starting position:");
+			scaPar1_L.setText("Position values:");
+			setScaPar1List(new String[]{"[0,..,n]", "[0,1],[2,3],[3,4]"});
+			choiceScaPar1.setSelectedItem("[0,..,n]");
+			scaPar2_L.setText("Random starting:");
 			setScaPar2List(new String[]{"True", "False"});
 			choiceScaPar2.setSelectedItem("False");
 			break;

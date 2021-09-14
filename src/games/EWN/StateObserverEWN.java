@@ -64,7 +64,11 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         for(int i = 0; i < numPlayers; i++){
             players.add(new Player(i,size));
         }
-        getFixedStartingPosition();
+        if(ConfigEWN.RANDOM_POSITION){
+            getRandomStartingPosition();
+        }else {
+            getFixedStartingPosition();
+        }
         // Init empty board:
         advanceNondeterministic(); // setActions when we start a new state
     }
@@ -108,7 +112,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     }
 
     private void getFixedStartingPosition(){
-        int[][][] startingPosition = getStartingsPosition(size,numPlayers);
+        int[][][] startingPosition = getStartingsPosition();
         for(int i = 0;i < startingPosition.length; i++){
             for(int k = 0; k < startingPosition[i].length; k++){
                 int[] startPosEntry = startingPosition[i][k];
@@ -132,7 +136,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         int[] randomPositionIndex = getRandomPositionindices();
         for(int player = 0; player < ConfigEWN.NUM_PLAYERS; player++){
             for(int index = 0; index < values.length;index++){
-                int position = mirror(randomPositionIndex[index],player);
+                int position = rotate(randomPositionIndex[index],player);
                 int j = position % ConfigEWN.BOARD_SIZE;
                 int i = (position-j)/ConfigEWN.BOARD_SIZE;
                 Token t = new Token(i,j,values[index],player);
@@ -142,11 +146,25 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         }
     }
 
-    private int mirror(int index, int player){
-        int n = ConfigEWN.BOARD_SIZE * ConfigEWN.BOARD_SIZE-1;
+    /**
+     *           2nd player
+     *  0 1 2    8 7 6
+     *  3 4 5 => 5 4 3
+     *  6 7 8    2 1 0
+     *
+     * @param index
+     * @param player
+     * @return
+     */
+    private int rotate(int index, int player){
+        int n = ConfigEWN.BOARD_SIZE;
+        int j = index % n;
+        int i = (index-j) / n ;
         switch(player){
             case 0: return index;
-            case 1: return n-index;
+            case 1: return (n*n-1) - ((i * n)+j);
+            case 2: return (n-1-j)*n +i; // 0 => 30, 1 => 31
+            case 3: return j*n+(n-1-i);
             default:throw new RuntimeException("Swap not implemented");
         }
     }
@@ -238,7 +256,6 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         if(!isOver){
             this.player = (this.player + 1) % numPlayers; //next player
             availableActions.clear();
-            isNextActionDeterministic=false;
         }
 
         isNextActionDeterministic = false;      // /WK/ this was missing, I think
@@ -274,13 +291,13 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         return size == 6 ? 6:3;
     }
 
-    private int[][][] getStartingsPosition(int size, int player){
-        if(player == 2) {
-            return size == 3 ? StartingPositions.S3P2 : StartingPositions.S5P2;
+    private int[][][] getStartingsPosition(){
+        if(numPlayers == 2) {
+            return ConfigEWN.BOARD_SIZE == 3 ? StartingPositions.S3P2 : StartingPositions.S5P2;
         }
-        else if(player == 3) return StartingPositions.S6P3;
+        else if(numPlayers == 3) return StartingPositions.S6P3;
         else{
-             return size == 6 ? StartingPositions.S6P4 : StartingPositions.S4P4;
+             return ConfigEWN.BOARD_SIZE == 6 ? StartingPositions.S6P4 : StartingPositions.S4P4;
         }
     }
 
@@ -331,7 +348,10 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         this.availableActions = p.getAvailableActions();
         if(availableActions.size() == 0){
             count++;
+            System.out.println(stringDescr());
             if(count > 3){
+                System.out.println("--final--");
+                System.out.println(stringDescr());
                 isGameOver();
             }else {
                 this.player = (player + 1) % numPlayers;
@@ -371,8 +391,8 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             }
         } else if(numPlayers == 3){
             // Can only be the single player
-            if (playerWin >= 0){
-                return player ==  2 ? PLAYER_WINS : PLAYER_LOSES;
+            if (playerWin ==2){
+                return PLAYER_WINS;
             }
             if(playerLooses >= 0){
                 if(playerLooses == 0 || playerLooses == 1){
@@ -569,26 +589,19 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         }
 
     private boolean gameOverThreePlayer(){
-        if(availableActions.size() == 0) {
-            playerWin = 2;
-            return true;
-        }
-        for(Player p : players){
-            if(p.getTokens().size() == 0) {
-                playerLooses = p.getPlayer();
+        int winPosition = ConfigEWN.BOARD_SIZE-1;
+        for (Token t : players.get(2).getTokens()) {
+            if (t.getIndex() == winPosition) {
+                playerWin = 2;
                 return true;
-            };
-            int winPosition = ConfigEWN.BOARD_SIZE-1;
-            if(p.getPlayer() == 2){
-                for(Token t : p.getTokens()){
-                    if(t.getIndex() == winPosition){
-                        playerWin = 2;
-                        return true;
-                    }
-                }
             }
         }
-
+        for(Player p : players) {
+            if (p.getTokens().size() == 0) {
+                playerLooses = p.getPlayer();
+                return true;
+            }
+        }
         return false;
     }
 

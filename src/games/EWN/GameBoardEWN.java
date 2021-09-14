@@ -10,6 +10,7 @@ import games.Othello.ConfigOthello;
 import games.StateObservation;
 import tools.Types;
 
+import java.nio.file.Path;
 import java.util.Random;
 
 /**
@@ -39,10 +40,10 @@ public class GameBoardEWN implements GameBoard {
     private boolean selecting;
 
 
-    public GameBoardEWN(Arena arena, int size, int playerNum){
+    public GameBoardEWN(Arena arena){
         super();
         m_Arena = arena;
-        m_so = new StateObserverEWN(size,playerNum);
+        m_so = new StateObserverEWN();
         rand = new Random();
         selecting = true;
         selectedTokenPosition = -1;
@@ -97,7 +98,7 @@ public class GameBoardEWN implements GameBoard {
                 m_gameGui.unSelect();
                 selecting = true;
             }else{
-                Types.ACTIONS act = Helper.parseAction(selectedTokenPosition,index, ConfigEWN.BOARD_SIZE);
+                Types.ACTIONS act = Helper.parseAction(selectedTokenPosition,index);
                 if( m_so.isLegalAction(act)) {
                     m_so.advance(act);
                     (m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
@@ -169,10 +170,14 @@ public class GameBoardEWN implements GameBoard {
 
     @Override
     public String getSubDir() {
-        int numPlayer = ConfigEWN.NUM_PLAYERS;
         int boardSize = ConfigEWN.BOARD_SIZE;
         int cellCoding = ConfigEWN.CEll_CODING;
-        return boardSize+"x"+boardSize+" "+numPlayer+"P" + (cellCoding == 0 ? " N+1 Position Values" : " N*2+1 Position Values");
+        boolean random = ConfigEWN.RANDOM_POSITION;
+        String board = boardSize+"x"+boardSize+" ";
+        String players = ConfigEWN.NUM_PLAYERS + " Players";
+        String isRandom = random ? " random " : "";
+        return board+players+ConfigEWN.CELL_CODE_NAMING[cellCoding]+isRandom;
+
 
     }
 
