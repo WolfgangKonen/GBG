@@ -5,6 +5,7 @@ import controllers.ExpectimaxNWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.Arena;
+import games.StateObsNondeterministic;
 import games.StateObservation;
 import params.ParMC;
 import params.ParOther;
@@ -99,15 +100,23 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         int numberAgents = m_mcPar.getNumAgents();
         int depth = m_mcPar.getRolloutDepth();
         boolean stopOnRoundOver = m_mcPar.getStopOnRoundOver();
-        
+
+        Types.ACTIONS_VT actBest;
         if(numberAgents > 1) {
             //more than one agent (majority vote)
-        	return getNextAction2MultipleAgents(so, iterations, numberAgents, depth, stopOnRoundOver);
+        	actBest = getNextAction2MultipleAgents(so, iterations, numberAgents, depth, stopOnRoundOver);
         } else {
             //only one agent: select one of the following lines:
-        	return getNextAction_PAR(so, iterations, depth, stopOnRoundOver);
-        	//return getNextAction_MassivePAR(so, iterations, depth, stopOnRoundOver);
+        	actBest =  getNextAction_PAR(so, iterations, depth, stopOnRoundOver);
+        	//actBest = getNextAction_MassivePAR(so, iterations, depth, stopOnRoundOver);
         }
+
+        // TODO (when ObserverBase's storedActBest is ACTIONS_VT)
+        //      But perhaps the update storeBestActionInfo is done outside in Arena
+        // Check if the update of the stored ScoreTuple in so is the same as in actBest:
+        //assert actBest.getScoreTuple().equals(so.getStoredActBest().getScoreTuple())
+
+        return actBest;
 	}
 
     /**
@@ -572,27 +581,52 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-//		ScoreTuple sc = new ScoreTuple(so);
-//		switch (so.getNumPlayers()) {
-//		case 1:
-//			sc.scTup[0] = this.getScore(so);
-//			break;
-//		case 2:
-//			int player = so.getPlayer();
-//			int opponent = (player==0) ? 1 : 0;
-//			sc.scTup[player] = this.getScore(so);
-//			sc.scTup[opponent] = -sc.scTup[player];
-//			break;
-//		default:
-	        if (so.isGameOver()) {
-	        	return so.getGameScoreTuple();
-	        } else {
-	            Types.ACTIONS_VT actBestVT = getNextAction2(so.partialState(), false, true);
-	            return actBestVT.getScoreTuple();
-	        }
-//		}
-//    	return sc;
+        if (so.isGameOver()) {
+            return so.getGameScoreTuple();
+        } else {
+            if (so.isNextActionDeterministic()) {
+                Types.ACTIONS_VT actBestVT = getNextAction2(so.partialState(), false, true);
+                return actBestVT.getScoreTuple();
+            } else {
+                return getScoreTuple_NextActionNonDet((StateObsNondeterministic) so);
+            }
+        }
 	}
+
+    /**
+     * This is for the case that getScoreTuple is called with a next-action-nondeterministic state.
+     * In that case we average over all nondeterministic actions and call for each of the resulting
+     * states with next-action-deterministic {@link #getNextAction2(StateObservation, boolean, boolean)}.
+     *
+     * @param soND  the state whose next action is nondeterministic
+     * @return the weighted average over all non-deterministic choices (weight = probability of each choice)
+     */
+	private ScoreTuple getScoreTuple_NextActionNonDet(StateObsNondeterministic soND) {
+        ArrayList<Types.ACTIONS> rans = soND.getAvailableRandoms();
+        assert (rans.size()>0) : "Error: getAvailableRandoms returns no actions";
+        ScoreTuple expecScoreTuple=new ScoreTuple(soND);	// a 0-ScoreTuple
+        ScoreTuple currScoreTuple;
+        double currProbab;
+        double sumProbab=0.0;
+        StateObsNondeterministic NewSO;
+        for(int i = 0; i < rans.size(); ++i)
+        {
+            NewSO = soND.copy();
+            NewSO.advanceNondeterministic(rans.get(i));
+            while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
+                NewSO.advanceNondeterministic();
+            }
+
+            currScoreTuple = getNextAction2(NewSO.partialState(), false, true).getScoreTuple();
+
+            currProbab = soND.getProbability(rans.get(i));
+            sumProbab += currProbab;
+            expecScoreTuple.combine(currScoreTuple, ScoreTuple.CombineOP.AVG, 0, currProbab);
+        }
+        assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilities is not 1.0";
+
+        return expecScoreTuple;
+    }
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>.

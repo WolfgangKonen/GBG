@@ -57,7 +57,7 @@ public class ScoreTuple implements Serializable {
 		for (int i=0; i<scTup.length; i++) f = (scTup[i]>f) ? scTup[i] : f;
 		return f;
 	}
-	
+
 	public int argmax() {
 		double f = -Double.MAX_VALUE;
 		int ind=0;
@@ -68,7 +68,13 @@ public class ScoreTuple implements Serializable {
 			}
 		return ind;
 	}
-	
+
+	public boolean equals(ScoreTuple other) {
+		for (int i=0; i<scTup.length; i++)
+			if (this.scTup[i] != other.scTup[i]) return false;
+		return true;
+	}
+
 	public ScoreTuple shift(int k) {
 		ScoreTuple shiftedTuple = new ScoreTuple(this);
 		for (int i=0; i<scTup.length; i++) shiftedTuple.scTup[(i+k)%scTup.length] = scTup[i];

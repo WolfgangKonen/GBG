@@ -216,6 +216,13 @@ public class Types {
             this.scBest = scBest;
         }
 
+		public ACTIONS_VT(ACTIONS_VT other) {
+			super(other);
+			this.vTable = other.vTable.clone();
+			this.vBest = other.vBest;
+			if (other.scBest!=null) this.scBest = new ScoreTuple(other.scBest);
+		}
+
         public double[] getVTable() {
         	return vTable;
         }

@@ -1082,7 +1082,7 @@ public class XArenaFuncs {
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		boolean nextMoveSilent = (verbose < 2);
 		StateObservation so;
-		Types.ACTIONS actBest;
+		Types.ACTIONS_VT actBest;
 		String sMsg;
 
 		String[] pa_string = new String[numPlayers];
@@ -1139,6 +1139,7 @@ public class XArenaFuncs {
 				if (nextTimes != null)
 					nextTimes[player].addNewTimeNS(endTNano - startTNano);
 				so.advance(actBest);
+				so.storeBestActionInfo(actBest);	// /WK/ added 2021-09-10, but probably never needed
 
 
 				if (so.isGameOver()) {
