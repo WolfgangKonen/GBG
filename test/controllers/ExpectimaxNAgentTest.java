@@ -26,7 +26,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         String selectedGame = "EWN";
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardEWN gb = new GameBoardEWN(t_Game,3,2);		// needed for chooseStartState()
+        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
         StateObserverEWN so;
 
         pa = new ExpectimaxNAgent("ExpectimaxN",nDepth);
@@ -67,7 +67,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         String selectedGame = "EWN";
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardEWN gb = new GameBoardEWN(t_Game,3,2);		// needed for chooseStartState()
+        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
 
         pa = new ExpectimaxNAgent("ExpectimaxN",nDepth);
@@ -115,7 +115,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         String selectedGame = "EWN";
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardEWN gb = new GameBoardEWN(t_Game,3,2);		// needed for chooseStartState()
+        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
         DecimalFormat frmAct = new DecimalFormat("0000");
 

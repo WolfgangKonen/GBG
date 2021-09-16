@@ -298,16 +298,24 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score (tuple for all players).  
 	 * <p>
-	 * Here we use the wrapped {@link PlayAgent} to return a tuple of game values.
+	 * Here we use the wrapped {@link PlayAgent#estimateGameValueTuple(StateObservation, ScoreTuple)}
+	 * to return a tuple of game values. This method returns V(s) + R(s) (score-to-come plus score-so-far)
 	 * 
-	 * @param sob	the state observation
-	 * @return		the tuple of estimated score 
+	 * @param sob		the state observation
+	 * @param prevTuple	for N &ge; 3 player, we only know the game value for the player who <b>created</b>
+	 * 					{@code sob}. To provide also values for other players, {@code prevTuple} allows
+	 * 					passing in such other players' value from previous states, which may serve
+	 * 					as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}.
+	 * @return			the agent's estimate of the final game value (score-so-far plus score-to-come)
+	 * 					<b>for all players</b>. The return value is a tuple containing
+	 * 					{@link StateObservation#getNumPlayers()} {@code double}'s.
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false,true);
-		return actBest.getScoreTuple();
+		return wrapped_pa.estimateGameValueTuple(sob, prevTuple);
 //		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
+//		return wrapped_pa.getNextAction2(sob,false,true).getScoreTuple(); // /WK/ 2021-09-13: also flawed
+			// (because getNextAction2's ScoreTuple does not include score-so-far, but a final game state does)
 	}
 	
 	/**

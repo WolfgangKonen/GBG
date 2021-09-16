@@ -1,11 +1,15 @@
 package controllers.MCTSWrapper.passStates;
 
+import controllers.MCTSExpWrapper.stateApproximation2.Approximator2;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
 import controllers.MCTSWrapper.utils.Lazy;
 import controllers.MCTSWrapper.utils.StateObservationExtensions;
 import controllers.MCTSWrapper.utils.Tuple;
 import games.ObserverBase;
+import games.StateObsNondeterministic;
 import games.StateObservation;
+import tools.ScoreTuple;
+import tools.Types;
 
 import java.util.ArrayList;
 
@@ -68,11 +72,50 @@ public final class GameStateIncludingPass {
         );
     }
 
+    public GameStateIncludingPass advanceDeterministic(final ApplicableAction action) {
+        return new GameStateIncludingPass(
+                action.advanceDet(state)
+        );
+    }
+
+    public Tuple<ApplicableAction,GameStateIncludingPass> advanceNondeterministic(final ApplicableAction action) {
+        assert state instanceof StateObsNondeterministic : "[GameStateIncludingPass] state must be NON DET";
+        final var tuple = action.advanceNonDet((StateObsNondeterministic) state);
+        return new Tuple(new RegularAction(tuple.element1), new GameStateIncludingPass(tuple.element2));
+    }
+
+    public double getProbability(Types.ACTIONS a) {
+        assert state instanceof StateObsNondeterministic : "[GameStateIncludingPass] state must be NON DET";
+        return ((StateObsNondeterministic) state).getProbability(a);
+    }
+
     /**
      * @return Actions available from the current game state including pass actions.
      */
     public ApplicableAction[] getAvailableActionsIncludingPassActions() {
         return lazyAvailableActions.value();
+    }
+
+    /**
+     * This is for MCTSExpWrapper (without pass possibility)
+     *
+     * @return random (nondeterministic) actions available from the current game state
+     */
+    public ApplicableAction[] getAvailableRandoms() {
+        assert state instanceof StateObsNondeterministic : "[getAvailableRandoms] state is NOT StateObsNondeterministic";
+        StateObsNondeterministic soND = (StateObsNondeterministic) state;
+        return soND.getAvailableRandoms().stream().map(RegularAction::new).toArray(ApplicableAction[]::new);
+    }
+
+    /**
+     * This is for MCTSExpWrapper (without pass possibility)
+     *
+     * @return a specific random (nondeterministic) action chosen according to the probability distribution of random actions
+     */
+    public ApplicableAction getNextRandomAction() {
+        assert state instanceof StateObsNondeterministic : "[getAvailableRandoms] state is NOT StateObsNondeterministic";
+        StateObsNondeterministic soND = (StateObsNondeterministic) state;
+        return new RegularAction(soND.getNextNondeterministicAction());
     }
 
     /**
@@ -89,6 +132,14 @@ public final class GameStateIncludingPass {
         return state.getGameScore(state.getPlayer());
     }
 
+    /**
+     * @return The final game score tuple of a terminating game state.
+     */
+    public ScoreTuple getFinalScoreTuple() {
+        return state.getGameScoreTuple();
+    }
+
+    public int getPlayer() { return state.getPlayer(); }
     public int getNumPlayers() { return state.getNumPlayers(); }
 
     public int getMoveCounter() { return state.getMoveCounter(); }
@@ -111,6 +162,17 @@ public final class GameStateIncludingPass {
         return lazyMustPass.value()
             ? approximateValueAndMoveProbabilitiesForPassingState(approximator)
             : approximator.predict(state);
+    }
+
+    /**
+     * This is for MCTSExpWrapper (without pass possibility)
+     *
+     * @param approximator
+     * @return A tuple containing the ScoreTuple of the best action and an array for the vector p.
+     * @return
+     */
+    public Tuple<ScoreTuple, double[]> getApproximatedValueAndMoveProbabilities(final Approximator2 approximator) {
+        return approximator.predict(state);
     }
 
     /**

@@ -426,7 +426,12 @@ public class GameBoardCube implements GameBoard {
 		boolean cond;
 		//System.out.println("selectByTwists1: p="+p);
 		StateObserverCube so = new StateObserverCube(); // default cube
+		int attempts=0;
 		while (so.isEqual(new StateObserverCube())) {		// do another round, if so is after twisting still default state
+			attempts++;
+			if (attempts % 1000==0) {
+				System.err.println("[selectByTwists1] no cube different from default found -- may be p=0?? p="+p);
+			}
 			// make p twists and hope that we land in
 			// distance set D[p] (which is often not true for p>5)
 			switch (CubeConfig.twistType) {

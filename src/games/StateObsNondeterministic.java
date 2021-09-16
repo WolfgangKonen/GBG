@@ -23,6 +23,8 @@ public interface StateObsNondeterministic extends StateObservation {
 
     /**
      * Advance the current afterstate to a new state (do the nondeterministic part of advance)
+	 *
+	 * Choose the nondeterministic action according to its probability of occurence (!)
      */
 	Types.ACTIONS advanceNondeterministic();
 

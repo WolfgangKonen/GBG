@@ -33,7 +33,7 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
         String strAgent = Types.GUI_DEFAULT_DIR_AGENT + "/test_TD4_EWN.zip.agt.zip";
-        GameBoardEWN gb = new GameBoardEWN(t_Game,3,2);		// needed for chooseStartState()
+        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
 
         boolean res = t_Game.loadAgent(0, strAgent);
@@ -93,7 +93,7 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
         String strAgent = Types.GUI_DEFAULT_DIR_AGENT + "/test_TD4_EWN.zip.agt.zip";
-        GameBoardEWN gb = new GameBoardEWN(t_Game,3,2);		// needed for chooseStartState()
+        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
         DecimalFormat frmAct = new DecimalFormat("0000");
 

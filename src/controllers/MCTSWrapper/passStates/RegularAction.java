@@ -1,6 +1,8 @@
 package controllers.MCTSWrapper.passStates;
 
 import controllers.MCTSWrapper.utils.StateObservationExtensions;
+import controllers.MCTSWrapper.utils.Tuple;
+import games.StateObsNondeterministic;
 import games.StateObservation;
 import tools.Types;
 
@@ -40,6 +42,30 @@ public final class RegularAction implements ApplicableAction {
                                                        // a passing situation has occurred that has been skipped.
             ? StateObservationExtensions.passToNextPlayer(stateCopy)
             : stateCopy;
+    }
+
+    /**
+     * This is for MCTSExpWrapper (without pass possibility)
+     *
+     * @return return a copy of so which is deterministically advanced by this.action
+     */
+    @Override
+    public StateObservation advanceDet(final StateObservation so) {
+        final var stateCopy = so.copy();
+        stateCopy.advanceDeterministic(action);
+        return stateCopy;
+    }
+
+    /**
+     * This is for MCTSExpWrapper (without pass possibility)
+     *
+     * @return return a copy of so which is non-deterministically advanced by this.action
+     */
+    @Override
+    public Tuple<Types.ACTIONS,StateObsNondeterministic> advanceNonDet(final StateObsNondeterministic so) {
+        final var stateCopy = so.copy();
+        final var r = stateCopy.advanceNondeterministic(action);
+        return new Tuple( r, stateCopy);
     }
 
     /**
