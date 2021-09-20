@@ -1,7 +1,7 @@
 package controllers.MCTS;
 
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
@@ -242,6 +242,9 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	}
 
 
+	/**
+	 * Used by {@link #getScoreTuple(StateObservation, ScoreTuple)}
+	 */
 	@Override
 	public double getScore(StateObservation so) {
 		int nAct = so.getNumAvailableActions();
@@ -268,7 +271,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * @param so	the state s_t for which the value is desired
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
@@ -299,7 +302,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 			sc = so.getRewardTuple(rgs);
 			if (!so.isGameOver())
 				sc.scTup[player] = this.getScore(so);
-				// return MCTS' estimate of the value of so for the player to move in so
+				// return MCTS' estimate of the so's value for the player to move in so
 		}
     	return sc;
 	}

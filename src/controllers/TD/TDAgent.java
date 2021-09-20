@@ -542,6 +542,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
+			so.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			//couldn't we just train till round over?
 			//if(so.isRoundOver()&&!so.isGameOver()){
@@ -679,7 +680,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			actBest = this.getNextAction2(so.partialState(), true, true);
 			randomMove = actBest.isRandomAction();
 			so.advance(actBest);
-			
+			so.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
+
 			counter++;
 			if (counter==epiLength) {
 				break;

@@ -265,6 +265,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
 			s_t.advance(a_t);		// advance the state 
+			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) m_finished = true;
 			if (s_t.getMoveCounter()>=epiLength) {
@@ -321,6 +322,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 
 			s_t.advance(a_t);		// advance the state
+			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) {
 				m_finished = true;

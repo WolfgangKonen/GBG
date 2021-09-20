@@ -469,14 +469,14 @@ public class XArenaFuncs {
 				// --- questionable, the code concerned with wrapper!! ---
 				PlayAgent inner_pa = m_PlayAgents[n];
 				if (m_PlayAgents[n].getName().equals("ExpectimaxWrapper"))
-					inner_pa = ((ExpectimaxWrapper) inner_pa).getWrappedPlayAgent();
+					inner_pa = ((ExpectimaxNWrapper) inner_pa).getWrappedPlayAgent();
 				if (!sAgent.equals(inner_pa.getName()))
 					throw new RuntimeException("Current agent for player " + n + " is " + m_PlayAgents[n].getName()
 							+ " but selector for player " + n + " requires " + sAgent + ".");
 				pa = m_PlayAgents[n]; // take the n'th current agent, which
 										// is *assumed* to be trained (!)
 
-				// Wrapper nPly, Wrapper MCTS and PUCT for Wrapper MCTS are the ONLY parameters from tab 'Other pars'
+				// Wrapper MaxN: { nPly} and Wrapper MCTS: {iterations, PUCT, depth} are the ONLY parameters from tab 'Other pars'
 				// which may be changed by the user AFTER training an agent. (All the other opar parameters may be only
 				// set/changed BEFORE training a trainable agent.) The following line of code was missing before 2020-08-11
 				// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
@@ -539,7 +539,7 @@ public class XArenaFuncs {
 	 *         wrapped agents if {@code nply>0})
 	 * 
 	 * @see MaxN2Wrapper
-	 * @see ExpectimaxWrapper
+	 * @see ExpectimaxNWrapper
 	 */
 	public PlayAgent[] wrapAgents(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so)
 	{
@@ -571,7 +571,7 @@ public class XArenaFuncs {
 				// qa = new MaxNWrapper(pa, wrap_mPar, oPar); // wrap_mPar has useMaxNHashMap
 				// qa = new MaxNWrapper(pa,nply); // always maxNHashMap==false  // OLD
 			} else {
-				qa = new ExpectimaxWrapper(pa, nply);
+				qa = new ExpectimaxNWrapper(pa, nply);
 			}
 		} else {
 			qa = pa;
@@ -584,7 +584,7 @@ public class XArenaFuncs {
 				oPar.getWrapperMCTS_PUCT(),
 				new PlayAgentApproximator(qa),
 				"MCTS-Wrapped "+qa.getName(),
-					oPar.getStopEval()
+				oPar.getWrapperMCTS_depth()
             );
 		}
 
@@ -1082,7 +1082,7 @@ public class XArenaFuncs {
 		DecimalFormat frm = new DecimalFormat("#0.000");
 		boolean nextMoveSilent = (verbose < 2);
 		StateObservation so;
-		Types.ACTIONS actBest;
+		Types.ACTIONS_VT actBest;
 		String sMsg;
 
 		String[] pa_string = new String[numPlayers];
@@ -1128,7 +1128,7 @@ public class XArenaFuncs {
 			so = startSO.copy();
 
 			if(so.needsRandomization()) {
-				// Randomizing the start state in case a game already is initalized with a state to make sure there is a fair competition.
+				// Randomizing the start state in case a game already is initialized with a state to make sure there is a fair competition.
 				so.randomizeStartState();
 			}
 
@@ -1139,6 +1139,7 @@ public class XArenaFuncs {
 				if (nextTimes != null)
 					nextTimes[player].addNewTimeNS(endTNano - startTNano);
 				so.advance(actBest);
+				so.storeBestActionInfo(actBest);	// /WK/ added 2021-09-10, but probably never needed
 
 
 				if (so.isGameOver()) {

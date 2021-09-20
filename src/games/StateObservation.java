@@ -3,7 +3,9 @@ package games;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
+import controllers.PlayAgtVector;
 import controllers.TD.ntuple2.*;
 import controllers.TD.ntuple4.*;
 import tools.ScoreTuple;
@@ -212,7 +214,7 @@ public interface StateObservation extends Serializable{
      * have it here to allow the same syntax in {@link TDNTuple3Agt} and {@link TDNTuple4Agt} when making an action for
      * any StateObservation, deterministic or nondeterministic.)
      */
-	void advanceNondeterministic();
+	Types.ACTIONS advanceNondeterministic();
 
 	/**
 	 * Return true if the next action is deterministic.<p>
@@ -316,12 +318,17 @@ public interface StateObservation extends Serializable{
 	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
 	 *  
 	 * @param actBest	the best action
-	 * @param vtable	one double for each action in {@link #getAvailableActions()}:
-	 * 					it stores the value of that action (as given by the double[] 
-	 * 					from {@link Types.ACTIONS_VT#getVTable()}) 
 	 */
-	void storeBestActionInfo(ACTIONS actBest, double[] vtable);
-	
+// -- this is obsolete now:
+//	 		* @param vtable	one double for each action in {@link #getAvailableActions()}:
+//			* 					it stores the value of that action (as given by  <br>
+//			* 					{@code double[]} {@link Types.ACTIONS_VT#getVTable()})
+	void storeBestActionInfo(Types.ACTIONS_VT actBest); //, double[] vtable);
+
+	Types.ACTIONS_VT getStoredActBest();
+
+	ScoreTuple getStoredBestScoreTuple();
+
 	/**
 	 * @return  {0,1,...,n-1} for an n-player game: <b>who moves in this state</b>
 	 */
@@ -346,7 +353,22 @@ public interface StateObservation extends Serializable{
 	 */
 	int getNumPlayers();
 
+	/**
+	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 * whether the start state needs randomization when doing such a competition.
+	 * <p>
+	 * Currently only used by {@link games.Poker.StateObserverPoker}
+	 *
+	 * @return true or false
+	 */
+	boolean needsRandomization();
+
+	/**
+	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 *  if {@link #needsRandomization()} returns true
+	 * <p>
+	 * Currently only used by {@link games.Poker.StateObserverPoker}
+	 */
 	void randomizeStartState();
 
-	boolean needsRandomization();
 }

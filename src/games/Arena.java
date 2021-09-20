@@ -14,7 +14,6 @@ import games.SimpleGame.StateObserverSG;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
-import params.ParOther;
 import starters.GBGLaunch;
 import tools.ScoreTuple;
 import tools.Types;
@@ -350,14 +349,14 @@ abstract public class Arena implements Runnable {
 					actBest = paX.getNextAction2(so.partialState(), false, true);
 					if (actBest != null) 	// a HumanAgent will return
 											// actBest=null
-						so.storeBestActionInfo(actBest, actBest.getVTable());
+						so.storeBestActionInfo(actBest);
 
 					gb.updateBoard(so, true, true);
 //					if (so.isRoundOver()) {
 //						so.initRound();
 //						assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
 //					}
-					if (so instanceof StateObserverSG) {
+					if (so instanceof StateObserverSG && actBest.getVTable()!=null) {
 						DecimalFormat form = new DecimalFormat("0.0000");
 						double[] optimHit = {4.888888889,4.666666667,4.333333333,3.888888889,
 								3.333333333,2.666666667,1.888888889,1,0 };
@@ -533,7 +532,7 @@ abstract public class Arena implements Runnable {
 							return;
 						}
 
-						so.storeBestActionInfo(actBest, actBest.getVTable());
+						so.storeBestActionInfo(actBest);
 						so.advance(actBest);
 						logManager.addLogEntry(actBest, so, logSessionid);
 						if (m_spDT==null) {		// the normal play (non-TS, i.e. no tournament)

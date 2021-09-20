@@ -304,6 +304,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public void setWrapperParams(ParOther otherPar) {
 		m_oPar.setWrapperNPly(otherPar.getWrapperNPly());
 		m_oPar.setWrapperMCTS_PUCT(otherPar.getWrapperMCTS_PUCT());
+		m_oPar.setWrapperMCTS_depth(otherPar.getWrapperMCTS_depth());
 		m_oPar.setWrapperMCTSIterations(otherPar.getWrapperMCTSIterations());
 	}
 

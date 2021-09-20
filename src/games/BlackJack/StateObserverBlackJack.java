@@ -646,12 +646,15 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
 
     @Override
-    public void advanceNondeterministic() {
-        advanceNondeterministic(getNextNondeterministicAction());
+    public ACTIONS advanceNondeterministic() {
+        ACTIONS act = getNextNondeterministicAction();
+        advanceNondeterministic(act);
+
+        return act;
     }
 
     @Override
-    public void advanceNondeterministic(ACTIONS randAction) {
+    public ACTIONS advanceNondeterministic(ACTIONS randAction) {
         if (isNextActionDeterministic) {
             throw new RuntimeException("Next action should be deterministic");
         }
@@ -869,6 +872,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         }
         if (isNextActionDeterministic)
             setAvailableActions();
+        return randAction;
     }
 
 

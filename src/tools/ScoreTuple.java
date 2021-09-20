@@ -24,12 +24,13 @@ public class ScoreTuple implements Serializable {
 	 */
 	public double[] scTup;
 	/**
-	 * for CombineOP=MIN (MAX): how many of the tuple combined have minValue (maxValue). 
+	 * for CombineOP=MIN (MAX): how many of the tuples that were combined into  {@code this} have
+	 * the same minValue (maxValue) in component playNum.
 	 * This is needed in {@link MaxNAgent} and {@link ExpectimaxNAgent} to break ties.
 	 */
-	public int count;
-	private double minValue = Double.MAX_VALUE;
-	private double maxValue = -Double.MAX_VALUE;
+	public int count = 1;
+	//private double minValue = Double.MAX_VALUE;
+	//private double maxValue = -Double.MAX_VALUE;
 	
 	/**
 	 * @param N number of players
@@ -56,7 +57,7 @@ public class ScoreTuple implements Serializable {
 		for (int i=0; i<scTup.length; i++) f = (scTup[i]>f) ? scTup[i] : f;
 		return f;
 	}
-	
+
 	public int argmax() {
 		double f = -Double.MAX_VALUE;
 		int ind=0;
@@ -67,7 +68,13 @@ public class ScoreTuple implements Serializable {
 			}
 		return ind;
 	}
-	
+
+	public boolean equals(ScoreTuple other) {
+		for (int i=0; i<scTup.length; i++)
+			if (this.scTup[i] != other.scTup[i]) return false;
+		return true;
+	}
+
 	public ScoreTuple shift(int k) {
 		ScoreTuple shiftedTuple = new ScoreTuple(this);
 		for (int i=0; i<scTup.length; i++) shiftedTuple.scTup[(i+k)%scTup.length] = scTup[i];
@@ -147,20 +154,20 @@ public class ScoreTuple implements Serializable {
     		for (int i=0; i<scTup.length; i++) scTup[i] += currProbab*tuple2nd.scTup[i];
     		break;
 		case MIN:
-			if (tuple2nd.scTup[playNum]<minValue) {
-				minValue = tuple2nd.scTup[playNum];
+			if (tuple2nd.scTup[playNum]<this.scTup[playNum]) {
+				//minValue = tuple2nd.scTup[playNum];
 				this.scTup = tuple2nd.scTup.clone();
 				count=1;
-			}  else if (tuple2nd.scTup[playNum]==minValue) {
+			}  else if (tuple2nd.scTup[playNum]==this.scTup[playNum]) {
 				count++;
 			}  	
 			break;
 		case MAX:
-			if (tuple2nd.scTup[playNum]>maxValue) {
-				maxValue = tuple2nd.scTup[playNum];
+			if (tuple2nd.scTup[playNum]>this.scTup[playNum]) {
+				//maxValue = tuple2nd.scTup[playNum];
 				this.scTup = tuple2nd.scTup.clone();
 				count=1;
-			}  else if (tuple2nd.scTup[playNum]==maxValue) {
+			}  else if (tuple2nd.scTup[playNum]==this.scTup[playNum]) {
 				count++;
 			}
 			break;

@@ -1,18 +1,10 @@
 package controllers.TD.ntuple2;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Locale;
 import java.util.Random;
 
 import agentIO.LoadSaveGBG;
@@ -23,7 +15,7 @@ import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
 import games.GameBoard;
@@ -313,8 +305,16 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
         assert actBest != null : "Oops, no best action actBest";
 		NewSO = so.copy();
 		NewSO.advance(actBest);
+
 		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
-		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
+		ScoreTuple scBest = so.getStoredBestScoreTuple();
+				// This is the previous tuple, only relevant in case N>=3. If so.getStoredBestScoreTuple() encounters
+				// null pointers, it returns an all-zeros-tuple with length so.getNumPlayers().
+		scBest.scTup[so.getPlayer()] = bestQValue;
+		if (so.getNumPlayers()==2) {			// the following holds for 2-player, zero-sum games:
+			int opponent = 1-so.getPlayer();
+			scBest.scTup[opponent] = -bestQValue;
+		}
 		if (!silent) {
 			System.out.println("---Best Move: "+NewSO.stringDescr()+", "+(bestQValue));
 		}
@@ -343,7 +343,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * @param so	the state s_t for which the value is desired
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
@@ -351,7 +351,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-		throw new RuntimeException("getScoreTuple(StateObservation so) not available for SarsaAgt");			        		
+		throw new RuntimeException("getScoreTuple(StateObservation so) not available for "+this.getName());
 	}
 
 	/**
@@ -538,7 +538,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 				
 		int t=0;
 		StateObservation s_t = so.copy();
-		Types.ACTIONS a_t = getNextAction2(s_t.partialState(), true, true);
+		Types.ACTIONS_VT a_t_vt = getNextAction2(s_t.partialState(), true, true);
+		ACTIONS a_t = a_t_vt;
 		for (int n=0; n<numPlayers; n++) {
 			sLast[n] = (n==nextPlayer ? s_t : null);	// nextPlayer is X=so.getPlayer()
 			aLast[n] = (n==nextPlayer ? a_t : null);	// sLast[X]=so is the state on which X has to act 
@@ -547,7 +548,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	               
 	        // take action a_t and observe reward & next state 
-	        ns = new NextState(this,s_t,a_t);	        
+	        ns = new NextState(this,s_t,a_t_vt);
 	        nextPlayer = ns.getNextSO().getPlayer();
 	        R = ns.getNextRewardTupleCheckFinished(epiLength);
 	        

@@ -135,3 +135,5 @@ agents/theNtuple.txt
 /experiments/
 agents/Othello/csv/multiCompeteOthello-i10000-TCL4C.xlsx
 agents/Othello/TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip
+agents/test_MC.agt.zip
+agents/test_TD4_EWN.zip.agt.zip

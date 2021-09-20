@@ -23,7 +23,7 @@ import java.util.Random;
  */
 public class MCTSEChanceNode
 {
-    public static final double epsilon = 1e-6;		                                // tiebreaker
+    private static final double epsilon = 1e-6;		                                // tiebreaker
     /**
      * the state observation associated with this node
      */
@@ -32,11 +32,11 @@ public class MCTSEChanceNode
      * member {@code #action} is only used for printout in {@link #printChildInfo(int, boolean)}
      */
     public Types.ACTIONS action;
-    private MCTSETreeNode parentNode;
+    private final MCTSETreeNode parentNode;
     public List<MCTSETreeNode> childrenNodes = new ArrayList<>();
     public MCTSEPlayer m_player;
 
-    public List<Types.ACTIONS> notExpandedActions;         // Actions that are not represented by a node
+    public ArrayList<Types.ACTIONS> notExpandedActions;         // Actions that are not represented by a node
     public double value = 0;   				// total value
     public int visits = 0; 					// total number of visits
     public Random m_rnd;    // do we need it separately in each node or could it be once in MCTSEPlayer ??
@@ -65,7 +65,7 @@ public class MCTSEChanceNode
         this.m_player = player;
         this.m_rnd = random;
 
-        notExpandedActions = (List<Types.ACTIONS>) so.getAvailableActions().clone();
+        notExpandedActions = (ArrayList<Types.ACTIONS>) so.getAvailableActions().clone();
 
         if(player.getRootNode() != null) {
             player.getRootNode().numberChanceNodes++;
@@ -180,11 +180,36 @@ public class MCTSEChanceNode
     }
 
     /**
+     * Selects the best Action of an expanded tree
+     *
+     * @return the action from the children of {@code this} which maximizes
+     * <pre>
+     * 		 U(i) = child[i].getQ()/child[i].visits
+     * </pre>
+     */
+    public Types.ACTIONS bestAction() {
+        Types.ACTIONS selected = null;
+        double bestValue = -Double.MAX_VALUE;
+        double currentValue;
+
+        for (MCTSETreeNode child: childrenNodes) {
+            //currentValue = child.value / child.visits + m_rnd.nextDouble() * epsilon; // before 09/2021
+            currentValue = child.getQ() / child.visits + m_rnd.nextDouble() * epsilon;
+            if (currentValue > bestValue) {
+                bestValue = currentValue;
+                selected = child.action;
+            }
+        }
+
+        return selected;
+    }
+
+    /**
      * Select the next {@link MCTSEChanceNode} that should be evaluated
      *
      * If the current node is not fully expanded, a random unexpanded {@link MCTSETreeNode} will be chosen
      * If the current node is fully expanded, the child {@link MCTSETreeNode} will be selected with 
-     * uct() and its child {@link MCTSEChanceNode} will be returned with treePolicy() 
+     * uct() and its child {@link MCTSEChanceNode} will be returned with treePolicy()
      *
      * @return the {@link MCTSEChanceNode} that should be evaluated
      */
@@ -204,27 +229,24 @@ public class MCTSEChanceNode
             //select a child (MCTSETreeNode) with UCT or eps-greedy, 
         	//select/create a chance node with MCTSETreeNode::treePolicy() 
         	//and call MCTSEChanceNode::treePolicy() again to ensure recursion
-        	
-			switch(m_player.getParMCTSE().getSelectMode()) {
-			case 0: 
-//	            return uctNormalised().treePolicy().treePolicy();	
-				// uctNormalised() is obsolete now. We do the optional normalization via valueFnc(),
-				// which is called by rollOut(). (The initial estimate for root's maxRolloutScore
-				// is now calculated in MCTSEPlayer::init().) Given this optional normalization, 
-				// we can use always normal uct() here: 
-	            return uct().treePolicy().treePolicy();	 
-	            // Why 2-times treePolicy()? - Because uct() returns a MCTSETreeNode
-	            // and uct().treePolicy returns a MCTSEChanceNode. If we would stop here we would 
-	            // have no recursion, we would just select a chance node 2 layers down. With 
-	            // the second .treePolicy() we ensure that a complete recursion is done (until a 
-	            // terminal state or the prescribed tree depth is reached).
-			case 1: 
-	            return egreedy().treePolicy().treePolicy();
-			case 2: 
-	            return rouletteWheel().treePolicy().treePolicy();
-			default: 
-				throw new RuntimeException("this selectMode is not yet implemented");
-			}
+
+            return switch (m_player.getParMCTSE().getSelectMode()) {
+                case 0 ->
+//	                    return uctNormalised().treePolicy().treePolicy();
+                        // uctNormalised() is obsolete now. We do the optional normalization via valueFnc(),
+                        // which is called by rollOut(). (The initial estimate for root's maxRolloutScore
+                        // is now calculated in MCTSEPlayer::init().) Given this optional normalization,
+                        // we can always use normal uct() here:
+                        uct().treePolicy().treePolicy();
+                // Why 2-times treePolicy()? - Because uct() returns a MCTSETreeNode
+                // and uct().treePolicy returns a MCTSEChanceNode. If we would stop here we would
+                // have no recursion, we would just select a chance node 2 layers down. With
+                // the second .treePolicy() we ensure that a complete recursion is done (until a
+                // terminal state or the prescribed tree depth is reached).
+                case 1 -> egreedy().treePolicy().treePolicy();
+                case 2 -> rouletteWheel().treePolicy().treePolicy();
+                default -> throw new RuntimeException("this selectMode is not yet implemented");
+            };
 
         }
     }
@@ -243,8 +265,8 @@ public class MCTSEChanceNode
 
         for (MCTSETreeNode child : childrenNodes)
         {
-            double uctValue = child.value / child.visits 
-            		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + MCTSEChanceNode.epsilon))
+            double uctValue = child.getQ() / child.visits
+            		+ m_player.getK() * Math.sqrt(Math.log(visits + 1) / (child.visits + epsilon))
             		+ m_rnd.nextDouble() * epsilon; 
             		// small random numbers: break ties in unexpanded node
 
@@ -398,8 +420,6 @@ public class MCTSEChanceNode
         boolean stopConditionMet;
         StateObservation rollerState = so.copy();
         int maxDepth = this.m_player.getROLLOUT_DEPTH();
-        int rolloutDepth;
-
 
         //for(int i = this.depth; i < maxDepth; i++) {  // this alternative was implemented before 03/2021, but we think
                                                         // it might lead to wrong results for small maxDepth
@@ -425,9 +445,7 @@ public class MCTSEChanceNode
 
             } else {
                 // /WK/ **BUG1** fix: check every sob (including the first!) whether the stop condition is
-                // already met. If this is the case, return sob without advance and set
-                // rolloutDepth to i (being 0 in the first iteration).
-                rolloutDepth = i;
+                // already met. If this is the case, return sob without advance
                 break; // out of for
             }
         }
@@ -454,7 +472,6 @@ public class MCTSEChanceNode
         assert so instanceof StateObserver2048: "so is not instanceof StateObserver2048, use rollOut() instead off rollOut1()";
         StateObserver2048 rollerState = (StateObserver2048)so.copy();
         int maxDepth = this.m_player.getROLLOUT_DEPTH();
-        int rolloutDepth;
 
         //for(int i = this.depth; i < maxDepth; i++) {  // this alternative was implemented before 03/2021, but we think
                                                         // it might lead to wrong results for small maxDepth
@@ -477,7 +494,6 @@ public class MCTSEChanceNode
                 }
 
             } else {
-                rolloutDepth = i;
                 break; // out of for
             }
         }
@@ -549,11 +565,8 @@ public class MCTSEChanceNode
         if (rollerState.isGameOver()) {
             return true;
         }
-        if (rollerState.isRoundOver() && stopOnRoundOver) {         // /WK/ NEW/03/2021
-            return true;
-        }
 
-        return false;
+        return (rollerState.isRoundOver() && stopOnRoundOver);        // /WK/ NEW/03/2021
     }
 
     /**
@@ -615,30 +628,6 @@ public class MCTSEChanceNode
 //        }
 //    }
 
-    /**
-     * Selects the best Action of an expanded tree
-     *
-     * @return the action from the child of root's childrenNodes which maximizes
-     * <pre>
-     * 		 U(i) = childrenNodes[i].value/childrenNodes[i].visits
-     * </pre>
-     */
-    public Types.ACTIONS bestAction() {
-        Types.ACTIONS selected = null;
-        double bestValue = -Double.MAX_VALUE;
-        double currentValue;
-
-        for (MCTSETreeNode child: childrenNodes) {
-            currentValue = child.value / child.visits + m_rnd.nextDouble() * epsilon;
-            if (currentValue > bestValue) {
-                bestValue = currentValue;
-                selected = child.action;
-            }
-        }
-
-        return selected;
-    }
-    
 	/**
 	 * just for diagnostics:
 	 * 

@@ -15,7 +15,7 @@ import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS_VT;
 import controllers.AgentBase;
-import controllers.ExpectimaxWrapper;
+import controllers.ExpectimaxNWrapper;
 import controllers.MaxNAgent;
 import controllers.MaxN2Wrapper;
 import controllers.PlayAgent;
@@ -178,7 +178,12 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		this.m_Net.xnf.instantiateAfterLoading();
 		assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
 		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
-		
+
+		// older agents may not have the wrapper depth parameter, so it is 0. Set it in this case to -1:
+		if (this.getParOther().getWrapperMCTS_depth()==0) this.getParOther().setWrapperMCTS_depth(-1);
+		// older agents may not have the wrapper p_UCT parameter, so it is 0. Set it in this case to 1.0:
+		if (this.getParOther().getWrapperMCTS_PUCT()==0) this.getParOther().setWrapperMCTS_PUCT(1.0);
+
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
 		// get the loaded values)
@@ -241,7 +246,11 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         
         VTable = new double[acts.size()];  
         
-        assert acts.size()>0 : "Oops, no available action";
+//        assert acts.size()>0 : "Oops, no available action";
+		if (acts.size()==0) {
+			System.err.println("Oops, no available action");
+			if (so.isGameOver()) System.err.println("so: game over!");
+		}
         for(i = 0; i < acts.size(); ++i)
         {
 			thisAct = acts.get(i);
@@ -315,13 +324,23 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         assert actBest != null : "Oops, no best action actBest";
 		NewSO = so.copy();
 		NewSO.advance(actBest);
-		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
-		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
-		//if (so instanceof StateObserverCube)
-			scBest.scTup[so.getPlayer()]=bestValue;
-			// this is necessary for RubiksCube. TODO: Test if we can generalize it for all games
-			// (i.e. generalize this.getScoreTuple to "r + gamma * V" for all games)
-//
+
+		ScoreTuple scBest = so.getStoredBestScoreTuple();
+				// This is the previous tuple, only relevant in case N>=3. If so.getStoredBestScoreTuple() encounters
+				// null pointers, it returns an all-zeros-tuple with length so.getNumPlayers().
+		scBest.scTup[so.getPlayer()] = bestValue;
+		if (so.getNumPlayers()==2) {			// the following holds for 2-player, zero-sum games:
+			int opponent = 1-so.getPlayer();
+			scBest.scTup[opponent] = -bestValue;
+		}
+		// --- old version, before 2021-09-10 ---
+//		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
+//		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
+//		//if (so instanceof StateObserverCube)
+//			scBest.scTup[so.getPlayer()]=bestValue;
+//			// this is necessary for RubiksCube. TODO: Test if we can generalize it for all games
+//			// (i.e. generalize this.getScoreTuple to "r + gamma * V" for all games)
+
 //		double[] res = {bestValue};  				// old and wrong - the reason it was undetected was only that
 //		ScoreTuple scBest = new ScoreTuple(res);	// scBest was never really used before MaxN2Wrapper change 2020-09-09
 
@@ -422,16 +441,16 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	}
 
 	/**
-	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Return the agent's estimate of {@code sob}'s score-to-come  (future reward) <b>for all players</b>.
+	 * Is called by {@link #estimateGameValueTuple(StateObservation, ScoreTuple)}.
 	 * @param so			the state s_t for which the value is desired
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
 	 * 
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
-	 * 				the future score for s_t from the perspective of player i
+	 * 				the **future** score for s_t from the perspective of player i.
 	 */
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
@@ -471,35 +490,35 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				sc.scTup[cp] = m_Net.getScoreI(curSOWB,cp);  
 			}
 		}
-		
-		// In any case: add the reward obtained so far, since the net predicts
-		// with getScoreI only the expected future reward.
-		boolean rgs = m_oPar.getRewardIsGameScore();
-//		for (int i=0; i<so.getNumPlayers(); i++)
-//			sc.scTup[i] += so.getReward(i, rgs);
-		sc.combine(so.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
+
     	return sc;
 	}
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. <br>
-	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxWrapper}). 
+	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * Is called when training an agent in multi-update mode AND the maximum episode length
 	 * is reached. 
 	 * 
 	 * @param sob			the current game state
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}.  
-	 * @return				the agent's estimate of the final game value <b>for all players</b>. 
-	 * 						The return value is a tuple containing  
+	 * @return				the agent's estimate of the final game value (score-so-far plus score-to-come)
+	 * 						<b>for all players</b>. The return value is a tuple containing
 	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return this.getScoreTuple(sob, prevTuple);
-		
+		// getScoreTuple(sob,...): the reward-to-come, as estimated by this agent
+		ScoreTuple sc = this.getScoreTuple(sob, prevTuple);
+		boolean rgs = m_oPar.getRewardIsGameScore();
+		// sob.getRewardTuple(rgs): the reward obtained so far, since the net predicts
+		// with getScoreI only the expected future reward.
+		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
+		sc.combine(sob.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
+
 		// old version (2019), not recommended:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
 //		ScoreTuple sc = new ScoreTuple(sob);
@@ -507,7 +526,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 //			sc.scTup[i] = sob.getReward(i, rgs);
 //			// this is valid, but it may be a bad estimate in games where the reward is only 
 //			// meaningful for game-over-states.
-//		return sc;
+
+		return sc;
 	}
 
 	private void assertStateForSim(StateObservation s_next, StateObservation s_last) {
@@ -721,7 +741,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
 	public boolean trainAgent(StateObservation so) {
-		Types.ACTIONS a_t;
+		Types.ACTIONS_VT a_t;
 		int   curPlayer=so.getPlayer();
 		NextState ns;
 		ScoreTuple R = new ScoreTuple(so);

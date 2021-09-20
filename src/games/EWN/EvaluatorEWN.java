@@ -73,7 +73,7 @@ public class EvaluatorEWN extends Evaluator {
         m_PlayAgent  = playAgent;
 
         if(diffStartList == null){
-            StateObserverEWN so = new StateObserverEWN(ConfigEWN.BOARD_SIZE, ConfigEWN.NUM_PLAYERS);
+            StateObserverEWN so = new StateObserverEWN();
             diffStartList = new ArrayList<>();
 
         }
@@ -84,7 +84,7 @@ public class EvaluatorEWN extends Evaluator {
                 lastResult = 0.0;
                 return false;
             case 0: switch(ConfigEWN.NUM_PLAYERS){
-                case 2: return evalAgainstOpponent(m_PlayAgent, randomAgent,false, 100) > 0.0;
+                case 2: return evalAgainstOpponent(m_PlayAgent, randomAgent,false, 100) > 0.5;
                 case 3:return evalAgainstOpponent(m_PlayAgent, randomAgent,randomAgent2,false, 100) > 0.0;
                 case 4:return evalAgainstOpponent(m_PlayAgent, randomAgent, randomAgent2, randomAgent3,false, 100) > 0.0;
             };

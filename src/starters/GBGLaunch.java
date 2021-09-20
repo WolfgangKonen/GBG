@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import games.Arena;
+import games.BlackJack.ArenaBlackJack;
+import games.BlackJack.ArenaBlackJackTrain;
 import games.CFour.ArenaC4;
 import games.CFour.ArenaTrainC4;
 import games.EWN.ArenaEWN;
@@ -59,7 +61,7 @@ public class GBGLaunch {
 	/**
 	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe","EWN","Yavalath"}
 	 */
-	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe","EWN","Yavalath"};
+	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe", "Yavalath"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
@@ -176,7 +178,10 @@ public class GBGLaunch {
 		case "2048": 
 			t_Game = new ArenaTrain2048(title,withUI);
 			break;
-		case "ConnectFour": 
+		case "Blackjack":
+				t_Game = new ArenaBlackJackTrain(title,withUI);
+				break;
+		case "ConnectFour":
 			t_Game = new ArenaTrainC4(title,withUI);
 			break;
 		case "Hex": 
@@ -236,7 +241,7 @@ public class GBGLaunch {
 		case "EWN":
 			ArenaTrainEWN.setConfig(scaPar[0]);
 			ArenaTrainEWN.setCellCoding(scaPar[1]);
-
+			ArenaTrainEWN.setRandomStartingPosition(scaPar[2]);
 			t_Game = new ArenaTrainEWN(title, withUI);
 			break;
 		case "Yavalath":
@@ -273,7 +278,10 @@ public class GBGLaunch {
 		case "2048": 
 			t_Game = new Arena2048(title,withUI);
 			break;
-		case "ConnectFour": 
+		case "Blackjack":
+			t_Game = new ArenaBlackJack(title,withUI);
+			break;
+		case "ConnectFour":
 			t_Game = new ArenaC4(title,withUI);
 			break;
 		case "Hex": 
@@ -331,6 +339,7 @@ public class GBGLaunch {
 		case "EWN":
 			ArenaEWN.setConfig(scaPar[0]);
 			ArenaEWN.setCellCoding(scaPar[1]);
+			ArenaEWN.setRandomStartingPosition(scaPar[2]);
 
 			t_Game = new ArenaEWN(title, withUI);
 		case "Yavalath":
@@ -338,7 +347,7 @@ public class GBGLaunch {
 
 			t_Game = new ArenaYavalath(title,withUI);
 			break;
-		default: 
+		default:
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
 			System.exit(1);
 		}
@@ -507,7 +516,8 @@ public class GBGLaunch {
 			scaPar[0] = "3x3 2-Player";
 			scaPar[1] = "N-Player + 1";
 		case "2048":
-		case "ConnectFour": 
+		case "Blackjack":
+		case "ConnectFour":
 		case "Othello":
 		case "Poker":
 		case "TicTacToe":
@@ -594,13 +604,16 @@ public class GBGLaunch {
 			scaPar0_L.setText("Settings:");
 			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
-			scaPar1_L.setText("Tuple amount:");
-
-			setScaPar1List(new String[]{"N-Player + 1", "Upper-Lower"});
-			choiceScaPar1.setSelectedItem("N-Player + 1");
+			scaPar1_L.setText("Position values:");
+			setScaPar1List(new String[]{"[0,..,n]", "[0,1],[2,3],[3,4]"});
+			choiceScaPar1.setSelectedItem("[0,..,n]");
+			scaPar2_L.setText("Random starting:");
+			setScaPar2List(new String[]{"True", "False"});
+			choiceScaPar2.setSelectedItem("False");
 			break;
-		case "2048": 
-		case "ConnectFour": 
+		case "2048":
+		case "Blackjack":
+		case "ConnectFour":
 		case "Othello":
 		case "Poker":
 		case "TicTacToe": 

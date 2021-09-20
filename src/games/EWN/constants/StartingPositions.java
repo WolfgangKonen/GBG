@@ -43,7 +43,7 @@ public class StartingPositions {
     public static final int[][][] S4P4 = {
             {{0, 0}, {1, 0}, {2, 3}, {0, 3}},
             {{2, 0}, {-1, -1}, {-1, -1}, {1, 3}},
-            {{1, 2}, {-1, -1}, {-1, -1}, {3, 1}},
+            {{1, 2}, {-1, -1}, {-1, -1}, {2, 1}},
             {{0, 2}, {2, 2}, {1, 1}, {0, 1}},
     };
 
@@ -68,6 +68,7 @@ public class StartingPositions {
             {{-1, -1}, {-1, -1}, {-1, -1}}
     };
 
-
+    public static final int[] TOKENS_THREE = {0,1,2};
+    public static final int[] TOKENS_SIX = {0,1,2,3,4,5};
 
 }

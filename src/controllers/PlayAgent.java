@@ -73,17 +73,18 @@ public interface PlayAgent {
 	 * Each player wants to maximize *its* score.	 
 	 */
 	double getScore(StateObservation sob);
-	
+
 	/**
-	 * 
-	 * @param sob			the current game state
+	 * Return the agent's estimate of {@code sob}'s score-to-come  (future reward) <b>for all players</b>.
+	 * Is called by {@link #estimateGameValueTuple(StateObservation, ScoreTuple)}.
+	 * @param sob			the state s_t for which the value is desired
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
-	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
-	 * @return				the agent's estimate of the final reward <b>for all players</b>. 
-	 * 						The return value is a tuple containing  
-	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
+	 * 						passing in such other players' value from previous states, which may serve
+	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}.
+	 *
+	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of
+	 * 				the **future** score for s_t from the perspective of player i.
 	 */
 	ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple);
 	
@@ -111,11 +112,11 @@ public interface PlayAgent {
 	 * @param sob			the current game state
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
-	 * @return				the agent's estimate of the final reward <b>for all players</b>. 
-	 * 						The return value is a tuple containing  
-	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
+	 * @return				the agent's estimate of the final game value (score-so-far plus score-to-come)
+	 * 						<b>for all players</b>. The return value is a tuple containing
+	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s.
 	 */
 	ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple);
 	

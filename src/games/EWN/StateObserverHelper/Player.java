@@ -2,9 +2,10 @@ package games.EWN.StateObserverHelper;
 
 import tools.Types;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Player {
+public class Player implements Serializable {
     private  ArrayList<Types.ACTIONS> availableActions;
     private ArrayList<Token> tokens;
     private int playerNumber;
