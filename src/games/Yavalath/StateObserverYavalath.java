@@ -33,7 +33,7 @@ import static games.Yavalath.ConfigYavalath.*;
  *
  */
 
-public class StateObserverYavalath extends ObserverBase {
+public class StateObserverYavalath extends ObserverBase implements StateObservation {
 
     private ArrayList<Types.ACTIONS> availableActions;
     private TileYavalath[][] board;
@@ -288,7 +288,8 @@ public class StateObserverYavalath extends ObserverBase {
     }
 
     @Override
-    public void storeBestActionInfo(Types.ACTIONS bestAction, double[] valueTable){
+    public void storeBestActionInfo(Types.ACTIONS_VT bestAction){
+        double[] valueTable = bestAction.getVTable();
         clearValues();
         for(int i=0;i<getNumAvailableActions();i++){
             double value = valueTable[i];
