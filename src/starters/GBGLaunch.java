@@ -33,6 +33,8 @@ import games.Sim.ArenaSim;
 import games.Sim.ArenaTrainSim;
 import games.TicTacToe.ArenaTTT;
 import games.TicTacToe.ArenaTrainTTT;
+import games.Yavalath.ArenaTrainYavalath;
+import games.Yavalath.ArenaYavalath;
 import games.ZweiTausendAchtundVierzig.Arena2048;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import gui.SolidBorder;
@@ -55,9 +57,9 @@ import tools.Types;
  */
 public class GBGLaunch {
 	/**
-	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe"} 
+	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe","EWN","Yavalath"}
 	 */
-	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe","EWN"};
+	String[] game_list = {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe","EWN","Yavalath"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
@@ -237,6 +239,10 @@ public class GBGLaunch {
 
 			t_Game = new ArenaTrainEWN(title, withUI);
 			break;
+		case "Yavalath":
+			ArenaTrainYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
+			t_Game = new ArenaTrainYavalath(title,withUI);
+			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
 			System.exit(1);
@@ -327,6 +333,11 @@ public class GBGLaunch {
 			ArenaEWN.setCellCoding(scaPar[1]);
 
 			t_Game = new ArenaEWN(title, withUI);
+		case "Yavalath":
+			ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
+
+			t_Game = new ArenaYavalath(title,withUI);
+			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
 			System.exit(1);
@@ -505,6 +516,9 @@ public class GBGLaunch {
 			//
 			scaPar[0]=scaPar[1]=scaPar[2]="";
 			break;
+		case "Yavalath":
+			scaPar[0] = "2";
+			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
 			System.exit(1);
@@ -599,6 +613,10 @@ public class GBGLaunch {
 			setScaPar0List(new int[]{});
 			setScaPar1List(new int[]{});
 			setScaPar2List(new int[]{});
+			break;
+		case "Yavalath":
+			scaPar0_L.setText("Players");
+			setScaPar0List(new int[]{2});
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
