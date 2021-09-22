@@ -17,7 +17,7 @@ public class ArenaTrainKuhnPoker extends ArenaTrain   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "Poker";
+		return "KuhnPoker";
 	}
 	
 	/**

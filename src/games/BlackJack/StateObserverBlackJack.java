@@ -1,6 +1,8 @@
 package games.BlackJack;
 
 import java.util.ArrayList;
+
+import controllers.MCTSWrapper.utils.Tuple;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
@@ -192,10 +194,11 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
     /**
      * completes face-down-card of the dealer depending on the phase the gamestate is in
-     * @return resulting GameState (never used)
+     * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
+     * 			the number of possible completions.
      */
     @Override
-    public StateObservation randomCompletion(){
+    public Tuple<StateObservation,Integer> completePartialState(){
         //setPartialState(false); // maybe not needed. maybe we should introduce a flag completed
         // if the dealer has no hand there is nothing to complete
         if(!this.isPartialState()){
@@ -203,13 +206,13 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         }
 
         if(dealer.getActiveHand() == null){
-            return this;
+            return new Tuple<>(this,1);
         }
         // if the second card of the dealer is unknown we need completion
         if(dealer.getActiveHand().getCards().get(1).rank == Card.Rank.X){
             if(gPhase.getValue() < gamePhase.PLAYERONACTION.getValue()){
                 //check for Black did not happen. We can complete with any Card.
-                return completeRandom();
+                return new Tuple<>(completeRandom(),1);
             }else{
                 /** in this case the dealer peeked already for a BlackJack. If the dealer had a Black Jack
                  * the round would have ended already. So in this Case the completion cant result in a
@@ -218,13 +221,13 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                  * is an A, K, Q, J, or a Ten.
                  */
                 if(dealer.getActiveHand().getCards().get(0).rank.getValue() == 10 || dealer.getActiveHand().getCards().get(0).rank.getValue() == 1){
-                    return completeRestricted();
+                    return new Tuple<>(completeRestricted(),1);
                 }
-                return completeRandom();
+                return new Tuple<>(completeRandom(),1);
             }
 
         }
-        return this;
+        return new Tuple<>(this,1);
 
     }
 
@@ -236,7 +239,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         dealer.getActiveHand().getCards().remove(1);
         dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
         if(dealer.getActiveHand().size() != 2)
-            throw new RuntimeException("Dealers handsize must be 2 after completion!");
+            throw new RuntimeException("Dealer's hand size must be 2 after completion!");
         return this;
     }
 
@@ -756,7 +759,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
             case PEEKFORBLACKJACK:
                 String logEntry = "Dealer peeks for Blackjack -> ";
                 if(this.isPartialState()){
-                    randomCompletion();
+                    completePartialState();
                 }
                 if(dealer.getActiveHand().checkForBlackJack()){
                     // dealer has a blackjack, players cant act anymore
@@ -777,7 +780,7 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
 
             case DEALERPLAYS:
                 if(this.isPartialState()){
-                    randomCompletion();
+                    completePartialState();
                 }
                 log.add("Dealer reaveals card " + dealer.getActiveHand().getCards().get(1));
                 while (dealer.getActiveHand().getHandValue() < 17) {

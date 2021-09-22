@@ -175,6 +175,10 @@ public final class GameStateIncludingPass {
         return approximator.predict(state);
     }
 
+    public Types.ACTIONS_VT getNextAction(final Approximator2 approximator) {
+        return approximator.getNextAction(state);
+    }
+
     /**
      * For a passing state the negated evaluation from the opposing player's point of view is used for the value v.
      * The vector of probabilities of possible actions p will then provide a 100% probability of a pass action,

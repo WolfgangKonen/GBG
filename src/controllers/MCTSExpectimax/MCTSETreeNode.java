@@ -72,44 +72,52 @@ public class MCTSETreeNode {
 	}
 
 	/**
-	 * The value Q(e) of Expectimax node e (={@code this}) is formed by calculating the weighted average of (Q_c/N_c) for all
+	 * The value Q(e) of EXPECTIMAX node e (={@code this}) is formed by calculating the weighted average of (Q_c/N_c) for all
 	 * child nodes c, where the weight for node c is the probability of the nondeterministic action that leads from e to c.
-	 * Finally, the weighted average is multiplied by N, the number of visits to e, because the PUCT formula calculates Q(e)/N.
+	 * Finally, the weighted average is multiplied by N, the number of visits to e, because the PUCT formula calculates
+	 * Q(e)/N. This is the result if switch {@code QDIRECT==false} in source code.
 	 * <p>
 	 * [Earlier we used instead {@code this.value}, which is formed by accumulating the backups during search. In the limit of
-	 * large N, both approaches yield very similar values, although not identical. But if node e is not visited very
-	 * often (e.g. deeper down the tree), the formula calculated here should be more precise, since it puts rare events
-	 * directly in the right context.]
+	 * large N, both approaches yield very similar values, although not identical. But if node e is <b>not</b> visited very
+	 * often (e.g. deeper down the tree), the formula for switch {@code QDIRECT==false} should be more precise, since it puts rare events
+	 * directly in the right context.
+	 * <p>
+	 * However, we found that the earlier version yields much better results for KuhnPoker, so we retain the earlier
+	 * version in case  {@code QDIRECT==true} in source code.]
 	 *
 	 * @return the value of this Expectimax node
 	 */
 	double getQ() {
-    	// return this.value; 		// this was effective before 09/2021
-		// the following is a bit longer, but more precise in the case of fewer visits to this:
-    	double qValue=0.0;
-		for (Tuple<MCTSEChanceNode,Double> childTuple : childrenNodes) {
-			MCTSEChanceNode childNode = childTuple.element1;
-			Double prob = childTuple.element2;
-			qValue += prob * (childNode.value/ childNode.visits);
-		}
-		qValue *= this.visits;
-
-		// only debug & comparison with this.value:
-		boolean DBG_GETQ=false;
-		if (DBG_GETQ) {
-			if (depth==0) {
-				StateObsNondeterministic thisSO = (StateObsNondeterministic) this.so.copy();
-				thisSO.advanceDeterministic(this.action);
-				int nrands = thisSO.getAvailableRandoms().size();
-				int nchilds = this.childrenNodes.size();
-				DecimalFormat frm = new DecimalFormat("0.0000");
-				System.out.println("d="+depth+", value="+frm.format(value)+", qValue="+frm.format(qValue)
-						+", v/qV="+frm.format(value/qValue)
-						+", nrand="+nrands+","+nchilds+", nVisits="+visits);
+		boolean QDIRECT = true;
+		if (QDIRECT) {
+			return this.value; 		// this was effective before 09/2021
+		} else {
+			// the following is a bit longer, but more precise in the case of fewer visits to this:
+			double qValue=0.0;
+			for (Tuple<MCTSEChanceNode,Double> childTuple : childrenNodes) {
+				MCTSEChanceNode childNode = childTuple.element1;
+				Double prob = childTuple.element2;
+				qValue += prob * (childNode.value/ childNode.visits);
 			}
-		}
+			qValue *= this.visits;
 
-    	return qValue;
+			// only debug & comparison with this.value:
+			boolean DBG_GETQ=false;
+			if (DBG_GETQ) {
+				if (depth==0) {
+					StateObsNondeterministic thisSO = (StateObsNondeterministic) this.so.copy();
+					thisSO.advanceDeterministic(this.action);
+					int nrands = thisSO.getAvailableRandoms().size();
+					int nchilds = this.childrenNodes.size();
+					DecimalFormat frm = new DecimalFormat("0.0000");
+					System.out.println("d="+depth+", value="+frm.format(value)+", qValue="+frm.format(qValue)
+							+", v/qV="+frm.format(value/qValue)
+							+", nrand="+nrands+","+nchilds+", nVisits="+visits);
+				}
+			}
+
+			return qValue;
+		}
 	}
     /**
      * Select the next {@link MCTSEChanceNode} that should be evaluated.
@@ -134,11 +142,21 @@ public class MCTSETreeNode {
      * @return the selected child node
      */
     public MCTSEChanceNode expand() {
+		Double dprob;
 		boolean stopOnRoundOver = m_player.getParMCTSE().getStopOnRoundOver();
 		StateObsNondeterministic childSo = (StateObsNondeterministic) so.copy();
         childSo.advanceDeterministic(action);
-		Types.ACTIONS randAct = childSo.advanceNondeterministic();
-		Double dprob = childSo.getProbability(randAct);	// the probability that environment selects this random action
+        if (childSo.isNextActionDeterministic()) {
+        	// the determinisic advance results in a next-action-deterministic state (this happens for example in
+			// Poker, if the 1st player bets or checks. Now an action is required from the 2nd player, no card is dealt)
+			// --> we model such a case with a tree node that has only one 'random' action 'do nothing' and thus results
+			// with probability 1.0 in the CHANCE child {@code childSO}.
+        	dprob = 1.0;
+		} else {
+        	// the normal case: the deterministic advance results in a next-action-NOT-deterministic state
+			Types.ACTIONS randAct = childSo.advanceNondeterministic();
+			dprob = childSo.getProbability(randAct);	// the probability that environment selects this random action
+		}
 
     	if(childSo.isRoundOver() && !stopOnRoundOver)	// /WK/03/2021 Bug fix '&& !stopOnRoundOver' as suggested by TZ
     		childSo.initRound();
@@ -164,6 +182,10 @@ public class MCTSETreeNode {
 		//create a new child node
         MCTSEChanceNode child = new MCTSEChanceNode(childSo, null, this, random, m_player);
         childrenNodes.add(new Tuple<>(child,dprob));
+
+        if (dprob==1.0)
+			assert childrenNodes.size()==1 : "Too many children!";
+			// in the next-action-deterministic-case, this node should have exactly one child
 
         return child;
     }

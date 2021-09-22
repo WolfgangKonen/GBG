@@ -75,6 +75,7 @@ public final class Mctse {
         final var selected2 = selectedENode.selectNondet();
         final var selectedRandom = selected2.element1;
         final var selectedCNode = selected2.element2;
+        selectedENode.incrementVisitCount(selectedRandom);
 
         final var childValue = search(selectedCNode, depth+1); // Recursive call of the tree search for the child node
 

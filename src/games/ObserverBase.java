@@ -3,6 +3,7 @@ package games;
 import java.util.ArrayList;
 
 import TournamentSystem.TSTimeStorage;
+import controllers.MCTSWrapper.utils.Tuple;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import tools.ScoreTuple;
@@ -194,12 +195,18 @@ abstract public class ObserverBase implements StateObservation {
 	 * Default implementation for  perfect information games: there is nothing to do, the perfect-information state
 	 * is already complete.
 	 *
-	 * @return the state {@code this}, it is the completed state
+	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
+	 * 			the number of possible completions.
 	 */
-	public StateObservation randomCompletion() {
+	public Tuple<StateObservation,Integer> completePartialState() {
 		if (isImperfectInformationGame())
-			throw new RuntimeException("ObserverBase.randomCompletion is NOT valid for imperfect-information games!");
-		return this;
+			throw new RuntimeException("ObserverBase.completePartialState() is NOT valid for imperfect-information games!");
+		return new Tuple<>(this,1);
+	}
+	public Tuple<StateObservation,Integer>  completePartialState(int p) {
+		if (isImperfectInformationGame())
+			throw new RuntimeException("ObserverBase.completePartialState(int) is NOT valid for imperfect-information games!");
+		return new Tuple<>(this,1);
 	}
 
 	public boolean isRoundOver() { return m_roundOver; }

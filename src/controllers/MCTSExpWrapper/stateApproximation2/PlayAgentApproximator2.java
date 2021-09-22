@@ -1,10 +1,11 @@
 package controllers.MCTSExpWrapper.stateApproximation2;
 
-import controllers.MCTSWrapper.ConfigWrapper;
+import controllers.MCTSExpWrapper.ConfigExpWrapper;
 import controllers.MCTSWrapper.utils.Tuple;
 import controllers.PlayAgent;
 import games.StateObservation;
 import tools.ScoreTuple;
+import tools.Types;
 
 import java.util.Arrays;
 
@@ -45,6 +46,10 @@ public final class PlayAgentApproximator2 implements Approximator2 {
         );
     }
 
+    public Types.ACTIONS_VT getNextAction(StateObservation stateObservation) {
+        return agent.getNextAction2(stateObservation, false, true);
+    }
+
     private static double[] moveProbabilitiesForVTable(final double[] vTable, final StateObservation stateObservation) {
         assert (vTable.length == stateObservation.getNumAvailableActions()) : "Ooops, wrong size for vTable!";
         return optSoftmax(vTable);
@@ -57,7 +62,7 @@ public final class PlayAgentApproximator2 implements Approximator2 {
     }
 
     private static double[] optSoftmax(final double[] values) {
-        return (ConfigWrapper.USESOFTMAX) ? softmax(values) : values;
+        return (ConfigExpWrapper.USESOFTMAX) ? softmax(values) : values;
     }
 
     private static double[] softmax(final double[] values) {

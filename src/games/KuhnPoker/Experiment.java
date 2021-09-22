@@ -51,10 +51,13 @@ public class Experiment {
 
     public static void main(String[] args) throws Exception {
         Experiment ex = new Experiment();
-        ex.oneRoundChallenge(TD_NTUPLE_3, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(TD_NTUPLE_4, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(SARSA_4, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(QLEARN_4, KUHN, "CompleteRun");
+        ex.oneRoundChallenge(MCTSE, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(MC, KUHN, "CompleteRun");
+
+//        ex.oneRoundChallenge(TD_NTUPLE_3, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(TD_NTUPLE_4, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(SARSA_4, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(QLEARN_4, KUHN, "CompleteRun");
         //ex.oneRoundChallenge(EXPECTIMAX, KUHN, "CompleteRun");
         //ex.oneRoundChallenge(MCTSE, KUHN, "CompleteRun");
         //ex.oneRoundChallenge(KUHN, KUHN, "CompleteRun");
@@ -399,7 +402,7 @@ public class Experiment {
         String experimentName = experiment;
 
         // number of rounds played for evaluation for each position
-        int playRounds = 1000000;
+        int playRounds = 10000; //1000000;   // /WK/
 
         PlayAgent observedAgent;
         PlayAgent benchmarkAgent;

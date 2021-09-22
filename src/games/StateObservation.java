@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import TournamentSystem.TSTimeStorage;
+import controllers.MCTSWrapper.utils.Tuple;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.TD.ntuple2.*;
@@ -266,12 +267,25 @@ public interface StateObservation extends Serializable{
 	 * random fill-in method. Imperfect-information games have to <b>override</b> the default implementation in
 	 * {@link ObserverBase}.
 	 * </ul> <p>
-	 * Note that the randomly completed state is in general <b>NOT</b> (!) identical to the full state from which the
-	 * partial state was derived. It is - given the observable elements in the partial state -
+	 * Note that the randomly completed state in {@code this} is in general <b>NOT</b> (!) identical to the full state
+	 * from which the partial state was derived. It is - given the observable elements in the partial state -
 	 * <b>one</b> of the possibilities that the player has to take into account.
-	 * @return the randomly completed state
+	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
+	 * 			the number of possible completions.
 	 */
-	StateObservation randomCompletion();
+	Tuple<StateObservation,Integer> completePartialState();
+
+	/**
+	 * Same as {@link #completePartialState()}, but only the part of the state that is visible to player {@code p}
+	 * is completed. (This reduces the complexity for tree-based agents, since only the relevant part needs to be expanded.)
+	 * <p>
+	 * Depending on whether the completed state contains unfilled elements or not, the partial state flag is set to
+	 * true or false.
+	 * @param p	the player number
+	 * @return 	a {@link Tuple} where {@code element1} carries the partially completed state and {@code element2} has
+	 * 			the number of possible completions.
+	 */
+	Tuple<StateObservation,Integer> completePartialState(int p);
 
 	boolean isRoundOver();
 	void setRoundOver(boolean p);

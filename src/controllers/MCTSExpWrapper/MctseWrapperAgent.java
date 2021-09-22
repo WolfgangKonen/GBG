@@ -88,9 +88,9 @@ public final class MctseWrapperAgent extends AgentBase {
         if (mctsNode.visitCounts.size()==0) {
             // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
             // but we leave it in as debug check for the moment
-            System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
-            System.err.println(mctsNode.gameState.stringDescr());
-            return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()],0.0);
+            //System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
+            //System.err.println(mctsNode.gameState.stringDescr());
+            return mctsNode.gameState.getNextAction(this.approximator);
         }
         lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
             Comparator.comparingDouble(Map.Entry::getValue)

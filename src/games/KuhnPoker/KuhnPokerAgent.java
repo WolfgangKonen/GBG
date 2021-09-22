@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * the Random {@link PlayAgent}
+ * Optimal Kuhn Poker Agent
  *
- * @author Wolfgang Konen, TH Koeln, 2016
+ * @author Tim Zeh, TH Koeln, 2021
  *
  */
 public class KuhnPokerAgent extends AgentBase implements PlayAgent {

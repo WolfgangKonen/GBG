@@ -11,17 +11,17 @@ public class ConfigExpWrapper {
      *  <li> If true (recommended setting for Othello, ConnectFour), use softmax squashing.
      * </ul>
      */
-    public static boolean USESOFTMAX=true;
+    public static boolean USESOFTMAX=false;
 
-
-    /**
-     * A switch for {@link MctseWrapperAgent}:
-     * <ul>
-     *  <li>  If false (recommended setting for ConnectFour), force tree re-build in every call.
-     *  <li>  If true (recommended setting for Othello), re-use the tree (i.e. as in JS's master code).
-     * </ul>
-     */
-    public static boolean USELASTMCTS = true;
+    // --- currently not used in MCTSExpWrapper ---
+//    /**
+//     * A switch for {@link MctseWrapperAgent}:
+//     * <ul>
+//     *  <li>  If false (recommended setting for ConnectFour), force tree re-build in every call.
+//     *  <li>  If true (recommended setting for Othello), re-use the tree (i.e. as in JS's master code).
+//     * </ul>
+//     */
+//    public static boolean USELASTMCTS = true;
 
     /**
      * EPS is a parameter for {@link MctseChanceNode#selectChild(double)}, it should be &lt;&lt; 1. It controls the behavior
