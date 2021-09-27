@@ -14,7 +14,7 @@ public class ConfigEWN {
      */
     public static int BOARD_SIZE = 3;
 
-    public static int CEll_CODING = 1;
+    public static int CEll_CODING = 0;
 
     public static String[] CELL_CODE_NAMING = {"[0]", "[0],[1],[2]"};
 

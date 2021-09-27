@@ -35,6 +35,8 @@ public interface StateObsNondeterministic extends StateObservation {
 	Types.ACTIONS advanceNondeterministic(ACTIONS randAction);
     
     boolean isNextActionDeterministic();
+
+//    void setNextActionDeterministic(boolean b);
     
     /**
      * Get the next nondeterministic action
@@ -54,6 +56,20 @@ public interface StateObsNondeterministic extends StateObservation {
 	 *         nondeterministic advance.
 	 */
 	double getProbability(ACTIONS action);
+
+	/**
+	 * Only for imperfect-information games: if {@link #isPartialState()}{@code ==true}, then
+	 * return all possible completions
+	 * @return a list with all possible completing actions (that can be sent to {@link #advanceNondeterministic()})
+	 */
+	ArrayList<ACTIONS> getAvailableCompletions();
+
+	/**
+	 *
+	 * @param action  the completing action
+	 * @return the probability that the completion {@code action} is selected .
+	 */
+	double getProbCompletion(ACTIONS action);
 
 	StateObsNondeterministic copy();
 }

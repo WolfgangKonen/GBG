@@ -22,6 +22,8 @@ import games.EWN.ArenaEWN;
 import games.EWN.ArenaTrainEWN;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
+import games.KuhnPoker.ArenaKuhnPoker;
+import games.KuhnPoker.ArenaTrainKuhnPoker;
 import games.Nim.ArenaNim2P;
 import games.Nim.ArenaNim3P;
 import games.Nim.ArenaTrainNim2P;
@@ -61,7 +63,7 @@ public class GBGLaunch {
 	/**
 	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe","EWN","Yavalath"}
 	 */
-	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe", "Yavalath"};
+	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","KuhnPoker","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe", "Yavalath"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
@@ -217,6 +219,9 @@ public class GBGLaunch {
 		case "Poker":
 			t_Game = new ArenaTrainPoker(title,withUI);
 			break;
+		case "KuhnPoker":
+				t_Game = new ArenaTrainKuhnPoker(title,withUI);
+				break;
 		case "RubiksCube":
 			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
 			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
@@ -316,6 +321,9 @@ public class GBGLaunch {
 		case "Poker":
 			t_Game = new ArenaPoker(title,withUI);
 			break;
+		case "KuhnPoker":
+				t_Game = new ArenaKuhnPoker(title,withUI);
+				break;
 		case "RubiksCube":
 			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
 			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
@@ -520,6 +528,7 @@ public class GBGLaunch {
 		case "ConnectFour":
 		case "Othello":
 		case "Poker":
+		case "KuhnPoker":
 		case "TicTacToe":
 			//
 			// games with no scalable parameters
@@ -616,7 +625,8 @@ public class GBGLaunch {
 		case "ConnectFour":
 		case "Othello":
 		case "Poker":
-		case "TicTacToe": 
+		case "KuhnPoker":
+		case "TicTacToe":
 			//
 			// games with no scalable parameters
 			//

@@ -120,7 +120,15 @@ abstract public class ObserverBase implements StateObservation {
 	 * getAvailableActions(), as required by the interface {@link StateObservation}.
 	 */
 	abstract public ArrayList<ACTIONS> getAvailableActions();
-	
+
+	public ArrayList<ACTIONS> getAvailableCompletions() {
+		throw new RuntimeException("Games with imperfect information (thus with partial states) need to override this method. "+
+				"Games without partial states should never call it");
+	}
+
+	public double getProbCompletion(ACTIONS action) { return 1.0; }
+
+
 	protected void advanceBase(ACTIONS action) {
 		this.creatingPlayer = this.getPlayer();
 		this.addToLastMoves(action);
@@ -167,6 +175,11 @@ abstract public class ObserverBase implements StateObservation {
 		return true;
 	}
 
+//	public void setNextActionDeterministic(boolean b) {
+//		// nothing to do here, since ObserverBase is for a deterministic game
+//		;
+//	}
+
 	/**
 	 * Default implementation for deterministic games: the state and its preceding afterstate are the same,
 	 * thus return just {@code this}. <br>
@@ -186,8 +199,9 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	public StateObservation partialState() { return this; }
 
+	public boolean isPartialState(int p) { return m_partialState; }
 	public boolean isPartialState() { return m_partialState; }
-	public void setPartialState(boolean p) { m_partialState = p; }
+	public void setPartialState(boolean pstate) { m_partialState = pstate; }
 
 	public boolean isImperfectInformationGame() { return false; }
 
@@ -198,15 +212,20 @@ abstract public class ObserverBase implements StateObservation {
 	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
 	 * 			the number of possible completions.
 	 */
-	public Tuple<StateObservation,Integer> completePartialState() {
+	public Tuple<StateObservation,Double> completePartialState() {
 		if (isImperfectInformationGame())
 			throw new RuntimeException("ObserverBase.completePartialState() is NOT valid for imperfect-information games!");
-		return new Tuple<>(this,1);
+		return new Tuple<>(this,1.0);
 	}
-	public Tuple<StateObservation,Integer>  completePartialState(int p) {
+	public Tuple<StateObservation,Double>  completePartialState(int p) {
 		if (isImperfectInformationGame())
 			throw new RuntimeException("ObserverBase.completePartialState(int) is NOT valid for imperfect-information games!");
-		return new Tuple<>(this,1);
+		return new Tuple<>(this,1.0);
+	}
+	public Tuple<StateObservation,Double>  completePartialState(int p, ACTIONS ranAct) {
+		if (isImperfectInformationGame())
+			throw new RuntimeException("ObserverBase.completePartialState(int,ACTIONS) is NOT valid for imperfect-information games!");
+		return new Tuple<>(this,1.0);
 	}
 
 	public boolean isRoundOver() { return m_roundOver; }

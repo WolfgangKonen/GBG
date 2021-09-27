@@ -205,12 +205,14 @@ public class MCTSEChanceNode
     }
 
     /**
-     * Select the next {@link MCTSEChanceNode} that should be evaluated
-     *
-     * If the current node is not fully expanded, a random unexpanded {@link MCTSETreeNode} will be chosen
-     * If the current node is fully expanded, the child {@link MCTSETreeNode} will be selected with 
-     * uct() and its child {@link MCTSEChanceNode} will be returned with treePolicy()
-     *
+     * Select the next {@link MCTSEChanceNode} that should be evaluated.
+     * <p><ul>
+     *      <li> If the current node is not fully expanded, a random unexpanded {@link MCTSETreeNode} will be added and
+     * one of its child {@link MCTSEChanceNode}s will be returned via treePolicy().
+     *      <li> If the current node is fully expanded, one child {@link MCTSETreeNode} will be selected with
+     * {@link #uct()}, {@link #egreedy()} or {@link #rouletteWheel()}, resp., and one of its child {@link MCTSEChanceNode}s
+     * will be returned via treePolicy().
+     * </ul>
      * @return the {@link MCTSEChanceNode} that should be evaluated
      */
     private MCTSEChanceNode treePolicy() {
@@ -238,11 +240,11 @@ public class MCTSEChanceNode
                         // is now calculated in MCTSEPlayer::init().) Given this optional normalization,
                         // we can always use normal uct() here:
                         uct().treePolicy().treePolicy();
-                // Why 2-times treePolicy()? - Because uct() returns a MCTSETreeNode
-                // and uct().treePolicy returns a MCTSEChanceNode. If we would stop here we would
-                // have no recursion, we would just select a chance node 2 layers down. With
-                // the second .treePolicy() we ensure that a complete recursion is done (until a
-                // terminal state or the prescribed tree depth is reached).
+                        // Why 2-times treePolicy()? - Because uct() returns a MCTSETreeNode
+                        // and uct().treePolicy returns a MCTSEChanceNode. If we stopped after the first treePolicy(),
+                        // we would have no recursion, we would just select a chance node 2 layers down. With
+                        // the second .treePolicy() we ensure that a complete recursion is done (until a
+                        // terminal state or the prescribed tree depth is reached).
                 case 1 -> egreedy().treePolicy().treePolicy();
                 case 2 -> rouletteWheel().treePolicy().treePolicy();
                 default -> throw new RuntimeException("this selectMode is not yet implemented");
@@ -390,7 +392,7 @@ public class MCTSEChanceNode
     }
 
     /**
-     * Expand the current node, by randomly selecting one unexplored child node
+     * Expand the current node, by randomly selecting one of the yet unexplored child nodes
      * 
      * @return the selected child node
      */
@@ -426,7 +428,8 @@ public class MCTSEChanceNode
         for(int i = 0; i < maxDepth; i++) {
             stopConditionMet = isRolloutFinished(rollerState);
             if (!stopConditionMet) {
-                if (rollerState.isRoundOver()) rollerState.initRound();         // NEW/03/2021: for round-based games
+                if (rollerState.isRoundOver())
+                    rollerState.initRound();         // NEW/03/2021: for round-based games
                 //rollerState.setAvailableActions();	// /WK/ commented out since every advance() includes setAvailableActions()
                                                         // and the initial 'so' has also its available actions set.
                                                         // Calling setAvailableActions without need slows down,

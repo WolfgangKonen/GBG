@@ -1,8 +1,9 @@
 package games.KuhnPoker;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Pots {
+public class Pots implements Serializable {
         private final ArrayList<Pot> pots;
 
     /**

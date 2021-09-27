@@ -3,6 +3,7 @@ package games.BlackJack;
 import java.util.ArrayList;
 
 import controllers.MCTSWrapper.utils.Tuple;
+import games.ObsNondetBase;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
@@ -11,7 +12,7 @@ import tools.Types.ACTIONS;
 import tools.Types;
 import static games.BlackJack.BlackJackConfig.*;
 
-public class StateObserverBlackJack extends ObserverBase implements StateObsNondeterministic {
+public class StateObserverBlackJack extends ObsNondetBase implements StateObsNondeterministic {
 
 
     private static final long serialVersionUID = 1L;
@@ -195,10 +196,10 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
     /**
      * completes face-down-card of the dealer depending on the phase the gamestate is in
      * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
-     * 			the number of possible completions.
+     * 			the probability that this random completion occurs.
      */
     @Override
-    public Tuple<StateObservation,Integer> completePartialState(){
+    public Tuple<StateObservation,Double> completePartialState(){
         //setPartialState(false); // maybe not needed. maybe we should introduce a flag completed
         // if the dealer has no hand there is nothing to complete
         if(!this.isPartialState()){
@@ -206,13 +207,13 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
         }
 
         if(dealer.getActiveHand() == null){
-            return new Tuple<>(this,1);
+            return new Tuple<>(this,1.0);
         }
         // if the second card of the dealer is unknown we need completion
         if(dealer.getActiveHand().getCards().get(1).rank == Card.Rank.X){
             if(gPhase.getValue() < gamePhase.PLAYERONACTION.getValue()){
                 //check for Black did not happen. We can complete with any Card.
-                return new Tuple<>(completeRandom(),1);
+                return new Tuple<>(completeRandom(),1.0);
             }else{
                 /** in this case the dealer peeked already for a BlackJack. If the dealer had a Black Jack
                  * the round would have ended already. So in this Case the completion cant result in a
@@ -221,13 +222,13 @@ public class StateObserverBlackJack extends ObserverBase implements StateObsNond
                  * is an A, K, Q, J, or a Ten.
                  */
                 if(dealer.getActiveHand().getCards().get(0).rank.getValue() == 10 || dealer.getActiveHand().getCards().get(0).rank.getValue() == 1){
-                    return new Tuple<>(completeRestricted(),1);
+                    return new Tuple<>(completeRestricted(),1.0);
                 }
-                return new Tuple<>(completeRandom(),1);
+                return new Tuple<>(completeRandom(),1.0);
             }
 
         }
-        return new Tuple<>(this,1);
+        return new Tuple<>(this,1.0);
 
     }
 

@@ -1,5 +1,7 @@
 package controllers;
 
+import controllers.MCTSExpectimax.MCTSETreeNode;
+import controllers.MCTSWrapper.utils.Tuple;
 import games.StateObservation;
 import games.Arena;
 import games.StateObsNondeterministic;
@@ -213,6 +215,9 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * @return			score tuple for state {@code soND} as calculated by ExpectimaxNAgent (EA)
 	 */
 	private ScoreTuple getEAScoreTuple(StateObsNondeterministic soND, boolean silent, int depth) {
+		assert soND.isLegalState() : "Not a legal state";
+		int player = soND.getPlayer();
+
 		boolean rgs = m_oPar.getRewardIsGameScore();
 		boolean stopOnRoundOver= m_mpar.getStopOnRoundOver(); 		// /WK/03/2021: NEW
 		boolean stopConditionMet = soND.isGameOver() || (stopOnRoundOver && soND.isRoundOver());
@@ -226,14 +231,40 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		int i;
 		ScoreTuple currScoreTuple;
         ScoreTuple scBest;
+		ScoreTuple expecScoreTuple=new ScoreTuple(soND);	// a 0-ScoreTuple
 		ScoreTuple.CombineOP cOpMax = ScoreTuple.CombineOP.MAX;
 		StateObsNondeterministic NewSO;
 
-        assert soND.isLegalState() : "Not a legal state"; 
 
-        int player = soND.getPlayer();
-        
-        if (soND.isNextActionDeterministic()) {
+		if (MCTSETreeNode.WITH_PARTIAL && soND.isPartialState(soND.getPlayer())) {
+			//
+			// branch into the possible partial-state completions and average over them
+			//
+			ArrayList<ACTIONS> rans = soND.getAvailableCompletions();
+			assert (rans.size()>0) : "Error: getAvailableCompletions returns no actions";
+			double currProbab;
+			double sumProbab=0.0;
+			for(i = 0; i < rans.size(); ++i)
+			{
+				NewSO = soND.copy();
+				NewSO.completePartialState(soND.getPlayer(),rans.get(i));
+
+				// recursive call: NewSO has the same player p = soND.getPlayer() and it is not partial w.r.t. p,
+				// so this isPartialState-branch will *not* be called repeatedly:
+				currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
+
+				currProbab = soND.getProbability(rans.get(i));
+				//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
+				sumProbab += currProbab;
+				expecScoreTuple.combine(currScoreTuple, ScoreTuple.CombineOP.AVG, player, currProbab);
+			}
+			assert (Math.abs(sumProbab-1.0)<1e-8) : "[avg over partial states] Error: sum of probabilities is not 1.0";
+			//if (!silent && depth<0) printNondet(soND,expecScoreTuple,sumProbab,depth);
+
+			return expecScoreTuple;
+		} // WITH_PARTIAL && isPartialState
+
+		if (soND.isNextActionDeterministic()) {
         	//
         	// find the best next deterministic action for current player in state soND
         	//
@@ -270,7 +301,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 						currScoreTuple = estimateGameValueTuple(NewSO, null);
 					}
     			}
-            	if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
+            	//if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
 
     			// always *maximize* P's element in the tuple currScoreTuple, 
     			// where P is the player to move in state soND:
@@ -287,7 +318,6 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
         	//
             ArrayList<ACTIONS> rans = soND.getAvailableRandoms();
             assert (rans.size()>0) : "Error: getAvailableRandoms returns no actions";
-    		ScoreTuple expecScoreTuple=new ScoreTuple(soND);	// a 0-ScoreTuple
     		// select one of the following two lines:
 			ScoreTuple.CombineOP cOpND = ScoreTuple.CombineOP.AVG;
 			//ScoreTuple.CombineOP cOpND = ScoreTuple.CombineOP.MIN;

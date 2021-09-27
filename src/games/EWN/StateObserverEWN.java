@@ -5,9 +5,8 @@ import games.EWN.StateObserverHelper.Player;
 import games.EWN.StateObserverHelper.Token;
 import games.EWN.constants.ConfigEWN;
 import games.EWN.constants.StartingPositions;
-import games.ObserverBase;
+import games.ObsNondetBase;
 import games.StateObsNondeterministic;
-import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -18,7 +17,7 @@ import java.util.Random;
 
 import static tools.Types.WINNER.*;
 
-public class StateObserverEWN extends ObserverBase implements  StateObsNondeterministic {
+public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeterministic {
 
     public static final long serialVersionUID = 12L;
     private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
@@ -70,7 +69,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             getFixedStartingPosition();
         }
         // Init empty board:
-        advanceNondeterministic(); // setActions when we start a new state
+        advanceNondeterministic(); // roll the dice and setAvailableActions when we start a new state
     }
 
 
@@ -88,11 +87,12 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         this.isNextActionDeterministic = other.isNextActionDeterministic();
         this.playerLooses = other.getPlayerLooses();
         this.playerWin = other.getPlayerWin();
-        this.m_scoreTuple = other.getM_scoreTuple();
+        this.m_scoreTuple = new ScoreTuple(other.m_scoreTuple);
         this.availableActions = new ArrayList<ACTIONS>();
         this.availableRandomActions = other.getAvailableRandoms();
         this.gameState = new Token[size][size];
         this.turn = other.turn;
+        this.rolledDice = other.rolledDice;
         // init players
         for(int i = 0; i < numPlayers; i++){
             this.players.add(new Player(i,size));
@@ -108,7 +108,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
                 }
             }
         }
-        if(this.availableActions == null) throw new RuntimeException("AvailActions cannot be null");
+        if(this.availableActions == null) throw new RuntimeException("availableActions cannot be null");
         setAvailableActions();
     }
 
@@ -451,7 +451,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
             case PLAYER_WINS:
                 return REWARD_POSITIVE;
             case TIE:  throw new RuntimeException("invalid outcome of the game [wrong getGameScore]");
-            };
+            }
         return 0.0;
     }
 
@@ -474,7 +474,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
 
     @Override
     public String getName() {
-        return "EWS";
+        return "EWN";
     }
 
     @Override
@@ -532,7 +532,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
 
     @Override
     public void setPlayer(int p ){
-        this.player = player;
+        this.player = p;
     }
 
     @Override

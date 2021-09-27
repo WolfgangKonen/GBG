@@ -51,7 +51,8 @@ public class Experiment {
 
     public static void main(String[] args) throws Exception {
         Experiment ex = new Experiment();
-        ex.oneRoundChallenge(MCTSE, KUHN, "CompleteRun");
+        ex.oneRoundChallenge(EXPECTIMAX, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(MCTSE, KUHN, "CompleteRun");
 //        ex.oneRoundChallenge(MC, KUHN, "CompleteRun");
 
 //        ex.oneRoundChallenge(TD_NTUPLE_3, KUHN, "CompleteRun");
@@ -402,7 +403,7 @@ public class Experiment {
         String experimentName = experiment;
 
         // number of rounds played for evaluation for each position
-        int playRounds = 10000; //1000000;   // /WK/
+        int playRounds = 100000; //10000; //1000000;   // /WK/
 
         PlayAgent observedAgent;
         PlayAgent benchmarkAgent;
@@ -458,10 +459,12 @@ public class Experiment {
         PlayAgtVector paVector = new PlayAgtVector(pavec);
         int numPlayers = paVector.getNumPlayers();
         ScoreTuple[] means = new ScoreTuple[numPlayers];
+        ScoreTuple[] sums = new ScoreTuple[numPlayers];
         ScoreTuple  shiftedTuple, scMean = new ScoreTuple(numPlayers);
 
         for(int i=0;i<numPlayers;i++){
             means[i] = new ScoreTuple(numPlayers);
+            sums[i] = new ScoreTuple(numPlayers);
         }
 
         double sWeight = 1.0/playRounds;
@@ -507,6 +510,7 @@ public class Experiment {
                         // calculate "reward" as score change for the turn
                         sc.combine(scStart, ScoreTuple.CombineOP.DIFF, observedPlayer, 0);
                         means[z].combine(sc, ScoreTuple.CombineOP.AVG, observedPlayer, sWeight);
+                        sums[z].combine(sc, ScoreTuple.CombineOP.SUM, observedPlayer, 0);
 
                         // Information:
                             // Position
@@ -552,7 +556,9 @@ public class Experiment {
         experimentOverview.put("rounds",playRounds);
         for(int i=0;i<pavec.length;i++){
             experimentOverview.put("meanScoreForPosition"+i,means[i].scTup[i]);
+            System.out.println("meanScoreForPosition "+i+": "+means[i].scTup[i]);
         }
+        System.out.println("meanScore: "+(means[0].scTup[0]+means[1].scTup[1])/2);
 
 
         infoFile.write(experimentOverview.toString());

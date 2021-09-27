@@ -257,8 +257,18 @@ public interface StateObservation extends Serializable{
 	 */
 	StateObservation partialState();
 
+	/**
+	 * @param p		player
+	 * @return Is {@code this} partial with respect to player p?
+	 */
+	boolean isPartialState(int p);
+
+	/**
+	 * @return Is {@code this} partial with respect to any player?
+	 */
 	boolean isPartialState();
-	void setPartialState(boolean p);
+
+	void setPartialState(boolean pstate);
 
 	/**
 	 * <ul>
@@ -271,10 +281,9 @@ public interface StateObservation extends Serializable{
 	 * from which the partial state was derived. It is - given the observable elements in the partial state -
 	 * <b>one</b> of the possibilities that the player has to take into account.
 	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
-	 * 			the number of possible completions.
+	 * 			the probability that this random completion occurs.
 	 */
-	Tuple<StateObservation,Integer> completePartialState();
-
+	Tuple<StateObservation,Double> completePartialState();
 	/**
 	 * Same as {@link #completePartialState()}, but only the part of the state that is visible to player {@code p}
 	 * is completed. (This reduces the complexity for tree-based agents, since only the relevant part needs to be expanded.)
@@ -283,9 +292,22 @@ public interface StateObservation extends Serializable{
 	 * true or false.
 	 * @param p	the player number
 	 * @return 	a {@link Tuple} where {@code element1} carries the partially completed state and {@code element2} has
-	 * 			the number of possible completions.
+	 * 			the probability that this random completion occurs.
 	 */
-	Tuple<StateObservation,Integer> completePartialState(int p);
+	Tuple<StateObservation,Double> completePartialState(int p);
+	/**
+	 * Same as {@link #completePartialState(int) completePartialState(int p)}, but complete the state for player p
+	 * by random action {@code ranAct}
+	 * <p>
+	 * Depending on whether the completed state contains unfilled elements or not, the partial state flag is set to
+	 * true or false.
+	 * @param p			the player number
+	 * @param ranAct	the random action
+	 * @return 	a {@link Tuple} where {@code element1} carries the partially completed state and {@code element2} has
+	 * 			the probability that this random completion occurs.
+	 */
+	Tuple<StateObservation,Double> completePartialState(int p, ACTIONS ranAct);
+
 
 	boolean isRoundOver();
 	void setRoundOver(boolean p);

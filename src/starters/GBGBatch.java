@@ -7,9 +7,11 @@ import controllers.*;
 import controllers.PlayAgent.AgentState;
 import games.*;
 import games.CFour.ArenaTrainC4;
+import games.EWN.ArenaEWN;
 import games.EWN.ArenaTrainEWN;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
+import games.KuhnPoker.ArenaTrainKuhnPoker;
 import games.Nim.ArenaNim2P;
 import games.Nim.ArenaNim3P;
 import games.Nim.ArenaTrainNim2P;
@@ -218,7 +220,12 @@ public class GBGBatch {
 			case "TicTacToe":
 				return new ArenaTrainTTT("", false);
 			case "EWN":
+				ArenaEWN.setConfig(scaPar[0]);
+				ArenaEWN.setCellCoding(scaPar[1]);
+				ArenaEWN.setRandomStartingPosition(scaPar[2]);
 				return new ArenaTrainEWN("", false);
+			case "KuhnPoker":
+				return new ArenaTrainKuhnPoker("",false);
 			default:
 				System.err.println("[GBGBatch.main] args[0]=" + selectedGame + ": This game is unknown.");
 				System.exit(1);
@@ -265,13 +272,14 @@ public class GBGBatch {
 		case "2048":
 		case "ConnectFour": 
 		case "Othello": 
-		case "TicTacToe": 
+		case "TicTacToe":
+		case "KuhnPoker":
 			//
 			// games with no scalable parameters
 			//
 			break;
 		default: 
-			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
+			System.err.println("[GBGBatch] "+selectedGame+": This game is unknown.");
 			System.exit(1);
 		}
 		return scaPar;
