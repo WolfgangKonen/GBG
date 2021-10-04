@@ -121,11 +121,6 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	abstract public ArrayList<ACTIONS> getAvailableActions();
 
-	public ArrayList<ACTIONS> getAvailableCompletions() {
-		throw new RuntimeException("Games with imperfect information (thus with partial states) need to override this method. "+
-				"Games without partial states should never call it");
-	}
-
 	public double getProbCompletion(ACTIONS action) { return 1.0; }
 
 
@@ -225,6 +220,11 @@ abstract public class ObserverBase implements StateObservation {
 	public Tuple<StateObservation,Double>  completePartialState(int p, ACTIONS ranAct) {
 		if (isImperfectInformationGame())
 			throw new RuntimeException("ObserverBase.completePartialState(int,ACTIONS) is NOT valid for imperfect-information games!");
+		return new Tuple<>(this,1.0);
+	}
+	public Tuple<StateObservation,Double>  completePartialState(int p, StateObservation root) {
+		if (isImperfectInformationGame())
+			throw new RuntimeException("ObserverBase.completePartialState(int,StateObservation) is NOT valid for imperfect-information games!");
 		return new Tuple<>(this,1.0);
 	}
 

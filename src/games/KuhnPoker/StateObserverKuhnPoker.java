@@ -2,7 +2,6 @@ package games.KuhnPoker;
 
 import controllers.MCTSWrapper.utils.Tuple;
 import games.ObsNondetBase;
-import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
 import tools.Types;
@@ -390,7 +389,7 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 			rewards[i] = chips[i] - gamescores[i];
 		//System.arraycopy(chips,0,gamescores,0,gamescores.length);
 		for(int i=0;i<gamescores.length;i++)
-			gamescores[i] = PLAY_ONE_ROUND_ONLY ? chips[i] : chips[i] - START_CHIPS;
+			gamescores[i] = PLAY_ONE_ROUND_ONLY ? (chips[i] - START_CHIPS) : chips[i];
 
 
 		addToLog("-----------------End Round("+gameround+")------------------");
@@ -486,6 +485,9 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	public ArrayList<ACTIONS> getAvailableCompletions() {
 		return getAvailableRandoms();
 	}
+	public ArrayList<ACTIONS> getAvailableCompletions(int p) {
+		return getAvailableRandoms();
+	}
 
 
 	public int getNumAvailableRandoms() {
@@ -524,16 +526,12 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 
 	@Override
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
-		if(rewardIsGameScore)
-			return gamescores[referringState.getPlayer()];
 		return gamescores[referringState.getPlayer()];
 		//return rewards[referringState.getPlayer()];
 	}
 
 	@Override
 	public double getReward(int player, boolean rewardIsGameScore){
-		if(rewardIsGameScore)
-			return gamescores[player];
 		return gamescores[player];
 		//return rewards[player];
 	}
@@ -560,6 +558,9 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	public boolean isFinalRewardGame() {
 		return false;
 	}
+
+	@Override
+	public boolean isImperfectInformationGame() { return true; }
 
 	@Override
 	public boolean isLegalState() {
@@ -766,7 +767,7 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	 */
 	@Override
 	public Tuple<StateObservation,Double> completePartialState() {
-		ArrayList<ACTIONS> rans = getAvailableRandoms();
+		ArrayList<ACTIONS> rans = getAvailableCompletions();
 		int ransSize = rans.size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
 		if (isPartialState) {
 			ACTIONS randAction = rans.get(ThreadLocalRandom.current().nextInt(rans.size()));
@@ -790,7 +791,7 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	 */
 	@Override
 	public Tuple<StateObservation,Double> completePartialState(int p) {
-		ArrayList<ACTIONS> rans = getAvailableRandoms();
+		ArrayList<ACTIONS> rans = getAvailableCompletions();
 		int ransSize = rans.size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
 		if (isPartialState) {
 			ACTIONS randAction = rans.get(ThreadLocalRandom.current().nextInt(rans.size()));
@@ -804,15 +805,16 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	}
 
 	/**
-	 * Complete a partial state by randomly 'filling the holes' (for player p)
+	 * Complete a partial state by 'filling the holes' (for player p) with a specific random action {@code ranAct}
 	 *
-	 * @param p		the player for which the state is completed
-	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
+	 * @param p		 the player for which the state is completed
+	 * @param ranAct	the random action
+	 * @return 	a {@link Tuple} where {@code element1} carries the completed state and {@code element2} has
 	 * 			the probability that this random completion occurs.
 	 */
 	@Override
 	public Tuple<StateObservation,Double> completePartialState(int p, ACTIONS ranAct) {
-		int ransSize = getAvailableRandoms().size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
+		int ransSize = getAvailableCompletions().size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
 		if (isPartialState) {
 			if(holeCards[p][0]==null){
 				holeCards[p][0] = new PlayingCard(dealCard(ranAct.toInt()));
@@ -821,6 +823,27 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 				setPartialState(false);
 		}
 		return new Tuple<>(this,1.0/ransSize);
+	}
+
+	/**
+	 * Complete a partial state by 'filling the holes' (for player p) from another state {@code root}
+	 *
+	 * @param p		 the player for which the state is completed
+	 * @param root	 the other state
+	 * @return 	a {@link Tuple} where {@code element1} carries the completed state and {@code element2} has
+	 * 			the probability that this completion occurs (1.0 in this case).
+	 */
+	@Override
+	public Tuple<StateObservation,Double> completePartialState(int p, StateObservation root) {
+		assert root instanceof StateObserverKuhnPoker : "root is not of class StateObserverKuhnPoker";
+		if (isPartialState) {
+			if(holeCards[p][0]==null){
+				holeCards[p][0] = ((StateObserverKuhnPoker)root).getHoleCards(p)[0];
+			}
+			if(holeCards[0][0]!=null && holeCards[1][0]!=null)
+				setPartialState(false);
+		}
+		return new Tuple<>(this,1.0);
 	}
 
 	/**
@@ -842,6 +865,7 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		isPartialState = pstate;
 	}
 
+
 	public int getMoveCounter() {
 		return m_counter;
 	}
@@ -850,12 +874,10 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		return storedActions;
 	}
 
-
 	@Override
 	public boolean isRoundBasedGame(){
 		return true;
 	}
-
 
 	public ArrayList<Integer> getLastRoundMoves() {
 		return lastRoundMoves;

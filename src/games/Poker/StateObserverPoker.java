@@ -1,6 +1,7 @@
 package games.Poker;
 
 import games.KuhnPoker.KuhnPokerConfig;
+import games.ObsNondetBase;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
@@ -20,7 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * </ul>
  *
  */
-public class StateObserverPoker extends ObserverBase implements StateObsNondeterministic {
+public class StateObserverPoker extends ObsNondetBase implements StateObsNondeterministic {
 
 	//<editor-fold desc="variables">
 	//debug
@@ -900,6 +901,15 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	}
 
 	/**
+	 * For Poker the possible completions are the available random actions (the cards that can be dealt)
+	 */
+	public ArrayList<ACTIONS> getAvailableCompletions() {
+		return getAvailableRandoms();
+	}
+	public ArrayList<ACTIONS> getAvailableCompletions(int p) {
+		return getAvailableRandoms();
+	}
+	/**
 	 *
 	 * @return true, if the current position is a win (for either player)
 	 */
@@ -959,6 +969,9 @@ public class StateObserverPoker extends ObserverBase implements StateObsNondeter
 	public boolean isFinalRewardGame() {
 		return true;
 	}
+
+	@Override
+	public boolean isImperfectInformationGame() { return true; }
 
 	@Override
 	public boolean isLegalState() {

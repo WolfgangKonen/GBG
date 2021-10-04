@@ -308,6 +308,15 @@ public interface StateObservation extends Serializable{
 	 */
 	Tuple<StateObservation,Double> completePartialState(int p, ACTIONS ranAct);
 
+	/**
+	 * Complete a partial state by 'filling the holes' (for player p) from another state {@code root}
+	 *
+	 * @param p		 the player for which the state is completed
+	 * @param root	 the state from which we fill the 'holes' for player p
+	 * @return 	a {@link Tuple} where {@code element1} carries the completed state and {@code element2} has
+	 * 			the probability that this completion occurs (1.0 in this case).
+	 */
+	Tuple<StateObservation,Double> completePartialState(int p, StateObservation root);
 
 	boolean isRoundOver();
 	void setRoundOver(boolean p);

@@ -51,6 +51,7 @@ public class ScoreTuple implements Serializable {
 	public ScoreTuple(ScoreTuple other) {
 		this.scTup = other.scTup.clone();
 	}
+	public ScoreTuple copy() { return new ScoreTuple(this); }
 	
 	public double max() {
 		double f = -Double.MAX_VALUE;

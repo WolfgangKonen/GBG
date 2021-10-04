@@ -171,7 +171,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
      * @param mode
      * @return resulting partial state
      */
-    public StateObservation partialState(PartialStateMode mode) {
+    public StateObsNondeterministic partialState(PartialStateMode mode) {
         switch (mode) {
             case THIS_PLAYER:
             case WHATS_ON_TABLE:
@@ -261,7 +261,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
     }
 
     @Override
-    public StateObservation partialState() {
+    public StateObsNondeterministic partialState() {
         return partialState(PartialStateMode.THIS_PLAYER);
     }
 

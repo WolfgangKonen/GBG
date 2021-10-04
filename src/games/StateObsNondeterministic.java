@@ -63,6 +63,12 @@ public interface StateObsNondeterministic extends StateObservation {
 	 * @return a list with all possible completing actions (that can be sent to {@link #advanceNondeterministic()})
 	 */
 	ArrayList<ACTIONS> getAvailableCompletions();
+	/**
+	 * Same as {@link #getAvailableCompletions()}, but take only the possible completions for player p
+	 * @param p  the player
+	 * @return list with all possible completing actions for player p
+	 */
+	ArrayList<ACTIONS> getAvailableCompletions(int p);
 
 	/**
 	 *
@@ -70,6 +76,8 @@ public interface StateObsNondeterministic extends StateObservation {
 	 * @return the probability that the completion {@code action} is selected .
 	 */
 	double getProbCompletion(ACTIONS action);
+
+	StateObsNondeterministic partialState();
 
 	StateObsNondeterministic copy();
 }

@@ -507,8 +507,12 @@ public class Experiment {
                     so.advance(actBest);
                     if (so.isRoundOver()) {
                         sc = so.getGameScoreTuple();
-                        // calculate "reward" as score change for the turn
-                        sc.combine(scStart, ScoreTuple.CombineOP.DIFF, observedPlayer, 0);
+                        if (!StateObserverKuhnPoker.PLAY_ONE_ROUND_ONLY) {
+                            // calculate "reward" as score change for the turn
+                            // (if PLAY_ONE_ROUND_ONLY is true, we do not need this, because this switch subtracts the
+                            // start chips already in StateObserverKuhnPoker)
+                            sc.combine(scStart, ScoreTuple.CombineOP.DIFF, observedPlayer, 0);
+                        }
                         means[z].combine(sc, ScoreTuple.CombineOP.AVG, observedPlayer, sWeight);
                         sums[z].combine(sc, ScoreTuple.CombineOP.SUM, observedPlayer, 0);
 

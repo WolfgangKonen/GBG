@@ -8,6 +8,7 @@ import games.StateObsNondeterministic;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
+import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
@@ -34,9 +35,23 @@ import java.util.Random;
  */
 public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializable
 {
+	/**
+	 * If {@code PARTIAL_IN_RECURSION==true}, form a partial state before starting the recursion in
+	 * {@link #getScore(StateObservation)} and {@link #getScoreTuple(StateObservation, ScoreTuple)} (recommended)
+	 * <p>
+	 * If {@code PARTIAL_IN_RECURSION==false}, do not form partial states before starting the recursion.
+	 */
+	public static boolean PARTIAL_IN_RECURSION = true;
+
+	/**
+	 *
+	 */
+	enum ViewType {PLAYER, ROOT}
+
 	private final Random rand;
 	protected ParMaxN m_mpar;
 	protected int m_depth=10;
+	protected StateObsNondeterministic root;
 
 	//	protected boolean m_rgs=true;  // use now AgentBase::m_oPar.getRewardIsGameScore()
 	//private boolean m_useHashMap=true;		// don't use HashMap in ExpectimaxNAgent!
@@ -119,6 +134,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 			throw new RuntimeException(" Error in "
 					+"ExpectimaxNAgent.getNextAction2(so,...): next action has to be deterministic!");
 
+		this.root = soND;
+
 		if (random)
 			System.out.println("WARNING: ExpectimaxNAgent does not support random==true");
 
@@ -152,11 +169,17 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 			NewSO = soND.copy();
 			NewSO.advanceDeterministic(acts.get(i));
 
-			currScoreTuple = getEAScoreTuple(NewSO, silent,1);
+			if (MCTSETreeNode.WITH_PARTIAL && soND.isImperfectInformationGame()) {
+				currScoreTuple = getEAScoreTuple_partial(
+						new DuoStateND(NewSO,NewSO),
+						silent,1, ViewType.ROOT).element2();
+			} else {
+				currScoreTuple = getEAScoreTuple(NewSO, silent,1);
+			}
 
 			vTable[i] = value = currScoreTuple.scTup[player];
 
-			// always *maximize* P's element in the tuple currScoreTuple,
+			// retain the ScoreTuple which is *maximum* in P's element,
 			// where P is the player to move in state soND:
 			scBest.combine(currScoreTuple, cOpMax, player, 0.0);
 
@@ -206,6 +229,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	}
 
 	/**
+	 * For perfect-information games:
 	 * Loop over all actions available for {@code soND} to find the action with the best
 	 * score tuple (best score for {@code soND}'s player).
 	 *
@@ -230,61 +254,33 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 		int i;
 		ScoreTuple currScoreTuple;
-        ScoreTuple scBest;
+		ScoreTuple scBest;
 		ScoreTuple expecScoreTuple=new ScoreTuple(soND);	// a 0-ScoreTuple
 		ScoreTuple.CombineOP cOpMax = ScoreTuple.CombineOP.MAX;
 		StateObsNondeterministic NewSO;
 
 
-		if (MCTSETreeNode.WITH_PARTIAL && soND.isPartialState(soND.getPlayer())) {
+		if (soND.isNextActionDeterministic()) {
 			//
-			// branch into the possible partial-state completions and average over them
+			// find the best next deterministic action for current player in state soND
 			//
-			ArrayList<ACTIONS> rans = soND.getAvailableCompletions();
-			assert (rans.size()>0) : "Error: getAvailableCompletions returns no actions";
-			double currProbab;
-			double sumProbab=0.0;
-			for(i = 0; i < rans.size(); ++i)
+			ArrayList<ACTIONS> acts = soND.getAvailableActions();
+			scBest=new ScoreTuple(soND,true);		// make a new ScoreTuple with all values as low as possible
+			for(i = 0; i < acts.size(); ++i)
 			{
 				NewSO = soND.copy();
-				NewSO.completePartialState(soND.getPlayer(),rans.get(i));
+				NewSO.advanceDeterministic(acts.get(i));
 
-				// recursive call: NewSO has the same player p = soND.getPlayer() and it is not partial w.r.t. p,
-				// so this isPartialState-branch will *not* be called repeatedly:
-				currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
+				/////// debug only:
+				//System.out.print(NewSO);
+				//System.out.println("depth="+depth);
 
-				currProbab = soND.getProbability(rans.get(i));
-				//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
-				sumProbab += currProbab;
-				expecScoreTuple.combine(currScoreTuple, ScoreTuple.CombineOP.AVG, player, currProbab);
-			}
-			assert (Math.abs(sumProbab-1.0)<1e-8) : "[avg over partial states] Error: sum of probabilities is not 1.0";
-			//if (!silent && depth<0) printNondet(soND,expecScoreTuple,sumProbab,depth);
-
-			return expecScoreTuple;
-		} // WITH_PARTIAL && isPartialState
-
-		if (soND.isNextActionDeterministic()) {
-        	//
-        	// find the best next deterministic action for current player in state soND
-        	//
-            ArrayList<ACTIONS> acts = soND.getAvailableActions();
-        	scBest=new ScoreTuple(soND,true);		// make a new ScoreTuple with all values as low as possible
-            for(i = 0; i < acts.size(); ++i)
-            {
-            	NewSO = soND.copy();
-            	NewSO.advanceDeterministic(acts.get(i));
-
-            	/////// debug only:
-            	//System.out.print(NewSO);
-            	//System.out.println("depth="+depth);
-            	
-            	if (depth<this.m_depth) {
-    				// here is the recursion:
-    				currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
-    			} else {
-    				// this is the 2nd place to terminate the recursion:
-    				// (after finishing the for-loop for every element of acts)
+				if (depth<this.m_depth) {
+					// here is the recursion:
+					currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
+				} else {
+					// this is the 2nd place to terminate the recursion:
+					// (after finishing the for-loop for every element of acts)
 					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
 					// this check on stopConditionMet is needed when using this method from
 					// ExpectimaxNWrapper: If NewSO is a game-over state, we do not need to call the estimator
@@ -295,20 +291,198 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 						currScoreTuple =  NewSO.getRewardTuple(rgs);
 					} else {
 						countMaxDepth++;
-						// not needed anymore (and leads for EWN to a wrong isNextActionDeterministic==false):
+						// setAvailableActions not needed anymore (and leads for EWN to a wrong isNextActionDeterministic==false):
 //						NewSO.setAvailableActions();		// The former problematic MC-N, which could not handle an
-												// incoming NewSO with next-action-nondeterministic does now handle it
+						// incoming NewSO with next-action-nondeterministic, does now handle it
 						currScoreTuple = estimateGameValueTuple(NewSO, null);
+					}
+				}
+				//if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
+
+				// always *maximize* P's element in the tuple currScoreTuple,
+				// where P is the player to move in state soND:
+				scBest.combine(currScoreTuple, cOpMax, player, 0.0);
+			} // for
+
+			return scBest;
+
+		} // if (isNextActionDeterministic)
+		else
+		{ // i.e. if next action is nondeterministic:
+			//
+			// average (or min) over all next nondeterministic actions
+			//
+			ArrayList<ACTIONS> rans = soND.getAvailableRandoms();
+			assert (rans.size()>0) : "Error: getAvailableRandoms returns no actions";
+			// select one of the following two lines:
+			ScoreTuple.CombineOP cOpND = ScoreTuple.CombineOP.AVG;
+			//ScoreTuple.CombineOP cOpND = ScoreTuple.CombineOP.MIN;
+			double currProbab;
+			double sumProbab=0.0;
+			for(i = 0; i < rans.size(); ++i)
+			{
+				NewSO = soND.copy();
+				NewSO.advanceNondeterministic(rans.get(i));
+				while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
+					NewSO.advanceNondeterministic();
+				}
+
+				// here is the recursion:
+				currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
+				// was before called with depth+1, but we now increase depth only on deterministic moves (!)
+
+				currProbab = soND.getProbability(rans.get(i));
+				//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
+				sumProbab += currProbab;
+				// if cOpND==AVG, expecScoreTuple will contain the average ScoreTuple
+				// if cOpND==MIN, expecScoreTuple will contain the worst ScoreTuple for
+				// player (this considers the environment as an adversarial player)
+				expecScoreTuple.combine(currScoreTuple, cOpND, player, currProbab);
+			}
+			assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilities is not 1.0";
+			if (!silent && depth<0) printNondet(soND,expecScoreTuple,sumProbab,depth);
+
+			return expecScoreTuple;
+		} // else (isNextActionDeterministic)
+
+	}
+
+	/**
+	 * For imperfect-information games (games with partial states):
+	 * Loop over all actions available for {@code soND} to find the action with the best
+	 * score tuple (best score for {@code soND}'s player).
+	 *
+	 * @param duoState	duo of states [ current game state {@code soND}, state root ] (not changed on return)
+	 * @param silent	operate w/o printouts
+	 * @param depth		tree depth
+	 * @param fView     the view perspective (PLAYER or ROOT) to take when backing up the ScoreTuple
+	 * @return			duo of {@link ScoreTuple}s for state {@code soND} as calculated by ExpectimaxNAgent (EA)
+	 */
+	private DuoScoreTuples getEAScoreTuple_partial(DuoStateND duoState,
+											   boolean silent, int depth,
+											   ViewType fView) {
+		StateObsNondeterministic soND = duoState.element1();
+		StateObsNondeterministic soRoot = duoState.element2();
+
+		assert soND.isLegalState() : "Not a legal state";
+		int player = soND.getPlayer();
+
+		boolean rgs = m_oPar.getRewardIsGameScore();
+		boolean stopOnRoundOver= m_mpar.getStopOnRoundOver(); 		// /WK/03/2021: NEW
+		boolean stopConditionMet = soND.isGameOver() || (stopOnRoundOver && soND.isRoundOver());
+		if (stopConditionMet)
+		{
+			// this is the 1st place to terminate the recursion:
+			countTerminal++;
+			return new DuoScoreTuples(soND.getRewardTuple(rgs),soRoot.getRewardTuple(rgs));
+		}
+
+		int i;
+        ScoreTuple scBest,scView;
+		ScoreTuple expecScoreTuple=new ScoreTuple(soND);	// a 0-ScoreTuple
+		DuoScoreTuples duoExpecScTuple = new DuoScoreTuples(expecScoreTuple,expecScoreTuple);
+		StateObsNondeterministic NewSO, NewRoot;
+
+		if (MCTSETreeNode.WITH_PARTIAL && soND.isPartialState(soND.getPlayer())) {
+			//
+			// branch into the possible partial-state completions and average over them
+			//
+			int p = soND.getPlayer();
+			if (p == root.getPlayer() && soND.isNextActionDeterministic()) {
+				// if p is the root player, take only the root completion (average = root's value)
+				StateObsNondeterministic sRoot = duoState.element2();
+				return getEAScoreTuple_partial(new DuoStateND(sRoot,sRoot), silent, depth, fView);
+			}
+			// else, if p is not the root player, get all possible completions for player p
+			// and take the weighted average of their resulting score tuples:
+			ArrayList<ACTIONS> rans = soND.getAvailableCompletions(p);
+			assert (rans.size()>0) : "Error: getAvailableCompletions returns no actions";
+			double currProbab;
+			double sumProbab=0.0;
+			for(i = 0; i < rans.size(); ++i)
+			{
+				DuoStateND newDuoState = duoState.duoCompletePartial(soND.getPlayer(),rans.get(i));
+				if (soND.isNextActionDeterministic())
+					newDuoState = newDuoState.duoPartialState(root.getPlayer());
+
+				// recursive call: newDuoState has the same player p = soND.getPlayer() and it is not partial w.r.t. p,
+				// so this isPartialState-branch will *not* be called repeatedly:
+				DuoScoreTuples duoScoreTup = getEAScoreTuple_partial(newDuoState, silent, depth, fView);
+
+				currProbab = soND.getProbability(rans.get(i));
+				//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
+				sumProbab += currProbab;
+				duoExpecScTuple.combine(duoScoreTup,ScoreTuple.CombineOP.AVG,player, currProbab);
+			}
+			assert (Math.abs(sumProbab-1.0)<1e-8) : "[avg over partial states] Error: sum of probabilities is not 1.0";
+//			if (!silent && depth<0) {
+//				printNondet(soND,duoExpecScTuple.element1(),sumProbab,depth);
+//				printNondet(soND,duoExpecScTuple.element2(),sumProbab,depth);
+//			}
+
+			return duoExpecScTuple;
+		} // WITH_PARTIAL && isPartialState
+
+
+
+		if (soND.isNextActionDeterministic()) {
+        	//
+        	// find the best next deterministic action for current player in state soND
+        	//
+            ArrayList<ACTIONS> acts = soND.getAvailableActions();
+        	scBest=new ScoreTuple(soND,true);		// make a new ScoreTuple with all values as low as possible
+			scView=new ScoreTuple(soND);
+            for(i = 0; i < acts.size(); ++i)
+            {
+//            	NewSO = soND.copy();
+//            	NewSO.advanceDeterministic(acts.get(i));
+
+				DuoStateND newDuoState = duoState.duoAdvanceDet(acts.get(i));
+				DuoScoreTuples duoScoreTup;
+				NewSO = newDuoState.element1();
+				NewRoot = newDuoState.element2();
+				// player has changed, no partial state!
+
+				/////// debug only:
+            	//System.out.print(NewSO);
+            	//System.out.println("depth="+depth);
+            	
+            	if (depth<this.m_depth) {
+    				// here is the recursion:
+					duoScoreTup = getEAScoreTuple_partial(newDuoState, silent,depth+1, ViewType.PLAYER);
+    			} else {
+    				// this is the 2nd place to terminate the recursion:
+    				// (after finishing the for-loop for every element of acts)
+					stopConditionMet = NewSO.isGameOver() || (stopOnRoundOver && NewSO.isRoundOver());
+					// this check on stopConditionMet is needed when using this method from
+					// ExpectimaxNWrapper: If NewSO is a game-over state, we do not need to call the estimator
+					// (i.e. wrapped agent), we just take the final reward
+					if (stopConditionMet)
+					{
+						countTerminal++;
+						duoScoreTup = new DuoScoreTuples(NewSO.getRewardTuple(rgs),NewRoot.getRewardTuple(rgs));
+					} else {
+						countMaxDepth++;
+						// setAvailableActions not needed anymore (and leads for EWN to a wrong isNextActionDeterministic==false):
+//						NewSO.setAvailableActions();		// The former problematic MC-N, which could not handle an
+												// incoming NewSO with next-action-nondeterministic, does now handle it
+						duoScoreTup = new DuoScoreTuples(estimateGameValueTuple(NewSO, null),
+					  	 								 estimateGameValueTuple(NewRoot, null));
 					}
     			}
             	//if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
 
     			// always *maximize* P's element in the tuple currScoreTuple, 
     			// where P is the player to move in state soND:
-    			scBest.combine(currScoreTuple, cOpMax, player, 0.0);
+//				currScoreTuple = ;
+//    			scBest.combine(currScoreTuple, cOpMax, player, 0.0);
+				if (duoScoreTup.element1().scTup[player] > scBest.scTup[player] ) {
+					scBest = duoScoreTup.element1().copy();
+					scView = (fView!=ViewType.ROOT) ? duoScoreTup.element1() : duoScoreTup.element2();
+				}
             } // for
 
-			return scBest;
+			return new DuoScoreTuples(scView,scView);
 
         } // if (isNextActionDeterministic)
         else 
@@ -325,28 +499,29 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 			double sumProbab=0.0;
             for(i = 0; i < rans.size(); ++i)
             {
-            	NewSO = soND.copy();
-            	NewSO.advanceNondeterministic(rans.get(i));
-				while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
-					NewSO.advanceNondeterministic();
-				}
+				DuoStateND newDuoState = duoState.duoAdvanceNonDet(rans.get(i));
+				if (MCTSETreeNode.WITH_PARTIAL) newDuoState = newDuoState.duoPartialState(root.getPlayer());
 
 				// here is the recursion:
-				currScoreTuple = getEAScoreTuple(NewSO, silent,depth);
-							// was before called with depth+1, but we now increase depth only on deterministic moves (!)
-				
+				DuoScoreTuples duoScoreTup = getEAScoreTuple_partial(newDuoState,
+						silent, depth, fView);
+						// was before called with depth+1, but now we increase depth only on deterministic moves (!)
+
 				currProbab = soND.getProbability(rans.get(i));
             	//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
 				sumProbab += currProbab;
 				// if cOpND==AVG, expecScoreTuple will contain the average ScoreTuple
 				// if cOpND==MIN, expecScoreTuple will contain the worst ScoreTuple for
 				// player (this considers the environment as an adversarial player)
-				expecScoreTuple.combine(currScoreTuple, cOpND, player, currProbab);
+				duoExpecScTuple.combine(duoScoreTup,cOpND, player, currProbab);
             }
 			assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilities is not 1.0";
-			if (!silent && depth<0) printNondet(soND,expecScoreTuple,sumProbab,depth);
+//			if (!silent && depth<0) {
+//				printNondet(soND,duoExpecScTuple.element1(),sumProbab,depth);
+//				printNondet(soND,duoExpecScTuple.element2(),sumProbab,depth);
+//			}
 
-            return expecScoreTuple;
+			return duoExpecScTuple;
         } // else (isNextActionDeterministic)
 
 	}
@@ -361,17 +536,28 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 */
 	@Override
 	public double getScore(StateObservation sob) {
-		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
-		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
-		
-		return getEAScoreTuple(soND, true,0).scTup[sob.getPlayer()];
+		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObsNondeterministic";
+		StateObsNondeterministic soND_p, soND = (StateObsNondeterministic) sob;
+		if (!soND.isImperfectInformationGame()) {
+			return getEAScoreTuple(soND, true, 0).scTup[sob.getPlayer()];
+		} else {
+			soND_p = PARTIAL_IN_RECURSION ? soND.partialState() : soND;
+			return getEAScoreTuple_partial(new DuoStateND(soND_p,soND_p), true, 0,ViewType.ROOT)
+					.element2()
+					.scTup[sob.getPlayer()];
+		}
 	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
-		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
-		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
-		
-		return getEAScoreTuple(soND, true,0);
+		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObsNondeterministic";
+		StateObsNondeterministic soND_p, soND = (StateObsNondeterministic) sob;
+		if (!soND.isImperfectInformationGame()) {
+			return getEAScoreTuple(soND, true, 0);
+		} else {
+			soND_p = PARTIAL_IN_RECURSION ? soND.partialState() : soND;
+			return getEAScoreTuple_partial(new DuoStateND(soND_p,soND_p), true, 0,ViewType.ROOT)
+					.element2();
+		}
 	}
 	
 	/**
@@ -443,5 +629,92 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
     	System.out.println("---   Random: "+NewSO.stringDescr()+"   "+scTuple.toString()+
     			", p="+currProbab+", depth="+depth);
     }
+
+	/**
+	 * For games with partial states: a tuple of two states (the state itself and its 'root sibling')
+	 * together with various methods to operate on and return such a tuple.
+	 */
+	static class DuoStateND {
+		private final Tuple<StateObsNondeterministic,StateObsNondeterministic> duoTuple;
+
+		DuoStateND(StateObsNondeterministic s1, StateObsNondeterministic s2) {
+			duoTuple = new Tuple<>(s1.copy(),s2.copy());
+		}
+
+		DuoStateND(DuoStateND other) {
+			StateObsNondeterministic s1 = other.element1().copy();
+			StateObsNondeterministic s2 = other.element2().copy();
+			duoTuple = new Tuple<>(s1,s2);
+		}
+
+		public DuoStateND duoPartialState(int proot) {
+			StateObsNondeterministic s1 = this.element1().copy().partialState();
+			StateObsNondeterministic s2 = this.element2().copy();
+			s2 = (s2.getPlayer()!=proot) ? s2 : s2.partialState();
+			return new DuoStateND(s1,s2);
+		}
+
+		public DuoStateND duoCompletePartial(int p, Types.ACTIONS ranAct) {
+			StateObsNondeterministic s1 = this.element1().copy();
+			StateObsNondeterministic s2 = this.element2().copy();
+			s1.completePartialState(p,ranAct);
+			s2.completePartialState(p,ranAct);
+			return new DuoStateND(s1,s2);
+		}
+
+		public DuoStateND duoAdvanceDet(Types.ACTIONS act) {
+			StateObsNondeterministic s1 = this.element1().copy();
+			StateObsNondeterministic s2 = this.element2().copy();
+			s1.advanceDeterministic(act);
+			s2.advanceDeterministic(act);
+			return new DuoStateND(s1,s2);
+		}
+
+		public DuoStateND duoAdvanceNonDet(Types.ACTIONS ranAct) {
+			StateObsNondeterministic s1 = this.element1().copy();
+			StateObsNondeterministic s2 = this.element2().copy();
+			s1.advanceNondeterministic(ranAct);
+			while(!s1.isNextActionDeterministic() && !s1.isRoundOver()){		// /WK/03/2021 NEW
+				s1.advanceNondeterministic();
+			}
+			s2.advanceNondeterministic(ranAct);
+			while(!s2.isNextActionDeterministic() && !s2.isRoundOver()){		// /WK/03/2021 NEW
+				s2.advanceNondeterministic();
+			}
+			return new DuoStateND(s1,s2);
+		}
+
+		public StateObsNondeterministic element1() { return duoTuple.element1; }
+		public StateObsNondeterministic element2() { return duoTuple.element2; }
+	}
+
+	/**
+	 * For games with partial states: a tuple of two {@link ScoreTuple}s (from the state itself and its 'root sibling')
+	 * together with various methods to operate on and return such a tuple.
+	 */
+	static class DuoScoreTuples {
+		private final Tuple<ScoreTuple,ScoreTuple> duoTuple;
+
+		DuoScoreTuples(ScoreTuple s1, ScoreTuple s2) {
+			duoTuple = new Tuple<>(s1.copy(),s2.copy());
+		}
+
+		DuoScoreTuples(DuoScoreTuples other) {
+			ScoreTuple s1 = other.element1().copy();
+			ScoreTuple s2 = other.element2().copy();
+			duoTuple = new Tuple<>(s1,s2);
+		}
+
+		public DuoScoreTuples combine(DuoScoreTuples duoScoreTup, ScoreTuple.CombineOP cOp, int player, double currProbab) {
+			ScoreTuple s1 = duoScoreTup.element1();
+			ScoreTuple s2 = duoScoreTup.element2();
+			this.element1().combine(s1, cOp, player, currProbab);
+			this.element2().combine(s2, cOp, player, currProbab);
+			return this;
+		}
+
+		public ScoreTuple element1() { return duoTuple.element1; }
+		public ScoreTuple element2() { return duoTuple.element2; }
+	}
 
 }
