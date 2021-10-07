@@ -1,11 +1,11 @@
 package games.EWN.gui;
 
+import app.display.util.GUIUtil;
 import games.Arena;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
-import games.EWN.StateObserverHelper.Helper;
-import games.EWN.constants.ConfigEWN;
-import games.StateObservation;
+import games.EWN.config.ConfigEWN;
+import tools.Types;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +21,7 @@ public class GameBoardGuiEWN extends JFrame {
     private GameBoardEWN m_gb = null;
     private BoardGui boardGui = null;
     private LegendGui legend;
+    private JLabel errorMessage;
     private boolean selecting;
     private int SelectedTokenPos;
 
@@ -34,9 +35,18 @@ public class GameBoardGuiEWN extends JFrame {
         this.add(boardGui,BorderLayout.CENTER);
         this.legend  = new LegendGui(so.getNumPlayers() ,so.getNextNondeterministicAction().toInt());
         this.add(legend,BorderLayout.NORTH);
+        this.initErrorMessage();
+        this.add(errorMessage, BorderLayout.SOUTH);
         this.setMinimumSize(new Dimension(500,300));
         pack();
         setVisible(true);
+    }
+
+    public void initErrorMessage(){
+        errorMessage = new JLabel(" ");
+        errorMessage.setForeground(Color.RED);
+        errorMessage.setFont(new Font("Arial", Font.PLAIN,Types.GUI_TITLEFONTSIZE));
+
     }
 
     /**
@@ -91,6 +101,10 @@ public class GameBoardGuiEWN extends JFrame {
         //boardGui.getBoard()[x][y].updateValues(Helper.parseAction(from,to,ConfigEWN.BOARD_SIZE));
     }
 
+    public void setError(String str)
+    {
+        this.errorMessage.setText(str);
+    }
     public GameBoardEWN getM_gb(){
         return m_gb;
     }

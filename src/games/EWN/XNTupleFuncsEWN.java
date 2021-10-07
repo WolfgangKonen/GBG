@@ -1,15 +1,10 @@
 package games.EWN;
 
-import game.equipment.container.board.Board;
 import games.*;
-import games.BlackJack.GameBoardBlackJack;
-import games.EWN.StateObserverHelper.Helper;
 import games.EWN.StateObserverHelper.Token;
-import games.EWN.constants.ConfigEWN;
-import tools.Types;
+import games.EWN.config.ConfigEWN;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**

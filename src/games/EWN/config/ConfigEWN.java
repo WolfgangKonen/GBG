@@ -1,4 +1,4 @@
-package games.EWN.constants;
+package games.EWN.config;
 
 public class ConfigEWN {
 

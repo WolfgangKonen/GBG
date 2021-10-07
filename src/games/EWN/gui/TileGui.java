@@ -3,14 +3,10 @@ package games.EWN.gui;
 import games.Arena;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverHelper.Token;
-import games.EWN.constants.ConfigEWN;
 import tools.Types;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -84,7 +80,7 @@ public class TileGui extends JPanel{
                 if(aTaskState == Arena.Task.PLAY) {
                     gb.hGameMove(index); // Human play
                 }else if( aTaskState == Arena.Task.INSPECTV) {
-                   // gb.inspectMove(index); // Inspect
+                    gb.inspectMove(index); // Inspect
                 }
 
             }

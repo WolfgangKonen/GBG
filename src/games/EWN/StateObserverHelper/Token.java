@@ -1,6 +1,6 @@
 package games.EWN.StateObserverHelper;
 
-import games.EWN.constants.ConfigEWN;
+import games.EWN.config.ConfigEWN;
 import tools.Types;
 
 import java.io.Serializable;

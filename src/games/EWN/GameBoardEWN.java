@@ -3,14 +3,16 @@ package games.EWN;
 import controllers.PlayAgent;
 import games.Arena;
 import games.EWN.StateObserverHelper.Helper;
-import games.EWN.constants.ConfigEWN;
+import games.EWN.config.ConfigEWN;
 import games.EWN.gui.GameBoardGuiEWN;
 import games.GameBoard;
 import games.Othello.ConfigOthello;
 import games.StateObservation;
 import tools.Types;
 
-import java.nio.file.Path;
+import javax.swing.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -36,12 +38,29 @@ public class GameBoardEWN implements GameBoard {
     protected Random rand;
     private boolean arenaActReq = false;
     private transient GameBoardGuiEWN m_gameGui;
+    double[][] vGameState;
     private int selectedTokenPosition;
     private boolean selecting;
-
+    private boolean inspecting;
 
     public GameBoardEWN(Arena arena){
         super();
+        m_Arena = arena;
+        m_so = new StateObserverEWN();
+        rand = new Random();
+        selecting = true;
+        inspecting = false;
+        vGameState = new double[ConfigEWN.BOARD_SIZE*3][ConfigEWN.BOARD_SIZE*3];
+        selectedTokenPosition = -1;
+        if(m_Arena.hasGUI()){
+            m_gameGui = new GameBoardGuiEWN(this);
+        }
+    }
+
+    public GameBoardEWN(Arena arena, int size, int player){
+        super();
+        ConfigEWN.BOARD_SIZE = size;
+        ConfigEWN.NUM_PLAYERS = player;
         m_Arena = arena;
         m_so = new StateObserverEWN();
         rand = new Random();
@@ -51,7 +70,6 @@ public class GameBoardEWN implements GameBoard {
             m_gameGui = new GameBoardGuiEWN(this);
         }
     }
-
 
     @Override
     public void initialize() {}
@@ -82,17 +100,49 @@ public class GameBoardEWN implements GameBoard {
         if(m_gameGui != null){
             m_gameGui.updateBoard(soN, withReset,showValueOnGameboard);
         }
+
+        if(soN != null && showValueOnGameboard && soN.getStoredValues() != null) {
+            for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
+                for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
+                    vGameState[i][j] = Double.NaN;
+
+            for(int y = 0 ; y < soN.getStoredValues().length; y++)
+            {
+                System.out.println("index: " + y + " Values" + soN.getStoredValues()[y]);
+                /**Types.ACTIONS action = sot.getStoredAction(y);
+                int iAction = action.toInt();
+                int jFirst= iAction%ConfigOthello.BOARD_SIZE;
+                int iFirst= (iAction-jFirst)/ConfigOthello.BOARD_SIZE;
+                vGameState[iFirst][jFirst] = sot.getStoredValues()[y];**/
+            }
+        }
     }
 
     public void hGameMove(int index) {
         if(!(m_Arena.taskState == Arena.Task.PLAY)) return;
         if(selecting){
+            m_gameGui.setError(" ");
+
             if(selectedTokenPosition > -1) {
                 m_gameGui.unSelect();
                 selectedTokenPosition = -1;
             }
             selectedTokenPosition = m_gameGui.hGameSelecting(index);
-            selecting = false;
+            //Check if the selected index is able to make a move
+            ArrayList<Types.ACTIONS> allActions = m_so.getAvailableActions();
+            for(Types.ACTIONS a : allActions){
+                int[] indices = Helper.getIntsFromAction(a);
+                if(indices[0] == index){
+                    selecting = false;
+                    break;
+                }
+            }
+            if(selecting){
+                int diceRoll = m_so.getNextNondeterministicAction().toInt() + 1;
+                m_gameGui.setError("The dice rolled: " + diceRoll + ". Invalid token selection.");
+                m_gameGui.unSelect();
+                selectedTokenPosition = -1;
+            }
         }else {
             if(selectedTokenPosition == index){
                 m_gameGui.unSelect();
@@ -110,6 +160,8 @@ public class GameBoardEWN implements GameBoard {
                 }
             }
         }
+
+
         /**
         Types.ACTIONS act = Helper.parseAction(x,y, ConfigEWN.BOARD_SIZE);
         if( m_so.isLegalAction(act)) {
@@ -123,7 +175,22 @@ public class GameBoardEWN implements GameBoard {
          **/
     }
 
-
+    public void inspectMove(int index)
+    {
+      /**  // Selecting the token, which will be inspected;
+            // get all actions
+            ArrayList<Types.ACTIONS> actions = m_so.getAvailableActions();
+            for(Types.ACTIONS a : actions){
+                int[] actionParsed = Helper.getIntsFromAction(a);
+                if(actionParsed[0] == index){
+                    m_so.advance(a);
+                }
+            }
+        }
+        m_Arena.setStatusMessage("Inspecting the value function ...");
+        m_so.advance(act);
+        arenaActReq = true;**/
+    }
 
 
 

@@ -2,7 +2,7 @@ package games.EWN;
 
 import controllers.PlayAgent;
 import games.ArenaTrain;
-import games.EWN.constants.ConfigEWN;
+import games.EWN.config.ConfigEWN;
 import games.Evaluator;
 import games.GameBoard;
 import games.XNTupleFuncs;

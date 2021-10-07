@@ -3,11 +3,10 @@ package games.EWN;
 import games.EWN.StateObserverHelper.Helper;
 import games.EWN.StateObserverHelper.Player;
 import games.EWN.StateObserverHelper.Token;
-import games.EWN.constants.ConfigEWN;
-import games.EWN.constants.StartingPositions;
+import games.EWN.config.ConfigEWN;
+import games.EWN.config.StartingPositions;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
-import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -38,7 +37,6 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     private int playerWin;      // Representing the winning player for faster evaluation
     private int playerLooses;   // Representing the loosing player for faster evaluation
     private ScoreTuple m_scoreTuple;
-
 
 
     public StateObserverEWN(){
@@ -212,7 +210,6 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     public void advance(ACTIONS action) {
         super.advanceBase(action);		//		includes addToLastMoves(action)
         if(isNextActionDeterministic) {
-            // Hotfix seems to work Dive into action generation
             if(action != null) {
                 count = 0;
                 advanceDeterministic(action);
@@ -238,27 +235,28 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
      * @param action    the action
      */
     public void advanceDeterministic(ACTIONS action){
-        int[] convertedAction = Helper.getIntsFromAction(action); // [from, to] int array
-        int to_x = convertedAction[1] % size;
-        int to_y = (convertedAction[1] - to_x) / size;
-        int from_x = convertedAction[0] % size;
-        int from_y = (convertedAction[0] - from_x) / size;
-        Token from_token = gameState[from_y][from_x];
-        Token to_token = gameState[to_y][to_x];
-        // check if the token is owned by a player or is empty
-        if (to_token.getPlayer() >= 0) {
-            players.get(to_token.getPlayer()).removeToken(to_token);
+        if(!(action.toInt() == -1)){
+            int[] convertedAction = Helper.getIntsFromAction(action); // [from, to] int array
+            int to_x = convertedAction[1] % size;
+            int to_y = (convertedAction[1] - to_x) / size;
+            int from_x = convertedAction[0] % size;
+            int from_y = (convertedAction[0] - from_x) / size;
+            Token from_token = gameState[from_y][from_x];
+            Token to_token = gameState[to_y][to_x];
+            // check if the token is owned by a player or is empty
+            if (to_token.getPlayer() >= 0) {
+                players.get(to_token.getPlayer()).removeToken(to_token);
+            }
+            gameState[to_y][to_x] = from_token; // Setting token to new index;
+            players.get(player).updateToken(from_token, to_token);
+            gameState[from_y][from_x] = new Token(from_y, from_x, -1, -1); // Remove old token
         }
-        gameState[to_y][to_x] = from_token; // Setting token to new index;
-        players.get(player).updateToken(from_token, to_token);
-        gameState[from_y][from_x] = new Token(from_y, from_x, -1, -1); // Remove old token
         turn++;
         boolean isOver = this.isGameOver();
         if(!isOver){
             this.player = (this.player + 1) % numPlayers; //next player
             availableActions.clear();
         }
-
         isNextActionDeterministic = false;      // /WK/ this was missing, I think
     }
 
@@ -269,7 +267,10 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         }
         int actIndex = random.nextInt(availableRandomActions.size());
         advanceNondeterministic(availableRandomActions.get(actIndex));
-
+        if(this.availableActions.size() == 0){
+            this.availableActions.add(new ACTIONS(-1)); // Add empty action
+        }
+        this.isNextActionDeterministic = true;
         return nextNondeterministicAction;
     }
 
@@ -278,7 +279,8 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     @Override
     public ACTIONS advanceNondeterministic(ACTIONS action) {
         nextNondeterministicAction = action;
-        this.setAvailableActions();             // this sets also isNextActionDeterministic
+        this.setAvailableActions();// this sets also isNextActionDeterministic |
+
         return action;
 
     }
@@ -344,26 +346,11 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     @Override
     public void setAvailableActions() {
         Player p = players.get(player);
-
         p.setAvailableActions(nextNondeterministicAction.toInt());
         this.availableActions = p.getAvailableActions();
-        if(availableActions.size() == 0){
-            count++;
-            System.out.println(stringDescr());
-            if(count > 3){
-                System.out.println("--final--");
-                System.out.println(stringDescr());
-                isGameOver();
-            }else {
-                this.player = (player + 1) % numPlayers;
-                this.isNextActionDeterministic = false;
-                count = 0;
-                advanceNondeterministic();
-            }
-        }else {
-            isNextActionDeterministic = true;
-        }
     }
+
+
 
     @Override
     public ACTIONS getAction(int i) {
@@ -382,54 +369,61 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
         return numPlayers;
     }
 
-    private Types.WINNER getWinner(int player){
+    private Types.WINNER getWinner2(int player) {
+        if(playerWin >= 0) return playerWin == player ? PLAYER_WINS : PLAYER_LOSES;
+        return playerLooses == player ? PLAYER_LOSES : PLAYER_WINS;
 
-        if(numPlayers == 2) {
+    }
+
+    private Types.WINNER getWinner3(int player) {
+            // Can only be player 2
             if(playerWin >= 0) {
-                return playerWin == player ? PLAYER_WINS : PLAYER_LOSES;
-            }else if(playerLooses >= 0){
-                return playerLooses == player ? PLAYER_LOSES : PLAYER_WINS;
-            }
-        } else if(numPlayers == 3){
-            // Can only be the single player
-            if (playerWin ==2){
-                return PLAYER_WINS;
+                return player == 2 ? PLAYER_WINS : PLAYER_LOSES;
             }
             if(playerLooses >= 0){
-                if(playerLooses == 0 || playerLooses == 1){
-                    return (player == 0 || player == 1) ? PLAYER_LOSES : PLAYER_WINS;
+                // if playerLooses == 2
+                if(playerLooses == 2){
+                    return player == 2 ? PLAYER_LOSES : PLAYER_WINS;
                 }
-                return player == 2 ? PLAYER_LOSES : PLAYER_WINS;
+                return player == 2 ? PLAYER_WINS : PLAYER_LOSES;
             }
-        }
-        else {
-            // Teams [0,2] vs. [1,3]
+            throw new RuntimeException("There must be a winner");
+    }
 
-            if(playerWin >= 0){
-                // Check if the player is the winner
-                if((playerWin == 0 || playerWin == 2) && (player == 0 || player == 2)){
-                    return PLAYER_WINS;
-                }
-                if((playerWin == 1 || playerWin == 3) && (player == 1 || player == 3))
-                {
-                    return PLAYER_WINS;
-                }
+
+    private Types.WINNER getWinner4(int player) {
+        if(playerWin >= 0){
+            // Check if the player is the winner
+            if((playerWin == 0 || playerWin == 2) && (player == 0 || player == 2)){
+                return PLAYER_WINS;
+            }
+            if((playerWin == 1 || playerWin == 3) && (player == 1 || player == 3))
+            {
+                return PLAYER_WINS;
+            }
+            return PLAYER_LOSES;
+        }
+        else if(playerLooses >= 0){
+
+            if((playerLooses == 0 || playerLooses == 2) && (player == 0 || player == 2)){
                 return PLAYER_LOSES;
             }
-            if(playerLooses >= 0){
-
-                if((playerLooses == 0 || playerLooses == 2) && (player == 0 || player == 2)){
-                    return PLAYER_LOSES;
-                }
-                if((playerLooses == 1 || playerLooses == 3) && (player == 1 || player == 3))
-                {
-                    return PLAYER_LOSES;
-                }
-                return PLAYER_WINS;
+            if((playerLooses == 1 || playerLooses == 3) && (player == 1 || player == 3))
+            {
+                return PLAYER_LOSES;
             }
+            return PLAYER_WINS;
         }
+        throw new RuntimeException("There must be a winner");
+    }
 
-        throw new RuntimeException("Game is not over yet.");
+    private Types.WINNER getWinner(int player){
+        switch (ConfigEWN.NUM_PLAYERS){
+            case 2: return getWinner2(player);
+            case 3: return getWinner3(player);
+            case 4: return getWinner4(player);
+            default: throw new RuntimeException("Number of players: "+player + " no allowed");
+        }
     }
 
 
@@ -474,7 +468,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
 
     @Override
     public String getName() {
-        return "EWS";
+        return "EWN";
     }
 
     @Override
@@ -545,7 +539,7 @@ public class StateObserverEWN extends ObserverBase implements  StateObsNondeterm
     /**
      * Game Over conditions
      *
-     * 2 Player:
+     * 2 or 4 Player:
      *  One player does not have any tokens left.
      *  One Token reaches the opposite corner
      *
