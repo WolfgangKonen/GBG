@@ -1,7 +1,10 @@
 package controllers.MCTSWrapper.passStates;
 
 import controllers.MCTSWrapper.utils.Identifiable;
+import controllers.MCTSWrapper.utils.Tuple;
+import games.StateObsNondeterministic;
 import games.StateObservation;
+import tools.Types;
 
 /**
  * Represents an identifiable action that can be applied to a game state.
@@ -16,4 +19,8 @@ public interface ApplicableAction extends Identifiable {
      * So the given StateObservation instance remains unchanged.
      */
     StateObservation applyTo(final StateObservation so);
+
+    Tuple<Types.ACTIONS,StateObsNondeterministic> advanceNonDet(final StateObsNondeterministic so);
+
+    StateObservation advanceDet(final StateObservation so);
 }

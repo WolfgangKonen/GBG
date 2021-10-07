@@ -5,6 +5,8 @@ import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.*;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
+import controllers.MCTSExpWrapper.MctseWrapperAgent;
+import controllers.MCTSExpWrapper.stateApproximation2.PlayAgentApproximator2;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
@@ -19,6 +21,7 @@ import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
+import games.KuhnPoker.KuhnPokerAgent;
 import games.Nim.BoutonAgent;
 import games.Nim.DaviNimAgent;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
@@ -243,29 +246,27 @@ public class XArenaFuncs {
 //												// XArenaButtonsGui
 //				pa = new Edax();
 			} else if (sAgent.equals("Edax2")) {// Othello only, see
-												// gui_agent_list in
-												// XArenaButtonsGui
+												// gui_agent_list in XArenaButtonsGui
 				pa = new Edax2(sAgent, m_xab.edPar[n]);
 //			} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
-//												// gui_agent_list in
-//												// XArenaButtonsGui
+//												// gui_agent_list in XArenaButtonsGui
 //				pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
 			} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see
-												 // gui_agent_list in
-												 // XArenaButtonsGui
+												 // gui_agent_list in XArenaButtonsGui
 				pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
 			} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see
-				 								 // gui_agent_list in
-				 								 // XArenaButtonsGui
+				 								 // gui_agent_list in XArenaButtonsGui
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n], nTuples, xnf, maxGameNum);
 			} else if(sAgent.equals("BSBJA")) { // Black Jack only, see
-												// gui_agent_list in
-												// XArenaButtonsGui
+												// gui_agent_list in XArenaButtonsGui
 				pa = new BasicStrategyBlackJackAgent();
+			} else if(sAgent.equals("KuhnOptimal")) { // KuhnPoker only, see
+													  // gui_agent_list in XArenaButtonsGui
+				pa = new KuhnPokerAgent("KuhnOptimal");
 			}
 		} catch (Exception e) {
 			m_Arena.showMessage(e.getClass().getName() + ": " + e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -353,6 +354,9 @@ public class XArenaFuncs {
 											// gui_agent_list in
 											// XArenaButtonsGui
 			pa = new BasicStrategyBlackJackAgent();
+		} else if(sAgent.equals("KuhnOptimal")) { // KuhnPoker only, see
+			// gui_agent_list in XArenaButtonsGui
+			pa = new KuhnPokerAgent("KuhnOptimal");
 		}else { // all the trainable agents:
 			if (m_PlayAgents[n] == null) {
 				if (sAgent.equals("TDS")) {
@@ -559,6 +563,8 @@ public class XArenaFuncs {
 		return qaVector;
 	}
 
+	// Currently, a wrapping with MCTS(E)-wrapper (outer) can be stacked on top of an MaxN-wrapper (inner)
+	// TODO: Decide if this is useful, if it should be allowed
 	protected PlayAgent wrapAgent(int n, PlayAgent pa, ParOther oPar, ParMaxN mPar, StateObservation so) {
 		PlayAgent qa;
 		int nply = oPar.getWrapperNPly();
@@ -578,14 +584,24 @@ public class XArenaFuncs {
 		}
 
 		// Wrap the agent with MCTS lookahead if the mcts wrapper iterations count ist greater then zero.
-		if(oPar.getWrapperMCTSIterations() > 0){
-			qa = new MCTSWrapperAgent(
-				oPar.getWrapperMCTSIterations(),
-				oPar.getWrapperMCTS_PUCT(),
-				new PlayAgentApproximator(qa),
-				"MCTS-Wrapped "+qa.getName(),
-				oPar.getWrapperMCTS_depth()
-            );
+		if(oPar.getWrapperMCTSIterations() > 0 && !(pa instanceof HumanPlayer)){
+			if (so.isDeterministicGame()) {
+				qa = new MCTSWrapperAgent(
+						oPar.getWrapperMCTSIterations(),
+						oPar.getWrapperMCTS_PUCT(),
+						new PlayAgentApproximator(qa),
+						"MCTS-Wrapped "+qa.getName(),
+						oPar.getWrapperMCTS_depth()
+				);
+			} else {
+				qa = new MctseWrapperAgent(
+						oPar.getWrapperMCTSIterations(),
+						oPar.getWrapperMCTS_PUCT(),
+						new PlayAgentApproximator2(qa),
+						"MCTSE-Wrapped "+qa.getName(),
+						oPar.getWrapperMCTS_depth()
+				);
+			}
 		}
 
 		return qa;

@@ -1,6 +1,8 @@
 package games.KuhnPoker;
 
-public class Pot {
+import java.io.Serializable;
+
+public class Pot implements Serializable {
     private double size;
     private final double[] open;
     private boolean[] claim;

@@ -1,10 +1,7 @@
 package games.ZweiTausendAchtundVierzig;
 
 import controllers.TD.ntuple2.NTupleBase;
-import games.StateObservation;
-import games.BoardVector;
-import games.ObserverBase;
-import games.StateObsNondeterministic;
+import games.*;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -39,7 +36,7 @@ import java.util.Random;
  * @author Wolfgang Konen, TH Koeln
  * @author Johannes Kutsch
  */
-public class StateObserver2048 extends ObserverBase implements StateObsNondeterministic {
+public class StateObserver2048 extends ObsNondetBase implements StateObsNondeterministic {
 	public static final String[] ACTIONSTRING = {" left", "   up", "right", " down"};
     private Random random = new Random();
     protected ArrayList<Integer> emptyTiles = new ArrayList<>();
@@ -713,7 +710,12 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
         nextNondeterministicAction = null;
         return randAction;
     }
-    
+
+    /**
+     * Advance the current afterstate to a new state (do the nondeterministic part of advance)
+     *
+     * Choose the nondeterministic action according to its probability of occurence (!)
+     */
     public ACTIONS advanceNondeterministic() {
         setNextNondeterministicAction();
         return advanceNondeterministic(nextNondeterministicAction);
@@ -727,6 +729,8 @@ public class StateObserver2048 extends ObserverBase implements StateObsNondeterm
      * 2 = second tile, value 2 <br>
      * 3 = second tile, value 4
      * ....
+     *
+     * Choose the nondeterministic action according to its probability of occurence (!)
      */
     private void setNextNondeterministicAction() {
         if(isNextActionDeterministic) {

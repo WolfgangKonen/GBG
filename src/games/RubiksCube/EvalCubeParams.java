@@ -3,7 +3,7 @@ package games.RubiksCube;
 import controllers.PlayAgent;
 
 public class EvalCubeParams {
-    public int pMin=CubeConfig.pMin; //1;
+    public int pMin=(CubeConfig.pMin<=0) ? 1 : CubeConfig.pMin; //1;        // avoid pMin=0 --> endless search for a non-default start cube
     public int pMax=CubeConfig.pMax;
     public int epiLength=10;
     public int evalNmax=CubeConfig.EvalNmax;

@@ -51,10 +51,14 @@ public class Experiment {
 
     public static void main(String[] args) throws Exception {
         Experiment ex = new Experiment();
-        ex.oneRoundChallenge(TD_NTUPLE_3, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(TD_NTUPLE_4, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(SARSA_4, KUHN, "CompleteRun");
-        ex.oneRoundChallenge(QLEARN_4, KUHN, "CompleteRun");
+        ex.oneRoundChallenge(EXPECTIMAX, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(MCTSE, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(MC, KUHN, "CompleteRun");
+
+//        ex.oneRoundChallenge(TD_NTUPLE_3, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(TD_NTUPLE_4, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(SARSA_4, KUHN, "CompleteRun");
+//        ex.oneRoundChallenge(QLEARN_4, KUHN, "CompleteRun");
         //ex.oneRoundChallenge(EXPECTIMAX, KUHN, "CompleteRun");
         //ex.oneRoundChallenge(MCTSE, KUHN, "CompleteRun");
         //ex.oneRoundChallenge(KUHN, KUHN, "CompleteRun");
@@ -399,7 +403,7 @@ public class Experiment {
         String experimentName = experiment;
 
         // number of rounds played for evaluation for each position
-        int playRounds = 1000000;
+        int playRounds = 100000; //10000; //1000000;   // /WK/
 
         PlayAgent observedAgent;
         PlayAgent benchmarkAgent;
@@ -455,10 +459,12 @@ public class Experiment {
         PlayAgtVector paVector = new PlayAgtVector(pavec);
         int numPlayers = paVector.getNumPlayers();
         ScoreTuple[] means = new ScoreTuple[numPlayers];
+        ScoreTuple[] sums = new ScoreTuple[numPlayers];
         ScoreTuple  shiftedTuple, scMean = new ScoreTuple(numPlayers);
 
         for(int i=0;i<numPlayers;i++){
             means[i] = new ScoreTuple(numPlayers);
+            sums[i] = new ScoreTuple(numPlayers);
         }
 
         double sWeight = 1.0/playRounds;
@@ -501,9 +507,14 @@ public class Experiment {
                     so.advance(actBest);
                     if (so.isRoundOver()) {
                         sc = so.getGameScoreTuple();
-                        // calculate "reward" as score change for the turn
-                        sc.combine(scStart, ScoreTuple.CombineOP.DIFF, observedPlayer, 0);
+                        if (!StateObserverKuhnPoker.PLAY_ONE_ROUND_ONLY) {
+                            // calculate "reward" as score change for the turn
+                            // (if PLAY_ONE_ROUND_ONLY is true, we do not need this, because this switch subtracts the
+                            // start chips already in StateObserverKuhnPoker)
+                            sc.combine(scStart, ScoreTuple.CombineOP.DIFF, observedPlayer, 0);
+                        }
                         means[z].combine(sc, ScoreTuple.CombineOP.AVG, observedPlayer, sWeight);
+                        sums[z].combine(sc, ScoreTuple.CombineOP.SUM, observedPlayer, 0);
 
                         // Information:
                             // Position
@@ -549,7 +560,9 @@ public class Experiment {
         experimentOverview.put("rounds",playRounds);
         for(int i=0;i<pavec.length;i++){
             experimentOverview.put("meanScoreForPosition"+i,means[i].scTup[i]);
+            System.out.println("meanScoreForPosition "+i+": "+means[i].scTup[i]);
         }
+        System.out.println("meanScore: "+(means[0].scTup[0]+means[1].scTup[1])/2);
 
 
         infoFile.write(experimentOverview.toString());

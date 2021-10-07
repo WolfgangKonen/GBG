@@ -1,5 +1,6 @@
 package games.SimpleGame;
 
+import games.ObsNondetBase;
 import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
@@ -18,7 +19,7 @@ import java.util.Random;
  * <li> signaling end, score and winner of the game
  * </ul>
  */
-public class StateObserverSG extends ObserverBase implements StateObsNondeterministic {
+public class StateObserverSG extends ObsNondetBase implements StateObsNondeterministic {
 	public static final int UPPER = 9;
 	public static final double REWARD_NEGATIVE = 0;
 	public static final double REWARD_POSITIVE = UPPER;

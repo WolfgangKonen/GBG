@@ -12,7 +12,7 @@ import tools.ScoreTuple;
 import java.util.ArrayList;
 
 /**
- * Evaluator for Poker
+ * Evaluator for KuhnPoker
  */
 public class EvaluatorKuhnPoker extends Evaluator {
 
@@ -102,8 +102,8 @@ public class EvaluatorKuhnPoker extends Evaluator {
 	public String getPrintString() {
 		return switch (m_mode) {
 			case -1 -> "no evaluation done ";
-			case 0 -> "success rate (against random): ";
-			case 1 -> "success rate (against Kuhn): ";
+			case 0 -> "success rate (against random agent): ";
+			case 1 -> "success rate (against KuhnPokerAgent): ";
 			default -> null;
 		};
 	}

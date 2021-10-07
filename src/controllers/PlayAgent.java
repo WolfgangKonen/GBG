@@ -112,11 +112,11 @@ public interface PlayAgent {
 	 * @param sob			the current game state
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
-	 * 						to pass in such other players' value from previous states, which may serve 
+	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
-	 * @return				the agent's estimate of the final reward <b>for all players</b>. 
-	 * 						The return value is a tuple containing  
-	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s. 
+	 * @return				the agent's estimate of the final game value (score-so-far plus score-to-come)
+	 * 						<b>for all players</b>. The return value is a tuple containing
+	 * 						{@link StateObservation#getNumPlayers()} {@code double}'s.
 	 */
 	ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple);
 	

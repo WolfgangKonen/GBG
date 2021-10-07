@@ -1,8 +1,9 @@
 package games.KuhnPoker;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class PlayingCard {
+public class PlayingCard implements Serializable {
 
     private final int rank;
     private final int suit;

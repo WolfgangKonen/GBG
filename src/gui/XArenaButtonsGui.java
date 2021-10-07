@@ -144,7 +144,7 @@ public class XArenaButtonsGui extends JPanel {
 
 		// add game-specific agent names for certain games (currently ConnectFour, Nim and Othello)
 		String gName = m_arena.getGameName();
-		int offset = (gName.equals("Nim") || gName.equals("Nim3P")) || gName.equals("BlackJack")
+		int offset = (gName.equals("Nim") || gName.equals("Nim3P")) || gName.equals("BlackJack") || gName.equals("KuhnPoker")
 				   ? 1 : (gName.equals("ConnectFour") || gName.equals("RubiksCube"))
 				   ? 2 : (gName.equals("Othello")) ? 3: 0;
 		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
@@ -154,6 +154,7 @@ public class XArenaButtonsGui extends JPanel {
 				gui_agent_list[gui_agent_list.length - 2] = "AlphaBeta";
 				gui_agent_list[gui_agent_list.length - 1] = "AlphaBeta-DL";
 			}
+			case "KuhnPoker" -> gui_agent_list[gui_agent_list.length - 1] = "KuhnOptimal";
 			case "Nim" -> gui_agent_list[gui_agent_list.length - 1] = "Bouton";
 			case "Nim3P" -> gui_agent_list[gui_agent_list.length - 1] = "DaviNim";
 			case "RubiksCube" -> {

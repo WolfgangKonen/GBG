@@ -23,7 +23,20 @@ import java.util.Random;
  * @see AltTreeNode
  */
 public class MCTSETreeNode {
-    public static double epsilon = 1e-6;		            // tiebreaker
+	/**
+	 * If {@code WITH_PARTIAL==true}, complete a possible partial state when reaching {@link #expand()}.
+	 * <p>
+	 * If {@code WITH_PARTIAL==false}, no partial state completion takes place in {@link #expand()}
+	 * (<b>not</b> recommended, just for comparing with the status prior to 2021-09).
+	 */
+	public static boolean WITH_PARTIAL=true;
+
+	/**
+	 * switch what to return in {@link #getQ()}, see discussion {@link #getQ() there}
+	 */
+	public static boolean QDIRECT = true;
+
+	public static double epsilon = 1e-6;		            // tiebreaker
     /**
      * the parent node's state
      */
@@ -46,8 +59,7 @@ public class MCTSETreeNode {
 	/**
 	 * cumulative probability, needed in {@link MCTSEChanceNode#rouletteWheel()}
 	 */
-    double cumProb=0;		 		
-
+    double cumProb=0;
 
     /**
      * @param so         the (not advanced) state of the parentNode
@@ -72,44 +84,54 @@ public class MCTSETreeNode {
 	}
 
 	/**
-	 * The value Q(e) of Expectimax node e (={@code this}) is formed by calculating the weighted average of (Q_c/N_c) for all
+	 * The value Q(e) of EXPECTIMAX node e (={@code this}) is formed by calculating the weighted average of (Q_c/N_c) for all
 	 * child nodes c, where the weight for node c is the probability of the nondeterministic action that leads from e to c.
-	 * Finally, the weighted average is multiplied by N, the number of visits to e, because the PUCT formula calculates Q(e)/N.
+	 * Finally, the weighted average is multiplied by N, the number of visits to e, because the PUCT formula calculates
+	 * Q(e)/N. This is the result if switch {@link #QDIRECT}{@code ==false} in source code.
 	 * <p>
 	 * [Earlier we used instead {@code this.value}, which is formed by accumulating the backups during search. In the limit of
-	 * large N, both approaches yield very similar values, although not identical. But if node e is not visited very
-	 * often (e.g. deeper down the tree), the formula calculated here should be more precise, since it puts rare events
-	 * directly in the right context.]
+	 * large N, both approaches yield very similar values, although not identical. But if node e is <b>not</b> visited very
+	 * often (e.g. deeper down the tree), the formula for switch {@link #QDIRECT}{@code ==false} should be more precise, since it puts rare events
+	 * directly in the right context.
+	 * <p>
+	 * However, we found that the earlier version yields better results for KuhnPoker, so we retain the earlier
+	 * version in case {@link #QDIRECT}{@code ==true} in source code. - However, with the new switch {@link #WITH_PARTIAL}{@code ==true}
+	 * and with {@link games.KuhnPoker.StateObserverKuhnPoker#PLAY_ONE_ROUND_ONLY PLAY_ONE_ROUND_ONLY}{@code ==true}, we
+	 * see again that both versions of {@link #QDIRECT} work equally well.]
 	 *
 	 * @return the value of this Expectimax node
 	 */
 	double getQ() {
-    	// return this.value; 		// this was effective before 09/2021
-		// the following is a bit longer, but more precise in the case of fewer visits to this:
-    	double qValue=0.0;
-		for (Tuple<MCTSEChanceNode,Double> childTuple : childrenNodes) {
-			MCTSEChanceNode childNode = childTuple.element1;
-			Double prob = childTuple.element2;
-			qValue += prob * (childNode.value/ childNode.visits);
-		}
-		qValue *= this.visits;
-
-		// only debug & comparison with this.value:
-		boolean DBG_GETQ=false;
-		if (DBG_GETQ) {
-			if (depth==0) {
-				StateObsNondeterministic thisSO = (StateObsNondeterministic) this.so.copy();
-				thisSO.advanceDeterministic(this.action);
-				int nrands = thisSO.getAvailableRandoms().size();
-				int nchilds = this.childrenNodes.size();
-				DecimalFormat frm = new DecimalFormat("0.0000");
-				System.out.println("d="+depth+", value="+frm.format(value)+", qValue="+frm.format(qValue)
-						+", v/qV="+frm.format(value/qValue)
-						+", nrand="+nrands+","+nchilds+", nVisits="+visits);
+		if (MCTSETreeNode.QDIRECT) {
+			return this.value; 		// this was effective before 09/2021
+		} else {
+			// the following is a bit longer, but more precise in the case of fewer visits to this.
+			// However, it turns out to be a bit worse for KuhnPoker.
+			double qValue=0.0;
+			for (Tuple<MCTSEChanceNode,Double> childTuple : childrenNodes) {
+				MCTSEChanceNode childNode = childTuple.element1;
+				Double prob = childTuple.element2;
+				qValue += prob * (childNode.value/ childNode.visits);
 			}
-		}
+			qValue *= this.visits;
 
-    	return qValue;
+			// only debug & comparison with this.value:
+			boolean DBG_GETQ=false;
+			if (DBG_GETQ) {
+				if (depth==0) {
+					StateObsNondeterministic thisSO = (StateObsNondeterministic) this.so.copy();
+					thisSO.advanceDeterministic(this.action);
+					int nrands = thisSO.getAvailableRandoms().size();
+					int nchilds = this.childrenNodes.size();
+					DecimalFormat frm = new DecimalFormat("0.0000");
+					System.out.println("d="+depth+", value="+frm.format(value)+", qValue="+frm.format(qValue)
+							+", v/qV="+frm.format(value/qValue)
+							+", nrand="+nrands+","+nchilds+", nVisits="+visits);
+				}
+			}
+
+			return qValue;
+		}
 	}
     /**
      * Select the next {@link MCTSEChanceNode} that should be evaluated.
@@ -126,19 +148,39 @@ public class MCTSETreeNode {
     /**
      * Expand the current node, by randomly selecting one child node.
      * <p>
-     * More precisely: take the parent node's state {@link #so} and advance it by {@link #action}.
+     * More precisely: <ul>
+	 *     <li> Take the parent node's state {@link #so} and advance it by {@link #action}.
      * This advance contains the deterministic and the non-deterministic part, so it can end up 
-     * in various CHANCE child nodes. See if such a child node already exists in {@link #childrenNodes},
+     * in various CHANCE child nodes.
+	 *     <li> If the child is a partial state (and if {@link #WITH_PARTIAL} is true), then complete it randomly to a
+	 *  full state. (This is important for games like Kuhn Poker in order to correctly average <i>early enough</i> over
+	 *  the possible completions for the imperfect information.)
+	 *     <li> Now see if such a child node already exists in {@link #childrenNodes},
      * if so, return it. If not, create and return a new one and add it to {@link #childrenNodes}.
-     * 
+     * </ul>
      * @return the selected child node
      */
     public MCTSEChanceNode expand() {
+		Double dprob;
 		boolean stopOnRoundOver = m_player.getParMCTSE().getStopOnRoundOver();
 		StateObsNondeterministic childSo = (StateObsNondeterministic) so.copy();
         childSo.advanceDeterministic(action);
-		Types.ACTIONS randAct = childSo.advanceNondeterministic();
-		Double dprob = childSo.getProbability(randAct);	// the probability that environment selects this random action
+        if (childSo.isNextActionDeterministic()) {
+        	// the deterministic advance results in a next-action-deterministic state (this happens for example in
+			// Poker, if the 1st player bets or checks. Now an action is required from the 2nd player, no card is dealt)
+			// --> we model such a case with a tree node that has only one 'random' action 'do nothing' and thus results
+			// with probability 1.0 in the CHANCE child {@code childSO}.
+        	dprob = 1.0;
+		} else {
+        	// the normal case: the deterministic advance results in a next-action-NOT-deterministic state
+			Types.ACTIONS randAct = childSo.advanceNondeterministic();
+			dprob = childSo.getProbability(randAct);	// the probability that environment selects this random action
+		}
+
+        if (WITH_PARTIAL && childSo.isPartialState()) {
+			Tuple<StateObservation,Double> tup = childSo.completePartialState();
+			dprob *= tup.element2;
+		}
 
     	if(childSo.isRoundOver() && !stopOnRoundOver)	// /WK/03/2021 Bug fix '&& !stopOnRoundOver' as suggested by TZ
     		childSo.initRound();
@@ -164,6 +206,11 @@ public class MCTSETreeNode {
 		//create a new child node
         MCTSEChanceNode child = new MCTSEChanceNode(childSo, null, this, random, m_player);
         childrenNodes.add(new Tuple<>(child,dprob));
+
+        // for unclear reasons, this assertion does fire (unwantedly) if WITH_PARTIAL==true --> TODO
+//        if (dprob==1.0)
+//			assert childrenNodes.size()==1 : "Too many children!";
+//			// in the next-action-deterministic-case and without partial completion, this node should have exactly one child
 
         return child;
     }

@@ -22,6 +22,8 @@ import games.EWN.ArenaEWN;
 import games.EWN.ArenaTrainEWN;
 import games.Hex.ArenaHex;
 import games.Hex.ArenaTrainHex;
+import games.KuhnPoker.ArenaKuhnPoker;
+import games.KuhnPoker.ArenaTrainKuhnPoker;
 import games.Nim.ArenaNim2P;
 import games.Nim.ArenaNim3P;
 import games.Nim.ArenaTrainNim2P;
@@ -35,6 +37,8 @@ import games.Sim.ArenaSim;
 import games.Sim.ArenaTrainSim;
 import games.TicTacToe.ArenaTTT;
 import games.TicTacToe.ArenaTrainTTT;
+import games.Yavalath.ArenaTrainYavalath;
+import games.Yavalath.ArenaYavalath;
 import games.ZweiTausendAchtundVierzig.Arena2048;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import gui.SolidBorder;
@@ -57,9 +61,9 @@ import tools.Types;
  */
 public class GBGLaunch {
 	/**
-	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe"} 
+	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe","EWN","Yavalath"}
 	 */
-	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe"};
+	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","KuhnPoker","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe", "Yavalath"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
@@ -215,6 +219,9 @@ public class GBGLaunch {
 		case "Poker":
 			t_Game = new ArenaTrainPoker(title,withUI);
 			break;
+		case "KuhnPoker":
+				t_Game = new ArenaTrainKuhnPoker(title,withUI);
+				break;
 		case "RubiksCube":
 			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
 			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
@@ -241,6 +248,10 @@ public class GBGLaunch {
 			ArenaTrainEWN.setCellCoding(scaPar[1]);
 			ArenaTrainEWN.setRandomStartingPosition(scaPar[2]);
 			t_Game = new ArenaTrainEWN(title, withUI);
+			break;
+		case "Yavalath":
+			ArenaTrainYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
+			t_Game = new ArenaTrainYavalath(title,withUI);
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
@@ -310,6 +321,9 @@ public class GBGLaunch {
 		case "Poker":
 			t_Game = new ArenaPoker(title,withUI);
 			break;
+		case "KuhnPoker":
+				t_Game = new ArenaKuhnPoker(title,withUI);
+				break;
 		case "RubiksCube":
 			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
 			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
@@ -336,7 +350,12 @@ public class GBGLaunch {
 			ArenaEWN.setRandomStartingPosition(scaPar[2]);
 
 			t_Game = new ArenaEWN(title, withUI);
-		default: 
+		case "Yavalath":
+			ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
+
+			t_Game = new ArenaYavalath(title,withUI);
+			break;
+		default:
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
 			System.exit(1);
 		}
@@ -509,11 +528,15 @@ public class GBGLaunch {
 		case "ConnectFour":
 		case "Othello":
 		case "Poker":
+		case "KuhnPoker":
 		case "TicTacToe":
 			//
 			// games with no scalable parameters
 			//
 			scaPar[0]=scaPar[1]=scaPar[2]="";
+			break;
+		case "Yavalath":
+			scaPar[0] = "2";
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
@@ -602,7 +625,8 @@ public class GBGLaunch {
 		case "ConnectFour":
 		case "Othello":
 		case "Poker":
-		case "TicTacToe": 
+		case "KuhnPoker":
+		case "TicTacToe":
 			//
 			// games with no scalable parameters
 			//
@@ -612,6 +636,10 @@ public class GBGLaunch {
 			setScaPar0List(new int[]{});
 			setScaPar1List(new int[]{});
 			setScaPar2List(new int[]{});
+			break;
+		case "Yavalath":
+			scaPar0_L.setText("Players");
+			setScaPar0List(new int[]{2});
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");

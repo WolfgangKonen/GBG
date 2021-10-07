@@ -20,7 +20,7 @@ public class ArenaKuhnPoker extends Arena   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "Poker";
+		return "KuhnPoker";
 	}
 
 	/**

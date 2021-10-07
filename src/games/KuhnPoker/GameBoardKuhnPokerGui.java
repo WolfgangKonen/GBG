@@ -31,6 +31,7 @@ public class GameBoardKuhnPokerGui extends JFrame {
     private JButton continueButton;
 
     private JCheckBox waitCheck;
+    private JCheckBox oneRoundCheck;
 
     private JLabel currentPlayerChipsLabel;
 
@@ -101,6 +102,9 @@ public class GameBoardKuhnPokerGui extends JFrame {
         waitCheck  = new JCheckBox("wait");
         waitCheck.setSelected(false);
 
+        oneRoundCheck = new JCheckBox("1 round");
+        oneRoundCheck.setSelected(StateObserverKuhnPoker.PLAY_ONE_ROUND_ONLY);
+
         checkButton.addActionListener( e -> {
             if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(1);
@@ -141,6 +145,10 @@ public class GameBoardKuhnPokerGui extends JFrame {
 
         continueButton.setEnabled(false);
 
+        oneRoundCheck.addActionListener(e -> {
+            StateObserverKuhnPoker.PLAY_ONE_ROUND_ONLY = oneRoundCheck.isSelected();
+        });
+
         currentPlayerChipsLabel = new JLabel("Chips: ");
 
         Panel actionPanel = new Panel(new FlowLayout());
@@ -151,6 +159,7 @@ public class GameBoardKuhnPokerGui extends JFrame {
         actionPanel.add(foldButton );
         actionPanel.add(continueButton);
         actionPanel.add(waitCheck);
+        actionPanel.add(oneRoundCheck);
         return actionPanel;
 
     }

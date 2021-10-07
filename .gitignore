@@ -18,7 +18,6 @@ games/Logs/*
 logs/*
 Pokerlogs/*
 agents/temp/*
-src/controllers/MCTSExpWrapper/*
 
 # all JAR files (GBGBatch.jar,...) now moved to jartools/:
 jartools/*

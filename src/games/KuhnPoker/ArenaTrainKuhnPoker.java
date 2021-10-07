@@ -17,7 +17,7 @@ public class ArenaTrainKuhnPoker extends ArenaTrain   {
 	 *         {@code agents} directory
 	 */
 	public String getGameName() {
-		return "Poker";
+		return "KuhnPoker";
 	}
 	
 	/**
@@ -55,16 +55,19 @@ public class ArenaTrainKuhnPoker extends ArenaTrain   {
 			throw new RuntimeException("[Arena.main] args="+args_txt+" not allowed.");
 		}
 	}
-	@Override
-	public String gameOverString(StateObservation so, String[] agentVec) {
-		String goStr="";
-		StateObserverKuhnPoker sop = (StateObserverKuhnPoker) so;
-		for(int i = 0;i<so.getNumPlayers();i++){
-			if(sop.getChips()[i]>0) {
-				goStr+= Types.GUI_PLAYER_NAME[i]+ " has won!";
-				break;
-			}
-		}
-		return goStr;
-	}
+
+	// /WK/ 09/2021: It is better NOT to override Arena.gameOverString, since the string created below is less
+	// informative and even plain wrong in case StateObserverKuhnPoker.PLAY_ONE_ROUND_ONLY==true.
+//	@Override
+//	public String gameOverString(StateObservation so, String[] agentVec) {
+//		String goStr="";
+//		StateObserverKuhnPoker sop = (StateObserverKuhnPoker) so;
+//		for(int i = 0;i<so.getNumPlayers();i++){
+//			if(sop.getChips()[i]>0) {
+//				goStr+= Types.GUI_PLAYER_NAME[i]+ " has won!";
+//				break;
+//			}
+//		}
+//		return goStr;
+//	}
 }

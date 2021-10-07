@@ -1,6 +1,7 @@
 package games.KuhnPoker;
 
-import games.ObserverBase;
+import controllers.MCTSWrapper.utils.Tuple;
+import games.ObsNondetBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
 import tools.Types;
@@ -20,21 +21,35 @@ import java.util.concurrent.ThreadLocalRandom;
  * </ul>
  *
  */
-public class StateObserverKuhnPoker extends ObserverBase implements StateObsNondeterministic {
-
-	//<editor-fold desc="variables">
-	//debug
-	public boolean debug = false;
+public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNondeterministic {
 
 	public static final int NUM_PLAYER = 2;
 	private static final int START_CHIPS = 10;
 	private static final int BIGBLIND = 1;
 
+	/**
+	 * If {@code PLAY_ONE_ROUND==true}, the game is over after just one round. The <b>delta in chips</b> is reported
+	 * as game score and game reward.
+	 * <p>
+	 * If {@code PLAY_ONE_ROUND==false}, the game proceeds over many rounds until one player has won all chips.
+	 * The <b>current chips</b> are reported as game score and game reward.
+	 */
+	public static boolean PLAY_ONE_ROUND_ONLY=true;
+
     private int m_Player;			// player who makes the next move
 	protected ArrayList<ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
+	/**
+	 * the actions (cards) that are possible for the {@link #holeCards} being null
+	 */
 	private ArrayList<ACTIONS> availableRandomActions;
+		// availableRandomActions is modified in initCardDeck, in copy constructor, in dealCard,
+		// and in partialState. It contains the cards available for dealCard.
 	public ACTIONS lastAction;
 
+	/**
+	 * holeCard[i][j] is the j-th card that player i holds. In KuhnPoker, each player has exactly one card, so
+	 * j=0 is the only possible choice
+	 */
 	private PlayingCard[][] holeCards; //[player][card]
 
 	private ArrayList<Integer> cards;
@@ -44,11 +59,11 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	int start_player;
 
-	private Boolean[] checkedPlayer;
+	private final Boolean[] checkedPlayer;
 
-	private double[] gamescores;
+	private final double[] gamescores;
 	private double[] chips;
-	private double[] rewards;
+	private final double[] rewards;		// currently never used /WK/09/21
 
 	private boolean isNextActionDeterministic;
 	private ACTIONS nextNondeterministicAction;
@@ -61,7 +76,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	private Pots pots;
 	private Random rand;
 
-	private boolean newRound;
+	private final boolean newRound;
 
 	private ArrayList<Integer> lastRoundMoves;
 
@@ -259,12 +274,16 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	//<editor-fold desc="advance">
 
 	/**
-	 * Advance the current state with 'action' to a new state combining the deterministic and the non-deterministic actions in one method.
-	 * Actions:
-	 * - 0 -> FOLD	: give up the current round
-	 * - 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
-	 * - 2 -> BET	: bet the "Big Blind"
-	 * - 3 -> CALL	: bet the same amount as the previous player bet
+	 * Advance the current state with 'action' to a new state combining the deterministic and the non-deterministic
+	 * actions in one method.
+	 * Actions:<ul>
+	 * <li> 0 -> FOLD	: give up the current round
+	 * <li> 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
+	 * <li> 2 -> BET	: bet the "Big Blind"
+	 * <li> 3 -> CALL	: bet the same amount as the previous player bet
+	 * </ul>
+	 * NOTE: If the deterministic advance results in a next-adction-deterministic state (as it can happen in Poker),
+	 * then the non-deterministic part is skipped.
 	 * @param action to advance the state of the game
 	 */
 	public void advance(ACTIONS action){
@@ -278,11 +297,12 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	/**
 	 * Advance the current state with 'action' to a new state
-	 * Actions:
-	 * - 0 -> FOLD	: give up the current round
-	 * - 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
-	 * - 2 -> BET	: bet the "Big Blind"
-	 * - 3 -> CALL	: bet the same amount as the previous player bet
+	 * Actions:<ul>
+	 * <li> 0 -> FOLD	: give up the current round
+	 * <li> 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
+	 * <li> 2 -> BET	: bet the "Big Blind"
+	 * <li> 3 -> CALL	: bet the same amount as the previous player bet
+	 * </ul>
 	 * @param action to advance the state of the game
 	 */
 	public void advanceDeterministic(ACTIONS action) {
@@ -356,14 +376,21 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 					}
 				}
 			}
-			addToLog(winner +" has won Pot ("+ p +") with "+ (int)pots.getPotSize(p)  +" chips");
+			String str = winner +" has won Pot ("+ p +") with "+ (int)pots.getPotSize(p)  +" chips";
+			// if it is not a partial state (i.e. not during rollout) then add the known holecards to the log description:
+			if (holeCards[0][0]!=null && holeCards[1][0]!=null)
+				str = str+ "   ["+holeCards[0][0].getLongRank()+"-"+holeCards[1][0].getLongRank()+"]";
+			addToLog(str);
 			chips[winner] += pots.getPotSize(p);
 		}
 
 		//update scores
 		for(int i=0;i<rewards.length;i++)
 			rewards[i] = chips[i] - gamescores[i];
-		System.arraycopy(chips,0,gamescores,0,gamescores.length);
+		//System.arraycopy(chips,0,gamescores,0,gamescores.length);
+		for(int i=0;i<gamescores.length;i++)
+			gamescores[i] = PLAY_ONE_ROUND_ONLY ? (chips[i] - START_CHIPS) : chips[i];
+
 
 		addToLog("-----------------End Round("+gameround+")------------------");
 		for(int i = 0 ; i <getNumPlayers() ; i++)
@@ -372,6 +399,9 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		isNextActionDeterministic = true;
 
 		if(chips[0]<1||chips[1]<1)
+			GAMEOVER = true;
+
+		if (PLAY_ONE_ROUND_ONLY && isRoundOver())
 			GAMEOVER = true;
 
 		return randAction;
@@ -444,22 +474,33 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	}
 
 	public ArrayList<ACTIONS> getAvailableRandoms() {
-		/* // Kuhn Poker doesn't really need random actions because no further cards are reveiled during the game.
-		// 99 as a dummy int
-		ArrayList<ACTIONS> randoms = new ArrayList<>();
-		randoms.add(ACTIONS.fromInt(99));
-
-		Expectimax does need to go through all states to calculate the value
-*/
 		return availableRandomActions;
+			// availableRandomActions is modified in initCardDeck, in copy constructor, in dealCard,
+			// and in partialState. It contains the cards available for dealCard.
 	}
+
+	/**
+	 * For KuhnPoker the possible completions are the available random actions (the cards that can be dealt)
+	 */
+	public ArrayList<ACTIONS> getAvailableCompletions() {
+		return getAvailableRandoms();
+	}
+	public ArrayList<ACTIONS> getAvailableCompletions(int p) {
+		return getAvailableRandoms();
+	}
+
 
 	public int getNumAvailableRandoms() {
 		return cards.size();
 	}
 
 	public double getProbability(ACTIONS action) {
-		// each random action (card drawn) has the same propability.
+		// each random action (card dealt) has the same probability
+		return 1.0/getNumAvailableRandoms();
+	}
+
+	public double getProbCompletion(ACTIONS action) {
+		// each random action (card dealt) has the same probability
 		return 1.0/getNumAvailableRandoms();
 	}
 
@@ -485,26 +526,22 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 	@Override
 	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
-		if(rewardIsGameScore)
-			return gamescores[referringState.getPlayer()];
 		return gamescores[referringState.getPlayer()];
 		//return rewards[referringState.getPlayer()];
 	}
 
 	@Override
 	public double getReward(int player, boolean rewardIsGameScore){
-		if(rewardIsGameScore)
-			return gamescores[player];
 		return gamescores[player];
 		//return rewards[player];
 	}
 
 	public double getMinGameScore() {
-		return 0;
+		return PLAY_ONE_ROUND_ONLY ? -2 : 0;
 	}
 
 	public double getMaxGameScore() {
-		return START_CHIPS*NUM_PLAYER;
+		return PLAY_ONE_ROUND_ONLY ? +2 : START_CHIPS*NUM_PLAYER;
 	}
 
 	@Override
@@ -521,6 +558,9 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	public boolean isFinalRewardGame() {
 		return false;
 	}
+
+	@Override
+	public boolean isImperfectInformationGame() { return true; }
 
 	@Override
 	public boolean isLegalState() {
@@ -571,6 +611,10 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 	public boolean isNextActionDeterministic() {
 		return isNextActionDeterministic;
 	}
+
+//	public void setNextActionDeterministic(boolean b) {
+//		isNextActionDeterministic = b;
+//	}
 
 	public ACTIONS getNextNondeterministicAction() {
 		setNextNondeterministicAction();
@@ -698,7 +742,7 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		StateObserverKuhnPoker partialState = this.copy();
 		int player = partialState.getPlayer();
 		partialState.setPartialState(true);
-		m_roundOver = false;
+		//setRoundOver(false);
 		for (int i = 0; i < partialState.holeCards.length; i++) {
 			if(i==player)
 				continue;
@@ -706,6 +750,8 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 
 				partialState.cards.add(partialState.holeCards[i][0].getId());
 				partialState.availableRandomActions.add(ACTIONS.fromInt(partialState.holeCards[i][0].getId()));
+					// availableRandomActions contains already the stock card, now it gets additionally the holeCard
+					// which is set to null in next line --> there are two available actions
 
 				partialState.holeCards[i][0] = null;
 			}
@@ -713,15 +759,112 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		return partialState;
 	}
 
+	/**
+	 * Complete a partial state by randomly 'filling the holes' (for all players)
+	 *
+	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
+	 * 			the probability that this random completion occurs.
+	 */
 	@Override
-	public boolean isPartialState(){
-		return isPartialState;
+	public Tuple<StateObservation,Double> completePartialState() {
+		ArrayList<ACTIONS> rans = getAvailableCompletions();
+		int ransSize = rans.size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
+		if (isPartialState) {
+			ACTIONS randAction = rans.get(ThreadLocalRandom.current().nextInt(rans.size()));
+			if(holeCards[0][0]==null){
+				holeCards[0][0] = new PlayingCard(dealCard(randAction.toInt()));
+			}
+			if(holeCards[1][0]==null){
+				holeCards[1][0] = new PlayingCard(dealCard(randAction.toInt()));
+			}
+			setPartialState(false);
+		}
+		return new Tuple<>(this,1.0/ransSize);
 	}
 
+	/**
+	 * Complete a partial state by randomly 'filling the holes' (for player p)
+	 *
+	 * @param p		the player for which the state is completed
+	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
+	 * 			the probability that this random completion occurs.
+	 */
 	@Override
-	public void setPartialState(boolean partialState) {
-		isPartialState = partialState;
+	public Tuple<StateObservation,Double> completePartialState(int p) {
+		ArrayList<ACTIONS> rans = getAvailableCompletions();
+		int ransSize = rans.size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
+		if (isPartialState) {
+			ACTIONS randAction = rans.get(ThreadLocalRandom.current().nextInt(rans.size()));
+			if(holeCards[p][0]==null){
+				holeCards[p][0] = new PlayingCard(dealCard(randAction.toInt()));
+			}
+			if(holeCards[0][0]!=null && holeCards[1][0]!=null)
+				setPartialState(false);
+		}
+		return new Tuple<>(this,1.0/ransSize);
 	}
+
+	/**
+	 * Complete a partial state by 'filling the holes' (for player p) with a specific random action {@code ranAct}
+	 *
+	 * @param p		 the player for which the state is completed
+	 * @param ranAct	the random action
+	 * @return 	a {@link Tuple} where {@code element1} carries the completed state and {@code element2} has
+	 * 			the probability that this random completion occurs.
+	 */
+	@Override
+	public Tuple<StateObservation,Double> completePartialState(int p, ACTIONS ranAct) {
+		int ransSize = getAvailableCompletions().size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
+		if (isPartialState) {
+			if(holeCards[p][0]==null){
+				holeCards[p][0] = new PlayingCard(dealCard(ranAct.toInt()));
+			}
+			if(holeCards[0][0]!=null && holeCards[1][0]!=null)
+				setPartialState(false);
+		}
+		return new Tuple<>(this,1.0/ransSize);
+	}
+
+	/**
+	 * Complete a partial state by 'filling the holes' (for player p) from another state {@code root}
+	 *
+	 * @param p		 the player for which the state is completed
+	 * @param root	 the other state
+	 * @return 	a {@link Tuple} where {@code element1} carries the completed state and {@code element2} has
+	 * 			the probability that this completion occurs (1.0 in this case).
+	 */
+	@Override
+	public Tuple<StateObservation,Double> completePartialState(int p, StateObservation root) {
+		assert root instanceof StateObserverKuhnPoker : "root is not of class StateObserverKuhnPoker";
+		if (isPartialState) {
+			if(holeCards[p][0]==null){
+				holeCards[p][0] = ((StateObserverKuhnPoker)root).getHoleCards(p)[0];
+			}
+			if(holeCards[0][0]!=null && holeCards[1][0]!=null)
+				setPartialState(false);
+		}
+		return new Tuple<>(this,1.0);
+	}
+
+	/**
+	 * @param p		player
+	 * @return Is {@code this} partial with respect to player p?
+	 */
+	public boolean isPartialState(int p) {
+		return (holeCards[p][0]==null);
+	}
+
+	/**
+	 * @return Is {@code this} partial with respect to any player?
+	 */
+	@Override
+	public boolean isPartialState(){ return isPartialState; }
+
+	@Override
+	public void setPartialState(boolean pstate) {
+		isPartialState = pstate;
+	}
+
 
 	public int getMoveCounter() {
 		return m_counter;
@@ -731,12 +874,10 @@ public class StateObserverKuhnPoker extends ObserverBase implements StateObsNond
 		return storedActions;
 	}
 
-
 	@Override
 	public boolean isRoundBasedGame(){
 		return true;
 	}
-
 
 	public ArrayList<Integer> getLastRoundMoves() {
 		return lastRoundMoves;

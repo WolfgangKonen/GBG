@@ -1,7 +1,10 @@
 package controllers.MCTSWrapper.passStates;
 
 import controllers.MCTSWrapper.utils.StateObservationExtensions;
+import controllers.MCTSWrapper.utils.Tuple;
+import games.StateObsNondeterministic;
 import games.StateObservation;
+import tools.Types;
 
 /**
  * Represents a pseudo action that must be performed
@@ -24,6 +27,22 @@ public final class PassAction implements ApplicableAction {
     @Override
     public StateObservation applyTo(final StateObservation so) {
         return StateObservationExtensions.passToNextPlayer(so);
+    }
+
+    /**
+     * This is just to fulfill the interface
+     */
+    @Override
+    public StateObservation advanceDet(final StateObservation so) {
+        throw new RuntimeException("[advanceDet] not available for PassAction");
+    }
+
+    /**
+     * This is just to fulfill the interface
+     */
+    @Override
+    public Tuple<Types.ACTIONS,StateObsNondeterministic> advanceNonDet(final StateObsNondeterministic so) {
+        throw new RuntimeException("[advanceNonDet] not available for PassAction");
     }
 
     @Override

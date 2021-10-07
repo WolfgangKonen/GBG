@@ -1,8 +1,10 @@
 package controllers;
 
+import controllers.MC.MCAgentN;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
 import org.junit.Test;
+import params.ParMC;
 import starters.GBGBatch;
 import tools.Types;
 
@@ -32,12 +34,13 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
         String selectedGame = "EWN";
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        String strAgent = Types.GUI_DEFAULT_DIR_AGENT + "/test_TD4_EWN.zip.agt.zip";
-        GameBoardEWN gb = new GameBoardEWN(t_Game,3,2);		// needed for chooseStartState()
+        String strAgent = "test_TD4_EWN.zip.agt.zip";
+        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
 
-        boolean res = t_Game.loadAgent(0, strAgent);
-        assert res : "\n[ExpectimaxNWrapperTest] Aborted: agtFile = "+ strAgent + " not found!";
+        setupPaths(strAgent, "csvFile");     // builds filePath
+        boolean res = t_Game.loadAgent(0, filePath);
+        assert res : "\n[ExpectimaxNWrapperTest] Aborted: agtFile = "+ filePath + " not found!";
 
         String sAgent = t_Game.m_xab.getSelectedAgent(0);
         pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
@@ -92,13 +95,14 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
         String selectedGame = "EWN";
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        String strAgent = Types.GUI_DEFAULT_DIR_AGENT + "/test_TD4_EWN.zip.agt.zip";
-        GameBoardEWN gb = new GameBoardEWN(t_Game,3,2);		// needed for chooseStartState()
+        String strAgent = "test_TD4_EWN.zip.agt.zip";
+        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
         DecimalFormat frmAct = new DecimalFormat("0000");
 
-        boolean res = t_Game.loadAgent(0, strAgent);
-        assert res : "\n[ExpectimaxNWrapperTest] Aborted: agtFile = "+ strAgent + " not found!";
+        setupPaths(strAgent, "csvFile");     // builds filePath
+        boolean res = t_Game.loadAgent(0, filePath);
+        assert res : "\n[ExpectimaxNWrapperTest] Aborted: agtFile = "+ filePath + " not found!";
 
         String sAgent = t_Game.m_xab.getSelectedAgent(0);
         pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
