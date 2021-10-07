@@ -187,7 +187,7 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
     /**
      * <p>
      * Returns the legal action according to the suggestion made by the Basic Strategy.
-     * Not everytime the top suggestion is available as legal action (e.g. Dh -> Double Down if possible, otherwise Hit)
+     * Not everytime the top suggestion is available as legal action (e.g. Dh = Double Down if possible, otherwise Hit)
      * Double Down could be illegal in this example.
      * <p>
      * @param so			current game state (is returned unchanged)

@@ -32,7 +32,7 @@ public class XNTupleFuncsSG extends XNTupleBase implements XNTupleFuncs, Seriali
 	
 	/**
 	 * @return the maximum number P of position values 0, 1, 2,..., P-1
-	 * 		0: (m_sum>UPPER), 1,2,...,UPPER: m_sum
+	 * 		0: (m_sum &gt; UPPER), 1,2,...,UPPER: m_sum
 	 */
 	@Override
 	public int getNumPositionValues() {
@@ -69,7 +69,7 @@ public class XNTupleFuncsSG extends XNTupleBase implements XNTupleFuncs, Seriali
 	/**
 	 * The board vector is an {@code int[]} vector
 	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
-	 * 		for cell 0 the position value 0: (m_sum>UPPER), 1,2,...,UPPER: m_sum.
+	 * 		for cell 0 the position value 0: (m_sum &gt; UPPER), 1,2,...,UPPER: m_sum.
 	 * 		for cell 1 the position value 0: open, 1: final
 	 */
 	@Override

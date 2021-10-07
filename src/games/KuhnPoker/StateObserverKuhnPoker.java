@@ -277,10 +277,10 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	 * Advance the current state with 'action' to a new state combining the deterministic and the non-deterministic
 	 * actions in one method.
 	 * Actions:<ul>
-	 * <li> 0 -> FOLD	: give up the current round
-	 * <li> 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
-	 * <li> 2 -> BET	: bet the "Big Blind"
-	 * <li> 3 -> CALL	: bet the same amount as the previous player bet
+	 * <li> 0 -&gt; FOLD	: give up the current round
+	 * <li> 1 -&gt; CHECK	: pass for the current action (wait for someone else to do something to react on)
+	 * <li> 2 -&gt; BET	: bet the "Big Blind"
+	 * <li> 3 -&gt; CALL	: bet the same amount as the previous player bet
 	 * </ul>
 	 * NOTE: If the deterministic advance results in a next-adction-deterministic state (as it can happen in Poker),
 	 * then the non-deterministic part is skipped.
@@ -298,10 +298,10 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	/**
 	 * Advance the current state with 'action' to a new state
 	 * Actions:<ul>
-	 * <li> 0 -> FOLD	: give up the current round
-	 * <li> 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
-	 * <li> 2 -> BET	: bet the "Big Blind"
-	 * <li> 3 -> CALL	: bet the same amount as the previous player bet
+	 * <li> 0 -&gt; FOLD	: give up the current round
+	 * <li> 1 -&gt; CHECK	: pass for the current action (wait for someone else to do something to react on)
+	 * <li> 2 -&gt; BET	: bet the "Big Blind"
+	 * <li> 3 -&gt; CALL	: bet the same amount as the previous player bet
 	 * </ul>
 	 * @param action to advance the state of the game
 	 */
@@ -524,11 +524,11 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		return gamescores[player];
 	}
 
-	@Override
-	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
-		return gamescores[referringState.getPlayer()];
-		//return rewards[referringState.getPlayer()];
-	}
+//	@Override
+//	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
+//		return gamescores[referringState.getPlayer()];
+//		//return rewards[referringState.getPlayer()];
+//	}
 
 	@Override
 	public double getReward(int player, boolean rewardIsGameScore){

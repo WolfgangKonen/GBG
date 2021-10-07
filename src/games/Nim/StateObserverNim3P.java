@@ -107,35 +107,15 @@ public class StateObserverNim3P extends StateObserverNim implements StateObserva
 		return getGameScore(player);
 	}
 
-	/**
-	 * @return 	the game score, i.e. the sum of rewards for the current state. 
-	 * 			For Nim3P only game-over states have a non-zero game score. 
-	 * 			It is the reward from the perspective of {@code refer}.
-	 */
-	@Override
-	public double getGameScore(StateObservation refer) {
-		return getGameScore(refer.getPlayer());
-//        if(isGameOver()) {
-//        	// If the game is over, it is a win for the player to move in this, and he/she gets reward 1.
-//        	// If EXTRA_RULE==false, both other players lose and get reward 0.0, 
-//        	// If EXTRA_RULE==true, then the player following the winner gets reward 0.2.
-//        	// [There is no tie in game Nim3P.]
-////        	double secondReward=0.0;
-////        	if (NimConfig.EXTRA_RULE && refer.getPlayer()==(this.getPlayer()+1)%this.getNumPlayers()) secondReward = 0.2;
-////        	return (refer.getPlayer()==this.getPlayer()) ? 1 : secondReward;
-//        	
-//        	// If the game is over, it is a win for the player preceding the player who took the last item, and he/she gets reward 1.
-//        	// If EXTRA_RULE==false, both other players lose and get reward 0.0, 
-//        	// If EXTRA_RULE==true, then the player following the loser gets reward 0.2.
-//        	// [There is no tie in game Nim3P.]
-//        	double secondReward = (NimConfig.EXTRA_RULE) ? 0.2 : 0.0;
-//        	int thisP = this.getPlayer();
-//        	int N = this.getNumPlayers();
-//        	if (refer.getPlayer()==thisP) return secondReward;
-//        	if (refer.getPlayer()==((thisP+1)%N)) return 1;
-//        }       
-//        return 0; 
-	}
+//	/**
+//	 * @return 	the game score, i.e. the sum of rewards for the current state.
+//	 * 			For Nim3P only game-over states have a non-zero game score.
+//	 * 			It is the reward from the perspective of {@code refer}.
+//	 */
+//	@Override
+//	public double getGameScore(StateObservation refer) {
+//		return getGameScore(refer.getPlayer());
+//	}
 
 	@Override
 	public String getName() { return "Nim3P";	}

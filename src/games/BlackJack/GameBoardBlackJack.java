@@ -122,7 +122,7 @@ public class GameBoardBlackJack implements GameBoard {
     }
 
     /**
-     * @param	actReq true : GameBoard requests an action from Arena
+     * @param	actionReq true : GameBoard requests an action from Arena
      * 			(see {@link #isActionReq()})
      */
     @Override

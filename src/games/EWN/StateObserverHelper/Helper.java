@@ -6,14 +6,14 @@ import tools.Types;
 public class Helper {
 
     /**
-     * Concatenate from + to =>  1, 4 => 104
+     * Concatenate from + to =&gt;  1, 4 => 104
      * where [1][04] is the string;
      * @param from  index of board
      * @param to index of board
      * @return  ACTiON
      */
     public static Types.ACTIONS parseAction(int from, int to){
-        from *= 100; // 0 => 0   [1,...9] => x00  [10,...25] => xx00
+        from *= 100; // 0 => 0   [1,...9] =&gt; x00  [10,...25] => xx00
         return new Types.ACTIONS(from + to);
     }
 

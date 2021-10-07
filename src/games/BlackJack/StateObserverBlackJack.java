@@ -338,11 +338,11 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
         return BlackJackActionDet.values()[act.toInt()].name();
     }
 
-    // provisionally TODO: refactor
-    @Override
-    public double getGameScore(StateObservation referringState) {
-        return getGameScore(referringState.getPlayer());
-    }
+//    // provisionally TODO: refactor
+//    @Override
+//    public double getGameScore(StateObservation referringState) {
+//        return getGameScore(referringState.getPlayer());
+//    }
 
     // provisionally TODO: refactor
     @Override
@@ -370,11 +370,11 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
         double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
         return this.getGameScore(player)/denom;
     }
-    @Override
-    public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
-        double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
-        return this.getGameScore(referringState.getPlayer())/denom;
-    }
+//    @Override
+//    public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+//        double denom = (rewardIsGameScore) ? 1.0 : MAXDELTASCORE;
+//        return this.getGameScore(referringState.getPlayer())/denom;
+//    }
 
 // /WK/ questionable: stepReward is only if each step should get a reward
 //    public ScoreTuple getStepRewardTuple() {

@@ -222,11 +222,11 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     }
 
     /**
-     * Advancing step <br />
-     *      the deterministic part
-     * We get action p.e. 706
+     * Advancing step, the deterministic part
+     * <p>
+     * For example, if we get action 706:
      * <ol>
-     *     <li>Convert the action 706 to indices [from,to] => [7,6] {@link Helper}</li>
+     *     <li>Convert the action 706 to indices [from,to] =&gt; [7,6] {@link Helper}</li>
      *     <li>Split the indices of the array to their from and to coordinates</li>
      *     <li>if to_token is a players token remove it</li>
      *     <li>Changing the gameState</li>

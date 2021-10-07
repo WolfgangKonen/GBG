@@ -548,22 +548,22 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         return score / MAXSCORE;
 	}
 	
-	/**
-	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. This
-	 * player dependence is only relevant for games with more than one player.
-	 * @param referringState
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
-	 * @return  the cumulative reward 
-	 */
-    @Override
-	public double getReward(StateObservation referringState,boolean rewardIsGameScore) {
-    	if (rewardIsGameScore) {
-    		return getGameScore(referringState.getPlayer());
-    	} else {
-    		return this.getCumulEmptyTiles();
-    	}
-	}
+//	/**
+//	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. This
+//	 * player dependence is only relevant for games with more than one player.
+//	 * @param referringState
+//	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
+//	 * 		  game-specific reward (currently {@link #getCumulEmptyTiles()})
+//	 * @return  the cumulative reward
+//	 */
+//    @Override
+//	public double getReward(StateObservation referringState,boolean rewardIsGameScore) {
+//    	if (rewardIsGameScore) {
+//    		return getGameScore(referringState.getPlayer());
+//    	} else {
+//    		return this.getCumulEmptyTiles();
+//    	}
+//	}
     
 	/**
 	 * Same as getReward(referringState,rgs), but with the player of referringState. 
@@ -574,7 +574,7 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
     	if (rewardIsGameScore) {
-    		return this.getGameScore(this);    		
+    		return this.getGameScore(this.getPlayer());
     	} else {
     		return this.getCumulEmptyTiles();
     	}

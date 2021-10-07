@@ -24,8 +24,8 @@ public class ConfigExpWrapper {
 //    public static boolean USELASTMCTS = true;
 
     /**
-     * EPS is a parameter for {@link MctseChanceNode#selectChild(double)}, it should be &lt;&lt; 1. It controls the behavior
-     * if N(s)==0, where N(s) is the number of visits to {@code this} node:
+     * EPS is a parameter for {@link MctseChanceNode#selectChild(double)}, it should be <code>&lt;&lt; 1</code>.
+     * It controls the behavior if N(s)==0, where N(s) is the number of visits to {@code this} node:
      * <ul>
      *  <li> Case A)  EPS = +1e-8 (a small positive value): The Nair-case, like in <a href="https://web.stanford.edu/~surag/posts/alphazero.html">
      *           https://web.stanford.edu/~surag/posts/alphazero.html</a>:
@@ -35,7 +35,7 @@ public class ConfigExpWrapper {
      * </ul>
      * While Case A) is a more exploiting start, Cases B) and C) give the node a more exploring start.
      * Case A) should be from theory the best choice in general.
-     * If N(s) &gt; 0, then EPS is negligible (if condition  <code>|EPS| << 1</code> is fulfilled): Thus, all cases are the
+     * If N(s) &gt; 0, then EPS is negligible (if condition  <code>|EPS| &lt;&lt; 1</code> is fulfilled): Thus, all cases are the
      * same, they use the PUCT formula for selection.
      * <p>
      * Recommendation:

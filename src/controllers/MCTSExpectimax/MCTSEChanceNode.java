@@ -415,8 +415,6 @@ public class MCTSEChanceNode
      * @return 	a vector of length N, where the {@code i}th element holds q(reward[{@code i}]), the reward
      * 			for the {@code i}th player in state {@code so} after the rollout is finished.<br>
      * 			q() normalizes the rewards to [0,1] if flag 'Normalize' is checked. Otherwise it is the identity function.
-     *
-     * @see StateObservation#getReward(StateObservation, boolean)
      */
     public ScoreTuple rollOut() {
         boolean stopConditionMet;

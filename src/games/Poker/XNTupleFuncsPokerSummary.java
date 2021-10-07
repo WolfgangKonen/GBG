@@ -32,6 +32,7 @@ public class XNTupleFuncsPokerSummary extends XNTuplePoker implements XNTupleFun
 	 * <li>number of connected cards: 3 (6,7,8)</li>
 	 * <li>pairs: 7 </li>
 	 * <li>...</li>
+	 * </ul>
 	 */
 	public XNTupleFuncsPokerSummary(){
 

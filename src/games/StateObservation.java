@@ -94,21 +94,21 @@ public interface StateObservation extends Serializable{
 	 */
 	String stringActionDescr(ACTIONS act);
 
-	/**
-	 * *** This method is deprecated, use instead getGameScore(referringState.getPlayer()) ***
-	 * <p>
-	 * The game score, seen from the perspective of {@code referringState}'s player. The
-	 * perspective shift is only relevant for games with more than one player.
-	 * <p>
-	 * The keyword abstract signals that derived classes will be either abstract or implement
-	 * this method, as required by the interface {@link StateObservation} as well.
-	 * 
-	 * @param referringState gives the perspective
-	 * @return  The game score, seen from the perspective of {@code referringState}'s player.<br>
-	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1). 
-	 */
-	@Deprecated
-	double getGameScore(StateObservation referringState);
+//	/**
+//	 * *** This method is deprecated, use instead getGameScore(referringState.getPlayer()) ***
+//	 * <p>
+//	 * The game score, seen from the perspective of {@code referringState}'s player. The
+//	 * perspective shift is only relevant for games with more than one player.
+//	 * <p>
+//	 * The keyword abstract signals that derived classes will be either abstract or implement
+//	 * this method, as required by the interface {@link StateObservation} as well.
+//	 *
+//	 * @param referringState gives the perspective
+//	 * @return  The game score, seen from the perspective of {@code referringState}'s player.<br>
+//	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1).
+//	 */
+//	@Deprecated
+//	double getGameScore(StateObservation referringState);
 	
 	/**
 	 * The game score, seen from the perspective of {@code player}. The
@@ -126,18 +126,18 @@ public interface StateObservation extends Serializable{
 	 */
 	ScoreTuple getGameScoreTuple();
 
-	/**
-	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
-	 * <p>
-	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. The
-	 * perspective shift is only relevant for games with more than one player.
-	 * @param referringState	gives the perspective
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return  the cumulative reward 
-	 */
-	@Deprecated
-	double getReward(StateObservation referringState, boolean rewardIsGameScore);
+//	/**
+//	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
+//	 * <p>
+//	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. The
+//	 * perspective shift is only relevant for games with more than one player.
+//	 * @param referringState	gives the perspective
+//	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
+//	 * 		  game-specific reward
+//	 * @return  the cumulative reward
+//	 */
+//	@Deprecated
+//	double getReward(StateObservation referringState, boolean rewardIsGameScore);
 
 	/**
 	 * The cumulative reward, seen from the perspective of {@code player}. The
@@ -259,7 +259,7 @@ public interface StateObservation extends Serializable{
 
 	/**
 	 * @param p		player
-	 * @return Is {@code this} partial with respect to player p?
+	 * @return Is {@code this} partial with respect to player p? I.e. does it omit information that player p would have?
 	 */
 	boolean isPartialState(int p);
 

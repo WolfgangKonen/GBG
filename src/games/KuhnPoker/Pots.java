@@ -109,7 +109,7 @@ public class Pots implements Serializable {
 
     /**
      * Returns an overview which player has a claim for the pot(s).
-     * e.g. [0] == {true,true,true,false} => player 0,1,2 are competing for the pot [0] player 3 not.
+     * e.g. [0] == {true,true,true,false} =&gt; player 0,1,2 are competing for the pot [0] player 3 not.
      * @return two dimensional array with [pot][player] and claim
      */
     public boolean[][] getClaims(){

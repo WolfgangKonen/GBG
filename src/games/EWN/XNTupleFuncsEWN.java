@@ -72,11 +72,11 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
      *  size = 3 Possible sizes {3,4,5,6}
      *   <pre>
      * 	 00 01 02
-     * 	 03 04 05    --->    00,01,02,03,04,05,06,07,08
+     * 	 03 04 05    ---&gt;    00,01,02,03,04,05,06,07,08
      * 	 06 07 08
      * 	 </pre>
      *
-     * 	   returns the boardvector
+     * 	   returns the board vector
      * 	  <pre>
      * 	   0,1,2,3,4,5,6,7,8
      *

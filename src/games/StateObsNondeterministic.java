@@ -70,13 +70,21 @@ public interface StateObsNondeterministic extends StateObservation {
 	 */
 	ArrayList<ACTIONS> getAvailableCompletions(int p);
 
-	/**
-	 *
-	 * @param action  the completing action
-	 * @return the probability that the completion {@code action} is selected .
-	 */
-	double getProbCompletion(ACTIONS action);
+	// --- not needed anymore, we have the Tuples returned in StateObservation.completePartial... ---
+//	/**
+//	 * @param action  the completing action
+//	 * @return the probability that the completing action {@code action} is selected.
+//	 */
+//	double getProbCompletion(ACTIONS action);
 
+	/**
+	 * Same semantic as {@link StateObservation#partialState()}. But in contrast to {@link StateObservation#partialState()},
+	 * it returns an object implementing {@link StateObsNondeterministic}.
+	 *
+	 * @return a new {@link StateObsNondeterministic} object
+	 *
+	 * @see StateObservation#partialState()
+	 */
 	StateObsNondeterministic partialState();
 
 	StateObsNondeterministic copy();

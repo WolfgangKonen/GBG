@@ -644,12 +644,12 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 	/**
 	 * Advance the current state with 'action' to a new state combining the deterministic and the non-deterministic actions in one method.
 	 * Actions:
-	 * - 0 -> FOLD	: give up the current round
-	 * - 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
-	 * - 2 -> BET	: bet the "Big Blind"
-	 * - 3 -> CALL	: bet the same amount as the previous player bet
-	 * - 4 -> RAISE	: raise the last bet by the "Big Blind"
-	 * - 5 -> ALL IN: bet all remaining chips
+	 * - 0 -&gt; FOLD	: give up the current round
+	 * - 1 -&gt; CHECK	: pass for the current action (wait for someone else to do something to react on)
+	 * - 2 -&gt; BET	: bet the "Big Blind"
+	 * - 3 -&gt; CALL	: bet the same amount as the previous player bet
+	 * - 4 -&gt; RAISE	: raise the last bet by the "Big Blind"
+	 * - 5 -&gt; ALL IN: bet all remaining chips
 	 * @param action to advance the state of the game
 	 */
 	public void advance(ACTIONS action){
@@ -664,12 +664,12 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 	/**
 	 * Advance the current state with 'action' to a new state
 	 * Actions:
-	 * - 0 -> FOLD	: give up the current round
-	 * - 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
-	 * - 2 -> BET	: bet the "Big Blind"
-	 * - 3 -> CALL	: bet the same amount as the previous player bet
-	 * - 4 -> RAISE	: raise the last bet by the "Big Blind"
-	 * - 5 -> ALL IN: bet all remaining chips
+	 * - 0 -&gt; FOLD	: give up the current round
+	 * - 1 -&gt; CHECK	: pass for the current action (wait for someone else to do something to react on)
+	 * - 2 -&gt; BET	: bet the "Big Blind"
+	 * - 3 -&gt; CALL	: bet the same amount as the previous player bet
+	 * - 4 -&gt; RAISE	: raise the last bet by the "Big Blind"
+	 * - 5 -&gt; ALL IN: bet all remaining chips
 	 * @param action to advance the state of the game
 	 */
 	public void advanceDeterministic(ACTIONS action) {
@@ -717,11 +717,11 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 	 * Advance the current state with 'action' to a new state
 	 * Actions:
 	 * - 1-52: deal the card with ID
-	 * 	- 1 -> ♥ 2
-	 * 	- 2 -> ♥ 3
+	 * 	- 1 -&gt; ♥ 2
+	 * 	- 2 -&gt; ♥ 3
 	 * 	...
-	 * - 53 -> determine winner of the round
-	 * - 53 -> determine winner of the round
+	 * - 53 -&gt; determine winner of the round
+	 * - 53 -&gt; determine winner of the round
 	 * @param randAction to advance the state of the game
 	 */
 	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
@@ -917,29 +917,28 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 		return GAMEOVER;
 	}
 
-	/**
-	 * @return 	returns the sum of rewards in state so, seen from the perspective of the player to move in state refer. {@code refer}.
-	 */
-	public double getGameScore(StateObservation refer) {
-		/*if(isGameOver()) {
-			if(chips[refer.getPlayer()]>0)
-				return 1;
-			return -1;
-		}
-		return 0;
-		 */
-		return gamescores[refer.getPlayer()];
-	}
+//	/**
+//	 * @return 	returns the sum of rewards in state so, seen from the perspective of the player to move in state refer. {@code refer}.
+//	 */
+//	public double getGameScore(StateObservation refer) {
+//		/*if(isGameOver()) {
+//			if(chips[refer.getPlayer()]>0)
+//				return 1;
+//			return -1;
+//		}
+//		return 0;
+//		 */
+//		return gamescores[refer.getPlayer()];
+//	}
 
 	@Override
 	public double getGameScore(int player){
 		return gamescores[player];
 	}
 
-	@Override
-	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
-		return gamescores[referringState.getPlayer()];
-	}
+//	public double getReward(StateObservation referringState, boolean rewardIsGameScore){
+//		return gamescores[referringState.getPlayer()];
+//	}
 
 
 	@Override

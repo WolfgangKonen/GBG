@@ -6,7 +6,7 @@ public class Card implements Comparable<Card>{
     /**
      * Compares this card with the specified card for order. Returns a negative integer, zero,
      * or a positive integer as this card is less than, equal to, or greater than the specified object.
-     * @param other card
+     * @param o the other card
      * @return int -1 or 0 or 1
      */
     @Override

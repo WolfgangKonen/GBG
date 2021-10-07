@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
  * <p>
  * Similar to former {@code MCAgent}, but it operates on {@link ScoreTuple} and is thus general for
  * N-player games with arbitrary N. It might be a bit slower than {@code MCAgent}.
- * <p>
+ *
  * @see MCAgentConfig
  * @see RandomSearch
  * @see ParMC

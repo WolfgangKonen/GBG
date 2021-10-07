@@ -613,7 +613,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
     /**
      * fixes multiline-String for .csv output
-     * @params data string that needs to get fixed
+     * @param data string that needs to get fixed
      * @return fixed data String
      */
     public String fixString(String data) {

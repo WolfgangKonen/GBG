@@ -14,7 +14,8 @@ public class ExpectimaxNAgentTest extends GBGBatch {
     /**
      * This test just executes nEpi EWN[3x3 2-player] episodes where ExpectimaxNAgent plays against itself.
      * No assertions, just printout on console and the user can check if everything is OK.
-     * For nDepth>=15, a tree traversal should never stop prematurely (i.e. countMaxDepth=0 for all moves should hold).
+     * <p>
+     * For nDepth &ge; 15, a tree traversal should never stop prematurely (i.e. countMaxDepth=0 for all moves should hold).
      */
     @Test
     public void playGameTest() {

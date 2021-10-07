@@ -15,7 +15,7 @@ import java.util.Random;
 /**
  * Class <strong> StateObs2048Slow </strong> holds a 2048 game state.
  * The game state is coded in a matrix of tiles {@code Tile[][] gameBoard}. The code for 
- * merging tiles is better understandable, but also slower than in {@link StateObserver2048}.<p>
+ * merging tiles is better understandable, but also slower than in {@link StateObserver2048}.
  * <p>
  * This is just an alternate class for {@link StateObserver2048} (for testing purposes). It is only used if
  * class {@link StateObserver2048} is renamed to {@code StateObserverNEW} and then
@@ -387,24 +387,23 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
 //        return this.getGameScore(this);
     }
 
-	/**
-	 * The cumulative reward relative to referringState. 
-	 * @param referringState
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return  the cumulative reward 
-	 */
-    @Override
-	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
-		return getGameScore(referringState.getPlayer());
-	}
+//	/**
+//	 * The cumulative reward relative to referringState.
+//	 * @param referringState
+//	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
+//	 * 		  game-specific reward
+//	 * @return  the cumulative reward
+//	 */
+//    @Override
+//	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+//		return getGameScore(referringState.getPlayer());
+//	}
 
 	/**
-	 * Same as getReward(referringState), but with the player of referringState. 
-	 * @param player the player of referringState, a number in 0,1,...,N.
+	 * @param player the player, a number in 0,1,...,N.
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
-	 * @return  the cumulative reward 
+	 * @return  the cumulative reward from the perspective of {@code player}
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
         return this.getGameScore(this.getPlayer());

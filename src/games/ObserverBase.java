@@ -314,23 +314,23 @@ abstract public class ObserverBase implements StateObservation {
 		m_counter++;
 	}
 
-	/**
-	 * *** This method is deprecated, use instead getGameScore(referringState.getPlayer()) ***
-	 * <p>
-	 * The game score, seen from the perspective of {@code referringState}'s player. The
-	 * perspective is only relevant for games with more than one player.
-	 * <p>
-	 * The keyword abstract signals that derived classes will be either abstract or implement
-	 * this method, as required by the interface {@link StateObservation} as well.
-	 * 
-	 * @param referringState see below
-	 * @return  The game score, seen from the perspective of {@code referringState}'s player.<br>
-	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1). 
-	 */
-	@Deprecated
-    public double getGameScore(StateObservation referringState) {
-		return getGameScore(referringState.getPlayer());
-	}
+//	/**
+//	 * *** This method is deprecated, use instead getGameScore(referringState.getPlayer()) ***
+//	 * <p>
+//	 * The game score, seen from the perspective of {@code referringState}'s player. The
+//	 * perspective is only relevant for games with more than one player.
+//	 * <p>
+//	 * The keyword abstract signals that derived classes will be either abstract or implement
+//	 * this method, as required by the interface {@link StateObservation} as well.
+//	 *
+//	 * @param referringState see below
+//	 * @return  The game score, seen from the perspective of {@code referringState}'s player.<br>
+//	 * 			If referringState has opposite player (N=2), then it is getGameScore(this)*(-1).
+//	 */
+//	@Deprecated
+//  public double getGameScore(StateObservation referringState) {
+//		return getGameScore(referringState.getPlayer());
+//	}
 
 	/**
 	 * The game score, seen from the perspective of player {@code player}. The 
@@ -341,11 +341,7 @@ abstract public class ObserverBase implements StateObservation {
 	 * 			If they are different, then it is getGameScore()*(-1). 
 	 */
 	abstract public double getGameScore(int player);
-//	public double getGameScore(int player) {
-//    	assert (this.getNumPlayers()<=2) : "ObserverBase's implementation of getGameScore(int) is not valid for current class";
-//		return (this.getPlayer() == player ? this.getGameScore(this) : (-1)*this.getGameScore(this) );
-//	}
-	
+
 	/**
 	 * This implementation is valid for all classes implementing {@link StateObservation}, once
 	 * they have a valid implementation for {@link #getGameScore(int)}.
@@ -361,28 +357,28 @@ abstract public class ObserverBase implements StateObservation {
 		return sc;
 	}
 
-	/**
-	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
-	 * <p>
-	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. The
-	 * perspective is only relevant for games with more than one player.
-	 * <p> 
-	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
-	 * 
-	 * @param referringState	gives the perspective
-	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
-	 * 		  game-specific reward
-	 * @return the cumulative reward 
-	 */
-	@Deprecated
-	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
-		String sWarn = "WARNING getReward: Case rgs==false is not handled in ObserverBase!";
-		if (!rewardIsGameScore) {
-			System.out.println(sWarn);
-//			throw new RuntimeException(sWarn);
-		}
-		return getGameScore(referringState.getPlayer());
-	}
+//	/**
+//	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
+//	 * <p>
+//	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. The
+//	 * perspective is only relevant for games with more than one player.
+//	 * <p>
+//	 * The default implementation here in {@link ObserverBase} implements the reward as game score.
+//	 *
+//	 * @param referringState	gives the perspective
+//	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different,
+//	 * 		  game-specific reward
+//	 * @return the cumulative reward
+//	 */
+//	@Deprecated
+//	public double getReward(StateObservation referringState, boolean rewardIsGameScore) {
+//		String sWarn = "WARNING getReward: Case rgs==false is not handled in ObserverBase!";
+//		if (!rewardIsGameScore) {
+//			System.out.println(sWarn);
+////			throw new RuntimeException(sWarn);
+//		}
+//		return getGameScore(referringState.getPlayer());
+//	}
 
 	/**
 	 * The cumulative reward, seen from the perspective of {@code player}. The

@@ -380,10 +380,10 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return finalSim.getAllRewards();
 	}
 
-	@Override
-	public double getGameScore(StateObservation referringState) {
-		return getGameScore(referringState.getPlayer());									
-	}
+//	@Override
+//	public double getGameScore(StateObservation referringState) {
+//		return getGameScore(referringState.getPlayer());
+//	}
 	
 	@Override
 	public double getGameScore(int player) {
