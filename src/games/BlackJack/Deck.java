@@ -12,7 +12,7 @@ public class Deck {
     public Deck() { // infinite
         deck = new ArrayList<Card>();
         int count = 0;
-        // depricated for (int i = 0; i < 6; i++) { // 6 card decks (common in Blackjack)
+        // deprecated for (int i = 0; i < 6; i++) { // 6 card decks (common in Blackjack)
             for (int s = 0; s < 4; s++) { // create every permutation
                 for (int r = 0; r < 13; r++) {
                     deck.add(new Card(Card.Rank.values()[r], Card.Suit.values()[s]));

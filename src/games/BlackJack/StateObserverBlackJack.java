@@ -203,25 +203,26 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
         //setPartialState(false); // maybe not needed. maybe we should introduce a flag completed
         // if the dealer has no hand there is nothing to complete
         if(!this.isPartialState()){
-            throw new RuntimeException("A state that is not a partial State should not be completed");
+            throw new RuntimeException("A state that is not a partial state should not be completed");
         }
 
         if(dealer.getActiveHand() == null){
             return new Tuple<>(this,1.0);
         }
-        // if the second card of the dealer is unknown we need completion
+        // if the second card of the dealer is unknown, we need completion
         if(dealer.getActiveHand().getCards().get(1).rank == Card.Rank.X){
             if(gPhase.getValue() < gamePhase.PLAYERONACTION.getValue()){
-                //check for Black did not happen. We can complete with any Card.
+                //check for Black Jack did not happen. We can complete with any card.
                 return new Tuple<>(completeRandom(),1.0);
             }else{
-                /** in this case the dealer peeked already for a BlackJack. If the dealer had a Black Jack
-                 * the round would have ended already. So in this Case the completion cant result in a
-                 * Black Jack for the dealer, this would be an illegal Game State.
+                /** in this case the dealer peeked already for a Black Jack. If the dealer had a Black Jack
+                 * the round would have ended already. So in this case the completion cannot result in a
+                 * Black Jack for the dealer, this would be an illegal game state.
                  * We need to restrict the completion if the upcard of the dealer
                  * is an A, K, Q, J, or a Ten.
                  */
-                if(dealer.getActiveHand().getCards().get(0).rank.getValue() == 10 || dealer.getActiveHand().getCards().get(0).rank.getValue() == 1){
+                if(     dealer.getActiveHand().getCards().get(0).rank.getValue() == 10 ||
+                        dealer.getActiveHand().getCards().get(0).rank.getValue() == 1){
                     return new Tuple<>(completeRestricted(),1.0);
                 }
                 return new Tuple<>(completeRandom(),1.0);
@@ -229,13 +230,24 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
 
         }
         return new Tuple<>(this,1.0);
-
     }
 
     /**
-     * completes this gamestate randomly by: dealers face-down-card
-     * @return resulting GameState (never used)
+     * This is just a stub signaling that we have to implement it, if it is used
+     *
+     * @param p			the player number
+     * @param ranAct	the random action
+     * @return
      */
+    @Override
+    public Tuple<StateObservation,Double> completePartialState(int p, ACTIONS ranAct){
+        throw new RuntimeException("[completePartialState(int,ACTIONS] Not yet implemented!!");
+    }
+
+        /**
+         * completes this game state randomly by: dealers face-down-card
+         * @return resulting GameState (never used)
+         */
     private StateObservation completeRandom(){
         dealer.getActiveHand().getCards().remove(1);
         dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
@@ -256,7 +268,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
             dealer.getActiveHand().addCard(ArenaBlackJack.deck.draw());
         }while(dealer.getActiveHand().checkForBlackJack());
         if(dealer.getActiveHand().size() != 2)
-            throw new RuntimeException("Dealers handsize must be 2 after completion!");
+            throw new RuntimeException("Dealer's hand size must be 2 after completion!");
         return this;
     }
 

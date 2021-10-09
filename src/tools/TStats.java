@@ -1,4 +1,4 @@
-package games;
+package tools;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -19,10 +19,10 @@ import games.RubiksCube.CubeConfig;
  *  for other (puzzle) games as well.
  */
 public class TStats {
-	int n;
-	int p;
-	int moveNum;
-	int epiLength;
+	public int n;
+	public int p;
+	public int moveNum;
+	public int epiLength;
 	
 	public TStats(int n, int p, int moveNum, int epiLength) {
 		this.n=n;

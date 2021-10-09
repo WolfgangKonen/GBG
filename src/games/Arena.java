@@ -15,6 +15,7 @@ import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
 import starters.GBGLaunch;
+import tools.PStats;
 import tools.ScoreTuple;
 import tools.Types;
 import TournamentSystem.TSAgent;

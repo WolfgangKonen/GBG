@@ -30,7 +30,7 @@ import games.RubiksCube.CubeConfig;
 import games.RubiksCube.DAVI2Agent;
 import games.RubiksCube.DAVI3Agent;
 import games.RubiksCube.GameBoardCube;
-import games.TStats.TAggreg;
+import tools.TStats.TAggreg;
 import gui.DeviationWeightsChart;
 import gui.LineChartSuccess;
 import params.*;
