@@ -14,6 +14,7 @@ import tools.Types.ACTIONS;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static tools.Types.WINNER.*;
 
@@ -52,7 +53,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         this.nextNondeterministicAction=null;
         this.isNextActionDeterministic=false;
         this.gameState = new Token[size][size];
-        this.random = new Random();
+        this.random = new Random(ThreadLocalRandom.current().nextInt());
         this.players = new ArrayList<>();
         this.availableActions = new ArrayList<>();
         this.availableRandomActions = new ArrayList<>();
@@ -80,7 +81,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         this.numPlayers = other.getNumPlayers();
         this.size = other.getSize();
         count = other.count;
-        this.random = new Random();
+        this.random = new Random(ThreadLocalRandom.current().nextInt());
         this.players = new ArrayList<>();
         this.nextNondeterministicAction = other.getNextNondeterministicAction();
         this.isNextActionDeterministic = other.isNextActionDeterministic();
@@ -178,7 +179,8 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     private int[] shuffle(int[] array){
         int index;
         for(int i = array.length-1; i > 0; i--){
-            index = random.nextInt(i+1);
+            //index = random.nextInt(i+1);
+            index = ThreadLocalRandom.current().nextInt(i+1);
             if(index != i){
                 array[index] ^= array[i];
                 array[i] ^= array[index];
@@ -188,6 +190,9 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         return array;
     }
 
+    /**
+     * @return the indices - in ascending order - that player 0's pieces occupy in the starting position
+     */
     private int[] getNormalPositionIndices(){
         switch (ConfigEWN.BOARD_SIZE){
             case 3:return new int[]{0,1,3};
@@ -266,7 +271,8 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         if(isNextActionDeterministic){
             throw new RuntimeException("ACTION IS DETERMINISTIC must be NON");
         }
-        int actIndex = random.nextInt(availableRandomActions.size());
+        //int actIndex = random.nextInt(availableRandomActions.size());
+        int actIndex = ThreadLocalRandom.current().nextInt(availableRandomActions.size());
         advanceNondeterministic(availableRandomActions.get(actIndex));
         if(this.availableActions.size() == 0){
             this.availableActions.add(new ACTIONS(-1)); // Add empty action
@@ -280,7 +286,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     @Override
     public ACTIONS advanceNondeterministic(ACTIONS action) {
         nextNondeterministicAction = action;
-        this.setAvailableActions();// this sets also isNextActionDeterministic |
+        this.setAvailableActions();// this sets also isNextActionDeterministic
 
         return action;
 
@@ -342,6 +348,15 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     @Override
     public int getNumAvailableActions() {
         return this.availableActions.size();
+    }
+
+    /**
+     * Helper for test routines
+     * @param ranAct
+     */
+    public void setNextActionDeterministic(ACTIONS ranAct) {
+        nextNondeterministicAction = ranAct;
+        setAvailableActions();
     }
 
     @Override

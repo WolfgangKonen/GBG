@@ -46,7 +46,9 @@ public final class PlayAgentApproximator implements Approximator {
 
     private static double[] moveProbabilitiesForVTable(final double[] vTable, final StateObservation stateObservation) {
         assert (vTable.length == stateObservation.getNumAvailableActions()) : "Ooops, wrong size for vTable!";
-        return optSoftmax(vTable);
+        final var minV = stateObservation.getMinGameScore();
+        final var maxV = stateObservation.getMaxGameScore();
+        return optSoftmax(vTable,minV,maxV);
 //        return optSoftmax(
 //            vTable.length > stateObservation.getNumAvailableActions() // For historical reasons the vTable is sometimes
 //                                                                      // larger by 1 than the number of available actions.
@@ -55,8 +57,8 @@ public final class PlayAgentApproximator implements Approximator {
 //        );
     }
 
-    private static double[] optSoftmax(final double[] values) {
-        return (ConfigWrapper.USESOFTMAX) ? softmax(values) : values;
+    private static double[] optSoftmax(final double[] values, final double minV, final double maxV) {
+        return (ConfigWrapper.USESOFTMAX) ? softmax(values) : minmaxmap(values,minV,maxV);
     }
 
     private static double[] softmax(final double[] values) {
@@ -68,6 +70,15 @@ public final class PlayAgentApproximator implements Approximator {
 
         return Arrays.stream(exponentialValues).map(
             v -> v / sum
+        ).toArray();
+    }
+
+    private static double[] minmaxmap(final double[] values, final double minV, final double maxV) {
+        final var vrange = maxV-minV;
+        assert vrange > 0 : "[minmaxmap] vrange is not positive!";
+
+        return Arrays.stream(values).map(
+                v -> (v-minV) / vrange
         ).toArray();
     }
 

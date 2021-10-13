@@ -1,10 +1,10 @@
 package games.BlackJack;
 
+import java.io.Serial;
 import java.util.ArrayList;
 
 import controllers.MCTSWrapper.utils.Tuple;
 import games.ObsNondetBase;
-import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
 import tools.ScoreTuple;
@@ -15,22 +15,24 @@ import static games.BlackJack.BlackJackConfig.*;
 public class StateObserverBlackJack extends ObsNondetBase implements StateObsNondeterministic {
 
 
+    @Serial
     private static final long serialVersionUID = 1L;
-    private ArrayList<Types.ACTIONS> availableActions = new ArrayList<Types.ACTIONS>();
+
+    private ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();
     private Player currentPlayer;
     private boolean isNextActionDeterministic = true;
-    private ArrayList<Integer> availableRandoms = new ArrayList<Integer>();
-    private Dealer dealer;
-    private Player players[];
+    private ArrayList<Integer> availableRandoms = new ArrayList<>();
+    private final Dealer dealer;
+    private final Player[] players;
     private int playersTurn;
     private gamePhase gPhase = gamePhase.BETPHASE;
-    private boolean playerActedInPhase[];
-    private ArrayList<String> log = new ArrayList<String>();
+    private boolean[] playerActedInPhase;
+    private ArrayList<String> log = new ArrayList<>();
     private int currentSleepDuration = 0;
     private int episode = 0;
-    private final double maximumBetSize = 10;
-    private int epiLength;
-    private int MAXDELTASCORE = 100;
+    //private final double maximumBetSize = 10;
+    private final int epiLength;
+    private final int MAXDELTASCORE = 100;
 
     public StateObserverBlackJack() {
         this(NUM_PLAYERS, episodeLength);
@@ -93,9 +95,9 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
         BET10(0), HIT(1), STAND(2), DOUBLEDOWN(3), SPLIT(4),
         SURRENDER(5), INSURANCE(6), NOINSURANCE(7);
 
-        private int action;
+        private final int action;
 
-        private BlackJackActionDet(int action) {
+        BlackJackActionDet(int action) {
             this.action = action;
         }
 
@@ -110,9 +112,9 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
     enum BlackJackActionNonDet {
         DEALCARD(0), DEALERPLAYS(1), PAYPLAYERS(2), PEEKFORBLACKJACK(3);
 
-        private int action;
+        private final int action;
 
-        private BlackJackActionNonDet(int action) {
+        BlackJackActionNonDet(int action) {
             this.action = action;
         }
 
@@ -137,9 +139,9 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
         BETPHASE(0), DEALPHASE(1), ASKFORINSURANCE(2) ,PEEKFORBLACKJACK(3),
         PLAYERONACTION(4), DEALERONACTION(5), PAYOUT(6);
 
-        private int value;
+        private final int value;
 
-        private gamePhase(int value) {
+        gamePhase(int value) {
             this.value = value;
         }
 
@@ -153,44 +155,54 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
     }
 
     enum results {
-        WIN, PUSH, LOSS, SURRENDER, BLACKJACK;
+        WIN, PUSH, LOSS, SURRENDER, BLACKJACK
     }
 
 
     @Override
     public boolean isImperfectInformationGame() { return true; }
 
-    enum PartialStateMode {
-        THIS_PLAYER, WHATS_ON_TABLE, FULL;
-    }
+//    enum PartialStateMode {
+//        THIS_PLAYER, WHATS_ON_TABLE, FULL;
+//    }
 
     /**
-     * returns a partial state
-     * possible modes THIS_PLAYER (what the current player would see), WHATS_ON_TABLE (what an observer would see),
-     * FULL (every information in game can be accesed)
-     * @param mode
-     * @return resulting partial state
+     *
+     * @return  resulting partial state
      */
-    public StateObsNondeterministic partialState(PartialStateMode mode) {
-        switch (mode) {
-            case THIS_PLAYER:
-            case WHATS_ON_TABLE:
+    @Override
+    public StateObsNondeterministic partialState() {
+    // --- we do not need the different PartialStateMode values anymore ---
+//        return partialState(PartialStateMode.THIS_PLAYER);
+//    }
+//
+//    /**
+//     * returns a partial state
+//     * possible modes THIS_PLAYER (what the current player would see), WHATS_ON_TABLE (what an observer would see),
+//     * FULL (every information in game can be accesed)
+//     * @param mode
+//     * @return resulting partial state
+//     */
+//    public StateObsNondeterministic partialState(PartialStateMode mode) {
+//        switch (mode) {
+//            case THIS_PLAYER:
+//            case WHATS_ON_TABLE:
                 if (gPhase != gamePhase.DEALERONACTION && gPhase != gamePhase.PAYOUT) {
 
                     StateObserverBlackJack p_so = new StateObserverBlackJack(this);
                     p_so.setPartialState(true);
                     if (dealer.hasHand() && dealer.getActiveHand().size() > 1) {
                         p_so.dealer.activeHand.getCards().remove(1);
-                        p_so.dealer.activeHand.getCards().add(new Card(Card.Rank.X, Card.Suit.X));
+                        p_so.dealer.activeHand.getCards().add(new Card(Card.Rank.X, Card.Suit.X));  // X codes 'unknown'
                     }
                     return p_so;
                 } else {
                     return new StateObserverBlackJack(this);
                 }
-            case FULL:
-                return new StateObserverBlackJack(this);
-        }
-        return new StateObserverBlackJack(this);
+//            case FULL:
+//                return new StateObserverBlackJack(this);
+//        }
+//        return new StateObserverBlackJack(this);
     }
 
     /**
@@ -215,7 +227,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
                 //check for Black Jack did not happen. We can complete with any card.
                 return new Tuple<>(completeRandom(),1.0);
             }else{
-                /** in this case the dealer peeked already for a Black Jack. If the dealer had a Black Jack
+                /* in this case the dealer peeked already for a Black Jack. If the dealer had a Black Jack
                  * the round would have ended already. So in this case the completion cannot result in a
                  * Black Jack for the dealer, this would be an illegal game state.
                  * We need to restrict the completion if the upcard of the dealer
@@ -237,7 +249,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
      *
      * @param p			the player number
      * @param ranAct	the random action
-     * @return
+     * @return a tuple (state, probability)
      */
     @Override
     public Tuple<StateObservation,Double> completePartialState(int p, ACTIONS ranAct){
@@ -270,11 +282,6 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
         if(dealer.getActiveHand().size() != 2)
             throw new RuntimeException("Dealer's hand size must be 2 after completion!");
         return this;
-    }
-
-    @Override
-    public StateObsNondeterministic partialState() {
-        return partialState(PartialStateMode.THIS_PLAYER);
     }
 
 
@@ -435,7 +442,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
 
     @Override
     public ArrayList<ACTIONS> getAllAvailableActions() {
-        ArrayList<ACTIONS> allActions = new ArrayList<ACTIONS>();
+        ArrayList<ACTIONS> allActions = new ArrayList<>();
         for (BlackJackActionDet a : BlackJackActionDet.values()) {
             allActions.add(ACTIONS.fromInt(a.getAction()));
         }
@@ -689,7 +696,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
                 switch (gPhase) {
 
                     case DEALPHASE:
-                        // in dealphase the cards get dealt 1 by 1
+                        // in deal phase the cards get dealt 1 by 1
                         if (everyPlayerActed()) { // if true dealer gets a card
                             if(this.isPartialState() && dealer.getActiveHand() != null){
                                 dealer.addCardToActiveHand(new Card(Card.Rank.X, Card.Suit.X));
@@ -737,11 +744,9 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
                         currentHand.addCard(newCard);
 
                         // consequence of the card being dealt and the last action
-                        switch (lastAction) {
-                            case DOUBLEDOWN:
-                                currentHand.setHandFinished();
-                                addToLastMoves(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.action));
-                                break;
+                        if (lastAction == BlackJackActionDet.DOUBLEDOWN) {
+                            currentHand.setHandFinished();
+                            addToLastMoves(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.action));
                         }
 
                         if (currentHand.isHandFinished()) { // checking if the hand is finished, manualy finished or
@@ -885,7 +890,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
                 setRoundOver(true);
                 //initRound();
                 break;
-        }
+        } // switch (a)
         if (isNextActionDeterministic)
             setAvailableActions();
         return randAction;

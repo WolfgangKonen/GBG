@@ -10,6 +10,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * This class represents a MCTS Expectimax (MCTSE) Chance node.
@@ -397,7 +398,7 @@ public class MCTSEChanceNode
      * @return the selected child node
      */
     public MCTSETreeNode expand() {
-        Types.ACTIONS action = notExpandedActions.get(m_rnd.nextInt(notExpandedActions.size()));
+        Types.ACTIONS action = notExpandedActions.get(ThreadLocalRandom.current().nextInt(notExpandedActions.size()));
         notExpandedActions.remove(action);
 
 //      StateObserver2048 childSo = (StateObserver2048) so.copy();		// /WK/ can be done w/o using StateObserver2048:
@@ -433,7 +434,7 @@ public class MCTSEChanceNode
                                                         // Calling setAvailableActions without need slows down,
                                                         // especially for Othello (factor 3-4).
                 if (rollerState.getNumAvailableActions() > 0) {
-                    int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
+                    int action = ThreadLocalRandom.current().nextInt(rollerState.getNumAvailableActions());
                     rollerState.advance(rollerState.getAction(action));
                 }
                 else {
@@ -485,7 +486,7 @@ public class MCTSEChanceNode
                                                         // Calling setAvailableActions without need slows down,
                                                         // especially for Othello (factor 3-4).
                 if (rollerState.getNumAvailableActions() > 0) {
-                    int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
+                    int action = ThreadLocalRandom.current().nextInt(rollerState.getNumAvailableActions());
                     rollerState.advance(rollerState.getAction(action));
                 }
                 else {

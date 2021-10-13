@@ -103,6 +103,10 @@ public final class MctseChanceNode {
         //if (vsz==0 && ConfigWrapper.EPS<0) bestP_act = selectBestFromP(availableActions);
 
         for (final var a : availableActions) {
+            // --- just optional  debug info ---
+            //double pp = getP(a);
+            //double nn = getN(a);
+
             // In case visitCounst.size()>0, select according to the normal PUCT formula (EPS negligible, because |EPS| << 1)
             // In case visitCounts.size()==0 && EPS>0, select bestAction = argmax(getP(a)).
             // [This is because a non-visited node has getQ(a) = getN(a) = 0.]
@@ -110,6 +114,7 @@ public final class MctseChanceNode {
             var value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ConfigExpWrapper.EPS) / (1 + getN(a));
             // In case visitCounts.size()==0 && EPS==0, select the 1st action. This is the case originally
             // provided by JS, and it is better in the Othello-case.
+
 
             // In case visitCounts.size()==0 && EPS <0, select a random action
             // (experimental option: ... that is NOT argmax(getP(a))).

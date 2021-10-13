@@ -10,6 +10,15 @@ import tools.Types;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * GameBoardGuiEWN is build from three elements:
+ * <pre>
+ *     NORTH:   LegendGui
+ *     CENTER:  BoardGui
+ *     SOUTH:   JLabel (ErrorMessage)  </pre>
+ * @see BoardGui
+ * @see LegendGui
+ */
 public class GameBoardGuiEWN extends JFrame {
 
     private static final long serialVersionUID = 12L;

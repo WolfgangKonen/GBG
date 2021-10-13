@@ -236,7 +236,8 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		
 		double bestScore = VTable[actions.size()];
 		System.arraycopy(VTable, 0, vtable, 0, vtable.length);
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), false, vtable, bestScore);
+		ScoreTuple scBest = new ScoreTuple(so,bestScore);
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), false, vtable, bestScore, scBest);
 		// we return with actBestVT an object whose vtable has length N = actions.size();
         return actBestVT;
 	}

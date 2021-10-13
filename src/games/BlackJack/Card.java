@@ -15,7 +15,8 @@ public class Card implements Comparable<Card>{
     }
 
     /**
-     * Represents the suit of a card as enum
+     * Represents the suit of a card as enum. <br>
+     * X codes 'unknown' (for partial state)
      */
     enum Suit {
         HEART(0), DIAMOND(1), CLUB(2), SPADE(3), X(4);
@@ -29,7 +30,8 @@ public class Card implements Comparable<Card>{
     }
 
     /**
-     * Represents the rank of a card as enum
+     * Represents the rank of a card as enum. <br>
+     * X codes 'unknown' (for partial state)
      */
     enum Rank {
         TWO(2, 0), THREE(3, 1), FOUR(4 , 2), FIVE(5, 3),

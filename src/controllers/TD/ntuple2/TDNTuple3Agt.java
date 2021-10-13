@@ -324,15 +324,12 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
         assert actBest != null : "Oops, no best action actBest";
 		NewSO = so.copy();
 		NewSO.advance(actBest);
-
-		ScoreTuple scBest = so.getStoredBestScoreTuple();
-				// This is the previous tuple, only relevant in case N>=3. If so.getStoredBestScoreTuple() encounters
-				// null pointers, it returns an all-zeros-tuple with length so.getNumPlayers().
-		scBest.scTup[so.getPlayer()] = bestValue;
-		if (so.getNumPlayers()==2) {			// the following holds for 2-player, zero-sum games:
-			int opponent = 1-so.getPlayer();
-			scBest.scTup[opponent] = -bestValue;
+		if (!silent) {
+			printDebugInfo(so,NewSO,bestValue,VTable);
 		}
+
+		// determine the ScoreTuple scBest (needed when we wrap this agent with MCTS(Exp)Wrapper):
+		ScoreTuple scBest = new ScoreTuple(so,bestValue);
 		// --- old version, before 2021-09-10 ---
 //		ScoreTuple prevTuple = new ScoreTuple(so);	// a surrogate for the previous tuple, needed only in case N>=3
 //		ScoreTuple scBest = this.getScoreTuple(NewSO, prevTuple);
@@ -343,11 +340,6 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
 //		double[] res = {bestValue};  				// old and wrong - the reason it was undetected was only that
 //		ScoreTuple scBest = new ScoreTuple(res);	// scBest was never really used before MaxN2Wrapper change 2020-09-09
-
-		if (!silent) {
-			printDebugInfo(so,NewSO,bestValue,VTable);
-		}
-
 		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestValue,scBest);
 		return actBestVT;
 	}

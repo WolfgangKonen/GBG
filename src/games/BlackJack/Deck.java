@@ -32,7 +32,7 @@ public class Deck {
      */
     public Card draw() {
         Random r = new Random();
-        // returns random card between zero and decksize
+        // returns random card between zero and deck size
         return deck.get(r.ints(0, (size() + 1 - 1)).findFirst().getAsInt());
     }
 

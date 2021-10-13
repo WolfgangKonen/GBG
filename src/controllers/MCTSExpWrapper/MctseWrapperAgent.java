@@ -6,6 +6,7 @@ import controllers.MCTSExpWrapper.stateApproximation2.Approximator2;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.PlayAgtVector;
 import games.StateObservation;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.util.Arrays;
@@ -20,6 +21,7 @@ public final class MctseWrapperAgent extends AgentBase {
     private final int iterations;
     private final Mctse mcts;
     private final Approximator2 approximator;
+    private MctseChanceNode rootNode;
 
     /**
      * @param iterations   Number of monte carlo iterations to be performed before the next action is selected.
@@ -72,27 +74,27 @@ public final class MctseWrapperAgent extends AgentBase {
         final boolean random,
         final boolean silent
     ) {
-        MctseChanceNode mctsNode;
 
-        mctsNode = new MctseChanceNode(new GameStateIncludingPass(sob));
+
+        rootNode = new MctseChanceNode(new GameStateIncludingPass(sob));
 
 
         mcts.largestDepth=0;
         // Performs the given number of mcts iterations.
         for (int i = 0; i < iterations; i++) {
-            mcts.search(mctsNode,0);
+            mcts.search(rootNode,0);
         }
 
         // Selects the int value of the action that leads to the child node that maximizes the visit count.
         // This value is also cached for further calls.
-        if (mctsNode.visitCounts.size()==0) {
+        if (rootNode.visitCounts.size()==0) {
             // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
             // but we leave it in as debug check for the moment
             //System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
             //System.err.println(mctsNode.gameState.stringDescr());
-            return mctsNode.gameState.getNextAction(this.approximator);
+            return rootNode.gameState.getNextAction(this.approximator);
         }
-        lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
+        lastSelectedAction = rootNode.visitCounts.entrySet().stream().max(
             Comparator.comparingDouble(Map.Entry::getValue)
         ).orElseThrow().getKey();
 
@@ -107,13 +109,15 @@ public final class MctseWrapperAgent extends AgentBase {
         // --- debug info RubiksCube ---
         //System.out.println("largestDepth = "+mcts.largestDepth);
 
-        final var vTable = getVTableFor(mctsNode);
+        final var vTable = getVTableFor(rootNode);
         final var vBest = Arrays.stream(vTable).max().orElse(Double.NaN);
+        ScoreTuple scBest = new ScoreTuple(sob,vBest);
         return new Types.ACTIONS_VT(
             lastSelectedAction,
             false,
             vTable,
-            vBest
+            vBest,
+            scBest
         );
     }   // getNextAction2
 

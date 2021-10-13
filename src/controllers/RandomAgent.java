@@ -97,16 +97,18 @@ public class RandomAgent extends AgentBase implements PlayAgent {
         actBest = bestActions.get(rand.nextInt(bestActions.size()));
         // if several actions have the same best score, select one of them randomly
 
-        // optional: show the best action
         assert actBest != null : "Oops, no best action actBest";
+		StateObservation NewSO = so.copy();
+		NewSO.advance(actBest);
         if (!silent) {
-        	StateObservation NewSO = so.copy();
-        	NewSO.advance(actBest);
+			// optional: show the best action
         	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxScore);
         }			
 		actBest.setRandomSelect(true);		// the action was a random move
-	
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, maxScore);
+
+		// determine the ScoreTuple scBest (needed when we wrap this agent with MCTS(Exp)Wrapper):
+		ScoreTuple scBest = new ScoreTuple(so,maxScore);
+		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), true, vtable, maxScore, scBest);
         return actBestVT;
 	}
 
