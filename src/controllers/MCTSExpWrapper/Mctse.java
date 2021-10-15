@@ -86,7 +86,7 @@ public final class Mctse {
 
         // Update the node's Q(a) (needs Delta-Avg)
         int player = node.gameState.getPlayer();
-        double qAvg = selectedENode.setAverageTuple().scTup[player];
+        double qAvg = selectedENode.getAverageTuple().scTup[player];
         final var qValue = node.getQ(selectedAction);
         node.qValues.put(
                 selectedAction.getId(),

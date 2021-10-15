@@ -70,10 +70,6 @@ public class MctseWrapperTest extends GBGBatch {
                             new PlayAgentApproximator2(pa),
                             "Mctse-Wrapped " + pa.getName(),
                             maxDepth);
-                    if (oPar.getWrapperNPly() > 0) {
-                        System.out.println("oPar nPly = " + oPar.getWrapperNPly());
-                        qa = new MaxN2Wrapper(pa, oPar.getWrapperNPly(), oPar);
-                    }
 
                     startTime = System.currentTimeMillis();
 
@@ -102,6 +98,10 @@ public class MctseWrapperTest extends GBGBatch {
                                 ", vBest="+act_pa.getVBest() + " " + act_qa.getVBest()+
                                 ", act_pa="+act_pa.toInt()+", act_qa="+act_qa.toInt());
                         //so.advance(act_pa);
+
+                        int numNodes = ((MctseWrapperAgent) qa).getRootNode().checkTree(iterMctseWrap-1);
+                        // why iterMctseWrap-1? - The first call expands, does not increment any visit count
+                        System.out.println("[checkTree] numNodes="+numNodes);
                     }
 
                     deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;

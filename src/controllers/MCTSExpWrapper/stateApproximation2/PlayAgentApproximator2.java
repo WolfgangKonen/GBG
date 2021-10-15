@@ -67,6 +67,10 @@ public final class PlayAgentApproximator2 implements Approximator2 {
         return (ConfigExpWrapper.USESOFTMAX) ? softmax(values) : minmaxmap(values,minV,maxV);
     }
 
+    /*
+     * map values by softmax function. This ensures that sum(values)=1, i.e. values can be interpreted as probability
+     * distribution
+     */
     private static double[] softmax(final double[] values) {
         final var exponentialValues = Arrays.stream(values).map(
             Math::exp
@@ -79,6 +83,9 @@ public final class PlayAgentApproximator2 implements Approximator2 {
         ).toArray();
     }
 
+    /*
+     * map values into range [0,1]
+     */
     private static double[] minmaxmap(final double[] values, final double minV, final double maxV) {
         final var vrange = maxV-minV;
         assert vrange > 0 : "[minmaxmap] vrange is not positive!";

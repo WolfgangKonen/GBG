@@ -21,6 +21,7 @@ public final class MctseWrapperAgent extends AgentBase {
     private final int iterations;
     private final Mctse mcts;
     private final Approximator2 approximator;
+
     private MctseChanceNode rootNode;
 
     /**
@@ -162,6 +163,10 @@ public final class MctseWrapperAgent extends AgentBase {
         String cs = super.getName();
         cs = cs + "["+approximator.getName()+","+this.iterations+"]";
         return cs;
+    }
+
+    public MctseChanceNode getRootNode() {
+        return rootNode;
     }
 
 }

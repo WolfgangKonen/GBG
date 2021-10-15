@@ -2,8 +2,11 @@ package controllers.MCTSExpWrapper;
 
 import controllers.MCTSWrapper.passStates.ApplicableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
+import controllers.MCTSWrapper.passStates.RegularAction;
 import controllers.MCTSWrapper.utils.Tuple;
 import tools.ScoreTuple;
+import tools.Types;
+import tools.Types.ACTIONS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,10 +113,10 @@ public final class MctseChanceNode {
             // In case visitCounst.size()>0, select according to the normal PUCT formula (EPS negligible, because |EPS| << 1)
             // In case visitCounts.size()==0 && EPS>0, select bestAction = argmax(getP(a)).
             // [This is because a non-visited node has getQ(a) = getN(a) = 0.]
-            // This is the solution from Surag Nair, however, it is suboptimal for Othello. Why?
+            // This is the solution from Surag Nair, and it is the *recommended* choice.
             var value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ConfigExpWrapper.EPS) / (1 + getN(a));
             // In case visitCounts.size()==0 && EPS==0, select the 1st action. This is the case originally
-            // provided by JS, and it is better in the Othello-case.
+            // provided by JS, and it seemed first better in the Othello-case (but later we found that it is comparable to EPS>0).
 
 
             // In case visitCounts.size()==0 && EPS <0, select a random action
@@ -169,22 +172,23 @@ public final class MctseChanceNode {
     }
 
 
-    /**
-     * @param availableActions
-     * @return the action argmax(getP(a)) (the first maximizing action, if there are more than one with the same max)
-     */
-    private ApplicableAction selectBestFromP(ApplicableAction[] availableActions) {
-        var bestValue = Double.NEGATIVE_INFINITY;
-        ApplicableAction bestAction = null;
-        for (final var a : availableActions) {
-            var value = getP(a);
-            if (value > bestValue) {
-                bestValue = value;
-                bestAction = a;
-            }
-        }
-        return bestAction;
-    }
+    //--- never used ---
+//    /**
+//     * @param availableActions
+//     * @return the action argmax(getP(a)) (the first maximizing action, if there are more than one with the same max)
+//     */
+//    private ApplicableAction selectBestFromP(ApplicableAction[] availableActions) {
+//        var bestValue = Double.NEGATIVE_INFINITY;
+//        ApplicableAction bestAction = null;
+//        for (final var a : availableActions) {
+//            var value = getP(a);
+//            if (value > bestValue) {
+//                bestValue = value;
+//                bestAction = a;
+//            }
+//        }
+//        return bestAction;
+//    }
 
     private static double sum(final Collection<Integer> values) {
         return values.stream().mapToInt(it -> it).sum();
@@ -209,6 +213,22 @@ public final class MctseChanceNode {
             action.getId(),
             getN(action) + 1
         );
+    }
+
+    public int checkTree(int selfVisits) {
+        int numNodes = 1;       // 1 for self
+        int sumv = (int) sum(visitCounts.values());
+        if (selfVisits>0 && sumv>0) {
+            //System.out.println("Chance: "+selfVisits+", sumv="+sumv);
+            assert selfVisits == sumv : "[MctseChanceNode.checkTree] Error: selfVisits=" + selfVisits + ", sum(visitCounts)=" + sumv;
+        }
+        for (Map.Entry<Integer, MctseExpecNode> entry : childNodes.entrySet()) {
+            MctseExpecNode child = entry.getValue();
+            ACTIONS act = new ACTIONS(entry.getKey());
+            RegularAction actreg = new RegularAction(act);
+            numNodes += child.checkTree(getN(actreg));
+        }
+        return numNodes;
     }
 
 }
