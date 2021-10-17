@@ -19,12 +19,13 @@ public class ArenaTrainYavalath extends ArenaTrain {
 
     @Override
     public GameBoard makeGameBoard() {
-        return new GameBoardYavalath(this);
+        gb = new GameBoardYavalath(this);
+        return gb;
     }
 
     @Override
     public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-        return null;
+         return new EvaluatorYavalath(pa,gb,stopEval,mode,verbose);
     }
 
     @Override

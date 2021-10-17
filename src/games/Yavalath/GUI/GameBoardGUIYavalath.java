@@ -109,16 +109,16 @@ public class GameBoardGUIYavalath {
 
         private void drawGameBoard(Graphics2D g2) {
 
-            switch (gb.so.getPlayer()) {
+            switch (gb.m_so.getPlayer()) {
                 case 0 -> statusLabel.setText("Player 1 to move.");
                 case 1 -> statusLabel.setText("Player 2 to move.");
                 case 2 -> statusLabel.setText("Player 3 to move.");
             }
 
-            swapLabel.setVisible(gb.so.getMoveCounter() == 1);
+            swapLabel.setVisible(gb.m_so.getMoveCounter() == 1);
 
             //Draw all the individual cells
-            for (TileYavalath[] x : gb.so.getGameBoard()) {
+            for (TileYavalath[] x : gb.m_so.getGameBoard()) {
                 for (TileYavalath y : x) {
                     if (y.getPlayer() != INVALID_FIELD) {
                         g2.setColor(CELL_BACKGROUND);
@@ -148,7 +148,7 @@ public class GameBoardGUIYavalath {
                 }
             }
             //Mark the game-piece that was last placed on the board
-            TileYavalath lastPlayed = gb.so.getLastPlayedTile();
+            TileYavalath lastPlayed = gb.m_so.getLastPlayedTile();
             if (lastPlayed == null) return;
             g2.setColor(Color.RED);
             g2.drawOval(lastPlayed.getTileCenter().x - GAME_PIECE_RADIUS,
@@ -171,14 +171,14 @@ public class GameBoardGUIYavalath {
                     return;
                 }
                 Point clicked = e.getPoint();
-                TileYavalath clickedTile = UtilityFunctionsYavalath.clickedTile(clicked, gb.so.getGameBoard());
+                TileYavalath clickedTile = UtilityFunctionsYavalath.clickedTile(clicked, gb.m_so.getGameBoard());
                 if (clickedTile == null) return;
 
                 Types.ACTIONS humanMove = new Types.ACTIONS(clickedTile.getX()*BOARD_SIZE + clickedTile.getY());
-                gb.so.advance(humanMove);
+                gb.m_so.advance(humanMove);
 
                 if(gb.getArena().taskState == Arena.Task.PLAY){
-                    (gb.getArena().getLogManager()).addLogEntry(humanMove,gb.so,gb.getArena().getLogSessionID());
+                    (gb.getArena().getLogManager()).addLogEntry(humanMove,gb.m_so,gb.getArena().getLogSessionID());
                 }
 
                 updateBoard(null, false, false);
