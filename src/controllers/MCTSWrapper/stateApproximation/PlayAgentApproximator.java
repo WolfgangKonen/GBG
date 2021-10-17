@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * A component that approximates the value v and the
- * vector of move probabilities p of a StateObservation by a wrapped PlayAgent.
+ * vector of move probabilities <b>p</b> of a state as predicted by a wrapped {@link PlayAgent}.
  */
 public final class PlayAgentApproximator implements Approximator {
     private final PlayAgent agent;
@@ -19,21 +19,9 @@ public final class PlayAgentApproximator implements Approximator {
     }
 
     /**
-     * @return The approximator's estimate of the final score for that game state.
-     */
-    public double getScore(final StateObservation sob) {
-        return agent.getScore(sob);
-//        int P = sob.getPlayer();        // suggestion WK - but probably not needed yet
-//        return sob.isGameOver() ? sob.getRewardTuple(true).scTup[P]
-//                                : agent.getScore(sob) + sob.getStepRewardTuple().scTup[P];
-    }
-    // /WK/ If the method were really used (currently it is not), it would be perhaps necessary to include the reward
-    //      and step reward as indicated in the now commented lines
-
-    /**
-     * Predicts the value v and the move probabilities p of a given StateObservation.
+     * Predicts the value v and the move probabilities p of a given state.
      *
-     * @return A tuple containing the value v and an array for the vector p.
+     * @return A tuple containing the value v for the best action and an array for the vector <b>p</b>.
      */
     @Override
     public Tuple<Double, double[]> predict(final StateObservation stateObservation) {
@@ -49,12 +37,6 @@ public final class PlayAgentApproximator implements Approximator {
         final var minV = stateObservation.getMinGameScore();
         final var maxV = stateObservation.getMaxGameScore();
         return optSoftmax(vTable,minV,maxV);
-//        return optSoftmax(
-//            vTable.length > stateObservation.getNumAvailableActions() // For historical reasons the vTable is sometimes
-//                                                                      // larger by 1 than the number of available actions.
-//                ? Arrays.copyOfRange(vTable, 0, stateObservation.getNumAvailableActions())
-//                : vTable
-//        );
     }
 
     private static double[] optSoftmax(final double[] values, final double minV, final double maxV) {
@@ -88,6 +70,18 @@ public final class PlayAgentApproximator implements Approximator {
                 v -> (v-minV) / vrange
         ).toArray();
     }
+
+    /**
+     * @return The approximator's estimate of the final score for that game state.
+     */
+    public double getScore(final StateObservation sob) {
+        return agent.getScore(sob);
+//        int P = sob.getPlayer();        // suggestion WK - but probably not needed yet
+//        return sob.isGameOver() ? sob.getRewardTuple(true).scTup[P]
+//                                : agent.getScore(sob) + sob.getStepRewardTuple().scTup[P];
+    }
+    // /WK/ If the method were really used (currently it is not), it would be perhaps necessary to include the reward
+    //      and step reward as indicated in the now commented lines
 
     public String getName() { return agent.getName(); }
 }

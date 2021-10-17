@@ -1,19 +1,23 @@
 package controllers.MCTSExpWrapper.stateApproximation2;
 
 import controllers.MCTSWrapper.utils.Tuple;
+import controllers.PlayAgent;
 import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;
 
 /**
- * A component used to approximate the value v and
- * the vector of move probabilities p of a given StateObservation.
+ * A component that approximates the {@link ScoreTuple} and the
+ * vector of move probabilities <b>p</b> of a state as predicted by a wrapped {@link PlayAgent}.
+ * <p>
+ * Difference to {@link controllers.MCTSWrapper.stateApproximation.Approximator Approximator}:
+ * The method {@link #predict(StateObservation)} returns a {@link ScoreTuple} as first Tuple element.
  */
 public interface Approximator2 {
     /**
-     * Predicts the value v and the move probabilities p of a given StateObservation.
+     * Predicts the {@link ScoreTuple} and the move probabilities p of a given state.
      *
-     * @return A tuple containing the value v and an array for the vector p.
+     * @return A tuple containing the {@link ScoreTuple} for the best action and an array for the vector <b>p</b>.
      */
     Tuple<ScoreTuple, double[]> predict(final StateObservation stateObservation);
 

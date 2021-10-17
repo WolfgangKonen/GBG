@@ -47,7 +47,7 @@ public final class MctseWrapperAgent extends AgentBase {
     }
 
     /**
-     * the action MCTSWrapper took the last time it was called
+     * the action that MCTSWrapper took the last time it was called
      */
     private int lastSelectedAction = Integer.MIN_VALUE;
 //    /**
@@ -81,7 +81,7 @@ public final class MctseWrapperAgent extends AgentBase {
 
 
         mcts.largestDepth=0;
-        // Performs the given number of mcts iterations.
+        // Performs the given number of MCTS iterations:
         for (int i = 0; i < iterations; i++) {
             mcts.search(rootNode,0);
         }
@@ -91,8 +91,8 @@ public final class MctseWrapperAgent extends AgentBase {
         if (rootNode.visitCounts.size()==0) {
             // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
             // but we leave it in as debug check for the moment
-            //System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
-            //System.err.println(mctsNode.gameState.stringDescr());
+            System.err.println("[MctseWrapperAgent] getNextAction2: *** Warning *** visitCounts.size == 0");
+            System.err.println(rootNode.gameState.stringDescr());
             return rootNode.gameState.getNextAction(this.approximator);
         }
         lastSelectedAction = rootNode.visitCounts.entrySet().stream().max(
@@ -112,6 +112,7 @@ public final class MctseWrapperAgent extends AgentBase {
 
         final var vTable = getVTableFor(rootNode);
         final var vBest = Arrays.stream(vTable).max().orElse(Double.NaN);
+        if (!silent) printMoveInfo(sob,lastSelectedAction,vBest);
         ScoreTuple scBest = new ScoreTuple(sob,vBest);
         return new Types.ACTIONS_VT(
             lastSelectedAction,
@@ -137,6 +138,12 @@ public final class MctseWrapperAgent extends AgentBase {
         return Arrays.stream(values)
             .map(v -> v / sum)
             .toArray();
+    }
+
+    private void printMoveInfo(StateObservation sob, int lastSelectedAction, double vBest){
+        StateObservation NewSO = sob.copy();
+        NewSO.advance(Types.ACTIONS.fromInt(lastSelectedAction));
+        System.out.println("---Best Move: " + NewSO.stringDescr() + ", " + (vBest));
     }
 
     @Override

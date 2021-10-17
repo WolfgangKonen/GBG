@@ -5,13 +5,13 @@ import games.StateObservation;
 
 /**
  * A component used to approximate the value v and
- * the vector of move probabilities p of a given StateObservation.
+ * the vector of move probabilities <b>p</b> of a given state.
  */
 public interface Approximator {
     /**
      * Predicts the value v and the move probabilities p of a given StateObservation.
      *
-     * @return A tuple containing the value v and an array for the vector p.
+     * @return A tuple containing the value v and an array for the vector <b>p</b>.
      */
     Tuple<Double, double[]> predict(final StateObservation stateObservation);
 

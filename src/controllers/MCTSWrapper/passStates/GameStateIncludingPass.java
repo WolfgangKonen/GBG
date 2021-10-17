@@ -140,6 +140,10 @@ public final class GameStateIncludingPass {
         return state.isGameOver();
     }
 
+    public boolean isNextActionDeterministic() {
+        return state.isNextActionDeterministic();
+    }
+
     /**
      * @return The final game result of a terminating game state.
      */

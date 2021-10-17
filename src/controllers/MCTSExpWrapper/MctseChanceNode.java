@@ -1,72 +1,64 @@
 package controllers.MCTSExpWrapper;
 
+import controllers.MCTSExpWrapper.stateApproximation2.Approximator2;
 import controllers.MCTSWrapper.passStates.ApplicableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.passStates.RegularAction;
 import controllers.MCTSWrapper.utils.Tuple;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class represents a MCTS Expectimax (MCTSE) Chance node.
- * Each Chance node has multiple {@link MctseExpecNode} children and one {@link MctseExpecNode} parent.
+ * This class represents a MCTSE <b>Chance node</b>.
+ * Each Chance node has multiple {@link MctseNode} children.
  * The MCTSE tree starts with a Chance node and has Chance nodes at all leaves.
- *
- * A Chance node is reached after nondeterministic (environment) action(s). The next action is deterministic
- * and calculated by the agent.
- *
- * This node is implemented as a linked list and thus also represents a search tree at the same time.
+ * <p>
+ * A Chance node is (usually, but not always) reached after nondeterministic (environment) action(s).
+ * But in any case, the next action is deterministic and calculated by the agent.
+ * <p>
+ * This node with its {@code childNodes} represents a linked list and thus also a search tree.
  */
-public final class MctseChanceNode {
-    /**
-     * The game state represented by the node.
-     * The class GameStateIncludingPass is used instead of StateObservation
-     * to also consider pass situations in the search tree.
-     */
-    public final GameStateIncludingPass gameState;
-
-    public final Map<Integer, MctseExpecNode> childNodes;
+public final class MctseChanceNode extends MctseNode {
+    public final Map<Integer, MctseNode> childNodes;
     public final Map<Integer, Double> moveProbabilities;
     public final Map<Integer, Double> qValues;
-    public final Map<Integer, Integer> visitCounts;
 
     private boolean expanded;
     private ScoreTuple bestScoreTuple;      // score tuple belonging to the best action of this at time of expansion of this
-    private ScoreTuple sumOfScoreTuples;
+//    private ScoreTuple sumOfScoreTuples;
 
     public MctseChanceNode(final GameStateIncludingPass gameState) {
-        this.gameState = gameState;
+        super(gameState);
 
         childNodes = new HashMap<>();
         moveProbabilities = new HashMap<>();
         qValues = new HashMap<>();
-        visitCounts = new HashMap<>();
-        sumOfScoreTuples = new ScoreTuple(gameState.getFinalScoreTuple().scTup.length);  // initialize with all 0's
+//        sumOfScoreTuples = new ScoreTuple(gameState.getFinalScoreTuple().scTup.length);  // initialize with all 0's
     }
 
-    public void setExpanded() {
-        expanded = true;
+    public void expand(Approximator2 approximator) {
+        final var sTupleAndMoveProbabilities = gameState.getApproximatedValueAndMoveProbabilities(approximator);
+        setMoveProbabilities(sTupleAndMoveProbabilities.element2);
+        setExpanded();
+        setBestScoreTuple(sTupleAndMoveProbabilities.element1);
     }
 
-    public boolean isExpanded() {
-        return expanded;
-    }
+    private void setExpanded() {  expanded = true;  }
 
-    public void setBestScoreTuple(ScoreTuple sc) { bestScoreTuple = sc; }
+    public boolean isExpanded() {  return expanded;  }
+
+    private void setBestScoreTuple(ScoreTuple sc) { bestScoreTuple = sc; }
 
     public ScoreTuple getBestScoreTuple() { return bestScoreTuple; }
 
-    public void addToSumOfScoreTuples(ScoreTuple sc) {
-        sumOfScoreTuples.combine(sc, ScoreTuple.CombineOP.SUM,0,0);
-    }
+//    public void addToSumOfScoreTuples(ScoreTuple sc) {
+//        sumOfScoreTuples.combine(sc, ScoreTuple.CombineOP.SUM,0,0);
+//    }
 
-    public ScoreTuple getSumOfScoreTuples() { return sumOfScoreTuples; }
+//    public ScoreTuple getSumOfScoreTuples() { return sumOfScoreTuples; }
 
     /**
      * Overrides the node's move probabilities.
@@ -74,7 +66,7 @@ public final class MctseChanceNode {
      * @param moveProps The new move probabilities.
      * @throws IllegalArgumentException If the moveProps array's size doesn't equal the count of available actions.
      */
-    public void setMoveProbabilities(final double[] moveProps) {
+    private void setMoveProbabilities(final double[] moveProps) {
         final var availableActions = gameState.getAvailableActionsIncludingPassActions();
 
         if (availableActions.length != moveProps.length)
@@ -85,7 +77,16 @@ public final class MctseChanceNode {
         }
     }
 
-    public Tuple<ApplicableAction, MctseExpecNode> selectChild(final double c_puct) {
+    /**
+     * Try all available actions and select the one which maximizes the PUCT formula. Depending on the action and the
+     * game, the resulting child might have a deterministic or a nondeterministic next action. Consequently, the returned
+     * child may be a {@link MctseChanceNode} or {@link MctseExpecNode}, respectively. Thus, it is returned
+     * as base class {@link MctseNode}.
+     * @param c_puct parameter for PUCT formula. The larger, the larger the influence from the move probabilities
+     *               of the wrapped agent.
+     * @return a tuple with the selected action as 1st element and the selected child {@link MctseNode} as 2nd element.
+     */
+    public Tuple<ApplicableAction, MctseNode> selectChild(final double c_puct) {
         final var availableActions = gameState.getAvailableActionsIncludingPassActions();
 
 //        // /WK/ debug check
@@ -134,37 +135,23 @@ public final class MctseChanceNode {
 
         assert bestAction != null;
 
-//        // /WK/ debug check only
-//        var bestValue2 = Double.NEGATIVE_INFINITY;
-//        ApplicableAction bestAction2 = null;
-//        if (ConfigWrapper.EPS>0) {
-//            for (final var a : availableActions) {
-//                double value;
-//                // this variant is more closely to the Surag-Nair code. It should give exactly the same actions
-//                if (getN(a)==0) {
-//                    value = c_puct * getP(a) * Math.sqrt(sum(visitCounts.values()) + ConfigWrapper.EPS) ;
-//                } else {
-//                    value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ ConfigWrapper.EPS) / (1 + getN(a));
-//                }
-//                if (value > bestValue2) {
-//                    bestValue2 = value;
-//                    bestAction2 = a;
-//                }
-//            }
-//            if (bestAction.getId()!=bestAction2.getId()) {
-//                int dummy = 1;
-//            }
-//            assert (bestAction.getId()==bestAction2.getId()) : "Check bestAction2 failed!";
-//            if (vsz==0)
-//                assert (bestAction.getId()==selectBestFromP(availableActions).getId()) : "Check selectBestFromP failed!";
-//        }
+        // Now we advance gameState by bestAction. Depending on the game and depending on bestAction, it might happen
+        // that the next state requires a deterministic (KuhnPoker) or a non-deterministic (2048, EWN) action.
+        // If the next state already exists in childNodes, it has the right class (MctseChanceNode or MctseExpecNode).
+        // If not, the right class is created, depending on isNextActionDeterministic(), and returned as MctseNode.
 
-        final MctseExpecNode child;
+        final MctseNode child;
         if (childNodes.containsKey(bestAction.getId())) {
             child = childNodes.get(bestAction.getId());
         } else {
-            child = new MctseExpecNode(gameState.advanceDeterministic(bestAction));    // a new, non-expanded node
-                // note that gameState will make a copy of the state before advancing, so that the former state is not changed
+            GameStateIncludingPass newGameState = gameState.advanceDeterministic(bestAction);
+                                // note that advanceDeterministic will make a copy of the state before advancing,
+                                // so that the former state is not changed
+            if (newGameState.isNextActionDeterministic()) {
+                child = new MctseChanceNode(newGameState);   // a new, non-expanded node
+            } else {
+                child = new MctseExpecNode(newGameState);    // a new, non-expanded node
+            }
             childNodes.put(bestAction.getId(), child);
         }
 
@@ -190,31 +177,22 @@ public final class MctseChanceNode {
 //        return bestAction;
 //    }
 
-    private static double sum(final Collection<Integer> values) {
-        return values.stream().mapToInt(it -> it).sum();
-    }
-
     double getQ(final ApplicableAction action) {
         return qValues.getOrDefault(action.getId(), 0.0);
-    }
-
-    int getN(final ApplicableAction action) {
-        return visitCounts.getOrDefault(action.getId(), 0);
     }
 
     double getP(final ApplicableAction action) {
         return moveProbabilities.getOrDefault(action.getId(), 0.0);
     }
 
-    public ArrayList<Integer> getLastMoves() { return gameState.getLastMoves(); }
-
-    void incrementVisitCount(final ApplicableAction action) {
-        visitCounts.put(
-            action.getId(),
-            getN(action) + 1
-        );
-    }
-
+    /**
+     * Check that {@code selfVisits}, the number of visits to {@code this} (excluding expand visits), as established
+     * by the parent level, is the same as the sum of visitCounts of {@code this}.
+     * <p>
+     * Do this recursively for the whole branch of {@code this}.
+     * @param selfVisits    number of visits to {@code this} (from parent)
+     * @return the number of nodes in this branch (including {@code this}), just as information, no check
+     */
     public int checkTree(int selfVisits) {
         int numNodes = 1;       // 1 for self
         int sumv = (int) sum(visitCounts.values());
@@ -222,13 +200,33 @@ public final class MctseChanceNode {
             //System.out.println("Chance: "+selfVisits+", sumv="+sumv);
             assert selfVisits == sumv : "[MctseChanceNode.checkTree] Error: selfVisits=" + selfVisits + ", sum(visitCounts)=" + sumv;
         }
-        for (Map.Entry<Integer, MctseExpecNode> entry : childNodes.entrySet()) {
-            MctseExpecNode child = entry.getValue();
-            ACTIONS act = new ACTIONS(entry.getKey());
-            RegularAction actreg = new RegularAction(act);
-            numNodes += child.checkTree(getN(actreg));
+        for (Map.Entry<Integer, MctseNode> entry : childNodes.entrySet()) {
+            RegularAction actreg = new RegularAction(new ACTIONS(entry.getKey()));
+            if( entry.getValue() instanceof MctseExpecNode) {
+                MctseExpecNode child = (MctseExpecNode) entry.getValue();
+                numNodes += child.checkTree(getN(actreg));
+            } else { // ... instanceof MctseChanceNode
+                MctseChanceNode child = (MctseChanceNode) entry.getValue();
+                numNodes += child.checkTree(getN(actreg)-1);
+                // why getN(actreg)-1? - The first call expands, does not increment any visit count
+            }
         }
         return numNodes;
     }
+
+    public int numChilds(Map histo) {
+        int numExpec = 0;       // do not count chance nodes
+        for (Map.Entry<Integer, MctseNode> entry : childNodes.entrySet()) {
+            if( entry.getValue() instanceof MctseExpecNode) {
+                MctseExpecNode child = (MctseExpecNode) entry.getValue();
+                numExpec += child.numChilds(histo);
+            } else { // ... instanceof MctseChanceNode
+                MctseChanceNode child = (MctseChanceNode) entry.getValue();
+                numExpec += child.numChilds(histo);
+            }
+        }
+        return numExpec;
+    }
+
 
 }
