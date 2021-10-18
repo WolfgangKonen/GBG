@@ -16,6 +16,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -54,8 +55,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	protected StateObsNondeterministic root;
 
 	//	protected boolean m_rgs=true;  // use now AgentBase::m_oPar.getRewardIsGameScore()
-	//private boolean m_useHashMap=true;		// don't use HashMap in ExpectimaxNAgent!
-	//private HashMap<String,ScoreTuple> hm;
+	private boolean m_useHashMap=true;	// new 2021-10-18
+	private HashMap<String,ScoreTuple> hm;
 	protected int countTerminal;		// # of terminal node visits in getNextAction2
 	protected int countMaxDepth;		// # of premature returns due to maxDepth in getNextAction2
 	
@@ -74,16 +75,17 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		super.setGameNum(0);
         rand = new Random(System.currentTimeMillis());
         m_mpar = new ParMaxN();
-		//hm = new HashMap<String, ScoreTuple>();
+		hm = new HashMap<String, ScoreTuple>();
 		setAgentState(AgentState.TRAINED);
 	}
 	
 	public ExpectimaxNAgent(String name, ParMaxN mpar, ParOther opar)
 	{
 		this(name);
-		m_depth = mpar.getMaxNDepth();
 		m_mpar = mpar;
 		m_oPar = opar;		// AgentBase::m_oPar
+		m_depth = mpar.getMaxNDepth();
+		m_useHashMap = mpar.getMaxNUseHashmap();
 	}
 	
 	public ExpectimaxNAgent(String name, int nply)
@@ -104,9 +106,21 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
 		m_arena.m_xab.setMaxNDepthFrom(n, this.getDepth() );
+		m_arena.m_xab.setMaxNParFrom(n,this.m_mpar);
 //		m_arena.m_xab.setOParFrom(n, this.getParOther() );		// do or don't?
 	}
-	
+
+	private ScoreTuple retrieveFromHashMap(boolean m_useHashMap, String stringRep) {
+		ScoreTuple sc = null;
+		if (m_useHashMap) {
+			// speed up MaxNAgent for repeated calls by storing/retrieving the
+			// scores of visited states in HashMap hm:
+			sc = hm.get(stringRep); 		// returns null if not in hm
+			//System.out.println(stringRep+":"+sc);
+		}
+		return sc;
+	}
+
 	/**
 	 * Get the best next action and return it
 	 * @param so			current game state (not changed on return), has to implement
@@ -223,6 +237,8 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 			}
 		}
 
+		if (!silent) System.out.println("[ExpectimaxN] HashMap size: "+hm.size());
+
 		ACTIONS_VT actBestVT = new ACTIONS_VT(actBest.toInt(), false, vTable, bestValue, scBest);
 
         return actBestVT;
@@ -254,10 +270,11 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 		int i;
 		ScoreTuple currScoreTuple;
-		ScoreTuple scBest;
+		ScoreTuple sc,scBest;
 		ScoreTuple expecScoreTuple=new ScoreTuple(soND);	// a 0-ScoreTuple
 		ScoreTuple.CombineOP cOpMax = ScoreTuple.CombineOP.MAX;
 		StateObsNondeterministic NewSO;
+		String stringRep;
 
 
 		if (soND.isNextActionDeterministic()) {
@@ -276,8 +293,19 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				//System.out.println("depth="+depth);
 
 				if (depth<this.m_depth) {
-					// here is the recursion:
-					currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
+					stringRep = NewSO.stringDescr();
+					sc = retrieveFromHashMap(m_useHashMap,stringRep);
+					if (sc==null) {
+						// here is the recursion:
+						currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
+						if (m_useHashMap) {  hm.put(stringRep, currScoreTuple);  }
+					} else {
+						currScoreTuple = sc;
+					}
+
+					// --- version w/o HashMap hm:
+//					// here is the recursion:
+//					currScoreTuple = getEAScoreTuple(NewSO, silent,depth+1);
 				} else {
 					// this is the 2nd place to terminate the recursion:
 					// (after finishing the for-loop for every element of acts)

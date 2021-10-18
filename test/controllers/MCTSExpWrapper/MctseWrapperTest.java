@@ -1,5 +1,6 @@
 package controllers.MCTSExpWrapper;
 
+import controllers.ExpectimaxNAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpWrapper.stateApproximation2.PlayAgentApproximator2;
 import controllers.MaxN2Wrapper;
@@ -31,9 +32,11 @@ public class MctseWrapperTest extends GBGBatch {
      *  [  ] [X2] [  ]   (diceVal:1, availActions: 0501,0502,0504 )
      *  [  ] [X0] [O1]
      *  [  ] [O2] [  ]       </pre>
-     * and test whether TDNT4 or MCTSE-Wrapper[TDNT4] suggest the right move 0504.
-     * Result: Only MCTSE-Wrapper[TDNT4] suggest the right move. TDNT4 randomly picks a move because
-     * all values for this state are exactly the same.
+     * and test whether TDNT4, MCTSE-Wrapper[TDNT4] or ExpectimaxN suggest the right move 0504.
+     * <p>
+     * Next, run checkTree on MCTSE-Wrapper[TDNT4]: check for consistent visit counts and report number of nodes.
+     * Finally, run numChilds on MCTSE-Wrapper[TDNT4]: if a MctseExpecNode has enough visit counts (empirically
+     * 4*maxNumChildren), is then every child formed, i.e. visited at least once?:
      */
     @Test
     public void stateEWNTest() {
@@ -47,11 +50,10 @@ public class MctseWrapperTest extends GBGBatch {
         double elapsedTime=0,deltaTime;
 
         selectedGame = "EWN";
-        PlayAgent pa;
-        PlayAgent qa;
+        PlayAgent pa,qa,ra;
         double c_puct=500.0;
         int maxDepth = -1;
-        Types.ACTIONS_VT act_pa, act_qa;
+        Types.ACTIONS_VT act_pa, act_qa, act_ra;
 
 
         t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
@@ -69,6 +71,7 @@ public class MctseWrapperTest extends GBGBatch {
                 ParOther oPar = new ParOther();
                 oPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
                 pa.setWrapperParams(oPar);
+                ra = new ExpectimaxNAgent("");
 
                 for (int iterMctseWrap : iterMctseWrapArr) {
                     System.out.println("*** iterMctseWrap="+iterMctseWrap+ " ***");
@@ -82,13 +85,13 @@ public class MctseWrapperTest extends GBGBatch {
 
                     // build the state to examine
                     StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState();
-                    so.setNextActionDeterministic(ACTIONS.fromInt(1));
-                    so.advanceDeterministic(ACTIONS.fromInt(304));
-                    so.advanceNondeterministic(ACTIONS.fromInt(0));
-                    so.advanceDeterministic(ACTIONS.fromInt(804));
-                    so.advanceNondeterministic(ACTIONS.fromInt(0));
-                    so.advanceDeterministic(ACTIONS.fromInt(4));
-                    so.advanceNondeterministic(ACTIONS.fromInt(1));
+                    so.setNextActionDeterministic(ACTIONS.fromInt(1));  // bestAction X: 0307
+//                    so.advanceDeterministic(ACTIONS.fromInt(304));  // X: from 3 to 4
+//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: 0804
+//                    so.advanceDeterministic(ACTIONS.fromInt(804));  // O: from 8 to 4
+//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0004
+//                    so.advanceDeterministic(ACTIONS.fromInt(4));    // X: from 0 to 4
+//                    so.advanceNondeterministic(ACTIONS.fromInt(1));     // bestAction O: 0504
 /* Now we have the state
         [  ] [X2] [  ]     (diceVal:1,   availActions: 0501,0502,0504 )
         [  ] [X0] [O1]
@@ -96,14 +99,15 @@ public class MctseWrapperTest extends GBGBatch {
    The optimal action is 0504
  */
 
-                    for (int i=0; i<10; i++) {
+                    for (int i=0; i<2; i++) {
                         act_pa = pa.getNextAction2(so,false,true);
                         act_qa = qa.getNextAction2(so,false,true);
+                        act_ra = ra.getNextAction2(so,false,false);
                         if (iterMctseWrap==1)
                             assert act_pa.getVBest()==act_qa.getVBest() : "vBest differs for pa and qa";
                         System.out.println("i="+i+": "+so.stringDescr()+
                                 ", vBest="+act_pa.getVBest() + " " + act_qa.getVBest()+
-                                ", act_pa="+act_pa.toInt()+", act_qa="+act_qa.toInt());
+                                ", act_TD="+act_pa.toInt()+", act_Wrap="+act_qa.toInt()+", act_Expec="+act_ra.toInt());
                         //so.advance(act_pa);
 
                         int numNodes = ((MctseWrapperAgent) qa).getRootNode().checkTree(iterMctseWrap-1);

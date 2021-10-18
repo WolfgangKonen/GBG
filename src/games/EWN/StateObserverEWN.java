@@ -273,11 +273,10 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         }
         //int actIndex = random.nextInt(availableRandomActions.size());
         int actIndex = ThreadLocalRandom.current().nextInt(availableRandomActions.size());
-        advanceNondeterministic(availableRandomActions.get(actIndex));
+        advanceNondeterministic(availableRandomActions.get(actIndex));  // this sets also isNextActionDeterministic
         if(this.availableActions.size() == 0){
             this.availableActions.add(new ACTIONS(-1)); // Add empty action
         }
-        this.isNextActionDeterministic = true;
         return nextNondeterministicAction;
     }
 
@@ -286,7 +285,8 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     @Override
     public ACTIONS advanceNondeterministic(ACTIONS action) {
         nextNondeterministicAction = action;
-        this.setAvailableActions();// this sets also isNextActionDeterministic
+        this.setAvailableActions();
+        this.isNextActionDeterministic = true;
 
         return action;
 
