@@ -58,26 +58,6 @@ public interface StateObsNondeterministic extends StateObservation {
 	double getProbability(ACTIONS action);
 
 	/**
-	 * Only for imperfect-information games: if {@link #isPartialState()}{@code ==true}, then
-	 * return all possible completions
-	 * @return a list with all possible completing actions (that can be sent to {@link #advanceNondeterministic()})
-	 */
-	ArrayList<ACTIONS> getAvailableCompletions();
-	/**
-	 * Same as {@link #getAvailableCompletions()}, but take only the possible completions for player p
-	 * @param p  the player
-	 * @return list with all possible completing actions for player p
-	 */
-	ArrayList<ACTIONS> getAvailableCompletions(int p);
-
-	// --- not needed anymore, we have the Tuples returned in StateObservation.completePartial... ---
-//	/**
-//	 * @param action  the completing action
-//	 * @return the probability that the completing action {@code action} is selected.
-//	 */
-//	double getProbCompletion(ACTIONS action);
-
-	/**
 	 * Same semantic as {@link StateObservation#partialState()}. But in contrast to {@link StateObservation#partialState()},
 	 * it returns an object implementing {@link StateObsNondeterministic}.
 	 *

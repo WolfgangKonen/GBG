@@ -9,6 +9,7 @@ import controllers.MCTSWrapper.stateApproximation.Approximator;
 import controllers.PlayAgtVector;
 import games.ObserverBase;
 import games.StateObservation;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.util.Arrays;
@@ -189,11 +190,13 @@ public final class MCTSWrapperAgent extends AgentBase {
 
         final var vTable = getVTableFor(mctsNode);
         final var vBest = Arrays.stream(vTable).max().orElse(Double.NaN);
+        ScoreTuple scBest = new ScoreTuple(sob,vBest);
         return new Types.ACTIONS_VT(
             lastSelectedAction,
             false,
             vTable,
-            vBest
+            vBest,
+            scBest
         );
     }   // getNextAction2
 

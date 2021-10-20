@@ -87,10 +87,10 @@ public final class MCTSNode {
             // In case visitCounst.size()>0, select according to the normal PUCT formula (EPS negligible, because |EPS| << 1)
             // In case visitCounts.size()==0 && EPS>0, select bestAction = argmax(getP(a)).
             // [This is because a non-visited node has getQ(a) = getN(a) = 0.]
-            // This is the solution from Surag Nair, however, it is suboptimal for Othello. Why?
+            // This is the solution from Surag Nair, and it is the *recommended* choice.
             var value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ConfigWrapper.EPS) / (1 + getN(a));
             // In case visitCounts.size()==0 && EPS==0, select the 1st action. This is the case originally
-            // provided by JS, and it is better in the Othello-case.
+            // provided by JS, and it seemed first better in the Othello-case (but later we found that it is comparable to EPS>0).
 
             // In case visitCounts.size()==0 && EPS <0, select a random action
             // (experimental option: ... that is NOT argmax(getP(a))).

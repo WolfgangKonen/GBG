@@ -11,7 +11,7 @@ public class ConfigExpWrapper {
      *  <li> If true (recommended setting for Othello, ConnectFour), use softmax squashing.
      * </ul>
      */
-    public static boolean USESOFTMAX=false;
+    public static boolean USESOFTMAX=true;
 
     // --- currently not used in MCTSExpWrapper ---
 //    /**

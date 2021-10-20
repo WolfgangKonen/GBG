@@ -26,7 +26,7 @@ public class TreeKuhnPokerTest extends GBGBatch {
      *     {@link StateObserverKuhnPoker#PLAY_ONE_ROUND_ONLY PLAY_ONE_ROUND_ONLY} = true
      * </ul>
      */
-    public boolean TEST_ONE_SWITCH_ONLY=true;
+    public boolean TEST_ONE_SWITCH_ONLY=false;
 
     /**
      * Checks for KuhnPoker and the starting player 0: Far a given state with a certain card {@code numCard}
@@ -144,10 +144,10 @@ public class TreeKuhnPokerTest extends GBGBatch {
      * and a certain action {@code p0act} that player 0 has played:
      * Is the agent MCTSExpectimax able to find the optimal next action or not?
      * <p>
-     * It turns out that -- if {@code numCard}=10 (Q) and {@code p0act}=1 (CHECK) is selected -- only <b>one</b> of the
+     * It turns out that -- if {@code numCard}=10 (Q) and {@code p0act}=1 (CHECK) is selected -- only <b>two</b> of the
      * four tested switch combinations (see {@link #TEST_ONE_SWITCH_ONLY}), namely <ul>
      *      <li> {@link MCTSETreeNode#WITH_PARTIAL WITH_PARTIAL} = true                   and
-     *      <li> {@link StateObserverKuhnPoker#PLAY_ONE_ROUND_ONLY PLAY_ONE_ROUND_ONLY} = true,
+     *      <li> {@link StateObserverKuhnPoker#PLAY_ONE_ROUND_ONLY PLAY_ONE_ROUND_ONLY} = arbitrary,
      * </ul>gets the desired result (20x action 1 = CHECK)
      */
     @Test
@@ -240,7 +240,7 @@ public class TreeKuhnPokerTest extends GBGBatch {
 
                 // How often is it found that the agent chooses 0 (FOLD), 1 (CHECK), 2 (BET), 3 (CALL)?
                 System.out.print("  found:");
-                for (int k = 0; k < actHist.length; k++) System.out.print(actHist[k] + " ");
+                for (int count : actHist) System.out.print(count + " ");
                 System.out.println("\n" + hashmap.get(numCard)[p0act]);
 
             } // for (b)
@@ -250,7 +250,7 @@ public class TreeKuhnPokerTest extends GBGBatch {
 
     private void printDetailedResults(Types.ACTIONS_VT act) {
         double[] vtab = act.getVTable();
-        for (int k=0;k<vtab.length;k++) System.out.print(vtab[k]+" ");
+        for (double v : vtab) System.out.print(v + " ");
         System.out.println("--> best action = "+act.toInt());
 //                ArrayList<Types.ACTIONS> alist = startSO.getAvailableActions();
 //                System.out.print("avail actions: ");

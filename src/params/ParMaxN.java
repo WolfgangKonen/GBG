@@ -151,10 +151,10 @@ public class ParMaxN implements Serializable {
 					this.setMaxNDepth(5);
 					this.setMaxNUseHashmap(true);
 				}
-				case "EWN","EWS" -> {
-					this.setMaxNUseHashmap(false);
-					this.enableHashmapPart(false);
-				}
+//				case "EWN","EWS" -> {
+//					this.setMaxNUseHashmap(false);
+//					this.enableHashmapPart(false);
+//				}
 				default -> {
 					this.setMaxNDepth(DEFAULT_MAXN_TREE_DEPTH);
 					this.setMaxNUseHashmap(DEFAULT_MAXN_USE_HASHMAP);

@@ -12,6 +12,7 @@ import games.Arena;
 import games.GameBoard;
 import games.XArenaButtons;
 import games.XArenaFuncs;
+import tools.PStats;
 import tools.Types;
 
 /**
@@ -52,7 +53,7 @@ import tools.Types;
  *  </pre>
  *    
  *  @see XArenaFuncs#multiTrain(int, String, XArenaButtons, GameBoard, String)
- *  @see games.PStats
+ *  @see PStats
  */
 public class MTrain {
 	public int i;				// number of training run during multiTrain

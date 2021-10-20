@@ -1,4 +1,4 @@
-package games;
+package tools;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -11,26 +11,27 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import controllers.PlayAgent;
+import games.Arena;
+import games.StateObservation;
 import starters.MTrain;
-import tools.Types;
 
 /**
  *  Class PStats holds the results from one move during game play.
  *  When playing one or multiple games, an object {@code ArrayList<PStats> psList} is 
  *  created and finally written with
- *  {@link PStats#printPlayStats(ArrayList, StateObservation, PlayAgent[], Arena) PStats#printPlayStats} 
+ *  {@link PStats#printPlayStats(ArrayList, StateObservation, PlayAgent[], Arena) PStats#printPlayStats}
  *  to file {@link Types#PLAYSTATS_FILENAME}. <br>
  *  This happens only if {@link Types#PLAYSTATS_WRITING}{@code ==true}.<p>
- *  
+ *  <p>
  *  This class is currently in part specific to game 2048 (it records for example the number of 
  *  empty tiles). This is the reason why it is needed in addition to the information stored
  *  by {@link games.LogManager}. If called in other games, PStats receives just 0 for the 
- *  number of empty tiles.<p>
- *   
- *  Class PStats is just for diagnostic purposes, it has no influence on the game strategy. 
+ *  number of empty tiles.
+ *  <p>
+ *  Class PStats is just for diagnostic purposes, it has no influence on the game strategy.
  *  
  *  @see Arena#PlayGame()
- *  @see games.ZweiTausendAchtundVierzig.Evaluator2048#evalAgent(PlayAgent)
+ *  @see games.ZweiTausendAchtundVierzig.Evaluator2048#evalAgent(PlayAgent) Evaluator2048.evalAgent
  *  @see MTrain
  */
 public class PStats {

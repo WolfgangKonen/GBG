@@ -13,15 +13,17 @@ import java.util.Random;
 public class GameBoardYavalath implements GameBoard {
 
     private boolean actionReq = false;
-    public StateObserverYavalath so;
-    private Arena arena;
+    public StateObserverYavalath m_so;
+    protected Arena m_arena;
     private GameBoardGUIYavalath gb_gui;
-    private Random rand;
+    protected Random rand;
 
     public GameBoardYavalath(Arena arena){
-        this.arena = arena;
-        so = new StateObserverYavalath();
-        gb_gui = new GameBoardGUIYavalath(this);
+        m_arena = arena;
+        m_so = new StateObserverYavalath();
+        if(m_arena.hasGUI() && gb_gui==null) {
+            gb_gui = new GameBoardGUIYavalath(this);
+        }
         rand = new Random(System.currentTimeMillis());
     }
 
@@ -34,11 +36,11 @@ public class GameBoardYavalath implements GameBoard {
     @Override
     public void clearBoard(boolean boardClear, boolean vClear) {
         if(boardClear){
-            so = new StateObserverYavalath();
+            m_so = new StateObserverYavalath();
         } else if(vClear){
-            so.clearValues();
+            m_so.clearValues();
         }
-        if(gb_gui != null && arena.taskState != Arena.Task.TRAIN){
+        if(gb_gui != null && m_arena.taskState != Arena.Task.TRAIN){
             gb_gui.clearBoard(boardClear,vClear);
         }
     }
@@ -55,7 +57,7 @@ public class GameBoardYavalath implements GameBoard {
             assert (so instanceof StateObserverYavalath)
                     :"StateObservation 'so' is not an instance of StateObserverYavalath";
             soYav = (StateObserverYavalath) so;
-            this.so = soYav;
+            this.m_so = soYav;
         }
         if(gb_gui!=null)
             gb_gui.updateBoard(soYav,withReset,showValueOnGameboard);
@@ -90,7 +92,7 @@ public class GameBoardYavalath implements GameBoard {
 
     @Override
     public StateObservation getStateObs() {
-        return so;
+        return m_so;
     }
 
     @Override
@@ -100,13 +102,13 @@ public class GameBoardYavalath implements GameBoard {
 
     @Override
     public Arena getArena() {
-        return arena;
+        return m_arena;
     }
 
     @Override
     public StateObservation getDefaultStartState() {
         clearBoard(true,true);
-        return so;
+        return m_so;
     }
 
     @Override
@@ -119,10 +121,10 @@ public class GameBoardYavalath implements GameBoard {
 
         getDefaultStartState();
         if(rand.nextDouble()>0.5){
-            ArrayList<Types.ACTIONS> actions = so.getAvailableActions();
+            ArrayList<Types.ACTIONS> actions = m_so.getAvailableActions();
             int actInt = rand.nextInt(actions.size());
-            so.advance(actions.get(actInt));
+            m_so.advance(actions.get(actInt));
         }
-        return so;
+        return m_so;
     }
 }

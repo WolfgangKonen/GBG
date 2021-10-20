@@ -51,6 +51,25 @@ public class ScoreTuple implements Serializable {
 	public ScoreTuple(ScoreTuple other) {
 		this.scTup = other.scTup.clone();
 	}
+
+	/**
+	 * Build a new score tuple from a state and maxScore for the player to move.
+	 * Used by various getNextAction2 methods.
+	 * @param so
+	 * @param maxScore
+	 */
+	public ScoreTuple(StateObservation so, double maxScore) {
+		this.scTup = so.getStoredBestScoreTuple().scTup.clone();
+		// This is the previous tuple, only relevant in case N>=3. If so.getStoredBestScoreTuple() encounters
+		// null pointers, it returns an all-zeros-tuple with length so.getNumPlayers().
+
+		this.scTup[so.getPlayer()] = maxScore;
+		if (so.getNumPlayers()==2) {			// the following holds for 2-player, zero-sum games:
+			int opponent = 1-so.getPlayer();
+			this.scTup[opponent] = -maxScore;
+		}
+	}
+
 	public ScoreTuple copy() { return new ScoreTuple(this); }
 	
 	public double max() {

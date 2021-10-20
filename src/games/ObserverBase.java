@@ -3,7 +3,6 @@ package games;
 import java.util.ArrayList;
 
 import TournamentSystem.TSTimeStorage;
-import controllers.MCTSWrapper.utils.Tuple;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import tools.ScoreTuple;
@@ -23,10 +22,9 @@ import tools.Types.ACTIONS;
  * 
  * @see StateObservation
  */
-abstract public class ObserverBase implements StateObservation {
+abstract public class ObserverBase extends PartialPerfect implements StateObservation {
 	protected int m_counter = 0;		// move counter
 	protected int creatingPlayer = -1;
-	protected boolean m_partialState = false;
 	protected boolean m_roundOver=false;
 
     protected Types.ACTIONS[] storedActions = null;
@@ -121,9 +119,6 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	abstract public ArrayList<ACTIONS> getAvailableActions();
 
-	public double getProbCompletion(ACTIONS action) { return 1.0; }
-
-
 	protected void advanceBase(ACTIONS action) {
 		this.creatingPlayer = this.getPlayer();
 		this.addToLastMoves(action);
@@ -184,49 +179,6 @@ abstract public class ObserverBase implements StateObservation {
 	 */
 	@Override
 	public StateObservation precedingAfterstate() { return this; }
-
-	/**
-	 * Default implementation for perfect information games: the partial state that the player-to-move observes is
-	 * identical to {@code this}. <br>
-	 * Games with imperfect information have to override this method.
-	 *
-	 * @return the partial information state (here: identical to {@code this})
-	 */
-	public StateObservation partialState() { return this; }
-
-	public boolean isPartialState(int p) { return m_partialState; }
-	public boolean isPartialState() { return m_partialState; }
-	public void setPartialState(boolean pstate) { m_partialState = pstate; }
-
-	public boolean isImperfectInformationGame() { return false; }
-
-	/**
-	 * Default implementation for  perfect information games: there is nothing to do, the perfect-information state
-	 * is already complete.
-	 *
-	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
-	 * 			the number of possible completions.
-	 */
-	public Tuple<StateObservation,Double> completePartialState() {
-		if (isImperfectInformationGame())
-			throw new RuntimeException("ObserverBase.completePartialState() is NOT valid for imperfect-information games!");
-		return new Tuple<>(this,1.0);
-	}
-	public Tuple<StateObservation,Double>  completePartialState(int p) {
-		if (isImperfectInformationGame())
-			throw new RuntimeException("ObserverBase.completePartialState(int) is NOT valid for imperfect-information games!");
-		return new Tuple<>(this,1.0);
-	}
-	public Tuple<StateObservation,Double>  completePartialState(int p, ACTIONS ranAct) {
-		if (isImperfectInformationGame())
-			throw new RuntimeException("ObserverBase.completePartialState(int,ACTIONS) is NOT valid for imperfect-information games!");
-		return new Tuple<>(this,1.0);
-	}
-	public Tuple<StateObservation,Double>  completePartialState(int p, StateObservation root) {
-		if (isImperfectInformationGame())
-			throw new RuntimeException("ObserverBase.completePartialState(int,StateObservation) is NOT valid for imperfect-information games!");
-		return new Tuple<>(this,1.0);
-	}
 
 	public boolean isRoundOver() { return m_roundOver; }
 	public void setRoundOver(boolean p) { m_roundOver=p; }

@@ -489,7 +489,6 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		return getAvailableRandoms();
 	}
 
-
 	public int getNumAvailableRandoms() {
 		return cards.size();
 	}
@@ -783,28 +782,6 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	}
 
 	/**
-	 * Complete a partial state by randomly 'filling the holes' (for player p)
-	 *
-	 * @param p		the player for which the state is completed
-	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
-	 * 			the probability that this random completion occurs.
-	 */
-	@Override
-	public Tuple<StateObservation,Double> completePartialState(int p) {
-		ArrayList<ACTIONS> rans = getAvailableCompletions();
-		int ransSize = rans.size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
-		if (isPartialState) {
-			ACTIONS randAction = rans.get(ThreadLocalRandom.current().nextInt(rans.size()));
-			if(holeCards[p][0]==null){
-				holeCards[p][0] = new PlayingCard(dealCard(randAction.toInt()));
-			}
-			if(holeCards[0][0]!=null && holeCards[1][0]!=null)
-				setPartialState(false);
-		}
-		return new Tuple<>(this,1.0/ransSize);
-	}
-
-	/**
 	 * Complete a partial state by 'filling the holes' (for player p) with a specific random action {@code ranAct}
 	 *
 	 * @param p		 the player for which the state is completed
@@ -825,26 +802,48 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		return new Tuple<>(this,1.0/ransSize);
 	}
 
-	/**
-	 * Complete a partial state by 'filling the holes' (for player p) from another state {@code root}
-	 *
-	 * @param p		 the player for which the state is completed
-	 * @param root	 the other state
-	 * @return 	a {@link Tuple} where {@code element1} carries the completed state and {@code element2} has
-	 * 			the probability that this completion occurs (1.0 in this case).
-	 */
-	@Override
-	public Tuple<StateObservation,Double> completePartialState(int p, StateObservation root) {
-		assert root instanceof StateObserverKuhnPoker : "root is not of class StateObserverKuhnPoker";
-		if (isPartialState) {
-			if(holeCards[p][0]==null){
-				holeCards[p][0] = ((StateObserverKuhnPoker)root).getHoleCards(p)[0];
-			}
-			if(holeCards[0][0]!=null && holeCards[1][0]!=null)
-				setPartialState(false);
-		}
-		return new Tuple<>(this,1.0);
-	}
+//	/**
+//	 * Complete a partial state by randomly 'filling the holes' (for player p)
+//	 *
+//	 * @param p		the player for which the state is completed
+//	 * @return 	a {@link Tuple} where {@code element1} carries the randomly completed state and {@code element2} has
+//	 * 			the probability that this random completion occurs.
+//	 */
+//	@Override
+//	public Tuple<StateObservation,Double> completePartialState(int p) {
+//		ArrayList<ACTIONS> rans = getAvailableCompletions();
+//		int ransSize = rans.size();  // (!) backup the size here, because dealCard below will *decrease* rans.size()!
+//		if (isPartialState) {
+//			ACTIONS randAction = rans.get(ThreadLocalRandom.current().nextInt(rans.size()));
+//			if(holeCards[p][0]==null){
+//				holeCards[p][0] = new PlayingCard(dealCard(randAction.toInt()));
+//			}
+//			if(holeCards[0][0]!=null && holeCards[1][0]!=null)
+//				setPartialState(false);
+//		}
+//		return new Tuple<>(this,1.0/ransSize);
+//	}
+
+//	/**
+//	 * Complete a partial state by 'filling the holes' (for player p) from another state {@code root}
+//	 *
+//	 * @param p		 the player for which the state is completed
+//	 * @param root	 the other state
+//	 * @return 	a {@link Tuple} where {@code element1} carries the completed state and {@code element2} has
+//	 * 			the probability that this completion occurs (1.0 in this case).
+//	 */
+//	@Override
+//	public Tuple<StateObservation,Double> completePartialState(int p, StateObservation root) {
+//		assert root instanceof StateObserverKuhnPoker : "root is not of class StateObserverKuhnPoker";
+//		if (isPartialState) {
+//			if(holeCards[p][0]==null){
+//				holeCards[p][0] = ((StateObserverKuhnPoker)root).getHoleCards(p)[0];
+//			}
+//			if(holeCards[0][0]!=null && holeCards[1][0]!=null)
+//				setPartialState(false);
+//		}
+//		return new Tuple<>(this,1.0);
+//	}
 
 	/**
 	 * @param p		player

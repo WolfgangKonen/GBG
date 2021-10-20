@@ -6,7 +6,7 @@ import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
 import games.Arena;
-import games.PStats;
+import tools.PStats;
 import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
 import tools.Types;
 import tools.Types.ACTIONS_VT;

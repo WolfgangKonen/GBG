@@ -5,8 +5,8 @@ import controllers.PlayAgent;
 import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
-import games.TStats;
-import games.TStats.TAggreg;
+import tools.TStats;
+import tools.TStats.TAggreg;
 
 /**
  * Evaluator for RubiksCube. For p = {pMin, ..., pMax}: Test with {@code ecp.EvalNmax}

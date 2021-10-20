@@ -78,6 +78,21 @@ public final class GameStateIncludingPass {
         );
     }
 
+    /**
+     *
+     * @return a tuple with <ol>
+     *  <li> element: varying nondeterministic actions according to the state's probability distribution
+     *  <li> element: a *COPY* of the gameState that has this nondeterministic action applied  </ol>
+     * (It is important to make a COPY, so that the original gameState is not affected by advanceNondeterministic
+     * and is still in (isNextActionDeterministic()==false)-condition.)
+     */
+    public Tuple<ApplicableAction,GameStateIncludingPass> advanceNondeterministic() {
+        assert state instanceof StateObsNondeterministic : "[GameStateIncludingPass] state must be NON DET";
+        final var stateCopy = state.copy();
+        final var r = stateCopy.advanceNondeterministic();
+        return new Tuple(new RegularAction(r), new GameStateIncludingPass(stateCopy));
+    }
+
     public Tuple<ApplicableAction,GameStateIncludingPass> advanceNondeterministic(final ApplicableAction action) {
         assert state instanceof StateObsNondeterministic : "[GameStateIncludingPass] state must be NON DET";
         final var tuple = action.advanceNonDet((StateObsNondeterministic) state);
@@ -123,6 +138,10 @@ public final class GameStateIncludingPass {
      */
     public boolean isFinalGameState() {
         return state.isGameOver();
+    }
+
+    public boolean isNextActionDeterministic() {
+        return state.isNextActionDeterministic();
     }
 
     /**
