@@ -8,6 +8,7 @@ import java.awt.*;
 public class LegendGui extends JPanel {
     private Font menu = new Font("Calibri", Font.PLAIN, 20);
     private JLabel playerLabel, cubeLabel, playerDescription, cubeDescription;
+    private int[] cubed = new int[]{0,0,0,0,0,0};
 
     public LegendGui(int player, int cube){
         super();
@@ -30,9 +31,12 @@ public class LegendGui extends JPanel {
     }
 
     public void update(int player, int cube){
+
         this.playerDescription.setText("Player:" + String.valueOf(player+1));
         this.playerLabel.setBackground(Types.GUI_PLAYER_COLOR[player]);
+        cubed[cube]++;
         this.cubeLabel.setText(String.valueOf(cube+1));
+        System.out.println(cubed[0] + " " + cubed[1] + " " +cubed[2] + " " +cubed[3] + " " +cubed[4] + " " +cubed[5]);
     }
 
 }

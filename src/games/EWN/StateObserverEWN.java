@@ -11,6 +11,7 @@ import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
 
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,7 +22,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
     public static final long serialVersionUID = 12L;
     private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
-    public Random random;
+    private static Random random = new SecureRandom(); // using secure random and not reinitializing the random every turn should prevent this effect
     private int numPlayers;
     public int count;
     private int player;
@@ -52,7 +53,6 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         this.nextNondeterministicAction=null;
         this.isNextActionDeterministic=false;
         this.gameState = new Token[size][size];
-        this.random = new Random();
         this.players = new ArrayList<>();
         this.availableActions = new ArrayList<>();
         this.availableRandomActions = new ArrayList<>();
@@ -80,7 +80,6 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         this.numPlayers = other.getNumPlayers();
         this.size = other.getSize();
         count = other.count;
-        this.random = new Random();
         this.players = new ArrayList<>();
         this.nextNondeterministicAction = other.getNextNondeterministicAction();
         this.isNextActionDeterministic = other.isNextActionDeterministic();

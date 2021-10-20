@@ -4,7 +4,9 @@ import app.display.util.GUIUtil;
 import games.Arena;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
+import games.EWN.StateObserverHelper.Helper;
 import games.EWN.config.ConfigEWN;
+import games.Othello.ConfigOthello;
 import tools.Types;
 
 import javax.swing.*;
@@ -14,7 +16,7 @@ public class GameBoardGuiEWN extends JFrame {
 
     private static final long serialVersionUID = 12L;
 
-    private double vGameState;
+    private double[][] vGameState;
     /**
      * Reference to parent object {@link GameBoardEWN}
      */
@@ -29,6 +31,7 @@ public class GameBoardGuiEWN extends JFrame {
         super("Einstein Wuerfelt Nicht");
         this.m_gb = gb;
         this.selecting = true;
+        this.vGameState = new double[ConfigEWN.BOARD_SIZE*ConfigEWN.BOARD_SIZE][3];
         StateObserverEWN so = (StateObserverEWN) gb.getStateObs();
         this.setLayout(new BorderLayout());
         this.boardGui = new BoardGui(gb,so);
@@ -55,7 +58,6 @@ public class GameBoardGuiEWN extends JFrame {
      * @param vClear
      */
     public void clearBoard(boolean boardClear, boolean vClear){
-        if(vClear)boardGui.clearBoard(boardClear, vClear);
         updateBoard((StateObserverEWN )this.m_gb.getStateObs(), false, true);
         selecting = true;
     }
@@ -77,6 +79,8 @@ public class GameBoardGuiEWN extends JFrame {
         boardGui.updateBoard( so,withReset,showValueOnGameboard);
         if(so == null) return;
         legend.update(so.getPlayer(),so.getNextNondeterministicAction().toInt());
+
+        boardGui.updateBoard(so,withReset,showValueOnGameboard);
     }
 
     public void showGameBoard(Arena arena, boolean alignToMain){
