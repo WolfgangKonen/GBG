@@ -59,7 +59,9 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	private HashMap<String,ScoreTuple> hm;
 	protected int countTerminal;		// # of terminal node visits in getNextAction2
 	protected int countMaxDepth;		// # of premature returns due to maxDepth in getNextAction2
-	
+	private boolean DBG_EWN = false;
+	private int DBG_EWN_DEPTH = 2;
+
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip will become unreadable or you have
@@ -193,6 +195,13 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 			vTable[i] = value = currScoreTuple.scTup[player];
 
+			if (DBG_EWN) {
+				int diceval = soND.getNextNondeterministicAction().toInt();
+				DecimalFormat frm = new DecimalFormat("0000");
+				System.out.println("[-] d=0"+": p"+player+"d"+diceval+" "
+						+frm.format(acts.get(i).toInt())+" V="+currScoreTuple.scTup[player]);
+			}
+
 			// retain the ScoreTuple which is *maximum* in P's element,
 			// where P is the player to move in state soND:
 			scBest.combine(currScoreTuple, cOpMax, player, 0.0);
@@ -216,13 +225,12 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		actBest = bestActions.get(rand.nextInt(bestActions.size()));
 		assert actBest != null : "Oops, no best action actBest";
 
-		boolean DBG_EWN = false;
 		if (DBG_EWN) {
 			if (!silent) {
 				DecimalFormat frmAct = new DecimalFormat("0000");
 				DecimalFormat frmVal = new DecimalFormat("+0.00;-0.00");
 				System.out.println(
-						"so.diceVal="+soND.getNextNondeterministicAction().toInt()
+						"so.player="+player+" so.diceVal="+soND.getNextNondeterministicAction().toInt()
 								+", bestValue["+soND.getPlayer()+"]="+frmVal.format(bestValue)
 								+", bestAction="+frmAct.format(actBest.toInt())
 								+", countTerminal="+getCountTerminal()
@@ -293,7 +301,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				//System.out.println("depth="+depth);
 
 				if (depth<this.m_depth) {
-					stringRep = NewSO.stringDescr();
+					stringRep = NewSO.uniqueStringDescr();
 					sc = retrieveFromHashMap(m_useHashMap,stringRep);
 					if (sc==null) {
 						// here is the recursion:
@@ -330,6 +338,14 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				// always *maximize* P's element in the tuple currScoreTuple,
 				// where P is the player to move in state soND:
 				scBest.combine(currScoreTuple, cOpMax, player, 0.0);
+
+				if (DBG_EWN && depth<=DBG_EWN_DEPTH) {
+					int diceval = soND.getNextNondeterministicAction().toInt();
+					DecimalFormat frm = new DecimalFormat("0000");
+					System.out.print("[MAX]"); for (int z=0;z<depth;z++) System.out.print(" ");
+					System.out.println("d="+depth+": p"+player+"d"+diceval+" "
+							+frm.format(acts.get(i).toInt())+" V="+currScoreTuple.scTup[player]);
+				}
 			} // for
 
 			return scBest;
@@ -366,6 +382,12 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				// if cOpND==MIN, expecScoreTuple will contain the worst ScoreTuple for
 				// player (this considers the environment as an adversarial player)
 				expecScoreTuple.combine(currScoreTuple, cOpND, player, currProbab);
+
+				if (DBG_EWN && depth<=DBG_EWN_DEPTH) {
+					System.out.print("[EXP]"); for (int z=0;z<depth;z++) System.out.print("  ");
+					System.out.println("d="+depth+": p"+player+" "+rans.get(i).toInt()+" V="+currScoreTuple.scTup[player]);
+				}
+
 			}
 			assert (Math.abs(sumProbab-1.0)<1e-8) : "Error: sum of probabilities is not 1.0";
 			if (!silent && depth<0) printNondet(soND,expecScoreTuple,sumProbab,depth);

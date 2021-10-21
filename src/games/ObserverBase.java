@@ -397,6 +397,10 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	 */
 	abstract public String stringDescr();
 
+	public String uniqueStringDescr() {
+		return stringDescr();
+	}
+
 	/**
 	 * 
 	 * @return a string representation of action {@code act}

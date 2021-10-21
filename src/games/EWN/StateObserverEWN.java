@@ -10,6 +10,7 @@ import games.StateObsNondeterministic;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
+import controllers.ExpectimaxNAgent;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -506,6 +507,40 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
                 str += "availActions:  ";
                 for (ACTIONS act : this.getAvailableActions())
                     str += frmAct.format(act.toInt()) + " ";
+                str += ")";
+            }
+            str += "\n";
+        }
+        str += "\n";
+        return str;
+    }
+
+    /**
+     * Method {@link #stringDescr()} is not unique since it omits the player to move. AND the 'availActions' string can
+     * lead to different strings for the same state (depending on whether {@link #getAvailableActions()} returns
+     * {@code null} or not). With {@code uniqueStringDescr()} we return a unique string for each state.
+     *
+     * @return a unique string description of the state
+     *
+     * @see ExpectimaxNAgent
+     */
+    @Override
+    public String uniqueStringDescr() {
+        String str = "\n";
+        for(int i = 0; i < gameState.length; i++){
+            for(int k = 0; k < gameState[i].length; k++){
+                Token t = gameState[i][k];
+                int p = t.getPlayer();
+                str += p== 0 ? "[X": p== 1 ? "[O":p==2 ? "[*" : p==3 ? "[#": "[ ";
+                // note that the t.getValue() of non-empty fields is one smaller than the piece value displayed in GameBoard
+                String val = String.valueOf(t.getValue());
+                str += (t.getValue()>-1  ? val +"]" : " ]") + " ";
+            }
+            if (i==0) {
+                // note that diceVal is one smaller than the "Dice: " displayed in GameBoard
+                DecimalFormat frmAct = new DecimalFormat("0000");
+                str += "    (diceVal:"+this.getNextNondeterministicAction().toInt()+",   ";
+                str += "player:  " +this.getPlayer();
                 str += ")";
             }
             str += "\n";

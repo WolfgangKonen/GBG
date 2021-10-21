@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import TournamentSystem.TSTimeStorage;
-import controllers.MCTSWrapper.utils.Tuple;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.TD.ntuple2.*;
@@ -12,6 +11,9 @@ import controllers.TD.ntuple4.*;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
+import controllers.ExpectimaxNAgent;
+import controllers.MaxNAgent;
+
 
 /**
  * Interface StateObservation observes the current state of the game, it has utility functions for
@@ -83,10 +85,20 @@ public interface StateObservation extends PartialState, Serializable{
 	String toString();
 
 	/**
-	 * 
 	 * @return a string representation of the current state
 	 */
 	String stringDescr();
+
+	/**
+	 * Two different states need to have a different string description AND each state should have only one string
+	 * description. Needed for hash map in {@link MaxNAgent} and {@link ExpectimaxNAgent}.
+	 * <p>
+	 * (For round-based games we follow the convention that the string should uniquely describe the state of the current
+	 * round, not of the whole episode.)
+	 *
+	 * @return	a unique string description of the state
+	 */
+	String uniqueStringDescr();
 
 	/**
 	 * 

@@ -18,6 +18,7 @@ import starters.GBGBatch;
 import tools.Types;
 import tools.Types.ACTIONS;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,7 +72,7 @@ public class MctseWrapperTest extends GBGBatch {
                 ParOther oPar = new ParOther();
                 oPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
                 pa.setWrapperParams(oPar);
-                ra = new ExpectimaxNAgent("");
+                ra = new ExpectimaxNAgent("",15);
 
                 for (int iterMctseWrap : iterMctseWrapArr) {
                     System.out.println("*** iterMctseWrap="+iterMctseWrap+ " ***");
@@ -85,19 +86,44 @@ public class MctseWrapperTest extends GBGBatch {
 
                     // build the state to examine
                     StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState();
-                    so.setNextActionDeterministic(ACTIONS.fromInt(1));  // bestAction X: 0307
+
+                    so.setNextActionDeterministic(ACTIONS.fromInt(1));  // bestAction X: 0307, V=+0.827
 //                    so.advanceDeterministic(ACTIONS.fromInt(304));  // X: from 3 to 4
-//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: 0804
+//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: 0804, V=+5/9
 //                    so.advanceDeterministic(ACTIONS.fromInt(804));  // O: from 8 to 4
-//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0004
+//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0004, V=-5/9
 //                    so.advanceDeterministic(ACTIONS.fromInt(4));    // X: from 0 to 4
-//                    so.advanceNondeterministic(ACTIONS.fromInt(1));     // bestAction O: 0504
-/* Now we have the state
+//                    so.advanceNondeterministic(ACTIONS.fromInt(1));     // bestAction O: 0504, V=+1/3
+/* Now we have the state (O moves)
         [  ] [X2] [  ]     (diceVal:1,   availActions: 0501,0502,0504 )
         [  ] [X0] [O1]
         [  ] [O2] [  ]
    The optimal action is 0504
  */
+
+//                    so.setNextActionDeterministic(ACTIONS.fromInt(0));  // bestAction X: 0004, V=-0.235
+//                    so.advanceDeterministic(ACTIONS.fromInt(1));    // X: from 0 to 1
+//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: 0804, V=-1/9
+//                    so.advanceDeterministic(ACTIONS.fromInt(805));   // O: from 8 to 5
+//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0105, V=+1
+//                    so.advanceDeterministic(ACTIONS.fromInt(104));   // X: from 1 to 4
+//                    so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction O: 0704, V=+1/3
+/* Now we have the state (O moves)
+        [  ] [  ] [  ]     (diceVal:2,   availActions: 0706,0704,0703 )
+        [X1] [X0] [O0]
+        [  ] [O2] [  ]
+   The optimal action is 0704 (V=1.0)
+ */
+//                    so.advanceDeterministic(ACTIONS.fromInt(704));   // O: from 7 to 4
+//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0307
+/* Now we have the state (X moves)
+        [  ] [  ] [  ]     (diceVal:0,   availActions: 0706,0704,0703 )
+        [X1] [O2] [O0]
+        [  ] [  ] [  ]
+   The optimal action is 0307 (V=-1.0)
+ */
+//                    so.advanceDeterministic(ACTIONS.fromInt(307));   // X: from 3 to 7
+//                    so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: none, O looses
 
                     for (int i=0; i<2; i++) {
                         act_pa = pa.getNextAction2(so,false,true);
@@ -105,8 +131,11 @@ public class MctseWrapperTest extends GBGBatch {
                         act_ra = ra.getNextAction2(so,false,false);
                         if (iterMctseWrap==1)
                             assert act_pa.getVBest()==act_qa.getVBest() : "vBest differs for pa and qa";
+                        DecimalFormat form = new DecimalFormat("0.000");
+                        double[] vtab = act_ra.getVTable();
                         System.out.println("i="+i+": "+so.stringDescr()+
-                                ", vBest="+act_pa.getVBest() + " " + act_qa.getVBest()+
+                                "[vTab Expectimax] "+ form.format(vtab[0]) + " " + form.format(vtab[1]) + " " +form.format(vtab[2]) + " " +
+                                "\n[3 agts] vBest=("+form.format(act_pa.getVBest()) + " " + form.format(act_qa.getVBest()) + " " + form.format(act_ra.getVBest())+")"+
                                 ", act_TD="+act_pa.toInt()+", act_Wrap="+act_qa.toInt()+", act_Expec="+act_ra.toInt());
                         //so.advance(act_pa);
 

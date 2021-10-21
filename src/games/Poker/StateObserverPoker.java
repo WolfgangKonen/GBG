@@ -1,8 +1,6 @@
 package games.Poker;
 
-import games.KuhnPoker.KuhnPokerConfig;
 import games.ObsNondetBase;
-import games.ObserverBase;
 import games.StateObsNondeterministic;
 import games.StateObservation;
 import tools.Types;
@@ -101,43 +99,6 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 	//</editor-fold>
 
 	//<editor-fold desc="constructor">
-	// *** never used *** /WK/
-	public void restart(){
-		gameround = 0;
-		turns = 0;
-		isPartialState = false;
-		//rand = new Random(System.currentTimeMillis());
-		rand = new Random(ThreadLocalRandom.current().nextInt());
-		dealtCards = 0;
-		setRoundOver(false);
-		lastActions = new ArrayList<>();
-		GAMEOVER = false;
-
-		dealer = 0;
-
-		// information about the player:
-		gamescores = new double[NUM_PLAYER];
-
-		for(int i = 0;i<NUM_PLAYER;i++){
-			chips[i] = START_CHIPS;
-			activePlayers[i] = true;
-			playingPlayers[i] = true;
-			foldedPlayers[i] = false;
-			gamescores[i] = START_CHIPS;
-		}
-
-		if(setStartChips!=null)
-			chips = setStartChips;
-
-		initRound();
-
-		isNextActionDeterministic = true;
-	}
-
-	public void setStartChips(double[] chips){
-		setStartChips = chips;
-	}
-
 	public StateObserverPoker() {
 		gameround = 0;
 		turns = 0;
@@ -244,6 +205,43 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 
 		setAvailableActions();
 	}
+	// *** never used *** /WK/
+	public void restart(){
+		gameround = 0;
+		turns = 0;
+		isPartialState = false;
+		//rand = new Random(System.currentTimeMillis());
+		rand = new Random(ThreadLocalRandom.current().nextInt());
+		dealtCards = 0;
+		setRoundOver(false);
+		lastActions = new ArrayList<>();
+		GAMEOVER = false;
+
+		dealer = 0;
+
+		// information about the player:
+		gamescores = new double[NUM_PLAYER];
+
+		for(int i = 0;i<NUM_PLAYER;i++){
+			chips[i] = START_CHIPS;
+			activePlayers[i] = true;
+			playingPlayers[i] = true;
+			foldedPlayers[i] = false;
+			gamescores[i] = START_CHIPS;
+		}
+
+		if(setStartChips!=null)
+			chips = setStartChips;
+
+		initRound();
+
+		isNextActionDeterministic = true;
+	}
+
+	public void setStartChips(double[] chips){
+		setStartChips = chips;
+	}
+
 	//</editor-fold>
 
 	//<editor-fold desc="helper">
@@ -984,14 +982,26 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 	}
 
 
-	@Deprecated
-	public String toString() {
-		return stringDescr();
-	}
-
 	@Override
 	public String stringDescr() {
-		return "";
+		StringBuilder cc = new StringBuilder();
+		for (int p=0; p<NUM_PLAYER; p++) {
+			cc.append("Player "+p+": Score: "+getGameScore(0)+" Holecards: ");
+			for (int h=0; h<2; h++) {
+				cc.append( (getHoleCards(p)[h]==null) ? "[??]" :  getHoleCards(p)[h].toString() );
+			}
+			cc.append("\r\n");
+		}
+		cc.append("Community Cards: ");
+		for (PlayingCard card: communityCards) {
+			cc.append( (card==null) ? "[??]" : card.toString());
+		}
+
+		cc.append("\r\nmoves:");
+//		for (int move : getLastActions()) {
+//			desc+=move+"-";
+//		}
+		return cc.toString();
 	}
 
 	public String getName() { return "Poker";	}

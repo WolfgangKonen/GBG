@@ -3,6 +3,7 @@ package controllers;
 import controllers.MCTSExpectimax.MCTSETreeNode;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import games.KuhnPoker.StateObserverKuhnPoker;
+import games.Poker.StateObserverPoker;
 import org.junit.Test;
 import params.ParMCTSE;
 import starters.GBGBatch;
@@ -137,6 +138,13 @@ public class TreeKuhnPokerTest extends GBGBatch {
 //        }
 //        System.out.println();
         System.out.println("[agentKuhnPartialTest1st] with pa="+pa.getClass().getSimpleName()+" finished");
+    }
+
+    @Test
+    public void testPoker() {
+        StateObserverPoker startSO = new StateObserverPoker();
+
+        System.out.println(startSO.stringDescr());
     }
 
     /**

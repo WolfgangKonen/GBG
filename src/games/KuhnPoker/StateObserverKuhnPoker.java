@@ -576,11 +576,6 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	}
 
 
-	@Deprecated
-	public String toString() {
-		return stringDescr();
-	}
-
 	@Override
 	public String stringDescr() {
 		// IMPORTANT FOR MCTSE!
@@ -598,8 +593,7 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		else
 			desc += getHoleCards(1)[0].toString();
 		desc+="\r\nmoves:";
-		for (int move:getLastRoundMoves()
-			 ) {
+		for (int move : getLastRoundMoves()) {
 			desc+=move+"-";
 		}
 		return desc;

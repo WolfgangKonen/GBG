@@ -166,7 +166,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     			currScoreTuple = NewSO.getRewardTuple(rgs);
     		} else {
     			if (depth<this.m_depth) {
-    				stringRep = NewSO.stringDescr();
+    				stringRep = NewSO.uniqueStringDescr();
     	        	sc = retrieveFromHashMap(m_useHashMap,stringRep);
     				if (sc==null) {
     					// here is the recursion: getAllScores may call getBestAction back:
@@ -187,7 +187,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     			}
     		}
 //			if (m_useHashMap && !found) {
-//				stringRep = NewSO.stringDescr();
+//				stringRep = NewSO.uniqueStringDescr();
 //				hm.put(stringRep, currScoreTuple);
 //			}
 			

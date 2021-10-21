@@ -401,8 +401,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	@Override
 	public String stringDescr() {
 		StringBuilder sout = new StringBuilder();
-		String[] str = new String[4];
-		str[0] = "_"; str[1]="0"; str[2]="1";str[3]="2" ;
+		String[] str = {"_", "0", "1", "2" };
 		
 		for(int i = 0; i < lFrom.length -1 ; i++) {
 			for(int j = lFrom[i].getNode()+1; j < lFrom.length; j++) {
@@ -415,8 +414,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 
 	public String stringDescr2() {
 		StringBuilder sout = new StringBuilder();
-		String[] str = new String[4];
-		str[0] = "-"; str[1]="0"; str[2]="1";str[3]="2" ;
+		String[] str = {"_", "0", "1", "2" };
 		
 		for(int i = 0; i < lFrom.length -1 ; i++) {
 			for(int j = 0; j < lFrom.length; j++) {
