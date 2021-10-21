@@ -2,7 +2,10 @@ package games.EWN.gui;
 
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
+import games.EWN.StateObserverHelper.Helper;
+import games.EWN.config.ConfigEWN;
 import games.StateObservation;
+import games.ZweiTausendAchtundVierzig.Tile;
 import tools.Types;
 
 import javax.swing.*;
@@ -12,12 +15,9 @@ import java.awt.*;
  * Simple panel which contains the board
  */
 public class BoardGui extends JPanel {
-
-
     private StateObserverEWN m_so = null;
     private int size;
     private TileGui[][] board;
-    private double[][] vGameState;
     private boolean drag;
     private int from = -1;
     private GameBoardEWN m_gb;
@@ -25,11 +25,10 @@ public class BoardGui extends JPanel {
     public BoardGui(GameBoardEWN gb, StateObserverEWN so){
         super();
         m_gb = gb;
+        this.size = so.getSize();
         drag=false;
         this.m_so = so;
-        this.size = so.getSize();
         this.board = new TileGui[size][size];
-        vGameState = new double[size][size];
         this.setLayout(new GridLayout(size,size,1,1));
         this.setBackground(Color.BLUE );
         initBoard();
@@ -55,10 +54,6 @@ public class BoardGui extends JPanel {
         return this.m_gb;
     }
 
-    public void clearBoard(boolean boardClear, boolean vClear){
-        if(vClear) emptyVGameState();
-    }
-
     public void selectToken(int x, int y){
         board[x][y].markAsSelected();
     }
@@ -77,11 +72,17 @@ public class BoardGui extends JPanel {
     if(so != null){
         StateObserverEWN soT = (StateObserverEWN) so;
         // Update legend
-
+        for(TileGui[] tRow: board)
+            for(TileGui t: tRow)
+                t.emptyValues();
         if(showValueOnGameboard && soT.getStoredValues() != null){
-           emptyVGameState();
            for(int i = 0; i < soT.getStoredValues().length; i++){
                Types.ACTIONS act = soT.getStoredAction(i);
+               int[] indices = Helper.getIntsFromAction(act);
+               int j = indices[0] % ConfigEWN.BOARD_SIZE;
+               int ii = (indices[0]-j) / ConfigEWN.BOARD_SIZE;
+               double x = soT.getStoredValues()[i];
+               board[ii][j].updateValue(indices[1],x,size);
            }
         }
         updateComponents(soT, showValueOnGameboard);
@@ -99,14 +100,6 @@ public class BoardGui extends JPanel {
         }
         this.repaint();
    }
-
-   private void emptyVGameState(){
-       vGameState = new double[size][size];
-       for(int i = 0; i < size; i++)
-           for(int k = 0; k < size; k++)
-               vGameState[i][k] = Double.NaN;
-   }
-
 
    public int getFrom(){
         return from;

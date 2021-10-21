@@ -41,7 +41,7 @@ public class GameBoardEWN implements GameBoard {
     double[][] vGameState;
     private int selectedTokenPosition;
     private boolean selecting;
-    private boolean inspecting;
+    private int[] cubed;
 
     public GameBoardEWN(Arena arena){
         super();
@@ -49,7 +49,6 @@ public class GameBoardEWN implements GameBoard {
         m_so = new StateObserverEWN();
         rand = new Random();
         selecting = true;
-        inspecting = false;
         vGameState = new double[ConfigEWN.BOARD_SIZE*3][ConfigEWN.BOARD_SIZE*3];
         selectedTokenPosition = -1;
         if(m_Arena.hasGUI()){
@@ -118,8 +117,7 @@ public class GameBoardEWN implements GameBoard {
         }
     }
 
-    public void hGameMove(int index) {
-        if(!(m_Arena.taskState == Arena.Task.PLAY)) return;
+    private void move(int index){
         if(selecting){
             m_gameGui.setError(" ");
 
@@ -160,36 +158,17 @@ public class GameBoardEWN implements GameBoard {
                 }
             }
         }
+    }
 
-
-        /**
-        Types.ACTIONS act = Helper.parseAction(x,y, ConfigEWN.BOARD_SIZE);
-        if( m_so.isLegalAction(act)) {
-            m_so.advance(act);
-            (m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-            arenaActReq = true;
-        }
-        else {
-            System.out.println("Not Allowed: illegal Action");
-        }
-         **/
+    public void hGameMove(int index) {
+        if(!(m_Arena.taskState == Arena.Task.PLAY)) return;
+        move(index);
     }
 
     public void inspectMove(int index)
     {
-      /**  // Selecting the token, which will be inspected;
-            // get all actions
-            ArrayList<Types.ACTIONS> actions = m_so.getAvailableActions();
-            for(Types.ACTIONS a : actions){
-                int[] actionParsed = Helper.getIntsFromAction(a);
-                if(actionParsed[0] == index){
-                    m_so.advance(a);
-                }
-            }
-        }
-        m_Arena.setStatusMessage("Inspecting the value function ...");
-        m_so.advance(act);
-        arenaActReq = true;**/
+        if(!(m_Arena.taskState == Arena.Task.INSPECTV)) return;
+        move(index);
     }
 
 
