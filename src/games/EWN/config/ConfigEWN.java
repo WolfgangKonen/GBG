@@ -18,6 +18,9 @@ public class ConfigEWN {
 
     public static String[] CELL_CODE_NAMING = {"[0]", "[0],[1],[2]"};
 
+    public static String[] CELL_CODE_DIR_NAMING = {"G-0", "G-0-1-2"};
+    // avoid "[" and "]" in dir name because Excel cannot save on such dirs
+
     public static boolean RANDOM_POSITION = false;
 
 }

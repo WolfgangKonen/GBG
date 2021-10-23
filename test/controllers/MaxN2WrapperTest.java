@@ -10,13 +10,11 @@ public class MaxN2WrapperTest extends GBGBatch {
     String selectedGame = "RubiksCube";
     String[] agtFile = {"davi2-p11-2000k.agt.zip","davi3-p11-2000k-120-7t-BASE.agt.zip","TCL3-p13-3000k-120-7t.agt.zip"};
     String[] agtType = {"DAVI2", "DAVI3","TDNT3"};
-    String csvFile = "test.csv";
-    String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
+    String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);     // for RubiksCube: 2x2x2, CSTATE, ALL
 
     /**
      * Calling MaxN2Wrapper with nPly=0 should result in the same best values as calling the wrapped agent directly.
-     * Check this on nStates random start states for RubiksCube and for all agents in {@code agtFile} (currently certain
-     * DAVI2 and DAVI3 agents).
+     * Check this on nStates random start states for RubiksCube and for all agents in {@code agtFile}.
      */
     @Test
     public void nPlyEqualsZeroTest() {
@@ -27,17 +25,11 @@ public class MaxN2WrapperTest extends GBGBatch {
         int nStates=100;
         Types.ACTIONS_VT act_pa, act_qa;
 
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardCube gb = new GameBoardCube(t_Game);		// needed for chooseStartState()
+        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        GameBoardCube gb = new GameBoardCube(arenaTrain);		// needed for chooseStartState()
 
         for (int k=0; k< agtType.length; k++) {
-            setupPaths(agtFile[k],csvFile);     // builds filePath
-
-            boolean res = t_Game.loadAgent(0, filePath);
-            assert res : "\n[MaxN2WrapperTest] Aborted: agtFile = "+agtFile[k] + " not found!";
-
-            String sAgent = t_Game.m_xab.getSelectedAgent(0);
-            pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
+            pa = arenaTrain.loadAgent(agtFile[k]);
             qa = new MaxN2Wrapper(pa, nply, pa.getParOther());
 
 
@@ -53,7 +45,4 @@ public class MaxN2WrapperTest extends GBGBatch {
             System.out.println("[nPlyEqualsZeroTest,"+agtType[k]+"] all states checked with getNextAction2 result in the same vBest");
         } // for (k)
     }
-
-
-
 }

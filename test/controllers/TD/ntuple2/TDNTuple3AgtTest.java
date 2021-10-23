@@ -110,19 +110,19 @@ public class TDNTuple3AgtTest extends GBGBatch {
         PlayAgent pa;
 
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoard gb = t_Game.makeGameBoard();		// needed for chooseStartState()
+        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        GameBoard gb = arenaTrain.makeGameBoard();		// needed for chooseStartState()
 
         assert evalThresh[0].length>nplyMax : "evalThresh[0] too small for nplyMax = "+nplyMax;
 
         for (int k=0; k< agtFile.length; k++) {
             setupPaths(agtFile[k],csvFile);     // builds filePath
 
-            boolean res = t_Game.loadAgent(0, filePath);
+            boolean res = arenaTrain.loadAgent(0, filePath);
             assert res : "\n[TDNTuple3AgtTest] Aborted: agtFile = "+ agtFile[k] + " not found!";
 
-            String sAgent = t_Game.m_xab.getSelectedAgent(0);
-            pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
+            String sAgent = arenaTrain.m_xab.getSelectedAgent(0);
+            pa = arenaTrain.m_xfun.fetchAgent(0,sAgent, arenaTrain.m_xab);
 
             innerQuickEval(pa, k, nplyMax, agtFile, evalThresh, gb, 0);
 
@@ -142,23 +142,23 @@ public class TDNTuple3AgtTest extends GBGBatch {
         int nplyMax=1;
 
         String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoard gb = t_Game.makeGameBoard();		// needed for chooseStartState()
+        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        GameBoard gb = arenaTrain.makeGameBoard();		// needed for chooseStartState()
 
         MTrainSweep mTrainSweep = new MTrainSweep();
 
         for (int k=0; k< agtFile.length; k++) {
             setupPaths(agtFile[k],csvFile);     // builds filePath
 
-            boolean res = t_Game.loadAgent(0, filePath);
+            boolean res = arenaTrain.loadAgent(0, filePath);
             assert res : "\n[TDNTuple3AgtTest] Aborted: agtFile = "+agtFile[k] + " not found!";
 
-            if (maxGameNum==-1) maxGameNum=t_Game.m_xab.getGameNumber();
-            t_Game.m_xab.oPar[0].setNumEval(maxGameNum/2);
-            String sAgent = t_Game.m_xab.getSelectedAgent(0);
-            pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
+            if (maxGameNum==-1) maxGameNum= arenaTrain.m_xab.getGameNumber();
+            arenaTrain.m_xab.oPar[0].setNumEval(maxGameNum/2);
+            String sAgent = arenaTrain.m_xab.getSelectedAgent(0);
+            pa = arenaTrain.m_xfun.fetchAgent(0,sAgent, arenaTrain.m_xab);
 
-            pa = mTrainSweep.doSingleTraining(0,0,pa,t_Game,t_Game.m_xab,gb,maxGameNum,0.0,0.0);
+            pa = mTrainSweep.doSingleTraining(0,0,pa, arenaTrain, arenaTrain.m_xab,gb,maxGameNum,0.0,0.0);
 
             innerQuickEval(pa,k,nplyMax, agtFile, evalThresh, gb, -1);
 
@@ -184,8 +184,8 @@ public class TDNTuple3AgtTest extends GBGBatch {
                             new MaxN2Wrapper(pa, nply, pa.getParOther()) :
                             new ExpectimaxNWrapper(pa, nply);
 
-            int qem = t_Game.m_xab.oPar[0].getQuickEvalMode();
-            m_evaluatorQ = t_Game.m_xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,-1);
+            int qem = arenaTrain.m_xab.oPar[0].getQuickEvalMode();
+            m_evaluatorQ = arenaTrain.m_xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,-1);
 
             for (int i=0; i<nRuns; i++) {
                 m_evaluatorQ.eval(qa);

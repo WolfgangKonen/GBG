@@ -44,10 +44,10 @@ public class MCTSWrapperAgentTest extends GBGBatch {
      * The %-solved rates are reported like in QuickEval.
      * Results are written to console and may be copied to .txt for later inspection.
      * Results (%-solved rates) are tested against certain expectations for EPS=1e-08, c_puct=1.0, see HashMap hm.
-     *
+     * <p>
      * Note that pMin=7 and pMax=9. This is still far away from God's number = 20 for the 3x3x3 cube. Thus, the
      * evaluation results are not yet very satisfactorily (we get not much better than a 65% solved-rate).
-     *
+     * <p>
      * Computation time depends on iterMCTSWrap and the number of for-loop-passes in rubiksCubeTest. For a single pass
      * with iterMCTSWrap=1000, EPS=1e-08, maxDepth=50 the time is about 550 sec. But it can last also much longer (up to
      * 1500 sec, if the perc-solved-rate goes down (unsuccessful searches take longer)). So be aware that the total
@@ -73,10 +73,14 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     }
 
     /**
-     * Same as {@link #rubiksCube3x3Test()}, but for 2x2x2 cube.
-     * Note that pMin=11, pMax=13.
-     * (11 is already God's number for 2x2x2 cube and 'ALL_TWISTS'. So a successful test shows that this cube can be
-     * basically solved with MCTSWrapper.)
+     * Same as {@link #rubiksCube3x3Test()}, but for 2x2x2 cube. <br>
+     * Note that pMin=11, pMax=13. <br>
+     * (Since 11 is already God's number for the 2x2x2 cube and 'ALL_TWISTS', a successful test shows that MCTSWrapper
+     * solves the 2x2x2 cube.)
+     * <p>
+     * Computation time depends on iterMCTSWrap and the number of for-loop-passes in {@code innerRubiksCubeTest}.
+     * Example for iterMCTSWrapArr={0,50,100,200,300}, nTrial=4, epsArr = {1e-8, 0.0, -1e-8}, one agtFile:
+     * 60 for-loop-passes, in total 2700 sec.
      */
     @Test
     public void rubiksCube2x2Test() {
@@ -128,18 +132,14 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardCube gb = new GameBoardCube(t_Game);		// needed for chooseStartState()
+        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        GameBoardCube gb = new GameBoardCube(arenaTrain);		// needed for chooseStartState()
 
         for (int run=0; run<nTrial; run++) {
             for (String agtFile : agtFiles) {
-                setupPaths(agtFile, csvFile);     // builds filePath
-                boolean res = t_Game.loadAgent(0, filePath);
-                assert res : "\n[MCTSWrapperAgentTest] Aborted: agtFile = " + agtFile + " not found!";
                 System.out.println("*** Running rubiksCubeTest for " + agtFile + " (scaPar={" + scaPar[0] + "," + scaPar[1] + "," + scaPar[2] + "}) ***");
+                pa = arenaTrain.loadAgent(agtFile);
 
-                String sAgent = t_Game.m_xab.getSelectedAgent(0);
-                pa = t_Game.m_xfun.fetchAgent(0, sAgent, t_Game.m_xab);
                 ParOther oPar = new ParOther();
                 oPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
                 pa.setWrapperParams(oPar);
@@ -181,7 +181,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
                     // print the full list mcList after finishing each  (iterMCTSWrap)
                     // (overwrites the file written from previous (iterMCTSWrap))
-                    MCompeteMWrap.printMultiCompeteList(csvFile, mcList, pa, t_Game, userTitle1, userTitle2);
+                    MCompeteMWrap.printMultiCompeteList(csvFile, mcList, pa, arenaTrain, userTitle1, userTitle2);
                 } // for (EPS)
             } // for (agtFiles)
         } // for (run)
@@ -190,16 +190,24 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     }
 
     /**
-     * Test the performance of MCTSWrapperAgent on ConnectFour: We run multi-compete episodes
-     *     MCTS(iter=10000,treeDepth=40)    vs.    MCTSWrapper[agtFile](iter=iterMWrap, EPS=1e-08)
-     *     MCTS(iter=10000,treeDepth=40)    vs.    MCTSWrapper[agtFile](iter=iterMWrap, EPS=0.0)
-     * where MCTSWrapper plays 2nd. [If it plays 1st, it will always win, this is uninteresting.]
-     * The win rates for agtFile="TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip" are tested against these expectations:
-     *     1) If iterMCTSWrap==0, then winrate[MCTSWrapper] &le; 0.4 (not strict, sometimes only &le; 0.6), for both EPS
-     *     2) If iterMCTSWrap &ge; 300, then winrate[MCTSWrapper] &ge; 0.95, for both EPS
+     * Test the performance of MCTSWrapperAgent on ConnectFour: We run multi-compete episodes for EPS=1e-08
+     * <ul>
+     *     <li> MCTS(iter=10000,treeDepth=40)    vs.    <br>
+     *          MCTSWrapper[agtFile](iter=iterMWrap)
+     * </ul>
+     * where agtFile="TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip"  and MCTSWrapper plays 2nd.
+     * [If it plays 1st, it will always win, this is uninteresting.]
+     * <p>
+     * The win rates are tested against these expectations:
+     * <ol>
+     *     <li> If iterMCTSWrap==0, then winrate[MCTSWrapper] &le; 0.4 (not strict, sometimes only &le; 0.6)
+     *     <li> If iterMCTSWrap &ge; 300, then winrate[MCTSWrapper] &ge; 0.95
+     *  </ol>
      *  Results are written to {@code csvFile} for inspection.
-     *  Computation time &lt; 400 sec for 8 iterMWrap values, 2 EPS values and 1 trial with 10 episodes for each
-     *  parameter setting.
+     *  <p>
+     * Computation time depends on iterMCTSWrap and the number of for-loop-passes in {@code innerC4Test}.
+     * Example for numEpisodes=25, iterMCTSWrapArr={0,50,100,200,300,500,750,1000}, nTrial=5, one EPS, one agtFile, one player role for MCTSWrapper:
+     * 8*5=40 for-loop-passes, in total 2800 sec.
      */
     @Test
     public void C4_vs_MCTS_Test() {
@@ -223,11 +231,13 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     /**
      * Test the performance of MCTSWrapperAgent on ConnectFour: We run multi-compete episodes
      * <ul>
-     *   <li>  MCTSWrapper[agtFile](iter=iterMWrap, EPS=1e-08)    vs.    AlphaBeta-DL (distant losses)
-     *   <li>  MCTSWrapper[agtFile](iter=iterMWrap, EPS=0.0  )    vs.    AlphaBeta-DL (distant losses)
+     *   <li>  MCTSWrapper[agtFile](iter=iterMWrap, EPS=1e-08)    vs.    AlphaBeta-DL
+     *   <li>  MCTSWrapper[agtFile](iter=iterMWrap, EPS=0.0  )    vs.    AlphaBeta-DL
      * </ul>
-     * where MCTSWrapper plays 1st. [If it plays 2nd, it will always lose, this is uninteresting.] <br>
-     * The win rates for agtFile="TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip" are tested against these expectations:
+     * where AlphaBeta-DL="AlphaBeta with distant losses" and MCTSWrapper plays 1st.
+     * [If it plays 2nd, it will always lose, this is uninteresting.]
+     * <p>
+     * The win rates for agtFile="TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip" are compared with these expectations:
      * <ol>
      *  <li>   If iterMCTSWrap==0, then winrate[MCTSWrapper] &le; 0.955 (not strict, sometimes only &le; 0.96), for both EPS
      *  <li>   If iterMCTSWrap &ge; 500, then winrate[MCTSWrapper] &ge; 0.95, for both EPS
@@ -265,21 +275,19 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         selectedGame = "ConnectFour";
         scaPar = GBGBatch.setDefaultScaPars(selectedGame);
         String[] agtFiles = {"2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip"};
-        PlayAgent pa;
-        PlayAgent qa;
-        PlayAgent opponent;
+        PlayAgent pa,qa,opponent;
         String userTitle1 = "user1", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
         double winrate;     // the win rate of MCTSWrapperAgent
         //double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         double c_puct = 1.0;
-        int playerMWrap;
+        int playerMWrap;        // playerMWrap: whether MCTSWrapper is player 0 or player 1
 
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardC4 gb = new GameBoardC4(t_Game);		// needed for chooseStartState()
+        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        GameBoardC4 gb = new GameBoardC4(arenaTrain);
         StateObservation so = gb.getDefaultStartState();
 
         switch(opponentName) {
@@ -290,15 +298,12 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                     ParMCTS parMCTS = new ParMCTS();
                     parMCTS.setNumIter(10000);
                     parMCTS.setTreeDepth(40);
-                    parMCTS.setNormalize(false);        // was missing prior to 2021-08-11, makes MCTS stronger as 1st player
+                    parMCTS.setNormalize(false);        // was missing prior to 2021-08-11, makes MCTS stronger when playing 1st
                     ParOther oPar = new ParOther();
                     opponent = new MCTSAgentT("MCTS",so, parMCTS, oPar);
                 } else {        // load MCTS from file, just for debugging
                     String mctsFile = "3-MCTS10000-40.agt.zip";
-                    setupPaths(mctsFile, csvFile);     // builds filePath
-                    boolean res = t_Game.loadAgent(1, filePath);
-                    assert res : "\n[MCTSWrapperAgentTest] Aborted: mctsFile = " + mctsFile + " not found!";
-                    opponent = t_Game.m_xfun.fetchAgent(1, "MCTS", t_Game.m_xab);
+                    opponent = arenaTrain.loadAgent(mctsFile);
                 }
             }
             case "AlphaBetaDL" -> {
@@ -312,12 +317,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
         for (int run=0; run<nTrial; run++) {
             for (String agtFile : agtFiles) {
-                setupPaths(agtFile, csvFile);     // builds filePath
-                boolean res = t_Game.loadAgent(0, filePath);
-                assert res : "\n[MCTSWrapperAgentTest] Aborted: agtFile = " + agtFile + " not found!";
-
-                String sAgent = t_Game.m_xab.getSelectedAgent(0);
-                pa = t_Game.m_xfun.fetchAgent(0, sAgent, t_Game.m_xab);
+                //setupPaths(agtFile, csvFile);     // builds filePath
+                pa = arenaTrain.loadAgent(agtFile);
 
                 for (double EPS : epsArr) {
                     ConfigWrapper.EPS = EPS;
@@ -343,8 +344,6 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                             System.out.println("oPar nPly = " + nPly);
                             qa = new MaxN2Wrapper(pa, nPly, oPar);
                         }
-
-
 
                         ScoreTuple sc;
                         PlayAgtVector paVector = new PlayAgtVector(qa, opponent);
@@ -373,7 +372,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
                         // print the full list mcList after finishing each  (p_MCTS)
                         // (overwrites the file written from previous (p_MCTS))
-                        MCompeteMWrap.printMultiCompeteList(csvFile, mcList, pa, t_Game, userTitle1, userTitle2);
+                        MCompeteMWrap.printMultiCompeteList(csvFile, mcList, pa, arenaTrain, userTitle1, userTitle2);
                     } // for (iterMCTSWrap)
                 } // for (EPS)
             } // for (agtFile)
@@ -388,8 +387,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     public void getVTable_Test() {
         selectedGame = "Othello";
         scaPar = GBGBatch.setDefaultScaPars(selectedGame);
-        t_Game = GBGBatch.setupSelectedGame(selectedGame, scaPar);   // t_Game is ArenaTrain object
-        GameBoard gb = new GameBoardOthello(t_Game);        // needed for chooseStartState()
+        arenaTrain = GBGBatch.setupSelectedGame(selectedGame, scaPar);   // t_Game is ArenaTrain object
+        GameBoard gb = new GameBoardOthello(arenaTrain);        // needed for chooseStartState()
         StateObservation sob = gb.getDefaultStartState();
         MCTSNode mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
         Approximator approximator = new PlayAgentApproximator(new RandomAgent("rand"));

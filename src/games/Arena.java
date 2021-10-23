@@ -14,6 +14,7 @@ import games.SimpleGame.StateObserverSG;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
+import starters.GBGBatch;
 import starters.GBGLaunch;
 import tools.PStats;
 import tools.ScoreTuple;
@@ -1077,7 +1078,7 @@ abstract public class Arena implements Runnable {
 	}
 
 	// We moved this method from XArenaMenu to Arena, because it can be used by batch 
-	// facility GBGBatch as well. Therefore it should not be part of the GUI (which
+	// facility GBGBatch as well. Therefore, it should not be part of the GUI (which
 	// XArenaMenu is)
 	/**
 	 * Load agent stored in <b>filePath</b> to player <b>n</b>
@@ -1154,6 +1155,22 @@ abstract public class Arena implements Runnable {
 		this.setStatusMessage(str);
 		System.out.println("[LoadAgent] "+str);
 		return res;
+	}
+
+	/**
+	 * Utility method for test units (e.g. ExpectimaxNAgentTest)
+	 * @param agtFile	agent filename
+	 * @return			the loaded agent, if successful
+	 */
+	public PlayAgent loadAgent(String agtFile) {
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + getGameName();
+		String subDir = getGameBoard().getSubDir();
+		if (subDir != null) strDir += "/" + subDir;
+		String filePath = strDir + "/" + agtFile;
+		boolean res = loadAgent(0, filePath);
+		assert res : "\nAborted: agtFile = " + agtFile + " not found! ["+filePath+"]";
+		String sAgent = m_xab.getSelectedAgent(0);
+		return this.m_xfun.fetchAgent(0, sAgent, m_xab);
 	}
 
 	public boolean hasGUI() {

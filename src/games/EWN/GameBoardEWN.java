@@ -222,7 +222,7 @@ public class GameBoardEWN implements GameBoard {
         String board = boardSize+"x"+boardSize+" ";
         String players = ConfigEWN.NUM_PLAYERS + " Players";
         String isRandom = random ? " random " : "";
-        return board+players+ConfigEWN.CELL_CODE_NAMING[cellCoding]+isRandom;
+        return board+players+" "+ConfigEWN.CELL_CODE_DIR_NAMING[cellCoding]+isRandom;
 
 
     }

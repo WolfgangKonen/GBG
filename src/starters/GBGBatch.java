@@ -52,7 +52,7 @@ public class GBGBatch {
 	public static String[] csvNameDef = {"multiTrain.csv","multiTrainAlphaSweep.csv"
 			,"multiTrainLambdaSweep.csv","multiTrainIncAmountSweep.csv","multiCompeteOthello.csv"};
 	private static GBGBatch t_Batch = null;
-	protected static ArenaTrain t_Game;
+	protected static ArenaTrain arenaTrain;
 	protected static String filePath = null;
 	protected static String savePath = null;
 
@@ -146,7 +146,7 @@ public class GBGBatch {
 		for (int i = 0; i < 3; i++)
 			if (args.length >= i + 7) scaPar[i] = args[i + 6];
 
-		t_Game = setupSelectedGame(selectedGame, scaPar);
+		arenaTrain = setupSelectedGame(selectedGame, scaPar);
 
 		setupPaths(args[2],csvName);
 
@@ -155,11 +155,11 @@ public class GBGBatch {
 
 		// start a batch run without any windows
 		switch (args[1]) {
-			case "1" -> t_Batch.batch1(trainNum, maxGameNum, filePath, t_Game.m_xab, t_Game.getGameBoard(), csvName);
-			case "2" -> t_Batch.batch2(trainNum, maxGameNum, filePath, t_Game.m_xab, t_Game.getGameBoard(), csvName);
-			case "3" -> t_Batch.batch3(trainNum, maxGameNum, filePath, t_Game.m_xab, t_Game.getGameBoard(), csvName);
-			case "4" -> t_Batch.batch4(trainNum, maxGameNum, filePath, t_Game.m_xab, t_Game.getGameBoard(), csvName);
-			case "5" -> t_Batch.batch5(trainNum, filePath, t_Game.getGameBoard(), csvName);
+			case "1" -> t_Batch.batch1(trainNum, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "2" -> t_Batch.batch2(trainNum, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "3" -> t_Batch.batch3(trainNum, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "4" -> t_Batch.batch4(trainNum, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "5" -> t_Batch.batch5(trainNum, filePath, arenaTrain.getGameBoard(), csvName);
 			default -> {
 				System.err.println("[GBGBatch.main] args[1]=" + args[1] + " not allowed.");
 				System.exit(1);
@@ -257,7 +257,7 @@ public class GBGBatch {
 		case "Sim": 
 			scaPar[0]="2";		 	
 			scaPar[1]="6";			
-			scaPar[2]="None";			
+			scaPar[2]="False";
 			break;
 		case "RubiksCube": 
 			scaPar[0]="2x2x2";		 	
@@ -286,8 +286,8 @@ public class GBGBatch {
 	}
 
 	protected static void setupPaths(String agtFile, String csvFile){
-		String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + t_Game.getGameName();
-		String subDir = t_Game.getGameBoard().getSubDir();
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + arenaTrain.getGameName();
+		String subDir = arenaTrain.getGameBoard().getSubDir();
 		if (subDir != null) strDir += "/" + subDir;
 
 		filePath = strDir + "/" + agtFile; //+ "tdntuple3.agt.zip";
@@ -314,7 +314,7 @@ public class GBGBatch {
 	public void batch1(int trainNum, int maxGameNum, String filePath,
 					   XArenaButtons xab,	GameBoard gb, String csvName) {
 		// load an agent to fill xab with the appropriate parameter settings
-		boolean res = t_Game.loadAgent(0, filePath);
+		boolean res = arenaTrain.loadAgent(0, filePath);
 		if (!res) {
 			System.err.println("\n[GBGBatch.batch1] Aborted (no agent found).");
 			return;
@@ -326,10 +326,10 @@ public class GBGBatch {
 		
 		// run multiTrain
 		xab.m_arena.taskState=Arena.Task.MULTTRN;
-		t_Game.m_xfun.m_PlayAgents[0] = t_Game.m_xfun.multiTrain(0, xab.getSelectedAgent(0), xab, gb, csvName);
-		t_Game.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
+		arenaTrain.m_xfun.m_PlayAgents[0] = arenaTrain.m_xfun.multiTrain(0, xab.getSelectedAgent(0), xab, gb, csvName);
+		arenaTrain.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
 		System.out.println("[GBGBatch.main] multiTrain finished: Results written to "+csvName);
-		res = t_Game.saveAgent(0, savePath);
+		res = arenaTrain.saveAgent(0, savePath);
 		if (res) {
 			System.out.println("[GBGBatch.main] last agent saved to "+savePath);
 		} else {
@@ -355,7 +355,7 @@ public class GBGBatch {
 		double[] alphaArr = {1.0, 2.5, 3.7, 5.0, 7.5, 10.0};
 		double[] alphaFinalArr = alphaArr.clone();
 		// load an agent to fill xab with the appropriate parameter settings
-		boolean res = t_Game.loadAgent(0, filePath);
+		boolean res = arenaTrain.loadAgent(0, filePath);
 		if (!res) {
 			System.err.println("\n[GBGBatch.batch2] Aborted (no agent found).");
 			return;
@@ -367,10 +367,10 @@ public class GBGBatch {
 		
 		// run multiTrainAlphaSweep
 		xab.m_arena.taskState=Arena.Task.MULTTRN;
-		t_Game.m_xfun.m_PlayAgents[0] = mTrainSweep.multiTrainAlphaSweep(0, alphaArr, alphaFinalArr, t_Game, xab, gb, csvName);
-		t_Game.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
+		arenaTrain.m_xfun.m_PlayAgents[0] = mTrainSweep.multiTrainAlphaSweep(0, alphaArr, alphaFinalArr, arenaTrain, xab, gb, csvName);
+		arenaTrain.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
 		System.out.println("[GBGBatch.main] multiTrainAlphaSweep finished: Results written to "+csvName);
-		res = t_Game.saveAgent(0, savePath);
+		res = arenaTrain.saveAgent(0, savePath);
 		if (res) {
 			System.out.println("[GBGBatch.main] last agent saved to "+savePath);
 		} else {
@@ -395,7 +395,7 @@ public class GBGBatch {
 					   XArenaButtons xab, GameBoard gb, String csvName) throws IOException {
 		double[] lambdaArr = {0.00, 0.04, 0.09, 0.16, 0.25};
 		// load an agent to fill xab with the appropriate parameter settings
-		boolean res = t_Game.loadAgent(0, filePath);
+		boolean res = arenaTrain.loadAgent(0, filePath);
 		if (!res) {
 			System.err.println("\n[GBGBatch.batch3] Aborted (no agent found).");
 			return;
@@ -407,10 +407,10 @@ public class GBGBatch {
 		
 		// run multiTrainLambdaSweep
 		xab.m_arena.taskState=Arena.Task.MULTTRN;
-		t_Game.m_xfun.m_PlayAgents[0] = mTrainSweep.multiTrainLambdaSweep(0, lambdaArr, t_Game, xab, gb, csvName);
-		t_Game.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
+		arenaTrain.m_xfun.m_PlayAgents[0] = mTrainSweep.multiTrainLambdaSweep(0, lambdaArr, arenaTrain, xab, gb, csvName);
+		arenaTrain.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
 		System.out.println("[GBGBatch.main] multiTrainLambdaSweep finished: Results written to "+csvName);
-		res = t_Game.saveAgent(0, savePath);
+		res = arenaTrain.saveAgent(0, savePath);
 		if (res) {
 			System.out.println("[GBGBatch.main] last agent saved to "+savePath);
 		} else {
@@ -436,7 +436,7 @@ public class GBGBatch {
 					   XArenaButtons xab, GameBoard gb, String csvName) throws IOException {
 		double[] incAmountArr = {+0.5, 0.00, -0.03, -0.10, -0.5};
 		// load an agent to fill xab with the appropriate parameter settings
-		boolean res = t_Game.loadAgent(0, filePath);
+		boolean res = arenaTrain.loadAgent(0, filePath);
 		if (!res) {
 			System.err.println("\n[GBGBatch.batch4] Aborted (no agent found).");
 			return;
@@ -447,10 +447,10 @@ public class GBGBatch {
 		if (maxGameNum!=-1) xab.setGameNumber(maxGameNum);
 
 		xab.m_arena.taskState=Arena.Task.MULTTRN;
-		t_Game.m_xfun.m_PlayAgents[0] = mTrainSweep.multiTrainIncAmountSweep(0, incAmountArr, t_Game, xab, gb, csvName);
-		t_Game.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
+		arenaTrain.m_xfun.m_PlayAgents[0] = mTrainSweep.multiTrainIncAmountSweep(0, incAmountArr, arenaTrain, xab, gb, csvName);
+		arenaTrain.m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
 		System.out.println("[GBGBatch.main] multiTrainIncAmountSweep finished: Results written to "+csvName);
-		res = t_Game.saveAgent(0, savePath);
+		res = arenaTrain.saveAgent(0, savePath);
 		if (res) {
 			System.out.println("[GBGBatch.main] last agent saved to "+savePath);
 		} else {
@@ -475,14 +475,14 @@ public class GBGBatch {
 		long startTime = System.currentTimeMillis();
 
 		// load an agent to fill xab with the appropriate parameter settings
-		boolean res = t_Game.loadAgent(0, filePath);
+		boolean res = arenaTrain.loadAgent(0, filePath);
 		if (!res) {
 			System.err.println("\n[GBGBatch.batch5] Aborted (no agent found).");
 			return;
 		}
-		PlayAgent pa = t_Game.m_xfun.m_PlayAgents[0];
+		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
 
-		MCompeteMWrap.multiCompeteSweep(pa,iterMCTS,t_Game,gb,csvName);
+		MCompeteMWrap.multiCompeteSweep(pa,iterMCTS, arenaTrain,gb,csvName);
 
 		long elapsedMs = (System.currentTimeMillis() - startTime);
 		double elapsedTime = (double)elapsedMs/1000.0;

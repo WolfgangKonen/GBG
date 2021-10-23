@@ -218,7 +218,7 @@ public class Types {
 
 		public ACTIONS_VT(ACTIONS_VT other) {
 			super(other);
-			this.vTable = other.vTable.clone();
+			if (other.vTable!=null) this.vTable = other.vTable.clone();
 			this.vBest = other.vBest;
 			if (other.scBest!=null) this.scBest = new ScoreTuple(other.scBest);
 		}

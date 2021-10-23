@@ -79,7 +79,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
         storedActions = new Types.ACTIONS[acts.size()];
         for(int i = 0; i < storedActions.length; ++i)
         	storedActions[i] = acts.get(i);
-		storedValues = actBest.getVTable().clone();
+		if (actBest.getVTable()!=null) storedValues = actBest.getVTable().clone();
         storedActBest = new Types.ACTIONS_VT(actBest);	// deep copy
 		storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
 //        if (actBest instanceof Types.ACTIONS_VT) {

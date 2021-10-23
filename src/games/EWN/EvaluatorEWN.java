@@ -51,9 +51,10 @@ public class EvaluatorEWN extends Evaluator {
         randomAgent = new RandomAgent("Random");
         randomAgent2 = new RandomAgent("Random");
         randomAgent3 = new RandomAgent("Random");
-        ParMCTSE paramsMC = new  ParMCTSE();
 
-        mctse = new MCTSExpectimaxAgt("MCTSE",paramsMC);
+        ParMCTSE parMCTSE = new ParMCTSE();
+        parMCTSE.setNumIter(500);
+        mctse = new MCTSExpectimaxAgt("MCTSE",parMCTSE);
 
     }
 
@@ -88,6 +89,7 @@ public class EvaluatorEWN extends Evaluator {
                 case 4:return evalAgainstOpponent(m_PlayAgent, randomAgent, randomAgent2, randomAgent3,false, 100) > 0.0;
             };
             case 1: return evalAgainstOpponent(m_PlayAgent, mctse, false,100) > 0.0;
+            case 2: return evalAgainstOpponent(m_PlayAgent, mctse, false,10) > 0.0;
             default: return false;
         }
     }
@@ -186,7 +188,7 @@ public class EvaluatorEWN extends Evaluator {
     }
     @Override
     public int[] getAvailableModes() {
-        return new int[]{-1, 0,1};
+        return new int[]{-1, 0,1,2};
     }
 
     @Override
@@ -204,7 +206,8 @@ public class EvaluatorEWN extends Evaluator {
         switch (m_mode) {
             case -1:return "no evaluation done ";
             case 0: return "success against Random (best is 1.0): ";
-            case 1: return "success against Mctse (best is 1.0): ";
+            case 1: return "success against Mctse, 100 episodes (best is 1.0): ";
+            case 2: return "success against Mctse, 10 episodes (best is 1.0): ";
             default:
                 return null;
 
@@ -215,8 +218,9 @@ public class EvaluatorEWN extends Evaluator {
     @Override
     public String getTooltipString() {
         return "<html>-1: none<br>"
-                + " 0: vs. Random, best is 1.0"
-                + "1: vs. Mcts, best is 1.0"
+                + "0: vs. Random, best is 1.0"
+                + "1: vs. Mctse-100, best is 1.0"
+                + "2: vs. Mctse-10, best is 1.0"
                 + "</html>";
 
     }
@@ -224,9 +228,9 @@ public class EvaluatorEWN extends Evaluator {
     @Override
     public String getPlotTitle() {
         switch (m_mode) {
-            case 0:
-                return "success against Random";
-            case 1: return "success against Mcts";
+            case 0: return "success against Random";
+            case 1: return "success against Mctse-100";
+            case 2: return "success against Mctse-10";
             default:
                 return null;
         }

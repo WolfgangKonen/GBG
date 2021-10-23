@@ -24,10 +24,9 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         int nDepth=15;
         Types.ACTIONS_VT act_pa;
 
-        String selectedGame = "EWN";
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
+        String[] scaPar = GBGBatch.setDefaultScaPars("EWN");  // for EWN currently: 3x3 2-player
+        arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
+        GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for chooseStartState()
         StateObserverEWN so;
 
         pa = new ExpectimaxNAgent("ExpectimaxN",nDepth);
@@ -65,13 +64,20 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         int nDepth=9;
         boolean silent = false;
 
-        String selectedGame = "EWN";
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
+        String[] scaPar = GBGBatch.setDefaultScaPars("EWN");                // for EWN: 3x3
+        //scaPar = new String[]{"5x5 2-Player","[0,1][2,3][3,4]","False"};    // for EWN: 5x5
+            // ExpectimaxN for 5x5 EWN has exponentially rising time and memory demands:
+            // For nDepth=4,5,6 the hash map size is 70.000, 600.000, 4.500.000, resp., so we cannot reach from
+            // the start state the final states --> pretty useless
+        arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
+        GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
 
         pa = new ExpectimaxNAgent("ExpectimaxN",nDepth);
+
+        // --- just as test, will not fulfill assertions exactly ---
+//        String agtFile = "tdnt4-10000.agt.zip";
+//        pa = arenaTrain.loadAgent(agtFile);
 
         // select a state:
         gb.clearBoard(true,true);
@@ -82,15 +88,12 @@ public class ExpectimaxNAgentTest extends GBGBatch {
             so = (StateObserverEWN) startSO.copy();
             so.advanceNondeterministic(startR);
 
-            //if (startR.toInt()==0) continue;
-
             System.out.println("\n*** Episode with dice value "+startR.toInt()+ " starts ***");
             System.out.print(so);
 
-
             innerETreeTest(pa,so,silent,"dice value="+startR.toInt());
-
         }
+
         System.out.println("[expectimaxTree3Test] finished");
     }
 
@@ -110,13 +113,12 @@ public class ExpectimaxNAgentTest extends GBGBatch {
     @Test
     public void expectimaxTree9Test() {
         PlayAgent pa;
-        int nDepth=13;
+        int nDepth=9;
         boolean silent = false;  // passed on to getNextAction2
 
-        String selectedGame = "EWN";
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
+        String[] scaPar = GBGBatch.setDefaultScaPars("EWN");        // for EWN currently: 3x3 2-player
+        arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
+        GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
         DecimalFormat frmAct = new DecimalFormat("0000");
 
@@ -128,24 +130,34 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
         for (Types.ACTIONS startR : startRandoms) {
+            System.out.println("\n*** Branch with diceVal "+startR.toInt()+ " starts ***");
             startSO.advanceNondeterministic(startR);
             ArrayList<Types.ACTIONS> nextActions = startSO.getAvailableActions();
 
             System.out.print(startSO);
 
             for (Types.ACTIONS a : nextActions) {
-                System.out.println("\n*** Episode with action "+frmAct.format(a.toInt())+ " starts ***");
+                System.out.println("\n  *** Episode with action "+frmAct.format(a.toInt())+ " starts ***");
 
                 so = (StateObserverEWN) startSO.copy();
                 so.advance(a);
 
                 innerETreeTest(pa,so,silent,"action="+frmAct.format(a.toInt()));
-
             }
         }
         System.out.println("[expectimaxTree9Test] finished");
     }
 
+    /**
+     * Helper method for {@link #expectimaxTree3Test()} and {@link #expectimaxTree9Test()}:
+     * For {@code pa} which should have a nondeterministic next action (otherwise exception):
+     * Check that the ExpectimaxN value of {@code so} plus the probability-weight-average of all
+     * child state values resulting from each of the possible dice values sums up to 0.
+     * @param pa
+     * @param so
+     * @param silent
+     * @param text
+     */
     private void innerETreeTest(PlayAgent pa, StateObserverEWN so, boolean silent, String text) {
         StateObserverEWN afterstate, newSO;
         Types.ACTIONS_VT act_pa = pa.getNextAction2(so.partialState(),false,silent);

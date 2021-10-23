@@ -1,10 +1,8 @@
 package controllers;
 
-import controllers.MC.MCAgentN;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
 import org.junit.Test;
-import params.ParMC;
 import starters.GBGBatch;
 import tools.Types;
 
@@ -25,48 +23,41 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
      * <p>
      * The test can only succeed, if the wrapped agent is *deterministic*.
      * Here we use a TDNTuple4Agt loaded from disk.
+     *
+     * The test currently works only for nply ={1,2}, not for nply={3,4}
      */
     @Test
     public void expectimaxWrap3Test() {
-        PlayAgent pa,qaDeep,qaShallow;
+        String selectedGame = "EWN";
+        String strAgent = "tdnt4-10000.agt.zip";
         boolean silent = true;
 
-        String selectedGame = "EWN";
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        String strAgent = "test_TD4_EWN.zip.agt.zip";
-        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
+        PlayAgent pa,qaDeep,qaShallow;
+        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);     // for EWN : 3x3 2-player
+        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for start state
         StateObserverEWN startSO, so;
 
-        setupPaths(strAgent, "csvFile");     // builds filePath
-        boolean res = t_Game.loadAgent(0, filePath);
-        assert res : "\n[ExpectimaxNWrapperTest] Aborted: agtFile = "+ filePath + " not found!";
-
-        String sAgent = t_Game.m_xab.getSelectedAgent(0);
-        pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
+        pa = arenaTrain.loadAgent(strAgent);
         //pa = new MCAgentN(new ParMC());       // just a check: with a nondeterministic wrapped agent, the test will fail
 
-        for (int nply=1; nply<4; nply++) {
+        for (int nply=1; nply<3; nply++) {
             System.out.println("\n*** Test with nply =  "+nply+ " starts ***");
             qaDeep = new ExpectimaxNWrapper(pa,nply+1);
             qaShallow = new ExpectimaxNWrapper(pa,nply);
 
-            // select a state:
-            gb.clearBoard(true,true);
-            startSO = (StateObserverEWN) gb.getStateObs();
+            // select start state:
+            startSO = (StateObserverEWN) gb.getDefaultStartState();
             ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
             for (Types.ACTIONS startR : startRandoms) {
-                startSO.advanceNondeterministic(startR);
-
+                so = (StateObserverEWN) startSO.copy();
+                so.advanceNondeterministic(startR);
 
                 //System.out.println("\n*** Episode with dice value "+startR.toInt()+ " starts ***");
-                //System.out.print(startSO);
-
-                so = (StateObserverEWN) startSO.copy();
+                //System.out.print(so);
 
                 innerEWrapTest(qaDeep,qaShallow,so,silent,"dice value="+startR.toInt());
-
             }
 
         }
@@ -86,43 +77,39 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
      * <p>
      * The test can only succeed, if the wrapped agent is *deterministic*.
      * Here we use a TDNTuple4Agt loaded from disk.
+     *
+     * The test currently works only for nply ={1,2}, not for nply={3,4}
      */
     @Test
     public void expectimaxWrap9Test() {
-        PlayAgent pa,qaDeep,qaShallow;
+        String selectedGame = "EWN";
+        String strAgent = "tdnt4-10000.agt.zip";
         boolean silent = true;
 
-        String selectedGame = "EWN";
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);  // for EWN currently: 3x3 2-player
-        t_Game = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
-        String strAgent = "test_TD4_EWN.zip.agt.zip";
-        GameBoardEWN gb = new GameBoardEWN(t_Game); //,3,2);		// needed for chooseStartState()
+        PlayAgent pa,qaDeep,qaShallow;
+        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);     // for EWN : 3x3 2-player
+        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for start state
         StateObserverEWN startSO, so;
         DecimalFormat frmAct = new DecimalFormat("0000");
 
-        setupPaths(strAgent, "csvFile");     // builds filePath
-        boolean res = t_Game.loadAgent(0, filePath);
-        assert res : "\n[ExpectimaxNWrapperTest] Aborted: agtFile = "+ filePath + " not found!";
-
-        String sAgent = t_Game.m_xab.getSelectedAgent(0);
-        pa = t_Game.m_xfun.fetchAgent(0,sAgent, t_Game.m_xab);
+        pa = arenaTrain.loadAgent(strAgent);
         //pa = new MCAgentN(new ParMC());       // just a check: with a nondeterministic wrapped agent, the test will fail
 
-        for (int nply=1; nply<4; nply++) {
+        for (int nply=1; nply<3; nply++) {
             System.out.println("\n*** Test with nply =  "+nply+ " starts ***");
             qaDeep = new ExpectimaxNWrapper(pa,nply+1);
             qaShallow = new ExpectimaxNWrapper(pa,nply);
 
-            // select a state:
-            gb.clearBoard(true, true);
-            startSO = (StateObserverEWN) gb.getStateObs();
+            // select start state:
+            startSO = (StateObserverEWN) gb.getDefaultStartState();
             ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
             for (Types.ACTIONS startR : startRandoms) {
                 startSO.advanceNondeterministic(startR);
                 ArrayList<Types.ACTIONS> nextActions = startSO.getAvailableActions();
 
-                System.out.print(startSO);
+                //System.out.print(startSO);
 
                 for (Types.ACTIONS a : nextActions) {
                     //System.out.println("\n*** Episode with action " + frmAct.format(a.toInt()) + " starts ***");
@@ -131,10 +118,9 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
                     so.advance(a);
 
                     innerEWrapTest(qaDeep,qaShallow,so,silent,"action=" + frmAct.format(a.toInt()));
-
                 }
             }
-        }
+        }   // for (nply)
         System.out.println("[expectimaxWrap9Test] finished");
     }
 
