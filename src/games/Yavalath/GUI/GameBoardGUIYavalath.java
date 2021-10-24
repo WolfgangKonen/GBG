@@ -1,19 +1,22 @@
 package games.Yavalath.GUI;
 
 import games.Arena;
-import games.Yavalath.*;
+import games.Yavalath.GameBoardYavalath;
+import games.Yavalath.StateObserverYavalath;
+import games.Yavalath.TileYavalath;
+import games.Yavalath.UtilityFunctionsYavalath;
 import tools.Types;
-
-import static games.Yavalath.ConfigYavalath.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static games.Yavalath.ConfigYavalath.*;
+
 public class GameBoardGUIYavalath {
-    final static Color COLOR_PLAYER_ONE = Color.WHITE;
-    final static Color COLOR_PLAYER_TWO = Color.BLACK;
+    static Color COLOR_PLAYER_ONE = Color.WHITE;
+    static Color COLOR_PLAYER_TWO = Color.BLACK;
     final static Color COLOR_PLAYER_THREE = Color.RED;
     final static Color CELL_BACKGROUND = Color.YELLOW;
     final static Color CELL_LINING = Color.ORANGE;
@@ -25,7 +28,8 @@ public class GameBoardGUIYavalath {
     private boolean drawValues;
 
     private JFrame frame = new JFrame("GBG - Yavalath");
-    private YavalathPanel panel;
+    private YavalathPanel yavPanel;
+    private InfoPanel infoPanel;
 
     private GameBoardYavalath gb;
 
@@ -35,11 +39,17 @@ public class GameBoardGUIYavalath {
     }
 
     private void initializeFrame(){
-        panel = new YavalathPanel();
+        yavPanel = new YavalathPanel();
+        infoPanel = new InfoPanel();
 
         frame.setVisible(true);
         frame.setSize(800,800);
-        frame.add(panel);
+        frame.setLayout(new BorderLayout());
+        frame.add(yavPanel);
+        frame.add(infoPanel,BorderLayout.SOUTH);
+
+
+
     }
 
     public void updateBoard(StateObserverYavalath so, boolean withReset, boolean showValueOnBoard){
@@ -48,7 +58,8 @@ public class GameBoardGUIYavalath {
     }
 
     public void toFront() {
-        panel.toFront();
+        yavPanel.toFront();
+        infoPanel.toFront();
     }
 
     public void destroy() {
@@ -71,6 +82,8 @@ public class GameBoardGUIYavalath {
     }
 
     public void clearBoard(boolean boardClear, boolean vClear) {
+        COLOR_PLAYER_ONE = Color.white;
+        COLOR_PLAYER_TWO = Color.black;
         frame.repaint();
     }
 
@@ -79,25 +92,11 @@ public class GameBoardGUIYavalath {
      * Includes the mouseListener for detecting human input into the game.
      */
     public class YavalathPanel extends JPanel {
-        private JLabel statusLabel;
-        private JLabel swapLabel;
-
         YavalathPanel() {
-            Font font = new Font("Arial", Font.BOLD, Types.GUI_HELPFONTSIZE);
-
-            statusLabel = new JLabel();
-            statusLabel.setForeground(Color.WHITE);
-            statusLabel.setFont(font);
-
-            swapLabel = new JLabel("Swap Rule available!");
-            swapLabel.setForeground(Color.WHITE);
-            swapLabel.setFont(font);
 
             setBackground(BACKGROUND_COLOR);
             MouseListenerYavalath ml = new MouseListenerYavalath();
             addMouseListener(ml);
-            add(statusLabel);
-            add(swapLabel);
         }
 
         public void paintComponent(Graphics g) {
@@ -108,14 +107,6 @@ public class GameBoardGUIYavalath {
         }
 
         private void drawGameBoard(Graphics2D g2) {
-
-            switch (gb.m_so.getPlayer()) {
-                case 0 -> statusLabel.setText("Player 1 to move.");
-                case 1 -> statusLabel.setText("Player 2 to move.");
-                case 2 -> statusLabel.setText("Player 3 to move.");
-            }
-
-            swapLabel.setVisible(gb.m_so.getMoveCounter() == 1);
 
             //Draw all the individual cells
             for (TileYavalath[] x : gb.m_so.getGameBoard()) {
@@ -138,7 +129,8 @@ public class GameBoardGUIYavalath {
 
                         //Draw the values for the individual cells
                         if (drawValues) {
-                            Double value = y.getValue();
+                            Double value;
+                            value = y.getValue();
                             if (Double.isNaN(value)) continue;
                             String tileValueText = Long.toString(Math.round(value * 1000));
                             g2.setColor(Color.RED);
@@ -184,6 +176,113 @@ public class GameBoardGUIYavalath {
                 updateBoard(null, false, false);
                 gb.setActionReq(true);
             }
+        }
+    }
+
+    public class InfoPanel extends JPanel{
+
+        private JLabel turn;
+        private JLabel playerOneColor;
+        private JLabel playerTwoColor;
+        private JLabel playerThreeColor;
+        private JLabel swapRuleLabel;
+        private JButton swapRuleButton;
+
+        InfoPanel(){
+            Font font = new Font("Arial", Font.BOLD, Types.GUI_HELPFONTSIZE);
+            setSize(800,100);
+            turn = new JLabel();
+            turn.setFont(font);
+
+            playerOneColor = new JLabel();
+            playerOneColor.setFont(font);
+
+            playerTwoColor = new JLabel();
+            playerTwoColor.setFont(font);
+
+            playerThreeColor = new JLabel();
+            playerThreeColor.setFont(font);
+
+            swapRuleLabel = new JLabel("Swap Rule Available!");
+            swapRuleLabel.setFont(font);
+            swapRuleLabel.setVisible(false);
+
+            swapRuleButton = new JButton("Use it!");
+            swapRuleButton.setVisible(false);
+            swapRuleButton.addActionListener(e -> {
+                gb.useSwapRule();
+                COLOR_PLAYER_ONE = Color.BLACK;
+                COLOR_PLAYER_TWO = Color.WHITE;
+            });
+
+            setBackground(BACKGROUND_COLOR);
+
+            this.setLayout(new GridLayout(3,3));
+            add(new JLabel(""));
+            add(turn);
+            add(new JLabel(""));
+            add(playerOneColor);
+            add(playerTwoColor);
+            add(playerThreeColor);
+            add(swapRuleLabel);
+            add(swapRuleButton);
+
+        }
+
+        public void paintComponent(Graphics g){
+            Graphics2D g2 = (Graphics2D) g;
+            super.paintComponent(g2);
+
+            setInfoPanel();
+        }
+
+        private void setInfoPanel(){
+
+            switch (gb.m_so.getPlayer()) {
+                case 0 -> {
+                    turn.setForeground(COLOR_PLAYER_ONE);
+                    turn.setText("Player 1 to move");
+                }
+                case 1 -> {
+                    turn.setForeground(COLOR_PLAYER_TWO);
+                    turn.setText("Player 2 to move");
+                }
+                case 2 -> {
+                    turn.setForeground(COLOR_PLAYER_THREE);
+                    turn.setText("Player 3 to move");
+                }
+            }
+
+            swapRuleLabel.setVisible(gb.m_so.getMoveCounter()==1 || gb.m_so.swapRuleUsed());
+            swapRuleButton.setVisible(gb.m_so.getMoveCounter() == 1);
+
+            if(gb.m_so.swapRuleUsed()) swapRuleLabel.setText("Swap Rule was used!");
+
+            if(COLOR_PLAYER_ONE == Color.WHITE){
+                playerOneColor.setText("Player 1 is WHITE");
+                playerOneColor.setForeground(Color.WHITE);
+            }else if(COLOR_PLAYER_ONE == Color.BLACK){
+                playerOneColor.setText("Player 1 is BLACK");
+                playerOneColor.setForeground(Color.BLACK);
+            }
+
+            if(COLOR_PLAYER_TWO == Color.BLACK){
+                playerTwoColor.setText("Player 2 is BLACK");
+                playerTwoColor.setForeground(Color.BLACK);
+            }else if(COLOR_PLAYER_TWO == Color.WHITE){
+                playerTwoColor.setText("Player 2 is WHITE");
+                playerTwoColor.setForeground(Color.WHITE);
+            }
+
+            playerThreeColor.setText("Player 3 is RED");
+            playerThreeColor.setForeground(COLOR_PLAYER_THREE);
+            playerThreeColor.setVisible(gb.m_so.getNumPlayers() == 3);
+
+        }
+
+        public void toFront() {
+            frame.setState(Frame.NORMAL);
+            super.setVisible(true);
         }
     }
 }

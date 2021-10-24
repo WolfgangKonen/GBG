@@ -168,6 +168,11 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
 
     }
 
+    private void advance(TileYavalath tile){
+        Types.ACTIONS action = new Types.ACTIONS(tile.getX()*BOARD_SIZE+tile.getY());
+        advance(action);
+    }
+
     @Override
     public int getPlayer() {
         return currentPlayer;
@@ -332,5 +337,14 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
 
     public TileYavalath getLastPlayedTile(){
         return lastPlayedTile;
+    }
+
+    public void useSwapRule(){
+        swapRuleUsed = true;
+        advance(lastPlayedTile);
+    }
+
+    public boolean swapRuleUsed(){
+        return swapRuleUsed;
     }
 }

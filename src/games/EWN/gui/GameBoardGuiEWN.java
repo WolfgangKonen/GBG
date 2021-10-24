@@ -1,12 +1,9 @@
 package games.EWN.gui;
 
-import app.display.util.GUIUtil;
 import games.Arena;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
-import games.EWN.StateObserverHelper.Helper;
 import games.EWN.config.ConfigEWN;
-import games.Othello.ConfigOthello;
 import tools.Types;
 
 import javax.swing.*;

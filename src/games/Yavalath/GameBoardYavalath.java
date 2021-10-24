@@ -127,4 +127,9 @@ public class GameBoardYavalath implements GameBoard {
         }
         return m_so;
     }
+
+    public void useSwapRule(){
+        m_so.useSwapRule();
+        updateBoard(m_so,false,false);
+    }
 }
