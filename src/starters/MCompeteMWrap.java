@@ -190,7 +190,7 @@ public class MCompeteMWrap {
                         if (iterMWrap == 0) qa = pa;
                         else qa = new MCTSWrapperAgent(iterMWrap, c_puct,
                                 new PlayAgentApproximator(pa),
-                                "MCTS-Wrapped " + pa.getName(),
+                                "MCTS-wrapped " + pa.getName(),
                                 -1);
 
                         int nPly = 0;                 // if >0 together with iterMCTSWrapArr={0}: test MaxNWrapper

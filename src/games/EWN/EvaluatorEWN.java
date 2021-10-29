@@ -23,6 +23,7 @@ public class EvaluatorEWN extends Evaluator {
     private RandomAgent randomAgent;
     private RandomAgent randomAgent2;
     private RandomAgent randomAgent3;
+    private int iterMctse;
 
 
     protected static ArrayList<StateObserverEWN> diffStartList = null;
@@ -45,15 +46,13 @@ public class EvaluatorEWN extends Evaluator {
     }
 
     public void initEvaluator() {
-        ParMaxN params = new ParMaxN();
-        int maxNDepth = 4;
-        params.setMaxNDepth(maxNDepth);
         randomAgent = new RandomAgent("Random");
         randomAgent2 = new RandomAgent("Random");
         randomAgent3 = new RandomAgent("Random");
 
+        iterMctse = 1000;
         ParMCTSE parMCTSE = new ParMCTSE();
-        parMCTSE.setNumIter(500);
+        parMCTSE.setNumIter(iterMctse);
         mctse = new MCTSExpectimaxAgt("MCTSE",parMCTSE);
 
     }
@@ -206,8 +205,8 @@ public class EvaluatorEWN extends Evaluator {
         switch (m_mode) {
             case -1:return "no evaluation done ";
             case 0: return "success against Random (best is 1.0): ";
-            case 1: return "success against Mctse, 100 episodes (best is 1.0): ";
-            case 2: return "success against Mctse, 10 episodes (best is 1.0): ";
+            case 1: return "success against Mctse-"+iterMctse+", 100 episodes (best is 1.0): ";
+            case 2: return "success against Mctse-"+iterMctse+", 10 episodes (best is 1.0): ";
             default:
                 return null;
 
@@ -229,8 +228,8 @@ public class EvaluatorEWN extends Evaluator {
     public String getPlotTitle() {
         switch (m_mode) {
             case 0: return "success against Random";
-            case 1: return "success against Mctse-100";
-            case 2: return "success against Mctse-10";
+            case 1: return "success against Mctse-"+iterMctse+", 100 epi";
+            case 2: return "success against Mctse-"+iterMctse+", 10 epi";
             default:
                 return null;
         }

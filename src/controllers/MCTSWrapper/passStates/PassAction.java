@@ -52,4 +52,7 @@ public final class PassAction implements ApplicableAction {
         // that this value is used for real actions.
         return Integer.MIN_VALUE;
     }
+
+    @Override
+    public Types.ACTIONS getAction() { return null; }
 }

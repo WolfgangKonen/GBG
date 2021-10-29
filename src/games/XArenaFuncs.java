@@ -590,7 +590,7 @@ public class XArenaFuncs {
 						oPar.getWrapperMCTSIterations(),
 						oPar.getWrapperMCTS_PUCT(),
 						new PlayAgentApproximator(qa),
-						"MCTS-Wrapped "+qa.getName(),
+						"MCTS-wrapped "+qa.getName(),
 						oPar.getWrapperMCTS_depth()
 				);
 			} else {
@@ -598,7 +598,7 @@ public class XArenaFuncs {
 						oPar.getWrapperMCTSIterations(),
 						oPar.getWrapperMCTS_PUCT(),
 						new PlayAgentApproximator2(qa),
-						"MCTSE-Wrapped "+qa.getName(),
+						"Mctse-wrapped "+qa.getName(),
 						oPar.getWrapperMCTS_depth()
 				);
 			}

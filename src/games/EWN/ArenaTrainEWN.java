@@ -72,7 +72,7 @@ public class ArenaTrainEWN extends ArenaTrain {
         switch(str){
             case "[0,..,n]": ConfigEWN.CEll_CODING = 0;
                 break;
-            case "[0,1],[2,3],[3,4]": ConfigEWN.CEll_CODING = 1;
+            case "[0,1],[2,3],[4,5]": ConfigEWN.CEll_CODING = 1;
                 break;
         }
     }

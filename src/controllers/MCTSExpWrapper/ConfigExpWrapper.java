@@ -46,4 +46,19 @@ public class ConfigExpWrapper {
      * configurations it was superseeded by EPS = 1e-8 (Case A).]
      */
     public static double EPS = 1e-8;  //1e-8; 0.0; -1e-8
+
+    /**
+     * A switch for {@link MctseWrapperAgent}:
+     * <ul>
+     *  <li>  If true, expand EXPECTIMAX nodes when they are newly formed. That is, create all their CHANCE children
+     *        and expand them. Return the average over the childrens' score tuples.
+     *  <li>  If false, do not expand EXPECTIMAX nodes.
+     * </ul>
+     *  In any way, on subsequent passes through these EXPECTIMAX nodes, they select one of their children at random.
+     *  <p>
+     *  In theory, the {@code true}-setting should give better results, because EXPECTIMAX nodes with few visits should
+     *  get better results
+     */
+    public static boolean DO_EXPECTIMAX_EXPAND = true;
+
 }

@@ -1,9 +1,11 @@
 package controllers.MCTSExpWrapper;
 
+import controllers.MCTSExpWrapper.stateApproximation2.Approximator2;
 import controllers.MCTSWrapper.passStates.ApplicableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.passStates.RegularAction;
 import controllers.MCTSWrapper.utils.Tuple;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.util.HashMap;
@@ -23,7 +25,7 @@ public final class MctseExpecNode extends MctseNode {
 
 //    public final Map<Integer, Double> moveProbabilities;
 //    public final Map<Integer, Double> meanValues;
-//    private boolean expanded;
+    private boolean expanded = false;
 
     public MctseExpecNode(final GameStateIncludingPass gameState) {
         super(gameState);
@@ -33,14 +35,13 @@ public final class MctseExpecNode extends MctseNode {
         //meanValues = new HashMap<>();
     }
 
-    //--- never used ---
-//    public void setExpanded() {
-//        expanded = true;
-//    }
-//    public boolean isExpanded() {
-//        return expanded;
-//    }
-//
+    public void setExpanded() {
+        expanded = true;
+    }
+    public boolean isExpanded() {
+        return expanded;
+    }
+
 //   /**
 //     * Overrides the node's move probabilities.
 //     *
@@ -57,6 +58,22 @@ public final class MctseExpecNode extends MctseNode {
 //            moveProbabilities.put(availableActions[i].getId(), moveProps[i]);
 //        }
 //    }
+
+    public ScoreTuple expand(Approximator2 approximator) {
+        ScoreTuple avgScoreTuple = new ScoreTuple(gameState.getNumPlayers());
+        for (ApplicableAction r : gameState.getAvailableRandoms()) {
+            final double weight = gameState.getProbability(r);
+            final var tuple = gameState.advanceNondeterministic(r);
+            // final game state
+            final MctseChanceNode child = new MctseChanceNode(tuple.element2);    // a new, non-expanded node
+            child.expand(approximator);
+            childNodes.put(r.getId(), child);
+            ScoreTuple delta = child.getBestScoreTuple();
+            avgScoreTuple.combine(delta, ScoreTuple.CombineOP.AVG,0,weight);
+        }
+        setExpanded();
+        return avgScoreTuple;
+    }
 
     public Tuple<ApplicableAction, MctseChanceNode> selectNondet() {
         //--- old and wrong: this would always select the *same* random action---

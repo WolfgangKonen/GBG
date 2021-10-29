@@ -266,8 +266,8 @@ public class GBGBatch {
 			break;
 		case "EWN":
 			scaPar[0]="3x3 2-Player";
-			scaPar[1]="N-Player + 1";
-			scaPar[2]="None";
+			scaPar[1]="[0,..,n]";
+			scaPar[2]="False";
 			break;
 		case "2048":
 		case "ConnectFour": 

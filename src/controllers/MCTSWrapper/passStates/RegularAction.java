@@ -75,4 +75,7 @@ public final class RegularAction implements ApplicableAction {
     public int getId() {
         return action.toInt();
     }
+
+    @Override
+    public Types.ACTIONS getAction() { return action; }
 }

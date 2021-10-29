@@ -150,7 +150,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         if (iterMCTSWrap == 0) qa = pa;
                         else qa = new MCTSWrapperAgent(iterMCTSWrap, c_puct,
                                 new PlayAgentApproximator(pa),
-                                "MCTS-Wrapped " + pa.getName(),
+                                "MCTS-wrapped " + pa.getName(),
                                 maxDepth);
                         if (oPar.getWrapperNPly() > 0) {
                             System.out.println("oPar nPly = " + oPar.getWrapperNPly());
@@ -327,7 +327,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         if (iterMCTSWrap == 0) qa = pa;
                         else qa = new MCTSWrapperAgent(iterMCTSWrap, c_puct,
                                 new PlayAgentApproximator(pa),
-                                "MCTS-Wrapped " + pa.getName(),
+                                "MCTS-wrapped " + pa.getName(),
                                 100); // -1);
 
                         // *** only a sub-test: How good would AB-DL be in place of MCTSWrap(TCL-EXP)? ***

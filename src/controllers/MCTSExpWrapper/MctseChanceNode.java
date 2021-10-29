@@ -26,7 +26,7 @@ public final class MctseChanceNode extends MctseNode {
     public final Map<Integer, Double> moveProbabilities;
     public final Map<Integer, Double> qValues;
 
-    private boolean expanded;
+    private boolean expanded = false;
     private ScoreTuple bestScoreTuple;      // score tuple belonging to the best action of this at time of expansion of this
 //    private ScoreTuple sumOfScoreTuples;
 
@@ -115,7 +115,8 @@ public final class MctseChanceNode extends MctseNode {
             // In case visitCounts.size()==0 && EPS>0, select bestAction = argmax(getP(a)).
             // [This is because a non-visited node has getQ(a) = getN(a) = 0.]
             // This is the solution from Surag Nair, and it is the *recommended* choice.
-            var value = getQ(a) + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ConfigExpWrapper.EPS) / (1 + getN(a));
+            var value = getQ(a)/(getN(a)+ConfigExpWrapper.EPS)      // bug fix 2021-10-29: divide by getN(a)
+                    + c_puct * getP(a) * Math.sqrt(sum(visitCounts.values())+ConfigExpWrapper.EPS) / (1 + getN(a));
             // In case visitCounts.size()==0 && EPS==0, select the 1st action. This is the case originally
             // provided by JS, and it seemed first better in the Othello-case (but later we found that it is comparable to EPS>0).
 

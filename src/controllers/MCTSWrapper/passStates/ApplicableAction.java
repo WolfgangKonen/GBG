@@ -23,4 +23,6 @@ public interface ApplicableAction extends Identifiable {
     Tuple<Types.ACTIONS,StateObsNondeterministic> advanceNonDet(final StateObsNondeterministic so);
 
     StateObservation advanceDet(final StateObservation so);
+
+    Types.ACTIONS getAction();
 }

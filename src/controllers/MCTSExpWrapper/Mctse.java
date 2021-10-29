@@ -44,7 +44,7 @@ public final class Mctse {
         if (node.gameState.isFinalGameState())
             return node.gameState.getFinalScoreTuple();
 
-        // If a non-expanded node is reached, expand it (set its move probabilities) and return its best ScoreTuple
+        // If a non-expanded CHANCE node is reached, expand it (set its move probabilities) and return its best ScoreTuple
         if (!node.isExpanded()) {
             node.expand(approximator);
             return node.getBestScoreTuple();
@@ -69,39 +69,39 @@ public final class Mctse {
         final var selectedAction = selected.element1;
 
         int player = node.gameState.getPlayer();
-        //double putQ = Double.NaN;
         final MctseChanceNode selectedCNode;
         if (selected.element2 instanceof MctseExpecNode) {
             final var selectedENode = (MctseExpecNode) selected.element2;
+
+            if (ConfigExpWrapper.DO_EXPECTIMAX_EXPAND) {
+                if (selectedENode.gameState.isFinalGameState()) {
+                    int dummy=1;    // just optional debug stop
+                } else {
+                    // If a non-expanded, non-finel EXPECTIMAX node is reached, expand it (create all CHANCE children and
+                    // expand them) and return the probability-weighted average of their score tuples.
+                    if (!selectedENode.isExpanded()) {
+                        return selectedENode.expand(approximator);
+                    }
+                }
+            }
+
+            // Here, selectedENode is already expanded (or we do not expand EXPECTIMAX nodes)
+            // In any case, we select one of its CHANCE children randomly
             final var selectedNondet = selectedENode.selectNondet();
             selectedENode.incrementVisitCount(selectedNondet.element1);
             selectedCNode = selectedNondet.element2;
-            //putQ = selectedENode.getAverageTuple().scTup[player];
         } else {
             assert selected.element2 instanceof MctseChanceNode;
             selectedCNode = (MctseChanceNode) selected.element2;
         }
 
-        // Recursive call of the tree search for the child node. childValue is 'Delta' in pseudo code
+        // Recursive call of the tree search for the CHANCE child node. childValue is 'Delta' in pseudo-code.
         final var childValue = search(selectedCNode, depth+1);
-
-        // --- not needed anymore ---
-//        // Update the CHANCE child node's sumOfScoreTuples (Delta-Sum) with the childValue.
-//        selectedCNode.addToSumOfScoreTuples(childValue);
-//        // (should we update also node's sumOfScoreTuples? - No, this is done by the recursion, except for the
-//        // root node. And the root node does not need its sumOfScoreTuples updated)
-//
-//        // Increment the node's Q(a), depending on the child's class in {@code selected}
-//        if (selected.element2 instanceof MctseExpecNode) {
-//            ;   // nothing to do, putQ was set already above
-//        } else {    // ... instanceof MctseChanceNode
-//            putQ = selectedCNode.getSumOfScoreTuples().scTup[player];
-//        }
 
         final var qValue = node.getQ(selectedAction);
         node.qValues.put(
                 selectedAction.getId(),
-                qValue +      // this is here because we *increment* the node's Q(a) by putQ
+                qValue +      // this is here because we **increment** the node's Q(a) by ['Delta']_p
                 childValue.scTup[player]);
 
         // Increment the node's visit count (N).

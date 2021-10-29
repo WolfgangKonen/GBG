@@ -99,9 +99,9 @@ public final class GameStateIncludingPass {
         return new Tuple(new RegularAction(tuple.element1), new GameStateIncludingPass(tuple.element2));
     }
 
-    public double getProbability(Types.ACTIONS a) {
+    public double getProbability(ApplicableAction a) {
         assert state instanceof StateObsNondeterministic : "[GameStateIncludingPass] state must be NON DET";
-        return ((StateObsNondeterministic) state).getProbability(a);
+        return ((StateObsNondeterministic) state).getProbability(a.getAction());
     }
 
     /**
