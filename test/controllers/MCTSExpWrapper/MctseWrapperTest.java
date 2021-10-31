@@ -498,8 +498,8 @@ public class MctseWrapperTest extends GBGBatch {
         for (int iter : iterMCTSWrapArr) {
             hm.put(iter,fact*0.90);                     // Other values: mode=10, EPS=1e-8, c_puct=1.0
         }
-        int nTrial = 5;
-        int mode = 0;
+        int nTrial = 1;
+        int mode = 10;
         String csvFile = "mEWN3x3.csv";
 
         innerEWNTest(scaPar,agtFiles,iterMCTSWrapArr,hm,nTrial,mode, csvFile);
@@ -629,11 +629,12 @@ public class MctseWrapperTest extends GBGBatch {
 
     /**
      * Helper method for {@link #wholeEWN3x3Test()}:
-     * Check whether agent {@code qa} returns correct decisions on a number of {@code numStates=1000} 3x3 EWN states.
+     * Check whether agents {@code pa} and {@code qa} return correct decisions on a number of {@code numStates=1000} 3x3 EWN states.
      * <p>
      * This check works only for 3x3 EWN because only there we have a perfect benchmark agent ExpectimaxN. (For 5x5 EWN
      * or larger, an attempt to run Expectimax leads to exploding mem-size and run time.)
-     * @param qa    the agent
+     * @param pa    the (unwrapped) agent
+     * @param qa    the (wrapped) agent
      * @param gb    needed for default start state
      * @return      the precision, i.e. the rate of correct decisions of agent {@code qa}
      */
@@ -656,8 +657,9 @@ public class MctseWrapperTest extends GBGBatch {
             int ind_pa = where(actlist,act_pa);
             int ind_qa = where(actlist,act_qa);
             double[] vtab = act_ea.getVTable();
-            boolean pcorrect = (vtab[ind_pa]==maximum(vtab));
-            boolean qcorrect = (vtab[ind_qa]==maximum(vtab));
+            final var vmax = Arrays.stream(vtab).max().orElse(Double.NaN);
+            boolean pcorrect = (vtab[ind_pa]==vmax);
+            boolean qcorrect = (vtab[ind_qa]==vmax);
             if (pcorrect) cp++;
             if (qcorrect) cq++;
             if (!pcorrect && !qcorrect) {
@@ -728,11 +730,12 @@ public class MctseWrapperTest extends GBGBatch {
         return stateMap;
     }
 
-    private double maximum(double[] vtab) {
-        double vmax = -Double.MAX_VALUE;
-        for (double v : vtab) if (v>vmax) vmax=v;
-        return vmax;
-    }
+    // --- not needed, now done via Arrays.stream(vtab).max() ---
+//    private double maximum(double[] vtab) {
+//        double vmax = -Double.MAX_VALUE;
+//        for (double v : vtab) if (v>vmax) vmax=v;
+//        return vmax;
+//    }
 
     private int where(ArrayList<ACTIONS> actlist, ACTIONS act_qa) {
         int ind_qa=-1;

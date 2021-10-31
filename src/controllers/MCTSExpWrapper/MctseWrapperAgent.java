@@ -73,12 +73,9 @@ public final class MctseWrapperAgent extends AgentBase {
     public Types.ACTIONS_VT getNextAction2(
         final StateObservation sob,
         final boolean random,
-        final boolean silent
-    ) {
-
-
+        final boolean silent)
+    {
         rootNode = new MctseChanceNode(new GameStateIncludingPass(sob));
-
 
         mcts.largestDepth=0;
         // Performs the given number of MCTS iterations:
@@ -86,7 +83,7 @@ public final class MctseWrapperAgent extends AgentBase {
             mcts.search(rootNode,0);
         }
 
-        // Selects the int value of the action that leads to the child node that maximizes the visit count.
+        // Selects the int value of the action that leads to the child node with maximal visit counts.
         // This value is also cached for further calls.
         if (rootNode.visitCounts.size()==0) {
             // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),

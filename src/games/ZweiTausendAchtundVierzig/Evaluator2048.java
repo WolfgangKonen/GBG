@@ -276,12 +276,6 @@ public class Evaluator2048 extends Evaluator {
         return lastResult > ConfigEvaluator.MINPOINTS;
     }
 
- 	// --- implemented by Evaluator ---
-//  @Override
-//  public double getLastResult() {
-//      return lastResult;
-//  }
-    
     private PStats makePStats2048(int i, StateObserver2048 so2048, ACTIONS_VT actBest, int cumEmpty) {
     	int moveNum = so2048.getMoveCounter();
     	int actNum = (actBest==null) ? (-1) : actBest.toInt();
@@ -345,7 +339,7 @@ public class Evaluator2048 extends Evaluator {
      * {@code ArrayList<EResult>} from several runs, for later inspection and printout
      *
      */
-    public class EResult {
+    public static class EResult {
     	public int nPly;			// nPly
     	public int numEval;			// number of evaluation games (episodes) for this nPly
     	public double lowScore;		// lowest score
@@ -475,7 +469,7 @@ public class Evaluator2048 extends Evaluator {
 	public String getTooltipString() {
 		// use "<html> ... <br> ... </html>" to get multi-line tooltip text
 		return "<html>-1: none<br>"
-				+ "0: avg score from 250 games<br>"
+				+ "0: avg score from "+ConfigEvaluator.NUMBEREVALUATIONS+" games<br>"
 				+ "1: Evaluator2048_BoardPositions<br>"
 				+ "2: Evaluator2048_EA<br>"
 				+ "</html>";

@@ -11,7 +11,7 @@ public class ConfigEvaluator {
 
 
     //Evaluator2048 Settings
-    public static final int NUMBEREVALUATIONS = 20; //10; //250; //
+    public static final int NUMBEREVALUATIONS = 50; //10; //250; //
     public static final int MINPOINTS = 10000;
     //public static final boolean PLAYSTATS_CSV = false;	// use instead Types.PLAYSTATS_WRITING
 

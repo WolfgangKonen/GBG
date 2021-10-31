@@ -1,0 +1,49 @@
++++ Results 2048 for TC-NT3_fixed_4_6-Tupels_200k-FA.agt.zip as wrapped agent +++
+
+*** iterations = 0 , i.e. no wrapping ***
+Lowest score is: 16808
+Average score is: 135541 +- 8118
+Median score is: 156982
+Highest score is: 263804
+Average game duration: 130ms
+Duration of evaluation: 6s
+Average moves per game: 5651.0
+Moves per second: 43638.0
+
+Highest tiles: 
+01024, 002  (4.0%)
+02048, 002  (4.0%)
+04096, 009  (18.0%)
+08192, 034  (68.0%)
+16384, 003  (6.0%)
+
+*** iterations = 100, maxDepth=-1, c_puct=1.0 *** 
+much worse!
+Average score is: 28283 +- 2265
+Median score is: 25992
+
+*** iterations = 500, maxDepth=4, c_puct=1.0 *** 
+much worse!
+Average score is: 49262 +- 2499
+Median score is: 55458
+
+*** iterations = 500, maxDepth=3, c_puct=100.0 *** 
+much worse!
+Average score is: 18495 +- 1472
+Median score is: 16216
+
+*** ExpectimaxNWrapper, nPly=2 *** 
+much better!
+Lowest score is: 108992
+Average score is: 207195 +- 8435
+Median score is: 176314
+Highest score is: 365276
+Average game duration: 77572ms
+Duration of evaluation: 3879s
+Average moves per game: 8318.0
+Moves per second: 107.0
+
+Highest tiles: 
+08192, 035  (70.0%)
+16384, 015  (30.0%)
+

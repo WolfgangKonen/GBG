@@ -23,40 +23,19 @@ import java.util.Map;
 public final class MctseExpecNode extends MctseNode {
     public final Map<Integer, MctseChanceNode> childNodes;
 
-//    public final Map<Integer, Double> moveProbabilities;
-//    public final Map<Integer, Double> meanValues;
-    private boolean expanded = false;
 
     public MctseExpecNode(final GameStateIncludingPass gameState) {
         super(gameState);
 
         childNodes = new HashMap<>();
-        //moveProbabilities = new HashMap<>();
-        //meanValues = new HashMap<>();
     }
 
-    public void setExpanded() {
-        expanded = true;
-    }
-    public boolean isExpanded() {
-        return expanded;
-    }
-
-//   /**
-//     * Overrides the node's move probabilities.
-//     *
-//     * @param moveProps The new move probabilities.
-//     * @throws IllegalArgumentException If the moveProps array's size doesn't equal the count of available actions.
-//     */
-//    public void setMoveProbabilities(final double[] moveProps) {
-//        final var availableActions = gameState.getAvailableActionsIncludingPassActions();
-//
-//        if (availableActions.length != moveProps.length)
-//            throw new IllegalArgumentException("The length of moveProps array has to match the count of available actions");
-//
-//        for (int i = 0; i < moveProps.length; i++) {
-//            moveProbabilities.put(availableActions[i].getId(), moveProps[i]);
-//        }
+    // --- now in MctseNode ---
+//    public void setExpanded() {
+//        expanded = true;
+//    }
+//    public boolean isExpanded() {
+//        return expanded;
 //    }
 
     public ScoreTuple expand(Approximator2 approximator) {
@@ -98,55 +77,6 @@ public final class MctseExpecNode extends MctseNode {
 
         return new Tuple<>(r, child);
     }
-
-    //--- never used ---
-//    /**
-//     * @param availableActions
-//     * @return the action argmax(getP(a)) (the first maximizing action, if there are more than one with the same max)
-//     */
-//    private ApplicableAction selectBestFromP(ApplicableAction[] availableActions) {
-//        var bestValue = Double.NEGATIVE_INFINITY;
-//        ApplicableAction bestAction = null;
-//        for (final var a : availableActions) {
-//            var value = getP(a);
-//            if (value > bestValue) {
-//                bestValue = value;
-//                bestAction = a;
-//            }
-//        }
-//        return bestAction;
-//    }
-
-    //--- never used ---
-//    /**
-//     * Loop over childNodes to calculate average {@link ScoreTuple}.
-//     * @return a weighted average {@link ScoreTuple} where the weights are the probability of each action
-//     *      and the {@link ScoreTuple}s are the <b>mean</b> tuples of each child
-//     */
-//    public ScoreTuple getAverageTuple() {
-//        int selfVisits = (int) sum(visitCounts.values());
-//        ScoreTuple averageScoreTuple = new ScoreTuple(gameState.getNumPlayers());  // initialize with 0's
-//        for (Map.Entry<Integer, MctseChanceNode> entry : childNodes.entrySet()) {
-//            Types.ACTIONS act = new Types.ACTIONS(entry.getKey());
-//            double prob = gameState.getProbability(act);
-//            ApplicableAction actionND = new RegularAction(act);
-//            MctseChanceNode child = entry.getValue();
-//            double weight = prob*selfVisits/(double)getN(actionND);    // TODO
-//            averageScoreTuple.combine(child.getSumOfScoreTuples(), ScoreTuple.CombineOP.AVG,0,weight);
-//            // note that child.getSumOfScoreTuples()/getN(actionND) is just the *mean* score tuple of the child.
-//            // The multiplication by selfVisits is just for the caller of this method, thus the effective weight
-//            // is just prob.
-//        }
-//        return averageScoreTuple;
-//    }
-
-//    double getP(final ApplicableAction action) {
-//        return moveProbabilities.getOrDefault(action.getId(), 0.0);
-//    }
-//
-//    double getQ(final ApplicableAction action) {
-//        return meanValues.getOrDefault(action.getId(), 0.0);
-//    }
 
     /**
      * Check that {@code selfVisits}, the number of visits to {@code this}, as established

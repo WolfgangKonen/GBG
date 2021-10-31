@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class represents a MCTSE <b>Chance node</b>.
+ * This class represents an MCTSE <b>Chance node</b>.
  * Each Chance node has multiple {@link MctseNode} children.
  * The MCTSE tree starts with a Chance node and has Chance nodes at all leaves.
  * <p>
@@ -26,9 +26,7 @@ public final class MctseChanceNode extends MctseNode {
     public final Map<Integer, Double> moveProbabilities;
     public final Map<Integer, Double> qValues;
 
-    private boolean expanded = false;
     private ScoreTuple bestScoreTuple;      // score tuple belonging to the best action of this at time of expansion of this
-//    private ScoreTuple sumOfScoreTuples;
 
     public MctseChanceNode(final GameStateIncludingPass gameState) {
         super(gameState);
@@ -36,29 +34,22 @@ public final class MctseChanceNode extends MctseNode {
         childNodes = new HashMap<>();
         moveProbabilities = new HashMap<>();
         qValues = new HashMap<>();
-//        sumOfScoreTuples = new ScoreTuple(gameState.getFinalScoreTuple().scTup.length);  // initialize with all 0's
     }
 
     public void expand(Approximator2 approximator) {
-        final var sTupleAndMoveProbabilities = gameState.getApproximatedValueAndMoveProbabilities(approximator);
-        setMoveProbabilities(sTupleAndMoveProbabilities.element2);
-        setExpanded();
-        setBestScoreTuple(sTupleAndMoveProbabilities.element1);
+        if (gameState.isFinalGameState()) {
+            // if the game state reached with the previous nondeterministic action is a final state (can happen for
+            // game 2048 and DO_EXPECTIMAX_EXPAND==true) then set this node's ScoreTuple to the final state score tuple
+            // AND do not expand this node (this guarantees that on next pass through this node the same score tuple will be returned)
+            setBestScoreTuple(gameState.getFinalScoreTuple());
+        } else {
+            // the normal case
+            final var sTupleAndMoveProbabilities = gameState.getApproximatedValueAndMoveProbabilities(approximator);
+            setMoveProbabilities(sTupleAndMoveProbabilities.element2);
+            setExpanded();
+            setBestScoreTuple(sTupleAndMoveProbabilities.element1);
+        }
     }
-
-    private void setExpanded() {  expanded = true;  }
-
-    public boolean isExpanded() {  return expanded;  }
-
-    private void setBestScoreTuple(ScoreTuple sc) { bestScoreTuple = sc; }
-
-    public ScoreTuple getBestScoreTuple() { return bestScoreTuple; }
-
-//    public void addToSumOfScoreTuples(ScoreTuple sc) {
-//        sumOfScoreTuples.combine(sc, ScoreTuple.CombineOP.SUM,0,0);
-//    }
-
-//    public ScoreTuple getSumOfScoreTuples() { return sumOfScoreTuples; }
 
     /**
      * Overrides the node's move probabilities.
@@ -76,6 +67,10 @@ public final class MctseChanceNode extends MctseNode {
             moveProbabilities.put(availableActions[i].getId(), moveProps[i]);
         }
     }
+
+    private void setBestScoreTuple(ScoreTuple sc) { bestScoreTuple = sc; }
+
+    public ScoreTuple getBestScoreTuple() { return bestScoreTuple; }
 
     /**
      * Try all available actions and select the one which maximizes the PUCT formula. Depending on the action and the
@@ -160,24 +155,6 @@ public final class MctseChanceNode extends MctseNode {
     }
 
 
-    //--- never used ---
-//    /**
-//     * @param availableActions
-//     * @return the action argmax(getP(a)) (the first maximizing action, if there are more than one with the same max)
-//     */
-//    private ApplicableAction selectBestFromP(ApplicableAction[] availableActions) {
-//        var bestValue = Double.NEGATIVE_INFINITY;
-//        ApplicableAction bestAction = null;
-//        for (final var a : availableActions) {
-//            var value = getP(a);
-//            if (value > bestValue) {
-//                bestValue = value;
-//                bestAction = a;
-//            }
-//        }
-//        return bestAction;
-//    }
-
     double getQ(final ApplicableAction action) {
         return qValues.getOrDefault(action.getId(), 0.0);
     }
@@ -228,6 +205,5 @@ public final class MctseChanceNode extends MctseNode {
         }
         return numExpec;
     }
-
 
 }

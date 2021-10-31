@@ -4,7 +4,7 @@ import controllers.MCTSExpWrapper.stateApproximation2.Approximator2;
 import tools.ScoreTuple;
 
 /***
- * A class that encapsulates the algorithm for a monte carlo tree search for 2-player games.
+ * A class that encapsulates the algorithm for Monte Carlo Tree Search Expectimax for 2-player games.
  * The games must have separate states for situations where a player has to pass.
  *
  * This inspiration for this code comes from https://web.stanford.edu/~surag/posts/alphazero.html
@@ -34,7 +34,7 @@ public final class Mctse {
      * <p>
      * Values are negated in 2-player games because they are viewed from the previous player's perspective.
      * <p>
-     *     ATTENTION: This method is not yet viable for N &gt; 2 players (!!)
+     * ATTENTION: This method is not yet viable for N &gt; 2 players (!!)
      *
      * @param node Node where the tree search starts.
      * @return The evaluation of a reached leaf node's game state (negated on each recursion level for 2-player games).
@@ -73,9 +73,12 @@ public final class Mctse {
         if (selected.element2 instanceof MctseExpecNode) {
             final var selectedENode = (MctseExpecNode) selected.element2;
 
+            // optional: a fresh, non-expanded EXPECTIMAX node may be expanded
             if (ConfigExpWrapper.DO_EXPECTIMAX_EXPAND) {
                 if (selectedENode.gameState.isFinalGameState()) {
-                    int dummy=1;    // just optional debug stop
+                    // do nothing (no expand), if selectedENode contains a game-over state
+
+                    //int dummy=1;    // just optional debug stop
                 } else {
                     // If a non-expanded, non-finel EXPECTIMAX node is reached, expand it (create all CHANCE children and
                     // expand them) and return the probability-weighted average of their score tuples.

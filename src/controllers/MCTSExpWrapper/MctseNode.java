@@ -25,6 +25,8 @@ public class MctseNode {
 
     public final Map<Integer, Integer> visitCounts;
 
+    protected boolean expanded = false;
+
     MctseNode(final GameStateIncludingPass gameState) {
         this.gameState = gameState;
         visitCounts = new HashMap<>();
@@ -46,5 +48,9 @@ public class MctseNode {
                 getN(action) + 1
         );
     }
+
+    protected void setExpanded() {  expanded = true;  }
+
+    public boolean isExpanded() {  return expanded;  }
 
 }
