@@ -1,18 +1,5 @@
 package starters;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
 import games.Arena;
 import games.BlackJack.ArenaBlackJack;
 import games.BlackJack.ArenaBlackJackTrain;
@@ -43,6 +30,13 @@ import games.ZweiTausendAchtundVierzig.Arena2048;
 import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import gui.SolidBorder;
 import tools.Types;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * This class is a general launcher for GBG. The user may select via launcher UI or predefine  
@@ -639,7 +633,7 @@ public class GBGLaunch {
 			break;
 		case "Yavalath":
 			scaPar0_L.setText("Players");
-			setScaPar0List(new int[]{2});
+			setScaPar0List(new int[]{2,3});
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");

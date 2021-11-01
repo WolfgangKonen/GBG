@@ -15,12 +15,14 @@ public class UtilityFunctionsYavalath {
      * Returns a value for losing or winning from the perspective of the last played tile.
      * Does this by checking if it has any neighbours that can produce a line.
      *
-     * @param gb       The game board
-     * @param lastTile The last played tile
+     * @param so       The StateObserver
      * @return {@link Types.WINNER#PLAYER_WINS} on 4 tile lines or
      *         {@link Types.WINNER#PLAYER_LOSES} on 3 tile lines
      */
-    public static Types.WINNER getWinner(TileYavalath[][] gb, TileYavalath lastTile){
+    public static Types.WINNER getWinner(StateObserverYavalath so){
+        TileYavalath[][] gb = so.getGameBoard();
+        TileYavalath lastTile = so.getMoveList().get(0);
+
         if (lastTile==null) return null;
         int player = lastTile.getPlayer();
 
@@ -79,6 +81,9 @@ public class UtilityFunctionsYavalath {
                 return Types.WINNER.PLAYER_LOSES;
             }
         }
+        if(so.getNumAvailableActions()==0) {
+            return Types.WINNER.TIE;
+        }
         return null;
     }
 
@@ -132,6 +137,94 @@ public class UtilityFunctionsYavalath {
         if((i >= 0 && i <ConfigYavalath.BOARD_SIZE) && (j >= 0 && j < ConfigYavalath.BOARD_SIZE)){
             return board[i][j].getPlayer() != ConfigYavalath.INVALID_FIELD;
         }else return false;
+    }
+
+
+    /**
+     * Checks if the next player can win on his turn.
+     * @param so The state-observer
+     * @return The action that would lead to the win
+     */
+    public static Types.ACTIONS nextPlayerCanWin(StateObserverYavalath so){
+
+        TileYavalath[][] gb = so.getGameBoard();
+
+        //Need to call nextPlayer twice because it hasnt been called from advance yet
+        TileYavalath tileToUse = so.getLastTileFromPlayer(so.getNextPlayerFrom(so.getNextPlayer()));
+
+        if(tileToUse == null) return null;
+
+        int playerToUse = tileToUse.getPlayer();
+
+        ArrayList<TileYavalath> neighbours = getNeighbours(gb,tileToUse);
+
+        int tileToUseX = tileToUse.getX();
+        int tileToUseY = tileToUse.getY();
+
+        for(TileYavalath neighbour : neighbours){
+
+            int neighbourX = neighbour.getX();
+            int neighbourY = neighbour.getY();
+
+            int deltaX = tileToUseX - neighbourX;
+            int deltaY = tileToUseY - neighbourY;
+
+            //For neighbours that belong to the same player check if there is a single tile in that direction or behind with one free space in between
+            if(neighbour.getPlayer() == playerToUse) {
+
+                //Extrapolate the tile in the direction of the neighbour and the opposite direction
+                int extrapolateX = neighbourX - 2 * deltaX;
+                int extrapolateY = neighbourY - 2 * deltaY;
+
+                int extrapolateOppositeX = tileToUseX + 2 * deltaX;
+                int extrapolateOppositeY = tileToUseY + 2 * deltaY;
+
+                //Check if there is a valid tile and if the player is the same
+                if (isTileValid(extrapolateX, extrapolateY, gb)) {
+                    if (gb[extrapolateX][extrapolateY].getPlayer() == playerToUse) {
+                        int threateningTileX = neighbourX - deltaX;
+                        int threateningTileY = neighbourY - deltaY;
+                        //Check if the threatening tile is free
+                        if(gb[threateningTileX][threateningTileY].getPlayer() == ConfigYavalath.EMPTY){
+                            gb[threateningTileX][threateningTileY].setThreateningMove(true);
+                            return new Types.ACTIONS(threateningTileX * ConfigYavalath.BOARD_SIZE + threateningTileY);
+                        }
+
+                    }
+                }
+
+                if (isTileValid(extrapolateOppositeX, extrapolateOppositeY, gb)) {
+                    if (gb[extrapolateOppositeX][extrapolateOppositeY].getPlayer() == playerToUse) {
+                        int threateningTileX = tileToUseX + deltaX;
+                        int threateningTileY = tileToUseY + deltaY;
+                        if(gb[threateningTileX][threateningTileY].getPlayer() == ConfigYavalath.EMPTY){
+                            gb[threateningTileX][threateningTileY].setThreateningMove(true);
+                            return new Types.ACTIONS(threateningTileX * ConfigYavalath.BOARD_SIZE + threateningTileY);
+                        }
+                    }
+                }
+                //If the neighbour is an empty space check if there's a 2 tile line behind it
+            } else if(neighbour.getPlayer() == ConfigYavalath.EMPTY){
+                int length = 0;
+                for (int i = 1; i < 3; i++) {
+                    int x = neighbourX - i * deltaX;
+                    int y = neighbourY - i * deltaY;
+
+                    if(isTileValid(x,y,gb)){
+                        if(gb[x][y].getPlayer() == playerToUse){
+                            length++;
+                        } else break;
+                    }
+
+                }
+                if (length == 2) {
+                    gb[neighbourX][neighbourY].setThreateningMove(true);
+                    return new Types.ACTIONS(neighbourX*ConfigYavalath.BOARD_SIZE + neighbourY);
+                }
+            }
+        }
+        //All other tiles belong to an enemy, dont need to check for those
+        return null;
     }
 
     /**

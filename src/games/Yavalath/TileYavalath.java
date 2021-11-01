@@ -19,6 +19,7 @@ public class TileYavalath implements Serializable {
     private double value;
     private Polygon poly;
     private Point tileCenter;
+    private boolean threateningMove; //Only used for marking it on the board so its easy to recognize
 
     public TileYavalath(int x, int y, int player){
         this.player = player;
@@ -75,6 +76,14 @@ public class TileYavalath implements Serializable {
 
     public Point getTileCenter(){
         return tileCenter;
+    }
+
+    public void setThreateningMove(boolean threat){
+        threateningMove = threat;
+    }
+
+    public boolean getThreateningMove(){
+        return threateningMove;
     }
 
     /**

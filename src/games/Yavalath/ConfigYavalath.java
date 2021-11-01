@@ -2,7 +2,7 @@ package games.Yavalath;
 
 public class ConfigYavalath {
 
-    static int BOARD_LENGTH = 5; //Edge length of the board
+    public static int BOARD_LENGTH = 5; //Edge length of the board
     public static int BOARD_SIZE = (BOARD_LENGTH*2)-1; //Max length one row of the board can have
     static int x = (BOARD_SIZE-BOARD_LENGTH);
     static int INVALID_CELLS = x*x+x; //Number of invalid cells that are only there to simplify the board

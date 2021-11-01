@@ -3,7 +3,10 @@ package games.Yavalath;
 import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
+
+import java.io.Serializable;
 import java.util.ArrayList;
+
 import static games.Yavalath.ConfigYavalath.*;
 /*
  *                  Board representation, full board with invalid cells
@@ -38,8 +41,10 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     private ArrayList<Types.ACTIONS> availableActions;
     private TileYavalath[][] board;
     private int currentPlayer;
-    private TileYavalath lastPlayedTile;
     private boolean swapRuleUsed = false;
+    private int numPlayers = PLAYERS;
+    private GameInformation information;
+    private ArrayList <TileYavalath> moveList;
 
     /**
      * change the version ID for serialization only if a newer version is no longer
@@ -53,6 +58,8 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         board = setDefaultGameBoard();
         currentPlayer = PLAYER_ONE;
         setAvailableActions();
+        information = new GameInformation(numPlayers);
+        moveList = new ArrayList<>();
     }
 
     public StateObserverYavalath(StateObserverYavalath stateObserverYavalath) {
@@ -60,8 +67,10 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         this.board = new TileYavalath[BOARD_SIZE][BOARD_SIZE];
         this.board = UtilityFunctionsYavalath.copyBoard(stateObserverYavalath.getGameBoard());
         this.currentPlayer = stateObserverYavalath.currentPlayer;
-        this.lastPlayedTile = stateObserverYavalath.lastPlayedTile;
+        this.numPlayers = stateObserverYavalath.numPlayers;
         this.swapRuleUsed = stateObserverYavalath.swapRuleUsed;
+        this.information = new GameInformation(stateObserverYavalath.information);
+        this.moveList = (ArrayList<TileYavalath>) stateObserverYavalath.moveList.clone();
         if(stateObserverYavalath.availableActions!=null){
             this.availableActions = (ArrayList<Types.ACTIONS>) stateObserverYavalath.availableActions.clone();
         }
@@ -114,23 +123,33 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     /**
      *
      */
-    //TODO Need to consider swap rule + 3 player extension in that case
     @Override
     public void setAvailableActions() {
-            availableActions = new ArrayList<>();
-            for(int i=0;i<BOARD_SIZE;i++){
-                for(int j=0;j<BOARD_SIZE;j++){
-                    if(Math.abs(j-i)<BOARD_LENGTH && board[i][j].getPlayer() == EMPTY){
-                        int actionInt = i*BOARD_SIZE+j;
-                        availableActions.add(new Types.ACTIONS(actionInt));
+
+        availableActions = new ArrayList<>();
+
+        //In 3-player-variant need to check if the next player can win on this move and set the action to that winning move
+        if(numPlayers == 3 && moveList != null){
+            Types.ACTIONS threateningMove = UtilityFunctionsYavalath.nextPlayerCanWin(this);
+            if(threateningMove!= null){
+                availableActions.add(threateningMove);
+                return;
+            }
+        }
+
+        for(int i=0;i<BOARD_SIZE;i++){
+            for(int j=0;j<BOARD_SIZE;j++){
+                if(Math.abs(j-i)<BOARD_LENGTH && board[i][j].getPlayer() == EMPTY){
+                    int actionInt = i*BOARD_SIZE+j;
+                    availableActions.add(new Types.ACTIONS(actionInt));
                     }
                 }
             }
             //If only the first piece has been placed, swap rule is available and the just executed action needs to be added to
             //the list of available actions again
-            if(getMoveCounter()==1){
-                availableActions.add(new Types.ACTIONS(lastPlayedTile.getX()*BOARD_SIZE+lastPlayedTile.getY()));
-            }
+        if(getMoveCounter()==1 && numPlayers == 2){
+            availableActions.add(new Types.ACTIONS(moveList.get(0).getX()*BOARD_SIZE+moveList.get(0).getY()));
+        }
 
     }
 
@@ -140,9 +159,8 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     }
 
     /**
-     * Advances the current state given 'action' to a new state
+     * Advances the current state given 'action' to a new state and updates the game information accordingly.
      */
-    //TODO 3 player extension
     @Override
     public void advance(Types.ACTIONS action) {
         this.advanceBase(action);
@@ -159,13 +177,27 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         }
 
         board[i][j].setPlayer(currentPlayer);
-        lastPlayedTile = board[i][j];
-        setAvailableActions();
+        board[i][j].setThreateningMove(false);
+        moveList.add(0, board[i][j]);
         super.addToLastMoves(action);
         super.incrementMoveCounter();
 
-        currentPlayer = (currentPlayer == PLAYER_ONE ) ? PLAYER_TWO : PLAYER_ONE;
+        setAvailableActions();
+        Types.WINNER info = UtilityFunctionsYavalath.getWinner(this);
+        if(info != null){
+            switch(info){
+                case TIE -> information.updateGameInformation(-1,-1);
+                case PLAYER_WINS -> information.updateGameInformation(currentPlayer,-1);
+                case PLAYER_LOSES -> {
+                    information.updateGameInformation(-2,currentPlayer);
 
+                    if(availableActions.size() == 0){   //in case the losing move of the player also places the last tile on the board
+                        information.updateGameInformation(-1,information.loser);
+                    }
+                }
+            }
+        }
+        currentPlayer = getNextPlayer();
     }
 
     private void advance(TileYavalath tile){
@@ -180,7 +212,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
 
     @Override
     public int getNumPlayers() {
-        return PLAYERS;
+        return numPlayers;
     }
 
 
@@ -189,20 +221,9 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
      * 			For Yavalath only game-over states have a non-zero game score.
      * 			It is the reward from the perspective of {@code player}.
      */
-    //TODO 3 player extension
     @Override
     public double getGameScore(int player) {
-        Types.WINNER winner = UtilityFunctionsYavalath.getWinner(board,lastPlayedTile);
-
-        if(winner == Types.WINNER.PLAYER_WINS) {
-            if(player == lastPlayedTile.getPlayer()) return 1.0;
-            else return -1.0;
-        }
-        else if (winner == Types.WINNER.PLAYER_LOSES) {
-            if(player == lastPlayedTile.getPlayer()) return -1.0;
-            else return 1.0;
-        }
-        else return 0;
+        return information.getGameScores()[player];
     }
 
     @Override
@@ -227,8 +248,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
 
     @Override
     public boolean isGameOver() {
-        int winner = determineWinner();
-        return (getNumAvailableActions() == 0 || winner != EMPTY);
+        return (information.winner != -2);
     }
 
     @Override
@@ -241,43 +261,124 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         return true;
     }
 
+    /**
+     * Returns the last tile that player has played.
+     */
+    public TileYavalath getLastTileFromPlayer(int player){
+        for (TileYavalath x:moveList){
+            if(x.getPlayer() == player) return x;
+        }
+        return null;
+    }
+
+    public ArrayList<TileYavalath> getMoveList(){
+        return moveList;
+    }
+
 
     /**
      * Checks if the current state of the game board is legal and achievable by counting
-     * the game tiles each player has placed. Considers the swap-rule.
+     * the game tiles each player has placed. Considers the swap-rule in 2 player version
+     * and prematurely exited players in 3 player version.
      */
-    //TODO 3 player extension
     @Override
     public boolean isLegalState() {
         int playerOneTiles = 0;
         int playerTwoTiles = 0;
+        int playerThreeTiles = 0;
 
         for (TileYavalath[] tileRow:board) {
             for(TileYavalath tile:tileRow){
-                if(tile.getPlayer()==PLAYER_ONE){
+                if(tile.getPlayer() == PLAYER_ONE){
                     playerOneTiles++;
                 } else if(tile.getPlayer()==PLAYER_TWO){
                     playerTwoTiles++;
+                } else if(tile.getPlayer() == PLAYER_THREE){
+                    playerThreeTiles++;
                 }
             }
         }
 
+        boolean result = false;
+
+        switch (numPlayers){
+            case 2 -> result = legalState2P(playerOneTiles,playerTwoTiles);
+            case 3 -> result = legalState3P(playerOneTiles,playerTwoTiles,playerThreeTiles);
+        }
+
+        return result;
+    }
+
+    private boolean legalState2P(int playerOneTiles, int playerTwoTiles){
         if(currentPlayer == PLAYER_ONE){
             if(swapRuleUsed){
                 return (playerTwoTiles-1 == playerOneTiles);
-            } else {
+            } else{
                 return (playerOneTiles == playerTwoTiles);
             }
-        } else if(currentPlayer == PLAYER_TWO){
+        } else {
             if(swapRuleUsed){
                 return (playerOneTiles == playerTwoTiles);
             } else{
                 return (playerOneTiles-1 == playerTwoTiles);
             }
         }
-
-        return true;
     }
+
+    private boolean legalState3P(int playerOneTiles, int playerTwoTiles, int playerThreeTiles){
+        if(currentPlayer == PLAYER_ONE){
+            switch(information.loser){
+                case -1 -> {
+                    return (playerOneTiles == playerTwoTiles && playerOneTiles == playerThreeTiles);
+                }
+                case 0 -> {
+                    return (playerTwoTiles == playerThreeTiles);
+                }
+                case 1 -> {
+                    return (playerOneTiles == playerThreeTiles);
+                }
+                case 2 -> {
+                    return (playerOneTiles == playerTwoTiles);
+                }
+            }
+        }else if(currentPlayer == PLAYER_TWO){
+            switch(information.loser){
+                case -1 -> {
+                    return (playerOneTiles-1 == playerTwoTiles && playerOneTiles-1 == playerThreeTiles);
+                }
+                case 0 -> {
+                    return (playerTwoTiles == playerThreeTiles);
+                }
+                case 1 -> {
+                    return (playerOneTiles-1 == playerThreeTiles);
+                }
+                case 2 -> {
+                    return (playerOneTiles-1 == playerTwoTiles);
+                }
+            }
+        }else{
+            switch(information.loser){
+                case -1 -> {
+                    return (playerOneTiles == playerTwoTiles && playerOneTiles+1 == playerThreeTiles);
+                }
+                case 0 -> {
+                    return (playerTwoTiles+1 == playerThreeTiles);
+                }
+                case 1 -> {
+                    return (playerOneTiles+1 == playerThreeTiles);
+                }
+                case 2 -> {
+                    return (playerOneTiles+1 == playerTwoTiles);
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isLegalAction(Types.ACTIONS action){
+        return availableActions.contains(action);
+    }
+
 
     @Override
     public String stringDescr() {
@@ -320,31 +421,229 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         }
     }
 
-    //TODO 3 player extension
-    private int determineWinner(){
-        Types.WINNER result = UtilityFunctionsYavalath.getWinner(board, lastPlayedTile);
-        if(result == Types.WINNER.PLAYER_WINS){
-            return (this.getPlayer() == PLAYER_ONE ? PLAYER_TWO : PLAYER_ONE);
-        } else if(result == Types.WINNER.PLAYER_LOSES){
-            return (this.getPlayer() == PLAYER_ONE ? PLAYER_ONE : PLAYER_TWO);
-        }
-        return EMPTY;
-    }
-
     public TileYavalath[][] getGameBoard(){
         return board;
     }
 
-    public TileYavalath getLastPlayedTile(){
-        return lastPlayedTile;
-    }
-
     public void useSwapRule(){
-        swapRuleUsed = true;
-        advance(lastPlayedTile);
+        advance(moveList.get(0));
     }
 
     public boolean swapRuleUsed(){
         return swapRuleUsed;
+    }
+
+    /**
+     * Adjusts the next player. Skips if next player has lost already (Only applicable to 3-player-Yavalath).
+     * @return Next player to play
+     */
+    @Override
+    public int getNextPlayer(){
+        int nextPlayer = (currentPlayer+1)%numPlayers;
+        if(nextPlayer == information.loser){
+            nextPlayer = (nextPlayer+1)%numPlayers;
+        }
+        return nextPlayer;
+    }
+
+    public int getNextPlayerFrom(int player){
+        int nextPlayer = (player+1)%numPlayers;
+        if(nextPlayer == information.loser){
+            nextPlayer = (nextPlayer+1)%numPlayers;
+        }
+        return nextPlayer;
+    }
+
+    public int getLoser(){
+        return information.loser;
+    }
+
+    public int getWinner(){
+        return information.winner;
+    }
+
+    public boolean isTie(){
+        return information.winner == -1;
+    }
+
+
+    /**
+     * Only used for adjusting the player numbers for testing purposes.
+     * @param players Number of players
+     */
+    public void setNumPlayers(int players){
+        numPlayers = players;
+        information = new GameInformation(players);
+    }
+
+
+    /**
+     * Holds information about the final game state, including if a player
+     * has lost already in 3-player-Yavalath and the game-scores for each player.
+     */
+    class GameInformation implements Serializable {
+        private int winner; //-2 uninitialized, -1 on draw, 0,1,2 on player win
+        private int loser; //-1 uninitialized, 0,1,2 if a player has lost
+        double[] gameScores;
+
+        GameInformation(int numPlayers){
+            winner = -2;
+            loser = -1;
+            gameScores = new double[numPlayers];
+        }
+
+        GameInformation(GameInformation original){
+            this.winner = original.winner;
+            this.loser = original.loser;
+            this.gameScores = original.gameScores.clone();
+        }
+
+        /**
+         * Updates the game information from the latest winner or loser information.
+         * @param winner -1 for ties, 0,1,2 for player win, -2 for everything else
+         * @param loser 0,1,2 for player loss, -1 for everything else
+         */
+        public void updateGameInformation(int winner,int loser){
+            this.winner = winner;
+            this.loser = loser;
+            updateGameScores();
+        }
+
+        private void updateGameScores() {
+            switch (numPlayers){
+                case 2 -> updateGameScores2P();
+                case 3 -> updateGameScores3P();
+            }
+        }
+
+        private void updateGameScores3P() {
+            switch (winner){
+                case -2 -> {     //No winner yet
+                    switch (loser){
+                        case 0 -> { //Player 1 has lost
+                            gameScores[0] = NEGATIVE_REWARD;
+                            // another player has already lost before, need to mark winner
+                            if(gameScores[1] == NEGATIVE_REWARD || gameScores[2] == NEGATIVE_REWARD){
+                                if(gameScores[1] == NEGATIVE_REWARD){ //Player 2 has also lost, 3 wins
+                                    winner = 2;
+                                    gameScores[2] = POSITIVE_REWARD;
+                                }else {     //Player 3 has also lost, 2 wins
+                                    winner = 1;
+                                    gameScores[1] = POSITIVE_REWARD;
+                                }
+                            }
+                        }
+                        case 1 -> { //Player 2 has lost
+                            gameScores[1] = NEGATIVE_REWARD;
+                            // another player has already lost before, need to mark winner
+                            if(gameScores[0] == NEGATIVE_REWARD || gameScores[2] == NEGATIVE_REWARD){
+                                if(gameScores[0] == NEGATIVE_REWARD){ //Player 1 has also lost, 3 wins
+                                    winner = 2;
+                                    gameScores[2] = POSITIVE_REWARD;
+                                }else {     //Player 3 has also lost, 1 wins
+                                    winner = 0;
+                                    gameScores[0] = POSITIVE_REWARD;
+                                }
+                            }
+                        }
+                        case 2 -> { //Player 3 has lost
+                            gameScores[2] = NEGATIVE_REWARD;
+                            // another player has already lost before, need to mark winner
+                            if(gameScores[0] == NEGATIVE_REWARD || gameScores[1] == NEGATIVE_REWARD){
+                                if(gameScores[0] == NEGATIVE_REWARD){   //Player 1 has also lost, 2 wins
+                                    winner = 1;
+                                    gameScores[1] = POSITIVE_REWARD;
+                                }else {     //Player 2 has also lost, 1 wins
+                                    winner = 0;
+                                    gameScores[0] = POSITIVE_REWARD;
+                                }
+                            }
+                        }
+                    }
+                }
+                case -1 -> {  //draw
+                    switch (loser){
+                        case -1 -> { //draw between everyone
+                                for (int i = 0; i <3 ; i++) {
+                                gameScores[i] = 0.0;
+                            }
+                        }
+                        case 0 -> { //draw between player 2 and 3
+                            gameScores[1] = 0.0;
+                            gameScores[2] = 0.0;
+                        }
+                        case 1 -> { //draw between player 1 and 3
+                            gameScores[0] = 0.0;
+                            gameScores[2] = 0.0;
+                        }
+                        case 2 -> { //draw between player 1 and 2
+                            gameScores[0] = 0.0;
+                            gameScores[1] = 0.0;
+                        }
+
+                    }
+                    }
+                case 0 -> { //Player 1 wins, 2 and 3 lose
+                    gameScores[0] = POSITIVE_REWARD;
+                    gameScores[1] = NEGATIVE_REWARD;
+                    gameScores[2] = NEGATIVE_REWARD;
+                }
+                case 1 -> { //Player 2 wins, 1 and 3 lose
+                    gameScores[0] = NEGATIVE_REWARD;
+                    gameScores[1] = POSITIVE_REWARD;
+                    gameScores[2] = NEGATIVE_REWARD;
+                }
+                case 2 -> { //Player 3 wins, 1 and 2 lose
+                    gameScores[0] = NEGATIVE_REWARD;
+                    gameScores[1] = NEGATIVE_REWARD;
+                    gameScores[2] = POSITIVE_REWARD;
+                }
+            }
+        }
+
+        private void updateGameScores2P() {
+            switch(winner){
+                case -2 -> { //no winner yet
+                    switch (loser){
+                        case 0 -> { //Player 1 loses, 2 wins
+                            gameScores[0] = NEGATIVE_REWARD;
+                            gameScores[1] = POSITIVE_REWARD;
+                            winner = 1;
+                        }
+                        case 1 -> { //Player 2 loses, 1 wins
+                            gameScores[0] = POSITIVE_REWARD;
+                            gameScores[1] = NEGATIVE_REWARD;
+                            winner = 0;
+                        }
+                    }
+                }
+                case -1 -> { //draw
+                    gameScores[0] = 0.0;
+                    gameScores[1] = 0.0;
+                }
+                case 0 -> { //Player 1 wins, 2 loses
+                    gameScores[0] = POSITIVE_REWARD;
+                    gameScores[1] = NEGATIVE_REWARD;
+                }
+                case 1 -> { //Player 2 wins, 1 loses
+                    gameScores[0] = NEGATIVE_REWARD;
+                    gameScores[1] = POSITIVE_REWARD;
+                }
+            }
+        }
+
+        public int getWinner(){
+            return winner;
+        }
+
+        public int getLoser(){
+            return loser;
+        }
+
+        public double[] getGameScores(){
+            return gameScores;
+        }
+
+
     }
 }

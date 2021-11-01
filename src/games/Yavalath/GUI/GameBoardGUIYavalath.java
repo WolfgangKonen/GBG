@@ -107,7 +107,7 @@ public class GameBoardGUIYavalath {
         }
 
         private void drawGameBoard(Graphics2D g2) {
-
+            TileYavalath threateningMove = null;
             //Draw all the individual cells
             for (TileYavalath[] x : gb.m_so.getGameBoard()) {
                 for (TileYavalath y : x) {
@@ -115,6 +115,7 @@ public class GameBoardGUIYavalath {
                         g2.setColor(CELL_BACKGROUND);
                         g2.fillPolygon(y.getPoly());
                         g2.setColor(CELL_LINING);
+                        if(y.getThreateningMove()) threateningMove = y;
                         g2.drawPolygon(y.getPoly());
 
                         if (y.getPlayer() == PLAYER_ONE || y.getPlayer() == PLAYER_TWO ||
@@ -140,12 +141,22 @@ public class GameBoardGUIYavalath {
                 }
             }
             //Mark the game-piece that was last placed on the board
-            TileYavalath lastPlayed = gb.m_so.getLastPlayedTile();
-            if (lastPlayed == null) return;
-            g2.setColor(Color.RED);
-            g2.drawOval(lastPlayed.getTileCenter().x - GAME_PIECE_RADIUS,
-                    lastPlayed.getTileCenter().y - GAME_PIECE_RADIUS, GAME_PIECE_RADIUS * 2,
-                    GAME_PIECE_RADIUS * 2);
+            if(gb.m_so.getMoveList().size() > 0){
+                TileYavalath lastPlayed = gb.m_so.getMoveList().get(0);
+                g2.setColor(Color.BLUE);
+                g2.setStroke(new BasicStroke(2));
+                g2.drawOval(lastPlayed.getTileCenter().x - GAME_PIECE_RADIUS,
+                        lastPlayed.getTileCenter().y - GAME_PIECE_RADIUS, GAME_PIECE_RADIUS * 2,
+                        GAME_PIECE_RADIUS * 2);
+
+            }
+
+            //If there is a threatening move on the board, mark it
+            if(threateningMove!=null){
+                g2.setStroke(new BasicStroke(2));
+                g2.setColor(Color.RED);
+                g2.drawPolygon(threateningMove.getPoly());
+            }
         }
 
         public void toFront() {
@@ -167,14 +178,8 @@ public class GameBoardGUIYavalath {
                 if (clickedTile == null) return;
 
                 Types.ACTIONS humanMove = new Types.ACTIONS(clickedTile.getX()*BOARD_SIZE + clickedTile.getY());
-                gb.m_so.advance(humanMove);
-
-                if(gb.getArena().taskState == Arena.Task.PLAY){
-                    (gb.getArena().getLogManager()).addLogEntry(humanMove,gb.m_so,gb.getArena().getLogSessionID());
-                }
-
+                gb.HGameMove(humanMove);
                 updateBoard(null, false, false);
-                gb.setActionReq(true);
             }
         }
     }

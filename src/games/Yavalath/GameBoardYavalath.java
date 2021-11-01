@@ -128,6 +128,17 @@ public class GameBoardYavalath implements GameBoard {
         return m_so;
     }
 
+    public void HGameMove(Types.ACTIONS action){
+        if(m_so.isLegalAction(action)){
+            m_so.advance(action);
+            if(m_arena.taskState == Arena.Task.PLAY){
+                m_arena.getLogManager().addLogEntry(action,m_so,m_arena.getLogSessionID());
+            }
+            setActionReq(true);
+        }
+
+    }
+
     public void useSwapRule(){
         m_so.useSwapRule();
         updateBoard(m_so,false,false);
