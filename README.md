@@ -18,6 +18,8 @@ games implemented in the GBG framework. It can be compared with all other AI age
 
 For a quick overview of GBG see the [GBG Wiki](https://github.com/WolfgangKonen/GBG/wiki).
 
+[GBG Wiki](https://github.com/WolfgangKonen/GBG/wiki) - **Install and Configure** shows how to install GBG.
+
 For an in-depth description of classes and interfaces in GBG see the [technical report on GBG [Konen2022a]](http://www.gm.fh-koeln.de/ciopwebpub/Konen22a.d/TR-GBG.pdf). This technical report describes in tutorial form 
 the set of interfaces, abstract and non-abstract classes which help to standardize and implement
 those parts of board game playing and learning that otherwise would be tedious and repetitive parts in coding. 
