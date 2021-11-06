@@ -168,6 +168,11 @@ public final class MctseChanceNode extends MctseNode {
      * by the parent level, is the same as the sum of visitCounts of {@code this}.
      * <p>
      * Do this recursively for the whole branch of {@code this}.
+     * <p>
+     * Do this check only for
+     * {@link ConfigExpWrapper#DO_EXPECTIMAX_EXPAND DO_EXPECTIMAX_EXPAND}{@code =false} because in the other case the number of visits
+     * differ by one or two nodes.
+     *
      * @param selfVisits    number of visits to {@code this} (from parent)
      * @return the number of nodes in this branch (including {@code this}), just as information, no check
      */
@@ -175,8 +180,10 @@ public final class MctseChanceNode extends MctseNode {
         int numNodes = 1;       // 1 for self
         int sumv = (int) sum(visitCounts.values());
         if (selfVisits>0 && sumv>0) {
-            //System.out.println("Chance: "+selfVisits+", sumv="+sumv);
-            assert selfVisits == sumv : "[MctseChanceNode.checkTree] Error: selfVisits=" + selfVisits + ", sum(visitCounts)=" + sumv;
+//            if (selfVisits!=sumv)
+//                System.err.println("Chance: "+selfVisits+", sumv="+sumv);
+            if (!ConfigExpWrapper.DO_EXPECTIMAX_EXPAND) // the assertion works only in this setting
+                assert selfVisits == sumv : "[MctseChanceNode.checkTree] Error: selfVisits=" + selfVisits + ", sum(visitCounts)=" + sumv;
         }
         for (Map.Entry<Integer, MctseNode> entry : childNodes.entrySet()) {
             RegularAction actreg = new RegularAction(new ACTIONS(entry.getKey()));
@@ -192,6 +199,16 @@ public final class MctseChanceNode extends MctseNode {
         return numNodes;
     }
 
+    /**
+     * Form a histogram in {@code Map histo} that counts for EXPECTIMAX nodes with the same number of visits (that is
+     * the Map's key) how many nodes have 0, 1, ..., {@code numRans} children where {@code numRans} is the multiplicity
+     * of EXPECTIMAX nodes, i.e. the number of available nondeterministic actions.
+     * <p>
+     * NOTE: This method might fail, if EXPECTIMAX nodes with the same number of visits differ in their {@code numRans}.
+     *
+     * @param histo a {@code Map<Integer, double[]>} that is modified in the EXPECTIMAX recursive call
+     * @return the number of EXPECTIMAX nodes in this branch
+     */
     public int numChilds(Map histo) {
         int numExpec = 0;       // do not count chance nodes
         for (Map.Entry<Integer, MctseNode> entry : childNodes.entrySet()) {

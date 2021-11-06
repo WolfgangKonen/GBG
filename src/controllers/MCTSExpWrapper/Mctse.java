@@ -78,9 +78,9 @@ public final class Mctse {
                 if (selectedENode.gameState.isFinalGameState()) {
                     // do nothing (no expand), if selectedENode contains a game-over state
 
-                    //int dummy=1;    // just optional debug stop
+                    int dummy=1;    // just optional debug stop
                 } else {
-                    // If a non-expanded, non-finel EXPECTIMAX node is reached, expand it (create all CHANCE children and
+                    // If a non-expanded, non-final EXPECTIMAX node is reached, expand it (create all CHANCE children and
                     // expand them) and return the probability-weighted average of their score tuples.
                     if (!selectedENode.isExpanded()) {
                         return selectedENode.expand(approximator);

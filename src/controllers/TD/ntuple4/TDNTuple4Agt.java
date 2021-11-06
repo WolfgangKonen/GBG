@@ -140,6 +140,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		
 		setNTParams(ntPar);
 		setTDParams(tdPar, maxGameNum);
+		setMaxGameNum(maxGameNum);
 		m_Net.setHorizon();
 		
 		setAgentState(AgentState.INIT);

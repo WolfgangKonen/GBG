@@ -329,24 +329,28 @@ public class StateObserverOthello extends ObserverBase{
 		int sign = (player == this.playerNextMove) ? 1 :(-1);
 		if(this.isGameOver()) {		// 	Working correctly now	
 			Types.WINNER win = this.winStatus();
-			return switch (win) {
-				case PLAYER_LOSES, PLAYER_DISQ -> sign * REWARD_NEGATIVE;
-				case PLAYER_WINS -> sign * REWARD_POSITIVE;
-				case TIE -> 0.0;
-			};
+			double res = 0.0;
+			switch (win) {
+				case PLAYER_LOSES:
+				case PLAYER_DISQ: res = sign * REWARD_NEGATIVE; break;
+				case PLAYER_WINS: res = sign * REWARD_POSITIVE; break;
+				case TIE: res = 0.0; break;
+			}
+			return res;
 		}
 		return 0.0;
 	}
 
 	@Override
 	public String stringDescr() {
-		String sout = "";
+		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++) {
 			for(int j = 0; j < ConfigOthello.BOARD_SIZE; j++) {
-				sout += (currentGameState[i][j] == BaseOthello.getOpponent(1)) ? "O" : (currentGameState[i][j] == +1) ? "X": "-";
+				sb.append( (currentGameState[i][j] == BaseOthello.getOpponent(1))
+						? "O" : (currentGameState[i][j] == 1) ? "X": "-");
 			}
 		}
-		return sout;
+		return sb.toString();
 	}
 
 	public void toString2() {

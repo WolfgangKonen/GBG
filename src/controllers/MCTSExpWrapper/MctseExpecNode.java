@@ -43,7 +43,6 @@ public final class MctseExpecNode extends MctseNode {
         for (ApplicableAction r : gameState.getAvailableRandoms()) {
             final double weight = gameState.getProbability(r);
             final var tuple = gameState.advanceNondeterministic(r);
-            // final game state
             final MctseChanceNode child = new MctseChanceNode(tuple.element2);    // a new, non-expanded node
             child.expand(approximator);
             childNodes.put(r.getId(), child);
@@ -83,6 +82,11 @@ public final class MctseExpecNode extends MctseNode {
      * by the parent level, is the same as the sum of visitCounts.
      * <p>
      * Do this recursively for the whole branch of {@code this}.
+     * <p>
+     * Do this check only for
+     * {@link ConfigExpWrapper#DO_EXPECTIMAX_EXPAND DO_EXPECTIMAX_EXPAND}{@code =false} because in the other case the number of visits
+     * differ by one or two nodes.
+     *
      * @param selfVisits    number of visits to {@code this} (from parent)
      * @return the number of nodes in this branch (including {@code this}), just as information, no check
      */
@@ -90,9 +94,12 @@ public final class MctseExpecNode extends MctseNode {
         int numNodes=1;         // 1 for self
         if (selfVisits>0) {
             int sumv = (int) sum(visitCounts.values());
-            //System.out.println("Expec: "+selfVisits+", sumv="+sumv);
-            assert selfVisits == sumv : "[MctseExpecNode.checkTree] Error: selfVisits=" + selfVisits + ", sum(visitCounts)=" + sumv;
+//            if (selfVisits!=sumv)
+//                System.err.println("Expec: "+selfVisits+", sumv="+sumv);
+            if (!ConfigExpWrapper.DO_EXPECTIMAX_EXPAND) // the assertion works only in this setting
+                assert selfVisits == sumv : "[MctseExpecNode.checkTree] Error: selfVisits=" + selfVisits + ", sum(visitCounts)=" + sumv;
         }
+        // loop over all children (they are always CHANCE nodes):
         for (Map.Entry<Integer, MctseChanceNode> entry : childNodes.entrySet()) {
             MctseChanceNode child = entry.getValue();
             RegularAction actreg = new RegularAction(new Types.ACTIONS(entry.getKey()));
@@ -102,6 +109,16 @@ public final class MctseExpecNode extends MctseNode {
         return numNodes;
     }
 
+    /**
+     * Form a histogram in {@code Map histo} that counts for EXPECTIMAX nodes with the same number of visits (that is
+     * the Map's key) how many nodes have 0, 1, ..., {@code numRans} children where {@code numRans} is the multiplicity
+     * of EXPECTIMAX nodes, i.e. the number of available nondeterministic actions.
+     * <p>
+     * NOTE: This method might fail, if EXPECTIMAX nodes with the same number of visits differ in their {@code numRans}.
+     *
+     * @param histo a {@code Map<Integer, double[]>} that is modified in the EXPECTIMAX recursive call
+     * @return the number of EXPECTIMAX nodes in this branch
+     */
     public int numChilds(Map histo) {
         int numVisits = (int) sum(visitCounts.values());
         double[] entry;

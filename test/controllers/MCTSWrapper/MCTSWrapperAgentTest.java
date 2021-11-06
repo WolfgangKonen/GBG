@@ -169,7 +169,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                             assert percSolved > hm.get(iterMCTSWrap) :
                                     "Test failed for iterMCTSWrap = " + iterMCTSWrap +
                                     ": % solved=" + percSolved + ", but threshol";
-                        mCompete = new MCompeteMWrap(run, 1, 0, iterMCTSWrap,
+                        mCompete = new MCompeteMWrap(run, agtFile, 1, 0, iterMCTSWrap,
                                 EPS, 0, c_puct, percSolved,
                                 userValue1, userValue2);
                         mcList.add(mCompete);
@@ -353,7 +353,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                             winrate = (sc.scTup[p_MWrap] + 1) / 2;
                             System.out.println("(iterMW,EPS,p_MWrap) = (" + iterMCTSWrap + "," + EPS + "," + p_MWrap + "): " +
                                     "  winrate = " + winrate);
-                            mCompete = new MCompeteMWrap(run, numEpisodes, 0, iterMCTSWrap,
+                            mCompete = new MCompeteMWrap(run, agtFile, numEpisodes, 0, iterMCTSWrap,
                                     EPS, p_MWrap, c_puct, winrate,
                                     userValue1, userValue2);
                             mcList.add(mCompete);

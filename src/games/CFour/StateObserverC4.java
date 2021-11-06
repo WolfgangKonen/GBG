@@ -1,5 +1,6 @@
 package games.CFour;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -40,6 +41,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverC4() {
@@ -114,9 +116,25 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 		return m_C4.isLegalMove(act.toInt());
 	}
 
+	/**
+	 * This method should not be used in the code (see {@link StateObservation#toString()} for explanation why).
+	 * But it is useful for the IntelliJ debugger: "View".
+	 *
+	 * @return a multi-line, human-readable string description.
+	 */
 	@Deprecated
     public String toString() {
-    	return stringDescr();
+		StringBuilder sout = new StringBuilder();
+		String[] str = new String[] {"-","X","o"};
+
+		int[][] board = m_C4.getBoard();
+		for (int j=C4Base.ROWCOUNT-1;j>=0;j--) {
+			for (int i=0;i<C4Base.COLCOUNT;i++) {
+				sout.append(str[board[i][j]]).append(" ");
+			}
+			sout.append("\n");
+		}
+		return sout.toString();
     }
 	
 	/**
@@ -132,9 +150,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
     public String stringDescr() {
 		StringBuilder sout = new StringBuilder();
 		String[] str = new String[] {"-","X","o"};
-//		String[] str = new String[3];
-//		str[0] = "-"; str[1]="X"; str[2]="o";
-		
+
 		int[][] board = m_C4.getBoard();
 		for (int i=0;i<C4Base.COLCOUNT;i++) {
 			sout.append("|");
@@ -264,7 +280,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	public LastCell getLastCell() { return lastCell; }
 	public LastCell getPrevCell() { return prevCell; }
 
-	public class LastCell implements Serializable {
+	public static class LastCell implements Serializable {
 		public int c;
 		public int r;
 		public int p;

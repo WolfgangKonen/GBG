@@ -44,7 +44,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	// The consequence is a larger mem size of StateObservation objects, but we have to live with this.
 
 	public ObserverBase() {
-		lastMoves = new ArrayList<Integer>();
+		lastMoves = new ArrayList<>();
 	}
     
     public ObserverBase(ObserverBase other) {
@@ -81,12 +81,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
         	storedActions[i] = acts.get(i);
 		if (actBest.getVTable()!=null) storedValues = actBest.getVTable().clone();
         storedActBest = new Types.ACTIONS_VT(actBest);	// deep copy
-		storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
-//        if (actBest instanceof Types.ACTIONS_VT) {
-//        	storedMaxScore = ((Types.ACTIONS_VT) actBest).getVBest();
-//        } else {
-//            storedMaxScore = vtable[acts.size()];
-//        }
+		storedMaxScore = actBest.getVBest();
 	}
 
 	public Types.ACTIONS getStoredAction(int k) {
@@ -165,11 +160,6 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 		return true;
 	}
 
-//	public void setNextActionDeterministic(boolean b) {
-//		// nothing to do here, since ObserverBase is for a deterministic game
-//		;
-//	}
-
 	/**
 	 * Default implementation for deterministic games: the state and its preceding afterstate are the same,
 	 * thus return just {@code this}. <br>
@@ -241,11 +231,6 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	public ArrayList<Integer> getLastMoves() {
 		return lastMoves;
 	}
-
-	// never used:
-//	public void resetLastMoves() {
-//		this.lastMoves = new ArrayList<>();
-//	}
 
 	public int getMinEpisodeLength() {
 		return 1;
@@ -409,7 +394,16 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 		return ""+act.toInt();
 	}
 
-	@Deprecated     // see StateObservation for reason. Better use stringDescr() directly.
+	/**
+	 * Why is {@code toString} deprecated? - Because java.Object implements already {@code toString}  and thus it can
+	 * go unnoticed if a class implementing StateObservation does not implement {@code toString}.
+	 * Better use {@code stringDescr} in code.
+	 * <p>
+	 * But {@code toString}  is useful for the IntelliJ debugger: "View".
+	 *
+	 * @return a string representation of the current state
+	 */
+	@Deprecated
     public String toString() {
         return stringDescr();
     }

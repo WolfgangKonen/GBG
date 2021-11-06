@@ -67,21 +67,14 @@ public interface StateObservation extends PartialState, Serializable{
 	 */
 	boolean stopInspectOnGameOver();
 	
-//	/**
-//	 * @return this predicate is true only for 2-player games where the reward of player 0
-//	 * is always the negative of the reward of player 1. E.g. TTT, Hex, where a reward of +1
-//	 * for one player means -1 for the other. 
-//	 */
-//	public boolean has2OppositeRewards();
-	
 	/**
-	 * 
+	 * Why is {@code toString} deprecated? - Because java.Object implements already {@code toString}  and thus it can
+	 * go unnoticed if a class implementing StateObservation does not implement {@code toString}.
+	 * Better use {@code stringDescr} instead.
+	 *
 	 * @return a string representation of the current state
 	 */
 	@Deprecated
-	// Why? - Because java.Object has already a default for toString() and thus it can
-	// go unnoticed if a class implementing StateObservation does not implement toString().
-	// Better use stringDescr()
 	String toString();
 
 	/**
@@ -245,9 +238,9 @@ public interface StateObservation extends PartialState, Serializable{
      *  
      * @return the afterstate or {@code null}. <p>
      * 
-     * For deterministic games, the afterstate is identical to {@code this}. For 
-     * nondeterministic games, it depends on the game: E.g. for 2048 it is usually not known, 
-     * if we know only the current state {@code this}. For Backgammon it is the preceding 
+     * For deterministic games, the preceding afterstate is identical to {@code this}. For
+     * nondeterministic games, it depends on the game: E.g. for 2048 it is usually not known
+     * if we know only the current state {@code this}. For Backgammon, it is the preceding
      * board position (if known) without the nondeterministic dice part. 
      */
     StateObservation precedingAfterstate();
@@ -318,14 +311,6 @@ public interface StateObservation extends PartialState, Serializable{
 	 */
 	int getCreatingPlayer();
 
-//	/**
-//	 * @return  1 for a 1-player game (e.g. 2048),  
-//	 * 			{+1,-1} for a 2-player game (e.g. TicTacToe): who moves next
-//	 * 			{0,1,...,n-1} for an n-player game: who moves next
-//	 */
-//	@Deprecated
-//	public int getPlayerPM();
-
 	/**
 	 * @return  1 for a 1-player game (e.g. 2048), 2 for a 2-player game
 	 * 			(e.g. TicTacToe) and so on
@@ -346,7 +331,7 @@ public interface StateObservation extends PartialState, Serializable{
 	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
 	 *  if {@link #needsRandomization()} returns true
 	 * <p>
-	 * Currently only used by {@link games.Poker.StateObserverPoker}
+	 * Currently, only used by {@link games.Poker.StateObserverPoker}
 	 */
 	void randomizeStartState();
 

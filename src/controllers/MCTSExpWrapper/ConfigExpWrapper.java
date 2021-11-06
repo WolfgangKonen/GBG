@@ -51,14 +51,15 @@ public class ConfigExpWrapper {
      * A switch for {@link MctseWrapperAgent}:
      * <ul>
      *  <li>  If true, expand EXPECTIMAX nodes when they are newly formed. That is, create all their CHANCE children
-     *        and expand them. Return the average over the childrens' score tuples.
+     *        and expand them. Return the average over the childrens' score tuples. Exception: If the EXPECTIMAX node
+     *        contains a final state, do not expand and return the final state's score tuple instead.
      *  <li>  If false, do not expand EXPECTIMAX nodes.
      * </ul>
      *  In any way, on subsequent passes through these EXPECTIMAX nodes, they select one of their children at random.
      *  <p>
-     *  In theory, the {@code true}-setting should give better results, because EXPECTIMAX nodes with few visits should
-     *  get better results
+     *  In theory, the {@code true}-setting should give better results, because the value of EXPECTIMAX nodes with few
+     *  visits is better estimated.
      */
-    public static boolean DO_EXPECTIMAX_EXPAND = true;
+    public static boolean DO_EXPECTIMAX_EXPAND = false;
 
 }

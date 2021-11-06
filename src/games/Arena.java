@@ -1073,8 +1073,20 @@ abstract public class Arena implements Runnable {
 			str = e.getMessage();
 		}
 		this.setStatusMessage(str);
-		System.out.println("[SaveAgent] "+str);
+		System.out.println("[saveAgent] "+str);
 		return bstatus;
+	}
+
+	public boolean saveAgent(PlayAgent pa, String savePath) {
+		String str;
+		try {
+			this.tdAgentIO.saveGBGAgent(pa,savePath);
+			str = "Saved Agent!";
+		} catch(IOException e) {
+			str = e.getMessage();
+		}
+		System.out.println("[saveAgent] "+str);
+		return true;
 	}
 
 	// We moved this method from XArenaMenu to Arena, because it can be used by batch 

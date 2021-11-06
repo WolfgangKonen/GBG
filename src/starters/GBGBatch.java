@@ -47,10 +47,11 @@ import tools.Types;
 public class GBGBatch { 
 
 	/**
-	 * The default csv filename for the different batch facilities (batch1, batch2, batch3)
+	 * The default csv filename for the different batch facilities (batch1, batch2, ..., batch7)
 	 */
 	public static String[] csvNameDef = {"multiTrain.csv","multiTrainAlphaSweep.csv"
-			,"multiTrainLambdaSweep.csv","multiTrainIncAmountSweep.csv","multiCompeteOthello.csv"};
+			,"multiTrainLambdaSweep.csv","multiTrainIncAmountSweep.csv"
+			,"multiTrainOthello.csv","multiCompeteOthelloSweep.csv","multiCompeteOthello.csv"};
 	private static GBGBatch t_Batch = null;
 	protected static ArenaTrain arenaTrain;
 	protected static String filePath = null;
@@ -61,7 +62,7 @@ public class GBGBatch {
 	/**
 	 * Syntax:
 	 * <pre>
-	 * GBGBatch gameName n agentFile [ trainNum maxGameNum csvFile scaPar0 scaPar1 scaPar2 ] </pre>
+	 * GBGBatch gameName n agentFile [ nruns maxGameNum csvFile scaPar0 scaPar1 scaPar2 ] </pre>
 	 * <p>
 	 * Examples:
 	 * <pre>
@@ -71,22 +72,27 @@ public class GBGBatch {
 	 * @param args <br>
 	 * 			[0] {@code gameName}: name of the game, suitable as subdirectory name in the 
 	 *         		{@code agents} directory <br>
-	 *          [1] {@code n}: "1", "2", "3" or "4"  to call either
+	 *          [1] {@code n}: 1,2,3,...,7  to call either
 	 *          	{@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1} (multiTrain) or
 	 *              {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2} (multiTrainAlphaSweep) or
 	 *              {@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3} (multiTrainLambdaSweep) or
-	 *              {@link #batch4(int, int, String, XArenaButtons, GameBoard, String) batch4} (multiTrainIncAmountSweep)
-	 *              {@link #batch5(int, String, GameBoard, String) batch5} (multiCompeteSweep)
+	 *              {@link #batch4(int, int, String, XArenaButtons, GameBoard, String) batch4} (multiTrainIncAmountSweep) or
+	 *              {@link #batch5(int, String, String, GameBoard) batch5} (multiTrainSweep) or
+	 *              {@link #batch6(int, String, GameBoard, String) batch6} (multiCompeteSweep) or
+	 *              {@link #batch7(int, String, GameBoard, String) batch7} (multiCompete).
+	 *              The last three options 5,6,7 are only for game Othello.
 	 *              <br>
 	 *          [2] {@code agentFile}: e.g. "tdntuple3.agt.zip". This agent is loaded from
 	 *          	{@code agents/}{@link Types#GUI_DEFAULT_DIR_AGENT}{@code /gameName/}  (+ a suitable subdir, if 
 	 *          	applicable). It specifies the agent type and all its parameters for multi-training 
 	 *          	in {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1},
 	 *          	{@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}  or 
-	 *          	{@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3}.<br>
-	 *          [3] (optional) trainNum: how many agents to train (default -1). In case of batch5, this argument
+	 *          	{@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3}.
+	 *          	In case of batch6, this arguments codes the directory where to search for agent files.<br>
+	 *          [3] (optional) nruns: how many agents to train (default -1). In case of batch6 or batch7, this argument
 	 *              contains {@code iterMCTS}.   <br>
-	 *          [4] (optional) maxGameNum: maximum number of training episodes (default -1) <br>
+	 *          [4] (optional) maxGameNum: maximum number of training episodes (default -1: take the parameter stored
+	 *              in the loaded agent file.) <br>
 	 *          [5] (optional) csvFile: filename for CSV results (defaults: "multiTrain.csv" or 
 	 *          	"multiTrainAlphaSweep.csv" or "multiTrainLambdaSweep.csv" or "multiTrainIncAmountSweep.csv",
 	 *          	see {@link #csvNameDef}) <br>
@@ -95,7 +101,7 @@ public class GBGBatch {
 	 *          [8] (optional) scaPar2: scalable parameter 2 <br>
 	 *          <p>
 	 *          
-	 * If <b>trainNum</b> or <b>maxGameNum</b> are -1, their respective values stored in {@code agentFile} are taken.
+	 * If <b>nruns</b> or <b>maxGameNum</b> are -1, their respective values stored in {@code agentFile} are taken.
 	 * <p>
 	 * Side effect: the last trained agent is stored to {@code <csvName>.agt.zip}, where
 	 * {@code <csvname>} is {@code args[5]} w/o {@code .csv}
@@ -108,7 +114,7 @@ public class GBGBatch {
 	 */
 	public static void main(String[] args) throws IOException {
 		t_Batch = new GBGBatch();
-		int trainNum = -1;
+		int nruns = -1;
 		int maxGameNum = -1;
 		String csvName = "";
 		
@@ -126,7 +132,7 @@ public class GBGBatch {
 		}
 
 		try {
-			if (args.length>=4) trainNum = Integer.parseInt(args[3]);
+			if (args.length>=4) nruns = Integer.parseInt(args[3]);
 		} catch(NumberFormatException e) {
 			e.printStackTrace(System.err);
 			System.err.println("[GBGBatch.main]: args[3]='"+args[3]+"' is not a number!");
@@ -148,18 +154,21 @@ public class GBGBatch {
 
 		arenaTrain = setupSelectedGame(selectedGame, scaPar);
 
-		setupPaths(args[2],csvName);
+		String agtFile = args[2];
+		setupPaths(agtFile,csvName);		// builds filePath
 
-		if (args[1].equals("5"))
-			assert(selectedGame.equals("Othello")) : "batch5 only allowed for game Othello (uses Edax2)";
+		if (args[1].equals("5") || args[1].equals("6") || args[1].equals("7"))
+			assert(selectedGame.equals("Othello")) : "batch5,6,7 only allowed for game Othello (uses Edax2)";
 
-		// start a batch run without any windows
+		// start a batch run without any GUI elements
 		switch (args[1]) {
-			case "1" -> t_Batch.batch1(trainNum, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
-			case "2" -> t_Batch.batch2(trainNum, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
-			case "3" -> t_Batch.batch3(trainNum, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
-			case "4" -> t_Batch.batch4(trainNum, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
-			case "5" -> t_Batch.batch5(trainNum, filePath, arenaTrain.getGameBoard(), csvName);
+			case "1" -> t_Batch.batch1(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "2" -> t_Batch.batch2(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "3" -> t_Batch.batch3(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "4" -> t_Batch.batch4(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "5" -> t_Batch.batch5(nruns, agtFile, filePath, arenaTrain.getGameBoard());
+			case "6" -> t_Batch.batch6(nruns, agtFile, arenaTrain.getGameBoard(), csvName);
+			case "7" -> t_Batch.batch7(nruns, agtFile, arenaTrain.getGameBoard(), csvName);
 			default -> {
 				System.err.println("[GBGBatch.main] args[1]=" + args[1] + " not allowed.");
 				System.exit(1);
@@ -376,7 +385,6 @@ public class GBGBatch {
 		} else {
 			System.err.println("[GBGBatch.main] could not save agent!");
 		}
-		
 	} // batch2
 
 	/**
@@ -460,34 +468,84 @@ public class GBGBatch {
 	} // batch4
 
 	/**
-	 * Perform Othello multi-competition with MCTSWrapperAgent wrapped around agent in filePath against
-	 * Edax2 with different depth levels. <br>
-	 * Write results to file {@code csvName}.
-	 * @param iterMCTS		how many iterations in MCTSWrapperAgent. If &lt; 2, clip iterMCTS to 2.
-	 * @param filePath		full path of the agent file
+	 * Perform Othello multi-training. In each run, agent {@code pa} is constructed anew (to get different random tuples)
+	 * and then trained.
+	 * <p>
+	 * Write results to directory {@code agents/Othello/multiTrain}.
+	 * @param nruns		number of training runs
+	 * @param filePath		agent filename
 	 * @param gb			game board object, needed by multiCompeteSweep for start state selection
-	 * @param csvName		filename for CSV results
+	 *
+	 * @see MCompeteSweep#multiTrainSweepOthello(PlayAgent, String, int, int, ArenaTrain, GameBoard)  MCompeteMWrap.multiTrainSweepOthello
 	 */
-	public void batch5(int iterMCTS, String filePath,
-					   GameBoard gb, String csvName) {
-		//if (iterMCTS<2) iterMCTS=2;
-		//iterMCTS=0;
-		long startTime = System.currentTimeMillis();
+	public void batch5(int nruns, String agtFile, String filePath,
+					   GameBoard gb) {
+
+		int maxTrainGameNum=-1;		// number of episodes in each training. If -1, take maxGameNum from loaded agent
 
 		// load an agent to fill xab with the appropriate parameter settings
 		boolean res = arenaTrain.loadAgent(0, filePath);
 		if (!res) {
-			System.err.println("\n[GBGBatch.batch5] Aborted (no agent found).");
+			System.err.println("\n[GBGBatch.batch6] Aborted (no agent found).");
 			return;
 		}
 		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
 
-		MCompeteMWrap.multiCompeteSweep(pa,iterMCTS, arenaTrain,gb,csvName);
+		long startTime = System.currentTimeMillis();
 
-		long elapsedMs = (System.currentTimeMillis() - startTime);
-		double elapsedTime = (double)elapsedMs/1000.0;
-		System.out.println("[GBGBatch.batch5] multiCompeteSweep finished in "+elapsedTime+" sec: Results written to "+csvName);
+		MCompeteSweep mcmw = new MCompeteSweep();
+		mcmw.multiTrainSweepOthello(pa,agtFile,maxTrainGameNum,nruns,arenaTrain,gb);
+
+		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
+		System.out.println("[GBGBatch.batch5] multiTrainSweep finished in "+elapsedTime+" sec. ");
 	} // batch5
 
+	/**
+	 * Perform Othello multi-competition for all agents found in directory {@code agents/Othello/<agtDir>}, first with
+	 * the base agent, then wrapped by MCTSWrapperAgent with iterMCTS iterations. In both cases, compete
+	 * in all roles against Edax at different Edax depth levels.
+	 * <p>
+	 * Write results to file {@code csvName}.
+	 * @param iterMCTS		how many iterations in MCTSWrapperAgent.
+	 * @param agtDir
+	 * @param gb			game board object, needed by multiCompeteSweep for start state selection
+	 * @param csvName		filename for CSV results
+	 */
+	public void batch6(int iterMCTS, String agtDir, GameBoard gb, String csvName) {
+
+		long startTime = System.currentTimeMillis();
+
+		MCompeteSweep mcmw = new MCompeteSweep();
+		mcmw.multiCompeteSweepOthello(iterMCTS,agtDir,arenaTrain,gb,csvName);
+
+		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
+		System.out.println("[GBGBatch.batch6] multiCompeteSweep finished in "+elapsedTime+" sec: Results written to "+csvName);
+	} // batch6
+
+	/**
+	 * Perform Othello multi-competition with MCTSWrapperAgent wrapped around agent in agtFile against
+	 * Edax with different depth levels.
+	 * <p>
+	 * Write results to file {@code csvName}.
+	 * @param iterMCTS		how many iterations in MCTSWrapperAgent.
+	 * @param agtFile		agent filename
+	 * @param gb			game board object, needed by multiCompeteSweep for start state selection
+	 * @param csvName		filename for CSV results
+	 */
+	public void batch7(int iterMCTS, String agtFile,
+					   GameBoard gb, String csvName) {
+
+		int nruns=1;		// 1 for deterministic agent, >=1 for nondeterministic agent
+
+		PlayAgent pa = arenaTrain.loadAgent(agtFile);	// load agent
+
+		long startTime = System.currentTimeMillis();
+
+		MCompeteSweep mcmw = new MCompeteSweep();
+		mcmw.multiCompeteOthello(pa,iterMCTS,nruns,arenaTrain,gb,csvName);
+
+		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
+		System.out.println("[GBGBatch.batch7] multiCompete finished in "+elapsedTime+" sec: Results written to "+csvName);
+	} // batch7
 
 }

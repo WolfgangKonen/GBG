@@ -31,32 +31,43 @@ public class MctseWrapperTest extends GBGBatch {
     String selectedGame;
     String[] scaPar;
     String[] agtFiles;
+
+    /**
+     * Different episodes for {@link #stateEWNTest()}
+     */
     enum EpisodeType {CASE_A,CASE_B,CASE_C,CASE_D}
+
+    /**
+     * number of states in episode
+     */
     int[] kmax = {4,5,4,5};
 
     static HashMap<String,StateObserverEWN> stateMap = null;
 
     /**
-     * Test the MctseWrapperAgent on 3x3 EWN: We build a state, e.g.
+     * Test the MctseWrapperAgent on 3x3 EWN: We run through a sequence {@code CASE_A}, ... of {@link #kmax} states, e.g.
      * <pre>
      *  [  ] [X2] [  ]   (diceVal:1, availActions: 0501,0502,0504 )
      *  [  ] [X0] [O1]
      *  [  ] [O2] [  ]       </pre>
-     * and test whether TDNT4, MCTSE-Wrapper[TDNT4] or ExpectimaxN suggest the right move 0504.
+     * and test whether TDNT4, MCTSE-Wrapper[TDNT4] or ExpectimaxN suggest the right move 0504. We assert that
+     * ExpectimaxN, the perfect agent for 3x3 EWN, returns the stored best moves for this sequence.
      * <p>
      * Next, run {@link MctseChanceNode#checkTree(int) checkTree} on MCTSE-Wrapper[TDNT4]: check for consistent visit
      * counts and report number of nodes.
      * <p>
-     * Finally, run {@link MctseChanceNode#numChilds(Map) numChilds} on MCTSE-Wrapper[TDNT4]: if a MctseExpecNode has
+     * Next, run {@link MctseChanceNode#numChilds(Map) numChilds} on MCTSE-Wrapper[TDNT4]: if a MctseExpecNode has
      * enough visit counts (empirically: at least 4*maxNumChildren), is then every child formed, i.e. visited at
      * least once? This test has no guarantee to succeed, it may fail with low probability.
+     * <p>
+     * Finally, we report the number of correct decisions that the wrapped agent made.
      */
     @Test
     public void stateEWNTest() {
         String agtFile = "tdnt4-10000.agt.zip";
-        int[] iterMctseWrapArr = {500}; //{100,500,1000}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
+        int[] iterMctseWrapArr = {1000}; //{100,500,1000}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
         int nTrial = 1;
-        EpisodeType m_epi = EpisodeType.CASE_D;     // CASE_A   CASE_B    CASE_C   CASE_D
+        EpisodeType m_epi = EpisodeType.CASE_A;     // CASE_A   CASE_B    CASE_C   CASE_D
 
         long startTime;
         double elapsedTime=0,deltaTime;
@@ -71,6 +82,8 @@ public class MctseWrapperTest extends GBGBatch {
         arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
 
         pa = arenaTrain.loadAgent(agtFile);
+        ra = new ExpectimaxNAgent("",15);
+        int countWrapCorrect = 0;
         System.out.println("*** Running stateEWNTest for " + agtFile + " (scaPar={" + scaPar[0] + "," + scaPar[1] + "," + scaPar[2] + "}) ***");
 
 //        ParOther oPar = new ParOther();
@@ -78,9 +91,8 @@ public class MctseWrapperTest extends GBGBatch {
 //        pa.setWrapperParams(oPar);
 
         for (int run=0; run<nTrial; run++) {
-            for (int k=4; k<kmax[m_epi.ordinal()]; k++) {
+            for (int k=0; k<kmax[m_epi.ordinal()]; k++) {   // steps of the sequence
                 System.out.println("+++ k="+k+": +++");
-                ra = new ExpectimaxNAgent("",15);
 
                 for (int iterMctseWrap : iterMctseWrapArr) {
                     System.out.println("*** iterMctseWrap="+iterMctseWrap+ " ***");
@@ -109,17 +121,21 @@ public class MctseWrapperTest extends GBGBatch {
                             assert act_pa.getVBest()==act_qa.getVBest() : "vBest differs for pa and qa";
                         DecimalFormat form = new DecimalFormat("0.000");
                         double[] vtab = act_ra.getVTable();
-                        System.out.println("i="+i+": "+so.stringDescr()+
-                                "[vTab Expectimax] "+ form.format(vtab[0]) + " " + form.format(vtab[1]) + " " +form.format(vtab[2]) + " " +
+                        System.out.print("i="+i+": "+so.stringDescr()+"[vTab Expectimax] ");
+                        for (double v : vtab) System.out.print(form.format(v)+" ");
+                        System.out.println(
                                 "\n[3 agts] vBest=("+form.format(act_pa.getVBest()) + " " + form.format(act_qa.getVBest()) + " " + form.format(act_ra.getVBest())+")"+
                                 ", act_TD="+act_pa.toInt()+", act_Wrap="+act_qa.toInt()+", act_Expec="+act_ra.toInt());
                         int bestAct = so.getStoredActBest().toInt();
-                        //assert act_ra.toInt() == bestAct : "Mismatch: act_Expec="+act_ra.toInt()+" != bestAct="+ bestAct;
+                        assert act_ra.toInt() == bestAct : "Mismatch: act_Expec="+act_ra.toInt()+" != bestAct="+ bestAct;
+                        if (act_ra.toInt()==act_qa.toInt()) countWrapCorrect++;
 
                         // ---- checkTree test ----
                         int numNodes = ((MctseWrapperAgent) qa).getRootNode().checkTree(iterMctseWrap-1);
                         // why iterMctseWrap-1? - The first call expands, does not increment any visit count
                         System.out.println("[checkTree] numNodes="+numNodes);
+                        if (!ConfigExpWrapper.DO_EXPECTIMAX_EXPAND)
+                            System.out.println("[checkTree] Assertion on numVisits succeeded for every branch");
 
                         // ---- numChild test ----
                         // Make a histogram of childNodes.size() of all MctseExpecNodes (Expectimax nodes).
@@ -134,8 +150,8 @@ public class MctseWrapperTest extends GBGBatch {
                         for (Map.Entry<Integer, double[]> entry : histo.entrySet()) {
                             int numVisits = entry.getKey();
                             double[] vals = entry.getValue();
-                            double[] vals2 = vals.clone();
                             countsHisto += sum(vals);
+                            double[] vals2 = vals.clone();
                             vals2[vals.length-1]=0;  // we delete the highest bin count, then all entries should be 0.0
                             if (numVisits > 4*vals.length) {
                                 assert sum(vals2)==0 :
@@ -145,6 +161,7 @@ public class MctseWrapperTest extends GBGBatch {
                         assert numExpec == countsHisto :
                                 "[EWNTest] numExpec="+numExpec+" and countsHisto="+countsHisto+" differ!";
                         System.out.println("[numChilds] numExpecNodes="+numExpec+","+countsHisto);
+                        System.out.println("[numChilds] Number of EXPECTIMAX nodes equal to sum of counts in histogram");
 
                     } // for (i)
 
@@ -156,6 +173,7 @@ public class MctseWrapperTest extends GBGBatch {
             } // for (k)
         } // for (run)
 
+        System.out.println("[stateEWNTest] Wrapped agent had "+countWrapCorrect+" from "+kmax[m_epi.ordinal()]+" decisions correct");
         System.out.println("[stateEWNTest] "+elapsedTime+" sec.");
     }
 
@@ -280,16 +298,16 @@ public class MctseWrapperTest extends GBGBatch {
     private StateObserverEWN buildStateD(Arena arenaEWN, int k) {
         GameBoardEWN gb = new GameBoardEWN(arenaEWN);
         StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState();
-        so.setNextActionDeterministic(ACTIONS.fromInt(2));      // bestAction X: 0307, V=+0.827
-        int[] bestAction = new int []{307,504,408,805,4};
+        so.setNextActionDeterministic(ACTIONS.fromInt(2));      // bestAction X: 0105, V=+0.48
+        int[] bestAction = new int []{105,703,205,805,304};
 
         if (k>0) {
-            so.advanceDeterministic(ACTIONS.fromInt(102));    // X: from 1 to 2
-            so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction O: 0504, V=+0.58
+            so.advanceDeterministic(ACTIONS.fromInt(102));    // X: from 1 to 2, suboptimal, V=-0.09
+            so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction O: 0703, V=+0.39
         }
         if (k>1) {
-            so.advanceDeterministic(ACTIONS.fromInt(704));   // O: from 7 to 4
-            so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction X: 0408, V=+1
+            so.advanceDeterministic(ACTIONS.fromInt(704));   // O: from 7 to 4, suboptimal
+            so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction X: 0205, V=+1
         }
         if (k>2) {
             so.advanceDeterministic(ACTIONS.fromInt(205));   // X: from 2 to 5
@@ -348,11 +366,8 @@ public class MctseWrapperTest extends GBGBatch {
         for (int run=0; run<nTrial; run++) {
             ParMC mcPar = new ParMC();
             pa = new MCAgentN(mcPar);
+            //pa = new RandomAgent("");
             pa = new ExpectimaxNAgent("ExpectimaxN",6);
-
-//            ParOther oPar = new ParOther();
-//            oPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
-//            pa.setWrapperParams(oPar);
 
             for (int iterMctseWrap : iterMctseWrapArr) {
                 System.out.println("*** iterMctseWrap="+iterMctseWrap+ " ***");
@@ -370,7 +385,7 @@ public class MctseWrapperTest extends GBGBatch {
                     StateObserverKuhnPoker so = (StateObserverKuhnPoker) gb.getDefaultStartState();
                     // best action for p0 is {1,2} if p0=J, {2} if p0=Q, {1,2} if p0=K
 
-                    //so.advance(new ACTIONS(1));   // p0 plays CHECK
+                    so.advance(new ACTIONS(1));   // p0 plays CHECK
                     // best action for p1 is {1,2} if p1=J, {2} if p1=Q, {2} if p1=K
 
                     //so.advance(new ACTIONS(1));   // p0 plays BET
@@ -381,8 +396,8 @@ public class MctseWrapperTest extends GBGBatch {
                     if (iterMctseWrap==1)
                         assert act_pa.getVBest()==act_qa.getVBest() : "vBest differs for pa and qa";
                     System.out.println("i="+i+": "+so.stringDescr()+
-                            ", vBest="+act_pa.getVBest() + " " + act_qa.getVBest()+
-                            ", act_pa="+act_pa.toInt()+", act_qa="+act_qa.toInt());
+                            ", vBest_(pa,qa)=("+act_pa.getVBest() + ", " + act_qa.getVBest()+
+                            "), act_pa="+act_pa.toInt()+", act_qa="+act_qa.toInt());
                     //so.advance(act_pa);
 
                     int numNodes = ((MctseWrapperAgent) qa).getRootNode().checkTree(iterMctseWrap-1);
@@ -495,8 +510,8 @@ public class MctseWrapperTest extends GBGBatch {
         //int[] iterMCTSWrapArr = {500}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
         int fact=1;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of precision to expect as a fct of iterMCTSWrap
-        for (int iter : iterMCTSWrapArr) {
-            hm.put(iter,fact*0.90);                     // Other values: mode=10, EPS=1e-8, c_puct=1.0
+        for (int iter : iterMCTSWrapArr) {              // Other values: mode=10, EPS=1e-8, c_puct=1.0
+            hm.put(iter,fact*0.90);
         }
         int nTrial = 1;
         int mode = 10;
@@ -505,6 +520,9 @@ public class MctseWrapperTest extends GBGBatch {
         innerEWNTest(scaPar,agtFiles,iterMCTSWrapArr,hm,nTrial,mode, csvFile);
     }
 
+    /**
+     * Similar to {@link #wholeEWN3x3Test()}, but for 5x5 EWN
+     */
     @Test
     public void wholeEWN5x5Test() {
         scaPar = new String[]{"5x5 2-Player","[0,1],[2,3],[4,5]","False"};
@@ -589,7 +607,7 @@ public class MctseWrapperTest extends GBGBatch {
                         // When evaluated against MCTSE-1000, 100epi (mode=1), we see win rates in [0.50,0.59] (takes time! 15 sec)
                         // When evaluated against MCTSE-1000, 10epi (mode=2), we see win rates in [0.35,0.65]
                         // Thus, MCTSE 10epi (numEpisodes=10) is highly unstable and MCTSE 100epi needs some time
-                        //qa = new ExpectimaxNAgent("",1);
+                        //qa = new ExpectimaxNAgent("",15);
 
                         startTime = System.currentTimeMillis();
 
@@ -608,7 +626,7 @@ public class MctseWrapperTest extends GBGBatch {
                                     "Test failed for iterMCTSWrap = " + iterMCTSWrap +
                                             ": winrate=" + frm.format(winrate) + ", but threshold = "+hm.get(iterMCTSWrap);
                         deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
-                        mCompete = new MCompeteMWrap(run, 1, 0, iterMCTSWrap,
+                        mCompete = new MCompeteMWrap(run,agtFile, 1, 0, iterMCTSWrap,
                                 EPS, 0, c_puct, winrate,
                                 deltaTime, userValue2);
                         mcList.add(mCompete);

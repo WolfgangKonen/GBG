@@ -195,9 +195,9 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 //            }
             for (int j = 0; j < HexConfig.BOARD_SIZE; j++) {
                 switch (board[i][j].getPlayer()) {
-                    case HexConfig.PLAYER_ONE -> sb.append('B');
-                    case PLAYER_TWO -> sb.append('W');
-                    default -> sb.append('-');
+                    case HexConfig.PLAYER_ONE: sb.append('B'); break;
+                    case PLAYER_TWO: sb.append('W'); break;
+                    default: sb.append('-');
                 }
             }
 //            sb.append("\n");

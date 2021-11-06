@@ -192,9 +192,9 @@ public class GameBoardTTTGui extends JFrame {
 				int winner = sc.argmax();
 				if (sc.max()==0.0) winner = -2;	// tie indicator
 				switch (winner) {
-					case (0) -> leftInfo.setText("X has won   ");
-					case (1) -> leftInfo.setText("O has won   ");
-					case (-2) -> leftInfo.setText("Tie         ");
+					case (0): leftInfo.setText("X has won   "); break;
+					case (1): leftInfo.setText("O has won   "); break;
+					case (-2): leftInfo.setText("Tie         "); break;
 				}
 			}
 			
