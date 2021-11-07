@@ -60,7 +60,13 @@ public class BaseBuffer{
     }
 
     public void saveTransition(){
-        if(lastTransition != null) addTransition(lastTransition);
+        if(lastTransition != null
+            && lastTransition.getNextState() != null&& lastTransition.getCurSOWB() != null && lastTransition.getRLast() != null
+        ){
+            addTransition(lastTransition);
+
+        }
+        else lastTransition = null;
     }
 
     public ITransition getLastTransition(){

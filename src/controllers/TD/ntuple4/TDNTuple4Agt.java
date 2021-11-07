@@ -611,13 +611,81 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				replayBuffer.getLastTransition().setReward2(r_next);
 				replayBuffer.getLastTransition().setReward(R);
 				replayBuffer.getLastTransition().setNextState(ns);
-
-				replayBuffer.saveTransition();
 				//m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,r_next,t.getNextState().getSO());
 			}
 		}
 	}
 
+	private void finalAdaptAgents2(ITransition t) {
+		double target,vLast,vLastNew;
+//		int[] curBoard, nextBoard;
+		NextState4 ns = t.getNextState();
+		ScoreTuple R = t.getReward();
+		StateObservation s_after = t.getNextState().getAfterState();
+		StateObservation s_next = t.getNextState().getNextSO();
+		StateObservation[] sLast = t.getSLast();
+		ScoreTuple rLast = t.getRLast();
+		int curPlayer = t.getNextState().getSO().getPlayer();
+		for (int n=0; n<numPlayers; n++) {
+			if (n!=curPlayer) {
+				// This 1st part of finalAdaptAgents is only relevant for games with more than one player:
+				//
+				// adapt the value of the last state sLast[n] of each player other than curPlayer
+				// towards the reward received when curPlayer did his terminal move.
+				//
+				if (sLast[n]!=null ) {
+					target  = (R.scTup[n] - rLast.scTup[n]) 		// delta reward
+							+ s_next.getStepRewardTuple().scTup[n];
+					StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
+					vLast = m_Net.getScoreI(curSOWB,n);
+
+					m_Net.updateWeightsTD(curSOWB, n, vLast, target, R.scTup[n], ns.getSO());
+
+					//debug only:
+					if (m_DEBG) {
+						assert s_next.isLegalState() : "s_next is not legal";
+//	    	    		if (s_next.isGameOver()) {
+//	    	            	vLastNew = m_Net.getScoreI(curSOWB,n);
+//	    	            	int dummy=1;
+//	    	    		}
+						String s1 = sLast[n].stringDescr();
+						String s2 = s_next.stringDescr();
+						if (target!=0.0) { //(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
+							vLastNew = m_Net.getScoreI(curSOWB,n);
+							System.out.println(s1+" "+s2+", "
+									+String.format("%.4f",vLast)+" -> "+String.format("%.4f",vLastNew)
+									+" target="+String.format("%.4f",target)
+									+" player="+(n==0 ? "X" : "O")+" (f)"+this.getGameNum());
+							if (++acount % 50 ==0) {
+								int dummy=1;
+							}
+						}
+					}
+				}
+			} else { // if n==curPlayer
+				if (FINALADAPT_PART2 && !this.epiLengthStop) {
+					// The following is equivalent to TDNTuple2Agt's call of m_Net.updateWeightsNewTerminal():
+					//
+					// If s_next is terminal, adapt the value of the *afterstate* that
+					// curPlayer observed after he did his final move. Adapt it towards
+					// target 0. (This is only relevant for TERNARY==false, since
+					// only then the value of this afterstate is used in getNextAction2.)
+					//
+					// 09/2019: We do the final part2 adaptation only, if the game-over condition is not due ot an
+					// epiLengthStop (then the final state has no special meaning and should NOT be adapted towards
+					// target 0
+					// WK/04/2019: NEW use afterstate, *not* next state
+					StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_after, m_Net.xnf);
+//					curBoard = curSOWB.getBoardVector().bvec;
+					vLast = m_Net.getScoreI(curSOWB,curPlayer);
+
+					m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);
+				}
+
+			}
+		} // for
+
+	}
 
 	/**
 	 * Adapt the n-tuple weights for state {@code sLast[curPlayer]}, the last afterstate that current
@@ -792,19 +860,17 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 					// 09/2019: We do the final part2 adaptation only, if the game-over condition is not due ot an
 					// epiLengthStop (then the final state has no special meaning and should NOT be adapted towards
 					// target 0
-																// WK/04/2019: NEW use afterstate, *not* next state
 		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_after, m_Net.xnf);
 //					curBoard = curSOWB.getBoardVector().bvec;
 		        	vLast = m_Net.getScoreI(curSOWB,curPlayer);
-		        	
-	    			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);					
+	    			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);
 				}
 				
 			}
 		} // for
 		
 	}
-	
+
 	/**
 	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
 	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
@@ -861,26 +927,24 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 			// Collecting
 	        if(ConfigReplayBuffer.USE_REPLAYBUFFER){
-				// Deactivate and save from function call update weights only here.
-				/**replayBuffer.createNewTransition();
-				replayBuffer.getLastTransition().setState(s_t.copy());
-				replayBuffer.getLastTransition().setAction(a_t);
-				replayBuffer.getLastTransition().setNextState(ns);
-				replayBuffer.getLastTransition().setReward(R.copy());
-				replayBuffer.getLastTransition().setLastReward(rLast.copy());
-				replayBuffer.getLastTransition().setSLast(sLast);
-				replayBuffer.saveTransition();**/
 				adaptAgentV2(curPlayer, R, ns);
 			}else {
 				adaptAgentV(curPlayer, R, ns);
 			}
-
+			sLast[curPlayer] = ns.getAfterState();
+			rLast.scTup[curPlayer] = R.scTup[curPlayer];
 	        // we differentiate between the afterstate (on which we learn) and the 
 	        // next state s_t, which may have environment random elements added and from which 
 	        // we advance. 
 	        // (for deterministic games, ns.getAfterState() and ns.getNextSO() are the same)
-	        sLast[curPlayer] = ns.getAfterState();
-	        rLast.scTup[curPlayer] = R.scTup[curPlayer];
+			if(ConfigReplayBuffer.USE_REPLAYBUFFER && replayBuffer.getLastTransition() != null){
+				replayBuffer.getLastTransition().setSLast(sLast);
+				replayBuffer.getLastTransition().setLastReward(rLast.copy());
+
+				replayBuffer.saveTransition();
+			}
+
+
 	        s_t = ns.getNextSO();
 
 	        if (s_t.isRoundOver() && !getParTD().hasStopOnRoundOver()) {	// /WK/ NEW 03/2021
@@ -899,7 +963,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				if(t == null) continue;
 				m_Net.updateWeightsTD(t.getCurSOWB(),t.getPlayer(),t.getVLast(),t.getTarget(),t.getReward2(),t.getState());
 				if(t.getState().isGameOver()){
-					finalAdaptAgents(t.getPlayer(),t.getReward(),t.getNextState());
+					finalAdaptAgents2(t);
 				}
 				/**if(t.getNextState().nextSO.isGameOver()){
 					finalAdaptAgents(t);
