@@ -16,6 +16,7 @@ import game.functions.ints.state.Next;
 import game.functions.ints.state.State;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.BlackJack.StateObserverBlackJack;
+import graphics.svg.element.BaseElement;
 import params.ParNT;
 import params.ParOther;
 import params.ParTD;
@@ -91,7 +92,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	
 	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
 
-	private BaseBuffer replayBuffer;
+	private BaseBuffer[] replayBuffer;
 
 	/**
 	 * Default constructor for {@link TDNTuple4Agt}, needed for loading a serialized version
@@ -122,7 +123,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		this.randLast = new boolean[numPlayers];
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);
 		if(ConfigReplayBuffer.USE_REPLAYBUFFER){
-			replayBuffer = new BaseBuffer();
+			replayBuffer = new BaseBuffer[numPlayers];
+			for(int i =0 ; i<numPlayers; i++){
+				replayBuffer[i] = new BaseBuffer();
+			}
 		}
 	}
 
@@ -602,15 +606,15 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
 
 			} else  {
-				replayBuffer.createNewTransition();
-				replayBuffer.getLastTransition().setPlayer(curPlayer);
-				replayBuffer.getLastTransition().setCurSOWB(curSOWB);
-				replayBuffer.getLastTransition().setVLast(vLast);
-				replayBuffer.getLastTransition().setTarget(target);
-				replayBuffer.getLastTransition().setState(ns.getSO());
-				replayBuffer.getLastTransition().setReward2(r_next);
-				replayBuffer.getLastTransition().setReward(R);
-				replayBuffer.getLastTransition().setNextState(ns);
+				replayBuffer[curPlayer].createNewTransition();
+				replayBuffer[curPlayer].getLastTransition().setPlayer(curPlayer);
+				replayBuffer[curPlayer].getLastTransition().setCurSOWB(curSOWB);
+				replayBuffer[curPlayer].getLastTransition().setVLast(vLast);
+				replayBuffer[curPlayer].getLastTransition().setTarget(target);
+				replayBuffer[curPlayer].getLastTransition().setState(ns.getSO());
+				replayBuffer[curPlayer].getLastTransition().setReward2(r_next);
+				replayBuffer[curPlayer].getLastTransition().setReward(R);
+				replayBuffer[curPlayer].getLastTransition().setNextState(ns);
 				//m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,r_next,t.getNextState().getSO());
 			}
 		}
@@ -882,7 +886,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 */
 	public boolean trainAgent(StateObservation so) {
 		Types.ACTIONS_VT a_t;
-		int   curPlayer;
+		int curPlayer;
 		NextState4 ns;
 		ScoreTuple R;
 		rLast = new ScoreTuple(so);
@@ -937,11 +941,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	        // next state s_t, which may have environment random elements added and from which 
 	        // we advance. 
 	        // (for deterministic games, ns.getAfterState() and ns.getNextSO() are the same)
-			if(ConfigReplayBuffer.USE_REPLAYBUFFER && replayBuffer.getLastTransition() != null){
-				replayBuffer.getLastTransition().setSLast(sLast);
-				replayBuffer.getLastTransition().setLastReward(rLast.copy());
+			if(ConfigReplayBuffer.USE_REPLAYBUFFER && replayBuffer[curPlayer].getLastTransition() != null){
+				replayBuffer[curPlayer].getLastTransition().setSLast(sLast);
+				replayBuffer[curPlayer].getLastTransition().setLastReward(rLast.copy());
 
-				replayBuffer.saveTransition();
+				replayBuffer[curPlayer].saveTransition();
 			}
 
 
@@ -952,20 +956,26 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			}
 
 		} while(!m_finished);			// simplification: m_finished is set by ns.getNextRewardTupleCheckFinished
-		if(ConfigReplayBuffer.USE_REPLAYBUFFER) replayBuffer.setCollecting(false);
+		if(ConfigReplayBuffer.USE_REPLAYBUFFER) replayBuffer[curPlayer].setCollecting(false);
 		if (FINALADAPTAGENTS)
 			if(!ConfigReplayBuffer.USE_REPLAYBUFFER) finalAdaptAgents(curPlayer, R, ns);
 
 		// Start Learning
 		if(ConfigReplayBuffer.USE_REPLAYBUFFER && !ConfigReplayBuffer.COLLECTING){
-			ITransition[] transitions = replayBuffer.getBatches(60);
-			for(ITransition t : transitions){
-				if(t == null) continue;
-				m_Net.updateWeightsTD(t.getCurSOWB(),t.getPlayer(),t.getVLast(),t.getTarget(),t.getReward2(),t.getState());
-				if(t.getState().isGameOver()){
+			for(int i = 0; i <numPlayers; i++){
+				ITransition[] transitions = replayBuffer[i].getBatches(60);
+				for(ITransition t : transitions){
+					if(t == null) continue;
+					m_Net.updateWeightsTD(t.getCurSOWB(),t.getPlayer(),t.getVLast(),t.getTarget(),t.getReward2(),t.getState());
+					if(t.getState().isGameOver()) {
+						finalAdaptAgents2(t);
+					}
+				}
+
+				/**if(t.getState().isGameOver()){
 					finalAdaptAgents2(t);
 				}
-				/**if(t.getNextState().nextSO.isGameOver()){
+				if(t.getNextState().nextSO.isGameOver()){
 					finalAdaptAgents(t);
 				}else {
 					adaptAgentV(t);
