@@ -46,6 +46,11 @@ public class ArenaEWN extends Arena {
                 ConfigEWN.NUM_PLAYERS = 2;
                 break;
             }
+            case "4x4 2-Player":{
+                ConfigEWN.BOARD_SIZE = 4;
+                ConfigEWN.NUM_PLAYERS = 2;
+                break;
+            }
             case"5x5 2-Player": {
                 ConfigEWN.BOARD_SIZE = 5;
                 ConfigEWN.NUM_PLAYERS = 2;

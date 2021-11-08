@@ -296,14 +296,14 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
 
     private int getRandomActionSize(int size, int player){
-        if(player == 2) return size == 3 ? 3 : 6;
+        if(player == 2) return size == 5 ? 6 : 3;
         else if(player == 3) return 6;
         return size == 6 ? 6:3;
     }
 
     private int[][][] getStartingsPosition(){
         if(numPlayers == 2) {
-            return ConfigEWN.BOARD_SIZE == 3 ? StartingPositions.S3P2 : StartingPositions.S5P2;
+            return ConfigEWN.BOARD_SIZE == 3 ? StartingPositions.S3P2 : ConfigEWN.BOARD_SIZE == 4 ? StartingPositions.S4P2 : StartingPositions.S5P2;
         }
         else if(numPlayers == 3) return StartingPositions.S6P3;
         else{

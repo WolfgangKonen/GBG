@@ -605,7 +605,7 @@ public class GBGLaunch {
 			break;
 		case "EWN":
 			scaPar0_L.setText("Settings:");
-			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
+			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","4x4 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
 			scaPar1_L.setText("Position values:");
 			setScaPar1List(new String[]{"[0,..,n]", "[0,1],[2,3],[4,5]"});
