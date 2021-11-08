@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class RPParams extends Frame{
+public class RBParams extends Frame{
 
 
 
@@ -21,9 +21,9 @@ public class RPParams extends Frame{
 
     Button ok;
     JPanel ePanel;
-    RPParams e_par;
+    RBParams e_par;
 
-    public RPParams() {
+    public RBParams() {
         super("Other Parameter");
 
         capacity_T = new JTextField("200"); //
@@ -100,8 +100,8 @@ public class RPParams extends Frame{
      * @param ep
      *            ParOther of the re-loaded agent
      */
-    public void setFrom(ParEdax ep) {
-        this.setDepth(ep.getDepth());
-        this.setMoveTime(ep.getMoveTime());
+    public void setFrom(ParRB ep) {
+        this.setUseRb(ep.getUseRB());
+        this.setCapacity(ep.getCapacity());
     }
 }

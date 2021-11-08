@@ -175,7 +175,7 @@ public class XArenaFuncs {
 				NTuple4Factory ntupfac = new NTuple4Factory();
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum);
+						m_xab.oPar[n],m_xab.rbPar[n], nTuples, xnf, maxGameNum);
 			} else if (sAgent.equals("Sarsa")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
@@ -392,7 +392,7 @@ public class XArenaFuncs {
 						NTuple4Factory ntupfac = new NTuple4Factory();
 						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 						pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-								m_xab.oPar[n], nTuples, xnf, maxGameNum);
+								m_xab.oPar[n],m_xab.rbPar[n], nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 						// e.printStackTrace();

@@ -103,7 +103,7 @@ public class ParRB implements Serializable {
         }
         switch (agentName) {
             default:
-                this.setCapacity(21);
+                this.setCapacity(200);
                 this.setUseRB(true);
                 break;
         }
