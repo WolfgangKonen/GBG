@@ -57,7 +57,7 @@ public class ParRB implements Serializable {
     /**
      * Call this from XArenaFuncs constructAgent or fetchAgent to get the latest changes from GUI
      */
-    public void pushFromEdaxParams() {
+    public void pushFromRBParams() {
         if (RBparams!=null)
             this.setFrom(RBparams);
     }

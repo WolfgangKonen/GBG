@@ -44,6 +44,7 @@ public class XArenaButtons //extends JPanel
 	public ParMC[] mcPar;
 	public ParMCTSE[] mctsePar;
 	public ParEdax[] edPar;
+	public ParRB[] rbPar;
 	public String[] selectedAgents;
 
 	// tournament system remote data input
@@ -73,6 +74,7 @@ public class XArenaButtons //extends JPanel
 		mcPar = new ParMC[numPlayers];
 		mctsePar = new ParMCTSE[numPlayers];
 		edPar = new ParEdax[numPlayers];
+		rbPar = new ParRB[numPlayers];
 		selectedAgents = new String[numPlayers];
 
 		// for-loop over *decrementing* n so that we set on the last pass (n=0) with the call 
@@ -88,6 +90,7 @@ public class XArenaButtons //extends JPanel
 			mcPar[n] = new ParMC(m_arena.hasGUI());
 			mctsePar[n] = new ParMCTSE(m_arena.hasGUI());
 			edPar[n] = new ParEdax(m_arena.hasGUI());
+			rbPar[n] = new ParRB(m_arena.hasGUI());
 			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_arena.getGameName());
 			
 			try {
@@ -161,7 +164,7 @@ public class XArenaButtons //extends JPanel
 		mctsePar[n].setParamDefaults(agentName, gameName, numPlayers);
 		maxnPar[n].setParamDefaults(agentName, gameName, numPlayers);
 		oPar[n].setParamDefaults(agentName, gameName);
-
+		rbPar[n].setParamDefaults(agentName,gameName);
 		switch (agentName) {
 		case "TDS":
 //		case "TD-Ntuple-2":
@@ -395,4 +398,5 @@ public class XArenaButtons //extends JPanel
 	public void setMctseParFrom(int n, ParMCTSE parMctse) {
 		mctsePar[n].setFrom( parMctse );
 	}
+	public void setRBParFrom(int n, ParRB parRB){rbPar[n].setFrom(parRB);}
 } // class XArenaButtons	

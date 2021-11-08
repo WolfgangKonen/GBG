@@ -8,6 +8,8 @@ import controllers.ReplayBuffer.Transition.Transition;
 import controllers.TD.ntuple4.NextState4;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
+import params.ParRB;
+import params.RBParams;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -19,18 +21,29 @@ public class BaseBuffer{
     private ISelector selector;
     private int bufferMaxPointer;
     private ITransition lastTransition;
+    private RBParams m_params;
 
     public BaseBuffer(){
-        if(ConfigReplayBuffer.USE_REPLAYBUFFER){
-            ConfigReplayBuffer.COLLECTING = true;
-            indexPointer = 0;
-            bufferMaxPointer = 0;
-            capacity = ConfigReplayBuffer.CAPACITY;
-            buffer = new ITransition[ConfigReplayBuffer.CAPACITY];
-            selector = setSelector(ConfigReplayBuffer.SELECTOR);
-            lastTransition = null;
-            assert selector instanceof RandomSelector;
-        }
+        ConfigReplayBuffer.COLLECTING = true;
+        indexPointer = 0;
+        bufferMaxPointer = 0;
+        capacity = ConfigReplayBuffer.CAPACITY;
+        buffer = new ITransition[ConfigReplayBuffer.CAPACITY];
+        selector = setSelector(ConfigReplayBuffer.SELECTOR);
+        lastTransition = null;
+        assert selector instanceof RandomSelector;
+    }
+    public BaseBuffer(ParRB params) {
+        ConfigReplayBuffer.COLLECTING = true;
+        ConfigReplayBuffer.CAPACITY = params.getCapacity();
+        ConfigReplayBuffer.USE_REPLAYBUFFER = params.getUseRB();
+        indexPointer = 0;
+        bufferMaxPointer = 0;
+        capacity = params.getCapacity();
+        buffer = new ITransition[ConfigReplayBuffer.CAPACITY];
+        selector = setSelector(ConfigReplayBuffer.SELECTOR);
+        lastTransition = null;
+        assert selector instanceof RandomSelector;
     }
 
 

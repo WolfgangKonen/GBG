@@ -115,7 +115,7 @@ public class XArenaFuncs {
 		m_xab.mctsPar[n].pushFromMCTSParams();
 		m_xab.mctsePar[n].pushFromMCTSEParams();
 		m_xab.edPar[n].pushFromEdaxParams();
-
+		m_xab.rbPar[n].pushFromRBParams();
 		// update element pMaxValue in GameBoardCubeGUI, if present:
 		if (m_xab.m_arena.getGameBoard() instanceof GameBoardCube) {
 			((GameBoardCube)m_xab.m_arena.getGameBoard()).setPMin(CubeConfig.pMin);

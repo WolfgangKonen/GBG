@@ -943,12 +943,13 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	        // next state s_t, which may have environment random elements added and from which 
 	        // we advance. 
 	        // (for deterministic games, ns.getAfterState() and ns.getNextSO() are the same)
-			if(ConfigReplayBuffer.USE_REPLAYBUFFER && replayBuffer.getLastTransition() != null){
-				replayBuffer.getLastTransition().setSLast(sLast);
-				replayBuffer.getLastTransition().setLastReward(rLast.copy());
-				replayBuffer.saveTransition();
+			if(ConfigReplayBuffer.USE_REPLAYBUFFER) {
+				if (replayBuffer.getLastTransition() != null) {
+					replayBuffer.getLastTransition().setSLast(sLast);
+					replayBuffer.getLastTransition().setLastReward(rLast.copy());
+					replayBuffer.saveTransition();
+				}
 			}
-
 
 	        s_t = ns.getNextSO();
 
