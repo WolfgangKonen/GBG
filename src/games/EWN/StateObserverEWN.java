@@ -482,10 +482,8 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         return +1;
     }
 
-    @Override
-    public String getName() {
-        return "EWN";
-    }
+    // --- obsolete, use Arena().getGameName() instead
+//    public String getName() {return "EWN";}
 
     @Override
     public String stringDescr() {

@@ -6,6 +6,7 @@ import javax.swing.JPanel;
 
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.Arena;
 import games.Othello.Edax.Edax2;
 
 /**
@@ -112,7 +113,7 @@ public class ParEdax implements Serializable {
 	 * choices may be enabled or disabled.
 	 * 
 	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "TDS" (for {@link TDAgent})
-	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param gameName the string from {@link Arena#getGameName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
 		switch (gameName) {

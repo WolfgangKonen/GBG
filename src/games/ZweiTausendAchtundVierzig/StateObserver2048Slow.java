@@ -419,8 +419,8 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
         return REWARD_POSITIVE;
     }
 
-    @Override
-    public String getName() { return "ZweiTausendAchtundVierzig"; }
+    // --- obsolete, use Arena().getGameName() instead
+//    public String getName() { return "ZweiTausendAchtundVierzig"; }
 
 	/**
 	 * The board vector is an {@code int[]} vector where each entry corresponds to one

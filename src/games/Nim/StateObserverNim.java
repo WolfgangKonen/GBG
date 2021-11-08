@@ -144,7 +144,8 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	public double getMinGameScore() { return NimConfig.REWARD_NEGATIVE; }
 	public double getMaxGameScore() { return NimConfig.REWARD_POSITIVE; }
 
-	public String getName() { return "Nim";	}
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() { return "Nim";	}
 
 	/**
 	 * Advance the current state with action {@code action} to a new state

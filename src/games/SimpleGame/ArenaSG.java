@@ -30,7 +30,11 @@ public class ArenaSG extends Arena   {
 	public ArenaSG(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+	public ArenaSG(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -71,7 +75,7 @@ public class ArenaSG extends Arena   {
 		return new XNTupleFuncsSG();
 	}
 
-	public void performArenaDerivedTasks() {  }
+//    public void performArenaDerivedTasks() {}
 
 	
 	/**

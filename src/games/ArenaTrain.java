@@ -29,22 +29,9 @@ abstract public class ArenaTrain extends Arena
 {
 	private static final long serialVersionUID = 1L;
 
-	// --- never used ---
-//	// launch ArenaTrain with UI
-//	public ArenaTrain() {
-//		super();
-//		initArenaTrain();
-//	}
-//	
-//	// launch ArenaTrain with UI
-//	public ArenaTrain(String title) {
-//		super(title);
-//		initArenaTrain();
-//	}
-	
 	// decide via withUI whether wit UI or not
 	public ArenaTrain(String title, boolean withUI) {
-		super(title, withUI);
+		super(title, withUI, true);
 		initArenaTrain();
 	}
 	
@@ -56,7 +43,7 @@ abstract public class ArenaTrain extends Arena
 	}
 	
 	public boolean hasTrainRights() {
-		return true;
+		return m_hasTrainRights;
 	}
 	
 	public int getGuiArenaHeight() {
@@ -128,7 +115,7 @@ abstract public class ArenaTrain extends Arena
 //			enableButtons(false);	// see MultiTrain.addActionListener in XArenaButtonsGui
 			
 	        setStatusMessage("MultiTrain started ...");
-	        long start_time = Calendar.getInstance().getTime().getTime();
+	        long start_time = System.currentTimeMillis();
 			try {
 				
 				m_xfun.m_PlayAgents[0] = m_xfun.multiTrain(0, m_xab.getSelectedAgent(0), m_xab, gb, "multiTrain.csv");
@@ -146,8 +133,8 @@ abstract public class ArenaTrain extends Arena
 				m_xfun.m_PlayAgents[0].setAgentState(AgentState.TRAINED);
 		        setStatusMessage("MultiTrain finished: "+ m_xfun.getLastMsg());
 			}
-	        long elapsed_time = Calendar.getInstance().getTime().getTime() - start_time;
-	        System.out.println("MultiTrain finished, time : "+ elapsed_time + " msec");
+	        double elapsed_time = (System.currentTimeMillis() - start_time)/1000.0;
+	        System.out.println("MultiTrain finished, time : "+ elapsed_time + " sec");
 
 			enableButtons(true);
 			taskState = Task.IDLE; 

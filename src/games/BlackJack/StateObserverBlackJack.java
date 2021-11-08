@@ -422,10 +422,8 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
     }
 
 
-    @Override
-    public String getName() {
-        return "BlackJack";
-    }
+    // --- obsolete, use Arena().getGameName() instead
+//    public String getName() {return "BlackJack";}
 
     @Override
     public void advance(ACTIONS action) {

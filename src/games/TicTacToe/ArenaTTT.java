@@ -34,7 +34,11 @@ public class ArenaTTT extends Arena   {
 	public ArenaTTT(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+	public ArenaTTT(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -75,7 +79,7 @@ public class ArenaTTT extends Arena   {
 		return new XNTupleFuncsTTT();
 	}
 
-	public void performArenaDerivedTasks() {  }
+//    public void performArenaDerivedTasks() {}
 
 	
 	/**
@@ -91,7 +95,7 @@ public class ArenaTTT extends Arena   {
 		if (args.length==0) {
 			t_Frame.init();
 		} else {
-			throw new RuntimeException("[Arena.main] args="+args+" not allowed. Use TicTacToeBatch.");
+			throw new RuntimeException("[Arena.main] args="+args+" not allowed. Use GBGBatch.");
 		}
 	}
 	

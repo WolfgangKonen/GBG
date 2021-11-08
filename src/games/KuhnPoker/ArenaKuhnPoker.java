@@ -8,13 +8,14 @@ import java.io.IOException;
 
 
 public class ArenaKuhnPoker extends Arena   {
-
-
-
 	public ArenaKuhnPoker(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+	public ArenaKuhnPoker(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -45,7 +46,7 @@ public class ArenaKuhnPoker extends Arena   {
 		return new XNTupleFuncsKuhnPoker();
 	}
 
-	public void performArenaDerivedTasks() {  }
+//    public void performArenaDerivedTasks() {}
 
 
 	@Override

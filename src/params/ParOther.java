@@ -334,7 +334,7 @@ public class ParOther implements Serializable {
 	 * choices may be enabled or disabled.
 	 * 
 	 * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "Sarsa" (for {@link SarsaAgt})
-	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
 		// Currently we have here only the sensible defaults for one game ("RubiksCube"):

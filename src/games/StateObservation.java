@@ -188,11 +188,12 @@ public interface StateObservation extends PartialState, Serializable{
 
 	void resetMoveCounter();
 	
-	/**
-	 *
-	 * @return the name of the Game (should be a valid directory name)
-	 */
-	String getName();
+	// --- obsolete, use Arena().getGameName() instead
+//	/**
+//	 *
+//	 * @return the name of the Game (should be a valid directory name)
+//	 */
+//	String getName();
 
 	/**
 	 * Advance the current state with {@code action} to a new state

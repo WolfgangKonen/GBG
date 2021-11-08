@@ -16,7 +16,11 @@ public class Arena2048 extends Arena {
 	public Arena2048(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+    public Arena2048(String title, boolean withUI, boolean withTrainRights) {
+        super(title,withUI,withTrainRights);
+    }
+
     /**
      * @return a name of the game, suitable as subdirectory name in the
      *         {@code agents} directory
@@ -71,7 +75,7 @@ public class Arena2048 extends Arena {
         return new Feature2048(featmode);
     }
 
-    public void performArenaDerivedTasks() {  }
+//    public void performArenaDerivedTasks() {}
     
 	/**
 	 * Start GBG for 2048 (non-trainable version)

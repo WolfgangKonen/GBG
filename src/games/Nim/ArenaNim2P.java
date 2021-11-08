@@ -39,7 +39,11 @@ public class ArenaNim2P extends Arena   {
 	public ArenaNim2P(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+	public ArenaNim2P(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -124,9 +128,9 @@ public class ArenaNim2P extends Arena   {
 	
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncsNim2P();
-	}	
+	}
 
-	public void performArenaDerivedTasks() {  }
+//    public void performArenaDerivedTasks() {}
 
 	
 	/**

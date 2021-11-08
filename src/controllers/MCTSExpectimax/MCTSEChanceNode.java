@@ -164,7 +164,7 @@ public class MCTSEChanceNode
                 }
             }
             if (m_player.getNormalize()) {
-                double maxScore = (so.getName().equals("2048")) ? m_player.getRootNode().maxRolloutScore : so.getMaxGameScore();
+                double maxScore = (so instanceof StateObserver2048) ? m_player.getRootNode().maxRolloutScore : so.getMaxGameScore();
                 vTable[i] = vTable[i]*maxScore;
             }
         }
@@ -528,7 +528,7 @@ public class MCTSEChanceNode
 		if (m_player.getNormalize()) {
             double maxScore;
             double minScore=so.getMinGameScore();
-			if (so.getName().equals("2048")) {
+			if (so instanceof StateObserver2048) {
 				// A special normalization for 2048: maxRolloutScore is an estimate of the maximum
 				// expected rollout score from the current root node (estimated initially in 
 				// MCTSEPlayer::init() by a quick 100-iterations mctseScearch() and then updated 

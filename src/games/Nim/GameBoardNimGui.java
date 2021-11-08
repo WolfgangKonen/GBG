@@ -71,7 +71,7 @@ public class GameBoardNimGui extends JFrame {
 	private Color colTHK3 = new Color(162,0,162);
 	
 	public GameBoardNimGui(GameBoardNimBase gb) {
-		super(gb.getStateObs().getName());	// "Nim" or "Nim3P"
+		super(gb.getArena().getGameName());	// "Nim" or "Nim3P"
 		m_gb = gb;
 		switch (m_gb.getStateObs().getNumPlayers()) {
 		case 2:

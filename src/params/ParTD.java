@@ -358,7 +358,7 @@ public class ParTD implements Serializable {
 	 * @param agentName one out of
 	 * 			"TD-Ntuple-3" ({@link TDNTuple3Agt}),
 	 * 			"Sarsa" ({@link SarsaAgt}) or "TDS" ({@link TDAgent})
-	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
 		// Currently we have here only the sensible defaults for some games and

@@ -236,10 +236,8 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         return POSITIVE_REWARD;
     }
 
-    @Override
-    public String getName() {
-        return "Yavalath";
-    }
+    // --- obsolete, use Arena().getGameName() instead
+//    public String getName() {return "Yavalath";}
 
     @Override
     public StateObserverYavalath copy() {

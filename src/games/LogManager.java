@@ -159,7 +159,7 @@ public class LogManager {
      *
      * @param sessionid the id of the current logsession
      */
-    public void endLoggingSession(int sessionid) {
+    public void endLoggingSession(int sessionid, String gameName) {
         if (loggingEnabled) {
             LogSessionContainer logSessionContainer;
 
@@ -185,7 +185,7 @@ public class LogManager {
                 simpleLoggingContainers.remove(sessionid);
             }
 
-            saveLogSessionContainer(logSessionContainer);
+            saveLogSessionContainer(logSessionContainer, gameName);
         }
     }
 
@@ -226,17 +226,17 @@ public class LogManager {
      *
      * @param logSessionContainer the LogSessionContainer
      */
-    public void saveLogSessionContainer(LogSessionContainer logSessionContainer) {
+    public void saveLogSessionContainer(LogSessionContainer logSessionContainer, String gameName) {
         if (logSessionContainer.stateObservations.size() > 0) {
-            String saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName();
+            String saveDirectory = filePath + "\\" + gameName;
             if(subDir != null && !subDir.equals("")) {
-                saveDirectory = filePath + "\\" + logSessionContainer.stateObservations.get(0).getName() + "\\" + subDir;
+                saveDirectory = filePath + "\\" + gameName + "\\" + subDir;
                 //System.out.println(saveDirectory);
             }
 
     		tools.Utils.checkAndCreateFolder(saveDirectory);
 
-            String sessionFolderName = saveDirectory + "\\" + logSessionContainer.stateObservations.get(0).getName() + "_" + getCurrentTimeStamp();
+            String sessionFolderName = saveDirectory + "\\" + gameName + "_" + getCurrentTimeStamp();
             String sessionFolderNameSuffix = "";
 
             //test if File already exists

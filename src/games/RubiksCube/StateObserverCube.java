@@ -231,7 +231,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		return new ScoreTuple(new double[]{val});
 	}
 
-	public String getName() { return "RubiksCube";	}	// should be a valid directory name
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() { return "RubiksCube";	}
 
 	/**
 	 * Advance the current state with 'action' to a new state. 

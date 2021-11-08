@@ -129,7 +129,7 @@ public class ParMaxN implements Serializable {
 	 * choices may be enabled or disabled.
 	 * 
 	 * @param agentName "Max-N" or "Expectimax-N" (see Types.GUI_AGENT_LIST)
-	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 * @param numPlayers currently not used
 	 */
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {

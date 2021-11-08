@@ -19,6 +19,7 @@ import games.Othello.ArenaOthello;
 import games.Othello.ArenaTrainOthello;
 import games.Poker.ArenaPoker;
 import games.Poker.ArenaTrainPoker;
+import games.RubiksCube.ArenaCube;
 import games.RubiksCube.ArenaTrainCube;
 import games.Sim.ArenaSim;
 import games.Sim.ArenaTrainSim;
@@ -64,7 +65,7 @@ public class GBGLaunch {
 	}
 	public LaunchTask launcherState = LaunchTask.SELECTGAME;	// also used in Arena.destroy()
 	
-	private static final long serialVersionUID = 1L;
+	//private static final long serialVersionUID = 1L;
 	public static Arena t_Game;
 	private final JFrame launcherUI;
 	private static String selectedGame = "TicTacToe";
@@ -88,9 +89,9 @@ public class GBGLaunch {
 	 * <p>  
 	 * Examples:       
 	 * <ul>
-	 * <li>	{@code GBGLaunch 1 Nim} : start launcher, with Nim preselected
 	 * <li>	{@code GBGLaunch} : start launcher, with TicTacToe preselected
-	 * <li>	{@code GBGLaunch 0 Hex} : start directly Hex, no launcher
+	 * <li>	{@code GBGLaunch 1 Nim} : start launcher, with Nim preselected
+	 * <li>	{@code GBGLaunch 0 Hex P} : start directly Hex, no launcher, no train rights
 	 * <li>	{@code GBGLaunch 0} : start directly TicTacToe, no launcher
 	 * </ul>
 	 * When a scalable game is started w/o launcher, the method {@link #setDefaultScaPars()} will set 
@@ -148,7 +149,11 @@ public class GBGLaunch {
 			}
 		} else {
 			// start selectedGame without launcherUI-loop
-			startGBGameTrain(selectedGame,null);
+			if (withTrainRights) {
+				startGBGameTrain(selectedGame,null);
+			} else {
+				startGBGamePlay(selectedGame,null);
+			}
 		}
 
 	}
@@ -159,15 +164,16 @@ public class GBGLaunch {
 	 * @param t_Launch		the launcher
 	 */
 	private static void startGBGameTrain(String selectedGame, GBGLaunch t_Launch) {
-		String title = "General Board Game Playing";
+		String x, title = "General Board Game Playing";
 		String[] scaPar = new String[3];
 		for (int i=0; i<3; i++) scaPar[i]="";
 		if (t_Launch==null) {
 			scaPar = setDefaultScaPars();
 		} else {
-			scaPar[0] = (String) t_Launch.choiceScaPar0.getSelectedItem();
-			scaPar[1] = (String) t_Launch.choiceScaPar1.getSelectedItem();
-			scaPar[2] = (String) t_Launch.choiceScaPar2.getSelectedItem();			
+			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when later using scaPar[i])
+			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
+			x = (String) t_Launch.choiceScaPar1.getSelectedItem(); if (x!=null) scaPar[1]=x;
+			x = (String) t_Launch.choiceScaPar2.getSelectedItem(); if (x!=null) scaPar[2]=x;
 		}
 		final boolean withUI = true;
 		switch(selectedGame) {
@@ -175,8 +181,8 @@ public class GBGLaunch {
 			t_Game = new ArenaTrain2048(title,withUI);
 			break;
 		case "Blackjack":
-				t_Game = new ArenaBlackJackTrain(title,withUI);
-				break;
+			t_Game = new ArenaBlackJackTrain(title,withUI);
+			break;
 		case "ConnectFour":
 			t_Game = new ArenaTrainC4(title,withUI);
 			break;
@@ -258,19 +264,21 @@ public class GBGLaunch {
 	
 	/**
 	 * Start a game without train rights (just play)
-	 * @param selectedGame
-	 * @param t_Launch
+	 * @param selectedGame	the game
+	 * @param t_Launch		the starter object
 	 */
 	private static void startGBGamePlay(String selectedGame, GBGLaunch t_Launch) {
 		String title = "General Board Game Playing";
 		String[] scaPar = {"","",""};
+		String x;
 		for (int i=0; i<3; i++) scaPar[i]="";
 		if (t_Launch==null) {
 			scaPar = setDefaultScaPars();
 		} else {
-			scaPar[0] = (String) t_Launch.choiceScaPar0.getSelectedItem();
-			scaPar[1] = (String) t_Launch.choiceScaPar1.getSelectedItem();
-			scaPar[2] = (String) t_Launch.choiceScaPar2.getSelectedItem();			
+			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when using scaPar[i]
+			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
+			x = (String) t_Launch.choiceScaPar1.getSelectedItem(); if (x!=null) scaPar[1]=x;
+			x = (String) t_Launch.choiceScaPar2.getSelectedItem(); if (x!=null) scaPar[2]=x;
 		}
 		final boolean withUI = true;
 		switch(selectedGame) {
@@ -316,15 +324,16 @@ public class GBGLaunch {
 			t_Game = new ArenaPoker(title,withUI);
 			break;
 		case "KuhnPoker":
-				t_Game = new ArenaKuhnPoker(title,withUI);
-				break;
+			t_Game = new ArenaKuhnPoker(title,withUI);
+			break;
 		case "RubiksCube":
 			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
 			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
 			// the Arena buttons are constructed 
-			ArenaTrainCube.setCubeType(scaPar[0]);
-			ArenaTrainCube.setBoardVecType(scaPar[1]);
-			t_Game = new ArenaTrainCube(title,withUI);		// ArenaCube still missing
+			ArenaCube.setCubeType(scaPar[0]);
+			ArenaCube.setBoardVecType(scaPar[1]);
+			ArenaCube.setTwistType(scaPar[2]);
+			t_Game = new ArenaCube(title,withUI);
 			break;
 		case "Sim": 
 			// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaSim, 
@@ -342,11 +351,10 @@ public class GBGLaunch {
 			ArenaEWN.setConfig(scaPar[0]);
 			ArenaEWN.setCellCoding(scaPar[1]);
 			ArenaEWN.setRandomStartingPosition(scaPar[2]);
-
 			t_Game = new ArenaEWN(title, withUI);
+			break;
 		case "Yavalath":
 			ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
-
 			t_Game = new ArenaYavalath(title,withUI);
 			break;
 		default:
@@ -373,7 +381,7 @@ public class GBGLaunch {
 		JLabel Blank = new JLabel(" "); // a little bit of space
 		JLabel  m_title = new JLabel("GBG Launcher", SwingConstants.CENTER);
 		m_title.setForeground(Color.black);
-		Font tFont = new Font("Arial", 1, Types.GUI_TITLEFONTSIZE);
+		Font tFont = new Font("Arial", Font.BOLD, Types.GUI_TITLEFONTSIZE);
 		m_title.setFont(tFont);
 		titlePanel.add(Blank);
 		titlePanel.add(m_title);
@@ -466,21 +474,40 @@ public class GBGLaunch {
 					public void actionPerformed(ActionEvent e)
 					{	
 						selectedGame = (String)choiceGame.getSelectedItem();
-						if (selectedGame.equals("Nim")) {
-							String heapSize = (String)choiceScaPar1.getSelectedItem();
-							int iHeapSize = Integer.parseInt(heapSize);
-							choiceScaPar2.removeAllItems();
-							if (iHeapSize==3) {
-								setScaPar2List(new int[]{2,3});	
-							} else {
-								setScaPar2List(new int[]{2,3,4,5});	
-								if (iHeapSize>5) choiceScaPar2.addItem(heapSize);								
+						if (selectedGame!=null) {
+							if (selectedGame.equals("Nim")) {
+								String heapSize = (String)choiceScaPar1.getSelectedItem();
+								assert heapSize!=null : "heapSize is null!";
+								int iHeapSize = Integer.parseInt(heapSize);
+								choiceScaPar2.removeAllItems();
+								if (iHeapSize==3) {
+									setScaPar2List(new int[]{2,3});
+								} else {
+									setScaPar2List(new int[]{2,3,4,5});
+									if (iHeapSize>5) choiceScaPar2.addItem(heapSize);
+								}
 							}
 						}
 					}
 				}	
 		);
 		
+	}
+
+	/**
+	 * helper class for {@link GBGLaunch#GBGLaunch()}
+	 */
+	protected static class WindowClosingAdapter
+			extends WindowAdapter
+	{
+		public WindowClosingAdapter()  {  }
+
+		public void windowClosing(WindowEvent event)
+		{
+			event.getWindow().setVisible(false);
+			event.getWindow().dispose();
+			System.exit(0);
+		}
 	}
 
 	/**
@@ -514,9 +541,11 @@ public class GBGLaunch {
 			scaPar[0]="2x2x2";		 	
 			scaPar[1]="STICKER2";
 			scaPar[2]="ALL";
+			break;
 		case "EWN":
 			scaPar[0] = "3x3 2-Player";
 			scaPar[1] = "N-Player + 1";
+			break;
 		case "2048":
 		case "Blackjack":
 		case "ConnectFour":
@@ -685,6 +714,10 @@ public class GBGLaunch {
 			choiceScaPar2.addItem(s);
 	}
 
+	//
+	// *TODO*
+	//
+
 	public void setScaPar1Tooltip(String str) {
 		choiceScaPar0.setToolTipText(str);
 	}
@@ -695,22 +728,6 @@ public class GBGLaunch {
 
 	public void setScaPar3Tooltip(String str) {
 		choiceScaPar2.setToolTipText(str);
-	}
-
-	/**
-	 * helper class for {@link GBGLaunch#GBGLaunch()}
-	 */
-	protected static class WindowClosingAdapter
-	extends WindowAdapter
-	{
-		public WindowClosingAdapter()  {  }
-
-		public void windowClosing(WindowEvent event)
-		{
-			event.getWindow().setVisible(false);
-			event.getWindow().dispose();
-			System.exit(0);
-		}
 	}
 
 }

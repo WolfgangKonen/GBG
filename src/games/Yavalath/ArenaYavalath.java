@@ -9,6 +9,10 @@ public class ArenaYavalath extends Arena {
         super(title, withUI);
     }
 
+    public ArenaYavalath(String title, boolean withUI, boolean withTrainRights) {
+        super(title,withUI,withTrainRights);
+    }
+
     @Override
     public String getGameName() {
         return "Yavalath";
@@ -30,10 +34,8 @@ public class ArenaYavalath extends Arena {
         return new EvaluatorYavalath(pa,gb,stopEval,mode);
     }
 
-    @Override
-    public void performArenaDerivedTasks() {
-
-    }
+//    @Override
+//    public void performArenaDerivedTasks() {}
 
     public XNTupleFuncs makeXNTupleFuncs(){
         return new XNTupleFuncsYavalath();

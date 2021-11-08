@@ -599,7 +599,8 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		return desc;
 	}
 
-	public String getName() { return "Poker";	}
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() { return "Poker";	}
 
 	public boolean isNextActionDeterministic() {
 		return isNextActionDeterministic;

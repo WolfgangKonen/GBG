@@ -291,7 +291,7 @@ public class ParNT implements Serializable {
 	 * 
 	 * @param agentName currently only "TD-Ntuple-2","TD-Ntuple-3","Sarsa"
 	 * 				all other strings are without any effect
-	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
 		switch (agentName) {

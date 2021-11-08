@@ -112,7 +112,8 @@ public class StateObserverSG extends ObsNondetBase implements StateObsNondetermi
 	public double getMinGameScore() { return REWARD_NEGATIVE; }
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
-	public String getName() { return "SimpleGame";	}
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() { return "SimpleGame";	}
 
 	/**
 	 * Advance the current state with 'action' to a new state

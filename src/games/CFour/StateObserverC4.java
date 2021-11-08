@@ -199,7 +199,8 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 	public double getMinGameScore() { return REWARD_NEGATIVE; }
 	public double getMaxGameScore() { return REWARD_POSITIVE; }
 
-	public String getName() { return "ConnectFour";	}
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() { return "ConnectFour";	}
 
 	/**
 	 * Advance the current state with 'action' to a new state

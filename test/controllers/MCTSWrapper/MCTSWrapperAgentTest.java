@@ -57,7 +57,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     public void rubiksCube3x3Test() {
         scaPar=new String[]{"3x3x3", "STICKER2", "ALL"};
         agtFiles = new String[]{"TCL4-p9-2000k-120-7t.agt.zip"};
-        int[] iterMCTSWrapArr = {200}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
+        int[] iterMCTSWrapArr = {200,500}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
         int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
@@ -122,8 +122,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         selectedGame = "RubiksCube";
         PlayAgent pa;
         PlayAgent qa;
-        double[] epsArr = {1e-8, 0.0, -1e-8}; // {1e-8, 0.0};    // {1e-8};
-        double c_puct=1.0;
+        double[] epsArr = {1e-8}; // {1e-8, 0.0, -1e-8}; // {1e-8, 0.0};    //
+        double c_puct=10.0;
         String userTitle1 = "user1", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
         int maxDepth = 50;  // 25, 50, -1
