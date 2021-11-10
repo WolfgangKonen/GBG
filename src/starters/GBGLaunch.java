@@ -251,6 +251,7 @@ public class GBGLaunch {
 			break;
 		case "Yavalath":
 			ArenaTrainYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
+			ArenaTrainYavalath.setBoardSize(Integer.parseInt(scaPar[1]));
 			t_Game = new ArenaTrainYavalath(title,withUI);
 			break;
 		default: 
@@ -355,6 +356,7 @@ public class GBGLaunch {
 			break;
 		case "Yavalath":
 			ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
+			ArenaYavalath.setBoardSize(Integer.parseInt(scaPar[1]));
 			t_Game = new ArenaYavalath(title,withUI);
 			break;
 		default:
@@ -560,6 +562,7 @@ public class GBGLaunch {
 			break;
 		case "Yavalath":
 			scaPar[0] = "2";
+			scaPar[1] = "5";
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
@@ -662,7 +665,13 @@ public class GBGLaunch {
 			break;
 		case "Yavalath":
 			scaPar0_L.setText("Players");
-			setScaPar0List(new int[]{2,3});
+			scaPar1_L.setText("Board Size");
+			setScaPar0List(new String[]{ "2","3"});
+			setScaPar1List(new String[]{ "3","4","5","6"});
+			choiceScaPar0.setSelectedItem("2");
+			choiceScaPar1.setSelectedItem("5");
+			scaPar0_L.setToolTipText("Number of players");
+			scaPar1_L.setToolTipText("Size of the board game (Meaning length of its edge)");
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");

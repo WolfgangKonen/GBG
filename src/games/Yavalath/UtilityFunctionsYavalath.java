@@ -4,6 +4,7 @@ import tools.Types;
 
 import java.awt.*;
 import java.util.ArrayList;
+import static games.Yavalath.ConfigYavalath.*;
 
 /**
  * The type Utility functions yavalath.
@@ -94,7 +95,7 @@ public class UtilityFunctionsYavalath {
      */
     private static boolean occupiedTileInNeighbours(ArrayList<TileYavalath> neighbours){
         for(TileYavalath x : neighbours){
-            if(!(x.getPlayer() == ConfigYavalath.EMPTY)){
+            if(!(x.getPlayer() == EMPTY)){
                 return true;
             }
         }
@@ -134,8 +135,8 @@ public class UtilityFunctionsYavalath {
      * @param board The game board
      */
     private static boolean isTileValid(int i, int j, TileYavalath[][] board){
-        if((i >= 0 && i <ConfigYavalath.BOARD_SIZE) && (j >= 0 && j < ConfigYavalath.BOARD_SIZE)){
-            return board[i][j].getPlayer() != ConfigYavalath.INVALID_FIELD;
+        if((i >= 0 && i < getMaxRowLength()) && (j >= 0 && j < getMaxRowLength())){
+            return board[i][j].getPlayer() != INVALID_FIELD;
         }else return false;
     }
 
@@ -185,9 +186,9 @@ public class UtilityFunctionsYavalath {
                         int threateningTileX = neighbourX - deltaX;
                         int threateningTileY = neighbourY - deltaY;
                         //Check if the threatening tile is free
-                        if(gb[threateningTileX][threateningTileY].getPlayer() == ConfigYavalath.EMPTY){
+                        if(gb[threateningTileX][threateningTileY].getPlayer() == EMPTY){
                             gb[threateningTileX][threateningTileY].setThreateningMove(true);
-                            return new Types.ACTIONS(threateningTileX * ConfigYavalath.BOARD_SIZE + threateningTileY);
+                            return new Types.ACTIONS(threateningTileX * getMaxRowLength() + threateningTileY);
                         }
 
                     }
@@ -197,14 +198,14 @@ public class UtilityFunctionsYavalath {
                     if (gb[extrapolateOppositeX][extrapolateOppositeY].getPlayer() == playerToUse) {
                         int threateningTileX = tileToUseX + deltaX;
                         int threateningTileY = tileToUseY + deltaY;
-                        if(gb[threateningTileX][threateningTileY].getPlayer() == ConfigYavalath.EMPTY){
+                        if(gb[threateningTileX][threateningTileY].getPlayer() == EMPTY){
                             gb[threateningTileX][threateningTileY].setThreateningMove(true);
-                            return new Types.ACTIONS(threateningTileX * ConfigYavalath.BOARD_SIZE + threateningTileY);
+                            return new Types.ACTIONS(threateningTileX * getMaxRowLength() + threateningTileY);
                         }
                     }
                 }
                 //If the neighbour is an empty space check if there's a 2 tile line behind it
-            } else if(neighbour.getPlayer() == ConfigYavalath.EMPTY){
+            } else if(neighbour.getPlayer() == EMPTY){
                 int length = 0;
                 for (int i = 1; i < 3; i++) {
                     int x = neighbourX - i * deltaX;
@@ -219,7 +220,7 @@ public class UtilityFunctionsYavalath {
                 }
                 if (length == 2) {
                     gb[neighbourX][neighbourY].setThreateningMove(true);
-                    return new Types.ACTIONS(neighbourX*ConfigYavalath.BOARD_SIZE + neighbourY);
+                    return new Types.ACTIONS(neighbourX* getMaxRowLength() + neighbourY);
                 }
             }
         }
@@ -242,7 +243,7 @@ public class UtilityFunctionsYavalath {
 
         for (TileYavalath[] tileRow:board) {
             for (TileYavalath tile:tileRow) {
-                if(tile.getPlayer()!=ConfigYavalath.INVALID_FIELD){
+                if(tile.getPlayer()!= INVALID_FIELD){
                     tilePoly = tile.getPoly();
                     if(tilePoly.contains(clickPoint))return tile;
                 }
@@ -258,9 +259,9 @@ public class UtilityFunctionsYavalath {
      * @return The new copied game board
      */
     protected static TileYavalath[][] copyBoard(TileYavalath[][] board){
-        TileYavalath[][] tempBoard = new TileYavalath[ConfigYavalath.BOARD_SIZE][ConfigYavalath.BOARD_SIZE];
-        for(int i=0;i<ConfigYavalath.BOARD_SIZE;i++){
-            for(int j=0;j<ConfigYavalath.BOARD_SIZE;j++){
+        TileYavalath[][] tempBoard = new TileYavalath[getMaxRowLength()][getMaxRowLength()];
+        for(int i = 0; i< getMaxRowLength(); i++){
+            for(int j = 0; j< getMaxRowLength(); j++){
                 tempBoard[i][j] = board[i][j].copyTile();
             }
         }

@@ -42,7 +42,7 @@ public class ArenaYavalath extends Arena {
     }
 
     public static void setPlayerNumber(int players){
-        ConfigYavalath.PLAYERS = players;
+        ConfigYavalath.setPlayers(players);
     }
 
     public static void setBoardSize(int size){

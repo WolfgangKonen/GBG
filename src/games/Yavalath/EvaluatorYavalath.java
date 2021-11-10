@@ -14,7 +14,6 @@ import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 
-import javax.swing.plaf.nimbus.State;
 import java.util.ArrayList;
 
 public class EvaluatorYavalath extends Evaluator {
@@ -46,12 +45,12 @@ public class EvaluatorYavalath extends Evaluator {
 
     private ArrayList<StateObserverYavalath> addAll1PlyStates(ArrayList<StateObserverYavalath> diffStartList){
         StateObserverYavalath so = (StateObserverYavalath) m_gb.getDefaultStartState();
-        for(int i=0;i<ConfigYavalath.BOARD_SIZE;i++){
-            for(int j=0;j<ConfigYavalath.BOARD_SIZE;j++){
-                if(Math.abs(j-i)>ConfigYavalath.BOARD_LENGTH){
+        for(int i = 0; i<ConfigYavalath.getMaxRowLength(); i++){
+            for(int j = 0; j<ConfigYavalath.getMaxRowLength(); j++){
+                if(Math.abs(j-i)>ConfigYavalath.getBoardSize()){
                     break;
                 }
-                Types.ACTIONS a = new Types.ACTIONS(i*ConfigYavalath.BOARD_SIZE+j);
+                Types.ACTIONS a = new Types.ACTIONS(i*ConfigYavalath.getMaxRowLength() +j);
                 StateObserverYavalath so_copy = so.copy();
                 so_copy.advance(a);
                 diffStartList.add(so_copy);
