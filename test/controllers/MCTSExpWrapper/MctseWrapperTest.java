@@ -3,10 +3,7 @@ package controllers.MCTSExpWrapper;
 import controllers.*;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpWrapper.stateApproximation2.PlayAgentApproximator2;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.MCTSWrapper.ConfigWrapper;
-import controllers.MCTSWrapper.MCTSWrapperAgent;
-import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import games.Arena;
 import games.EWN.EvaluatorEWN;
 import games.EWN.GameBoardEWN;
@@ -17,10 +14,10 @@ import games.StateObservation;
 import games.ZweiTausendAchtundVierzig.GameBoard2048;
 import org.junit.Test;
 import params.ParMC;
-import params.ParMCTSE;
 import params.ParOther;
 import starters.GBGBatch;
 import starters.MCompeteMWrap;
+import starters.SetupGBG;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -78,8 +75,8 @@ public class MctseWrapperTest extends GBGBatch {
         Types.ACTIONS_VT act_pa, act_qa, act_ra;
         StateObserverEWN so;
 
-        scaPar = GBGBatch.setDefaultScaPars("EWN");                // for EWN: 3x3
-        arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
+        scaPar = SetupGBG.setDefaultScaPars("EWN");                // for EWN: 3x3
+        arenaTrain = SetupGBG.setupSelectedGame("EWN",scaPar,"",false,true);
 
         pa = arenaTrain.loadAgent(agtFile);
         ra = new ExpectimaxNAgent("",15);
@@ -360,7 +357,7 @@ public class MctseWrapperTest extends GBGBatch {
         int maxDepth = -1;
         Types.ACTIONS_VT act_pa, act_qa;
 
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);   // t_Game is ArenaTrain object
         GameBoardKuhnPoker gb = new GameBoardKuhnPoker(arenaTrain);		// needed for chooseStartState()
 
         for (int run=0; run<nTrial; run++) {
@@ -440,7 +437,7 @@ public class MctseWrapperTest extends GBGBatch {
         Types.ACTIONS_VT act_pa, act_qa;
 
 
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);   // t_Game is ArenaTrain object
         GameBoard2048 gb = new GameBoard2048(arenaTrain);		// needed for chooseStartState()
 
         for (int run=0; run<nTrial; run++) {
@@ -571,7 +568,7 @@ public class MctseWrapperTest extends GBGBatch {
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
+        arenaTrain = SetupGBG.setupSelectedGame("EWN",scaPar,"",false,true);
         GameBoardEWN gb = new GameBoardEWN(arenaTrain);		// needed for start state
 
         for (int run=0; run<nTrial; run++) {

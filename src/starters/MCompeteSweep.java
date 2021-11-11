@@ -21,7 +21,7 @@ import java.util.Objects;
  *  This class contains several Othello sweep routines (multi-training and multi-competition) that are called from
  *  {@link GBGBatch}.
  *  <p>
- *  When starting {@link SingleCompetitor#doSingleCompetition(int, PlayAgent, String, int, ArenaTrain, GameBoard, double, String)
+ *  When starting {@link SingleCompetitor#doSingleCompetition(int, PlayAgent, String, int, Arena, GameBoard, double, String)
  *  SingleCompetitor.doSingleCompetition}, an object {@code ArrayList<MCompete> mcList} is created and
  *  finally written with {@link MCompeteMWrap#printMultiCompeteList(String, ArrayList, PlayAgent, Arena, String, String)
  *  MCompeteMWrap.printMultiCompeteList} to file <b>{@code agents/<gameDir>/csv/<csvName>}</b> (usually {@code multiCompete.csv}).
@@ -48,12 +48,12 @@ public class MCompeteSweep {
      * @param pa		    agent to wrap
      * @param iterMWrap	    number of MCTS wrapper iterations
      * @param nruns	        number of runs, each run prints a line to csv. Should be 1 for deterministic agent {@code pa}
-     * @param arenaTrain    Arena object
+     * @param arenaTrain    Arena object with train rights
      * @param gb		    the game board, needed for start state selection
      * @param csvName	    results are written to this filename
      * @return the wrapped agent
      */
-    public PlayAgent multiCompeteOthello(PlayAgent pa, int iterMWrap, int nruns, ArenaTrain arenaTrain,
+    public PlayAgent multiCompeteOthello(PlayAgent pa, int iterMWrap, int nruns, Arena arenaTrain,
                                          GameBoard gb, String csvName) {
         SingleCompetitor sCompetitor = new SingleCompetitor();
         PlayAgent qa=null;
@@ -68,7 +68,7 @@ public class MCompeteSweep {
     } // multiCompeteOthello
 
     /**
-     * Same as {@link #multiCompeteOthello(PlayAgent, int, int, ArenaTrain, GameBoard, String) multiCompeteOthello}, but
+     * Same as {@link #multiCompeteOthello(PlayAgent, int, int, Arena, GameBoard, String) multiCompeteOthello}, but
      * instead of a single agent {@code pa} we sweep over all agents that we find in directory
      * <b>{@code agents/Othello/<agtDir>}</b>.
      * <p>
@@ -84,12 +84,12 @@ public class MCompeteSweep {
      *
      * @param iterMWrap	    number of MCTS wrapper iterations
      * @param agtDir        the directory where to search for agent files
-     * @param arenaTrain    Arena object
+     * @param arenaTrain    Arena object with train rights
      * @param gb		    the game board, needed for start state selection
      * @param csvName	    results are written to this filename
      * @return the last wrapped agent
      */
-    public PlayAgent multiCompeteSweepOthello(int iterMWrap, String agtDir, ArenaTrain arenaTrain,
+    public PlayAgent multiCompeteSweepOthello(int iterMWrap, String agtDir, Arena arenaTrain,
                                               GameBoard gb, String csvName) {
         SingleCompetitor sCompetitor = new SingleCompetitor();
         PlayAgent pa,qa=null;
@@ -132,13 +132,13 @@ public class MCompeteSweep {
      * @param agtFile       agent filename, we use its {@code agtBase} (part w/o ".agt.zip") to form the new filenames
      * @param maxGameNum    number of training episodes in each run
      * @param nruns	        number of training runs
-     * @param arenaTrain    ArenaTrain object
+     * @param arenaTrain    Arena object with train rights
      * @param gb		    the game board, needed for start state selection
      * @return the last trained agent
      */
     public PlayAgent multiTrainSweepOthello(
             PlayAgent pa, String agtFile, int maxGameNum, int nruns,
-            ArenaTrain arenaTrain, GameBoard gb)
+            Arena arenaTrain, GameBoard gb)
     {
         String userTitle1 = "time", userTitle2 = "user2";
         DecimalFormat frm = new DecimalFormat("00");
@@ -191,13 +191,13 @@ public class MCompeteSweep {
      * @param maxGameNum    number of training episodes in each run
      * @param iterMWrap	    number of MCTS wrapper iterations
      * @param nruns	        number of runs, each run prints a line to csv. Should be 1 for deterministic agent {@code pa}
-     * @param arenaTrain    Arena object
+     * @param arenaTrain    Arena object with train rights
      * @param gb		    the game board, needed for start state selection
      * @param csvName	    results of competition are written to this filename
      * @return the last wrapped agent
      */
     public PlayAgent multiTrainCompeteSweepOthello(
-            PlayAgent pa, String agtFile, int maxGameNum, int iterMWrap, int nruns, ArenaTrain arenaTrain,
+            PlayAgent pa, String agtFile, int maxGameNum, int iterMWrap, int nruns, Arena arenaTrain,
             GameBoard gb, String csvName)
     {
         String userTitle1 = "time", userTitle2 = "user2";
@@ -244,7 +244,7 @@ public class MCompeteSweep {
 
         public double getElapsedTime() { return elapsedTime; }
 
-        public PlayAgent doSingleCompetition(int i, PlayAgent pa, String agtFile, int iterMWrap, ArenaTrain arenaTrain,
+        public PlayAgent doSingleCompetition(int i, PlayAgent pa, String agtFile, int iterMWrap, Arena arenaTrain,
                                              GameBoard gb, double userValue2, String csvName ) {
             String userTitle1 = "time", userTitle2 = "user2";
             int numEpisodes;    // parameter for competeNPlayer
@@ -320,7 +320,7 @@ public class MCompeteSweep {
             this.oT = new Measure();			     //
         }
 
-        public PlayAgent doSingleTraining(int n, int i, PlayAgent pa, ArenaTrain arenaTrain, XArenaButtons xab,
+        public PlayAgent doSingleTraining(int n, int i, PlayAgent pa, Arena arenaTrain, XArenaButtons xab,
                                           GameBoard gb, int maxGameNum, double userValue1, double userValue2 ) { //throws IOException  {
             int numEval = xab.oPar[n].getNumEval();
             int gameNum;

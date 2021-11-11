@@ -48,7 +48,7 @@ public class MTrainSweep {
      * {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}. <br>
      * The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
      */
-    public PlayAgent multiTrainAlphaSweep(int n, double[] alphaArr, double[] alphaFinalArr, ArenaTrain t_Game,
+    public PlayAgent multiTrainAlphaSweep(int n, double[] alphaArr, double[] alphaFinalArr, Arena t_Game,
                                           XArenaButtons xab, GameBoard gb, String csvName) throws IOException {
         DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");
         DecimalFormat frm = new DecimalFormat("#0.000");
@@ -129,7 +129,7 @@ public class MTrainSweep {
      * {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}. <br>
      * The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
      */
-    public PlayAgent multiTrainLambdaSweep(int n, double[] lambdaArr, ArenaTrain t_Game, XArenaButtons xab,
+    public PlayAgent multiTrainLambdaSweep(int n, double[] lambdaArr, Arena t_Game, XArenaButtons xab,
                                            GameBoard gb, String csvName) throws IOException {
         DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");
         DecimalFormat frm = new DecimalFormat("#0.000");
@@ -207,7 +207,7 @@ public class MTrainSweep {
      * {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}. <br>
      * The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
      */
-    public PlayAgent multiTrainIncAmountSweep(int n, double[] incAmountArr, ArenaTrain t_Game, XArenaButtons xab,
+    public PlayAgent multiTrainIncAmountSweep(int n, double[] incAmountArr, Arena t_Game, XArenaButtons xab,
                                               GameBoard gb, String csvName) throws IOException {
         DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");
         DecimalFormat frm = new DecimalFormat("#0.000");
@@ -269,7 +269,7 @@ public class MTrainSweep {
     // helper functions for multiTrainAlphaSweep & multiTrainLambdaSweep & multiTrainIncAmountSweep
     //
 
-    public PlayAgent doSingleTraining(int n, int i, PlayAgent pa,ArenaTrain t_Game, XArenaButtons xab,
+    public PlayAgent doSingleTraining(int n, int i, PlayAgent pa, Arena t_Game, XArenaButtons xab,
                                          GameBoard gb, int maxGameNum, double userValue1, double userValue2 ) { //throws IOException  {
         int numEval = xab.oPar[n].getNumEval();
         int gameNum;

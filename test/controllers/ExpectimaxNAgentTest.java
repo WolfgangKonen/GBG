@@ -4,6 +4,7 @@ import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
 import org.junit.Test;
 import starters.GBGBatch;
+import starters.SetupGBG;
 import tools.Types;
 
 import java.text.DecimalFormat;
@@ -24,8 +25,8 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         int nDepth=15;
         Types.ACTIONS_VT act_pa;
 
-        String[] scaPar = GBGBatch.setDefaultScaPars("EWN");  // for EWN currently: 3x3 2-player
-        arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
+        String[] scaPar = SetupGBG.setDefaultScaPars("EWN");  // for EWN currently: 3x3 2-player
+        arenaTrain = SetupGBG.setupSelectedGame("EWN",scaPar,"",false,true);
         GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for chooseStartState()
         StateObserverEWN so;
 
@@ -64,12 +65,12 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         int nDepth=9;
         boolean silent = false;
 
-        String[] scaPar = GBGBatch.setDefaultScaPars("EWN");                // for EWN: 3x3
+        String[] scaPar = SetupGBG.setDefaultScaPars("EWN");                // for EWN: 3x3
         //scaPar = new String[]{"5x5 2-Player","[0,1][2,3][3,4]","False"};    // for EWN: 5x5
             // ExpectimaxN for 5x5 EWN has exponentially rising time and memory demands:
             // For nDepth=4,5,6 the hash map size is 70.000, 600.000, 4.500.000, resp., so we cannot reach from
             // the start state the final states --> pretty useless
-        arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
+        arenaTrain = SetupGBG.setupSelectedGame("EWN",scaPar,"",false,true);
         GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
 
@@ -116,8 +117,8 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         int nDepth=9;
         boolean silent = false;  // passed on to getNextAction2
 
-        String[] scaPar = GBGBatch.setDefaultScaPars("EWN");        // for EWN currently: 3x3 2-player
-        arenaTrain = GBGBatch.setupSelectedGame("EWN",scaPar);
+        String[] scaPar = SetupGBG.setDefaultScaPars("EWN");        // for EWN currently: 3x3 2-player
+        arenaTrain = SetupGBG.setupSelectedGame("EWN",scaPar,"",false,true);
         GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
         DecimalFormat frmAct = new DecimalFormat("0000");

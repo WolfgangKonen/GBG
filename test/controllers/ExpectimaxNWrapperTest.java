@@ -4,6 +4,7 @@ import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
 import org.junit.Test;
 import starters.GBGBatch;
+import starters.SetupGBG;
 import tools.Types;
 
 import java.text.DecimalFormat;
@@ -33,8 +34,8 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
         boolean silent = true;
 
         PlayAgent pa,qaDeep,qaShallow;
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);     // for EWN : 3x3 2-player
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        String[] scaPar = SetupGBG.setDefaultScaPars(selectedGame);     // for EWN : 3x3 2-player
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for start state
         StateObserverEWN startSO, so;
 
@@ -87,8 +88,8 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
         boolean silent = true;
 
         PlayAgent pa,qaDeep,qaShallow;
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);     // for EWN : 3x3 2-player
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        String[] scaPar = SetupGBG.setDefaultScaPars(selectedGame);     // for EWN : 3x3 2-player
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for start state
         StateObserverEWN startSO, so;
         DecimalFormat frmAct = new DecimalFormat("0000");

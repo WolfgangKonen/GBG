@@ -7,6 +7,7 @@ import games.*;
 import org.junit.Test;
 import starters.GBGBatch;
 import starters.MTrainSweep;
+import starters.SetupGBG;
 
 /**
  * The JUnit tests in this class are not exact, because most agent performances fluctuate a bit due to random variations
@@ -109,8 +110,8 @@ public class TDNTuple3AgtTest extends GBGBatch {
     public void quickEval(String selectedGame, String[] agtFile, double[][] evalThresh, int nplyMax) {
         PlayAgent pa;
 
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        String[] scaPar = SetupGBG.setDefaultScaPars(selectedGame);
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoard gb = arenaTrain.makeGameBoard();		// needed for chooseStartState()
 
         assert evalThresh[0].length>nplyMax : "evalThresh[0] too small for nplyMax = "+nplyMax;
@@ -141,8 +142,9 @@ public class TDNTuple3AgtTest extends GBGBatch {
         PlayAgent pa;
         int nplyMax=1;
 
-        String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        String[] scaPar = SetupGBG.setDefaultScaPars(selectedGame);
+        if (selectedGame.equals("RubiksCube")) scaPar = new String[]{"2x2x2","CSTATE","ALL"};
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoard gb = arenaTrain.makeGameBoard();		// needed for chooseStartState()
 
         MTrainSweep mTrainSweep = new MTrainSweep();

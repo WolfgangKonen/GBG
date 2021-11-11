@@ -22,6 +22,7 @@ import starters.MCompeteMWrap;
 import org.junit.Test;
 import params.ParMCTS;
 import params.ParOther;
+import starters.SetupGBG;
 import tools.ScoreTuple;
 
 import java.util.ArrayList;
@@ -132,7 +133,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardCube gb = new GameBoardCube(arenaTrain);		// needed for chooseStartState()
 
         for (int run=0; run<nTrial; run++) {
@@ -286,7 +287,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardC4 gb = new GameBoardC4(arenaTrain);
         StateObservation so = gb.getDefaultStartState();
 
@@ -386,8 +387,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     @Test
     public void getVTable_Test() {
         selectedGame = "Othello";
-        scaPar = GBGBatch.setDefaultScaPars(selectedGame);
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame, scaPar);   // t_Game is ArenaTrain object
+        scaPar = SetupGBG.setDefaultScaPars(selectedGame);
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame, scaPar,"",false,true);
         GameBoard gb = new GameBoardOthello(arenaTrain);        // needed for chooseStartState()
         StateObservation sob = gb.getDefaultStartState();
         MCTSNode mctsNode = new MCTSNode(new GameStateIncludingPass(sob));

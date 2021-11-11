@@ -4,6 +4,7 @@ import controllers.PlayAgent;
 import org.junit.Test;
 import starters.GBGBatch;
 import starters.MTrainSweep;
+import starters.SetupGBG;
 
 import java.io.IOException;
 
@@ -13,11 +14,12 @@ public class GBGBatchTest extends GBGBatch {
     String csvFile = "test.csv";
     String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);
 
-    protected MTrainSweep mTrainSweep;
+    // is already in GBGBatch:
+//    protected MTrainSweep mTrainSweep = new MTrainSweep();
 
     @Test
     public void multiTrainAlphaSweep_T() {
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         setupPaths(agtFile,csvFile);
         double[] alphaArr = {1.0};
         double[] alphaFinalArr = alphaArr.clone();
@@ -42,7 +44,7 @@ public class GBGBatchTest extends GBGBatch {
 
     @Test
     public void multiTrainLambdaSweep_T() {
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         setupPaths(agtFile,csvFile);
         double[] lambdaArr = {0.5};
 

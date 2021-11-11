@@ -54,7 +54,7 @@ import java.awt.event.WindowEvent;
  * 
  * @see GBGBatch
  */
-public class GBGLaunch {
+public class GBGLaunch extends SetupGBG {
 	/**
 	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe","EWN","Yavalath"}
 	 */
@@ -94,7 +94,7 @@ public class GBGLaunch {
 	 * <li>	{@code GBGLaunch 0 Hex P} : start directly Hex, no launcher, no train rights
 	 * <li>	{@code GBGLaunch 0} : start directly TicTacToe, no launcher
 	 * </ul>
-	 * When a scalable game is started w/o launcher, the method {@link #setDefaultScaPars()} will set 
+	 * When a scalable game is started w/o launcher, the method {@link SetupGBG#setDefaultScaPars(String)} will set
 	 * appropriate default scalable parameters for the game in question.
 	 */
 	public static void main(String[] args) {
@@ -123,6 +123,8 @@ public class GBGLaunch {
 					break;
 				case STARTGAME:
 					t_Launch.launcherUI.setVisible(false);
+					// TODO:
+					//startGBGame(selectedGame,t_Launch,withTrainRights);
 					if (withTrainRights) {
 						startGBGameTrain(selectedGame,t_Launch);
 					} else {
@@ -148,6 +150,9 @@ public class GBGLaunch {
 				
 			}
 		} else {
+			// TODO:
+			//startGBGame(selectedGame,null,withTrainRights);
+
 			// start selectedGame without launcherUI-loop
 			if (withTrainRights) {
 				startGBGameTrain(selectedGame,null);
@@ -159,16 +164,43 @@ public class GBGLaunch {
 	}
 
 	/**
-	 * Start a game with train rights 
-	 * @param selectedGame	the game
-	 * @param t_Launch		the launcher
+	 * Start a game with or without train rights
+	 * @param selectedGame		the game name
+	 * @param t_Launch			the launcher
+	 * @param withTrainRights	whether Arena is trainable or not
+	 *
+	 * @see SetupGBG
 	 */
+	private static void startGBGame(String selectedGame, GBGLaunch t_Launch, boolean withTrainRights) {
+		String x, title = "General Board Game Playing";
+		String[] scaPar = new String[3];
+		for (int i=0; i<3; i++) scaPar[i]="";
+		if (t_Launch==null) {
+			scaPar = setDefaultScaPars(selectedGame);
+		} else {
+			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when later using scaPar[i])
+			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
+			x = (String) t_Launch.choiceScaPar1.getSelectedItem(); if (x!=null) scaPar[1]=x;
+			x = (String) t_Launch.choiceScaPar2.getSelectedItem(); if (x!=null) scaPar[2]=x;
+		}
+
+		t_Game = setupSelectedGame(selectedGame, scaPar, title,true,withTrainRights);
+
+		t_Game.setLauncherObj(t_Launch);
+		t_Game.init();
+	}
+
+		/**
+         * Start a game with train rights
+         * @param selectedGame	the game
+         * @param t_Launch		the launcher
+         */
 	private static void startGBGameTrain(String selectedGame, GBGLaunch t_Launch) {
 		String x, title = "General Board Game Playing";
 		String[] scaPar = new String[3];
 		for (int i=0; i<3; i++) scaPar[i]="";
 		if (t_Launch==null) {
-			scaPar = setDefaultScaPars();
+			scaPar = setDefaultScaPars(selectedGame);
 		} else {
 			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when later using scaPar[i])
 			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
@@ -274,7 +306,7 @@ public class GBGLaunch {
 		String x;
 		for (int i=0; i<3; i++) scaPar[i]="";
 		if (t_Launch==null) {
-			scaPar = setDefaultScaPars();
+			scaPar = setDefaultScaPars(selectedGame);
 		} else {
 			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when using scaPar[i]
 			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
