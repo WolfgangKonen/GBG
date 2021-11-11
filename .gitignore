@@ -62,6 +62,7 @@ agents/Nim3P/N03-S05-ExtraYes/multiTest*.agt.zip
 agents/Othello/AAREADME.txt
 agents/Othello/multiTrain/*
 agents/Othello/multiTrain-10agents/*
+agents/Othello/multiTrain-10agents-2/*
 agents/Othello/TCL3-*noFA*.agt.zip
 agents/Othello/TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.agt.zip
 # (the only Othello agent we have in repos is TCL3-fixed6_250k-lam05_P4_H001-FAm.agt.zip)
