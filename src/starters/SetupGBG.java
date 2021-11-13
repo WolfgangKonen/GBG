@@ -1,6 +1,7 @@
 package starters;
 
 import games.Arena;
+import games.BlackJack.ArenaBlackJack;
 import games.CFour.ArenaC4;
 import games.EWN.ArenaEWN;
 import games.Hex.ArenaHex;
@@ -8,9 +9,11 @@ import games.KuhnPoker.ArenaKuhnPoker;
 import games.Nim.ArenaNim2P;
 import games.Nim.ArenaNim3P;
 import games.Othello.ArenaOthello;
+import games.Poker.ArenaPoker;
 import games.RubiksCube.ArenaCube;
 import games.Sim.ArenaSim;
 import games.TicTacToe.ArenaTTT;
+import games.Yavalath.ArenaYavalath;
 import games.ZweiTausendAchtundVierzig.Arena2048;
 
 /**
@@ -56,6 +59,7 @@ public class SetupGBG {
                 break;
             case "Yavalath":
                 scaPar[0] = "2";
+                scaPar[1] = "5";
                 break;
             case "2048":
             case "Blackjack":
@@ -79,28 +83,27 @@ public class SetupGBG {
     public static Arena setupSelectedGame(String selectedGame, String[] scaPar, String title, boolean withUI, boolean withTrainRights){
 
         switch (selectedGame) {
+            // Set configurable parameters of the game, e.g.
+            //      ConfigSim.{NUM_PLAYERS,NUM_NODES}       or
+            //      HexConfig.BOARD_SIZE        or
+            //      NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS}
+            // *prior* to calling constructor ArenaXYZ, which will directly call Arena's constructor where
+            // the game board and the Arena buttons are constructed
             case "2048":
                 return new Arena2048(title, withUI, withTrainRights);
+            case "Blackjack":
+                return new ArenaBlackJack(title,withUI);
             case "ConnectFour":
                 return new ArenaC4(title, withUI,withTrainRights);
             case "Hex":
-                // Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaTrainHex,
-                // which will directly call Arena's constructor where the game board and
-                // the Arena buttons are constructed
                 ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
                 return new ArenaHex(title, withUI,withTrainRights);
             case "Nim":
-                // Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor
-                // ArenaTrainNim2P, which will directly call Arena's constructor where the game board and
-                // the Arena buttons are constructed
                 ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
                 ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
                 ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
                 return new ArenaNim2P(title, withUI,withTrainRights);
             case "Nim3P":
-                // Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor
-                // ArenaNimTrainNim3P, which will directly call Arena's constructor where the game board and
-                // the Arena buttons are constructed
                 ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
                 ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
                 ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));    // Nim3P: always MaxMinus == HeapSize (!)
@@ -108,18 +111,16 @@ public class SetupGBG {
                 return new ArenaNim3P(title, withUI,withTrainRights);
             case "Othello":
                 return new ArenaOthello(title, withUI,withTrainRights);
+            case "Poker":
+                return new ArenaPoker(title,withUI);
+            case "KuhnPoker":
+                return new ArenaKuhnPoker(title,withUI,withTrainRights);
             case "RubiksCube":
-                // Set CubeConfig.{cubeType,boardVecType,twistType} *prior* to calling constructor
-                // ArenaTrainCube, which will directly call Arena's constructor where the game board and
-                // the Arena buttons are constructed
                 ArenaCube.setCubeType(scaPar[0]);
                 ArenaCube.setBoardVecType(scaPar[1]);
                 ArenaCube.setTwistType(scaPar[2]);
                 return new ArenaCube(title, withUI,withTrainRights);
             case "Sim":
-                // Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaTrainSim,
-                // which will directly call Arena's constructor where the game board and
-                // the Arena buttons are constructed
                 ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
                 ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
                 ArenaSim.setCoalition(scaPar[2]);
@@ -131,8 +132,10 @@ public class SetupGBG {
                 ArenaEWN.setCellCoding(scaPar[1]);
                 ArenaEWN.setRandomStartingPosition(scaPar[2]);
                 return new ArenaEWN(title, withUI,withTrainRights);
-            case "KuhnPoker":
-                return new ArenaKuhnPoker(title,withUI,withTrainRights);
+            case "Yavalath":
+                ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
+                ArenaYavalath.setBoardSize(Integer.parseInt(scaPar[1]));
+                return new ArenaYavalath(title,withUI);
             default:
                 System.err.println("[GBGBatch.main] args[0]=" + selectedGame + ": This game is unknown.");
                 System.exit(1);

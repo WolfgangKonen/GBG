@@ -53,12 +53,14 @@ import java.awt.event.WindowEvent;
  * @author Wolfgang Konen, TH Koeln, 2020
  * 
  * @see GBGBatch
+ * @see SetupGBG
  */
 public class GBGLaunch extends SetupGBG {
 	/**
-	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe","EWN","Yavalath"}
+	 *  The possible games:
 	 */
-	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","KuhnPoker","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe", "Yavalath"};
+	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","KuhnPoker","Nim","Nim3P",
+						  "Othello","Poker","RubiksCube","Sim","TicTacToe", "Yavalath"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
@@ -545,65 +547,6 @@ public class GBGLaunch extends SetupGBG {
 	}
 
 	/**
-	 * Set default values for the scalable parameters.
-	 * <p>
-	 * This is for the case where GBGLaunch is started with {@code args[0]=0}, which means "Start
-	 * the game directly, w/o launcher UI".
-	 */
-	public static String[] setDefaultScaPars() {
-		String[] scaPar = new String[3];
-		switch(selectedGame) {
-		case "Hex": 
-			scaPar[0]="6";		// the initial (recommended) value	
-			break;
-		case "Nim": 
-			scaPar[0]="3";		// 	
-			scaPar[1]="5";		// the initial (recommended) values	
-			scaPar[2]="5";		// 
-			break;
-		case "Nim3P":
-			scaPar[0]="3";		// 	
-			scaPar[1]="5";		// the initial (recommended) values	
-			scaPar[2]="true";	// 
-			break;
-		case "Sim": 
-			scaPar[0]="2";		 	
-			scaPar[1]="6";			
-			scaPar[2]="None";			
-			break;
-		case "RubiksCube": 
-			scaPar[0]="2x2x2";		 	
-			scaPar[1]="STICKER2";
-			scaPar[2]="ALL";
-			break;
-		case "EWN":
-			scaPar[0] = "3x3 2-Player";
-			scaPar[1] = "N-Player + 1";
-			break;
-		case "2048":
-		case "Blackjack":
-		case "ConnectFour":
-		case "Othello":
-		case "Poker":
-		case "KuhnPoker":
-		case "TicTacToe":
-			//
-			// games with no scalable parameters
-			//
-			scaPar[0]=scaPar[1]=scaPar[2]="";
-			break;
-		case "Yavalath":
-			scaPar[0] = "2";
-			scaPar[1] = "5";
-			break;
-		default: 
-			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
-			System.exit(1);
-		}
-		return scaPar;
-	}
-	
-	/**
 	 * Adjust the scalable parameters of a game after the game selector has changed.
 	 */
 	public void adjustScaParGuiPart() {
@@ -759,15 +702,13 @@ public class GBGLaunch extends SetupGBG {
 	// *TODO*
 	//
 
-	public void setScaPar1Tooltip(String str) {
-		choiceScaPar0.setToolTipText(str);
-	}
+	public void setScaPar0Tooltip(String str) { choiceScaPar0.setToolTipText(str); }
 
-	public void setScaPar2Tooltip(String str) {
+	public void setScaPar1Tooltip(String str) {
 		choiceScaPar1.setToolTipText(str);
 	}
 
-	public void setScaPar3Tooltip(String str) {
+	public void setScaPar2Tooltip(String str) {
 		choiceScaPar2.setToolTipText(str);
 	}
 

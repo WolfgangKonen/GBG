@@ -1,35 +1,14 @@
 package games.Nim;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 import controllers.PlayAgent;
 import games.GameBoard;
 import games.StateObservation;
 import games.Arena;
-import games.Arena.Task;
-import games.TicTacToe.GameBoardTTTGui;
-import games.TicTacToe.StateObserverTTT;
-import games.ArenaTrain;
-import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ACTIONS;
 
 /**
  * This class implements the game board for the game Nim3P = Nim <b>for 3 players</b>:

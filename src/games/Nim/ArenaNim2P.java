@@ -2,17 +2,12 @@ package games.Nim;
 
 import java.io.IOException;
 
-import javax.swing.JFrame;
-
 import controllers.PlayAgent;
 import games.Arena;
 import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import games.Hex.HexConfig;
-import games.Sim.ConfigSim;
-import games.ArenaTrain;
 
 /**
  * {@link Arena} for Nim (2 players). It borrows all functionality

@@ -10,9 +10,6 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import games.Hex.HexConfig;
-import games.Sim.ConfigSim;
-import games.ArenaTrain;
 
 /**
  * {@link Arena} for Nim3P (3 players). It borrows all functionality

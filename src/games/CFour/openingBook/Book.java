@@ -1,7 +1,6 @@
 package games.CFour.openingBook;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * There are 3 different opning-books available: <br>
@@ -56,9 +55,18 @@ public class Book {
 	 * @throws IOException
 	 */
 	public void openBook() throws IOException {
-		file = getClass().getResourceAsStream(BOOKPATH[bookNr]);
+		// old form where book*.dat was in src/games/CFour/openingBook and made the JAR files big:
+		//file = getClass().getResourceAsStream(BOOKPATH[bookNr]);
+
+		// new form where book*.dat is in agents/ConnectFour/AlphaBetaAgent/openingBook:
+		String path = "agents/ConnectFour/AlphaBetaAgent/openingBook/"+BOOKPATH[bookNr];
+		try {
+			file = new BufferedInputStream(new FileInputStream(path));
+		} catch (IOException e) {
+			throw (new IOException("Could not open file "+path));
+		}
 		if (file == null)
-			throw (new IOException("Could not open File"));
+			throw (new IOException("Could not open file "+path));
 	}
 
 	/**

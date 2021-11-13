@@ -371,7 +371,7 @@ public class GameBoardNimGui extends JFrame {
 	 * will be set into enabled state <code>false</code>. (All other positions will get state 
 	 * <code>true</code>.)
 	 */ 
-	private void guiUpdateBoard(boolean showValueOnGameboard)
+	public void guiUpdateBoard(boolean showValueOnGameboard)
 	{		
 		double value, maxvalue=Double.NEGATIVE_INFINITY;
 		int imax=0,jmax=0;

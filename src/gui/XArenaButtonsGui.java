@@ -22,7 +22,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import games.Arena;
-import games.ArenaTrain;
 import games.LogManagerGUI;
 import games.XArenaButtons;
 import tools.Types;
@@ -293,12 +292,12 @@ public class XArenaButtonsGui extends JPanel {
 						{	
 							m_arena.m_xab.m_numTrainBtn = x;
 							// toggle m_arena.state between TRAIN and IDLE
-							if (m_arena.taskState!=ArenaTrain.Task.TRAIN) {
-								m_arena.taskState = ArenaTrain.Task.TRAIN;
+							if (m_arena.taskState!=Arena.Task.TRAIN) {
+								m_arena.taskState = Arena.Task.TRAIN;
 								enableButtons(false,false,false);	// disable all buttons ...
 								mTrain[x].setEnabled(true);			// ... but the TRAIN button
 							} else {
-								m_arena.taskState = ArenaTrain.Task.IDLE;
+								m_arena.taskState = Arena.Task.IDLE;
 								enableButtons(true,true,true);
 							}
 						}
@@ -312,13 +311,13 @@ public class XArenaButtonsGui extends JPanel {
 					public void actionPerformed(ActionEvent e)
 					{
 						// toggle m_arena.state between MULTTRN and IDLE
-						if (m_arena.taskState!=ArenaTrain.Task.MULTTRN) {
-							m_arena.taskState = ArenaTrain.Task.MULTTRN;
+						if (m_arena.taskState!=Arena.Task.MULTTRN) {
+							m_arena.taskState = Arena.Task.MULTTRN;
 							m_arena.setStatusMessage("Multitrain for agent X ...");
 							enableButtons(false,false,false);	// disable all buttons ...
 							MultiTrain.setEnabled(true);		// ... but the MultiTrain button
 						} else {
-							m_arena.taskState = ArenaTrain.Task.IDLE;
+							m_arena.taskState = Arena.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
 							enableButtons(true,true,true);
 						}
@@ -332,19 +331,19 @@ public class XArenaButtonsGui extends JPanel {
 				{
 					public void actionPerformed(ActionEvent e)
 					{	
-						if (m_arena.taskState==ArenaTrain.Task.INSPECTV) {
-							m_arena.taskState = ArenaTrain.Task.IDLE;
+						if (m_arena.taskState==Arena.Task.INSPECTV) {
+							m_arena.taskState = Arena.Task.IDLE;
 							// if Play button is pressed while being in InspectV-mode, 
 							// store this in taskBefore:
-							m_arena.taskBefore=ArenaTrain.Task.INSPECTV;
+							m_arena.taskBefore=Arena.Task.INSPECTV;
 						}
 						
 						// toggle m_arena.taskState between PLAY and IDLE
-						if (m_arena.taskState!=ArenaTrain.Task.PLAY) {
-							m_arena.taskState = ArenaTrain.Task.PLAY;
+						if (m_arena.taskState!=Arena.Task.PLAY) {
+							m_arena.taskState = Arena.Task.PLAY;
 							m_arena.setStatusMessage("Playing a game ...");
 						} else {
-							m_arena.taskState = ArenaTrain.Task.IDLE;
+							m_arena.taskState = Arena.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
 						}
 						
@@ -358,11 +357,11 @@ public class XArenaButtonsGui extends JPanel {
 					public void actionPerformed(ActionEvent e)
 					{	
 						// toggle m_arena.state between INSPECTV and IDLE
-						if (m_arena.taskState!=ArenaTrain.Task.INSPECTV) {
-							m_arena.taskState = ArenaTrain.Task.INSPECTV;
+						if (m_arena.taskState!=Arena.Task.INSPECTV) {
+							m_arena.taskState = Arena.Task.INSPECTV;
 							m_arena.setStatusMessage("Inspecting the value function ...");
 						} else {
-							m_arena.taskState = ArenaTrain.Task.IDLE;
+							m_arena.taskState = Arena.Task.IDLE;
 							m_arena.setStatusMessage("Done.");
 						}
 					}
@@ -542,7 +541,7 @@ public class XArenaButtonsGui extends JPanel {
 	}
 	
 	/**
-	 * Enable/disable the buttons of {@link Arena} or {@link ArenaTrain} 
+	 * Enable/disable the buttons of {@link Arena}
 	 * 
 	 * @param state			if true: enable, if false: disable
 	 * @param playEnabled		the state for button Play (overrides {@code state})
