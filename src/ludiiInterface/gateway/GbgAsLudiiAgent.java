@@ -2,7 +2,7 @@ package ludiiInterface.gateway;
 
 import controllers.PlayAgent;
 import game.Game;
-import games.Othello.ArenaTrainOthello;
+import games.Othello.ArenaOthello;
 import ludiiInterface.othello.useCases.moves.LudiiMoves;
 import ludiiInterface.othello.useCases.state.AsStateObserverOthello;
 import ludiiInterface.othello.useCases.state.GbgStateFromLudiiContext;
@@ -29,9 +29,10 @@ public final class GbgAsLudiiAgent extends AI {
     public void initAI(final Game game, final int playerID)
     {
         try {
-            gbgAgent = new ArenaTrainOthello(
+            gbgAgent = new ArenaOthello(
                     "GBG vs. Ludii - Othello Arena",
-                    false
+                    false,
+                true
 //            ).tdAgentIO.loadGBGAgent(gbgAgentPath			// /WK/ just during debugging
             ).tdAgentIO.loadGBGAgent(
                     loadFileFromDialog("GBG Agenten auswählen")

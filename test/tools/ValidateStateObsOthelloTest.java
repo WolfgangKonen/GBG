@@ -2,7 +2,7 @@ package tools;
 
 import controllers.PlayAgent;
 import games.Arena;
-import games.Othello.ArenaTrainOthello;
+import games.Othello.ArenaOthello;
 import games.StateObservation;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class ValidateStateObsOthelloTest {
     private ValidateStateObsTest vat = new ValidateStateObsTest();
     private final static String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/Othello/";
     private final static String gbgAgentPath = strDir + "TCL3-100_7_250k-lam05_P4_nPly2-FAm.agt.zip";
-    private static final Arena ar = new ArenaTrainOthello("", false);
+    private static final Arena ar = new ArenaOthello("", false,true);
     private static final StateObservation sob = ar.getGameBoard().getDefaultStartState();
 
     //

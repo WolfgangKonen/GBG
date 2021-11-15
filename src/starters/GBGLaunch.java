@@ -1,34 +1,6 @@
 package starters;
 
 import games.Arena;
-import games.BlackJack.ArenaBlackJack;
-import games.BlackJack.ArenaBlackJackTrain;
-import games.CFour.ArenaC4;
-import games.CFour.ArenaTrainC4;
-import games.EWN.ArenaEWN;
-import games.EWN.ArenaTrainEWN;
-import games.Hex.ArenaHex;
-import games.Hex.ArenaTrainHex;
-import games.KuhnPoker.ArenaKuhnPoker;
-import games.KuhnPoker.ArenaTrainKuhnPoker;
-import games.Nim.ArenaNim2P;
-import games.Nim.ArenaNim3P;
-import games.Nim.ArenaTrainNim2P;
-import games.Nim.ArenaTrainNim3P;
-import games.Othello.ArenaOthello;
-import games.Othello.ArenaTrainOthello;
-import games.Poker.ArenaPoker;
-import games.Poker.ArenaTrainPoker;
-import games.RubiksCube.ArenaCube;
-import games.RubiksCube.ArenaTrainCube;
-import games.Sim.ArenaSim;
-import games.Sim.ArenaTrainSim;
-import games.TicTacToe.ArenaTTT;
-import games.TicTacToe.ArenaTrainTTT;
-import games.Yavalath.ArenaTrainYavalath;
-import games.Yavalath.ArenaYavalath;
-import games.ZweiTausendAchtundVierzig.Arena2048;
-import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import gui.SolidBorder;
 import tools.Types;
 
@@ -125,13 +97,10 @@ public class GBGLaunch extends SetupGBG {
 					break;
 				case STARTGAME:
 					t_Launch.launcherUI.setVisible(false);
-					// TODO:
-					//startGBGame(selectedGame,t_Launch,withTrainRights);
-					if (withTrainRights) {
-						startGBGameTrain(selectedGame,t_Launch);
-					} else {
-						startGBGamePlay(selectedGame,t_Launch);
-					}
+
+					// start selectedGame with launcherUI-loop
+					startGBGame(selectedGame,t_Launch,withTrainRights);
+
 					t_Launch.launcherState = LaunchTask.IDLE;
 					break;
 				case EXITSELECTOR:
@@ -152,15 +121,10 @@ public class GBGLaunch extends SetupGBG {
 				
 			}
 		} else {
-			// TODO:
-			//startGBGame(selectedGame,null,withTrainRights);
 
 			// start selectedGame without launcherUI-loop
-			if (withTrainRights) {
-				startGBGameTrain(selectedGame,null);
-			} else {
-				startGBGamePlay(selectedGame,null);
-			}
+			startGBGame(selectedGame,null,withTrainRights);
+
 		}
 
 	}
@@ -186,222 +150,13 @@ public class GBGLaunch extends SetupGBG {
 			x = (String) t_Launch.choiceScaPar2.getSelectedItem(); if (x!=null) scaPar[2]=x;
 		}
 
+		// SetupGBG.setupSelectedGame has the switch statement over all games:
 		t_Game = setupSelectedGame(selectedGame, scaPar, title,true,withTrainRights);
 
 		t_Game.setLauncherObj(t_Launch);
 		t_Game.init();
 	}
 
-		/**
-         * Start a game with train rights
-         * @param selectedGame	the game
-         * @param t_Launch		the launcher
-         */
-	private static void startGBGameTrain(String selectedGame, GBGLaunch t_Launch) {
-		String x, title = "General Board Game Playing";
-		String[] scaPar = new String[3];
-		for (int i=0; i<3; i++) scaPar[i]="";
-		if (t_Launch==null) {
-			scaPar = setDefaultScaPars(selectedGame);
-		} else {
-			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when later using scaPar[i])
-			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
-			x = (String) t_Launch.choiceScaPar1.getSelectedItem(); if (x!=null) scaPar[1]=x;
-			x = (String) t_Launch.choiceScaPar2.getSelectedItem(); if (x!=null) scaPar[2]=x;
-		}
-		final boolean withUI = true;
-		switch(selectedGame) {
-		case "2048": 
-			t_Game = new ArenaTrain2048(title,withUI);
-			break;
-		case "Blackjack":
-			t_Game = new ArenaBlackJackTrain(title,withUI);
-			break;
-		case "ConnectFour":
-			t_Game = new ArenaTrainC4(title,withUI);
-			break;
-		case "Hex": 
-			// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaTrainHex, 
-			// which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			assert scaPar[0] != null;
-			ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
-			t_Game = new ArenaTrainHex(title,withUI);
-			break;
-		case "Nim": 
-			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
-			// ArenaTrainNim2P, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
-			t_Game = new ArenaTrainNim2P(title,withUI);
-			break;
-		case "Nim3P":
-			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor  
-			// ArenaNimTrainNim3P, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));	// Nim3P: always MaxMinus == HeapSize (!)
-			ArenaNim3P.setExtraRule(Boolean.parseBoolean(scaPar[2]));
-			t_Game = new ArenaTrainNim3P(title,withUI);				
-			break;
-		case "Othello": 
-			t_Game = new ArenaTrainOthello(title,withUI);
-			break;
-		case "Poker":
-			t_Game = new ArenaTrainPoker(title,withUI);
-			break;
-		case "KuhnPoker":
-				t_Game = new ArenaTrainKuhnPoker(title,withUI);
-				break;
-		case "RubiksCube":
-			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
-			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaTrainCube.setCubeType(scaPar[0]);
-			ArenaTrainCube.setBoardVecType(scaPar[1]);
-			ArenaTrainCube.setTwistType(scaPar[2]);
-			t_Game = new ArenaTrainCube(title,withUI);
-			break;
-		case "Sim": 
-			// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaTrainSim, 
-			// which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
-			ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
-			ArenaSim.setCoalition(scaPar[2]);
-			t_Game = new ArenaTrainSim(title,withUI);
-			break;
-		case "TicTacToe": 
-			t_Game = new ArenaTrainTTT(title,withUI);
-			break;
-		case "EWN":
-			ArenaTrainEWN.setConfig(scaPar[0]);
-			ArenaTrainEWN.setCellCoding(scaPar[1]);
-			ArenaTrainEWN.setRandomStartingPosition(scaPar[2]);
-			t_Game = new ArenaTrainEWN(title, withUI);
-			break;
-		case "Yavalath":
-			ArenaTrainYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
-			ArenaTrainYavalath.setBoardSize(Integer.parseInt(scaPar[1]));
-			t_Game = new ArenaTrainYavalath(title,withUI);
-			break;
-		default: 
-			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
-			System.exit(1);
-		}
-
-		t_Game.setLauncherObj(t_Launch);
-		t_Game.init();
-	}
-	
-	/**
-	 * Start a game without train rights (just play)
-	 * @param selectedGame	the game
-	 * @param t_Launch		the starter object
-	 */
-	private static void startGBGamePlay(String selectedGame, GBGLaunch t_Launch) {
-		String title = "General Board Game Playing";
-		String[] scaPar = {"","",""};
-		String x;
-		for (int i=0; i<3; i++) scaPar[i]="";
-		if (t_Launch==null) {
-			scaPar = setDefaultScaPars(selectedGame);
-		} else {
-			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when using scaPar[i]
-			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
-			x = (String) t_Launch.choiceScaPar1.getSelectedItem(); if (x!=null) scaPar[1]=x;
-			x = (String) t_Launch.choiceScaPar2.getSelectedItem(); if (x!=null) scaPar[2]=x;
-		}
-		final boolean withUI = true;
-		switch(selectedGame) {
-		case "2048": 
-			t_Game = new Arena2048(title,withUI);
-			break;
-		case "Blackjack":
-			t_Game = new ArenaBlackJack(title,withUI);
-			break;
-		case "ConnectFour":
-			t_Game = new ArenaC4(title,withUI);
-			break;
-		case "Hex": 
-			// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaHex, 
-			// which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
-			t_Game = new ArenaHex(title,withUI);
-			break;
-		case "Nim": 
-			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
-			// ArenaNim2P, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
-			t_Game = new ArenaNim2P(title,withUI);				
-			break;
-		case "Nim3P":
-			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor  
-			// ArenaNim2P, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));	// Nim3P: always MaxMinus == HeapSize (!)
-			ArenaNim3P.setExtraRule(Boolean.parseBoolean(scaPar[2]));
-			t_Game = new ArenaNim3P(title,withUI);				
-			break;
-		case "Othello": 
-			t_Game = new ArenaOthello(title,withUI);
-			break;
-		case "Poker":
-			t_Game = new ArenaPoker(title,withUI);
-			break;
-		case "KuhnPoker":
-			t_Game = new ArenaKuhnPoker(title,withUI);
-			break;
-		case "RubiksCube":
-			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
-			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaCube.setCubeType(scaPar[0]);
-			ArenaCube.setBoardVecType(scaPar[1]);
-			ArenaCube.setTwistType(scaPar[2]);
-			t_Game = new ArenaCube(title,withUI);
-			break;
-		case "Sim": 
-			// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaSim, 
-			// which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
-			ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
-			ArenaSim.setCoalition(scaPar[2]);
-			t_Game = new ArenaSim(title,withUI);
-			break;
-		case "TicTacToe": 
-			t_Game = new ArenaTTT(title,withUI);
-			break;
-		case "EWN":
-			ArenaEWN.setConfig(scaPar[0]);
-			ArenaEWN.setCellCoding(scaPar[1]);
-			ArenaEWN.setRandomStartingPosition(scaPar[2]);
-			t_Game = new ArenaEWN(title, withUI);
-			break;
-		case "Yavalath":
-			ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
-			ArenaYavalath.setBoardSize(Integer.parseInt(scaPar[1]));
-			t_Game = new ArenaYavalath(title,withUI);
-			break;
-		default:
-			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
-			System.exit(1);
-		}
-
-		t_Game.setLauncherObj(t_Launch);
-		t_Game.init();
-	}
-	
 	/**
 	 * creates the launcher UI
 	 */

@@ -128,7 +128,7 @@ abstract public class CubeState implements Serializable {
 	 * {@code tforF, tforL, tforU} are the <b>forward</b> transformations needed in {@link #FTw()}, {@link #LTw()}, {@link #UTw()}.<br>
 	 * That is, {@code tforF[i]} is the new location for a sticker which was in location {@code i} prior to a {@link #FTw()} transformation.<br>
 	 * {@code tforF, tforL, tforU} are filled via method {@link #generateForwardTs()},
-	 * which is called once at startup time from the constructor {@link ArenaTrainCube#ArenaTrainCube(String, boolean)}.
+	 * which is called once at startup time from the constructor {@link ArenaCube#ArenaCube(String, boolean)}.
 	 */
 	private static int[]
 			tforU = null, tforL = null, tforF = null,

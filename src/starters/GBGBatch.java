@@ -72,25 +72,25 @@ public class GBGBatch extends SetupGBG {
 	 *          	{@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}  or 
 	 *          	{@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3}.
 	 *          	In case of batch6, this arguments codes the directory where to search for agent files.<br>
-	 *          [3] (optional) nruns: how many agents to train (default -1). In case of batch6 or batch7, this argument
+	 *          [3] (optional) {@code nruns}: how many agents to train (default -1). In case of batch6 or batch7, this argument
 	 *              contains {@code iterMCTS}.   <br>
-	 *          [4] (optional) maxGameNum: maximum number of training episodes (default -1: take the parameter stored
+	 *          [4] (optional) {@code maxGameNum}: maximum number of training episodes (default -1: take the parameter stored
 	 *              in the loaded agent file.) <br>
-	 *          [5] (optional) csvFile: filename for CSV results (defaults: "multiTrain.csv" or 
+	 *          [5] (optional) {@code csvFile}: filename for CSV results (defaults: "multiTrain.csv" or
 	 *          	"multiTrainAlphaSweep.csv" or "multiTrainLambdaSweep.csv" or "multiTrainIncAmountSweep.csv",
 	 *          	see {@link #csvNameDef}) <br>
-	 *          [6] (optional) scaPar0: scalable parameter 0 <br>
-	 *          [7] (optional) scaPar1: scalable parameter 1 <br>
-	 *          [8] (optional) scaPar2: scalable parameter 2 <br>
+	 *          [6] (optional) {@code scaPar0}: scalable parameter 0 <br>
+	 *          [7] (optional) {@code scaPar1}: scalable parameter 1 <br>
+	 *          [8] (optional) {@code scaPar2}: scalable parameter 2 <br>
 	 *          <p>
 	 *          
-	 * If <b>nruns</b> or <b>maxGameNum</b> are -1, their respective values stored in {@code agentFile} are taken.
+	 * If {@code nruns} or {@code maxGameNum} are -1, their respective values stored in {@code agentFile} are taken.
 	 * <p>
 	 * Side effect: the last trained agent is stored to {@code <csvName>.agt.zip}, where
 	 * {@code <csvname>} is {@code args[5]} w/o {@code .csv}
 	 * <p>
-	 * <b>scaPar0,1,2</b> contain the scalable parameters of a game (if a game supports such parameters). Example: The game 
-	 * Hex has the board size (4,5,6,...) as scalable parameter scaPar0. If no scalable parameter is given as 
+	 * {@code scaPar0,1,2} contain the scalable parameters of a game (if a game supports such parameters). Example: The game
+	 * Hex has the board size (4,5,6,...) as scalable parameter {@code scaPar0}. If no scalable parameter is given as
 	 * command line argument, the defaults from {@link #setDefaultScaPars(String)} apply.
 	 * 
 	 * @throws IOException if s.th. goes wrong when loading the agent or saving the csv file.

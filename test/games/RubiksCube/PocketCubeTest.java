@@ -24,7 +24,7 @@ import java.util.Random;
  */
 public class PocketCubeTest {
 
-    ArenaTrainCube ar = new ArenaTrainCube("",false);
+    ArenaCube ar = new ArenaCube("",false,true);
     GameBoardCube gb;		// needed for chooseStartState()
 
     protected Random rand = new Random(System.currentTimeMillis());

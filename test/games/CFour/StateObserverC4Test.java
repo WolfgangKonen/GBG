@@ -5,9 +5,6 @@ import games.Arena;
 import games.StateObservation;
 import org.junit.Test;
 import tools.Types;
-import tools.ValidateStateObsTest;
-
-import java.io.IOException;
 
 public class StateObserverC4Test {
     // this is a full board which has in the highest row a 'oooo', i.e. it is a win for player 1 ('o')
@@ -90,7 +87,7 @@ public class StateObserverC4Test {
     private final tools.ValidateStateObsTest vat = new tools.ValidateStateObsTest();
     private final static String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/ConnectFour/";
     private final static String gbgAgentPath = strDir + "TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip";
-    private static final Arena ar = new ArenaTrainC4("", false);
+    private static final Arena ar = new ArenaC4("", false,true);
     private static final StateObservation sob = ar.getGameBoard().getDefaultStartState();
 
     //

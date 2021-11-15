@@ -74,16 +74,25 @@ public class SetupGBG {
                 scaPar[0]=scaPar[1]=scaPar[2]="";
                 break;
             default:
-                System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
+                System.err.println("[SetupGBG.setDefaulScaPars] "+selectedGame+": This game is unknown.");
                 System.exit(1);
         }
         return scaPar;
     }
 
-    public static Arena setupSelectedGame(String selectedGame, String[] scaPar, String title, boolean withUI, boolean withTrainRights){
-
+    /**
+     * @param selectedGame      game name
+     * @param scaPar            scalable parameters
+     * @param title             title string for GUI
+     * @param withUI            whether we have a GUI or not
+     * @param withTrainRights   whether {@link Arena} has train rights or not
+     * @return the new {@link Arena} object for the specific game
+     */
+    public static Arena setupSelectedGame(String selectedGame, String[] scaPar, String title,
+                                          boolean withUI, boolean withTrainRights)
+    {
         switch (selectedGame) {
-            // Set configurable parameters of the game, e.g.
+            // Set configurable parameters of the game, e.g. for games Sim, Hex, Nim
             //      ConfigSim.{NUM_PLAYERS,NUM_NODES}       or
             //      HexConfig.BOARD_SIZE        or
             //      NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS}
@@ -137,7 +146,7 @@ public class SetupGBG {
                 ArenaYavalath.setBoardSize(Integer.parseInt(scaPar[1]));
                 return new ArenaYavalath(title,withUI);
             default:
-                System.err.println("[GBGBatch.main] args[0]=" + selectedGame + ": This game is unknown.");
+                System.err.println("[SetupGBG.setupSelectedGame] args[0]=" + selectedGame + ": This game is unknown.");
                 System.exit(1);
                 return null;
         }

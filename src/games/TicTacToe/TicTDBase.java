@@ -1,9 +1,5 @@
 package games.TicTacToe;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -15,6 +11,7 @@ import java.util.Random;
 import controllers.PlayAgent;
 import controllers.AgentBase;
 import controllers.MCTS.MCTSAgentT;
+import games.StateObservation;
 import tools.Types.ACTIONS;
 
 
@@ -380,7 +377,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 	 *        {@code =false}: count the possible legal boards (without symmetry considerations);<br>   
 	 * 		  {@code =true}: count the number of nodes in the game tree
 	 * 
-	 * @see games.TicTacToe.ArenaTrainTTT
+	 * @see games.TicTacToe.ArenaTTT
 	 */
 	public static void countStates2(boolean gameTreeStates) {
 		hm2 = new HashMap<String, Integer>();

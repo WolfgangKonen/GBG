@@ -32,11 +32,11 @@ import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 /**
- * This class contains the GUI and the task dispatcher for the game. The GUI for
- * buttons and choice boxes is in {@link XArenaButtons}.
+ * This class contains the task dispatcher for the game. It has an {@link ArenaGui} member for the
+ * Arena GUI. The GUI for buttons and choice boxes is in {@link XArenaButtons}.
  * <p>
- * Run this class for example from {@code main} in {@link games.TicTacToe.ArenaTTT} or
- * {@link games.TicTacToe.ArenaTrainTTT} for the TicTacToe game.
+ * Use this class for example from {@code main} in {@link games.TicTacToe.ArenaTTT} for the TicTacToe game.
+ * Or use it from {@code main} in {@link GBGLaunch} for all games
  * 
  * @author Wolfgang Konen, TH Koeln
  */

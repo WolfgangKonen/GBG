@@ -86,7 +86,7 @@ public class ArenaSG extends Arena   {
 	 */
 	public static void main(String[] args) throws IOException 
 	{
-		ArenaSG t_Frame = new ArenaSG("General Board Game Playing",true);
+		ArenaSG t_Frame = new ArenaSG("General Board Game Playing",true, true);
 
 		if (args.length==0) {
 			t_Frame.init();

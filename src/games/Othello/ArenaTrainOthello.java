@@ -8,9 +8,6 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import games.TicTacToe.ArenaTrainTTT;
-import games.TicTacToe.FeatureTTT;
-import games.TicTacToe.XNTupleFuncsTTT;
 
 public class ArenaTrainOthello extends ArenaTrain {
 
