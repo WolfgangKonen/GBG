@@ -162,11 +162,13 @@ public class Experiment {
 
         ParOther oPar = new ParOther();
 
+        ParRB rbPar = new ParRB();
+
         int maxGameNum = 100000;
 
         NTuple4Factory ntupfac = new NTuple4Factory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnf);
-        PlayAgent pa = new TDNTuple4Agt(agentName,tdPar,ntPar, oPar, nTuples, xnf, maxGameNum);
+        PlayAgent pa = new TDNTuple4Agt(agentName,tdPar,ntPar, oPar,rbPar, nTuples, xnf, maxGameNum);
 
         pa = trainAgent(pa,gb,savePath);
 

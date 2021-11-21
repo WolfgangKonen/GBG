@@ -10,9 +10,14 @@ public class ParRB implements Serializable {
 
     public static boolean DEFAULT_USERB = true;
     public static int DEFAULT_CAPACITY = 200;
+    public static int DEFAULT_BATCHSIZE = 1;
+    public static int DEFAULT_COMBOBOXES = 0; // used for entry based on index;
 
     private int capacity = DEFAULT_CAPACITY;
     private boolean useRB = DEFAULT_USERB;
+    private int batchSize = DEFAULT_BATCHSIZE;
+    private int selector = DEFAULT_COMBOBOXES;
+    private int pusher = DEFAULT_COMBOBOXES;
 
     private transient RBParams RBparams = null;
 
@@ -41,7 +46,9 @@ public class ParRB implements Serializable {
     public void setFrom(ParRB ep) {
         this.capacity = ep.getCapacity();
         this.useRB = ep.getUseRB();
-
+        this.batchSize = ep.getBatchSize();
+        this.selector = ep.getSelectorV();
+        this.pusher = ep.getPusherV();
         if (RBparams!=null)
             RBparams.setFrom(this);
     }
@@ -49,7 +56,9 @@ public class ParRB implements Serializable {
     public void setFrom(RBParams ep) {
         this.capacity = ep.getCapacity();
         this.useRB = ep.getUseRb();
-
+        this.batchSize = ep.getBatchSize();
+        this.selector = ep.getSelector();
+        this.pusher = ep.getPusher();
         if (RBparams!=null)
             RBparams.setFrom(this);
     }
@@ -68,12 +77,38 @@ public class ParRB implements Serializable {
         return null;
     }
 
+    public int getBatchSize(){return batchSize;}
+
+    public void setBatchSize(int i) {
+        this.batchSize = i;
+        if (RBparams!=null)
+            RBparams.setBatchSize(i);
+
+    }
+
     public int getCapacity() {
         return capacity;
     }
 
     public boolean getUseRB() {
         return useRB;
+    }
+
+    public int getBatchSizeV(){return batchSize;}
+    public int getPusherV(){return pusher;}
+    public int getSelectorV(){return selector;}
+
+    public void setSelector(int i){
+        this.selector=i;
+        if (RBparams!=null)
+            RBparams.setSelector(i);
+    }
+
+    public void setPusher(int i){
+        this.pusher=i;
+        if(RBparams!=null){
+            RBparams.setPusher(i);
+        }
     }
 
     public void setCapacity(int num) {
@@ -103,8 +138,11 @@ public class ParRB implements Serializable {
         }
         switch (agentName) {
             default:
-                this.setCapacity(200);
+                this.setCapacity(1);
                 this.setUseRB(true);
+                this.setBatchSize(1);
+                this.setPusher(0);
+                this.setSelector(0);
                 break;
         }
     }

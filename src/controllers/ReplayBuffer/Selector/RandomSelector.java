@@ -1,6 +1,7 @@
 package controllers.ReplayBuffer.Selector;
 
 import controllers.ReplayBuffer.Buffer.BaseBuffer;
+import controllers.ReplayBuffer.ConfigReplayBuffer;
 import controllers.ReplayBuffer.Transition.ITransition;
 
 /**
@@ -11,20 +12,19 @@ public class RandomSelector extends BaseSelector{
         super(buffer);
     }
 
-    @Override
-    public ITransition selectBatch() {
-        return getBuffer()[random.nextInt(getMaxBufferPosition())];
-    }
 
     @Override
-    public ITransition[] selectBatch(int n) {
+    public ITransition[] selectBatch() {
 
-        ITransition[] transitions = new ITransition[n];
-        for(int i = 0; i < n; i++){
-            transitions[i] = selectBatch();
+        ITransition[] transitions = new ITransition[getBatchSize()];
+        if(ConfigReplayBuffer.DBG) System.out.println("Maximal buffer size: " + getMaxBufferPosition());
+        for(int i = 0; i < getBatchSize(); i++){
+            transitions[i] =  getBuffer()[random.nextInt(getMaxBufferPosition())];;
         }
         return transitions;
     }
 
-
+    public String toString(){
+        return "Random Selector";
+    }
 }

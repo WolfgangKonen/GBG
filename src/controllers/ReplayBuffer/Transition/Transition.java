@@ -3,100 +3,48 @@ package controllers.ReplayBuffer.Transition;
 import controllers.TD.ntuple4.NextState4;
 import game.functions.ints.state.Next;
 import game.functions.ints.state.Score;
+import game.functions.ints.state.State;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
+import games.TicTacToe.StateObserverTTT;
 import tools.ScoreTuple;
 import tools.Types;
 
 public class Transition implements ITransition {
 
-    private int bufferIndex, player;
-    private StateObservation state;
-    private Types.ACTIONS action;
-    private NextState4 nextState;
+    private StateObsWithBoardVector sowb;
+    private NextState4 next_state;
     private StateObservation[] sLast;
-    private ScoreTuple lastReward;
-    private StateObsWithBoardVector curSOWB;
-    private double vLast, target, reward2;
-    private ScoreTuple reward;
-    public Transition(int i){
-        bufferIndex = i;
-    }
+    private int player;
+    private ScoreTuple rLast,R;
+    private double vLast, target,r_next;
 
+    public Transition(){};
 
-
-    public int getBufferIndex() {
-        return bufferIndex;
-    }
-
-    public void setBufferIndex(int bufferIndex) {
-        this.bufferIndex = bufferIndex;
-    }
-
-    public void setState(StateObservation state) {
-        this.state = state;
-    }
-
-    public void setAction(Types.ACTIONS action) {
-        this.action = action;
-    }
-
-    public void setNextState(NextState4 nextState) {
-        this.nextState = nextState;
-    }
-
-    public void setSLast(StateObservation[] sLast) {
+    public Transition(StateObsWithBoardVector sowb,int player, double vLast, double target,double r_next, NextState4 ns, StateObservation[] sLast, ScoreTuple rLast){
+        this.sowb = sowb;
+        this.next_state = ns;
         this.sLast = sLast;
-    }
-
-    public void setLastReward(ScoreTuple lastReward) {
-        this.lastReward = lastReward;
-    }
-
-    @Override
-    public void setReward(ScoreTuple reward) {
-        this.reward = reward;
-    }
-
-
-    @Override
-    public StateObservation getState() {
-        return state;
+        this.player = player;
+        this.rLast = rLast;
+        this.target = target;
+        this.vLast = vLast;
+        this.r_next = r_next;
     }
 
     @Override
-    public Types.ACTIONS getActions() {
-        return action;
+    public void setSowb(StateObsWithBoardVector sowb) {
+        this.sowb = sowb;
     }
 
     @Override
-    public NextState4 getNextState() {
-        return nextState;
+    public StateObsWithBoardVector getSowb() {
+        return sowb;
     }
 
     @Override
-    public StateObservation[] getSLast() {
-        return sLast;
-    }
-
-    @Override
-    public ScoreTuple getRLast() {
-        return lastReward;
-    }
-
-    @Override
-    public ScoreTuple getReward() {
-        return reward;
-    }
-
-    @Override
-    public StateObsWithBoardVector getCurSOWB() {
-        return curSOWB;
-    }
-
-    @Override
-    public void setCurSOWB(StateObsWithBoardVector curSOWB) {
-        this.curSOWB = curSOWB;
+    public void setPlayer(int player) {
+        this.player = player;
     }
 
     @Override
@@ -105,8 +53,8 @@ public class Transition implements ITransition {
     }
 
     @Override
-    public void setPlayer(int p) {
-        player =p;
+    public void setVLast(double vlast) {
+        this.vLast = vlast;
     }
 
     @Override
@@ -115,8 +63,8 @@ public class Transition implements ITransition {
     }
 
     @Override
-    public void setVLast(double v) {
-        vLast = v;
+    public void setTarget(double target) {
+        this.target = target;
     }
 
     @Override
@@ -125,17 +73,61 @@ public class Transition implements ITransition {
     }
 
     @Override
-    public void setTarget(double t) {
-        target = t;
+    public void setRNext(double r_next) {
+        this.r_next = r_next;
     }
 
     @Override
-    public void setReward2(double r) {
-        reward2 = r;
+    public double getRNext() {
+        return r_next;
+    }
+
+
+    @Override
+    public void setNextState(NextState4 ns) {
+        this.next_state = ns;
     }
 
     @Override
-    public double getReward2() {
-        return reward2;
+    public NextState4 getNextState4() {
+        return next_state;
+    }
+
+    public StateObservation getNextState(){
+        return next_state.getNextSO();
+    }
+
+    @Override
+    public void setSLast(StateObservation[] sLast) {
+        this.sLast = sLast;
+    }
+
+    @Override
+    public StateObservation[] getSLast() {
+        return sLast;
+    }
+
+    @Override
+    public void setRLast(ScoreTuple rLast) {
+        this.rLast = rLast;
+    }
+
+    @Override
+    public double getPlayerRLast(){
+        return rLast.scTup[player];
+    }
+
+    @Override
+    public void setR(ScoreTuple R) {this.R = R;
+    }
+
+    @Override
+    public ScoreTuple getR() {
+        return R;
+    }
+
+    @Override
+    public ScoreTuple getRLast() {
+        return rLast;
     }
 }

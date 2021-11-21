@@ -27,16 +27,15 @@ abstract class BaseSelector implements ISelector{
         return buffer.getBuffer();
     }
 
-    protected int getCapacity(){
-        return buffer.getCapacity();
-    }
+    protected int getCapacity(){return buffer.getCapacity();}
+
+    protected int getBatchSize(){return buffer.getBatchSize();}
 
     protected int getMaxBufferPosition(){
         return this.buffer.getMaxBufferIndex();
     }
 
-    public abstract ITransition[] selectBatch(int n);
-    public abstract ITransition selectBatch();
+    public abstract ITransition[] selectBatch();
 
 
 }
