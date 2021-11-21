@@ -17,30 +17,17 @@ public class Transition implements ITransition {
     private StateObservation[] sLast;
     private int player;
     private ScoreTuple rLast,R;
-    private double vLast, target,r_next;
 
     public Transition(){};
 
-    public Transition(StateObsWithBoardVector sowb,int player, double vLast, double target,double r_next, NextState4 ns, StateObservation[] sLast, ScoreTuple rLast){
-        this.sowb = sowb;
+    public Transition(int player, NextState4 ns, StateObservation[] sLast, ScoreTuple rLast,ScoreTuple R){
         this.next_state = ns;
         this.sLast = sLast;
         this.player = player;
         this.rLast = rLast;
-        this.target = target;
-        this.vLast = vLast;
-        this.r_next = r_next;
+        this.R = R;
     }
 
-    @Override
-    public void setSowb(StateObsWithBoardVector sowb) {
-        this.sowb = sowb;
-    }
-
-    @Override
-    public StateObsWithBoardVector getSowb() {
-        return sowb;
-    }
 
     @Override
     public void setPlayer(int player) {
@@ -51,37 +38,6 @@ public class Transition implements ITransition {
     public int getPlayer() {
         return player;
     }
-
-    @Override
-    public void setVLast(double vlast) {
-        this.vLast = vlast;
-    }
-
-    @Override
-    public double getVLast() {
-        return vLast;
-    }
-
-    @Override
-    public void setTarget(double target) {
-        this.target = target;
-    }
-
-    @Override
-    public double getTarget() {
-        return target;
-    }
-
-    @Override
-    public void setRNext(double r_next) {
-        this.r_next = r_next;
-    }
-
-    @Override
-    public double getRNext() {
-        return r_next;
-    }
-
 
     @Override
     public void setNextState(NextState4 ns) {
@@ -108,11 +64,6 @@ public class Transition implements ITransition {
     }
 
     @Override
-    public void setRLast(ScoreTuple rLast) {
-        this.rLast = rLast;
-    }
-
-    @Override
     public double getPlayerRLast(){
         return rLast.scTup[player];
     }
@@ -124,6 +75,11 @@ public class Transition implements ITransition {
     @Override
     public ScoreTuple getR() {
         return R;
+    }
+
+    @Override
+    public void setRLast(ScoreTuple rLast) {
+        this.rLast = rLast;
     }
 
     @Override

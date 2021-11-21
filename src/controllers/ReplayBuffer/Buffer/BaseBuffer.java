@@ -142,18 +142,15 @@ public class BaseBuffer{
    }
 
     public void addToLastTransition(
-            StateObsWithBoardVector sowb,
             int player,
-            double vLast,
-            double target,
-            double r_next,
             NextState4 ns,
             StateObservation[] sLast,
-            ScoreTuple rLast
+            ScoreTuple rLast,
+            ScoreTuple R
             ){
         sLast = copySLast(sLast);
 
-        lastTransition = new Transition(sowb,player,vLast,target,r_next,ns,sLast,rLast.copy());
+        lastTransition = new Transition(player,ns,sLast,rLast.copy(),R.copy());
         addTransition(lastTransition);
     }
 
