@@ -21,7 +21,11 @@ public class ArenaSim extends Arena{
 	public ArenaSim(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-		
+
+	public ArenaSim(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -56,8 +60,8 @@ public class ArenaSim extends Arena{
 				   ConfigSim.NUM_PLAYERS);		
 	}
 
-	@Override
-	public void performArenaDerivedTasks() {    }
+//    @Override
+//    public void performArenaDerivedTasks() {}
 
     /**
      * set the number of players for Sim

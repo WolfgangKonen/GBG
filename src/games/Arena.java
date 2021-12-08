@@ -32,11 +32,11 @@ import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 /**
- * This class contains the GUI and the task dispatcher for the game. The GUI for
- * buttons and choice boxes is in {@link XArenaButtons}.
+ * This class contains the task dispatcher for the game. It has an {@link ArenaGui} member for the
+ * Arena GUI. The GUI for buttons and choice boxes is in {@link XArenaButtons}.
  * <p>
- * Run this class for example from {@code main} in {@link games.TicTacToe.ArenaTTT} or
- * {@link games.TicTacToe.ArenaTrainTTT} for the TicTacToe game.
+ * Use this class for example from {@code main} in {@link games.TicTacToe.ArenaTTT} for the TicTacToe game.
+ * Or use it from {@code main} in {@link GBGLaunch} for all games
  * 
  * @author Wolfgang Konen, TH Koeln
  */
@@ -68,7 +68,8 @@ abstract public class Arena implements Runnable {
 	public int currentSleepDuration = 0;
 	public LogManager logManager;
 	private int logSessionid;
-	private final boolean withUI;	// whether to start GUI or not
+	protected final boolean withUI;	// whether to start GUI or not
+	protected final boolean m_hasTrainRights;
 
 	// TS variables
 	private final String TAG = "[Arena] ";
@@ -79,6 +80,14 @@ abstract public class Arena implements Runnable {
 	// decide via withUI whether wit UI or not
 	public Arena(String title, boolean withUI) {
 		this.withUI = withUI;
+		this.m_hasTrainRights = false;
+		initGame(title);
+	}
+
+	// decide via withTrainRights whether this Arena has train rights
+	public Arena(String title, boolean withUI, boolean withTrainRights) {
+		this.withUI = withUI;
+		this.m_hasTrainRights = withTrainRights;
 		initGame(title);
 	}
 
@@ -106,9 +115,16 @@ abstract public class Arena implements Runnable {
 		logManager.setSubDir(gb.getSubDir());
 
 		if (withUI) {
-			m_ArenaFrame = new ArenaGui(this, title);
+			String prefix = (m_hasTrainRights ? "ArenaTrain  " : "Arena  ");
+			m_ArenaFrame = new ArenaGui(this, prefix+title);
 			m_tabs = new XArenaTabs(this);
-		} 
+		}
+		if (hasTrainRights()) {
+			if (hasGUI()) {
+				this.setTitle("ArenaTrain  "+this.getGameName());
+				this.m_xab.initTrain();
+			}
+		}
 	}
 
 	public void init() {
@@ -247,9 +263,8 @@ abstract public class Arena implements Runnable {
 //					enableButtons(true);
 			}
 
-			performArenaDerivedTasks();
-			// a derived class, e.g. ArenaTrain, may define additional tasks
-			// in this method
+			if (m_hasTrainRights)
+				performArenaDerivedTasks(); 		// additional train-right-related tasks
 
 		} // while (true)
 	}
@@ -631,7 +646,7 @@ abstract public class Arena implements Runnable {
 		// game over - leave the Task.PLAY task:
 		PStats.printPlayStats(psList, startSO, qaVector, this);
 //		PStats.printHighTileStats(psList, startSO, qaVector, this);
-		logManager.endLoggingSession(logSessionid);
+		logManager.endLoggingSession(logSessionid, this.getGameName());
 		taskState = Task.IDLE;
 		setStatusMessage("Done.");
 	} // PlayGame(TSGameDataTransfer spDT)
@@ -1202,7 +1217,7 @@ abstract public class Arena implements Runnable {
 	}
 
 	public boolean hasTrainRights() {
-		return false;
+		return m_hasTrainRights;
 	}
 	
 	public GameBoard getGameBoard() {
@@ -1231,23 +1246,13 @@ abstract public class Arena implements Runnable {
 			m_ArenaFrame.setTitle(title);
 	}
 
-	// overridden by ArenaTrain
 	public int getGuiArenaHeight() {
-		return Types.GUI_ARENA_HEIGHT;
+		return (m_hasTrainRights ? Types.GUI_ARENATRAIN_HEIGHT : Types.GUI_ARENA_HEIGHT);
 	}
 	
-//	// @Override
-//	public void setProgress(tools.Progress p) {
-//		this.progress = p;
-//	}
-
 	public void enableButtons(boolean state) {
 		m_xab.enableButtons(state, state, state);
 	}
-
-//	public void enableButtons(boolean state, boolean playEnabled) {
-//		m_xab.enableButtons(state, playEnabled, state);
-//	}
 
 	public void enableButtons(boolean state, boolean playEnabled, boolean inspectVEnabled) {
 		m_xab.enableButtons(state, playEnabled, inspectVEnabled);
@@ -1316,23 +1321,6 @@ abstract public class Arena implements Runnable {
 				"No XNTupleFuncs class available for game " + this.getGameName() + " (needed for TD-Ntuple)");
 	}
 
-	/**
-	 * This method is called from {@link #run()} and it has to be overridden by
-	 * classes derived from {@link Arena} (e.g. {@link ArenaTrain}).
-	 * <p>
-	 * 
-	 * It allows to add additional tasks to the task switch. May be an empty
-	 * method if no tasks have to be added.
-	 * <p>
-	 * 
-	 * This method will use member {@code taskState} from {@link Arena}. It
-	 * performs several actions appropriate for the derived class and -
-	 * importantly - changes taskState back to IDLE (when appropriate).
-	 * 
-	 * @see ArenaTrain
-	 */
-	abstract public void performArenaDerivedTasks();
-
 	public void showMessage(String message, String title, int msgCode) {
 		if (withUI) {
 			MessageBox.show(this.m_ArenaFrame,message,title,msgCode);
@@ -1344,6 +1332,141 @@ abstract public class Arena implements Runnable {
 			}
 		}
 	}
-	
+
+	/**
+	 * This method is called from {@link #run()} if {@code this} has train rights.
+	 * <p>
+	 * This method uses the member {@code taskState}, performs several actions only
+	 * appropriate for an Arena with train rights and - importantly - changes
+	 * taskState back to IDLE (when appropriate).
+	 * <p>
+	 * A class derived from {@code this} may override this method, but it
+	 * should usually call inside with {@code super.performArenaDerivedTask()} this
+	 * method, before extensions are added.
+	 */
+	public void performArenaDerivedTasks() {
+		String agentN;
+		int n;
+		if (m_hasTrainRights) {
+			switch (taskState) {
+				case TRAIN:
+					n = m_xab.getNumTrainBtn();
+					agentN = m_xab.getSelectedAgent(n);
+					PlayAgent pa=null;
+					try {
+						pa = m_xfun.constructAgent(n,agentN, m_xab);
+						if (pa==null) throw new RuntimeException("Could not construct agent = " + agentN);
+
+					} catch(Exception e) {
+						this.showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
+					}
+					if (pa!=null && pa.isTrainable()) {
+//				enableButtons(false);	// see mTrain[n].addActionListener in XArenaButtonsGui
+						setStatusMessage("Training "+agentN+"-Player X ...");
+						try {
+
+							m_xfun.m_PlayAgents[n] = m_xfun.train(n,agentN, m_xab, gb);
+
+						} catch (RuntimeException e) {
+							String s = e.getMessage();
+							e.printStackTrace();
+							if (s==null) s=e.getClass().getName();
+							this.showMessage(s,"Error", JOptionPane.ERROR_MESSAGE);
+							enableButtons(true);
+							taskState = Task.IDLE;
+							break;
+						}
+
+						if (m_xfun.m_PlayAgents[n] != null) {
+							pa = m_xfun.m_PlayAgents[n];
+							Evaluator m_evaluator2 = makeEvaluator(pa,gb,0,m_xab.oPar[n].getQuickEvalMode(),1);
+							m_evaluator2.eval(pa);
+							System.out.println("final "+m_evaluator2.getMsg());
+							m_xfun.m_PlayAgents[n].setAgentState(PlayAgent.AgentState.TRAINED);
+							setStatusMessage("final "+m_evaluator2.getMsg());
+							//System.out.println("Duration training: " + ((double)pa.getDurationTrainingMs()/1000));
+							//System.out.println("Duration evaluation: " + ((double)pa.getDurationEvaluationMs()/1000));
+						} else {
+							setStatusMessage("Done.");
+						}
+
+					}
+					enableButtons(true);
+					taskState = Task.IDLE;
+					break;
+				case MULTTRN:
+//			enableButtons(false);	// see MultiTrain.addActionListener in XArenaButtonsGui
+
+					setStatusMessage("MultiTrain started ...");
+					long start_time = System.currentTimeMillis();
+					try {
+
+						m_xfun.m_PlayAgents[0] = m_xfun.multiTrain(0, m_xab.getSelectedAgent(0), m_xab, gb, "multiTrain.csv");
+
+					} catch (RuntimeException e) {
+						this.showMessage(e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+						enableButtons(true);
+						taskState = Task.IDLE;
+						break;
+					}
+
+					if (m_xfun.m_PlayAgents[0]==null) {
+						setStatusMessage("Done.");
+					} else {
+						m_xfun.m_PlayAgents[0].setAgentState(PlayAgent.AgentState.TRAINED);
+						setStatusMessage("MultiTrain finished: "+ m_xfun.getLastMsg());
+					}
+					double elapsed_time = (System.currentTimeMillis() - start_time)/1000.0;
+					System.out.println("MultiTrain finished, time : "+ elapsed_time + " sec");
+
+					enableButtons(true);
+					taskState = Task.IDLE;
+					updateBoard();
+					break;
+//		case INSPECTNTUP:
+//			gb.clearBoard(false,true);
+//			InspectNtup();
+//			state = Task.IDLE;
+//			break;
+
+			}
+		}
+
+	}
+
+// *TODO* --- this may be integrated later in the general interface ---
+//
+//	/**
+//	 * Inspect the N-tuple states and their LUT weights for agents using N-tuples
+//	 * (currently {@link TDSNPlayer}, {@link TD_NTPlayer} or (deprecated) {@link TDSPlayer} with featmode==8).
+//	 * <p>
+//	 * Based on the current N-tuple situation, construct and display a {@link NTupleShow} object.
+//	 *
+//	 * @see NTupleShow
+//	 * @see TicGameButtons#nTupShowAction()
+//	 */
+//	protected void InspectNtup() {
+//		String pa_string = m_TTT.m_PlayAgentX.getClass().getName();
+//		System.out.println("[InspectNtup] "+pa_string);
+//		NTuple[] nTuples = null;
+//		if (pa_string=="TicTacToe.TDSNPlayer") {
+//			nTuples = ((TDSNPlayer) m_TTT.m_PlayAgentX).getNTuples();
+//		}
+//		if (pa_string=="TicTacToe.TD_NTPlayer") {
+//			((TD_NTPlayer) m_TTT.m_PlayAgentX).copyWeights();
+//			nTuples = ((TD_NTPlayer) m_TTT.m_PlayAgentX).getNTuples();
+//		}
+//		if (pa_string=="controllers.TD.TDPlayerTTT" && m_TTT.m_PlayAgentX.getFeatmode()==8) {
+//			((TDSPlayer) m_TTT.m_PlayAgentX).copyWeights();
+//			nTuples = ((TicTDBase) m_TTT.m_PlayAgentX).getNTuples();
+//		}
+//		if (nTuples!=null) {
+//			m_xab.ntupleShow = new NTupleShow(nTuples,m_xab);
+//			m_xab.nTupShowAction();
+//		}
+//		else System.out.println("[InspectNtup] Warning: nTuples==null!");
+//
+//	}
+
 
 }

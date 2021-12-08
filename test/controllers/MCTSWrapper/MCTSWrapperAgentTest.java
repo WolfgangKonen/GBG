@@ -22,6 +22,7 @@ import starters.MCompeteMWrap;
 import org.junit.Test;
 import params.ParMCTS;
 import params.ParOther;
+import starters.SetupGBG;
 import tools.ScoreTuple;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     public void rubiksCube3x3Test() {
         scaPar=new String[]{"3x3x3", "STICKER2", "ALL"};
         agtFiles = new String[]{"TCL4-p9-2000k-120-7t.agt.zip"};
-        int[] iterMCTSWrapArr = {200}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
+        int[] iterMCTSWrapArr = {200,500}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
         int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
@@ -122,8 +123,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         selectedGame = "RubiksCube";
         PlayAgent pa;
         PlayAgent qa;
-        double[] epsArr = {1e-8, 0.0, -1e-8}; // {1e-8, 0.0};    // {1e-8};
-        double c_puct=1.0;
+        double[] epsArr = {1e-8}; // {1e-8, 0.0, -1e-8}; // {1e-8, 0.0};    //
+        double c_puct=10.0;
         String userTitle1 = "user1", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
         int maxDepth = 50;  // 25, 50, -1
@@ -132,7 +133,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);   // t_Game is ArenaTrain object
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardCube gb = new GameBoardCube(arenaTrain);		// needed for chooseStartState()
 
         for (int run=0; run<nTrial; run++) {
@@ -286,7 +287,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardC4 gb = new GameBoardC4(arenaTrain);
         StateObservation so = gb.getDefaultStartState();
 
@@ -386,8 +387,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     @Test
     public void getVTable_Test() {
         selectedGame = "Othello";
-        scaPar = GBGBatch.setDefaultScaPars(selectedGame);
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame, scaPar);   // t_Game is ArenaTrain object
+        scaPar = SetupGBG.setDefaultScaPars(selectedGame);
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame, scaPar,"",false,true);
         GameBoard gb = new GameBoardOthello(arenaTrain);        // needed for chooseStartState()
         StateObservation sob = gb.getDefaultStartState();
         MCTSNode mctsNode = new MCTSNode(new GameStateIncludingPass(sob));

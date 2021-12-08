@@ -225,10 +225,8 @@ public class StateObserverOthello extends ObserverBase{
 		return +1;			// WK the right choice
 	}
 
-	@Override
-	public String getName() {
-		return "Othello";
-	}
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() {return "Othello";}
 
 	@Override
 	public int getNumAvailableActions() {

@@ -7,6 +7,7 @@ import games.StateObservation;
 import games.Yavalath.GUI.GameBoardGUIYavalath;
 import tools.Types;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -37,7 +38,8 @@ public class GameBoardYavalath implements GameBoard {
     public void clearBoard(boolean boardClear, boolean vClear) {
         if(boardClear){
             m_so = new StateObserverYavalath();
-        } else if(vClear){
+        }
+        if(vClear){
             m_so.clearValues();
         }
         if(gb_gui != null && m_arena.taskState != Arena.Task.TRAIN){
@@ -97,7 +99,8 @@ public class GameBoardYavalath implements GameBoard {
 
     @Override
     public String getSubDir() {
-        return null;
+        DecimalFormat form = new DecimalFormat("00");
+        return form.format(ConfigYavalath.getPlayers()) + " Players Size " + form.format(ConfigYavalath.getBoardSize());
     }
 
     @Override

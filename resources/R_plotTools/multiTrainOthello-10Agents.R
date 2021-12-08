@@ -23,10 +23,15 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
-filenames=c("multiTrainOthello-10Agents.csv" 
-            # generated with >GBGBatch Othello 5 ...
+filenames=c(#"multiTrainOthello-10Agents.csv" 
+            #"multiTrainOthello-10Agents-2.csv"
+            "multiTrainOthello-20Agents.csv"
+            # generated with >GBGBatch Othello 6 ...
 )
-
+pdffile=#"MCTSWrap-TCL10.pdf"
+        #"MCTSWrap-TCL10-2.pdf"
+        "MCTSWrap-TCL20.pdf"
+        
   
 dfAll = data.frame()
 for (k in 1:length(filenames)) {
@@ -71,6 +76,5 @@ q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text
 q <- q+theme(plot.title = element_text(size = rel(1.5)))    # bigger title text  
 
 plot(q)
-pdffile="MCTSWrap-TCL10.pdf"
 ggsave(pdffile, width = 8.04, height = 4.95, units = "in")
 cat(paste("Plot saved to",pdffile))

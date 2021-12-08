@@ -10,6 +10,9 @@ import games.XNTupleFuncs;
 public class ArenaEWN extends Arena {
     public ArenaEWN(String title, boolean withUI){super(title,withUI);}
 
+    public ArenaEWN(String title, boolean withUI, boolean withTrainRights) {
+        super(title,withUI,withTrainRights);
+    }
 
     @Override
     public String getGameName() {
@@ -34,15 +37,18 @@ public class ArenaEWN extends Arena {
         return new XNTupleFuncsEWN();
     }
 
-    @Override
-    public void performArenaDerivedTasks() {
-
-    }
+//    @Override
+//    public void performArenaDerivedTasks() {}
 
     public static void setConfig(String str){
         switch(str){
             case"3x3 2-Player":{
                 ConfigEWN.BOARD_SIZE = 3;
+                ConfigEWN.NUM_PLAYERS = 2;
+                break;
+            }
+            case "4x4 2-Player":{
+                ConfigEWN.BOARD_SIZE = 4;
                 ConfigEWN.NUM_PLAYERS = 2;
                 break;
             }

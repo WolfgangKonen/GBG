@@ -13,7 +13,11 @@ public class ArenaPoker extends Arena   {
 	public ArenaPoker(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+	public ArenaPoker(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -44,7 +48,7 @@ public class ArenaPoker extends Arena   {
 		return new XNTupleFuncsPoker();
 	}
 
-	public void performArenaDerivedTasks() {  }
+//    public void performArenaDerivedTasks() {}
 
 
 	@Override

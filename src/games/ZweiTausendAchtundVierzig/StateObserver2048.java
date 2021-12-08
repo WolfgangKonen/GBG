@@ -588,9 +588,8 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         return REWARD_POSITIVE;
     }
 
-    public String getName() {
-        return "2048";
-    }
+    // --- obsolete, use Arena().getGameName() instead
+//    public String getName() {return "2048";}
 
     public double getBoard() {
         return boardB;

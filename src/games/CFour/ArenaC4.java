@@ -34,7 +34,11 @@ public class ArenaC4 extends Arena   {
 	public ArenaC4(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+	public ArenaC4(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -76,7 +80,7 @@ public class ArenaC4 extends Arena   {
 		return new XNTupleFuncsC4();
 	}
 
-	public void performArenaDerivedTasks() {  }
+//    public void performArenaDerivedTasks() {}
 
 	/**
 	 * Start GBG for Connect Four (non-trainable version)

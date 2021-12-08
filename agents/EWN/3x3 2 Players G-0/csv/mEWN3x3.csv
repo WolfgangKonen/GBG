@@ -1,10 +1,10 @@
 TDNTuple4Agt: USESYM:true, P:3, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false
 TDNTuple4Agt: alpha_init->final:0.2->0.2, epsilon_init->final:0.1->0.0, gamma: 1.0, fixed n-tuple, mode=0, evalQ: 0, evalT: 0
-run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, DO_EEXPAND
-0, 1, 0, 0, 1.0E-8, 0, 5.0, 0.933, 0.96, 1.0
-0, 1, 0, 100, 1.0E-8, 0, 5.0, 0.975, 1.309, 1.0
-0, 1, 0, 200, 1.0E-8, 0, 5.0, 0.985, 1.607, 1.0
-0, 1, 0, 500, 1.0E-8, 0, 5.0, 0.989, 2.851, 1.0
-0, 1, 0, 1000, 1.0E-8, 0, 5.0, 0.996, 4.772, 1.0
-0, 1, 0, 2000, 1.0E-8, 0, 5.0, 0.997, 8.428, 1.0
-0, 1, 0, 5000, 1.0E-8, 0, 5.0, 0.999, 19.205, 1.0
+agtFile, run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, DO_EEXPAND
+tdnt4-10000.agt.zip, 0, 1, 0, 0, 1.0E-8, 0, 5.0, 0.933, 0.56, 0.0
+tdnt4-10000.agt.zip, 0, 1, 0, 100, 1.0E-8, 0, 5.0, 0.979, 0.904, 0.0
+tdnt4-10000.agt.zip, 0, 1, 0, 200, 1.0E-8, 0, 5.0, 0.984, 1.249, 0.0
+tdnt4-10000.agt.zip, 0, 1, 0, 500, 1.0E-8, 0, 5.0, 0.99, 2.268, 0.0
+tdnt4-10000.agt.zip, 0, 1, 0, 1000, 1.0E-8, 0, 5.0, 0.994, 3.791, 0.0
+tdnt4-10000.agt.zip, 0, 1, 0, 2000, 1.0E-8, 0, 5.0, 0.998, 6.887, 0.0
+tdnt4-10000.agt.zip, 0, 1, 0, 5000, 1.0E-8, 0, 5.0, 0.999, 15.769, 0.0

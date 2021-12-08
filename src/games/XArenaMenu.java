@@ -22,7 +22,7 @@ import tools.ShowBrowser;
 import tools.Types;
 
 /**
- * Main menu for {@link Arena} and {@link ArenaTrain}.
+ * Main menu for {@link Arena}.
  * 
  * @author Wolfgang Konen, TH Koeln, 2016-2020
  */
@@ -93,7 +93,7 @@ public class XArenaMenu extends JMenuBar {
 			}
 		});
 		menuItem.setToolTipText(TIPPARAMTABS);
-		if (!(m_arena instanceof ArenaTrain))
+		if (!m_arena.hasTrainRights())
 			menuItem.setEnabled(false);			// no param tabs for Arena
 		menu.add(menuItem);
 		// ==============================================================
@@ -166,7 +166,7 @@ public class XArenaMenu extends JMenuBar {
 				}
 			});
 			menuItem.setToolTipText(TIPSAVE);
-			if (!(m_arena instanceof ArenaTrain))
+			if (!m_arena.hasTrainRights())
 				menuItem.setEnabled(false);			// no agent save for Arena
 			submenu.add(menuItem);
 			submenu.addSeparator();

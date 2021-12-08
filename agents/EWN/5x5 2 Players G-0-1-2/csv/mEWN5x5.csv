@@ -1,10 +1,10 @@
-RandomAgent
-controllers.RandomAgent:
-run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, DO_EEXPAND
-0, 1, 0, 0, 1.0E-8, 0, 5.0, 0.050000000000000044, 8.036, 1.0
-0, 1, 0, 100, 1.0E-8, 0, 5.0, 0.15000000000000002, 7.636, 1.0
-0, 1, 0, 200, 1.0E-8, 0, 5.0, 0.3, 7.086, 1.0
-0, 1, 0, 500, 1.0E-8, 0, 5.0, 0.3, 8.504, 1.0
-0, 1, 0, 1000, 1.0E-8, 0, 5.0, 0.2, 10.776, 1.0
-0, 1, 0, 2000, 1.0E-8, 0, 5.0, 0.2, 16.622, 1.0
-0, 1, 0, 5000, 1.0E-8, 0, 5.0, 0.4, 28.069, 1.0
+TDNTuple4Agt: USESYM:true, P:7, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false
+TDNTuple4Agt: alpha_init->final:0.2->0.2, epsilon_init->final:0.0->0.0, gamma: 1.0, fixed n-tuple, mode=0, evalQ: 0, evalT: 2
+agtFile, run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, DO_EEXPAND
+tcl4-100000.agt.zip, 0, 1, 0, 0, 1.0E-8, 0, 5.0, 0.45, 7.007, 0.0
+tcl4-100000.agt.zip, 0, 1, 0, 100, 1.0E-8, 0, 5.0, 0.25, 6.758, 0.0
+tcl4-100000.agt.zip, 0, 1, 0, 200, 1.0E-8, 0, 5.0, 0.65, 6.994, 0.0
+tcl4-100000.agt.zip, 0, 1, 0, 500, 1.0E-8, 0, 5.0, 0.55, 8.607, 0.0
+tcl4-100000.agt.zip, 0, 1, 0, 1000, 1.0E-8, 0, 5.0, 0.55, 7.895, 0.0
+tcl4-100000.agt.zip, 0, 1, 0, 2000, 1.0E-8, 0, 5.0, 0.4, 9.916, 0.0
+tcl4-100000.agt.zip, 0, 1, 0, 5000, 1.0E-8, 0, 5.0, 0.6, 15.827, 0.0

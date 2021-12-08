@@ -1,9 +1,5 @@
 package games.Nim;
 
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -15,18 +11,15 @@ import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
-import games.ArenaTrain;
 import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
 import games.Hex.StateObserverHex;
-import gui.MessageBox;
 import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
-import tools.Types;
 
 /**
  * Evaluator for the game Nim (2 players). Depending on the value of parameter {@code mode} in constructor:

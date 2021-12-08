@@ -10,9 +10,6 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import games.Hex.HexConfig;
-import games.Sim.ConfigSim;
-import games.ArenaTrain;
 
 /**
  * {@link Arena} for Nim3P (3 players). It borrows all functionality
@@ -39,7 +36,11 @@ public class ArenaNim3P extends Arena   {
 	public ArenaNim3P(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+	public ArenaNim3P(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	/**
 	 * @return a name of the game, suitable as subdirectory name in the 
 	 *         {@code agents} directory
@@ -132,9 +133,9 @@ public class ArenaNim3P extends Arena   {
 	
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncsNim3P();
-	}	
+	}
 
-	public void performArenaDerivedTasks() {  }
+//    public void performArenaDerivedTasks() {}
 
 	
 	/**

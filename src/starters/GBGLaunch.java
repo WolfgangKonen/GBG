@@ -1,33 +1,6 @@
 package starters;
 
 import games.Arena;
-import games.BlackJack.ArenaBlackJack;
-import games.BlackJack.ArenaBlackJackTrain;
-import games.CFour.ArenaC4;
-import games.CFour.ArenaTrainC4;
-import games.EWN.ArenaEWN;
-import games.EWN.ArenaTrainEWN;
-import games.Hex.ArenaHex;
-import games.Hex.ArenaTrainHex;
-import games.KuhnPoker.ArenaKuhnPoker;
-import games.KuhnPoker.ArenaTrainKuhnPoker;
-import games.Nim.ArenaNim2P;
-import games.Nim.ArenaNim3P;
-import games.Nim.ArenaTrainNim2P;
-import games.Nim.ArenaTrainNim3P;
-import games.Othello.ArenaOthello;
-import games.Othello.ArenaTrainOthello;
-import games.Poker.ArenaPoker;
-import games.Poker.ArenaTrainPoker;
-import games.RubiksCube.ArenaTrainCube;
-import games.Sim.ArenaSim;
-import games.Sim.ArenaTrainSim;
-import games.TicTacToe.ArenaTTT;
-import games.TicTacToe.ArenaTrainTTT;
-import games.Yavalath.ArenaTrainYavalath;
-import games.Yavalath.ArenaYavalath;
-import games.ZweiTausendAchtundVierzig.Arena2048;
-import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import gui.SolidBorder;
 import tools.Types;
 
@@ -52,19 +25,21 @@ import java.awt.event.WindowEvent;
  * @author Wolfgang Konen, TH Koeln, 2020
  * 
  * @see GBGBatch
+ * @see SetupGBG
  */
-public class GBGLaunch {
+public class GBGLaunch extends SetupGBG {
 	/**
-	 *  The possible games: {"2048","ConnectFour","Hex","Nim","Nim3P","Othello","RubiksCube","Sim","TicTacToe","EWN","Yavalath"}
+	 *  The possible games:
 	 */
-	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","KuhnPoker","Nim","Nim3P","Othello","Poker","RubiksCube","Sim","TicTacToe", "Yavalath"};
+	String[] game_list = {"2048","Blackjack","ConnectFour","EWN","Hex","KuhnPoker","Nim","Nim3P",
+						  "Othello","Poker","RubiksCube","Sim","TicTacToe", "Yavalath"};
 	
 	public enum LaunchTask {
 		STARTSELECTOR, SELECTGAME,	STARTGAME, EXITSELECTOR, IDLE
 	}
 	public LaunchTask launcherState = LaunchTask.SELECTGAME;	// also used in Arena.destroy()
 	
-	private static final long serialVersionUID = 1L;
+	//private static final long serialVersionUID = 1L;
 	public static Arena t_Game;
 	private final JFrame launcherUI;
 	private static String selectedGame = "TicTacToe";
@@ -88,12 +63,12 @@ public class GBGLaunch {
 	 * <p>  
 	 * Examples:       
 	 * <ul>
-	 * <li>	{@code GBGLaunch 1 Nim} : start launcher, with Nim preselected
 	 * <li>	{@code GBGLaunch} : start launcher, with TicTacToe preselected
-	 * <li>	{@code GBGLaunch 0 Hex} : start directly Hex, no launcher
+	 * <li>	{@code GBGLaunch 1 Nim} : start launcher, with Nim preselected
+	 * <li>	{@code GBGLaunch 0 Hex P} : start directly Hex, no launcher, no train rights
 	 * <li>	{@code GBGLaunch 0} : start directly TicTacToe, no launcher
 	 * </ul>
-	 * When a scalable game is started w/o launcher, the method {@link #setDefaultScaPars()} will set 
+	 * When a scalable game is started w/o launcher, the method {@link SetupGBG#setDefaultScaPars(String)} will set
 	 * appropriate default scalable parameters for the game in question.
 	 */
 	public static void main(String[] args) {
@@ -122,11 +97,10 @@ public class GBGLaunch {
 					break;
 				case STARTGAME:
 					t_Launch.launcherUI.setVisible(false);
-					if (withTrainRights) {
-						startGBGameTrain(selectedGame,t_Launch);
-					} else {
-						startGBGamePlay(selectedGame,t_Launch);
-					}
+
+					// start selectedGame with launcherUI-loop
+					startGBGame(selectedGame,t_Launch,withTrainRights);
+
 					t_Launch.launcherState = LaunchTask.IDLE;
 					break;
 				case EXITSELECTOR:
@@ -147,217 +121,42 @@ public class GBGLaunch {
 				
 			}
 		} else {
+
 			// start selectedGame without launcherUI-loop
-			startGBGameTrain(selectedGame,null);
+			startGBGame(selectedGame,null,withTrainRights);
+
 		}
 
 	}
 
 	/**
-	 * Start a game with train rights 
-	 * @param selectedGame	the game
-	 * @param t_Launch		the launcher
+	 * Start a game with or without train rights
+	 * @param selectedGame		the game name
+	 * @param t_Launch			the launcher
+	 * @param withTrainRights	whether Arena is trainable or not
+	 *
+	 * @see SetupGBG
 	 */
-	private static void startGBGameTrain(String selectedGame, GBGLaunch t_Launch) {
-		String title = "General Board Game Playing";
+	private static void startGBGame(String selectedGame, GBGLaunch t_Launch, boolean withTrainRights) {
+		String x, title = "General Board Game Playing";
 		String[] scaPar = new String[3];
 		for (int i=0; i<3; i++) scaPar[i]="";
 		if (t_Launch==null) {
-			scaPar = setDefaultScaPars();
+			scaPar = setDefaultScaPars(selectedGame);
 		} else {
-			scaPar[0] = (String) t_Launch.choiceScaPar0.getSelectedItem();
-			scaPar[1] = (String) t_Launch.choiceScaPar1.getSelectedItem();
-			scaPar[2] = (String) t_Launch.choiceScaPar2.getSelectedItem();			
+			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when later using scaPar[i])
+			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
+			x = (String) t_Launch.choiceScaPar1.getSelectedItem(); if (x!=null) scaPar[1]=x;
+			x = (String) t_Launch.choiceScaPar2.getSelectedItem(); if (x!=null) scaPar[2]=x;
 		}
-		final boolean withUI = true;
-		switch(selectedGame) {
-		case "2048": 
-			t_Game = new ArenaTrain2048(title,withUI);
-			break;
-		case "Blackjack":
-				t_Game = new ArenaBlackJackTrain(title,withUI);
-				break;
-		case "ConnectFour":
-			t_Game = new ArenaTrainC4(title,withUI);
-			break;
-		case "Hex": 
-			// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaTrainHex, 
-			// which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			assert scaPar[0] != null;
-			ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
-			t_Game = new ArenaTrainHex(title,withUI);
-			break;
-		case "Nim": 
-			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
-			// ArenaTrainNim2P, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
-			t_Game = new ArenaTrainNim2P(title,withUI);
-			break;
-		case "Nim3P":
-			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor  
-			// ArenaNimTrainNim3P, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));	// Nim3P: always MaxMinus == HeapSize (!)
-			ArenaNim3P.setExtraRule(Boolean.parseBoolean(scaPar[2]));
-			t_Game = new ArenaTrainNim3P(title,withUI);				
-			break;
-		case "Othello": 
-			t_Game = new ArenaTrainOthello(title,withUI);
-			break;
-		case "Poker":
-			t_Game = new ArenaTrainPoker(title,withUI);
-			break;
-		case "KuhnPoker":
-				t_Game = new ArenaTrainKuhnPoker(title,withUI);
-				break;
-		case "RubiksCube":
-			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
-			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaTrainCube.setCubeType(scaPar[0]);
-			ArenaTrainCube.setBoardVecType(scaPar[1]);
-			ArenaTrainCube.setTwistType(scaPar[2]);
-			t_Game = new ArenaTrainCube(title,withUI);
-			break;
-		case "Sim": 
-			// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaTrainSim, 
-			// which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
-			ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
-			ArenaSim.setCoalition(scaPar[2]);
-			t_Game = new ArenaTrainSim(title,withUI);
-			break;
-		case "TicTacToe": 
-			t_Game = new ArenaTrainTTT(title,withUI);
-			break;
-		case "EWN":
-			ArenaTrainEWN.setConfig(scaPar[0]);
-			ArenaTrainEWN.setCellCoding(scaPar[1]);
-			ArenaTrainEWN.setRandomStartingPosition(scaPar[2]);
-			t_Game = new ArenaTrainEWN(title, withUI);
-			break;
-		case "Yavalath":
-			ArenaTrainYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
-			t_Game = new ArenaTrainYavalath(title,withUI);
-			break;
-		default: 
-			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
-			System.exit(1);
-		}
+
+		// SetupGBG.setupSelectedGame has the switch statement over all games:
+		t_Game = setupSelectedGame(selectedGame, scaPar, title,true,withTrainRights);
 
 		t_Game.setLauncherObj(t_Launch);
 		t_Game.init();
 	}
-	
-	/**
-	 * Start a game without train rights (just play)
-	 * @param selectedGame
-	 * @param t_Launch
-	 */
-	private static void startGBGamePlay(String selectedGame, GBGLaunch t_Launch) {
-		String title = "General Board Game Playing";
-		String[] scaPar = {"","",""};
-		for (int i=0; i<3; i++) scaPar[i]="";
-		if (t_Launch==null) {
-			scaPar = setDefaultScaPars();
-		} else {
-			scaPar[0] = (String) t_Launch.choiceScaPar0.getSelectedItem();
-			scaPar[1] = (String) t_Launch.choiceScaPar1.getSelectedItem();
-			scaPar[2] = (String) t_Launch.choiceScaPar2.getSelectedItem();			
-		}
-		final boolean withUI = true;
-		switch(selectedGame) {
-		case "2048": 
-			t_Game = new Arena2048(title,withUI);
-			break;
-		case "Blackjack":
-			t_Game = new ArenaBlackJack(title,withUI);
-			break;
-		case "ConnectFour":
-			t_Game = new ArenaC4(title,withUI);
-			break;
-		case "Hex": 
-			// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaHex, 
-			// which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
-			t_Game = new ArenaHex(title,withUI);
-			break;
-		case "Nim": 
-			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor  
-			// ArenaNim2P, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
-			t_Game = new ArenaNim2P(title,withUI);				
-			break;
-		case "Nim3P":
-			// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor  
-			// ArenaNim2P, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
-			ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
-			ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));	// Nim3P: always MaxMinus == HeapSize (!)
-			ArenaNim3P.setExtraRule(Boolean.parseBoolean(scaPar[2]));
-			t_Game = new ArenaNim3P(title,withUI);				
-			break;
-		case "Othello": 
-			t_Game = new ArenaOthello(title,withUI);
-			break;
-		case "Poker":
-			t_Game = new ArenaPoker(title,withUI);
-			break;
-		case "KuhnPoker":
-				t_Game = new ArenaKuhnPoker(title,withUI);
-				break;
-		case "RubiksCube":
-			// Set CubeConfig.{cubeType,boardVecType} *prior* to calling constructor  
-			// ArenaTrainCube, which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaTrainCube.setCubeType(scaPar[0]);
-			ArenaTrainCube.setBoardVecType(scaPar[1]);
-			t_Game = new ArenaTrainCube(title,withUI);		// ArenaCube still missing
-			break;
-		case "Sim": 
-			// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaSim, 
-			// which will directly call Arena's constructor where the game board and
-			// the Arena buttons are constructed 
-			ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
-			ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
-			ArenaSim.setCoalition(scaPar[2]);
-			t_Game = new ArenaSim(title,withUI);
-			break;
-		case "TicTacToe": 
-			t_Game = new ArenaTTT(title,withUI);
-			break;
-		case "EWN":
-			ArenaEWN.setConfig(scaPar[0]);
-			ArenaEWN.setCellCoding(scaPar[1]);
-			ArenaEWN.setRandomStartingPosition(scaPar[2]);
 
-			t_Game = new ArenaEWN(title, withUI);
-		case "Yavalath":
-			ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
-
-			t_Game = new ArenaYavalath(title,withUI);
-			break;
-		default:
-			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
-			System.exit(1);
-		}
-
-		t_Game.setLauncherObj(t_Launch);
-		t_Game.init();
-	}
-	
 	/**
 	 * creates the launcher UI
 	 */
@@ -373,7 +172,7 @@ public class GBGLaunch {
 		JLabel Blank = new JLabel(" "); // a little bit of space
 		JLabel  m_title = new JLabel("GBG Launcher", SwingConstants.CENTER);
 		m_title.setForeground(Color.black);
-		Font tFont = new Font("Arial", 1, Types.GUI_TITLEFONTSIZE);
+		Font tFont = new Font("Arial", Font.BOLD, Types.GUI_TITLEFONTSIZE);
 		m_title.setFont(tFont);
 		titlePanel.add(Blank);
 		titlePanel.add(m_title);
@@ -466,15 +265,18 @@ public class GBGLaunch {
 					public void actionPerformed(ActionEvent e)
 					{	
 						selectedGame = (String)choiceGame.getSelectedItem();
-						if (selectedGame.equals("Nim")) {
-							String heapSize = (String)choiceScaPar1.getSelectedItem();
-							int iHeapSize = Integer.parseInt(heapSize);
-							choiceScaPar2.removeAllItems();
-							if (iHeapSize==3) {
-								setScaPar2List(new int[]{2,3});	
-							} else {
-								setScaPar2List(new int[]{2,3,4,5});	
-								if (iHeapSize>5) choiceScaPar2.addItem(heapSize);								
+						if (selectedGame!=null) {
+							if (selectedGame.equals("Nim")) {
+								String heapSize = (String)choiceScaPar1.getSelectedItem();
+								assert heapSize!=null : "heapSize is null!";
+								int iHeapSize = Integer.parseInt(heapSize);
+								choiceScaPar2.removeAllItems();
+								if (iHeapSize==3) {
+									setScaPar2List(new int[]{2,3});
+								} else {
+									setScaPar2List(new int[]{2,3,4,5});
+									if (iHeapSize>5) choiceScaPar2.addItem(heapSize);
+								}
 							}
 						}
 					}
@@ -484,61 +286,21 @@ public class GBGLaunch {
 	}
 
 	/**
-	 * Set default values for the scalable parameters.
-	 * <p>
-	 * This is for the case where GBGLaunch is started with {@code args[0]=0}, which means "Start
-	 * the game directly, w/o launcher UI".
+	 * helper class for {@link GBGLaunch#GBGLaunch()}
 	 */
-	public static String[] setDefaultScaPars() {
-		String[] scaPar = new String[3];
-		switch(selectedGame) {
-		case "Hex": 
-			scaPar[0]="6";		// the initial (recommended) value	
-			break;
-		case "Nim": 
-			scaPar[0]="3";		// 	
-			scaPar[1]="5";		// the initial (recommended) values	
-			scaPar[2]="5";		// 
-			break;
-		case "Nim3P":
-			scaPar[0]="3";		// 	
-			scaPar[1]="5";		// the initial (recommended) values	
-			scaPar[2]="true";	// 
-			break;
-		case "Sim": 
-			scaPar[0]="2";		 	
-			scaPar[1]="6";			
-			scaPar[2]="None";			
-			break;
-		case "RubiksCube": 
-			scaPar[0]="2x2x2";		 	
-			scaPar[1]="STICKER2";
-			scaPar[2]="ALL";
-		case "EWN":
-			scaPar[0] = "3x3 2-Player";
-			scaPar[1] = "N-Player + 1";
-		case "2048":
-		case "Blackjack":
-		case "ConnectFour":
-		case "Othello":
-		case "Poker":
-		case "KuhnPoker":
-		case "TicTacToe":
-			//
-			// games with no scalable parameters
-			//
-			scaPar[0]=scaPar[1]=scaPar[2]="";
-			break;
-		case "Yavalath":
-			scaPar[0] = "2";
-			break;
-		default: 
-			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
-			System.exit(1);
+	protected static class WindowClosingAdapter
+			extends WindowAdapter
+	{
+		public WindowClosingAdapter()  {  }
+
+		public void windowClosing(WindowEvent event)
+		{
+			event.getWindow().setVisible(false);
+			event.getWindow().dispose();
+			System.exit(0);
 		}
-		return scaPar;
 	}
-	
+
 	/**
 	 * Adjust the scalable parameters of a game after the game selector has changed.
 	 */
@@ -605,7 +367,7 @@ public class GBGLaunch {
 			break;
 		case "EWN":
 			scaPar0_L.setText("Settings:");
-			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
+			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","4x4 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
 			scaPar1_L.setText("Position values:");
 			setScaPar1List(new String[]{"[0,..,n]", "[0,1],[2,3],[4,5]"});
@@ -633,7 +395,13 @@ public class GBGLaunch {
 			break;
 		case "Yavalath":
 			scaPar0_L.setText("Players");
-			setScaPar0List(new int[]{2,3});
+			scaPar1_L.setText("Board Size");
+			setScaPar0List(new String[]{ "2","3"});
+			setScaPar1List(new String[]{ "3","4","5","6"});
+			choiceScaPar0.setSelectedItem("2");
+			choiceScaPar1.setSelectedItem("5");
+			scaPar0_L.setToolTipText("Number of players");
+			scaPar1_L.setToolTipText("Size of the board game (Meaning length of its edge)");
 			break;
 		default: 
 			System.err.println("[GBGLaunch] "+selectedGame+": This game is unknown.");
@@ -685,32 +453,18 @@ public class GBGLaunch {
 			choiceScaPar2.addItem(s);
 	}
 
-	public void setScaPar1Tooltip(String str) {
-		choiceScaPar0.setToolTipText(str);
-	}
+	//
+	// *TODO*
+	//
 
-	public void setScaPar2Tooltip(String str) {
+	public void setScaPar0Tooltip(String str) { choiceScaPar0.setToolTipText(str); }
+
+	public void setScaPar1Tooltip(String str) {
 		choiceScaPar1.setToolTipText(str);
 	}
 
-	public void setScaPar3Tooltip(String str) {
+	public void setScaPar2Tooltip(String str) {
 		choiceScaPar2.setToolTipText(str);
-	}
-
-	/**
-	 * helper class for {@link GBGLaunch#GBGLaunch()}
-	 */
-	protected static class WindowClosingAdapter
-	extends WindowAdapter
-	{
-		public WindowClosingAdapter()  {  }
-
-		public void windowClosing(WindowEvent event)
-		{
-			event.getWindow().setVisible(false);
-			event.getWindow().dispose();
-			System.exit(0);
-		}
 	}
 
 }

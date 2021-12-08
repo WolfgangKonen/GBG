@@ -22,8 +22,8 @@ public class notes
          *
          * Kette der Vererbung/Aufrufe:
          * @see LaunchTrainTTT // Startpunkt TTT
-         * @see games.TicTacToe.ArenaTrainTTT
-         * @see games.ArenaTrain
+         * @see games.TicTacToe.ArenaTTT
+         * @see games.Arena
          * @see Arena // Arenacode und Gameloop
          *
          * @see XArenaMenu // TopMenu der GUI

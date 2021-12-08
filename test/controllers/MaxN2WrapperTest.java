@@ -4,13 +4,14 @@ import starters.GBGBatch;
 import games.RubiksCube.GameBoardCube;
 import games.StateObservation;
 import org.junit.Test;
+import starters.SetupGBG;
 import tools.Types;
 
 public class MaxN2WrapperTest extends GBGBatch {
     String selectedGame = "RubiksCube";
     String[] agtFile = {"davi2-p11-2000k.agt.zip","davi3-p11-2000k-120-7t-BASE.agt.zip","TCL3-p13-3000k-120-7t.agt.zip"};
     String[] agtType = {"DAVI2", "DAVI3","TDNT3"};
-    String[] scaPar = GBGBatch.setDefaultScaPars(selectedGame);     // for RubiksCube: 2x2x2, CSTATE, ALL
+    String[] scaPar = {"2x2x2","CSTATE","ALL"};
 
     /**
      * Calling MaxN2Wrapper with nPly=0 should result in the same best values as calling the wrapped agent directly.
@@ -25,7 +26,7 @@ public class MaxN2WrapperTest extends GBGBatch {
         int nStates=100;
         Types.ACTIONS_VT act_pa, act_qa;
 
-        arenaTrain = GBGBatch.setupSelectedGame(selectedGame,scaPar);
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardCube gb = new GameBoardCube(arenaTrain);		// needed for chooseStartState()
 
         for (int k=0; k< agtType.length; k++) {

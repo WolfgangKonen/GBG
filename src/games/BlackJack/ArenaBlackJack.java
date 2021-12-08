@@ -7,13 +7,16 @@ import games.Arena;
 import games.Evaluator;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import java.util.ArrayList;
 
 public class ArenaBlackJack extends Arena {
 
 
     public ArenaBlackJack(String title, boolean withUI) {
         super(title, withUI);
+    }
+
+    public ArenaBlackJack(String title, boolean withUI, boolean withTrainRights) {
+        super(title,withUI,withTrainRights);
     }
 
     /**
@@ -52,10 +55,8 @@ public class ArenaBlackJack extends Arena {
         return new EvaluatorBlackJack(pa, gb, mode, stopEval, verbose);
     }
 
-    @Override
-    public void performArenaDerivedTasks() {
-        // TODO Auto-generated method stub
-    }
+//    @Override
+//    public void performArenaDerivedTasks() {}
 
     /**
      * Factory pattern method: make a new XNTupleFuncs (needed for TD-Agents)
@@ -73,7 +74,7 @@ public class ArenaBlackJack extends Arena {
     /**
      * Start GBG for BlackJack (non-trainable version)
      *
-     * @param args
+     * @param args  CLI arguments
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {

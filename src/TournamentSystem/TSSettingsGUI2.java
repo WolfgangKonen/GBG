@@ -3,7 +3,6 @@ package TournamentSystem;
 import TournamentSystem.tools.TSDiskAgentDataTransfer;
 import controllers.*;
 import games.Arena;
-import games.ArenaTrain;
 import games.XArenaMenu;
 
 import javax.swing.*;
@@ -222,7 +221,7 @@ public class TSSettingsGUI2 extends JFrame {
         saveResultsToDiskButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (mArena.taskState != ArenaTrain.Task.IDLE) {
+                if (mArena.taskState != Arena.Task.IDLE) {
                     System.out.println(TAG + "ERROR :: ARENA is not IDLE, cannot save tournament, aborting");
                     JOptionPane.showMessageDialog(null, "ERROR: Arena not IDLE");
                     return;
@@ -245,7 +244,7 @@ public class TSSettingsGUI2 extends JFrame {
         loadResultsFromDiskButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (mArena.taskState != ArenaTrain.Task.IDLE) {
+                if (mArena.taskState != Arena.Task.IDLE) {
                     System.out.println(TAG + "ERROR :: ARENA is not IDLE, cannot load tournament, aborting");
                     return;
                 }
@@ -336,7 +335,7 @@ public class TSSettingsGUI2 extends JFrame {
      * loads previously saved agents from disk into the tournament system
      */
     private void loadAgentsFromDisk() {
-        if (mArena.taskState != ArenaTrain.Task.IDLE) {
+        if (mArena.taskState != Arena.Task.IDLE) {
             System.out.println(TAG + "ERROR :: ARENA is not IDLE, dont try to change data while its working, aborting");
             return;
         }
@@ -393,7 +392,7 @@ public class TSSettingsGUI2 extends JFrame {
      * Prepares the set data for the tournament and starts it in {@link Arena} by changing the TastState
      */
     private void playPressed() {
-        if (mArena.taskState != ArenaTrain.Task.IDLE) {
+        if (mArena.taskState != Arena.Task.IDLE) {
             System.out.println(TAG + "ERROR :: ARENA is not IDLE, cannot start tournament, aborting");
             return;
         }
@@ -475,13 +474,13 @@ public class TSSettingsGUI2 extends JFrame {
         }
         mTSAgentManager.printGamePlan();
 
-        if (mArena.taskState != ArenaTrain.Task.IDLE) {
+        if (mArena.taskState != Arena.Task.IDLE) {
             System.out.println(TAG + "ERROR :: could not start Tourmenent, Arena is not IDLE");
         } else {
             if (numPlayers > 1) {
                 // hand over data
                 mArena.tournamentAgentManager = mTSAgentManager;
-                mArena.taskState = ArenaTrain.Task.TRNEMNT;
+                mArena.taskState = Arena.Task.TRNEMNT;
             } else {
                 // single player TS...
                 mTSAgentManager.runSinglePlayerTournament(mArena);

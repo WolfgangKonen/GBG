@@ -11,13 +11,13 @@ public class CubeConfig {
 	 * <li> <b>POCKET</b>: 2x2x2 pocket cube
 	 * <li> <b>RUBIKS</b>: 3x3x3 Rubik's cube 		
 	 * </ul>
-	 * @see ArenaTrainCube#setCubeType(String)
+	 * @see ArenaCube#setCubeType(String)
 	 * 
 	 */
 	public static enum CubeType {POCKET,RUBIKS}
 
 	/**
-	 * @see ArenaTrainCube#setCubeType(String) 
+	 * @see ArenaCube#setCubeType(String)
 	 */
 	public static CubeType cubeType = CubeType.POCKET;
 	
@@ -29,7 +29,7 @@ public class CubeConfig {
 	 * <li> <b>STICKER</b>: the sticker representation in one-hot encoding (7*7 cells for 2x2x2)
 	 * <li> <b>STICKER2</b>: the sticker representation in compact encoding (7*2 cells for 2x2x2)
 	 * </ul>
-	 * @see ArenaTrainCube#setBoardVecType(String)
+	 * @see ArenaCube#setBoardVecType(String)
 	 */
 	public enum BoardVecType {CUBESTATE, CUBEPLUSACTION, STICKER, STICKER2}
 	
@@ -37,7 +37,7 @@ public class CubeConfig {
 	 * {@link BoardVecType} {@code boardVecType} holds the board vector type for all {@link CubeState} objects and 
 	 * is used in {@link CubeState#getBoardVector()} and in {@link XNTupleFuncsCube}.
 	 * 
-	 * @see ArenaTrainCube#setBoardVecType(String) 
+	 * @see ArenaCube#setBoardVecType(String)
 	 */
 	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;		// CUBESTATE, CUBEPLUSACTION, STICKER
 
@@ -47,7 +47,7 @@ public class CubeConfig {
 	 * <li> <b>ALLTWISTS</b>: all twists, quarter and half twists (i.e. U1, U2, U3)
 	 * <li> <b>QUARTERTWISTS</b>: only quarter twists (i.e. U1, U3) 		
 	 * </ul>
-	 * @see ArenaTrainCube#setTwistType(String)
+	 * @see ArenaCube#setTwistType(String)
 	 */
 	public enum TwistType {ALLTWISTS, QUARTERTWISTS}
 	public static TwistType twistType = TwistType.ALLTWISTS;

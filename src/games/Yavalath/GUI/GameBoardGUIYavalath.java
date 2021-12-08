@@ -1,10 +1,8 @@
 package games.Yavalath.GUI;
 
 import games.Arena;
-import games.Yavalath.GameBoardYavalath;
-import games.Yavalath.StateObserverYavalath;
-import games.Yavalath.TileYavalath;
-import games.Yavalath.UtilityFunctionsYavalath;
+import games.Hex.HexUtils;
+import games.Yavalath.*;
 import tools.Types;
 
 import javax.swing.*;
@@ -15,13 +13,14 @@ import java.awt.event.MouseEvent;
 import static games.Yavalath.ConfigYavalath.*;
 
 public class GameBoardGUIYavalath {
+    static Color COLOR_PLAYER_ZERO = Color.BLACK;
     static Color COLOR_PLAYER_ONE = Color.WHITE;
-    static Color COLOR_PLAYER_TWO = Color.BLACK;
-    final static Color COLOR_PLAYER_THREE = Color.RED;
+    final static Color COLOR_PLAYER_TWO = Color.BLUE;
     final static Color CELL_BACKGROUND = Color.YELLOW;
     final static Color CELL_LINING = Color.ORANGE;
     final static Color BACKGROUND_COLOR = Color.GRAY;
 
+    //TODO: Adjust window size based on board size
     private int WINDOW_HEIGHT;
     private int WINDOW_WIDTH;
 
@@ -82,8 +81,8 @@ public class GameBoardGUIYavalath {
     }
 
     public void clearBoard(boolean boardClear, boolean vClear) {
-        COLOR_PLAYER_ONE = Color.white;
-        COLOR_PLAYER_TWO = Color.black;
+        COLOR_PLAYER_ZERO = Color.BLACK;
+        COLOR_PLAYER_ONE = Color.WHITE;
         frame.repaint();
     }
 
@@ -111,39 +110,39 @@ public class GameBoardGUIYavalath {
             //Draw all the individual cells
             for (TileYavalath[] x : gb.m_so.getGameBoard()) {
                 for (TileYavalath y : x) {
-                    if (y.getPlayer() != INVALID_FIELD) {
+                    if(y.getPlayer() == EMPTY){
+                        g2.setColor(calculateTileColor(y,drawValues));
+                        g2.fillPolygon(y.getPoly());
+                        g2.setColor(CELL_LINING);
+                        g2.drawPolygon(y.getPoly());
+                        if(y.getThreateningMove()) threateningMove = y;
+                    } else if(y.getPlayer() == PLAYER_ZERO || y.getPlayer() == PLAYER_ONE || y.getPlayer() == PLAYER_TWO){
                         g2.setColor(CELL_BACKGROUND);
                         g2.fillPolygon(y.getPoly());
                         g2.setColor(CELL_LINING);
-                        if(y.getThreateningMove()) threateningMove = y;
                         g2.drawPolygon(y.getPoly());
 
-                        if (y.getPlayer() == PLAYER_ONE || y.getPlayer() == PLAYER_TWO ||
-                                y.getPlayer() == PLAYER_THREE) {
-                            if (y.getPlayer() == PLAYER_ONE) g2.setColor(COLOR_PLAYER_ONE);
-                            else if (y.getPlayer() == PLAYER_TWO) g2.setColor(COLOR_PLAYER_TWO);
-                            else if (y.getPlayer() == PLAYER_THREE) g2.setColor(COLOR_PLAYER_THREE);
-                            g2.fillOval(y.getTileCenter().x - GAME_PIECE_RADIUS,
-                                    y.getTileCenter().y - GAME_PIECE_RADIUS, GAME_PIECE_RADIUS * 2,
-                                    GAME_PIECE_RADIUS * 2);
-                        }
-
-                        //Draw the values for the individual cells
-                        if (drawValues) {
-                            Double value;
-                            value = y.getValue();
-                            if (Double.isNaN(value)) continue;
-                            String tileValueText = Long.toString(Math.round(value * 1000));
-                            g2.setColor(Color.RED);
-                            g2.drawString(tileValueText, y.getTileCenter().x - GAME_PIECE_RADIUS / 2, y.getTileCenter().y);
-                        }
+                        //Draw game-piece
+                        if(y.getPlayer() == PLAYER_ZERO) g2.setColor(COLOR_PLAYER_ZERO);
+                        else if(y.getPlayer() == PLAYER_ONE) g2.setColor(COLOR_PLAYER_ONE);
+                        else if(y.getPlayer() == PLAYER_TWO) g2.setColor(COLOR_PLAYER_TWO);
+                        g2.fillOval(y.getTileCenter().x - GAME_PIECE_RADIUS,
+                                y.getTileCenter().y - GAME_PIECE_RADIUS, GAME_PIECE_RADIUS * 2,
+                                GAME_PIECE_RADIUS * 2);
+                    }
+                    if(y.getPlayer() != INVALID_FIELD && drawValues){
+                        Double value = y.getValue();
+                        if (Double.isNaN(value)) continue;
+                        String tileValueText = Long.toString(Math.round(value * 1000));
+                        g2.setColor(Color.GRAY);
+                        g2.drawString(tileValueText, y.getTileCenter().x - GAME_PIECE_RADIUS / 2, y.getTileCenter().y);
                     }
                 }
             }
             //Mark the game-piece that was last placed on the board
             if(gb.m_so.getMoveList().size() > 0){
                 TileYavalath lastPlayed = gb.m_so.getMoveList().get(0);
-                g2.setColor(Color.BLUE);
+                g2.setColor(Color.RED);
                 g2.setStroke(new BasicStroke(2));
                 g2.drawOval(lastPlayed.getTileCenter().x - GAME_PIECE_RADIUS,
                         lastPlayed.getTileCenter().y - GAME_PIECE_RADIUS, GAME_PIECE_RADIUS * 2,
@@ -177,19 +176,39 @@ public class GameBoardGUIYavalath {
                 TileYavalath clickedTile = UtilityFunctionsYavalath.clickedTile(clicked, gb.m_so.getGameBoard());
                 if (clickedTile == null) return;
 
-                Types.ACTIONS humanMove = new Types.ACTIONS(clickedTile.getX()*BOARD_SIZE + clickedTile.getY());
+                Types.ACTIONS humanMove = new Types.ACTIONS(clickedTile.getX()* getMaxRowLength() + clickedTile.getY());
                 gb.HGameMove(humanMove);
                 updateBoard(null, false, false);
             }
+        }
+
+        /**
+         * Calculates the color for a tile, depending on if its player owned or not.
+         * If it isn't it gets a color gradient depending on the value of the tile (Uses the same method that Hex does).
+         *
+         * @param tile The tile to calculate the color for.
+         * @param showValues Whether tile values should be visible.
+         */
+        private Color calculateTileColor(TileYavalath tile, boolean showValues){
+            if(tile.getPlayer() == PLAYER_ZERO){
+                return COLOR_PLAYER_ZERO;
+            } else if(tile.getPlayer() == PLAYER_ONE){
+                return COLOR_PLAYER_ONE;
+            } else if (tile.getPlayer() == PLAYER_TWO){
+                return COLOR_PLAYER_TWO;
+            } else if (showValues && !Double.isNaN(tile.getValue())){
+                return HexUtils.calculateTileColor(tile.getValue());
+            }
+            return CELL_BACKGROUND;
         }
     }
 
     public class InfoPanel extends JPanel{
 
         private JLabel turn;
+        private JLabel playerZeroColor;
         private JLabel playerOneColor;
         private JLabel playerTwoColor;
-        private JLabel playerThreeColor;
         private JLabel swapRuleLabel;
         private JButton swapRuleButton;
 
@@ -199,14 +218,14 @@ public class GameBoardGUIYavalath {
             turn = new JLabel();
             turn.setFont(font);
 
+            playerZeroColor = new JLabel();
+            playerZeroColor.setFont(font);
+
             playerOneColor = new JLabel();
             playerOneColor.setFont(font);
 
             playerTwoColor = new JLabel();
             playerTwoColor.setFont(font);
-
-            playerThreeColor = new JLabel();
-            playerThreeColor.setFont(font);
 
             swapRuleLabel = new JLabel("Swap Rule Available!");
             swapRuleLabel.setFont(font);
@@ -216,8 +235,8 @@ public class GameBoardGUIYavalath {
             swapRuleButton.setVisible(false);
             swapRuleButton.addActionListener(e -> {
                 gb.useSwapRule();
-                COLOR_PLAYER_ONE = Color.BLACK;
-                COLOR_PLAYER_TWO = Color.WHITE;
+                COLOR_PLAYER_ZERO = Color.BLACK;
+                COLOR_PLAYER_ONE = Color.WHITE;
             });
 
             setBackground(BACKGROUND_COLOR);
@@ -226,9 +245,9 @@ public class GameBoardGUIYavalath {
             add(new JLabel(""));
             add(turn);
             add(new JLabel(""));
+            add(playerZeroColor);
             add(playerOneColor);
             add(playerTwoColor);
-            add(playerThreeColor);
             add(swapRuleLabel);
             add(swapRuleButton);
 
@@ -245,16 +264,22 @@ public class GameBoardGUIYavalath {
 
             switch (gb.m_so.getPlayer()) {
                 case 0 -> {
-                    turn.setForeground(COLOR_PLAYER_ONE);
-                    turn.setText("Player 1 to move");
+                    turn.setForeground(COLOR_PLAYER_ZERO);
+                    switch (ConfigYavalath.getPlayers()){
+                        case 2 ->turn.setText("Player X to move");
+                        case 3 ->turn.setText("Player 0 to move");
+                    }
                 }
                 case 1 -> {
-                    turn.setForeground(COLOR_PLAYER_TWO);
-                    turn.setText("Player 2 to move");
+                    turn.setForeground(COLOR_PLAYER_ONE);
+                    switch (ConfigYavalath.getPlayers()){
+                        case 2 -> turn.setText("Player O to move");
+                        case 3 -> turn.setText("Player 1 to move");
+                    }
                 }
                 case 2 -> {
-                    turn.setForeground(COLOR_PLAYER_THREE);
-                    turn.setText("Player 3 to move");
+                    turn.setForeground(COLOR_PLAYER_TWO);
+                    turn.setText("Player 2 to move");
                 }
             }
 
@@ -263,25 +288,39 @@ public class GameBoardGUIYavalath {
 
             if(gb.m_so.swapRuleUsed()) swapRuleLabel.setText("Swap Rule was used!");
 
-            if(COLOR_PLAYER_ONE == Color.WHITE){
-                playerOneColor.setText("Player 1 is WHITE");
-                playerOneColor.setForeground(Color.WHITE);
-            }else if(COLOR_PLAYER_ONE == Color.BLACK){
-                playerOneColor.setText("Player 1 is BLACK");
+            if(COLOR_PLAYER_ZERO == Color.WHITE){
+                switch (ConfigYavalath.getPlayers()){
+                    case 2 -> playerZeroColor.setText("Player X is WHITE");
+                    case 3 -> playerZeroColor.setText("Player 0 is WHITE");
+                }
+                playerZeroColor.setForeground(Color.WHITE);
+
+            }else if(COLOR_PLAYER_ZERO == Color.BLACK){
+                switch (ConfigYavalath.getPlayers()){
+                    case 2 -> playerZeroColor.setText("Player X is BLACK");
+                    case 3 -> playerZeroColor.setText("Player 0 is BLACK");
+                }
+                playerZeroColor.setForeground(Color.BLACK);
+            }
+
+            if(COLOR_PLAYER_ONE == Color.BLACK){
+                switch(ConfigYavalath.getPlayers()){
+                    case 2 -> playerOneColor.setText("Player O is BLACK");
+                    case 3 -> playerOneColor.setText("Player 1 is BLACK");
+                }
                 playerOneColor.setForeground(Color.BLACK);
+
+            }else if(COLOR_PLAYER_ONE == Color.WHITE){
+                switch(ConfigYavalath.getPlayers()){
+                    case 2 -> playerOneColor.setText("Player O is WHITE");
+                    case 3 -> playerOneColor.setText("Player 1 is WHITE");
+                }
+                playerOneColor.setForeground(Color.WHITE);
             }
 
-            if(COLOR_PLAYER_TWO == Color.BLACK){
-                playerTwoColor.setText("Player 2 is BLACK");
-                playerTwoColor.setForeground(Color.BLACK);
-            }else if(COLOR_PLAYER_TWO == Color.WHITE){
-                playerTwoColor.setText("Player 2 is WHITE");
-                playerTwoColor.setForeground(Color.WHITE);
-            }
-
-            playerThreeColor.setText("Player 3 is RED");
-            playerThreeColor.setForeground(COLOR_PLAYER_THREE);
-            playerThreeColor.setVisible(gb.m_so.getNumPlayers() == 3);
+            playerTwoColor.setText("Player 2 is BLUE");
+            playerTwoColor.setForeground(COLOR_PLAYER_TWO);
+            playerTwoColor.setVisible(gb.m_so.getNumPlayers() == 3);
 
         }
 

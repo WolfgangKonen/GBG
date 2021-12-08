@@ -233,10 +233,8 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
         return HexConfig.REWARD_POSITIVE;
     }
 
-    @Override
-    public String getName() {
-        return "Hex";
-    }
+    // --- obsolete, use Arena().getGameName() instead
+//    public String getName() {return "Hex";}
 
     @Override
     public void advance(Types.ACTIONS action) {

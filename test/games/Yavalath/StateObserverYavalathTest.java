@@ -59,7 +59,7 @@ public class StateObserverYavalathTest {
         for(int x:actions){
             soYav2P.advance(new Types.ACTIONS(x));
         }
-        assert soYav2P.getWinner() == PLAYER_ONE;
+        assert soYav2P.getWinner() == PLAYER_ZERO;
     }
 
     public void winCondition2PlayersPlayerTwo(){
@@ -70,7 +70,7 @@ public class StateObserverYavalathTest {
         for(int x:actions){
             soYav2P.advance(new Types.ACTIONS(x));
         }
-        assert soYav2P.getWinner() == PLAYER_TWO;
+        assert soYav2P.getWinner() == PLAYER_ONE;
     }
 
     @Test
@@ -83,7 +83,7 @@ public class StateObserverYavalathTest {
             soYav3P.advance(new Types.ACTIONS(x));
         }
         assert soYav3P.isGameOver();
-        assert soYav3P.getWinner() == PLAYER_ONE;
+        assert soYav3P.getWinner() == PLAYER_ZERO;
     }
 
     private void lossCondition2PlayersPlayerOne(){
@@ -94,7 +94,7 @@ public class StateObserverYavalathTest {
         for (int x:actions){
             soYav2P.advance(new Types.ACTIONS(x));
         }
-        assert soYav2P.getLoser() == PLAYER_ONE;
+        assert soYav2P.getLoser() == PLAYER_ZERO;
     }
 
     private void lossCondition2PlayersPlayerTwo(){
@@ -105,7 +105,7 @@ public class StateObserverYavalathTest {
         for (int x:actions){
             soYav2P.advance(new Types.ACTIONS(x));
         }
-        assert soYav2P.getLoser() == PLAYER_TWO;
+        assert soYav2P.getLoser() == PLAYER_ONE;
     }
 
     @Test
@@ -118,12 +118,12 @@ public class StateObserverYavalathTest {
         for (int x : actions){
             soYav3P.advance(new Types.ACTIONS(x));
         }
-        assert soYav3P.getLoser() == PLAYER_ONE;
+        assert soYav3P.getLoser() == PLAYER_ZERO;
 
         //Player 2 also loses, game should be over
         soYav3P.advance(new Types.ACTIONS(11));
         assert soYav3P.isGameOver();
-        assert soYav3P.getWinner() == PLAYER_THREE;
+        assert soYav3P.getWinner() == PLAYER_TWO;
 
     }
 
@@ -157,7 +157,7 @@ public class StateObserverYavalathTest {
             soYav3P.advance(new Types.ACTIONS(x));
         }
 
-        assert soYav3P.getLoser() == PLAYER_ONE;
+        assert soYav3P.getLoser() == PLAYER_ZERO;
         assert soYav3P.isTie();
         assert soYav3P.isGameOver();
 

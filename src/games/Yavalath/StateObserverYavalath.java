@@ -2,6 +2,7 @@ package games.Yavalath;
 
 import games.ObserverBase;
 import games.StateObservation;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.io.Serializable;
@@ -42,7 +43,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     private TileYavalath[][] board;
     private int currentPlayer;
     private boolean swapRuleUsed = false;
-    private int numPlayers = PLAYERS;
+    private int numPlayers = getPlayers();
     private GameInformation information;
     private ArrayList <TileYavalath> moveList;
 
@@ -56,7 +57,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     public StateObserverYavalath(){
         super();
         board = setDefaultGameBoard();
-        currentPlayer = PLAYER_ONE;
+        currentPlayer = PLAYER_ZERO;
         setAvailableActions();
         information = new GameInformation(numPlayers);
         moveList = new ArrayList<>();
@@ -64,7 +65,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
 
     public StateObserverYavalath(StateObserverYavalath stateObserverYavalath) {
         super(stateObserverYavalath);
-        this.board = new TileYavalath[BOARD_SIZE][BOARD_SIZE];
+        this.board = new TileYavalath[getMaxRowLength()][getMaxRowLength()];
         this.board = UtilityFunctionsYavalath.copyBoard(stateObserverYavalath.getGameBoard());
         this.currentPlayer = stateObserverYavalath.currentPlayer;
         this.numPlayers = stateObserverYavalath.numPlayers;
@@ -80,11 +81,11 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
      * Creates a new game board with empty or invalid tiles depending on how they are used.
      */
     public TileYavalath[][] setDefaultGameBoard() {
-        TileYavalath[][] newBoard = new TileYavalath[BOARD_SIZE][BOARD_SIZE];
+        TileYavalath[][] newBoard = new TileYavalath[getMaxRowLength()][getMaxRowLength()];
 
-        for(int i=0;i<BOARD_SIZE;i++){
-            for(int j=0;j<BOARD_SIZE;j++){
-                if (Math.abs(j-i)<BOARD_LENGTH){
+        for(int i = 0; i< getMaxRowLength(); i++){
+            for(int j = 0; j< getMaxRowLength(); j++){
+                if (Math.abs(j-i)< getBoardSize()){
                     newBoard[i][j] = new TileYavalath(i,j, EMPTY);
                 }
                 else {
@@ -98,10 +99,10 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     @Override
     public ArrayList<Types.ACTIONS> getAllAvailableActions() {
         ArrayList<Types.ACTIONS> allActions = new ArrayList<>();
-        for(int i=0;i<BOARD_SIZE;i++){
-            for(int j=0;j<BOARD_SIZE;j++){
-                if(Math.abs(j-i)<BOARD_LENGTH){
-                    int actionInt = i*BOARD_SIZE+j;
+        for(int i = 0; i< getMaxRowLength(); i++){
+            for(int j = 0; j< getMaxRowLength(); j++){
+                if(Math.abs(j-i)< getBoardSize()){
+                    int actionInt = i* getMaxRowLength() +j;
                     allActions.add(new Types.ACTIONS(actionInt));
                 }
             }
@@ -137,10 +138,10 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
             }
         }
 
-        for(int i=0;i<BOARD_SIZE;i++){
-            for(int j=0;j<BOARD_SIZE;j++){
-                if(Math.abs(j-i)<BOARD_LENGTH && board[i][j].getPlayer() == EMPTY){
-                    int actionInt = i*BOARD_SIZE+j;
+        for(int i = 0; i< getMaxRowLength(); i++){
+            for(int j = 0; j< getMaxRowLength(); j++){
+                if(Math.abs(j-i)< getBoardSize() && board[i][j].getPlayer() == EMPTY){
+                    int actionInt = i* getMaxRowLength() +j;
                     availableActions.add(new Types.ACTIONS(actionInt));
                     }
                 }
@@ -148,7 +149,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
             //If only the first piece has been placed, swap rule is available and the just executed action needs to be added to
             //the list of available actions again
         if(getMoveCounter()==1 && numPlayers == 2){
-            availableActions.add(new Types.ACTIONS(moveList.get(0).getX()*BOARD_SIZE+moveList.get(0).getY()));
+            availableActions.add(new Types.ACTIONS(moveList.get(0).getX()* getMaxRowLength() +moveList.get(0).getY()));
         }
 
     }
@@ -166,8 +167,8 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         this.advanceBase(action);
         int actionInt = action.toInt();
 
-        int j = actionInt % BOARD_SIZE;
-        int i = (actionInt-j) / BOARD_SIZE;
+        int j = actionInt % getMaxRowLength();
+        int i = (actionInt-j) / getMaxRowLength();
 
         if (board[i][j].getPlayer() != EMPTY && board[i][j].getPlayer() != INVALID_FIELD){
             if(super.m_counter == 1){
@@ -201,7 +202,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     }
 
     private void advance(TileYavalath tile){
-        Types.ACTIONS action = new Types.ACTIONS(tile.getX()*BOARD_SIZE+tile.getY());
+        Types.ACTIONS action = new Types.ACTIONS(tile.getX()* getMaxRowLength() +tile.getY());
         advance(action);
     }
 
@@ -223,7 +224,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
      */
     @Override
     public double getGameScore(int player) {
-        return information.getGameScores()[player];
+        return information.getGameScores().scTup[player];
     }
 
     @Override
@@ -236,10 +237,8 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         return POSITIVE_REWARD;
     }
 
-    @Override
-    public String getName() {
-        return "Yavalath";
-    }
+    // --- obsolete, use Arena().getGameName() instead
+//    public String getName() {return "Yavalath";}
 
     @Override
     public StateObserverYavalath copy() {
@@ -289,11 +288,11 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
 
         for (TileYavalath[] tileRow:board) {
             for(TileYavalath tile:tileRow){
-                if(tile.getPlayer() == PLAYER_ONE){
+                if(tile.getPlayer() == PLAYER_ZERO){
                     playerOneTiles++;
-                } else if(tile.getPlayer()==PLAYER_TWO){
+                } else if(tile.getPlayer()== PLAYER_ONE){
                     playerTwoTiles++;
-                } else if(tile.getPlayer() == PLAYER_THREE){
+                } else if(tile.getPlayer() == PLAYER_TWO){
                     playerThreeTiles++;
                 }
             }
@@ -310,7 +309,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     }
 
     private boolean legalState2P(int playerOneTiles, int playerTwoTiles){
-        if(currentPlayer == PLAYER_ONE){
+        if(currentPlayer == PLAYER_ZERO){
             if(swapRuleUsed){
                 return (playerTwoTiles-1 == playerOneTiles);
             } else{
@@ -326,7 +325,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     }
 
     private boolean legalState3P(int playerOneTiles, int playerTwoTiles, int playerThreeTiles){
-        if(currentPlayer == PLAYER_ONE){
+        if(currentPlayer == PLAYER_ZERO){
             switch(information.loser){
                 case -1 -> {
                     return (playerOneTiles == playerTwoTiles && playerOneTiles == playerThreeTiles);
@@ -341,7 +340,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
                     return (playerOneTiles == playerTwoTiles);
                 }
             }
-        }else if(currentPlayer == PLAYER_TWO){
+        }else if(currentPlayer == PLAYER_ONE){
             switch(information.loser){
                 case -1 -> {
                     return (playerOneTiles-1 == playerTwoTiles && playerOneTiles-1 == playerThreeTiles);
@@ -384,9 +383,9 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     public String stringDescr() {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            sb.append(" ".repeat(BOARD_SIZE - i));
-            for (int j = 0; j < BOARD_SIZE; j++) {
+        for (int i = 0; i < getMaxRowLength(); i++) {
+            sb.append(" ".repeat(getMaxRowLength() - i));
+            for (int j = 0; j < getMaxRowLength(); j++) {
                 switch (board[i][j].getPlayer()) {
                     case -2 -> sb.append("  ");
                     case -1 -> sb.append("_ ");
@@ -408,14 +407,14 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         for(int i=0;i<getNumAvailableActions();i++){
             double value = valueTable[i];
             int actionInt = getAction(i).toInt();
-            int y = actionInt%BOARD_SIZE, x= (actionInt-y)/BOARD_SIZE;
+            int y = actionInt% getMaxRowLength(), x= (actionInt-y)/ getMaxRowLength();
             board[x][y].setValue(value);
         }
     }
 
     public void clearValues(){
-        for(int i=0;i<BOARD_SIZE;i++){
-            for(int j=0;j<BOARD_SIZE;j++){
+        for(int i = 0; i< getMaxRowLength(); i++){
+            for(int j = 0; j< getMaxRowLength(); j++){
                 board[i][j].setValue(Double.NaN);
             }
         }
@@ -484,18 +483,20 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     class GameInformation implements Serializable {
         private int winner; //-2 uninitialized, -1 on draw, 0,1,2 on player win
         private int loser; //-1 uninitialized, 0,1,2 if a player has lost
-        double[] gameScores;
+        ScoreTuple gameScores;
+        //double[] gameScores;
 
         GameInformation(int numPlayers){
             winner = -2;
             loser = -1;
-            gameScores = new double[numPlayers];
+            gameScores = new ScoreTuple(numPlayers);
+            //gameScores = new double[numPlayers];
         }
 
         GameInformation(GameInformation original){
             this.winner = original.winner;
             this.loser = original.loser;
-            this.gameScores = original.gameScores.clone();
+            this.gameScores = original.gameScores.copy();
         }
 
         /**
@@ -521,41 +522,41 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
                 case -2 -> {     //No winner yet
                     switch (loser){
                         case 0 -> { //Player 1 has lost
-                            gameScores[0] = NEGATIVE_REWARD;
+                            gameScores.scTup[0] = NEGATIVE_REWARD;
                             // another player has already lost before, need to mark winner
-                            if(gameScores[1] == NEGATIVE_REWARD || gameScores[2] == NEGATIVE_REWARD){
-                                if(gameScores[1] == NEGATIVE_REWARD){ //Player 2 has also lost, 3 wins
+                            if(gameScores.scTup[1] == NEGATIVE_REWARD || gameScores.scTup[2] == NEGATIVE_REWARD){
+                                if(gameScores.scTup[1] == NEGATIVE_REWARD){ //Player 2 has also lost, 3 wins
                                     winner = 2;
-                                    gameScores[2] = POSITIVE_REWARD;
+                                    gameScores.scTup[2] = POSITIVE_REWARD;
                                 }else {     //Player 3 has also lost, 2 wins
                                     winner = 1;
-                                    gameScores[1] = POSITIVE_REWARD;
+                                    gameScores.scTup[1] = POSITIVE_REWARD;
                                 }
                             }
                         }
                         case 1 -> { //Player 2 has lost
-                            gameScores[1] = NEGATIVE_REWARD;
+                            gameScores.scTup[1] = NEGATIVE_REWARD;
                             // another player has already lost before, need to mark winner
-                            if(gameScores[0] == NEGATIVE_REWARD || gameScores[2] == NEGATIVE_REWARD){
-                                if(gameScores[0] == NEGATIVE_REWARD){ //Player 1 has also lost, 3 wins
+                            if(gameScores.scTup[0] == NEGATIVE_REWARD || gameScores.scTup[2] == NEGATIVE_REWARD){
+                                if(gameScores.scTup[0] == NEGATIVE_REWARD){ //Player 1 has also lost, 3 wins
                                     winner = 2;
-                                    gameScores[2] = POSITIVE_REWARD;
+                                    gameScores.scTup[2] = POSITIVE_REWARD;
                                 }else {     //Player 3 has also lost, 1 wins
                                     winner = 0;
-                                    gameScores[0] = POSITIVE_REWARD;
+                                    gameScores.scTup[0] = POSITIVE_REWARD;
                                 }
                             }
                         }
                         case 2 -> { //Player 3 has lost
-                            gameScores[2] = NEGATIVE_REWARD;
+                            gameScores.scTup[2] = NEGATIVE_REWARD;
                             // another player has already lost before, need to mark winner
-                            if(gameScores[0] == NEGATIVE_REWARD || gameScores[1] == NEGATIVE_REWARD){
-                                if(gameScores[0] == NEGATIVE_REWARD){   //Player 1 has also lost, 2 wins
+                            if(gameScores.scTup[0] == NEGATIVE_REWARD || gameScores.scTup[1] == NEGATIVE_REWARD){
+                                if(gameScores.scTup[0] == NEGATIVE_REWARD){   //Player 1 has also lost, 2 wins
                                     winner = 1;
-                                    gameScores[1] = POSITIVE_REWARD;
+                                    gameScores.scTup[1] = POSITIVE_REWARD;
                                 }else {     //Player 2 has also lost, 1 wins
                                     winner = 0;
-                                    gameScores[0] = POSITIVE_REWARD;
+                                    gameScores.scTup[0] = POSITIVE_REWARD;
                                 }
                             }
                         }
@@ -565,38 +566,38 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
                     switch (loser){
                         case -1 -> { //draw between everyone
                                 for (int i = 0; i <3 ; i++) {
-                                gameScores[i] = 0.0;
+                                gameScores.scTup[i] = 0.0;
                             }
                         }
                         case 0 -> { //draw between player 2 and 3
-                            gameScores[1] = 0.0;
-                            gameScores[2] = 0.0;
+                            gameScores.scTup[1] = 0.0;
+                            gameScores.scTup[2] = 0.0;
                         }
                         case 1 -> { //draw between player 1 and 3
-                            gameScores[0] = 0.0;
-                            gameScores[2] = 0.0;
+                            gameScores.scTup[0] = 0.0;
+                            gameScores.scTup[2] = 0.0;
                         }
                         case 2 -> { //draw between player 1 and 2
-                            gameScores[0] = 0.0;
-                            gameScores[1] = 0.0;
+                            gameScores.scTup[0] = 0.0;
+                            gameScores.scTup[1] = 0.0;
                         }
 
                     }
                     }
                 case 0 -> { //Player 1 wins, 2 and 3 lose
-                    gameScores[0] = POSITIVE_REWARD;
-                    gameScores[1] = NEGATIVE_REWARD;
-                    gameScores[2] = NEGATIVE_REWARD;
+                    gameScores.scTup[0] = POSITIVE_REWARD;
+                    gameScores.scTup[1] = NEGATIVE_REWARD;
+                    gameScores.scTup[2] = NEGATIVE_REWARD;
                 }
                 case 1 -> { //Player 2 wins, 1 and 3 lose
-                    gameScores[0] = NEGATIVE_REWARD;
-                    gameScores[1] = POSITIVE_REWARD;
-                    gameScores[2] = NEGATIVE_REWARD;
+                    gameScores.scTup[0] = NEGATIVE_REWARD;
+                    gameScores.scTup[1] = POSITIVE_REWARD;
+                    gameScores.scTup[2] = NEGATIVE_REWARD;
                 }
                 case 2 -> { //Player 3 wins, 1 and 2 lose
-                    gameScores[0] = NEGATIVE_REWARD;
-                    gameScores[1] = NEGATIVE_REWARD;
-                    gameScores[2] = POSITIVE_REWARD;
+                    gameScores.scTup[0] = NEGATIVE_REWARD;
+                    gameScores.scTup[1] = NEGATIVE_REWARD;
+                    gameScores.scTup[2] = POSITIVE_REWARD;
                 }
             }
         }
@@ -606,28 +607,28 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
                 case -2 -> { //no winner yet
                     switch (loser){
                         case 0 -> { //Player 1 loses, 2 wins
-                            gameScores[0] = NEGATIVE_REWARD;
-                            gameScores[1] = POSITIVE_REWARD;
+                            gameScores.scTup[0] = NEGATIVE_REWARD;
+                            gameScores.scTup[1] = POSITIVE_REWARD;
                             winner = 1;
                         }
                         case 1 -> { //Player 2 loses, 1 wins
-                            gameScores[0] = POSITIVE_REWARD;
-                            gameScores[1] = NEGATIVE_REWARD;
+                            gameScores.scTup[0] = POSITIVE_REWARD;
+                            gameScores.scTup[1] = NEGATIVE_REWARD;
                             winner = 0;
                         }
                     }
                 }
                 case -1 -> { //draw
-                    gameScores[0] = 0.0;
-                    gameScores[1] = 0.0;
+                    gameScores.scTup[0] = 0.0;
+                    gameScores.scTup[1] = 0.0;
                 }
                 case 0 -> { //Player 1 wins, 2 loses
-                    gameScores[0] = POSITIVE_REWARD;
-                    gameScores[1] = NEGATIVE_REWARD;
+                    gameScores.scTup[0] = POSITIVE_REWARD;
+                    gameScores.scTup[1] = NEGATIVE_REWARD;
                 }
                 case 1 -> { //Player 2 wins, 1 loses
-                    gameScores[0] = NEGATIVE_REWARD;
-                    gameScores[1] = POSITIVE_REWARD;
+                    gameScores.scTup[0] = NEGATIVE_REWARD;
+                    gameScores.scTup[1] = POSITIVE_REWARD;
                 }
             }
         }
@@ -640,7 +641,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
             return loser;
         }
 
-        public double[] getGameScores(){
+        public ScoreTuple getGameScores(){
             return gameScores;
         }
 

@@ -179,7 +179,7 @@ public class ParMCTS implements Serializable {
 	 * choices may be enabled or disabled.
 	 * 
 	 * @param agentName currently only "MCTS" 
-	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 * @param numPlayers
 	 */
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {

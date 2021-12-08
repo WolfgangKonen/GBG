@@ -1004,7 +1004,8 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 		return cc.toString();
 	}
 
-	public String getName() { return "Poker";	}
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() { return "Poker";	}
 
 	public boolean isNextActionDeterministic() {
 		return isNextActionDeterministic;

@@ -50,7 +50,7 @@ public class BasicStrategyChartTest {
                                             new Card(Card.Rank.QUEEN, Card.Suit.SPADE),
                                             new Card(Card.Rank.SEVEN, Card.Suit.HEART),
                 new Card(Card.Rank.FIVE, Card.Suit.CLUB));
-        ArenaBlackJackTrain ar = new ArenaBlackJackTrain("tit",false);
+        ArenaBlackJack ar = new ArenaBlackJack("tit",false,true);
         XNTupleFuncs xf = ar.makeXNTupleFuncs();
         BoardVector bv = xf.getBoardVector(so);
         System.out.println(so.stringDescr());

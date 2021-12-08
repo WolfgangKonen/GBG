@@ -117,8 +117,8 @@ public class StateObserverNim3P extends StateObserverNim implements StateObserva
 //		return getGameScore(refer.getPlayer());
 //	}
 
-	@Override
-	public String getName() { return "Nim3P";	}
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() { return "Nim3P";	}
 
 	/**
 	 * @return 	{0,1,2} for the player to move next. 

@@ -13,7 +13,11 @@ public class ArenaOthello extends Arena {
 	public ArenaOthello(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
+
+	public ArenaOthello(String title, boolean withUI, boolean withTrainRights) {
+		super(title,withUI,withTrainRights);
+	}
+
 	@Override
 	public String getGameName() {
 		return "Othello";
@@ -52,11 +56,11 @@ public class ArenaOthello extends Arena {
 		return new XNTupleFuncsOthello();
 	}
 	
-	@Override
-	public void performArenaDerivedTasks() {	}
+//	@Override
+//	public void performArenaDerivedTasks() {	}
 	
 	public static void main(String[] args) {
-		ArenaOthello t_Frame = new ArenaOthello("General Board Game Playing",true);
+		ArenaOthello t_Frame = new ArenaOthello("General Board Game Playing",true, true);
 		if(args.length == 0) {
 			t_Frame.init();
 		}else throw new RuntimeException("[Arena.main] args="+args+ "not allowed");

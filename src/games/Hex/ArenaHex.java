@@ -30,8 +30,12 @@ public class ArenaHex extends Arena {
 	public ArenaHex(String title, boolean withUI) {
 		super(title,withUI);		
 	}
-	
-   /**
+
+    public ArenaHex(String title, boolean withUI, boolean withTrainRights) {
+        super(title,withUI,withTrainRights);
+    }
+
+    /**
      * @return a name of the game, suitable as subdirectory name in the
      * {@code agents} directory
      */
@@ -90,8 +94,8 @@ public class ArenaHex extends Arena {
         return new XNTupleFuncsHex();
     }
 
-    public void performArenaDerivedTasks() {
-    }
+//    @Override
+//    public void performArenaDerivedTasks() {}
 
 	/**
 	 * Start GBG for Hex (non-trainable version)

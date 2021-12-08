@@ -276,7 +276,7 @@ public class ParMCTSE implements Serializable
 	 * choices may be enabled or disabled.
 	 * 
 	 * @param agentName currently only "MCTSE" 
-	 * @param gameName the string from {@link games.StateObservation#getName()}
+	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 * @param numPlayers	number of players in this game
 	 */
 	public void setParamDefaults(String agentName, String gameName, int numPlayers) {

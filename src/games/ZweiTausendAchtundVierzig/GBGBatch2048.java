@@ -3,7 +3,7 @@ package games.ZweiTausendAchtundVierzig;
 import java.util.ArrayList;
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import games.ArenaTrain;
+import games.Arena;
 import games.Evaluator;
 import games.XArenaButtons;
 import games.XArenaFuncs;
@@ -26,19 +26,19 @@ import tools.Types;
  * @author Wolfgang Konen, TH Koeln, 2020
  * 
  * @see GBGLaunch
- * @see ArenaTrain
+ * @see Arena
  * @see XArenaFuncs
  *  
  *
  */
-public class GBGBatch2048 { 
+public class GBGBatch2048 {
 
 	private static final long serialVersionUID = 1L;
 	/**
 	 * The default csv filename for the different batch facilities (batch1, batch2, batch3)
 	 */
 	public static String[] csvNameDef = {"eResult.csv","test1.csv","test2.csv"};
-	public static ArenaTrain t_Game;
+	public static Arena t_Game;
 	private static GBGBatch2048 t_Batch = null;
 
 	protected Evaluator m_evaluatorQ = null;
@@ -69,7 +69,7 @@ public class GBGBatch2048 {
 			System.exit(1);
 		}
 
-		t_Game = new ArenaTrain2048("",false);
+		t_Game = new Arena2048("",false,true);
 
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+t_Game.getGameName();
 		String subDir = t_Game.getGameBoard().getSubDir();

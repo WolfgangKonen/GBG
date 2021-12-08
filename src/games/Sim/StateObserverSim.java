@@ -303,10 +303,8 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return +1;
 	}
 
-	@Override
-	public String getName() {
-		return "Sim";
-	}
+	// --- obsolete, use Arena().getGameName() instead
+//	public String getName() {return "Sim";}
 
 	@Override
 	public int getNumAvailableActions() {

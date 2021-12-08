@@ -109,7 +109,7 @@ public class LogManagerGUI {
                 File selectedFile = fileChooser.getSelectedFile();
 
                 LogSessionContainer logSessionContainer = logManager.generateLogSessionContainerFromFile(selectedFile.getPath());
-                logManager.saveLogSessionContainer(logSessionContainer);
+                logManager.saveLogSessionContainer(logSessionContainer, gameBoard.getArena().getGameName());
 
                 if (verbose) {
                     System.out.println("LogManager: compiled temp log successfully");
@@ -139,7 +139,7 @@ public class LogManagerGUI {
         jMILoad.addActionListener((e) ->
         {
             //load a new .gamelog File
-            String gameName = gameBoard.getStateObs().getName();
+            String gameName = gameBoard.getArena().getGameName();
             String logPath = logManager.filePath + "\\" + gameName;
             String subDir = logManager.getSubDir();
             if (subDir != null){

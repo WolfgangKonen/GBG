@@ -8,7 +8,7 @@ import tools.Types;
 
 
 /**
- * Helper class for {@link Arena} and {@link ArenaTrain}: <ul> 
+ * Helper class for {@link Arena}: <ul>
  * <li> sets the buttons, selectors and text fields,
  * <li> sets initial values for all relevant fields,
  * <li> has the action code for Param-, Train-, MultiTrain-, and Play-button events.

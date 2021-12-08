@@ -1,9 +1,5 @@
 package games.TicTacToe;
 
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -11,13 +7,10 @@ import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
-import games.ArenaTrain;
 import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
-import games.Hex.StateObserverHex;
-import gui.MessageBox;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
