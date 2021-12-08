@@ -95,7 +95,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	
 	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
 
-	private BaseBuffer replayBuffer = null;
+	private transient BaseBuffer replayBuffer = null;
 
 	/**
 	 * Default constructor for {@link TDNTuple4Agt}, needed for loading a serialized version
@@ -891,18 +891,20 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			}
 		} while(!m_finished);			// simplification: m_finished is set by ns.getNextRewardTupleCheckFinished
 		if (FINALADAPTAGENTS) finalAdaptAgents2(curPlayer, R, ns);
+
+		//if(replayBuffer.getMaxBufferIndex() == replayBuffer.getCapacity()) learnFromReplayBuffer();
+
+
 		try {
 			this.finishUpdateWeights();		// adjust learn params ALPHA & m_epsilon
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-
-		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		incrementGameNum();
 		if (this.getGameNum() % 500 == 0) {
 			System.out.println("gameNum: "+this.getGameNum());
 		}
-
+		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		return false;
 	}
 
@@ -934,18 +936,14 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 					replayBuffer.addToLastTransition(curPlayer,ns,sLast,rLast,R);
 					learnFromReplayBuffer();
 				}
-
 			}
 		}
-
 	}
 
 
 
 
 	private void adaptAgentV2(int curPlayer, ScoreTuple R, NextState4 ns) {
-		StateObservation s_after = ns.getAfterState();
-		StateObservation s_next = ns.getNextSO();
 		boolean learnFromRM = m_oPar.getLearnFromRM();
 		if (sLast[curPlayer]!=null) {
 			if (randLast[curPlayer] && !learnFromRM) {
@@ -970,7 +968,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			StateObservation s_next = t.getNextState4().getNextSO();
 			StateObservation s_after = t.getNextState4().getAfterState();
 			double v_next = calculate_v_next(s_next,s_after,player);
-
 			r_next  = (t.getR().scTup[player] - t.getRLast().scTup[player])
 					+ s_next.getStepRewardTuple().scTup[player];
 			if (TERNARY) {
@@ -980,7 +977,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			}
 			m_Net.updateWeightsTD(sowb,player,vLast,target,r_next,t.getNextState4().getNextSO());
 		}
-
 	}
 
 	private double calculate_v_next(StateObservation s_next, StateObservation s_after,int player){
