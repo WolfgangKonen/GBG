@@ -2,26 +2,9 @@ package starters;
 
 import java.io.IOException;
 
-
 import controllers.*;
 import controllers.PlayAgent.AgentState;
 import games.*;
-import games.CFour.ArenaTrainC4;
-import games.EWN.ArenaEWN;
-import games.EWN.ArenaTrainEWN;
-import games.Hex.ArenaHex;
-import games.Hex.ArenaTrainHex;
-import games.KuhnPoker.ArenaTrainKuhnPoker;
-import games.Nim.ArenaNim2P;
-import games.Nim.ArenaNim3P;
-import games.Nim.ArenaTrainNim2P;
-import games.Nim.ArenaTrainNim3P;
-import games.Othello.ArenaTrainOthello;
-import games.RubiksCube.ArenaTrainCube;
-import games.Sim.ArenaSim;
-import games.Sim.ArenaTrainSim;
-import games.TicTacToe.ArenaTrainTTT;
-import games.ZweiTausendAchtundVierzig.ArenaTrain2048;
 import tools.Types;
 
 /**
@@ -39,12 +22,12 @@ import tools.Types;
  * @author Wolfgang Konen, TH Koeln, 2020
  * 
  * @see GBGLaunch
- * @see ArenaTrain
+ * @see Arena
  * @see XArenaFuncs
  *  
  *
  */
-public class GBGBatch { 
+public class GBGBatch extends SetupGBG {
 
 	/**
 	 * The default csv filename for the different batch facilities (batch1, batch2, ..., batch7)
@@ -53,11 +36,11 @@ public class GBGBatch {
 			,"multiTrainLambdaSweep.csv","multiTrainIncAmountSweep.csv"
 			,"multiTrainOthello.csv","multiCompeteOthelloSweep.csv","multiCompeteOthello.csv"};
 	private static GBGBatch t_Batch = null;
-	protected static ArenaTrain arenaTrain;
+	protected static Arena arenaTrain;
 	protected static String filePath = null;
 	protected static String savePath = null;
 
-	protected MTrainSweep mTrainSweep;
+	protected MTrainSweep mTrainSweep = new MTrainSweep();
 
 	/**
 	 * Syntax:
@@ -89,25 +72,25 @@ public class GBGBatch {
 	 *          	{@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}  or 
 	 *          	{@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3}.
 	 *          	In case of batch6, this arguments codes the directory where to search for agent files.<br>
-	 *          [3] (optional) nruns: how many agents to train (default -1). In case of batch6 or batch7, this argument
+	 *          [3] (optional) {@code nruns}: how many agents to train (default -1). In case of batch6 or batch7, this argument
 	 *              contains {@code iterMCTS}.   <br>
-	 *          [4] (optional) maxGameNum: maximum number of training episodes (default -1: take the parameter stored
+	 *          [4] (optional) {@code maxGameNum}: maximum number of training episodes (default -1: take the parameter stored
 	 *              in the loaded agent file.) <br>
-	 *          [5] (optional) csvFile: filename for CSV results (defaults: "multiTrain.csv" or 
+	 *          [5] (optional) {@code csvFile}: filename for CSV results (defaults: "multiTrain.csv" or
 	 *          	"multiTrainAlphaSweep.csv" or "multiTrainLambdaSweep.csv" or "multiTrainIncAmountSweep.csv",
 	 *          	see {@link #csvNameDef}) <br>
-	 *          [6] (optional) scaPar0: scalable parameter 0 <br>
-	 *          [7] (optional) scaPar1: scalable parameter 1 <br>
-	 *          [8] (optional) scaPar2: scalable parameter 2 <br>
+	 *          [6] (optional) {@code scaPar0}: scalable parameter 0 <br>
+	 *          [7] (optional) {@code scaPar1}: scalable parameter 1 <br>
+	 *          [8] (optional) {@code scaPar2}: scalable parameter 2 <br>
 	 *          <p>
 	 *          
-	 * If <b>nruns</b> or <b>maxGameNum</b> are -1, their respective values stored in {@code agentFile} are taken.
+	 * If {@code nruns} or {@code maxGameNum} are -1, their respective values stored in {@code agentFile} are taken.
 	 * <p>
 	 * Side effect: the last trained agent is stored to {@code <csvName>.agt.zip}, where
 	 * {@code <csvname>} is {@code args[5]} w/o {@code .csv}
 	 * <p>
-	 * <b>scaPar0,1,2</b> contain the scalable parameters of a game (if a game supports such parameters). Example: The game 
-	 * Hex has the board size (4,5,6,...) as scalable parameter scaPar0. If no scalable parameter is given as 
+	 * {@code scaPar0,1,2} contain the scalable parameters of a game (if a game supports such parameters). Example: The game
+	 * Hex has the board size (4,5,6,...) as scalable parameter {@code scaPar0}. If no scalable parameter is given as
 	 * command line argument, the defaults from {@link #setDefaultScaPars(String)} apply.
 	 * 
 	 * @throws IOException if s.th. goes wrong when loading the agent or saving the csv file.
@@ -152,7 +135,7 @@ public class GBGBatch {
 		for (int i = 0; i < 3; i++)
 			if (args.length >= i + 7) scaPar[i] = args[i + 6];
 
-		arenaTrain = setupSelectedGame(selectedGame, scaPar);
+		arenaTrain = setupSelectedGame(selectedGame, scaPar,"",false,true);
 
 		String agtFile = args[2];
 		setupPaths(agtFile,csvName);		// builds filePath
@@ -176,122 +159,6 @@ public class GBGBatch {
 		}
 
 		System.exit(0);
-	}
-
-	public static ArenaTrain setupSelectedGame(String selectedGame, String[] scaPar){
-
-		switch (selectedGame) {
-			case "2048":
-				return new ArenaTrain2048("", false);
-			case "ConnectFour":
-				return new ArenaTrainC4("", false);
-			case "Hex":
-				// Set HexConfig.BOARD_SIZE *prior* to calling constructor ArenaTrainHex,
-				// which will directly call Arena's constructor where the game board and
-				// the Arena buttons are constructed
-				ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
-				return new ArenaTrainHex("", false);
-			case "Nim":
-				// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS} *prior* to calling constructor
-				// ArenaTrainNim2P, which will directly call Arena's constructor where the game board and
-				// the Arena buttons are constructed
-				ArenaNim2P.setNumHeaps(Integer.parseInt(scaPar[0]));
-				ArenaNim2P.setHeapSize(Integer.parseInt(scaPar[1]));
-				ArenaNim2P.setMaxMinus(Integer.parseInt(scaPar[2]));
-				return new ArenaTrainNim2P("", false);
-			case "Nim3P":
-				// Set NimConfig.{NUMBER_HEAPS,HEAP_SIZE,MAX_MINUS,EXTRA_RULE} *prior* to calling constructor
-				// ArenaNimTrainNim3P, which will directly call Arena's constructor where the game board and
-				// the Arena buttons are constructed
-				ArenaNim3P.setNumHeaps(Integer.parseInt(scaPar[0]));
-				ArenaNim3P.setHeapSize(Integer.parseInt(scaPar[1]));
-				ArenaNim3P.setMaxMinus(Integer.parseInt(scaPar[1]));    // Nim3P: always MaxMinus == HeapSize (!)
-				ArenaNim3P.setExtraRule(Boolean.parseBoolean(scaPar[2]));
-				return new ArenaTrainNim3P("", false);
-			case "Othello":
-				return new ArenaTrainOthello("", false);
-			case "RubiksCube":
-				// Set CubeConfig.{cubeType,boardVecType,twistType} *prior* to calling constructor
-				// ArenaTrainCube, which will directly call Arena's constructor where the game board and
-				// the Arena buttons are constructed
-				ArenaTrainCube.setCubeType(scaPar[0]);
-				ArenaTrainCube.setBoardVecType(scaPar[1]);
-				ArenaTrainCube.setTwistType(scaPar[2]);
-				return new ArenaTrainCube("", false);
-			case "Sim":
-				// Set ConfigSim.{NUM_PLAYERS,NUM_NODES} *prior* to calling constructor ArenaTrainSim,
-				// which will directly call Arena's constructor where the game board and
-				// the Arena buttons are constructed
-				ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));
-				ArenaSim.setNumNodes(Integer.parseInt(scaPar[1]));
-				ArenaSim.setCoalition(scaPar[2]);
-				return new ArenaTrainSim("", false);
-			case "TicTacToe":
-				return new ArenaTrainTTT("", false);
-			case "EWN":
-				ArenaEWN.setConfig(scaPar[0]);
-				ArenaEWN.setCellCoding(scaPar[1]);
-				ArenaEWN.setRandomStartingPosition(scaPar[2]);
-				return new ArenaTrainEWN("", false);
-			case "KuhnPoker":
-				return new ArenaTrainKuhnPoker("",false);
-			default:
-				System.err.println("[GBGBatch.main] args[0]=" + selectedGame + ": This game is unknown.");
-				System.exit(1);
-				return null;
-		}
-	}
-
-	/**
-	 * Set default values for the scalable parameters.
-	 * <p>
-	 * This is for the case where GBGBatch is started without {@code args[6], args[7], args[8]}. See {@link #main(String[])}.
-	 */
-	public static String[] setDefaultScaPars(String selectedGame) {
-		String[] scaPar = new String[3];
-		switch(selectedGame) {
-		case "Hex": 
-			scaPar[0]="6";		// the initial (recommended) value
-			break;
-		case "Nim": 
-			scaPar[0]="3";		// 	
-			scaPar[1]="5";		// the initial (recommended) values	
-			scaPar[2]="5";		// 
-			break;
-		case "Nim3P":
-			scaPar[0]="3";		// 	
-			scaPar[1]="5";		// the initial (recommended) values	
-			scaPar[2]="true";	// 
-			break;
-		case "Sim": 
-			scaPar[0]="2";		 	
-			scaPar[1]="6";			
-			scaPar[2]="False";
-			break;
-		case "RubiksCube": 
-			scaPar[0]="2x2x2";		 	
-			scaPar[1]="CSTATE";			
-			scaPar[2]="ALL";
-			break;
-		case "EWN":
-			scaPar[0]="3x3 2-Player";
-			scaPar[1]="[0,..,n]";
-			scaPar[2]="False";
-			break;
-		case "2048":
-		case "ConnectFour": 
-		case "Othello": 
-		case "TicTacToe":
-		case "KuhnPoker":
-			//
-			// games with no scalable parameters
-			//
-			break;
-		default: 
-			System.err.println("[GBGBatch] "+selectedGame+": This game is unknown.");
-			System.exit(1);
-		}
-		return scaPar;
 	}
 
 	protected static void setupPaths(String agtFile, String csvFile){
@@ -476,7 +343,7 @@ public class GBGBatch {
 	 * @param filePath		agent filename
 	 * @param gb			game board object, needed by multiCompeteSweep for start state selection
 	 *
-	 * @see MCompeteSweep#multiTrainSweepOthello(PlayAgent, String, int, int, ArenaTrain, GameBoard)  MCompeteMWrap.multiTrainSweepOthello
+	 * @see MCompeteSweep#multiTrainSweepOthello(PlayAgent, String, int, int, Arena, GameBoard)  MCompeteMWrap.multiTrainSweepOthello
 	 */
 	public void batch5(int nruns, String agtFile, String filePath,
 					   GameBoard gb) {
@@ -507,7 +374,7 @@ public class GBGBatch {
 	 * <p>
 	 * Write results to file {@code csvName}.
 	 * @param iterMCTS		how many iterations in MCTSWrapperAgent.
-	 * @param agtDir
+	 * @param agtDir		directory with Othello agents
 	 * @param gb			game board object, needed by multiCompeteSweep for start state selection
 	 * @param csvName		filename for CSV results
 	 */

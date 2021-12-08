@@ -83,7 +83,7 @@ public class EvaluatorEWN extends Evaluator {
                 lastResult = 0.0;
                 return false;
             case 0: switch(ConfigEWN.NUM_PLAYERS){
-                case 2: return evalAgainstOpponent(m_PlayAgent, randomAgent,false, 100) > 0.5;
+                case 2: return evalAgainstOpponent(m_PlayAgent, randomAgent,false, 1000) > 0.5;
                 case 3:return evalAgainstOpponent(m_PlayAgent, randomAgent,randomAgent2,false, 100) > 0.0;
                 case 4:return evalAgainstOpponent(m_PlayAgent, randomAgent, randomAgent2, randomAgent3,false, 100) > 0.0;
             };
@@ -233,7 +233,40 @@ public class EvaluatorEWN extends Evaluator {
             default:
                 return null;
         }
-
-
     }
+
+    /**
+     *
+     * @param playAgent agent to be evaluated
+     * @param opponent agent to be played against
+     * @param diffStarts if true
+     * @param numEpisodes number of episodes during evaluation
+     * @return {@code ScoreTuple} Tuple which holds the average score for {@playAgent} and {@opponent}
+     */
+    public double evaluateFree(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes){
+        StateObservation so = m_gb.getDefaultStartState();
+        // Weight stuff we maybe need this later
+        int N = ConfigEWN.NUM_PLAYERS;
+        ScoreTuple scMean = new ScoreTuple(N);
+        if (diffStarts) 	// start from all start states in diffStartList
+        {
+            double sWeight = 1 / (double) (numEpisodes * diffStartList.size());
+            int count=0;
+            ScoreTuple sc;
+            for (int c=0; c<numEpisodes; c++) {
+                for (StateObservation sd : diffStartList) {
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0);
+                    scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
+                    count++;
+                }
+            }
+            System.out.println("count = "+ count);
+        }else {
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0);
+        }
+        lastResult = scMean.scTup[0];
+        m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;
+        return lastResult;
+    }
+
 }

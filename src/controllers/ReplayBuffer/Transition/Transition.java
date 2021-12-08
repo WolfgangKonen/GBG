@@ -12,7 +12,6 @@ import tools.Types;
 
 public class Transition implements ITransition {
 
-    private StateObsWithBoardVector sowb;
     private NextState4 next_state;
     private StateObservation[] sLast;
     private int player;
@@ -69,8 +68,7 @@ public class Transition implements ITransition {
     }
 
     @Override
-    public void setR(ScoreTuple R) {this.R = R;
-    }
+    public void setR(ScoreTuple R) {this.R = R; }
 
     @Override
     public ScoreTuple getR() {

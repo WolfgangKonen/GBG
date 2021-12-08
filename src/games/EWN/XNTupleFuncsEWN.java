@@ -162,6 +162,7 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
 
     @Override
     public int[][] fixedNTuples(int mode) {
+        System.out.println(mode);
         switch(mode) {
             case 0:
                 switch(ConfigEWN.BOARD_SIZE) {
@@ -251,7 +252,7 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
                             {17,18,19,22,23,24}
                     };
                     default:
-                        throw new RuntimeException("XNTupleFuncsEWS: The size of the board must be [3,4,5,6].");
+                        throw new RuntimeException("XNTupleFuncsEWN: The size of the board must be [3,4,5,6].");
                 }
             default: throw new RuntimeException("mode = " +mode + " is not supported");
         }

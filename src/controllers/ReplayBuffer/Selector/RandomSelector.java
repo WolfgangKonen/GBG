@@ -12,10 +12,8 @@ public class RandomSelector extends BaseSelector{
         super(buffer);
     }
 
-
     @Override
     public ITransition[] selectBatch() {
-
         ITransition[] transitions = new ITransition[getBatchSize()];
         if(ConfigReplayBuffer.DBG) System.out.println("Maximal buffer size: " + getMaxBufferPosition());
         for(int i = 0; i < getBatchSize(); i++){
