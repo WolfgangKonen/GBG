@@ -1,16 +1,15 @@
 package ludiiInterface;
 
-import javax.swing.*;
-
 import tools.Types;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 public final class Util {
     public static String loadFileFromDialog(String dialogTitle) {
-		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/Othello";
+		String strDir = Types.GUI_DEFAULT_DIR_AGENT;
         final var dialog = new JFileChooser();
         dialog.setDialogTitle(dialogTitle);
         dialog.setDialogType(JFileChooser.OPEN_DIALOG);

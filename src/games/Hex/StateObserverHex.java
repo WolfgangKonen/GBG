@@ -45,8 +45,8 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
      * become unreadable or you have to provide a special version transformation)
      */
     private static final long serialVersionUID = 12L;
-    private int currentPlayer;
-    private final HexTile[][] board;
+    protected int currentPlayer;
+    protected final HexTile[][] board;
     private HexTile lastUpdatedTile;
     private ArrayList<Types.ACTIONS> availableActions;
 

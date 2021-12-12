@@ -11,7 +11,7 @@ public class HexConfig {
     /**
      * Length of one side of the game board in tiles
      */
-    static int BOARD_SIZE = 5;
+    public static int BOARD_SIZE = 5;
 
     /**
      * Number of tiles on the game board

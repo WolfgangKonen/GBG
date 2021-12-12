@@ -1,7 +1,6 @@
 package games.Othello;
 
 import games.ObserverBase;
-import games.StateObservation;
 import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.WINNER;
@@ -58,7 +57,7 @@ public class StateObserverOthello extends ObserverBase{
 	private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
 	
 	protected int[][] currentGameState;
-	private int playerNextMove; 	// the player to move in the current state
+	protected int playerNextMove; 	// the player to move in the current state
 	private int countBlack, countWhite;	// probably never really needed
 	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
 //	public ArrayList<Integer> lastMoves;		// this is now in ObserverBase

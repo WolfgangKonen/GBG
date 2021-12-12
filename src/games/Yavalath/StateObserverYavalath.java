@@ -40,8 +40,8 @@ import static games.Yavalath.ConfigYavalath.*;
 public class StateObserverYavalath extends ObserverBase implements StateObservation {
 
     private ArrayList<Types.ACTIONS> availableActions;
-    private TileYavalath[][] board;
-    private int currentPlayer;
+    protected TileYavalath[][] board;
+    protected int currentPlayer;
     private boolean swapRuleUsed = false;
     private int numPlayers = getPlayers();
     private GameInformation information;
