@@ -1,17 +1,17 @@
 #
 # **** These are new results with MCTSWrapper[TCL4-EXP] from Jan 2021 ****
 #
-# **** see TDNTupleAgt.docx, Sec 'MCTSWrapper Results', 'Rubik's Cube'.
+# **** see MCTSWrapperResults-2021-01-16.docx, Sec. 'Rubik's Cube'.
 # 
 library(ggplot2)
 library(grid)
 source("summarySE.R")
 
-PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
-CUBEW=3
+PLOTALLLINES=F  # if =T: make a plot for each filename, with one line for each run
+CUBEW=3         # cube width, either 2 or 3
 
-cubeww =paste0( CUBEW,"x",CUBEW)
-cubewww=paste0(cubeww,"x",CUBEW)
+cubeww =paste0( CUBEW,"x",CUBEW)  # e.g. "3x3"
+cubewww=paste0(cubeww,"x",CUBEW)  # e.g. "3x3x3"
 wfac = 1;
 errWidth=20/wfac;
 titleStr = paste("RubiksCube ",cubeww," with MCTSWrap(TCL), no SoftMax",sep="");
