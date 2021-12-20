@@ -7,8 +7,8 @@ public class ConfigWrapper {
     /**
      * A switch for {@link PlayAgentApproximator}:
      * <ul>
-     *  <li> If false (recommended setting for RubiksCube), do not use softmax squashing for move probabilities.
-     *  <li> If true (recommended setting for Othello, ConnectFour), use softmax squashing.
+     *  <li> If false (recommended setting for RubiksCube 2x2x2), do not use softmax squashing for move probabilities.
+     *  <li> If true (recommended setting for Othello, ConnectFour, RubiksCube 3x3x3), use softmax squashing.
      * </ul>
      */
     public static boolean USESOFTMAX=true;
@@ -18,7 +18,8 @@ public class ConfigWrapper {
      * A switch for {@link MCTSWrapperAgent}:
      * <ul>
      *  <li>  If false (recommended setting for ConnectFour), force tree re-build in every call.
-     *  <li>  If true (recommended setting for Othello), re-use the tree (i.e. as in JS's master code).
+     *  <li>  If true (recommended setting for Othello, RubiksCube), re-use the tree (i.e. as in JS's master code) in
+     *        subsequent calls during one episode.
      * </ul>
      */
     public static boolean USELASTMCTS = true;

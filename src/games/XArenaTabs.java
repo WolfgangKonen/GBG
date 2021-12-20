@@ -12,7 +12,8 @@ public class XArenaTabs extends JFrame
 {
 	JTabbedPane outer;
 	JTabbedPane[] tp;
-	int opIndex = 6;		// index of tab "Other pars"
+	int bufIndex = 6; 		// index of tab "Buffer"
+	int opIndex = 7;		// index of tab "Other pars"
 	
 	public XArenaTabs(Arena arena) {
 		super(arena.getGameName()+" Parameters");
@@ -30,15 +31,18 @@ public class XArenaTabs extends JFrame
 			tp[i].addTab("MC pars", arena.m_xab.mcPar[i].getPanel());    				// 3
 			tp[i].addTab("MCTS pars", arena.m_xab.mctsPar[i].getPanel());				// 4
 			tp[i].addTab("MCTSE pars", arena.m_xab.mctsePar[i].getPanel()); 			// 5
-			tp[i].addTab("Buffer",arena.m_xab.rbPar[i].getPanel());					// 6
 			if (arena.getGameName().equals("Othello")) {
-				tp[i].addTab("Edax pars", arena.m_xab.edPar[i].getPanel());				// 7
+				tp[i].addTab("Edax pars", arena.m_xab.edPar[i].getPanel());				// 6
 				tp[i].setToolTipTextAt(6, "Edax (Othello-specific)");
+				tp[i].addTab("Buffer",arena.m_xab.rbPar[i].getPanel());					// 7
+				bufIndex=7;
 				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 8
-				opIndex=7;
+				opIndex=8;
 			} else {
+				tp[i].addTab("Buffer",arena.m_xab.rbPar[i].getPanel());					// 6
+				bufIndex=6;
 				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 7
-				opIndex=6;
+				opIndex=7;
 			}
 			tp[i].setSize(getMinimumSize());
 			tp[i].setEnabledAt(i, true); 			// do we need this?
@@ -48,7 +52,7 @@ public class XArenaTabs extends JFrame
 			tp[i].setToolTipTextAt(3, "Monte Carlo");
 			tp[i].setToolTipTextAt(4, "Monte Carlo Tree Search");
 			tp[i].setToolTipTextAt(5, "MCTS-Expectimax");
-			tp[i].setToolTipTextAt(6, "Replay buffer");
+			tp[i].setToolTipTextAt(bufIndex, "Replay buffer");
 			tp[i].setToolTipTextAt(opIndex, "Evaluator, Wrapper & General Training");
 
 

@@ -58,7 +58,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     public void rubiksCube3x3Test() {
         scaPar=new String[]{"3x3x3", "STICKER2", "ALL"};
         agtFiles = new String[]{"TCL4-p9-2000k-120-7t.agt.zip"};
-        int[] iterMCTSWrapArr = {200,500}; //{0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
+        //agtFiles = new String[]{"TCL4-p20-5000k-120-7t.agt.zip"};
+        int[] iterMCTSWrapArr = {0,100,200,500,1000}; //{20,50}; //{200,500}; //,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
         int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
@@ -67,10 +68,10 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         hm.put( 200,fact*0.44);
         hm.put( 500,fact*0.65);
         hm.put(1000,fact*0.65);
-        int nTrial = 1;
+        int nTrial = 4;
         String csvFile = "mRubiks3x3.csv";
 
-        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,7,9, nTrial, csvFile);
+        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,1,9, nTrial, csvFile);
     }
 
     /**
@@ -87,7 +88,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     public void rubiksCube2x2Test() {
         scaPar=new String[]{"2x2x2", "STICKER2", "ALL"};
         agtFiles = new String[]{"TCL4-p13-3000k-60-7t.agt.zip"};
-        int[] iterMCTSWrapArr={0,50,100,200,300}; // {0,100,200,500,1000}; //,100,200,300,500,600,800,1000};
+        int[] iterMCTSWrapArr={0,50,100,200,500,1000}; //{0,50,100,200,300}; // ,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
         int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
@@ -101,15 +102,18 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         int nTrial = 4;
         String csvFile = "mRubiks2x2.csv";
 
-        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,11,13, nTrial, csvFile);
+        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,1,13, nTrial, csvFile);
     }
 
     /**
      * @param scaPar    scalable parameters
      * @param agtFiles  the agent(s) to wrap
+     * @param iterMCTSWrapArr
      * @param hm        hash map with expected lower bounds on %-solved-rate as a fct of iterMCTSWrap
      * @param pMin      min number of scrambling twists
      * @param pMax      max number of scrambling twists
+     * @param nTrial    number of runs
+     * @param csvFile   result file
      */
     public void innerRubiksTest(String[] scaPar,
                                 String[] agtFiles,
@@ -125,9 +129,10 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         PlayAgent qa;
         double[] epsArr = {1e-8}; // {1e-8, 0.0, -1e-8}; // {1e-8, 0.0};    //
         double c_puct=10.0;
-        String userTitle1 = "user1", userTitle2 = "user2";
+        String userTitle1 = "pTwist", userTitle2 = "EE";
         double userValue1=0.0, userValue2=0.0;
         int maxDepth = 50;  // 25, 50, -1
+        int ee = 20;       // 20 or 50: eval-epiLength
         double percSolved;
 
         MCompeteMWrap mCompete;
@@ -138,7 +143,9 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
         for (int run=0; run<nTrial; run++) {
             for (String agtFile : agtFiles) {
-                System.out.println("*** Running rubiksCubeTest for " + agtFile + " (scaPar={" + scaPar[0] + "," + scaPar[1] + "," + scaPar[2] + "}) ***");
+                System.out.println("*** Starting run "+run+"/"+(nTrial-1) +
+                        " of innerRubiksCubeTest for " + agtFile + " (scaPar={" + scaPar[0] + "," + scaPar[1] + "," + scaPar[2] +
+                        "}) ***");
                 pa = arenaTrain.loadAgent(agtFile);
 
                 ParOther oPar = new ParOther();
@@ -151,7 +158,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         if (iterMCTSWrap == 0) qa = pa;
                         else qa = new MCTSWrapperAgent(iterMCTSWrap, c_puct,
                                 new PlayAgentApproximator(pa),
-                                "MCTS-wrapped " + pa.getName(),
+                                "MCTS-wrapped", // +" " + pa.getName(),
                                 maxDepth);
                         if (oPar.getWrapperNPly() > 0) {
                             System.out.println("oPar nPly = " + oPar.getWrapperNPly());
@@ -160,20 +167,29 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
                         startTime = System.currentTimeMillis();
 
-                        // NOTE: these tests are run with epiLength=20 (!)
-                        EvalCubeParams ecp = new EvalCubeParams(pMin, pMax, 20, CubeConfig.EvalNmax);
-                        EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 0, 1, 0, ecp);
-                        m_eval.evalAgent(qa);
-                        percSolved = m_eval.getLastResult();
-                        System.out.println(m_eval.getMsg());
-                        if (EPS == 1e-8 && c_puct == 1.0)       // test thresholds currently only available for this setting
-                            assert percSolved > hm.get(iterMCTSWrap) :
+                        double avgPercSolved=0.0;
+                        for (int p=pMin; p<=pMax; p++) {
+                            EvalCubeParams ecp = new EvalCubeParams(p, p, ee, CubeConfig.EvalNmax);
+                            EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 0, 1, 0, ecp);
+                            m_eval.evalAgent(qa);
+                            percSolved = m_eval.getLastResult();
+                            System.out.println(m_eval.getMsg());
+                            mCompete = new MCompeteMWrap(run, agtFile, 1, 0, iterMCTSWrap,
+                                    EPS, 0, c_puct, percSolved,
+                                    p, ee);
+                            mcList.add(mCompete);
+                            avgPercSolved += percSolved;
+                        }
+                        avgPercSolved /= (pMax-pMin+1);
+                        if (EPS == 1e-8 && c_puct == 1.0) {     // test thresholds currently only available for this setting
+                            if (hm.get(iterMCTSWrap)==null) {
+                                System.err.println("[innerRubiksTest] Warning: Assertion skipped because hm has no threshold entry for iter="+iterMCTSWrap);
+                            } else
+                                assert avgPercSolved > hm.get(iterMCTSWrap) :
                                     "Test failed for iterMCTSWrap = " + iterMCTSWrap +
-                                    ": % solved=" + percSolved + ", but threshol";
-                        mCompete = new MCompeteMWrap(run, agtFile, 1, 0, iterMCTSWrap,
-                                EPS, 0, c_puct, percSolved,
-                                userValue1, userValue2);
-                        mcList.add(mCompete);
+                                    ": % solved=" + avgPercSolved + ", but threshold is "+hm.get(iterMCTSWrap);
+
+                        }
 
                         deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
                         elapsedTime += deltaTime;
