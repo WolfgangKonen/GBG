@@ -189,21 +189,31 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public boolean trainAgent(StateObservation so) {
 		Types.ACTIONS  a_t;
 		StateObservation s_t = so.copy();
+		boolean m_finished=false;
+		int moveCounter = 0;
 		int epiLength = m_oPar.getEpisodeLength();
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 		
 		do {
-	        m_numTrnMoves++;		// number of train moves 
+	        m_numTrnMoves++;		// number of train moves
+			moveCounter++;
 	        
 			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
 			s_t.advance(a_t);		// advance the state (game-specific behavior)
 
 			if(s_t.isRoundOver()&&!s_t.isGameOver()&&s_t.isRoundBasedGame())
 				s_t.initRound();
-		} while(!s_t.isGameOver());			
-				
+			if (s_t.isGameOver()) m_finished=true;
+			if (moveCounter>=epiLength) m_finished=true;
+		} while(!m_finished);
+
 		incrementGameNum();
-		if (this.getGameNum() % 500 == 0) System.out.println("gameNum: "+this.getGameNum());
+		if (this.getGameNum() % 100 == 0) {
+			System.err.println("[AgentBase.trainAgent] WARNING: only dummy training (for time measurements)");
+		}
+		if (this.getGameNum() % 500 == 0) {
+			System.out.println("gameNum: " + this.getGameNum());
+		}
 		
 		return false;		
 	} 
@@ -321,8 +331,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	/**
-	 * Check whether pa is a valid (non-null) and trained agent, of the same
-	 * type as requested by agentName
+	 * Check whether pa is a valid (non-null) and trained agent
 	 * 
 	 * @param paVector
 	 *            vector of all agents in {@link games.Arena}
@@ -350,37 +359,38 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return true;
 	}
 
-	/**
-	 * Check whether pa is a valid (non-null) and trained agent, of the same
-	 * type as requested by agentName
-	 * 
-	 * @param pa			the agent to validate
-	 * @param agentName		the agent's name
-	 * @param Player		needed for message forming
-	 * @param arena			where to show message
-	 * @return				false, if any check fails, otherwise true
-	 */
-	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, Arena arena) {
-		if (pa == null) {
-			arena.showMessage("Cannot execute command. " + agentName + " is null!", 
-					"Warning", JOptionPane.WARNING_MESSAGE);
-			return false;
-		}
-		if (pa.getAgentState() != AgentState.TRAINED) {
-			arena.showMessage("Cannot execute command. " + agentName + " is not trained!", 
-					"Warning", JOptionPane.WARNING_MESSAGE);
-			return false;
-		}
-
-		String pa_string = pa.getClass().getName();
-		if (agentName.equals("TDS") & !(pa instanceof TDAgent)) {
-			arena.showMessage(
-					"Cannot execute command. " + "Current player " + Player + " is not a TDAgent: " + pa_string + ".",
-					"Warning", JOptionPane.WARNING_MESSAGE);
-			return false;
-		}
-		return true;
-	}
+	// --- not used anywhere ---
+//	/**
+//	 * Check whether pa is a valid (non-null) and trained agent, of the same
+//	 * type as requested by agentName
+//	 *
+//	 * @param pa			the agent to validate
+//	 * @param agentName		the agent's name
+//	 * @param Player		needed for message forming
+//	 * @param arena			where to show message
+//	 * @return				false, if any check fails, otherwise true
+//	 */
+//	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, Arena arena) {
+//		if (pa == null) {
+//			arena.showMessage("Cannot execute command. " + agentName + " is null!",
+//					"Warning", JOptionPane.WARNING_MESSAGE);
+//			return false;
+//		}
+//		if (pa.getAgentState() != AgentState.TRAINED) {
+//			arena.showMessage("Cannot execute command. " + agentName + " is not trained!",
+//					"Warning", JOptionPane.WARNING_MESSAGE);
+//			return false;
+//		}
+//
+//		String pa_string = pa.getClass().getName();
+//		if (agentName.equals("TDS") & !(pa instanceof TDAgent)) {
+//			arena.showMessage(
+//					"Cannot execute command. " + "Current player " + Player + " is not a TDAgent: " + pa_string + ".",
+//					"Warning", JOptionPane.WARNING_MESSAGE);
+//			return false;
+//		}
+//		return true;
+//	}
 
 	public int getEpochMax() {
 		return epochMax;

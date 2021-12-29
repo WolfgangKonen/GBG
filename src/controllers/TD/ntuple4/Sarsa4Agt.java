@@ -433,7 +433,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
     		} else {
 //            	nextBoard = m_Net.xnf.getBoardVector(s_after);
     			m_Net.updateWeightsQ(curSOWB, nextPlayer, aLast[nextPlayer], qLast,
-    					r_next,target,ns.getSO());
+                        target, r_next, ns.getSO());
     		}
     		
     		//debug only:
@@ -491,7 +491,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		        	qLast = m_Net.getQFunc(curSOWB,n,aLast[n]);
 		        	
 	    			m_Net.updateWeightsQ(curSOWB, n, aLast[n], qLast,
-	    					R.scTup[n],target,ns.getSO());
+                            target, R.scTup[n], ns.getSO());
 
 	    			//debug only:
 	    			if (m_DEBG) {

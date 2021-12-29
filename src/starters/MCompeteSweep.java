@@ -8,6 +8,7 @@ import controllers.PlayAgtVector;
 import games.*;
 import games.Othello.Edax.Edax2;
 import params.ParEdax;
+import params.ParOther;
 import tools.Measure;
 import tools.ScoreTuple;
 import tools.Types;
@@ -276,7 +277,7 @@ public class MCompeteSweep {
                             else qa = new MCTSWrapperAgent(iter, c_puct,
                                     new PlayAgentApproximator(pa),
                                     "MCTS-wrapped " + pa.getName(),
-                                    -1);
+                                    -1, new ParOther());
 
                             StateObservation so = gb.getDefaultStartState();
                             ScoreTuple sc;

@@ -159,7 +159,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         else qa = new MCTSWrapperAgent(iterMCTSWrap, c_puct,
                                 new PlayAgentApproximator(pa),
                                 "MCTS-wrapped", // +" " + pa.getName(),
-                                maxDepth);
+                                maxDepth, oPar);
                         if (oPar.getWrapperNPly() > 0) {
                             System.out.println("oPar nPly = " + oPar.getWrapperNPly());
                             qa = new MaxN2Wrapper(pa, oPar.getWrapperNPly(), oPar);
@@ -245,6 +245,26 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         System.out.println("[C4_vs_MCTS_Test] "+elapsedTime+" sec.");
     }
 
+    // this is just for time measurements
+    @Test
+    public void C4_vs_Rand_Test() {
+        long startTime;
+        double elapsedTime;
+
+        int numEpisodes=25;
+        int nTrial=5;
+        int[] iterMCTSWrapArr={0,50,100,200,300,500,750,1000};  // ={0,1000}; //
+        double[] epsArr = { 1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
+        String csvFile = "mCompeteRand-vs-MWrap-25runs-normF.csv";
+        boolean doAssert = false;
+        startTime = System.currentTimeMillis();
+
+        innerC4Test(numEpisodes,nTrial,iterMCTSWrapArr,epsArr,"Random",csvFile,doAssert);
+
+        elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+        System.out.println("[C4_vs_Rand_Test] "+elapsedTime+" sec.");
+    }
+
     /**
      * Test the performance of MCTSWrapperAgent on ConnectFour: We run multi-compete episodes
      * <ul>
@@ -289,11 +309,13 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                             String csvFile,
                             boolean doAssert)
     {
+        long startTime;
+        double elapsedTime;
         selectedGame = "ConnectFour";
         scaPar = GBGBatch.setDefaultScaPars(selectedGame);
         String[] agtFiles = {"2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip"};
         PlayAgent pa,qa,opponent;
-        String userTitle1 = "user1", userTitle2 = "user2";
+        String userTitle1 = "time", userTitle2 = "user2";
         double userValue1=0.0, userValue2=0.0;
         double winrate;     // the win rate of MCTSWrapperAgent
         //double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
@@ -329,6 +351,12 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                 opponent.instantiateAfterLoading();
 
             }
+            case "Random" -> {
+                playerMWrap = 0;
+                opponent = new RandomAgent("Rand");
+                opponent.instantiateAfterLoading();
+
+            }
             default -> throw new RuntimeException("Wrong value for opponentName");
         }
 
@@ -345,7 +373,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         else qa = new MCTSWrapperAgent(iterMCTSWrap, c_puct,
                                 new PlayAgentApproximator(pa),
                                 "MCTS-wrapped " + pa.getName(),
-                                100); // -1);
+                                100, new ParOther()); // -1);
 
                         // *** only a sub-test: How good would AB-DL be in place of MCTSWrap(TCL-EXP)? ***
                         //qa = new AlphaBetaAgent(new BookSum(),1000);	// search for distant losses
@@ -366,13 +394,15 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         PlayAgtVector paVector = new PlayAgtVector(qa, opponent);
                         for (int p_MWrap : new int[]{playerMWrap})       // {0,1}
                         {     // p_MWrap: whether MCTSWrapper is player 0 or player 1
+                            startTime = System.currentTimeMillis();
                             sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), so, numEpisodes, 0, null);
                             winrate = (sc.scTup[p_MWrap] + 1) / 2;
+                            elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
                             System.out.println("(iterMW,EPS,p_MWrap) = (" + iterMCTSWrap + "," + EPS + "," + p_MWrap + "): " +
-                                    "  winrate = " + winrate);
+                                    "  winrate = " + winrate+"     time = "+elapsedTime);
                             mCompete = new MCompeteMWrap(run, agtFile, numEpisodes, 0, iterMCTSWrap,
                                     EPS, p_MWrap, c_puct, winrate,
-                                    userValue1, userValue2);
+                                    elapsedTime, userValue2);
                             mcList.add(mCompete);
                             if (opponent instanceof MCTSAgentT && doAssert) {
                                 if (p_MWrap == 1 && iterMCTSWrap == 0)
@@ -383,6 +413,139 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                                 if (p_MWrap == 0 && iterMCTSWrap == 0)
                                     assert (winrate <= 0.95) : "winrate is not <=0.95 for iter==0!";
                                 if (p_MWrap == 0 && iterMCTSWrap >= 500)
+                                    assert (winrate >= 0.95) : "winrate is not >=0.95 for iter>=500!";
+                            }
+                        } // for (p_MWrap)
+
+                        // print the full list mcList after finishing each  (p_MCTS)
+                        // (overwrites the file written from previous (p_MCTS))
+                        MCompeteMWrap.printMultiCompeteList(csvFile, mcList, pa, arenaTrain, userTitle1, userTitle2);
+                    } // for (iterMCTSWrap)
+                } // for (EPS)
+            } // for (agtFile)
+        } // for (run)
+    }
+
+    // this is just for time measurements
+    @Test
+    public void Othello_vs_Rand_Test() {
+        long startTime;
+        double elapsedTime;
+
+        int numEpisodes=1;
+        int nTrial=5;
+        int[] iterMCTSWrapArr={0,100,500,10000};  // ={0,1000}; //
+        double[] epsArr = { 1e-8}; // {1e-8, 0.0};    // {1e-8, 0.0, -1e-8};
+        String csvFile = "multiCompeteOthello-time.csv";
+        boolean doAssert = false;
+        startTime = System.currentTimeMillis();
+
+        innerOthelloTest(numEpisodes,nTrial,iterMCTSWrapArr,epsArr,"Random",csvFile,doAssert);
+
+        elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+        System.out.println("[C4_vs_Rand_Test] "+elapsedTime+" sec.");
+    }
+
+    public void innerOthelloTest(int numEpisodes, int nTrial,
+                            int[] iterMCTSWrapArr,
+                            double[] epsArr,
+                            String opponentName,
+                            String csvFile,
+                            boolean doAssert)
+    {
+        long startTime;
+        double elapsedTime;
+        selectedGame = "Othello";
+        scaPar = GBGBatch.setDefaultScaPars(selectedGame);
+        String[] agtFiles = {"TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip"};
+        PlayAgent pa,qa,opponent;
+        String userTitle1 = "time", userTitle2 = "user2";
+        double userValue1=0.0, userValue2=0.0;
+        double winrate;     // the win rate of MCTSWrapperAgent
+        //double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
+        double c_puct = 1.0;
+        int playerMWrap;        // playerMWrap: whether MCTSWrapper is player 0 or player 1
+
+        MCompeteMWrap mCompete;
+        ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
+
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
+        GameBoardOthello gb = new GameBoardOthello(arenaTrain);
+        StateObservation so = gb.getDefaultStartState();
+
+        switch(opponentName) {
+            case "MCTS" -> {
+                playerMWrap = 1;
+                boolean CONSTRUCT_MCTS_ANEW = true;
+                if (CONSTRUCT_MCTS_ANEW) {
+                    ParMCTS parMCTS = new ParMCTS();
+                    parMCTS.setNumIter(10000);
+                    parMCTS.setTreeDepth(40);
+                    parMCTS.setNormalize(false);        // was missing prior to 2021-08-11, makes MCTS stronger when playing 1st
+                    ParOther oPar = new ParOther();
+                    opponent = new MCTSAgentT("MCTS",so, parMCTS, oPar);
+                } else {        // load MCTS from file, just for debugging
+                    String mctsFile = "3-MCTS10000-40.agt.zip";
+                    opponent = arenaTrain.loadAgent(mctsFile);
+                }
+            }
+            case "Random" -> {
+                playerMWrap = 0;
+                opponent = new RandomAgent("Rand");
+                opponent.instantiateAfterLoading();
+
+            }
+            default -> throw new RuntimeException("Wrong value for opponentName");
+        }
+
+        for (int run=0; run<nTrial; run++) {
+            for (String agtFile : agtFiles) {
+                //setupPaths(agtFile, csvFile);     // builds filePath
+                pa = arenaTrain.loadAgent(agtFile);
+
+                for (double EPS : epsArr) {
+                    ConfigWrapper.EPS = EPS;
+                    //numEpisodes = (EPS<0) ? 10 : 1;
+                    for (int iterMCTSWrap : iterMCTSWrapArr) {
+                        if (iterMCTSWrap == 0) qa = pa;
+                        else qa = new MCTSWrapperAgent(iterMCTSWrap, c_puct,
+                                new PlayAgentApproximator(pa),
+                                "MCTS-wrapped " + pa.getName(),
+                                100, new ParOther()); // -1);
+
+                        // *** only a sub-test: How good would AB-DL be in place of MCTSWrap(TCL-EXP)? ***
+                        //qa = new AlphaBetaAgent(new BookSum(),1000);	// search for distant losses
+                        //qa.instantiateAfterLoading();
+
+                        // *** another sub-test: How good would MaxNWrapper be in place of MCTSWrapperAgent
+                        int nPly=0;                 // if nPly>0, test this together with iterMCTSWrapArr={0}
+                        if (nPly > 0)
+                        {
+                            ParOther oPar = pa.getParOther();
+                            oPar.setWrapperNPly(nPly);
+                            pa.setWrapperParams(oPar);
+                            System.out.println("oPar nPly = " + nPly);
+                            qa = new MaxN2Wrapper(pa, nPly, oPar);
+                        }
+
+                        ScoreTuple sc;
+                        PlayAgtVector paVector = new PlayAgtVector(qa, opponent);
+                        for (int p_MWrap : new int[]{playerMWrap})       // {0,1}
+                        {     // p_MWrap: whether MCTSWrapper is player 0 or player 1
+                            startTime = System.currentTimeMillis();
+                            sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), so, numEpisodes, 0, null);
+                            winrate = (sc.scTup[p_MWrap] + 1) / 2;
+                            elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+                            System.out.println("(iterMW,EPS,p_MWrap) = (" + iterMCTSWrap + "," + EPS + "," + p_MWrap + "): " +
+                                    "  winrate = " + winrate+"     time = "+elapsedTime);
+                            mCompete = new MCompeteMWrap(run, agtFile, numEpisodes, 0, iterMCTSWrap,
+                                    EPS, p_MWrap, c_puct, winrate,
+                                    elapsedTime, userValue2);
+                            mcList.add(mCompete);
+                            if (opponent instanceof MCTSAgentT && doAssert) {
+                                if (p_MWrap == 1 && iterMCTSWrap == 0)
+                                    assert (winrate <= 0.6) : "winrate is not <=0.6 for iter==0!";
+                                if (p_MWrap == 1 && iterMCTSWrap >= 500)
                                     assert (winrate >= 0.95) : "winrate is not >=0.95 for iter>=500!";
                             }
                         } // for (p_MWrap)
@@ -410,7 +573,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         MCTSNode mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
         Approximator approximator = new PlayAgentApproximator(new RandomAgent("rand"));
         MCTS mcts = new MCTS(approximator, 1.0, 50);
-        MCTSWrapperAgent mwa = new MCTSWrapperAgent(100,1.0,approximator,"",50);
+        MCTSWrapperAgent mwa = new MCTSWrapperAgent(100,1.0,approximator,"",50, new ParOther());
         int ncalls = 100000;
         long startTime;
         double elapsedTime;

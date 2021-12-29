@@ -315,7 +315,8 @@ class LogContainer implements Serializable {
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 1L;
 
     public LogContainer(Types.ACTIONS action, StateObservation stateObservation) {
         this.action = action;
@@ -337,7 +338,8 @@ class LogSessionContainer implements Serializable {
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 1L;
 
     public void addLogEntry(LogContainer logContainer) {
         actions.add(logContainer.action);

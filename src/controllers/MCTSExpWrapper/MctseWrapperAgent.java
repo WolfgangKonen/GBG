@@ -6,6 +6,7 @@ import controllers.MCTSExpWrapper.stateApproximation2.Approximator2;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.PlayAgtVector;
 import games.StateObservation;
+import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -37,12 +38,13 @@ public final class MctseWrapperAgent extends AgentBase {
         final double c_puct,
         final Approximator2 approximator,
         final String name,
-        final int maxDepth
+        final int maxDepth,
+        final ParOther oPar
     ) {
+        super(name,oPar);
         this.iterations = iterations;
         this.approximator = approximator;
         mcts = new Mctse(approximator, c_puct, maxDepth);
-        setName(name);
         setAgentState(AgentState.TRAINED);
     }
 

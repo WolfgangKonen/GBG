@@ -97,7 +97,7 @@ public class MctseWrapperTest extends GBGBatch {
                     else qa = new MctseWrapperAgent(iterMctseWrap, c_puct,
                             new PlayAgentApproximator2(pa),
                             "Mctse-wrapped " + pa.getName(),
-                            maxDepth);
+                            maxDepth,new ParOther());
 
                     startTime = System.currentTimeMillis();
 
@@ -372,7 +372,7 @@ public class MctseWrapperTest extends GBGBatch {
                 else qa = new MctseWrapperAgent(iterMctseWrap, c_puct,
                         new PlayAgentApproximator2(pa),
                         "Mctse-wrapped " + pa.getName(),
-                        maxDepth);
+                        maxDepth,new ParOther());
 
                 startTime = System.currentTimeMillis();
 
@@ -455,7 +455,7 @@ public class MctseWrapperTest extends GBGBatch {
                     else qa = new MctseWrapperAgent(iterMctseWrap, c_puct,
                             new PlayAgentApproximator2(pa),
                             "Mctse-wrapped " + pa.getName(),
-                            maxDepth);
+                            maxDepth,oPar);
                     if (oPar.getWrapperNPly() > 0) {
                         System.out.println("oPar nPly = " + oPar.getWrapperNPly());
                         qa = new ExpectimaxN2Wrapper(pa, oPar.getWrapperNPly());
@@ -593,7 +593,7 @@ public class MctseWrapperTest extends GBGBatch {
                         else qa = new MctseWrapperAgent(iterMCTSWrap, c_puct,
                                 new PlayAgentApproximator2(pa),
                                 "Mctse-wrapped " + pa.getName(),
-                                maxDepth);
+                                maxDepth,oPar);
                         if (oPar.getWrapperNPly() > 0) {
                             System.out.println("oPar nPly = " + oPar.getWrapperNPly());
                             qa = new ExpectimaxN2Wrapper(pa, oPar.getWrapperNPly());

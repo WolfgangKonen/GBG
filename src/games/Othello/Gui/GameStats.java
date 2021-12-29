@@ -64,11 +64,11 @@ public class GameStats extends JPanel{
 	/**
 	 * Used for creating the JLabel objects with same constraints.
 	 * @param str first message the label has to hold.
-	 * @return
+	 * @return a new label
 	 */
 	private JLabel createLabel(String str) {
 		JLabel dummy = new JLabel(str);
-		dummy.setFont(new Font("Arial",Font.CENTER_BASELINE,Types.GUI_DIALOGFONTSIZE));
+		dummy.setFont(new Font("Arial",Font.CENTER_BASELINE,(int)(Types.GUI_DIALOGFONTSIZE*1.7)));
 		return dummy;
 	}
 	

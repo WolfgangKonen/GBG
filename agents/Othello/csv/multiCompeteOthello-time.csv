@@ -1,0 +1,23 @@
+TDNTuple4Agt: USESYM:true, P:4, NORMALIZE:false, sigmoid:tanh, lambda:0.5, horizon:4, AFTERSTATE:false, learnFromRM: true
+TDNTuple4Agt: alpha_init->final:0.2->0.2, epsilon_init->final:0.2->0.1, gamma: 1.0, random 100 7-tuple, evalQ: 9, evalT: 10
+agtFile, run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, user2
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 0, 1, 0, 0, 1.0E-8, 0, 1.0, 1.0, 0.03, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 0, 1, 0, 100, 1.0E-8, 0, 1.0, 1.0, 0.508, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 0, 1, 0, 500, 1.0E-8, 0, 1.0, 1.0, 1.928, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 0, 1, 0, 10000, 1.0E-8, 0, 1.0, 1.0, 37.583, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 1, 1, 0, 0, 1.0E-8, 0, 1.0, 1.0, 0.006, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 1, 1, 0, 100, 1.0E-8, 0, 1.0, 1.0, 0.295, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 1, 1, 0, 500, 1.0E-8, 0, 1.0, 1.0, 1.761, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 1, 1, 0, 10000, 1.0E-8, 0, 1.0, 1.0, 37.121, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 2, 1, 0, 0, 1.0E-8, 0, 1.0, 1.0, 0.006, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 2, 1, 0, 100, 1.0E-8, 0, 1.0, 1.0, 0.348, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 2, 1, 0, 500, 1.0E-8, 0, 1.0, 1.0, 1.745, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 2, 1, 0, 10000, 1.0E-8, 0, 1.0, 1.0, 39.492, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 3, 1, 0, 0, 1.0E-8, 0, 1.0, 1.0, 0.006, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 3, 1, 0, 100, 1.0E-8, 0, 1.0, 1.0, 0.359, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 3, 1, 0, 500, 1.0E-8, 0, 1.0, 1.0, 1.701, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 3, 1, 0, 10000, 1.0E-8, 0, 1.0, 1.0, 35.168, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 4, 1, 0, 0, 1.0E-8, 0, 1.0, 1.0, 0.006, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 4, 1, 0, 100, 1.0E-8, 0, 1.0, 1.0, 0.349, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 4, 1, 0, 500, 1.0E-8, 0, 1.0, 1.0, 1.597, 0.0
+TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip, 4, 1, 0, 10000, 1.0E-8, 0, 1.0, 1.0, 37.293, 0.0

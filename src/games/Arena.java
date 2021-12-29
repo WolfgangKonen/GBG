@@ -14,7 +14,6 @@ import games.SimpleGame.StateObserverSG;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
-import starters.GBGBatch;
 import starters.GBGLaunch;
 import tools.PStats;
 import tools.ScoreTuple;
@@ -988,7 +987,7 @@ abstract public class Arena implements Runnable {
 	 * In addition, it prints the best i and the number of rollouts (iterations)
 	 * in which the game terminates.
 	 * 
-	 * Currently this function is only for StateObserver2048 so. Otherwise it
+	 * Currently, this function is only for StateObserver2048 so. Otherwise, it
 	 * returns the 'normal' pa.getNextAction2().
 	 * 
 	 * @param so		StateObserver2048 state
@@ -1053,7 +1052,7 @@ abstract public class Arena implements Runnable {
 	}
 
 	// We moved this method from XArenaMenu to Arena, because it can be used by batch 
-	// facility GBGBatch as well. Therefore it should not be part of the GUI (which
+	// facility GBGBatch as well. Therefore, it should not be part of the GUI (which
 	// XArenaMenu is)
 	/**
 	 * @param index   number of the player (agent)
@@ -1276,7 +1275,7 @@ abstract public class Arena implements Runnable {
 	 *            the game board
 	 * @param stopEval
 	 *            the number of successful evaluations needed to reach the
-	 *            evaluator goal (may be used during training to stop it
+	 *            evaluator goal (this may be used during training to stop it
 	 *            prematurely)
 	 * @param mode
 	 *            which evaluator mode. 

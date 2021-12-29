@@ -24,8 +24,8 @@ public class Legend extends JPanel {
 				(int) (Types.GUI_SCALING_FACTOR_Y * 7)));
 		setBackground(Types.GUI_BGCOLOR);
 		//text for the legend
-		textRedMark = new JLabel("last Move: ");
-		textGreenMark = new JLabel(" possible Moves: ");
+		textRedMark = createLabel("last Move: ");
+		textGreenMark = createLabel(" possible Moves: ");
 		// red mark
 		redMark = new JLabel("   ");
 		redMark.setBorder(BorderFactory.createLineBorder(ConfigOthello.LASTMOVECOLOR, 2));
@@ -39,4 +39,16 @@ public class Legend extends JPanel {
 		add(textGreenMark);
 		add(greenMark);
 	}
+
+	/**
+	 * Used for creating the JLabel objects with same constraints.
+	 * @param str first message the label has to hold.
+	 * @return a new label
+	 */
+	private JLabel createLabel(String str) {
+		JLabel dummy = new JLabel(str);
+		dummy.setFont(new Font("Arial",Font.CENTER_BASELINE,(int)(Types.GUI_DIALOGFONTSIZE*1.7)));
+		return dummy;
+	}
+
 }

@@ -8,7 +8,7 @@ import tools.Types.WINNER;
 import java.util.ArrayList;
 /**
  * This class holds valid Othello game state objects. It is coded
- * as a two dimensional int[8][8] array, where each index represents either
+ * as a two-dimensional int[8][8] array, where each index represents either
  * <ul>
  * <li>a  Black cell ("O") = 0,
  * <li>a  White cell ("X") = 1,
@@ -33,8 +33,8 @@ import java.util.ArrayList;
  *
  *     col 0   1   2   3   4   5   6   7
  *  </pre>
- *  The action number for board cell {@code (i,j)} is given by {@code 8*i+j}. Thus the 
- *  possible action numbers are:
+ *  The action number for board cell {@code (i,j)} is given by {@code 8*i+j}.
+ *  Thus, the possible action numbers are:
  * <pre>
  *                                            row
  *        00  01  02  03  04  05  06  07       0
@@ -59,9 +59,9 @@ public class StateObserverOthello extends ObserverBase{
 	protected int[][] currentGameState;
 	protected int playerNextMove; 	// the player to move in the current state
 	private int countBlack, countWhite;	// probably never really needed
-	private ArrayList<ACTIONS> availableActions = new ArrayList<ACTIONS>();
+	private ArrayList<ACTIONS> availableActions = new ArrayList<>();
 //	public ArrayList<Integer> lastMoves;		// this is now in ObserverBase
-	private int turn;
+//	private int turn;			// use super.getMoveCounter() instead
 	
 	public StateObserverOthello()
 	{
@@ -81,7 +81,7 @@ public class StateObserverOthello extends ObserverBase{
 		playerNextMove = getOpponent(1);	// /WK/ the correct choice
 		countBlack = 2;
 		countWhite = 2;
-		turn = 0;
+//		turn = 0;
 		
 		setAvailableActions();
 	}
@@ -101,7 +101,7 @@ public class StateObserverOthello extends ObserverBase{
 		this.playerNextMove = other.playerNextMove;
 		this.countBlack = other.countBlack;
 		this.countWhite = other.countWhite;
-		this.turn = other.turn;
+//		this.turn = other.turn;
 		if (other.availableActions!=null)	// this check is needed when loading older logs
 			this.availableActions = (ArrayList<ACTIONS>) other.availableActions.clone();
 					// Note that clone does only clone the ArrayList, but not the contained ACTIONS, they are 
@@ -134,9 +134,9 @@ public class StateObserverOthello extends ObserverBase{
 				// Although the actions 27, 38, 35, 36 will never happen in an Othello game, we add them
 				// here to retVal. This is necessary to let getAllAvailableActions() return a list with size
 				// 64. Only then nTuples will be constructed in SarsaAgt with numOutputs=64. This in turn is 
-				// necessary, because actions with minimum 0 and maximum 63 can occur. Otherwise we would
+				// necessary, because actions with minimum 0 and maximum 63 can occur. Otherwise, we would
 				// get a OutOfBoundException in NTuple2ValueFunc.getQFunc() whenever equivAction has an
-				// element >= 60 (60 would be retVal's size if the preceding line were NOT comented out)
+				// element >= 60 (60 would be retVal's size if the preceding line were NOT commented out)
 				//
 				// WK 2019-06-23: 2nd fix: The bug fix above is no longer necessary, because we changed in XArenaFuncs
 				// what is done with allAvailableActions: now it will infer minimum 0 and maximum 63 from the 
@@ -182,7 +182,7 @@ public class StateObserverOthello extends ObserverBase{
 	}
 
 	/**
-	 * Determines the winner after the game is over by counting each players discs
+	 * Determines the winner after the game is over by counting each player's discs
 	 */
 	public WINNER winStatus() {
 		assert isGameOver() :"Game isn't over";
@@ -268,9 +268,9 @@ public class StateObserverOthello extends ObserverBase{
 	}
 	
 	/**
-	 * Changing the game state with a valid Action
-	 * updating the availableActions
-	 * checking if one player has to pass this turn.
+	 * Change the game state with a valid action.
+	 * Update the available actions.
+	 * Check if one player has to pass.
 	 */
 	@Override
 	public void advance(ACTIONS action) {
@@ -300,9 +300,10 @@ public class StateObserverOthello extends ObserverBase{
 									// calculated above is valid!
 		super.addToLastMoves(action);
 		super.incrementMoveCounter();
-		turn++;
-		// /WK/ If the following assertion never fires, we can abandon turn in favor of ObserverBase::moveCounter:
-		assert (turn==this.getMoveCounter()) : "Oops, turn="+turn+" and moveCounter="+this.getMoveCounter()+" differ!";
+		this.setPieceCounters();	// /WK/2021-12/ added for safety and for logging
+		//turn++;
+		// // /WK/ If the following assertion never fires, we can abandon turn in favor of ObserverBase::moveCounter:
+		//assert (turn==this.getMoveCounter()) : "Oops, turn="+turn+" and moveCounter="+this.getMoveCounter()+" differ!";
 	}
 
 	@Override
@@ -398,7 +399,7 @@ public class StateObserverOthello extends ObserverBase{
 	
 	public int getCountWhite() { return countWhite;}
 	public int getCountBlack() { return countBlack;}
-	public void setCountWhite(int w) {countWhite = w;}
-	public void setCountBlack(int b) {countBlack = b;}
-	public int getTurn() { return turn; }
+	//public void setCountWhite(int w) {countWhite = w;}
+	//public void setCountBlack(int b) {countBlack = b;}
+	//public int getTurn() { return turn; }
 }

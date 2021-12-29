@@ -2,31 +2,16 @@ package games.Othello.Gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Arrays;
-import java.util.Random;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
+import java.io.Serial;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import controllers.PlayAgent;
 import games.Arena;
-import games.GameBoard;
 import games.StateObservation;
-import games.Nim.GameBoardNim2P;
 import games.Othello.ConfigOthello;
 import games.Othello.GameBoardOthello;
 import games.Othello.StateObserverOthello;
-import games.Othello.Gui.GameStats;
-import games.Othello.Gui.Legend;
-import games.Othello.Gui.Tile;
 import tools.Types;
 
 
@@ -45,35 +30,36 @@ public class GameBoardOthelloGui extends JFrame {
 	/**
 	 * SerialNumber
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 	
 	/**
 	 * a reference to the 'parent' {@link GameBoardOthello} object
 	 */
-	private GameBoardOthello m_gb=null;
+	private final GameBoardOthello m_gb;
 	
 //	private int[][] gameState;  // 1 = White   2 = Black // never used
 	private double[][] vGameState;	
-	private GameStats gameStats; 	// Displaying Game information
-	private Legend legend;
-	private JPanel boardPanel; 		// Container for the 8 x 8 game board
+	private GameStats gameStats; 	// displaying game information
 	private Tile[][] board;			// representation of the game board
 	
-	private int counterWhite, counterBlack;
+	//private int counterWhite, counterBlack;	// /WK/ not really clear why we need this, we have sot.getCountWhite() etc
 	
 	public GameBoardOthelloGui(GameBoardOthello gb)
 	{
 		super("Othello");
 		m_gb = gb;
-		initGameBoard("");
+		initGameBoard();
 	}
 	
 	/**
 	 * Initialize the game board gui using {@link #initBoard()} and other game relevant information
-	 * @param title
 	 */
-	public void initGameBoard(String title)
+	public void initGameBoard()
 	{
+		Legend legend;
+		JPanel boardPanel; 		// Container for the 8 x 8 game board
+
 		// Initializing necessary elements
 		board = new Tile[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 //		gameState = new int[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE]; // never used
@@ -115,10 +101,7 @@ public class GameBoardOthelloGui extends JFrame {
 	/**
 	 * Resets the game to it starting state {@link StateObserverOthello}
 	 */
-	public void clearBoard(boolean boardClear, boolean vClear) {
-		if(boardClear) {
-//			m_so = new StateObserverOthello();
-		}
+	public void clearBoard(boolean vClear) {
 		if(vClear) {
 			vGameState = new double[ConfigOthello.BOARD_SIZE][ConfigOthello.BOARD_SIZE];
 			for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++){
@@ -138,12 +121,18 @@ public class GameBoardOthelloGui extends JFrame {
 	 */
 	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
 		if(so != null) {
-			assert ( so instanceof StateObserverOthello) : "so is not an instance of StateOberverOthello";
+			assert ( so instanceof StateObserverOthello) : "so is not an instance of StateObserverOthello";
 			StateObserverOthello sot = (StateObserverOthello) so;
-			sot.setCountBlack(counterBlack);
-			sot.setCountWhite(counterWhite);
+
+			// bug when displaying a .gamelog file:
+			//sot.setCountBlack(counterBlack);
+			//sot.setCountWhite(counterWhite);
+			// /WK/2021-12/ bug fix, needed for display of logs: recalc counters for state 'sot':
+			sot.setPieceCounters();
+			int counterBlack = sot.getCountBlack();
+			int counterWhite = sot.getCountWhite();
 			
-			updateGameStats(counterBlack,counterWhite,sot.getTurn(),sot.getPlayer());
+			updateGameStats(counterBlack,counterWhite,sot.getMoveCounter(),sot.getPlayer());
 		
 			
 			if(showValueOnGameboard && sot.getStoredValues() != null) {
@@ -176,13 +165,9 @@ public class GameBoardOthelloGui extends JFrame {
 		gameStats.setWhiteCount(whiteDiscs);
 		gameStats.setBlackCount(blackDiscs);
 		gameStats.setTurnCount(turnCount);
-		switch(player) {
-		case(0):
-			gameStats.changeNextMove("Next move: Black");
-			break;
-		case(1): 
-			gameStats.changeNextMove("Next move: White");
-			break;
+		switch (player) {
+			case (0) -> gameStats.changeNextMove("Next move: Black");
+			case (1) -> gameStats.changeNextMove("Next move: White");
 		}
 	}
 
@@ -194,10 +179,9 @@ public class GameBoardOthelloGui extends JFrame {
 	{
 		
 		double value, maxValue= Double.NEGATIVE_INFINITY;
-		int maxI = 0, maxJ = 0;
 		String valueText;
-		counterBlack = 0;
-		counterWhite = 0;
+		//counterBlack = 0;
+		//counterWhite = 0;
 		for(int i = 0; i < board.length; i++)
 		{
 			for(int j = 0; j < board[i].length; j++)
@@ -215,8 +199,6 @@ public class GameBoardOthelloGui extends JFrame {
 					if (value<0) valueText = ""+(int)(-value *100);
 					if (value>maxValue) {
 						maxValue=value;
-						maxI=i;
-						maxJ=j;
 					}
 				}
 				// Disable every button.
@@ -228,12 +210,12 @@ public class GameBoardOthelloGui extends JFrame {
 				if(sot.getCurrentGameState()[i][j] == ConfigOthello.WHITE) {
 					board[i][j].setBackground(Color.WHITE);
 					board[i][j].setText("");
-					counterWhite++;
+					//counterWhite++;
 				}
 				else if(sot.getCurrentGameState()[i][j] == ConfigOthello.BLACK) {
 					board[i][j].setBackground(Color.BLACK);
 					board[i][j].setText("");
-					counterBlack++;
+					//counterBlack++;
 				}
 				else {
 					// Enable buttons, which are valid for a move

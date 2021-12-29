@@ -1,20 +1,13 @@
 package games.Othello;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
 import games.StateObservation;
-import games.Nim.GameBoardNimGui;
-import games.Nim.NimConfig;
-import games.Nim.StateObserverNim;
 import games.Othello.Gui.GameBoardOthelloGui;
-import games.Othello.Gui.GameStats;
-import games.Othello.Gui.Legend;
-import games.Othello.Gui.Tile;
 import games.RubiksCube.GameBoardCube;
 import tools.Types;
 
@@ -55,7 +48,7 @@ public class GameBoardOthello implements GameBoard {
 	
 	/**
 	 * Initialising the game board using {@code initBoard()} and other game relevant information
-	 * @param arena
+	 * @param arena	the parent Arena object
 	 */
 	public void initGameBoard(Arena arena)
 	{
@@ -80,7 +73,7 @@ public class GameBoardOthello implements GameBoard {
 		}
 							// considerable speed-up during training (!)
         if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
-			m_gameGui.clearBoard(boardClear, vClear);
+			m_gameGui.clearBoard(vClear);
 	}
 
 	@Override
@@ -178,7 +171,7 @@ public class GameBoardOthello implements GameBoard {
 				// choose randomly one of the possible actions in default 
 				// start state and advance m_so by one ply
 				ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
-				int i = (int) (rand.nextInt(acts.size()));
+				int i = rand.nextInt(acts.size());
 				m_so.advance(acts.get(i));
 			}
 		}

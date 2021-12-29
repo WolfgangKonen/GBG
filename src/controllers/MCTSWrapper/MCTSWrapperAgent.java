@@ -9,6 +9,7 @@ import controllers.MCTSWrapper.stateApproximation.Approximator;
 import controllers.PlayAgtVector;
 import games.ObserverBase;
 import games.StateObservation;
+import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -38,12 +39,13 @@ public final class MCTSWrapperAgent extends AgentBase {
         final double c_puct,
         final Approximator approximator,
         final String name,
-        final int maxDepth
+        final int maxDepth,
+        final ParOther oPar
     ) {
+        super(name,oPar);
         this.iterations = iterations;
         this.approximator = approximator;
         mcts = new MCTS(approximator, c_puct, maxDepth);
-        setName(name);
         setAgentState(AgentState.TRAINED);
     }
 
@@ -52,7 +54,7 @@ public final class MCTSWrapperAgent extends AgentBase {
      */
     private int lastSelectedAction = Integer.MIN_VALUE;
     /**
-     * the tree node (state) that MCTSWrapper reached with {@link #lastSelectedNode} the last time it was called
+     * the tree node (state) that MCTSWrapper reached the last time it was called
      */
     private MCTSNode lastSelectedNode;
 

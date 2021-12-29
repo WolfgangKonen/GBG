@@ -591,7 +591,8 @@ public class XArenaFuncs {
 						oPar.getWrapperMCTS_PUCT(),
 						new PlayAgentApproximator(qa),
 						"MCTS-wrapped "+qa.getName(),
-						oPar.getWrapperMCTS_depth()
+						oPar.getWrapperMCTS_depth(),
+						oPar
 				);
 			} else {
 				qa = new MctseWrapperAgent(
@@ -599,7 +600,8 @@ public class XArenaFuncs {
 						oPar.getWrapperMCTS_PUCT(),
 						new PlayAgentApproximator2(qa),
 						"Mctse-wrapped "+qa.getName(),
-						oPar.getWrapperMCTS_depth()
+						oPar.getWrapperMCTS_depth(),
+						oPar
 				);
 			}
 		}
@@ -647,7 +649,12 @@ public class XArenaFuncs {
 			pa = this.constructAgent(n, sAgent, xab);
 			if (pa == null)
 				throw new RuntimeException("Could not construct agent = " + sAgent);
+			qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getDefaultStartState());
 
+			if (qa == null)
+				throw new RuntimeException("Could not wrap agent = " + sAgent);
+			pa = qa;
+			pa.setWrapperParams(xab.oPar[n]);
 		} catch (RuntimeException e) {
 			m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 			return null;
@@ -812,6 +819,8 @@ public class XArenaFuncs {
 						// (counting only training time, excluding evaluation time)
 		DecimalFormat frm1 = new DecimalFormat("#0.00");
 		System.out.println("moves/s: "+frm1.format(movesSecond)+" [(#trainAgent-calls)/(total time spent in trainAgent)]. ");
+		double totalEvalSec = (double) pa.getDurationEvaluationMs() / 1000.0;
+		System.out.println("total train + eval time: "+frm1.format(totalTrainSec)+" + " + frm1.format(totalEvalSec)+" sec ");
 
 		return pa;
 	}

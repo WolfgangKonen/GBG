@@ -418,7 +418,7 @@ public class NTuple4ValueFunc implements Serializable {
 	 *            the target to learn, usually (reward + GAMMA * value of the actual afterstate) for
 	 *            non-terminal states.   
 	 * @param reward
-	 *            only for debug info: the delta reward given for the transition into next board 
+	 *            only for debug info: the delta reward given for the transition into next board
 	 * @param thisSO
 	 * 			  only for debug info: access to the current state's stringDescr()
 	 */
@@ -442,26 +442,25 @@ public class NTuple4ValueFunc implements Serializable {
 
 	/**
 	 * Update the weights of the n-tuple system in case of Q-learning ({@link Sarsa4Agt} or QLearnAgt).
-	 * 
-	 * @param lastSOWB
+	 *  @param lastSOWB
 	 *            the board for which the NN is to be adapted. This is in case of {@link Sarsa4Agt} the
 	 *            state of lastPlayer <b>one round earlier</b>, i.e. {@code sLast[lastPlayer]}
 	 * @param lastPlayer
 	 *            the player to move on lastBoard
 	 * @param lastAction
-	 *            the action taken on lastBoard
+ 	 *            the action taken on lastBoard
 	 * @param qLast
 	 *            the Q-value Q(s,a) for s=lastBoard and a=lastAction
-	 * @param reward
-	 *            the delta reward given for taking action a in state s
 	 * @param target
-	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
-	 *            non-terminal states.   
+ 	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
+	 *            non-terminal states.
+	 * @param reward
+	 *            only for debug info: the delta reward given for taking action a in state s
 	 * @param thisSO
-	 * 			  only for debug info: access to the current state's stringDescr()
+	 * 		  	  only for debug info: access to the current state's stringDescr()
 	 */
 	public void updateWeightsQ(StateObsWithBoardVector lastSOWB, int lastPlayer, Types.ACTIONS lastAction,
-			double qLast, double reward, double target, StateObservation thisSO) {
+							   double qLast, double target, double reward, StateObservation thisSO) {
 		// delta is the error signal:
 		double delta = (target - qLast);
 		// derivative of tanh ( if hasSigmoid()==true):
