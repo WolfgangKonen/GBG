@@ -353,17 +353,18 @@ public class GBGLaunch extends SetupGBG {
 			scaPar2_L.setText("Twist Type");
 			scaPar0_L.setToolTipText("Pocket Cube or Rubik's Cube");
 			scaPar1_L.setToolTipText("Type of board vectors (only n-tuple agents)");
-			scaPar2_L.setToolTipText("Type of twists (all or only quarter)");
+			scaPar2_L.setToolTipText("<html>Type of twists: half-turn metric (HTM) <br>" +
+					"or quarter-turn metric (QTM)</html>");
 			//setScaPar0List(new int[]{});
 			//setScaPar1List(new int[]{});
 			//setScaPar2List(new int[]{});
 			setScaPar0List(new String[]{"2x2x2","3x3x3"});
 			setScaPar1List(new String[]{"CSTATE","CPLUS","STICKER","STICKER2"});
-			setScaPar2List(new String[]{"ALL","QUARTER"});
+			setScaPar2List(new String[]{"HTM","QTM"});
 			//choiceScaPar0.addItem("3x3x3");
 			choiceScaPar0.setSelectedItem("3x3x3");			//
 			choiceScaPar1.setSelectedItem("STICKER2");		// the initial (recommended) values
-			choiceScaPar2.setSelectedItem("ALL");			//
+			choiceScaPar2.setSelectedItem("HTM");			//
 			break;
 		case "EWN":
 			scaPar0_L.setText("Settings:");

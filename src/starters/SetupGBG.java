@@ -50,7 +50,7 @@ public class SetupGBG {
             case "RubiksCube":
                 scaPar[0]="2x2x2";
                 scaPar[1]="STICKER2";
-                scaPar[2]="ALL";
+                scaPar[2]="HTM";
                 break;
             case "EWN":
                 scaPar[0] = "3x3 2-Player";

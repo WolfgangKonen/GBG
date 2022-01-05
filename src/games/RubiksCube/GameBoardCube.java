@@ -389,6 +389,7 @@ public class GameBoardCube implements GameBoard {
 			m_so = new StateObserverCube(D[p].get(index));
 		} else {
 			p = 1+rand.nextInt(CubeConfig.pMax);
+			// since rand.nextInt(K) selects from {0,...,K-1}, we have p from {1,...,pMax}
 			m_so = selectByTwists1(p);
 //			m_so = selectByTwists2(p);
 			
@@ -435,7 +436,7 @@ public class GameBoardCube implements GameBoard {
 			// make p twists and hope that we land in
 			// distance set D[p] (which is often not true for p>5)
 			switch (CubeConfig.twistType) {
-				case ALLTWISTS:
+				case HTM:
 					for (int k=0; k<p; k++)  {
 						do {
 							index = rand.nextInt(so.getAvailableActions().size());
@@ -447,7 +448,7 @@ public class GameBoardCube implements GameBoard {
 						so.advance(so.getAction(index));
 					}
 					break;
-				case QUARTERTWISTS:
+				case QTM:
 					for (int k=0; k<p; k++)  {
 						do {
 							index = rand.nextInt(so.getAvailableActions().size());
@@ -551,8 +552,8 @@ public class GameBoardCube implements GameBoard {
 			case STICKER2 -> substr += "_STICKER2";
 		}
 		switch (CubeConfig.twistType) {
-			case ALLTWISTS -> substr += "_AT";
-			case QUARTERTWISTS -> substr += "_QT";
+			case HTM -> substr += "_AT";
+			case QTM -> substr += "_QT";
 		}
 		return substr;
 	}

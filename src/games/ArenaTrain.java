@@ -10,6 +10,9 @@ import tools.Types;
 
 
 /**
+ * --- This class is now deprecated. It can be equivalently done with
+ * ---         Arena("   ", true, true);
+ *
  * This class contains the GUI for the arena with train capabilities.
  * It extends the task dispatcher of {@link Arena} with the function 
  * {@link #performArenaDerivedTasks()} which contains tasks to trigger functions for
@@ -25,6 +28,7 @@ import tools.Types;
  * @author Wolfgang Konen, TH Koeln, Nov'16
  *
  */
+@Deprecated
 abstract public class ArenaTrain extends Arena  
 {
 	private static final long serialVersionUID = 1L;

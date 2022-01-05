@@ -293,7 +293,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 */
 	public void setAvailableActions() {
 		acts.clear();
-		if (CubeConfig.twistType==CubeConfig.TwistType.ALLTWISTS) {
+		if (CubeConfig.twistType==CubeConfig.TwistType.HTM) {
 			// we change the former behavior and allow all actions, because it is cumbersome in the search to omit actions
 			// (which might be the right ones due to earlier errors). Instead we forbid now only in DAVI3.getNextAction2
 			// the inverse of the last action m_action in order to avoid cycles of 2.
@@ -315,10 +315,10 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 			for (int i=0; i<this.numAllActions; i++) {
 				acts.add(Types.ACTIONS.fromInt(i));  				
 			}
-		} else {   // the QUARTERTWISTS case: add all allowed quarter twist actions
+		} else {   // the QTM case: add all allowed quarter twist actions
 			int[] quarteracts = {0,2,3,5,6,8};  						//  {U1,U3,L1,L3,F1,F3}
 			if (CubeConfig.cubeType== CubeConfig.CubeType.RUBIKS)
-				quarteracts = new int[]{0,2,3,5,6,8,9,11,12,14,15,17};	//+ {D1,D3,R1,R3,B1,B3}
+				quarteracts = new int[]{0,2,3,5,6,8,9,11,12,14,15,17};	//  {U1,U3,L1,L3,F1,F3,D1,D3,R1,R3,B1,B3}
 			for (int quarteract : quarteracts) {
 				acts.add(ACTIONS.fromInt(quarteract));
 			}

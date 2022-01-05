@@ -26,7 +26,7 @@ public class CubeConfig {
 	 * <ul>
 	 * <li> <b>CUBESTATE</b>: only the cube state (what {@link CubeState#fcol} holds)
 	 * <li> <b>CUBEPLUSACTION</b>: the cube state plus the action which led to this state 
-	 * <li> <b>STICKER</b>: the sticker representation in one-hot encoding (7*7 cells for 2x2x2)
+	 * <li> <b>STICKER</b>: the sticker representation in one-hot encoding (7*7 cells for 2x2x2) (deprecated)
 	 * <li> <b>STICKER2</b>: the sticker representation in compact encoding (7*2 cells for 2x2x2)
 	 * </ul>
 	 * @see ArenaCube#setBoardVecType(String)
@@ -39,18 +39,18 @@ public class CubeConfig {
 	 * 
 	 * @see ArenaCube#setBoardVecType(String)
 	 */
-	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;		// CUBESTATE, CUBEPLUSACTION, STICKER
+	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;
 
 	/**
 	 * What type of twists are allowed?
 	 * <ul>
-	 * <li> <b>ALLTWISTS</b>: all twists, quarter and half twists (i.e. U1, U2, U3)
-	 * <li> <b>QUARTERTWISTS</b>: only quarter twists (i.e. U1, U3) 		
+	 * <li> <b>HTM</b>: half-turn metric, quarter and half twists (i.e. U1, U2, U3)
+	 * <li> <b>QTM</b>: quarter-turn metric, only quarter twists (i.e. U1, U3)
 	 * </ul>
 	 * @see ArenaCube#setTwistType(String)
 	 */
-	public enum TwistType {ALLTWISTS, QUARTERTWISTS}
-	public static TwistType twistType = TwistType.ALLTWISTS;
+	public enum TwistType {HTM, QTM}
+	public static TwistType twistType = TwistType.HTM;
 	
 	/**
 	 * <b>{@code pMax}</b> serves several purposes:
@@ -78,14 +78,14 @@ public class CubeConfig {
 
 	/**
 	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
-	 * DAVI2Agent, DAVI3Agent, TDNTuple3Agt and StateObserverCube.
+	 * DAVI2Agent, DAVI3Agent, DAVI4Agent, TDNTuple3Agt and StateObserverCube.
 	 */
 	public static double stepReward = (CubeConfig.cubeType==CubeType.POCKET) ? -0.04 : -0.1;  //-0.01;
 
 	/**
 	 * whether a replay buffer with certain capacity and batch size is used or not
 	 */
-	public static boolean REPLAYBUFFER = true;  // false;true; //
+	public static boolean REPLAYBUFFER = false;  // false;true; //
 
 	public static int replayBufferCapacity = 500;
 	public static int batchSize = 50;

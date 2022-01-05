@@ -15,11 +15,11 @@ import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
 /**
- *  Implements DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agnostelli2019].
+ *  Implements DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agnostelli2019] with a HashMap.
  *  <p>
- *  It simplifies DAVI by replacing the neural net with state-based value iteration. It maintains a table or  
+ *  It simplifies DAVI by replacing the deep neural net with state-based value iteration. It maintains a table or
  *  {@link HashMap} of the value of all seen states. Thus, it is probably only viable 
- *  for smaller systems and cannot generalize to unseen states.<br>
+ *  for smaller systems.<br>
  *  It <b>maximizes</b> the (non-positive) value V(s) where each step (twist) adds a negative step reward to V(s).  
  *  Only the solved cube s* has V(s*)=0.
  *
@@ -45,7 +45,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		super.setGameNum(0);		
 		setAgentState(AgentState.INIT);
         rand = new Random(System.currentTimeMillis());
-		vm = new HashMap<String, Double>();
+		vm = new HashMap<String, Double>();		// key: string representation of state, value: daviValue
 	}
 	
 	/**
@@ -61,7 +61,8 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		m_arena.m_xab.setOParFrom(n, this.getParOther() );
 		System.out.println("DAVI2 vm.size="+this.vm.size());
 	}
-	
+
+	// param random is just for the interface, not used here
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
 		int i;
@@ -93,7 +94,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         	}
         } // for
         
-        // There might be one or more than one action with minValue. 
+        // There might be one or more than one action with maxValue.
         // Break ties by selecting one of them randomly:
         actBest = bestActions.get(rand.nextInt(bestActions.size()));
 
@@ -110,17 +111,17 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	}
 
 	/**
-	 * This is the simple version: maintain a full hash table for all visited states. This is only viable for cubes 
+	 * For DAVI2: maintain a full hash table for all visited states. This is only viable for cubes
 	 * with not too large state spaces.
 	 * @param so
 	 * @return 0, if {@code so} is the solved state, LOW_V if {@code so} is unknown in the HashMap. In all
 	 * 		   other cases, return the HashMap value of {@code so}.
 	 */
-	public double daviValue(StateObserverCube so) {
-		if (so.isEqual(def)) return 0;			// Do not return LOW_V, but return 0 if the solved cube is found.
-												// Thus the values stored in vm are 0.9, 0.8, 0.7, ...
+	protected double daviValue(StateObserverCube so) {
+		if (so.isEqual(def)) return 0;			// return 0 if the solved cube is found.
+												// Thus, the values stored in vm are -0.1,-0.2,-0.3, ...
 												// Otherwise the solved cube would get a total value of -8.1 =
-												// -9.1 + REWARD_POSITIVE, which is unpleasently negative for InspectV
+												// -9.1 + REWARD_POSITIVE, which is unpleasantly negative for InspectV
 		String stringRep = so.stringDescr();
 		Double dvalue = vm.get(stringRep); 		// returns null if not in vm
 		double x = (dvalue==null) ? LOW_V : dvalue;
@@ -148,9 +149,9 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
-	        // put the best V-table value for state s_t into the HashMap
-			if (a_t.getVBest()>CubeConfig.stepReward+LOW_V)
+			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
+	        // put the best value from V-table for state s_t into the HashMap
+			if (a_t.getVBest()>CubeConfig.stepReward+LOW_V)		// stepReward is c in pseudo code
 				// if V(s) <= c+L, there is no need to store it --> results in a factor 6 smaller hash map.
 	        	vm.put(s_t.stringDescr(), a_t.getVBest());
 	        
@@ -166,8 +167,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		//System.out.println("Final state: "+s_t.stringDescr()+", "+a_t.getVBest());
 				
 		incrementGameNum();
-		if (this.getGameNum() % 2000 == 0) System.out.println("gameNum: "+this.getGameNum());
-		
+
 		return false;		
 	} 
 

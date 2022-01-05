@@ -1,5 +1,8 @@
 package games;
 
+import games.RubiksCube.StateObserverCube;
+import games.RubiksCube.StateObserverCubeCleared;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -165,13 +168,21 @@ public class LogManagerGUI {
                     fis.close();
                     ois.close();
 
-                    //check if gameboard and log have the same StateObserver Type
-                    if(!tempLog.stateObservations.get(0).getClass().equals(gameBoard.getStateObs().getClass())) {
-                        JOptionPane.showMessageDialog(null, "Please only select logs for the current gameboard.");
-                        return;
+                    if (tempLog.stateObservations.get(0) instanceof StateObserverCube) {
+                        //symptomatic fix for RubiksCube, where the elements can be StateObserverCube or StateObserverCubeCleared:
+                        //it is however guaranteed that each object is an instance of (super-)class StateObserverCube:
+                        if (!(gameBoard.getStateObs() instanceof StateObserverCube)){
+                            JOptionPane.showMessageDialog(null, "Please only select logs for the current GameBoard.");
+                            return;
+                        }
                     } else {
-                        currentLog = tempLog;
+                        //check if gameBoard and log have the same StateObserver Type
+                        if(!tempLog.stateObservations.get(0).getClass().equals(gameBoard.getStateObs().getClass())) {
+                            JOptionPane.showMessageDialog(null, "Please only select logs for the current GameBoard.");
+                            return;
+                        }
                     }
+                    currentLog = tempLog;
 
                     gameBoard.clearBoard(true,true);
                     loadBoard(0);

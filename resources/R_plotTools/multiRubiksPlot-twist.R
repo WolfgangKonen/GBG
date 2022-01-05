@@ -10,18 +10,28 @@ source("summarySE.R")
 
 PLOTALLLINES=F  # if =T: make a plot for each filename, with one line for each run
 EE=20           # 20 or 50: eval epiLength
+TWISTTYPE="QTM" # QTM or HTM
 
 filenames=c()
 for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
   cubeww =paste0( CUBEW,"x",CUBEW)  # e.g. "3x3"
   cubewww=paste0(cubeww,"x",CUBEW)  # e.g. "3x3x3"
-  path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_AT/csv/",sep=""); 
-  fname <- switch(CUBEW
-                  ," "
-                  ,paste0("mRubiks2x2-MWrap[TCL4-p13]-SoftMax-p1-13-EE",EE,".csv")  # CUBEW=2
-                  ,paste0("mRubiks3x3-MWrap[TCL4-p9]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3
-                  #,paste0("mRubiks3x3-MWrap[TCL4-p20]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3
-                  )
+  if (TWISTTYPE=="HTM") {
+    path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_AT/csv/",sep=""); 
+    fname <- switch(CUBEW
+                    ," "
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p13]-SoftMax-p1-13-EE",EE,".csv") # CUBEW=2, HTM
+                    ,paste0("mRubiks3x3-MWrap[TCL4-p9]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3, HTM
+                    #,paste0("mRubiks3x3-MWrap[TCL4-p20]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3
+    )
+  } else {  # i.e. "QTM"
+    path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_QT/csv/",sep=""); 
+    fname <- switch(CUBEW
+                    ," "
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p16]-QTM-p1-16-EE",EE,".csv")   # CUBEW=2, QTM
+                    ,paste0("mRubiks3x3-MWrap[TCL4-p13]-QTM-p1-13-EE",EE,".csv")   # CUBEW=3, QTM
+    )
+  } 
   # -noSoftMax/-SoftMax: with USESOFTMAX=false/true in ConfigWrapper.
   # -noLast: with USELASTMCTS=false in ConfigWrapper.
   # other settings: maxDepth=50, c_puct=1.0, STICKER2, all twists
@@ -101,8 +111,9 @@ q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, p
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_y_continuous(limits=Ylimits, labels=percent) 
 q <- q+ylab(evalStr)
-q <- q+scale_x_continuous(limits=c(1,13), breaks=c(1,3,5,7,9,11,13)) 
-q <- q+xlab("scrambling twists")
+q <- q+scale_x_continuous(limits=c(1,16), breaks=c(1,3,5,7,9,11,13,15)) 
+q <- q+xlab("scrambling twists") +
+     annotate("text",x=14.0,y=0.05,label=TWISTTYPE, size=5)
 q <- q+guides(colour = guide_legend(reverse = FALSE))
 q <- q+guides(linetype = guide_legend(reverse = FALSE))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 
@@ -110,8 +121,9 @@ q <- q+theme(axis.text = element_text(size = rel(1.5)))     # bigger tick mark t
 q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text  
 q <- q+theme(plot.title = element_text(size = rel(1.5)))    # bigger title text  
 
+
 plot(q)
-pdffile="Rubiks-both-cubes-ptwist.pdf"
+pdffile=paste0("Rubiks-both-cubes-ptwist-",TWISTTYPE,".pdf")
 ggsave(pdffile, width = 8.04, height = 4.95, units = "in")
 cat(paste("Plot saved to",pdffile,"\n"))
 

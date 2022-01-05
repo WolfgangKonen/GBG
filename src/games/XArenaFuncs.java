@@ -26,10 +26,7 @@ import games.Nim.BoutonAgent;
 import games.Nim.DaviNimAgent;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
-import games.RubiksCube.CubeConfig;
-import games.RubiksCube.DAVI2Agent;
-import games.RubiksCube.DAVI3Agent;
-import games.RubiksCube.GameBoardCube;
+import games.RubiksCube.*;
 import tools.TStats.TAggreg;
 import gui.DeviationWeightsChart;
 import gui.LineChartSuccess;
@@ -261,6 +258,13 @@ public class XArenaFuncs {
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n], nTuples, xnf, maxGameNum);
+			} else if (sAgent.equals("DAVI4")) { // RubiksCube only, see
+												 // gui_agent_list in XArenaButtonsGui
+				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+				NTuple4Factory ntupfac = new NTuple4Factory();
+				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+				pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+						m_xab.oPar[n], nTuples, xnf, maxGameNum);
 			} else if(sAgent.equals("BSBJA")) { // Black Jack only, see
 												// gui_agent_list in XArenaButtonsGui
 				pa = new BasicStrategyBlackJackAgent();
@@ -451,17 +455,28 @@ public class XArenaFuncs {
 //													// XArenaButtonsGui
 //					pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
 				} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see
-													 // gui_agent_list in
-													 // XArenaButtonsGui
+													 // gui_agent_list in XArenaButtonsGui
 					pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
 				} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see
-					 								 // gui_agent_list in
-													 // XArenaButtonsGui
+					 								 // gui_agent_list in XArenaButtonsGui
 					try {
 						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory();
 						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 						pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+								m_xab.oPar[n], nTuples, xnf, maxGameNum);
+					} catch (Exception e) {
+						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+						// e.printStackTrace();
+						pa = null;
+					}
+				} else if (sAgent.equals("DAVI4")) { // RubiksCube only, see
+													 // gui_agent_list in XArenaButtonsGui
+					try {
+						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+						NTuple4Factory ntupfac = new NTuple4Factory();
+						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+						pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 								m_xab.oPar[n], nTuples, xnf, maxGameNum);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -719,6 +734,10 @@ public class XArenaFuncs {
 				collectTrainStats(tsList, pa, so);
 
 			gameNum = pa.getGameNum();
+			int liveSignal = (so instanceof StateObserverCube) ? 10000 : 500;
+			if (gameNum % liveSignal == 0) {
+				System.out.println("gameNum: "+gameNum);
+			}
 			if (gameNum % numEval == 0) { // || gameNum==1) {
 				elapsedMs = (System.currentTimeMillis() - startTime);
 				pa.incrementDurationTrainingMs(elapsedMs);

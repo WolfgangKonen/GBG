@@ -56,11 +56,23 @@ public class MCTSWrapperAgentTest extends GBGBatch {
      */
     @Test
     public void rubiksCube3x3Test() {
-        scaPar=new String[]{"3x3x3", "STICKER2", "ALL"};
-        agtFiles = new String[]{"TCL4-p9-2000k-120-7t.agt.zip"};
-        //agtFiles = new String[]{"TCL4-p20-5000k-120-7t.agt.zip"};
+        int pMin=1, pMax;
+        scaPar=new String[]{"3x3x3", "STICKER2", "QTM"};    // select here between "HTM" and "QTM"
+        switch (scaPar[2]) {
+            case "HTM":
+                agtFiles = new String[]{"TCL4-p9-2000k-120-7t.agt.zip"};
+                //agtFiles = new String[]{"TCL4-p20-5000k-120-7t.agt.zip"};
+                pMax=9;
+                break;
+            case "QTM":
+                agtFiles = new String[]{"TCL4-p13-3000k-120-7t.agt.zip"};
+                pMax=13;
+                break;
+            default:
+                throw new RuntimeException("Unallowed value "+scaPar[2]+" for scaPar[2]");
+        }
         int[] iterMCTSWrapArr = {0,100,200,500,1000}; //{20,50}; //{200,500}; //,100,200,300,500,600,800,1000};
-        //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
+        //int[] iterMCTSWrapArr={10000};  // only in conjunction with oPar's nPly > 0 (see below)
         int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
         hm.put(   0,fact*0.23);                         // Other values: EPS=1e-8, maxDepth=50, c_puct=1.0
@@ -71,13 +83,14 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         int nTrial = 4;
         String csvFile = "mRubiks3x3.csv";
 
-        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,1,9, nTrial, csvFile);
+//      innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,1,9, nTrial, csvFile); // for Rubiks-both-cubes-ptwist.pdf
+        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,pMin,pMax, nTrial, csvFile); // for Rubiks-both-cubes-iter.pdf
     }
 
     /**
      * Same as {@link #rubiksCube3x3Test()}, but for 2x2x2 cube. <br>
-     * Note that pMin=11, pMax=13. <br>
-     * (Since 11 is already God's number for the 2x2x2 cube and 'ALL_TWISTS', a successful test shows that MCTSWrapper
+     * Note that pMax=13 for HTM and pMax=16 for QTM. <br>
+     * (Since for the 2x2x2 cube God's number is 11 in the HTM- and 14 in the QTM-case, a successful test shows that MCTSWrapper
      * solves the 2x2x2 cube.)
      * <p>
      * Computation time depends on iterMCTSWrap and the number of for-loop-passes in {@code innerRubiksCubeTest}.
@@ -86,8 +99,20 @@ public class MCTSWrapperAgentTest extends GBGBatch {
      */
     @Test
     public void rubiksCube2x2Test() {
-        scaPar=new String[]{"2x2x2", "STICKER2", "ALL"};
-        agtFiles = new String[]{"TCL4-p13-3000k-60-7t.agt.zip"};
+        int pMin=1, pMax;
+        scaPar=new String[]{"2x2x2", "STICKER2", "QTM"};    // select here between "HTM" and "QTM"
+        switch (scaPar[2]) {
+            case "HTM":
+                agtFiles = new String[]{"TCL4-p13-3000k-60-7t.agt.zip"};
+                pMax=13;
+                break;
+            case "QTM":
+                agtFiles = new String[]{"TCL4-p16-3000k-60-7t.agt.zip"};
+                pMax=16;
+                break;
+            default:
+                throw new RuntimeException("Unallowed value "+scaPar[2]+" for scaPar[2]");
+        }
         int[] iterMCTSWrapArr={0,50,100,200,500,1000}; //{0,50,100,200,300}; // ,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
         int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
@@ -102,7 +127,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         int nTrial = 4;
         String csvFile = "mRubiks2x2.csv";
 
-        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,1,13, nTrial, csvFile);
+        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,pMin,pMax, nTrial, csvFile);
     }
 
     /**

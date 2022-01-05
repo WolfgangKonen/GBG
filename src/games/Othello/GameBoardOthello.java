@@ -101,6 +101,7 @@ public class GameBoardOthello implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if( m_so.isLegalAction(act)) {			
 			m_so.advance(act);
+			updateBoard(m_so,false,false);   // show the human move (while agent might think about next move)
 			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 			arenaActReq = true;	
 		}

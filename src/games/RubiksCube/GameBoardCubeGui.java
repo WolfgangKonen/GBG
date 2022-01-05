@@ -22,8 +22,11 @@ import games.Arena;
 import tools.Types;
 
 /**
- * Class GameBoardCube implements interface GameBoard for RubiksCube.
- * It has the board game GUI. 
+ * This abstract class  implements interface {@link games.GameBoard GameBoard} for RubiksCube.
+ * The concrete derived classes {@link GameBoardCubeGui2x2} and {@link GameBoardCubeGui3x3} have the settings for
+ * buttonX, buttonY and other cube-specific settings.
+ * <p>
+ * GameBoardCube has the board game GUI.
  * It shows board game states, optionally the values of possible next actions,
  * and allows user interactions with the board to enter legal moves during 
  * game play or to enter board positions for which the agent reaction is 
@@ -77,8 +80,8 @@ abstract public class GameBoardCubeGui extends JFrame {
 	protected final Color colBlue = new Color(0,0,184);
 	protected final Color colRed = colTHK1;
 
-	protected int boardX,boardY;
-	protected int buttonX, buttonY;
+	protected int boardX,boardY;		// set via GameBoardCubeGui2x2 or GameBoardCubeGui3x3
+	protected int buttonX, buttonY;		// set via GameBoardCubeGui2x2 or GameBoardCubeGui3x3
 
 	GameBoardCubeGui(GameBoardCube gb) {
 		super("Rubiks Cube");
@@ -154,7 +157,8 @@ abstract public class GameBoardCubeGui extends JFrame {
 		for (int j=0; j<3; j++) {
 			JLabel jlab = new JLabel();
 			jlab.setFont(lfont);
-			jlab.setText(""+(j+1));
+			if (!(j==1 && CubeConfig.twistType== CubeConfig.TwistType.QTM))
+				jlab.setText(""+(j+1));
 			jlab.setPreferredSize(new Dimension(labSize,labSize)); // controls the label size
 			jlab.setHorizontalAlignment(JLabel.CENTER);
 			jlab.setVerticalAlignment(JLabel.BOTTOM);
@@ -172,7 +176,8 @@ abstract public class GameBoardCubeGui extends JFrame {
 				Button[i][j].setForeground(Color.white);
 				Button[i][j].setFont(bfont);
 				Button[i][j].setPreferredSize(minimumSize);
-				Button[i][j].setVisible(true);
+				boolean visible = !(j==1 && CubeConfig.twistType== CubeConfig.TwistType.QTM);
+				Button[i][j].setVisible(visible);
 				Button[i][j].setEnabled(true);
 				Button[i][j].setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 				//.createEtchedBorder(), .createLoweredSoftBevelBorder()
@@ -208,7 +213,8 @@ abstract public class GameBoardCubeGui extends JFrame {
 		for (int j=0; j<buttonX; j++) {
 			JLabel jlab = new JLabel();
 			jlab.setFont(lfont);
-			jlab.setText(""+(j+1));
+			if (!(j==1 && CubeConfig.twistType== CubeConfig.TwistType.QTM))
+				jlab.setText(""+(j+1));
 			jlab.setPreferredSize(new Dimension(labSize,labSize)); // controls the label size
 			jlab.setHorizontalAlignment(JLabel.CENTER);
 			jlab.setVerticalAlignment(JLabel.TOP);
@@ -402,7 +408,7 @@ abstract public class GameBoardCubeGui extends JFrame {
 		public void actionPerformed(ActionEvent e){}			
 	}
 
-	abstract public void showGameBoard(Arena ticGame, boolean alignToMain);
+	abstract public void showGameBoard(Arena arena, boolean alignToMain);
 
     @Override
 	public void toFront() {

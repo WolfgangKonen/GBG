@@ -17,6 +17,7 @@ import game.functions.ints.state.Next;
 import game.functions.ints.state.State;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.BlackJack.StateObserverBlackJack;
+import games.RubiksCube.StateObserverCube;
 import graphics.svg.element.BaseElement;
 import jdk.swing.interop.SwingInterOpUtils;
 import params.ParNT;
@@ -820,11 +821,8 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			e.printStackTrace();
 		}
 		
-		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		incrementGameNum();
-		if (this.getGameNum() % 500 == 0) {
-			System.out.println("gameNum: "+this.getGameNum());
-		}
+
 		return false;
 	} // trainAgent
 

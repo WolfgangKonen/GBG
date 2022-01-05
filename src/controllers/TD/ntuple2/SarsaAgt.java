@@ -580,12 +580,8 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			e.printStackTrace();
 		}
 		
-		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		incrementGameNum();
-		if (this.getGameNum() % 500 == 0) {
-			System.out.println("gameNum: "+this.getGameNum());
-		}
-		
+
 		return false;
 		
 	} // trainAgent

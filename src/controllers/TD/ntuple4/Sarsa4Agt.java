@@ -584,12 +584,8 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 			e.printStackTrace();
 		}
 		
-		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		incrementGameNum();
-		if (this.getGameNum() % 500 == 0) {
-			System.out.println("gameNum: "+this.getGameNum());
-		}
-		
+
 		return false;
 		
 	} // trainAgent

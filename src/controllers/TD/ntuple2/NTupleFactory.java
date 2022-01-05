@@ -83,8 +83,8 @@ public class NTupleFactory {
 	 *            number of tuples that shall be generated
 	 * @param POSVALUES
 	 *            possible values/field of the board (currently not used)
-	 * @param numCells
-	 *            number of cells on the board (TicTacToe: 9)
+	 * @param xnf
+	 *            XNTupleFuncs
 	 * @throws IOException may only happen if PRINTNTUPLES=true
 	 */
 	private int[][] generateRandomWalkNTuples(int numWalkSteps,

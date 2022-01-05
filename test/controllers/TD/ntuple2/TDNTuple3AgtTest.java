@@ -22,7 +22,7 @@ import starters.SetupGBG;
 public class TDNTuple3AgtTest extends GBGBatch {
     String csvFile = "test.csv";
 
-    // settings for RubiksCube with default scalable parameters {"2x2x2","CSTATE","ALL"}, see GBGBatch::setDefaultScaPars
+    // settings for RubiksCube with default scalable parameters {"2x2x2","CSTATE","HTM"}, see GBGBatch::setDefaultScaPars
     String[] agtFileA = {"TCL3-p06-1000k-60-7t-TEST.agt.zip","davi3-p06-500k-60-7t.agt.zip"};
                     // lower thresholds for quickEvalTest and ...
     double[][] evalThreshA = {{0.97, 0.99},      // ... TCL3
@@ -143,7 +143,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
         int nplyMax=1;
 
         String[] scaPar = SetupGBG.setDefaultScaPars(selectedGame);
-        if (selectedGame.equals("RubiksCube")) scaPar = new String[]{"2x2x2","CSTATE","ALL"};
+        if (selectedGame.equals("RubiksCube")) scaPar = new String[]{"2x2x2","CSTATE","HTM"};
         arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoard gb = arenaTrain.makeGameBoard();		// needed for chooseStartState()
 

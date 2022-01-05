@@ -5,29 +5,40 @@
 # 
 library(ggplot2)
 library(grid)
+library(scales)     # needed for 'labels=percent'
 source("summarySE.R")
 
 PLOTALLLINES=F  # if =T: make a plot for each filename, with one line for each run
 EE=20           # 20 or 50: eval epiLength
+TWISTTYPE="QTM"
 
 filenames=c()
 for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
   cubeww =paste0( CUBEW,"x",CUBEW)  # e.g. "3x3"
   cubewww=paste0(cubeww,"x",CUBEW)  # e.g. "3x3x3"
-  path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_AT/csv/",sep=""); 
-  fname <- switch(CUBEW
-                  ," "
-                  ,paste0("mRubiks2x2-MWrap[TCL4-p13]-SoftMax-p1-13-EE",EE,".csv")  # CUBEW=2
-                  ,paste0("mRubiks3x3-MWrap[TCL4-p9]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3
-                  #,paste0("mRubiks3x3-MWrap[TCL4-p20]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3
-                  #,paste0("mRubiks",cubeww,"-MWrap-SoftMax.csv")   # CUBEW=2
-                  #,paste0("mRubiks",cubeww,"-MWrap-SoftMax.csv")   # CUBEW=3
-                  #,paste0("mRubiks",cubeww,"-MWrap-noSoftMax-noLast.csv") 
-                  #,paste0("mRubiks",cubeww,"-MWrap-noSoftMax.csv")    
-                  )
+  if (TWISTTYPE=="HTM") {
+    path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_AT/csv/",sep=""); 
+    fname <- switch(CUBEW
+                    ," "
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p13]-SoftMax-p1-13-EE",EE,".csv") # CUBEW=2, HTM
+                    ,paste0("mRubiks3x3-MWrap[TCL4-p9]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3, HTM
+                    #,paste0("mRubiks3x3-MWrap[TCL4-p20]-SoftMax-p1-9-EE",EE,".csv") # CUBEW=3, HTM
+                    #,paste0("mRubiks",cubeww,"-MWrap-SoftMax.csv")   # CUBEW=2
+                    #,paste0("mRubiks",cubeww,"-MWrap-SoftMax.csv")   # CUBEW=3
+                    #,paste0("mRubiks",cubeww,"-MWrap-noSoftMax-noLast.csv") 
+                    #,paste0("mRubiks",cubeww,"-MWrap-noSoftMax.csv")    
+    )
+  } else {  # i.e. "QTM"
+    path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_QT/csv/",sep=""); 
+    fname <- switch(CUBEW
+                    ," "
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p16]-QTM-p1-16-EE",EE,".csv")   # CUBEW=2, QTM
+                    ,paste0("mRubiks3x3-MWrap[TCL4-p13]-QTM-p1-13-EE",EE,".csv")   # CUBEW=3, QTM
+    )
+  } 
   # -noSoftMax/-SoftMax: with USESOFTMAX=false/true in ConfigWrapper.
   # -noLast: with USELASTMCTS=false in ConfigWrapper.
-  # other settings: maxDepth=50, c_puct=1.0, STICKER2, all twists
+  # other settings: maxDepth=50, c_puct=1.0, STICKER2
   # agtFile: 
   #   2x2: "TCL4-p13-3000k-60-7t.agt.zip"
   #   3x3: "TCL4-p9-2000k-120-7t.agt.zip" or "TCL4-p20-5000k-120-7t.agt.zip"
@@ -50,10 +61,17 @@ Ylimits=c(-0.01,1.01);
 dfBoth = data.frame()
 for (k in 1:length(filenames)) {
   filename = filenames[k]
-  higher_p <- switch(k
-                     ,c(11,12,13)    # CUBEW=2
-                     ,c(7,8,9)       # CUBEW=3
-                     )
+  if (TWISTTYPE=="HTM") {
+    higher_p <- switch(k
+                       ,c(11,12,13)    # CUBEW=2
+                       ,c(7,8,9)       # CUBEW=3
+    )
+  } else {  # i.e. "QTM"
+    higher_p <- switch(k
+                       ,c(14,15,16)    # CUBEW=2
+                       ,c(11,12,13)    # CUBEW=3
+    )
+  }
   df <- read.csv(file=filename, dec=".",sep=",",skip=2)
   df$run <- as.factor(df$run)
   print(unique(df$run))
@@ -105,7 +123,6 @@ tgc$cubeWidth <- as.factor(tgc$cubeWidth)
 # The errorbars may overlap, so use position_dodge to move them horizontally
 #pd <- position_dodge(1000/wfac) # move them 1000/wfac to the left and right
 
-
 q <- ggplot(tgc,aes(x=iterMWrap,y=winrate,colour=cubeWidth,linetype=agent))
 #q <- q+labs(title=titleStr)
 q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
@@ -121,7 +138,7 @@ q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text
 q <- q+theme(plot.title = element_text(size = rel(1.5)))    # bigger title text  
 
 plot(q)
-pdffile="Rubiks-both-cubes-iter.pdf"
+pdffile=paste0("Rubiks-both-cubes-iter-",TWISTTYPE,".pdf")
 ggsave(pdffile, width = 8.04, height = 4.95, units = "in")
 cat(paste("Plot saved to",pdffile,"\n"))
 

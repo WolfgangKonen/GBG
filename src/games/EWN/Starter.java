@@ -17,7 +17,7 @@ import tools.Types;
 public class Starter {
 
     private static Starter t_Batch = null;
-    protected static ArenaTrain arenaTrain;
+    protected static Arena arenaTrain;
     protected static String filePath = null;
     protected static String savePath = null;
     protected MTrainSweep mTrainSweep;
@@ -48,7 +48,7 @@ public class Starter {
         ArenaEWN.setConfig("5x5 2-Player");
         ArenaEWN.setCellCoding("[0,1],[2,3],[4,5]");
         ArenaEWN.setRandomStartingPosition("True");
-        arenaTrain = new ArenaTrainEWN("", true);
+        arenaTrain = new ArenaEWN("", true, true);
         String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + arenaTrain.getGameName();
         String subDir = arenaTrain.getGameBoard().getSubDir();
         if (subDir != null) strDir += "/" + subDir;

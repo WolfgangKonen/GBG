@@ -146,11 +146,11 @@ public class OtherParams extends Frame {
 				"additional evaluator with this mode during training (none if mode is the same as Quick Eval Mode)");
 		numEval_L.setToolTipText("During training: Call the evaluators every NumEval episodes");
 		epiLeng_L.setToolTipText(
-				"During training: Maximum number of moves in an episode. If reached, game terminates prematurely. -1: never terminate.");
+				"<html>During training: Maximum number of moves in an episode. <br>If reached, game terminates prematurely. -1: never terminate.</html>");
 		stopTest_L.setToolTipText("During training: If >0 then perform stop test");
 		stopEval_L.setToolTipText(
-				"During evaluation: Maximum number of moves in an episode. If reached, game terminates prematurely. -1: never terminate.");
-		chooseS01L.setToolTipText("Choose start state in training: 50% default, 50% random 1-ply");
+				"<html>During evaluation: Maximum number of moves in an episode. <br>If reached, game terminates prematurely. -1: never terminate.</html>");
+		chooseS01L.setToolTipText("<html>Choose start state in training: <br>50% default, 50% random 1-ply</html>");
 		learnRM_L.setToolTipText("Learn from random moves during training");
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		wNply_L.setToolTipText(

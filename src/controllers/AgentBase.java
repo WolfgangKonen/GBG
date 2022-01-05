@@ -211,10 +211,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		if (this.getGameNum() % 100 == 0) {
 			System.err.println("[AgentBase.trainAgent] WARNING: only dummy training (for time measurements)");
 		}
-		if (this.getGameNum() % 500 == 0) {
-			System.out.println("gameNum: " + this.getGameNum());
-		}
-		
+
 		return false;		
 	} 
 

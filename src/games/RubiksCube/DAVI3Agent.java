@@ -21,7 +21,7 @@ import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
 /**
- *  Implements the DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agnostelli2019].
+ *  Implements the DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agostinelli2019].
  *  <p>
  *  It simplifies DAVI by replacing the deep neural net with a (shallow but wide) n-tuple network.
  *  <ul>
@@ -31,7 +31,7 @@ import tools.Types.ACTIONS_VT;
  *      in batches sampled from this replay buffer. </li>
  *  </ul>
  *  It <b>maximizes</b> the value V(s) where each step (twist) adds a negative step reward to V(s).
- *  Only the solved cube s* has V(s*)={@link StateObserverCube#REWARD_POSITIVE}.
+ *  Only the solved cube s* has V(s*)=0.
  *
  */
 public class DAVI3Agent extends NTupleBase implements PlayAgent {
@@ -46,6 +46,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 //	private int numPlayers;
 
 	private final boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
+	// recommended setting is false, because true gives a lot of unwanted 'cross-talk' in not yet visited states.
 
 	private final boolean m_DEBG = false; //false;true;
 
@@ -279,8 +280,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		//System.out.println("Final state: "+s_t.stringDescr()+", "+a_t.getVBest());
 				
 		incrementGameNum();
-		if (this.getGameNum() % 2000 == 0) System.out.println("gameNum: "+this.getGameNum());
-		
+
 		return false;		
 	}
 
@@ -374,7 +374,6 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		}
 
 		incrementGameNum();
-		if (this.getGameNum() % 2000 == 0) System.out.println("gameNum: "+this.getGameNum());
 
 		return false;
 	}

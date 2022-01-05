@@ -117,8 +117,8 @@ public class ArenaCube extends Arena   {
      */
     public static void setTwistType(String tCube) {
 		switch (tCube) {
-			case "ALL" -> CubeConfig.twistType = TwistType.ALLTWISTS;
-			case "QUARTER" -> CubeConfig.twistType = TwistType.QUARTERTWISTS;
+			case "HTM" -> CubeConfig.twistType = TwistType.HTM;
+			case "QTM" -> CubeConfig.twistType = TwistType.QTM;
 			default -> throw new RuntimeException("Twist type " + tCube + " is not known.");
 		}
     }

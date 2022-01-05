@@ -11,7 +11,7 @@ public class MaxN2WrapperTest extends GBGBatch {
     String selectedGame = "RubiksCube";
     String[] agtFile = {"davi2-p11-2000k.agt.zip","davi3-p11-2000k-120-7t-BASE.agt.zip","TCL3-p13-3000k-120-7t.agt.zip"};
     String[] agtType = {"DAVI2", "DAVI3","TDNT3"};
-    String[] scaPar = {"2x2x2","CSTATE","ALL"};
+    String[] scaPar = {"2x2x2","CSTATE","HTM"};
 
     /**
      * Calling MaxN2Wrapper with nPly=0 should result in the same best values as calling the wrapped agent directly.
