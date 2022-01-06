@@ -236,8 +236,53 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
      */
     @Override
 	public boolean trainAgent(StateObservation so) {
-		return (CubeConfig.REPLAYBUFFER) ? trainAgent_replayBuffer(so) : trainAgent_autodidactic(so);
+		return (CubeConfig.REPLAYBUFFER) ? trainAgent_replayBuffer(so) : trainAgent_autodidactic2(so);
 	}
+
+	/**
+	 * train with true autodidactic iteration as in [McAleer2018], [Agostin2019]
+	 */
+	public boolean trainAgent_autodidactic2(StateObservation so) {
+		ACTIONS_VT  a_t;
+		ACTIONS act;
+		StateObserverCube s_t = def.copy();	// so is actually not used
+		int curPlayer;
+		double vLast,target;
+		boolean m_finished = false;
+		int epiLength = m_oPar.getEpisodeLength();
+		assert (epiLength != -1) : "trainAgent: Rubik's Cube should not be run with epiLength==-1 !";
+
+		for (int k=0; k<epiLength; k++) {
+			m_numTrnMoves++;		// number of train moves
+
+			// advance with an action that brings the cube one twist further away from the solved cube
+			s_t = selectByTwists1(rand.nextInt(epiLength)+1);
+
+			// select the best action back according to the current policy
+			a_t = getNextAction2(s_t.partialState(), false, true);
+
+			// update the network's response to current state s_t: Let it move towards the desired target:
+			target = a_t.getVBest();
+			StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_t, m_Net.xnf);
+			curPlayer = s_t.getPlayer();
+			vLast = m_Net.getScoreI(curSOWB,curPlayer);
+			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
+					s_t.getStepRewardTuple().scTup[0],s_t);
+
+			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
+
+			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
+
+			if (s_t.isGameOver()) {
+				System.err.println("Game over should not happen in autodidactic iteration");
+			}
+		}
+
+		incrementGameNum();
+
+		return false;
+	}
+
 
 	/**
 	 * train with true autodidactic iteration as in [McAleer2018], [Agostin2019]
@@ -475,6 +520,62 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 			this.target += amount;
 			return this;
 		}
+	}
+
+	/**
+	 * Method to select a start state by doing p random twist on the default cube.
+	 * This may be the only way to select a start state being p=8,9,... twists away from the
+	 * solved cube (where the distance set D[p] becomes to big).
+	 * <p>
+	 * But it has the caveat that p random twists do not guarantee to produce a state in D[p].
+	 * Due to twins etc. the resulting state may be actually in D[p-1], D[p-2] and below.
+	 * However, it works quickly for arbitrary p.
+	 */
+	protected StateObserverCubeCleared selectByTwists1(int p) {
+		StateObserverCubeCleared d_so;
+		int index;
+		boolean cond;
+		//System.out.println("selectByTwists1: p="+p);
+		StateObserverCube so = new StateObserverCube(); // default cube
+		int attempts=0;
+		while (so.isEqual(def)) {		// do another round, if so is after twisting still default state
+			attempts++;
+			if (attempts % 1000==0) {
+				System.err.println("[selectByTwists1] no cube different from default found -- may be p=0?? p="+p);
+			}
+			// make p twists and hope that we land in
+			// distance set D[p] (which is often not true for p>5)
+			switch (CubeConfig.twistType) {
+				case HTM:
+					for (int k=0; k<p; k++)  {
+						do {
+							index = rand.nextInt(so.getAvailableActions().size());
+							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
+							// If doublets are forbidden (i.e. TWIST_DOUBLETS==false), then boolean cond stays true as long as
+							// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because
+							// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists.
+						} while (cond);
+						so.advance(so.getAction(index));
+					}
+					break;
+				case QTM:
+					for (int k=0; k<p; k++)  {
+						do {
+							index = rand.nextInt(so.getAvailableActions().size());
+							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
+									(index%3+1) != so.getCubeState().lastTimes);
+							// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
+							// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3
+							// are possible here). This is because doublet U1U3 would leave the cube unchanged
+						} while (cond);
+						so.advance(so.getAction(index));
+					}
+					break;
+			}
+		}
+		d_so = new StateObserverCubeCleared(so,p);
+
+		return d_so;
 	}
 
 

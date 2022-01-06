@@ -2,6 +2,8 @@
 # **** These are new results with MCTSWrapper[TCL4-EXP] from Jan 2021 ****
 #
 # **** see MCTSWrapperResults-2021-01-16.docx, Sec. 'Rubik's Cube'.
+# **** The relevant CSV files are generate with 
+#      MCTSWrapperAgentTest.rubiksCube2x2Test & .rubiksCube3x3Test
 # 
 library(ggplot2)
 library(grid)
@@ -10,7 +12,7 @@ source("summarySE.R")
 
 PLOTALLLINES=F  # if =T: make a plot for each filename, with one line for each run
 EE=20           # 20 or 50: eval epiLength
-TWISTTYPE="QTM" # QTM or HTM
+TWISTTYPE="HTM" # QTM or HTM
 
 filenames=c()
 for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
@@ -22,22 +24,26 @@ for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
                     ," "
                     ,paste0("mRubiks2x2-MWrap[TCL4-p13]-SoftMax-p1-13-EE",EE,".csv") # CUBEW=2, HTM
                     ,paste0("mRubiks3x3-MWrap[TCL4-p9]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3, HTM
-                    #,paste0("mRubiks3x3-MWrap[TCL4-p20]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3
+                    #,paste0("mRubiks3x3-MWrap[TCL4-p20]-SoftMax-p1-9-EE",EE,".csv") # CUBEW=3
     )
   } else {  # i.e. "QTM"
     path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_QT/csv/",sep=""); 
     fname <- switch(CUBEW
                     ," "
-                    ,paste0("mRubiks2x2-MWrap[TCL4-p16]-QTM-p1-16-EE",EE,".csv")   # CUBEW=2, QTM
+                    #,paste0("mRubiks2x2-MWrap[TCL4-p16]-QTM-p1-16-EE",EE,".csv")  # CUBEW=2, QTM
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p16-lam05]-QTM-p1-16-EE",EE,".csv")# CUBEW=2, QTM
                     ,paste0("mRubiks3x3-MWrap[TCL4-p13]-QTM-p1-13-EE",EE,".csv")   # CUBEW=3, QTM
     )
   } 
   # -noSoftMax/-SoftMax: with USESOFTMAX=false/true in ConfigWrapper.
   # -noLast: with USELASTMCTS=false in ConfigWrapper.
-  # other settings: maxDepth=50, c_puct=1.0, STICKER2, all twists
-  # agtFile: 
+  # other settings: maxDepth=50, c_puct=1.0, STICKER2 
+  # agtFiles for HTM: 
   #   2x2: "TCL4-p13-3000k-60-7t.agt.zip"
   #   3x3: "TCL4-p9-2000k-120-7t.agt.zip"
+  # agtFiles for QTM: 
+  #   2x2: "TCL4-p16-3000k-60-7t.agt.zip" or "TCL4-p16-3000k-60-7t-lam05.agt.zip"
+  #   3x3: "TCL4-p13-3000k-120-7t.agt.zip"
   filename <- paste0(path,fname)
   filenames = c(filenames,filename)
 }

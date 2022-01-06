@@ -1,6 +1,8 @@
 package games.RubiksCube;
 
+import java.io.Serial;
 import java.util.ArrayList;
+import java.util.Random;
 
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.BoardVector;
@@ -26,11 +28,24 @@ import tools.Types.ACTIONS;
 public class StateObserverCube extends ObserverBase implements StateObservation {
 	private final CubeState m_state;
 	/**
-	 * the action which led to m_state (numAllActions (9 or 18) if not known)
+	 * the action which led to m_state (iActUnknown (9 or 18) if not known)
 	 */
 	protected ACTIONS m_action;
+
+	private static final int[] quarterActs = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ?
+			new int[]{0, 2, 3, 5, 6, 8} :  						//  {U1,U3,L1,L3,F1,F3}
+			new int[]{0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15, 17};	//  {U1,U3,L1,L3,F1,F3,D1,D3,R1,R3,B1,B3}
+	private static final int[] halfTurnActs = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ?
+			new int[]{0,1,2,3,4,5,6,7,8} :  					//  {U1,U2,U3,L1,L2,L3,F1,F2,F3}
+			new int[]{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};	//  {U1,U2,U3,L1,L2,L3,F1,F2,F3,D1,D2,D3,R1,R2,R3,B1,B2,B3}
+	private static final int[] allActs = (CubeConfig.twistType== CubeConfig.TwistType.QTM) ? quarterActs : halfTurnActs;
+	public static final int iActUnknown = (CubeConfig.twistType== CubeConfig.TwistType.QTM) ? 9 : 18;
+	public static final int numAllActions = allActs.length;
+
+	private static final Random rand = new Random(System.currentTimeMillis());
 	private static final CubeStateFactory csFactory = new CubeStateFactory();
 	private static final CubeState def = csFactory.makeCubeState(); // a solved cube as reference
+	private static final StateObserverCube sdef = new StateObserverCube();
 	/**
 	 * The reward for the solved cube is 1.5. It is higher than the usual game-won reward 1.0, because some agents (e.g.
 	 * {@link TDNTuple3Agt}) produce game values a bit higher than 1.0 for non-solved cube states. REWARD_POSITIVE should 
@@ -44,22 +59,18 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     public static final double REWARD_NEGATIVE = -1.0;
 	private final ArrayList<ACTIONS> acts = new ArrayList<>();	// holds all available actions
 
-	public int numAllActions;
-   
-//	private double prevReward = 0.0;
-	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
-	 * unreadable or you have to provide a special version transformation)
+	 * unreadable, or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverCube() {
 		super();
 		m_state = csFactory.makeCubeState(); 		// default (solved) cube of type CubeConfig.cubeType
-		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
-		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
+		m_action = new ACTIONS(iActUnknown);		// iActUnknown (9 or 18) codes 'not known'
 		setAvailableActions();
 	}
 
@@ -67,8 +78,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public StateObserverCube(BoardVector boardVector) {
 		super();
 		m_state = csFactory.makeCubeState(boardVector);
-		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
-		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
+		m_action = new ACTIONS(iActUnknown);		// iActUnknown (9 or 18) codes 'not known'
 		setAvailableActions();
 	}
 	
@@ -76,16 +86,14 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public StateObserverCube(CubeState other) {
 		super();
 		m_state = csFactory.makeCubeState(other);
-		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
-		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
+		m_action = new ACTIONS(iActUnknown);		// iActUnknown (9 or 18) codes 'not known'
 		setAvailableActions();
 	}
 	
 	public StateObserverCube(StateObserverCube other) {
 		super(other);		// copy members m_counter, lastMoves and stored*
 		m_state = csFactory.makeCubeState(other.m_state);
-		numAllActions = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
-		m_action = new ACTIONS(numAllActions);		// numAllActions (9 or 18) codes 'not known'
+		m_action = new ACTIONS(iActUnknown);		// iActUnknown (9 or 18) codes 'not known'
 		setAvailableActions();
 	}
 	
@@ -131,7 +139,10 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	}
 	
 	public boolean isLegalAction(ACTIONS act) {
-		return (0<=act.toInt() && act.toInt()<this.numAllActions);
+		int hit=0;
+		for (int i=0; i<allActs.length; i++)
+			if (act.toInt()==allActs[i]) hit=1;
+		return (hit==1);
 	}
 
 	@Override
@@ -241,12 +252,15 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 */
 	@Override
 	public void advance(ACTIONS action) {
-//		prevReward = this.getGameScore(this);		// prior to advance() we set prevReward to the game score of 
-//													// the current state. In this way, the cumuluative game score 
-//													// returned by getGameScore can accumulate the cost-to-go.
 		m_action = action;
 		int iAction = action.toInt();
-		assert (0<=iAction && iAction<numAllActions) : "iAction is not in 0,1,...,"+numAllActions;
+
+		//check validity of action
+		int hit=0;
+		for (int i=0; i<allActs.length; i++)
+			if (iAction==allActs[i]) hit=1;
+		assert (hit==1)	: "iAction is not in set of available actions";
+
 		int j=iAction%3;
 		int i=(iAction-j)/3;		// reverse: iAction = 3*i + j
 
@@ -266,8 +280,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
     @Override
 	public ArrayList<ACTIONS> getAllAvailableActions() {
         ArrayList<ACTIONS> allActions = new ArrayList<>();
-        for (int j = 0; j < numAllActions; j++)
-        	allActions.add(Types.ACTIONS.fromInt(j));
+        for (int act : allActs)
+        	allActions.add(Types.ACTIONS.fromInt(act));
         
         return allActions;
 	}
@@ -285,43 +299,15 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * Given the current state in {@link #m_state}, what are the available actions? 
 	 * Set them in member {@code ArrayList<ACTIONS> acts}.
-	 * <p>
-	 * Note that actions with the same flavor (U,L,F) as the last twist would be in principle also available,
-	 * but they could be subsumed with the last twist. So they are omitted in order to reduce complexity. This 
-	 * takes place only in the {@link CubeConfig#twistType}{@code ==ALLTWISTS} case. <br>
-	 * In the {@code QUARTERTWISTS} case nothing is omitted, since it may be necessary to do the same action again.  
 	 */
 	public void setAvailableActions() {
 		acts.clear();
 		if (CubeConfig.twistType==CubeConfig.TwistType.HTM) {
-			// we change the former behavior and allow all actions, because it is cumbersome in the search to omit actions
-			// (which might be the right ones due to earlier errors). Instead we forbid now only in DAVI3.getNextAction2
-			// the inverse of the last action m_action in order to avoid cycles of 2.
-//			if (m_state.lastTwist!=Twist.U) {
-//				acts.add(Types.ACTIONS.fromInt(0));  // U1
-//				acts.add(Types.ACTIONS.fromInt(1));  // U2
-//				acts.add(Types.ACTIONS.fromInt(2));  // U3
-//			}
-//			if (m_state.lastTwist!=Twist.L) {
-//				acts.add(Types.ACTIONS.fromInt(3));  // L1
-//				acts.add(Types.ACTIONS.fromInt(4));  // L2
-//				acts.add(Types.ACTIONS.fromInt(5));  // L3
-//			}		
-//			if (m_state.lastTwist!=Twist.F) {
-//				acts.add(Types.ACTIONS.fromInt(6));  // F1
-//				acts.add(Types.ACTIONS.fromInt(7));  // F2
-//				acts.add(Types.ACTIONS.fromInt(8));  // F3
-//			}		
-			for (int i=0; i<this.numAllActions; i++) {
-				acts.add(Types.ACTIONS.fromInt(i));  				
-			}
+			for (int halfturnact : halfTurnActs)
+				acts.add(ACTIONS.fromInt(halfturnact));
 		} else {   // the QTM case: add all allowed quarter twist actions
-			int[] quarteracts = {0,2,3,5,6,8};  						//  {U1,U3,L1,L3,F1,F3}
-			if (CubeConfig.cubeType== CubeConfig.CubeType.RUBIKS)
-				quarteracts = new int[]{0,2,3,5,6,8,9,11,12,14,15,17};	//  {U1,U3,L1,L3,F1,F3,D1,D3,R1,R3,B1,B3}
-			for (int quarteract : quarteracts) {
+			for (int quarteract : quarterActs)
 				acts.add(ACTIONS.fromInt(quarteract));
-			}
 		}
 	}
 	
@@ -385,4 +371,31 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	public int hashCode() {
 		return this.m_state.toString().hashCode();
 	}
+
+	/**
+	 * Method to select a start state by doing p random twist on the default cube.
+	 */
+	protected StateObserverCubeCleared selectByTwists(int p) {
+		StateObserverCubeCleared d_so;
+		int index;
+		StateObserverCube so = new StateObserverCube(); // default cube
+		int attempts=0;
+		while (so.isEqual(sdef)) {		// do another round, if so is after twisting still default state
+			attempts++;
+			if (attempts % 1000==0) {
+				System.err.println("[selectByTwists] no cube different from default found -- may be p=0?? p="+p);
+			}
+			// make p twists and hope that we land in
+			// distance set D[p] (which is often not true for p>5)
+			for (int k=0; k<p; k++)  {
+				index = rand.nextInt(so.allActs.length);
+				so.advance(Types.ACTIONS.fromInt(allActs[index]));
+			}
+		}
+		d_so = new StateObserverCubeCleared(so,p);
+
+		return d_so;
+	}
+
+
 }

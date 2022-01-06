@@ -40,6 +40,7 @@ public class GameBoardCube implements GameBoard {
 	 */
 	protected StateObserverCube m_so;
 	private boolean arenaActReq=false;
+	private StateObserverCube def = new StateObserverCube();
 
 	//
 	// all members following below are concerned with distance sets D[p]. The concept of distance sets is now 
@@ -428,7 +429,7 @@ public class GameBoardCube implements GameBoard {
 		//System.out.println("selectByTwists1: p="+p);
 		StateObserverCube so = new StateObserverCube(); // default cube
 		int attempts=0;
-		while (so.isEqual(new StateObserverCube())) {		// do another round, if so is after twisting still default state
+		while (so.isEqual(def)) {		// do another round, if so is after twisting still default state
 			attempts++;
 			if (attempts % 1000==0) {
 				System.err.println("[selectByTwists1] no cube different from default found -- may be p=0?? p="+p);

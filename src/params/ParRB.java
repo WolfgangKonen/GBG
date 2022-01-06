@@ -2,13 +2,15 @@ package params;
 
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.Arena;
+import games.StateObservation;
 
 import javax.swing.*;
 import java.io.Serializable;
 
 public class ParRB implements Serializable {
 
-    public static boolean DEFAULT_USERB = true;
+    public static boolean DEFAULT_USERB = false;
     public static int DEFAULT_CAPACITY = 200;
     public static int DEFAULT_BATCHSIZE = 1;
     public static int DEFAULT_COMBOBOXES = 0; // used for entry based on index;
@@ -129,7 +131,7 @@ public class ParRB implements Serializable {
      * choices may be enabled or disabled.
      *
      * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "TDS" (for {@link TDAgent})
-     * @param gameName the string from {@link games.StateObservation#getName()}
+     * @param gameName the string from {@link Arena#getGameName()}
      */
     public void setParamDefaults(String agentName, String gameName) {
         switch (gameName) {
@@ -139,7 +141,7 @@ public class ParRB implements Serializable {
         switch (agentName) {
             default:
                 this.setCapacity(1);
-                this.setUseRB(true);
+                this.setUseRB(false);
                 this.setBatchSize(1);
                 this.setPusher(0);
                 this.setSelector(0);

@@ -107,11 +107,12 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                 pMax=13;
                 break;
             case "QTM":
-                agtFiles = new String[]{"TCL4-p16-3000k-60-7t.agt.zip"};
+                //agtFiles = new String[]{"TCL4-p16-3000k-60-7t.agt.zip"};
+                agtFiles = new String[]{"TCL4-p16-3000k-60-7t-lam05.agt.zip"};
                 pMax=16;
                 break;
             default:
-                throw new RuntimeException("Unallowed value "+scaPar[2]+" for scaPar[2]");
+                throw new RuntimeException("Illegal value "+scaPar[2]+" for scaPar[2]");
         }
         int[] iterMCTSWrapArr={0,50,100,200,500,1000}; //{0,50,100,200,300}; // ,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)

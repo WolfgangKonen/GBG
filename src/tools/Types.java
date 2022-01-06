@@ -11,10 +11,12 @@ import javax.swing.plaf.FontUIResource;
 
 import controllers.MaxNAgent;
 import games.Arena;
+import games.RubiksCube.CubeConfig;
 import games.RubiksCube.CubeState2x2;
 import games.RubiksCube.StateObserverCube;
 import games.StateObservation;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -36,9 +38,10 @@ public class Types {
 
 		/**
     	 * change the version ID for serialization only if a newer version is no longer 
-    	 * compatible with an older one (older .agt.zip will become unreadable or you have
+    	 * compatible with an older one (older .agt.zip will become unreadable, or you have
     	 * to provide a special version transformation)
     	 */
+		@Serial
     	private static final long  serialVersionUID = 12L;
 
         public ACTIONS(int numVal) {			
@@ -109,10 +112,11 @@ public class Types {
         	if (so instanceof StateObserverCube) {
 				int[] inverseActs;
         		if (((StateObserverCube) so).getCubeState() instanceof CubeState2x2) {
-					inverseActs = new int[]{2,1,0, 5,4,3, 8,7,6, 9};	// '9' codes 'not known' --> we return 'not known'
+					inverseActs = new int[]{2,1,0, 5,4,3, 8,7,6, 9} ;	// '9' codes 'not known' --> we return 'not known'
 				} else { // CubeState3x3 case
-					inverseActs = new int[]{ 2, 1,0,   5, 4, 3,   8, 7, 6,
-							                11,10,9,  14,13,12,  17,16,15,  18};	// '18' codes 'not known' --> we return 'not known'
+					inverseActs = new int[]{
+									  2,1,0,   5,4,3,      8,7,6,
+									11,10,9,  14,13,12,  17,16,15,  18};// '18' codes 'not known' --> we return 'not known'
 				}
 				int iAction = act.toInt();
 				return new ACTIONS(inverseActs[iAction]);
@@ -163,9 +167,10 @@ public class Types {
 
 		/**
     	 * change the version ID for serialization only if a newer version is no longer 
-    	 * compatible with an older one (older .agt.zip will become unreadable or you have
+    	 * compatible with an older one (older .agt.zip will become unreadable, or you have
     	 * to provide a special version transformation)
     	 */
+		@Serial
     	private static final long  serialVersionUID = 12L;
 
         public ACTIONS_VT(int numVal) {			
