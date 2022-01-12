@@ -127,33 +127,6 @@ public class CubeConfig {
 //	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
 	// is now replaced with ParOther.stopEval
 
-	/**
-	 * Size array for {@link GameBoardCube#generateDistanceSets(Random)}:
-	 * Narr[p] is the number of elements to pick from D[p] when generating D[p+1]. So the size
-	 * of D[p+1] will be roughly 6*Narr[p].
-	 */
-	@Deprecated
-	final static int[] Narr = {0,0,9,54, 321,1847,5000,5000, 9900,50,50,50}; // for GenerateNext
-//	final static int[] Narr = {0,0,9,20, 100, 300, 900,1800, 9900,50,50,50}; // for GenerateNext
-//	final static int[] Narr = {0,0,9,50, 150,600,3000,15000, 50,50,50,50};  // for GenerateNextColSymm
-//		                       0         4                   8
-
-	/**
-	 * Selector array for {@link GameBoardCube#chooseStartState(controllers.PlayAgent)}.<br>
-	 * Needed only in the now <b>deprecated</b> ({@link GameBoardCube#SELECT_FROM_D SELECT_FROM_D}{@code ==true})-case.
-	 * <p> 
-	 * Set X=Xper[{@link CubeConfig#pMax}]. 
-	 * If the proportion of training games is in the first X[1] percent, select from D[1], 
-	 * if it is between X[1] and X[2] percent, select from D[2], and so on.  
-	 */
-	@Deprecated
-	final static double[][] Xper = 							// 1st index:
-			new double[][]{{0.0}, {0.0,1.0}, {0,0.2,1.0}	// [0],[1],[2]
-				,{0,0.1,0.2,1.0},{0,0.1,0.2,0.5,1.0}		//,[3],[4]
-				,{0,0.05,0.10,0.25,0.5,1.0}					//,[5]
-				,{0,0.025,0.05,0.10,0.25,0.5,1.0}			//,[6]
-				,{0,0.0125,0.025,0.05,0.125,0.25,0.5,1.0}	//,[7]
-			};
 
 	/**
 	 * theoCov[p] is the known maximum size of distance set D[p] (theoretical coverage, 2x2x2 cube, see

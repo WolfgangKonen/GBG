@@ -6,9 +6,9 @@ import java.util.*;
 
 import agentIO.LoadSaveGBG;
 import controllers.PlayAgent;
-import controllers.TD.ntuple2.NTuple2ValueFunc;
-import controllers.TD.ntuple2.NTupleBase;
-import controllers.TD.ntuple2.NextState;
+import controllers.TD.ntuple4.NTuple4Base;
+import controllers.TD.ntuple4.NTuple4ValueFunc;
+import controllers.TD.ntuple4.NextState4;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
@@ -34,21 +34,21 @@ import tools.Types.ACTIONS_VT;
  *  Only the solved cube s* has V(s*)=0.
  *
  */
-public class DAVI3Agent extends NTupleBase implements PlayAgent {
+public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 
-	private static final StateObserverCube def = new StateObserverCube();   // default (solved) cube
+	protected static final StateObserverCube def = new StateObserverCube();   // default (solved) cube
 
-	private Random rand;
+	protected Random rand;
 
-	private transient LinkedList<TrainingItem> replayBuffer;
+	protected transient LinkedList<TrainingItem> replayBuffer;
 
 //	private NTupleAgt.EligType m_elig;
 //	private int numPlayers;
 
-	private final boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
+	protected final boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
 	// recommended setting is false, because true gives a lot of unwanted 'cross-talk' in not yet visited states.
 
-	private final boolean m_DEBG = false; //false;true;
+	protected final boolean m_DEBG = false; //false;true;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
@@ -75,6 +75,9 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);			
 	}
 
+	public DAVI3Agent(String name) {
+		super(name);
+	}
 	/**
 	 * 
 	 * @param tdPar			temporal difference parameters
@@ -92,10 +95,10 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 //		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
 		rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42); 
 		
-		int posVals = xnf.getNumPositionValues();
+		int[] posVals = xnf.getPositionValuesVector();
 		int numCells = xnf.getNumCells();
 		
-		m_Net = new NTuple2ValueFunc(this,nTuples, xnf, posVals,
+		m_Net = new NTuple4ValueFunc(this,nTuples, xnf, posVals,
 				RANDINITWEIGHTS,ntPar,numCells,1);
 		
 		setNTParams(ntPar);
@@ -115,7 +118,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	 */
 	public boolean instantiateAfterLoading() {
 		this.m_Net.xnf.instantiateAfterLoading();
-		assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
+		//assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
 		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
 		
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
@@ -167,7 +170,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 			// in a cycle of 2. We avoid such cycles and continue with next pass through for-loop
 			// --> beneficial when searching for the solved cube in play & train.
 			// If you do not want to skip any action - e.g. when inspecting states - then enter this method with
-			// a 'cleared' state {@link StateObserverCubeCleared} {@code so} (lastAction==9)
+			// a 'cleared' state that has m_action (the action that led to this state) set to 'unknown'.
 			if (thisAct.isEqualToInverseOfLastAction(so))
 				continue;  // with next for-pass
 
@@ -217,7 +220,7 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 	public double daviValue(StateObserverCube so) {
 		double score;
 		if (so.isEqual(def)) return 0.0; // no future rewards in game-over states; the former
-		 								 // StateObserverCube.REWARD_POSITIVE is now in getDeltaRewardTuple
+		 								 // StateObserverCube.REWARD_POSITIVE is now in so.getReward
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		score = m_Net.getScoreI(curSOWB,so.getPlayer());
 		return score;
@@ -445,11 +448,11 @@ public class DAVI3Agent extends NTupleBase implements PlayAgent {
 
 	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
 	// Currently only dummy to make the interface NTupleAgt (which NTupleBase has to implement) happy!
-	public void collectReward(NextState ns) {
+	public void collectReward(NextState4 ns) {
 	}
 
 	// class TrainingItem is needed for replayBuffer (see trainAgent_replayBuffer(so))
-	private static class TrainingItem implements Serializable {
+	protected static class TrainingItem implements Serializable {
 		StateObsWithBoardVector sowb;
 		double target;
 		int numEpisode;

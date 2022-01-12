@@ -19,7 +19,7 @@ logs/*
 Pokerlogs/*
 agents/temp/*
 
-# all JAR files (GBGBatch.jar,...) now moved to jartools/:
+# all JAR files (GBGBatch.jar,...) now moved to jartools/, but excluded from GitHub:
 jartools/*
 GBGLaunch_BACKUP.jar
 
@@ -72,6 +72,7 @@ agents/RubiksCube/2x2x2_CSTATE_AT/*.zip
 agents/RubiksCube/2x2x2_STICKER_AT/*test.agt.zip
 agents/RubiksCube/2x2x2_STICKER2_AT/*lam05.agt.zip
 agents/RubiksCube/2x2x2_STICKER2_QT/*lam05.agt.zip
+agents/RubiksCube/2x2x2_STICKER2_QT/davi*.agt.zip
 agents/RubiksCube/3x3x3_STICKER2_AT/TCL4-p9-2000k-120-7t.agt.zip
 agents/RubiksCube/3x3x3_STICKER2_QT/*.zip
 agents/TicTacToe/test.agt.zip

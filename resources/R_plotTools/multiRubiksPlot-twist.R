@@ -12,7 +12,7 @@ source("summarySE.R")
 
 PLOTALLLINES=F  # if =T: make a plot for each filename, with one line for each run
 EE=20           # 20 or 50: eval epiLength
-TWISTTYPE="HTM" # QTM or HTM
+TWISTTYPE="QTM" # QTM or HTM
 
 filenames=c()
 for (CUBEW in c(2,3)) {        # cube width, either 2 or 3

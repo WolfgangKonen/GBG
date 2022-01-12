@@ -36,7 +36,7 @@ public class ParOther implements Serializable {
     private int numEval = DEFAULT_NUM_EVAL;
     private int episodeLength = DEFAULT_EPISODE_LENGTH;
 	private int stopTest = DEFAULT_STOP_TEST;
-    private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval
+    private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval & play
     private int wrapperNply = DEFAULT_WRAPPER_NPLY;
 	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
 	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
@@ -172,6 +172,7 @@ public class ParOther implements Serializable {
 		return stopTest;
 	}
 
+	// new meaning: max episode length during eval & play
 	public int getStopEval() {
 		return stopEval;
 	}
@@ -257,6 +258,7 @@ public class ParOther implements Serializable {
 			otparams.setEpisodeLength(epilen);
 	}
 
+	// new meaning: max episode length during eval & play
 	public void setStopEval(int epilen) {
 		this.stopEval = epilen;
 		if (otparams!=null)

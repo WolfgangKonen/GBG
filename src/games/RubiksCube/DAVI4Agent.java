@@ -1,13 +1,8 @@
 package games.RubiksCube;
 
-import agentIO.LoadSaveGBG;
 import controllers.PlayAgent;
-import controllers.TD.ntuple2.NTuple2ValueFunc;
-import controllers.TD.ntuple2.NTupleBase;
-import controllers.TD.ntuple2.NextState;
-import controllers.TD.ntuple4.NTuple4Base;
-import controllers.TD.ntuple4.NTuple4ValueFunc;
-import controllers.TD.ntuple4.NextState4;
+import controllers.TD.ntuple4.TDNTuple4Agt;
+import games.Arena;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
@@ -15,49 +10,44 @@ import params.ParNT;
 import params.ParOther;
 import params.ParTD;
 import tools.ScoreTuple;
+import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 /**
- *  Implements the DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agostinelli2019].
+ *  Implements the DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agostinelli19].
  *  <p>
- *  It simplifies DAVI by replacing the deep neural net with a (shallow but wide) n-tuple network.
- *  <ul>
- *      <li> If {@link CubeConfig#REPLAYBUFFER} is false, simplify DAVI further by updating the net in each step only with
- *      the actual (state, target) pair </li>
- *      <li> If {@link CubeConfig#REPLAYBUFFER} is true, maintain a replay buffer of {@link TrainingItem}s and train the net
- *      in batches sampled from this replay buffer. </li>
- *  </ul>
- *  It <b>maximizes</b> the value V(s) where each step (twist) adds a negative step reward to V(s).
- *  Only the solved cube s* has V(s*)=0.
+ *  It extends {@link DAVI3Agent} but has the training set generation closer to [McAleer18], [Agostinelli19],
+ *  it follows their ADI method (Autodidactic iteration).
  *
  */
-public class DAVI4Agent extends NTuple4Base implements PlayAgent {
-
-	private static final StateObserverCube def = new StateObserverCube();   // default (solved) cube
-
-	private Random rand;
-
-	private transient LinkedList<TrainingItem> replayBuffer;
-
-//	private NTupleAgt.EligType m_elig;
-//	private int numPlayers;
-
-	private final boolean RANDINITWEIGHTS = false;// If true, initialize weights of value function randomly
-	// recommended setting is false, because true gives a lot of unwanted 'cross-talk' in not yet visited states.
-
-	private final boolean m_DEBG = false; //false;true;
+public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 
 	/**
+	 *  Flag for the training set generation process: <br>
+	 *  If true, follow [McAleer18]: Generate from the solved cube a scramble sequence of length k <br>
+	 *  If false, follow [Agostinelli19]: Generate from the solved cube a k-times scrambled cube.
+	 *  <p>
+	 *  In both cases, k is in each episode uniform-randomly selected from {1,2,...,pMax}.
+	 *  The [McAleer18] approach has more (p=1) samples than (p=2) samples than ..., because every k-sequence has a
+	 *  (p=1) state, most have a (p=2) state and only a fraction (1/pMax) has a (p=pMax) state.
+	 *  <p>
+	 *  Both approaches have pMax/2 states per train episode (on average).
+	 */
+	public final static boolean TRAINSET_MCALEER = true;
+
+	public final static boolean STACKED_TCL = false;
+
+	private PlayAgent stacked_tcl;
+	private String stackedFile="TCL4-p16-10M-120-7t-lam05.agt.zip";
+	/**
 	 * change the version ID for serialization only if a newer version is no longer
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
 	@Serial
@@ -74,68 +64,10 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 	 * @param maxGameNum	maximum number of training games
 	 */
 	public DAVI4Agent(String name, ParTD tdPar, ParNT ntPar, ParOther oPar,
-                      int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) {
-		super(name);
-//		this.numPlayers = xnf.getNumPlayers();
-		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);			
-	}
-
-	/**
-	 * 
-	 * @param tdPar			temporal difference parameters
-	 * @param ntPar			n-tuples and temporal coherence parameter
-	 * @param oPar			other params
-	 * @param nTuples		the set of n-tuples
-	 * @param xnf			contains game-specific n-tuple functions
-	 * @param maxGameNum	maximum number of training games
-	 */
-	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,
-			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) {
-		m_tdPar = new ParTD(tdPar);			// m_tdPar is in NTupleBase
-		m_ntPar = new ParNT(ntPar);			// m_ntPar is in NTupleBase
-		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
-//		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
-		rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42); 
-
-		int[] posVals = xnf.getPositionValuesVector();
-		int numCells = xnf.getNumCells();
-		
-		m_Net = new NTuple4ValueFunc(this,nTuples, xnf, posVals,
-				RANDINITWEIGHTS,ntPar,numCells,1);
-		
-		setNTParams(ntPar);
-		setTDParams(tdPar, maxGameNum);
-		m_Net.setHorizon();
-
-		replayBuffer  = new LinkedList<>();
-
-		setAgentState(AgentState.INIT);
-	}
-
-	/**
-	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
-	 * of transient members), put the relevant code in here.
-	 * 
-	 * @see LoadSaveGBG#transformObjectToPlayAgent
-	 */
-	public boolean instantiateAfterLoading() {
-		this.m_Net.xnf.instantiateAfterLoading();
-		//assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
-		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
-		
-		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
-		// (they would stay otherwise at their default values, would not 
-		// get the loaded values)
-		this.setTDParams(this.getParTD(), this.getMaxGameNum());
-		this.setNTParams(this.getParNT());
-		this.weightAnalysis(null);
-		
-		// initialize transient members (in case a further training should take place --> see ValidateAgentTest) 
-		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples
-
-		replayBuffer  = new LinkedList<>();
-
-		return true;
+                      int[][] nTuples, XNTupleFuncs xnf, int maxGameNum, Arena arena) {
+		super(name, tdPar, ntPar, oPar,
+		 		nTuples, xnf, maxGameNum);
+		stacked_tcl = arena.loadAgent(stackedFile);
 	}
 
 	/**
@@ -151,30 +83,33 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 	 */
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+		if (!STACKED_TCL)
+			return super.getNextAction2(so,random,silent);
+
 		int i;
 		StateObserverCube newSO;
-        ArrayList<ACTIONS> acts = so.getAvailableActions();
-        ACTIONS actBest;
-        List<ACTIONS> bestActions = new ArrayList<>();
+		ArrayList<ACTIONS> acts = so.getAvailableActions();
+		ACTIONS actBest;
+		List<ACTIONS> bestActions = new ArrayList<>();
 		double[] vTable = new double[acts.size()];
-        double maxValue = -Double.MAX_VALUE;
-        double value;
-        boolean rgs=false;
+		double maxValue = -Double.MAX_VALUE;
+		double value;
+		boolean rgs=false;
 
-        assert so.isLegalState() : "Not a legal state"; 
-        assert so instanceof StateObserverCube : "Not a StateObserverCube object";
+		assert so.isLegalState() : "Not a legal state";
+		assert so instanceof StateObserverCube : "Not a StateObserverCube object";
 
-        for(i = 0; i < acts.size(); ++i)
-        {
-        	ACTIONS thisAct = acts.get(i);
+		for(i = 0; i < acts.size(); ++i)
+		{
+			ACTIONS thisAct = acts.get(i);
 
 			// If an action is the inverse of the last action, it would lead to the previous state again, resulting
 			// in a cycle of 2. We avoid such cycles and continue with next pass through for-loop
 			// --> beneficial when searching for the solved cube in play & train.
 			// If you do not want to skip any action - e.g. when inspecting states - then enter this method with
-			// a 'cleared' state {@link StateObserverCubeCleared} {@code so} (lastAction==9)
-//			if (thisAct.isEqualToInverseOfLastAction(so))
-//				continue;  // with next for-pass
+			// a 'cleared' state that has m_action (the action that led to this state) set to 'unknown'.
+			if (thisAct.isEqualToInverseOfLastAction(so))
+				continue;  // with next for-pass
 
 			newSO = ((StateObserverCube) so).copy();
 			newSO.advance(acts.get(i));
@@ -182,10 +117,10 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 			// value is the r + V(s) for taking action i in state s='so'. Action i leads to state newSO.
 			value = vTable[i] = newSO.getRewardTuple(rgs).scTup[0] +
 					newSO.getStepRewardTuple().scTup[0] + daviValue(newSO);
-						// this is a bit complicated for saying "stepReward
-						// ( + REWARD_POSITIVE, if it's the solved cube)' but
-						// in this way we have a common interface valid for all games:
-						//    vTable = deltaReward + V(s) [expected future rewards]
+			// this is a bit complicated for saying "stepReward
+			// ( + REWARD_POSITIVE, if it's the solved cube)' but
+			// in this way we have a common interface valid for all games:
+			//    vTable = deltaReward + V(s) [expected future rewards]
 			assert (!Double.isNaN(value)) : "Oops, daviValue returned NaN! Decrease alpha!";
 			// Always *maximize* 'value'
 			if (value==maxValue) bestActions.add(acts.get(i));
@@ -194,19 +129,19 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 				bestActions.clear();
 				bestActions.add(acts.get(i));
 			}
-        } // for
-        
-        assert bestActions.size() > 0 : "Oops, no element in bestActions! ";
-        // There might be one or more than one action with maxValue.
-        // Break ties by selecting one of them randomly:
-        actBest = bestActions.get(rand.nextInt(bestActions.size()));
+		} // for
 
-        // optional: print the best action's after state newSO and its V(newSO) = delta reward + daviValue(newSO)
-        if (!silent) {
-        	newSO = ((StateObserverCube) so).copy();
-        	newSO.advance(actBest);
-        	System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
-        }			
+		assert bestActions.size() > 0 : "Oops, no element in bestActions! ";
+		// There might be one or more than one action with maxValue.
+		// Break ties by selecting one of them randomly:
+		actBest = bestActions.get(rand.nextInt(bestActions.size()));
+
+		// optional: print the best action's after state newSO and its V(newSO) = delta reward + daviValue(newSO)
+		if (!silent) {
+			newSO = ((StateObserverCube) so).copy();
+			newSO.advance(actBest);
+			System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
+		}
 
 		ScoreTuple scBest = new ScoreTuple(new double[]{maxValue});
 
@@ -214,21 +149,6 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 	}
 
 	/**
-	 * This is the NN version: Ask the neural net (here: an ntuple network) to predict the value of {@code so}
-	 * @param so	the state
-	 * @return 0.0, if {@code so} is the solved state (no expected future rewards).
-	 *         In all other cases, return the prediction of {@link #m_Net}.
-	 */
-	public double daviValue(StateObserverCube so) {
-		double score;
-		if (so.isEqual(def)) return 0.0; // no future rewards in game-over states; the former
-		 								 // StateObserverCube.REWARD_POSITIVE is now in getDeltaRewardTuple
-		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
-		score = m_Net.getScoreI(curSOWB,so.getPlayer());
-		return score;
-	}
-	
-    /**
      * Train the agent for one complete episode starting from state so
      * 
      * @param so 		start state
@@ -236,13 +156,123 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
      */
     @Override
 	public boolean trainAgent(StateObservation so) {
-		return (CubeConfig.REPLAYBUFFER) ? trainAgent_replayBuffer(so) : trainAgent_autodidactic2(so);
+		return  (STACKED_TCL) ? trainAgent_stackedTCL(so) :
+				(CubeConfig.REPLAYBUFFER) ? trainAgent_replayBuffer(so) :
+				(TRAINSET_MCALEER) ? trainAgent_autodidactic_McA(so) : trainAgent_autodidactic_Ago(so);
 	}
 
 	/**
-	 * train with true autodidactic iteration as in [McAleer2018], [Agostin2019]
+	 * stacked TCL training: baseline training with a stacked TCL net to try at each move
 	 */
-	public boolean trainAgent_autodidactic2(StateObservation so) {
+	public boolean trainAgent_stackedTCL(StateObservation so) {
+		Types.ACTIONS_VT  a_t;
+		StateObservation s_t = so.copy();
+		int epiLength = m_oPar.getEpisodeLength();
+		int curPlayer;
+		double vLast,target;
+		assert (epiLength != -1) : "trainAgent: Rubik's Cube should not be run with epiLength==-1 !";
+		if (so.equals(def)) {
+			System.err.println("trainAgent: cube should NOT be the default (solved) cube!");
+			return false;
+		}
+		boolean m_finished = false;
+
+		do {
+			m_numTrnMoves++;		// number of train moves
+
+			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
+
+			// update the network's response to current state s_t: Let it move towards the desired target:
+			target = a_t.getVBest();
+			StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_t, m_Net.xnf);
+			curPlayer = s_t.getPlayer();
+			vLast = m_Net.getScoreI(curSOWB,curPlayer);
+			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
+					s_t.getStepRewardTuple().scTup[0],s_t);
+
+			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
+
+			s_t.advance(a_t);		// advance the state
+			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
+
+			if (s_t.isGameOver()) m_finished = true;
+			if (s_t.getMoveCounter()>=epiLength) {
+				m_finished=true;
+//				vLast = m_Net.getScoreI(curSOWB,curPlayer);
+//				target=((StateObserverCube) s_t).getMinGameScore();
+//				m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,s_t.getDeltaRewardTuple(false).scTup[0],s_t);
+			}
+
+		} while(!m_finished);
+		//System.out.println("Final state: "+s_t.stringDescr()+", "+a_t.getVBest());
+
+		incrementGameNum();
+
+		return false;
+	}
+
+	/**
+	 * train with true autodidactic iteration as in [McAleer2018]
+	 */
+	public boolean trainAgent_autodidactic_McA(StateObservation so) {
+		ACTIONS_VT  a_t;
+		ACTIONS act;
+		StateObserverCube s_t = def.copy();	// we do not use param so, but start from the default cube and twist
+		// it step-by-step until epiLength is reached
+		int curPlayer;
+		double vLast,target;
+		boolean m_finished = false;
+		int epiLength = m_oPar.getEpisodeLength();
+		assert (epiLength != -1) : "trainAgent: Rubik's Cube should not be run with epiLength==-1 !";
+		int p = 1 + rand.nextInt(m_oPar.getpMaxRubiks()-1);
+
+		do {
+			m_numTrnMoves++;		// number of train moves
+
+			// advance with an action that brings the cube one twist further away from the solved cube
+			do {
+				act = s_t.getAction(rand.nextInt(s_t.getNumAvailableActions()));
+				s_t.advance(act);
+			} while (s_t.isEqual(def));
+			s_t = (StateObserverCube) s_t.clearedAction();
+
+			// select the best action back according to the current policy
+			a_t = getNextAction2(s_t.partialState(), false, true);
+
+			// update the network's response to current state s_t: Let it move towards the desired target:
+			target = a_t.getVBest();
+			StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_t, m_Net.xnf);
+			curPlayer = s_t.getPlayer();
+			vLast = m_Net.getScoreI(curSOWB,curPlayer);
+//			m_Net.w_updateWeightsTD(curSOWB, curPlayer, 1.0/s_t.getMoveCounter(),vLast, target,
+//					s_t.getStepRewardTuple().scTup[0],s_t);
+			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
+					s_t.getStepRewardTuple().scTup[0],s_t);
+
+			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
+
+			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
+
+			if (s_t.isGameOver()) {
+				System.err.println("Game over should not happen in autodidactic iteration");
+				m_finished = true;
+			}
+			if (s_t.getMoveCounter()>=p) {
+				m_finished=true;
+			}
+
+		} while(!m_finished);
+
+		incrementGameNum();
+
+		return false;
+	}
+
+
+	/**
+	 * train with true autodidactic iteration as in [Agostinelli2019]
+	 */
+	public boolean trainAgent_autodidactic_Ago(StateObservation so) {
 		ACTIONS_VT  a_t;
 		ACTIONS act;
 		StateObserverCube s_t = def.copy();	// so is actually not used
@@ -256,7 +286,8 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 			m_numTrnMoves++;		// number of train moves
 
 			// advance with an action that brings the cube one twist further away from the solved cube
-			s_t = selectByTwists1(rand.nextInt(epiLength)+1);
+			int p = rand.nextInt(epiLength)+1;
+			s_t = StateObserverCube.chooseNewState(p);
 
 			// select the best action back according to the current policy
 			a_t = getNextAction2(s_t.partialState(), false, true);
@@ -266,7 +297,7 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 			StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_t, m_Net.xnf);
 			curPlayer = s_t.getPlayer();
 			vLast = m_Net.getScoreI(curSOWB,curPlayer);
-			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
+			m_Net.w_updateWeightsTD(curSOWB, curPlayer, 1.0/p,vLast, target,
 					s_t.getStepRewardTuple().scTup[0],s_t);
 
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
@@ -277,62 +308,6 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 				System.err.println("Game over should not happen in autodidactic iteration");
 			}
 		}
-
-		incrementGameNum();
-
-		return false;
-	}
-
-
-	/**
-	 * train with true autodidactic iteration as in [McAleer2018], [Agostin2019]
-	 */
-	public boolean trainAgent_autodidactic(StateObservation so) {
-		ACTIONS_VT  a_t;
-		ACTIONS act;
-		StateObserverCube s_t = def.copy();	// so is actually not used
-		int curPlayer;
-		double vLast,target;
-		boolean m_finished = false;
-		int epiLength = m_oPar.getEpisodeLength();
-		assert (epiLength != -1) : "trainAgent: Rubik's Cube should not be run with epiLength==-1 !";
-
-		do {
-			m_numTrnMoves++;		// number of train moves
-
-			// advance with an action that brings the cube one twist further away from the solved cube
-			do {
-//				do {
-//					act = s_t.getAction(rand.nextInt(s_t.getNumAvailableActions()));
-//				} while(act.isEqualToInverseOfLastAction(s_t));
-				act = s_t.getAction(rand.nextInt(s_t.getNumAvailableActions()));
-				s_t.advance(act);
-			} while (s_t.isEqual(def));
-
-			// select the best action back according to the current policy
-			a_t = getNextAction2(s_t.partialState(), false, true);
-
-			// update the network's response to current state s_t: Let it move towards the desired target:
-			target = a_t.getVBest();
-			StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_t, m_Net.xnf);
-			curPlayer = s_t.getPlayer();
-			vLast = m_Net.getScoreI(curSOWB,curPlayer);
-			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
-					s_t.getStepRewardTuple().scTup[0],s_t);
-
-			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
-
-			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
-
-			if (s_t.isGameOver()) {
-				System.err.println("Game over should not happen in autodidactic iteration");
-				m_finished = true;
-			}
-			if (s_t.getMoveCounter()>=epiLength) {
-				m_finished=true;
-			}
-
-		} while(!m_finished);
 
 		incrementGameNum();
 
@@ -432,152 +407,6 @@ public class DAVI4Agent extends NTuple4Base implements PlayAgent {
 
 		return false;
 	}
-
-//	@Override
-//	public double getScore(StateObservation so) {
-//        assert (so instanceof StateObserverCube) : "Not a StateObserverCube object";
-//		StateObserverCube soC = (StateObserverCube) so;
-//		return daviValue(soC);
-//	}
-
-	@Override
-	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
-		assert (so instanceof StateObserverCube) : "Not a StateObserverCube object";
-		StateObserverCube soC = (StateObserverCube) so;
-
-		ScoreTuple sTuple = new ScoreTuple(1);
-		sTuple.scTup[0] = daviValue(soC);
-		return sTuple;
-	}
-
-//	@Override
-//	public double estimateGameValue(StateObservation so) {
-//		return so.getGameScore(so.getPlayer());
-//	}
-
-	@Override
-	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
-		double[] d = {so.getRewardTuple(false).scTup[0] +
-					  so.getStepRewardTuple().scTup[0] + daviValue((StateObserverCube)so)};
-		return new ScoreTuple(d);
-	}
-
-	@Override
-	public boolean isTrainable() {
-		return true;
-	}
-
-    @Override
-	public String printTrainStatus() {
-    	int[] res = m_Net.activeWeights();
-		return getClass().getSimpleName()+": pMax="+CubeConfig.pMax + ", active weights="+res[1]; 
-	}
-
-	@Override
-	public String stringDescr() {
-		m_Net.setHorizon();
-		String cs = getClass().getSimpleName();
-		String str = cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
-				+ ", P:" + (m_Net.getXnf().getNumPositionValues())
-				+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
-				+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
-				+ ", alpha:" + m_Net.getAlpha()
-				+ ", pMax:" + m_oPar.getpMaxRubiks()
-				+ ", EE:" + m_oPar.getStopEval()		// Eval EpiLength
-				+ ", qMode:" + m_oPar.getQuickEvalMode()
-				+ ", incAmount:" + m_oPar.getIncAmount()
-				;
-		return str;
-	}
-
-	@Override
-	public String stringDescr2() {
-		m_Net.setHorizon();
-		int[] res = m_Net.activeWeights();
-		return getClass().getName() + ": pMax="+CubeConfig.pMax + ", epiLength="+m_oPar.getEpisodeLength()
-									+ ", active weights="+res[1] + ", horizon="+m_Net.getHorizon();
-	}
-
-	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
-	// Only dummy to make the interface NTuple4Agt (which NTuple4Base has to implement) happy!
-	public void collectReward(NextState4 ns) {
-		throw new RuntimeException("[DAVI4Agent] collectReward should not be called, is only a stub ");
-	}
-
-	// class TrainingItem is needed for replayBuffer (see trainAgent_replayBuffer(so))
-	private static class TrainingItem implements Serializable {
-		StateObsWithBoardVector sowb;
-		double target;
-		int numEpisode;
-
-		TrainingItem(StateObsWithBoardVector sowb, double target, int numEpisode) {
-			this.sowb = sowb;
-			this.target = target;
-			this.numEpisode = numEpisode;
-		}
-
-		TrainingItem increaseTarget(double amount) {
-			this.target += amount;
-			return this;
-		}
-	}
-
-	/**
-	 * Method to select a start state by doing p random twist on the default cube.
-	 * This may be the only way to select a start state being p=8,9,... twists away from the
-	 * solved cube (where the distance set D[p] becomes to big).
-	 * <p>
-	 * But it has the caveat that p random twists do not guarantee to produce a state in D[p].
-	 * Due to twins etc. the resulting state may be actually in D[p-1], D[p-2] and below.
-	 * However, it works quickly for arbitrary p.
-	 */
-	protected StateObserverCubeCleared selectByTwists1(int p) {
-		StateObserverCubeCleared d_so;
-		int index;
-		boolean cond;
-		//System.out.println("selectByTwists1: p="+p);
-		StateObserverCube so = new StateObserverCube(); // default cube
-		int attempts=0;
-		while (so.isEqual(def)) {		// do another round, if so is after twisting still default state
-			attempts++;
-			if (attempts % 1000==0) {
-				System.err.println("[selectByTwists1] no cube different from default found -- may be p=0?? p="+p);
-			}
-			// make p twists and hope that we land in
-			// distance set D[p] (which is often not true for p>5)
-			switch (CubeConfig.twistType) {
-				case HTM:
-					for (int k=0; k<p; k++)  {
-						do {
-							index = rand.nextInt(so.getAvailableActions().size());
-							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
-							// If doublets are forbidden (i.e. TWIST_DOUBLETS==false), then boolean cond stays true as long as
-							// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because
-							// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists.
-						} while (cond);
-						so.advance(so.getAction(index));
-					}
-					break;
-				case QTM:
-					for (int k=0; k<p; k++)  {
-						do {
-							index = rand.nextInt(so.getAvailableActions().size());
-							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
-									(index%3+1) != so.getCubeState().lastTimes);
-							// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
-							// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3
-							// are possible here). This is because doublet U1U3 would leave the cube unchanged
-						} while (cond);
-						so.advance(so.getAction(index));
-					}
-					break;
-			}
-		}
-		d_so = new StateObserverCubeCleared(so,p);
-
-		return d_so;
-	}
-
 
 
 }

@@ -18,9 +18,9 @@ import tools.Types.ACTIONS_VT;
  *  Implements DAVI algorithm (Deep Approximate Value Iteration) for Rubik's Cube [Agnostelli2019] with a HashMap.
  *  <p>
  *  It simplifies DAVI by replacing the deep neural net with state-based value iteration. It maintains a table or
- *  {@link HashMap} of the value of all seen states. Thus, it is probably only viable 
- *  for smaller systems.<br>
- *  It <b>maximizes</b> the (non-positive) value V(s) where each step (twist) adds a negative step reward to V(s).  
+ *  {@link HashMap} of the value of all seen states. Thus, it probably
+ *  <b>works only for smaller systems</b>.<br>
+ *  It maximizes the (non-positive) value V(s) where each step (twist) adds a negative step reward to V(s).
  *  Only the solved cube s* has V(s*)=0.
  *
  */

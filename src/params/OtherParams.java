@@ -149,7 +149,7 @@ public class OtherParams extends Frame {
 				"<html>During training: Maximum number of moves in an episode. <br>If reached, game terminates prematurely. -1: never terminate.</html>");
 		stopTest_L.setToolTipText("During training: If >0 then perform stop test");
 		stopEval_L.setToolTipText(
-				"<html>During evaluation: Maximum number of moves in an episode. <br>If reached, game terminates prematurely. -1: never terminate.</html>");
+				"<html>During eval &amp play: Maximum number of moves in an episode. <br>If reached, game terminates prematurely. -1: never terminate.</html>");
 		chooseS01L.setToolTipText("<html>Choose start state in training: <br>50% default, 50% random 1-ply</html>");
 		learnRM_L.setToolTipText("Learn from random moves during training");
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
@@ -341,7 +341,9 @@ public class OtherParams extends Frame {
 	}
 
 	public int getStopEval() {
-		return Integer.valueOf(stopEval_T.getText()).intValue();
+		int elen = Integer.valueOf(stopEval_T.getText()).intValue();
+		if (elen == -1)	elen = Integer.MAX_VALUE;
+		return elen;
 	}
 
 	public int getNumEval() {

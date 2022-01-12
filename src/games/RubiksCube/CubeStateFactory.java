@@ -2,10 +2,10 @@ package games.RubiksCube;
 
 import games.BoardVector;
 
+/**
+ * factory class that allows to delegate the CubeState object construction to classes derived from CubeState:
+ */
 public class CubeStateFactory {
-    //
-    // factory methods: they allow to delegate the CubeState object construction to classes derived from CubeState:
-    //
 
     public CubeState makeCubeState() {
         switch (CubeConfig.cubeType) {

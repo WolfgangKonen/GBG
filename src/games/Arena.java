@@ -331,23 +331,24 @@ abstract public class Arena implements Runnable {
 
 		boolean stored_USELASTMCTS = ConfigWrapper.USELASTMCTS;
 		ConfigWrapper.USELASTMCTS = false;
-		so = gb.getStateObs().clearedCopy();
+		so = gb.getStateObs();  // just to initialize it
 
 		while (taskState == Task.INSPECTV) {
 			if (gb.isActionReq()) {
 				gb.setActionReq(false);
 				gb.enableInteraction(false);
+
 				so = gb.getStateObs().clearedCopy();
 				//so = gb.getStateObs();
-				if (!so.isGameOver()&&so.isRoundOver()) so.initRound();
-
-				// clearedCopy realizes a special treatment needed for RubiksCube: getNextAction2, which is called
+				// Special treatment for RubiksCube: getNextAction2, which is called
 				// below, skips from the available actions the inverse of the last action to avoid cycles of 2.
 				// This boosts performance when playing or evaluating RubiksCube. But it is wrong on InspectV,
-				// here we want to cover *ALL* available actions. By clearing the cube state we clear the last action
-				// (set it to unknown).
+				// here we want to cover *ALL* available actions. clearedCopy realizes this: By clearing the cube
+				// state we clear the last action (set it to unknown) and thus allow all actions in getNextAction2.
+				//
 				// For all other games, clearedCopy is identical to copy.
 
+				if (!so.isGameOver()&&so.isRoundOver()) so.initRound();
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
 					// int Index = this.getHexIndex(soh.getBoard());
@@ -468,13 +469,13 @@ abstract public class Arena implements Runnable {
 	}
 
 	/**
-	 * Play a game. Is called either via {@link Arena}'s Play button or from the Tournament System (TS). In 
-	 * the TS-case, the game is a single-player game, since only then the tournament is a game play of 
+	 * Play a game on the game board. Is called either via {@link Arena}'s Play button or from the Tournament System (TS).
+	 * In the TS-case, the game is a single-player game, since only then the tournament is a game play of
 	 * each agent and the results are recorded. <br>
 	 * [In both cases we have {@code this.taskState == Task.PLAY}.]
 	 * 
-	 * @param spDT if {@code null} then {@code #PlayGame(TSGameDataTransfer)} was called via
-	 * Play button, if not, it was called from the Tournament System.
+	 * @param spDT 	if {@code null} then {@code #PlayGame(TSGameDataTransfer)} was called via
+	 * 				Play button, if not, it was called from the Tournament System.
 	 */
 	public void PlayGame(TSGameDataTransfer spDT) {
 		m_spDT = spDT;
@@ -497,7 +498,7 @@ abstract public class Arena implements Runnable {
 		PlayAgent[] qaVector = fetchPlayAgents(numPlayers);
 		if (qaVector==null) return;
 
-		String[] agentVec = buildPlayMessages(qaVector,numPlayers);
+		ArrayList<String> agentList = buildPlayMessages(qaVector,numPlayers);
 
 		so = selectPlayStartState(showValue);
 
@@ -530,18 +531,18 @@ abstract public class Arena implements Runnable {
 							int N_EMPTY = 4;
 							actBest = getNextAction_DEBG(so.partialState(), pa, p2, N_EMPTY);
 						} else {
-							//long startT = System.currentTimeMillis();
 							long startTNano = System.nanoTime();
 							actBest = pa.getNextAction2(so.partialState(), false, false);
-							//long endT = System.currentTimeMillis();
-							long endTNano = System.nanoTime();
-							//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endT-startT)+"ms");
-							//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms");
-							if (m_spDT!=null)
-								m_spDT.nextTimes[0].addNewTimeNS(endTNano-startTNano);
+
+							if (m_spDT!=null) {
+								long endTNano = System.nanoTime();
+								//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endT-startT)+"ms");
+								//System.out.println("pa.getNextAction2(so.partialState(), false, true); processTime: "+(endTNano-startTNano)+"ns | "+(endTNano-startTNano)/(1*Math.pow(10,6))+"ms");
+								m_spDT.nextTimes[0].addNewTimeNS(endTNano - startTNano);
+							}
 						}
 						if (actBest==null) {
-							// an exception occurred and was caught:
+							// s.th. went wrong:
 							System.out.println("Cannot play a game with "+pa.getName());
 							taskState = Task.IDLE;
 							setStatusMessage("Done.");
@@ -613,13 +614,14 @@ abstract public class Arena implements Runnable {
 				// test two conditions to break out of the while-loop
 				//
 				if (so.isGameOver()) {
-					String gostr = this.gameOverString(so,agentVec);
+					String gostr = this.gameOverString(so,agentList);
 					this.gameOverMessages(so,numPlayers,gostr,showValue);
 
 					break; // this is the 1st condition to break out of while loop
 				} // if isGameOver
 
-				if (so.getMoveCounter() > m_xab.oPar[0].getEpisodeLength()) {
+				int epiLength = m_xab.oPar[0].getStopEval();	// stopEval contains the play & eval epiLength
+				if (so.getMoveCounter() > epiLength) {
 					double gScore = so.getGameScore(so.getPlayer());
 					if (so instanceof StateObserver2048)
 						gScore *= StateObserver2048.MAXSCORE;
@@ -629,6 +631,10 @@ abstract public class Arena implements Runnable {
 					break; // this is the 2nd condition to break out of while loop
 				} // if (so.getMoveCounter()...)
 
+				// enable premature exit if PLAY button is pressed again:
+				if (taskState != Arena.Task.PLAY) {
+					showMessage("Play stopped prematurely", "Warning", JOptionPane.WARNING_MESSAGE);
+				}
 			} 	// while(taskState == Task.PLAY) [will be left only by one
 				// of the last two break(s) above OR when taskState changes]
 		} catch (RuntimeException e) {
@@ -650,7 +656,109 @@ abstract public class Arena implements Runnable {
 		setStatusMessage("Done.");
 	} // PlayGame(TSGameDataTransfer spDT)
 
-	// fetch the agents in a way general for 1-, 2- and N-player games
+	/**
+	 * Play an internal game (without game board, without sleep, without HumanPlayer)
+	 *
+	 * @param qaVector	the agent vector
+	 * @param so		the start state
+	 * @return
+	 */
+	public ArrayList<String> playInnerGame(PlayAgent[] qaVector,StateObservation so) {
+		final int numPlayers = gb.getStateObs().getNumPlayers();
+		Types.ACTIONS_VT actBest;
+		PlayAgent pa;
+
+		String gostr;
+
+		ArrayList<String> strList = buildPlayMessages(qaVector,numPlayers);
+//		for (int i=0; i<agentVec.length; i++) strList.add(agentVec[i]);
+
+		assert qaVector.length == so.getNumPlayers() : "Number of agents does not match so.getNumPlayers()!";
+
+//		startSO = so.copy();
+
+//		logSessionid = logManager.newLoggingSession(so);
+
+//		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, nEmpty, cumEmpty, highestTile);
+//		psList.add(pstats);
+
+//		int nEmpty = 0, cumEmpty = 0, highestTile=0;
+//		double gameScore = 0.0;
+
+		while (true) {
+				pa = qaVector[so.getPlayer()];
+				assert !(pa instanceof controllers.HumanPlayer) :"[playInnerGame] HumanPlayer not allowed";
+//					gb.setActionReq(false);
+//					showValue_U = showValue;	// leave the previously shown values if it is HumanPlayer
+
+//					gb.enableInteraction(false);
+
+					actBest = pa.getNextAction2(so.partialState(), false, false);
+
+					if (actBest==null) {
+						// s.th. went wrong:
+						strList.add("[actBest==null] Cannot play a game with "+pa.getName());
+						return strList;
+					}
+
+					so.storeBestActionInfo(actBest);
+					so.advance(actBest);
+//					logManager.addLogEntry(actBest, so, logSessionid);
+
+//					// gather information for later printout to agents/gameName/csv/playStats.csv.
+//					// This is mostly for diagnostics in game 2048, but useful for other games as well.
+//					if (so instanceof StateObserver2048) {
+//						StateObserver2048 so2048 = (StateObserver2048) so;
+//						nEmpty = so2048.getNumEmptyTiles();
+//						cumEmpty += nEmpty;
+//						highestTile = so2048.getHighestTileValue();
+//						gameScore = so2048.getGameScore(so2048.getPlayer()) * so2048.MAXSCORE;
+//					} else {
+//						gameScore = so.getGameScore(so.getPlayer());
+//					}
+//					pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), actBest.toInt(), gameScore,
+//							nEmpty, cumEmpty, highestTile);
+//					psList.add(pstats);
+//					gb.enableInteraction(true);
+
+//				if (!so.isRoundOver()) gb.updateBoard(so, false, showValue_U);
+
+			if (so.isRoundOver()) {
+
+				if (!so.isGameOver()) {
+					so.initRound();
+					assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
+				}
+			}
+
+			//
+			// test two conditions to break out of the while-loop
+			//
+			if (so.isGameOver()) {
+				gostr = this.gameOverString(so,strList);
+//				this.gameOverMessages(so,numPlayers,gostr,false);
+
+				break; // this is the 1st condition to break out of while loop
+			} // if isGameOver
+
+			int epiLength = m_xab.oPar[0].getStopEval();	// stopEval contains the play & eval epiLength
+			if (so.getMoveCounter() > epiLength) {
+				double gScore = so.getGameScore(so.getPlayer());
+				if (so instanceof StateObserver2048) gScore *= StateObserver2048.MAXSCORE;
+				gostr ="Game stopped (epiLength) with score " + gScore;
+
+				break; // this is the 2nd condition to break out of while loop
+			} // if (so.getMoveCounter()...)
+
+		} // while
+
+		strList.add(gostr);
+//		logManager.endLoggingSession(logSessionid, this.getGameName());
+
+		return strList;
+	} // playInnerGame
+
+		// fetch the agents in a way general for 1-, 2- and N-player games
 	private PlayAgent[] fetchPlayAgents(int numPlayers) {
 		PlayAgent[] paVector, qaVector;
 		try {
@@ -682,8 +790,10 @@ abstract public class Arena implements Runnable {
 
 	// Build the messages shown at start of game play (helper for PlayGame(...))
 	// Returns the string vector of all agent names.
-	private String[] buildPlayMessages(PlayAgent[] qaVector, int numPlayers){
-		String[] agentVec = new String[numPlayers];
+	private ArrayList<String> buildPlayMessages(PlayAgent[] qaVector, int numPlayers){
+//		String[] agentVec = new String[numPlayers];
+		ArrayList<String> agentList = new ArrayList<>();
+		String str;
 		StringBuilder sMsg;
 
 		if (m_spDT == null)
@@ -691,22 +801,26 @@ abstract public class Arena implements Runnable {
 
 		switch (numPlayers) {
 			case (1) -> {
-				agentVec[0] = m_xab.getSelectedAgent(0);
-				sMsg = new StringBuilder("Playing a game ... [ " + agentVec[0] + " ]");
+//				agentVec[0] = m_xab.getSelectedAgent(0);
+				agentList.add(0,m_xab.getSelectedAgent(0));
+				sMsg = new StringBuilder("Playing a game ... [ " + agentList.get(0) + " ]");
 				int wrappedNPly = m_xab.oPar[0].getWrapperNPly();
 				if (wrappedNPly > 0)
-					sMsg = new StringBuilder("Playing a game ... [ " + agentVec[0] + ", nPly=" + wrappedNPly + " ]");
+					sMsg = new StringBuilder("Playing a game ... [ " + agentList.get(0) + ", nPly=" + wrappedNPly + " ]");
 			}
 			case (2) -> {
-				agentVec[0] = qaVector[0].getName();
-				agentVec[1] = qaVector[1].getName();
-				sMsg = new StringBuilder("Playing a game ... [" + agentVec[0] + " (X) vs. " + agentVec[1] + " (O)]");
+//				agentVec[0] = qaVector[0].getName();
+//				agentVec[1] = qaVector[1].getName();
+				agentList.add(0,qaVector[0].getName());
+				agentList.add(1,qaVector[1].getName());
+				sMsg = new StringBuilder("Playing a game ... [" + agentList.get(0) + " (X) vs. " + agentList.get(1) + " (O)]");
 			}
 			default -> {
 				sMsg = new StringBuilder("Playing a game ... [");
 				for (int n = 0; n < numPlayers; n++) {
-					agentVec[n] = qaVector[n].getName();
-					sMsg.append(agentVec[n]).append("(").append(n).append(")");
+//					agentVec[n] = qaVector[n].getName();
+					agentList.add(n,qaVector[n].getName());
+					sMsg.append(agentList.get(n)).append("(").append(n).append(")");
 					if (n < numPlayers - 1)
 						sMsg.append(", ");
 				}
@@ -716,7 +830,7 @@ abstract public class Arena implements Runnable {
 		setStatusMessage(sMsg.toString());
 		System.out.println(sMsg);
 
-		return agentVec;
+		return agentList;
 	}
 
 	// Select the start state (helper for PlayGame(...))
@@ -799,10 +913,10 @@ abstract public class Arena implements Runnable {
 	 * If a game should require a special string here, it may override this function.
 	 * 
 	 * @param so			the game-over state 
-	 * @param agentVec		the names of all agents
+	 * @param agentList		the names of all agents
 	 * @return	the game-over string
 	 */
-	public String gameOverString(StateObservation so, String[] agentVec) {
+	public String gameOverString(StateObservation so, ArrayList<String> agentList) {
 		ScoreTuple sc = so.getGameScoreTuple();
 
 		// just debug C4:
@@ -824,8 +938,8 @@ abstract public class Arena implements Runnable {
 			case 2 -> {
 				winner = sc.argmax();
 				goStr = new StringBuilder(switch (winner) {
-					case (0) -> "X (" + agentVec[0] + ") wins";
-					case (1) -> "O (" + agentVec[1] + ") wins";
+					case (0) -> "X (" + agentList.get(0) + ") wins";
+					case (1) -> "O (" + agentList.get(1) + ") wins";
 					default -> goStr.toString();
 				});
 				if (sc.max() == 0.0)
@@ -850,7 +964,7 @@ abstract public class Arena implements Runnable {
 						numWinners++;
 					}
 				}
-				goStr.append((numWinners == 1) ? " (" + agentVec[winner] + ") wins" : " win");
+				goStr.append((numWinners == 1) ? " (" + agentList.get(winner) + ") wins" : " win");
 
 				// count the ties:
 				if (sc.max() == 0.0) {
@@ -891,7 +1005,7 @@ abstract public class Arena implements Runnable {
 						numWinners++;
 					}
 				}
-				goStr.append((numWinners == 1) ? " (" + agentVec[winner] + ") wins" : " win");
+				goStr.append((numWinners == 1) ? " (" + agentList.get(winner) + ") wins" : " win");
 				if (sc.max() == 0.0) {
 					goStr = new StringBuilder("Tie between ");
 					int numTies = 0;

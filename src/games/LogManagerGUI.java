@@ -1,7 +1,6 @@
 package games;
 
 import games.RubiksCube.StateObserverCube;
-import games.RubiksCube.StateObserverCubeCleared;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;

@@ -264,7 +264,7 @@ public class XArenaFuncs {
 				NTuple4Factory ntupfac = new NTuple4Factory();
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum);
+						m_xab.oPar[n], nTuples, xnf, maxGameNum, m_xab.m_arena);
 			} else if(sAgent.equals("BSBJA")) { // Black Jack only, see
 												// gui_agent_list in XArenaButtonsGui
 				pa = new BasicStrategyBlackJackAgent();
@@ -477,7 +477,7 @@ public class XArenaFuncs {
 						NTuple4Factory ntupfac = new NTuple4Factory();
 						int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 						pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-								m_xab.oPar[n], nTuples, xnf, maxGameNum);
+								m_xab.oPar[n], nTuples, xnf, maxGameNum, m_Arena);
 					} catch (Exception e) {
 						m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 						// e.printStackTrace();

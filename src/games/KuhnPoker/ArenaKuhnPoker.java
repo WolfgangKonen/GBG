@@ -5,6 +5,7 @@ import games.*;
 import tools.Types;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 public class ArenaKuhnPoker extends Arena   {
@@ -50,7 +51,7 @@ public class ArenaKuhnPoker extends Arena   {
 
 
 	@Override
-	public String gameOverString(StateObservation so, String[] agentVec) {
+	public String gameOverString(StateObservation so, ArrayList<String> agentVec) {
 		String goStr="";
 		StateObserverKuhnPoker sop = (StateObserverKuhnPoker) so;
 		for(int i = 0;i<so.getNumPlayers();i++){

@@ -38,8 +38,8 @@ public interface StateObservation extends PartialState, Serializable{
 
 	/**
 	 * Some classes implementing StateObservation store information about the history that led to this state.
-	 * This is useful in some situations (e.g. Rubik's Cube, when searching the twist sequence to the solved cube
-	 * then it is useful to avoid the inverse twist of the last twist taken). But in some other situations,
+	 * This is useful in some situations (e.g. Rubik's Cube: When searching the twist sequence to the solved cube,
+	 * it is useful to avoid the inverse twist of the last twist taken). But in some other situations,
 	 * history information should be cleared, i.e. a cleared copy is needed.
 	 * <p>
 	 * ObserverBase provides a default implementation which just returns a copy of {@code this}.

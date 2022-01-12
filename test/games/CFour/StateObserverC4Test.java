@@ -6,6 +6,8 @@ import games.StateObservation;
 import org.junit.Test;
 import tools.Types;
 
+import java.util.ArrayList;
+
 public class StateObserverC4Test {
     // this is a full board which has in the highest row a 'oooo', i.e. it is a win for player 1 ('o')
     String sb1 = "|ooXoXo|XoXoXo|oXXXoo|XXoXoo|oXoXXX|XoXoXo|XoXoXo|";
@@ -61,7 +63,8 @@ public class StateObserverC4Test {
     public void runTestWin(String prefix, int[][] board, int[][] bprev, String sb, String sp) {
         StateObserverC4 sobC4 = new StateObserverC4(board);
         StateObserverC4 sprev = new StateObserverC4(bprev);
-        String[] players = {"P1","P2"};
+        ArrayList<String> players = new ArrayList<>();
+        players.add("P1"); players.add("P2");
 
         assert sobC4.isLegalState();
         assert sobC4.stringDescr().equals(sb);

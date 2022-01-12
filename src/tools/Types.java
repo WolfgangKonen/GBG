@@ -103,6 +103,7 @@ public class Types {
 		public boolean isEqualToInverseOfLastAction(StateObservation so) {
 			if (so instanceof StateObserverCube) {
 				Types.ACTIONS inverseAct = inverseAction(((StateObserverCube) so).getLastAction(),so);
+				// note the getLastAction() returns m_action, which is set to 'unknown' in the clearedCopy() case.
 				return this.equals(inverseAct);
 			}
 			return false; 	// for all games other than RubiksCube
@@ -112,11 +113,11 @@ public class Types {
         	if (so instanceof StateObserverCube) {
 				int[] inverseActs;
         		if (((StateObserverCube) so).getCubeState() instanceof CubeState2x2) {
-					inverseActs = new int[]{2,1,0, 5,4,3, 8,7,6, 9} ;	// '9' codes 'not known' --> we return 'not known'
+					inverseActs = new int[]{2,1,0, 5,4,3, 8,7,6, 9} ;	// '9' codes 'unknown'. In this case we also return 'unknown'
 				} else { // CubeState3x3 case
 					inverseActs = new int[]{
 									  2,1,0,   5,4,3,      8,7,6,
-									11,10,9,  14,13,12,  17,16,15,  18};// '18' codes 'not known' --> we return 'not known'
+									11,10,9,  14,13,12,  17,16,15,  18};//'18' codes 'unknown'. In this case we also return 'unknown'
 				}
 				int iAction = act.toInt();
 				return new ACTIONS(inverseActs[iAction]);

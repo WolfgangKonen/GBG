@@ -226,7 +226,8 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
         Types.ACTIONS_VT actBestVT;
     	bestValue = -Double.MAX_VALUE;
 		double[] VTable;		
-		
+		//if (!silent) System.out.print("GNA2: ");	// just debug: we enter getNextAction2 ...
+
         otilde = so.getRewardTuple(rgs).scTup[so.getPlayer()];
         
         // just debug:
@@ -259,9 +260,9 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			// lead to the previous state again, resulting in a cycle of 2. We avoid such cycles and continue with
 			// next pass through for-loop --> beneficial when searching for the solved cube in play & train.
 			// If you do not want to skip any action - e.g. when inspecting states - then enter this method with
-			// a 'cleared' state {@link StateObserverCubeCleared} {@code so} (lastAction==9).
+			// a 'cleared' state that has m_action (the action that led to this state) set to 'unknown'.
 			//
-			// For all other games, usually no return to the previous state is possible. For those games
+			// For most other games, no return to the previous state is possible. For those games
 			// isEqualToInverseOfLastAction returns always false.
 			if (thisAct.isEqualToInverseOfLastAction(so))
 				continue;	// with next for-pass
