@@ -120,7 +120,7 @@ public class DAVI_Test {
      * @return a HashMap with a ValueContainer for every key p = {1,...,pMax} (number of twists)
      */
     protected HashMap<Integer,ValueContainer> predict_value(PlayAgent pa, int pMax, int nump, GameBoardCube gb) {
-        HashMap<Integer,ValueContainer> hm = new HashMap<Integer, ValueContainer>();
+        HashMap<Integer,ValueContainer> hm = new HashMap<>();
         for (int p=1; p<=pMax; p++) {
             ValueContainer vc = new ValueContainer(nump);
 
@@ -152,9 +152,9 @@ public class DAVI_Test {
      * A set of {@code cubes} with their predicted {@code values} and solution length {@code pSolve}. <br>
      * This object is also capable to calculate mean, std, min and max of array {@code values}
      */
-    class ValueContainer {
+    static class ValueContainer {
         public double[] values;
-        private double[] sq_dev;
+        private final double[] sq_dev;
         public StateObservation[] cubes;
         public int[] pSolve;
         public double mean;
@@ -238,5 +238,6 @@ public class DAVI_Test {
         assert(vc.mean==2);
         assert(vc.std==myStd);
     }
+
 
 }

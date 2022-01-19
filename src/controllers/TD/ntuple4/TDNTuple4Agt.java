@@ -173,6 +173,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
 		this.m_Net.xnf.instantiateAfterLoading();
 		for (int i=0; i<m_Net.xnf.getPositionValuesVector().length; i++)
 			assert (m_Net.getNTuples()[0].getPosVals(i)==m_Net.xnf.getPositionValuesVector()[i]) : "Error getPosVals("+i+")";

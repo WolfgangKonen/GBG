@@ -40,12 +40,11 @@ agents/theNtuple.txt
 # too big (92 MB) for a regular save to GitHub (remember that GitHub has a hard file limit at 100 MB -
 # and if such a >100-MB file happens to be in a commit, the commit will fail - and so far there is no other 
 # option to reset this than setting up the whole local clone anew again (!!))
-agents/2048/fixed TEST eTiles 4 6-Tupels 200k TDNT2.agt.zip
 agents/2048/TEST*.agt.zip
 agents/2048/TC*.agt.zip
 agents/2048/Sarsa*.agt.zip
 agents/2048/old
-#(the only 2048 agent we have in repos is sample-TDNT2-forGitHub.agt.zip)
+#(the only 2048 agent we have in repos is TDNT3-forGitHub.stub.agt.zip)
 agents/Hex/04/old
 agents/Hex/05/old
 agents/Hex/05/sarsaNT-eps02.agt.zip

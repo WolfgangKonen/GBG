@@ -212,9 +212,7 @@ public class XArenaFuncs {
 //				pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 			} else if (sAgent.equals("MC-N")) {
 				pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
-			} else if (sAgent.equals("AlphaBeta")) {// CFour only, see
-													// gui_agent_list in
-													// XArenaButtonsGui
+			} else if (sAgent.equals("AlphaBeta")) {// CFour only, see gui_agent_list in XArenaButtonsGui
 				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
 				alphaBetaStd.instantiateAfterLoading();
 				pa = alphaBetaStd;
@@ -222,54 +220,37 @@ public class XArenaFuncs {
 				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
 				alphaBetaStd.instantiateAfterLoading();
 				pa = alphaBetaStd;
-			} else if (sAgent.equals("Bouton")) { 	// Nim only, see
-													// gui_agent_list in
-													// XArenaButtonsGui
+			} else if (sAgent.equals("Bouton")) { 	// Nim only, see gui_agent_list in XArenaButtonsGui
 				pa = new BoutonAgent(sAgent);
-			} else if (sAgent.equals("DaviNim")) { 	// Nim3P only, see
-													// gui_agent_list in
-													// XArenaButtonsGui
+			} else if (sAgent.equals("DaviNim")) { 	// Nim3P only, see gui_agent_list in XArenaButtonsGui
 				pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
-			} else if (sAgent.equals("HeurPlayer")) { // Othello only, see
-													  // gui_agent_list in
-													  // XArenaButtonsGui
+			} else if (sAgent.equals("HeurPlayer")) { // Othello only, see gui_agent_list in XArenaButtonsGui
 				pa = new BenchMarkPlayer("HeurPlayer", 0);
-			} else if (sAgent.equals("BenchPlayer")) { // Othello only, see
-													   // gui_agent_list in
-													   // XArenaButtonsGui
+			} else if (sAgent.equals("BenchPlayer")) { // Othello only, see gui_agent_list in XArenaButtonsGui
 				pa = new BenchMarkPlayer("BenchPlayer", 1);
-//			} else if (sAgent.equals("Edax")) { // Othello only, see
-//												// gui_agent_list in
-//												// XArenaButtonsGui
+//			} else if (sAgent.equals("Edax")) { // Othello only, see gui_agent_list in XArenaButtonsGui
 //				pa = new Edax();
-			} else if (sAgent.equals("Edax2")) {// Othello only, see
-												// gui_agent_list in XArenaButtonsGui
+			} else if (sAgent.equals("Edax2")) {// Othello only, see gui_agent_list in XArenaButtonsGui
 				pa = new Edax2(sAgent, m_xab.edPar[n]);
-//			} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
-//												// gui_agent_list in XArenaButtonsGui
+//			} else if (sAgent.equals("DAVI")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
 //				pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
-			} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see
-												 // gui_agent_list in XArenaButtonsGui
+			} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
 				pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
-			} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see
-				 								 // gui_agent_list in XArenaButtonsGui
+			} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n], nTuples, xnf, maxGameNum);
-			} else if (sAgent.equals("DAVI4")) { // RubiksCube only, see
-												 // gui_agent_list in XArenaButtonsGui
+			} else if (sAgent.equals("DAVI4")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTuple4Factory ntupfac = new NTuple4Factory();
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n], nTuples, xnf, maxGameNum, m_xab.m_arena);
-			} else if(sAgent.equals("BSBJA")) { // Black Jack only, see
-												// gui_agent_list in XArenaButtonsGui
+			} else if(sAgent.equals("BSBJA")) { // Black Jack only, see gui_agent_list in XArenaButtonsGui
 				pa = new BasicStrategyBlackJackAgent();
-			} else if(sAgent.equals("KuhnOptimal")) { // KuhnPoker only, see
-													  // gui_agent_list in XArenaButtonsGui
+			} else if(sAgent.equals("KuhnOptimal")) { // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
 				pa = new KuhnPokerAgent("KuhnOptimal");
 			}
 		} catch (Exception e) {
@@ -327,9 +308,7 @@ public class XArenaFuncs {
 //			pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("MC-N")) {
 			pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("AlphaBeta")) {// CFour only, see
-												// gui_agent_list in
-												// XArenaButtonsGui
+		} else if (sAgent.equals("AlphaBeta")) {// CFour only, see gui_agent_list in XArenaButtonsGui
 			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
 			alphaBetaStd.instantiateAfterLoading();
 			pa = alphaBetaStd;
@@ -337,29 +316,19 @@ public class XArenaFuncs {
 			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
 			alphaBetaStd.instantiateAfterLoading();
 			pa = alphaBetaStd;
-		} else if (sAgent.equals("Bouton")) { 	// Nim only, see gui_agent_list in
-												// XArenaButtonsGui
+		} else if (sAgent.equals("Bouton")) { 	// Nim only, see gui_agent_list in XArenaButtonsGui
 			pa = new BoutonAgent(sAgent);
-		} else if (sAgent.equals("HeurPlayer")) { 	// Othello only, see
-													// gui_agent_list in
-													// XArenaButtonsGui
+		} else if (sAgent.equals("HeurPlayer")) { 	// Othello only, see gui_agent_list in XArenaButtonsGui
 			pa = new BenchMarkPlayer("HeurPlayer", 0);
-		} else if (sAgent.equals("BenchPlayer")) { 	// Othello only, see
-													// gui_agent_list in
-													// XArenaButtonsGui
+		} else if (sAgent.equals("BenchPlayer")) { 	// Othello only, see gui_agent_list in XArenaButtonsGui
 			pa = new BenchMarkPlayer("BenchPlayer", 1);
-//		} else if (sAgent.equals("Edax")) { // Othello only, see gui_agent_list
-//											// in XArenaButtons
+//		} else if (sAgent.equals("Edax")) { // Othello only, see gui_agent_list in XArenaButtons
 //			pa = new Edax();
-		} else if (sAgent.equals("Edax2")) { 	// Othello only, see gui_agent_list
-												// in XArenaButtons
+		} else if (sAgent.equals("Edax2")) { 	// Othello only, see gui_agent_list in XArenaButtons
 			pa = new Edax2(sAgent, m_xab.edPar[n]);
-		} else if(sAgent.equals("BSBJA")) { // Black Jack only, see
-											// gui_agent_list in
-											// XArenaButtonsGui
+		} else if(sAgent.equals("BSBJA")) { // Black Jack only, see gui_agent_list in XArenaButtonsGui
 			pa = new BasicStrategyBlackJackAgent();
-		} else if(sAgent.equals("KuhnOptimal")) { // KuhnPoker only, see
-			// gui_agent_list in XArenaButtonsGui
+		} else if(sAgent.equals("KuhnOptimal")) { // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
 			pa = new KuhnPokerAgent("KuhnOptimal");
 		}else { // all the trainable agents:
 			if (m_PlayAgents[n] == null) {
@@ -446,19 +415,13 @@ public class XArenaFuncs {
 						// e.printStackTrace();
 						pa = null;
 					}
-				} else if (sAgent.equals("DaviNim")) { 	// Nim3P only, see
-														// gui_agent_list in
-														// XArenaButtonsGui
+				} else if (sAgent.equals("DaviNim")) { 	// Nim3P only, see gui_agent_list in XArenaButtonsGui
 					pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
-//				} else if (sAgent.equals("DAVI")) { // RubiksCube only, see
-//													// gui_agent_list in
-//													// XArenaButtonsGui
+//				} else if (sAgent.equals("DAVI")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
 //					pa = new DAVIAgent(sAgent, m_xab.oPar[n]);
-				} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see
-													 // gui_agent_list in XArenaButtonsGui
+				} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
 					pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
-				} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see
-					 								 // gui_agent_list in XArenaButtonsGui
+				} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
 					try {
 						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 						NTupleFactory ntupfac = new NTupleFactory();
@@ -470,8 +433,7 @@ public class XArenaFuncs {
 						// e.printStackTrace();
 						pa = null;
 					}
-				} else if (sAgent.equals("DAVI4")) { // RubiksCube only, see
-													 // gui_agent_list in XArenaButtonsGui
+				} else if (sAgent.equals("DAVI4")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
 					try {
 						XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 						NTuple4Factory ntupfac = new NTuple4Factory();
@@ -495,8 +457,9 @@ public class XArenaFuncs {
 				pa = m_PlayAgents[n]; // take the n'th current agent, which
 										// is *assumed* to be trained (!)
 
-				// Wrapper MaxN: { nPly} and Wrapper MCTS: {iterations, PUCT, depth} are the ONLY parameters from tab 'Other pars'
-				// which may be changed by the user AFTER training an agent. (All the other opar parameters may be only
+				// Wrapper MaxN: { nPly}, Wrapper MCTS: {iterations, PUCT, depth}, and stopEval (EpiLength Eval) are the
+				// ONLY parameters from tab 'Other pars' which may be changed by the user AFTER training an agent.
+				// (All the other opar parameters may be only
 				// set/changed BEFORE training a trainable agent.) The following line of code was missing before 2020-08-11
 				// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
 				// Now it will be saved:

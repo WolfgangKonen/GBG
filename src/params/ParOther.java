@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.swing.JPanel;
 
+import controllers.PlayAgent;
+import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
@@ -48,6 +50,7 @@ public class ParOther implements Serializable {
 	private boolean bReplayBuf = false;	// only relevant for RubiksCube: whether to use a replay buffer or not
 	private double incAmount = 0;		// only relevant for RubiksCube in case bReplayBuf==true, see DAVI3Agent
     private boolean rewardIsGameScore = true;
+    private AgentState aState = AgentState.RAW;
     
     /**
      * This member is only constructed when the constructor 
@@ -63,9 +66,12 @@ public class ParOther implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public ParOther() {	}
+	public ParOther() {
+		aState = AgentState.RAW;
+	}
     
 	public ParOther(boolean withUI, Arena m_arena) {
+		aState = AgentState.RAW;
 		if (withUI)
 			otparams = new OtherParams(m_arena);
 	}
@@ -96,7 +102,8 @@ public class ParOther implements Serializable {
 		this.bReplayBuf = op.getReplayBuffer();
 		this.incAmount = op.getIncAmount();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
-		
+		this.aState = op.getAgentState();
+
 		if (otparams!=null)
 			otparams.setFrom(this);
 	}
@@ -119,6 +126,7 @@ public class ParOther implements Serializable {
 		this.bReplayBuf = op.getReplayBuffer();
 		this.incAmount = op.getIncAmount();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
+		this.aState = op.getAgentState();
 		
 		if (otparams!=null)
 			otparams.setFrom(this);
@@ -211,6 +219,10 @@ public class ParOther implements Serializable {
 
 	public boolean getRewardIsGameScore() {
 		return rewardIsGameScore;
+	}
+
+	public AgentState getAgentState() {
+		return aState;
 	}
 
 	public void setQuickEvalMode(int qem) {
@@ -328,7 +340,13 @@ public class ParOther implements Serializable {
 		if (otparams!=null)
 			otparams.setRewardIsGameScore(bRGS);
 	}
-	
+
+	public void setAgentState(AgentState as) {
+		this.aState=as;
+		if (otparams!=null)
+			otparams.setAgentState(as);
+	}
+
 
 	/**
 	 * Set sensible parameters for a specific agent and specific game. By "sensible

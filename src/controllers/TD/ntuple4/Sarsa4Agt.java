@@ -200,6 +200,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
 		this.m_Net.xnf.instantiateAfterLoading();
 		// set horizon cut for older agents (where horCut was not part of ParTD):
 		if (this.getParTD().getHorizonCut()==0.0) 

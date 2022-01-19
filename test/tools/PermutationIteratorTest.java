@@ -33,12 +33,13 @@ public class PermutationIteratorTest {
 
     @Test
     public void testPermutationIterableInvers() {
+        // pi.incwea() does the opposite of pi.get(i), it returns the index of a certain permutation
         // test pi.invers(), that is, that it finds the right index (in the iterable) of all permutations of List il:
         System.out.println ("PermutationIterable for list il = "+il.toString());
         PermutationIterator <Integer> pitor = (PermutationIterator  <Integer>) pi.iterator ();
         for (int i=0; i<(int)pitor.last; i++) {
             List <Integer> li = pitor.get(i);
-            //show(li);
+            PermutationIteratorTest.show(li);
             assert i == pi.invers(li) : "pi.invers failed for i=" + i + " and li=" + pitor.get(i); //somehow 'li.toString();' will not work here
         }
         // this is not really needed, just for clarity:

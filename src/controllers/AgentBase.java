@@ -60,11 +60,14 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 
 	public AgentBase(String name) {
 		m_name = name;
+		m_oPar = new ParOther();
+		m_oPar.setAgentState(this.m_agentState);
 	}
 
 	public AgentBase(String name, ParOther oPar) {
 		m_name = name;
 		m_oPar = new ParOther(oPar);
+		m_oPar.setAgentState(this.m_agentState);
 	}
 
 	/**
@@ -235,7 +238,8 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
     @Override
-	public boolean instantiateAfterLoading() { 
+	public boolean instantiateAfterLoading() {
+		m_oPar.setAgentState(this.m_agentState);
 		return true; 	// dummy stub, see LoadSaveTD.saveTDAgent
 	}
 	
@@ -313,6 +317,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_oPar.setWrapperMCTS_PUCT(otherPar.getWrapperMCTS_PUCT());
 		m_oPar.setWrapperMCTS_depth(otherPar.getWrapperMCTS_depth());
 		m_oPar.setWrapperMCTSIterations(otherPar.getWrapperMCTSIterations());
+		m_oPar.setStopEval(otherPar.getStopEval());
 	}
 
     @Override

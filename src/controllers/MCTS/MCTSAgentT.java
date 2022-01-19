@@ -99,6 +99,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     }
 
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
         m_Timer = new ElapsedCpuTimer(TimerType.CPU_TIME);
         m_Timer.setMaxTimeMillis(40);
         mctsPlayer.instantiateAfterLoading();

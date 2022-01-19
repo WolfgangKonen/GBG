@@ -502,6 +502,7 @@ abstract public class Arena implements Runnable {
 
 		so = selectPlayStartState(showValue);
 
+		boolean silent = (so instanceof StateObserver2048) ? true : false;
 		assert qaVector.length == so.getNumPlayers() : "Number of agents does not match so.getNumPlayers()!";
 		startSO = so.copy();
 		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, nEmpty, cumEmpty, highestTile);
@@ -532,7 +533,7 @@ abstract public class Arena implements Runnable {
 							actBest = getNextAction_DEBG(so.partialState(), pa, p2, N_EMPTY);
 						} else {
 							long startTNano = System.nanoTime();
-							actBest = pa.getNextAction2(so.partialState(), false, false);
+							actBest = pa.getNextAction2(so.partialState(), false, silent);
 
 							if (m_spDT!=null) {
 								long endTNano = System.nanoTime();
@@ -1174,6 +1175,7 @@ abstract public class Arena implements Runnable {
 	public boolean saveAgent(int index, String savePath) {
 		int numPlayers = getGameBoard().getStateObs().getNumPlayers();
 		boolean bstatus = false;
+		this.setStatusMessage("Saving ....");
 		try {
 			// fetching the agents ensures that the actual parameters from the tabs
 			// are all taken (!)
@@ -1195,7 +1197,7 @@ abstract public class Arena implements Runnable {
 			} else {
 				this.tdAgentIO.saveGBGAgent(td,savePath);
 			}
-			str = "Saved Agent!";
+			str = "Saving .... Saved Agent!";
 			bstatus = true;
 		} catch(IOException e) {
 			str = e.getMessage();

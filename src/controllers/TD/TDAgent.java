@@ -184,7 +184,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
-		if (this.getParOther() == null ) 
+		super.instantiateAfterLoading();
+		if (this.getParOther() == null )
 			this.setDefaultParOther();
 		return true;
 	}

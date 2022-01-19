@@ -63,6 +63,7 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
 		// since member commandLineInteractor is transient (not serializable), it will be null
 		// when loading a saved Edaxs2 from disk  -->  we need to restore it (with the help of 
 		// member edaxPar) as it is done in constructor 

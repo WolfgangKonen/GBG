@@ -16,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import controllers.PlayAgent;
+import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
@@ -76,6 +78,7 @@ public class OtherParams extends Frame {
 	JLabel pMin_L;
 	JLabel pMax_L;
 	JLabel rBuf_L;
+	JLabel aState_L;
 	public JTextField numEval_T;
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
@@ -88,8 +91,9 @@ public class OtherParams extends Frame {
 	public JTextField pMax_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
-	public Checkbox replayBuf;
 	public Checkbox rewardIsGameScore;
+	public Checkbox replayBuf;
+	public JLabel agentState;
 
 	Button ok;
 	JPanel oPanel;
@@ -130,9 +134,11 @@ public class OtherParams extends Frame {
 		pMin_L = new JLabel("pMin");
 		pMax_L = new JLabel("pMax");
 		rBuf_L = new JLabel("Replay buffer");
+		aState_L = new JLabel("Agent state");
 		chooseS01 = new Checkbox("", false);
 		learnRM = new Checkbox("", false);
 		replayBuf = new Checkbox("", false);
+		agentState = new JLabel("");
 		rewardIsGameScore = new Checkbox("", true);
 		ok = new Button("OK");
 		m_par = this;
@@ -264,15 +270,17 @@ public class OtherParams extends Frame {
 			oPanel.add(learnRM);
 		}
 
-		oPanel.add(rgs_L);
-		oPanel.add(rewardIsGameScore);
 		if (m_arena.getGameName().equals("RubiksCube")) {
 			oPanel.add(rBuf_L);
 			oPanel.add(replayBuf);
 		} else {
-			oPanel.add(new Canvas());
-			oPanel.add(new Canvas());
+			oPanel.add(rgs_L);
+			oPanel.add(rewardIsGameScore);
 		}
+		oPanel.add(aState_L);
+		oPanel.add(agentState);
+//		oPanel.add(new Canvas());
+//		oPanel.add(new Canvas());
 
 		add(oPanel, BorderLayout.CENTER);
 		add(ok, BorderLayout.SOUTH);
@@ -401,6 +409,17 @@ public class OtherParams extends Frame {
 		return rewardIsGameScore.getState();
 	}
 
+	public AgentState getAgentState() {
+		AgentState as =
+				switch(agentState.getText()) {
+					case "RAW","" -> AgentState.RAW;
+					case "INIT" -> AgentState.INIT;
+					case "TRAINED" -> AgentState.TRAINED;
+					default -> throw new IllegalStateException("Unexpected value: " + agentState.getText());
+				};
+		return as;
+	}
+
 	public void setQuickEvalMode(int qEvalmode) {
 		// If the mode list has not been initialized, add the selected mode to
 		// the list
@@ -494,6 +513,14 @@ public class OtherParams extends Frame {
 		rewardIsGameScore.setState(bRGS);
 	}
 
+	public void setAgentState(AgentState as) {
+		switch(as) {
+			case RAW: agentState.setText("RAW"); break;
+			case INIT: agentState.setText("INIT"); break;
+			case TRAINED: agentState.setText("TRAINED"); break;
+		}
+	}
+
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded
 	 * agent
@@ -502,12 +529,15 @@ public class OtherParams extends Frame {
 	 *            ParOther of the re-loaded agent
 	 */
 	public void setFrom(ParOther op) {
+		int elen;
 		this.setQuickEvalMode(op.getQuickEvalMode());
 		this.setTrainEvalMode(op.getTrainEvalMode());
 		this.setNumEval(op.getNumEval());
-		this.setEpisodeLength(op.getEpisodeLength());
+		elen = (op.getEpisodeLength()==Integer.MAX_VALUE) ? -1 : op.getEpisodeLength();
+		this.setEpisodeLength(elen);
+		elen = (op.getStopEval()==Integer.MAX_VALUE) ? -1 : op.getStopEval();
+		this.setStopEval(elen);
 		this.setStopTest(op.getStopTest());
-		this.setStopEval(op.getStopEval());
 		this.setWrapperNPly(op.getWrapperNPly());
 		this.setWrapperMCTSIterations(op.getWrapperMCTSIterations());
 		this.setWrapperMCTS_PUCT(op.getWrapperMCTS_PUCT());
@@ -518,6 +548,7 @@ public class OtherParams extends Frame {
 		this.learnRM.setState(op.getLearnFromRM());
 		this.replayBuf.setState(op.getReplayBuffer());
 		this.rewardIsGameScore.setState(op.getRewardIsGameScore());
+		this.setAgentState(op.getAgentState());
 
 		// only for RubiksCube:
 		// if pMax is changed via fillParamTabsAfterLoading, set also the corresponding element in GameBoardCubeGUI
