@@ -86,7 +86,7 @@ public interface XNTupleFuncs {
 	 * 		according to the n-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
 	 * Symmetric board vectors are board vectors with the same value and with equivalent best
-	 * next actions. For example, TicTacToe has 8 symmetries: 4 rotations (0�, 90�, 180�, 270�)
+	 * next actions. For example, TicTacToe has 8 symmetries: 4 rotations (0, 90, 180, 270 degrees)
 	 * times 2 mirror reflections.
 	 * <p>
 	 * If a game has no symmetries, this method should return a length-1 array {@code BoardVector[] boardArray} with

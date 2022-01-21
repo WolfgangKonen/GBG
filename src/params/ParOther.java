@@ -1,10 +1,10 @@
 package params;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import javax.swing.JPanel;
 
-import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
@@ -64,6 +64,7 @@ public class ParOther implements Serializable {
 	 * compatible with an older one (older .agt.zip containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public ParOther() {
@@ -357,35 +358,48 @@ public class ParOther implements Serializable {
 	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
-		switch (gameName) {
-		case "RubiksCube": 
-			this.setChooseStart01(true);		// always select a non-solved cube as start state
-			enableChoosePart(false);
-			enableRgsPart(false);
-			this.setEpisodeLength(12);
-			this.setStopEval(50);
-			this.setpMinRubiks(1);
-			this.setpMaxRubiks(9);
-			this.setReplayBuffer(false);
-			this.setQuickEvalMode(1);
-			this.setTrainEvalMode(-1);
-			this.setNumEval(10000);
-			this.setRewardIsGameScore(false);
-			break;
-		default:								//  all other
-			this.setEpisodeLength(-1);
-			this.setStopEval(-1);
-			break;
-		}
 		switch (agentName) {
-		case "Sarsa":
-		case "TD-NTuple-3":
-			this.setLearnFromRM(true);
-			break;
-		default: 
-			this.setLearnFromRM(false);
-			break;
+			case "Sarsa":
+				this.setLearnFromRM(true);
+				break;
+			default:
+				this.setLearnFromRM(false);
+				break;
+		}
+		switch (gameName) {
+			case "RubiksCube":
+				this.setChooseStart01(true);		// always select a non-solved cube as start state
+				enableChoosePart(false);
+				this.setRewardIsGameScore(false);
+				enableRgsPart(false);
+				this.setEpisodeLength(12);
+				this.setStopEval(50);
+				this.setpMinRubiks(1);
+				this.setpMaxRubiks(9);
+				this.setReplayBuffer(false);
+				this.setQuickEvalMode(1);
+				this.setTrainEvalMode(-1);
+				this.setNumEval(10000);
+			case "TicTacToe":
+				this.setQuickEvalMode(2);
+				this.setTrainEvalMode(1);
+				switch (agentName) {
+					case "Sarsa":
+					case "Sarsa-4":
+					case "Qlearn-4":
+					case "TD-Ntuple-3":
+					case "TD-Ntuple-4":
+						this.setLearnFromRM(true);
+						break;
+					default:
+						this.setLearnFromRM(false);
+						break;
+				}
+				break;
+			default:								//  all other
+				this.setEpisodeLength(-1);
+				this.setStopEval(-1);
+				break;
 		}
 	}
 	

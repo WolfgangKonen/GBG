@@ -211,12 +211,12 @@ public class NTuple4ValueFunc implements Serializable {
 		equiv = getSymBoards2(curSOWB, getUSESYMMETRY(), getNSym());
 		equivAction = xnf.symmetryActions(act.toInt());
 
+		if (equivAction.length==0) throw new RuntimeException( "[getQFunc] Error: equivAction has length 0");
 		for (i=0; i<equivAction.length; i++) {
-			if (equivAction[i]>=nTuples.length) {
-				System.err.println("Warning: equivAction["+i+"]="+equivAction[i]+" is not smaller than nTuples.length="+nTuples.length+" !!!");
+			if (equivAction[i]>=nTuples.length) throw new RuntimeException(
+				"[getQFunc] equivAction["+i+"]="+equivAction[i]+" is not smaller than nTuples.length="+nTuples.length+" !!!");
 				// this should normally not happen. If it happens, we are out for an OutOfBoundException in the 
 				// following lines ...
-			}
 		}
 		
 		for (i = 0; i < numTuples; i++) {

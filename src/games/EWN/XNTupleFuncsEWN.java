@@ -52,7 +52,7 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
 
     /**
      *
-     * @return
+     * @return the number of players
      */
     @Override
     public int getNumPlayers() {
@@ -60,13 +60,17 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
     }
 
 
+    /**
+     * TODO: /WK/ actually, the symmetries should be 2!
+     *
+     * @return the maximum number of symmetries in this game
+     */
     @Override
     public int getNumSymmetries() {
         return 1;
     }
 
     /**
-     *
      * Since we probably have each player with 6 tokens we can use
      *
      *  size = 3 Possible sizes {3,4,5,6}
@@ -85,9 +89,6 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
      * @param so the stateObservation of the current game state
      * @return  a vector of length {@link #getNumCells() , holding for each cell its}
      * position value with  0 = Black, 1 = white, 2 = blue, 3 = red 4 Empty
-     *
-     *
-     *
      */
     @Override
     public BoardVector getBoardVector(StateObservation so) {
@@ -142,10 +143,16 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
 
     @Override
     public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
-        if(n > 2 || n < 1) throw new RuntimeException("There are maximal 2 symmetry vectors");
-        BoardVector[] bvArray = new BoardVector[n];
+//        if(n > 2 || n < 1) throw new RuntimeException("There are maximal 2 symmetry vectors");
+//        BoardVector[] bvArray = new BoardVector[n];
+//        bvArray[0] = boardVector;
+//        if(n == 2) bvArray[1] = getDiagonalSymmetryVector(boardVector);
+        //
+        // /WK/ currently we return only the boardVector itself (the no-symmetry case), because
+        //      we have not yet implemented symmetryActions properly for the diagonal-symmetry case
+        //
+        BoardVector[] bvArray = new BoardVector[1];
         bvArray[0] = boardVector;
-        if(n == 2) bvArray[1] = getDiagonalSymmetryVector(boardVector);
         return bvArray;
     }
 
@@ -157,7 +164,7 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
      */
     @Override
     public int[] symmetryActions(int actionKey) {
-        return new int[0];
+        return new int[] {actionKey};
     }
 
     @Override
@@ -308,7 +315,6 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
     public String fixedTooltipString() {
         return "<html>"
                 + "0: 4 6-Tuples "
-
                 + "</html>";
     }
 

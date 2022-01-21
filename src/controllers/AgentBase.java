@@ -1,10 +1,8 @@
 package controllers;
 
+import java.io.Serial;
 import java.io.Serializable;
 
-import javax.swing.JOptionPane;
-
-import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.StateObservation;
@@ -46,8 +44,9 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	/**
 	 * change the version ID for serialization only if a newer version is no
 	 * longer compatible with an older one (older .agt.zip will become
-	 * unreadable or you have to provide a special version transformation)
+	 * unreadable, or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	/**
@@ -139,8 +138,9 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 
 	public void setAgentState(AgentState aState) {
 		m_agentState = aState;
+		m_oPar.setAgentState(aState);
 	}
-	public void resetAgent() { ; }
+	public void resetAgent() {  }
 
 	public String getName() {
 		return m_name;
@@ -245,7 +245,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	
     @Override
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
-		; 				// dummy stub, see XArenaMenu.loadAgent
+		 				// dummy stub, see XArenaMenu.loadAgent
 	}
 	
     @Override
@@ -320,6 +320,10 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_oPar.setStopEval(otherPar.getStopEval());
 	}
 
+	public void setParOther(ParOther op) {
+    	m_oPar.setFrom(op);
+	}
+
     @Override
 	public ParOther getParOther() {
 		return m_oPar;
@@ -333,16 +337,15 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	/**
-	 * Check whether pa is a valid (non-null) and trained agent
+	 * Check whether all agents in paVector are valid (non-null) and trained.
+	 * Otherwise, a RuntimeException is thrown.
 	 * 
 	 * @param paVector
 	 *            vector of all agents in {@link games.Arena}
 	 * @param numPlayers
 	 *            number of players
-	 * @return true, if each agent is valid. Otherwise a RuntimeException is
-	 *         thrown.
 	 */
-	public static boolean validTrainedAgents(PlayAgent[] paVector, int numPlayers) throws RuntimeException {
+	public static void validTrainedAgents(PlayAgent[] paVector, int numPlayers) throws RuntimeException {
 		PlayAgent pa;
 		String nStr;
 		for (int n = 0; n < paVector.length; n++) {
@@ -353,46 +356,35 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 			if (pa == null) {
 				throw new RuntimeException("Cannot execute command. Agent for player " + nStr + " is null!");
 			}
-			if (pa.getAgentState() != AgentState.TRAINED) {
+ 			if (pa.getAgentState() != AgentState.TRAINED) {
 				throw new RuntimeException(
 						"Cannot execute command. Agent " + pa.getName() + " for player " + nStr + " is not trained!");
 			}
 		}
-		return true;
 	}
 
-	// --- not used anywhere ---
-//	/**
-//	 * Check whether pa is a valid (non-null) and trained agent, of the same
-//	 * type as requested by agentName
-//	 *
-//	 * @param pa			the agent to validate
-//	 * @param agentName		the agent's name
-//	 * @param Player		needed for message forming
-//	 * @param arena			where to show message
-//	 * @return				false, if any check fails, otherwise true
-//	 */
-//	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, Arena arena) {
-//		if (pa == null) {
-//			arena.showMessage("Cannot execute command. " + agentName + " is null!",
-//					"Warning", JOptionPane.WARNING_MESSAGE);
-//			return false;
-//		}
-//		if (pa.getAgentState() != AgentState.TRAINED) {
-//			arena.showMessage("Cannot execute command. " + agentName + " is not trained!",
-//					"Warning", JOptionPane.WARNING_MESSAGE);
-//			return false;
-//		}
-//
-//		String pa_string = pa.getClass().getName();
-//		if (agentName.equals("TDS") & !(pa instanceof TDAgent)) {
-//			arena.showMessage(
-//					"Cannot execute command. " + "Current player " + Player + " is not a TDAgent: " + pa_string + ".",
-//					"Warning", JOptionPane.WARNING_MESSAGE);
-//			return false;
-//		}
-//		return true;
-//	}
+	/**
+	 * Check whether pa is a valid (non-null) agent.
+	 * Otherwise, a RuntimeException is thrown.
+	 *
+	 * @param pa
+	 *            vector of all agents in {@link games.Arena}
+	 * @param numPlayers
+	 *            number of players
+	 */
+	public static void validSaveAgent(PlayAgent pa, int n, int numPlayers) throws RuntimeException {
+		String nStr = (numPlayers == 2)
+				?  Types.GUI_2PLAYER_NAME[n]
+				:	Types.GUI_PLAYER_NAME[n];
+		if (pa == null) {
+			throw new RuntimeException("Cannot execute command. Agent for player " + nStr + " is null!");
+		}
+// the check on TRAINED is not wanted here: we want to save agents in state INIT (agent stubs for GitHub)
+//			if (pa.getAgentState() != AgentState.TRAINED) {
+//				throw new RuntimeException(
+//						"Cannot execute command. Agent " + pa.getName() + " for player " + nStr + " is not trained!");
+//			}
+	}
 
 	public int getEpochMax() {
 		return epochMax;

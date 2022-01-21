@@ -2,6 +2,7 @@ package ludiiInterface.general;
 
 import controllers.PlayAgent;
 import game.Game;
+import games.Arena;
 import games.Hex.HexConfig;
 import games.Othello.ArenaOthello;
 import ludiiInterface.Util;
@@ -85,6 +86,7 @@ public class GBGAsLudiiAI extends AI {
         try{
             if(agentPath == null){
                 agentPath = loadFileFromDialog("GBG Agenten auswählen");
+                System.out.println(agentPath);
             }
             gbgAgent = new ArenaOthello(
                     "GBG vs. Ludii",
@@ -96,6 +98,18 @@ public class GBGAsLudiiAI extends AI {
         } catch( final Exception e){
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Assumes the gameID to be set. Then loads the agent that is supposed to play
+     * either via a direct path or by opening a file dialog to choose from.
+     * @param game
+     * @param playerID
+     */
+    public void initAI(final Game game, final int playerID, PlayAgent pa){
+        if (gameID==-1) throw new RuntimeException("[initAI] gameID is not set (-1)");
+        this.playerID = playerID;
+        this.gbgAgent = pa;
     }
 
     /**

@@ -263,7 +263,7 @@ abstract public class Arena implements Runnable {
 			}
 
 			if (m_hasTrainRights)
-				performArenaDerivedTasks(); 		// additional train-right-related tasks
+				performArenaTrainTasks(); 		// additional train-right-related tasks
 
 		} // while (true)
 	}
@@ -794,7 +794,6 @@ abstract public class Arena implements Runnable {
 	private ArrayList<String> buildPlayMessages(PlayAgent[] qaVector, int numPlayers){
 //		String[] agentVec = new String[numPlayers];
 		ArrayList<String> agentList = new ArrayList<>();
-		String str;
 		StringBuilder sMsg;
 
 		if (m_spDT == null)
@@ -1180,7 +1179,7 @@ abstract public class Arena implements Runnable {
 			// fetching the agents ensures that the actual parameters from the tabs
 			// are all taken (!)
 			m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
-			AgentBase.validTrainedAgents(m_xfun.m_PlayAgents,numPlayers);
+			//AgentBase.validTrainedAgents(m_xfun.m_PlayAgents,numPlayers);
 
 		} catch (RuntimeException e) {
 			this.showMessage( e.getMessage(), 
@@ -1190,6 +1189,13 @@ abstract public class Arena implements Runnable {
 		}
 
 		PlayAgent td = this.m_xfun.m_PlayAgents[index];
+		AgentBase.validSaveAgent(td,index,numPlayers);
+		td.setParOther(m_xab.oPar[index]);		// copy parameter settings from oPar tab
+		if (td.getAgentState()== PlayAgent.AgentState.INIT) {
+			td.setMaxGameNum(m_xab.getGameNumber());
+			td.setGameNum(0);
+		}
+
 		String str;
 		try {
 			if (savePath==null) {
@@ -1207,6 +1213,7 @@ abstract public class Arena implements Runnable {
 		return bstatus;
 	}
 
+	// only used from MCompeteSweep
 	public boolean saveAgent(PlayAgent pa, String savePath) {
 		String str;
 		try {
@@ -1456,10 +1463,10 @@ abstract public class Arena implements Runnable {
 	 * taskState back to IDLE (when appropriate).
 	 * <p>
 	 * A class derived from {@code this} may override this method, but it
-	 * should usually call inside with {@code super.performArenaDerivedTask()} this
+	 * should usually call inside with {@code super.performArenaTrainTasks()} this
 	 * method, before extensions are added.
 	 */
-	public void performArenaDerivedTasks() {
+	public void performArenaTrainTasks() {
 		String agentN;
 		int n;
 		if (m_hasTrainRights) {
@@ -1498,6 +1505,7 @@ abstract public class Arena implements Runnable {
 							m_evaluator2.eval(pa);
 							System.out.println("final "+m_evaluator2.getMsg());
 							m_xfun.m_PlayAgents[n].setAgentState(PlayAgent.AgentState.TRAINED);
+							m_xab.setOParFrom(n,pa.getParOther());
 							setStatusMessage("final "+m_evaluator2.getMsg());
 							//System.out.println("Duration training: " + ((double)pa.getDurationTrainingMs()/1000));
 							//System.out.println("Duration evaluation: " + ((double)pa.getDurationEvaluationMs()/1000));

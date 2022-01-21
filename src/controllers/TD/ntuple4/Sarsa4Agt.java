@@ -1,6 +1,7 @@
 package controllers.TD.ntuple4;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,8 @@ import params.ParNT;
 import params.ParOther;
 import params.ParTD;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
+import tools.Types.ACTIONS_VT;
 import controllers.AgentBase;
 import controllers.ExpectimaxNWrapper;
 import controllers.MaxN2Wrapper;
@@ -75,14 +76,15 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 13L;
 
 	private int numPlayers;
 	transient private StateObservation[] sLast;	// last state of player p
-	transient private Types.ACTIONS[] aLast;	// last action of player p
+	transient private ACTIONS[] aLast;	// last action of player p
 	transient private boolean[] randLast;		// whether last action of player p was a random action
 	transient private ScoreTuple rLast;
 	
@@ -90,17 +92,17 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	private int actionIndexMin;
 	private int actionIndexMax;
 	
-	private boolean RANDINITWEIGHTS = false;// If true, init weights of value function randomly
+	private final boolean RANDINITWEIGHTS = false;// If true, init weights of value function randomly
 
 	private boolean m_DEBG = false;
 	// debug printout in collectReward:
 	public static boolean DBG_REWARD=false;
 	
-	// is set to true in getNextAction2(...), if the next action is a random selected one:
+	// is set to true in getNextAction2(...), if the next action is a randomly selected one:
 	boolean randomSelect = false;
 	
 	// use finalAdaptAgents(...), normaly true. Set only to false if you want to test how agents behave otherwise:
-	private boolean FINALADAPTAGENTS=true;
+	private final boolean FINALADAPTAGENTS=true;
 	
 	
 	private int acount=0;
@@ -125,14 +127,13 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * @param xnf			contains game-specific n-tuple functions
 	 * @param allAvailActions	neede to infer the number of outputs of the n-tuple network
 	 * @param maxGameNum	maximum number of training games
-	 * @throws IOException
 	 */
 	public Sarsa4Agt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar,
-					 int[][] nTuples, XNTupleFuncs xnf, ArrayList<ACTIONS> allAvailActions, int maxGameNum) throws IOException {
+					 int[][] nTuples, XNTupleFuncs xnf, ArrayList<ACTIONS> allAvailActions, int maxGameNum) {
 		super(name);
 		this.numPlayers = xnf.getNumPlayers();
 		this.sLast = new StateObservation[numPlayers];
-		this.aLast = new Types.ACTIONS[numPlayers];
+		this.aLast = new ACTIONS[numPlayers];
 		this.randLast = new boolean[numPlayers];
 		this.setMaxGameNum(maxGameNum);
 		processAvailActions(allAvailActions);		// calc members actionIndexMin, actionIndexMax, numOutputs
@@ -148,7 +149,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		this.actionIndexMin = Integer.MAX_VALUE;
 		this.actionIndexMax = Integer.MIN_VALUE;
 		while (iter.hasNext()) {
-			int key = ((ACTIONS) iter.next()).toInt();
+			int key = iter.next().toInt();
 			if (key<actionIndexMin) actionIndexMin=key;
 			if (key>actionIndexMax) actionIndexMax=key;
 		}
@@ -170,10 +171,9 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * @param numOutputs	the number of outputs of the n-tuple network (=number of all
 	 * 						available actions)
 	 * @param maxGameNum	maximum number of training games
-	 * @throws IOException
 	 */
 	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,  
-			int[][] nTuples, XNTupleFuncs xnf, int numOutputs, int maxGameNum) throws IOException {
+			int[][] nTuples, XNTupleFuncs xnf, int numOutputs, int maxGameNum) {
 		m_tdPar = new ParTD(tdPar);
 		m_ntPar = new ParNT(ntPar);
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
@@ -194,7 +194,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	}
 
 	/**
-	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * If agents need a special treatment after being loaded from disk (e.g. instantiation
 	 * of transient members), put the relevant code in here.
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
@@ -215,7 +215,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		
 		// initialize transient members (in case a further training should take place --> see ValidateAgent) 
 		this.sLast = new StateObservation[numPlayers];
-		this.aLast = new Types.ACTIONS[numPlayers];
+		this.aLast = new ACTIONS[numPlayers];
 		this.randLast = new boolean[numPlayers];
 		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples
 		
@@ -231,19 +231,19 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
-	 * actBest has predicate isRandomAction()  (true: if action was selected 
+	 * actBest has the predicate isRandomAction()  (true: if action was selected
 	 * at random, false: if action was selected by agent).<br>
 	 * actBest has also the members vTable and vBest to store the Q value for each available
 	 * action (as returned by so.getAvailableActions()) and the Q value for the best action actBest.
 	 */
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
-		int i, j;
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+		int i;
 		double bestQValue;
-        double qValue=0;			// the quantity to be maximized
+        double qValue;			// the quantity to be maximized
 		StateObservation NewSO;
-        Types.ACTIONS actBest = null;
-        Types.ACTIONS_VT actBestVT = null;
+        ACTIONS actBest = null;
+        ACTIONS_VT actBestVT;
     	bestQValue = -Double.MAX_VALUE;
 		double[] VTable;		
 		
@@ -252,8 +252,8 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 			randomSelect = (rand.nextDouble() < m_epsilon);
 		}
 		
-        ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
-        List<Types.ACTIONS> bestActions = new ArrayList<>();
+        ArrayList<ACTIONS> acts = so.getAvailableActions();
+        List<ACTIONS> bestActions = new ArrayList<>();
         
         VTable = new double[acts.size()];  
         
@@ -324,7 +324,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 			System.out.println("---Best Move: "+NewSO.stringDescr()+", "+(bestQValue));
 		}
 
-		actBestVT = new Types.ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestQValue,scBest);
+		actBestVT = new ACTIONS_VT(actBest.toInt(), randomSelect, VTable, bestQValue,scBest);
 		return actBestVT;
 	}	
 	
@@ -389,11 +389,9 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * @return {@code a_next}, the action to perform in state {@code s_next} when following the 
 	 * 						(epsilon-greedy) policy derived from Q
 	 */
-	private Types.ACTIONS adaptAgentQ(int nextPlayer, ScoreTuple R, NextState4 ns) {
-		Types.ACTIONS a_next=null;
-		StateObservation s_after = ns.getAfterState();
+	private ACTIONS_VT adaptAgentSarsa(int nextPlayer, ScoreTuple R, NextState4 ns) {
+		ACTIONS_VT a_next;
 		StateObservation s_next = ns.getNextSO();
-		int[] curBoard;
 		double qValue,qLast,qLastNew,target;
 		boolean learnFromRM = m_oPar.getLearnFromRM();
 		
@@ -402,7 +400,6 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 			qValue = 0.0;
 		} else {
 			a_next = getNextAction2(s_next.partialState(),true,true);
-//			int[] nextBoard = m_Net.xnf.getBoardVector(s_after);
 			StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(s_next,m_Net.xnf);	// WK: NEW: next state instead of afterstate
         	qValue = m_Net.getQFunc(nextSOWB,nextPlayer,a_next);
 		}
@@ -418,10 +415,9 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 //				int dummy=0;
 //			}
 			
-        	// note that curBoard is NOT the board vector of state ns.getSO(), but of state
+        	// note that curSOWB is NOT the board vector of state ns.getSO(), but of state
         	// sLast[curPlayer] (one round earlier!)
     		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[nextPlayer], m_Net.xnf);
-			curBoard = curSOWB.getBoardVector().bvec; 
         	qLast = m_Net.getQFunc(curSOWB,nextPlayer,aLast[nextPlayer]);
         	
         	// if last action of nextPlayer was a random move: 
@@ -454,7 +450,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	            		int dummy=1;
 	            	}
 	    		}
-	    		if (s_next.stringDescr()=="XooX-o-XX") {
+	    		if (s_next.stringDescr().equals("XooX-o-XX")) {
 	    			System.out.println(this.getGameNum()+" target="+target);
 	    			int dummy=1;
 	    		}
@@ -476,8 +472,6 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 */
 	private void finalAdaptAgents(int nextPlayer, ScoreTuple R, NextState4 ns) {
 		double target,qLast,qLastNew;
-		int[] curBoard, nextBoard;
-//		StateObservation s_after = ns.getAfterState();
 		StateObservation s_next = ns.getNextSO();
 		
 		for (int n=0; n<numPlayers; n++) {
@@ -488,7 +482,6 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 			        // TODO: think whether the subtraction rlast.scTup[n] is right for every n
 					//		 (or whether we need to correct rLast before calling finalAdaptAgents)
 		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
-					curBoard = curSOWB.getBoardVector().bvec; 
 		        	qLast = m_Net.getQFunc(curSOWB,n,aLast[n]);
 		        	
 	    			m_Net.updateWeightsQ(curSOWB, n, aLast[n], qLast,
@@ -528,36 +521,33 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
 	public boolean trainAgent(StateObservation so) {
-		double[] VTable = null;
-		double reward = 0.0;
-		Types.ACTIONS_VT actBest;
-		Types.ACTIONS a_next;
+		ACTIONS_VT a_next;
 		int   nextPlayer=so.getPlayer();
-		NextState4 ns = null;
-		ScoreTuple R = new ScoreTuple(so);
+		NextState4 ns;
+		ScoreTuple R;
 		rLast = new ScoreTuple(so);
 
 //		boolean learnFromRM = m_oPar.useLearnFromRM();
 		int epiLength = m_oPar.getEpisodeLength();
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 				
-		int t=0;
 		StateObservation s_t = so.copy();
-		Types.ACTIONS_VT a_t_vt = getNextAction2(s_t.partialState(), true, true);
-		ACTIONS a_t = a_t_vt;
+		a_next = getNextAction2(s_t.partialState(), true, true);
+		ACTIONS a_t = (ACTIONS) a_next;
 		for (int n=0; n<numPlayers; n++) {
 			sLast[n] = (n==nextPlayer ? s_t : null);	// nextPlayer is X=so.getPlayer()
 			aLast[n] = (n==nextPlayer ? a_t : null);	// sLast[X]=so is the state on which X has to act 
 		}
+
 		do {
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	               
-	        // take action a_t and observe reward & next state 
-	        ns = new NextState4(this,s_t,a_t_vt);
+	        // take action a_next and observe reward & next state
+	        ns = new NextState4(this,s_t,a_next);
 	        nextPlayer = ns.getNextSO().getPlayer();
 	        R = ns.getNextRewardTupleCheckFinished(epiLength);
 	        
-	        a_next = adaptAgentQ(nextPlayer, R, ns);
+	        a_next = adaptAgentSarsa(nextPlayer, R, ns);
 	        
 	        // We *cannot* differentiate between the afterstate and next state in SARSA learning, 
 	        // because the action to perform in state s_t has to be based on the next state s_t
@@ -567,12 +557,11 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	        //
 //	        sLast[nextPlayer] = ns.getAfterState(); 		// the afterstate generated by curPlayer
 	        sLast[nextPlayer] = s_t = ns.getNextSO(); 		// WK: NEW the *next* state generated by curPlayer
-	        aLast[nextPlayer] = a_t = a_next;
+	        aLast[nextPlayer] = a_next;
 	        rLast.scTup[nextPlayer] = R.scTup[nextPlayer];
 	        randLast[nextPlayer] = (a_next==null ? false : a_next.isRandomAction());
 			 					  //a_next is null if ns.getNextSO() is terminal  	
-			t++;
-			
+
 		} while(!s_t.isGameOver());
 		
 		if (FINALADAPTAGENTS) 

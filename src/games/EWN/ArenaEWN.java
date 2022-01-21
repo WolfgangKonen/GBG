@@ -37,9 +37,6 @@ public class ArenaEWN extends Arena {
         return new XNTupleFuncsEWN();
     }
 
-//    @Override
-//    public void performArenaDerivedTasks() {}
-
     public static void setConfig(String str){
         switch(str){
             case"3x3 2-Player":{

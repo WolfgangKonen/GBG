@@ -55,9 +55,6 @@ public class ArenaBlackJack extends Arena {
         return new EvaluatorBlackJack(pa, gb, mode, stopEval, verbose);
     }
 
-//    @Override
-//    public void performArenaDerivedTasks() {}
-
     /**
      * Factory pattern method: make a new XNTupleFuncs (needed for TD-Agents)
      * @return XNTupleFuncsBlackJack

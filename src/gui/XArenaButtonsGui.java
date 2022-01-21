@@ -11,16 +11,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import controllers.PlayAgent;
 import games.Arena;
 import games.LogManagerGUI;
 import games.XArenaButtons;
@@ -220,7 +215,26 @@ public class XArenaButtonsGui extends JPanel {
 									m_arena.m_xab.changedViaLoad[n]=false;
 							} else {
 								// the normal case, if item change was triggered by user:
-								m_arena.m_xab.setParamDefaults(n, m_arena.m_xab.selectedAgents[n], m_arena.getGameName());
+								// new 2022-01-20: construct agent at selection time (agent state INIT)
+								if (arg0.getStateChange()==ItemEvent.SELECTED) {
+									// each change in choiceAgent[n] will trigger TWO ItemEvents:
+									// 1) a DESELECTED event and 2) a SELECTED event. We construct the agent
+									// only after the 2nd event.
+									m_arena.m_xab.setParamDefaults(n, m_arena.m_xab.selectedAgents[n], m_arena.getGameName());
+									//
+									String agentN = m_arena.m_xab.getSelectedAgent(n);
+									PlayAgent pa=null;
+									try {
+										pa = m_arena.m_xfun.constructAgent(n,agentN, m_arena.m_xab);
+										if (pa==null) throw new RuntimeException("Could not construct agent = " + agentN);
+
+									} catch(Exception e) {
+										m_arena.showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
+									}
+									m_arena.m_xfun.m_PlayAgents[n] = pa;
+									m_arena.m_xab.setOParFrom(n,pa.getParOther());
+								}
+
 								if (!m_arena.hasTrainRights()) {
 									m_arena.m_xab.tdPar[n].enableAll(false);
 									m_arena.m_xab.ntPar[n].enableAll(false);									
