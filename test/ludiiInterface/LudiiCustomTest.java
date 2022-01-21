@@ -41,7 +41,7 @@ public class LudiiCustomTest extends GBGBatch {
 
         selectedGame = "Othello";
         scaPar=new String[]{"", "", ""};
-        agtFile = "TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip";
+        agtFile = "TCL4-100_7_250k-lam05_P4_nPly2-FAm_A.agt.zip";
         arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         pa = arenaTrain.loadAgent(agtFile);
         System.out.println(pa.getName()+"\n"+pa.stringDescr());
