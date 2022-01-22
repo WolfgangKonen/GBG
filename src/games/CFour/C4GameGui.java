@@ -265,7 +265,7 @@ public class C4GameGui extends JPanel implements ListOperation {
 //		ImgShowComponent imgShComp = oldImg.replaceImg2(imgIndex);
 		if (oldImg != imgShComp)
 			imgShComp.addMouseListener(new MouseHandler(num1, num2) {
-				public void mouseClicked(MouseEvent e) {
+				public void mouseReleased(MouseEvent e) {
 					handleMouseClick(x, y);
 				}
 			});
