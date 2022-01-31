@@ -894,7 +894,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	private void learnFromReplayBuffer(){
 		// Awaiting the replaybuffer to be full prior learning attempt
 		if(replayBuffer.getMaxBufferIndex() != replayBuffer.getCapacity()) return;
-		System.out.println("hello learn");
 		ITransition[] transitions = replayBuffer.getBatch();
 		for(ITransition t : transitions){
 			int player = t.getPlayer();
