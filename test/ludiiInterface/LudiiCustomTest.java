@@ -46,7 +46,7 @@ public class LudiiCustomTest extends GBGBatch {
         pa = arenaTrain.loadAgent(agtFile);
         System.out.println(pa.getName()+"\n"+pa.stringDescr());
 
-        PLAYER_2 = new GBGAsLudiiAI(0);
+        PLAYER_2 = new GBGAsLudiiAI();
         ludiiGame = GameLoader.loadGameFromName("Reversi.lud");
 
         final other.context.Context context = new Context(ludiiGame, new Trial(ludiiGame));
@@ -104,7 +104,7 @@ public class LudiiCustomTest extends GBGBatch {
         List<String> options;
         HexConfig.BOARD_SIZE = 4;
         options = Arrays.asList("Board Size/"+HexConfig.BOARD_SIZE+"x"+HexConfig.BOARD_SIZE);
-        PLAYER_2 = new GBGAsLudiiAI(2,HexConfig.BOARD_SIZE,2);
+        PLAYER_2 = new GBGAsLudiiAI(HexConfig.BOARD_SIZE,2);
         ludiiGame = GameLoader.loadGameFromName("Hex.lud",options);
 
         final other.context.Context context = new Context(ludiiGame, new Trial(ludiiGame));
@@ -167,9 +167,6 @@ public class LudiiCustomTest extends GBGBatch {
             logMessage.append("Tie: ");
         }else {
             logMessage.append("Winner: ").append(ais.get(context.trial().status().winner()).friendlyName()).append(": ");
-        }
-        for (int i = 1; i < ais.size(); i++) {
-            logMessage.append(context.score(i)).append(":");
         }
         logMessage.append(" Moves: ");
         for(Move move : context.trial().generateCompleteMovesList()) {

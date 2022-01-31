@@ -35,12 +35,12 @@ public class LudiiCustomMatch {
 
         switch (game){
             case "Othello" -> {
-                PLAYER_2 = new GBGAsLudiiAI(0);
+                PLAYER_2 = new GBGAsLudiiAI();
                 ludiiGame = GameLoader.loadGameFromName("Reversi.lud");
 
             }
             case "Yavalath" -> {
-                PLAYER_2 = new GBGAsLudiiAI(1);
+                PLAYER_2 = new GBGAsLudiiAI();
                 ludiiGame = GameLoader.loadGameFromName("Yavalath.lud");
             }
             case "Hex" -> {
@@ -81,7 +81,7 @@ public class LudiiCustomMatch {
                     }
 
                 }
-                PLAYER_2 = new GBGAsLudiiAI(2,size,2);
+                PLAYER_2 = new GBGAsLudiiAI(size,2);
                 ludiiGame = GameLoader.loadGameFromName("Hex.lud",options);
             }
         }
@@ -114,7 +114,7 @@ public class LudiiCustomMatch {
             final Model model = context.model();
 
             while (!context.trial().over()){
-                model.startNewStep(context,ais,1.0);
+                model.startNewStep(context,ais,0.1);
             }
             if(context.trial().status().winner() == 0){
                 System.out.println("Tie.");

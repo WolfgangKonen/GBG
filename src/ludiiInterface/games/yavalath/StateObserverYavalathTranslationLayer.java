@@ -21,16 +21,18 @@ public class StateObserverYavalathTranslationLayer extends StateObserverYavalath
 
     private void updateGameState(){
         SystemConversionYavalath conversion = new SystemConversionYavalath();
-
+        //Get a list of all moves made in the context
         List<Move> ludiiContextMoves = ludiiContext.trial().generateCompleteMovesList();
 
         for(Move x : ludiiContextMoves){
             if(!conversion.isValidLudiiIndex(x.to())){
                 System.out.println("ludii index invalid"); //seems to be an error happening here, might have to do with swap rule
             }
+            // x.to() returns the position of the stone we place, translate that into a action value
             int actionInt = conversion.getGBGIndexFromLudii(x.to());
             int j = actionInt% ConfigYavalath.getMaxRowLength();
             int i = (actionInt-j)/ConfigYavalath.getMaxRowLength();
+            // x.mover() returns who made the move, use that to adjust the state observer board accordingly
             board[i][j].setPlayer(conversion.getGBGPlayerFromLudii(x.mover()));
         }
         currentPlayer = conversion.getGBGPlayerFromLudii(playerID);

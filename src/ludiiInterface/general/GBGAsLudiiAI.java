@@ -2,7 +2,6 @@ package ludiiInterface.general;
 
 import controllers.PlayAgent;
 import game.Game;
-import games.Arena;
 import games.Hex.HexConfig;
 import games.Othello.ArenaOthello;
 import ludiiInterface.Util;
@@ -18,7 +17,6 @@ import other.context.Context;
 import other.move.Move;
 import tools.Types;
 
-import javax.swing.*;
 import java.util.Optional;
 import java.util.Random;
 
@@ -27,14 +25,6 @@ import static ludiiInterface.Util.loadFileFromDialog;
 public class GBGAsLudiiAI extends AI {
 
     private PlayAgent gbgAgent;
-
-    /**
-     * -1 = uninitialized, needed for game selection in Ludii UI
-     * 0 = Othello
-     * 1 = Yavalath
-     * 2 = Hex
-     **/
-    private int gameID = -1;
     private int playerID, size, players;
     private String gbgAgentPathYavalath = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Yavalath\\yavAgent.agt.zip";
     private final String gbgAgentPathOthello = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Othello\\TCL3-100_7_250k-lam05_P4_nPly2-FAm_A.agt.zip";
@@ -46,41 +36,20 @@ public class GBGAsLudiiAI extends AI {
         friendlyName = getClass().getSimpleName();
     }
 
-    public GBGAsLudiiAI(int gameID){
-        this.gameID = gameID;
-        friendlyName = getClass().getSimpleName();
-    }
-
-    public GBGAsLudiiAI(int gameID, int size, int players){
-        this.gameID = gameID;
+    public GBGAsLudiiAI(int size, int players){
         this.size = size;
         this.players = players;
         friendlyName = getClass().getSimpleName();
     }
 
     /**
-     * Sets the gameID if it has not been specified in the constructor. Then loads the agent that is supposed to play
-     * either via a direct path or by opening a file dialog to choose from.
+     * Loads the agent that is supposed to play either via a direct path or by opening a file dialog to choose from.
      * @param game
      * @param playerID
      */
     @Override
     public void initAI(final Game game, final int playerID){
         this.playerID = playerID;
-        if(gameID == -1){
-            JComboBox comboBox = new JComboBox(games);
-            comboBox.setSelectedIndex(0);
-            JOptionPane.showMessageDialog(null, comboBox,"Choose a game", JOptionPane.QUESTION_MESSAGE);
-            switch ((String) comboBox.getSelectedItem()){
-                case "Othello" -> gameID = 0;
-                case "Yavalath" -> gameID = 1;
-                case "Hex" -> {
-                    gameID = 2;
-                    size = 6;
-                    HexConfig.BOARD_SIZE = 6;
-                }
-            }
-        }
 
         //Load the agent either via file dialog, or directly via a specified string (useful if you're only using the same agent for a while)
         try{
@@ -107,7 +76,6 @@ public class GBGAsLudiiAI extends AI {
      * @param playerID
      */
     public void initAI(final Game game, final int playerID, PlayAgent pa){
-        if (gameID==-1) throw new RuntimeException("[initAI] gameID is not set (-1)");
         this.playerID = playerID;
         this.gbgAgent = pa;
     }
@@ -122,14 +90,14 @@ public class GBGAsLudiiAI extends AI {
         Optional<Move> move;
 
 
-        switch(gameID){
-            case 0 -> {
+        switch(game.name()){
+            case "Reversi" -> {
                 move = selectActionOthello(game,context,maxSeconds,maxIterations,maxDepth,playerID);
             }
-            case 1 -> {
+            case "Yavalath" -> {
                 move = selectActionYavalath(game,context,maxSeconds,maxIterations,maxDepth);
             }
-            case 2 -> {
+            case "Hex" -> {
                 move = selectActionHex(game,context,maxSeconds,maxIterations,maxDepth);
             }
             default -> {
@@ -191,6 +159,15 @@ public class GBGAsLudiiAI extends AI {
      * Not fully functional yet.
      */
     private Optional<Move> selectActionHex(Game game,Context context,double maxSeconds, int maxIterations, int maxDepth){
+
+        //Detects and sets board size
+        for(String s : game.getOptions()){
+            if(s.contains("Board Size")){
+                int boardSize = Character.getNumericValue(s.charAt(11));
+                HexConfig.BOARD_SIZE = boardSize;
+                size = boardSize;
+            }
+        }
 
         Optional<Move> returnMove = Optional.empty();
 

@@ -18,7 +18,7 @@ public class SystemConversionHex extends SystemConversion {
             { 0, 3}, { 1, 2}, { 2, 7}, { 3, 1},
             { 4, 6}, { 5,11}, { 6, 0}, { 7, 5},
             { 8,10}, { 9,15}, {10, 4}, {11, 9},
-            {12,14}, {13, 8}, {14,13}, {15,13}
+            {12,14}, {13, 8}, {14,13}, {15,12}
     }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
     Map<Integer,Integer> map5x5 = Stream.of(new Integer[][] {
