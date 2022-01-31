@@ -17,7 +17,6 @@ import game.functions.ints.state.Next;
 import game.functions.ints.state.State;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.BlackJack.StateObserverBlackJack;
-import games.RubiksCube.StateObserverCube;
 import graphics.svg.element.BaseElement;
 import jdk.swing.interop.SwingInterOpUtils;
 import params.ParNT;
@@ -56,13 +55,13 @@ import games.Sim.StateObserverSim;
  * @see PlayAgent
  * @see AgentBase
  * @see NTuple4Base
- * 
+ *
  * @author Wolfgang Konen, TH Koeln, 2020
  */
 public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Serializable {
-	
+
 	private NTuple4Agt.EligType m_elig;
-	
+
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip will become unreadable, or you have
@@ -93,7 +92,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	// variable FINALADAPT_PART2 is normally true. Set only to false if you want to test how agents behave otherwise.
 	// If false, do not run through part 'adapt value(s_final) towards 0'. Only relevant, if FINALADAPTAGENTS==true.
 	private final boolean FINALADAPT_PART2=true; //false;
-	
+
 	private int acount=0;	// just for debug: counter to stop debugger after every X adaptation steps
 
 	private transient BaseBuffer replayBuffer = null;
@@ -130,50 +129,51 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);
 		if(rbPar.getUseRB()){
 			replayBuffer = new BaseBuffer(rbPar);
+			ConfigReplayBuffer.USE_REPLAYBUFFER = true;
 		}else {
-			System.out.println("Set Replaybuffer to 0");
 			replayBuffer = null;
+			ConfigReplayBuffer.USE_REPLAYBUFFER = false;
+
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @param tdPar			temporal difference parameters
 	 * @param ntPar			n-tuples and temporal coherence parameter
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
 	 * @param maxGameNum	maximum number of training games
 	 */
-	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,  
-			int[][] nTuples, XNTupleFuncs xnf, int maxGameNum)  {
+	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,
+						 int[][] nTuples, XNTupleFuncs xnf, int maxGameNum)  {
 		m_tdPar = new ParTD(tdPar);
 		m_ntPar = new ParNT(ntPar);
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
 		m_elig = (m_tdPar.getEligMode()==0) ? EligType.STANDARD : EligType.RESET;
 		rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42); 
-		
+
 		int[] posVals = xnf.getPositionValuesVector();
 		int numCells = xnf.getNumCells();
-		
+
 		m_Net = new NTuple4ValueFunc(this,nTuples, xnf, posVals,
 				RANDINITWEIGHTS,ntPar,numCells,1);
-		
+
 		setNTParams(ntPar);
 		setTDParams(tdPar, maxGameNum);
 		setMaxGameNum(maxGameNum);
 		m_Net.setHorizon();
-		
+
 		setAgentState(AgentState.INIT);
 	}
 
 	/**
 	 * If agents need a special treatment after being loaded from disk (e.g. instantiation
 	 * of transient members), put the relevant code in here.
-	 * 
+	 *
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
-		super.instantiateAfterLoading();
 		this.m_Net.xnf.instantiateAfterLoading();
 		for (int i=0; i<m_Net.xnf.getPositionValuesVector().length; i++)
 			assert (m_Net.getNTuples()[0].getPosVals(i)==m_Net.xnf.getPositionValuesVector()[i]) : "Error getPosVals("+i+")";
@@ -190,18 +190,18 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		this.setTDParams(this.getParTD(), this.getMaxGameNum());
 		this.setNTParams(this.getParNT());
 		this.weightAnalysis(null);
-		
+
 		// initialize transient members (in case a further training should take place --> see ValidateAgentTest) 
 		this.sLast = new StateObservation[numPlayers];
 		this.randLast = new boolean[numPlayers];
 		this.m_Net.instantiateAfterLoading();   // instantiate transient eList and nTuples
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Get the best next action and return it 
-	 * 
+	 *
 	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow random action selection with probability m_epsilon
 	 * @param silent		no output
@@ -217,86 +217,85 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
 		int i;
 		double bestValue;
-        double value;			// the quantity to be maximized
-        double otilde, rtilde;
+		double value;			// the quantity to be maximized
+		double otilde, rtilde;
 		boolean rgs = this.getParOther().getRewardIsGameScore();
 		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we use TD target r + gamma*V
 		StateObservation NewSO;
 		Types.ACTIONS thisAct;
-        Types.ACTIONS actBest;
-        Types.ACTIONS_VT actBestVT;
-    	bestValue = -Double.MAX_VALUE;
-		double[] VTable;		
-		//if (!silent) System.out.print("GNA2: ");	// just debug: we enter getNextAction2 ...
+		Types.ACTIONS actBest;
+		Types.ACTIONS_VT actBestVT;
+		bestValue = -Double.MAX_VALUE;
+		double[] VTable;
 
-        otilde = so.getRewardTuple(rgs).scTup[so.getPlayer()];
-        
-        // just debug:
+		otilde = so.getRewardTuple(rgs).scTup[so.getPlayer()];
+
+		// just debug:
 //        if (so.isGameOver()) {
 //        	System.out.println("Game over: "+so.getRewardTuple(true));
 //        }
-        
-    	boolean randomSelect;		// true signals: the next action is a randomly selected one
-    	randomSelect = false;
+
+		boolean randomSelect;		// true signals: the next action is a randomly selected one
+		randomSelect = false;
 		if (random) {
 			randomSelect = (rand.nextDouble() < m_epsilon);
 		}
-		
-        ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
-        List<Types.ACTIONS> bestActions = new ArrayList<>();
-        
-        VTable = new double[acts.size()];  
 
-        if (DBG_BJ) {
-        	System.out.println("so "+ so.stringDescr());
+		ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
+		List<Types.ACTIONS> bestActions = new ArrayList<>();
+
+		VTable = new double[acts.size()];
+
+		if (DBG_BJ) {
+			System.out.println("so "+ so.stringDescr());
 			System.out.println("so reward:" + so.getRewardTuple(rgs));
 		}
 
-        assert acts.size()>0 : "Oops, no available action";
-        for(i = 0; i < acts.size(); ++i)
-        {
+		assert acts.size()>0 : "Oops, no available action";
+		for(i = 0; i < acts.size(); ++i)
+		{
 			thisAct = acts.get(i);
 
 			// this is just relevant for game RubiksCube: If an action is the inverse of the last action, it would
 			// lead to the previous state again, resulting in a cycle of 2. We avoid such cycles and continue with
 			// next pass through for-loop --> beneficial when searching for the solved cube in play & train.
 			// If you do not want to skip any action - e.g. when inspecting states - then enter this method with
-			// a 'cleared' state that has m_action (the action that led to this state) set to 'unknown'.
+			// a 'cleared' state {@link StateObserverCubeCleared} {@code so} (lastAction==9).
 			//
-			// For most other games, no return to the previous state is possible. For those games
+			// For all other games, usually no return to the previous state is possible. For those games
 			// isEqualToInverseOfLastAction returns always false.
 			if (thisAct.isEqualToInverseOfLastAction(so))
 				continue;	// with next for-pass
 
-        	NewSO = so.copy();
+			NewSO = so.copy();
 
-    		if (randomSelect) {
-    			value = rand.nextDouble();
-    		} else {
-    	        if (this.getAFTERSTATE()) {
-    	        	// if parameter "AFTERSTATE" is checked in ParNT, i.e. we use afterstate logic:
-    	        	//
-    	        	NewSO.advanceDeterministic(thisAct); 	// generate the afterstate
-    	        	value = this.getScore(NewSO,so); // this is V(s') from so-perspective
+			if (randomSelect) {
+				value = rand.nextDouble();
+			} else {
+				if (this.getAFTERSTATE()) {
+					// if parameter "AFTERSTATE" is checked in ParNT, i.e. we use afterstate logic:
+					//
+					NewSO.advanceDeterministic(thisAct); 	// generate the afterstate
+					value = this.getScore(NewSO,so); // this is V(s') from so-perspective
 					while (!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()) {	// /WK/ NEW/03/2021
 						NewSO.advanceNondeterministic();
 					}
-    	        } else {
-    	        	// the non-afterstate logic for the case of single moves:
-    	        	//System.out.println("NewSO: "+NewSO.stringDescr()+", act: "+act.toInt()); // DEBUG
-    	            NewSO.advance(acts.get(i));
-    	            value = this.getScore(NewSO,so); // this is V(s'') from the perspective of so
-    	        }
-    	        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
-    	        // but they usually differ for nondeterministic games.
+				} else {
+					// the non-afterstate logic for the case of single moves:
+					//System.out.println("NewSO: "+NewSO.stringDescr()+", act: "+act.toInt()); // DEBUG
+					NewSO.advance(acts.get(i));
+					value = this.getScore(NewSO,so); // this is V(s'') from the perspective of so
+				}
+				// both ways of calculating the agent score are the same for deterministic games (s'=s''),
+				// but they usually differ for nondeterministic games.
 
 				rtilde  = (NewSO.getRewardTuple(rgs).scTup[so.getPlayer()]-otilde)
 						+ so.getStepRewardTuple().scTup[so.getPlayer()];
-            	if (TERNARY) {
-            		value = NewSO.isGameOver() ? rtilde : getGamma()*value;
-            	} else {
-        	        value = rtilde + getGamma()*value;
-            	}
+				if (TERNARY) {
+					value = NewSO.isGameOver() ? rtilde : getGamma()*value;
+				} else {
+					value = rtilde + getGamma()*value;
+				}
 
 				if (DBG_BJ) {
 					DecimalFormat form = new DecimalFormat("#0.000");
@@ -309,11 +308,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				}
 
 			}
-       	
+
 			// just a debug check:
 			if (Double.isInfinite(value)) System.out.println("value(NewSO) is infinite!");
-			
-			value = normalize2(value,so);					
+
+			value = normalize2(value,so);
 			VTable[i] = value;
 
 			//
@@ -323,17 +322,17 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			//
 			if (bestValue < value) {
 				bestValue = value;
-                bestActions.clear();
-                bestActions.add(acts.get(i));
+				bestActions.clear();
+				bestActions.add(acts.get(i));
 			} else if (bestValue == value) {
-                bestActions.add(acts.get(i));
+				bestActions.add(acts.get(i));
 			}
 
-        } // for
-        actBest = bestActions.get(rand.nextInt(bestActions.size()));
-        // if several actions have the same best value, select one of them randomly
+		} // for
+		actBest = bestActions.get(rand.nextInt(bestActions.size()));
+		// if several actions have the same best value, select one of them randomly
 
-        assert actBest != null : "Oops, no best action actBest";
+		assert actBest != null : "Oops, no best action actBest";
 
 		if (DBG_BJ) {
 			BasicStrategyBlackJackAgent bsbja = new BasicStrategyBlackJackAgent();
@@ -390,7 +389,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		}
 	}
 
-		
+
 	/**
 	 * Return the agent's estimate of the score for that afterstate {@code so}.
 	 * For 2-player games like TTT, the score is V(), the probability that the player to move
@@ -405,7 +404,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * <p> 
 	 * This method is only implemented here to satisfy {@link PlayAgent}'s interface. If called,
 	 * it throws an exception.
-	 * 
+	 *
 	 * @param so		   the (after-)state for which the value is desired
 	 * @return V(s_t|p_t), the agent's estimate of the future score for that after state (its value)
 	 */
@@ -426,7 +425,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * NOTE: For {@link TDNTuple4Agt} and N &gt; 1, this method should be only called in the form
 	 * {@code getScore(NextSO,so)}. This is actually the case, 
 	 * see {@link #getNextAction2(StateObservation, boolean, boolean)}.
-	 * 
+	 *
 	 * @param so	the (after-)state s_t for which the value is desired
 	 * @param refer	the referring state
 	 * @return		V(s_t|p_refer), the agent's estimate of the future score for s_t
@@ -435,12 +434,12 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	public double getScore(StateObservation so, StateObservation refer) {
 		double score;
 		//if (so instanceof StateObserverCube)
-			if (so.isGameOver())
-				return 0.0;		// This is very needed for RubiksCube (no expected future rewards for game-over states).
-								// We assume from now on (09/2020) that it is at least not harmful for all other games.
+		if (so.isGameOver())
+			return 0.0;		// This is very needed for RubiksCube (no expected future rewards for game-over states).
+		// We assume from now on (09/2020) that it is at least not harmful for all other games.
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		score = m_Net.getScoreI(curSOWB,refer.getPlayer());
-    	return score;
+		return score;
 	}
 
 	/**
@@ -451,7 +450,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
 	 * 						passing in such other players' value from previous states, which may serve
 	 * 						as surrogate for the unknown values in {@code sob}. {@code prevTuple} may be {@code null}. 
-	 * 
+	 *
 	 * @return		an N-tuple with elements V(s_t|i), i=0,...,N-1, the agent's estimate of 
 	 * 				the future score for s_t from the perspective of player i
 	 */
@@ -476,8 +475,8 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			case 2 -> {
 				int player = so.getPlayer();
 				int opponent = (player == 0) ? 1 : 0;
-	//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
-	//			sc.scTup[opponent] = -sc.scTup[player];
+				//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
+				//			sc.scTup[opponent] = -sc.scTup[player];
 				//
 				// This is an important bug fix (2019-03-10) for TDNTuple4Agt:
 				// If we want to get the score tuple for state 'so' where
@@ -505,7 +504,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			}
 		}
 
-    	return sc;
+		return sc;
 	}
 
 	/**
@@ -513,7 +512,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
 	 * Is called when training an agent in multi-update mode AND the maximum episode length
 	 * is reached. 
-	 * 
+	 *
 	 * @param sob			the current game state
 	 * @param prevTuple		for N &ge; 3 player, we only know the game value for the player who <b>created</b>
 	 * 						{@code sob}. To provide also values for other players, {@code prevTuple} allows
@@ -532,7 +531,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		// with getScoreI only the expected future reward.
 		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
 		sc.combine(sob.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
-		
+
 		// old version (2019), not recommended:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
 //		ScoreTuple sc = new ScoreTuple(sob);
@@ -563,7 +562,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	/**
 	 * Adapt the n-tuple weights for state {@code sLast[curPlayer]}, the last afterstate that current
 	 * player generated, towards the target derived from {@code s_next}.
-	 * 
+	 *
 	 * @param curPlayer		the player to move in state {@code ns.getSO()}
 	 * @param R				the (cumulative) reward tuple received when moving into {@code s_next}
 	 * @param ns			the {@code NextState} object holds the afterstate {@code ns.getAfterState()}
@@ -576,14 +575,14 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 //		int[] curBoard;
 		double v_next,vLast,vLastNew,target;
 		boolean learnFromRM = m_oPar.getLearnFromRM();
-		
+
 		// calculate v_next which is the estimated game value for the afterstate generated by
 		// curPlayer from state ns.getSO(), seen from the perspective of curPlayer
 		if (s_next.isGameOver()) {
 			v_next = 0.0;
 		} else {
 			StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(s_after,m_Net.xnf);
-        	v_next = m_Net.getScoreI(nextSOWB,curPlayer);
+			v_next = m_Net.getScoreI(nextSOWB,curPlayer);
 		}
 		// SLast is not used yet
 		if (sLast[curPlayer]!=null) {
@@ -591,11 +590,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			double r_next;
 			r_next  = (R.scTup[curPlayer] - rLast.scTup[curPlayer])
 					+ s_next.getStepRewardTuple().scTup[curPlayer];
-        	if (TERNARY) {
-        		target = s_next.isGameOver() ? r_next : getGamma()*v_next;
-        	} else {
-    			target = r_next + getGamma()*v_next;        		
-        	}
+			if (TERNARY) {
+				target = s_next.isGameOver() ? r_next : getGamma()*v_next;
+			} else {
+				target = r_next + getGamma()*v_next;
+			}
 
 //			if (target==-1.0) {
 //				int dummy=0;
@@ -603,58 +602,58 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 //			if (Math.abs(v_next)>0.7) {
 //				int dummy=0;
 //			}
-        	
-        	// note that curBoard is NOT the board vector of state ns.getSO(), but of state
-        	// sLast[curPlayer] (one round earlier!)
-    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[curPlayer], m_Net.xnf);
-//			curBoard = curSOWB.getBoardVector().bvec;
-        	vLast = m_Net.getScoreI(curSOWB,curPlayer);
-        	
-//    		if (randLast[curPlayer] && !learnFromRM && !s_next.isGameOver()) {
-        	// the above line was the statement before 2019-09-02. But it is wrong (at 
-        	// least for the game Sim, and probably also other games) to learn on s_next.isGameOver():
-        	// Because in Sim a game-over situation means that curPlayer has lost --> it is not 
-        	// correct to learn on such a random move, because another move might be a winning or 
-        	// tie move --> sLast[curPlayer] would learn the wrong (negative) target!
-        	// That is why we learn now *never* on a random move (except if learnFromRM is true):
-        	if (randLast[curPlayer] && !learnFromRM) {
-            	// if last action (of curPlayer) leading to s_next was a random move: 
-    			// no training, go to next move.
-    			if (m_DEBG) 
-    				System.out.println("random move --> no train");
-    			
-    			m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
-    				
-    		} else {
 
-    			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,r_next,ns.getSO());
-    		}
-    		
-    		//debug only:
+			// note that curBoard is NOT the board vector of state ns.getSO(), but of state
+			// sLast[curPlayer] (one round earlier!)
+			StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[curPlayer], m_Net.xnf);
+//			curBoard = curSOWB.getBoardVector().bvec;
+			vLast = m_Net.getScoreI(curSOWB,curPlayer);
+
+//    		if (randLast[curPlayer] && !learnFromRM && !s_next.isGameOver()) {
+			// the above line was the statement before 2019-09-02. But it is wrong (at
+			// least for the game Sim, and probably also other games) to learn on s_next.isGameOver():
+			// Because in Sim a game-over situation means that curPlayer has lost --> it is not
+			// correct to learn on such a random move, because another move might be a winning or
+			// tie move --> sLast[curPlayer] would learn the wrong (negative) target!
+			// That is why we learn now *never* on a random move (except if learnFromRM is true):
+			if (randLast[curPlayer] && !learnFromRM) {
+				// if last action (of curPlayer) leading to s_next was a random move:
+				// no training, go to next move.
+				if (m_DEBG)
+					System.out.println("random move --> no train");
+
+				m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
+
+			} else {
+
+				m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,r_next,ns.getSO());
+			}
+
+			//debug only:
 			if (m_DEBG) {
-	    		if (s_next.isGameOver()) {
-	            	//vLastNew = m_Net.getScoreI(curSOWB,curPlayer);
-	            	int dummy=1;
-	    		}
-	    		assertStateForSim(s_next, sLast[curPlayer]);	// this is only for debugging Sim
+				if (s_next.isGameOver()) {
+					//vLastNew = m_Net.getScoreI(curSOWB,curPlayer);
+					int dummy=1;
+				}
+				assertStateForSim(s_next, sLast[curPlayer]);	// this is only for debugging Sim
 //            	ScoreTuple sc1 = s_next.getGameScoreTuple();
 //           	ScoreTuple sc2 = this.getScoreTuple(s_next, null);
-	    		String s1 = sLast[curPlayer].stringDescr();
-	    		String s2 = s_next.stringDescr();
-	    		if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
-	            	vLastNew = m_Net.getScoreI(curSOWB,curPlayer);
-	            	System.out.println(s1+" "+s2+", "
-	            			+String.format("%.4f",vLast)+" -> "+String.format("%.4f",vLastNew)
-	            			+" target="+String.format("%.4f",target) 
-	            			+" player="+(curPlayer==0 ? "X" : "O"));
-	            	if (++acount % 50 ==0) {
-	            		int dummy=1;
-	            	}
-	    		}
+				String s1 = sLast[curPlayer].stringDescr();
+				String s2 = s_next.stringDescr();
+				if (target!=0.0) {//(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
+					vLastNew = m_Net.getScoreI(curSOWB,curPlayer);
+					System.out.println(s1+" "+s2+", "
+							+String.format("%.4f",vLast)+" -> "+String.format("%.4f",vLastNew)
+							+" target="+String.format("%.4f",target)
+							+" player="+(curPlayer==0 ? "X" : "O"));
+					if (++acount % 50 ==0) {
+						int dummy=1;
+					}
+				}
 			}
 
 		}  // if(sLast[..]!=null)
-	
+
 		// --- not needed here, see else-branch in finalAdaptAgents, where we do the same ---
 //		if (s_next.isGameOver()) {
 //			// if s_next is terminal, adapt towards target 0 the afterstate that precedes s_next 
@@ -664,7 +663,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 //			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, target,R.scTup[curPlayer],ns.getSO());
 //		}
 	}
-	
+
 	/**
 	 * This function is called when {@code ns.getNextSO()} is terminal. It does two things:
 	 * <ol>
@@ -675,7 +674,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * 		the terminal state, towards 0. <br>
 	 * 		[This second part is only relevant if TERNARY==false in source code.]
 	 * </ol>
-	 * 
+	 *
 	 * @param curPlayer the player to move in @{@code ns.getSO()} = the player who generates {@code ns.getNextSO()}
 	 * @param R         the reward tuple for {@code ns.getNextSO()}
 	 * @param ns		the next state object when applying action {@code a_t} in state {@code s_t}
@@ -684,152 +683,77 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		double target,vLast,vLastNew;
 //		int[] curBoard, nextBoard;
 		StateObservation s_after = ns.getAfterState();
-		StateObservation s_next = ns.getNextSO(); 
+		StateObservation s_next = ns.getNextSO();
+
 		for (int n=0; n<numPlayers; n++) {
 			if (n!=curPlayer) {
 				// This 1st part of finalAdaptAgents is only relevant for games with more than one player:
 				//
 				// adapt the value of the last state sLast[n] of each player other than curPlayer
-				// towards the reward received when curPlayer did his terminal move. 
+				// towards the reward received when curPlayer did his terminal move.
 				//
 				if (sLast[n]!=null ) {
 					target  = (R.scTup[n] - rLast.scTup[n]) 		// delta reward
 							+ s_next.getStepRewardTuple().scTup[n];
-		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
-		        	vLast = m_Net.getScoreI(curSOWB,n);
-		        	
-	    			m_Net.updateWeightsTD(curSOWB, n, vLast, target, R.scTup[n], ns.getSO());
+					StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
+					vLast = m_Net.getScoreI(curSOWB,n);
 
-	    			//debug only:
-	    			if (m_DEBG) {
-	    				assert s_next.isLegalState() : "s_next is not legal";
+					m_Net.updateWeightsTD(curSOWB, n, vLast, target, R.scTup[n], ns.getSO());
+
+					//debug only:
+					if (m_DEBG) {
+						assert s_next.isLegalState() : "s_next is not legal";
 //	    	    		if (s_next.isGameOver()) {
 //	    	            	vLastNew = m_Net.getScoreI(curSOWB,n);
 //	    	            	int dummy=1;
 //	    	    		}
-	    	    		String s1 = sLast[n].stringDescr();
-	    	    		String s2 = s_next.stringDescr();
-	    	    		if (target!=0.0) { //(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
-	    	            	vLastNew = m_Net.getScoreI(curSOWB,n);
-	    	            	System.out.println(s1+" "+s2+", "
-	    	            			+String.format("%.4f",vLast)+" -> "+String.format("%.4f",vLastNew)
-	    	            			+" target="+String.format("%.4f",target)
-	    	            			+" player="+(n==0 ? "X" : "O")+" (f)"+this.getGameNum());
-	    	            	if (++acount % 50 ==0) {
-	    	            		int dummy=1;
-	    	            	}
-	    	    		}
-	    			}
+						String s1 = sLast[n].stringDescr();
+						String s2 = s_next.stringDescr();
+						if (target!=0.0) { //(target==-1.0) { //(s_next.stringDescr()=="XoXX-oXo-") {
+							vLastNew = m_Net.getScoreI(curSOWB,n);
+							System.out.println(s1+" "+s2+", "
+									+String.format("%.4f",vLast)+" -> "+String.format("%.4f",vLastNew)
+									+" target="+String.format("%.4f",target)
+									+" player="+(n==0 ? "X" : "O")+" (f)"+this.getGameNum());
+							if (++acount % 50 ==0) {
+								int dummy=1;
+							}
+						}
+					}
 				}
 			} else { // if n==curPlayer
 				if (FINALADAPT_PART2 && !this.epiLengthStop) {
 					// The following is equivalent to TDNTuple2Agt's call of m_Net.updateWeightsNewTerminal():
 					//
-					// If s_next is terminal, adapt the value of the *afterstate* that 
-					// curPlayer observed after he did his final move. Adapt it towards 
-					// target 0. (This is only relevant for TERNARY==false, since 
+					// If s_next is terminal, adapt the value of the *afterstate* that
+					// curPlayer observed after he did his final move. Adapt it towards
+					// target 0. (This is only relevant for TERNARY==false, since
 					// only then the value of this afterstate is used in getNextAction2.)
 					//
 					// 09/2019: We do the final part2 adaptation only, if the game-over condition is not due ot an
 					// epiLengthStop (then the final state has no special meaning and should NOT be adapted towards
 					// target 0
-		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_after, m_Net.xnf);
+					StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_after, m_Net.xnf);
 //					curBoard = curSOWB.getBoardVector().bvec;
-		        	vLast = m_Net.getScoreI(curSOWB,curPlayer);
-	    			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);
+					vLast = m_Net.getScoreI(curSOWB,curPlayer);
+					m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);
 				}
-				
+
 			}
 		} // for
-		
+
 	}
 
 	/**
 	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
-	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
+	 * Side effects: Increment m_GameNum by +1. Change the agent's internal
 	 * parameters (weights and so on).
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)
-	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
+	 * @return			true, if agent raised a stop condition (only CMAPlayer)
 	 */
 	public boolean trainAgent(StateObservation so) {
-		if(replayBuffer != null) return trainAgent2(so);
-		Types.ACTIONS_VT a_t;
-		int curPlayer;
-		NextState4 ns;
-		ScoreTuple R;
-		rLast = new ScoreTuple(so);
-
-		int epiLength = m_oPar.getEpisodeLength();
-		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
-
-		StateObservation s_t = so.copy();
-		for (int n=0; n<numPlayers; n++) {
-			sLast[n] = null;
-		}
-		int kk= (so.getPlayer()-1+numPlayers)%numPlayers;	// p=0,N=1 --> kk=0; p=0,N=2 --> kk=1
-		sLast[kk] = so.precedingAfterstate();
-		// The player kk who generated 'so' gets so's preceding afterstate as its sLast.
-		// (This is important for RubiksCube, in order to learn from the first move on in 
-		// this deterministic single-player game: The player who generated 'so' is so.getPlayer()
-		// itself, thus kk=0, and the preceding afterstate is 'so' itself.)
-		
-		m_counter=0;		// /WK/bug fix 2019-05-21
-		m_finished=false;	// /WK/bug fix 2019-05-21
-		do {
-	        m_numTrnMoves++;		// number of train moves (including random moves)
-	        // choose action a_t, using epsilon-greedy policy based on V
-			a_t = getNextAction2(s_t.partialState(), true, true);
-			// Adding transitions
-			// only for debug:
-//			if (a_t.isRandomAction() && s_t.getPlayer()==1) {
-//				int dummy = 1;
-//			}
-
-	        // take action a_t and observe reward & next state 
-	        ns = new NextState4(this,s_t,a_t);
-			curPlayer = ns.getSO().getPlayer();
-
-	        assert curPlayer<randLast.length : "Oops, randLast too small!";
-	        randLast[curPlayer] = a_t.isRandomAction(); // /WK/ bug fix: has to come before adaptAgentV (!)
-	        	// Remark: This line was missing before 2019-09-02, it was only done 4 lines later, after
-	        	// adaptAgentV(). As a result, in the old version randLast[curPlayer] would be false, even
-	        	// if a_t was a random action. (Only in the next round, when a_t might be greedy again,
-	        	// randLast[curPlayer] would be true.). This was the wrong behavior, which is now fixed.
-	        R = ns.getNextRewardTupleCheckFinished(epiLength);	// this may set m_finished
-
-			adaptAgentV(curPlayer, R, ns);
-
-			sLast[curPlayer] = ns.getAfterState();
-			rLast.scTup[curPlayer] = R.scTup[curPlayer];
-	        // we differentiate between the afterstate (on which we learn) and the 
-	        // next state s_t, which may have environment random elements added and from which 
-	        // we advance. 
-	        // (for deterministic games, ns.getAfterState() and ns.getNextSO() are the same)
-
-			// Check for replaybuffer
-	        s_t = ns.getNextSO();
-
-	        if (s_t.isRoundOver() && !getParTD().hasStopOnRoundOver()) {	// /WK/ NEW 03/2021
-				s_t.initRound();
-			}
-		} while(!m_finished);			// simplification: m_finished is set by ns.getNextRewardTupleCheckFinished
-
-		if (FINALADAPTAGENTS) finalAdaptAgents(curPlayer, R, ns);
-		try {
-			this.finishUpdateWeights();		// adjust learn params ALPHA & m_epsilon
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-		
-		incrementGameNum();
-
-		return false;
-	} // trainAgent
-
-
-	private boolean trainAgent2(StateObservation so){
 		Types.ACTIONS_VT a_t;
 		int curPlayer;
 		NextState4 ns;
@@ -874,8 +798,12 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			// randLast[curPlayer] would be true.). This was the wrong behavior, which is now fixed.
 			R = ns.getNextRewardTupleCheckFinished(epiLength);	// this may set m_finished
 
-			adaptAgentV2(curPlayer, R, ns);
-
+			// Check for replaybuffer
+			if(ConfigReplayBuffer.USE_REPLAYBUFFER) {
+				adaptAgentV2(curPlayer,R,ns);
+			}else{
+				adaptAgentV(curPlayer, R, ns);
+			}
 			sLast[curPlayer] = ns.getAfterState();
 			rLast.scTup[curPlayer] = R.scTup[curPlayer];
 			// we differentiate between the afterstate (on which we learn) and the
@@ -883,30 +811,35 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			// we advance.
 			// (for deterministic games, ns.getAfterState() and ns.getNextSO() are the same)
 
-			// Check for replaybuffer
 			s_t = ns.getNextSO();
 
 			if (s_t.isRoundOver() && !getParTD().hasStopOnRoundOver()) {	// /WK/ NEW 03/2021
 				s_t.initRound();
 			}
 		} while(!m_finished);			// simplification: m_finished is set by ns.getNextRewardTupleCheckFinished
-		if (FINALADAPTAGENTS) finalAdaptAgents2(curPlayer, R, ns);
 
-		//if(replayBuffer.getMaxBufferIndex() == replayBuffer.getCapacity()) learnFromReplayBuffer();
-
+		if (FINALADAPTAGENTS) {
+			// check for replay buffer
+			if(ConfigReplayBuffer.USE_REPLAYBUFFER) {
+				finalAdaptAgents2(curPlayer,R,ns);
+				learnFromReplayBuffer();
+			}else finalAdaptAgents(curPlayer, R, ns);
+		}
+		// start learning
 
 		try {
 			this.finishUpdateWeights();		// adjust learn params ALPHA & m_epsilon
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+
+		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		incrementGameNum();
 		if (this.getGameNum() % 500 == 0) {
 			System.out.println("gameNum: "+this.getGameNum());
 		}
-		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		return false;
-	}
+	} // trainAgent
 
 
 	/**
@@ -928,13 +861,14 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		for (int n=0; n<numPlayers; n++) {
 			if (n!=curPlayer) {
 				if (sLast[n]!=null ) {
-					replayBuffer.addToLastTransition(n,ns,sLast,rLast,R);
-					learnFromReplayBuffer();
+					// Add the finaladaptation to the replaybuffer from the perspective of all other players
+					replayBuffer.addTransition(n,ns,sLast[n],rLast,R,1);
+					//learnFromReplayBuffer();
 				}
 			} else {
 				if (FINALADAPT_PART2 && !this.epiLengthStop) {
-					replayBuffer.addToLastTransition(curPlayer,ns,sLast,rLast,R);
-					learnFromReplayBuffer();
+					// Add the finaladaptation to the replaybuffer from the perspective of curplayer
+					replayBuffer.addTransition(curPlayer,ns,ns.getAfterState(),rLast,R,2);
 				}
 			}
 		}
@@ -949,8 +883,8 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			if (randLast[curPlayer] && !learnFromRM) {
 				m_Net.clearEligList(m_elig);	// the list is only cleared if m_elig==RESET
 			} else {
-				replayBuffer.addToLastTransition(curPlayer,ns,sLast,rLast,R);
-				learnFromReplayBuffer();
+				replayBuffer.addTransition(curPlayer,ns,sLast[curPlayer],rLast,R,0);
+
 			}
 		}
 	}
@@ -958,10 +892,13 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 
 	private void learnFromReplayBuffer(){
-		ITransition[] transitions = replayBuffer.getBatches();
+		// Awaiting the replaybuffer to be full prior learning attempt
+		if(replayBuffer.getMaxBufferIndex() != replayBuffer.getCapacity()) return;
+		System.out.println("hello learn");
+		ITransition[] transitions = replayBuffer.getBatch();
 		for(ITransition t : transitions){
 			int player = t.getPlayer();
-			StateObsWithBoardVector sowb = new StateObsWithBoardVector(t.getSLast()[player], m_Net.xnf);
+			StateObsWithBoardVector sowb = new StateObsWithBoardVector(t.getSLast(), m_Net.xnf);
 			double vLast = m_Net.getScoreI(sowb,player);
 			double target;
 			double r_next;
@@ -970,15 +907,44 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			double v_next = calculate_v_next(s_next,s_after,player);
 			r_next  = (t.getR().scTup[player] - t.getRLast().scTup[player])
 					+ s_next.getStepRewardTuple().scTup[player];
-			if (TERNARY) {
-				target = s_next.isGameOver() ? r_next : getGamma()*v_next;
-			} else {
-				target = r_next + getGamma()*v_next;
+			switch(t.isFinalTransition()){
+				case 0:{
+					if (TERNARY) {
+						target = s_next.isGameOver() ? r_next : getGamma()*v_next;
+					} else {
+						target = r_next + getGamma()*v_next;
+					}
+					break;
+				}
+				case 1:{
+					target = r_next;
+					break;
+				}
+				case 2:{
+					target = 0.0;
+					break;
+				}
+				default: throw new RuntimeException("isFinalTransition error: Value is " + t.isFinalTransition());
 			}
+			if(ConfigReplayBuffer.DBG){
+				String s = "";
+				s += "FinalState:" +sowb.getStateObservation().isGameOver()+"\n";
+				s+= "Player:"+player+"\nvLast:"+ vLast +"\nTarget:" +target+"\nReward:"+r_next;
+				System.out.println(s);
+
+			}
+			// Update the weights
 			m_Net.updateWeightsTD(sowb,player,vLast,target,r_next,t.getNextState4().getNextSO());
 		}
 	}
 
+	/**
+	 *
+	 * @param s_next
+	 * @param s_after
+	 * @param player
+	 * @return
+	 */
 	private double calculate_v_next(StateObservation s_next, StateObservation s_after,int player){
 		double v_next = 0.0;
 		if (s_next.isGameOver()) {
@@ -995,25 +961,25 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
 		return       cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
-						+ ", P:" + (m_Net.getXnf().getNumPositionValues())
-						+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
-						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
-						+ ", lambda:" + m_Net.getLambda()
-						+ ", horizon:" + m_Net.getHorizon()
-						+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
-						+ ", learnFromRM: " + (m_oPar.getLearnFromRM()?"true":"false");
+				+ ", P:" + (m_Net.getXnf().getNumPositionValues())
+				+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
+				+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
+				+ ", lambda:" + m_Net.getLambda()
+				+ ", horizon:" + m_Net.getHorizon()
+				+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
+				+ ", learnFromRM: " + (m_oPar.getLearnFromRM()?"true":"false");
 	}
 
 	@Override
 	public String stringDescr2() {
 		String cs = getClass().getSimpleName();
 		return       cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
-						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
-						+ ", gamma: " + m_tdPar.getGamma()
-						+ ", "+stringDescrNTuple()		// see NTupleBase
-						+ ", evalQ: " + m_oPar.getQuickEvalMode() + ", evalT: " + m_oPar.getTrainEvalMode();
+				+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
+				+ ", gamma: " + m_tdPar.getGamma()
+				+ ", "+stringDescrNTuple()		// see NTupleBase
+				+ ", evalQ: " + m_oPar.getQuickEvalMode() + ", evalT: " + m_oPar.getTrainEvalMode();
 	}
-		
+
 	// Callback function from constructor NextState4(NTupleAgt,StateObservation,ACTIONS).
 	// It sets various elements of NextState4 ns (nextReward, nextRewardTuple).
 	// It is part of TDNTuple4Agt (and not part of NextState4), because it uses various elements
@@ -1033,9 +999,9 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			System.out.print(ns.nextRewardTuple.toString());
 //			System.out.print("Reward: "+ns.nextReward);
 			System.out.println("   ["+ns.nextSO.stringDescr()+"]  " + ns.nextSO.getGameScore(ns.nextSO.getPlayer())
-							 + " for player " + ns.nextSO.getPlayer());
+					+ " for player " + ns.nextSO.getPlayer());
 		}
 	}
 
-	
+
 }

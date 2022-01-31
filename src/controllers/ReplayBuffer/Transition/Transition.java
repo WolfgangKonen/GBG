@@ -13,19 +13,23 @@ import tools.Types;
 public class Transition implements ITransition {
 
     private NextState4 next_state;
-    private StateObservation[] sLast;
+    private StateObservation sLast;
     private int player;
     private ScoreTuple rLast,R;
+    private int isFinalTransition;
 
+    // Create an empty transition
     public Transition(){};
 
-    public Transition(int player, NextState4 ns, StateObservation[] sLast, ScoreTuple rLast,ScoreTuple R){
+    public Transition(int player, NextState4 ns, StateObservation sLast, ScoreTuple rLast,ScoreTuple R, int isFinalTransition){
         this.next_state = ns;
         this.sLast = sLast;
         this.player = player;
         this.rLast = rLast;
         this.R = R;
+        this.isFinalTransition = isFinalTransition;
     }
+
 
 
     @Override
@@ -53,12 +57,12 @@ public class Transition implements ITransition {
     }
 
     @Override
-    public void setSLast(StateObservation[] sLast) {
+    public void setSLast(StateObservation sLast) {
         this.sLast = sLast;
     }
 
     @Override
-    public StateObservation[] getSLast() {
+    public StateObservation getSLast() {
         return sLast;
     }
 
@@ -76,6 +80,16 @@ public class Transition implements ITransition {
     }
 
     @Override
+    public void setIsFinalTransition(int i) {
+        isFinalTransition = i;
+    }
+
+    @Override
+    public int isFinalTransition() {
+        return isFinalTransition;
+    }
+
+    @Override
     public void setRLast(ScoreTuple rLast) {
         this.rLast = rLast;
     }
@@ -84,4 +98,6 @@ public class Transition implements ITransition {
     public ScoreTuple getRLast() {
         return rLast;
     }
+
 }
+

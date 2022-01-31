@@ -708,3 +708,4 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         return this.m_scoreTuple;
     }
 }
+

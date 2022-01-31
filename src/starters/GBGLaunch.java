@@ -353,25 +353,24 @@ public class GBGLaunch extends SetupGBG {
 			scaPar2_L.setText("Twist Type");
 			scaPar0_L.setToolTipText("Pocket Cube or Rubik's Cube");
 			scaPar1_L.setToolTipText("Type of board vectors (only n-tuple agents)");
-			scaPar2_L.setToolTipText("<html>Type of twists: half-turn metric (HTM) <br>" +
-					"or quarter-turn metric (QTM)</html>");
+			scaPar2_L.setToolTipText("Type of twists (all or only quarter)");
 			//setScaPar0List(new int[]{});
 			//setScaPar1List(new int[]{});
 			//setScaPar2List(new int[]{});
 			setScaPar0List(new String[]{"2x2x2","3x3x3"});
 			setScaPar1List(new String[]{"CSTATE","CPLUS","STICKER","STICKER2"});
-			setScaPar2List(new String[]{"HTM","QTM"});
+			setScaPar2List(new String[]{"ALL","QUARTER"});
 			//choiceScaPar0.addItem("3x3x3");
-			choiceScaPar0.setSelectedItem("2x2x2");			//
+			choiceScaPar0.setSelectedItem("3x3x3");			//
 			choiceScaPar1.setSelectedItem("STICKER2");		// the initial (recommended) values
-			choiceScaPar2.setSelectedItem("QTM");			//
+			choiceScaPar2.setSelectedItem("ALL");			//
 			break;
 		case "EWN":
 			scaPar0_L.setText("Settings:");
-			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","4x4 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
+			setScaPar0List(new String[]{"3x3 2-Player", "4x4 2-Player","5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
 			scaPar1_L.setText("Position values:");
-			setScaPar1List(new String[]{"[0,..,n]", "[0,1],[2,3],[4,5]"});
+			setScaPar1List(new String[]{"[0,..,n]", "[0,1],[2,3],[4,5]","[0],[1],[2],[3],[4],[5]"});
 			choiceScaPar1.setSelectedItem("[0,..,n]");
 			scaPar2_L.setText("Random starting:");
 			setScaPar2List(new String[]{"True", "False"});
@@ -469,3 +468,4 @@ public class GBGLaunch extends SetupGBG {
 	}
 
 }
+

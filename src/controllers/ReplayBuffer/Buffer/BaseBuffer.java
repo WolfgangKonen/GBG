@@ -26,24 +26,18 @@ public class BaseBuffer{
     private ITransition lastTransition;
     private int indexPointer;
     private int bufferMaxPointer;  // Highest possible index -> Should be max capacity-1
-    private boolean collecting;
-    private int[] episodeLengths;
     private int capacity;
     private int batchSize;
-    private int episodeLength;
     private ISelector selector;
     private IPusher pusher;
 
     public BaseBuffer(int capacity, int selector, int pusher,int batchSize){
-        collecting = true;
         this.batchSize = batchSize;
         this.capacity = capacity;
         buffer = new ITransition[capacity];
         indexPointer = 0;
         bufferMaxPointer = 0;
         lastTransition = null;
-        episodeLength =-1;
-        episodeLengths = new int[capacity];
         this.selector = setSelector(selector);
         this.pusher = setPusher(pusher);
     }
@@ -66,41 +60,29 @@ public class BaseBuffer{
      */
     private void incrementBufferMaxPointer(){
         if(ConfigReplayBuffer.DBG) System.out.println("Incrementing the BufferMaxPtr from: " +bufferMaxPointer + " to : "+  (bufferMaxPointer +1));
-        if(bufferMaxPointer == capacity){
-           if(episodeLength == -1) calculateEpisodeLength();
-            return;
-        }
+        if(bufferMaxPointer == capacity) return;
         bufferMaxPointer = bufferMaxPointer +1;
     }
 
 
 
-    /**
-     * Add a transition to the replay buffer and update the pointers
-     * @param t Transition
-     */
-    public void addTransition(ITransition t){
-        if(!pusher.pushTransition(t)) return;
-        if(ConfigReplayBuffer.DBG) System.out.println("Adding transition at point: " + indexPointer );
-        buffer[indexPointer] = t;
-        incrementIndexPointer();
-        incrementBufferMaxPointer();
-    }
+
 
     /**
      * Used to get the last transition index
      * @return Integer
      */
-    private int lastIndexPointer(){
+    public int lastIndexPointer(){
         if(indexPointer == 0) return capacity-1;
         return indexPointer;
     }
 
     /**
-     * Return batches using selector
+     * Returns one batch using the selectors policy
+     * The batch size is set via {@code batchSize}
      * @return
      */
-    public ITransition[] getBatches(){
+    public ITransition[] getBatch(){
         return selector.selectBatch();
     }
 
@@ -114,7 +96,9 @@ public class BaseBuffer{
     }
 
     /**
+     * Entry point for the ISelector interface
      * Choose selector based on index
+     *
      * @param i Integer
      * @return Instance implements ISelector
      */
@@ -126,6 +110,7 @@ public class BaseBuffer{
     }
 
     /**
+     * Entry point for the IPusher Interface
      * Choose pusher based on index
      * @param i Intger
      * @return Instance implements IPusher
@@ -137,62 +122,62 @@ public class BaseBuffer{
         }
     }
 
-   public void updateEpisodeCounter(int episodeLength){
-       episodeLengths[bufferMaxPointer-1] = episodeLength;
-   }
 
-    public void addToLastTransition(
+    /**
+     * This Method accepts multiple values to create a transition and stores it.
+     * @param player player to whom the transition belongs to
+     * @param ns    Nextstate4 object
+     * @param sLast
+     * @param rLast
+     * @param R
+     */
+    public void addTransition(
             int player,
             NextState4 ns,
-            StateObservation[] sLast,
+            StateObservation sLast,
             ScoreTuple rLast,
-            ScoreTuple R
-            ){
-        sLast = copySLast(sLast);
-
-        lastTransition = new Transition(player,ns,sLast,rLast.copy(),R.copy());
-        addTransition(lastTransition);
+            ScoreTuple R,
+            int isFinalTransition
+    ){
+        sLast = sLast.copy();
+        lastTransition = new Transition(player,ns,sLast,rLast.copy(),R.copy(),isFinalTransition);
+        savetransition(lastTransition);
     }
 
-
-    private StateObservation[] copySLast(StateObservation[] copy){
-        StateObservation[] returnValue = new StateObservation[copy.length];
-        for(int i = 0; i < copy.length; i++ ){
-            returnValue[i] = copy[i].copy();
-        }
-        return returnValue;
+    /**
+     * This method updates the internal pointers and adds the transition to the
+     * replaybuffer
+     *
+     * @param t Transition
+     */
+    private void savetransition(ITransition t){
+        if(!pusher.pushTransition(t)) return;
+        if(ConfigReplayBuffer.DBG) System.out.println("Adding transition at point: " + indexPointer );
+        buffer[indexPointer] = t;
+        incrementIndexPointer();
+        incrementBufferMaxPointer();
     }
 
-    private void calculateEpisodeLength(){
-        double result;
-        int sum = 0;
-        for(int i : episodeLengths){
-            sum += i;
-        }
-        result = sum / episodeLengths.length;
-        episodeLength = (int) result;
-    }
 
     // Getter and Setter here
-    public void setCollecting(boolean b){collecting = b;}
     public int getCapacity(){return this.capacity;}
+
     public int getMaxBufferIndex(){
         return bufferMaxPointer;
     }
 
-    public boolean getCollecting(){return collecting;}
-    public ITransition getLastTransition(){
-        return lastTransition;
-    }
-    public ITransition getLastTransitionIndex(){
-        return buffer[lastIndexPointer()];
-    }
+
+    /**
+     * @return returns the buffer array.
+     */
     public ITransition[] getBuffer(){
         return buffer;
     }
+
+    /**
+     * @return the batch size
+     */
     public int getBatchSize(){return batchSize;}
-
-
 
 
 
@@ -208,3 +193,4 @@ public class BaseBuffer{
 
 
 }
+

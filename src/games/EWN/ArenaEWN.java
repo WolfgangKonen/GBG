@@ -37,6 +37,9 @@ public class ArenaEWN extends Arena {
         return new XNTupleFuncsEWN();
     }
 
+//    @Override
+//    public void performArenaDerivedTasks() {}
+
     public static void setConfig(String str){
         switch(str){
             case"3x3 2-Player":{
@@ -79,11 +82,12 @@ public class ArenaEWN extends Arena {
                 break;
             case "[0,1],[2,3],[4,5]": ConfigEWN.CEll_CODING = 1;
                 break;
+            case "[0],[1],[2],[3],[4],[5]": ConfigEWN.CEll_CODING = 2;
+                break;
         }
     }
 
     public static void setRandomStartingPosition(String str){
-        System.out.println(str);
         switch (str){
             case "True":ConfigEWN.RANDOM_POSITION = true;
                 break;
@@ -102,3 +106,4 @@ public class ArenaEWN extends Arena {
 
 
 }
+
